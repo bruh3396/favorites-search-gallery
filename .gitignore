@@ -1,0 +1,12 @@
+.vscode
+documentation
+experimental
+html
+output
+scripts
+tampermonkey.txt
+.prettierrc
+node_modules
+package-lock.json
+package.json
+eslint.config.mjs
