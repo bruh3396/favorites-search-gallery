@@ -272,7 +272,7 @@ onmessage = (message) => {
     this.allThumbNodes = [];
     this.finalPageNumber = this.getFinalFavoritesPageNumber();
     this.matchCountLabel = document.getElementById("match-count-label");
-    this.maxNumberOfFavoritesToDisplay = 10000;
+    this.maxNumberOfFavoritesToDisplay = 100000;
     this.failedFetchRequests = [];
     this.currentLoadState = FavoritesLoader.loadState.NOT_STARTED;
     this.expectedFavoritesCount = 53;

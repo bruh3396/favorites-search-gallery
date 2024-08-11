@@ -796,6 +796,7 @@ function getContentType(tags) {
  * @returns {{orGroups: String[][], remainingSearchTags: String[]}}
  */
 function extractTagGroups(searchQuery) {
+  searchQuery = searchQuery.toLowerCase();
   const orRegex = /\( (.*?) \)/g;
   const orGroups = Array.from(removeExtraWhiteSpace(searchQuery)
     .matchAll(orRegex))

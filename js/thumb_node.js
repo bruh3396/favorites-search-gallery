@@ -4,7 +4,7 @@ const THUMB_NODE_TEMPLATE = THUMB_NODE_DOM.createElement("div");
 THUMB_NODE_TEMPLATE.className = "thumb-node";
 THUMB_NODE_TEMPLATE.innerHTML = `
     <div>
-      <img>
+      <img loading="lazy">
       <button class="remove-button light-green-gradient" style="visibility: hidden;">Remove</button>
     </div>
 `;

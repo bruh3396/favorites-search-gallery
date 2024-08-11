@@ -1,36 +1,6 @@
 # favorites-search-gallery
-R34 Favorites Search + Gallery
-
-## Features
-  1. Search favorites with the exact same syntax as the normal post pages: AND, OR, and NOT combinations (except for meta tags like rating:, score:, etc.).
-  Example search:
-      ( video ~ animated ~ high_res* ~ absurd_res* ) -low_res* ( female* ~ 1girls ) -ai_generated -red_hair
-
-  2. View full resolution images and gifs, or play videos when hovering over or clicking on a thumbnail + gallery controls.
-      Gallery also works on post pages
-
-  3. Only wait on fetching once.
-      Favorites are stored in a client database after fetching them for the first time.
-      Allows for near instant loading on later page reloads.
-
-  4. Save multiple custom searches to use later.
-  5. Shuffle search results order.
-  6. Invert search results.
-  6. Toggle filtering of blacklisted tags.
-  8. Search favorites by their post ID.
-  9. Tooltip that shows which tags and or groups matched any given thumbnail.
-  10. Choose fullscreen image resolution.
-  11. Look at other user's favorites with the above features (blacklisted images are hidden automatically)
-  12. Enlarged remove buttons that don't force page reloads
-  13. Search autocomplete
-
-## Screenshots / GIFs
-
-## Installation
-
-## Preffered Spec Requirements:
-    VRAM: 4GB
-    Internet Download Speed: 75Mb/s
+Favorites Search + Gallery
+https://github.com/bruh3396/favorites-search-gallery
 
 ## Controls
     Left Click (Toggle) on thumbnail: Toggle gallery
@@ -41,11 +11,40 @@ R34 Favorites Search + Gallery
     Scroll Wheel/Arrow Keys/WASD: Move to next/previous image in gallery
     Escape: Exit gallery
 
+## Features
+  1. Search favorites with the exact same syntax as the normal post pages: AND, OR, and NOT combinations (except for meta tags like rating:, score:, etc.).
+  Example search:
+      ( video ~ animated ~ high_res* ~ absurd_res* ) -low_res* ( female* ~ 1girls ) -ai_generated -red_hair
 
+  2. View full resolution images and gifs, or play videos when hovering over or clicking on a thumbnail + gallery controls.
+      Gallery also works on post pages.
+
+  3. Only wait on fetching once.
+      Favorites are stored in a client database after fetching them for the first time.
+      Allows for near instant loading on later page reloads.
+
+  4. Save multiple custom searches to use later.
+  5. Shuffle search results order.
+  6. Invert search results.
+  6. Toggle filtering of blacklisted tags.
+  8. Search favorites by their post ID.
+  9. Tooltip showing which tags and or groups matched any given thumbnail.
+  10. Choose fullscreen image resolution.
+  11. Look at other user's favorites with the above features (blacklisted images are hidden automatically).
+  12. Enlarged remove buttons that don't force page reloads.
+  13. Autocompleted search.
+
+## Screenshots / GIFs
+
+## Installation
+
+## Preffered Spec Requirements:
+    VRAM: 4GB
+    Internet Download Speed: 75Mb/s
 
 ## FAQ
     Q: Why is there some bug?
-    A: If not already addressed below, contact me on r34 with the bug and explain how to reproduce it.
+    A: If not already addressed below, contact me with the bug and explain how to reproduce it.
 
     Q: Everything stopped working, why I can't see any favorites?
     A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings. Then retry.

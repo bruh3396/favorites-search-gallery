@@ -74,7 +74,7 @@ const renderHTML = `<style>
     >a>img,
     >span>img,
     >div>img {
-      outline: 3px solid white !important;
+      outline: 3px solid yellow !important;
     }
   }
 

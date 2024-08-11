@@ -34,7 +34,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           margin-top: 4px;
         }
 
-        >button {
+        button {
           height: 35px;
           border: none;
           border-radius: 4px;
@@ -214,19 +214,17 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #find-favorite {
       margin-top: 7px;
 
-      >* {
+      >input {
         border-radius: 6px;
         height: 35px;
-      }
-
-      >input {
         width: 75px;
+        border: 1px solid;
       }
 
     }
 
     #favorites-pagination-container {
-      > button {
+      >button {
         background: transparent;
         margin: 0px 2px;
         padding: 2px 6px;
@@ -235,6 +233,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         font-size: 14px;
         color: white;
         font-weight: normal;
+
         &:hover {
           background-color: #93b393;
         }
@@ -256,12 +255,16 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     <div id="left-favorites-panel">
       <h2>Search Favorites</h2>
       <div id="left-favorites-panel-top-row">
-        <button title="Search favorites (Ctrl-Click: Search Posts)" id="search-button">Search</button>
+        <button title="Search favorites\nctrl+click: Search all posts" id="search-button">Search</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Shuffle order of search results" id="shuffle-button">Shuffle</button>
-        <button title="Clear the search box" id="clear-button">Clear</button>
+        <button title="Clear the search box" id="clear-button" style="display: none;">Clear</button>
         <button title="Save results as search" id="save-search-button" style="display: none;">Save</button>
-        <button title="Reload favorites from web" id="reset-button">Reset</button>
+        <button title="Reset saved favorites" id="reset-button">Reset</button>
+        <span id="find-favorite">
+          <button id="find-favorite-button" style="white-space: nowrap; ">Find</button>
+          <input id="find-favorite-input" type="text" placeholder="ID">
+        </span>
         <label id="match-count-label"></label>
         <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
       </div>
@@ -274,8 +277,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           <div id="show-options"><label class="checkbox" title="Toggle options"><input type="checkbox"
                 id="options-checkbox"> Options</label></div>
           <div id="favorite-options">
-            <div><label class="checkbox" title="Toggle buttons that remove favorites"><input type="checkbox"
-                  id="show-remove-buttons"> Remove Buttons</label></div>
+            <div><label class="checkbox" title="Toggle remove buttons"><input type="checkbox" id="show-remove-buttons">
+                Remove Buttons</label></div>
             <div><label class="checkbox" title="Exclude blacklisted tags from search"><input type="checkbox"
                   id="filter-blacklist-checkbox"> Filter Blacklist</label></div>
           </div>
@@ -289,10 +292,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
               </span>
             </div>
           </div>
-        </div>
-        <div id="find-favorite">
-          <button id="find-favorite-button" style="white-space: nowrap; ">Find</button>
-          <input id="find-favorite-input" type="text" placeholder="ID">
         </div>
       </div>
     </div>
