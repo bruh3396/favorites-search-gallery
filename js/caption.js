@@ -86,7 +86,7 @@ const captionHTML = `<style>
 </style>`;
 
 class Caption {
-  static cookies = {
+  static preferences = {
     visibility: "showCaptions"
   };
   static localStorageKeys = {
@@ -146,7 +146,7 @@ class Caption {
     this.savedTags = this.loadSavedTags();
     this.createElement();
     this.injectHTML();
-    this.setVisibility(this.getVisibilityCookie());
+    this.setVisibility(this.getVisibilityPreference());
     this.addEventListeners();
   }
 
@@ -163,7 +163,7 @@ class Caption {
       "show-captions",
       "Details",
       "Show details when hovering over thumbnail",
-      this.getVisibilityCookie(),
+      this.getVisibilityPreference(),
       (event) => {
         this.setVisibility(event.target.checked);
       },
@@ -454,14 +454,14 @@ class Caption {
     } else if (!this.caption.classList.contains("disabled")) {
       this.caption.classList.add("disabled");
     }
-    setCookie(Caption.cookies.visibility, value);
+    setPreference(Caption.preferences.visibility, value);
   }
 
   /**
    * @returns {Boolean}
    */
-  getVisibilityCookie() {
-    return getCookie(Caption.cookies.visibility, false);
+  getVisibilityPreference() {
+    return getPreference(Caption.preferences.visibility, false);
   }
 
   /**

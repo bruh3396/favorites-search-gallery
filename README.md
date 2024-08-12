@@ -2,6 +2,13 @@
 Favorites Search + Gallery
 https://github.com/bruh3396/favorites-search-gallery
 
+## Intro
+  The old favorites search by MegaMoo7 stopped working some time ago.\
+  I couldn't find a suitable replacement, so I made my own adaptation.\
+  The main improvement is a gallery viewer.
+
+
+
 ## Controls
     Left Click (Toggle) on thumbnail: Toggle gallery
     Middle Click:

@@ -39,6 +39,7 @@ const savedSearchesHTML = `<div id="saved-searches">
     }
 
     #saved-search-listContainer {
+      direction: rtl;
       max-height: 200px;
       overflow-y: auto;
       overflow-x: hidden;
@@ -71,6 +72,7 @@ const savedSearchesHTML = `<div id="saved-searches">
 
     .save-search-label {
       flex: 1000 30px;
+      text-align: left;
 
       &:hover {
         color: white;
@@ -129,9 +131,9 @@ const savedSearchesHTML = `<div id="saved-searches">
 `;
 
 class SavedSearches {
-  static cookies = {
-    textareaWidth: "savedSearchesTextAreaCookieWidth",
-    textareaHeight: "savedSearchesTextAreaCookieHeight",
+  static preferences = {
+    textareaWidth: "savedSearchesTextAreaWidth",
+    textareaHeight: "savedSearchesTextAreaHeight",
     savedSearches: "savedSearches",
     visibility: "savedSearchVisibility"
   };
@@ -185,7 +187,7 @@ class SavedSearches {
   }
 
   insertHTMLIntoDocument() {
-    const showSavedSeaches = getCookie(SavedSearches.cookies.visibility, true);
+    const showSavedSeaches = getPreference(SavedSearches.preferences.visibility, true);
     let placeToInsertSavedSearches = document.getElementById("right-favorites-panel");
 
     if (placeToInsertSavedSearches === null) {
@@ -200,7 +202,7 @@ class SavedSearches {
       showSavedSeaches,
       (e) => {
         document.getElementById("saved-searches").style.display = e.target.checked ? "block" : "none";
-        setCookie(SavedSearches.cookies.visibility, e.target.checked);
+        setPreference(SavedSearches.preferences.visibility, e.target.checked);
       },
       true
     );
@@ -265,10 +267,10 @@ class SavedSearches {
     editButton.className = "edit-saved-search-button";
     removeButton.className = "remove-saved-search-button";
     moveToTopButton.className = "move-saved-search-to-top-button";
-    newListItem.appendChild(removeButton);
-    newListItem.appendChild(editButton);
-    newListItem.appendChild(moveToTopButton);
     newListItem.appendChild(savedSearchLabel);
+    newListItem.appendChild(moveToTopButton);
+    newListItem.appendChild(editButton);
+    newListItem.appendChild(removeButton);
     this.savedSearchesList.insertBefore(newListItem, this.savedSearchesList.firstChild);
     savedSearchLabel.onclick = () => {
       const searchBox = document.getElementById("favorites-search-box");

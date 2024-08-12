@@ -49,7 +49,7 @@ class Tooltip {
   previousSearch;
 
   constructor() {
-    this.enabled = getCookie("showTooltip", true);
+    this.enabled = getPreference("showTooltip", true);
     document.body.insertAdjacentHTML("afterbegin", tooltipHTML);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;
@@ -328,7 +328,7 @@ class Tooltip {
       " Tooltips",
       "Show related tags when hovering over a thumbnail",
       this.enabled, (event) => {
-        setCookie("showTooltip", event.target.checked);
+        setPreference("showTooltip", event.target.checked);
         this.setVisible(event.target.checked);
       },
       true

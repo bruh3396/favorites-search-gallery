@@ -319,12 +319,12 @@ if (!onPostPage()) {
 }
 const FAVORITE_OPTIONS = [document.getElementById("favorite-options"), document.getElementById("additional-favorite-options")];
 const MAX_SEARCH_HISTORY_LENGTH = 100;
-const FAVORITE_SEARCH_COOKIE_KEYS = {
-  textareaWidth: "searchTextAreaCookieWidth",
-  textareaHeight: "searchTextAreaCookieHeight",
-  showRemoveButtons: "showRemove",
+const FAVORITE_SEARCH_PREFERENCES = {
+  textareaWidth: "searchTextareaWidth",
+  textareaHeight: "searchTextareaHeight",
+  showRemoveButtons: "showRemoveButtons",
   showOptions: "showOptions",
-  filterBlacklist: "filter-blacklist-checkbox",
+  filterBlacklist: "filterBlacklistCheckbox",
   searchHistory: "favoritesSearchHistory",
   findFavorite: "findFavorite",
   thumbSize: "thumbSize",
@@ -365,14 +365,14 @@ let lastSearchQuery = "";
 
 function initializeFavoritesPage() {
   addEventListenersToFavoritesPage();
-  loadFavoritesPageCookies();
+  loadFavoritesPagePreferences();
   removePaginatorFromFavoritesPage();
   hideRemoveLinksWhenNotOnOwnFavoritesPage();
 }
 
-function loadFavoritesPageCookies() {
-  const height = getCookie(FAVORITE_SEARCH_COOKIE_KEYS.textareaHeight);
-  const width = getCookie(FAVORITE_SEARCH_COOKIE_KEYS.textareaWidth);
+function loadFavoritesPagePreferences() {
+  const height = getPreference(FAVORITE_SEARCH_PREFERENCES.textareaHeight);
+  const width = getPreference(FAVORITE_SEARCH_PREFERENCES.textareaWidth);
 
   if (height !== null && width !== null) {
     /*
@@ -380,19 +380,19 @@ function loadFavoritesPageCookies() {
      * FAVORITE_SEARCH_INPUTS.searchBox.style.height = height + "px"
      */
   }
-  const removeButtonsAreVisible = getCookie(FAVORITE_SEARCH_COOKIE_KEYS.showRemoveButtons, false) && userIsOnTheirOwnFavoritesPage();
+  const removeButtonsAreVisible = getPreference(FAVORITE_SEARCH_PREFERENCES.showRemoveButtons, false) && userIsOnTheirOwnFavoritesPage();
 
   FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.checked = removeButtonsAreVisible;
   setTimeout(() => {
     updateVisibilityOfAllRemoveButtons();
   }, 100);
-  const showOptions = getCookie(FAVORITE_SEARCH_COOKIE_KEYS.showOptions, false);
+  const showOptions = getPreference(FAVORITE_SEARCH_PREFERENCES.showOptions, false);
 
   FAVORITE_SEARCH_CHECKBOXES.showOptions.checked = showOptions;
   toggleFavoritesOptions(showOptions);
 
   if (userIsOnTheirOwnFavoritesPage()) {
-    FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked = getCookie(FAVORITE_SEARCH_COOKIE_KEYS.filterBlacklist, false);
+    FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked = getPreference(FAVORITE_SEARCH_PREFERENCES.filterBlacklist, false);
     favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked);
   } else {
     FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked = true;
@@ -403,8 +403,8 @@ function loadFavoritesPageCookies() {
   if (searchHistory.length > 0) {
     FAVORITE_SEARCH_INPUTS.searchBox.value = searchHistory[0];
   }
-  FAVORITE_SEARCH_INPUTS.findFavorite.value = getCookie(FAVORITE_SEARCH_COOKIE_KEYS.findFavorite, "");
-  FAVORITE_SEARCH_INPUTS.columnCount.value = getCookie(FAVORITE_SEARCH_COOKIE_KEYS.columnCount, 10);
+  FAVORITE_SEARCH_INPUTS.findFavorite.value = getPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, "");
+  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 10);
   changeColumnCount(FAVORITE_SEARCH_INPUTS.columnCount.value);
 }
 
@@ -491,19 +491,19 @@ function addEventListenersToFavoritesPage() {
   });
   FAVORITE_SEARCH_CHECKBOXES.showOptions.onchange = () => {
     toggleFavoritesOptions(FAVORITE_SEARCH_CHECKBOXES.showOptions.checked);
-    setCookie(FAVORITE_SEARCH_COOKIE_KEYS.showOptions, FAVORITE_SEARCH_CHECKBOXES.showOptions.checked);
+    setPreference(FAVORITE_SEARCH_PREFERENCES.showOptions, FAVORITE_SEARCH_CHECKBOXES.showOptions.checked);
   };
   const resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
-      setCookie(FAVORITE_SEARCH_COOKIE_KEYS.textareaWidth, entry.contentRect.width);
-      setCookie(FAVORITE_SEARCH_COOKIE_KEYS.textareaHeight, entry.contentRect.height);
+      setPreference(FAVORITE_SEARCH_PREFERENCES.textareaWidth, entry.contentRect.width);
+      setPreference(FAVORITE_SEARCH_PREFERENCES.textareaHeight, entry.contentRect.height);
     }
   });
 
   resizeObserver.observe(FAVORITE_SEARCH_INPUTS.searchBox);
   FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.onchange = () => {
     updateVisibilityOfAllRemoveButtons();
-    setCookie(FAVORITE_SEARCH_COOKIE_KEYS.showRemoveButtons, FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.checked);
+    setPreference(FAVORITE_SEARCH_PREFERENCES.showRemoveButtons, FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.checked);
   };
   FAVORITE_SEARCH_BUTTONS.shuffle.onclick = () => {
     favoritesLoader.shuffleSearchResults();
@@ -512,7 +512,7 @@ function addEventListenersToFavoritesPage() {
     FAVORITE_SEARCH_INPUTS.searchBox.value = "";
   };
   FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.onchange = () => {
-    setCookie(FAVORITE_SEARCH_COOKIE_KEYS.filterBlacklist, FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked);
+    setPreference(FAVORITE_SEARCH_PREFERENCES.filterBlacklist, FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked);
     favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked);
     favoritesLoader.searchFavorites();
   };
@@ -528,12 +528,12 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_SEARCH_INPUTS.findFavorite.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       scrollToThumb(FAVORITE_SEARCH_INPUTS.findFavorite.value);
-      setCookie(FAVORITE_SEARCH_COOKIE_KEYS.findFavorite, postId);
+      setPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, postId);
     }
   });
   FAVORITE_SEARCH_BUTTONS.findFavorite.onclick = () => {
     scrollToThumb(FAVORITE_SEARCH_INPUTS.findFavorite.value);
-    setCookie(FAVORITE_SEARCH_COOKIE_KEYS.findFavorite, postId);
+    setPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, postId);
   };
   FAVORITE_SEARCH_BUTTONS.columnPlus.onclick = () => {
     changeColumnCount(parseInt(FAVORITE_SEARCH_INPUTS.columnCount.value) + 1);
@@ -619,7 +619,7 @@ function changeColumnCount(count) {
     }
     `, "columnCount");
   FAVORITE_SEARCH_INPUTS.columnCount.value = count;
-  setCookie(FAVORITE_SEARCH_COOKIE_KEYS.columnCount, count);
+  setPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, count);
 }
 
 async function findSomeoneWithMoreThanXFavorites(X) {
