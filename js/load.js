@@ -852,7 +852,7 @@ onmessage = (message) => {
   }
 
   deletePersistentData() {
-    localStorage.removeItem("captionTags");
+    localStorage.clear();
     indexedDB.deleteDatabase("Favorites");
   }
 

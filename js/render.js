@@ -99,12 +99,24 @@ class Renderer {
     leftClick: 0,
     middleClick: 1
   };
-
   static galleryDirections = {
     d: "d",
     a: "a",
     right: "ArrowRight",
     left: "ArrowLeft"
+  };
+  static galleryKeyDownTraversalCooldown = {
+    timeout: null,
+    waitTime: 100,
+    get ready() {
+      if (this.timeout === null) {
+        this.timeout = setTimeout(() => {
+          this.timeout = null;
+        }, this.waitTime);
+        return true;
+      }
+      return false;
+    }
   };
   static icons = {
     openEye: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z\" /><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\" /></svg>",
@@ -120,7 +132,7 @@ class Renderer {
   };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 1000;
 let retryDelay = 0;
@@ -445,7 +457,7 @@ onmessage = async(message) => {
   injectOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="original-content-container">
-              <video id="original-video-container" width="90%" height="90%" autoplay muted loop style="display: none; top:5%; left:5%; position:fixed; z-index:9998;pointer-events:none;">
+              <video id="original-video-container" width="90%" height="90%" autoplay muted loop style="display: block; top:5%; left:5%; position:fixed; z-index:9998;pointer-events:none;">
                   <source src="" type="video/mp4">
                       Your browser does not support the video tag.
               </video>
@@ -465,6 +477,10 @@ onmessage = async(message) => {
     this.visibleCanvas.height = this.visibleCanvasResolution.height;
     this.visibleCanvas.id = "visible-canvas";
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
+
+    this.videoContainer.onloadeddata = () => {
+      this.videoContainer.style.display = "block";
+    };
   }
 
   addEventListeners() {
@@ -548,7 +564,7 @@ onmessage = async(message) => {
         const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
         const direction = delta > 0 ? Renderer.galleryDirections.left : Renderer.galleryDirections.right;
 
-        this.traverseGallery.bind(this)(direction);
+        this.traverseGallery.bind(this)(direction, false);
       } else if (hoveringOverThumb() && this.showOriginalContentOnHover) {
         let opacity = parseFloat(getPreference(Renderer.preferences.backgroundOpacity, 1));
 
@@ -583,7 +599,7 @@ onmessage = async(message) => {
 
           case Renderer.galleryDirections.right:
             event.preventDefault();
-            this.traverseGallery(event.key);
+            this.traverseGallery(event.key, event.repeat);
             break;
 
           case "X":
@@ -927,8 +943,13 @@ onmessage = async(message) => {
 
   /**
    * @param {String} direction
+   * @param {Boolean} keyIsHeldDown
    */
-  traverseGallery(direction) {
+  traverseGallery(direction, keyIsHeldDown) {
+    if (keyIsHeldDown && !Renderer.galleryKeyDownTraversalCooldown.ready) {
+      return;
+    }
+
     let selectedThumb = this.getSelectedThumb();
 
     this.clearOriginalContentSources();
@@ -1003,7 +1024,7 @@ onmessage = async(message) => {
 
   clearOriginalContentSources() {
     this.clearVisibleCanvas();
-    this.videoContainer.src = "";
+    this.setOriginalVideoSource("");
     this.gifContainer.src = "";
   }
 
@@ -1058,7 +1079,7 @@ onmessage = async(message) => {
       return;
     }
     this.toggleVisibleCanvas(false);
-    this.videoContainer.style.display = "block";
+    // this.videoContainer.style.display = "block";
     this.playOriginalVideo(thumb);
 
     if (!this.inGalleryMode) {
@@ -1078,9 +1099,17 @@ onmessage = async(message) => {
    * @param {HTMLElement} thumb
    */
   playOriginalVideo(thumb) {
-    this.videoContainer.src = this.getVideoSource(thumb);
+    this.setOriginalVideoSource(this.getVideoSource(thumb));
     this.videoContainer.play().catch(() => { });
   }
+
+  /**
+   * @param {String} source
+   */
+   setOriginalVideoSource(source) {
+    this.videoContainer.style.display = "none";
+    this.videoContainer.src = source;
+   }
 
   /**
    * @param {HTMLElement} thumb
@@ -1350,14 +1379,14 @@ onmessage = async(message) => {
    */
   toggleOriginalVideo(value) {
     if (value !== undefined) {
-      this.videoContainer.style.display = value ? "block" : "none";
+      // this.videoContainer.style.display = value ? "block" : "none";
       return;
     }
 
     if (!this.currentlyHoveringOverVideoThumb() || this.videoContainer.style.display === "block") {
-      this.videoContainer.style.display = "none";
+      // this.videoContainer.style.display = "none";
     } else {
-      this.videoContainer.style.display = "block";
+      // this.videoContainer.style.display = "block";
     }
   }
 
@@ -1519,7 +1548,7 @@ onmessage = async(message) => {
    * @returns {Number}
    */
   getRenderDelay(postId) {
-    const extensionKnownSpeed = onPostPage() ? 4 : 4;
+    const extensionKnownSpeed = onPostPage() ? 6 : 6;
     return this.extensionIsKnown(postId) ? this.renderDelay / extensionKnownSpeed : this.renderDelay;
   }
 
@@ -1683,7 +1712,7 @@ onmessage = async(message) => {
             findExtension: true,
             postId
           });
-          await sleep(150);
+          await sleep(15);
         }
       }
     }

@@ -14,15 +14,20 @@ class AwesompleteWrapper {
     if (textarea === null) {
       return;
     }
-    const awesomplete = new Awesomplete(textarea, {
+    const awesomplete = new Awesomplete_(textarea, {
       minChars: 1,
       list: [],
       filter: (suggestion, input) => {
-        return Awesomplete.FILTER_STARTSWITH(suggestion.value, this.getLastTag(input));
+        return Awesomplete_.FILTER_STARTSWITH(suggestion.value, this.getLastTag(input));
       },
       sort: false,
       item: (suggestion, tags) => {
-        return Awesomplete.ITEM(suggestion, this.getLastTag(tags));
+        const html = tags.trim() === "" ? suggestion.label : suggestion.label.replace(RegExp(Awesomplete_.$.regExpEscape(tags.trim()), "gi"), "<mark>$&</mark>");
+        return Awesomplete_.$.create("li", {
+          innerHTML: html,
+          "aria-selected": "false",
+          className: `tag-type-${suggestion.type}`
+        });
       },
       replace: (suggestion) => {
         awesomplete.input.value = `${awesomplete.input.value.match(/^(.+ )?[\s-]*|/)[0] + suggestion.value} `;
@@ -36,13 +41,10 @@ class AwesompleteWrapper {
 
   /**
    * @param {String} prefix
-   * @param {Awesomplete} awesomplete
+   * @param {Awesomplete_} awesomplete
    * @returns
    */
   populateAwesompleteFromPrefix(prefix, awesomplete) {
-    if (prefix === null) {
-      return;
-    }
     fetch(`https://rule34.xxx/autocomplete.php?q=${prefix}`)
       .then((response) => {
         if (response.ok) {
@@ -52,8 +54,7 @@ class AwesompleteWrapper {
       })
       .then((suggestions) => {
         awesomplete.list = JSON.parse(suggestions);
-      }).catch((error) => {
-        console.error(error);
+      }).catch(() => {
       });
   }
 
@@ -63,7 +64,7 @@ class AwesompleteWrapper {
    */
   getLastTag(searchQuery) {
     const lastTag = searchQuery.match(/[^ -][^ ]*$/);
-    return lastTag === null ? null : lastTag[0];
+    return lastTag === null ? "" : lastTag[0];
   }
 }
 

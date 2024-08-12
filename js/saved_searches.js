@@ -38,7 +38,7 @@ const savedSearchesHTML = `<div id="saved-searches">
       }
     }
 
-    #saved-search-listContainer {
+    #saved-search-list-container {
       direction: rtl;
       max-height: 200px;
       overflow-y: auto;
@@ -48,6 +48,7 @@ const savedSearchesHTML = `<div id="saved-searches">
     }
 
     #saved-search-list {
+      direction: ltr;
       >li {
         display: flex;
         flex-direction: row;
@@ -123,7 +124,7 @@ const savedSearchesHTML = `<div id="saved-searches">
       <textarea id="saved-searches-input" spellcheck="false" style="width: 97%;"
         placeholder="Save Custom Search"></textarea>
     </div>
-    <div id="saved-search-listContainer">
+    <div id="saved-search-list-container">
       <div id="saved-search-list"></div>
     </div>
   </div>
@@ -267,10 +268,10 @@ class SavedSearches {
     editButton.className = "edit-saved-search-button";
     removeButton.className = "remove-saved-search-button";
     moveToTopButton.className = "move-saved-search-to-top-button";
-    newListItem.appendChild(savedSearchLabel);
-    newListItem.appendChild(moveToTopButton);
-    newListItem.appendChild(editButton);
     newListItem.appendChild(removeButton);
+    newListItem.appendChild(editButton);
+    newListItem.appendChild(moveToTopButton);
+    newListItem.appendChild(savedSearchLabel);
     this.savedSearchesList.insertBefore(newListItem, this.savedSearchesList.firstChild);
     savedSearchLabel.onclick = () => {
       const searchBox = document.getElementById("favorites-search-box");

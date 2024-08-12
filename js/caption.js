@@ -100,7 +100,7 @@ class Caption {
   };
   static htmlTagType = "li";
   static template = `
-     <ul id="captionList">
+     <ul id="caption-list">
          <li id="caption-id"><h6>ID</h6></li>
          ${Caption.getCaptionHeaderHTML()}
      </ul>
