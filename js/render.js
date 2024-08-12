@@ -96,27 +96,27 @@ const renderHTML = `<style>
 
 class Renderer {
   static clickCodes = {
-    LEFT_CLICK: 0,
-    MIDDLE_CLICK: 1
+    leftClick: 0,
+    middleClick: 1
   };
 
   static galleryDirections = {
-    D: "d",
-    A: "a",
-    RIGHT: "ArrowRight",
-    LEFT: "ArrowLeft"
+    d: "d",
+    a: "a",
+    right: "ArrowRight",
+    left: "ArrowLeft"
   };
   static icons = {
-    OPEN_EYE: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z\" /><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\" /></svg>",
-    CLOSED_EYE: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88\" /></svg>",
-    OPEN_LOCK: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z\" /></svg>",
-    CLOSED_LOCK: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z\" /></svg>"
+    openEye: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z\" /><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\" /></svg>",
+    closedEye: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88\" /></svg>",
+    openLock: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z\" /></svg>",
+    closedLock: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z\" /></svg>"
   };
   static preferences = {
-    SHOW_ON_HOVER: "showImagesWhenHovering",
-    BACKGROUND_OPACITY: "galleryBackgroundOpacity",
-    RESOLUTION: "galleryResolution",
-    IMAGE_EXTENSIONS: "imageExtensions"
+    showOnHover: "showImagesWhenHovering",
+    backgroundOpacity: "galleryBackgroundOpacity",
+    resolution: "galleryResolution",
+    imageExtensions: "imageExtensions"
   };
   static webWorkers = {
     renderer:
@@ -271,8 +271,8 @@ onmessage = async(message) => {
   };
   static get defaultResolution() {
     return {
-      POSTS_PAGE: "3840x2160",
-      FAVORITES_PAGE: "3840x2160"
+      postPage: "3840x2160",
+      favoritesPage: "3840x2160"
     };
   }
 
@@ -285,7 +285,7 @@ onmessage = async(message) => {
    */
   visibleContext;
   /**
-   * @type {{HEIGHT: Number, WIDTH: Number}}
+   * @type {{height: Number, width: Number}}
    */
   visibleCanvasResolution;
   /**
@@ -381,8 +381,8 @@ onmessage = async(message) => {
     this.visibleCanvas = document.createElement("canvas");
     this.visibleContext = this.visibleCanvas.getContext("2d");
     this.visibleCanvasResolution = {
-      WIDTH: 100,
-      HEIGHT: 100
+      width: 100,
+      height: 100
     };
     this.offscreenCanvases = new Map();
     this.offscreenCanvasRenderers = [new Worker(getWorkerURL(Renderer.webWorkers.renderer))];
@@ -405,7 +405,7 @@ onmessage = async(message) => {
     this.renderWhileFavoritesAreStillLoading = false;
     this.finishedLoading = onPostPage();
     this.maxNumberOfImagesToRender = this.getMaxNumberOfImagesToRender();
-    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Renderer.preferences.SHOW_ON_HOVER, true) : false;
+    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Renderer.preferences.showOnHover, true) : false;
     this.initialize();
   }
 
@@ -415,7 +415,7 @@ onmessage = async(message) => {
     this.loadDiscoveredImageExtensions();
     this.preparePostPage();
     this.injectHTML();
-    this.updateBackgroundOpacity(getPreference(Renderer.preferences.BACKGROUND_OPACITY, 1));
+    this.updateBackgroundOpacity(getPreference(Renderer.preferences.backgroundOpacity, 1));
   }
 
   injectHTML() {
@@ -430,11 +430,11 @@ onmessage = async(message) => {
 
   injectOptionsHTML() {
     addOptionToFavoritesPage(
-      Renderer.preferences.SHOW_ON_HOVER,
+      Renderer.preferences.showOnHover,
       "Enlarge On Hover",
       "View full resolution images/play videos when hovering over any thumbnail (Middle mouse click)",
       this.showOriginalContentOnHover, (element) => {
-        setPreference(Renderer.preferences.SHOW_ON_HOVER, element.target.checked);
+        setPreference(Renderer.preferences.showOnHover, element.target.checked);
         this.toggleAllVisibility();
       },
       true
@@ -461,8 +461,8 @@ onmessage = async(message) => {
     this.background = document.getElementById("original-content-background");
     this.videoContainer = document.getElementById("original-video-container");
     this.gifContainer = document.getElementById("original-gif-container");
-    this.visibleCanvas.width = this.visibleCanvasResolution.WIDTH;
-    this.visibleCanvas.height = this.visibleCanvasResolution.HEIGHT;
+    this.visibleCanvas.width = this.visibleCanvasResolution.width;
+    this.visibleCanvas.height = this.visibleCanvasResolution.height;
     this.visibleCanvas.id = "visible-canvas";
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
   }
@@ -472,7 +472,7 @@ onmessage = async(message) => {
       let thumb;
 
       switch (event.button) {
-        case Renderer.clickCodes.LEFT_CLICK:
+        case Renderer.clickCodes.leftClick:
           if (this.inGalleryMode) {
             if (isVideo(this.getSelectedThumb())) {
               return;
@@ -491,7 +491,7 @@ onmessage = async(message) => {
           this.enterGalleryMode();
           break;
 
-        case Renderer.clickCodes.MIDDLE_CLICK:
+        case Renderer.clickCodes.middleClick:
           event.preventDefault();
 
           if (hoveringOverThumb() || this.inGalleryMode) {
@@ -539,18 +539,18 @@ onmessage = async(message) => {
       }
     });
     window.addEventListener("auxclick", (event) => {
-      if (event.button === Renderer.clickCodes.MIDDLE_CLICK) {
+      if (event.button === Renderer.clickCodes.middleClick) {
         event.preventDefault();
       }
     });
     document.addEventListener("wheel", (event) => {
       if (this.inGalleryMode) {
         const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
-        const direction = delta > 0 ? Renderer.galleryDirections.LEFT : Renderer.galleryDirections.RIGHT;
+        const direction = delta > 0 ? Renderer.galleryDirections.left : Renderer.galleryDirections.right;
 
         this.traverseGallery.bind(this)(direction);
       } else if (hoveringOverThumb() && this.showOriginalContentOnHover) {
-        let opacity = parseFloat(getPreference(Renderer.preferences.BACKGROUND_OPACITY, 1));
+        let opacity = parseFloat(getPreference(Renderer.preferences.backgroundOpacity, 1));
 
         opacity -= event.deltaY * 0.0005;
         opacity = clamp(opacity, "0", "1");
@@ -575,13 +575,13 @@ onmessage = async(message) => {
     document.addEventListener("keydown", (event) => {
       if (this.inGalleryMode) {
         switch (event.key) {
-          case Renderer.galleryDirections.A:
+          case Renderer.galleryDirections.a:
 
-          case Renderer.galleryDirections.D:
+          case Renderer.galleryDirections.d:
 
-          case Renderer.galleryDirections.LEFT:
+          case Renderer.galleryDirections.left:
 
-          case Renderer.galleryDirections.RIGHT:
+          case Renderer.galleryDirections.right:
             event.preventDefault();
             this.traverseGallery(event.key);
             break;
@@ -725,7 +725,7 @@ onmessage = async(message) => {
       this.recentlyDiscoveredImageExtensionsCount = 0;
 
       if (!onPostPage()) {
-        localStorage.setItem(Renderer.preferences.IMAGE_EXTENSIONS, JSON.stringify(this.imageExtensions));
+        localStorage.setItem(Renderer.preferences.imageExtensions, JSON.stringify(this.imageExtensions));
       }
     }
   }
@@ -868,7 +868,7 @@ onmessage = async(message) => {
   }
 
   loadDiscoveredImageExtensions() {
-    this.imageExtensions = JSON.parse(localStorage.getItem(Renderer.preferences.IMAGE_EXTENSIONS)) || {};
+    this.imageExtensions = JSON.parse(localStorage.getItem(Renderer.preferences.imageExtensions)) || {};
   }
 
   openPostInNewPage() {
@@ -958,7 +958,7 @@ onmessage = async(message) => {
    * @param {String} direction
    */
   setNextSelectedThumbIndex(direction) {
-    if (direction === Renderer.galleryDirections.LEFT || direction === Renderer.galleryDirections.A) {
+    if (direction === Renderer.galleryDirections.left || direction === Renderer.galleryDirections.a) {
       this.currentlySelectedThumbIndex -= 1;
       this.currentlySelectedThumbIndex = this.currentlySelectedThumbIndex < 0 ? this.visibleThumbs.length - 1 : this.currentlySelectedThumbIndex;
     } else {
@@ -983,7 +983,7 @@ onmessage = async(message) => {
     const showOnHoverCheckbox = document.getElementById("showImagesWhenHoveringCheckbox");
 
     if (showOnHoverCheckbox !== null) {
-      setPreference(Renderer.preferences.SHOW_ON_HOVER, this.showOriginalContentOnHover);
+      setPreference(Renderer.preferences.showOnHover, this.showOriginalContentOnHover);
       showOnHoverCheckbox.checked = this.showOriginalContentOnHover;
     }
   }
@@ -1377,7 +1377,7 @@ onmessage = async(message) => {
    */
   updateBackgroundOpacity(opacity) {
     this.background.style.opacity = opacity;
-    setPreference(Renderer.preferences.BACKGROUND_OPACITY, opacity);
+    setPreference(Renderer.preferences.backgroundOpacity, opacity);
   }
 
   /**
@@ -1408,7 +1408,7 @@ onmessage = async(message) => {
 
   showEyeIcon() {
     const eyeIcon = document.getElementById("svg-eye");
-    const svg = this.showOriginalContentOnHover ? Renderer.icons.OPEN_EYE : Renderer.icons.CLOSED_EYE;
+    const svg = this.showOriginalContentOnHover ? Renderer.icons.openEye : Renderer.icons.closedEye;
 
     if (eyeIcon) {
       eyeIcon.remove();
@@ -1418,7 +1418,7 @@ onmessage = async(message) => {
 
   showLockIcon() {
     const lockIcon = document.getElementById("svg-lock");
-    const svg = this.inGalleryMode ? Renderer.icons.CLOSED_LOCK : Renderer.icons.OPEN_LOCK;
+    const svg = this.inGalleryMode ? Renderer.icons.closedLock : Renderer.icons.openLock;
 
     if (lockIcon) {
       lockIcon.remove();
@@ -1432,8 +1432,8 @@ onmessage = async(message) => {
   createTransferableOffscreenCanvas() {
     const canvas = document.createElement("canvas");
 
-    canvas.width = this.visibleCanvasResolution.WIDTH;
-    canvas.height = this.visibleCanvasResolution.HEIGHT;
+    canvas.width = this.visibleCanvasResolution.width;
+    canvas.height = this.visibleCanvasResolution.height;
     const offscreen = canvas.transferControlToOffscreen();
     return {
       canvas,
@@ -1536,8 +1536,8 @@ onmessage = async(message) => {
    * @returns {Number}
    */
   getMaxNumberOfImagesToRender() {
-    const width = this.visibleCanvasResolution.WIDTH;
-    const height = this.visibleCanvasResolution.HEIGHT;
+    const width = this.visibleCanvasResolution.width;
+    const height = this.visibleCanvasResolution.height;
     const rgba = 4;
     const megabyteSize = 1048576;
     const availableVRAM = 2000;
@@ -1563,7 +1563,7 @@ onmessage = async(message) => {
     const scale = 40;
     const width = 16 * scale;
     const height = 9 * scale;
-    const defaultResolution = getPreference(Renderer.preferences.RESOLUTION, Renderer.defaultResolution.FAVORITES_PAGE);
+    const defaultResolution = getPreference(Renderer.preferences.resolution, Renderer.defaultResolution.favoritesPage);
     const container = document.createElement("div");
 
     container.style.paddingTop = "8px";
@@ -1594,7 +1594,7 @@ onmessage = async(message) => {
           this.markAsUnloaded(postId);
         }
       }, this.renderDelay);
-      setPreference(Renderer.preferences.RESOLUTION, resolutionDropdown.value);
+      setPreference(Renderer.preferences.resolution, resolutionDropdown.value);
       this.setVisibleCanvasResolution();
     };
     container.appendChild(resolutionLabel);
@@ -1604,11 +1604,11 @@ onmessage = async(message) => {
   }
 
   setVisibleCanvasResolution() {
-    const resolution = onPostPage() ? Renderer.defaultResolution.POSTS_PAGE : getPreference(Renderer.preferences.RESOLUTION, Renderer.defaultResolution.FAVORITES_PAGE);
+    const resolution = onPostPage() ? Renderer.defaultResolution.postPage : getPreference(Renderer.preferences.resolution, Renderer.defaultResolution.favoritesPage);
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
-    this.visibleCanvasResolution.WIDTH = dimensions[0];
-    this.visibleCanvasResolution.HEIGHT = dimensions[1];
+    this.visibleCanvasResolution.width = dimensions[0];
+    this.visibleCanvasResolution.height = dimensions[1];
     this.visibleCanvas.width = dimensions[0];
     this.visibleCanvas.height = dimensions[1];
     this.maxNumberOfImagesToRender = this.getMaxNumberOfImagesToRender();
@@ -1624,7 +1624,7 @@ onmessage = async(message) => {
     const lookahead = Math.min(8, Math.round(this.maxNumberOfImagesToRender / 2) - 2);
     let possiblyUnrenderedThumbIndex;
 
-    if (direction === Renderer.galleryDirections.LEFT || direction === Renderer.galleryDirections.A) {
+    if (direction === Renderer.galleryDirections.left || direction === Renderer.galleryDirections.a) {
       possiblyUnrenderedThumbIndex = currentThumbIndex - lookahead;
     } else {
       possiblyUnrenderedThumbIndex = currentThumbIndex + lookahead;

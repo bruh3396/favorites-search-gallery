@@ -1,9 +1,9 @@
 class FavoritesLoader {
   static loadState = {
-    NOT_STARTED: 0,
-    STARTED: 1,
-    FINISHED: 2,
-    INDEXED_DB: 3
+    notStarted: 0,
+    started: 1,
+    finished: 2,
+    indexedDB: 3
   };
   static objectStoreName = `user${getFavoritesPageId()}`;
   static databaseName = "Favorites";
@@ -274,7 +274,7 @@ onmessage = (message) => {
     this.matchCountLabel = document.getElementById("match-count-label");
     this.maxNumberOfFavoritesToDisplay = 100000;
     this.failedFetchRequests = [];
-    this.currentLoadState = FavoritesLoader.loadState.NOT_STARTED;
+    this.currentLoadState = FavoritesLoader.loadState.notStarted;
     this.expectedFavoritesCount = 53;
     this.matchingFavoritesCount = 0;
     this.searchQuery = "";
@@ -291,7 +291,7 @@ onmessage = (message) => {
 
       switch (message.response) {
         case "finishedLoading":
-          this.currentLoadState = FavoritesLoader.loadState.INDEXED_DB;
+          this.currentLoadState = FavoritesLoader.loadState.indexedDB;
           this.attachSavedFavoritesToDocument(message.favorites);
           this.updateSavedFavorites();
           break;
@@ -353,15 +353,15 @@ onmessage = (message) => {
     dispatchEvent(new Event("searchStarted"));
 
     switch (this.currentLoadState) {
-      case FavoritesLoader.loadState.STARTED:
+      case FavoritesLoader.loadState.started:
         this.showSearchResultsAfterStartedLoading();
         break;
 
-      case FavoritesLoader.loadState.FINISHED:
+      case FavoritesLoader.loadState.finished:
         this.showSearchResultsAfterFinishedLoading();
         break;
 
-      case FavoritesLoader.loadState.INDEXED_DB:
+      case FavoritesLoader.loadState.indexedDB:
         break;
 
       default:
@@ -575,13 +575,13 @@ onmessage = (message) => {
   async fetchFavorites() {
     let currentPageNumber = 0;
 
-    this.currentLoadState = FavoritesLoader.loadState.STARTED;
+    this.currentLoadState = FavoritesLoader.loadState.started;
     this.toggleContentVisibility(true);
     setTimeout(() => {
       dispatchEvent(new Event("startedFetchingFavorites"));
     }, 50);
 
-    while (this.currentLoadState === FavoritesLoader.loadState.STARTED) {
+    while (this.currentLoadState === FavoritesLoader.loadState.started) {
       await this.fetchFavoritesStep(currentPageNumber * 50);
       this.setProgressText(`Fetching Favorites ${this.allThumbNodes.length}`);
       currentPageNumber += 1;
@@ -727,7 +727,7 @@ onmessage = (message) => {
   }
 
   onAllFavoritesLoaded() {
-    this.currentLoadState = FavoritesLoader.loadState.FINISHED;
+    this.currentLoadState = FavoritesLoader.loadState.finished;
     this.showLoadingUI(false);
     dispatchEventWithDelay("favoritesLoaded");
   }
