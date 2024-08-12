@@ -383,11 +383,11 @@ class Caption {
         const showOnHoverCheckbox = document.getElementById("showOnHover");
 
         if (showOnHoverCheckbox !== null && showOnHoverCheckbox.checked) {
-          this.showCaption(event.detail);
+          this.show(event.detail);
         }
       });
       window.addEventListener("showCaption", (event) => {
-        this.showCaption(event.detail);
+        this.show(event.detail);
       });
       window.addEventListener("gotPostPageHTML", (event) => {
         this.savedTags[event.detail.postId] = this.extractTags(event.detail.html);

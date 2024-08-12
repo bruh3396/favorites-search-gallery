@@ -27,17 +27,12 @@ async function drawCanvas(imageURL, canvas, extension, postId, thumbIndex) {
   }
 }
 
-function getPostPageURLFromPostId(postId) {
-  return "https://rule34.xxx/index.php?page=post&s=view&id=" + postId;
-}
-
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function getOriginalImageURL(postId) {
-  const postPageURL = getPostPageURLFromPostId(postId);
-  return fetch(postPageURL)
+function getOriginalImageURLFromPostPage(postId) {
+  return fetch("https://rule34.xxx/index.php?page=post&s=view&id=" + postId)
     .then((response) => {
       if (response.ok) {
         return response.text();
@@ -51,7 +46,11 @@ function getOriginalImageURL(postId) {
       });
       const imageURL = (/itemprop="image" content="(.*)"/g).exec(html);
       return imageURL[1].replace("us.rule34", "rule34");
-    }).catch(async() => {
+    }).catch(async(error) => {
+      if (!error.message.includes("503")) {
+        console.error(error);
+        return "https://rule34.xxx/images/r34chibi.png";
+      }
       await sleep(retryDelay);
       retryDelay += RETRY_DELAY_INCREMENT;
 
@@ -59,6 +58,28 @@ function getOriginalImageURL(postId) {
         retryDelay = RETRY_DELAY_INCREMENT;
       }
       return getOriginalImageURL(postPageURL);
+    });
+}
+
+function getOriginalImageURL(postId) {
+  return fetch("https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + postId)
+    .then((response) => {
+      if (response.ok) {
+        return response.text();
+      }
+      throw new Error(response.status + ": " + postId);
+    })
+    .then((html) => {
+      let url;
+
+      try {
+        url = (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
+      } catch (error) {
+        url = "";
+      }
+      return url;
+    }).catch(() => {
+      return getOriginalImageURLFromPostPage(postId);
     });
 }
 
@@ -104,8 +125,7 @@ function getExtensionFromImageURL(imageURL) {
 }
 
 async function getImageExtensionFromPostId(postId) {
-  const postPageURL = getPostPageURLFromPostId(postId);
-  const imageURL = await getOriginalImageURL(postPageURL);
+  const imageURL = await getOriginalImageURL(postId);
   return getExtensionFromImageURL(imageURL);
 }
 

@@ -6,6 +6,13 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       padding: 10px;
       z-index: 30;
       margin-bottom: 10px;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
     }
 
     #favorites-top-bar-panels {
@@ -221,6 +228,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         border: 1px solid;
       }
 
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
     }
 
     #favorites-pagination-container {
@@ -247,7 +260,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #content {
       display: grid !important;
-      grid-template-columns: repeat(15, 1fr);
+      grid-template-columns: repeat(10, 1fr);
       grid-gap: 1em;
     }
   </style>
@@ -263,13 +276,13 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <button title="Reset saved favorites" id="reset-button">Reset</button>
         <span id="find-favorite">
           <button id="find-favorite-button" style="white-space: nowrap; ">Find</button>
-          <input id="find-favorite-input" type="text" placeholder="ID">
+          <input type="number" id="find-favorite-input" type="text" placeholder="ID">
         </span>
         <label id="match-count-label"></label>
         <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
       </div>
       <div>
-        <textarea name="tags" id="favorites-search-box" placeholder="Search Favorites"
+        <textarea name="tags" id="favorites-search-box" placeholder="Search by Tags or IDs"
           spellcheck="false">( video ~ animated* ~ highres ~ absurd_res* ) -low_res* ( 1girls ~ female* ) -tagme </textarea>
       </div>
       <div style="display: flex; flex-flow: row-wrap;">
@@ -599,7 +612,7 @@ function toggleFavoritesOptions(value) {
 }
 
 function changeColumnCount(count) {
-  count = clamp(parseInt(count), 5, 15);
+  count = clamp(parseInt(count), 2, 20);
   injectStyleHTML(`
     #content {
       grid-template-columns: repeat(${count}, 1fr) !important;

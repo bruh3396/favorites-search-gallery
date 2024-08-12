@@ -33,9 +33,9 @@ const renderHTML = `<style>
     transition: transform 0.1s ease-in-out, opacity 0.5s ease;
   } */
 
-  /* .image {
+  .image {
         outline: 2px solid white;
-    } */
+    }
 
   .gif {
     outline: 2px solid hotpink;
@@ -120,7 +120,7 @@ class Renderer {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 1000;
 let retryDelay = 0;
@@ -150,17 +150,12 @@ async function drawCanvas(imageURL, canvas, extension, postId, thumbIndex) {
   }
 }
 
-function getPostPageURLFromPostId(postId) {
-  return "https://rule34.xxx/index.php?page=post&s=view&id=" + postId;
-}
-
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function getOriginalImageURL(postId) {
-  const postPageURL = getPostPageURLFromPostId(postId);
-  return fetch(postPageURL)
+function getOriginalImageURLFromPostPage(postId) {
+  return fetch("https://rule34.xxx/index.php?page=post&s=view&id=" + postId)
     .then((response) => {
       if (response.ok) {
         return response.text();
@@ -174,7 +169,11 @@ function getOriginalImageURL(postId) {
       });
       const imageURL = (/itemprop="image" content="(.*)"/g).exec(html);
       return imageURL[1].replace("us.rule34", "rule34");
-    }).catch(async() => {
+    }).catch(async(error) => {
+      if (!error.message.includes("503")) {
+        console.error(error);
+        return "https://rule34.xxx/images/r34chibi.png";
+      }
       await sleep(retryDelay);
       retryDelay += RETRY_DELAY_INCREMENT;
 
@@ -182,6 +181,28 @@ function getOriginalImageURL(postId) {
         retryDelay = RETRY_DELAY_INCREMENT;
       }
       return getOriginalImageURL(postPageURL);
+    });
+}
+
+function getOriginalImageURL(postId) {
+  return fetch("https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + postId)
+    .then((response) => {
+      if (response.ok) {
+        return response.text();
+      }
+      throw new Error(response.status + ": " + postId);
+    })
+    .then((html) => {
+      let url;
+
+      try {
+        url = (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
+      } catch (error) {
+        url = "";
+      }
+      return url;
+    }).catch(() => {
+      return getOriginalImageURLFromPostPage(postId);
     });
 }
 
@@ -227,8 +248,7 @@ function getExtensionFromImageURL(imageURL) {
 }
 
 async function getImageExtensionFromPostId(postId) {
-  const postPageURL = getPostPageURLFromPostId(postId);
-  const imageURL = await getOriginalImageURL(postPageURL);
+  const imageURL = await getOriginalImageURL(postId);
   return getExtensionFromImageURL(imageURL);
 }
 
@@ -392,8 +412,8 @@ onmessage = async(message) => {
   initialize() {
     this.setVisibleCanvasResolution();
     this.addEventListeners();
-    this.preparePostsPage();
     this.loadDiscoveredImageExtensions();
+    this.preparePostPage();
     this.injectHTML();
     this.updateBackgroundOpacity(getCookie(Renderer.cookieKeys.BACKGROUND_OPACITY, 1));
   }
@@ -480,38 +500,38 @@ onmessage = async(message) => {
             this.toggleAllVisibility();
           }
           break;
-          /*
-           * event.preventDefault();
-           * const selectedThumb = this.getSelectedThumb.bind(this)();
-           */
+        /*
+         * event.preventDefault();
+         * const selectedThumb = this.getSelectedThumb.bind(this)();
+         */
 
-          /*
-           * if (this.inGalleryMode) {
-           *   this.openPostInNewPage();
-           *   return;
-           * }
-           * this.toggleAllVisibility();
-           */
+        /*
+         * if (this.inGalleryMode) {
+         *   this.openPostInNewPage();
+         *   return;
+         * }
+         * this.toggleAllVisibility();
+         */
 
-          /*
-           * if (isVideo(selectedThumb)) {
-           *   if (this.showOriginalContentOnHover) {
-           *     this.toggleCursorVisibility(false);
-           *     this.playOriginalVideo(selectedThumb);
-           *   } else {
-           *     this.toggleCursorVisibility(true);
-           *     // this.videoContainer.pause();
-           *   }
-           * } else if (
-           *   hoveringOverThumb()
-           *   && !isGif(selectedThumb)
-           *   && this.showOriginalContentOnHover) {
-           *   this.toggleCursorVisibility(false);
-           *   this.drawVisibleCanvas(this.OFFSCREEN_CANVASES.get(selectedThumb.id));
-           * } else {
-           *   this.toggleCursorVisibility(true);
-           * }
-           */
+        /*
+         * if (isVideo(selectedThumb)) {
+         *   if (this.showOriginalContentOnHover) {
+         *     this.toggleCursorVisibility(false);
+         *     this.playOriginalVideo(selectedThumb);
+         *   } else {
+         *     this.toggleCursorVisibility(true);
+         *     // this.videoContainer.pause();
+         *   }
+         * } else if (
+         *   hoveringOverThumb()
+         *   && !isGif(selectedThumb)
+         *   && this.showOriginalContentOnHover) {
+         *   this.toggleCursorVisibility(false);
+         *   this.drawVisibleCanvas(this.OFFSCREEN_CANVASES.get(selectedThumb.id));
+         * } else {
+         *   this.toggleCursorVisibility(true);
+         * }
+         */
 
         default:
 
@@ -592,6 +612,7 @@ onmessage = async(message) => {
     });
     window.addEventListener("load", () => {
       if (onPostPage()) {
+        console.log(this.offscreenCanvases.size);
         this.initializeThumbsForHovering.bind(this)();
         this.enumerateVisibleThumbs();
       }
@@ -670,7 +691,7 @@ onmessage = async(message) => {
     }
 
     if (!message.extensionAlreadyFound) {
-      this.assignExtension(message.postId, message.extension);
+      this.assignExtension(message.postId, message.newExtension);
     }
 
     if (this.showOriginalContentOnHover) {
@@ -714,31 +735,73 @@ onmessage = async(message) => {
     }
   }
 
-  preparePostsPage() {
-    if (onPostPage()) {
-      const imageList = document.getElementsByClassName("image-list")[0];
-      const thumbs = Array.from(imageList.querySelectorAll(".thumb"));
-
-      for (const thumb of thumbs) {
-        removeTitleFromImage(getImageFromThumb(thumb));
-        assignContentType(thumb);
-        thumb.id = thumb.id.substring(1);
-      }
-      setTimeout(() => {
-        this.renderImagesInTheBackground();
-      }, 20);
-      window.onblur = () => {
-        this.stopRendering = true;
-        setTimeout(() => {
-          for (const [id, _] of this.offscreenCanvases) {
-            this.offscreenCanvases.delete(id);
-          }
-        }, 100);
-        setTimeout(() => {
-          this.stopRendering = false;
-        }, 200);
-      };
+  async preparePostPage() {
+    if (!onPostPage()) {
+      return;
     }
+    const imageList = document.getElementsByClassName("image-list")[0];
+    const thumbs = Array.from(imageList.querySelectorAll(".thumb"));
+
+    for (const thumb of thumbs) {
+      removeTitleFromImage(getImageFromThumb(thumb));
+      assignContentType(thumb);
+      thumb.id = thumb.id.substring(1);
+    }
+    window.onblur = () => {
+      this.stopRendering = true;
+      setTimeout(() => {
+        for (const [id, _] of this.offscreenCanvases) {
+          this.offscreenCanvases.delete(id);
+        }
+      }, 100);
+      setTimeout(() => {
+        this.stopRendering = false;
+      }, 200);
+    };
+    await this.findImageExtensionsOnPostPage();
+    this.renderImagesInTheBackground();
+  }
+
+  findImageExtensionsOnPostPage() {
+    const postsPerPage = 42;
+    const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
+    const blacklistedTags = ` ${negateTags(TAG_BLACKLIST)}`.replace(/\s-/g, "+-");
+    let pageNumber = (/&pid=(\d+)/).exec(location.href);
+    let tags = (/&tags=([^&]*)/).exec(location.href);
+
+    pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
+    tags = tags === null ? "" : `${tags[1]}`;
+    tags = tags === "all" ? "" : tags;
+    const postPageAPIURL = `${apiURL}&tags=${tags}${blacklistedTags}&pid=${pageNumber}`;
+
+    console.dir(postPageAPIURL);
+    return fetch(postPageAPIURL)
+      .then((response) => {
+        if (response.ok) {
+          return response.text();
+        }
+        return null;
+      }).then((html) => {
+        if (html === null) {
+          console.error(`Failed to fetch: ${postPageAPIURL}`);
+        }
+        const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+        const posts = Array.from(dom.getElementsByTagName("post"));
+
+        for (const post of posts) {
+          const isAnImage = getContentType(post.getAttribute("tags")) === "image";
+          const originalImageURL = post.getAttribute("file_url");
+          const isBlacklisted = originalImageURL === "https://api-cdn.rule34.xxx/images//";
+
+          if (!isAnImage || isBlacklisted) {
+            continue;
+          }
+          const postId = post.getAttribute("id");
+          const extension = (/\.(png|jpg|jpeg|gif)/g).exec(originalImageURL)[1];
+
+          this.assignExtension(postId, extension);
+        }
+      });
   }
 
   enumerateVisibleThumbs() {
@@ -951,7 +1014,7 @@ onmessage = async(message) => {
 
   playOriginalVideo(thumb) {
     this.videoContainer.src = this.getVideoSource(thumb);
-    this.videoContainer.play().catch(() => {});
+    this.videoContainer.play().catch(() => { });
   }
 
   showOriginalGIF(thumb) {
@@ -1004,6 +1067,9 @@ onmessage = async(message) => {
   }
 
   async renderImagesAround(thumb) {
+    if (onPostPage()) {
+      return;
+    }
     this.deleteOldRenders();
 
     if (this.currentlyRendering) {
@@ -1235,9 +1301,14 @@ onmessage = async(message) => {
   }
 
   getVisibleUnrenderedImageThumbs() {
-    return Array.from(getAllVisibleThumbs()).filter((thumb) => {
+    let thumbs = Array.from(getAllVisibleThumbs()).filter((thumb) => {
       return isImage(thumb) && this.isNotRendered(thumb);
     });
+
+    if (onPostPage()) {
+      thumbs = thumbs.filter(thumb => !thumb.classList.contains("blacklisted-image"));
+    }
+    return thumbs;
   }
 
   onFavoritesSearch() {
@@ -1271,11 +1342,11 @@ onmessage = async(message) => {
     }
     this.currentlyRendering = true;
     const imageThumbsToRender = [];
-    const imageThumbs = this.getVisibleUnrenderedImageThumbs();
+    const allImageThumbs = this.getVisibleUnrenderedImageThumbs();
     const imagesAlreadyRenderedCount = this.offscreenCanvases.size;
 
-    for (let i = 0; i < imageThumbs.length && i + imagesAlreadyRenderedCount < this.maxNumberOfImagesToRender; i += 1) {
-      imageThumbsToRender.push(imageThumbs[i]);
+    for (let i = 0; i < allImageThumbs.length && i + imagesAlreadyRenderedCount < this.maxNumberOfImagesToRender; i += 1) {
+      imageThumbsToRender.push(allImageThumbs[i]);
     }
 
     if (imageThumbsToRender.length > 0) {
@@ -1297,7 +1368,8 @@ onmessage = async(message) => {
   }
 
   getRenderDelay(postId) {
-    return this.extensionIsKnown(postId) ? this.renderDelay / 4 : this.renderDelay;
+    const extensionKnownSpeed = onPostPage() ? 6 : 4;
+    return this.extensionIsKnown(postId) ? this.renderDelay / extensionKnownSpeed : this.renderDelay;
   }
 
   extensionIsKnown(postId) {
@@ -1381,7 +1453,7 @@ onmessage = async(message) => {
 
   renderInAdvanceWhileTraversingInGalleryMode(thumb, direction) {
     const currentThumbIndex = parseInt(thumb.getAttribute(this.thumbIndexAttribute));
-    const lookahead = Math.min(5, Math.round(this.maxNumberOfImagesToRender / 2) - 2);
+    const lookahead = Math.min(8, Math.round(this.maxNumberOfImagesToRender / 2) - 2);
     let possiblyUnrenderedThumbIndex;
 
     if (direction === Renderer.galleryDirections.LEFT || direction === Renderer.galleryDirections.A) {
@@ -1433,7 +1505,7 @@ onmessage = async(message) => {
       .map(thumb => thumb.id);
 
     while (postIdsWithUnknownExtensions.length > 0) {
-      await sleep(5000);
+      await sleep(2000);
 
       while (this.finishedLoading && !this.currentlyRendering && postIdsWithUnknownExtensions.length > 0) {
         const postId = postIdsWithUnknownExtensions.pop();
@@ -1443,7 +1515,7 @@ onmessage = async(message) => {
             findExtension: true,
             postId
           });
-          await sleep(250);
+          await sleep(150);
         }
       }
     }
