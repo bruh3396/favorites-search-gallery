@@ -112,7 +112,7 @@ class Renderer {
     OPEN_LOCK: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z\" /></svg>",
     CLOSED_LOCK: "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"white\" class=\"w-6 h-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z\" /></svg>"
   };
-  static cookieKeys = {
+  static preferences = {
     SHOW_ON_HOVER: "showImagesWhenHovering",
     BACKGROUND_OPACITY: "galleryBackgroundOpacity",
     RESOLUTION: "galleryResolution",
@@ -405,7 +405,7 @@ onmessage = async(message) => {
     this.renderWhileFavoritesAreStillLoading = false;
     this.finishedLoading = onPostPage();
     this.maxNumberOfImagesToRender = this.getMaxNumberOfImagesToRender();
-    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getCookie(Renderer.cookieKeys.SHOW_ON_HOVER, true) : false;
+    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Renderer.preferences.SHOW_ON_HOVER, true) : false;
     this.initialize();
   }
 
@@ -415,7 +415,7 @@ onmessage = async(message) => {
     this.loadDiscoveredImageExtensions();
     this.preparePostPage();
     this.injectHTML();
-    this.updateBackgroundOpacity(getCookie(Renderer.cookieKeys.BACKGROUND_OPACITY, 1));
+    this.updateBackgroundOpacity(getPreference(Renderer.preferences.BACKGROUND_OPACITY, 1));
   }
 
   injectHTML() {
@@ -430,11 +430,11 @@ onmessage = async(message) => {
 
   injectOptionsHTML() {
     addOptionToFavoritesPage(
-      Renderer.cookieKeys.SHOW_ON_HOVER,
+      Renderer.preferences.SHOW_ON_HOVER,
       "Enlarge On Hover",
       "View full resolution images/play videos when hovering over any thumbnail (Middle mouse click)",
       this.showOriginalContentOnHover, (element) => {
-        setCookie(Renderer.cookieKeys.SHOW_ON_HOVER, element.target.checked);
+        setPreference(Renderer.preferences.SHOW_ON_HOVER, element.target.checked);
         this.toggleAllVisibility();
       },
       true
@@ -550,7 +550,7 @@ onmessage = async(message) => {
 
         this.traverseGallery.bind(this)(direction);
       } else if (hoveringOverThumb() && this.showOriginalContentOnHover) {
-        let opacity = parseFloat(getCookie(Renderer.cookieKeys.BACKGROUND_OPACITY, 1));
+        let opacity = parseFloat(getPreference(Renderer.preferences.BACKGROUND_OPACITY, 1));
 
         opacity -= event.deltaY * 0.0005;
         opacity = clamp(opacity, "0", "1");
@@ -725,7 +725,7 @@ onmessage = async(message) => {
       this.recentlyDiscoveredImageExtensionsCount = 0;
 
       if (!onPostPage()) {
-        localStorage.setItem(Renderer.cookieKeys.IMAGE_EXTENSIONS, JSON.stringify(this.imageExtensions));
+        localStorage.setItem(Renderer.preferences.IMAGE_EXTENSIONS, JSON.stringify(this.imageExtensions));
       }
     }
   }
@@ -780,16 +780,7 @@ onmessage = async(message) => {
   }
 
   findImageExtensionsOnPostPage() {
-    const postsPerPage = 42;
-    const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
-    const blacklistedTags = ` ${negateTags(TAG_BLACKLIST)}`.replace(/\s-/g, "+-");
-    let pageNumber = (/&pid=(\d+)/).exec(location.href);
-    let tags = (/&tags=([^&]*)/).exec(location.href);
-
-    pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
-    tags = tags === null ? "" : `${tags[1]}`;
-    tags = tags === "all" ? "" : tags;
-    const postPageAPIURL = `${apiURL}&tags=${tags}${blacklistedTags}&pid=${pageNumber}`;
+    const postPageAPIURL = this.getPostPageAPIURL();
     return fetch(postPageAPIURL)
       .then((response) => {
         if (response.ok) {
@@ -804,8 +795,8 @@ onmessage = async(message) => {
         const posts = Array.from(dom.getElementsByTagName("post"));
 
         for (const post of posts) {
-          const isAnImage = getContentType(post.getAttribute("tags")) === "image";
           const originalImageURL = post.getAttribute("file_url");
+          const isAnImage = getContentType(post.getAttribute("tags")) === "image";
           const isBlacklisted = originalImageURL === "https://api-cdn.rule34.xxx/images//";
 
           if (!isAnImage || isBlacklisted) {
@@ -817,6 +808,26 @@ onmessage = async(message) => {
           this.assignExtension(postId, extension);
         }
       });
+  }
+
+  /**
+   * @returns {String}
+   */
+  getPostPageAPIURL() {
+    const postsPerPage = 42;
+    const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
+    let blacklistedTags = ` ${negateTags(TAG_BLACKLIST)}`.replace(/\s-/g, "+-");
+    let pageNumber = (/&pid=(\d+)/).exec(location.href);
+    let tags = (/&tags=([^&]*)/).exec(location.href);
+
+    pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
+    tags = tags === null ? "" : tags[1];
+
+    if (tags === "all") {
+      tags = "";
+      blacklistedTags = "";
+    }
+    return `${apiURL}&tags=${tags}${blacklistedTags}&pid=${pageNumber}`;
   }
 
   enumerateVisibleThumbs() {
@@ -857,7 +868,7 @@ onmessage = async(message) => {
   }
 
   loadDiscoveredImageExtensions() {
-    this.imageExtensions = JSON.parse(localStorage.getItem(Renderer.cookieKeys.IMAGE_EXTENSIONS)) || {};
+    this.imageExtensions = JSON.parse(localStorage.getItem(Renderer.preferences.IMAGE_EXTENSIONS)) || {};
   }
 
   openPostInNewPage() {
@@ -972,7 +983,7 @@ onmessage = async(message) => {
     const showOnHoverCheckbox = document.getElementById("showImagesWhenHoveringCheckbox");
 
     if (showOnHoverCheckbox !== null) {
-      setCookie(Renderer.cookieKeys.SHOW_ON_HOVER, this.showOriginalContentOnHover);
+      setPreference(Renderer.preferences.SHOW_ON_HOVER, this.showOriginalContentOnHover);
       showOnHoverCheckbox.checked = this.showOriginalContentOnHover;
     }
   }
@@ -1264,9 +1275,9 @@ onmessage = async(message) => {
     this.toggleOriginalGIF(value);
   }
 
-    /**
-     * @param {Boolean} value
-     */
+  /**
+   * @param {Boolean} value
+   */
   toggleBackgroundVisibility(value) {
     if (value === undefined) {
       this.background.style.display = this.background.style.display === "block" ? "none" : "block";
@@ -1275,9 +1286,9 @@ onmessage = async(message) => {
     this.background.style.display = value ? "block" : "none";
   }
 
-    /**
-     * @param {Boolean} value
-     */
+  /**
+   * @param {Boolean} value
+   */
   toggleScrollbarVisibility(value) {
     if (value === undefined) {
       document.body.style.overflowY = document.body.style.overflowY === "auto" ? "hidden" : "auto";
@@ -1286,9 +1297,9 @@ onmessage = async(message) => {
     document.body.style.overflowY = value ? "auto" : "hidden";
   }
 
-    /**
-     * @param {Boolean} value
-     */
+  /**
+   * @param {Boolean} value
+   */
   toggleCursorVisibility(value) {
     // const image = getImageFromThumb(this.getSelectedThumb());
 
@@ -1310,9 +1321,9 @@ onmessage = async(message) => {
      */
   }
 
-    /**
-     * @param {Boolean} value
-     */
+  /**
+   * @param {Boolean} value
+   */
   toggleVideoControls(value) {
     if (value === undefined) {
       this.videoContainer.style.pointerEvents = this.videoContainer.style.pointerEvents === "auto" ? "none" : "auto";
@@ -1323,9 +1334,9 @@ onmessage = async(message) => {
     }
   }
 
-    /**
-     * @param {Boolean} value
-     */
+  /**
+   * @param {Boolean} value
+   */
   toggleVisibleCanvas(value) {
     if (value === undefined) {
       this.visibleCanvas.style.visibility = this.visibleCanvas.style.visibility === "visible" ? "hidden" : "visible";
@@ -1334,9 +1345,9 @@ onmessage = async(message) => {
     }
   }
 
-    /**
-     * @param {Boolean} value
-     */
+  /**
+   * @param {Boolean} value
+   */
   toggleOriginalVideo(value) {
     if (value !== undefined) {
       this.videoContainer.style.display = value ? "block" : "none";
@@ -1350,9 +1361,9 @@ onmessage = async(message) => {
     }
   }
 
-    /**
-     * @param {Boolean} value
-     */
+  /**
+   * @param {Boolean} value
+   */
   toggleOriginalGIF(value) {
     if (value === undefined) {
       this.gifContainer.style.visibility = this.gifContainer.style.visibility === "visible" ? "hidden" : "visible";
@@ -1366,7 +1377,7 @@ onmessage = async(message) => {
    */
   updateBackgroundOpacity(opacity) {
     this.background.style.opacity = opacity;
-    setCookie(Renderer.cookieKeys.BACKGROUND_OPACITY, opacity);
+    setPreference(Renderer.preferences.BACKGROUND_OPACITY, opacity);
   }
 
   /**
@@ -1552,7 +1563,7 @@ onmessage = async(message) => {
     const scale = 40;
     const width = 16 * scale;
     const height = 9 * scale;
-    const defaultResolution = getCookie(Renderer.cookieKeys.RESOLUTION, Renderer.defaultResolution.FAVORITES_PAGE);
+    const defaultResolution = getPreference(Renderer.preferences.RESOLUTION, Renderer.defaultResolution.FAVORITES_PAGE);
     const container = document.createElement("div");
 
     container.style.paddingTop = "8px";
@@ -1583,7 +1594,7 @@ onmessage = async(message) => {
           this.markAsUnloaded(postId);
         }
       }, this.renderDelay);
-      setCookie(Renderer.cookieKeys.RESOLUTION, resolutionDropdown.value);
+      setPreference(Renderer.preferences.RESOLUTION, resolutionDropdown.value);
       this.setVisibleCanvasResolution();
     };
     container.appendChild(resolutionLabel);
@@ -1593,7 +1604,7 @@ onmessage = async(message) => {
   }
 
   setVisibleCanvasResolution() {
-    const resolution = onPostPage() ? Renderer.defaultResolution.POSTS_PAGE : getCookie(Renderer.cookieKeys.RESOLUTION, Renderer.defaultResolution.FAVORITES_PAGE);
+    const resolution = onPostPage() ? Renderer.defaultResolution.POSTS_PAGE : getPreference(Renderer.preferences.RESOLUTION, Renderer.defaultResolution.FAVORITES_PAGE);
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
     this.visibleCanvasResolution.WIDTH = dimensions[0];
