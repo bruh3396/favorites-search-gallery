@@ -132,7 +132,7 @@ class Renderer {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 1000;
 let retryDelay = 0;
@@ -422,6 +422,7 @@ onmessage = async(message) => {
   }
 
   initialize() {
+    this.createBlankVideoPoster();
     this.setVisibleCanvasResolution();
     this.addEventListeners();
     this.loadDiscoveredImageExtensions();
@@ -457,9 +458,7 @@ onmessage = async(message) => {
   injectOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="original-content-container">
-              <video id="original-video-container" width="90%" height="90%" autoplay muted loop style="display: block; top:5%; left:5%; position:fixed; z-index:9998;pointer-events:none;">
-                  <source src="" type="video/mp4">
-                      Your browser does not support the video tag.
+              <video id="original-video-container" width="90%" height="90%" autoplay muted loop style="display: none; top:5%; left:5%; position:fixed; z-index:9998;pointer-events:none;">
               </video>
               <img id="original-gif-container" class="focused"></img>
               <div id="original-content-background" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background: black; z-index: 999; display: none; pointer-events: none;"></div>
@@ -477,10 +476,6 @@ onmessage = async(message) => {
     this.visibleCanvas.height = this.visibleCanvasResolution.height;
     this.visibleCanvas.id = "visible-canvas";
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
-
-    this.videoContainer.onloadeddata = () => {
-      this.videoContainer.style.display = "block";
-    };
   }
 
   addEventListeners() {
@@ -967,10 +962,12 @@ onmessage = async(message) => {
     } else if (isGif(selectedThumb)) {
       this.toggleCursorVisibility(false);
       this.toggleVideoControls(false);
+      this.toggleOriginalVideo(false);
       this.showOriginalGIF(selectedThumb);
     } else {
       this.toggleCursorVisibility(false);
       this.toggleVideoControls(false);
+      this.toggleOriginalVideo(false);
       this.showOriginalImage(selectedThumb);
     }
   }
@@ -1024,7 +1021,7 @@ onmessage = async(message) => {
 
   clearOriginalContentSources() {
     this.clearVisibleCanvas();
-    this.setOriginalVideoSource("");
+    this.videoContainer.src = "";
     this.gifContainer.src = "";
   }
 
@@ -1079,7 +1076,7 @@ onmessage = async(message) => {
       return;
     }
     this.toggleVisibleCanvas(false);
-    // this.videoContainer.style.display = "block";
+    this.videoContainer.style.display = "block";
     this.playOriginalVideo(thumb);
 
     if (!this.inGalleryMode) {
@@ -1099,17 +1096,9 @@ onmessage = async(message) => {
    * @param {HTMLElement} thumb
    */
   playOriginalVideo(thumb) {
-    this.setOriginalVideoSource(this.getVideoSource(thumb));
+    this.videoContainer.src = this.getVideoSource(thumb);
     this.videoContainer.play().catch(() => { });
   }
-
-  /**
-   * @param {String} source
-   */
-   setOriginalVideoSource(source) {
-    this.videoContainer.style.display = "none";
-    this.videoContainer.src = source;
-   }
 
   /**
    * @param {HTMLElement} thumb
@@ -1300,7 +1289,7 @@ onmessage = async(message) => {
    */
   toggleOriginalContentVisibility(value) {
     this.toggleVisibleCanvas(value);
-    this.toggleOriginalVideo(value);
+    // this.toggleOriginalVideo(value);
     this.toggleOriginalGIF(value);
   }
 
@@ -1378,15 +1367,15 @@ onmessage = async(message) => {
    * @param {Boolean} value
    */
   toggleOriginalVideo(value) {
-    if (value !== undefined) {
-      // this.videoContainer.style.display = value ? "block" : "none";
+    if (value !== undefined && this.videoContainer.src !== "") {
+      this.videoContainer.style.display = value ? "block" : "none";
       return;
     }
 
     if (!this.currentlyHoveringOverVideoThumb() || this.videoContainer.style.display === "block") {
-      // this.videoContainer.style.display = "none";
+      this.videoContainer.style.display = "none";
     } else {
-      // this.videoContainer.style.display = "block";
+      this.videoContainer.style.display = "block";
     }
   }
 
@@ -1716,6 +1705,17 @@ onmessage = async(message) => {
         }
       }
     }
+  }
+
+  createBlankVideoPoster() {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    context.fillStyle = "black";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      this.videoContainer.setAttribute("poster", URL.createObjectURL(blob));
+    });
   }
 }
 
