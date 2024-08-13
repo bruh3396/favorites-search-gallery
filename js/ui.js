@@ -263,10 +263,18 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       grid-template-columns: repeat(10, 1fr);
       grid-gap: 1em;
     }
+
+    #help-links-container {
+      margin-top: 17px;
+    }
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
-      <h2>Search Favorites</h2>
+      <h2 style="display: inline;">Search Favorites</h2>
+      <span style="margin-left: 10px;">
+        <label id="match-count-label"></label>
+        <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
+      </span>
       <div id="left-favorites-panel-top-row">
         <button title="Search favorites\nctrl+click: Search all posts" id="search-button">Search</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
@@ -278,14 +286,16 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           <button title="Scroll to favorite using its ID" id="find-favorite-button" style="white-space: nowrap; ">Find</button>
           <input type="number" id="find-favorite-input" type="text" placeholder="ID">
         </span>
-        <label id="match-count-label"></label>
-        <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
+        <span id="help-links-container">
+          <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
+        </span>
       </div>
       <div>
         <textarea name="tags" id="favorites-search-box" placeholder="Search by Tags or IDs"
           spellcheck="false">( video ~ animated* ~ highres ~ absurd_res* ) -low_res* ( 1girls ~ female* ) -tagme </textarea>
       </div>
-      <div style="display: flex; flex-flow: row-wrap;">
+
+      <div id="left-favorites-panel-bottom-row" style="display: flex; flex-flow: row-wrap;">
         <div id="favorite-options-container">
           <div id="show-options"><label class="checkbox" title="Toggle options"><input type="checkbox"
                 id="options-checkbox"> Options</label></div>
@@ -293,7 +303,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             <div><label class="checkbox" title="Toggle remove buttons"><input type="checkbox" id="show-remove-buttons">
                 Remove Buttons</label></div>
             <div><label class="checkbox" title="Exclude blacklisted tags from search"><input type="checkbox"
-                  id="filter-blacklist-checkbox"> Filter Blacklist</label></div>
+                  id="filter-blacklist-checkbox"> Exclude Blacklist</label></div>
           </div>
           <div id="additional-favorite-options">
             <div id="column-resize-container">
@@ -424,7 +434,8 @@ function addEventListenersToFavoritesPage() {
     const query = FAVORITE_SEARCH_INPUTS.searchBox.value;
 
     if (event.ctrlKey) {
-      const postPageURL = `https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(query)}`;
+      const queryWithFormattedIds = query.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
+      const postPageURL = `https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(queryWithFormattedIds)}`;
 
       window.open(postPageURL);
     } else {

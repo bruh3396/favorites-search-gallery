@@ -132,7 +132,7 @@ class Renderer {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 1000;
 let retryDelay = 0;
@@ -388,6 +388,10 @@ onmessage = async(message) => {
    * @type {HTMLDivElement}
    */
   background;
+  /**
+   * @type {Number}
+   */
+  extensionKnownSpeed;
 
   constructor() {
     this.visibleCanvas = document.createElement("canvas");
@@ -397,9 +401,10 @@ onmessage = async(message) => {
       height: 100
     };
     this.offscreenCanvases = new Map();
-    this.offscreenCanvasRenderers = [new Worker(getWorkerURL(Renderer.webWorkers.renderer))];
+    this.createOffscreenCanvasRenderers(1);
+    this.extensionKnownSpeed = 8;
     this.thumbIndexAttribute = "index";
-    this.renderDelay = 250;
+    this.renderDelay = 200;
     this.renderedThumbRange = {
       minIndex: 0,
       maxIndex: 0
@@ -429,6 +434,17 @@ onmessage = async(message) => {
     this.preparePostPage();
     this.injectHTML();
     this.updateBackgroundOpacity(getPreference(Renderer.preferences.backgroundOpacity, 1));
+  }
+
+  /**
+   * @param {Number} count
+   */
+  createOffscreenCanvasRenderers(count) {
+    this.offscreenCanvasRenderers = [];
+
+    for (let i = 0; i < count; i += 1) {
+      this.offscreenCanvasRenderers.push(new Worker(getWorkerURL(Renderer.webWorkers.renderer)));
+    }
   }
 
   injectHTML() {
@@ -1537,8 +1553,8 @@ onmessage = async(message) => {
    * @returns {Number}
    */
   getRenderDelay(postId) {
-    const extensionKnownSpeed = onPostPage() ? 6 : 6;
-    return this.extensionIsKnown(postId) ? this.renderDelay / extensionKnownSpeed : this.renderDelay;
+    // const extensionKnownSpeed = onPostPage() ? 4 : 2;
+    return this.extensionIsKnown(postId) ? this.renderDelay / this.extensionKnownSpeed : this.renderDelay;
   }
 
   /**

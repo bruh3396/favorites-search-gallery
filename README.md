@@ -50,10 +50,20 @@ I noticed [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites
 ## Features
 
 <ol>
-    <li>Search favorites with the exact same syntax as the normal post pages:<br>
-        Example: ( video ~ animated ~ high_res* ~ absurd_res* ) -low_res* ( female* ~ 1girls ) -ai_generated -red_hair
+    <li>Search favorites with the the same syntax as the normal post pages (except for meta tags):<br>
+        <strong>Includes:</strong>
+            <ul>
+            <li>AND, OR, NOT</li>
+            <li>WILDCARD</li>
+            <li>ID</li>
+            </ul>
+        <strong>Does not include:</strong> Meta tags like: rating, score, etc
         <br>
-        AND, OR, and NOT combinations (except for meta tags like rating:, score:, etc.)
+        <strong>Examples:</strong><br>
+        <ul>
+        <li>( video ~ animated ~ high_res* ~ absurd_res* ) -low_res* ( female* ~ 1girls ~ 123 ) -ai_generated -red_hair</li>
+        <li>( 123 ~ 456 ~ 99999* ~ 1girls ) -video ( apple* ~ banana ~ pineapple )</li>
+        </ul>
     </li><br>
     <li>View full resolution images and GIFs, or play videos when hovering over or clicking on a thumbnail + gallery controls<br>
         Gallery also works on post pages

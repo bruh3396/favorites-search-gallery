@@ -92,12 +92,12 @@ class Caption {
   static localStorageKeys = {
     captionTags: "captionTags"
   };
-  static tagCategory = {
-    copyright: null,
-    character: null,
-    artist: null
-    // metadata: null,
-  };
+  static importantTagCategories = new Set([
+      "copyright",
+      "character",
+      "artist"
+      // "metadata"
+    ]);
   static htmlTagType = "li";
   static template = `
      <ul id="caption-list">
@@ -112,7 +112,7 @@ class Caption {
   static getCaptionHeaderHTML() {
     let html = "";
 
-    for (const category of Object.keys(Caption.tagCategory)) {
+    for (const category of Caption.importantTagCategories) {
       const capitalizedTagType = capitalize(category);
       const header = capitalizedTagType === "Metadata" ? "Meta" : capitalizedTagType;
 
@@ -278,7 +278,7 @@ class Caption {
     requestPageInformation(postPageURL, (response) => {
       const dom = new DOMParser().parseFromString(`<div>${response}</div>`, "text/html");
 
-      for (const tagType of Object.keys(Caption.tagCategory)) {
+      for (const tagType of Caption.importantTagCategories) {
         const tags = Array.from(dom.getElementsByClassName(`tag-type-${tagType}`));
 
         this.addFetchedTags(tags, tagType, thumb.id);
@@ -296,7 +296,7 @@ class Caption {
     const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
     const captionTags = {};
 
-    for (const tagType of Object.keys(Caption.tagCategory)) {
+    for (const tagType of Caption.importantTagCategories) {
       const extractedTags = [];
       const tagsOnPostPage = Array.from(dom.getElementsByClassName(`tag-type-${tagType}`));
 
@@ -314,7 +314,7 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   populateTagsFromLocalStorage(thumb) {
-    for (const tagType of Object.keys(Caption.tagCategory)) {
+    for (const tagType of Caption.importantTagCategories) {
       try {
         for (const tagValue of this.savedTags[thumb.id][tagType]) {
           this.addTag(tagType, tagValue);
@@ -484,8 +484,57 @@ class Caption {
   getCategoryHeaderId(tagCategory) {
     return `caption${capitalize(tagCategory)}`;
   }
+
+  collectTagTypes() {
+    const tagTypes = {
+      0: "general",
+      1: "artist",
+      2: "metadata",
+      3: "copyright",
+      4: "character"
+    };
+    const parser = new DOMParser();
+    const tags = {};
+
+    window.addEventListener("favoritesLoaded", async() => {
+      const allTags = Array.from(getAllThumbNodeElements())
+        .map(thumb => getTagsFromThumb(thumb).replace(/\d+$/, ""))
+        .join(" ")
+        .split(" ")
+        .sort();
+
+      if (allTags.length === 0) {
+        return;
+      }
+      const lastTag = allTags[allTags.length - 1];
+      const uniqueTags = new Set(allTags);
+
+      for (const tagName of uniqueTags) {
+        const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
+
+        fetch(apiURL)
+          .then((response) => {
+            if (response.ok) {
+              return response.text();
+            }
+            throw new Error(response.statusText);
+          })
+          .then((html) => {
+            const dom = parser.parseFromString(html, "text/html");
+            const type = dom.getElementsByTagName("tag")[0].getAttribute("type");
+
+            tags[tagName] = type;
+
+            if (tagName === lastTag) {
+              // console.log(JSON.stringify(tags));
+            }
+          });
+        await sleep(1);
+      }
+    });
+  }
 }
 
 if (!onPostPage()) {
-  // const caption = new Caption();
+  const caption = new Caption();
 }

@@ -850,33 +850,4 @@ function removeExtraWhiteSpace(string) {
   return string.trim().replace(/\s+/g, " ");
 }
 
-async function collectTagTypes() {
-  const tagTypes = {
-    0: "general",
-    1: "artist",
-    2: "metadata",
-    3: "copyright",
-    4: "character"
-  };
-  const tags = {};
-  const parser = new DOMParser();
-
-  for (let i = 0; i < 10; i += 1) {
-    apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=tag&q=index&limit=1000&pid=${i}`;
-    fetch(apiURL)
-      .then((response) => {
-        return response.text();
-      })
-      .then((html) => {
-        const dom = parser.parseFromString(html, "text/xml");
-        const xmlTags = dom.getElementsByTagName("tag");
-
-        for (const xmlTag of xmlTags) {
-          tags[xmlTag.getAttribute("name")] = tagTypes[parseInt(xmlTag.getAttribute("type"))];
-        }
-      });
-    await sleep(10);
-  }
-}
-
 initializeUtilities();
