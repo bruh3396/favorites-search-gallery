@@ -30,7 +30,7 @@ class AwesompleteWrapper {
         });
       },
       replace: (suggestion) => {
-        awesomplete.input.value = `${awesomplete.input.value.match(/^(.+ )?[\s-]*|/)[0] + suggestion.value} `;
+        awesomplete.input.value = `${awesomplete.input.value.match(/^(.+ )?[\s-]*|/)[0] + decodeEntities(suggestion.value)} `;
       }
     });
 

@@ -105,6 +105,7 @@ class Caption {
     3: "copyright",
     4: "character"
   };
+
   static htmlTagType = "li";
   static template = `
      <ul id="caption-list">
@@ -129,6 +130,19 @@ class Caption {
   }
 
   /**
+   * @param {String} tagCategory
+   * @returns {Number}
+   */
+  static getNumberFromTagCategory(tagCategory) {
+    for (const [key, value] of Object.entries(Caption.tagCategoryAssociations)) {
+      if (value === tagCategory) {
+        return key;
+      }
+    }
+    return 0;
+  }
+
+  /**
    * @type {Boolean}
    */
   get disabled() {
@@ -140,12 +154,22 @@ class Caption {
    */
   caption;
   /**
-   * @type {Object.<String, Object>}
+   * @type {Object.<String, Number>}
    */
   savedTags;
+  /**
+   * @type {String[]}
+   */
+  problematicTags;
+  /**
+   * @type {Boolean}
+   */
+  currentlyCorrectingProblematicTags;
 
   constructor() {
     this.savedTags = this.loadSavedTags();
+    this.problematicTags = [];
+    this.currentlyCorrectingProblematicTags = false;
     this.collectAllTagTypes();
     this.createElement();
     this.injectHTML();
@@ -318,7 +342,7 @@ class Caption {
   }
 
   /**
-   * @returns {Object.<String, Object>}
+   * @returns {Object.<String, Number>}
    */
   loadSavedTags() {
     return JSON.parse(localStorage.getItem(Caption.localStorageKeys.tagCategories) || "{}");
@@ -447,6 +471,47 @@ class Caption {
   }
 
   /**
+   * @param {String} problematicTag
+   */
+  async correctProblematicTag(problematicTag) {
+    this.problematicTags.push(problematicTag);
+
+    if (this.currentlyCorrectingProblematicTags) {
+      return;
+    }
+    this.currentlyCorrectingProblematicTags = true;
+
+    while (this.problematicTags.length > 0) {
+      const tagName = this.problematicTags.pop();
+      const tagPageURL = `https://rule34.xxx/index.php?page=tags&s=list&tags=${tagName}`;
+
+      await sleep(500);
+      fetch(tagPageURL)
+        .then((response) => {
+          if (response.ok) {
+            return response.text();
+          }
+          throw new Error(response.statusText);
+        })
+        .then((html) => {
+          const dom = new DOMParser().parseFromString(html, "text/html");
+          const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
+
+          if (columnOfFirstRow.length !== 3) {
+            this.savedTags[tagName] = 0;
+            this.saveTags();
+            return;
+          }
+          const category = columnOfFirstRow[2].textContent.split(",")[0].split(" ")[0];
+
+          this.savedTags[tagName] = Caption.getNumberFromTagCategory(category);
+          this.saveTags();
+        });
+    }
+    this.currentlyCorrectingProblematicTags = false;
+  }
+
+  /**
    * @param {String[]} tags
    * @param { Function} onAllTagsFound
    */
@@ -468,6 +533,11 @@ class Caption {
         .then((html) => {
           const dom = parser.parseFromString(html, "text/html");
           const type = dom.getElementsByTagName("tag")[0].getAttribute("type");
+
+          if (type === "array") {
+            this.correctProblematicTag(tagName);
+            return;
+          }
 
           this.savedTags[tagName] = type;
 
