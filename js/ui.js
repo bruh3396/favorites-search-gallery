@@ -271,11 +271,11 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <button title="Search favorites\nctrl+click: Search all posts" id="search-button">Search</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Shuffle order of search results" id="shuffle-button">Shuffle</button>
-        <button title="Clear the search box" id="clear-button" style="display: none;">Clear</button>
+        <button title="Clear the search box" id="clear-button">Clear</button>
         <button title="Save results as search" id="save-search-button" style="display: none;">Save</button>
         <button title="Reset saved favorites" id="reset-button">Reset</button>
         <span id="find-favorite">
-          <button id="find-favorite-button" style="white-space: nowrap; ">Find</button>
+          <button title="Scroll to favorite using its ID" id="find-favorite-button" style="white-space: nowrap; ">Find</button>
           <input type="number" id="find-favorite-input" type="text" placeholder="ID">
         </span>
         <label id="match-count-label"></label>
@@ -330,7 +330,7 @@ const FAVORITE_SEARCH_PREFERENCES = {
   thumbSize: "thumbSize",
   columnCount: "columnCount"
 };
-const FAVAORITE_SEARCH_LOACAL_STORAGE = {
+const FAVORITE_SEARCH_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
 };
 const FAVORITE_SEARCH_BUTTONS = {
@@ -349,7 +349,6 @@ const FAVORITE_SEARCH_CHECKBOXES = {
   showRemoveButtons: document.getElementById("show-remove-buttons"),
   filterBlacklist: document.getElementById("filter-blacklist-checkbox")
 };
-
 const FAVORITE_SEARCH_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
   findFavorite: document.getElementById("find-favorite-input"),
@@ -358,7 +357,6 @@ const FAVORITE_SEARCH_INPUTS = {
 const FAVORITE_SEARCH_LABELS = {
   findFavorite: document.getElementById("find-favorite-label")
 };
-
 let searchHistory = [];
 let searchHistoryIndex = 0;
 let lastSearchQuery = "";
@@ -398,7 +396,7 @@ function loadFavoritesPagePreferences() {
     FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked = true;
     FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.parentElement.style.display = "none";
   }
-  searchHistory = JSON.parse(localStorage.getItem(FAVAORITE_SEARCH_LOACAL_STORAGE.searchHistory)) || [];
+  searchHistory = JSON.parse(localStorage.getItem(FAVORITE_SEARCH_LOCAL_STORAGE.searchHistory)) || [];
 
   if (searchHistory.length > 0) {
     FAVORITE_SEARCH_INPUTS.searchBox.value = searchHistory[0];
@@ -474,7 +472,7 @@ function addEventListenersToFavoritesPage() {
 
       case "Escape":
         if (!awesompleteIsHidden(FAVORITE_SEARCH_INPUTS.searchBox)) {
-          hideAwesomeplete();
+          favoritesLoader.hideAwesomplete();
         }
         break;
 
@@ -548,7 +546,7 @@ function addEventListenersToFavoritesPage() {
 
 function completeSearchSuggestion(suggestion) {
   suggestion = suggestion.innerText.replace(/ \([0-9]+\)$/, "");
-  hideAwesomeplete();
+  favoritesLoader.hideAwesomplete();
   FAVORITE_SEARCH_INPUTS.searchBox.value = FAVORITE_SEARCH_INPUTS.searchBox.value.replace(/\S+$/, `${suggestion} `);
 }
 
@@ -573,7 +571,7 @@ function addToFavoritesSearchHistory(newSearch) {
   searchHistory = searchHistory.filter(search => search !== newSearch);
   searchHistory.unshift(newSearch);
   searchHistory.length = Math.min(searchHistory.length, MAX_SEARCH_HISTORY_LENGTH);
-  localStorage.setItem(FAVAORITE_SEARCH_LOACAL_STORAGE.searchHistory, JSON.stringify(searchHistory));
+  localStorage.setItem(FAVORITE_SEARCH_LOCAL_STORAGE.searchHistory, JSON.stringify(searchHistory));
 }
 
 /**

@@ -136,7 +136,8 @@ class SavedSearches {
     textareaWidth: "savedSearchesTextAreaWidth",
     textareaHeight: "savedSearchesTextAreaHeight",
     savedSearches: "savedSearches",
-    visibility: "savedSearchVisibility"
+    visibility: "savedSearchVisibility",
+    tutorial: "savedSearchesTutorial"
   };
   static localStorageKeys = {
     savedSearches: "savedSearches"
@@ -176,6 +177,10 @@ class SavedSearches {
     if (onPostPage()) {
       return;
     }
+    this.initialize();
+  }
+
+  initialize() {
     this.insertHTMLIntoDocument();
     this.saveButton = document.getElementById("save-custom-search-button");
     this.textarea = document.getElementById("saved-searches-input");
@@ -188,19 +193,19 @@ class SavedSearches {
   }
 
   insertHTMLIntoDocument() {
-    const showSavedSeaches = getPreference(SavedSearches.preferences.visibility, true);
+    const showSavedSearches = getPreference(SavedSearches.preferences.visibility, true);
     let placeToInsertSavedSearches = document.getElementById("right-favorites-panel");
 
     if (placeToInsertSavedSearches === null) {
       placeToInsertSavedSearches = document.getElementById("favorites-top-bar");
     }
     placeToInsertSavedSearches.insertAdjacentHTML("beforeend", savedSearchesHTML);
-    document.getElementById("saved-searches").style.display = showSavedSeaches ? "block" : "none";
+    document.getElementById("saved-searches").style.display = showSavedSearches ? "block" : "none";
     const options = addOptionToFavoritesPage(
       "savedSearchesCheckbox",
       "Saved Searches",
       "Toggle saved searches",
-      showSavedSeaches,
+      showSavedSearches,
       (e) => {
         document.getElementById("saved-searches").style.display = e.target.checked ? "block" : "none";
         setPreference(SavedSearches.preferences.visibility, e.target.checked);
@@ -289,7 +294,7 @@ class SavedSearches {
     };
     removeButton.onclick = () => {
       if (this.inEditMode()) {
-        alert("Cancel curent edit before removing another search");
+        alert("Cancel current edit before removing another search");
         return;
       }
 
@@ -360,10 +365,37 @@ class SavedSearches {
 
   loadSavedSearches() {
     const savedSearches = JSON.parse(localStorage.getItem(SavedSearches.localStorageKeys.savedSearches)) || [];
+    const firstUse = getPreference(SavedSearches.preferences.tutorial, true);
+
+    setPreference(SavedSearches.preferences.tutorial, false);
+
+    if (firstUse && savedSearches.length === 0) {
+      this.createTutorialSearches();
+      return;
+    }
 
     for (let i = savedSearches.length - 1; i >= 0; i -= 1) {
       this.saveSearch(savedSearches[i]);
     }
+  }
+
+  createTutorialSearches() {
+    const searches = [];
+
+    window.addEventListener("startedFetchingFavorites", async() => {
+      await sleep(1000);
+      const postIds = getAllVisibleThumbs().map(thumb => thumb.id);
+
+      shuffleArray(postIds);
+
+      const exampleSearch = `( EXAMPLE: ~ ${postIds.slice(0, 9).join(" ~ ")} ) ( male* ~ female* ~ 1boy ~ 1girls )`;
+
+      searches.push(exampleSearch);
+
+      for (let i = searches.length - 1; i >= 0; i -= 1) {
+        this.saveSearch(searches[i]);
+      }
+    });
   }
 
   /**

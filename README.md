@@ -1,74 +1,116 @@
 # favorites-search-gallery
-Favorites Search + Gallery
-https://github.com/bruh3396/favorites-search-gallery
 
-## Intro
-  The old favorites search by MegaMoo7 stopped working some time ago.\
-  I couldn't find a suitable replacement, so I made my own adaptation.\
-  The main improvement is a gallery viewer.
+### Search, view, and play favorites all on one page
 
+<li><a href="#about">About</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#controls">Controls</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#preferred-specs">Preferred Specs</a></li>
+<li><a href="#faq">FAQ</a></li>
 
+## About
+
+I noticed [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites-search) stopped working some time ago\
+ I couldn't find a suitable replacement, so I created my own
+
+## Getting Started
+
+<ol>
+<li>Install the extension  or Tampermonkey script (not linked here for obvious reasons)</li>
+<li>Go to any favorites page
+    <ul>
+    <li>Should look like: <strong>...</strong>/index.php?page=favorites&s=view&id=<strong>&ltID&gt</strong></li>
+    </ul>
+</li>
+<li>Enjoy</li>
+</ol>
 
 ## Controls
-    Left Click (Toggle) on thumbnail: Toggle gallery
-    Middle Click:
-        Not hovering hover thumbnail: Toggle content automatically enlarging when hovering over thumbnails
-        Hovering over thumbnail/In gallery: Open post page of thumbnail in new tab
 
-    Scroll Wheel/Arrow Keys/WASD: Move to next/previous image in gallery
-    Escape: Exit gallery
+<ul>
+    <li><strong>Left click:</strong></li>
+      <ul>
+        <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
+        <li><strong>In gallery:</strong> Exit gallery, disable enlarge on hover</li>
+      </ul>
+    <li>
+      <strong>Middle click:</strong>
+      <ul>
+          <li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
+          <li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
+      </ul>
+    </li>
+    <li><strong>Scroll Wheel/Arrow Keys/WASD (in gallery):</strong> Traverse gallery</li>
+    <li><strong>Scroll Wheel: (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity</li>
+    <li><strong>Escape (in gallery):</strong> Exit gallery, disable enlarge on hover</li>
+    <li><strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover</li>
+</ul>
 
 ## Features
-  1. Search favorites with the exact same syntax as the normal post pages: AND, OR, and NOT combinations (except for meta tags like rating:, score:, etc.).
-  Example search:
-      ( video ~ animated ~ high_res* ~ absurd_res* ) -low_res* ( female* ~ 1girls ) -ai_generated -red_hair
 
-  2. View full resolution images and gifs, or play videos when hovering over or clicking on a thumbnail + gallery controls.
-      Gallery also works on post pages.
+<ol>
+    <li>Search favorites with the exact same syntax as the normal post pages:<br>
+        Example: ( video ~ animated ~ high_res* ~ absurd_res* ) -low_res* ( female* ~ 1girls ) -ai_generated -red_hair
+        <br>
+        AND, OR, and NOT combinations (except for meta tags like rating:, score:, etc.)
+    </li><br>
+    <li>View full resolution images and GIFs, or play videos when hovering over or clicking on a thumbnail + gallery controls<br>
+        Gallery also works on post pages
+    </li><br>
+    <li>Only wait on fetching once.<br>
+        Favorites are stored in a client database after fetching them for the first time<br>
+        Allows for quick loading anytime later
+    </li><br>
+    <li>Save multiple custom searches to use later</li><br>
+    <li>Shuffle search results order</li><br>
+    <li>Invert search results</li><br>
+    <li>Filtering of blacklisted tags</li><br>
+    <li>Search favorites by their post ID</li><br>
+    <li>Tooltip showing which tags and or groups matched any given thumbnail</li><br>
+    <li>Choose full-screen image resolution</li><br>
+    <li>Enlarged remove buttons that don't force page reloads</li><br>
+    <li>Autocompleted tag search</li><br>
+    <li>Look at other user's favorites with the above features (blacklisted tags are hidden automatically)</li><br>
+</ol>
 
-  3. Only wait on fetching once.
-      Favorites are stored in a client database after fetching them for the first time.
-      Allows for near instant loading on later page reloads.
+## Preferred Specs:
 
-  4. Save multiple custom searches to use later.
-  5. Shuffle search results order.
-  6. Invert search results.
-  6. Toggle filtering of blacklisted tags.
-  8. Search favorites by their post ID.
-  9. Tooltip showing which tags and or groups matched any given thumbnail.
-  10. Choose fullscreen image resolution.
-  11. Look at other user's favorites with the above features (blacklisted images are hidden automatically).
-  12. Enlarged remove buttons that don't force page reloads.
-  13. Autocompleted search.
-
-## Screenshots / GIFs
-
-## Installation
-
-## Preffered Spec Requirements:
-    VRAM: 4GB
-    Internet Download Speed: 75Mb/s
+VRAM: 4GB\
+Download Speed: 75Mb/s
 
 ## FAQ
-    Q: Why is there some bug?
-    A: If not already addressed below, contact me with the bug and explain how to reproduce it.
 
-    Q: Everything stopped working, why I can't see any favorites?
-    A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings. Then retry.
+Q: Why is there some bug/issue?\
+A: If not already addressed below, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
 
-    Q: What browsers are supported?
-    A: I've only tested Chrome and Edge for now. Firefox is currently disabled.
+Q: Everything stopped working, why I can't see any favorites?\
+A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings. Then retry.
 
-    Q: Does it work on mobile?
-    A: No.
+Q: What browsers are supported?\
+A: Chrome and Edge work. Firefox is currently disabled for now.
 
-    Q: Why is everything laggy?
-    A: Responsiveness depends on:
-        1. Internet speed: A lot of network request (loading favorites, rendering images, getting image extensions) occur in the background.
-        2. Favorite count: >15000 favorites can start getting slow when they're all on one page. I plan to implement multiple pages or lazy loading in the future.
+Q: Does it work on mobile?\
+A: No.
 
-    Q: Why do I sometimes see a black screen for a couple of seconds?
-    A: Your GPU most cleared its memory after exceeding its limit as a result of you looking at images too quickly.
-    The script stores full resolution images as offscreen canvases in VRAM rather than using <img> elements or object URLs.
-    This improves responsiveness, but uses more video memory.
-    The garbage collection will eventually free old renders, so as long as you aren't rapidly traversing through the gallery, you should be fine.
+Q: Why am I experiencing lag?\
+A: Responsiveness depends on:
+
+<ul>
+    <li>Internet speed: A lot of network activity (loading favorites, rendering images, getting image extensions) happens in the background.</li>
+    <li>Favorite count: >15000 favorites can start getting slow when they're all on one page. I plan to implement multiple pages in the future.</li>
+</ul>
+
+Q: Why do I sometimes see a black screen for a couple of seconds?\
+A: Your GPU most cleared its memory after exceeding its limit as a result of you looking at images too quickly:
+
+<ul>
+    <li>The script stores full resolution images in VRAM rather than using image elements or file blobs.</li>
+    <ul>
+        <li>This improves responsiveness, but uses more video memory.</li>
+    </ul>
+    <li>The garbage collection will eventually free old renders
+    <ul>
+        <li>As long as you aren't rapidly moving through the gallery, you should be fine.</li>
+    </ul>
+</ul>

@@ -206,7 +206,7 @@ function getAllThumbNodeElements() {
 }
 
 /**
- * @returns {HTMLCollectionOf.<Element>}
+ * @returns {HTMLElement[]}
  */
 function getAllVisibleThumbs() {
   return Array.from(getAllThumbNodeElements())
@@ -282,7 +282,7 @@ function isImage(thumb) {
  * @param {String} position
  * @param {Number} duration
  */
-function showOverlayedIcon(svgContent, id, newWidth, newHeight, position = "center", duration = 500) {
+function showOverlayingIcon(svgContent, id, newWidth, newHeight, position = "center", duration = 500) {
   const svgDocument = new DOMParser().parseFromString(svgContent, "image/svg+xml");
   const svgElement = svgDocument.documentElement;
   const zoomLevel = getZoomLevel();
@@ -543,23 +543,23 @@ function removeInappropriatelyRatedContent(appropriateRating) {
 
 function getTagDistribution() {
   const images = Array.from(getAllThumbNodeElements()).map(thumb => getImageFromThumb(thumb));
-  const tagOccurences = {};
+  const tagOccurrences = {};
 
   images.forEach((image) => {
     const tags = image.getAttribute("tags").replace(/ \d+$/, "").split(" ");
 
     tags.forEach((tag) => {
-      const occurences = tagOccurences[tag];
+      const occurrences = tagOccurrences[tag];
 
-      tagOccurences[tag] = occurences === undefined ? 1 : occurences + 1;
+      tagOccurrences[tag] = occurrences === undefined ? 1 : occurrences + 1;
     });
   });
-  const sortedTagOccurences = sortObjectByValues(tagOccurences);
+  const sortedTagOccurrences = sortObjectByValues(tagOccurrences);
   let result = "";
   let i = 0;
   const max = 50;
 
-  sortedTagOccurences.forEach(item => {
+  sortedTagOccurrences.forEach(item => {
     if (i < max) {
       result += `${item.key}: ${item.value}\n`;
     }

@@ -132,7 +132,7 @@ class Renderer {
   };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 1000;
 let retryDelay = 0;
@@ -1211,9 +1211,9 @@ onmessage = async(message) => {
         imageThumbsToRender.push(currentThumb);
       }
     }
-    const indiciesOfImageThumbsToRender = imageThumbsToRender.map(imageThumb => parseInt(imageThumb.getAttribute(this.thumbIndexAttribute)));
+    const indicesOfImageThumbsToRender = imageThumbsToRender.map(imageThumb => parseInt(imageThumb.getAttribute(this.thumbIndexAttribute)));
 
-    this.setRenderRange(indiciesOfImageThumbsToRender);
+    this.setRenderRange(indicesOfImageThumbsToRender);
     await this.renderImages(imageThumbsToRender);
     this.currentlyRendering = false;
   }
@@ -1431,7 +1431,7 @@ onmessage = async(message) => {
     if (eyeIcon) {
       eyeIcon.remove();
     }
-    showOverlayedIcon(svg, "svg-eye", 100, 100, "bottom-right");
+    showOverlayingIcon(svg, "svg-eye", 100, 100, "bottom-right");
   }
 
   showLockIcon() {
@@ -1441,7 +1441,7 @@ onmessage = async(message) => {
     if (lockIcon) {
       lockIcon.remove();
     }
-    showOverlayedIcon(svg, "svg-lock", 100, 100, "bottom-left");
+    showOverlayingIcon(svg, "svg-lock", 100, 100, "bottom-left");
   }
 
   /**
@@ -1659,19 +1659,19 @@ onmessage = async(message) => {
     this.renderImagesAround(possiblyUnrenderedThumb);
   }
 
-  setRenderRange(indicies) {
-    indicies.sort((a, b) => {
+  setRenderRange(indices) {
+    indices.sort((a, b) => {
       return a - b;
     });
-    this.renderedThumbRange.minIndex = indicies[0];
-    this.renderedThumbRange.maxIndex = indicies[indicies.length - 1];
+    this.renderedThumbRange.minIndex = indices[0];
+    this.renderedThumbRange.maxIndex = indices[indices.length - 1];
   }
 
   indexRenderRange() {
     if (this.offscreenCanvases.size === 0) {
       return;
     }
-    const indicies = [];
+    const indices = [];
 
     for (const postId of this.offscreenCanvases.keys()) {
       const thumb = getThumbByPostId(postId);
@@ -1679,9 +1679,9 @@ onmessage = async(message) => {
       if (thumb === null) {
         break;
       }
-      indicies.push(parseInt(thumb.getAttribute(this.thumbIndexAttribute)));
+      indices.push(parseInt(thumb.getAttribute(this.thumbIndexAttribute)));
     }
-    this.setRenderRange(indicies);
+    this.setRenderRange(indices);
   }
 
   async findImageExtensionsInTheBackground() {

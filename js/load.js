@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 function sleep(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -348,7 +348,7 @@ onmessage = (message) => {
    */
   searchFavorites(searchQuery) {
     this.searchQuery = searchQuery === undefined ? this.searchQuery : searchQuery;
-    this.hideAwesomeplete();
+    this.hideAwesomplete();
     this.resetMatchCount();
     dispatchEvent(new Event("searchStarted"));
 
@@ -583,7 +583,7 @@ onmessage = (message) => {
 
     while (this.currentLoadState === FavoritesLoader.loadState.started) {
       await this.fetchFavoritesStep(currentPageNumber * 50);
-      this.setProgressText(`Fetching Favorites ${this.allThumbNodes.length}`);
+      this.setProgressText(`Fetching Favorites ${this.allThumbNodes.length} / ${this.expectedFavoritesCount}`);
       currentPageNumber += 1;
     }
   }
@@ -825,7 +825,7 @@ onmessage = (message) => {
     });
   }
 
-  hideAwesomeplete() {
+  hideAwesomplete() {
     if (this.favoritesSearchInput === null) {
       this.favoritesSearchInput = document.getElementById("favorites-search-box");
     }

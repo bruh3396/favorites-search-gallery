@@ -113,10 +113,10 @@ class Caption {
     let html = "";
 
     for (const category of Object.keys(Caption.tagCategory)) {
-      const capitilizedTagType = capitalize(category);
-      const header = capitilizedTagType === "Metadata" ? "Meta" : capitilizedTagType;
+      const capitalizedTagType = capitalize(category);
+      const header = capitalizedTagType === "Metadata" ? "Meta" : capitalizedTagType;
 
-      html += `<li id="caption${capitilizedTagType}" style="display: none;"><h6>${header}</h6></li>\n`;
+      html += `<li id="caption${capitalizedTagType}" style="display: none;"><h6>${header}</h6></li>\n`;
     }
     return html;
   }
