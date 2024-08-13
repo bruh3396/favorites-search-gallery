@@ -29,13 +29,13 @@ I noticed [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites
 ## Controls
 
 <ul>
-    <li><strong>Left click:</strong></li>
+    <li><strong>Left Click:</strong></li>
       <ul>
         <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
-        <li><strong>In gallery:</strong> Exit gallery, disable enlarge on hover</li>
+        <li><strong>In gallery:</strong> Exit gallery</li>
       </ul>
     <li>
-      <strong>Middle click:</strong>
+      <strong>Middle Click:</strong>
       <ul>
           <li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
           <li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
@@ -43,7 +43,7 @@ I noticed [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites
     </li>
     <li><strong>Scroll Wheel/Arrow Keys/WASD (in gallery):</strong> Traverse gallery</li>
     <li><strong>Scroll Wheel: (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity</li>
-    <li><strong>Escape (in gallery):</strong> Exit gallery, disable enlarge on hover</li>
+    <li><strong>Escape (in gallery):</strong> Exit gallery</li>
     <li><strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover</li>
 </ul>
 

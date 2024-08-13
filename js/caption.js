@@ -47,19 +47,19 @@ const captionHTML = `<style>
     }
   }
 
-  .artistTag {
+  .artist-tag {
     color: #f0a0a0;
   }
 
-  .characterTag {
+  .character-tag {
     color: #f0f0a0;
   }
 
-  .copyrightTag {
+  .copyright-tag {
     color: #e73ee7;
   }
 
-  .metadataTag {
+  .metadata-tag {
     color: #FF8800;
   }
 
@@ -90,14 +90,21 @@ class Caption {
     visibility: "showCaptions"
   };
   static localStorageKeys = {
-    captionTags: "captionTags"
+    tagCategories: "tagCategories"
   };
   static importantTagCategories = new Set([
-      "copyright",
-      "character",
-      "artist"
-      // "metadata"
-    ]);
+    "copyright",
+    "character",
+    "artist"
+    // "metadata"
+  ]);
+  static tagCategoryAssociations = {
+    0: "general",
+    1: "artist",
+    2: "metadata",
+    3: "copyright",
+    4: "character"
+  };
   static htmlTagType = "li";
   static template = `
      <ul id="caption-list">
@@ -106,9 +113,9 @@ class Caption {
      </ul>
  `;
 
- /**
-  * @returns {String}
-  */
+  /**
+   * @returns {String}
+   */
   static getCaptionHeaderHTML() {
     let html = "";
 
@@ -136,14 +143,10 @@ class Caption {
    * @type {Object.<String, Object>}
    */
   savedTags;
-  /**
-   * @type {Number}
-   */
-  recentlyAddedTagsCount;
 
   constructor() {
-    this.recentlyAddedTagsCount = 0;
     this.savedTags = this.loadSavedTags();
+    this.collectAllTagTypes();
     this.createElement();
     this.injectHTML();
     this.setVisibility(this.getVisibilityPreference());
@@ -224,12 +227,7 @@ class Caption {
     thumb.appendChild(captionWrapper);
     this.resize(thumb);
 
-    if (this.savedTags[thumb.id] === undefined) {
-      this.fetchTags(thumb);
-    } else {
-      this.populateTagsFromLocalStorage(thumb);
-      this.resizeFont(thumb);
-    }
+    this.populateTags(thumb);
   }
 
   /**
@@ -269,96 +267,23 @@ class Caption {
   }
 
   /**
-   * @param {HTMLElement} thumb
-   */
-  fetchTags(thumb) {
-    const postPageURL = `https://rule34.xxx/index.php?page=post&s=view&id=${thumb.id}`;
-
-    this.savedTags[thumb.id] = {};
-    requestPageInformation(postPageURL, (response) => {
-      const dom = new DOMParser().parseFromString(`<div>${response}</div>`, "text/html");
-
-      for (const tagType of Caption.importantTagCategories) {
-        const tags = Array.from(dom.getElementsByClassName(`tag-type-${tagType}`));
-
-        this.addFetchedTags(tags, tagType, thumb.id);
-      }
-      this.saveTags();
-      this.resizeFont(thumb);
-    });
-  }
-
-  /**
-   * @param {String} html
-   * @returns {Object.<String, String[]>}
-   */
-  extractTags(html) {
-    const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
-    const captionTags = {};
-
-    for (const tagType of Caption.importantTagCategories) {
-      const extractedTags = [];
-      const tagsOnPostPage = Array.from(dom.getElementsByClassName(`tag-type-${tagType}`));
-
-      for (const tagElement of tagsOnPostPage) {
-        const tagValue = tagElement.children[1].textContent;
-
-        extractedTags.push(tagValue);
-      }
-      captionTags[tagType] = extractedTags;
-    }
-    return captionTags;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  populateTagsFromLocalStorage(thumb) {
-    for (const tagType of Caption.importantTagCategories) {
-      try {
-        for (const tagValue of this.savedTags[thumb.id][tagType]) {
-          this.addTag(tagType, tagValue);
-        }
-      } catch (error) {
-        Reflect.deleteProperty(this.savedTags, thumb.id);
-      }
-    }
-  }
-
-  /**
-   * @param {String[]} tags
    * @param {String} tagCategory
-   * @param {String} postId
+   * @param {String} tagName
    */
-  addFetchedTags(tags, tagCategory, postId) {
-    this.savedTags[postId][tagCategory] = [];
-
-    if (tags.length === 0) {
+  addTag(tagCategory, tagName) {
+    if (!Caption.importantTagCategories.has(tagCategory)) {
       return;
     }
 
-    for (const tag of tags) {
-      const tagValue = tag.children[1].textContent;
-
-      this.savedTags[postId][tagCategory].push(tagValue);
-      this.addTag(tagCategory, tagValue);
-    }
-  }
-
-  /**
-   * @param {String} tagCategory
-   * @param {String} tagValue
-   */
-  addTag(tagCategory, tagValue) {
     const header = document.getElementById(this.getCategoryHeaderId(tagCategory));
     const tag = document.createElement(Caption.htmlTagType);
 
-    tag.className = `${tagCategory}Tag caption-tag`;
-    tag.textContent = tagValue;
+    tag.className = `${tagCategory}-tag caption-tag`;
+    tag.textContent = this.replaceUnderscoresWithSpaces(tagName);
     header.insertAdjacentElement("afterend", tag);
     header.style.display = "block";
     tag.onclick = () => {
-      this.tagOnClick(this.replaceSpacesWithUnderscores(tag.textContent));
+      this.tagOnClick(tagName);
     };
     tag.addEventListener("contextmenu", (event) => {
       event.preventDefault();
@@ -389,10 +314,6 @@ class Caption {
       window.addEventListener("showCaption", (event) => {
         this.show(event.detail);
       });
-      window.addEventListener("gotPostPageHTML", (event) => {
-        this.savedTags[event.detail.postId] = this.extractTags(event.detail.html);
-        this.saveTags();
-      });
     }
   }
 
@@ -400,16 +321,11 @@ class Caption {
    * @returns {Object.<String, Object>}
    */
   loadSavedTags() {
-    return JSON.parse(localStorage.getItem(Caption.localStorageKeys.captionTags) || "{}");
+    return JSON.parse(localStorage.getItem(Caption.localStorageKeys.tagCategories) || "{}");
   }
 
   saveTags() {
-    if (this.recentlyAddedTagsCount >= 3 && userIsOnTheirOwnFavoritesPage()) {
-      this.recentlyAddedTagsCount = 0;
-      localStorage.setItem(Caption.localStorageKeys.captionTags, JSON.stringify(this.savedTags));
-    } else {
-      this.recentlyAddedTagsCount += 1;
-    }
+    localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(this.savedTags));
   }
 
   /**
@@ -430,11 +346,11 @@ class Caption {
   }
 
   /**
-   * @param {String} tagValue
+   * @param {String} tagName
    * @returns {String}
    */
-  replaceSpacesWithUnderscores(tagValue) {
-    return tagValue.replace(/ /gm, "_");
+  replaceUnderscoresWithSpaces(tagName) {
+    return tagName.replace(/_/gm, " ");
   }
 
   /**
@@ -485,52 +401,99 @@ class Caption {
     return `caption${capitalize(tagCategory)}`;
   }
 
-  collectTagTypes() {
-    const tagTypes = {
-      0: "general",
-      1: "artist",
-      2: "metadata",
-      3: "copyright",
-      4: "character"
-    };
-    const parser = new DOMParser();
-    const tags = {};
+  /**
+   * @param {HTMLElement} thumb
+   */
+  populateTags(thumb) {
+    const thumbTags = getTagsFromThumb(thumb).replace(/\s\d+$/, "")
+      .split(" ");
+    const unknownThumbTags = thumbTags
+      .filter(tag => this.savedTags[tag] === undefined);
 
-    window.addEventListener("favoritesLoaded", async() => {
+    if (unknownThumbTags.length > 0) {
+      this.collectTagTypes(unknownThumbTags, () => {
+        this.addTags(thumbTags, thumb);
+      });
+      return;
+    }
+    this.addTags(thumbTags, thumb);
+  }
+
+  /**
+   * @param {String[]} thumbTags
+   * @param {HTMLElement} thumb
+   */
+  addTags(thumbTags, thumb) {
+    for (const tagName of thumbTags) {
+      const category = this.getTagCategory(tagName);
+
+      this.addTag(category, tagName);
+    }
+    this.saveTags();
+    this.resizeFont(thumb);
+  }
+
+  /**
+   * @param {String} tag
+   * @returns {String}
+   */
+  getTagCategory(tag) {
+    const typeNumber = this.savedTags[tag];
+
+    if (typeNumber === undefined) {
+      return "general";
+    }
+    return Caption.tagCategoryAssociations[typeNumber];
+  }
+
+  /**
+   * @param {String[]} tags
+   * @param { Function} onAllTagsFound
+   */
+  async collectTagTypes(tags, onAllTagsFound) {
+    const parser = new DOMParser();
+    const lastTag = tags[tags.length - 1];
+    const uniqueTags = new Set(tags);
+
+    for (const tagName of uniqueTags) {
+      const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
+
+      fetch(apiURL)
+        .then((response) => {
+          if (response.ok) {
+            return response.text();
+          }
+          throw new Error(response.statusText);
+        })
+        .then((html) => {
+          const dom = parser.parseFromString(html, "text/html");
+          const type = dom.getElementsByTagName("tag")[0].getAttribute("type");
+
+          this.savedTags[tagName] = type;
+
+          if (tagName === lastTag && onAllTagsFound !== undefined) {
+            onAllTagsFound();
+          }
+        });
+      await sleep(1);
+    }
+  }
+
+  collectAllTagTypes() {
+    window.addEventListener("favoritesLoaded", () => {
       const allTags = Array.from(getAllThumbNodeElements())
-        .map(thumb => getTagsFromThumb(thumb).replace(/\d+$/, ""))
+        .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
         .join(" ")
         .split(" ")
+        .filter(tag => this.savedTags[tag] === undefined)
         .sort();
 
       if (allTags.length === 0) {
         return;
       }
-      const lastTag = allTags[allTags.length - 1];
-      const uniqueTags = new Set(allTags);
-
-      for (const tagName of uniqueTags) {
-        const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
-
-        fetch(apiURL)
-          .then((response) => {
-            if (response.ok) {
-              return response.text();
-            }
-            throw new Error(response.statusText);
-          })
-          .then((html) => {
-            const dom = parser.parseFromString(html, "text/html");
-            const type = dom.getElementsByTagName("tag")[0].getAttribute("type");
-
-            tags[tagName] = type;
-
-            if (tagName === lastTag) {
-              // console.log(JSON.stringify(tags));
-            }
-          });
-        await sleep(1);
-      }
+      this.collectTagTypes(allTags, () => {
+        this.saveTags();
+      });
     });
   }
 }
