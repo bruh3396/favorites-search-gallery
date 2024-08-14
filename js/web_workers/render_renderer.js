@@ -2,6 +2,13 @@
 const RETRY_DELAY_INCREMENT = 1000;
 let retryDelay = 0;
 
+/**
+ * @param {String} imageURL
+ * @param {OffscreenCanvas} canvas
+ * @param {String} extension
+ * @param {String} postId
+ * @param {Number} thumbIndex
+ */
 async function drawCanvas(imageURL, canvas, extension, postId, thumbIndex) {
   const extensionAlreadyFound = extension !== null && extension !== undefined;
   let newExtension = extension;
@@ -15,22 +22,32 @@ async function drawCanvas(imageURL, canvas, extension, postId, thumbIndex) {
   const result = await fetchImage(imageURL);
 
   if (result) {
-    await drawCanvasFromBlob(result.blob, canvas);
+    const imageBitmap = await drawCanvasFromBlob(result.blob, canvas);
+
     setTimeout(() => {
       postMessage({
         newExtension,
         postId,
         thumbIndex,
-        extensionAlreadyFound
+        extensionAlreadyFound,
+        imageBitmap
       });
     }, 50);
   }
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+/**
+ * @param {Number} milliseconds
+ * @returns {Promise}
+ */
+function sleep(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
+/**
+ * @param {String} postId
+ * @returns {String}
+ */
 function getOriginalImageURLFromPostPage(postId) {
   return fetch("https://rule34.xxx/index.php?page=post&s=view&id=" + postId)
     .then((response) => {
@@ -61,6 +78,10 @@ function getOriginalImageURLFromPostPage(postId) {
     });
 }
 
+/**
+ * @param {String} postId
+ * @returns {String}
+ */
 function getOriginalImageURL(postId) {
   return fetch("https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + postId)
     .then((response) => {
@@ -83,6 +104,11 @@ function getOriginalImageURL(postId) {
     });
 }
 
+/**
+ *
+ * @param {String} imageURL
+ * @returns {{url: String, blob: Blob} | {url: String, error: String}}
+ */
 async function fetchImage(imageURL) {
   const response = await fetch(imageURL);
 
@@ -99,14 +125,24 @@ async function fetchImage(imageURL) {
   };
 }
 
+/**
+ * @param {Blob} blob
+ * @param {OffscreenCanvas} canvas
+ * @returns {ImageBitmap}
+ */
 async function drawCanvasFromBlob(blob, canvas) {
   const imageBitmap = await createImageBitmap(blob);
   const context = canvas.getContext("2d");
 
   context.drawImage(imageBitmap, 0, 0);
   drawScaledCanvas(imageBitmap, context);
+  return imageBitmap;
 }
 
+/**
+ * @param {ImageBitmap} imageBitmap
+ * @param {OffscreenCanvasRenderingContext2D} context
+ */
 function drawScaledCanvas(imageBitmap, context) {
   const canvas = context.canvas;
   const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
@@ -120,10 +156,18 @@ function drawScaledCanvas(imageBitmap, context) {
   );
 }
 
+/**
+ * @param {String} imageURL
+ * @returns {String}
+ */
 function getExtensionFromImageURL(imageURL) {
   return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
 }
 
+/**
+ * @param {String} postId
+ * @returns {String}
+ */
 async function getImageExtensionFromPostId(postId) {
   const imageURL = await getOriginalImageURL(postId);
   return getExtensionFromImageURL(imageURL);

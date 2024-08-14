@@ -760,7 +760,7 @@ function enteredOverCaptionTag(event) {
 
 function exitIfUsingFirefox() {
   if (usingFirefox()) {
-    alert("Favorites Search/Viewer:\nCurrently not compatible with Firefox, try Chrome or Edge.");
+    // alert("Favorites Search/Viewer:\nCurrently not compatible with Firefox, try Chrome or Edge.");
   }
 }
 

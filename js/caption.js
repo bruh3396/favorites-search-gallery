@@ -361,7 +361,6 @@ class Caption {
         once: true
       });
       window.addEventListener("favoritesAdded", () => {
-        console.log(11212);
         this.addEventListenersToThumbs.bind(this)();
       });
       window.addEventListener("thumbUnderCursorOnLoad", (event) => {
