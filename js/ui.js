@@ -131,7 +131,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       >a,
       >div {
         position: relative;
-        display: inline;
 
         &:has(.remove-button:hover) {
           outline: 3px solid red;
@@ -196,6 +195,18 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       }
     }
 
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      appearance: none;
+      -moz-appearance: textfield;
+      width: 15px;
+    }
+
     #column-resize-container {
       margin-top: 10px;
 
@@ -204,16 +215,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           width: 20px;
           text-align: center;
           align-items: center;
-        }
-
-        >input[type="number"] {
-          width: 15px;
-        }
-
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
         }
       }
     }
@@ -227,13 +228,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         width: 75px;
         border: 1px solid;
       }
-
-      input::-webkit-outer-spin-button,
-      input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-
     }
 
     #favorites-pagination-container {
@@ -283,7 +277,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <button title="Save results as search" id="save-search-button" style="display: none;">Save</button>
         <button title="Reset saved favorites" id="reset-button">Reset</button>
         <span id="find-favorite">
-          <button title="Scroll to favorite using its ID" id="find-favorite-button" style="white-space: nowrap; ">Find</button>
+          <button title="Scroll to favorite using its ID" id="find-favorite-button"
+            style="white-space: nowrap; ">Find</button>
           <input type="number" id="find-favorite-input" type="text" placeholder="ID">
         </span>
         <span id="help-links-container">

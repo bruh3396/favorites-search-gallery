@@ -11,12 +11,19 @@ const captionHTML = `<style>
     left: 0px;
     top: 0px;
     text-align: left;
-    transition: transform 0.3s cubic-bezier(1, 0.2, 0.2, 1);
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(.26,.28,.2,.82);
+    padding-left: 5px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     h6 {
       display: block;
       color: white;
-      padding-left: 5px;
       padding-top: 0px;
     }
 
@@ -24,6 +31,16 @@ const captionHTML = `<style>
       width: fit-content;
       list-style-type: none;
       display: inline-block;
+    }
+
+    &.active {
+        transform: translateX(0%);
+    }
+
+    &.transition-completed {
+      .caption-tag {
+        pointer-events: all;
+      }
     }
   }
 
@@ -36,10 +53,9 @@ const captionHTML = `<style>
   }
 
   .caption-tag {
-    pointer-events: all;
+    pointer-events: none;
     color: #6cb0ff;
     word-wrap: break-word;
-    margin-left: 10px;
 
     &:hover {
       text-decoration-line: underline;
@@ -63,13 +79,7 @@ const captionHTML = `<style>
     color: #FF8800;
   }
 
-  .thumb.selected {
-    .caption {
-      transform: translateY(50%);
-    }
-  }
-
-  .captionWrapper {
+  .caption-wrapper {
     pointer-events: none;
     position: absolute !important;
     overflow: hidden;
@@ -78,10 +88,6 @@ const captionHTML = `<style>
     width: 100%;
     height: 100%;
     display: block !important;
-  }
-
-  #caption-id {
-    display: block;
   }
 </style>`;
 
@@ -98,33 +104,31 @@ class Caption {
     "artist"
     // "metadata"
   ]);
-  static tagCategoryAssociations = {
+  static tagCategoryEncodings = {
     0: "general",
     1: "artist",
     2: "metadata",
     3: "copyright",
     4: "character"
   };
-
-  static htmlTagType = "li";
   static template = `
      <ul id="caption-list">
-         <li id="caption-id"><h6>ID</h6></li>
-         ${Caption.getCaptionHeaderHTML()}
+         <li id="caption-id" style="display: block;"><h6>ID</h6></li>
+         ${Caption.getCategoryHeaderHTML()}
      </ul>
  `;
 
   /**
    * @returns {String}
    */
-  static getCaptionHeaderHTML() {
+  static getCategoryHeaderHTML() {
     let html = "";
 
     for (const category of Caption.importantTagCategories) {
-      const capitalizedTagType = capitalize(category);
-      const header = capitalizedTagType === "Metadata" ? "Meta" : capitalizedTagType;
+      const capitalizedCategory = capitalize(category);
+      const header = capitalizedCategory === "Metadata" ? "Meta" : capitalizedCategory;
 
-      html += `<li id="caption${capitalizedTagType}" style="display: none;"><h6>${header}</h6></li>\n`;
+      html += `<li id="caption${capitalizedCategory}" style="display: none;"><h6>${header}</h6></li>`;
     }
     return html;
   }
@@ -133,10 +137,10 @@ class Caption {
    * @param {String} tagCategory
    * @returns {Number}
    */
-  static getNumberFromTagCategory(tagCategory) {
-    for (const [key, value] of Object.entries(Caption.tagCategoryAssociations)) {
-      if (value === tagCategory) {
-        return key;
+  static getTagCategoryEncoding(tagCategory) {
+    for (const [encoding, category] of Object.entries(Caption.tagCategoryEncodings)) {
+      if (category === tagCategory) {
+        return encoding;
       }
     }
     return 0;
@@ -152,11 +156,15 @@ class Caption {
   /**
    * @type {HTMLDivElement}
    */
+  captionWrapper;
+  /**
+   * @type {HTMLDivElement}
+   */
   caption;
   /**
    * @type {Object.<String, Number>}
    */
-  savedTags;
+  tagCategoryAssociations;
   /**
    * @type {String[]}
    */
@@ -167,20 +175,24 @@ class Caption {
   currentlyCorrectingProblematicTags;
 
   constructor() {
-    this.savedTags = this.loadSavedTags();
+    this.tagCategoryAssociations = this.loadSavedTags();
     this.problematicTags = [];
     this.currentlyCorrectingProblematicTags = false;
-    this.collectAllTagTypes();
-    this.createElement();
+    this.previousThumb = null;
+    this.findCategoriesOfAllTags();
+    this.create();
     this.injectHTML();
     this.setVisibility(this.getVisibilityPreference());
     this.addEventListeners();
   }
 
-  createElement() {
+  create() {
+    this.captionWrapper = document.createElement("div");
+    this.captionWrapper.className = "caption-wrapper";
     this.caption = document.createElement("div");
     this.caption.className = "caption";
-    document.head.appendChild(this.caption);
+    this.captionWrapper.appendChild(this.caption);
+    document.head.appendChild(this.captionWrapper);
     this.caption.innerHTML = Caption.template;
   }
 
@@ -202,21 +214,16 @@ class Caption {
     await sleep(500);
 
     for (const thumb of getAllThumbNodeElements()) {
-      const image = getImageFromThumb(thumb);
+      const imageContainer = getImageFromThumb(thumb).parentElement;
 
-      if (image.hasAttribute("hasCaptionListener")) {
+      if (imageContainer.hasAttribute("has-caption-listener")) {
         return;
       }
-      image.setAttribute("hasCaptionListener", true);
-      image.addEventListener("mouseenter", () => {
-        this.selectThumb(thumb, true);
+      imageContainer.setAttribute("has-caption-listener", true);
+      imageContainer.addEventListener("mouseenter", () => {
         this.show(thumb);
       });
-      image.addEventListener("mouseleave", (event) => {
-        if (enteredOverCaptionTag(event)) {
-          return;
-        }
-        this.selectThumb(thumb, false);
+      imageContainer.addEventListener("mouseleave", () => {
         this.hide(thumb);
       });
     }
@@ -229,13 +236,12 @@ class Caption {
     if (this.disabled || thumb === null) {
       return;
     }
-    const captionWrapper = document.createElement("div");
-
-    captionWrapper.className = "captionWrapper";
-    this.caption.classList.toggle("inactive", false);
+    thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
+    this.caption.classList.remove("inactive");
     this.caption.innerHTML = Caption.template;
+    this.captionWrapper.removeAttribute("style");
     const captionIdHeader = document.getElementById("caption-id");
-    const captionIdTag = document.createElement(Caption.htmlTagType);
+    const captionIdTag = document.createElement("li");
 
     captionIdTag.className = "caption-tag";
     captionIdTag.textContent = thumb.id;
@@ -247,10 +253,8 @@ class Caption {
       this.tagOnClick(`-${thumb.id}`);
     });
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
-    captionWrapper.appendChild(this.caption);
-    thumb.appendChild(captionWrapper);
+    thumb.children[0].appendChild(this.captionWrapper);
     this.resize(thumb);
-
     this.populateTags(thumb);
   }
 
@@ -258,15 +262,32 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   hide(thumb) {
-    if (this.disabled || !this.alreadyAttachedToThumb(thumb)) {
+    if (this.disabled) {
       return;
     }
-    this.caption.classList.toggle("inactive", true);
-    document.head.appendChild(this.caption);
+    this.animateExit(thumb);
+    this.animate(false);
+    this.caption.classList.add("inactive");
+    this.caption.classList.remove("transition-completed");
+  }
 
-    for (const captionWrapper of thumb.querySelectorAll(".captionWrapper")) {
-      captionWrapper.remove();
-    }
+  /**
+   * @param {HTMLElement} thumb
+   */
+  animateExit(thumb) {
+    const captionWrapperClone = this.captionWrapper.cloneNode(true);
+    const captionClone = captionWrapperClone.children[0];
+
+    thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
+    captionWrapperClone.classList.add("caption-wrapper-clone");
+    captionWrapperClone.querySelectorAll("*").forEach(element => element.removeAttribute("id"));
+    captionClone.ontransitionend = () => {
+      captionWrapperClone.remove();
+    };
+    thumb.children[0].appendChild(captionWrapperClone);
+    setTimeout(() => {
+      captionClone.classList.remove("active");
+    }, 4);
   }
 
   /**
@@ -298,14 +319,16 @@ class Caption {
     if (!Caption.importantTagCategories.has(tagCategory)) {
       return;
     }
-
     const header = document.getElementById(this.getCategoryHeaderId(tagCategory));
-    const tag = document.createElement(Caption.htmlTagType);
+    const tag = document.createElement("li");
 
     tag.className = `${tagCategory}-tag caption-tag`;
     tag.textContent = this.replaceUnderscoresWithSpaces(tagName);
     header.insertAdjacentElement("afterend", tag);
     header.style.display = "block";
+    tag.onmouseover = (event) => {
+      event.stopPropagation();
+    };
     tag.onclick = () => {
       this.tagOnClick(tagName);
     };
@@ -316,6 +339,16 @@ class Caption {
   }
 
   addEventListeners() {
+    this.caption.addEventListener("transitionend", () => {
+      if (this.caption.classList.contains("active")) {
+        this.caption.classList.add("transition-completed");
+      }
+      this.caption.classList.remove("transitioning");
+    });
+    this.caption.addEventListener("transitionstart", () => {
+      this.caption.classList.add("transitioning");
+    });
+
     if (onPostPage()) {
       window.addEventListener("load", () => {
         this.addEventListenersToThumbs.bind(this)();
@@ -327,7 +360,10 @@ class Caption {
       window.addEventListener("favoritesLoaded", this.addEventListenersToThumbs.bind(this)(), {
         once: true
       });
-      window.addEventListener("favoritesAdded", this.addEventListenersToThumbs.bind(this)());
+      window.addEventListener("favoritesAdded", () => {
+        console.log(11212);
+        this.addEventListenersToThumbs.bind(this)();
+      });
       window.addEventListener("thumbUnderCursorOnLoad", (event) => {
         const showOnHoverCheckbox = document.getElementById("showOnHover");
 
@@ -349,7 +385,7 @@ class Caption {
   }
 
   saveTags() {
-    localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(this.savedTags));
+    localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(this.tagCategoryAssociations));
   }
 
   /**
@@ -357,10 +393,12 @@ class Caption {
    */
   tagOnClick(value) {
     const searchBox = onPostPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
+    const searchBoxDoesNotIncludeTag = true;
+    // const searchBoxDoesNotIncludeTag = searchBox !== null && !searchBox.value.includes(` ${value}`);
 
     navigator.clipboard.writeText(value);
 
-    if (searchBox !== null && !searchBox.value.includes(` ${value}`)) {
+    if (searchBoxDoesNotIncludeTag) {
       searchBox.value += ` ${value}`;
       searchBox.focus();
       value = searchBox.value;
@@ -375,14 +413,6 @@ class Caption {
    */
   replaceUnderscoresWithSpaces(tagName) {
     return tagName.replace(/_/gm, " ");
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Boolean}
-   */
-  alreadyAttachedToThumb(thumb) {
-    return this.caption.parentElement.parentElement.id === thumb.id;
   }
 
   /**
@@ -401,20 +431,14 @@ class Caption {
    * @returns {Boolean}
    */
   getVisibilityPreference() {
-    return getPreference(Caption.preferences.visibility, false);
+    return getPreference(Caption.preferences.visibility, true);
   }
 
   /**
-   * @param {HTMLElement} thumb
    * @param {Boolean} value
    */
-  selectThumb(thumb, value) {
-    if (usingRenderer()) {
-      return;
-    }
-    setTimeout(() => {
-      thumb.classList.toggle("selected", value);
-    }, 10);
+  animate(value) {
+    this.caption.classList.toggle("active", value);
   }
 
   /**
@@ -432,10 +456,10 @@ class Caption {
     const thumbTags = getTagsFromThumb(thumb).replace(/\s\d+$/, "")
       .split(" ");
     const unknownThumbTags = thumbTags
-      .filter(tag => this.savedTags[tag] === undefined);
+      .filter(tag => this.tagCategoryAssociations[tag] === undefined);
 
     if (unknownThumbTags.length > 0) {
-      this.collectTagTypes(unknownThumbTags, () => {
+      this.findTagCategories(unknownThumbTags, () => {
         this.addTags(thumbTags, thumb);
       });
       return;
@@ -455,19 +479,20 @@ class Caption {
     }
     this.saveTags();
     this.resizeFont(thumb);
+    this.animate(true);
   }
 
   /**
-   * @param {String} tag
+   * @param {String} tagName
    * @returns {String}
    */
-  getTagCategory(tag) {
-    const typeNumber = this.savedTags[tag];
+  getTagCategory(tagName) {
+    const encoding = this.tagCategoryAssociations[tagName];
 
-    if (typeNumber === undefined) {
+    if (encoding === undefined) {
       return "general";
     }
-    return Caption.tagCategoryAssociations[typeNumber];
+    return Caption.tagCategoryEncodings[encoding];
   }
 
   /**
@@ -485,8 +510,7 @@ class Caption {
       const tagName = this.problematicTags.pop();
       const tagPageURL = `https://rule34.xxx/index.php?page=tags&s=list&tags=${tagName}`;
 
-      await sleep(500);
-      fetch(tagPageURL)
+      await fetch(tagPageURL)
         .then((response) => {
           if (response.ok) {
             return response.text();
@@ -498,13 +522,13 @@ class Caption {
           const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
 
           if (columnOfFirstRow.length !== 3) {
-            this.savedTags[tagName] = 0;
+            this.tagCategoryAssociations[tagName] = 0;
             this.saveTags();
             return;
           }
           const category = columnOfFirstRow[2].textContent.split(",")[0].split(" ")[0];
 
-          this.savedTags[tagName] = Caption.getNumberFromTagCategory(category);
+          this.tagCategoryAssociations[tagName] = Caption.getTagCategoryEncoding(category);
           this.saveTags();
         });
     }
@@ -512,15 +536,15 @@ class Caption {
   }
 
   /**
-   * @param {String[]} tags
-   * @param { Function} onAllTagsFound
+   * @param {String[]} tagNames
+   * @param {Function} onAllCategoriesFound
    */
-  async collectTagTypes(tags, onAllTagsFound) {
+  async findTagCategories(tagNames, onAllCategoriesFound) {
     const parser = new DOMParser();
-    const lastTag = tags[tags.length - 1];
-    const uniqueTags = new Set(tags);
+    const lastTagName = tagNames[tagNames.length - 1];
+    const uniqueTagNames = new Set(tagNames);
 
-    for (const tagName of uniqueTags) {
+    for (const tagName of uniqueTagNames) {
       const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
 
       fetch(apiURL)
@@ -532,36 +556,36 @@ class Caption {
         })
         .then((html) => {
           const dom = parser.parseFromString(html, "text/html");
-          const type = dom.getElementsByTagName("tag")[0].getAttribute("type");
+          const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
 
-          if (type === "array") {
+          if (encoding === "array") {
             this.correctProblematicTag(tagName);
             return;
           }
 
-          this.savedTags[tagName] = type;
+          this.tagCategoryAssociations[tagName] = encoding;
 
-          if (tagName === lastTag && onAllTagsFound !== undefined) {
-            onAllTagsFound();
+          if (tagName === lastTagName && onAllCategoriesFound !== undefined) {
+            onAllCategoriesFound();
           }
         });
-      await sleep(1);
+      await sleep(10);
     }
   }
 
-  collectAllTagTypes() {
+  findCategoriesOfAllTags() {
     window.addEventListener("favoritesLoaded", () => {
-      const allTags = Array.from(getAllThumbNodeElements())
+      const allTagNames = Array.from(getAllThumbNodeElements())
         .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
         .join(" ")
         .split(" ")
-        .filter(tag => this.savedTags[tag] === undefined)
+        .filter(tagName => this.tagCategoryAssociations[tagName] === undefined)
         .sort();
 
-      if (allTags.length === 0) {
+      if (allTagNames.length === 0) {
         return;
       }
-      this.collectTagTypes(allTags, () => {
+      this.findTagCategories(allTagNames, () => {
         this.saveTags();
       });
     });

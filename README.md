@@ -1,55 +1,50 @@
 # favorites-search-gallery
 
-### Search, view, and play favorites all on one page
-
-<li><a href="#about">About</a></li>
-<li><a href="#getting-started">Getting Started</a></li>
-<li><a href="#controls">Controls</a></li>
-<li><a href="#features">Features</a></li>
-<li><a href="#preferred-specs">Preferred Specs</a></li>
-<li><a href="#faq">FAQ</a></li>
+<a href="#about">About</a>\
+<a href="#getting-started">Getting Started</a>\
+<a href="#controls">Controls</a>\
+<a href="#features">Features</a>\
+<a href="#preferred-specs">Preferred Specs</a>\
+<a href="#faq">FAQ</a>
 
 ## About
 
-I noticed [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites-search) stopped working some time ago\
- I couldn't find a suitable replacement, so I created my own
+[Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites-search) stopped working some time ago\
+I couldn't find a suitable replacement, so I created my own adaptation including a gallery and QOL features
 
 ## Getting Started
 
-<ol>
-<li>Install the extension  or Tampermonkey script (not linked here for obvious reasons)</li>
-<li>Go to any favorites page
-    <ul>
-    <li>Should look like: <strong>...</strong>/index.php?page=favorites&s=view&id=<strong>&ltID&gt</strong></li>
-    </ul>
-</li>
+<ul>
+    <li>Install Tampermonkey</li>
+    <li>Install this script using Tampermonkey</li>
+    <li>Go to any favorites page
+        <ul>
+        <li>Should end with: <strong>index.php?page=favorites&s=view&id=<font color ="blue">&ltID&gt</font></strong></li>
+        </ul>
+    </li>
 <li>Enjoy</li>
-</ol>
+</ul>
 
 ## Controls
 
-<ul>
-    <li><strong>Left Click:</strong></li>
-      <ul>
-        <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
-        <li><strong>In gallery:</strong> Exit gallery</li>
-      </ul>
-    <li>
-      <strong>Middle Click:</strong>
-      <ul>
-          <li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
-          <li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
-      </ul>
-    </li>
-    <li><strong>Scroll Wheel/Arrow Keys/WASD (in gallery):</strong> Traverse gallery</li>
-    <li><strong>Scroll Wheel: (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity</li>
-    <li><strong>Escape (in gallery):</strong> Exit gallery</li>
-    <li><strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover</li>
-</ul>
+<strong>Left Click:</strong>
+    <ul>
+    <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
+    <li><strong>In gallery:</strong> Exit gallery</li>
+    </ul><br>
+    <strong>Middle Click:</strong>
+    <ul>
+        <li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
+        <li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
+    </ul><br>
+<strong>Scroll Wheel/Arrow Keys/WASD (in gallery):</strong> Traverse gallery<br><br>
+<strong>Scroll Wheel: (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
+<strong>Escape (in gallery):</strong> Exit gallery<br><br>
+<strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover
 
 ## Features
 
-<ol>
+<ul>
     <li>Search favorites with the the same syntax as the normal post pages (except for meta tags):<br>
         <strong>Includes:</strong>
             <ul>
@@ -57,32 +52,44 @@ I noticed [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites
             <li>WILDCARD</li>
             <li>ID</li>
             </ul>
-        <strong>Does not include:</strong> Meta tags like: rating, score, etc
+        <strong>Does not include:</strong>
+        <ul>
+            <li>score:</li>
+            <li>rating:</li>
+            <li>user:</li>
+            <li>height:</li>
+            <li>width:</li>
+            <li>parent:</li>
+            <li>source:</li>
+            <li>updated:</li>
+        </ul>
         <br>
         <strong>Examples:</strong><br>
         <ul>
         <li>( video ~ animated ~ high_res* ~ absurd_res* ) -low_res* ( female* ~ 1girls ~ 123 ) -ai_generated -red_hair</li>
-        <li>( 123 ~ 456 ~ 99999* ~ 1girls ) -video ( apple* ~ banana ~ pineapple )</li>
+        <li>( 123 ~ 456 ~ 99999* ~ pear ) -grape* ( apple* ~ banana ~ pineapple ) -orange -cherry</li>
         </ul>
-    </li><br>
-    <li>View full resolution images and GIFs, or play videos when hovering over or clicking on a thumbnail + gallery controls<br>
-        Gallery also works on post pages
-    </li><br>
+    </li>
+    <li>View full resolution images, or play videos and GIFs ( also works on post pages )
+    </li>
     <li>Only wait on fetching once.<br>
-        Favorites are stored in a client database after fetching them for the first time<br>
-        Allows for quick loading anytime later
-    </li><br>
-    <li>Save multiple custom searches to use later</li><br>
-    <li>Shuffle search results order</li><br>
-    <li>Invert search results</li><br>
-    <li>Filtering of blacklisted tags</li><br>
-    <li>Search favorites by their post ID</li><br>
-    <li>Tooltip showing which tags and or groups matched any given thumbnail</li><br>
-    <li>Choose full-screen image resolution</li><br>
-    <li>Enlarged remove buttons that don't force page reloads</li><br>
-    <li>Autocompleted tag search</li><br>
-    <li>Look at other user's favorites with the above features (blacklisted tags are hidden automatically)</li><br>
-</ol>
+    <ul>
+        <li>Favorites are stored in a client database after fetching them for the first time</li>
+        <li>Allows for quick loading anytime later</li>
+    </ul>
+    </li>
+    <li>Save custom searches</li>
+    <li>Shuffle search results</li>
+    <li>Invert search results</li>
+    <li>Exclude results with blacklisted tags</li>
+    <li>Search by post ID</li>
+    <li>See tooltip showing which tags were matched by the last search</li>
+    <li>Clickable overlay of character, copyright, and artist tags related to thumbnail</li>
+    <li>Choose full-screen image resolution</li>
+    <li>Enlarged remove buttons that don't force page reloads</li>
+    <li>Autocompleted tag search</li>
+    <li>Look at other user's favorites with the above features (blacklisted tags are hidden automatically)</li>
+</ul>
 
 ## Preferred Specs:
 
@@ -112,7 +119,7 @@ A: Responsiveness depends on:
 </ul>
 
 Q: Why do I sometimes see a black screen for a couple of seconds?\
-A: Your GPU most cleared its memory after exceeding its limit as a result of you looking at images too quickly:
+A: Your GPU most likely cleared its memory after exceeding its limit as a result of you looking at images too quickly:
 
 <ul>
     <li>The script stores full resolution images in VRAM rather than using image elements or file blobs.</li>
