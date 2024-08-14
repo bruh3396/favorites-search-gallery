@@ -93,7 +93,7 @@ I couldn't find a suitable replacement, so I created my own adaptation including
 
 ## Preferred Specs:
 
-VRAM: 4GB\
+Memory: 8GB\
 Download Speed: 75Mb/s
 
 ## FAQ
@@ -105,7 +105,7 @@ Q: Everything stopped working, why I can't see any favorites?\
 A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings. Then retry.
 
 Q: What browsers are supported?\
-A: Chrome and Edge work. Firefox is currently disabled for now.
+A: Chrome, Edge, and Firefox work. Have not tested other browsers.
 
 Q: Does it work on mobile?\
 A: No.
@@ -122,9 +122,9 @@ Q: Why do I sometimes see a black screen for a couple of seconds?\
 A: Your GPU most likely cleared its memory after exceeding its limit as a result of you looking at images too quickly:
 
 <ul>
-    <li>The script stores full resolution images in VRAM rather than using image elements or file blobs.</li>
+    <li>The script stores full resolution images RAM</li>
     <ul>
-        <li>This improves responsiveness, but uses more video memory.</li>
+        <li>This improves responsiveness at the cost of memory.</li>
     </ul>
     <li>The garbage collection will eventually free old renders
     <ul>

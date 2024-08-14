@@ -660,7 +660,6 @@ function getWorkerURL(content) {
 }
 
 function initializeUtilities() {
-  exitIfUsingFirefox();
   injectCommonStyles();
   trackCursorPosition();
   setTheme();
@@ -712,13 +711,6 @@ function usingRenderer() {
   return document.getElementById("original-content-container") !== null;
 }
 
-/**
- * @returns {Boolean}
- */
-function usingFirefox() {
-  return navigator.userAgent.toLowerCase().includes("firefox");
-}
-
 function getThumbUnderCursorOnLoad() {
   const thumbNodeElement = getThumbUnderCursor();
 
@@ -756,12 +748,6 @@ function usingDarkTheme() {
  */
 function enteredOverCaptionTag(event) {
   return event.relatedTarget !== null && event.relatedTarget.classList.contains("caption-tag");
-}
-
-function exitIfUsingFirefox() {
-  if (usingFirefox()) {
-    // alert("Favorites Search/Viewer:\nCurrently not compatible with Firefox, try Chrome or Edge.");
-  }
 }
 
 /**

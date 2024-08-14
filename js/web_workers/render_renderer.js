@@ -4,12 +4,11 @@ let retryDelay = 0;
 
 /**
  * @param {String} imageURL
- * @param {OffscreenCanvas} canvas
  * @param {String} extension
  * @param {String} postId
  * @param {Number} thumbIndex
  */
-async function drawCanvas(imageURL, canvas, extension, postId, thumbIndex) {
+async function getImageBitmap(imageURL, extension, postId, thumbIndex) {
   const extensionAlreadyFound = extension !== null && extension !== undefined;
   let newExtension = extension;
 
@@ -22,7 +21,7 @@ async function drawCanvas(imageURL, canvas, extension, postId, thumbIndex) {
   const result = await fetchImage(imageURL);
 
   if (result) {
-    const imageBitmap = await drawCanvasFromBlob(result.blob, canvas);
+    const imageBitmap = await createImageBitmap(result.blob);
 
     setTimeout(() => {
       postMessage({
@@ -126,37 +125,6 @@ async function fetchImage(imageURL) {
 }
 
 /**
- * @param {Blob} blob
- * @param {OffscreenCanvas} canvas
- * @returns {ImageBitmap}
- */
-async function drawCanvasFromBlob(blob, canvas) {
-  const imageBitmap = await createImageBitmap(blob);
-  const context = canvas.getContext("2d");
-
-  context.drawImage(imageBitmap, 0, 0);
-  drawScaledCanvas(imageBitmap, context);
-  return imageBitmap;
-}
-
-/**
- * @param {ImageBitmap} imageBitmap
- * @param {OffscreenCanvasRenderingContext2D} context
- */
-function drawScaledCanvas(imageBitmap, context) {
-  const canvas = context.canvas;
-  const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
-  const centerShiftX = (canvas.width - (imageBitmap.width * ratio)) / 2;
-  const centerShiftY = (canvas.height - (imageBitmap.height * ratio)) / 2;
-
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(
-    imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
-    centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
-  );
-}
-
-/**
  * @param {String} imageURL
  * @returns {String}
  */
@@ -184,6 +152,6 @@ onmessage = async(message) => {
       postId: request.postId
     });
   } else {
-    await drawCanvas(request.imageURL, request.offscreenCanvas, request.extension, request.postId, request.thumbIndex);
+    await getImageBitmap(request.imageURL, request.extension, request.postId, request.thumbIndex);
   }
 };
