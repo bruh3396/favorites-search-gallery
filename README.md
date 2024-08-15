@@ -117,17 +117,3 @@ A: Responsiveness depends on:
     <li>Internet speed: A lot of network activity (loading favorites, rendering images, getting image extensions) happens in the background.</li>
     <li>Favorite count: >15000 favorites can start getting slow when they're all on one page. I plan to implement multiple pages in the future.</li>
 </ul>
-
-Q: Why do I sometimes see a black screen for a couple of seconds?\
-A: Your GPU most likely cleared its memory after exceeding its limit as a result of you looking at images too quickly:
-
-<ul>
-    <li>The script stores full resolution images RAM</li>
-    <ul>
-        <li>This improves responsiveness at the cost of memory.</li>
-    </ul>
-    <li>The garbage collection will eventually free old renders
-    <ul>
-        <li>As long as you aren't rapidly moving through the gallery, you should be fine.</li>
-    </ul>
-</ul>

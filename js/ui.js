@@ -142,10 +142,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
       }
 
-      img {
+      img, canvas {
         width: 100%;
-        max-height: 62vh;
-        object-fit: cover;
       }
 
       &.hidden {

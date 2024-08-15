@@ -1,39 +1,28 @@
-const THUMB_NODE_DOM = new DOMParser().parseFromString("<div></div>", "text/html");
-const THUMB_NODE_TEMPLATE = THUMB_NODE_DOM.createElement("div");
+const THUMB_NODE_TEMPLATE = new DOMParser().parseFromString("<div></div>", "text/html").createElement("div");
 
 THUMB_NODE_TEMPLATE.className = "thumb-node";
 THUMB_NODE_TEMPLATE.innerHTML = `
     <div>
-      <img loading="lazy">
+      <img loading="lazy" alt="loading">
       <button class="remove-button light-green-gradient" style="visibility: hidden;">Remove</button>
     </div>
 `;
 
 class ThumbNode {
-  static baseRule34URL = {
+  static baseURLs = {
     post: "https://rule34.xxx/index.php?page=post&s=view&id=",
     remove: "https://rule34.xxx/index.php?page=favorites&s=delete&id="
   };
   static thumbnailExtractionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
 
   /**
-   * @param {String} source
+   * @param {String} compressedSource
    * @param {String} id
    * @returns {String}
    */
-  static reconstructThumbnailSource(source, id) {
-    source = source.split("_");
-    return `https://us.rule34.xxx/thumbnails//${source[0]}/thumbnail_${source[1]}.jpg?${id}`;
-  }
-
-  /**
-   * @param {String} id
-   */
-  static setIdToBeRemovedOnReload(id) {
-    const idsToRemoveOnReload = getIdsToRemoveOnReload();
-
-    idsToRemoveOnReload.push(id);
-    localStorage.setItem(IDS_TO_REMOVE_ON_RELOAD_KEY, JSON.stringify(idsToRemoveOnReload));
+  static decompressThumbnailSource(compressedSource, id) {
+    compressedSource = compressedSource.split("_");
+    return `https://us.rule34.xxx/thumbnails//${compressedSource[0]}/thumbnail_${compressedSource[1]}.jpg?${id}`;
   }
 
   /**
@@ -78,14 +67,14 @@ class ThumbNode {
    * @type {String}
    */
   get removeURL() {
-    return ThumbNode.baseRule34URL.remove + this.id;
+    return ThumbNode.baseURLs.remove + this.id;
   }
 
   /**
    * @type {String}
    */
   get href() {
-    return ThumbNode.baseRule34URL.post + this.id;
+    return ThumbNode.baseURLs.post + this.id;
   }
 
   /**
@@ -121,54 +110,54 @@ class ThumbNode {
   }
 
   /**
-   * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumbObject
-   * @param {Boolean} createFromRecord
+   * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumb
+   * @param {Boolean} fromRecord
    */
-  constructor(thumbObject, createFromRecord) {
+  constructor(thumb, fromRecord) {
+    this.instantiateTemplate();
+    this.populateAttributes(thumb, fromRecord);
+    this.setupRemoveButton();
+    this.setClickLink();
+  }
+
+  instantiateTemplate() {
     this.root = THUMB_NODE_TEMPLATE.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
     this.removeButton = this.root.children[0].children[1];
-    this.create(thumbObject, createFromRecord);
-    this.root.id = this.id;
-    this.image.setAttribute("tags", this.tagsString);
+  }
 
+  setupRemoveButton() {
     if (userIsOnTheirOwnFavoritesPage()) {
       this.removeButton.onclick = (event) => {
         event.stopPropagation();
-        ThumbNode.setIdToBeRemovedOnReload(this.id);
+        setIdToBeRemovedOnReload(this.id);
         fetch(this.removeURL);
         this.removeButton.remove();
-      };
-    }
-    this.postTags = new PostTags(this.tagsString);
-
-    if (usingRenderer()) {
-      this.container.setAttribute("href", this.href);
-    } else {
-      this.container.onclick = () => {
-        window.open(this.href, "_blank");
       };
     }
   }
 
   /**
-   * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumbObject
-   * @param {Boolean} createFromRecord
+   * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumb
+   * @param {Boolean} fromDatabaseRecord
    */
-  create(thumbObject, createFromRecord) {
-    if (createFromRecord) {
-      this.createFromDatabaseRecord(thumbObject);
+  populateAttributes(thumb, fromDatabaseRecord) {
+    if (fromDatabaseRecord) {
+      this.createFromDatabaseRecord(thumb);
     } else {
-      this.createFromHTMLElement(thumbObject);
+      this.createFromHTMLElement(thumb);
     }
+    this.root.id = this.id;
+    this.image.setAttribute("tags", this.tagsString);
+    this.postTags = new PostTags(this.tagsString);
   }
 
   /**
    * @param {{id: String, tags: String, src: String, type: String}} record
    */
   createFromDatabaseRecord(record) {
-    this.image.src = ThumbNode.reconstructThumbnailSource(record.src, record.id);
+    this.image.src = ThumbNode.decompressThumbnailSource(record.src, record.id);
     this.id = record.id;
     this.tagsString = record.tags;
     this.image.classList.add(record.type);
@@ -184,6 +173,16 @@ class ThumbNode {
     this.id = ThumbNode.getIdFromThumbElement(thumbElement);
     this.tagsString = `${imageElement.title} ${this.id}`;
     this.image.classList.add(getContentType(this.tagsString));
+  }
+
+  setClickLink() {
+    if (usingRenderer()) {
+      this.container.setAttribute("href", this.href);
+    } else {
+      this.container.onclick = () => {
+        window.open(this.href, "_blank");
+      };
+    }
   }
 
   /**

@@ -469,6 +469,16 @@ function getIdsToRemoveOnReload() {
   return JSON.parse(localStorage.getItem(IDS_TO_REMOVE_ON_RELOAD_KEY)) || [];
 }
 
+/**
+ * @param {String} postId
+ */
+function setIdToBeRemovedOnReload(postId) {
+  const idsToRemoveOnReload = getIdsToRemoveOnReload();
+
+  idsToRemoveOnReload.push(postId);
+  localStorage.setItem(IDS_TO_REMOVE_ON_RELOAD_KEY, JSON.stringify(idsToRemoveOnReload));
+}
+
 function clearRecentlyRemovedIds() {
   localStorage.removeItem(IDS_TO_REMOVE_ON_RELOAD_KEY);
 }
@@ -834,6 +844,15 @@ function extractTagGroups(searchQuery) {
  */
 function removeExtraWhiteSpace(string) {
   return string.trim().replace(/\s+/g, " ");
+}
+
+/**
+ *
+ * @param {HTMLImageElement} image
+ * @returns {Boolean}
+ */
+function imageIsLoaded(image) {
+  return image.complete || image.naturalWidth !== 0;
 }
 
 initializeUtilities();

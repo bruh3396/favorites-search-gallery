@@ -74,7 +74,7 @@ const renderHTML = `<style>
     >a>img,
     >span>img,
     >div>img {
-      outline: 3px solid yellow !important;
+      outline: 6px solid yellow !important;
     }
   }
 
@@ -92,6 +92,10 @@ const renderHTML = `<style>
     height: 25px;
     cursor: pointer;
   }
+
+  .thumb,
+  .thumb-node {
+  }
 </style>`;/* eslint-disable no-useless-escape */
 
 class Renderer {
@@ -107,7 +111,7 @@ class Renderer {
   };
   static galleryKeyDownTraversalCooldown = {
     timeout: null,
-    waitTime: 200,
+    waitTime: 30,
     get ready() {
       if (this.timeout === null) {
         this.timeout = setTimeout(() => {
@@ -1150,9 +1154,7 @@ onmessage = async(message) => {
       let i = 0;
 
       for (const postId of this.imageBitmaps.keys()) {
-        this.imageBitmaps.set(postId, null);
-        this.imageBitmaps.delete(postId);
-        this.markAsUnloaded(postId);
+        this.deleteRender(postId);
         i += 1;
 
         if (i >= numberOfRendersToDelete) {
