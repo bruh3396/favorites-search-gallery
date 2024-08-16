@@ -4,13 +4,24 @@ const renderHTML = `<style>
     overflow-x: hidden;
   }
 
-  /* .thumb.loaded,
-  .thumb-node.loaded {
-    .image {
-      outline: 2px solid transparent;
-      animation: outlineGlow 1s forwards;
-      opacity: 1;
+  /* .thumb,
+  .thumb-node {
+    &.loaded {
+
+      .image,
+      canvas {
+        outline: 2px solid transparent;
+        animation: outlineGlow 1s forwards;
+        opacity: 1;
+      }
     }
+
+    .image,
+    canvas {
+      opacity: 0.4;
+      transition: transform 0.1s ease-in-out, opacity 0.5s ease;
+    }
+
   }
 
   .image.loaded {
@@ -26,16 +37,13 @@ const renderHTML = `<style>
     100% {
       outline-color: turquoise;
     }
-  }
-
-  .image {
-    opacity: 0.4;
-    transition: transform 0.1s ease-in-out, opacity 0.5s ease;
   } */
 
+
+
   .image {
-        outline: 2px solid white;
-    }
+    outline: 2px solid slategrey;
+  }
 
   .gif {
     outline: 2px solid hotpink;
@@ -74,7 +82,7 @@ const renderHTML = `<style>
     >a>img,
     >span>img,
     >div>img {
-      outline: 6px solid yellow !important;
+      outline: 3px solid yellow !important;
     }
   }
 
@@ -93,8 +101,20 @@ const renderHTML = `<style>
     cursor: pointer;
   }
 
-  .thumb,
-  .thumb-node {
+  .thumb-node,
+  .thumb {
+
+    >div,
+    >a {
+      >canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1;
+        visibility: hidden;
+      }
+    }
   }
 </style>`;/* eslint-disable no-useless-escape */
 
@@ -109,9 +129,9 @@ class Renderer {
     right: "ArrowRight",
     left: "ArrowLeft"
   };
-  static galleryKeyDownTraversalCooldown = {
+  static galleryTraversalCooldown = {
     timeout: null,
-    waitTime: 30,
+    waitTime: 300,
     get ready() {
       if (this.timeout === null) {
         this.timeout = setTimeout(() => {
@@ -137,10 +157,10 @@ class Renderer {
     imageExtensions: "imageExtensions"
   };
   static webWorkers = {
-    renderer:
+    imageFetcher:
 `
 /* eslint-disable prefer-template */
-const RETRY_DELAY_INCREMENT = 1000;
+const RETRY_DELAY_INCREMENT = 100;
 let retryDelay = 0;
 
 /**
@@ -189,7 +209,8 @@ function sleep(milliseconds) {
  * @returns {String}
  */
 function getOriginalImageURLFromPostPage(postId) {
-  return fetch("https://rule34.xxx/index.php?page=post&s=view&id=" + postId)
+  const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + postId;
+  return fetch(postPageURL)
     .then((response) => {
       if (response.ok) {
         return response.text();
@@ -197,12 +218,7 @@ function getOriginalImageURLFromPostPage(postId) {
       throw new Error(response.status + ": " + postPageURL);
     })
     .then((html) => {
-      postMessage({
-        gotPostPageHTML: html,
-        postId
-      });
-      const imageURL = (/itemprop="image" content="(.*)"/g).exec(html);
-      return imageURL[1].replace("us.rule34", "rule34");
+      return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
     }).catch(async(error) => {
       if (!error.message.includes("503")) {
         console.error(error);
@@ -214,7 +230,7 @@ function getOriginalImageURLFromPostPage(postId) {
       if (retryDelay > RETRY_DELAY_INCREMENT * 5) {
         retryDelay = RETRY_DELAY_INCREMENT;
       }
-      return getOriginalImageURL(postPageURL);
+      return getOriginalImageURLFromPostPage(postPageURL);
     });
 }
 
@@ -223,7 +239,8 @@ function getOriginalImageURLFromPostPage(postId) {
  * @returns {String}
  */
 function getOriginalImageURL(postId) {
-  return fetch("https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + postId)
+  const apiURL = "https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + postId;
+  return fetch(apiURL)
     .then((response) => {
       if (response.ok) {
         return response.text();
@@ -231,14 +248,7 @@ function getOriginalImageURL(postId) {
       throw new Error(response.status + ": " + postId);
     })
     .then((html) => {
-      let url;
-
-      try {
-        url = (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
-      } catch (error) {
-        url = "";
-      }
-      return url;
+      return (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
     }).catch(() => {
       return getOriginalImageURLFromPostPage(postId);
     });
@@ -297,11 +307,98 @@ onmessage = async(message) => {
   }
 };
 
+`,
+    thumbnailRenderer:
 `
+/**
+ * @type {Map.<String, OffscreenCanvas>}
+ */
+const offscreenCanvases = new Map();
+const screenWidthFraction = 3;
+let screenWidth = 1080;
+
+/**
+ * @param {OffscreenCanvas} offscreenCanvas
+ * @param {ImageBitmap} imageBitmap
+ * @param {String} id
+ * @param {Number} width
+ * @param {Number} height
+ */
+function draw(offscreenCanvas, imageBitmap, id, width, height) {
+  if (offscreenCanvas === undefined) {
+    offscreenCanvas = offscreenCanvases.get(id);
+  } else {
+    offscreenCanvases.set(id, offscreenCanvas);
+  }
+  setOffscreenCanvasDimensions(offscreenCanvas, width, height);
+  drawCanvas(offscreenCanvas, imageBitmap, id);
+}
+
+/**
+ * @param {OffscreenCanvas} offscreenCanvas
+ * @param {Number} width
+ * @param {Number} height
+ */
+function setOffscreenCanvasDimensions(offscreenCanvas, width, height) {
+  const newWidth = screenWidth / screenWidthFraction;
+  const ratio = newWidth / width;
+  const newHeight = ratio * height;
+
+  offscreenCanvas.width = Math.round(newWidth);
+  offscreenCanvas.height = Math.round(newHeight);
+}
+
+/**
+ * @param {OffscreenCanvas} offscreenCanvas
+ * @param {ImageBitmap} imageBitmap
+ */
+function drawCanvas(offscreenCanvas, imageBitmap, id) {
+  const context = offscreenCanvas.getContext("2d");
+  const ratio = Math.min(offscreenCanvas.width / imageBitmap.width, offscreenCanvas.height / imageBitmap.height);
+  const centerShiftX = (offscreenCanvas.width - (imageBitmap.width * ratio)) / 2;
+  const centerShiftY = (offscreenCanvas.height - (imageBitmap.height * ratio)) / 2;
+
+  context.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+  context.drawImage(
+    imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
+    centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
+  );
+  imageBitmap.close();
+  postMessage({
+    action: "finishedDrawing",
+    id
+  });
+}
+
+onmessage = (message) => {
+  message = message.data;
+
+  switch (message.action) {
+    case "draw":
+      draw(message.offscreenCanvas, message.imageBitmap, message.id, message.width, message.height);
+      break;
+
+    case "setScreenWidth":
+      screenWidth = message.screenWidth;
+      break;
+
+    case "delete":
+      break;
+
+    default:
+      break;
+  }
+};
+
+`
+
   };
-  static defaultResolution = {
-      postPage: "3840x2160",
-      favoritesPage: "5120x2280"
+  static defaultResolutions = {
+    postPage: "7680x4320",
+    favoritesPage: "7680x4320"
+  };
+  static attributes = {
+    thumbIndex: "index"
   };
 
   /**
@@ -313,29 +410,25 @@ onmessage = async(message) => {
    */
   mainContext;
   /**
-   * @type {{height: Number, width: Number}}
-   */
-  mainCanvasResolution;
-  /**
    * @type {Map.<String, ImageBitmap>}
    */
   imageBitmaps;
   /**
    * @type {HTMLImageElement}
    */
-  placeholderImage;
+  mainCanvasPlaceholderImage;
   /**
    * @type {Worker[]}
    */
-  renderers;
+  imageBitmapFetchers;
   /**
-   * @type {String}
+   * @type {Worker}
    */
-  thumbIndexAttribute;
+  thumbUpscaler;
   /**
-   * @type {Number}
+   * @type {Set}
    */
-  renderDelay;
+  upscaledThumbs;
   /**
    * @type {{minIndex: Number, maxIndex: Number}}
    */
@@ -351,6 +444,14 @@ onmessage = async(message) => {
   /**
    * @type {Number}
    */
+  imageFetchDelay;
+  /**
+   * @type {Number}
+   */
+  extensionAlreadyKnownFetchSpeed;
+  /**
+   * @type {Number}
+   */
   recentlyDiscoveredImageExtensionCount;
   /**
    * @type {Number}
@@ -359,7 +460,7 @@ onmessage = async(message) => {
   /**
    * @type {Number}
    */
-  rendererIndex;
+  imageBitmapFetcherIndex;
   /**
    * @type {Number}
    */
@@ -404,43 +505,10 @@ onmessage = async(message) => {
    * @type {HTMLDivElement}
    */
   background;
-  /**
-   * @type {Number}
-   */
-  extensionKnownSpeed;
 
   constructor() {
-    this.mainCanvas = document.createElement("canvas");
-    this.mainContext = this.mainCanvas.getContext("2d");
-    this.mainCanvasResolution = {
-      width: 100,
-      height: 100
-    };
-    this.imageBitmaps = new Map();
-    this.createRenderingWebWorkers(1);
-    this.extensionKnownSpeed = 6;
-    this.thumbIndexAttribute = "index";
-    this.renderDelay = 150;
-    this.renderedThumbRange = {
-      minIndex: 0,
-      maxIndex: 0
-    };
-    this.visibleThumbs = [];
-    this.imageExtensions = {};
-    this.recentlyDiscoveredImageExtensionCount = 0;
-    this.currentlySelectedThumbIndex = 0;
-    this.rendererIndex = 0;
-    this.lastSelectedThumbIndexBeforeEnteringGalleryMode = 0;
-    this.inGalleryMode = false;
-    this.recentlyExitedGalleryMode = false;
-    this.stopRendering = false;
-    this.currentlyRendering = false;
-    this.finishedLoading = onPostPage();
-    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Renderer.preferences.showOnHover, true) : false;
-    this.initialize();
-  }
-
-  initialize() {
+    this.setDefaults();
+    this.createWebWorkers();
     this.createPlaceholderImage();
     this.createBlankVideoPoster();
     this.setMainCanvasResolution();
@@ -451,14 +519,41 @@ onmessage = async(message) => {
     this.updateBackgroundOpacity(getPreference(Renderer.preferences.backgroundOpacity, 1));
   }
 
-  /**
-   * @param {Number} count
-   */
-  createRenderingWebWorkers(count) {
-    this.renderers = [];
+  setDefaults() {
+    this.mainCanvas = document.createElement("canvas");
+    this.mainContext = this.mainCanvas.getContext("2d");
+    this.imageBitmaps = new Map();
+    this.renderedThumbRange = {
+      minIndex: 0,
+      maxIndex: 0
+    };
+    this.visibleThumbs = [];
+    this.imageExtensions = {};
+    this.upscaledThumbs = new Set();
+    this.imageFetchDelay = 200;
+    this.extensionAlreadyKnownFetchSpeed = 6;
+    this.recentlyDiscoveredImageExtensionCount = 0;
+    this.currentlySelectedThumbIndex = 0;
+    this.imageBitmapFetcherIndex = 0;
+    this.lastSelectedThumbIndexBeforeEnteringGalleryMode = 0;
+    this.inGalleryMode = false;
+    this.recentlyExitedGalleryMode = false;
+    this.stopRendering = false;
+    this.currentlyRendering = false;
+    this.finishedLoading = onPostPage();
+    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Renderer.preferences.showOnHover, true) : false;
+  }
 
-    for (let i = 0; i < count; i += 1) {
-      this.renderers.push(new Worker(getWorkerURL(Renderer.webWorkers.renderer)));
+  createWebWorkers() {
+    this.imageBitmapFetchers = [];
+    this.thumbUpscaler = new Worker(getWorkerURL(Renderer.webWorkers.thumbnailRenderer));
+    this.thumbUpscaler.postMessage({
+      action: "setScreenWidth",
+      screenWidth: window.screen.width
+    });
+
+    for (let i = 0; i < 1; i += 1) {
+      this.imageBitmapFetchers.push(new Worker(getWorkerURL(Renderer.webWorkers.imageFetcher)));
     }
   }
 
@@ -503,8 +598,6 @@ onmessage = async(message) => {
     this.background = document.getElementById("original-content-background");
     this.videoContainer = document.getElementById("original-video-container");
     this.gifContainer = document.getElementById("original-gif-container");
-    this.mainCanvas.width = this.mainCanvasResolution.width;
-    this.mainCanvas.height = this.mainCanvasResolution.height;
     this.mainCanvas.id = "main-canvas";
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
   }
@@ -634,6 +727,14 @@ onmessage = async(message) => {
       this.initializeThumbsForHovering.bind(this)(event.detail);
       this.enumerateVisibleThumbs();
     });
+    window.addEventListener("originalContentCleared", (event) => {
+      const ids = event.detail
+        .filter(id => !this.extensionIsKnown(id));
+
+        if (ids.length > 0) {
+          this.findImageExtensionsInTheBackground(ids);
+        }
+    });
     window.addEventListener("startedFetchingFavorites", () => {
       setTimeout(() => {
         const thumbElement = document.querySelector(".thumb-node");
@@ -645,7 +746,7 @@ onmessage = async(message) => {
     }, {
       once: true
     });
-    window.addEventListener("favoritesLoaded", (event) => {
+    window.addEventListener("favoritesLoaded", () => {
       this.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
@@ -656,18 +757,32 @@ onmessage = async(message) => {
       this.enumerateVisibleThumbs();
       this.onFavoritesSearch();
     });
-    this.renderers.forEach((renderer) => {
+    this.imageBitmapFetchers.forEach((renderer) => {
       renderer.onmessage = (message) => {
         this.handleRendererMessage(message.data);
       };
     });
+    this.thumbUpscaler.onmessage = (message) => {
+      message = message.data;
+
+      switch (message.action) {
+        case "finishedDrawing":
+          document.getElementById(message.id)
+            .getElementsByTagName("canvas")[0]
+            .style.visibility = "visible";
+          break;
+
+        default:
+          break;
+      }
+    };
   }
 
   /**
    * @param {HTMLElement[]} thumbs
    */
   initializeThumbsForHovering(thumbs) {
-    const thumbElements = thumbs === undefined ? getAllThumbNodeElements() : thumbs;
+    const thumbElements = thumbs === undefined ? getAllThumbs() : thumbs;
 
     for (const thumbElement of thumbElements) {
       this.addEventListenersToThumb(thumbElement);
@@ -680,16 +795,9 @@ onmessage = async(message) => {
   handleRendererMessage(message) {
     if (message.foundExtension) {
       this.assignExtension(message.postId, message.foundExtension);
-    } else if (message.gotPostPageHTML) {
-      dispatchEvent(new CustomEvent("gotPostPageHTML", {
-        detail: {
-          html: message.gotPostPageHTML,
-          postId: message.postId
-        }
-      }));
-    } else {
-      this.onRenderFinished(message);
+      return;
     }
+    this.onRenderFinished(message);
   }
 
   /**
@@ -723,6 +831,39 @@ onmessage = async(message) => {
         this.showOriginalContent(thumb);
       }
     }
+    this.upscaleThumbResolution(thumb, message.imageBitmap);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @param {ImageBitmap} imageBitmap
+   */
+  async upscaleThumbResolution(thumb, imageBitmap) {
+    if (onPostPage() || this.upscaledThumbs.has(thumb.id)) {
+      return;
+    }
+    this.upscaledThumbs.add(thumb.id);
+    const image = getImageFromThumb(thumb);
+    const imageBitmapClone = await createImageBitmap(imageBitmap);
+    const message = {
+      action: "draw",
+      id: thumb.id,
+      imageBitmap: imageBitmapClone,
+      width: image.width,
+      height: image.height
+    };
+    const transferrableObjects = [];
+    let canvas = thumb.querySelector("canvas");
+
+    if (canvas === null) {
+      canvas = document.createElement("canvas");
+      const offscreenCanvas = canvas.transferControlToOffscreen();
+
+      message.offscreenCanvas = offscreenCanvas;
+      transferrableObjects.push(offscreenCanvas);
+      thumb.children[0].appendChild(canvas);
+    }
+    this.thumbUpscaler.postMessage(message, transferrableObjects);
   }
 
   /**
@@ -794,9 +935,13 @@ onmessage = async(message) => {
   }
 
   deleteRender(id) {
+    const thumb = document.getElementById(id);
+
+    if (thumb !== null) {
+      thumb.classList.remove("loaded");
+    }
     this.imageBitmaps.get(id).close();
     this.imageBitmaps.delete(id);
-    this.markAsUnloaded(id);
   }
 
   findImageExtensionsOnPostPage() {
@@ -864,7 +1009,7 @@ onmessage = async(message) => {
    * @param {Number} index
    */
   enumerateThumb(thumb, index) {
-    thumb.setAttribute(this.thumbIndexAttribute, index);
+    thumb.setAttribute(Renderer.attributes.thumbIndex, index);
   }
 
   /**
@@ -950,7 +1095,7 @@ onmessage = async(message) => {
    * @param {Boolean} keyIsHeldDown
    */
   traverseGallery(direction, keyIsHeldDown) {
-    if (keyIsHeldDown && !Renderer.galleryKeyDownTraversalCooldown.ready) {
+    if (keyIsHeldDown && !Renderer.galleryTraversalCooldown.ready) {
       return;
     }
 
@@ -1059,7 +1204,7 @@ onmessage = async(message) => {
    */
   showOriginalContent(thumb) {
     this.highlightThumb(thumb, true);
-    this.currentlySelectedThumbIndex = parseInt(thumb.getAttribute(this.thumbIndexAttribute));
+    this.currentlySelectedThumbIndex = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
 
     if (isVideo(thumb)) {
       this.showOriginalVideo(thumb);
@@ -1097,7 +1242,7 @@ onmessage = async(message) => {
    * @returns {String}
    */
   getVideoSource(thumb) {
-    return getOriginalContentURL(thumb).replace("jpg", "mp4");
+    return getOriginalImageURLFromThumb(thumb).replace("jpg", "mp4");
   }
 
   /**
@@ -1113,7 +1258,7 @@ onmessage = async(message) => {
    */
   showOriginalGIF(thumb) {
     const extension = includesTag("animated_png", getTagsFromThumb(thumb)) ? "png" : "gif";
-    const originalSource = getOriginalContentURL(thumb).replace("jpg", extension);
+    const originalSource = getOriginalImageURLFromThumb(thumb).replace("jpg", extension);
 
     this.gifContainer.src = originalSource;
 
@@ -1135,17 +1280,6 @@ onmessage = async(message) => {
       this.drawMainCanvas(imageBitmap);
     }
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
-  }
-
-  /**
-   * @param {String} postId
-   */
-  markAsUnloaded(postId) {
-    const thumb = document.getElementById(postId);
-
-    if (thumb !== null) {
-      thumb.classList.remove("loaded");
-    }
   }
 
   deleteOldRenders() {
@@ -1178,7 +1312,7 @@ onmessage = async(message) => {
         return;
       }
       this.stopRendering = true;
-      await sleep(this.renderDelay);
+      await sleep(this.imageFetchDelay);
       this.stopRendering = false;
     }
     this.currentlyRendering = true;
@@ -1217,7 +1351,7 @@ onmessage = async(message) => {
         imageThumbsToRender.push(currentThumb);
       }
     }
-    const indicesOfImageThumbsToRender = imageThumbsToRender.map(imageThumb => parseInt(imageThumb.getAttribute(this.thumbIndexAttribute)));
+    const indicesOfImageThumbsToRender = imageThumbsToRender.map(imageThumb => parseInt(imageThumb.getAttribute(Renderer.attributes.thumbIndex)));
 
     this.setRenderRange(indicesOfImageThumbsToRender);
     await this.renderImages(imageThumbsToRender);
@@ -1276,16 +1410,16 @@ onmessage = async(message) => {
    */
   renderOriginalImage(thumb) {
     const renderMessage = {
-      imageURL: getOriginalContentURL(thumb),
+      imageURL: getOriginalImageURLFromThumb(thumb),
       postId: thumb.id,
-      thumbIndex: thumb.getAttribute(this.thumbIndexAttribute),
+      thumbIndex: thumb.getAttribute(Renderer.attributes.thumbIndex),
       extension: this.imageExtensions[thumb.id]
     };
 
-    this.imageBitmaps.set(thumb.id, this.placeholderImage);
-    this.renderers[this.rendererIndex].postMessage(renderMessage);
-    this.rendererIndex += 1;
-    this.rendererIndex = this.rendererIndex < this.renderers.length ? this.rendererIndex : 0;
+    this.imageBitmaps.set(thumb.id, this.mainCanvasPlaceholderImage);
+    this.imageBitmapFetchers[this.imageBitmapFetcherIndex].postMessage(renderMessage);
+    this.imageBitmapFetcherIndex += 1;
+    this.imageBitmapFetcherIndex = this.imageBitmapFetcherIndex < this.imageBitmapFetchers.length ? this.imageBitmapFetcherIndex : 0;
   }
 
   /**
@@ -1406,7 +1540,7 @@ onmessage = async(message) => {
    */
   getIndexOfThumbUnderCursor() {
     const thumb = getThumbUnderCursor();
-    return thumb === null ? null : parseInt(thumb.getAttribute(this.thumbIndexAttribute));
+    return thumb === null ? null : parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
   }
 
   /**
@@ -1502,8 +1636,8 @@ onmessage = async(message) => {
     }
 
     if (imageThumbsToRender.length > 0) {
-      this.renderedThumbRange.minIndex = imageThumbsToRender[0].getAttribute(this.thumbIndexAttribute);
-      this.renderedThumbRange.maxIndex = imageThumbsToRender[imageThumbsToRender.length - 1].getAttribute(this.thumbIndexAttribute);
+      this.renderedThumbRange.minIndex = imageThumbsToRender[0].getAttribute(Renderer.attributes.thumbIndex);
+      this.renderedThumbRange.maxIndex = imageThumbsToRender[imageThumbsToRender.length - 1].getAttribute(Renderer.attributes.thumbIndex);
     }
     await this.renderImages(imageThumbsToRender);
     this.currentlyRendering = false;
@@ -1518,7 +1652,7 @@ onmessage = async(message) => {
         break;
       }
       this.renderOriginalImage(thumb);
-      await sleep(this.getRenderDelay(thumb.id));
+      await sleep(this.getImageFetchDelay(thumb.id));
     }
   }
 
@@ -1526,8 +1660,8 @@ onmessage = async(message) => {
    * @param {String} postId
    * @returns {Number}
    */
-  getRenderDelay(postId) {
-    return this.extensionIsKnown(postId) ? this.renderDelay / this.extensionKnownSpeed : this.renderDelay;
+  getImageFetchDelay(postId) {
+    return this.extensionIsKnown(postId) ? this.imageFetchDelay / this.extensionAlreadyKnownFetchSpeed : this.imageFetchDelay;
   }
 
   /**
@@ -1554,7 +1688,7 @@ onmessage = async(message) => {
    * @returns
    */
   thumbInRenderRange(thumb) {
-    const index = parseInt(thumb.getAttribute(this.thumbIndexAttribute));
+    const index = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
     return index >= this.renderedThumbRange.minIndex && index <= this.renderedThumbRange.maxIndex;
   }
 
@@ -1567,7 +1701,7 @@ onmessage = async(message) => {
     const scale = 40;
     const width = 16 * scale;
     const height = 9 * scale;
-    const defaultResolution = getPreference(Renderer.preferences.resolution, Renderer.defaultResolution.favoritesPage);
+    const defaultResolution = getPreference(Renderer.preferences.resolution, Renderer.defaultResolutions.favoritesPage);
     const container = document.createElement("div");
 
     container.style.paddingTop = "8px";
@@ -1577,7 +1711,7 @@ onmessage = async(message) => {
     resolutionLabel.textContent = "Image Resolution";
     resolutionDropdown.id = "resolution-dropdown";
 
-    for (let i = 1; i <= 5120 / width; i += 1) {
+    for (let i = 1; i <= 7680 / width; i += 1) {
       const resolution = `${i * width}x${i * height}`;
       const resolutionOption = document.createElement("option");
 
@@ -1598,11 +1732,9 @@ onmessage = async(message) => {
   }
 
   setMainCanvasResolution() {
-    const resolution = onPostPage() ? Renderer.defaultResolution.postPage : getPreference(Renderer.preferences.resolution, Renderer.defaultResolution.favoritesPage);
+    const resolution = onPostPage() ? Renderer.defaultResolutions.postPage : getPreference(Renderer.preferences.resolution, Renderer.defaultResolutions.favoritesPage);
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
-    this.mainCanvasResolution.width = dimensions[0];
-    this.mainCanvasResolution.height = dimensions[1];
     this.mainCanvas.width = dimensions[0];
     this.mainCanvas.height = dimensions[1];
     this.maxNumberOfImagesToRender = this.getMaxNumberOfImagesToRender();
@@ -1614,7 +1746,7 @@ onmessage = async(message) => {
    * @returns
    */
   renderInAdvanceWhileTraversingInGalleryMode(thumb, direction) {
-    const currentThumbIndex = parseInt(thumb.getAttribute(this.thumbIndexAttribute));
+    const currentThumbIndex = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
     const lookahead = Math.min(8, Math.round(this.maxNumberOfImagesToRender / 2) - 2);
     let possiblyUnrenderedThumbIndex;
 
@@ -1655,32 +1787,45 @@ onmessage = async(message) => {
       if (thumb === null) {
         break;
       }
-      indices.push(parseInt(thumb.getAttribute(this.thumbIndexAttribute)));
+      indices.push(parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex)));
     }
     this.setRenderRange(indices);
   }
 
-  async findImageExtensionsInTheBackground() {
-    const postIdsWithUnknownExtensions = Array.from(getAllThumbNodeElements())
-      .filter(thumb => isImage(thumb))
-      .filter(thumb => !this.extensionIsKnown(thumb.id))
-      .map(thumb => thumb.id);
+  /**
+   * @param {String[]} ids
+   */
+  async findImageExtensionsInTheBackground(ids) {
+    const postIdsWithUnknownExtensions = ids === undefined ? this.getPostIdsWithUnknownExtensions() : ids;
 
     while (postIdsWithUnknownExtensions.length > 0) {
       await sleep(2000);
 
-      while (this.finishedLoading && !this.currentlyRendering && postIdsWithUnknownExtensions.length > 0) {
+      while (postIdsWithUnknownExtensions.length > 0) {
+        const networkBandwidthIsLimited = !this.finishedLoading || this.currentlyRendering;
+        const delay = networkBandwidthIsLimited ? 100 : 15;
+
         const postId = postIdsWithUnknownExtensions.pop();
 
         if (postId !== undefined && postId !== null && !this.extensionIsKnown(postId)) {
-          this.renderers[0].postMessage({
+          this.imageBitmapFetchers[0].postMessage({
             findExtension: true,
             postId
           });
-          await sleep(15);
+          await sleep(delay);
         }
       }
     }
+  }
+
+  /**
+   * @returns {String[]}
+   */
+  getPostIdsWithUnknownExtensions() {
+    return Array.from(getAllThumbs())
+      .filter(thumb => isImage(thumb))
+      .filter(thumb => !this.extensionIsKnown(thumb.id))
+      .map(thumb => thumb.id);
   }
 
   createBlankVideoPoster() {
@@ -1695,8 +1840,8 @@ onmessage = async(message) => {
   }
 
   createPlaceholderImage() {
-    this.placeholderImage = document.createElement("img");
-    this.placeholderImage.src = "https://rule34.xxx/images/header2.png";
+    this.mainCanvasPlaceholderImage = document.createElement("img");
+    this.mainCanvasPlaceholderImage.src = "https://rule34.xxx/images/header2.png";
   }
 }
 

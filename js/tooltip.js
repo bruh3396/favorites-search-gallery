@@ -107,7 +107,7 @@ class Tooltip {
    * @param {HTMLCollectionOf.<Element>} thumbs
    */
   addEventListenersToThumbs(thumbs) {
-    thumbs = thumbs === undefined ? getAllThumbNodeElements() : thumbs;
+    thumbs = thumbs === undefined ? getAllThumbs() : thumbs;
 
     for (const thumb of thumbs) {
       const image = getImageFromThumb(thumb);

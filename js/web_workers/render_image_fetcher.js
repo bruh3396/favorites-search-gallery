@@ -1,5 +1,5 @@
 /* eslint-disable prefer-template */
-const RETRY_DELAY_INCREMENT = 1000;
+const RETRY_DELAY_INCREMENT = 100;
 let retryDelay = 0;
 
 /**
@@ -48,7 +48,8 @@ function sleep(milliseconds) {
  * @returns {String}
  */
 function getOriginalImageURLFromPostPage(postId) {
-  return fetch("https://rule34.xxx/index.php?page=post&s=view&id=" + postId)
+  const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + postId;
+  return fetch(postPageURL)
     .then((response) => {
       if (response.ok) {
         return response.text();
@@ -56,12 +57,7 @@ function getOriginalImageURLFromPostPage(postId) {
       throw new Error(response.status + ": " + postPageURL);
     })
     .then((html) => {
-      postMessage({
-        gotPostPageHTML: html,
-        postId
-      });
-      const imageURL = (/itemprop="image" content="(.*)"/g).exec(html);
-      return imageURL[1].replace("us.rule34", "rule34");
+      return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
     }).catch(async(error) => {
       if (!error.message.includes("503")) {
         console.error(error);
@@ -73,7 +69,7 @@ function getOriginalImageURLFromPostPage(postId) {
       if (retryDelay > RETRY_DELAY_INCREMENT * 5) {
         retryDelay = RETRY_DELAY_INCREMENT;
       }
-      return getOriginalImageURL(postPageURL);
+      return getOriginalImageURLFromPostPage(postPageURL);
     });
 }
 
@@ -82,7 +78,8 @@ function getOriginalImageURLFromPostPage(postId) {
  * @returns {String}
  */
 function getOriginalImageURL(postId) {
-  return fetch("https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + postId)
+  const apiURL = "https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + postId;
+  return fetch(apiURL)
     .then((response) => {
       if (response.ok) {
         return response.text();
@@ -90,14 +87,7 @@ function getOriginalImageURL(postId) {
       throw new Error(response.status + ": " + postId);
     })
     .then((html) => {
-      let url;
-
-      try {
-        url = (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
-      } catch (error) {
-        url = "";
-      }
-      return url;
+      return (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
     }).catch(() => {
       return getOriginalImageURLFromPostPage(postId);
     });

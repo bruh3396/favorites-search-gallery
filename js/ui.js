@@ -405,7 +405,7 @@ function loadFavoritesPagePreferences() {
     FAVORITE_SEARCH_INPUTS.searchBox.value = searchHistory[0];
   }
   FAVORITE_SEARCH_INPUTS.findFavorite.value = getPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, "");
-  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 10);
+  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 7);
   changeColumnCount(FAVORITE_SEARCH_INPUTS.columnCount.value);
 }
 
@@ -600,7 +600,7 @@ function traverseFavoritesSearchHistory(direction) {
 function copySearchResultIdsToClipboard() {
   const customSearch = [];
 
-  for (const thumb of getAllThumbNodeElements()) {
+  for (const thumb of getAllThumbs()) {
     customSearch.push(thumb.id);
   }
   navigator.clipboard.writeText(`( ${customSearch.join(" ~ ")} )`);
@@ -630,7 +630,7 @@ async function findSomeoneWithMoreThanXFavorites(X) {
   };
   const commentsAPIURL = "https://api.rule34.xxx/index.php?page=dapi&s=comment&q=index&post_id=";
 
-  for (const thumb of getAllThumbNodeElements()) {
+  for (const thumb of getAllThumbs()) {
     const user = await fetch(commentsAPIURL + thumb.id)
       .then((response) => {
         return response.text();

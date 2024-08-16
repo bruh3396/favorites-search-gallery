@@ -3,7 +3,7 @@ const THUMB_NODE_TEMPLATE = new DOMParser().parseFromString("<div></div>", "text
 THUMB_NODE_TEMPLATE.className = "thumb-node";
 THUMB_NODE_TEMPLATE.innerHTML = `
     <div>
-      <img loading="lazy" alt="loading">
+      <img>
       <button class="remove-button light-green-gradient" style="visibility: hidden;">Remove</button>
     </div>
 `;

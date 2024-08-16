@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 function sleep(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -340,7 +340,18 @@ onmessage = (message) => {
   }
 
   clearContent() {
+    const ids = Array.from(document.getElementsByClassName("thumb"))
+      .filter(thumb => isImage(thumb))
+      .map(thumb => thumb.children[0].id.substring(1));
+
+    setTimeout(() => {
+      dispatchEvent(new CustomEvent("originalContentCleared", {
+        detail: ids
+      }));
+    }, 10);
+
     document.getElementById("content").innerHTML = "";
+
   }
 
   /**
@@ -956,7 +967,7 @@ onmessage = (message) => {
     let placeToInsert = "beforeend";
 
     if (failedRequest !== undefined) {
-      elementToInsertAround = getAllThumbNodeElements()[failedRequest.indexToInsert];
+      elementToInsertAround = getAllThumbs()[failedRequest.indexToInsert];
       placeToInsert = "afterend";
       thumbNodes = Array.from(thumbNodes).reverse();
     }

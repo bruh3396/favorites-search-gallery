@@ -213,7 +213,7 @@ class Caption {
   async addEventListenersToThumbs() {
     await sleep(500);
 
-    for (const thumb of getAllThumbNodeElements()) {
+    for (const thumb of getAllThumbs()) {
       const imageContainer = getImageFromThumb(thumb).parentElement;
 
       if (imageContainer.hasAttribute("has-caption-listener")) {
@@ -574,7 +574,7 @@ class Caption {
 
   findCategoriesOfAllTags() {
     window.addEventListener("favoritesLoaded", () => {
-      const allTagNames = Array.from(getAllThumbNodeElements())
+      const allTagNames = Array.from(getAllThumbs())
         .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
         .join(" ")
         .split(" ")
@@ -592,5 +592,5 @@ class Caption {
 }
 
 if (!onPostPage()) {
-  const caption = new Caption();
+  // const caption = new Caption();
 }

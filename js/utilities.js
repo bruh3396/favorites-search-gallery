@@ -200,7 +200,7 @@ function getImageFromThumb(thumb) {
 /**
  * @returns {HTMLCollectionOf.<Element>}
  */
-function getAllThumbNodeElements() {
+function getAllThumbs() {
   const className = onPostPage() ? "thumb" : "thumb-node";
   return document.getElementsByClassName(className);
 }
@@ -209,7 +209,7 @@ function getAllThumbNodeElements() {
  * @returns {HTMLElement[]}
  */
 function getAllVisibleThumbs() {
-  return Array.from(getAllThumbNodeElements())
+  return Array.from(getAllThumbs())
     .filter(thumbNodeElement => thumbNodeElement.style.display !== "none");
 }
 
@@ -217,10 +217,29 @@ function getAllVisibleThumbs() {
  * @param {HTMLElement} thumb
  * @returns {String}
  */
-function getOriginalContentURL(thumb) {
-  return getImageFromThumb(thumb).src
+function getOriginalImageURLFromThumb(thumb) {
+  return getOriginalImageURL(getImageFromThumb(thumb).src);
+}
+
+/**
+ * @param {String} thumbnailURL
+ * @returns {String}
+ */
+function getOriginalImageURL(thumbnailURL) {
+  return thumbnailURL
     .replace("thumbnails", "/images")
     .replace("thumbnail_", "")
+    .replace("us.rule34", "rule34");
+}
+
+/**
+ * @param {String} originalImageURL
+ * @returns {String}
+ */
+function getThumbnailURL(originalImageURL) {
+  return originalImageURL
+    .replace(/\/images\/\/(\d+)\//, "thumbnails/$1/thumbnail_")
+    .replace(/(?:gif|jpeg|png)/, "jpg")
     .replace("us.rule34", "rule34");
 }
 
@@ -544,7 +563,7 @@ function hasAppropriateRating(thumb, appropriateRating) {
  * @param {String} appropriateRating
  */
 function removeInappropriatelyRatedContent(appropriateRating) {
-  Array.from(getAllThumbNodeElements()).forEach((thumb) => {
+  Array.from(getAllThumbs()).forEach((thumb) => {
     if (!hasAppropriateRating(thumb, appropriateRating)) {
       // setThumbDisplay(thumb, false);
     }
@@ -552,7 +571,7 @@ function removeInappropriatelyRatedContent(appropriateRating) {
 }
 
 function getTagDistribution() {
-  const images = Array.from(getAllThumbNodeElements()).map(thumb => getImageFromThumb(thumb));
+  const images = Array.from(getAllThumbs()).map(thumb => getImageFromThumb(thumb));
   const tagOccurrences = {};
 
   images.forEach((image) => {
