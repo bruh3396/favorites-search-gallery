@@ -183,7 +183,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     }
 
     #favorite-options-container {
-      margin-top: 10px;
       display: flex;
       flex-flow: row wrap;
       width: 60%;
@@ -261,6 +260,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #help-links-container {
       margin-top: 17px;
     }
+
+    #left-favorites-panel-bottom-row {
+      display: flex;
+      flex-flow: row wrap;
+      margin-top: 10px;
+    }
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
@@ -310,6 +315,9 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             </div>
           </div>
         </div>
+        <div id="show-ui-container" style="width: 35%;">
+          <div id="show-ui-div" style="max-width: 400px;"><label class="checkbox" title="Toggle UI"><input type="checkbox" id="show-ui">UI</label></div>
+        </div>
       </div>
     </div>
     <div id="right-favorites-panel" style="flex: 2;"></div>
@@ -332,7 +340,8 @@ const FAVORITE_SEARCH_PREFERENCES = {
   searchHistory: "favoritesSearchHistory",
   findFavorite: "findFavorite",
   thumbSize: "thumbSize",
-  columnCount: "columnCount"
+  columnCount: "columnCount",
+  showUI: "showUI"
 };
 const FAVORITE_SEARCH_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -350,7 +359,8 @@ const FAVORITE_SEARCH_BUTTONS = {
 const FAVORITE_SEARCH_CHECKBOXES = {
   showOptions: document.getElementById("options-checkbox"),
   showRemoveButtons: document.getElementById("show-remove-buttons"),
-  filterBlacklist: document.getElementById("filter-blacklist-checkbox")
+  filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
+  showUI: document.getElementById("show-ui")
 };
 const FAVORITE_SEARCH_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
@@ -407,6 +417,11 @@ function loadFavoritesPagePreferences() {
   FAVORITE_SEARCH_INPUTS.findFavorite.value = getPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, "");
   FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 7);
   changeColumnCount(FAVORITE_SEARCH_INPUTS.columnCount.value);
+
+  const showUI = getPreference(FAVORITE_SEARCH_PREFERENCES.showUI, true);
+
+  FAVORITE_SEARCH_CHECKBOXES.showUI.checked = showUI;
+  toggleUI(showUI);
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -543,6 +558,10 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_SEARCH_INPUTS.columnCount.onchange = () => {
     changeColumnCount(parseInt(FAVORITE_SEARCH_INPUTS.columnCount.value));
   };
+
+  FAVORITE_SEARCH_CHECKBOXES.showUI.onchange = () => {
+    toggleUI(FAVORITE_SEARCH_CHECKBOXES.showUI.checked);
+  };
 }
 
 function completeSearchSuggestion(suggestion) {
@@ -609,6 +628,28 @@ function changeColumnCount(count) {
     `, "columnCount");
   FAVORITE_SEARCH_INPUTS.columnCount.value = count;
   setPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, count);
+}
+
+/**
+ * @param {Boolean} value
+ */
+function toggleUI(value) {
+  const favoritesTopBar = document.getElementById("favorites-top-bar");
+  const favoritesTopBarPanels = document.getElementById("favorites-top-bar-panels");
+  const header = document.getElementById("header");
+  const showUIContainer = document.getElementById("show-ui-container");
+  const showUIDiv = document.getElementById("show-ui-div");
+
+  if (value) {
+    header.style.display = "";
+    showUIContainer.appendChild(showUIDiv);
+    favoritesTopBarPanels.style.display = "flex";
+  } else {
+    favoritesTopBar.appendChild(showUIDiv);
+    header.style.display = "none";
+    favoritesTopBarPanels.style.display = "none";
+  }
+  setPreference(FAVORITE_SEARCH_PREFERENCES.showUI, value);
 }
 
 async function findSomeoneWithMoreThanXFavorites(X) {

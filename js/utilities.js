@@ -6,6 +6,7 @@ const CURSOR_POSITION = {
 };
 const PREFERENCES = "preferences";
 let onPostPageFlag;
+let usingFirefoxFlag;
 
 /**
  * @param {String} key
@@ -888,6 +889,16 @@ function removeExtraWhiteSpace(string) {
  */
 function imageIsLoaded(image) {
   return image.complete || image.naturalWidth !== 0;
+}
+
+/**
+ * @returns {Boolean}
+ */
+function usingFirefox() {
+  if (usingFirefoxFlag === undefined) {
+    usingFirefoxFlag = navigator.userAgent.toLowerCase().includes("firefox");
+  }
+  return usingFirefoxFlag;
 }
 
 initializeUtilities();
