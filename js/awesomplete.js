@@ -2,23 +2,19 @@
 class AwesompleteWrapper {
   constructor() {
     document.querySelectorAll("textarea").forEach((textarea) => {
-      this.addAwesompleteToTextarea(textarea);
+      this.addAwesompleteToInput(textarea);
     });
   }
 
   /**
-   * @param {HTMLTextAreaElement} textarea
-   * @returns
+   * @param {HTMLTextAreaElement} input
    */
-  addAwesompleteToTextarea(textarea) {
-    if (textarea === null) {
-      return;
-    }
-    const awesomplete = new Awesomplete_(textarea, {
+  addAwesompleteToInput(input) {
+    const awesomplete = new Awesomplete_(input, {
       minChars: 1,
       list: [],
-      filter: (suggestion, input) => {
-        return Awesomplete_.FILTER_STARTSWITH(suggestion.value, this.getLastTag(input));
+      filter: (suggestion, _) => {
+        return Awesomplete_.FILTER_STARTSWITH(suggestion.value, this.getCurrentTag(awesomplete.input));
       },
       sort: false,
       item: (suggestion, tags) => {
@@ -30,21 +26,20 @@ class AwesompleteWrapper {
         });
       },
       replace: (suggestion) => {
-        awesomplete.input.value = `${awesomplete.input.value.match(/^(.+ )?[\s-]*|/)[0] + decodeEntities(suggestion.value)} `;
+        this.insertSuggestion(awesomplete.input, decodeEntities(suggestion.value));
       }
     });
 
-    textarea.oninput = (event) => {
-      this.populateAwesompleteFromPrefix(this.getLastTag(event.target.value), awesomplete);
+    input.oninput = () => {
+      this.populateAwesompleteList(this.getCurrentTag(input), awesomplete);
     };
   }
 
   /**
    * @param {String} prefix
    * @param {Awesomplete_} awesomplete
-   * @returns
    */
-  populateAwesompleteFromPrefix(prefix, awesomplete) {
+  populateAwesompleteList(prefix, awesomplete) {
     fetch(`https://rule34.xxx/autocomplete.php?q=${prefix}`)
       .then((response) => {
         if (response.ok) {
@@ -56,6 +51,30 @@ class AwesompleteWrapper {
         awesomplete.list = JSON.parse(suggestions);
       }).catch(() => {
       });
+  }
+
+  /**
+   * @param {HTMLInputElement | HTMLTextAreaElement} input
+   * @param {String} suggestion
+   */
+  insertSuggestion(input, suggestion) {
+    const firstHalf = input.value.slice(0, input.selectionStart);
+    const secondHalf = input.value.slice(input.selectionStart);
+    const firstHalfWithPrefixRemoved = firstHalf.replace(/(?:^|\s)(-?)\S+$/, " $1");
+    const result = removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf} `);
+    const newSelectionStart = firstHalfWithPrefixRemoved.length + suggestion.length + 1;
+
+    input.value = `${result} `;
+    input.selectionStart = newSelectionStart;
+    input.selectionEnd = newSelectionStart;
+  }
+
+  /**
+   * @param {HTMLInputElement | HTMLTextAreaElement} input
+   * @returns {String}
+   */
+  getCurrentTag(input) {
+    return this.getLastTag(input.value.slice(0, input.selectionStart));
   }
 
   /**
