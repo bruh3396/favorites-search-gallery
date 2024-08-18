@@ -5,6 +5,7 @@ const CURSOR_POSITION = {
   Y: 0
 };
 const PREFERENCES = "preferences";
+let onPostPageFlag;
 
 /**
  * @param {String} key
@@ -302,6 +303,11 @@ function isImage(thumb) {
  * @param {Number} duration
  */
 function showOverlayingIcon(svgContent, id, newWidth, newHeight, position = "center", duration = 500) {
+  const skip = true;
+
+  if (skip) {
+    return;
+  }
   const svgDocument = new DOMParser().parseFromString(svgContent, "image/svg+xml");
   const svgElement = svgDocument.documentElement;
   const zoomLevel = getZoomLevel();
@@ -478,7 +484,10 @@ function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChe
  * @returns {Boolean}
  */
 function onPostPage() {
-  return location.href.includes("page=post");
+  if (onPostPageFlag === undefined) {
+    onPostPageFlag = location.href.includes("page=post");
+  }
+  return onPostPageFlag;
 }
 
 /**
@@ -635,7 +644,7 @@ function injectCommonStyles() {
 }
 
 function configureVideoOutlines() {
-  injectStyleHTML("img.video {outline: 2px solid blue;}", "video-border");
+  injectStyleHTML("img.video {outline: 4px solid blue;}", "video-border");
 }
 
 function removeInlineImgStyles() {
@@ -835,6 +844,13 @@ function getContentType(tags) {
   const isAnimated = tags.includes("animated ") || tags.includes("video ");
   const isAGif = isAnimated && !tags.includes("video ");
   return isAGif ? "gif" : isAnimated ? "video" : "image";
+}
+
+function correctMisspelledTags(tags) {
+  if ((/vide(?:\s|$)/).test(tags)) {
+    tags += " video";
+  }
+  return tags;
 }
 
 /**

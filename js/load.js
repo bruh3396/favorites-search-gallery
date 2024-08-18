@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 function sleep(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -82,6 +82,10 @@ class FavoritesDatabase {
           this.addContentTypeToFavorite(favorite);
           favoritesObjectStore.add(favorite);
           database.close();
+        });
+
+        postMessage({
+          response: "finishedStoring"
         });
       })
       .catch((event) => {
@@ -213,6 +217,10 @@ onmessage = (message) => {
    */
   expectedFavoritesCount;
   /**
+   * @type {Boolean}
+   */
+  expectedFavoritesCountFound;
+  /**
    * @type {String}
    */
   searchQuery;
@@ -276,6 +284,7 @@ onmessage = (message) => {
     this.failedFetchRequests = [];
     this.currentLoadState = FavoritesLoader.loadState.notStarted;
     this.expectedFavoritesCount = 53;
+    this.expectedFavoritesCountFound = false;
     this.matchingFavoritesCount = 0;
     this.searchQuery = "";
     this.databaseWorker = new Worker(getWorkerURL(FavoritesLoader.webWorkers.database));
@@ -295,6 +304,11 @@ onmessage = (message) => {
           this.attachSavedFavoritesToDocument(message.favorites);
           this.updateSavedFavorites();
           break;
+
+          case "finishedStoring":
+            setTimeout(() => {
+              this.databaseWorker.terminate();
+            }, 5000);
 
         default:
           break;
@@ -329,6 +343,7 @@ onmessage = (message) => {
           const cells = row.querySelectorAll("td");
 
           if (cells.length >= 2 && cells[0].textContent.trim() === "Favorites") {
+            this.expectedFavoritesCountFound = true;
             this.expectedFavoritesCount = parseInt(cells[1].textContent.trim());
             return;
           }
@@ -340,18 +355,14 @@ onmessage = (message) => {
   }
 
   clearContent() {
-    const ids = Array.from(document.getElementsByClassName("thumb"))
-      .filter(thumb => isImage(thumb))
-      .map(thumb => thumb.children[0].id.substring(1));
+    const thumbs = Array.from(document.getElementsByClassName("thumb"));
 
     setTimeout(() => {
       dispatchEvent(new CustomEvent("originalContentCleared", {
-        detail: ids
+        detail: thumbs
       }));
-    }, 10);
-
+    }, 1000);
     document.getElementById("content").innerHTML = "";
-
   }
 
   /**
@@ -578,7 +589,9 @@ onmessage = (message) => {
     if (newThumbNodes.length > 0) {
       this.insertNewFavoritesAfterReloadingPage(newThumbNodes);
       this.storeFavorites(newThumbNodes);
-      this.showLoadingUI(false);
+      this.toggleLoadingUI(false);
+    } else {
+      this.databaseWorker.terminate();
     }
     this.updateMatchCount(getAllVisibleThumbs().length);
   }
@@ -594,7 +607,12 @@ onmessage = (message) => {
 
     while (this.currentLoadState === FavoritesLoader.loadState.started) {
       await this.fetchFavoritesStep(currentPageNumber * 50);
-      this.setProgressText(`Fetching Favorites ${this.allThumbNodes.length} / ${this.expectedFavoritesCount}`);
+      let progressText = `Fetching Favorites ${this.allThumbNodes.length}`;
+
+      if (this.expectedFavoritesCountFound) {
+        progressText = `${progressText} / ${this.expectedFavoritesCount}`;
+      }
+      this.setProgressText(progressText);
       currentPageNumber += 1;
     }
   }
@@ -722,7 +740,7 @@ onmessage = (message) => {
       content.insertBefore(thumb, content.firstChild);
     }
     this.searchResultsAreShuffled = true;
-    dispatchEventWithDelay("finishedSearching", 50);
+    dispatchEventWithDelay("shuffle");
   }
 
   unShuffleSearchResults() {
@@ -739,14 +757,14 @@ onmessage = (message) => {
 
   onAllFavoritesLoaded() {
     this.currentLoadState = FavoritesLoader.loadState.finished;
-    this.showLoadingUI(false);
+    this.toggleLoadingUI(false);
     dispatchEventWithDelay("favoritesLoaded");
   }
 
   /**
    * @param {Boolean} value
    */
-  showLoadingUI(value) {
+  toggleLoadingUI(value) {
     this.showLoadingWheel(value);
     this.toggleContentVisibility(!value);
     this.setProgressText(value ? "Loading Favorites" : "All Favorites Loaded");
@@ -802,7 +820,7 @@ onmessage = (message) => {
   }
 
   loadFavorites() {
-    this.showLoadingUI(true);
+    this.toggleLoadingUI(true);
     let recentlyRemovedFavoriteIds = [];
 
     if (this.databaseAccessIsAllowed && userIsOnTheirOwnFavoritesPage()) {

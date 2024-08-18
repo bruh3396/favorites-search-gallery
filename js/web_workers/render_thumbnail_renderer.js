@@ -1,46 +1,40 @@
 /**
  * @type {Map.<String, OffscreenCanvas>}
  */
-const offscreenCanvases = new Map();
-const screenWidthFraction = 3;
+const OFFSCREEN_CANVASES = new Map();
 let screenWidth = 1080;
 
 /**
  * @param {OffscreenCanvas} offscreenCanvas
  * @param {ImageBitmap} imageBitmap
  * @param {String} id
- * @param {Number} width
- * @param {Number} height
+ * @param {Number} maxResolutionFraction
  */
-function draw(offscreenCanvas, imageBitmap, id, width, height) {
-  if (offscreenCanvas === undefined) {
-    offscreenCanvas = offscreenCanvases.get(id);
-  } else {
-    offscreenCanvases.set(id, offscreenCanvas);
-  }
-  setOffscreenCanvasDimensions(offscreenCanvas, width, height);
-  drawCanvas(offscreenCanvas, imageBitmap, id);
+function draw(offscreenCanvas, imageBitmap, id, maxResolutionFraction) {
+  OFFSCREEN_CANVASES.set(id, offscreenCanvas);
+  setOffscreenCanvasDimensions(offscreenCanvas, imageBitmap, maxResolutionFraction);
+  drawOffscreenCanvas(offscreenCanvas, imageBitmap);
 }
 
 /**
  * @param {OffscreenCanvas} offscreenCanvas
- * @param {Number} width
- * @param {Number} height
+ * @param {ImageBitmap} imageBitmap
+ * @param {Number} maxResolutionFraction
  */
-function setOffscreenCanvasDimensions(offscreenCanvas, width, height) {
-  const newWidth = screenWidth / screenWidthFraction;
-  const ratio = newWidth / width;
-  const newHeight = ratio * height;
+function setOffscreenCanvasDimensions(offscreenCanvas, imageBitmap, maxResolutionFraction) {
+  const newWidth = screenWidth / maxResolutionFraction;
+  const ratio = newWidth / imageBitmap.width;
+  const newHeight = ratio * imageBitmap.height;
 
-  offscreenCanvas.width = Math.round(newWidth);
-  offscreenCanvas.height = Math.round(newHeight);
+  offscreenCanvas.width = newWidth;
+  offscreenCanvas.height = newHeight;
 }
 
 /**
  * @param {OffscreenCanvas} offscreenCanvas
  * @param {ImageBitmap} imageBitmap
  */
-function drawCanvas(offscreenCanvas, imageBitmap, id) {
+function drawOffscreenCanvas(offscreenCanvas, imageBitmap) {
   const context = offscreenCanvas.getContext("2d");
   const ratio = Math.min(offscreenCanvas.width / imageBitmap.width, offscreenCanvas.height / imageBitmap.height);
   const centerShiftX = (offscreenCanvas.width - (imageBitmap.width * ratio)) / 2;
@@ -52,10 +46,6 @@ function drawCanvas(offscreenCanvas, imageBitmap, id) {
     centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
   );
   imageBitmap.close();
-  postMessage({
-    action: "finishedDrawing",
-    id
-  });
 }
 
 onmessage = (message) => {
@@ -63,7 +53,7 @@ onmessage = (message) => {
 
   switch (message.action) {
     case "draw":
-      draw(message.offscreenCanvas, message.imageBitmap, message.id, message.width, message.height);
+      draw(message.offscreenCanvas, message.imageBitmap, message.id, message.maxResolutionFraction);
       break;
 
     case "setScreenWidth":

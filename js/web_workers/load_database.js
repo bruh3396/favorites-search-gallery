@@ -71,6 +71,10 @@ class FavoritesDatabase {
           favoritesObjectStore.add(favorite);
           database.close();
         });
+
+        postMessage({
+          response: "finishedStoring"
+        });
       })
       .catch((event) => {
         const error = event.target.error;

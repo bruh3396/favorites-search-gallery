@@ -123,6 +123,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       height: 40px;
       background: white;
       border: none;
+      z-index: 2;
     }
 
     .thumb-node {
@@ -144,6 +145,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
       img, canvas {
         width: 100%;
+        z-index: 1;
       }
 
       &.hidden {
@@ -272,9 +274,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Shuffle order of search results" id="shuffle-button">Shuffle</button>
         <button title="Clear the search box" id="clear-button">Clear</button>
-        <button title="Save results as search" id="save-search-button" style="display: none;">Save</button>
         <button title="Reset saved favorites" id="reset-button">Reset</button>
-        <span id="find-favorite">
+        <span id="find-favorite" class="light-green-gradient" style="display: none;">
           <button title="Scroll to favorite using its ID" id="find-favorite-button"
             style="white-space: nowrap; ">Find</button>
           <input type="number" id="find-favorite-input" type="text" placeholder="ID">
@@ -285,7 +286,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       </div>
       <div>
         <textarea name="tags" id="favorites-search-box" placeholder="Search by Tags or IDs"
-          spellcheck="false">( video ~ animated* ~ highres ~ absurd_res* ) -low_res* ( 1girls ~ female* ) -tagme </textarea>
+          spellcheck="false"></textarea>
       </div>
 
       <div id="left-favorites-panel-bottom-row" style="display: flex; flex-flow: row-wrap;">
@@ -341,7 +342,6 @@ const FAVORITE_SEARCH_BUTTONS = {
   shuffle: document.getElementById("shuffle-button"),
   clear: document.getElementById("clear-button"),
   invert: document.getElementById("invert-button"),
-  saveSearch: document.getElementById("save-search-button"),
   reset: document.getElementById("reset-button"),
   findFavorite: document.getElementById("find-favorite-button"),
   columnPlus: document.getElementById("column-resize-plus"),
@@ -521,9 +521,6 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_SEARCH_BUTTONS.invert.onclick = () => {
     favoritesLoader.invertSearchResults();
   };
-  FAVORITE_SEARCH_BUTTONS.saveSearch.onclick = () => {
-    copySearchResultIdsToClipboard();
-  };
   FAVORITE_SEARCH_BUTTONS.reset.onclick = () => {
     favoritesLoader.deletePersistentData();
   };
@@ -597,16 +594,6 @@ function traverseFavoritesSearchHistory(direction) {
   }
 }
 
-function copySearchResultIdsToClipboard() {
-  const customSearch = [];
-
-  for (const thumb of getAllThumbs()) {
-    customSearch.push(thumb.id);
-  }
-  navigator.clipboard.writeText(`( ${customSearch.join(" ~ ")} )`);
-  alert("Copied current search Ids to clipboard");
-}
-
 function toggleFavoritesOptions(value) {
   for (const option of FAVORITE_OPTIONS) {
     option.style.display = value ? "block" : "none";
@@ -614,7 +601,7 @@ function toggleFavoritesOptions(value) {
 }
 
 function changeColumnCount(count) {
-  count = clamp(parseInt(count), 2, 20);
+  count = clamp(parseInt(count), 4, 20);
   injectStyleHTML(`
     #content {
       grid-template-columns: repeat(${count}, 1fr) !important;

@@ -2,7 +2,7 @@ const captionHTML = `<style>
   .caption {
     overflow: hidden;
     pointer-events: none;
-    background: rgba(0, 0, 0, .7);
+    background: rgba(0, 0, 0, .75);
     z-index: 15;
     position: absolute;
     width: 100%;
@@ -12,7 +12,8 @@ const captionHTML = `<style>
     top: 0px;
     text-align: left;
     transform: translateX(-100%);
-    transition: transform .3s cubic-bezier(.26,.28,.2,.82);
+    /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
+    transition: transform .4s ease;
     padding-left: 5px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -173,12 +174,17 @@ class Caption {
    * @type {Boolean}
    */
   currentlyCorrectingProblematicTags;
+  /**
+   * @type {String}
+   */
+  currentThumbId;
 
   constructor() {
     this.tagCategoryAssociations = this.loadSavedTags();
     this.problematicTags = [];
     this.currentlyCorrectingProblematicTags = false;
     this.previousThumb = null;
+    this.currentThumbId = null;
     this.findCategoriesOfAllTags();
     this.create();
     this.injectHTML();
@@ -212,12 +218,13 @@ class Caption {
 
   async addEventListenersToThumbs() {
     await sleep(500);
+    const thumbs = getAllThumbs();
 
-    for (const thumb of getAllThumbs()) {
+    for (const thumb of thumbs) {
       const imageContainer = getImageFromThumb(thumb).parentElement;
 
       if (imageContainer.hasAttribute("has-caption-listener")) {
-        return;
+        continue;
       }
       imageContainer.setAttribute("has-caption-listener", true);
       imageContainer.addEventListener("mouseenter", () => {
@@ -254,7 +261,6 @@ class Caption {
     });
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
     thumb.children[0].appendChild(this.captionWrapper);
-    this.resize(thumb);
     this.populateTags(thumb);
   }
 
@@ -288,15 +294,6 @@ class Caption {
     setTimeout(() => {
       captionClone.classList.remove("active");
     }, 4);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  resize(thumb) {
-    const height = getImageFromThumb(thumb).getBoundingClientRect().height;
-
-    this.caption.style.height = `${height}px`;
   }
 
   /**
@@ -452,31 +449,42 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   populateTags(thumb) {
-    const thumbTags = getTagsFromThumb(thumb).replace(/\s\d+$/, "")
+    const tagNames = getTagsFromThumb(thumb).replace(/\s\d+$/, "")
       .split(" ");
-    const unknownThumbTags = thumbTags
+    const unknownThumbTags = tagNames
       .filter(tag => this.tagCategoryAssociations[tag] === undefined);
 
+    this.currentThumbId = thumb.id;
+
     if (unknownThumbTags.length > 0) {
-      this.findTagCategories(unknownThumbTags, () => {
-        this.addTags(thumbTags, thumb);
+      this.findTagCategories(unknownThumbTags, 1, () => {
+        this.addTags(tagNames, thumb);
       });
       return;
     }
-    this.addTags(thumbTags, thumb);
+    this.addTags(tagNames, thumb);
   }
 
   /**
-   * @param {String[]} thumbTags
+   * @param {String[]} tagNames
    * @param {HTMLElement} thumb
    */
-  addTags(thumbTags, thumb) {
-    for (const tagName of thumbTags) {
+  addTags(tagNames, thumb) {
+    this.saveTags();
+
+    if (this.currentThumbId !== thumb.id) {
+      return;
+    }
+
+    if (thumb.getElementsByClassName("caption-tag").length > 1) {
+      return;
+    }
+
+    for (const tagName of tagNames) {
       const category = this.getTagCategory(tagName);
 
       this.addTag(category, tagName);
     }
-    this.saveTags();
     this.resizeFont(thumb);
     this.animate(true);
   }
@@ -536,9 +544,10 @@ class Caption {
 
   /**
    * @param {String[]} tagNames
+   * @param {Number} fetchDelay
    * @param {Function} onAllCategoriesFound
    */
-  async findTagCategories(tagNames, onAllCategoriesFound) {
+  async findTagCategories(tagNames, fetchDelay, onAllCategoriesFound) {
     const parser = new DOMParser();
     const lastTagName = tagNames[tagNames.length - 1];
     const uniqueTagNames = new Set(tagNames);
@@ -568,23 +577,38 @@ class Caption {
             onAllCategoriesFound();
           }
         });
-      await sleep(10);
+      await sleep(fetchDelay);
     }
   }
 
+  /**
+   * @param {HTMLElement[]} thumbs
+   * @returns {String[]}
+   */
+  getTagNamesWithUnknownCategories(thumbs) {
+    return Array.from(thumbs)
+      .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
+      .join(" ")
+      .split(" ")
+      .filter(tagName => this.tagCategoryAssociations[tagName] === undefined);
+  }
+
   findCategoriesOfAllTags() {
+    window.addEventListener("originalContentCleared", (event) => {
+      const thumbs = event.detail;
+      const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
+
+      this.findTagCategories(tagNames, 3, () => {
+        this.saveTags();
+      });
+    });
     window.addEventListener("favoritesLoaded", () => {
-      const allTagNames = Array.from(getAllThumbs())
-        .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
-        .join(" ")
-        .split(" ")
-        .filter(tagName => this.tagCategoryAssociations[tagName] === undefined)
-        .sort();
+      const allTagNames = this.getTagNamesWithUnknownCategories(getAllThumbs);
 
       if (allTagNames.length === 0) {
         return;
       }
-      this.findTagCategories(allTagNames, () => {
+      this.findTagCategories(allTagNames, 2, () => {
         this.saveTags();
       });
     });
@@ -592,5 +616,5 @@ class Caption {
 }
 
 if (!onPostPage()) {
-  // const caption = new Caption();
+  const caption = new Caption();
 }

@@ -3,8 +3,9 @@ const THUMB_NODE_TEMPLATE = new DOMParser().parseFromString("<div></div>", "text
 THUMB_NODE_TEMPLATE.className = "thumb-node";
 THUMB_NODE_TEMPLATE.innerHTML = `
     <div>
-      <img>
+      <img loading="lazy">
       <button class="remove-button light-green-gradient" style="visibility: hidden;">Remove</button>
+      <canvas></canvas>
     </div>
 `;
 
@@ -171,7 +172,7 @@ class ThumbNode {
 
     this.image.src = imageElement.src;
     this.id = ThumbNode.getIdFromThumbElement(thumbElement);
-    this.tagsString = `${imageElement.title} ${this.id}`;
+    this.tagsString = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
     this.image.classList.add(getContentType(this.tagsString));
   }
 
@@ -182,6 +183,12 @@ class ThumbNode {
       this.container.onclick = () => {
         window.open(this.href, "_blank");
       };
+      this.container.addEventListener("mousedown", (event) => {
+        if (event.button === 1) {
+          event.preventDefault();
+          window.open(this.href, "_blank");
+        }
+      });
     }
   }
 

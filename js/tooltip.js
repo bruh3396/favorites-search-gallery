@@ -158,7 +158,7 @@ class Tooltip {
     }
     const tooltipIsLeftOfCenter = tooltipRect.left < (window.innerWidth / 2);
 
-    this.tooltip.style.top = `${imageRect.top + window.scrollY - offset}px`;
+    this.tooltip.style.top = `${imageRect.top + window.scrollY + (imageRect.height / 2) - offset}px`;
 
     if (tooltipIsLeftOfCenter) {
       this.tooltip.style.left = `${imageRect.right + offset}px`;

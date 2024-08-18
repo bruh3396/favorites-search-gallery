@@ -102,7 +102,7 @@ Q: Why is there some bug/issue?\
 A: If not already addressed below, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
 
 Q: Everything stopped working, why I can't see any favorites?\
-A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings. Then retry.
+A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings or the Reset button. Then retry.
 
 Q: What browsers are supported?\
 A: Chrome, Edge, and Firefox work. Have not tested other browsers.
@@ -112,8 +112,11 @@ A: No.
 
 Q: Why am I experiencing lag?\
 A: Responsiveness depends on:
-
 <ul>
-    <li>Internet speed: A lot of network activity (loading favorites, rendering images, getting image extensions) happens in the background.</li>
+    <li>Internet speed: </li>
+    <ul>
+        <li>A lot of network activity (loading favorites, rendering images) happens in the background.</li>
+        <li>A stable wired connection is preferred.</li>
+    </ul>
     <li>Favorite count: >15000 favorites can start getting slow when they're all on one page. I plan to implement multiple pages in the future.</li>
 </ul>

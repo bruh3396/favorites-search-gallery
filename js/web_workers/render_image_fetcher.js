@@ -6,9 +6,8 @@ let retryDelay = 0;
  * @param {String} imageURL
  * @param {String} extension
  * @param {String} postId
- * @param {Number} thumbIndex
  */
-async function getImageBitmap(imageURL, extension, postId, thumbIndex) {
+async function getImageBitmap(imageURL, extension, postId) {
   const extensionAlreadyFound = extension !== null && extension !== undefined;
   let newExtension = extension;
 
@@ -27,7 +26,6 @@ async function getImageBitmap(imageURL, extension, postId, thumbIndex) {
       postMessage({
         newExtension,
         postId,
-        thumbIndex,
         extensionAlreadyFound,
         imageBitmap
       });

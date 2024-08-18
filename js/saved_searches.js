@@ -112,7 +112,8 @@ const savedSearchesHTML = `<div id="saved-searches">
   </style>
   <h2>Saved Searches</h2>
   <div id="saved-searches-buttons">
-    <button id="save-custom-search-button">Save</button>
+    <button title="Save custom search" id="save-custom-search-button">Save</button>
+    <button title="Save results as search" id="save-results-button">Save Results</button>
     <button id="stop-editing-saved-search-button" style="display: none;">Cancel</button>
     <span>
       <button id="export-saved-search-button">Export</button>
@@ -172,6 +173,10 @@ class SavedSearches {
    * @type {HTMLButtonElement}
    */
   exportButton;
+  /**
+   * @type {HTMLButtonElement}
+   */
+  saveSearchResultsButton;
 
   constructor() {
     if (onPostPage()) {
@@ -188,7 +193,8 @@ class SavedSearches {
     this.stopEditingButton = document.getElementById("stop-editing-saved-search-button");
     this.importButton = document.getElementById("import-saved-search-button");
     this.exportButton = document.getElementById("export-saved-search-button");
-    this.addEventListenersToButtons();
+    this.saveSearchResultsButton = document.getElementById("save-results-button");
+    this.addEventListeners();
     this.loadSavedSearches();
   }
 
@@ -216,7 +222,7 @@ class SavedSearches {
     document.getElementById("show-options").insertAdjacentElement("afterend", options);
   }
 
-  addEventListenersToButtons() {
+  addEventListeners() {
     this.saveButton.onclick = () => {
       this.saveSearch(this.textarea.value.trim());
     };
@@ -249,6 +255,9 @@ class SavedSearches {
     };
     this.importButton.onclick = () => {
       this.importSavedSearches();
+    };
+    this.saveSearchResultsButton.onclick = () => {
+      this.copySearchResultIdsToClipboard();
     };
   }
 
@@ -425,6 +434,26 @@ class SavedSearches {
       }
       this.storeSavedSearches();
     }
+  }
+
+  copySearchResultIdsToClipboard() {
+    const resultIds = [];
+
+    for (const thumb of getAllVisibleThumbs()) {
+      resultIds.push(thumb.id);
+    }
+
+    if (resultIds.length === 0) {
+      return;
+    }
+
+    if (resultIds.length > 300) {
+      if (!confirm(`Are you sure you want to save ${resultIds.length} ids as one search?`));
+    }
+
+    const customSearch = `( ${resultIds.join(" ~ ")} )`;
+
+    this.saveSearch(customSearch);
   }
 }
 
