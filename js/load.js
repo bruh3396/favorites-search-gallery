@@ -671,7 +671,7 @@ onmessage = (message) => {
         const {thumbNodes, searchResults} = this.extractFavoritesPage(html);
 
         setTimeout(() => {
-          dispatchEvent(new CustomEvent("favoritesAdded", {
+          dispatchEvent(new CustomEvent("favoritesFetched", {
             detail: thumbNodes.map(thumbNode => thumbNode.root)
           }));
         }, 250);
@@ -969,7 +969,7 @@ onmessage = (message) => {
       }
     }
     setTimeout(() => {
-      dispatchEvent(new CustomEvent("favoritesAdded", {
+      dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
         detail: newThumbNodes.map(thumbNode => thumbNode.root)
       }));
     }, 250);

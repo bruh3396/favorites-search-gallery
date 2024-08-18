@@ -66,7 +66,7 @@ class Tooltip {
       });
     } else {
       this.addFavoritesOptions();
-      window.addEventListener("favoritesAdded", (event) => {
+      window.addEventListener("favoritesFetched", (event) => {
         this.addEventListenersToThumbs.bind(this)(event.detail);
       });
       window.addEventListener("favoritesLoaded", () => {

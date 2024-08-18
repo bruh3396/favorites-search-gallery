@@ -28,24 +28,24 @@ class PostTags {
 
 /**
  * @param {String} searchQuery
- * @returns {{orGroups: String[][], remainingSearchTags: String[], isEmptySearch: Boolean}}
+ * @returns {{orGroups: String[][], remainingSearchTags: String[], isEmpty: Boolean}}
  */
 function getSearchCommand(searchQuery) {
   const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
   return {
     orGroups,
     remainingSearchTags,
-    isEmptySearch: searchQuery.trim() === ""
+    isEmpty: searchQuery.trim() === ""
   };
 }
 
 /**
- * @param {{orGroups: String[][], remainingSearchTags: String[], isEmptySearch: Boolean}} searchCommand
+ * @param {{orGroups: String[][], remainingSearchTags: String[], isEmpty: Boolean}} searchCommand
  * @param {PostTags} postTags
  * @returns {Boolean}
  */
 function postTagsMatchSearch(searchCommand, postTags) {
-  if (searchCommand.isEmptySearch) {
+  if (searchCommand.isEmpty) {
     return true;
   }
 

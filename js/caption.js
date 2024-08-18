@@ -357,7 +357,7 @@ class Caption {
       window.addEventListener("favoritesLoaded", this.addEventListenersToThumbs.bind(this)(), {
         once: true
       });
-      window.addEventListener("favoritesAdded", () => {
+      window.addEventListener("favoritesFetched", () => {
         this.addEventListenersToThumbs.bind(this)();
       });
       window.addEventListener("thumbUnderCursorOnLoad", (event) => {

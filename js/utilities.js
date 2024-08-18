@@ -223,11 +223,11 @@ function getOriginalImageURLFromThumb(thumb) {
 }
 
 /**
- * @param {String} thumbnailURL
+ * @param {String} thumbURL
  * @returns {String}
  */
-function getOriginalImageURL(thumbnailURL) {
-  return thumbnailURL
+function getOriginalImageURL(thumbURL) {
+  return thumbURL
     .replace("thumbnails", "/images")
     .replace("thumbnail_", "")
     .replace("us.rule34", "rule34");
@@ -237,7 +237,7 @@ function getOriginalImageURL(thumbnailURL) {
  * @param {String} originalImageURL
  * @returns {String}
  */
-function getThumbnailURL(originalImageURL) {
+function getThumbURL(originalImageURL) {
   return originalImageURL
     .replace(/\/images\/\/(\d+)\//, "thumbnails/$1/thumbnail_")
     .replace(/(?:gif|jpeg|png)/, "jpg")

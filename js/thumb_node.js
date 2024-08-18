@@ -14,24 +14,24 @@ class ThumbNode {
     post: "https://rule34.xxx/index.php?page=post&s=view&id=",
     remove: "https://rule34.xxx/index.php?page=favorites&s=delete&id="
   };
-  static thumbnailExtractionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
+  static thumbSourceExtractionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
 
   /**
    * @param {String} compressedSource
    * @param {String} id
    * @returns {String}
    */
-  static decompressThumbnailSource(compressedSource, id) {
+  static decompressThumbSource(compressedSource, id) {
     compressedSource = compressedSource.split("_");
     return `https://us.rule34.xxx/thumbnails//${compressedSource[0]}/thumbnail_${compressedSource[1]}.jpg?${id}`;
   }
 
   /**
-   * @param {HTMLElement} thumbElement
+   * @param {HTMLElement} thumb
    * @returns {String}
    */
-  static getIdFromThumbElement(thumbElement) {
-    const elementWithId = onPostPage() ? thumbElement : thumbElement.children[0];
+  static getIdFromThumb(thumb) {
+    const elementWithId = onPostPage() ? thumb : thumb.children[0];
     return elementWithId.id.substring(1);
   }
 
@@ -54,7 +54,7 @@ class ThumbNode {
   /**
    * @type {String}
    */
-  tagsString;
+  tags;
   /**
    * @type {PostTags}
    */
@@ -82,7 +82,7 @@ class ThumbNode {
    * @type {String[]}
    */
   get tagList() {
-    return this.tagsString.split(" ");
+    return this.tags.split(" ");
   }
 
   /**
@@ -91,16 +91,16 @@ class ThumbNode {
   get databaseRecord() {
     return {
       id: this.id,
-      tags: this.tagsString,
-      src: this.compressedThumbnailSource
+      tags: this.tags,
+      src: this.compressedThumbSource
     };
   }
 
   /**
    * @type {String}
    */
-  get compressedThumbnailSource() {
-    return this.image.src.match(ThumbNode.thumbnailExtractionRegex).splice(1).join("_");
+  get compressedThumbSource() {
+    return this.image.src.match(ThumbNode.thumbSourceExtractionRegex).splice(1).join("_");
   }
 
   /**
@@ -118,7 +118,7 @@ class ThumbNode {
     this.instantiateTemplate();
     this.populateAttributes(thumb, fromRecord);
     this.setupRemoveButton();
-    this.setClickLink();
+    this.setupOnClickLink();
   }
 
   instantiateTemplate() {
@@ -150,33 +150,33 @@ class ThumbNode {
       this.createFromHTMLElement(thumb);
     }
     this.root.id = this.id;
-    this.image.setAttribute("tags", this.tagsString);
-    this.postTags = new PostTags(this.tagsString);
+    this.image.setAttribute("tags", this.tags);
+    this.postTags = new PostTags(this.tags);
   }
 
   /**
    * @param {{id: String, tags: String, src: String, type: String}} record
    */
   createFromDatabaseRecord(record) {
-    this.image.src = ThumbNode.decompressThumbnailSource(record.src, record.id);
+    this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
-    this.tagsString = record.tags;
+    this.tags = record.tags;
     this.image.classList.add(record.type);
   }
 
   /**
-   * @param {HTMLElement} thumbElement
+   * @param {HTMLElement} thumb
    */
-  createFromHTMLElement(thumbElement) {
-    const imageElement = thumbElement.children[0].children[0];
+  createFromHTMLElement(thumb) {
+    const imageElement = thumb.children[0].children[0];
 
     this.image.src = imageElement.src;
-    this.id = ThumbNode.getIdFromThumbElement(thumbElement);
-    this.tagsString = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
-    this.image.classList.add(getContentType(this.tagsString));
+    this.id = ThumbNode.getIdFromThumb(thumb);
+    this.tags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
+    this.image.classList.add(getContentType(this.tags));
   }
 
-  setClickLink() {
+  setupOnClickLink() {
     if (usingRenderer()) {
       this.container.setAttribute("href", this.href);
     } else {
@@ -184,7 +184,9 @@ class ThumbNode {
         window.open(this.href, "_blank");
       };
       this.container.addEventListener("mousedown", (event) => {
-        if (event.button === 1) {
+        const middleClick = 1;
+
+        if (event.button === middleClick) {
           event.preventDefault();
           window.open(this.href, "_blank");
         }
