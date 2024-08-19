@@ -412,6 +412,14 @@ class Caption {
   }
 
   /**
+   * @param {String} tagName
+   * @returns {String}
+   */
+  replaceSpacesWithUnderscores(tagName) {
+    return tagName.replace(/\s/gm, "_");
+  }
+
+  /**
    * @param {Boolean} value
    */
   setVisibility(value) {

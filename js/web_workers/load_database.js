@@ -1,4 +1,8 @@
 /* eslint-disable prefer-template */
+/**
+ * @param {Number} milliseconds
+ * @returns {Promise}
+ */
 function sleep(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
@@ -16,6 +20,11 @@ class FavoritesDatabase {
    * @type {Number}
    */
   version;
+
+  /**
+   * @param {String} objectStoreName
+   * @param {Number | String} version
+   */
   constructor(objectStoreName, version) {
     this.objectStoreName = objectStoreName;
     this.version = version;

@@ -64,7 +64,7 @@ class AwesompleteWrapper {
     const result = removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf} `);
     const newSelectionStart = firstHalfWithPrefixRemoved.length + suggestion.length + 1;
 
-    input.value = `${result} `;
+    input.value = `${result} `.replace(/^\s+/, "");
     input.selectionStart = newSelectionStart;
     input.selectionEnd = newSelectionStart;
   }

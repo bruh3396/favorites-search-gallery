@@ -11,6 +11,10 @@ class FavoritesLoader {
     database:
 `
 /* eslint-disable prefer-template */
+/**
+ * @param {Number} milliseconds
+ * @returns {Promise}
+ */
 function sleep(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
@@ -28,6 +32,11 @@ class FavoritesDatabase {
    * @type {Number}
    */
   version;
+
+  /**
+   * @param {String} objectStoreName
+   * @param {Number | String} version
+   */
   constructor(objectStoreName, version) {
     this.objectStoreName = objectStoreName;
     this.version = version;
@@ -607,7 +616,7 @@ onmessage = (message) => {
 
     while (this.currentLoadState === FavoritesLoader.loadState.started) {
       await this.fetchFavoritesStep(currentPageNumber * 50);
-      let progressText = `Fetching Favorites ${this.allThumbNodes.length}`;
+      let progressText = `Saving Favorites ${this.allThumbNodes.length}`;
 
       if (this.expectedFavoritesCountFound) {
         progressText = `${progressText} / ${this.expectedFavoritesCount}`;

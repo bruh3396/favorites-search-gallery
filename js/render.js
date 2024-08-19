@@ -126,7 +126,7 @@ class Renderer {
   };
   static galleryTraversalCooldown = {
     timeout: null,
-    waitTime: 400,
+    waitTime: 200,
     get ready() {
       if (this.timeout === null) {
         this.timeout = setTimeout(() => {
@@ -427,6 +427,14 @@ onmessage = (message) => {
    */
   upscaledThumbs;
   /**
+   * @type {Object[]}
+   */
+  upscaleRequests;
+  /**
+   * @type {Boolean}
+   */
+  currentlyUpscaling;
+  /**
    * @type {{minIndex: Number, maxIndex: Number}}
    */
   renderedThumbRange;
@@ -527,6 +535,8 @@ onmessage = (message) => {
     this.visibleThumbs = [];
     this.imageExtensions = {};
     this.upscaledThumbs = new Set();
+    this.upscaleRequests = [];
+    this.currentlyUpscaling = false;
     this.imageFetchDelay = 200;
     this.extensionAlreadyKnownFetchSpeed = 8;
     this.recentlyDiscoveredImageExtensionCount = 0;
@@ -734,6 +744,7 @@ onmessage = (message) => {
 
         if (thumb !== null && !this.finishedLoading) {
           this.renderImagesAround(thumb, 10);
+          this.upscaleAnimatedVisibleThumbsAround(thumb);
         }
       }, 650);
     }, {
@@ -800,6 +811,8 @@ onmessage = (message) => {
    * @param {Object} message
    */
   onRenderFinished(message) {
+    this.deleteOldestRender();
+
     const thumb = document.getElementById(message.postId);
 
     this.imageBitmaps.set(message.postId, message.imageBitmap);
@@ -808,7 +821,7 @@ onmessage = (message) => {
       return;
     }
     thumb.classList.add("loaded");
-    this.upscaleThumbResolution(thumb, message.imageBitmap, 3);
+    this.upscaleThumbResolution(thumb, message.imageBitmap, 4);
 
     if (message.extension === "gif") {
       getImageFromThumb(thumb).setAttribute("gif", true);
@@ -843,17 +856,32 @@ onmessage = (message) => {
       return;
     }
     this.upscaledThumbs.add(thumb.id);
-    const canvas = thumb.querySelector("canvas");
-    const offscreenCanvas = canvas.transferControlToOffscreen();
     const message = {
       action: "draw",
       id: thumb.id,
-      offscreenCanvas,
+      offscreenCanvas: thumb.querySelector("canvas").transferControlToOffscreen(),
       imageBitmap,
       maxResolutionFraction
     };
 
-    this.thumbUpscaler.postMessage(message, [offscreenCanvas]);
+    // this.upscaleRequests.push(message);
+    // this.dispatchThumbResolutionUpscaleRequests();
+    this.thumbUpscaler.postMessage(message, [message.offscreenCanvas]);
+  }
+
+  async dispatchThumbResolutionUpscaleRequests() {
+    if (this.currentlyUpscaling) {
+      return;
+    }
+    this.currentlyUpscaling = true;
+
+    while (this.upscaleRequests.length > 0) {
+      await sleep(25);
+      const message = this.upscaleRequests.shift();
+
+      this.thumbUpscaler.postMessage(message, [message.offscreenCanvas]);
+    }
+    this.currentlyUpscaling = false;
   }
 
   /**
@@ -1284,18 +1312,12 @@ onmessage = (message) => {
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
   }
 
-  deleteOldRenders() {
-    if (this.imageBitmaps.size > Math.floor(this.maxNumberOfImagesToRender * 1.25)) {
-      const numberOfRendersToDelete = Math.ceil(this.maxNumberOfImagesToRender / 4);
-      let i = 0;
+  deleteOldestRender() {
+    if (this.imageBitmaps.size > this.maxNumberOfImagesToRender) {
+      const iterator = this.imageBitmaps.keys().next();
 
-      for (const postId of this.imageBitmaps.keys()) {
-        this.deleteRender(postId);
-        i += 1;
-
-        if (i >= numberOfRendersToDelete) {
-          break;
-        }
+      if (!iterator.done) {
+        this.deleteRender(iterator.value);
       }
     }
   }
@@ -1307,7 +1329,6 @@ onmessage = (message) => {
     if (onPostPage()) {
       return;
     }
-    this.deleteOldRenders();
 
     if (this.currentlyRendering) {
       if (this.thumbInRenderRange(initialThumb)) {
@@ -1316,7 +1337,7 @@ onmessage = (message) => {
       await this.pauseRendering(this.imageFetchDelay);
     }
     this.currentlyRendering = true;
-    const amountToRender = Math.ceil(this.maxNumberOfImagesToRender / 4);
+    const amountToRender = Math.ceil(this.maxNumberOfImagesToRender / 6);
     const imageThumbsToRender = this.getAdjacentVisibleThumbs(initialThumb, amountToRender, (thumb) => {
       return isImage(thumb) && this.isNotRendered(thumb);
     });
@@ -1620,7 +1641,7 @@ onmessage = (message) => {
   }
 
   deleteRendersNotIncludedInNewSearch() {
-    for (const [id, _] of this.imageBitmaps) {
+    for (const id of this.imageBitmaps.keys()) {
       const thumb = document.getElementById(id);
 
       if (thumb !== null && !this.isVisible(thumb)) {
@@ -1688,7 +1709,7 @@ onmessage = (message) => {
       newImage.onload = () => {
         createImageBitmap(newImage)
           .then((imageBitmap) => {
-            this.upscaleThumbResolution(thumb, imageBitmap, 4);
+            this.upscaleThumbResolution(thumb, imageBitmap, 5.5);
             newImage = null;
           });
       };
@@ -1788,7 +1809,7 @@ onmessage = (message) => {
    */
   renderInAdvanceWhileTraversingInGalleryMode(thumb, direction) {
     const currentThumbIndex = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
-    const lookahead = Math.min(15, Math.round(this.maxNumberOfImagesToRender / 2) - 2);
+    const lookahead = Math.min(12, Math.round(this.maxNumberOfImagesToRender / 2) - 2);
     let possiblyUnrenderedThumbIndex;
 
     if (direction === Renderer.galleryDirections.left || direction === Renderer.galleryDirections.a) {

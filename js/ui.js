@@ -415,7 +415,7 @@ function loadFavoritesPagePreferences() {
     FAVORITE_SEARCH_INPUTS.searchBox.value = searchHistory[0];
   }
   FAVORITE_SEARCH_INPUTS.findFavorite.value = getPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, "");
-  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 7);
+  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 6);
   changeColumnCount(FAVORITE_SEARCH_INPUTS.columnCount.value);
 
   const showUI = getPreference(FAVORITE_SEARCH_PREFERENCES.showUI, true);

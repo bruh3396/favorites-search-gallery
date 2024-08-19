@@ -1,16 +1,17 @@
 # favorites-search-gallery
 
-<a href="#about">About</a>\
-<a href="#getting-started">Getting Started</a>\
-<a href="#controls">Controls</a>\
-<a href="#features">Features</a>\
-<a href="#preferred-specs">Preferred Specs</a>\
-<a href="#faq">FAQ</a>
+[About](#about)<br>
+[Getting Started](#getting-started)<br>
+[Controls](#controls)<br>
+[Features](#features)<br>
+[Preferred Specs](#preferred-specs)<br>
+[FAQ](#faq)
 
 ## About
 
-[Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites-search) stopped working some time ago\
-I couldn't find a suitable replacement, so I created my own adaptation including a gallery and QOL features
+[Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites-search) stopped working some time ago<br>
+I couldn't find a suitable replacement, so I created my own adaptation including a gallery and some QOL [features](#features)<br>
+The script is still in development, please let me know if you experience a bug, or have a question/feature request.
 
 ## Getting Started
 
@@ -28,15 +29,15 @@ I couldn't find a suitable replacement, so I created my own adaptation including
 ## Controls
 
 <strong>Left Click:</strong>
-    <ul>
-    <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
-    <li><strong>In gallery:</strong> Exit gallery</li>
-    </ul><br>
-    <strong>Middle Click:</strong>
-    <ul>
-        <li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
-        <li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
-    </ul><br>
+<ul>
+<li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
+<li><strong>In gallery:</strong> Exit gallery</li>
+</ul><br>
+<strong>Middle Click:</strong>
+<ul>
+<li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
+<li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
+</ul><br>
 <strong>Scroll Wheel/Arrow Keys/WASD (in gallery):</strong> Traverse gallery<br><br>
 <strong>Scroll Wheel: (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
 <strong>Escape (in gallery):</strong> Exit gallery<br><br>
@@ -93,25 +94,28 @@ I couldn't find a suitable replacement, so I created my own adaptation including
 
 ## Preferred Specs:
 
-Memory: 8GB\
-Download Speed: 75Mb/s
+Memory: 8GB<br>
+Video Memory: 4GB<br>
+Download Speed: 75Mb/s<br>
+Favorite Count: <10000 (for now)
 
 ## FAQ
 
-Q: Why is there some bug/issue?\
+Q: Why is there some bug/issue?<br>
 A: If not already addressed below, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
 
-Q: Everything stopped working, why I can't see any favorites?\
+Q: Everything stopped working, why I can't see any favorites?<br>
 A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings or the Reset button. Then retry.
 
-Q: What browsers are supported?\
+Q: What browsers are supported?<br>
 A: Chrome, Edge, and Firefox work. Have not tested other browsers.
 
-Q: Does it work on mobile?\
+Q: Does it work on mobile?<br>
 A: No.
 
-Q: Why am I experiencing lag?\
+Q: Why am I experiencing lag?<br>
 A: Responsiveness depends on:
+
 <ul>
     <li>Internet speed: </li>
     <ul>
