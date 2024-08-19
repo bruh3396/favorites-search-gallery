@@ -66,21 +66,9 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       margin-left: -3px;
       height: 27px;
 
-      &:hover {
-        color: #000;
-        background: #93b393;
-        text-shadow: none;
-        cursor: pointer;
-      }
-
       input {
         vertical-align: -5px;
         cursor: pointer;
-      }
-
-      input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
       }
     }
 
@@ -279,12 +267,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Shuffle order of search results" id="shuffle-button">Shuffle</button>
         <button title="Clear the search box" id="clear-button">Clear</button>
-        <button title="Reset saved favorites" id="reset-button">Reset</button>
         <span id="find-favorite" class="light-green-gradient" style="display: none;">
           <button title="Scroll to favorite using its ID" id="find-favorite-button"
             style="white-space: nowrap; ">Find</button>
           <input type="number" id="find-favorite-input" type="text" placeholder="ID">
         </span>
+        <button title="Reset saved favorites" id="reset-button">Reset</button>
         <span id="help-links-container">
           <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
         </span>
@@ -379,6 +367,7 @@ function initializeFavoritesPage() {
   loadFavoritesPagePreferences();
   removePaginatorFromFavoritesPage();
   hideRemoveLinksWhenNotOnOwnFavoritesPage();
+  configureMobileUi();
 }
 
 function loadFavoritesPagePreferences() {
@@ -650,6 +639,88 @@ function toggleUI(value) {
     favoritesTopBarPanels.style.display = "none";
   }
   setPreference(FAVORITE_SEARCH_PREFERENCES.showUI, value);
+}
+
+function configureMobileUi() {
+  if (onMobileDevice()) {
+    injectStyleHTML(`
+      .thumb, .thumb-node {
+        > div > canvas {
+          display: none;
+        }
+      }
+
+      .checkbox {
+        input[type="checkbox"] {
+          margin-right: 10px;
+        }
+      }
+
+      #favorites-top-bar-panels {
+        >div {
+          textarea {
+            width: 95% !important;
+          }
+        }
+      }
+
+      #container {
+        position: fixed !important;
+        z-index: 9999;
+        width: 100vw;
+
+      }
+
+      #content {
+        margin-top: 300px !important;
+      }
+
+      #show-ui-container {
+        display: none;
+      }
+
+      #favorite-options-container {
+        display: block !important;
+      }
+
+      #favorites-top-bar-panels {
+        display: block !important;
+      }
+
+      #right-favorites-panel {
+        margin-left: 0px !important;
+      }
+
+      #left-favorites-panel-bottom-row {
+        margin-left: 10px !important;
+      }
+      `);
+      const container = document.createElement("div");
+
+      container.id = "container";
+
+      document.body.insertAdjacentElement("afterbegin", container);
+      container.appendChild(document.getElementById("header"));
+      container.appendChild(document.getElementById("favorites-top-bar"));
+
+  } else {
+    injectStyleHTML(`
+      .checkbox {
+
+        &:hover {
+          color: #000;
+          background: #93b393;
+          text-shadow: none;
+          cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+          width: 20px;
+          height: 20px;
+        }
+      }
+      `);
+  }
 }
 
 async function findSomeoneWithMoreThanXFavorites(X) {

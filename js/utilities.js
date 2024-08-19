@@ -5,8 +5,11 @@ const CURSOR_POSITION = {
   Y: 0
 };
 const PREFERENCES = "preferences";
-let onPostPageFlag;
-let usingFirefoxFlag;
+const FLAGS = {
+  onPostPage: undefined,
+  usingFirefox: undefined,
+  onMobileDevice: undefined
+};
 
 /**
  * @param {String} key
@@ -485,10 +488,10 @@ function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChe
  * @returns {Boolean}
  */
 function onPostPage() {
-  if (onPostPageFlag === undefined) {
-    onPostPageFlag = location.href.includes("page=post");
+  if (FLAGS.onPostPage === undefined) {
+    FLAGS.onPostPage = location.href.includes("page=post");
   }
-  return onPostPageFlag;
+  return FLAGS.onPostPage;
 }
 
 /**
@@ -645,7 +648,9 @@ function injectCommonStyles() {
 }
 
 function configureVideoOutlines() {
-  injectStyleHTML("img.video {outline: 4px solid blue;}", "video-border");
+  const size = onMobileDevice() ? 2 : 4;
+
+  injectStyleHTML(`img.video {outline: ${size}px solid blue;}`, "video-border");
 }
 
 function removeInlineImgStyles() {
@@ -895,10 +900,20 @@ function imageIsLoaded(image) {
  * @returns {Boolean}
  */
 function usingFirefox() {
-  if (usingFirefoxFlag === undefined) {
-    usingFirefoxFlag = navigator.userAgent.toLowerCase().includes("firefox");
+  if (FLAGS.usingFirefox === undefined) {
+    FLAGS.usingFirefox = navigator.userAgent.toLowerCase().includes("firefox");
   }
-  return usingFirefoxFlag;
+  return FLAGS.usingFirefox;
+}
+
+/**
+ * @returns  {Boolean}
+ */
+function onMobileDevice() {
+  if (FLAGS.onMobileDevice === undefined) {
+    FLAGS.onMobileDevice = (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent);
+  }
+  return FLAGS.onMobileDevice;
 }
 
 initializeUtilities();

@@ -179,7 +179,7 @@ class SavedSearches {
   saveSearchResultsButton;
 
   constructor() {
-    if (onPostPage()) {
+    if (onPostPage() || onMobileDevice()) {
       return;
     }
     this.initialize();

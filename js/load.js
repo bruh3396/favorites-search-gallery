@@ -890,8 +890,15 @@ onmessage = (message) => {
   }
 
   deletePersistentData() {
-    localStorage.clear();
-    indexedDB.deleteDatabase("Favorites");
+    const message = `
+Are you sure you want to reset?
+This will delete all cached favorites, preferences, and custom searches.
+    `;
+
+    if (confirm(message)) {
+      localStorage.clear();
+      indexedDB.deleteDatabase(FavoritesLoader.databaseName);
+    }
   }
 
   /**

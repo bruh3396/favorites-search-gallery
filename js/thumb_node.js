@@ -168,6 +168,13 @@ class ThumbNode {
    * @param {HTMLElement} thumb
    */
   createFromHTMLElement(thumb) {
+    if (onMobileDevice()) {
+      const noScript = thumb.querySelector("noscript");
+
+      if (noScript !== null) {
+        thumb.children[0].insertAdjacentElement("afterbegin", noScript.children[0]);
+      }
+    }
     const imageElement = thumb.children[0].children[0];
 
     this.image.src = imageElement.src;

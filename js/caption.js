@@ -180,6 +180,9 @@ class Caption {
   currentThumbId;
 
   constructor() {
+    if (onPostPage() || onMobileDevice()) {
+      return;
+    }
     this.tagCategoryAssociations = this.loadSavedTags();
     this.problematicTags = [];
     this.currentlyCorrectingProblematicTags = false;
@@ -623,6 +626,4 @@ class Caption {
   }
 }
 
-if (!onPostPage()) {
-  const caption = new Caption();
-}
+const caption = new Caption();

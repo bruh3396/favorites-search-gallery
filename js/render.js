@@ -512,6 +512,9 @@ onmessage = (message) => {
   background;
 
   constructor() {
+    if (onMobileDevice()) {
+      return;
+    }
     this.initializeFields();
     this.createWebWorkers();
     this.createFullscreenCanvasImagePlaceholder();

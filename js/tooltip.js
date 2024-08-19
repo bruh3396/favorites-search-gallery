@@ -49,6 +49,9 @@ class Tooltip {
   previousSearch;
 
   constructor() {
+    if (onMobileDevice()) {
+      return;
+    }
     this.enabled = getPreference("showTooltip", true);
     document.body.insertAdjacentHTML("afterbegin", tooltipHTML);
     this.tooltip = document.getElementById("tooltip");
