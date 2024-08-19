@@ -11,7 +11,7 @@
 
 [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites-search) stopped working some time ago<br>
 I couldn't find a suitable replacement, so I created my own adaptation including a gallery and some QOL [features](#features)<br>
-The script is still in development, please let me know if you experience a bug, or have a question/feature request.
+The script is still in development, please let me know if you experience a bug, or have a question/feature request
 
 ## Getting Started
 
