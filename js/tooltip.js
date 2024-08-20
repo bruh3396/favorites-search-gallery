@@ -11,7 +11,7 @@ const tooltipHTML = `<div id="tooltip-container">
       visibility: hidden;
       opacity: 0;
       transition: visibility 0s, opacity 0.25s linear;
-      font-size: 1.3em;
+      font-size: 1.05em;
     }
 
     #tooltip.visible {

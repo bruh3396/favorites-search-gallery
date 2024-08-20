@@ -49,7 +49,7 @@ const renderHTML = `<style>
     transition: none;
     float: left;
     overflow: hidden;
-    z-index: 9998;
+    z-index: 9997;
     pointer-events: none;
     position: fixed;
     height: 100vh;
@@ -62,7 +62,7 @@ const renderHTML = `<style>
   #fullscreen-canvas {
     float: left;
     overflow: hidden;
-    z-index: 9999;
+    z-index: 9998;
     pointer-events: none;
     position: fixed;
     height: 100vh;
@@ -680,7 +680,7 @@ onmessage = (message) => {
     this.videoContainer = document.getElementById("original-video-container");
     this.gifContainer = document.getElementById("original-gif-container");
     this.fullscreenCanvas.id = "fullscreen-canvas";
-    this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
+    this.toggleOriginalContentVisibility(false);
   }
 
   addEventListeners() {
@@ -704,9 +704,12 @@ onmessage = (message) => {
             return;
           }
 
-          if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
-            this.openPostInNewPage(thumb);
-            return;
+          if (onMobileDevice()) {
+            if (!this.enlargeOnClickOnMobile) {
+              this.openPostInNewPage(thumb);
+              return;
+            }
+            this.deleteAllRenders();
           }
           this.toggleAllVisibility(true);
           this.showOriginalContent(thumb);
@@ -1467,7 +1470,7 @@ onmessage = (message) => {
       await this.pauseRendering(this.imageFetchDelay);
     }
     this.currentlyRendering = true;
-    const amountToRender = Math.ceil(this.maxNumberOfImagesToRender / 6);
+    const amountToRender = Math.max(4, Math.ceil(this.maxNumberOfImagesToRender / 6));
     const imageThumbsToRender = this.getAdjacentVisibleThumbs(initialThumb, amountToRender, (thumb) => {
       return isImage(thumb) && this.isNotRendered(thumb);
     });
@@ -1571,10 +1574,6 @@ onmessage = (message) => {
     this.imageBitmapFetcherIndex = this.imageBitmapFetcherIndex < this.imageBitmapFetchers.length ? this.imageBitmapFetcherIndex : 0;
 
     const image = getImageFromThumb(thumb);
-
-    if (onMobileDevice()) {
-      this.clearFullscreenCanvas();
-    }
 
     if (!imageIsLoaded(image)) {
       return;
@@ -1843,7 +1842,7 @@ onmessage = (message) => {
    */
   async renderImages(imagesToRender) {
     for (const thumb of imagesToRender) {
-      if (this.stopRendering) {
+      if (this.stopRendering && !onMobileDevice()) {
         break;
       }
       this.renderOriginalImage(thumb);
@@ -1903,7 +1902,7 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getMaxNumberOfImagesToRender() {
-    const availableMemory = onMobileDevice() ? 120 : 1200;
+    const availableMemory = onMobileDevice() ? 200 : 1200;
     const averageImageSize = 20;
     const maxImagesToRender = Math.floor(availableMemory / averageImageSize);
     return maxImagesToRender;
@@ -1974,7 +1973,8 @@ onmessage = (message) => {
    */
   renderInAdvanceWhileTraversingInGalleryMode(thumb, direction) {
     const currentThumbIndex = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
-    const lookahead = Math.min(12, Math.round(this.maxNumberOfImagesToRender / 2) - 2);
+    const lookahead = this.getLookahead();
+
     let possiblyUnrenderedThumbIndex;
 
     if (direction === Renderer.galleryDirections.left || direction === Renderer.galleryDirections.a) {
@@ -1992,6 +1992,13 @@ onmessage = (message) => {
       this.upscaleAnimatedVisibleThumbsAround(possiblyUnrenderedThumb);
       this.renderImagesAround(possiblyUnrenderedThumb);
     }
+  }
+
+  /**
+   * @returns {Number}
+   */
+  getLookahead() {
+    return Math.max(3, Math.min(10, Math.round(this.maxNumberOfImagesToRender / 2) - 2));
   }
 
   /**

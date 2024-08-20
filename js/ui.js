@@ -278,7 +278,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         </span>
       </div>
       <div>
-        <textarea name="tags" id="favorites-search-box" placeholder="Search by Tags or IDs"
+        <textarea name="tags" id="favorites-search-box" placeholder="Search with Tags and/or IDs"
           spellcheck="false"></textarea>
       </div>
 
