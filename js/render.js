@@ -49,7 +49,7 @@ const renderHTML = `<style>
     transition: none;
     float: left;
     overflow: hidden;
-    z-index: 9997;
+    z-index: 9998;
     pointer-events: none;
     position: fixed;
     height: 100vh;
@@ -62,7 +62,7 @@ const renderHTML = `<style>
   #fullscreen-canvas {
     float: left;
     overflow: hidden;
-    z-index: 9998;
+    z-index: 9999;
     pointer-events: none;
     position: fixed;
     height: 100vh;
@@ -146,7 +146,8 @@ class Renderer {
   static preferences = {
     showOnHover: "showImagesWhenHovering",
     backgroundOpacity: "galleryBackgroundOpacity",
-    resolution: "galleryResolution"
+    resolution: "galleryResolution",
+    enlargeOnClick: "enlargeOnClick"
   };
   static localStorageKeys = {
     imageExtensions: "imageExtensions"
@@ -376,7 +377,6 @@ onmessage = (message) => {
 };
 
 `
-
   };
   static defaultResolutions = {
     postPage: "7680x4320",
@@ -396,6 +396,49 @@ onmessage = (message) => {
     "png": 1,
     "jpeg": 2,
     "gif": 3
+  };
+
+  static swipe = {
+    threshold: 60,
+    touchStart: {
+      x: 0,
+      y: 0
+    },
+    touchEnd: {
+      x: 0,
+      y: 0
+    },
+    get deltaX() {
+      return this.touchStart.x - this.touchEnd.x;
+    },
+    get deltaY() {
+      return this.touchStart.y - this.touchEnd.y;
+    },
+    get right() {
+      return this.deltaX < -this.threshold;
+    },
+    get left() {
+      return this.deltaX > this.threshold;
+    },
+    get up() {
+      return this.deltaY > this.threshold;
+    },
+    get down() {
+      return this.deltaY < -this.threshold;
+    },
+    /**
+     * @param {TouchEvent} touchEvent
+     * @param {Boolean} atStart
+     */
+    set(touchEvent, atStart) {
+      if (atStart) {
+        this.touchStart.x = touchEvent.changedTouches[0].screenX;
+        this.touchStart.y = touchEvent.changedTouches[0].screenY;
+      } else {
+        this.touchEnd.x = touchEvent.changedTouches[0].screenX;
+        this.touchEnd.y = touchEvent.changedTouches[0].screenY;
+      }
+    }
   };
 
   /**
@@ -510,9 +553,17 @@ onmessage = (message) => {
    * @type {HTMLDivElement}
    */
   background;
+  /**
+   * @type {Boolean}
+   */
+  enlargeOnClickOnMobile;
+  /**
+   * @type {Boolean}
+   */
+  usingLandscapeOrientation;
 
   constructor() {
-    if (onMobileDevice()) {
+    if (onMobileDevice() && onPostPage()) {
       return;
     }
     this.initializeFields();
@@ -550,8 +601,10 @@ onmessage = (message) => {
     this.recentlyExitedGalleryMode = false;
     this.stopRendering = false;
     this.currentlyRendering = false;
+    this.usingLandscapeOrientation = true;
     this.finishedLoading = onPostPage();
     this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Renderer.preferences.showOnHover, true) : false;
+    this.enlargeOnClickOnMobile = getPreference(Renderer.preferences.enlargeOnClick, true);
   }
 
   createWebWorkers() {
@@ -578,14 +631,32 @@ onmessage = (message) => {
   }
 
   injectOptionsHTML() {
+    let optionId = Renderer.preferences.showOnHover;
+    let optionText = "Enlarge on Hover";
+    let optionTitle = "View full resolution images/play videos when a thumbnail is clicked";
+    let optionIsChecked = this.showOriginalContentOnHover;
+    let onOptionChanged = (event) => {
+      setPreference(Renderer.preferences.showOnHover, event.target.checked);
+      this.toggleAllVisibility();
+    };
+
+    if (onMobileDevice()) {
+      optionId = "open-post-in-new-page-on-mobile";
+      optionText = "Enlarge on Click";
+      optionTitle = "View full resolution images/play videos when a thumbnail is clicked";
+      optionIsChecked = this.enlargeOnClickOnMobile;
+      onOptionChanged = (event) => {
+        setPreference(Renderer.preferences.enlargeOnClick, event.target.checked);
+        this.enlargeOnClickOnMobile = event.target.checked;
+      };
+    }
+
     addOptionToFavoritesPage(
-      Renderer.preferences.showOnHover,
-      "Enlarge On Hover",
-      "View full resolution images/play videos when hovering over any thumbnail (Middle mouse click)",
-      this.showOriginalContentOnHover, (element) => {
-        setPreference(Renderer.preferences.showOnHover, element.target.checked);
-        this.toggleAllVisibility();
-      },
+      optionId,
+      optionText,
+      optionTitle,
+      optionIsChecked,
+      onOptionChanged,
       true
     );
     this.injectImageResolutionOptionsHTML();
@@ -614,21 +685,27 @@ onmessage = (message) => {
 
   addEventListeners() {
     document.addEventListener("mousedown", (event) => {
-      let thumb;
+      const clickedOnAnImage = event.target.tagName.toLowerCase() === "img";
+      const clickedOnAThumb = clickedOnAnImage && getThumbFromImage(event.target).className.includes("thumb");
+      const thumb = clickedOnAThumb ? getThumbFromImage(event.target) : null;
 
       switch (event.button) {
         case Renderer.clickCodes.leftClick:
           if (this.inGallery) {
-            if (isVideo(this.getSelectedThumb())) {
+            if (isVideo(this.getSelectedThumb()) && !onMobileDevice()) {
               return;
             }
             this.exitGallery();
             this.toggleAllVisibility(false);
             return;
           }
-          thumb = getThumbUnderCursor();
 
           if (thumb === null) {
+            return;
+          }
+
+          if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
+            this.openPostInNewPage(thumb);
             return;
           }
           this.toggleAllVisibility(true);
@@ -786,6 +863,42 @@ onmessage = (message) => {
         }
       };
     }
+
+    if (onMobileDevice()) {
+      window.addEventListener("blur", () => {
+        this.deleteAllRenders();
+      });
+      document.addEventListener("touchstart", (event) => {
+        if (!this.inGallery) {
+          return;
+        }
+        event.preventDefault();
+        Renderer.swipe.set(event, true);
+      }, {
+        passive: false
+      });
+      document.addEventListener("touchend", (event) => {
+        if (!this.inGallery) {
+          return;
+        }
+        event.preventDefault();
+        Renderer.swipe.set(event, false);
+
+        if (Renderer.swipe.up) {
+          this.exitGallery();
+          this.toggleAllVisibility(false);
+        } else if (Renderer.swipe.left) {
+          this.traverseGallery(Renderer.galleryDirections.right, false);
+        } else if (Renderer.swipe.right) {
+          this.traverseGallery(Renderer.galleryDirections.left, false);
+        } else {
+          this.exitGallery();
+          this.toggleAllVisibility;
+        }
+      }, {
+        passive: false
+      });
+    }
   }
 
   /**
@@ -855,7 +968,7 @@ onmessage = (message) => {
    * @param {Number} maxResolutionFraction
    */
   upscaleThumbResolution(thumb, imageBitmap, maxResolutionFraction) {
-    if (onPostPage() || this.upscaledThumbs.has(thumb.id) || this.thumbUpscaler === undefined) {
+    if (onPostPage() || this.upscaledThumbs.has(thumb.id) || this.thumbUpscaler === undefined || onMobileDevice()) {
       return;
     }
     this.upscaledThumbs.add(thumb.id);
@@ -1042,6 +1155,9 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   addEventListenersToThumb(thumb) {
+    if (onMobileDevice()) {
+      return;
+    }
     const image = getImageFromThumb(thumb);
 
     image.onmouseover = () => {
@@ -1062,8 +1178,13 @@ onmessage = (message) => {
     this.imageExtensions = JSON.parse(localStorage.getItem(Renderer.localStorageKeys.imageExtensions)) || {};
   }
 
-  openPostInNewPage() {
-    const firstChild = this.getSelectedThumb().children[0];
+  /**
+   *
+   * @param {HTMLElement} thumb
+   */
+  openPostInNewPage(thumb) {
+    thumb = thumb === undefined ? this.getSelectedThumb() : thumb;
+    const firstChild = thumb.children[0];
 
     if (firstChild.hasAttribute("href")) {
       window.open(firstChild.getAttribute("href"), "_blank");
@@ -1225,7 +1346,9 @@ onmessage = (message) => {
    * @param {Boolean} value
    */
   highlightThumb(thumb, value) {
-    thumb.classList.toggle("selected", value);
+    if (!onMobileDevice()) {
+      thumb.classList.toggle("selected", value);
+    }
   }
 
   /**
@@ -1330,6 +1453,10 @@ onmessage = (message) => {
    */
   async renderImagesAround(initialThumb) {
     if (onPostPage()) {
+      return;
+    }
+
+    if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
       return;
     }
 
@@ -1445,13 +1572,22 @@ onmessage = (message) => {
 
     const image = getImageFromThumb(thumb);
 
+    if (onMobileDevice()) {
+      this.clearFullscreenCanvas();
+    }
+
     if (!imageIsLoaded(image)) {
       return;
     }
+
     createImageBitmap(image)
       .then((imageBitmap) => {
         if (this.imageBitmaps.get(thumb.id) === undefined) {
           this.imageBitmaps.set(thumb.id, imageBitmap);
+
+          if (this.getSelectedThumb().id === thumb.id) {
+            this.drawFullscreenCanvas(imageBitmap);
+          }
         }
       });
   }
@@ -1588,6 +1724,7 @@ onmessage = (message) => {
    * @param {ImageBitmap} imageBitmap
    */
   drawFullscreenCanvas(imageBitmap) {
+    this.resizeFullscreenCanvas();
     const ratio = Math.min(this.fullscreenCanvas.width / imageBitmap.width, this.fullscreenCanvas.height / imageBitmap.height);
     const centerShiftX = (this.fullscreenCanvas.width - (imageBitmap.width * ratio)) / 2;
     const centerShiftY = (this.fullscreenCanvas.height - (imageBitmap.height * ratio)) / 2;
@@ -1597,6 +1734,22 @@ onmessage = (message) => {
       imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
       centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
     );
+  }
+
+  resizeFullscreenCanvas() {
+    if (!onMobileDevice()) {
+      return;
+    }
+    const windowInLandscapeOrientation = window.innerWidth > window.innerHeight;
+    const usingIncorrectOrientation = windowInLandscapeOrientation !== this.usingLandscapeOrientation;
+
+    if (usingIncorrectOrientation) {
+      const temp = this.fullscreenCanvas.width;
+
+      this.fullscreenCanvas.width = this.fullscreenCanvas.height;
+      this.fullscreenCanvas.height = temp;
+      this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
+    }
   }
 
   clearFullscreenCanvas() {
@@ -1657,6 +1810,11 @@ onmessage = (message) => {
     if (this.currentlyRendering) {
       return;
     }
+
+    if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
+      return;
+    }
+
     this.currentlyRendering = true;
     const unrenderedImageThumbs = this.getVisibleUnrenderedImageThumbs();
     const imageThumbsToRender = [];
@@ -1697,6 +1855,10 @@ onmessage = (message) => {
    * @param {HTMLElement} animatedThumbs
    */
   async upscaleAnimatedThumbs(animatedThumbs) {
+    if (onMobileDevice()) {
+      return;
+    }
+
     for (const thumb of animatedThumbs) {
       if (this.isUpscaled(thumb)) {
         continue;
@@ -1741,7 +1903,7 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getMaxNumberOfImagesToRender() {
-    const availableMemory = 1200;
+    const availableMemory = onMobileDevice() ? 120 : 1200;
     const averageImageSize = 20;
     const maxImagesToRender = Math.floor(availableMemory / averageImageSize);
     return maxImagesToRender;

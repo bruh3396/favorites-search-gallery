@@ -11,7 +11,7 @@
 
 [Favorites Search by MegaMoo77](https://github.com/MegaMoo77/favorites-search) stopped working some time ago<br>
 I couldn't find a suitable replacement, so I created my own adaptation including a gallery and some QOL [features](#features)<br>
-The script is still in development, please let me know if you experience a bug, or have a question/feature request
+This script is still in development, please let me know if you experience a bug, or have a question/feature request
 
 ## Getting Started
 
@@ -28,7 +28,9 @@ The script is still in development, please let me know if you experience a bug, 
 
 ## Controls
 
-<strong>Left Click:</strong>
+### Desktop
+
+<strong>Left Click/Touch:</strong>
 <ul>
 <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
 <li><strong>In gallery:</strong> Exit gallery</li>
@@ -38,9 +40,9 @@ The script is still in development, please let me know if you experience a bug, 
 <li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
 <li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
 </ul><br>
-<strong>Scroll Wheel/Arrow Keys/WASD (in gallery):</strong> Traverse gallery<br><br>
-<strong>Scroll Wheel: (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
-<strong>Escape (in gallery):</strong> Exit gallery<br><br>
+<strong>Scroll Wheel/Arrow Keys/WASD/Swipe Left or Right (in gallery):</strong> Traverse gallery<br><br>
+<strong>Scroll Wheel (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
+<strong>Escape/Swipe Up (in gallery):</strong> Exit gallery<br><br>
 <strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover
 
 ## Features
@@ -110,12 +112,16 @@ A: Delete all site data (cookies, localStorage, indexedDB) through your browser'
 Q: What browsers are supported?<br>
 A: Chrome, Edge, and Firefox work. Have not tested other browsers.
 
-Q: Does it work on mobile?<br>
-A: No.
+Q: Does it work on mobile/Android/iOS?<br>
+A: Yes, but only search  and gallery are enabled. Tooltips and captions are disabled to improve performance.<br>
+<ul>
+    <li>Requires a mobile browser that supports Tampermonkey, like Firefox on Android.</li>
+    <li>Still a new feature and somewhat laggy. I plan to optimize it further.</li>
+    <li>Has an option to disable gallery on lower performance devices.</li>
+</ul>
 
 Q: Why am I experiencing lag?<br>
 A: Responsiveness depends on:
-
 <ul>
     <li>Internet speed: </li>
     <ul>

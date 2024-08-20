@@ -80,7 +80,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       height: 120px;
       animation: spin 1s ease-in-out infinite;
       pointer-events: none;
-      z-index: 9998;
+      z-index: 9991;
       position: fixed;
       max-height: 100vh;
       margin: 0;
@@ -666,7 +666,7 @@ function configureMobileUi() {
 
       #container {
         position: fixed !important;
-        z-index: 9999;
+        z-index: 30;
         width: 100vw;
 
       }

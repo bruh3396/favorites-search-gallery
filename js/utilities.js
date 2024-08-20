@@ -443,6 +443,9 @@ function clearAwesompleteSelection(input) {
 }
 
 function trackCursorPosition() {
+  if (onMobileDevice()) {
+    return;
+  }
   document.addEventListener("mousemove", (event) => {
     CURSOR_POSITION.X = event.clientX;
     CURSOR_POSITION.Y = event.clientY;
@@ -725,6 +728,9 @@ function getTagBlacklist() {
  * @returns {HTMLElement | null}
  */
 function getThumbUnderCursor() {
+  if (onMobileDevice()) {
+    return null;
+  }
   const elementUnderCursor = document.elementFromPoint(CURSOR_POSITION.X, CURSOR_POSITION.Y);
 
   if (elementUnderCursor !== undefined && elementUnderCursor !== null && elementUnderCursor.nodeName.toLowerCase() === "img") {
@@ -737,6 +743,9 @@ function getThumbUnderCursor() {
  * @returns {Boolean}
  */
 function hoveringOverThumb() {
+  if (onMobileDevice()) {
+    return null;
+  }
   return getThumbUnderCursor() !== null;
 }
 
