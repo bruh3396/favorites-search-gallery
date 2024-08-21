@@ -305,7 +305,7 @@ onmessage = async(message) => {
 
 `,
     thumbnailRenderer:
-      `
+`
 /**
  * @type {Map.<String, OffscreenCanvas>}
  */
@@ -832,8 +832,9 @@ onmessage = (message) => {
       setTimeout(() => {
         const thumb = document.querySelector(".thumb-node");
 
+        this.renderImagesInTheBackground();
+
         if (thumb !== null && !this.finishedLoading) {
-          this.renderImagesAround(thumb, 10);
           this.upscaleAnimatedVisibleThumbsAround(thumb);
         }
       }, 650);
@@ -1849,6 +1850,7 @@ onmessage = (message) => {
       .slice(0, this.maxNumberOfImagesToRender / 2)
       .filter(thumb => !isImage(thumb) && !this.isUpscaled(thumb));
 
+    console.log(animatedThumbsToUpscale.length);
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
 
     for (let i = 0; i < unrenderedImageThumbs.length && i + imagesAlreadyRenderedCount < this.maxNumberOfImagesToRender; i += 1) {
@@ -2005,12 +2007,16 @@ onmessage = (message) => {
     this.movedForwardInGallery = forward;
 
     for (let i = 0; i < lookahead; i += 1) {
+      if (nextThumbToRender === null) {
+        break;
+      }
+
       if (!isImage(nextThumbToRender)) {
         nextThumbToRender = this.getAdjacentVisibleThumb(nextThumbToRender, forward);
         continue;
       }
 
-      if (nextThumbToRender === null || this.isNotRendered(nextThumbToRender)) {
+      if (this.isNotRendered(nextThumbToRender)) {
         break;
       }
       nextThumbToRender = this.getAdjacentVisibleThumb(nextThumbToRender, forward);
