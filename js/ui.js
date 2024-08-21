@@ -32,7 +32,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           margin-top: 4px;
         }
 
-        button {
+        >button {
           height: 35px;
           border: none;
           border-radius: 4px;
@@ -670,6 +670,7 @@ function toggleUI(value) {
 
 function configureMobileUi() {
   if (onMobileDevice()) {
+    FAVORITE_SEARCH_INPUTS.performanceProfile.parentElement.style.display = "none";
     injectStyleHTML(`
       .thumb, .thumb-node {
         > div > canvas {
