@@ -113,7 +113,7 @@ const renderHTML = `<style>
   }
 </style>`;/* eslint-disable no-useless-escape */
 
-class Renderer {
+class Gallery {
   static clickCodes = {
     leftClick: 0,
     middleClick: 1
@@ -520,6 +520,10 @@ onmessage = (message) => {
   /**
    * @type {Boolean}
    */
+  movedForwardInGallery;
+  /**
+   * @type {Boolean}
+   */
   recentlyExitedGalleryMode;
   /**
    * @type {Boolean}
@@ -563,7 +567,9 @@ onmessage = (message) => {
   usingLandscapeOrientation;
 
   constructor() {
-    if (onMobileDevice() && onPostPage()) {
+    const galleryDisabled = (onMobileDevice() && onPostPage()) || getPerformanceProfile() > 0;
+
+    if (galleryDisabled) {
       return;
     }
     this.initializeFields();
@@ -575,7 +581,7 @@ onmessage = (message) => {
     this.loadDiscoveredImageExtensions();
     this.preparePostPage();
     this.injectHTML();
-    this.updateBackgroundOpacity(getPreference(Renderer.preferences.backgroundOpacity, 1));
+    this.updateBackgroundOpacity(getPreference(Gallery.preferences.backgroundOpacity, 1));
   }
 
   initializeFields() {
@@ -598,25 +604,26 @@ onmessage = (message) => {
     this.imageBitmapFetcherIndex = 0;
     this.lastSelectedThumbIndexBeforeEnteringGalleryMode = 0;
     this.inGallery = false;
+    this.movedForwardInGallery = true;
     this.recentlyExitedGalleryMode = false;
     this.stopRendering = false;
     this.currentlyRendering = false;
     this.usingLandscapeOrientation = true;
     this.finishedLoading = onPostPage();
-    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Renderer.preferences.showOnHover, true) : false;
-    this.enlargeOnClickOnMobile = getPreference(Renderer.preferences.enlargeOnClick, true);
+    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Gallery.preferences.showOnHover, true) : false;
+    this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
   }
 
   createWebWorkers() {
     this.imageBitmapFetchers = [];
-    this.thumbUpscaler = new Worker(getWorkerURL(Renderer.webWorkers.thumbnailRenderer));
+    this.thumbUpscaler = new Worker(getWorkerURL(Gallery.webWorkers.thumbnailRenderer));
     this.thumbUpscaler.postMessage({
       action: "setScreenWidth",
       screenWidth: window.screen.width
     });
 
     for (let i = 0; i < 1; i += 1) {
-      this.imageBitmapFetchers.push(new Worker(getWorkerURL(Renderer.webWorkers.imageFetcher)));
+      this.imageBitmapFetchers.push(new Worker(getWorkerURL(Gallery.webWorkers.imageFetcher)));
     }
   }
 
@@ -631,12 +638,12 @@ onmessage = (message) => {
   }
 
   injectOptionsHTML() {
-    let optionId = Renderer.preferences.showOnHover;
+    let optionId = Gallery.preferences.showOnHover;
     let optionText = "Enlarge on Hover";
     let optionTitle = "View full resolution images/play videos when a thumbnail is clicked";
     let optionIsChecked = this.showOriginalContentOnHover;
     let onOptionChanged = (event) => {
-      setPreference(Renderer.preferences.showOnHover, event.target.checked);
+      setPreference(Gallery.preferences.showOnHover, event.target.checked);
       this.toggleAllVisibility();
     };
 
@@ -646,7 +653,7 @@ onmessage = (message) => {
       optionTitle = "View full resolution images/play videos when a thumbnail is clicked";
       optionIsChecked = this.enlargeOnClickOnMobile;
       onOptionChanged = (event) => {
-        setPreference(Renderer.preferences.enlargeOnClick, event.target.checked);
+        setPreference(Gallery.preferences.enlargeOnClick, event.target.checked);
         this.enlargeOnClickOnMobile = event.target.checked;
       };
     }
@@ -690,7 +697,7 @@ onmessage = (message) => {
       const thumb = clickedOnAThumb ? getThumbFromImage(event.target) : null;
 
       switch (event.button) {
-        case Renderer.clickCodes.leftClick:
+        case Gallery.clickCodes.leftClick:
           if (this.inGallery) {
             if (isVideo(this.getSelectedThumb()) && !onMobileDevice()) {
               return;
@@ -716,7 +723,7 @@ onmessage = (message) => {
           this.enterGallery();
           break;
 
-        case Renderer.clickCodes.middleClick:
+        case Gallery.clickCodes.middleClick:
           event.preventDefault();
 
           if (hoveringOverThumb() || this.inGallery) {
@@ -732,18 +739,18 @@ onmessage = (message) => {
       }
     });
     window.addEventListener("auxclick", (event) => {
-      if (event.button === Renderer.clickCodes.middleClick) {
+      if (event.button === Gallery.clickCodes.middleClick) {
         event.preventDefault();
       }
     });
     document.addEventListener("wheel", (event) => {
       if (this.inGallery) {
         const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
-        const direction = delta > 0 ? Renderer.galleryDirections.left : Renderer.galleryDirections.right;
+        const direction = delta > 0 ? Gallery.galleryDirections.left : Gallery.galleryDirections.right;
 
         this.traverseGallery.bind(this)(direction, false);
       } else if (hoveringOverThumb() && this.showOriginalContentOnHover) {
-        let opacity = parseFloat(getPreference(Renderer.preferences.backgroundOpacity, 1));
+        let opacity = parseFloat(getPreference(Gallery.preferences.backgroundOpacity, 1));
 
         opacity -= event.deltaY * 0.0005;
         opacity = clamp(opacity, "0", "1");
@@ -761,13 +768,13 @@ onmessage = (message) => {
     document.addEventListener("keydown", (event) => {
       if (this.inGallery) {
         switch (event.key) {
-          case Renderer.galleryDirections.a:
+          case Gallery.galleryDirections.a:
 
-          case Renderer.galleryDirections.d:
+          case Gallery.galleryDirections.d:
 
-          case Renderer.galleryDirections.left:
+          case Gallery.galleryDirections.left:
 
-          case Renderer.galleryDirections.right:
+          case Gallery.galleryDirections.right:
             event.preventDefault();
             this.traverseGallery(event.key, event.repeat);
             break;
@@ -876,7 +883,7 @@ onmessage = (message) => {
           return;
         }
         event.preventDefault();
-        Renderer.swipe.set(event, true);
+        Gallery.swipe.set(event, true);
       }, {
         passive: false
       });
@@ -885,15 +892,15 @@ onmessage = (message) => {
           return;
         }
         event.preventDefault();
-        Renderer.swipe.set(event, false);
+        Gallery.swipe.set(event, false);
 
-        if (Renderer.swipe.up) {
+        if (Gallery.swipe.up) {
           this.exitGallery();
           this.toggleAllVisibility(false);
-        } else if (Renderer.swipe.left) {
-          this.traverseGallery(Renderer.galleryDirections.right, false);
-        } else if (Renderer.swipe.right) {
-          this.traverseGallery(Renderer.galleryDirections.left, false);
+        } else if (Gallery.swipe.left) {
+          this.traverseGallery(Gallery.galleryDirections.right, false);
+        } else if (Gallery.swipe.right) {
+          this.traverseGallery(Gallery.galleryDirections.left, false);
         } else {
           this.exitGallery();
           this.toggleAllVisibility;
@@ -1023,7 +1030,7 @@ onmessage = (message) => {
       this.recentlyDiscoveredImageExtensionCount = 0;
 
       if (!onPostPage()) {
-        localStorage.setItem(Renderer.localStorageKeys.imageExtensions, JSON.stringify(this.imageExtensions));
+        localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(this.imageExtensions));
       }
     }
   }
@@ -1151,7 +1158,7 @@ onmessage = (message) => {
    * @param {Number} index
    */
   enumerateThumb(thumb, index) {
-    thumb.setAttribute(Renderer.attributes.thumbIndex, index);
+    thumb.setAttribute(Gallery.attributes.thumbIndex, index);
   }
 
   /**
@@ -1178,7 +1185,7 @@ onmessage = (message) => {
   }
 
   loadDiscoveredImageExtensions() {
-    this.imageExtensions = JSON.parse(localStorage.getItem(Renderer.localStorageKeys.imageExtensions)) || {};
+    this.imageExtensions = JSON.parse(localStorage.getItem(Gallery.localStorageKeys.imageExtensions)) || {};
   }
 
   /**
@@ -1245,7 +1252,7 @@ onmessage = (message) => {
    * @param {Boolean} keyIsHeldDown
    */
   traverseGallery(direction, keyIsHeldDown) {
-    if (keyIsHeldDown && !Renderer.galleryTraversalCooldown.ready) {
+    if (keyIsHeldDown && !Gallery.galleryTraversalCooldown.ready) {
       return;
     }
 
@@ -1256,7 +1263,7 @@ onmessage = (message) => {
     this.setNextSelectedThumbIndex(direction);
     selectedThumb = this.getSelectedThumb();
     this.highlightThumb(selectedThumb, true);
-    this.renderInAdvanceWhileTraversingInGalleryMode(selectedThumb, direction);
+    this.renderInAdvanceWhileTraversingGallery(selectedThumb, direction);
 
     if (!usingFirefox()) {
       scrollToThumb(selectedThumb.id, false);
@@ -1283,7 +1290,7 @@ onmessage = (message) => {
    * @param {String} direction
    */
   setNextSelectedThumbIndex(direction) {
-    if (direction === Renderer.galleryDirections.left || direction === Renderer.galleryDirections.a) {
+    if (direction === Gallery.galleryDirections.left || direction === Gallery.galleryDirections.a) {
       this.currentlySelectedThumbIndex -= 1;
       this.currentlySelectedThumbIndex = this.currentlySelectedThumbIndex < 0 ? this.visibleThumbs.length - 1 : this.currentlySelectedThumbIndex;
     } else {
@@ -1308,7 +1315,7 @@ onmessage = (message) => {
     const showOnHoverCheckbox = document.getElementById("showImagesWhenHoveringCheckbox");
 
     if (showOnHoverCheckbox !== null) {
-      setPreference(Renderer.preferences.showOnHover, this.showOriginalContentOnHover);
+      setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
       showOnHoverCheckbox.checked = this.showOriginalContentOnHover;
     }
   }
@@ -1359,7 +1366,7 @@ onmessage = (message) => {
    */
   showOriginalContent(thumb) {
     this.highlightThumb(thumb, true);
-    this.currentlySelectedThumbIndex = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
+    this.currentlySelectedThumbIndex = parseInt(thumb.getAttribute(Gallery.attributes.thumbIndex));
 
     const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, 20, (_) => {
       return true;
@@ -1470,13 +1477,19 @@ onmessage = (message) => {
       await this.pauseRendering(this.imageFetchDelay);
     }
     this.currentlyRendering = true;
-    const amountToRender = Math.max(4, Math.ceil(this.maxNumberOfImagesToRender / 6));
+    const amountToRender = Math.max(2, Math.ceil(this.maxNumberOfImagesToRender / 2));
+
     const imageThumbsToRender = this.getAdjacentVisibleThumbs(initialThumb, amountToRender, (thumb) => {
       return isImage(thumb) && this.isNotRendered(thumb);
     });
-    const indicesOfImageThumbsToRender = imageThumbsToRender.map(imageThumb => parseInt(imageThumb.getAttribute(Renderer.attributes.thumbIndex)));
+    const indicesOfImageThumbsToRender = imageThumbsToRender.map(imageThumb => parseInt(imageThumb.getAttribute(Gallery.attributes.thumbIndex)));
 
     this.setRenderRange(indicesOfImageThumbsToRender);
+
+    if (this.isNotRendered(initialThumb)) {
+      imageThumbsToRender.unshift(initialThumb);
+    }
+
     await this.renderImages(imageThumbsToRender);
     this.currentlyRendering = false;
   }
@@ -1492,7 +1505,7 @@ onmessage = (message) => {
     let currentThumb = initialThumb;
     let previousThumb = initialThumb;
     let nextThumb = initialThumb;
-    let traverseForward = true;
+    let traverseForward = this.inGallery ? this.movedForwardInGallery : true;
 
     while (currentThumb !== null && adjacentVisibleThumbs.length < limit) {
       if (traverseForward) {
@@ -1501,13 +1514,7 @@ onmessage = (message) => {
         previousThumb = this.getAdjacentVisibleThumb(previousThumb, false);
       }
 
-      if (previousThumb === null) {
-        traverseForward = true;
-      } else if (nextThumb === null) {
-        traverseForward = false;
-      } else {
-        traverseForward = !traverseForward;
-      }
+      traverseForward = this.getTraversalDirection(previousThumb, traverseForward, nextThumb);
       currentThumb = traverseForward ? nextThumb : previousThumb;
 
       if (currentThumb !== null) {
@@ -1520,26 +1527,45 @@ onmessage = (message) => {
   }
 
   /**
+   * @param {HTMLElement} previousThumb
+   * @param {HTMLElement} traverseForward
+   * @param {HTMLElement} nextThumb
+   * @returns {Boolean}
+   */
+  getTraversalDirection(previousThumb, traverseForward, nextThumb) {
+    if (this.inGallery) {
+      return this.movedForwardInGallery;
+    }
+
+    if (previousThumb === null) {
+      traverseForward = true;
+    } else if (nextThumb === null) {
+      traverseForward = false;
+    }
+    return !traverseForward;
+  }
+
+  /**
    * @param {HTMLElement} thumb
-   * @param {Boolean} traverseForward
+   * @param {Boolean} forward
    * @returns {HTMLElement}
    */
-  getAdjacentVisibleThumb(thumb, traverseForward) {
-    let adjacentThumb = this.getAdjacentThumb(thumb, traverseForward);
+  getAdjacentVisibleThumb(thumb, forward) {
+    let adjacentThumb = this.getAdjacentThumb(thumb, forward);
 
     while (adjacentThumb !== null && !this.isVisible(adjacentThumb)) {
-      adjacentThumb = this.getAdjacentThumb(adjacentThumb, traverseForward);
+      adjacentThumb = this.getAdjacentThumb(adjacentThumb, forward);
     }
     return adjacentThumb;
   }
 
   /**
    * @param {HTMLElement} thumb
-   * @param {Boolean} traverseForward
+   * @param {Boolean} forward
    * @returns {HTMLElement}
    */
-  getAdjacentThumb(thumb, traverseForward) {
-    return traverseForward ? thumb.nextElementSibling : thumb.previousElementSibling;
+  getAdjacentThumb(thumb, forward) {
+    return forward ? thumb.nextElementSibling : thumb.previousElementSibling;
   }
 
   /**
@@ -1565,7 +1591,7 @@ onmessage = (message) => {
     const renderMessage = {
       imageURL: getOriginalImageURLFromThumb(thumb),
       postId: thumb.id,
-      thumbIndex: thumb.getAttribute(Renderer.attributes.thumbIndex),
+      thumbIndex: thumb.getAttribute(Gallery.attributes.thumbIndex),
       extension: this.getImageExtension(thumb.id)
     };
 
@@ -1701,7 +1727,7 @@ onmessage = (message) => {
    */
   updateBackgroundOpacity(opacity) {
     this.background.style.opacity = opacity;
-    setPreference(Renderer.preferences.backgroundOpacity, opacity);
+    setPreference(Gallery.preferences.backgroundOpacity, opacity);
   }
 
   /**
@@ -1709,7 +1735,7 @@ onmessage = (message) => {
    */
   getIndexOfThumbUnderCursor() {
     const thumb = getThumbUnderCursor();
-    return thumb === null ? null : parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
+    return thumb === null ? null : parseInt(thumb.getAttribute(Gallery.attributes.thumbIndex));
   }
 
   /**
@@ -1757,7 +1783,7 @@ onmessage = (message) => {
 
   showEyeIcon() {
     const eyeIcon = document.getElementById("svg-eye");
-    const svg = this.showOriginalContentOnHover ? Renderer.icons.openEye : Renderer.icons.closedEye;
+    const svg = this.showOriginalContentOnHover ? Gallery.icons.openEye : Gallery.icons.closedEye;
 
     if (eyeIcon) {
       eyeIcon.remove();
@@ -1767,7 +1793,7 @@ onmessage = (message) => {
 
   showLockIcon() {
     const lockIcon = document.getElementById("svg-lock");
-    const svg = this.inGallery ? Renderer.icons.closedLock : Renderer.icons.openLock;
+    const svg = this.inGallery ? Gallery.icons.closedLock : Gallery.icons.openLock;
 
     if (lockIcon) {
       lockIcon.remove();
@@ -1830,8 +1856,8 @@ onmessage = (message) => {
     }
 
     if (imageThumbsToRender.length > 0) {
-      this.renderedThumbRange.minIndex = imageThumbsToRender[0].getAttribute(Renderer.attributes.thumbIndex);
-      this.renderedThumbRange.maxIndex = imageThumbsToRender[imageThumbsToRender.length - 1].getAttribute(Renderer.attributes.thumbIndex);
+      this.renderedThumbRange.minIndex = imageThumbsToRender[0].getAttribute(Gallery.attributes.thumbIndex);
+      this.renderedThumbRange.maxIndex = imageThumbsToRender[imageThumbsToRender.length - 1].getAttribute(Gallery.attributes.thumbIndex);
     }
     await this.renderImages(imageThumbsToRender);
     this.currentlyRendering = false;
@@ -1902,7 +1928,7 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getMaxNumberOfImagesToRender() {
-    const availableMemory = onMobileDevice() ? 200 : 1200;
+    const availableMemory = onMobileDevice() ? 120 : 400;
     const averageImageSize = 20;
     const maxImagesToRender = Math.floor(availableMemory / averageImageSize);
     return maxImagesToRender;
@@ -1913,7 +1939,7 @@ onmessage = (message) => {
    * @returns {Boolean}
    */
   thumbInRenderRange(thumb) {
-    const index = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
+    const index = parseInt(thumb.getAttribute(Gallery.attributes.thumbIndex));
     return index >= this.renderedThumbRange.minIndex && index <= this.renderedThumbRange.maxIndex;
   }
 
@@ -1926,7 +1952,7 @@ onmessage = (message) => {
     const scale = 40;
     const width = 16 * scale;
     const height = 9 * scale;
-    const defaultResolution = getPreference(Renderer.preferences.resolution, Renderer.defaultResolutions.favoritesPage);
+    const defaultResolution = getPreference(Gallery.preferences.resolution, Gallery.defaultResolutions.favoritesPage);
     const container = document.createElement("div");
 
     container.style.paddingTop = "8px";
@@ -1947,7 +1973,7 @@ onmessage = (message) => {
       resolutionDropdown.appendChild(resolutionOption);
     }
     resolutionDropdown.onchange = () => {
-      setPreference(Renderer.preferences.resolution, resolutionDropdown.value);
+      setPreference(Gallery.preferences.resolution, resolutionDropdown.value);
       this.setFullscreenCanvasResolution();
     };
     container.appendChild(resolutionLabel);
@@ -1958,7 +1984,7 @@ onmessage = (message) => {
   }
 
   setFullscreenCanvasResolution() {
-    const resolution = onPostPage() ? Renderer.defaultResolutions.postPage : getPreference(Renderer.preferences.resolution, Renderer.defaultResolutions.favoritesPage);
+    const resolution = onPostPage() ? Gallery.defaultResolutions.postPage : getPreference(Gallery.preferences.resolution, Gallery.defaultResolutions.favoritesPage);
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
     this.fullscreenCanvas.width = dimensions[0];
@@ -1971,26 +1997,32 @@ onmessage = (message) => {
    * @param {String} direction
    * @returns
    */
-  renderInAdvanceWhileTraversingInGalleryMode(thumb, direction) {
-    const currentThumbIndex = parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex));
+  renderInAdvanceWhileTraversingGallery(thumb, direction) {
     const lookahead = this.getLookahead();
+    const forward = direction === Gallery.galleryDirections.right;
+    let nextThumbToRender = this.getAdjacentVisibleThumb(thumb, forward);
 
-    let possiblyUnrenderedThumbIndex;
+    this.movedForwardInGallery = forward;
 
-    if (direction === Renderer.galleryDirections.left || direction === Renderer.galleryDirections.a) {
-      possiblyUnrenderedThumbIndex = currentThumbIndex - lookahead;
-    } else {
-      possiblyUnrenderedThumbIndex = currentThumbIndex + lookahead;
+    for (let i = 0; i < lookahead; i += 1) {
+      if (!isImage(nextThumbToRender)) {
+        nextThumbToRender = this.getAdjacentVisibleThumb(nextThumbToRender, forward);
+        continue;
+      }
+
+      if (nextThumbToRender === null || this.isNotRendered(nextThumbToRender)) {
+        break;
+      }
+      nextThumbToRender = this.getAdjacentVisibleThumb(nextThumbToRender, forward);
     }
 
-    if (possiblyUnrenderedThumbIndex < 0 || possiblyUnrenderedThumbIndex >= this.visibleThumbs.length) {
+    if (nextThumbToRender === null) {
       return;
     }
-    const possiblyUnrenderedThumb = this.visibleThumbs[possiblyUnrenderedThumbIndex];
 
-    if (this.isNotRendered(possiblyUnrenderedThumb)) {
-      this.upscaleAnimatedVisibleThumbsAround(possiblyUnrenderedThumb);
-      this.renderImagesAround(possiblyUnrenderedThumb);
+    if (this.isNotRendered(nextThumbToRender) && isImage(nextThumbToRender)) {
+      this.upscaleAnimatedVisibleThumbsAround(nextThumbToRender);
+      this.renderImagesAround(nextThumbToRender);
     }
   }
 
@@ -1998,7 +2030,7 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getLookahead() {
-    return Math.max(3, Math.min(10, Math.round(this.maxNumberOfImagesToRender / 2) - 2));
+    return Math.max(3, Math.min(10, Math.round(this.maxNumberOfImagesToRender / 4) - 2));
   }
 
   /**
@@ -2035,7 +2067,7 @@ onmessage = (message) => {
       if (thumb === null) {
         break;
       }
-      indices.push(parseInt(thumb.getAttribute(Renderer.attributes.thumbIndex)));
+      indices.push(parseInt(thumb.getAttribute(Gallery.attributes.thumbIndex)));
     }
     this.setRenderRange(indices);
   }
@@ -2103,7 +2135,7 @@ onmessage = (message) => {
    * @returns {String}
    */
   getImageExtension(postId) {
-    return Renderer.extensionDecodings[this.imageExtensions[parseInt(postId)]];
+    return Gallery.extensionDecodings[this.imageExtensions[parseInt(postId)]];
   }
 
   /**
@@ -2111,8 +2143,8 @@ onmessage = (message) => {
    * @param {String} extension
    */
   setImageExtension(postId, extension) {
-    this.imageExtensions[parseInt(postId)] = Renderer.extensionEncodings[extension];
+    this.imageExtensions[parseInt(postId)] = Gallery.extensionEncodings[extension];
   }
 }
 
-const renderer = new Renderer();
+const gallery = new Gallery();

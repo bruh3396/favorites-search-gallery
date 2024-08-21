@@ -925,4 +925,8 @@ function onMobileDevice() {
   return FLAGS.onMobileDevice;
 }
 
+function getPerformanceProfile() {
+  return parseInt(getPreference("performanceProfile", 0));
+}
+
 initializeUtilities();

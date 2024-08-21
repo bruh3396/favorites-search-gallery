@@ -49,7 +49,7 @@ class Tooltip {
   previousSearch;
 
   constructor() {
-    if (onMobileDevice()) {
+    if (onMobileDevice() || getPerformanceProfile() > 1) {
       return;
     }
     this.enabled = getPreference("showTooltip", true);

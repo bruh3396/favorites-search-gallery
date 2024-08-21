@@ -180,7 +180,9 @@ class Caption {
   currentThumbId;
 
   constructor() {
-    if (onPostPage() || onMobileDevice()) {
+    const captionDisabled = (onPostPage() || onMobileDevice()) || getPerformanceProfile() > 1;
+
+    if (captionDisabled) {
       return;
     }
     this.tagCategoryAssociations = this.loadSavedTags();

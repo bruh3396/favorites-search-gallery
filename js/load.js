@@ -445,7 +445,7 @@ onmessage = (message) => {
     });
     const eventThatFavoritesBecomeVisibleAt = databaseStatus.objectStoreExists ? "favoritesLoaded" : "load";
 
-    this.broadcastThumbUnderCursorOnLoadWhenAvailable(eventThatFavoritesBecomeVisibleAt);
+    // this.broadcastThumbUnderCursorOnLoadWhenAvailable(eventThatFavoritesBecomeVisibleAt);
 
     if (databaseStatus.objectStoreIsNotEmpty) {
       this.loadFavorites();

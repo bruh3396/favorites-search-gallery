@@ -18,15 +18,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #favorites-top-bar-panels {
       >div {
         flex: 1;
-
-        textarea {
-          max-width: 100%;
-          height: 50px;
-          width: 95%;
-          padding: 10px;
-          border-radius: 6px;
-          resize: vertical;
-        }
       }
     }
 
@@ -58,6 +49,15 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       margin-left: 10px;
     }
 
+    textarea {
+      max-width: 100%;
+      height: 50px;
+      width: 95%;
+      padding: 10px;
+      border-radius: 6px;
+      resize: vertical;
+    }
+
     .checkbox {
       display: block;
       cursor: pointer;
@@ -66,7 +66,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       margin-left: -3px;
       height: 27px;
 
-      input {
+      >input {
         vertical-align: -5px;
         cursor: pointer;
       }
@@ -80,7 +80,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       height: 120px;
       animation: spin 1s ease-in-out infinite;
       pointer-events: none;
-      z-index: 9991;
+      z-index: 9990;
       position: fixed;
       max-height: 100vh;
       margin: 0;
@@ -121,6 +121,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       >div {
         position: relative;
 
+        >img,
+        >canvas {
+          width: 100%;
+          z-index: 1;
+        }
+
         &:has(.remove-button:hover) {
           outline: 3px solid red;
 
@@ -131,10 +137,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
       }
 
-      img, canvas {
-        width: 100%;
-        z-index: 1;
-      }
+
 
       &.hidden {
         display: none;
@@ -285,7 +288,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       <div id="left-favorites-panel-bottom-row" style="display: flex; flex-flow: row-wrap;">
         <div id="favorite-options-container">
           <div id="show-options"><label class="checkbox" title="Toggle options"><input type="checkbox"
-                id="options-checkbox"> Options</label></div>
+                id="options-checkbox"> More Options</label></div>
           <div id="favorite-options">
             <div><label class="checkbox" title="Toggle remove buttons"><input type="checkbox" id="show-remove-buttons">
                 Remove Buttons</label></div>
@@ -293,6 +296,14 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   id="filter-blacklist-checkbox"> Exclude Blacklist</label></div>
           </div>
           <div id="additional-favorite-options">
+            <div id="performance-profile-container" style="padding-top: 6px;">
+              <label>Performance Profile</label>
+              <select id="performance-profile">
+                <option value="0">Normal</option>
+                <option value="1">Low (no gallery)</option>
+                <option value="2">Potato (only search)</option>
+              </select>
+            </div>
             <div id="column-resize-container">
               <span>
                 <label>Columns</label>
@@ -304,7 +315,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           </div>
         </div>
         <div id="show-ui-container" style="width: 35%;">
-          <div id="show-ui-div" style="max-width: 400px;"><label class="checkbox" title="Toggle UI"><input type="checkbox" id="show-ui">UI</label></div>
+          <div id="show-ui-div" style="max-width: 400px;"><label class="checkbox" title="Toggle UI"><input
+                type="checkbox" id="show-ui">UI</label></div>
         </div>
       </div>
     </div>
@@ -329,7 +341,8 @@ const FAVORITE_SEARCH_PREFERENCES = {
   findFavorite: "findFavorite",
   thumbSize: "thumbSize",
   columnCount: "columnCount",
-  showUI: "showUI"
+  showUI: "showUI",
+  performanceProfile: "performanceProfile"
 };
 const FAVORITE_SEARCH_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -353,7 +366,8 @@ const FAVORITE_SEARCH_CHECKBOXES = {
 const FAVORITE_SEARCH_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
   findFavorite: document.getElementById("find-favorite-input"),
-  columnCount: document.getElementById("column-resize-input")
+  columnCount: document.getElementById("column-resize-input"),
+  performanceProfile: document.getElementById("performance-profile")
 };
 const FAVORITE_SEARCH_LABELS = {
   findFavorite: document.getElementById("find-favorite-label")
@@ -411,6 +425,14 @@ function loadFavoritesPagePreferences() {
 
   FAVORITE_SEARCH_CHECKBOXES.showUI.checked = showUI;
   toggleUI(showUI);
+
+  const performanceProfile = getPerformanceProfile();
+
+  for (const option of FAVORITE_SEARCH_INPUTS.performanceProfile.children) {
+    if (parseInt(option.value) === performanceProfile) {
+      option.selected = "selected";
+    }
+  }
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -550,6 +572,11 @@ function addEventListenersToFavoritesPage() {
 
   FAVORITE_SEARCH_CHECKBOXES.showUI.onchange = () => {
     toggleUI(FAVORITE_SEARCH_CHECKBOXES.showUI.checked);
+  };
+
+  FAVORITE_SEARCH_INPUTS.performanceProfile.onchange = () => {
+    setPreference(FAVORITE_SEARCH_PREFERENCES.performanceProfile, parseInt(FAVORITE_SEARCH_INPUTS.performanceProfile.value));
+    window.location.reload();
   };
 }
 
