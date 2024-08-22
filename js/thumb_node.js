@@ -64,6 +64,10 @@ class ThumbNode {
    * @type {HTMLButtonElement}
    */
   removeButton;
+  /**
+   * @type {Boolean}
+   */
+  matchedByMostRecentSearch;
 
   /**
    * @type {String}
@@ -120,6 +124,7 @@ class ThumbNode {
     this.populateAttributes(thumb, fromRecord);
     this.setupRemoveButton();
     this.setupOnClickLink();
+    this.setFlags();
   }
 
   instantiateTemplate() {
@@ -215,5 +220,9 @@ class ThumbNode {
    */
   toggleVisibility(value) {
     this.root.style.display = value ? "" : "none";
+  }
+
+  setFlags() {
+    this.matchedByMostRecentSearch = true;
   }
 }

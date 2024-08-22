@@ -75,6 +75,9 @@ class Tooltip {
       window.addEventListener("favoritesLoaded", () => {
         this.addEventListenersToThumbs.bind(this)();
       });
+      window.addEventListener("changedPage", () => {
+        this.addEventListenersToThumbs.bind(this)();
+      });
       window.addEventListener("thumbUnderCursorOnLoad", (event) => {
         this.showOnLoadIfHoveringOverThumb(event.detail);
       }, {
@@ -115,7 +118,7 @@ class Tooltip {
     for (const thumb of thumbs) {
       const image = getImageFromThumb(thumb);
 
-      if (image.hasAttribute("hasTooltipListener")) {
+      if (image.classList.contains("tooltip")) {
         return;
       }
       image.onmouseenter = () => {
@@ -128,7 +131,7 @@ class Tooltip {
           this.hide();
         }
       };
-      image.setAttribute("hasTooltipListener", true);
+      image.classList.add("tooltip");
     }
   }
 

@@ -1,4 +1,4 @@
-const renderHTML = `<style>
+const galleryHTML = `<style>
   body {
     width: 99.5vw;
     overflow-x: hidden;
@@ -13,7 +13,18 @@ const renderHTML = `<style>
         animation: outlineGlow 1s forwards;
         opacity: 1;
       }
+
+
     }
+
+    >div>canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1;
+        visibility: hidden;
+      }
 
     .image {
       opacity: 0.4;
@@ -35,6 +46,10 @@ const renderHTML = `<style>
     100% {
       outline-color: turquoise;
     }
+  }
+
+  #fullscreen-canvas {
+    opacity: .05;
   } */
 
   /* .image {
@@ -127,7 +142,12 @@ class Gallery {
   static galleryTraversalCooldown = {
     timeout: null,
     waitTime: 200,
+    skipCooldown: false,
     get ready() {
+      if (this.skipCooldown) {
+        return true;
+      }
+
       if (this.timeout === null) {
         this.timeout = setTimeout(() => {
           this.timeout = null;
@@ -397,7 +417,6 @@ onmessage = (message) => {
     "jpeg": 2,
     "gif": 3
   };
-
   static swipe = {
     threshold: 60,
     touchStart: {
@@ -450,13 +469,13 @@ onmessage = (message) => {
    */
   fullscreenContext;
   /**
-   * @type {Map.<String, ImageBitmap>}
-   */
-  imageBitmaps;
-  /**
    * @type {HTMLImageElement}
    */
   fullscreenCanvasPlaceholder;
+  /**
+   * @type {Map.<String, ImageBitmap>}
+   */
+  imageBitmaps;
   /**
    * @type {Worker[]}
    */
@@ -565,6 +584,9 @@ onmessage = (message) => {
    * @type {Boolean}
    */
   usingLandscapeOrientation;
+  /**
+   * @type {leftPostPage}
+   */
 
   constructor() {
     const galleryDisabled = (onMobileDevice() && onPostPage()) || getPerformanceProfile() > 0;
@@ -609,8 +631,9 @@ onmessage = (message) => {
     this.stopRendering = false;
     this.currentlyRendering = false;
     this.usingLandscapeOrientation = true;
+    this.leftPostPage = false;
     this.finishedLoading = onPostPage();
-    this.showOriginalContentOnHover = window.location.href.includes("favorites") ? getPreference(Gallery.preferences.showOnHover, true) : false;
+    this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
   }
 
@@ -634,7 +657,7 @@ onmessage = (message) => {
   }
 
   injectStyleHTML() {
-    injectStyleHTML(renderHTML);
+    injectStyleHTML(galleryHTML);
   }
 
   injectOptionsHTML() {
@@ -841,16 +864,22 @@ onmessage = (message) => {
     }, {
       once: true
     });
-    window.addEventListener("favoritesLoaded", () => {
+    window.addEventListener("favoritesLoaded", (event) => {
       this.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
       this.renderImagesInTheBackground();
-      this.assignImageExtensionsInTheBackground();
+      this.assignImageExtensionsInTheBackground(event.detail);
     });
-    window.addEventListener("finishedSearching", () => {
+    window.addEventListener("changedPage", async() => {
+      console.log("changedPage");
+      this.clearFullscreenCanvas();
+      this.toggleOriginalContentVisibility(false);
+      await this.deleteAllRenders();
+      Array.from(getAllThumbs()).forEach((thumb) => thumb.classList.remove("loaded"));
+      this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
-      this.onFavoritesSearch();
+      this.renderImagesInTheBackground();
     });
     window.addEventListener("shuffle", async() => {
       this.enumerateVisibleThumbs();
@@ -1069,7 +1098,14 @@ onmessage = (message) => {
       this.deleteAllRenders();
     });
     window.onblur = () => {
+      this.leftPostPage = true;
       this.deleteAllRenders();
+    };
+    window.onfocus = () => {
+      if (this.leftPostPage) {
+        this.leftPostPage = false;
+        this.renderImagesInTheBackground();
+      }
     };
     await this.findImageExtensionsOnPostPage();
     this.renderImagesInTheBackground();
@@ -1171,6 +1207,10 @@ onmessage = (message) => {
     }
     const image = getImageFromThumb(thumb);
 
+    if (image.classList.contains("gallery")) {
+      return;
+    }
+
     image.onmouseover = () => {
       if (this.inGallery || this.recentlyExitedGalleryMode) {
         return;
@@ -1183,6 +1223,7 @@ onmessage = (message) => {
       }
       this.hideOriginalContent(thumb);
     };
+    image.classList.add("gallery");
   }
 
   loadDiscoveredImageExtensions() {
@@ -1214,6 +1255,7 @@ onmessage = (message) => {
   }
 
   enterGallery() {
+    console.log(this.visibleThumbs);
     const selectedThumb = this.getSelectedThumb();
 
     this.lastSelectedThumbIndexBeforeEnteringGalleryMode = this.currentlySelectedThumbIndex;
@@ -1240,7 +1282,7 @@ onmessage = (message) => {
         this.showOriginalContent(this.visibleThumbs[thumbIndex]);
       }
     }
-    this.recentlyExitedGalleryMode = true;
+    this.recentlyExitedGallery = true;
     setTimeout(() => {
       this.recentlyExitedGalleryMode = false;
     }, 300);
@@ -1450,7 +1492,7 @@ onmessage = (message) => {
   }
 
   deleteOldestRender() {
-    if (this.imageBitmaps.size > this.maxNumberOfImagesToRender) {
+    if (this.imageBitmaps.size > this.maxNumberOfImagesToRender * 1.5) {
       const iterator = this.imageBitmaps.keys().next();
 
       if (!iterator.done) {
@@ -1609,9 +1651,14 @@ onmessage = (message) => {
     createImageBitmap(image)
       .then((imageBitmap) => {
         if (this.imageBitmaps.get(thumb.id) === undefined) {
+          const selectedThumb = this.getSelectedThumb();
+
+          if (thumb === null || thumb === undefined || selectedThumb === null || selectedThumb === undefined) {
+            return;
+          }
           this.imageBitmaps.set(thumb.id, imageBitmap);
 
-          if (this.getSelectedThumb().id === thumb.id) {
+          if (selectedThumb !== null && selectedThumb.id === thumb.id) {
             this.drawFullscreenCanvas(imageBitmap);
           }
         }
@@ -1816,12 +1863,6 @@ onmessage = (message) => {
     return thumbs;
   }
 
-  async onFavoritesSearch() {
-    this.deleteRendersNotIncludedInNewSearch();
-    await this.pauseRendering(50);
-    this.renderImagesInTheBackground();
-  }
-
   deleteRendersNotIncludedInNewSearch() {
     for (const id of this.imageBitmaps.keys()) {
       const thumb = document.getElementById(id);
@@ -1845,12 +1886,10 @@ onmessage = (message) => {
     const unrenderedImageThumbs = this.getVisibleUnrenderedImageThumbs();
     const imageThumbsToRender = [];
     const imagesAlreadyRenderedCount = this.imageBitmaps.size;
-
     const animatedThumbsToUpscale = Array.from(getAllVisibleThumbs())
       .slice(0, this.maxNumberOfImagesToRender / 2)
       .filter(thumb => !isImage(thumb) && !this.isUpscaled(thumb));
 
-    console.log(animatedThumbsToUpscale.length);
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
 
     for (let i = 0; i < unrenderedImageThumbs.length && i + imagesAlreadyRenderedCount < this.maxNumberOfImagesToRender; i += 1) {
@@ -1930,10 +1969,10 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getMaxNumberOfImagesToRender() {
-    const availableMemory = onMobileDevice() ? 120 : 400;
+    const availableMemory = onMobileDevice() ? 100 : 420;
     const averageImageSize = 20;
     const maxImagesToRender = Math.floor(availableMemory / averageImageSize);
-    return maxImagesToRender;
+    return onPostPage() ? 50 : maxImagesToRender;
   }
 
   /**
@@ -2036,7 +2075,7 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getLookahead() {
-    return Math.max(3, Math.min(10, Math.round(this.maxNumberOfImagesToRender / 4) - 2));
+    return Math.max(3, Math.min(10, Math.round(this.maxNumberOfImagesToRender / 2) - 2));
   }
 
   /**
@@ -2079,10 +2118,10 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {String[]} ids
+   * @param {ThumbNode[]} thumbNodes
    */
-  async assignImageExtensionsInTheBackground(ids) {
-    const postIdsWithUnknownExtensions = ids === undefined ? this.getPostIdsWithUnknownExtensions() : ids;
+  async assignImageExtensionsInTheBackground(thumbNodes) {
+    const postIdsWithUnknownExtensions = this.getPostIdsWithUnknownExtensions(thumbNodes);
 
     while (postIdsWithUnknownExtensions.length > 0) {
       await sleep(4000);
@@ -2102,10 +2141,12 @@ onmessage = (message) => {
   }
 
   /**
+   * @param {ThumbNode[]} thumbNodes
    * @returns {String[]}
    */
-  getPostIdsWithUnknownExtensions() {
-    return Array.from(getAllThumbs())
+  getPostIdsWithUnknownExtensions(thumbNodes) {
+    return thumbNodes
+      .map(thumbNode => thumbNode.root)
       .filter(thumb => isImage(thumb))
       .filter(thumb => !this.extensionIsKnown(thumb.id))
       .map(thumb => thumb.id);

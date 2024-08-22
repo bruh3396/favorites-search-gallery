@@ -97,21 +97,19 @@ function userIsOnTheirOwnFavoritesPage() {
  * @param {Number} delay
  */
 function requestPageInformation(url, callback, delay = 0) {
-  const httpRequest = new XMLHttpRequest();
   const delayIncrement = 500;
 
-  httpRequest.open("GET", url, true);
-  httpRequest.onreadystatechange = () => {
-    if (httpRequest.readyState === 4) {
-      if (httpRequest.status === 503) {
-        requestPageInformation(url, callback, delay + delayIncrement);
-      }
-      return callback(httpRequest.responseText);
-    }
-    return null;
-  };
   setTimeout(() => {
-    httpRequest.send();
+    fetch((url))
+      .then((response) => {
+        if (response.status === 503) {
+          requestPageInformation(url, callback, delay + delayIncrement);
+        }
+        return response.text();
+      })
+      .then((html) => {
+        callback(html);
+      });
   }, delay);
 }
 
@@ -653,7 +651,7 @@ function injectCommonStyles() {
 function configureVideoOutlines() {
   const size = onMobileDevice() ? 2 : 4;
 
-  injectStyleHTML(`img.video {outline: ${size}px solid blue;}`, "video-border");
+  injectStyleHTML("img.video {outline: 2px solid blue;}", "video-border");
 }
 
 function removeInlineImgStyles() {

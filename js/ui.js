@@ -225,10 +225,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         background: transparent;
         margin: 0px 2px;
         padding: 2px 6px;
-        border: 1px solid white;
+        border: 1px solid black;
         cursor: pointer;
         font-size: 14px;
-        color: white;
+        color: black;
         font-weight: normal;
 
         &:hover {
@@ -238,6 +238,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         &.selected {
           border: none;
           font-weight: bold;
+          pointer-events: none;
         }
       }
     }
@@ -261,9 +262,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;">Search Favorites</h2>
-      <span style="margin-left: 10px;">
+      <span style="margin-left: 5px;">
         <label id="match-count-label"></label>
         <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
+        <label id="pagination-label" style="margin-left: 10px;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
         <button title="Search favorites\nctrl+click: Search all posts" id="search-button">Search</button>
@@ -298,6 +300,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           <div id="additional-favorite-options">
             <div id="performance-profile-container" style="padding-top: 6px;">
               <label>Performance Profile</label>
+              <br>
               <select id="performance-profile">
                 <option value="0">Normal</option>
                 <option value="1">Low (no gallery)</option>
@@ -418,7 +421,7 @@ function loadFavoritesPagePreferences() {
     FAVORITE_SEARCH_INPUTS.searchBox.value = searchHistory[0];
   }
   FAVORITE_SEARCH_INPUTS.findFavorite.value = getPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, "");
-  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 6);
+  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 8);
   changeColumnCount(FAVORITE_SEARCH_INPUTS.columnCount.value);
 
   const showUI = getPreference(FAVORITE_SEARCH_PREFERENCES.showUI, true);

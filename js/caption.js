@@ -228,10 +228,10 @@ class Caption {
     for (const thumb of thumbs) {
       const imageContainer = getImageFromThumb(thumb).parentElement;
 
-      if (imageContainer.hasAttribute("has-caption-listener")) {
+      if (imageContainer.classList.contains("has-caption")) {
         continue;
       }
-      imageContainer.setAttribute("has-caption-listener", true);
+      imageContainer.classList.add("has-caption", true);
       imageContainer.addEventListener("mouseenter", () => {
         this.show(thumb);
       });
@@ -252,7 +252,7 @@ class Caption {
     this.caption.classList.remove("inactive");
     this.caption.innerHTML = Caption.template;
     this.captionWrapper.removeAttribute("style");
-    const captionIdHeader = document.getElementById("caption-id");
+    const captionIdHeader = this.caption.querySelector("#caption-id");
     const captionIdTag = document.createElement("li");
 
     captionIdTag.className = "caption-tag";
@@ -365,6 +365,15 @@ class Caption {
       window.addEventListener("favoritesFetched", () => {
         this.addEventListenersToThumbs.bind(this)();
       });
+      window.addEventListener("changedPage", () => {
+        this.addEventListenersToThumbs.bind(this)();
+        const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 100));
+
+        this.findTagCategories(tagNames, 3, () => {
+          this.saveTags();
+        });
+
+      });
       window.addEventListener("thumbUnderCursorOnLoad", (event) => {
         const showOnHoverCheckbox = document.getElementById("showOnHover");
 
@@ -374,6 +383,22 @@ class Caption {
       });
       window.addEventListener("showCaption", (event) => {
         this.show(event.detail);
+      });
+      window.addEventListener("originalContentCleared", (event) => {
+        const thumbs = event.detail;
+        const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
+
+        this.findTagCategories(tagNames, 3, () => {
+          this.saveTags();
+        });
+      });
+      window.addEventListener("originalContentCleared", (event) => {
+        const thumbs = event.detail;
+        const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
+
+        this.findTagCategories(tagNames, 3, () => {
+          this.saveTags();
+        });
       });
     }
   }
@@ -607,14 +632,6 @@ class Caption {
   }
 
   findCategoriesOfAllTags() {
-    window.addEventListener("originalContentCleared", (event) => {
-      const thumbs = event.detail;
-      const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
-
-      this.findTagCategories(tagNames, 3, () => {
-        this.saveTags();
-      });
-    });
     window.addEventListener("favoritesLoaded", () => {
       const allTagNames = this.getTagNamesWithUnknownCategories(getAllThumbs);
 
