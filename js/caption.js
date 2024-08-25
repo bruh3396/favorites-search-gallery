@@ -73,11 +73,11 @@ const captionHTML = `<style>
   }
 
   .copyright-tag {
-    color: #e73ee7;
+    color: #EFA1CF;
   }
 
   .metadata-tag {
-    color: #FF8800;
+    color: #8FD9ED;
   }
 
   .caption-wrapper {
@@ -102,15 +102,16 @@ class Caption {
   static importantTagCategories = new Set([
     "copyright",
     "character",
-    "artist"
-    // "metadata"
+    "artist",
+    "metadata"
   ]);
   static tagCategoryEncodings = {
     0: "general",
     1: "artist",
-    2: "metadata",
+    2: "unknown",
     3: "copyright",
-    4: "character"
+    4: "character",
+    5: "metadata"
   };
   static template = `
      <ul id="caption-list">
@@ -221,23 +222,23 @@ class Caption {
     );
   }
 
-  async addEventListenersToThumbs() {
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  async addEventListenersToThumbs(thumbs) {
     await sleep(500);
-    const thumbs = getAllThumbs();
+    thumbs = thumbs === undefined ? getAllThumbs() : thumbs;
 
     for (const thumb of thumbs) {
       const imageContainer = getImageFromThumb(thumb).parentElement;
 
-      if (imageContainer.classList.contains("has-caption")) {
-        continue;
-      }
-      imageContainer.classList.add("has-caption", true);
-      imageContainer.addEventListener("mouseenter", () => {
+      imageContainer.onmouseenter = () => {
         this.show(thumb);
-      });
-      imageContainer.addEventListener("mouseleave", () => {
+      };
+
+      imageContainer.onmouseleave = () => {
         this.hide(thumb);
-      });
+      };
     }
   }
 
@@ -257,7 +258,8 @@ class Caption {
 
     captionIdTag.className = "caption-tag";
     captionIdTag.textContent = thumb.id;
-    captionIdTag.onclick = () => {
+    captionIdTag.onclick = (event) => {
+      event.stopPropagation();
       this.tagOnClick(thumb.id);
     };
     captionIdTag.addEventListener("contextmenu", (event) => {
@@ -276,7 +278,10 @@ class Caption {
     if (this.disabled) {
       return;
     }
-    this.animateExit(thumb);
+
+    if (thumb !== null && thumb !== undefined) {
+      this.animateExit(thumb);
+    }
     this.animate(false);
     this.caption.classList.add("inactive");
     this.caption.classList.remove("transition-completed");
@@ -331,7 +336,8 @@ class Caption {
     tag.onmouseover = (event) => {
       event.stopPropagation();
     };
-    tag.onclick = () => {
+    tag.onclick = (event) => {
+      event.stopPropagation();
       this.tagOnClick(tagName);
     };
     tag.addEventListener("contextmenu", (event) => {
@@ -349,6 +355,17 @@ class Caption {
     });
     this.caption.addEventListener("transitionstart", () => {
       this.caption.classList.add("transitioning");
+    });
+    window.addEventListener("showOriginalContent", (event) => {
+      const thumb = caption.parentElement;
+
+      if (event.detail) {
+        this.hide(thumb);
+
+        this.caption.classList.add("hide");
+      } else {
+        this.caption.classList.remove("hide");
+      }
     });
 
     if (onPostPage()) {
@@ -399,6 +416,11 @@ class Caption {
         this.findTagCategories(tagNames, 3, () => {
           this.saveTags();
         });
+      });
+      window.addEventListener("newFavoritesFetchedOnReload", (event) => {
+        this.addEventListenersToThumbs.bind(this)(event.detail);
+      }, {
+        once: true
       });
     }
   }
@@ -593,28 +615,33 @@ class Caption {
     for (const tagName of uniqueTagNames) {
       const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
 
-      fetch(apiURL)
-        .then((response) => {
-          if (response.ok) {
-            return response.text();
-          }
-          throw new Error(response.statusText);
-        })
-        .then((html) => {
-          const dom = parser.parseFromString(html, "text/html");
-          const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
+      try {
+        fetch(apiURL)
+          .then((response) => {
+            if (response.ok) {
+              return response.text();
+            }
+            throw new Error(response.statusText);
+          })
+          .then((html) => {
+            const dom = parser.parseFromString(html, "text/html");
+            const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
 
-          if (encoding === "array") {
-            this.correctProblematicTag(tagName);
-            return;
-          }
+            if (encoding === "array") {
+              this.correctProblematicTag(tagName);
+              return;
+            }
+            this.tagCategoryAssociations[tagName] = parseInt(encoding);
 
-          this.tagCategoryAssociations[tagName] = encoding;
-
-          if (tagName === lastTagName && onAllCategoriesFound !== undefined) {
-            onAllCategoriesFound();
-          }
-        });
+            if (tagName === lastTagName && onAllCategoriesFound !== undefined) {
+              onAllCategoriesFound();
+            }
+          });
+      } catch (error) {
+        if (error.name !== "TypeError") {
+          throw error;
+        }
+      }
       await sleep(fetchDelay);
     }
   }

@@ -113,12 +113,12 @@ const savedSearchesHTML = `<div id="saved-searches">
   <h2>Saved Searches</h2>
   <div id="saved-searches-buttons">
     <button title="Save custom search" id="save-custom-search-button">Save</button>
-    <button title="Save results as search" id="save-results-button">Save Results</button>
     <button id="stop-editing-saved-search-button" style="display: none;">Cancel</button>
     <span>
       <button id="export-saved-search-button">Export</button>
       <button id="import-saved-search-button">Import</button>
     </span>
+    <button title="Save result ids as search" id="save-results-button">Save Results</button>
   </div>
   <div id="saved-searches-container">
     <div id="saved-searches-input-container">
@@ -257,7 +257,7 @@ class SavedSearches {
       this.importSavedSearches();
     };
     this.saveSearchResultsButton.onclick = () => {
-      this.copySearchResultIdsToClipboard();
+      this.saveSearchResultsAsCustomSearch();
     };
   }
 
@@ -436,7 +436,7 @@ class SavedSearches {
     }
   }
 
-  copySearchResultIdsToClipboard() {
+  saveSearchResultsAsCustomSearch() {
     const resultIds = [];
 
     for (const thumb of getAllVisibleThumbs()) {
@@ -448,9 +448,10 @@ class SavedSearches {
     }
 
     if (resultIds.length > 300) {
-      if (!confirm(`Are you sure you want to save ${resultIds.length} ids as one search?`));
+      if (!confirm(`Are you sure you want to save ${resultIds.length} ids as one search?`)) {
+        return;
+      }
     }
-
     const customSearch = `( ${resultIds.join(" ~ ")} )`;
 
     this.saveSearch(customSearch);

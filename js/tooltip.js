@@ -83,6 +83,11 @@ class Tooltip {
       }, {
         once: true
       });
+      window.addEventListener("newFavoritesFetchedOnReload", (event) => {
+        this.addEventListenersToThumbs.bind(this)(event.detail);
+      }, {
+        once: true
+      });
     }
   }
 
@@ -118,9 +123,6 @@ class Tooltip {
     for (const thumb of thumbs) {
       const image = getImageFromThumb(thumb);
 
-      if (image.classList.contains("tooltip")) {
-        return;
-      }
       image.onmouseenter = () => {
         if (this.enabled) {
           this.show(image);
@@ -131,7 +133,6 @@ class Tooltip {
           this.hide();
         }
       };
-      image.classList.add("tooltip");
     }
   }
 

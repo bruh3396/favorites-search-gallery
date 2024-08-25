@@ -24,7 +24,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #left-favorites-panel {
       >div:first-of-type {
         margin-bottom: 5px;
-        min-width: 560px;
+        /* min-width: 600px; */
 
         >label {
           align-content: center;
@@ -128,12 +128,16 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
 
         &:has(.remove-button:hover) {
-          outline: 3px solid red;
+          outline: 3px solid red !important;
 
           >.remove-button {
             box-shadow: 0px 3px 0px 0px red;
             color: red;
           }
+        }
+
+        >a>div {
+          height: 100%;
         }
       }
 
@@ -221,6 +225,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     }
 
     #favorites-pagination-container {
+      padding: 0px 10px 0px 10px;
       >button {
         background: transparent;
         margin: 0px 2px;
@@ -236,7 +241,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
 
         &.selected {
-          border: none;
+          border: none !important;
           font-weight: bold;
           pointer-events: none;
         }
@@ -258,14 +263,41 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       flex-flow: row wrap;
       margin-top: 10px;
     }
+
+    #additional-favorite-options {
+      >div {
+        padding-top: 6px;
+      }
+    }
+
+    #performance-profile {
+      width: 150px;
+    }
+
+    #results-per-page-input {
+      width: 136px;
+    }
+
+    #show-ui-div{
+      max-width: 400px;
+
+      &.ui-hidden {
+        max-width: 100vw;
+        text-align: center;
+        align-content: center;
+      }
+    }
+
+
+
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;">Search Favorites</h2>
       <span style="margin-left: 5px;">
         <label id="match-count-label"></label>
-        <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
         <label id="pagination-label" style="margin-left: 10px;"></label>
+        <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
         <button title="Search favorites\nctrl+click: Search all posts" id="search-button">Search</button>
@@ -298,7 +330,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   id="filter-blacklist-checkbox"> Exclude Blacklist</label></div>
           </div>
           <div id="additional-favorite-options">
-            <div id="performance-profile-container" style="padding-top: 6px;">
+            <div id="performance-profile-container">
               <label>Performance Profile</label>
               <br>
               <select id="performance-profile">
@@ -306,6 +338,11 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <option value="1">Low (no gallery)</option>
                 <option value="2">Potato (only search)</option>
               </select>
+            </div>
+            <div id="results-per-page-container" title="Maximum number of search results to display on each page\nLess is more responsive">
+                <label id="results-per-page-label">Results per Page</label>
+                <br>
+                <input type="number" id="results-per-page-input" min="50" max="10000" step="500">
             </div>
             <div id="column-resize-container">
               <span>
@@ -318,12 +355,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           </div>
         </div>
         <div id="show-ui-container" style="width: 35%;">
-          <div id="show-ui-div" style="max-width: 400px;"><label class="checkbox" title="Toggle UI"><input
+          <div id="show-ui-div"><label class="checkbox" title="Toggle UI"><input
                 type="checkbox" id="show-ui">UI</label></div>
         </div>
       </div>
     </div>
-    <div id="right-favorites-panel" style="flex: 2;"></div>
+    <div id="right-favorites-panel" style="flex: 1;"></div>
   </div>
   <div class="loading-wheel" id="loading-wheel" style="display: none;"></div>
 </div>
@@ -334,7 +371,7 @@ if (!onPostPage()) {
 }
 const FAVORITE_OPTIONS = [document.getElementById("favorite-options"), document.getElementById("additional-favorite-options")];
 const MAX_SEARCH_HISTORY_LENGTH = 100;
-const FAVORITE_SEARCH_PREFERENCES = {
+const FAVORITE_PREFERENCES = {
   textareaWidth: "searchTextareaWidth",
   textareaHeight: "searchTextareaHeight",
   showRemoveButtons: "showRemoveButtons",
@@ -345,12 +382,13 @@ const FAVORITE_SEARCH_PREFERENCES = {
   thumbSize: "thumbSize",
   columnCount: "columnCount",
   showUI: "showUI",
-  performanceProfile: "performanceProfile"
+  performanceProfile: "performanceProfile",
+  resultsPerPage: "resultsPerPage"
 };
-const FAVORITE_SEARCH_LOCAL_STORAGE = {
+const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
 };
-const FAVORITE_SEARCH_BUTTONS = {
+const FAVORITE_BUTTONS = {
   search: document.getElementById("search-button"),
   shuffle: document.getElementById("shuffle-button"),
   clear: document.getElementById("clear-button"),
@@ -360,17 +398,18 @@ const FAVORITE_SEARCH_BUTTONS = {
   columnPlus: document.getElementById("column-resize-plus"),
   columnMinus: document.getElementById("column-resize-minus")
 };
-const FAVORITE_SEARCH_CHECKBOXES = {
+const FAVORITE_CHECKBOXES = {
   showOptions: document.getElementById("options-checkbox"),
   showRemoveButtons: document.getElementById("show-remove-buttons"),
   filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
   showUI: document.getElementById("show-ui")
 };
-const FAVORITE_SEARCH_INPUTS = {
+const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
   findFavorite: document.getElementById("find-favorite-input"),
   columnCount: document.getElementById("column-resize-input"),
-  performanceProfile: document.getElementById("performance-profile")
+  performanceProfile: document.getElementById("performance-profile"),
+  resultsPerPage: document.getElementById("results-per-page-input")
 };
 const FAVORITE_SEARCH_LABELS = {
   findFavorite: document.getElementById("find-favorite-label")
@@ -388,8 +427,8 @@ function initializeFavoritesPage() {
 }
 
 function loadFavoritesPagePreferences() {
-  const height = getPreference(FAVORITE_SEARCH_PREFERENCES.textareaHeight);
-  const width = getPreference(FAVORITE_SEARCH_PREFERENCES.textareaWidth);
+  const height = getPreference(FAVORITE_PREFERENCES.textareaHeight);
+  const width = getPreference(FAVORITE_PREFERENCES.textareaWidth);
 
   if (height !== null && width !== null) {
     /*
@@ -397,45 +436,49 @@ function loadFavoritesPagePreferences() {
      * FAVORITE_SEARCH_INPUTS.searchBox.style.height = height + "px"
      */
   }
-  const removeButtonsAreVisible = getPreference(FAVORITE_SEARCH_PREFERENCES.showRemoveButtons, false) && userIsOnTheirOwnFavoritesPage();
+  const removeButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showRemoveButtons, false) && userIsOnTheirOwnFavoritesPage();
 
-  FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.checked = removeButtonsAreVisible;
+  FAVORITE_CHECKBOXES.showRemoveButtons.checked = removeButtonsAreVisible;
   setTimeout(() => {
     updateVisibilityOfAllRemoveButtons();
   }, 100);
-  const showOptions = getPreference(FAVORITE_SEARCH_PREFERENCES.showOptions, false);
+  const showOptions = getPreference(FAVORITE_PREFERENCES.showOptions, false);
 
-  FAVORITE_SEARCH_CHECKBOXES.showOptions.checked = showOptions;
+  FAVORITE_CHECKBOXES.showOptions.checked = showOptions;
   toggleFavoritesOptions(showOptions);
 
   if (userIsOnTheirOwnFavoritesPage()) {
-    FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked = getPreference(FAVORITE_SEARCH_PREFERENCES.filterBlacklist, false);
-    favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked);
+    FAVORITE_CHECKBOXES.filterBlacklist.checked = getPreference(FAVORITE_PREFERENCES.filterBlacklist, false);
+    favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
   } else {
-    FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked = true;
-    FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.parentElement.style.display = "none";
+    FAVORITE_CHECKBOXES.filterBlacklist.checked = true;
+    FAVORITE_CHECKBOXES.filterBlacklist.parentElement.style.display = "none";
   }
-  searchHistory = JSON.parse(localStorage.getItem(FAVORITE_SEARCH_LOCAL_STORAGE.searchHistory)) || [];
+  searchHistory = JSON.parse(localStorage.getItem(FAVORITE_LOCAL_STORAGE.searchHistory)) || [];
 
   if (searchHistory.length > 0) {
-    FAVORITE_SEARCH_INPUTS.searchBox.value = searchHistory[0];
+    FAVORITE_INPUTS.searchBox.value = searchHistory[0];
   }
-  FAVORITE_SEARCH_INPUTS.findFavorite.value = getPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, "");
-  FAVORITE_SEARCH_INPUTS.columnCount.value = getPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, 8);
-  changeColumnCount(FAVORITE_SEARCH_INPUTS.columnCount.value);
+  FAVORITE_INPUTS.findFavorite.value = getPreference(FAVORITE_PREFERENCES.findFavorite, "");
+  FAVORITE_INPUTS.columnCount.value = getPreference(FAVORITE_PREFERENCES.columnCount, DEFAULTS.columnCount);
+  changeColumnCount(FAVORITE_INPUTS.columnCount.value);
 
-  const showUI = getPreference(FAVORITE_SEARCH_PREFERENCES.showUI, true);
+  const showUI = getPreference(FAVORITE_PREFERENCES.showUI, true);
 
-  FAVORITE_SEARCH_CHECKBOXES.showUI.checked = showUI;
+  FAVORITE_CHECKBOXES.showUI.checked = showUI;
   toggleUI(showUI);
 
   const performanceProfile = getPerformanceProfile();
 
-  for (const option of FAVORITE_SEARCH_INPUTS.performanceProfile.children) {
+  for (const option of FAVORITE_INPUTS.performanceProfile.children) {
     if (parseInt(option.value) === performanceProfile) {
       option.selected = "selected";
     }
   }
+
+  const resultsPerPage = parseInt(getPreference(FAVORITE_PREFERENCES.resultsPerPage, DEFAULTS.resultsPerPage));
+
+  changeResultsPerPage(resultsPerPage, false);
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -452,8 +495,8 @@ function removePaginatorFromFavoritesPage() {
 }
 
 function addEventListenersToFavoritesPage() {
-  FAVORITE_SEARCH_BUTTONS.search.onclick = (event) => {
-    const query = FAVORITE_SEARCH_INPUTS.searchBox.value;
+  FAVORITE_BUTTONS.search.onclick = (event) => {
+    const query = FAVORITE_INPUTS.searchBox.value;
 
     if (event.ctrlKey) {
       const queryWithFormattedIds = query.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
@@ -465,21 +508,21 @@ function addEventListenersToFavoritesPage() {
       addToFavoritesSearchHistory(query);
     }
   };
-  FAVORITE_SEARCH_INPUTS.searchBox.addEventListener("keydown", (event) => {
+  FAVORITE_INPUTS.searchBox.addEventListener("keydown", (event) => {
     switch (event.key) {
       case "Enter":
-        if (awesompleteIsUnselected(FAVORITE_SEARCH_INPUTS.searchBox)) {
+        if (awesompleteIsUnselected(FAVORITE_INPUTS.searchBox)) {
           event.preventDefault();
-          FAVORITE_SEARCH_BUTTONS.search.click();
+          FAVORITE_BUTTONS.search.click();
         } else {
-          clearAwesompleteSelection(FAVORITE_SEARCH_INPUTS.searchBox);
+          clearAwesompleteSelection(FAVORITE_INPUTS.searchBox);
         }
         break;
 
       case "ArrowUp":
 
       case "ArrowDown":
-        if (awesompleteIsHidden(FAVORITE_SEARCH_INPUTS.searchBox)) {
+        if (awesompleteIsHidden(FAVORITE_INPUTS.searchBox)) {
           event.preventDefault();
           traverseFavoritesSearchHistory(event.key);
         } else {
@@ -490,21 +533,21 @@ function addEventListenersToFavoritesPage() {
       case "Tab":
         {
           event.preventDefault();
-          const awesomplete = FAVORITE_SEARCH_INPUTS.searchBox.parentElement;
+          const awesomplete = FAVORITE_INPUTS.searchBox.parentElement;
           const searchSuggestions = Array.from(awesomplete.querySelectorAll("li")) || [];
 
-          if (!awesompleteIsUnselected(FAVORITE_SEARCH_INPUTS.searchBox)) {
+          if (!awesompleteIsUnselected(FAVORITE_INPUTS.searchBox)) {
             const selectedSearchSuggestion = searchSuggestions.find(suggestion => suggestion.getAttribute("aria-selected") === "true");
 
             completeSearchSuggestion(selectedSearchSuggestion);
-          } else if (!awesompleteIsHidden(FAVORITE_SEARCH_INPUTS.searchBox)) {
+          } else if (!awesompleteIsHidden(FAVORITE_INPUTS.searchBox)) {
             completeSearchSuggestion(searchSuggestions[0]);
           }
           break;
         }
 
       case "Escape":
-        if (!awesompleteIsHidden(FAVORITE_SEARCH_INPUTS.searchBox)) {
+        if (!awesompleteIsHidden(FAVORITE_INPUTS.searchBox)) {
           favoritesLoader.hideAwesomplete();
         }
         break;
@@ -514,90 +557,94 @@ function addEventListenersToFavoritesPage() {
         break;
     }
   });
-  FAVORITE_SEARCH_INPUTS.searchBox.addEventListener("wheel", (event) => {
+  FAVORITE_INPUTS.searchBox.addEventListener("wheel", (event) => {
     const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
 
     traverseFavoritesSearchHistory(direction);
     event.preventDefault();
   });
-  FAVORITE_SEARCH_CHECKBOXES.showOptions.onchange = () => {
-    toggleFavoritesOptions(FAVORITE_SEARCH_CHECKBOXES.showOptions.checked);
-    setPreference(FAVORITE_SEARCH_PREFERENCES.showOptions, FAVORITE_SEARCH_CHECKBOXES.showOptions.checked);
+  FAVORITE_CHECKBOXES.showOptions.onchange = () => {
+    toggleFavoritesOptions(FAVORITE_CHECKBOXES.showOptions.checked);
+    setPreference(FAVORITE_PREFERENCES.showOptions, FAVORITE_CHECKBOXES.showOptions.checked);
   };
   const resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
-      setPreference(FAVORITE_SEARCH_PREFERENCES.textareaWidth, entry.contentRect.width);
-      setPreference(FAVORITE_SEARCH_PREFERENCES.textareaHeight, entry.contentRect.height);
+      setPreference(FAVORITE_PREFERENCES.textareaWidth, entry.contentRect.width);
+      setPreference(FAVORITE_PREFERENCES.textareaHeight, entry.contentRect.height);
     }
   });
 
-  resizeObserver.observe(FAVORITE_SEARCH_INPUTS.searchBox);
-  FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.onchange = () => {
+  resizeObserver.observe(FAVORITE_INPUTS.searchBox);
+  FAVORITE_CHECKBOXES.showRemoveButtons.onchange = () => {
     updateVisibilityOfAllRemoveButtons();
-    setPreference(FAVORITE_SEARCH_PREFERENCES.showRemoveButtons, FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.checked);
+    setPreference(FAVORITE_PREFERENCES.showRemoveButtons, FAVORITE_CHECKBOXES.showRemoveButtons.checked);
   };
-  FAVORITE_SEARCH_BUTTONS.shuffle.onclick = () => {
+  FAVORITE_BUTTONS.shuffle.onclick = () => {
     favoritesLoader.shuffleSearchResults();
   };
-  FAVORITE_SEARCH_BUTTONS.clear.onclick = () => {
-    FAVORITE_SEARCH_INPUTS.searchBox.value = "";
+  FAVORITE_BUTTONS.clear.onclick = () => {
+    FAVORITE_INPUTS.searchBox.value = "";
   };
-  FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.onchange = () => {
-    setPreference(FAVORITE_SEARCH_PREFERENCES.filterBlacklist, FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked);
-    favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_SEARCH_CHECKBOXES.filterBlacklist.checked);
+  FAVORITE_CHECKBOXES.filterBlacklist.onchange = () => {
+    setPreference(FAVORITE_PREFERENCES.filterBlacklist, FAVORITE_CHECKBOXES.filterBlacklist.checked);
+    favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
     favoritesLoader.searchFavorites();
   };
-  FAVORITE_SEARCH_BUTTONS.invert.onclick = () => {
+  FAVORITE_BUTTONS.invert.onclick = () => {
     favoritesLoader.invertSearchResults();
   };
-  FAVORITE_SEARCH_BUTTONS.reset.onclick = () => {
+  FAVORITE_BUTTONS.reset.onclick = () => {
     favoritesLoader.deletePersistentData();
   };
-  FAVORITE_SEARCH_INPUTS.findFavorite.addEventListener("keydown", (event) => {
+  FAVORITE_INPUTS.findFavorite.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
-      scrollToThumb(FAVORITE_SEARCH_INPUTS.findFavorite.value);
-      setPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, postId);
+      scrollToThumb(FAVORITE_INPUTS.findFavorite.value);
+      setPreference(FAVORITE_PREFERENCES.findFavorite, postId);
     }
   });
-  FAVORITE_SEARCH_BUTTONS.findFavorite.onclick = () => {
-    scrollToThumb(FAVORITE_SEARCH_INPUTS.findFavorite.value);
-    setPreference(FAVORITE_SEARCH_PREFERENCES.findFavorite, postId);
+  FAVORITE_BUTTONS.findFavorite.onclick = () => {
+    scrollToThumb(FAVORITE_INPUTS.findFavorite.value);
+    setPreference(FAVORITE_PREFERENCES.findFavorite, postId);
   };
-  FAVORITE_SEARCH_BUTTONS.columnPlus.onclick = () => {
-    changeColumnCount(parseInt(FAVORITE_SEARCH_INPUTS.columnCount.value) + 1);
+  FAVORITE_BUTTONS.columnPlus.onclick = () => {
+    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) + 1);
   };
-  FAVORITE_SEARCH_BUTTONS.columnMinus.onclick = () => {
-    changeColumnCount(parseInt(FAVORITE_SEARCH_INPUTS.columnCount.value) - 1);
+  FAVORITE_BUTTONS.columnMinus.onclick = () => {
+    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) - 1);
   };
-  FAVORITE_SEARCH_INPUTS.columnCount.onchange = () => {
-    changeColumnCount(parseInt(FAVORITE_SEARCH_INPUTS.columnCount.value));
-  };
-
-  FAVORITE_SEARCH_CHECKBOXES.showUI.onchange = () => {
-    toggleUI(FAVORITE_SEARCH_CHECKBOXES.showUI.checked);
+  FAVORITE_INPUTS.columnCount.onchange = () => {
+    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value));
   };
 
-  FAVORITE_SEARCH_INPUTS.performanceProfile.onchange = () => {
-    setPreference(FAVORITE_SEARCH_PREFERENCES.performanceProfile, parseInt(FAVORITE_SEARCH_INPUTS.performanceProfile.value));
+  FAVORITE_CHECKBOXES.showUI.onchange = () => {
+    toggleUI(FAVORITE_CHECKBOXES.showUI.checked);
+  };
+
+  FAVORITE_INPUTS.performanceProfile.onchange = () => {
+    setPreference(FAVORITE_PREFERENCES.performanceProfile, parseInt(FAVORITE_INPUTS.performanceProfile.value));
     window.location.reload();
+  };
+
+  FAVORITE_INPUTS.resultsPerPage.onchange = () => {
+    changeResultsPerPage(parseInt(FAVORITE_INPUTS.resultsPerPage.value));
   };
 }
 
 function completeSearchSuggestion(suggestion) {
   suggestion = suggestion.innerText.replace(/ \([0-9]+\)$/, "");
   favoritesLoader.hideAwesomplete();
-  FAVORITE_SEARCH_INPUTS.searchBox.value = FAVORITE_SEARCH_INPUTS.searchBox.value.replace(/\S+$/, `${suggestion} `);
+  FAVORITE_INPUTS.searchBox.value = FAVORITE_INPUTS.searchBox.value.replace(/\S+$/, `${suggestion} `);
 }
 
 function hideRemoveLinksWhenNotOnOwnFavoritesPage() {
   if (!userIsOnTheirOwnFavoritesPage()) {
-    FAVORITE_SEARCH_CHECKBOXES.showRemoveButtons.parentElement.style.display = "none";
+    FAVORITE_CHECKBOXES.showRemoveButtons.parentElement.style.display = "none";
   }
 }
 
 function updateLastSearchQuery() {
-  if (FAVORITE_SEARCH_INPUTS.searchBox.value !== lastSearchQuery) {
-    lastSearchQuery = FAVORITE_SEARCH_INPUTS.searchBox.value;
+  if (FAVORITE_INPUTS.searchBox.value !== lastSearchQuery) {
+    lastSearchQuery = FAVORITE_INPUTS.searchBox.value;
   }
   searchHistoryIndex = -1;
 }
@@ -610,7 +657,7 @@ function addToFavoritesSearchHistory(newSearch) {
   searchHistory = searchHistory.filter(search => search !== newSearch);
   searchHistory.unshift(newSearch);
   searchHistory.length = Math.min(searchHistory.length, MAX_SEARCH_HISTORY_LENGTH);
-  localStorage.setItem(FAVORITE_SEARCH_LOCAL_STORAGE.searchHistory, JSON.stringify(searchHistory));
+  localStorage.setItem(FAVORITE_LOCAL_STORAGE.searchHistory, JSON.stringify(searchHistory));
 }
 
 /**
@@ -625,28 +672,61 @@ function traverseFavoritesSearchHistory(direction) {
     }
 
     if (searchHistoryIndex === -1) {
-      FAVORITE_SEARCH_INPUTS.searchBox.value = lastSearchQuery;
+      FAVORITE_INPUTS.searchBox.value = lastSearchQuery;
     } else {
-      FAVORITE_SEARCH_INPUTS.searchBox.value = searchHistory[searchHistoryIndex];
+      FAVORITE_INPUTS.searchBox.value = searchHistory[searchHistoryIndex];
     }
   }
 }
 
+/**
+ * @param {Boolean} value
+ */
 function toggleFavoritesOptions(value) {
   for (const option of FAVORITE_OPTIONS) {
     option.style.display = value ? "block" : "none";
   }
 }
 
+/**
+ * @param {Number} count
+ */
 function changeColumnCount(count) {
+  count = parseInt(count);
+
+  if (isNaN(count)) {
+    FAVORITE_INPUTS.columnCount.value = getPreference(FAVORITE_PREFERENCES.columnCount, DEFAULTS.columnCount);
+    return;
+  }
   count = clamp(parseInt(count), 4, 20);
   injectStyleHTML(`
     #content {
       grid-template-columns: repeat(${count}, 1fr) !important;
     }
     `, "columnCount");
-  FAVORITE_SEARCH_INPUTS.columnCount.value = count;
-  setPreference(FAVORITE_SEARCH_PREFERENCES.columnCount, count);
+  FAVORITE_INPUTS.columnCount.value = count;
+  setPreference(FAVORITE_PREFERENCES.columnCount, count);
+}
+
+/**
+ * @param {Number} resultsPerPage
+ * @param {Boolean} search
+ */
+function changeResultsPerPage(resultsPerPage, search = true) {
+  resultsPerPage = parseInt(resultsPerPage);
+
+  if (isNaN(resultsPerPage)) {
+    FAVORITE_INPUTS.resultsPerPage.value = getPreference(FAVORITE_PREFERENCES.resultsPerPage, DEFAULTS.resultsPerPage);
+    return;
+  }
+  resultsPerPage = clamp(resultsPerPage, 50, 20000);
+  FAVORITE_INPUTS.resultsPerPage.value = resultsPerPage;
+  setPreference(FAVORITE_PREFERENCES.resultsPerPage, resultsPerPage);
+
+  if (search) {
+    favoritesLoader.updateMaxNumberOfFavoritesToDisplay(resultsPerPage);
+  }
+
 }
 
 /**
@@ -668,12 +748,13 @@ function toggleUI(value) {
     header.style.display = "none";
     favoritesTopBarPanels.style.display = "none";
   }
-  setPreference(FAVORITE_SEARCH_PREFERENCES.showUI, value);
+  showUIDiv.classList.toggle("ui-hidden", !value);
+  setPreference(FAVORITE_PREFERENCES.showUI, value);
 }
 
 function configureMobileUi() {
   if (onMobileDevice()) {
-    FAVORITE_SEARCH_INPUTS.performanceProfile.parentElement.style.display = "none";
+    FAVORITE_INPUTS.performanceProfile.parentElement.style.display = "none";
     injectStyleHTML(`
       .thumb, .thumb-node {
         > div > canvas {

@@ -1,11 +1,13 @@
 const THUMB_NODE_TEMPLATE = new DOMParser().parseFromString("<div></div>", "text/html").createElement("div");
 const CANVAS_HTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
+const REMOVE_BUTTON_HTML = userIsOnTheirOwnFavoritesPage() ? "<button class=\"remove-button light-green-gradient\" style=\"visibility: hidden;\">Remove</button>" : "";
 
 THUMB_NODE_TEMPLATE.className = "thumb-node";
+
 THUMB_NODE_TEMPLATE.innerHTML = `
     <div>
       <img loading="lazy">
-      <button class="remove-button light-green-gradient" style="visibility: hidden;">Remove</button>
+      ${REMOVE_BUTTON_HTML}
       ${CANVAS_HTML}
     </div>
 `;
@@ -53,6 +55,10 @@ class ThumbNode {
    */
   image;
   /**
+   * @type {HTMLButtonElement}
+   */
+  removeButton;
+  /**
    * @type {String}
    */
   tags;
@@ -60,10 +66,6 @@ class ThumbNode {
    * @type {PostTags}
    */
   postTags;
-  /**
-   * @type {HTMLButtonElement}
-   */
-  removeButton;
   /**
    * @type {Boolean}
    */
@@ -131,18 +133,19 @@ class ThumbNode {
     this.root = THUMB_NODE_TEMPLATE.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
-    this.removeButton = this.root.children[0].children[1];
+    this.removeButton = userIsOnTheirOwnFavoritesPage() ? this.root.children[0].children[1] : null;
   }
 
   setupRemoveButton() {
-    if (userIsOnTheirOwnFavoritesPage()) {
-      this.removeButton.onclick = (event) => {
-        event.stopPropagation();
-        setIdToBeRemovedOnReload(this.id);
-        fetch(this.removeURL);
-        this.removeButton.remove();
-      };
+    if (this.removeButton === null) {
+      return;
     }
+    this.removeButton.onclick = (event) => {
+      event.stopPropagation();
+      setIdToBeRemovedOnReload(this.id);
+      fetch(this.removeURL);
+      this.removeButton.remove();
+    };
   }
 
   /**
@@ -193,17 +196,7 @@ class ThumbNode {
     if (usingRenderer()) {
       this.container.setAttribute("href", this.href);
     } else {
-      this.container.onclick = () => {
-        window.open(this.href, "_blank");
-      };
-      this.container.addEventListener("mousedown", (event) => {
-        const middleClick = 1;
-
-        if (event.button === middleClick) {
-          event.preventDefault();
-          window.open(this.href, "_blank");
-        }
-      });
+      this.container.setAttribute("onclick", `window.open("${this.href}")`);
     }
   }
 
@@ -224,5 +217,16 @@ class ThumbNode {
 
   setFlags() {
     this.matchedByMostRecentSearch = true;
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleMatched(value) {
+    if (value === undefined) {
+      this.matchedByMostRecentSearch = !this.matchedByMostRecentSearch;
+    } else {
+      this.matchedByMostRecentSearch = value;
+    }
   }
 }

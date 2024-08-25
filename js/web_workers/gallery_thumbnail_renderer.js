@@ -1,7 +1,7 @@
 /**
  * @type {Map.<String, OffscreenCanvas>}
  */
-const OFFSCREEN_CANVASES = new Map();
+let OFFSCREEN_CANVASES = new Map();
 let screenWidth = 1080;
 
 /**
@@ -48,6 +48,19 @@ function drawOffscreenCanvas(offscreenCanvas, imageBitmap) {
   imageBitmap.close();
 }
 
+function deleteAllCanvases() {
+  for (const id of OFFSCREEN_CANVASES.keys()) {
+    let offscreenCanvas = OFFSCREEN_CANVASES.get(id);
+
+    offscreenCanvas.getContext("2d").clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+    offscreenCanvas = null;
+    OFFSCREEN_CANVASES.set(id, offscreenCanvas);
+    OFFSCREEN_CANVASES.delete(id);
+  }
+  OFFSCREEN_CANVASES.clear();
+  OFFSCREEN_CANVASES = new Map();
+}
+
 onmessage = (message) => {
   message = message.data;
 
@@ -60,7 +73,8 @@ onmessage = (message) => {
       screenWidth = message.screenWidth;
       break;
 
-    case "delete":
+    case "deleteAll":
+      deleteAllCanvases();
       break;
 
     default:

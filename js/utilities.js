@@ -10,6 +10,10 @@ const FLAGS = {
   usingFirefox: undefined,
   onMobileDevice: undefined
 };
+const DEFAULTS = {
+  columnCount: 6,
+  resultsPerPage: 2000
+};
 
 /**
  * @param {String} key
@@ -639,7 +643,24 @@ function injectCommonStyles() {
     img {
       border: none !important;
     }
-  `, "lightDarkTheme");
+
+    .thumb-node,
+    .thumb {
+      >a,
+      >span,
+      >div {
+        &:hover {
+          outline: 3px solid #0075FF !important;
+        }
+      }
+    }
+
+    input[type=number] {
+      border: 1px solid #767676;
+      border-radius: 2px;
+    }
+  `, "utilities-common-styles");
+
   setTimeout(() => {
     if (onPostPage()) {
       removeInlineImgStyles();
@@ -649,9 +670,9 @@ function injectCommonStyles() {
 }
 
 function configureVideoOutlines() {
-  const size = onMobileDevice() ? 2 : 4;
+  const size = onMobileDevice() ? 2 : 3;
 
-  injectStyleHTML("img.video {outline: 2px solid blue;}", "video-border");
+  injectStyleHTML(`img.video {outline: ${size}px solid blue;}`, "video-border");
 }
 
 function removeInlineImgStyles() {
@@ -666,6 +687,13 @@ function setTheme() {
       for (const element of document.querySelectorAll(".light-green-gradient")) {
         element.classList.remove("light-green-gradient");
         element.classList.add("dark-green-gradient");
+
+        injectStyleHTML(`
+          input[type=number] {
+            background-color: #303030;
+            color: white;
+          }
+          `, "dark-theme-number-input");
       }
     }
   }, 10);
@@ -854,8 +882,10 @@ function assignContentType(thumb) {
  */
 function getContentType(tags) {
   tags += " ";
-  const isAnimated = tags.includes("animated ") || tags.includes("video ");
-  const isAGif = isAnimated && !tags.includes("video ");
+  const hasVideoTag = (/(?:^|\s)video(?:$|\s)/).test(tags);
+  const hasAnimatedTag = (/(?:^|\s)animated(?:$|\s)/).test(tags);
+  const isAnimated = hasAnimatedTag || hasVideoTag;
+  const isAGif = hasAnimatedTag && !hasVideoTag;
   return isAGif ? "gif" : isAnimated ? "video" : "image";
 }
 

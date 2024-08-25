@@ -2,9 +2,9 @@
 
 [About](#about)<br>
 [Getting Started](#getting-started)<br>
-[Controls](#controls)<br>
 [Features](#features)<br>
 [Preferred Specs](#preferred-specs)<br>
+[Controls](#controls)<br>
 [FAQ](#faq)
 
 ## About
@@ -26,25 +26,6 @@ This script is still in development, please let me know if you experience a bug,
 <li>Enjoy</li>
 </ul>
 
-## Controls
-
-### Desktop
-
-<strong>Left Click/Touch:</strong>
-<ul>
-<li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
-<li><strong>In gallery:</strong> Exit gallery</li>
-</ul><br>
-<strong>Middle Click:</strong>
-<ul>
-<li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
-<li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
-</ul><br>
-<strong>Scroll Wheel/Arrow Keys/WASD/Swipe Left or Right (in gallery):</strong> Traverse gallery<br><br>
-<strong>Scroll Wheel (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
-<strong>Escape/Swipe Up (in gallery):</strong> Exit gallery<br><br>
-<strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover
-
 ## Features
 
 <ul>
@@ -52,7 +33,7 @@ This script is still in development, please let me know if you experience a bug,
         <strong>Includes:</strong>
             <ul>
             <li>AND, OR, NOT</li>
-            <li>WILDCARD</li>
+            <li>WILDCARD (starts with)</li>
             <li>ID</li>
             </ul>
         <strong>Does not include:</strong>
@@ -99,7 +80,25 @@ This script is still in development, please let me know if you experience a bug,
 Memory: 8GB<br>
 Video Memory: 4GB<br>
 Download Speed: 75Mb/s<br>
-Favorite Count: <10000 (for now)
+
+## Controls
+
+### Desktop
+
+<strong>Left Click/Touch:</strong>
+<ul>
+<li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
+<li><strong>In gallery:</strong> Exit gallery</li>
+</ul><br>
+<strong>Middle Click:</strong>
+<ul>
+<li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
+<li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
+</ul><br>
+<strong>Scroll Wheel/Arrow Keys/WASD/Swipe Left or Right (in gallery):</strong> Traverse gallery<br><br>
+<strong>Scroll Wheel (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
+<strong>Escape/Swipe Up (in gallery):</strong> Exit gallery<br><br>
+<strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover
 
 ## FAQ
 
@@ -107,15 +106,19 @@ Q: Why is there some bug/issue?<br>
 A: If not already addressed below, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
 
 Q: Everything stopped working, why I can't see any favorites?<br>
-A: Delete all site data (cookies, localStorage, indexedDB) through your browser's settings or the Reset button. Then retry.
+A: Click the "Reset" button and reload.<br>If that doesn't work, delete all site data (cookies, localStorage, indexedDB) through your browser's settings.<br> If that also doesn't work, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
 
 Q: What browsers are supported?<br>
-A: Chrome, Edge, and Firefox work. Have not tested other browsers.
+A: Chrome, Edge, and Firefox are supported.
 
 Q: Does it work on mobile/Android/iOS?<br>
 A: Yes, but only search  and gallery are enabled. Tooltips and captions are disabled to improve performance.<br>
 <ul>
-    <li>Requires a mobile browser that supports Tampermonkey, like Firefox on Android.</li>
+    <li>Requires a mobile browser that supports Tampermonkey or Userscripts</li>
+    <ul>
+        <li>Firefox on Android.</li>
+        <li> <a href="https://github.com/quoid/userscripts">Userscripts</a> on iOS.</li>
+    </ul>
     <li>Still a new feature and somewhat laggy. I plan to optimize it further.</li>
     <li>Has an option to disable gallery on lower performance devices.</li>
 </ul>
@@ -128,5 +131,9 @@ A: Responsiveness depends on:
         <li>A lot of network activity (loading favorites, rendering images) happens in the background.</li>
         <li>A stable wired connection is preferred.</li>
     </ul>
-    <li>Favorite count: >15000 favorites can start getting slow when they're all on one page. I plan to implement multiple pages in the future.</li>
+    Improve responsiveness and performance by:
+    <ul>
+     <li>Reducing the "Results per Page" option.</li>
+     <li>Lowering the "Performance Profile" option.</li>
+    </ul>
 </ul>

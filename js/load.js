@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -270,12 +270,31 @@ onmessage = (message) => {
    * @type {DOMParser}
    */
   parser;
+  /**
+   * @type {Boolean}
+   */
+  foundEmptyFavoritesPage;
+  /**
+   * @type {ThumbNode[]}
+   */
+  searchResultsWhileFetching;
+  /**
+   * @type {Number}
+   */
+  recentlyChangedMaxNumberOfFavoritesToDisplay;
+  /**
+   * @type {Number}
+   */
+  maxPageNumberButtonCount;
+  /**
+   * @type {Boolean}
+   */
+  newPageNeedsToBeCreated;
 
   /**
    * @type {Boolean}
    */
   get databaseAccessIsAllowed() {
-    // return userIsOnTheirOwnFavoritesPage();
     return true;
   }
 
@@ -308,21 +327,26 @@ onmessage = (message) => {
       return;
     }
     this.allThumbNodes = [];
+    this.searchResultsWhileFetching = [];
     this.finalPageNumber = this.getFinalFavoritesPageNumber();
     this.matchCountLabel = document.getElementById("match-count-label");
-    this.maxNumberOfFavoritesToDisplay = 2000;
+    this.maxNumberOfFavoritesToDisplay = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
     this.failedFetchRequests = [];
     this.currentLoadState = FavoritesLoader.loadState.notStarted;
     this.expectedFavoritesCount = 53;
     this.expectedFavoritesCountFound = false;
     this.searchResultsAreShuffled = false;
     this.searchResultsAreInverted = false;
+    this.foundEmptyFavoritesPage = false;
+    this.newPageNeedsToBeCreated = false;
+    this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
     this.matchingFavoritesCount = 0;
+    this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
     this.searchQuery = "";
     this.databaseWorker = new Worker(getWorkerURL(FavoritesLoader.webWorkers.database));
     this.favoritesSearchInput = document.getElementById("favorites-search-box");
     this.paginationContainer = this.createPaginationContainer();
-    this.currentFavoritesPageNumber = 0;
+    this.currentFavoritesPageNumber = 1;
     this.parser = new DOMParser();
     this.createDatabaseMessageHandler();
     this.loadFavorites();
@@ -351,7 +375,7 @@ onmessage = (message) => {
   }
 
   loadFavorites() {
-    this.clearContent();
+    this.clearOriginalContent();
     this.setFavoritesCount();
     this.searchFavorites();
   }
@@ -388,7 +412,7 @@ onmessage = (message) => {
       });
   }
 
-  clearContent() {
+  clearOriginalContent() {
     const thumbs = Array.from(document.getElementsByClassName("thumb"));
 
     setTimeout(() => {
@@ -428,24 +452,12 @@ onmessage = (message) => {
   }
 
   showSearchResultsAfterStartedLoading() {
-    const resultIds = this.getSearchResultIds(this.allThumbNodes, this.allThumbNodes.length - 1);
-
-    // for (const thumbNode of this.allThumbNodes) {
-    //   if (resultIds[thumbNode.id] === undefined) {
-    //     thumbNode.toggleVisibility(false);
-    //   } else {
-    //     thumbNode.toggleVisibility(true);
-    //     this.incrementMatchCount();
-    //   }
-    // }
+    this.searchResultsWhileFetching = this.getSearchResults(this.allThumbNodes);
+    this.paginateSearchResults(this.searchResultsWhileFetching);
   }
 
   showSearchResultsAfterFinishedLoading() {
-    const searchResults = this.getSearchResults(this.allThumbNodes);
-
-    this.paginateSearchResults(searchResults);
-    this.updateMatchCount(searchResults.length);
-    dispatchEventWithDelay("changedPage");
+    this.paginateSearchResults(this.getSearchResults(this.allThumbNodes));
   }
 
   async showSearchResultsBeforeStartedLoading() {
@@ -534,9 +546,9 @@ onmessage = (message) => {
 
       if (postTagsMatchSearch(searchCommand, thumbNodes[i].postTags)) {
         results.push(thumbNodes[i]);
-        thumbNode.matchedByMostRecentSearch = true;
+        thumbNode.toggleMatched(true);
       } else {
-        thumbNode.matchedByMostRecentSearch = false;
+        thumbNode.toggleMatched(false);
       }
     }
     return results;
@@ -629,6 +641,8 @@ onmessage = (message) => {
 
     this.currentLoadState = FavoritesLoader.loadState.started;
     this.toggleContentVisibility(true);
+    this.insertPaginationContainer();
+    this.updatePaginationUi(1, []);
     setTimeout(() => {
       dispatchEvent(new Event("startedFetchingFavorites"));
     }, 50);
@@ -654,7 +668,7 @@ onmessage = (message) => {
     finishedLoading = finishedLoading || currentPageNumber >= (this.finalPageNumber * 2) + 1;
     finishedLoading = finishedLoading && this.failedFetchRequests.length === 0;
 
-    if (currentPageNumber <= this.finalPageNumber) {
+    if (currentPageNumber <= this.finalPageNumber && !this.foundEmptyFavoritesPage) {
       await this.fetchFavoritesFromSinglePage(currentPageNumber);
     } else if (this.failedFetchRequests.length > 0) {
       const failedRequest = this.failedFetchRequests.shift();
@@ -698,6 +712,10 @@ onmessage = (message) => {
       .then((html) => {
         const {thumbNodes, searchResults} = this.extractFavoritesPage(html);
 
+        this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(searchResults);
+        this.foundEmptyFavoritesPage = thumbNodes.length === 0;
+        this.updateMatchCount(this.searchResultsWhileFetching.length);
+
         setTimeout(() => {
           dispatchEvent(new CustomEvent("favoritesFetched", {
             detail: thumbNodes.map(thumbNode => thumbNode.root)
@@ -709,11 +727,7 @@ onmessage = (message) => {
         } else {
           this.allThumbNodes = this.allThumbNodes.concat(thumbNodes);
         }
-
-        if (this.allThumbNodes.length < this.maxNumberOfFavoritesToDisplay) {
-          this.incrementMatchCount(searchResults.length);
-          this.addFavoritesToContent(searchResults, failedRequest);
-        }
+        this.addFavoritesToContent(searchResults, failedRequest);
       })
       .catch((error) => {
         console.error(error);
@@ -744,14 +758,13 @@ onmessage = (message) => {
   invertSearchResults() {
     this.resetMatchCount();
     this.allThumbNodes.forEach((thumbNode) => {
-      thumbNode.matchedByMostRecentSearch = !thumbNode.matchedByMostRecentSearch;
+      thumbNode.toggleMatched();
     });
     const invertedSearchResults = this.getThumbNodesMatchedByLastSearch();
 
     this.searchResultsAreInverted = true;
     this.paginateSearchResults(invertedSearchResults);
     window.scrollTo(0, 0);
-    // dispatchEventWithDelay("finishedSearching");
   }
 
   shuffleSearchResults() {
@@ -813,7 +826,7 @@ onmessage = (message) => {
         if (!userIsOnTheirOwnFavoritesPage()) {
           continue;
         }
-        thumbNode.matchedByMostRecentSearch = false;
+        thumbNode.toggleMatched(false);
       } else {
         searchResults.push(thumbNode);
       }
@@ -892,12 +905,15 @@ onmessage = (message) => {
   deletePersistentData() {
     const message = `
 Are you sure you want to reset?
-This will delete all cached favorites, preferences, and custom searches.
+This will delete all cached favorites, and preferences.
     `;
 
     if (confirm(message)) {
+      const savedSearches = JSON.parse(localStorage.getItem("savedSearches"));
+
       localStorage.clear();
       indexedDB.deleteDatabase(FavoritesLoader.databaseName);
+      localStorage.setItem("savedSearches", JSON.stringify(savedSearches));
     }
   }
 
@@ -962,7 +978,6 @@ This will delete all cached favorites, preferences, and custom searches.
     const searchResults = this.reconstructContent(databaseRecords);
 
     this.paginateSearchResults(searchResults);
-    this.updateMatchCount(searchResults.length);
     this.onAllFavoritesLoaded();
   }
 
@@ -980,6 +995,7 @@ This will delete all cached favorites, preferences, and custom searches.
         thumbNode.insertInDocument(content, "afterbegin");
       }
     }
+    this.updatePaginationUi(this.currentFavoritesPageNumber, this.getThumbNodesMatchedByLastSearch());
     setTimeout(() => {
       dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
         detail: newThumbNodes.map(thumbNode => thumbNode.root)
@@ -992,6 +1008,27 @@ This will delete all cached favorites, preferences, and custom searches.
    * @param {{url: String, indexToInsert: Number}} failedRequest
    */
   addFavoritesToContent(thumbNodes, failedRequest) {
+    const pageNumberButtons = document.getElementsByClassName("pagination-number");
+    const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
+    const pageCount = this.getPageCount(this.searchResultsWhileFetching.length);
+    const needsToCreateNewPage = pageCount > lastPageButtonNumber;
+    const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount;
+
+    if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
+      this.updatePaginationUi(this.currentFavoritesPageNumber, this.searchResultsWhileFetching);
+    }
+
+    const onLastPage = (pageCount === this.currentFavoritesPageNumber);
+    const missingThumbNodeCount = this.maxNumberOfFavoritesToDisplay - getAllThumbs().length;
+
+    if (!onLastPage) {
+      if (missingThumbNodeCount > 0) {
+        thumbNodes = thumbNodes.slice(0, missingThumbNodeCount);
+      } else {
+        return;
+      }
+    }
+
     const content = document.getElementById("content");
     let elementToInsertAround = content;
     let placeToInsert = "beforeend";
@@ -1034,19 +1071,6 @@ This will delete all cached favorites, preferences, and custom searches.
   }
 
   /**
-   * @param {String} eventName
-   */
-  broadcastThumbUnderCursorOnLoadWhenAvailable(eventName) {
-    window.addEventListener(eventName, () => {
-      setTimeout(() => {
-        getThumbUnderCursorOnLoad();
-      }, 500);
-    }, {
-      once: true
-    });
-  }
-
-  /**
    * @param {Boolean} value
    */
   toggleTagBlacklistExclusion(value) {
@@ -1054,15 +1078,20 @@ This will delete all cached favorites, preferences, and custom searches.
   }
 
   /**
+   * @param {Number} searchResultsLength
+   * @returns {Number}
+   */
+  getPageCount(searchResultsLength) {
+    return Math.floor(searchResultsLength / this.maxNumberOfFavoritesToDisplay) + 1;
+  }
+
+  /**
    * @param {ThumbNode[]} searchResults
    */
   paginateSearchResults(searchResults) {
-    const pageCount = Math.floor(searchResults.length / this.maxNumberOfFavoritesToDisplay) + 1;
-
+    this.updateMatchCount(searchResults.length);
     this.insertPaginationContainer();
     this.changeResultsPage(1, searchResults);
-    this.createPageNumberButtons(pageCount, searchResults);
-    this.createPageTraversalButtons(searchResults, pageCount);
   }
 
   insertPaginationContainer() {
@@ -1071,10 +1100,7 @@ This will delete all cached favorites, preferences, and custom searches.
       const placeToInsertPagination = topRowButtons[topRowButtons.length - 1];
 
       placeToInsertPagination.insertAdjacentElement("afterend", this.paginationContainer);
-    } else {
-      this.paginationContainer.innerHTML = "";
     }
-
   }
 
   /**
@@ -1091,52 +1117,69 @@ This will delete all cached favorites, preferences, and custom searches.
             color: white !important;
           }
         }
-      `);
+      `, "pagination-style");
     }
     container.id = "favorites-pagination-container";
-    container.style.padding = "0 10px 0 40px";
     return container;
   }
 
   /**
-   * @param {Number} pageCount
+   * @param {Number} currentPageNumber
    * @param {ThumbNode[]} searchResults
    */
-  createPageNumberButtons(pageCount, searchResults) {
-    for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
-      const isMiddlePage = pageNumber > 2 && pageNumber < pageCount;
+  createPageNumberButtons(currentPageNumber, searchResults) {
+    const pageCount = this.getPageCount(searchResults.length);
+    let numberOfButtonsCreated = 0;
 
-      if (isMiddlePage) {
-        continue;
-      }
-      const pageNavigationButton = document.createElement("button");
+    for (let i = currentPageNumber; i <= pageCount && numberOfButtonsCreated < this.maxPageNumberButtonCount; i += 1) {
+      numberOfButtonsCreated += 1;
+      this.createPageNumberButton(currentPageNumber, i, searchResults);
+    }
 
-      pageNavigationButton.id = `favorites-page-${pageNumber}`;
-      pageNavigationButton.onclick = () => {
-        this.changeResultsPage(pageNumber, searchResults);
-      };
-      this.paginationContainer.appendChild(pageNavigationButton);
-      pageNavigationButton.textContent = pageNumber;
+    if (numberOfButtonsCreated >= this.maxPageNumberButtonCount) {
+      return;
+    }
+
+    for (let j = currentPageNumber - 1; j >= 1 && numberOfButtonsCreated < this.maxPageNumberButtonCount; j -= 1) {
+      numberOfButtonsCreated += 1;
+      this.createPageNumberButton(currentPageNumber, j, searchResults, "afterbegin");
     }
   }
 
   /**
+   * @param {Number} currentPageNumber
+   * @param {Number} pageNumber
    * @param {ThumbNode[]} searchResults
-   * @param {Number} pageCount
+   * @param {String} position
    */
-  createPageTraversalButtons(searchResults, pageCount) {
+  createPageNumberButton(currentPageNumber, pageNumber, searchResults, position = "beforeend") {
+    const pageNumberButton = document.createElement("button");
+    const selected = currentPageNumber === pageNumber;
+
+    pageNumberButton.id = `favorites-page-${pageNumber}`;
+    pageNumberButton.class = "pagination-number";
+    pageNumberButton.classList.toggle("selected", selected);
+    pageNumberButton.onclick = () => {
+      this.changeResultsPage(pageNumber, searchResults);
+    };
+    this.paginationContainer.insertAdjacentElement(position, pageNumberButton);
+    pageNumberButton.textContent = pageNumber;
+  }
+
+  updatePaginationWhileFetching(searchResults) {
+
+  }
+
+  /**
+   * @param {ThumbNode[]} searchResults
+   */
+  createPageTraversalButtons(searchResults) {
+    const pageCount = this.getPageCount(searchResults.length);
     const previousPage = document.createElement("button");
     const firstPage = document.createElement("button");
     const nextPage = document.createElement("button");
     const finalPage = document.createElement("button");
 
-    previousPage.style.display = "none";
-    firstPage.style.display = "none";
-
-    if (pageCount < 2) {
-      nextPage.style.display = "none";
-      finalPage.style.display = "none";
-    }
     previousPage.textContent = "<";
     firstPage.textContent = "<<";
     nextPage.textContent = ">";
@@ -1157,6 +1200,38 @@ This will delete all cached favorites, preferences, and custom searches.
     this.paginationContainer.insertAdjacentElement("afterbegin", firstPage);
     this.paginationContainer.appendChild(nextPage);
     this.paginationContainer.appendChild(finalPage);
+
+    this.updateVisibilityOfPageTraversalButtons(previousPage, firstPage, nextPage, finalPage, this.getPageCount(searchResults.length));
+  }
+
+  /**
+   * @param {ThumbNode[]} searchResults
+   */
+  createGotoSpecificPageInputs(searchResults) {
+    if (this.firstPageNumberExists() && this.lastPageNumberExists(this.getPageCount(searchResults.length))) {
+      return;
+    }
+    const html = `
+      <input type="number" placeholder="page" style="width: 4em;">
+      <button>Go</button>
+    `;
+    const container = document.createElement("span");
+
+    container.innerHTML = html;
+    const input = container.children[0];
+    const button = container.children[1];
+
+    input.onkeydown = (event) => {
+      if (event.key === "Enter") {
+        button.click();
+      }
+    };
+    button.onclick = () => {
+      const pageNumber = clamp(parseInt(input.value), 1, this.getPageCount(searchResults.length));
+
+      this.changeResultsPage(pageNumber, searchResults);
+    };
+    this.paginationContainer.appendChild(container);
   }
 
   /**
@@ -1167,17 +1242,44 @@ This will delete all cached favorites, preferences, and custom searches.
     if (this.onSamePage(pageNumber)) {
       return;
     }
-    const start = this.maxNumberOfFavoritesToDisplay * (pageNumber - 1);
-    const end = this.maxNumberOfFavoritesToDisplay * pageNumber;
+    const {start, end} = this.getPaginationStartEndIndices(pageNumber);
 
     this.previousSearchQuery = this.searchQuery;
     this.currentFavoritesPageNumber = pageNumber;
-    this.updateVisibilityOfPageTraversalButtons(end, searchResults, pageNumber);
-    this.setPaginationLabel(start, end, searchResults);
-    this.createFavoritesPage(searchResults, start, end);
+    this.updatePaginationUi(pageNumber, searchResults);
+    this.createPaginatedFavoritesPage(searchResults, start, end);
+    this.reAddAllThumbNodeEventListeners();
 
     if (this.currentLoadState !== FavoritesLoader.loadState.indexedDB) {
       dispatchEventWithDelay("changedPage");
+    }
+  }
+
+  getPaginationStartEndIndices(pageNumber) {
+    return {
+      start: this.maxNumberOfFavoritesToDisplay * (pageNumber - 1),
+      end: this.maxNumberOfFavoritesToDisplay * pageNumber
+    };
+  }
+
+  /**
+   * @param {Number} pageNumber
+   * @param {ThumbNode[]} searchResults
+   */
+  updatePaginationUi(pageNumber, searchResults) {
+    const {start, end} = this.getPaginationStartEndIndices(pageNumber);
+    const searchResultsLength = searchResults.length;
+
+    this.setPaginationLabel(start, end, searchResultsLength);
+    this.paginationContainer.innerHTML = "";
+    this.createPageNumberButtons(pageNumber, searchResults);
+    this.createPageTraversalButtons(searchResults);
+    this.createGotoSpecificPageInputs(searchResults);
+  }
+
+  reAddAllThumbNodeEventListeners() {
+    for (const thumbNode of this.allThumbNodes) {
+      thumbNode.setupRemoveButton();
     }
   }
 
@@ -1187,15 +1289,17 @@ This will delete all cached favorites, preferences, and custom searches.
    * @param {Number} end
    * @returns
    */
-  createFavoritesPage(searchResults, start, end) {
+  createPaginatedFavoritesPage(searchResults, start, end) {
     const newThumbNodes = searchResults.slice(start, end);
     const content = document.getElementById("content");
-
-    content.innerHTML = "";
+    const newContent = document.createDocumentFragment();
 
     for (const thumbNode of newThumbNodes) {
-      content.appendChild(thumbNode.root);
+      newContent.appendChild(thumbNode.root);
     }
+
+    content.innerHTML = "";
+    content.appendChild(newContent);
     window.scrollTo(0, 0);
   }
 
@@ -1204,37 +1308,28 @@ This will delete all cached favorites, preferences, and custom searches.
    * @returns {Boolean}
    */
   onSamePage(pageNumber) {
-    const result = (this.currentFavoritesPageNumber === pageNumber) &&
-    (this.searchQuery === this.previousSearchQuery) &&
-    !this.searchResultsAreShuffled &&
-    !this.searchResultsAreInverted;
-
-    console.log({
-      newPageNumber: pageNumber,
-      currentPageNumber: this.currentFavoritesPageNumber,
-      searchQuery: this.searchQuery,
-      previousSearchQuery: this.previousSearchQuery,
-      searchResultsAreShuffled: this.searchResultsAreShuffled,
-      searchResultsAreInverted: this.searchResultsAreInverted,
-      onSamePage: result
-    });
-    return result;
+    return (this.currentFavoritesPageNumber === pageNumber) &&
+      (this.searchQuery === this.previousSearchQuery) &&
+      !this.searchResultsAreShuffled &&
+      !this.searchResultsAreInverted &&
+      this.currentLoadState === FavoritesLoader.loadState.finished &&
+      !this.recentlyChangedMaxNumberOfFavoritesToDisplay;
   }
 
   /**
    * @param {Number} start
    * @param {Number} end
-   * @param {ThumbNode[]} searchResults
+   * @param {Number} searchResults
    * @returns
    */
-  setPaginationLabel(start, end, searchResults) {
-    end = Math.min(end, searchResults.length);
+  setPaginationLabel(start, end, searchResultsLength) {
+    end = Math.min(end, searchResultsLength);
 
     if (this.paginationLabel === undefined) {
       this.paginationLabel = document.getElementById("pagination-label");
     }
 
-    if (searchResults.length <= this.maxNumberOfFavoritesToDisplay) {
+    if (searchResultsLength <= this.maxNumberOfFavoritesToDisplay) {
       this.paginationLabel.textContent = "";
       return;
     }
@@ -1243,23 +1338,56 @@ This will delete all cached favorites, preferences, and custom searches.
   }
 
   /**
-   * @param {Number} end
-   * @param {ThumbNode[]} searchResults
-   * @param {Number} pageNumber
+   * @returns {Boolean}
    */
-  updateVisibilityOfPageTraversalButtons(end, searchResults, pageNumber) {
-    const onFinalPage = end >= searchResults.length;
-    const onFirstPage = pageNumber === 1;
+  firstPageNumberExists() {
+    return document.getElementById("favorites-page-1") !== null;
+  }
 
-    const pageButtons = Array.from(this.paginationContainer.children);
+  /**
+   * @param {Number} pageCount
+   * @returns {Boolean}
+   */
+  lastPageNumberExists(pageCount) {
+    return document.getElementById(`favorites-page-${pageCount}`) !== null;
+  }
 
-    for (const element of pageButtons.slice(0, 2)) {
-      element.style.display = onFirstPage ? "none" : "";
+  /**
+   * @param {HTMLButtonElement} previousPage
+   * @param {HTMLButtonElement} firstPage
+   * @param {HTMLButtonElement} nextPage
+   * @param {HTMLButtonElement} finalPage
+   * @param {Number} pageCount
+   */
+  updateVisibilityOfPageTraversalButtons(previousPage, firstPage, nextPage, finalPage, pageCount) {
+    const firstNumberExists = this.firstPageNumberExists();
+    const lastNumberExists = this.lastPageNumberExists(pageCount);
+
+    if (firstNumberExists && lastNumberExists) {
+      previousPage.style.display = "none";
+      firstPage.style.display = "none";
+      nextPage.style.display = "none";
+      finalPage.style.display = "none";
+    } else {
+      if (firstNumberExists) {
+        previousPage.style.visibility = "hidden";
+        firstPage.style.visibility = "hidden";
+      }
+
+      if (lastNumberExists) {
+        nextPage.style.visibility = "hidden";
+        finalPage.style.visibility = "hidden";
+      }
     }
-
-    for (const element of pageButtons.slice(-2)) {
-      element.style.display = onFinalPage ? "none" : "";
-    }
+  }
+  /**
+   * @param {Number} value
+   */
+  updateMaxNumberOfFavoritesToDisplay(value) {
+    this.maxNumberOfFavoritesToDisplay = value;
+    this.recentlyChangedMaxNumberOfFavoritesToDisplay = true;
+    this.searchFavorites();
+    this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
   }
 }
 

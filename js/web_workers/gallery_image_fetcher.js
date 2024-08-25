@@ -117,7 +117,12 @@ async function fetchImage(imageURL) {
  * @returns {String}
  */
 function getExtensionFromImageURL(imageURL) {
-  return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
+  try {
+    return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
+
+  } catch (error) {
+    return "jpg";
+  }
 }
 
 /**
