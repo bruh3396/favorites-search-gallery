@@ -39,6 +39,11 @@ class ThumbNode {
   }
 
   /**
+   * @type {Map.<String, ThumbNode>}
+   */
+  static allThumbNodes = new Map();
+
+  /**
    * @type {HTMLDivElement}
    */
   root;
@@ -127,6 +132,7 @@ class ThumbNode {
     this.setupRemoveButton();
     this.setupOnClickLink();
     this.setFlags();
+    this.addInstanceToAllThumbNodes();
   }
 
   instantiateTemplate() {
@@ -217,6 +223,10 @@ class ThumbNode {
 
   setFlags() {
     this.matchedByMostRecentSearch = true;
+  }
+
+  addInstanceToAllThumbNodes() {
+    ThumbNode.allThumbNodes.set(this.id, this);
   }
 
   /**

@@ -684,7 +684,7 @@ function injectCommonStyles() {
  * @param {Boolean} value
  */
 function toggleFancyImageHovering(value) {
-  if (onMobileDevice()) {
+  if (onMobileDevice() || onPostPage()) {
     value = false;
   }
 

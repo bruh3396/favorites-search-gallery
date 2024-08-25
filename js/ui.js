@@ -488,7 +488,7 @@ function loadFavoritesPagePreferences() {
     toggleFancyImageHovering(false);
     FAVORITE_CHECKBOXES.fancyImageHovering.parentElement.style.display = "none";
   } else {
-    const fancyImageHovering = getPreference(FAVORITE_PREFERENCES.fancyImageHovering, false);
+    const fancyImageHovering = getPreference(FAVORITE_PREFERENCES.fancyImageHovering, true);
 
     FAVORITE_CHECKBOXES.fancyImageHovering.checked = fancyImageHovering;
     toggleFancyImageHovering(fancyImageHovering);
