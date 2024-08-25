@@ -164,7 +164,7 @@ class Gallery {
   };
   static webWorkers = {
     imageFetcher:
-      `
+`
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 100;
 let retryDelay = 0;
@@ -302,17 +302,32 @@ async function getImageExtensionFromPostId(postId) {
 }
 
 onmessage = async(message) => {
-  const request = message.data;
+  message = message.data;
+  let extension;
 
-  if (request.findExtension) {
-    const extension = await getImageExtensionFromPostId(request.postId);
+  switch (message.action) {
+    case "render":
+      getImageBitmap(message.imageURL, message.extension, message.postId);
+      break;
 
-    postMessage({
-      foundExtension: extension,
-      postId: request.postId
-    });
-  } else {
-    await getImageBitmap(request.imageURL, request.extension, request.postId, request.thumbIndex);
+    case "renderMultiple":
+      for (const image of message.images) {
+        getImageBitmap(image.imageURL, image.extension, image.postId);
+        await sleep(image.fetchDelay);
+      }
+    break;
+
+    case "findExtension":
+      extension = await getImageExtensionFromPostId(message.postId);
+
+      postMessage({
+        foundExtension: extension,
+        postId: message.postId
+      });
+      break;
+
+    default:
+      break;
   }
 };
 
@@ -692,7 +707,7 @@ onmessage = (message) => {
 
   injectOptionsHTML() {
     let optionId = Gallery.preferences.showOnHover;
-    let optionText = "Enlarge on Hover";
+    let optionText = "Fullscreen on Hover";
     let optionTitle = "View full resolution images/play videos when a thumbnail is clicked";
     let optionIsChecked = this.showOriginalContentOnHover;
     let onOptionChanged = (event) => {
@@ -1673,25 +1688,48 @@ onmessage = (message) => {
 
   /**
    * @param {HTMLElement} thumb
+   * @returns {{imageURL: String, postId: String, extension: String}}
    */
-  renderOriginalImage(thumb) {
-    const renderMessage = {
+  getRenderMessage(thumb) {
+    return {
       imageURL: getOriginalImageURLFromThumb(thumb),
       postId: thumb.id,
-      thumbIndex: thumb.getAttribute(Gallery.attributes.thumbIndex),
-      extension: this.getImageExtension(thumb.id)
+      extension: this.getImageExtension(thumb.id),
+      fetchDelay: this.getImageFetchDelay(thumb.id)
     };
+  }
 
+  /**
+   * @param {{imageURL: String, postId: String, extension: String}} renderMessage
+   */
+  postRenderMessage(renderMessage) {
+    renderMessage.action = "render";
     this.imageBitmapFetchers[this.imageBitmapFetcherIndex].postMessage(renderMessage);
     this.imageBitmapFetcherIndex += 1;
     this.imageBitmapFetcherIndex = this.imageBitmapFetcherIndex < this.imageBitmapFetchers.length ? this.imageBitmapFetcherIndex : 0;
+  }
 
-    const image = getImageFromThumb(thumb);
-
-    if (!imageIsLoaded(image)) {
-      return;
-    }
+  /**
+   * @param {HTMLElement} thumb
+   */
+  renderOriginalImage(thumb) {
+    this.postRenderMessage(this.getRenderMessage(thumb));
     this.createFullscreenCanvasLowResolutionPlaceHolder(thumb);
+  }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  renderMultipleOriginalImages(thumbs) {
+    const messages = [];
+
+    for (const thumb of thumbs) {
+      messages.push(this.getRenderMessage(thumb));
+    }
+    this.imageBitmapFetchers[0].postMessage({
+      action: "renderMultiple",
+      images: messages
+    });
   }
 
   /**
@@ -1699,6 +1737,10 @@ onmessage = (message) => {
    */
   createFullscreenCanvasLowResolutionPlaceHolder(thumb) {
     const image = getImageFromThumb(thumb);
+
+    if (!imageIsLoaded(image)) {
+      return;
+    }
 
     try {
       createImageBitmap(image)
@@ -1963,6 +2005,8 @@ onmessage = (message) => {
    * @param {HTMLElement[]} imagesToRender
    */
   async renderImages(imagesToRender) {
+    // this.renderMultipleOriginalImages(imagesToRender);
+
     for (const thumb of imagesToRender) {
       if (this.stopRendering && !onMobileDevice()) {
         break;
@@ -2186,7 +2230,7 @@ onmessage = (message) => {
 
         if (postId !== undefined && postId !== null && !this.extensionIsKnown(postId)) {
           this.imageBitmapFetchers[0].postMessage({
-            findExtension: true,
+            action: "findExtension",
             postId
           });
           await sleep(10);

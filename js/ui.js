@@ -328,6 +328,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 Remove Buttons</label></div>
             <div><label class="checkbox" title="Exclude blacklisted tags from search"><input type="checkbox"
                   id="filter-blacklist-checkbox"> Exclude Blacklist</label></div>
+            <div><label class="checkbox" title="Enable fancy image hovering (experimental)"><input type="checkbox"
+                  id="fancy-image-hovering-checkbox"> Fancy Hovering</label></div>
           </div>
           <div id="additional-favorite-options">
             <div id="performance-profile-container">
@@ -383,7 +385,8 @@ const FAVORITE_PREFERENCES = {
   columnCount: "columnCount",
   showUI: "showUI",
   performanceProfile: "performanceProfile",
-  resultsPerPage: "resultsPerPage"
+  resultsPerPage: "resultsPerPage",
+  fancyImageHovering: "fancyImageHovering"
 };
 const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -402,7 +405,8 @@ const FAVORITE_CHECKBOXES = {
   showOptions: document.getElementById("options-checkbox"),
   showRemoveButtons: document.getElementById("show-remove-buttons"),
   filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
-  showUI: document.getElementById("show-ui")
+  showUI: document.getElementById("show-ui"),
+  fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox")
 };
 const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
@@ -479,6 +483,16 @@ function loadFavoritesPagePreferences() {
   const resultsPerPage = parseInt(getPreference(FAVORITE_PREFERENCES.resultsPerPage, DEFAULTS.resultsPerPage));
 
   changeResultsPerPage(resultsPerPage, false);
+
+  if (onMobileDevice()) {
+    toggleFancyImageHovering(false);
+    FAVORITE_CHECKBOXES.fancyImageHovering.parentElement.style.display = "none";
+  } else {
+    const fancyImageHovering = getPreference(FAVORITE_PREFERENCES.fancyImageHovering, false);
+
+    FAVORITE_CHECKBOXES.fancyImageHovering.checked = fancyImageHovering;
+    toggleFancyImageHovering(fancyImageHovering);
+  }
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -599,12 +613,12 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_INPUTS.findFavorite.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       scrollToThumb(FAVORITE_INPUTS.findFavorite.value);
-      setPreference(FAVORITE_PREFERENCES.findFavorite, postId);
+      setPreference(FAVORITE_PREFERENCES.findFavorite, FAVORITE_INPUTS.findFavorite.value);
     }
   });
   FAVORITE_BUTTONS.findFavorite.onclick = () => {
     scrollToThumb(FAVORITE_INPUTS.findFavorite.value);
-    setPreference(FAVORITE_PREFERENCES.findFavorite, postId);
+    setPreference(FAVORITE_PREFERENCES.findFavorite, FAVORITE_INPUTS.findFavorite.value);
   };
   FAVORITE_BUTTONS.columnPlus.onclick = () => {
     changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) + 1);
@@ -628,6 +642,13 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_INPUTS.resultsPerPage.onchange = () => {
     changeResultsPerPage(parseInt(FAVORITE_INPUTS.resultsPerPage.value));
   };
+
+  if (!onMobileDevice()) {
+    FAVORITE_CHECKBOXES.fancyImageHovering.onchange = () => {
+      toggleFancyImageHovering(FAVORITE_CHECKBOXES.fancyImageHovering.checked);
+      setPreference(FAVORITE_PREFERENCES.fancyImageHovering, FAVORITE_CHECKBOXES.fancyImageHovering.checked);
+    };
+  }
 }
 
 function completeSearchSuggestion(suggestion) {

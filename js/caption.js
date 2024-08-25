@@ -13,8 +13,7 @@ const captionHTML = `<style>
     text-align: left;
     transform: translateX(-100%);
     /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
-    transition: transform .4s ease;
-    padding-left: 5px;
+    transition: transform .35s ease;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -51,6 +50,10 @@ const captionHTML = `<style>
 
   .caption.inactive {
     display: none;
+  }
+
+  #caption-list {
+    padding-left: 5px;
   }
 
   .caption-tag {

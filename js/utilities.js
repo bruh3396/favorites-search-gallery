@@ -659,6 +659,17 @@ function injectCommonStyles() {
       border: 1px solid #767676;
       border-radius: 2px;
     }
+
+    .size-calculation-div {
+      position: absolute !important;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      visibility: hidden;
+      transition: none !important;
+      transform: scale(1.15, 1.15);
+    }
   `, "utilities-common-styles");
 
   setTimeout(() => {
@@ -667,6 +678,70 @@ function injectCommonStyles() {
     }
     configureVideoOutlines();
   }, 100);
+}
+
+/**
+ * @param {Boolean} value
+ */
+function toggleFancyImageHovering(value) {
+  if (onMobileDevice()) {
+    value = false;
+  }
+
+  if (!value) {
+    const style = document.getElementById("fancy-image-hovering");
+
+    if (style !== null) {
+      style.remove();
+    }
+    return;
+  }
+  injectStyleHTML(`
+    #content {
+      padding: 20px 30px 30px !important;
+      grid-gap: 4em !important;
+    }
+
+    .thumb-node,
+    .thumb {
+      >a,
+      >span,
+      >div {
+        box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        transition: all 0.3s ease-in-out;
+        position: relative;
+
+
+        &::after {
+          content: '';
+          position: absolute;
+          z-index: -1;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          top: 0;
+          left: 0;
+          border-radius: 5px;
+          box-shadow: 5px 10px 15px rgba(0,0,0,0.45);
+          transition: opacity 0.3s ease-in-out;
+        }
+
+        &:hover {
+          outline: none !important;
+          transform: scale(1.15, 1.15);
+          z-index: 10;
+
+          img {
+            outline: none !important;
+          }
+
+          &::after {
+            opacity: 1;
+          }
+        }
+      }
+    }
+    `, "fancy-image-hovering");
 }
 
 function configureVideoOutlines() {
@@ -734,6 +809,7 @@ function getWorkerURL(content) {
 
 function initializeUtilities() {
   injectCommonStyles();
+  toggleFancyImageHovering(true);
   trackCursorPosition();
   setTheme();
 }

@@ -131,7 +131,7 @@ A: Responsiveness depends on:
         <li>A lot of network activity (loading favorites, rendering images) happens in the background.</li>
         <li>A stable wired connection is preferred.</li>
     </ul>
-    Improve responsiveness and performance by:
+    <li> Improve responsiveness and performance by:</li>
     <ul>
      <li>Reducing the "Results per Page" option.</li>
      <li>Lowering the "Performance Profile" option.</li>

@@ -135,16 +135,31 @@ async function getImageExtensionFromPostId(postId) {
 }
 
 onmessage = async(message) => {
-  const request = message.data;
+  message = message.data;
+  let extension;
 
-  if (request.findExtension) {
-    const extension = await getImageExtensionFromPostId(request.postId);
+  switch (message.action) {
+    case "render":
+      getImageBitmap(message.imageURL, message.extension, message.postId);
+      break;
 
-    postMessage({
-      foundExtension: extension,
-      postId: request.postId
-    });
-  } else {
-    await getImageBitmap(request.imageURL, request.extension, request.postId, request.thumbIndex);
+    case "renderMultiple":
+      for (const image of message.images) {
+        getImageBitmap(image.imageURL, image.extension, image.postId);
+        await sleep(image.fetchDelay);
+      }
+    break;
+
+    case "findExtension":
+      extension = await getImageExtensionFromPostId(message.postId);
+
+      postMessage({
+        foundExtension: extension,
+        postId: message.postId
+      });
+      break;
+
+    default:
+      break;
   }
 };

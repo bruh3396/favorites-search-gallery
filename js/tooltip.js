@@ -123,7 +123,11 @@ class Tooltip {
     for (const thumb of thumbs) {
       const image = getImageFromThumb(thumb);
 
-      image.onmouseenter = () => {
+      image.onmouseenter = (event) => {
+        if (enteredOverCaptionTag(event)) {
+          return;
+        }
+
         if (this.enabled) {
           this.show(image);
         }
@@ -140,12 +144,25 @@ class Tooltip {
    * @param {HTMLImageElement} image
    */
   setPosition(image) {
-    const imageRect = image.getBoundingClientRect();
-    let tooltipRect;
-    const offset = 7;
+    const imageChangesSizeOnHover = document.getElementById("fancy-image-hovering") !== null;
+    let rect;
 
-    this.tooltip.style.top = `${imageRect.bottom + offset + window.scrollY}px`;
-    this.tooltip.style.left = `${imageRect.x - 3}px`;
+    if (imageChangesSizeOnHover) {
+      const imageContainer = image.parentElement;
+      const sizeCalculationDiv = document.createElement("div");
+
+      sizeCalculationDiv.className = "size-calculation-div";
+      imageContainer.appendChild(sizeCalculationDiv);
+      rect = sizeCalculationDiv.getBoundingClientRect();
+      sizeCalculationDiv.remove();
+    } else {
+      rect = image.getBoundingClientRect();
+    }
+    const offset = 7;
+    let tooltipRect;
+
+    this.tooltip.style.top = `${rect.bottom + offset + window.scrollY}px`;
+    this.tooltip.style.left = `${rect.x - 3}px`;
     this.tooltip.classList.toggle("visible", true);
     tooltipRect = this.tooltip.getBoundingClientRect();
     const toolTipIsClippedAtBottom = tooltipRect.bottom > window.innerHeight;
@@ -153,7 +170,7 @@ class Tooltip {
     if (!toolTipIsClippedAtBottom) {
       return;
     }
-    this.tooltip.style.top = `${imageRect.top - tooltipRect.height + window.scrollY - offset}px`;
+    this.tooltip.style.top = `${rect.top - tooltipRect.height + window.scrollY - offset}px`;
     tooltipRect = this.tooltip.getBoundingClientRect();
     const favoritesTopBar = document.getElementById("favorites-top-bar");
     const elementAboveTooltip = favoritesTopBar === null ? document.getElementById("header") : favoritesTopBar;
@@ -165,12 +182,12 @@ class Tooltip {
     }
     const tooltipIsLeftOfCenter = tooltipRect.left < (window.innerWidth / 2);
 
-    this.tooltip.style.top = `${imageRect.top + window.scrollY + (imageRect.height / 2) - offset}px`;
+    this.tooltip.style.top = `${rect.top + window.scrollY + (rect.height / 2) - offset}px`;
 
     if (tooltipIsLeftOfCenter) {
-      this.tooltip.style.left = `${imageRect.right + offset}px`;
+      this.tooltip.style.left = `${rect.right + offset}px`;
     } else {
-      this.tooltip.style.left = `${imageRect.left - 750 - offset}px`;
+      this.tooltip.style.left = `${rect.left - 750 - offset}px`;
     }
   }
 

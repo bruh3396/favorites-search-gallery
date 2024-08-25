@@ -374,6 +374,7 @@ onmessage = (message) => {
           setTimeout(() => {
             this.databaseWorker.terminate();
           }, 5000);
+          break;
 
         default:
           break;
@@ -606,6 +607,7 @@ onmessage = (message) => {
   addNewFavoritesToSavedFavorites(allFavoriteIds, currentPageNumber, newFavoritesToAdd) {
     const favoritesPageURL = `${document.location.href}&pid=${currentPageNumber}`;
     let allNewFavoritesFound = false;
+    const searchCommand = getSearchCommand(this.finalSearchQuery);
 
     requestPageInformation(favoritesPageURL, (response) => {
       const thumbNodes = this.extractThumbNodesFromFavoritesPage(response);
@@ -617,7 +619,10 @@ onmessage = (message) => {
           allNewFavoritesFound = true;
           break;
         }
-        newFavoritesToAdd.push(thumbNode);
+
+        if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
+          newFavoritesToAdd.push(thumbNode);
+        }
       }
 
       if (!allNewFavoritesFound && currentPageNumber < this.finalPageNumber) {
