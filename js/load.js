@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -193,6 +193,12 @@ onmessage = (message) => {
     useTagBlacklist: true,
     negatedTagBlacklist: negateTags(TAG_BLACKLIST)
   };
+
+  /**
+   * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: {pageNumber: Number, thumbNodes: ThumbNode[], searchResults: ThumbNode[]}[]}}
+   */
+  fetchedThumbNodes;
+
   /**
    * @type {ThumbNode[]}
    */
@@ -214,7 +220,7 @@ onmessage = (message) => {
    */
   maxNumberOfFavoritesToDisplay;
   /**
-   * @type {[{url: String, indexToInsert: Number}]}
+   * @type {[{url: String, pageNumber: Number, retries: Number}]}
    */
   failedFetchRequests;
   /**
@@ -331,6 +337,7 @@ onmessage = (message) => {
     this.finalPageNumber = this.getFinalFavoritesPageNumber();
     this.matchCountLabel = document.getElementById("match-count-label");
     this.maxNumberOfFavoritesToDisplay = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
+    this.fetchedThumbNodes = {};
     this.failedFetchRequests = [];
     this.currentLoadState = FavoritesLoader.loadState.notStarted;
     this.expectedFavoritesCount = 53;
@@ -462,7 +469,7 @@ onmessage = (message) => {
 
   async showSearchResultsBeforeStartedLoading() {
     if (!this.databaseAccessIsAllowed) {
-      this.fetchFavorites();
+      this.startFetchingFavorites();
       return;
     }
     const databaseStatus = await this.getDatabaseStatus();
@@ -476,7 +483,7 @@ onmessage = (message) => {
     if (databaseStatus.objectStoreIsNotEmpty) {
       this.loadFavoritesFromDatabase();
     } else {
-      this.fetchFavorites();
+      this.startFetchingFavorites();
     }
   }
 
@@ -636,48 +643,69 @@ onmessage = (message) => {
     }
   }
 
-  async fetchFavorites() {
-    let currentPageNumber = 0;
+  initializeFetchedThumbNodesInsertionQueue() {
+    this.fetchedThumbNodes.highestInsertedPageNumber = -1;
+    this.fetchedThumbNodes.insertionQueue = [];
+  }
+
+  startFetchingFavorites() {
+    st = performance.now();
+    const currentPageNumber = 0;
 
     this.currentLoadState = FavoritesLoader.loadState.started;
     this.toggleContentVisibility(true);
     this.insertPaginationContainer();
     this.updatePaginationUi(1, []);
+    this.initializeFetchedThumbNodesInsertionQueue();
     setTimeout(() => {
       dispatchEvent(new Event("startedFetchingFavorites"));
     }, 50);
 
-    while (this.currentLoadState === FavoritesLoader.loadState.started) {
-      await this.fetchFavoritesStep(currentPageNumber * 50);
-      let progressText = `Saving Favorites ${this.allThumbNodes.length}`;
+    this.fetchFavorites();
+  }
 
-      if (this.expectedFavoritesCountFound) {
-        progressText = `${progressText} / ${this.expectedFavoritesCount}`;
+  updateProgressWhileFetching() {
+    let progressText = `Saving Favorites ${this.allThumbNodes.length}`;
+
+    if (this.expectedFavoritesCountFound) {
+      progressText = `${progressText} / ${this.expectedFavoritesCount}`;
+    }
+    this.setProgressText(progressText);
+  }
+
+  async fetchFavorites() {
+    let currentPageNumber = 0;
+
+    while (this.currentLoadState === FavoritesLoader.loadState.started) {
+      if (this.failedFetchRequests.length > 0) {
+        const failedRequest = this.failedFetchRequests.shift();
+        const waitTime = (7 ** (failedRequest.retries + 1)) + 300;
+
+        this.fetchFavoritesFromSinglePage(currentPageNumber, failedRequest);
+        await sleep(waitTime);
+      } else if (currentPageNumber <= this.finalPageNumber && !this.foundEmptyFavoritesPage) {
+        this.fetchFavoritesFromSinglePage(currentPageNumber);
+        currentPageNumber += 1;
+        await sleep(200);
+      } else if (this.finishedFetching(currentPageNumber)) {
+        this.onAllFavoritesLoaded();
+        this.storeFavorites();
+      } else {
+        await sleep(10000);
       }
-      this.setProgressText(progressText);
-      currentPageNumber += 1;
     }
   }
 
   /**
-   * @param {Number} currentPageNumber
+   * @param {Number} pageNumber
+   * @returns {Boolean}
    */
-  async fetchFavoritesStep(currentPageNumber) {
-    let finishedLoading = this.allThumbNodes.length >= this.expectedFavoritesCount - 2;
+  finishedFetching(pageNumber) {
+    pageNumber *= 50;
+    let done = this.allThumbNodes.length >= this.expectedFavoritesCount - 2;
 
-    finishedLoading = finishedLoading || currentPageNumber >= (this.finalPageNumber * 2) + 1;
-    finishedLoading = finishedLoading && this.failedFetchRequests.length === 0;
-
-    if (currentPageNumber <= this.finalPageNumber && !this.foundEmptyFavoritesPage) {
-      await this.fetchFavoritesFromSinglePage(currentPageNumber);
-    } else if (this.failedFetchRequests.length > 0) {
-      const failedRequest = this.failedFetchRequests.shift();
-
-      await this.fetchFavoritesFromSinglePage(currentPageNumber, failedRequest);
-    } else if (finishedLoading) {
-      this.onAllFavoritesLoaded();
-      this.storeFavorites();
-    }
+    done = done || this.foundEmptyFavoritesPage || pageNumber >= (this.finalPageNumber * 2) + 1;
+    return done && this.failedFetchRequests.length === 0;
   }
 
   /**
@@ -695,39 +723,32 @@ onmessage = (message) => {
 
   /**
    * @param {Number} pageNumber
-   * @param {{url: String, indexToInsert: Number}} failedRequest
+   * @param {{url: String, pageNumber: Number, retries: Number}} failedRequest
    */
   fetchFavoritesFromSinglePage(pageNumber, failedRequest) {
     const refetching = failedRequest !== undefined;
+
+    pageNumber = refetching ? failedRequest.pageNumber : pageNumber * 50;
     const favoritesPageURL = refetching ? failedRequest.url : `${document.location.href}&pid=${pageNumber}`;
     return fetch(favoritesPageURL)
       .then((response) => {
         if (response.ok) {
           return response.text();
         }
-        failedRequest = refetching ? failedRequest : this.getFailedFetchRequest(response, pageNumber);
+
+        if (refetching) {
+          failedRequest.retries += 1;
+        } else {
+          failedRequest = this.getFailedFetchRequest(response, pageNumber);
+        }
         this.failedFetchRequests.push(failedRequest);
         throw new Error(response.status);
       })
       .then((html) => {
         const {thumbNodes, searchResults} = this.extractFavoritesPage(html);
 
-        this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(searchResults);
+        this.addFetchedThumbNodesToInsertionQueue(pageNumber, thumbNodes, searchResults);
         this.foundEmptyFavoritesPage = thumbNodes.length === 0;
-        this.updateMatchCount(this.searchResultsWhileFetching.length);
-
-        setTimeout(() => {
-          dispatchEvent(new CustomEvent("favoritesFetched", {
-            detail: thumbNodes.map(thumbNode => thumbNode.root)
-          }));
-        }, 250);
-
-        if (refetching) {
-          this.allThumbNodes.splice(failedRequest.indexToInsert, 0, ...thumbNodes);
-        } else {
-          this.allThumbNodes = this.allThumbNodes.concat(thumbNodes);
-        }
-        this.addFavoritesToContent(searchResults, failedRequest);
       })
       .catch((error) => {
         console.error(error);
@@ -735,14 +756,75 @@ onmessage = (message) => {
   }
 
   /**
+   * @param {Number} pageNumber
+   * @param {ThumbNode[]} thumbNodes
+   * @param {ThumbNode[]} searchResults
+   */
+  addFetchedThumbNodesToInsertionQueue(pageNumber, thumbNodes, searchResults) {
+    pageNumber = Math.floor(parseInt(pageNumber) / 50);
+    this.fetchedThumbNodes.insertionQueue.push({
+      pageNumber,
+      thumbNodes,
+      searchResults
+    });
+    this.fetchedThumbNodes.insertionQueue.sort((a, b) => a.pageNumber - b.pageNumber);
+    this.emptyInsertionQueue();
+  }
+
+  emptyInsertionQueue() {
+    if (this.fetchedThumbNodes.emptying) {
+      return;
+    }
+    this.fetchedThumbNodes.emptying = true;
+
+    while (this.fetchedThumbNodes.insertionQueue.length > 0) {
+      const element = this.fetchedThumbNodes.insertionQueue[0];
+
+      if (this.previousPageNumberIsPresent(element.pageNumber)) {
+        this.processFetchedThumbNodes(element.thumbNodes, element.searchResults);
+        this.fetchedThumbNodes.insertionQueue.shift();
+        this.fetchedThumbNodes.highestInsertedPageNumber += 1;
+      } else {
+        break;
+      }
+    }
+
+    this.fetchedThumbNodes.emptying = false;
+  }
+
+  /**
+   * @param {Number} pageNumber
+   * @returns {Boolean}
+   */
+  previousPageNumberIsPresent(pageNumber) {
+    return this.fetchedThumbNodes.highestInsertedPageNumber + 1 === pageNumber;
+  }
+
+  /**
+   * @param {ThumbNode[]} thumbNodes
+   * @param {ThumbNode[]} searchResults
+   */
+  processFetchedThumbNodes(thumbNodes, searchResults) {
+    this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(searchResults);
+    this.updateMatchCount(this.searchResultsWhileFetching.length);
+    dispatchEvent(new CustomEvent("favoritesFetched", {
+      detail: thumbNodes.map(thumbNode => thumbNode.root)
+    }));
+    this.allThumbNodes = this.allThumbNodes.concat(thumbNodes);
+    this.addFavoritesToContent(searchResults);
+    this.updateProgressWhileFetching();
+  }
+
+  /**
    * @param {String} response
    * @param {Number} pageNumber
-   * @returns {{url: String, indexToInsert: Number}}
+   * @returns {{url: String, pageNumber: Number, retries: Number}}
    */
   getFailedFetchRequest(response, pageNumber) {
     return {
       url: response.url,
-      indexToInsert: pageNumber - 1
+      pageNumber,
+      retries: 0
     };
   }
 
@@ -1005,9 +1087,8 @@ This will delete all cached favorites, and preferences.
 
   /**
    * @param {ThumbNode[]} thumbNodes
-   * @param {{url: String, indexToInsert: Number}} failedRequest
    */
-  addFavoritesToContent(thumbNodes, failedRequest) {
+  addFavoritesToContent(thumbNodes) {
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
     const pageCount = this.getPageCount(this.searchResultsWhileFetching.length);
@@ -1030,17 +1111,9 @@ This will delete all cached favorites, and preferences.
     }
 
     const content = document.getElementById("content");
-    let elementToInsertAround = content;
-    let placeToInsert = "beforeend";
-
-    if (failedRequest !== undefined) {
-      elementToInsertAround = getAllThumbs()[failedRequest.indexToInsert];
-      placeToInsert = "afterend";
-      thumbNodes = Array.from(thumbNodes).reverse();
-    }
 
     for (const thumbNode of thumbNodes) {
-      thumbNode.insertInDocument(elementToInsertAround, placeToInsert);
+      content.appendChild(thumbNode.root);
     }
   }
 
@@ -1392,3 +1465,4 @@ This will delete all cached favorites, and preferences.
 }
 
 const favoritesLoader = new FavoritesLoader();
+let st;

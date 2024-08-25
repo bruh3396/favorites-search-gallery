@@ -719,7 +719,7 @@ function changeResultsPerPage(resultsPerPage, search = true) {
     FAVORITE_INPUTS.resultsPerPage.value = getPreference(FAVORITE_PREFERENCES.resultsPerPage, DEFAULTS.resultsPerPage);
     return;
   }
-  resultsPerPage = clamp(resultsPerPage, 50, 20000);
+  resultsPerPage = clamp(resultsPerPage, 50, 5000);
   FAVORITE_INPUTS.resultsPerPage.value = resultsPerPage;
   setPreference(FAVORITE_PREFERENCES.resultsPerPage, resultsPerPage);
 

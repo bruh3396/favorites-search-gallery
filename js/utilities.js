@@ -12,7 +12,7 @@ const FLAGS = {
 };
 const DEFAULTS = {
   columnCount: 6,
-  resultsPerPage: 2000
+  resultsPerPage: 1000
 };
 
 /**
