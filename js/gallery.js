@@ -708,7 +708,7 @@ onmessage = (message) => {
   injectOptionsHTML() {
     let optionId = Gallery.preferences.showOnHover;
     let optionText = "Fullscreen on Hover";
-    let optionTitle = "View full resolution images/play videos when a thumbnail is clicked";
+    let optionTitle = "View full resolution images or play videos and GIFs when hovering over a thumbnail";
     let optionIsChecked = this.showOriginalContentOnHover;
     let onOptionChanged = (event) => {
       setPreference(Gallery.preferences.showOnHover, event.target.checked);

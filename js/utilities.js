@@ -205,7 +205,7 @@ function getImageFromThumb(thumb) {
 }
 
 /**
- * @returns {HTMLCollectionOf.<Element>}
+ * @returns {HTMLCollectionOf.<HTMLElement>}
  */
 function getAllThumbs() {
   const className = onPostPage() ? "thumb" : "thumb-node";
@@ -668,7 +668,7 @@ function injectCommonStyles() {
       height: 100%;
       visibility: hidden;
       transition: none !important;
-      transform: scale(1.15, 1.15);
+      transform: scale(1.1, 1.1);
     }
   `, "utilities-common-styles");
 
@@ -698,8 +698,8 @@ function toggleFancyImageHovering(value) {
   }
   injectStyleHTML(`
     #content {
-      padding: 20px 30px 30px !important;
-      grid-gap: 4em !important;
+      padding: 40px 40px 30px !important;
+      grid-gap: 2.5em !important;
     }
 
     .thumb-node,
@@ -728,7 +728,7 @@ function toggleFancyImageHovering(value) {
 
         &:hover {
           outline: none !important;
-          transform: scale(1.15, 1.15);
+          transform: scale(1.1, 1.1);
           z-index: 10;
 
           img {
@@ -808,6 +808,12 @@ function getWorkerURL(content) {
 }
 
 function initializeUtilities() {
+  const enableOnSearchPages = getPreference("enableOnSearchPages", true);
+
+  if (!enableOnSearchPages && onPostPage()) {
+    throw new Error("Disabled on search pages");
+  }
+
   injectCommonStyles();
   toggleFancyImageHovering(true);
   trackCursorPosition();

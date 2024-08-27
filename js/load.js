@@ -195,6 +195,11 @@ onmessage = (message) => {
   };
 
   /**
+   * @type {Number}
+   */
+  static currentLoadState = FavoritesLoader.loadState.notStarted;
+
+  /**
    * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: {pageNumber: Number, thumbNodes: ThumbNode[], searchResults: ThumbNode[]}[]}}
    */
   fetchedThumbNodes;
@@ -223,10 +228,6 @@ onmessage = (message) => {
    * @type {[{url: String, pageNumber: Number, retries: Number}]}
    */
   failedFetchRequests;
-  /**
-   * @type {LoadState}
-   */
-  currentLoadState;
   /**
    * @type {Number}
    */
@@ -339,7 +340,6 @@ onmessage = (message) => {
     this.maxNumberOfFavoritesToDisplay = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
     this.fetchedThumbNodes = {};
     this.failedFetchRequests = [];
-    this.currentLoadState = FavoritesLoader.loadState.notStarted;
     this.expectedFavoritesCount = 53;
     this.expectedFavoritesCountFound = false;
     this.searchResultsAreShuffled = false;
@@ -365,7 +365,7 @@ onmessage = (message) => {
 
       switch (message.response) {
         case "finishedLoading":
-          this.currentLoadState = FavoritesLoader.loadState.indexedDB;
+          FavoritesLoader.currentLoadState = FavoritesLoader.loadState.indexedDB;
           this.attachSavedFavoritesToDocument(message.favorites);
           this.updateSavedFavorites();
           break;
@@ -442,7 +442,7 @@ onmessage = (message) => {
     this.searchResultsAreShuffled = false;
     this.searchResultsAreInverted = false;
 
-    switch (this.currentLoadState) {
+    switch (FavoritesLoader.currentLoadState) {
       case FavoritesLoader.loadState.started:
         this.showSearchResultsAfterStartedLoading();
         break;
@@ -657,7 +657,7 @@ onmessage = (message) => {
     st = performance.now();
     const currentPageNumber = 0;
 
-    this.currentLoadState = FavoritesLoader.loadState.started;
+    FavoritesLoader.currentLoadState = FavoritesLoader.loadState.started;
     this.toggleContentVisibility(true);
     this.insertPaginationContainer();
     this.updatePaginationUi(1, []);
@@ -681,7 +681,7 @@ onmessage = (message) => {
   async fetchFavorites() {
     let currentPageNumber = 0;
 
-    while (this.currentLoadState === FavoritesLoader.loadState.started) {
+    while (FavoritesLoader.currentLoadState === FavoritesLoader.loadState.started) {
       if (this.failedFetchRequests.length > 0) {
         const failedRequest = this.failedFetchRequests.shift();
         const waitTime = (7 ** (failedRequest.retries + 1)) + 300;
@@ -867,7 +867,7 @@ onmessage = (message) => {
   }
 
   onAllFavoritesLoaded() {
-    this.currentLoadState = FavoritesLoader.loadState.finished;
+    FavoritesLoader.currentLoadState = FavoritesLoader.loadState.finished;
     this.toggleLoadingUI(false);
     dispatchEvent(new CustomEvent("favoritesLoaded", {
       detail: this.allThumbNodes
@@ -897,16 +897,11 @@ onmessage = (message) => {
     if (databaseRecords === null) {
       return null;
     }
-    const dom = new DOMParser().parseFromString("<div id=\"content\"></div>", "text/html");
-    const content = dom.getElementById("content");
     const searchCommand = getSearchCommand(this.finalSearchQuery);
     const searchResults = [];
 
-    let addedFavoritesCount = 0;
-
     for (const record of databaseRecords) {
       const thumbNode = new ThumbNode(record, true);
-      const underMaximumFavorites = addedFavoritesCount < this.maxNumberOfFavoritesToDisplay;
       const isBlacklisted = !postTagsMatchSearch(searchCommand, thumbNode.postTags);
 
       if (isBlacklisted) {
@@ -918,12 +913,6 @@ onmessage = (message) => {
         searchResults.push(thumbNode);
       }
       this.allThumbNodes.push(thumbNode);
-
-      if (underMaximumFavorites) {
-
-        addedFavoritesCount += 1;
-        content.appendChild(thumbNode.root);
-      }
     }
     return searchResults;
   }
@@ -1062,9 +1051,7 @@ This will delete all cached favorites, and preferences.
    * @param {[{id: String, tags: String, src: String}]} databaseRecords
    */
   attachSavedFavoritesToDocument(databaseRecords) {
-    const searchResults = this.reconstructContent(databaseRecords);
-
-    this.paginateSearchResults(searchResults);
+    this.paginateSearchResults(this.reconstructContent(databaseRecords));
     this.onAllFavoritesLoaded();
   }
 
@@ -1235,17 +1222,14 @@ This will delete all cached favorites, and preferences.
     const selected = currentPageNumber === pageNumber;
 
     pageNumberButton.id = `favorites-page-${pageNumber}`;
-    pageNumberButton.class = "pagination-number";
+    pageNumberButton.title = `Goto page ${pageNumber}`;
+    pageNumberButton.className = "pagination-number";
     pageNumberButton.classList.toggle("selected", selected);
     pageNumberButton.onclick = () => {
       this.changeResultsPage(pageNumber, searchResults);
     };
     this.paginationContainer.insertAdjacentElement(position, pageNumberButton);
     pageNumberButton.textContent = pageNumber;
-  }
-
-  updatePaginationWhileFetching(searchResults) {
-
   }
 
   /**
@@ -1328,7 +1312,7 @@ This will delete all cached favorites, and preferences.
     this.createPaginatedFavoritesPage(searchResults, start, end);
     this.reAddAllThumbNodeEventListeners();
 
-    if (this.currentLoadState !== FavoritesLoader.loadState.indexedDB) {
+    if (FavoritesLoader.currentLoadState !== FavoritesLoader.loadState.indexedDB) {
       dispatchEventWithDelay("changedPage");
     }
   }
@@ -1390,7 +1374,7 @@ This will delete all cached favorites, and preferences.
       (this.searchQuery === this.previousSearchQuery) &&
       !this.searchResultsAreShuffled &&
       !this.searchResultsAreInverted &&
-      this.currentLoadState === FavoritesLoader.loadState.finished &&
+      FavoritesLoader.currentLoadState === FavoritesLoader.loadState.finished &&
       !this.recentlyChangedMaxNumberOfFavoritesToDisplay;
   }
 

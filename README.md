@@ -83,8 +83,6 @@ Download Speed: 75Mb/s<br>
 
 ## Controls
 
-### Desktop
-
 <strong>Left Click/Touch:</strong>
 <ul>
 <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>

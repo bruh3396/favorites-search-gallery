@@ -44,6 +44,20 @@ class ThumbNode {
   static allThumbNodes = new Map();
 
   /**
+   * @type {Map.<String, ThumbNode>}
+   */
+  static get thumbNodesMatchedBySearch() {
+    const thumbNodes = new Map();
+
+    for (const [id, thumbNode] of ThumbNode.allThumbNodes.entries()) {
+      if (thumbNode.matchedByMostRecentSearch) {
+        thumbNodes.set(id, thumbNode);
+      }
+    }
+    return thumbNodes;
+  }
+
+  /**
    * @type {HTMLDivElement}
    */
   root;
@@ -226,7 +240,9 @@ class ThumbNode {
   }
 
   addInstanceToAllThumbNodes() {
-    ThumbNode.allThumbNodes.set(this.id, this);
+    if (!ThumbNode.allThumbNodes.has(this.id)) {
+      ThumbNode.allThumbNodes.set(this.id, this);
+    }
   }
 
   /**
@@ -238,5 +254,17 @@ class ThumbNode {
     } else {
       this.matchedByMostRecentSearch = value;
     }
+  }
+
+  addTags(newTags) {
+    const tagList = newTags.split(" ");
+
+    for (const tag of tagList) {
+      if (tag !== "" && !includesTag(tag, this.tags)) {
+        this.tags = `${this.tags} ${tag}`;
+      }
+    }
+    this.image.setAttribute("tags", this.tags);
+    this.postTags.create(this.tags);
   }
 }

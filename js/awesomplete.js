@@ -4,10 +4,15 @@ class AwesompleteWrapper {
     document.querySelectorAll("textarea").forEach((textarea) => {
       this.addAwesompleteToInput(textarea);
     });
+    document.querySelectorAll("input").forEach((input) => {
+      if (input.hasAttribute("needs-autocomplete")) {
+        this.addAwesompleteToInput(input);
+      }
+    });
   }
 
   /**
-   * @param {HTMLTextAreaElement} input
+   * @param {HTMLElement} input
    */
   addAwesompleteToInput(input) {
     const awesomplete = new Awesomplete_(input, {

@@ -180,8 +180,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #favorite-options-container {
       display: flex;
       flex-flow: row wrap;
-      width: 60%;
-
+      min-width: 50%;
       >div {
         flex: 1;
         padding-right: 6px;
@@ -262,6 +261,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       display: flex;
       flex-flow: row wrap;
       margin-top: 10px;
+
+      > div {
+        flex: 1;
+      }
     }
 
     #additional-favorite-options {
@@ -300,16 +303,16 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
-        <button title="Search favorites\nctrl+click: Search all posts" id="search-button">Search</button>
+        <button title="Search favorites\nctrl+click: Search all of rule34 in a new tab" id="search-button">Search</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
-        <button title="Shuffle order of search results" id="shuffle-button">Shuffle</button>
-        <button title="Clear the search box" id="clear-button">Clear</button>
+        <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
+        <button title="Empty the search box" id="clear-button">Clear</button>
         <span id="find-favorite" class="light-green-gradient" style="display: none;">
           <button title="Scroll to favorite using its ID" id="find-favorite-button"
             style="white-space: nowrap; ">Find</button>
           <input type="number" id="find-favorite-input" type="text" placeholder="ID">
         </span>
-        <button title="Reset saved favorites" id="reset-button">Reset</button>
+        <button title="Remove cached favorites and preferences" id="reset-button">Reset</button>
         <span id="help-links-container">
           <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
         </span>
@@ -319,11 +322,13 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           spellcheck="false"></textarea>
       </div>
 
-      <div id="left-favorites-panel-bottom-row" style="display: flex; flex-flow: row-wrap;">
+      <div id="left-favorites-panel-bottom-row">
         <div id="favorite-options-container">
-          <div id="show-options"><label class="checkbox" title="Toggle options"><input type="checkbox"
+          <div id="show-options"><label class="checkbox" title="Show more options"><input type="checkbox"
                 id="options-checkbox"> More Options</label></div>
           <div id="favorite-options">
+            <div><label class="checkbox" title="Enable gallery and other features on search pages"><input type="checkbox" id="enable-on-search-pages">
+                Enhance Search Pages</label></div>
             <div><label class="checkbox" title="Toggle remove buttons"><input type="checkbox" id="show-remove-buttons">
                 Remove Buttons</label></div>
             <div><label class="checkbox" title="Exclude blacklisted tags from search"><input type="checkbox"
@@ -332,7 +337,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   id="fancy-image-hovering-checkbox"> Fancy Hovering</label></div>
           </div>
           <div id="additional-favorite-options">
-            <div id="performance-profile-container">
+            <div id="performance-profile-container" title="Improve performance by disabling features">
               <label>Performance Profile</label>
               <br>
               <select id="performance-profile">
@@ -341,12 +346,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <option value="2">Potato (only search)</option>
               </select>
             </div>
-            <div id="results-per-page-container" title="Maximum number of search results to display on each page\nLess is more responsive">
+            <div id="results-per-page-container" title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
                 <label id="results-per-page-label">Results per Page</label>
                 <br>
                 <input type="number" id="results-per-page-input" min="50" max="10000" step="500">
             </div>
-            <div id="column-resize-container">
+            <div id="column-resize-container" title="Set the number of favorites per row">
               <span>
                 <label>Columns</label>
                 <button id="column-resize-minus">-</button>
@@ -356,7 +361,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             </div>
           </div>
         </div>
-        <div id="show-ui-container" style="width: 35%;">
+        <div id="show-ui-container">
           <div id="show-ui-div"><label class="checkbox" title="Toggle UI"><input
                 type="checkbox" id="show-ui">UI</label></div>
         </div>
@@ -386,7 +391,8 @@ const FAVORITE_PREFERENCES = {
   showUI: "showUI",
   performanceProfile: "performanceProfile",
   resultsPerPage: "resultsPerPage",
-  fancyImageHovering: "fancyImageHovering"
+  fancyImageHovering: "fancyImageHovering",
+  enableOnSearchPages: "enableOnSearchPages"
 };
 const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -406,7 +412,8 @@ const FAVORITE_CHECKBOXES = {
   showRemoveButtons: document.getElementById("show-remove-buttons"),
   filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
   showUI: document.getElementById("show-ui"),
-  fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox")
+  fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
+  enableOnSearchPages: document.getElementById("enable-on-search-pages")
 };
 const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
@@ -493,6 +500,10 @@ function loadFavoritesPagePreferences() {
     FAVORITE_CHECKBOXES.fancyImageHovering.checked = fancyImageHovering;
     toggleFancyImageHovering(fancyImageHovering);
   }
+
+  const enableOnSearchPages = getPreference(FAVORITE_PREFERENCES.enableOnSearchPages, true);
+
+  FAVORITE_CHECKBOXES.enableOnSearchPages.checked = enableOnSearchPages;
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -649,6 +660,10 @@ function addEventListenersToFavoritesPage() {
       setPreference(FAVORITE_PREFERENCES.fancyImageHovering, FAVORITE_CHECKBOXES.fancyImageHovering.checked);
     };
   }
+
+  FAVORITE_CHECKBOXES.enableOnSearchPages.onchange = () => {
+    setPreference(FAVORITE_PREFERENCES.enableOnSearchPages, FAVORITE_CHECKBOXES.enableOnSearchPages.checked);
+  };
 }
 
 function completeSearchSuggestion(suggestion) {

@@ -350,7 +350,7 @@ class Tooltip {
     addOptionToFavoritesPage(
       "show-tooltip",
       " Tooltips",
-      "Show related tags when hovering over a thumbnail",
+      "Show tags when hovering over a thumbnail and see which ones were matched by a search",
       this.enabled, (event) => {
         setPreference("showTooltip", event.target.checked);
         this.setVisible(event.target.checked);
