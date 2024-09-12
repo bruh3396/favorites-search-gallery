@@ -62,7 +62,14 @@ This script is still in development, please let me know if you experience a bug,
         <li>Allows for quick loading anytime later</li>
     </ul>
     </li>
+    <li>Add custom or existing tags to favorites</li>
+        <ul>
+            <li>Allows for complex tags and grouping (essentially folders)</li>
+            <li>Does not actually add tags to the post associated with a favorite (all changes are local)</li>
+            <li>Original tags of favorite cannot be altered</li>
+        </ul>
     <li>Save custom searches</li>
+    <li>Enlarged remove buttons that don't force page reloads</li>
     <li>Shuffle search results</li>
     <li>Invert search results</li>
     <li>Exclude results with blacklisted tags</li>
@@ -70,7 +77,6 @@ This script is still in development, please let me know if you experience a bug,
     <li>See tooltip showing which tags were matched by the last search</li>
     <li>Clickable overlay of character, copyright, and artist tags related to thumbnail</li>
     <li>Choose full-screen image resolution</li>
-    <li>Enlarged remove buttons that don't force page reloads</li>
     <li>Autocompleted tag search</li>
     <li>Look at other user's favorites with the above features (blacklisted tags are hidden automatically)</li>
 </ul>

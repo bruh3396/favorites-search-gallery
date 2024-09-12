@@ -80,7 +80,11 @@ class ThumbNode {
   /**
    * @type {String}
    */
-  tags;
+  originalTags;
+  /**
+   * @type {String}
+   */
+  additionalTags;
   /**
    * @type {PostTags}
    */
@@ -108,7 +112,7 @@ class ThumbNode {
    * @type {String[]}
    */
   get tagList() {
-    return this.tags.split(" ");
+    return this.originalTags.split(" ");
   }
 
   /**
@@ -117,7 +121,7 @@ class ThumbNode {
   get databaseRecord() {
     return {
       id: this.id,
-      tags: this.tags,
+      tags: this.originalTags,
       src: this.compressedThumbSource
     };
   }
@@ -179,8 +183,8 @@ class ThumbNode {
       this.createFromHTMLElement(thumb);
     }
     this.root.id = this.id;
-    this.image.setAttribute("tags", this.tags);
-    this.postTags = new PostTags(this.tags);
+    this.additionalTags = TagModifier.tagModifications.get(this.id) || "";
+    this.updateTags();
   }
 
   /**
@@ -189,7 +193,7 @@ class ThumbNode {
   createFromDatabaseRecord(record) {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
-    this.tags = record.tags;
+    this.originalTags = record.tags;
     this.image.classList.add(record.type);
   }
 
@@ -208,8 +212,8 @@ class ThumbNode {
 
     this.image.src = imageElement.src;
     this.id = ThumbNode.getIdFromThumb(thumb);
-    this.tags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
-    this.image.classList.add(getContentType(this.tags));
+    this.originalTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
+    this.image.classList.add(getContentType(this.originalTags));
   }
 
   setupOnClickLink() {
@@ -256,15 +260,61 @@ class ThumbNode {
     }
   }
 
-  addTags(newTags) {
-    const tagList = newTags.split(" ");
+  /**
+   *
+   * @param {String} oldTags
+   * @param {String} newTags
+   * @returns {String}
+   */
+  mergeTags(oldTags, newTags) {
+    oldTags = removeExtraWhiteSpace(oldTags);
+    newTags = removeExtraWhiteSpace(newTags);
+    const finalTags = new Set(oldTags.split(" "));
 
-    for (const tag of tagList) {
-      if (tag !== "" && !includesTag(tag, this.tags)) {
-        this.tags = `${this.tags} ${tag}`;
+    for (const newTag of newTags.split(" ")) {
+      if (newTag !== "") {
+        finalTags.add(newTag);
       }
     }
-    this.image.setAttribute("tags", this.tags);
-    this.postTags.create(this.tags);
+    return finalTags.size > 0 ? removeExtraWhiteSpace(Array.from(finalTags.keys()).join(" ")) : "";
+  }
+
+  updateTags() {
+    const finalTags = this.mergeTags(this.originalTags, this.additionalTags);
+
+    this.image.setAttribute("tags", finalTags);
+    this.postTags = new PostTags(finalTags);
+  }
+
+  /**
+   * @param {String} newTags
+   * @returns {String}
+   */
+  addAdditionalTags(newTags) {
+    this.additionalTags = this.mergeTags(this.additionalTags, newTags);
+    this.updateTags();
+    return this.additionalTags;
+  }
+
+  /**
+ * @param {String} tagsToRemove
+ * @returns {String}
+ */
+  removeAdditionalTags(tagsToRemove) {
+    const tagsToRemoveList = tagsToRemove.split(" ");
+
+    this.additionalTags = Array.from(this.additionalTags.split(" "))
+      .filter(tag => !tagsToRemoveList.includes(tag))
+      .join(" ");
+    this.updateTags();
+    return this.additionalTags;
+  }
+
+  resetAdditionalTags() {
+    if (this.additionalTags === "") {
+      return;
+    }
+    this.additionalTags = "";
+    this.updateTags();
   }
 }

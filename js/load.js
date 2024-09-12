@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -90,8 +90,8 @@ class FavoritesDatabase {
         favorites.forEach(favorite => {
           this.addContentTypeToFavorite(favorite);
           favoritesObjectStore.add(favorite);
-          database.close();
         });
+        database.close();
 
         postMessage({
           response: "finishedStoring"
@@ -297,6 +297,10 @@ onmessage = (message) => {
    * @type {Boolean}
    */
   newPageNeedsToBeCreated;
+  /**
+   * @type {Boolean}
+   */
+    tagsWereRecentlyModified;
 
   /**
    * @type {Boolean}
@@ -346,6 +350,7 @@ onmessage = (message) => {
     this.searchResultsAreInverted = false;
     this.foundEmptyFavoritesPage = false;
     this.newPageNeedsToBeCreated = false;
+    this.tagsWereRecentlyModified = false;
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
     this.matchingFavoritesCount = 0;
     this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
@@ -355,8 +360,15 @@ onmessage = (message) => {
     this.paginationContainer = this.createPaginationContainer();
     this.currentFavoritesPageNumber = 1;
     this.parser = new DOMParser();
+    this.addEventListeners();
     this.createDatabaseMessageHandler();
     this.loadFavorites();
+  }
+
+  addEventListeners() {
+    window.addEventListener("modifiedTags", () => {
+      this.tagsWereRecentlyModified = true;
+    });
   }
 
   createDatabaseMessageHandler() {
@@ -439,8 +451,10 @@ onmessage = (message) => {
     this.hideAwesomplete();
     this.resetMatchCount();
     dispatchEvent(new Event("searchStarted"));
-    this.searchResultsAreShuffled = false;
-    this.searchResultsAreInverted = false;
+    setTimeout(() => {
+      this.searchResultsAreShuffled = false;
+      this.searchResultsAreInverted = false;
+    }, 50);
 
     switch (FavoritesLoader.currentLoadState) {
       case FavoritesLoader.loadState.started:
@@ -654,7 +668,6 @@ onmessage = (message) => {
   }
 
   startFetchingFavorites() {
-    st = performance.now();
     const currentPageNumber = 0;
 
     FavoritesLoader.currentLoadState = FavoritesLoader.loadState.started;
@@ -989,6 +1002,7 @@ This will delete all cached favorites, and preferences.
 
       localStorage.clear();
       indexedDB.deleteDatabase(FavoritesLoader.databaseName);
+      indexedDB.deleteDatabase("AdditionalTags");
       localStorage.setItem("savedSearches", JSON.stringify(savedSearches));
     }
   }
@@ -1304,8 +1318,10 @@ This will delete all cached favorites, and preferences.
     if (this.onSamePage(pageNumber)) {
       return;
     }
+
     const {start, end} = this.getPaginationStartEndIndices(pageNumber);
 
+    this.tagsWereRecentlyModified = false;
     this.previousSearchQuery = this.searchQuery;
     this.currentFavoritesPageNumber = pageNumber;
     this.updatePaginationUi(pageNumber, searchResults);
@@ -1375,7 +1391,8 @@ This will delete all cached favorites, and preferences.
       !this.searchResultsAreShuffled &&
       !this.searchResultsAreInverted &&
       FavoritesLoader.currentLoadState === FavoritesLoader.loadState.finished &&
-      !this.recentlyChangedMaxNumberOfFavoritesToDisplay;
+      !this.recentlyChangedMaxNumberOfFavoritesToDisplay &&
+      !this.tagsWereRecentlyModified;
   }
 
   /**
@@ -1454,4 +1471,3 @@ This will delete all cached favorites, and preferences.
 }
 
 const favoritesLoader = new FavoritesLoader();
-let st;

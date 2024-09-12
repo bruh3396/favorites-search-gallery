@@ -1,4 +1,50 @@
 /* eslint-disable new-cap */
+const CUSTOM_TAGS = loadCustomTags();
+
+/**
+ * @returns {Set.<String>}
+ */
+function loadCustomTags() {
+  return new Set(JSON.parse(localStorage.getItem("customTags")) || []);
+}
+
+/**
+ * @param {String} tags
+ */
+function setCustomTags(tags) {
+  for (const tag of removeExtraWhiteSpace(tags).split(" ")) {
+    if (tag !== "") {
+      CUSTOM_TAGS.add(tag);
+    }
+  }
+  localStorage.setItem("customTags", JSON.stringify(Array.from(CUSTOM_TAGS)));
+}
+
+function isOfficial(tag) {
+
+}
+
+/**
+ * @param {{label: String, value: String, type: String}[]} officialTags
+ * @returns {{label: String, value: String, type: String}[]}
+ */
+function mergeOfficialTagsWithCustomTags(officialTags) {
+  const customTags = Array.from(CUSTOM_TAGS);
+  const officialTagValues = new Set(officialTags.map(officialTag => officialTag.value));
+  const mergedTags = officialTags;
+
+  for (const customTag of customTags) {
+    if (!officialTagValues.has(customTag)) {
+      mergedTags.unshift({
+        label: `${customTag} (custom)`,
+        value: customTag,
+        type: "custom"
+      });
+    }
+  }
+  return mergedTags;
+}
+
 class AwesompleteWrapper {
   constructor() {
     document.querySelectorAll("textarea").forEach((textarea) => {
@@ -45,7 +91,7 @@ class AwesompleteWrapper {
    * @param {Awesomplete_} awesomplete
    */
   populateAwesompleteList(prefix, awesomplete) {
-    fetch(`https://rule34.xxx/autocomplete.php?q=${prefix}`)
+    fetch(`https://ac.rule34.xxx/autocomplete.php?q=${prefix}`)
       .then((response) => {
         if (response.ok) {
           return response.text();
@@ -53,8 +99,9 @@ class AwesompleteWrapper {
         throw new Error(response.status);
       })
       .then((suggestions) => {
+        // const mergedSuggestions = mergeOfficialTagsWithCustomTags(JSON.parse(suggestions));
+        // awesomplete.list = mergedSuggestions;
         awesomplete.list = JSON.parse(suggestions);
-      }).catch(() => {
       });
   }
 

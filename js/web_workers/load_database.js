@@ -78,8 +78,8 @@ class FavoritesDatabase {
         favorites.forEach(favorite => {
           this.addContentTypeToFavorite(favorite);
           favoritesObjectStore.add(favorite);
-          database.close();
         });
+        database.close();
 
         postMessage({
           response: "finishedStoring"
