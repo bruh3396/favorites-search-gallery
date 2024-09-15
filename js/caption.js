@@ -123,6 +123,11 @@ class Caption {
      </ul>
  `;
 
+   /**
+   * @type {Object.<String, Number>}
+   */
+ static tagCategoryAssociations;
+
   /**
    * @returns {String}
    */
@@ -167,10 +172,6 @@ class Caption {
    */
   caption;
   /**
-   * @type {Object.<String, Number>}
-   */
-  tagCategoryAssociations;
-  /**
    * @type {String[]}
    */
   problematicTags;
@@ -189,7 +190,7 @@ class Caption {
     if (captionDisabled) {
       return;
     }
-    this.tagCategoryAssociations = this.loadSavedTags();
+    Caption.tagCategoryAssociations = this.loadSavedTags();
     this.problematicTags = [];
     this.currentlyCorrectingProblematicTags = false;
     this.previousThumb = null;
@@ -263,11 +264,11 @@ class Caption {
     captionIdTag.textContent = thumb.id;
     captionIdTag.onclick = (event) => {
       event.stopPropagation();
-      this.tagOnClick(thumb.id);
+      this.tagOnClick(thumb.id, event);
     };
     captionIdTag.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      this.tagOnClick(`-${thumb.id}`);
+      this.tagOnClick(`-${thumb.id}`, event);
     });
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
     thumb.children[0].appendChild(this.captionWrapper);
@@ -341,11 +342,11 @@ class Caption {
     };
     tag.onclick = (event) => {
       event.stopPropagation();
-      this.tagOnClick(tagName);
+      this.tagOnClick(tagName, event);
     };
     tag.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      this.tagOnClick(`-${this.replaceSpacesWithUnderscores(tag.textContent)}`);
+      this.tagOnClick(`-${this.replaceSpacesWithUnderscores(tag.textContent)}`, event);
     });
   }
 
@@ -436,13 +437,18 @@ class Caption {
   }
 
   saveTags() {
-    localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(this.tagCategoryAssociations));
+    localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(Caption.tagCategoryAssociations));
   }
 
   /**
    * @param {String} value
+   * @param {MouseEvent} mouseEvent
    */
-  tagOnClick(value) {
+  tagOnClick(value, mouseEvent) {
+    if (mouseEvent.ctrlKey) {
+      openSearchPage(value);
+      return;
+    }
     const searchBox = onPostPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
     const searchBoxDoesNotIncludeTag = true;
     // const searchBoxDoesNotIncludeTag = searchBox !== null && !searchBox.value.includes(` ${value}`);
@@ -515,7 +521,7 @@ class Caption {
     const tagNames = getTagsFromThumb(thumb).replace(/\s\d+$/, "")
       .split(" ");
     const unknownThumbTags = tagNames
-      .filter(tag => this.tagCategoryAssociations[tag] === undefined);
+      .filter(tag => Caption.tagCategoryAssociations[tag] === undefined);
 
     this.currentThumbId = thumb.id;
 
@@ -557,7 +563,7 @@ class Caption {
    * @returns {String}
    */
   getTagCategory(tagName) {
-    const encoding = this.tagCategoryAssociations[tagName];
+    const encoding = Caption.tagCategoryAssociations[tagName];
 
     if (encoding === undefined) {
       return "general";
@@ -592,13 +598,13 @@ class Caption {
           const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
 
           if (columnOfFirstRow.length !== 3) {
-            this.tagCategoryAssociations[tagName] = 0;
+            Caption.tagCategoryAssociations[tagName] = 0;
             this.saveTags();
             return;
           }
           const category = columnOfFirstRow[2].textContent.split(",")[0].split(" ")[0];
 
-          this.tagCategoryAssociations[tagName] = Caption.getTagCategoryEncoding(category);
+          Caption.tagCategoryAssociations[tagName] = Caption.getTagCategoryEncoding(category);
           this.saveTags();
         });
     }
@@ -634,7 +640,7 @@ class Caption {
               this.correctProblematicTag(tagName);
               return;
             }
-            this.tagCategoryAssociations[tagName] = parseInt(encoding);
+            Caption.tagCategoryAssociations[tagName] = parseInt(encoding);
 
             if (tagName === lastTagName && onAllCategoriesFound !== undefined) {
               onAllCategoriesFound();
@@ -658,7 +664,7 @@ class Caption {
       .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
       .join(" ")
       .split(" ")
-      .filter(tagName => this.tagCategoryAssociations[tagName] === undefined);
+      .filter(tagName => Caption.tagCategoryAssociations[tagName] === undefined);
   }
 
   findCategoriesOfAllTags() {

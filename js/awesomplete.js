@@ -11,17 +11,20 @@ function loadCustomTags() {
 /**
  * @param {String} tags
  */
-function setCustomTags(tags) {
+async function setCustomTags(tags) {
+
   for (const tag of removeExtraWhiteSpace(tags).split(" ")) {
-    if (tag !== "") {
+    if (tag === "" || CUSTOM_TAGS.has(tag)) {
+      continue;
+    }
+
+    const isAnOfficialTag = await isOfficialTag(tag);
+
+    if (!isAnOfficialTag) {
       CUSTOM_TAGS.add(tag);
     }
   }
   localStorage.setItem("customTags", JSON.stringify(Array.from(CUSTOM_TAGS)));
-}
-
-function isOfficial(tag) {
-
 }
 
 /**
@@ -91,6 +94,9 @@ class AwesompleteWrapper {
    * @param {Awesomplete_} awesomplete
    */
   populateAwesompleteList(prefix, awesomplete) {
+    if (prefix.trim() === "") {
+      return;
+    }
     fetch(`https://ac.rule34.xxx/autocomplete.php?q=${prefix}`)
       .then((response) => {
         if (response.ok) {
@@ -99,9 +105,11 @@ class AwesompleteWrapper {
         throw new Error(response.status);
       })
       .then((suggestions) => {
-        // const mergedSuggestions = mergeOfficialTagsWithCustomTags(JSON.parse(suggestions));
-        // awesomplete.list = mergedSuggestions;
-        awesomplete.list = JSON.parse(suggestions);
+
+        const mergedSuggestions = mergeOfficialTagsWithCustomTags(JSON.parse(suggestions));
+
+        awesomplete.list = mergedSuggestions;
+        // awesomplete.list = JSON.parse(suggestions);
       });
   }
 

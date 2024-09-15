@@ -1039,4 +1039,28 @@ function getPerformanceProfile() {
   return parseInt(getPreference("performanceProfile", 0));
 }
 
+function isOfficialTag(tagName) {
+  const tagPageURL = `https://rule34.xxx/index.php?page=tags&s=list&tags=${tagName}`;
+  return fetch(tagPageURL)
+    .then((response) => {
+      if (response.ok) {
+        return response.text();
+      }
+      throw new Error(response.statusText);
+    })
+    .then((html) => {
+      const dom = new DOMParser().parseFromString(html, "text/html");
+      const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
+      return columnOfFirstRow.length === 3;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
+}
+
+function openSearchPage(searchQuery) {
+  window.open(`https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(searchQuery)}`);
+}
+
 initializeUtilities();

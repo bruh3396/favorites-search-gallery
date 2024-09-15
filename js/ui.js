@@ -494,6 +494,7 @@ function loadFavoritesPagePreferences() {
   if (onMobileDevice()) {
     toggleFancyImageHovering(false);
     FAVORITE_CHECKBOXES.fancyImageHovering.parentElement.style.display = "none";
+    FAVORITE_CHECKBOXES.enableOnSearchPages.parentElement.style.display = "none";
   } else {
     const fancyImageHovering = getPreference(FAVORITE_PREFERENCES.fancyImageHovering, false);
 
@@ -525,9 +526,8 @@ function addEventListenersToFavoritesPage() {
 
     if (event.ctrlKey) {
       const queryWithFormattedIds = query.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
-      const postPageURL = `https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(queryWithFormattedIds)}`;
 
-      window.open(postPageURL);
+      openSearchPage(queryWithFormattedIds);
     } else {
       favoritesLoader.searchFavorites(query);
       addToFavoritesSearchHistory(query);

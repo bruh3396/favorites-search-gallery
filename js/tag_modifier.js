@@ -25,7 +25,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
     }
 
     .tag-type-custom>a, .tag-type-custom {
-      color: #0075FF;
+      color: #00FFFF;
     }
   </style>
   <div id="tag-modifier-option-container">
@@ -268,7 +268,7 @@ class TagModifier {
    * @param {Boolean} remove
    */
   modifyTagsOfSelected(remove) {
-    const tags = this.ui.textarea.value;
+    const tags = this.ui.textarea.value.toLowerCase();
     const tagsWithoutContentTypes = this.removeContentTypeTags(tags);
     const tagsToModify = removeExtraWhiteSpace(tagsWithoutContentTypes);
     const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
@@ -360,6 +360,9 @@ class TagModifier {
   }
 
   resetTagModifications() {
+    if (!confirm("Are you sure you want to delete all tag modifications?")) {
+      return;
+    }
     CUSTOM_TAGS.clear();
     indexedDB.deleteDatabase("AdditionalTags");
     ThumbNode.allThumbNodes.forEach(thumbNode => {

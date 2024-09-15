@@ -13,8 +13,6 @@ const galleryHTML = `<style>
         animation: outlineGlow 1s forwards;
         opacity: 1;
       }
-
-
     }
 
     >div>canvas {

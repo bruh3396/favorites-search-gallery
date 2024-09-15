@@ -998,12 +998,14 @@ This will delete all cached favorites, and preferences.
     `;
 
     if (confirm(message)) {
-      const savedSearches = JSON.parse(localStorage.getItem("savedSearches"));
+      const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
 
-      localStorage.clear();
+      Object.keys(localStorage).forEach((key) => {
+        if (!persistentLocalStorageKeys.has(key)) {
+          localStorage.removeItem(key);
+        }
+     });
       indexedDB.deleteDatabase(FavoritesLoader.databaseName);
-      indexedDB.deleteDatabase("AdditionalTags");
-      localStorage.setItem("savedSearches", JSON.stringify(savedSearches));
     }
   }
 
