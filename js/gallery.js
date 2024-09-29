@@ -2132,11 +2132,10 @@ onmessage = (message) => {
    * @param {String} direction
    * @returns
    */
-  renderInAdvanceWhileTraversingGallery(direction) {
-    const selectedThumb = this.getSelectedThumb();
+  renderInAdvanceWhileTraversingGallery(thumb, direction) {
     const lookahead = this.getLookahead();
     const forward = direction === Gallery.galleryDirections.right;
-    let nextThumbToRender = this.getAdjacentVisibleThumb(selectedThumb, forward);
+    let nextThumbToRender = this.getAdjacentVisibleThumb(thumb, forward);
 
     this.movedForwardInGallery = forward;
 
