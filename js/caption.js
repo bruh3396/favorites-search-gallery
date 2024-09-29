@@ -14,6 +14,8 @@ const captionHTML = `<style>
     transform: translateX(-100%);
     /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
     transition: transform .35s ease;
+    padding-top: 4px;
+    padding-left: 7px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -53,7 +55,7 @@ const captionHTML = `<style>
   }
 
   #caption-list {
-    padding-left: 5px;
+    /* padding-left: 5px; */
   }
 
   .caption-tag {
@@ -87,10 +89,10 @@ const captionHTML = `<style>
     pointer-events: none;
     position: absolute !important;
     overflow: hidden;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: -4px;
+    left: -4px;
+    width: 105%;
+    height: 105%;
     display: block !important;
   }
 </style>`;

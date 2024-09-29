@@ -747,7 +747,19 @@ function toggleFancyImageHovering(value) {
 function configureVideoOutlines() {
   const size = onMobileDevice() ? 2 : 3;
 
-  injectStyleHTML(`img.video {outline: ${size}px solid blue;}`, "video-border");
+  injectStyleHTML(`
+    .thumb-node, .thumb {
+
+      >a,
+      >div {
+        &:has(img.video) {
+          >img {
+            outline: ${size}px solid blue;
+          }
+        }
+      }
+    }
+    `, "video-border");
 }
 
 function removeInlineImgStyles() {
@@ -921,9 +933,9 @@ function scrollToThumb(postId, doAnimation = true) {
 
   if (elementIsNotAThumb) {
     if (postId === "") {
-      alert("Please enter a post ID");
+      // alert("Please enter a post ID");
     } else {
-      alert(`Favorite with post ID ${postId} not found`);
+      // alert(`Favorite with post ID ${postId} not found`);
     }
     return;
   }

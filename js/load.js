@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -300,8 +300,11 @@ onmessage = (message) => {
   /**
    * @type {Boolean}
    */
-    tagsWereRecentlyModified;
-
+  tagsWereRecentlyModified;
+  /**
+   * @type {Boolean}
+   */
+  excludeBlacklistClicked;
   /**
    * @type {Boolean}
    */
@@ -352,6 +355,7 @@ onmessage = (message) => {
     this.newPageNeedsToBeCreated = false;
     this.tagsWereRecentlyModified = false;
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
+    this.excludeBlacklistClicked = false;
     this.matchingFavoritesCount = 0;
     this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
     this.searchQuery = "";
@@ -1004,7 +1008,7 @@ This will delete all cached favorites, and preferences.
         if (!persistentLocalStorageKeys.has(key)) {
           localStorage.removeItem(key);
         }
-     });
+      });
       indexedDB.deleteDatabase(FavoritesLoader.databaseName);
     }
   }
@@ -1101,7 +1105,10 @@ This will delete all cached favorites, and preferences.
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
     const pageCount = this.getPageCount(this.searchResultsWhileFetching.length);
     const needsToCreateNewPage = pageCount > lastPageButtonNumber;
-    const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount;
+    const nextPageButton = document.getElementById("next-page-button");
+    const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount &&
+      nextPageButton !== null && nextPageButton.style.display !== "none" &&
+      nextPageButton.style.visibility !== "hidden";
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
       this.updatePaginationUi(this.currentFavoritesPageNumber, this.searchResultsWhileFetching);
@@ -1320,10 +1327,10 @@ This will delete all cached favorites, and preferences.
     if (this.onSamePage(pageNumber)) {
       return;
     }
-
     const {start, end} = this.getPaginationStartEndIndices(pageNumber);
 
     this.tagsWereRecentlyModified = false;
+    this.excludeBlacklistClicked = false;
     this.previousSearchQuery = this.searchQuery;
     this.currentFavoritesPageNumber = pageNumber;
     this.updatePaginationUi(pageNumber, searchResults);
@@ -1394,7 +1401,8 @@ This will delete all cached favorites, and preferences.
       !this.searchResultsAreInverted &&
       FavoritesLoader.currentLoadState === FavoritesLoader.loadState.finished &&
       !this.recentlyChangedMaxNumberOfFavoritesToDisplay &&
-      !this.tagsWereRecentlyModified;
+      !this.tagsWereRecentlyModified &&
+      !this.excludeBlacklistClicked;
   }
 
   /**
@@ -1470,6 +1478,7 @@ This will delete all cached favorites, and preferences.
     this.searchFavorites();
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
   }
+
 }
 
 const favoritesLoader = new FavoritesLoader();

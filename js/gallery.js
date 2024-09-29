@@ -162,7 +162,7 @@ class Gallery {
   };
   static webWorkers = {
     imageFetcher:
-`
+      `
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 100;
 let retryDelay = 0;
@@ -796,6 +796,7 @@ onmessage = (message) => {
             this.openPostInNewPage();
           } else if (!this.inGallery) {
             this.toggleAllVisibility();
+            setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
           }
           break;
 
@@ -1172,8 +1173,8 @@ onmessage = (message) => {
     };
     window.onfocus = () => {
       if (this.leftPostPage) {
-        this.leftPostPage = false;
         this.renderImagesInTheBackground();
+        this.leftPostPage = false;
       }
     };
     await this.findImageExtensionsOnPostPage();
@@ -1294,7 +1295,7 @@ onmessage = (message) => {
       if (this.inGallery || enteredOverCaptionTag(event)) {
         return;
       }
-      this.hideOriginalContent(thumb);
+      this.hideOriginalContent();
     };
   }
 
@@ -1349,7 +1350,7 @@ onmessage = (message) => {
     const thumbIndex = this.getIndexOfThumbUnderCursor();
 
     if (thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGalleryMode) {
-      this.hideOriginalContent(this.getSelectedThumb());
+      this.hideOriginalContent();
 
       if (thumbIndex !== null && this.showOriginalContentOnHover) {
         this.showOriginalContent(this.visibleThumbs[thumbIndex]);
@@ -1434,10 +1435,7 @@ onmessage = (message) => {
     }
   }
 
-  /**
-   * @param {HTMLElement} thumb
-   */
-  hideOriginalContent(thumb) {
+  hideOriginalContent() {
     this.toggleBackgroundVisibility(false);
     this.toggleScrollbarVisibility(true);
     this.toggleCursorVisibility(true);
@@ -1976,7 +1974,6 @@ onmessage = (message) => {
     if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
       return;
     }
-
     this.currentlyRendering = true;
     const unrenderedImageThumbs = this.getVisibleUnrenderedImageThumbs();
     const imageThumbsToRender = [];
@@ -2135,10 +2132,11 @@ onmessage = (message) => {
    * @param {String} direction
    * @returns
    */
-  renderInAdvanceWhileTraversingGallery(thumb, direction) {
+  renderInAdvanceWhileTraversingGallery(direction) {
+    const selectedThumb = this.getSelectedThumb();
     const lookahead = this.getLookahead();
     const forward = direction === Gallery.galleryDirections.right;
-    let nextThumbToRender = this.getAdjacentVisibleThumb(thumb, forward);
+    let nextThumbToRender = this.getAdjacentVisibleThumb(selectedThumb, forward);
 
     this.movedForwardInGallery = forward;
 

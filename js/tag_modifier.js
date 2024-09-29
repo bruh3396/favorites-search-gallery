@@ -25,7 +25,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
     }
 
     .tag-type-custom>a, .tag-type-custom {
-      color: #00FFFF;
+      color: hotpink;
     }
   </style>
   <div id="tag-modifier-option-container">
@@ -97,7 +97,7 @@ class TagModifier {
   selectedThumbNodes;
 
   constructor() {
-    if (onPostPage() || onMobileDevice()) {
+    if (onPostPage()) {
       return;
     }
     this.favoritesOption = {};

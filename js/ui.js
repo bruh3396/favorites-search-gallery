@@ -119,6 +119,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
       >a,
       >div {
+        overflow: hidden;
         position: relative;
 
         >img,
@@ -181,6 +182,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       display: flex;
       flex-flow: row wrap;
       min-width: 50%;
+
       >div {
         flex: 1;
         padding-right: 6px;
@@ -225,6 +227,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #favorites-pagination-container {
       padding: 0px 10px 0px 10px;
+
       >button {
         background: transparent;
         margin: 0px 2px;
@@ -262,7 +265,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       flex-flow: row wrap;
       margin-top: 10px;
 
-      > div {
+      >div {
         flex: 1;
       }
     }
@@ -281,7 +284,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       width: 136px;
     }
 
-    #show-ui-div{
+    #show-ui-div {
       max-width: 400px;
 
       &.ui-hidden {
@@ -290,9 +293,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         align-content: center;
       }
     }
-
-
-
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
@@ -303,7 +303,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
-        <button title="Search favorites\nctrl+click: Search all of rule34 in a new tab" id="search-button">Search</button>
+        <button title="Search favorites\nctrl+click: Search all of rule34 in a new tab"
+          id="search-button">Search</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
         <button title="Empty the search box" id="clear-button">Clear</button>
@@ -327,7 +328,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           <div id="show-options"><label class="checkbox" title="Show more options"><input type="checkbox"
                 id="options-checkbox"> More Options</label></div>
           <div id="favorite-options">
-            <div><label class="checkbox" title="Enable gallery and other features on search pages"><input type="checkbox" id="enable-on-search-pages">
+            <div><label class="checkbox" title="Enable gallery and other features on search pages"><input
+                  type="checkbox" id="enable-on-search-pages">
                 Enhance Search Pages</label></div>
             <div><label class="checkbox" title="Toggle remove buttons"><input type="checkbox" id="show-remove-buttons">
                 Remove Buttons</label></div>
@@ -346,10 +348,11 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <option value="2">Potato (only search)</option>
               </select>
             </div>
-            <div id="results-per-page-container" title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
-                <label id="results-per-page-label">Results per Page</label>
-                <br>
-                <input type="number" id="results-per-page-input" min="50" max="10000" step="500">
+            <div id="results-per-page-container"
+              title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
+              <label id="results-per-page-label">Results per Page</label>
+              <br>
+              <input type="number" id="results-per-page-input" min="50" max="10000" step="500">
             </div>
             <div id="column-resize-container" title="Set the number of favorites per row">
               <span>
@@ -362,8 +365,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           </div>
         </div>
         <div id="show-ui-container">
-          <div id="show-ui-div"><label class="checkbox" title="Toggle UI"><input
-                type="checkbox" id="show-ui">UI</label></div>
+          <div id="show-ui-div"><label class="checkbox" title="Toggle UI"><input type="checkbox" id="show-ui">UI</label>
+          </div>
         </div>
       </div>
     </div>
@@ -533,6 +536,12 @@ function addEventListenersToFavoritesPage() {
       addToFavoritesSearchHistory(query);
     }
   };
+  FAVORITE_BUTTONS.search.addEventListener("contextmenu", (event) => {
+    const queryWithFormattedIds = FAVORITE_INPUTS.searchBox.value.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
+
+    openSearchPage(queryWithFormattedIds);
+    event.preventDefault();
+  });
   FAVORITE_INPUTS.searchBox.addEventListener("keydown", (event) => {
     switch (event.key) {
       case "Enter":
@@ -613,6 +622,7 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_CHECKBOXES.filterBlacklist.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.filterBlacklist, FAVORITE_CHECKBOXES.filterBlacklist.checked);
     favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
+    favoritesLoader.excludeBlacklistClicked = true;
     favoritesLoader.searchFavorites();
   };
   FAVORITE_BUTTONS.invert.onclick = () => {

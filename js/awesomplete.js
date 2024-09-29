@@ -29,15 +29,16 @@ async function setCustomTags(tags) {
 
 /**
  * @param {{label: String, value: String, type: String}[]} officialTags
+ * @param String prefix
  * @returns {{label: String, value: String, type: String}[]}
  */
-function mergeOfficialTagsWithCustomTags(officialTags) {
+function mergeOfficialTagsWithCustomTags(officialTags, prefix) {
   const customTags = Array.from(CUSTOM_TAGS);
   const officialTagValues = new Set(officialTags.map(officialTag => officialTag.value));
   const mergedTags = officialTags;
 
   for (const customTag of customTags) {
-    if (!officialTagValues.has(customTag)) {
+    if (!officialTagValues.has(customTag) && customTag.startsWith(prefix)) {
       mergedTags.unshift({
         label: `${customTag} (custom)`,
         value: customTag,
@@ -106,7 +107,7 @@ class AwesompleteWrapper {
       })
       .then((suggestions) => {
 
-        const mergedSuggestions = mergeOfficialTagsWithCustomTags(JSON.parse(suggestions));
+        const mergedSuggestions = mergeOfficialTagsWithCustomTags(JSON.parse(suggestions), prefix);
 
         awesomplete.list = mergedSuggestions;
         // awesomplete.list = JSON.parse(suggestions);
