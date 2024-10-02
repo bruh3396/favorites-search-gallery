@@ -168,6 +168,10 @@ function updateVisibilityOfAllRemoveButtons() {
       }
     `, "remove-button-visibility");
   hideCaptionsWhenRemoveButtonsAreVisible(removeButtonsAreVisible);
+
+  if (FAVORITE_CHECKBOXES.fancyImageHovering.checked) {
+    toggleFancyImageHovering(!removeButtonsAreVisible);
+  }
 }
 
 /**
@@ -753,10 +757,13 @@ function configureVideoOutlines() {
       >a,
       >div {
         &:has(img.video) {
-          >img {
             outline: ${size}px solid blue;
-          }
         }
+
+        &:has(img.gif) {
+          outline: 2px solid hotpink;
+        }
+
       }
     }
     `, "video-border");
@@ -1073,6 +1080,17 @@ function isOfficialTag(tagName) {
 
 function openSearchPage(searchQuery) {
   window.open(`https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(searchQuery)}`);
+}
+
+function mapToObject(map) {
+  return Array.from(map).reduce((object, [key, value]) => {
+    object[key] = value;
+    return object;
+  }, {});
+}
+
+function objectToMap(object) {
+  return new Map(Object.entries(object));
 }
 
 initializeUtilities();

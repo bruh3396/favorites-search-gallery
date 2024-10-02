@@ -87,9 +87,8 @@ class FavoritesDatabase {
       })
       .catch((event) => {
         const error = event.target.error;
-        const errorType = error.name;
 
-        if (errorType === "VersionError") {
+        if (error.name === "VersionError") {
           this.version += 1;
           this.storeFavorites(favorites);
         } else {

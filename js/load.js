@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -99,9 +99,8 @@ class FavoritesDatabase {
       })
       .catch((event) => {
         const error = event.target.error;
-        const errorType = error.name;
 
-        if (errorType === "VersionError") {
+        if (error.name === "VersionError") {
           this.version += 1;
           this.storeFavorites(favorites);
         } else {
@@ -999,6 +998,7 @@ onmessage = (message) => {
     const message = `
 Are you sure you want to reset?
 This will delete all cached favorites, and preferences.
+Tag modifications and saved searches will be preserved.
     `;
 
     if (confirm(message)) {

@@ -54,10 +54,6 @@ const galleryHTML = `<style>
     outline: 2px solid slategrey;
   } */
 
-  .gif {
-    outline: 2px solid hotpink;
-  }
-
   .focused {
     transition: none;
     float: left;
@@ -106,6 +102,7 @@ const galleryHTML = `<style>
     >div,
     >a {
       >canvas {
+        width: 100%;
         position: absolute;
         top: 0;
         left: 0;

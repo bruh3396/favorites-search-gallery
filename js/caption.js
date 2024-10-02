@@ -89,10 +89,10 @@ const captionHTML = `<style>
     pointer-events: none;
     position: absolute !important;
     overflow: hidden;
-    top: -4px;
-    left: -4px;
-    width: 105%;
-    height: 105%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: block !important;
   }
 </style>`;

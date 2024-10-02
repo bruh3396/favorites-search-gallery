@@ -307,7 +307,7 @@ class SavedSearches {
         return;
       }
 
-      if (confirm(`Remove Saved Search: ${savedSearchLabel.innerText} ?`)) {
+      if (confirm(`Remove saved search: ${savedSearchLabel.innerText} ?`)) {
         this.savedSearchesList.removeChild(newListItem);
         this.storeSavedSearches();
       }
@@ -424,7 +424,7 @@ class SavedSearches {
   importSavedSearches() {
     const doesNotHaveSavedSearches = this.savedSearchesList.querySelectorAll("li").length === 0;
 
-    if (doesNotHaveSavedSearches || confirm("are you sure you want to import saved searches? ( this will overwrite current saved searches )")) {
+    if (doesNotHaveSavedSearches || confirm("Are you sure you want to import saved searches? This will overwrite current saved searches.")) {
       const savedSearches = this.textarea.value.split("\n");
 
       this.savedSearchesList.innerHTML = "";

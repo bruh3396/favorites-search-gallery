@@ -35,10 +35,10 @@ const tagModifierHTML = `<div id="tag-modifier-container">
   </div>
   <div id="tag-modifier-ui-container">
     <label id="tag-modifier-ui-status-label">No Status</label>
-    <textarea id="tag-modifier-ui-textarea" placeholder="tags"></textarea>
+    <textarea id="tag-modifier-ui-textarea" placeholder="tags" spellcheck="false"></textarea>
     <div id="tag-modifier-ui-modification-buttons">
-      <button id="tag-modifier-ui-add" title="Add tags to all selected favorites">Add</button>
-      <button id="tag-modifier-remove" title="Remove tags to all selected favorites">Remove</button>
+      <button id="tag-modifier-ui-add" title="Add tags to selected favorites">Add</button>
+      <button id="tag-modifier-remove" title="Remove tags from selected favorites">Remove</button>
     </div>
     <div id="tag-modifier-ui-selection-buttons">
       <button id="tag-modifier-ui-select-all" title="Select all favorites for tag modification">Select all</button>
@@ -87,7 +87,9 @@ class TagModifier {
    * remove: HTMLButtonElement,
    * reset: HTMLButtonElement,
    * selectAll: HTMLButtonElement,
-   * unSelectAll: HTMLButtonElement}}
+   * unSelectAll: HTMLButtonElement,
+   * import: HTMLButtonElement,
+   * export: HTMLButtonElement}}
    */
   ui;
 
@@ -120,6 +122,8 @@ class TagModifier {
     this.ui.reset = document.getElementById("tag-modifier-reset");
     this.ui.selectAll = document.getElementById("tag-modifier-ui-select-all");
     this.ui.unSelectAll = document.getElementById("tag-modifier-ui-un-select-all");
+    this.ui.import = document.getElementById("tag-modifier-import");
+    this.ui.export = document.getElementById("tag-modifier-export");
   }
 
   addEventListeners() {
@@ -131,6 +135,8 @@ class TagModifier {
     this.ui.add.onclick = this.addTagsToSelected.bind(this);
     this.ui.remove.onclick = this.removeTagsFromSelected.bind(this);
     this.ui.reset.onclick = this.resetTagModifications.bind(this);
+    this.ui.import.onclick = this.importTagModifications.bind(this);
+    this.ui.export.onclick = this.exportTagModifications.bind(this);
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
     });
@@ -324,12 +330,22 @@ class TagModifier {
       const objectStore = database
         .transaction(TagModifier.objectStoreName, "readwrite")
         .objectStore(TagModifier.objectStoreName);
+      const idsWithNoTagModifications = [];
 
       for (const [id, tags] of TagModifier.tagModifications) {
-        objectStore.put({
-          id,
-          tags
-        });
+        if (tags === "") {
+          idsWithNoTagModifications.push(id);
+          objectStore.delete(id);
+        } else {
+          objectStore.put({
+            id,
+            tags
+          });
+        }
+      }
+
+      for (const id of idsWithNoTagModifications) {
+        TagModifier.tagModifications.delete(id);
       }
       database.close();
     };
@@ -369,6 +385,40 @@ class TagModifier {
       thumbNode.resetAdditionalTags();
     });
     dispatchEvent(new Event("modifiedTags"));
+    localStorage.removeItem("customTags");
+  }
+
+  exportTagModifications() {
+    const modifications = JSON.stringify(mapToObject(TagModifier.tagModifications));
+
+    navigator.clipboard.writeText(modifications);
+    alert("Copied tag modifications to clipboard");
+  }
+
+  importTagModifications() {
+    // if (!confirm("Are you sure you want to import these tag modifications?")) {
+    //   return;
+    // }
+
+    let modifications;
+
+    try {
+      const object = JSON.parse(this.ui.textarea.value);
+
+      if (!(typeof object === "object")) {
+        throw new TypeError(`Input parsed as ${typeof (object)}, but expected object`);
+      }
+      modifications = objectToMap(object);
+    } catch (error) {
+      if (error.name === "SyntaxError" || error.name === "TypeError") {
+        alert("Import Unsuccessful. Failed to parse input, JSON object format expected.");
+      } else {
+        throw error;
+      }
+      return;
+    }
+
+    console.log(modifications);
   }
 }
 

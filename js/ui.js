@@ -122,8 +122,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         overflow: hidden;
         position: relative;
 
-        >img,
-        >canvas {
+        >img {
           width: 100%;
           z-index: 1;
         }
