@@ -197,7 +197,6 @@ class Caption {
     this.currentlyCorrectingProblematicTags = false;
     this.previousThumb = null;
     this.currentThumbId = null;
-    this.findCategoriesOfAllTags();
     this.create();
     this.injectHTML();
     this.setVisibility(this.getVisibilityPreference());
@@ -406,14 +405,6 @@ class Caption {
       });
       window.addEventListener("showCaption", (event) => {
         this.show(event.detail);
-      });
-      window.addEventListener("originalContentCleared", (event) => {
-        const thumbs = event.detail;
-        const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
-
-        this.findTagCategories(tagNames, 3, () => {
-          this.saveTags();
-        });
       });
       window.addEventListener("originalContentCleared", (event) => {
         const thumbs = event.detail;
@@ -667,19 +658,6 @@ class Caption {
       .join(" ")
       .split(" ")
       .filter(tagName => Caption.tagCategoryAssociations[tagName] === undefined);
-  }
-
-  findCategoriesOfAllTags() {
-    window.addEventListener("favoritesLoaded", () => {
-      const allTagNames = this.getTagNamesWithUnknownCategories(getAllThumbs);
-
-      if (allTagNames.length === 0) {
-        return;
-      }
-      this.findTagCategories(allTagNames, 2, () => {
-        this.saveTags();
-      });
-    });
   }
 }
 

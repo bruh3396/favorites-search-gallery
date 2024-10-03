@@ -202,8 +202,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     }
 
     #column-resize-container {
-      margin-top: 10px;
-
       >span {
         >button {
           width: 20px;
@@ -271,7 +269,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #additional-favorite-options {
       >div {
-        padding-top: 6px;
+        padding-top: 15px;
       }
     }
 
@@ -359,6 +357,23 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <button id="column-resize-minus">-</button>
                 <input type="number" id="column-resize-input" min="2" max="20">
                 <button id="column-resize-plus">+</button>
+              </span>
+            </div>
+            <div id="sort-container" title="Sort order of search results">
+              <span>
+                <label>Sort By</label>
+                <br>
+                <select id="sorting-method">
+                  <option value="default">Default</option>
+                  <option value="width">Width</option>
+                  <option value="score">Score</option>
+                  <option value="height">Height</option>
+                  <option value="create">Date Uploaded</option>
+                  <option value="change">Date Changed</option>
+                  <option value="id">ID</option>
+                </select>
+                <label>Ascending</label>
+                <input type="checkbox" id="sort-ascending">
               </span>
             </div>
           </div>

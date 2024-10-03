@@ -65,7 +65,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {[{id: String, tags: String, src: String}]} favorites
+   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
    */
   storeFavorites(favorites) {
     this.openConnection()

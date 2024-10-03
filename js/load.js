@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -77,7 +77,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {[{id: String, tags: String, src: String}]} favorites
+   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
    */
   storeFavorites(favorites) {
     this.openConnection()
@@ -616,7 +616,7 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {Object.<string, ThumbNode>} allFavoriteIds
+   * @param {Object.<String, ThumbNode>} allFavoriteIds
    * @param {Number} currentPageNumber
    * @param {ThumbNode[]} newFavoritesToAdd
    */
@@ -882,7 +882,7 @@ onmessage = (message) => {
     FavoritesLoader.currentLoadState = FavoritesLoader.loadState.finished;
     this.toggleLoadingUI(false);
     dispatchEvent(new CustomEvent("favoritesLoaded", {
-      detail: this.allThumbNodes
+      detail: this.allThumbNodes.map(thumbNode => thumbNode.root)
     }));
   }
 
@@ -946,12 +946,13 @@ onmessage = (message) => {
   /**
    * @param {ThumbNode[]} thumbNodes
    */
-  storeFavorites(thumbNodes) {
+  async storeFavorites(thumbNodes) {
     if (!this.databaseAccessIsAllowed) {
       return;
     }
     const storeAll = thumbNodes === undefined;
 
+    await sleep(500);
     thumbNodes = storeAll ? this.allThumbNodes : thumbNodes;
     const records = thumbNodes.map(thumbNode => thumbNode.databaseRecord);
 
@@ -1377,14 +1378,13 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   createPaginatedFavoritesPage(searchResults, start, end) {
-    const newThumbNodes = searchResults.slice(start, end);
+    const newThumbNodes = this.sortThumbNodes(searchResults).slice(start, end);
     const content = document.getElementById("content");
     const newContent = document.createDocumentFragment();
 
     for (const thumbNode of newThumbNodes) {
       newContent.appendChild(thumbNode.root);
     }
-
     content.innerHTML = "";
     content.appendChild(newContent);
     window.scrollTo(0, 0);
@@ -1479,6 +1479,70 @@ Tag modifications and saved searches will be preserved.
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
   }
 
+  /**
+   * @param {ThumbNode[]} thumbNodes
+   * @returns {ThumbNode[]}
+   */
+  sortThumbNodes(thumbNodes) {
+    if (!FavoritesLoader.loadState.finished) {
+      alert("Wait for all favorites to load before changing sort method");
+      return thumbNodes;
+    }
+    const sortedThumbNodes = thumbNodes.slice();
+    const sortingMethod = this.getSortingMethod();
+
+    if (sortingMethod !== "default") {
+      sortedThumbNodes.sort((b, a) => {
+        switch (sortingMethod) {
+          case "score":
+            return a.metadata.score - b.metadata.score;
+
+          case "width":
+            return a.metadata.width - b.metadata.width;
+
+          case "height":
+            return a.metadata.height - b.metadata.height;
+
+          case "create":
+            return a.metadata.creationTimestamp - b.metadata.creationTimestamp;
+
+          case "change":
+            return a.metadata.lastChangedTimestamp - b.metadata.lastChangedTimestamp;
+
+          case "id":
+            return a.metadata.id - b.metadata.id;
+
+          default:
+            return 0;
+        }
+      });
+    }
+
+    if (this.sortAscending()) {
+      sortedThumbNodes.reverse();
+    }
+    return sortedThumbNodes;
+  }
+
+  /**
+   * @returns {String}
+   */
+  getSortingMethod() {
+    const sortingMethodSelect = document.getElementById("sorting-method");
+
+    if (this.searchResultsAreShuffled) {
+      return "default";
+    }
+    return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  sortAscending() {
+    const sortFavoritesAscending = document.getElementById("sort-ascending");
+    return sortFavoritesAscending === null ? false : sortFavoritesAscending.checked;
+  }
 }
 
 const favoritesLoader = new FavoritesLoader();

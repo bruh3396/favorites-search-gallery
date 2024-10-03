@@ -168,10 +168,6 @@ function updateVisibilityOfAllRemoveButtons() {
       }
     `, "remove-button-visibility");
   hideCaptionsWhenRemoveButtonsAreVisible(removeButtonsAreVisible);
-
-  if (FAVORITE_CHECKBOXES.fancyImageHovering.checked) {
-    toggleFancyImageHovering(!removeButtonsAreVisible);
-  }
 }
 
 /**
@@ -714,7 +710,6 @@ function toggleFancyImageHovering(value) {
         box-shadow: 0 1px 2px rgba(0,0,0,0.15);
         transition: all 0.3s ease-in-out;
         position: relative;
-
 
         &::after {
           content: '';

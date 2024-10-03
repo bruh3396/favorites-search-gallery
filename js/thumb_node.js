@@ -18,6 +18,7 @@ class ThumbNode {
     remove: "https://rule34.xxx/index.php?page=favorites&s=delete&id="
   };
   static thumbSourceExtractionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
+  static parser = new DOMParser();
 
   /**
    * @param {String} compressedSource
@@ -93,6 +94,10 @@ class ThumbNode {
    * @type {Boolean}
    */
   matchedByMostRecentSearch;
+  /**
+   * @type {FavoriteMetadata}
+  */
+  metadata;
 
   /**
    * @type {String}
@@ -116,13 +121,14 @@ class ThumbNode {
   }
 
   /**
-   * @type {{id: String, tags: String, src: String}}
+   * @type {{id: String, tags: String, src: String, metadata: String}}
    */
   get databaseRecord() {
     return {
       id: this.id,
       tags: this.originalTags,
-      src: this.compressedThumbSource
+      src: this.compressedThumbSource,
+      metadata: this.metadata.json
     };
   }
 
@@ -188,13 +194,14 @@ class ThumbNode {
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, type: String}} record
+   * @param {{id: String, tags: String, src: String, type: String, metadata: String}} record
    */
   createFromDatabaseRecord(record) {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
     this.originalTags = record.tags;
     this.image.classList.add(record.type);
+    this.metadata = new FavoriteMetadata(this.id, JSON.parse(record.metadata));
   }
 
   /**
@@ -214,6 +221,7 @@ class ThumbNode {
     this.id = ThumbNode.getIdFromThumb(thumb);
     this.originalTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
     this.image.classList.add(getContentType(this.originalTags));
+    this.metadata = new FavoriteMetadata(this.id);
   }
 
   setupOnClickLink() {
