@@ -202,7 +202,6 @@ onmessage = (message) => {
    * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: {pageNumber: Number, thumbNodes: ThumbNode[], searchResults: ThumbNode[]}[]}}
    */
   fetchedThumbNodes;
-
   /**
    * @type {ThumbNode[]}
    */
@@ -336,7 +335,7 @@ onmessage = (message) => {
   }
 
   constructor() {
-    if (onPostPage()) {
+    if (onSearchPage()) {
       return;
     }
     this.allThumbNodes = [];
@@ -622,11 +621,11 @@ onmessage = (message) => {
    * @param {ThumbNode[]} newFavoritesToAdd
    */
   addNewFavoritesToSavedFavorites(allFavoriteIds, currentPageNumber, newFavoritesToAdd) {
-    const favoritesPageURL = `${document.location.href}&pid=${currentPageNumber}`;
+    const favoritesPage = `${document.location.href}&pid=${currentPageNumber}`;
     let allNewFavoritesFound = false;
     const searchCommand = getSearchCommand(this.finalSearchQuery);
 
-    requestPageInformation(favoritesPageURL, (response) => {
+    requestPageInformation(favoritesPage, (response) => {
       const thumbNodes = this.extractThumbNodesFromFavoritesPage(response);
 
       for (const thumbNode of thumbNodes) {
@@ -671,8 +670,6 @@ onmessage = (message) => {
   }
 
   startFetchingFavorites() {
-    const currentPageNumber = 0;
-
     FavoritesLoader.currentLoadState = FavoritesLoader.loadState.started;
     this.toggleContentVisibility(true);
     this.insertPaginationContainer();
@@ -681,7 +678,6 @@ onmessage = (message) => {
     setTimeout(() => {
       dispatchEvent(new Event("startedFetchingFavorites"));
     }, 50);
-
     this.fetchFavorites();
   }
 
@@ -750,8 +746,8 @@ onmessage = (message) => {
     const refetching = failedRequest !== undefined;
 
     pageNumber = refetching ? failedRequest.pageNumber : pageNumber * 50;
-    const favoritesPageURL = refetching ? failedRequest.url : `${document.location.href}&pid=${pageNumber}`;
-    return fetch(favoritesPageURL)
+    const favoritesPage = refetching ? failedRequest.url : `${document.location.href}&pid=${pageNumber}`;
+    return fetch(favoritesPage)
       .then((response) => {
         if (response.ok) {
           return response.text();
@@ -1270,13 +1266,17 @@ Tag modifications and saved searches will be preserved.
     nextPage.textContent = ">";
     finalPage.textContent = ">>";
     previousPage.onclick = () => {
-      this.changeResultsPage(this.currentFavoritesPageNumber - 1, searchResults);
+      if (this.currentFavoritesPageNumber - 1 >= 1) {
+        this.changeResultsPage(this.currentFavoritesPageNumber - 1, searchResults);
+      }
     };
     firstPage.onclick = () => {
       this.changeResultsPage(1, searchResults);
     };
     nextPage.onclick = () => {
-      this.changeResultsPage(this.currentFavoritesPageNumber + 1, searchResults);
+      if (this.currentFavoritesPageNumber + 1 <= pageCount) {
+        this.changeResultsPage(this.currentFavoritesPageNumber + 1, searchResults);
+      }
     };
     finalPage.onclick = () => {
       this.changeResultsPage(pageCount, searchResults);

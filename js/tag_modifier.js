@@ -99,7 +99,7 @@ class TagModifier {
   selectedThumbNodes;
 
   constructor() {
-    if (onPostPage()) {
+    if (onSearchPage()) {
       return;
     }
     this.favoritesOption = {};

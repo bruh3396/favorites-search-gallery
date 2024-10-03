@@ -63,7 +63,7 @@ class Tooltip {
   }
 
   addEventListeners() {
-    if (onPostPage()) {
+    if (onSearchPage()) {
       window.addEventListener("load", () => {
         this.addEventListenersToThumbs.bind(this)();
       });
@@ -99,8 +99,8 @@ class Tooltip {
   }
 
   assignColorsToMatchedTags() {
-    if (onPostPage()) {
-      this.assignColorsToMatchedTagsOnPostPage();
+    if (onSearchPage()) {
+      this.assignColorsToMatchedTagsOnSearchPage();
     } else {
       this.searchBox = document.getElementById("favorites-search-box");
       this.assignColorsToMatchedTagsOnFavoritesPage();
@@ -375,7 +375,7 @@ class Tooltip {
     this.enabled = value;
   }
 
-  assignColorsToMatchedTagsOnPostPage() {
+  assignColorsToMatchedTagsOnSearchPage() {
     const searchQuery = document.getElementsByName("tags")[0].getAttribute("value");
 
     this.assignTagColors(searchQuery);

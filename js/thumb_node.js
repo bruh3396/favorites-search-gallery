@@ -34,7 +34,7 @@ class ThumbNode {
    * @returns {String}
    */
   static getIdFromThumb(thumb) {
-    const elementWithId = onPostPage() ? thumb : thumb.children[0];
+    const elementWithId = onSearchPage() ? thumb : thumb.children[0];
     return elementWithId.id.substring(1);
   }
 

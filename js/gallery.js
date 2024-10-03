@@ -159,7 +159,7 @@ class Gallery {
   };
   static webWorkers = {
     imageFetcher:
-      `
+`
 /* eslint-disable prefer-template */
 const RETRY_DELAY_INCREMENT = 100;
 let retryDelay = 0;
@@ -207,7 +207,7 @@ function sleep(milliseconds) {
  * @param {String} postId
  * @returns {String}
  */
-function getOriginalImageURLFromPostPage(postId) {
+function getOriginalImageURLFromSearchPage(postId) {
   const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + postId;
   return fetch(postPageURL)
     .then((response) => {
@@ -229,7 +229,7 @@ function getOriginalImageURLFromPostPage(postId) {
       if (retryDelay > RETRY_DELAY_INCREMENT * 5) {
         retryDelay = RETRY_DELAY_INCREMENT;
       }
-      return getOriginalImageURLFromPostPage(postPageURL);
+      return getOriginalImageURLFromSearchPage(postPageURL);
     });
 }
 
@@ -249,7 +249,7 @@ function getOriginalImageURL(postId) {
     .then((html) => {
       return (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
     }).catch(() => {
-      return getOriginalImageURLFromPostPage(postId);
+      return getOriginalImageURLFromSearchPage(postId);
     });
 }
 
@@ -416,7 +416,7 @@ onmessage = (message) => {
 `
   };
   static defaultResolutions = {
-    postPage: "7680x4320",
+    searchPage: "7680x4320",
     favoritesPage: "7680x4320"
   };
   static attributes = {
@@ -614,8 +614,9 @@ onmessage = (message) => {
    */
   usingLandscapeOrientation;
   /**
-   * @type {leftPostPage}
-   */
+   * @type {Boolean}
+  */
+  leftSearchPage;
   /**
    * @type {HTMLElement}
    */
@@ -626,7 +627,7 @@ onmessage = (message) => {
   lastEnteredThumb;
 
   constructor() {
-    const galleryDisabled = (onMobileDevice() && onPostPage()) || getPerformanceProfile() > 0;
+    const galleryDisabled = (onMobileDevice() && onSearchPage()) || getPerformanceProfile() > 0;
 
     if (galleryDisabled) {
       return;
@@ -638,7 +639,7 @@ onmessage = (message) => {
     this.setFullscreenCanvasResolution();
     this.addEventListeners();
     this.loadDiscoveredImageExtensions();
-    this.preparePostPage();
+    this.prepareSearchPage();
     this.injectHTML();
     this.updateBackgroundOpacity(getPreference(Gallery.preferences.backgroundOpacity, 1));
   }
@@ -670,9 +671,9 @@ onmessage = (message) => {
     this.usingLandscapeOrientation = true;
     this.thumbUnderCursor = null;
     this.lastEnteredThumb = null;
-    this.leftPostPage = false;
+    this.leftSearchPage = false;
     this.content = document.getElementById("content");
-    this.finishedLoading = onPostPage();
+    this.finishedLoading = onSearchPage();
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
   }
@@ -868,7 +869,7 @@ onmessage = (message) => {
       }
     });
     window.addEventListener("load", () => {
-      if (onPostPage()) {
+      if (onSearchPage()) {
         this.initializeThumbsForHovering.bind(this)();
         this.enumerateVisibleThumbs();
       }
@@ -1048,7 +1049,7 @@ onmessage = (message) => {
    * @param {Number} maxResolutionFraction
    */
   upscaleThumbResolution(thumb, imageBitmap, maxResolutionFraction) {
-    if (onPostPage() || this.upscaledThumbs.has(thumb.id) || this.thumbUpscaler === undefined || onMobileDevice()) {
+    if (onSearchPage() || this.upscaledThumbs.has(thumb.id) || this.thumbUpscaler === undefined || onMobileDevice()) {
       return;
     }
     const offscreenCanvas = this.getOffscreenCanvasFromThumb(thumb);
@@ -1133,7 +1134,7 @@ onmessage = (message) => {
     if (this.recentlyDiscoveredImageExtensionCount >= Gallery.settings.extensionsFoundBeforeSavingCount) {
       this.recentlyDiscoveredImageExtensionCount = 0;
 
-      if (!onPostPage()) {
+      if (!onSearchPage()) {
         localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(this.imageExtensions));
       }
     }
@@ -1149,8 +1150,8 @@ onmessage = (message) => {
     }
   }
 
-  async preparePostPage() {
-    if (!onPostPage()) {
+  async prepareSearchPage() {
+    if (!onSearchPage()) {
       return;
     }
     const imageList = document.getElementsByClassName("image-list")[0];
@@ -1161,21 +1162,22 @@ onmessage = (message) => {
       assignContentType(thumb);
       thumb.id = thumb.id.substring(1);
     }
+    await this.findImageExtensionsOnSearchPage();
+    this.renderImagesInTheBackground();
+
     window.addEventListener("unload", () => {
       this.deleteAllRenders();
     });
     window.onblur = () => {
-      this.leftPostPage = true;
+      this.leftSearchPage = true;
       this.deleteAllRenders();
     };
     window.onfocus = () => {
-      if (this.leftPostPage) {
+      if (this.leftSearchPage) {
         this.renderImagesInTheBackground();
-        this.leftPostPage = false;
+        this.leftSearchPage = false;
       }
     };
-    await this.findImageExtensionsOnPostPage();
-    this.renderImagesInTheBackground();
   }
 
   async deleteAllRenders() {
@@ -1198,9 +1200,9 @@ onmessage = (message) => {
     this.imageBitmaps.delete(id);
   }
 
-  findImageExtensionsOnPostPage() {
-    const postPageAPIURL = this.getPostPageAPIURL();
-    return fetch(postPageAPIURL)
+  findImageExtensionsOnSearchPage() {
+    const searchPageAPIURL = this.getSearchPageAPIURL();
+    return fetch(searchPageAPIURL)
       .then((response) => {
         if (response.ok) {
           return response.text();
@@ -1208,7 +1210,7 @@ onmessage = (message) => {
         return null;
       }).then((html) => {
         if (html === null) {
-          console.error(`Failed to fetch: ${postPageAPIURL}`);
+          console.error(`Failed to fetch: ${searchPageAPIURL}`);
         }
         const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
         const posts = Array.from(dom.getElementsByTagName("post"));
@@ -1232,7 +1234,7 @@ onmessage = (message) => {
   /**
    * @returns {String}
    */
-  getPostPageAPIURL() {
+  getSearchPageAPIURL() {
     const postsPerPage = 42;
     const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
     let blacklistedTags = ` ${negateTags(TAG_BLACKLIST)}`.replace(/\s-/g, "+-");
@@ -1557,7 +1559,7 @@ onmessage = (message) => {
    * @param {HTMLElement} initialThumb
    */
   async renderImagesAround(initialThumb) {
-    if (onPostPage()) {
+    if (onSearchPage()) {
       return;
     }
 
@@ -1947,7 +1949,7 @@ onmessage = (message) => {
       return isImage(thumb) && this.isNotRendered(thumb);
     });
 
-    if (onPostPage()) {
+    if (onSearchPage()) {
       thumbs = thumbs.filter(thumb => !thumb.classList.contains("blacklisted-image"));
     }
     return thumbs;
@@ -2063,7 +2065,7 @@ onmessage = (message) => {
     const availableMemory = onMobileDevice() ? Gallery.settings.mobileMemory : Gallery.settings.desktopMemory;
     const averageImageSize = 20;
     const maxImagesToRender = Math.floor(availableMemory / averageImageSize);
-    return onPostPage() ? 50 : maxImagesToRender;
+    return onSearchPage() ? 50 : maxImagesToRender;
   }
 
   /**
@@ -2116,7 +2118,7 @@ onmessage = (message) => {
   }
 
   setFullscreenCanvasResolution() {
-    const resolution = onPostPage() ? Gallery.defaultResolutions.postPage : getPreference(Gallery.preferences.resolution, Gallery.defaultResolutions.favoritesPage);
+    const resolution = onSearchPage() ? Gallery.defaultResolutions.searchPage : getPreference(Gallery.preferences.resolution, Gallery.defaultResolutions.favoritesPage);
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
     this.fullscreenCanvas.width = dimensions[0];

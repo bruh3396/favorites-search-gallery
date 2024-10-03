@@ -6,7 +6,7 @@ const CURSOR_POSITION = {
 };
 const PREFERENCES = "preferences";
 const FLAGS = {
-  onPostPage: undefined,
+  onSearchPage: undefined,
   usingFirefox: undefined,
   onMobileDevice: undefined
 };
@@ -212,7 +212,7 @@ function getImageFromThumb(thumb) {
  * @returns {HTMLCollectionOf.<HTMLElement>}
  */
 function getAllThumbs() {
-  const className = onPostPage() ? "thumb" : "thumb-node";
+  const className = onSearchPage() ? "thumb" : "thumb-node";
   return document.getElementsByClassName(className);
 }
 
@@ -496,11 +496,11 @@ function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChe
 /**
  * @returns {Boolean}
  */
-function onPostPage() {
-  if (FLAGS.onPostPage === undefined) {
-    FLAGS.onPostPage = location.href.includes("page=post");
+function onSearchPage() {
+  if (FLAGS.onSearchPage === undefined) {
+    FLAGS.onSearchPage = location.href.includes("page=post");
   }
-  return FLAGS.onPostPage;
+  return FLAGS.onSearchPage;
 }
 
 /**
@@ -677,7 +677,7 @@ function injectCommonStyles() {
   `, "utilities-common-styles");
 
   setTimeout(() => {
-    if (onPostPage()) {
+    if (onSearchPage()) {
       removeInlineImgStyles();
     }
     configureVideoOutlines();
@@ -688,7 +688,7 @@ function injectCommonStyles() {
  * @param {Boolean} value
  */
 function toggleFancyImageHovering(value) {
-  if (onMobileDevice() || onPostPage()) {
+  if (onMobileDevice() || onSearchPage()) {
     value = false;
   }
 
@@ -829,7 +829,7 @@ function getWorkerURL(content) {
 function initializeUtilities() {
   const enableOnSearchPages = getPreference("enableOnSearchPages", true);
 
-  if (!enableOnSearchPages && onPostPage()) {
+  if (!enableOnSearchPages && onSearchPage()) {
     throw new Error("Disabled on search pages");
   }
 
@@ -837,6 +837,43 @@ function initializeUtilities() {
   toggleFancyImageHovering(true);
   trackCursorPosition();
   setTheme();
+  prefetchAdjacentSearchPages();
+}
+
+function prefetchAdjacentSearchPages() {
+  if (!onSearchPage()) {
+    return;
+  }
+
+  const id = "search-page-prefetch";
+
+  if (document.getElementById(id) !== null) {
+    return;
+  }
+
+  const container = document.createElement("div");
+  const currentPage = document.getElementById("paginator").children[0].querySelector("b");
+
+  for (const sibling of [currentPage.previousElementSibling, currentPage.nextElementSibling]) {
+    if (sibling !== null) {
+      container.appendChild(createPrefetchLink(sibling.href));
+    }
+  }
+  container.id = "search-page-prefetch";
+  document.head.appendChild(container);
+}
+
+/**
+ * @param {String} url
+ * @returns {HTMLLinkElement}
+ */
+function createPrefetchLink(url) {
+  const link = document.createElement("link");
+
+  link.rel = "prefetch";
+  link.href = url;
+  return link;
+
 }
 
 /**

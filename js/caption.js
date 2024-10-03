@@ -187,7 +187,7 @@ class Caption {
   currentThumbId;
 
   constructor() {
-    const captionDisabled = (onPostPage() || onMobileDevice()) || getPerformanceProfile() > 1;
+    const captionDisabled = (onSearchPage() || onMobileDevice()) || getPerformanceProfile() > 1;
 
     if (captionDisabled) {
       return;
@@ -374,7 +374,7 @@ class Caption {
       }
     });
 
-    if (onPostPage()) {
+    if (onSearchPage()) {
       window.addEventListener("load", () => {
         this.addEventListenersToThumbs.bind(this)();
       }, {
@@ -451,7 +451,7 @@ class Caption {
       openSearchPage(value);
       return;
     }
-    const searchBox = onPostPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
+    const searchBox = onSearchPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
     const searchBoxDoesNotIncludeTag = true;
     // const searchBoxDoesNotIncludeTag = searchBox !== null && !searchBox.value.includes(` ${value}`);
 
