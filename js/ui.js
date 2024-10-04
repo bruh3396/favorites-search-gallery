@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
   <style>
     #favorites-top-bar {
@@ -36,7 +37,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           height: 35px;
           border: none;
           border-radius: 4px;
-          cursor: pointer;
 
           &:hover {
             filter: brightness(140%);
@@ -58,9 +58,13 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       resize: vertical;
     }
 
+    button,
+    input[type="checkbox"] {
+      cursor: pointer;
+    }
+
     .checkbox {
       display: block;
-      cursor: pointer;
       padding: 2px 6px 2px 0px;
       border-radius: 4px;
       margin-left: -3px;
@@ -68,7 +72,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
       >input {
         vertical-align: -5px;
-        cursor: pointer;
       }
     }
 
@@ -104,7 +107,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
-      cursor: pointer;
       color: #0075FF;
       font-weight: bold;
       font-size: 20px;
@@ -230,7 +232,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         margin: 0px 2px;
         padding: 2px 6px;
         border: 1px solid black;
-        cursor: pointer;
         font-size: 14px;
         color: black;
         font-weight: normal;
@@ -269,10 +270,15 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #additional-favorite-options {
       >div:first-child {
-        padding-top: 6px;
+        margin-top: 6px;
       }
+
       >div:not(:first-child) {
-        padding-top: 11px;
+        margin-top: 11px;
+      }
+
+      select {
+        cursor: pointer;
       }
     }
 
@@ -281,7 +287,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     }
 
     #results-per-page-input {
-      width: 136px;
+      width: 140px;
     }
 
     #show-ui-div {
@@ -291,6 +297,46 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         max-width: 100vw;
         text-align: center;
         align-content: center;
+      }
+    }
+
+    #rating-container {
+      position: absolute;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      >label {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        outline: 1px solid;
+        padding: 3px;
+        cursor: pointer;
+        opacity: 0.5;;
+      }
+
+      >label[for="explicit-rating-checkbox"] {
+        border-radius: 7px 0px 0px 7px;
+      }
+
+      >label[for="questionable-rating-checkbox"] {
+        margin-left: -3px;
+      }
+
+      >label[for="safe-rating-checkbox"] {
+        margin-left: -3px;
+        border-radius: 0px 7px 7px 0px;
+      }
+
+      >input[type="checkbox"] {
+        display: none;
+
+        &:checked+label {
+          background-color: #0075FF;
+          opacity: 1;
+        }
       }
     }
   </style>
@@ -341,8 +387,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           <div id="additional-favorite-options">
             <div id="sort-container" title="Sort order of search results">
               <div>
-                <label style="margin-right: 22px;">Sort By</label>
-                <label style="margin-left:  22px;">Ascending</label>
+                <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
+                <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
               </div>
               <div style="position: relative; bottom: 4px;">
                 <select id="sorting-method" style="width: 150px;">
@@ -358,8 +404,21 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   style="height: 20px; width: 20px; margin: 0; bottom: -6px; position: relative;">
               </div>
             </div>
+            <div style="margin-bottom: 35px; margin-top: 5px;">
+              <div>
+                <label>Rating</label>
+              </div>
+              <div id="rating-container">
+                <input type="checkbox" id="explicit-rating-checkbox" checked>
+                <label for="explicit-rating-checkbox">Explicit</label>
+                <input type="checkbox" id="questionable-rating-checkbox" checked>
+                <label for="questionable-rating-checkbox">Questionable</label>
+                <input type="checkbox" id="safe-rating-checkbox" checked>
+                <label for="safe-rating-checkbox" style="margin: -3px;">Safe</label>
+              </div>
+            </div>
             <div id="performance-profile-container" title="Improve performance by disabling features">
-              <label>Performance Profile</label>
+              <label for="performance-profile">Performance Profile</label>
               <br>
               <select id="performance-profile">
                 <option value="0">Normal</option>
@@ -369,7 +428,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             </div>
             <div id="results-per-page-container"
               title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
-              <label id="results-per-page-label">Results per Page</label>
+              <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
               <br>
               <input type="number" id="results-per-page-input" min="50" max="10000" step="500">
             </div>
@@ -414,7 +473,8 @@ const FAVORITE_PREFERENCES = {
   fancyImageHovering: "fancyImageHovering",
   enableOnSearchPages: "enableOnSearchPages",
   sortAscending: "sortAscending",
-  sortingMethod: "sortingMethod"
+  sortingMethod: "sortingMethod",
+  allowedRatings: "allowedRatings"
 };
 const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -436,7 +496,10 @@ const FAVORITE_CHECKBOXES = {
   showUI: document.getElementById("show-ui"),
   fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
   enableOnSearchPages: document.getElementById("enable-on-search-pages"),
-  sortAscending: document.getElementById("sort-ascending")
+  sortAscending: document.getElementById("sort-ascending"),
+  explicitRating: document.getElementById("explicit-rating-checkbox"),
+  questionableRating: document.getElementById("questionable-rating-checkbox"),
+  safeRating: document.getElementById("safe-rating-checkbox")
 };
 const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
@@ -444,11 +507,13 @@ const FAVORITE_INPUTS = {
   columnCount: document.getElementById("column-resize-input"),
   performanceProfile: document.getElementById("performance-profile"),
   resultsPerPage: document.getElementById("results-per-page-input"),
-  sortingMethod: document.getElementById("sorting-method")
+  sortingMethod: document.getElementById("sorting-method"),
+  allowedRatings: document.getElementById("rating-container")
 };
 const FAVORITE_SEARCH_LABELS = {
   findFavorite: document.getElementById("find-favorite-label")
 };
+
 let searchHistory = [];
 let searchHistoryIndex = 0;
 let lastSearchQuery = "";
@@ -527,6 +592,11 @@ function loadFavoritesPagePreferences() {
       option.selected = "selected";
     }
   }
+  const allowedRatings = loadAllowedRatings();
+
+  FAVORITE_CHECKBOXES.explicitRating.checked = (allowedRatings & 4) === 4;
+  FAVORITE_CHECKBOXES.questionableRating.checked = (allowedRatings & 2) === 2;
+  FAVORITE_CHECKBOXES.safeRating.checked = (allowedRatings & 1) === 1;
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -695,6 +765,10 @@ function addEventListenersToFavoritesPage() {
     setPreference(FAVORITE_PREFERENCES.sortingMethod, FAVORITE_INPUTS.sortingMethod.value);
     favoritesLoader.onSortingParametersUpdated();
   };
+
+  FAVORITE_INPUTS.allowedRatings.onchange = () => {
+    changeAllowedRatings();
+  };
 }
 
 function completeSearchSuggestion(suggestion) {
@@ -793,7 +867,6 @@ function changeResultsPerPage(resultsPerPage, search = true) {
   if (search) {
     favoritesLoader.updateMaxNumberOfFavoritesToDisplay(resultsPerPage);
   }
-
 }
 
 /**
@@ -899,6 +972,50 @@ function configureMobileUi() {
         }
       }
       `);
+  }
+}
+
+/**
+ * @returns {Number}
+ */
+function loadAllowedRatings() {
+  return parseInt(getPreference("allowedRatings", 7));
+}
+
+function changeAllowedRatings() {
+  let allowedRatings = 0;
+
+  if (FAVORITE_CHECKBOXES.explicitRating.checked) {
+    allowedRatings += 4;
+  }
+
+  if (FAVORITE_CHECKBOXES.questionableRating.checked) {
+    allowedRatings += 2;
+  }
+
+  if (FAVORITE_CHECKBOXES.safeRating.checked) {
+    allowedRatings += 1;
+  }
+
+  setPreference(FAVORITE_PREFERENCES.allowedRatings, allowedRatings);
+  favoritesLoader.onAllowedRatingsChanged(allowedRatings);
+  preventUserFromUncheckingAllRatings(allowedRatings);
+}
+
+/**
+ * @param {Number} allowedRatings
+ */
+function preventUserFromUncheckingAllRatings(allowedRatings) {
+  if (allowedRatings === 4) {
+    FAVORITE_CHECKBOXES.explicitRating.nextElementSibling.style.pointerEvents = "none";
+  } else if (allowedRatings === 2) {
+    FAVORITE_CHECKBOXES.questionableRating.nextElementSibling.style.pointerEvents = "none";
+  } else if (allowedRatings === 1) {
+    FAVORITE_CHECKBOXES.safeRating.nextElementSibling.style.pointerEvents = "none";
+  } else {
+    FAVORITE_CHECKBOXES.explicitRating.nextElementSibling.removeAttribute("style");
+    FAVORITE_CHECKBOXES.questionableRating.nextElementSibling.removeAttribute("style");
+    FAVORITE_CHECKBOXES.safeRating.nextElementSibling.removeAttribute("style");
   }
 }
 

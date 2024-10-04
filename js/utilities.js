@@ -544,54 +544,6 @@ function injectStyleHTML(html, id) {
   document.head.appendChild(style);
 }
 
-/**
- * @param {HTMLElement} content
- */
-function populateMetadata(content) {
-  const scripts = Array.from(content.getElementsByTagName("script"));
-
-  scripts.shift();
-  scripts.forEach((script) => {
-    // eval(script.innerHTML);
-  });
-}
-
-/**
- * @param {HTMLElement} image
- */
-function addMetaDataToThumb(image) {
-  const thumb = getThumbFromImage(image);
-  const metadata = posts[thumb.id];
-
-  thumb.setAttribute("rating", metadata.rating);
-  thumb.setAttribute("score", metadata.score);
-}
-
-/**
- * @param {HTMLElement} thumb
- * @param {String} appropriateRating
- * @returns {Boolean}
- */
-function hasAppropriateRating(thumb, appropriateRating) {
-  const ratings = {
-    "Safe": 0,
-    "Questionable": 1,
-    "Explicit": 2
-  };
-  return ratings[thumb.getAttribute("rating")] <= ratings[appropriateRating];
-}
-
-/**
- * @param {String} appropriateRating
- */
-function removeInappropriatelyRatedContent(appropriateRating) {
-  Array.from(getAllThumbs()).forEach((thumb) => {
-    if (!hasAppropriateRating(thumb, appropriateRating)) {
-      // setThumbDisplay(thumb, false);
-    }
-  });
-}
-
 function getTagDistribution() {
   const images = Array.from(getAllThumbs()).map(thumb => getImageFromThumb(thumb));
   const tagOccurrences = {};

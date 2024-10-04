@@ -6,6 +6,7 @@ class FavoriteMetadata {
   static fetchQueue = [];
   static currentlyFetching = false;
   static fetchDelay = 5;
+
   /**
    * @param {FavoriteMetadata} favoriteMetadata
    */
@@ -25,6 +26,31 @@ class FavoriteMetadata {
     }
     FavoriteMetadata.currentlyFetching = false;
   }
+
+  /**
+  * @param {String} imageURL
+  * @returns {String}
+  */
+  static getExtensionFromFileURL(imageURL) {
+    try {
+      return (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL)[1];
+
+    } catch (error) {
+      return "jpg";
+    }
+  }
+
+  /**
+   * @param {String} rating
+   * @returns {Number}
+   */
+  static convertRatingToNumber(rating) {
+    return {
+       "e": 4,
+       "q": 2,
+       "s": 1
+    }[rating] || 4;
+  }
   /**
    * @type {String}
   */
@@ -42,7 +68,7 @@ class FavoriteMetadata {
   */
   score;
   /**
-   * @type {String}
+   * @type {Number}
   */
   rating;
   /**
@@ -97,7 +123,7 @@ class FavoriteMetadata {
     this.score = 0;
     this.creationTimestamp = 0;
     this.lastChangedTimestamp = 0;
-    this.rating = "e";
+    this.rating = 4;
     this.postIsDeleted = false;
   }
 
@@ -133,11 +159,11 @@ class FavoriteMetadata {
         this.width = parseInt(metadata.getAttribute("width"));
         this.height = parseInt(metadata.getAttribute("height"));
         this.score = parseInt(metadata.getAttribute("score"));
-        this.rating = metadata.getAttribute("rating");
+        this.rating = FavoriteMetadata.convertRatingToNumber(metadata.getAttribute("rating"));
         this.creationTimestamp = Date.parse(metadata.getAttribute("created_at"));
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
-        const extension = this.getExtensionFromFileURL(metadata.getAttribute("file_url"));
+        const extension = FavoriteMetadata.getExtensionFromFileURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {
           dispatchEvent(new CustomEvent("favoriteMetadataFetched", {
@@ -179,18 +205,5 @@ class FavoriteMetadata {
    */
   metadataIsEmpty() {
     return this.width === 0 && !this.postIsDeleted;
-  }
-
-  /**
- * @param {String} imageURL
- * @returns {String}
- */
-  getExtensionFromFileURL(imageURL) {
-    try {
-      return (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL)[1];
-
-    } catch (error) {
-      return "jpg";
-    }
   }
 }

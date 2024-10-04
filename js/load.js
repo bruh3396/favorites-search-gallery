@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 class FavoritesLoader {
   static loadState = {
     notStarted: 0,
@@ -9,7 +10,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -341,7 +342,7 @@ onmessage = (message) => {
   /**
    * @type {Boolean}
    */
-  tagsWereRecentlyModified;
+  tagsWereModified;
   /**
    * @type {Boolean}
    */
@@ -350,6 +351,14 @@ onmessage = (message) => {
    * @type {Boolean}
   */
   sortingParametersChanged;
+  /**
+   * @type {Boolean}
+  */
+  allowedRatingsChanged;
+  /**
+   * @type {Number}
+  */
+  allowedRatings;
   /**
    * @type {String[]}
   */
@@ -400,6 +409,7 @@ onmessage = (message) => {
     this.finalPageNumber = this.getFinalFavoritesPageNumber();
     this.matchCountLabel = document.getElementById("match-count-label");
     this.maxNumberOfFavoritesToDisplay = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
+    this.allowedRatings = loadAllowedRatings();
     this.fetchedThumbNodes = {};
     this.failedFetchRequests = [];
     this.expectedFavoritesCount = 53;
@@ -408,10 +418,11 @@ onmessage = (message) => {
     this.searchResultsAreInverted = false;
     this.foundEmptyFavoritesPage = false;
     this.newPageNeedsToBeCreated = false;
-    this.tagsWereRecentlyModified = false;
+    this.tagsWereModified = false;
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
     this.excludeBlacklistClicked = false;
     this.sortingParametersChanged = false;
+    this.allowedRatingsChanged = false;
     this.matchingFavoritesCount = 0;
     this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
     this.searchQuery = "";
@@ -426,7 +437,7 @@ onmessage = (message) => {
 
   addEventListeners() {
     window.addEventListener("modifiedTags", () => {
-      this.tagsWereRecentlyModified = true;
+      this.tagsWereModified = true;
     });
     window.addEventListener("missingMetadata", (event) => {
       this.addNewFavoriteMetadata(event.detail);
@@ -446,7 +457,7 @@ onmessage = (message) => {
 
         case "finishedStoring":
           setTimeout(() => {
-            this.databaseWorker.terminate();
+            // this.databaseWorker.terminate();
           }, 5000);
           break;
 
@@ -628,7 +639,7 @@ onmessage = (message) => {
     for (let i = 0; i < stopIndex; i += 1) {
       const thumbNode = thumbNodes[i];
 
-      if (postTagsMatchSearch(searchCommand, thumbNodes[i].postTags)) {
+      if (this.postTagsMatchSearchAndRating(searchCommand, thumbNode)) {
         results.push(thumbNodes[i]);
         thumbNode.toggleMatched(true);
       } else {
@@ -695,10 +706,7 @@ onmessage = (message) => {
           allNewFavoritesFound = true;
           break;
         }
-
-        if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
-          newFavoritesToAdd.push(thumbNode);
-        }
+        newFavoritesToAdd.push(thumbNode);
       }
 
       if (!allNewFavoritesFound && currentPageNumber < this.finalPageNumber) {
@@ -715,8 +723,8 @@ onmessage = (message) => {
    */
   finishUpdatingSavedFavorites(newThumbNodes) {
     if (newThumbNodes.length > 0) {
-      this.insertNewFavoritesAfterReloadingPage(newThumbNodes);
       this.storeFavorites(newThumbNodes);
+      this.insertNewFavoritesAfterReloadingPage(newThumbNodes);
       this.toggleLoadingUI(false);
       this.updateMatchCount(this.allThumbNodes.filter(thumbNode => thumbNode.isVisible).length);
     } else if (this.idsRequiringMetadataDatabaseUpdate.length === 0) {
@@ -975,11 +983,14 @@ onmessage = (message) => {
     for (const record of databaseRecords) {
       const thumbNode = new ThumbNode(record, true);
       const isBlacklisted = !postTagsMatchSearch(searchCommand, thumbNode.postTags);
+      const inappropriateRating = !this.ratingIsAllowed(thumbNode);
 
       if (isBlacklisted) {
         if (!userIsOnTheirOwnFavoritesPage()) {
           continue;
         }
+        thumbNode.toggleMatched(false);
+      } else if (inappropriateRating) {
         thumbNode.toggleMatched(false);
       } else {
         searchResults.push(thumbNode);
@@ -1150,21 +1161,28 @@ Tag modifications and saved searches will be preserved.
   /**
    * @param {ThumbNode[]} newThumbNodes
    */
-  insertNewFavoritesAfterReloadingPage(newThumbNodes) {
+  async insertNewFavoritesAfterReloadingPage(newThumbNodes) {
     const content = document.getElementById("content");
-    const searchCommand = getSearchCommand(this.searchQuery);
+    const searchCommand = getSearchCommand(this.finalSearchQuery);
+    const insertedThumbNodes = [];
+    const metadataPopulateWaitTime = 1000;
 
     newThumbNodes.reverse();
 
+    if (this.allowedRatings !== 7) {
+      await sleep(metadataPopulateWaitTime);
+    }
+
     for (const thumbNode of newThumbNodes) {
-      if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
+      if (this.postTagsMatchSearchAndRating(searchCommand, thumbNode)) {
         thumbNode.insertInDocument(content, "afterbegin");
+        insertedThumbNodes.push(thumbNode);
       }
     }
     this.updatePaginationUi(this.currentFavoritesPageNumber, this.getThumbNodesMatchedByLastSearch());
     setTimeout(() => {
       dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
-        detail: newThumbNodes.map(thumbNode => thumbNode.root)
+        detail: insertedThumbNodes.map(thumbNode => thumbNode.root)
       }));
     }, 250);
   }
@@ -1401,16 +1419,13 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} searchResults
    */
   changeResultsPage(pageNumber, searchResults) {
-    if (this.onSamePage(pageNumber)) {
+    if (!this.aNewSearchWillProduceDifferentResults(pageNumber)) {
       return;
     }
     const {start, end} = this.getPaginationStartEndIndices(pageNumber);
 
-    this.tagsWereRecentlyModified = false;
-    this.excludeBlacklistClicked = false;
-    this.sortingParametersChanged = false;
-    this.previousSearchQuery = this.searchQuery;
     this.currentFavoritesPageNumber = pageNumber;
+    this.resetFlagsThatImplyDifferentSearchResults();
     this.updatePaginationUi(pageNumber, searchResults);
     this.createPaginatedFavoritesPage(searchResults, start, end);
     this.reAddAllThumbNodeEventListeners();
@@ -1418,6 +1433,14 @@ Tag modifications and saved searches will be preserved.
     if (FavoritesLoader.currentLoadState !== FavoritesLoader.loadState.indexedDB) {
       dispatchEventWithDelay("changedPage");
     }
+  }
+
+  resetFlagsThatImplyDifferentSearchResults() {
+    this.tagsWereModified = false;
+    this.excludeBlacklistClicked = false;
+    this.sortingParametersChanged = false;
+    this.allowedRatingsChanged = false;
+    this.previousSearchQuery = this.searchQuery;
   }
 
   getPaginationStartEndIndices(pageNumber) {
@@ -1471,16 +1494,17 @@ Tag modifications and saved searches will be preserved.
    * @param {Number} pageNumber
    * @returns {Boolean}
    */
-  onSamePage(pageNumber) {
-    return (this.currentFavoritesPageNumber === pageNumber) &&
-      (this.searchQuery === this.previousSearchQuery) &&
-      !this.searchResultsAreShuffled &&
-      !this.searchResultsAreInverted &&
-      FavoritesLoader.currentLoadState === FavoritesLoader.loadState.finished &&
-      !this.recentlyChangedMaxNumberOfFavoritesToDisplay &&
-      !this.tagsWereRecentlyModified &&
-      !this.excludeBlacklistClicked &&
-      !this.sortingParametersChanged;
+  aNewSearchWillProduceDifferentResults(pageNumber) {
+    return this.currentFavoritesPageNumber !== pageNumber ||
+      this.searchQuery !== this.previousSearchQuery ||
+      FavoritesLoader.currentLoadState !== FavoritesLoader.loadState.finished ||
+      this.searchResultsAreShuffled ||
+      this.searchResultsAreInverted ||
+      this.recentlyChangedMaxNumberOfFavoritesToDisplay ||
+      this.tagsWereModified ||
+      this.excludeBlacklistClicked ||
+      this.sortingParametersChanged ||
+      this.allowedRatingsChanged;
   }
 
   /**
@@ -1628,13 +1652,23 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
+   * @param {Number} allowedRatings
+   */
+  onAllowedRatingsChanged(allowedRatings) {
+    this.allowedRatings = allowedRatings;
+    this.allowedRatingsChanged = true;
+    this.searchFavorites();
+
+  }
+
+  /**
    * @param {String} postId
    */
   addNewFavoriteMetadata(postId) {
     if (!ThumbNode.allThumbNodes.has(postId)) {
       return;
     }
-    const batchSize = 50;
+    const batchSize = 500;
     const waitTime = 1000;
 
     clearTimeout(this.newMetadataReceivedTimeout);
@@ -1652,6 +1686,26 @@ Tag modifications and saved searches will be preserved.
   updateFavoriteMetadataInDatabase() {
     this.updateFavorites(this.idsRequiringMetadataDatabaseUpdate.map(id => ThumbNode.allThumbNodes.get(id)));
     this.idsRequiringMetadataDatabaseUpdate = [];
+  }
+
+  /**
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+  */
+  ratingIsAllowed(thumbNode) {
+    if (thumbNode.metadata === undefined) {
+      return true;
+    }
+    return (thumbNode.metadata.rating & this.allowedRatings) > 0;
+  }
+
+  /**
+   * @param {{orGroups: String[][], remainingSearchTags: String[], isEmpty: Boolean}} searchCommand
+   * @param {ThumbNode} thumbNode
+   * @returns
+   */
+  postTagsMatchSearchAndRating(searchCommand, thumbNode) {
+    return this.ratingIsAllowed(thumbNode) && postTagsMatchSearch(searchCommand, thumbNode.postTags);
   }
 }
 
