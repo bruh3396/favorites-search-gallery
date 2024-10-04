@@ -268,8 +268,11 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     }
 
     #additional-favorite-options {
-      >div {
-        padding-top: 15px;
+      >div:first-child {
+        padding-top: 6px;
+      }
+      >div:not(:first-child) {
+        padding-top: 11px;
       }
     }
 
@@ -336,6 +339,25 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   id="fancy-image-hovering-checkbox"> Fancy Hovering</label></div>
           </div>
           <div id="additional-favorite-options">
+            <div id="sort-container" title="Sort order of search results">
+              <div>
+                <label style="margin-right: 22px;">Sort By</label>
+                <label style="margin-left:  22px;">Ascending</label>
+              </div>
+              <div style="position: relative; bottom: 4px;">
+                <select id="sorting-method" style="width: 150px;">
+                  <option value="default">Default</option>
+                  <option value="score">Score</option>
+                  <option value="width">Width</option>
+                  <option value="height">Height</option>
+                  <option value="create">Date Uploaded</option>
+                  <option value="change">Date Changed</option>
+                  <!-- <option value="id">ID</option> -->
+                </select>
+                <input type="checkbox" id="sort-ascending"
+                  style="height: 20px; width: 20px; margin: 0; bottom: -6px; position: relative;">
+              </div>
+            </div>
             <div id="performance-profile-container" title="Improve performance by disabling features">
               <label>Performance Profile</label>
               <br>
@@ -357,23 +379,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <button id="column-resize-minus">-</button>
                 <input type="number" id="column-resize-input" min="2" max="20">
                 <button id="column-resize-plus">+</button>
-              </span>
-            </div>
-            <div id="sort-container" title="Sort order of search results">
-              <span>
-                <label style="padding-right: 10px;">Sort By</label>
-                <label>Ascending</label>
-                <input type="checkbox" id="sort-ascending">
-                <br>
-                <select id="sorting-method" style="width: 150px;">
-                  <option value="default">Default</option>
-                  <option value="score">Score</option>
-                  <option value="width">Width</option>
-                  <option value="height">Height</option>
-                  <option value="create">Date Uploaded</option>
-                  <option value="change">Date Changed</option>
-                  <option value="id">ID</option>
-                </select>
               </span>
             </div>
           </div>

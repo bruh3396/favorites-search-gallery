@@ -712,7 +712,7 @@ function toggleFancyImageHovering(value) {
       >span,
       >div {
         box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        transition: all 0.3s ease-in-out;
+        transition: all 0.2s ease-in-out;
         position: relative;
 
         &::after {

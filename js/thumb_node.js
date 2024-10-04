@@ -201,6 +201,7 @@ class ThumbNode {
     this.id = record.id;
     this.originalTags = record.tags;
     this.image.classList.add(record.type);
+    record.metadata = record.metadata === undefined ? null : record.metadata;
     this.metadata = new FavoriteMetadata(this.id, record.metadata);
   }
 

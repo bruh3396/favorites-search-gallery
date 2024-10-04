@@ -89,7 +89,7 @@ class FavoritesDatabase {
 
         favorites.forEach(favorite => {
           this.addContentTypeToFavorite(favorite);
-          favoritesObjectStore.put(favorite);
+          favoritesObjectStore.add(favorite);
         });
         database.close();
 
@@ -117,39 +117,82 @@ class FavoritesDatabase {
       .then(async(event) => {
         const database = event.target.result;
         const objectStore = database
-        .transaction(this.objectStoreName, "readwrite")
-        .objectStore(this.objectStoreName);
-      const index = objectStore.index("id");
+          .transaction(this.objectStoreName, "readwrite")
+          .objectStore(this.objectStoreName);
+        const index = objectStore.index("id");
 
-      for (const id of idsToDelete) {
-        const deleteRequest = index.getKey(id);
+        for (const id of idsToDelete) {
+          const deleteRequest = index.getKey(id);
 
-        await new Promise((resolve, reject) => {
-          deleteRequest.onsuccess = resolve;
-          deleteRequest.onerror = reject;
-        }).then((event1) => {
-          const primaryKey = event1.target.result;
+          await new Promise((resolve, reject) => {
+            deleteRequest.onsuccess = resolve;
+            deleteRequest.onerror = reject;
+          }).then((indexEvent) => {
+            const primaryKey = indexEvent.target.result;
 
-          if (primaryKey !== undefined) {
-            objectStore.delete(primaryKey);
-          }
-        });
-      }
-      objectStore.getAll().onsuccess = (successEvent) => {
-        const results = successEvent.target.result.reverse();
+            if (primaryKey !== undefined) {
+              objectStore.delete(primaryKey);
+            }
+          });
+        }
+        objectStore.getAll().onsuccess = (getAllEvent) => {
+          const results = getAllEvent.target.result.reverse();
 
-        postMessage({
-          response: "finishedLoading",
-          favorites: results
-        });
-      };
-      database.close();
+          postMessage({
+            response: "finishedLoading",
+            favorites: results
+          });
+        };
+        database.close();
       });
-
   }
 
   /**
-   * @param {{id: String, tags: String, src: String}} favorite
+ * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
+ */
+  updateFavorites(favorites) {
+    this.openConnection()
+      .then((event) => {
+        /**
+         * @type {IDBDatabase}
+        */
+        const database = event.target.result;
+        const favoritesObjectStore = database
+          .transaction(this.objectStoreName, "readwrite")
+          .objectStore(this.objectStoreName);
+        const objectStoreIndex = favoritesObjectStore.index("id");
+        let updatedCount = 0;
+
+        favorites.forEach(favorite => {
+          const index = objectStoreIndex.getKey(favorite.id);
+
+          this.addContentTypeToFavorite(favorite);
+          index.onsuccess = (indexEvent) => {
+            const primaryKey = indexEvent.target.result;
+
+            favoritesObjectStore.put(favorite, primaryKey);
+            updatedCount += 1;
+
+            if (updatedCount >= favorites.length) {
+              database.close();
+            }
+          };
+        });
+      })
+      .catch((event) => {
+        const error = event.target.error;
+
+        if (error.name === "VersionError") {
+          this.version += 1;
+          this.updateFavorites(favorites);
+        } else {
+          console.error(error);
+        }
+      });
+  }
+
+  /**
+   * @param {{id: String, tags: String, src: String, metadata: String}} favorite
    */
   addContentTypeToFavorite(favorite) {
     const tags = favorite.tags + " ";
@@ -179,6 +222,10 @@ onmessage = (message) => {
 
     case "load":
       favoritesDatabase.loadFavorites(request.deletedIds);
+      break;
+
+    case "update":
+      favoritesDatabase.updateFavorites(request.favorites);
       break;
 
     default:
@@ -302,7 +349,16 @@ onmessage = (message) => {
   /**
    * @type {Boolean}
   */
-  sortParametersChanged;
+  sortingParametersChanged;
+  /**
+   * @type {String[]}
+  */
+  idsRequiringMetadataDatabaseUpdate;
+  /**
+   * @type {Number}
+  */
+  newMetadataReceivedTimeout;
+
   /**
    * @type {Boolean}
    */
@@ -340,6 +396,7 @@ onmessage = (message) => {
     }
     this.allThumbNodes = [];
     this.searchResultsWhileFetching = [];
+    this.idsRequiringMetadataDatabaseUpdate = [];
     this.finalPageNumber = this.getFinalFavoritesPageNumber();
     this.matchCountLabel = document.getElementById("match-count-label");
     this.maxNumberOfFavoritesToDisplay = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
@@ -354,7 +411,7 @@ onmessage = (message) => {
     this.tagsWereRecentlyModified = false;
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
     this.excludeBlacklistClicked = false;
-    this.sortParametersChanged = false;
+    this.sortingParametersChanged = false;
     this.matchingFavoritesCount = 0;
     this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
     this.searchQuery = "";
@@ -370,6 +427,9 @@ onmessage = (message) => {
   addEventListeners() {
     window.addEventListener("modifiedTags", () => {
       this.tagsWereRecentlyModified = true;
+    });
+    window.addEventListener("missingMetadata", (event) => {
+      this.addNewFavoriteMetadata(event.detail);
     });
   }
 
@@ -659,8 +719,8 @@ onmessage = (message) => {
       this.storeFavorites(newThumbNodes);
       this.toggleLoadingUI(false);
       this.updateMatchCount(this.allThumbNodes.filter(thumbNode => thumbNode.isVisible).length);
-    } else {
-      this.databaseWorker.terminate();
+    } else if (this.idsRequiringMetadataDatabaseUpdate.length === 0) {
+      // this.databaseWorker.terminate();
     }
   }
 
@@ -961,6 +1021,21 @@ onmessage = (message) => {
     }
     this.databaseWorker.postMessage({
       command: "store",
+      favorites: records
+    });
+  }
+
+  /**
+   * @param {ThumbNode[]} thumbNodes
+   */
+  updateFavorites(thumbNodes) {
+    if (!this.databaseAccessIsAllowed) {
+      return;
+    }
+    const records = thumbNodes.map(thumbNode => thumbNode.databaseRecord);
+
+    this.databaseWorker.postMessage({
+      command: "update",
       favorites: records
     });
   }
@@ -1333,7 +1408,7 @@ Tag modifications and saved searches will be preserved.
 
     this.tagsWereRecentlyModified = false;
     this.excludeBlacklistClicked = false;
-    this.sortParametersChanged = false;
+    this.sortingParametersChanged = false;
     this.previousSearchQuery = this.searchQuery;
     this.currentFavoritesPageNumber = pageNumber;
     this.updatePaginationUi(pageNumber, searchResults);
@@ -1405,7 +1480,7 @@ Tag modifications and saved searches will be preserved.
       !this.recentlyChangedMaxNumberOfFavoritesToDisplay &&
       !this.tagsWereRecentlyModified &&
       !this.excludeBlacklistClicked &&
-      !this.sortParametersChanged;
+      !this.sortingParametersChanged;
   }
 
   /**
@@ -1548,8 +1623,35 @@ Tag modifications and saved searches will be preserved.
   }
 
   onSortingParametersUpdated() {
-    this.sortParametersChanged = true;
+    this.sortingParametersChanged = true;
     this.searchFavorites();
+  }
+
+  /**
+   * @param {String} postId
+   */
+  addNewFavoriteMetadata(postId) {
+    if (!ThumbNode.allThumbNodes.has(postId)) {
+      return;
+    }
+    const batchSize = 50;
+    const waitTime = 1000;
+
+    clearTimeout(this.newMetadataReceivedTimeout);
+    this.idsRequiringMetadataDatabaseUpdate.push(postId);
+
+    if (this.idsRequiringMetadataDatabaseUpdate.length >= batchSize) {
+      this.updateFavoriteMetadataInDatabase();
+      return;
+    }
+    this.newMetadataReceivedTimeout = setTimeout(() => {
+      this.updateFavoriteMetadataInDatabase();
+    }, waitTime);
+  }
+
+  updateFavoriteMetadataInDatabase() {
+    this.updateFavorites(this.idsRequiringMetadataDatabaseUpdate.map(id => ThumbNode.allThumbNodes.get(id)));
+    this.idsRequiringMetadataDatabaseUpdate = [];
   }
 }
 

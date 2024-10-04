@@ -729,7 +729,7 @@ onmessage = (message) => {
       onOptionChanged,
       true
     );
-    this.injectImageResolutionOptionsHTML();
+    // this.injectImageResolutionOptionsHTML();
   }
 
   injectOriginalContentContainerHTML() {

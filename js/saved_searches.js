@@ -199,7 +199,7 @@ class SavedSearches {
   }
 
   insertHTMLIntoDocument() {
-    const showSavedSearches = getPreference(SavedSearches.preferences.visibility, true);
+    const showSavedSearches = getPreference(SavedSearches.preferences.visibility, false);
     let placeToInsertSavedSearches = document.getElementById("right-favorites-panel");
 
     if (placeToInsertSavedSearches === null) {

@@ -1,8 +1,32 @@
 class FavoriteMetadata {
   static parser = new DOMParser();
-
   /**
-   * @type {Number}
+   * @type {FavoriteMetadata[]}
+  */
+  static fetchQueue = [];
+  static currentlyFetching = false;
+  static fetchDelay = 5;
+  /**
+   * @param {FavoriteMetadata} favoriteMetadata
+   */
+  static async fetchMissingMetadata(favoriteMetadata) {
+    FavoriteMetadata.fetchQueue.push(favoriteMetadata);
+
+    if (FavoriteMetadata.currentlyFetching) {
+      return;
+    }
+    FavoriteMetadata.currentlyFetching = true;
+
+    while (FavoriteMetadata.fetchQueue.length > 0) {
+      const metadata = this.fetchQueue.pop();
+
+      metadata.populateMetadataFromAPI(true);
+      await sleep(FavoriteMetadata.fetchDelay);
+    }
+    FavoriteMetadata.currentlyFetching = false;
+  }
+  /**
+   * @type {String}
   */
   id;
   /**
@@ -62,7 +86,7 @@ class FavoriteMetadata {
    * @param {Object.<String, String>} record
    */
   constructor(id, record) {
-    this.id = parseInt(id);
+    this.id = id;
     this.setDefaults();
     this.populateMetadata(record);
   }
@@ -83,16 +107,18 @@ class FavoriteMetadata {
   populateMetadata(record) {
     if (record === undefined) {
       this.populateMetadataFromAPI();
+    } else if (record === null) {
+      FavoriteMetadata.fetchMissingMetadata(this);
     } else {
       this.populateMetadataFromRecord(JSON.parse(record));
 
       if (this.metadataIsEmpty()) {
-        this.populateMetadataFromAPI();
+        FavoriteMetadata.fetchMissingMetadata(this);
       }
     }
   }
 
-  populateMetadataFromAPI() {
+  populateMetadataFromAPI(missingInDatabase = false) {
     fetch(this.apiURL)
       .then((response) => {
         return response.text();
@@ -119,6 +145,12 @@ class FavoriteMetadata {
               id: this.id,
               extension
             }
+          }));
+        }
+
+        if (missingInDatabase) {
+          dispatchEvent(new CustomEvent("missingMetadata", {
+            detail: this.id
           }));
         }
       })
