@@ -9,7 +9,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -89,7 +89,7 @@ class FavoritesDatabase {
 
         favorites.forEach(favorite => {
           this.addContentTypeToFavorite(favorite);
-          favoritesObjectStore.add(favorite);
+          favoritesObjectStore.put(favorite);
         });
         database.close();
 
@@ -192,11 +192,11 @@ onmessage = (message) => {
     useTagBlacklist: true,
     negatedTagBlacklist: negateTags(TAG_BLACKLIST)
   };
-
   /**
    * @type {Number}
    */
   static currentLoadState = FavoritesLoader.loadState.notStarted;
+  static parser = new DOMParser();
 
   /**
    * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: {pageNumber: Number, thumbNodes: ThumbNode[], searchResults: ThumbNode[]}[]}}
@@ -272,10 +272,6 @@ onmessage = (message) => {
    */
   paginationLabel;
   /**
-   * @type {DOMParser}
-   */
-  parser;
-  /**
    * @type {Boolean}
    */
   foundEmptyFavoritesPage;
@@ -303,6 +299,10 @@ onmessage = (message) => {
    * @type {Boolean}
    */
   excludeBlacklistClicked;
+  /**
+   * @type {Boolean}
+  */
+  sortParametersChanged;
   /**
    * @type {Boolean}
    */
@@ -354,6 +354,7 @@ onmessage = (message) => {
     this.tagsWereRecentlyModified = false;
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
     this.excludeBlacklistClicked = false;
+    this.sortParametersChanged = false;
     this.matchingFavoritesCount = 0;
     this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
     this.searchQuery = "";
@@ -361,7 +362,6 @@ onmessage = (message) => {
     this.favoritesSearchInput = document.getElementById("favorites-search-box");
     this.paginationContainer = this.createPaginationContainer();
     this.currentFavoritesPageNumber = 1;
-    this.parser = new DOMParser();
     this.addEventListeners();
     this.createDatabaseMessageHandler();
     this.loadFavorites();
@@ -850,7 +850,7 @@ onmessage = (message) => {
    * @returns {ThumbNode[]}
    */
   extractThumbNodesFromFavoritesPage(response) {
-    const dom = this.parser.parseFromString(response, "text/html");
+    const dom = FavoritesLoader.parser.parseFromString(response, "text/html");
     return Array.from(dom.getElementsByClassName("thumb")).map(thumb => new ThumbNode(thumb, false));
   }
 
@@ -1160,6 +1160,7 @@ Tag modifications and saved searches will be preserved.
    */
   toggleTagBlacklistExclusion(value) {
     FavoritesLoader.tagNegation.useTagBlacklist = value;
+    this.excludeBlacklistClicked = true;
   }
 
   /**
@@ -1332,6 +1333,7 @@ Tag modifications and saved searches will be preserved.
 
     this.tagsWereRecentlyModified = false;
     this.excludeBlacklistClicked = false;
+    this.sortParametersChanged = false;
     this.previousSearchQuery = this.searchQuery;
     this.currentFavoritesPageNumber = pageNumber;
     this.updatePaginationUi(pageNumber, searchResults);
@@ -1402,7 +1404,8 @@ Tag modifications and saved searches will be preserved.
       FavoritesLoader.currentLoadState === FavoritesLoader.loadState.finished &&
       !this.recentlyChangedMaxNumberOfFavoritesToDisplay &&
       !this.tagsWereRecentlyModified &&
-      !this.excludeBlacklistClicked;
+      !this.excludeBlacklistClicked &&
+      !this.sortParametersChanged;
   }
 
   /**
@@ -1542,6 +1545,11 @@ Tag modifications and saved searches will be preserved.
   sortAscending() {
     const sortFavoritesAscending = document.getElementById("sort-ascending");
     return sortFavoritesAscending === null ? false : sortFavoritesAscending.checked;
+  }
+
+  onSortingParametersUpdated() {
+    this.sortParametersChanged = true;
+    this.searchFavorites();
   }
 }
 

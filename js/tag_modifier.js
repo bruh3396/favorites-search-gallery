@@ -396,10 +396,6 @@ class TagModifier {
   }
 
   importTagModifications() {
-    // if (!confirm("Are you sure you want to import these tag modifications?")) {
-    //   return;
-    // }
-
     let modifications;
 
     try {
@@ -417,8 +413,7 @@ class TagModifier {
       }
       return;
     }
-
-    console.log(modifications);
+    console.error(modifications);
   }
 }
 

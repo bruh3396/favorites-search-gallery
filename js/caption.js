@@ -315,12 +315,58 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   resizeFont(thumb) {
-    const imageRect = getImageFromThumb(thumb).getBoundingClientRect();
+    const columnInput = document.getElementById("column-resize-input");
+    const heightCanBeDerivedWithoutRect = this.thumbMetadataExists(thumb) && columnInput !== null;
+    let height;
+
+    if (heightCanBeDerivedWithoutRect) {
+      height = this.estimateThumbHeightFromMetadata(thumb, columnInput);
+    } else {
+      height = getImageFromThumb(thumb).getBoundingClientRect().height;
+    }
     const captionListRect = this.caption.children[0].getBoundingClientRect();
-    const ratio = imageRect.height / captionListRect.height;
+    const ratio = height / captionListRect.height;
     const scale = ratio > 1 ? Math.sqrt(ratio) : ratio * 0.85;
 
     this.caption.parentElement.style.fontSize = `${roundToTwoDecimalPlaces(scale)}em`;
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {Boolean}
+   */
+  thumbMetadataExists(thumb) {
+    if (onSearchPage()) {
+      return false;
+    }
+    const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
+
+    if (thumbNode === undefined) {
+      return false;
+    }
+
+    if (thumbNode.metadata === undefined) {
+      return false;
+    }
+
+    if (thumbNode.metadata.width <= 0 || thumbNode.metadata.width <= 0) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @param {HTMLInputElement} columnInput
+   * @returns {Number}
+   */
+  estimateThumbHeightFromMetadata(thumb, columnInput) {
+    const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
+    const gridGap = 16;
+    const columnCount = Math.max(1, parseInt(columnInput.value));
+    const thumbWidthEstimate = (window.innerWidth - (columnCount * gridGap)) / columnCount;
+    const thumbWidthScale = thumbNode.metadata.width / thumbWidthEstimate;
+    return thumbNode.metadata.height / thumbWidthScale;
   }
 
   /**

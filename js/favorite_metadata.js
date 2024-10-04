@@ -1,30 +1,6 @@
 class FavoriteMetadata {
   static parser = new DOMParser();
-  static idsWithoutMetadata = {};
-  /**
-   * @type {FavoriteMetadata[]}
-  */
-  static fetchQueue = [];
-  static currentlyFetching = false;
-  /**
-   * @param {FavoriteMetadata} favoriteMetadata
-   */
-  static async fetchMetadataWithRateLimiting(favoriteMetadata) {
-    FavoriteMetadata.fetchQueue.push(favoriteMetadata);
 
-    if (FavoriteMetadata.currentlyFetching) {
-      return;
-    }
-    FavoriteMetadata.currentlyFetching = true;
-
-    while (FavoriteMetadata.fetchQueue.length > 0) {
-      const f = this.fetchQueue.pop();
-
-      f.populateMetadataFromAPI();
-      await sleep(10);
-    }
-    FavoriteMetadata.currentlyFetching = false;
-  }
   /**
    * @type {Number}
   */
@@ -108,7 +84,7 @@ class FavoriteMetadata {
     if (record === undefined) {
       this.populateMetadataFromAPI();
     } else {
-      this.populateMetadataFromRecord(record);
+      this.populateMetadataFromRecord(JSON.parse(record));
 
       if (this.metadataIsEmpty()) {
         this.populateMetadataFromAPI();
@@ -134,12 +110,22 @@ class FavoriteMetadata {
         this.rating = metadata.getAttribute("rating");
         this.creationTimestamp = Date.parse(metadata.getAttribute("created_at"));
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
+
+        const extension = this.getExtensionFromFileURL(metadata.getAttribute("file_url"));
+
+        if (extension !== "mp4") {
+          dispatchEvent(new CustomEvent("favoriteMetadataFetched", {
+            detail: {
+              id: this.id,
+              extension
+            }
+          }));
+        }
       })
       .catch((error) => {
         if (!error.message.startsWith("deleted")) {
           this.postIsDeleted = true;
         }
-        FavoriteMetadata.idsWithoutMetadata[this.id] = error.message;
       });
   }
 
@@ -161,5 +147,18 @@ class FavoriteMetadata {
    */
   metadataIsEmpty() {
     return this.width === 0 && !this.postIsDeleted;
+  }
+
+  /**
+ * @param {String} imageURL
+ * @returns {String}
+ */
+  getExtensionFromFileURL(imageURL) {
+    try {
+      return (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL)[1];
+
+    } catch (error) {
+      return "jpg";
+    }
   }
 }

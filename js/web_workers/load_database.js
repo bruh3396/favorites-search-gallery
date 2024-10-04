@@ -77,7 +77,7 @@ class FavoritesDatabase {
 
         favorites.forEach(favorite => {
           this.addContentTypeToFavorite(favorite);
-          favoritesObjectStore.add(favorite);
+          favoritesObjectStore.put(favorite);
         });
         database.close();
 

@@ -8,7 +8,8 @@ const PREFERENCES = "preferences";
 const FLAGS = {
   onSearchPage: undefined,
   usingFirefox: undefined,
-  onMobileDevice: undefined
+  onMobileDevice: undefined,
+  userIsOnTheirOwnFavoritesPage: undefined
 };
 const DEFAULTS = {
   columnCount: 6,
@@ -91,7 +92,10 @@ function getFavoritesPageId() {
  * @returns {Boolean}
  */
 function userIsOnTheirOwnFavoritesPage() {
-  return getUserId() === getFavoritesPageId();
+  if (FLAGS.userIsOnTheirOwnFavoritesPage === undefined) {
+    FLAGS.userIsOnTheirOwnFavoritesPage = getUserId() === getFavoritesPageId();
+  }
+  return FLAGS.userIsOnTheirOwnFavoritesPage;
 }
 
 /**
@@ -1054,7 +1058,7 @@ function extractTagGroups(searchQuery) {
  * @returns {String}
  */
 function removeExtraWhiteSpace(string) {
-  return string.trim().replace(/\s+/g, " ");
+  return string.trim().replace(/\s\s+/g, " ");
 }
 
 /**

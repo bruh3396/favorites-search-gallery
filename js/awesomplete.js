@@ -110,7 +110,6 @@ class AwesompleteWrapper {
         const mergedSuggestions = mergeOfficialTagsWithCustomTags(JSON.parse(suggestions), prefix);
 
         awesomplete.list = mergedSuggestions;
-        // awesomplete.list = JSON.parse(suggestions);
       });
   }
 

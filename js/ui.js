@@ -361,19 +361,19 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             </div>
             <div id="sort-container" title="Sort order of search results">
               <span>
-                <label>Sort By</label>
+                <label style="padding-right: 10px;">Sort By</label>
+                <label>Ascending</label>
+                <input type="checkbox" id="sort-ascending">
                 <br>
-                <select id="sorting-method">
+                <select id="sorting-method" style="width: 150px;">
                   <option value="default">Default</option>
-                  <option value="width">Width</option>
                   <option value="score">Score</option>
+                  <option value="width">Width</option>
                   <option value="height">Height</option>
                   <option value="create">Date Uploaded</option>
                   <option value="change">Date Changed</option>
                   <option value="id">ID</option>
                 </select>
-                <label>Ascending</label>
-                <input type="checkbox" id="sort-ascending">
               </span>
             </div>
           </div>
@@ -396,8 +396,6 @@ if (!onSearchPage()) {
 const FAVORITE_OPTIONS = [document.getElementById("favorite-options"), document.getElementById("additional-favorite-options")];
 const MAX_SEARCH_HISTORY_LENGTH = 100;
 const FAVORITE_PREFERENCES = {
-  textareaWidth: "searchTextareaWidth",
-  textareaHeight: "searchTextareaHeight",
   showRemoveButtons: "showRemoveButtons",
   showOptions: "showOptions",
   filterBlacklist: "filterBlacklistCheckbox",
@@ -409,7 +407,9 @@ const FAVORITE_PREFERENCES = {
   performanceProfile: "performanceProfile",
   resultsPerPage: "resultsPerPage",
   fancyImageHovering: "fancyImageHovering",
-  enableOnSearchPages: "enableOnSearchPages"
+  enableOnSearchPages: "enableOnSearchPages",
+  sortAscending: "sortAscending",
+  sortingMethod: "sortingMethod"
 };
 const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -430,14 +430,16 @@ const FAVORITE_CHECKBOXES = {
   filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
   showUI: document.getElementById("show-ui"),
   fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
-  enableOnSearchPages: document.getElementById("enable-on-search-pages")
+  enableOnSearchPages: document.getElementById("enable-on-search-pages"),
+  sortAscending: document.getElementById("sort-ascending")
 };
 const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
   findFavorite: document.getElementById("find-favorite-input"),
   columnCount: document.getElementById("column-resize-input"),
   performanceProfile: document.getElementById("performance-profile"),
-  resultsPerPage: document.getElementById("results-per-page-input")
+  resultsPerPage: document.getElementById("results-per-page-input"),
+  sortingMethod: document.getElementById("sorting-method")
 };
 const FAVORITE_SEARCH_LABELS = {
   findFavorite: document.getElementById("find-favorite-label")
@@ -455,15 +457,6 @@ function initializeFavoritesPage() {
 }
 
 function loadFavoritesPagePreferences() {
-  const height = getPreference(FAVORITE_PREFERENCES.textareaHeight);
-  const width = getPreference(FAVORITE_PREFERENCES.textareaWidth);
-
-  if (height !== null && width !== null) {
-    /*
-     * FAVORITE_SEARCH_INPUTS.searchBox.style.width = width + "px"
-     * FAVORITE_SEARCH_INPUTS.searchBox.style.height = height + "px"
-     */
-  }
   const removeButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showRemoveButtons, false) && userIsOnTheirOwnFavoritesPage();
 
   FAVORITE_CHECKBOXES.showRemoveButtons.checked = removeButtonsAreVisible;
@@ -519,9 +512,16 @@ function loadFavoritesPagePreferences() {
     toggleFancyImageHovering(fancyImageHovering);
   }
 
-  const enableOnSearchPages = getPreference(FAVORITE_PREFERENCES.enableOnSearchPages, true);
+  FAVORITE_CHECKBOXES.enableOnSearchPages.checked = getPreference(FAVORITE_PREFERENCES.enableOnSearchPages, true);
+  FAVORITE_CHECKBOXES.sortAscending.checked = getPreference(FAVORITE_PREFERENCES.sortAscending, false);
 
-  FAVORITE_CHECKBOXES.enableOnSearchPages.checked = enableOnSearchPages;
+  const sortingMethod = getPreference(FAVORITE_PREFERENCES.sortingMethod, "default");
+
+  for (const option of FAVORITE_INPUTS.sortingMethod) {
+    if (option.value === sortingMethod) {
+      option.selected = "selected";
+    }
+  }
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -615,14 +615,7 @@ function addEventListenersToFavoritesPage() {
     toggleFavoritesOptions(FAVORITE_CHECKBOXES.showOptions.checked);
     setPreference(FAVORITE_PREFERENCES.showOptions, FAVORITE_CHECKBOXES.showOptions.checked);
   };
-  const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-      setPreference(FAVORITE_PREFERENCES.textareaWidth, entry.contentRect.width);
-      setPreference(FAVORITE_PREFERENCES.textareaHeight, entry.contentRect.height);
-    }
-  });
 
-  resizeObserver.observe(FAVORITE_INPUTS.searchBox);
   FAVORITE_CHECKBOXES.showRemoveButtons.onchange = () => {
     updateVisibilityOfAllRemoveButtons();
     setPreference(FAVORITE_PREFERENCES.showRemoveButtons, FAVORITE_CHECKBOXES.showRemoveButtons.checked);
@@ -636,7 +629,6 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_CHECKBOXES.filterBlacklist.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.filterBlacklist, FAVORITE_CHECKBOXES.filterBlacklist.checked);
     favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
-    favoritesLoader.excludeBlacklistClicked = true;
     favoritesLoader.searchFavorites();
   };
   FAVORITE_BUTTONS.invert.onclick = () => {
@@ -687,6 +679,16 @@ function addEventListenersToFavoritesPage() {
 
   FAVORITE_CHECKBOXES.enableOnSearchPages.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.enableOnSearchPages, FAVORITE_CHECKBOXES.enableOnSearchPages.checked);
+  };
+
+  FAVORITE_CHECKBOXES.sortAscending.onchange = () => {
+    setPreference(FAVORITE_PREFERENCES.sortAscending, FAVORITE_CHECKBOXES.sortAscending.checked);
+    favoritesLoader.onSortingParametersUpdated();
+  };
+
+  FAVORITE_INPUTS.sortingMethod.onchange = () => {
+    setPreference(FAVORITE_PREFERENCES.sortingMethod, FAVORITE_INPUTS.sortingMethod.value);
+    favoritesLoader.onSortingParametersUpdated();
   };
 }
 
