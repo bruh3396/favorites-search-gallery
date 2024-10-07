@@ -9,7 +9,8 @@ const FLAGS = {
   onSearchPage: undefined,
   usingFirefox: undefined,
   onMobileDevice: undefined,
-  userIsOnTheirOwnFavoritesPage: undefined
+  userIsOnTheirOwnFavoritesPage: undefined,
+  usingRenderer: undefined
 };
 const DEFAULTS = {
   columnCount: 6,
@@ -763,7 +764,7 @@ function dispatchEventWithDelay(eventName, delay) {
  * @param {String} postId
  * @returns
  */
-function getThumbByPostId(postId) {
+function getThumbById(postId) {
   return document.getElementById(postId);
 }
 
@@ -876,7 +877,10 @@ function usingCaptions() {
  * @returns {Boolean}
  */
 function usingRenderer() {
-  return document.getElementById("original-content-container") !== null;
+  if (FLAGS.usingRenderer === undefined) {
+    FLAGS.usingRenderer = document.getElementById("original-content-container") !== null;
+  }
+  return FLAGS.usingRenderer;
 }
 
 function getThumbUnderCursorOnLoad() {

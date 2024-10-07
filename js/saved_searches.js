@@ -263,8 +263,9 @@ class SavedSearches {
 
   /**
    * @param {String} newSavedSearch
+   * @param {Boolean} updateLocalStorage
    */
-  saveSearch(newSavedSearch) {
+  saveSearch(newSavedSearch, updateLocalStorage = true) {
     if (newSavedSearch === "" || newSavedSearch === undefined) {
       return;
     }
@@ -330,7 +331,10 @@ class SavedSearches {
       this.stopEditingSavedSearches(newListItem);
     };
     this.textarea.value = "";
-    this.storeSavedSearches();
+
+    if (updateLocalStorage) {
+      this.storeSavedSearches();
+    }
   }
 
   /**
@@ -384,7 +388,7 @@ class SavedSearches {
     }
 
     for (let i = savedSearches.length - 1; i >= 0; i -= 1) {
-      this.saveSearch(savedSearches[i]);
+      this.saveSearch(savedSearches[i], false);
     }
   }
 

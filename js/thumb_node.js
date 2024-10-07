@@ -45,6 +45,19 @@ class ThumbNode {
   static allThumbNodes = new Map();
 
   /**
+   * @param {String} id
+   * @returns {Number}
+   */
+  static getPixelCount(id) {
+    const thumbNode = ThumbNode.allThumbNodes.get(id);
+
+    if (thumbNode === undefined || thumbNode.metadata === undefined) {
+      return 0;
+    }
+    return thumbNode.metadata.pixelCount;
+  }
+
+  /**
    * @type {Map.<String, ThumbNode>}
    */
   static get thumbNodesMatchedBySearch() {
@@ -184,9 +197,9 @@ class ThumbNode {
    */
   populateAttributes(thumb, fromDatabaseRecord) {
     if (fromDatabaseRecord) {
-      this.createFromDatabaseRecord(thumb);
+      this.populateAttributesFromDatabaseRecord(thumb);
     } else {
-      this.createFromHTMLElement(thumb);
+      this.populateAttributesFromHTMLElement(thumb);
     }
     this.root.id = this.id;
     this.additionalTags = TagModifier.tagModifications.get(this.id) || "";
@@ -196,7 +209,7 @@ class ThumbNode {
   /**
    * @param {{id: String, tags: String, src: String, type: String, metadata: String}} record
    */
-  createFromDatabaseRecord(record) {
+  populateAttributesFromDatabaseRecord(record) {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
     this.originalTags = record.tags;
@@ -208,7 +221,7 @@ class ThumbNode {
   /**
    * @param {HTMLElement} thumb
    */
-  createFromHTMLElement(thumb) {
+  populateAttributesFromHTMLElement(thumb) {
     if (onMobileDevice()) {
       const noScript = thumb.querySelector("noscript");
 

@@ -93,7 +93,7 @@ class FavoriteMetadata {
   }
 
   /**
-   * @returns {String}
+   * @type {String}
    */
   get json() {
     return JSON.stringify({
@@ -105,6 +105,13 @@ class FavoriteMetadata {
       change: this.lastChangedTimestamp,
       deleted: this.postIsDeleted
     });
+  }
+
+  /**
+   * @type {Number}
+   */
+  get pixelCount() {
+    return this.width * this.height;
   }
 
   /**

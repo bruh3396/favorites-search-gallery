@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
   <style>
     #favorites-top-bar {
@@ -118,6 +117,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     .thumb-node {
       position: relative;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
 
       >a,
       >div {
@@ -301,9 +306,13 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     }
 
     #rating-container {
-      position: absolute;
+      margin-top: 3px !important;
+    }
+
+    #allowed-ratings {
       margin-top: 5px;
-      margin-bottom: 5px;
+      font-size: 12px;
+
       >label {
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -314,7 +323,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         outline: 1px solid;
         padding: 3px;
         cursor: pointer;
-        opacity: 0.5;;
+        opacity: 0.5;
+        position: relative;
       }
 
       >label[for="explicit-rating-checkbox"] {
@@ -351,8 +361,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       <div id="left-favorites-panel-top-row">
         <button title="Search favorites\nctrl+click: Search all of rule34 in a new tab"
           id="search-button">Search</button>
-        <button title="Show results not matched by search" id="invert-button">Invert</button>
-        <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
+          <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
+          <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Empty the search box" id="clear-button">Clear</button>
         <span id="find-favorite" class="light-green-gradient" style="display: none;">
           <button title="Scroll to favorite using its ID" id="find-favorite-button"
@@ -404,11 +414,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   style="height: 20px; width: 20px; margin: 0; bottom: -6px; position: relative;">
               </div>
             </div>
-            <div style="margin-bottom: 35px; margin-top: 5px;">
-              <div>
-                <label>Rating</label>
-              </div>
-              <div id="rating-container">
+            <div id="rating-container">
+              <label>Rating</label>
+              <br>
+              <div id="allowed-ratings">
                 <input type="checkbox" id="explicit-rating-checkbox" checked>
                 <label for="explicit-rating-checkbox">Explicit</label>
                 <input type="checkbox" id="questionable-rating-checkbox" checked>
@@ -452,7 +461,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
   </div>
   <div class="loading-wheel" id="loading-wheel" style="display: none;"></div>
 </div>
-`;
+`;/* eslint-disable no-bitwise */
 
 if (!onSearchPage()) {
   document.getElementById("content").insertAdjacentHTML("beforebegin", uiHTML);
@@ -508,7 +517,7 @@ const FAVORITE_INPUTS = {
   performanceProfile: document.getElementById("performance-profile"),
   resultsPerPage: document.getElementById("results-per-page-input"),
   sortingMethod: document.getElementById("sorting-method"),
-  allowedRatings: document.getElementById("rating-container")
+  allowedRatings: document.getElementById("allowed-ratings")
 };
 const FAVORITE_SEARCH_LABELS = {
   findFavorite: document.getElementById("find-favorite-label")
@@ -758,12 +767,12 @@ function addEventListenersToFavoritesPage() {
 
   FAVORITE_CHECKBOXES.sortAscending.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.sortAscending, FAVORITE_CHECKBOXES.sortAscending.checked);
-    favoritesLoader.onSortingParametersUpdated();
+    favoritesLoader.onSortingParametersChanged();
   };
 
   FAVORITE_INPUTS.sortingMethod.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.sortingMethod, FAVORITE_INPUTS.sortingMethod.value);
-    favoritesLoader.onSortingParametersUpdated();
+    favoritesLoader.onSortingParametersChanged();
   };
 
   FAVORITE_INPUTS.allowedRatings.onchange = () => {
@@ -839,7 +848,7 @@ function changeColumnCount(count) {
     FAVORITE_INPUTS.columnCount.value = getPreference(FAVORITE_PREFERENCES.columnCount, DEFAULTS.columnCount);
     return;
   }
-  count = clamp(parseInt(count), 4, 20);
+  count = clamp(parseInt(count), 4, 50);
   injectStyleHTML(`
     #content {
       grid-template-columns: repeat(${count}, 1fr) !important;

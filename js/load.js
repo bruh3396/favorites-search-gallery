@@ -10,7 +10,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -82,21 +82,30 @@ class FavoritesDatabase {
    */
   storeFavorites(favorites) {
     this.openConnection()
-      .then((event) => {
-        const database = event.target.result;
-        const favoritesObjectStore = database
-          .transaction(this.objectStoreName, "readwrite")
-          .objectStore(this.objectStoreName);
+      .then((connectionEvent) => {
+        /**
+         * @type {IDBDatabase}
+         */
+        const database = connectionEvent.target.result;
+        const transaction = database.transaction(this.objectStoreName, "readwrite");
+        const objectStore = transaction.objectStore(this.objectStoreName);
+
+        transaction.oncomplete = (event) => {
+          postMessage({
+            response: "finishedStoring"
+          });
+          database.close();
+        };
+
+        transaction.onerror = (event) => {
+          console.error(event);
+        };
 
         favorites.forEach(favorite => {
           this.addContentTypeToFavorite(favorite);
-          favoritesObjectStore.add(favorite);
+          objectStore.put(favorite);
         });
-        database.close();
 
-        postMessage({
-          response: "finishedStoring"
-        });
       })
       .catch((event) => {
         const error = event.target.error;
@@ -114,13 +123,28 @@ class FavoritesDatabase {
    * @param {String[]} idsToDelete
    */
   async loadFavorites(idsToDelete) {
+    let loadedFavorites = {};
+
     await this.openConnection()
-      .then(async(event) => {
-        const database = event.target.result;
-        const objectStore = database
-          .transaction(this.objectStoreName, "readwrite")
-          .objectStore(this.objectStoreName);
+      .then(async(connectionEvent) => {
+        /**
+         * @type {IDBDatabase}
+        */
+        const database = connectionEvent.target.result;
+        const transaction = database.transaction(this.objectStoreName, "readwrite");
+        const objectStore = transaction.objectStore(this.objectStoreName);
         const index = objectStore.index("id");
+
+        transaction.onerror = (event) => {
+          console.error(event);
+        };
+        transaction.oncomplete = () => {
+          postMessage({
+            response: "finishedLoading",
+            favorites: loadedFavorites
+          });
+          database.close();
+        };
 
         for (const id of idsToDelete) {
           const deleteRequest = index.getKey(id);
@@ -134,17 +158,18 @@ class FavoritesDatabase {
             if (primaryKey !== undefined) {
               objectStore.delete(primaryKey);
             }
+          }).catch((error) => {
+            console.error(error);
           });
         }
-        objectStore.getAll().onsuccess = (getAllEvent) => {
-          const results = getAllEvent.target.result.reverse();
+        const getAllRequest = objectStore.getAll();
 
-          postMessage({
-            response: "finishedLoading",
-            favorites: results
-          });
+        getAllRequest.onsuccess = (event) => {
+          loadedFavorites = event.target.result.reverse();
         };
-        database.close();
+        getAllRequest.onerror = (event) => {
+          console.error(event);
+        };
       });
   }
 
@@ -455,11 +480,11 @@ onmessage = (message) => {
           this.updateSavedFavorites();
           break;
 
-        case "finishedStoring":
-          setTimeout(() => {
-            // this.databaseWorker.terminate();
-          }, 5000);
-          break;
+        // case "finishedStoring":
+        //   setTimeout(() => {
+        //     // this.databaseWorker.terminate();
+        //   }, 5000);
+        //   break;
 
         default:
           break;
@@ -639,7 +664,7 @@ onmessage = (message) => {
     for (let i = 0; i < stopIndex; i += 1) {
       const thumbNode = thumbNodes[i];
 
-      if (this.postTagsMatchSearchAndRating(searchCommand, thumbNode)) {
+      if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
         results.push(thumbNodes[i]);
         thumbNode.toggleMatched(true);
       } else {
@@ -1174,7 +1199,7 @@ Tag modifications and saved searches will be preserved.
     }
 
     for (const thumbNode of newThumbNodes) {
-      if (this.postTagsMatchSearchAndRating(searchCommand, thumbNode)) {
+      if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
         thumbNode.insertInDocument(content, "afterbegin");
         insertedThumbNodes.push(thumbNode);
       }
@@ -1268,6 +1293,7 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} searchResults
    */
   paginateSearchResults(searchResults) {
+    searchResults = this.getResultsWithAllowedRatings(searchResults);
     this.updateMatchCount(searchResults.length);
     this.insertPaginationContainer();
     this.changeResultsPage(1, searchResults);
@@ -1425,10 +1451,10 @@ Tag modifications and saved searches will be preserved.
     const {start, end} = this.getPaginationStartEndIndices(pageNumber);
 
     this.currentFavoritesPageNumber = pageNumber;
-    this.resetFlagsThatImplyDifferentSearchResults();
     this.updatePaginationUi(pageNumber, searchResults);
     this.createPaginatedFavoritesPage(searchResults, start, end);
     this.reAddAllThumbNodeEventListeners();
+    this.resetFlagsThatImplyDifferentSearchResults();
 
     if (FavoritesLoader.currentLoadState !== FavoritesLoader.loadState.indexedDB) {
       dispatchEventWithDelay("changedPage");
@@ -1478,7 +1504,7 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   createPaginatedFavoritesPage(searchResults, start, end) {
-    const newThumbNodes = this.sortThumbNodes(searchResults).slice(start, end);
+    const newThumbNodes = this.searchResultsAreShuffled ? searchResults : this.sortThumbNodes(searchResults).slice(start, end);
     const content = document.getElementById("content");
     const newContent = document.createDocumentFragment();
 
@@ -1586,44 +1612,45 @@ Tag modifications and saved searches will be preserved.
    * @returns {ThumbNode[]}
    */
   sortThumbNodes(thumbNodes) {
-    if (!FavoritesLoader.loadState.finished) {
-      alert("Wait for all favorites to load before changing sort method");
-      return thumbNodes;
-    }
-    const sortedThumbNodes = thumbNodes.slice();
-    const sortingMethod = this.getSortingMethod();
+    return thumbNodes;
+    // if (!FavoritesLoader.loadState.finished) {
+    //   alert("Wait for all favorites to load before changing sort method");
+    //   return thumbNodes;
+    // }
+    // const sortedThumbNodes = thumbNodes.slice();
+    // const sortingMethod = this.getSortingMethod();
 
-    if (sortingMethod !== "default") {
-      sortedThumbNodes.sort((b, a) => {
-        switch (sortingMethod) {
-          case "score":
-            return a.metadata.score - b.metadata.score;
+    // if (sortingMethod !== "default") {
+    //   sortedThumbNodes.sort((b, a) => {
+    //     switch (sortingMethod) {
+    //       case "score":
+    //         return a.metadata.score - b.metadata.score;
 
-          case "width":
-            return a.metadata.width - b.metadata.width;
+    //       case "width":
+    //         return a.metadata.width - b.metadata.width;
 
-          case "height":
-            return a.metadata.height - b.metadata.height;
+    //       case "height":
+    //         return a.metadata.height - b.metadata.height;
 
-          case "create":
-            return a.metadata.creationTimestamp - b.metadata.creationTimestamp;
+    //       case "create":
+    //         return a.metadata.creationTimestamp - b.metadata.creationTimestamp;
 
-          case "change":
-            return a.metadata.lastChangedTimestamp - b.metadata.lastChangedTimestamp;
+    //       case "change":
+    //         return a.metadata.lastChangedTimestamp - b.metadata.lastChangedTimestamp;
 
-          case "id":
-            return a.metadata.id - b.metadata.id;
+    //       case "id":
+    //         return a.metadata.id - b.metadata.id;
 
-          default:
-            return 0;
-        }
-      });
-    }
+    //       default:
+    //         return 0;
+    //     }
+    //   });
+    // }
 
-    if (this.sortAscending()) {
-      sortedThumbNodes.reverse();
-    }
-    return sortedThumbNodes;
+    // if (this.sortAscending()) {
+    //   sortedThumbNodes.reverse();
+    // }
+    // return sortedThumbNodes;
   }
 
   /**
@@ -1631,10 +1658,6 @@ Tag modifications and saved searches will be preserved.
    */
   getSortingMethod() {
     const sortingMethodSelect = document.getElementById("sorting-method");
-
-    if (this.searchResultsAreShuffled) {
-      return "default";
-    }
     return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
   }
 
@@ -1646,9 +1669,11 @@ Tag modifications and saved searches will be preserved.
     return sortFavoritesAscending === null ? false : sortFavoritesAscending.checked;
   }
 
-  onSortingParametersUpdated() {
+  onSortingParametersChanged() {
     this.sortingParametersChanged = true;
-    this.searchFavorites();
+    const matchedThumbNodes = this.getThumbNodesMatchedByLastSearch();
+
+    this.paginateSearchResults(matchedThumbNodes);
   }
 
   /**
@@ -1657,8 +1682,9 @@ Tag modifications and saved searches will be preserved.
   onAllowedRatingsChanged(allowedRatings) {
     this.allowedRatings = allowedRatings;
     this.allowedRatingsChanged = true;
-    this.searchFavorites();
+    const matchedThumbNodes = this.getThumbNodesMatchedByLastSearch();
 
+    this.paginateSearchResults(matchedThumbNodes);
   }
 
   /**
@@ -1697,6 +1723,14 @@ Tag modifications and saved searches will be preserved.
       return true;
     }
     return (thumbNode.metadata.rating & this.allowedRatings) > 0;
+  }
+
+/**
+ * @param {ThumbNode[]} searchResults
+ * @returns {ThumbNode[]}
+ */
+  getResultsWithAllowedRatings(searchResults) {
+    return searchResults.filter(thumbNode => this.ratingIsAllowed(thumbNode));
   }
 
   /**
