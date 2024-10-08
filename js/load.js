@@ -329,6 +329,15 @@ onmessage = (message) => {
    */
   searchResultsAreInverted;
   /**
+   * @type {Boolean}
+   */
+  searchResultsWereShuffled;
+  /**
+  /**
+   * @type {Boolean}
+   */
+  searchResultsWereInverted;
+  /**
    * @type {HTMLTextAreaElement}
    */
   favoritesSearchInput;
@@ -441,6 +450,8 @@ onmessage = (message) => {
     this.expectedFavoritesCountFound = false;
     this.searchResultsAreShuffled = false;
     this.searchResultsAreInverted = false;
+    this.searchResultsWereShuffled = false;
+    this.searchResultsWereInverted = false;
     this.foundEmptyFavoritesPage = false;
     this.newPageNeedsToBeCreated = false;
     this.tagsWereModified = false;
@@ -549,10 +560,6 @@ onmessage = (message) => {
     this.hideAwesomplete();
     this.resetMatchCount();
     dispatchEvent(new Event("searchStarted"));
-    setTimeout(() => {
-      this.searchResultsAreShuffled = false;
-      this.searchResultsAreInverted = false;
-    }, 50);
 
     switch (FavoritesLoader.currentLoadState) {
       case FavoritesLoader.loadState.started:
@@ -1462,10 +1469,14 @@ Tag modifications and saved searches will be preserved.
   }
 
   resetFlagsThatImplyDifferentSearchResults() {
+    this.searchResultsWereShuffled = this.searchResultsAreShuffled;
+    this.searchResultsWereInverted = this.searchResultsAreInverted;
     this.tagsWereModified = false;
     this.excludeBlacklistClicked = false;
     this.sortingParametersChanged = false;
     this.allowedRatingsChanged = false;
+    this.searchResultsAreShuffled = false;
+    this.searchResultsAreInverted = false;
     this.previousSearchQuery = this.searchQuery;
   }
 
@@ -1504,7 +1515,7 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   createPaginatedFavoritesPage(searchResults, start, end) {
-    const newThumbNodes = this.searchResultsAreShuffled ? searchResults : this.sortThumbNodes(searchResults).slice(start, end);
+    const newThumbNodes = this.sortThumbNodes(searchResults).slice(start, end);
     const content = document.getElementById("content");
     const newContent = document.createDocumentFragment();
 
@@ -1526,6 +1537,8 @@ Tag modifications and saved searches will be preserved.
       FavoritesLoader.currentLoadState !== FavoritesLoader.loadState.finished ||
       this.searchResultsAreShuffled ||
       this.searchResultsAreInverted ||
+      this.searchResultsWereShuffled ||
+      this.searchResultsWereInverted ||
       this.recentlyChangedMaxNumberOfFavoritesToDisplay ||
       this.tagsWereModified ||
       this.excludeBlacklistClicked ||
@@ -1612,51 +1625,53 @@ Tag modifications and saved searches will be preserved.
    * @returns {ThumbNode[]}
    */
   sortThumbNodes(thumbNodes) {
-    return thumbNodes;
-    // if (!FavoritesLoader.loadState.finished) {
-    //   alert("Wait for all favorites to load before changing sort method");
-    //   return thumbNodes;
-    // }
-    // const sortedThumbNodes = thumbNodes.slice();
-    // const sortingMethod = this.getSortingMethod();
+    if (!FavoritesLoader.loadState.finished) {
+      alert("Wait for all favorites to load before changing sort method");
+      return thumbNodes;
+    }
+    const sortedThumbNodes = thumbNodes.slice();
+    const sortingMethod = this.getSortingMethod();
 
-    // if (sortingMethod !== "default") {
-    //   sortedThumbNodes.sort((b, a) => {
-    //     switch (sortingMethod) {
-    //       case "score":
-    //         return a.metadata.score - b.metadata.score;
+    if (sortingMethod !== "default") {
+      sortedThumbNodes.sort((b, a) => {
+        switch (sortingMethod) {
+          case "score":
+            return a.metadata.score - b.metadata.score;
 
-    //       case "width":
-    //         return a.metadata.width - b.metadata.width;
+          case "width":
+            return a.metadata.width - b.metadata.width;
 
-    //       case "height":
-    //         return a.metadata.height - b.metadata.height;
+          case "height":
+            return a.metadata.height - b.metadata.height;
 
-    //       case "create":
-    //         return a.metadata.creationTimestamp - b.metadata.creationTimestamp;
+          case "create":
+            return a.metadata.creationTimestamp - b.metadata.creationTimestamp;
 
-    //       case "change":
-    //         return a.metadata.lastChangedTimestamp - b.metadata.lastChangedTimestamp;
+          case "change":
+            return a.metadata.lastChangedTimestamp - b.metadata.lastChangedTimestamp;
 
-    //       case "id":
-    //         return a.metadata.id - b.metadata.id;
+          case "id":
+            return a.metadata.id - b.metadata.id;
 
-    //       default:
-    //         return 0;
-    //     }
-    //   });
-    // }
+          default:
+            return 0;
+        }
+      });
+    }
 
-    // if (this.sortAscending()) {
-    //   sortedThumbNodes.reverse();
-    // }
-    // return sortedThumbNodes;
+    if (this.sortAscending()) {
+      sortedThumbNodes.reverse();
+    }
+    return sortedThumbNodes;
   }
 
   /**
    * @returns {String}
    */
   getSortingMethod() {
+    if (this.searchResultsAreShuffled) {
+      return "default";
+    }
     const sortingMethodSelect = document.getElementById("sorting-method");
     return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
   }

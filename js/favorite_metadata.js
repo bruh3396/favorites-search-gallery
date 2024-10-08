@@ -5,12 +5,17 @@ class FavoriteMetadata {
   */
   static fetchQueue = [];
   static currentlyFetching = false;
-  static fetchDelay = 5;
+  static fetchDelay = {
+    normal: 5,
+    deleted: 500
+  };
+  static postStatisticsRegex = /Posted:\s*(\S+\s\S+).*Size:\s*(\d+)x(\d+).*Rating:\s*(\S+).*Score:\s*(\d+)/gm;
 
   /**
    * @param {FavoriteMetadata} favoriteMetadata
+   * @param {Boolean} missingInDatabase
    */
-  static async fetchMissingMetadata(favoriteMetadata) {
+  static async fetchMissingMetadata(favoriteMetadata, missingInDatabase = false) {
     FavoriteMetadata.fetchQueue.push(favoriteMetadata);
 
     if (FavoriteMetadata.currentlyFetching) {
@@ -21,8 +26,12 @@ class FavoriteMetadata {
     while (FavoriteMetadata.fetchQueue.length > 0) {
       const metadata = this.fetchQueue.pop();
 
-      metadata.populateMetadataFromAPI(true);
-      await sleep(FavoriteMetadata.fetchDelay);
+      if (metadata.postIsDeleted) {
+        metadata.populateMetadataFromPost(missingInDatabase);
+      } else {
+        metadata.populateMetadataFromAPI(true);
+      }
+      await sleep(metadata.fetchDelay);
     }
     FavoriteMetadata.currentlyFetching = false;
   }
@@ -46,9 +55,12 @@ class FavoriteMetadata {
    */
   static convertRatingToNumber(rating) {
     return {
-       "e": 4,
-       "q": 2,
-       "s": 1
+      "Explicit": 4,
+      "e": 4,
+      "Questionable": 2,
+      "q": 2,
+      "Safe": 1,
+      "s": 1
     }[rating] || 4;
   }
   /**
@@ -90,6 +102,14 @@ class FavoriteMetadata {
 
   get apiURL() {
     return `https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=${this.id}`;
+  }
+
+  get postURL() {
+    return `https://rule34.xxx/index.php?page=post&s=view&id=${this.id}`;
+  }
+
+  get fetchDelay() {
+    return this.postIsDeleted ? FavoriteMetadata.fetchDelay.deleted : FavoriteMetadata.fetchDelay.normal;
   }
 
   /**
@@ -141,16 +161,19 @@ class FavoriteMetadata {
     if (record === undefined) {
       this.populateMetadataFromAPI();
     } else if (record === null) {
-      FavoriteMetadata.fetchMissingMetadata(this);
+      FavoriteMetadata.fetchMissingMetadata(this, true);
     } else {
       this.populateMetadataFromRecord(JSON.parse(record));
 
       if (this.metadataIsEmpty()) {
-        FavoriteMetadata.fetchMissingMetadata(this);
+        FavoriteMetadata.fetchMissingMetadata(this, true);
       }
     }
   }
 
+  /**
+   * @param {Boolean} missingInDatabase
+   */
   populateMetadataFromAPI(missingInDatabase = false) {
     fetch(this.apiURL)
       .then((response) => {
@@ -161,7 +184,9 @@ class FavoriteMetadata {
         const metadata = dom.querySelector("post");
 
         if (metadata === null) {
-          throw new Error(`deleted: ${this.apiURL}`);
+          throw new Error(`metadata is null - ${this.apiURL}`, {
+            cause: "DeletedMetadata"
+          });
         }
         this.width = parseInt(metadata.getAttribute("width"));
         this.height = parseInt(metadata.getAttribute("height"));
@@ -188,8 +213,11 @@ class FavoriteMetadata {
         }
       })
       .catch((error) => {
-        if (!error.message.startsWith("deleted")) {
+        if (error.cause === "DeletedMetadata") {
           this.postIsDeleted = true;
+          FavoriteMetadata.fetchMissingMetadata(this);
+        } else {
+          console.error(error);
         }
       });
   }
@@ -208,9 +236,47 @@ class FavoriteMetadata {
   }
 
   /**
+   * @param {Boolean} missingInDatabase
+   */
+  populateMetadataFromPost(missingInDatabase = false) {
+    fetch(this.postURL)
+      .then((response) => {
+        return response.text();
+      })
+      .then((html) => {
+        const dom = FavoriteMetadata.parser.parseFromString(html, "text/html");
+        const statistics = dom.getElementById("stats");
+
+        if (statistics === null) {
+          return;
+        }
+        const textContent = replaceLineBreaks(statistics.textContent.trim(), " ");
+        const match = FavoriteMetadata.postStatisticsRegex.exec(textContent);
+
+        FavoriteMetadata.postStatisticsRegex.lastIndex = 0;
+
+        if (!match) {
+          return;
+        }
+        this.width = parseInt(match[2]);
+        this.height = parseInt(match[3]);
+        this.score = parseInt(match[5]);
+        this.rating = FavoriteMetadata.convertRatingToNumber(match[4]);
+        this.creationTimestamp = Date.parse(match[1]);
+        this.lastChangedTimestamp = this.creationTimestamp;
+
+        if (missingInDatabase) {
+          dispatchEvent(new CustomEvent("missingMetadata", {
+            detail: this.id
+          }));
+        }
+      });
+  }
+
+  /**
    * @returns {Boolean}
    */
   metadataIsEmpty() {
-    return this.width === 0 && !this.postIsDeleted;
+    return this.width === 0 && this.height === 0;
   }
 }

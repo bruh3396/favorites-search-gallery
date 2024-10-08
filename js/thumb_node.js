@@ -167,7 +167,7 @@ class ThumbNode {
     this.instantiateTemplate();
     this.populateAttributes(thumb, fromRecord);
     this.setupRemoveButton();
-    this.setupOnClickLink();
+    this.setupClickLink();
     this.setFlags();
     this.addInstanceToAllThumbNodes();
   }
@@ -238,7 +238,7 @@ class ThumbNode {
     this.metadata = new FavoriteMetadata(this.id);
   }
 
-  setupOnClickLink() {
+  setupClickLink() {
     if (usingRenderer()) {
       this.container.setAttribute("href", this.href);
     } else {

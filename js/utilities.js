@@ -1018,6 +1018,15 @@ function removeExtraWhiteSpace(string) {
 }
 
 /**
+ * @param {String} string
+ * @param {String} replacement
+ * @returns {String}
+ */
+function replaceLineBreaks(string, replacement = "") {
+  return string.replace(/(\r\n|\n|\r)/gm, replacement);
+}
+
+/**
  *
  * @param {HTMLImageElement} image
  * @returns {Boolean}
