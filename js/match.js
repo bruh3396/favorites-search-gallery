@@ -19,7 +19,7 @@ class PostTags {
    * @param {String} tags
    */
   create(tags) {
-    this.array = removeExtraWhiteSpace(tags)
+    this.array = tags
       .split(" ")
       .sort();
     this.set = new Set(this.array);

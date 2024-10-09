@@ -37,29 +37,19 @@ class FavoriteMetadata {
   }
 
   /**
-  * @param {String} imageURL
-  * @returns {String}
-  */
-  static getExtensionFromFileURL(imageURL) {
-    try {
-      return (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL)[1];
-
-    } catch (error) {
-      return "jpg";
-    }
-  }
-
-  /**
    * @param {String} rating
    * @returns {Number}
    */
   static convertRatingToNumber(rating) {
     return {
       "Explicit": 4,
+      "E": 4,
       "e": 4,
       "Questionable": 2,
+      "Q": 2,
       "q": 2,
       "Safe": 1,
+      "S": 1,
       "s": 1
     }[rating] || 4;
   }
@@ -150,8 +140,15 @@ class FavoriteMetadata {
     this.score = 0;
     this.creationTimestamp = 0;
     this.lastChangedTimestamp = 0;
-    this.rating = 4;
+    // this.rating = 4;
     this.postIsDeleted = false;
+  }
+
+  /**
+   * @param {Number} rating
+   */
+  presetRating(rating) {
+    this.rating = rating;
   }
 
   /**
@@ -165,7 +162,7 @@ class FavoriteMetadata {
     } else {
       this.populateMetadataFromRecord(JSON.parse(record));
 
-      if (this.metadataIsEmpty()) {
+      if (this.isEmpty()) {
         FavoriteMetadata.fetchMissingMetadata(this, true);
       }
     }
@@ -195,7 +192,7 @@ class FavoriteMetadata {
         this.creationTimestamp = Date.parse(metadata.getAttribute("created_at"));
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
-        const extension = FavoriteMetadata.getExtensionFromFileURL(metadata.getAttribute("file_url"));
+        const extension = getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {
           dispatchEvent(new CustomEvent("favoriteMetadataFetched", {
@@ -215,7 +212,10 @@ class FavoriteMetadata {
       .catch((error) => {
         if (error.cause === "DeletedMetadata") {
           this.postIsDeleted = true;
-          // FavoriteMetadata.fetchMissingMetadata(this);
+
+          if (FavoritesLoader.finishedLoading) {
+            FavoriteMetadata.fetchMissingMetadata(this, true);
+          }
         } else {
           console.error(error);
         }
@@ -276,7 +276,7 @@ class FavoriteMetadata {
   /**
    * @returns {Boolean}
    */
-  metadataIsEmpty() {
+  isEmpty() {
     return this.width === 0 && this.height === 0;
   }
 }

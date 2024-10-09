@@ -270,6 +270,9 @@ onmessage = (message) => {
    */
   static currentLoadState = FavoritesLoader.loadState.notStarted;
   static parser = new DOMParser();
+  static get finishedLoading() {
+    return FavoritesLoader.currentLoadState === FavoritesLoader.loadState.finished;
+  }
 
   /**
    * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: {pageNumber: Number, thumbNodes: ThumbNode[], searchResults: ThumbNode[]}[]}}
@@ -672,7 +675,7 @@ onmessage = (message) => {
       const thumbNode = thumbNodes[i];
 
       if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
-        results.push(thumbNodes[i]);
+        results.push(thumbNode);
         thumbNode.toggleMatched(true);
       } else {
         thumbNode.toggleMatched(false);
@@ -800,7 +803,7 @@ onmessage = (message) => {
 
         this.fetchFavoritesFromSinglePage(currentPageNumber, failedRequest);
         await sleep(waitTime);
-      } else if (currentPageNumber <= this.finalPageNumber && !this.foundEmptyFavoritesPage) {
+      } else if (currentPageNumber * 50 <= this.finalPageNumber && !this.foundEmptyFavoritesPage) {
         this.fetchFavoritesFromSinglePage(currentPageNumber);
         currentPageNumber += 1;
         await sleep(200);
@@ -923,7 +926,9 @@ onmessage = (message) => {
    */
   processFetchedThumbNodes(thumbNodes, searchResults) {
     this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(searchResults);
-    this.updateMatchCount(this.searchResultsWhileFetching.length);
+    const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
+
+    this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
     dispatchEvent(new CustomEvent("favoritesFetched", {
       detail: thumbNodes.map(thumbNode => thumbNode.root)
     }));
@@ -1015,14 +1020,11 @@ onmessage = (message) => {
     for (const record of databaseRecords) {
       const thumbNode = new ThumbNode(record, true);
       const isBlacklisted = !postTagsMatchSearch(searchCommand, thumbNode.postTags);
-      const inappropriateRating = !this.ratingIsAllowed(thumbNode);
 
       if (isBlacklisted) {
         if (!userIsOnTheirOwnFavoritesPage()) {
           continue;
         }
-        thumbNode.toggleMatched(false);
-      } else if (inappropriateRating) {
         thumbNode.toggleMatched(false);
       } else {
         searchResults.push(thumbNode);
@@ -1206,7 +1208,7 @@ Tag modifications and saved searches will be preserved.
     }
 
     for (const thumbNode of newThumbNodes) {
-      if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
+      if (this.postTagsMatchSearchAndRating(searchCommand, thumbNode)) {
         thumbNode.insertInDocument(content, "afterbegin");
         insertedThumbNodes.push(thumbNode);
       }
@@ -1223,9 +1225,11 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} thumbNodes
    */
   addFavoritesToContent(thumbNodes) {
+    thumbNodes = this.getResultsWithAllowedRatings(thumbNodes);
+    const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
-    const pageCount = this.getPageCount(this.searchResultsWhileFetching.length);
+    const pageCount = this.getPageCount(searchResultsWhileFetchingWithAllowedRatings.length);
     const needsToCreateNewPage = pageCount > lastPageButtonNumber;
     const nextPageButton = document.getElementById("next-page-button");
     const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount &&
@@ -1233,7 +1237,7 @@ Tag modifications and saved searches will be preserved.
       nextPageButton.style.visibility !== "hidden";
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
-      this.updatePaginationUi(this.currentFavoritesPageNumber, this.searchResultsWhileFetching);
+      this.updatePaginationUi(this.currentFavoritesPageNumber, searchResultsWhileFetchingWithAllowedRatings);
     }
 
     const onLastPage = (pageCount === this.currentFavoritesPageNumber);
@@ -1734,9 +1738,6 @@ Tag modifications and saved searches will be preserved.
    * @returns {Boolean}
   */
   ratingIsAllowed(thumbNode) {
-    if (thumbNode.metadata === undefined) {
-      return true;
-    }
     return (thumbNode.metadata.rating & this.allowedRatings) > 0;
   }
 
@@ -1745,6 +1746,9 @@ Tag modifications and saved searches will be preserved.
  * @returns {ThumbNode[]}
  */
   getResultsWithAllowedRatings(searchResults) {
+    if (this.allowedRatings === 7) {
+      return searchResults;
+    }
     return searchResults.filter(thumbNode => this.ratingIsAllowed(thumbNode));
   }
 

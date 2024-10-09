@@ -6,7 +6,7 @@ THUMB_NODE_TEMPLATE.className = "thumb-node";
 
 THUMB_NODE_TEMPLATE.innerHTML = `
     <div>
-      <img loading="lazy">
+      <img>
       ${REMOVE_BUTTON_HTML}
       ${CANVAS_HTML}
     </div>
@@ -40,6 +40,15 @@ class ThumbNode {
   }
 
   /**
+   * @param {HTMLElement} thumb
+   * @returns {Number}
+   */
+  static extractRatingFromThumb(thumb) {
+    const rating = (/'rating':'(\S)/).exec(thumb.nextSibling.textContent)[1];
+    return FavoriteMetadata.convertRatingToNumber(rating);
+  }
+
+  /**
    * @type {Map.<String, ThumbNode>}
    */
   static allThumbNodes = new Map();
@@ -69,6 +78,24 @@ class ThumbNode {
       }
     }
     return thumbNodes;
+  }
+
+  /**
+   *
+   * @param {String} id
+   * @returns {String}
+   */
+  static getExtensionFromThumbNode(id) {
+    const thumbNode = ThumbNode.allThumbNodes.get(id);
+
+    if (thumbNode === undefined) {
+      return undefined;
+    }
+
+    if (thumbNode.metadata.isEmpty()) {
+      return undefined;
+    }
+    return thumbNode.metadata.extension;
   }
 
   /**
@@ -213,8 +240,11 @@ class ThumbNode {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
     this.originalTags = record.tags;
-    this.image.classList.add(record.type);
-    record.metadata = record.metadata === undefined ? null : record.metadata;
+    this.image.className = record.type;
+
+    if (record.metadata === undefined) {
+      record.metadata = null;
+    }
     this.metadata = new FavoriteMetadata(this.id, record.metadata);
   }
 
@@ -236,6 +266,7 @@ class ThumbNode {
     this.originalTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
     this.image.classList.add(getContentType(this.originalTags));
     this.metadata = new FavoriteMetadata(this.id);
+    this.metadata.presetRating(ThumbNode.extractRatingFromThumb(thumb));
   }
 
   setupClickLink() {
@@ -289,6 +320,9 @@ class ThumbNode {
    * @returns {String}
    */
   mergeTags(oldTags, newTags) {
+    if (newTags === "") {
+      return oldTags;
+    }
     oldTags = removeExtraWhiteSpace(oldTags);
     newTags = removeExtraWhiteSpace(newTags);
     const finalTags = new Set(oldTags.split(" "));

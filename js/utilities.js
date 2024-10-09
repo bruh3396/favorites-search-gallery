@@ -6,6 +6,7 @@ const CURSOR_POSITION = {
 };
 const PREFERENCES = "preferences";
 const FLAGS = {
+  set: false,
   onSearchPage: undefined,
   usingFirefox: undefined,
   onMobileDevice: undefined,
@@ -93,7 +94,7 @@ function getFavoritesPageId() {
  * @returns {Boolean}
  */
 function userIsOnTheirOwnFavoritesPage() {
-  if (FLAGS.userIsOnTheirOwnFavoritesPage === undefined) {
+  if (!FLAGS.set) {
     FLAGS.userIsOnTheirOwnFavoritesPage = getUserId() === getFavoritesPageId();
   }
   return FLAGS.userIsOnTheirOwnFavoritesPage;
@@ -243,6 +244,19 @@ function getOriginalImageURL(thumbURL) {
     .replace("thumbnail_", "")
     .replace("us.rule34", "rule34");
 }
+
+  /**
+   * @param {String} imageURL
+   * @returns {String}
+   */
+  function getExtensionFromImageURL(imageURL) {
+    try {
+      return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
+
+    } catch (error) {
+      return "jpg";
+    }
+  }
 
 /**
  * @param {String} originalImageURL
@@ -498,7 +512,7 @@ function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChe
  * @returns {Boolean}
  */
 function onSearchPage() {
-  if (FLAGS.onSearchPage === undefined) {
+  if (!FLAGS.set) {
     FLAGS.onSearchPage = location.href.includes("page=post");
   }
   return FLAGS.onSearchPage;
@@ -790,6 +804,7 @@ function initializeUtilities() {
   trackCursorPosition();
   setTheme();
   prefetchAdjacentSearchPages();
+  setFlags();
 }
 
 function prefetchAdjacentSearchPages() {
@@ -813,6 +828,17 @@ function prefetchAdjacentSearchPages() {
   }
   container.id = "search-page-prefetch";
   document.head.appendChild(container);
+}
+
+function setFlags() {
+  setTimeout(() => {
+    onSearchPage();
+    onMobileDevice();
+    usingRenderer();
+    userIsOnTheirOwnFavoritesPage();
+    usingFirefox();
+    FLAGS.set = true;
+  }, 250);
 }
 
 /**
@@ -877,7 +903,7 @@ function usingCaptions() {
  * @returns {Boolean}
  */
 function usingRenderer() {
-  if (FLAGS.usingRenderer === undefined) {
+  if (!FLAGS.set) {
     FLAGS.usingRenderer = document.getElementById("original-content-container") !== null;
   }
   return FLAGS.usingRenderer;
@@ -1039,7 +1065,7 @@ function imageIsLoaded(image) {
  * @returns {Boolean}
  */
 function usingFirefox() {
-  if (FLAGS.usingFirefox === undefined) {
+  if (!FLAGS.set) {
     FLAGS.usingFirefox = navigator.userAgent.toLowerCase().includes("firefox");
   }
   return FLAGS.usingFirefox;
@@ -1049,7 +1075,7 @@ function usingFirefox() {
  * @returns  {Boolean}
  */
 function onMobileDevice() {
-  if (FLAGS.onMobileDevice === undefined) {
+  if (!FLAGS.set) {
     FLAGS.onMobileDevice = (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent);
   }
   return FLAGS.onMobileDevice;

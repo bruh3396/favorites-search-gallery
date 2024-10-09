@@ -99,7 +99,6 @@ const galleryDebugHTML = `
       left: 0;
       pointer-events: none;
       z-index: 1;
-      visibility: hidden;
     }
 
     .image {
@@ -373,7 +372,10 @@ class ImageFetcher {
         return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
       }).catch((error) => {
         if (!error.message.includes("503")) {
-          console.error(error);
+          console.error({
+            error,
+            url: postPageURL
+          });
           return "https://rule34.xxx/images/r34chibi.png";
         }
         return ImageFetcher.getOriginalImageURLFromPostPage(id);
@@ -590,7 +592,7 @@ class ImageRenderer {
   /**
    * @type {Map.<String, RenderRequest>}
   */
-  allRenderRequests;
+  incompleteRenderRequests;
   /**
    * @type {Map.<String, {completed: Boolean, imageBitmap: ImageBitmap, request: RenderRequest}>}
    */
@@ -635,7 +637,7 @@ class ImageRenderer {
     this.context = this.canvas.getContext("2d");
     this.thumbUpscaler = new ThumbUpscaler(message.screenWidth, message.onSearchPage);
     this.renders = new Map();
-    this.allRenderRequests = new Map();
+    this.incompleteRenderRequests = new Map();
     this.lastRequestedDrawId = "";
     this.currentlyDrawnId = "";
     this.onMobileDevice = message.onMobileDevice;
@@ -681,7 +683,7 @@ class ImageRenderer {
    * @param {*} batchRequestId
    */
   async renderImage(request, batchRequestId) {
-    this.allRenderRequests.set(request.id, request);
+    this.incompleteRenderRequests.set(request.id, request);
     await ImageFetcher.setOriginalImageURLAndExtension(request);
     let blob;
 
@@ -717,6 +719,7 @@ class ImageRenderer {
       imageBitmap,
       request
     });
+    this.incompleteRenderRequests.delete(request.id);
     this.thumbUpscaler.upscaleCanvas(request, imageBitmap);
     postMessage({
       action: "renderCompleted",
@@ -860,19 +863,19 @@ class ImageRenderer {
   abortOutdatedFetchRequests(newBatchRenderRequest) {
     const newIds = newBatchRenderRequest.renderRequestIds;
 
-    for (const [id, request] of this.allRenderRequests.entries()) {
+    for (const [id, request] of this.incompleteRenderRequests.entries()) {
       if (!newIds.has(id)) {
         request.abortController.abort();
-        this.allRenderRequests.delete(id);
+        this.incompleteRenderRequests.delete(id);
       }
     }
   }
 
   abortAllFetchRequests() {
-    for (const request of this.allRenderRequests.values()) {
+    for (const request of this.incompleteRenderRequests.values()) {
       request.abortController.abort();
     }
-    this.allRenderRequests.clear();
+    this.incompleteRenderRequests.clear();
   }
 
   /**
@@ -1442,7 +1445,7 @@ onmessage = (message) => {
           break;
 
         case "extensionFound":
-          // this.assignExtension(message.id, message.extension);
+          this.assignExtension(message.id, message.extension);
           break;
 
         default:
@@ -1699,9 +1702,19 @@ onmessage = (message) => {
     this.imageRenderer.postMessage({
       action: "deleteAllRenders"
     });
+
+    if (Gallery.settings.debugEnabled) {
+      this.visibleThumbs.forEach((thumb) => {
+        thumb.classList.remove("loaded");
+      });
+    }
   }
 
   deleteAllTransferredCanvases() {
+    if (onSearchPage()) {
+      return;
+    }
+
     for (const id of this.transferredCanvases.keys()) {
       this.transferredCanvases.get(id).remove();
       this.transferredCanvases.delete(id);
@@ -1796,7 +1809,7 @@ onmessage = (message) => {
             continue;
           }
           const id = post.getAttribute("id");
-          const extension = (/\.(png|jpg|jpeg|gif)/g).exec(originalImageURL)[1];
+          const extension = getExtensionFromImageURL(originalImageURL);
 
           this.assignExtension(id, extension);
         }
@@ -1825,6 +1838,7 @@ onmessage = (message) => {
         }
       }
     }
+    Gallery.settings.extensionsFoundBeforeSavingCount = 0;
   }
 
   /**
@@ -1842,9 +1856,13 @@ onmessage = (message) => {
       this.recentlyDiscoveredImageExtensionCount = 0;
 
       if (!onSearchPage()) {
-        localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(this.imageExtensions));
+        this.storeAllImageExtensions();
       }
     }
+  }
+
+  storeAllImageExtensions() {
+    localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(this.imageExtensions));
   }
 
   /**
@@ -2018,7 +2036,7 @@ onmessage = (message) => {
     }
 
     this.renderInAdvanceWhileTraversingGallery(selectedThumb, direction);
-    this.preloadVideosAround(selectedThumb);
+    // this.preloadVideosAround(selectedThumb);
 
     if (!usingFirefox()) {
       scrollToThumb(selectedThumb.id, false);
