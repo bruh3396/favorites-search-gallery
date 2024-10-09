@@ -14,7 +14,7 @@ const FLAGS = {
 };
 const DEFAULTS = {
   columnCount: 6,
-  resultsPerPage: 1000
+  resultsPerPage: 200
 };
 
 /**

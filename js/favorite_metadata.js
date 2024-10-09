@@ -7,7 +7,7 @@ class FavoriteMetadata {
   static currentlyFetching = false;
   static fetchDelay = {
     normal: 5,
-    deleted: 500
+    deleted: 300
   };
   static postStatisticsRegex = /Posted:\s*(\S+\s\S+).*Size:\s*(\d+)x(\d+).*Rating:\s*(\S+).*Score:\s*(\d+)/gm;
 
@@ -215,7 +215,7 @@ class FavoriteMetadata {
       .catch((error) => {
         if (error.cause === "DeletedMetadata") {
           this.postIsDeleted = true;
-          FavoriteMetadata.fetchMissingMetadata(this);
+          // FavoriteMetadata.fetchMissingMetadata(this);
         } else {
           console.error(error);
         }

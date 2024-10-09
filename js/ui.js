@@ -113,6 +113,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       background: white;
       border: none;
       z-index: 2;
+
+      &:active {
+        filter: none !important;
+      }
     }
 
     .thumb-node {
@@ -848,7 +852,7 @@ function changeColumnCount(count) {
     FAVORITE_INPUTS.columnCount.value = getPreference(FAVORITE_PREFERENCES.columnCount, DEFAULTS.columnCount);
     return;
   }
-  count = clamp(parseInt(count), 4, 50);
+  count = clamp(parseInt(count), 4, 20);
   injectStyleHTML(`
     #content {
       grid-template-columns: repeat(${count}, 1fr) !important;

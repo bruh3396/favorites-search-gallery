@@ -36,7 +36,7 @@ const galleryHTML = `<style>
     z-index: 9996;
   }
 
-  #fullscreen-canvas {
+  #main-canvas {
     z-index: 9997;
     /* display: none; */
   }
@@ -124,7 +124,7 @@ const galleryDebugHTML = `
     }
   }
 
-  #fullscreen-canvas, #low-resolution-canvas {
+  #main-canvas, #low-resolution-canvas {
     opacity: .5;
   }`;
 
@@ -216,6 +216,14 @@ class RenderRequest {
   */
   pixelCount;
   /**
+   * @type {OffscreenCanvas}
+  */
+  canvas;
+  /**
+   * @type {Number}
+  */
+  resolutionFraction;
+  /**
    * @type {AbortController}
   */
   abortController;
@@ -225,7 +233,7 @@ class RenderRequest {
   alreadyStarted;
 
   /**
-  * @param {{id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number}} request
+  * @param {{id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number, canvas: OffscreenCanvas, resolutionFraction: Number}} request
   */
   constructor(request) {
     this.id = request.id;
@@ -234,6 +242,8 @@ class RenderRequest {
     this.thumbURL = request.thumbURL;
     this.fetchDelay = request.fetchDelay;
     this.pixelCount = request.pixelCount;
+    this.canvas = request.canvas;
+    this.resolutionFraction = request.resolutionFraction;
     this.abortController = new AbortController();
     this.alreadyStarted = false;
   }
@@ -248,7 +258,7 @@ class BatchRenderRequest {
   /**
    * @type {String}
   */
-  requestId;
+  id;
   /**
    * @type {String}
   */
@@ -257,6 +267,10 @@ class BatchRenderRequest {
    * @type {RenderRequest[]}
   */
   renderRequests;
+  /**
+   * @type {RenderRequest[]}
+  */
+  allRenderRequests;
 
   get renderRequestIds() {
     return new Set(this.renderRequests.map(request => request.id));
@@ -264,15 +278,16 @@ class BatchRenderRequest {
 
   /**
    * @param {{
-   *  requestId: String,
+   *  id: String,
    *  requestType: String,
-   *  renderRequests: {requestId: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number}[]
+   *  renderRequests: {id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number, canvas: OffscreenCanvas, resolutionFraction: Number}[]
    * }} batchRequest
    */
   constructor(batchRequest) {
-    this.requestId = batchRequest.requestId;
+    this.id = batchRequest.id;
     this.requestType = batchRequest.requestType;
     this.renderRequests = batchRequest.renderRequests.map(r => new RenderRequest(r));
+    this.allRenderRequests = this.renderRequests;
     this.truncateLargeRenderRequests();
   }
 
@@ -298,13 +313,12 @@ class BatchRenderRequest {
 
 class ImageFetcher {
   /**
-   * @type {Number}
+   * @type {Set.<String>}
   */
-  retryDelayIncrement = 100;
-  /**
-   * @type {Number}
-  */
-  retryDelay = 0;
+  static deletedIds = new Set();
+  static get deletedIdFetchDelay() {
+    return ImageFetcher.deletedIds.size * 250;
+  }
   /**
    * @param {RenderRequest} request
    */
@@ -342,8 +356,11 @@ class ImageFetcher {
    * @param {String} id
    * @returns {String}
    */
-  static getOriginalImageURLFromPostPage(id) {
+  static async getOriginalImageURLFromPostPage(id) {
     const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + id;
+
+    ImageFetcher.deletedIds.add(id);
+    await sleep(ImageFetcher.deletedIdFetchDelay);
     return fetch(postPageURL)
       .then((response) => {
         if (response.ok) {
@@ -352,19 +369,14 @@ class ImageFetcher {
         throw new Error(response.status + ": " + postPageURL);
       })
       .then((html) => {
+        ImageFetcher.deletedIds.delete(id);
         return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
-      }).catch(async(error) => {
+      }).catch((error) => {
         if (!error.message.includes("503")) {
           console.error(error);
           return "https://rule34.xxx/images/r34chibi.png";
         }
-        await sleep(ImageFetcher.retryDelay);
-        ImageFetcher.retryDelay += ImageFetcher.retryDelayIncrement;
-
-        if (ImageFetcher.retryDelay > ImageFetcher.retryDelayIncrement * 5) {
-          ImageFetcher.retryDelay = ImageFetcher.retryDelayIncrement;
-        }
-        return ImageFetcher.getOriginalImageURLFromPostPage(postPageURL);
+        return ImageFetcher.getOriginalImageURLFromPostPage(id);
       });
   }
 
@@ -383,11 +395,20 @@ class ImageFetcher {
 
   /**
    * @param {RenderRequest} request
+   * @returns {Promise}
   */
-  static async fetchImageBlob(request) {
-    const response = await fetch(request.imageURL, {
+  static fetchImage(request) {
+    return fetch(request.imageURL, {
       signal: request.abortController.signal
     });
+  }
+
+  /**
+   * @param {RenderRequest} request
+   * @returns {Blob}
+  */
+  static async fetchImageBlob(request) {
+    const response = await ImageFetcher.fetchImage(request);
     return response.blob();
   }
 
@@ -417,89 +438,132 @@ class ThumbUpscaler {
    * @type {Number}
   */
   screenWidth;
+  /**
+   * @type {Boolean}
+  */
+  onSearchPage;
 
-  constructor(screenWidth) {
+  /**
+   * @param {Number} screenWidth
+   * @param {Boolean} onSearchPage
+   */
+  constructor(screenWidth, onSearchPage) {
     this.screenWidth = screenWidth;
+    this.onSearchPage = onSearchPage;
   }
 
   /**
-   * @param {OffscreenCanvas} offscreenCanvas
-   * @param {ImageBitmap} imageBitmap
-   * @param {String} id
-   * @param {Number} maxResolutionFraction
+   * @param {{id: String, imageURL: String, canvas: OffscreenCanvas, resolutionFraction: Number}[]} message
    */
-  draw(offscreenCanvas, imageBitmap, id, maxResolutionFraction) {
-    this.canvases.set(id, offscreenCanvas);
-    setOffscreenCanvasDimensions(offscreenCanvas, imageBitmap, maxResolutionFraction);
-    drawOffscreenCanvas(offscreenCanvas, imageBitmap);
+  async upscaleMultipleAnimatedCanvases(message) {
+    const requests = message.map(r => new RenderRequest(r));
+
+    requests.forEach((request) => {
+      this.addCanvas(request);
+    });
+
+    for (const request of requests) {
+      ImageFetcher.fetchImage(request)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((blob) => {
+          createImageBitmap(blob)
+            .then((imageBitmap) => {
+              this.upscaleCanvas(request, imageBitmap);
+            });
+        });
+      await sleep(50);
+    }
   }
 
   /**
-   * @param {OffscreenCanvas} offscreenCanvas
+   * @param {RenderRequest} request
    * @param {ImageBitmap} imageBitmap
-   * @param {Number} maxResolutionFraction
    */
-  setOffscreenCanvasDimensions(offscreenCanvas, imageBitmap, maxResolutionFraction) {
-    const newWidth = screenWidth / maxResolutionFraction;
+  upscaleCanvas(request, imageBitmap) {
+    if (this.onSearchPage || imageBitmap === undefined || !this.canvases.has(request.id)) {
+      return;
+    }
+    this.setCanvasDimensions(request, imageBitmap);
+    this.drawCanvas(request.id, imageBitmap);
+  }
+
+  /**
+   * @param {RenderRequest} request
+   * @param {ImageBitmap} imageBitmap
+   */
+  setCanvasDimensions(request, imageBitmap) {
+    const canvas = this.canvases.get(request.id);
+    const newWidth = this.screenWidth / request.resolutionFraction;
     const ratio = newWidth / imageBitmap.width;
     const newHeight = ratio * imageBitmap.height;
 
-    offscreenCanvas.width = newWidth;
-    offscreenCanvas.height = newHeight;
+    canvas.width = newWidth;
+    canvas.height = newHeight;
   }
 
   /**
-   * @param {OffscreenCanvas} offscreenCanvas
+   * @param {String} id
    * @param {ImageBitmap} imageBitmap
    */
-  drawOffscreenCanvas(offscreenCanvas, imageBitmap) {
-    const context = offscreenCanvas.getContext("2d");
-    const ratio = Math.min(offscreenCanvas.width / imageBitmap.width, offscreenCanvas.height / imageBitmap.height);
-    const centerShiftX = (offscreenCanvas.width - (imageBitmap.width * ratio)) / 2;
-    const centerShiftY = (offscreenCanvas.height - (imageBitmap.height * ratio)) / 2;
+  drawCanvas(id, imageBitmap) {
+    const canvas = this.canvases.get(id);
+    const context = canvas.getContext("2d");
+    const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
+    const centerShiftX = (canvas.width - (imageBitmap.width * ratio)) / 2;
+    const centerShiftY = (canvas.height - (imageBitmap.height * ratio)) / 2;
 
-    context.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+    context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(
       imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
       centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
     );
-    imageBitmap.close();
   }
 
-  deleteAllCanvases() {
-    for (const id of this.canvases.keys()) {
-      let offscreenCanvas = this.canvases.get(id);
-
-      offscreenCanvas.getContext("2d").clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-      offscreenCanvas = null;
-      this.canvases.set(id, offscreenCanvas);
-      this.canvases.delete(id);
+  clearAllCanvases() {
+    for (const [id, canvas] of this.canvases.entries()) {
+      this.clearCanvas(id, canvas);
     }
     this.canvases.clear();
-    this.OFFSCREEN_CANVASES = new Map();
   }
 
-  onmessage = (message) => {
-    message = message.data;
+  /**
+   * @param {String} id
+   * @param {OffscreenCanvas} canvas
+   */
+  clearCanvas(id, canvas) {
+    const context = canvas.getContext("2d");
 
-    switch (message.action) {
-      case "draw":
-        draw(message.offscreenCanvas, message.imageBitmap, message.id, message.maxResolutionFraction);
-        break;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = 0;
+    canvas.height = 0;
+    canvas = null;
+    this.canvases.set(id, canvas);
+    this.canvases.delete(id);
+  }
 
-      case "setScreenWidth":
-        screenWidth = message.screenWidth;
-        break;
-
-      case "deleteAll":
-        deleteAllCanvases();
-        break;
-
-      default:
-        break;
+  /**
+   * @param {RenderRequest} request
+   */
+  addCanvas(request) {
+    if (request.canvas === undefined) {
+      return;
     }
-  };
 
+    if (!this.canvases.has(request.id)) {
+      this.canvases.set(request.id, request.canvas);
+    }
+  }
+
+  /**
+   * @param {BatchRenderRequest} batchRequest
+   */
+  addCanvases(batchRequest) {
+    batchRequest.allRenderRequests.forEach((request) => {
+      this.addCanvas(request);
+    });
+  }
 }
 
 class ImageRenderer {
@@ -545,6 +609,10 @@ class ImageRenderer {
   onMobileDevice;
   /**
    * @type {Boolean}
+  */
+  onSearchPage;
+  /**
+   * @type {Boolean}
    */
   usingLandscapeOrientation;
 
@@ -559,19 +627,19 @@ class ImageRenderer {
   }
 
   /**
-   * @param {OffscreenCanvas} canvas
-   * @param {Number} screenWidth
-   * @param {Boolean} onMobileDevice
+   *
+   * @param {{canvas: OffscreenCanvas, screenWidth: Number, onMobileDevice: Boolean, onSearchPage: Boolean }} message
    */
-  constructor(canvas, screenWidth, onMobileDevice) {
-    this.canvas = canvas;
+  constructor(message) {
+    this.canvas = message.canvas;
     this.context = this.canvas.getContext("2d");
-    this.thumbUpscaler = new ThumbUpscaler(screenWidth);
+    this.thumbUpscaler = new ThumbUpscaler(message.screenWidth, message.onSearchPage);
     this.renders = new Map();
     this.allRenderRequests = new Map();
     this.lastRequestedDrawId = "";
     this.currentlyDrawnId = "";
-    this.onMobileDevice = onMobileDevice;
+    this.onMobileDevice = message.onMobileDevice;
+    this.onSearchPage = message.onSearchPage;
     this.usingLandscapeOrientation = true;
   }
 
@@ -579,7 +647,7 @@ class ImageRenderer {
    * @param {BatchRenderRequest} batchRenderRequest
    */
   async renderMultipleImages(batchRenderRequest) {
-    const batchRequestId = batchRenderRequest.requestId;
+    const batchRequestId = batchRenderRequest.id;
 
     batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
       .filter(request => !this.renderIsFinished(request.id));
@@ -627,7 +695,10 @@ class ImageRenderer {
       if (error.name === "AbortError") {
         this.deleteRender(request.id);
       } else {
-        console.error(error);
+        console.error({
+          error,
+          request
+        });
       }
       return;
     }
@@ -646,6 +717,7 @@ class ImageRenderer {
       imageBitmap,
       request
     });
+    this.thumbUpscaler.upscaleCanvas(request, imageBitmap);
     postMessage({
       action: "renderCompleted",
       extension: request.extension,
@@ -667,18 +739,18 @@ class ImageRenderer {
   }
 
   /**
-   * @param {String} requestId
+   * @param {String} id
    * @returns {Boolean}
    */
-  isApartOfOutdatedBatchRequest(requestId) {
-    if (requestId === undefined || requestId === null) {
+  isApartOfOutdatedBatchRequest(id) {
+    if (id === undefined || id === null) {
       return false;
     }
 
     if (!this.hasBatchRenderRequest) {
       return true;
     }
-    return this.batchRenderRequest.renderRequestIds.has(requestId);
+    return this.batchRenderRequest.renderRequestIds.has(id);
   }
 
   /**
@@ -733,11 +805,14 @@ class ImageRenderer {
   }
 
   deleteAllRenders() {
+    this.thumbUpscaler.clearAllCanvases();
     this.abortAllFetchRequests();
 
     for (const id of this.renders.keys()) {
       this.deleteRender(id, true);
     }
+    this.batchRenderRequest = undefined;
+    this.renderRequest = undefined;
     this.renders.clear();
   }
 
@@ -821,11 +896,13 @@ class ImageRenderer {
       case "render":
         this.renderRequest = new RenderRequest(message);
         this.lastRequestedDrawId = message.id;
+        this.thumbUpscaler.addCanvas(this.renderRequest);
         this.renderImage(this.renderRequest);
         break;
 
       case "renderMultiple":
         batchRenderRequest = new BatchRenderRequest(message);
+        this.thumbUpscaler.addCanvases(batchRenderRequest);
         this.abortOutdatedFetchRequests(batchRenderRequest);
         this.removeDuplicateRenderRequests(batchRenderRequest);
         this.deleteRendersNotInNewRequest(batchRenderRequest);
@@ -837,13 +914,17 @@ class ImageRenderer {
         this.deleteAllRenders();
         break;
 
-      case "drawFullscreenCanvas":
+      case "drawMainCanvas":
         this.lastRequestedDrawId = message.id;
         this.drawCanvas(message.id);
         break;
 
-      case "clearFullscreenCanvas":
+      case "clearMainCanvas":
         this.clearCanvas();
+        break;
+
+      case "upscaleAnimatedThumbs":
+        this.thumbUpscaler.upscaleMultipleAnimatedCanvases(message.upscaleRequests);
         break;
 
       default:
@@ -864,7 +945,7 @@ onmessage = (message) => {
     case "initialize":
       BatchRenderRequest.settings.megabyteLimit = message.megabyteLimit;
       BatchRenderRequest.settings.batchSizeMinimum = message.minimumImagesToRender;
-      imageRenderer = new ImageRenderer(message.canvas, message.screenWidth, message.onMobileDevice);
+      imageRenderer = new ImageRenderer(message);
       break;
 
     case "findExtension":
@@ -941,25 +1022,26 @@ onmessage = (message) => {
     }
   };
   static settings = {
-    maxNumberOfImagesToRenderInBackground: 50,
-    maxNumberOfImagesToRenderAround: 25,
+    maxNumberOfImagesToRenderInBackground: 100,
+    maxNumberOfImagesToRenderAround: 50,
+    maxNumberOfPreloadedVideos: 8,
     traversalLookahead: 8,
     megabyteLimit: 1000,
     minimumImagesToRender: 10,
     imageFetchDelay: 250,
     imageFetchDelayWhenExtensionKnown: 25,
-    upscaledThumbResolutionFraction: 3.5,
-    upscaledAnimatedThumbResolutionFraction: 5.5,
+    upscaledThumbResolutionFraction: 4,
+    upscaledAnimatedThumbResolutionFraction: 6,
     extensionsFoundBeforeSavingCount: 5,
     animatedThumbsToUpscaleRange: 20,
-    animatedThumbsToUpscaleDiscrete: 10,
-    debugEnabled: true
+    animatedThumbsToUpscaleDiscrete: 20,
+    debugEnabled: false
   };
 
   /**
    * @type {HTMLCanvasElement}
    */
-  fullscreenCanvas;
+  mainCanvas;
   /**
    * @type {HTMLCanvasElement}
    */
@@ -993,14 +1075,6 @@ onmessage = (message) => {
    */
   imageRenderer;
   /**
-   * @type {Worker}
-   */
-  thumbUpscaler;
-  /**
-   * @type {Map.<String, HTMLCanvasElement>}
-   */
-  upscaledThumbs;
-  /**
    * @type {Set.<String>}
   */
   startedRenders;
@@ -1008,6 +1082,14 @@ onmessage = (message) => {
    * @type {Set.<String>}
   */
   completedRenders;
+  /**
+   * @type {Map.<String, HTMLCanvasElement>}
+  */
+  transferredCanvases;
+  /**
+   * @type {Map.<String, String | null>}
+  */
+  preloadedVideoURLs;
   /**
    * @type {HTMLElement[]}
    */
@@ -1070,7 +1152,7 @@ onmessage = (message) => {
       return;
     }
     this.initializeFields();
-    this.setFullscreenCanvasResolution();
+    this.setMainCanvasResolution();
     this.createWebWorkers();
     this.createVideoBackground();
     this.addEventListeners();
@@ -1081,14 +1163,15 @@ onmessage = (message) => {
   }
 
   initializeFields() {
-    this.fullscreenCanvas = document.createElement("canvas");
+    this.mainCanvas = document.createElement("canvas");
     this.lowResolutionCanvas = document.createElement("canvas");
     this.lowResolutionContext = this.lowResolutionCanvas.getContext("2d");
     this.thumbUnderCursor = null;
     this.lastEnteredThumb = null;
-    this.upscaledThumbs = new Map();
     this.startedRenders = new Set();
     this.completedRenders = new Set();
+    this.transferredCanvases = new Map();
+    this.preloadedVideoURLs = new Map();
     this.visibleThumbs = [];
     this.imageExtensions = {};
     this.recentlyDiscoveredImageExtensionCount = 0;
@@ -1104,16 +1187,16 @@ onmessage = (message) => {
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
   }
 
-  setFullscreenCanvasResolution() {
+  setMainCanvasResolution() {
     const resolution = onSearchPage() ? Gallery.resolutions.search : Gallery.resolutions.favorites;
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
-    this.fullscreenCanvas.width = dimensions[0];
-    this.fullscreenCanvas.height = dimensions[1];
+    this.mainCanvas.width = dimensions[0];
+    this.mainCanvas.height = dimensions[1];
   }
 
   createWebWorkers() {
-    const offscreenCanvas = this.fullscreenCanvas.transferControlToOffscreen();
+    const offscreenCanvas = this.mainCanvas.transferControlToOffscreen();
 
     this.imageRenderer = new Worker(getWorkerURL(Gallery.webWorkers.renderer));
     this.imageRenderer.postMessage({
@@ -1122,17 +1205,13 @@ onmessage = (message) => {
       onMobileDevice: onMobileDevice(),
       screenWidth: window.screen.width,
       megabyteLimit: Gallery.settings.megabyteLimit,
-      minimumImagesToRender: Gallery.settings.minimumImagesToRender
+      minimumImagesToRender: Gallery.settings.minimumImagesToRender,
+      onSearchPage: onSearchPage()
     }, [offscreenCanvas]);
   }
 
   createVideoBackground() {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    context.fillStyle = "black";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    canvas.toBlob((blob) => {
+    document.createElement("canvas").toBlob((blob) => {
       this.videoContainer.setAttribute("poster", URL.createObjectURL(blob));
     });
   }
@@ -1210,6 +1289,9 @@ onmessage = (message) => {
     });
     document.addEventListener("wheel", (event) => {
       if (this.inGallery) {
+        if (event.ctrlKey) {
+          return;
+        }
         const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
         const direction = delta > 0 ? Gallery.directions.left : Gallery.directions.right;
 
@@ -1281,12 +1363,18 @@ onmessage = (message) => {
     window.addEventListener("newFavoritesFetchedOnReload", (event) => {
       this.initializeThumbsForHovering.bind(this)(event.detail);
       this.enumerateVisibleThumbs();
+      /**
+       * @type {HTMLElement[]}
+      */
+      const thumbs = event.detail.reverse();
 
-      if (event.detail.length > 0) {
-        const thumb = event.detail[0];
+      if (thumbs.length > 0) {
+        const thumb = thumbs[0];
 
         this.upscaleAnimatedVisibleThumbsAround(thumb);
-        this.renderImagesAround(thumb);
+        this.renderImages(thumbs
+          .filter(t => isImage(t))
+          .slice(0, 20));
       }
     });
     window.addEventListener("startedFetchingFavorites", () => {
@@ -1315,10 +1403,9 @@ onmessage = (message) => {
     });
     window.addEventListener("changedPage", () => {
       this.imageRenderer.postMessage({
-        action: "clearFullscreenCanvas"
+        action: "clearMainCanvas"
       });
       this.toggleOriginalContentVisibility(false);
-      this.deleteAllUpscaledCanvases();
       this.deleteAllRenders();
 
       if (Gallery.settings.debugEnabled) {
@@ -1355,24 +1442,13 @@ onmessage = (message) => {
           break;
 
         case "extensionFound":
-          this.assignExtension(message.id, message.extension);
+          // this.assignExtension(message.id, message.extension);
+          break;
 
         default:
           break;
       }
     };
-
-    if (this.thumbUpscaler !== undefined) {
-      this.thumbUpscaler.onmessage = (message) => {
-        message = message.data;
-
-        switch (message.action) {
-          default:
-
-            break;
-        }
-      };
-    }
   }
 
   addMobileEventListeners() {
@@ -1509,14 +1585,14 @@ onmessage = (message) => {
     const originalContentContainer = document.getElementById("original-content-container");
 
     originalContentContainer.insertBefore(this.lowResolutionCanvas, originalContentContainer.firstChild);
-    originalContentContainer.insertBefore(this.fullscreenCanvas, originalContentContainer.firstChild);
+    originalContentContainer.insertBefore(this.mainCanvas, originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");
     this.videoContainer = document.getElementById("original-video-container");
     this.gifContainer = document.getElementById("original-gif-container");
-    this.fullscreenCanvas.id = "fullscreen-canvas";
+    this.mainCanvas.id = "main-canvas";
     this.lowResolutionCanvas.id = "low-resolution-canvas";
-    this.lowResolutionCanvas.width = this.fullscreenCanvas.width;
-    this.lowResolutionCanvas.height = this.fullscreenCanvas.height;
+    this.lowResolutionCanvas.width = this.mainCanvas.width;
+    this.lowResolutionCanvas.height = this.mainCanvas.height;
     this.toggleOriginalContentVisibility(false);
   }
 
@@ -1545,7 +1621,7 @@ onmessage = (message) => {
     }
     const animatedThumbsToUpscale = Array.from(getAllVisibleThumbs())
       .slice(0, Gallery.settings.animatedThumbsToUpscaleDiscrete)
-      .filter(thumb => !isImage(thumb) && !this.isUpscaled(thumb));
+      .filter(thumb => !isImage(thumb));
 
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
 
@@ -1560,15 +1636,22 @@ onmessage = (message) => {
    * @param {String} requestType
    */
   renderImages(imagesToRender, requestType) {
-    this.imageRenderer.postMessage({
-      action: "renderMultiple",
-      requestId: this.currentBatchRenderRequestId,
-      renderRequests: imagesToRender.map(image => this.getRenderRequest(image)),
-      requestType
-    });
+    const renderRequests = imagesToRender.map(image => this.getRenderRequest(image));
+    const canvases = onSearchPage() ? [] : renderRequests
+      .filter(request => request.canvas !== undefined)
+      .map(request => request.canvas);
+
     imagesToRender.forEach((thumb) => {
       this.startedRenders.add(thumb.id);
+      this.transferredCanvases.set(thumb.id, this.getCanvasFromThumb(thumb));
     });
+    this.imageRenderer.postMessage({
+      action: "renderMultiple",
+      id: this.currentBatchRenderRequestId,
+      renderRequests,
+      requestType
+    }, canvases);
+
     this.currentBatchRenderRequestId += 1;
 
     if (this.currentBatchRenderRequestId >= 1000) {
@@ -1589,7 +1672,6 @@ onmessage = (message) => {
         thumb.classList.add("loaded");
       }
 
-      // this.upscaleThumbResolution(thumb, message.imageBitmap, Gallery.settings.upscaledThumbResolutionFraction);
       if (message.extension === "gif") {
         getImageFromThumb(thumb).setAttribute("gif", true);
         return;
@@ -1611,11 +1693,29 @@ onmessage = (message) => {
   }
 
   deleteAllRenders() {
+    this.startedRenders.clear();
+    this.completedRenders.clear();
+    this.deleteAllTransferredCanvases();
     this.imageRenderer.postMessage({
       action: "deleteAllRenders"
     });
-    this.startedRenders.clear();
-    this.completedRenders.clear();
+  }
+
+  deleteAllTransferredCanvases() {
+    for (const id of this.transferredCanvases.keys()) {
+      this.transferredCanvases.get(id).remove();
+      this.transferredCanvases.delete(id);
+    }
+    this.transferredCanvases.clear();
+    setTimeout(() => {
+    }, 1000);
+  }
+
+  deleteAllPreloadedVideos() {
+    for (const url of this.preloadedVideoURLs.values()) {
+      URL.revokeObjectURL(url);
+    }
+    this.preloadedVideoURLs.clear();
   }
 
   /**
@@ -1634,27 +1734,6 @@ onmessage = (message) => {
 
   /**
    * @param {HTMLElement} thumb
-   * @param {ImageBitmap} imageBitmap
-   * @param {Number} maxResolutionFraction
-   */
-  upscaleThumbResolution(thumb, imageBitmap, maxResolutionFraction) {
-    if (onSearchPage() || this.upscaledThumbs.has(thumb.id) || this.thumbUpscaler === undefined || onMobileDevice()) {
-      return;
-    }
-    const offscreenCanvas = this.getOffscreenCanvasFromThumb(thumb);
-    const message = {
-      action: "draw",
-      offscreenCanvas,
-      id: thumb.id,
-      imageBitmap,
-      maxResolutionFraction
-    };
-
-    // this.thumbUpscaler.postMessage(message, [offscreenCanvas]);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
    * @returns {HTMLCanvasElement}
    */
   getCanvasFromThumb(thumb) {
@@ -1665,36 +1744,22 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    * @returns {HTMLCanvasElement}
    */
-  getOffscreenCanvasFromThumb(thumb) {
-    let canvas = this.getCanvasFromThumb(thumb);
+  getCanvasFromThumbForced(thumb) {
+    let canvas = thumb.querySelector("canvas");
 
     if (canvas === null) {
       canvas = document.createElement("canvas");
       thumb.children[0].appendChild(canvas);
     }
-    this.upscaledThumbs.set(thumb.id, canvas);
-    return canvas.transferControlToOffscreen();
-  }
-
-  deleteAllUpscaledCanvases() {
-    // this.thumbUpscaler.postMessage({
-    //   action: "deleteAll"
-    // });
-
-    for (const id of this.upscaledThumbs.keys()) {
-      this.upscaledThumbs.get(id).remove();
-      this.upscaledThumbs.set(id, null);
-      this.upscaledThumbs.delete(id);
-    }
-    this.upscaledThumbs.clear();
+    return canvas;
   }
 
   /**
    * @param {HTMLElement} thumb
-   * @returns {Boolean}
+   * @returns {HTMLCanvasElement}
    */
-  isUpscaled(thumb) {
-    return this.upscaledThumbs.has(thumb.id);
+  getOffscreenCanvasFromThumb(thumb) {
+    return this.getCanvasFromThumbForced(thumb).transferControlToOffscreen();
   }
 
   hideCaptionsWhenShowingOriginalContent() {
@@ -1742,6 +1807,7 @@ onmessage = (message) => {
    * @param {HTMLElement[]} thumbs
    */
   async assignImageExtensionsInTheBackground(thumbs) {
+    await sleep(1000);
     const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(thumbs);
 
     while (idsWithUnknownExtensions.length > 0) {
@@ -1927,6 +1993,7 @@ onmessage = (message) => {
     setTimeout(() => {
       this.recentlyExitedGallery = false;
     }, 300);
+    this.deleteAllPreloadedVideos();
     this.inGallery = false;
   }
 
@@ -1951,6 +2018,7 @@ onmessage = (message) => {
     }
 
     this.renderInAdvanceWhileTraversingGallery(selectedThumb, direction);
+    this.preloadVideosAround(selectedThumb);
 
     if (!usingFirefox()) {
       scrollToThumb(selectedThumb.id, false);
@@ -2018,15 +2086,15 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {Boolean} clearFullscreenCanvas
+   * @param {Boolean} clearMainCanvas
    */
-  clearOriginalContentSources(clearFullscreenCanvas = false) {
-    this.fullscreenCanvas.style.visibility = "hidden";
+  clearOriginalContentSources(clearMainCanvas = false) {
+    this.mainCanvas.style.visibility = "hidden";
     this.lowResolutionCanvas.style.visibility = "hidden";
 
-    if (clearFullscreenCanvas) {
+    if (clearMainCanvas) {
       this.imageRenderer.postMessage({
-        action: "clearFullscreenCanvas"
+        action: "clearMainCanvas"
       });
     }
     this.videoContainer.src = "";
@@ -2051,7 +2119,7 @@ onmessage = (message) => {
 
     const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (_) => {
       return true;
-    }).filter(t => !isImage(t) && !this.isUpscaled(t));
+    }).filter(t => !isImage(t) && !this.transferredCanvases.has(t.id));
 
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
 
@@ -2077,7 +2145,7 @@ onmessage = (message) => {
     if (!this.showOriginalContentOnHover) {
       return;
     }
-    this.toggleFullscreenCanvas(false);
+    this.toggleMainCanvas(false);
     this.videoContainer.style.display = "block";
     this.playOriginalVideo(thumb);
 
@@ -2098,7 +2166,13 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   playOriginalVideo(thumb) {
-    this.videoContainer.src = this.getVideoSource(thumb);
+    const preloadedVideoURL = this.preloadedVideoURLs.get(thumb.id);
+
+    if (preloadedVideoURL !== undefined && preloadedVideoURL !== null) {
+      this.videoContainer.src = preloadedVideoURL;
+    } else {
+      this.videoContainer.src = this.getVideoSource(thumb);
+    }
     this.videoContainer.play().catch(() => { });
   }
 
@@ -2122,13 +2196,13 @@ onmessage = (message) => {
   showOriginalImage(thumb) {
     if (this.isCompletelyRendered(thumb)) {
       this.clearLowResolutionCanvas();
-      this.drawFullscreenCanvas(thumb);
+      this.drawMainCanvas(thumb);
     } else if (this.renderHasStarted(thumb)) {
       this.drawLowResolutionCanvas(thumb);
       this.imageRenderer.postMessage({
-        action: "clearFullscreenCanvas"
+        action: "clearMainCanvas"
       });
-      this.drawFullscreenCanvas(thumb);
+      this.drawMainCanvas(thumb);
     } else {
       this.renderOriginalImage(thumb);
 
@@ -2151,7 +2225,7 @@ onmessage = (message) => {
       return;
     }
     const amountToRender = Gallery.settings.maxNumberOfImagesToRenderAround;
-    const imageThumbsToRender = this.getAdjacentVisibleThumbs(initialThumb, amountToRender, (thumb) => {
+    const imageThumbsToRender = this.getAdjacentVisibleThumbsLooped(initialThumb, amountToRender, (thumb) => {
       return isImage(thumb);
     });
 
@@ -2159,6 +2233,55 @@ onmessage = (message) => {
       imageThumbsToRender.unshift(initialThumb);
     }
     this.renderImages(imageThumbsToRender, "adjacent");
+  }
+
+  /**
+   * @param {HTMLElement} initialThumb
+   */
+  preloadVideosAround(initialThumb) {
+    if (onSearchPage()) {
+      return;
+    }
+
+    if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
+      return;
+    }
+    const nearbyThumbs = this.getAdjacentVisibleThumbsLooped(
+      initialThumb,
+      Gallery.settings.maxNumberOfPreloadedVideos / 2,
+      () => {
+        return true;
+      }
+    );
+
+    nearbyThumbs.forEach((thumb) => {
+      this.preloadVideo(thumb);
+    });
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  preloadVideo(thumb) {
+    if (thumb === null || !isVideo(thumb) || this.preloadedVideoURLs.has(thumb.id)) {
+      return;
+    }
+    this.preloadedVideoURLs.set(thumb.id, null);
+    fetch(this.getVideoSource(thumb))
+      .then((response) => {
+        return response.blob();
+      }).then((blob) => {
+        this.preloadedVideoURLs.set(thumb.id, URL.createObjectURL(blob));
+      });
+
+    if (this.preloadedVideoURLs.size > Gallery.settings.maxNumberOfPreloadedVideos) {
+      const iterator = this.preloadedVideoURLs.entries().next();
+
+      if (!iterator.done) {
+        URL.revokeObjectURL(iterator.value[1]);
+        this.preloadedVideoURLs.delete(iterator.value[0]);
+      }
+    }
   }
 
   /**
@@ -2180,7 +2303,6 @@ onmessage = (message) => {
       } else {
         previousThumb = this.getAdjacentVisibleThumb(previousThumb, false);
       }
-
       traverseForward = this.getTraversalDirection(previousThumb, traverseForward, nextThumb);
       currentThumb = traverseForward ? nextThumb : previousThumb;
 
@@ -2194,16 +2316,47 @@ onmessage = (message) => {
   }
 
   /**
+   * @param {HTMLElement} initialThumb
+   * @param {Number} limit
+   * @param {Function} additionalQualifier
+   * @returns {HTMLElement[]}
+   */
+  getAdjacentVisibleThumbsLooped(initialThumb, limit, additionalQualifier) {
+    const adjacentVisibleThumbs = [];
+    const discoveredIds = new Set();
+    let currentThumb = initialThumb;
+    let previousThumb = initialThumb;
+    let nextThumb = initialThumb;
+    let traverseForward = true;
+
+    while (currentThumb !== null && adjacentVisibleThumbs.length < limit) {
+      if (traverseForward) {
+        nextThumb = this.getAdjacentVisibleThumbLooped(nextThumb, true);
+      } else {
+        previousThumb = this.getAdjacentVisibleThumbLooped(previousThumb, false);
+      }
+      traverseForward = !traverseForward;
+      currentThumb = traverseForward ? nextThumb : previousThumb;
+
+      if (discoveredIds.has(currentThumb.id)) {
+        break;
+      }
+      discoveredIds.add(currentThumb.id);
+
+      if (this.isVisible(currentThumb) && additionalQualifier(currentThumb)) {
+        adjacentVisibleThumbs.push(currentThumb);
+      }
+    }
+    return adjacentVisibleThumbs;
+  }
+
+  /**
    * @param {HTMLElement} previousThumb
    * @param {HTMLElement} traverseForward
    * @param {HTMLElement} nextThumb
    * @returns {Boolean}
    */
   getTraversalDirection(previousThumb, traverseForward, nextThumb) {
-    // if (this.inGallery) {
-    //   return this.movedForwardInGallery;
-    // }
-
     if (previousThumb === null) {
       traverseForward = true;
     } else if (nextThumb === null) {
@@ -2222,6 +2375,24 @@ onmessage = (message) => {
 
     while (adjacentThumb !== null && !this.isVisible(adjacentThumb)) {
       adjacentThumb = this.getAdjacentThumb(adjacentThumb, forward);
+    }
+    return adjacentThumb;
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @param {Boolean} forward
+   * @returns {HTMLElement}
+   */
+  getAdjacentVisibleThumbLooped(thumb, forward) {
+    let adjacentThumb = this.getAdjacentThumb(thumb, forward);
+
+    while (adjacentThumb !== null && !this.isVisible(adjacentThumb)) {
+      adjacentThumb = this.getAdjacentThumb(adjacentThumb, forward);
+    }
+
+    if (adjacentThumb === null) {
+      adjacentThumb = forward ? this.visibleThumbs[0] : this.visibleThumbs[this.visibleThumbs.length - 1];
     }
     return adjacentThumb;
   }
@@ -2261,18 +2432,36 @@ onmessage = (message) => {
 
   /**
    * @param {HTMLElement} thumb
-   * @returns {{imageURL: String, id: String, extension: String}}
+   * @returns {{
+   *  action: String,
+   *  imageURL: String,
+   *  id: String,
+   *  extension: String,
+   *  fetchDelay: Number,
+   *  thumbURL: String,
+   *  pixelCount: Number,
+   *  canvas: OffscreenCanvas
+   *  resolutionFraction: Number
+   * }}
    */
   getRenderRequest(thumb) {
-    return {
+    const request = {
       action: "render",
       imageURL: getOriginalImageURLFromThumb(thumb),
       id: thumb.id,
       extension: this.getImageExtension(thumb.id),
       fetchDelay: this.getBaseImageFetchDelay(thumb.id),
       thumbURL: getImageFromThumb(thumb).src.replace("us.rule", "rule"),
-      pixelCount: this.getPixelCount(thumb)
+      pixelCount: this.getPixelCount(thumb),
+      resolutionFraction: Gallery.settings.upscaledThumbResolutionFraction
     };
+
+    if (!onSearchPage()) {
+      if (!this.transferredCanvases.has(thumb.id)) {
+        request.canvas = this.getOffscreenCanvasFromThumb(thumb);
+      }
+    }
+    return request;
   }
 
   /**
@@ -2294,15 +2483,24 @@ onmessage = (message) => {
    */
   renderOriginalImage(thumb) {
     this.startedRenders.add(thumb.id);
-    this.imageRenderer.postMessage(this.getRenderRequest(thumb));
+    const request = this.getRenderRequest(thumb);
+
+    if (onSearchPage()) {
+      this.imageRenderer.postMessage(request);
+    } else if (this.transferredCanvases.has(thumb.id)) {
+      this.imageRenderer.postMessage(request);
+    } else {
+      this.transferredCanvases.set(thumb.id, this.getCanvasFromThumb(thumb));
+      this.imageRenderer.postMessage(request, [request.canvas]);
+    }
   }
 
   /**
    * @param {HTMLElement} thumb
    */
-  drawFullscreenCanvas(thumb) {
+  drawMainCanvas(thumb) {
     this.imageRenderer.postMessage({
-      action: "drawFullscreenCanvas",
+      action: "drawMainCanvas",
       id: thumb.id
     });
   }
@@ -2311,7 +2509,7 @@ onmessage = (message) => {
    * @param {Boolean} value
    */
   toggleOriginalContentVisibility(value) {
-    this.toggleFullscreenCanvas(value);
+    this.toggleMainCanvas(value);
     this.toggleOriginalGIF(value);
 
     if (!value) {
@@ -2377,12 +2575,12 @@ onmessage = (message) => {
   /**
    * @param {Boolean} value
    */
-  toggleFullscreenCanvas(value) {
+  toggleMainCanvas(value) {
     if (value === undefined) {
-      this.fullscreenCanvas.style.visibility = this.fullscreenCanvas.style.visibility === "visible" ? "hidden" : "visible";
-      this.lowResolutionCanvas.style.visibility = this.fullscreenCanvas.style.visibility === "visible" ? "hidden" : "visible";
+      this.mainCanvas.style.visibility = this.mainCanvas.style.visibility === "visible" ? "hidden" : "visible";
+      this.lowResolutionCanvas.style.visibility = this.mainCanvas.style.visibility === "visible" ? "hidden" : "visible";
     } else {
-      this.fullscreenCanvas.style.visibility = value ? "visible" : "hidden";
+      this.mainCanvas.style.visibility = value ? "visible" : "hidden";
       this.lowResolutionCanvas.style.visibility = value ? "visible" : "hidden";
     }
   }
@@ -2456,34 +2654,37 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {HTMLElement} animatedThumbs
+   * @param {HTMLElement[]} animatedThumbs
    */
-  async upscaleAnimatedThumbs(animatedThumbs) {
+  upscaleAnimatedThumbs(animatedThumbs) {
     if (onMobileDevice()) {
       return;
     }
+    const upscaleRequests = [];
 
     for (const thumb of animatedThumbs) {
-      if (this.isUpscaled(thumb)) {
+      if (this.transferredCanvases.has(thumb.id)) {
         continue;
       }
+      this.transferredCanvases.set(thumb.id, this.getCanvasFromThumbForced(thumb));
       const image = getImageFromThumb(thumb);
-      let newImage = new Image();
       let source = getOriginalImageURL(image.src);
 
       if (isGif(thumb)) {
         source = source.replace("jpg", "gif");
       }
-      newImage.src = source;
-      newImage.onload = () => {
-        createImageBitmap(newImage)
-          .then((imageBitmap) => {
-            this.upscaleThumbResolution(thumb, imageBitmap, Gallery.settings.upscaledAnimatedThumbResolutionFraction);
-            newImage = null;
-          });
-      };
-      await sleep(Gallery.settings.imageFetchDelay);
+      upscaleRequests.push({
+        id: thumb.id,
+        imageURL: source,
+        canvas: this.getOffscreenCanvasFromThumb(thumb),
+        resolutionFraction: Gallery.settings.upscaledAnimatedThumbResolutionFraction
+      });
     }
+
+    this.imageRenderer.postMessage({
+      action: "upscaleAnimatedThumbs",
+      upscaleRequests
+    }, upscaleRequests.map(request => request.canvas));
   }
 
   /**
@@ -2543,7 +2744,7 @@ onmessage = (message) => {
    */
   upscaleAnimatedVisibleThumbsAround(thumb) {
     const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (t) => {
-      return !isImage(t) && !this.isUpscaled(t);
+      return !isImage(t) && !this.transferredCanvases.has(t.id);
     });
 
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
@@ -2555,8 +2756,7 @@ onmessage = (message) => {
    */
   getIdsWithUnknownExtensions(thumbs) {
     return thumbs
-      .filter(thumb => isImage(thumb))
-      .filter(thumb => !this.extensionIsKnown(thumb.id))
+      .filter(thumb => isImage(thumb) && !this.extensionIsKnown(thumb.id))
       .map(thumb => thumb.id);
   }
 
@@ -2564,6 +2764,9 @@ onmessage = (message) => {
    * @param {String} id
    */
   drawLowResolutionCanvas(thumb) {
+    if (onSearchPage()) {
+      return;
+    }
     const image = getImageFromThumb(thumb);
 
     if (!imageIsLoaded(image)) {

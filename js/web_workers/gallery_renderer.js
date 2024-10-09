@@ -45,6 +45,14 @@ class RenderRequest {
   */
   pixelCount;
   /**
+   * @type {OffscreenCanvas}
+  */
+  canvas;
+  /**
+   * @type {Number}
+  */
+  resolutionFraction;
+  /**
    * @type {AbortController}
   */
   abortController;
@@ -54,7 +62,7 @@ class RenderRequest {
   alreadyStarted;
 
   /**
-  * @param {{id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number}} request
+  * @param {{id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number, canvas: OffscreenCanvas, resolutionFraction: Number}} request
   */
   constructor(request) {
     this.id = request.id;
@@ -63,6 +71,8 @@ class RenderRequest {
     this.thumbURL = request.thumbURL;
     this.fetchDelay = request.fetchDelay;
     this.pixelCount = request.pixelCount;
+    this.canvas = request.canvas;
+    this.resolutionFraction = request.resolutionFraction;
     this.abortController = new AbortController();
     this.alreadyStarted = false;
   }
@@ -77,7 +87,7 @@ class BatchRenderRequest {
   /**
    * @type {String}
   */
-  requestId;
+  id;
   /**
    * @type {String}
   */
@@ -86,6 +96,10 @@ class BatchRenderRequest {
    * @type {RenderRequest[]}
   */
   renderRequests;
+  /**
+   * @type {RenderRequest[]}
+  */
+  allRenderRequests;
 
   get renderRequestIds() {
     return new Set(this.renderRequests.map(request => request.id));
@@ -93,15 +107,16 @@ class BatchRenderRequest {
 
   /**
    * @param {{
-   *  requestId: String,
+   *  id: String,
    *  requestType: String,
-   *  renderRequests: {requestId: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number}[]
+   *  renderRequests: {id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number, canvas: OffscreenCanvas, resolutionFraction: Number}[]
    * }} batchRequest
    */
   constructor(batchRequest) {
-    this.requestId = batchRequest.requestId;
+    this.id = batchRequest.id;
     this.requestType = batchRequest.requestType;
     this.renderRequests = batchRequest.renderRequests.map(r => new RenderRequest(r));
+    this.allRenderRequests = this.renderRequests;
     this.truncateLargeRenderRequests();
   }
 
@@ -127,13 +142,12 @@ class BatchRenderRequest {
 
 class ImageFetcher {
   /**
-   * @type {Number}
+   * @type {Set.<String>}
   */
-  retryDelayIncrement = 100;
-  /**
-   * @type {Number}
-  */
-  retryDelay = 0;
+  static deletedIds = new Set();
+  static get deletedIdFetchDelay() {
+    return ImageFetcher.deletedIds.size * 250;
+  }
   /**
    * @param {RenderRequest} request
    */
@@ -171,8 +185,11 @@ class ImageFetcher {
    * @param {String} id
    * @returns {String}
    */
-  static getOriginalImageURLFromPostPage(id) {
+  static async getOriginalImageURLFromPostPage(id) {
     const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + id;
+
+    ImageFetcher.deletedIds.add(id);
+    await sleep(ImageFetcher.deletedIdFetchDelay);
     return fetch(postPageURL)
       .then((response) => {
         if (response.ok) {
@@ -181,19 +198,14 @@ class ImageFetcher {
         throw new Error(response.status + ": " + postPageURL);
       })
       .then((html) => {
+        ImageFetcher.deletedIds.delete(id);
         return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
-      }).catch(async(error) => {
+      }).catch((error) => {
         if (!error.message.includes("503")) {
           console.error(error);
           return "https://rule34.xxx/images/r34chibi.png";
         }
-        await sleep(ImageFetcher.retryDelay);
-        ImageFetcher.retryDelay += ImageFetcher.retryDelayIncrement;
-
-        if (ImageFetcher.retryDelay > ImageFetcher.retryDelayIncrement * 5) {
-          ImageFetcher.retryDelay = ImageFetcher.retryDelayIncrement;
-        }
-        return ImageFetcher.getOriginalImageURLFromPostPage(postPageURL);
+        return ImageFetcher.getOriginalImageURLFromPostPage(id);
       });
   }
 
@@ -212,11 +224,20 @@ class ImageFetcher {
 
   /**
    * @param {RenderRequest} request
+   * @returns {Promise}
   */
-  static async fetchImageBlob(request) {
-    const response = await fetch(request.imageURL, {
+  static fetchImage(request) {
+    return fetch(request.imageURL, {
       signal: request.abortController.signal
     });
+  }
+
+  /**
+   * @param {RenderRequest} request
+   * @returns {Blob}
+  */
+  static async fetchImageBlob(request) {
+    const response = await ImageFetcher.fetchImage(request);
     return response.blob();
   }
 
@@ -246,89 +267,132 @@ class ThumbUpscaler {
    * @type {Number}
   */
   screenWidth;
+  /**
+   * @type {Boolean}
+  */
+  onSearchPage;
 
-  constructor(screenWidth) {
+  /**
+   * @param {Number} screenWidth
+   * @param {Boolean} onSearchPage
+   */
+  constructor(screenWidth, onSearchPage) {
     this.screenWidth = screenWidth;
+    this.onSearchPage = onSearchPage;
   }
 
   /**
-   * @param {OffscreenCanvas} offscreenCanvas
-   * @param {ImageBitmap} imageBitmap
-   * @param {String} id
-   * @param {Number} maxResolutionFraction
+   * @param {{id: String, imageURL: String, canvas: OffscreenCanvas, resolutionFraction: Number}[]} message
    */
-  draw(offscreenCanvas, imageBitmap, id, maxResolutionFraction) {
-    this.canvases.set(id, offscreenCanvas);
-    setOffscreenCanvasDimensions(offscreenCanvas, imageBitmap, maxResolutionFraction);
-    drawOffscreenCanvas(offscreenCanvas, imageBitmap);
+  async upscaleMultipleAnimatedCanvases(message) {
+    const requests = message.map(r => new RenderRequest(r));
+
+    requests.forEach((request) => {
+      this.addCanvas(request);
+    });
+
+    for (const request of requests) {
+      ImageFetcher.fetchImage(request)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((blob) => {
+          createImageBitmap(blob)
+            .then((imageBitmap) => {
+              this.upscaleCanvas(request, imageBitmap);
+            });
+        });
+      await sleep(50);
+    }
   }
 
   /**
-   * @param {OffscreenCanvas} offscreenCanvas
+   * @param {RenderRequest} request
    * @param {ImageBitmap} imageBitmap
-   * @param {Number} maxResolutionFraction
    */
-  setOffscreenCanvasDimensions(offscreenCanvas, imageBitmap, maxResolutionFraction) {
-    const newWidth = screenWidth / maxResolutionFraction;
+  upscaleCanvas(request, imageBitmap) {
+    if (this.onSearchPage || imageBitmap === undefined || !this.canvases.has(request.id)) {
+      return;
+    }
+    this.setCanvasDimensions(request, imageBitmap);
+    this.drawCanvas(request.id, imageBitmap);
+  }
+
+  /**
+   * @param {RenderRequest} request
+   * @param {ImageBitmap} imageBitmap
+   */
+  setCanvasDimensions(request, imageBitmap) {
+    const canvas = this.canvases.get(request.id);
+    const newWidth = this.screenWidth / request.resolutionFraction;
     const ratio = newWidth / imageBitmap.width;
     const newHeight = ratio * imageBitmap.height;
 
-    offscreenCanvas.width = newWidth;
-    offscreenCanvas.height = newHeight;
+    canvas.width = newWidth;
+    canvas.height = newHeight;
   }
 
   /**
-   * @param {OffscreenCanvas} offscreenCanvas
+   * @param {String} id
    * @param {ImageBitmap} imageBitmap
    */
-  drawOffscreenCanvas(offscreenCanvas, imageBitmap) {
-    const context = offscreenCanvas.getContext("2d");
-    const ratio = Math.min(offscreenCanvas.width / imageBitmap.width, offscreenCanvas.height / imageBitmap.height);
-    const centerShiftX = (offscreenCanvas.width - (imageBitmap.width * ratio)) / 2;
-    const centerShiftY = (offscreenCanvas.height - (imageBitmap.height * ratio)) / 2;
+  drawCanvas(id, imageBitmap) {
+    const canvas = this.canvases.get(id);
+    const context = canvas.getContext("2d");
+    const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
+    const centerShiftX = (canvas.width - (imageBitmap.width * ratio)) / 2;
+    const centerShiftY = (canvas.height - (imageBitmap.height * ratio)) / 2;
 
-    context.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+    context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(
       imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
       centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
     );
-    imageBitmap.close();
   }
 
-  deleteAllCanvases() {
-    for (const id of this.canvases.keys()) {
-      let offscreenCanvas = this.canvases.get(id);
-
-      offscreenCanvas.getContext("2d").clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-      offscreenCanvas = null;
-      this.canvases.set(id, offscreenCanvas);
-      this.canvases.delete(id);
+  clearAllCanvases() {
+    for (const [id, canvas] of this.canvases.entries()) {
+      this.clearCanvas(id, canvas);
     }
     this.canvases.clear();
-    this.OFFSCREEN_CANVASES = new Map();
   }
 
-  onmessage = (message) => {
-    message = message.data;
+  /**
+   * @param {String} id
+   * @param {OffscreenCanvas} canvas
+   */
+  clearCanvas(id, canvas) {
+    const context = canvas.getContext("2d");
 
-    switch (message.action) {
-      case "draw":
-        draw(message.offscreenCanvas, message.imageBitmap, message.id, message.maxResolutionFraction);
-        break;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = 0;
+    canvas.height = 0;
+    canvas = null;
+    this.canvases.set(id, canvas);
+    this.canvases.delete(id);
+  }
 
-      case "setScreenWidth":
-        screenWidth = message.screenWidth;
-        break;
-
-      case "deleteAll":
-        deleteAllCanvases();
-        break;
-
-      default:
-        break;
+  /**
+   * @param {RenderRequest} request
+   */
+  addCanvas(request) {
+    if (request.canvas === undefined) {
+      return;
     }
-  };
 
+    if (!this.canvases.has(request.id)) {
+      this.canvases.set(request.id, request.canvas);
+    }
+  }
+
+  /**
+   * @param {BatchRenderRequest} batchRequest
+   */
+  addCanvases(batchRequest) {
+    batchRequest.allRenderRequests.forEach((request) => {
+      this.addCanvas(request);
+    });
+  }
 }
 
 class ImageRenderer {
@@ -374,6 +438,10 @@ class ImageRenderer {
   onMobileDevice;
   /**
    * @type {Boolean}
+  */
+  onSearchPage;
+  /**
+   * @type {Boolean}
    */
   usingLandscapeOrientation;
 
@@ -388,19 +456,19 @@ class ImageRenderer {
   }
 
   /**
-   * @param {OffscreenCanvas} canvas
-   * @param {Number} screenWidth
-   * @param {Boolean} onMobileDevice
+   *
+   * @param {{canvas: OffscreenCanvas, screenWidth: Number, onMobileDevice: Boolean, onSearchPage: Boolean }} message
    */
-  constructor(canvas, screenWidth, onMobileDevice) {
-    this.canvas = canvas;
+  constructor(message) {
+    this.canvas = message.canvas;
     this.context = this.canvas.getContext("2d");
-    this.thumbUpscaler = new ThumbUpscaler(screenWidth);
+    this.thumbUpscaler = new ThumbUpscaler(message.screenWidth, message.onSearchPage);
     this.renders = new Map();
     this.allRenderRequests = new Map();
     this.lastRequestedDrawId = "";
     this.currentlyDrawnId = "";
-    this.onMobileDevice = onMobileDevice;
+    this.onMobileDevice = message.onMobileDevice;
+    this.onSearchPage = message.onSearchPage;
     this.usingLandscapeOrientation = true;
   }
 
@@ -408,7 +476,7 @@ class ImageRenderer {
    * @param {BatchRenderRequest} batchRenderRequest
    */
   async renderMultipleImages(batchRenderRequest) {
-    const batchRequestId = batchRenderRequest.requestId;
+    const batchRequestId = batchRenderRequest.id;
 
     batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
       .filter(request => !this.renderIsFinished(request.id));
@@ -456,7 +524,10 @@ class ImageRenderer {
       if (error.name === "AbortError") {
         this.deleteRender(request.id);
       } else {
-        console.error(error);
+        console.error({
+          error,
+          request
+        });
       }
       return;
     }
@@ -475,6 +546,7 @@ class ImageRenderer {
       imageBitmap,
       request
     });
+    this.thumbUpscaler.upscaleCanvas(request, imageBitmap);
     postMessage({
       action: "renderCompleted",
       extension: request.extension,
@@ -496,18 +568,18 @@ class ImageRenderer {
   }
 
   /**
-   * @param {String} requestId
+   * @param {String} id
    * @returns {Boolean}
    */
-  isApartOfOutdatedBatchRequest(requestId) {
-    if (requestId === undefined || requestId === null) {
+  isApartOfOutdatedBatchRequest(id) {
+    if (id === undefined || id === null) {
       return false;
     }
 
     if (!this.hasBatchRenderRequest) {
       return true;
     }
-    return this.batchRenderRequest.renderRequestIds.has(requestId);
+    return this.batchRenderRequest.renderRequestIds.has(id);
   }
 
   /**
@@ -562,11 +634,14 @@ class ImageRenderer {
   }
 
   deleteAllRenders() {
+    this.thumbUpscaler.clearAllCanvases();
     this.abortAllFetchRequests();
 
     for (const id of this.renders.keys()) {
       this.deleteRender(id, true);
     }
+    this.batchRenderRequest = undefined;
+    this.renderRequest = undefined;
     this.renders.clear();
   }
 
@@ -650,11 +725,13 @@ class ImageRenderer {
       case "render":
         this.renderRequest = new RenderRequest(message);
         this.lastRequestedDrawId = message.id;
+        this.thumbUpscaler.addCanvas(this.renderRequest);
         this.renderImage(this.renderRequest);
         break;
 
       case "renderMultiple":
         batchRenderRequest = new BatchRenderRequest(message);
+        this.thumbUpscaler.addCanvases(batchRenderRequest);
         this.abortOutdatedFetchRequests(batchRenderRequest);
         this.removeDuplicateRenderRequests(batchRenderRequest);
         this.deleteRendersNotInNewRequest(batchRenderRequest);
@@ -666,13 +743,17 @@ class ImageRenderer {
         this.deleteAllRenders();
         break;
 
-      case "drawFullscreenCanvas":
+      case "drawMainCanvas":
         this.lastRequestedDrawId = message.id;
         this.drawCanvas(message.id);
         break;
 
-      case "clearFullscreenCanvas":
+      case "clearMainCanvas":
         this.clearCanvas();
+        break;
+
+      case "upscaleAnimatedThumbs":
+        this.thumbUpscaler.upscaleMultipleAnimatedCanvases(message.upscaleRequests);
         break;
 
       default:
@@ -693,7 +774,7 @@ onmessage = (message) => {
     case "initialize":
       BatchRenderRequest.settings.megabyteLimit = message.megabyteLimit;
       BatchRenderRequest.settings.batchSizeMinimum = message.minimumImagesToRender;
-      imageRenderer = new ImageRenderer(message.canvas, message.screenWidth, message.onMobileDevice);
+      imageRenderer = new ImageRenderer(message);
       break;
 
     case "findExtension":

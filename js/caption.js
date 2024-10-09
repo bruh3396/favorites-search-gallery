@@ -54,10 +54,6 @@ const captionHTML = `<style>
     display: none;
   }
 
-  #caption-list {
-    /* padding-left: 5px; */
-  }
-
   .caption-tag {
     pointer-events: none;
     color: #6cb0ff;
