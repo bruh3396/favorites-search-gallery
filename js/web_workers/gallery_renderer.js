@@ -15,8 +15,8 @@ function sleep(milliseconds) {
 function estimateMegabyteSize(pixelCount) {
   const rgb = 3;
   const bytes = rgb * pixelCount;
-  const megabyteSize = 1048576;
-  return bytes / megabyteSize;
+  const numberOfBytesInMegabyte = 1048576;
+  return bytes / numberOfBytesInMegabyte;
 }
 
 class RenderRequest {
@@ -80,7 +80,7 @@ class RenderRequest {
 
 class BatchRenderRequest {
   static settings = {
-    megabyteLimit: 1000,
+    megabyteMemoryLimit: 1000,
     batchSizeMinimum: 10
   };
 
@@ -117,15 +117,15 @@ class BatchRenderRequest {
     this.requestType = batchRequest.requestType;
     this.renderRequests = batchRequest.renderRequests.map(r => new RenderRequest(r));
     this.allRenderRequests = this.renderRequests;
-    this.truncateLargeRenderRequests();
+    this.truncateRenderRequestsExceedingMemoryLimit();
   }
 
-  truncateLargeRenderRequests() {
+  truncateRenderRequestsExceedingMemoryLimit() {
     const truncatedRequest = [];
     let currentMegabyteSize = 0;
 
     for (const request of this.renderRequests) {
-      if (currentMegabyteSize < BatchRenderRequest.settings.megabyteLimit || truncatedRequest.length < BatchRenderRequest.settings.batchSizeMinimum) {
+      if (currentMegabyteSize < BatchRenderRequest.settings.megabyteMemoryLimit || truncatedRequest.length < BatchRenderRequest.settings.batchSizeMinimum) {
         truncatedRequest.push(request);
         currentMegabyteSize += estimateMegabyteSize(request.pixelCount);
       } else {
@@ -144,9 +144,9 @@ class ImageFetcher {
   /**
    * @type {Set.<String>}
   */
-  static deletedIds = new Set();
-  static get deletedIdFetchDelay() {
-    return ImageFetcher.deletedIds.size * 250;
+  static idsToFetchFromPostPages = new Set();
+  static get postPageFetchDelay() {
+    return ImageFetcher.idsToFetchFromPostPages.size * 250;
   }
   /**
    * @param {RenderRequest} request
@@ -188,8 +188,8 @@ class ImageFetcher {
   static async getOriginalImageURLFromPostPage(id) {
     const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + id;
 
-    ImageFetcher.deletedIds.add(id);
-    await sleep(ImageFetcher.deletedIdFetchDelay);
+    ImageFetcher.idsToFetchFromPostPages.add(id);
+    await sleep(ImageFetcher.postPageFetchDelay);
     return fetch(postPageURL)
       .then((response) => {
         if (response.ok) {
@@ -198,7 +198,7 @@ class ImageFetcher {
         throw new Error(response.status + ": " + postPageURL);
       })
       .then((html) => {
-        ImageFetcher.deletedIds.delete(id);
+        ImageFetcher.idsToFetchFromPostPages.delete(id);
         return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
       }).catch((error) => {
         if (!error.message.includes("503")) {
@@ -291,7 +291,7 @@ class ThumbUpscaler {
     const requests = message.map(r => new RenderRequest(r));
 
     requests.forEach((request) => {
-      this.addCanvas(request);
+      this.collectCanvas(request);
     });
 
     for (const request of requests) {
@@ -353,9 +353,9 @@ class ThumbUpscaler {
     );
   }
 
-  clearAllCanvases() {
+  deleteAllCanvases() {
     for (const [id, canvas] of this.canvases.entries()) {
-      this.clearCanvas(id, canvas);
+      this.deleteCanvas(id, canvas);
     }
     this.canvases.clear();
   }
@@ -364,7 +364,7 @@ class ThumbUpscaler {
    * @param {String} id
    * @param {OffscreenCanvas} canvas
    */
-  clearCanvas(id, canvas) {
+  deleteCanvas(id, canvas) {
     const context = canvas.getContext("2d");
 
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -378,7 +378,7 @@ class ThumbUpscaler {
   /**
    * @param {RenderRequest} request
    */
-  addCanvas(request) {
+  collectCanvas(request) {
     if (request.canvas === undefined) {
       return;
     }
@@ -391,9 +391,9 @@ class ThumbUpscaler {
   /**
    * @param {BatchRenderRequest} batchRequest
    */
-  addCanvases(batchRequest) {
+  collectCanvases(batchRequest) {
     batchRequest.allRenderRequests.forEach((request) => {
-      this.addCanvas(request);
+      this.collectCanvas(request);
     });
   }
 }
@@ -617,19 +617,19 @@ class ImageRenderer {
   }
 
   resizeCanvas() {
-    if (!this.onMobileDevice) {
-      return;
-    }
-    const windowInLandscapeOrientation = window.innerWidth > window.innerHeight;
-    const usingIncorrectOrientation = windowInLandscapeOrientation !== this.usingLandscapeOrientation;
+    // if (!this.onMobileDevice) {
+    //   return;
+    // }
+    // const windowInLandscapeOrientation = window.innerWidth > window.innerHeight;
+    // const usingIncorrectOrientation = windowInLandscapeOrientation !== this.usingLandscapeOrientation;
 
-    if (usingIncorrectOrientation) {
-      const temp = this.canvas.width;
+    // if (usingIncorrectOrientation) {
+    //   const temp = this.canvas.width;
 
-      this.canvas.width = this.canvas.height;
-      this.canvas.height = temp;
-      this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
-    }
+    //   this.canvas.width = this.canvas.height;
+    //   this.canvas.height = temp;
+    //   this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
+    // }
   }
 
   clearCanvas() {
@@ -638,7 +638,7 @@ class ImageRenderer {
   }
 
   deleteAllRenders() {
-    this.thumbUpscaler.clearAllCanvases();
+    this.thumbUpscaler.deleteAllCanvases();
     this.abortAllFetchRequests();
 
     for (const id of this.renders.keys()) {
@@ -729,13 +729,13 @@ class ImageRenderer {
       case "render":
         this.renderRequest = new RenderRequest(message);
         this.lastRequestedDrawId = message.id;
-        this.thumbUpscaler.addCanvas(this.renderRequest);
+        this.thumbUpscaler.collectCanvas(this.renderRequest);
         this.renderImage(this.renderRequest);
         break;
 
       case "renderMultiple":
         batchRenderRequest = new BatchRenderRequest(message);
-        this.thumbUpscaler.addCanvases(batchRenderRequest);
+        this.thumbUpscaler.collectCanvases(batchRenderRequest);
         this.abortOutdatedFetchRequests(batchRenderRequest);
         this.removeDuplicateRenderRequests(batchRenderRequest);
         this.deleteRendersNotInNewRequest(batchRenderRequest);
@@ -776,7 +776,7 @@ onmessage = (message) => {
 
   switch (message.action) {
     case "initialize":
-      BatchRenderRequest.settings.megabyteLimit = message.megabyteLimit;
+      BatchRenderRequest.settings.megabyteMemoryLimit = message.megabyteLimit;
       BatchRenderRequest.settings.batchSizeMinimum = message.minimumImagesToRender;
       imageRenderer = new ImageRenderer(message);
       break;

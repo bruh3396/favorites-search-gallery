@@ -10,7 +10,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -859,7 +859,7 @@ onmessage = (message) => {
         if (refetching) {
           failedRequest.retries += 1;
         } else {
-          failedRequest = this.getFailedFetchRequest(response, pageNumber);
+          failedRequest = this.getFailedFetchRequest(favoritesPage, pageNumber);
         }
         this.failedFetchRequests.push(failedRequest);
         throw new Error(response.status);
@@ -926,9 +926,9 @@ onmessage = (message) => {
    */
   processFetchedThumbNodes(thumbNodes, searchResults) {
     this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(searchResults);
-    const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
+    const searchResultsWhileFetchingWithFiltersApplied = this.getResultsWithFiltersApplied(this.searchResultsWhileFetching);
 
-    this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
+    this.updateMatchCount(searchResultsWhileFetchingWithFiltersApplied.length);
     dispatchEvent(new CustomEvent("favoritesFetched", {
       detail: thumbNodes.map(thumbNode => thumbNode.root)
     }));
@@ -938,13 +938,13 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {String} response
+   * @param {String} url
    * @param {Number} pageNumber
    * @returns {{url: String, pageNumber: Number, retries: Number}}
    */
-  getFailedFetchRequest(response, pageNumber) {
+  getFailedFetchRequest(url, pageNumber) {
     return {
-      url: response.url,
+      url,
       pageNumber,
       retries: 0
     };
@@ -1225,11 +1225,11 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} thumbNodes
    */
   addFavoritesToContent(thumbNodes) {
-    thumbNodes = this.getResultsWithAllowedRatings(thumbNodes);
-    const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
+    thumbNodes = this.getResultsWithFiltersApplied(thumbNodes);
+    const searchResultsWhileFetchingWithFiltersApplied = this.getResultsWithFiltersApplied(this.searchResultsWhileFetching);
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
-    const pageCount = this.getPageCount(searchResultsWhileFetchingWithAllowedRatings.length);
+    const pageCount = this.getPageCount(searchResultsWhileFetchingWithFiltersApplied.length);
     const needsToCreateNewPage = pageCount > lastPageButtonNumber;
     const nextPageButton = document.getElementById("next-page-button");
     const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount &&
@@ -1237,7 +1237,7 @@ Tag modifications and saved searches will be preserved.
       nextPageButton.style.visibility !== "hidden";
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
-      this.updatePaginationUi(this.currentFavoritesPageNumber, searchResultsWhileFetchingWithAllowedRatings);
+      this.updatePaginationUi(this.currentFavoritesPageNumber, searchResultsWhileFetchingWithFiltersApplied);
     }
 
     const onLastPage = (pageCount === this.currentFavoritesPageNumber);
@@ -1304,7 +1304,7 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} searchResults
    */
   paginateSearchResults(searchResults) {
-    searchResults = this.getResultsWithAllowedRatings(searchResults);
+    searchResults = this.getResultsWithFiltersApplied(searchResults);
     this.updateMatchCount(searchResults.length);
     this.insertPaginationContainer();
     this.changeResultsPage(1, searchResults);
@@ -1741,10 +1741,18 @@ Tag modifications and saved searches will be preserved.
     return (thumbNode.metadata.rating & this.allowedRatings) > 0;
   }
 
-/**
- * @param {ThumbNode[]} searchResults
- * @returns {ThumbNode[]}
- */
+  /**
+   * @param {ThumbNode[]} searchResults
+   * @returns {ThumbNode[]}
+   */
+  getResultsWithFiltersApplied(searchResults) {
+    return this.getResultsWithAllowedRatings(searchResults);
+  }
+
+  /**
+   * @param {ThumbNode[]} searchResults
+   * @returns {ThumbNode[]}
+   */
   getResultsWithAllowedRatings(searchResults) {
     if (this.allowedRatings === 7) {
       return searchResults;

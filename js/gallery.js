@@ -99,6 +99,7 @@ const galleryDebugHTML = `
       left: 0;
       pointer-events: none;
       z-index: 1;
+      visibility: hidden;
     }
 
     .image {
@@ -138,24 +139,8 @@ class Gallery {
     right: "ArrowRight",
     left: "ArrowLeft"
   };
-  static traversalCooldown = {
-    timeout: null,
-    waitTime: 100,
-    skipCooldown: false,
-    get ready() {
-      if (this.skipCooldown) {
-        return true;
-      }
-
-      if (this.timeout === null) {
-        this.timeout = setTimeout(() => {
-          this.timeout = null;
-        }, this.waitTime);
-        return true;
-      }
-      return false;
-    }
-  };
+  static traversalCooldown = new Cooldown(100);
+  static renderOnPageChangeCooldown = new Cooldown(750, true);
   static preferences = {
     showOnHover: "showImagesWhenHovering",
     backgroundOpacity: "galleryBackgroundOpacity",
@@ -185,8 +170,8 @@ function sleep(milliseconds) {
 function estimateMegabyteSize(pixelCount) {
   const rgb = 3;
   const bytes = rgb * pixelCount;
-  const megabyteSize = 1048576;
-  return bytes / megabyteSize;
+  const numberOfBytesInMegabyte = 1048576;
+  return bytes / numberOfBytesInMegabyte;
 }
 
 class RenderRequest {
@@ -250,7 +235,7 @@ class RenderRequest {
 
 class BatchRenderRequest {
   static settings = {
-    megabyteLimit: 1000,
+    megabyteMemoryLimit: 1000,
     batchSizeMinimum: 10
   };
 
@@ -287,15 +272,15 @@ class BatchRenderRequest {
     this.requestType = batchRequest.requestType;
     this.renderRequests = batchRequest.renderRequests.map(r => new RenderRequest(r));
     this.allRenderRequests = this.renderRequests;
-    this.truncateLargeRenderRequests();
+    this.truncateRenderRequestsExceedingMemoryLimit();
   }
 
-  truncateLargeRenderRequests() {
+  truncateRenderRequestsExceedingMemoryLimit() {
     const truncatedRequest = [];
     let currentMegabyteSize = 0;
 
     for (const request of this.renderRequests) {
-      if (currentMegabyteSize < BatchRenderRequest.settings.megabyteLimit || truncatedRequest.length < BatchRenderRequest.settings.batchSizeMinimum) {
+      if (currentMegabyteSize < BatchRenderRequest.settings.megabyteMemoryLimit || truncatedRequest.length < BatchRenderRequest.settings.batchSizeMinimum) {
         truncatedRequest.push(request);
         currentMegabyteSize += estimateMegabyteSize(request.pixelCount);
       } else {
@@ -314,9 +299,9 @@ class ImageFetcher {
   /**
    * @type {Set.<String>}
   */
-  static deletedIds = new Set();
-  static get deletedIdFetchDelay() {
-    return ImageFetcher.deletedIds.size * 250;
+  static idsToFetchFromPostPages = new Set();
+  static get postPageFetchDelay() {
+    return ImageFetcher.idsToFetchFromPostPages.size * 250;
   }
   /**
    * @param {RenderRequest} request
@@ -358,8 +343,8 @@ class ImageFetcher {
   static async getOriginalImageURLFromPostPage(id) {
     const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + id;
 
-    ImageFetcher.deletedIds.add(id);
-    await sleep(ImageFetcher.deletedIdFetchDelay);
+    ImageFetcher.idsToFetchFromPostPages.add(id);
+    await sleep(ImageFetcher.postPageFetchDelay);
     return fetch(postPageURL)
       .then((response) => {
         if (response.ok) {
@@ -368,7 +353,7 @@ class ImageFetcher {
         throw new Error(response.status + ": " + postPageURL);
       })
       .then((html) => {
-        ImageFetcher.deletedIds.delete(id);
+        ImageFetcher.idsToFetchFromPostPages.delete(id);
         return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
       }).catch((error) => {
         if (!error.message.includes("503")) {
@@ -461,7 +446,7 @@ class ThumbUpscaler {
     const requests = message.map(r => new RenderRequest(r));
 
     requests.forEach((request) => {
-      this.addCanvas(request);
+      this.collectCanvas(request);
     });
 
     for (const request of requests) {
@@ -523,9 +508,9 @@ class ThumbUpscaler {
     );
   }
 
-  clearAllCanvases() {
+  deleteAllCanvases() {
     for (const [id, canvas] of this.canvases.entries()) {
-      this.clearCanvas(id, canvas);
+      this.deleteCanvas(id, canvas);
     }
     this.canvases.clear();
   }
@@ -534,7 +519,7 @@ class ThumbUpscaler {
    * @param {String} id
    * @param {OffscreenCanvas} canvas
    */
-  clearCanvas(id, canvas) {
+  deleteCanvas(id, canvas) {
     const context = canvas.getContext("2d");
 
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -548,7 +533,7 @@ class ThumbUpscaler {
   /**
    * @param {RenderRequest} request
    */
-  addCanvas(request) {
+  collectCanvas(request) {
     if (request.canvas === undefined) {
       return;
     }
@@ -561,9 +546,9 @@ class ThumbUpscaler {
   /**
    * @param {BatchRenderRequest} batchRequest
    */
-  addCanvases(batchRequest) {
+  collectCanvases(batchRequest) {
     batchRequest.allRenderRequests.forEach((request) => {
-      this.addCanvas(request);
+      this.collectCanvas(request);
     });
   }
 }
@@ -787,19 +772,19 @@ class ImageRenderer {
   }
 
   resizeCanvas() {
-    if (!this.onMobileDevice) {
-      return;
-    }
-    const windowInLandscapeOrientation = window.innerWidth > window.innerHeight;
-    const usingIncorrectOrientation = windowInLandscapeOrientation !== this.usingLandscapeOrientation;
+    // if (!this.onMobileDevice) {
+    //   return;
+    // }
+    // const windowInLandscapeOrientation = window.innerWidth > window.innerHeight;
+    // const usingIncorrectOrientation = windowInLandscapeOrientation !== this.usingLandscapeOrientation;
 
-    if (usingIncorrectOrientation) {
-      const temp = this.canvas.width;
+    // if (usingIncorrectOrientation) {
+    //   const temp = this.canvas.width;
 
-      this.canvas.width = this.canvas.height;
-      this.canvas.height = temp;
-      this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
-    }
+    //   this.canvas.width = this.canvas.height;
+    //   this.canvas.height = temp;
+    //   this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
+    // }
   }
 
   clearCanvas() {
@@ -808,7 +793,7 @@ class ImageRenderer {
   }
 
   deleteAllRenders() {
-    this.thumbUpscaler.clearAllCanvases();
+    this.thumbUpscaler.deleteAllCanvases();
     this.abortAllFetchRequests();
 
     for (const id of this.renders.keys()) {
@@ -899,13 +884,13 @@ class ImageRenderer {
       case "render":
         this.renderRequest = new RenderRequest(message);
         this.lastRequestedDrawId = message.id;
-        this.thumbUpscaler.addCanvas(this.renderRequest);
+        this.thumbUpscaler.collectCanvas(this.renderRequest);
         this.renderImage(this.renderRequest);
         break;
 
       case "renderMultiple":
         batchRenderRequest = new BatchRenderRequest(message);
-        this.thumbUpscaler.addCanvases(batchRenderRequest);
+        this.thumbUpscaler.collectCanvases(batchRenderRequest);
         this.abortOutdatedFetchRequests(batchRenderRequest);
         this.removeDuplicateRenderRequests(batchRenderRequest);
         this.deleteRendersNotInNewRequest(batchRenderRequest);
@@ -946,7 +931,7 @@ onmessage = (message) => {
 
   switch (message.action) {
     case "initialize":
-      BatchRenderRequest.settings.megabyteLimit = message.megabyteLimit;
+      BatchRenderRequest.settings.megabyteMemoryLimit = message.megabyteLimit;
       BatchRenderRequest.settings.batchSizeMinimum = message.minimumImagesToRender;
       imageRenderer = new ImageRenderer(message);
       break;
@@ -964,7 +949,7 @@ onmessage = (message) => {
 `
   };
   static resolutions = {
-    search: "7680x4320",
+    search: onMobileDevice() ? "7680x4320" : "3840x2160",
     favorites: "7680x4320"
   };
   static htmlAttributes = {
@@ -982,7 +967,7 @@ onmessage = (message) => {
     "jpeg": 2,
     "gif": 3
   };
-  static swipe = {
+  static swipeControls = {
     threshold: 60,
     touchStart: {
       x: 0,
@@ -1026,18 +1011,19 @@ onmessage = (message) => {
   };
   static settings = {
     maxNumberOfImagesToRenderInBackground: 100,
-    maxNumberOfImagesToRenderAround: 50,
+    maxNumberOfImagesToRenderAround: onMobileDevice() ? 2 : 50,
     maxNumberOfPreloadedVideos: 8,
     traversalLookahead: 8,
-    megabyteLimit: 1000,
-    minimumImagesToRender: 10,
+    megabyteLimit: onMobileDevice() ? 0 : 1000,
+    minimumImagesToRender: onMobileDevice() ? 3 : 10,
     imageFetchDelay: 250,
     imageFetchDelayWhenExtensionKnown: 25,
-    upscaledThumbResolutionFraction: 4,
-    upscaledAnimatedThumbResolutionFraction: 6,
+    upscaledThumbResolutionFraction: 3.5,
+    upscaledAnimatedThumbResolutionFraction: 8,
     extensionsFoundBeforeSavingCount: 5,
     animatedThumbsToUpscaleRange: 20,
     animatedThumbsToUpscaleDiscrete: 20,
+    renderAroundAggressively: true,
     debugEnabled: false
   };
 
@@ -1188,6 +1174,9 @@ onmessage = (message) => {
     this.finishedLoading = onSearchPage();
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
+    Gallery.renderOnPageChangeCooldown.onDebounceEnd = () => {
+      this.renderImagesInTheBackground();
+    };
   }
 
   setMainCanvasResolution() {
@@ -1374,7 +1363,7 @@ onmessage = (message) => {
       if (thumbs.length > 0) {
         const thumb = thumbs[0];
 
-        this.upscaleAnimatedVisibleThumbsAround(thumb);
+        this.upscaleAnimatedThumbsAround(thumb);
         this.renderImages(thumbs
           .filter(t => isImage(t))
           .slice(0, 20));
@@ -1388,7 +1377,7 @@ onmessage = (message) => {
         this.renderImagesInTheBackground();
 
         if (thumb !== null && !this.finishedLoading) {
-          this.upscaleAnimatedVisibleThumbsAround(thumb);
+          this.upscaleAnimatedThumbsAround(thumb);
         }
       }, 650);
     }, {
@@ -1398,7 +1387,7 @@ onmessage = (message) => {
       this.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
-      this.assignImageExtensionsInTheBackground(event.detail);
+      this.findImageExtensionsInTheBackground(event.detail);
 
       if (!this.favoritesWereFetched) {
         this.renderImagesInTheBackground();
@@ -1419,7 +1408,10 @@ onmessage = (message) => {
       }
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
-      this.renderImagesInTheBackground();
+
+      if (Gallery.renderOnPageChangeCooldown.ready) {
+        this.renderImagesInTheBackground();
+      }
     });
     window.addEventListener("shuffle", () => {
       this.enumerateVisibleThumbs();
@@ -1427,7 +1419,7 @@ onmessage = (message) => {
       this.renderImagesInTheBackground();
     });
     window.addEventListener("favoriteMetadataFetched", (event) => {
-      this.assignExtension(event.detail.id, event.detail.extension);
+      this.assignImageExtension(event.detail.id, event.detail.extension);
     });
   }
 
@@ -1445,7 +1437,7 @@ onmessage = (message) => {
           break;
 
         case "extensionFound":
-          this.assignExtension(message.id, message.extension);
+          this.assignImageExtension(message.id, message.extension);
           break;
 
         default:
@@ -1466,7 +1458,7 @@ onmessage = (message) => {
         return;
       }
       event.preventDefault();
-      Gallery.swipe.set(event, true);
+      Gallery.swipeControls.set(event, true);
     }, {
       passive: false
     });
@@ -1475,14 +1467,14 @@ onmessage = (message) => {
         return;
       }
       event.preventDefault();
-      Gallery.swipe.set(event, false);
+      Gallery.swipeControls.set(event, false);
 
-      if (Gallery.swipe.up) {
+      if (Gallery.swipeControls.up) {
         this.exitGallery();
         this.toggleAllVisibility(false);
-      } else if (Gallery.swipe.left) {
+      } else if (Gallery.swipeControls.left) {
         this.traverseGallery(Gallery.directions.right, false);
-      } else if (Gallery.swipe.right) {
+      } else if (Gallery.swipeControls.right) {
         this.traverseGallery(Gallery.directions.left, false);
       } else {
         this.exitGallery();
@@ -1644,10 +1636,6 @@ onmessage = (message) => {
       .filter(request => request.canvas !== undefined)
       .map(request => request.canvas);
 
-    imagesToRender.forEach((thumb) => {
-      this.startedRenders.add(thumb.id);
-      this.transferredCanvases.set(thumb.id, this.getCanvasFromThumb(thumb));
-    });
     this.imageRenderer.postMessage({
       action: "renderMultiple",
       id: this.currentBatchRenderRequestId,
@@ -1680,7 +1668,7 @@ onmessage = (message) => {
         return;
       }
     }
-    this.assignExtension(message.id, message.extension);
+    this.assignImageExtension(message.id, message.extension);
   }
 
   onRenderDeleted(message) {
@@ -1750,14 +1738,6 @@ onmessage = (message) => {
    * @returns {HTMLCanvasElement}
    */
   getCanvasFromThumb(thumb) {
-    return thumb.querySelector("canvas");
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {HTMLCanvasElement}
-   */
-  getCanvasFromThumbForced(thumb) {
     let canvas = thumb.querySelector("canvas");
 
     if (canvas === null) {
@@ -1772,7 +1752,10 @@ onmessage = (message) => {
    * @returns {HTMLCanvasElement}
    */
   getOffscreenCanvasFromThumb(thumb) {
-    return this.getCanvasFromThumbForced(thumb).transferControlToOffscreen();
+    const canvas = this.getCanvasFromThumb(thumb);
+
+    this.transferredCanvases.set(thumb.id, canvas);
+    return canvas.transferControlToOffscreen();
   }
 
   hideCaptionsWhenShowingOriginalContent() {
@@ -1811,7 +1794,7 @@ onmessage = (message) => {
           const id = post.getAttribute("id");
           const extension = getExtensionFromImageURL(originalImageURL);
 
-          this.assignExtension(id, extension);
+          this.assignImageExtension(id, extension);
         }
       });
   }
@@ -1819,7 +1802,7 @@ onmessage = (message) => {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  async assignImageExtensionsInTheBackground(thumbs) {
+  async findImageExtensionsInTheBackground(thumbs) {
     await sleep(1000);
     const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(thumbs);
 
@@ -1845,7 +1828,7 @@ onmessage = (message) => {
    * @param {String} id
    * @param {String} extension
    */
-  assignExtension(id, extension) {
+  assignImageExtension(id, extension) {
     if (this.imageExtensions[parseInt(id)] !== undefined) {
       return;
     }
@@ -2135,11 +2118,11 @@ onmessage = (message) => {
   showOriginalContent(thumb) {
     this.currentlySelectedThumbIndex = parseInt(thumb.getAttribute(Gallery.htmlAttributes.thumbIndex));
 
-    const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (_) => {
-      return true;
-    }).filter(t => !isImage(t) && !this.transferredCanvases.has(t.id));
+    this.upscaleAnimatedThumbsAroundDiscrete(thumb);
 
-    this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
+    if (!this.inGallery && Gallery.settings.renderAroundAggressively) {
+      this.renderImagesAround(thumb);
+    }
 
     if (isVideo(thumb)) {
       this.showOriginalVideo(thumb);
@@ -2224,7 +2207,7 @@ onmessage = (message) => {
     } else {
       this.renderOriginalImage(thumb);
 
-      if (!this.inGallery) {
+      if (!this.inGallery && !Gallery.settings.renderAroundAggressively) {
         this.renderImagesAround(thumb);
       }
     }
@@ -2450,6 +2433,14 @@ onmessage = (message) => {
 
   /**
    * @param {HTMLElement} thumb
+   * @returns {Boolean}
+   */
+  canvasIsTransferrable(thumb) {
+    return !onSearchPage() && !this.transferredCanvases.has(thumb.id);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
    * @returns {{
    *  action: String,
    *  imageURL: String,
@@ -2460,6 +2451,7 @@ onmessage = (message) => {
    *  pixelCount: Number,
    *  canvas: OffscreenCanvas
    *  resolutionFraction: Number
+   *  windowDimensions: {width: Number, height:Number}
    * }}
    */
   getRenderRequest(thumb) {
@@ -2474,10 +2466,17 @@ onmessage = (message) => {
       resolutionFraction: Gallery.settings.upscaledThumbResolutionFraction
     };
 
-    if (!onSearchPage()) {
-      if (!this.transferredCanvases.has(thumb.id)) {
-        request.canvas = this.getOffscreenCanvasFromThumb(thumb);
-      }
+    this.startedRenders.add(thumb.id);
+
+    if (this.canvasIsTransferrable(thumb)) {
+          request.canvas = this.getOffscreenCanvasFromThumb(thumb);
+    }
+
+    if (onMobileDevice()) {
+      request.windowDimensions = {
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
     }
     return request;
   }
@@ -2487,11 +2486,10 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getPixelCount(thumb) {
-    const defaultPixelCount = 2073600;
-
     if (onSearchPage()) {
       return 0;
     }
+    const defaultPixelCount = 2073600;
     const pixelCount = ThumbNode.getPixelCount(thumb.id);
     return pixelCount === 0 ? defaultPixelCount : pixelCount;
   }
@@ -2500,16 +2498,12 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   renderOriginalImage(thumb) {
-    this.startedRenders.add(thumb.id);
-    const request = this.getRenderRequest(thumb);
+    if (this.canvasIsTransferrable(thumb)) {
+      const request = this.getRenderRequest(thumb);
 
-    if (onSearchPage()) {
-      this.imageRenderer.postMessage(request);
-    } else if (this.transferredCanvases.has(thumb.id)) {
-      this.imageRenderer.postMessage(request);
-    } else {
-      this.transferredCanvases.set(thumb.id, this.getCanvasFromThumb(thumb));
       this.imageRenderer.postMessage(request, [request.canvas]);
+    } else {
+      this.imageRenderer.postMessage(this.getRenderRequest(thumb));
     }
   }
 
@@ -2645,33 +2639,6 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {HTMLElement} thumb
-   */
-  estimateImageSizeInMegabytes(thumb) {
-    const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
-    const pixelCount = thumbNode === undefined ? 0 : thumbNode.metadata.pixelCount;
-    const rgba = 4;
-    const megabyteSize = 10000000;
-    return (pixelCount * rgba) / megabyteSize;
-  }
-
-  /**
-   *
-   * @param {HTMLElement} thumb
-   */
-  getRateLimitedImageFetchDelay(thumb) {
-    const sizeInMegabytes = this.estimateImageSizeInMegabytes(thumb);
-    const megabytesPerSecond = 10;
-    const megabytesPerMilliSecond = megabytesPerSecond / 1000;
-    const delay = sizeInMegabytes / megabytesPerMilliSecond;
-
-    if (delay < 300) {
-      return 0;
-    }
-    return Math.min(1500, delay * 0.75);
-  }
-
-  /**
    * @param {HTMLElement[]} animatedThumbs
    */
   upscaleAnimatedThumbs(animatedThumbs) {
@@ -2681,19 +2648,17 @@ onmessage = (message) => {
     const upscaleRequests = [];
 
     for (const thumb of animatedThumbs) {
-      if (this.transferredCanvases.has(thumb.id)) {
+      if (!this.canvasIsTransferrable(thumb)) {
         continue;
       }
-      this.transferredCanvases.set(thumb.id, this.getCanvasFromThumbForced(thumb));
-      const image = getImageFromThumb(thumb);
-      let source = getOriginalImageURL(image.src);
+      let imageURL = getOriginalImageURL(getImageFromThumb(thumb).src);
 
       if (isGif(thumb)) {
-        source = source.replace("jpg", "gif");
+        imageURL = imageURL.replace("jpg", "gif");
       }
       upscaleRequests.push({
         id: thumb.id,
-        imageURL: source,
+        imageURL,
         canvas: this.getOffscreenCanvasFromThumb(thumb),
         resolutionFraction: Gallery.settings.upscaledAnimatedThumbResolutionFraction
       });
@@ -2723,7 +2688,7 @@ onmessage = (message) => {
    */
   renderInAdvanceWhileTraversingGallery(thumb, direction) {
     if (isImage(thumb) && !this.renderHasStarted(thumb)) {
-      this.upscaleAnimatedVisibleThumbsAround(thumb);
+      this.upscaleAnimatedThumbsAround(thumb);
       this.renderImagesAround(thumb);
       return;
     }
@@ -2751,7 +2716,7 @@ onmessage = (message) => {
     }
 
     if (!this.renderHasStarted(nextThumbToRender) && isImage(nextThumbToRender)) {
-      this.upscaleAnimatedVisibleThumbsAround(nextThumbToRender);
+      this.upscaleAnimatedThumbsAround(nextThumbToRender);
       // this.renderImagesAround(nextThumbToRender);
       this.renderImagesAround(thumb);
     }
@@ -2760,10 +2725,21 @@ onmessage = (message) => {
   /**
    * @param {HTMLElement} thumb
    */
-  upscaleAnimatedVisibleThumbsAround(thumb) {
-    const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (t) => {
+  upscaleAnimatedThumbsAround(thumb) {
+    const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
       return !isImage(t) && !this.transferredCanvases.has(t.id);
     });
+
+    this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  upscaleAnimatedThumbsAroundDiscrete(thumb) {
+    const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (_) => {
+      return true;
+    }).filter(t => !isImage(t) && !this.transferredCanvases.has(t.id));
 
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
   }

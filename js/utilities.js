@@ -1,3 +1,71 @@
+class Cooldown {
+  /**
+   * @type {Number}
+  */
+  timeout;
+  /**
+   * @type {Number}
+  */
+  waitTime;
+  /**
+   * @type {Boolean}
+  */
+  skipCooldown;
+  /**
+   * @type {Boolean}
+  */
+  debounce;
+  /**
+   * @type {Boolean}
+  */
+  debouncing;
+  /**
+   * @type {Function}
+  */
+  onDebounceEnd;
+
+  get ready() {
+    if (this.skipCooldown) {
+      return true;
+    }
+
+    if (this.timeout === null) {
+      this.startTimeout();
+      return true;
+    }
+
+    if (this.debounce) {
+      this.debouncing = true;
+      clearTimeout(this.timeout);
+      this.startTimeout();
+    }
+    return false;
+  }
+
+  /**
+   * @param {Number} waitTime
+   * @param {Boolean} debounce
+   */
+  constructor(waitTime, debounce = false) {
+    this.timeout = null;
+    this.waitTime = waitTime;
+    this.skipCooldown = false;
+    this.debounce = debounce;
+    this.debouncing = false;
+    this.onDebounceEnd = () => {};
+  }
+
+  startTimeout() {
+    this.timeout = setTimeout(() => {
+      if (this.debouncing) {
+        this.onDebounceEnd();
+        this.debouncing = false;
+      }
+      this.timeout = null;
+    }, this.waitTime);
+  }
+}
+
 const IDS_TO_REMOVE_ON_RELOAD_KEY = "recentlyRemovedIds";
 const TAG_BLACKLIST = getTagBlacklist();
 const CURSOR_POSITION = {
@@ -245,18 +313,18 @@ function getOriginalImageURL(thumbURL) {
     .replace("us.rule34", "rule34");
 }
 
-  /**
-   * @param {String} imageURL
-   * @returns {String}
-   */
-  function getExtensionFromImageURL(imageURL) {
-    try {
-      return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
+/**
+ * @param {String} imageURL
+ * @returns {String}
+ */
+function getExtensionFromImageURL(imageURL) {
+  try {
+    return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
 
-    } catch (error) {
-      return "jpg";
-    }
+  } catch (error) {
+    return "jpg";
   }
+}
 
 /**
  * @param {String} originalImageURL
@@ -320,66 +388,6 @@ function isImage(thumb) {
 }
 
 /**
- * @param {String} svgContent
- * @param {String} id
- * @param {Number} newWidth
- * @param {Number} newHeight
- * @param {String} position
- * @param {Number} duration
- */
-function showOverlayingIcon(svgContent, id, newWidth, newHeight, position = "center", duration = 500) {
-  const skip = true;
-
-  if (skip) {
-    return;
-  }
-  const svgDocument = new DOMParser().parseFromString(svgContent, "image/svg+xml");
-  const svgElement = svgDocument.documentElement;
-  const zoomLevel = getZoomLevel();
-
-  svgElement.setAttribute("width", Math.round(newWidth / zoomLevel));
-  svgElement.setAttribute("height", Math.round(newHeight / zoomLevel));
-
-  if (document.getElementById(id) !== null) {
-    return;
-  }
-  const svgOverlay = document.createElement("div");
-
-  svgOverlay.id = id;
-
-  switch (position) {
-    case "center":
-      svgOverlay.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;";
-      break;
-
-    case "bottom-left":
-      svgOverlay.style.cssText = "position: fixed; bottom: 0; left: 0; z-index: 9999;";
-      break;
-
-    case "bottom-right":
-      svgOverlay.style.cssText = "position: fixed; bottom: 0; right: 0; z-index: 9999;";
-      break;
-
-    case "top-left":
-      svgOverlay.style.cssText = "position: fixed; top: 0; left: 0; z-index: 9999;";
-      break;
-
-    case "top-right":
-      svgOverlay.style.cssText = "position: fixed; top: 0; right: 0; z-index: 9999;";
-      break;
-
-    default:
-      svgOverlay.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;";
-  }
-  svgOverlay.style.cssText += " pointer-events:none;";
-  svgOverlay.innerHTML = new XMLSerializer().serializeToString(svgElement);
-  // document.body.appendChild(svgOverlay);
-  setTimeout(() => {
-    svgOverlay.remove();
-  }, duration);
-}
-
-/**
  * @param {any[]} array
  */
 function shuffleArray(array) {
@@ -397,14 +405,6 @@ function shuffleArray(array) {
         array[maxIndex]
       ];
   }
-}
-
-/**
- * @returns {Number}
- */
-function getZoomLevel() {
-  const zoomLevel = window.outerWidth / window.innerWidth;
-  return zoomLevel;
 }
 
 /**
@@ -1118,6 +1118,14 @@ function mapToObject(map) {
 
 function objectToMap(object) {
   return new Map(Object.entries(object));
+}
+
+/**
+ * @param {String} string
+ * @returns {Boolean}
+ */
+function isNumber(string) {
+  return (/^\d+$/).test(string);
 }
 
 initializeUtilities();

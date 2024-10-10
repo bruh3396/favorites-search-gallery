@@ -120,6 +120,7 @@ class Caption {
          ${Caption.getCategoryHeaderHTML()}
      </ul>
  `;
+  static findCategoriesOnPageChangeCooldown = new Cooldown(1000, true);
 
    /**
    * @type {Object.<String, Number>}
@@ -197,6 +198,9 @@ class Caption {
     this.injectHTML();
     this.setVisibility(this.getVisibilityPreference());
     this.addEventListeners();
+    Caption.findCategoriesOnPageChangeCooldown.onDebounceEnd = () => {
+      this.findTagCategoriesOnPageChange();
+    };
   }
 
   create() {
@@ -431,12 +435,10 @@ class Caption {
       });
       window.addEventListener("changedPage", () => {
         this.addEventListenersToThumbs.bind(this)();
-        const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 100));
 
-        this.findTagCategories(tagNames, 3, () => {
-          this.saveTags();
-        });
-
+        if (Caption.findCategoriesOnPageChangeCooldown.ready) {
+          this.findTagCategoriesOnPageChange();
+        }
       });
       window.addEventListener("thumbUnderCursorOnLoad", (event) => {
         const showOnHoverCheckbox = document.getElementById("showOnHover");
@@ -646,6 +648,14 @@ class Caption {
     this.currentlyCorrectingProblematicTags = false;
   }
 
+  findTagCategoriesOnPageChange() {
+    const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 100));
+
+    this.findTagCategories(tagNames, 3, () => {
+      this.saveTags();
+    });
+  }
+
   /**
    * @param {String[]} tagNames
    * @param {Number} fetchDelay
@@ -699,7 +709,7 @@ class Caption {
       .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
       .join(" ")
       .split(" ")
-      .filter(tagName => Caption.tagCategoryAssociations[tagName] === undefined);
+      .filter(tagName => !isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
   }
 }
 
