@@ -45,7 +45,7 @@ class ThumbNode {
    */
   static extractRatingFromThumb(thumb) {
     const rating = (/'rating':'(\S)/).exec(thumb.nextSibling.textContent)[1];
-    return FavoriteMetadata.convertRatingToNumber(rating);
+    return FavoriteMetadata.encodeRating(rating);
   }
 
   /**

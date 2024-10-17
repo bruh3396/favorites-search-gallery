@@ -4,7 +4,12 @@ class FavoriteMetadata {
    * @type {FavoriteMetadata[]}
   */
   static fetchQueue = [];
-  static currentlyFetching = false;
+  /**
+   * @type {FavoriteMetadata[]}
+  */
+  static deletedPostFetchQueue = [];
+  static currentlyFetchingFromQueue = false;
+  static allFavoritesLoaded = false;
   static fetchDelay = {
     normal: 5,
     deleted: 300
@@ -13,34 +18,33 @@ class FavoriteMetadata {
 
   /**
    * @param {FavoriteMetadata} favoriteMetadata
-   * @param {Boolean} missingInDatabase
    */
-  static async fetchMissingMetadata(favoriteMetadata, missingInDatabase = false) {
+  static async fetchMissingMetadata(favoriteMetadata) {
     FavoriteMetadata.fetchQueue.push(favoriteMetadata);
 
-    if (FavoriteMetadata.currentlyFetching) {
+    if (FavoriteMetadata.currentlyFetchingFromQueue) {
       return;
     }
-    FavoriteMetadata.currentlyFetching = true;
+    FavoriteMetadata.currentlyFetchingFromQueue = true;
 
     while (FavoriteMetadata.fetchQueue.length > 0) {
       const metadata = this.fetchQueue.pop();
 
       if (metadata.postIsDeleted) {
-        metadata.populateMetadataFromPost(missingInDatabase);
+        metadata.populateMetadataFromPost();
       } else {
         metadata.populateMetadataFromAPI(true);
       }
       await sleep(metadata.fetchDelay);
     }
-    FavoriteMetadata.currentlyFetching = false;
+    FavoriteMetadata.currentlyFetchingFromQueue = false;
   }
 
   /**
    * @param {String} rating
    * @returns {Number}
    */
-  static convertRatingToNumber(rating) {
+  static encodeRating(rating) {
     return {
       "Explicit": 4,
       "E": 4,
@@ -52,6 +56,13 @@ class FavoriteMetadata {
       "S": 1,
       "s": 1
     }[rating] || 4;
+  }
+
+  static {
+    window.addEventListener("favoritesLoaded", () => {
+      FavoriteMetadata.allFavoritesLoaded = true;
+      FavoriteMetadata.deletedPostFetchQueue.forEach((element) => FavoriteMetadata.fetchMissingMetadata(element));
+    });
   }
   /**
    * @type {String}
@@ -188,7 +199,7 @@ class FavoriteMetadata {
         this.width = parseInt(metadata.getAttribute("width"));
         this.height = parseInt(metadata.getAttribute("height"));
         this.score = parseInt(metadata.getAttribute("score"));
-        this.rating = FavoriteMetadata.convertRatingToNumber(metadata.getAttribute("rating"));
+        this.rating = FavoriteMetadata.encodeRating(metadata.getAttribute("rating"));
         this.creationTimestamp = Date.parse(metadata.getAttribute("created_at"));
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
@@ -212,10 +223,7 @@ class FavoriteMetadata {
       .catch((error) => {
         if (error.cause === "DeletedMetadata") {
           this.postIsDeleted = true;
-
-          if (FavoritesLoader.finishedLoading) {
-            FavoriteMetadata.fetchMissingMetadata(this, true);
-          }
+          FavoriteMetadata.deletedPostFetchQueue.push(this);
         } else {
           console.error(error);
         }
@@ -235,10 +243,7 @@ class FavoriteMetadata {
     this.postIsDeleted = record.deleted;
   }
 
-  /**
-   * @param {Boolean} missingInDatabase
-   */
-  populateMetadataFromPost(missingInDatabase = false) {
+  populateMetadataFromPost() {
     fetch(this.postURL)
       .then((response) => {
         return response.text();
@@ -261,11 +266,11 @@ class FavoriteMetadata {
         this.width = parseInt(match[2]);
         this.height = parseInt(match[3]);
         this.score = parseInt(match[5]);
-        this.rating = FavoriteMetadata.convertRatingToNumber(match[4]);
+        this.rating = FavoriteMetadata.encodeRating(match[4]);
         this.creationTimestamp = Date.parse(match[1]);
-        this.lastChangedTimestamp = this.creationTimestamp;
+        this.lastChangedTimestamp = this.creationTimestamp / 1000;
 
-        if (missingInDatabase) {
+        if (FavoriteMetadata.allFavoritesLoaded) {
           dispatchEvent(new CustomEvent("missingMetadata", {
             detail: this.id
           }));
@@ -278,5 +283,63 @@ class FavoriteMetadata {
    */
   isEmpty() {
     return this.width === 0 && this.height === 0;
+  }
+
+  /**
+   * @param {{metric: String, operator: String, value: String, negated: Boolean}[]} filters
+   * @returns {Boolean}
+   */
+  satisfiesAllFilters(filters) {
+    for (const expression of filters) {
+      if (!this.satisfiesExpression(expression)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @param {{metric: String, operator: String, value: Number, negated: Boolean}} filter
+   * @returns {Boolean}
+   */
+  satisfiesExpression(filter) {
+    const metricMap = {
+      "id": this.id,
+      "width": this.width,
+      "height": this.height,
+      "score": this.score
+    };
+    const metricValue = metricMap[filter.metric] || 0;
+    const value = metricMap[filter.value] || parseInt(filter.value);
+    return this.evaluateExpression(metricValue, filter.operator, value, filter.negated);
+  }
+
+  /**
+   * @param {Number} metricValue
+   * @param {String} operator
+   * @param {Number} value
+   * @param {Number} negated
+   * @returns {Boolean}
+   */
+  evaluateExpression(metricValue, operator, value, negated) {
+    let result = true;
+
+    switch (operator) {
+      case ":":
+        result = metricValue === value;
+        break;
+
+      case ":<":
+        result = metricValue < value;
+        break;
+
+      case ":>":
+        result = metricValue > value;
+        break;
+
+      default:
+        break;
+    }
+    return negated ? !result : result;
   }
 }

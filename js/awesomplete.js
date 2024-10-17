@@ -12,12 +12,10 @@ function loadCustomTags() {
  * @param {String} tags
  */
 async function setCustomTags(tags) {
-
   for (const tag of removeExtraWhiteSpace(tags).split(" ")) {
     if (tag === "" || CUSTOM_TAGS.has(tag)) {
       continue;
     }
-
     const isAnOfficialTag = await isOfficialTag(tag);
 
     if (!isAnOfficialTag) {
@@ -29,16 +27,16 @@ async function setCustomTags(tags) {
 
 /**
  * @param {{label: String, value: String, type: String}[]} officialTags
- * @param String prefix
+ * @param {String} searchQuery
  * @returns {{label: String, value: String, type: String}[]}
  */
-function mergeOfficialTagsWithCustomTags(officialTags, prefix) {
+function mergeOfficialTagsWithCustomTags(officialTags, searchQuery) {
   const customTags = Array.from(CUSTOM_TAGS);
   const officialTagValues = new Set(officialTags.map(officialTag => officialTag.value));
   const mergedTags = officialTags;
 
   for (const customTag of customTags) {
-    if (!officialTagValues.has(customTag) && customTag.startsWith(prefix)) {
+    if (!officialTagValues.has(customTag) && customTag.startsWith(searchQuery)) {
       mergedTags.unshift({
         label: `${customTag} (custom)`,
         value: customTag,

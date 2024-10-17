@@ -24,7 +24,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #left-favorites-panel {
       >div:first-of-type {
         margin-bottom: 5px;
-        /* min-width: 600px; */
 
         >label {
           align-content: center;
@@ -365,8 +364,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       <div id="left-favorites-panel-top-row">
         <button title="Search favorites\nctrl+click: Search all of rule34 in a new tab"
           id="search-button">Search</button>
-          <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
-          <button title="Show results not matched by search" id="invert-button">Invert</button>
+        <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
+        <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Empty the search box" id="clear-button">Clear</button>
         <span id="find-favorite" class="light-green-gradient" style="display: none;">
           <button title="Scroll to favorite using its ID" id="find-favorite-button"

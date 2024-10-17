@@ -120,12 +120,11 @@ class Caption {
          ${Caption.getCategoryHeaderHTML()}
      </ul>
  `;
-  static findCategoriesOnPageChangeCooldown = new Cooldown(1000, true);
-
-   /**
-   * @type {Object.<String, Number>}
-   */
- static tagCategoryAssociations;
+  static findCategoriesOnPageChangeCooldown = new Cooldown(3000, true);
+  /**
+  * @type {Object.<String, Number>}
+  */
+  static tagCategoryAssociations;
 
   /**
    * @returns {String}
@@ -146,7 +145,7 @@ class Caption {
    * @param {String} tagCategory
    * @returns {Number}
    */
-  static getTagCategoryEncoding(tagCategory) {
+  static encodeTagCategory(tagCategory) {
     for (const [encoding, category] of Object.entries(Caption.tagCategoryEncodings)) {
       if (category === tagCategory) {
         return encoding;
@@ -158,7 +157,14 @@ class Caption {
   /**
    * @type {Boolean}
    */
-  get disabled() {
+  static get disabled() {
+    return (onSearchPage() || onMobileDevice()) || getPerformanceProfile() > 1;
+  }
+
+  /**
+   * @type {Boolean}
+   */
+  get hidden() {
     return this.caption.classList.contains("hide") || this.caption.classList.contains("disabled") || this.caption.classList.contains("remove");
   }
 
@@ -184,26 +190,28 @@ class Caption {
   currentThumbId;
 
   constructor() {
-    const captionDisabled = (onSearchPage() || onMobileDevice()) || getPerformanceProfile() > 1;
-
-    if (captionDisabled) {
+    if (Caption.disabled) {
       return;
     }
+    this.initializeFields();
+    this.createHTMLElement();
+    this.injectHTML();
+    this.setVisibility(this.getVisibilityPreference());
+    this.addEventListeners();
+  }
+
+  initializeFields() {
     Caption.tagCategoryAssociations = this.loadSavedTags();
+    Caption.findCategoriesOnPageChangeCooldown.onDebounceEnd = () => {
+      this.findTagCategoriesOnPageChange();
+    };
     this.problematicTags = [];
     this.currentlyCorrectingProblematicTags = false;
     this.previousThumb = null;
     this.currentThumbId = null;
-    this.create();
-    this.injectHTML();
-    this.setVisibility(this.getVisibilityPreference());
-    this.addEventListeners();
-    Caption.findCategoriesOnPageChangeCooldown.onDebounceEnd = () => {
-      this.findTagCategoriesOnPageChange();
-    };
   }
 
-  create() {
+  createHTMLElement() {
     this.captionWrapper = document.createElement("div");
     this.captionWrapper.className = "caption-wrapper";
     this.caption = document.createElement("div");
@@ -228,6 +236,90 @@ class Caption {
   }
 
   /**
+   * @param {Boolean} value
+   */
+  setVisibility(value) {
+    if (value) {
+      this.caption.classList.remove("disabled");
+    } else if (!this.caption.classList.contains("disabled")) {
+      this.caption.classList.add("disabled");
+    }
+    setPreference(Caption.preferences.visibility, value);
+  }
+
+  addEventListeners() {
+    this.caption.addEventListener("transitionend", () => {
+      if (this.caption.classList.contains("active")) {
+        this.caption.classList.add("transition-completed");
+      }
+      this.caption.classList.remove("transitioning");
+    });
+    this.caption.addEventListener("transitionstart", () => {
+      this.caption.classList.add("transitioning");
+    });
+    window.addEventListener("showOriginalContent", (event) => {
+      const thumb = caption.parentElement;
+
+      if (event.detail) {
+        this.removeFromThumb(thumb);
+
+        this.caption.classList.add("hide");
+      } else {
+        this.caption.classList.remove("hide");
+      }
+    });
+
+    if (onSearchPage()) {
+      window.addEventListener("load", () => {
+        this.addEventListenersToThumbs.bind(this)();
+      }, {
+        once: true,
+        passive: true
+      });
+    } else {
+      window.addEventListener("favoritesLoaded", () => {
+        this.addEventListenersToThumbs.bind(this)();
+        Caption.findCategoriesOnPageChangeCooldown.waitTime = 1000;
+      }, {
+        once: true
+      });
+      window.addEventListener("favoritesFetched", () => {
+        this.addEventListenersToThumbs.bind(this)();
+      });
+      window.addEventListener("changedPage", () => {
+        this.addEventListenersToThumbs.bind(this)();
+
+        if (Caption.findCategoriesOnPageChangeCooldown.ready) {
+          this.findTagCategoriesOnPageChange();
+        }
+      });
+      window.addEventListener("thumbUnderCursorOnLoad", (event) => {
+        const showOnHoverCheckbox = document.getElementById("showOnHover");
+
+        if (showOnHoverCheckbox !== null && showOnHoverCheckbox.checked) {
+          this.attachToThumb(event.detail);
+        }
+      });
+      window.addEventListener("showCaption", (event) => {
+        this.attachToThumb(event.detail);
+      });
+      window.addEventListener("originalContentCleared", (event) => {
+        const thumbs = event.detail;
+        const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
+
+        this.findTagCategories(tagNames, 3, () => {
+          this.saveTags();
+        });
+      });
+      window.addEventListener("newFavoritesFetchedOnReload", (event) => {
+        this.addEventListenersToThumbs.bind(this)(event.detail);
+      }, {
+        once: true
+      });
+    }
+  }
+
+  /**
    * @param {HTMLElement[]} thumbs
    */
   async addEventListenersToThumbs(thumbs) {
@@ -238,11 +330,11 @@ class Caption {
       const imageContainer = getImageFromThumb(thumb).parentElement;
 
       imageContainer.onmouseenter = () => {
-        this.show(thumb);
+        this.attachToThumb(thumb);
       };
 
       imageContainer.onmouseleave = () => {
-        this.hide(thumb);
+        this.removeFromThumb(thumb);
       };
     }
   }
@@ -250,8 +342,8 @@ class Caption {
   /**
    * @param {HTMLElement} thumb
    */
-  show(thumb) {
-    if (this.disabled || thumb === null) {
+  attachToThumb(thumb) {
+    if (this.hidden || thumb === null) {
       return;
     }
     thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
@@ -279,13 +371,13 @@ class Caption {
   /**
    * @param {HTMLElement} thumb
    */
-  hide(thumb) {
-    if (this.disabled) {
+  removeFromThumb(thumb) {
+    if (this.hidden) {
       return;
     }
 
     if (thumb !== null && thumb !== undefined) {
-      this.animateExit(thumb);
+      this.animateRemoval(thumb);
     }
     this.animate(false);
     this.caption.classList.add("inactive");
@@ -295,7 +387,7 @@ class Caption {
   /**
    * @param {HTMLElement} thumb
    */
-  animateExit(thumb) {
+  animateRemoval(thumb) {
     const captionWrapperClone = this.captionWrapper.cloneNode(true);
     const captionClone = captionWrapperClone.children[0];
 
@@ -397,75 +489,6 @@ class Caption {
     });
   }
 
-  addEventListeners() {
-    this.caption.addEventListener("transitionend", () => {
-      if (this.caption.classList.contains("active")) {
-        this.caption.classList.add("transition-completed");
-      }
-      this.caption.classList.remove("transitioning");
-    });
-    this.caption.addEventListener("transitionstart", () => {
-      this.caption.classList.add("transitioning");
-    });
-    window.addEventListener("showOriginalContent", (event) => {
-      const thumb = caption.parentElement;
-
-      if (event.detail) {
-        this.hide(thumb);
-
-        this.caption.classList.add("hide");
-      } else {
-        this.caption.classList.remove("hide");
-      }
-    });
-
-    if (onSearchPage()) {
-      window.addEventListener("load", () => {
-        this.addEventListenersToThumbs.bind(this)();
-      }, {
-        once: true,
-        passive: true
-      });
-    } else {
-      window.addEventListener("favoritesLoaded", this.addEventListenersToThumbs.bind(this)(), {
-        once: true
-      });
-      window.addEventListener("favoritesFetched", () => {
-        this.addEventListenersToThumbs.bind(this)();
-      });
-      window.addEventListener("changedPage", () => {
-        this.addEventListenersToThumbs.bind(this)();
-
-        if (Caption.findCategoriesOnPageChangeCooldown.ready) {
-          this.findTagCategoriesOnPageChange();
-        }
-      });
-      window.addEventListener("thumbUnderCursorOnLoad", (event) => {
-        const showOnHoverCheckbox = document.getElementById("showOnHover");
-
-        if (showOnHoverCheckbox !== null && showOnHoverCheckbox.checked) {
-          this.show(event.detail);
-        }
-      });
-      window.addEventListener("showCaption", (event) => {
-        this.show(event.detail);
-      });
-      window.addEventListener("originalContentCleared", (event) => {
-        const thumbs = event.detail;
-        const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
-
-        this.findTagCategories(tagNames, 3, () => {
-          this.saveTags();
-        });
-      });
-      window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-        this.addEventListenersToThumbs.bind(this)(event.detail);
-      }, {
-        once: true
-      });
-    }
-  }
-
   /**
    * @returns {Object.<String, Number>}
    */
@@ -515,18 +538,6 @@ class Caption {
    */
   replaceSpacesWithUnderscores(tagName) {
     return tagName.replace(/\s/gm, "_");
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  setVisibility(value) {
-    if (value) {
-      this.caption.classList.remove("disabled");
-    } else if (!this.caption.classList.contains("disabled")) {
-      this.caption.classList.add("disabled");
-    }
-    setPreference(Caption.preferences.visibility, value);
   }
 
   /**
@@ -641,7 +652,7 @@ class Caption {
           }
           const category = columnOfFirstRow[2].textContent.split(",")[0].split(" ")[0];
 
-          Caption.tagCategoryAssociations[tagName] = Caption.getTagCategoryEncoding(category);
+          Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(category);
           this.saveTags();
         });
     }

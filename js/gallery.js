@@ -32,13 +32,21 @@ const galleryHTML = `<style>
     }
   }
 
+  #original-video-container {
+    display: none;
+    /* top:5%;
+    left:5%; */
+    position:fixed;
+    z-index:9998;
+    pointer-events:none;
+  }
+
   #low-resolution-canvas {
     z-index: 9996;
   }
 
   #main-canvas {
     z-index: 9997;
-    /* display: none; */
   }
 
   a.hide {
@@ -139,8 +147,7 @@ class Gallery {
     right: "ArrowRight",
     left: "ArrowLeft"
   };
-  static traversalCooldown = new Cooldown(100);
-  static renderOnPageChangeCooldown = new Cooldown(750, true);
+
   static preferences = {
     showOnHover: "showImagesWhenHovering",
     backgroundOpacity: "galleryBackgroundOpacity",
@@ -1018,14 +1025,25 @@ onmessage = (message) => {
     minimumImagesToRender: onMobileDevice() ? 3 : 10,
     imageFetchDelay: 250,
     imageFetchDelayWhenExtensionKnown: 25,
-    upscaledThumbResolutionFraction: 3.5,
+    upscaledThumbResolutionFraction: 5,
     upscaledAnimatedThumbResolutionFraction: 8,
     extensionsFoundBeforeSavingCount: 5,
     animatedThumbsToUpscaleRange: 20,
     animatedThumbsToUpscaleDiscrete: 20,
+    traversalCooldownTime: 100,
+    renderOnPageChangeCooldownTime: 2000,
     renderAroundAggressively: true,
     debugEnabled: false
   };
+  static traversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
+  static renderOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
+
+  /**
+   * @returns {Boolean}
+   */
+  static get disabled() {
+    return (onMobileDevice() && onSearchPage()) || getPerformanceProfile() > 0;
+  }
 
   /**
    * @type {HTMLCanvasElement}
@@ -1132,12 +1150,8 @@ onmessage = (message) => {
    */
   enlargeOnClickOnMobile;
 
-  get disabled() {
-    return (onMobileDevice() && onSearchPage()) || getPerformanceProfile() > 0;
-  }
-
   constructor() {
-    if (this.disabled) {
+    if (Gallery.disabled) {
       return;
     }
     this.initializeFields();
@@ -1368,6 +1382,8 @@ onmessage = (message) => {
           .filter(t => isImage(t))
           .slice(0, 20));
       }
+    }, {
+      once: true
     });
     window.addEventListener("startedFetchingFavorites", () => {
       this.favoritesWereFetched = true;
@@ -1384,6 +1400,7 @@ onmessage = (message) => {
       once: true
     });
     window.addEventListener("favoritesLoaded", (event) => {
+      Gallery.renderOnPageChangeCooldown.waitTime = 1000;
       this.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
@@ -1392,6 +1409,8 @@ onmessage = (message) => {
       if (!this.favoritesWereFetched) {
         this.renderImagesInTheBackground();
       }
+    }, {
+      once: true
     });
     window.addEventListener("changedPage", () => {
       this.imageRenderer.postMessage({
@@ -1569,7 +1588,7 @@ onmessage = (message) => {
   injectOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="original-content-container">
-              <video id="original-video-container" width="90%" height="90%" autoplay muted loop style="display: none; top:5%; left:5%; position:fixed; z-index:9998;pointer-events:none;">
+              <video id="original-video-container" width="100%" height="100%" autoplay muted loop>
               </video>
               <img id="original-gif-container" class="focused"></img>
               <div id="original-content-background" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background: black; z-index: 999; display: none; pointer-events: none;"></div>
@@ -1583,6 +1602,11 @@ onmessage = (message) => {
     originalContentContainer.insertBefore(this.mainCanvas, originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");
     this.videoContainer = document.getElementById("original-video-container");
+    this.videoContainer.addEventListener("mousemove", () => {
+      if (this.videoContainer.controls !== "controls") {
+        this.videoContainer.controls = "controls";
+      }
+    });
     this.gifContainer = document.getElementById("original-gif-container");
     this.mainCanvas.id = "main-canvas";
     this.lowResolutionCanvas.id = "low-resolution-canvas";
@@ -1642,7 +1666,6 @@ onmessage = (message) => {
       renderRequests,
       requestType
     }, canvases);
-
     this.currentBatchRenderRequestId += 1;
 
     if (this.currentBatchRenderRequestId >= 1000) {
@@ -2017,8 +2040,8 @@ onmessage = (message) => {
     if (Gallery.settings.debugEnabled) {
       selectedThumb.classList.add("debug-selected");
     }
-
-    this.renderInAdvanceWhileTraversingGallery(selectedThumb, direction);
+    this.upscaleAnimatedThumbsAround(selectedThumb);
+    this.renderImagesAround(selectedThumb);
     // this.preloadVideosAround(selectedThumb);
 
     if (!usingFirefox()) {
@@ -2175,6 +2198,7 @@ onmessage = (message) => {
       this.videoContainer.src = this.getVideoSource(thumb);
     }
     this.videoContainer.play().catch(() => { });
+    this.toggleVideoControls(true);
   }
 
   /**
@@ -2469,7 +2493,7 @@ onmessage = (message) => {
     this.startedRenders.add(thumb.id);
 
     if (this.canvasIsTransferrable(thumb)) {
-          request.canvas = this.getOffscreenCanvasFromThumb(thumb);
+      request.canvas = this.getOffscreenCanvasFromThumb(thumb);
     }
 
     if (onMobileDevice()) {
@@ -2502,7 +2526,7 @@ onmessage = (message) => {
       const request = this.getRenderRequest(thumb);
 
       this.imageRenderer.postMessage(request, [request.canvas]);
-    } else {
+    } else if (!onSearchPage()) {
       this.imageRenderer.postMessage(this.getRenderRequest(thumb));
     }
   }
@@ -2577,10 +2601,15 @@ onmessage = (message) => {
   toggleVideoControls(value) {
     if (value === undefined) {
       this.videoContainer.style.pointerEvents = this.videoContainer.style.pointerEvents === "auto" ? "none" : "auto";
-      this.videoContainer.style.controls = this.videoContainer.style.controls === "controls" ? false : "controls";
+      this.videoContainer.controls = this.videoContainer.controls === "controls" ? false : "controls";
     } else {
       this.videoContainer.style.pointerEvents = value ? "auto" : "none";
-      this.videoContainer.controls = value ? "controls" : false;
+
+      if (onMobileDevice()) {
+        this.videoContainer.controls = value ? "controls" : false;
+      } else if (!value) {
+        this.videoContainer.controls = false;
+      }
     }
   }
 
@@ -2679,47 +2708,6 @@ onmessage = (message) => {
       return Gallery.settings.imageFetchDelayWhenExtensionKnown;
     }
     return Gallery.settings.imageFetchDelay;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @param {String} direction
-   * @returns
-   */
-  renderInAdvanceWhileTraversingGallery(thumb, direction) {
-    if (isImage(thumb) && !this.renderHasStarted(thumb)) {
-      this.upscaleAnimatedThumbsAround(thumb);
-      this.renderImagesAround(thumb);
-      return;
-    }
-    const forward = direction === Gallery.directions.right;
-    let nextThumbToRender = this.getAdjacentVisibleThumb(thumb, forward);
-
-    for (let i = 0; i < Gallery.settings.traversalLookahead; i += 1) {
-      if (nextThumbToRender === null) {
-        break;
-      }
-
-      if (!isImage(nextThumbToRender)) {
-        nextThumbToRender = this.getAdjacentVisibleThumb(nextThumbToRender, forward);
-        continue;
-      }
-
-      if (!this.renderHasStarted(nextThumbToRender)) {
-        break;
-      }
-      nextThumbToRender = this.getAdjacentVisibleThumb(nextThumbToRender, forward);
-    }
-
-    if (nextThumbToRender === null) {
-      return;
-    }
-
-    if (!this.renderHasStarted(nextThumbToRender) && isImage(nextThumbToRender)) {
-      this.upscaleAnimatedThumbsAround(nextThumbToRender);
-      // this.renderImagesAround(nextThumbToRender);
-      this.renderImagesAround(thumb);
-    }
   }
 
   /**

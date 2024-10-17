@@ -793,12 +793,11 @@ function getWorkerURL(content) {
 }
 
 function initializeUtilities() {
-  const enableOnSearchPages = getPreference("enableOnSearchPages", true);
+  const enableOnSearchPages = getPreference("enableOnSearchPages", true) && getPerformanceProfile() === 0;
 
   if (!enableOnSearchPages && onSearchPage()) {
     throw new Error("Disabled on search pages");
   }
-
   injectCommonStyles();
   toggleFancyImageHovering(true);
   trackCursorPosition();

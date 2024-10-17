@@ -441,22 +441,20 @@ class SavedSearches {
   }
 
   saveSearchResultsAsCustomSearch() {
-    const resultIds = [];
+    const searchResultIds = Array.from(ThumbNode.allThumbNodes.values())
+      .filter(thumbNode => thumbNode.matchedByMostRecentSearch)
+      .map(thumbNode => thumbNode.id);
 
-    for (const thumb of getAllVisibleThumbs()) {
-      resultIds.push(thumb.id);
-    }
-
-    if (resultIds.length === 0) {
+    if (searchResultIds.length === 0) {
       return;
     }
 
-    if (resultIds.length > 300) {
-      if (!confirm(`Are you sure you want to save ${resultIds.length} ids as one search?`)) {
+    if (searchResultIds.length > 300) {
+      if (!confirm(`Are you sure you want to save ${searchResultIds.length} ids as one search?`)) {
         return;
       }
     }
-    const customSearch = `( ${resultIds.join(" ~ ")} )`;
+    const customSearch = `( ${searchResultIds.join(" ~ ")} )`;
 
     this.saveSearch(customSearch);
   }

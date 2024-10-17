@@ -85,7 +85,7 @@ class FavoritesDatabase {
         };
 
         transaction.onerror = (event) => {
-          console.error(event);
+          console.error(event.target.result);
         };
 
         favorites.forEach(favorite => {
