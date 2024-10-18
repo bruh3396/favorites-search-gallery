@@ -33,12 +33,12 @@ const galleryHTML = `<style>
   }
 
   #original-video-container {
-    display: none;
-    /* top:5%;
-    left:5%; */
-    position:fixed;
-    z-index:9998;
-    pointer-events:none;
+    video {
+      display: none;
+      position:fixed;
+      z-index:9998;
+      pointer-events:none;
+    }
   }
 
   #low-resolution-canvas {
@@ -160,7 +160,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
@@ -1061,9 +1061,13 @@ onmessage = (message) => {
    */
   lowResolutionContext;
   /**
-   * @type {HTMLVideoElement}
+   * @type {HTMLDivElement}
    */
   videoContainer;
+  /**
+   * @type {HTMLVideoElement[]}
+   */
+  videoPlayers;
   /**
    * @type {HTMLImageElement}
    */
@@ -1164,7 +1168,7 @@ onmessage = (message) => {
     this.initializeFields();
     this.setMainCanvasResolution();
     this.createWebWorkers();
-    this.createVideoBackground();
+    this.createVideoBackgrounds();
     this.addEventListeners();
     this.loadDiscoveredImageExtensions();
     this.prepareSearchPage();
@@ -1225,9 +1229,13 @@ onmessage = (message) => {
     }, [offscreenCanvas]);
   }
 
-  createVideoBackground() {
+  createVideoBackgrounds() {
     document.createElement("canvas").toBlob((blob) => {
-      this.videoContainer.setAttribute("poster", URL.createObjectURL(blob));
+      const videoBackgroundURL = URL.createObjectURL(blob);
+
+      for (const video of this.videoPlayers) {
+        video.setAttribute("poster", videoBackgroundURL);
+      }
     });
   }
 
@@ -1351,7 +1359,7 @@ onmessage = (message) => {
 
           case "m":
             if (isVideo(this.getSelectedThumb())) {
-              this.videoContainer.muted = !this.videoContainer.muted;
+              this.getActiveVideoPlayer().muted = !this.getActiveVideoPlayer().muted;
             }
             break;
 
@@ -1428,9 +1436,7 @@ onmessage = (message) => {
       once: true
     });
     window.addEventListener("changedPage", () => {
-      this.imageRenderer.postMessage({
-        action: "clearMainCanvas"
-      });
+      this.clearMainCanvas();
       this.toggleOriginalContentVisibility(false);
       this.deleteAllRenders();
 
@@ -1621,8 +1627,13 @@ onmessage = (message) => {
   injectOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="original-content-container">
-              <video id="original-video-container" width="100%" height="100%" autoplay muted loop>
-              </video>
+              <div id="original-video-container">
+                <video id="video-player-0" width="100%" height="100%" autoplay muted loop controlsList="nofullscreen" active></video>
+                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
+                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
+                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
+                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
+              </div>
               <img id="original-gif-container" class="focused"></img>
               <div id="original-content-background" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background: black; z-index: 999; display: none; pointer-events: none;"></div>
           </div>
@@ -1635,14 +1646,32 @@ onmessage = (message) => {
     originalContentContainer.insertBefore(this.mainCanvas, originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");
     this.videoContainer = document.getElementById("original-video-container");
-    this.videoContainer.addEventListener("mousemove", () => {
-      if (this.videoContainer.controls !== "controls") {
-        this.videoContainer.controls = "controls";
-      }
-    });
-    this.videoContainer.addEventListener("ended", () => {
-      this.doAutoplay();
-    });
+    this.videoPlayers = Array.from(this.videoContainer.querySelectorAll("video"));
+
+    for (const video of this.videoPlayers) {
+      video.addEventListener("mousemove", () => {
+        if (!video.hasAttribute("controls")) {
+          video.setAttribute("controls", "");
+        }
+      });
+      video.addEventListener("click", () => {
+        if (video.paused) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+      video.addEventListener("volumechange", () => {
+
+        for (const v of this.getInactiveVideoPlayers()) {
+          v.volume = video.volume;
+          v.muted = video.muted;
+        }
+      });
+      video.addEventListener("ended", () => {
+        this.doAutoplay();
+      });
+    }
     this.toggleAutoplay(this.autoplayEnabled);
     this.gifContainer = document.getElementById("original-gif-container");
     this.mainCanvas.id = "main-canvas";
@@ -2068,21 +2097,22 @@ onmessage = (message) => {
     if (Gallery.settings.debugEnabled) {
       this.getSelectedThumb().classList.remove("debug-selected");
     }
-    this.setNextSelectedThumbIndex(direction);
-    const selectedThumb = this.getSelectedThumb();
-
-    if (this.autoplayEnabled) {
-      if (isVideo(selectedThumb)) {
-        Gallery.autoplayCooldown.stop();
-      } else {
-        Gallery.autoplayCooldown.restart();
-      }
-    }
 
     if (keyIsHeldDown && !Gallery.traversalCooldown.ready) {
       return;
     }
+    this.setNextSelectedThumbIndex(direction);
+    const selectedThumb = this.getSelectedThumb();
+
+    // if (this.autoplayEnabled) {
+    //   if (isVideo(selectedThumb)) {
+    //     Gallery.autoplayCooldown.stop();
+    //   } else {
+    //     Gallery.autoplayCooldown.restart();
+    //   }
+    // }
     this.clearOriginalContentSources();
+    this.stopAllVideos();
 
     if (Gallery.settings.debugEnabled) {
       selectedThumb.classList.add("debug-selected");
@@ -2102,12 +2132,12 @@ onmessage = (message) => {
     } else if (isGif(selectedThumb)) {
       this.toggleCursorVisibility(false);
       this.toggleVideoControls(false);
-      this.toggleOriginalVideo(false);
+      this.toggleOriginalVideoContainer(false);
       this.showOriginalGIF(selectedThumb);
     } else {
       this.toggleCursorVisibility(false);
       this.toggleVideoControls(false);
-      this.toggleOriginalVideo(false);
+      this.toggleOriginalVideoContainer(false);
       this.showOriginalImage(selectedThumb);
     }
   }
@@ -2151,24 +2181,20 @@ onmessage = (message) => {
     this.toggleBackgroundVisibility(false);
     this.toggleScrollbarVisibility(true);
     this.toggleCursorVisibility(true);
-    this.clearOriginalContentSources(true);
-    this.toggleOriginalVideo(false);
+    this.clearOriginalContentSources();
+
+    // for (const video of this.videoPlayers) {
+    //   video.src = "";
+    // }
+    this.stopAllVideos();
+    this.clearMainCanvas();
+    this.toggleOriginalVideoContainer(false);
     this.toggleOriginalGIF(false);
   }
 
-  /**
-   * @param {Boolean} clearMainCanvas
-   */
-  clearOriginalContentSources(clearMainCanvas = false) {
+  clearOriginalContentSources() {
     this.mainCanvas.style.visibility = "hidden";
     this.lowResolutionCanvas.style.visibility = "hidden";
-
-    if (clearMainCanvas) {
-      this.imageRenderer.postMessage({
-        action: "clearMainCanvas"
-      });
-    }
-    this.videoContainer.src = "";
     this.gifContainer.src = "";
   }
 
@@ -2226,6 +2252,26 @@ onmessage = (message) => {
   }
 
   /**
+   * @param {HTMLElement} initialThumb
+   */
+  preloadInactiveVideoPlayers(initialThumb) {
+    const inactiveVideoPlayers = this.getInactiveVideoPlayers();
+    const videoThumbsAroundInitialThumb = this.getAdjacentVisibleThumbsLooped(initialThumb, inactiveVideoPlayers.length, (t) => {
+      return isVideo(t) && t.id !== initialThumb.id;
+    });
+    const loadedVideoSources = new Set(inactiveVideoPlayers
+      .map(video => video.src)
+      .filter(src => src !== ""));
+    const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => this.getVideoSource(thumb)));
+    const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(this.getVideoSource(thumb)));
+    const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
+
+    for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
+      freeInactiveVideoPlayers[i].src = this.getVideoSource(videoThumbsNotLoaded[i]);
+    }
+  }
+
+  /**
    * @param {HTMLElement} thumb
    * @returns {String}
    */
@@ -2237,15 +2283,55 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   playOriginalVideo(thumb) {
-    const preloadedVideoURL = this.preloadedVideoURLs.get(thumb.id);
+    this.setActiveVideoPlayer(thumb);
 
-    if (preloadedVideoURL !== undefined && preloadedVideoURL !== null) {
-      this.videoContainer.src = preloadedVideoURL;
-    } else {
-      this.videoContainer.src = this.getVideoSource(thumb);
+    if (this.inGallery) {
+      this.preloadInactiveVideoPlayers(thumb);
     }
-    this.videoContainer.play().catch(() => { });
+    this.stopAllVideos();
+    // const preloadedVideoURL = this.preloadedVideoURLs.get(thumb.id);
+    const video = this.getActiveVideoPlayer();
+
+    // if (preloadedVideoURL !== undefined && preloadedVideoURL !== null) {
+    //   video.src = preloadedVideoURL;
+    // } else {
+    //   video.src = this.getVideoSource(thumb);
+    // }
+    if (!video.src.includes(`?${thumb.id}`)) {
+      video.src = this.getVideoSource(thumb);
+    }
+    video.style.display = "block";
+    video.play().catch(() => { });
     this.toggleVideoControls(true);
+
+    // if (!this.inGallery) {
+    //   setTimeout(() => {
+    //     this.preloadInactiveVideoPlayers(thumb);
+    //     this.stopAllInactiveVideos();
+    //   }, 500);
+    // }
+  }
+
+  stopAllVideos() {
+    for (const video of this.videoPlayers) {
+      this.stopVideo(video);
+    }
+  }
+
+  stopAllInactiveVideos() {
+    for (const video of this.getInactiveVideoPlayers()) {
+      this.stopVideo(video);
+    }
+  }
+
+  /**
+   * @param {HTMLVideoElement} video
+   */
+  stopVideo(video) {
+    video.style.display = "none";
+    video.pause();
+    video.removeAttribute("controls");
+    // video.currentTime = 0;
   }
 
   /**
@@ -2271,9 +2357,7 @@ onmessage = (message) => {
       this.drawMainCanvas(thumb);
     } else if (this.renderHasStarted(thumb)) {
       this.drawLowResolutionCanvas(thumb);
-      this.imageRenderer.postMessage({
-        action: "clearMainCanvas"
-      });
+      this.clearMainCanvas();
       this.drawMainCanvas(thumb);
     } else {
       this.renderOriginalImage(thumb);
@@ -2588,6 +2672,12 @@ onmessage = (message) => {
     });
   }
 
+  clearMainCanvas() {
+    this.imageRenderer.postMessage({
+      action: "clearMainCanvas"
+    });
+  }
+
   /**
    * @param {Boolean} value
    */
@@ -2596,7 +2686,7 @@ onmessage = (message) => {
     this.toggleOriginalGIF(value);
 
     if (!value) {
-      this.toggleOriginalVideo(false);
+      this.toggleOriginalVideoContainer(false);
     }
   }
 
@@ -2667,17 +2757,22 @@ onmessage = (message) => {
    * @param {Boolean} value
    */
   toggleVideoControls(value) {
-    if (value === undefined) {
-      this.videoContainer.style.pointerEvents = this.videoContainer.style.pointerEvents === "auto" ? "none" : "auto";
-      this.videoContainer.controls = this.videoContainer.controls === "controls" ? false : "controls";
-    } else {
-      this.videoContainer.style.pointerEvents = value ? "auto" : "none";
+    const video = this.getActiveVideoPlayer();
 
-      if (onMobileDevice()) {
-        this.videoContainer.controls = value ? "controls" : false;
-      } else if (!value) {
-        this.videoContainer.controls = false;
+    if (value === undefined) {
+      video.style.pointerEvents = video.style.pointerEvents === "auto" ? "none" : "auto";
+
+      if (video.hasAttribute("controls")) {
+        video.removeAttribute("controls");
       }
+      return;
+    }
+    video.style.pointerEvents = value ? "auto" : "none";
+
+    if (onMobileDevice()) {
+      video.controls = value ? "controls" : false;
+    } else if (!value) {
+      video.removeAttribute("controls");
     }
   }
 
@@ -2697,8 +2792,8 @@ onmessage = (message) => {
   /**
    * @param {Boolean} value
    */
-  toggleOriginalVideo(value) {
-    if (value !== undefined && this.videoContainer.src !== "") {
+  toggleOriginalVideoContainer(value) {
+    if (value !== undefined) {
       this.videoContainer.style.display = value ? "block" : "none";
       return;
     }
@@ -2710,6 +2805,35 @@ onmessage = (message) => {
     }
   }
 
+  /**
+   * @param {HTMLElement} thumb
+   */
+  setActiveVideoPlayer(thumb) {
+    for (const video of this.videoPlayers) {
+      video.removeAttribute("active");
+    }
+
+    for (const video of this.videoPlayers) {
+      if (video.src.includes(`?${thumb.id}`)) {
+        video.setAttribute("active", "");
+        return;
+      }
+    }
+    this.videoPlayers[0].setAttribute("active", "");
+  }
+  /**
+   * @returns {HTMLVideoElement}
+   */
+  getActiveVideoPlayer() {
+    return this.videoPlayers.find(video => video.hasAttribute("active")) || this.videoPlayers[0];
+  }
+
+  /**
+   * @returns {HTMLVideoElement[]}
+   */
+  getInactiveVideoPlayers() {
+    return this.videoPlayers.filter(video => !video.hasAttribute("active"));
+  }
   /**
    * @param {Boolean} value
    */

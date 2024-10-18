@@ -644,7 +644,7 @@ class Caption {
           if (response.ok) {
             return response.text();
           }
-          throw new Error(response.statusText);
+          throw new Error(response.status);
         })
         .then((html) => {
           const dom = new DOMParser().parseFromString(html, "text/html");
@@ -660,15 +660,6 @@ class Caption {
           Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(category);
           this.saveTags();
           this.problematicTagsThatFailedFetch.delete(problematicTag);
-        }).catch((error) => {
-          if (error.message.includes("429")) {
-            this.problematicTagsThatFailedFetch.add(problematicTag);
-            setTimeout(() => {
-              this.correctProblematicTag(problematicTag);
-            }, 1000 * this.problematicTagsThatFailedFetch.size);
-          } else {
-            console.error(error.message);
-          }
         });
     }
     this.currentlyCorrectingProblematicTags = false;
