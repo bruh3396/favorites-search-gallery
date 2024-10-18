@@ -273,6 +273,12 @@ onmessage = (message) => {
   static get finishedLoading() {
     return FavoritesLoader.currentLoadState === FavoritesLoader.loadState.finished;
   }
+  /**
+   * @type {Boolean}
+  */
+  static get disabled() {
+    return !onFavoritesPage();
+  }
 
   /**
    * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: {pageNumber: Number, thumbNodes: ThumbNode[], searchResults: ThumbNode[]}[]}}
@@ -445,7 +451,7 @@ onmessage = (message) => {
   }
 
   constructor() {
-    if (onSearchPage()) {
+    if (FavoritesLoader.disabled) {
       return;
     }
     this.allThumbNodes = [];

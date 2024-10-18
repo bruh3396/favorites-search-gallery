@@ -466,7 +466,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 </div>
 `;/* eslint-disable no-bitwise */
 
-if (!onSearchPage()) {
+if (onFavoritesPage()) {
   document.getElementById("content").insertAdjacentHTML("beforebegin", uiHTML);
 }
 const FAVORITE_OPTIONS = [document.getElementById("favorite-options"), document.getElementById("additional-favorite-options")];
@@ -1096,6 +1096,6 @@ async function findSomeoneWithMoreThanXFavorites(X) {
   alert(`Could not find user with more than ${X} favorites`);
 }
 
-if (!onSearchPage()) {
+if (onFavoritesPage()) {
   initializeFavoritesPage();
 }

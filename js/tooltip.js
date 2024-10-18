@@ -24,6 +24,13 @@ const tooltipHTML = `<div id="tooltip-container">
 
 class Tooltip {
   /**
+   * @type {Boolean}
+  */
+  static get disabled() {
+    return onMobileDevice() || getPerformanceProfile() > 1 || onPostPage();
+  }
+
+  /**
    * @type {HTMLDivElement}
    */
   tooltip;
@@ -49,7 +56,7 @@ class Tooltip {
   previousSearch;
 
   constructor() {
-    if (onMobileDevice() || getPerformanceProfile() > 1) {
+    if (Tooltip.disabled) {
       return;
     }
     this.enabled = getPreference("showTooltip", true);

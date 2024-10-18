@@ -96,6 +96,8 @@ const PREFERENCES = "preferences";
 const FLAGS = {
   set: false,
   onSearchPage: undefined,
+  onFavoritesPage: undefined,
+  onPostPage: undefined,
   usingFirefox: undefined,
   onMobileDevice: undefined,
   userIsOnTheirOwnFavoritesPage: undefined,
@@ -537,9 +539,29 @@ function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChe
  */
 function onSearchPage() {
   if (!FLAGS.set) {
-    FLAGS.onSearchPage = location.href.includes("page=post");
+    FLAGS.onSearchPage = location.href.includes("page=post&s=list");
   }
   return FLAGS.onSearchPage;
+}
+
+/**
+ * @returns {Boolean}
+ */
+function onFavoritesPage() {
+  if (!FLAGS.set) {
+    FLAGS.onFavoritesPage = location.href.includes("page=favorites");
+  }
+  return FLAGS.onFavoritesPage;
+}
+
+/**
+ * @returns {Boolean}
+ */
+function onPostPage() {
+  if (!FLAGS.set) {
+    FLAGS.onPostPage = location.href.includes("page=post&s=view");
+  }
+  return FLAGS.onPostPage;
 }
 
 /**
@@ -817,6 +839,9 @@ function getWorkerURL(content) {
 }
 
 function initializeUtilities() {
+  if (onPostPage()) {
+    return;
+  }
   const enableOnSearchPages = getPreference("enableOnSearchPages", true) && getPerformanceProfile() === 0;
 
   if (!enableOnSearchPages && onSearchPage()) {
@@ -855,6 +880,8 @@ function prefetchAdjacentSearchPages() {
 function setFlags() {
   setTimeout(() => {
     onSearchPage();
+    onFavoritesPage();
+    onPostPage();
     onMobileDevice();
     usingRenderer();
     userIsOnTheirOwnFavoritesPage();

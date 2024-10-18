@@ -48,7 +48,16 @@ function mergeOfficialTagsWithCustomTags(officialTags, searchQuery) {
 }
 
 class AwesompleteWrapper {
+  /**
+   * @type {Boolean}
+  */
+  static get disabled() {
+    return !onFavoritesPage();
+  }
   constructor() {
+    if (AwesompleteWrapper.disabled) {
+      return;
+    }
     document.querySelectorAll("textarea").forEach((textarea) => {
       this.addAwesompleteToInput(textarea);
     });

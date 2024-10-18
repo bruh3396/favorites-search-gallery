@@ -1045,7 +1045,7 @@ onmessage = (message) => {
    * @returns {Boolean}
    */
   static get disabled() {
-    return (onMobileDevice() && onSearchPage()) || getPerformanceProfile() > 0;
+    return (onMobileDevice() && onSearchPage()) || getPerformanceProfile() > 0 || onPostPage();
   }
 
   /**

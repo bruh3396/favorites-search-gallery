@@ -158,7 +158,7 @@ class Caption {
    * @type {Boolean}
    */
   static get disabled() {
-    return (onSearchPage() || onMobileDevice()) || getPerformanceProfile() > 1;
+    return !onFavoritesPage() || onMobileDevice() || getPerformanceProfile() > 1;
   }
 
   /**
@@ -693,6 +693,10 @@ class Caption {
     const uniqueTagNames = new Set(tagNames);
 
     for (const tagName of uniqueTagNames) {
+      if (isNumber(tagName) && tagName.length > 5) {
+        Caption.tagCategoryAssociations[tagName] = 0;
+        continue;
+      }
       const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
 
       try {

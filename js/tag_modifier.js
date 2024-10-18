@@ -69,6 +69,12 @@ class TagModifier {
   static get currentlyModifyingTags() {
     return document.getElementById("tag-edit-mode") !== null;
   }
+  /**
+   * @type {Boolean}
+  */
+  static get disabled() {
+    return !onFavoritesPage();
+  }
 
   /**
    * @type {Map.<String, String>}
@@ -99,7 +105,7 @@ class TagModifier {
   selectedThumbNodes;
 
   constructor() {
-    if (onSearchPage()) {
+    if (TagModifier.disabled) {
       return;
     }
     this.favoritesOption = {};
