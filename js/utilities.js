@@ -23,6 +23,10 @@ class Cooldown {
    * @type {Function}
   */
   onDebounceEnd;
+  /**
+   * @type {Function}
+  */
+  onCooldownEnd;
 
   get ready() {
     if (this.skipCooldown) {
@@ -30,14 +34,14 @@ class Cooldown {
     }
 
     if (this.timeout === null) {
-      this.startTimeout();
+      this.start();
       return true;
     }
 
     if (this.debounce) {
       this.debouncing = true;
       clearTimeout(this.timeout);
-      this.startTimeout();
+      this.start();
     }
     return false;
   }
@@ -53,17 +57,33 @@ class Cooldown {
     this.debounce = debounce;
     this.debouncing = false;
     this.onDebounceEnd = () => {};
+    this.onCooldownEnd = () => {};
   }
 
-  startTimeout() {
+  start() {
     this.timeout = setTimeout(() => {
+      this.timeout = null;
+
       if (this.debouncing) {
         this.onDebounceEnd();
         this.debouncing = false;
       }
-      this.timeout = null;
+      this.onCooldownEnd();
     }, this.waitTime);
   }
+
+  stop() {
+    if (this.timeout === null) {
+      return;
+    }
+    clearTimeout(this.timeout);
+  }
+
+  restart() {
+    this.stop();
+    this.start();
+  }
+
 }
 
 const IDS_TO_REMOVE_ON_RELOAD_KEY = "recentlyRemovedIds";
@@ -342,8 +362,12 @@ function getThumbURL(originalImageURL) {
  * @returns {String}
  */
 function getTagsFromThumb(thumb) {
-  const image = getImageFromThumb(thumb);
-  return image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
+  if (onSearchPage()) {
+    const image = getImageFromThumb(thumb);
+    return image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
+  }
+  const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
+  return thumbNode === undefined ? "" : thumbNode.finalTags;
 }
 
 /**
@@ -810,18 +834,17 @@ function prefetchAdjacentSearchPages() {
   if (!onSearchPage()) {
     return;
   }
-
   const id = "search-page-prefetch";
+  const alreadyPrefetched = document.getElementById(id) !== null;
 
-  if (document.getElementById(id) !== null) {
+  if (alreadyPrefetched) {
     return;
   }
-
   const container = document.createElement("div");
   const currentPage = document.getElementById("paginator").children[0].querySelector("b");
 
   for (const sibling of [currentPage.previousElementSibling, currentPage.nextElementSibling]) {
-    if (sibling !== null) {
+    if (sibling !== null && sibling.tagName.toLowerCase() === "a") {
       container.appendChild(createPrefetchLink(sibling.href));
     }
   }

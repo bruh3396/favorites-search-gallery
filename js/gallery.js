@@ -152,7 +152,8 @@ class Gallery {
     showOnHover: "showImagesWhenHovering",
     backgroundOpacity: "galleryBackgroundOpacity",
     resolution: "galleryResolution",
-    enlargeOnClick: "enlargeOnClick"
+    enlargeOnClick: "enlargeOnClick",
+    autoplay: "autoplay"
   };
   static localStorageKeys = {
     imageExtensions: "imageExtensions"
@@ -1032,11 +1033,13 @@ onmessage = (message) => {
     animatedThumbsToUpscaleDiscrete: 20,
     traversalCooldownTime: 100,
     renderOnPageChangeCooldownTime: 2000,
+    autoplayTime: 5000,
     renderAroundAggressively: true,
     debugEnabled: false
   };
   static traversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
   static renderOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
+  static autoplayCooldown = new Cooldown(Gallery.settings.autoplayTime);
 
   /**
    * @returns {Boolean}
@@ -1149,6 +1152,10 @@ onmessage = (message) => {
    * @type {Boolean}
    */
   enlargeOnClickOnMobile;
+  /**
+   * @type {Boolean}
+  */
+  autoplayEnabled;
 
   constructor() {
     if (Gallery.disabled) {
@@ -1188,6 +1195,8 @@ onmessage = (message) => {
     this.finishedLoading = onSearchPage();
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
+    // this.autoplayEnabled = getPreference(Gallery.preferences.autoplay, false);
+    this.autoplayEnabled = false;
     Gallery.renderOnPageChangeCooldown.onDebounceEnd = () => {
       this.renderImagesInTheBackground();
     };
@@ -1344,6 +1353,12 @@ onmessage = (message) => {
             if (isVideo(this.getSelectedThumb())) {
               this.videoContainer.muted = !this.videoContainer.muted;
             }
+            break;
+
+          case "B":
+
+          case "b":
+            this.toggleBackgroundOpacity();
             break;
 
           case "Escape":
@@ -1556,6 +1571,11 @@ onmessage = (message) => {
   }
 
   injectOptionsHTML() {
+    this.injectShowOnHoverOption();
+    // this.injectAutoplayOption();
+  }
+
+  injectShowOnHoverOption() {
     let optionId = Gallery.preferences.showOnHover;
     let optionText = "Fullscreen on Hover";
     let optionTitle = "View full resolution images or play videos and GIFs when hovering over a thumbnail";
@@ -1585,6 +1605,19 @@ onmessage = (message) => {
     );
   }
 
+  injectAutoplayOption() {
+    addOptionToFavoritesPage(
+      "autoplay",
+      "Autoplay",
+      "Enable autoplay in gallery.",
+      this.autoplayEnabled,
+      (event) => {
+        this.toggleAutoplay(event.target.checked);
+      },
+      true
+    );
+  }
+
   injectOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="original-content-container">
@@ -1607,6 +1640,10 @@ onmessage = (message) => {
         this.videoContainer.controls = "controls";
       }
     });
+    this.videoContainer.addEventListener("ended", () => {
+      this.doAutoplay();
+    });
+    this.toggleAutoplay(this.autoplayEnabled);
     this.gifContainer = document.getElementById("original-gif-container");
     this.mainCanvas.id = "main-canvas";
     this.lowResolutionCanvas.id = "low-resolution-canvas";
@@ -1996,6 +2033,7 @@ onmessage = (message) => {
     dispatchEvent(new CustomEvent("showOriginalContent", {
       detail: true
     }));
+    this.startAutoplay(selectedThumb);
   }
 
   exitGallery() {
@@ -2019,6 +2057,7 @@ onmessage = (message) => {
     }, 300);
     this.deleteAllPreloadedVideos();
     this.inGallery = false;
+    this.stopAutoplay();
   }
 
   /**
@@ -2026,16 +2065,24 @@ onmessage = (message) => {
    * @param {Boolean} keyIsHeldDown
    */
   traverseGallery(direction, keyIsHeldDown) {
-    if (keyIsHeldDown && !Gallery.traversalCooldown.ready) {
-      return;
-    }
-    this.clearOriginalContentSources();
-
     if (Gallery.settings.debugEnabled) {
       this.getSelectedThumb().classList.remove("debug-selected");
     }
     this.setNextSelectedThumbIndex(direction);
     const selectedThumb = this.getSelectedThumb();
+
+    if (this.autoplayEnabled) {
+      if (isVideo(selectedThumb)) {
+        Gallery.autoplayCooldown.stop();
+      } else {
+        Gallery.autoplayCooldown.restart();
+      }
+    }
+
+    if (keyIsHeldDown && !Gallery.traversalCooldown.ready) {
+      return;
+    }
+    this.clearOriginalContentSources();
 
     if (Gallery.settings.debugEnabled) {
       selectedThumb.classList.add("debug-selected");
@@ -2567,6 +2614,27 @@ onmessage = (message) => {
   /**
    * @param {Boolean} value
    */
+  toggleBackgroundOpacity(value) {
+    if (value !== undefined) {
+      if (value) {
+        this.updateBackgroundOpacity(1);
+      } else {
+        this.updateBackgroundOpacity(0);
+      }
+      return;
+    }
+    const opacity = parseFloat(this.background.style.opacity);
+
+    if (opacity < 1) {
+      this.updateBackgroundOpacity(1);
+    } else {
+      this.updateBackgroundOpacity(0);
+    }
+  }
+
+  /**
+   * @param {Boolean} value
+   */
   toggleScrollbarVisibility(value) {
     if (value === undefined) {
       document.body.style.overflowY = document.body.style.overflowY === "auto" ? "hidden" : "auto";
@@ -2767,6 +2835,48 @@ onmessage = (message) => {
 
   clearLowResolutionCanvas() {
     this.lowResolutionContext.clearRect(0, 0, this.lowResolutionCanvas.width, this.lowResolutionCanvas.height);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleAutoplay(value) {
+    // setPreference(Gallery.preferences.autoplay, value);
+    // this.autoplayEnabled = value;
+
+    // if (value) {
+    //   this.videoContainer.removeAttribute("loop");
+    // } else {
+    //   this.videoContainer.setAttribute("loop", "");
+    // }
+  }
+
+  /**
+   * @param {HTMLElement} selectedThumb
+   */
+  startAutoplay(selectedThumb) {
+    if (!this.autoplayEnabled) {
+      return;
+    }
+    Gallery.autoplayCooldown.onCooldownEnd = () => {
+      this.doAutoplay();
+    };
+
+    if (isImage(selectedThumb)) {
+      Gallery.autoplayCooldown.start();
+    }
+  }
+
+  stopAutoplay() {
+    Gallery.autoplayCooldown.onCooldownEnd = () => { };
+    Gallery.autoplayCooldown.stop();
+  }
+
+  doAutoplay() {
+    if (!this.autoplayEnabled || !this.inGallery) {
+      return;
+    }
+    this.traverseGallery(Gallery.directions.right, false);
   }
 }
 

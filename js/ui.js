@@ -362,7 +362,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
-        <button title="Search favorites\nctrl+click: Search all of rule34 in a new tab"
+        <button title="Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab"
           id="search-button">Search</button>
         <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
@@ -609,6 +609,7 @@ function loadFavoritesPagePreferences() {
   FAVORITE_CHECKBOXES.explicitRating.checked = (allowedRatings & 4) === 4;
   FAVORITE_CHECKBOXES.questionableRating.checked = (allowedRatings & 2) === 2;
   FAVORITE_CHECKBOXES.safeRating.checked = (allowedRatings & 1) === 1;
+  preventUserFromUncheckingAllRatings(allowedRatings);
 }
 
 function removePaginatorFromFavoritesPage() {

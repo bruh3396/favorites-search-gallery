@@ -202,10 +202,7 @@ class Tooltip {
    * @param {HTMLImageElement} image
    */
   show(image) {
-    let tags = image.hasAttribute("tags") ? image.getAttribute("tags") : image.getAttribute("title");
-
-    tags = this.removeIdFromTags(image, tags);
-    this.setText(tags);
+    this.setText(this.getTagsFromImageWithIdRemoved(image));
     this.setPosition(image);
   }
 
@@ -219,14 +216,14 @@ class Tooltip {
 
   /**
    * @param {HTMLImageElement} image
-   * @param {String} tags
-   * @returns
+   * @returns {String}
    */
-  removeIdFromTags(image, tags) {
-    const id = getThumbFromImage(image).id;
+  getTagsFromImageWithIdRemoved(image) {
+    const thumb = getThumbFromImage(image);
+    let tags = getTagsFromThumb(thumb);
 
-    if (this.tagColorCodes[id] === undefined) {
-      tags = tags.replace(` ${id}`, "");
+    if (this.tagColorCodes[thumb.id] === undefined) {
+      tags = tags.replace(` ${thumb.id}`, "");
     }
     return tags;
   }

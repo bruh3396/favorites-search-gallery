@@ -181,6 +181,10 @@ class Caption {
    */
   problematicTags;
   /**
+   * @type {Set.<String>}
+  */
+  problematicTagsThatFailedFetch;
+  /**
    * @type {Boolean}
    */
   currentlyCorrectingProblematicTags;
@@ -206,6 +210,7 @@ class Caption {
       this.findTagCategoriesOnPageChange();
     };
     this.problematicTags = [];
+    this.problematicTagsThatFailedFetch = new Set();
     this.currentlyCorrectingProblematicTags = false;
     this.previousThumb = null;
     this.currentThumbId = null;
@@ -654,6 +659,16 @@ class Caption {
 
           Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(category);
           this.saveTags();
+          this.problematicTagsThatFailedFetch.delete(problematicTag);
+        }).catch((error) => {
+          if (error.message.includes("429")) {
+            this.problematicTagsThatFailedFetch.add(problematicTag);
+            setTimeout(() => {
+              this.correctProblematicTag(problematicTag);
+            }, 1000 * this.problematicTagsThatFailedFetch.size);
+          } else {
+            console.error(error.message);
+          }
         });
     }
     this.currentlyCorrectingProblematicTags = false;

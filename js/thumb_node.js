@@ -127,6 +127,10 @@ class ThumbNode {
    */
   additionalTags;
   /**
+   * @type {String}
+  */
+  finalTags;
+  /**
    * @type {PostTags}
    */
   postTags;
@@ -240,6 +244,7 @@ class ThumbNode {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
     this.originalTags = record.tags;
+    this.finalTags = record.tags;
     this.image.className = record.type;
 
     if (record.metadata === undefined) {
@@ -264,6 +269,7 @@ class ThumbNode {
     this.image.src = imageElement.src;
     this.id = ThumbNode.getIdFromThumb(thumb);
     this.originalTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
+    this.finalTags = this.originalTags;
     this.image.classList.add(getContentType(this.originalTags));
     this.metadata = new FavoriteMetadata(this.id);
     this.metadata.presetRating(ThumbNode.extractRatingFromThumb(thumb));
@@ -336,10 +342,10 @@ class ThumbNode {
   }
 
   updateTags() {
-    const finalTags = this.mergeTags(this.originalTags, this.additionalTags);
+    this.finalTags = this.mergeTags(this.originalTags, this.additionalTags);
 
-    this.image.setAttribute("tags", finalTags);
-    this.postTags = new PostTags(finalTags);
+    // this.image.setAttribute("tags", finalTags);
+    this.postTags = new PostTags(this.finalTags);
   }
 
   /**

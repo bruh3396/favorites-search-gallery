@@ -326,6 +326,7 @@ class SavedSearches {
         return;
       }
       newListItem.parentElement.insertAdjacentElement("afterbegin", newListItem);
+      this.storeSavedSearches();
     };
     this.stopEditingButton.onclick = () => {
       this.stopEditingSavedSearches(newListItem);

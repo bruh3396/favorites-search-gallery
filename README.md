@@ -5,6 +5,7 @@
 [Features](#features)<br>
 [Preferred Specs](#preferred-specs)<br>
 [Controls](#controls)<br>
+[Hotkeys](#hotkeys)<br>
 [FAQ](#faq)
 
 ## About
@@ -88,7 +89,6 @@ Video Memory: 4GB<br>
 Download Speed: 75Mb/s<br>
 
 ## Controls
-
 <strong>Left Click/Touch:</strong>
 <ul>
 <li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
@@ -103,6 +103,8 @@ Download Speed: 75Mb/s<br>
 <strong>Scroll Wheel (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
 <strong>Escape/Swipe Up (in gallery):</strong> Exit gallery<br><br>
 <strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover
+
+## Hotkeys
 
 ## FAQ
 
