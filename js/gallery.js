@@ -1020,20 +1020,19 @@ onmessage = (message) => {
   static settings = {
     maxNumberOfImagesToRenderInBackground: 100,
     maxNumberOfImagesToRenderAround: onMobileDevice() ? 2 : 50,
-    maxNumberOfPreloadedVideos: 8,
-    traversalLookahead: 8,
     megabyteLimit: onMobileDevice() ? 0 : 1000,
     minimumImagesToRender: onMobileDevice() ? 3 : 10,
     imageFetchDelay: 250,
     imageFetchDelayWhenExtensionKnown: 25,
-    upscaledThumbResolutionFraction: 5,
-    upscaledAnimatedThumbResolutionFraction: 8,
+    upscaledThumbResolutionFraction: 4,
+    upscaledAnimatedThumbResolutionFraction: 5,
     extensionsFoundBeforeSavingCount: 5,
     animatedThumbsToUpscaleRange: 20,
-    animatedThumbsToUpscaleDiscrete: 20,
+    animatedThumbsToUpscaleDiscrete: 10,
     traversalCooldownTime: 100,
     renderOnPageChangeCooldownTime: 2000,
     autoplayTime: 5000,
+    additionalVideoPlayerCount: onMobileDevice() ? 0 : 2,
     renderAroundAggressively: true,
     debugEnabled: false
   };
@@ -1101,9 +1100,9 @@ onmessage = (message) => {
   */
   transferredCanvases;
   /**
-   * @type {Map.<String, String | null>}
+   * @type {Map.<String, {start: Number, end:Number}>}
   */
-  preloadedVideoURLs;
+  videoClips;
   /**
    * @type {HTMLElement[]}
    */
@@ -1174,6 +1173,7 @@ onmessage = (message) => {
     this.prepareSearchPage();
     this.injectHTML();
     this.updateBackgroundOpacity(getPreference(Gallery.preferences.backgroundOpacity, 1));
+    this.loadVideoClips();
   }
 
   initializeFields() {
@@ -1185,7 +1185,7 @@ onmessage = (message) => {
     this.startedRenders = new Set();
     this.completedRenders = new Set();
     this.transferredCanvases = new Map();
-    this.preloadedVideoURLs = new Map();
+    this.videoClips = new Map();
     this.visibleThumbs = [];
     this.imageExtensions = {};
     this.recentlyDiscoveredImageExtensionCount = 0;
@@ -1437,6 +1437,7 @@ onmessage = (message) => {
     });
     window.addEventListener("changedPage", () => {
       this.clearMainCanvas();
+      this.clearVideoSources();
       this.toggleOriginalContentVisibility(false);
       this.deleteAllRenders();
 
@@ -1629,10 +1630,6 @@ onmessage = (message) => {
           <div id="original-content-container">
               <div id="original-video-container">
                 <video id="video-player-0" width="100%" height="100%" autoplay muted loop controlsList="nofullscreen" active></video>
-                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
-                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
-                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
-                <video width="100%" height="100%" autoplay muted loop controlsList="nofullscreen"></video>
               </div>
               <img id="original-gif-container" class="focused"></img>
               <div id="original-content-background" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background: black; z-index: 999; display: none; pointer-events: none;"></div>
@@ -1646,8 +1643,27 @@ onmessage = (message) => {
     originalContentContainer.insertBefore(this.mainCanvas, originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");
     this.videoContainer = document.getElementById("original-video-container");
+    this.addAdditionalVideoPlayers();
     this.videoPlayers = Array.from(this.videoContainer.querySelectorAll("video"));
+    this.addVideoPlayerEventListeners();
+    this.toggleAutoplay(this.autoplayEnabled);
+    this.gifContainer = document.getElementById("original-gif-container");
+    this.mainCanvas.id = "main-canvas";
+    this.lowResolutionCanvas.id = "low-resolution-canvas";
+    this.lowResolutionCanvas.width = this.mainCanvas.width;
+    this.lowResolutionCanvas.height = this.mainCanvas.height;
+    this.toggleOriginalContentVisibility(false);
+  }
 
+  addAdditionalVideoPlayers() {
+    const videoPlayerHTML = "<video width=\"100%\" height=\"100%\" autoplay muted loop controlsList=\"nofullscreen\"></video>";
+
+    for (let i = 0; i < Gallery.settings.additionalVideoPlayerCount; i += 1) {
+      this.videoContainer.insertAdjacentHTML("beforeend", videoPlayerHTML);
+    }
+  }
+
+  addVideoPlayerEventListeners() {
     for (const video of this.videoPlayers) {
       video.addEventListener("mousemove", () => {
         if (!video.hasAttribute("controls")) {
@@ -1656,7 +1672,7 @@ onmessage = (message) => {
       });
       video.addEventListener("click", () => {
         if (video.paused) {
-          video.play().catch(() => {});
+          video.play().catch(() => { });
         } else {
           video.pause();
         }
@@ -1672,13 +1688,6 @@ onmessage = (message) => {
         this.doAutoplay();
       });
     }
-    this.toggleAutoplay(this.autoplayEnabled);
-    this.gifContainer = document.getElementById("original-gif-container");
-    this.mainCanvas.id = "main-canvas";
-    this.lowResolutionCanvas.id = "low-resolution-canvas";
-    this.lowResolutionCanvas.width = this.mainCanvas.width;
-    this.lowResolutionCanvas.height = this.mainCanvas.height;
-    this.toggleOriginalContentVisibility(false);
   }
 
   /**
@@ -1799,13 +1808,6 @@ onmessage = (message) => {
     this.transferredCanvases.clear();
     setTimeout(() => {
     }, 1000);
-  }
-
-  deleteAllPreloadedVideos() {
-    for (const url of this.preloadedVideoURLs.values()) {
-      URL.revokeObjectURL(url);
-    }
-    this.preloadedVideoURLs.clear();
   }
 
   /**
@@ -2020,6 +2022,7 @@ onmessage = (message) => {
       if (this.inGallery || enteredOverCaptionTag(event)) {
         return;
       }
+      this.stopAllVideos();
       this.hideOriginalContent();
     };
   }
@@ -2084,7 +2087,6 @@ onmessage = (message) => {
     setTimeout(() => {
       this.recentlyExitedGallery = false;
     }, 300);
-    this.deleteAllPreloadedVideos();
     this.inGallery = false;
     this.stopAutoplay();
   }
@@ -2119,7 +2121,6 @@ onmessage = (message) => {
     }
     this.upscaleAnimatedThumbsAround(selectedThumb);
     this.renderImagesAround(selectedThumb);
-    // this.preloadVideosAround(selectedThumb);
 
     if (!usingFirefox()) {
       scrollToThumb(selectedThumb.id, false);
@@ -2254,7 +2255,12 @@ onmessage = (message) => {
   /**
    * @param {HTMLElement} initialThumb
    */
-  preloadInactiveVideoPlayers(initialThumb) {
+ preloadInactiveVideoPlayers(initialThumb) {
+    if (!this.inGallery) {
+      // await sleep(500);
+      // this.stopAllInactiveVideos();
+      return;
+    }
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
     const videoThumbsAroundInitialThumb = this.getAdjacentVisibleThumbsLooped(initialThumb, inactiveVideoPlayers.length, (t) => {
       return isVideo(t) && t.id !== initialThumb.id;
@@ -2267,7 +2273,7 @@ onmessage = (message) => {
     const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
 
     for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
-      freeInactiveVideoPlayers[i].src = this.getVideoSource(videoThumbsNotLoaded[i]);
+      this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
     }
   }
 
@@ -2280,36 +2286,68 @@ onmessage = (message) => {
   }
 
   /**
+   * @param {HTMLVideoElement} video
+   * @param {HTMLElement} thumb
+   */
+  setVideoSource(video, thumb) {
+    if (this.videoPlayerHasSource(video, thumb)) {
+      return;
+    }
+    this.createVideoClip(video, thumb);
+    video.src = this.getVideoSource(thumb);
+  }
+
+  /**
+   * @param {HTMLVideoElement} video
+   * @param {HTMLElement} thumb
+   */
+  createVideoClip(video, thumb) {
+    const clip = this.videoClips.get(thumb.id);
+
+    if (clip === undefined) {
+      video.ontimeupdate = null;
+      return;
+    }
+    video.ontimeupdate = () => {
+      if (video.currentTime < clip.start || video.currentTime > clip.end) {
+        video.removeAttribute("controls");
+        video.currentTime = clip.start;
+      }
+    };
+  }
+
+  clearVideoSources() {
+    for (const video of this.videoPlayers) {
+      video.src = "";
+    }
+  }
+
+  /**
+   * @param {HTMLVideoElement} video
+   * @returns {String | null}
+   */
+  getSourceIdFromVideo(video) {
+    const regex = /\.mp4\?(\d+)/;
+    const match = regex.exec(video.src);
+
+    if (match === null) {
+      return null;
+    }
+    return match[1];
+  }
+  /**
    * @param {HTMLElement} thumb
    */
   playOriginalVideo(thumb) {
     this.setActiveVideoPlayer(thumb);
-
-    if (this.inGallery) {
-      this.preloadInactiveVideoPlayers(thumb);
-    }
+    this.preloadInactiveVideoPlayers(thumb);
     this.stopAllVideos();
-    // const preloadedVideoURL = this.preloadedVideoURLs.get(thumb.id);
     const video = this.getActiveVideoPlayer();
 
-    // if (preloadedVideoURL !== undefined && preloadedVideoURL !== null) {
-    //   video.src = preloadedVideoURL;
-    // } else {
-    //   video.src = this.getVideoSource(thumb);
-    // }
-    if (!video.src.includes(`?${thumb.id}`)) {
-      video.src = this.getVideoSource(thumb);
-    }
+    this.setVideoSource(video, thumb);
     video.style.display = "block";
     video.play().catch(() => { });
     this.toggleVideoControls(true);
-
-    // if (!this.inGallery) {
-    //   setTimeout(() => {
-    //     this.preloadInactiveVideoPlayers(thumb);
-    //     this.stopAllInactiveVideos();
-    //   }, 500);
-    // }
   }
 
   stopAllVideos() {
@@ -2389,55 +2427,6 @@ onmessage = (message) => {
       imageThumbsToRender.unshift(initialThumb);
     }
     this.renderImages(imageThumbsToRender, "adjacent");
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   */
-  preloadVideosAround(initialThumb) {
-    if (onSearchPage()) {
-      return;
-    }
-
-    if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
-      return;
-    }
-    const nearbyThumbs = this.getAdjacentVisibleThumbsLooped(
-      initialThumb,
-      Gallery.settings.maxNumberOfPreloadedVideos / 2,
-      () => {
-        return true;
-      }
-    );
-
-    nearbyThumbs.forEach((thumb) => {
-      this.preloadVideo(thumb);
-    });
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  preloadVideo(thumb) {
-    if (thumb === null || !isVideo(thumb) || this.preloadedVideoURLs.has(thumb.id)) {
-      return;
-    }
-    this.preloadedVideoURLs.set(thumb.id, null);
-    fetch(this.getVideoSource(thumb))
-      .then((response) => {
-        return response.blob();
-      }).then((blob) => {
-        this.preloadedVideoURLs.set(thumb.id, URL.createObjectURL(blob));
-      });
-
-    if (this.preloadedVideoURLs.size > Gallery.settings.maxNumberOfPreloadedVideos) {
-      const iterator = this.preloadedVideoURLs.entries().next();
-
-      if (!iterator.done) {
-        URL.revokeObjectURL(iterator.value[1]);
-        this.preloadedVideoURLs.delete(iterator.value[0]);
-      }
-    }
   }
 
   /**
@@ -2814,7 +2803,7 @@ onmessage = (message) => {
     }
 
     for (const video of this.videoPlayers) {
-      if (video.src.includes(`?${thumb.id}`)) {
+      if (this.videoPlayerHasSource(video, thumb)) {
         video.setAttribute("active", "");
         return;
       }
@@ -2826,6 +2815,15 @@ onmessage = (message) => {
    */
   getActiveVideoPlayer() {
     return this.videoPlayers.find(video => video.hasAttribute("active")) || this.videoPlayers[0];
+  }
+
+  /**
+   * @param {HTMLVideoElement} video
+   * @param {HTMLElement} thumb
+   * @returns {Boolean}
+   */
+  videoPlayerHasSource(video, thumb) {
+    return video.src === this.getVideoSource(thumb);
   }
 
   /**
@@ -3001,6 +2999,9 @@ onmessage = (message) => {
       return;
     }
     this.traverseGallery(Gallery.directions.right, false);
+  }
+
+  loadVideoClips() {
   }
 }
 
