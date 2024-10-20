@@ -103,6 +103,10 @@ class AwesompleteWrapper {
           event.preventDefault();
           break;
 
+        case "Escape":
+          hideAwesomplete(input);
+          break;
+
         default:
           break;
       }

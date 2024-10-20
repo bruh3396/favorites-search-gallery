@@ -1,21 +1,22 @@
 const THUMB_NODE_TEMPLATE = new DOMParser().parseFromString("<div></div>", "text/html").createElement("div");
 const CANVAS_HTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
-const REMOVE_BUTTON_HTML = userIsOnTheirOwnFavoritesPage() ? "<button class=\"remove-button light-green-gradient\">Remove</button>" : "";
+const REMOVE_FAVORITE_BUTTON_HTML = "<button class=\"remove-favorite-button auxillary-button light-green-gradient\">Remove</button>";
+const ADD_FAVORITE_BUTTON_HTML = "<button class=\"add-favorite-button auxillary-button light-green-gradient\">Add Favorite</button>";
+const AUXILLARY_BUTTON_HTML = userIsOnTheirOwnFavoritesPage() ? REMOVE_FAVORITE_BUTTON_HTML : ADD_FAVORITE_BUTTON_HTML;
 
 THUMB_NODE_TEMPLATE.className = "thumb-node";
 
 THUMB_NODE_TEMPLATE.innerHTML = `
     <div>
       <img>
-      ${REMOVE_BUTTON_HTML}
+      ${AUXILLARY_BUTTON_HTML}
       ${CANVAS_HTML}
     </div>
 `;
 
 class ThumbNode {
   static baseURLs = {
-    post: "https://rule34.xxx/index.php?page=post&s=view&id=",
-    remove: "https://rule34.xxx/index.php?page=favorites&s=delete&id="
+    post: "https://rule34.xxx/index.php?page=post&s=view&id="
   };
   static thumbSourceExtractionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
   static parser = new DOMParser();
@@ -117,7 +118,7 @@ class ThumbNode {
   /**
    * @type {HTMLButtonElement}
    */
-  removeButton;
+  auxillaryButton;
   /**
    * @type {String}
    */
@@ -142,13 +143,6 @@ class ThumbNode {
    * @type {FavoriteMetadata}
   */
   metadata;
-
-  /**
-   * @type {String}
-   */
-  get removeURL() {
-    return ThumbNode.baseURLs.remove + this.id;
-  }
 
   /**
    * @type {String}
@@ -197,7 +191,7 @@ class ThumbNode {
   constructor(thumb, fromRecord) {
     this.instantiateTemplate();
     this.populateAttributes(thumb, fromRecord);
-    this.setupRemoveButton();
+    this.setupAuxillaryButton();
     this.setupClickLink();
     this.setFlags();
     this.addInstanceToAllThumbNodes();
@@ -207,19 +201,23 @@ class ThumbNode {
     this.root = THUMB_NODE_TEMPLATE.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
-    this.removeButton = userIsOnTheirOwnFavoritesPage() ? this.root.children[0].children[1] : null;
+    this.auxillaryButton = this.root.children[0].children[1];
   }
 
-  setupRemoveButton() {
-    if (this.removeButton === null) {
-      return;
+  setupAuxillaryButton() {
+    if (userIsOnTheirOwnFavoritesPage()) {
+      this.auxillaryButton.onclick = (event) => {
+        event.stopPropagation();
+        this.auxillaryButton.remove();
+        removeFavorite(this.id);
+      };
+    } else {
+      this.auxillaryButton.onclick = (event) => {
+        event.stopPropagation();
+        this.auxillaryButton.remove();
+        addFavorite(this.id);
+      };
     }
-    this.removeButton.onclick = (event) => {
-      event.stopPropagation();
-      setIdToBeRemovedOnReload(this.id);
-      fetch(this.removeURL);
-      this.removeButton.remove();
-    };
   }
 
   /**

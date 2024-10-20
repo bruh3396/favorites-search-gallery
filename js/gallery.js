@@ -133,7 +133,7 @@ const galleryDebugHTML = `
   }
 
   #main-canvas, #low-resolution-canvas {
-    opacity: .5;
+    opacity: 0.25;
   }`;
 
 class Gallery {
@@ -1034,14 +1034,14 @@ onmessage = (message) => {
     imageFetchDelay: 250,
     imageFetchDelayWhenExtensionKnown: 25,
     upscaledThumbResolutionFraction: 4.5,
-    upscaledAnimatedThumbResolutionFraction: 7,
+    upscaledAnimatedThumbResolutionFraction: 5.5,
     extensionsFoundBeforeSavingCount: 5,
-    animatedThumbsToUpscaleRange: 10,
-    animatedThumbsToUpscaleDiscrete: 10,
+    animatedThumbsToUpscaleRange: 20,
+    animatedThumbsToUpscaleDiscrete: 20,
     traversalCooldownTime: 300,
     renderOnPageChangeCooldownTime: 2000,
     autoplayTime: 5000,
-    additionalVideoPlayerCount: onMobileDevice() ? 0 : 2,
+    additionalVideoPlayerCount: onMobileDevice() ? 0 : 3,
     renderAroundAggressively: true,
     debugEnabled: false,
     developerMode: true
@@ -1383,7 +1383,7 @@ onmessage = (message) => {
 
         case "f":
           {
-            const addedFavoriteStatus = await addFavorite(this.getSelectedThumb());
+            const addedFavoriteStatus = await addFavorite(this.getSelectedThumb().id);
           }
           break;
 
@@ -1607,7 +1607,7 @@ onmessage = (message) => {
 
   injectDebugHTML() {
     if (Gallery.settings.debugEnabled) {
-      injectStyleHTML(galleryDebugHTML);
+      injectStyleHTML(galleryDebugHTML, "gallery-debug");
     }
   }
 
@@ -1704,6 +1704,8 @@ onmessage = (message) => {
         if (!video.hasAttribute("controls")) {
           video.setAttribute("controls", "");
         }
+      }, {
+        passive: true
       });
       video.addEventListener("click", () => {
         if (video.paused) {
@@ -1711,6 +1713,8 @@ onmessage = (message) => {
         } else {
           video.pause();
         }
+      }, {
+        passive: true
       });
       video.addEventListener("volumechange", (event) => {
         if (!event.target.hasAttribute("active")) {
@@ -1723,9 +1727,13 @@ onmessage = (message) => {
           v.volume = video.volume;
           v.muted = video.muted;
         }
+      }, {
+        passive: true
       });
       video.addEventListener("ended", () => {
         this.doAutoplay();
+      }, {
+        passive: true
       });
     }
   }
@@ -2090,7 +2098,7 @@ onmessage = (message) => {
   }
 
   unFavoriteSelectedContent() {
-    const removeLink = getRemoveLinkFromThumb(this.getSelectedThumb());
+    const removeLink = getRemoveFavoriteLinkFromThumb(this.getSelectedThumb());
 
     if (removeLink === null || removeLink.style.visibility === "hidden") {
       return;
@@ -2298,11 +2306,10 @@ onmessage = (message) => {
   /**
    * @param {HTMLElement} initialThumb
    */
-  preloadInactiveVideoPlayers(initialThumb) {
+  async preloadInactiveVideoPlayers(initialThumb) {
     if (!this.inGallery) {
-      // await sleep(500);
-      // this.stopAllInactiveVideos();
-      return;
+      await sleep(500);
+      this.stopAllInactiveVideos();
     }
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
     const videoThumbsAroundInitialThumb = this.getAdjacentVisibleThumbsLooped(initialThumb, inactiveVideoPlayers.length, (t) => {

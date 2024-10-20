@@ -126,7 +126,7 @@ const savedSearchesHTML = `<div id="saved-searches">
         placeholder="Save Custom Search"></textarea>
     </div>
     <div id="saved-search-list-container">
-      <div id="saved-search-list"></div>
+      <ul id="saved-search-list"></ul>
     </div>
   </div>
 </div>
@@ -206,20 +206,17 @@ class SavedSearches {
 
   insertHTMLIntoDocument() {
     const showSavedSearches = getPreference(SavedSearches.preferences.visibility, false);
-    let placeToInsertSavedSearches = document.getElementById("right-favorites-panel");
+    const savedSearchesContainer = document.getElementById("right-favorites-panel");
 
-    if (placeToInsertSavedSearches === null) {
-      placeToInsertSavedSearches = document.getElementById("favorites-top-bar");
-    }
-    placeToInsertSavedSearches.insertAdjacentHTML("beforeend", savedSearchesHTML);
-    document.getElementById("saved-searches").style.display = showSavedSearches ? "block" : "none";
+    savedSearchesContainer.insertAdjacentHTML("beforeend", savedSearchesHTML);
+    document.getElementById("right-favorites-panel").style.display = showSavedSearches ? "block" : "none";
     const options = addOptionToFavoritesPage(
       "savedSearchesCheckbox",
       "Saved Searches",
       "Toggle saved searches",
       showSavedSearches,
       (e) => {
-        document.getElementById("saved-searches").style.display = e.target.checked ? "block" : "none";
+        savedSearchesContainer.style.display = e.target.checked ? "block" : "none";
         setPreference(SavedSearches.preferences.visibility, e.target.checked);
       },
       true

@@ -6,8 +6,8 @@ class FavoritesLoader {
     finished: 2,
     indexedDB: 3
   };
-  static objectStoreName = `user${getFavoritesPageId()}`;
   static databaseName = "Favorites";
+  static objectStoreName = `user${getFavoritesPageId()}`;
   static webWorkers = {
     database:
       `
@@ -454,6 +454,13 @@ onmessage = (message) => {
     if (FavoritesLoader.disabled) {
       return;
     }
+    this.initializeFields();
+    this.addEventListeners();
+    this.createDatabaseMessageHandler();
+    this.loadFavorites();
+  }
+
+  initializeFields() {
     this.allThumbNodes = [];
     this.searchResultsWhileFetching = [];
     this.idsRequiringMetadataDatabaseUpdate = [];
@@ -485,9 +492,6 @@ onmessage = (message) => {
     this.favoritesSearchInput = document.getElementById("favorites-search-box");
     this.paginationContainer = this.createPaginationContainer();
     this.currentFavoritesPageNumber = 1;
-    this.addEventListeners();
-    this.createDatabaseMessageHandler();
-    this.loadFavorites();
   }
 
   addEventListeners() {
@@ -500,20 +504,18 @@ onmessage = (message) => {
   }
 
   createDatabaseMessageHandler() {
-    this.databaseWorker.onmessage = (message) => {
+    this.databaseWorker.onmessage = async(message) => {
       message = message.data;
 
       switch (message.response) {
         case "finishedLoading":
           FavoritesLoader.currentLoadState = FavoritesLoader.loadState.indexedDB;
           this.attachSavedFavoritesToDocument(message.favorites);
-          this.updateSavedFavorites();
+          await sleep(100);
+          this.addNewFavoritesToSavedFavorites(this.getAllFavoriteIds(), 0, []);
           break;
 
         case "finishedStoring":
-          //   setTimeout(() => {
-          //     // this.databaseWorker.terminate();
-          //   }, 5000);
           break;
 
         default:
@@ -523,15 +525,15 @@ onmessage = (message) => {
   }
 
   loadFavorites() {
-    this.clearOriginalContent();
-    this.setFavoritesCount();
+    this.clearOriginalFavorites();
+    this.setExpectedFavoritesCount();
     this.searchFavorites();
   }
 
-  setFavoritesCount() {
-    const profilePage = `https://rule34.xxx/index.php?page=account&s=profile&id=${getFavoritesPageId()}`;
+  setExpectedFavoritesCount() {
+    const profileURL = `https://rule34.xxx/index.php?page=account&s=profile&id=${getFavoritesPageId()}`;
 
-    fetch(profilePage)
+    fetch(profileURL)
       .then((response) => {
         if (response.ok) {
           return response.text();
@@ -539,36 +541,27 @@ onmessage = (message) => {
         throw new Error(response.status);
       })
       .then((html) => {
-        const table = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html").querySelector("table");
+        const table = FavoritesLoader.parser.parseFromString(html, "text/html").querySelector("table");
+        const favoritesURL = Array.from(table.querySelectorAll("a")).find(a => a.href.includes("page=favorites&s=view"));
+        const favoritesCount = parseInt(favoritesURL.textContent);
 
-        if (table === null) {
-          return;
-        }
-
-        for (const row of table.querySelectorAll("tr")) {
-          const cells = row.querySelectorAll("td");
-
-          if (cells.length >= 2 && cells[0].textContent.trim() === "Favorites") {
-            this.expectedFavoritesCountFound = true;
-            this.expectedFavoritesCount = parseInt(cells[1].textContent.trim());
-            return;
-          }
-        }
+        this.expectedFavoritesCountFound = true;
+        this.expectedFavoritesCount = favoritesCount;
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        console.error(`Could not find total favorites count from ${profileURL}, are you logged in?`);
       });
   }
 
-  clearOriginalContent() {
+  clearOriginalFavorites() {
     const thumbs = Array.from(document.getElementsByClassName("thumb"));
 
+    document.getElementById("content").innerHTML = "";
     setTimeout(() => {
-      dispatchEvent(new CustomEvent("originalContentCleared", {
+      dispatchEvent(new CustomEvent("originalFavoritesCleared", {
         detail: thumbs
       }));
     }, 1000);
-    document.getElementById("content").innerHTML = "";
   }
 
   /**
@@ -581,7 +574,6 @@ onmessage = (message) => {
       // this.searchQuery = this.removeMetadataFilters(searchQuery);
       // this.metadataFilters = this.extractMetadataFilters(searchQuery);
     }
-    this.hideAwesomplete();
     this.resetMatchCount();
     dispatchEvent(new Event("searchStarted"));
 
@@ -706,53 +698,16 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {ThumbNode[]} thumbNodes
-   * @param {Number} stopIndex
-   * @returns {Object.<String, Number>}
-   */
-  getSearchResultIds(thumbNodes, stopIndex) {
-    const results = {};
-
-    for (const thumbNode of this.getSearchResults(thumbNodes, stopIndex)) {
-      results[thumbNode.id] = 0;
-    }
-    return results;
-  }
-
-  fetchNewFavoritesWithoutReloadingPage() {
-    const previousFavoriteCount = this.expectedFavoritesCount;
-    let currentFavoritesCount = 0;
-
-    this.setFavoritesCount();
-    setTimeout(() => {
-      currentFavoritesCount = getIdsToRemoveOnReload().length + this.expectedFavoritesCount;
-      const newFavoritesCount = currentFavoritesCount - previousFavoriteCount;
-
-      if (newFavoritesCount > 0) {
-        this.updateSavedFavorites();
-        this.setProgressText(`Fetching ${newFavoritesCount} new favorite${newFavoritesCount > 1 ? "s" : ""}`);
-        this.showProgressText(true);
-      }
-    }, 800);
-  }
-
-  updateSavedFavorites() {
-    setTimeout(() => {
-      this.addNewFavoritesToSavedFavorites(this.getAllFavoriteIds(), 0, []);
-    }, 100);
-  }
-
-  /**
    * @param {Object.<String, ThumbNode>} allFavoriteIds
    * @param {Number} currentPageNumber
    * @param {ThumbNode[]} newFavoritesToAdd
    */
   addNewFavoritesToSavedFavorites(allFavoriteIds, currentPageNumber, newFavoritesToAdd) {
-    const favoritesPage = `${document.location.href}&pid=${currentPageNumber}`;
+    const favoritesURL = `${document.location.href}&pid=${currentPageNumber}`;
+    const exceededFavoritesPageNumber = currentPageNumber > this.finalPageNumber;
     let allNewFavoritesFound = false;
-    const searchCommand = getSearchCommand(this.finalSearchQuery);
 
-    requestPageInformation(favoritesPage, (response) => {
+    requestPageInformation(favoritesURL, (response) => {
       const thumbNodes = this.extractThumbNodesFromFavoritesPage(response);
 
       for (const thumbNode of thumbNodes) {
@@ -765,11 +720,11 @@ onmessage = (message) => {
         newFavoritesToAdd.push(thumbNode);
       }
 
-      if (!allNewFavoritesFound && currentPageNumber < this.finalPageNumber) {
-        this.addNewFavoritesToSavedFavorites(allFavoriteIds, currentPageNumber + 50, newFavoritesToAdd);
-      } else {
+      if (allNewFavoritesFound || exceededFavoritesPageNumber) {
         this.allThumbNodes = newFavoritesToAdd.concat(this.allThumbNodes);
         this.finishUpdatingSavedFavorites(newFavoritesToAdd);
+      } else {
+        this.addNewFavoritesToSavedFavorites(allFavoriteIds, currentPageNumber + 50, newFavoritesToAdd);
       }
     });
   }
@@ -778,14 +733,13 @@ onmessage = (message) => {
    * @param {ThumbNode[]} newThumbNodes
    */
   finishUpdatingSavedFavorites(newThumbNodes) {
-    if (newThumbNodes.length > 0) {
-      this.storeFavorites(newThumbNodes);
-      this.insertNewFavoritesAfterReloadingPage(newThumbNodes);
-      this.toggleLoadingUI(false);
-      this.updateMatchCount(this.allThumbNodes.filter(thumbNode => thumbNode.isVisible).length);
-    } else if (this.idsRequiringMetadataDatabaseUpdate.length === 0) {
-      // this.databaseWorker.terminate();
+    if (newThumbNodes.length === 0) {
+      return;
     }
+    this.storeFavorites(newThumbNodes);
+    this.insertNewFavoritesAfterReloadingPage(newThumbNodes);
+    this.toggleLoadingUI(false);
+    this.updateMatchCount(this.allThumbNodes.filter(thumbNode => thumbNode.isVisible).length);
   }
 
   initializeFetchedThumbNodesInsertionQueue() {
@@ -1104,20 +1058,6 @@ onmessage = (message) => {
     });
   }
 
-  hideAwesomplete() {
-    if (this.favoritesSearchInput === null) {
-      this.favoritesSearchInput = document.getElementById("favorites-search-box");
-    }
-
-    if (this.favoritesSearchInput === null) {
-      return;
-    }
-    this.favoritesSearchInput.blur();
-    setTimeout(() => {
-      this.favoritesSearchInput.focus();
-    }, 100);
-  }
-
   /**
    * @returns {Number}
    */
@@ -1331,10 +1271,10 @@ Tag modifications and saved searches will be preserved.
 
   insertPaginationContainer() {
     if (document.getElementById(this.paginationContainer.id) === null) {
-      const topRowButtons = Array.from(document.getElementById("left-favorites-panel-top-row").querySelectorAll("button"));
-      const placeToInsertPagination = topRowButtons[topRowButtons.length - 1];
+      const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
 
       placeToInsertPagination.insertAdjacentElement("afterend", this.paginationContainer);
+      placeToInsertPagination.remove();
     }
   }
 
@@ -1344,16 +1284,6 @@ Tag modifications and saved searches will be preserved.
   createPaginationContainer() {
     const container = document.createElement("span");
 
-    if (usingDarkTheme()) {
-      injectStyleHTML(`
-        #favorites-pagination-container {
-          >button {
-            border: 1px solid white !important;
-            color: white !important;
-          }
-        }
-      `, "pagination-style");
-    }
     container.id = "favorites-pagination-container";
     return container;
   }
@@ -1538,7 +1468,7 @@ Tag modifications and saved searches will be preserved.
 
   reAddAllThumbNodeEventListeners() {
     for (const thumbNode of this.allThumbNodes) {
-      thumbNode.setupRemoveButton();
+      thumbNode.setupAuxillaryButton();
     }
   }
 

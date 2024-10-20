@@ -239,11 +239,11 @@ function sleep(milliseconds) {
 }
 
 /**
- * @param {Boolean} removeButtonsAreVisible
+ * @param {Boolean} value
  */
-function hideCaptionsWhenRemoveButtonsAreVisible(removeButtonsAreVisible) {
+function forceHideCaptions(value) {
   for (const caption of document.getElementsByClassName("caption")) {
-    if (removeButtonsAreVisible) {
+    if (value) {
       caption.classList.add("remove");
     } else {
       caption.classList.remove("remove");
@@ -251,29 +251,12 @@ function hideCaptionsWhenRemoveButtonsAreVisible(removeButtonsAreVisible) {
   }
 }
 
-function updateVisibilityOfAllRemoveButtons() {
-  const removeButtonCheckbox = document.getElementById("show-remove-buttons");
-
-  if (removeButtonCheckbox === null) {
-    return;
-  }
-  const removeButtonsAreVisible = removeButtonCheckbox.checked;
-  const visibility = removeButtonsAreVisible ? "visible" : "hidden";
-
-  injectStyleHTML(`
-      .remove-button {
-        visibility: ${visibility} !important;
-      }
-    `, "remove-button-visibility");
-  hideCaptionsWhenRemoveButtonsAreVisible(removeButtonsAreVisible);
-}
-
 /**
  * @param {HTMLElement} thumb
  * @returns {String | null}
  */
-function getRemoveLinkFromThumb(thumb) {
-  return thumb.querySelector(".remove-button");
+function getRemoveFavoriteLinkFromThumb(thumb) {
+  return thumb.querySelector(".remove-favorite-button");
 }
 
 /**
@@ -444,20 +427,45 @@ function negateTags(tags) {
 }
 
 /**
- * @param {HTMLInputElement} input
- * @returns {Boolean}
+ * @param {HTMLInputElement | HTMLTextAreaElement} input
+ * @returns {HTMLDivElement | null}
  */
-function awesompleteIsHidden(input) {
-  if (input.parentElement.className === "awesomplete") {
-    return input.parentElement.children[1].hasAttribute("hidden");
-  }
-  return false;
-}
-
-function awesompleteIsUnselected(input) {
+function getAwesompleteFromInput(input) {
   const awesomplete = input.parentElement;
 
+  if (awesomplete === null || awesomplete.className !== "awesomplete") {
+    return null;
+  }
+  return awesomplete;
+}
+
+/**
+ * @param {HTMLInputElement | HTMLTextAreaElement} input
+ * @returns {Boolean}
+ */
+function awesompleteIsVisible(input) {
+  const awesomplete = getAwesompleteFromInput(input);
+
   if (awesomplete === null) {
+    return false;
+  }
+  const awesompleteSuggestions = awesomplete.querySelector("ul");
+  return awesompleteSuggestions !== null && !awesompleteSuggestions.hasAttribute("hidden");
+}
+
+/**
+ *
+ * @param {HTMLInputElement | HTMLTextAreaElement} input
+ * @returns
+ */
+function awesompleteIsUnselected(input) {
+  const awesomplete = getAwesompleteFromInput(input);
+
+  if (awesomplete === null) {
+    return true;
+  }
+
+  if (!awesompleteIsVisible(input)) {
     return true;
   }
   const searchSuggestions = Array.from(awesomplete.querySelectorAll("li"));
@@ -471,7 +479,7 @@ function awesompleteIsUnselected(input) {
 }
 
 /**
- * @param {HTMLInputElement} input
+ * @param {HTMLInputElement | HTMLTextAreaElement} input
  * @returns
  */
 function clearAwesompleteSelection(input) {
@@ -792,6 +800,14 @@ function setTheme() {
             color: white;
           }
           `, "dark-theme-number-input");
+        injectStyleHTML(`
+            #favorites-pagination-container {
+              >button {
+                border: 1px solid white !important;
+                color: white !important;
+              }
+            }
+          `, "pagination-style");
       }
     }
   }, 10);
@@ -1154,15 +1170,12 @@ function isNumber(string) {
 }
 
 /**
- * @param {HTMLElement} thumb
+ * @param {String} id
  * @returns {Promise.<Number>}
  */
-function addFavorite(thumb) {
-  if (thumb === null || thumb === undefined) {
-    return ADD_FAVORITE_STATUS.error;
-  }
-  fetch(`https://rule34.xxx/index.php?page=post&s=vote&id=${thumb.id}&type=up`);
-  return fetch(`https://rule34.xxx/public/addfav.php?id=${thumb.id}`)
+function addFavorite(id) {
+  fetch(`https://rule34.xxx/index.php?page=post&s=vote&id=${id}&type=up`);
+  return fetch(`https://rule34.xxx/public/addfav.php?id=${id}`)
     .then((response) => {
       return response.text();
     })
@@ -1172,6 +1185,14 @@ function addFavorite(thumb) {
     .catch(() => {
       return ADD_FAVORITE_STATUS.error;
     });
+}
+
+/**
+ * @param {String} id
+ */
+function removeFavorite(id) {
+  setIdToBeRemovedOnReload(id);
+  fetch(`https://rule34.xxx/index.php?page=favorites&s=delete&id=${id}`);
 }
 
 /**
@@ -1190,6 +1211,13 @@ function insertSuggestion(input, suggestion) {
   input.value = result;
   input.selectionStart = selectionStart;
   input.selectionEnd = selectionStart;
+}
+
+/**
+ * @param {HTMLInputElement | HTMLTextAreaElement} input
+ */
+function hideAwesomplete(input) {
+  getAwesompleteFromInput(input).querySelector("ul").setAttribute("hidden", "");
 }
 
 initializeUtilities();

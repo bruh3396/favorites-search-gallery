@@ -301,7 +301,7 @@ class Caption {
       window.addEventListener("showCaption", (event) => {
         this.attachToThumb(event.detail);
       });
-      window.addEventListener("originalContentCleared", (event) => {
+      window.addEventListener("originalFavoritesCleared", (event) => {
         const thumbs = event.detail;
         const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
 

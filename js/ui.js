@@ -100,15 +100,15 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       }
     }
 
-    .remove-button {
+    .auxillary-button {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
-      color: #0075FF;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 15px;
       height: 40px;
+      color: #0075FF;
       background: white;
       border: none;
       z-index: 2;
@@ -137,12 +137,28 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           z-index: 1;
         }
 
-        &:has(.remove-button:hover) {
-          outline: 3px solid red !important;
+        &:has(.auxillary-button:hover) {
+          outline-style: solid !important;
+          outline-width: 3px !important;
 
-          >.remove-button {
-            box-shadow: 0px 3px 0px 0px red;
+          >.auxillary-button {
+            box-shadow: 0px 3px 0px 0px;
+          }
+        }
+
+        &:has(.remove-favorite-button:hover) {
+          outline-color: red !important;
+
+          >.remove-favorite-button {
             color: red;
+          }
+        }
+
+        &:has(.add-favorite-button:hover) {
+          outline-color: goldenrod !important;
+
+          >.add-favorite-button {
+            color: goldenrod;
           }
         }
 
@@ -206,19 +222,34 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     }
 
     input[type="number"] {
-      appearance: none;
       -moz-appearance: textfield;
+      appearance: none;
       width: 15px;
     }
 
     #column-resize-container {
-      >span {
+      >div {
+        align-content: center;
+
         >button {
-          width: 20px;
-          text-align: center;
-          align-items: center;
+          width: 30px;
+          height: 30px;
+          padding: 0;
+          margin: 0;
+
+          svg {
+            padding-top: 3px;
+          }
         }
       }
+    }
+
+    #column-resize-input {
+      margin: 0;
+      position: relative;
+      bottom: 5px;
+      width: 30px;
+      height: 25px;
     }
 
     #find-favorite {
@@ -264,6 +295,16 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #help-links-container {
       margin-top: 17px;
+
+      >a {
+        text-decoration: underline;
+      }
+    }
+
+    #whats-new-container {
+      font-weight: bolder;
+      font-style: italic;
+      text-decoration: none !important;
     }
 
     #left-favorites-panel-bottom-row {
@@ -352,13 +393,23 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
       }
     }
+
+    #sort-ascending {
+      margin: 0;
+      bottom: -6px;
+      position: relative;
+    }
+
+    .auxillary-button {
+      visibility: hidden;
+    }
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;">Search Favorites</h2>
       <span style="margin-left: 5px;">
         <label id="match-count-label"></label>
-        <label id="pagination-label" style="margin-left: 10px;"></label>
+        <label id="pagination-label" style="margin-left: 50px;"></label>
         <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
@@ -373,8 +424,15 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           <input type="number" id="find-favorite-input" type="text" placeholder="ID">
         </span>
         <button title="Remove cached favorites and preferences" id="reset-button">Reset</button>
+        <span id="favorites-pagination-placeholder"></span>
         <span id="help-links-container">
-          <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
+          <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Controls</a>
+          |
+          <a href="https://github.com/bruh3396/favorites-search-gallery#features" target="_blank">Help</a>
+          |
+          <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report Bug</a>
+          |
+          <a id="whats-new-container" href="#" onclick="return false">What's new!</a>
         </span>
       </div>
       <div>
@@ -390,8 +448,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             <div><label class="checkbox" title="Enable gallery and other features on search pages"><input
                   type="checkbox" id="enable-on-search-pages">
                 Enhance Search Pages</label></div>
-            <div><label class="checkbox" title="Toggle remove buttons"><input type="checkbox" id="show-remove-buttons">
+            <div style="display: none;"><label class="checkbox" title="Toggle remove buttons"><input type="checkbox"
+                  id="show-remove-buttons">
                 Remove Buttons</label></div>
+            <div style="display: none;"><label class="checkbox" title="Toggle add favorite buttons"><input
+                  type="checkbox" id="show-add-favorite-buttons">
+                Add Favorite Buttons</label></div>
             <div><label class="checkbox" title="Exclude blacklisted tags from search"><input type="checkbox"
                   id="filter-blacklist-checkbox"> Exclude Blacklist</label></div>
             <div><label class="checkbox" title="Enable fancy image hovering (experimental)"><input type="checkbox"
@@ -413,8 +475,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   <option value="change">Date Changed</option>
                   <!-- <option value="id">ID</option> -->
                 </select>
-                <input type="checkbox" id="sort-ascending"
-                  style="height: 20px; width: 20px; margin: 0; bottom: -6px; position: relative;">
+                <input type="checkbox" id="sort-ascending">
               </div>
             </div>
             <div id="rating-container">
@@ -445,12 +506,24 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
               <input type="number" id="results-per-page-input" min="50" max="10000" step="500">
             </div>
             <div id="column-resize-container" title="Set the number of favorites per row">
-              <span>
+              <div>
                 <label>Columns</label>
-                <button id="column-resize-minus">-</button>
+                <br>
+                <button id="column-resize-minus">
+                  <svg xmlns="http://www.w3.org/2000/svg" id="Isolation_Mode" data-name="Isolation Mode"
+                    viewBox="0 0 24 24" width="20" height="20">
+                    <rect x="6" y="10.5" width="12" height="3" />
+                  </svg>
+                </button>
                 <input type="number" id="column-resize-input" min="2" max="20">
-                <button id="column-resize-plus">+</button>
-              </span>
+                <button id="column-resize-plus">
+                  <svg xmlns="http://www.w3.org/2000/svg" id="Isolation_Mode" data-name="Isolation Mode"
+                    viewBox="0 0 24 24" width="20" height="20">
+                    <polygon
+                      points="18 10.5 13.5 10.5 13.5 6 10.5 6 10.5 10.5 6 10.5 6 13.5 10.5 13.5 10.5 18 13.5 18 13.5 13.5 18 13.5 18 10.5" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -472,7 +545,7 @@ if (onFavoritesPage()) {
 const FAVORITE_OPTIONS = [document.getElementById("favorite-options"), document.getElementById("additional-favorite-options")];
 const MAX_SEARCH_HISTORY_LENGTH = 100;
 const FAVORITE_PREFERENCES = {
-  showRemoveButtons: "showRemoveButtons",
+  showAuxillaryButtons: userIsOnTheirOwnFavoritesPage() ? "showRemoveButtons" : "showAddFavoriteButtons",
   showOptions: "showOptions",
   filterBlacklist: "filterBlacklistCheckbox",
   searchHistory: "favoritesSearchHistory",
@@ -503,7 +576,7 @@ const FAVORITE_BUTTONS = {
 };
 const FAVORITE_CHECKBOXES = {
   showOptions: document.getElementById("options-checkbox"),
-  showRemoveButtons: document.getElementById("show-remove-buttons"),
+  showAuxillaryButtons: userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-buttons") : document.getElementById("show-add-favorite-buttons"),
   filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
   showUI: document.getElementById("show-ui"),
   fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
@@ -534,17 +607,19 @@ function initializeFavoritesPage() {
   addEventListenersToFavoritesPage();
   loadFavoritesPagePreferences();
   removePaginatorFromFavoritesPage();
-  hideRemoveLinksWhenNotOnOwnFavoritesPage();
-  configureMobileUi();
+  configureAuxillaryButtonOptionVisibility();
+  configureMobileUI();
+  configureDesktopUI();
 }
 
 function loadFavoritesPagePreferences() {
-  const removeButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showRemoveButtons, false) && userIsOnTheirOwnFavoritesPage();
+  const auxillaryFavoriteButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showAuxillaryButtons, false);
 
-  FAVORITE_CHECKBOXES.showRemoveButtons.checked = removeButtonsAreVisible;
+  FAVORITE_CHECKBOXES.showAuxillaryButtons.checked = auxillaryFavoriteButtonsAreVisible;
   setTimeout(() => {
-    updateVisibilityOfAllRemoveButtons();
+    toggleAuxillaryButtons();
   }, 100);
+
   const showOptions = getPreference(FAVORITE_PREFERENCES.showOptions, false);
 
   FAVORITE_CHECKBOXES.showOptions.checked = showOptions;
@@ -634,6 +709,7 @@ function addEventListenersToFavoritesPage() {
 
       openSearchPage(queryWithFormattedIds);
     } else {
+      hideAwesomplete(FAVORITE_INPUTS.searchBox);
       favoritesLoader.searchFavorites(query);
       addToFavoritesSearchHistory(query);
     }
@@ -658,17 +734,11 @@ function addEventListenersToFavoritesPage() {
       case "ArrowUp":
 
       case "ArrowDown":
-        if (awesompleteIsHidden(FAVORITE_INPUTS.searchBox)) {
+        if (awesompleteIsVisible(FAVORITE_INPUTS.searchBox)) {
+          updateLastSearchQuery();
+        } else {
           event.preventDefault();
           traverseFavoritesSearchHistory(event.key);
-        } else {
-          updateLastSearchQuery();
-        }
-        break;
-
-      case "Escape":
-        if (!awesompleteIsHidden(FAVORITE_INPUTS.searchBox)) {
-          favoritesLoader.hideAwesomplete();
         }
         break;
 
@@ -688,9 +758,9 @@ function addEventListenersToFavoritesPage() {
     setPreference(FAVORITE_PREFERENCES.showOptions, FAVORITE_CHECKBOXES.showOptions.checked);
   };
 
-  FAVORITE_CHECKBOXES.showRemoveButtons.onchange = () => {
-    updateVisibilityOfAllRemoveButtons();
-    setPreference(FAVORITE_PREFERENCES.showRemoveButtons, FAVORITE_CHECKBOXES.showRemoveButtons.checked);
+  FAVORITE_CHECKBOXES.showAuxillaryButtons.onchange = () => {
+    toggleAuxillaryButtons();
+    setPreference(FAVORITE_PREFERENCES.showAuxillaryButtons, FAVORITE_CHECKBOXES.showAuxillaryButtons.checked);
   };
   FAVORITE_BUTTONS.shuffle.onclick = () => {
     favoritesLoader.shuffleSearchResults();
@@ -768,16 +838,8 @@ function addEventListenersToFavoritesPage() {
   };
 }
 
-function completeSearchSuggestion(suggestion) {
-  suggestion = suggestion.innerText.replace(/ \([0-9]+\)$/, "");
-  favoritesLoader.hideAwesomplete();
-  FAVORITE_INPUTS.searchBox.value = FAVORITE_INPUTS.searchBox.value.replace(/\S+$/, `${suggestion} `);
-}
-
-function hideRemoveLinksWhenNotOnOwnFavoritesPage() {
-  if (!userIsOnTheirOwnFavoritesPage()) {
-    FAVORITE_CHECKBOXES.showRemoveButtons.parentElement.style.display = "none";
-  }
+function configureAuxillaryButtonOptionVisibility() {
+  FAVORITE_CHECKBOXES.showAuxillaryButtons.parentElement.parentElement.style.display = "block";
 }
 
 function updateLastSearchQuery() {
@@ -824,6 +886,17 @@ function toggleFavoritesOptions(value) {
   for (const option of FAVORITE_OPTIONS) {
     option.style.display = value ? "block" : "none";
   }
+}
+
+function toggleAuxillaryButtons() {
+  const visibility = FAVORITE_CHECKBOXES.showAuxillaryButtons.checked ? "visible" : "hidden";
+
+  injectStyleHTML(`
+      .auxillary-button {
+        visibility: ${visibility} !important;
+      }
+    `, "auxillary-button-visibility");
+  forceHideCaptions(FAVORITE_CHECKBOXES.showAuxillaryButtons.checked);
 }
 
 /**
@@ -889,10 +962,12 @@ function toggleUI(value) {
   setPreference(FAVORITE_PREFERENCES.showUI, value);
 }
 
-function configureMobileUi() {
-  if (onMobileDevice()) {
-    FAVORITE_INPUTS.performanceProfile.parentElement.style.display = "none";
-    injectStyleHTML(`
+function configureMobileUI() {
+  if (!onMobileDevice()) {
+    return;
+  }
+  FAVORITE_INPUTS.performanceProfile.parentElement.style.display = "none";
+  injectStyleHTML(`
       .thumb, .thumb-node {
         > div > canvas {
           display: none;
@@ -944,32 +1019,40 @@ function configureMobileUi() {
         margin-left: 10px !important;
       }
       `);
-      const container = document.createElement("div");
+  const container = document.createElement("div");
 
-      container.id = "container";
+  container.id = "container";
 
-      document.body.insertAdjacentElement("afterbegin", container);
-      container.appendChild(document.getElementById("header"));
-      container.appendChild(document.getElementById("favorites-top-bar"));
+  document.body.insertAdjacentElement("afterbegin", container);
+  container.appendChild(document.getElementById("header"));
+  container.appendChild(document.getElementById("favorites-top-bar"));
+}
 
-  } else {
-    injectStyleHTML(`
-      .checkbox {
-
-        &:hover {
-          color: #000;
-          background: #93b393;
-          text-shadow: none;
-          cursor: pointer;
-        }
-
-        input[type="checkbox"] {
-          width: 20px;
-          height: 20px;
-        }
-      }
-      `);
+function configureDesktopUI() {
+  if (onMobileDevice()) {
+    return;
   }
+  injectStyleHTML(`
+    .checkbox {
+
+      &:hover {
+        color: #000;
+        background: #93b393;
+        text-shadow: none;
+        cursor: pointer;
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    #sort-ascending {
+      width: 20px;
+      height: 20px;
+    }
+  `);
 }
 
 /**
