@@ -56,8 +56,8 @@ class Cooldown {
     this.skipCooldown = false;
     this.debounce = debounce;
     this.debouncing = false;
-    this.onDebounceEnd = () => {};
-    this.onCooldownEnd = () => {};
+    this.onDebounceEnd = () => { };
+    this.onCooldownEnd = () => { };
   }
 
   start() {
@@ -88,11 +88,7 @@ class Cooldown {
 
 const IDS_TO_REMOVE_ON_RELOAD_KEY = "recentlyRemovedIds";
 const TAG_BLACKLIST = getTagBlacklist();
-const CURSOR_POSITION = {
-  X: 0,
-  Y: 0
-};
-const PREFERENCES = "preferences";
+const PREFERENCES_LOCAL_STORAGE_KEY = "preferences";
 const FLAGS = {
   set: false,
   onSearchPage: undefined,
@@ -106,6 +102,12 @@ const FLAGS = {
 const DEFAULTS = {
   columnCount: 6,
   resultsPerPage: 200
+};
+const ADD_FAVORITE_STATUS = {
+  error: 0,
+  alreadyAdded: 1,
+  notLoggedIn: 2,
+  success: 3
 };
 
 /**
@@ -144,10 +146,10 @@ function getCookie(key, defaultValue) {
  * @param {any} value
  */
 function setPreference(key, value) {
-  const preferences = JSON.parse(localStorage.getItem(PREFERENCES) || "{}");
+  const preferences = JSON.parse(localStorage.getItem(PREFERENCES_LOCAL_STORAGE_KEY) || "{}");
 
   preferences[key] = value;
-  localStorage.setItem(PREFERENCES, JSON.stringify(preferences));
+  localStorage.setItem(PREFERENCES_LOCAL_STORAGE_KEY, JSON.stringify(preferences));
 }
 
 /**
@@ -156,7 +158,7 @@ function setPreference(key, value) {
  * @returns {String | null}
  */
 function getPreference(key, defaultValue) {
-  const preferences = JSON.parse(localStorage.getItem(PREFERENCES) || "{}");
+  const preferences = JSON.parse(localStorage.getItem(PREFERENCES_LOCAL_STORAGE_KEY) || "{}");
   const preference = preferences[key];
 
   if (preference === undefined) {
@@ -487,16 +489,6 @@ function clearAwesompleteSelection(input) {
   for (const li of searchSuggestions) {
     li.setAttribute("aria-selected", false);
   }
-}
-
-function trackCursorPosition() {
-  if (onMobileDevice()) {
-    return;
-  }
-  document.addEventListener("mousemove", (event) => {
-    CURSOR_POSITION.X = event.clientX;
-    CURSOR_POSITION.Y = event.clientY;
-  });
 }
 
 /**
@@ -849,7 +841,6 @@ function initializeUtilities() {
   }
   injectCommonStyles();
   toggleFancyImageHovering(true);
-  trackCursorPosition();
   setTheme();
   prefetchAdjacentSearchPages();
   setFlags();
@@ -916,31 +907,6 @@ function getTagBlacklist() {
 }
 
 /**
- * @returns {HTMLElement | null}
- */
-function getThumbUnderCursor() {
-  if (onMobileDevice()) {
-    return null;
-  }
-  const elementUnderCursor = document.elementFromPoint(CURSOR_POSITION.X, CURSOR_POSITION.Y);
-
-  if (elementUnderCursor !== undefined && elementUnderCursor !== null && elementUnderCursor.nodeName.toLowerCase() === "img") {
-    return getThumbFromImage(elementUnderCursor);
-  }
-  return null;
-}
-
-/**
- * @returns {Boolean}
- */
-function hoveringOverThumb() {
-  if (onMobileDevice()) {
-    return null;
-  }
-  return getThumbUnderCursor() !== null;
-}
-
-/**
  * @returns {Boolean}
  */
 function usingCaptions() {
@@ -956,14 +922,6 @@ function usingRenderer() {
     FLAGS.usingRenderer = document.getElementById("original-content-container") !== null;
   }
   return FLAGS.usingRenderer;
-}
-
-function getThumbUnderCursorOnLoad() {
-  const thumbNodeElement = getThumbUnderCursor();
-
-  dispatchEvent(new CustomEvent("thumbUnderCursorOnLoad", {
-    detail: thumbNodeElement
-  }));
 }
 
 /**
@@ -1130,10 +1088,17 @@ function onMobileDevice() {
   return FLAGS.onMobileDevice;
 }
 
+/**
+ * @returns {Number}
+ */
 function getPerformanceProfile() {
   return parseInt(getPreference("performanceProfile", 0));
 }
 
+/**
+ * @param {String} tagName
+ * @returns {Promise.<Boolean>}
+ */
 function isOfficialTag(tagName) {
   const tagPageURL = `https://rule34.xxx/index.php?page=tags&s=list&tags=${tagName}`;
   return fetch(tagPageURL)
@@ -1154,10 +1119,17 @@ function isOfficialTag(tagName) {
     });
 }
 
+/**
+ * @param {String} searchQuery
+ */
 function openSearchPage(searchQuery) {
   window.open(`https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(searchQuery)}`);
 }
 
+/**
+ * @param {Map} map
+ * @returns {Object}
+ */
 function mapToObject(map) {
   return Array.from(map).reduce((object, [key, value]) => {
     object[key] = value;
@@ -1165,6 +1137,10 @@ function mapToObject(map) {
   }, {});
 }
 
+/**
+ * @param {Object} object
+ * @returns {Map}
+ */
 function objectToMap(object) {
   return new Map(Object.entries(object));
 }
@@ -1175,6 +1151,45 @@ function objectToMap(object) {
  */
 function isNumber(string) {
   return (/^\d+$/).test(string);
+}
+
+/**
+ * @param {HTMLElement} thumb
+ * @returns {Promise.<Number>}
+ */
+function addFavorite(thumb) {
+  if (thumb === null || thumb === undefined) {
+    return ADD_FAVORITE_STATUS.error;
+  }
+  fetch(`https://rule34.xxx/index.php?page=post&s=vote&id=${thumb.id}&type=up`);
+  return fetch(`https://rule34.xxx/public/addfav.php?id=${thumb.id}`)
+    .then((response) => {
+      return response.text();
+    })
+    .then((html) => {
+      return parseInt(html);
+    })
+    .catch(() => {
+      return ADD_FAVORITE_STATUS.error;
+    });
+}
+
+/**
+ * @param {HTMLInputElement | HTMLTextAreaElement} input
+ * @param {String} suggestion
+ */
+function insertSuggestion(input, suggestion) {
+  const cursorAtEnd = input.selectionStart === input.value.length;
+  const firstHalf = input.value.slice(0, input.selectionStart);
+  const secondHalf = input.value.slice(input.selectionStart);
+  const firstHalfWithPrefixRemoved = firstHalf.replace(/(\s?)(-?)\S+$/, "$1$2");
+  const combinedHalves = removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf}`);
+  const result = cursorAtEnd ? `${combinedHalves} ` : combinedHalves;
+  const selectionStart = firstHalfWithPrefixRemoved.length + suggestion.length + 1;
+
+  input.value = result;
+  input.selectionStart = selectionStart;
+  input.selectionEnd = selectionStart;
 }
 
 initializeUtilities();

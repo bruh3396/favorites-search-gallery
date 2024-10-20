@@ -5,7 +5,6 @@
 [Features](#features)<br>
 [Preferred Specs](#preferred-specs)<br>
 [Controls](#controls)<br>
-[Hotkeys](#hotkeys)<br>
 [FAQ](#faq)
 
 ## About
@@ -80,6 +79,8 @@ This script is still in development, please let me know if you experience a bug,
     <li>Choose full-screen image resolution</li>
     <li>Autocompleted tag search</li>
     <li>Look at other user's favorites with the above features (blacklisted tags are hidden automatically)</li>
+    <li>Sort by score, width, height, rating, id, date uploaded, or date changed</li>
+    <li>Filter by rating: safe, questionable, explicit, or any combination of the three</li>
 </ul>
 
 ## Preferred Specs:
@@ -89,22 +90,31 @@ Video Memory: 4GB<br>
 Download Speed: 75Mb/s<br>
 
 ## Controls
-<strong>Left Click/Touch:</strong>
-<ul>
-<li><strong>On thumbnail:</strong> Show original content associated with thumbnail and enter gallery</li>
-<li><strong>In gallery:</strong> Exit gallery</li>
-</ul><br>
-<strong>Middle Click:</strong>
-<ul>
-<li><strong>On thumbnail / In gallery:</strong> Open post page of thumbnail in new tab</li>
-<li><strong>Not on thumbnail:</strong> Show original content automatically when hovering over thumbnail (toggle)</li>
-</ul><br>
-<strong>Scroll Wheel/Arrow Keys/WASD/Swipe Left or Right (in gallery):</strong> Traverse gallery<br><br>
-<strong>Scroll Wheel (on thumbnail, not in gallery, hovering enabled):</strong> Change background opacity<br><br>
-<strong>Escape/Swipe Up (in gallery):</strong> Exit gallery<br><br>
-<strong>Right Click (in gallery):</strong> Exit gallery, but enable enlarge on hover
+### General Controls
+| Input | Function | Condition |
+| :-------- | :-------- | :-------- |
+| Left Click, Touch | Enlarge thumbnail content and enter gallery | Clicked on a thumbnail |
+| Middle Click | Open post page of thumbnail in new tab | Clicked on a thumbnail |
+| Middle Click | Toggle "Enlarge on Hover" option | Did **NOT** click on a thumbnail |
+| Scroll Wheel | Change background opacity | Hovering over thumbnail with "Enlarge on Hover" enabled |
 
-## Hotkeys
+### Gallery Controls
+| Input | Function | Condition |
+| :-------- | :-------- | :-------- |
+| Arrow Keys, Scroll Wheel, WASD, Swipe  | Traverse gallery | |
+| Left Click, Touch, Escape | Exit gallery | Content is not a video |
+| Right Click | Exit gallery, Enable "Enlarge on Hover" option | |
+| Middle Click | Open post page of thumbnail in new tab | |
+
+### Extra Gallery Hotkeys
+
+| Key | Function | Condition |
+| :-------- | :-------- | :-------- |
+| F | Add favorite | **NOT** on your own favorite page |
+| X | Remove favorite | "Remove Button" option checked |
+| M | Toggle video mute |  |
+| B | Toggle background |  |
+
 
 ## FAQ
 
@@ -112,34 +122,26 @@ Q: Why is there some bug/issue?<br>
 A: If not already addressed below, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
 
 Q: Everything stopped working, why I can't see any favorites?<br>
-A: Click the "Reset" button and reload.<br>If that doesn't work, delete all site data (cookies, localStorage, indexedDB) through your browser's settings.<br> If that also doesn't work, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
+A: Click the "Reset" button and reload.<br><br>
+If that doesn't work, delete all site data (cookies, localStorage, indexedDB) through your browser's settings.
+<br> If that also doesn't work, [report the bug](https://github.com/bruh3396/favorites-search-gallery/issues) and explain how to reproduce it.
 
 Q: What browsers are supported?<br>
 A: Chrome, Edge, and Firefox are supported.
 
 Q: Does it work on mobile/Android/iOS?<br>
 A: Yes, but only search  and gallery are enabled. Tooltips and captions are disabled to improve performance.<br>
-<ul>
-    <li>Requires a mobile browser that supports Tampermonkey or Userscripts</li>
-    <ul>
-        <li>Firefox on Android.</li>
-        <li> <a href="https://github.com/quoid/userscripts">Userscripts</a> on iOS.</li>
-    </ul>
-    <li>Still a new feature and somewhat laggy. I plan to optimize it further.</li>
-    <li>Has an option to disable gallery on lower performance devices.</li>
-</ul>
+- Requires a mobile browser that supports Tampermonkey or Userscripts
+  - Firefox on Android.
+  - [Userscripts](https://github.com/quoid/userscripts) on iOS.
+- Still a new feature and somewhat laggy. I plan to optimize it further.
+- Has an option to disable gallery on lower performance devices.
 
 Q: Why am I experiencing lag?<br>
 A: Responsiveness depends on:
-<ul>
-    <li>Internet speed: </li>
-    <ul>
-        <li>A lot of network activity (loading favorites, rendering images) happens in the background.</li>
-        <li>A stable wired connection is preferred.</li>
-    </ul>
-    <li> Improve responsiveness and performance by:</li>
-    <ul>
-     <li>Reducing the "Results per Page" option.</li>
-     <li>Lowering the "Performance Profile" option.</li>
-    </ul>
-</ul>
+- Internet speed:
+  - A lot of network activity (loading favorites, rendering images) happens in the background.
+  - A stable wired connection is preferred.
+- Improve responsiveness and performance by:
+  - Reducing the "Results per Page" option.
+  - Lowering the "Performance Profile" option.

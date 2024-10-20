@@ -262,6 +262,9 @@ class ImageFetcher {
 }
 
 class ThumbUpscaler {
+  static settings = {
+    maxCanvasHeight: 16000
+  };
   /**
    * @type {Map.<String, OffscreenCanvas>}
    */
@@ -327,12 +330,20 @@ class ThumbUpscaler {
    */
   setCanvasDimensions(request, imageBitmap) {
     const canvas = this.canvases.get(request.id);
-    const newWidth = this.screenWidth / request.resolutionFraction;
-    const ratio = newWidth / imageBitmap.width;
-    const newHeight = ratio * imageBitmap.height;
+    let width = this.screenWidth / request.resolutionFraction;
+    let height = (width / imageBitmap.width) * imageBitmap.height;
 
-    canvas.width = newWidth;
-    canvas.height = newHeight;
+    if (width > imageBitmap.width) {
+      width = imageBitmap.width;
+      height = imageBitmap.height;
+    }
+
+    if (height > ThumbUpscaler.settings.maxCanvasHeight) {
+      width *= (ThumbUpscaler.settings.maxCanvasHeight / height);
+      height = ThumbUpscaler.settings.maxCanvasHeight;
+    }
+    canvas.width = width;
+    canvas.height = height;
   }
 
   /**
@@ -342,14 +353,11 @@ class ThumbUpscaler {
   drawCanvas(id, imageBitmap) {
     const canvas = this.canvases.get(id);
     const context = canvas.getContext("2d");
-    const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
-    const centerShiftX = (canvas.width - (imageBitmap.width * ratio)) / 2;
-    const centerShiftY = (canvas.height - (imageBitmap.height * ratio)) / 2;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(
       imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
-      centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
+      0, 0, canvas.width, canvas.height
     );
   }
 

@@ -233,7 +233,6 @@ class SavedSearches {
       this.saveSearch(this.textarea.value.trim());
     };
     this.textarea.addEventListener("keydown", (event) => {
-
       switch (event.key) {
         case "Enter":
           if (awesompleteIsUnselected(this.textarea)) {

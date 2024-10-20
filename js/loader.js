@@ -10,7 +10,7 @@ class FavoritesLoader {
   static databaseName = "Favorites";
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -90,7 +90,7 @@ class FavoritesDatabase {
         const transaction = database.transaction(this.objectStoreName, "readwrite");
         const objectStore = transaction.objectStore(this.objectStoreName);
 
-        transaction.oncomplete = (event) => {
+        transaction.oncomplete = () => {
           postMessage({
             response: "finishedStoring"
           });
@@ -98,7 +98,7 @@ class FavoritesDatabase {
         };
 
         transaction.onerror = (event) => {
-          console.error(event.target.result);
+          console.error(event);
         };
 
         favorites.forEach(favorite => {
@@ -511,9 +511,9 @@ onmessage = (message) => {
           break;
 
         case "finishedStoring":
-        //   setTimeout(() => {
-        //     // this.databaseWorker.terminate();
-        //   }, 5000);
+          //   setTimeout(() => {
+          //     // this.databaseWorker.terminate();
+          //   }, 5000);
           break;
 
         default:
@@ -876,13 +876,6 @@ onmessage = (message) => {
         if (response.ok) {
           return response.text();
         }
-
-        if (refetching) {
-          failedRequest.retries += 1;
-        } else {
-          failedRequest = this.getFailedFetchRequest(favoritesPage, pageNumber);
-        }
-        this.failedFetchRequests.push(failedRequest);
         throw new Error(`${response.status}: Favorite page failed to fetch, ${favoritesPage}`);
       })
       .then((html) => {
@@ -892,7 +885,12 @@ onmessage = (message) => {
         this.foundEmptyFavoritesPage = thumbNodes.length === 0;
       })
       .catch((error) => {
-        console.error(error);
+        if (refetching) {
+          failedRequest.retries += 1;
+        } else {
+          failedRequest = this.getFailedFetchRequest(favoritesPage, pageNumber);
+        }
+        this.failedFetchRequests.push(failedRequest);
       });
   }
 
@@ -1252,7 +1250,7 @@ Tag modifications and saved searches will be preserved.
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
     const pageCount = this.getPageCount(searchResultsWhileFetchingWithFiltersApplied.length);
     const needsToCreateNewPage = pageCount > lastPageButtonNumber;
-    const nextPageButton = document.getElementById("next-page-button");
+    const nextPageButton = document.getElementById("next-page");
     const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount &&
       nextPageButton !== null && nextPageButton.style.display !== "none" &&
       nextPageButton.style.visibility !== "hidden";
@@ -1418,6 +1416,12 @@ Tag modifications and saved searches will be preserved.
     firstPage.textContent = "<<";
     nextPage.textContent = ">";
     finalPage.textContent = ">>";
+
+    previousPage.id = "previous-page";
+    firstPage.id = "first-page";
+    nextPage.id = "next-page";
+    finalPage.id = "final-page";
+
     previousPage.onclick = () => {
       if (this.currentFavoritesPageNumber - 1 >= 1) {
         this.changeResultsPage(this.currentFavoritesPageNumber - 1, searchResults);

@@ -666,22 +666,6 @@ function addEventListenersToFavoritesPage() {
         }
         break;
 
-      case "Tab":
-        {
-          event.preventDefault();
-          const awesomplete = FAVORITE_INPUTS.searchBox.parentElement;
-          const searchSuggestions = Array.from(awesomplete.querySelectorAll("li")) || [];
-
-          if (!awesompleteIsUnselected(FAVORITE_INPUTS.searchBox)) {
-            const selectedSearchSuggestion = searchSuggestions.find(suggestion => suggestion.getAttribute("aria-selected") === "true");
-
-            completeSearchSuggestion(selectedSearchSuggestion);
-          } else if (!awesompleteIsHidden(FAVORITE_INPUTS.searchBox)) {
-            completeSearchSuggestion(searchSuggestions[0]);
-          }
-          break;
-        }
-
       case "Escape":
         if (!awesompleteIsHidden(FAVORITE_INPUTS.searchBox)) {
           favoritesLoader.hideAwesomplete();

@@ -88,7 +88,23 @@ class AwesompleteWrapper {
         });
       },
       replace: (suggestion) => {
-        this.insertSuggestion(awesomplete.input, decodeEntities(suggestion.value));
+        insertSuggestion(awesomplete.input, decodeEntities(suggestion.value));
+      }
+    });
+
+    input.addEventListener("keydown", (event) => {
+      switch (event.key) {
+        case "Tab":
+          if (!awesomplete.isOpened || awesomplete.suggestions.length === 0) {
+            return;
+          }
+          awesomplete.next();
+          awesomplete.select();
+          event.preventDefault();
+          break;
+
+        default:
+          break;
       }
     });
 
@@ -118,22 +134,6 @@ class AwesompleteWrapper {
 
         awesomplete.list = mergedSuggestions;
       });
-  }
-
-  /**
-   * @param {HTMLInputElement | HTMLTextAreaElement} input
-   * @param {String} suggestion
-   */
-  insertSuggestion(input, suggestion) {
-    const firstHalf = input.value.slice(0, input.selectionStart);
-    const secondHalf = input.value.slice(input.selectionStart);
-    const firstHalfWithPrefixRemoved = firstHalf.replace(/(?:^|\s)(-?)\S+$/, " $1");
-    const result = removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf} `);
-    const newSelectionStart = firstHalfWithPrefixRemoved.length + suggestion.length + 1;
-
-    input.value = `${result} `.replace(/^\s+/, "");
-    input.selectionStart = newSelectionStart;
-    input.selectionEnd = newSelectionStart;
   }
 
   /**

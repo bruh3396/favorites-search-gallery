@@ -77,7 +77,7 @@ class FavoritesDatabase {
         const transaction = database.transaction(this.objectStoreName, "readwrite");
         const objectStore = transaction.objectStore(this.objectStoreName);
 
-        transaction.oncomplete = (event) => {
+        transaction.oncomplete = () => {
           postMessage({
             response: "finishedStoring"
           });
@@ -85,7 +85,7 @@ class FavoritesDatabase {
         };
 
         transaction.onerror = (event) => {
-          console.error(event.target.result);
+          console.error(event);
         };
 
         favorites.forEach(favorite => {

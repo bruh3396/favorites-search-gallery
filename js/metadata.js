@@ -3,7 +3,7 @@ class FavoriteMetadata {
   /**
    * @type {FavoriteMetadata[]}
   */
-  static fetchQueue = [];
+  static missingMetadataFetchQueue = [];
   /**
    * @type {FavoriteMetadata[]}
   */
@@ -20,15 +20,17 @@ class FavoriteMetadata {
    * @param {FavoriteMetadata} favoriteMetadata
    */
   static async fetchMissingMetadata(favoriteMetadata) {
-    FavoriteMetadata.fetchQueue.push(favoriteMetadata);
+    if (favoriteMetadata !== undefined) {
+      FavoriteMetadata.missingMetadataFetchQueue.push(favoriteMetadata);
+    }
 
     if (FavoriteMetadata.currentlyFetchingFromQueue) {
       return;
     }
     FavoriteMetadata.currentlyFetchingFromQueue = true;
 
-    while (FavoriteMetadata.fetchQueue.length > 0) {
-      const metadata = this.fetchQueue.pop();
+    while (FavoriteMetadata.missingMetadataFetchQueue.length > 0) {
+      const metadata = this.missingMetadataFetchQueue.pop();
 
       if (metadata.postIsDeleted) {
         metadata.populateMetadataFromPost();
@@ -61,7 +63,10 @@ class FavoriteMetadata {
   static {
     window.addEventListener("favoritesLoaded", () => {
       FavoriteMetadata.allFavoritesLoaded = true;
-      FavoriteMetadata.deletedPostFetchQueue.forEach((element) => FavoriteMetadata.fetchMissingMetadata(element));
+      FavoriteMetadata.missingMetadataFetchQueue = FavoriteMetadata.missingMetadataFetchQueue.concat(FavoriteMetadata.deletedPostFetchQueue);
+      FavoriteMetadata.fetchMissingMetadata();
+    }, {
+      once: true
     });
   }
   /**
@@ -224,6 +229,8 @@ class FavoriteMetadata {
         if (error.cause === "DeletedMetadata") {
           this.postIsDeleted = true;
           FavoriteMetadata.deletedPostFetchQueue.push(this);
+        } else if (error.message === "Failed to fetch") {
+          FavoriteMetadata.missingMetadataFetchQueue.push(this);
         } else {
           console.error(error);
         }

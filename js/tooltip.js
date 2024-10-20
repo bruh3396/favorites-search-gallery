@@ -66,6 +66,7 @@ class Tooltip {
     this.tagColorCodes = {};
     this.setTheme();
     this.addEventListeners();
+    this.addFavoritesOptions();
     this.assignColorsToMatchedTags();
   }
 
@@ -73,22 +74,21 @@ class Tooltip {
     if (onSearchPage()) {
       window.addEventListener("load", () => {
         this.addEventListenersToThumbs.bind(this)();
+      }, {
+        once: true,
+        passive: true
       });
     } else {
-      this.addFavoritesOptions();
       window.addEventListener("favoritesFetched", (event) => {
         this.addEventListenersToThumbs.bind(this)(event.detail);
       });
       window.addEventListener("favoritesLoaded", () => {
         this.addEventListenersToThumbs.bind(this)();
+      }, {
+        once: true
       });
       window.addEventListener("changedPage", () => {
         this.addEventListenersToThumbs.bind(this)();
-      });
-      window.addEventListener("thumbUnderCursorOnLoad", (event) => {
-        this.showOnLoadIfHoveringOverThumb(event.detail);
-      }, {
-        once: true
       });
       window.addEventListener("newFavoritesFetchedOnReload", (event) => {
         this.addEventListenersToThumbs.bind(this)(event.detail);

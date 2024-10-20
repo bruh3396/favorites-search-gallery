@@ -85,10 +85,10 @@ const captionHTML = `<style>
     pointer-events: none;
     position: absolute !important;
     overflow: hidden;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: -1px;
+    left: -1px;
+    width: 102%;
+    height: 102%;
     display: block !important;
   }
 </style>`;
@@ -296,13 +296,6 @@ class Caption {
 
         if (Caption.findCategoriesOnPageChangeCooldown.ready) {
           this.findTagCategoriesOnPageChange();
-        }
-      });
-      window.addEventListener("thumbUnderCursorOnLoad", (event) => {
-        const showOnHoverCheckbox = document.getElementById("showOnHover");
-
-        if (showOnHoverCheckbox !== null && showOnHoverCheckbox.checked) {
-          this.attachToThumb(event.detail);
         }
       });
       window.addEventListener("showCaption", (event) => {

@@ -1,6 +1,6 @@
 const THUMB_NODE_TEMPLATE = new DOMParser().parseFromString("<div></div>", "text/html").createElement("div");
 const CANVAS_HTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
-const REMOVE_BUTTON_HTML = userIsOnTheirOwnFavoritesPage() ? "<button class=\"remove-button light-green-gradient\" style=\"visibility: hidden;\">Remove</button>" : "";
+const REMOVE_BUTTON_HTML = userIsOnTheirOwnFavoritesPage() ? "<button class=\"remove-button light-green-gradient\">Remove</button>" : "";
 
 THUMB_NODE_TEMPLATE.className = "thumb-node";
 

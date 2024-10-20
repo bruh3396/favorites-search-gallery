@@ -137,9 +137,9 @@ const galleryDebugHTML = `
   }`;
 
 class Gallery {
-  static clickCodes = {
-    leftClick: 0,
-    middleClick: 1
+  static clickTypes = {
+    left: 0,
+    middle: 1
   };
   static directions = {
     d: "d",
@@ -147,13 +147,14 @@ class Gallery {
     right: "ArrowRight",
     left: "ArrowLeft"
   };
-
   static preferences = {
     showOnHover: "showImagesWhenHovering",
     backgroundOpacity: "galleryBackgroundOpacity",
     resolution: "galleryResolution",
     enlargeOnClick: "enlargeOnClick",
-    autoplay: "autoplay"
+    autoplay: "autoplay",
+    videoVolume: "videoVolume",
+    videoMuted: "videoMuted"
   };
   static localStorageKeys = {
     imageExtensions: "imageExtensions"
@@ -425,6 +426,9 @@ class ImageFetcher {
 }
 
 class ThumbUpscaler {
+  static settings = {
+    maxCanvasHeight: 16000
+  };
   /**
    * @type {Map.<String, OffscreenCanvas>}
    */
@@ -490,12 +494,20 @@ class ThumbUpscaler {
    */
   setCanvasDimensions(request, imageBitmap) {
     const canvas = this.canvases.get(request.id);
-    const newWidth = this.screenWidth / request.resolutionFraction;
-    const ratio = newWidth / imageBitmap.width;
-    const newHeight = ratio * imageBitmap.height;
+    let width = this.screenWidth / request.resolutionFraction;
+    let height = (width / imageBitmap.width) * imageBitmap.height;
 
-    canvas.width = newWidth;
-    canvas.height = newHeight;
+    if (width > imageBitmap.width) {
+      width = imageBitmap.width;
+      height = imageBitmap.height;
+    }
+
+    if (height > ThumbUpscaler.settings.maxCanvasHeight) {
+      width *= (ThumbUpscaler.settings.maxCanvasHeight / height);
+      height = ThumbUpscaler.settings.maxCanvasHeight;
+    }
+    canvas.width = width;
+    canvas.height = height;
   }
 
   /**
@@ -505,14 +517,11 @@ class ThumbUpscaler {
   drawCanvas(id, imageBitmap) {
     const canvas = this.canvases.get(id);
     const context = canvas.getContext("2d");
-    const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
-    const centerShiftX = (canvas.width - (imageBitmap.width * ratio)) / 2;
-    const centerShiftY = (canvas.height - (imageBitmap.height * ratio)) / 2;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(
       imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
-      centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
+      0, 0, canvas.width, canvas.height
     );
   }
 
@@ -956,7 +965,7 @@ onmessage = (message) => {
 
 `
   };
-  static resolutions = {
+  static mainCanvasResolutions = {
     search: onMobileDevice() ? "7680x4320" : "3840x2160",
     favorites: "7680x4320"
   };
@@ -1018,23 +1027,24 @@ onmessage = (message) => {
     }
   };
   static settings = {
-    maxNumberOfImagesToRenderInBackground: 100,
-    maxNumberOfImagesToRenderAround: onMobileDevice() ? 2 : 50,
-    megabyteLimit: onMobileDevice() ? 0 : 1000,
-    minimumImagesToRender: onMobileDevice() ? 3 : 10,
+    maxImagesToRenderInBackground: 50,
+    maxImagesToRenderAround: onMobileDevice() ? 2 : 50,
+    megabyteLimit: onMobileDevice() ? 0 : 300,
+    minImagesToRender: onMobileDevice() ? 3 : 7,
     imageFetchDelay: 250,
     imageFetchDelayWhenExtensionKnown: 25,
-    upscaledThumbResolutionFraction: 4,
-    upscaledAnimatedThumbResolutionFraction: 5,
+    upscaledThumbResolutionFraction: 4.5,
+    upscaledAnimatedThumbResolutionFraction: 7,
     extensionsFoundBeforeSavingCount: 5,
-    animatedThumbsToUpscaleRange: 20,
+    animatedThumbsToUpscaleRange: 10,
     animatedThumbsToUpscaleDiscrete: 10,
-    traversalCooldownTime: 100,
+    traversalCooldownTime: 300,
     renderOnPageChangeCooldownTime: 2000,
     autoplayTime: 5000,
     additionalVideoPlayerCount: onMobileDevice() ? 0 : 2,
     renderAroundAggressively: true,
-    debugEnabled: false
+    debugEnabled: false,
+    developerMode: true
   };
   static traversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
   static renderOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
@@ -1138,7 +1148,7 @@ onmessage = (message) => {
   /**
    * @type {Boolean}
   */
-  leftSearchPage;
+  leftPage;
   /**
    * @type {Boolean}
   */
@@ -1194,7 +1204,7 @@ onmessage = (message) => {
     this.currentBatchRenderRequestId = 0;
     this.inGallery = false;
     this.recentlyExitedGallery = false;
-    this.leftSearchPage = false;
+    this.leftPage = false;
     this.favoritesWereFetched = false;
     this.finishedLoading = onSearchPage();
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
@@ -1207,7 +1217,7 @@ onmessage = (message) => {
   }
 
   setMainCanvasResolution() {
-    const resolution = onSearchPage() ? Gallery.resolutions.search : Gallery.resolutions.favorites;
+    const resolution = onSearchPage() ? Gallery.mainCanvasResolutions.search : Gallery.mainCanvasResolutions.favorites;
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
     this.mainCanvas.width = dimensions[0];
@@ -1224,7 +1234,7 @@ onmessage = (message) => {
       onMobileDevice: onMobileDevice(),
       screenWidth: window.screen.width,
       megabyteLimit: Gallery.settings.megabyteLimit,
-      minimumImagesToRender: Gallery.settings.minimumImagesToRender,
+      minimumImagesToRender: Gallery.settings.minImagesToRender,
       onSearchPage: onSearchPage()
     }, [offscreenCanvas]);
   }
@@ -1244,6 +1254,7 @@ onmessage = (message) => {
     this.addFavoritesLoaderEventListeners();
     this.addWebWorkerMessageHandlers();
     this.addMobileEventListeners();
+    this.addMemoryManagementEventListeners();
   }
 
   addGalleryEventListeners() {
@@ -1263,7 +1274,7 @@ onmessage = (message) => {
       const thumb = clickedOnAThumb ? getThumbFromImage(event.target) : null;
 
       switch (event.button) {
-        case Gallery.clickCodes.leftClick:
+        case Gallery.clickTypes.left:
           if (this.inGallery) {
             if (isVideo(this.getSelectedThumb()) && !onMobileDevice()) {
               return;
@@ -1289,7 +1300,7 @@ onmessage = (message) => {
           this.enterGallery();
           break;
 
-        case Gallery.clickCodes.middleClick:
+        case Gallery.clickTypes.middle:
           event.preventDefault();
 
           if (thumb !== null || this.inGallery) {
@@ -1306,7 +1317,7 @@ onmessage = (message) => {
       }
     });
     window.addEventListener("auxclick", (event) => {
-      if (event.button === Gallery.clickCodes.middleClick) {
+      if (event.button === Gallery.clickTypes.middle) {
         event.preventDefault();
       }
     });
@@ -1336,47 +1347,67 @@ onmessage = (message) => {
       }
     });
     document.addEventListener("keydown", (event) => {
-      if (this.inGallery) {
-        switch (event.key) {
-          case Gallery.directions.a:
+      if (!this.inGallery) {
+        return;
+      }
 
-          case Gallery.directions.d:
+      switch (event.key) {
+        case Gallery.directions.a:
 
-          case Gallery.directions.left:
+        case Gallery.directions.d:
 
-          case Gallery.directions.right:
-            event.preventDefault();
-            this.traverseGallery(event.key, event.repeat);
-            break;
+        case Gallery.directions.left:
 
-          case "X":
+        case Gallery.directions.right:
+          event.preventDefault();
+          this.traverseGallery(event.key, event.repeat);
+          break;
 
-          case "x":
-            this.unFavoriteSelectedContent();
-            break;
+        case "X":
 
-          case "M":
+        case "x":
+          this.unFavoriteSelectedContent();
+          break;
 
-          case "m":
-            if (isVideo(this.getSelectedThumb())) {
-              this.getActiveVideoPlayer().muted = !this.getActiveVideoPlayer().muted;
-            }
-            break;
+        default:
+          break;
+      }
+    });
+    window.addEventListener("keydown", async(event) => {
+      if (!this.inGallery) {
+        return;
+      }
 
-          case "B":
+      switch (event.key) {
+        case "F":
 
-          case "b":
-            this.toggleBackgroundOpacity();
-            break;
+        case "f":
+          {
+            const addedFavoriteStatus = await addFavorite(this.getSelectedThumb());
+          }
+          break;
 
-          case "Escape":
-            this.exitGallery();
-            this.toggleAllVisibility(false);
-            break;
+        case "M":
 
-          default:
-            break;
-        }
+        case "m":
+          if (isVideo(this.getSelectedThumb())) {
+            this.getActiveVideoPlayer().muted = !this.getActiveVideoPlayer().muted;
+          }
+          break;
+
+        case "B":
+
+        case "b":
+          this.toggleBackgroundOpacity();
+          break;
+
+        case "Escape":
+          this.exitGallery();
+          this.toggleAllVisibility(false);
+          break;
+
+        default:
+          break;
       }
     });
   }
@@ -1526,6 +1557,23 @@ onmessage = (message) => {
     });
   }
 
+  addMemoryManagementEventListeners() {
+    if (Gallery.settings.developerMode && onFavoritesPage()) {
+      return;
+    }
+    window.onblur = () => {
+      this.leftPage = true;
+      this.deleteAllRenders();
+      this.clearInactiveVideoSources();
+    };
+    window.onfocus = () => {
+      if (this.leftPage) {
+        this.renderImagesInTheBackground();
+        this.leftPage = false;
+      }
+    };
+  }
+
   loadDiscoveredImageExtensions() {
     this.imageExtensions = JSON.parse(localStorage.getItem(Gallery.localStorageKeys.imageExtensions)) || {};
   }
@@ -1544,20 +1592,6 @@ onmessage = (message) => {
     }
     await this.findImageExtensionsOnSearchPage();
     this.renderImagesInTheBackground();
-
-    window.addEventListener("unload", () => {
-      this.deleteAllRenders();
-    });
-    window.onblur = () => {
-      this.leftSearchPage = true;
-      this.deleteAllRenders();
-    };
-    window.onfocus = () => {
-      if (this.leftSearchPage) {
-        this.renderImagesInTheBackground();
-        this.leftSearchPage = false;
-      }
-    };
   }
 
   injectHTML() {
@@ -1646,6 +1680,7 @@ onmessage = (message) => {
     this.addAdditionalVideoPlayers();
     this.videoPlayers = Array.from(this.videoContainer.querySelectorAll("video"));
     this.addVideoPlayerEventListeners();
+    this.loadVideoVolume();
     this.toggleAutoplay(this.autoplayEnabled);
     this.gifContainer = document.getElementById("original-gif-container");
     this.mainCanvas.id = "main-canvas";
@@ -1677,7 +1712,12 @@ onmessage = (message) => {
           video.pause();
         }
       });
-      video.addEventListener("volumechange", () => {
+      video.addEventListener("volumechange", (event) => {
+        if (!event.target.hasAttribute("active")) {
+          return;
+        }
+        setPreference(Gallery.preferences.videoVolume, video.volume);
+        setPreference(Gallery.preferences.videoMuted, video.muted);
 
         for (const v of this.getInactiveVideoPlayers()) {
           v.volume = video.volume;
@@ -1688,6 +1728,13 @@ onmessage = (message) => {
         this.doAutoplay();
       });
     }
+  }
+
+  loadVideoVolume() {
+    const video = this.getActiveVideoPlayer();
+
+    video.volume = parseFloat(getPreference(Gallery.preferences.videoVolume, 1));
+    video.muted = getPreference(Gallery.preferences.videoMuted, true);
   }
 
   /**
@@ -1720,7 +1767,7 @@ onmessage = (message) => {
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
 
     const imageThumbsToRender = this.getVisibleUnrenderedImageThumbs()
-      .slice(0, Gallery.settings.maxNumberOfImagesToRenderInBackground);
+      .slice(0, Gallery.settings.maxImagesToRenderInBackground);
 
     this.renderImages(imageThumbsToRender, "background");
   }
@@ -2183,10 +2230,6 @@ onmessage = (message) => {
     this.toggleScrollbarVisibility(true);
     this.toggleCursorVisibility(true);
     this.clearOriginalContentSources();
-
-    // for (const video of this.videoPlayers) {
-    //   video.src = "";
-    // }
     this.stopAllVideos();
     this.clearMainCanvas();
     this.toggleOriginalVideoContainer(false);
@@ -2255,7 +2298,7 @@ onmessage = (message) => {
   /**
    * @param {HTMLElement} initialThumb
    */
- preloadInactiveVideoPlayers(initialThumb) {
+  preloadInactiveVideoPlayers(initialThumb) {
     if (!this.inGallery) {
       // await sleep(500);
       // this.stopAllInactiveVideos();
@@ -2318,6 +2361,14 @@ onmessage = (message) => {
 
   clearVideoSources() {
     for (const video of this.videoPlayers) {
+      video.src = "";
+    }
+  }
+
+  clearInactiveVideoSources() {
+    const videoPlayers = this.inGallery ? this.getInactiveVideoPlayers() : this.videoPlayers;
+
+    for (const video of videoPlayers) {
       video.src = "";
     }
   }
@@ -2418,7 +2469,7 @@ onmessage = (message) => {
     if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
       return;
     }
-    const amountToRender = Gallery.settings.maxNumberOfImagesToRenderAround;
+    const amountToRender = Gallery.settings.maxImagesToRenderAround;
     const imageThumbsToRender = this.getAdjacentVisibleThumbsLooped(initialThumb, amountToRender, (thumb) => {
       return isImage(thumb);
     });
@@ -2936,9 +2987,6 @@ onmessage = (message) => {
    * @param {String} id
    */
   drawLowResolutionCanvas(thumb) {
-    if (onSearchPage()) {
-      return;
-    }
     const image = getImageFromThumb(thumb);
 
     if (!imageIsLoaded(image)) {
