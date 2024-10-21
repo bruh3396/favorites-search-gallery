@@ -192,6 +192,10 @@ class Caption {
    * @type {String}
    */
   currentThumbId;
+  /**
+   * @type {AbortController}
+  */
+  abortController;
 
   constructor() {
     if (Caption.disabled) {
@@ -213,6 +217,7 @@ class Caption {
     this.problematicTagsThatFailedFetch = new Set();
     this.currentlyCorrectingProblematicTags = false;
     this.currentThumbId = null;
+    this.abortController = new AbortController();
   }
 
   createHTMLElement() {
@@ -324,6 +329,8 @@ class Caption {
     });
     window.addEventListener("changedPage", () => {
       this.addEventListenersToThumbs.bind(this)();
+      this.abortController.abort("ChangedPage");
+      this.abortController = new AbortController();
 
       if (Caption.findCategoriesOnPageChangeCooldown.ready) {
         this.findTagCategoriesOnPageChange();
@@ -334,9 +341,13 @@ class Caption {
     });
     window.addEventListener("originalFavoritesCleared", (event) => {
       const thumbs = event.detail;
-      const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
+      const tagNames = Array.from(thumbs)
+        .map(thumb => getImageFromThumb(thumb).title)
+        .join(" ")
+        .split(" ")
+        .filter(tagName => !isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
 
-      this.findTagCategories(tagNames, 3, () => {
+      this.findTagCategories(tagNames, 10, () => {
         this.saveTags();
       });
     });
@@ -602,7 +613,7 @@ class Caption {
     this.currentThumbId = thumb.id;
 
     if (unknownThumbTags.length > 0) {
-      this.findTagCategories(unknownThumbTags, 1, () => {
+      this.findTagCategories(unknownThumbTags, 3, () => {
         this.addTags(tagNames, thumb);
       });
       return;
@@ -689,9 +700,9 @@ class Caption {
   }
 
   findTagCategoriesOnPageChange() {
-    const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 100));
+    const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 200));
 
-    this.findTagCategories(tagNames, 3, () => {
+    this.findTagCategories(tagNames, 10, () => {
       this.saveTags();
     });
   }
@@ -711,10 +722,17 @@ class Caption {
         Caption.tagCategoryAssociations[tagName] = 0;
         continue;
       }
+
+      if (tagName.includes("'")) {
+        this.correctProblematicTag(tagName);
+        continue;
+      }
       const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
 
       try {
-        fetch(apiURL)
+        fetch(apiURL, {
+          signal: this.abortController.signal
+        })
           .then((response) => {
             if (response.ok) {
               return response.text();
@@ -734,11 +752,15 @@ class Caption {
             if (tagName === lastTagName && onAllCategoriesFound !== undefined) {
               onAllCategoriesFound();
             }
+          }).catch(() => {
+            if (onAllCategoriesFound !== undefined) {
+              onAllCategoriesFound();
+            }
           });
       } catch (error) {
-        if (error.name !== "TypeError") {
-          throw error;
-        }
+        // if (error.name !== "TypeError") {
+        //   throw error;
+        // }
       }
       await sleep(fetchDelay);
     }

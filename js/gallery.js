@@ -144,7 +144,15 @@ const galleryDebugHTML = `
 
   #main-canvas, #low-resolution-canvas {
     opacity: 0.25;
-  }`;
+  }
+
+  #original-video-container {
+    video {
+      opacity: 0.15;
+    }
+  }
+
+  `;
 
 class Gallery {
   static clickTypes = {
@@ -1039,12 +1047,12 @@ onmessage = (message) => {
   static settings = {
     maxImagesToRenderInBackground: 50,
     maxImagesToRenderAround: onMobileDevice() ? 2 : 50,
-    megabyteLimit: onMobileDevice() ? 0 : 300,
-    minImagesToRender: onMobileDevice() ? 3 : 7,
+    megabyteLimit: onMobileDevice() ? 0 : 375,
+    minImagesToRender: onMobileDevice() ? 3 : 8,
     imageFetchDelay: 250,
     imageFetchDelayWhenExtensionKnown: 25,
-    upscaledThumbResolutionFraction: 4.5,
-    upscaledAnimatedThumbResolutionFraction: 5.5,
+    upscaledThumbResolutionFraction: 5,
+    upscaledAnimatedThumbResolutionFraction: 5,
     extensionsFoundBeforeSavingCount: 5,
     animatedThumbsToUpscaleRange: 20,
     animatedThumbsToUpscaleDiscrete: 20,
@@ -1308,8 +1316,8 @@ onmessage = (message) => {
             this.deleteAllRenders();
           }
           this.toggleAllVisibility(true);
-          this.showOriginalContent(thumb);
           this.enterGallery();
+          this.showOriginalContent(thumb);
           break;
 
         case Gallery.clickTypes.middle:
@@ -1334,6 +1342,10 @@ onmessage = (message) => {
       }
     });
     document.addEventListener("wheel", (event) => {
+      if (event.shiftKey) {
+        return;
+      }
+
       if (this.inGallery) {
         if (event.ctrlKey) {
           return;
@@ -1568,7 +1580,8 @@ onmessage = (message) => {
   }
 
   addMemoryManagementEventListeners() {
-    if (Gallery.settings.developerMode && onFavoritesPage()) {
+    // if (Gallery.settings.developerMode && onFavoritesPage()) {
+    if (onFavoritesPage()) {
       return;
     }
     window.onblur = () => {
@@ -2133,6 +2146,9 @@ onmessage = (message) => {
 
     if (!showRemoveFavoriteButtons.checked) {
       showFullscreenIcon(ICONS.warning, 1000);
+      setTimeout(() => {
+        alert("The \"Remove Buttons\" option must be checked to use this hotkey");
+      }, 20);
       return;
     }
     showFullscreenIcon(ICONS.heartMinus);
@@ -2153,7 +2169,7 @@ onmessage = (message) => {
     dispatchEvent(new CustomEvent("showOriginalContent", {
       detail: true
     }));
-    // this.preloadInactiveVideoPlayers(selectedThumb);
+    this.preloadInactiveVideoPlayers(selectedThumb);
     this.startAutoplay(selectedThumb);
   }
 
@@ -2210,6 +2226,7 @@ onmessage = (message) => {
     }
     this.upscaleAnimatedThumbsAround(selectedThumb);
     this.renderImagesAround(selectedThumb);
+    this.preloadInactiveVideoPlayers(selectedThumb);
 
     if (!usingFirefox()) {
       scrollToThumb(selectedThumb.id, false);
@@ -2335,9 +2352,10 @@ onmessage = (message) => {
    * @param {HTMLElement} initialThumb
    */
   preloadInactiveVideoPlayers(initialThumb) {
-    if (!this.inGallery) {
+    if (!this.inGallery || Gallery.settings.additionalVideoPlayerCount < 1) {
       return;
     }
+    this.setActiveVideoPlayer(initialThumb);
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
     const videoThumbsAroundInitialThumb = this.getAdjacentVisibleThumbsLooped(initialThumb, inactiveVideoPlayers.length, (t) => {
       return isVideo(t) && t.id !== initialThumb.id;
@@ -2352,6 +2370,7 @@ onmessage = (message) => {
     for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
       this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
     }
+    this.stopAllVideos();
   }
 
   /**
@@ -2424,8 +2443,8 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   playOriginalVideo(thumb) {
-    this.setActiveVideoPlayer(thumb);
-    this.preloadInactiveVideoPlayers(thumb);
+    // this.setActiveVideoPlayer(thumb);
+    // this.preloadInactiveVideoPlayers(thumb);
     this.stopAllVideos();
     const video = this.getActiveVideoPlayer();
 
@@ -2568,7 +2587,7 @@ onmessage = (message) => {
       traverseForward = !traverseForward;
       currentThumb = traverseForward ? nextThumb : previousThumb;
 
-      if (discoveredIds.has(currentThumb.id)) {
+      if (currentThumb === undefined || discoveredIds.has(currentThumb.id)) {
         break;
       }
       discoveredIds.add(currentThumb.id);

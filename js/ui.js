@@ -123,7 +123,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     .add-favorite-button {
       >svg {
-        fill:hotpink;
+        fill: hotpink;
       }
     }
 
@@ -243,10 +243,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           height: 30px;
           padding: 0;
           margin: 0;
-
-          svg {
-            padding-top: 3px;
-          }
         }
       }
     }
@@ -254,9 +250,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #column-resize-input {
       margin: 0;
       position: relative;
-      bottom: 5px;
+      bottom: 9px;
       width: 30px;
       height: 25px;
+      font-size: larger;
     }
 
     #find-favorite {
@@ -302,16 +299,74 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #help-links-container {
       margin-top: 17px;
+    }
 
-      /* >a {
-        text-decoration: underline;
-      } */
+    #whats-new-link {
+      cursor: pointer;
+      padding: 30px 0px;
+      position: relative;
+      font-weight: bolder;
+      font-style: italic;
+      background: none;
+      text-decoration: none !important;
+
+      &.hidden:not(.persistent)>div {
+        display: none;
+      }
+
+      &.persistent,
+      &:hover {
+        &.light-green-gradient {
+          color: black;
+        }
+
+        &:not(.light-green-gradient) {
+          color: white;
+        }
+      }
     }
 
     #whats-new-container {
+      z-index: 10;
+      top: 50px;
+      left: 0px;
+      font-style: normal;
+      font-weight: normal;
+      /* left: 50%; */
+      /* transform: translateX(-50%); */
+      white-space: nowrap;
+      max-width: 100vw;
+      padding: 5px 20px;
+      position: absolute;
+      pointer-events: none;
+      text-shadow: none;
+      border-radius: 2px;
+
+      &.light-green-gradient {
+        outline: 2px solid black;
+
+      }
+
+      &:not(.light-green-gradient) {
+        outline: 1.5px solid white;
+      }
+
+      ul {
+        padding-left: 20px;
+
+        >li {
+          list-style: none;
+        }
+      }
+
+      h2 {
+        font-weight: bold;
+      }
+    }
+
+    .hotkey {
       font-weight: bolder;
-      font-style: italic;
-      text-decoration: none !important;
+      color: orange;
     }
 
     #left-favorites-panel-bottom-row {
@@ -396,6 +451,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
         &:checked+label {
           background-color: #0075FF;
+          color: white;
           opacity: 1;
         }
       }
@@ -416,8 +472,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       <h2 style="display: inline;">Search Favorites</h2>
       <span style="margin-left: 5px;">
         <label id="match-count-label"></label>
-        <label id="pagination-label" style="margin-left: 50px;"></label>
-        <label id="favorites-fetch-progress-label" style="color: #3498db;"></label>
+        <label id="pagination-label" style="margin-left: 10px;"></label>
+        <label id="favorites-fetch-progress-label" style="padding-left: 20px; color: #3498db;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
         <button title="Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab"
@@ -433,13 +489,58 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <button title="Remove cached favorites and preferences" id="reset-button">Reset</button>
         <span id="favorites-pagination-placeholder"></span>
         <span id="help-links-container">
-          <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Controls</a>
+          <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
           |
-          <a href="https://github.com/bruh3396/favorites-search-gallery#search-syntax" target="_blank">Help</a>
+          <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
+            target="_blank">Feedback</a>
           |
-          <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report Bug</a>
+          <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report Issue</a>
           |
-          <a id="whats-new-container" href="#" onclick="return false">What's new?</a>
+          <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
+            <div id="whats-new-container" class="light-green-gradient">
+              <h5>New Features:</h5>
+              <ul>
+                <li>Sort by score, upload date, etc.</li>
+                <li>"Add favorite" buttons on other users' favorites pages</li>
+                <li>Filter by rating</li>
+              </ul>
+
+
+              <h5>New Gallery Hotkeys:</h5>
+              <ul>
+                <li><span class="hotkey">F</span> -- Add favorite</li>
+                <li><span class="hotkey">X</span> -- Remove favorite</li>
+                <li><span class="hotkey">M</span> -- Mute/unmute video</li>
+                <li><span class="hotkey">B</span> -- Toggle background</li>
+              </ul>
+
+              <h5>Other New Controls:</h5>
+              <ul>
+                <li><span class="hotkey">Shift + Scroll Wheel</span> -- Change column count</li>
+                <li><span class="hotkey">T</span> -- Toggle tooltips</li>
+                <li><span class="hotkey">D</span> -- Toggle details</li>
+              </ul>
+
+              <h5>Performance:</h5>
+              <ul>
+                <li>Reduced memory/network usage</li>
+                <li>Reduced load time</li>
+                <li>Seamless video playback (desktop)</li>
+              </ul>
+
+              <h5>Planned Features:</h5>
+              <ul>
+                <li>Edit custom tags (basically folders/pools) on:</li>
+                <ul>
+                  <li>search pages</li>
+                  <li>post pages</li>
+                </ul>
+                <li>Fix comic strips</li>
+                <li>Gallery autoplay</li>
+              </ul>
+            </div>
+          </a>
+
         </span>
       </div>
       <div>
@@ -518,14 +619,14 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <br>
                 <button id="column-resize-minus">
                   <svg xmlns="http://www.w3.org/2000/svg" id="Isolation_Mode" data-name="Isolation Mode"
-                    viewBox="0 0 24 24" width="20" height="20">
+                    viewBox="0 0 24 24">
                     <rect x="6" y="10.5" width="12" height="3" />
                   </svg>
                 </button>
                 <input type="number" id="column-resize-input" min="2" max="20">
                 <button id="column-resize-plus">
                   <svg xmlns="http://www.w3.org/2000/svg" id="Isolation_Mode" data-name="Isolation Mode"
-                    viewBox="0 0 24 24" width="20" height="20">
+                    viewBox="0 0 24 24">
                     <polygon
                       points="18 10.5 13.5 10.5 13.5 6 10.5 6 10.5 10.5 6 10.5 6 13.5 10.5 13.5 10.5 18 13.5 18 13.5 13.5 18 13.5 18 10.5" />
                   </svg>
@@ -617,10 +718,13 @@ function initializeFavoritesPage() {
   configureAuxillaryButtonOptionVisibility();
   configureMobileUI();
   configureDesktopUI();
+  setupWhatsNewDropdown();
 }
 
 function loadFavoritesPagePreferences() {
-  const auxillaryFavoriteButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showAuxillaryButtons, false);
+  const userIsLoggedIn = getUserId() !== null;
+  const showAuxillaryButtonsDefault = !userIsOnTheirOwnFavoritesPage() && userIsLoggedIn;
+  const auxillaryFavoriteButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showAuxillaryButtons, showAuxillaryButtonsDefault);
 
   FAVORITE_CHECKBOXES.showAuxillaryButtons.checked = auxillaryFavoriteButtonsAreVisible;
   setTimeout(() => {
@@ -755,6 +859,9 @@ function addEventListenersToFavoritesPage() {
     }
   });
   FAVORITE_INPUTS.searchBox.addEventListener("wheel", (event) => {
+    if (event.shiftKey || event.ctrlKey) {
+      return;
+    }
     const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
 
     traverseFavoritesSearchHistory(direction);
@@ -843,6 +950,18 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_INPUTS.allowedRatings.onchange = () => {
     changeAllowedRatings();
   };
+
+  window.addEventListener("wheel", (event) => {
+    if (!event.shiftKey) {
+      return;
+    }
+    const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
+    const columnAddend = delta > 0 ? -1 : 1;
+
+    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) + columnAddend);
+  }, {
+    passive: true
+  });
 }
 
 function configureAuxillaryButtonOptionVisibility() {
@@ -1079,6 +1198,36 @@ function configureDesktopUI() {
       height: 20px;
     }
   `);
+}
+
+function setupWhatsNewDropdown() {
+  const whatsNew = document.getElementById("whats-new-link");
+
+  if (whatsNew === null) {
+    return;
+  }
+  whatsNew.onclick = () => {
+    if (whatsNew.classList.contains("persistent")) {
+      whatsNew.classList.remove("persistent");
+      whatsNew.classList.add("hidden");
+    } else {
+      whatsNew.classList.add("persistent");
+    }
+    return false;
+  };
+
+  whatsNew.onblur = () => {
+    whatsNew.classList.remove("persistent");
+    whatsNew.classList.add("hidden");
+  };
+
+  whatsNew.onmouseenter = () => {
+    whatsNew.classList.remove("hidden");
+  };
+
+  whatsNew.onmouseleave = () => {
+    whatsNew.classList.add("hidden");
+  };
 }
 
 /**
