@@ -79,6 +79,16 @@ const galleryHTML = `<style>
       }
     }
   }
+
+  .fullscreen-icon {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    pointer-events: none;
+    width: 30%;
+  }
 </style>
 `;/* eslint-disable no-useless-escape */
 
@@ -1041,6 +1051,7 @@ onmessage = (message) => {
     traversalCooldownTime: 300,
     renderOnPageChangeCooldownTime: 2000,
     autoplayTime: 5000,
+    addFavoriteCooldownTime: 250,
     additionalVideoPlayerCount: onMobileDevice() ? 0 : 3,
     renderAroundAggressively: true,
     debugEnabled: false,
@@ -1049,6 +1060,7 @@ onmessage = (message) => {
   static traversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
   static renderOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
   static autoplayCooldown = new Cooldown(Gallery.settings.autoplayTime);
+  static changeFavoriteCooldown = new Cooldown(Gallery.settings.addFavoriteCooldownTime, true);
 
   /**
    * @returns {Boolean}
@@ -1382,9 +1394,7 @@ onmessage = (message) => {
         case "F":
 
         case "f":
-          {
-            const addedFavoriteStatus = await addFavorite(this.getSelectedThumb().id);
-          }
+          await this.addFavoriteInGallery(event);
           break;
 
         case "M":
@@ -1617,7 +1627,7 @@ onmessage = (message) => {
   }
 
   injectShowOnHoverOption() {
-    let optionId = Gallery.preferences.showOnHover;
+    let optionId = "show-content-on-hover";
     let optionText = "Fullscreen on Hover";
     let optionTitle = "View full resolution images or play videos and GIFs when hovering over a thumbnail";
     let optionIsChecked = this.showOriginalContentOnHover;
@@ -2098,12 +2108,35 @@ onmessage = (message) => {
   }
 
   unFavoriteSelectedContent() {
-    const removeLink = getRemoveFavoriteLinkFromThumb(this.getSelectedThumb());
-
-    if (removeLink === null || removeLink.style.visibility === "hidden") {
+    if (!userIsOnTheirOwnFavoritesPage()) {
       return;
     }
-    removeLink.click();
+    const selectedThumb = this.getSelectedThumb();
+
+    if (selectedThumb === null) {
+      return;
+    }
+    const removeFavoriteButton = getRemoveFavoriteButtonFromThumb(selectedThumb);
+
+    if (removeFavoriteButton === null) {
+      return;
+    }
+    const showRemoveFavoriteButtons = document.getElementById("show-remove-favorite-buttons");
+
+    if (showRemoveFavoriteButtons === null) {
+      return;
+    }
+
+    if (!Gallery.changeFavoriteCooldown.ready) {
+      return;
+    }
+
+    if (!showRemoveFavoriteButtons.checked) {
+      showFullscreenIcon(ICONS.warning, 1000);
+      return;
+    }
+    showFullscreenIcon(ICONS.heartMinus);
+    removeFavoriteButton.click();
   }
 
   enterGallery() {
@@ -2120,6 +2153,7 @@ onmessage = (message) => {
     dispatchEvent(new CustomEvent("showOriginalContent", {
       detail: true
     }));
+    // this.preloadInactiveVideoPlayers(selectedThumb);
     this.startAutoplay(selectedThumb);
   }
 
@@ -2225,12 +2259,6 @@ onmessage = (message) => {
     dispatchEvent(new CustomEvent("showOriginalContent", {
       detail: this.showOriginalContentOnHover
     }));
-    const showOnHoverCheckbox = document.getElementById("showImagesWhenHoveringCheckbox");
-
-    if (showOnHoverCheckbox !== null) {
-      setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
-      showOnHoverCheckbox.checked = this.showOriginalContentOnHover;
-    }
   }
 
   hideOriginalContent() {
@@ -2306,10 +2334,9 @@ onmessage = (message) => {
   /**
    * @param {HTMLElement} initialThumb
    */
-  async preloadInactiveVideoPlayers(initialThumb) {
+  preloadInactiveVideoPlayers(initialThumb) {
     if (!this.inGallery) {
-      await sleep(500);
-      this.stopAllInactiveVideos();
+      return;
     }
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
     const videoThumbsAroundInitialThumb = this.getAdjacentVisibleThumbsLooped(initialThumb, inactiveVideoPlayers.length, (t) => {
@@ -3057,6 +3084,40 @@ onmessage = (message) => {
   }
 
   loadVideoClips() {
+  }
+
+  /**
+   * @param {KeyboardEvent} event
+   */
+  async addFavoriteInGallery(event) {
+    if (!this.inGallery || event.repeat || !Gallery.changeFavoriteCooldown.ready) {
+      return;
+    }
+    const selectedThumb = this.getSelectedThumb();
+
+    if (selectedThumb === undefined || selectedThumb === null) {
+      showFullscreenIcon(ICONS.error);
+      return;
+    }
+    const addedFavoriteStatus = await addFavorite(selectedThumb.id);
+    let svg = ICONS.error;
+
+    switch (addedFavoriteStatus) {
+      case ADDED_FAVORITE_STATUS.alreadyAdded:
+        svg = ICONS.heartCheck;
+        break;
+
+      case ADDED_FAVORITE_STATUS.success:
+        svg = ICONS.heartPlus;
+        dispatchEvent(new CustomEvent("favoriteAddedOrDeleted", {
+          detail: selectedThumb.id
+        }));
+        break;
+
+      default:
+        break;
+    }
+    showFullscreenIcon(svg);
   }
 }
 

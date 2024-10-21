@@ -75,7 +75,14 @@ This script is still in development, please let me know if you experience a bug,
 | Right Click | Exit gallery, Enable "Enlarge on Hover" option | |
 | Middle Click | Open post page of thumbnail in new tab | |
 
-### Extra Gallery Hotkeys
+### General Hotkeys
+
+| Key | Function |
+| :-------- | :-------- |
+| T | Toggle tooltips |
+| D | Toggle details |
+
+### Gallery Hotkeys
 
 | Key | Function | Condition |
 | :-------- | :-------- | :-------- |

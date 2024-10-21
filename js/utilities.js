@@ -91,24 +91,91 @@ const TAG_BLACKLIST = getTagBlacklist();
 const PREFERENCES_LOCAL_STORAGE_KEY = "preferences";
 const FLAGS = {
   set: false,
-  onSearchPage: undefined,
-  onFavoritesPage: undefined,
-  onPostPage: undefined,
-  usingFirefox: undefined,
-  onMobileDevice: undefined,
-  userIsOnTheirOwnFavoritesPage: undefined,
-  usingRenderer: undefined
+  onSearchPage: {
+    set: false,
+    value: undefined
+  },
+  onFavoritesPage: {
+    set: false,
+    value: undefined
+  },
+  onPostPage: {
+    set: false,
+    value: undefined
+  },
+  usingFirefox: {
+    set: false,
+    value: undefined
+  },
+  onMobileDevice: {
+    set: false,
+    value: undefined
+  },
+  userIsOnTheirOwnFavoritesPage: {
+    set: false,
+    value: undefined
+  },
+  usingRenderer: {
+    set: false,
+    value: undefined
+  }
+};
+const ICONS = {
+  delete: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-trash\"><polyline points=\"3 6 5 6 21 6\"></polyline><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"></path></svg>",
+  edit: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-edit\"><path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"></path><path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"></path></svg>",
+  upArrow: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-arrow-up\"><line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"5\"></line><polyline points=\"5 12 12 5 19 12\"></polyline></svg>",
+  heartPlus: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FF69B4\"><path d=\"M440-501Zm0 381L313-234q-72-65-123.5-116t-85-96q-33.5-45-49-87T40-621q0-94 63-156.5T260-840q52 0 99 22t81 62q34-40 81-62t99-22q81 0 136 45.5T831-680h-85q-18-40-53-60t-73-20q-51 0-88 27.5T463-660h-46q-31-45-70.5-72.5T260-760q-57 0-98.5 39.5T120-621q0 33 14 67t50 78.5q36 44.5 98 104T440-228q26-23 61-53t56-50l9 9 19.5 19.5L605-283l9 9q-22 20-56 49.5T498-172l-58 52Zm280-160v-120H600v-80h120v-120h80v120h120v80H800v120h-80Z\"/></svg>",
+  heartMinus: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FF0000\"><path d=\"M440-501Zm0 381L313-234q-72-65-123.5-116t-85-96q-33.5-45-49-87T40-621q0-94 63-156.5T260-840q52 0 99 22t81 62q34-40 81-62t99-22q84 0 153 59t69 160q0 14-2 29.5t-6 31.5h-85q5-18 8-34t3-30q0-75-50-105.5T620-760q-51 0-88 27.5T463-660h-46q-31-45-70.5-72.5T260-760q-57 0-98.5 39.5T120-621q0 33 14 67t50 78.5q36 44.5 98 104T440-228q26-23 61-53t56-50l9 9 19.5 19.5L605-283l9 9q-22 20-56 49.5T498-172l-58 52Zm160-280v-80h320v80H600Z\"/></svg>",
+  heartCheck: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#51b330\"><path d=\"M718-313 604-426l57-56 57 56 141-141 57 56-198 198ZM440-501Zm0 381L313-234q-72-65-123.5-116t-85-96q-33.5-45-49-87T40-621q0-94 63-156.5T260-840q52 0 99 22t81 62q34-40 81-62t99-22q81 0 136 45.5T831-680h-85q-18-40-53-60t-73-20q-51 0-88 27.5T463-660h-46q-31-45-70.5-72.5T260-760q-57 0-98.5 39.5T120-621q0 33 14 67t50 78.5q36 44.5 98 104T440-228q26-23 61-53t56-50l9 9 19.5 19.5L605-283l9 9q-22 20-56 49.5T498-172l-58 52Z\"/></svg>",
+  error: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FF0000\"><path d=\"M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z\"/></svg>",
+  warning: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#DAB600\"><path d=\"m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z\"/></svg>",
+  empty: "<button>123</button>"
 };
 const DEFAULTS = {
   columnCount: 6,
   resultsPerPage: 200
 };
-const ADD_FAVORITE_STATUS = {
+const ADDED_FAVORITE_STATUS = {
   error: 0,
   alreadyAdded: 1,
   notLoggedIn: 2,
   success: 3
 };
+const STYLES = {
+  thumbHoverOutline: `
+    .thumb-node,
+    .thumb {
+      >a,
+      >span,
+      >div {
+        &:hover {
+          outline: 3px solid #0075FF;
+        }
+      }
+    }`,
+  thumbHoverOutlineDisabled: `
+    .thumb-node,
+    .thumb {
+      >a,
+      >span,
+      >div:not(:has(img.video)) {
+        &:hover {
+          outline: none;
+        }
+      }
+    }`
+};
+const TYPEABLE_INPUTS = new Set([
+  "color",
+  "email",
+  "number",
+  "password",
+  "search",
+  "tel",
+  "text",
+  "url",
+  "datetime"
+]);
 
 /**
  * @param {String} key
@@ -186,10 +253,11 @@ function getFavoritesPageId() {
  * @returns {Boolean}
  */
 function userIsOnTheirOwnFavoritesPage() {
-  if (!FLAGS.set) {
-    FLAGS.userIsOnTheirOwnFavoritesPage = getUserId() === getFavoritesPageId();
+  if (!FLAGS.userIsOnTheirOwnFavoritesPage.set) {
+    FLAGS.userIsOnTheirOwnFavoritesPage.value = getUserId() === getFavoritesPageId();
+    FLAGS.userIsOnTheirOwnFavoritesPage.set = true;
   }
-  return FLAGS.userIsOnTheirOwnFavoritesPage;
+  return FLAGS.userIsOnTheirOwnFavoritesPage.value;
 }
 
 /**
@@ -255,8 +323,16 @@ function forceHideCaptions(value) {
  * @param {HTMLElement} thumb
  * @returns {String | null}
  */
-function getRemoveFavoriteLinkFromThumb(thumb) {
+function getRemoveFavoriteButtonFromThumb(thumb) {
   return thumb.querySelector(".remove-favorite-button");
+}
+
+/**
+ * @param {HTMLElement} thumb
+ * @returns {String | null}
+ */
+function getAddFavoriteButtonFromThumb(thumb) {
+  return thumb.querySelector(".add-favorite-button");
 }
 
 /**
@@ -510,7 +586,7 @@ function clearAwesompleteSelection(input) {
  */
 function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible) {
   const favoritesPageOptions = document.getElementById("favorite-options");
-  const checkboxId = `${optionId}Checkbox`;
+  const checkboxId = `${optionId}-checkbox`;
 
   if (favoritesPageOptions === null) {
     return null;
@@ -538,30 +614,33 @@ function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChe
  * @returns {Boolean}
  */
 function onSearchPage() {
-  if (!FLAGS.set) {
-    FLAGS.onSearchPage = location.href.includes("page=post&s=list");
+  if (!FLAGS.onSearchPage.set) {
+    FLAGS.onSearchPage.value = location.href.includes("page=post&s=list");
+    FLAGS.onSearchPage.set = true;
   }
-  return FLAGS.onSearchPage;
+  return FLAGS.onSearchPage.value;
 }
 
 /**
  * @returns {Boolean}
  */
 function onFavoritesPage() {
-  if (!FLAGS.set) {
-    FLAGS.onFavoritesPage = location.href.includes("page=favorites");
+  if (!FLAGS.onFavoritesPage.set) {
+    FLAGS.onFavoritesPage.value = location.href.includes("page=favorites");
+    FLAGS.onFavoritesPage.set = true;
   }
-  return FLAGS.onFavoritesPage;
+  return FLAGS.onFavoritesPage.value;
 }
 
 /**
  * @returns {Boolean}
  */
 function onPostPage() {
-  if (!FLAGS.set) {
-    FLAGS.onPostPage = location.href.includes("page=post&s=view");
+  if (!FLAGS.onPostPage.set) {
+    FLAGS.onPostPage.value = location.href.includes("page=post&s=view");
+    FLAGS.onPostPage.set = true;
   }
-  return FLAGS.onPostPage;
+  return FLAGS.onPostPage.value;
 }
 
 /**
@@ -661,17 +740,6 @@ function injectCommonStyles() {
       border: none !important;
     }
 
-    .thumb-node,
-    .thumb {
-      >a,
-      >span,
-      >div {
-        &:hover {
-          outline: 3px solid #0075FF !important;
-        }
-      }
-    }
-
     input[type=number] {
       border: 1px solid #767676;
       border-radius: 2px;
@@ -688,6 +756,8 @@ function injectCommonStyles() {
       transform: scale(1.1, 1.1);
     }
   `, "utilities-common-styles");
+
+  injectStyleHTML(STYLES.thumbHoverOutline, "thumb-hover-outlines");
 
   setTimeout(() => {
     if (onSearchPage()) {
@@ -725,7 +795,7 @@ function toggleFancyImageHovering(value) {
       >span,
       >div {
         box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        transition: all 0.2s ease-in-out;
+        transition: transform 0.2s ease-in-out;
         position: relative;
 
         &::after {
@@ -859,7 +929,6 @@ function initializeUtilities() {
   toggleFancyImageHovering(true);
   setTheme();
   prefetchAdjacentSearchPages();
-  setFlags();
 }
 
 function prefetchAdjacentSearchPages() {
@@ -882,19 +951,6 @@ function prefetchAdjacentSearchPages() {
   }
   container.id = "search-page-prefetch";
   document.head.appendChild(container);
-}
-
-function setFlags() {
-  setTimeout(() => {
-    onSearchPage();
-    onFavoritesPage();
-    onPostPage();
-    onMobileDevice();
-    usingRenderer();
-    userIsOnTheirOwnFavoritesPage();
-    usingFirefox();
-    FLAGS.set = true;
-  }, 250);
 }
 
 /**
@@ -934,10 +990,11 @@ function usingCaptions() {
  * @returns {Boolean}
  */
 function usingRenderer() {
-  if (!FLAGS.set) {
-    FLAGS.usingRenderer = document.getElementById("original-content-container") !== null;
+  if (!FLAGS.usingRenderer.set) {
+    FLAGS.usingRenderer.value = document.getElementById("original-content-container") !== null;
+    FLAGS.usingRenderer.set = true;
   }
-  return FLAGS.usingRenderer;
+  return FLAGS.usingRenderer.value;
 }
 
 /**
@@ -1088,20 +1145,22 @@ function imageIsLoaded(image) {
  * @returns {Boolean}
  */
 function usingFirefox() {
-  if (!FLAGS.set) {
-    FLAGS.usingFirefox = navigator.userAgent.toLowerCase().includes("firefox");
+  if (!FLAGS.usingFirefox.set) {
+    FLAGS.usingFirefox.value = navigator.userAgent.toLowerCase().includes("firefox");
+    FLAGS.usingFirefox.set = true;
   }
-  return FLAGS.usingFirefox;
+  return FLAGS.usingFirefox.value;
 }
 
 /**
  * @returns  {Boolean}
  */
 function onMobileDevice() {
-  if (!FLAGS.set) {
-    FLAGS.onMobileDevice = (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent);
+  if (!FLAGS.onMobileDevice.set) {
+    FLAGS.onMobileDevice.value = (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent);
+    FLAGS.onMobileDevice.set = true;
   }
-  return FLAGS.onMobileDevice;
+  return FLAGS.onMobileDevice.value;
 }
 
 /**
@@ -1183,7 +1242,7 @@ function addFavorite(id) {
       return parseInt(html);
     })
     .catch(() => {
-      return ADD_FAVORITE_STATUS.error;
+      return ADDED_FAVORITE_STATUS.error;
     });
 }
 
@@ -1218,6 +1277,52 @@ function insertSuggestion(input, suggestion) {
  */
 function hideAwesomplete(input) {
   getAwesompleteFromInput(input).querySelector("ul").setAttribute("hidden", "");
+}
+
+/**
+ * @param {String} svg
+ * @param {Number} duration
+ */
+function showFullscreenIcon(svg, duration = 500) {
+  const svgDocument = new DOMParser().parseFromString(svg, "image/svg+xml");
+  const svgElement = svgDocument.documentElement;
+  const svgOverlay = document.createElement("div");
+
+  svgOverlay.classList.add("fullscreen-icon");
+  svgOverlay.innerHTML = new XMLSerializer().serializeToString(svgElement);
+  svgOverlay.width = "90vw";
+  document.body.appendChild(svgOverlay);
+  setTimeout(() => {
+    svgOverlay.remove();
+  }, duration);
+}
+
+/**
+ * @param {String} svg
+ * @returns {String}
+ */
+function createObjectURLFromSvg(svg) {
+  const blob = new Blob([svg], {
+    type: "image/svg+xml"
+  });
+  return URL.createObjectURL(blob);
+}
+
+/**
+ * @param {HTMLElement} element
+ * @returns {Boolean}
+ */
+function isTypeableInput(element) {
+  const tagName = element.tagName.toLowerCase();
+
+  if (tagName === "textarea") {
+    return true;
+  }
+
+  if (tagName === "input") {
+    return TYPEABLE_INPUTS.has(element.getAttribute("type"));
+  }
+  return false;
 }
 
 initializeUtilities();

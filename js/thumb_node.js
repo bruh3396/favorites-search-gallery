@@ -1,25 +1,68 @@
-const THUMB_NODE_TEMPLATE = new DOMParser().parseFromString("<div></div>", "text/html").createElement("div");
-const CANVAS_HTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
-const REMOVE_FAVORITE_BUTTON_HTML = "<button class=\"remove-favorite-button auxillary-button light-green-gradient\">Remove</button>";
-const ADD_FAVORITE_BUTTON_HTML = "<button class=\"add-favorite-button auxillary-button light-green-gradient\">Add Favorite</button>";
-const AUXILLARY_BUTTON_HTML = userIsOnTheirOwnFavoritesPage() ? REMOVE_FAVORITE_BUTTON_HTML : ADD_FAVORITE_BUTTON_HTML;
-
-THUMB_NODE_TEMPLATE.className = "thumb-node";
-
-THUMB_NODE_TEMPLATE.innerHTML = `
-    <div>
-      <img>
-      ${AUXILLARY_BUTTON_HTML}
-      ${CANVAS_HTML}
-    </div>
-`;
-
 class ThumbNode {
+  /**
+   * @type {Map.<String, ThumbNode>}
+   */
+  static allThumbNodes = new Map();
   static baseURLs = {
     post: "https://rule34.xxx/index.php?page=post&s=view&id="
   };
   static thumbSourceExtractionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
   static parser = new DOMParser();
+  /**
+   * @type {HTMLElement}
+  */
+  static template;
+  /**
+   * @type {String}
+  */
+  static removeFavoriteButtonHTML;
+  /**
+   * @type {String}
+  */
+  static addFavoriteButtonHTML;
+  /**
+   * @type {String}
+  */
+  static auxillaryButtonHTML;
+
+  static {
+    this.createTemplates();
+    this.addEventListeners();
+  }
+
+  static createTemplates() {
+    ThumbNode.template = ThumbNode.parser.parseFromString("<div></div>", "text/html").createElement("div");
+    const canvasHTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
+    const heartPlusBlobURL = createObjectURLFromSvg(ICONS.heartPlus);
+    const heartMinusBlobURL = createObjectURLFromSvg(ICONS.heartMinus);
+    const heartPlusImageHTML = `<img src=${heartPlusBlobURL}>`;
+    const heartMinusImageHTML = `<img src=${heartMinusBlobURL}>`;
+
+    ThumbNode.removeFavoriteButtonHTML = `<button class="remove-favorite-button auxillary-button light-green-gradient">${heartMinusImageHTML}</button>`;
+    ThumbNode.addFavoriteButtonHTML = `<button class="add-favorite-button auxillary-button light-green-gradient">${heartPlusImageHTML}</button>`;
+    const auxillaryButtonHTML = userIsOnTheirOwnFavoritesPage() ? ThumbNode.removeFavoriteButtonHTML : ThumbNode.addFavoriteButtonHTML;
+
+    ThumbNode.template.className = "thumb-node";
+
+    ThumbNode.template.innerHTML = `
+        <div>
+          <img loading="lazy">
+          ${auxillaryButtonHTML}
+          ${canvasHTML}
+        </div>
+    `;
+  }
+
+  static addEventListeners() {
+    window.addEventListener("favoriteAddedOrDeleted", (event) => {
+      const id = event.detail;
+      const thumbNode = this.allThumbNodes.get(id);
+
+      if (thumbNode !== undefined) {
+        thumbNode.swapAuxillaryButton();
+      }
+    });
+  }
 
   /**
    * @param {String} compressedSource
@@ -48,11 +91,6 @@ class ThumbNode {
     const rating = (/'rating':'(\S)/).exec(thumb.nextSibling.textContent)[1];
     return FavoriteMetadata.encodeRating(rating);
   }
-
-  /**
-   * @type {Map.<String, ThumbNode>}
-   */
-  static allThumbNodes = new Map();
 
   /**
    * @param {String} id
@@ -198,7 +236,7 @@ class ThumbNode {
   }
 
   instantiateTemplate() {
-    this.root = THUMB_NODE_TEMPLATE.cloneNode(true);
+    this.root = ThumbNode.template.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
     this.auxillaryButton = this.root.children[0].children[1];
@@ -206,17 +244,41 @@ class ThumbNode {
 
   setupAuxillaryButton() {
     if (userIsOnTheirOwnFavoritesPage()) {
-      this.auxillaryButton.onclick = (event) => {
-        event.stopPropagation();
-        this.auxillaryButton.remove();
-        removeFavorite(this.id);
-      };
+      this.auxillaryButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
     } else {
-      this.auxillaryButton.onclick = (event) => {
-        event.stopPropagation();
-        this.auxillaryButton.remove();
-        addFavorite(this.id);
-      };
+      this.auxillaryButton.onclick = this.addFavoriteButtonOnClick.bind(this);
+    }
+  }
+
+  /**
+   * @param {MouseEvent} event
+   */
+  removeFavoriteButtonOnClick(event) {
+    event.stopPropagation();
+    removeFavorite(this.id);
+    this.swapAuxillaryButton();
+  }
+  /**
+   * @param {MouseEvent} event
+   */
+  addFavoriteButtonOnClick(event) {
+    event.stopPropagation();
+    addFavorite(this.id);
+
+    this.swapAuxillaryButton();
+  }
+
+  swapAuxillaryButton() {
+    const isRemoveFavoriteButton = this.auxillaryButton.classList.contains("remove-favorite-button");
+
+    if (isRemoveFavoriteButton) {
+      this.auxillaryButton.outerHTML = ThumbNode.addFavoriteButtonHTML;
+      this.auxillaryButton = this.root.children[0].children[1];
+      this.auxillaryButton.onclick = this.addFavoriteButtonOnClick.bind(this);
+    } else {
+      this.auxillaryButton.outerHTML = ThumbNode.removeFavoriteButtonHTML;
+      this.auxillaryButton = this.root.children[0].children[1];
+      this.auxillaryButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
     }
   }
 

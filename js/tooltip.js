@@ -41,7 +41,7 @@ class Tooltip {
   /**
    * @type {Boolean}
    */
-  enabled;
+  visible;
   /**
    * @type {Object.<String,String>}
    */
@@ -54,16 +54,21 @@ class Tooltip {
    * @type {String}
    */
   previousSearch;
+  /**
+   * @type {HTMLImageElement}
+  */
+  currentImage;
 
   constructor() {
     if (Tooltip.disabled) {
       return;
     }
-    this.enabled = getPreference("showTooltip", true);
+    this.visible = getPreference("showTooltip", true);
     document.body.insertAdjacentHTML("afterbegin", tooltipHTML);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;
     this.tagColorCodes = {};
+    this.currentImage = null;
     this.setTheme();
     this.addEventListeners();
     this.addFavoritesOptions();
@@ -71,31 +76,74 @@ class Tooltip {
   }
 
   addEventListeners() {
-    if (onSearchPage()) {
-      window.addEventListener("load", () => {
-        this.addEventListenersToThumbs.bind(this)();
-      }, {
-        once: true,
-        passive: true
-      });
-    } else {
-      window.addEventListener("favoritesFetched", (event) => {
-        this.addEventListenersToThumbs.bind(this)(event.detail);
-      });
-      window.addEventListener("favoritesLoaded", () => {
-        this.addEventListenersToThumbs.bind(this)();
-      }, {
-        once: true
-      });
-      window.addEventListener("changedPage", () => {
-        this.addEventListenersToThumbs.bind(this)();
-      });
-      window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-        this.addEventListenersToThumbs.bind(this)(event.detail);
-      }, {
-        once: true
-      });
+    this.addAllPageEventListeners();
+    this.addSearchPageEventListeners();
+    this.addFavoritesPageEventListeners();
+  }
+
+  addAllPageEventListeners() {
+    document.addEventListener("keydown", (event) => {
+      if (event.key.toLowerCase() !== "t" || event.repeat || isTypeableInput(event.target)) {
+        return;
+      }
+
+      if (onFavoritesPage()) {
+        const showTooltipsCheckbox = document.getElementById("show-tooltips-checkbox");
+
+        if (showTooltipsCheckbox !== null) {
+          showTooltipsCheckbox.click();
+
+          if (this.currentImage !== null) {
+            if (this.visible) {
+              this.show(this.currentImage);
+            } else {
+              this.hide();
+            }
+          }
+        }
+      } else if (onSearchPage()) {
+        this.toggleVisibility();
+
+        if (this.currentImage !== null) {
+          this.hide();
+        }
+      }
+    });
+  }
+
+  addSearchPageEventListeners() {
+    if (!onSearchPage()) {
+      return;
     }
+    window.addEventListener("load", () => {
+      this.addEventListenersToThumbs.bind(this)();
+    }, {
+      once: true,
+      passive: true
+    });
+  }
+
+  addFavoritesPageEventListeners() {
+    if (!onFavoritesPage()) {
+      return;
+    }
+    window.addEventListener("favoritesFetched", (event) => {
+      this.addEventListenersToThumbs.bind(this)(event.detail);
+    });
+    window.addEventListener("favoritesLoaded", () => {
+      this.addEventListenersToThumbs.bind(this)();
+    }, {
+      once: true
+    });
+    window.addEventListener("changedPage", () => {
+      this.currentImage = null;
+      this.addEventListenersToThumbs.bind(this)();
+    });
+    window.addEventListener("newFavoritesFetchedOnReload", (event) => {
+      this.addEventListenersToThumbs.bind(this)(event.detail);
+    }, {
+      once: true
+    });
   }
 
   setTheme() {
@@ -134,13 +182,15 @@ class Tooltip {
         if (enteredOverCaptionTag(event)) {
           return;
         }
+        this.currentImage = image;
 
-        if (this.enabled) {
+        if (this.visible) {
           this.show(image);
         }
       };
       image.onmouseleave = (event) => {
         if (!enteredOverCaptionTag(event)) {
+          this.currentImage = null;
           this.hide();
         }
       };
@@ -352,15 +402,25 @@ class Tooltip {
 
   addFavoritesOptions() {
     addOptionToFavoritesPage(
-      "show-tooltip",
+      "show-tooltips",
       " Tooltips",
       "Show tags when hovering over a thumbnail and see which ones were matched by a search",
-      this.enabled, (event) => {
-        setPreference("showTooltip", event.target.checked);
-        this.setVisible(event.target.checked);
+      this.visible, (event) => {
+        this.toggleVisibility(event.target.checked);
       },
       true
     );
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleVisibility(value) {
+    if (value === undefined) {
+      value = !this.visible;
+    }
+    setPreference("showTooltip", value);
+    this.visible = value;
   }
 
   /**
@@ -370,13 +430,6 @@ class Tooltip {
     if (thumb !== null) {
       this.show(getImageFromThumb(thumb));
     }
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  setVisible(value) {
-    this.enabled = value;
   }
 
   assignColorsToMatchedTagsOnSearchPage() {

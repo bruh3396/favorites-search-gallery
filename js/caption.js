@@ -200,7 +200,7 @@ class Caption {
     this.initializeFields();
     this.createHTMLElement();
     this.injectHTML();
-    this.setVisibility(this.getVisibilityPreference());
+    this.toggleVisibility(this.getVisibilityPreference());
     this.addEventListeners();
   }
 
@@ -212,7 +212,6 @@ class Caption {
     this.problematicTags = [];
     this.problematicTagsThatFailedFetch = new Set();
     this.currentlyCorrectingProblematicTags = false;
-    this.previousThumb = null;
     this.currentThumbId = null;
   }
 
@@ -220,7 +219,7 @@ class Caption {
     this.captionWrapper = document.createElement("div");
     this.captionWrapper.className = "caption-wrapper";
     this.caption = document.createElement("div");
-    this.caption.className = "caption";
+    this.caption.className = "caption inactive";
     this.captionWrapper.appendChild(this.caption);
     document.head.appendChild(this.captionWrapper);
     this.caption.innerHTML = Caption.template;
@@ -234,7 +233,7 @@ class Caption {
       "Show details when hovering over thumbnail",
       this.getVisibilityPreference(),
       (event) => {
-        this.setVisibility(event.target.checked);
+        this.toggleVisibility(event.target.checked);
       },
       true
     );
@@ -243,7 +242,11 @@ class Caption {
   /**
    * @param {Boolean} value
    */
-  setVisibility(value) {
+  toggleVisibility(value) {
+    if (value === undefined) {
+      value = this.caption.classList.contains("disabled");
+    }
+
     if (value) {
       this.caption.classList.remove("disabled");
     } else if (!this.caption.classList.contains("disabled")) {
@@ -253,6 +256,12 @@ class Caption {
   }
 
   addEventListeners() {
+    this.addAllPageEventListeners();
+    this.addSearchPageEventListeners();
+    this.addFavoritesPageEventListeners();
+  }
+
+  addAllPageEventListeners() {
     this.caption.addEventListener("transitionend", () => {
       if (this.caption.classList.contains("active")) {
         this.caption.classList.add("transition-completed");
@@ -274,47 +283,68 @@ class Caption {
       }
     });
 
-    if (onSearchPage()) {
-      window.addEventListener("load", () => {
-        this.addEventListenersToThumbs.bind(this)();
-      }, {
-        once: true,
-        passive: true
-      });
-    } else {
-      window.addEventListener("favoritesLoaded", () => {
-        this.addEventListenersToThumbs.bind(this)();
-        Caption.findCategoriesOnPageChangeCooldown.waitTime = 1000;
-      }, {
-        once: true
-      });
-      window.addEventListener("favoritesFetched", () => {
-        this.addEventListenersToThumbs.bind(this)();
-      });
-      window.addEventListener("changedPage", () => {
-        this.addEventListenersToThumbs.bind(this)();
+    document.addEventListener("keydown", (event) => {
+      if (event.key.toLowerCase() !== "d" || event.repeat || isTypeableInput(event.target) || !this.caption.classList.contains("inactive")) {
+        return;
+      }
 
-        if (Caption.findCategoriesOnPageChangeCooldown.ready) {
-          this.findTagCategoriesOnPageChange();
+      if (onFavoritesPage()) {
+        const showCaptionsCheckbox = document.getElementById("show-captions-checkbox");
+
+        if (showCaptionsCheckbox !== null) {
+          showCaptionsCheckbox.click();
         }
-      });
-      window.addEventListener("showCaption", (event) => {
-        this.attachToThumb(event.detail);
-      });
-      window.addEventListener("originalFavoritesCleared", (event) => {
-        const thumbs = event.detail;
-        const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
+      } else if (onSearchPage()) {
+        this.toggleVisibility();
+      }
+    });
+  }
 
-        this.findTagCategories(tagNames, 3, () => {
-          this.saveTags();
-        });
-      });
-      window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-        this.addEventListenersToThumbs.bind(this)(event.detail);
-      }, {
-        once: true
-      });
+  addSearchPageEventListeners() {
+    if (!onSearchPage()) {
+      return;
     }
+    window.addEventListener("load", () => {
+      this.addEventListenersToThumbs.bind(this)();
+    }, {
+      once: true,
+      passive: true
+    });
+  }
+
+  addFavoritesPageEventListeners() {
+    window.addEventListener("favoritesLoaded", () => {
+      this.addEventListenersToThumbs.bind(this)();
+      Caption.findCategoriesOnPageChangeCooldown.waitTime = 1000;
+    }, {
+      once: true
+    });
+    window.addEventListener("favoritesFetched", () => {
+      this.addEventListenersToThumbs.bind(this)();
+    });
+    window.addEventListener("changedPage", () => {
+      this.addEventListenersToThumbs.bind(this)();
+
+      if (Caption.findCategoriesOnPageChangeCooldown.ready) {
+        this.findTagCategoriesOnPageChange();
+      }
+    });
+    window.addEventListener("showCaption", (event) => {
+      this.attachToThumb(event.detail);
+    });
+    window.addEventListener("originalFavoritesCleared", (event) => {
+      const thumbs = event.detail;
+      const tagNames = this.getTagNamesWithUnknownCategories(thumbs);
+
+      this.findTagCategories(tagNames, 3, () => {
+        this.saveTags();
+      });
+    });
+    window.addEventListener("newFavoritesFetchedOnReload", (event) => {
+      this.addEventListenersToThumbs.bind(this)(event.detail);
+    }, {
+      once: true
+    });
   }
 
   /**

@@ -102,19 +102,28 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     .auxillary-button {
       position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
+      left: 0px;
+      top: 0px;
+      width: 40%;
       font-weight: bold;
-      font-size: 15px;
-      height: 40px;
-      color: #0075FF;
-      background: white;
+      background: none;
       border: none;
       z-index: 2;
+      filter: grayscale(50%);
 
-      &:active {
+      &:active,
+      &:hover {
         filter: none !important;
+      }
+    }
+
+    .remove-favorite-button {
+      color: red;
+    }
+
+    .add-favorite-button {
+      >svg {
+        fill:hotpink;
       }
     }
 
@@ -139,11 +148,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
         &:has(.auxillary-button:hover) {
           outline-style: solid !important;
-          outline-width: 3px !important;
-
-          >.auxillary-button {
-            box-shadow: 0px 3px 0px 0px;
-          }
+          outline-width: 5px !important;
         }
 
         &:has(.remove-favorite-button:hover) {
@@ -155,10 +160,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
 
         &:has(.add-favorite-button:hover) {
-          outline-color: goldenrod !important;
+          outline-color: hotpink !important;
 
           >.add-favorite-button {
-            color: goldenrod;
+            svg {
+              fill: hotpink;
+            }
           }
         }
 
@@ -296,9 +303,9 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     #help-links-container {
       margin-top: 17px;
 
-      >a {
+      /* >a {
         text-decoration: underline;
-      }
+      } */
     }
 
     #whats-new-container {
@@ -428,11 +435,11 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         <span id="help-links-container">
           <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Controls</a>
           |
-          <a href="https://github.com/bruh3396/favorites-search-gallery#features" target="_blank">Help</a>
+          <a href="https://github.com/bruh3396/favorites-search-gallery#search-syntax" target="_blank">Help</a>
           |
           <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report Bug</a>
           |
-          <a id="whats-new-container" href="#" onclick="return false">What's new!</a>
+          <a id="whats-new-container" href="#" onclick="return false">What's new?</a>
         </span>
       </div>
       <div>
@@ -449,7 +456,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   type="checkbox" id="enable-on-search-pages">
                 Enhance Search Pages</label></div>
             <div style="display: none;"><label class="checkbox" title="Toggle remove buttons"><input type="checkbox"
-                  id="show-remove-buttons">
+                  id="show-remove-favorite-buttons">
                 Remove Buttons</label></div>
             <div style="display: none;"><label class="checkbox" title="Toggle add favorite buttons"><input
                   type="checkbox" id="show-add-favorite-buttons">
@@ -576,7 +583,7 @@ const FAVORITE_BUTTONS = {
 };
 const FAVORITE_CHECKBOXES = {
   showOptions: document.getElementById("options-checkbox"),
-  showAuxillaryButtons: userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-buttons") : document.getElementById("show-add-favorite-buttons"),
+  showAuxillaryButtons: userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-favorite-buttons") : document.getElementById("show-add-favorite-buttons"),
   filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
   showUI: document.getElementById("show-ui"),
   fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
@@ -889,14 +896,33 @@ function toggleFavoritesOptions(value) {
 }
 
 function toggleAuxillaryButtons() {
-  const visibility = FAVORITE_CHECKBOXES.showAuxillaryButtons.checked ? "visible" : "hidden";
+  const value = FAVORITE_CHECKBOXES.showAuxillaryButtons.checked;
+
+  toggleAuxillaryButtonVisibility(value);
+  hideThumbHoverOutlines(value);
+  forceHideCaptions(value);
+}
+
+/**
+ * @param {Boolean} hideOutlines
+ */
+function hideThumbHoverOutlines(hideOutlines) {
+  const style = hideOutlines ? STYLES.thumbHoverOutlineDisabled : STYLES.thumbHoverOutline;
+
+  injectStyleHTML(style, "thumb-hover-outlines");
+}
+
+/**
+ * @param {Boolean} value
+ */
+function toggleAuxillaryButtonVisibility(value) {
+  const visibility = value ? "visible" : "hidden";
 
   injectStyleHTML(`
       .auxillary-button {
         visibility: ${visibility} !important;
       }
     `, "auxillary-button-visibility");
-  forceHideCaptions(FAVORITE_CHECKBOXES.showAuxillaryButtons.checked);
 }
 
 /**
