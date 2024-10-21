@@ -928,6 +928,7 @@ function initializeUtilities() {
   injectCommonStyles();
   toggleFancyImageHovering(true);
   setTheme();
+  removeBlacklistedThumbs();
   prefetchAdjacentSearchPages();
 }
 
@@ -964,6 +965,17 @@ function createPrefetchLink(url) {
   link.href = url;
   return link;
 
+}
+
+function removeBlacklistedThumbs() {
+  if (!onSearchPage()) {
+    return;
+  }
+  const blacklistedThumbs = Array.from(document.getElementsByClassName("blacklisted-image"));
+
+  for (const thumb of blacklistedThumbs) {
+    thumb.remove();
+  }
 }
 
 /**

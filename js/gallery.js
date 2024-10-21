@@ -1607,11 +1607,16 @@ onmessage = (message) => {
     }
     const imageList = document.getElementsByClassName("image-list")[0];
     const thumbs = Array.from(imageList.querySelectorAll(".thumb"));
+    const scripts = Array.from(imageList.querySelectorAll("script"));
 
     for (const thumb of thumbs) {
       removeTitleFromImage(getImageFromThumb(thumb));
       assignContentType(thumb);
       thumb.id = thumb.id.substring(1);
+    }
+
+    for (const script of scripts) {
+      script.remove();
     }
     await this.findImageExtensionsOnSearchPage();
     this.renderImagesInTheBackground();
@@ -3008,6 +3013,9 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   upscaleAnimatedThumbsAround(thumb) {
+    if (!onFavoritesPage()) {
+      return;
+    }
     const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
       return !isImage(t) && !this.transferredCanvases.has(t.id);
     });
@@ -3019,6 +3027,9 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   upscaleAnimatedThumbsAroundDiscrete(thumb) {
+    if (!onFavoritesPage()) {
+      return;
+    }
     const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (_) => {
       return true;
     }).filter(t => !isImage(t) && !this.transferredCanvases.has(t.id));

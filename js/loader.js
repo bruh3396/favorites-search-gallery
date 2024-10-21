@@ -781,7 +781,7 @@ onmessage = (message) => {
       } else if (currentPageNumber * 50 <= this.finalPageNumber && !this.foundEmptyFavoritesPage) {
         this.fetchFavoritesFromSinglePage(currentPageNumber);
         currentPageNumber += 1;
-        await sleep(200);
+        await sleep(210);
       } else if (this.finishedFetching(currentPageNumber)) {
         this.onAllFavoritesLoaded();
         this.storeFavorites();

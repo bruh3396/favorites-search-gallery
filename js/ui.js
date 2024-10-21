@@ -586,7 +586,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <input type="checkbox" id="sort-ascending">
               </div>
             </div>
-            <div id="rating-container">
+            <div id="rating-container" title="Filter search results by rating">
               <label>Rating</label>
               <br>
               <div id="allowed-ratings">
