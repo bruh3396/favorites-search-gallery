@@ -368,15 +368,15 @@ class ThumbNode {
     }
   }
 
+  toggleMatched() {
+      this.matchedByMostRecentSearch = !this.matchedByMostRecentSearch;
+  }
+
   /**
    * @param {Boolean} value
    */
-  toggleMatched(value) {
-    if (value === undefined) {
-      this.matchedByMostRecentSearch = !this.matchedByMostRecentSearch;
-    } else {
-      this.matchedByMostRecentSearch = value;
-    }
+  setMatched(value) {
+    this.matchedByMostRecentSearch = value;
   }
 
   /**

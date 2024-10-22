@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 class PostTags {
   /**
    * @type {Set.<String>}
@@ -20,31 +21,82 @@ class PostTags {
    */
   create(tags) {
     this.array = removeExtraWhiteSpace(tags)
-      .split(" ")
-      .sort();
+      .split(" ");
     this.set = new Set(this.array);
   }
 }
 
-/**
- * @param {String} searchQuery
- * @returns {{orGroups: String[][], remainingSearchTags: String[], isEmpty: Boolean}}
- */
-function getSearchCommand(searchQuery) {
-  const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
-  return {
-    orGroups,
-    remainingSearchTags,
-    isEmpty: searchQuery.trim() === ""
-  };
+class SearchTag {
+  /**
+   * @type {String}
+  */
+  value;
+  /**
+   * @type {Boolean}
+  */
+  isNegated;
+  /**
+   * @type {Boolean}
+  */
+  isWildcard;
+  /**
+   * @type {RegExp}
+  */
+  wildcardRegex;
+
+  /**
+   * @param {String} searchTag
+   */
+  constructor(searchTag) {
+    this.isNegated = searchTag.startsWith("-");
+    this.isWildcard = searchTag.includes("*");
+    this.value = this.isNegated ? searchTag.substring(1) : searchTag;
+    this.wildcardRegex = new RegExp(`^${this.value.replaceAll(/\*/g, ".*")}$`);
+  }
+}
+
+class SearchCommand {
+  /**
+   * @type {SearchTag[][]}
+  */
+  orGroups;
+  /**
+   * @type {SearchTag[]}
+  */
+  remainingSearchTags;
+  /**
+   * @type {Boolean}
+  */
+  isEmpty;
+
+  /**
+   * @param {String} searchQuery
+   */
+  constructor(searchQuery) {
+    this.orGroups = [];
+    this.remainingSearchTags = [];
+    this.isEmpty = searchQuery.trim() === "";
+
+    if (this.isEmpty) {
+      return;
+    }
+    const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
+
+    for (const orGroup of orGroups) {
+      this.orGroups.push(orGroup.map(searchTag => new SearchTag(searchTag)));
+    }
+    this.remainingSearchTags = remainingSearchTags.map(searchTag => new SearchTag(searchTag));
+  }
 }
 
 /**
- * @param {{orGroups: String[][], remainingSearchTags: String[], isEmpty: Boolean}} searchCommand
+ * @param {SearchCommand} searchCommand
  * @param {PostTags} postTags
  * @returns {Boolean}
  */
 function postTagsMatchSearch(searchCommand, postTags) {
+  // console.log(1);
+
   if (searchCommand.isEmpty) {
     return true;
   }
@@ -56,7 +108,7 @@ function postTagsMatchSearch(searchCommand, postTags) {
 }
 
 /**
- * @param {String[]} remainingSearchTags
+ * @param {SearchTag[]} remainingSearchTags
  * @param {PostTags} postTags
  * @returns {Boolean}
  */
@@ -70,7 +122,7 @@ function postTagsMatchAllRemainingSearchTags(remainingSearchTags, postTags) {
 }
 
 /**
- * @param {String[][]} orGroups
+ * @param {SearchTag[][]} orGroups
  * @param {PostTags} postTags
  * @returns {Boolean}
  */
@@ -84,7 +136,7 @@ function postTagsMatchAllOrGroups(orGroups, postTags) {
 }
 
 /**
- * @param {String[]} orGroup
+ * @param {SearchTag[]} orGroup
  * @param {PostTags} postTags
  * @returns {Boolean}
  */
@@ -98,48 +150,39 @@ function atLeastOnePostTagIsInOrGroup(orGroup, postTags) {
 }
 
 /**
- * @param {String} searchTag
+ * @param {SearchTag} searchTag
  * @param {PostTags} postTags
  * @param {Boolean} inOrGroup
  * @returns {Boolean}
  */
 function postTagsMatchSearchTag(searchTag, postTags, inOrGroup) {
-  const isNegated = inOrGroup ? false : searchTag.startsWith("-");
-  const isWildcard = searchTag.endsWith("*");
+  const isNegated = inOrGroup ? false : searchTag.isNegated;
 
-  searchTag = isWildcard ? searchTag.slice(0, -1) : searchTag;
-  searchTag = isNegated ? searchTag.substring(1) : searchTag;
-  const postTagsContainSearchTag = postTags.set.has(searchTag);
-
-  if (postTagsContainSearchTag) {
+  if (searchTag.isWildcard && postTagsMatchWildcardSearchTag(searchTag, postTags.array)) {
     return !isNegated;
   }
 
-  if (isWildcard && binarySearchStartsWith(searchTag, postTags.array)) {
+  if (postTags.set.has(searchTag.value)) {
     return !isNegated;
   }
   return isNegated;
 }
 
 /**
- * @param {String} target
- * @param {String[]} array
+ * @param {SearchTag} searchTag
+ * @param {String[]} tags
  * @returns {Boolean}
  */
-function binarySearchStartsWith(target, array) {
-  let left = 0;
-  let right = array.length - 1;
+function postTagsMatchWildcardSearchTag(searchTag, tags) {
+  return tags.some(tag => searchTag.wildcardRegex.test(tag));
+}
 
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-
-    if (array[mid].startsWith(target)) {
-      return true;
-    } else if (array[mid] < target) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
-    }
-  }
-  return false;
+/**
+ * @param {String} searchTag
+ * @param {String[]} tags
+ * @returns {Boolean}
+ */
+function tagsMatchWildcardSearchTag(searchTag, tags) {
+  const wildcardRegex = new RegExp(`^${searchTag.replaceAll(/\*/g, ".*")}$`);
+  return tags.some(tag => wildcardRegex.test(tag));
 }

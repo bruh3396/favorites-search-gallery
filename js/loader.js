@@ -678,7 +678,8 @@ onmessage = (message) => {
    * @returns {ThumbNode[]}
    */
   getSearchResults(thumbNodes, stopIndex) {
-    const searchCommand = getSearchCommand(this.finalSearchQuery);
+    const searchCommand = new SearchCommand(this.finalSearchQuery);
+
     const results = [];
 
     stopIndex = stopIndex === undefined ? thumbNodes.length : stopIndex;
@@ -689,9 +690,9 @@ onmessage = (message) => {
 
       if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
         results.push(thumbNode);
-        thumbNode.toggleMatched(true);
+        thumbNode.setMatched(true);
       } else {
-        thumbNode.toggleMatched(false);
+        thumbNode.setMatched(false);
       }
     }
     return results;
@@ -987,7 +988,7 @@ onmessage = (message) => {
     if (databaseRecords === null) {
       return null;
     }
-    const searchCommand = getSearchCommand(this.finalSearchQuery);
+    const searchCommand = new SearchCommand(this.finalSearchQuery);
     const searchResults = [];
 
     for (const record of databaseRecords) {
@@ -998,7 +999,7 @@ onmessage = (message) => {
         if (!userIsOnTheirOwnFavoritesPage()) {
           continue;
         }
-        thumbNode.toggleMatched(false);
+        thumbNode.setMatched(false);
       } else {
         searchResults.push(thumbNode);
       }
@@ -1156,7 +1157,7 @@ Tag modifications and saved searches will be preserved.
    */
   async insertNewFavoritesAfterReloadingPage(newThumbNodes) {
     const content = document.getElementById("content");
-    const searchCommand = getSearchCommand(this.finalSearchQuery);
+    const searchCommand = new SearchCommand(this.finalSearchQuery);
     const insertedThumbNodes = [];
     const metadataPopulateWaitTime = 1000;
 

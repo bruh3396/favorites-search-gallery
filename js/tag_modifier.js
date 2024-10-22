@@ -70,6 +70,11 @@ class TagModifier {
     return document.getElementById("tag-edit-mode") !== null;
   }
   /**
+   * @type {Map.<String, String>}
+   */
+  static tagModifications = new Map();
+
+  /**
    * @type {Boolean}
   */
   static get disabled() {
@@ -77,14 +82,9 @@ class TagModifier {
   }
 
   /**
-   * @type {Map.<String, String>}
-   */
-  static tagModifications = new Map();
-  /**
    * @type {{container: HTMLDivElement, checkbox: HTMLInputElement}}
    */
   favoritesOption;
-
   /**
    * @type { {container: HTMLDivElement,
    * textarea:  HTMLTextAreaElement,
@@ -98,11 +98,14 @@ class TagModifier {
    * export: HTMLButtonElement}}
    */
   ui;
-
   /**
    * @type {ThumbNode[]}
    */
   selectedThumbNodes;
+  /**
+   * @type {Boolean}
+  */
+  atLeastOneFavoriteIsSelected;
 
   constructor() {
     if (TagModifier.disabled) {
@@ -111,6 +114,7 @@ class TagModifier {
     this.favoritesOption = {};
     this.ui = {};
     this.selectedThumbNodes = [];
+    this.atLeastOneFavoriteIsSelected = false;
     this.loadTagModifications();
     this.injectHTML();
     this.addEventListeners();
@@ -235,9 +239,14 @@ class TagModifier {
   }
 
   unSelectAll() {
+    if (!this.atLeastOneFavoriteIsSelected) {
+      return;
+    }
+
     for (const thumbNode of ThumbNode.allThumbNodes.values()) {
       this.toggleThumbSelection(thumbNode.root, false);
     }
+    this.atLeastOneFavoriteIsSelected = false;
   }
 
   selectAll() {
@@ -251,6 +260,8 @@ class TagModifier {
    * @param {Boolean} value
    */
   toggleThumbSelection(thumb, value) {
+    this.atLeastOneFavoriteIsSelected = true;
+
     if (value === undefined) {
       thumb.classList.toggle("tag-modifier-selected");
     } else {

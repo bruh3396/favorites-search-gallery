@@ -794,7 +794,6 @@ class ImageRenderer {
     if (render.completed) {
       this.currentlyDrawnCanvasId = id;
     }
-    this.resizeCanvas();
     const ratio = Math.min(this.canvas.width / render.imageBitmap.width, this.canvas.height / render.imageBitmap.height);
     const centerShiftX = (this.canvas.width - (render.imageBitmap.width * ratio)) / 2;
     const centerShiftY = (this.canvas.height - (render.imageBitmap.height * ratio)) / 2;
@@ -806,24 +805,24 @@ class ImageRenderer {
     );
   }
 
-  resizeCanvas() {
-    // if (!this.onMobileDevice) {
-    //   return;
-    // }
-    // const windowInLandscapeOrientation = window.innerWidth > window.innerHeight;
-    // const usingIncorrectOrientation = windowInLandscapeOrientation !== this.usingLandscapeOrientation;
+  /**
+   * @param {Boolean} usingLandscapeOrientation
+   */
+  changeCanvasOrientation(usingLandscapeOrientation) {
+    if (usingLandscapeOrientation !== this.usingLandscapeOrientation) {
+      this.swapCanvasOrientation();
+    }
+  }
 
-    // if (usingIncorrectOrientation) {
-    //   const temp = this.canvas.width;
+  swapCanvasOrientation() {
+    const temp = this.canvas.width;
 
-    //   this.canvas.width = this.canvas.height;
-    //   this.canvas.height = temp;
-    //   this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
-    // }
+    this.canvas.width = this.canvas.height;
+    this.canvas.height = temp;
+    this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
   }
 
   clearCanvas() {
-    this.currentlyDrawnCanvasId = "";
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
@@ -948,6 +947,10 @@ class ImageRenderer {
 
       case "upscaleAnimatedThumbs":
         this.thumbUpscaler.upscaleMultipleAnimatedCanvases(message.upscaleRequests);
+        break;
+
+      case "changeCanvasOrientation":
+        this.changeCanvasOrientation(message.usingLandscapeOrientation);
         break;
 
       default:
@@ -1204,6 +1207,7 @@ onmessage = (message) => {
     this.injectHTML();
     this.updateBackgroundOpacity(getPreference(Gallery.preferences.backgroundOpacity, 1));
     this.loadVideoClips();
+    this.setMainCanvasOrientation();
   }
 
   initializeFields() {
@@ -1577,6 +1581,37 @@ onmessage = (message) => {
     }, {
       passive: false
     });
+
+    window.addEventListener("orientationchange", () => {
+      if (this.imageRenderer !== null && this.imageRenderer !== undefined) {
+        this.setMainCanvasOrientation();
+      }
+    }, {
+      passive: true
+    });
+  }
+
+  setMainCanvasOrientation() {
+    if (!onMobileDevice()) {
+      return;
+    }
+    const usingLandscapeOrientation = window.screen.orientation.angle === 90;
+
+    this.imageRenderer.postMessage({
+      action: "changeCanvasOrientation",
+      usingLandscapeOrientation
+    });
+
+    if (!this.inGallery) {
+      return;
+    }
+
+    const thumb = this.getSelectedThumb();
+
+    if (thumb === undefined || thumb === null) {
+      return;
+    }
+    this.imageRenderer.postMessage(this.getRenderRequest(thumb));
   }
 
   addMemoryManagementEventListeners() {
@@ -2689,7 +2724,7 @@ onmessage = (message) => {
    * @returns {Boolean}
    */
   canvasIsTransferrable(thumb) {
-    return !onSearchPage() && !this.transferredCanvases.has(thumb.id);
+    return !onMobileDevice() && !onSearchPage() && !this.transferredCanvases.has(thumb.id);
   }
 
   /**
@@ -3013,7 +3048,7 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   upscaleAnimatedThumbsAround(thumb) {
-    if (!onFavoritesPage()) {
+    if (!onFavoritesPage() || onMobileDevice()) {
       return;
     }
     const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
@@ -3027,7 +3062,7 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   upscaleAnimatedThumbsAroundDiscrete(thumb) {
-    if (!onFavoritesPage()) {
+    if (!onFavoritesPage() || onMobileDevice()) {
       return;
     }
     const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (_) => {
@@ -3051,6 +3086,9 @@ onmessage = (message) => {
    * @param {String} id
    */
   drawLowResolutionCanvas(thumb) {
+    if (onMobileDevice()) {
+      return;
+    }
     const image = getImageFromThumb(thumb);
 
     if (!imageIsLoaded(image)) {
@@ -3068,6 +3106,9 @@ onmessage = (message) => {
   }
 
   clearLowResolutionCanvas() {
+    if (onMobileDevice()) {
+      return;
+    }
     this.lowResolutionContext.clearRect(0, 0, this.lowResolutionCanvas.width, this.lowResolutionCanvas.height);
   }
 

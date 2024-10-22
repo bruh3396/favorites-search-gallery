@@ -612,7 +612,6 @@ class ImageRenderer {
     if (render.completed) {
       this.currentlyDrawnCanvasId = id;
     }
-    this.resizeCanvas();
     const ratio = Math.min(this.canvas.width / render.imageBitmap.width, this.canvas.height / render.imageBitmap.height);
     const centerShiftX = (this.canvas.width - (render.imageBitmap.width * ratio)) / 2;
     const centerShiftY = (this.canvas.height - (render.imageBitmap.height * ratio)) / 2;
@@ -624,24 +623,24 @@ class ImageRenderer {
     );
   }
 
-  resizeCanvas() {
-    // if (!this.onMobileDevice) {
-    //   return;
-    // }
-    // const windowInLandscapeOrientation = window.innerWidth > window.innerHeight;
-    // const usingIncorrectOrientation = windowInLandscapeOrientation !== this.usingLandscapeOrientation;
+  /**
+   * @param {Boolean} usingLandscapeOrientation
+   */
+  changeCanvasOrientation(usingLandscapeOrientation) {
+    if (usingLandscapeOrientation !== this.usingLandscapeOrientation) {
+      this.swapCanvasOrientation();
+    }
+  }
 
-    // if (usingIncorrectOrientation) {
-    //   const temp = this.canvas.width;
+  swapCanvasOrientation() {
+    const temp = this.canvas.width;
 
-    //   this.canvas.width = this.canvas.height;
-    //   this.canvas.height = temp;
-    //   this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
-    // }
+    this.canvas.width = this.canvas.height;
+    this.canvas.height = temp;
+    this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
   }
 
   clearCanvas() {
-    this.currentlyDrawnCanvasId = "";
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
@@ -766,6 +765,10 @@ class ImageRenderer {
 
       case "upscaleAnimatedThumbs":
         this.thumbUpscaler.upscaleMultipleAnimatedCanvases(message.upscaleRequests);
+        break;
+
+      case "changeCanvasOrientation":
+        this.changeCanvasOrientation(message.usingLandscapeOrientation);
         break;
 
       default:

@@ -45,7 +45,7 @@ class Tooltip {
   /**
    * @type {Object.<String,String>}
    */
-  tagColorCodes;
+  searchTagColorCodes;
   /**
    * @type {HTMLTextAreaElement}
    */
@@ -67,7 +67,7 @@ class Tooltip {
     document.body.insertAdjacentHTML("afterbegin", tooltipHTML);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;
-    this.tagColorCodes = {};
+    this.searchTagColorCodes = {};
     this.currentImage = null;
     this.setTheme();
     this.addEventListeners();
@@ -279,7 +279,7 @@ class Tooltip {
     const thumb = getThumbFromImage(image);
     let tags = getTagsFromThumb(thumb);
 
-    if (this.tagColorCodes[thumb.id] === undefined) {
+    if (this.searchTagColorCodes[thumb.id] === undefined) {
       tags = tags.replace(` ${thumb.id}`, "");
     }
     return tags;
@@ -333,7 +333,7 @@ class Tooltip {
     searchQuery = this.removeNotTags(searchQuery);
     const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
 
-    this.tagColorCodes = {};
+    this.searchTagColorCodes = {};
     this.assignColorsToOrGroupTags(orGroups);
     this.assignColorsToRemainingTags(remainingSearchTags);
   }
@@ -376,8 +376,8 @@ class Tooltip {
   addColorCodedTag(tag, color) {
     tag = this.sanitizeTags(tag);
 
-    if (this.tagColorCodes[tag] === undefined) {
-      this.tagColorCodes[tag] = color;
+    if (this.searchTagColorCodes[tag] === undefined) {
+      this.searchTagColorCodes[tag] = color;
     }
   }
 
@@ -386,15 +386,13 @@ class Tooltip {
    * @returns {String | null}
    */
   getColorCode(tag) {
-    if (this.tagColorCodes[tag] !== undefined) {
-      return this.tagColorCodes[tag];
+    if (this.searchTagColorCodes[tag] !== undefined) {
+      return this.searchTagColorCodes[tag];
     }
 
-    for (const [tagPrefix, _] of Object.entries(this.tagColorCodes)) {
-      if (tagPrefix.endsWith("*")) {
-        if (tag.startsWith(tagPrefix.replace(/\*$/, ""))) {
-          return this.tagColorCodes[tagPrefix];
-        }
+    for (const searchTag of Object.keys(this.searchTagColorCodes)) {
+      if (tagsMatchWildcardSearchTag(searchTag, [tag])) {
+          return this.searchTagColorCodes[searchTag];
       }
     }
     return undefined;

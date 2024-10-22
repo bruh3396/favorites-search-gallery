@@ -299,6 +299,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #help-links-container {
       margin-top: 17px;
+
+      > :not(:first-child) {
+        display: none !important;
+      }
     }
 
     #whats-new-link {
@@ -1171,6 +1175,13 @@ function configureMobileUI() {
   document.body.insertAdjacentElement("afterbegin", container);
   container.appendChild(document.getElementById("header"));
   container.appendChild(document.getElementById("favorites-top-bar"));
+
+  const helpLinksContainer = document.getElementById("help-links-container");
+
+  if (helpLinksContainer !== null) {
+    helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
+  }
+
 }
 
 function configureDesktopUI() {
@@ -1201,6 +1212,9 @@ function configureDesktopUI() {
 }
 
 function setupWhatsNewDropdown() {
+  if (onMobileDevice()) {
+    return;
+  }
   const whatsNew = document.getElementById("whats-new-link");
 
   if (whatsNew === null) {
