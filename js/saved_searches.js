@@ -405,6 +405,8 @@ class SavedSearches {
       for (let i = searches.length - 1; i >= 0; i -= 1) {
         this.saveSearch(searches[i]);
       }
+    }, {
+      once: true
     });
   }
 

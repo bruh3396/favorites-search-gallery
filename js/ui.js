@@ -730,6 +730,7 @@ let searchHistoryIndex = 0;
 let lastSearchQuery = "";
 
 function initializeFavoritesPage() {
+  setMainButtonInteractability(false);
   addEventListenersToFavoritesPage();
   loadFavoritesPagePreferences();
   removePaginatorFromFavoritesPage();
@@ -979,6 +980,12 @@ function addEventListenersToFavoritesPage() {
     changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) + columnAddend);
   }, {
     passive: true
+  });
+
+  window.addEventListener("readyToSearch", () => {
+    setMainButtonInteractability(true);
+  }, {
+    once: true
   });
 }
 
@@ -1299,6 +1306,19 @@ function preventUserFromUncheckingAllRatings(allowedRatings) {
     FAVORITE_CHECKBOXES.explicitRating.nextElementSibling.removeAttribute("style");
     FAVORITE_CHECKBOXES.questionableRating.nextElementSibling.removeAttribute("style");
     FAVORITE_CHECKBOXES.safeRating.nextElementSibling.removeAttribute("style");
+  }
+}
+
+function setMainButtonInteractability(value) {
+  const container = document.getElementById("left-favorites-panel-top-row");
+
+  if (container === null) {
+    return;
+  }
+  const mainButtons = Array.from(container.children).filter(child => child.tagName.toLowerCase() === "button");
+
+  for (const button of mainButtons) {
+    button.disabled = !value;
   }
 }
 

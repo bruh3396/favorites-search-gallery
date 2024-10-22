@@ -1447,12 +1447,15 @@ onmessage = (message) => {
       this.enumerateVisibleThumbs();
     });
     window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-      this.initializeThumbsForHovering.bind(this)(event.detail);
+      if (event.detail.empty) {
+        return;
+      }
+      this.initializeThumbsForHovering.bind(this)(event.detail.thumbs);
       this.enumerateVisibleThumbs();
       /**
        * @type {HTMLElement[]}
       */
-      const thumbs = event.detail.reverse();
+      const thumbs = event.detail.thumbs.reverse();
 
       if (thumbs.length > 0) {
         const thumb = thumbs[0];

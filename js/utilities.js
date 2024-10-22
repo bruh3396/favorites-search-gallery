@@ -646,7 +646,7 @@ function onPostPage() {
 /**
  * @returns {String[]}
  */
-function getIdsToRemoveOnReload() {
+function getIdsToDeleteOnReload() {
   return JSON.parse(localStorage.getItem(IDS_TO_REMOVE_ON_RELOAD_KEY)) || [];
 }
 
@@ -654,13 +654,13 @@ function getIdsToRemoveOnReload() {
  * @param {String} postId
  */
 function setIdToBeRemovedOnReload(postId) {
-  const idsToRemoveOnReload = getIdsToRemoveOnReload();
+  const idsToRemoveOnReload = getIdsToDeleteOnReload();
 
   idsToRemoveOnReload.push(postId);
   localStorage.setItem(IDS_TO_REMOVE_ON_RELOAD_KEY, JSON.stringify(idsToRemoveOnReload));
 }
 
-function clearRecentlyRemovedIds() {
+function clearIdsToDeleteOnReload() {
   localStorage.removeItem(IDS_TO_REMOVE_ON_RELOAD_KEY);
 }
 

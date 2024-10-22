@@ -27,6 +27,8 @@ class PostTags {
 }
 
 class SearchTag {
+  static unmatchableRegex = /^\b$/;
+
   /**
    * @type {String}
   */
@@ -51,7 +53,21 @@ class SearchTag {
     this.isNegated = searchTag.startsWith("-");
     this.isWildcard = searchTag.includes("*");
     this.value = this.isNegated ? searchTag.substring(1) : searchTag;
-    this.wildcardRegex = new RegExp(`^${this.value.replaceAll(/\*/g, ".*")}$`);
+    this.wildcardRegex = this.createWildcardRegex();
+  }
+
+  /**
+   * @returns {RegExp}
+   */
+  createWildcardRegex() {
+    if (!this.isWildcard) {
+      return SearchTag.unmatchableRegex;
+    }
+    try {
+      return new RegExp(`^${this.value.replaceAll(/\*/g, ".*")}$`);
+    } catch {
+      return SearchTag.unmatchableRegex;
+    }
   }
 }
 
@@ -95,8 +111,6 @@ class SearchCommand {
  * @returns {Boolean}
  */
 function postTagsMatchSearch(searchCommand, postTags) {
-  // console.log(1);
-
   if (searchCommand.isEmpty) {
     return true;
   }

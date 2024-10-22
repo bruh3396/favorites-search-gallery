@@ -140,7 +140,9 @@ class Tooltip {
       this.addEventListenersToThumbs.bind(this)();
     });
     window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-      this.addEventListenersToThumbs.bind(this)(event.detail);
+      if (!event.detail.empty) {
+        this.addEventListenersToThumbs.bind(this)(event.detail.thumbs);
+      }
     }, {
       once: true
     });

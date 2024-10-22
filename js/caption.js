@@ -336,9 +336,6 @@ class Caption {
         this.findTagCategoriesOnPageChange();
       }
     });
-    window.addEventListener("showCaption", (event) => {
-      this.attachToThumb(event.detail);
-    });
     window.addEventListener("originalFavoritesCleared", (event) => {
       const thumbs = event.detail;
       const tagNames = Array.from(thumbs)
@@ -350,9 +347,13 @@ class Caption {
       this.findTagCategories(tagNames, 10, () => {
         this.saveTags();
       });
+    }, {
+      once: true
     });
     window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-      this.addEventListenersToThumbs.bind(this)(event.detail);
+      if (!event.detail.empty) {
+        this.addEventListenersToThumbs.bind(this)(event.detail.thumbs);
+      }
     }, {
       once: true
     });

@@ -234,7 +234,7 @@ onmessage = (message) => {
       break;
 
     case "load":
-      favoritesDatabase.loadFavorites(request.deletedIds);
+      favoritesDatabase.loadFavorites(request.idsToDelete);
       break;
 
     case "update":

@@ -216,13 +216,6 @@ class ThumbNode {
   }
 
   /**
-   * @type {Boolean}
-   */
-  get isVisible() {
-    return this.root.style.display !== "none";
-  }
-
-  /**
    * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumb
    * @param {Boolean} fromRecord
    */
