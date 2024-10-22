@@ -179,7 +179,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**

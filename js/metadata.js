@@ -1,4 +1,8 @@
 class FavoriteMetadata {
+  /**
+   * @type {Map.<String, FavoriteMetadata>}
+  */
+  static allMetadata = new Map();
   static parser = new DOMParser();
   /**
    * @type {FavoriteMetadata[]}
@@ -148,6 +152,7 @@ class FavoriteMetadata {
     this.id = id;
     this.setDefaults();
     this.populateMetadata(record);
+    this.addInstanceToAllMetadata();
   }
 
   setDefaults() {
@@ -306,30 +311,29 @@ class FavoriteMetadata {
   }
 
   /**
-   * @param {{metric: String, operator: String, value: Number, negated: Boolean}} filter
+   * @param {MetadataSearchExpression} expression
    * @returns {Boolean}
    */
-  satisfiesExpression(filter) {
+  satisfiesExpression(expression) {
     const metricMap = {
       "id": this.id,
       "width": this.width,
       "height": this.height,
       "score": this.score
     };
-    const metricValue = metricMap[filter.metric] || 0;
-    const value = metricMap[filter.value] || parseInt(filter.value);
-    return this.evaluateExpression(metricValue, filter.operator, value, filter.negated);
+    const metricValue = metricMap[expression.metric] || 0;
+    const value = metricMap[expression.value] || expression.value;
+    return this.evaluateExpression(metricValue, expression.operator, value);
   }
 
   /**
    * @param {Number} metricValue
    * @param {String} operator
    * @param {Number} value
-   * @param {Number} negated
    * @returns {Boolean}
    */
-  evaluateExpression(metricValue, operator, value, negated) {
-    let result = true;
+  evaluateExpression(metricValue, operator, value) {
+    let result = false;
 
     switch (operator) {
       case ":":
@@ -347,6 +351,12 @@ class FavoriteMetadata {
       default:
         break;
     }
-    return negated ? !result : result;
+    return result;
+  }
+
+  addInstanceToAllMetadata() {
+    if (!FavoriteMetadata.allMetadata.has(this.id)) {
+      FavoriteMetadata.allMetadata.set(this.id, this);
+    }
   }
 }

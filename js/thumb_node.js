@@ -396,9 +396,7 @@ class ThumbNode {
 
   updateTags() {
     this.finalTags = this.mergeTags(this.originalTags, this.additionalTags);
-
-    // this.image.setAttribute("tags", finalTags);
-    this.postTags = new PostTags(this.finalTags);
+    this.postTags = new PostTags(this.id, this.finalTags);
   }
 
   /**

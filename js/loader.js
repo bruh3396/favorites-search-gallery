@@ -315,11 +315,7 @@ onmessage = (message) => {
   /**
    * @type {String}
    */
-  fullSearchQuery;
-  /**
-   * @type {String}
-   */
-  previousFullSearchQuery;
+  previousSearchQuery;
   /**
    * @type {Worker}
    */
@@ -406,10 +402,6 @@ onmessage = (message) => {
    * @type {Number}
   */
   newMetadataReceivedTimeout;
-  /**
-   * @type {{metric: String, operator: String, value: String, negated: Boolean}[]}
-  */
-  metadataFilters;
 
   /**
    * @type {String}
@@ -454,7 +446,6 @@ onmessage = (message) => {
     this.allowedRatings = loadAllowedRatings();
     this.fetchedThumbNodes = {};
     this.failedFetchRequests = [];
-    this.metadataFilters = [];
     this.expectedFavoritesCount = 53;
     this.expectedFavoritesCountFound = false;
     this.searchResultsAreShuffled = false;
@@ -471,7 +462,6 @@ onmessage = (message) => {
     this.matchingFavoritesCount = 0;
     this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
     this.searchQuery = "";
-    this.fullSearchQuery = "";
     this.databaseWorker = new Worker(getWorkerURL(FavoritesLoader.webWorkers.database));
     this.favoritesSearchInput = document.getElementById("favorites-search-box");
     this.paginationContainer = this.createPaginationContainer();
@@ -564,10 +554,7 @@ onmessage = (message) => {
    */
   setSearchQuery(searchQuery) {
     if (searchQuery !== undefined) {
-      this.fullSearchQuery = searchQuery;
       this.searchQuery = searchQuery;
-      // this.searchQuery = this.removeMetadataFilters(searchQuery);
-      // this.metadataFilters = this.extractMetadataFilters(searchQuery);
     }
   }
 
@@ -890,9 +877,9 @@ onmessage = (message) => {
    */
   processFetchedThumbNodes(thumbNodes, searchResults) {
     this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(searchResults);
-    const searchResultsWhileFetchingWithFiltersApplied = this.getResultsWithFiltersApplied(this.searchResultsWhileFetching);
+    const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
 
-    this.updateMatchCount(searchResultsWhileFetchingWithFiltersApplied.length);
+    this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
     dispatchEvent(new CustomEvent("favoritesFetched", {
       detail: thumbNodes.map(thumbNode => thumbNode.root)
     }));
@@ -1164,11 +1151,11 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} thumbNodes
    */
   addFavoritesToContent(thumbNodes) {
-    thumbNodes = this.getResultsWithFiltersApplied(thumbNodes);
-    const searchResultsWhileFetchingWithFiltersApplied = this.getResultsWithFiltersApplied(this.searchResultsWhileFetching);
+    thumbNodes = this.getResultsWithAllowedRatings(thumbNodes);
+    const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
-    const pageCount = this.getPageCount(searchResultsWhileFetchingWithFiltersApplied.length);
+    const pageCount = this.getPageCount(searchResultsWhileFetchingWithAllowedRatings.length);
     const needsToCreateNewPage = pageCount > lastPageButtonNumber;
     const nextPageButton = document.getElementById("next-page");
     const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount &&
@@ -1176,7 +1163,7 @@ Tag modifications and saved searches will be preserved.
       nextPageButton.style.visibility !== "hidden";
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
-      this.updatePaginationUi(this.currentFavoritesPageNumber, searchResultsWhileFetchingWithFiltersApplied);
+      this.updatePaginationUi(this.currentFavoritesPageNumber, searchResultsWhileFetchingWithAllowedRatings);
     }
 
     const onLastPage = (pageCount === this.currentFavoritesPageNumber);
@@ -1229,7 +1216,7 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} searchResults
    */
   paginateSearchResults(searchResults) {
-    searchResults = this.getResultsWithFiltersApplied(searchResults);
+    searchResults = this.getResultsWithAllowedRatings(searchResults);
     this.updateMatchCount(searchResults.length);
     this.insertPaginationContainer();
     this.changeResultsPage(1, searchResults);
@@ -1413,7 +1400,7 @@ Tag modifications and saved searches will be preserved.
     this.allowedRatingsChanged = false;
     this.searchResultsAreShuffled = false;
     this.searchResultsAreInverted = false;
-    this.previousFullSearchQuery = this.fullSearchQuery;
+    this.previousSearchQuery = this.searchQuery;
   }
 
   getPaginationStartEndIndices(pageNumber) {
@@ -1469,7 +1456,7 @@ Tag modifications and saved searches will be preserved.
    */
   aNewSearchWillProduceDifferentResults(pageNumber) {
     return this.currentFavoritesPageNumber !== pageNumber ||
-      this.fullSearchQuery !== this.previousFullSearchQuery ||
+      this.searchQuery !== this.previousSearchQuery ||
       FavoritesLoader.currentLoadingState !== FavoritesLoader.loadingState.allFavoritesLoaded ||
       this.searchResultsAreShuffled ||
       this.searchResultsAreInverted ||
@@ -1677,20 +1664,6 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} searchResults
    * @returns {ThumbNode[]}
    */
-  getResultsWithFiltersApplied(searchResults) {
-    const noFiltersAreApplied = (this.allowedRatings === 7 && this.metadataFilters.length === 0);
-
-    if (noFiltersAreApplied) {
-      return searchResults;
-    }
-    return this.getResultsWithAllowedRatings(searchResults);
-    // return searchResults.filter(thumbNode => this.ratingIsAllowed(thumbNode) && thumbNode.metadata.satisfiesAllFilters(this.metadataFilters));
-  }
-
-  /**
-   * @param {ThumbNode[]} searchResults
-   * @returns {ThumbNode[]}
-   */
   getResultsWithAllowedRatings(searchResults) {
     if (this.allowedRatings === 7) {
       return searchResults;
@@ -1705,30 +1678,6 @@ Tag modifications and saved searches will be preserved.
    */
   postTagsMatchSearchAndRating(searchCommand, thumbNode) {
     return this.ratingIsAllowed(thumbNode) && postTagsMatchSearch(searchCommand, thumbNode.postTags);
-  }
-
-  /**
- * @param {String} searchQuery
- * @returns {{metric: String, operator: String, value: String , negated: Boolean}[]};
- */
-  extractMetadataFilters(searchQuery) {
-    return [...searchQuery.matchAll(/(?:^|\s)(-?)(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)\b/g)]
-      .map((comparison) => {
-        return {
-          metric: comparison[2],
-          operator: comparison[3],
-          value: comparison[4],
-          negated: comparison[1] === "-"
-        };
-      });
-  }
-
-  /**
-   * @param {String} searchQuery
-   * @returns {String}
-   */
-  removeMetadataFilters(searchQuery) {
-    return removeExtraWhiteSpace(searchQuery.replaceAll(/(?:^|\s)(-?)(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)\b/g, ""));
   }
 }
 

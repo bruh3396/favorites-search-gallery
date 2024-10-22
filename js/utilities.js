@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 class Cooldown {
   /**
    * @type {Number}
@@ -84,6 +85,32 @@ class Cooldown {
     this.start();
   }
 
+}
+
+class MetadataSearchExpression {
+  /**
+   * @type {String}
+  */
+  metric;
+  /**
+   * @type {String}
+  */
+  operator;
+  /**
+   * @type {String | Number}
+  */
+  value;
+
+  /**
+   * @param {String} metric
+   * @param {String} operator
+   * @param {String} value
+   */
+  constructor(metric, operator, value) {
+    this.metric = metric;
+    this.operator = operator;
+    this.value = isNumber(value) ? parseInt(value) : value;
+  }
 }
 
 const IDS_TO_REMOVE_ON_RELOAD_KEY = "recentlyRemovedIds";

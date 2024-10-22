@@ -40,6 +40,11 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             filter: brightness(140%);
           }
         }
+
+        >button[disabled] {
+          filter: none !important;
+          cursor: wait !important;
+        }
       }
     }
 

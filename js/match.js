@@ -1,6 +1,10 @@
 /* eslint-disable max-classes-per-file */
 class PostTags {
   /**
+   * @type {String}
+  */
+  id;
+  /**
    * @type {Set.<String>}
    */
   set;
@@ -10,9 +14,11 @@ class PostTags {
   array;
 
   /**
+   * @param {String} id
    * @param {String} tags
    */
-  constructor(tags) {
+  constructor(id, tags) {
+    this.id = id;
     this.create(tags);
   }
 
@@ -27,8 +33,6 @@ class PostTags {
 }
 
 class SearchTag {
-  static unmatchableRegex = /^\b$/;
-
   /**
    * @type {String}
   */
@@ -36,39 +40,132 @@ class SearchTag {
   /**
    * @type {Boolean}
   */
-  isNegated;
-  /**
-   * @type {Boolean}
-  */
-  isWildcard;
-  /**
-   * @type {RegExp}
-  */
-  wildcardRegex;
+  negated;
 
   /**
    * @param {String} searchTag
+   * @param {Boolean} inOrGroup
    */
-  constructor(searchTag) {
-    this.isNegated = searchTag.startsWith("-");
-    this.isWildcard = searchTag.includes("*");
-    this.value = this.isNegated ? searchTag.substring(1) : searchTag;
-    this.wildcardRegex = this.createWildcardRegex();
+  constructor(searchTag, inOrGroup) {
+    this.negated = inOrGroup ? false : searchTag.startsWith("-");
+    this.value = this.negated ? searchTag.substring(1) : searchTag;
+  }
+
+  /**
+   * @param {PostTags} postTags
+   * @returns {Boolean}
+   */
+  matches(postTags) {
+    if (postTags.set.has(this.value)) {
+      return !this.negated;
+    }
+    return this.negated;
+  }
+
+}
+
+class WildCardSearchTag extends SearchTag {
+  static unmatchableRegex = /^\b$/;
+
+  /**
+   * @type {RegExp}
+  */
+  regex;
+
+  /**
+   * @param {String} searchTag
+   * @param {Boolean} inOrGroup
+   */
+  constructor(searchTag, inOrGroup) {
+    super(searchTag, inOrGroup);
+    this.regex = this.createWildcardRegex();
   }
 
   /**
    * @returns {RegExp}
    */
   createWildcardRegex() {
-    if (!this.isWildcard) {
-      return SearchTag.unmatchableRegex;
-    }
     try {
       return new RegExp(`^${this.value.replaceAll(/\*/g, ".*")}$`);
     } catch {
-      return SearchTag.unmatchableRegex;
+      return WildCardSearchTag.unmatchableRegex;
     }
   }
+
+  /**
+   * @param {PostTags} postTags
+   * @returns {Boolean}
+   */
+  matches(postTags) {
+    if (postTags.array.some(tag => this.regex.test(tag))) {
+      return !this.negated;
+    }
+    return this.negated;
+  }
+}
+
+class MetadataSearchTag extends SearchTag {
+  static regex = /^-?(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)$/;
+
+  /**
+   * @type {MetadataSearchExpression}
+  */
+  expression;
+
+  /**
+   * @param {String} searchTag
+   * @param {Boolean} inOrGroup
+   */
+  constructor(searchTag, inOrGroup) {
+    super(searchTag, inOrGroup);
+    this.expression = this.createExpression(searchTag);
+  }
+
+  /**
+   * @param {String} searchTag
+   * @returns {MetadataSearchExpression}
+   */
+  createExpression(searchTag) {
+    const extractedExpression = MetadataSearchTag.regex.exec(searchTag);
+    return new MetadataSearchExpression(
+      extractedExpression[1],
+      extractedExpression[2],
+      extractedExpression[3]
+    );
+  }
+
+  /**
+   * @param {PostTags} postTags
+   * @returns {Boolean}
+   */
+  matches(postTags) {
+    const metadata = FavoriteMetadata.allMetadata.get(postTags.id);
+
+    if (metadata === undefined) {
+      return false;
+    }
+
+    if (metadata.satisfiesExpression(this.expression)) {
+      return !this.negated;
+    }
+    return this.negated;
+  }
+}
+
+/**
+ * @param {String} searchTag
+ * @param {Boolean} inOrGroup
+ * @returns {SearchTag}
+ */
+function createSearchTag(searchTag, inOrGroup) {
+  if (MetadataSearchTag.regex.test(searchTag)) {
+    return new MetadataSearchTag(searchTag, inOrGroup);
+  }
+
+  if (searchTag.includes("*")) {
+    return new WildCardSearchTag(searchTag, inOrGroup);
+  }
+  return new SearchTag(searchTag, inOrGroup);
 }
 
 class SearchCommand {
@@ -99,9 +196,9 @@ class SearchCommand {
     const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
 
     for (const orGroup of orGroups) {
-      this.orGroups.push(orGroup.map(searchTag => new SearchTag(searchTag)));
+      this.orGroups.push(orGroup.map(searchTag => createSearchTag(searchTag, true)));
     }
-    this.remainingSearchTags = remainingSearchTags.map(searchTag => new SearchTag(searchTag));
+    this.remainingSearchTags = remainingSearchTags.map(searchTag => createSearchTag(searchTag, false));
   }
 }
 
@@ -128,7 +225,7 @@ function postTagsMatchSearch(searchCommand, postTags) {
  */
 function postTagsMatchAllRemainingSearchTags(remainingSearchTags, postTags) {
   for (const searchTag of remainingSearchTags) {
-    if (!postTagsMatchSearchTag(searchTag, postTags, false)) {
+    if (!searchTag.matches(postTags)) {
       return false;
     }
   }
@@ -156,39 +253,11 @@ function postTagsMatchAllOrGroups(orGroups, postTags) {
  */
 function atLeastOnePostTagIsInOrGroup(orGroup, postTags) {
   for (const orTag of orGroup) {
-    if (postTagsMatchSearchTag(orTag, postTags, true)) {
+    if (orTag.matches(postTags)) {
       return true;
     }
   }
   return false;
-}
-
-/**
- * @param {SearchTag} searchTag
- * @param {PostTags} postTags
- * @param {Boolean} inOrGroup
- * @returns {Boolean}
- */
-function postTagsMatchSearchTag(searchTag, postTags, inOrGroup) {
-  const isNegated = inOrGroup ? false : searchTag.isNegated;
-
-  if (searchTag.isWildcard && postTagsMatchWildcardSearchTag(searchTag, postTags.array)) {
-    return !isNegated;
-  }
-
-  if (postTags.set.has(searchTag.value)) {
-    return !isNegated;
-  }
-  return isNegated;
-}
-
-/**
- * @param {SearchTag} searchTag
- * @param {String[]} tags
- * @returns {Boolean}
- */
-function postTagsMatchWildcardSearchTag(searchTag, tags) {
-  return tags.some(tag => searchTag.wildcardRegex.test(tag));
 }
 
 /**
