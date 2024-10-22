@@ -68,55 +68,75 @@ This script is still in development, please let me know if you experience a bug,
 | Shift + Scroll Wheel | Change column count | |
 
 ### Gallery Controls
-| Input | Function | Condition |
-| :-------- | :-------- | :-------- |
-| Arrow Keys, Scroll Wheel, WASD, Swipe  | Traverse gallery | |
-| Left Click, Touch | Exit gallery | Content is not a video |
-| Escape | Exit gallery | |
-| Right Click | Exit gallery, Enable "Enlarge on Hover" option | |
-| Middle Click | Open post page of thumbnail in new tab | |
+| Input                                 | Function                                       | Condition              |
+| :-------------------------------------| :----------------------------------------------| :----------------------|
+| Arrow Keys, Scroll Wheel, WASD, Swipe | Traverse gallery                               |                        |
+| Left Click, Touch                     | Exit gallery                                   | Content is not a video |
+| Escape                                | Exit gallery                                   |                        |
+| Right Click                           | Exit gallery, Enable "Enlarge on Hover" option |                        |
+| Middle Click                          | Open post page of thumbnail in new tab         |                        |
+
 
 ### Gallery Hotkeys
 
-| Key | Function | Condition |
-| :-------- | :-------- | :-------- |
-| F | Add favorite | |
-| X | Remove favorite | "Remove Button" option checked |
-| M | Toggle video mute |  |
-| B | Toggle background |  |
+| Key | Function          | Condition                      |
+|:--- |:----------------- |:------------------------------ |
+| F   | Add favorite      |                                |
+| X   | Remove favorite   | "Remove Button" option checked |
+| M   | Toggle video mute |                                |
+| B   | Toggle background |                                |
+
+
 
 ### General Hotkeys
 
-| Key | Function |
-| :-------- | :-------- |
-| T | Toggle tooltips |
-| D | Toggle details |
+| Key | Function        |
+| :---| :---------------|
+| T   | Toggle tooltips |
+| D   | Toggle details  |
+
 
 ## Search Syntax
-Mostly identical to normal search syntax on the site
-| Operator | Example |
-| :-------- | :-------- |
-| And | apple banana grape |
-| Or | ( apple ~ banana ~ grape ) |
-| Not | -pineapple -orange | |
-| Wildcard | app* bana* grapefru* (Only supports "starts with" at the moment, i.e: "app*sauce" is invalid)|
-| ID |  12345 55555 |
-| Any Combination | ( fruit ~ vegetable ~ apple* ) -banana -grape* -lemon* ( ripe ~ tasty* ) -12345 -55555 -112234 |
 
-  **Realistic Examples:**
+| Operator        | Example                                                                                                                |
+| :---------------| :----------------------------------------------------------------------------------------------------------------------|
+| And             | apple banana grape                                                                                                     |
+| Or              | ( apple ~ banana ~ grape )                                                                                             |
+| Not             | -pineapple -orange                                                                                                     |
+| Wildcard        | a\*ple\*auce b\*a\*n\*a \*grape\*   (**Note:** "\*tag" works for this script but not for the normal site)              |
+| ID              | 12345 55555                                                                                                            |
+| Any Combination | ( fruit ~ vegetable ~ a\*sauce ) \*apple\* -apple\* -banana -grape\* -lemon\* ( ripe ~ tasty\* ) -12345 -55555 -112234 |
 
-  * ( video ~ animated ~ high_res\* ~ absurd_res\* ) -low_res\* ( female\* ~ 1girls ~ 123 ) -ai_generated -red_hair -no_sound looking_at_viewer
-  * ( fortnite* ~ valorant* ~ apex* ~ league_of* ) -video -animated* -ai_generated 3d*
 
-  **Currently does not include (\*WIP):**
-  * score:
-  * rating:
-  * user:
-  * height:
-  * width:
-  * parent:
-  * source:
-  * updated:
+
+### Wildcard Examples with Explanations
+
+| Query                       | Explanation                                                                          |
+|-----------------------------|--------------------------------------------------------------------------------------|
+| apple\*                     | **starts** with "apple"                                                              |
+| \*apple                     | **ends** with "apple"                                                                |
+| \*apple\* -\*apple -apple\* | **contains** "apple", but does ***NOT*** **start** or **end** with "apple"           |
+| a\*sauce                    | **starts** with "a" and **ends** with "sauce"                                        |
+| pi\*ea\*ple                 | **starts** with "pi", **contains** "ea" in the middle, and **ends** with "ple"       |
+
+
+
+
+### Realistic Examples
+
+* ( video ~ animated ~ high_res\* ~ absurd_res\* ) -low_res\* ( female\* ~ 1girls ~ 123 ) -ai_generated -red_hair -no_sound looking_at_viewer
+* ( fortnite\* ~ valorant\* ~ apex\* ~ \*league\* ) -video -\*animated\* -ai_generated \*3d\* -\*2d\*
+
+
+**Currently does not include (\*WIP):**
+* score:
+* rating:
+* user:
+* height:
+* width:
+* parent:
+* source:
+* updated:
 
 
 ## FAQ

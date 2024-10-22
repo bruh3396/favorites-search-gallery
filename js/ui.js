@@ -299,10 +299,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #help-links-container {
       margin-top: 17px;
-
-      > :not(:first-child) {
-        display: none !important;
-      }
     }
 
     #whats-new-link {
@@ -363,8 +359,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
       }
 
-      h2 {
-        font-weight: bold;
+      h5, h6 {
+        color: rgb(255, 0, 255);
       }
     }
 
@@ -502,7 +498,25 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           |
           <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
             <div id="whats-new-container" class="light-green-gradient">
-              <h5>New Features:</h5>
+              <h4>1.13:</h4>
+              <h5>Features:</h5>
+              <ul>
+                <li>Wildcard search now works anywhere in tag</li>
+                <li>Examples:</li>
+                <ul>
+                  <li>a*ple*auce</li>
+                  <li>-*apple*</li>
+                  <li>*ine*pple</li>
+                </ul>
+                <li>Blacklisted images removed from search pages</li>
+              </ul>
+              <h5>Performance:</h5>
+              <ul>
+                <li>Improved search speed</li>
+                <li>Fixed mobile gallery orientation</li>
+              </ul>
+              <h4>1.11:</h4>
+              <h5>Features:</h5>
               <ul>
                 <li>Sort by score, upload date, etc.</li>
                 <li>"Add favorite" buttons on other users' favorites pages</li>
@@ -510,7 +524,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
               </ul>
 
 
-              <h5>New Gallery Hotkeys:</h5>
+              <h5>Gallery Hotkeys:</h5>
               <ul>
                 <li><span class="hotkey">F</span> -- Add favorite</li>
                 <li><span class="hotkey">X</span> -- Remove favorite</li>
@@ -518,7 +532,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <li><span class="hotkey">B</span> -- Toggle background</li>
               </ul>
 
-              <h5>Other New Controls:</h5>
+              <h5>Other Controls:</h5>
               <ul>
                 <li><span class="hotkey">Shift + Scroll Wheel</span> -- Change column count</li>
                 <li><span class="hotkey">T</span> -- Toggle tooltips</li>

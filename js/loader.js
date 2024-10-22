@@ -1272,10 +1272,16 @@ Tag modifications and saved searches will be preserved.
 
   insertPaginationContainer() {
     if (document.getElementById(this.paginationContainer.id) === null) {
-      const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
 
-      placeToInsertPagination.insertAdjacentElement("afterend", this.paginationContainer);
-      placeToInsertPagination.remove();
+      if (onMobileDevice()) {
+        document.getElementById("favorites-top-bar-panels").insertAdjacentElement("afterbegin", this.paginationContainer);
+      } else {
+        const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
+
+        placeToInsertPagination.insertAdjacentElement("afterend", this.paginationContainer);
+        placeToInsertPagination.remove();
+      }
+
     }
   }
 
