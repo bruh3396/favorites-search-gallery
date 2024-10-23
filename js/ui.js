@@ -364,7 +364,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
         }
       }
 
-      h5, h6 {
+      h5,
+      h6 {
         color: rgb(255, 0, 255);
       }
     }
@@ -503,6 +504,22 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           |
           <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
             <div id="whats-new-container" class="light-green-gradient">
+              <h4>1.14:</h4>
+              <h5>Features:</h5>
+              <ul>
+                <li>Search with meta tags: score, width, height, id</li>
+                <li>Examples:</li>
+                <ul>
+                  <li>score:&gt;50 score:&lt;100 -score:55</li>
+                  <li>height:&gt;width</li>
+                  <li>( width:height ~ height:1920 ) id:&lt;999 </li>
+                </ul>
+                <li>Notes:</li>
+                <ul>
+                  <li> "12345" and "id:12345" are equivalent</li>
+                  <li>Wildcard "*" does not work with meta tags</li>
+                </ul>
+              </ul>
               <h4>1.13:</h4>
               <h5>Features:</h5>
               <ul>
@@ -543,23 +560,25 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                 <li><span class="hotkey">T</span> -- Toggle tooltips</li>
                 <li><span class="hotkey">D</span> -- Toggle details</li>
               </ul>
-
-              <h5>Performance:</h5>
-              <ul>
-                <li>Reduced memory/network usage</li>
-                <li>Reduced load time</li>
-                <li>Seamless video playback (desktop)</li>
-              </ul>
-
-              <h5>Planned Features:</h5>
-              <ul>
-                <li>Edit custom tags (basically folders/pools) on:</li>
+              <span style="display: none;">
+                <h5>Performance:</h5>
                 <ul>
-                  <li>search pages</li>
-                  <li>post pages</li>
+                  <li>Reduced memory/network usage</li>
+                  <li>Reduced load time</li>
+                  <li>Seamless video playback (desktop)</li>
                 </ul>
-                <li>Fix comic strips</li>
-                <li>Gallery autoplay</li>
+
+                <h5>Planned Features:</h5>
+                <ul>
+                  <li>Edit custom tags (basically folders/pools) on:</li>
+                  <ul>
+                    <li>search pages</li>
+                    <li>post pages</li>
+                  </ul>
+                  <li>Fix comic strips</li>
+                  <li>Gallery autoplay</li>
+              </span>
+
               </ul>
             </div>
           </a>
@@ -729,6 +748,7 @@ const FAVORITE_INPUTS = {
 const FAVORITE_SEARCH_LABELS = {
   findFavorite: document.getElementById("find-favorite-label")
 };
+const columnWheelResizeCaptionCooldown = new Cooldown(500, true);
 
 let searchHistory = [];
 let searchHistoryIndex = 0;
@@ -804,7 +824,7 @@ function loadFavoritesPagePreferences() {
     toggleFancyImageHovering(fancyImageHovering);
   }
 
-  FAVORITE_CHECKBOXES.enableOnSearchPages.checked = getPreference(FAVORITE_PREFERENCES.enableOnSearchPages, true);
+  FAVORITE_CHECKBOXES.enableOnSearchPages.checked = getPreference(FAVORITE_PREFERENCES.enableOnSearchPages, false);
   FAVORITE_CHECKBOXES.sortAscending.checked = getPreference(FAVORITE_PREFERENCES.sortAscending, false);
 
   const sortingMethod = getPreference(FAVORITE_PREFERENCES.sortingMethod, "default");
@@ -982,15 +1002,35 @@ function addEventListenersToFavoritesPage() {
     const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
     const columnAddend = delta > 0 ? -1 : 1;
 
+    if (columnWheelResizeCaptionCooldown.ready) {
+      forceHideCaptions(true);
+    }
     changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) + columnAddend);
   }, {
     passive: true
   });
+  columnWheelResizeCaptionCooldown.onDebounceEnd = () => {
+    forceHideCaptions(false);
+  };
+  columnWheelResizeCaptionCooldown.onCooldownEnd = () => {
+    if (!columnWheelResizeCaptionCooldown.debouncing) {
+      forceHideCaptions(false);
+    }
+  };
 
   window.addEventListener("readyToSearch", () => {
     setMainButtonInteractability(true);
   }, {
     once: true
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() !== "r" || event.repeat || isTypeableInput(event.target)) {
+      return;
+    }
+    FAVORITE_CHECKBOXES.showAuxillaryButtons.click();
+  }, {
+    passive: true
   });
 }
 
@@ -1050,6 +1090,10 @@ function toggleAuxillaryButtons() {
   toggleAuxillaryButtonVisibility(value);
   hideThumbHoverOutlines(value);
   forceHideCaptions(value);
+
+  if (!value) {
+    dispatchEvent(new Event("captionOverrideEnd"));
+  }
 }
 
 /**

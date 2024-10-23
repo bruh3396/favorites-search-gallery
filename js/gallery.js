@@ -179,7 +179,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
@@ -1387,7 +1387,6 @@ onmessage = (message) => {
         case Gallery.directions.left:
 
         case Gallery.directions.right:
-          event.preventDefault();
           this.traverseGallery(event.key, event.repeat);
           break;
 
@@ -1400,6 +1399,8 @@ onmessage = (message) => {
         default:
           break;
       }
+    }, {
+      passive: true
     });
     window.addEventListener("keydown", async(event) => {
       if (!this.inGallery) {
@@ -1435,6 +1436,8 @@ onmessage = (message) => {
         default:
           break;
       }
+    }, {
+      passive: true
     });
   }
 
@@ -1689,7 +1692,7 @@ onmessage = (message) => {
     let optionIsChecked = this.showOriginalContentOnHover;
     let onOptionChanged = (event) => {
       setPreference(Gallery.preferences.showOnHover, event.target.checked);
-      this.toggleAllVisibility();
+      this.toggleAllVisibility(event.target.checked);
     };
 
     if (onMobileDevice()) {
@@ -2212,7 +2215,6 @@ onmessage = (message) => {
     dispatchEvent(new CustomEvent("showOriginalContent", {
       detail: true
     }));
-    this.preloadInactiveVideoPlayers(selectedThumb);
     this.startAutoplay(selectedThumb);
   }
 
@@ -2319,6 +2321,13 @@ onmessage = (message) => {
     dispatchEvent(new CustomEvent("showOriginalContent", {
       detail: this.showOriginalContentOnHover
     }));
+    setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
+
+    const showOnHoverCheckbox = document.getElementById("show-content-on-hover-checkbox");
+
+    if (showOnHoverCheckbox !== null) {
+      showOnHoverCheckbox.checked = this.showOriginalContentOnHover;
+    }
   }
 
   hideOriginalContent() {

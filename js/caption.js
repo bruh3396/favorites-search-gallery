@@ -177,6 +177,10 @@ class Caption {
    */
   caption;
   /**
+   * @type {HTMLElement}
+   */
+  currentThumb;
+  /**
    * @type {String[]}
    */
   problematicTags;
@@ -213,6 +217,7 @@ class Caption {
     Caption.findCategoriesOnPageChangeCooldown.onDebounceEnd = () => {
       this.findTagCategoriesOnPageChange();
     };
+    this.currentThumb = null;
     this.problematicTags = [];
     this.problematicTagsThatFailedFetch = new Set();
     this.currentlyCorrectingProblematicTags = false;
@@ -289,7 +294,7 @@ class Caption {
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() !== "d" || event.repeat || isTypeableInput(event.target) || !this.caption.classList.contains("inactive")) {
+      if (event.key.toLowerCase() !== "d" || event.repeat || isTypeableInput(event.target)) {
         return;
       }
 
@@ -298,10 +303,20 @@ class Caption {
 
         if (showCaptionsCheckbox !== null) {
           showCaptionsCheckbox.click();
+
+          if (this.currentThumb !== null && !this.caption.classList.contains("remove")) {
+            if (showCaptionsCheckbox.checked) {
+              this.attachToThumbHelper(this.currentThumb);
+            } else {
+              this.removeFromThumbHelper(this.currentThumb);
+            }
+          }
         }
       } else if (onSearchPage()) {
-        this.toggleVisibility();
+        // this.toggleVisibility();
       }
+    }, {
+      passive: true
     });
   }
 
@@ -357,6 +372,11 @@ class Caption {
     }, {
       once: true
     });
+    window.addEventListener("captionOverrideEnd", () => {
+      if (this.currentThumb !== null) {
+        this.attachToThumb(this.currentThumb);
+      }
+    });
   }
 
   /**
@@ -370,10 +390,12 @@ class Caption {
       const imageContainer = getImageFromThumb(thumb).parentElement;
 
       imageContainer.onmouseenter = () => {
+        this.currentThumb = thumb;
         this.attachToThumb(thumb);
       };
 
       imageContainer.onmouseleave = () => {
+        this.currentThumb = null;
         this.removeFromThumb(thumb);
       };
     }
@@ -386,6 +408,10 @@ class Caption {
     if (this.hidden || thumb === null) {
       return;
     }
+    this.attachToThumbHelper(thumb);
+  }
+
+  attachToThumbHelper(thumb) {
     thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
     this.caption.classList.remove("inactive");
     this.caption.innerHTML = Caption.template;
@@ -416,6 +442,13 @@ class Caption {
       return;
     }
 
+    this.removeFromThumbHelper(thumb);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  removeFromThumbHelper(thumb) {
     if (thumb !== null && thumb !== undefined) {
       this.animateRemoval(thumb);
     }

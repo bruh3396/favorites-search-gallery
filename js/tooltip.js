@@ -108,6 +108,8 @@ class Tooltip {
           this.hide();
         }
       }
+    }, {
+      passive: true
     });
   }
 
@@ -394,7 +396,7 @@ class Tooltip {
 
     for (const searchTag of Object.keys(this.searchTagColorCodes)) {
       if (tagsMatchWildcardSearchTag(searchTag, [tag])) {
-          return this.searchTagColorCodes[searchTag];
+        return this.searchTagColorCodes[searchTag];
       }
     }
     return undefined;

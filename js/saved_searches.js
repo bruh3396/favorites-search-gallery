@@ -245,6 +245,8 @@ class SavedSearches {
         default:
           break;
       }
+    }, {
+      passive: true
     });
     this.exportButton.onclick = () => {
       this.exportSavedSearches();

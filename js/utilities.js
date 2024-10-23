@@ -109,7 +109,22 @@ class MetadataSearchExpression {
   constructor(metric, operator, value) {
     this.metric = metric;
     this.operator = operator;
-    this.value = isNumber(value) ? parseInt(value) : value;
+    this.value = this.setValue(value);
+  }
+
+  /**
+   * @param {String} value
+   * @returns {String | Number}
+   */
+  setValue(value) {
+    if (!isNumber(value)) {
+      return value;
+    }
+
+    if (this.metric === "id") {
+      return this.operator === ":" ? parseInt(value) : value;
+    }
+    return parseInt(value);
   }
 }
 
@@ -340,6 +355,7 @@ function forceHideCaptions(value) {
   for (const caption of document.getElementsByClassName("caption")) {
     if (value) {
       caption.classList.add("remove");
+      caption.classList.add("inactive");
     } else {
       caption.classList.remove("remove");
     }
@@ -947,7 +963,7 @@ function initializeUtilities() {
   if (onPostPage()) {
     return;
   }
-  const enableOnSearchPages = getPreference("enableOnSearchPages", true) && getPerformanceProfile() === 0;
+  const enableOnSearchPages = getPreference("enableOnSearchPages", false) && getPerformanceProfile() === 0;
 
   if (!enableOnSearchPages && onSearchPage()) {
     throw new Error("Disabled on search pages");

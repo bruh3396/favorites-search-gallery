@@ -79,12 +79,14 @@ This script is still in development, please let me know if you experience a bug,
 
 ### Gallery Hotkeys
 
-| Key | Function          | Condition                      |
-|:--- |:----------------- |:------------------------------ |
-| F   | Add favorite      |                                |
-| X   | Remove favorite   | "Remove Button" option checked |
-| M   | Toggle video mute |                                |
-| B   | Toggle background |                                |
+| Key | Function                       | Condition                          |
+|-----|--------------------------------|------------------------------------|
+| F   | Add favorite                   |                                    |
+| X   | Remove favorite                | "Remove Button" option checked     |
+| M   | Toggle video mute              |                                    |
+| B   | Toggle background              |                                    |
+| R   | Toggle Add/Remove Favorite Buttons | On your own favorites page         |
+
 
 
 
@@ -98,18 +100,24 @@ This script is still in development, please let me know if you experience a bug,
 
 ## Search Syntax
 
-| Operator        | Example                                                                                                                |
-| :---------------| :----------------------------------------------------------------------------------------------------------------------|
-| And             | apple banana grape                                                                                                     |
-| Or              | ( apple ~ banana ~ grape )                                                                                             |
-| Not             | -pineapple -orange                                                                                                     |
-| Wildcard        | a\*ple\*auce b\*a\*n\*a \*grape\*   (**Note:** "\*tag" works for this script but not for the normal site)              |
-| ID              | 12345 55555                                                                                                            |
-| Any Combination | ( fruit ~ vegetable ~ a\*sauce ) \*apple\* -apple\* -banana -grape\* -lemon\* ( ripe ~ tasty\* ) -12345 -55555 -112234 |
+### Basic
+
+( Same as the normal site syntax with addition of lone "ID" without ":" )
+
+| Operator        | Syntax          | Example                                                                                                                |
+|-----------------|-----------------|------------------------------------------------------------------------------------------------------------------------|
+| And             | tag1 tag2       | apple banana grape                                                                                                     |
+| Or              | ( tag1 ~ tag2 ) | ( apple ~ banana ~ grape )                                                                                             |
+| Not             | -tag1           | -pineapple -orange                                                                                                     |
+| Wildcard        | ta*1            | a\*ple\*auce b\*a\*n\*a \*grape\*   (**Note:** "\*tag" works for this script but not for the normal site)              |
+| ID              | \<id\>          | 12345 55555                                                                                                            |
+| Any Combination |                 | ( fruit ~ vegetable ~ a\*sauce ) \*apple\* -apple\* -banana -grape\* -lemon\* ( ripe ~ tasty\* ) -12345 -55555 -112234 |
 
 
 
-### Wildcard Examples with Explanations
+### Wildcard Examples
+
+( Same except "\*tag" aka "ends with" works here, but does not work on the site )
 
 | Query                       | Explanation                                                                          |
 |-----------------------------|--------------------------------------------------------------------------------------|
@@ -119,24 +127,43 @@ This script is still in development, please let me know if you experience a bug,
 | a\*sauce                    | **starts** with "a" and **ends** with "sauce"                                        |
 | pi\*ea\*ple                 | **starts** with "pi", **contains** "ea" in the middle, and **ends** with "ple"       |
 
+### Meta
+
+( Same except relative comparisons like "height:>width" work here, but do not work on the site )<br>
+
+| Operator     | Syntax | Example     |
+|--------------|--------|-------------|
+| Equals       | :      | width:1920  |
+| Greater than | :>     | score:>50   |
+| Less than    | :<     | id:<9999999 |
+
+
+Supported:
+ * score
+ * width
+ * height
+ * id
+
+Notes:
+  *  "123" and "id:123" are equivalent
+  * Score requires reset to update, but will update daily in the future (*WIP)
+
+### Meta Examples
+
+| Query                                            | Explanation                                                                                            |
+|--------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| ( score:<10 ~ score:100 ~ score:>10000 ~ apple ) | score is **less** than 10, or score **equals** 100, or score is greater than **1000** , or is an apple |
+| width:1920 height:1080 -video -animated          | HD image                                                                                               |
+| height:>width video                              | portrait video                                                                                         |
+| -height:>width video                             | landscape video                                                                                        |
+
 
 
 
 ### Realistic Examples
 
-* ( video ~ animated ~ high_res\* ~ absurd_res\* ) -low_res\* ( female\* ~ 1girls ~ 123 ) -ai_generated -red_hair -no_sound looking_at_viewer
+* ( video ~ animated ~ high_res\* ~ absurd_res\* ) -low_res\* ( female\* ~ 1girls ~ 123 ) -ai_generated -red_hair -no_sound looking_at_viewer score:>100
 * ( fortnite\* ~ valorant\* ~ apex\* ~ \*league\* ) -video -\*animated\* -ai_generated \*3d\* -\*2d\*
-
-
-**Currently does not include (\*WIP):**
-* score:
-* rating:
-* user:
-* height:
-* width:
-* parent:
-* source:
-* updated:
 
 
 ## FAQ
