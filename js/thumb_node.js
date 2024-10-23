@@ -26,8 +26,10 @@ class ThumbNode {
   static auxillaryButtonHTML;
 
   static {
-    this.createTemplates();
-    this.addEventListeners();
+    if (!onPostPage()) {
+      this.createTemplates();
+      this.addEventListeners();
+    }
   }
 
   static createTemplates() {

@@ -65,13 +65,15 @@ class FavoriteMetadata {
   }
 
   static {
-    window.addEventListener("favoritesLoaded", () => {
-      FavoriteMetadata.allFavoritesLoaded = true;
-      FavoriteMetadata.missingMetadataFetchQueue = FavoriteMetadata.missingMetadataFetchQueue.concat(FavoriteMetadata.deletedPostFetchQueue);
-      FavoriteMetadata.fetchMissingMetadata();
-    }, {
-      once: true
-    });
+    if (!onPostPage()) {
+      window.addEventListener("favoritesLoaded", () => {
+        FavoriteMetadata.allFavoritesLoaded = true;
+        FavoriteMetadata.missingMetadataFetchQueue = FavoriteMetadata.missingMetadataFetchQueue.concat(FavoriteMetadata.deletedPostFetchQueue);
+        FavoriteMetadata.fetchMissingMetadata();
+      }, {
+        once: true
+      });
+    }
   }
   /**
    * @type {String}

@@ -750,7 +750,7 @@ onmessage = (message) => {
   }
 
   updateProgressWhileFetching() {
-    let progressText = `Saving Favorites ${this.allThumbNodes.length}`;
+    let progressText = `Fetching Favorites ${this.allThumbNodes.length}`;
 
     if (this.expectedFavoritesCountFound) {
       progressText = `${progressText} / ${this.expectedFavoritesCount}`;
@@ -1486,7 +1486,6 @@ Tag modifications and saved searches will be preserved.
       this.paginationLabel.textContent = "";
       return;
     }
-
     this.paginationLabel.textContent = `${start} - ${end}`;
   }
 
@@ -1517,10 +1516,10 @@ Tag modifications and saved searches will be preserved.
     const lastNumberExists = this.lastPageNumberExists(pageCount);
 
     if (firstNumberExists && lastNumberExists) {
-      previousPage.style.display = "none";
-      firstPage.style.display = "none";
-      nextPage.style.display = "none";
-      finalPage.style.display = "none";
+      previousPage.style.visibility = "hidden";
+      firstPage.style.visibility = "hidden";
+      nextPage.style.visibility = "hidden";
+      finalPage.style.visibility = "hidden";
     } else {
       if (firstNumberExists) {
         previousPage.style.visibility = "hidden";

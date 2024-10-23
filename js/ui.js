@@ -308,7 +308,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #whats-new-link {
       cursor: pointer;
-      padding: 30px 0px;
+      padding: 0;
       position: relative;
       font-weight: bolder;
       font-style: italic;
@@ -333,7 +333,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
 
     #whats-new-container {
       z-index: 10;
-      top: 50px;
+      top: 20px;
       left: 0px;
       font-style: normal;
       font-weight: normal;
@@ -472,11 +472,22 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
     .auxillary-button {
       visibility: hidden;
     }
+
+    #favorites-load-status {
+      >label {
+        display: inline-block;
+        width: 140px;
+      }
+    }
+
+    #favorites-fetch-progress-label {
+      color: #3498db;
+    }
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;">Search Favorites</h2>
-      <span style="margin-left: 5px;">
+      <span id="favorites-load-status" style="margin-left: 5px;">
         <label id="match-count-label"></label>
         <label id="pagination-label" style="margin-left: 10px;"></label>
         <label id="favorites-fetch-progress-label" style="padding-left: 20px; color: #3498db;"></label>

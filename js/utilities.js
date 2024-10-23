@@ -121,8 +121,8 @@ class MetadataSearchExpression {
       return value;
     }
 
-    if (this.metric === "id") {
-      return this.operator === ":" ? parseInt(value) : value;
+    if (this.metric === "id" && this.operator === ":") {
+      return value;
     }
     return parseInt(value);
   }
