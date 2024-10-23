@@ -1,37 +1,4 @@
 /* eslint-disable max-classes-per-file */
-class PostTags {
-  /**
-   * @type {String}
-  */
-  id;
-  /**
-   * @type {Set.<String>}
-   */
-  set;
-  /**
-   * @type {String[]}
-   */
-  array;
-
-  /**
-   * @param {String} id
-   * @param {String} tags
-   */
-  constructor(id, tags) {
-    this.id = id;
-    this.create(tags);
-  }
-
-  /**
-   * @param {String} tags
-   */
-  create(tags) {
-    this.array = removeExtraWhiteSpace(tags)
-      .split(" ");
-    this.set = new Set(this.array);
-  }
-}
-
 class SearchTag {
   /**
    * @type {String}
@@ -52,11 +19,11 @@ class SearchTag {
   }
 
   /**
-   * @param {PostTags} postTags
+   * @param {ThumbNode} thumbNode
    * @returns {Boolean}
    */
-  matches(postTags) {
-    if (postTags.set.has(this.value)) {
+  matches(thumbNode) {
+    if (thumbNode.tagSet.has(this.value)) {
       return !this.negated;
     }
     return this.negated;
@@ -93,12 +60,14 @@ class WildCardSearchTag extends SearchTag {
   }
 
   /**
-   * @param {PostTags} postTags
+   * @param {ThumbNode} thumbNode
    * @returns {Boolean}
    */
-  matches(postTags) {
-    if (postTags.array.some(tag => this.regex.test(tag))) {
-      return !this.negated;
+  matches(thumbNode) {
+    for (const tag of thumbNode.tagSet.values()) {
+      if (this.regex.test(tag)) {
+        return !this.negated;
+      }
     }
     return this.negated;
   }
@@ -135,11 +104,11 @@ class MetadataSearchTag extends SearchTag {
   }
 
   /**
-   * @param {PostTags} postTags
+   * @param {ThumbNode} thumbNode
    * @returns {Boolean}
    */
-  matches(postTags) {
-    const metadata = FavoriteMetadata.allMetadata.get(postTags.id);
+  matches(thumbNode) {
+    const metadata = FavoriteMetadata.allMetadata.get(thumbNode.id);
 
     if (metadata === undefined) {
       return false;
@@ -204,28 +173,28 @@ class SearchCommand {
 
 /**
  * @param {SearchCommand} searchCommand
- * @param {PostTags} postTags
+ * @param {ThumbNode} thumbNode
  * @returns {Boolean}
  */
-function postTagsMatchSearch(searchCommand, postTags) {
+function matchesSearch(searchCommand, thumbNode) {
   if (searchCommand.isEmpty) {
     return true;
   }
 
-  if (!postTagsMatchAllRemainingSearchTags(searchCommand.remainingSearchTags, postTags)) {
+  if (!matchesAllRemainingSearchTags(searchCommand.remainingSearchTags, thumbNode)) {
     return false;
   }
-  return postTagsMatchAllOrGroups(searchCommand.orGroups, postTags);
+  return matchesAllOrGroups(searchCommand.orGroups, thumbNode);
 }
 
 /**
  * @param {SearchTag[]} remainingSearchTags
- * @param {PostTags} postTags
+ * @param {ThumbNode} thumbNode
  * @returns {Boolean}
  */
-function postTagsMatchAllRemainingSearchTags(remainingSearchTags, postTags) {
+function matchesAllRemainingSearchTags(remainingSearchTags, thumbNode) {
   for (const searchTag of remainingSearchTags) {
-    if (!searchTag.matches(postTags)) {
+    if (!searchTag.matches(thumbNode)) {
       return false;
     }
   }
@@ -234,12 +203,12 @@ function postTagsMatchAllRemainingSearchTags(remainingSearchTags, postTags) {
 
 /**
  * @param {SearchTag[][]} orGroups
- * @param {PostTags} postTags
+ * @param {ThumbNode} thumbNode
  * @returns {Boolean}
  */
-function postTagsMatchAllOrGroups(orGroups, postTags) {
+function matchesAllOrGroups(orGroups, thumbNode) {
   for (const orGroup of orGroups) {
-    if (!atLeastOnePostTagIsInOrGroup(orGroup, postTags)) {
+    if (!atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode)) {
       return false;
     }
   }
@@ -248,12 +217,12 @@ function postTagsMatchAllOrGroups(orGroups, postTags) {
 
 /**
  * @param {SearchTag[]} orGroup
- * @param {PostTags} postTags
+ * @param {ThumbNode} thumbNode
  * @returns {Boolean}
  */
-function atLeastOnePostTagIsInOrGroup(orGroup, postTags) {
+function atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode) {
   for (const orTag of orGroup) {
-    if (orTag.matches(postTags)) {
+    if (orTag.matches(thumbNode)) {
       return true;
     }
   }

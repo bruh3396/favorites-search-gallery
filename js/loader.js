@@ -671,7 +671,7 @@ onmessage = (message) => {
     for (let i = 0; i < stopIndex; i += 1) {
       const thumbNode = thumbNodes[i];
 
-      if (postTagsMatchSearch(searchCommand, thumbNode.postTags)) {
+      if (matchesSearch(searchCommand, thumbNode.postTags)) {
         results.push(thumbNode);
         thumbNode.setMatched(true);
       } else {
@@ -971,7 +971,7 @@ onmessage = (message) => {
 
     for (const record of databaseRecords) {
       const thumbNode = new ThumbNode(record, true);
-      const isBlacklisted = !postTagsMatchSearch(searchCommand, thumbNode.postTags);
+      const isBlacklisted = !matchesSearch(searchCommand, thumbNode.postTags);
 
       if (isBlacklisted) {
         if (!userIsOnTheirOwnFavoritesPage()) {
@@ -1676,7 +1676,7 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   postTagsMatchSearchAndRating(searchCommand, thumbNode) {
-    return this.ratingIsAllowed(thumbNode) && postTagsMatchSearch(searchCommand, thumbNode.postTags);
+    return this.ratingIsAllowed(thumbNode) && matchesSearch(searchCommand, thumbNode.postTags);
   }
 }
 
