@@ -181,17 +181,9 @@ class Caption {
    */
   currentThumb;
   /**
-   * @type {String[]}
+   * @type {Set.<String>}
    */
   problematicTags;
-  /**
-   * @type {Set.<String>}
-  */
-  problematicTagsThatFailedFetch;
-  /**
-   * @type {Boolean}
-   */
-  currentlyCorrectingProblematicTags;
   /**
    * @type {String}
    */
@@ -218,9 +210,7 @@ class Caption {
       this.findTagCategoriesOnPageChange();
     };
     this.currentThumb = null;
-    this.problematicTags = [];
-    this.problematicTagsThatFailedFetch = new Set();
-    this.currentlyCorrectingProblematicTags = false;
+    this.problematicTags = new Set();
     this.currentThumbId = null;
     this.abortController = new AbortController();
   }
@@ -584,7 +574,6 @@ class Caption {
     }
     const searchBox = onSearchPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
     const searchBoxDoesNotIncludeTag = true;
-    // const searchBoxDoesNotIncludeTag = searchBox !== null && !searchBox.value.includes(` ${value}`);
 
     navigator.clipboard.writeText(value);
 
@@ -602,7 +591,7 @@ class Caption {
    * @returns {String}
    */
   replaceUnderscoresWithSpaces(tagName) {
-    return tagName.replace(/_/gm, " ");
+    return tagName.replaceAll(/_/gm, " ");
   }
 
   /**
@@ -610,7 +599,7 @@ class Caption {
    * @returns {String}
    */
   replaceSpacesWithUnderscores(tagName) {
-    return tagName.replace(/\s/gm, "_");
+    return tagName.replaceAll(/\s/gm, "_");
   }
 
   /**
@@ -639,12 +628,19 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   populateTags(thumb) {
-    const tagNames = getTagsFromThumb(thumb).replace(/\s\d+$/, "")
+    const tagNames = removeExtraWhiteSpace(getTagsFromThumb(thumb).replace(thumb.id, ""))
       .split(" ");
     const unknownThumbTags = tagNames
-      .filter(tag => Caption.tagCategoryAssociations[tag] === undefined);
+      .filter(tag => Caption.tagCategoryAssociations[tag] === undefined && !CUSTOM_TAGS.has(tag));
 
     this.currentThumbId = thumb.id;
+
+    if (this.allTagsAreProblematic(unknownThumbTags)) {
+      this.correctAllProblematicTagsFromThumb(thumb, () => {
+        this.addTags(tagNames, thumb);
+      });
+      return;
+    }
 
     if (unknownThumbTags.length > 0) {
       this.findTagCategories(unknownThumbTags, 3, () => {
@@ -693,44 +689,64 @@ class Caption {
   }
 
   /**
-   * @param {String} problematicTag
+   * @param {String[]} tags
+   * @returns {Boolean}
    */
-  async correctProblematicTag(problematicTag) {
-    this.problematicTags.push(problematicTag);
-
-    if (this.currentlyCorrectingProblematicTags) {
-      return;
+  allTagsAreProblematic(tags) {
+    for (const tag of tags) {
+      if (!this.problematicTags.has(tag)) {
+        return false;
+      }
     }
-    this.currentlyCorrectingProblematicTags = true;
+    return tags.length > 0;
+  }
 
-    while (this.problematicTags.length > 0) {
-      const tagName = this.problematicTags.pop();
-      const tagPageURL = `https://rule34.xxx/index.php?page=tags&s=list&tags=${tagName}`;
+  /**
+   * @param {HTMLElement} thumb
+   * @param {Function} onProblematicTagsCorrected
+   */
+  correctAllProblematicTagsFromThumb(thumb, onProblematicTagsCorrected) {
+    fetch(`https://rule34.xxx/index.php?page=post&s=view&id=${thumb.id}`)
+      .then((response) => {
+        return response.text();
+      })
+      .then((html) => {
+        const tagCategoryMap = this.getTagCategoryMapFromPostPage(html);
 
-      await fetch(tagPageURL)
-        .then((response) => {
-          if (response.ok) {
-            return response.text();
+        for (const [tagName, tagCategory] of tagCategoryMap.entries()) {
+          if (this.problematicTags.has(tagName)) {
+            Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(tagCategory);
+            this.problematicTags.delete(tagName);
           }
-          throw new Error(response.status);
-        })
-        .then((html) => {
-          const dom = new DOMParser().parseFromString(html, "text/html");
-          const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
+        }
+        onProblematicTagsCorrected();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 
-          if (columnOfFirstRow.length !== 3) {
-            Caption.tagCategoryAssociations[tagName] = 0;
-            this.saveTags();
-            return;
-          }
-          const category = columnOfFirstRow[2].textContent.split(",")[0].split(" ")[0];
+  /**
+   * @param {String} html
+   * @returns {Map.<String, String>}
+   */
+  getTagCategoryMapFromPostPage(html) {
+    const dom = new DOMParser().parseFromString(html, "text/html");
+    return Array.from(dom.querySelectorAll(".tag"))
+    .reduce((map, element) => {
+        const tagCategory = element.classList[0].replace("tag-type-", "");
+        const tagName = this.replaceSpacesWithUnderscores(element.children[1].textContent);
 
-          Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(category);
-          this.saveTags();
-          this.problematicTagsThatFailedFetch.delete(problematicTag);
-        });
-    }
-    this.currentlyCorrectingProblematicTags = false;
+        map.set(tagName, tagCategory);
+        return map;
+    }, new Map());
+  }
+
+  /**
+   * @param {String} tag
+   */
+  setAsProblematic(tag) {
+    this.problematicTags.add(tag);
   }
 
   findTagCategoriesOnPageChange() {
@@ -758,7 +774,7 @@ class Caption {
       }
 
       if (tagName.includes("'")) {
-        this.correctProblematicTag(tagName);
+        this.setAsProblematic(tagName);
         continue;
       }
       const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
@@ -778,7 +794,7 @@ class Caption {
             const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
 
             if (encoding === "array") {
-              this.correctProblematicTag(tagName);
+              this.setAsProblematic(tagName);
               return;
             }
             Caption.tagCategoryAssociations[tagName] = parseInt(encoding);

@@ -304,23 +304,23 @@ function userIsOnTheirOwnFavoritesPage() {
 
 /**
  * @param {String} url
- * @param {Function} callback
+ * @param {Function} onSuccess
  * @param {Number} delayIncrement
  * @param {Number} delay
  */
-function requestPageInformation(url, callback, delay = 0) {
+function requestPageInformation(url, onSuccess, delay = 0) {
   const delayIncrement = 500;
 
   setTimeout(() => {
     fetch((url))
       .then((response) => {
         if (response.status === 503) {
-          requestPageInformation(url, callback, delay + delayIncrement);
+          requestPageInformation(url, onSuccess, delay + delayIncrement);
         }
         return response.text();
       })
       .then((html) => {
-        callback(html);
+        onSuccess(html);
       });
   }, delay);
 }
