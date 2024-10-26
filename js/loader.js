@@ -339,10 +339,6 @@ onmessage = (message) => {
    */
   searchResultsWereInverted;
   /**
-   * @type {HTMLTextAreaElement}
-   */
-  favoritesSearchInput;
-  /**
    * @type {Number}
    */
   currentFavoritesPageNumber;
@@ -463,7 +459,6 @@ onmessage = (message) => {
     this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
     this.searchQuery = "";
     this.databaseWorker = new Worker(getWorkerURL(FavoritesLoader.webWorkers.database));
-    this.favoritesSearchInput = document.getElementById("favorites-search-box");
     this.paginationContainer = this.createPaginationContainer();
     this.currentFavoritesPageNumber = 1;
   }
@@ -662,7 +657,6 @@ onmessage = (message) => {
    */
   getSearchResults(thumbNodes, stopIndex) {
     const searchCommand = new SearchCommand(this.finalSearchQuery);
-
     const results = [];
 
     stopIndex = stopIndex === undefined ? thumbNodes.length : stopIndex;
@@ -671,7 +665,7 @@ onmessage = (message) => {
     for (let i = 0; i < stopIndex; i += 1) {
       const thumbNode = thumbNodes[i];
 
-      if (matchesSearch(searchCommand, thumbNode.postTags)) {
+      if (matchesSearch(searchCommand, thumbNode)) {
         results.push(thumbNode);
         thumbNode.setMatched(true);
       } else {
@@ -816,7 +810,9 @@ onmessage = (message) => {
         this.addFetchedThumbNodesToInsertionQueue(pageNumber, thumbNodes, searchResults);
         this.foundEmptyFavoritesPage = thumbNodes.length === 0;
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
+
         if (refetching) {
           failedRequest.retries += 1;
         } else {
@@ -971,7 +967,7 @@ onmessage = (message) => {
 
     for (const record of databaseRecords) {
       const thumbNode = new ThumbNode(record, true);
-      const isBlacklisted = !matchesSearch(searchCommand, thumbNode.postTags);
+      const isBlacklisted = !matchesSearch(searchCommand, thumbNode);
 
       if (isBlacklisted) {
         if (!userIsOnTheirOwnFavoritesPage()) {
@@ -1131,7 +1127,7 @@ Tag modifications and saved searches will be preserved.
     }
 
     for (const thumbNode of newThumbNodes) {
-      if (this.postTagsMatchSearchAndRating(searchCommand, thumbNode)) {
+      if (this.matchesSearchAndRating(searchCommand, thumbNode)) {
         thumbNode.insertInDocument(content, "afterbegin");
         insertedThumbNodes.push(thumbNode);
       }
@@ -1233,7 +1229,6 @@ Tag modifications and saved searches will be preserved.
         placeToInsertPagination.insertAdjacentElement("afterend", this.paginationContainer);
         placeToInsertPagination.remove();
       }
-
     }
   }
 
@@ -1675,8 +1670,8 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode} thumbNode
    * @returns
    */
-  postTagsMatchSearchAndRating(searchCommand, thumbNode) {
-    return this.ratingIsAllowed(thumbNode) && matchesSearch(searchCommand, thumbNode.postTags);
+  matchesSearchAndRating(searchCommand, thumbNode) {
+    return this.ratingIsAllowed(thumbNode) && matchesSearch(searchCommand, thumbNode);
   }
 }
 

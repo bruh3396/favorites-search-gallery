@@ -284,7 +284,7 @@ class Tooltip {
     let tags = getTagsFromThumb(thumb);
 
     if (this.searchTagColorCodes[thumb.id] === undefined) {
-      tags = tags.replace(` ${thumb.id}`, "");
+      tags = removeExtraWhiteSpace(tags.replace(thumb.id, ""));
     }
     return tags;
   }

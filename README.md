@@ -152,7 +152,7 @@ Notes:
 
 | Query                                            | Explanation                                                                                            |
 |--------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| ( score:<10 ~ score:100 ~ score:>10000 ~ apple ) | score is **less** than 10, or score **equals** 100, or score is greater than **1000** , or is an apple |
+| ( score:<10 ~ score:100 ~ score:>10000 ~ apple ) | score is **less** than 10, or score **equals** 100, or score is **greater** than 1000, or is an apple  |
 | width:1920 height:1080 -video -animated          | HD image                                                                                               |
 | height:>width video                              | portrait video                                                                                         |
 | -height:>width video                             | landscape video                                                                                        |

@@ -3167,26 +3167,6 @@ onmessage = (message) => {
   }
 
   loadVideoClips() {
-    this.videoClips.set("11088530", {
-      start: 63,
-      end: 67.5
-    });
-    this.videoClips.set("10652693", {
-      start: 17.5,
-      end: 23.5
-    });
-    this.videoClips.set("9063945", {
-      start: 32.4,
-      end: 56
-    });
-    this.videoClips.set("10952764", {
-      start: 36,
-      end: 77
-    });
-    this.videoClips.set("10037010", {
-      start: 86.5,
-      end: 100
-    });
   }
 
   /**

@@ -1375,7 +1375,7 @@ function setMainButtonInteractability(value) {
   if (container === null) {
     return;
   }
-  const mainButtons = Array.from(container.children).filter(child => child.tagName.toLowerCase() === "button");
+  const mainButtons = Array.from(container.children).filter(child => child.tagName.toLowerCase() === "button" && child.textContent !== "Reset");
 
   for (const button of mainButtons) {
     button.disabled = !value;
@@ -1443,7 +1443,7 @@ async function findSomeoneWithMoreThanXFavorites(X) {
       return;
     }
   }
-  alert(`Could not find user with more than ${X} favorites`);
+  console.error(`Could not find user with more than ${X} favorites`);
 }
 
 if (onFavoritesPage()) {

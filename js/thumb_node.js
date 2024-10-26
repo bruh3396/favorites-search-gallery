@@ -3,10 +3,13 @@ class ThumbNode {
    * @type {Map.<String, ThumbNode>}
    */
   static allThumbNodes = new Map();
-  static baseURLs = {
-    post: "https://rule34.xxx/index.php?page=post&s=view&id="
-  };
+  /**
+   * @type {RegExp}
+  */
   static thumbSourceExtractionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
+  /**
+   * @type {DOMParser}
+  */
   static parser = new DOMParser();
   /**
    * @type {HTMLElement}
@@ -20,10 +23,6 @@ class ThumbNode {
    * @type {String}
   */
   static addFavoriteButtonHTML;
-  /**
-   * @type {String}
-  */
-  static auxillaryButtonHTML;
 
   static {
     if (!onPostPage()) {
@@ -33,19 +32,18 @@ class ThumbNode {
   }
 
   static createTemplates() {
-    ThumbNode.template = ThumbNode.parser.parseFromString("<div></div>", "text/html").createElement("div");
+    ThumbNode.template = ThumbNode.parser.parseFromString("<div class=\"thumb-node\"></div>", "text/html").createElement("div");
     const canvasHTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
     const heartPlusBlobURL = createObjectURLFromSvg(ICONS.heartPlus);
     const heartMinusBlobURL = createObjectURLFromSvg(ICONS.heartMinus);
     const heartPlusImageHTML = `<img src=${heartPlusBlobURL}>`;
     const heartMinusImageHTML = `<img src=${heartMinusBlobURL}>`;
 
-    ThumbNode.removeFavoriteButtonHTML = `<button class="remove-favorite-button auxillary-button light-green-gradient">${heartMinusImageHTML}</button>`;
-    ThumbNode.addFavoriteButtonHTML = `<button class="add-favorite-button auxillary-button light-green-gradient">${heartPlusImageHTML}</button>`;
+    ThumbNode.removeFavoriteButtonHTML = `<button class="remove-favorite-button auxillary-button">${heartMinusImageHTML}</button>`;
+    ThumbNode.addFavoriteButtonHTML = `<button class="add-favorite-button auxillary-button">${heartPlusImageHTML}</button>`;
     const auxillaryButtonHTML = userIsOnTheirOwnFavoritesPage() ? ThumbNode.removeFavoriteButtonHTML : ThumbNode.addFavoriteButtonHTML;
 
     ThumbNode.template.className = "thumb-node";
-
     ThumbNode.template.innerHTML = `
         <div>
           <img loading="lazy">
@@ -122,7 +120,6 @@ class ThumbNode {
   }
 
   /**
-   *
    * @param {String} id
    * @returns {String}
    */
@@ -162,13 +159,9 @@ class ThumbNode {
   /**
    * @type {String}
    */
-  originalTags;
-  /**
-   * @type {String}
-   */
   additionalTags;
   /**
-   * @type {Set}
+   * @type {Set.<String>}
    */
   tagSet;
   /**
@@ -184,14 +177,14 @@ class ThumbNode {
    * @type {String}
    */
   get href() {
-    return ThumbNode.baseURLs.post + this.id;
+    return `https://rule34.xxx/index.php?page=post&s=view&id=${this.id}`;
   }
 
   /**
-   * @type {String[]}
+   * @type {String}
    */
-  get tagList() {
-    return this.originalTags.split(" ");
+  get compressedThumbSource() {
+    return this.image.src.match(ThumbNode.thumbSourceExtractionRegex).splice(1).join("_");
   }
 
   /**
@@ -208,17 +201,17 @@ class ThumbNode {
 
   /**
    * @type {String}
-   */
-  get compressedThumbSource() {
-    return this.image.src.match(ThumbNode.thumbSourceExtractionRegex).splice(1).join("_");
+  */
+  get originalTags() {
+    return Array.from(this.tagSet).join(" ");
   }
 
-    /**
-     * @type {String}
-    */
-    get finalTags() {
-      return this.mergeTags(this.originalTags, this.additionalTags);
-    }
+  /**
+   * @type {String}
+  */
+  get finalTags() {
+    return this.mergeTags(this.originalTags, this.additionalTags);
+  }
 
   /**
    * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumb
@@ -229,7 +222,7 @@ class ThumbNode {
     this.populateAttributes(thumb, fromRecord);
     this.setupAuxillaryButton();
     this.setupClickLink();
-    this.setFlags();
+    this.setMatched(true);
     this.addInstanceToAllThumbNodes();
   }
 
@@ -281,7 +274,7 @@ class ThumbNode {
   }
 
   /**
-   * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumb
+   * @param {HTMLElement | {id: String, tags: String, src: String, type: String, metadata: String}} thumb
    * @param {Boolean} fromDatabaseRecord
    */
   populateAttributes(thumb, fromDatabaseRecord) {
@@ -292,7 +285,7 @@ class ThumbNode {
     }
     this.root.id = this.id;
     this.additionalTags = TagModifier.tagModifications.get(this.id) || "";
-    this.updateTagSet();
+    this.updateTags();
   }
 
   /**
@@ -301,7 +294,7 @@ class ThumbNode {
   populateAttributesFromDatabaseRecord(record) {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
-    this.originalTags = record.tags;
+    this.tagSet = this.createTagSet(record.tags);
     this.image.className = record.type;
 
     if (record.metadata === undefined) {
@@ -325,8 +318,11 @@ class ThumbNode {
 
     this.image.src = imageElement.src;
     this.id = ThumbNode.getIdFromThumb(thumb);
-    this.originalTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
-    this.image.classList.add(getContentType(this.originalTags));
+
+    const thumbTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
+
+    this.tagSet = this.createTagSet(thumbTags);
+    this.image.classList.add(getContentType(thumbTags));
     this.metadata = new FavoriteMetadata(this.id);
     this.metadata.presetRating(ThumbNode.extractRatingFromThumb(thumb));
   }
@@ -347,17 +343,6 @@ class ThumbNode {
     element.insertAdjacentElement(position, this.root);
   }
 
-  /**
-   * @param {Boolean} value
-   */
-  toggleVisibility(value) {
-    this.root.style.display = value ? "" : "none";
-  }
-
-  setFlags() {
-    this.matchedByMostRecentSearch = true;
-  }
-
   addInstanceToAllThumbNodes() {
     if (!ThumbNode.allThumbNodes.has(this.id)) {
       ThumbNode.allThumbNodes.set(this.id, this);
@@ -365,7 +350,7 @@ class ThumbNode {
   }
 
   toggleMatched() {
-      this.matchedByMostRecentSearch = !this.matchedByMostRecentSearch;
+    this.matchedByMostRecentSearch = !this.matchedByMostRecentSearch;
   }
 
   /**
@@ -394,11 +379,26 @@ class ThumbNode {
         finalTags.add(newTag);
       }
     }
-    return finalTags.size > 0 ? removeExtraWhiteSpace(Array.from(finalTags.keys()).join(" ")) : "";
+
+    if (finalTags.size === 0) {
+      return "";
+    }
+    return removeExtraWhiteSpace(Array.from(finalTags.keys()).join(" "));
   }
 
-  updateTagSet() {
-    this.tagSet = new Set(this.finalTags);
+  /**
+   *
+   * @param {String} tags
+   * @returns {Set.<String>}
+   */
+  createTagSet(tags) {
+    return new Set(removeExtraWhiteSpace(tags).split(" ").sort());
+  }
+
+  updateTags() {
+    if (this.additionalTags !== "") {
+      this.tagSet = this.createTagSet(this.finalTags);
+    }
   }
 
   /**
@@ -407,7 +407,7 @@ class ThumbNode {
    */
   addAdditionalTags(newTags) {
     this.additionalTags = this.mergeTags(this.additionalTags, newTags);
-    this.updateTagSet();
+    this.updateTags();
     return this.additionalTags;
   }
 
@@ -421,7 +421,7 @@ class ThumbNode {
     this.additionalTags = Array.from(this.additionalTags.split(" "))
       .filter(tag => !tagsToRemoveList.includes(tag))
       .join(" ");
-    this.updateTagSet();
+    this.updateTags();
     return this.additionalTags;
   }
 
@@ -430,6 +430,6 @@ class ThumbNode {
       return;
     }
     this.additionalTags = "";
-    this.updateTagSet();
+    this.updateTags();
   }
 }

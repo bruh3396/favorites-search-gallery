@@ -10,6 +10,20 @@ class SearchTag {
   negated;
 
   /**
+   * @type {Number}
+  */
+  get cost() {
+    return 0;
+  }
+
+  /**
+   * @type {Number}
+  */
+  get finalCost() {
+    return this.negated ? this.cost + 1 : this.cost;
+  }
+
+  /**
    * @param {String} searchTag
    * @param {Boolean} inOrGroup
    */
@@ -28,16 +42,31 @@ class SearchTag {
     }
     return this.negated;
   }
-
 }
 
 class WildCardSearchTag extends SearchTag {
   static unmatchableRegex = /^\b$/;
+  static startsWithRegex = /^[^*]*\*$/;
 
   /**
    * @type {RegExp}
   */
   regex;
+  /**
+   * @type {Boolean}
+  */
+  equivalentToStartsWith;
+  /**
+   * @type {String}
+  */
+  startsWithPrefix;
+
+  /**
+   * @type {Number}
+  */
+  get cost() {
+    return this.equivalentToStartsWith ? 10 : 20;
+  }
 
   /**
    * @param {String} searchTag
@@ -46,6 +75,8 @@ class WildCardSearchTag extends SearchTag {
   constructor(searchTag, inOrGroup) {
     super(searchTag, inOrGroup);
     this.regex = this.createWildcardRegex();
+    this.equivalentToStartsWith = WildCardSearchTag.startsWithRegex.test(searchTag);
+    this.startsWithPrefix = this.value.slice(0, -1);
   }
 
   /**
@@ -64,6 +95,34 @@ class WildCardSearchTag extends SearchTag {
    * @returns {Boolean}
    */
   matches(thumbNode) {
+    if (this.equivalentToStartsWith) {
+      return this.matchesPrefix(thumbNode);
+    }
+    return this.matchesWildcard(thumbNode);
+  }
+
+  /**
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+   */
+  matchesPrefix(thumbNode) {
+    for (const tag of thumbNode.tagSet.values()) {
+      if (tag.startsWith(this.startsWithPrefix)) {
+        return !this.negated;
+      }
+
+      if (this.startsWithPrefix < tag) {
+        break;
+      }
+    }
+    return this.negated;
+  }
+
+  /**
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+   */
+  matchesWildcard(thumbNode) {
     for (const tag of thumbNode.tagSet.values()) {
       if (this.regex.test(tag)) {
         return !this.negated;
@@ -80,6 +139,13 @@ class MetadataSearchTag extends SearchTag {
    * @type {MetadataSearchExpression}
   */
   expression;
+
+  /**
+   * @type {Number}
+  */
+  get cost() {
+    return 0;
+  }
 
   /**
    * @param {String} searchTag
@@ -122,22 +188,50 @@ class MetadataSearchTag extends SearchTag {
 }
 
 /**
- * @param {String} searchTag
+ * @param {String[]} searchTagValues
+ * @param {Boolean} isOrGroup
+ * @returns {SearchTag[]}
+ */
+function createSearchTagGroup(searchTagValues, isOrGroup) {
+  const uniqueSearchTagValues = new Set();
+  const searchTags = [];
+
+  for (const searchTagValue of searchTagValues) {
+    if (uniqueSearchTagValues.has(searchTagValue)) {
+      continue;
+    }
+    uniqueSearchTagValues.add(searchTagValue);
+    searchTags.push(createSearchTag(searchTagValue, isOrGroup));
+  }
+  return searchTags;
+}
+
+/**
+ * @param {String} searchTagValue
  * @param {Boolean} inOrGroup
  * @returns {SearchTag}
  */
-function createSearchTag(searchTag, inOrGroup) {
-  if (MetadataSearchTag.regex.test(searchTag)) {
-    return new MetadataSearchTag(searchTag, inOrGroup);
+function createSearchTag(searchTagValue, inOrGroup) {
+  if (MetadataSearchTag.regex.test(searchTagValue)) {
+    return new MetadataSearchTag(searchTagValue, inOrGroup);
   }
 
-  if (searchTag.includes("*")) {
-    return new WildCardSearchTag(searchTag, inOrGroup);
+  if (searchTagValue.includes("*")) {
+    return new WildCardSearchTag(searchTagValue, inOrGroup);
   }
-  return new SearchTag(searchTag, inOrGroup);
+  return new SearchTag(searchTagValue, inOrGroup);
 }
 
 class SearchCommand {
+  /**
+   * @param {SearchTag[]} searchTags
+   */
+  static sortByLeastExpensive(searchTags) {
+    searchTags.sort((a, b) => {
+      return a.finalCost - b.finalCost;
+    });
+  }
+
   /**
    * @type {SearchTag[][]}
   */
@@ -165,9 +259,20 @@ class SearchCommand {
     const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
 
     for (const orGroup of orGroups) {
-      this.orGroups.push(orGroup.map(searchTag => createSearchTag(searchTag, true)));
+      this.orGroups.push(createSearchTagGroup(orGroup, true));
     }
-    this.remainingSearchTags = remainingSearchTags.map(searchTag => createSearchTag(searchTag, false));
+    this.remainingSearchTags = createSearchTagGroup(remainingSearchTags, false);
+    this.optimizeSearchCommand();
+  }
+
+  optimizeSearchCommand() {
+    for (const orGroup of this.orGroups) {
+      SearchCommand.sortByLeastExpensive(orGroup);
+    }
+    SearchCommand.sortByLeastExpensive(this.remainingSearchTags);
+    this.orGroups.sort((a, b) => {
+      return a.length - b.length;
+    });
   }
 }
 
