@@ -1156,7 +1156,7 @@ function correctMisspelledTags(tags) {
  */
 function extractTagGroups(searchQuery) {
   searchQuery = searchQuery.toLowerCase();
-  const orRegex = /\( (.*?) \)/g;
+  const orRegex = /(?:^|\s)\(\s((?:\S+)(?:(?:\s~\s)\S+)*)\s\)/g;
   const orGroups = Array.from(removeExtraWhiteSpace(searchQuery)
     .matchAll(orRegex))
     .map((orGroup) => orGroup[1].split(" ~ "));

@@ -137,6 +137,39 @@ class ThumbNode {
   }
 
   /**
+   * @param {String} oldTags
+   * @param {String} newTags
+   * @returns {String}
+   */
+  static mergeTags(oldTags, newTags) {
+    if (newTags === "") {
+      return oldTags;
+    }
+    oldTags = removeExtraWhiteSpace(oldTags);
+    newTags = removeExtraWhiteSpace(newTags);
+    const finalTags = new Set(oldTags.split(" "));
+
+    for (const newTag of newTags.split(" ")) {
+      if (newTag !== "") {
+        finalTags.add(newTag);
+      }
+    }
+
+    if (finalTags.size === 0) {
+      return "";
+    }
+    return removeExtraWhiteSpace(Array.from(finalTags.keys()).join(" "));
+  }
+
+  /**
+   * @param {String} tags
+   * @returns {Set.<String>}
+   */
+  static createTagSet(tags) {
+    return new Set(removeExtraWhiteSpace(tags).split(" ").sort());
+  }
+
+  /**
    * @type {HTMLDivElement}
    */
   root;
@@ -160,6 +193,10 @@ class ThumbNode {
    * @type {String}
    */
   additionalTags;
+  /**
+   * @type {Number}
+  */
+  originalTagsLength;
   /**
    * @type {Set.<String>}
    */
@@ -203,14 +240,14 @@ class ThumbNode {
    * @type {String}
   */
   get originalTags() {
-    return Array.from(this.tagSet).join(" ");
+    return Array.from(this.tagSet).slice(0, this.originalTagsLength).join(" ");
   }
 
   /**
    * @type {String}
   */
   get finalTags() {
-    return this.mergeTags(this.originalTags, this.additionalTags);
+    return ThumbNode.mergeTags(this.originalTags, this.additionalTags);
   }
 
   /**
@@ -284,8 +321,12 @@ class ThumbNode {
       this.populateAttributesFromHTMLElement(thumb);
     }
     this.root.id = this.id;
+    this.originalTagsLength = this.tagSet.size;
     this.additionalTags = TagModifier.tagModifications.get(this.id) || "";
-    this.updateTags();
+
+    if (this.additionalTags !== "") {
+      this.updateTags();
+    }
   }
 
   /**
@@ -294,7 +335,7 @@ class ThumbNode {
   populateAttributesFromDatabaseRecord(record) {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
-    this.tagSet = this.createTagSet(record.tags);
+    this.tagSet = ThumbNode.createTagSet(record.tags);
     this.image.className = record.type;
 
     if (record.metadata === undefined) {
@@ -321,7 +362,7 @@ class ThumbNode {
 
     const thumbTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
 
-    this.tagSet = this.createTagSet(thumbTags);
+    this.tagSet = ThumbNode.createTagSet(thumbTags);
     this.image.classList.add(getContentType(thumbTags));
     this.metadata = new FavoriteMetadata(this.id);
     this.metadata.presetRating(ThumbNode.extractRatingFromThumb(thumb));
@@ -360,44 +401,13 @@ class ThumbNode {
     this.matchedByMostRecentSearch = value;
   }
 
-  /**
-   *
-   * @param {String} oldTags
-   * @param {String} newTags
-   * @returns {String}
-   */
-  mergeTags(oldTags, newTags) {
-    if (newTags === "") {
-      return oldTags;
-    }
-    oldTags = removeExtraWhiteSpace(oldTags);
-    newTags = removeExtraWhiteSpace(newTags);
-    const finalTags = new Set(oldTags.split(" "));
-
-    for (const newTag of newTags.split(" ")) {
-      if (newTag !== "") {
-        finalTags.add(newTag);
-      }
-    }
-
-    if (finalTags.size === 0) {
-      return "";
-    }
-    return removeExtraWhiteSpace(Array.from(finalTags.keys()).join(" "));
-  }
-
-  /**
-   *
-   * @param {String} tags
-   * @returns {Set.<String>}
-   */
-  createTagSet(tags) {
-    return new Set(removeExtraWhiteSpace(tags).split(" ").sort());
-  }
-
   updateTags() {
-    if (this.additionalTags !== "") {
-      this.tagSet = this.createTagSet(this.finalTags);
+    this.tagSet = ThumbNode.createTagSet(this.originalTags);
+
+    for (const additionalTag of this.additionalTags.split(" ")) {
+      if (!this.tagSet.has(additionalTag) && additionalTag !== "") {
+        this.tagSet.add(additionalTag);
+      }
     }
   }
 
@@ -406,7 +416,7 @@ class ThumbNode {
    * @returns {String}
    */
   addAdditionalTags(newTags) {
-    this.additionalTags = this.mergeTags(this.additionalTags, newTags);
+    this.additionalTags = ThumbNode.mergeTags(this.additionalTags, newTags);
     this.updateTags();
     return this.additionalTags;
   }
@@ -418,9 +428,9 @@ class ThumbNode {
   removeAdditionalTags(tagsToRemove) {
     const tagsToRemoveList = tagsToRemove.split(" ");
 
-    this.additionalTags = Array.from(this.additionalTags.split(" "))
+    this.additionalTags = removeExtraWhiteSpace(Array.from(this.additionalTags.split(" "))
       .filter(tag => !tagsToRemoveList.includes(tag))
-      .join(" ");
+      .join(" "));
     this.updateTags();
     return this.additionalTags;
   }
