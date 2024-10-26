@@ -281,12 +281,12 @@ class Tooltip {
    */
   getTagsFromImageWithIdRemoved(image) {
     const thumb = getThumbFromImage(image);
-    let tags = getTagsFromThumb(thumb);
+    const tags = getTagsFromThumb(thumb);
 
     if (this.searchTagColorCodes[thumb.id] === undefined) {
-      tags = removeExtraWhiteSpace(tags.replace(thumb.id, ""));
+      tags.delete(thumb.id);
     }
-    return tags;
+    return Array.from(tags).join(" ");
   }
 
   /**
@@ -320,7 +320,7 @@ class Tooltip {
 
       if (tagColor !== undefined) {
         html = `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>${html}`;
-      } else if (includesTag(tag, TAG_BLACKLIST)) {
+      } else if (includesTag(tag, new Set(TAG_BLACKLIST.split(" ")))) {
         html += `<span style="color:red"><s><b>${tagWithSpace}</b></s></span>`;
       } else {
         html += tagWithSpace;

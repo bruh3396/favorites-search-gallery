@@ -106,20 +106,6 @@ class ThumbNode {
   }
 
   /**
-   * @type {Map.<String, ThumbNode>}
-   */
-  static get thumbNodesMatchedBySearch() {
-    const thumbNodes = new Map();
-
-    for (const [id, thumbNode] of ThumbNode.allThumbNodes.entries()) {
-      if (thumbNode.matchedByMostRecentSearch) {
-        thumbNodes.set(id, thumbNode);
-      }
-    }
-    return thumbNodes;
-  }
-
-  /**
    * @param {String} id
    * @returns {String}
    */
@@ -137,36 +123,41 @@ class ThumbNode {
   }
 
   /**
-   * @param {String} oldTags
-   * @param {String} newTags
-   * @returns {String}
-   */
-  static mergeTags(oldTags, newTags) {
-    if (newTags === "") {
-      return oldTags;
-    }
-    oldTags = removeExtraWhiteSpace(oldTags);
-    newTags = removeExtraWhiteSpace(newTags);
-    const finalTags = new Set(oldTags.split(" "));
-
-    for (const newTag of newTags.split(" ")) {
-      if (newTag !== "") {
-        finalTags.add(newTag);
-      }
-    }
-
-    if (finalTags.size === 0) {
-      return "";
-    }
-    return removeExtraWhiteSpace(Array.from(finalTags.keys()).join(" "));
-  }
-
-  /**
    * @param {String} tags
    * @returns {Set.<String>}
    */
-  static createTagSet(tags) {
-    return new Set(removeExtraWhiteSpace(tags).split(" ").sort());
+  static getTagSetFromTags(tags) {
+    tags = removeExtraWhiteSpace(tags);
+
+    if (tags === "") {
+      return new Set();
+    }
+    return new Set(tags.split(" ").sort());
+  }
+
+  /**
+   * @param {Set.<String>} tagSet
+   * @returns {String}
+   */
+  static getTagsFromTagSet(tagSet) {
+    if (tagSet.size === 0) {
+      return "";
+    }
+    return Array.from(tagSet).join(" ");
+  }
+
+  /**
+   * @type {Map.<String, ThumbNode>}
+   */
+  static get thumbNodesMatchedBySearch() {
+    const thumbNodes = new Map();
+
+    for (const [id, thumbNode] of ThumbNode.allThumbNodes.entries()) {
+      if (thumbNode.matchedByMostRecentSearch) {
+        thumbNodes.set(id, thumbNode);
+      }
+    }
+    return thumbNodes;
   }
 
   /**
@@ -190,7 +181,7 @@ class ThumbNode {
    */
   auxillaryButton;
   /**
-   * @type {String}
+   * @type {Set.<String>}
    */
   additionalTags;
   /**
@@ -230,24 +221,41 @@ class ThumbNode {
   get databaseRecord() {
     return {
       id: this.id,
-      tags: this.originalTags,
+      tags: this.originalTagsString,
       src: this.compressedThumbSource,
       metadata: this.metadata.json
     };
   }
 
   /**
-   * @type {String}
+   * @type {Set.<String>}
   */
-  get originalTags() {
-    return Array.from(this.tagSet).slice(0, this.originalTagsLength).join(" ");
+  get originalTagSet() {
+    const originalTags = new Set();
+    let count = 0;
+
+    for (const tag of this.tagSet.values()) {
+      if (count >= this.originalTagsLength) {
+        break;
+      }
+      count += 1;
+      originalTags.add(tag);
+    }
+    return originalTags;
+  }
+
+  /**
+   * @type {Set.<String>}
+  */
+  get originalTagsString() {
+   return ThumbNode.getTagsFromTagSet(this.originalTagSet);
   }
 
   /**
    * @type {String}
   */
-  get finalTags() {
-    return ThumbNode.mergeTags(this.originalTags, this.additionalTags);
+  get additionalTagsString() {
+    return ThumbNode.getTagsFromTagSet(this.additionalTags);
   }
 
   /**
@@ -311,7 +319,7 @@ class ThumbNode {
   }
 
   /**
-   * @param {HTMLElement | {id: String, tags: String, src: String, type: String, metadata: String}} thumb
+   * @param {HTMLElement | {id: String, tags: Set.<String>, src: String, type: String, metadata: String}} thumb
    * @param {Boolean} fromDatabaseRecord
    */
   populateAttributes(thumb, fromDatabaseRecord) {
@@ -322,20 +330,20 @@ class ThumbNode {
     }
     this.root.id = this.id;
     this.originalTagsLength = this.tagSet.size;
-    this.additionalTags = TagModifier.tagModifications.get(this.id) || "";
+    this.additionalTags = ThumbNode.getTagSetFromTags(TagModifier.tagModifications.get(this.id) || "");
 
-    if (this.additionalTags !== "") {
+    if (this.additionalTags.size !== 0) {
       this.updateTags();
     }
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, type: String, metadata: String}} record
+   * @param {{id: String, tags: Set.<String>, src: String, type: String, metadata: String}} record
    */
   populateAttributesFromDatabaseRecord(record) {
     this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
     this.id = record.id;
-    this.tagSet = ThumbNode.createTagSet(record.tags);
+    this.tagSet = ThumbNode.getTagSetFromTags(record.tags);
     this.image.className = record.type;
 
     if (record.metadata === undefined) {
@@ -359,10 +367,10 @@ class ThumbNode {
 
     this.image.src = imageElement.src;
     this.id = ThumbNode.getIdFromThumb(thumb);
+    const thumbTags = correctMisspelledTags(imageElement.title);
 
-    const thumbTags = `${correctMisspelledTags(imageElement.title)} ${this.id}`;
-
-    this.tagSet = ThumbNode.createTagSet(thumbTags);
+    this.tagSet = ThumbNode.getTagSetFromTags(thumbTags);
+    this.tagSet.add(this.id);
     this.image.classList.add(getContentType(thumbTags));
     this.metadata = new FavoriteMetadata(this.id);
     this.metadata.presetRating(ThumbNode.extractRatingFromThumb(thumb));
@@ -402,13 +410,8 @@ class ThumbNode {
   }
 
   updateTags() {
-    this.tagSet = ThumbNode.createTagSet(this.originalTags);
-
-    for (const additionalTag of this.additionalTags.split(" ")) {
-      if (!this.tagSet.has(additionalTag) && additionalTag !== "") {
-        this.tagSet.add(additionalTag);
-      }
-    }
+    this.tagSet = this.originalTagSet;
+    this.tagSet = union(this.tagSet, this.additionalTags);
   }
 
   /**
@@ -416,9 +419,13 @@ class ThumbNode {
    * @returns {String}
    */
   addAdditionalTags(newTags) {
-    this.additionalTags = ThumbNode.mergeTags(this.additionalTags, newTags);
-    this.updateTags();
-    return this.additionalTags;
+    const newTagsSet = ThumbNode.getTagSetFromTags(newTags);
+
+    if (newTagsSet.size > 0) {
+      this.additionalTags = union(this.additionalTags, newTagsSet);
+      this.updateTags();
+    }
+    return this.additionalTagsString;
   }
 
   /**
@@ -426,20 +433,20 @@ class ThumbNode {
  * @returns {String}
  */
   removeAdditionalTags(tagsToRemove) {
-    const tagsToRemoveList = tagsToRemove.split(" ");
+    const tagsToRemoveSet = ThumbNode.getTagSetFromTags(tagsToRemove);
 
-    this.additionalTags = removeExtraWhiteSpace(Array.from(this.additionalTags.split(" "))
-      .filter(tag => !tagsToRemoveList.includes(tag))
-      .join(" "));
-    this.updateTags();
-    return this.additionalTags;
+    if (tagsToRemoveSet.size > 0) {
+      this.additionalTags = difference(this.additionalTags, tagsToRemoveSet);
+      this.updateTags();
+    }
+    return this.additionalTagsString;
   }
 
   resetAdditionalTags() {
-    if (this.additionalTags === "") {
+    if (this.additionalTags.size === 0) {
       return;
     }
-    this.additionalTags = "";
+    this.additionalTags = new Set();
     this.updateTags();
   }
 }

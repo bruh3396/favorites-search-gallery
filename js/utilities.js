@@ -465,24 +465,23 @@ function getThumbURL(originalImageURL) {
 
 /**
  * @param {HTMLElement} thumb
- * @returns {String}
+ * @returns {Set.<String>}
  */
 function getTagsFromThumb(thumb) {
   if (onSearchPage()) {
-    const image = getImageFromThumb(thumb);
-    return image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
+    return ThumbNode.getTagSetFromTags(getImageFromThumb(thumb).title);
   }
   const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
-  return thumbNode === undefined ? "" : thumbNode.finalTags;
+  return thumbNode === undefined ? new Set() : new Set(thumbNode.tagSet);
 }
 
 /**
  * @param {String} tag
- * @param {String} tags
+ * @param {Set.<String>} tags
  * @returns
  */
 function includesTag(tag, tags) {
-  return tags.includes(` ${tag} `) || tags.endsWith(` ${tag}`) || tags.startsWith(`${tag} `);
+  return tags.has(tag);
 }
 
 /**
@@ -494,7 +493,7 @@ function isVideo(thumb) {
     return true;
   }
   const tags = getTagsFromThumb(thumb);
-  return includesTag("video", tags) || includesTag("mp4", tags);
+  return tags.has("video") || tags.has("mp4");
 }
 
 /**
@@ -506,7 +505,7 @@ function isGif(thumb) {
     return false;
   }
   const tags = getTagsFromThumb(thumb);
-  return includesTag("gif", tags) || includesTag("animated", tags) || includesTag("animated_png", tags) || getImageFromThumb(thumb).hasAttribute("gif");
+  return tags.has("gif") || tags.has("animated") || tags.has("animated_png") || getImageFromThumb(thumb).hasAttribute("gif");
 }
 
 /**
@@ -1378,6 +1377,34 @@ function isTypeableInput(element) {
     return TYPEABLE_INPUTS.has(element.getAttribute("type"));
   }
   return false;
+}
+
+/**
+ * @param {Set} a
+ * @param {Set} b
+ * @returns {Set}
+ */
+function union(a, b) {
+  const c = new Set(a);
+
+  for (const element of b.values()) {
+    c.add(element);
+  }
+  return c;
+}
+
+/**
+ * @param {Set} a
+ * @param {Set} b
+ * @returns {Set}
+ */
+function difference(a, b) {
+  const c = new Set(a);
+
+  for (const element of b.values()) {
+    c.delete(element);
+  }
+  return c;
 }
 
 initializeUtilities();

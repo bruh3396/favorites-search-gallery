@@ -2532,7 +2532,8 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   showOriginalGIF(thumb) {
-    const extension = includesTag("animated_png", getTagsFromThumb(thumb)) ? "png" : "gif";
+    const tags = getTagsFromThumb(thumb);
+    const extension = tags.has("animated_png") ? "png" : "gif";
     const originalSource = getOriginalImageURLFromThumb(thumb).replace("jpg", extension);
 
     this.gifContainer.src = originalSource;

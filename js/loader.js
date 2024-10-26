@@ -1160,6 +1160,8 @@ Tag modifications and saved searches will be preserved.
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
       this.updatePaginationUi(this.currentFavoritesPageNumber, searchResultsWhileFetchingWithAllowedRatings);
+    } else {
+      this.updatePageButtonEventListeners(searchResultsWhileFetchingWithAllowedRatings);
     }
 
     const onLastPage = (pageCount === this.currentFavoritesPageNumber);
@@ -1339,7 +1341,7 @@ Tag modifications and saved searches will be preserved.
     }
     const html = `
       <input type="number" placeholder="page" style="width: 4em;">
-      <button>Go</button>
+      <button id="goto-page">Go</button>
     `;
     const container = document.createElement("span");
 
@@ -1352,17 +1354,37 @@ Tag modifications and saved searches will be preserved.
         button.click();
       }
     };
-    button.onclick = () => {
+
+    this.paginationContainer.appendChild(container);
+    this.updatePageButtonEventListeners(searchResults);
+  }
+
+  /**
+   * @param {ThumbNode[]} searchResults
+   */
+  updatePageButtonEventListeners(searchResults) {
+    const gotoPageButton = document.getElementById("goto-page");
+    const finalPageButton = document.getElementById("final-page");
+    const pageCount = this.getPageCount(searchResults.length);
+
+    if (gotoPageButton === null || finalPageButton === null) {
+      return;
+    }
+
+    gotoPageButton.onclick = () => {
       let pageNumber = parseInt(input.value);
 
       if (!isNumber(pageNumber)) {
         return;
       }
-      pageNumber = clamp(pageNumber, 1, this.getPageCount(searchResults.length));
-
+      pageNumber = clamp(pageNumber, 1, pageCount);
       this.changeResultsPage(pageNumber, searchResults);
+
     };
-    this.paginationContainer.appendChild(container);
+
+    finalPageButton.onclick = () => {
+      this.changeResultsPage(pageCount, searchResults);
+    };
   }
 
   /**

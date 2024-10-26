@@ -628,10 +628,11 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   populateTags(thumb) {
-    const tagNames = removeExtraWhiteSpace(getTagsFromThumb(thumb).replace(thumb.id, ""))
-      .split(" ");
-    const unknownThumbTags = tagNames
-      .filter(tag => Caption.tagCategoryAssociations[tag] === undefined && !CUSTOM_TAGS.has(tag));
+    const tagNames = getTagsFromThumb(thumb);
+
+    tagNames.delete(thumb.id);
+    const unknownThumbTags = Array.from(tagNames)
+      .filter(tagName => this.tagCategoryIsUnknown(thumb, tagName));
 
     this.currentThumbId = thumb.id;
 
@@ -714,10 +715,8 @@ class Caption {
         const tagCategoryMap = this.getTagCategoryMapFromPostPage(html);
 
         for (const [tagName, tagCategory] of tagCategoryMap.entries()) {
-          if (this.problematicTags.has(tagName)) {
-            Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(tagCategory);
-            this.problematicTags.delete(tagName);
-          }
+          Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(tagCategory);
+          this.problematicTags.delete(tagName);
         }
         onProblematicTagsCorrected();
       })
@@ -733,20 +732,22 @@ class Caption {
   getTagCategoryMapFromPostPage(html) {
     const dom = new DOMParser().parseFromString(html, "text/html");
     return Array.from(dom.querySelectorAll(".tag"))
-    .reduce((map, element) => {
+      .reduce((map, element) => {
         const tagCategory = element.classList[0].replace("tag-type-", "");
         const tagName = this.replaceSpacesWithUnderscores(element.children[1].textContent);
 
         map.set(tagName, tagCategory);
         return map;
-    }, new Map());
+      }, new Map());
   }
 
   /**
    * @param {String} tag
    */
   setAsProblematic(tag) {
-    this.problematicTags.add(tag);
+    if (Caption.tagCategoryAssociations[tag] === undefined && !CUSTOM_TAGS.has(tag)) {
+      this.problematicTags.add(tag);
+    }
   }
 
   findTagCategoriesOnPageChange() {
@@ -775,8 +776,15 @@ class Caption {
 
       if (tagName.includes("'")) {
         this.setAsProblematic(tagName);
+      }
+
+      if (this.problematicTags.has(tagName)) {
+        if (tagName === lastTagName) {
+          onAllCategoriesFound();
+        }
         continue;
       }
+
       const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
 
       try {
@@ -799,18 +807,14 @@ class Caption {
             }
             Caption.tagCategoryAssociations[tagName] = parseInt(encoding);
 
-            if (tagName === lastTagName && onAllCategoriesFound !== undefined) {
+            if (tagName === lastTagName) {
               onAllCategoriesFound();
             }
           }).catch(() => {
-            if (onAllCategoriesFound !== undefined) {
-              onAllCategoriesFound();
-            }
+            onAllCategoriesFound();
           });
       } catch (error) {
-        // if (error.name !== "TypeError") {
-        //   throw error;
-        // }
+        console.error(error);
       }
       await sleep(fetchDelay);
     }
@@ -821,11 +825,27 @@ class Caption {
    * @returns {String[]}
    */
   getTagNamesWithUnknownCategories(thumbs) {
-    return Array.from(thumbs)
-      .map(thumb => getTagsFromThumb(thumb).replace(/ \d+$/, ""))
-      .join(" ")
-      .split(" ")
-      .filter(tagName => !isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
+    const tagNamesWithUnknownCategories = new Set();
+
+    for (const thumb of thumbs) {
+      const tagNames = Array.from(getTagsFromThumb(thumb));
+
+      for (const tagName of tagNames) {
+        if (this.tagCategoryIsUnknown(thumb, tagName)) {
+          tagNamesWithUnknownCategories.add(tagName);
+        }
+      }
+    }
+    return Array.from(tagNamesWithUnknownCategories);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @param {String} tagName
+   * @returns
+   */
+  tagCategoryIsUnknown(thumb, tagName) {
+    return tagName !== thumb.id && Caption.tagCategoryAssociations[tagName] === undefined && !CUSTOM_TAGS.has(tagName);
   }
 }
 
