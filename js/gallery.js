@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const galleryHTML = `<style>
   body {
     width: 99.5vw;
@@ -90,7 +91,7 @@ const galleryHTML = `<style>
     width: 30%;
   }
 </style>
-`;/* eslint-disable no-useless-escape */
+`;
 
 const galleryDebugHTML = `
   .thumb,
@@ -1516,7 +1517,7 @@ onmessage = (message) => {
       if (Gallery.renderOnPageChangeCooldown.ready) {
         setTimeout(() => {
           this.renderImagesInTheBackground();
-        }, 25);
+        }, 50);
       }
     });
     window.addEventListener("shuffle", () => {
@@ -1623,7 +1624,6 @@ onmessage = (message) => {
   }
 
   addMemoryManagementEventListeners() {
-    // if (Gallery.settings.developerMode && onFavoritesPage()) {
     if (onFavoritesPage()) {
       return;
     }

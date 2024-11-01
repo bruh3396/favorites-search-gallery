@@ -338,7 +338,9 @@ class Caption {
       this.abortController = new AbortController();
 
       if (Caption.findCategoriesOnPageChangeCooldown.ready) {
-        this.findTagCategoriesOnPageChange();
+        setTimeout(() => {
+          this.findTagCategoriesOnPageChange();
+        }, 100);
       }
     });
     window.addEventListener("originalFavoritesCleared", (event) => {

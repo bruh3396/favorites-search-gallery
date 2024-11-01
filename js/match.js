@@ -44,7 +44,7 @@ class SearchTag {
   }
 }
 
-class WildCardSearchTag extends SearchTag {
+class WildcardSearchTag extends SearchTag {
   static unmatchableRegex = /^\b$/;
   static startsWithRegex = /^[^*]*\*$/;
 
@@ -75,7 +75,7 @@ class WildCardSearchTag extends SearchTag {
   constructor(searchTag, inOrGroup) {
     super(searchTag, inOrGroup);
     this.regex = this.createWildcardRegex();
-    this.equivalentToStartsWith = WildCardSearchTag.startsWithRegex.test(searchTag);
+    this.equivalentToStartsWith = WildcardSearchTag.startsWithRegex.test(searchTag);
     this.startsWithPrefix = this.value.slice(0, -1);
   }
 
@@ -86,7 +86,7 @@ class WildCardSearchTag extends SearchTag {
     try {
       return new RegExp(`^${this.value.replaceAll(/\*/g, ".*")}$`);
     } catch {
-      return WildCardSearchTag.unmatchableRegex;
+      return WildcardSearchTag.unmatchableRegex;
     }
   }
 
@@ -187,42 +187,42 @@ class MetadataSearchTag extends SearchTag {
   }
 }
 
-/**
- * @param {String[]} searchTagValues
- * @param {Boolean} isOrGroup
- * @returns {SearchTag[]}
- */
-function createSearchTagGroup(searchTagValues, isOrGroup) {
-  const uniqueSearchTagValues = new Set();
-  const searchTags = [];
-
-  for (const searchTagValue of searchTagValues) {
-    if (uniqueSearchTagValues.has(searchTagValue)) {
-      continue;
-    }
-    uniqueSearchTagValues.add(searchTagValue);
-    searchTags.push(createSearchTag(searchTagValue, isOrGroup));
-  }
-  return searchTags;
-}
-
-/**
- * @param {String} searchTagValue
- * @param {Boolean} inOrGroup
- * @returns {SearchTag}
- */
-function createSearchTag(searchTagValue, inOrGroup) {
-  if (MetadataSearchTag.regex.test(searchTagValue)) {
-    return new MetadataSearchTag(searchTagValue, inOrGroup);
-  }
-
-  if (searchTagValue.includes("*")) {
-    return new WildCardSearchTag(searchTagValue, inOrGroup);
-  }
-  return new SearchTag(searchTagValue, inOrGroup);
-}
-
 class SearchCommand {
+  /**
+   * @param {String} tag
+   * @param {Boolean} inOrGroup
+   * @returns {SearchTag}
+   */
+  static createSearchTag(tag, inOrGroup) {
+    if (MetadataSearchTag.regex.test(tag)) {
+      return new MetadataSearchTag(tag, inOrGroup);
+    }
+
+    if (tag.includes("*")) {
+      return new WildcardSearchTag(tag, inOrGroup);
+    }
+    return new SearchTag(tag, inOrGroup);
+  }
+
+  /**
+   * @param {String[]} tags
+   * @param {Boolean} isOrGroup
+   * @returns {SearchTag[]}
+   */
+  static createSearchTagGroup(tags, isOrGroup) {
+    const uniqueTags = new Set();
+    const searchTags = [];
+
+    for (const tag of tags) {
+      if (uniqueTags.has(tag)) {
+        continue;
+      }
+      uniqueTags.add(tag);
+      searchTags.push(SearchCommand.createSearchTag(tag, isOrGroup));
+    }
+    return searchTags;
+  }
+
   /**
    * @param {SearchTag[]} searchTags
    */
@@ -249,8 +249,6 @@ class SearchCommand {
    * @param {String} searchQuery
    */
   constructor(searchQuery) {
-    this.orGroups = [];
-    this.remainingSearchTags = [];
     this.isEmpty = searchQuery.trim() === "";
 
     if (this.isEmpty) {
@@ -258,10 +256,8 @@ class SearchCommand {
     }
     const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
 
-    for (const orGroup of orGroups) {
-      this.orGroups.push(createSearchTagGroup(orGroup, true));
-    }
-    this.remainingSearchTags = createSearchTagGroup(remainingSearchTags, false);
+    this.orGroups = orGroups.map(orGroup => SearchCommand.createSearchTagGroup(orGroup, true));
+    this.remainingSearchTags = SearchCommand.createSearchTagGroup(remainingSearchTags, false);
     this.optimizeSearchCommand();
   }
 
@@ -274,72 +270,59 @@ class SearchCommand {
       return a.length - b.length;
     });
   }
-}
 
-/**
- * @param {SearchCommand} searchCommand
- * @param {ThumbNode} thumbNode
- * @returns {Boolean}
- */
-function matchesSearch(searchCommand, thumbNode) {
-  if (searchCommand.isEmpty) {
+  /**
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+   */
+  matches(thumbNode) {
+    if (this.isEmpty) {
+      return true;
+    }
+
+    if (!this.matchesAllRemainingSearchTags(thumbNode)) {
+      return false;
+    }
+    return this.matchesAllOrGroups(thumbNode);
+  }
+
+  /**
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+   */
+  matchesAllRemainingSearchTags(thumbNode) {
+    for (const searchTag of this.remainingSearchTags) {
+      if (!searchTag.matches(thumbNode)) {
+        return false;
+      }
+    }
     return true;
   }
 
-  if (!matchesAllRemainingSearchTags(searchCommand.remainingSearchTags, thumbNode)) {
+  /**
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+   */
+  matchesAllOrGroups(thumbNode) {
+    for (const orGroup of this.orGroups) {
+      if (!this.atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @param {SearchTag[]} orGroup
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+   */
+  atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode) {
+    for (const orTag of orGroup) {
+      if (orTag.matches(thumbNode)) {
+        return true;
+      }
+    }
     return false;
   }
-  return matchesAllOrGroups(searchCommand.orGroups, thumbNode);
-}
-
-/**
- * @param {SearchTag[]} remainingSearchTags
- * @param {ThumbNode} thumbNode
- * @returns {Boolean}
- */
-function matchesAllRemainingSearchTags(remainingSearchTags, thumbNode) {
-  for (const searchTag of remainingSearchTags) {
-    if (!searchTag.matches(thumbNode)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * @param {SearchTag[][]} orGroups
- * @param {ThumbNode} thumbNode
- * @returns {Boolean}
- */
-function matchesAllOrGroups(orGroups, thumbNode) {
-  for (const orGroup of orGroups) {
-    if (!atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * @param {SearchTag[]} orGroup
- * @param {ThumbNode} thumbNode
- * @returns {Boolean}
- */
-function atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode) {
-  for (const orTag of orGroup) {
-    if (orTag.matches(thumbNode)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * @param {String} searchTag
- * @param {String[]} tags
- * @returns {Boolean}
- */
-function tagsMatchWildcardSearchTag(searchTag, tags) {
-  const wildcardRegex = new RegExp(`^${searchTag.replaceAll(/\*/g, ".*")}$`);
-  return tags.some(tag => wildcardRegex.test(tag));
 }

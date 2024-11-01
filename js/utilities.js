@@ -191,7 +191,7 @@ const STYLES = {
       >span,
       >div {
         &:hover {
-          outline: 3px solid #0075FF;
+          outline: 3px solid #0075FF !important;
         }
       }
     }`,
@@ -1453,6 +1453,16 @@ function convertToTagString(tagSet) {
 function getPostPageId() {
   const match = (/id=(\d+)/).exec(window.location.href);
   return match === null ? null : match[1];
+}
+
+/**
+ * @param {String} searchTag
+ * @param {String[]} tags
+ * @returns {Boolean}
+ */
+function tagsMatchWildcardSearchTag(searchTag, tags) {
+  const wildcardRegex = new RegExp(`^${searchTag.replaceAll(/\*/g, ".*")}$`);
+  return tags.some(tag => wildcardRegex.test(tag));
 }
 
 initializeUtilities();
