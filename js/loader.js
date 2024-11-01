@@ -474,15 +474,14 @@ onmessage = (message) => {
   }
 
   createDatabaseMessageHandler() {
-    this.databaseWorker.onmessage = async(message) => {
-      message = message.data;
-
-      switch (message.response) {
+    this.databaseWorker.onmessage = (message) => {
+      switch (message.data.response) {
         case "finishedLoading":
-          this.paginateSearchResults(this.reconstructContent(message.favorites));
+          this.paginateSearchResults(this.reconstructContent(message.data.favorites));
           this.onAllFavoritesLoaded();
-          await sleep(100);
-          this.findNewFavoritesOnReload(this.getAllFavoriteIds(), 0, []);
+          setTimeout(() => {
+            this.findNewFavoritesOnReload(this.getAllFavoriteIds(), 0, []);
+          }, 100);
           break;
 
         case "finishedStoring":
@@ -1340,8 +1339,8 @@ Tag modifications and saved searches will be preserved.
       return;
     }
     const html = `
-      <input type="number" placeholder="page" style="width: 4em;">
-      <button id="goto-page">Go</button>
+      <input type="number" placeholder="page" style="width: 4em;" id="goto-page-input">
+      <button id="goto-page-button">Go</button>
     `;
     const container = document.createElement("span");
 
@@ -1363,11 +1362,12 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} searchResults
    */
   updatePageButtonEventListeners(searchResults) {
-    const gotoPageButton = document.getElementById("goto-page");
+    const gotoPageButton = document.getElementById("goto-page-button");
     const finalPageButton = document.getElementById("final-page");
+    const input = document.getElementById("goto-page-input");
     const pageCount = this.getPageCount(searchResults.length);
 
-    if (gotoPageButton === null || finalPageButton === null) {
+    if (gotoPageButton === null || finalPageButton === null || input === null) {
       return;
     }
 
@@ -1400,7 +1400,7 @@ Tag modifications and saved searches will be preserved.
     this.currentFavoritesPageNumber = pageNumber;
     this.updatePaginationUi(pageNumber, searchResults);
     this.createPaginatedFavoritesPage(searchResults, start, end);
-    this.reAddAllThumbNodeEventListeners();
+    // this.reAddThumbNodeEventListeners(searchResults);
     this.resetFlagsThatImplyDifferentSearchResults();
 
     if (FavoritesLoader.currentLoadingState !== FavoritesLoader.loadingState.loadingFavoritesFromDatabase) {
@@ -1442,8 +1442,11 @@ Tag modifications and saved searches will be preserved.
     this.createGotoSpecificPageInputs(searchResults);
   }
 
-  reAddAllThumbNodeEventListeners() {
-    for (const thumbNode of this.allThumbNodes) {
+  /**
+   * @param {ThumbNode[]} thumbNodes
+   */
+  reAddThumbNodeEventListeners(thumbNodes) {
+    for (const thumbNode of thumbNodes) {
       thumbNode.setupAuxillaryButton();
     }
   }

@@ -1514,7 +1514,9 @@ onmessage = (message) => {
       this.enumerateVisibleThumbs();
 
       if (Gallery.renderOnPageChangeCooldown.ready) {
-        this.renderImagesInTheBackground();
+        setTimeout(() => {
+          this.renderImagesInTheBackground();
+        }, 25);
       }
     });
     window.addEventListener("shuffle", () => {

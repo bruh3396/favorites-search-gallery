@@ -18,16 +18,16 @@ This script is still in development, please let me know if you experience a bug,
 
 1. Install Tampermonkey
 2. Install this script using Tampermonkey
-3. Go to any favorites page:
-   * Should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
+3. Go to any favorites page, it should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
 4. Enjoy
 ## Features
 
-* Search favorites with the the same [syntax](#search-syntax) as the normal search pages (except for meta tags):
-
-
-* View full resolution images, or play videos and GIFs ( also works on search pages )
-* Only wait on fetching once.
+* Search favorites with the the same [syntax](#search-syntax) as the normal search pages (including meta tags):
+* View full resolution images, or play videos and GIFs in a gallery (also works on search pages)
+* Autocompleted tag search
+* Remove favorites without reloading page
+* Add favorites from other users' favorites pages
+* Only wait on fetching once
   * Favorites are stored in a client database after fetching them for the first time
   * Allows for quick loading anytime later
 * Add custom or existing tags to favorites
@@ -35,20 +35,16 @@ This script is still in development, please let me know if you experience a bug,
     * Does not actually add tags to the post associated with a favorite (all changes are local)
     * Original tags of favorite cannot be altered
 * Save custom searches
-* Enlarged remove buttons that don't force page reloads
 * Shuffle search results
 * Invert search results
 * Exclude results with blacklisted tags
 * Search by post ID
 * See tooltip showing which tags were matched by the last search
-* Clickable overlay of character, copyright, and artist tags related to favorite
-* Choose full-screen image resolution
-* Autocompleted tag search
-* Look at other user's favorites with the above features (blacklisted tags are hidden automatically)
+* Click overlay of tags related to favorite to add them to the search box
+* Look at other user's favorites with the above features (blacklisted tags are automatically hidden)
 * Sort by score, width, height, rating, id, date uploaded, or date changed
 * Filter by rating: safe, questionable, explicit, or any combination of the three
-* Add favorites in gallery
-* Add favorites from other users' favorites pages
+* Add/Remove favorites while in gallery
 
 ## Recommended Specs:
 | Metric | Recommended |
@@ -85,7 +81,6 @@ This script is still in development, please let me know if you experience a bug,
 | X   | Remove favorite                | "Remove Button" option checked     |
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
-| R   | Toggle Add/Remove Favorite Buttons | On your own favorites page         |
 
 
 
@@ -96,6 +91,7 @@ This script is still in development, please let me know if you experience a bug,
 | :---| :---------------|
 | T   | Toggle tooltips |
 | D   | Toggle details  |
+| R   | Toggle Add/Remove Favorite Buttons |
 
 
 ## Search Syntax

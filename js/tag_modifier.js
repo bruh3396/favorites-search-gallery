@@ -14,6 +14,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
 
     .thumb-node.tag-modifier-selected {
       outline: 2px dashed white !important;
+
       >div {
         opacity: 1;
         filter: grayscale(0%);
@@ -24,7 +25,8 @@ const tagModifierHTML = `<div id="tag-modifier-container">
       visibility: hidden;
     }
 
-    .tag-type-custom>a, .tag-type-custom {
+    .tag-type-custom>a,
+    .tag-type-custom {
       color: hotpink;
     }
   </style>
@@ -36,13 +38,16 @@ const tagModifierHTML = `<div id="tag-modifier-container">
   <div id="tag-modifier-ui-container">
     <label id="tag-modifier-ui-status-label">No Status</label>
     <textarea id="tag-modifier-ui-textarea" placeholder="tags" spellcheck="false"></textarea>
-    <div id="tag-modifier-ui-modification-buttons">
-      <button id="tag-modifier-ui-add" title="Add tags to selected favorites">Add</button>
-      <button id="tag-modifier-remove" title="Remove tags from selected favorites">Remove</button>
-    </div>
-    <div id="tag-modifier-ui-selection-buttons">
-      <button id="tag-modifier-ui-select-all" title="Select all favorites for tag modification">Select all</button>
-      <button id="tag-modifier-ui-un-select-all" title="Unselect all favorites for tag modification">Unselect all</button>
+    <div id="tag-modifier-buttons">
+      <span id="tag-modifier-ui-modification-buttons">
+        <button id="tag-modifier-ui-add" title="Add tags to selected favorites">Add</button>
+        <button id="tag-modifier-remove" title="Remove tags from selected favorites">Remove</button>
+      </span>
+      <span id="tag-modifier-ui-selection-buttons">
+        <button id="tag-modifier-ui-select-all" title="Select all favorites for tag modification">Select all</button>
+        <button id="tag-modifier-ui-un-select-all" title="Unselect all favorites for tag modification">Unselect
+          all</button>
+      </span>
     </div>
     <div id="tag-modifier-ui-reset-button-container">
       <button id="tag-modifier-reset" title="Reset tag modifications">Reset</button>
@@ -52,7 +57,9 @@ const tagModifierHTML = `<div id="tag-modifier-container">
       <button id="tag-modifier-export" title="Export modified tags">Export</button>
     </div>
   </div>
-</div>`;
+</div>
+
+`;
 
 class TagModifier {
   /**
@@ -64,21 +71,28 @@ class TagModifier {
    */
   static objectStoreName = "additionalTags";
   /**
+   * @type {Map.<String, String>}
+   */
+  static tagModifications = new Map();
+  static preferences = {
+    modifyTagsOutsideFavoritesPage: "modifyTagsOutsideFavoritesPage"
+  };
+
+  /**
    * @type {Boolean}
    */
   static get currentlyModifyingTags() {
     return document.getElementById("tag-edit-mode") !== null;
   }
-  /**
-   * @type {Map.<String, String>}
-   */
-  static tagModifications = new Map();
 
   /**
    * @type {Boolean}
   */
   static get disabled() {
-    return !onFavoritesPage();
+    if (onFavoritesPage()) {
+      return false;
+    }
+    return getPreference(TagModifier.preferences.modifyTagsOutsideFavoritesPage, false);
   }
 
   /**
@@ -97,7 +111,7 @@ class TagModifier {
    * import: HTMLButtonElement,
    * export: HTMLButtonElement}}
    */
-  ui;
+  favoritesUI;
   /**
    * @type {ThumbNode[]}
    */
@@ -112,7 +126,7 @@ class TagModifier {
       return;
     }
     this.favoritesOption = {};
-    this.ui = {};
+    this.favoritesUI = {};
     this.selectedThumbNodes = [];
     this.atLeastOneFavoriteIsSelected = false;
     this.loadTagModifications();
@@ -121,35 +135,118 @@ class TagModifier {
   }
 
   injectHTML() {
+    this.injectFavoritesPageHTML();
+    this.injectSearchPageHTML();
+    this.injectPostPageHTML();
+  }
+
+  injectFavoritesPageHTML() {
+    if (!onFavoritesPage()) {
+      return;
+    }
     document.getElementById("left-favorites-panel-bottom-row").lastElementChild.insertAdjacentHTML("beforebegin", tagModifierHTML);
     this.favoritesOption.container = document.getElementById("tag-modifier-container");
     this.favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox");
-    this.ui.container = document.getElementById("tag-modifier-ui-container");
-    this.ui.statusLabel = document.getElementById("tag-modifier-ui-status-label");
-    this.ui.textarea = document.getElementById("tag-modifier-ui-textarea");
-    this.ui.add = document.getElementById("tag-modifier-ui-add");
-    this.ui.remove = document.getElementById("tag-modifier-remove");
-    this.ui.reset = document.getElementById("tag-modifier-reset");
-    this.ui.selectAll = document.getElementById("tag-modifier-ui-select-all");
-    this.ui.unSelectAll = document.getElementById("tag-modifier-ui-un-select-all");
-    this.ui.import = document.getElementById("tag-modifier-import");
-    this.ui.export = document.getElementById("tag-modifier-export");
+    this.favoritesUI.container = document.getElementById("tag-modifier-ui-container");
+    this.favoritesUI.statusLabel = document.getElementById("tag-modifier-ui-status-label");
+    this.favoritesUI.textarea = document.getElementById("tag-modifier-ui-textarea");
+    this.favoritesUI.add = document.getElementById("tag-modifier-ui-add");
+    this.favoritesUI.remove = document.getElementById("tag-modifier-remove");
+    this.favoritesUI.reset = document.getElementById("tag-modifier-reset");
+    this.favoritesUI.selectAll = document.getElementById("tag-modifier-ui-select-all");
+    this.favoritesUI.unSelectAll = document.getElementById("tag-modifier-ui-un-select-all");
+    this.favoritesUI.import = document.getElementById("tag-modifier-import");
+    this.favoritesUI.export = document.getElementById("tag-modifier-export");
+  }
+
+  injectSearchPageHTML() {
+    if (!onSearchPage()) {
+      return;
+    }
+    1;
+  }
+
+  injectPostPageHTML() {
+    if (!onPostPage()) {
+      return;
+    }
+    const contentContainer = document.querySelector(".flexi");
+    const originalAddToFavoritesLink = Array.from(document.querySelectorAll("a")).find(a => a.textContent === "Add to favorites");
+
+    const html = `
+      <div style="margin-bottom: 1em;">
+        <h4 class="image-sublinks">
+        <a href="#" id="add-to-favorites">Add to favorites</a>
+        |
+        <a href="#" id="add-custom-tags">Add custom tag</a>
+        <select id="custom-tags-list"></select>
+        </h4>
+      </div>
+    `;
+
+    if (contentContainer === null || originalAddToFavoritesLink === undefined) {
+      return;
+    }
+    contentContainer.insertAdjacentHTML("beforebegin", html);
+
+    const addToFavorites = document.getElementById("add-to-favorites");
+    const addCustomTags = document.getElementById("add-custom-tags");
+    const customTagsList = document.getElementById("custom-tags-list");
+
+    for (const customTag of CUSTOM_TAGS.values()) {
+      const option = document.createElement("option");
+
+      option.value = customTag;
+      option.textContent = customTag;
+      customTagsList.appendChild(option);
+    }
+    addToFavorites.onclick = () => {
+      originalAddToFavoritesLink.click();
+      return false;
+    };
+
+    addCustomTags.onclick = () => {
+      return false;
+    };
   }
 
   addEventListeners() {
+    this.addFavoritesPageEventListeners();
+    this.addSearchPageEventListeners();
+    this.addPostPageEventListeners();
+  }
+
+  addFavoritesPageEventListeners() {
+    if (!onFavoritesPage()) {
+      return;
+    }
     this.favoritesOption.checkbox.onchange = (event) => {
       this.toggleTagEditMode(event.target.checked);
     };
-    this.ui.selectAll.onclick = this.selectAll.bind(this);
-    this.ui.unSelectAll.onclick = this.unSelectAll.bind(this);
-    this.ui.add.onclick = this.addTagsToSelected.bind(this);
-    this.ui.remove.onclick = this.removeTagsFromSelected.bind(this);
-    this.ui.reset.onclick = this.resetTagModifications.bind(this);
-    this.ui.import.onclick = this.importTagModifications.bind(this);
-    this.ui.export.onclick = this.exportTagModifications.bind(this);
+    this.favoritesUI.selectAll.onclick = this.selectAll.bind(this);
+    this.favoritesUI.unSelectAll.onclick = this.unSelectAll.bind(this);
+    this.favoritesUI.add.onclick = this.addTagsToSelected.bind(this);
+    this.favoritesUI.remove.onclick = this.removeTagsFromSelected.bind(this);
+    this.favoritesUI.reset.onclick = this.resetTagModifications.bind(this);
+    this.favoritesUI.import.onclick = this.importTagModifications.bind(this);
+    this.favoritesUI.export.onclick = this.exportTagModifications.bind(this);
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
     });
+  }
+
+  addSearchPageEventListeners() {
+    if (!onSearchPage()) {
+      return;
+    }
+    1;
+  }
+
+  addPostPageEventListeners() {
+    if (!onPostPage()) {
+      return;
+    }
+    1;
   }
 
   /**
@@ -159,7 +256,7 @@ class TagModifier {
     this.toggleThumbInteraction(value);
     this.toggleUi(value);
     this.toggleTagEditModeEventListeners(value);
-    this.ui.unSelectAll.click();
+    this.favoritesUI.unSelectAll.click();
   }
 
   /**
@@ -205,7 +302,7 @@ class TagModifier {
    * @param {Boolean} value
    */
   toggleUi(value) {
-    this.ui.container.style.display = value ? "block" : "none";
+    this.favoritesUI.container.style.display = value ? "block" : "none";
   }
 
   /**
@@ -227,13 +324,13 @@ class TagModifier {
    * @param {String} text
    */
   showStatus(text) {
-    this.ui.statusLabel.style.visibility = "visible";
-    this.ui.statusLabel.textContent = text;
+    this.favoritesUI.statusLabel.style.visibility = "visible";
+    this.favoritesUI.statusLabel.textContent = text;
     setTimeout(() => {
-      const statusHasNotChanged = this.ui.statusLabel.textContent === text;
+      const statusHasNotChanged = this.favoritesUI.statusLabel.textContent === text;
 
       if (statusHasNotChanged) {
-        this.ui.statusLabel.style.visibility = "hidden";
+        this.favoritesUI.statusLabel.style.visibility = "hidden";
       }
     }, 1000);
   }
@@ -291,7 +388,7 @@ class TagModifier {
    * @param {Boolean} remove
    */
   modifyTagsOfSelected(remove) {
-    const tags = this.ui.textarea.value.toLowerCase();
+    const tags = this.favoritesUI.textarea.value.toLowerCase();
     const tagsWithoutContentTypes = this.removeContentTypeTags(tags);
     const tagsToModify = removeExtraWhiteSpace(tagsWithoutContentTypes);
     const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
@@ -416,7 +513,7 @@ class TagModifier {
     let modifications;
 
     try {
-      const object = JSON.parse(this.ui.textarea.value);
+      const object = JSON.parse(this.favoritesUI.textarea.value);
 
       if (!(typeof object === "object")) {
         throw new TypeError(`Input parsed as ${typeof (object)}, but expected object`);

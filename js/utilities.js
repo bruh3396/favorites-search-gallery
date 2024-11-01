@@ -469,7 +469,9 @@ function getThumbURL(originalImageURL) {
  */
 function getTagsFromThumb(thumb) {
   if (onSearchPage()) {
-    return ThumbNode.getTagSetFromTags(getImageFromThumb(thumb).title);
+    const image = getImageFromThumb(thumb);
+    const tags = image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
+    return convertToTagSet(tags);
   }
   const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
   return thumbNode === undefined ? new Set() : new Set(thumbNode.tagSet);
@@ -967,6 +969,7 @@ function initializeUtilities() {
   if (!enableOnSearchPages && onSearchPage()) {
     throw new Error("Disabled on search pages");
   }
+  removeUnusedScripts();
   injectCommonStyles();
   toggleFancyImageHovering(true);
   setTheme();
@@ -1155,7 +1158,7 @@ function correctMisspelledTags(tags) {
  */
 function extractTagGroups(searchQuery) {
   searchQuery = searchQuery.toLowerCase();
-  const orRegex = /(?:^|\s)\(\s((?:\S+)(?:(?:\s~\s)\S+)*)\s\)/g;
+  const orRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
   const orGroups = Array.from(removeExtraWhiteSpace(searchQuery)
     .matchAll(orRegex))
     .map((orGroup) => orGroup[1].split(" ~ "));
@@ -1405,6 +1408,51 @@ function difference(a, b) {
     c.delete(element);
   }
   return c;
+}
+
+function removeUnusedScripts() {
+  if (!onFavoritesPage()) {
+    return;
+  }
+  const scripts = Array.from(document.querySelectorAll("script"));
+
+  for (const script of scripts) {
+    if ((/(?:fluidplayer|awesomplete)/).test(script.src || "")) {
+      script.remove();
+    }
+  }
+}
+
+/**
+ * @param {String} tagString
+ * @returns {Set.<String>}
+ */
+function convertToTagSet(tagString) {
+  tagString = removeExtraWhiteSpace(tagString);
+
+  if (tagString === "") {
+    return new Set();
+  }
+  return new Set(tagString.split(" ").sort());
+}
+
+/**
+ * @param {Set.<String>} tagSet
+ * @returns {String}
+ */
+function convertToTagString(tagSet) {
+  if (tagSet.size === 0) {
+    return "";
+  }
+  return Array.from(tagSet).join(" ");
+}
+
+/**
+ * @returns {String | null}
+ */
+function getPostPageId() {
+  const match = (/id=(\d+)/).exec(window.location.href);
+  return match === null ? null : match[1];
 }
 
 initializeUtilities();

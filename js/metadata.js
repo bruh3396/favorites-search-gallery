@@ -175,6 +175,13 @@ class FavoriteMetadata {
   }
 
   /**
+   * @param {Number} score
+   */
+  presetScore(score) {
+    this.score = score;
+  }
+
+  /**
    * @param {Object.<String, String>} record
    */
   populateMetadata(record) {
