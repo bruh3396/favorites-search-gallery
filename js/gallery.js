@@ -171,7 +171,9 @@ class Gallery {
     backgroundOpacity: "galleryBackgroundOpacity",
     resolution: "galleryResolution",
     enlargeOnClick: "enlargeOnClick",
-    autoplay: "autoplay",
+    autoplayEnabled: "autoplayEnabled",
+    autoplayPaused: "autoplayPaused",
+    autoplayDirection: "autoplayDirection",
     videoVolume: "videoVolume",
     videoMuted: "videoMuted"
   };
@@ -1057,23 +1059,31 @@ onmessage = (message) => {
     imageFetchDelayWhenExtensionKnown: 25,
     upscaledThumbResolutionFraction: 5,
     upscaledAnimatedThumbResolutionFraction: 5,
-    extensionsFoundBeforeSavingCount: 5,
+    extensionsFoundBeforeSavingCount: 200,
     animatedThumbsToUpscaleRange: 20,
     animatedThumbsToUpscaleDiscrete: 20,
     traversalCooldownTime: 300,
     renderOnPageChangeCooldownTime: 2000,
-    autoplayTime: 5000,
+    autoplayMenuVisibilityDuration: 500,
+    autoplayProgressUpdateInterval: 100,
+    autoplayTime: 2000,
     addFavoriteCooldownTime: 250,
     additionalVideoPlayerCount: onMobileDevice() ? 0 : 2,
     renderAroundAggressively: true,
     debugEnabled: false,
     developerMode: true
   };
-  static traversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
-  static renderOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
+  static keyHeldDownTraversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
+  static backgroundRenderingOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
   static autoplayCooldown = new Cooldown(Gallery.settings.autoplayTime);
-  static changeFavoriteCooldown = new Cooldown(Gallery.settings.addFavoriteCooldownTime, true);
-
+  static addOrRemoveFavoriteCooldown = new Cooldown(Gallery.settings.addFavoriteCooldownTime, true);
+  static autoPlayMenuVisibilityCooldown = new Cooldown(Gallery.settings.autoplayMenuVisibilityDuration);
+  static autoplayMenuIconURLs = {
+    play: createObjectURLFromSvg(ICONS.play),
+    pause: createObjectURLFromSvg(ICONS.pause),
+    changeDirection: createObjectURLFromSvg(ICONS.changeDirection),
+    tune: createObjectURLFromSvg(ICONS.tune)
+  };
   /**
    * @returns {Boolean}
    */
@@ -1081,6 +1091,10 @@ onmessage = (message) => {
     return (onMobileDevice() && onSearchPage()) || getPerformanceProfile() > 0 || onPostPage();
   }
 
+  /**
+   * @type {HTMLDivElement}
+  */
+  originalContentContainer;
   /**
    * @type {HTMLCanvasElement}
    */
@@ -1109,6 +1123,22 @@ onmessage = (message) => {
    * @type {HTMLDivElement}
    */
   background;
+  /**
+   * @type {HTMLDivElement}
+  */
+  autoplayMenu;
+  /**
+   * @type {HTMLDivElement}
+  */
+  autoplayProgress;
+  /**
+   * @type {HTMLImageElement}
+  */
+  autoplayPlayButton;
+  /**
+   * @type {HTMLImageElement}
+  */
+  autoplaySettingsButton;
   /**
    * @type {HTMLElement}
    */
@@ -1145,6 +1175,10 @@ onmessage = (message) => {
    * @type {Object.<Number, String>}
    */
   imageExtensions;
+  /**
+   * @type {String}
+  */
+  autoplayDirection;
   /**
    * @type {Number}
    */
@@ -1193,6 +1227,10 @@ onmessage = (message) => {
    * @type {Boolean}
   */
   autoplayEnabled;
+  /**
+   * @type {Boolean}
+  */
+  autoplayPaused;
 
   constructor() {
     if (Gallery.disabled) {
@@ -1223,6 +1261,7 @@ onmessage = (message) => {
     this.videoClips = new Map();
     this.visibleThumbs = [];
     this.imageExtensions = {};
+    this.autoplayDirection = getPreference(Gallery.preferences.autoplayDirection, Gallery.directions.right);
     this.recentlyDiscoveredImageExtensionCount = 0;
     this.currentlySelectedThumbIndex = 0;
     this.lastSelectedThumbIndexBeforeEnteringGallery = 0;
@@ -1234,10 +1273,13 @@ onmessage = (message) => {
     this.finishedLoading = onSearchPage();
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
-    // this.autoplayEnabled = getPreference(Gallery.preferences.autoplay, false);
-    this.autoplayEnabled = false;
-    Gallery.renderOnPageChangeCooldown.onDebounceEnd = () => {
+    this.autoplayEnabled = getPreference(Gallery.preferences.autoplayEnabled, false);
+    this.autoplayPaused = false;
+    Gallery.backgroundRenderingOnPageChangeCooldown.onDebounceEnd = () => {
       this.renderImagesInTheBackground();
+    };
+    Gallery.autoPlayMenuVisibilityCooldown.onCooldownEnd = () => {
+      this.hideAutoplayMenu();
     };
   }
 
@@ -1294,6 +1336,12 @@ onmessage = (message) => {
       passive: true
     });
     document.addEventListener("mousedown", (event) => {
+      const clickedOnAutoplayMenu = event.target.id.startsWith("autoplay-");
+
+      if (clickedOnAutoplayMenu) {
+        return;
+      }
+
       const clickedOnAnImage = event.target.tagName.toLowerCase() === "img";
       const clickedOnAThumb = clickedOnAnImage && getThumbFromImage(event.target).className.includes("thumb");
       const thumb = clickedOnAThumb ? getThumbFromImage(event.target) : null;
@@ -1487,7 +1535,7 @@ onmessage = (message) => {
       once: true
     });
     window.addEventListener("favoritesLoaded", (event) => {
-      Gallery.renderOnPageChangeCooldown.waitTime = 1000;
+      Gallery.backgroundRenderingOnPageChangeCooldown.waitTime = 1000;
       this.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
@@ -1514,7 +1562,7 @@ onmessage = (message) => {
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
 
-      if (Gallery.renderOnPageChangeCooldown.ready) {
+      if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
         setTimeout(() => {
           this.renderImagesInTheBackground();
         }, 50);
@@ -1670,6 +1718,8 @@ onmessage = (message) => {
     this.injectDebugHTML();
     this.injectOptionsHTML();
     this.injectOriginalContentContainerHTML();
+    this.injectAutoplayMenuHTML();
+
   }
 
   injectStyleHTML() {
@@ -1684,7 +1734,7 @@ onmessage = (message) => {
 
   injectOptionsHTML() {
     this.injectShowOnHoverOption();
-    // this.injectAutoplayOption();
+    this.injectAutoplayOption();
   }
 
   injectShowOnHoverOption() {
@@ -1742,10 +1792,9 @@ onmessage = (message) => {
       `;
 
     document.body.insertAdjacentHTML("afterbegin", originalContentContainerHTML);
-    const originalContentContainer = document.getElementById("original-content-container");
-
-    originalContentContainer.insertBefore(this.lowResolutionCanvas, originalContentContainer.firstChild);
-    originalContentContainer.insertBefore(this.mainCanvas, originalContentContainer.firstChild);
+    this.originalContentContainer = document.getElementById("original-content-container");
+    this.originalContentContainer.insertBefore(this.lowResolutionCanvas, this.originalContentContainer.firstChild);
+    this.originalContentContainer.insertBefore(this.mainCanvas, this.originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");
     this.videoContainer = document.getElementById("original-video-container");
     this.addAdditionalVideoPlayers();
@@ -1759,6 +1808,111 @@ onmessage = (message) => {
     this.lowResolutionCanvas.width = this.mainCanvas.width;
     this.lowResolutionCanvas.height = this.mainCanvas.height;
     this.toggleOriginalContentVisibility(false);
+  }
+
+  injectAutoplayMenuHTML() {
+    const html = `
+<div id="autoplay-menu-container" style="visibility: hidden;">
+  <style>
+    #autoplay-menu {
+      position: fixed;
+      left: 50%;
+      transform: translate(-50%);
+      top: 2%;
+      padding: 0;
+      margin: 0;
+      background: rgba(40, 40, 40, 1);
+      border-radius: 3px;
+      white-space: nowrap;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity .25s ease-in-out;
+
+      &.visible {
+        opacity: 1;
+      }
+
+      &.persistent {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      >div>img {
+        position: relative;
+        height: 75px;
+        cursor: pointer;
+        background-color: rgba(128, 128, 128, 0);
+        margin: 5px;
+        background-size: 10%;
+        z-index: 2;
+
+        &:hover {
+          background-color: rgba(200, 200, 200, .5);
+          ;
+          border-radius: 4px;
+        }
+
+        &.flipped {
+          transform: scale(-1, 1);;
+        }
+      }
+    }
+
+    #autoplay-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background-color: #0075FF;
+      z-index: 1;
+
+      &.animated {
+        transition: width 2s linear;
+      }
+    }
+  </style>
+  <div id="autoplay-menu">
+    <div>
+      <img id="autoplay-play-button" title="Pause">
+      <img id="autoplay-settings-button" title="Settings">
+      <img id="autoplay-change-direction-button" title="Change direction" class="flipped">
+    </div>
+    <div id="autoplay-progress" class="animated"></div>
+  </div>
+</div>
+    `;
+
+    document.body.insertAdjacentHTML("afterbegin", html);
+    this.autoplayMenu = document.getElementById("autoplay-menu");
+    this.autoplayProgress = document.getElementById("autoplay-progress");
+    this.autoplayPlayButton = document.getElementById("autoplay-play-button");
+    this.autoplaySettingsButton = document.getElementById("autoplay-settings-button");
+    this.autoplayPlayButton.src = Gallery.autoplayMenuIconURLs.pause;
+    this.autoplaySettingsButton.src = Gallery.autoplayMenuIconURLs.tune;
+
+    const autoplayDirectionButton = document.getElementById("autoplay-change-direction-button");
+
+    autoplayDirectionButton.src = Gallery.autoplayMenuIconURLs.changeDirection;
+    autoplayDirectionButton.onclick = () => {
+      if (this.autoplayDirection === Gallery.directions.right) {
+        this.autoplayDirection = Gallery.directions.left;
+      } else {
+        this.autoplayDirection = Gallery.directions.right;
+      }
+      autoplayDirectionButton.classList.toggle("flipped", this.autoplayDirection === Gallery.directions.right);
+      setPreference(Gallery.preferences.autoplayDirection, this.autoplayDirection);
+    };
+
+    this.autoplayPlayButton.onclick = () => {
+      this.pauseAutoplay();
+    };
+    this.autoplayMenu.onmouseenter = () => {
+      this.autoplayMenu.classList.toggle("persistent", true);
+    };
+    this.autoplayMenu.onmouseleave = () => {
+      this.autoplayMenu.classList.toggle("persistent", false);
+    };
   }
 
   addAdditionalVideoPlayers() {
@@ -1802,7 +1956,7 @@ onmessage = (message) => {
         passive: true
       });
       video.addEventListener("ended", () => {
-        this.doAutoplay();
+        this.onAutoplayCooldownComplete();
       }, {
         passive: true
       });
@@ -2188,7 +2342,7 @@ onmessage = (message) => {
       return;
     }
 
-    if (!Gallery.changeFavoriteCooldown.ready) {
+    if (!Gallery.addOrRemoveFavoriteCooldown.ready) {
       return;
     }
 
@@ -2252,19 +2406,13 @@ onmessage = (message) => {
       this.getSelectedThumb().classList.remove("debug-selected");
     }
 
-    if (keyIsHeldDown && !Gallery.traversalCooldown.ready) {
+    if (keyIsHeldDown && !Gallery.keyHeldDownTraversalCooldown.ready) {
       return;
     }
     this.setNextSelectedThumbIndex(direction);
     const selectedThumb = this.getSelectedThumb();
 
-    // if (this.autoplayEnabled) {
-    //   if (isVideo(selectedThumb)) {
-    //     Gallery.autoplayCooldown.stop();
-    //   } else {
-    //     Gallery.autoplayCooldown.restart();
-    //   }
-    // }
+    this.startAutoplayCooldown(selectedThumb);
     this.clearOriginalContentSources();
     this.stopAllVideos();
 
@@ -3131,14 +3279,41 @@ onmessage = (message) => {
    * @param {Boolean} value
    */
   toggleAutoplay(value) {
-    // setPreference(Gallery.preferences.autoplay, value);
-    // this.autoplayEnabled = value;
+    setPreference(Gallery.preferences.autoplayEnabled, value);
+    this.autoplayEnabled = value;
+    this.toggleVideoLooping(!value);
+  }
 
-    // if (value) {
-    //   this.videoContainer.removeAttribute("loop");
-    // } else {
-    //   this.videoContainer.setAttribute("loop", "");
-    // }
+  /**
+   * @param {Boolean} value
+   */
+  toggleVideoLooping(value) {
+    for (const video of this.videoPlayers) {
+      video.toggleAttribute("loop", value);
+    }
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  pauseAutoplay(value) {
+    if (value === undefined) {
+      value = !this.autoplayPaused;
+    }
+    this.autoplayPaused = value;
+
+    if (this.autoplayPaused) {
+      this.autoplayPlayButton.src = Gallery.autoplayMenuIconURLs.play;
+      this.autoplayPlayButton.title = "Resume";
+      this.toggleVideoLooping(true);
+      this.stopAutoplayProgress();
+    } else {
+      this.autoplayPlayButton.src = Gallery.autoplayMenuIconURLs.pause;
+      this.autoplayPlayButton.title = "Pause";
+      this.toggleVideoLooping(false);
+      this.startAutoplayCooldown(this.getSelectedThumb());
+    }
+
   }
 
   /**
@@ -3149,24 +3324,78 @@ onmessage = (message) => {
       return;
     }
     Gallery.autoplayCooldown.onCooldownEnd = () => {
-      this.doAutoplay();
+      this.onAutoplayCooldownComplete();
     };
 
     if (isImage(selectedThumb)) {
       Gallery.autoplayCooldown.start();
     }
+    this.autoplayMenu.parentElement.style.visibility = "visible";
+    this.originalContentContainer.onmousemove = () => {
+      this.showAutoplayMenu();
+      Gallery.autoPlayMenuVisibilityCooldown.restart();
+    };
   }
 
   stopAutoplay() {
     Gallery.autoplayCooldown.onCooldownEnd = () => { };
     Gallery.autoplayCooldown.stop();
+    this.autoplayMenu.parentElement.style.visibility = "hidden";
+    this.originalContentContainer.onmousemove = null;
+    this.hideAutoplayMenu();
+    this.stopAutoplayProgress();
   }
 
-  doAutoplay() {
-    if (!this.autoplayEnabled || !this.inGallery) {
+  startAutoplayCooldown(selectedThumb) {
+    if (!this.autoplayEnabled) {
       return;
     }
-    this.traverseGallery(Gallery.directions.right, false);
+
+    if (isVideo(selectedThumb)) {
+      Gallery.autoplayCooldown.stop();
+      return;
+
+    }
+
+    if (!this.autoplayPaused) {
+      this.startAutoplayProgress();
+    }
+    Gallery.autoplayCooldown.restart();
+
+  }
+
+  onAutoplayCooldownComplete() {
+    if (!this.autoplayEnabled || !this.inGallery || this.autoplayPaused) {
+      return;
+    }
+    this.traverseGallery(this.autoplayDirection, false);
+  }
+
+  showAutoplayMenu() {
+    this.autoplayMenu.classList.toggle("visible", true);
+  }
+
+  hideAutoplayMenu() {
+    this.autoplayMenu.classList.toggle("visible", false);
+  }
+
+  /**
+   * @param {Number} percentage
+   */
+  setAutoplayProgress(percentage) {
+    this.autoplayProgress.style.width = `${percentage}%`;
+  }
+
+  stopAutoplayProgress() {
+    this.autoplayProgress.classList.remove("animated");
+    this.setAutoplayProgress(0);
+  }
+
+  async startAutoplayProgress() {
+    this.stopAutoplayProgress();
+    await sleep(10);
+    this.autoplayProgress.classList.add("animated");
+    this.setAutoplayProgress(100);
   }
 
   loadVideoClips() {
@@ -3176,7 +3405,7 @@ onmessage = (message) => {
    * @param {KeyboardEvent} event
    */
   async addFavoriteInGallery(event) {
-    if (!this.inGallery || event.repeat || !Gallery.changeFavoriteCooldown.ready) {
+    if (!this.inGallery || event.repeat || !Gallery.addOrRemoveFavoriteCooldown.ready) {
       return;
     }
     const selectedThumb = this.getSelectedThumb();

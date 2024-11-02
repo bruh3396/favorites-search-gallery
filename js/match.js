@@ -25,10 +25,9 @@ class SearchTag {
 
   /**
    * @param {String} searchTag
-   * @param {Boolean} inOrGroup
    */
-  constructor(searchTag, inOrGroup) {
-    this.negated = inOrGroup ? false : searchTag.startsWith("-");
+  constructor(searchTag) {
+    this.negated = searchTag.startsWith("-");
     this.value = this.negated ? searchTag.substring(1) : searchTag;
   }
 
@@ -70,10 +69,9 @@ class WildcardSearchTag extends SearchTag {
 
   /**
    * @param {String} searchTag
-   * @param {Boolean} inOrGroup
    */
-  constructor(searchTag, inOrGroup) {
-    super(searchTag, inOrGroup);
+  constructor(searchTag) {
+    super(searchTag);
     this.regex = this.createWildcardRegex();
     this.equivalentToStartsWith = WildcardSearchTag.startsWithRegex.test(searchTag);
     this.startsWithPrefix = this.value.slice(0, -1);
@@ -151,8 +149,8 @@ class MetadataSearchTag extends SearchTag {
    * @param {String} searchTag
    * @param {Boolean} inOrGroup
    */
-  constructor(searchTag, inOrGroup) {
-    super(searchTag, inOrGroup);
+  constructor(searchTag) {
+    super(searchTag);
     this.expression = this.createExpression(searchTag);
   }
 
@@ -190,18 +188,17 @@ class MetadataSearchTag extends SearchTag {
 class SearchCommand {
   /**
    * @param {String} tag
-   * @param {Boolean} inOrGroup
    * @returns {SearchTag}
    */
-  static createSearchTag(tag, inOrGroup) {
+  static createSearchTag(tag) {
     if (MetadataSearchTag.regex.test(tag)) {
-      return new MetadataSearchTag(tag, inOrGroup);
+      return new MetadataSearchTag(tag);
     }
 
     if (tag.includes("*")) {
-      return new WildcardSearchTag(tag, inOrGroup);
+      return new WildcardSearchTag(tag);
     }
-    return new SearchTag(tag, inOrGroup);
+    return new SearchTag(tag);
   }
 
   /**
@@ -209,7 +206,7 @@ class SearchCommand {
    * @param {Boolean} isOrGroup
    * @returns {SearchTag[]}
    */
-  static createSearchTagGroup(tags, isOrGroup) {
+  static createSearchTagGroup(tags) {
     const uniqueTags = new Set();
     const searchTags = [];
 
@@ -218,7 +215,7 @@ class SearchCommand {
         continue;
       }
       uniqueTags.add(tag);
-      searchTags.push(SearchCommand.createSearchTag(tag, isOrGroup));
+      searchTags.push(SearchCommand.createSearchTag(tag));
     }
     return searchTags;
   }
@@ -256,8 +253,8 @@ class SearchCommand {
     }
     const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
 
-    this.orGroups = orGroups.map(orGroup => SearchCommand.createSearchTagGroup(orGroup, true));
-    this.remainingSearchTags = SearchCommand.createSearchTagGroup(remainingSearchTags, false);
+    this.orGroups = orGroups.map(orGroup => SearchCommand.createSearchTagGroup(orGroup));
+    this.remainingSearchTags = SearchCommand.createSearchTagGroup(remainingSearchTags);
     this.optimizeSearchCommand();
   }
 
