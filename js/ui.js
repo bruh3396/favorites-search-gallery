@@ -1,4 +1,4 @@
-const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
+const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-highlightable">
   <style>
     #favorites-top-bar {
       position: sticky;
@@ -6,13 +6,13 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       padding: 10px;
       z-index: 30;
       margin-bottom: 10px;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
 
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 0;
+      }
     }
 
     #favorites-top-bar-panels {
@@ -228,38 +228,20 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       }
     }
 
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-      appearance: none;
-      width: 15px;
-    }
-
     #column-resize-container {
       >div {
         align-content: center;
-
-        >button {
-          width: 30px;
-          height: 30px;
-          padding: 0;
-          margin: 0;
-        }
       }
     }
 
     #column-resize-input {
-      margin: 0;
+      margin: auto;
+      /* margin: 0;
       position: relative;
       bottom: 9px;
       width: 30px;
       height: 25px;
-      font-size: larger;
+      font-size: larger; */
     }
 
     #find-favorite {
@@ -398,15 +380,28 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       select {
         cursor: pointer;
       }
+
+      .number {
+        font-size: 16px;
+
+        >input {
+          width: 5ch;
+        }
+      }
+
+      .number-label-container {
+        display: inline-block;
+        min-width: 130px;
+      }
     }
 
     #performance-profile {
       width: 150px;
     }
 
-    #results-per-page-input {
+    /* #results-per-page-input {
       width: 140px;
-    }
+    } */
 
     #show-ui-div {
       &.ui-hidden {
@@ -425,12 +420,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       font-size: 12px;
 
       >label {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
         outline: 1px solid;
         padding: 3px;
         cursor: pointer;
@@ -514,7 +503,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
           |
           <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
             <div id="whats-new-container" class="light-green-gradient">
-              <h4>1.14:</h4>
+              <h4>Older:</h4>
               <h5>Features:</h5>
               <ul>
                 <li>Search with meta tags: score, width, height, id</li>
@@ -524,15 +513,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   <li>height:&gt;width</li>
                   <li>( width:height ~ height:1920 ) id:&lt;999 </li>
                 </ul>
-                <li>Notes:</li>
-                <ul>
-                  <li> "12345" and "id:12345" are equivalent</li>
-                  <li>Wildcard "*" does not work with meta tags</li>
-                </ul>
-              </ul>
-              <h4>1.13:</h4>
-              <h5>Features:</h5>
-              <ul>
                 <li>Wildcard search now works anywhere in tag</li>
                 <li>Examples:</li>
                 <ul>
@@ -541,21 +521,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
                   <li>*ine*pple</li>
                 </ul>
                 <li>Blacklisted images removed from search pages</li>
-              </ul>
-              <h5>Performance:</h5>
-              <ul>
-                <li>Improved search speed</li>
-                <li>Fixed mobile gallery orientation</li>
-              </ul>
-              <h4>1.11:</h4>
-              <h5>Features:</h5>
-              <ul>
                 <li>Sort by score, upload date, etc.</li>
                 <li>"Add favorite" buttons on other users' favorites pages</li>
                 <li>Filter by rating</li>
               </ul>
-
-
               <h5>Gallery Hotkeys:</h5>
               <ul>
                 <li><span class="hotkey">F</span> -- Add favorite</li>
@@ -603,14 +572,14 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
       <div id="left-favorites-panel-bottom-row">
         <div id="favorite-options-container">
           <div id="show-options"><label class="checkbox" title="Show more options"><input type="checkbox"
-                id="options-checkbox"> More Options</label></div>
+                id="options-checkbox"> More Options <span class="option-hint"> (O)</span></label></div>
           <div id="favorite-options">
             <div><label class="checkbox" title="Enable gallery and other features on search pages"><input
                   type="checkbox" id="enable-on-search-pages">
                 Enhance Search Pages</label></div>
             <div style="display: none;"><label class="checkbox" title="Toggle remove buttons"><input type="checkbox"
                   id="show-remove-favorite-buttons">
-                Remove Buttons</label></div>
+                Remove Buttons <span class="option-hint"> (R)</span></label></div>
             <div style="display: none;"><label class="checkbox" title="Toggle add favorite buttons"><input
                   type="checkbox" id="show-add-favorite-buttons">
                 Add Favorite Buttons</label></div>
@@ -641,7 +610,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             <div id="rating-container" title="Filter search results by rating">
               <label>Rating</label>
               <br>
-              <div id="allowed-ratings">
+              <div id="allowed-ratings" class="not-highlightable">
                 <input type="checkbox" id="explicit-rating-checkbox" checked>
                 <label for="explicit-rating-checkbox">Explicit</label>
                 <input type="checkbox" id="questionable-rating-checkbox" checked>
@@ -661,34 +630,33 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient">
             </div>
             <div id="results-per-page-container"
               title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
-              <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
+              <span class="number-label-container">
+                <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
+              </span>
               <br>
-              <input type="number" id="results-per-page-input" min="50" max="10000" step="500">
+              <span class="number">
+                <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+                <input type="number" id="results-per-page-input" min="100" max="10000" step="50">
+                <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+              </span>
             </div>
             <div id="column-resize-container" title="Set the number of favorites per row">
               <div>
-                <label>Columns</label>
+                <span class="number-label-container">
+                  <label>Columns</label>
+                </span>
                 <br>
-                <button id="column-resize-minus">
-                  <svg xmlns="http://www.w3.org/2000/svg" id="Isolation_Mode" data-name="Isolation Mode"
-                    viewBox="0 0 24 24">
-                    <rect x="6" y="10.5" width="12" height="3" />
-                  </svg>
-                </button>
-                <input type="number" id="column-resize-input" min="2" max="20">
-                <button id="column-resize-plus">
-                  <svg xmlns="http://www.w3.org/2000/svg" id="Isolation_Mode" data-name="Isolation Mode"
-                    viewBox="0 0 24 24">
-                    <polygon
-                      points="18 10.5 13.5 10.5 13.5 6 10.5 6 10.5 10.5 6 10.5 6 13.5 10.5 13.5 10.5 18 13.5 18 13.5 13.5 18 13.5 18 10.5" />
-                  </svg>
-                </button>
+                <span class="number">
+                  <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+                  <input type="number" id="column-resize-input" min="2" max="20">
+                  <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+                </span>
               </div>
             </div>
           </div>
         </div>
         <div id="show-ui-container">
-          <div id="show-ui-div"><label class="checkbox" title="Toggle UI"><input type="checkbox" id="show-ui">UI</label>
+          <div id="show-ui-div"><label class="checkbox" title="Toggle UI"><input type="checkbox" id="show-ui">UI<span class="option-hint"> (U)</span></label>
           </div>
         </div>
       </div>
@@ -719,7 +687,8 @@ const FAVORITE_PREFERENCES = {
   enableOnSearchPages: "enableOnSearchPages",
   sortAscending: "sortAscending",
   sortingMethod: "sortingMethod",
-  allowedRatings: "allowedRatings"
+  allowedRatings: "allowedRatings",
+  optionHints: "optionHints"
 };
 const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -730,9 +699,7 @@ const FAVORITE_BUTTONS = {
   clear: document.getElementById("clear-button"),
   invert: document.getElementById("invert-button"),
   reset: document.getElementById("reset-button"),
-  findFavorite: document.getElementById("find-favorite-button"),
-  columnPlus: document.getElementById("column-resize-plus"),
-  columnMinus: document.getElementById("column-resize-minus")
+  findFavorite: document.getElementById("find-favorite-button")
 };
 const FAVORITE_CHECKBOXES = {
   showOptions: document.getElementById("options-checkbox"),
@@ -754,9 +721,6 @@ const FAVORITE_INPUTS = {
   resultsPerPage: document.getElementById("results-per-page-input"),
   sortingMethod: document.getElementById("sorting-method"),
   allowedRatings: document.getElementById("allowed-ratings")
-};
-const FAVORITE_SEARCH_LABELS = {
-  findFavorite: document.getElementById("find-favorite-label")
 };
 const columnWheelResizeCaptionCooldown = new Cooldown(500, true);
 
@@ -821,7 +785,7 @@ function loadFavoritesPagePreferences() {
 
   const resultsPerPage = parseInt(getPreference(FAVORITE_PREFERENCES.resultsPerPage, DEFAULTS.resultsPerPage));
 
-  changeResultsPerPage(resultsPerPage, false);
+  changeResultsPerPage(resultsPerPage);
 
   if (onMobileDevice()) {
     toggleFancyImageHovering(false);
@@ -850,6 +814,10 @@ function loadFavoritesPagePreferences() {
   FAVORITE_CHECKBOXES.questionableRating.checked = (allowedRatings & 2) === 2;
   FAVORITE_CHECKBOXES.safeRating.checked = (allowedRatings & 1) === 1;
   preventUserFromUncheckingAllRatings(allowedRatings);
+
+  const optionHintsEnabled = getPreference(FAVORITE_PREFERENCES.optionHints, false);
+
+  toggleOptionHints(optionHintsEnabled);
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -957,12 +925,6 @@ function addEventListenersToFavoritesPage() {
     scrollToThumb(FAVORITE_INPUTS.findFavorite.value);
     setPreference(FAVORITE_PREFERENCES.findFavorite, FAVORITE_INPUTS.findFavorite.value);
   };
-  FAVORITE_BUTTONS.columnPlus.onclick = () => {
-    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) + 1);
-  };
-  FAVORITE_BUTTONS.columnMinus.onclick = () => {
-    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) - 1);
-  };
   FAVORITE_INPUTS.columnCount.onchange = () => {
     changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value));
   };
@@ -977,7 +939,7 @@ function addEventListenersToFavoritesPage() {
   };
 
   FAVORITE_INPUTS.resultsPerPage.onchange = () => {
-    changeResultsPerPage(parseInt(FAVORITE_INPUTS.resultsPerPage.value));
+    changeResultsPerPage(parseInt(FAVORITE_INPUTS.resultsPerPage.value), false);
   };
 
   if (!onMobileDevice()) {
@@ -1035,10 +997,36 @@ function addEventListenersToFavoritesPage() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() !== "r" || event.repeat || isTypeableInput(event.target)) {
+    if (event.repeat || isTypeableInput(event.target)) {
       return;
     }
-    FAVORITE_CHECKBOXES.showAuxillaryButtons.click();
+
+    switch (event.key.toLowerCase()) {
+      case "r":
+        FAVORITE_CHECKBOXES.showAuxillaryButtons.click();
+        break;
+
+      case "u":
+        FAVORITE_CHECKBOXES.showUI.click();
+        break;
+
+      case "o":
+        FAVORITE_CHECKBOXES.showOptions.click();
+        break;
+
+      case "s":
+        // if (!FAVORITE_CHECKBOXES.showUI.checked) {
+        //   FAVORITE_CHECKBOXES.showUI.click();
+        // }
+        // setTimeout(() => {
+        //   FAVORITE_INPUTS.searchBox.focus();
+        //   FAVORITE_INPUTS.searchBox.select();
+        // }, 100);
+        break;
+
+      default:
+        break;
+    }
   }, {
     passive: true
   });
@@ -1156,9 +1144,8 @@ function changeColumnCount(count) {
 
 /**
  * @param {Number} resultsPerPage
- * @param {Boolean} search
  */
-function changeResultsPerPage(resultsPerPage, search = true) {
+function changeResultsPerPage(resultsPerPage) {
   resultsPerPage = parseInt(resultsPerPage);
 
   if (isNaN(resultsPerPage)) {
@@ -1168,10 +1155,7 @@ function changeResultsPerPage(resultsPerPage, search = true) {
   resultsPerPage = clamp(resultsPerPage, 50, 5000);
   FAVORITE_INPUTS.resultsPerPage.value = resultsPerPage;
   setPreference(FAVORITE_PREFERENCES.resultsPerPage, resultsPerPage);
-
-  if (search) {
-    favoritesLoader.updateMaxNumberOfFavoritesToDisplay(resultsPerPage);
-  }
+  favoritesLoader.updateMaxNumberOfFavoritesToDisplay(resultsPerPage);
 }
 
 /**
@@ -1387,68 +1371,13 @@ function setMainButtonInteractability(value) {
   }
 }
 
-async function findSomeoneWithMoreThanXFavorites(X) {
-  const alreadyCheckedUserIds = {
-    "2": null
-  };
-  const commentsAPIURL = "https://api.rule34.xxx/index.php?page=dapi&s=comment&q=index&post_id=";
+/**
+ * @param {Boolean} value
+ */
+function toggleOptionHints(value) {
+  const html = value ? "" : ".option-hint {display:none;}";
 
-  for (const thumb of getAllThumbs()) {
-    const user = await fetch(commentsAPIURL + thumb.id)
-      .then((response) => {
-        return response.text();
-      })
-      .then(async(html) => {
-        let userWithMostFavorites = 2;
-        let mostFavoritesSeen = -1;
-        const dom1 = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
-        const userIds = Array.from(dom1.getElementsByTagName("comment")).map(comment => comment.getAttribute("creator_id"));
-
-        for (const userId of userIds) {
-          if (alreadyCheckedUserIds[userId] !== undefined) {
-            break;
-          }
-          alreadyCheckedUserIds[userId] = null;
-          const favoritesCount = await fetch(`https://rule34.xxx/index.php?page=account&s=profile&id=${userId}`)
-            .then((response) => {
-              return response.text();
-            })
-            .then((responseHTML) => {
-              const dom2 = new DOMParser().parseFromString(`<div>${responseHTML}</div>`, "text/html");
-              const tableElement = dom2.querySelector("table");
-
-              if (tableElement) {
-                const rows = tableElement.querySelectorAll("tr");
-                const targetItem = "Favorites";
-
-                for (const row of rows) {
-                  const cells = row.querySelectorAll("td");
-
-                  if (cells.length >= 2 && cells[0].textContent.trim() === targetItem) {
-                    return parseInt(cells[1].textContent.trim());
-                  }
-                }
-              }
-              return 0;
-            });
-
-          if (favoritesCount > mostFavoritesSeen) {
-            mostFavoritesSeen = favoritesCount;
-            userWithMostFavorites = userId;
-          }
-        }
-        return {
-          id: userWithMostFavorites,
-          count: mostFavoritesSeen
-        };
-      });
-
-    if (user.count > X) {
-      alert(`https://rule34.xxx/index.php?page=account&s=profile&id=${user.id}`);
-      return;
-    }
-  }
-  console.error(`Could not find user with more than ${X} favorites`);
+  injectStyleHTML(html, "option-hint-visibility");
 }
 
 if (onFavoritesPage()) {

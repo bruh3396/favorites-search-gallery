@@ -1,5 +1,4 @@
 /* eslint-disable no-bitwise */
-/* eslint-disable max-classes-per-file */
 class FavoritesPageRequest {
   /**
    * @type {Number}
@@ -57,7 +56,7 @@ class FavoritesLoader {
   static objectStoreName = `user${getFavoritesPageId()}`;
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -827,7 +826,7 @@ onmessage = (message) => {
    */
   async fetchNewFavoritesPage(pageNumber) {
     this.fetchFavorites(new FavoritesPageRequest(pageNumber));
-    await sleep(185);
+    await sleep(250);
   }
 
   /**
@@ -969,9 +968,7 @@ onmessage = (message) => {
     dispatchEvent(new Event("readyToSearch"));
     FavoritesLoader.currentLoadingState = FavoritesLoader.loadingStates.allFavoritesLoaded;
     this.toggleLoadingUI(false);
-    dispatchEvent(new CustomEvent("favoritesLoaded", {
-      detail: this.allThumbNodes.map(thumbNode => thumbNode.root)
-    }));
+    dispatchEvent(new Event("favoritesLoaded"));
   }
 
   /**
@@ -1163,7 +1160,7 @@ Tag modifications and saved searches will be preserved.
 
     for (const thumbNode of newThumbNodes) {
       if (this.matchesSearchAndRating(searchCommand, thumbNode)) {
-        thumbNode.insertInDocument(content, "afterbegin");
+        thumbNode.insertAtBeginningOfContent(content);
         insertedThumbNodes.push(thumbNode);
       }
     }
@@ -1213,7 +1210,7 @@ Tag modifications and saved searches will be preserved.
     const content = document.getElementById("content");
 
     for (const thumbNode of thumbNodes) {
-      content.appendChild(thumbNode.root);
+      thumbNode.insertAtEndOfContent(content);
     }
   }
 
@@ -1499,7 +1496,7 @@ Tag modifications and saved searches will be preserved.
     const newContent = document.createDocumentFragment();
 
     for (const thumbNode of newThumbNodes) {
-      newContent.appendChild(thumbNode.root);
+      thumbNode.insertAtEndOfContent(newContent);
     }
     content.innerHTML = "";
     content.appendChild(newContent);
@@ -1594,8 +1591,6 @@ Tag modifications and saved searches will be preserved.
   updateMaxNumberOfFavoritesToDisplay(value) {
     this.maxNumberOfFavoritesToDisplay = value;
     this.recentlyChangedMaxNumberOfFavoritesToDisplay = true;
-    this.searchFavorites();
-    this.recentlyChangedMaxNumberOfFavoritesToDisplay = false;
   }
 
   /**

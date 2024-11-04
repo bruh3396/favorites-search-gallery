@@ -1,4 +1,141 @@
-/* eslint-disable max-classes-per-file */
+const utilitiesHTML = `<style>
+  .light-green-gradient {
+    background: linear-gradient(to bottom, #aae5a4, #89e180);
+    color: black;
+  }
+
+  .dark-green-gradient {
+    background: linear-gradient(to bottom, #5e715e, #293129);
+    color: white;
+  }
+
+  img {
+    border: none !important;
+  }
+
+  .not-highlightable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  input[type=number] {
+    border: 1px solid #767676;
+    border-radius: 2px;
+  }
+
+  .size-calculation-div {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    transition: none !important;
+    transform: scale(1.1, 1.1);
+  }
+
+  .number {
+    display: inline-block;
+    margin-top: 5px;
+    border: 1px solid white;
+    padding: 0px 10px;
+    border-radius: 20px;
+    background-color: white;
+
+    >hold-button,
+    button {
+      position: relative;
+      top: 0;
+      left: 0;
+      font-size: inherit;
+      outline: none;
+      background: none;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      margin: 0;
+
+      &:hover {
+        >span {
+          color: #0075FF;
+        }
+      }
+
+      >span {
+        font-weight: bold;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        position: relative;
+        pointer-events: none;
+        border: none;
+        outline: none;
+        top: 0;
+        font-size: 1.2em !important;
+      }
+
+      &.number-arrow-up {
+        >span {
+          transition: left .1s ease;
+          left: 0;
+        }
+
+        &:hover>span {
+          left: 3px;
+        }
+      }
+
+      &.number-arrow-down {
+        >span {
+          transition: right .1s ease;
+          right: 0;
+        }
+
+        &:hover>span {
+          right: 3px;
+        }
+      }
+    }
+
+    >input[type="number"] {
+      font-size: inherit;
+      text-align: center;
+      color: #0075FF;
+      width: 2ch;
+      padding: 0;
+      margin: 0;
+      font-weight: bold;
+      padding: 3px;
+      background: none;
+      /* outline: none; */
+      border: none;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    >input[type="number"]::-webkit-outer-spin-button,
+    >input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+  }
+
+  .fullscreen-icon {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10010;
+    pointer-events: none;
+    width: 30vw;
+  }
+</style>`;
+
 class Cooldown {
   /**
    * @type {Number}
@@ -40,9 +177,7 @@ class Cooldown {
     }
 
     if (this.debounce) {
-      this.debouncing = true;
-      clearTimeout(this.timeout);
-      this.start();
+      this.startDebounce();
     }
     return false;
   }
@@ -59,6 +194,12 @@ class Cooldown {
     this.debouncing = false;
     this.onDebounceEnd = () => { };
     this.onCooldownEnd = () => { };
+  }
+
+  startDebounce() {
+    this.debouncing = true;
+    clearTimeout(this.timeout);
+    this.start();
   }
 
   start() {
@@ -174,8 +315,10 @@ const ICONS = {
   empty: "<button>123</button>",
   play: "<svg id=\"autoplay-play-button\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z\" /></svg>",
   pause: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z\"/></svg>",
-  changeDirection: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"m320-160-56-57 103-103H80v-80h287L264-503l56-57 200 200-200 200Zm320-240L440-600l200-200 56 57-103 103h287v80H593l103 103-56 57Z\"/></svg>",
-  tune: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z\"/></svg>"
+  changeDirection: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z\"/></svg>",
+  changeDirectionAlt: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#0075FF\"><path d=\"M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z\"/></svg>",
+  tune: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z\"/></svg>",
+  settings: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z\"/></svg>"
 };
 const DEFAULTS = {
   columnCount: 6,
@@ -468,7 +611,7 @@ function getThumbURL(originalImageURL) {
 }
 
 /**
- * @param {HTMLElement} thumb
+ * @param {HTMLElement | ThumbNode} thumb
  * @returns {Set.<String>}
  */
 function getTagsFromThumb(thumb) {
@@ -491,19 +634,16 @@ function includesTag(tag, tags) {
 }
 
 /**
- * @param {HTMLElement} thumb
+ * @param {HTMLElement | ThumbNode} thumb
  * @returns {Boolean}
  */
 function isVideo(thumb) {
-  if (thumb.classList.contains("video")) {
-    return true;
-  }
   const tags = getTagsFromThumb(thumb);
   return tags.has("video") || tags.has("mp4");
 }
 
 /**
- * @param {HTMLElement} thumb
+ * @param {HTMLElement | ThumbNode} thumb
  * @returns {Boolean}
  */
 function isGif(thumb) {
@@ -511,11 +651,22 @@ function isGif(thumb) {
     return false;
   }
   const tags = getTagsFromThumb(thumb);
-  return tags.has("gif") || tags.has("animated") || tags.has("animated_png") || getImageFromThumb(thumb).hasAttribute("gif");
+  return tags.has("gif") || tags.has("animated") || tags.has("animated_png") || hasGifAttribute(thumb);
 }
 
 /**
- * @param {HTMLElement} thumb
+ * @param {HTMLElement | ThumbNode} thumb
+ * @returns {Boolean}
+ */
+function hasGifAttribute(thumb) {
+  if (thumb instanceof ThumbNode) {
+    return false;
+  }
+  return getImageFromThumb(thumb).hasAttribute("gif");
+}
+
+/**
+ * @param {HTMLElement | ThumbNode} thumb
  * @returns {Boolean}
  */
 function isImage(thumb) {
@@ -630,9 +781,10 @@ function clearAwesompleteSelection(input) {
  * @param {Boolean} optionIsChecked
  * @param {Function} onOptionChanged
  * @param {Boolean} optionIsVisible
+ * @param {String} optionHint
  * @returns {HTMLElement | null}
  */
-function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible) {
+function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible, optionHint = "") {
   const favoritesPageOptions = document.getElementById("favorite-options");
   const checkboxId = `${optionId}-checkbox`;
 
@@ -648,7 +800,8 @@ function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChe
   favoritesPageOptions.insertAdjacentHTML("beforeend", `
     <div id="${optionId}" style="display: ${optionIsVisible}">
       <label class="checkbox" title="${optionTitle}">
-      <input id="${checkboxId}" type="checkbox" > ${optionText}</label>
+
+      <input id="${checkboxId}" type="checkbox"> ${optionText}<span class="option-hint"> ${optionHint}</span></label>
     </div>
   `);
   const newOptionsCheckbox = document.getElementById(checkboxId);
@@ -773,37 +926,7 @@ function sortObjectByValues(obj) {
 }
 
 function injectCommonStyles() {
-  injectStyleHTML(`
-    .light-green-gradient {
-        background: linear-gradient(to bottom, #aae5a4, #89e180);
-        color: black;
-    }
-
-    .dark-green-gradient {
-        background: linear-gradient(to bottom, #5e715e, #293129);
-        color: white;
-    }
-
-    img {
-      border: none !important;
-    }
-
-    input[type=number] {
-      border: 1px solid #767676;
-      border-radius: 2px;
-    }
-
-    .size-calculation-div {
-      position: absolute !important;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      visibility: hidden;
-      transition: none !important;
-      transform: scale(1.1, 1.1);
-    }
-  `, "utilities-common-styles");
+  injectStyleHTML(utilitiesHTML, "utilities-common-styles");
 
   injectStyleHTML(STYLES.thumbHoverOutline, "thumb-hover-outlines");
 
@@ -926,6 +1049,14 @@ function setTheme() {
               }
             }
           `, "pagination-style");
+        injectStyleHTML(`
+            .number {
+              background-color: #303030;
+
+              >hold-button,
+              button {
+                color: white;
+            }`);
       }
     }
   }, 10);
@@ -975,6 +1106,7 @@ function initializeUtilities() {
   }
   removeUnusedScripts();
   injectCommonStyles();
+  setupCustomWebComponents();
   toggleFancyImageHovering(true);
   setTheme();
   removeBlacklistedThumbs();
@@ -1351,7 +1483,6 @@ function showFullscreenIcon(svg, duration = 500) {
 
   svgOverlay.classList.add("fullscreen-icon");
   svgOverlay.innerHTML = new XMLSerializer().serializeToString(svgElement);
-  svgOverlay.width = "90vw";
   document.body.appendChild(svgOverlay);
   setTimeout(() => {
     svgOverlay.remove();
@@ -1471,6 +1602,27 @@ function tagsMatchWildcardSearchTag(searchTag, tags) {
   } catch {
     return false;
   }
+}
+
+function setupCustomWebComponents() {
+  setupCustomNumberWebComponents();
+}
+
+async function setupCustomNumberWebComponents() {
+  await sleep(400);
+  const numberComponents = Array.from(document.querySelectorAll(".number"));
+
+  for (const element of numberComponents) {
+    const numberComponent = new NumberComponent(element);
+  }
+}
+
+/**
+ * @param {Number} milliseconds
+ * @returns {Number}
+ */
+function millisecondsToSeconds(milliseconds) {
+  return roundToTwoDecimalPlaces(milliseconds / 1000);
 }
 
 initializeUtilities();

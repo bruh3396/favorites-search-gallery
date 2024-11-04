@@ -410,7 +410,8 @@ class Tooltip {
       this.visible, (event) => {
         this.toggleVisibility(event.target.checked);
       },
-      true
+      true,
+      "(T)"
     );
   }
 

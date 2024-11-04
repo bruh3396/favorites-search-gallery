@@ -66,7 +66,7 @@ This script is still in development, please let me know if you experience a bug,
 ### Gallery Controls
 | Input                                 | Function                                       | Condition              |
 | :-------------------------------------| :----------------------------------------------| :----------------------|
-| Arrow Keys, Scroll Wheel, WASD, Swipe | Traverse gallery                               |                        |
+| Arrow Keys, Scroll Wheel, AD, Swipe | Traverse gallery                               |                        |
 | Left Click, Touch                     | Exit gallery                                   | Content is not a video |
 | Escape                                | Exit gallery                                   |                        |
 | Right Click                           | Exit gallery, Enable "Enlarge on Hover" option |                        |
@@ -91,7 +91,9 @@ This script is still in development, please let me know if you experience a bug,
 | :---| :---------------|
 | T   | Toggle tooltips |
 | D   | Toggle details  |
-| R   | Toggle Add/Remove Favorite Buttons |
+| U   | Toggle UI |
+| O   | Toggle more options  |
+| R   | Toggle add/remove favorite buttons |
 
 
 ## Search Syntax

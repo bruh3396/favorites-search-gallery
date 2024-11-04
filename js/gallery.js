@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-escape */
 const galleryHTML = `<style>
   body {
     width: 99.5vw;
@@ -81,17 +80,20 @@ const galleryHTML = `<style>
     }
   }
 
-  .fullscreen-icon {
+  #original-content-background {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 999;
+    display: none;
     pointer-events: none;
-    width: 30%;
   }
+
 </style>
-`;
+`;/* eslint-disable no-useless-escape */
 
 const galleryDebugHTML = `
   .thumb,
@@ -171,9 +173,6 @@ class Gallery {
     backgroundOpacity: "galleryBackgroundOpacity",
     resolution: "galleryResolution",
     enlargeOnClick: "enlargeOnClick",
-    autoplayEnabled: "autoplayEnabled",
-    autoplayPaused: "autoplayPaused",
-    autoplayDirection: "autoplayDirection",
     videoVolume: "videoVolume",
     videoMuted: "videoMuted"
   };
@@ -1056,6 +1055,7 @@ onmessage = (message) => {
     megabyteLimit: onMobileDevice() ? 0 : 375,
     minImagesToRender: onMobileDevice() ? 3 : 8,
     imageFetchDelay: 250,
+    throttledImageFetchDelay: 400,
     imageFetchDelayWhenExtensionKnown: 25,
     upscaledThumbResolutionFraction: 5,
     upscaledAnimatedThumbResolutionFraction: 5,
@@ -1064,10 +1064,8 @@ onmessage = (message) => {
     animatedThumbsToUpscaleDiscrete: 20,
     traversalCooldownTime: 300,
     renderOnPageChangeCooldownTime: 2000,
-    autoplayMenuVisibilityDuration: 500,
-    autoplayProgressUpdateInterval: 100,
-    autoplayTime: 2000,
     addFavoriteCooldownTime: 250,
+    cursorVisibilityCooldownTime: 500,
     additionalVideoPlayerCount: onMobileDevice() ? 0 : 2,
     renderAroundAggressively: true,
     debugEnabled: false,
@@ -1075,15 +1073,9 @@ onmessage = (message) => {
   };
   static keyHeldDownTraversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
   static backgroundRenderingOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
-  static autoplayCooldown = new Cooldown(Gallery.settings.autoplayTime);
   static addOrRemoveFavoriteCooldown = new Cooldown(Gallery.settings.addFavoriteCooldownTime, true);
-  static autoPlayMenuVisibilityCooldown = new Cooldown(Gallery.settings.autoplayMenuVisibilityDuration);
-  static autoplayMenuIconURLs = {
-    play: createObjectURLFromSvg(ICONS.play),
-    pause: createObjectURLFromSvg(ICONS.pause),
-    changeDirection: createObjectURLFromSvg(ICONS.changeDirection),
-    tune: createObjectURLFromSvg(ICONS.tune)
-  };
+  static cursorVisibilityCooldown = new Cooldown(Gallery.settings.cursorVisibilityCooldownTime);
+
   /**
    * @returns {Boolean}
    */
@@ -1091,6 +1083,10 @@ onmessage = (message) => {
     return (onMobileDevice() && onSearchPage()) || getPerformanceProfile() > 0 || onPostPage();
   }
 
+  /**
+   * @type {Autoplay}
+  */
+  autoplayController;
   /**
    * @type {HTMLDivElement}
   */
@@ -1123,22 +1119,6 @@ onmessage = (message) => {
    * @type {HTMLDivElement}
    */
   background;
-  /**
-   * @type {HTMLDivElement}
-  */
-  autoplayMenu;
-  /**
-   * @type {HTMLDivElement}
-  */
-  autoplayProgress;
-  /**
-   * @type {HTMLImageElement}
-  */
-  autoplayPlayButton;
-  /**
-   * @type {HTMLImageElement}
-  */
-  autoplaySettingsButton;
   /**
    * @type {HTMLElement}
    */
@@ -1175,10 +1155,6 @@ onmessage = (message) => {
    * @type {Object.<Number, String>}
    */
   imageExtensions;
-  /**
-   * @type {String}
-  */
-  autoplayDirection;
   /**
    * @type {Number}
    */
@@ -1223,19 +1199,12 @@ onmessage = (message) => {
    * @type {Boolean}
    */
   enlargeOnClickOnMobile;
-  /**
-   * @type {Boolean}
-  */
-  autoplayEnabled;
-  /**
-   * @type {Boolean}
-  */
-  autoplayPaused;
 
   constructor() {
     if (Gallery.disabled) {
       return;
     }
+    this.createAutoplayController();
     this.initializeFields();
     this.setMainCanvasResolution();
     this.createWebWorkers();
@@ -1261,7 +1230,6 @@ onmessage = (message) => {
     this.videoClips = new Map();
     this.visibleThumbs = [];
     this.imageExtensions = {};
-    this.autoplayDirection = getPreference(Gallery.preferences.autoplayDirection, Gallery.directions.right);
     this.recentlyDiscoveredImageExtensionCount = 0;
     this.currentlySelectedThumbIndex = 0;
     this.lastSelectedThumbIndexBeforeEnteringGallery = 0;
@@ -1273,13 +1241,8 @@ onmessage = (message) => {
     this.finishedLoading = onSearchPage();
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
-    this.autoplayEnabled = getPreference(Gallery.preferences.autoplayEnabled, false);
-    this.autoplayPaused = false;
     Gallery.backgroundRenderingOnPageChangeCooldown.onDebounceEnd = () => {
       this.renderImagesInTheBackground();
-    };
-    Gallery.autoPlayMenuVisibilityCooldown.onCooldownEnd = () => {
-      this.hideAutoplayMenu();
     };
   }
 
@@ -1336,9 +1299,9 @@ onmessage = (message) => {
       passive: true
     });
     document.addEventListener("mousedown", (event) => {
-      const clickedOnAutoplayMenu = event.target.id.startsWith("autoplay-");
+      const autoplayMenu = document.getElementById("autoplay-menu");
 
-      if (clickedOnAutoplayMenu) {
+      if (autoplayMenu !== null && autoplayMenu.contains(event.target)) {
         return;
       }
 
@@ -1534,12 +1497,12 @@ onmessage = (message) => {
     }, {
       once: true
     });
-    window.addEventListener("favoritesLoaded", (event) => {
+    window.addEventListener("favoritesLoaded", () => {
       Gallery.backgroundRenderingOnPageChangeCooldown.waitTime = 1000;
       this.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
-      this.findImageExtensionsInTheBackground(event.detail);
+      this.findImageExtensionsInTheBackground();
 
       if (!this.favoritesWereFetched) {
         this.renderImagesInTheBackground();
@@ -1675,17 +1638,17 @@ onmessage = (message) => {
     if (onFavoritesPage()) {
       return;
     }
-    window.onblur = () => {
+    window.addEventListener("blur", () => {
       this.leftPage = true;
       this.deleteAllRenders();
       this.clearInactiveVideoSources();
-    };
-    window.onfocus = () => {
+    });
+    window.addEventListener("focus", () => {
       if (this.leftPage) {
         this.renderImagesInTheBackground();
         this.leftPage = false;
       }
-    };
+    });
   }
 
   loadDiscoveredImageExtensions() {
@@ -1718,7 +1681,6 @@ onmessage = (message) => {
     this.injectDebugHTML();
     this.injectOptionsHTML();
     this.injectOriginalContentContainerHTML();
-    this.injectAutoplayMenuHTML();
 
   }
 
@@ -1734,7 +1696,6 @@ onmessage = (message) => {
 
   injectOptionsHTML() {
     this.injectShowOnHoverOption();
-    this.injectAutoplayOption();
   }
 
   injectShowOnHoverOption() {
@@ -1763,20 +1724,8 @@ onmessage = (message) => {
       optionTitle,
       optionIsChecked,
       onOptionChanged,
-      true
-    );
-  }
-
-  injectAutoplayOption() {
-    addOptionToFavoritesPage(
-      "autoplay",
-      "Autoplay",
-      "Enable autoplay in gallery.",
-      this.autoplayEnabled,
-      (event) => {
-        this.toggleAutoplay(event.target.checked);
-      },
-      true
+      true,
+      "(Middle Click)"
     );
   }
 
@@ -1787,7 +1736,7 @@ onmessage = (message) => {
                 <video id="video-player-0" width="100%" height="100%" autoplay muted loop controlsList="nofullscreen" active></video>
               </div>
               <img id="original-gif-container" class="focused"></img>
-              <div id="original-content-background" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background: black; z-index: 999; display: none; pointer-events: none;"></div>
+              <div id="original-content-background"></div>
           </div>
       `;
 
@@ -1801,118 +1750,14 @@ onmessage = (message) => {
     this.videoPlayers = Array.from(this.videoContainer.querySelectorAll("video"));
     this.addVideoPlayerEventListeners();
     this.loadVideoVolume();
-    this.toggleAutoplay(this.autoplayEnabled);
     this.gifContainer = document.getElementById("original-gif-container");
     this.mainCanvas.id = "main-canvas";
     this.lowResolutionCanvas.id = "low-resolution-canvas";
     this.lowResolutionCanvas.width = this.mainCanvas.width;
     this.lowResolutionCanvas.height = this.mainCanvas.height;
     this.toggleOriginalContentVisibility(false);
-  }
-
-  injectAutoplayMenuHTML() {
-    const html = `
-<div id="autoplay-menu-container" style="visibility: hidden;">
-  <style>
-    #autoplay-menu {
-      position: fixed;
-      left: 50%;
-      transform: translate(-50%);
-      top: 2%;
-      padding: 0;
-      margin: 0;
-      background: rgba(40, 40, 40, 1);
-      border-radius: 3px;
-      white-space: nowrap;
-      z-index: 10000;
-      opacity: 0;
-      transition: opacity .25s ease-in-out;
-
-      &.visible {
-        opacity: 1;
-      }
-
-      &.persistent {
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-
-      >div>img {
-        position: relative;
-        height: 75px;
-        cursor: pointer;
-        background-color: rgba(128, 128, 128, 0);
-        margin: 5px;
-        background-size: 10%;
-        z-index: 2;
-
-        &:hover {
-          background-color: rgba(200, 200, 200, .5);
-          ;
-          border-radius: 4px;
-        }
-
-        &.flipped {
-          transform: scale(-1, 1);;
-        }
-      }
-    }
-
-    #autoplay-progress {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0%;
-      height: 100%;
-      background-color: #0075FF;
-      z-index: 1;
-
-      &.animated {
-        transition: width 2s linear;
-      }
-    }
-  </style>
-  <div id="autoplay-menu">
-    <div>
-      <img id="autoplay-play-button" title="Pause">
-      <img id="autoplay-settings-button" title="Settings">
-      <img id="autoplay-change-direction-button" title="Change direction" class="flipped">
-    </div>
-    <div id="autoplay-progress" class="animated"></div>
-  </div>
-</div>
-    `;
-
-    document.body.insertAdjacentHTML("afterbegin", html);
-    this.autoplayMenu = document.getElementById("autoplay-menu");
-    this.autoplayProgress = document.getElementById("autoplay-progress");
-    this.autoplayPlayButton = document.getElementById("autoplay-play-button");
-    this.autoplaySettingsButton = document.getElementById("autoplay-settings-button");
-    this.autoplayPlayButton.src = Gallery.autoplayMenuIconURLs.pause;
-    this.autoplaySettingsButton.src = Gallery.autoplayMenuIconURLs.tune;
-
-    const autoplayDirectionButton = document.getElementById("autoplay-change-direction-button");
-
-    autoplayDirectionButton.src = Gallery.autoplayMenuIconURLs.changeDirection;
-    autoplayDirectionButton.onclick = () => {
-      if (this.autoplayDirection === Gallery.directions.right) {
-        this.autoplayDirection = Gallery.directions.left;
-      } else {
-        this.autoplayDirection = Gallery.directions.right;
-      }
-      autoplayDirectionButton.classList.toggle("flipped", this.autoplayDirection === Gallery.directions.right);
-      setPreference(Gallery.preferences.autoplayDirection, this.autoplayDirection);
-    };
-
-    this.autoplayPlayButton.onclick = () => {
-      this.pauseAutoplay();
-    };
-    this.autoplayMenu.onmouseenter = () => {
-      this.autoplayMenu.classList.toggle("persistent", true);
-    };
-    this.autoplayMenu.onmouseleave = () => {
-      this.autoplayMenu.classList.toggle("persistent", false);
-    };
+    this.toggleVideoLooping(this.autoplayController.paused);
+    this.addBackgroundEventListeners();
   }
 
   addAdditionalVideoPlayers() {
@@ -1956,11 +1801,24 @@ onmessage = (message) => {
         passive: true
       });
       video.addEventListener("ended", () => {
-        this.onAutoplayCooldownComplete();
+        this.autoplayController.onVideoEnded();
       }, {
         passive: true
       });
     }
+  }
+
+  addBackgroundEventListeners() {
+    if (onMobileDevice()) {
+      return;
+    }
+    this.background.addEventListener("mousemove", () => {
+      this.toggleCursorVisibility(true);
+      Gallery.cursorVisibilityCooldown.restart();
+    });
+    Gallery.cursorVisibilityCooldown.onCooldownEnd = () => {
+      this.toggleCursorVisibility(false);
+    };
   }
 
   loadVideoVolume() {
@@ -1976,6 +1834,37 @@ onmessage = (message) => {
   updateBackgroundOpacity(opacity) {
     this.background.style.opacity = opacity;
     setPreference(Gallery.preferences.backgroundOpacity, opacity);
+  }
+
+  createAutoplayController() {
+    const subscribers = new AutoplayListenerList(
+      () => {
+        this.toggleVideoLooping(false);
+      },
+      () => {
+        this.toggleVideoLooping(true);
+      },
+      () => {
+        this.toggleVideoLooping(true);
+      },
+      () => {
+        this.toggleVideoLooping(false);
+      },
+      () => {
+        if (this.inGallery) {
+          const direction = Autoplay.settings.moveForward ? Gallery.directions.right : Gallery.directions.left;
+
+          this.traverseGallery(direction, false);
+        }
+      },
+      () => {
+        if (this.inGallery && isVideo(this.getSelectedThumb())) {
+          this.playOriginalVideo(this.getSelectedThumb());
+        }
+      }
+    );
+
+    this.autoplayController = new Autoplay(subscribers);
   }
 
   /**
@@ -2170,12 +2059,9 @@ onmessage = (message) => {
       });
   }
 
-  /**
-   * @param {HTMLElement[]} thumbs
-   */
-  async findImageExtensionsInTheBackground(thumbs) {
+  async findImageExtensionsInTheBackground() {
     await sleep(1000);
-    const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(thumbs);
+    const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(Array.from(ThumbNode.allThumbNodes.values()));
 
     while (idsWithUnknownExtensions.length > 0) {
       await sleep(3000);
@@ -2364,14 +2250,13 @@ onmessage = (message) => {
     this.background.style.pointerEvents = "auto";
 
     if (isVideo(selectedThumb)) {
-      this.toggleCursorVisibility(true);
       this.toggleVideoControls(true);
     }
     this.inGallery = true;
     dispatchEvent(new CustomEvent("showOriginalContent", {
       detail: true
     }));
-    this.startAutoplay(selectedThumb);
+    this.autoplayController.start(selectedThumb);
   }
 
   exitGallery() {
@@ -2394,7 +2279,7 @@ onmessage = (message) => {
       this.recentlyExitedGallery = false;
     }, 300);
     this.inGallery = false;
-    this.stopAutoplay();
+    this.autoplayController.stop();
   }
 
   /**
@@ -2412,7 +2297,7 @@ onmessage = (message) => {
     this.setNextSelectedThumbIndex(direction);
     const selectedThumb = this.getSelectedThumb();
 
-    this.startAutoplayCooldown(selectedThumb);
+    this.autoplayController.startViewTimer(selectedThumb);
     this.clearOriginalContentSources();
     this.stopAllVideos();
 
@@ -2428,16 +2313,13 @@ onmessage = (message) => {
     }
 
     if (isVideo(selectedThumb)) {
-      this.toggleCursorVisibility(true);
       this.toggleVideoControls(true);
       this.showOriginalVideo(selectedThumb);
     } else if (isGif(selectedThumb)) {
-      this.toggleCursorVisibility(false);
       this.toggleVideoControls(false);
       this.toggleOriginalVideoContainer(false);
       this.showOriginalGIF(selectedThumb);
     } else {
-      this.toggleCursorVisibility(false);
       this.toggleVideoControls(false);
       this.toggleOriginalVideoContainer(false);
       this.showOriginalImage(selectedThumb);
@@ -2483,7 +2365,6 @@ onmessage = (message) => {
   hideOriginalContent() {
     this.toggleBackgroundVisibility(false);
     this.toggleScrollbarVisibility(true);
-    this.toggleCursorVisibility(true);
     this.clearOriginalContentSources();
     this.stopAllVideos();
     this.clearMainCanvas();
@@ -2528,7 +2409,6 @@ onmessage = (message) => {
     }
 
     if (this.showOriginalContentOnHover) {
-      this.toggleCursorVisibility(false);
       this.toggleBackgroundVisibility(true);
       this.toggleScrollbarVisibility(false);
     }
@@ -2730,7 +2610,7 @@ onmessage = (message) => {
       return isImage(thumb);
     });
 
-    if (!this.renderHasStarted(initialThumb)) {
+    if (isImage(initialThumb) && !this.renderHasStarted(initialThumb)) {
       imageThumbsToRender.unshift(initialThumb);
     }
     this.renderImages(imageThumbsToRender, "adjacent");
@@ -3033,20 +2913,13 @@ onmessage = (message) => {
    * @param {Boolean} value
    */
   toggleCursorVisibility(value) {
-    // const image = getImageFromThumb(this.getSelectedThumb());
+    const html = `
+      #original-content-background {
+        cursor: ${value ? "auto" : "none"};
+      }
+    `;
 
-    // if (value === undefined) {
-    //   image.style.cursor = image.style.cursor === "pointer" ? "none" : "pointer";
-    //   return;
-    // }
-
-    // if (value) {
-    //   image.style.cursor = "pointer";
-    //   document.body.style.cursor = "pointer";
-    // } else {
-    //   image.style.cursor = "none";
-    //   document.body.style.cursor = "none";
-    // }
+    injectStyleHTML(html, "gallery-cursor-visibility");
   }
 
   /**
@@ -3201,6 +3074,10 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getBaseImageFetchDelay(id) {
+    if (onFavoritesPage() && !this.finishedLoading) {
+      return Gallery.settings.throttledImageFetchDelay;
+    }
+
     if (this.extensionIsKnown(id)) {
       return Gallery.settings.imageFetchDelayWhenExtensionKnown;
     }
@@ -3236,7 +3113,7 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {HTMLElement[]} thumbs
+   * @param {ThumbNode[]} thumbs
    * @returns {String[]}
    */
   getIdsWithUnknownExtensions(thumbs) {
@@ -3278,124 +3155,10 @@ onmessage = (message) => {
   /**
    * @param {Boolean} value
    */
-  toggleAutoplay(value) {
-    setPreference(Gallery.preferences.autoplayEnabled, value);
-    this.autoplayEnabled = value;
-    this.toggleVideoLooping(!value);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
   toggleVideoLooping(value) {
     for (const video of this.videoPlayers) {
       video.toggleAttribute("loop", value);
     }
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  pauseAutoplay(value) {
-    if (value === undefined) {
-      value = !this.autoplayPaused;
-    }
-    this.autoplayPaused = value;
-
-    if (this.autoplayPaused) {
-      this.autoplayPlayButton.src = Gallery.autoplayMenuIconURLs.play;
-      this.autoplayPlayButton.title = "Resume";
-      this.toggleVideoLooping(true);
-      this.stopAutoplayProgress();
-    } else {
-      this.autoplayPlayButton.src = Gallery.autoplayMenuIconURLs.pause;
-      this.autoplayPlayButton.title = "Pause";
-      this.toggleVideoLooping(false);
-      this.startAutoplayCooldown(this.getSelectedThumb());
-    }
-
-  }
-
-  /**
-   * @param {HTMLElement} selectedThumb
-   */
-  startAutoplay(selectedThumb) {
-    if (!this.autoplayEnabled) {
-      return;
-    }
-    Gallery.autoplayCooldown.onCooldownEnd = () => {
-      this.onAutoplayCooldownComplete();
-    };
-
-    if (isImage(selectedThumb)) {
-      Gallery.autoplayCooldown.start();
-    }
-    this.autoplayMenu.parentElement.style.visibility = "visible";
-    this.originalContentContainer.onmousemove = () => {
-      this.showAutoplayMenu();
-      Gallery.autoPlayMenuVisibilityCooldown.restart();
-    };
-  }
-
-  stopAutoplay() {
-    Gallery.autoplayCooldown.onCooldownEnd = () => { };
-    Gallery.autoplayCooldown.stop();
-    this.autoplayMenu.parentElement.style.visibility = "hidden";
-    this.originalContentContainer.onmousemove = null;
-    this.hideAutoplayMenu();
-    this.stopAutoplayProgress();
-  }
-
-  startAutoplayCooldown(selectedThumb) {
-    if (!this.autoplayEnabled) {
-      return;
-    }
-
-    if (isVideo(selectedThumb)) {
-      Gallery.autoplayCooldown.stop();
-      return;
-
-    }
-
-    if (!this.autoplayPaused) {
-      this.startAutoplayProgress();
-    }
-    Gallery.autoplayCooldown.restart();
-
-  }
-
-  onAutoplayCooldownComplete() {
-    if (!this.autoplayEnabled || !this.inGallery || this.autoplayPaused) {
-      return;
-    }
-    this.traverseGallery(this.autoplayDirection, false);
-  }
-
-  showAutoplayMenu() {
-    this.autoplayMenu.classList.toggle("visible", true);
-  }
-
-  hideAutoplayMenu() {
-    this.autoplayMenu.classList.toggle("visible", false);
-  }
-
-  /**
-   * @param {Number} percentage
-   */
-  setAutoplayProgress(percentage) {
-    this.autoplayProgress.style.width = `${percentage}%`;
-  }
-
-  stopAutoplayProgress() {
-    this.autoplayProgress.classList.remove("animated");
-    this.setAutoplayProgress(0);
-  }
-
-  async startAutoplayProgress() {
-    this.stopAutoplayProgress();
-    await sleep(10);
-    this.autoplayProgress.classList.add("animated");
-    this.setAutoplayProgress(100);
   }
 
   loadVideoClips() {

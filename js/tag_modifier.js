@@ -32,7 +32,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
   </style>
   <div id="tag-modifier-option-container">
     <label class="checkbox" title="Add or Remove custom or official tags to favorites">
-      <input type="checkbox" id="tag-modifier-option-checkbox">Modify Tags
+      <input type="checkbox" id="tag-modifier-option-checkbox">Modify Tags<span class="option-hint"> (M)</span>
     </label>
   </div>
   <div id="tag-modifier-ui-container">
@@ -233,6 +233,24 @@ class TagModifier {
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
     });
+    document.addEventListener("keydown", (event) => {
+      if (event.repeat || isTypeableInput(event.target)) {
+        return;
+      }
+
+      switch (event.key.toLowerCase()) {
+        case "m":
+          setTimeout(() => {
+            this.favoritesOption.checkbox.click();
+          }, 100);
+          break;
+
+        default:
+          break;
+      }
+    }, {
+      passive: true
+    });
   }
 
   addSearchPageEventListeners() {
@@ -275,12 +293,6 @@ class TagModifier {
       .thumb-node  {
         cursor: pointer;
         outline: 1px solid black;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
 
         > div {
           outline: none !important;
@@ -310,6 +322,10 @@ class TagModifier {
    */
   toggleTagEditModeEventListeners(value) {
     for (const thumbNode of ThumbNode.allThumbNodes.values()) {
+      if (thumbNode.root === undefined) {
+        continue;
+      }
+
       if (value) {
         thumbNode.root.onclick = () => {
           this.toggleThumbSelection(thumbNode.root);
@@ -384,7 +400,6 @@ class TagModifier {
   }
 
   /**
-   *
    * @param {Boolean} remove
    */
   modifyTagsOfSelected(remove) {

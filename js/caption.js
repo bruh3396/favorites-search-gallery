@@ -16,12 +16,6 @@ const captionHTML = `<style>
     transition: transform .35s ease;
     padding-top: 4px;
     padding-left: 7px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 
     h6 {
       display: block;
@@ -125,6 +119,13 @@ class Caption {
   * @type {Object.<String, Number>}
   */
   static tagCategoryAssociations;
+  static settings = {
+    tagFetchDelayAfterFinishedLoading: 20,
+    tagFetchDelayBeforeFinishedLoading: 200
+  };
+  static flags = {
+    finishedLoading: false
+  };
 
   /**
    * @returns {String}
@@ -166,6 +167,16 @@ class Caption {
    */
   get hidden() {
     return this.caption.classList.contains("hide") || this.caption.classList.contains("disabled") || this.caption.classList.contains("remove");
+  }
+
+  /**
+   * @type {Number}
+  */
+  static get tagFetchDelay() {
+    if (Caption.flags.finishedLoading) {
+      return Caption.settings.tagFetchDelayAfterFinishedLoading;
+    }
+    return Caption.settings.tagFetchDelayBeforeFinishedLoading;
   }
 
   /**
@@ -219,7 +230,7 @@ class Caption {
     this.captionWrapper = document.createElement("div");
     this.captionWrapper.className = "caption-wrapper";
     this.caption = document.createElement("div");
-    this.caption.className = "caption inactive";
+    this.caption.className = "caption inactive not-highlightable";
     this.captionWrapper.appendChild(this.caption);
     document.head.appendChild(this.captionWrapper);
     this.caption.innerHTML = Caption.template;
@@ -235,7 +246,8 @@ class Caption {
       (event) => {
         this.toggleVisibility(event.target.checked);
       },
-      true
+      true,
+      "(D)"
     );
   }
 
@@ -325,6 +337,7 @@ class Caption {
   addFavoritesPageEventListeners() {
     window.addEventListener("favoritesLoaded", () => {
       this.addEventListenersToThumbs.bind(this)();
+      Caption.flags.finishedLoading = true;
       Caption.findCategoriesOnPageChangeCooldown.waitTime = 1000;
     }, {
       once: true
@@ -351,7 +364,7 @@ class Caption {
         .split(" ")
         .filter(tagName => !isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
 
-      this.findTagCategories(tagNames, 10, () => {
+      this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
         this.saveTags();
       });
     }, {
@@ -755,7 +768,7 @@ class Caption {
   findTagCategoriesOnPageChange() {
     const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 200));
 
-    this.findTagCategories(tagNames, 10, () => {
+    this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
       this.saveTags();
     });
   }

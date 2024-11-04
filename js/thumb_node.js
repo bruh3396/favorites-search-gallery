@@ -23,6 +23,9 @@ class ThumbNode {
    * @type {String}
   */
   static addFavoriteButtonHTML;
+  static settings = {
+    deferHTMLElementCreation: false
+  };
 
   static {
     if (!onPostPage()) {
@@ -166,6 +169,22 @@ class ThumbNode {
    */
   auxillaryButton;
   /**
+   * @type {{id: String, tags: String, src: String, metadata: String}}
+  */
+  savedDatabaseRecord;
+  /**
+   * @type {Boolean}
+  */
+  essentialAttributesPopulated;
+  /**
+   * @type {Boolean}
+  */
+  additionalTagsInitialized;
+  /**
+   * @type {Set.<String>}
+   */
+  tagSet;
+  /**
    * @type {Set.<String>}
    */
   additionalTags;
@@ -173,10 +192,6 @@ class ThumbNode {
    * @type {Number}
   */
   originalTagsLength;
-  /**
-   * @type {Set.<String>}
-   */
-  tagSet;
   /**
    * @type {Boolean}
    */
@@ -197,6 +212,9 @@ class ThumbNode {
    * @type {String}
    */
   get compressedThumbSource() {
+    if (this.savedDatabaseRecord !== null) {
+      return this.savedDatabaseRecord.src;
+    }
     return this.image.src.match(ThumbNode.thumbSourceExtractionRegex).splice(1).join("_");
   }
 
@@ -233,7 +251,7 @@ class ThumbNode {
    * @type {Set.<String>}
   */
   get originalTagsString() {
-   return convertToTagString(this.originalTagSet);
+    return convertToTagString(this.originalTagSet);
   }
 
   /**
@@ -244,16 +262,42 @@ class ThumbNode {
   }
 
   /**
-   * @param {HTMLElement | {id: String, tags: String, src: String, type: String}} thumb
+   * @param {HTMLElement | Object} thumb
    * @param {Boolean} fromRecord
    */
   constructor(thumb, fromRecord) {
+    this.initializeFields();
+    this.createHTMLElement(thumb, fromRecord);
+    this.setMatched(true);
+    this.addInstanceToAllThumbNodes();
+  }
+
+  initializeFields() {
+    this.savedDatabaseRecord = null;
+    this.essentialAttributesPopulated = false;
+    this.additionalTagsInitialized = false;
+  }
+
+  /**
+   * @param {HTMLElement | Object} thumb
+   * @param {Boolean} fromRecord
+   */
+  createHTMLElement(thumb, fromRecord) {
+    if (fromRecord && ThumbNode.settings.deferHTMLElementCreation) {
+      this.savedDatabaseRecord = thumb;
+      this.populateEssentialAttributesFromDatabaseRecord(thumb);
+      this.initializeAdditionalTags();
+      this.deleteConsumedPropertiesFromSavedDatabaseRecord();
+      return;
+    }
+    this.createHTMLElementHelper(thumb, fromRecord);
+  }
+
+  createHTMLElementHelper(thumb, fromRecord) {
     this.instantiateTemplate();
     this.populateAttributes(thumb, fromRecord);
     this.setupAuxillaryButton();
     this.setupClickLink();
-    this.setMatched(true);
-    this.addInstanceToAllThumbNodes();
   }
 
   instantiateTemplate() {
@@ -279,6 +323,7 @@ class ThumbNode {
     removeFavorite(this.id);
     this.swapAuxillaryButton();
   }
+
   /**
    * @param {MouseEvent} event
    */
@@ -304,7 +349,7 @@ class ThumbNode {
   }
 
   /**
-   * @param {HTMLElement | {id: String, tags: Set.<String>, src: String, type: String, metadata: String}} thumb
+   * @param {HTMLElement | Object} thumb
    * @param {Boolean} fromDatabaseRecord
    */
   populateAttributes(thumb, fromDatabaseRecord) {
@@ -313,24 +358,15 @@ class ThumbNode {
     } else {
       this.populateAttributesFromHTMLElement(thumb);
     }
-    this.root.id = this.id;
-    this.originalTagsLength = this.tagSet.size;
-    this.additionalTags = convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
-
-    if (this.additionalTags.size !== 0) {
-      this.updateTags();
-    }
+    this.initializeAdditionalTags();
   }
 
   /**
-   * @param {{id: String, tags: Set.<String>, src: String, type: String, metadata: String}} record
+   * @param {Object} record
    */
   populateAttributesFromDatabaseRecord(record) {
-    this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
-    this.id = record.id;
-    this.tagSet = convertToTagSet(record.tags);
-    this.image.className = record.type;
-    this.metadata = new FavoriteMetadata(this.id, record.metadata || null);
+    this.populateEssentialAttributesFromDatabaseRecord(record);
+    this.populateHTMLAttributesFromDatabaseRecord(record);
   }
 
   /**
@@ -356,6 +392,47 @@ class ThumbNode {
     this.metadata = new FavoriteMetadata(this.id);
     this.metadata.presetRating(ThumbNode.extractRatingFromThumb(thumb));
     this.metadata.presetScore(ThumbNode.extractScoreFromThumb(thumb));
+    this.root.id = this.id;
+  }
+
+  /**
+   * @param {{id: String, tags: Set.<String>, metadata: String}} record
+   */
+  populateEssentialAttributesFromDatabaseRecord(record) {
+    if (this.essentialAttributesPopulated) {
+      return;
+    }
+    this.essentialAttributesPopulated = true;
+    this.id = record.id;
+    this.tagSet = convertToTagSet(record.tags);
+    this.metadata = new FavoriteMetadata(this.id, record.metadata || null);
+  }
+
+  /**
+   * @param {{src: String, type: String, id: String}} record
+   */
+  populateHTMLAttributesFromDatabaseRecord(record) {
+    this.image.src = ThumbNode.decompressThumbSource(record.src, record.id);
+    this.image.className = record.type;
+    this.root.id = record.id;
+  }
+
+  initializeAdditionalTags() {
+    if (this.additionalTagsInitialized) {
+      return;
+    }
+    this.additionalTagsInitialized = true;
+    this.originalTagsLength = this.tagSet.size;
+    this.additionalTags = convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
+
+    if (this.additionalTags.size !== 0) {
+      this.updateTags();
+    }
+  }
+
+  deleteConsumedPropertiesFromSavedDatabaseRecord() {
+    Reflect.deleteProperty(this.savedDatabaseRecord, "metadata");
+    Reflect.deleteProperty(this.savedDatabaseRecord, "tags");
   }
 
   setupClickLink() {
@@ -367,11 +444,25 @@ class ThumbNode {
   }
 
   /**
-   * @param {HTMLElement} element
-   * @param {String} position
+   * @param {HTMLElement} content
    */
-  insertInDocument(element, position) {
-    element.insertAdjacentElement(position, this.root);
+  insertAtEndOfContent(content) {
+    if (this.savedDatabaseRecord !== null) {
+      this.createHTMLElementHelper(this.savedDatabaseRecord, true);
+      this.savedDatabaseRecord = null;
+    }
+    content.appendChild(this.root);
+  }
+
+  /**
+   * @param {HTMLElement} content
+   */
+  insertAtBeginningOfContent(content) {
+    if (this.savedDatabaseRecord !== null) {
+      this.createHTMLElementHelper(this.savedDatabaseRecord, true);
+      this.savedDatabaseRecord = null;
+    }
+    content.insertAdjacentElement("afterbegin", this.root);
   }
 
   addInstanceToAllThumbNodes() {
