@@ -149,13 +149,13 @@ class ThumbNode {
   }
 
   /**
-   * @type {HTMLDivElement}
-   */
-  root;
-  /**
    * @type {String}
    */
   id;
+  /**
+   * @type {HTMLDivElement}
+   */
+  root;
   /**
    * @type {HTMLElement}
    */
@@ -284,13 +284,17 @@ class ThumbNode {
    */
   createHTMLElement(thumb, fromRecord) {
     if (fromRecord && ThumbNode.settings.deferHTMLElementCreation) {
-      this.savedDatabaseRecord = thumb;
-      this.populateEssentialAttributesFromDatabaseRecord(thumb);
-      this.initializeAdditionalTags();
-      this.deleteConsumedPropertiesFromSavedDatabaseRecord();
+      this.populateEssentialAttributes(thumb);
       return;
     }
     this.createHTMLElementHelper(thumb, fromRecord);
+  }
+
+  populateEssentialAttributes(thumb) {
+    this.savedDatabaseRecord = thumb;
+    this.populateEssentialAttributesFromDatabaseRecord(thumb);
+    this.initializeAdditionalTags();
+    this.deleteConsumedPropertiesFromSavedDatabaseRecord();
   }
 
   createHTMLElementHelper(thumb, fromRecord) {

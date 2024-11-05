@@ -56,7 +56,7 @@ const autoplayHTML = `<div id="autoplay-menu-container">
     }
 
     #autoplay-video-progress-bar {
-      background-color: hotpink;
+      background-color: royalblue;
     }
 
     #autoplay-settings-menu {
@@ -67,7 +67,6 @@ const autoplayHTML = `<div id="autoplay-menu-container">
       transform: translate(-50%, -105%);
       border-radius: 4px;
       font-size: 10px !important;
-      color: white;
       background: rgba(40, 40, 40, 1);
 
       &.visible {
@@ -76,14 +75,32 @@ const autoplayHTML = `<div id="autoplay-menu-container">
 
       >div {
         font-size: 30px;
-
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 5px 10px;
+        color: white;
+
 
         >label {
           padding-right: 20px;
+        }
+
+        >.number {
+          background: none;
+          outline: 2px solid white;
+
+          >hold-button,
+          >button {
+            &::after {
+              width: 200%;
+              height: 130%;
+            }
+          }
+
+          >input[type="number"] {
+            color: white;
+          }
         }
       }
     }
@@ -139,7 +156,7 @@ const autoplayHTML = `<div id="autoplay-menu-container">
         <label for="autoplay-image-duration-input">Image/GIF Duration</label>
         <span class="number">
           <hold-button class="number-arrow-down" pollingtime="100"><span>&lt;</span></hold-button>
-          <input type="number" id="autoplay-image-duration-input" min="1" max="60" step="1" style="width: 5ch;">
+          <input type="number" id="autoplay-image-duration-input" min="1" max="60" step="1">
           <hold-button class="number-arrow-up" pollingtime="100"><span>&gt;</span></hold-button>
         </span>
       </div>
@@ -147,8 +164,7 @@ const autoplayHTML = `<div id="autoplay-menu-container">
         <label for="autoplay-minimum-video-duration-input">Minimum Video Duration</label>
         <span class="number">
           <hold-button class="number-arrow-down" pollingtime="100"><span>&lt;</span></hold-button>
-          <input type="number" id="autoplay-minimum-animated-duration-input" min="1" max="60" step="1"
-            style="width: 5ch;">
+          <input type="number" id="autoplay-minimum-animated-duration-input" min="1" max="60" step="1">
           <hold-button class="number-arrow-up" pollingtime="100"><span>&gt;</span></hold-button>
         </span>
       </div>
@@ -180,7 +196,7 @@ class AutoplayListenerList {
   /**
    * @type {Function}
   */
-  onVideoEndedTooEarly;
+  onVideoEndedBeforeMinimumViewTime;
 
   /**
    * @param {Function} onEnable
@@ -196,7 +212,7 @@ class AutoplayListenerList {
     this.onPause = onPause;
     this.onResume = onResume;
     this.onComplete = onComplete;
-    this.onVideoEndedTooEarly = onVideoEndedEarly;
+    this.onVideoEndedBeforeMinimumViewTime = onVideoEndedEarly;
   }
 }
 
@@ -216,10 +232,9 @@ class Autoplay {
     tune: createObjectURLFromSvg(ICONS.tune)
   };
   static settings = {
-    imageViewDuration: getPreference(Autoplay.preferences.imageDuration, 1000),
+    imageViewDuration: getPreference(Autoplay.preferences.imageDuration, 3000),
     minimumVideoDuration: getPreference(Autoplay.preferences.minimumVideoDuration, 5000),
     menuVisibilityDuration: 500,
-    settingsMenuInputDebounceTime: 100,
     moveForward: getPreference(Autoplay.preferences.direction, true),
 
     get imageViewDurationInSeconds() {
@@ -284,10 +299,6 @@ class Autoplay {
   */
   videoViewTimer;
   /**
-   * @type {Cooldown}
-  */
-  settingsMenuInputDebounce;
-  /**
    * @type {Boolean}
   */
   active;
@@ -342,7 +353,7 @@ class Autoplay {
     };
     this.eventListenersAbortController = new AbortController();
     this.currentThumb = null;
-    this.active = getPreference(Autoplay.preferences.active, false);
+    this.active = getPreference(Autoplay.preferences.active, true);
     this.paused = getPreference(Autoplay.preferences.paused, false);
     this.menuIsPersistent = false;
     this.menuIsVisible = false;
@@ -351,7 +362,6 @@ class Autoplay {
   initializeTimers() {
     this.imageViewTimer = new Cooldown(Autoplay.settings.imageViewDuration);
     this.menuVisibilityTimer = new Cooldown(Autoplay.settings.menuVisibilityDuration);
-    this.settingsMenuInputDebounce = new Cooldown(Autoplay.settings.settingsMenuInputDebounceTime, true);
     this.videoViewTimer = new Cooldown(Autoplay.settings.minimumVideoDuration);
 
     this.imageViewTimer.onCooldownEnd = () => { };
@@ -363,7 +373,6 @@ class Autoplay {
         }
       }, 100);
     };
-    this.settingsMenuInputDebounce.onDebounceEnd = () => { };
   }
 
   injectHTML() {
@@ -390,7 +399,7 @@ class Autoplay {
   }
 
   injectOptionHTML() {
-    addOptionToFavoritesPage(
+    createFavoritesOption(
       "autoplay",
       "Autoplay",
       "Enable autoplay in gallery.",
@@ -461,26 +470,18 @@ class Autoplay {
 
   addSettingsMenuEventListeners() {
     this.ui.settingsMenu.imageDurationInput.onchange = () => {
-      this.settingsMenuInputDebounce.startDebounce();
+      this.setImageViewDuration();
 
-      this.settingsMenuInputDebounce.onDebounceEnd = () => {
-        this.setImageViewDuration();
-
-        if (this.currentThumb !== null && isImage(this.currentThumb)) {
-          this.startViewTimer(this.currentThumb);
-        }
-      };
+      if (this.currentThumb !== null && isImage(this.currentThumb)) {
+        this.startViewTimer(this.currentThumb);
+      }
     };
     this.ui.settingsMenu.minimumVideoDurationInput.onchange = () => {
-      this.settingsMenuInputDebounce.startDebounce();
+      this.setMinimumVideoViewDuration();
 
-      this.settingsMenuInputDebounce.onDebounceEnd = () => {
-        this.setMinimumVideoViewDuration();
-
-        if (this.currentThumb !== null && !isImage(this.currentThumb)) {
-          this.startViewTimer(this.currentThumb);
-        }
-      };
+      if (this.currentThumb !== null && !isImage(this.currentThumb)) {
+        this.startViewTimer(this.currentThumb);
+      }
     };
   }
 
@@ -552,6 +553,7 @@ class Autoplay {
 
     setPreference(Autoplay.preferences.minimumVideoDuration, duration);
     Autoplay.settings.minimumVideoDuration = duration;
+    this.videoViewTimer.waitTime = duration;
     this.ui.settingsMenu.minimumVideoDurationInput.value = Autoplay.settings.minimumVideoDurationInSeconds;
     this.injectVideoProgressHTML();
   }
@@ -560,10 +562,14 @@ class Autoplay {
    * @param {HTMLElement} thumb
    */
   startViewTimer(thumb) {
-    if (!this.active || Autoplay.disabled || this.paused || thumb === null) {
+    if (thumb === null) {
       return;
     }
     this.currentThumb = thumb;
+
+    if (!this.active || Autoplay.disabled || this.paused) {
+      return;
+    }
 
     if (isVideo(thumb)) {
       this.startVideoViewTimer();
@@ -575,7 +581,6 @@ class Autoplay {
   startImageViewTimer() {
     this.stopVideoProgressBar();
     this.stopVideoViewTimer();
-
     this.startImageProgressBar();
     this.imageViewTimer.restart();
   }
@@ -588,14 +593,13 @@ class Autoplay {
   startVideoViewTimer() {
     this.stopImageViewTimer();
     this.stopImageProgressBar();
-
     this.startVideoProgressBar();
     this.videoViewTimer.restart();
   }
 
   stopVideoViewTimer() {
     this.videoViewTimer.stop();
-    this.stopImageProgressBar();
+    this.stopVideoProgressBar();
   }
 
   /**
@@ -629,6 +633,7 @@ class Autoplay {
       this.ui.playButton.src = Autoplay.menuIconImageURLs.play;
       this.ui.playButton.title = "Resume Autoplay";
       this.stopImageViewTimer();
+      this.stopVideoViewTimer();
       this.subscribers.onPause();
     } else {
       this.ui.playButton.src = Autoplay.menuIconImageURLs.pause;
@@ -642,7 +647,7 @@ class Autoplay {
     if (this.videoViewTimer.timeout === null) {
       this.subscribers.onComplete();
     } else {
-      this.subscribers.onVideoEndedTooEarly();
+      this.subscribers.onVideoEndedBeforeMinimumViewTime();
     }
   }
 
@@ -652,6 +657,23 @@ class Autoplay {
     };
     document.addEventListener("mousemove", () => {
       this.showMenu();
+    }, {
+      signal: this.eventListenersAbortController.signal
+    });
+    document.addEventListener("keydown", (event) => {
+      if (!isHotkeyEvent(event)) {
+        return;
+      }
+
+      switch (event.key.toLowerCase()) {
+        case "p":
+          this.showMenu();
+          this.pause();
+          break;
+
+        default:
+          break;
+      }
     }, {
       signal: this.eventListenersAbortController.signal
     });
@@ -699,5 +721,4 @@ class Autoplay {
   stopVideoProgressBar() {
     this.ui.videoProgressBar.classList.remove("animated");
   }
-
 }

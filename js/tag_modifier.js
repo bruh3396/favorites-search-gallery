@@ -32,7 +32,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
   </style>
   <div id="tag-modifier-option-container">
     <label class="checkbox" title="Add or Remove custom or official tags to favorites">
-      <input type="checkbox" id="tag-modifier-option-checkbox">Modify Tags<span class="option-hint"> (M)</span>
+      <input type="checkbox" id="tag-modifier-option-checkbox">Modify Tags<span class="option-hint"></span>
     </label>
   </div>
   <div id="tag-modifier-ui-container">
@@ -232,24 +232,6 @@ class TagModifier {
     this.favoritesUI.export.onclick = this.exportTagModifications.bind(this);
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.repeat || isTypeableInput(event.target)) {
-        return;
-      }
-
-      switch (event.key.toLowerCase()) {
-        case "m":
-          setTimeout(() => {
-            this.favoritesOption.checkbox.click();
-          }, 100);
-          break;
-
-        default:
-          break;
-      }
-    }, {
-      passive: true
     });
   }
 

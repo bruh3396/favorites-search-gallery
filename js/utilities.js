@@ -39,10 +39,11 @@ const utilitiesHTML = `<style>
   }
 
   .number {
-    display: inline-block;
+    position: relative;
     margin-top: 5px;
-    border: 1px solid white;
-    padding: 0px 10px;
+    border: 1px solid;
+    /* padding: 0px 10px; */
+    padding: 0;
     border-radius: 20px;
     background-color: white;
 
@@ -56,13 +57,26 @@ const utilitiesHTML = `<style>
       background: none;
       cursor: pointer;
       border: none;
+      margin: 0px 8px;
       padding: 0;
-      margin: 0;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200%;
+        height: 100%;
+        /* outline: 1px solid greenyellow; */
+        /* background-color: hotpink; */
+      }
 
       &:hover {
         >span {
           color: #0075FF;
         }
+
       }
 
       >span {
@@ -73,6 +87,7 @@ const utilitiesHTML = `<style>
         border: none;
         outline: none;
         top: 0;
+        z-index: 5;
         font-size: 1.2em !important;
       }
 
@@ -102,14 +117,12 @@ const utilitiesHTML = `<style>
     >input[type="number"] {
       font-size: inherit;
       text-align: center;
-      color: #0075FF;
       width: 2ch;
       padding: 0;
       margin: 0;
       font-weight: bold;
       padding: 3px;
       background: none;
-      /* outline: none; */
       border: none;
 
       &:focus {
@@ -133,6 +146,10 @@ const utilitiesHTML = `<style>
     z-index: 10010;
     pointer-events: none;
     width: 30vw;
+  }
+
+  input[type="checkbox"] {
+    accent-color: #0075FF;
   }
 </style>`;
 
@@ -219,6 +236,7 @@ class Cooldown {
       return;
     }
     clearTimeout(this.timeout);
+    this.timeout = null;
   }
 
   restart() {
@@ -784,7 +802,7 @@ function clearAwesompleteSelection(input) {
  * @param {String} optionHint
  * @returns {HTMLElement | null}
  */
-function addOptionToFavoritesPage(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible, optionHint = "") {
+function createFavoritesOption(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible, optionHint = "") {
   const favoritesPageOptions = document.getElementById("favorite-options");
   const checkboxId = `${optionId}-checkbox`;
 
@@ -1515,6 +1533,14 @@ function isTypeableInput(element) {
     return TYPEABLE_INPUTS.has(element.getAttribute("type"));
   }
   return false;
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @returns {Boolean}
+ */
+function isHotkeyEvent(event) {
+  return !event.repeat && !isTypeableInput(event.target);
 }
 
 /**

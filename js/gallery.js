@@ -1057,7 +1057,7 @@ onmessage = (message) => {
     imageFetchDelay: 250,
     throttledImageFetchDelay: 400,
     imageFetchDelayWhenExtensionKnown: 25,
-    upscaledThumbResolutionFraction: 5,
+    upscaledThumbResolutionFraction: 4,
     upscaledAnimatedThumbResolutionFraction: 5,
     extensionsFoundBeforeSavingCount: 200,
     animatedThumbsToUpscaleRange: 20,
@@ -1718,7 +1718,7 @@ onmessage = (message) => {
         this.enlargeOnClickOnMobile = event.target.checked;
       };
     }
-    addOptionToFavoritesPage(
+    createFavoritesOption(
       optionId,
       optionText,
       optionTitle,
@@ -2521,12 +2521,11 @@ onmessage = (message) => {
     }
     return match[1];
   }
+
   /**
    * @param {HTMLElement} thumb
    */
   playOriginalVideo(thumb) {
-    // this.setActiveVideoPlayer(thumb);
-    // this.preloadInactiveVideoPlayers(thumb);
     this.stopAllVideos();
     const video = this.getActiveVideoPlayer();
 
@@ -3012,6 +3011,7 @@ onmessage = (message) => {
   getInactiveVideoPlayers() {
     return this.videoPlayers.filter(video => !video.hasAttribute("active"));
   }
+
   /**
    * @param {Boolean} value
    */

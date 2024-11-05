@@ -83,7 +83,7 @@ class Tooltip {
 
   addAllPageEventListeners() {
     document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() !== "t" || event.repeat || isTypeableInput(event.target)) {
+      if (event.key.toLowerCase() !== "t" || !isHotkeyEvent(event)) {
         return;
       }
 
@@ -403,7 +403,7 @@ class Tooltip {
   }
 
   addFavoritesOptions() {
-    addOptionToFavoritesPage(
+    createFavoritesOption(
       "show-tooltips",
       " Tooltips",
       "Show tags when hovering over a thumbnail and see which ones were matched by a search",

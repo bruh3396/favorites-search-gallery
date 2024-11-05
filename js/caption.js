@@ -238,7 +238,7 @@ class Caption {
 
   injectHTML() {
     injectStyleHTML(captionHTML);
-    addOptionToFavoritesPage(
+    createFavoritesOption(
       "show-captions",
       "Details",
       "Show details when hovering over thumbnail",
@@ -296,7 +296,7 @@ class Caption {
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() !== "d" || event.repeat || isTypeableInput(event.target)) {
+      if (event.key.toLowerCase() !== "d" || !isHotkeyEvent(event)) {
         return;
       }
 

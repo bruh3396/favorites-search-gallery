@@ -24,6 +24,10 @@ class HoldButton extends HTMLElement {
    * @type {Number}
   */
   pollingTime = HoldButton.defaultPollingTime;
+  /**
+   * @type {Boolean}
+  */
+  holdingDown = false;
 
   connectedCallback() {
     if (onMobileDevice()) {
@@ -58,17 +62,23 @@ class HoldButton extends HTMLElement {
   addEventListeners() {
     this.addEventListener("mousedown", (event) => {
       if (event.button === 0) {
+        this.holdingDown = true;
         this.startPolling();
       }
     });
 
     this.addEventListener("mouseup", (event) => {
       if (event.button === 0) {
+        this.holdingDown = false;
         this.stopPolling();
       }
     });
 
     this.addEventListener("mouseleave", () => {
+      if (this.holdingDown) {
+        this.onMouseLeaveWhileHoldingDown();
+        this.holdingDown = false;
+      }
       this.stopPolling();
     });
   }
@@ -87,6 +97,9 @@ class HoldButton extends HTMLElement {
   }
 
   onmousehold() {
+  }
+
+  onMouseLeaveWhileHoldingDown() {
   }
 }
 
@@ -151,38 +164,42 @@ class NumberComponent {
       return;
     }
     this.upArrow.onmousehold = () => {
-      this.incrementInput();
+      this.incrementInput(true);
+    };
+    this.downArrow.onmousehold = () => {
+      this.incrementInput(false);
     };
     this.upArrow.addEventListener("mousedown", (event) => {
       if (event.button === 0) {
-        this.incrementInput();
+        this.incrementInput(true);
       }
     });
-    this.downArrow.onmousehold = () => {
-      this.decrementInput();
-    };
     this.downArrow.addEventListener("mousedown", (event) => {
       if (event.button === 0) {
-        this.decrementInput();
+        this.incrementInput(false);
       }
     });
-  }
-
-  incrementInput() {
-    this.changeInput(true);
-  }
-
-  decrementInput() {
-    this.changeInput(false);
+    this.upArrow.addEventListener("mouseup", () => {
+      this.input.onchange();
+    });
+    this.downArrow.addEventListener("mouseup", () => {
+      this.input.onchange();
+    });
+    this.upArrow.onMouseLeaveWhileHoldingDown = () => {
+      this.input.onchange();
+    };
+    this.downArrow.onMouseLeaveWhileHoldingDown = () => {
+      this.input.onchange();
+    };
   }
 
   /**
    * @param {Boolean} add
    */
-  changeInput(add) {
+  incrementInput(add) {
     const currentValue = parseFloat(this.input.value) || 1;
+    const incrementedValue = add ? currentValue + this.increment : currentValue - this.increment;
 
-    this.input.value = add ? currentValue + this.increment : currentValue - this.increment;
-    this.input.onchange();
+    this.input.value = clamp(incrementedValue, 0, 9999);
   }
 }

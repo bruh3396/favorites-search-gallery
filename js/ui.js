@@ -1,4 +1,5 @@
-const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-highlightable">
+const uiHTML = `
+<div id="favorites-top-bar" class="light-green-gradient not-highlightable">
   <style>
     #favorites-top-bar {
       position: sticky;
@@ -382,7 +383,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
 
       .number {
-        font-size: 16px;
+        font-size: 20px;
 
         >input {
           width: 5ch;
@@ -579,10 +580,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
                 Enhance Search Pages</label></div>
             <div style="display: none;"><label class="checkbox" title="Toggle remove buttons"><input type="checkbox"
                   id="show-remove-favorite-buttons">
-                Remove Buttons <span class="option-hint"> (R)</span></label></div>
+                Remove Buttons<span class="option-hint"> (R)</span></label></div>
             <div style="display: none;"><label class="checkbox" title="Toggle add favorite buttons"><input
                   type="checkbox" id="show-add-favorite-buttons">
-                Add Favorite Buttons</label></div>
+                Add Favorite Buttons<span class="option-hint"> (R)</span></label></div>
             <div><label class="checkbox" title="Exclude blacklisted tags from search"><input type="checkbox"
                   id="filter-blacklist-checkbox"> Exclude Blacklist</label></div>
             <div><label class="checkbox" title="Enable fancy image hovering (experimental)"><input type="checkbox"
@@ -688,7 +689,7 @@ const FAVORITE_PREFERENCES = {
   sortAscending: "sortAscending",
   sortingMethod: "sortingMethod",
   allowedRatings: "allowedRatings",
-  optionHints: "optionHints"
+  showHints: "showHints"
 };
 const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -711,7 +712,8 @@ const FAVORITE_CHECKBOXES = {
   sortAscending: document.getElementById("sort-ascending"),
   explicitRating: document.getElementById("explicit-rating-checkbox"),
   questionableRating: document.getElementById("questionable-rating-checkbox"),
-  safeRating: document.getElementById("safe-rating-checkbox")
+  safeRating: document.getElementById("safe-rating-checkbox"),
+  showHints: null
 };
 const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
@@ -737,6 +739,7 @@ function initializeFavoritesPage() {
   configureMobileUI();
   configureDesktopUI();
   setupWhatsNewDropdown();
+  addHintsOption();
 }
 
 function loadFavoritesPagePreferences() {
@@ -814,10 +817,6 @@ function loadFavoritesPagePreferences() {
   FAVORITE_CHECKBOXES.questionableRating.checked = (allowedRatings & 2) === 2;
   FAVORITE_CHECKBOXES.safeRating.checked = (allowedRatings & 1) === 1;
   preventUserFromUncheckingAllRatings(allowedRatings);
-
-  const optionHintsEnabled = getPreference(FAVORITE_PREFERENCES.optionHints, false);
-
-  toggleOptionHints(optionHintsEnabled);
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -997,7 +996,7 @@ function addEventListenersToFavoritesPage() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.repeat || isTypeableInput(event.target)) {
+    if (!isHotkeyEvent(event)) {
       return;
     }
 
@@ -1012,6 +1011,12 @@ function addEventListenersToFavoritesPage() {
 
       case "o":
         FAVORITE_CHECKBOXES.showOptions.click();
+        break;
+
+      case "h":
+        if (FAVORITE_CHECKBOXES.showHints !== null) {
+          FAVORITE_CHECKBOXES.showHints.click();
+        }
         break;
 
       case "s":
@@ -1155,7 +1160,7 @@ function changeResultsPerPage(resultsPerPage) {
   resultsPerPage = clamp(resultsPerPage, 50, 5000);
   FAVORITE_INPUTS.resultsPerPage.value = resultsPerPage;
   setPreference(FAVORITE_PREFERENCES.resultsPerPage, resultsPerPage);
-  favoritesLoader.updateMaxNumberOfFavoritesToDisplay(resultsPerPage);
+  favoritesLoader.updateResultsPerPage(resultsPerPage);
 }
 
 /**
@@ -1378,6 +1383,33 @@ function toggleOptionHints(value) {
   const html = value ? "" : ".option-hint {display:none;}";
 
   injectStyleHTML(html, "option-hint-visibility");
+}
+
+async function addHintsOption() {
+  toggleOptionHints(false);
+
+  await sleep(50);
+
+  if (onMobileDevice()) {
+    return;
+  }
+  const optionHintsEnabled = getPreference(FAVORITE_PREFERENCES.showHints, true);
+
+  createFavoritesOption(
+    "show-hints",
+    "Hints",
+    "Show hotkeys and shortcuts",
+    optionHintsEnabled,
+    (event) => {
+      toggleOptionHints(event.target.checked);
+      setPreference(FAVORITE_PREFERENCES.showHints, event.target.checked);
+    },
+    true,
+    "(H)"
+  );
+
+  FAVORITE_CHECKBOXES.showHints = document.getElementById("show-hints-checkbox");
+  toggleOptionHints(optionHintsEnabled);
 }
 
 if (onFavoritesPage()) {
