@@ -181,7 +181,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
@@ -1058,7 +1058,7 @@ onmessage = (message) => {
     throttledImageFetchDelay: 400,
     imageFetchDelayWhenExtensionKnown: 25,
     upscaledThumbResolutionFraction: 4,
-    upscaledAnimatedThumbResolutionFraction: 5,
+    upscaledAnimatedThumbResolutionFraction: 6,
     extensionsFoundBeforeSavingCount: 200,
     animatedThumbsToUpscaleRange: 20,
     animatedThumbsToUpscaleDiscrete: 20,
@@ -1212,7 +1212,7 @@ onmessage = (message) => {
     this.addEventListeners();
     this.loadDiscoveredImageExtensions();
     this.prepareSearchPage();
-    this.injectHTML();
+    this.insertHTML();
     this.updateBackgroundOpacity(getPreference(Gallery.preferences.backgroundOpacity, 1));
     this.loadVideoClips();
     this.setMainCanvasOrientation();
@@ -1526,9 +1526,7 @@ onmessage = (message) => {
       this.enumerateVisibleThumbs();
 
       if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
-        setTimeout(() => {
-          this.renderImagesInTheBackground();
-        }, 50);
+        this.renderImagesInTheBackground();
       }
     });
     window.addEventListener("shuffle", () => {
@@ -1676,29 +1674,29 @@ onmessage = (message) => {
     this.renderImagesInTheBackground();
   }
 
-  injectHTML() {
-    this.injectStyleHTML();
-    this.injectDebugHTML();
-    this.injectOptionsHTML();
-    this.injectOriginalContentContainerHTML();
+  insertHTML() {
+    this.insertStyleHTML();
+    this.insertDebugHTML();
+    this.insertOptionsHTML();
+    this.insertOriginalContentContainerHTML();
 
   }
 
-  injectStyleHTML() {
-    injectStyleHTML(galleryHTML);
+  insertStyleHTML() {
+    insertStyleHTML(galleryHTML);
   }
 
-  injectDebugHTML() {
+  insertDebugHTML() {
     if (Gallery.settings.debugEnabled) {
-      injectStyleHTML(galleryDebugHTML, "gallery-debug");
+      insertStyleHTML(galleryDebugHTML, "gallery-debug");
     }
   }
 
-  injectOptionsHTML() {
-    this.injectShowOnHoverOption();
+  insertOptionsHTML() {
+    this.insertShowOnHoverOption();
   }
 
-  injectShowOnHoverOption() {
+  insertShowOnHoverOption() {
     let optionId = "show-content-on-hover";
     let optionText = "Fullscreen on Hover";
     let optionTitle = "View full resolution images or play videos and GIFs when hovering over a thumbnail";
@@ -1729,7 +1727,7 @@ onmessage = (message) => {
     );
   }
 
-  injectOriginalContentContainerHTML() {
+  insertOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="original-content-container">
               <div id="original-video-container">
@@ -2918,7 +2916,7 @@ onmessage = (message) => {
       }
     `;
 
-    injectStyleHTML(html, "gallery-cursor-visibility");
+    insertStyleHTML(html, "gallery-cursor-visibility");
   }
 
   /**

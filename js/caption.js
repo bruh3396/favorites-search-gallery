@@ -210,7 +210,7 @@ class Caption {
     }
     this.initializeFields();
     this.createHTMLElement();
-    this.injectHTML();
+    this.insertHTML();
     this.toggleVisibility(this.getVisibilityPreference());
     this.addEventListeners();
   }
@@ -236,8 +236,8 @@ class Caption {
     this.caption.innerHTML = Caption.template;
   }
 
-  injectHTML() {
-    injectStyleHTML(captionHTML);
+  insertHTML() {
+    insertStyleHTML(captionHTML);
     createFavoritesOption(
       "show-captions",
       "Details",

@@ -887,7 +887,7 @@ function clearIdsToDeleteOnReload() {
  * @param {String} html
  * @param {String} id
  */
-function injectStyleHTML(html, id) {
+function insertStyleHTML(html, id) {
   const style = document.createElement("style");
 
   style.textContent = html.replace("<style>", "").replace("</style>", "");
@@ -943,10 +943,10 @@ function sortObjectByValues(obj) {
   }));
 }
 
-function injectCommonStyles() {
-  injectStyleHTML(utilitiesHTML, "utilities-common-styles");
+function insertCommonStyleHTML() {
+  insertStyleHTML(utilitiesHTML, "utilities-common-styles");
 
-  injectStyleHTML(STYLES.thumbHoverOutline, "thumb-hover-outlines");
+  insertStyleHTML(STYLES.thumbHoverOutline, "thumb-hover-outlines");
 
   setTimeout(() => {
     if (onSearchPage()) {
@@ -972,7 +972,7 @@ function toggleFancyImageHovering(value) {
     }
     return;
   }
-  injectStyleHTML(`
+  insertStyleHTML(`
     #content {
       padding: 40px 40px 30px !important;
       grid-gap: 2.5em !important;
@@ -1022,7 +1022,7 @@ function toggleFancyImageHovering(value) {
 function configureVideoOutlines() {
   const size = onMobileDevice() ? 2 : 3;
 
-  injectStyleHTML(`
+  insertStyleHTML(`
     .thumb-node, .thumb {
 
       >a,
@@ -1053,13 +1053,13 @@ function setTheme() {
         element.classList.remove("light-green-gradient");
         element.classList.add("dark-green-gradient");
 
-        injectStyleHTML(`
+        insertStyleHTML(`
           input[type=number] {
             background-color: #303030;
             color: white;
           }
           `, "dark-theme-number-input");
-        injectStyleHTML(`
+        insertStyleHTML(`
             #favorites-pagination-container {
               >button {
                 border: 1px solid white !important;
@@ -1067,7 +1067,7 @@ function setTheme() {
               }
             }
           `, "pagination-style");
-        injectStyleHTML(`
+        insertStyleHTML(`
             .number {
               background-color: #303030;
 
@@ -1123,7 +1123,7 @@ function initializeUtilities() {
     throw new Error("Disabled on search pages");
   }
   removeUnusedScripts();
-  injectCommonStyles();
+  insertCommonStyleHTML();
   setupCustomWebComponents();
   toggleFancyImageHovering(true);
   setTheme();

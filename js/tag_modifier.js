@@ -130,21 +130,21 @@ class TagModifier {
     this.selectedThumbNodes = [];
     this.atLeastOneFavoriteIsSelected = false;
     this.loadTagModifications();
-    this.injectHTML();
+    this.insertHTML();
     this.addEventListeners();
   }
 
-  injectHTML() {
-    this.injectFavoritesPageHTML();
-    this.injectSearchPageHTML();
-    this.injectPostPageHTML();
+  insertHTML() {
+    this.insertFavoritesPageHTML();
+    this.insertSearchPageHTML();
+    this.insertPostPageHTML();
   }
 
-  injectFavoritesPageHTML() {
+  insertFavoritesPageHTML() {
     if (!onFavoritesPage()) {
       return;
     }
-    document.getElementById("left-favorites-panel-bottom-row").lastElementChild.insertAdjacentHTML("beforebegin", tagModifierHTML);
+    document.getElementById("left-favorites-panel-bottom-row").insertAdjacentHTML("beforeend", tagModifierHTML);
     this.favoritesOption.container = document.getElementById("tag-modifier-container");
     this.favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox");
     this.favoritesUI.container = document.getElementById("tag-modifier-ui-container");
@@ -159,14 +159,14 @@ class TagModifier {
     this.favoritesUI.export = document.getElementById("tag-modifier-export");
   }
 
-  injectSearchPageHTML() {
+  insertSearchPageHTML() {
     if (!onSearchPage()) {
       return;
     }
     1;
   }
 
-  injectPostPageHTML() {
+  insertPostPageHTML() {
     if (!onPostPage()) {
       return;
     }
@@ -271,7 +271,7 @@ class TagModifier {
       }
       return;
     }
-    injectStyleHTML(`
+    insertStyleHTML(`
       .thumb-node  {
         cursor: pointer;
         outline: 1px solid black;
@@ -528,4 +528,4 @@ class TagModifier {
   }
 }
 
-const tagModifier = new TagModifier();
+// const tagModifier = new TagModifier();

@@ -81,6 +81,7 @@ This script is still in development, please let me know if you experience a bug,
 | X   | Remove favorite                | "Remove Button" option checked     |
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
+| P   | Stop/start autoplay            | Autoplay option checked            |
 
 
 

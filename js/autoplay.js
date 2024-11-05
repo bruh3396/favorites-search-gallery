@@ -325,7 +325,7 @@ class Autoplay {
     this.initializeSubscribers(subscribers);
     this.initializeFields();
     this.initializeTimers();
-    this.injectHTML();
+    this.insertHTML();
     this.setMenuIconImageSources();
     this.loadAutoplaySettingsIntoUi();
     this.addEventListeners();
@@ -375,14 +375,14 @@ class Autoplay {
     };
   }
 
-  injectHTML() {
-    this.injectMenuHTML();
-    this.injectOptionHTML();
-    this.injectImageProgressHTML();
-    this.injectVideoProgressHTML();
+  insertHTML() {
+    this.insertMenuHTML();
+    this.insertOptionHTML();
+    this.insertImageProgressHTML();
+    this.insertVideoProgressHTML();
   }
 
-  injectMenuHTML() {
+  insertMenuHTML() {
     document.body.insertAdjacentHTML("afterbegin", autoplayHTML);
     this.ui.container = document.getElementById("autoplay-menu-container");
     this.ui.menu = document.getElementById("autoplay-menu");
@@ -398,7 +398,7 @@ class Autoplay {
     this.ui.videoProgressBar = document.getElementById("autoplay-video-progress-bar");
   }
 
-  injectOptionHTML() {
+  insertOptionHTML() {
     createFavoritesOption(
       "autoplay",
       "Autoplay",
@@ -411,8 +411,8 @@ class Autoplay {
     );
   }
 
-  injectImageProgressHTML() {
-    injectStyleHTML(`
+  insertImageProgressHTML() {
+    insertStyleHTML(`
       #autoplay-image-progress-bar.animated {
           transition: width ${Autoplay.settings.imageViewDurationInSeconds}s linear;
           width: 100%;
@@ -420,8 +420,8 @@ class Autoplay {
       `, "autoplay-image-progress-bar-animation");
   }
 
-  injectVideoProgressHTML() {
-    injectStyleHTML(`
+  insertVideoProgressHTML() {
+    insertStyleHTML(`
       #autoplay-video-progress-bar.animated {
           transition: width ${Autoplay.settings.minimumVideoDurationInSeconds}s linear;
           width: 100%;
@@ -540,7 +540,7 @@ class Autoplay {
     Autoplay.settings.imageViewDuration = duration;
     this.imageViewTimer.waitTime = duration;
     this.ui.settingsMenu.imageDurationInput.value = Autoplay.settings.imageViewDurationInSeconds;
-    this.injectImageProgressHTML();
+    this.insertImageProgressHTML();
   }
 
   setMinimumVideoViewDuration() {
@@ -555,7 +555,7 @@ class Autoplay {
     Autoplay.settings.minimumVideoDuration = duration;
     this.videoViewTimer.waitTime = duration;
     this.ui.settingsMenu.minimumVideoDurationInput.value = Autoplay.settings.minimumVideoDurationInSeconds;
-    this.injectVideoProgressHTML();
+    this.insertVideoProgressHTML();
   }
 
   /**

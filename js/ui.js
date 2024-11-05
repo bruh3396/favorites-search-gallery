@@ -1,5 +1,4 @@
-const uiHTML = `
-<div id="favorites-top-bar" class="light-green-gradient not-highlightable">
+const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-highlightable">
   <style>
     #favorites-top-bar {
       position: sticky;
@@ -490,19 +489,24 @@ const uiHTML = `
         <span id="find-favorite" class="light-green-gradient" style="display: none;">
           <button title="Scroll to favorite using its ID" id="find-favorite-button"
             style="white-space: nowrap; ">Find</button>
-          <input type="number" id="find-favorite-input" type="text" placeholder="ID">
+          <input type="number" id="find-favorite-input" placeholder="ID">
         </span>
         <button title="Remove cached favorites and preferences" id="reset-button">Reset</button>
         <span id="favorites-pagination-placeholder"></span>
         <span id="help-links-container">
           <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
           |
+
           <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
             target="_blank">Feedback</a>
           |
-          <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report Issue</a>
+
+          <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
+            Issue</a>
           |
+
           <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
+
             <div id="whats-new-container" class="light-green-gradient">
               <h4>Older:</h4>
               <h5>Features:</h5>
@@ -528,17 +532,30 @@ const uiHTML = `
               </ul>
               <h5>Gallery Hotkeys:</h5>
               <ul>
-                <li><span class="hotkey">F</span> -- Add favorite</li>
-                <li><span class="hotkey">X</span> -- Remove favorite</li>
-                <li><span class="hotkey">M</span> -- Mute/unmute video</li>
-                <li><span class="hotkey">B</span> -- Toggle background</li>
+                <li>
+                  <span class="hotkey">F</span> -- Add favorite
+                </li>
+                <li>
+                  <span class="hotkey">X</span> -- Remove favorite
+                </li>
+                <li>
+                  <span class="hotkey">M</span> -- Mute/unmute video
+                </li>
+                <li>
+                  <span class="hotkey">B</span> -- Toggle background
+                </li>
               </ul>
-
               <h5>Other Controls:</h5>
               <ul>
-                <li><span class="hotkey">Shift + Scroll Wheel</span> -- Change column count</li>
-                <li><span class="hotkey">T</span> -- Toggle tooltips</li>
-                <li><span class="hotkey">D</span> -- Toggle details</li>
+                <li>
+                  <span class="hotkey">Shift + Scroll Wheel</span> -- Change column count
+                </li>
+                <li>
+                  <span class="hotkey">T</span> -- Toggle tooltips
+                </li>
+                <li>
+                  <span class="hotkey">D</span> -- Toggle details
+                </li>
               </ul>
               <span style="display: none;">
                 <h5>Performance:</h5>
@@ -547,7 +564,6 @@ const uiHTML = `
                   <li>Reduced load time</li>
                   <li>Seamless video playback (desktop)</li>
                 </ul>
-
                 <h5>Planned Features:</h5>
                 <ul>
                   <li>Edit custom tags (basically folders/pools) on:</li>
@@ -557,37 +573,56 @@ const uiHTML = `
                   </ul>
                   <li>Fix comic strips</li>
                   <li>Gallery autoplay</li>
+                </ul>
               </span>
-
-              </ul>
             </div>
           </a>
-
         </span>
       </div>
       <div>
         <textarea name="tags" id="favorites-search-box" placeholder="Search with Tags and/or IDs"
           spellcheck="false"></textarea>
       </div>
-
       <div id="left-favorites-panel-bottom-row">
         <div id="favorite-options-container">
-          <div id="show-options"><label class="checkbox" title="Show more options"><input type="checkbox"
-                id="options-checkbox"> More Options <span class="option-hint"> (O)</span></label></div>
+          <div id="show-options">
+            <label class="checkbox" title="Show more options">
+              <input type="checkbox" id="options-checkbox"> More Options
+              <span class="option-hint">
+                (O)</span>
+            </label>
+          </div>
           <div id="favorite-options">
-            <div><label class="checkbox" title="Enable gallery and other features on search pages"><input
-                  type="checkbox" id="enable-on-search-pages">
-                Enhance Search Pages</label></div>
-            <div style="display: none;"><label class="checkbox" title="Toggle remove buttons"><input type="checkbox"
-                  id="show-remove-favorite-buttons">
-                Remove Buttons<span class="option-hint"> (R)</span></label></div>
-            <div style="display: none;"><label class="checkbox" title="Toggle add favorite buttons"><input
-                  type="checkbox" id="show-add-favorite-buttons">
-                Add Favorite Buttons<span class="option-hint"> (R)</span></label></div>
-            <div><label class="checkbox" title="Exclude blacklisted tags from search"><input type="checkbox"
-                  id="filter-blacklist-checkbox"> Exclude Blacklist</label></div>
-            <div><label class="checkbox" title="Enable fancy image hovering (experimental)"><input type="checkbox"
-                  id="fancy-image-hovering-checkbox"> Fancy Hovering</label></div>
+            <div>
+              <label class="checkbox" title="Enable gallery and other features on search pages">
+                <input type="checkbox" id="enable-on-search-pages">
+                Enhance Search Pages
+              </label>
+            </div>
+            <div style="display: none;">
+              <label class="checkbox" title="Toggle remove buttons">
+                <input type="checkbox" id="show-remove-favorite-buttons">
+                Remove Buttons
+                <span class="option-hint"> (R)</span>
+              </label>
+            </div>
+            <div style="display: none;">
+              <label class="checkbox" title="Toggle add favorite buttons">
+                <input type="checkbox" id="show-add-favorite-buttons">
+                Add Favorite Buttons
+                <span class="option-hint"> (R)</span>
+              </label>
+            </div>
+            <div>
+              <label class="checkbox" title="Exclude blacklisted tags from search">
+                <input type="checkbox" id="filter-blacklist-checkbox"> Exclude Blacklist
+              </label>
+            </div>
+            <div>
+              <label class="checkbox" title="Enable fancy image hovering (experimental)">
+                <input type="checkbox" id="fancy-image-hovering-checkbox"> Fancy Hovering
+              </label>
+            </div>
           </div>
           <div id="additional-favorite-options">
             <div id="sort-container" title="Sort order of search results">
@@ -636,9 +671,13 @@ const uiHTML = `
               </span>
               <br>
               <span class="number">
-                <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+                <hold-button class="number-arrow-down" pollingtime="50">
+                  <span>&lt;</span>
+                </hold-button>
                 <input type="number" id="results-per-page-input" min="100" max="10000" step="50">
-                <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+                <hold-button class="number-arrow-up" pollingtime="50">
+                  <span>&gt;</span>
+                </hold-button>
               </span>
             </div>
             <div id="column-resize-container" title="Set the number of favorites per row">
@@ -648,16 +687,24 @@ const uiHTML = `
                 </span>
                 <br>
                 <span class="number">
-                  <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+                  <hold-button class="number-arrow-down" pollingtime="50">
+                    <span>&lt;</span>
+                  </hold-button>
                   <input type="number" id="column-resize-input" min="2" max="20">
-                  <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+                  <hold-button class="number-arrow-up" pollingtime="50">
+                    <span>&gt;</span>
+                  </hold-button>
                 </span>
               </div>
             </div>
           </div>
         </div>
         <div id="show-ui-container">
-          <div id="show-ui-div"><label class="checkbox" title="Toggle UI"><input type="checkbox" id="show-ui">UI<span class="option-hint"> (U)</span></label>
+          <div id="show-ui-div">
+            <label class="checkbox" title="Toggle UI">
+              <input type="checkbox" id="show-ui">UI
+              <span class="option-hint"> (U)</span>
+            </label>
           </div>
         </div>
       </div>
@@ -665,8 +712,7 @@ const uiHTML = `
     <div id="right-favorites-panel" style="flex: 1;"></div>
   </div>
   <div class="loading-wheel" id="loading-wheel" style="display: none;"></div>
-</div>
-`;/* eslint-disable no-bitwise */
+</div>`;/* eslint-disable no-bitwise */
 
 if (onFavoritesPage()) {
   document.getElementById("content").insertAdjacentHTML("beforebegin", uiHTML);
@@ -1111,7 +1157,7 @@ function toggleAuxillaryButtons() {
 function hideThumbHoverOutlines(hideOutlines) {
   const style = hideOutlines ? STYLES.thumbHoverOutlineDisabled : STYLES.thumbHoverOutline;
 
-  injectStyleHTML(style, "thumb-hover-outlines");
+  insertStyleHTML(style, "thumb-hover-outlines");
 }
 
 /**
@@ -1120,7 +1166,7 @@ function hideThumbHoverOutlines(hideOutlines) {
 function toggleAuxillaryButtonVisibility(value) {
   const visibility = value ? "visible" : "hidden";
 
-  injectStyleHTML(`
+  insertStyleHTML(`
       .auxillary-button {
         visibility: ${visibility} !important;
       }
@@ -1138,7 +1184,7 @@ function changeColumnCount(count) {
     return;
   }
   count = clamp(parseInt(count), 4, 20);
-  injectStyleHTML(`
+  insertStyleHTML(`
     #content {
       grid-template-columns: repeat(${count}, 1fr) !important;
     }
@@ -1191,7 +1237,7 @@ function configureMobileUI() {
     return;
   }
   FAVORITE_INPUTS.performanceProfile.parentElement.style.display = "none";
-  injectStyleHTML(`
+  insertStyleHTML(`
       .thumb, .thumb-node {
         > div > canvas {
           display: none;
@@ -1263,7 +1309,7 @@ function configureDesktopUI() {
   if (onMobileDevice()) {
     return;
   }
-  injectStyleHTML(`
+  insertStyleHTML(`
     .checkbox {
 
       &:hover {
@@ -1382,7 +1428,7 @@ function setMainButtonInteractability(value) {
 function toggleOptionHints(value) {
   const html = value ? "" : ".option-hint {display:none;}";
 
-  injectStyleHTML(html, "option-hint-visibility");
+  insertStyleHTML(html, "option-hint-visibility");
 }
 
 async function addHintsOption() {
