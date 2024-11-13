@@ -22,6 +22,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
     }
 
     #left-favorites-panel {
+      flex: 10 !important;
+
       >div:first-of-type {
         margin-bottom: 5px;
 
@@ -49,7 +51,9 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
     }
 
     #right-favorites-panel {
-      margin-left: 10px;
+      flex: 9 !important;
+      margin-left: 30px;
+      display: none;
     }
 
     textarea {
@@ -216,42 +220,20 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
     }
 
-    #favorite-options-container {
-      display: flex;
-      flex-flow: row wrap;
-      min-width: 50%;
-
-      >div {
-        flex: 1;
-        padding-right: 6px;
-        flex-basis: 45%;
-      }
-    }
-
     #column-resize-container {
       >div {
         align-content: center;
       }
     }
 
-    #column-resize-input {
-      margin: auto;
-      /* margin: 0;
-      position: relative;
-      bottom: 9px;
-      width: 30px;
-      height: 25px;
-      font-size: larger; */
-    }
-
     #find-favorite {
       margin-top: 7px;
 
       >input {
-        border-radius: 6px;
-        height: 35px;
         width: 75px;
-        border: 1px solid;
+        /* border-radius: 6px;
+        height: 35px;
+        border: 1px solid; */
       }
     }
 
@@ -360,39 +342,43 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 
     #left-favorites-panel-bottom-row {
       display: flex;
-      flex-flow: row wrap;
       margin-top: 10px;
+      flex-wrap: nowrap;
 
       >div {
         flex: 1;
       }
-    }
-
-    #additional-favorite-options {
-      >div:first-child {
-        margin-top: 6px;
-      }
-
-      >div:not(:first-child) {
-        margin-top: 11px;
-      }
-
-      select {
-        cursor: pointer;
-      }
 
       .number {
-        font-size: 20px;
+        font-size: 16px;
 
         >input {
           width: 5ch;
         }
       }
+    }
 
-      .number-label-container {
-        display: inline-block;
-        min-width: 130px;
+    #additional-favorite-options {
+      /* display: flex;
+      flex-wrap: wrap;
+      flex-direction: row; */
+
+      >div {
+        /* flex-basis: 45%; */
       }
+
+      >div:not(:last-child) {
+        padding-bottom: 10px;
+      }
+
+      select {
+        cursor: pointer;
+      }
+    }
+
+    .number-label-container {
+      display: inline-block;
+      min-width: 130px;
     }
 
     #performance-profile {
@@ -412,7 +398,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
     }
 
     #rating-container {
-      margin-top: 3px !important;
+      white-space: nowrap;
     }
 
     #allowed-ratings {
@@ -451,12 +437,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
     }
 
-    #sort-ascending {
-      margin: 0;
-      bottom: -6px;
-      position: relative;
-    }
-
     .auxillary-button {
       visibility: hidden;
     }
@@ -470,6 +450,36 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 
     #favorites-fetch-progress-label {
       color: #3498db;
+    }
+
+    #favorite-options {
+      /* display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+
+      >div {
+        flex-basis: 45%;
+      } */
+    }
+
+    #main-favorite-options-container {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+
+      >div {
+        flex-basis: 45%;
+      }
+    }
+
+    #sort-ascending {
+      position: absolute;
+      top: -2px;
+      left: 150px;
+    }
+
+    #find-favorite-input {
+      border: none !important;
     }
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
@@ -486,11 +496,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
         <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Empty the search box" id="clear-button">Clear</button>
-        <span id="find-favorite" class="light-green-gradient" style="display: none;">
-          <button title="Scroll to favorite using its ID" id="find-favorite-button"
-            style="white-space: nowrap; ">Find</button>
-          <input type="number" id="find-favorite-input" placeholder="ID">
-        </span>
         <button title="Remove cached favorites and preferences" id="reset-button">Reset</button>
         <span id="favorites-pagination-placeholder"></span>
         <span id="help-links-container">
@@ -584,132 +589,158 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
           spellcheck="false"></textarea>
       </div>
       <div id="left-favorites-panel-bottom-row">
-        <div id="favorite-options-container">
-          <div id="show-options">
-            <label class="checkbox" title="Show more options">
-              <input type="checkbox" id="options-checkbox"> More Options
-              <span class="option-hint">
-                (O)</span>
-            </label>
-          </div>
-          <div id="favorite-options">
-            <div>
-              <label class="checkbox" title="Enable gallery and other features on search pages">
-                <input type="checkbox" id="enable-on-search-pages">
-                Enhance Search Pages
-              </label>
-            </div>
-            <div style="display: none;">
-              <label class="checkbox" title="Toggle remove buttons">
-                <input type="checkbox" id="show-remove-favorite-buttons">
-                Remove Buttons
-                <span class="option-hint"> (R)</span>
-              </label>
-            </div>
-            <div style="display: none;">
-              <label class="checkbox" title="Toggle add favorite buttons">
-                <input type="checkbox" id="show-add-favorite-buttons">
-                Add Favorite Buttons
-                <span class="option-hint"> (R)</span>
-              </label>
-            </div>
-            <div>
-              <label class="checkbox" title="Exclude blacklisted tags from search">
-                <input type="checkbox" id="filter-blacklist-checkbox"> Exclude Blacklist
-              </label>
-            </div>
-            <div>
-              <label class="checkbox" title="Enable fancy image hovering (experimental)">
-                <input type="checkbox" id="fancy-image-hovering-checkbox"> Fancy Hovering
-              </label>
-            </div>
-          </div>
-          <div id="additional-favorite-options">
-            <div id="sort-container" title="Sort order of search results">
-              <div>
-                <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
-                <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+        <div id="bottom-panel-1">
+          <label class="checkbox" title="Show more options">
+            <input type="checkbox" id="options-checkbox"> More Options
+            <span class="option-hint"> (O)</span>
+          </label>
+          <div class="options-container">
+            <div id="main-favorite-options-container">
+              <div id="favorite-options">
+                <div>
+                  <label class="checkbox" title="Enable gallery and other features on search pages">
+                    <input type="checkbox" id="enable-on-search-pages">
+                    Enhance Search Pages
+                  </label>
+                </div>
+                <div style="display: none;">
+                  <label class="checkbox" title="Toggle remove buttons">
+                    <input type="checkbox" id="show-remove-favorite-buttons">
+                    Remove Buttons
+                    <span class="option-hint"> (R)</span>
+                  </label>
+                </div>
+                <div style="display: none;">
+                  <label class="checkbox" title="Toggle add favorite buttons">
+                    <input type="checkbox" id="show-add-favorite-buttons">
+                    Add Favorite Buttons
+                    <span class="option-hint"> (R)</span>
+                  </label>
+                </div>
+                <div>
+                  <label class="checkbox" title="Exclude blacklisted tags from search">
+                    <input type="checkbox" id="filter-blacklist-checkbox"> Exclude Blacklist
+                  </label>
+                </div>
+                <div>
+                  <label class="checkbox" title="Enable fancy image hovering (experimental)">
+                    <input type="checkbox" id="fancy-image-hovering-checkbox"> Fancy Hovering
+                  </label>
+                </div>
+                <div>
+                  <label class="checkbox" title="Show hotkeys and shortcuts">
+                    <input type="checkbox" id="show-hints-checkbox">Hints<span class="option-hint"> (H)</span>
+                  </label>
+                </div>
               </div>
-              <div style="position: relative; bottom: 4px;">
-                <select id="sorting-method" style="width: 150px;">
-                  <option value="default">Default</option>
-                  <option value="score">Score</option>
-                  <option value="width">Width</option>
-                  <option value="height">Height</option>
-                  <option value="create">Date Uploaded</option>
-                  <option value="change">Date Changed</option>
-                  <!-- <option value="id">ID</option> -->
-                </select>
-                <input type="checkbox" id="sort-ascending">
-              </div>
-            </div>
-            <div id="rating-container" title="Filter search results by rating">
-              <label>Rating</label>
-              <br>
-              <div id="allowed-ratings" class="not-highlightable">
-                <input type="checkbox" id="explicit-rating-checkbox" checked>
-                <label for="explicit-rating-checkbox">Explicit</label>
-                <input type="checkbox" id="questionable-rating-checkbox" checked>
-                <label for="questionable-rating-checkbox">Questionable</label>
-                <input type="checkbox" id="safe-rating-checkbox" checked>
-                <label for="safe-rating-checkbox" style="margin: -3px;">Safe</label>
-              </div>
-            </div>
-            <div id="performance-profile-container" title="Improve performance by disabling features">
-              <label for="performance-profile">Performance Profile</label>
-              <br>
-              <select id="performance-profile">
-                <option value="0">Normal</option>
-                <option value="1">Low (no gallery)</option>
-                <option value="2">Potato (only search)</option>
-              </select>
-            </div>
-            <div id="results-per-page-container"
-              title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
-              <span class="number-label-container">
-                <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
-              </span>
-              <br>
-              <span class="number">
-                <hold-button class="number-arrow-down" pollingtime="50">
-                  <span>&lt;</span>
-                </hold-button>
-                <input type="number" id="results-per-page-input" min="100" max="10000" step="50">
-                <hold-button class="number-arrow-up" pollingtime="50">
-                  <span>&gt;</span>
-                </hold-button>
-              </span>
-            </div>
-            <div id="column-resize-container" title="Set the number of favorites per row">
-              <div>
-                <span class="number-label-container">
-                  <label>Columns</label>
-                </span>
-                <br>
-                <span class="number">
-                  <hold-button class="number-arrow-down" pollingtime="50">
-                    <span>&lt;</span>
-                  </hold-button>
-                  <input type="number" id="column-resize-input" min="2" max="20">
-                  <hold-button class="number-arrow-up" pollingtime="50">
-                    <span>&gt;</span>
-                  </hold-button>
-                </span>
+              <div id="dynamic-favorite-options">
               </div>
             </div>
           </div>
         </div>
-        <div id="show-ui-container">
+
+        <div id="bottom-panel-2">
+          <div id="additional-favorite-options-container" class="options-container">
+            <div id="additional-favorite-options">
+              <div id="sort-container" title="Sort order of search results">
+                <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
+                <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+                <div style="position: relative;">
+                  <select id="sorting-method" style="width: 150px;">
+                    <option value="default">Default</option>
+                    <option value="score">Score</option>
+                    <option value="width">Width</option>
+                    <option value="height">Height</option>
+                    <option value="create">Date Uploaded</option>
+                    <option value="change">Date Changed</option>
+                  </select>
+                  <input type="checkbox" id="sort-ascending">
+                </div>
+              </div>
+
+              <div>
+                <div id="results-per-page-container" style="display: inline-block;"
+                  title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
+                  <span class="number-label-container">
+                    <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
+                  </span>
+                  <br>
+                  <span class="number">
+                    <hold-button class="number-arrow-down" pollingtime="50">
+                      <span>&lt;</span>
+                    </hold-button>
+                    <input type="number" id="results-per-page-input" min="100" max="10000" step="50">
+                    <hold-button class="number-arrow-up" pollingtime="50">
+                      <span>&gt;</span>
+                    </hold-button>
+                  </span>
+                </div>
+                <div id="column-resize-container" title="Set the number of favorites per row"
+                  style="display: inline-block;">
+                  <div>
+                    <span class="number-label-container">
+                      <label>Columns</label>
+                    </span>
+                    <br>
+                    <span class="number">
+                      <hold-button class="number-arrow-down" pollingtime="50">
+                        <span>&lt;</span>
+                      </hold-button>
+                      <input type="number" id="column-resize-input" min="2" max="20">
+                      <hold-button class="number-arrow-up" pollingtime="50">
+                        <span>&gt;</span>
+                      </hold-button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div id="rating-container" title="Filter search results by rating">
+                <label>Rating</label>
+                <br>
+                <div id="allowed-ratings" class="not-highlightable">
+                  <input type="checkbox" id="explicit-rating-checkbox" checked>
+                  <label for="explicit-rating-checkbox">Explicit</label>
+                  <input type="checkbox" id="questionable-rating-checkbox" checked>
+                  <label for="questionable-rating-checkbox">Questionable</label>
+                  <input type="checkbox" id="safe-rating-checkbox" checked>
+                  <label for="safe-rating-checkbox" style="margin: -3px;">Safe</label>
+                </div>
+              </div>
+              <div id="performance-profile-container" title="Improve performance by disabling features">
+                <label for="performance-profile">Performance Profile</label>
+                <br>
+                <select id="performance-profile">
+                  <option value="0">Normal</option>
+                  <option value="1">Low (no gallery)</option>
+                  <option value="2">Potato (only search)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="bottom-panel-3">
           <div id="show-ui-div">
             <label class="checkbox" title="Toggle UI">
               <input type="checkbox" id="show-ui">UI
               <span class="option-hint"> (U)</span>
             </label>
           </div>
+          <div class="options-container">
+            <span id="find-favorite">
+              <button title="Find favorite favorite using its ID" id="find-favorite-button"
+                style="white-space: nowrap; ">Find</button>
+              <input type="number" id="find-favorite-input" placeholder="ID">
+            </span>
+          </div>
+        </div>
+
+        <div id="bottom-panel-4">
+
         </div>
       </div>
     </div>
-    <div id="right-favorites-panel" style="flex: 1;"></div>
+    <div id="right-favorites-panel"></div>
   </div>
   <div class="loading-wheel" id="loading-wheel" style="display: none;"></div>
 </div>`;/* eslint-disable no-bitwise */
@@ -717,12 +748,11 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 if (onFavoritesPage()) {
   document.getElementById("content").insertAdjacentHTML("beforebegin", uiHTML);
 }
-const FAVORITE_OPTIONS = [document.getElementById("favorite-options"), document.getElementById("additional-favorite-options")];
 const MAX_SEARCH_HISTORY_LENGTH = 100;
 const FAVORITE_PREFERENCES = {
   showAuxillaryButtons: userIsOnTheirOwnFavoritesPage() ? "showRemoveButtons" : "showAddFavoriteButtons",
   showOptions: "showOptions",
-  filterBlacklist: "filterBlacklistCheckbox",
+  excludeBlacklist: "excludeBlacklist",
   searchHistory: "favoritesSearchHistory",
   findFavorite: "findFavorite",
   thumbSize: "thumbSize",
@@ -759,7 +789,7 @@ const FAVORITE_CHECKBOXES = {
   explicitRating: document.getElementById("explicit-rating-checkbox"),
   questionableRating: document.getElementById("questionable-rating-checkbox"),
   safeRating: document.getElementById("safe-rating-checkbox"),
-  showHints: null
+  showHints: document.getElementById("show-hints-checkbox")
 };
 const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
@@ -804,7 +834,7 @@ function loadFavoritesPagePreferences() {
   toggleFavoritesOptions(showOptions);
 
   if (userIsOnTheirOwnFavoritesPage()) {
-    FAVORITE_CHECKBOXES.filterBlacklist.checked = getPreference(FAVORITE_PREFERENCES.filterBlacklist, false);
+    FAVORITE_CHECKBOXES.filterBlacklist.checked = getPreference(FAVORITE_PREFERENCES.excludeBlacklist, false);
     favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
   } else {
     FAVORITE_CHECKBOXES.filterBlacklist.checked = true;
@@ -950,7 +980,7 @@ function addEventListenersToFavoritesPage() {
     FAVORITE_INPUTS.searchBox.value = "";
   };
   FAVORITE_CHECKBOXES.filterBlacklist.onchange = () => {
-    setPreference(FAVORITE_PREFERENCES.filterBlacklist, FAVORITE_CHECKBOXES.filterBlacklist.checked);
+    setPreference(FAVORITE_PREFERENCES.excludeBlacklist, FAVORITE_CHECKBOXES.filterBlacklist.checked);
     favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
     favoritesLoader.searchFavorites();
   };
@@ -962,12 +992,11 @@ function addEventListenersToFavoritesPage() {
   };
   FAVORITE_INPUTS.findFavorite.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
-      scrollToThumb(FAVORITE_INPUTS.findFavorite.value);
-      setPreference(FAVORITE_PREFERENCES.findFavorite, FAVORITE_INPUTS.findFavorite.value);
+      FAVORITE_BUTTONS.findFavorite.click();
     }
   });
   FAVORITE_BUTTONS.findFavorite.onclick = () => {
-    scrollToThumb(FAVORITE_INPUTS.findFavorite.value);
+    favoritesLoader.findFavorite(FAVORITE_INPUTS.findFavorite.value);
     setPreference(FAVORITE_PREFERENCES.findFavorite, FAVORITE_INPUTS.findFavorite.value);
   };
   FAVORITE_INPUTS.columnCount.onchange = () => {
@@ -1060,9 +1089,7 @@ function addEventListenersToFavoritesPage() {
         break;
 
       case "h":
-        if (FAVORITE_CHECKBOXES.showHints !== null) {
           FAVORITE_CHECKBOXES.showHints.click();
-        }
         break;
 
       case "s":
@@ -1134,9 +1161,9 @@ function traverseFavoritesSearchHistory(direction) {
  * @param {Boolean} value
  */
 function toggleFavoritesOptions(value) {
-  for (const option of FAVORITE_OPTIONS) {
+  document.querySelectorAll(".options-container").forEach((option) => {
     option.style.display = value ? "block" : "none";
-  }
+  });
 }
 
 function toggleAuxillaryButtons() {
@@ -1216,12 +1243,12 @@ function toggleUI(value) {
   const favoritesTopBar = document.getElementById("favorites-top-bar");
   const favoritesTopBarPanels = document.getElementById("favorites-top-bar-panels");
   const header = document.getElementById("header");
-  const showUIContainer = document.getElementById("show-ui-container");
   const showUIDiv = document.getElementById("show-ui-div");
+  const showUIContainer = document.getElementById("bottom-panel-3");
 
   if (value) {
     header.style.display = "";
-    showUIContainer.appendChild(showUIDiv);
+    showUIContainer.insertAdjacentElement("afterbegin", showUIDiv);
     favoritesTopBarPanels.style.display = "flex";
   } else {
     favoritesTopBar.appendChild(showUIDiv);
@@ -1262,19 +1289,14 @@ function configureMobileUI() {
         position: fixed !important;
         z-index: 30;
         width: 100vw;
-
       }
 
       #content {
         margin-top: 300px !important;
       }
 
-      #show-ui-container {
+      #show-ui-div {
         display: none;
-      }
-
-      #favorite-options-container {
-        display: block !important;
       }
 
       #favorites-top-bar-panels {
@@ -1286,6 +1308,7 @@ function configureMobileUI() {
       }
 
       #left-favorites-panel-bottom-row {
+        display: block !important;
         margin-left: 10px !important;
       }
       `);
@@ -1441,20 +1464,12 @@ async function addHintsOption() {
   }
   const optionHintsEnabled = getPreference(FAVORITE_PREFERENCES.showHints, true);
 
-  createFavoritesOption(
-    "show-hints",
-    "Hints",
-    "Show hotkeys and shortcuts",
-    optionHintsEnabled,
-    (event) => {
-      toggleOptionHints(event.target.checked);
-      setPreference(FAVORITE_PREFERENCES.showHints, event.target.checked);
-    },
-    true,
-    "(H)"
-  );
+  FAVORITE_CHECKBOXES.showHints.checked = optionHintsEnabled;
+  FAVORITE_CHECKBOXES.showHints.onchange = () => {
+    toggleOptionHints(FAVORITE_CHECKBOXES.showHints.checked);
+    setPreference(FAVORITE_PREFERENCES.showHints, FAVORITE_CHECKBOXES.showHints.checked);
+  };
 
-  FAVORITE_CHECKBOXES.showHints = document.getElementById("show-hints-checkbox");
   toggleOptionHints(optionHintsEnabled);
 }
 

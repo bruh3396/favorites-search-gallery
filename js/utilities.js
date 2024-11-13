@@ -39,6 +39,7 @@ const utilitiesHTML = `<style>
   }
 
   .number {
+    white-space: nowrap;
     position: relative;
     margin-top: 5px;
     border: 1px solid;
@@ -383,6 +384,7 @@ const TYPEABLE_INPUTS = new Set([
   "url",
   "datetime"
 ]);
+const CUSTOM_TAGS = loadCustomTags();
 
 /**
  * @param {String} key
@@ -803,10 +805,11 @@ function clearAwesompleteSelection(input) {
  * @returns {HTMLElement | null}
  */
 function createFavoritesOption(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible, optionHint = "") {
-  const favoritesPageOptions = document.getElementById("favorite-options");
+  const id = onMobileDevice() ? "favorite-options" : "dynamic-favorite-options";
+  const placeToInsert = document.getElementById(id);
   const checkboxId = `${optionId}-checkbox`;
 
-  if (favoritesPageOptions === null) {
+  if (placeToInsert === null) {
     return null;
   }
 
@@ -815,7 +818,7 @@ function createFavoritesOption(optionId, optionText, optionTitle, optionIsChecke
   } else {
     optionIsVisible = "none";
   }
-  favoritesPageOptions.insertAdjacentHTML("beforeend", `
+  placeToInsert.insertAdjacentHTML("beforeend", `
     <div id="${optionId}" style="display: ${optionIsVisible}">
       <label class="checkbox" title="${optionTitle}">
 
@@ -1241,18 +1244,14 @@ function enteredOverCaptionTag(event) {
 
 /**
  * @param {String[]} postId
- * @param {Boolean} doAnimation
+ * @param {Boolean} endingAnimation
+ * @param {Boolean} smoothTransition
  */
-function scrollToThumb(postId, doAnimation = true) {
+function scrollToThumb(postId, endingAnimation, smoothTransition) {
   const element = document.getElementById(postId);
   const elementIsNotAThumb = element === null || (!element.classList.contains("thumb") && !element.classList.contains("thumb-node"));
 
   if (elementIsNotAThumb) {
-    if (postId === "") {
-      // alert("Please enter a post ID");
-    } else {
-      // alert(`Favorite with post ID ${postId} not found`);
-    }
     return;
   }
   const rect = element.getBoundingClientRect();
@@ -1261,10 +1260,10 @@ function scrollToThumb(postId, doAnimation = true) {
 
   window.scroll({
     top: rect.top + window.scrollY + (rect.height / 2) - (window.innerHeight / 2) - (favoritesSearchHeight / 2),
-    behavior: "smooth"
+    behavior: smoothTransition ? "smooth" : "instant"
   });
 
-  if (!doAnimation) {
+  if (!endingAnimation) {
     return;
   }
   const image = getImageFromThumb(element);
@@ -1649,6 +1648,52 @@ async function setupCustomNumberWebComponents() {
  */
 function millisecondsToSeconds(milliseconds) {
   return roundToTwoDecimalPlaces(milliseconds / 1000);
+}
+
+/**
+ * @returns {Set.<String>}
+ */
+function loadCustomTags() {
+  return new Set(JSON.parse(localStorage.getItem("customTags")) || []);
+}
+
+/**
+ * @param {String} tags
+ */
+async function setCustomTags(tags) {
+  for (const tag of removeExtraWhiteSpace(tags).split(" ")) {
+    if (tag === "" || CUSTOM_TAGS.has(tag)) {
+      continue;
+    }
+    const isAnOfficialTag = await isOfficialTag(tag);
+
+    if (!isAnOfficialTag) {
+      CUSTOM_TAGS.add(tag);
+    }
+  }
+  localStorage.setItem("customTags", JSON.stringify(Array.from(CUSTOM_TAGS)));
+}
+
+/**
+ * @param {{label: String, value: String, type: String}[]} officialTags
+ * @param {String} searchQuery
+ * @returns {{label: String, value: String, type: String}[]}
+ */
+function mergeOfficialTagsWithCustomTags(officialTags, searchQuery) {
+  const customTags = Array.from(CUSTOM_TAGS);
+  const officialTagValues = new Set(officialTags.map(officialTag => officialTag.value));
+  const mergedTags = officialTags;
+
+  for (const customTag of customTags) {
+    if (!officialTagValues.has(customTag) && customTag.startsWith(searchQuery)) {
+      mergedTags.unshift({
+        label: `${customTag} (custom)`,
+        value: customTag,
+        type: "custom"
+      });
+    }
+  }
+  return mergedTags;
 }
 
 initializeUtilities();

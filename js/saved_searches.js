@@ -216,7 +216,7 @@ class SavedSearches {
       true
     );
 
-    document.getElementById("show-options").insertAdjacentElement("afterend", options);
+    document.getElementById("bottom-panel-2").insertAdjacentElement("afterbegin", options);
   }
 
   addEventListeners() {

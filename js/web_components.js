@@ -65,6 +65,8 @@ class HoldButton extends HTMLElement {
         this.holdingDown = true;
         this.startPolling();
       }
+    }, {
+      passive: true
     });
 
     this.addEventListener("mouseup", (event) => {
@@ -72,6 +74,8 @@ class HoldButton extends HTMLElement {
         this.holdingDown = false;
         this.stopPolling();
       }
+    }, {
+      passive: true
     });
 
     this.addEventListener("mouseleave", () => {
@@ -80,6 +84,8 @@ class HoldButton extends HTMLElement {
         this.holdingDown = false;
       }
       this.stopPolling();
+    }, {
+      passive: true
     });
   }
 
@@ -173,17 +179,25 @@ class NumberComponent {
       if (event.button === 0) {
         this.incrementInput(true);
       }
+    }, {
+      passive: true
     });
     this.downArrow.addEventListener("mousedown", (event) => {
       if (event.button === 0) {
         this.incrementInput(false);
       }
+    }, {
+      passive: true
     });
     this.upArrow.addEventListener("mouseup", () => {
       this.input.onchange();
+    }, {
+      passive: true
     });
     this.downArrow.addEventListener("mouseup", () => {
       this.input.onchange();
+    }, {
+      passive: true
     });
     this.upArrow.onMouseLeaveWhileHoldingDown = () => {
       this.input.onchange();

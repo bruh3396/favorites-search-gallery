@@ -327,6 +327,10 @@ onmessage = (message) => {
    */
   allThumbNodes;
   /**
+   * @type {ThumbNode[]}
+  */
+  latestSearchResults;
+  /**
    * @type {Number}
    */
   finalPageNumber;
@@ -480,6 +484,7 @@ onmessage = (message) => {
 
   initializeFields() {
     this.allThumbNodes = [];
+    this.latestSearchResults = [];
     this.searchResultsWhileFetching = [];
     this.idsRequiringMetadataDatabaseUpdate = [];
     this.finalPageNumber = this.getFinalFavoritesPageNumber();
@@ -1252,6 +1257,7 @@ Tag modifications and saved searches will be preserved.
    * @param {ThumbNode[]} searchResults
    */
   paginateSearchResults(searchResults) {
+    this.latestSearchResults = searchResults;
     searchResults = this.getResultsWithAllowedRatings(searchResults);
     this.updateMatchCount(searchResults.length);
     this.insertPaginationContainer();
@@ -1439,7 +1445,6 @@ Tag modifications and saved searches will be preserved.
     this.currentFavoritesPageNumber = pageNumber;
     this.updatePaginationUi(pageNumber, searchResults);
     this.createPaginatedFavoritesPage(searchResults, start, end);
-    // this.reAddThumbNodeEventListeners(searchResults);
     this.resetFlagsThatImplyDifferentSearchResults();
 
     if (FavoritesLoader.currentLoadingState !== FavoritesLoader.loadingStates.loadingFavoritesFromDatabase) {
@@ -1497,11 +1502,13 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   createPaginatedFavoritesPage(searchResults, start, end) {
-    const newThumbNodes = this.sortThumbNodes(searchResults).slice(start, end);
+    const sortedSearchResults = this.sortThumbNodes(searchResults);
+
+    this.latestSearchResults = sortedSearchResults;
     const content = document.getElementById("content");
     const newContent = document.createDocumentFragment();
 
-    for (const thumbNode of newThumbNodes) {
+    for (const thumbNode of sortedSearchResults.slice(start, end)) {
       thumbNode.insertAtEndOfContent(newContent);
     }
     content.innerHTML = "";
@@ -1535,7 +1542,7 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   setPaginationLabel(start, end, searchResultsLength) {
-    end = Math.min(end, searchResultsLength);
+    end = Math.min(end - 1, searchResultsLength);
 
     if (this.paginationLabel === undefined) {
       this.paginationLabel = document.getElementById("pagination-label");
@@ -1737,6 +1744,28 @@ Tag modifications and saved searches will be preserved.
    */
   matchesSearchAndRating(searchCommand, thumbNode) {
     return this.ratingIsAllowed(thumbNode) && searchCommand.matches(thumbNode);
+  }
+
+  /**
+   * @param {Number} id
+   */
+  findFavorite(id) {
+    const searchResults = this.latestSearchResults;
+    const searchResultIds = searchResults.map(thumbNode => thumbNode.id);
+    const index = searchResultIds.indexOf(id);
+
+    if (index === -1) {
+      return;
+    }
+    const pageNumber = Math.floor(index / this.resultsPerPage) + 1;
+
+    dispatchEvent(new CustomEvent("foundFavorite", {
+      detail: id
+    }));
+    this.changeResultsPage(pageNumber, searchResults);
+    setTimeout(() => {
+      scrollToThumb(id, true, false);
+    }, 600);
   }
 }
 

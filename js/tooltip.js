@@ -129,8 +129,8 @@ class Tooltip {
     if (!onFavoritesPage()) {
       return;
     }
-    window.addEventListener("favoritesFetched", (event) => {
-      this.addEventListenersToThumbs.bind(this)(event.detail);
+    window.addEventListener("favoritesFetched", () => {
+      this.addEventListenersToThumbs.bind(this)();
     });
     window.addEventListener("favoritesLoaded", () => {
       this.addEventListenersToThumbs.bind(this)();
@@ -181,6 +181,10 @@ class Tooltip {
 
     for (const thumb of thumbs) {
       const image = getImageFromThumb(thumb);
+
+      if (image.onmouseenter !== null) {
+        continue;
+      }
 
       image.onmouseenter = (event) => {
         if (enteredOverCaptionTag(event)) {

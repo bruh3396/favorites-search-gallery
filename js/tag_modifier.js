@@ -89,12 +89,20 @@ class TagModifier {
    * @type {Boolean}
   */
   static get disabled() {
+    if (onMobileDevice()) {
+      return true;
+    }
+
     if (onFavoritesPage()) {
       return false;
     }
     return getPreference(TagModifier.preferences.modifyTagsOutsideFavoritesPage, false);
   }
 
+  /**
+   * @type {AbortController}
+  */
+  tagEditModeAbortController;
   /**
    * @type {{container: HTMLDivElement, checkbox: HTMLInputElement}}
    */
@@ -125,6 +133,7 @@ class TagModifier {
     if (TagModifier.disabled) {
       return;
     }
+    this.tagEditModeAbortController = new AbortController();
     this.favoritesOption = {};
     this.favoritesUI = {};
     this.selectedThumbNodes = [];
@@ -144,7 +153,7 @@ class TagModifier {
     if (!onFavoritesPage()) {
       return;
     }
-    document.getElementById("left-favorites-panel-bottom-row").insertAdjacentHTML("beforeend", tagModifierHTML);
+    document.getElementById("bottom-panel-4").insertAdjacentHTML("beforeend", tagModifierHTML);
     this.favoritesOption.container = document.getElementById("tag-modifier-container");
     this.favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox");
     this.favoritesUI.container = document.getElementById("tag-modifier-ui-container");
@@ -233,6 +242,9 @@ class TagModifier {
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
     });
+    window.addEventListener("changedPage", () => {
+      this.highlightSelectedThumbsOnPageChange();
+    });
   }
 
   addSearchPageEventListeners() {
@@ -247,6 +259,24 @@ class TagModifier {
       return;
     }
     1;
+  }
+
+  highlightSelectedThumbsOnPageChange() {
+    if (!this.atLeastOneFavoriteIsSelected) {
+      return;
+    }
+    const thumbNodes = Array.from(getAllThumbs())
+      .map(thumb => ThumbNode.allThumbNodes.get(thumb.id));
+
+    for (const thumbNode of thumbNodes) {
+      if (thumbNode === undefined) {
+        return;
+      }
+
+      if (this.isSelectedForModification(thumbNode)) {
+        this.highlightThumbNode(thumbNode, true);
+      }
+    }
   }
 
   /**
@@ -303,19 +333,25 @@ class TagModifier {
    * @param {Boolean} value
    */
   toggleTagEditModeEventListeners(value) {
-    for (const thumbNode of ThumbNode.allThumbNodes.values()) {
-      if (thumbNode.root === undefined) {
-        continue;
-      }
-
-      if (value) {
-        thumbNode.root.onclick = () => {
-          this.toggleThumbSelection(thumbNode.root);
-        };
-      } else {
-        thumbNode.root.onclick = null;
-      }
+    if (!value) {
+      this.tagEditModeAbortController.abort();
+      this.tagEditModeAbortController = new AbortController();
+      return;
     }
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.classList.contains("thumb-node")) {
+        return;
+      }
+      const thumbNode = ThumbNode.allThumbNodes.get(event.target.id);
+
+      if (thumbNode !== undefined) {
+        this.toggleThumbSelection(thumbNode);
+      }
+    }, {
+      signal: this.tagEditModeAbortController.signal
+    });
+
   }
 
   /**
@@ -339,29 +375,47 @@ class TagModifier {
     }
 
     for (const thumbNode of ThumbNode.allThumbNodes.values()) {
-      this.toggleThumbSelection(thumbNode.root, false);
+      this.toggleThumbSelection(thumbNode, false);
     }
     this.atLeastOneFavoriteIsSelected = false;
   }
 
   selectAll() {
     for (const thumbNode of ThumbNode.thumbNodesMatchedBySearch.values()) {
-      this.toggleThumbSelection(thumbNode.root, true);
+      this.toggleThumbSelection(thumbNode, true);
     }
   }
 
   /**
-   * @param {HTMLElement} thumb
+   * @param {ThumbNode} thumbNode
    * @param {Boolean} value
    */
-  toggleThumbSelection(thumb, value) {
+  toggleThumbSelection(thumbNode, value) {
     this.atLeastOneFavoriteIsSelected = true;
 
     if (value === undefined) {
-      thumb.classList.toggle("tag-modifier-selected");
-    } else {
-      thumb.classList.toggle("tag-modifier-selected", value);
+      value = !this.isSelectedForModification(thumbNode);
     }
+    thumbNode.selectedForTagModification = value ? true : undefined;
+    this.highlightThumbNode(thumbNode, value);
+  }
+
+  /**
+   * @param {ThumbNode} thumbNode
+   * @param {Boolean} value
+   */
+  highlightThumbNode(thumbNode, value) {
+    if (thumbNode.root !== undefined) {
+      thumbNode.root.classList.toggle("tag-modifier-selected", value);
+    }
+  }
+
+  /**
+   * @param {ThumbNode} thumbNode
+   * @returns {Boolean}
+   */
+  isSelectedForModification(thumbNode) {
+    return thumbNode.selectedForTagModification !== undefined;
   }
 
   /**
@@ -395,11 +449,11 @@ class TagModifier {
       return;
     }
 
-    for (const [id, thumbNode] of ThumbNode.allThumbNodes.entries()) {
-      if (thumbNode.root.classList.contains("tag-modifier-selected")) {
+    for (const thumbNode of ThumbNode.allThumbNodes.values()) {
+      if (this.isSelectedForModification(thumbNode)) {
         const additionalTags = remove ? thumbNode.removeAdditionalTags(tagsToModify) : thumbNode.addAdditionalTags(tagsToModify);
 
-        TagModifier.tagModifications.set(id, additionalTags);
+        TagModifier.tagModifications.set(thumbNode.id, additionalTags);
         modifiedTagsCount += 1;
       }
     }
@@ -528,4 +582,4 @@ class TagModifier {
   }
 }
 
-// const tagModifier = new TagModifier();
+const tagModifier = new TagModifier();

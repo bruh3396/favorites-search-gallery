@@ -394,6 +394,9 @@ class Caption {
     for (const thumb of thumbs) {
       const imageContainer = getImageFromThumb(thumb).parentElement;
 
+      if (imageContainer.onmouseenter !== null) {
+        continue;
+      }
       imageContainer.onmouseenter = () => {
         this.currentThumb = thumb;
         this.attachToThumb(thumb);

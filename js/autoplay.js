@@ -277,7 +277,7 @@ class Autoplay {
   /**
    * @type {AutoplayListenerList}
   */
-  subscribers;
+  events;
   /**
    * @type {AbortController}
   */
@@ -316,13 +316,13 @@ class Autoplay {
   menuIsVisible;
 
   /**
-   * @param {AutoplayListenerList} subscribers
+   * @param {AutoplayListenerList} events
    */
-  constructor(subscribers) {
+  constructor(events) {
     if (Autoplay.disabled) {
       return;
     }
-    this.initializeSubscribers(subscribers);
+    this.initializeEvents(events);
     this.initializeFields();
     this.initializeTimers();
     this.insertHTML();
@@ -332,14 +332,14 @@ class Autoplay {
   }
 
   /**
-   * @param {AutoplayListenerList} subscribers
+   * @param {AutoplayListenerList} events
    */
-  initializeSubscribers(subscribers) {
-    this.subscribers = subscribers;
+  initializeEvents(events) {
+    this.events = events;
 
-    const onComplete = subscribers.onComplete;
+    const onComplete = events.onComplete;
 
-    this.subscribers.onComplete = () => {
+    this.events.onComplete = () => {
       if (this.active && !this.paused) {
         onComplete();
       }
@@ -522,9 +522,9 @@ class Autoplay {
     this.active = value;
 
     if (value) {
-      this.subscribers.onEnable();
+      this.events.onEnable();
     } else {
-      this.subscribers.onDisable();
+      this.events.onDisable();
     }
   }
 
@@ -622,6 +622,7 @@ class Autoplay {
     this.ui.container.style.visibility = "hidden";
     this.removeAutoplayEventListeners();
     this.stopImageViewTimer();
+    this.stopVideoViewTimer();
     this.forceHideMenu();
   }
 
@@ -634,26 +635,26 @@ class Autoplay {
       this.ui.playButton.title = "Resume Autoplay";
       this.stopImageViewTimer();
       this.stopVideoViewTimer();
-      this.subscribers.onPause();
+      this.events.onPause();
     } else {
       this.ui.playButton.src = Autoplay.menuIconImageURLs.pause;
       this.ui.playButton.title = "Pause Autoplay";
       this.startViewTimer(this.currentThumb);
-      this.subscribers.onResume();
+      this.events.onResume();
     }
   }
 
   onVideoEnded() {
     if (this.videoViewTimer.timeout === null) {
-      this.subscribers.onComplete();
+      this.events.onComplete();
     } else {
-      this.subscribers.onVideoEndedBeforeMinimumViewTime();
+      this.events.onVideoEndedBeforeMinimumViewTime();
     }
   }
 
   addAutoplayEventListeners() {
     this.imageViewTimer.onCooldownEnd = () => {
-      this.subscribers.onComplete();
+      this.events.onComplete();
     };
     document.addEventListener("mousemove", () => {
       this.showMenu();
