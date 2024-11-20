@@ -181,7 +181,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
@@ -489,7 +489,7 @@ class ThumbUpscaler {
         .then((blob) => {
           createImageBitmap(blob)
             .then((imageBitmap) => {
-              this.upscaleCanvas(request, imageBitmap);
+              this.upscale(request, imageBitmap);
             });
         });
       await sleep(50);
@@ -500,7 +500,7 @@ class ThumbUpscaler {
    * @param {RenderRequest} request
    * @param {ImageBitmap} imageBitmap
    */
-  upscaleCanvas(request, imageBitmap) {
+  upscale(request, imageBitmap) {
     if (this.onSearchPage || imageBitmap === undefined || !this.canvases.has(request.id)) {
       return;
     }
@@ -702,7 +702,7 @@ class ImageRenderer {
 
   /**
    * @param {RenderRequest} request
-   * @param {*} batchRequestId
+   * @param {Number} batchRequestId
    */
   async renderImage(request, batchRequestId) {
     this.incompleteRenderRequests.set(request.id, request);
@@ -730,7 +730,6 @@ class ImageRenderer {
     if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
       return;
     }
-
     const imageBitmap = await createImageBitmap(blob);
 
     if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
@@ -742,7 +741,7 @@ class ImageRenderer {
       request
     });
     this.incompleteRenderRequests.delete(request.id);
-    this.thumbUpscaler.upscaleCanvas(request, imageBitmap);
+    this.thumbUpscaler.upscale(request, imageBitmap);
     postMessage({
       action: "renderCompleted",
       extension: request.extension,
@@ -913,6 +912,12 @@ class ImageRenderer {
     });
   }
 
+  upscaleAllRenderedThumbs() {
+    for (const render of this.renders.values()) {
+      this.thumbUpscaler.upscale(render.request, render.imageBitmap);
+    }
+  }
+
   onmessage(message) {
     let batchRenderRequest;
 
@@ -953,6 +958,10 @@ class ImageRenderer {
 
       case "changeCanvasOrientation":
         this.changeCanvasOrientation(message.usingLandscapeOrientation);
+        break;
+
+      case "upscaleAllRenderedThumbs":
+        this.upscaleAllRenderedThumbs();
         break;
 
       default:
@@ -1068,6 +1077,13 @@ onmessage = (message) => {
     cursorVisibilityCooldownTime: 500,
     additionalVideoPlayerCount: onMobileDevice() ? 0 : 2,
     renderAroundAggressively: true,
+    loopAtEndOfGalleryValue: false,
+    get loopAtEndOfGallery() {
+      if (!onFavoritesPage() || !Gallery.finishedLoading) {
+        return true;
+      }
+      return this.loopAtEndOfGalleryValue;
+    },
     debugEnabled: false,
     developerMode: true
   };
@@ -1075,6 +1091,7 @@ onmessage = (message) => {
   static backgroundRenderingOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
   static addOrRemoveFavoriteCooldown = new Cooldown(Gallery.settings.addFavoriteCooldownTime, true);
   static cursorVisibilityCooldown = new Cooldown(Gallery.settings.cursorVisibilityCooldownTime);
+  static finishedLoading = onSearchPage();
 
   /**
    * @returns {Boolean}
@@ -1152,6 +1169,10 @@ onmessage = (message) => {
    */
   visibleThumbs;
   /**
+   * @type {ThumbNode[]}
+  */
+  latestSearchResults;
+  /**
    * @type {Object.<Number, String>}
    */
   imageExtensions;
@@ -1159,6 +1180,10 @@ onmessage = (message) => {
    * @type {String}
   */
   foundFavoriteId;
+  /**
+   * @type {String}
+  */
+  changedPageInGalleryDirection;
   /**
    * @type {Number}
    */
@@ -1194,15 +1219,18 @@ onmessage = (message) => {
   /**
    * @type {Boolean}
    */
-  finishedLoading;
-  /**
-   * @type {Boolean}
-   */
   showOriginalContentOnHover;
   /**
    * @type {Boolean}
    */
   enlargeOnClickOnMobile;
+
+  /**
+   * @type {Boolean}
+  */
+  get changedPageWhileInGallery() {
+    return this.changedPageInGalleryDirection !== null;
+  }
 
   constructor() {
     if (Gallery.disabled) {
@@ -1233,8 +1261,10 @@ onmessage = (message) => {
     this.transferredCanvases = new Map();
     this.videoClips = new Map();
     this.visibleThumbs = [];
+    this.latestSearchResults = [];
     this.imageExtensions = {};
     this.foundFavoriteId = null;
+    this.changedPageInGalleryDirection = null;
     this.recentlyDiscoveredImageExtensionCount = 0;
     this.currentlySelectedThumbIndex = 0;
     this.lastSelectedThumbIndexBeforeEnteringGallery = 0;
@@ -1243,12 +1273,10 @@ onmessage = (message) => {
     this.recentlyExitedGallery = false;
     this.leftPage = false;
     this.favoritesWereFetched = false;
-    this.findingFavorite = false;
-    this.finishedLoading = onSearchPage();
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
     Gallery.backgroundRenderingOnPageChangeCooldown.onDebounceEnd = () => {
-      this.renderImagesOnPageChange();
+      this.onPageChange();
     };
   }
 
@@ -1499,7 +1527,7 @@ onmessage = (message) => {
 
         this.renderImagesInTheBackground();
 
-        if (thumb !== null && !this.finishedLoading) {
+        if (thumb !== null && !Gallery.finishedLoading) {
           this.upscaleAnimatedThumbsAround(thumb);
         }
       }, 650);
@@ -1508,7 +1536,7 @@ onmessage = (message) => {
     });
     window.addEventListener("favoritesLoaded", () => {
       Gallery.backgroundRenderingOnPageChangeCooldown.waitTime = 1000;
-      this.finishedLoading = true;
+      Gallery.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
       this.findImageExtensionsInTheBackground();
@@ -1519,27 +1547,33 @@ onmessage = (message) => {
     }, {
       once: true
     });
+    window.addEventListener("paginatedSearchResults", (event) => {
+      this.latestSearchResults = event.detail;
+    });
     window.addEventListener("changedPage", () => {
-      this.clearMainCanvas();
-      this.clearVideoSources();
-      this.toggleOriginalContentVisibility(false);
-      this.deleteAllRenders();
-
-      if (Gallery.settings.debugEnabled) {
-        Array.from(getAllThumbs()).forEach((thumb) => {
-          thumb.classList.remove("loaded");
-          thumb.classList.remove("debug-selected");
-        });
-      }
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateVisibleThumbs();
 
-      setTimeout(() => {
-        if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
-          this.renderImagesOnPageChange();
+      if (this.changedPageWhileInGallery) {
+        setTimeout(() => {
+          this.imageRenderer.postMessage({
+            action: "upscaleAllRenderedThumbs"
+          });
+        }, 100);
+      } else {
+        this.clearMainCanvas();
+        this.clearVideoSources();
+        this.toggleOriginalContentVisibility(false);
+        this.deleteAllRenders();
+
+        if (Gallery.settings.debugEnabled) {
+          Array.from(getAllThumbs()).forEach((thumb) => {
+            thumb.classList.remove("loaded");
+            thumb.classList.remove("debug-selected");
+          });
         }
-        this.foundFavoriteId = null;
-      }, 100);
+      }
+      this.onPageChange();
     });
     window.addEventListener("foundFavorite", (event) => {
       this.foundFavoriteId = event.detail;
@@ -1551,6 +1585,12 @@ onmessage = (message) => {
     });
     window.addEventListener("favoriteMetadataFetched", (event) => {
       this.assignImageExtension(event.detail.id, event.detail.extension);
+    });
+    window.addEventListener("didNotChangePageInGallery", (event) => {
+      if (this.inGallery) {
+        this.setNextSelectedThumbIndex(event.detail);
+        this.traverseGalleryHelper();
+      }
     });
   }
 
@@ -1913,14 +1953,46 @@ onmessage = (message) => {
     const imageThumbsToRender = this.getVisibleUnrenderedImageThumbs()
       .slice(0, Gallery.settings.maxImagesToRenderInBackground);
 
-    this.renderImages(imageThumbsToRender, "background");
+    this.renderImages(imageThumbsToRender);
   }
 
-  renderImagesOnPageChange() {
-    if (this.foundFavoriteId === null) {
-      this.renderImagesInTheBackground();
+  onPageChange() {
+    this.onPageChangeHelper();
+    this.foundFavoriteId = null;
+    this.changedPageInGalleryDirection = null;
+  }
+
+  onPageChangeHelper() {
+    if (this.visibleThumbs.length <= 0) {
       return;
     }
+
+    if (this.changedPageInGalleryDirection !== null) {
+      this.onPageChangedInGallery();
+      return;
+    }
+
+    if (this.foundFavoriteId !== null) {
+      this.onFavoriteFound();
+      return;
+    }
+    setTimeout(() => {
+      if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
+        this.renderImagesInTheBackground();
+      }
+    }, 100);
+  }
+
+  onPageChangedInGallery() {
+    if (this.changedPageInGalleryDirection === "ArrowRight") {
+      this.currentlySelectedThumbIndex = 0;
+    } else {
+      this.currentlySelectedThumbIndex = this.visibleThumbs.length - 1;
+    }
+    this.traverseGalleryHelper();
+  }
+
+  onFavoriteFound() {
     const thumb = document.getElementById(this.foundFavoriteId);
 
     if (thumb !== null) {
@@ -1930,9 +2002,8 @@ onmessage = (message) => {
 
   /**
    * @param {HTMLElement[]} imagesToRender
-   * @param {String} requestType
    */
-  renderImages(imagesToRender, requestType) {
+  renderImages(imagesToRender) {
     const renderRequests = imagesToRender.map(image => this.getRenderRequest(image));
     const canvases = onSearchPage() ? [] : renderRequests
       .filter(request => request.canvas !== undefined)
@@ -1942,7 +2013,7 @@ onmessage = (message) => {
       action: "renderMultiple",
       id: this.currentBatchRenderRequestId,
       renderRequests,
-      requestType
+      requestType: "none"
     }, canvases);
     this.currentBatchRenderRequestId += 1;
 
@@ -1959,15 +2030,24 @@ onmessage = (message) => {
 
     const thumb = document.getElementById(message.id);
 
-    if (thumb !== null) {
-      if (Gallery.settings.debugEnabled) {
-        thumb.classList.add("loaded");
-      }
+    if (Gallery.settings.debugEnabled) {
 
-      if (message.extension === "gif") {
-        getImageFromThumb(thumb).setAttribute("gif", true);
-        return;
+      if (Gallery.settings.loopAtEndOfGallery) {
+        if (thumb !== null) {
+          thumb.classList.add("loaded");
+        }
+      } else {
+        const thumbNode = ThumbNode.allThumbNodes.get(message.id);
+
+        if (thumbNode !== undefined && thumbNode.root !== undefined) {
+          thumbNode.root.classList.add("loaded");
+        }
       }
+    }
+
+    if (thumb !== null && message.extension === "gif") {
+      getImageFromThumb(thumb).setAttribute("gif", true);
+      return;
     }
     this.assignImageExtension(message.id, message.extension);
   }
@@ -1993,9 +2073,17 @@ onmessage = (message) => {
     });
 
     if (Gallery.settings.debugEnabled) {
-      this.visibleThumbs.forEach((thumb) => {
-        thumb.classList.remove("loaded");
-      });
+      if (Gallery.settings.loopAtEndOfGallery) {
+        for (const thumb of this.visibleThumbs) {
+          thumb.classList.remove("loaded");
+        }
+      } else {
+        for (const thumbNode of ThumbNode.allThumbNodes.values()) {
+          if (thumbNode.root !== undefined) {
+            thumbNode.root.classList.remove("loaded");
+          }
+        }
+      }
     }
   }
 
@@ -2009,8 +2097,6 @@ onmessage = (message) => {
       this.transferredCanvases.delete(id);
     }
     this.transferredCanvases.clear();
-    setTimeout(() => {
-    }, 1000);
   }
 
   /**
@@ -2100,7 +2186,7 @@ onmessage = (message) => {
     while (idsWithUnknownExtensions.length > 0) {
       await sleep(3000);
 
-      while (idsWithUnknownExtensions.length > 0 && this.finishedLoading) {
+      while (idsWithUnknownExtensions.length > 0 && Gallery.finishedLoading) {
         const id = idsWithUnknownExtensions.pop();
 
         if (id !== undefined && id !== null && !this.extensionIsKnown(id)) {
@@ -2333,7 +2419,19 @@ onmessage = (message) => {
     if (keyIsHeldDown && !Gallery.keyHeldDownTraversalCooldown.ready) {
       return;
     }
+
+    if (!Gallery.settings.loopAtEndOfGallery && this.reachedEndOfGallery(direction) && Gallery.finishedLoading) {
+      this.changedPageInGalleryDirection = direction;
+      dispatchEvent(new CustomEvent("reachedEndOfGallery", {
+        detail: direction
+      }));
+      return;
+    }
     this.setNextSelectedThumbIndex(direction);
+    this.traverseGalleryHelper();
+  }
+
+  traverseGalleryHelper() {
     const selectedThumb = this.getSelectedThumb();
 
     this.autoplayController.startViewTimer(selectedThumb);
@@ -2367,6 +2465,22 @@ onmessage = (message) => {
 
   /**
    * @param {String} direction
+   * @returns {Boolean}
+   */
+  reachedEndOfGallery(direction) {
+    if (direction === Gallery.directions.right && this.currentlySelectedThumbIndex >= this.visibleThumbs.length - 1) {
+      return true;
+    }
+
+    if (direction === Gallery.directions.left && this.currentlySelectedThumbIndex <= 0) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @param {String} direction
+   * @returns {Boolean}
    */
   setNextSelectedThumbIndex(direction) {
     if (direction === Gallery.directions.left || direction === Gallery.directions.a) {
@@ -2376,6 +2490,7 @@ onmessage = (message) => {
       this.currentlySelectedThumbIndex += 1;
       this.currentlySelectedThumbIndex = this.currentlySelectedThumbIndex >= this.visibleThumbs.length ? 0 : this.currentlySelectedThumbIndex;
     }
+    return false;
   }
 
   /**
@@ -2485,9 +2600,7 @@ onmessage = (message) => {
     }
     this.setActiveVideoPlayer(initialThumb);
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
-    const videoThumbsAroundInitialThumb = this.getAdjacentVisibleThumbsLooped(initialThumb, inactiveVideoPlayers.length, (t) => {
-      return isVideo(t) && t.id !== initialThumb.id;
-    });
+    const videoThumbsAroundInitialThumb = this.getAdjacentVideoThumbs(initialThumb, inactiveVideoPlayers.length);
     const loadedVideoSources = new Set(inactiveVideoPlayers
       .map(video => video.src)
       .filter(src => src !== ""));
@@ -2499,6 +2612,48 @@ onmessage = (message) => {
       this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
     }
     this.stopAllVideos();
+  }
+
+  /**
+  * @param {HTMLElement} initialThumb
+  * @param {Number} limit
+  * @returns {HTMLElement[]}
+  */
+  getAdjacentVideoThumbs(initialThumb, limit) {
+    if (Gallery.settings.loopAtEndOfGallery) {
+      return this.getAdjacentVideoThumbsOnCurrentPage(initialThumb, limit);
+    }
+    return this.getAdjacentVideoThumbsThroughoutAllPages(initialThumb, limit);
+  }
+
+  /**
+  * @param {HTMLElement} initialThumb
+  * @param {Number} limit
+  * @returns {HTMLElement[]}
+  */
+  getAdjacentVideoThumbsOnCurrentPage(initialThumb, limit) {
+      return this.getAdjacentThumbsLooped(
+        initialThumb,
+        limit,
+        (t) => {
+          return isVideo(t) && t.id !== initialThumb.id;
+        }
+      );
+
+  }
+  /**
+  * @param {HTMLElement} initialThumb
+  * @param {Number} limit
+  * @returns {HTMLElement[]}
+  */
+  getAdjacentVideoThumbsThroughoutAllPages(initialThumb, limit) {
+    return this.getAdjacentSearchResults(
+      initialThumb,
+      limit,
+      (t) => {
+        return isVideo(t) && t.id !== initialThumb.id;
+      }
+    );
   }
 
   /**
@@ -2600,7 +2755,6 @@ onmessage = (message) => {
     video.style.display = "none";
     video.pause();
     video.removeAttribute("controls");
-    // video.currentTime = 0;
   }
 
   /**
@@ -2643,22 +2797,51 @@ onmessage = (message) => {
    * @param {HTMLElement} initialThumb
    */
   renderImagesAround(initialThumb) {
-    if (onSearchPage()) {
+    if (onSearchPage() || (onMobileDevice() && !this.enlargeOnClickOnMobile)) {
       return;
     }
+    this.renderImages(this.getAdjacentImageThumbs(initialThumb));
+  }
 
-    if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
-      return;
-    }
-    const amountToRender = Gallery.settings.maxImagesToRenderAround;
-    const imageThumbsToRender = this.getAdjacentVisibleThumbsLooped(initialThumb, amountToRender, (thumb) => {
-      return isImage(thumb);
-    });
+  /**
+   * @param {HTMLElement} initialThumb
+   * @returns {HTMLElement[]}
+   */
+  getAdjacentImageThumbs(initialThumb) {
+    const adjacentImageThumbs = isImage(initialThumb) ? [initialThumb] : [];
 
-    if (isImage(initialThumb) && !this.renderHasStarted(initialThumb)) {
-      imageThumbsToRender.unshift(initialThumb);
+    if (Gallery.settings.loopAtEndOfGallery) {
+      return adjacentImageThumbs.concat(this.getAdjacentImageThumbsOnCurrentPage(initialThumb));
     }
-    this.renderImages(imageThumbsToRender, "adjacent");
+    return adjacentImageThumbs.concat(this.getAdjacentImageThumbThroughoutAllPages(initialThumb));
+  }
+
+  /**
+   * @param {HTMLElement} initialThumb
+   * @returns {HTMLElement[]}
+   */
+  getAdjacentImageThumbsOnCurrentPage(initialThumb) {
+    return this.getAdjacentThumbsLooped(
+      initialThumb,
+      Gallery.settings.maxImagesToRenderAround,
+      (thumb) => {
+        return isImage(thumb);
+      }
+    );
+  }
+
+  /**
+ * @param {HTMLElement} initialThumb
+ * @returns {HTMLElement[]}
+ */
+  getAdjacentImageThumbThroughoutAllPages(initialThumb) {
+    return this.getAdjacentSearchResults(
+      initialThumb,
+      Gallery.settings.maxImagesToRenderAround,
+      (thumbNode) => {
+        return isImage(thumbNode);
+      }
+    );
   }
 
   /**
@@ -2667,29 +2850,29 @@ onmessage = (message) => {
    * @param {Function} additionalQualifier
    * @returns {HTMLElement[]}
    */
-  getAdjacentVisibleThumbs(initialThumb, limit, additionalQualifier) {
-    const adjacentVisibleThumbs = [];
+  getAdjacentThumbs(initialThumb, limit, additionalQualifier) {
+    const adjacentThumbs = [];
     let currentThumb = initialThumb;
     let previousThumb = initialThumb;
     let nextThumb = initialThumb;
     let traverseForward = true;
 
-    while (currentThumb !== null && adjacentVisibleThumbs.length < limit) {
+    while (currentThumb !== null && adjacentThumbs.length < limit) {
       if (traverseForward) {
-        nextThumb = this.getAdjacentVisibleThumb(nextThumb, true);
+        nextThumb = this.getAdjacentThumb(nextThumb, true);
       } else {
-        previousThumb = this.getAdjacentVisibleThumb(previousThumb, false);
+        previousThumb = this.getAdjacentThumb(previousThumb, false);
       }
       traverseForward = this.getTraversalDirection(previousThumb, traverseForward, nextThumb);
       currentThumb = traverseForward ? nextThumb : previousThumb;
 
       if (currentThumb !== null) {
         if (this.isVisible(currentThumb) && additionalQualifier(currentThumb)) {
-          adjacentVisibleThumbs.push(currentThumb);
+          adjacentThumbs.push(currentThumb);
         }
       }
     }
-    return adjacentVisibleThumbs;
+    return adjacentThumbs;
   }
 
   /**
@@ -2698,19 +2881,19 @@ onmessage = (message) => {
    * @param {Function} additionalQualifier
    * @returns {HTMLElement[]}
    */
-  getAdjacentVisibleThumbsLooped(initialThumb, limit, additionalQualifier) {
-    const adjacentVisibleThumbs = [];
+  getAdjacentThumbsLooped(initialThumb, limit, additionalQualifier) {
+    const adjacentThumbs = [];
     const discoveredIds = new Set();
     let currentThumb = initialThumb;
     let previousThumb = initialThumb;
     let nextThumb = initialThumb;
     let traverseForward = true;
 
-    while (currentThumb !== null && adjacentVisibleThumbs.length < limit) {
+    while (currentThumb !== null && adjacentThumbs.length < limit) {
       if (traverseForward) {
-        nextThumb = this.getAdjacentVisibleThumbLooped(nextThumb, true);
+        nextThumb = this.getAdjacentThumbLooped(nextThumb, true);
       } else {
-        previousThumb = this.getAdjacentVisibleThumbLooped(previousThumb, false);
+        previousThumb = this.getAdjacentThumbLooped(previousThumb, false);
       }
       traverseForward = !traverseForward;
       currentThumb = traverseForward ? nextThumb : previousThumb;
@@ -2721,10 +2904,10 @@ onmessage = (message) => {
       discoveredIds.add(currentThumb.id);
 
       if (this.isVisible(currentThumb) && additionalQualifier(currentThumb)) {
-        adjacentVisibleThumbs.push(currentThumb);
+        adjacentThumbs.push(currentThumb);
       }
     }
-    return adjacentVisibleThumbs;
+    return adjacentThumbs;
   }
 
   /**
@@ -2747,21 +2930,7 @@ onmessage = (message) => {
    * @param {Boolean} forward
    * @returns {HTMLElement}
    */
-  getAdjacentVisibleThumb(thumb, forward) {
-    let adjacentThumb = this.getAdjacentThumb(thumb, forward);
-
-    while (adjacentThumb !== null && !this.isVisible(adjacentThumb)) {
-      adjacentThumb = this.getAdjacentThumb(adjacentThumb, forward);
-    }
-    return adjacentThumb;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @param {Boolean} forward
-   * @returns {HTMLElement}
-   */
-  getAdjacentVisibleThumbLooped(thumb, forward) {
+  getAdjacentThumbLooped(thumb, forward) {
     let adjacentThumb = this.getAdjacentThumb(thumb, forward);
 
     while (adjacentThumb !== null && !this.isVisible(adjacentThumb)) {
@@ -2781,6 +2950,71 @@ onmessage = (message) => {
    */
   getAdjacentThumb(thumb, forward) {
     return forward ? thumb.nextElementSibling : thumb.previousElementSibling;
+  }
+
+  /**
+   * @param {HTMLElement} initialThumb
+   * @param {Number} limit
+   * @param {Function} additionalQualifier
+   * @returns {HTMLElement[]}
+   */
+  getAdjacentSearchResults(initialThumb, limit, additionalQualifier) {
+    const initialSearchResultIndex = this.latestSearchResults.findIndex(thumbNode => thumbNode.id === initialThumb.id);
+
+    if (initialSearchResultIndex === -1) {
+      return [];
+    }
+    const adjacentSearchResults = [];
+    const discoveredIds = new Set();
+
+    let currentSearchResult;
+    let currentIndex;
+    let forward = true;
+    let previousIndex = initialSearchResultIndex;
+    let nextIndex = initialSearchResultIndex;
+
+    while (adjacentSearchResults.length < limit) {
+      if (forward) {
+        nextIndex = this.getAdjacentSearchResultIndex(nextIndex, true);
+        currentIndex = nextIndex;
+        forward = false;
+      } else {
+        previousIndex = this.getAdjacentSearchResultIndex(previousIndex, false);
+        currentIndex = previousIndex;
+        forward = true;
+      }
+      currentSearchResult = this.latestSearchResults[currentIndex];
+
+      if (discoveredIds.has(currentSearchResult.id)) {
+        break;
+      }
+      discoveredIds.add(currentSearchResult.id);
+
+      if (additionalQualifier(currentSearchResult)) {
+        adjacentSearchResults.push(currentSearchResult);
+      }
+    }
+
+    for (const searchResult of adjacentSearchResults) {
+      searchResult.activateHTMLElement();
+    }
+    return adjacentSearchResults.map(thumbNode => thumbNode.root);
+  }
+
+  /**
+   * @param {Number} i
+   * @param {Boolean} forward
+   * @returns {Number}
+   */
+  getAdjacentSearchResultIndex(i, forward) {
+    if (forward) {
+      i += 1;
+      i = i >= this.latestSearchResults.length ? 0 : i;
+    } else {
+      i -= 1;
+      i = i < 0 ? this.latestSearchResults.length - 1 : i;
+    }
+    return i;
   }
 
   /**
@@ -2812,7 +3046,7 @@ onmessage = (message) => {
    * @returns {Boolean}
    */
   canvasIsTransferrable(thumb) {
-    return !onMobileDevice() && !onSearchPage() && !this.transferredCanvases.has(thumb.id);
+    return !onMobileDevice() && !onSearchPage() && !this.transferredCanvases.has(thumb.id) && document.getElementById(thumb.id) !== null;
   }
 
   /**
@@ -3120,7 +3354,7 @@ onmessage = (message) => {
    * @returns {Number}
    */
   getBaseImageFetchDelay(id) {
-    if (onFavoritesPage() && !this.finishedLoading) {
+    if (onFavoritesPage() && !Gallery.finishedLoading) {
       return Gallery.settings.throttledImageFetchDelay;
     }
 
@@ -3137,7 +3371,7 @@ onmessage = (message) => {
     if (!onFavoritesPage() || onMobileDevice()) {
       return;
     }
-    const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
+    const animatedThumbsToUpscale = this.getAdjacentThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
       return !isImage(t) && !this.transferredCanvases.has(t.id);
     });
 
@@ -3151,7 +3385,7 @@ onmessage = (message) => {
     if (!onFavoritesPage() || onMobileDevice()) {
       return;
     }
-    const animatedThumbsToUpscale = this.getAdjacentVisibleThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (_) => {
+    const animatedThumbsToUpscale = this.getAdjacentThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (_) => {
       return true;
     }).filter(t => !isImage(t) && !this.transferredCanvases.has(t.id));
 

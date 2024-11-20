@@ -521,6 +521,9 @@ onmessage = (message) => {
     window.addEventListener("missingMetadata", (event) => {
       this.addNewFavoriteMetadata(event.detail);
     });
+    window.addEventListener("reachedEndOfGallery", (event) => {
+      this.changeResultsPageInGallery(event.detail);
+    });
     this.createDatabaseMessageHandler();
   }
 
@@ -748,6 +751,7 @@ onmessage = (message) => {
 
       if (allNewFavoritesFound || exceededFavoritesPageNumber) {
         this.allThumbNodes = newFavoritesToAdd.concat(this.allThumbNodes);
+        this.latestSearchResults = newFavoritesToAdd.concat(this.latestSearchResults);
         this.addNewFavoritesOnReload(newFavoritesToAdd);
       } else {
         this.findNewFavoritesOnReload(allFavoriteIds, currentPageNumber + 50, newFavoritesToAdd);
@@ -836,7 +840,7 @@ onmessage = (message) => {
    */
   async fetchNewFavoritesPage(pageNumber) {
     this.fetchFavorites(new FavoritesPageRequest(pageNumber));
-    await sleep(250);
+    await sleep(225);
   }
 
   /**
@@ -1250,18 +1254,30 @@ Tag modifications and saved searches will be preserved.
    * @returns {Number}
    */
   getPageCount(searchResultsLength) {
-    return Math.floor(searchResultsLength / this.resultsPerPage) + 1;
+    if (searchResultsLength === 0) {
+      return 1;
+    }
+    const pageCount = searchResultsLength / this.resultsPerPage;
+
+    if (searchResultsLength % this.resultsPerPage === 0) {
+      return pageCount;
+    }
+    return Math.floor(pageCount) + 1;
   }
 
   /**
    * @param {ThumbNode[]} searchResults
    */
   paginateSearchResults(searchResults) {
-    this.latestSearchResults = searchResults;
+    searchResults = this.sortThumbNodes(searchResults);
     searchResults = this.getResultsWithAllowedRatings(searchResults);
+    this.latestSearchResults = searchResults;
     this.updateMatchCount(searchResults.length);
     this.insertPaginationContainer();
     this.changeResultsPage(1, searchResults);
+    dispatchEvent(new CustomEvent("paginatedSearchResults", {
+      detail: searchResults
+    }));
   }
 
   insertPaginationContainer() {
@@ -1448,7 +1464,7 @@ Tag modifications and saved searches will be preserved.
     this.resetFlagsThatImplyDifferentSearchResults();
 
     if (FavoritesLoader.currentLoadingState !== FavoritesLoader.loadingStates.loadingFavoritesFromDatabase) {
-      dispatchEventWithDelay("changedPage");
+      dispatchEvent(new Event("changedPage"));
     }
   }
 
@@ -1502,13 +1518,10 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   createPaginatedFavoritesPage(searchResults, start, end) {
-    const sortedSearchResults = this.sortThumbNodes(searchResults);
-
-    this.latestSearchResults = sortedSearchResults;
     const content = document.getElementById("content");
     const newContent = document.createDocumentFragment();
 
-    for (const thumbNode of sortedSearchResults.slice(start, end)) {
+    for (const thumbNode of searchResults.slice(start, end)) {
       thumbNode.insertAtEndOfContent(newContent);
     }
     content.innerHTML = "";
@@ -1618,6 +1631,10 @@ Tag modifications and saved searches will be preserved.
       alert("Wait for all favorites to load before changing sort method");
       return thumbNodes;
     }
+
+    if (this.searchResultsAreShuffled) {
+      return thumbNodes;
+    }
     const sortedThumbNodes = thumbNodes.slice();
     const sortingMethod = this.getSortingMethod();
 
@@ -1658,9 +1675,6 @@ Tag modifications and saved searches will be preserved.
    * @returns {String}
    */
   getSortingMethod() {
-    if (this.searchResultsAreShuffled) {
-      return "default";
-    }
     const sortingMethodSelect = document.getElementById("sorting-method");
     return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
   }
@@ -1766,6 +1780,38 @@ Tag modifications and saved searches will be preserved.
     setTimeout(() => {
       scrollToThumb(id, true, false);
     }, 600);
+  }
+
+  /**
+   *
+   * @param {String} direction
+   */
+  changeResultsPageInGallery(direction) {
+    const searchResults = this.latestSearchResults;
+    const pageCount = this.getPageCount(searchResults.length);
+    const onLastPage = this.currentFavoritesPageNumber === pageCount;
+    const onFirstPage = this.currentFavoritesPageNumber === 1;
+    const onlyOnePage = onFirstPage && onLastPage;
+
+    if (onlyOnePage) {
+      dispatchEvent(new CustomEvent("didNotChangePageInGallery", {
+        detail: direction
+      }));
+      return;
+    }
+
+    if (onLastPage && direction === "ArrowRight") {
+      this.changeResultsPage(1, searchResults);
+      return;
+    }
+
+    if (onFirstPage && direction === "ArrowLeft") {
+      this.changeResultsPage(pageCount, searchResults);
+      return;
+    }
+    const newPageNumber = direction === "ArrowRight" ? this.currentFavoritesPageNumber + 1 : this.currentFavoritesPageNumber - 1;
+
+    this.changeResultsPage(newPageNumber, searchResults);
   }
 }
 

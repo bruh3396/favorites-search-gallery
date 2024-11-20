@@ -305,7 +305,7 @@ class ThumbUpscaler {
         .then((blob) => {
           createImageBitmap(blob)
             .then((imageBitmap) => {
-              this.upscaleCanvas(request, imageBitmap);
+              this.upscale(request, imageBitmap);
             });
         });
       await sleep(50);
@@ -316,7 +316,7 @@ class ThumbUpscaler {
    * @param {RenderRequest} request
    * @param {ImageBitmap} imageBitmap
    */
-  upscaleCanvas(request, imageBitmap) {
+  upscale(request, imageBitmap) {
     if (this.onSearchPage || imageBitmap === undefined || !this.canvases.has(request.id)) {
       return;
     }
@@ -518,7 +518,7 @@ class ImageRenderer {
 
   /**
    * @param {RenderRequest} request
-   * @param {*} batchRequestId
+   * @param {Number} batchRequestId
    */
   async renderImage(request, batchRequestId) {
     this.incompleteRenderRequests.set(request.id, request);
@@ -546,7 +546,6 @@ class ImageRenderer {
     if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
       return;
     }
-
     const imageBitmap = await createImageBitmap(blob);
 
     if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
@@ -558,7 +557,7 @@ class ImageRenderer {
       request
     });
     this.incompleteRenderRequests.delete(request.id);
-    this.thumbUpscaler.upscaleCanvas(request, imageBitmap);
+    this.thumbUpscaler.upscale(request, imageBitmap);
     postMessage({
       action: "renderCompleted",
       extension: request.extension,
@@ -729,6 +728,12 @@ class ImageRenderer {
     });
   }
 
+  upscaleAllRenderedThumbs() {
+    for (const render of this.renders.values()) {
+      this.thumbUpscaler.upscale(render.request, render.imageBitmap);
+    }
+  }
+
   onmessage(message) {
     let batchRenderRequest;
 
@@ -769,6 +774,10 @@ class ImageRenderer {
 
       case "changeCanvasOrientation":
         this.changeCanvasOrientation(message.usingLandscapeOrientation);
+        break;
+
+      case "upscaleAllRenderedThumbs":
+        this.upscaleAllRenderedThumbs();
         break;
 
       default:

@@ -100,6 +100,7 @@ const autoplayHTML = `<div id="autoplay-menu-container">
 
           >input[type="number"] {
             color: white;
+            width: 7ch;
           }
         }
       }

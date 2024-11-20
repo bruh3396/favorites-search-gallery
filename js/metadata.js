@@ -109,19 +109,31 @@ class FavoriteMetadata {
   postIsDeleted;
 
   /**
-   * @returns {String}
+   * @type {String}
   */
-
   get apiURL() {
     return `https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=${this.id}`;
   }
 
+  /**
+   * @type {String}
+  */
   get postURL() {
     return `https://rule34.xxx/index.php?page=post&s=view&id=${this.id}`;
   }
 
+  /**
+   * @type {Number}
+  */
   get fetchDelay() {
     return this.postIsDeleted ? FavoriteMetadata.fetchDelay.deleted : FavoriteMetadata.fetchDelay.normal;
+  }
+
+  /**
+   * @type {Boolean}
+  */
+  get isEmpty() {
+    return this.width === 0 && this.height === 0;
   }
 
   /**
@@ -192,7 +204,7 @@ class FavoriteMetadata {
     } else {
       this.populateMetadataFromRecord(JSON.parse(record));
 
-      if (this.isEmpty()) {
+      if (this.isEmpty) {
         FavoriteMetadata.fetchMissingMetadata(this, true);
       }
     }
@@ -297,13 +309,6 @@ class FavoriteMetadata {
           }));
         }
       });
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  isEmpty() {
-    return this.width === 0 && this.height === 0;
   }
 
   /**

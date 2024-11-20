@@ -262,6 +262,10 @@ class ThumbNode {
   */
   essentialAttributesPopulated;
   /**
+   * @type {Boolean}
+  */
+  htmlElementCreated;
+  /**
    * @type {Set.<String>}
    */
   tagSet;
@@ -354,6 +358,7 @@ class ThumbNode {
   initializeFields() {
     this.inactiveThumbNode = null;
     this.essentialAttributesPopulated = false;
+    this.htmlElementCreated = false;
   }
 
   /**
@@ -380,16 +385,27 @@ class ThumbNode {
     this.initializeAdditionalTags();
     this.deleteConsumedProperties(inactiveThumbNode);
   }
+
   /**
    * @param {InactiveThumbNode} inactiveThumbNode
    */
   createHTMLElement(inactiveThumbNode) {
+    if (this.htmlElementCreated) {
+      return;
+    }
+    this.htmlElementCreated = true;
     this.instantiateTemplate();
     this.populateEssentialAttributes(inactiveThumbNode);
     this.populateHTMLAttributes(inactiveThumbNode);
     this.setupAuxillaryButton();
     this.setupClickLink();
     this.deleteInactiveThumbNode();
+  }
+
+  activateHTMLElement() {
+    if (this.inactiveThumbNode !== null) {
+      this.createHTMLElement(this.inactiveThumbNode);
+    }
   }
 
   instantiateTemplate() {
@@ -445,7 +461,7 @@ class ThumbNode {
    */
   populateNonHTMLAttributes(inactiveThumbNode) {
     this.id = inactiveThumbNode.id;
-    this.tagSet = convertToTagSet(inactiveThumbNode.tags);
+    this.tagSet = convertToTagSet(`${inactiveThumbNode.id} ${inactiveThumbNode.tags}`);
     this.metadata = inactiveThumbNode.instantiateMetadata();
   }
 
