@@ -157,31 +157,31 @@ const utilitiesHTML = `<style>
 class Cooldown {
   /**
    * @type {Number}
-  */
+   */
   timeout;
   /**
    * @type {Number}
-  */
+   */
   waitTime;
   /**
    * @type {Boolean}
-  */
+   */
   skipCooldown;
   /**
    * @type {Boolean}
-  */
+   */
   debounce;
   /**
    * @type {Boolean}
-  */
+   */
   debouncing;
   /**
    * @type {Function}
-  */
+   */
   onDebounceEnd;
   /**
    * @type {Function}
-  */
+   */
   onCooldownEnd;
 
   get ready() {
@@ -250,15 +250,15 @@ class Cooldown {
 class MetadataSearchExpression {
   /**
    * @type {String}
-  */
+   */
   metric;
   /**
    * @type {String}
-  */
+   */
   operator;
   /**
    * @type {String | Number}
-  */
+   */
   value;
 
   /**

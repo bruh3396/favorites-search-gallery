@@ -176,27 +176,27 @@ const autoplayHTML = `<div id="autoplay-menu-container">
 class AutoplayListenerList {
   /**
    * @type {Function}
-  */
+   */
   onEnable;
   /**
    * @type {Function}
-  */
+   */
   onDisable;
   /**
    * @type {Function}
-  */
+   */
   onPause;
   /**
    * @type {Function}
-  */
+   */
   onResume;
   /**
    * @type {Function}
-  */
+   */
   onComplete;
   /**
    * @type {Function}
-  */
+   */
   onVideoEndedBeforeMinimumViewTime;
 
   /**
@@ -249,71 +249,71 @@ class Autoplay {
 
   /**
    * @type {Boolean}
-  */
+   */
   static get disabled() {
     return onMobileDevice();
   }
 
   /**
-  * @type {{
-  * container: HTMLDivElement,
-  * menu: HTMLDivElement,
-  * settingsButton: HTMLImageElement,
-  * settingsMenu: {
-  *  container: HTMLDivElement
-  *  imageDurationInput: HTMLInputElement,
-  *  minimumVideoDurationInput: HTMLInputElement,
-  * }
-  * playButton: HTMLImageElement,
-  * changeDirectionButton: HTMLImageElement,
-  * changeDirectionMask: {
-  *   container: HTMLDivElement,
-  *   image: HTMLImageElement
-  * },
-  * imageProgressBar: HTMLDivElement
-  * videoProgressBar: HTMLDivElement
-  * }}
-  */
+   * @type {{
+   * container: HTMLDivElement,
+   * menu: HTMLDivElement,
+   * settingsButton: HTMLImageElement,
+   * settingsMenu: {
+   *  container: HTMLDivElement
+   *  imageDurationInput: HTMLInputElement,
+   *  minimumVideoDurationInput: HTMLInputElement,
+   * }
+   * playButton: HTMLImageElement,
+   * changeDirectionButton: HTMLImageElement,
+   * changeDirectionMask: {
+   *   container: HTMLDivElement,
+   *   image: HTMLImageElement
+   * },
+   * imageProgressBar: HTMLDivElement
+   * videoProgressBar: HTMLDivElement
+   * }}
+   */
   ui;
   /**
    * @type {AutoplayListenerList}
-  */
+   */
   events;
   /**
    * @type {AbortController}
-  */
+   */
   eventListenersAbortController;
   /**
    * @type {HTMLElement}
-  */
+   */
   currentThumb;
   /**
    * @type {Cooldown}
-  */
+   */
   imageViewTimer;
   /**
    * @type {Cooldown}
-  */
+   */
   menuVisibilityTimer;
   /**
    * @type {Cooldown}
-  */
+   */
   videoViewTimer;
   /**
    * @type {Boolean}
-  */
+   */
   active;
   /**
    * @type {Boolean}
-  */
+   */
   paused;
   /**
    * @type {Boolean}
-  */
+   */
   menuIsPersistent;
   /**
    * @type {Boolean}
-  */
+   */
   menuIsVisible;
 
   /**

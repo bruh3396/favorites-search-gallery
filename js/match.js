@@ -2,23 +2,23 @@
 class SearchTag {
   /**
    * @type {String}
-  */
+   */
   value;
   /**
    * @type {Boolean}
-  */
+   */
   negated;
 
   /**
    * @type {Number}
-  */
+   */
   get cost() {
     return 0;
   }
 
   /**
    * @type {Number}
-  */
+   */
   get finalCost() {
     return this.negated ? this.cost + 1 : this.cost;
   }
@@ -49,20 +49,20 @@ class WildcardSearchTag extends SearchTag {
 
   /**
    * @type {RegExp}
-  */
+   */
   regex;
   /**
    * @type {Boolean}
-  */
+   */
   equivalentToStartsWith;
   /**
    * @type {String}
-  */
+   */
   startsWithPrefix;
 
   /**
    * @type {Number}
-  */
+   */
   get cost() {
     return this.equivalentToStartsWith ? 10 : 20;
   }
@@ -135,12 +135,12 @@ class MetadataSearchTag extends SearchTag {
 
   /**
    * @type {MetadataSearchExpression}
-  */
+   */
   expression;
 
   /**
    * @type {Number}
-  */
+   */
   get cost() {
     return 0;
   }
@@ -231,15 +231,15 @@ class SearchCommand {
 
   /**
    * @type {SearchTag[][]}
-  */
+   */
   orGroups;
   /**
    * @type {SearchTag[]}
-  */
+   */
   remainingSearchTags;
   /**
    * @type {Boolean}
-  */
+   */
   isEmpty;
 
   /**

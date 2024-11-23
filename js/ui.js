@@ -109,7 +109,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
     }
 
-    .auxillary-button {
+    .add-or-remove-button {
       position: absolute;
       left: 0px;
       top: 0px;
@@ -156,7 +156,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
           z-index: 1;
         }
 
-        &:has(.auxillary-button:hover) {
+        &:has(.add-or-remove-button:hover) {
           outline-style: solid !important;
           outline-width: 5px !important;
         }
@@ -373,6 +373,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 
       select {
         cursor: pointer;
+        min-height: 25px;
       }
     }
 
@@ -437,7 +438,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
     }
 
-    .auxillary-button {
+    .add-or-remove-button {
       visibility: hidden;
     }
 
@@ -750,7 +751,7 @@ if (onFavoritesPage()) {
 }
 const MAX_SEARCH_HISTORY_LENGTH = 100;
 const FAVORITE_PREFERENCES = {
-  showAuxillaryButtons: userIsOnTheirOwnFavoritesPage() ? "showRemoveButtons" : "showAddFavoriteButtons",
+  showAddOrRemoveButtons: userIsOnTheirOwnFavoritesPage() ? "showRemoveButtons" : "showAddFavoriteButtons",
   showOptions: "showOptions",
   excludeBlacklist: "excludeBlacklist",
   searchHistory: "favoritesSearchHistory",
@@ -780,7 +781,7 @@ const FAVORITE_BUTTONS = {
 };
 const FAVORITE_CHECKBOXES = {
   showOptions: document.getElementById("options-checkbox"),
-  showAuxillaryButtons: userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-favorite-buttons") : document.getElementById("show-add-favorite-buttons"),
+  showAddOrRemoveButtons: userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-favorite-buttons") : document.getElementById("show-add-favorite-buttons"),
   filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
   showUI: document.getElementById("show-ui"),
   fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
@@ -811,7 +812,7 @@ function initializeFavoritesPage() {
   addEventListenersToFavoritesPage();
   loadFavoritesPagePreferences();
   removePaginatorFromFavoritesPage();
-  configureAuxillaryButtonOptionVisibility();
+  configureAddOrRemoveButtonOptionVisibility();
   configureMobileUI();
   configureDesktopUI();
   setupWhatsNewDropdown();
@@ -820,12 +821,12 @@ function initializeFavoritesPage() {
 
 function loadFavoritesPagePreferences() {
   const userIsLoggedIn = getUserId() !== null;
-  const showAuxillaryButtonsDefault = !userIsOnTheirOwnFavoritesPage() && userIsLoggedIn;
-  const auxillaryFavoriteButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showAuxillaryButtons, showAuxillaryButtonsDefault);
+  const showAddOrRemoveButtonsDefault = !userIsOnTheirOwnFavoritesPage() && userIsLoggedIn;
+  const addOrRemoveFavoriteButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showAddOrRemoveButtons, showAddOrRemoveButtonsDefault);
 
-  FAVORITE_CHECKBOXES.showAuxillaryButtons.checked = auxillaryFavoriteButtonsAreVisible;
+  FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked = addOrRemoveFavoriteButtonsAreVisible;
   setTimeout(() => {
-    toggleAuxillaryButtons();
+    toggleAddOrRemoveButtons();
   }, 100);
 
   const showOptions = getPreference(FAVORITE_PREFERENCES.showOptions, false);
@@ -969,9 +970,9 @@ function addEventListenersToFavoritesPage() {
     setPreference(FAVORITE_PREFERENCES.showOptions, FAVORITE_CHECKBOXES.showOptions.checked);
   };
 
-  FAVORITE_CHECKBOXES.showAuxillaryButtons.onchange = () => {
-    toggleAuxillaryButtons();
-    setPreference(FAVORITE_PREFERENCES.showAuxillaryButtons, FAVORITE_CHECKBOXES.showAuxillaryButtons.checked);
+  FAVORITE_CHECKBOXES.showAddOrRemoveButtons.onchange = () => {
+    toggleAddOrRemoveButtons();
+    setPreference(FAVORITE_PREFERENCES.showAddOrRemoveButtons, FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked);
   };
   FAVORITE_BUTTONS.shuffle.onclick = () => {
     favoritesLoader.shuffleSearchResults();
@@ -1077,7 +1078,7 @@ function addEventListenersToFavoritesPage() {
 
     switch (event.key.toLowerCase()) {
       case "r":
-        FAVORITE_CHECKBOXES.showAuxillaryButtons.click();
+        FAVORITE_CHECKBOXES.showAddOrRemoveButtons.click();
         break;
 
       case "u":
@@ -1116,8 +1117,8 @@ function addEventListenersToFavoritesPage() {
   });
 }
 
-function configureAuxillaryButtonOptionVisibility() {
-  FAVORITE_CHECKBOXES.showAuxillaryButtons.parentElement.parentElement.style.display = "block";
+function configureAddOrRemoveButtonOptionVisibility() {
+  FAVORITE_CHECKBOXES.showAddOrRemoveButtons.parentElement.parentElement.style.display = "block";
 }
 
 function updateLastSearchQuery() {
@@ -1166,10 +1167,10 @@ function toggleFavoritesOptions(value) {
   });
 }
 
-function toggleAuxillaryButtons() {
-  const value = FAVORITE_CHECKBOXES.showAuxillaryButtons.checked;
+function toggleAddOrRemoveButtons() {
+  const value = FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked;
 
-  toggleAuxillaryButtonVisibility(value);
+  toggleAddOrRemoveButtonVisibility(value);
   hideThumbHoverOutlines(value);
   forceHideCaptions(value);
 
@@ -1190,14 +1191,14 @@ function hideThumbHoverOutlines(hideOutlines) {
 /**
  * @param {Boolean} value
  */
-function toggleAuxillaryButtonVisibility(value) {
+function toggleAddOrRemoveButtonVisibility(value) {
   const visibility = value ? "visible" : "hidden";
 
   insertStyleHTML(`
-      .auxillary-button {
+      .add-or-remove-button {
         visibility: ${visibility} !important;
       }
-    `, "auxillary-button-visibility");
+    `, "add-or-remove-button-visibility");
 }
 
 /**

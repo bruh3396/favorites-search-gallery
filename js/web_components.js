@@ -1,32 +1,32 @@
 class HoldButton extends HTMLElement {
   /**
    * @type {Number}
-  */
+   */
   static defaultPollingTime = 100;
   /**
    * @type {Number}
-  */
+   */
   static minPollingTime = 40;
   /**
    * @type {Number}
-  */
+   */
   static maxPollingTime = 500;
 
   /**
    * @type {Number}
-  */
+   */
   intervalId;
   /**
    * @type {Number}
-  */
+   */
   timeoutId;
   /**
    * @type {Number}
-  */
+   */
   pollingTime = HoldButton.defaultPollingTime;
   /**
    * @type {Boolean}
-  */
+   */
   holdingDown = false;
 
   connectedCallback() {
@@ -114,24 +114,24 @@ customElements.define("hold-button", HoldButton);
 class NumberComponent {
   /**
    * @type {HTMLInputElement}
-  */
+   */
   input;
   /**
    * @type {HoldButton}
-  */
+   */
   upArrow;
   /**
    * @type {HoldButton}
-  */
+   */
   downArrow;
   /**
    * @type {Number}
-  */
+   */
   increment;
 
   /**
    * @type {Boolean}
-  */
+   */
   get allSubComponentsConnected() {
     return this.input !== null && this.upArrow !== null && this.downArrow !== null;
   }

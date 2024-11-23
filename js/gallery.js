@@ -181,7 +181,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
@@ -192,62 +192,70 @@ function sleep(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
-/**
- * @param {Number} pixelCount
- * @returns {Number}
- */
-function estimateMegabyteSize(pixelCount) {
-  const rgb = 3;
-  const bytes = rgb * pixelCount;
-  const numberOfBytesInMegabyte = 1048576;
-  return bytes / numberOfBytesInMegabyte;
-}
-
 class RenderRequest {
   /**
    * @type {String}
-  */
+   */
   id;
   /**
    * @type {String}
-  */
+   */
   imageURL;
   /**
    * @type {String}
-  */
+   */
   extension;
   /**
    * @type {String}
-  */
+   */
   thumbURL;
   /**
    * @type {String}
-  */
+   */
   fetchDelay;
   /**
    * @type {Number}
-  */
+   */
   pixelCount;
   /**
    * @type {OffscreenCanvas}
-  */
+   */
   canvas;
   /**
    * @type {Number}
-  */
+   */
   resolutionFraction;
   /**
    * @type {AbortController}
-  */
+   */
   abortController;
   /**
    * @type {Boolean}
-  */
-  alreadyStarted;
+   */
+  hasStarted;
 
   /**
-  * @param {{id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number, canvas: OffscreenCanvas, resolutionFraction: Number}} request
-  */
+   * @type {Number}
+   */
+  get estimatedMegabyteSize() {
+    const rgb = 3;
+    const bytes = rgb * this.pixelCount;
+    const numberOfBytesInMegabyte = 1048576;
+    return bytes / numberOfBytesInMegabyte;
+  }
+
+  /**
+   * @param {{
+   *  id: String,
+   *  imageURL: String,
+   *  extension: String,
+   *  thumbURL: String,
+   *  fetchDelay: String,
+   *  pixelCount: Number,
+   *  canvas: OffscreenCanvas,
+   *  resolutionFraction: Number
+   * }} request
+   */
   constructor(request) {
     this.id = request.id;
     this.imageURL = request.imageURL;
@@ -258,32 +266,32 @@ class RenderRequest {
     this.canvas = request.canvas;
     this.resolutionFraction = request.resolutionFraction;
     this.abortController = new AbortController();
-    this.alreadyStarted = false;
+    this.hasStarted = false;
   }
 }
 
 class BatchRenderRequest {
   static settings = {
     megabyteMemoryLimit: 1000,
-    batchSizeMinimum: 10
+    minimumRequestCount: 10
   };
 
   /**
    * @type {String}
-  */
+   */
   id;
   /**
    * @type {String}
-  */
+   */
   requestType;
   /**
    * @type {RenderRequest[]}
-  */
+   */
   renderRequests;
   /**
    * @type {RenderRequest[]}
-  */
-  allRenderRequests;
+   */
+  originalRenderRequests;
 
   get renderRequestIds() {
     return new Set(this.renderRequests.map(request => request.id));
@@ -293,14 +301,23 @@ class BatchRenderRequest {
    * @param {{
    *  id: String,
    *  requestType: String,
-   *  renderRequests: {id: String, imageURL: String, extension: String, thumbURL: String, fetchDelay: String, pixelCount: Number, canvas: OffscreenCanvas, resolutionFraction: Number}[]
+   *  renderRequests: {
+   *   id: String,
+   *   imageURL: String,
+   *   extension: String,
+   *   thumbURL: String,
+   *   fetchDelay: String,
+   *   pixelCount: Number,
+   *   canvas: OffscreenCanvas,
+   *   resolutionFraction: Number
+   *  }[]
    * }} batchRequest
    */
   constructor(batchRequest) {
     this.id = batchRequest.id;
     this.requestType = batchRequest.requestType;
     this.renderRequests = batchRequest.renderRequests.map(r => new RenderRequest(r));
-    this.allRenderRequests = this.renderRequests;
+    this.originalRenderRequests = this.renderRequests;
     this.truncateRenderRequestsExceedingMemoryLimit();
   }
 
@@ -309,9 +326,12 @@ class BatchRenderRequest {
     let currentMegabyteSize = 0;
 
     for (const request of this.renderRequests) {
-      if (currentMegabyteSize < BatchRenderRequest.settings.megabyteMemoryLimit || truncatedRequest.length < BatchRenderRequest.settings.batchSizeMinimum) {
+      const overMemoryLimit = currentMegabyteSize < BatchRenderRequest.settings.megabyteMemoryLimit;
+      const underMinimumRequestCount = truncatedRequest.length < BatchRenderRequest.settings.minimumRequestCount;
+
+      if (overMemoryLimit || underMinimumRequestCount) {
         truncatedRequest.push(request);
-        currentMegabyteSize += estimateMegabyteSize(request.pixelCount);
+        currentMegabyteSize += request.estimatedMegabyteSize;
       } else {
         postMessage({
           action: "renderDeleted",
@@ -321,17 +341,21 @@ class BatchRenderRequest {
     }
     this.renderRequests = truncatedRequest;
   }
-
 }
 
 class ImageFetcher {
   /**
    * @type {Set.<String>}
-  */
+   */
   static idsToFetchFromPostPages = new Set();
+
+  /**
+   * @type {Number}
+   */
   static get postPageFetchDelay() {
     return ImageFetcher.idsToFetchFromPostPages.size * 250;
   }
+
   /**
    * @param {RenderRequest} request
    */
@@ -385,14 +409,14 @@ class ImageFetcher {
         ImageFetcher.idsToFetchFromPostPages.delete(id);
         return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
       }).catch((error) => {
-        if (!error.message.includes("503")) {
-          console.error({
-            error,
-            url: postPageURL
-          });
-          return "https://rule34.xxx/images/r34chibi.png";
+        if (error.message.includes("503")) {
+          return ImageFetcher.getOriginalImageURLFromPostPage(id);
         }
-        return ImageFetcher.getOriginalImageURLFromPostPage(id);
+        console.error({
+          error,
+          url: postPageURL
+        });
+        return "https://rule34.xxx/images/r34chibi.png";
       });
   }
 
@@ -403,7 +427,6 @@ class ImageFetcher {
   static getExtensionFromImageURL(imageURL) {
     try {
       return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
-
     } catch (error) {
       return "jpg";
     }
@@ -412,7 +435,7 @@ class ImageFetcher {
   /**
    * @param {RenderRequest} request
    * @returns {Promise}
-  */
+   */
   static fetchImage(request) {
     return fetch(request.imageURL, {
       signal: request.abortController.signal
@@ -422,7 +445,7 @@ class ImageFetcher {
   /**
    * @param {RenderRequest} request
    * @returns {Blob}
-  */
+   */
   static async fetchImageBlob(request) {
     const response = await ImageFetcher.fetchImage(request);
     return response.blob();
@@ -440,7 +463,6 @@ class ImageFetcher {
       action: "extensionFound",
       id,
       extension
-
     });
   }
 }
@@ -455,11 +477,11 @@ class ThumbUpscaler {
   canvases = new Map();
   /**
    * @type {Number}
-  */
+   */
   screenWidth;
   /**
    * @type {Boolean}
-  */
+   */
   onSearchPage;
 
   /**
@@ -584,7 +606,7 @@ class ThumbUpscaler {
    * @param {BatchRenderRequest} batchRequest
    */
   collectCanvases(batchRequest) {
-    batchRequest.allRenderRequests.forEach((request) => {
+    batchRequest.originalRenderRequests.forEach((request) => {
       this.collectCanvas(request);
     });
   }
@@ -592,28 +614,28 @@ class ThumbUpscaler {
 
 class ImageRenderer {
   /**
-  * @type {OffscreenCanvas}
-  */
+   * @type {OffscreenCanvas}
+   */
   canvas;
   /**
    * @type {CanvasRenderingContext2D}
-  */
+   */
   context;
   /**
    * @type {ThumbUpscaler}
-  */
+   */
   thumbUpscaler;
   /**
    * @type {RenderRequest}
-  */
+   */
   renderRequest;
   /**
    * @type {BatchRenderRequest}
-  */
+   */
   batchRenderRequest;
   /**
    * @type {Map.<String, RenderRequest>}
-  */
+   */
   incompleteRenderRequests;
   /**
    * @type {Map.<String, {completed: Boolean, imageBitmap: ImageBitmap, request: RenderRequest}>}
@@ -621,37 +643,42 @@ class ImageRenderer {
   renders;
   /**
    * @type {String}
-  */
+   */
   lastRequestedDrawId;
   /**
    * @type {String}
-  */
+   */
   currentlyDrawnId;
   /**
    * @type {Boolean}
-  */
+   */
   onMobileDevice;
   /**
    * @type {Boolean}
-  */
+   */
   onSearchPage;
   /**
    * @type {Boolean}
    */
   usingLandscapeOrientation;
 
+  /**
+   * @type {Boolean}
+   */
   get hasRenderRequest() {
     return this.renderRequest !== undefined &&
       this.renderRequest !== null;
   }
 
+  /**
+   * @type {Boolean}
+   */
   get hasBatchRenderRequest() {
     return this.batchRenderRequest !== undefined &&
       this.batchRenderRequest !== null;
   }
 
   /**
-   *
    * @param {{canvas: OffscreenCanvas, screenWidth: Number, onMobileDevice: Boolean, onSearchPage: Boolean }} message
    */
   constructor(message) {
@@ -673,11 +700,10 @@ class ImageRenderer {
   async renderMultipleImages(batchRenderRequest) {
     const batchRequestId = batchRenderRequest.id;
 
-    batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
-      .filter(request => !this.renderIsFinished(request.id));
+    this.removeCompletedRenderRequests(batchRenderRequest);
 
     for (const request of batchRenderRequest.renderRequests) {
-      if (request.alreadyStarted || this.renders.has(request.id)) {
+      if (request.hasStarted || this.renders.has(request.id)) {
         continue;
       }
       this.renders.set(request.id, {
@@ -688,11 +714,7 @@ class ImageRenderer {
     }
 
     for (const request of batchRenderRequest.renderRequests) {
-      if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
-        continue;
-      }
-
-      if (request.alreadyStarted) {
+      if (this.isApartOfOutdatedBatchRequest(batchRequestId) || request.hasStarted) {
         continue;
       }
       this.renderImage(request, batchRequestId);
@@ -842,7 +864,7 @@ class ImageRenderer {
   /**
    * @param {BatchRenderRequest} newBatchRenderRequest
    */
-  deleteRendersNotInNewRequest(newBatchRenderRequest) {
+  deleteRendersNotInNewRequests(newBatchRenderRequest) {
     const idsToRender = newBatchRenderRequest.renderRequestIds;
 
     for (const id of this.renders.keys()) {
@@ -901,15 +923,23 @@ class ImageRenderer {
   /**
    * @param {BatchRenderRequest} newBatchRenderRequest
    */
-  removeDuplicateRenderRequests(newBatchRenderRequest) {
+  markRenderRequestsThatHaveAlreadyStarted(newBatchRenderRequest) {
     if (!this.hasBatchRenderRequest) {
       return;
     }
-    const oldIds = this.batchRenderRequest.renderRequestIds;
+    const previousRequestIds = this.batchRenderRequest.renderRequestIds;
 
     newBatchRenderRequest.renderRequests.forEach((request) => {
-      request.alreadyStarted = oldIds.has(request.id);
+      request.hasStarted = previousRequestIds.has(request.id);
     });
+  }
+
+  /**
+   * @param {BatchRenderRequest} batchRenderRequest
+   */
+  removeCompletedRenderRequests(batchRenderRequest) {
+    batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
+      .filter(request => !this.renderIsFinished(request.id));
   }
 
   upscaleAllRenderedThumbs() {
@@ -933,8 +963,8 @@ class ImageRenderer {
         batchRenderRequest = new BatchRenderRequest(message);
         this.thumbUpscaler.collectCanvases(batchRenderRequest);
         this.abortOutdatedFetchRequests(batchRenderRequest);
-        this.removeDuplicateRenderRequests(batchRenderRequest);
-        this.deleteRendersNotInNewRequest(batchRenderRequest);
+        this.markRenderRequestsThatHaveAlreadyStarted(batchRenderRequest);
+        this.deleteRendersNotInNewRequests(batchRenderRequest);
         this.batchRenderRequest = batchRenderRequest;
         this.renderMultipleImages(batchRenderRequest);
         break;
@@ -972,25 +1002,23 @@ class ImageRenderer {
 
 /**
  * @type {ImageRenderer}
-*/
+ */
 let imageRenderer;
 
 onmessage = (message) => {
-  message = message.data;
-
-  switch (message.action) {
+  switch (message.data.action) {
     case "initialize":
-      BatchRenderRequest.settings.megabyteMemoryLimit = message.megabyteLimit;
-      BatchRenderRequest.settings.batchSizeMinimum = message.minimumImagesToRender;
-      imageRenderer = new ImageRenderer(message);
+      BatchRenderRequest.settings.megabyteMemoryLimit = message.data.megabyteLimit;
+      BatchRenderRequest.settings.minimumRequestCount = message.data.minimumImagesToRender;
+      imageRenderer = new ImageRenderer(message.data);
       break;
 
     case "findExtension":
-      ImageFetcher.findImageExtensionFromId(message.id);
+      ImageFetcher.findImageExtensionFromId(message.data.id);
       break;
 
     default:
-      imageRenderer.onmessage(message);
+      imageRenderer.onmessage(message.data);
       break;
   }
 };
@@ -1075,6 +1103,7 @@ onmessage = (message) => {
     renderOnPageChangeCooldownTime: 2000,
     addFavoriteCooldownTime: 250,
     cursorVisibilityCooldownTime: 500,
+    imageExtensionAssignmentCooldownTime: 1000,
     additionalVideoPlayerCount: onMobileDevice() ? 0 : 2,
     renderAroundAggressively: true,
     loopAtEndOfGalleryValue: false,
@@ -1091,6 +1120,7 @@ onmessage = (message) => {
   static backgroundRenderingOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
   static addOrRemoveFavoriteCooldown = new Cooldown(Gallery.settings.addFavoriteCooldownTime, true);
   static cursorVisibilityCooldown = new Cooldown(Gallery.settings.cursorVisibilityCooldownTime);
+  static imageExtensionAssignmentCooldown = new Cooldown(Gallery.settings.imageExtensionAssignmentCooldownTime);
   static finishedLoading = onSearchPage();
 
   /**
@@ -1102,11 +1132,11 @@ onmessage = (message) => {
 
   /**
    * @type {Autoplay}
-  */
+   */
   autoplayController;
   /**
    * @type {HTMLDivElement}
-  */
+   */
   originalContentContainer;
   /**
    * @type {HTMLCanvasElement}
@@ -1150,19 +1180,19 @@ onmessage = (message) => {
   imageRenderer;
   /**
    * @type {Set.<String>}
-  */
+   */
   startedRenders;
   /**
    * @type {Set.<String>}
-  */
+   */
   completedRenders;
   /**
    * @type {Map.<String, HTMLCanvasElement>}
-  */
+   */
   transferredCanvases;
   /**
    * @type {Map.<String, {start: Number, end:Number}>}
-  */
+   */
   videoClips;
   /**
    * @type {HTMLElement[]}
@@ -1170,7 +1200,7 @@ onmessage = (message) => {
   visibleThumbs;
   /**
    * @type {ThumbNode[]}
-  */
+   */
   latestSearchResults;
   /**
    * @type {Object.<Number, String>}
@@ -1178,11 +1208,11 @@ onmessage = (message) => {
   imageExtensions;
   /**
    * @type {String}
-  */
+   */
   foundFavoriteId;
   /**
    * @type {String}
-  */
+   */
   changedPageInGalleryDirection;
   /**
    * @type {Number}
@@ -1198,7 +1228,7 @@ onmessage = (message) => {
   lastSelectedThumbIndexBeforeEnteringGallery;
   /**
    * @type {Number}
-  */
+   */
   currentBatchRenderRequestId;
   /**
    * @type {Boolean}
@@ -1210,11 +1240,11 @@ onmessage = (message) => {
   recentlyExitedGallery;
   /**
    * @type {Boolean}
-  */
+   */
   leftPage;
   /**
    * @type {Boolean}
-  */
+   */
   favoritesWereFetched;
   /**
    * @type {Boolean}
@@ -1227,7 +1257,7 @@ onmessage = (message) => {
 
   /**
    * @type {Boolean}
-  */
+   */
   get changedPageWhileInGallery() {
     return this.changedPageInGalleryDirection !== null;
   }
@@ -1238,6 +1268,7 @@ onmessage = (message) => {
     }
     this.createAutoplayController();
     this.initializeFields();
+    this.initializeTimers();
     this.setMainCanvasResolution();
     this.createWebWorkers();
     this.createVideoBackgrounds();
@@ -1275,8 +1306,16 @@ onmessage = (message) => {
     this.favoritesWereFetched = false;
     this.showOriginalContentOnHover = getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = getPreference(Gallery.preferences.enlargeOnClick, true);
+  }
+
+  initializeTimers() {
     Gallery.backgroundRenderingOnPageChangeCooldown.onDebounceEnd = () => {
       this.onPageChange();
+    };
+    Gallery.imageExtensionAssignmentCooldown.onCooldownEnd = () => {
+      if (this.recentlyDiscoveredImageExtensionCount > 0) {
+        this.storeAllImageExtensions();
+      }
     };
   }
 
@@ -1445,6 +1484,22 @@ onmessage = (message) => {
           this.unFavoriteSelectedContent();
           break;
 
+        case " ":
+          if (isVideo(this.getSelectedThumb())) {
+            const video = this.getActiveVideoPlayer();
+
+            if (video === document.activeElement) {
+              return;
+            }
+
+            if (video.paused) {
+              video.play().catch(() => { });
+            } else {
+              video.pause();
+            }
+          }
+          break;
+
         default:
           break;
       }
@@ -1477,6 +1532,11 @@ onmessage = (message) => {
           this.toggleBackgroundOpacity();
           break;
 
+        case "n":
+          this.toggleCursorVisibility(true);
+          Gallery.cursorVisibilityCooldown.restart();
+          break;
+
         case "Escape":
           this.exitGallery();
           this.toggleAllVisibility(false);
@@ -1506,7 +1566,7 @@ onmessage = (message) => {
       this.enumerateVisibleThumbs();
       /**
        * @type {HTMLElement[]}
-      */
+       */
       const thumbs = event.detail.thumbs.reverse();
 
       if (thumbs.length > 0) {
@@ -1547,7 +1607,7 @@ onmessage = (message) => {
     }, {
       once: true
     });
-    window.addEventListener("paginatedSearchResults", (event) => {
+    window.addEventListener("newSearchResults", (event) => {
       this.latestSearchResults = event.detail;
     });
     window.addEventListener("changedPage", () => {
@@ -2209,19 +2269,24 @@ onmessage = (message) => {
     if (this.imageExtensions[parseInt(id)] !== undefined) {
       return;
     }
+    Gallery.imageExtensionAssignmentCooldown.restart();
     this.setImageExtension(id, extension);
+    this.updateStoredImageExtensions();
+  }
+
+  updateStoredImageExtensions() {
     this.recentlyDiscoveredImageExtensionCount += 1;
 
     if (this.recentlyDiscoveredImageExtensionCount >= Gallery.settings.extensionsFoundBeforeSavingCount) {
-      this.recentlyDiscoveredImageExtensionCount = 0;
-
-      if (!onSearchPage()) {
-        this.storeAllImageExtensions();
-      }
+      this.storeAllImageExtensions();
     }
   }
 
   storeAllImageExtensions() {
+    if (!onFavoritesPage()) {
+      return;
+    }
+    this.recentlyDiscoveredImageExtensionCount = 0;
     localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(this.imageExtensions));
   }
 
@@ -2405,6 +2470,7 @@ onmessage = (message) => {
     }, 300);
     this.inGallery = false;
     this.autoplayController.stop();
+    document.dispatchEvent(new Event("mousemove"));
   }
 
   /**
@@ -2615,10 +2681,10 @@ onmessage = (message) => {
   }
 
   /**
-  * @param {HTMLElement} initialThumb
-  * @param {Number} limit
-  * @returns {HTMLElement[]}
-  */
+   * @param {HTMLElement} initialThumb
+   * @param {Number} limit
+   * @returns {HTMLElement[]}
+   */
   getAdjacentVideoThumbs(initialThumb, limit) {
     if (Gallery.settings.loopAtEndOfGallery) {
       return this.getAdjacentVideoThumbsOnCurrentPage(initialThumb, limit);
@@ -2627,25 +2693,25 @@ onmessage = (message) => {
   }
 
   /**
-  * @param {HTMLElement} initialThumb
-  * @param {Number} limit
-  * @returns {HTMLElement[]}
-  */
+   * @param {HTMLElement} initialThumb
+   * @param {Number} limit
+   * @returns {HTMLElement[]}
+   */
   getAdjacentVideoThumbsOnCurrentPage(initialThumb, limit) {
-      return this.getAdjacentThumbsLooped(
-        initialThumb,
-        limit,
-        (t) => {
-          return isVideo(t) && t.id !== initialThumb.id;
-        }
-      );
+    return this.getAdjacentThumbsLooped(
+      initialThumb,
+      limit,
+      (t) => {
+        return isVideo(t) && t.id !== initialThumb.id;
+      }
+    );
 
   }
   /**
-  * @param {HTMLElement} initialThumb
-  * @param {Number} limit
-  * @returns {HTMLElement[]}
-  */
+   * @param {HTMLElement} initialThumb
+   * @param {Number} limit
+   * @returns {HTMLElement[]}
+   */
   getAdjacentVideoThumbsThroughoutAllPages(initialThumb, limit) {
     return this.getAdjacentSearchResults(
       initialThumb,
@@ -2810,7 +2876,7 @@ onmessage = (message) => {
   getAdjacentImageThumbs(initialThumb) {
     const adjacentImageThumbs = isImage(initialThumb) ? [initialThumb] : [];
 
-    if (Gallery.settings.loopAtEndOfGallery) {
+    if (Gallery.settings.loopAtEndOfGallery || this.latestSearchResults.length === 0) {
       return adjacentImageThumbs.concat(this.getAdjacentImageThumbsOnCurrentPage(initialThumb));
     }
     return adjacentImageThumbs.concat(this.getAdjacentImageThumbThroughoutAllPages(initialThumb));
@@ -2831,9 +2897,9 @@ onmessage = (message) => {
   }
 
   /**
- * @param {HTMLElement} initialThumb
- * @returns {HTMLElement[]}
- */
+   * @param {HTMLElement} initialThumb
+   * @returns {HTMLElement[]}
+   */
   getAdjacentImageThumbThroughoutAllPages(initialThumb) {
     return this.getAdjacentSearchResults(
       initialThumb,

@@ -87,7 +87,7 @@ class TagModifier {
 
   /**
    * @type {Boolean}
-  */
+   */
   static get disabled() {
     if (onMobileDevice()) {
       return true;
@@ -101,7 +101,7 @@ class TagModifier {
 
   /**
    * @type {AbortController}
-  */
+   */
   tagEditModeAbortController;
   /**
    * @type {{container: HTMLDivElement, checkbox: HTMLInputElement}}
@@ -126,7 +126,7 @@ class TagModifier {
   selectedThumbNodes;
   /**
    * @type {Boolean}
-  */
+   */
   atLeastOneFavoriteIsSelected;
 
   constructor() {
@@ -473,7 +473,7 @@ class TagModifier {
 
   createDatabase(event) {
     /**
-      * @type {IDBDatabase}
+     * @type {IDBDatabase}
      */
     const database = event.target.result;
 
@@ -490,7 +490,7 @@ class TagModifier {
     request.onsuccess = (event) => {
       /**
        * @type {IDBDatabase}
-      */
+       */
       const database = event.target.result;
       const objectStore = database
         .transaction(TagModifier.objectStoreName, "readwrite")
@@ -523,7 +523,7 @@ class TagModifier {
     request.onsuccess = (event) => {
       /**
        * @type {IDBDatabase}
-      */
+       */
       const database = event.target.result;
       const objectStore = database
         .transaction(TagModifier.objectStoreName, "readonly")

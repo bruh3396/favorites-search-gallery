@@ -2,7 +2,7 @@
 class AwesompleteWrapper {
   /**
    * @type {Boolean}
-  */
+   */
   static get disabled() {
     return !onFavoritesPage();
   }

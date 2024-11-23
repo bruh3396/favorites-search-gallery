@@ -25,7 +25,7 @@ const tooltipHTML = `<div id="tooltip-container">
 class Tooltip {
   /**
    * @type {Boolean}
-  */
+   */
   static get disabled() {
     return onMobileDevice() || getPerformanceProfile() > 1 || onPostPage();
   }
@@ -56,7 +56,7 @@ class Tooltip {
   previousSearch;
   /**
    * @type {HTMLImageElement}
-  */
+   */
   currentImage;
 
   constructor() {

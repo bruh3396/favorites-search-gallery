@@ -1,16 +1,16 @@
 class FavoriteMetadata {
   /**
    * @type {Map.<String, FavoriteMetadata>}
-  */
+   */
   static allMetadata = new Map();
   static parser = new DOMParser();
   /**
    * @type {FavoriteMetadata[]}
-  */
+   */
   static missingMetadataFetchQueue = [];
   /**
    * @type {FavoriteMetadata[]}
-  */
+   */
   static deletedPostFetchQueue = [];
   static currentlyFetchingFromQueue = false;
   static allFavoritesLoaded = false;
@@ -77,61 +77,61 @@ class FavoriteMetadata {
   }
   /**
    * @type {String}
-  */
+   */
   id;
   /**
    * @type {Number}
-  */
+   */
   width;
   /**
    * @type {Number}
-  */
+   */
   height;
   /**
    * @type {Number}
-  */
+   */
   score;
   /**
    * @type {Number}
-  */
+   */
   rating;
   /**
    * @type {Number}
-  */
+   */
   creationTimestamp;
   /**
    * @type {Number}
-  */
+   */
   lastChangedTimestamp;
   /**
    * @type {Boolean}
-  */
+   */
   postIsDeleted;
 
   /**
    * @type {String}
-  */
+   */
   get apiURL() {
     return `https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=${this.id}`;
   }
 
   /**
    * @type {String}
-  */
+   */
   get postURL() {
     return `https://rule34.xxx/index.php?page=post&s=view&id=${this.id}`;
   }
 
   /**
    * @type {Number}
-  */
+   */
   get fetchDelay() {
     return this.postIsDeleted ? FavoriteMetadata.fetchDelay.deleted : FavoriteMetadata.fetchDelay.normal;
   }
 
   /**
    * @type {Boolean}
-  */
+   */
   get isEmpty() {
     return this.width === 0 && this.height === 0;
   }
@@ -265,7 +265,7 @@ class FavoriteMetadata {
 
   /**
    * @param {Object.<String, String>} record
-  */
+   */
   populateMetadataFromRecord(record) {
     this.width = record.width;
     this.height = record.height;

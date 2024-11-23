@@ -2,31 +2,31 @@
 class FavoritesPageRequest {
   /**
    * @type {Number}
-  */
+   */
   pageNumber;
   /**
    * @type {Number}
-  */
+   */
   retryCount;
   /**
    * @type {ThumbNode[]}
-  */
+   */
   fetchedThumbNodes;
   /**
    * @type {ThumbNode[]}
-  */
+   */
   matchedThumbNodes;
 
   /**
    * @type {String}
-  */
+   */
   get url() {
     return `${document.location.href}&pid=${this.pageNumber * 50}`;
   }
 
   /**
    * @type {Number}
-  */
+   */
   get retryDelay() {
     return (7 ** (this.retryCount + 1)) + 300;
   }
@@ -328,7 +328,7 @@ onmessage = (message) => {
   allThumbNodes;
   /**
    * @type {ThumbNode[]}
-  */
+   */
   latestSearchResults;
   /**
    * @type {Number}
@@ -430,23 +430,23 @@ onmessage = (message) => {
   excludeBlacklistWasClicked;
   /**
    * @type {Boolean}
-  */
+   */
   sortingParametersWereChanged;
   /**
    * @type {Boolean}
-  */
+   */
   allowedRatingsWereChanged;
   /**
    * @type {Number}
-  */
+   */
   allowedRatings;
   /**
    * @type {String[]}
-  */
+   */
   idsRequiringMetadataDatabaseUpdate;
   /**
    * @type {Number}
-  */
+   */
   newMetadataReceivedTimeout;
 
   /**
@@ -824,7 +824,7 @@ onmessage = (message) => {
         this.storeFavorites();
         return;
       }
-      await sleep(10000);
+      await sleep(1000);
     }
   }
 
@@ -840,7 +840,7 @@ onmessage = (message) => {
    */
   async fetchNewFavoritesPage(pageNumber) {
     this.fetchFavorites(new FavoritesPageRequest(pageNumber));
-    await sleep(225);
+    await sleep(210);
   }
 
   /**
@@ -980,6 +980,12 @@ onmessage = (message) => {
   }
 
   onAllFavoritesLoaded() {
+    if (FavoritesLoader.currentLoadingState === FavoritesLoader.loadingStates.fetchingFavorites) {
+      this.latestSearchResults = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
+      dispatchEvent(new CustomEvent("newSearchResults", {
+        detail: this.latestSearchResults
+      }));
+    }
     dispatchEvent(new Event("readyToSearch"));
     FavoritesLoader.currentLoadingState = FavoritesLoader.loadingStates.allFavoritesLoaded;
     this.toggleLoadingUI(false);
@@ -1188,6 +1194,9 @@ Tag modifications and saved searches will be preserved.
         }
       }));
     }, 250);
+    dispatchEvent(new CustomEvent("newSearchResults", {
+      detail: this.latestSearchResults
+    }));
   }
 
   /**
@@ -1275,7 +1284,7 @@ Tag modifications and saved searches will be preserved.
     this.updateMatchCount(searchResults.length);
     this.insertPaginationContainer();
     this.changeResultsPage(1, searchResults);
-    dispatchEvent(new CustomEvent("paginatedSearchResults", {
+    dispatchEvent(new CustomEvent("newSearchResults", {
       detail: searchResults
     }));
   }
@@ -1507,7 +1516,7 @@ Tag modifications and saved searches will be preserved.
    */
   reAddThumbNodeEventListeners(thumbNodes) {
     for (const thumbNode of thumbNodes) {
-      thumbNode.setupAuxillaryButton();
+      thumbNode.setupAddOrRemoveButton();
     }
   }
 
@@ -1735,7 +1744,7 @@ Tag modifications and saved searches will be preserved.
   /**
    * @param {ThumbNode} thumbNode
    * @returns {Boolean}
-  */
+   */
   ratingIsAllowed(thumbNode) {
     return (thumbNode.metadata.rating & this.allowedRatings) > 0;
   }

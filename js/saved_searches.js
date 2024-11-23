@@ -145,7 +145,7 @@ class SavedSearches {
   };
   /**
    * @type {Boolean}
-  */
+   */
   static get disabled() {
     return !onFavoritesPage() || onMobileDevice();
   }

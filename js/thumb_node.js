@@ -38,31 +38,31 @@ class InactiveThumbNode {
 
   /**
    * @type {String}
-  */
+   */
   id;
   /**
    * @type {String}
-  */
+   */
   tags;
   /**
    * @type {String}
-  */
+   */
   src;
   /**
    * @type {String}
-  */
+   */
   metadata;
   /**
    * @type {Boolean}
-  */
+   */
   fromRecord;
   /**
    * @type {Number}
-  */
+   */
   rating;
   /**
    * @type {Number}
-  */
+   */
   score;
 
   /**
@@ -136,19 +136,19 @@ class ThumbNode {
   static allThumbNodes = new Map();
   /**
    * @type {RegExp}
-  */
+   */
   static thumbSourceCompressionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
   /**
    * @type {HTMLElement}
-  */
+   */
   static template;
   /**
    * @type {String}
-  */
+   */
   static removeFavoriteButtonHTML;
   /**
    * @type {String}
-  */
+   */
   static addFavoriteButtonHTML;
   static settings = {
     deferHTMLElementCreation: true
@@ -162,9 +162,9 @@ class ThumbNode {
   }
 
   static createTemplates() {
-    ThumbNode.removeFavoriteButtonHTML = `<button class="remove-favorite-button auxillary-button"><img src=${createObjectURLFromSvg(ICONS.heartMinus)}></button>`;
-    ThumbNode.addFavoriteButtonHTML = `<button class="add-favorite-button auxillary-button"><img src=${createObjectURLFromSvg(ICONS.heartPlus)}></button>`;
-    const auxillaryButtonHTML = userIsOnTheirOwnFavoritesPage() ? ThumbNode.removeFavoriteButtonHTML : ThumbNode.addFavoriteButtonHTML;
+    ThumbNode.removeFavoriteButtonHTML = `<button class="remove-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartMinus)}></button>`;
+    ThumbNode.addFavoriteButtonHTML = `<button class="add-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartPlus)}></button>`;
+    const buttonHTML = userIsOnTheirOwnFavoritesPage() ? ThumbNode.removeFavoriteButtonHTML : ThumbNode.addFavoriteButtonHTML;
     const canvasHTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
 
     ThumbNode.template = new DOMParser().parseFromString("<div class=\"thumb-node\"></div>", "text/html").createElement("div");
@@ -172,7 +172,7 @@ class ThumbNode {
     ThumbNode.template.innerHTML = `
         <div>
           <img>
-          ${auxillaryButtonHTML}
+          ${buttonHTML}
           ${canvasHTML}
         </div>
     `;
@@ -184,7 +184,7 @@ class ThumbNode {
       const thumbNode = this.allThumbNodes.get(id);
 
       if (thumbNode !== undefined) {
-        thumbNode.swapAuxillaryButton();
+        thumbNode.swapAddOrRemoveButton();
       }
     });
   }
@@ -252,18 +252,18 @@ class ThumbNode {
   /**
    * @type {HTMLButtonElement}
    */
-  auxillaryButton;
+  addOrRemoveButton;
   /**
    * @type {InactiveThumbNode}
-  */
+   */
   inactiveThumbNode;
   /**
    * @type {Boolean}
-  */
+   */
   essentialAttributesPopulated;
   /**
    * @type {Boolean}
-  */
+   */
   htmlElementCreated;
   /**
    * @type {Set.<String>}
@@ -275,7 +275,7 @@ class ThumbNode {
   additionalTags;
   /**
    * @type {Number}
-  */
+   */
   originalTagsLength;
   /**
    * @type {Boolean}
@@ -283,7 +283,7 @@ class ThumbNode {
   matchedByMostRecentSearch;
   /**
    * @type {FavoriteMetadata}
-  */
+   */
   metadata;
 
   /**
@@ -315,7 +315,7 @@ class ThumbNode {
 
   /**
    * @type {Set.<String>}
-  */
+   */
   get originalTagSet() {
     const originalTags = new Set();
     let count = 0;
@@ -332,14 +332,14 @@ class ThumbNode {
 
   /**
    * @type {Set.<String>}
-  */
+   */
   get originalTagsString() {
     return convertToTagString(this.originalTagSet);
   }
 
   /**
    * @type {String}
-  */
+   */
   get additionalTagsString() {
     return convertToTagString(this.additionalTags);
   }
@@ -397,7 +397,7 @@ class ThumbNode {
     this.instantiateTemplate();
     this.populateEssentialAttributes(inactiveThumbNode);
     this.populateHTMLAttributes(inactiveThumbNode);
-    this.setupAuxillaryButton();
+    this.setupAddOrRemoveButton();
     this.setupClickLink();
     this.deleteInactiveThumbNode();
   }
@@ -412,14 +412,14 @@ class ThumbNode {
     this.root = ThumbNode.template.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
-    this.auxillaryButton = this.root.children[0].children[1];
+    this.addOrRemoveButton = this.root.children[0].children[1];
   }
 
-  setupAuxillaryButton() {
+  setupAddOrRemoveButton() {
     if (userIsOnTheirOwnFavoritesPage()) {
-      this.auxillaryButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
+      this.addOrRemoveButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
     } else {
-      this.auxillaryButton.onclick = this.addFavoriteButtonOnClick.bind(this);
+      this.addOrRemoveButton.onclick = this.addFavoriteButtonOnClick.bind(this);
     }
   }
 
@@ -429,7 +429,7 @@ class ThumbNode {
   removeFavoriteButtonOnClick(event) {
     event.stopPropagation();
     removeFavorite(this.id);
-    this.swapAuxillaryButton();
+    this.swapAddOrRemoveButton();
   }
 
   /**
@@ -439,20 +439,20 @@ class ThumbNode {
     event.stopPropagation();
     addFavorite(this.id);
 
-    this.swapAuxillaryButton();
+    this.swapAddOrRemoveButton();
   }
 
-  swapAuxillaryButton() {
-    const isRemoveFavoriteButton = this.auxillaryButton.classList.contains("remove-favorite-button");
+  swapAddOrRemoveButton() {
+    const isRemoveFavoriteButton = this.addOrRemoveButton.classList.contains("remove-favorite-button");
 
     if (isRemoveFavoriteButton) {
-      this.auxillaryButton.outerHTML = ThumbNode.addFavoriteButtonHTML;
-      this.auxillaryButton = this.root.children[0].children[1];
-      this.auxillaryButton.onclick = this.addFavoriteButtonOnClick.bind(this);
+      this.addOrRemoveButton.outerHTML = ThumbNode.addFavoriteButtonHTML;
+      this.addOrRemoveButton = this.root.children[0].children[1];
+      this.addOrRemoveButton.onclick = this.addFavoriteButtonOnClick.bind(this);
     } else {
-      this.auxillaryButton.outerHTML = ThumbNode.removeFavoriteButtonHTML;
-      this.auxillaryButton = this.root.children[0].children[1];
-      this.auxillaryButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
+      this.addOrRemoveButton.outerHTML = ThumbNode.removeFavoriteButtonHTML;
+      this.addOrRemoveButton = this.root.children[0].children[1];
+      this.addOrRemoveButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
     }
   }
 
@@ -563,9 +563,9 @@ class ThumbNode {
   }
 
   /**
- * @param {String} tagsToRemove
- * @returns {String}
- */
+   * @param {String} tagsToRemove
+   * @returns {String}
+   */
   removeAdditionalTags(tagsToRemove) {
     const tagsToRemoveSet = convertToTagSet(tagsToRemove);
 

@@ -116,8 +116,8 @@ class Caption {
  `;
   static findCategoriesOnPageChangeCooldown = new Cooldown(3000, true);
   /**
-  * @type {Object.<String, Number>}
-  */
+   * @type {Object.<String, Number>}
+   */
   static tagCategoryAssociations;
   static settings = {
     tagFetchDelayAfterFinishedLoading: 20,
@@ -171,7 +171,7 @@ class Caption {
 
   /**
    * @type {Number}
-  */
+   */
   static get tagFetchDelay() {
     if (Caption.flags.finishedLoading) {
       return Caption.settings.tagFetchDelayAfterFinishedLoading;
@@ -201,7 +201,7 @@ class Caption {
   currentThumbId;
   /**
    * @type {AbortController}
-  */
+   */
   abortController;
 
   constructor() {
