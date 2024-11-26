@@ -948,9 +948,7 @@ function sortObjectByValues(obj) {
 
 function insertCommonStyleHTML() {
   insertStyleHTML(utilitiesHTML, "utilities-common-styles");
-
-  insertStyleHTML(STYLES.thumbHoverOutline, "thumb-hover-outlines");
-
+  toggleThumbHoverOutlines(false);
   setTimeout(() => {
     if (onSearchPage()) {
       removeInlineImgStyles();
@@ -1675,11 +1673,19 @@ async function setCustomTags(tags) {
 }
 
 /**
+ * @returns {String[]}
+ */
+function getSavedSearchValues() {
+  return Array.from(document.getElementsByClassName("save-search-label"))
+    .map(element => element.innerText);
+}
+
+/**
  * @param {{label: String, value: String, type: String}[]} officialTags
  * @param {String} searchQuery
  * @returns {{label: String, value: String, type: String}[]}
  */
-function mergeOfficialTagsWithCustomTags(officialTags, searchQuery) {
+function addCustomTagsToAutocompleteList(officialTags, searchQuery) {
   const customTags = Array.from(CUSTOM_TAGS);
   const officialTagValues = new Set(officialTags.map(officialTag => officialTag.value));
   const mergedTags = officialTags;
@@ -1694,6 +1700,73 @@ function mergeOfficialTagsWithCustomTags(officialTags, searchQuery) {
     }
   }
   return mergedTags;
+}
+
+/**
+ * @param {String} searchTag
+ * @param {String} savedSearch
+ * @returns {Boolean}
+ */
+function savedSearchMatchesSearchTag(searchTag, savedSearch) {
+  const sanitizedSavedSearch = removeExtraWhiteSpace(savedSearch.replace(/[~())]/g, ""));
+  const savedSearchTagList = sanitizedSavedSearch.split(" ");
+
+  for (const savedSearchTag of savedSearchTagList) {
+    if (savedSearchTag.startsWith(searchTag)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @param {String} tag
+ * @returns {String}
+ */
+function removeStartingHyphen(tag) {
+  return tag.replace(/^-/, "");
+}
+
+/**
+ * @param {String} searchTag
+ * @returns {{label: String, value: String, type: String}[]}
+ */
+function getSavedSearchesForAutocompleteList(searchTag) {
+  const minimumSearchTagLength = 3;
+
+  if (searchTag.length < minimumSearchTagLength) {
+    return [];
+  }
+  const maxMatchedSavedSearches = 5;
+  const matchedSavedSearches = [];
+  let i = 0;
+
+  for (const savedSearch of getSavedSearchValues()) {
+    if (savedSearchMatchesSearchTag(searchTag, savedSearch)) {
+      matchedSavedSearches.push({
+        label: `${savedSearch}`,
+        value: `${searchTag}_saved_search ${savedSearch}`,
+        type: "saved"
+      });
+      i += 1;
+    }
+
+    if (matchedSavedSearches.length > maxMatchedSavedSearches) {
+      break;
+    }
+  }
+  return matchedSavedSearches;
+}
+
+function removeSavedSearchPrefix(suggestion) {
+  return suggestion.replace(/^\S+_saved_search /, "");
+}
+
+/**
+ * @param {Boolean} value
+ */
+function toggleThumbHoverOutlines(value) {
+  // insertStyleHTML(value ? STYLES.thumbHoverOutlineDisabled : STYLES.thumbHoverOutline, "thumb-hover-outlines");
 }
 
 initializeUtilities();

@@ -1171,21 +1171,12 @@ function toggleAddOrRemoveButtons() {
   const value = FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked;
 
   toggleAddOrRemoveButtonVisibility(value);
-  hideThumbHoverOutlines(value);
+  toggleThumbHoverOutlines(value);
   forceHideCaptions(value);
 
   if (!value) {
     dispatchEvent(new Event("captionOverrideEnd"));
   }
-}
-
-/**
- * @param {Boolean} hideOutlines
- */
-function hideThumbHoverOutlines(hideOutlines) {
-  const style = hideOutlines ? STYLES.thumbHoverOutlineDisabled : STYLES.thumbHoverOutline;
-
-  insertStyleHTML(style, "thumb-hover-outlines");
 }
 
 /**

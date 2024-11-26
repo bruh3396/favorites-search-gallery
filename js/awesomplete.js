@@ -1,15 +1,50 @@
 /* eslint-disable new-cap */
 class AwesompleteWrapper {
+  static preferences = {
+    savedSearchSuggestions: "savedSearchSuggestions"
+  };
+
   /**
    * @type {Boolean}
    */
   static get disabled() {
     return !onFavoritesPage();
   }
+
+  /**
+   * @type {Boolean}
+   */
+  showSavedSearchSuggestions;
+
   constructor() {
     if (AwesompleteWrapper.disabled) {
       return;
     }
+    this.initializeFields();
+    this.insertHTML();
+    this.addAwesompleteToInputs();
+  }
+
+  initializeFields() {
+    this.showSavedSearchSuggestions = getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false);
+  }
+
+  insertHTML() {
+    createFavoritesOption(
+      "show-saved-search-suggestions",
+      "Saved Suggestions",
+      "Show saved search suggestions in autocomplete dropdown",
+      this.showSavedSearchSuggestions,
+      (event) => {
+        this.showSavedSearchSuggestions = event.target.checked;
+        setPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, event.target.checked);
+      },
+      true
+
+    );
+  }
+
+  addAwesompleteToInputs() {
     document.querySelectorAll("textarea").forEach((textarea) => {
       this.addAwesompleteToInput(textarea);
     });
@@ -40,7 +75,7 @@ class AwesompleteWrapper {
         });
       },
       replace: (suggestion) => {
-        insertSuggestion(awesomplete.input, decodeEntities(suggestion.value));
+        insertSuggestion(awesomplete.input, removeSavedSearchPrefix(decodeEntities(suggestion.value)));
       }
     });
 
@@ -65,18 +100,30 @@ class AwesompleteWrapper {
     });
 
     input.oninput = () => {
-      this.populateAwesompleteList(this.getCurrentTag(input), awesomplete);
+      this.populateAwesompleteList(input.id, this.getCurrentTagWithHyphen(input), awesomplete);
     };
   }
 
+  getSavedSearchesForAutocompleteList(inputId, prefix) {
+    if (!this.showSavedSearchSuggestions || inputId !== "favorites-search-box") {
+      return [];
+    }
+    return getSavedSearchesForAutocompleteList(prefix);
+  }
+
   /**
+   * @param {String} inputId
    * @param {String} prefix
    * @param {Awesomplete_} awesomplete
    */
-  populateAwesompleteList(prefix, awesomplete) {
+  populateAwesompleteList(inputId, prefix, awesomplete) {
     if (prefix.trim() === "") {
       return;
     }
+    const savedSearchSuggestions = this.getSavedSearchesForAutocompleteList(inputId, prefix);
+
+    prefix = prefix.replace(/^-/, "");
+
     fetch(`https://ac.rule34.xxx/autocomplete.php?q=${prefix}`)
       .then((response) => {
         if (response.ok) {
@@ -86,9 +133,9 @@ class AwesompleteWrapper {
       })
       .then((suggestions) => {
 
-        const mergedSuggestions = mergeOfficialTagsWithCustomTags(JSON.parse(suggestions), prefix);
+        const mergedSuggestions = addCustomTagsToAutocompleteList(JSON.parse(suggestions), prefix);
 
-        awesomplete.list = mergedSuggestions;
+        awesomplete.list = mergedSuggestions.concat(savedSearchSuggestions);
       });
   }
 
@@ -106,6 +153,23 @@ class AwesompleteWrapper {
    */
   getLastTag(searchQuery) {
     const lastTag = searchQuery.match(/[^ -][^ ]*$/);
+    return lastTag === null ? "" : lastTag[0];
+  }
+
+  /**
+   * @param {HTMLInputElement | HTMLTextAreaElement} input
+   * @returns {String}
+   */
+  getCurrentTagWithHyphen(input) {
+    return this.getLastTagWithHyphen(input.value.slice(0, input.selectionStart));
+  }
+
+  /**
+   * @param {String} searchQuery
+   * @returns {String}
+   */
+  getLastTagWithHyphen(searchQuery) {
+    const lastTag = searchQuery.match(/[^ ]*$/);
     return lastTag === null ? "" : lastTag[0];
   }
 }

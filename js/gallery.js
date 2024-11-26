@@ -1237,6 +1237,10 @@ onmessage = (message) => {
   /**
    * @type {Boolean}
    */
+  recentlyEnteredGallery;
+  /**
+   * @type {Boolean}
+   */
   recentlyExitedGallery;
   /**
    * @type {Boolean}
@@ -1301,6 +1305,7 @@ onmessage = (message) => {
     this.lastSelectedThumbIndexBeforeEnteringGallery = 0;
     this.currentBatchRenderRequestId = 0;
     this.inGallery = false;
+    this.recentlyEnteredGallery = false;
     this.recentlyExitedGallery = false;
     this.leftPage = false;
     this.favoritesWereFetched = false;
@@ -1709,7 +1714,7 @@ onmessage = (message) => {
         this.traverseGallery(Gallery.directions.left, false);
       } else {
         this.exitGallery();
-        this.toggleAllVisibility;
+        this.toggleAllVisibility(false);
       }
     }, {
       passive: false
@@ -1922,6 +1927,12 @@ onmessage = (message) => {
         this.autoplayController.onVideoEnded();
       }, {
         passive: true
+      });
+      video.addEventListener("dblclick", () => {
+        if (this.inGallery && !this.recentlyEnteredGallery) {
+          this.exitGallery();
+          this.toggleAllVisibility(false);
+        }
       });
     }
   }
@@ -2446,6 +2457,10 @@ onmessage = (message) => {
     }));
     this.autoplayController.start(selectedThumb);
     Gallery.cursorVisibilityCooldown.restart();
+    this.recentlyEnteredGallery = true;
+    setTimeout(() => {
+      this.recentlyEnteredGallery = false;
+    }, 300);
   }
 
   exitGallery() {
@@ -2615,6 +2630,7 @@ onmessage = (message) => {
   getIndexFromThumb(thumb) {
     return parseInt(thumb.getAttribute(Gallery.htmlAttributes.thumbIndex));
   }
+
   /**
    * @param {HTMLElement} thumb
    */

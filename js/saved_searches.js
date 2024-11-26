@@ -109,6 +109,11 @@ const savedSearchesHTML = `<div id="saved-searches">
         background: steelblue;
       }
     }
+
+    .tag-type-saved>a,
+    .tag-type-saved {
+      color: lightblue;
+    }
   </style>
   <h2>Saved Searches</h2>
   <div id="saved-searches-buttons">
@@ -369,10 +374,7 @@ class SavedSearches {
   }
 
   storeSavedSearches() {
-    const savedSearches = JSON.stringify(Array.from(document.getElementsByClassName("save-search-label"))
-      .map(element => element.innerText));
-
-    localStorage.setItem(SavedSearches.localStorageKeys.savedSearches, savedSearches);
+    localStorage.setItem(SavedSearches.localStorageKeys.savedSearches, JSON.stringify(getSavedSearchValues()));
   }
 
   loadSavedSearches() {
