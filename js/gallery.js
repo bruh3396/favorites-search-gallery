@@ -181,7 +181,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
@@ -2097,9 +2097,9 @@ onmessage = (message) => {
    * @param {Object} message
    */
   onRenderCompleted(message) {
-    this.completedRenders.add(message.id);
-
     const thumb = document.getElementById(message.id);
+
+    this.completedRenders.add(message.id);
 
     if (Gallery.settings.debugEnabled) {
 
@@ -2121,6 +2121,31 @@ onmessage = (message) => {
       return;
     }
     this.assignImageExtension(message.id, message.extension);
+    this.drawMainCanvasOnRenderCompleted(thumb);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  drawMainCanvasOnRenderCompleted(thumb) {
+    if (thumb === null) {
+      return;
+    }
+    const mainCanvasIsVisible = this.showOriginalContentOnHover || this.inGallery;
+
+    if (!mainCanvasIsVisible) {
+      return;
+    }
+    const selectedThumb = this.getSelectedThumb();
+    const selectedThumbIsImage = selectedThumb !== undefined && isImage(selectedThumb);
+
+    if (!selectedThumbIsImage) {
+      return;
+    }
+
+    if (selectedThumb.id === thumb.id) {
+      this.drawMainCanvas(thumb);
+    }
   }
 
   onRenderDeleted(message) {
@@ -2636,7 +2661,6 @@ onmessage = (message) => {
    */
   showOriginalContent(thumb) {
     this.currentlySelectedThumbIndex = this.getIndexFromThumb(thumb);
-
     this.upscaleAnimatedThumbsAroundDiscrete(thumb);
 
     if (!this.inGallery && Gallery.settings.renderAroundAggressively) {
@@ -2858,7 +2882,7 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   showOriginalImage(thumb) {
-    if (this.isCompletelyRendered(thumb)) {
+    if (this.renderIsCompleted(thumb)) {
       this.clearLowResolutionCanvas();
       this.drawMainCanvas(thumb);
     } else if (this.renderHasStarted(thumb)) {
@@ -2866,6 +2890,7 @@ onmessage = (message) => {
       this.clearMainCanvas();
       this.drawMainCanvas(thumb);
     } else {
+      this.drawLowResolutionCanvas(thumb);
       this.renderOriginalImage(thumb);
 
       if (!this.inGallery && !Gallery.settings.renderAroundAggressively) {
@@ -3119,7 +3144,7 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    * @returns {Boolean}
    */
-  isCompletelyRendered(thumb) {
+  renderIsCompleted(thumb) {
     return this.completedRenders.has(thumb.id);
   }
 
@@ -3190,11 +3215,15 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   renderOriginalImage(thumb) {
+    if (onSearchPage()) {
+      return;
+    }
+
     if (this.canvasIsTransferrable(thumb)) {
       const request = this.getRenderRequest(thumb);
 
       this.imageRenderer.postMessage(request, [request.canvas]);
-    } else if (!onSearchPage()) {
+    } else {
       this.imageRenderer.postMessage(this.getRenderRequest(thumb));
     }
   }

@@ -176,7 +176,7 @@ class FavoritesDatabase {
       .then(async(connectionEvent) => {
         /**
          * @type {IDBDatabase}
-        */
+         */
         const database = connectionEvent.target.result;
         const transaction = database.transaction(this.objectStoreName, "readwrite");
         const objectStore = transaction.objectStore(this.objectStoreName);
@@ -221,14 +221,14 @@ class FavoritesDatabase {
   }
 
   /**
- * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
- */
+   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
+   */
   updateFavorites(favorites) {
     this.openConnection()
       .then((event) => {
         /**
          * @type {IDBDatabase}
-        */
+         */
         const database = event.target.result;
         const favoritesObjectStore = database
           .transaction(this.objectStoreName, "readwrite")
@@ -1645,7 +1645,7 @@ Tag modifications and saved searches will be preserved.
       return thumbNodes;
     }
     const sortedThumbNodes = thumbNodes.slice();
-    const sortingMethod = this.getSortingMethod();
+    const sortingMethod = getSortingMethod();
 
     if (sortingMethod !== "default") {
       sortedThumbNodes.sort((b, a) => {
@@ -1681,14 +1681,6 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @returns {String}
-   */
-  getSortingMethod() {
-    const sortingMethodSelect = document.getElementById("sorting-method");
-    return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
-  }
-
-  /**
    * @returns {Boolean}
    */
   sortAscending() {
@@ -1701,6 +1693,7 @@ Tag modifications and saved searches will be preserved.
     const matchedThumbNodes = this.getThumbNodesMatchedByLastSearch();
 
     this.paginateSearchResults(matchedThumbNodes);
+    dispatchEvent(new Event("sortingParametersChanged"));
   }
 
   /**

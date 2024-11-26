@@ -111,8 +111,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 
     .add-or-remove-button {
       position: absolute;
-      left: 0px;
-      top: 0px;
+      left: 0;
+      top: 0;
       width: 40%;
       font-weight: bold;
       background: none;
@@ -134,6 +134,23 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       >svg {
         fill: hotpink;
       }
+    }
+
+    .statistic-hint {
+      position: absolute;
+      z-index: 3;
+      text-align: center;
+      right: 0;
+      top: 0;
+      background: white;
+      color: #0075FF;
+      font-weight: bold;
+      /* font-size: 18px; */
+      pointer-events: none;
+      font-size: calc(8px + (20 - 8) * ((100vw - 300px) / (3840 - 300)));
+      width: 55%;
+      padding: 2px 0px;
+      border-bottom-left-radius: 4px;
     }
 
     .thumb-node {
@@ -183,8 +200,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
           height: 100%;
         }
       }
-
-
 
       &.hidden {
         display: none;
@@ -359,14 +374,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
     }
 
     #additional-favorite-options {
-      /* display: flex;
-      flex-wrap: wrap;
-      flex-direction: row; */
-
-      >div {
-        /* flex-basis: 45%; */
-      }
-
       >div:not(:last-child) {
         padding-bottom: 10px;
       }
@@ -385,10 +392,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
     #performance-profile {
       width: 150px;
     }
-
-    /* #results-per-page-input {
-      width: 140px;
-    } */
 
     #show-ui-div {
       &.ui-hidden {
@@ -451,16 +454,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 
     #favorites-fetch-progress-label {
       color: #3498db;
-    }
-
-    #favorite-options {
-      /* display: flex;
-      flex-wrap: wrap;
-      flex-direction: row;
-
-      >div {
-        flex-basis: 45%;
-      } */
     }
 
     #main-favorite-options-container {
@@ -628,6 +621,12 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
                     <input type="checkbox" id="fancy-image-hovering-checkbox"> Fancy Hovering
                   </label>
                 </div>
+                <div style="display: none;">
+                  <label class="checkbox" title="Enable fancy image hovering (experimental)">
+                    <input type="checkbox" id="statistic-hint-checkbox"> Show Statistics
+                    <span class="option-hint"> (S)</span>
+                  </label>
+                </div>
                 <div>
                   <label class="checkbox" title="Show hotkeys and shortcuts">
                     <input type="checkbox" id="show-hints-checkbox">Hints<span class="option-hint"> (H)</span>
@@ -728,9 +727,9 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
             </label>
           </div>
           <div class="options-container">
-            <span id="find-favorite">
+            <span id="find-favorite" style="display: none;">
               <button title="Find favorite favorite using its ID" id="find-favorite-button"
-                style="white-space: nowrap; ">Find</button>
+                style="white-space: nowrap;">Find</button>
               <input type="number" id="find-favorite-input" placeholder="ID">
             </span>
           </div>
@@ -766,7 +765,8 @@ const FAVORITE_PREFERENCES = {
   sortAscending: "sortAscending",
   sortingMethod: "sortingMethod",
   allowedRatings: "allowedRatings",
-  showHints: "showHints"
+  showHints: "showHints",
+  showStatisticHints: "showStatisticHints"
 };
 const FAVORITE_LOCAL_STORAGE = {
   searchHistory: "favoritesSearchHistory"
@@ -790,7 +790,8 @@ const FAVORITE_CHECKBOXES = {
   explicitRating: document.getElementById("explicit-rating-checkbox"),
   questionableRating: document.getElementById("questionable-rating-checkbox"),
   safeRating: document.getElementById("safe-rating-checkbox"),
-  showHints: document.getElementById("show-hints-checkbox")
+  showHints: document.getElementById("show-hints-checkbox"),
+  showStatisticHints: document.getElementById("statistic-hint-checkbox")
 };
 const FAVORITE_INPUTS = {
   searchBox: document.getElementById("favorites-search-box"),
@@ -894,6 +895,11 @@ function loadFavoritesPagePreferences() {
   FAVORITE_CHECKBOXES.questionableRating.checked = (allowedRatings & 2) === 2;
   FAVORITE_CHECKBOXES.safeRating.checked = (allowedRatings & 1) === 1;
   preventUserFromUncheckingAllRatings(allowedRatings);
+
+  const showStatisticHints = getPreference(FAVORITE_PREFERENCES.showStatisticHints, false);
+
+  FAVORITE_CHECKBOXES.showStatisticHints.checked = showStatisticHints;
+  toggleStatisticHints(showStatisticHints);
 }
 
 function removePaginatorFromFavoritesPage() {
@@ -969,7 +975,6 @@ function addEventListenersToFavoritesPage() {
     toggleFavoritesOptions(FAVORITE_CHECKBOXES.showOptions.checked);
     setPreference(FAVORITE_PREFERENCES.showOptions, FAVORITE_CHECKBOXES.showOptions.checked);
   };
-
   FAVORITE_CHECKBOXES.showAddOrRemoveButtons.onchange = () => {
     toggleAddOrRemoveButtons();
     setPreference(FAVORITE_PREFERENCES.showAddOrRemoveButtons, FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked);
@@ -1003,16 +1008,13 @@ function addEventListenersToFavoritesPage() {
   FAVORITE_INPUTS.columnCount.onchange = () => {
     changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value));
   };
-
   FAVORITE_CHECKBOXES.showUI.onchange = () => {
     toggleUI(FAVORITE_CHECKBOXES.showUI.checked);
   };
-
   FAVORITE_INPUTS.performanceProfile.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.performanceProfile, parseInt(FAVORITE_INPUTS.performanceProfile.value));
     window.location.reload();
   };
-
   FAVORITE_INPUTS.resultsPerPage.onchange = () => {
     changeResultsPerPage(parseInt(FAVORITE_INPUTS.resultsPerPage.value), false);
   };
@@ -1023,25 +1025,20 @@ function addEventListenersToFavoritesPage() {
       setPreference(FAVORITE_PREFERENCES.fancyImageHovering, FAVORITE_CHECKBOXES.fancyImageHovering.checked);
     };
   }
-
   FAVORITE_CHECKBOXES.enableOnSearchPages.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.enableOnSearchPages, FAVORITE_CHECKBOXES.enableOnSearchPages.checked);
   };
-
   FAVORITE_CHECKBOXES.sortAscending.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.sortAscending, FAVORITE_CHECKBOXES.sortAscending.checked);
     favoritesLoader.onSortingParametersChanged();
   };
-
   FAVORITE_INPUTS.sortingMethod.onchange = () => {
     setPreference(FAVORITE_PREFERENCES.sortingMethod, FAVORITE_INPUTS.sortingMethod.value);
     favoritesLoader.onSortingParametersChanged();
   };
-
   FAVORITE_INPUTS.allowedRatings.onchange = () => {
     changeAllowedRatings();
   };
-
   window.addEventListener("wheel", (event) => {
     if (!event.shiftKey) {
       return;
@@ -1064,13 +1061,11 @@ function addEventListenersToFavoritesPage() {
       forceHideCaptions(false);
     }
   };
-
   window.addEventListener("readyToSearch", () => {
     setMainButtonInteractability(true);
   }, {
     once: true
   });
-
   document.addEventListener("keydown", (event) => {
     if (!isHotkeyEvent(event)) {
       return;
@@ -1094,13 +1089,7 @@ function addEventListenersToFavoritesPage() {
         break;
 
       case "s":
-        // if (!FAVORITE_CHECKBOXES.showUI.checked) {
-        //   FAVORITE_CHECKBOXES.showUI.click();
-        // }
-        // setTimeout(() => {
-        //   FAVORITE_INPUTS.searchBox.focus();
-        //   FAVORITE_INPUTS.searchBox.select();
-        // }, 100);
+        FAVORITE_CHECKBOXES.showStatisticHints.click();
         break;
 
       default:
@@ -1109,12 +1098,15 @@ function addEventListenersToFavoritesPage() {
   }, {
     passive: true
   });
-
   window.addEventListener("load", () => {
     FAVORITE_INPUTS.searchBox.focus();
   }, {
     once: true
   });
+  FAVORITE_CHECKBOXES.showStatisticHints.onchange = () => {
+    toggleStatisticHints(FAVORITE_CHECKBOXES.showStatisticHints.checked);
+    setPreference(FAVORITE_PREFERENCES.showStatisticHints, FAVORITE_CHECKBOXES.showStatisticHints.checked);
+  };
 }
 
 function configureAddOrRemoveButtonOptionVisibility() {
@@ -1242,10 +1234,12 @@ function toggleUI(value) {
     header.style.display = "";
     showUIContainer.insertAdjacentElement("afterbegin", showUIDiv);
     favoritesTopBarPanels.style.display = "flex";
+    favoritesTopBar.removeAttribute("style");
   } else {
     favoritesTopBar.appendChild(showUIDiv);
     header.style.display = "none";
     favoritesTopBarPanels.style.display = "none";
+    favoritesTopBar.style.background = getComputedStyle(document.body).background;
   }
   showUIDiv.classList.toggle("ui-hidden", !value);
   setPreference(FAVORITE_PREFERENCES.showUI, value);
@@ -1461,8 +1455,16 @@ async function addHintsOption() {
     toggleOptionHints(FAVORITE_CHECKBOXES.showHints.checked);
     setPreference(FAVORITE_PREFERENCES.showHints, FAVORITE_CHECKBOXES.showHints.checked);
   };
-
   toggleOptionHints(optionHintsEnabled);
+}
+
+/**
+ * @param {Boolean} value
+ */
+function toggleStatisticHints(value) {
+  const html = value ? "" : ".statistic-hint {display:none;}";
+
+  insertStyleHTML(html, "statistic-hint-visibility");
 }
 
 if (onFavoritesPage()) {

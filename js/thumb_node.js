@@ -103,9 +103,18 @@ class InactiveThumbNode {
 
     this.id = InactiveThumbNode.getIdFromThumb(thumb);
     this.src = image.src;
-    this.tags = correctMisspelledTags(image.title);
+    this.tags = this.preprocessTags(image);
     this.rating = InactiveThumbNode.extractRatingFromThumb(thumb);
     this.score = InactiveThumbNode.extractScoreFromThumb(thumb);
+  }
+
+  /**
+   * @param {HTMLImageElement} image
+   * @returns {String}
+   */
+  preprocessTags(image) {
+    const tags = correctMisspelledTags(image.title);
+    return removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
   }
 
   instantiateMetadata() {
@@ -150,6 +159,7 @@ class ThumbNode {
    * @type {String}
    */
   static addFavoriteButtonHTML;
+  static currentSortingMethod = getPreference("sortingMethod", "default");
   static settings = {
     deferHTMLElementCreation: true
   };
@@ -185,6 +195,14 @@ class ThumbNode {
 
       if (thumbNode !== undefined) {
         thumbNode.swapAddOrRemoveButton();
+      }
+    });
+    window.addEventListener("sortingParametersChanged", () => {
+      ThumbNode.currentSortingMethod = getSortingMethod();
+      const thumbNodes = Array.from(getAllThumbs()).map(thumb => ThumbNode.allThumbNodes.get(thumb.id));
+
+      for (const thumbNode of thumbNodes) {
+        thumbNode.createStatisticHint();
       }
     });
   }
@@ -253,6 +271,10 @@ class ThumbNode {
    * @type {HTMLButtonElement}
    */
   addOrRemoveButton;
+  /**
+   * @type {HTMLDivElement}
+   */
+  statisticHint;
   /**
    * @type {InactiveThumbNode}
    */
@@ -513,6 +535,7 @@ class ThumbNode {
     if (this.inactiveThumbNode !== null) {
       this.createHTMLElement(this.inactiveThumbNode, true);
     }
+    this.createStatisticHint();
     content.appendChild(this.root);
   }
 
@@ -523,6 +546,7 @@ class ThumbNode {
     if (this.inactiveThumbNode !== null) {
       this.createHTMLElement(this.inactiveThumbNode, true);
     }
+    this.createStatisticHint();
     content.insertAdjacentElement("afterbegin", this.root);
   }
 
@@ -582,5 +606,55 @@ class ThumbNode {
     }
     this.additionalTags = new Set();
     this.updateTags();
+  }
+
+  /**
+   * @returns {HTMLDivElement}
+   */
+  getStatisticHint() {
+    return this.container.querySelector(".statistic-hint");
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  hasStatisticHint() {
+    return this.getStatisticHint() !== null;
+  }
+
+  /**
+   * @returns {String}
+   */
+  getStatisticValue() {
+    switch (ThumbNode.currentSortingMethod) {
+      case "score":
+        return this.metadata.score;
+
+      case "width":
+        return this.metadata.width;
+
+      case "height":
+        return this.metadata.height;
+
+      case "create":
+        return convertTimestampToDate(this.metadata.creationTimestamp);
+
+      case "change":
+        return convertTimestampToDate(this.metadata.lastChangedTimestamp * 1000);
+
+      default:
+        return this.id;
+    }
+  }
+
+  createStatisticHint() {
+    // let hint = this.getStatisticHint();
+
+    // if (hint === null) {
+    //   hint = document.createElement("div");
+    //   hint.className = "statistic-hint";
+    //   this.container.appendChild(hint);
+    // }
+    // hint.textContent = this.getStatisticValue();
   }
 }

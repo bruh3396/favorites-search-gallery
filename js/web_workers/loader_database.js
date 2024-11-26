@@ -116,7 +116,7 @@ class FavoritesDatabase {
       .then(async(connectionEvent) => {
         /**
          * @type {IDBDatabase}
-        */
+         */
         const database = connectionEvent.target.result;
         const transaction = database.transaction(this.objectStoreName, "readwrite");
         const objectStore = transaction.objectStore(this.objectStoreName);
@@ -161,14 +161,14 @@ class FavoritesDatabase {
   }
 
   /**
- * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
- */
+   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
+   */
   updateFavorites(favorites) {
     this.openConnection()
       .then((event) => {
         /**
          * @type {IDBDatabase}
-        */
+         */
         const database = event.target.result;
         const favoritesObjectStore = database
           .transaction(this.objectStoreName, "readwrite")

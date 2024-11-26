@@ -282,6 +282,9 @@ class SavedSearches {
     editButton.innerHTML = ICONS.edit;
     removeButton.innerHTML = ICONS.delete;
     moveToTopButton.innerHTML = ICONS.upArrow;
+    editButton.title = "Edit";
+    removeButton.title = "Delete";
+    moveToTopButton.title = "Move to top";
     savedSearchLabel.className = "save-search-label";
     editButton.className = "edit-saved-search-button";
     removeButton.className = "remove-saved-search-button";

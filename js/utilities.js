@@ -152,6 +152,15 @@ const utilitiesHTML = `<style>
   input[type="checkbox"] {
     accent-color: #0075FF;
   }
+
+  .thumb {
+    > a {
+      pointer-events: none;
+      > img {
+        pointer-events: all;
+      }
+    }
+  }
 </style>`;
 
 class Cooldown {
@@ -1022,20 +1031,20 @@ function toggleFancyImageHovering(value) {
 
 function configureVideoOutlines() {
   const size = onMobileDevice() ? 2 : 3;
+  const selector = onFavoritesPage() ? "&:has(img.video)" : ">img.video";
 
   insertStyleHTML(`
     .thumb-node, .thumb {
 
       >a,
       >div {
-        &:has(img.video) {
+        ${selector} {
             outline: ${size}px solid blue;
         }
 
         &:has(img.gif) {
           outline: 2px solid hotpink;
         }
-
       }
     }
     `, "video-border");
@@ -1767,6 +1776,26 @@ function removeSavedSearchPrefix(suggestion) {
  */
 function toggleThumbHoverOutlines(value) {
   // insertStyleHTML(value ? STYLES.thumbHoverOutlineDisabled : STYLES.thumbHoverOutline, "thumb-hover-outlines");
+}
+
+/**
+ * @param {Number} timestamp
+ * @returns {String}
+ */
+function convertTimestampToDate(timestamp) {
+  const date = new Date(timestamp);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * @returns {String}
+ */
+function getSortingMethod() {
+  const sortingMethodSelect = document.getElementById("sorting-method");
+  return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
 }
 
 initializeUtilities();
