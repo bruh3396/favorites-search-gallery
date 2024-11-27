@@ -39,8 +39,7 @@ class AwesompleteWrapper {
         this.showSavedSearchSuggestions = event.target.checked;
         setPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, event.target.checked);
       },
-      true
-
+      false
     );
   }
 

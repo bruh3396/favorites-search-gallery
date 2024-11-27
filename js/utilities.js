@@ -35,7 +35,7 @@ const utilitiesHTML = `<style>
     height: 100%;
     visibility: hidden;
     transition: none !important;
-    transform: scale(1.1, 1.1);
+    transform: scale(1.05, 1.05);
   }
 
   .number {
@@ -43,7 +43,6 @@ const utilitiesHTML = `<style>
     position: relative;
     margin-top: 5px;
     border: 1px solid;
-    /* padding: 0px 10px; */
     padding: 0;
     border-radius: 20px;
     background-color: white;
@@ -154,9 +153,10 @@ const utilitiesHTML = `<style>
   }
 
   .thumb {
-    > a {
+    >a {
       pointer-events: none;
-      > img {
+
+      >img {
         pointer-events: all;
       }
     }
@@ -393,6 +393,11 @@ const TYPEABLE_INPUTS = new Set([
   "url",
   "datetime"
 ]);
+const CLICK_CODES = {
+  left: 0,
+  middle: 1,
+  right: 2
+};
 const CUSTOM_TAGS = loadCustomTags();
 
 /**
@@ -1013,7 +1018,7 @@ function toggleFancyImageHovering(value) {
 
         &:hover {
           outline: none !important;
-          transform: scale(1.1, 1.1);
+          transform: scale(1.05, 1.05);
           z-index: 10;
 
           img {

@@ -14,7 +14,7 @@ const captionHTML = `<style>
     transform: translateX(-100%);
     /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
     transition: transform .35s ease;
-    padding-top: 4px;
+    padding-top: 0.5ch;
     padding-left: 7px;
 
     h6 {
@@ -120,8 +120,8 @@ class Caption {
    */
   static tagCategoryAssociations;
   static settings = {
-    tagFetchDelayAfterFinishedLoading: 20,
-    tagFetchDelayBeforeFinishedLoading: 200
+    tagFetchDelayAfterFinishedLoading: 5,
+    tagFetchDelayBeforeFinishedLoading: 100
   };
   static flags = {
     finishedLoading: false
@@ -562,12 +562,35 @@ class Caption {
     };
     tag.onclick = (event) => {
       event.stopPropagation();
-      this.tagOnClick(tagName, event);
+      event.preventDefault();
     };
     tag.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      this.tagOnClick(`-${this.replaceSpacesWithUnderscores(tag.textContent)}`, event);
+      event.stopPropagation();
     });
+    tag.onmousedown = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      switch (event.button) {
+        case CLICK_CODES.left:
+          this.tagOnClick(tagName, event);
+          break;
+
+        case CLICK_CODES.middle:
+          dispatchEvent(new CustomEvent("searchForTag", {
+            detail: tagName
+          }));
+          break;
+
+        case CLICK_CODES.right:
+          this.tagOnClick(`-${tagName}`, event);
+          break;
+
+        default:
+          break;
+      }
+    };
   }
 
   /**

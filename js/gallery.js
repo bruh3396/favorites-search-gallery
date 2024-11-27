@@ -158,10 +158,6 @@ const galleryDebugHTML = `
   `;
 
 class Gallery {
-  static clickTypes = {
-    left: 0,
-    middle: 1
-  };
   static directions = {
     d: "d",
     a: "a",
@@ -1384,6 +1380,7 @@ onmessage = (message) => {
       }
       const clickedOnAnImage = event.target.tagName.toLowerCase() === "img";
       const clickedOnAThumb = clickedOnAnImage && getThumbFromImage(event.target).className.includes("thumb");
+      const clickedOnACaptionTag = event.target.classList.contains("caption-tag");
       const thumb = clickedOnAThumb ? getThumbFromImage(event.target) : null;
 
       if (clickedOnAThumb) {
@@ -1391,7 +1388,7 @@ onmessage = (message) => {
       }
 
       switch (event.button) {
-        case Gallery.clickTypes.left:
+        case CLICK_CODES.left:
           if (this.inGallery) {
             if (isVideo(this.getSelectedThumb()) && !onMobileDevice()) {
               return;
@@ -1417,24 +1414,23 @@ onmessage = (message) => {
           this.showOriginalContent(thumb);
           break;
 
-        case Gallery.clickTypes.middle:
+        case CLICK_CODES.middle:
           event.preventDefault();
 
           if (thumb !== null || this.inGallery) {
             this.openPostInNewPage();
-          } else if (!this.inGallery) {
+          } else if (!this.inGallery && !clickedOnACaptionTag) {
             this.toggleAllVisibility();
             setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
           }
           break;
 
         default:
-
           break;
       }
     });
     window.addEventListener("auxclick", (event) => {
-      if (event.button === Gallery.clickTypes.middle) {
+      if (event.button === CLICK_CODES.middle) {
         event.preventDefault();
       }
     });

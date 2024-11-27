@@ -110,10 +110,10 @@ const savedSearchesHTML = `<div id="saved-searches">
       }
     }
 
-    .tag-type-saved>a,
+    /* .tag-type-saved>a,
     .tag-type-saved {
       color: lightblue;
-    }
+    } */
   </style>
   <h2>Saved Searches</h2>
   <div id="saved-searches-buttons">

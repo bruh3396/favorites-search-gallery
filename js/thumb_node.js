@@ -14,8 +14,13 @@ class InactiveThumbNode {
    * @returns {Number}
    */
   static extractRatingFromThumb(thumb) {
-    const rating = (/'rating':'(\S)/).exec(thumb.nextSibling.textContent)[1];
-    return FavoriteMetadata.encodeRating(rating);
+    // try {
+    //   const rating = (/'rating':'(\S)/).exec(thumb.nextSibling.textContent)[1];
+    //   return FavoriteMetadata.encodeRating(rating);
+    // } catch {
+    //   return 4;
+    // }
+    return 4;
   }
 
   /**
@@ -23,8 +28,13 @@ class InactiveThumbNode {
    * @returns {Number}
    */
   static extractScoreFromThumb(thumb) {
-    const score = (/'score':(\d+)/).exec(thumb.nextSibling.textContent)[1];
-    return parseInt(score);
+    // try {
+    //   const score = (/'score':(\d+)/).exec(thumb.nextSibling.textContent)[1];
+    //   return parseInt(score);
+    // } catch {
+    //   return 0;
+    // }
+    return 0;
   }
 
   /**
@@ -104,8 +114,8 @@ class InactiveThumbNode {
     this.id = InactiveThumbNode.getIdFromThumb(thumb);
     this.src = image.src;
     this.tags = this.preprocessTags(image);
-    this.rating = InactiveThumbNode.extractRatingFromThumb(thumb);
-    this.score = InactiveThumbNode.extractScoreFromThumb(thumb);
+    // this.rating = InactiveThumbNode.extractRatingFromThumb(thumb);
+    // this.score = InactiveThumbNode.extractScoreFromThumb(thumb);
   }
 
   /**
@@ -122,9 +132,8 @@ class InactiveThumbNode {
       return new FavoriteMetadata(this.id, this.metadata);
     }
     const favoritesMetadata = new FavoriteMetadata(this.id);
-
-    favoritesMetadata.presetRating(this.rating);
-    favoritesMetadata.presetScore(this.score);
+    // favoritesMetadata.presetRating(this.rating);
+    // favoritesMetadata.presetScore(this.score);
     return favoritesMetadata;
   }
 
@@ -181,7 +190,7 @@ class ThumbNode {
     ThumbNode.template.className = "thumb-node";
     ThumbNode.template.innerHTML = `
         <div>
-          <img>
+          <img loading="lazy">
           ${buttonHTML}
           ${canvasHTML}
         </div>
@@ -647,7 +656,8 @@ class ThumbNode {
     }
   }
 
-  createStatisticHint() {
+  async createStatisticHint() {
+    // await sleep(200);
     // let hint = this.getStatisticHint();
 
     // if (hint === null) {

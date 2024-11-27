@@ -59,9 +59,12 @@ This script is still in development, please let me know if you experience a bug,
 | :-------- | :-------- | :-------- |
 | Left Click, Touch | Enlarge thumbnail content and enter gallery | Clicked on a thumbnail |
 | Middle Click | Open post page of thumbnail in new tab | Clicked on a thumbnail |
-| Middle Click | Toggle "Enlarge on Hover" option | Did **NOT** click on a thumbnail |
+| Middle Click | Toggle "Enlarge on Hover" option | Did **NOT** click on a thumbnail or tag in details |
 | Scroll Wheel | Change background opacity | Cursor hovering over thumbnail with "Enlarge on Hover" enabled |
 | Shift + Scroll Wheel | Change column count | |
+| Left Click | Add tag to search | Clicked on a tag in details |
+| Right Click | Add negated tag to search | Clicked on a tag in details |
+| Middle Click | Quick search tag | Clicked on tag in details |
 
 ### Gallery Controls
 | Input                                 | Function                                       | Condition              |

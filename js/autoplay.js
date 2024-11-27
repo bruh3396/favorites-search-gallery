@@ -354,7 +354,7 @@ class Autoplay {
     };
     this.eventListenersAbortController = new AbortController();
     this.currentThumb = null;
-    this.active = getPreference(Autoplay.preferences.active, true);
+    this.active = getPreference(Autoplay.preferences.active, false);
     this.paused = getPreference(Autoplay.preferences.paused, false);
     this.menuIsPersistent = false;
     this.menuIsVisible = false;

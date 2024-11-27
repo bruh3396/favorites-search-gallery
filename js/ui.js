@@ -340,7 +340,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
         padding-left: 20px;
 
         >li {
-          list-style: none;
+          /* list-style: none; */
         }
       }
 
@@ -475,6 +475,18 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
     #find-favorite-input {
       border: none !important;
     }
+
+    div#header {
+      margin-bottom: 0 !important;
+    }
+
+    body {
+
+      &:fullscreen,
+      &::backdrop {
+        background-color: var(--c-bg);
+      }
+    }
   </style>
   <div id="favorites-top-bar-panels" style="display: flex;">
     <div id="left-favorites-panel">
@@ -507,73 +519,27 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
           <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
 
             <div id="whats-new-container" class="light-green-gradient">
-              <h4>Older:</h4>
+              <h4>1.17:</h4>
               <h5>Features:</h5>
               <ul>
-                <li>Search with meta tags: score, width, height, id</li>
-                <li>Examples:</li>
+                <li>Added autoplay</li>
+                <li>Added new hotkeys and hints for them</li>
+                <li>Gallery now auto changes to next/previous page rather tha looping to start of same page</li>
                 <ul>
-                  <li>score:&gt;50 score:&lt;100 -score:55</li>
-                  <li>height:&gt;width</li>
-                  <li>( width:height ~ height:1920 ) id:&lt;999 </li>
+                  <li sty>Basically, you can view every single favorite without ever exiting the gallery</li>
                 </ul>
-                <li>Wildcard search now works anywhere in tag</li>
-                <li>Examples:</li>
-                <ul>
-                  <li>a*ple*auce</li>
-                  <li>-*apple*</li>
-                  <li>*ine*pple</li>
-                </ul>
-                <li>Blacklisted images removed from search pages</li>
-                <li>Sort by score, upload date, etc.</li>
-                <li>"Add favorite" buttons on other users' favorites pages</li>
-                <li>Filter by rating</li>
+                <li>Middle click on tag in "details" to quickly search for it</li>
+                <li>Changed UI</li>
               </ul>
-              <h5>Gallery Hotkeys:</h5>
+              <h5> Notes/Fixes:</h5>
               <ul>
                 <li>
-                  <span class="hotkey">F</span> -- Add favorite
-                </li>
-                <li>
-                  <span class="hotkey">X</span> -- Remove favorite
-                </li>
-                <li>
-                  <span class="hotkey">M</span> -- Mute/unmute video
-                </li>
-                <li>
-                  <span class="hotkey">B</span> -- Toggle background
-                </li>
+                  <strong>
+                    A large site update is ongoing, creating new bugs
+                </strong>
+              </li>
+                <li>I'm fixing anything I find, but please report any issues you find also</li>
               </ul>
-              <h5>Other Controls:</h5>
-              <ul>
-                <li>
-                  <span class="hotkey">Shift + Scroll Wheel</span> -- Change column count
-                </li>
-                <li>
-                  <span class="hotkey">T</span> -- Toggle tooltips
-                </li>
-                <li>
-                  <span class="hotkey">D</span> -- Toggle details
-                </li>
-              </ul>
-              <span style="display: none;">
-                <h5>Performance:</h5>
-                <ul>
-                  <li>Reduced memory/network usage</li>
-                  <li>Reduced load time</li>
-                  <li>Seamless video playback (desktop)</li>
-                </ul>
-                <h5>Planned Features:</h5>
-                <ul>
-                  <li>Edit custom tags (basically folders/pools) on:</li>
-                  <ul>
-                    <li>search pages</li>
-                    <li>post pages</li>
-                  </ul>
-                  <li>Fix comic strips</li>
-                  <li>Gallery autoplay</li>
-                </ul>
-              </span>
             </div>
           </a>
         </span>
@@ -623,13 +589,14 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
                 </div>
                 <div style="display: none;">
                   <label class="checkbox" title="Enable fancy image hovering (experimental)">
-                    <input type="checkbox" id="statistic-hint-checkbox"> Show Statistics
+                    <input type="checkbox" id="statistic-hint-checkbox"> Statistics
                     <span class="option-hint"> (S)</span>
                   </label>
                 </div>
                 <div>
                   <label class="checkbox" title="Show hotkeys and shortcuts">
-                    <input type="checkbox" id="show-hints-checkbox">Hints<span class="option-hint"> (H)</span>
+                    <input type="checkbox" id="show-hints-checkbox"> Hotkey Hints
+                    <span class="option-hint"> (H)</span>
                   </label>
                 </div>
               </div>
@@ -1089,7 +1056,7 @@ function addEventListenersToFavoritesPage() {
         break;
 
       case "s":
-        FAVORITE_CHECKBOXES.showStatisticHints.click();
+        // FAVORITE_CHECKBOXES.showStatisticHints.click();
         break;
 
       default:
@@ -1107,6 +1074,10 @@ function addEventListenersToFavoritesPage() {
     toggleStatisticHints(FAVORITE_CHECKBOXES.showStatisticHints.checked);
     setPreference(FAVORITE_PREFERENCES.showStatisticHints, FAVORITE_CHECKBOXES.showStatisticHints.checked);
   };
+  window.addEventListener("searchForTag", (event) => {
+    FAVORITE_INPUTS.searchBox.value = event.detail;
+    FAVORITE_BUTTONS.search.click();
+  });
 }
 
 function configureAddOrRemoveButtonOptionVisibility() {
