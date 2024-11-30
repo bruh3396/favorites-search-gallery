@@ -1735,10 +1735,20 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
+   * @returns {Boolean}
+   */
+  allRatingsAreAllowed() {
+    return this.allowedRatings === 7;
+  }
+
+  /**
    * @param {ThumbNode} thumbNode
    * @returns {Boolean}
    */
   ratingIsAllowed(thumbNode) {
+    if (this.allRatingsAreAllowed()) {
+      return true;
+    }
     return (thumbNode.metadata.rating & this.allowedRatings) > 0;
   }
 
@@ -1747,7 +1757,7 @@ Tag modifications and saved searches will be preserved.
    * @returns {ThumbNode[]}
    */
   getResultsWithAllowedRatings(searchResults) {
-    if (this.allowedRatings === 7) {
+    if (this.allRatingsAreAllowed()) {
       return searchResults;
     }
     return searchResults.filter(thumbNode => this.ratingIsAllowed(thumbNode));

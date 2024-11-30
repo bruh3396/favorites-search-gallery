@@ -1036,18 +1036,19 @@ function toggleFancyImageHovering(value) {
 
 function configureVideoOutlines() {
   const size = onMobileDevice() ? 2 : 3;
-  const selector = onFavoritesPage() ? "&:has(img.video)" : ">img.video";
+  const videoSelector = onFavoritesPage() ? "&:has(img.video)" : ">img.video";
+  const gifSelector = onFavoritesPage() ? "&:has(img.gif)" : ">img.gif";
 
   insertStyleHTML(`
     .thumb-node, .thumb {
 
       >a,
       >div {
-        ${selector} {
+        ${videoSelector} {
             outline: ${size}px solid blue;
         }
 
-        &:has(img.gif) {
+        ${gifSelector} {
           outline: 2px solid hotpink;
         }
       }

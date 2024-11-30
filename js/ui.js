@@ -314,11 +314,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
     #whats-new-container {
       z-index: 10;
       top: 20px;
-      left: 0px;
+      right: 0;
+      transform: translateX(25%);
       font-style: normal;
       font-weight: normal;
-      /* left: 50%; */
-      /* transform: translateX(-50%); */
       white-space: nowrap;
       max-width: 100vw;
       padding: 5px 20px;
@@ -732,7 +731,7 @@ const FAVORITE_PREFERENCES = {
   sortAscending: "sortAscending",
   sortingMethod: "sortingMethod",
   allowedRatings: "allowedRatings",
-  showHints: "showHints",
+  showHotkeyHints: "showHotkeyHints",
   showStatisticHints: "showStatisticHints"
 };
 const FAVORITE_LOCAL_STORAGE = {
@@ -757,7 +756,7 @@ const FAVORITE_CHECKBOXES = {
   explicitRating: document.getElementById("explicit-rating-checkbox"),
   questionableRating: document.getElementById("questionable-rating-checkbox"),
   safeRating: document.getElementById("safe-rating-checkbox"),
-  showHints: document.getElementById("show-hints-checkbox"),
+  showHotkeyHints: document.getElementById("show-hints-checkbox"),
   showStatisticHints: document.getElementById("statistic-hint-checkbox")
 };
 const FAVORITE_INPUTS = {
@@ -1052,7 +1051,7 @@ function addEventListenersToFavoritesPage() {
         break;
 
       case "h":
-          FAVORITE_CHECKBOXES.showHints.click();
+          FAVORITE_CHECKBOXES.showHotkeyHints.click();
         break;
 
       case "s":
@@ -1277,12 +1276,12 @@ function configureMobileUI() {
   container.appendChild(document.getElementById("header"));
   container.appendChild(document.getElementById("favorites-top-bar"));
 
-  const helpLinksContainer = document.getElementById("help-links-container");
+  // const helpLinksContainer = document.getElementById("help-links-container");
 
-  if (helpLinksContainer !== null) {
-    helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
-  }
-
+  // if (helpLinksContainer !== null) {
+  //   helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
+  // }
+  FAVORITE_CHECKBOXES.showHotkeyHints.parentElement.style.display = "none";
 }
 
 function configureDesktopUI() {
@@ -1419,12 +1418,12 @@ async function addHintsOption() {
   if (onMobileDevice()) {
     return;
   }
-  const optionHintsEnabled = getPreference(FAVORITE_PREFERENCES.showHints, true);
+  const optionHintsEnabled = getPreference(FAVORITE_PREFERENCES.showHotkeyHints, false);
 
-  FAVORITE_CHECKBOXES.showHints.checked = optionHintsEnabled;
-  FAVORITE_CHECKBOXES.showHints.onchange = () => {
-    toggleOptionHints(FAVORITE_CHECKBOXES.showHints.checked);
-    setPreference(FAVORITE_PREFERENCES.showHints, FAVORITE_CHECKBOXES.showHints.checked);
+  FAVORITE_CHECKBOXES.showHotkeyHints.checked = optionHintsEnabled;
+  FAVORITE_CHECKBOXES.showHotkeyHints.onchange = () => {
+    toggleOptionHints(FAVORITE_CHECKBOXES.showHotkeyHints.checked);
+    setPreference(FAVORITE_PREFERENCES.showHotkeyHints, FAVORITE_CHECKBOXES.showHotkeyHints.checked);
   };
   toggleOptionHints(optionHintsEnabled);
 }

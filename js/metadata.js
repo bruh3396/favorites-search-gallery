@@ -175,7 +175,7 @@ class FavoriteMetadata {
     this.score = 0;
     this.creationTimestamp = 0;
     this.lastChangedTimestamp = 0;
-    // this.rating = 4;
+    this.rating = 4;
     this.postIsDeleted = false;
   }
 

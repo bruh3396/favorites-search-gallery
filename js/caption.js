@@ -431,12 +431,16 @@ class Caption {
     captionIdTag.textContent = thumb.id;
     captionIdTag.onclick = (event) => {
       event.stopPropagation();
-      this.tagOnClick(thumb.id, event);
+      event.preventDefault();
     };
     captionIdTag.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      this.tagOnClick(`-${thumb.id}`, event);
+      event.stopPropagation();
     });
+
+    captionIdTag.onmousedown = (event) => {
+      this.tagOnClick(thumb.id, event);
+    };
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
     thumb.children[0].appendChild(this.captionWrapper);
     this.populateTags(thumb);
@@ -571,25 +575,7 @@ class Caption {
     tag.onmousedown = (event) => {
       event.preventDefault();
       event.stopPropagation();
-
-      switch (event.button) {
-        case CLICK_CODES.left:
-          this.tagOnClick(tagName, event);
-          break;
-
-        case CLICK_CODES.middle:
-          dispatchEvent(new CustomEvent("searchForTag", {
-            detail: tagName
-          }));
-          break;
-
-        case CLICK_CODES.right:
-          this.tagOnClick(`-${tagName}`, event);
-          break;
-
-        default:
-          break;
-      }
+      this.tagOnClick(tagName, event);
     };
   }
 
@@ -605,10 +591,35 @@ class Caption {
   }
 
   /**
+   * @param {String} tagName
+   * @param {MouseEvent} event
+   */
+  tagOnClick(tagName, event) {
+    switch (event.button) {
+      case CLICK_CODES.left:
+        this.tagOnClickHelper(tagName, event);
+        break;
+
+      case CLICK_CODES.middle:
+        dispatchEvent(new CustomEvent("searchForTag", {
+          detail: tagName
+        }));
+        break;
+
+      case CLICK_CODES.right:
+        this.tagOnClickHelper(`-${tagName}`, event);
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  /**
    * @param {String} value
    * @param {MouseEvent} mouseEvent
    */
-  tagOnClick(value, mouseEvent) {
+  tagOnClickHelper(value, mouseEvent) {
     if (mouseEvent.ctrlKey) {
       openSearchPage(value);
       return;

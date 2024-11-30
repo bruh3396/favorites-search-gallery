@@ -42,8 +42,7 @@ class InactiveThumbNode {
    * @returns {String}
    */
   static getIdFromThumb(thumb) {
-    const elementWithId = onSearchPage() ? thumb : thumb.children[0];
-    return elementWithId.id.substring(1);
+    return thumb.querySelector("a").id.replace(/\D/, "");
   }
 
   /**
@@ -109,7 +108,8 @@ class InactiveThumbNode {
         thumb.children[0].insertAdjacentElement("afterbegin", noScriptElement.children[0]);
       }
     }
-    const image = thumb.children[0].children[0];
+    // const image = thumb.children[0].children[0];
+    const image = thumb.querySelector("img");
 
     this.id = InactiveThumbNode.getIdFromThumb(thumb);
     this.src = image.src;
