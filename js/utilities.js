@@ -708,6 +708,14 @@ function isImage(thumb) {
 }
 
 /**
+ * @param {Number} maximum
+ * @returns {Number}
+ */
+function getRandomInteger(maximum) {
+  return Math.floor(Math.random() * maximum);
+}
+
+/**
  * @param {any[]} array
  */
 function shuffleArray(array) {
@@ -715,7 +723,7 @@ function shuffleArray(array) {
   let randomIndex;
 
   while (maxIndex > 0) {
-    randomIndex = Math.floor(Math.random() * maxIndex);
+    randomIndex = getRandomInteger(maxIndex);
     maxIndex -= 1;
     [
       array[maxIndex],
@@ -1158,15 +1166,20 @@ function prefetchAdjacentSearchPages() {
     return;
   }
   const container = document.createElement("div");
-  const currentPage = document.getElementById("paginator").children[0].querySelector("b");
 
-  for (const sibling of [currentPage.previousElementSibling, currentPage.nextElementSibling]) {
-    if (sibling !== null && sibling.tagName.toLowerCase() === "a") {
-      container.appendChild(createPrefetchLink(sibling.href));
+  try {
+    const currentPage = document.getElementById("paginator").children[0].querySelector("b");
+
+    for (const sibling of [currentPage.previousElementSibling, currentPage.nextElementSibling]) {
+      if (sibling !== null && sibling.tagName.toLowerCase() === "a") {
+        container.appendChild(createPrefetchLink(sibling.href));
+      }
     }
+    container.id = "search-page-prefetch";
+    document.head.appendChild(container);
+  } catch (error) {
+    console.error(error);
   }
-  container.id = "search-page-prefetch";
-  document.head.appendChild(container);
 }
 
 /**
@@ -1802,6 +1815,23 @@ function convertTimestampToDate(timestamp) {
 function getSortingMethod() {
   const sortingMethodSelect = document.getElementById("sorting-method");
   return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
+}
+
+/**
+ * @returns {HTMLDivElement}
+ */
+function getContent() {
+  const contentId = "content";
+  const content = document.getElementById(contentId);
+
+  if (content !== null) {
+    return content;
+  }
+  const newContent = document.createElement("div");
+
+  newContent.id = contentId;
+  document.body.appendChild(newContent);
+  return newContent;
 }
 
 initializeUtilities();

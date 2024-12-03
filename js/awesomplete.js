@@ -104,7 +104,7 @@ class AwesompleteWrapper {
   }
 
   getSavedSearchesForAutocompleteList(inputId, prefix) {
-    if (!this.showSavedSearchSuggestions || inputId !== "favorites-search-box") {
+    if (onMobileDevice() || !this.showSavedSearchSuggestions || inputId !== "favorites-search-box") {
       return [];
     }
     return getSavedSearchesForAutocompleteList(prefix);

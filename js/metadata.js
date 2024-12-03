@@ -19,7 +19,9 @@ class FavoriteMetadata {
     deleted: 300
   };
   static postStatisticsRegex = /Posted:\s*(\S+\s\S+).*Size:\s*(\d+)x(\d+).*Rating:\s*(\S+).*Score:\s*(\d+)/gm;
-
+  static settings = {
+    verifyTags: true
+  };
   /**
    * @param {FavoriteMetadata} favoriteMetadata
    */
@@ -180,20 +182,6 @@ class FavoriteMetadata {
   }
 
   /**
-   * @param {Number} rating
-   */
-  presetRating(rating) {
-    this.rating = rating;
-  }
-
-  /**
-   * @param {Number} score
-   */
-  presetScore(score) {
-    this.score = score;
-  }
-
-  /**
    * @param {Object.<String, String>} record
    */
   populateMetadata(record) {
@@ -234,6 +222,9 @@ class FavoriteMetadata {
         this.creationTimestamp = Date.parse(metadata.getAttribute("created_at"));
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
+        if (FavoriteMetadata.settings.verifyTags) {
+          ThumbNode.verifyTags(this.id, metadata.getAttribute("tags"));
+        }
         const extension = getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {

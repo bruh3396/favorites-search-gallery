@@ -177,7 +177,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
@@ -1191,6 +1191,10 @@ onmessage = (message) => {
    */
   videoClips;
   /**
+   * @type {Map.<String, String>}
+   */
+  enumeratedThumbs;
+  /**
    * @type {HTMLElement[]}
    */
   visibleThumbs;
@@ -1291,6 +1295,7 @@ onmessage = (message) => {
     this.completedRenders = new Set();
     this.transferredCanvases = new Map();
     this.videoClips = new Map();
+    this.enumeratedThumbs = new Map();
     this.visibleThumbs = [];
     this.latestSearchResults = [];
     this.imageExtensions = {};
@@ -1365,7 +1370,7 @@ onmessage = (message) => {
     window.addEventListener("load", () => {
       if (onSearchPage()) {
         this.initializeThumbsForHovering.bind(this)();
-        this.enumerateVisibleThumbs();
+        this.enumerateThumbs();
       }
       this.hideCaptionsWhenShowingOriginalContent();
     }, {
@@ -1557,14 +1562,14 @@ onmessage = (message) => {
     }
     window.addEventListener("favoritesFetched", () => {
       this.initializeThumbsForHovering.bind(this)();
-      this.enumerateVisibleThumbs();
+      this.enumerateThumbs();
     });
     window.addEventListener("newFavoritesFetchedOnReload", (event) => {
       if (event.detail.empty) {
         return;
       }
       this.initializeThumbsForHovering.bind(this)(event.detail.thumbs);
-      this.enumerateVisibleThumbs();
+      this.enumerateThumbs();
       /**
        * @type {HTMLElement[]}
        */
@@ -1599,7 +1604,7 @@ onmessage = (message) => {
       Gallery.backgroundRenderingOnPageChangeCooldown.waitTime = 1000;
       Gallery.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
-      this.enumerateVisibleThumbs();
+      this.enumerateThumbs();
       this.findImageExtensionsInTheBackground();
 
       if (!this.favoritesWereFetched) {
@@ -1613,7 +1618,7 @@ onmessage = (message) => {
     });
     window.addEventListener("changedPage", () => {
       this.initializeThumbsForHovering.bind(this)();
-      this.enumerateVisibleThumbs();
+      this.enumerateThumbs();
 
       if (this.changedPageWhileInGallery) {
         setTimeout(() => {
@@ -1640,7 +1645,7 @@ onmessage = (message) => {
       this.foundFavoriteId = event.detail;
     });
     window.addEventListener("shuffle", () => {
-      this.enumerateVisibleThumbs();
+      this.enumerateThumbs();
       this.deleteAllRenders();
       this.renderImagesInTheBackground();
     });
@@ -2354,20 +2359,22 @@ onmessage = (message) => {
     const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
     let blacklistedTags = ` ${negateTags(TAG_BLACKLIST)}`.replace(/\s-/g, "+-");
     let pageNumber = (/&pid=(\d+)/).exec(location.href);
-    let tags = (/&tags=([^&]*)/).exec(location.href);
+    let searchTags = (/&tags=([^&]*)/).exec(location.href);
 
     pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
-    tags = tags === null ? "" : tags[1];
+    searchTags = searchTags === null ? "" : searchTags[1];
 
-    if (tags === "all") {
-      tags = "";
+    if (searchTags === "all") {
+      searchTags = "";
       blacklistedTags = "";
     }
-    return `${apiURL}&tags=${tags}${blacklistedTags}&pid=${pageNumber}`;
+    return `${apiURL}&tags=${searchTags}${blacklistedTags}&pid=${pageNumber}`;
   }
 
-  enumerateVisibleThumbs() {
-    this.visibleThumbs = Array.from(getAllVisibleThumbs());
+  enumerateThumbs() {
+    this.visibleThumbs = Array.from(getAllThumbs());
+
+    this.enumeratedThumbs.clear();
 
     for (let i = 0; i < this.visibleThumbs.length; i += 1) {
       this.enumerateThumb(this.visibleThumbs[i], i);
@@ -2379,7 +2386,15 @@ onmessage = (message) => {
    * @param {Number} index
    */
   enumerateThumb(thumb, index) {
-    thumb.setAttribute(Gallery.htmlAttributes.thumbIndex, index);
+    this.enumeratedThumbs.set(thumb.id, index);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {Number | null}
+   */
+  getIndexFromThumb(thumb) {
+    return this.enumeratedThumbs.get(thumb.id) || 0;
   }
 
   /**
@@ -2642,14 +2657,6 @@ onmessage = (message) => {
       return false;
     }
     return isVideo(this.thumbUnderCursor);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Number}
-   */
-  getIndexFromThumb(thumb) {
-    return parseInt(thumb.getAttribute(Gallery.htmlAttributes.thumbIndex));
   }
 
   /**

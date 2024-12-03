@@ -579,7 +579,7 @@ onmessage = (message) => {
   clearOriginalFavoritesPage() {
     const thumbs = Array.from(document.getElementsByClassName("thumb"));
 
-    document.getElementById("content").innerHTML = "";
+    getContent().innerHTML = "";
     setTimeout(() => {
       dispatchEvent(new CustomEvent("originalFavoritesCleared", {
         detail: thumbs
@@ -1161,14 +1161,14 @@ Tag modifications and saved searches will be preserved.
    * @param {Boolean} value
    */
   toggleContentVisibility(value) {
-    document.getElementById("content").style.display = value ? "" : "none";
+    getContent().style.display = value ? "" : "none";
   }
 
   /**
    * @param {ThumbNode[]} newThumbNodes
    */
   async insertNewFavorites(newThumbNodes) {
-    const content = document.getElementById("content");
+    const content = getContent();
     const searchCommand = new SearchCommand(this.finalSearchQuery);
     const insertedThumbNodes = [];
     const metadataPopulateWaitTime = 1000;
@@ -1230,8 +1230,7 @@ Tag modifications and saved searches will be preserved.
         return;
       }
     }
-
-    const content = document.getElementById("content");
+    const content = getContent();
 
     for (const thumbNode of thumbNodes) {
       thumbNode.insertAtEndOfContent(content);
@@ -1527,7 +1526,7 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   createPaginatedFavoritesPage(searchResults, start, end) {
-    const content = document.getElementById("content");
+    const content = getContent();
     const newContent = document.createDocumentFragment();
 
     for (const thumbNode of searchResults.slice(start, end)) {
@@ -1574,7 +1573,7 @@ Tag modifications and saved searches will be preserved.
       this.paginationLabel.textContent = "";
       return;
     }
-    this.paginationLabel.textContent = `${start} - ${end}`;
+    this.paginationLabel.textContent = `${start + 1} - ${end + 1}`;
   }
 
   /**

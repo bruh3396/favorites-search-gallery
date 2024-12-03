@@ -191,7 +191,7 @@ class SavedSearches {
   }
 
   initialize() {
-    this.insertHTMLIntoDocument();
+    this.insertHTML();
     this.saveButton = document.getElementById("save-custom-search-button");
     this.textarea = document.getElementById("saved-searches-input");
     this.savedSearchesList = document.getElementById("saved-search-list");
@@ -203,7 +203,7 @@ class SavedSearches {
     this.loadSavedSearches();
   }
 
-  insertHTMLIntoDocument() {
+  insertHTML() {
     const showSavedSearches = getPreference(SavedSearches.preferences.visibility, false);
     const savedSearchesContainer = document.getElementById("right-favorites-panel");
 

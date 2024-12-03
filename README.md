@@ -64,16 +64,17 @@ This script is still in development, please let me know if you experience a bug,
 | Shift + Scroll Wheel | Change column count | |
 | Left Click | Add tag to search | Clicked on a tag in details |
 | Right Click | Add negated tag to search | Clicked on a tag in details |
-| Middle Click | Quick search tag | Clicked on tag in details |
+| Middle Click | Quick search tag | Clicked on a tag in details |
 
 ### Gallery Controls
 | Input                                 | Function                                       | Condition              |
 | :-------------------------------------| :----------------------------------------------| :----------------------|
 | Arrow Keys, Scroll Wheel, AD, Swipe | Traverse gallery                               |                        |
 | Left Click, Touch                     | Exit gallery                                   | Content is not a video |
-| Escape                                | Exit gallery                                   |                        |
+| Escape                                |                                    |                        |
 | Right Click                           | Exit gallery, Enable "Enlarge on Hover" option |                        |
 | Middle Click                          | Open post page of thumbnail in new tab         |                        |
+| Double Click                          | Exit gallery         | Content is a video                       |
 
 
 ### Gallery Hotkeys
@@ -98,13 +99,14 @@ This script is still in development, please let me know if you experience a bug,
 | U   | Toggle UI |
 | O   | Toggle more options  |
 | R   | Toggle add/remove favorite buttons |
+| H   | Toggle hints |
 
 
 ## Search Syntax
 
 ### Basic
 
-( Same as the normal site syntax with addition of lone "ID" without ":" )
+Same as the normal site syntax with addition of lone "ID" without ":"
 
 | Operator        | Syntax          | Example                                                                                                                |
 |-----------------|-----------------|------------------------------------------------------------------------------------------------------------------------|
@@ -119,7 +121,7 @@ This script is still in development, please let me know if you experience a bug,
 
 ### Wildcard Examples
 
-( Same except "\*tag" aka "ends with" works here, but does not work on the site )
+Same as the normal site except "\*tag" (aka "ends with") works here, but does not work on the site
 
 | Query                       | Explanation                                                                          |
 |-----------------------------|--------------------------------------------------------------------------------------|
@@ -131,7 +133,7 @@ This script is still in development, please let me know if you experience a bug,
 
 ### Meta
 
-( Same except relative comparisons like "height:>width" work here, but do not work on the site )<br>
+Same as the normal site except relative comparisons like "height:>width" work here, but do not work on the site<br>
 
 | Operator     | Syntax | Example     |
 |--------------|--------|-------------|

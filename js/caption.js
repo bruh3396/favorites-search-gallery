@@ -121,7 +121,7 @@ class Caption {
   static tagCategoryAssociations;
   static settings = {
     tagFetchDelayAfterFinishedLoading: 5,
-    tagFetchDelayBeforeFinishedLoading: 100
+    tagFetchDelayBeforeFinishedLoading: 40
   };
   static flags = {
     finishedLoading: false
@@ -365,7 +365,7 @@ class Caption {
         .filter(tagName => !isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
 
       this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
-        this.saveTags();
+        this.saveTagCategories();
       });
     }, {
       once: true
@@ -586,7 +586,7 @@ class Caption {
     return JSON.parse(localStorage.getItem(Caption.localStorageKeys.tagCategories) || "{}");
   }
 
-  saveTags() {
+  saveTagCategories() {
     localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(Caption.tagCategoryAssociations));
   }
 
@@ -709,7 +709,7 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   addTags(tagNames, thumb) {
-    this.saveTags();
+    this.saveTagCategories();
 
     if (this.currentThumbId !== thumb.id) {
       return;
@@ -806,7 +806,7 @@ class Caption {
     const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 200));
 
     this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
-      this.saveTags();
+      this.saveTagCategories();
     });
   }
 

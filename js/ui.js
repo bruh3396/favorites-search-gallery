@@ -171,6 +171,10 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
         >img {
           width: 100%;
           z-index: 1;
+          -webkit-user-drag: none;
+          -khtml-user-drag: none;
+          -moz-user-drag: none;
+          -o-user-drag: none;
         }
 
         &:has(.add-or-remove-button:hover) {
@@ -535,8 +539,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
                 <li>
                   <strong>
                     A large site update is ongoing, creating new bugs
-                </strong>
-              </li>
+                  </strong>
+                </li>
                 <li>I'm fixing anything I find, but please report any issues you find also</li>
               </ul>
             </div>
@@ -712,7 +716,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 </div>`;/* eslint-disable no-bitwise */
 
 if (onFavoritesPage()) {
-  document.getElementById("content").insertAdjacentHTML("beforebegin", uiHTML);
+  getContent().insertAdjacentHTML("beforebegin", uiHTML);
 }
 const MAX_SEARCH_HISTORY_LENGTH = 100;
 const FAVORITE_PREFERENCES = {

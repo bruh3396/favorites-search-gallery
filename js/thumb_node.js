@@ -11,38 +11,25 @@ class InactiveThumbNode {
 
   /**
    * @param {HTMLElement} thumb
-   * @returns {Number}
-   */
-  static extractRatingFromThumb(thumb) {
-    // try {
-    //   const rating = (/'rating':'(\S)/).exec(thumb.nextSibling.textContent)[1];
-    //   return FavoriteMetadata.encodeRating(rating);
-    // } catch {
-    //   return 4;
-    // }
-    return 4;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Number}
-   */
-  static extractScoreFromThumb(thumb) {
-    // try {
-    //   const score = (/'score':(\d+)/).exec(thumb.nextSibling.textContent)[1];
-    //   return parseInt(score);
-    // } catch {
-    //   return 0;
-    // }
-    return 0;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
    * @returns {String}
    */
   static getIdFromThumb(thumb) {
-    return thumb.querySelector("a").id.replace(/\D/, "");
+    const anchor = thumb.querySelector("a");
+
+    if (anchor !== null && anchor.hasAttribute("id")) {
+      return anchor.id.replace(/\D/, "");
+    }
+
+    if (anchor !== null && anchor.hasAttribute("href")) {
+      const match = (/id=(\d+)$/).exec(anchor.href);
+
+      if (match !== null) {
+        return match[1];
+      }
+    }
+    const image = thumb.querySelector("img");
+    const match = (/\?(\d+)$/).exec(image.src);
+    return match[1];
   }
 
   /**
@@ -101,21 +88,11 @@ class InactiveThumbNode {
    * @param {HTMLElement} thumb
    */
   populateAttributesFromHTMLElement(thumb) {
-    if (onMobileDevice()) {
-      const noScriptElement = thumb.querySelector("noscript");
-
-      if (noScriptElement !== null) {
-        thumb.children[0].insertAdjacentElement("afterbegin", noScriptElement.children[0]);
-      }
-    }
-    // const image = thumb.children[0].children[0];
     const image = thumb.querySelector("img");
 
     this.id = InactiveThumbNode.getIdFromThumb(thumb);
     this.src = image.src;
     this.tags = this.preprocessTags(image);
-    // this.rating = InactiveThumbNode.extractRatingFromThumb(thumb);
-    // this.score = InactiveThumbNode.extractScoreFromThumb(thumb);
   }
 
   /**
@@ -132,8 +109,6 @@ class InactiveThumbNode {
       return new FavoriteMetadata(this.id, this.metadata);
     }
     const favoritesMetadata = new FavoriteMetadata(this.id);
-    // favoritesMetadata.presetRating(this.rating);
-    // favoritesMetadata.presetScore(this.score);
     return favoritesMetadata;
   }
 
@@ -244,6 +219,29 @@ class ThumbNode {
       return undefined;
     }
     return thumbNode.metadata.extension;
+  }
+
+  /**
+   * @param {String} id
+   * @param {String} apiTags
+   */
+  static verifyTags(id, apiTags) {
+    const thumbNode = ThumbNode.allThumbNodes.get(id);
+
+    if (thumbNode === undefined) {
+      return;
+    }
+    const thumbNodeTagSet = new Set(thumbNode.originalTagSet);
+    const apiTagSet = convertToTagSet(apiTags);
+
+    thumbNodeTagSet.delete(id);
+    const tagsNotInThumbNode = difference(apiTagSet, thumbNodeTagSet);
+    const tagsNotInApi = difference(thumbNodeTagSet, apiTagSet);
+
+    if (tagsNotInApi.size === 0 && tagsNotInThumbNode.size === 0) {
+      return;
+    }
+    thumbNode.initializeTags(apiTags);
   }
 
   /**
@@ -412,8 +410,9 @@ class ThumbNode {
       return;
     }
     this.essentialAttributesPopulated = true;
-    this.populateNonHTMLAttributes(inactiveThumbNode);
-    this.initializeAdditionalTags();
+    this.id = inactiveThumbNode.id;
+    this.metadata = inactiveThumbNode.instantiateMetadata();
+    this.initializeTags(inactiveThumbNode.tags);
     this.deleteConsumedProperties(inactiveThumbNode);
   }
 
@@ -490,23 +489,22 @@ class ThumbNode {
   /**
    * @param {InactiveThumbNode} inactiveThumbNode
    */
-  populateNonHTMLAttributes(inactiveThumbNode) {
-    this.id = inactiveThumbNode.id;
-    this.tagSet = convertToTagSet(`${inactiveThumbNode.id} ${inactiveThumbNode.tags}`);
-    this.metadata = inactiveThumbNode.instantiateMetadata();
-  }
-
-  /**
-   * @param {InactiveThumbNode} inactiveThumbNode
-   */
   populateHTMLAttributes(inactiveThumbNode) {
     this.image.src = inactiveThumbNode.src;
     this.image.classList.add(getContentType(inactiveThumbNode.tags || convertToTagString(this.tagSet)));
     this.root.id = inactiveThumbNode.id;
   }
 
-  initializeAdditionalTags() {
+  /**
+   * @param {String} tags
+   */
+  initializeTags(tags) {
+    this.tagSet = convertToTagSet(`${this.id} ${tags}`);
     this.originalTagsLength = this.tagSet.size;
+    this.initializeAdditionalTags();
+  }
+
+  initializeAdditionalTags() {
     this.additionalTags = convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
 
     if (this.additionalTags.size !== 0) {
