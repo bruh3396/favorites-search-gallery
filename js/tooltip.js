@@ -64,7 +64,7 @@ class Tooltip {
       return;
     }
     this.visible = getPreference("showTooltip", true);
-    document.body.insertAdjacentHTML("afterbegin", tooltipHTML);
+    insertFavoritesSearchGalleryHTML("afterbegin", tooltipHTML);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;
     this.searchTagColorCodes = {};
@@ -209,7 +209,8 @@ class Tooltip {
    * @param {HTMLImageElement} image
    */
   setPosition(image) {
-    const imageChangesSizeOnHover = document.getElementById("fancy-image-hovering") !== null;
+    const fancyHoveringStyle = document.getElementById("fancy-image-hovering-fsg-style");
+    const imageChangesSizeOnHover = fancyHoveringStyle !== null && fancyHoveringStyle.textContent !== "";
     let rect;
 
     if (imageChangesSizeOnHover) {
@@ -237,8 +238,8 @@ class Tooltip {
     }
     this.tooltip.style.top = `${rect.top - tooltipRect.height + window.scrollY - offset}px`;
     tooltipRect = this.tooltip.getBoundingClientRect();
-    const favoritesTopBar = document.getElementById("favorites-top-bar");
-    const elementAboveTooltip = favoritesTopBar === null ? document.getElementById("header") : favoritesTopBar;
+    const menu = document.getElementById("favorites-search-gallery-menu");
+    const elementAboveTooltip = menu === null ? document.getElementById("header") : menu;
     const elementAboveTooltipRect = elementAboveTooltip.getBoundingClientRect();
     const toolTipIsClippedAtTop = tooltipRect.top < elementAboveTooltipRect.bottom;
 

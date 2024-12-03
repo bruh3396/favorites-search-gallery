@@ -153,7 +153,7 @@ class TagModifier {
     if (!onFavoritesPage()) {
       return;
     }
-    document.getElementById("bottom-panel-4").insertAdjacentHTML("beforeend", tagModifierHTML);
+    insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", tagModifierHTML);
     this.favoritesOption.container = document.getElementById("tag-modifier-container");
     this.favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox");
     this.favoritesUI.container = document.getElementById("tag-modifier-ui-container");
@@ -293,15 +293,11 @@ class TagModifier {
    * @param {Boolean} value
    */
   toggleThumbInteraction(value) {
-    if (!value) {
-      const tagEditModeStyle = document.getElementById("tag-edit-mode");
+    let html = "";
 
-      if (tagEditModeStyle !== null) {
-        tagEditModeStyle.remove();
-      }
-      return;
-    }
-    insertStyleHTML(`
+    if (value) {
+      html =
+        `
       .thumb-node  {
         cursor: pointer;
         outline: 1px solid black;
@@ -319,7 +315,9 @@ class TagModifier {
           transition: none !important;
         }
       }
-    `, "tag-edit-mode");
+    `;
+    }
+    insertStyleHTML(html, "tag-edit-mode");
   }
 
   /**

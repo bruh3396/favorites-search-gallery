@@ -1,6 +1,6 @@
-const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-highlightable">
+const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
   <style>
-    #favorites-top-bar {
+    #favorites-search-gallery-menu {
       position: sticky;
       top: 0;
       padding: 10px;
@@ -15,7 +15,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
     }
 
-    #favorites-top-bar-panels {
+    #favorites-search-gallery-menu-panels {
       >div {
         flex: 1;
       }
@@ -280,7 +280,8 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
     }
 
-    #content {
+    #favorites-search-gallery-content {
+      padding: 0px 20px 30px 20px;
       display: grid !important;
       grid-template-columns: repeat(10, 1fr);
       grid-gap: 1em;
@@ -341,10 +342,6 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 
       ul {
         padding-left: 20px;
-
-        >li {
-          /* list-style: none; */
-        }
       }
 
       h5,
@@ -491,7 +488,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
       }
     }
   </style>
-  <div id="favorites-top-bar-panels" style="display: flex;">
+  <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;">Search Favorites</h2>
       <span id="favorites-load-status" style="margin-left: 5px;">
@@ -716,7 +713,7 @@ const uiHTML = `<div id="favorites-top-bar" class="light-green-gradient not-high
 </div>`;/* eslint-disable no-bitwise */
 
 if (onFavoritesPage()) {
-  getContent().insertAdjacentHTML("beforebegin", uiHTML);
+  insertFavoritesSearchGalleryHTML("afterbegin", uiHTML);
 }
 const MAX_SEARCH_HISTORY_LENGTH = 100;
 const FAVORITE_PREFERENCES = {
@@ -1055,7 +1052,7 @@ function addEventListenersToFavoritesPage() {
         break;
 
       case "h":
-          FAVORITE_CHECKBOXES.showHotkeyHints.click();
+        FAVORITE_CHECKBOXES.showHotkeyHints.click();
         break;
 
       case "s":
@@ -1170,10 +1167,10 @@ function changeColumnCount(count) {
   }
   count = clamp(parseInt(count), 4, 20);
   insertStyleHTML(`
-    #content {
+    #favorites-search-gallery-content {
       grid-template-columns: repeat(${count}, 1fr) !important;
     }
-    `, "columnCount");
+    `, "column-count");
   FAVORITE_INPUTS.columnCount.value = count;
   setPreference(FAVORITE_PREFERENCES.columnCount, count);
 }
@@ -1198,8 +1195,8 @@ function changeResultsPerPage(resultsPerPage) {
  * @param {Boolean} value
  */
 function toggleUI(value) {
-  const favoritesTopBar = document.getElementById("favorites-top-bar");
-  const favoritesTopBarPanels = document.getElementById("favorites-top-bar-panels");
+  const menu = document.getElementById("favorites-search-gallery-menu");
+  const menuPanels = document.getElementById("favorites-search-gallery-menu-panels");
   const header = document.getElementById("header");
   const showUIDiv = document.getElementById("show-ui-div");
   const showUIContainer = document.getElementById("bottom-panel-3");
@@ -1207,13 +1204,13 @@ function toggleUI(value) {
   if (value) {
     header.style.display = "";
     showUIContainer.insertAdjacentElement("afterbegin", showUIDiv);
-    favoritesTopBarPanels.style.display = "flex";
-    favoritesTopBar.removeAttribute("style");
+    menuPanels.style.display = "flex";
+    menu.removeAttribute("style");
   } else {
-    favoritesTopBar.appendChild(showUIDiv);
+    menu.appendChild(showUIDiv);
     header.style.display = "none";
-    favoritesTopBarPanels.style.display = "none";
-    favoritesTopBar.style.background = getComputedStyle(document.body).background;
+    menuPanels.style.display = "none";
+    menu.style.background = getComputedStyle(document.body).background;
   }
   showUIDiv.classList.toggle("ui-hidden", !value);
   setPreference(FAVORITE_PREFERENCES.showUI, value);
@@ -1237,7 +1234,7 @@ function configureMobileUI() {
         }
       }
 
-      #favorites-top-bar-panels {
+      #favorites-search-gallery-menu-panels {
         >div {
           textarea {
             width: 95% !important;
@@ -1245,21 +1242,21 @@ function configureMobileUI() {
         }
       }
 
-      #container {
+      #favorites-search-gallery-content {
+        padding-top: 300px;
+      }
+
+      #mobile-container {
         position: fixed !important;
         z-index: 30;
         width: 100vw;
-      }
-
-      #content {
-        margin-top: 300px !important;
       }
 
       #show-ui-div {
         display: none;
       }
 
-      #favorites-top-bar-panels {
+      #favorites-search-gallery-menu-panels {
         display: block !important;
       }
 
@@ -1271,20 +1268,21 @@ function configureMobileUI() {
         display: block !important;
         margin-left: 10px !important;
       }
-      `);
-  const container = document.createElement("div");
+      `, "mobile");
 
-  container.id = "container";
+  const mobileUiContainer = document.createElement("div");
 
-  document.body.insertAdjacentElement("afterbegin", container);
-  container.appendChild(document.getElementById("header"));
-  container.appendChild(document.getElementById("favorites-top-bar"));
+  mobileUiContainer.id = "mobile-container";
 
-  // const helpLinksContainer = document.getElementById("help-links-container");
+  mobileUiContainer.appendChild(document.getElementById("header"));
+  mobileUiContainer.appendChild(document.getElementById("favorites-search-gallery-menu"));
+  insertFavoritesSearchGalleryHTML("afterbegin", mobileUiContainer);
 
-  // if (helpLinksContainer !== null) {
-  //   helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
-  // }
+  const helpLinksContainer = document.getElementById("help-links-container");
+
+  if (helpLinksContainer !== null) {
+    helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
+  }
   FAVORITE_CHECKBOXES.showHotkeyHints.parentElement.style.display = "none";
 }
 
@@ -1312,7 +1310,7 @@ function configureDesktopUI() {
       width: 20px;
       height: 20px;
     }
-  `);
+  `, "desktop");
 }
 
 function setupWhatsNewDropdown() {

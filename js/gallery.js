@@ -18,7 +18,7 @@ const galleryHTML = `<style>
     transform: translate(-50%, -50%);
   }
 
-  #original-content-container {
+  #gallery-container {
     >canvas,img {
       float: left;
       overflow: hidden;
@@ -1804,7 +1804,7 @@ onmessage = (message) => {
   }
 
   insertStyleHTML() {
-    insertStyleHTML(galleryHTML);
+    insertStyleHTML(galleryHTML, "gallery");
   }
 
   insertDebugHTML() {
@@ -1850,7 +1850,7 @@ onmessage = (message) => {
 
   insertOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
-          <div id="original-content-container">
+          <div id="gallery-container">
               <div id="original-video-container">
                 <video id="video-player-0" width="100%" height="100%" autoplay muted loop controlsList="nofullscreen" active></video>
               </div>
@@ -1859,8 +1859,8 @@ onmessage = (message) => {
           </div>
       `;
 
-    document.body.insertAdjacentHTML("afterbegin", originalContentContainerHTML);
-    this.originalContentContainer = document.getElementById("original-content-container");
+    insertFavoritesSearchGalleryHTML("afterbegin", originalContentContainerHTML);
+    this.originalContentContainer = document.getElementById("gallery-container");
     this.originalContentContainer.insertBefore(this.lowResolutionCanvas, this.originalContentContainer.firstChild);
     this.originalContentContainer.insertBefore(this.mainCanvas, this.originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");

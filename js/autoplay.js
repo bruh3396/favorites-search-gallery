@@ -1,6 +1,6 @@
-const autoplayHTML = `<div id="autoplay-menu-container">
+const autoplayHTML = `<div id="autoplay-container">
   <style>
-    #autoplay-menu-container {
+    #autoplay-container {
       visibility: hidden;
     }
 
@@ -384,8 +384,8 @@ class Autoplay {
   }
 
   insertMenuHTML() {
-    document.body.insertAdjacentHTML("afterbegin", autoplayHTML);
-    this.ui.container = document.getElementById("autoplay-menu-container");
+    insertFavoritesSearchGalleryHTML("afterbegin", autoplayHTML);
+    this.ui.container = document.getElementById("autoplay-container");
     this.ui.menu = document.getElementById("autoplay-menu");
     this.ui.settingsButton = document.getElementById("autoplay-settings-button");
     this.ui.settingsMenu.container = document.getElementById("autoplay-settings-menu");

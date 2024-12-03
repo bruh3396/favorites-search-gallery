@@ -319,6 +319,10 @@ onmessage = (message) => {
   }
 
   /**
+   * @type {HTMLDivElement}
+   */
+  contentContainer;
+  /**
    * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: FavoritesPageRequest[]}}
    */
   fetchedThumbNodes;
@@ -479,10 +483,13 @@ onmessage = (message) => {
     }
     this.initializeFields();
     this.addEventListeners();
-    this.initialize();
+    this.setExpectedFavoritesCount();
+    this.clearOriginalFavoritesPage();
+    this.searchFavorites();
   }
 
   initializeFields() {
+    this.contentContainer = this.createContentContainer();
     this.allThumbNodes = [];
     this.latestSearchResults = [];
     this.searchResultsWhileFetching = [];
@@ -547,12 +554,6 @@ onmessage = (message) => {
     };
   }
 
-  initialize() {
-    this.setExpectedFavoritesCount();
-    this.clearOriginalFavoritesPage();
-    this.searchFavorites();
-  }
-
   setExpectedFavoritesCount() {
     const profileURL = `https://rule34.xxx/index.php?page=account&s=profile&id=${getFavoritesPageId()}`;
 
@@ -578,13 +579,28 @@ onmessage = (message) => {
 
   clearOriginalFavoritesPage() {
     const thumbs = Array.from(document.getElementsByClassName("thumb"));
+    const content = document.getElementById("content");
 
-    getContent().innerHTML = "";
+    if (content !== null) {
+      content.remove();
+    }
+
     setTimeout(() => {
       dispatchEvent(new CustomEvent("originalFavoritesCleared", {
         detail: thumbs
       }));
     }, 1000);
+  }
+
+  /**
+   * @returns {HTMLDivElement}
+   */
+  createContentContainer() {
+    const content = document.createElement("div");
+
+    content.id = "favorites-search-gallery-content";
+    FAVORITES_SEARCH_GALLERY_CONTAINER.appendChild(content);
+    return content;
   }
 
   /**
@@ -1161,14 +1177,13 @@ Tag modifications and saved searches will be preserved.
    * @param {Boolean} value
    */
   toggleContentVisibility(value) {
-    getContent().style.display = value ? "" : "none";
+    this.contentContainer.style.display = value ? "" : "none";
   }
 
   /**
    * @param {ThumbNode[]} newThumbNodes
    */
   async insertNewFavorites(newThumbNodes) {
-    const content = getContent();
     const searchCommand = new SearchCommand(this.finalSearchQuery);
     const insertedThumbNodes = [];
     const metadataPopulateWaitTime = 1000;
@@ -1181,7 +1196,7 @@ Tag modifications and saved searches will be preserved.
 
     for (const thumbNode of newThumbNodes) {
       if (this.matchesSearchAndRating(searchCommand, thumbNode)) {
-        thumbNode.insertAtBeginningOfContent(content);
+        thumbNode.insertAtBeginningOfContent(this.contentContainer);
         insertedThumbNodes.push(thumbNode);
       }
     }
@@ -1230,10 +1245,9 @@ Tag modifications and saved searches will be preserved.
         return;
       }
     }
-    const content = getContent();
 
     for (const thumbNode of thumbNodes) {
-      thumbNode.insertAtEndOfContent(content);
+      thumbNode.insertAtEndOfContent(this.contentContainer);
     }
   }
 
@@ -1292,7 +1306,7 @@ Tag modifications and saved searches will be preserved.
     if (document.getElementById(this.paginationContainer.id) === null) {
 
       if (onMobileDevice()) {
-        document.getElementById("favorites-top-bar-panels").insertAdjacentElement("afterbegin", this.paginationContainer);
+        document.getElementById("favorites-search-gallery-menu").insertAdjacentElement("afterbegin", this.paginationContainer);
       } else {
         const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
 
@@ -1526,14 +1540,13 @@ Tag modifications and saved searches will be preserved.
    * @returns
    */
   createPaginatedFavoritesPage(searchResults, start, end) {
-    const content = getContent();
     const newContent = document.createDocumentFragment();
 
     for (const thumbNode of searchResults.slice(start, end)) {
       thumbNode.insertAtEndOfContent(newContent);
     }
-    content.innerHTML = "";
-    content.appendChild(newContent);
+    this.contentContainer.innerHTML = "";
+    this.contentContainer.appendChild(newContent);
     window.scrollTo(0, 0);
   }
 

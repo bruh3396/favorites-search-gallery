@@ -115,6 +115,7 @@ class Caption {
      </ul>
  `;
   static findCategoriesOnPageChangeCooldown = new Cooldown(3000, true);
+  static saveTagCategoriesCooldown = new Cooldown(1000);
   /**
    * @type {Object.<String, Number>}
    */
@@ -220,6 +221,9 @@ class Caption {
     Caption.findCategoriesOnPageChangeCooldown.onDebounceEnd = () => {
       this.findTagCategoriesOnPageChange();
     };
+    Caption.saveTagCategoriesCooldown.onCooldownEnd = () => {
+      this.saveTagCategories();
+    };
     this.currentThumb = null;
     this.problematicTags = new Set();
     this.currentThumbId = null;
@@ -237,7 +241,7 @@ class Caption {
   }
 
   insertHTML() {
-    insertStyleHTML(captionHTML);
+    insertStyleHTML(captionHTML, "caption");
     createFavoritesOption(
       "show-captions",
       "Details",
@@ -365,7 +369,7 @@ class Caption {
         .filter(tagName => !isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
 
       this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
-        this.saveTagCategories();
+        Caption.saveTagCategoriesCooldown.restart();
       });
     }, {
       once: true
@@ -709,7 +713,7 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   addTags(tagNames, thumb) {
-    this.saveTagCategories();
+    Caption.saveTagCategoriesCooldown.restart();
 
     if (this.currentThumbId !== thumb.id) {
       return;
@@ -806,7 +810,7 @@ class Caption {
     const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 200));
 
     this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
-      this.saveTagCategories();
+      Caption.saveTagCategoriesCooldown.restart();
     });
   }
 

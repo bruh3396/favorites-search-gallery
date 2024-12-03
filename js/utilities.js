@@ -297,6 +297,7 @@ class MetadataSearchExpression {
   }
 }
 
+const FAVORITES_SEARCH_GALLERY_CONTAINER = createFavoritesSearchGalleryContainer();
 const IDS_TO_REMOVE_ON_RELOAD_KEY = "recentlyRemovedIds";
 const TAG_BLACKLIST = getTagBlacklist();
 const PREFERENCES_LOCAL_STORAGE_KEY = "preferences";
@@ -918,6 +919,7 @@ function insertStyleHTML(html, id) {
   style.textContent = html.replace("<style>", "").replace("</style>", "");
 
   if (id !== undefined) {
+    id += "-fsg-style";
     const oldStyle = document.getElementById(id);
 
     if (oldStyle !== null) {
@@ -969,7 +971,7 @@ function sortObjectByValues(obj) {
 }
 
 function insertCommonStyleHTML() {
-  insertStyleHTML(utilitiesHTML, "utilities-common-styles");
+  insertStyleHTML(utilitiesHTML, "common");
   toggleThumbHoverOutlines(false);
   setTimeout(() => {
     if (onSearchPage()) {
@@ -986,17 +988,11 @@ function toggleFancyImageHovering(value) {
   if (onMobileDevice() || onSearchPage()) {
     value = false;
   }
+  let html = "";
 
-  if (!value) {
-    const style = document.getElementById("fancy-image-hovering");
-
-    if (style !== null) {
-      style.remove();
-    }
-    return;
-  }
-  insertStyleHTML(`
-    #content {
+  if (value) {
+    html = `
+    #favorites-search-gallery-content {
       padding: 40px 40px 30px !important;
       grid-gap: 2.5em !important;
     }
@@ -1039,7 +1035,9 @@ function toggleFancyImageHovering(value) {
         }
       }
     }
-    `, "fancy-image-hovering");
+    `;
+  }
+  insertStyleHTML(html, "fancy-image-hovering");
 }
 
 function configureVideoOutlines() {
@@ -1061,7 +1059,7 @@ function configureVideoOutlines() {
         }
       }
     }
-    `, "video-border");
+    `, "video-gif-borders");
 }
 
 function removeInlineImgStyles() {
@@ -1082,23 +1080,23 @@ function setTheme() {
             background-color: #303030;
             color: white;
           }
-          `, "dark-theme-number-input");
-        insertStyleHTML(`
-            #favorites-pagination-container {
-              >button {
-                border: 1px solid white !important;
-                color: white !important;
-              }
-            }
-          `, "pagination-style");
-        insertStyleHTML(`
-            .number {
-              background-color: #303030;
 
-              >hold-button,
-              button {
-                color: white;
-            }`);
+          .number {
+            background-color: #303030;
+
+            >hold-button,
+            button {
+              color: white;
+            }
+          }
+
+          #favorites-pagination-container {
+            >button {
+              border: 1px solid white !important;
+              color: white !important;
+            }
+          }
+          `, "dark-theme");
       }
     }
   }, 10);
@@ -1231,7 +1229,7 @@ function usingCaptions() {
  */
 function usingRenderer() {
   if (!FLAGS.usingRenderer.set) {
-    FLAGS.usingRenderer.value = document.getElementById("original-content-container") !== null;
+    FLAGS.usingRenderer.value = document.getElementById("gallery-container") !== null;
     FLAGS.usingRenderer.set = true;
   }
   return FLAGS.usingRenderer.value;
@@ -1281,8 +1279,8 @@ function scrollToThumb(postId, endingAnimation, smoothTransition) {
     return;
   }
   const rect = element.getBoundingClientRect();
-  const favoritesHeader = document.getElementById("favorites-top-bar");
-  const favoritesSearchHeight = favoritesHeader === null ? 0 : favoritesHeader.getBoundingClientRect().height;
+  const menu = document.getElementById("favorites-search-gallery-menu");
+  const favoritesSearchHeight = menu === null ? 0 : menu.getBoundingClientRect().height;
 
   window.scroll({
     top: rect.top + window.scrollY + (rect.height / 2) - (window.innerHeight / 2) - (favoritesSearchHeight / 2),
@@ -1820,18 +1818,36 @@ function getSortingMethod() {
 /**
  * @returns {HTMLDivElement}
  */
-function getContent() {
-  const contentId = "content";
-  const content = document.getElementById(contentId);
+function createFavoritesSearchGalleryContainer() {
+  const container = document.createElement("div");
 
-  if (content !== null) {
-    return content;
+  container.id = "favorites-search-gallery";
+  document.body.appendChild(container);
+  return container;
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {String} position
+ * @param {String} html
+ */
+function insertHTMLAndExtractStyle(element, position, html) {
+  const dom = new DOMParser().parseFromString(html, "text/html");
+  const styles = Array.from(dom.querySelectorAll("style"));
+
+  for (const style of styles) {
+    insertStyleHTML(style.innerHTML);
+    style.remove();
   }
-  const newContent = document.createElement("div");
+  element.insertAdjacentHTML(position, dom.body.innerHTML);
+}
 
-  newContent.id = contentId;
-  document.body.appendChild(newContent);
-  return newContent;
+/**
+ * @param {String} position
+ * @param {String} html
+ */
+function insertFavoritesSearchGalleryHTML(position, html) {
+  insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_CONTAINER, position, html);
 }
 
 initializeUtilities();

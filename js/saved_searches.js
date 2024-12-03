@@ -207,7 +207,7 @@ class SavedSearches {
     const showSavedSearches = getPreference(SavedSearches.preferences.visibility, false);
     const savedSearchesContainer = document.getElementById("right-favorites-panel");
 
-    savedSearchesContainer.insertAdjacentHTML("beforeend", savedSearchesHTML);
+    insertHTMLAndExtractStyle(savedSearchesContainer, "beforeend", savedSearchesHTML);
     document.getElementById("right-favorites-panel").style.display = showSavedSearches ? "block" : "none";
     const options = createFavoritesOption(
       "show-saved-searches",
