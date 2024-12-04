@@ -870,11 +870,14 @@ function loadFavoritesPagePreferences() {
 }
 
 function removePaginatorFromFavoritesPage() {
+  if (!onFavoritesPage()) {
+    return;
+  }
   const paginator = document.getElementById("paginator");
   const pi = document.getElementById("pi");
 
   if (paginator !== null) {
-    paginator.style.display = "none";
+    paginator.remove();
   }
 
   if (pi !== null) {

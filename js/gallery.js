@@ -34,6 +34,8 @@ const galleryHTML = `<style>
 
   #original-video-container {
     video {
+      top: 0;
+      left: 0;
       display: none;
       position:fixed;
       z-index:9998;
@@ -82,8 +84,8 @@ const galleryHTML = `<style>
 
   #original-content-background {
     position: fixed;
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background: black;
@@ -91,7 +93,6 @@ const galleryHTML = `<style>
     display: none;
     pointer-events: none;
   }
-
 </style>
 `;/* eslint-disable no-useless-escape */
 
@@ -1778,18 +1779,12 @@ onmessage = (message) => {
     if (!onSearchPage()) {
       return;
     }
-    const imageList = document.getElementsByClassName("image-list")[0];
-    const thumbs = Array.from(imageList.querySelectorAll(".thumb"));
-    const scripts = Array.from(imageList.querySelectorAll("script"));
+    const thumbs = Array.from(document.querySelectorAll(".thumb"));
 
     for (const thumb of thumbs) {
       removeTitleFromImage(getImageFromThumb(thumb));
       assignContentType(thumb);
-      thumb.id = thumb.id.substring(1);
-    }
-
-    for (const script of scripts) {
-      script.remove();
+      thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
     }
     await this.findImageExtensionsOnSearchPage();
     this.renderImagesInTheBackground();
@@ -2200,13 +2195,9 @@ onmessage = (message) => {
    * @returns {HTMLElement[]}
    */
   getVisibleUnrenderedImageThumbs() {
-    let thumbs = Array.from(getAllVisibleThumbs()).filter((thumb) => {
+    const thumbs = Array.from(getAllVisibleThumbs()).filter((thumb) => {
       return isImage(thumb) && !this.renderHasStarted(thumb);
     });
-
-    if (onSearchPage()) {
-      thumbs = thumbs.filter(thumb => !thumb.classList.contains("blacklisted-image"));
-    }
     return thumbs;
   }
 
@@ -2261,14 +2252,29 @@ onmessage = (message) => {
         const posts = Array.from(dom.getElementsByTagName("post"));
 
         for (const post of posts) {
+          const tags = post.getAttribute("tags");
+          const id = post.getAttribute("id");
           const originalImageURL = post.getAttribute("file_url");
-          const isAnImage = getContentType(post.getAttribute("tags")) === "image";
+          const tagSet = convertToTagSet(tags);
+          const thumb = document.getElementById(id);
+
+          if (!tagSet.has("video") && originalImageURL.endsWith("mp4") && thumb !== null) {
+            const image = getImageFromThumb(thumb);
+
+            image.setAttribute("tags", `${image.getAttribute("tags")} video`);
+            setContentType(image, "video");
+          } else if (!tagSet.has("gif") && originalImageURL.endsWith("gif") && thumb !== null) {
+            const image = getImageFromThumb(thumb);
+
+            image.setAttribute("tags", `${image.getAttribute("tags")} gif`);
+            setContentType(image, "gif");
+          }
+          const isAnImage = getContentType(tags) === "image";
           const isBlacklisted = originalImageURL === "https://api-cdn.rule34.xxx/images//";
 
           if (!isAnImage || isBlacklisted) {
             continue;
           }
-          const id = post.getAttribute("id");
           const extension = getExtensionFromImageURL(originalImageURL);
 
           this.assignImageExtension(id, extension);

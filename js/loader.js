@@ -335,10 +335,6 @@ onmessage = (message) => {
    */
   latestSearchResults;
   /**
-   * @type {Number}
-   */
-  finalPageNumber;
-  /**
    * @type {HTMLLabelElement}
    */
   matchCountLabel;
@@ -494,7 +490,6 @@ onmessage = (message) => {
     this.latestSearchResults = [];
     this.searchResultsWhileFetching = [];
     this.idsRequiringMetadataDatabaseUpdate = [];
-    this.finalPageNumber = this.getFinalFavoritesPageNumber();
     this.matchCountLabel = document.getElementById("match-count-label");
     this.resultsPerPage = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
     this.allowedRatings = loadAllowedRatings();
@@ -749,11 +744,11 @@ onmessage = (message) => {
    */
   findNewFavoritesOnReload(allFavoriteIds, currentPageNumber, newFavoritesToAdd) {
     const favoritesURL = `${document.location.href}&pid=${currentPageNumber}`;
-    const exceededFavoritesPageNumber = currentPageNumber > this.finalPageNumber;
     let allNewFavoritesFound = false;
 
     requestPageInformation(favoritesURL, (response) => {
       const thumbNodes = this.extractThumbNodesFromFavoritesPage(response);
+      const foundEmptyPage = thumbNodes.length === 0;
 
       for (const thumbNode of thumbNodes) {
         const favoriteIsNotNew = allFavoriteIds[thumbNode.id] !== undefined;
@@ -765,7 +760,7 @@ onmessage = (message) => {
         newFavoritesToAdd.push(thumbNode);
       }
 
-      if (allNewFavoritesFound || exceededFavoritesPageNumber) {
+      if (allNewFavoritesFound || foundEmptyPage) {
         this.allThumbNodes = newFavoritesToAdd.concat(this.allThumbNodes);
         this.latestSearchResults = newFavoritesToAdd.concat(this.latestSearchResults);
         this.addNewFavoritesOnReload(newFavoritesToAdd);
@@ -829,13 +824,13 @@ onmessage = (message) => {
         continue;
       }
 
-      if (currentPageNumber * 50 <= this.finalPageNumber && !this.foundEmptyFavoritesPage) {
+      if (!this.foundEmptyFavoritesPage) {
         await this.fetchNewFavoritesPage(currentPageNumber);
         currentPageNumber += 1;
         continue;
       }
 
-      if (this.isFinishedFetching(currentPageNumber)) {
+      if (this.isFinishedFetching()) {
         this.onAllFavoritesLoaded();
         this.storeFavorites();
         return;
@@ -860,15 +855,13 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {Number} pageNumber
    * @returns {Boolean}
    */
-  isFinishedFetching(pageNumber) {
-    pageNumber *= 50;
-    let finishedFetching = this.allThumbNodes.length >= this.expectedFavoritesCount - 2;
-
-    finishedFetching = finishedFetching || this.foundEmptyFavoritesPage || pageNumber >= (this.finalPageNumber * 2) + 1;
-    return finishedFetching && this.failedFetchRequests.length === 0;
+  isFinishedFetching() {
+    const allFavoritesFound = this.allThumbNodes.length >= this.expectedFavoritesCount - 2;
+    const finishedFetchingNewFavorites = allFavoritesFound || this.foundEmptyFavoritesPage;
+    const finishedRefetching = this.failedFetchRequests.length === 0;
+    return finishedFetchingNewFavorites && finishedRefetching;
   }
 
   /**
@@ -1093,18 +1086,6 @@ onmessage = (message) => {
       command: "update",
       favorites: thumbNodes.map(thumbNode => thumbNode.databaseRecord)
     });
-  }
-
-  /**
-   * @returns {Number}
-   */
-  getFinalFavoritesPageNumber() {
-    const lastPage = document.getElementsByName("lastpage")[0];
-
-    if (lastPage === undefined) {
-      return 0;
-    }
-    return parseInt(lastPage.getAttribute("onclick").match(/pid=([0-9]*)/)[1]);
   }
 
   deletePersistentData() {

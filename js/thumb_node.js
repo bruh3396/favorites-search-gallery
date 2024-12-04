@@ -10,29 +10,6 @@ class InactiveThumbNode {
   }
 
   /**
-   * @param {HTMLElement} thumb
-   * @returns {String}
-   */
-  static getIdFromThumb(thumb) {
-    const anchor = thumb.querySelector("a");
-
-    if (anchor !== null && anchor.hasAttribute("id")) {
-      return anchor.id.replace(/\D/, "");
-    }
-
-    if (anchor !== null && anchor.hasAttribute("href")) {
-      const match = (/id=(\d+)$/).exec(anchor.href);
-
-      if (match !== null) {
-        return match[1];
-      }
-    }
-    const image = thumb.querySelector("img");
-    const match = (/\?(\d+)$/).exec(image.src);
-    return match[1];
-  }
-
-  /**
    * @type {String}
    */
   id;
@@ -88,9 +65,9 @@ class InactiveThumbNode {
    * @param {HTMLElement} thumb
    */
   populateAttributesFromHTMLElement(thumb) {
+    this.id = getIdFromThumb(thumb);
     const image = thumb.querySelector("img");
 
-    this.id = InactiveThumbNode.getIdFromThumb(thumb);
     this.src = image.src;
     this.tags = this.preprocessTags(image);
   }
@@ -100,7 +77,7 @@ class InactiveThumbNode {
    * @returns {String}
    */
   preprocessTags(image) {
-    const tags = correctMisspelledTags(image.title);
+    const tags = correctMisspelledTags(image.title || image.getAttribute("tags"));
     return removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
   }
 
@@ -224,8 +201,9 @@ class ThumbNode {
   /**
    * @param {String} id
    * @param {String} apiTags
+   * @param {String} fileURL
    */
-  static verifyTags(id, apiTags) {
+  static verifyTags(id, apiTags, fileURL) {
     const thumbNode = ThumbNode.allThumbNodes.get(id);
 
     if (thumbNode === undefined) {
@@ -234,6 +212,12 @@ class ThumbNode {
     const thumbNodeTagSet = new Set(thumbNode.originalTagSet);
     const apiTagSet = convertToTagSet(apiTags);
 
+    if (fileURL.endsWith("mp4")) {
+      apiTagSet.add("video");
+    } else if (fileURL.endsWith("gif")) {
+      apiTagSet.add("gif");
+    }
+
     thumbNodeTagSet.delete(id);
     const tagsNotInThumbNode = difference(apiTagSet, thumbNodeTagSet);
     const tagsNotInApi = difference(thumbNodeTagSet, apiTagSet);
@@ -241,7 +225,7 @@ class ThumbNode {
     if (tagsNotInApi.size === 0 && tagsNotInThumbNode.size === 0) {
       return;
     }
-    thumbNode.initializeTags(apiTags);
+    thumbNode.initializeTags(convertToTagString(apiTagSet));
   }
 
   /**

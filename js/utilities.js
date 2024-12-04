@@ -575,7 +575,8 @@ function removeTitleFromImage(image) {
  * @returns {HTMLElement}
  */
 function getThumbFromImage(image) {
-  return image.parentNode.parentNode;
+  const className = onSearchPage() ? "thumb" : "thumb-node";
+  return image.closest(`.${className}`);
 }
 
 /**
@@ -583,7 +584,7 @@ function getThumbFromImage(image) {
  * @returns {HTMLImageElement}
  */
 function getImageFromThumb(thumb) {
-  return thumb.children[0].children[0];
+  return thumb.querySelector("img");
 }
 
 /**
@@ -1149,7 +1150,6 @@ function initializeUtilities() {
   setupCustomWebComponents();
   toggleFancyImageHovering(true);
   setTheme();
-  removeBlacklistedThumbs();
   prefetchAdjacentSearchPages();
 }
 
@@ -1191,17 +1191,6 @@ function createPrefetchLink(url) {
   link.href = url;
   return link;
 
-}
-
-function removeBlacklistedThumbs() {
-  if (!onSearchPage()) {
-    return;
-  }
-  const blacklistedThumbs = Array.from(document.getElementsByClassName("blacklisted-image"));
-
-  for (const thumb of blacklistedThumbs) {
-    thumb.remove();
-  }
 }
 
 /**
@@ -1306,7 +1295,18 @@ function assignContentType(thumb) {
   const tagAttribute = image.hasAttribute("tags") ? "tags" : "title";
   const tags = image.getAttribute(tagAttribute);
 
-  image.classList.add(getContentType(tags));
+  setContentType(image, getContentType(tags));
+}
+
+/**
+ * @param {HTMLImageElement} image
+ * @param {String} type
+ */
+function setContentType(image, type) {
+  image.classList.remove("image");
+  image.classList.remove("gif");
+  image.classList.remove("video");
+  image.classList.add(type);
 }
 
 /**
@@ -1848,6 +1848,43 @@ function insertHTMLAndExtractStyle(element, position, html) {
  */
 function insertFavoritesSearchGalleryHTML(position, html) {
   insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_CONTAINER, position, html);
+}
+
+/**
+ * @param {String} str
+ * @returns {String}
+ */
+function removeNonNumericCharacters(str) {
+  return str.replaceAll(/\D/g, "");
+}
+
+/**
+ * @param {HTMLElement} thumb
+ * @returns {String}
+ */
+function getIdFromThumb(thumb) {
+  const id = thumb.getAttribute("id");
+
+  if (id !== null) {
+    return removeNonNumericCharacters(id);
+  }
+
+  const anchor = thumb.querySelector("a");
+
+  if (anchor !== null && anchor.hasAttribute("id")) {
+    return removeNonNumericCharacters(anchor.id);
+  }
+
+  if (anchor !== null && anchor.hasAttribute("href")) {
+    const match = (/id=(\d+)$/).exec(anchor.href);
+
+    if (match !== null) {
+      return match[1];
+    }
+  }
+  const image = thumb.querySelector("img");
+  const match = (/\?(\d+)$/).exec(image.src);
+  return match[1];
 }
 
 initializeUtilities();
