@@ -391,9 +391,13 @@ onmessage = (message) => {
    */
   newMetadataReceivedTimeout;
   /**
-   * @type {FavoritesFetcher}
+   * @type {FavoritesPageFetcher}
    */
   favoritesFetcher;
+  /**
+   * @type {FetchedFavoritesPageQueue}
+   */
+  fetchedFavoritesQueue;
 
   /**
    * @type {String}
@@ -468,12 +472,14 @@ onmessage = (message) => {
   }
 
   initializeComponents() {
-    this.favoritesFetcher = new FavoritesFetcher(() => {
-        this.onAllFavoritesLoaded();
-        this.storeFavorites();
-      }, (request) => {
-        this.processFetchedFavorites(request);
-      });
+    this.fetchedFavoritesQueue = new FetchedFavoritesPageQueue((request) => {
+      this.processFetchedFavorites(request.fetchedFavorites);
+    });
+    this.favoritesFetcher = new FavoritesPageFetcher(() => {
+      this.onAllFavoritesFetched();
+    }, (request) => {
+      this.fetchedFavoritesQueue.enqueue(request);
+    });
   }
 
   addEventListeners() {
@@ -747,19 +753,19 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {FavoritesPageRequest} request
+   * @param {ThumbNode[]} favorites
    */
-  processFetchedFavorites(request) {
-    const matchedFavorites = this.getSearchResults(request.fetchedFavorites);
+  processFetchedFavorites(favorites) {
+    const matchedFavorites = this.getSearchResults(favorites);
 
     this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(matchedFavorites);
     const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
 
     this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
     dispatchEvent(new CustomEvent("favoritesFetched", {
-      detail: request.fetchedFavorites.map(thumbNode => thumbNode.root)
+      detail: favorites.map(thumbNode => thumbNode.root)
     }));
-    this.allFavorites = this.allFavorites.concat(request.fetchedFavorites);
+    this.allFavorites = this.allFavorites.concat(favorites);
     this.addFavoritesToContent(matchedFavorites);
     this.updateProgressWhileFetching();
   }
@@ -786,6 +792,11 @@ onmessage = (message) => {
 
   getThumbNodesMatchedByLastSearch() {
     return this.allFavorites.filter(thumbNode => thumbNode.matchedByMostRecentSearch);
+  }
+
+  onAllFavoritesFetched() {
+    this.onAllFavoritesLoaded();
+    this.storeFavorites();
   }
 
   onAllFavoritesLoaded() {

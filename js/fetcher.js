@@ -1,85 +1,12 @@
-/* eslint-disable max-classes-per-file */
-class FavoritesPageRequest {
-  /**
-   * @type {Number}
-   */
-  pageNumber;
-  /**
-   * @type {Number}
-   */
-  retryCount;
-  /**
-   * @type {ThumbNode[]}
-   */
-  fetchedFavorites;
-
-  /**
-   * @type {String}
-   */
-  get url() {
-    return `${document.location.href}&pid=${this.pageNumber * 50}`;
-  }
-
-  /**
-   * @type {Number}
-   */
-  get retryDelay() {
-    return (7 ** (this.retryCount)) + 200;
-  }
-
-  /**
-   * @param {Number} pageNumber
-   */
-  constructor(pageNumber) {
-    this.pageNumber = pageNumber;
-    this.retryCount = 0;
-    this.fetchedFavorites = [];
-  }
-
-  onFail() {
-    this.retryCount += 1;
-  }
-}
-
-class FavoritesPageParser {
-  static parser = new DOMParser();
-
-  /**
-   * @param {String} favoritesPageHTML
-   * @returns {ThumbNode[]}
-   */
-  static extractFavorites(favoritesPageHTML) {
-    const elements = FavoritesPageParser.extractThumbLikeElements(favoritesPageHTML);
-    return elements.map(element => new ThumbNode(element, false));
-  }
-
-  /**
-   * @param {String} favoritesPageHTML
-   * @returns {HTMLElement[]}
-   */
-  static extractThumbLikeElements(favoritesPageHTML) {
-    const dom = FavoritesPageParser.parser.parseFromString(favoritesPageHTML, "text/html");
-
-    let elements = Array.from(dom.getElementsByClassName("thumb"));
-
-    if (elements.length === 0) {
-      elements = Array.from(dom.getElementsByTagName("img"))
-        .filter(image => image.src.includes("thumbnail_"))
-        .map(image => image.parentElement);
-    }
-    return elements;
-  }
-}
-
-class FavoritesFetcher {
-  /**
-   * @type {FetchedFavoritesQueue}
-   */
-  fetchedFavoritesQueue;
+class FavoritesPageFetcher {
   /**
    * @type {Function}
    */
   onAllFavoritesPageRequestsCompleted;
+  /**
+   * @type {Function}
+   */
+  onFavoritesPageRequestCompleted;
   /**
    * @type {FavoritesPageRequest[]}
    */
@@ -154,8 +81,8 @@ class FavoritesFetcher {
    * @param {Function} onFavoritesPageRequestCompleted
    */
   constructor(onAllFavoritesPageRequestsCompleted, onFavoritesPageRequestCompleted) {
-    this.fetchedFavoritesQueue = new FetchedFavoritesQueue(onFavoritesPageRequestCompleted);
     this.onAllFavoritesPageRequestsCompleted = onAllFavoritesPageRequestsCompleted;
+    this.onFavoritesPageRequestCompleted = onFavoritesPageRequestCompleted;
     this.storedFavoriteIds = new Set();
     this.failedFavoritesPageRequests = [];
     this.currentPageNumber = 0;
@@ -266,7 +193,7 @@ class FavoritesFetcher {
   onRequestSuccess(request, html) {
     request.fetchedFavorites = FavoritesPageParser.extractFavorites(html);
     this.fetchedAnEmptyFavoritesPage = this.fetchedAnEmptyFavoritesPage || request.fetchedFavorites.length === 0;
-    this.fetchedFavoritesQueue.onFavoritesPageRequestCompleted(request);
+    this.onFavoritesPageRequestCompleted(request);
   }
 
   /**
@@ -277,75 +204,5 @@ class FavoritesFetcher {
     console.error(error);
     request.onFail();
     this.failedFavoritesPageRequests.push(request);
-  }
-}
-
-class FetchedFavoritesQueue {
-  /**
-   * @type {FavoritesPageRequest[]}
-   */
-  queue;
-  /**
-   * @type {Function}
-   */
-  onDequeue;
-  /**
-   * @type {Number}
-   */
-  highestDequeuedPageNumber;
-  /**
-   * @type {Boolean}
-   */
-  dequeuing;
-
-  get allPreviousPagesWereDequeued() {
-    return this.highestDequeuedPageNumber + 1 === this.queue[0].pageNumber;
-  }
-
-  get canDequeue() {
-    return this.queue.length > 0 && this.allPreviousPagesWereDequeued;
-  }
-
-  constructor(onDequeue) {
-    this.onDequeue = onDequeue;
-    this.highestDequeuedPageNumber = -1;
-    this.queue = [];
-  }
-
-  /**
-   * @param {FavoritesPageRequest} request
-   */
-  onFavoritesPageRequestCompleted(request) {
-    this.addFavoritesToQueue(request);
-    this.sortQueueByPageNumber();
-    this.emptyQueue();
-  }
-
-  /**
-   * @param {FavoritesPageRequest} request
-   */
-  addFavoritesToQueue(request) {
-    this.queue.push(request);
-  }
-
-  sortQueueByPageNumber() {
-    this.queue.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
-  }
-
-  emptyQueue() {
-    if (this.dequeuing) {
-      return;
-    }
-    this.dequeuing = true;
-
-    while (this.canDequeue) {
-      this.dequeue();
-    }
-    this.dequeuing = false;
-  }
-
-  dequeue() {
-    this.highestDequeuedPageNumber += 1;
-    this.onDequeue(this.queue.shift());
   }
 }
