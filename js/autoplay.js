@@ -403,7 +403,7 @@ class Autoplay {
     createFavoritesOption(
       "autoplay",
       "Autoplay",
-      "Enable autoplay in gallery.",
+      "Enable autoplay in gallery",
       this.active,
       (event) => {
         this.toggle(event.target.checked);

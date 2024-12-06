@@ -258,17 +258,10 @@ class Tooltip {
   }
 
   /**
-   * @param {String} tags
-   */
-  setText(tags) {
-    this.tooltip.innerHTML = this.formatHTML(tags);
-  }
-
-  /**
    * @param {HTMLImageElement} image
    */
   show(image) {
-    this.setText(this.getTagsFromImageWithIdRemoved(image));
+    this.tooltip.innerHTML = this.formatHTML(this.getTags(image));
     this.setPosition(image);
   }
 
@@ -284,14 +277,14 @@ class Tooltip {
    * @param {HTMLImageElement} image
    * @returns {String}
    */
-  getTagsFromImageWithIdRemoved(image) {
+  getTags(image) {
     const thumb = getThumbFromImage(image);
     const tags = getTagsFromThumb(thumb);
 
     if (this.searchTagColorCodes[thumb.id] === undefined) {
       tags.delete(thumb.id);
     }
-    return Array.from(tags).join(" ");
+    return Array.from(tags).sort().join(" ");
   }
 
   /**
@@ -312,27 +305,33 @@ class Tooltip {
   }
 
   /**
-   * @param {String[]} allTags
+   * @param {String} tags
    */
-  formatHTML(allTags) {
-    let html = "";
-    const tags = allTags.split(" ");
+  formatHTML(tags) {
+    let unmatchedTagsHTML = "";
+    let matchedTagsHTML = "";
 
-    for (let i = tags.length - 1; i >= 0; i -= 1) {
-      const tag = tags[i];
+    const tagList = removeExtraWhiteSpace(tags).split(" ");
+
+    for (let i = 0; i < tagList.length; i += 1) {
+      const tag = tagList[i];
       const tagColor = this.getColorCode(tag);
       const tagWithSpace = `${tag} `;
 
       if (tagColor !== undefined) {
-        html = `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>${html}`;
+        matchedTagsHTML += `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>`;
       } else if (includesTag(tag, new Set(TAG_BLACKLIST.split(" ")))) {
-        html += `<span style="color:red"><s><b>${tagWithSpace}</b></s></span>`;
+        unmatchedTagsHTML += `<span style="color:red"><s><b>${tagWithSpace}</b></s></span>`;
       } else {
-        html += tagWithSpace;
+        unmatchedTagsHTML += tagWithSpace;
       }
-
     }
-    return html === "" ? allTags : html;
+    const html = matchedTagsHTML + unmatchedTagsHTML;
+
+    if (html === "") {
+      return tags;
+    }
+    return html;
   }
 
   /**

@@ -45,14 +45,14 @@ class FavoritesPageRequest {
 }
 
 class FavoritesLoader {
-  static loadingStates = {
+  static states = {
     initial: 0,
     retrievingDatabaseStatus: 1,
     fetchingFavorites: 2,
     loadingFavoritesFromDatabase: 3,
     allFavoritesLoaded: 4
   };
-  static currentLoadingState = FavoritesLoader.loadingStates.initial;
+  static currentState = FavoritesLoader.states.initial;
   static databaseName = "Favorites";
   static objectStoreName = `user${getFavoritesPageId()}`;
   static webWorkers = {
@@ -618,27 +618,27 @@ onmessage = (message) => {
   }
 
   showSearchResults() {
-    switch (FavoritesLoader.currentLoadingState) {
-      case FavoritesLoader.loadingStates.initial:
+    switch (FavoritesLoader.currentState) {
+      case FavoritesLoader.states.initial:
         this.getAllFavorites();
         break;
 
-      case FavoritesLoader.loadingStates.retrievingDatabaseStatus:
+      case FavoritesLoader.states.retrievingDatabaseStatus:
         break;
 
-      case FavoritesLoader.loadingStates.fetchingFavorites:
+      case FavoritesLoader.states.fetchingFavorites:
         this.showSearchResultsWhileFetchingFavorites();
         break;
 
-      case FavoritesLoader.loadingStates.loadingFavoritesFromDatabase:
+      case FavoritesLoader.states.loadingFavoritesFromDatabase:
         break;
 
-      case FavoritesLoader.loadingStates.allFavoritesLoaded:
+      case FavoritesLoader.states.allFavoritesLoaded:
         this.showSearchResultsAfterAllFavoritesLoaded();
         break;
 
       default:
-        console.error(`Invalid FavoritesLoader state: ${FavoritesLoader.currentLoadingState}`);
+        console.error(`Invalid FavoritesLoader state: ${FavoritesLoader.currentState}`);
         break;
     }
   }
@@ -653,7 +653,7 @@ onmessage = (message) => {
   }
 
   async getAllFavorites() {
-    FavoritesLoader.currentLoadingState = FavoritesLoader.loadingStates.retrievingDatabaseStatus;
+    FavoritesLoader.currentState = FavoritesLoader.states.retrievingDatabaseStatus;
     const databaseStatus = await this.getDatabaseStatus();
 
     this.databaseWorker.postMessage({
@@ -794,7 +794,7 @@ onmessage = (message) => {
   }
 
   startFetchingAllFavorites() {
-    FavoritesLoader.currentLoadingState = FavoritesLoader.loadingStates.fetchingFavorites;
+    FavoritesLoader.currentState = FavoritesLoader.states.fetchingFavorites;
     this.toggleContentVisibility(true);
     this.insertPaginationContainer();
     this.updatePaginationUi(1, []);
@@ -818,7 +818,7 @@ onmessage = (message) => {
   async fetchAllFavorites() {
     let currentPageNumber = 0;
 
-    while (FavoritesLoader.currentLoadingState === FavoritesLoader.loadingStates.fetchingFavorites) {
+    while (FavoritesLoader.currentState === FavoritesLoader.states.fetchingFavorites) {
       if (this.failedFetchRequests.length > 0) {
         await this.refetchFailedFavoritesPage();
         continue;
@@ -989,14 +989,14 @@ onmessage = (message) => {
   }
 
   onAllFavoritesLoaded() {
-    if (FavoritesLoader.currentLoadingState === FavoritesLoader.loadingStates.fetchingFavorites) {
+    if (FavoritesLoader.currentState === FavoritesLoader.states.fetchingFavorites) {
       this.latestSearchResults = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
       dispatchEvent(new CustomEvent("newSearchResults", {
         detail: this.latestSearchResults
       }));
     }
     dispatchEvent(new Event("readyToSearch"));
-    FavoritesLoader.currentLoadingState = FavoritesLoader.loadingStates.allFavoritesLoaded;
+    FavoritesLoader.currentState = FavoritesLoader.states.allFavoritesLoaded;
     this.toggleLoadingUI(false);
     dispatchEvent(new Event("favoritesLoaded"));
   }
@@ -1045,7 +1045,7 @@ onmessage = (message) => {
   }
 
   loadFavoritesFromDatabase() {
-    FavoritesLoader.currentLoadingState = FavoritesLoader.loadingStates.loadingFavoritesFromDatabase;
+    FavoritesLoader.currentState = FavoritesLoader.states.loadingFavoritesFromDatabase;
     this.toggleLoadingUI(true);
     let idsToDelete = [];
 
@@ -1371,6 +1371,11 @@ Tag modifications and saved searches will be preserved.
     nextPage.id = "next-page";
     finalPage.id = "final-page";
 
+    previousPage.title = "Goto previous page";
+    firstPage.title = "Goto first page";
+    nextPage.title = "Goto next page";
+    finalPage.title = "Goto last page";
+
     previousPage.onclick = () => {
       if (this.currentFavoritesPageNumber - 1 >= 1) {
         this.changeResultsPage(this.currentFavoritesPageNumber - 1, searchResults);
@@ -1407,6 +1412,8 @@ Tag modifications and saved searches will be preserved.
       <button id="goto-page-button">Go</button>
     `;
     const container = document.createElement("span");
+
+    container.title = "Goto specific page";
 
     container.innerHTML = html;
     const input = container.children[0];
@@ -1466,7 +1473,7 @@ Tag modifications and saved searches will be preserved.
     this.createPaginatedFavoritesPage(searchResults, start, end);
     this.resetFlagsThatImplyDifferentSearchResults();
 
-    if (FavoritesLoader.currentLoadingState !== FavoritesLoader.loadingStates.loadingFavoritesFromDatabase) {
+    if (FavoritesLoader.currentState !== FavoritesLoader.states.loadingFavoritesFromDatabase) {
       dispatchEvent(new Event("changedPage"));
     }
   }
@@ -1538,7 +1545,7 @@ Tag modifications and saved searches will be preserved.
   aNewSearchWillProduceDifferentResults(pageNumber) {
     return this.currentFavoritesPageNumber !== pageNumber ||
       this.searchQuery !== this.previousSearchQuery ||
-      FavoritesLoader.currentLoadingState !== FavoritesLoader.loadingStates.allFavoritesLoaded ||
+      FavoritesLoader.currentState !== FavoritesLoader.states.allFavoritesLoaded ||
       this.searchResultsAreShuffled ||
       this.searchResultsAreInverted ||
       this.searchResultsWereShuffled ||
@@ -1629,7 +1636,7 @@ Tag modifications and saved searches will be preserved.
    * @returns {ThumbNode[]}
    */
   sortThumbNodes(thumbNodes) {
-    if (!FavoritesLoader.loadingStates.allFavoritesLoaded) {
+    if (!FavoritesLoader.states.allFavoritesLoaded) {
       alert("Wait for all favorites to load before changing sort method");
       return thumbNodes;
     }

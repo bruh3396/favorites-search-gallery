@@ -138,15 +138,15 @@ class BatchRenderRequest {
   }
 
   truncateRenderRequestsExceedingMemoryLimit() {
-    const truncatedRequest = [];
+    const truncatedRequests = [];
     let currentMegabyteSize = 0;
 
     for (const request of this.renderRequests) {
       const overMemoryLimit = currentMegabyteSize < BatchRenderRequest.settings.megabyteMemoryLimit;
-      const underMinimumRequestCount = truncatedRequest.length < BatchRenderRequest.settings.minimumRequestCount;
+      const underMinimumRequestCount = truncatedRequests.length < BatchRenderRequest.settings.minimumRequestCount;
 
       if (overMemoryLimit || underMinimumRequestCount) {
-        truncatedRequest.push(request);
+        truncatedRequests.push(request);
         currentMegabyteSize += request.estimatedMegabyteSize;
       } else {
         postMessage({
@@ -155,7 +155,7 @@ class BatchRenderRequest {
         });
       }
     }
-    this.renderRequests = truncatedRequest;
+    this.renderRequests = truncatedRequests;
   }
 }
 
@@ -508,6 +508,13 @@ class ImageRenderer {
     this.onMobileDevice = message.onMobileDevice;
     this.onSearchPage = message.onSearchPage;
     this.usingLandscapeOrientation = true;
+    this.configureCanvasQuality();
+  }
+
+  configureCanvasQuality() {
+    this.context.imageSmoothingEnabled = true;
+    this.context.imageSmoothingQuality = "high";
+    this.context.lineJoin = "miter";
   }
 
   /**

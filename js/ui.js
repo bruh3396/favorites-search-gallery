@@ -118,7 +118,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
       background: none;
       border: none;
       z-index: 2;
-      filter: grayscale(50%);
+      filter: grayscale(70%);
 
       &:active,
       &:hover {
@@ -153,6 +153,13 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
       border-bottom-left-radius: 4px;
     }
 
+    img {
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+    }
+
     .thumb-node {
       position: relative;
       -webkit-touch-callout: none;
@@ -171,13 +178,9 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
         >img {
           width: 100%;
           z-index: 1;
-          -webkit-user-drag: none;
-          -khtml-user-drag: none;
-          -moz-user-drag: none;
-          -o-user-drag: none;
         }
 
-        &:has(.add-or-remove-button:hover) {
+        /* &:has(.add-or-remove-button:hover) {
           outline-style: solid !important;
           outline-width: 5px !important;
         }
@@ -198,7 +201,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
               fill: hotpink;
             }
           }
-        }
+        } */
 
         >a>div {
           height: 100%;
@@ -502,7 +505,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
         <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
         <button title="Empty the search box" id="clear-button">Clear</button>
-        <button title="Remove cached favorites and preferences" id="reset-button">Reset</button>
+        <button title="Delete cached favorites and reset preferences" id="reset-button">Reset</button>
         <span id="favorites-pagination-placeholder"></span>
         <span id="help-links-container">
           <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
@@ -578,7 +581,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
                   </label>
                 </div>
                 <div>
-                  <label class="checkbox" title="Exclude blacklisted tags from search">
+                  <label class="checkbox" title="Exclude favorites with blacklisted tags from search">
                     <input type="checkbox" id="filter-blacklist-checkbox"> Exclude Blacklist
                   </label>
                 </div>
@@ -609,7 +612,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
         <div id="bottom-panel-2">
           <div id="additional-favorite-options-container" class="options-container">
             <div id="additional-favorite-options">
-              <div id="sort-container" title="Sort order of search results">
+              <div id="sort-container" title="Change sorting order of search results">
                 <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
                 <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
                 <div style="position: relative;">

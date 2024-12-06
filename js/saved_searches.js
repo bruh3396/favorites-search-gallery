@@ -120,8 +120,8 @@ const savedSearchesHTML = `<div id="saved-searches">
     <button title="Save custom search" id="save-custom-search-button">Save</button>
     <button id="stop-editing-saved-search-button" style="display: none;">Cancel</button>
     <span>
-      <button id="export-saved-search-button">Export</button>
-      <button id="import-saved-search-button">Import</button>
+      <button title="Export all saved searches" id="export-saved-search-button">Export</button>
+      <button title="Import saved searches" id="import-saved-search-button">Import</button>
     </span>
     <button title="Save result ids as search" id="save-results-button">Save Results</button>
   </div>

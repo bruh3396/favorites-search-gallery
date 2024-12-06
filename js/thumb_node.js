@@ -62,11 +62,11 @@ class InactiveThumbNode {
   }
 
   /**
-   * @param {HTMLElement} thumb
+   * @param {HTMLElement} element
    */
-  populateAttributesFromHTMLElement(thumb) {
-    this.id = getIdFromThumb(thumb);
-    const image = thumb.querySelector("img");
+  populateAttributesFromHTMLElement(element) {
+    this.id = getIdFromThumb(element);
+    const image = getImageFromThumb(element);
 
     this.src = image.src;
     this.tags = this.preprocessTags(image);

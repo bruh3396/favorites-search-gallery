@@ -31,7 +31,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
     }
   </style>
   <div id="tag-modifier-option-container">
-    <label class="checkbox" title="Add or Remove custom or official tags to favorites">
+    <label class="checkbox" title="Add or remove custom or official tags to favorites">
       <input type="checkbox" id="tag-modifier-option-checkbox">Modify Tags<span class="option-hint"></span>
     </label>
   </div>
