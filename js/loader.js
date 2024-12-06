@@ -1,49 +1,4 @@
 /* eslint-disable no-bitwise */
-class FavoritesPageRequest {
-  /**
-   * @type {Number}
-   */
-  pageNumber;
-  /**
-   * @type {Number}
-   */
-  retryCount;
-  /**
-   * @type {ThumbNode[]}
-   */
-  fetchedThumbNodes;
-  /**
-   * @type {ThumbNode[]}
-   */
-  matchedThumbNodes;
-
-  /**
-   * @type {String}
-   */
-  get url() {
-    return `${document.location.href}&pid=${this.pageNumber * 50}`;
-  }
-
-  /**
-   * @type {Number}
-   */
-  get retryDelay() {
-    return (7 ** (this.retryCount + 1)) + 300;
-  }
-
-  /**
-   * @param {Number} pageNumber
-   */
-  constructor(pageNumber) {
-    this.pageNumber = pageNumber;
-    this.retryCount = 0;
-  }
-
-  onFail() {
-    this.retryCount += 1;
-  }
-}
-
 class FavoritesLoader {
   static states = {
     initial: 0,
@@ -312,7 +267,6 @@ onmessage = (message) => {
     useTagBlacklist: true,
     negatedTagBlacklist: negateTags(TAG_BLACKLIST)
   };
-  static parser = new DOMParser();
 
   static get disabled() {
     return !onFavoritesPage();
@@ -323,13 +277,9 @@ onmessage = (message) => {
    */
   contentContainer;
   /**
-   * @type {{highestInsertedPageNumber : Number, emptying: Boolean, insertionQueue: FavoritesPageRequest[]}}
-   */
-  fetchedThumbNodes;
-  /**
    * @type {ThumbNode[]}
    */
-  allThumbNodes;
+  allFavorites;
   /**
    * @type {ThumbNode[]}
    */
@@ -346,10 +296,6 @@ onmessage = (message) => {
    * @type {Number}
    */
   resultsPerPage;
-  /**
-   * @type {FavoritesPageRequest[]}
-   */
-  failedFetchRequests;
   /**
    * @type {Number}
    */
@@ -401,10 +347,6 @@ onmessage = (message) => {
    */
   paginationLabel;
   /**
-   * @type {Boolean}
-   */
-  foundEmptyFavoritesPage;
-  /**
    * @type {ThumbNode[]}
    */
   searchResultsWhileFetching;
@@ -448,6 +390,10 @@ onmessage = (message) => {
    * @type {Number}
    */
   newMetadataReceivedTimeout;
+  /**
+   * @type {FavoritesFetcher}
+   */
+  favoritesFetcher;
 
   /**
    * @type {String}
@@ -473,11 +419,19 @@ onmessage = (message) => {
     return true;
   }
 
+  /**
+   * @type {Set.<String>}
+   */
+  get allFavoriteIds() {
+    return new Set(Array.from(this.allFavorites.values()).map(thumbNode => thumbNode.id));
+  }
+
   constructor() {
     if (FavoritesLoader.disabled) {
       return;
     }
     this.initializeFields();
+    this.initializeComponents();
     this.addEventListeners();
     this.setExpectedFavoritesCount();
     this.clearOriginalFavoritesPage();
@@ -486,22 +440,19 @@ onmessage = (message) => {
 
   initializeFields() {
     this.contentContainer = this.createContentContainer();
-    this.allThumbNodes = [];
+    this.allFavorites = [];
     this.latestSearchResults = [];
     this.searchResultsWhileFetching = [];
     this.idsRequiringMetadataDatabaseUpdate = [];
     this.matchCountLabel = document.getElementById("match-count-label");
     this.resultsPerPage = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
     this.allowedRatings = loadAllowedRatings();
-    this.fetchedThumbNodes = {};
-    this.failedFetchRequests = [];
     this.expectedFavoritesCount = 53;
     this.expectedFavoritesCountIsKnown = false;
     this.searchResultsAreShuffled = false;
     this.searchResultsAreInverted = false;
     this.searchResultsWereShuffled = false;
     this.searchResultsWereInverted = false;
-    this.foundEmptyFavoritesPage = false;
     this.newPageNeedsToBeCreated = false;
     this.tagsWereModified = false;
     this.recentlyChangedResultsPerPage = false;
@@ -514,6 +465,15 @@ onmessage = (message) => {
     this.databaseWorker = new Worker(getWorkerURL(FavoritesLoader.webWorkers.database));
     this.paginationContainer = this.createPaginationContainer();
     this.currentFavoritesPageNumber = 1;
+  }
+
+  initializeComponents() {
+    this.favoritesFetcher = new FavoritesFetcher(() => {
+        this.onAllFavoritesLoaded();
+        this.storeFavorites();
+      }, (request) => {
+        this.processFetchedFavorites(request);
+      });
   }
 
   addEventListeners() {
@@ -536,7 +496,7 @@ onmessage = (message) => {
           this.paginateSearchResults(this.reconstructContent(message.data.favorites));
           this.onAllFavoritesLoaded();
           setTimeout(() => {
-            this.findNewFavoritesOnReload(this.getAllFavoriteIds(), 0, []);
+            this.fetchNewFavoritesOnReload();
           }, 100);
           break;
 
@@ -560,7 +520,7 @@ onmessage = (message) => {
         throw new Error(response.status);
       })
       .then((html) => {
-        const table = FavoritesLoader.parser.parseFromString(html, "text/html").querySelector("table");
+        const table = new DOMParser().parseFromString(html, "text/html").querySelector("table");
         const favoritesURL = Array.from(table.querySelectorAll("a")).find(a => a.href.includes("page=favorites&s=view"));
         const favoritesCount = parseInt(favoritesURL.textContent);
 
@@ -620,7 +580,7 @@ onmessage = (message) => {
   showSearchResults() {
     switch (FavoritesLoader.currentState) {
       case FavoritesLoader.states.initial:
-        this.getAllFavorites();
+        this.loadAllFavorites();
         break;
 
       case FavoritesLoader.states.retrievingDatabaseStatus:
@@ -644,15 +604,15 @@ onmessage = (message) => {
   }
 
   showSearchResultsWhileFetchingFavorites() {
-    this.searchResultsWhileFetching = this.getSearchResults(this.allThumbNodes);
+    this.searchResultsWhileFetching = this.getSearchResults(this.allFavorites);
     this.paginateSearchResults(this.searchResultsWhileFetching);
   }
 
   showSearchResultsAfterAllFavoritesLoaded() {
-    this.paginateSearchResults(this.getSearchResults(this.allThumbNodes));
+    this.paginateSearchResults(this.getSearchResults(this.allFavorites));
   }
 
-  async getAllFavorites() {
+  async loadAllFavorites() {
     FavoritesLoader.currentState = FavoritesLoader.states.retrievingDatabaseStatus;
     const databaseStatus = await this.getDatabaseStatus();
 
@@ -665,7 +625,7 @@ onmessage = (message) => {
     if (databaseStatus.objectStoreIsNotEmpty) {
       this.loadFavoritesFromDatabase();
     } else {
-      this.startFetchingAllFavorites();
+      this.fetchAllFavorites();
     }
   }
 
@@ -737,43 +697,20 @@ onmessage = (message) => {
     return results;
   }
 
-  /**
-   * @param {Object.<String, ThumbNode>} allFavoriteIds
-   * @param {Number} currentPageNumber
-   * @param {ThumbNode[]} newFavoritesToAdd
-   */
-  findNewFavoritesOnReload(allFavoriteIds, currentPageNumber, newFavoritesToAdd) {
-    const favoritesURL = `${document.location.href}&pid=${currentPageNumber}`;
-    let allNewFavoritesFound = false;
-
-    requestPageInformation(favoritesURL, (response) => {
-      const thumbNodes = this.extractThumbNodesFromFavoritesPage(response);
-      const foundEmptyPage = thumbNodes.length === 0;
-
-      for (const thumbNode of thumbNodes) {
-        const favoriteIsNotNew = allFavoriteIds[thumbNode.id] !== undefined;
-
-        if (favoriteIsNotNew) {
-          allNewFavoritesFound = true;
-          break;
-        }
-        newFavoritesToAdd.push(thumbNode);
-      }
-
-      if (allNewFavoritesFound || foundEmptyPage) {
-        this.allThumbNodes = newFavoritesToAdd.concat(this.allThumbNodes);
-        this.latestSearchResults = newFavoritesToAdd.concat(this.latestSearchResults);
-        this.addNewFavoritesOnReload(newFavoritesToAdd);
-      } else {
-        this.findNewFavoritesOnReload(allFavoriteIds, currentPageNumber + 50, newFavoritesToAdd);
-      }
-    });
+  fetchNewFavoritesOnReload() {
+    this.favoritesFetcher.onAllFavoritesPageRequestsCompleted = (newFavorites) => {
+      this.addNewFavoritesOnReload(newFavorites);
+    };
+    this.favoritesFetcher.fetchAllNewFavoritesOnReload(this.allFavoriteIds);
   }
 
   /**
    * @param {ThumbNode[]} newFavorites
    */
   addNewFavoritesOnReload(newFavorites) {
+    this.allFavorites = newFavorites.concat(this.allFavorites);
+    this.latestSearchResults = newFavorites.concat(this.latestSearchResults);
+
     if (newFavorites.length === 0) {
       dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
         detail: {
@@ -788,26 +725,20 @@ onmessage = (message) => {
     this.toggleLoadingUI(false);
   }
 
-  initializeFetchedThumbNodesInsertionQueue() {
-    this.fetchedThumbNodes.highestInsertedPageNumber = -1;
-    this.fetchedThumbNodes.insertionQueue = [];
-  }
-
-  startFetchingAllFavorites() {
+  fetchAllFavorites() {
     FavoritesLoader.currentState = FavoritesLoader.states.fetchingFavorites;
     this.toggleContentVisibility(true);
     this.insertPaginationContainer();
     this.updatePaginationUi(1, []);
-    this.initializeFetchedThumbNodesInsertionQueue();
+    this.favoritesFetcher.fetchAllFavorites();
     dispatchEvent(new Event("readyToSearch"));
     setTimeout(() => {
       dispatchEvent(new Event("startedFetchingFavorites"));
     }, 50);
-    this.fetchAllFavorites();
   }
 
   updateProgressWhileFetching() {
-    let progressText = `Fetching Favorites ${this.allThumbNodes.length}`;
+    let progressText = `Fetching Favorites ${this.allFavorites.length}`;
 
     if (this.expectedFavoritesCountIsKnown) {
       progressText = `${progressText} / ${this.expectedFavoritesCount}`;
@@ -815,158 +746,27 @@ onmessage = (message) => {
     this.setProgressText(progressText);
   }
 
-  async fetchAllFavorites() {
-    let currentPageNumber = 0;
-
-    while (FavoritesLoader.currentState === FavoritesLoader.states.fetchingFavorites) {
-      if (this.failedFetchRequests.length > 0) {
-        await this.refetchFailedFavoritesPage();
-        continue;
-      }
-
-      if (!this.foundEmptyFavoritesPage) {
-        await this.fetchNewFavoritesPage(currentPageNumber);
-        currentPageNumber += 1;
-        continue;
-      }
-
-      if (this.isFinishedFetching()) {
-        this.onAllFavoritesLoaded();
-        this.storeFavorites();
-        return;
-      }
-      await sleep(1000);
-    }
-  }
-
-  async refetchFailedFavoritesPage() {
-    const failedRequest = this.failedFetchRequests.shift();
-
-    this.fetchFavorites(failedRequest);
-    await sleep(failedRequest.retryDelay);
-  }
-
-  /**
-   * @param {Number} pageNumber
-   */
-  async fetchNewFavoritesPage(pageNumber) {
-    this.fetchFavorites(new FavoritesPageRequest(pageNumber));
-    await sleep(210);
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  isFinishedFetching() {
-    const allFavoritesFound = this.allThumbNodes.length >= this.expectedFavoritesCount - 2;
-    const finishedFetchingNewFavorites = allFavoritesFound || this.foundEmptyFavoritesPage;
-    const finishedRefetching = this.failedFetchRequests.length === 0;
-    return finishedFetchingNewFavorites && finishedRefetching;
-  }
-
   /**
    * @param {FavoritesPageRequest} request
    */
-  fetchFavorites(request) {
-    fetch(request.url)
-      .then((response) => {
-        if (response.ok) {
-          return response.text();
-        }
-        throw new Error(`${response.status}: Failed to fetch, ${request.url}`);
-      })
-      .then((html) => {
-        request.fetchedThumbNodes = this.extractThumbNodesFromFavoritesPage(html);
-        request.matchedThumbNodes = this.getSearchResults(request.fetchedThumbNodes);
+  processFetchedFavorites(request) {
+    const matchedFavorites = this.getSearchResults(request.fetchedFavorites);
 
-        this.addFetchedThumbNodesToInsertionQueue(request);
-        this.foundEmptyFavoritesPage = request.fetchedThumbNodes.length === 0;
-      })
-      .catch((error) => {
-        console.error(error);
-        request.onFail();
-        this.failedFetchRequests.push(request);
-      });
-  }
-
-  /**
-   * @param {FavoritesPageRequest} request
-   */
-  addFetchedThumbNodesToInsertionQueue(request) {
-    this.fetchedThumbNodes.insertionQueue.push(request);
-    this.fetchedThumbNodes.insertionQueue.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
-    this.emptyInsertionQueue();
-  }
-
-  emptyInsertionQueue() {
-    if (this.fetchedThumbNodes.emptying) {
-      return;
-    }
-    this.fetchedThumbNodes.emptying = true;
-
-    while (this.fetchedThumbNodes.insertionQueue.length > 0) {
-      const request = this.fetchedThumbNodes.insertionQueue[0];
-
-      if (this.previousPageNumberIsPresent(request.pageNumber)) {
-        this.processFetchedThumbNodes(request);
-        this.fetchedThumbNodes.insertionQueue.shift();
-        this.fetchedThumbNodes.highestInsertedPageNumber += 1;
-      } else {
-        break;
-      }
-    }
-    this.fetchedThumbNodes.emptying = false;
-  }
-
-  /**
-   * @param {Number} pageNumber
-   * @returns {Boolean}
-   */
-  previousPageNumberIsPresent(pageNumber) {
-    return this.fetchedThumbNodes.highestInsertedPageNumber + 1 === pageNumber;
-  }
-
-  /**
-   * @param {FavoritesPageRequest} request
-   */
-  processFetchedThumbNodes(request) {
-    this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(request.matchedThumbNodes);
+    this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(matchedFavorites);
     const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
 
     this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
     dispatchEvent(new CustomEvent("favoritesFetched", {
-      detail: request.fetchedThumbNodes.map(thumbNode => thumbNode.root)
+      detail: request.fetchedFavorites.map(thumbNode => thumbNode.root)
     }));
-    this.allThumbNodes = this.allThumbNodes.concat(request.fetchedThumbNodes);
-    this.addFavoritesToContent(request.matchedThumbNodes);
+    this.allFavorites = this.allFavorites.concat(request.fetchedFavorites);
+    this.addFavoritesToContent(matchedFavorites);
     this.updateProgressWhileFetching();
-  }
-
-  /**
-   * @param {String} url
-   * @param {Number} pageNumber
-   * @returns {{url: String, pageNumber: Number, retries: Number}}
-   */
-  getFailedFetchRequest(url, pageNumber) {
-    return {
-      url,
-      pageNumber,
-      retries: 0
-    };
-  }
-
-  /**
-   * @param {String} response
-   * @returns {ThumbNode[]}
-   */
-  extractThumbNodesFromFavoritesPage(response) {
-    const dom = FavoritesLoader.parser.parseFromString(response, "text/html");
-    return Array.from(dom.getElementsByClassName("thumb")).map(thumb => new ThumbNode(thumb, false));
   }
 
   invertSearchResults() {
     this.resetMatchCount();
-    this.allThumbNodes.forEach((thumbNode) => {
+    this.allFavorites.forEach((thumbNode) => {
       thumbNode.toggleMatched();
     });
     const invertedSearchResults = this.getThumbNodesMatchedByLastSearch();
@@ -985,7 +785,7 @@ onmessage = (message) => {
   }
 
   getThumbNodesMatchedByLastSearch() {
-    return this.allThumbNodes.filter(thumbNode => thumbNode.matchedByMostRecentSearch);
+    return this.allFavorites.filter(thumbNode => thumbNode.matchedByMostRecentSearch);
   }
 
   onAllFavoritesLoaded() {
@@ -1039,7 +839,7 @@ onmessage = (message) => {
       } else {
         searchResults.push(thumbNode);
       }
-      this.allThumbNodes.push(thumbNode);
+      this.allFavorites.push(thumbNode);
     }
     return searchResults;
   }
@@ -1066,7 +866,7 @@ onmessage = (message) => {
     const storeAll = thumbNodes === undefined;
 
     await sleep(500);
-    thumbNodes = storeAll ? this.allThumbNodes : thumbNodes;
+    thumbNodes = storeAll ? this.allFavorites : thumbNodes;
     const records = thumbNodes.map(thumbNode => thumbNode.databaseRecord);
 
     if (storeAll) {
@@ -1139,7 +939,7 @@ Tag modifications and saved searches will be preserved.
     if (!this.matchCountLabelExists) {
       return;
     }
-    this.matchingFavoritesCount = value === undefined ? this.getSearchResults(this.allThumbNodes).length : value;
+    this.matchingFavoritesCount = value === undefined ? this.getSearchResults(this.allFavorites).length : value;
     this.matchCountLabel.textContent = `${this.matchingFavoritesCount} Matches`;
   }
 
@@ -1230,18 +1030,6 @@ Tag modifications and saved searches will be preserved.
     for (const thumbNode of thumbNodes) {
       thumbNode.insertAtEndOfContent(this.contentContainer);
     }
-  }
-
-  /**
-   * @returns {Object.<String, ThumbNode>}
-   */
-  getAllFavoriteIds() {
-    const favoriteIds = {};
-
-    for (const thumbNode of this.allThumbNodes) {
-      favoriteIds[thumbNode.id] = thumbNode;
-    }
-    return favoriteIds;
   }
 
   /**
@@ -1620,6 +1408,7 @@ Tag modifications and saved searches will be preserved.
       }
     }
   }
+
   /**
    * @param {Number} value
    */

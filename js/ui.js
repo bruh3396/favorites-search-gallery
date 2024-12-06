@@ -1298,7 +1298,6 @@ function configureDesktopUI() {
   }
   insertStyleHTML(`
     .checkbox {
-
       &:hover {
         color: #000;
         background: #93b393;

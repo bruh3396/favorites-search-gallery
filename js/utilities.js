@@ -1868,7 +1868,6 @@ function getIdFromThumb(thumb) {
   if (id !== null) {
     return removeNonNumericCharacters(id);
   }
-
   const anchor = thumb.querySelector("a");
 
   if (anchor !== null && anchor.hasAttribute("id")) {

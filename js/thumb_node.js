@@ -39,15 +39,15 @@ class InactiveThumbNode {
   score;
 
   /**
-   * @param {HTMLElement | Object} thumb
+   * @param {HTMLElement | Object} favorite
    */
-  constructor(thumb, fromRecord) {
+  constructor(favorite, fromRecord) {
     this.fromRecord = fromRecord;
 
     if (fromRecord) {
-      this.populateAttributesFromDatabaseRecord(thumb);
+      this.populateAttributesFromDatabaseRecord(favorite);
     } else {
-      this.populateAttributesFromHTMLElement(thumb);
+      this.populateAttributesFromHTMLElement(favorite);
     }
   }
 
