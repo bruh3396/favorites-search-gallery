@@ -66,7 +66,7 @@ const galleryHTML = `<style>
     cursor: pointer;
   }
 
-  .thumb-node,
+  .post,
   .thumb {
 
     >div,
@@ -98,7 +98,7 @@ const galleryHTML = `<style>
 
 const galleryDebugHTML = `
   .thumb,
-  .thumb-node {
+  .post {
     &.debug-selected {
       outline: 3px solid #0075FF !important;
     }
@@ -1207,7 +1207,7 @@ onmessage = (message) => {
    */
   visibleThumbs;
   /**
-   * @type {ThumbNode[]}
+   * @type {Post[]}
    */
   latestSearchResults;
   /**
@@ -1392,7 +1392,7 @@ onmessage = (message) => {
         return;
       }
       const clickedOnAnImage = event.target.tagName.toLowerCase() === "img" && !event.target.parentElement.classList.contains("add-or-remove-button");
-      const clickedOnAThumb = clickedOnAnImage && getThumbFromImage(event.target).className.includes("thumb");
+      const clickedOnAThumb = clickedOnAnImage && (getThumbFromImage(event.target).className.includes("thumb") || getThumbFromImage(event.target).className.includes("post"));
       const clickedOnACaptionTag = event.target.classList.contains("caption-tag");
       const thumb = clickedOnAThumb ? getThumbFromImage(event.target) : null;
 
@@ -1597,7 +1597,7 @@ onmessage = (message) => {
     window.addEventListener("startedFetchingFavorites", () => {
       this.favoritesWereFetched = true;
       setTimeout(() => {
-        const thumb = document.querySelector(".thumb-node");
+        const thumb = document.querySelector(".post");
 
         this.renderImagesInTheBackground();
 
@@ -2111,10 +2111,10 @@ onmessage = (message) => {
           thumb.classList.add("loaded");
         }
       } else {
-        const thumbNode = ThumbNode.allThumbNodes.get(message.id);
+        const post = Post.allPosts.get(message.id);
 
-        if (thumbNode !== undefined && thumbNode.root !== undefined) {
-          thumbNode.root.classList.add("loaded");
+        if (post !== undefined && post.root !== undefined) {
+          post.root.classList.add("loaded");
         }
       }
     }
@@ -2177,9 +2177,9 @@ onmessage = (message) => {
           thumb.classList.remove("loaded");
         }
       } else {
-        for (const thumbNode of ThumbNode.allThumbNodes.values()) {
-          if (thumbNode.root !== undefined) {
-            thumbNode.root.classList.remove("loaded");
+        for (const post of Post.allPosts.values()) {
+          if (post.root !== undefined) {
+            post.root.classList.remove("loaded");
           }
         }
       }
@@ -2291,7 +2291,7 @@ onmessage = (message) => {
 
   async findImageExtensionsInTheBackground() {
     await sleep(1000);
-    const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(Array.from(ThumbNode.allThumbNodes.values()));
+    const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(Array.from(Post.allPosts.values()));
 
     while (idsWithUnknownExtensions.length > 0) {
       await sleep(3000);
@@ -2961,8 +2961,8 @@ onmessage = (message) => {
     return this.getAdjacentSearchResults(
       initialThumb,
       Gallery.settings.maxImagesToRenderAround,
-      (thumbNode) => {
-        return isImage(thumbNode);
+      (post) => {
+        return isImage(post);
       }
     );
   }
@@ -3082,7 +3082,7 @@ onmessage = (message) => {
    * @returns {HTMLElement[]}
    */
   getAdjacentSearchResults(initialThumb, limit, additionalQualifier) {
-    const initialSearchResultIndex = this.latestSearchResults.findIndex(thumbNode => thumbNode.id === initialThumb.id);
+    const initialSearchResultIndex = this.latestSearchResults.findIndex(post => post.id === initialThumb.id);
 
     if (initialSearchResultIndex === -1) {
       return [];
@@ -3121,7 +3121,7 @@ onmessage = (message) => {
     for (const searchResult of adjacentSearchResults) {
       searchResult.activateHTMLElement();
     }
-    return adjacentSearchResults.map(thumbNode => thumbNode.root);
+    return adjacentSearchResults.map(post => post.root);
   }
 
   /**
@@ -3223,7 +3223,7 @@ onmessage = (message) => {
       return 0;
     }
     const defaultPixelCount = 2073600;
-    const pixelCount = ThumbNode.getPixelCount(thumb.id);
+    const pixelCount = Post.getPixelCount(thumb.id);
     return pixelCount === 0 ? defaultPixelCount : pixelCount;
   }
 
@@ -3520,7 +3520,7 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {ThumbNode[]} thumbs
+   * @param {Post[]} thumbs
    * @returns {String[]}
    */
   getIdsWithUnknownExtensions(thumbs) {

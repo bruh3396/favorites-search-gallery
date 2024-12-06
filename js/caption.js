@@ -520,17 +520,17 @@ class Caption {
     if (onSearchPage()) {
       return false;
     }
-    const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
+    const post = Post.allPosts.get(thumb.id);
 
-    if (thumbNode === undefined) {
+    if (post === undefined) {
       return false;
     }
 
-    if (thumbNode.metadata === undefined) {
+    if (post.metadata === undefined) {
       return false;
     }
 
-    if (thumbNode.metadata.width <= 0 || thumbNode.metadata.width <= 0) {
+    if (post.metadata.width <= 0 || post.metadata.width <= 0) {
       return false;
     }
     return true;
@@ -542,12 +542,12 @@ class Caption {
    * @returns {Number}
    */
   estimateThumbHeightFromMetadata(thumb, columnInput) {
-    const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
+    const post = Post.allPosts.get(thumb.id);
     const gridGap = 16;
     const columnCount = Math.max(1, parseInt(columnInput.value));
     const thumbWidthEstimate = (window.innerWidth - (columnCount * gridGap)) / columnCount;
-    const thumbWidthScale = thumbNode.metadata.width / thumbWidthEstimate;
-    return thumbNode.metadata.height / thumbWidthScale;
+    const thumbWidthScale = post.metadata.width / thumbWidthEstimate;
+    return post.metadata.height / thumbWidthScale;
   }
 
   /**

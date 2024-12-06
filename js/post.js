@@ -1,4 +1,4 @@
-class InactiveThumbNode {
+class InactivePost {
   /**
    * @param {String} compressedSource
    * @param {String} id
@@ -57,7 +57,7 @@ class InactiveThumbNode {
   populateAttributesFromDatabaseRecord(record) {
     this.id = record.id;
     this.tags = record.tags;
-    this.src = InactiveThumbNode.decompressThumbSource(record.src, record.id);
+    this.src = InactivePost.decompressThumbSource(record.src, record.id);
     this.metadata = record.metadata;
   }
 
@@ -99,11 +99,11 @@ class InactiveThumbNode {
   }
 }
 
-class ThumbNode {
+class Post {
   /**
-   * @type {Map.<String, ThumbNode>}
+   * @type {Map.<String, Post>}
    */
-  static allThumbNodes = new Map();
+  static allPosts = new Map();
   /**
    * @type {RegExp}
    */
@@ -133,14 +133,14 @@ class ThumbNode {
   }
 
   static createTemplates() {
-    ThumbNode.removeFavoriteButtonHTML = `<button class="remove-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartMinus)}></button>`;
-    ThumbNode.addFavoriteButtonHTML = `<button class="add-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartPlus)}></button>`;
-    const buttonHTML = userIsOnTheirOwnFavoritesPage() ? ThumbNode.removeFavoriteButtonHTML : ThumbNode.addFavoriteButtonHTML;
+    Post.removeFavoriteButtonHTML = `<button class="remove-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartMinus)}></button>`;
+    Post.addFavoriteButtonHTML = `<button class="add-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartPlus)}></button>`;
+    const buttonHTML = userIsOnTheirOwnFavoritesPage() ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
     const canvasHTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
 
-    ThumbNode.template = new DOMParser().parseFromString("<div class=\"thumb-node\"></div>", "text/html").createElement("div");
-    ThumbNode.template.className = "thumb-node";
-    ThumbNode.template.innerHTML = `
+    Post.template = new DOMParser().parseFromString("<div class=\"post\"></div>", "text/html").createElement("div");
+    Post.template.className = "post";
+    Post.template.innerHTML = `
         <div>
           <img loading="lazy">
           ${buttonHTML}
@@ -152,18 +152,18 @@ class ThumbNode {
   static addEventListeners() {
     window.addEventListener("favoriteAddedOrDeleted", (event) => {
       const id = event.detail;
-      const thumbNode = this.allThumbNodes.get(id);
+      const post = this.allPosts.get(id);
 
-      if (thumbNode !== undefined) {
-        thumbNode.swapAddOrRemoveButton();
+      if (post !== undefined) {
+        post.swapAddOrRemoveButton();
       }
     });
     window.addEventListener("sortingParametersChanged", () => {
-      ThumbNode.currentSortingMethod = getSortingMethod();
-      const thumbNodes = Array.from(getAllThumbs()).map(thumb => ThumbNode.allThumbNodes.get(thumb.id));
+      Post.currentSortingMethod = getSortingMethod();
+      const posts = Array.from(getAllThumbs()).map(thumb => Post.allPosts.get(thumb.id));
 
-      for (const thumbNode of thumbNodes) {
-        thumbNode.createStatisticHint();
+      for (const post of posts) {
+        post.createStatisticHint();
       }
     });
   }
@@ -173,29 +173,29 @@ class ThumbNode {
    * @returns {Number}
    */
   static getPixelCount(id) {
-    const thumbNode = ThumbNode.allThumbNodes.get(id);
+    const post = Post.allPosts.get(id);
 
-    if (thumbNode === undefined || thumbNode.metadata === undefined) {
+    if (post === undefined || post.metadata === undefined) {
       return 0;
     }
-    return thumbNode.metadata.pixelCount;
+    return post.metadata.pixelCount;
   }
 
   /**
    * @param {String} id
    * @returns {String}
    */
-  static getExtensionFromThumbNode(id) {
-    const thumbNode = ThumbNode.allThumbNodes.get(id);
+  static getExtensionFromPost(id) {
+    const post = Post.allPosts.get(id);
 
-    if (thumbNode === undefined) {
+    if (post === undefined) {
       return undefined;
     }
 
-    if (thumbNode.metadata.isEmpty()) {
+    if (post.metadata.isEmpty()) {
       return undefined;
     }
-    return thumbNode.metadata.extension;
+    return post.metadata.extension;
   }
 
   /**
@@ -204,12 +204,12 @@ class ThumbNode {
    * @param {String} fileURL
    */
   static verifyTags(id, apiTags, fileURL) {
-    const thumbNode = ThumbNode.allThumbNodes.get(id);
+    const post = Post.allPosts.get(id);
 
-    if (thumbNode === undefined) {
+    if (post === undefined) {
       return;
     }
-    const thumbNodeTagSet = new Set(thumbNode.originalTagSet);
+    const postTagSet = new Set(post.originalTagSet);
     const apiTagSet = convertToTagSet(apiTags);
 
     if (fileURL.endsWith("mp4")) {
@@ -218,28 +218,28 @@ class ThumbNode {
       apiTagSet.add("gif");
     }
 
-    thumbNodeTagSet.delete(id);
-    const tagsNotInThumbNode = difference(apiTagSet, thumbNodeTagSet);
-    const tagsNotInApi = difference(thumbNodeTagSet, apiTagSet);
+    postTagSet.delete(id);
+    const tagsNotInPost = difference(apiTagSet, postTagSet);
+    const tagsNotInApi = difference(postTagSet, apiTagSet);
 
-    if (tagsNotInApi.size === 0 && tagsNotInThumbNode.size === 0) {
+    if (tagsNotInApi.size === 0 && tagsNotInPost.size === 0) {
       return;
     }
-    thumbNode.initializeTags(convertToTagString(apiTagSet));
+    post.initializeTags(convertToTagString(apiTagSet));
   }
 
   /**
-   * @type {Map.<String, ThumbNode>}
+   * @type {Map.<String, Post>}
    */
-  static get thumbNodesMatchedBySearch() {
-    const thumbNodes = new Map();
+  static get postsMatchedBySearch() {
+    const posts = new Map();
 
-    for (const [id, thumbNode] of ThumbNode.allThumbNodes.entries()) {
-      if (thumbNode.matchedByMostRecentSearch) {
-        thumbNodes.set(id, thumbNode);
+    for (const [id, post] of Post.allPosts.entries()) {
+      if (post.matchedByMostRecentSearch) {
+        posts.set(id, post);
       }
     }
-    return thumbNodes;
+    return posts;
   }
 
   /**
@@ -267,9 +267,9 @@ class ThumbNode {
    */
   statisticHint;
   /**
-   * @type {InactiveThumbNode}
+   * @type {InactivePost}
    */
-  inactiveThumbNode;
+  inactivePost;
   /**
    * @type {Boolean}
    */
@@ -310,8 +310,8 @@ class ThumbNode {
    * @type {String}
    */
   get compressedThumbSource() {
-    const source = this.inactiveThumbNode === null ? this.image.src : this.inactiveThumbNode.src;
-    return source.match(ThumbNode.thumbSourceCompressionRegex).splice(1).join("_");
+    const source = this.inactivePost === null ? this.image.src : this.inactivePost.src;
+    return source.match(Post.thumbSourceCompressionRegex).splice(1).join("_");
   }
 
   /**
@@ -363,67 +363,67 @@ class ThumbNode {
    */
   constructor(thumb, fromRecord) {
     this.initializeFields();
-    this.initialize(new InactiveThumbNode(thumb, fromRecord));
+    this.initialize(new InactivePost(thumb, fromRecord));
     this.setMatched(true);
-    this.addInstanceToAllThumbNodes();
+    this.addInstanceToAllPosts();
   }
 
   initializeFields() {
-    this.inactiveThumbNode = null;
+    this.inactivePost = null;
     this.essentialAttributesPopulated = false;
     this.htmlElementCreated = false;
   }
 
   /**
-   * @param {InactiveThumbNode} inactiveThumbNode
+   * @param {InactivePost} inactivePost
    */
-  initialize(inactiveThumbNode) {
-    if (ThumbNode.settings.deferHTMLElementCreation) {
-      this.inactiveThumbNode = inactiveThumbNode;
-      this.populateEssentialAttributes(inactiveThumbNode);
+  initialize(inactivePost) {
+    if (Post.settings.deferHTMLElementCreation) {
+      this.inactivePost = inactivePost;
+      this.populateEssentialAttributes(inactivePost);
     } else {
-      this.createHTMLElement(inactiveThumbNode);
+      this.createHTMLElement(inactivePost);
     }
   }
 
   /**
-   * @param {InactiveThumbNode} inactiveThumbNode
+   * @param {InactivePost} inactivePost
    */
-  populateEssentialAttributes(inactiveThumbNode) {
+  populateEssentialAttributes(inactivePost) {
     if (this.essentialAttributesPopulated) {
       return;
     }
     this.essentialAttributesPopulated = true;
-    this.id = inactiveThumbNode.id;
-    this.metadata = inactiveThumbNode.instantiateMetadata();
-    this.initializeTags(inactiveThumbNode.tags);
-    this.deleteConsumedProperties(inactiveThumbNode);
+    this.id = inactivePost.id;
+    this.metadata = inactivePost.instantiateMetadata();
+    this.initializeTags(inactivePost.tags);
+    this.deleteConsumedProperties(inactivePost);
   }
 
   /**
-   * @param {InactiveThumbNode} inactiveThumbNode
+   * @param {InactivePost} inactivePost
    */
-  createHTMLElement(inactiveThumbNode) {
+  createHTMLElement(inactivePost) {
     if (this.htmlElementCreated) {
       return;
     }
     this.htmlElementCreated = true;
     this.instantiateTemplate();
-    this.populateEssentialAttributes(inactiveThumbNode);
-    this.populateHTMLAttributes(inactiveThumbNode);
+    this.populateEssentialAttributes(inactivePost);
+    this.populateHTMLAttributes(inactivePost);
     this.setupAddOrRemoveButton();
     this.setupClickLink();
-    this.deleteInactiveThumbNode();
+    this.deleteInactivePost();
   }
 
   activateHTMLElement() {
-    if (this.inactiveThumbNode !== null) {
-      this.createHTMLElement(this.inactiveThumbNode);
+    if (this.inactivePost !== null) {
+      this.createHTMLElement(this.inactivePost);
     }
   }
 
   instantiateTemplate() {
-    this.root = ThumbNode.template.cloneNode(true);
+    this.root = Post.template.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
     this.addOrRemoveButton = this.root.children[0].children[1];
@@ -460,23 +460,23 @@ class ThumbNode {
     const isRemoveFavoriteButton = this.addOrRemoveButton.classList.contains("remove-favorite-button");
 
     if (isRemoveFavoriteButton) {
-      this.addOrRemoveButton.outerHTML = ThumbNode.addFavoriteButtonHTML;
+      this.addOrRemoveButton.outerHTML = Post.addFavoriteButtonHTML;
       this.addOrRemoveButton = this.root.children[0].children[1];
       this.addOrRemoveButton.onclick = this.addFavoriteButtonOnClick.bind(this);
     } else {
-      this.addOrRemoveButton.outerHTML = ThumbNode.removeFavoriteButtonHTML;
+      this.addOrRemoveButton.outerHTML = Post.removeFavoriteButtonHTML;
       this.addOrRemoveButton = this.root.children[0].children[1];
       this.addOrRemoveButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
     }
   }
 
   /**
-   * @param {InactiveThumbNode} inactiveThumbNode
+   * @param {InactivePost} inactivePost
    */
-  populateHTMLAttributes(inactiveThumbNode) {
-    this.image.src = inactiveThumbNode.src;
-    this.image.classList.add(getContentType(inactiveThumbNode.tags || convertToTagString(this.tagSet)));
-    this.root.id = inactiveThumbNode.id;
+  populateHTMLAttributes(inactivePost) {
+    this.image.src = inactivePost.src;
+    this.image.classList.add(getContentType(inactivePost.tags || convertToTagString(this.tagSet)));
+    this.root.id = inactivePost.id;
   }
 
   /**
@@ -497,11 +497,11 @@ class ThumbNode {
   }
 
   /**
-   * @param {InactiveThumbNode} inactiveThumbNode
+   * @param {InactivePost} inactivePost
    */
-  deleteConsumedProperties(inactiveThumbNode) {
-    inactiveThumbNode.metadata = null;
-    inactiveThumbNode.tags = null;
+  deleteConsumedProperties(inactivePost) {
+    inactivePost.metadata = null;
+    inactivePost.tags = null;
   }
 
   setupClickLink() {
@@ -512,10 +512,10 @@ class ThumbNode {
     }
   }
 
-  deleteInactiveThumbNode() {
-    if (this.inactiveThumbNode !== null) {
-      this.inactiveThumbNode.clear();
-      this.inactiveThumbNode = null;
+  deleteInactivePost() {
+    if (this.inactivePost !== null) {
+      this.inactivePost.clear();
+      this.inactivePost = null;
     }
   }
 
@@ -523,8 +523,8 @@ class ThumbNode {
    * @param {HTMLElement} content
    */
   insertAtEndOfContent(content) {
-    if (this.inactiveThumbNode !== null) {
-      this.createHTMLElement(this.inactiveThumbNode, true);
+    if (this.inactivePost !== null) {
+      this.createHTMLElement(this.inactivePost, true);
     }
     this.createStatisticHint();
     content.appendChild(this.root);
@@ -534,16 +534,16 @@ class ThumbNode {
    * @param {HTMLElement} content
    */
   insertAtBeginningOfContent(content) {
-    if (this.inactiveThumbNode !== null) {
-      this.createHTMLElement(this.inactiveThumbNode, true);
+    if (this.inactivePost !== null) {
+      this.createHTMLElement(this.inactivePost, true);
     }
     this.createStatisticHint();
     content.insertAdjacentElement("afterbegin", this.root);
   }
 
-  addInstanceToAllThumbNodes() {
-    if (!ThumbNode.allThumbNodes.has(this.id)) {
-      ThumbNode.allThumbNodes.set(this.id, this);
+  addInstanceToAllPosts() {
+    if (!Post.allPosts.has(this.id)) {
+      Post.allPosts.set(this.id, this);
     }
   }
 
@@ -617,7 +617,7 @@ class ThumbNode {
    * @returns {String}
    */
   getStatisticValue() {
-    switch (ThumbNode.currentSortingMethod) {
+    switch (Post.currentSortingMethod) {
       case "score":
         return this.metadata.score;
 

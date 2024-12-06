@@ -8,7 +8,7 @@ class FavoritesPageRequest {
    */
   retryCount;
   /**
-   * @type {ThumbNode[]}
+   * @type {Post[]}
    */
   fetchedFavorites;
 

@@ -32,11 +32,11 @@ class SearchTag {
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matches(thumbNode) {
-    if (thumbNode.tagSet.has(this.value)) {
+  matches(post) {
+    if (post.tagSet.has(this.value)) {
       return !this.negated;
     }
     return this.negated;
@@ -89,22 +89,22 @@ class WildcardSearchTag extends SearchTag {
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matches(thumbNode) {
+  matches(post) {
     if (this.equivalentToStartsWith) {
-      return this.matchesPrefix(thumbNode);
+      return this.matchesPrefix(post);
     }
-    return this.matchesWildcard(thumbNode);
+    return this.matchesWildcard(post);
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matchesPrefix(thumbNode) {
-    for (const tag of thumbNode.tagSet.values()) {
+  matchesPrefix(post) {
+    for (const tag of post.tagSet.values()) {
       if (tag.startsWith(this.startsWithPrefix)) {
         return !this.negated;
       }
@@ -117,11 +117,11 @@ class WildcardSearchTag extends SearchTag {
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matchesWildcard(thumbNode) {
-    for (const tag of thumbNode.tagSet.values()) {
+  matchesWildcard(post) {
+    for (const tag of post.tagSet.values()) {
       if (this.regex.test(tag)) {
         return !this.negated;
       }
@@ -168,11 +168,11 @@ class MetadataSearchTag extends SearchTag {
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matches(thumbNode) {
-    const metadata = FavoriteMetadata.allMetadata.get(thumbNode.id);
+  matches(post) {
+    const metadata = FavoriteMetadata.allMetadata.get(post.id);
 
     if (metadata === undefined) {
       return false;
@@ -269,27 +269,27 @@ class SearchCommand {
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matches(thumbNode) {
+  matches(post) {
     if (this.isEmpty) {
       return true;
     }
 
-    if (!this.matchesAllRemainingSearchTags(thumbNode)) {
+    if (!this.matchesAllRemainingSearchTags(post)) {
       return false;
     }
-    return this.matchesAllOrGroups(thumbNode);
+    return this.matchesAllOrGroups(post);
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matchesAllRemainingSearchTags(thumbNode) {
+  matchesAllRemainingSearchTags(post) {
     for (const searchTag of this.remainingSearchTags) {
-      if (!searchTag.matches(thumbNode)) {
+      if (!searchTag.matches(post)) {
         return false;
       }
     }
@@ -297,12 +297,12 @@ class SearchCommand {
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  matchesAllOrGroups(thumbNode) {
+  matchesAllOrGroups(post) {
     for (const orGroup of this.orGroups) {
-      if (!this.atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode)) {
+      if (!this.atLeastOnePostTagIsInOrGroup(orGroup, post)) {
         return false;
       }
     }
@@ -311,12 +311,12 @@ class SearchCommand {
 
   /**
    * @param {SearchTag[]} orGroup
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  atLeastOneThumbNodeTagIsInOrGroup(orGroup, thumbNode) {
+  atLeastOnePostTagIsInOrGroup(orGroup, post) {
     for (const orTag of orGroup) {
-      if (orTag.matches(thumbNode)) {
+      if (orTag.matches(post)) {
         return true;
       }
     }

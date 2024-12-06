@@ -12,7 +12,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
       width: 80%;
     }
 
-    .thumb-node.tag-modifier-selected {
+    .post.tag-modifier-selected {
       outline: 2px dashed white !important;
 
       >div {
@@ -121,9 +121,9 @@ class TagModifier {
    */
   favoritesUI;
   /**
-   * @type {ThumbNode[]}
+   * @type {Post[]}
    */
-  selectedThumbNodes;
+  selectedPosts;
   /**
    * @type {Boolean}
    */
@@ -136,7 +136,7 @@ class TagModifier {
     this.tagEditModeAbortController = new AbortController();
     this.favoritesOption = {};
     this.favoritesUI = {};
-    this.selectedThumbNodes = [];
+    this.selectedPosts = [];
     this.atLeastOneFavoriteIsSelected = false;
     this.loadTagModifications();
     this.insertHTML();
@@ -265,16 +265,16 @@ class TagModifier {
     if (!this.atLeastOneFavoriteIsSelected) {
       return;
     }
-    const thumbNodes = Array.from(getAllThumbs())
-      .map(thumb => ThumbNode.allThumbNodes.get(thumb.id));
+    const posts = Array.from(getAllThumbs())
+      .map(thumb => Post.allPosts.get(thumb.id));
 
-    for (const thumbNode of thumbNodes) {
-      if (thumbNode === undefined) {
+    for (const post of posts) {
+      if (post === undefined) {
         return;
       }
 
-      if (this.isSelectedForModification(thumbNode)) {
-        this.highlightThumbNode(thumbNode, true);
+      if (this.isSelectedForModification(post)) {
+        this.highlightPost(post, true);
       }
     }
   }
@@ -298,7 +298,7 @@ class TagModifier {
     if (value) {
       html =
         `
-      .thumb-node  {
+      .post  {
         cursor: pointer;
         outline: 1px solid black;
 
@@ -338,13 +338,13 @@ class TagModifier {
     }
 
     document.addEventListener("click", (event) => {
-      if (!event.target.classList.contains("thumb-node")) {
+      if (!event.target.classList.contains("post")) {
         return;
       }
-      const thumbNode = ThumbNode.allThumbNodes.get(event.target.id);
+      const post = Post.allPosts.get(event.target.id);
 
-      if (thumbNode !== undefined) {
-        this.toggleThumbSelection(thumbNode);
+      if (post !== undefined) {
+        this.toggleThumbSelection(post);
       }
     }, {
       signal: this.tagEditModeAbortController.signal
@@ -372,48 +372,48 @@ class TagModifier {
       return;
     }
 
-    for (const thumbNode of ThumbNode.allThumbNodes.values()) {
-      this.toggleThumbSelection(thumbNode, false);
+    for (const post of Post.allPosts.values()) {
+      this.toggleThumbSelection(post, false);
     }
     this.atLeastOneFavoriteIsSelected = false;
   }
 
   selectAll() {
-    for (const thumbNode of ThumbNode.thumbNodesMatchedBySearch.values()) {
-      this.toggleThumbSelection(thumbNode, true);
+    for (const post of Post.postsMatchedBySearch.values()) {
+      this.toggleThumbSelection(post, true);
     }
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @param {Boolean} value
    */
-  toggleThumbSelection(thumbNode, value) {
+  toggleThumbSelection(post, value) {
     this.atLeastOneFavoriteIsSelected = true;
 
     if (value === undefined) {
-      value = !this.isSelectedForModification(thumbNode);
+      value = !this.isSelectedForModification(post);
     }
-    thumbNode.selectedForTagModification = value ? true : undefined;
-    this.highlightThumbNode(thumbNode, value);
+    post.selectedForTagModification = value ? true : undefined;
+    this.highlightPost(post, value);
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @param {Boolean} value
    */
-  highlightThumbNode(thumbNode, value) {
-    if (thumbNode.root !== undefined) {
-      thumbNode.root.classList.toggle("tag-modifier-selected", value);
+  highlightPost(post, value) {
+    if (post.root !== undefined) {
+      post.root.classList.toggle("tag-modifier-selected", value);
     }
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  isSelectedForModification(thumbNode) {
-    return thumbNode.selectedForTagModification !== undefined;
+  isSelectedForModification(post) {
+    return post.selectedForTagModification !== undefined;
   }
 
   /**
@@ -447,11 +447,11 @@ class TagModifier {
       return;
     }
 
-    for (const thumbNode of ThumbNode.allThumbNodes.values()) {
-      if (this.isSelectedForModification(thumbNode)) {
-        const additionalTags = remove ? thumbNode.removeAdditionalTags(tagsToModify) : thumbNode.addAdditionalTags(tagsToModify);
+    for (const post of Post.allPosts.values()) {
+      if (this.isSelectedForModification(post)) {
+        const additionalTags = remove ? post.removeAdditionalTags(tagsToModify) : post.addAdditionalTags(tagsToModify);
 
-        TagModifier.tagModifications.set(thumbNode.id, additionalTags);
+        TagModifier.tagModifications.set(post.id, additionalTags);
         modifiedTagsCount += 1;
       }
     }
@@ -544,8 +544,8 @@ class TagModifier {
     }
     CUSTOM_TAGS.clear();
     indexedDB.deleteDatabase("AdditionalTags");
-    ThumbNode.allThumbNodes.forEach(thumbNode => {
-      thumbNode.resetAdditionalTags();
+    Post.allPosts.forEach(post => {
+      post.resetAdditionalTags();
     });
     dispatchEvent(new Event("modifiedTags"));
     localStorage.removeItem("customTags");

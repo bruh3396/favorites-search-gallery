@@ -361,7 +361,7 @@ const ADDED_FAVORITE_STATUS = {
 };
 const STYLES = {
   thumbHoverOutline: `
-    .thumb-node,
+    .post,
     .thumb {
       >a,
       >span,
@@ -372,7 +372,7 @@ const STYLES = {
       }
     }`,
   thumbHoverOutlineDisabled: `
-    .thumb-node,
+    .post,
     .thumb {
       >a,
       >span,
@@ -575,7 +575,7 @@ function removeTitleFromImage(image) {
  * @returns {HTMLElement}
  */
 function getThumbFromImage(image) {
-  const className = onSearchPage() ? "thumb" : "thumb-node";
+  const className = onSearchPage() ? "thumb" : "post";
   return image.closest(`.${className}`);
 }
 
@@ -591,7 +591,7 @@ function getImageFromThumb(thumb) {
  * @returns {HTMLCollectionOf.<HTMLElement>}
  */
 function getAllThumbs() {
-  const className = onSearchPage() ? "thumb" : "thumb-node";
+  const className = onSearchPage() ? "thumb" : "post";
   return document.getElementsByClassName(className);
 }
 
@@ -600,7 +600,7 @@ function getAllThumbs() {
  */
 function getAllVisibleThumbs() {
   return Array.from(getAllThumbs())
-    .filter(thumbNodeElement => thumbNodeElement.style.display !== "none");
+    .filter(postElement => postElement.style.display !== "none");
 }
 
 /**
@@ -647,7 +647,7 @@ function getThumbURL(originalImageURL) {
 }
 
 /**
- * @param {HTMLElement | ThumbNode} thumb
+ * @param {HTMLElement | Post} thumb
  * @returns {Set.<String>}
  */
 function getTagsFromThumb(thumb) {
@@ -656,8 +656,8 @@ function getTagsFromThumb(thumb) {
     const tags = image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
     return convertToTagSet(tags);
   }
-  const thumbNode = ThumbNode.allThumbNodes.get(thumb.id);
-  return thumbNode === undefined ? new Set() : new Set(thumbNode.tagSet);
+  const post = Post.allPosts.get(thumb.id);
+  return post === undefined ? new Set() : new Set(post.tagSet);
 }
 
 /**
@@ -670,7 +670,7 @@ function includesTag(tag, tags) {
 }
 
 /**
- * @param {HTMLElement | ThumbNode} thumb
+ * @param {HTMLElement | Post} thumb
  * @returns {Boolean}
  */
 function isVideo(thumb) {
@@ -679,7 +679,7 @@ function isVideo(thumb) {
 }
 
 /**
- * @param {HTMLElement | ThumbNode} thumb
+ * @param {HTMLElement | Post} thumb
  * @returns {Boolean}
  */
 function isGif(thumb) {
@@ -691,18 +691,18 @@ function isGif(thumb) {
 }
 
 /**
- * @param {HTMLElement | ThumbNode} thumb
+ * @param {HTMLElement | Post} thumb
  * @returns {Boolean}
  */
 function hasGifAttribute(thumb) {
-  if (thumb instanceof ThumbNode) {
+  if (thumb instanceof Post) {
     return false;
   }
   return getImageFromThumb(thumb).hasAttribute("gif");
 }
 
 /**
- * @param {HTMLElement | ThumbNode} thumb
+ * @param {HTMLElement | Post} thumb
  * @returns {Boolean}
  */
 function isImage(thumb) {
@@ -998,7 +998,7 @@ function toggleFancyImageHovering(value) {
       grid-gap: 2.5em !important;
     }
 
-    .thumb-node,
+    .post,
     .thumb {
       >a,
       >span,
@@ -1047,7 +1047,7 @@ function configureVideoOutlines() {
   const gifSelector = onFavoritesPage() ? "&:has(img.gif)" : ">img.gif";
 
   insertStyleHTML(`
-    .thumb-node, .thumb {
+    .post, .thumb {
 
       >a,
       >div {
@@ -1262,7 +1262,7 @@ function enteredOverCaptionTag(event) {
  */
 function scrollToThumb(postId, endingAnimation, smoothTransition) {
   const element = document.getElementById(postId);
-  const elementIsNotAThumb = element === null || (!element.classList.contains("thumb") && !element.classList.contains("thumb-node"));
+  const elementIsNotAThumb = element === null || (!element.classList.contains("thumb") && !element.classList.contains("post"));
 
   if (elementIsNotAThumb) {
     return;

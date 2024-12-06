@@ -160,7 +160,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
       -o-user-drag: none;
     }
 
-    .thumb-node {
+    .post {
       position: relative;
       -webkit-touch-callout: none;
       -webkit-user-select: none;
@@ -1228,7 +1228,7 @@ function configureMobileUI() {
   }
   FAVORITE_INPUTS.performanceProfile.parentElement.style.display = "none";
   insertStyleHTML(`
-      .thumb, .thumb-node {
+      .thumb, .post {
         > div > canvas {
           display: none;
         }

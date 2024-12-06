@@ -277,11 +277,11 @@ onmessage = (message) => {
    */
   contentContainer;
   /**
-   * @type {ThumbNode[]}
+   * @type {Post[]}
    */
   allFavorites;
   /**
-   * @type {ThumbNode[]}
+   * @type {Post[]}
    */
   latestSearchResults;
   /**
@@ -347,7 +347,7 @@ onmessage = (message) => {
    */
   paginationLabel;
   /**
-   * @type {ThumbNode[]}
+   * @type {Post[]}
    */
   searchResultsWhileFetching;
   /**
@@ -427,7 +427,7 @@ onmessage = (message) => {
    * @type {Set.<String>}
    */
   get allFavoriteIds() {
-    return new Set(Array.from(this.allFavorites.values()).map(thumbNode => thumbNode.id));
+    return new Set(Array.from(this.allFavorites.values()).map(post => post.id));
   }
 
   constructor() {
@@ -685,19 +685,19 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {ThumbNode[]} thumbNodes
-   * @returns {ThumbNode[]}
+   * @param {Post[]} posts
+   * @returns {Post[]}
    */
-  getSearchResults(thumbNodes) {
+  getSearchResults(posts) {
     const searchCommand = new SearchCommand(this.finalSearchQuery);
     const results = [];
 
-    for (const thumbNode of thumbNodes) {
-      if (searchCommand.matches(thumbNode)) {
-        results.push(thumbNode);
-        thumbNode.setMatched(true);
+    for (const post of posts) {
+      if (searchCommand.matches(post)) {
+        results.push(post);
+        post.setMatched(true);
       } else {
-        thumbNode.setMatched(false);
+        post.setMatched(false);
       }
     }
     return results;
@@ -711,7 +711,7 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {ThumbNode[]} newFavorites
+   * @param {Post[]} newFavorites
    */
   addNewFavoritesOnReload(newFavorites) {
     this.allFavorites = newFavorites.concat(this.allFavorites);
@@ -753,7 +753,7 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {ThumbNode[]} favorites
+   * @param {Post[]} favorites
    */
   processFetchedFavorites(favorites) {
     const matchedFavorites = this.getSearchResults(favorites);
@@ -763,7 +763,7 @@ onmessage = (message) => {
 
     this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
     dispatchEvent(new CustomEvent("favoritesFetched", {
-      detail: favorites.map(thumbNode => thumbNode.root)
+      detail: favorites.map(post => post.root)
     }));
     this.allFavorites = this.allFavorites.concat(favorites);
     this.addFavoritesToContent(matchedFavorites);
@@ -772,10 +772,10 @@ onmessage = (message) => {
 
   invertSearchResults() {
     this.resetMatchCount();
-    this.allFavorites.forEach((thumbNode) => {
-      thumbNode.toggleMatched();
+    this.allFavorites.forEach((post) => {
+      post.toggleMatched();
     });
-    const invertedSearchResults = this.getThumbNodesMatchedByLastSearch();
+    const invertedSearchResults = this.getPostsMatchedByLastSearch();
 
     this.searchResultsAreInverted = true;
     this.paginateSearchResults(invertedSearchResults);
@@ -783,15 +783,15 @@ onmessage = (message) => {
   }
 
   shuffleSearchResults() {
-    const matchedThumbNodes = this.getThumbNodesMatchedByLastSearch();
+    const matchedPosts = this.getPostsMatchedByLastSearch();
 
-    shuffleArray(matchedThumbNodes);
+    shuffleArray(matchedPosts);
     this.searchResultsAreShuffled = true;
-    this.paginateSearchResults(matchedThumbNodes);
+    this.paginateSearchResults(matchedPosts);
   }
 
-  getThumbNodesMatchedByLastSearch() {
-    return this.allFavorites.filter(thumbNode => thumbNode.matchedByMostRecentSearch);
+  getPostsMatchedByLastSearch() {
+    return this.allFavorites.filter(post => post.matchedByMostRecentSearch);
   }
 
   onAllFavoritesFetched() {
@@ -829,7 +829,7 @@ onmessage = (message) => {
 
   /**
    * @param {[{id: String, tags: String, src: String}]} databaseRecords
-   * @returns {ThumbNode[]}}
+   * @returns {Post[]}}
    */
   reconstructContent(databaseRecords) {
     if (databaseRecords === null) {
@@ -839,18 +839,18 @@ onmessage = (message) => {
     const searchResults = [];
 
     for (const record of databaseRecords) {
-      const thumbNode = new ThumbNode(record, true);
-      const isBlacklisted = !searchCommand.matches(thumbNode);
+      const post = new Post(record, true);
+      const isBlacklisted = !searchCommand.matches(post);
 
       if (isBlacklisted) {
         if (!userIsOnTheirOwnFavoritesPage()) {
           continue;
         }
-        thumbNode.setMatched(false);
+        post.setMatched(false);
       } else {
-        searchResults.push(thumbNode);
+        searchResults.push(post);
       }
-      this.allFavorites.push(thumbNode);
+      this.allFavorites.push(post);
     }
     return searchResults;
   }
@@ -871,14 +871,14 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {ThumbNode[]} thumbNodes
+   * @param {Post[]} posts
    */
-  async storeFavorites(thumbNodes) {
-    const storeAll = thumbNodes === undefined;
+  async storeFavorites(posts) {
+    const storeAll = posts === undefined;
 
     await sleep(500);
-    thumbNodes = storeAll ? this.allFavorites : thumbNodes;
-    const records = thumbNodes.map(thumbNode => thumbNode.databaseRecord);
+    posts = storeAll ? this.allFavorites : posts;
+    const records = posts.map(post => post.databaseRecord);
 
     if (storeAll) {
       records.reverse();
@@ -890,12 +890,12 @@ onmessage = (message) => {
   }
 
   /**
-   * @param {ThumbNode[]} thumbNodes
+   * @param {Post[]} posts
    */
-  updateFavorites(thumbNodes) {
+  updateFavorites(posts) {
     this.databaseWorker.postMessage({
       command: "update",
-      favorites: thumbNodes.map(thumbNode => thumbNode.databaseRecord)
+      favorites: posts.map(post => post.databaseRecord)
     });
   }
 
@@ -973,31 +973,31 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} newThumbNodes
+   * @param {Post[]} newPosts
    */
-  async insertNewFavorites(newThumbNodes) {
+  async insertNewFavorites(newPosts) {
     const searchCommand = new SearchCommand(this.finalSearchQuery);
-    const insertedThumbNodes = [];
+    const insertedPosts = [];
     const metadataPopulateWaitTime = 1000;
 
-    newThumbNodes.reverse();
+    newPosts.reverse();
 
     if (this.allowedRatings !== 7) {
       await sleep(metadataPopulateWaitTime);
     }
 
-    for (const thumbNode of newThumbNodes) {
-      if (this.matchesSearchAndRating(searchCommand, thumbNode)) {
-        thumbNode.insertAtBeginningOfContent(this.contentContainer);
-        insertedThumbNodes.push(thumbNode);
+    for (const post of newPosts) {
+      if (this.matchesSearchAndRating(searchCommand, post)) {
+        post.insertAtBeginningOfContent(this.contentContainer);
+        insertedPosts.push(post);
       }
     }
-    this.updatePaginationUi(this.currentFavoritesPageNumber, this.getThumbNodesMatchedByLastSearch());
+    this.updatePaginationUi(this.currentFavoritesPageNumber, this.getPostsMatchedByLastSearch());
     setTimeout(() => {
       dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
         detail: {
           empty: false,
-          thumbs: insertedThumbNodes.map(thumbNode => thumbNode.root)
+          thumbs: insertedPosts.map(post => post.root)
         }
       }));
     }, 250);
@@ -1007,10 +1007,10 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} thumbNodes
+   * @param {Post[]} posts
    */
-  addFavoritesToContent(thumbNodes) {
-    thumbNodes = this.getResultsWithAllowedRatings(thumbNodes);
+  addFavoritesToContent(posts) {
+    posts = this.getResultsWithAllowedRatings(posts);
     const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
@@ -1028,18 +1028,18 @@ Tag modifications and saved searches will be preserved.
     }
 
     const onLastPage = (pageCount === this.currentFavoritesPageNumber);
-    const missingThumbNodeCount = this.resultsPerPage - getAllThumbs().length;
+    const missingPostCount = this.resultsPerPage - getAllThumbs().length;
 
     if (!onLastPage) {
-      if (missingThumbNodeCount > 0) {
-        thumbNodes = thumbNodes.slice(0, missingThumbNodeCount);
+      if (missingPostCount > 0) {
+        posts = posts.slice(0, missingPostCount);
       } else {
         return;
       }
     }
 
-    for (const thumbNode of thumbNodes) {
-      thumbNode.insertAtEndOfContent(this.contentContainer);
+    for (const post of posts) {
+      post.insertAtEndOfContent(this.contentContainer);
     }
   }
 
@@ -1068,10 +1068,10 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    */
   paginateSearchResults(searchResults) {
-    searchResults = this.sortThumbNodes(searchResults);
+    searchResults = this.sortPosts(searchResults);
     searchResults = this.getResultsWithAllowedRatings(searchResults);
     this.latestSearchResults = searchResults;
     this.updateMatchCount(searchResults.length);
@@ -1108,7 +1108,7 @@ Tag modifications and saved searches will be preserved.
 
   /**
    * @param {Number} currentPageNumber
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    */
   createPageNumberButtons(currentPageNumber, searchResults) {
     const pageCount = this.getPageCount(searchResults.length);
@@ -1132,7 +1132,7 @@ Tag modifications and saved searches will be preserved.
   /**
    * @param {Number} currentPageNumber
    * @param {Number} pageNumber
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    * @param {String} position
    */
   createPageNumberButton(currentPageNumber, pageNumber, searchResults, position = "beforeend") {
@@ -1151,7 +1151,7 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    */
   createPageTraversalButtons(searchResults) {
     const pageCount = this.getPageCount(searchResults.length);
@@ -1200,7 +1200,7 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    */
   createGotoSpecificPageInputs(searchResults) {
     if (this.firstPageNumberExists() && this.lastPageNumberExists(this.getPageCount(searchResults.length))) {
@@ -1229,7 +1229,7 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    */
   updatePageButtonEventListeners(searchResults) {
     const gotoPageButton = document.getElementById("goto-page-button");
@@ -1259,7 +1259,7 @@ Tag modifications and saved searches will be preserved.
 
   /**
    * @param {Number} pageNumber
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    */
   changeResultsPage(pageNumber, searchResults) {
     if (!this.aNewSearchWillProduceDifferentResults(pageNumber)) {
@@ -1298,7 +1298,7 @@ Tag modifications and saved searches will be preserved.
 
   /**
    * @param {Number} pageNumber
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    */
   updatePaginationUi(pageNumber, searchResults) {
     const {start, end} = this.getPaginationStartEndIndices(pageNumber);
@@ -1312,16 +1312,16 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} thumbNodes
+   * @param {Post[]} posts
    */
-  reAddThumbNodeEventListeners(thumbNodes) {
-    for (const thumbNode of thumbNodes) {
-      thumbNode.setupAddOrRemoveButton();
+  reAddPostEventListeners(posts) {
+    for (const post of posts) {
+      post.setupAddOrRemoveButton();
     }
   }
 
   /**
-   * @param {ThumbNode[]} searchResults
+   * @param {Post[]} searchResults
    * @param {Number} start
    * @param {Number} end
    * @returns
@@ -1329,8 +1329,8 @@ Tag modifications and saved searches will be preserved.
   createPaginatedFavoritesPage(searchResults, start, end) {
     const newContent = document.createDocumentFragment();
 
-    for (const thumbNode of searchResults.slice(start, end)) {
-      thumbNode.insertAtEndOfContent(newContent);
+    for (const post of searchResults.slice(start, end)) {
+      post.insertAtEndOfContent(newContent);
     }
     this.contentContainer.innerHTML = "";
     this.contentContainer.appendChild(newContent);
@@ -1432,23 +1432,23 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode[]} thumbNodes
-   * @returns {ThumbNode[]}
+   * @param {Post[]} posts
+   * @returns {Post[]}
    */
-  sortThumbNodes(thumbNodes) {
+  sortPosts(posts) {
     if (!FavoritesLoader.states.allFavoritesLoaded) {
       alert("Wait for all favorites to load before changing sort method");
-      return thumbNodes;
+      return posts;
     }
 
     if (this.searchResultsAreShuffled) {
-      return thumbNodes;
+      return posts;
     }
-    const sortedThumbNodes = thumbNodes.slice();
+    const sortedPosts = posts.slice();
     const sortingMethod = getSortingMethod();
 
     if (sortingMethod !== "default") {
-      sortedThumbNodes.sort((b, a) => {
+      sortedPosts.sort((b, a) => {
         switch (sortingMethod) {
           case "score":
             return a.metadata.score - b.metadata.score;
@@ -1475,9 +1475,9 @@ Tag modifications and saved searches will be preserved.
     }
 
     if (this.sortAscending()) {
-      sortedThumbNodes.reverse();
+      sortedPosts.reverse();
     }
-    return sortedThumbNodes;
+    return sortedPosts;
   }
 
   /**
@@ -1490,9 +1490,9 @@ Tag modifications and saved searches will be preserved.
 
   onSortingParametersChanged() {
     this.sortingParametersWereChanged = true;
-    const matchedThumbNodes = this.getThumbNodesMatchedByLastSearch();
+    const matchedPosts = this.getPostsMatchedByLastSearch();
 
-    this.paginateSearchResults(matchedThumbNodes);
+    this.paginateSearchResults(matchedPosts);
     dispatchEvent(new Event("sortingParametersChanged"));
   }
 
@@ -1502,16 +1502,16 @@ Tag modifications and saved searches will be preserved.
   onAllowedRatingsChanged(allowedRatings) {
     this.allowedRatings = allowedRatings;
     this.allowedRatingsWereChanged = true;
-    const matchedThumbNodes = this.getThumbNodesMatchedByLastSearch();
+    const matchedPosts = this.getPostsMatchedByLastSearch();
 
-    this.paginateSearchResults(matchedThumbNodes);
+    this.paginateSearchResults(matchedPosts);
   }
 
   /**
    * @param {String} postId
    */
   addNewFavoriteMetadata(postId) {
-    if (!ThumbNode.allThumbNodes.has(postId)) {
+    if (!Post.allPosts.has(postId)) {
       return;
     }
     const batchSize = 500;
@@ -1530,7 +1530,7 @@ Tag modifications and saved searches will be preserved.
   }
 
   updateFavoriteMetadataInDatabase() {
-    this.updateFavorites(this.idsRequiringMetadataDatabaseUpdate.map(id => ThumbNode.allThumbNodes.get(id)));
+    this.updateFavorites(this.idsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
     this.idsRequiringMetadataDatabaseUpdate = [];
   }
 
@@ -1542,34 +1542,34 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns {Boolean}
    */
-  ratingIsAllowed(thumbNode) {
+  ratingIsAllowed(post) {
     if (this.allRatingsAreAllowed()) {
       return true;
     }
-    return (thumbNode.metadata.rating & this.allowedRatings) > 0;
+    return (post.metadata.rating & this.allowedRatings) > 0;
   }
 
   /**
-   * @param {ThumbNode[]} searchResults
-   * @returns {ThumbNode[]}
+   * @param {Post[]} searchResults
+   * @returns {Post[]}
    */
   getResultsWithAllowedRatings(searchResults) {
     if (this.allRatingsAreAllowed()) {
       return searchResults;
     }
-    return searchResults.filter(thumbNode => this.ratingIsAllowed(thumbNode));
+    return searchResults.filter(post => this.ratingIsAllowed(post));
   }
 
   /**
    * @param {SearchCommand} searchCommand
-   * @param {ThumbNode} thumbNode
+   * @param {Post} post
    * @returns
    */
-  matchesSearchAndRating(searchCommand, thumbNode) {
-    return this.ratingIsAllowed(thumbNode) && searchCommand.matches(thumbNode);
+  matchesSearchAndRating(searchCommand, post) {
+    return this.ratingIsAllowed(post) && searchCommand.matches(post);
   }
 
   /**
@@ -1577,7 +1577,7 @@ Tag modifications and saved searches will be preserved.
    */
   findFavorite(id) {
     const searchResults = this.latestSearchResults;
-    const searchResultIds = searchResults.map(thumbNode => thumbNode.id);
+    const searchResultIds = searchResults.map(post => post.id);
     const index = searchResultIds.indexOf(id);
 
     if (index === -1) {

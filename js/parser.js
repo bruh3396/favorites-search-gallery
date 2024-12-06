@@ -3,11 +3,11 @@ class FavoritesPageParser {
 
   /**
    * @param {String} favoritesPageHTML
-   * @returns {ThumbNode[]}
+   * @returns {Post[]}
    */
   static extractFavorites(favoritesPageHTML) {
     const elements = FavoritesPageParser.extractFavoriteElements(favoritesPageHTML);
-    return elements.map(element => new ThumbNode(element, false));
+    return elements.map(element => new Post(element, false));
   }
 
   /**

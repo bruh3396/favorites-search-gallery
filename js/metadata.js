@@ -223,7 +223,7 @@ class FavoriteMetadata {
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
         if (FavoriteMetadata.settings.verifyTags) {
-          ThumbNode.verifyTags(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
+          Post.verifyTags(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
         }
         const extension = getExtensionFromImageURL(metadata.getAttribute("file_url"));
 

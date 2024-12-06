@@ -447,9 +447,9 @@ class SavedSearches {
   }
 
   saveSearchResultsAsCustomSearch() {
-    const searchResultIds = Array.from(ThumbNode.allThumbNodes.values())
-      .filter(thumbNode => thumbNode.matchedByMostRecentSearch)
-      .map(thumbNode => thumbNode.id);
+    const searchResultIds = Array.from(Post.allPosts.values())
+      .filter(post => post.matchedByMostRecentSearch)
+      .map(post => post.id);
 
     if (searchResultIds.length === 0) {
       return;

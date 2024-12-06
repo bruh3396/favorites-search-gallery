@@ -119,7 +119,7 @@ class FavoritesPageFetcher {
   }
 
   /**
-   * @returns {Promise.<{allNewFavoritesFound: Boolean, newFavorites: ThumbNode[]}>}
+   * @returns {Promise.<{allNewFavoritesFound: Boolean, newFavorites: Post[]}>}
    */
   fetchNewFavoritesOnReload() {
     return fetch(this.newFavoritesPageFetchRequest.url)
@@ -133,7 +133,7 @@ class FavoritesPageFetcher {
 
   /**
    * @param {String} html
-   * @returns {{allNewFavoritesFound: Boolean, newFavorites: ThumbNode[]}}
+   * @returns {{allNewFavoritesFound: Boolean, newFavorites: Post[]}}
    */
   extractNewFavorites(html) {
     const newFavorites = [];
