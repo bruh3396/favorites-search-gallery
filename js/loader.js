@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 class FavoritesLoader {
   static states = {
     initial: 0,
@@ -273,10 +272,6 @@ onmessage = (message) => {
   }
 
   /**
-   * @type {HTMLDivElement}
-   */
-  contentContainer;
-  /**
    * @type {Post[]}
    */
   allFavorites;
@@ -291,61 +286,19 @@ onmessage = (message) => {
   /**
    * @type {Number}
    */
-  matchingFavoritesCount;
+  matchedFavoritesCount;
   /**
-   * @type {Number}
-   */
-  resultsPerPage;
-  /**
-   * @type {Number}
+   * @type {Number | null}
    */
   expectedFavoritesCount;
-  /**
-   * @type {Boolean}
-   */
-  expectedFavoritesCountIsKnown;
   /**
    * @type {String}
    */
   searchQuery;
   /**
-   * @type {String}
-   */
-  previousSearchQuery;
-  /**
    * @type {Worker}
    */
   databaseWorker;
-  /**
-   * @type {Boolean}
-   */
-  searchResultsAreShuffled;
-  /**
-  /**
-   * @type {Boolean}
-   */
-  searchResultsAreInverted;
-  /**
-   * @type {Boolean}
-   */
-  searchResultsWereShuffled;
-  /**
-  /**
-   * @type {Boolean}
-   */
-  searchResultsWereInverted;
-  /**
-   * @type {Number}
-   */
-  currentFavoritesPageNumber;
-  /**
-   * @type {HTMLElement}
-   */
-  paginationContainer;
-  /**
-   * @type {HTMLLabelElement}
-   */
-  paginationLabel;
   /**
    * @type {Post[]}
    */
@@ -353,39 +306,11 @@ onmessage = (message) => {
   /**
    * @type {Number}
    */
-  recentlyChangedResultsPerPage;
-  /**
-   * @type {Number}
-   */
-  maxPageNumberButtonCount;
-  /**
-   * @type {Boolean}
-   */
-  newPageNeedsToBeCreated;
-  /**
-   * @type {Boolean}
-   */
-  tagsWereModified;
-  /**
-   * @type {Boolean}
-   */
-  excludeBlacklistWasClicked;
-  /**
-   * @type {Boolean}
-   */
-  sortingParametersWereChanged;
-  /**
-   * @type {Boolean}
-   */
-  allowedRatingsWereChanged;
-  /**
-   * @type {Number}
-   */
   allowedRatings;
   /**
    * @type {String[]}
    */
-  idsRequiringMetadataDatabaseUpdate;
+  favoriteIdsRequiringMetadataDatabaseUpdate;
   /**
    * @type {Number}
    */
@@ -393,11 +318,19 @@ onmessage = (message) => {
   /**
    * @type {FavoritesPageFetcher}
    */
-  favoritesFetcher;
+  fetcher;
   /**
    * @type {FetchedFavoritesPageQueue}
    */
   fetchedFavoritesQueue;
+  /**
+   * @type {FavoritesPaginator}
+   */
+  paginator;
+  /**
+   * @type {FavoritesSearchFlags}
+   */
+  searchFlags;
 
   /**
    * @type {String}
@@ -443,54 +376,40 @@ onmessage = (message) => {
   }
 
   initializeFields() {
-    this.contentContainer = this.createContentContainer();
     this.allFavorites = [];
     this.latestSearchResults = [];
     this.searchResultsWhileFetching = [];
-    this.idsRequiringMetadataDatabaseUpdate = [];
+    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
     this.matchCountLabel = document.getElementById("match-count-label");
-    this.resultsPerPage = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
     this.allowedRatings = loadAllowedRatings();
-    this.expectedFavoritesCount = 53;
-    this.expectedFavoritesCountIsKnown = false;
-    this.searchResultsAreShuffled = false;
-    this.searchResultsAreInverted = false;
-    this.searchResultsWereShuffled = false;
-    this.searchResultsWereInverted = false;
-    this.newPageNeedsToBeCreated = false;
-    this.tagsWereModified = false;
-    this.recentlyChangedResultsPerPage = false;
-    this.excludeBlacklistWasClicked = false;
-    this.sortingParametersWereChanged = false;
-    this.allowedRatingsWereChanged = false;
-    this.matchingFavoritesCount = 0;
-    this.maxPageNumberButtonCount = onMobileDevice() ? 3 : 5;
+    this.expectedFavoritesCount = null;
+    this.matchedFavoritesCount = 0;
     this.searchQuery = "";
     this.databaseWorker = new Worker(getWorkerURL(FavoritesLoader.webWorkers.database));
-    this.paginationContainer = this.createPaginationContainer();
-    this.currentFavoritesPageNumber = 1;
   }
 
   initializeComponents() {
     this.fetchedFavoritesQueue = new FetchedFavoritesPageQueue((request) => {
       this.processFetchedFavorites(request.fetchedFavorites);
     });
-    this.favoritesFetcher = new FavoritesPageFetcher(() => {
+    this.fetcher = new FavoritesPageFetcher(() => {
       this.onAllFavoritesFetched();
     }, (request) => {
       this.fetchedFavoritesQueue.enqueue(request);
     });
+    this.paginator = new FavoritesPaginator();
+    this.searchFlags = new FavoritesSearchFlags();
   }
 
   addEventListeners() {
     window.addEventListener("modifiedTags", () => {
-      this.tagsWereModified = true;
+      this.searchFlags.tagsWereModified = true;
     });
     window.addEventListener("missingMetadata", (event) => {
       this.addNewFavoriteMetadata(event.detail);
     });
     window.addEventListener("reachedEndOfGallery", (event) => {
-      this.changeResultsPageInGallery(event.detail);
+      this.paginator.changePageWhileInGallery(event.detail, this.latestSearchResults);
     });
     this.createDatabaseMessageHandler();
   }
@@ -530,7 +449,6 @@ onmessage = (message) => {
         const favoritesURL = Array.from(table.querySelectorAll("a")).find(a => a.href.includes("page=favorites&s=view"));
         const favoritesCount = parseInt(favoritesURL.textContent);
 
-        this.expectedFavoritesCountIsKnown = true;
         this.expectedFavoritesCount = favoritesCount;
       })
       .catch(() => {
@@ -554,22 +472,10 @@ onmessage = (message) => {
   }
 
   /**
-   * @returns {HTMLDivElement}
-   */
-  createContentContainer() {
-    const content = document.createElement("div");
-
-    content.id = "favorites-search-gallery-content";
-    FAVORITES_SEARCH_GALLERY_CONTAINER.appendChild(content);
-    return content;
-  }
-
-  /**
    * @param {String} searchQuery
    */
   searchFavorites(searchQuery) {
     this.setSearchQuery(searchQuery);
-    this.resetMatchCount();
     dispatchEvent(new Event("searchStarted"));
     this.showSearchResults();
   }
@@ -580,6 +486,7 @@ onmessage = (message) => {
   setSearchQuery(searchQuery) {
     if (searchQuery !== undefined) {
       this.searchQuery = searchQuery;
+      this.searchFlags.searchQuery = searchQuery;
     }
   }
 
@@ -704,10 +611,10 @@ onmessage = (message) => {
   }
 
   fetchNewFavoritesOnReload() {
-    this.favoritesFetcher.onAllFavoritesPageRequestsCompleted = (newFavorites) => {
+    this.fetcher.onAllFavoritesPageRequestsCompleted = (newFavorites) => {
       this.addNewFavoritesOnReload(newFavorites);
     };
-    this.favoritesFetcher.fetchAllNewFavoritesOnReload(this.allFavoriteIds);
+    this.fetcher.fetchAllNewFavoritesOnReload(this.allFavoriteIds);
   }
 
   /**
@@ -733,10 +640,10 @@ onmessage = (message) => {
 
   fetchAllFavorites() {
     FavoritesLoader.currentState = FavoritesLoader.states.fetchingFavorites;
-    this.toggleContentVisibility(true);
-    this.insertPaginationContainer();
-    this.updatePaginationUi(1, []);
-    this.favoritesFetcher.fetchAllFavorites();
+    this.paginator.toggleContentVisibility(true);
+    this.paginator.insertPaginationMenuContainer();
+    this.paginator.createPaginationMenu(1, []);
+    this.fetcher.fetchAllFavorites();
     dispatchEvent(new Event("readyToSearch"));
     setTimeout(() => {
       dispatchEvent(new Event("startedFetchingFavorites"));
@@ -746,7 +653,7 @@ onmessage = (message) => {
   updateProgressWhileFetching() {
     let progressText = `Fetching Favorites ${this.allFavorites.length}`;
 
-    if (this.expectedFavoritesCountIsKnown) {
+    if (this.expectedFavoritesCount !== null) {
       progressText = `${progressText} / ${this.expectedFavoritesCount}`;
     }
     this.setProgressText(progressText);
@@ -762,12 +669,12 @@ onmessage = (message) => {
     const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
 
     this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
+    this.allFavorites = this.allFavorites.concat(favorites);
+    this.addFetchedFavoritesToContent(searchResultsWhileFetchingWithAllowedRatings);
+    this.updateProgressWhileFetching();
     dispatchEvent(new CustomEvent("favoritesFetched", {
       detail: favorites.map(post => post.root)
     }));
-    this.allFavorites = this.allFavorites.concat(favorites);
-    this.addFavoritesToContent(matchedFavorites);
-    this.updateProgressWhileFetching();
   }
 
   invertSearchResults() {
@@ -777,7 +684,7 @@ onmessage = (message) => {
     });
     const invertedSearchResults = this.getPostsMatchedByLastSearch();
 
-    this.searchResultsAreInverted = true;
+    this.searchFlags.searchResultsAreInverted = true;
     this.paginateSearchResults(invertedSearchResults);
     window.scrollTo(0, 0);
   }
@@ -786,7 +693,7 @@ onmessage = (message) => {
     const matchedPosts = this.getPostsMatchedByLastSearch();
 
     shuffleArray(matchedPosts);
-    this.searchResultsAreShuffled = true;
+    this.searchFlags.searchResultsAreShuffled = true;
     this.paginateSearchResults(matchedPosts);
   }
 
@@ -817,7 +724,7 @@ onmessage = (message) => {
    */
   toggleLoadingUI(value) {
     this.showLoadingWheel(value);
-    this.toggleContentVisibility(!value);
+    this.paginator.toggleContentVisibility(!value);
     this.setProgressText(value ? "Loading Favorites" : "All Favorites Loaded");
 
     if (!value) {
@@ -899,25 +806,6 @@ onmessage = (message) => {
     });
   }
 
-  deletePersistentData() {
-    const message = `
-Are you sure you want to reset?
-This will delete all cached favorites, and preferences.
-Tag modifications and saved searches will be preserved.
-    `;
-
-    if (confirm(message)) {
-      const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
-
-      Object.keys(localStorage).forEach((key) => {
-        if (!persistentLocalStorageKeys.has(key)) {
-          localStorage.removeItem(key);
-        }
-      });
-      indexedDB.deleteDatabase(FavoritesLoader.databaseName);
-    }
-  }
-
   /**
    * @param {Boolean} value
    */
@@ -950,8 +838,8 @@ Tag modifications and saved searches will be preserved.
     if (!this.matchCountLabelExists) {
       return;
     }
-    this.matchingFavoritesCount = value === undefined ? this.getSearchResults(this.allFavorites).length : value;
-    this.matchCountLabel.textContent = `${this.matchingFavoritesCount} Matches`;
+    this.matchedFavoritesCount = value === undefined ? this.getSearchResults(this.allFavorites).length : value;
+    this.matchCountLabel.textContent = `${this.matchedFavoritesCount} Matches`;
   }
 
   /**
@@ -961,15 +849,8 @@ Tag modifications and saved searches will be preserved.
     if (!this.matchCountLabelExists) {
       return;
     }
-    this.matchingFavoritesCount += value === undefined ? 1 : value;
-    this.matchCountLabel.textContent = `${this.matchingFavoritesCount} Matches`;
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleContentVisibility(value) {
-    this.contentContainer.style.display = value ? "" : "none";
+    this.matchedFavoritesCount += value === undefined ? 1 : value;
+    this.matchCountLabel.textContent = `${this.matchedFavoritesCount} Matches`;
   }
 
   /**
@@ -988,11 +869,11 @@ Tag modifications and saved searches will be preserved.
 
     for (const post of newPosts) {
       if (this.matchesSearchAndRating(searchCommand, post)) {
-        post.insertAtBeginningOfContent(this.contentContainer);
+        this.paginator.insertNewFavorite(post);
         insertedPosts.push(post);
       }
     }
-    this.updatePaginationUi(this.currentFavoritesPageNumber, this.getPostsMatchedByLastSearch());
+    this.paginator.createPaginationMenu(this.paginator.currentPageNumber, this.getPostsMatchedByLastSearch());
     setTimeout(() => {
       dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
         detail: {
@@ -1007,40 +888,28 @@ Tag modifications and saved searches will be preserved.
   }
 
   /**
-   * @param {Post[]} posts
+   * @param {Post[]} favorites
    */
-  addFavoritesToContent(posts) {
-    posts = this.getResultsWithAllowedRatings(posts);
-    const searchResultsWhileFetchingWithAllowedRatings = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
-    const pageNumberButtons = document.getElementsByClassName("pagination-number");
-    const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
-    const pageCount = this.getPageCount(searchResultsWhileFetchingWithAllowedRatings.length);
-    const needsToCreateNewPage = pageCount > lastPageButtonNumber;
-    const nextPageButton = document.getElementById("next-page");
-    const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtonCount &&
-      nextPageButton !== null && nextPageButton.style.display !== "none" &&
-      nextPageButton.style.visibility !== "hidden";
+  addFetchedFavoritesToContent(favorites) {
+    this.paginator.paginateWhileFetching(favorites);
+  }
 
-    if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
-      this.updatePaginationUi(this.currentFavoritesPageNumber, searchResultsWhileFetchingWithAllowedRatings);
-    } else {
-      this.updatePageButtonEventListeners(searchResultsWhileFetchingWithAllowedRatings);
+  /**
+   * @param {Post[]} searchResults
+   */
+  paginateSearchResults(searchResults) {
+    if (!this.searchFlags.aNewSearchCouldProduceDifferentResults) {
+      return;
     }
-
-    const onLastPage = (pageCount === this.currentFavoritesPageNumber);
-    const missingPostCount = this.resultsPerPage - getAllThumbs().length;
-
-    if (!onLastPage) {
-      if (missingPostCount > 0) {
-        posts = posts.slice(0, missingPostCount);
-      } else {
-        return;
-      }
-    }
-
-    for (const post of posts) {
-      post.insertAtEndOfContent(this.contentContainer);
-    }
+    searchResults = this.sortPosts(searchResults);
+    searchResults = this.getResultsWithAllowedRatings(searchResults);
+    this.latestSearchResults = searchResults;
+    this.updateMatchCount(searchResults.length);
+    this.paginator.paginate(searchResults);
+    this.searchFlags.resetFlagsImplyingDifferentSearchResults();
+    dispatchEvent(new CustomEvent("newSearchResults", {
+      detail: searchResults
+    }));
   }
 
   /**
@@ -1048,387 +917,16 @@ Tag modifications and saved searches will be preserved.
    */
   toggleTagBlacklistExclusion(value) {
     FavoritesLoader.tagNegation.useTagBlacklist = value;
-    this.excludeBlacklistWasClicked = true;
-  }
-
-  /**
-   * @param {Number} searchResultsLength
-   * @returns {Number}
-   */
-  getPageCount(searchResultsLength) {
-    if (searchResultsLength === 0) {
-      return 1;
-    }
-    const pageCount = searchResultsLength / this.resultsPerPage;
-
-    if (searchResultsLength % this.resultsPerPage === 0) {
-      return pageCount;
-    }
-    return Math.floor(pageCount) + 1;
-  }
-
-  /**
-   * @param {Post[]} searchResults
-   */
-  paginateSearchResults(searchResults) {
-    searchResults = this.sortPosts(searchResults);
-    searchResults = this.getResultsWithAllowedRatings(searchResults);
-    this.latestSearchResults = searchResults;
-    this.updateMatchCount(searchResults.length);
-    this.insertPaginationContainer();
-    this.changeResultsPage(1, searchResults);
-    dispatchEvent(new CustomEvent("newSearchResults", {
-      detail: searchResults
-    }));
-  }
-
-  insertPaginationContainer() {
-    if (document.getElementById(this.paginationContainer.id) === null) {
-
-      if (onMobileDevice()) {
-        document.getElementById("favorites-search-gallery-menu").insertAdjacentElement("afterbegin", this.paginationContainer);
-      } else {
-        const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
-
-        placeToInsertPagination.insertAdjacentElement("afterend", this.paginationContainer);
-        placeToInsertPagination.remove();
-      }
-    }
-  }
-
-  /**
-   * @returns {HTMLElement}
-   */
-  createPaginationContainer() {
-    const container = document.createElement("span");
-
-    container.id = "favorites-pagination-container";
-    return container;
-  }
-
-  /**
-   * @param {Number} currentPageNumber
-   * @param {Post[]} searchResults
-   */
-  createPageNumberButtons(currentPageNumber, searchResults) {
-    const pageCount = this.getPageCount(searchResults.length);
-    let numberOfButtonsCreated = 0;
-
-    for (let i = currentPageNumber; i <= pageCount && numberOfButtonsCreated < this.maxPageNumberButtonCount; i += 1) {
-      numberOfButtonsCreated += 1;
-      this.createPageNumberButton(currentPageNumber, i, searchResults);
-    }
-
-    if (numberOfButtonsCreated >= this.maxPageNumberButtonCount) {
-      return;
-    }
-
-    for (let j = currentPageNumber - 1; j >= 1 && numberOfButtonsCreated < this.maxPageNumberButtonCount; j -= 1) {
-      numberOfButtonsCreated += 1;
-      this.createPageNumberButton(currentPageNumber, j, searchResults, "afterbegin");
-    }
-  }
-
-  /**
-   * @param {Number} currentPageNumber
-   * @param {Number} pageNumber
-   * @param {Post[]} searchResults
-   * @param {String} position
-   */
-  createPageNumberButton(currentPageNumber, pageNumber, searchResults, position = "beforeend") {
-    const pageNumberButton = document.createElement("button");
-    const selected = currentPageNumber === pageNumber;
-
-    pageNumberButton.id = `favorites-page-${pageNumber}`;
-    pageNumberButton.title = `Goto page ${pageNumber}`;
-    pageNumberButton.className = "pagination-number";
-    pageNumberButton.classList.toggle("selected", selected);
-    pageNumberButton.onclick = () => {
-      this.changeResultsPage(pageNumber, searchResults);
-    };
-    this.paginationContainer.insertAdjacentElement(position, pageNumberButton);
-    pageNumberButton.textContent = pageNumber;
-  }
-
-  /**
-   * @param {Post[]} searchResults
-   */
-  createPageTraversalButtons(searchResults) {
-    const pageCount = this.getPageCount(searchResults.length);
-    const previousPage = document.createElement("button");
-    const firstPage = document.createElement("button");
-    const nextPage = document.createElement("button");
-    const finalPage = document.createElement("button");
-
-    previousPage.textContent = "<";
-    firstPage.textContent = "<<";
-    nextPage.textContent = ">";
-    finalPage.textContent = ">>";
-
-    previousPage.id = "previous-page";
-    firstPage.id = "first-page";
-    nextPage.id = "next-page";
-    finalPage.id = "final-page";
-
-    previousPage.title = "Goto previous page";
-    firstPage.title = "Goto first page";
-    nextPage.title = "Goto next page";
-    finalPage.title = "Goto last page";
-
-    previousPage.onclick = () => {
-      if (this.currentFavoritesPageNumber - 1 >= 1) {
-        this.changeResultsPage(this.currentFavoritesPageNumber - 1, searchResults);
-      }
-    };
-    firstPage.onclick = () => {
-      this.changeResultsPage(1, searchResults);
-    };
-    nextPage.onclick = () => {
-      if (this.currentFavoritesPageNumber + 1 <= pageCount) {
-        this.changeResultsPage(this.currentFavoritesPageNumber + 1, searchResults);
-      }
-    };
-    finalPage.onclick = () => {
-      this.changeResultsPage(pageCount, searchResults);
-    };
-    this.paginationContainer.insertAdjacentElement("afterbegin", previousPage);
-    this.paginationContainer.insertAdjacentElement("afterbegin", firstPage);
-    this.paginationContainer.appendChild(nextPage);
-    this.paginationContainer.appendChild(finalPage);
-
-    this.updateVisibilityOfPageTraversalButtons(previousPage, firstPage, nextPage, finalPage, this.getPageCount(searchResults.length));
-  }
-
-  /**
-   * @param {Post[]} searchResults
-   */
-  createGotoSpecificPageInputs(searchResults) {
-    if (this.firstPageNumberExists() && this.lastPageNumberExists(this.getPageCount(searchResults.length))) {
-      return;
-    }
-    const html = `
-      <input type="number" placeholder="page" style="width: 4em;" id="goto-page-input">
-      <button id="goto-page-button">Go</button>
-    `;
-    const container = document.createElement("span");
-
-    container.title = "Goto specific page";
-
-    container.innerHTML = html;
-    const input = container.children[0];
-    const button = container.children[1];
-
-    input.onkeydown = (event) => {
-      if (event.key === "Enter") {
-        button.click();
-      }
-    };
-
-    this.paginationContainer.appendChild(container);
-    this.updatePageButtonEventListeners(searchResults);
-  }
-
-  /**
-   * @param {Post[]} searchResults
-   */
-  updatePageButtonEventListeners(searchResults) {
-    const gotoPageButton = document.getElementById("goto-page-button");
-    const finalPageButton = document.getElementById("final-page");
-    const input = document.getElementById("goto-page-input");
-    const pageCount = this.getPageCount(searchResults.length);
-
-    if (gotoPageButton === null || finalPageButton === null || input === null) {
-      return;
-    }
-
-    gotoPageButton.onclick = () => {
-      let pageNumber = parseInt(input.value);
-
-      if (!isNumber(pageNumber)) {
-        return;
-      }
-      pageNumber = clamp(pageNumber, 1, pageCount);
-      this.changeResultsPage(pageNumber, searchResults);
-
-    };
-
-    finalPageButton.onclick = () => {
-      this.changeResultsPage(pageCount, searchResults);
-    };
-  }
-
-  /**
-   * @param {Number} pageNumber
-   * @param {Post[]} searchResults
-   */
-  changeResultsPage(pageNumber, searchResults) {
-    if (!this.aNewSearchWillProduceDifferentResults(pageNumber)) {
-      return;
-    }
-    const {start, end} = this.getPaginationStartEndIndices(pageNumber);
-
-    this.currentFavoritesPageNumber = pageNumber;
-    this.updatePaginationUi(pageNumber, searchResults);
-    this.createPaginatedFavoritesPage(searchResults, start, end);
-    this.resetFlagsThatImplyDifferentSearchResults();
-
-    if (FavoritesLoader.currentState !== FavoritesLoader.states.loadingFavoritesFromDatabase) {
-      dispatchEvent(new Event("changedPage"));
-    }
-  }
-
-  resetFlagsThatImplyDifferentSearchResults() {
-    this.searchResultsWereShuffled = this.searchResultsAreShuffled;
-    this.searchResultsWereInverted = this.searchResultsAreInverted;
-    this.tagsWereModified = false;
-    this.excludeBlacklistWasClicked = false;
-    this.sortingParametersWereChanged = false;
-    this.allowedRatingsWereChanged = false;
-    this.searchResultsAreShuffled = false;
-    this.searchResultsAreInverted = false;
-    this.previousSearchQuery = this.searchQuery;
-  }
-
-  getPaginationStartEndIndices(pageNumber) {
-    return {
-      start: this.resultsPerPage * (pageNumber - 1),
-      end: this.resultsPerPage * pageNumber
-    };
-  }
-
-  /**
-   * @param {Number} pageNumber
-   * @param {Post[]} searchResults
-   */
-  updatePaginationUi(pageNumber, searchResults) {
-    const {start, end} = this.getPaginationStartEndIndices(pageNumber);
-    const searchResultsLength = searchResults.length;
-
-    this.setPaginationLabel(start, end, searchResultsLength);
-    this.paginationContainer.innerHTML = "";
-    this.createPageNumberButtons(pageNumber, searchResults);
-    this.createPageTraversalButtons(searchResults);
-    this.createGotoSpecificPageInputs(searchResults);
-  }
-
-  /**
-   * @param {Post[]} posts
-   */
-  reAddPostEventListeners(posts) {
-    for (const post of posts) {
-      post.setupAddOrRemoveButton();
-    }
-  }
-
-  /**
-   * @param {Post[]} searchResults
-   * @param {Number} start
-   * @param {Number} end
-   * @returns
-   */
-  createPaginatedFavoritesPage(searchResults, start, end) {
-    const newContent = document.createDocumentFragment();
-
-    for (const post of searchResults.slice(start, end)) {
-      post.insertAtEndOfContent(newContent);
-    }
-    this.contentContainer.innerHTML = "";
-    this.contentContainer.appendChild(newContent);
-    window.scrollTo(0, 0);
-  }
-
-  /**
-   * @param {Number} pageNumber
-   * @returns {Boolean}
-   */
-  aNewSearchWillProduceDifferentResults(pageNumber) {
-    return this.currentFavoritesPageNumber !== pageNumber ||
-      this.searchQuery !== this.previousSearchQuery ||
-      FavoritesLoader.currentState !== FavoritesLoader.states.allFavoritesLoaded ||
-      this.searchResultsAreShuffled ||
-      this.searchResultsAreInverted ||
-      this.searchResultsWereShuffled ||
-      this.searchResultsWereInverted ||
-      this.recentlyChangedResultsPerPage ||
-      this.tagsWereModified ||
-      this.excludeBlacklistWasClicked ||
-      this.sortingParametersWereChanged ||
-      this.allowedRatingsWereChanged;
-  }
-
-  /**
-   * @param {Number} start
-   * @param {Number} end
-   * @param {Number} searchResults
-   * @returns
-   */
-  setPaginationLabel(start, end, searchResultsLength) {
-    end = Math.min(end - 1, searchResultsLength);
-
-    if (this.paginationLabel === undefined) {
-      this.paginationLabel = document.getElementById("pagination-label");
-    }
-
-    if (searchResultsLength <= this.resultsPerPage) {
-      this.paginationLabel.textContent = "";
-      return;
-    }
-    this.paginationLabel.textContent = `${start + 1} - ${end + 1}`;
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  firstPageNumberExists() {
-    return document.getElementById("favorites-page-1") !== null;
-  }
-
-  /**
-   * @param {Number} pageCount
-   * @returns {Boolean}
-   */
-  lastPageNumberExists(pageCount) {
-    return document.getElementById(`favorites-page-${pageCount}`) !== null;
-  }
-
-  /**
-   * @param {HTMLButtonElement} previousPage
-   * @param {HTMLButtonElement} firstPage
-   * @param {HTMLButtonElement} nextPage
-   * @param {HTMLButtonElement} finalPage
-   * @param {Number} pageCount
-   */
-  updateVisibilityOfPageTraversalButtons(previousPage, firstPage, nextPage, finalPage, pageCount) {
-    const firstNumberExists = this.firstPageNumberExists();
-    const lastNumberExists = this.lastPageNumberExists(pageCount);
-
-    if (firstNumberExists && lastNumberExists) {
-      previousPage.style.visibility = "hidden";
-      firstPage.style.visibility = "hidden";
-      nextPage.style.visibility = "hidden";
-      finalPage.style.visibility = "hidden";
-    } else {
-      if (firstNumberExists) {
-        previousPage.style.visibility = "hidden";
-        firstPage.style.visibility = "hidden";
-      }
-
-      if (lastNumberExists) {
-        nextPage.style.visibility = "hidden";
-        finalPage.style.visibility = "hidden";
-      }
-    }
+    this.searchFlags.excludeBlacklistWasClicked = true;
   }
 
   /**
    * @param {Number} value
    */
   updateResultsPerPage(value) {
-    this.resultsPerPage = value;
-    this.recentlyChangedResultsPerPage = true;
+    this.paginator.maxFavoritesPerPage = value;
+    this.searchFlags.recentlyChangedResultsPerPage = true;
     this.searchFavorites();
-    this.recentlyChangedResultsPerPage = false;
-
   }
 
   /**
@@ -1436,12 +934,7 @@ Tag modifications and saved searches will be preserved.
    * @returns {Post[]}
    */
   sortPosts(posts) {
-    if (!FavoritesLoader.states.allFavoritesLoaded) {
-      alert("Wait for all favorites to load before changing sort method");
-      return posts;
-    }
-
-    if (this.searchResultsAreShuffled) {
+    if (this.searchFlags.searchResultsAreShuffled) {
       return posts;
     }
     const sortedPosts = posts.slice();
@@ -1489,7 +982,7 @@ Tag modifications and saved searches will be preserved.
   }
 
   onSortingParametersChanged() {
-    this.sortingParametersWereChanged = true;
+    this.searchFlags.sortingParametersWereChanged = true;
     const matchedPosts = this.getPostsMatchedByLastSearch();
 
     this.paginateSearchResults(matchedPosts);
@@ -1501,7 +994,7 @@ Tag modifications and saved searches will be preserved.
    */
   onAllowedRatingsChanged(allowedRatings) {
     this.allowedRatings = allowedRatings;
-    this.allowedRatingsWereChanged = true;
+    this.searchFlags.allowedRatingsWereChanged = true;
     const matchedPosts = this.getPostsMatchedByLastSearch();
 
     this.paginateSearchResults(matchedPosts);
@@ -1518,9 +1011,9 @@ Tag modifications and saved searches will be preserved.
     const waitTime = 1000;
 
     clearTimeout(this.newMetadataReceivedTimeout);
-    this.idsRequiringMetadataDatabaseUpdate.push(postId);
+    this.favoriteIdsRequiringMetadataDatabaseUpdate.push(postId);
 
-    if (this.idsRequiringMetadataDatabaseUpdate.length >= batchSize) {
+    if (this.favoriteIdsRequiringMetadataDatabaseUpdate.length >= batchSize) {
       this.updateFavoriteMetadataInDatabase();
       return;
     }
@@ -1530,8 +1023,8 @@ Tag modifications and saved searches will be preserved.
   }
 
   updateFavoriteMetadataInDatabase() {
-    this.updateFavorites(this.idsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
-    this.idsRequiringMetadataDatabaseUpdate = [];
+    this.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
+    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }
 
   /**
@@ -1549,6 +1042,7 @@ Tag modifications and saved searches will be preserved.
     if (this.allRatingsAreAllowed()) {
       return true;
     }
+    // eslint-disable-next-line no-bitwise
     return (post.metadata.rating & this.allowedRatings) > 0;
   }
 
@@ -1566,64 +1060,17 @@ Tag modifications and saved searches will be preserved.
   /**
    * @param {SearchCommand} searchCommand
    * @param {Post} post
-   * @returns
+   * @returns {Boolean}
    */
   matchesSearchAndRating(searchCommand, post) {
     return this.ratingIsAllowed(post) && searchCommand.matches(post);
   }
 
   /**
-   * @param {Number} id
+   * @param {String} id
    */
   findFavorite(id) {
-    const searchResults = this.latestSearchResults;
-    const searchResultIds = searchResults.map(post => post.id);
-    const index = searchResultIds.indexOf(id);
-
-    if (index === -1) {
-      return;
-    }
-    const pageNumber = Math.floor(index / this.resultsPerPage) + 1;
-
-    dispatchEvent(new CustomEvent("foundFavorite", {
-      detail: id
-    }));
-    this.changeResultsPage(pageNumber, searchResults);
-    setTimeout(() => {
-      scrollToThumb(id, true, false);
-    }, 600);
-  }
-
-  /**
-   *
-   * @param {String} direction
-   */
-  changeResultsPageInGallery(direction) {
-    const searchResults = this.latestSearchResults;
-    const pageCount = this.getPageCount(searchResults.length);
-    const onLastPage = this.currentFavoritesPageNumber === pageCount;
-    const onFirstPage = this.currentFavoritesPageNumber === 1;
-    const onlyOnePage = onFirstPage && onLastPage;
-
-    if (onlyOnePage) {
-      dispatchEvent(new CustomEvent("didNotChangePageInGallery", {
-        detail: direction
-      }));
-      return;
-    }
-
-    if (onLastPage && direction === "ArrowRight") {
-      this.changeResultsPage(1, searchResults);
-      return;
-    }
-
-    if (onFirstPage && direction === "ArrowLeft") {
-      this.changeResultsPage(pageCount, searchResults);
-      return;
-    }
-    const newPageNumber = direction === "ArrowRight" ? this.currentFavoritesPageNumber + 1 : this.currentFavoritesPageNumber - 1;
-
-    this.changeResultsPage(newPageNumber, searchResults);
+    this.paginator.findFavorite(id);
   }
 }
 

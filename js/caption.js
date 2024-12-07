@@ -288,7 +288,7 @@ class Caption {
       this.caption.classList.add("transitioning");
     });
     window.addEventListener("showOriginalContent", (event) => {
-      const thumb = caption.parentElement;
+      const thumb = this.caption.parentElement;
 
       if (event.detail) {
         this.removeFromThumb(thumb);

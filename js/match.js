@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 class SearchTag {
   /**
    * @type {String}

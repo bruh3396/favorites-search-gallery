@@ -34,7 +34,7 @@ class FavoritesPageFetcher {
   /**
    * @type {Boolean}
    */
-  get allFavoritesPageRequestsAreCompleted() {
+  get allFavoritesPageRequestsHaveCompleted() {
     return this.fetchedAnEmptyFavoritesPage && !this.hasFailedFavoritesPageRequests;
   }
 
@@ -91,7 +91,7 @@ class FavoritesPageFetcher {
 
   async fetchAllFavorites() {
     while (true) {
-      if (this.allFavoritesPageRequestsAreCompleted) {
+      if (this.allFavoritesPageRequestsHaveCompleted) {
         this.onAllFavoritesPageRequestsCompleted();
         return;
       }
@@ -164,13 +164,13 @@ class FavoritesPageFetcher {
 
     fetch(request.url)
       .then((response) => {
-        return this.onRequestResponse(response);
+        return this.onFavoritesPageRequestResponse(response);
       })
       .then((html) => {
-        this.onRequestSuccess(request, html);
+        this.onFavoritesPageRequestSuccess(request, html);
       })
       .catch((error) => {
-        this.onRequestFail(request, error);
+        this.onFavoritesPageRequestFail(request, error);
       });
     await sleep(request.retryDelay);
   }
@@ -179,7 +179,7 @@ class FavoritesPageFetcher {
    * @param {Response} response
    * @returns {Promise.<String>}
    */
-  onRequestResponse(response) {
+  onFavoritesPageRequestResponse(response) {
     if (response.ok) {
       return response.text();
     }
@@ -190,7 +190,7 @@ class FavoritesPageFetcher {
    * @param {FavoritesPageRequest} request
    * @param {String} html
    */
-  onRequestSuccess(request, html) {
+  onFavoritesPageRequestSuccess(request, html) {
     request.fetchedFavorites = FavoritesPageParser.extractFavorites(html);
     this.fetchedAnEmptyFavoritesPage = this.fetchedAnEmptyFavoritesPage || request.fetchedFavorites.length === 0;
     this.onFavoritesPageRequestCompleted(request);
@@ -200,7 +200,7 @@ class FavoritesPageFetcher {
    * @param {FavoritesPageRequest} request
    * @param {Error} error
    */
-  onRequestFail(request, error) {
+  onFavoritesPageRequestFail(request, error) {
     console.error(error);
     request.onFail();
     this.failedFavoritesPageRequests.push(request);

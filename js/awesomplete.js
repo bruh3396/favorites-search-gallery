@@ -1,4 +1,3 @@
-/* eslint-disable new-cap */
 class AwesompleteWrapper {
   static preferences = {
     savedSearchSuggestions: "savedSearchSuggestions"
@@ -62,6 +61,7 @@ class AwesompleteWrapper {
       minChars: 1,
       list: [],
       filter: (suggestion, _) => {
+        // eslint-disable-next-line new-cap
         return Awesomplete_.FILTER_STARTSWITH(suggestion.value, this.getCurrentTag(awesomplete.input));
       },
       sort: false,

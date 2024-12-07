@@ -65,6 +65,7 @@ This script is still in development, please let me know if you experience a bug,
 | Left Click | Add tag to search | Clicked on a tag in details |
 | Right Click | Add negated tag to search | Clicked on a tag in details |
 | Middle Click | Quick search tag | Clicked on a tag in details |
+| Ctrl Click | Search site for tag in new tab | Clicked on a tag in details |
 
 ### Gallery Controls
 | Input                                 | Function                                       | Condition              |

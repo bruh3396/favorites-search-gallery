@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds

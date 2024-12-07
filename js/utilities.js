@@ -400,6 +400,7 @@ const CLICK_CODES = {
   right: 2
 };
 const CUSTOM_TAGS = loadCustomTags();
+const FAVORITE_CLASS_NAME = "favorite";
 
 /**
  * @param {String} key
@@ -1241,6 +1242,15 @@ function roundToTwoDecimalPlaces(number) {
 }
 
 /**
+ * @param {Number} n
+ * @param {Number} number
+ */
+function roundToNDecimalPlaces(n, number) {
+  const x = 10 ** n;
+  return Math.round((number + Number.EPSILON) * x) / x;
+}
+
+/**
  * @returns {Boolean}
  */
 function usingDarkTheme() {
@@ -1828,7 +1838,7 @@ function createFavoritesSearchGalleryContainer() {
 
 /**
  * @param {HTMLElement} element
- * @param {String} position
+ * @param {InsertPosition} position
  * @param {String} html
  */
 function insertHTMLAndExtractStyle(element, position, html) {
@@ -1884,6 +1894,25 @@ function getIdFromThumb(thumb) {
   const image = thumb.querySelector("img");
   const match = (/\?(\d+)$/).exec(image.src);
   return match[1];
+}
+
+function deletePersistentData() {
+  const message = `
+Are you sure you want to reset?
+This will delete all cached favorites, and preferences.
+Tag modifications and saved searches will be preserved.
+  `;
+
+  if (confirm(message)) {
+    const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
+
+    Object.keys(localStorage).forEach((key) => {
+      if (!persistentLocalStorageKeys.has(key)) {
+        localStorage.removeItem(key);
+      }
+    });
+    indexedDB.deleteDatabase(FavoritesLoader.databaseName);
+  }
 }
 
 initializeUtilities();

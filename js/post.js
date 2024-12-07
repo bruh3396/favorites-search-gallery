@@ -492,7 +492,7 @@ class Post {
     this.additionalTags = convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
 
     if (this.additionalTags.size !== 0) {
-      this.updateTags();
+      this.combineOriginalAndAdditionalTags();
     }
   }
 
@@ -558,7 +558,7 @@ class Post {
     this.matchedByMostRecentSearch = value;
   }
 
-  updateTags() {
+  combineOriginalAndAdditionalTags() {
     this.tagSet = this.originalTagSet;
     this.tagSet = union(this.tagSet, this.additionalTags);
   }
@@ -572,7 +572,7 @@ class Post {
 
     if (newTagsSet.size > 0) {
       this.additionalTags = union(this.additionalTags, newTagsSet);
-      this.updateTags();
+      this.combineOriginalAndAdditionalTags();
     }
     return this.additionalTagsString;
   }
@@ -586,7 +586,7 @@ class Post {
 
     if (tagsToRemoveSet.size > 0) {
       this.additionalTags = difference(this.additionalTags, tagsToRemoveSet);
-      this.updateTags();
+      this.combineOriginalAndAdditionalTags();
     }
     return this.additionalTagsString;
   }
@@ -596,7 +596,7 @@ class Post {
       return;
     }
     this.additionalTags = new Set();
-    this.updateTags();
+    this.combineOriginalAndAdditionalTags();
   }
 
   /**

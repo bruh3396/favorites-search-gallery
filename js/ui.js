@@ -713,7 +713,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
     <div id="right-favorites-panel"></div>
   </div>
   <div class="loading-wheel" id="loading-wheel" style="display: none;"></div>
-</div>`;/* eslint-disable no-bitwise */
+</div>`;
 
 if (onFavoritesPage()) {
   insertFavoritesSearchGalleryHTML("afterbegin", uiHTML);
@@ -861,8 +861,11 @@ function loadFavoritesPagePreferences() {
   }
   const allowedRatings = loadAllowedRatings();
 
+  // eslint-disable-next-line no-bitwise
   FAVORITE_CHECKBOXES.explicitRating.checked = (allowedRatings & 4) === 4;
+  // eslint-disable-next-line no-bitwise
   FAVORITE_CHECKBOXES.questionableRating.checked = (allowedRatings & 2) === 2;
+  // eslint-disable-next-line no-bitwise
   FAVORITE_CHECKBOXES.safeRating.checked = (allowedRatings & 1) === 1;
   preventUserFromUncheckingAllRatings(allowedRatings);
 
@@ -967,7 +970,7 @@ function addEventListenersToFavoritesPage() {
     favoritesLoader.invertSearchResults();
   };
   FAVORITE_BUTTONS.reset.onclick = () => {
-    favoritesLoader.deletePersistentData();
+    deletePersistentData();
   };
   FAVORITE_INPUTS.findFavorite.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {

@@ -94,7 +94,7 @@ const galleryHTML = `<style>
     pointer-events: none;
   }
 </style>
-`;/* eslint-disable no-useless-escape */
+`;
 
 const galleryDebugHTML = `
   .thumb,
@@ -178,8 +178,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-`
-/* eslint-disable max-classes-per-file */
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -1385,6 +1384,7 @@ onmessage = (message) => {
       once: true,
       passive: true
     });
+    // eslint-disable-next-line complexity
     document.addEventListener("mousedown", (event) => {
       const autoplayMenu = document.getElementById("autoplay-menu");
 
@@ -1405,6 +1405,11 @@ onmessage = (message) => {
           if (this.inGallery) {
             if (isVideo(this.getSelectedThumb()) && !onMobileDevice()) {
               return;
+            }
+
+            if (event.ctrlKey) {
+              // this.zoomOnMainCanvas(event);
+              // return;
             }
             this.exitGallery();
             this.toggleAllVisibility(false);
@@ -1524,6 +1529,7 @@ onmessage = (message) => {
       if (!this.inGallery) {
         return;
       }
+      const zoomedIn = document.getElementById("main-canvas-zoom") !== null;
 
       switch (event.key) {
         case "F":
@@ -1556,11 +1562,30 @@ onmessage = (message) => {
           this.toggleAllVisibility(false);
           break;
 
+        case "Control":
+
+          this.setGalleryCursor(zoomedIn ? "zoom-out" : "zoom-in");
+          break;
+
         default:
           break;
       }
     }, {
       passive: true
+    });
+    window.addEventListener("keyup", (event) => {
+      if (!this.inGallery) {
+        return;
+      }
+
+      switch (event.key) {
+        case "Control":
+          this.setGalleryCursor("default");
+          break;
+
+        default:
+          break;
+      }
     });
   }
 
@@ -2534,6 +2559,7 @@ onmessage = (message) => {
     }, 300);
     this.inGallery = false;
     this.autoplayController.stop();
+    this.setGalleryCursor("default");
     document.dispatchEvent(new Event("mousemove"));
   }
 
@@ -3319,13 +3345,13 @@ onmessage = (message) => {
    * @param {Boolean} value
    */
   toggleCursorVisibility(value) {
-    const html = `
-      #original-content-background {
-        cursor: ${value ? "auto" : "none"};
-      }
-    `;
+    // const html = `
+    //   #original-content-background {
+    //     cursor: ${value ? "auto" : "none"};
+    //   }
+    // `;
 
-    insertStyleHTML(html, "gallery-cursor-visibility");
+    // insertStyleHTML(html, "gallery-cursor-visibility");
   }
 
   /**
@@ -3603,6 +3629,37 @@ onmessage = (message) => {
         break;
     }
     showFullscreenIcon(svg);
+  }
+
+  /**
+   * @param {String} cursor
+   */
+  setGalleryCursor(cursor) {
+    this.background.style.cursor = cursor;
+  }
+
+  /**
+   * @param {MouseEvent} event
+   */
+  zoomOnMainCanvas(event) {
+    const style = document.getElementById("main-canvas-zoom-fsg-style");
+
+    if (style !== null) {
+      style.remove();
+      return;
+    }
+    const x = 100 * roundToTwoDecimalPlaces(event.clientX / window.innerWidth);
+    const y = 100 * roundToTwoDecimalPlaces(event.clientY / window.innerHeight);
+
+    insertStyleHTML(`
+      #gallery-container {
+        canvas,
+        img {
+          transform-origin: ${x}% ${y}%;
+          transform: translate(-50%, -50%) scale(4) !important;
+        }
+      }
+    `, "main-canvas-zoom");
   }
 }
 
