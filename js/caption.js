@@ -434,8 +434,8 @@ class Caption {
     captionIdTag.className = "caption-tag";
     captionIdTag.textContent = thumb.id;
     captionIdTag.onclick = (event) => {
-      event.stopPropagation();
       event.preventDefault();
+      event.stopPropagation();
     };
     captionIdTag.addEventListener("contextmenu", (event) => {
       event.preventDefault();
@@ -443,6 +443,8 @@ class Caption {
     });
 
     captionIdTag.onmousedown = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       this.tagOnClick(thumb.id, event);
     };
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
@@ -807,7 +809,7 @@ class Caption {
   }
 
   findTagCategoriesOnPageChange() {
-    const tagNames = this.getTagNamesWithUnknownCategories(getAllVisibleThumbs().slice(0, 200));
+    const tagNames = this.getTagNamesWithUnknownCategories(getAllThumbs().slice(0, 200));
 
     this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
       Caption.saveTagCategoriesCooldown.restart();

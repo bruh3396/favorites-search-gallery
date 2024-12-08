@@ -114,7 +114,7 @@ Same as the normal site syntax with addition of lone "ID" without ":"
 | And             | tag1 tag2       | apple banana grape                                                                                                     |
 | Or              | ( tag1 ~ tag2 ) | ( apple ~ banana ~ grape )                                                                                             |
 | Not             | -tag1           | -pineapple -orange                                                                                                     |
-| Wildcard        | ta*1            | a\*ple\*auce b\*a\*n\*a \*grape\*   (**Note:** "\*tag" works for this script but not for the normal site)              |
+| Wildcard        | ta*1            | a\*ple\*auce b\*a\*n\*a \*grape\*                 |
 | ID              | \<id\>          | 12345 55555                                                                                                            |
 | Any Combination |                 | ( fruit ~ vegetable ~ a\*sauce ) \*apple\* -apple\* -banana -grape\* -lemon\* ( ripe ~ tasty\* ) -12345 -55555 -112234 |
 

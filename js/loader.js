@@ -11,7 +11,7 @@ class FavoritesLoader {
   static objectStoreName = `user${getFavoritesPageId()}`;
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -458,12 +458,15 @@ onmessage = (message) => {
 
   clearOriginalFavoritesPage() {
     const thumbs = Array.from(document.getElementsByClassName("thumb"));
-    const content = document.getElementById("content");
+    let content = document.getElementById("content");
+
+    if (content === null && thumbs.length > 0) {
+      content = thumbs[0].closest("body>div");
+    }
 
     if (content !== null) {
       content.remove();
     }
-
     setTimeout(() => {
       dispatchEvent(new CustomEvent("originalFavoritesCleared", {
         detail: thumbs
@@ -839,7 +842,9 @@ onmessage = (message) => {
       return;
     }
     this.matchedFavoritesCount = value === undefined ? this.getSearchResults(this.allFavorites).length : value;
-    this.matchCountLabel.textContent = `${this.matchedFavoritesCount} Matches`;
+    const suffix = this.matchedFavoritesCount === 1 ? "Match" : "Matches";
+
+    this.matchCountLabel.textContent = `${this.matchedFavoritesCount} ${suffix}`;
   }
 
   /**

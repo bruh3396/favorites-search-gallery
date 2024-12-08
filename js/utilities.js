@@ -327,7 +327,7 @@ const FLAGS = {
     set: false,
     value: undefined
   },
-  usingRenderer: {
+  galleryEnabled: {
     set: false,
     value: undefined
   }
@@ -361,7 +361,7 @@ const ADDED_FAVORITE_STATUS = {
 };
 const STYLES = {
   thumbHoverOutline: `
-    .post,
+    .favorite,
     .thumb {
       >a,
       >span,
@@ -372,7 +372,7 @@ const STYLES = {
       }
     }`,
   thumbHoverOutlineDisabled: `
-    .post,
+    .favorite,
     .thumb {
       >a,
       >span,
@@ -400,7 +400,7 @@ const CLICK_CODES = {
   right: 2
 };
 const CUSTOM_TAGS = loadCustomTags();
-const FAVORITE_CLASS_NAME = "favorite";
+const FAVORITE_ITEM_CLASS_NAME = "favorite";
 
 /**
  * @param {String} key
@@ -576,7 +576,7 @@ function removeTitleFromImage(image) {
  * @returns {HTMLElement}
  */
 function getThumbFromImage(image) {
-  const className = onSearchPage() ? "thumb" : "post";
+  const className = onSearchPage() ? "thumb" : FAVORITE_ITEM_CLASS_NAME;
   return image.closest(`.${className}`);
 }
 
@@ -589,19 +589,11 @@ function getImageFromThumb(thumb) {
 }
 
 /**
- * @returns {HTMLCollectionOf.<HTMLElement>}
- */
-function getAllThumbs() {
-  const className = onSearchPage() ? "thumb" : "post";
-  return document.getElementsByClassName(className);
-}
-
-/**
  * @returns {HTMLElement[]}
  */
-function getAllVisibleThumbs() {
-  return Array.from(getAllThumbs())
-    .filter(postElement => postElement.style.display !== "none");
+function getAllThumbs() {
+  const className = onSearchPage() ? "thumb" : FAVORITE_ITEM_CLASS_NAME;
+  return Array.from(document.getElementsByClassName(className));
 }
 
 /**
@@ -933,7 +925,7 @@ function insertStyleHTML(html, id) {
 }
 
 function getTagDistribution() {
-  const images = Array.from(getAllThumbs()).map(thumb => getImageFromThumb(thumb));
+  const images = getAllThumbs().map(thumb => getImageFromThumb(thumb));
   const tagOccurrences = {};
 
   images.forEach((image) => {
@@ -999,7 +991,7 @@ function toggleFancyImageHovering(value) {
       grid-gap: 2.5em !important;
     }
 
-    .post,
+    .favorite,
     .thumb {
       >a,
       >span,
@@ -1048,7 +1040,7 @@ function configureVideoOutlines() {
   const gifSelector = onFavoritesPage() ? "&:has(img.gif)" : ">img.gif";
 
   insertStyleHTML(`
-    .post, .thumb {
+    .favorite, .thumb {
 
       >a,
       >div {
@@ -1209,20 +1201,12 @@ function getTagBlacklist() {
 /**
  * @returns {Boolean}
  */
-function usingCaptions() {
-  const result = document.getElementById("captionList") !== null;
-  return result;
-}
-
-/**
- * @returns {Boolean}
- */
-function usingRenderer() {
-  if (!FLAGS.usingRenderer.set) {
-    FLAGS.usingRenderer.value = document.getElementById("gallery-container") !== null;
-    FLAGS.usingRenderer.set = true;
+function galleryEnabled() {
+  if (!FLAGS.galleryEnabled.set) {
+    FLAGS.galleryEnabled.value = document.getElementById("gallery-container") !== null;
+    FLAGS.galleryEnabled.set = true;
   }
-  return FLAGS.usingRenderer.value;
+  return FLAGS.galleryEnabled.value;
 }
 
 /**
@@ -1272,7 +1256,7 @@ function enteredOverCaptionTag(event) {
  */
 function scrollToThumb(postId, endingAnimation, smoothTransition) {
   const element = document.getElementById(postId);
-  const elementIsNotAThumb = element === null || (!element.classList.contains("thumb") && !element.classList.contains("post"));
+  const elementIsNotAThumb = element === null || (!element.classList.contains("thumb") && !element.classList.contains(FAVORITE_ITEM_CLASS_NAME));
 
   if (elementIsNotAThumb) {
     return;
@@ -1913,6 +1897,21 @@ Tag modifications and saved searches will be preserved.
     });
     indexedDB.deleteDatabase(FavoritesLoader.databaseName);
   }
+}
+
+/**
+ * @param {String} id
+ * @returns {String}
+ */
+function getPostPageURLFromPostId(id) {
+  return `https://rule34.xxx/index.php?page=post&s=view&id=${id}`;
+}
+
+/**
+ * @param {String} id
+ */
+function openPostInNewPage(id) {
+  window.open(getPostPageURLFromPostId(id), "_blank");
 }
 
 initializeUtilities();

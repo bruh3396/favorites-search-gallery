@@ -401,7 +401,7 @@ class SavedSearches {
 
     window.addEventListener("startedFetchingFavorites", async() => {
       await sleep(1000);
-      const postIds = getAllVisibleThumbs().map(thumb => thumb.id);
+      const postIds = getAllThumbs().map(thumb => thumb.id);
 
       shuffleArray(postIds);
 

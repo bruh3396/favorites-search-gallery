@@ -12,7 +12,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
       width: 80%;
     }
 
-    .post.tag-modifier-selected {
+    .favorite.tag-modifier-selected {
       outline: 2px dashed white !important;
 
       >div {
@@ -265,7 +265,7 @@ class TagModifier {
     if (!this.atLeastOneFavoriteIsSelected) {
       return;
     }
-    const posts = Array.from(getAllThumbs())
+    const posts = getAllThumbs()
       .map(thumb => Post.allPosts.get(thumb.id));
 
     for (const post of posts) {
@@ -298,7 +298,7 @@ class TagModifier {
     if (value) {
       html =
         `
-      .post  {
+      .favorite  {
         cursor: pointer;
         outline: 1px solid black;
 
@@ -338,7 +338,7 @@ class TagModifier {
     }
 
     document.addEventListener("click", (event) => {
-      if (!event.target.classList.contains("post")) {
+      if (!event.target.classList.contains(FAVORITE_ITEM_CLASS_NAME)) {
         return;
       }
       const post = Post.allPosts.get(event.target.id);

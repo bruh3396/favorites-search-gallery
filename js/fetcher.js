@@ -183,7 +183,7 @@ class FavoritesPageFetcher {
     if (response.ok) {
       return response.text();
     }
-    throw new Error(`${response.status}: Failed to fetch, ${request.url}`);
+    throw new Error(`${response.status}: Failed to fetch, ${response.url}`);
   }
 
   /**

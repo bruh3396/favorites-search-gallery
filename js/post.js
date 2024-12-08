@@ -138,8 +138,8 @@ class Post {
     const buttonHTML = userIsOnTheirOwnFavoritesPage() ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
     const canvasHTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
 
-    Post.template = new DOMParser().parseFromString("<div class=\"post\"></div>", "text/html").createElement("div");
-    Post.template.className = "post";
+    Post.template = new DOMParser().parseFromString("", "text/html").createElement("div");
+    Post.template.className = FAVORITE_ITEM_CLASS_NAME;
     Post.template.innerHTML = `
         <div>
           <img loading="lazy">
@@ -160,7 +160,7 @@ class Post {
     });
     window.addEventListener("sortingParametersChanged", () => {
       Post.currentSortingMethod = getSortingMethod();
-      const posts = Array.from(getAllThumbs()).map(thumb => Post.allPosts.get(thumb.id));
+      const posts = getAllThumbs().map(thumb => Post.allPosts.get(thumb.id));
 
       for (const post of posts) {
         post.createStatisticHint();
@@ -303,7 +303,7 @@ class Post {
    * @type {String}
    */
   get href() {
-    return `https://rule34.xxx/index.php?page=post&s=view&id=${this.id}`;
+    return getPostPageURLFromPostId(this.id);
   }
 
   /**
@@ -505,11 +505,17 @@ class Post {
   }
 
   setupClickLink() {
-    if (usingRenderer()) {
-      this.container.setAttribute("href", this.href);
-    } else {
-      this.container.setAttribute("onclick", `window.open("${this.href}")`);
+    if (!onFavoritesPage()) {
+      return;
     }
+    this.container.onmousedown = (event) => {
+      const middleClick = event.button === CLICK_CODES.middle;
+      const leftClick = event.button === CLICK_CODES.left;
+
+      if (middleClick || (leftClick && !galleryEnabled())) {
+        openPostInNewPage(this.id);
+      }
+    };
   }
 
   deleteInactivePost() {

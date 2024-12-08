@@ -143,11 +143,11 @@ const autoplayHTML = `<div id="autoplay-container">
   </style>
   <div id="autoplay-menu" class="not-highlightable">
     <div id="autoplay-buttons">
-      <img id="autoplay-settings-button" title="Autoplay Settings">
-      <img id="autoplay-play-button" title="Pause Autoplay">
-      <img id="autoplay-change-direction-button" title="Change Autoplay Direction">
+      <img id="autoplay-settings-button" title="Autoplay settings">
+      <img id="autoplay-play-button" title="Pause autoplay">
+      <img id="autoplay-change-direction-button" title="Change autoplay direction">
       <div id="autoplay-change-direction-mask-container">
-        <img id="autoplay-change-direction-mask" title="Change Autoplay Direction">
+        <img id="autoplay-change-direction-mask" title="Change autoplay direction">
       </div>
     </div>
     <div id="autoplay-image-progress-bar" class="autoplay-progress-bar"></div>

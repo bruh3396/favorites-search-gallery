@@ -160,7 +160,7 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
       -o-user-drag: none;
     }
 
-    .post {
+    .favorite {
       position: relative;
       -webkit-touch-callout: none;
       -webkit-user-select: none;
@@ -786,7 +786,7 @@ function initializeFavoritesPage() {
   configureAddOrRemoveButtonOptionVisibility();
   configureMobileUI();
   configureDesktopUI();
-  setupWhatsNewDropdown();
+  addEventListenersToWhatsNewMenu();
   addHintsOption();
 }
 
@@ -1231,7 +1231,7 @@ function configureMobileUI() {
   }
   FAVORITE_INPUTS.performanceProfile.parentElement.style.display = "none";
   insertStyleHTML(`
-      .thumb, .post {
+      .thumb, .favorite {
         > div > canvas {
           display: none;
         }
@@ -1321,7 +1321,7 @@ function configureDesktopUI() {
   `, "desktop");
 }
 
-function setupWhatsNewDropdown() {
+function addEventListenersToWhatsNewMenu() {
   if (onMobileDevice()) {
     return;
   }

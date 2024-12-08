@@ -106,6 +106,7 @@ class FavoritesPaginator {
     for (const favorite of favoritesToAdd) {
       favorite.insertAtEndOfContent(this.content);
     }
+    this.setPaginationLabel(this.currentPageNumber, favorites.length);
   }
 
   /**

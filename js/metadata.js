@@ -299,6 +299,9 @@ class FavoriteMetadata {
             detail: this.id
           }));
         }
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 

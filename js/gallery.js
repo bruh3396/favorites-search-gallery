@@ -66,7 +66,7 @@ const galleryHTML = `<style>
     cursor: pointer;
   }
 
-  .post,
+  .favorite,
   .thumb {
 
     >div,
@@ -98,7 +98,7 @@ const galleryHTML = `<style>
 
 const galleryDebugHTML = `
   .thumb,
-  .post {
+  .favorite {
     &.debug-selected {
       outline: 3px solid #0075FF !important;
     }
@@ -178,7 +178,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -1384,6 +1384,7 @@ onmessage = (message) => {
       once: true,
       passive: true
     });
+
     // eslint-disable-next-line complexity
     document.addEventListener("mousedown", (event) => {
       const autoplayMenu = document.getElementById("autoplay-menu");
@@ -1392,7 +1393,7 @@ onmessage = (message) => {
         return;
       }
       const clickedOnAnImage = event.target.tagName.toLowerCase() === "img" && !event.target.parentElement.classList.contains("add-or-remove-button");
-      const clickedOnAThumb = clickedOnAnImage && (getThumbFromImage(event.target).className.includes("thumb") || getThumbFromImage(event.target).className.includes("post"));
+      const clickedOnAThumb = clickedOnAnImage && (getThumbFromImage(event.target).className.includes("thumb") || getThumbFromImage(event.target).className.includes(FAVORITE_ITEM_CLASS_NAME));
       const clickedOnACaptionTag = event.target.classList.contains("caption-tag");
       const thumb = clickedOnAThumb ? getThumbFromImage(event.target) : null;
 
@@ -1435,12 +1436,22 @@ onmessage = (message) => {
         case CLICK_CODES.middle:
           event.preventDefault();
 
-          if (thumb !== null || this.inGallery) {
+          if (this.inGallery) {
             this.openPostInNewPage();
-          } else if (!this.inGallery && !clickedOnACaptionTag) {
+            return;
+          }
+
+          if (clickedOnAThumb && onSearchPage()) {
+            this.openPostInNewPage();
+            return;
+          }
+
+          if (!clickedOnAThumb && !clickedOnACaptionTag) {
             this.toggleAllVisibility();
             setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
           }
+
+          // console.log(event.target);
           break;
 
         default:
@@ -1622,7 +1633,7 @@ onmessage = (message) => {
     window.addEventListener("startedFetchingFavorites", () => {
       this.favoritesWereFetched = true;
       setTimeout(() => {
-        const thumb = document.querySelector(".post");
+        const thumb = document.querySelector(`.${FAVORITE_ITEM_CLASS_NAME}`);
 
         this.renderImagesInTheBackground();
 
@@ -1666,7 +1677,7 @@ onmessage = (message) => {
         this.deleteAllRenders();
 
         if (Gallery.settings.debugEnabled) {
-          Array.from(getAllThumbs()).forEach((thumb) => {
+          getAllThumbs().forEach((thumb) => {
             thumb.classList.remove("loaded");
             thumb.classList.remove("debug-selected");
           });
@@ -2043,13 +2054,13 @@ onmessage = (message) => {
     if (onMobileDevice() && !this.enlargeOnClickOnMobile) {
       return;
     }
-    const animatedThumbsToUpscale = Array.from(getAllVisibleThumbs())
+    const animatedThumbsToUpscale = getAllThumbs()
       .slice(0, Gallery.settings.animatedThumbsToUpscaleDiscrete)
       .filter(thumb => !isImage(thumb));
 
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
 
-    const imageThumbsToRender = this.getVisibleUnrenderedImageThumbs()
+    const imageThumbsToRender = this.getUnrenderedImageThumbs()
       .slice(0, Gallery.settings.maxImagesToRenderInBackground);
 
     this.renderImages(imageThumbsToRender);
@@ -2226,8 +2237,8 @@ onmessage = (message) => {
   /**
    * @returns {HTMLElement[]}
    */
-  getVisibleUnrenderedImageThumbs() {
-    const thumbs = Array.from(getAllVisibleThumbs()).filter((thumb) => {
+  getUnrenderedImageThumbs() {
+    const thumbs = getAllThumbs().filter((thumb) => {
       return isImage(thumb) && !this.renderHasStarted(thumb);
     });
     return thumbs;
@@ -2276,12 +2287,13 @@ onmessage = (message) => {
           return response.text();
         }
         return null;
-      }).then((html) => {
+      })
+      .then((html) => {
         if (html === null) {
           console.error(`Failed to fetch: ${searchPageAPIURL}`);
         }
         const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
-        const posts = Array.from(dom.getElementsByTagName("post"));
+        const posts = Array.from(dom.getElementsByTagName(FAVORITE_ITEM_CLASS_NAME));
 
         for (const post of posts) {
           const tags = post.getAttribute("tags");
@@ -2311,6 +2323,9 @@ onmessage = (message) => {
 
           this.assignImageExtension(id, extension);
         }
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 
@@ -2410,8 +2425,7 @@ onmessage = (message) => {
   }
 
   enumerateThumbs() {
-    this.visibleThumbs = Array.from(getAllThumbs());
-
+    this.visibleThumbs = getAllThumbs();
     this.enumeratedThumbs.clear();
 
     for (let i = 0; i < this.visibleThumbs.length; i += 1) {
@@ -2467,18 +2481,11 @@ onmessage = (message) => {
   }
 
   /**
-   *
    * @param {HTMLElement} thumb
    */
   openPostInNewPage(thumb) {
-    thumb = thumb === undefined ? this.getSelectedThumb() : thumb;
-    const firstChild = thumb.children[0];
-
-    if (firstChild.hasAttribute("href")) {
-      window.open(firstChild.getAttribute("href"), "_blank");
-    } else {
-      firstChild.click();
-    }
+    thumb = thumb === undefined || thumb === null ? this.getSelectedThumb() : thumb;
+    openPostInNewPage(getIdFromThumb(thumb));
   }
 
   unFavoriteSelectedContent() {
@@ -2539,7 +2546,7 @@ onmessage = (message) => {
 
   exitGallery() {
     if (Gallery.settings.debugEnabled) {
-      getAllVisibleThumbs().forEach(thumb => thumb.classList.remove("debug-selected"));
+      getAllThumbs().forEach(thumb => thumb.classList.remove("debug-selected"));
     }
     this.toggleCursorVisibility(true);
     this.toggleVideoControls(false);
