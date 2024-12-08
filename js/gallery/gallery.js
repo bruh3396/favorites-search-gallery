@@ -1,4 +1,6 @@
-const galleryHTML = `<style>
+class Gallery {
+  static galleryHTML = `
+<style>
   body {
     width: 99.5vw;
     overflow-x: hidden;
@@ -95,8 +97,7 @@ const galleryHTML = `<style>
   }
 </style>
 `;
-
-const galleryDebugHTML = `
+  static galleryDebugHTML = `
   .thumb,
   .favorite {
     &.debug-selected {
@@ -157,8 +158,6 @@ const galleryDebugHTML = `
   }
 
   `;
-
-class Gallery {
   static directions = {
     d: "d",
     a: "a",
@@ -178,7 +177,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -1450,8 +1449,6 @@ onmessage = (message) => {
             this.toggleAllVisibility();
             setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
           }
-
-          // console.log(event.target);
           break;
 
         default:
@@ -1693,7 +1690,7 @@ onmessage = (message) => {
       this.deleteAllRenders();
       this.renderImagesInTheBackground();
     });
-    window.addEventListener("favoriteMetadataFetched", (event) => {
+    window.addEventListener("metadataFetched", (event) => {
       this.assignImageExtension(event.detail.id, event.detail.extension);
     });
     window.addEventListener("didNotChangePageInGallery", (event) => {
@@ -1842,12 +1839,12 @@ onmessage = (message) => {
   }
 
   insertStyleHTML() {
-    insertStyleHTML(galleryHTML, "gallery");
+    insertStyleHTML(Gallery.galleryHTML, "gallery");
   }
 
   insertDebugHTML() {
     if (Gallery.settings.debugEnabled) {
-      insertStyleHTML(galleryDebugHTML, "gallery-debug");
+      insertStyleHTML(Gallery.galleryDebugHTML, "gallery-debug");
     }
   }
 

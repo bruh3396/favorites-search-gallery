@@ -171,7 +171,7 @@ class MetadataSearchTag extends SearchTag {
    * @returns {Boolean}
    */
   matches(post) {
-    const metadata = FavoriteMetadata.allMetadata.get(post.id);
+    const metadata = PostMetadata.allMetadata.get(post.id);
 
     if (metadata === undefined) {
       return false;

@@ -83,9 +83,9 @@ class InactivePost {
 
   instantiateMetadata() {
     if (this.fromRecord) {
-      return new FavoriteMetadata(this.id, this.metadata);
+      return new PostMetadata(this.id, this.metadata);
     }
-    const favoritesMetadata = new FavoriteMetadata(this.id);
+    const favoritesMetadata = new PostMetadata(this.id);
     return favoritesMetadata;
   }
 
@@ -126,7 +126,7 @@ class Post {
   };
 
   static {
-    if (!onPostPage()) {
+    if (onFavoritesPage()) {
       this.createTemplates();
       this.addEventListeners();
     }
@@ -295,7 +295,7 @@ class Post {
    */
   matchedByMostRecentSearch;
   /**
-   * @type {FavoriteMetadata}
+   * @type {PostMetadata}
    */
   metadata;
 

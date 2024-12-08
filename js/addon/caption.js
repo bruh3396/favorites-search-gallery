@@ -1,4 +1,6 @@
-const captionHTML = `<style>
+class Caption {
+  static captionHTML = `
+<style>
   .caption {
     overflow: hidden;
     pointer-events: none;
@@ -85,9 +87,8 @@ const captionHTML = `<style>
     height: 102%;
     display: block !important;
   }
-</style>`;
-
-class Caption {
+</style>
+`;
   static preferences = {
     visibility: "showCaptions"
   };
@@ -241,7 +242,7 @@ class Caption {
   }
 
   insertHTML() {
-    insertStyleHTML(captionHTML, "caption");
+    insertStyleHTML(Caption.captionHTML, "caption");
     createFavoritesOption(
       "show-captions",
       "Details",

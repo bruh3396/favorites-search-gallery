@@ -1,15 +1,56 @@
-class FavoriteMetadata {
+class MetadataSearchExpression {
   /**
-   * @type {Map.<String, FavoriteMetadata>}
+   * @type {String}
+   */
+  metric;
+  /**
+   * @type {String}
+   */
+  operator;
+  /**
+   * @type {String | Number}
+   */
+  value;
+
+  /**
+   * @param {String} metric
+   * @param {String} operator
+   * @param {String} value
+   */
+  constructor(metric, operator, value) {
+    this.metric = metric;
+    this.operator = operator;
+    this.value = this.setValue(value);
+  }
+
+  /**
+   * @param {String} value
+   * @returns {String | Number}
+   */
+  setValue(value) {
+    if (!isNumber(value)) {
+      return value;
+    }
+
+    if (this.metric === "id" && this.operator === ":") {
+      return value;
+    }
+    return parseInt(value);
+  }
+}
+
+class PostMetadata {
+  /**
+   * @type {Map.<String, PostMetadata>}
    */
   static allMetadata = new Map();
   static parser = new DOMParser();
   /**
-   * @type {FavoriteMetadata[]}
+   * @type {PostMetadata[]}
    */
   static missingMetadataFetchQueue = [];
   /**
-   * @type {FavoriteMetadata[]}
+   * @type {PostMetadata[]}
    */
   static deletedPostFetchQueue = [];
   static currentlyFetchingFromQueue = false;
@@ -23,19 +64,19 @@ class FavoriteMetadata {
     verifyTags: true
   };
   /**
-   * @param {FavoriteMetadata} favoriteMetadata
+   * @param {PostMetadata} missingMetadata
    */
-  static async fetchMissingMetadata(favoriteMetadata) {
-    if (favoriteMetadata !== undefined) {
-      FavoriteMetadata.missingMetadataFetchQueue.push(favoriteMetadata);
+  static async fetchMissingMetadata(missingMetadata) {
+    if (missingMetadata !== undefined) {
+      PostMetadata.missingMetadataFetchQueue.push(missingMetadata);
     }
 
-    if (FavoriteMetadata.currentlyFetchingFromQueue) {
+    if (PostMetadata.currentlyFetchingFromQueue) {
       return;
     }
-    FavoriteMetadata.currentlyFetchingFromQueue = true;
+    PostMetadata.currentlyFetchingFromQueue = true;
 
-    while (FavoriteMetadata.missingMetadataFetchQueue.length > 0) {
+    while (PostMetadata.missingMetadataFetchQueue.length > 0) {
       const metadata = this.missingMetadataFetchQueue.pop();
 
       if (metadata.postIsDeleted) {
@@ -45,7 +86,7 @@ class FavoriteMetadata {
       }
       await sleep(metadata.fetchDelay);
     }
-    FavoriteMetadata.currentlyFetchingFromQueue = false;
+    PostMetadata.currentlyFetchingFromQueue = false;
   }
 
   /**
@@ -67,11 +108,11 @@ class FavoriteMetadata {
   }
 
   static {
-    if (!onPostPage()) {
+    if (onFavoritesPage()) {
       window.addEventListener("favoritesLoaded", () => {
-        FavoriteMetadata.allFavoritesLoaded = true;
-        FavoriteMetadata.missingMetadataFetchQueue = FavoriteMetadata.missingMetadataFetchQueue.concat(FavoriteMetadata.deletedPostFetchQueue);
-        FavoriteMetadata.fetchMissingMetadata();
+        PostMetadata.allFavoritesLoaded = true;
+        PostMetadata.missingMetadataFetchQueue = PostMetadata.missingMetadataFetchQueue.concat(PostMetadata.deletedPostFetchQueue);
+        PostMetadata.fetchMissingMetadata();
       }, {
         once: true
       });
@@ -128,7 +169,7 @@ class FavoriteMetadata {
    * @type {Number}
    */
   get fetchDelay() {
-    return this.postIsDeleted ? FavoriteMetadata.fetchDelay.deleted : FavoriteMetadata.fetchDelay.normal;
+    return this.postIsDeleted ? PostMetadata.fetchDelay.deleted : PostMetadata.fetchDelay.normal;
   }
 
   /**
@@ -188,12 +229,12 @@ class FavoriteMetadata {
     if (record === undefined) {
       this.populateMetadataFromAPI();
     } else if (record === null) {
-      FavoriteMetadata.fetchMissingMetadata(this, true);
+      PostMetadata.fetchMissingMetadata(this, true);
     } else {
       this.populateMetadataFromRecord(JSON.parse(record));
 
       if (this.isEmpty) {
-        FavoriteMetadata.fetchMissingMetadata(this, true);
+        PostMetadata.fetchMissingMetadata(this, true);
       }
     }
   }
@@ -207,7 +248,7 @@ class FavoriteMetadata {
         return response.text();
       })
       .then((html) => {
-        const dom = FavoriteMetadata.parser.parseFromString(html, "text/html");
+        const dom = PostMetadata.parser.parseFromString(html, "text/html");
         const metadata = dom.querySelector("post");
 
         if (metadata === null) {
@@ -218,17 +259,17 @@ class FavoriteMetadata {
         this.width = parseInt(metadata.getAttribute("width"));
         this.height = parseInt(metadata.getAttribute("height"));
         this.score = parseInt(metadata.getAttribute("score"));
-        this.rating = FavoriteMetadata.encodeRating(metadata.getAttribute("rating"));
+        this.rating = PostMetadata.encodeRating(metadata.getAttribute("rating"));
         this.creationTimestamp = Date.parse(metadata.getAttribute("created_at"));
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
-        if (FavoriteMetadata.settings.verifyTags) {
+        if (PostMetadata.settings.verifyTags) {
           Post.verifyTags(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
         }
         const extension = getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {
-          dispatchEvent(new CustomEvent("favoriteMetadataFetched", {
+          dispatchEvent(new CustomEvent("metadataFetched", {
             detail: {
               id: this.id,
               extension
@@ -245,9 +286,9 @@ class FavoriteMetadata {
       .catch((error) => {
         if (error.cause === "DeletedMetadata") {
           this.postIsDeleted = true;
-          FavoriteMetadata.deletedPostFetchQueue.push(this);
+          PostMetadata.deletedPostFetchQueue.push(this);
         } else if (error.message === "Failed to fetch") {
-          FavoriteMetadata.missingMetadataFetchQueue.push(this);
+          PostMetadata.missingMetadataFetchQueue.push(this);
         } else {
           console.error(error);
         }
@@ -273,16 +314,16 @@ class FavoriteMetadata {
         return response.text();
       })
       .then((html) => {
-        const dom = FavoriteMetadata.parser.parseFromString(html, "text/html");
+        const dom = PostMetadata.parser.parseFromString(html, "text/html");
         const statistics = dom.getElementById("stats");
 
         if (statistics === null) {
           return;
         }
         const textContent = replaceLineBreaks(statistics.textContent.trim(), " ");
-        const match = FavoriteMetadata.postStatisticsRegex.exec(textContent);
+        const match = PostMetadata.postStatisticsRegex.exec(textContent);
 
-        FavoriteMetadata.postStatisticsRegex.lastIndex = 0;
+        PostMetadata.postStatisticsRegex.lastIndex = 0;
 
         if (!match) {
           return;
@@ -290,11 +331,11 @@ class FavoriteMetadata {
         this.width = parseInt(match[2]);
         this.height = parseInt(match[3]);
         this.score = parseInt(match[5]);
-        this.rating = FavoriteMetadata.encodeRating(match[4]);
+        this.rating = PostMetadata.encodeRating(match[4]);
         this.creationTimestamp = Date.parse(match[1]);
         this.lastChangedTimestamp = this.creationTimestamp / 1000;
 
-        if (FavoriteMetadata.allFavoritesLoaded) {
+        if (PostMetadata.allFavoritesLoaded) {
           dispatchEvent(new CustomEvent("missingMetadata", {
             detail: this.id
           }));
@@ -363,8 +404,8 @@ class FavoriteMetadata {
   }
 
   addInstanceToAllMetadata() {
-    if (!FavoriteMetadata.allMetadata.has(this.id)) {
-      FavoriteMetadata.allMetadata.set(this.id, this);
+    if (!PostMetadata.allMetadata.has(this.id)) {
+      PostMetadata.allMetadata.set(this.id, this);
     }
   }
 }

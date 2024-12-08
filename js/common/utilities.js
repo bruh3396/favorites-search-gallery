@@ -1,4 +1,6 @@
-const utilitiesHTML = `<style>
+class Utils {
+  static utilitiesHTML = `
+<style>
   .light-green-gradient {
     background: linear-gradient(to bottom, #aae5a4, #89e180);
     color: black;
@@ -161,140 +163,112 @@ const utilitiesHTML = `<style>
       }
     }
   }
-</style>`;
-
-class Cooldown {
-  /**
-   * @type {Number}
-   */
-  timeout;
-  /**
-   * @type {Number}
-   */
-  waitTime;
-  /**
-   * @type {Boolean}
-   */
-  skipCooldown;
-  /**
-   * @type {Boolean}
-   */
-  debounce;
-  /**
-   * @type {Boolean}
-   */
-  debouncing;
-  /**
-   * @type {Function}
-   */
-  onDebounceEnd;
-  /**
-   * @type {Function}
-   */
-  onCooldownEnd;
-
-  get ready() {
-    if (this.skipCooldown) {
-      return true;
+</style>
+`;
+  static FAVORITES_SEARCH_GALLERY_CONTAINER = Utils.createFavoritesSearchGalleryContainer();
+  static IDS_TO_REMOVE_ON_RELOAD_KEY = "recentlyRemovedIds";
+  static TAG_BLACKLIST = getTagBlacklist();
+  static PREFERENCES_LOCAL_STORAGE_KEY = "preferences";
+  static FLAGS = {
+    set: false,
+    onSearchPage: {
+      set: false,
+      value: undefined
+    },
+    onFavoritesPage: {
+      set: false,
+      value: undefined
+    },
+    onPostPage: {
+      set: false,
+      value: undefined
+    },
+    usingFirefox: {
+      set: false,
+      value: undefined
+    },
+    onMobileDevice: {
+      set: false,
+      value: undefined
+    },
+    userIsOnTheirOwnFavoritesPage: {
+      set: false,
+      value: undefined
+    },
+    galleryEnabled: {
+      set: false,
+      value: undefined
     }
-
-    if (this.timeout === null) {
-      this.start();
-      return true;
-    }
-
-    if (this.debounce) {
-      this.startDebounce();
-    }
-    return false;
-  }
-
-  /**
-   * @param {Number} waitTime
-   * @param {Boolean} debounce
-   */
-  constructor(waitTime, debounce = false) {
-    this.timeout = null;
-    this.waitTime = waitTime;
-    this.skipCooldown = false;
-    this.debounce = debounce;
-    this.debouncing = false;
-    this.onDebounceEnd = () => { };
-    this.onCooldownEnd = () => { };
-  }
-
-  startDebounce() {
-    this.debouncing = true;
-    clearTimeout(this.timeout);
-    this.start();
-  }
-
-  start() {
-    this.timeout = setTimeout(() => {
-      this.timeout = null;
-
-      if (this.debouncing) {
-        this.onDebounceEnd();
-        this.debouncing = false;
+  };
+  static ICONS = {
+    delete: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-trash\"><polyline points=\"3 6 5 6 21 6\"></polyline><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"></path></svg>",
+    edit: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-edit\"><path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"></path><path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"></path></svg>",
+    upArrow: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-arrow-up\"><line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"5\"></line><polyline points=\"5 12 12 5 19 12\"></polyline></svg>",
+    heartPlus: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FF69B4\"><path d=\"M440-501Zm0 381L313-234q-72-65-123.5-116t-85-96q-33.5-45-49-87T40-621q0-94 63-156.5T260-840q52 0 99 22t81 62q34-40 81-62t99-22q81 0 136 45.5T831-680h-85q-18-40-53-60t-73-20q-51 0-88 27.5T463-660h-46q-31-45-70.5-72.5T260-760q-57 0-98.5 39.5T120-621q0 33 14 67t50 78.5q36 44.5 98 104T440-228q26-23 61-53t56-50l9 9 19.5 19.5L605-283l9 9q-22 20-56 49.5T498-172l-58 52Zm280-160v-120H600v-80h120v-120h80v120h120v80H800v120h-80Z\"/></svg>",
+    heartMinus: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FF0000\"><path d=\"M440-501Zm0 381L313-234q-72-65-123.5-116t-85-96q-33.5-45-49-87T40-621q0-94 63-156.5T260-840q52 0 99 22t81 62q34-40 81-62t99-22q84 0 153 59t69 160q0 14-2 29.5t-6 31.5h-85q5-18 8-34t3-30q0-75-50-105.5T620-760q-51 0-88 27.5T463-660h-46q-31-45-70.5-72.5T260-760q-57 0-98.5 39.5T120-621q0 33 14 67t50 78.5q36 44.5 98 104T440-228q26-23 61-53t56-50l9 9 19.5 19.5L605-283l9 9q-22 20-56 49.5T498-172l-58 52Zm160-280v-80h320v80H600Z\"/></svg>",
+    heartCheck: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#51b330\"><path d=\"M718-313 604-426l57-56 57 56 141-141 57 56-198 198ZM440-501Zm0 381L313-234q-72-65-123.5-116t-85-96q-33.5-45-49-87T40-621q0-94 63-156.5T260-840q52 0 99 22t81 62q34-40 81-62t99-22q81 0 136 45.5T831-680h-85q-18-40-53-60t-73-20q-51 0-88 27.5T463-660h-46q-31-45-70.5-72.5T260-760q-57 0-98.5 39.5T120-621q0 33 14 67t50 78.5q36 44.5 98 104T440-228q26-23 61-53t56-50l9 9 19.5 19.5L605-283l9 9q-22 20-56 49.5T498-172l-58 52Z\"/></svg>",
+    error: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FF0000\"><path d=\"M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z\"/></svg>",
+    warning: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#DAB600\"><path d=\"m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z\"/></svg>",
+    empty: "<button>123</button>",
+    play: "<svg id=\"autoplay-play-button\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z\" /></svg>",
+    pause: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z\"/></svg>",
+    changeDirection: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z\"/></svg>",
+    changeDirectionAlt: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#0075FF\"><path d=\"M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z\"/></svg>",
+    tune: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z\"/></svg>",
+    settings: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z\"/></svg>"
+  };
+  static DEFAULTS = {
+    columnCount: 6,
+    resultsPerPage: 200
+  };
+  static ADDED_FAVORITE_STATUS = {
+    error: 0,
+    alreadyAdded: 1,
+    notLoggedIn: 2,
+    success: 3
+  };
+  static STYLES = {
+    thumbHoverOutline: `
+    .favorite,
+    .thumb {
+      >a,
+      >span,
+      >div {
+        &:hover {
+          outline: 3px solid #0075FF !important;
+        }
       }
-      this.onCooldownEnd();
-    }, this.waitTime);
-  }
-
-  stop() {
-    if (this.timeout === null) {
-      return;
-    }
-    clearTimeout(this.timeout);
-    this.timeout = null;
-  }
-
-  restart() {
-    this.stop();
-    this.start();
-  }
-
-}
-
-class MetadataSearchExpression {
-  /**
-   * @type {String}
-   */
-  metric;
-  /**
-   * @type {String}
-   */
-  operator;
-  /**
-   * @type {String | Number}
-   */
-  value;
-
-  /**
-   * @param {String} metric
-   * @param {String} operator
-   * @param {String} value
-   */
-  constructor(metric, operator, value) {
-    this.metric = metric;
-    this.operator = operator;
-    this.value = this.setValue(value);
-  }
-
-  /**
-   * @param {String} value
-   * @returns {String | Number}
-   */
-  setValue(value) {
-    if (!isNumber(value)) {
-      return value;
-    }
-
-    if (this.metric === "id" && this.operator === ":") {
-      return value;
-    }
-    return parseInt(value);
-  }
+    }`,
+    thumbHoverOutlineDisabled: `
+    .favorite,
+    .thumb {
+      >a,
+      >span,
+      >div:not(:has(img.video)) {
+        &:hover {
+          outline: none;
+        }
+      }
+    }`
+  };
+  static TYPEABLE_INPUTS = new Set([
+    "color",
+    "email",
+    "number",
+    "password",
+    "search",
+    "tel",
+    "text",
+    "url",
+    "datetime"
+  ]);
+  static CLICK_CODES = {
+    left: 0,
+    middle: 1,
+    right: 2
+  };
+  static CUSTOM_TAGS = loadCustomTags();
+  static FAVORITE_ITEM_CLASS_NAME = "favorite";
 }
 
 const FAVORITES_SEARCH_GALLERY_CONTAINER = createFavoritesSearchGalleryContainer();
@@ -483,29 +457,6 @@ function userIsOnTheirOwnFavoritesPage() {
     FLAGS.userIsOnTheirOwnFavoritesPage.set = true;
   }
   return FLAGS.userIsOnTheirOwnFavoritesPage.value;
-}
-
-/**
- * @param {String} url
- * @param {Function} onSuccess
- * @param {Number} delayIncrement
- * @param {Number} delay
- */
-function requestPageInformation(url, onSuccess, delay = 0) {
-  const delayIncrement = 500;
-
-  setTimeout(() => {
-    fetch((url))
-      .then((response) => {
-        if (response.status === 503) {
-          requestPageInformation(url, onSuccess, delay + delayIncrement);
-        }
-        return response.text();
-      })
-      .then((html) => {
-        onSuccess(html);
-      });
-  }, delay);
 }
 
 /**
@@ -1094,29 +1045,6 @@ function setTheme() {
       }
     }
   }, 10);
-}
-
-/**
- * @param {String} eventName
- * @param {Number} delay
- * @returns
- */
-function dispatchEventWithDelay(eventName, delay) {
-  if (delay === undefined) {
-    dispatchEvent(new Event(eventName));
-    return;
-  }
-  setTimeout(() => {
-    dispatchEvent(new Event(eventName));
-  }, delay);
-}
-
-/**
- * @param {String} postId
- * @returns
- */
-function getThumbById(postId) {
-  return document.getElementById(postId);
 }
 
 /**
@@ -1837,7 +1765,7 @@ function insertHTMLAndExtractStyle(element, position, html) {
 }
 
 /**
- * @param {String} position
+ * @param {InsertPosition} position
  * @param {String} html
  */
 function insertFavoritesSearchGalleryHTML(position, html) {

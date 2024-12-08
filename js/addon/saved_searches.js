@@ -1,4 +1,6 @@
-const savedSearchesHTML = `<div id="saved-searches">
+class SavedSearches {
+  static savedSearchesHTML = `
+<div id="saved-searches">
   <style>
     #saved-searches-container {
       margin: 0;
@@ -135,9 +137,9 @@ const savedSearchesHTML = `<div id="saved-searches">
     </div>
   </div>
 </div>
+<script>
+</script>
 `;
-
-class SavedSearches {
   static preferences = {
     textareaWidth: "savedSearchesTextAreaWidth",
     textareaHeight: "savedSearchesTextAreaHeight",
@@ -207,7 +209,7 @@ class SavedSearches {
     const showSavedSearches = getPreference(SavedSearches.preferences.visibility, false);
     const savedSearchesContainer = document.getElementById("right-favorites-panel");
 
-    insertHTMLAndExtractStyle(savedSearchesContainer, "beforeend", savedSearchesHTML);
+    insertHTMLAndExtractStyle(savedSearchesContainer, "beforeend", SavedSearches.savedSearchesHTML);
     document.getElementById("right-favorites-panel").style.display = showSavedSearches ? "block" : "none";
     const options = createFavoritesOption(
       "show-saved-searches",

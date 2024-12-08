@@ -1,4 +1,4 @@
-class FavoritesPageFetcher {
+class FavoritesFetcher {
   /**
    * @type {Function}
    */
@@ -18,7 +18,7 @@ class FavoritesPageFetcher {
   /**
    * @type {Number}
    */
-  currentPageNumber;
+  currentFavoritesPageNumber;
   /**
    * @type {Boolean}
    */
@@ -34,15 +34,15 @@ class FavoritesPageFetcher {
   /**
    * @type {Boolean}
    */
-  get allFavoritesPageRequestsHaveCompleted() {
-    return this.fetchedAnEmptyFavoritesPage && !this.hasFailedFavoritesPageRequests;
+  get hasNotFetchedAllFavoritesPages() {
+    return !this.fetchedAnEmptyFavoritesPage;
   }
 
   /**
    * @type {Boolean}
    */
-  get hasNotFetchedAllFavoritesPages() {
-    return !this.fetchedAnEmptyFavoritesPage;
+  get allFavoritesPageRequestsHaveNotCompleted() {
+    return this.hasNotFetchedAllFavoritesPages || this.hasFailedFavoritesPageRequests;
   }
 
   /**
@@ -56,9 +56,9 @@ class FavoritesPageFetcher {
    * @type {FavoritesPageRequest}
    */
   get newFavoritesPageFetchRequest() {
-    const request = new FavoritesPageRequest(this.currentPageNumber);
+    const request = new FavoritesPageRequest(this.currentFavoritesPageNumber);
 
-    this.currentPageNumber += 1;
+    this.currentFavoritesPageNumber += 1;
     return request;
   }
 
@@ -85,18 +85,15 @@ class FavoritesPageFetcher {
     this.onFavoritesPageRequestCompleted = onFavoritesPageRequestCompleted;
     this.storedFavoriteIds = new Set();
     this.failedFavoritesPageRequests = [];
-    this.currentPageNumber = 0;
+    this.currentFavoritesPageNumber = 0;
     this.fetchedAnEmptyFavoritesPage = false;
   }
 
   async fetchAllFavorites() {
-    while (true) {
-      if (this.allFavoritesPageRequestsHaveCompleted) {
-        this.onAllFavoritesPageRequestsCompleted();
-        return;
-      }
+    while (this.allFavoritesPageRequestsHaveNotCompleted) {
       await this.fetchFavoritesPage(this.currentFetchRequest);
     }
+    this.onAllFavoritesPageRequestsCompleted();
   }
 
   /**
@@ -137,7 +134,7 @@ class FavoritesPageFetcher {
    */
   extractNewFavorites(html) {
     const newFavorites = [];
-    const fetchedFavorites = FavoritesPageParser.extractFavorites(html);
+    const fetchedFavorites = FavoritesParser.extractFavorites(html);
     let allNewFavoritesFound = fetchedFavorites.length === 0;
 
     for (const favorite of fetchedFavorites) {
@@ -161,7 +158,6 @@ class FavoritesPageFetcher {
       console.error("Error: null fetch request");
       return;
     }
-
     fetch(request.url)
       .then((response) => {
         return this.onFavoritesPageRequestResponse(response);
@@ -191,9 +187,14 @@ class FavoritesPageFetcher {
    * @param {String} html
    */
   onFavoritesPageRequestSuccess(request, html) {
-    request.fetchedFavorites = FavoritesPageParser.extractFavorites(html);
-    this.fetchedAnEmptyFavoritesPage = this.fetchedAnEmptyFavoritesPage || request.fetchedFavorites.length === 0;
-    this.onFavoritesPageRequestCompleted(request);
+    request.fetchedFavorites = FavoritesParser.extractFavorites(html);
+    const favoritesPageIsEmpty = request.fetchedFavorites.length === 0;
+
+    this.fetchedAnEmptyFavoritesPage = this.fetchedAnEmptyFavoritesPage || favoritesPageIsEmpty;
+
+    if (!favoritesPageIsEmpty) {
+      this.onFavoritesPageRequestCompleted(request);
+    }
   }
 
   /**

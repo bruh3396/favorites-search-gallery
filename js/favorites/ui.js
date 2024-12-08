@@ -1,4 +1,5 @@
-const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
+const uiHTML = `
+<div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
   <style>
     #favorites-search-gallery-menu {
       position: sticky;
@@ -500,7 +501,8 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
         <label id="favorites-fetch-progress-label" style="padding-left: 20px; color: #3498db;"></label>
       </span>
       <div id="left-favorites-panel-top-row">
-        <button title="Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab"
+        <button title="Search favorites
+ctrl+click/right-click: Search all of rule34 in a new tab"
           id="search-button">Search</button>
         <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
         <button title="Show results not matched by search" id="invert-button">Invert</button>
@@ -630,7 +632,8 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
 
               <div>
                 <div id="results-per-page-container" style="display: inline-block;"
-                  title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
+                  title="Set the maximum number of search results to display on each page
+Lower numbers improve responsiveness">
                   <span class="number-label-container">
                     <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
                   </span>
@@ -713,7 +716,8 @@ const uiHTML = `<div id="favorites-search-gallery-menu" class="light-green-gradi
     <div id="right-favorites-panel"></div>
   </div>
   <div class="loading-wheel" id="loading-wheel" style="display: none;"></div>
-</div>`;
+</div>
+`;
 
 if (onFavoritesPage()) {
   insertFavoritesSearchGalleryHTML("afterbegin", uiHTML);

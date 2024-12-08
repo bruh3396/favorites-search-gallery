@@ -1,4 +1,4 @@
-class FetchedFavoritesPageQueue {
+class FetchedFavoritesQueue {
   /**
    * @type {FavoritesPageRequest[]}
    */

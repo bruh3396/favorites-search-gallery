@@ -1,4 +1,50 @@
-const autoplayHTML = `<div id="autoplay-container">
+class AutoplayListenerList {
+  /**
+   * @type {Function}
+   */
+  onEnable;
+  /**
+   * @type {Function}
+   */
+  onDisable;
+  /**
+   * @type {Function}
+   */
+  onPause;
+  /**
+   * @type {Function}
+   */
+  onResume;
+  /**
+   * @type {Function}
+   */
+  onComplete;
+  /**
+   * @type {Function}
+   */
+  onVideoEndedBeforeMinimumViewTime;
+
+  /**
+   * @param {Function} onEnable
+   * @param {Function} onDisable
+   * @param {Function} onPause
+   * @param {Function} onResume
+   * @param {Function} onComplete
+   * @param {Function} onVideoEndedEarly
+   */
+  constructor(onEnable, onDisable, onPause, onResume, onComplete, onVideoEndedEarly) {
+    this.onEnable = onEnable;
+    this.onDisable = onDisable;
+    this.onPause = onPause;
+    this.onResume = onResume;
+    this.onComplete = onComplete;
+    this.onVideoEndedBeforeMinimumViewTime = onVideoEndedEarly;
+  }
+}
+
+class Autoplay {
+  static autoplayHTML = `
+<div id="autoplay-container">
   <style>
     #autoplay-container {
       visibility: hidden;
@@ -171,53 +217,8 @@ const autoplayHTML = `<div id="autoplay-container">
       </div>
     </div>
   </div>
-</div>`;
-
-class AutoplayListenerList {
-  /**
-   * @type {Function}
-   */
-  onEnable;
-  /**
-   * @type {Function}
-   */
-  onDisable;
-  /**
-   * @type {Function}
-   */
-  onPause;
-  /**
-   * @type {Function}
-   */
-  onResume;
-  /**
-   * @type {Function}
-   */
-  onComplete;
-  /**
-   * @type {Function}
-   */
-  onVideoEndedBeforeMinimumViewTime;
-
-  /**
-   * @param {Function} onEnable
-   * @param {Function} onDisable
-   * @param {Function} onPause
-   * @param {Function} onResume
-   * @param {Function} onComplete
-   * @param {Function} onVideoEndedEarly
-   */
-  constructor(onEnable, onDisable, onPause, onResume, onComplete, onVideoEndedEarly) {
-    this.onEnable = onEnable;
-    this.onDisable = onDisable;
-    this.onPause = onPause;
-    this.onResume = onResume;
-    this.onComplete = onComplete;
-    this.onVideoEndedBeforeMinimumViewTime = onVideoEndedEarly;
-  }
-}
-
-class Autoplay {
+</div>
+`;
   static preferences = {
     active: "autoplayActive",
     paused: "autoplayPaused",
@@ -384,7 +385,7 @@ class Autoplay {
   }
 
   insertMenuHTML() {
-    insertFavoritesSearchGalleryHTML("afterbegin", autoplayHTML);
+    insertFavoritesSearchGalleryHTML("afterbegin", Autoplay.autoplayHTML);
     this.ui.container = document.getElementById("autoplay-container");
     this.ui.menu = document.getElementById("autoplay-menu");
     this.ui.settingsButton = document.getElementById("autoplay-settings-button");

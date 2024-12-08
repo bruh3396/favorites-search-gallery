@@ -316,11 +316,11 @@ onmessage = (message) => {
    */
   newMetadataReceivedTimeout;
   /**
-   * @type {FavoritesPageFetcher}
+   * @type {FavoritesFetcher}
    */
   fetcher;
   /**
-   * @type {FetchedFavoritesPageQueue}
+   * @type {FetchedFavoritesQueue}
    */
   fetchedFavoritesQueue;
   /**
@@ -389,10 +389,10 @@ onmessage = (message) => {
   }
 
   initializeComponents() {
-    this.fetchedFavoritesQueue = new FetchedFavoritesPageQueue((request) => {
+    this.fetchedFavoritesQueue = new FetchedFavoritesQueue((request) => {
       this.processFetchedFavorites(request.fetchedFavorites);
     });
-    this.fetcher = new FavoritesPageFetcher(() => {
+    this.fetcher = new FavoritesFetcher(() => {
       this.onAllFavoritesFetched();
     }, (request) => {
       this.fetchedFavoritesQueue.enqueue(request);
@@ -406,7 +406,7 @@ onmessage = (message) => {
       this.searchFlags.tagsWereModified = true;
     });
     window.addEventListener("missingMetadata", (event) => {
-      this.addNewFavoriteMetadata(event.detail);
+      this.addNewMetadata(event.detail);
     });
     window.addEventListener("reachedEndOfGallery", (event) => {
       this.paginator.changePageWhileInGallery(event.detail, this.latestSearchResults);
@@ -419,13 +419,14 @@ onmessage = (message) => {
       switch (message.data.response) {
         case "finishedLoading":
           this.paginateSearchResults(this.reconstructContent(message.data.favorites));
-          this.onAllFavoritesLoaded();
-          setTimeout(() => {
-            this.fetchNewFavoritesOnReload();
-          }, 100);
+          this.onAllFavoritesLoadedFromDatabase();
           break;
 
         case "finishedStoring":
+          this.setStatusText("All Favorites Saved");
+          setTimeout(() => {
+            this.toggleStatusText(false);
+          }, 750);
           break;
 
         default:
@@ -653,13 +654,13 @@ onmessage = (message) => {
     }, 50);
   }
 
-  updateProgressWhileFetching() {
-    let progressText = `Fetching Favorites ${this.allFavorites.length}`;
+  updateStatusWhileFetching() {
+    let statusText = `Fetching Favorites ${this.allFavorites.length}`;
 
     if (this.expectedFavoritesCount !== null) {
-      progressText = `${progressText} / ${this.expectedFavoritesCount}`;
+      statusText = `${statusText} / ${this.expectedFavoritesCount}`;
     }
-    this.setProgressText(progressText);
+    this.setStatusText(statusText);
   }
 
   /**
@@ -674,7 +675,7 @@ onmessage = (message) => {
     this.updateMatchCount(searchResultsWhileFetchingWithAllowedRatings.length);
     this.allFavorites = this.allFavorites.concat(favorites);
     this.addFetchedFavoritesToContent(searchResultsWhileFetchingWithAllowedRatings);
-    this.updateProgressWhileFetching();
+    this.updateStatusWhileFetching();
     dispatchEvent(new CustomEvent("favoritesFetched", {
       detail: favorites.map(post => post.root)
     }));
@@ -705,21 +706,27 @@ onmessage = (message) => {
   }
 
   onAllFavoritesFetched() {
+    this.latestSearchResults = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
+    dispatchEvent(new CustomEvent("newSearchResults", {
+      detail: this.latestSearchResults
+    }));
     this.onAllFavoritesLoaded();
     this.storeFavorites();
+    this.setStatusText("Saving Favorites");
+  }
+
+  onAllFavoritesLoadedFromDatabase() {
+    this.toggleLoadingUI(false);
+    this.onAllFavoritesLoaded();
+    setTimeout(() => {
+      this.fetchNewFavoritesOnReload();
+    }, 100);
   }
 
   onAllFavoritesLoaded() {
-    if (FavoritesLoader.currentState === FavoritesLoader.states.fetchingFavorites) {
-      this.latestSearchResults = this.getResultsWithAllowedRatings(this.searchResultsWhileFetching);
-      dispatchEvent(new CustomEvent("newSearchResults", {
-        detail: this.latestSearchResults
-      }));
-    }
     dispatchEvent(new Event("readyToSearch"));
-    FavoritesLoader.currentState = FavoritesLoader.states.allFavoritesLoaded;
-    this.toggleLoadingUI(false);
     dispatchEvent(new Event("favoritesLoaded"));
+    FavoritesLoader.currentState = FavoritesLoader.states.allFavoritesLoaded;
   }
 
   /**
@@ -728,11 +735,11 @@ onmessage = (message) => {
   toggleLoadingUI(value) {
     this.showLoadingWheel(value);
     this.paginator.toggleContentVisibility(!value);
-    this.setProgressText(value ? "Loading Favorites" : "All Favorites Loaded");
+    this.setStatusText(value ? "Loading Favorites" : "All Favorites Loaded");
 
     if (!value) {
       setTimeout(() => {
-        this.showProgressText(false);
+        this.toggleStatusText(false);
       }, 500);
     }
   }
@@ -819,14 +826,14 @@ onmessage = (message) => {
   /**
    * @param {Boolean} value
    */
-  showProgressText(value) {
+  toggleStatusText(value) {
     document.getElementById("favorites-fetch-progress-label").style.display = value ? "inline-block" : "none";
   }
 
   /**
    * @param {String} text
    */
-  setProgressText(text) {
+  setStatusText(text) {
     document.getElementById("favorites-fetch-progress-label").textContent = text;
   }
 
@@ -1008,7 +1015,7 @@ onmessage = (message) => {
   /**
    * @param {String} postId
    */
-  addNewFavoriteMetadata(postId) {
+  addNewMetadata(postId) {
     if (!Post.allPosts.has(postId)) {
       return;
     }
@@ -1019,15 +1026,15 @@ onmessage = (message) => {
     this.favoriteIdsRequiringMetadataDatabaseUpdate.push(postId);
 
     if (this.favoriteIdsRequiringMetadataDatabaseUpdate.length >= batchSize) {
-      this.updateFavoriteMetadataInDatabase();
+      this.updateMetadataInDatabase();
       return;
     }
     this.newMetadataReceivedTimeout = setTimeout(() => {
-      this.updateFavoriteMetadataInDatabase();
+      this.updateMetadataInDatabase();
     }, waitTime);
   }
 
-  updateFavoriteMetadataInDatabase() {
+  updateMetadataInDatabase() {
     this.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }

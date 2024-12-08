@@ -1,4 +1,6 @@
-const tagModifierHTML = `<div id="tag-modifier-container">
+class TagModifier {
+  static tagModifierHTML = `
+<div id="tag-modifier-container">
   <style>
     #tag-modifier-ui-container {
       display: none;
@@ -58,10 +60,7 @@ const tagModifierHTML = `<div id="tag-modifier-container">
     </div>
   </div>
 </div>
-
 `;
-
-class TagModifier {
   /**
    * @type {String}
    */
@@ -153,7 +152,7 @@ class TagModifier {
     if (!onFavoritesPage()) {
       return;
     }
-    insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", tagModifierHTML);
+    insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", TagModifier.tagModifierHTML);
     this.favoritesOption.container = document.getElementById("tag-modifier-container");
     this.favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox");
     this.favoritesUI.container = document.getElementById("tag-modifier-ui-container");
