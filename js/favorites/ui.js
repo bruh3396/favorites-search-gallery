@@ -1,4 +1,5 @@
-const uiHTML = `
+class FavoritesMenu {
+  static uiHTML = `
 <div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
   <style>
     #favorites-search-gallery-menu {
@@ -719,738 +720,784 @@ Lower numbers improve responsiveness">
 </div>
 `;
 
-if (onFavoritesPage()) {
-  insertFavoritesSearchGalleryHTML("afterbegin", uiHTML);
-}
-const MAX_SEARCH_HISTORY_LENGTH = 100;
-const FAVORITE_PREFERENCES = {
-  showAddOrRemoveButtons: userIsOnTheirOwnFavoritesPage() ? "showRemoveButtons" : "showAddFavoriteButtons",
-  showOptions: "showOptions",
-  excludeBlacklist: "excludeBlacklist",
-  searchHistory: "favoritesSearchHistory",
-  findFavorite: "findFavorite",
-  thumbSize: "thumbSize",
-  columnCount: "columnCount",
-  showUI: "showUI",
-  performanceProfile: "performanceProfile",
-  resultsPerPage: "resultsPerPage",
-  fancyImageHovering: "fancyImageHovering",
-  enableOnSearchPages: "enableOnSearchPages",
-  sortAscending: "sortAscending",
-  sortingMethod: "sortingMethod",
-  allowedRatings: "allowedRatings",
-  showHotkeyHints: "showHotkeyHints",
-  showStatisticHints: "showStatisticHints"
-};
-const FAVORITE_LOCAL_STORAGE = {
-  searchHistory: "favoritesSearchHistory"
-};
-const FAVORITE_BUTTONS = {
-  search: document.getElementById("search-button"),
-  shuffle: document.getElementById("shuffle-button"),
-  clear: document.getElementById("clear-button"),
-  invert: document.getElementById("invert-button"),
-  reset: document.getElementById("reset-button"),
-  findFavorite: document.getElementById("find-favorite-button")
-};
-const FAVORITE_CHECKBOXES = {
-  showOptions: document.getElementById("options-checkbox"),
-  showAddOrRemoveButtons: userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-favorite-buttons") : document.getElementById("show-add-favorite-buttons"),
-  filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
-  showUI: document.getElementById("show-ui"),
-  fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
-  enableOnSearchPages: document.getElementById("enable-on-search-pages"),
-  sortAscending: document.getElementById("sort-ascending"),
-  explicitRating: document.getElementById("explicit-rating-checkbox"),
-  questionableRating: document.getElementById("questionable-rating-checkbox"),
-  safeRating: document.getElementById("safe-rating-checkbox"),
-  showHotkeyHints: document.getElementById("show-hints-checkbox"),
-  showStatisticHints: document.getElementById("statistic-hint-checkbox")
-};
-const FAVORITE_INPUTS = {
-  searchBox: document.getElementById("favorites-search-box"),
-  findFavorite: document.getElementById("find-favorite-input"),
-  columnCount: document.getElementById("column-resize-input"),
-  performanceProfile: document.getElementById("performance-profile"),
-  resultsPerPage: document.getElementById("results-per-page-input"),
-  sortingMethod: document.getElementById("sorting-method"),
-  allowedRatings: document.getElementById("allowed-ratings")
-};
-const columnWheelResizeCaptionCooldown = new Cooldown(500, true);
-
-let searchHistory = [];
-let searchHistoryIndex = 0;
-let lastSearchQuery = "";
-
-function initializeFavoritesPage() {
-  setMainButtonInteractability(false);
-  addEventListenersToFavoritesPage();
-  loadFavoritesPagePreferences();
-  removePaginatorFromFavoritesPage();
-  configureAddOrRemoveButtonOptionVisibility();
-  configureMobileUI();
-  configureDesktopUI();
-  addEventListenersToWhatsNewMenu();
-  addHintsOption();
+static get disabled() {
+  return !Utils.onFavoritesPage();
 }
 
-function loadFavoritesPagePreferences() {
-  const userIsLoggedIn = getUserId() !== null;
-  const showAddOrRemoveButtonsDefault = !userIsOnTheirOwnFavoritesPage() && userIsLoggedIn;
-  const addOrRemoveFavoriteButtonsAreVisible = getPreference(FAVORITE_PREFERENCES.showAddOrRemoveButtons, showAddOrRemoveButtonsDefault);
+/**
+ * @type {Number}
+ */
+  maxSearchHistoryLength;
+  /**
+   * @type {Object.<PropertyKey, String>}
+   */
+  preferences;
+  /**
+   * @type {Object.<PropertyKey, String>}
+   */
+  localStorageKeys;
+  /**
+   * @type {Object.<PropertyKey, HTMLButtonElement>}
+   */
+  buttons;
+  /**
+   * @type {Object.<PropertyKey, HTMLInputElement}
+   */
+  checkboxes;
+  /**
+   * @type {Object.<PropertyKey, HTMLInputElement}
+   */
+  inputs;
+  /**
+   * @type {Cooldown}
+   */
+  columnWheelResizeCaptionCooldown;
+  /**
+   * @type {String[]}
+   */
+  searchHistory;
+  /**
+   * @type {Number}
+   */
+  searchHistoryIndex;
+  /**
+   * @type {String}
+   */
+  lastSearchQuery;
 
-  FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked = addOrRemoveFavoriteButtonsAreVisible;
-  setTimeout(() => {
-    toggleAddOrRemoveButtons();
-  }, 100);
-
-  const showOptions = getPreference(FAVORITE_PREFERENCES.showOptions, false);
-
-  FAVORITE_CHECKBOXES.showOptions.checked = showOptions;
-  toggleFavoritesOptions(showOptions);
-
-  if (userIsOnTheirOwnFavoritesPage()) {
-    FAVORITE_CHECKBOXES.filterBlacklist.checked = getPreference(FAVORITE_PREFERENCES.excludeBlacklist, false);
-    favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
-  } else {
-    FAVORITE_CHECKBOXES.filterBlacklist.checked = true;
-    FAVORITE_CHECKBOXES.filterBlacklist.parentElement.style.display = "none";
-  }
-  searchHistory = JSON.parse(localStorage.getItem(FAVORITE_LOCAL_STORAGE.searchHistory)) || [];
-
-  if (searchHistory.length > 0) {
-    FAVORITE_INPUTS.searchBox.value = searchHistory[0];
-  }
-  FAVORITE_INPUTS.findFavorite.value = getPreference(FAVORITE_PREFERENCES.findFavorite, "");
-  FAVORITE_INPUTS.columnCount.value = getPreference(FAVORITE_PREFERENCES.columnCount, DEFAULTS.columnCount);
-  changeColumnCount(FAVORITE_INPUTS.columnCount.value);
-
-  const showUI = getPreference(FAVORITE_PREFERENCES.showUI, true);
-
-  FAVORITE_CHECKBOXES.showUI.checked = showUI;
-  toggleUI(showUI);
-
-  const performanceProfile = getPerformanceProfile();
-
-  for (const option of FAVORITE_INPUTS.performanceProfile.children) {
-    if (parseInt(option.value) === performanceProfile) {
-      option.selected = "selected";
-    }
-  }
-
-  const resultsPerPage = parseInt(getPreference(FAVORITE_PREFERENCES.resultsPerPage, DEFAULTS.resultsPerPage));
-
-  changeResultsPerPage(resultsPerPage);
-
-  if (onMobileDevice()) {
-    toggleFancyImageHovering(false);
-    FAVORITE_CHECKBOXES.fancyImageHovering.parentElement.style.display = "none";
-    FAVORITE_CHECKBOXES.enableOnSearchPages.parentElement.style.display = "none";
-  } else {
-    const fancyImageHovering = getPreference(FAVORITE_PREFERENCES.fancyImageHovering, false);
-
-    FAVORITE_CHECKBOXES.fancyImageHovering.checked = fancyImageHovering;
-    toggleFancyImageHovering(fancyImageHovering);
-  }
-
-  FAVORITE_CHECKBOXES.enableOnSearchPages.checked = getPreference(FAVORITE_PREFERENCES.enableOnSearchPages, false);
-  FAVORITE_CHECKBOXES.sortAscending.checked = getPreference(FAVORITE_PREFERENCES.sortAscending, false);
-
-  const sortingMethod = getPreference(FAVORITE_PREFERENCES.sortingMethod, "default");
-
-  for (const option of FAVORITE_INPUTS.sortingMethod) {
-    if (option.value === sortingMethod) {
-      option.selected = "selected";
-    }
-  }
-  const allowedRatings = loadAllowedRatings();
-
-  // eslint-disable-next-line no-bitwise
-  FAVORITE_CHECKBOXES.explicitRating.checked = (allowedRatings & 4) === 4;
-  // eslint-disable-next-line no-bitwise
-  FAVORITE_CHECKBOXES.questionableRating.checked = (allowedRatings & 2) === 2;
-  // eslint-disable-next-line no-bitwise
-  FAVORITE_CHECKBOXES.safeRating.checked = (allowedRatings & 1) === 1;
-  preventUserFromUncheckingAllRatings(allowedRatings);
-
-  const showStatisticHints = getPreference(FAVORITE_PREFERENCES.showStatisticHints, false);
-
-  FAVORITE_CHECKBOXES.showStatisticHints.checked = showStatisticHints;
-  toggleStatisticHints(showStatisticHints);
-}
-
-function removePaginatorFromFavoritesPage() {
-  if (!onFavoritesPage()) {
-    return;
-  }
-  const paginator = document.getElementById("paginator");
-  const pi = document.getElementById("pi");
-
-  if (paginator !== null) {
-    paginator.remove();
-  }
-
-  if (pi !== null) {
-    pi.remove();
-  }
-}
-
-function addEventListenersToFavoritesPage() {
-  FAVORITE_BUTTONS.search.onclick = (event) => {
-    const query = FAVORITE_INPUTS.searchBox.value;
-
-    if (event.ctrlKey) {
-      const queryWithFormattedIds = query.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
-
-      openSearchPage(queryWithFormattedIds);
-    } else {
-      hideAwesomplete(FAVORITE_INPUTS.searchBox);
-      favoritesLoader.searchFavorites(query);
-      addToFavoritesSearchHistory(query);
-    }
-  };
-  FAVORITE_BUTTONS.search.addEventListener("contextmenu", (event) => {
-    const queryWithFormattedIds = FAVORITE_INPUTS.searchBox.value.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
-
-    openSearchPage(queryWithFormattedIds);
-    event.preventDefault();
-  });
-  FAVORITE_INPUTS.searchBox.addEventListener("keydown", (event) => {
-    switch (event.key) {
-      case "Enter":
-        if (awesompleteIsUnselected(FAVORITE_INPUTS.searchBox)) {
-          event.preventDefault();
-          FAVORITE_BUTTONS.search.click();
-        } else {
-          clearAwesompleteSelection(FAVORITE_INPUTS.searchBox);
-        }
-        break;
-
-      case "ArrowUp":
-
-      case "ArrowDown":
-        if (awesompleteIsVisible(FAVORITE_INPUTS.searchBox)) {
-          updateLastSearchQuery();
-        } else {
-          event.preventDefault();
-          traverseFavoritesSearchHistory(event.key);
-        }
-        break;
-
-      default:
-        updateLastSearchQuery();
-        break;
-    }
-  });
-  FAVORITE_INPUTS.searchBox.addEventListener("wheel", (event) => {
-    if (event.shiftKey || event.ctrlKey) {
+  constructor() {
+    if (FavoritesMenu.disabled) {
       return;
     }
-    const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
+    this.insertHTML();
+    this.initializeFields();
+    this.extractUIElements();
+    this.setMainButtonInteractability(false);
+    this.addEventListenersToFavoritesPage();
+    this.loadFavoritesPagePreferences();
+    this.removePaginatorFromFavoritesPage();
+    this.configureAddOrRemoveButtonOptionVisibility();
+    this.configureMobileUI();
+    this.configureDesktopUI();
+    this.addEventListenersToWhatsNewMenu();
+    this.addHintsOption();
+  }
 
-    traverseFavoritesSearchHistory(direction);
-    event.preventDefault();
-  });
-  FAVORITE_CHECKBOXES.showOptions.onchange = () => {
-    toggleFavoritesOptions(FAVORITE_CHECKBOXES.showOptions.checked);
-    setPreference(FAVORITE_PREFERENCES.showOptions, FAVORITE_CHECKBOXES.showOptions.checked);
-  };
-  FAVORITE_CHECKBOXES.showAddOrRemoveButtons.onchange = () => {
-    toggleAddOrRemoveButtons();
-    setPreference(FAVORITE_PREFERENCES.showAddOrRemoveButtons, FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked);
-  };
-  FAVORITE_BUTTONS.shuffle.onclick = () => {
-    favoritesLoader.shuffleSearchResults();
-  };
-  FAVORITE_BUTTONS.clear.onclick = () => {
-    FAVORITE_INPUTS.searchBox.value = "";
-  };
-  FAVORITE_CHECKBOXES.filterBlacklist.onchange = () => {
-    setPreference(FAVORITE_PREFERENCES.excludeBlacklist, FAVORITE_CHECKBOXES.filterBlacklist.checked);
-    favoritesLoader.toggleTagBlacklistExclusion(FAVORITE_CHECKBOXES.filterBlacklist.checked);
-    favoritesLoader.searchFavorites();
-  };
-  FAVORITE_BUTTONS.invert.onclick = () => {
-    favoritesLoader.invertSearchResults();
-  };
-  FAVORITE_BUTTONS.reset.onclick = () => {
-    deletePersistentData();
-  };
-  FAVORITE_INPUTS.findFavorite.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      FAVORITE_BUTTONS.findFavorite.click();
-    }
-  });
-  FAVORITE_BUTTONS.findFavorite.onclick = () => {
-    favoritesLoader.findFavorite(FAVORITE_INPUTS.findFavorite.value);
-    setPreference(FAVORITE_PREFERENCES.findFavorite, FAVORITE_INPUTS.findFavorite.value);
-  };
-  FAVORITE_INPUTS.columnCount.onchange = () => {
-    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value));
-  };
-  FAVORITE_CHECKBOXES.showUI.onchange = () => {
-    toggleUI(FAVORITE_CHECKBOXES.showUI.checked);
-  };
-  FAVORITE_INPUTS.performanceProfile.onchange = () => {
-    setPreference(FAVORITE_PREFERENCES.performanceProfile, parseInt(FAVORITE_INPUTS.performanceProfile.value));
-    window.location.reload();
-  };
-  FAVORITE_INPUTS.resultsPerPage.onchange = () => {
-    changeResultsPerPage(parseInt(FAVORITE_INPUTS.resultsPerPage.value), false);
-  };
+  insertHTML() {
+    Utils.insertFavoritesSearchGalleryHTML("afterbegin", FavoritesMenu.uiHTML);
+  }
 
-  if (!onMobileDevice()) {
-    FAVORITE_CHECKBOXES.fancyImageHovering.onchange = () => {
-      toggleFancyImageHovering(FAVORITE_CHECKBOXES.fancyImageHovering.checked);
-      setPreference(FAVORITE_PREFERENCES.fancyImageHovering, FAVORITE_CHECKBOXES.fancyImageHovering.checked);
+  initializeFields() {
+    this.maxSearchHistoryLength = 100;
+    this.searchHistory = [];
+    this.searchHistoryIndex = 0;
+    this.lastSearchQuery = "";
+    this.preferences = {
+      showAddOrRemoveButtons: Utils.userIsOnTheirOwnFavoritesPage() ? "showRemoveButtons" : "showAddFavoriteButtons",
+      showOptions: "showOptions",
+      excludeBlacklist: "excludeBlacklist",
+      searchHistory: "favoritesSearchHistory",
+      findFavorite: "findFavorite",
+      thumbSize: "thumbSize",
+      columnCount: "columnCount",
+      showUI: "showUI",
+      performanceProfile: "performanceProfile",
+      resultsPerPage: "resultsPerPage",
+      fancyImageHovering: "fancyImageHovering",
+      enableOnSearchPages: "enableOnSearchPages",
+      sortAscending: "sortAscending",
+      sortingMethod: "sortingMethod",
+      allowedRatings: "allowedRatings",
+      showHotkeyHints: "showHotkeyHints",
+      showStatisticHints: "showStatisticHints"
+    };
+    this.localStorageKeys = {
+      searchHistory: "favoritesSearchHistory"
+    };
+    this.columnWheelResizeCaptionCooldown = new Cooldown(500, true);
+  }
+
+  extractUIElements() {
+    this.buttons = {
+      search: document.getElementById("search-button"),
+      shuffle: document.getElementById("shuffle-button"),
+      clear: document.getElementById("clear-button"),
+      invert: document.getElementById("invert-button"),
+      reset: document.getElementById("reset-button"),
+      findFavorite: document.getElementById("find-favorite-button")
+    };
+    this.checkboxes = {
+      showOptions: document.getElementById("options-checkbox"),
+      showAddOrRemoveButtons: Utils.userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-favorite-buttons") : document.getElementById("show-add-favorite-buttons"),
+      filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
+      showUI: document.getElementById("show-ui"),
+      fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
+      enableOnSearchPages: document.getElementById("enable-on-search-pages"),
+      sortAscending: document.getElementById("sort-ascending"),
+      explicitRating: document.getElementById("explicit-rating-checkbox"),
+      questionableRating: document.getElementById("questionable-rating-checkbox"),
+      safeRating: document.getElementById("safe-rating-checkbox"),
+      showHotkeyHints: document.getElementById("show-hints-checkbox"),
+      showStatisticHints: document.getElementById("statistic-hint-checkbox")
+    };
+    this.inputs = {
+      searchBox: document.getElementById("favorites-search-box"),
+      findFavorite: document.getElementById("find-favorite-input"),
+      columnCount: document.getElementById("column-resize-input"),
+      performanceProfile: document.getElementById("performance-profile"),
+      resultsPerPage: document.getElementById("results-per-page-input"),
+      sortingMethod: document.getElementById("sorting-method"),
+      allowedRatings: document.getElementById("allowed-ratings")
     };
   }
-  FAVORITE_CHECKBOXES.enableOnSearchPages.onchange = () => {
-    setPreference(FAVORITE_PREFERENCES.enableOnSearchPages, FAVORITE_CHECKBOXES.enableOnSearchPages.checked);
-  };
-  FAVORITE_CHECKBOXES.sortAscending.onchange = () => {
-    setPreference(FAVORITE_PREFERENCES.sortAscending, FAVORITE_CHECKBOXES.sortAscending.checked);
-    favoritesLoader.onSortingParametersChanged();
-  };
-  FAVORITE_INPUTS.sortingMethod.onchange = () => {
-    setPreference(FAVORITE_PREFERENCES.sortingMethod, FAVORITE_INPUTS.sortingMethod.value);
-    favoritesLoader.onSortingParametersChanged();
-  };
-  FAVORITE_INPUTS.allowedRatings.onchange = () => {
-    changeAllowedRatings();
-  };
-  window.addEventListener("wheel", (event) => {
-    if (!event.shiftKey) {
+
+  loadFavoritesPagePreferences() {
+    const userIsLoggedIn = Utils.getUserId() !== null;
+    const showAddOrRemoveButtonsDefault = !Utils.userIsOnTheirOwnFavoritesPage() && userIsLoggedIn;
+    const addOrRemoveFavoriteButtonsAreVisible = Utils.getPreference(this.preferences.showAddOrRemoveButtons, showAddOrRemoveButtonsDefault);
+
+    this.checkboxes.showAddOrRemoveButtons.checked = addOrRemoveFavoriteButtonsAreVisible;
+    setTimeout(() => {
+      this.toggleAddOrRemoveButtons();
+    }, 100);
+
+    const showOptions = Utils.getPreference(this.preferences.showOptions, false);
+
+    this.checkboxes.showOptions.checked = showOptions;
+    this.toggleFavoritesOptions(showOptions);
+
+    if (Utils.userIsOnTheirOwnFavoritesPage()) {
+      this.checkboxes.filterBlacklist.checked = Utils.getPreference(this.preferences.excludeBlacklist, false);
+      favoritesLoader.toggleTagBlacklistExclusion(this.checkboxes.filterBlacklist.checked);
+    } else {
+      this.checkboxes.filterBlacklist.checked = true;
+      this.checkboxes.filterBlacklist.parentElement.style.display = "none";
+    }
+    this.searchHistory = JSON.parse(localStorage.getItem(this.localStorageKeys.searchHistory)) || [];
+
+    if (this.searchHistory.length > 0) {
+      this.inputs.searchBox.value = this.searchHistory[0];
+    }
+    this.inputs.findFavorite.value = Utils.getPreference(this.preferences.findFavorite, "");
+    this.inputs.columnCount.value = Utils.getPreference(this.preferences.columnCount, Utils.defaults.columnCount);
+    this.changeColumnCount(this.inputs.columnCount.value);
+
+    const showUI = Utils.getPreference(this.preferences.showUI, true);
+
+    this.checkboxes.showUI.checked = showUI;
+    this.toggleUI(showUI);
+
+    const performanceProfile = Utils.getPerformanceProfile();
+
+    for (const option of this.inputs.performanceProfile.children) {
+      if (parseInt(option.value) === performanceProfile) {
+        option.selected = "selected";
+      }
+    }
+
+    const resultsPerPage = parseInt(Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage));
+
+    this.changeResultsPerPage(resultsPerPage);
+
+    if (Utils.onMobileDevice()) {
+      Utils.toggleFancyImageHovering(false);
+      this.checkboxes.fancyImageHovering.parentElement.style.display = "none";
+      this.checkboxes.enableOnSearchPages.parentElement.style.display = "none";
+    } else {
+      const fancyImageHovering = Utils.getPreference(this.preferences.fancyImageHovering, false);
+
+      this.checkboxes.fancyImageHovering.checked = fancyImageHovering;
+      Utils.toggleFancyImageHovering(fancyImageHovering);
+    }
+
+    this.checkboxes.enableOnSearchPages.checked = Utils.getPreference(this.preferences.enableOnSearchPages, false);
+    this.checkboxes.sortAscending.checked = Utils.getPreference(this.preferences.sortAscending, false);
+
+    const sortingMethod = Utils.getPreference(this.preferences.sortingMethod, "default");
+
+    for (const option of this.inputs.sortingMethod) {
+      if (option.value === sortingMethod) {
+        option.selected = "selected";
+      }
+    }
+    const allowedRatings = Utils.loadAllowedRatings();
+
+    // eslint-disable-next-line no-bitwise
+    this.checkboxes.explicitRating.checked = (allowedRatings & 4) === 4;
+    // eslint-disable-next-line no-bitwise
+    this.checkboxes.questionableRating.checked = (allowedRatings & 2) === 2;
+    // eslint-disable-next-line no-bitwise
+    this.checkboxes.safeRating.checked = (allowedRatings & 1) === 1;
+    this.preventUserFromUncheckingAllRatings(allowedRatings);
+
+    const showStatisticHints = Utils.getPreference(this.preferences.showStatisticHints, false);
+
+    this.checkboxes.showStatisticHints.checked = showStatisticHints;
+    this.toggleStatisticHints(showStatisticHints);
+  }
+
+  removePaginatorFromFavoritesPage() {
+    if (!Utils.onFavoritesPage()) {
       return;
     }
-    const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
-    const columnAddend = delta > 0 ? -1 : 1;
+    const paginator = document.getElementById("paginator");
+    const pi = document.getElementById("pi");
 
-    if (columnWheelResizeCaptionCooldown.ready) {
-      forceHideCaptions(true);
+    if (paginator !== null) {
+      paginator.remove();
     }
-    changeColumnCount(parseInt(FAVORITE_INPUTS.columnCount.value) + columnAddend);
-  }, {
-    passive: true
-  });
-  columnWheelResizeCaptionCooldown.onDebounceEnd = () => {
-    forceHideCaptions(false);
-  };
-  columnWheelResizeCaptionCooldown.onCooldownEnd = () => {
-    if (!columnWheelResizeCaptionCooldown.debouncing) {
-      forceHideCaptions(false);
+
+    if (pi !== null) {
+      pi.remove();
     }
-  };
-  window.addEventListener("readyToSearch", () => {
-    setMainButtonInteractability(true);
-  }, {
-    once: true
-  });
-  document.addEventListener("keydown", (event) => {
-    if (!isHotkeyEvent(event)) {
+  }
+
+  addEventListenersToFavoritesPage() {
+    this.buttons.search.onclick = (event) => {
+      const query = this.inputs.searchBox.value;
+
+      if (event.ctrlKey) {
+        const queryWithFormattedIds = query.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
+
+        Utils.openSearchPage(queryWithFormattedIds);
+      } else {
+        Utils.hideAwesomplete(this.inputs.searchBox);
+        favoritesLoader.searchFavorites(query);
+        this.addToFavoritesSearchHistory(query);
+      }
+    };
+    this.buttons.search.addEventListener("contextmenu", (event) => {
+      const queryWithFormattedIds = this.inputs.searchBox.value.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
+
+      Utils.openSearchPage(queryWithFormattedIds);
+      event.preventDefault();
+    });
+    this.inputs.searchBox.addEventListener("keydown", (event) => {
+      switch (event.key) {
+        case "Enter":
+          if (Utils.awesompleteIsUnselected(this.inputs.searchBox)) {
+            event.preventDefault();
+            this.buttons.search.click();
+          } else {
+            Utils.clearAwesompleteSelection(this.inputs.searchBox);
+          }
+          break;
+
+        case "ArrowUp":
+
+        case "ArrowDown":
+          if (Utils.awesompleteIsVisible(this.inputs.searchBox)) {
+            this.updateLastSearchQuery();
+          } else {
+            event.preventDefault();
+            this.traverseFavoritesSearchHistory(event.key);
+          }
+          break;
+
+        default:
+          this.updateLastSearchQuery();
+          break;
+      }
+    });
+    this.inputs.searchBox.addEventListener("wheel", (event) => {
+      if (event.shiftKey || event.ctrlKey) {
+        return;
+      }
+      const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
+
+      this.traverseFavoritesSearchHistory(direction);
+      event.preventDefault();
+    });
+    this.checkboxes.showOptions.onchange = () => {
+      this.toggleFavoritesOptions(this.checkboxes.showOptions.checked);
+      Utils.setPreference(this.preferences.showOptions, this.checkboxes.showOptions.checked);
+    };
+    this.checkboxes.showAddOrRemoveButtons.onchange = () => {
+      this.toggleAddOrRemoveButtons();
+      Utils.setPreference(this.preferences.showAddOrRemoveButtons, this.checkboxes.showAddOrRemoveButtons.checked);
+    };
+    this.buttons.shuffle.onclick = () => {
+      favoritesLoader.shuffleSearchResults();
+    };
+    this.buttons.clear.onclick = () => {
+      this.inputs.searchBox.value = "";
+    };
+    this.checkboxes.filterBlacklist.onchange = () => {
+      Utils.setPreference(this.preferences.excludeBlacklist, this.checkboxes.filterBlacklist.checked);
+      favoritesLoader.toggleTagBlacklistExclusion(this.checkboxes.filterBlacklist.checked);
+      favoritesLoader.searchFavorites();
+    };
+    this.buttons.invert.onclick = () => {
+      favoritesLoader.invertSearchResults();
+    };
+    this.buttons.reset.onclick = () => {
+      Utils.deletePersistentData();
+    };
+    this.inputs.findFavorite.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        this.buttons.findFavorite.click();
+      }
+    });
+    this.buttons.findFavorite.onclick = () => {
+      favoritesLoader.findFavorite(this.inputs.findFavorite.value);
+      Utils.setPreference(this.preferences.findFavorite, this.inputs.findFavorite.value);
+    };
+    this.inputs.columnCount.onchange = () => {
+      this.changeColumnCount(parseInt(this.inputs.columnCount.value));
+    };
+    this.checkboxes.showUI.onchange = () => {
+      this.toggleUI(this.checkboxes.showUI.checked);
+    };
+    this.inputs.performanceProfile.onchange = () => {
+      Utils.setPreference(this.preferences.performanceProfile, parseInt(this.inputs.performanceProfile.value));
+      window.location.reload();
+    };
+    this.inputs.resultsPerPage.onchange = () => {
+      this.changeResultsPerPage(parseInt(this.inputs.resultsPerPage.value), false);
+    };
+
+    if (!Utils.onMobileDevice()) {
+      this.checkboxes.fancyImageHovering.onchange = () => {
+        Utils.toggleFancyImageHovering(this.checkboxes.fancyImageHovering.checked);
+        Utils.setPreference(this.preferences.fancyImageHovering, this.checkboxes.fancyImageHovering.checked);
+      };
+    }
+    this.checkboxes.enableOnSearchPages.onchange = () => {
+      Utils.setPreference(this.preferences.enableOnSearchPages, this.checkboxes.enableOnSearchPages.checked);
+    };
+    this.checkboxes.sortAscending.onchange = () => {
+      Utils.setPreference(this.preferences.sortAscending, this.checkboxes.sortAscending.checked);
+      favoritesLoader.onSortingParametersChanged();
+    };
+    this.inputs.sortingMethod.onchange = () => {
+      Utils.setPreference(this.preferences.sortingMethod, this.inputs.sortingMethod.value);
+      favoritesLoader.onSortingParametersChanged();
+    };
+    this.inputs.allowedRatings.onchange = () => {
+      this.changeAllowedRatings();
+    };
+    window.addEventListener("wheel", (event) => {
+      if (!event.shiftKey) {
+        return;
+      }
+      const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
+      const columnAddend = delta > 0 ? -1 : 1;
+
+      if (this.columnWheelResizeCaptionCooldown.ready) {
+        Utils.forceHideCaptions(true);
+      }
+      this.changeColumnCount(parseInt(this.inputs.columnCount.value) + columnAddend);
+    }, {
+      passive: true
+    });
+    this.columnWheelResizeCaptionCooldown.onDebounceEnd = () => {
+      Utils.forceHideCaptions(false);
+    };
+    this.columnWheelResizeCaptionCooldown.onCooldownEnd = () => {
+      if (!this.columnWheelResizeCaptionCooldown.debouncing) {
+        Utils.forceHideCaptions(false);
+      }
+    };
+    window.addEventListener("readyToSearch", () => {
+      this.setMainButtonInteractability(true);
+    }, {
+      once: true
+    });
+    document.addEventListener("keydown", (event) => {
+      if (!Utils.isHotkeyEvent(event)) {
+        return;
+      }
+
+      switch (event.key.toLowerCase()) {
+        case "r":
+          this.checkboxes.showAddOrRemoveButtons.click();
+          break;
+
+        case "u":
+          this.checkboxes.showUI.click();
+          break;
+
+        case "o":
+          this.checkboxes.showOptions.click();
+          break;
+
+        case "h":
+          this.checkboxes.showHotkeyHints.click();
+          break;
+
+        case "s":
+          // this.FAVORITE_CHECKBOXES.showStatisticHints.click();
+          break;
+
+        default:
+          break;
+      }
+    }, {
+      passive: true
+    });
+    window.addEventListener("load", () => {
+      this.inputs.searchBox.focus();
+    }, {
+      once: true
+    });
+    this.checkboxes.showStatisticHints.onchange = () => {
+      this.toggleStatisticHints(this.checkboxes.showStatisticHints.checked);
+      Utils.setPreference(this.preferences.showStatisticHints, this.checkboxes.showStatisticHints.checked);
+    };
+    window.addEventListener("searchForTag", (event) => {
+      this.inputs.searchBox.value = event.detail;
+      this.buttons.search.click();
+    });
+  }
+
+  configureAddOrRemoveButtonOptionVisibility() {
+    this.checkboxes.showAddOrRemoveButtons.parentElement.parentElement.style.display = "block";
+  }
+
+  updateLastSearchQuery() {
+    if (this.inputs.searchBox.value !== this.lastSearchQuery) {
+      this.lastSearchQuery = this.inputs.searchBox.value;
+    }
+    this.searchHistoryIndex = -1;
+  }
+
+  /**
+   * @param {String} newSearch
+   */
+  addToFavoritesSearchHistory(newSearch) {
+    newSearch = newSearch.trim();
+    this.searchHistory = this.searchHistory.filter(search => search !== newSearch);
+    this.searchHistory.unshift(newSearch);
+    this.searchHistory.length = Math.min(this.searchHistory.length, this.maxSearchHistoryLength);
+    localStorage.setItem(this.localStorageKeys.searchHistory, JSON.stringify(this.searchHistory));
+  }
+
+  /**
+   * @param {String} direction
+   */
+  traverseFavoritesSearchHistory(direction) {
+    if (this.searchHistory.length > 0) {
+      if (direction === "ArrowUp") {
+        this.searchHistoryIndex = Math.min(this.searchHistoryIndex + 1, this.searchHistory.length - 1);
+      } else {
+        this.searchHistoryIndex = Math.max(this.searchHistoryIndex - 1, -1);
+      }
+
+      if (this.searchHistoryIndex === -1) {
+        this.inputs.searchBox.value = this.lastSearchQuery;
+      } else {
+        this.inputs.searchBox.value = this.searchHistory[this.searchHistoryIndex];
+      }
+    }
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleFavoritesOptions(value) {
+    document.querySelectorAll(".options-container").forEach((option) => {
+      option.style.display = value ? "block" : "none";
+    });
+  }
+
+  toggleAddOrRemoveButtons() {
+    const value = this.checkboxes.showAddOrRemoveButtons.checked;
+
+    this.toggleAddOrRemoveButtonVisibility(value);
+    Utils.toggleThumbHoverOutlines(value);
+    Utils.forceHideCaptions(value);
+
+    if (!value) {
+      dispatchEvent(new Event("captionOverrideEnd"));
+    }
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleAddOrRemoveButtonVisibility(value) {
+    const visibility = value ? "visible" : "hidden";
+
+    Utils.insertStyleHTML(`
+        .add-or-remove-button {
+          visibility: ${visibility} !important;
+        }
+      `, "add-or-remove-button-visibility");
+  }
+
+  /**
+   * @param {Number} count
+   */
+  changeColumnCount(count) {
+    count = parseInt(count);
+
+    if (isNaN(count)) {
+      this.inputs.columnCount.value = Utils.getPreference(this.preferences.columnCount, Utils.defaults.columnCount);
       return;
     }
-
-    switch (event.key.toLowerCase()) {
-      case "r":
-        FAVORITE_CHECKBOXES.showAddOrRemoveButtons.click();
-        break;
-
-      case "u":
-        FAVORITE_CHECKBOXES.showUI.click();
-        break;
-
-      case "o":
-        FAVORITE_CHECKBOXES.showOptions.click();
-        break;
-
-      case "h":
-        FAVORITE_CHECKBOXES.showHotkeyHints.click();
-        break;
-
-      case "s":
-        // FAVORITE_CHECKBOXES.showStatisticHints.click();
-        break;
-
-      default:
-        break;
-    }
-  }, {
-    passive: true
-  });
-  window.addEventListener("load", () => {
-    FAVORITE_INPUTS.searchBox.focus();
-  }, {
-    once: true
-  });
-  FAVORITE_CHECKBOXES.showStatisticHints.onchange = () => {
-    toggleStatisticHints(FAVORITE_CHECKBOXES.showStatisticHints.checked);
-    setPreference(FAVORITE_PREFERENCES.showStatisticHints, FAVORITE_CHECKBOXES.showStatisticHints.checked);
-  };
-  window.addEventListener("searchForTag", (event) => {
-    FAVORITE_INPUTS.searchBox.value = event.detail;
-    FAVORITE_BUTTONS.search.click();
-  });
-}
-
-function configureAddOrRemoveButtonOptionVisibility() {
-  FAVORITE_CHECKBOXES.showAddOrRemoveButtons.parentElement.parentElement.style.display = "block";
-}
-
-function updateLastSearchQuery() {
-  if (FAVORITE_INPUTS.searchBox.value !== lastSearchQuery) {
-    lastSearchQuery = FAVORITE_INPUTS.searchBox.value;
+    count = Utils.clamp(parseInt(count), 4, 20);
+    Utils.insertStyleHTML(`
+      #favorites-search-gallery-content {
+        grid-template-columns: repeat(${count}, 1fr) !important;
+      }
+      `, "column-count");
+    this.inputs.columnCount.value = count;
+    Utils.setPreference(this.preferences.columnCount, count);
   }
-  searchHistoryIndex = -1;
-}
 
-/**
- * @param {String} newSearch
- */
-function addToFavoritesSearchHistory(newSearch) {
-  newSearch = newSearch.trim();
-  searchHistory = searchHistory.filter(search => search !== newSearch);
-  searchHistory.unshift(newSearch);
-  searchHistory.length = Math.min(searchHistory.length, MAX_SEARCH_HISTORY_LENGTH);
-  localStorage.setItem(FAVORITE_LOCAL_STORAGE.searchHistory, JSON.stringify(searchHistory));
-}
+  /**
+   * @param {Number} resultsPerPage
+   */
+  changeResultsPerPage(resultsPerPage) {
+    resultsPerPage = parseInt(resultsPerPage);
 
-/**
- * @param {String} direction
- */
-function traverseFavoritesSearchHistory(direction) {
-  if (searchHistory.length > 0) {
-    if (direction === "ArrowUp") {
-      searchHistoryIndex = Math.min(searchHistoryIndex + 1, searchHistory.length - 1);
+    if (isNaN(resultsPerPage)) {
+      this.inputs.resultsPerPage.value = Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage);
+      return;
+    }
+    resultsPerPage = Utils.clamp(resultsPerPage, 50, 5000);
+    this.inputs.resultsPerPage.value = resultsPerPage;
+    Utils.setPreference(this.preferences.resultsPerPage, resultsPerPage);
+    favoritesLoader.updateResultsPerPage(resultsPerPage);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleUI(value) {
+    const menu = document.getElementById("favorites-search-gallery-menu");
+    const menuPanels = document.getElementById("favorites-search-gallery-menu-panels");
+    const header = document.getElementById("header");
+    const showUIDiv = document.getElementById("show-ui-div");
+    const showUIContainer = document.getElementById("bottom-panel-3");
+
+    if (value) {
+      header.style.display = "";
+      showUIContainer.insertAdjacentElement("afterbegin", showUIDiv);
+      menuPanels.style.display = "flex";
+      menu.removeAttribute("style");
     } else {
-      searchHistoryIndex = Math.max(searchHistoryIndex - 1, -1);
+      menu.appendChild(showUIDiv);
+      header.style.display = "none";
+      menuPanels.style.display = "none";
+      menu.style.background = getComputedStyle(document.body).background;
     }
+    showUIDiv.classList.toggle("ui-hidden", !value);
+    Utils.setPreference(this.preferences.showUI, value);
+  }
 
-    if (searchHistoryIndex === -1) {
-      FAVORITE_INPUTS.searchBox.value = lastSearchQuery;
-    } else {
-      FAVORITE_INPUTS.searchBox.value = searchHistory[searchHistoryIndex];
+  configureMobileUI() {
+    if (!Utils.onMobileDevice()) {
+      return;
     }
-  }
-}
-
-/**
- * @param {Boolean} value
- */
-function toggleFavoritesOptions(value) {
-  document.querySelectorAll(".options-container").forEach((option) => {
-    option.style.display = value ? "block" : "none";
-  });
-}
-
-function toggleAddOrRemoveButtons() {
-  const value = FAVORITE_CHECKBOXES.showAddOrRemoveButtons.checked;
-
-  toggleAddOrRemoveButtonVisibility(value);
-  toggleThumbHoverOutlines(value);
-  forceHideCaptions(value);
-
-  if (!value) {
-    dispatchEvent(new Event("captionOverrideEnd"));
-  }
-}
-
-/**
- * @param {Boolean} value
- */
-function toggleAddOrRemoveButtonVisibility(value) {
-  const visibility = value ? "visible" : "hidden";
-
-  insertStyleHTML(`
-      .add-or-remove-button {
-        visibility: ${visibility} !important;
-      }
-    `, "add-or-remove-button-visibility");
-}
-
-/**
- * @param {Number} count
- */
-function changeColumnCount(count) {
-  count = parseInt(count);
-
-  if (isNaN(count)) {
-    FAVORITE_INPUTS.columnCount.value = getPreference(FAVORITE_PREFERENCES.columnCount, DEFAULTS.columnCount);
-    return;
-  }
-  count = clamp(parseInt(count), 4, 20);
-  insertStyleHTML(`
-    #favorites-search-gallery-content {
-      grid-template-columns: repeat(${count}, 1fr) !important;
-    }
-    `, "column-count");
-  FAVORITE_INPUTS.columnCount.value = count;
-  setPreference(FAVORITE_PREFERENCES.columnCount, count);
-}
-
-/**
- * @param {Number} resultsPerPage
- */
-function changeResultsPerPage(resultsPerPage) {
-  resultsPerPage = parseInt(resultsPerPage);
-
-  if (isNaN(resultsPerPage)) {
-    FAVORITE_INPUTS.resultsPerPage.value = getPreference(FAVORITE_PREFERENCES.resultsPerPage, DEFAULTS.resultsPerPage);
-    return;
-  }
-  resultsPerPage = clamp(resultsPerPage, 50, 5000);
-  FAVORITE_INPUTS.resultsPerPage.value = resultsPerPage;
-  setPreference(FAVORITE_PREFERENCES.resultsPerPage, resultsPerPage);
-  favoritesLoader.updateResultsPerPage(resultsPerPage);
-}
-
-/**
- * @param {Boolean} value
- */
-function toggleUI(value) {
-  const menu = document.getElementById("favorites-search-gallery-menu");
-  const menuPanels = document.getElementById("favorites-search-gallery-menu-panels");
-  const header = document.getElementById("header");
-  const showUIDiv = document.getElementById("show-ui-div");
-  const showUIContainer = document.getElementById("bottom-panel-3");
-
-  if (value) {
-    header.style.display = "";
-    showUIContainer.insertAdjacentElement("afterbegin", showUIDiv);
-    menuPanels.style.display = "flex";
-    menu.removeAttribute("style");
-  } else {
-    menu.appendChild(showUIDiv);
-    header.style.display = "none";
-    menuPanels.style.display = "none";
-    menu.style.background = getComputedStyle(document.body).background;
-  }
-  showUIDiv.classList.toggle("ui-hidden", !value);
-  setPreference(FAVORITE_PREFERENCES.showUI, value);
-}
-
-function configureMobileUI() {
-  if (!onMobileDevice()) {
-    return;
-  }
-  FAVORITE_INPUTS.performanceProfile.parentElement.style.display = "none";
-  insertStyleHTML(`
-      .thumb, .favorite {
-        > div > canvas {
-          display: none;
-        }
-      }
-
-      .checkbox {
-        input[type="checkbox"] {
-          margin-right: 10px;
-        }
-      }
-
-      #favorites-search-gallery-menu-panels {
-        >div {
-          textarea {
-            width: 95% !important;
+    this.inputs.performanceProfile.parentElement.style.display = "none";
+    Utils.insertStyleHTML(`
+        .thumb, .favorite {
+          > div > canvas {
+            display: none;
           }
         }
-      }
 
-      #favorites-search-gallery-content {
-        padding-top: 300px;
-      }
+        .checkbox {
+          input[type="checkbox"] {
+            margin-right: 10px;
+          }
+        }
 
-      #mobile-container {
-        position: fixed !important;
-        z-index: 30;
-        width: 100vw;
-      }
+        #favorites-search-gallery-menu-panels {
+          >div {
+            textarea {
+              width: 95% !important;
+            }
+          }
+        }
 
-      #show-ui-div {
-        display: none;
-      }
+        #favorites-search-gallery-content {
+          padding-top: 300px;
+        }
 
-      #favorites-search-gallery-menu-panels {
-        display: block !important;
-      }
+        #mobile-container {
+          position: fixed !important;
+          z-index: 30;
+          width: 100vw;
+        }
 
-      #right-favorites-panel {
-        margin-left: 0px !important;
-      }
+        #show-ui-div {
+          display: none;
+        }
 
-      #left-favorites-panel-bottom-row {
-        display: block !important;
-        margin-left: 10px !important;
-      }
-      `, "mobile");
+        #favorites-search-gallery-menu-panels {
+          display: block !important;
+        }
 
-  const mobileUiContainer = document.createElement("div");
+        #right-favorites-panel {
+          margin-left: 0px !important;
+        }
 
-  mobileUiContainer.id = "mobile-container";
+        #left-favorites-panel-bottom-row {
+          display: block !important;
+          margin-left: 10px !important;
+        }
+        `, "mobile");
 
-  mobileUiContainer.appendChild(document.getElementById("header"));
-  mobileUiContainer.appendChild(document.getElementById("favorites-search-gallery-menu"));
-  insertFavoritesSearchGalleryHTML("afterbegin", mobileUiContainer);
+    const mobileUIContainer = document.createElement("div");
 
-  const helpLinksContainer = document.getElementById("help-links-container");
+    mobileUIContainer.id = "mobile-container";
 
-  if (helpLinksContainer !== null) {
-    helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
+    mobileUIContainer.appendChild(document.getElementById("header"));
+    mobileUIContainer.appendChild(document.getElementById("favorites-search-gallery-menu"));
+    Utils.insertFavoritesSearchGalleryHTML("afterbegin", mobileUIContainer);
+
+    const helpLinksContainer = document.getElementById("help-links-container");
+
+    if (helpLinksContainer !== null) {
+      helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
+    }
+    this.checkboxes.showHotkeyHints.parentElement.style.display = "none";
   }
-  FAVORITE_CHECKBOXES.showHotkeyHints.parentElement.style.display = "none";
-}
 
-function configureDesktopUI() {
-  if (onMobileDevice()) {
-    return;
-  }
-  insertStyleHTML(`
-    .checkbox {
-      &:hover {
-        color: #000;
-        background: #93b393;
-        text-shadow: none;
-        cursor: pointer;
+  configureDesktopUI() {
+    if (Utils.onMobileDevice()) {
+      return;
+    }
+    Utils.insertStyleHTML(`
+      .checkbox {
+        &:hover {
+          color: #000;
+          background: #93b393;
+          text-shadow: none;
+          cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+          width: 20px;
+          height: 20px;
+        }
       }
 
-      input[type="checkbox"] {
+      #sort-ascending {
         width: 20px;
         height: 20px;
       }
-    }
-
-    #sort-ascending {
-      width: 20px;
-      height: 20px;
-    }
-  `, "desktop");
-}
-
-function addEventListenersToWhatsNewMenu() {
-  if (onMobileDevice()) {
-    return;
+    `, "desktop");
   }
-  const whatsNew = document.getElementById("whats-new-link");
 
-  if (whatsNew === null) {
-    return;
-  }
-  whatsNew.onclick = () => {
-    if (whatsNew.classList.contains("persistent")) {
+  addEventListenersToWhatsNewMenu() {
+    if (Utils.onMobileDevice()) {
+      return;
+    }
+    const whatsNew = document.getElementById("whats-new-link");
+
+    if (whatsNew === null) {
+      return;
+    }
+    whatsNew.onclick = () => {
+      if (whatsNew.classList.contains("persistent")) {
+        whatsNew.classList.remove("persistent");
+        whatsNew.classList.add("hidden");
+      } else {
+        whatsNew.classList.add("persistent");
+      }
+      return false;
+    };
+
+    whatsNew.onblur = () => {
       whatsNew.classList.remove("persistent");
       whatsNew.classList.add("hidden");
-    } else {
-      whatsNew.classList.add("persistent");
+    };
+
+    whatsNew.onmouseenter = () => {
+      whatsNew.classList.remove("hidden");
+    };
+
+    whatsNew.onmouseleave = () => {
+      whatsNew.classList.add("hidden");
+    };
+  }
+
+  changeAllowedRatings() {
+    let allowedRatings = 0;
+
+    if (this.checkboxes.explicitRating.checked) {
+      allowedRatings += 4;
     }
-    return false;
-  };
 
-  whatsNew.onblur = () => {
-    whatsNew.classList.remove("persistent");
-    whatsNew.classList.add("hidden");
-  };
+    if (this.checkboxes.questionableRating.checked) {
+      allowedRatings += 2;
+    }
 
-  whatsNew.onmouseenter = () => {
-    whatsNew.classList.remove("hidden");
-  };
+    if (this.checkboxes.safeRating.checked) {
+      allowedRatings += 1;
+    }
 
-  whatsNew.onmouseleave = () => {
-    whatsNew.classList.add("hidden");
-  };
-}
-
-/**
- * @returns {Number}
- */
-function loadAllowedRatings() {
-  return parseInt(getPreference("allowedRatings", 7));
-}
-
-function changeAllowedRatings() {
-  let allowedRatings = 0;
-
-  if (FAVORITE_CHECKBOXES.explicitRating.checked) {
-    allowedRatings += 4;
+    Utils.setPreference(this.preferences.allowedRatings, allowedRatings);
+    favoritesLoader.onAllowedRatingsChanged(allowedRatings);
+    this.preventUserFromUncheckingAllRatings(allowedRatings);
   }
 
-  if (FAVORITE_CHECKBOXES.questionableRating.checked) {
-    allowedRatings += 2;
+  /**
+   * @param {Number} allowedRatings
+   */
+  preventUserFromUncheckingAllRatings(allowedRatings) {
+    if (allowedRatings === 4) {
+      this.checkboxes.explicitRating.nextElementSibling.style.pointerEvents = "none";
+    } else if (allowedRatings === 2) {
+      this.checkboxes.questionableRating.nextElementSibling.style.pointerEvents = "none";
+    } else if (allowedRatings === 1) {
+      this.checkboxes.safeRating.nextElementSibling.style.pointerEvents = "none";
+    } else {
+      this.checkboxes.explicitRating.nextElementSibling.removeAttribute("style");
+      this.checkboxes.questionableRating.nextElementSibling.removeAttribute("style");
+      this.checkboxes.safeRating.nextElementSibling.removeAttribute("style");
+    }
   }
 
-  if (FAVORITE_CHECKBOXES.safeRating.checked) {
-    allowedRatings += 1;
+  setMainButtonInteractability(value) {
+    const container = document.getElementById("left-favorites-panel-top-row");
+
+    if (container === null) {
+      return;
+    }
+    const mainButtons = Array.from(container.children).filter(child => child.tagName.toLowerCase() === "button" && child.textContent !== "Reset");
+
+    for (const button of mainButtons) {
+      button.disabled = !value;
+    }
   }
 
-  setPreference(FAVORITE_PREFERENCES.allowedRatings, allowedRatings);
-  favoritesLoader.onAllowedRatingsChanged(allowedRatings);
-  preventUserFromUncheckingAllRatings(allowedRatings);
-}
+  /**
+   * @param {Boolean} value
+   */
+  toggleOptionHints(value) {
+    const html = value ? "" : ".option-hint {display:none;}";
 
-/**
- * @param {Number} allowedRatings
- */
-function preventUserFromUncheckingAllRatings(allowedRatings) {
-  if (allowedRatings === 4) {
-    FAVORITE_CHECKBOXES.explicitRating.nextElementSibling.style.pointerEvents = "none";
-  } else if (allowedRatings === 2) {
-    FAVORITE_CHECKBOXES.questionableRating.nextElementSibling.style.pointerEvents = "none";
-  } else if (allowedRatings === 1) {
-    FAVORITE_CHECKBOXES.safeRating.nextElementSibling.style.pointerEvents = "none";
-  } else {
-    FAVORITE_CHECKBOXES.explicitRating.nextElementSibling.removeAttribute("style");
-    FAVORITE_CHECKBOXES.questionableRating.nextElementSibling.removeAttribute("style");
-    FAVORITE_CHECKBOXES.safeRating.nextElementSibling.removeAttribute("style");
+    Utils.insertStyleHTML(html, "option-hint-visibility");
   }
-}
 
-function setMainButtonInteractability(value) {
-  const container = document.getElementById("left-favorites-panel-top-row");
+  async addHintsOption() {
+    this.toggleOptionHints(false);
 
-  if (container === null) {
-    return;
+    await Utils.sleep(50);
+
+    if (Utils.onMobileDevice()) {
+      return;
+    }
+    const optionHintsEnabled = Utils.getPreference(this.preferences.showHotkeyHints, false);
+
+    this.checkboxes.showHotkeyHints.checked = optionHintsEnabled;
+    this.checkboxes.showHotkeyHints.onchange = () => {
+      this.toggleOptionHints(this.checkboxes.showHotkeyHints.checked);
+      Utils.setPreference(this.preferences.showHotkeyHints, this.checkboxes.showHotkeyHints.checked);
+    };
+    this.toggleOptionHints(optionHintsEnabled);
   }
-  const mainButtons = Array.from(container.children).filter(child => child.tagName.toLowerCase() === "button" && child.textContent !== "Reset");
 
-  for (const button of mainButtons) {
-    button.disabled = !value;
+  /**
+   * @param {Boolean} value
+   */
+  toggleStatisticHints(value) {
+    const html = value ? "" : ".statistic-hint {display:none;}";
+
+    Utils.insertStyleHTML(html, "statistic-hint-visibility");
   }
-}
-
-/**
- * @param {Boolean} value
- */
-function toggleOptionHints(value) {
-  const html = value ? "" : ".option-hint {display:none;}";
-
-  insertStyleHTML(html, "option-hint-visibility");
-}
-
-async function addHintsOption() {
-  toggleOptionHints(false);
-
-  await sleep(50);
-
-  if (onMobileDevice()) {
-    return;
-  }
-  const optionHintsEnabled = getPreference(FAVORITE_PREFERENCES.showHotkeyHints, false);
-
-  FAVORITE_CHECKBOXES.showHotkeyHints.checked = optionHintsEnabled;
-  FAVORITE_CHECKBOXES.showHotkeyHints.onchange = () => {
-    toggleOptionHints(FAVORITE_CHECKBOXES.showHotkeyHints.checked);
-    setPreference(FAVORITE_PREFERENCES.showHotkeyHints, FAVORITE_CHECKBOXES.showHotkeyHints.checked);
-  };
-  toggleOptionHints(optionHintsEnabled);
-}
-
-/**
- * @param {Boolean} value
- */
-function toggleStatisticHints(value) {
-  const html = value ? "" : ".statistic-hint {display:none;}";
-
-  insertStyleHTML(html, "statistic-hint-visibility");
-}
-
-if (onFavoritesPage()) {
-  initializeFavoritesPage();
 }

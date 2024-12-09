@@ -250,7 +250,7 @@ class SearchCommand {
     if (this.isEmpty) {
       return;
     }
-    const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
+    const {orGroups, remainingSearchTags} = Utils.extractTagGroups(searchQuery);
 
     this.orGroups = orGroups.map(orGroup => SearchCommand.createSearchTagGroup(orGroup));
     this.remainingSearchTags = SearchCommand.createSearchTagGroup(remainingSearchTags);

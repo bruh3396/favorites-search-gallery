@@ -8,7 +8,7 @@ class FavoritesLoader {
   };
   static currentState = FavoritesLoader.states.initial;
   static databaseName = "Favorites";
-  static objectStoreName = `user${getFavoritesPageId()}`;
+  static objectStoreName = `user${Utils.getFavoritesPageId()}`;
   static webWorkers = {
     database:
 `
@@ -264,11 +264,11 @@ onmessage = (message) => {
   };
   static tagNegation = {
     useTagBlacklist: true,
-    negatedTagBlacklist: negateTags(TAG_BLACKLIST)
+    negatedTagBlacklist: Utils.negateTags(Utils.tagBlacklist)
   };
 
   static get disabled() {
-    return !onFavoritesPage();
+    return !Utils.onFavoritesPage();
   }
 
   /**
@@ -381,11 +381,11 @@ onmessage = (message) => {
     this.searchResultsWhileFetching = [];
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
     this.matchCountLabel = document.getElementById("match-count-label");
-    this.allowedRatings = loadAllowedRatings();
+    this.allowedRatings = Utils.loadAllowedRatings();
     this.expectedFavoritesCount = null;
     this.matchedFavoritesCount = 0;
     this.searchQuery = "";
-    this.databaseWorker = new Worker(getWorkerURL(FavoritesLoader.webWorkers.database));
+    this.databaseWorker = new Worker(Utils.getWorkerURL(FavoritesLoader.webWorkers.database));
   }
 
   initializeComponents() {
@@ -436,7 +436,7 @@ onmessage = (message) => {
   }
 
   setExpectedFavoritesCount() {
-    const profileURL = `https://rule34.xxx/index.php?page=account&s=profile&id=${getFavoritesPageId()}`;
+    const profileURL = `https://rule34.xxx/index.php?page=account&s=profile&id=${Utils.getFavoritesPageId()}`;
 
     fetch(profileURL)
       .then((response) => {
@@ -696,7 +696,7 @@ onmessage = (message) => {
   shuffleSearchResults() {
     const matchedPosts = this.getPostsMatchedByLastSearch();
 
-    shuffleArray(matchedPosts);
+    Utils.shuffleArray(matchedPosts);
     this.searchFlags.searchResultsAreShuffled = true;
     this.paginateSearchResults(matchedPosts);
   }
@@ -760,7 +760,7 @@ onmessage = (message) => {
       const isBlacklisted = !searchCommand.matches(post);
 
       if (isBlacklisted) {
-        if (!userIsOnTheirOwnFavoritesPage()) {
+        if (!Utils.userIsOnTheirOwnFavoritesPage()) {
           continue;
         }
         post.setMatched(false);
@@ -777,9 +777,9 @@ onmessage = (message) => {
     this.toggleLoadingUI(true);
     let idsToDelete = [];
 
-    if (userIsOnTheirOwnFavoritesPage()) {
-      idsToDelete = getIdsToDeleteOnReload();
-      clearIdsToDeleteOnReload();
+    if (Utils.userIsOnTheirOwnFavoritesPage()) {
+      idsToDelete = Utils.getIdsToDeleteOnReload();
+      Utils.clearIdsToDeleteOnReload();
     }
     this.databaseWorker.postMessage({
       command: "load",
@@ -793,7 +793,7 @@ onmessage = (message) => {
   async storeFavorites(posts) {
     const storeAll = posts === undefined;
 
-    await sleep(500);
+    await Utils.sleep(500);
     posts = storeAll ? this.allFavorites : posts;
     const records = posts.map(post => post.databaseRecord);
 
@@ -876,7 +876,7 @@ onmessage = (message) => {
     newPosts.reverse();
 
     if (this.allowedRatings !== 7) {
-      await sleep(metadataPopulateWaitTime);
+      await Utils.sleep(metadataPopulateWaitTime);
     }
 
     for (const post of newPosts) {
@@ -950,7 +950,7 @@ onmessage = (message) => {
       return posts;
     }
     const sortedPosts = posts.slice();
-    const sortingMethod = getSortingMethod();
+    const sortingMethod = Utils.getSortingMethod();
 
     if (sortingMethod !== "default") {
       sortedPosts.sort((b, a) => {
@@ -1085,5 +1085,3 @@ onmessage = (message) => {
     this.paginator.findFavorite(id);
   }
 }
-
-const favoritesLoader = new FavoritesLoader();

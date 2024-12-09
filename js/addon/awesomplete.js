@@ -7,7 +7,7 @@ class AwesompleteWrapper {
    * @type {Boolean}
    */
   static get disabled() {
-    return !onFavoritesPage();
+    return !Utils.onFavoritesPage();
   }
 
   /**
@@ -25,18 +25,18 @@ class AwesompleteWrapper {
   }
 
   initializeFields() {
-    this.showSavedSearchSuggestions = getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false);
+    this.showSavedSearchSuggestions = Utils.getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false);
   }
 
   insertHTML() {
-    createFavoritesOption(
+    Utils.createFavoritesOption(
       "show-saved-search-suggestions",
       "Saved Suggestions",
       "Show saved search suggestions in autocomplete dropdown",
       this.showSavedSearchSuggestions,
       (event) => {
         this.showSavedSearchSuggestions = event.target.checked;
-        setPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, event.target.checked);
+        Utils.setPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, event.target.checked);
       },
       false
     );
@@ -74,7 +74,7 @@ class AwesompleteWrapper {
         });
       },
       replace: (suggestion) => {
-        insertSuggestion(awesomplete.input, removeSavedSearchPrefix(decodeEntities(suggestion.value)));
+        Utils.insertSuggestion(awesomplete.input, Utils.removeSavedSearchPrefix(decodeEntities(suggestion.value)));
       }
     });
 
@@ -90,7 +90,7 @@ class AwesompleteWrapper {
           break;
 
         case "Escape":
-          hideAwesomplete(input);
+          Utils.hideAwesomplete(input);
           break;
 
         default:
@@ -104,10 +104,10 @@ class AwesompleteWrapper {
   }
 
   getSavedSearchesForAutocompleteList(inputId, prefix) {
-    if (onMobileDevice() || !this.showSavedSearchSuggestions || inputId !== "favorites-search-box") {
+    if (Utils.onMobileDevice() || !this.showSavedSearchSuggestions || inputId !== "favorites-search-box") {
       return [];
     }
-    return getSavedSearchesForAutocompleteList(prefix);
+    return Utils.getSavedSearchesForAutocompleteList(prefix);
   }
 
   /**
@@ -132,7 +132,7 @@ class AwesompleteWrapper {
       })
       .then((suggestions) => {
 
-        const mergedSuggestions = addCustomTagsToAutocompleteList(JSON.parse(suggestions), prefix);
+        const mergedSuggestions = Utils.addCustomTagsToAutocompleteList(JSON.parse(suggestions), prefix);
 
         awesomplete.list = mergedSuggestions.concat(savedSearchSuggestions);
       });
@@ -172,5 +172,3 @@ class AwesompleteWrapper {
     return lastTag === null ? "" : lastTag[0];
   }
 }
-
-const awesomplete = new AwesompleteWrapper();

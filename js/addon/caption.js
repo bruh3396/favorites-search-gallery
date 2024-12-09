@@ -136,7 +136,7 @@ class Caption {
     let html = "";
 
     for (const category of Caption.importantTagCategories) {
-      const capitalizedCategory = capitalize(category);
+      const capitalizedCategory = Utils.capitalize(category);
       const header = capitalizedCategory === "Metadata" ? "Meta" : capitalizedCategory;
 
       html += `<li id="caption${capitalizedCategory}" style="display: none;"><h6>${header}</h6></li>`;
@@ -161,7 +161,7 @@ class Caption {
    * @type {Boolean}
    */
   static get disabled() {
-    return !onFavoritesPage() || onMobileDevice() || getPerformanceProfile() > 1;
+    return !Utils.onFavoritesPage() || Utils.onMobileDevice() || Utils.getPerformanceProfile() > 1;
   }
 
   /**
@@ -242,8 +242,8 @@ class Caption {
   }
 
   insertHTML() {
-    insertStyleHTML(Caption.captionHTML, "caption");
-    createFavoritesOption(
+    Utils.insertStyleHTML(Caption.captionHTML, "caption");
+    Utils.createFavoritesOption(
       "show-captions",
       "Details",
       "Show details when hovering over thumbnail",
@@ -269,7 +269,7 @@ class Caption {
     } else if (!this.caption.classList.contains("disabled")) {
       this.caption.classList.add("disabled");
     }
-    setPreference(Caption.preferences.visibility, value);
+    Utils.setPreference(Caption.preferences.visibility, value);
   }
 
   addEventListeners() {
@@ -301,11 +301,11 @@ class Caption {
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() !== "d" || !isHotkeyEvent(event)) {
+      if (event.key.toLowerCase() !== "d" || !Utils.isHotkeyEvent(event)) {
         return;
       }
 
-      if (onFavoritesPage()) {
+      if (Utils.onFavoritesPage()) {
         const showCaptionsCheckbox = document.getElementById("show-captions-checkbox");
 
         if (showCaptionsCheckbox !== null) {
@@ -319,7 +319,7 @@ class Caption {
             }
           }
         }
-      } else if (onSearchPage()) {
+      } else if (Utils.onSearchPage()) {
         // this.toggleVisibility();
       }
     }, {
@@ -328,7 +328,7 @@ class Caption {
   }
 
   addSearchPageEventListeners() {
-    if (!onSearchPage()) {
+    if (!Utils.onSearchPage()) {
       return;
     }
     window.addEventListener("load", () => {
@@ -364,10 +364,10 @@ class Caption {
     window.addEventListener("originalFavoritesCleared", (event) => {
       const thumbs = event.detail;
       const tagNames = Array.from(thumbs)
-        .map(thumb => getImageFromThumb(thumb).title)
+        .map(thumb => Utils.getImageFromThumb(thumb).title)
         .join(" ")
         .split(" ")
-        .filter(tagName => !isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
+        .filter(tagName => !Utils.isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
 
       this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
         Caption.saveTagCategoriesCooldown.restart();
@@ -393,11 +393,11 @@ class Caption {
    * @param {HTMLElement[]} thumbs
    */
   async addEventListenersToThumbs(thumbs) {
-    await sleep(500);
-    thumbs = thumbs === undefined ? getAllThumbs() : thumbs;
+    await Utils.sleep(500);
+    thumbs = thumbs === undefined ? Utils.getAllThumbs() : thumbs;
 
     for (const thumb of thumbs) {
-      const imageContainer = getImageFromThumb(thumb).parentElement;
+      const imageContainer = Utils.getImageFromThumb(thumb).parentElement;
 
       if (imageContainer.onmouseenter !== null) {
         continue;
@@ -506,13 +506,13 @@ class Caption {
     if (heightCanBeDerivedWithoutRect) {
       height = this.estimateThumbHeightFromMetadata(thumb, columnInput);
     } else {
-      height = getImageFromThumb(thumb).getBoundingClientRect().height;
+      height = Utils.getImageFromThumb(thumb).getBoundingClientRect().height;
     }
     const captionListRect = this.caption.children[0].getBoundingClientRect();
     const ratio = height / captionListRect.height;
     const scale = ratio > 1 ? Math.sqrt(ratio) : ratio * 0.85;
 
-    this.caption.parentElement.style.fontSize = `${roundToTwoDecimalPlaces(scale)}em`;
+    this.caption.parentElement.style.fontSize = `${Utils.roundToTwoDecimalPlaces(scale)}em`;
   }
 
   /**
@@ -520,7 +520,7 @@ class Caption {
    * @returns {Boolean}
    */
   thumbMetadataExists(thumb) {
-    if (onSearchPage()) {
+    if (Utils.onSearchPage()) {
       return false;
     }
     const post = Post.allPosts.get(thumb.id);
@@ -603,17 +603,17 @@ class Caption {
    */
   tagOnClick(tagName, event) {
     switch (event.button) {
-      case CLICK_CODES.left:
+      case Utils.clickCodes.left:
         this.tagOnClickHelper(tagName, event);
         break;
 
-      case CLICK_CODES.middle:
+      case Utils.clickCodes.middle:
         dispatchEvent(new CustomEvent("searchForTag", {
           detail: tagName
         }));
         break;
 
-      case CLICK_CODES.right:
+      case Utils.clickCodes.right:
         this.tagOnClickHelper(`-${tagName}`, event);
         break;
 
@@ -628,10 +628,10 @@ class Caption {
    */
   tagOnClickHelper(value, mouseEvent) {
     if (mouseEvent.ctrlKey) {
-      openSearchPage(value);
+      Utils.openSearchPage(value);
       return;
     }
-    const searchBox = onSearchPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
+    const searchBox = Utils.onSearchPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
     const searchBoxDoesNotIncludeTag = true;
 
     navigator.clipboard.writeText(value);
@@ -665,7 +665,7 @@ class Caption {
    * @returns {Boolean}
    */
   getVisibilityPreference() {
-    return getPreference(Caption.preferences.visibility, true);
+    return Utils.getPreference(Caption.preferences.visibility, true);
   }
 
   /**
@@ -680,14 +680,14 @@ class Caption {
    * @returns {String}
    */
   getCategoryHeaderId(tagCategory) {
-    return `caption${capitalize(tagCategory)}`;
+    return `caption${Utils.capitalize(tagCategory)}`;
   }
 
   /**
    * @param {HTMLElement} thumb
    */
   populateTags(thumb) {
-    const tagNames = getTagsFromThumb(thumb);
+    const tagNames = Utils.getTagsFromThumb(thumb);
 
     tagNames.delete(thumb.id);
     const unknownThumbTags = Array.from(tagNames)
@@ -804,13 +804,13 @@ class Caption {
    * @param {String} tag
    */
   setAsProblematic(tag) {
-    if (Caption.tagCategoryAssociations[tag] === undefined && !CUSTOM_TAGS.has(tag)) {
+    if (Caption.tagCategoryAssociations[tag] === undefined && !Utils.customTags.has(tag)) {
       this.problematicTags.add(tag);
     }
   }
 
   findTagCategoriesOnPageChange() {
-    const tagNames = this.getTagNamesWithUnknownCategories(getAllThumbs().slice(0, 200));
+    const tagNames = this.getTagNamesWithUnknownCategories(Utils.getAllThumbs().slice(0, 200));
 
     this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
       Caption.saveTagCategoriesCooldown.restart();
@@ -828,7 +828,7 @@ class Caption {
     const uniqueTagNames = new Set(tagNames);
 
     for (const tagName of uniqueTagNames) {
-      if (isNumber(tagName) && tagName.length > 5) {
+      if (Utils.isNumber(tagName) && tagName.length > 5) {
         Caption.tagCategoryAssociations[tagName] = 0;
         continue;
       }
@@ -875,7 +875,7 @@ class Caption {
       } catch (error) {
         console.error(error);
       }
-      await sleep(fetchDelay);
+      await Utils.sleep(fetchDelay);
     }
   }
 
@@ -887,7 +887,7 @@ class Caption {
     const tagNamesWithUnknownCategories = new Set();
 
     for (const thumb of thumbs) {
-      const tagNames = Array.from(getTagsFromThumb(thumb));
+      const tagNames = Array.from(Utils.getTagsFromThumb(thumb));
 
       for (const tagName of tagNames) {
         if (this.tagCategoryIsUnknown(thumb, tagName)) {
@@ -904,8 +904,6 @@ class Caption {
    * @returns
    */
   tagCategoryIsUnknown(thumb, tagName) {
-    return tagName !== thumb.id && Caption.tagCategoryAssociations[tagName] === undefined && !CUSTOM_TAGS.has(tagName);
+    return tagName !== thumb.id && Caption.tagCategoryAssociations[tagName] === undefined && !Utils.customTags.has(tagName);
   }
 }
-
-const caption = new Caption();

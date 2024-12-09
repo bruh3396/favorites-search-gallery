@@ -65,8 +65,8 @@ class InactivePost {
    * @param {HTMLElement} element
    */
   populateAttributesFromHTMLElement(element) {
-    this.id = getIdFromThumb(element);
-    const image = getImageFromThumb(element);
+    this.id = Utils.getIdFromThumb(element);
+    const image = Utils.getImageFromThumb(element);
 
     this.src = image.src;
     this.tags = this.preprocessTags(image);
@@ -77,8 +77,8 @@ class InactivePost {
    * @returns {String}
    */
   preprocessTags(image) {
-    const tags = correctMisspelledTags(image.title || image.getAttribute("tags"));
-    return removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
+    const tags = Utils.correctMisspelledTags(image.title || image.getAttribute("tags"));
+    return Utils.removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
   }
 
   instantiateMetadata() {
@@ -120,26 +120,28 @@ class Post {
    * @type {String}
    */
   static addFavoriteButtonHTML;
-  static currentSortingMethod = getPreference("sortingMethod", "default");
+  static currentSortingMethod = Utils.getPreference("sortingMethod", "default");
   static settings = {
     deferHTMLElementCreation: true
   };
 
   static {
-    if (onFavoritesPage()) {
-      this.createTemplates();
-      this.addEventListeners();
-    }
+    Utils.addStaticInitializer(() => {
+      if (Utils.onFavoritesPage()) {
+        Post.createTemplates();
+        Post.addEventListeners();
+      }
+    });
   }
 
   static createTemplates() {
-    Post.removeFavoriteButtonHTML = `<button class="remove-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartMinus)}></button>`;
-    Post.addFavoriteButtonHTML = `<button class="add-favorite-button add-or-remove-button"><img src=${createObjectURLFromSvg(ICONS.heartPlus)}></button>`;
-    const buttonHTML = userIsOnTheirOwnFavoritesPage() ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
-    const canvasHTML = getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
+    Post.removeFavoriteButtonHTML = `<button class="remove-favorite-button add-or-remove-button"><img src=${Utils.createObjectURLFromSvg(Utils.icons.heartMinus)}></button>`;
+    Post.addFavoriteButtonHTML = `<button class="add-favorite-button add-or-remove-button"><img src=${Utils.createObjectURLFromSvg(Utils.icons.heartPlus)}></button>`;
+    const buttonHTML = Utils.userIsOnTheirOwnFavoritesPage() ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
+    const canvasHTML = Utils.getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
 
     Post.template = new DOMParser().parseFromString("", "text/html").createElement("div");
-    Post.template.className = FAVORITE_ITEM_CLASS_NAME;
+    Post.template.className = Utils.favoriteItemClassName;
     Post.template.innerHTML = `
         <div>
           <img loading="lazy">
@@ -159,8 +161,8 @@ class Post {
       }
     });
     window.addEventListener("sortingParametersChanged", () => {
-      Post.currentSortingMethod = getSortingMethod();
-      const posts = getAllThumbs().map(thumb => Post.allPosts.get(thumb.id));
+      Post.currentSortingMethod = Utils.getSortingMethod();
+      const posts = Utils.getAllThumbs().map(thumb => Post.allPosts.get(thumb.id));
 
       for (const post of posts) {
         post.createStatisticHint();
@@ -210,7 +212,7 @@ class Post {
       return;
     }
     const postTagSet = new Set(post.originalTagSet);
-    const apiTagSet = convertToTagSet(apiTags);
+    const apiTagSet = Utils.convertToTagSet(apiTags);
 
     if (fileURL.endsWith("mp4")) {
       apiTagSet.add("video");
@@ -219,13 +221,13 @@ class Post {
     }
 
     postTagSet.delete(id);
-    const tagsNotInPost = difference(apiTagSet, postTagSet);
-    const tagsNotInApi = difference(postTagSet, apiTagSet);
+    const tagsNotInPost = Utils.difference(apiTagSet, postTagSet);
+    const tagsNotInApi = Utils.difference(postTagSet, apiTagSet);
 
     if (tagsNotInApi.size === 0 && tagsNotInPost.size === 0) {
       return;
     }
-    post.initializeTags(convertToTagString(apiTagSet));
+    post.initializeTags(Utils.convertToTagString(apiTagSet));
   }
 
   /**
@@ -303,7 +305,7 @@ class Post {
    * @type {String}
    */
   get href() {
-    return getPostPageURLFromPostId(this.id);
+    return Utils.getPostPageURLFromPostId(this.id);
   }
 
   /**
@@ -347,14 +349,14 @@ class Post {
    * @type {Set.<String>}
    */
   get originalTagsString() {
-    return convertToTagString(this.originalTagSet);
+    return Utils.convertToTagString(this.originalTagSet);
   }
 
   /**
    * @type {String}
    */
   get additionalTagsString() {
-    return convertToTagString(this.additionalTags);
+    return Utils.convertToTagString(this.additionalTags);
   }
 
   /**
@@ -430,7 +432,7 @@ class Post {
   }
 
   setupAddOrRemoveButton() {
-    if (userIsOnTheirOwnFavoritesPage()) {
+    if (Utils.userIsOnTheirOwnFavoritesPage()) {
       this.addOrRemoveButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
     } else {
       this.addOrRemoveButton.onclick = this.addFavoriteButtonOnClick.bind(this);
@@ -442,7 +444,7 @@ class Post {
    */
   removeFavoriteButtonOnClick(event) {
     event.stopPropagation();
-    removeFavorite(this.id);
+    Utils.removeFavorite(this.id);
     this.swapAddOrRemoveButton();
   }
 
@@ -451,7 +453,7 @@ class Post {
    */
   addFavoriteButtonOnClick(event) {
     event.stopPropagation();
-    addFavorite(this.id);
+    Utils.addFavorite(this.id);
 
     this.swapAddOrRemoveButton();
   }
@@ -475,7 +477,7 @@ class Post {
    */
   populateHTMLAttributes(inactivePost) {
     this.image.src = inactivePost.src;
-    this.image.classList.add(getContentType(inactivePost.tags || convertToTagString(this.tagSet)));
+    this.image.classList.add(Utils.getContentType(inactivePost.tags || Utils.convertToTagString(this.tagSet)));
     this.root.id = inactivePost.id;
   }
 
@@ -483,13 +485,13 @@ class Post {
    * @param {String} tags
    */
   initializeTags(tags) {
-    this.tagSet = convertToTagSet(`${this.id} ${tags}`);
+    this.tagSet = Utils.convertToTagSet(`${this.id} ${tags}`);
     this.originalTagsLength = this.tagSet.size;
     this.initializeAdditionalTags();
   }
 
   initializeAdditionalTags() {
-    this.additionalTags = convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
+    this.additionalTags = Utils.convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
 
     if (this.additionalTags.size !== 0) {
       this.combineOriginalAndAdditionalTags();
@@ -505,15 +507,15 @@ class Post {
   }
 
   setupClickLink() {
-    if (!onFavoritesPage()) {
+    if (!Utils.onFavoritesPage()) {
       return;
     }
     this.container.onmousedown = (event) => {
-      const middleClick = event.button === CLICK_CODES.middle;
-      const leftClick = event.button === CLICK_CODES.left;
+      const middleClick = event.button === Utils.clickCodes.middle;
+      const leftClick = event.button === Utils.clickCodes.left;
 
-      if (middleClick || (leftClick && !galleryEnabled())) {
-        openPostInNewPage(this.id);
+      if (middleClick || (leftClick && !Utils.galleryEnabled())) {
+        Utils.openPostInNewPage(this.id);
       }
     };
   }
@@ -566,7 +568,7 @@ class Post {
 
   combineOriginalAndAdditionalTags() {
     this.tagSet = this.originalTagSet;
-    this.tagSet = union(this.tagSet, this.additionalTags);
+    this.tagSet = Utils.union(this.tagSet, this.additionalTags);
   }
 
   /**
@@ -574,10 +576,10 @@ class Post {
    * @returns {String}
    */
   addAdditionalTags(newTags) {
-    const newTagsSet = convertToTagSet(newTags);
+    const newTagsSet = Utils.convertToTagSet(newTags);
 
     if (newTagsSet.size > 0) {
-      this.additionalTags = union(this.additionalTags, newTagsSet);
+      this.additionalTags = Utils.union(this.additionalTags, newTagsSet);
       this.combineOriginalAndAdditionalTags();
     }
     return this.additionalTagsString;
@@ -588,10 +590,10 @@ class Post {
    * @returns {String}
    */
   removeAdditionalTags(tagsToRemove) {
-    const tagsToRemoveSet = convertToTagSet(tagsToRemove);
+    const tagsToRemoveSet = Utils.convertToTagSet(tagsToRemove);
 
     if (tagsToRemoveSet.size > 0) {
-      this.additionalTags = difference(this.additionalTags, tagsToRemoveSet);
+      this.additionalTags = Utils.difference(this.additionalTags, tagsToRemoveSet);
       this.combineOriginalAndAdditionalTags();
     }
     return this.additionalTagsString;
@@ -634,10 +636,10 @@ class Post {
         return this.metadata.height;
 
       case "create":
-        return convertTimestampToDate(this.metadata.creationTimestamp);
+        return Utils.convertTimestampToDate(this.metadata.creationTimestamp);
 
       case "change":
-        return convertTimestampToDate(this.metadata.lastChangedTimestamp * 1000);
+        return Utils.convertTimestampToDate(this.metadata.lastChangedTimestamp * 1000);
 
       default:
         return this.id;

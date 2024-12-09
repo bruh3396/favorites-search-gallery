@@ -227,24 +227,24 @@ class Autoplay {
     direction: "autoplayForward"
   };
   static menuIconImageURLs = {
-    play: createObjectURLFromSvg(ICONS.play),
-    pause: createObjectURLFromSvg(ICONS.pause),
-    changeDirection: createObjectURLFromSvg(ICONS.changeDirection),
-    changeDirectionAlt: createObjectURLFromSvg(ICONS.changeDirectionAlt),
-    tune: createObjectURLFromSvg(ICONS.tune)
+    play: Utils.createObjectURLFromSvg(Utils.icons.play),
+    pause: Utils.createObjectURLFromSvg(Utils.icons.pause),
+    changeDirection: Utils.createObjectURLFromSvg(Utils.icons.changeDirection),
+    changeDirectionAlt: Utils.createObjectURLFromSvg(Utils.icons.changeDirectionAlt),
+    tune: Utils.createObjectURLFromSvg(Utils.icons.tune)
   };
   static settings = {
-    imageViewDuration: getPreference(Autoplay.preferences.imageDuration, 3000),
-    minimumVideoDuration: getPreference(Autoplay.preferences.minimumVideoDuration, 5000),
+    imageViewDuration: Utils.getPreference(Autoplay.preferences.imageDuration, 3000),
+    minimumVideoDuration: Utils.getPreference(Autoplay.preferences.minimumVideoDuration, 5000),
     menuVisibilityDuration: 500,
-    moveForward: getPreference(Autoplay.preferences.direction, true),
+    moveForward: Utils.getPreference(Autoplay.preferences.direction, true),
 
     get imageViewDurationInSeconds() {
-      return millisecondsToSeconds(this.imageViewDuration);
+      return Utils.millisecondsToSeconds(this.imageViewDuration);
     },
 
     get minimumVideoDurationInSeconds() {
-      return millisecondsToSeconds(this.minimumVideoDuration);
+      return Utils.millisecondsToSeconds(this.minimumVideoDuration);
     }
   };
 
@@ -252,7 +252,7 @@ class Autoplay {
    * @type {Boolean}
    */
   static get disabled() {
-    return onMobileDevice();
+    return Utils.onMobileDevice();
   }
 
   /**
@@ -329,7 +329,7 @@ class Autoplay {
     this.initializeTimers();
     this.insertHTML();
     this.setMenuIconImageSources();
-    this.loadAutoplaySettingsIntoUi();
+    this.loadAutoplaySettingsIntoUI();
     this.addEventListeners();
   }
 
@@ -355,8 +355,8 @@ class Autoplay {
     };
     this.eventListenersAbortController = new AbortController();
     this.currentThumb = null;
-    this.active = getPreference(Autoplay.preferences.active, false);
-    this.paused = getPreference(Autoplay.preferences.paused, false);
+    this.active = Utils.getPreference(Autoplay.preferences.active, false);
+    this.paused = Utils.getPreference(Autoplay.preferences.paused, false);
     this.menuIsPersistent = false;
     this.menuIsVisible = false;
   }
@@ -385,7 +385,7 @@ class Autoplay {
   }
 
   insertMenuHTML() {
-    insertFavoritesSearchGalleryHTML("afterbegin", Autoplay.autoplayHTML);
+    Utils.insertFavoritesSearchGalleryHTML("afterbegin", Autoplay.autoplayHTML);
     this.ui.container = document.getElementById("autoplay-container");
     this.ui.menu = document.getElementById("autoplay-menu");
     this.ui.settingsButton = document.getElementById("autoplay-settings-button");
@@ -401,7 +401,7 @@ class Autoplay {
   }
 
   insertOptionHTML() {
-    createFavoritesOption(
+    Utils.createFavoritesOption(
       "autoplay",
       "Autoplay",
       "Enable autoplay in gallery",
@@ -414,7 +414,7 @@ class Autoplay {
   }
 
   insertImageProgressHTML() {
-    insertStyleHTML(`
+    Utils.insertStyleHTML(`
       #autoplay-image-progress-bar.animated {
           transition: width ${Autoplay.settings.imageViewDurationInSeconds}s linear;
           width: 100%;
@@ -423,7 +423,7 @@ class Autoplay {
   }
 
   insertVideoProgressHTML() {
-    insertStyleHTML(`
+    Utils.insertStyleHTML(`
       #autoplay-video-progress-bar.animated {
           transition: width ${Autoplay.settings.minimumVideoDurationInSeconds}s linear;
           width: 100%;
@@ -439,7 +439,7 @@ class Autoplay {
     this.ui.changeDirectionMask.container.classList.toggle("upper-right", Autoplay.settings.moveForward);
   }
 
-  loadAutoplaySettingsIntoUi() {
+  loadAutoplaySettingsIntoUI() {
     this.ui.settingsMenu.imageDurationInput.value = Autoplay.settings.imageViewDurationInSeconds;
     this.ui.settingsMenu.minimumVideoDurationInput.value = Autoplay.settings.minimumVideoDurationInSeconds;
   }
@@ -459,7 +459,7 @@ class Autoplay {
     this.ui.changeDirectionButton.onclick = () => {
       Autoplay.settings.moveForward = !Autoplay.settings.moveForward;
       this.ui.changeDirectionMask.container.classList.toggle("upper-right", Autoplay.settings.moveForward);
-      setPreference(Autoplay.preferences.direction, Autoplay.settings.moveForward);
+      Utils.setPreference(Autoplay.preferences.direction, Autoplay.settings.moveForward);
     };
 
     this.ui.menu.onmouseenter = () => {
@@ -474,14 +474,14 @@ class Autoplay {
     this.ui.settingsMenu.imageDurationInput.onchange = () => {
       this.setImageViewDuration();
 
-      if (this.currentThumb !== null && isImage(this.currentThumb)) {
+      if (this.currentThumb !== null && Utils.isImage(this.currentThumb)) {
         this.startViewTimer(this.currentThumb);
       }
     };
     this.ui.settingsMenu.minimumVideoDurationInput.onchange = () => {
       this.setMinimumVideoViewDuration();
 
-      if (this.currentThumb !== null && !isImage(this.currentThumb)) {
+      if (this.currentThumb !== null && !Utils.isImage(this.currentThumb)) {
         this.startViewTimer(this.currentThumb);
       }
     };
@@ -520,7 +520,7 @@ class Autoplay {
    * @param {Boolean} value
    */
   toggle(value) {
-    setPreference(Autoplay.preferences.active, value);
+    Utils.setPreference(Autoplay.preferences.active, value);
     this.active = value;
 
     if (value) {
@@ -536,9 +536,9 @@ class Autoplay {
     if (isNaN(durationInSeconds)) {
       durationInSeconds = Autoplay.settings.imageViewDurationInSeconds;
     }
-    const duration = Math.round(clamp(durationInSeconds * 1000, 1000, 60000));
+    const duration = Math.round(Utils.clamp(durationInSeconds * 1000, 1000, 60000));
 
-    setPreference(Autoplay.preferences.imageDuration, duration);
+    Utils.setPreference(Autoplay.preferences.imageDuration, duration);
     Autoplay.settings.imageViewDuration = duration;
     this.imageViewTimer.waitTime = duration;
     this.ui.settingsMenu.imageDurationInput.value = Autoplay.settings.imageViewDurationInSeconds;
@@ -551,9 +551,9 @@ class Autoplay {
     if (isNaN(durationInSeconds)) {
       durationInSeconds = Autoplay.settings.minimumVideoDurationInSeconds;
     }
-    const duration = Math.round(clamp(durationInSeconds * 1000, 0, 60000));
+    const duration = Math.round(Utils.clamp(durationInSeconds * 1000, 0, 60000));
 
-    setPreference(Autoplay.preferences.minimumVideoDuration, duration);
+    Utils.setPreference(Autoplay.preferences.minimumVideoDuration, duration);
     Autoplay.settings.minimumVideoDuration = duration;
     this.videoViewTimer.waitTime = duration;
     this.ui.settingsMenu.minimumVideoDurationInput.value = Autoplay.settings.minimumVideoDurationInSeconds;
@@ -573,7 +573,7 @@ class Autoplay {
       return;
     }
 
-    if (isVideo(thumb)) {
+    if (Utils.isVideo(thumb)) {
       this.startVideoViewTimer();
     } else {
       this.startImageViewTimer();
@@ -630,7 +630,7 @@ class Autoplay {
 
   pause() {
     this.paused = !this.paused;
-    setPreference(Autoplay.preferences.paused, this.paused);
+    Utils.setPreference(Autoplay.preferences.paused, this.paused);
 
     if (this.paused) {
       this.ui.playButton.src = Autoplay.menuIconImageURLs.play;
@@ -664,7 +664,7 @@ class Autoplay {
       signal: this.eventListenersAbortController.signal
     });
     document.addEventListener("keydown", (event) => {
-      if (!isHotkeyEvent(event)) {
+      if (!Utils.isHotkeyEvent(event)) {
         return;
       }
 

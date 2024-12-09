@@ -28,8 +28,8 @@ class FavoritesPaginator {
     this.content = this.createContentContainer();
     this.paginationMenu = this.createPaginationMenuContainer();
     this.currentPageNumber = 1;
-    this.favoritesPerPage = getPreference("resultsPerPage", DEFAULTS.resultsPerPage);
-    this.maxPageNumberButtons = onMobileDevice() ? 3 : 5;
+    this.favoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
+    this.maxPageNumberButtons = Utils.onMobileDevice() ? 3 : 5;
   }
 
   /**
@@ -39,7 +39,7 @@ class FavoritesPaginator {
     const content = document.createElement("div");
 
     content.id = "favorites-search-gallery-content";
-    FAVORITES_SEARCH_GALLERY_CONTAINER.appendChild(content);
+    Utils.favoritesSearchGalleryContainer.appendChild(content);
     return content;
   }
 
@@ -56,7 +56,7 @@ class FavoritesPaginator {
   insertPaginationMenuContainer() {
     if (document.getElementById(this.paginationMenu.id) === null) {
 
-      if (onMobileDevice()) {
+      if (Utils.onMobileDevice()) {
         document.getElementById("favorites-search-gallery-menu").insertAdjacentElement("afterbegin", this.paginationMenu);
       } else {
         const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
@@ -233,7 +233,7 @@ class FavoritesPaginator {
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
 
     for (const pageNumberButton of pageNumberButtons) {
-      const pageNumber = parseInt(removeNonNumericCharacters(pageNumberButton.id));
+      const pageNumber = parseInt(Utils.removeNonNumericCharacters(pageNumberButton.id));
 
       pageNumberButton.onclick = () => {
         this.changePage(pageNumber, favorites);
@@ -333,10 +333,10 @@ class FavoritesPaginator {
     gotoPageButton.onclick = () => {
       let pageNumber = parseInt(input.value);
 
-      if (!isNumber(pageNumber)) {
+      if (!Utils.isNumber(pageNumber)) {
         return;
       }
-      pageNumber = clamp(pageNumber, 1, pageCount);
+      pageNumber = Utils.clamp(pageNumber, 1, pageCount);
       this.changePage(pageNumber, favorites);
 
     };

@@ -1,4 +1,6 @@
-const tooltipHTML = `<div id="tooltip-container">
+class Tooltip {
+  static tooltipHTML = `
+<div id="tooltip-container">
   <style>
     #tooltip {
       max-width: 750px;
@@ -20,14 +22,13 @@ const tooltipHTML = `<div id="tooltip-container">
     }
   </style>
   <span id="tooltip" class="light-green-gradient"></span>
-</div>`;
-
-class Tooltip {
+</div>
+`;
   /**
    * @type {Boolean}
    */
   static get disabled() {
-    return onMobileDevice() || getPerformanceProfile() > 1 || onPostPage();
+    return Utils.onMobileDevice() || Utils.getPerformanceProfile() > 1 || Utils.onPostPage();
   }
 
   /**
@@ -63,8 +64,8 @@ class Tooltip {
     if (Tooltip.disabled) {
       return;
     }
-    this.visible = getPreference("showTooltip", true);
-    insertFavoritesSearchGalleryHTML("afterbegin", tooltipHTML);
+    this.visible = Utils.getPreference("showTooltip", true);
+    Utils.insertFavoritesSearchGalleryHTML("afterbegin", Tooltip.tooltipHTML);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;
     this.searchTagColorCodes = {};
@@ -83,11 +84,11 @@ class Tooltip {
 
   addAllPageEventListeners() {
     document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() !== "t" || !isHotkeyEvent(event)) {
+      if (event.key.toLowerCase() !== "t" || !Utils.isHotkeyEvent(event)) {
         return;
       }
 
-      if (onFavoritesPage()) {
+      if (Utils.onFavoritesPage()) {
         const showTooltipsCheckbox = document.getElementById("show-tooltips-checkbox");
 
         if (showTooltipsCheckbox !== null) {
@@ -101,7 +102,7 @@ class Tooltip {
             }
           }
         }
-      } else if (onSearchPage()) {
+      } else if (Utils.onSearchPage()) {
         this.toggleVisibility();
 
         if (this.currentImage !== null) {
@@ -114,7 +115,7 @@ class Tooltip {
   }
 
   addSearchPageEventListeners() {
-    if (!onSearchPage()) {
+    if (!Utils.onSearchPage()) {
       return;
     }
     window.addEventListener("load", () => {
@@ -126,7 +127,7 @@ class Tooltip {
   }
 
   addFavoritesPageEventListeners() {
-    if (!onFavoritesPage()) {
+    if (!Utils.onFavoritesPage()) {
       return;
     }
     window.addEventListener("favoritesFetched", () => {
@@ -151,14 +152,14 @@ class Tooltip {
   }
 
   setTheme() {
-    if (usingDarkTheme()) {
+    if (Utils.usingDarkTheme()) {
       this.tooltip.classList.remove("light-green-gradient");
       this.tooltip.classList.add("dark-green-gradient");
     }
   }
 
   assignColorsToMatchedTags() {
-    if (onSearchPage()) {
+    if (Utils.onSearchPage()) {
       this.assignColorsToMatchedTagsOnSearchPage();
     } else {
       this.searchBox = document.getElementById("favorites-search-box");
@@ -177,17 +178,17 @@ class Tooltip {
    * @param {HTMLCollectionOf.<Element>} thumbs
    */
   addEventListenersToThumbs(thumbs) {
-    thumbs = thumbs === undefined ? getAllThumbs() : thumbs;
+    thumbs = thumbs === undefined ? Utils.getAllThumbs() : thumbs;
 
     for (const thumb of thumbs) {
-      const image = getImageFromThumb(thumb);
+      const image = Utils.getImageFromThumb(thumb);
 
       if (image.onmouseenter !== null) {
         continue;
       }
 
       image.onmouseenter = (event) => {
-        if (enteredOverCaptionTag(event)) {
+        if (Utils.enteredOverCaptionTag(event)) {
           return;
         }
         this.currentImage = image;
@@ -197,7 +198,7 @@ class Tooltip {
         }
       };
       image.onmouseleave = (event) => {
-        if (!enteredOverCaptionTag(event)) {
+        if (!Utils.enteredOverCaptionTag(event)) {
           this.currentImage = null;
           this.hide();
         }
@@ -278,8 +279,8 @@ class Tooltip {
    * @returns {String}
    */
   getTags(image) {
-    const thumb = getThumbFromImage(image);
-    const tags = getTagsFromThumb(thumb);
+    const thumb = Utils.getThumbFromImage(image);
+    const tags = Utils.getTagsFromThumb(thumb);
 
     if (this.searchTagColorCodes[thumb.id] === undefined) {
       tags.delete(thumb.id);
@@ -311,7 +312,7 @@ class Tooltip {
     let unmatchedTagsHTML = "";
     let matchedTagsHTML = "";
 
-    const tagList = removeExtraWhiteSpace(tags).split(" ");
+    const tagList = Utils.removeExtraWhiteSpace(tags).split(" ");
 
     for (let i = 0; i < tagList.length; i += 1) {
       const tag = tagList[i];
@@ -320,7 +321,7 @@ class Tooltip {
 
       if (tagColor !== undefined) {
         matchedTagsHTML += `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>`;
-      } else if (includesTag(tag, new Set(TAG_BLACKLIST.split(" ")))) {
+      } else if (Utils.includesTag(tag, new Set(Utils.tagBlacklist.split(" ")))) {
         unmatchedTagsHTML += `<span style="color:red"><s><b>${tagWithSpace}</b></s></span>`;
       } else {
         unmatchedTagsHTML += tagWithSpace;
@@ -339,7 +340,7 @@ class Tooltip {
    */
   assignTagColors(searchQuery) {
     searchQuery = this.removeNotTags(searchQuery);
-    const {orGroups, remainingSearchTags} = extractTagGroups(searchQuery);
+    const {orGroups, remainingSearchTags} = Utils.extractTagGroups(searchQuery);
 
     this.searchTagColorCodes = {};
     this.assignColorsToOrGroupTags(orGroups);
@@ -399,7 +400,7 @@ class Tooltip {
     }
 
     for (const searchTag of Object.keys(this.searchTagColorCodes)) {
-      if (tagsMatchWildcardSearchTag(searchTag, [tag])) {
+      if (Utils.tagsMatchWildcardSearchTag(searchTag, [tag])) {
         return this.searchTagColorCodes[searchTag];
       }
     }
@@ -407,7 +408,7 @@ class Tooltip {
   }
 
   addFavoritesOptions() {
-    createFavoritesOption(
+    Utils.createFavoritesOption(
       "show-tooltips",
       " Tooltips",
       "Show tags when hovering over a thumbnail and see which ones were matched by a search",
@@ -426,7 +427,7 @@ class Tooltip {
     if (value === undefined) {
       value = !this.visible;
     }
-    setPreference("showTooltip", value);
+    Utils.setPreference("showTooltip", value);
     this.visible = value;
   }
 
@@ -435,7 +436,7 @@ class Tooltip {
    */
   showOnLoadIfHoveringOverThumb(thumb) {
     if (thumb !== null) {
-      this.show(getImageFromThumb(thumb));
+      this.show(Utils.getImageFromThumb(thumb));
     }
   }
 
@@ -453,5 +454,3 @@ class Tooltip {
     this.assignTagColors(this.searchBox.value);
   }
 }
-
-const tooltip = new Tooltip();

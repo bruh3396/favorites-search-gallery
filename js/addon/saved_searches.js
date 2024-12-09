@@ -154,7 +154,7 @@ class SavedSearches {
    * @type {Boolean}
    */
   static get disabled() {
-    return !onFavoritesPage() || onMobileDevice();
+    return !Utils.onFavoritesPage() || Utils.onMobileDevice();
   }
   /**
    * @type {HTMLTextAreaElement}
@@ -206,19 +206,19 @@ class SavedSearches {
   }
 
   insertHTML() {
-    const showSavedSearches = getPreference(SavedSearches.preferences.visibility, false);
+    const showSavedSearches = Utils.getPreference(SavedSearches.preferences.visibility, false);
     const savedSearchesContainer = document.getElementById("right-favorites-panel");
 
-    insertHTMLAndExtractStyle(savedSearchesContainer, "beforeend", SavedSearches.savedSearchesHTML);
+    Utils.insertHTMLAndExtractStyle(savedSearchesContainer, "beforeend", SavedSearches.savedSearchesHTML);
     document.getElementById("right-favorites-panel").style.display = showSavedSearches ? "block" : "none";
-    const options = createFavoritesOption(
+    const options = Utils.createFavoritesOption(
       "show-saved-searches",
       "Saved Searches",
       "Toggle saved searches",
       showSavedSearches,
       (e) => {
         savedSearchesContainer.style.display = e.target.checked ? "block" : "none";
-        setPreference(SavedSearches.preferences.visibility, e.target.checked);
+        Utils.setPreference(SavedSearches.preferences.visibility, e.target.checked);
       },
       true
     );
@@ -233,7 +233,7 @@ class SavedSearches {
     this.textarea.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "Enter":
-          if (awesompleteIsUnselected(this.textarea)) {
+          if (Utils.awesompleteIsUnselected(this.textarea)) {
             event.preventDefault();
             this.saveButton.click();
             this.textarea.blur();
@@ -244,7 +244,7 @@ class SavedSearches {
           break;
 
         case "Escape":
-          if (awesompleteIsUnselected(this.textarea) && this.stopEditingButton.style.display === "block") {
+          if (Utils.awesompleteIsUnselected(this.textarea) && this.stopEditingButton.style.display === "block") {
             this.stopEditingButton.click();
           }
           break;
@@ -281,9 +281,9 @@ class SavedSearches {
     const moveToTopButton = document.createElement("div");
 
     savedSearchLabel.innerText = newSavedSearch;
-    editButton.innerHTML = ICONS.edit;
-    removeButton.innerHTML = ICONS.delete;
-    moveToTopButton.innerHTML = ICONS.upArrow;
+    editButton.innerHTML = Utils.icons.edit;
+    removeButton.innerHTML = Utils.icons.delete;
+    moveToTopButton.innerHTML = Utils.icons.upArrow;
     editButton.title = "Edit";
     removeButton.title = "Delete";
     moveToTopButton.title = "Move to top";
@@ -379,14 +379,14 @@ class SavedSearches {
   }
 
   storeSavedSearches() {
-    localStorage.setItem(SavedSearches.localStorageKeys.savedSearches, JSON.stringify(getSavedSearchValues()));
+    localStorage.setItem(SavedSearches.localStorageKeys.savedSearches, JSON.stringify(Utils.getSavedSearchValues()));
   }
 
   loadSavedSearches() {
     const savedSearches = JSON.parse(localStorage.getItem(SavedSearches.localStorageKeys.savedSearches)) || [];
-    const firstUse = getPreference(SavedSearches.preferences.tutorial, true);
+    const firstUse = Utils.getPreference(SavedSearches.preferences.tutorial, true);
 
-    setPreference(SavedSearches.preferences.tutorial, false);
+    Utils.setPreference(SavedSearches.preferences.tutorial, false);
 
     if (firstUse && savedSearches.length === 0) {
       this.createTutorialSearches();
@@ -402,10 +402,10 @@ class SavedSearches {
     const searches = [];
 
     window.addEventListener("startedFetchingFavorites", async() => {
-      await sleep(1000);
-      const postIds = getAllThumbs().map(thumb => thumb.id);
+      await Utils.sleep(1000);
+      const postIds = Utils.getAllThumbs().map(thumb => thumb.id);
 
-      shuffleArray(postIds);
+      Utils.shuffleArray(postIds);
 
       const exampleSearch = `( EXAMPLE: ~ ${postIds.slice(0, 9).join(" ~ ")} ) ( male* ~ female* ~ 1boy ~ 1girls )`;
 
@@ -467,5 +467,3 @@ class SavedSearches {
     this.saveSearch(customSearch);
   }
 }
-
-const savedSearches = new SavedSearches();

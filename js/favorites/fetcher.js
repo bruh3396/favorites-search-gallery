@@ -168,7 +168,7 @@ class FavoritesFetcher {
       .catch((error) => {
         this.onFavoritesPageRequestFail(request, error);
       });
-    await sleep(request.retryDelay);
+    await Utils.sleep(request.retryDelay);
   }
 
   /**

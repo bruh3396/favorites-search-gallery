@@ -88,14 +88,14 @@ class TagModifier {
    * @type {Boolean}
    */
   static get disabled() {
-    if (onMobileDevice()) {
+    if (Utils.onMobileDevice()) {
       return true;
     }
 
-    if (onFavoritesPage()) {
+    if (Utils.onFavoritesPage()) {
       return false;
     }
-    return getPreference(TagModifier.preferences.modifyTagsOutsideFavoritesPage, false);
+    return Utils.getPreference(TagModifier.preferences.modifyTagsOutsideFavoritesPage, false);
   }
 
   /**
@@ -149,10 +149,10 @@ class TagModifier {
   }
 
   insertFavoritesPageHTML() {
-    if (!onFavoritesPage()) {
+    if (!Utils.onFavoritesPage()) {
       return;
     }
-    insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", TagModifier.tagModifierHTML);
+    Utils.insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", TagModifier.tagModifierHTML);
     this.favoritesOption.container = document.getElementById("tag-modifier-container");
     this.favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox");
     this.favoritesUI.container = document.getElementById("tag-modifier-ui-container");
@@ -168,14 +168,14 @@ class TagModifier {
   }
 
   insertSearchPageHTML() {
-    if (!onSearchPage()) {
+    if (!Utils.onSearchPage()) {
       return;
     }
     1;
   }
 
   insertPostPageHTML() {
-    if (!onPostPage()) {
+    if (!Utils.onPostPage()) {
       return;
     }
     const contentContainer = document.querySelector(".flexi");
@@ -201,7 +201,7 @@ class TagModifier {
     const addCustomTags = document.getElementById("add-custom-tags");
     const customTagsList = document.getElementById("custom-tags-list");
 
-    for (const customTag of CUSTOM_TAGS.values()) {
+    for (const customTag of Utils.customTags.values()) {
       const option = document.createElement("option");
 
       option.value = customTag;
@@ -225,7 +225,7 @@ class TagModifier {
   }
 
   addFavoritesPageEventListeners() {
-    if (!onFavoritesPage()) {
+    if (!Utils.onFavoritesPage()) {
       return;
     }
     this.favoritesOption.checkbox.onchange = (event) => {
@@ -247,14 +247,14 @@ class TagModifier {
   }
 
   addSearchPageEventListeners() {
-    if (!onSearchPage()) {
+    if (!Utils.onSearchPage()) {
       return;
     }
     1;
   }
 
   addPostPageEventListeners() {
-    if (!onPostPage()) {
+    if (!Utils.onPostPage()) {
       return;
     }
     1;
@@ -264,7 +264,7 @@ class TagModifier {
     if (!this.atLeastOneFavoriteIsSelected) {
       return;
     }
-    const posts = getAllThumbs()
+    const posts = Utils.getAllThumbs()
       .map(thumb => Post.allPosts.get(thumb.id));
 
     for (const post of posts) {
@@ -283,7 +283,7 @@ class TagModifier {
    */
   toggleTagEditMode(value) {
     this.toggleThumbInteraction(value);
-    this.toggleUi(value);
+    this.toggleUI(value);
     this.toggleTagEditModeEventListeners(value);
     this.favoritesUI.unSelectAll.click();
   }
@@ -316,13 +316,13 @@ class TagModifier {
       }
     `;
     }
-    insertStyleHTML(html, "tag-edit-mode");
+    Utils.insertStyleHTML(html, "tag-edit-mode");
   }
 
   /**
    * @param {Boolean} value
    */
-  toggleUi(value) {
+  toggleUI(value) {
     this.favoritesUI.container.style.display = value ? "block" : "none";
   }
 
@@ -337,7 +337,7 @@ class TagModifier {
     }
 
     document.addEventListener("click", (event) => {
-      if (!event.target.classList.contains(FAVORITE_ITEM_CLASS_NAME)) {
+      if (!event.target.classList.contains(Utils.favoriteItemClassName)) {
         return;
       }
       const post = Post.allPosts.get(event.target.id);
@@ -438,7 +438,7 @@ class TagModifier {
   modifyTagsOfSelected(remove) {
     const tags = this.favoritesUI.textarea.value.toLowerCase();
     const tagsWithoutContentTypes = this.removeContentTypeTags(tags);
-    const tagsToModify = removeExtraWhiteSpace(tagsWithoutContentTypes);
+    const tagsToModify = Utils.removeExtraWhiteSpace(tagsWithoutContentTypes);
     const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
     let modifiedTagsCount = 0;
 
@@ -464,7 +464,7 @@ class TagModifier {
     }
     this.showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);
     dispatchEvent(new Event("modifiedTags"));
-    setCustomTags(tagsToModify);
+    Utils.setCustomTags(tagsToModify);
     this.storeTagModifications();
   }
 
@@ -541,7 +541,7 @@ class TagModifier {
     if (!confirm("Are you sure you want to delete all tag modifications?")) {
       return;
     }
-    CUSTOM_TAGS.clear();
+    Utils.customTags.clear();
     indexedDB.deleteDatabase("AdditionalTags");
     Post.allPosts.forEach(post => {
       post.resetAdditionalTags();
@@ -551,7 +551,7 @@ class TagModifier {
   }
 
   exportTagModifications() {
-    const modifications = JSON.stringify(mapToObject(TagModifier.tagModifications));
+    const modifications = JSON.stringify(Utils.mapToObject(TagModifier.tagModifications));
 
     navigator.clipboard.writeText(modifications);
     alert("Copied tag modifications to clipboard");
@@ -566,7 +566,7 @@ class TagModifier {
       if (!(typeof object === "object")) {
         throw new TypeError(`Input parsed as ${typeof (object)}, but expected object`);
       }
-      modifications = objectToMap(object);
+      modifications = Utils.objectToMap(object);
     } catch (error) {
       if (error.name === "SyntaxError" || error.name === "TypeError") {
         alert("Import Unsuccessful. Failed to parse input, JSON object format expected.");
@@ -578,5 +578,3 @@ class TagModifier {
     console.error(modifications);
   }
 }
-
-const tagModifier = new TagModifier();

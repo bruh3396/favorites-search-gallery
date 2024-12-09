@@ -28,7 +28,7 @@ class MetadataSearchExpression {
    * @returns {String | Number}
    */
   setValue(value) {
-    if (!isNumber(value)) {
+    if (!Utils.isNumber(value)) {
       return value;
     }
 
@@ -84,7 +84,7 @@ class PostMetadata {
       } else {
         metadata.populateMetadataFromAPI(true);
       }
-      await sleep(metadata.fetchDelay);
+      await Utils.sleep(metadata.fetchDelay);
     }
     PostMetadata.currentlyFetchingFromQueue = false;
   }
@@ -108,15 +108,17 @@ class PostMetadata {
   }
 
   static {
-    if (onFavoritesPage()) {
-      window.addEventListener("favoritesLoaded", () => {
-        PostMetadata.allFavoritesLoaded = true;
-        PostMetadata.missingMetadataFetchQueue = PostMetadata.missingMetadataFetchQueue.concat(PostMetadata.deletedPostFetchQueue);
-        PostMetadata.fetchMissingMetadata();
-      }, {
-        once: true
-      });
-    }
+    Utils.addStaticInitializer(() => {
+      if (Utils.onFavoritesPage()) {
+        window.addEventListener("favoritesLoaded", () => {
+          PostMetadata.allFavoritesLoaded = true;
+          PostMetadata.missingMetadataFetchQueue = PostMetadata.missingMetadataFetchQueue.concat(PostMetadata.deletedPostFetchQueue);
+          PostMetadata.fetchMissingMetadata();
+        }, {
+          once: true
+        });
+      }
+    });
   }
   /**
    * @type {String}
@@ -266,7 +268,7 @@ class PostMetadata {
         if (PostMetadata.settings.verifyTags) {
           Post.verifyTags(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
         }
-        const extension = getExtensionFromImageURL(metadata.getAttribute("file_url"));
+        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {
           dispatchEvent(new CustomEvent("metadataFetched", {
@@ -320,7 +322,7 @@ class PostMetadata {
         if (statistics === null) {
           return;
         }
-        const textContent = replaceLineBreaks(statistics.textContent.trim(), " ");
+        const textContent = Utils.replaceLineBreaks(statistics.textContent.trim(), " ");
         const match = PostMetadata.postStatisticsRegex.exec(textContent);
 
         PostMetadata.postStatisticsRegex.lastIndex = 0;

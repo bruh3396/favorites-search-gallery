@@ -1,4 +1,10 @@
 class HoldButton extends HTMLElement {
+  static {
+    Utils.addStaticInitializer(() => {
+      customElements.define("hold-button", HoldButton);
+    });
+  }
+
   /**
    * @type {Number}
    */
@@ -30,7 +36,7 @@ class HoldButton extends HTMLElement {
   holdingDown = false;
 
   connectedCallback() {
-    if (onMobileDevice()) {
+    if (Utils.onMobileDevice()) {
       return;
     }
     this.addEventListeners();
@@ -56,7 +62,7 @@ class HoldButton extends HTMLElement {
     this.stopPolling();
     const pollingTime = parseFloat(newValue) || HoldButton.defaultPollingTime;
 
-    this.pollingTime = clamp(Math.round(pollingTime), HoldButton.minPollingTime, HoldButton.maxPollingTime);
+    this.pollingTime = Utils.clamp(Math.round(pollingTime), HoldButton.minPollingTime, HoldButton.maxPollingTime);
   }
 
   addEventListeners() {
@@ -109,8 +115,6 @@ class HoldButton extends HTMLElement {
   }
 }
 
-customElements.define("hold-button", HoldButton);
-
 class NumberComponent {
   /**
    * @type {HTMLInputElement}
@@ -149,7 +153,7 @@ class NumberComponent {
     if (!this.allSubComponentsConnected) {
       return;
     }
-    this.increment = roundToTwoDecimalPlaces(parseFloat(this.input.getAttribute("step")) || 1);
+    this.increment = Utils.roundToTwoDecimalPlaces(parseFloat(this.input.getAttribute("step")) || 1);
 
     if (this.input.onchange === null) {
       this.input.onchange = () => { };
@@ -214,6 +218,6 @@ class NumberComponent {
     const currentValue = parseFloat(this.input.value) || 1;
     const incrementedValue = add ? currentValue + this.increment : currentValue - this.increment;
 
-    this.input.value = clamp(incrementedValue, 0, 9999);
+    this.input.value = Utils.clamp(incrementedValue, 0, 9999);
   }
 }
