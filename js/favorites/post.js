@@ -29,14 +29,6 @@ class InactivePost {
    * @type {Boolean}
    */
   fromRecord;
-  /**
-   * @type {Number}
-   */
-  rating;
-  /**
-   * @type {Number}
-   */
-  score;
 
   /**
    * @param {HTMLElement | Object} favorite
@@ -94,8 +86,6 @@ class InactivePost {
     this.tags = null;
     this.src = null;
     this.metadata = null;
-    this.rating = null;
-    this.score = null;
   }
 }
 
@@ -135,19 +125,20 @@ class Post {
   }
 
   static createTemplates() {
-    Post.removeFavoriteButtonHTML = `<button class="remove-favorite-button add-or-remove-button"><img src=${Utils.createObjectURLFromSvg(Utils.icons.heartMinus)}></button>`;
-    Post.addFavoriteButtonHTML = `<button class="add-favorite-button add-or-remove-button"><img src=${Utils.createObjectURLFromSvg(Utils.icons.heartPlus)}></button>`;
+    Post.removeFavoriteButtonHTML = `<img class="remove-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Utils.icons.heartMinus)}>`;
+    Post.addFavoriteButtonHTML = `<img class="add-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Utils.icons.heartPlus)}>`;
     const buttonHTML = Utils.userIsOnTheirOwnFavoritesPage() ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
     const canvasHTML = Utils.getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
+    const containerTagName = "a";
 
     Post.template = new DOMParser().parseFromString("", "text/html").createElement("div");
     Post.template.className = Utils.favoriteItemClassName;
     Post.template.innerHTML = `
-        <div>
+        <${containerTagName}>
           <img loading="lazy">
           ${buttonHTML}
           ${canvasHTML}
-        </div>
+        </${containerTagName}>
     `;
   }
 
@@ -165,7 +156,7 @@ class Post {
       const posts = Utils.getAllThumbs().map(thumb => Post.allPosts.get(thumb.id));
 
       for (const post of posts) {
-        post.createStatisticHint();
+        post.createMetadataHint();
       }
     });
   }
@@ -219,15 +210,11 @@ class Post {
     } else if (fileURL.endsWith("gif")) {
       apiTagSet.add("gif");
     }
-
     postTagSet.delete(id);
-    const tagsNotInPost = Utils.difference(apiTagSet, postTagSet);
-    const tagsNotInApi = Utils.difference(postTagSet, apiTagSet);
 
-    if (tagsNotInApi.size === 0 && tagsNotInPost.size === 0) {
-      return;
+    if (Utils.symmetricDifference(apiTagSet, postTagSet).size > 0) {
+      post.initializeTags(Utils.convertToTagString(apiTagSet));
     }
-    post.initializeTags(Utils.convertToTagString(apiTagSet));
   }
 
   /**
@@ -253,7 +240,7 @@ class Post {
    */
   root;
   /**
-   * @type {HTMLElement}
+   * @type {HTMLAnchorElement}
    */
   container;
   /**
@@ -261,7 +248,7 @@ class Post {
    */
   image;
   /**
-   * @type {HTMLButtonElement}
+   * @type {HTMLImageElement}
    */
   addOrRemoveButton;
   /**
@@ -305,7 +292,7 @@ class Post {
    * @type {String}
    */
   get href() {
-    return Utils.getPostPageURLFromPostId(this.id);
+    return Utils.getPostPageURL(this.id);
   }
 
   /**
@@ -413,7 +400,7 @@ class Post {
     this.instantiateTemplate();
     this.populateEssentialAttributes(inactivePost);
     this.populateHTMLAttributes(inactivePost);
-    this.setupAddOrRemoveButton();
+    this.setupAddOrRemoveButton(Utils.userIsOnTheirOwnFavoritesPage());
     this.setupClickLink();
     this.deleteInactivePost();
   }
@@ -431,54 +418,78 @@ class Post {
     this.addOrRemoveButton = this.root.children[0].children[1];
   }
 
-  setupAddOrRemoveButton() {
-    if (Utils.userIsOnTheirOwnFavoritesPage()) {
-      this.addOrRemoveButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
+  /**
+   * @param {Boolean} isRemoveButton
+   */
+  setupAddOrRemoveButton(isRemoveButton) {
+    if (isRemoveButton) {
+      this.addOrRemoveButton.onmousedown = (event) => {
+        event.stopPropagation();
+
+        if (event.button === Utils.clickCodes.left) {
+          this.removeFavorite();
+        }
+      };
     } else {
-      this.addOrRemoveButton.onclick = this.addFavoriteButtonOnClick.bind(this);
+      this.addOrRemoveButton.onmousedown = (event) => {
+        event.stopPropagation();
+
+        if (event.button === Utils.clickCodes.left) {
+          this.addFavorite();
+        }
+      };
     }
   }
 
-  /**
-   * @param {MouseEvent} event
-   */
-  removeFavoriteButtonOnClick(event) {
-    event.stopPropagation();
+  removeFavorite() {
     Utils.removeFavorite(this.id);
     this.swapAddOrRemoveButton();
   }
 
-  /**
-   * @param {MouseEvent} event
-   */
-  addFavoriteButtonOnClick(event) {
-    event.stopPropagation();
+  addFavorite() {
     Utils.addFavorite(this.id);
-
     this.swapAddOrRemoveButton();
   }
 
-  swapAddOrRemoveButton() {
-    const isRemoveFavoriteButton = this.addOrRemoveButton.classList.contains("remove-favorite-button");
+  /**
+   *
+   * @returns {Promise<String>}
+   */
+  fetchImageExtension() {
+    return fetch(this.metadata.apiURL)
+      .then((response) => {
+        return response.text();
+      })
+      .then((html) => {
+        const dom = new DOMParser().parseFromString(html, "text/html");
+        const metadata = dom.querySelector("post");
+        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
-    if (isRemoveFavoriteButton) {
-      this.addOrRemoveButton.outerHTML = Post.addFavoriteButtonHTML;
-      this.addOrRemoveButton = this.root.children[0].children[1];
-      this.addOrRemoveButton.onclick = this.addFavoriteButtonOnClick.bind(this);
-    } else {
-      this.addOrRemoveButton.outerHTML = Post.removeFavoriteButtonHTML;
-      this.addOrRemoveButton = this.root.children[0].children[1];
-      this.addOrRemoveButton.onclick = this.removeFavoriteButtonOnClick.bind(this);
-    }
+        Gallery.assignImageExtension(this.id, extension);
+        return extension;
+      })
+      .catch((error) => {
+        console.error(error);
+        return "jpg";
+      });
+  }
+
+  swapAddOrRemoveButton() {
+    const isRemoveButton = this.addOrRemoveButton.classList.contains("remove-favorite-button");
+
+    this.addOrRemoveButton.outerHTML = isRemoveButton ? Post.addFavoriteButtonHTML : Post.removeFavoriteButtonHTML;
+    this.addOrRemoveButton = this.root.children[0].children[1];
+    this.setupAddOrRemoveButton(!isRemoveButton);
   }
 
   /**
    * @param {InactivePost} inactivePost
    */
-  populateHTMLAttributes(inactivePost) {
+  async populateHTMLAttributes(inactivePost) {
     this.image.src = inactivePost.src;
     this.image.classList.add(Utils.getContentType(inactivePost.tags || Utils.convertToTagString(this.tagSet)));
     this.root.id = inactivePost.id;
+    this.container.href = await Utils.getOriginalImageURLWithExtension(this.root);
   }
 
   /**
@@ -510,14 +521,17 @@ class Post {
     if (!Utils.onFavoritesPage()) {
       return;
     }
-    this.container.onmousedown = (event) => {
+    this.container.addEventListener("mousedown", (event) => {
+      if (event.ctrlKey) {
+        return;
+      }
       const middleClick = event.button === Utils.clickCodes.middle;
       const leftClick = event.button === Utils.clickCodes.left;
 
       if (middleClick || (leftClick && !Utils.galleryEnabled())) {
-        Utils.openPostInNewPage(this.id);
+        Utils.openPostInNewTab(this.id);
       }
-    };
+    });
   }
 
   deleteInactivePost() {
@@ -534,7 +548,7 @@ class Post {
     if (this.inactivePost !== null) {
       this.createHTMLElement(this.inactivePost, true);
     }
-    this.createStatisticHint();
+    this.createMetadataHint();
     content.appendChild(this.root);
   }
 
@@ -545,7 +559,7 @@ class Post {
     if (this.inactivePost !== null) {
       this.createHTMLElement(this.inactivePost, true);
     }
-    this.createStatisticHint();
+    this.createMetadataHint();
     content.insertAdjacentElement("afterbegin", this.root);
   }
 
@@ -610,7 +624,7 @@ class Post {
   /**
    * @returns {HTMLDivElement}
    */
-  getStatisticHint() {
+  getMetadataHintElement() {
     return this.container.querySelector(".statistic-hint");
   }
 
@@ -618,13 +632,13 @@ class Post {
    * @returns {Boolean}
    */
   hasStatisticHint() {
-    return this.getStatisticHint() !== null;
+    return this.getMetadataHintElement() !== null;
   }
 
   /**
    * @returns {String}
    */
-  getStatisticValue() {
+  getMetadataHintValue() {
     switch (Post.currentSortingMethod) {
       case "score":
         return this.metadata.score;
@@ -646,15 +660,15 @@ class Post {
     }
   }
 
-  async createStatisticHint() {
+  async createMetadataHint() {
     // await sleep(200);
-    // let hint = this.getStatisticHint();
+    // let hint = this.getMetadataHintElement();
 
     // if (hint === null) {
     //   hint = document.createElement("div");
     //   hint.className = "statistic-hint";
     //   this.container.appendChild(hint);
     // }
-    // hint.textContent = this.getStatisticValue();
+    // hint.textContent = this.getMetadataHintValue();
   }
 }

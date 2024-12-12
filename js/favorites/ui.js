@@ -173,11 +173,12 @@ class FavoritesMenu {
 
       >a,
       >div {
+        display: block;
         overflow: hidden;
         position: relative;
 
 
-        >img {
+        >img:first-child {
           width: 100%;
           z-index: 1;
         }
@@ -448,6 +449,7 @@ class FavoritesMenu {
 
     .add-or-remove-button {
       visibility: hidden;
+      cursor: pointer;
     }
 
     #favorites-load-status {
@@ -457,8 +459,9 @@ class FavoritesMenu {
       }
     }
 
-    #favorites-fetch-progress-label {
-      color: #3498db;
+    #favorites-load-status-label {
+      /* color: #3498db; */
+      padding-left: 20px;
     }
 
     #main-favorite-options-container {
@@ -499,7 +502,7 @@ class FavoritesMenu {
       <span id="favorites-load-status" style="margin-left: 5px;">
         <label id="match-count-label"></label>
         <label id="pagination-label" style="margin-left: 10px;"></label>
-        <label id="favorites-fetch-progress-label" style="padding-left: 20px; color: #3498db;"></label>
+        <label id="favorites-load-status-label"></label>
       </span>
       <div id="left-favorites-panel-top-row">
         <button title="Search favorites
@@ -525,6 +528,17 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
           <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
 
             <div id="whats-new-container" class="light-green-gradient">
+              <h4>1.17.2:</h4>
+              <h5>Features:</h5>
+              <ul>
+                <li>Redirect to original image</li>
+                <ul>
+                  <li>Ctrl+Click on thumbnail: redirect to original image, but stay on current tab</li>
+                  <li>Ctrl+Shift+Click on thumbnail: redirect to original image</li>
+                  <li>Works on both favorites and search pages</li>
+                  <li>Works both in and out of gallery</li>
+                </ul>
+              </ul>
               <h4>1.17:</h4>
               <h5>Features:</h5>
               <ul>

@@ -7,261 +7,6 @@ class FavoritesLoader {
     allFavoritesLoaded: 4
   };
   static currentState = FavoritesLoader.states.initial;
-  static databaseName = "Favorites";
-  static objectStoreName = `user${Utils.getFavoritesPageId()}`;
-  static webWorkers = {
-    database:
-`
-/* eslint-disable prefer-template */
-/**
- * @param {Number} milliseconds
- * @returns {Promise}
- */
-function sleep(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
-
-class FavoritesDatabase {
-  /**
-   * @type {String}
-   */
-  name = "Favorites";
-  /**
-   * @type {String}
-   */
-  objectStoreName;
-  /**
-   * @type {Number}
-   */
-  version;
-
-  /**
-   * @param {String} objectStoreName
-   * @param {Number | String} version
-   */
-  constructor(objectStoreName, version) {
-    this.objectStoreName = objectStoreName;
-    this.version = version;
-    this.createObjectStore();
-  }
-
-  createObjectStore() {
-    this.openConnection((event) => {
-      /**
-       * @type {IDBDatabase}
-       */
-      const database = event.target.result;
-      const objectStore = database
-        .createObjectStore(this.objectStoreName, {
-          autoIncrement: true
-        });
-
-      objectStore.createIndex("id", "id", {
-        unique: true
-      });
-    }).then((event) => {
-      event.target.result.close();
-    });
-  }
-
-  /**
-   * @param {Function} onUpgradeNeeded
-   * @returns {Promise}
-   */
-  openConnection(onUpgradeNeeded) {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.name, this.version);
-
-      request.onsuccess = resolve;
-      request.onerror = reject;
-      request.onupgradeneeded = onUpgradeNeeded;
-    });
-  }
-
-  /**
-   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
-   */
-  storeFavorites(favorites) {
-    this.openConnection()
-      .then((connectionEvent) => {
-        /**
-         * @type {IDBDatabase}
-         */
-        const database = connectionEvent.target.result;
-        const transaction = database.transaction(this.objectStoreName, "readwrite");
-        const objectStore = transaction.objectStore(this.objectStoreName);
-
-        transaction.oncomplete = () => {
-          postMessage({
-            response: "finishedStoring"
-          });
-          database.close();
-        };
-
-        transaction.onerror = (event) => {
-          console.error(event);
-        };
-
-        favorites.forEach(favorite => {
-          this.addContentTypeToFavorite(favorite);
-          objectStore.put(favorite);
-        });
-
-      })
-      .catch((event) => {
-        const error = event.target.error;
-
-        if (error.name === "VersionError") {
-          this.version += 1;
-          this.storeFavorites(favorites);
-        } else {
-          console.error(error);
-        }
-      });
-  }
-
-  /**
-   * @param {String[]} idsToDelete
-   */
-  async loadFavorites(idsToDelete) {
-    let loadedFavorites = {};
-
-    await this.openConnection()
-      .then(async(connectionEvent) => {
-        /**
-         * @type {IDBDatabase}
-         */
-        const database = connectionEvent.target.result;
-        const transaction = database.transaction(this.objectStoreName, "readwrite");
-        const objectStore = transaction.objectStore(this.objectStoreName);
-        const index = objectStore.index("id");
-
-        transaction.onerror = (event) => {
-          console.error(event);
-        };
-        transaction.oncomplete = () => {
-          postMessage({
-            response: "finishedLoading",
-            favorites: loadedFavorites
-          });
-          database.close();
-        };
-
-        for (const id of idsToDelete) {
-          const deleteRequest = index.getKey(id);
-
-          await new Promise((resolve, reject) => {
-            deleteRequest.onsuccess = resolve;
-            deleteRequest.onerror = reject;
-          }).then((indexEvent) => {
-            const primaryKey = indexEvent.target.result;
-
-            if (primaryKey !== undefined) {
-              objectStore.delete(primaryKey);
-            }
-          }).catch((error) => {
-            console.error(error);
-          });
-        }
-        const getAllRequest = objectStore.getAll();
-
-        getAllRequest.onsuccess = (event) => {
-          loadedFavorites = event.target.result.reverse();
-        };
-        getAllRequest.onerror = (event) => {
-          console.error(event);
-        };
-      });
-  }
-
-  /**
-   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
-   */
-  updateFavorites(favorites) {
-    this.openConnection()
-      .then((event) => {
-        /**
-         * @type {IDBDatabase}
-         */
-        const database = event.target.result;
-        const favoritesObjectStore = database
-          .transaction(this.objectStoreName, "readwrite")
-          .objectStore(this.objectStoreName);
-        const objectStoreIndex = favoritesObjectStore.index("id");
-        let updatedCount = 0;
-
-        favorites.forEach(favorite => {
-          const index = objectStoreIndex.getKey(favorite.id);
-
-          this.addContentTypeToFavorite(favorite);
-          index.onsuccess = (indexEvent) => {
-            const primaryKey = indexEvent.target.result;
-
-            favoritesObjectStore.put(favorite, primaryKey);
-            updatedCount += 1;
-
-            if (updatedCount >= favorites.length) {
-              database.close();
-            }
-          };
-        });
-      })
-      .catch((event) => {
-        const error = event.target.error;
-
-        if (error.name === "VersionError") {
-          this.version += 1;
-          this.updateFavorites(favorites);
-        } else {
-          console.error(error);
-        }
-      });
-  }
-
-  /**
-   * @param {{id: String, tags: String, src: String, metadata: String}} favorite
-   */
-  addContentTypeToFavorite(favorite) {
-    const tags = favorite.tags + " ";
-    const isAnimated = tags.includes("animated ") || tags.includes("video ");
-    const isGif = isAnimated && !tags.includes("video ");
-
-    favorite.type = isGif ? "gif" : isAnimated ? "video" : "image";
-  }
-}
-
-/**
- * @type {FavoritesDatabase}
- */
-let favoritesDatabase;
-
-onmessage = (message) => {
-  const request = message.data;
-
-  switch (request.command) {
-    case "create":
-      favoritesDatabase = new FavoritesDatabase(request.objectStoreName, request.version);
-      break;
-
-    case "store":
-      favoritesDatabase.storeFavorites(request.favorites);
-      break;
-
-    case "load":
-      favoritesDatabase.loadFavorites(request.idsToDelete);
-      break;
-
-    case "update":
-      favoritesDatabase.updateFavorites(request.favorites);
-      break;
-
-    default:
-      break;
-  }
-};
-
-`
-  };
   static tagNegation = {
     useTagBlacklist: true,
     negatedTagBlacklist: Utils.negateTags(Utils.tagBlacklist)
@@ -296,10 +41,6 @@ onmessage = (message) => {
    */
   searchQuery;
   /**
-   * @type {Worker}
-   */
-  databaseWorker;
-  /**
    * @type {Post[]}
    */
   searchResultsWhileFetching;
@@ -322,7 +63,7 @@ onmessage = (message) => {
   /**
    * @type {FetchedFavoritesQueue}
    */
-  fetchedFavoritesQueue;
+  fetchedQueue;
   /**
    * @type {FavoritesPaginator}
    */
@@ -331,6 +72,10 @@ onmessage = (message) => {
    * @type {FavoritesSearchFlags}
    */
   searchFlags;
+  /**
+   * @type {FavoritesDatabaseWrapper}
+   */
+  database;
 
   /**
    * @type {String}
@@ -363,6 +108,13 @@ onmessage = (message) => {
     return new Set(Array.from(this.allFavorites.values()).map(post => post.id));
   }
 
+  /**
+   * @type {Post[]}
+   */
+  get getFavoritesMatchedByLastSearch() {
+    return this.allFavorites.filter(post => post.matchedByMostRecentSearch);
+  }
+
   constructor() {
     if (FavoritesLoader.disabled) {
       return;
@@ -371,7 +123,7 @@ onmessage = (message) => {
     this.initializeComponents();
     this.addEventListeners();
     this.setExpectedFavoritesCount();
-    this.clearOriginalFavoritesPage();
+    Utils.clearOriginalFavoritesPage();
     this.searchFavorites();
   }
 
@@ -385,20 +137,24 @@ onmessage = (message) => {
     this.expectedFavoritesCount = null;
     this.matchedFavoritesCount = 0;
     this.searchQuery = "";
-    this.databaseWorker = new Worker(Utils.getWorkerURL(FavoritesLoader.webWorkers.database));
   }
 
   initializeComponents() {
-    this.fetchedFavoritesQueue = new FetchedFavoritesQueue((request) => {
+    this.fetchedQueue = new FetchedFavoritesQueue((request) => {
       this.processFetchedFavorites(request.fetchedFavorites);
     });
     this.fetcher = new FavoritesFetcher(() => {
       this.onAllFavoritesFetched();
     }, (request) => {
-      this.fetchedFavoritesQueue.enqueue(request);
+      this.fetchedQueue.enqueue(request);
     });
     this.paginator = new FavoritesPaginator();
     this.searchFlags = new FavoritesSearchFlags();
+    this.database = new FavoritesDatabaseWrapper(() => {
+      this.onFavoritesStoredToDatabase();
+    }, (favorites) => {
+      this.onAllFavoritesLoadedFromDatabase(favorites);
+    });
   }
 
   addEventListeners() {
@@ -411,28 +167,6 @@ onmessage = (message) => {
     window.addEventListener("reachedEndOfGallery", (event) => {
       this.paginator.changePageWhileInGallery(event.detail, this.latestSearchResults);
     });
-    this.createDatabaseMessageHandler();
-  }
-
-  createDatabaseMessageHandler() {
-    this.databaseWorker.onmessage = (message) => {
-      switch (message.data.response) {
-        case "finishedLoading":
-          this.paginateSearchResults(this.reconstructContent(message.data.favorites));
-          this.onAllFavoritesLoadedFromDatabase();
-          break;
-
-        case "finishedStoring":
-          this.setStatusText("All Favorites Saved");
-          setTimeout(() => {
-            this.toggleStatusText(false);
-          }, 750);
-          break;
-
-        default:
-          break;
-      }
-    };
   }
 
   setExpectedFavoritesCount() {
@@ -455,24 +189,6 @@ onmessage = (message) => {
       .catch(() => {
         console.error(`Could not find total favorites count from ${profileURL}, are you logged in?`);
       });
-  }
-
-  clearOriginalFavoritesPage() {
-    const thumbs = Array.from(document.getElementsByClassName("thumb"));
-    let content = document.getElementById("content");
-
-    if (content === null && thumbs.length > 0) {
-      content = thumbs[0].closest("body>div");
-    }
-
-    if (content !== null) {
-      content.remove();
-    }
-    setTimeout(() => {
-      dispatchEvent(new CustomEvent("originalFavoritesCleared", {
-        detail: thumbs
-      }));
-    }, 1000);
   }
 
   /**
@@ -531,68 +247,13 @@ onmessage = (message) => {
 
   async loadAllFavorites() {
     FavoritesLoader.currentState = FavoritesLoader.states.retrievingDatabaseStatus;
-    const databaseStatus = await this.getDatabaseStatus();
+    const databaseStatus = await this.database.initializeDatabase();
 
-    this.databaseWorker.postMessage({
-      command: "create",
-      objectStoreName: FavoritesLoader.objectStoreName,
-      version: databaseStatus.version
-    });
-
-    if (databaseStatus.objectStoreIsNotEmpty) {
-      this.loadFavoritesFromDatabase();
-    } else {
+    if (databaseStatus.objectStoreIsEmpty) {
       this.fetchAllFavorites();
+    } else {
+      this.loadAllFavoritesFromDatabase();
     }
-  }
-
-  /**
-   * @returns {{version: Number, objectStoreIsNotEmpty: Boolean}}
-   */
-  getDatabaseStatus() {
-    return window.indexedDB.databases()
-      .then((rule34Databases) => {
-        const favoritesDatabases = rule34Databases.filter(database => database.name === FavoritesLoader.databaseName);
-
-        if (favoritesDatabases.length !== 1) {
-          return {
-            version: 1,
-            objectStoreIsNotEmpty: false
-          };
-        }
-        const foundDatabase = favoritesDatabases[0];
-        return new Promise((resolve, reject) => {
-          const databaseRequest = indexedDB.open(FavoritesLoader.databaseName, foundDatabase.version);
-
-          databaseRequest.onsuccess = resolve;
-          databaseRequest.onerror = reject;
-        }).then((event) => {
-          const database = event.target.result;
-          const objectStoreExists = database.objectStoreNames.contains(FavoritesLoader.objectStoreName);
-          const version = database.version;
-
-          if (!objectStoreExists) {
-            database.close();
-            return {
-              version: database.version + 1,
-              objectStoreIsNotEmpty: false
-            };
-          }
-          const countRequest = database
-            .transaction(FavoritesLoader.objectStoreName, "readonly")
-            .objectStore(FavoritesLoader.objectStoreName).count();
-          return new Promise((resolve, reject) => {
-            countRequest.onsuccess = resolve;
-            countRequest.onerror = reject;
-          }).then((countEvent) => {
-            database.close();
-            return {
-              version,
-              objectStoreIsNotEmpty: countEvent.target.result > 0
-            };
-          });
-        });
-      });
   }
 
   /**
@@ -635,11 +296,13 @@ onmessage = (message) => {
           thumbs: []
         }
       }));
+      this.toggleStatusText(false);
       return;
     }
-    this.storeFavorites(newFavorites);
+    this.setStatusText(`Found ${newFavorites.length} new favorite${newFavorites.length === 1 ? "" : "s"}`);
+    this.toggleStatusText(false, 1000);
+    this.database.storeFavorites(newFavorites);
     this.insertNewFavorites(newFavorites);
-    this.toggleLoadingUI(false);
   }
 
   fetchAllFavorites() {
@@ -686,7 +349,7 @@ onmessage = (message) => {
     this.allFavorites.forEach((post) => {
       post.toggleMatched();
     });
-    const invertedSearchResults = this.getPostsMatchedByLastSearch();
+    const invertedSearchResults = this.getFavoritesMatchedByLastSearch;
 
     this.searchFlags.searchResultsAreInverted = true;
     this.paginateSearchResults(invertedSearchResults);
@@ -694,15 +357,11 @@ onmessage = (message) => {
   }
 
   shuffleSearchResults() {
-    const matchedPosts = this.getPostsMatchedByLastSearch();
+    const matchedPosts = this.getFavoritesMatchedByLastSearch;
 
     Utils.shuffleArray(matchedPosts);
     this.searchFlags.searchResultsAreShuffled = true;
     this.paginateSearchResults(matchedPosts);
-  }
-
-  getPostsMatchedByLastSearch() {
-    return this.allFavorites.filter(post => post.matchedByMostRecentSearch);
   }
 
   onAllFavoritesFetched() {
@@ -711,16 +370,25 @@ onmessage = (message) => {
       detail: this.latestSearchResults
     }));
     this.onAllFavoritesLoaded();
-    this.storeFavorites();
-    this.setStatusText("Saving Favorites");
+    this.database.storeAllFavorites(this.allFavorites);
+    this.setStatusText("Saving favorites");
   }
 
-  onAllFavoritesLoadedFromDatabase() {
+  /**
+   * @param {Object[]} favorites
+   */
+  onAllFavoritesLoadedFromDatabase(favorites) {
+    this.paginateSearchResults(this.reconstructContent(favorites));
     this.toggleLoadingUI(false);
     this.onAllFavoritesLoaded();
     setTimeout(() => {
       this.fetchNewFavoritesOnReload();
     }, 100);
+  }
+
+  onFavoritesStoredToDatabase() {
+    this.setStatusText("All favorites saved");
+    this.toggleStatusText(false, 1000);
   }
 
   onAllFavoritesLoaded() {
@@ -735,17 +403,11 @@ onmessage = (message) => {
   toggleLoadingUI(value) {
     this.showLoadingWheel(value);
     this.paginator.toggleContentVisibility(!value);
-    this.setStatusText(value ? "Loading Favorites" : "All Favorites Loaded");
-
-    if (!value) {
-      setTimeout(() => {
-        this.toggleStatusText(false);
-      }, 500);
-    }
+    this.setStatusText(value ? "Loading favorites" : "All favorites loaded");
   }
 
   /**
-   * @param {[{id: String, tags: String, src: String}]} databaseRecords
+   * @param {Object[]} databaseRecords
    * @returns {Post[]}}
    */
   reconstructContent(databaseRecords) {
@@ -772,48 +434,10 @@ onmessage = (message) => {
     return searchResults;
   }
 
-  loadFavoritesFromDatabase() {
+  loadAllFavoritesFromDatabase() {
     FavoritesLoader.currentState = FavoritesLoader.states.loadingFavoritesFromDatabase;
     this.toggleLoadingUI(true);
-    let idsToDelete = [];
-
-    if (Utils.userIsOnTheirOwnFavoritesPage()) {
-      idsToDelete = Utils.getIdsToDeleteOnReload();
-      Utils.clearIdsToDeleteOnReload();
-    }
-    this.databaseWorker.postMessage({
-      command: "load",
-      idsToDelete
-    });
-  }
-
-  /**
-   * @param {Post[]} posts
-   */
-  async storeFavorites(posts) {
-    const storeAll = posts === undefined;
-
-    await Utils.sleep(500);
-    posts = storeAll ? this.allFavorites : posts;
-    const records = posts.map(post => post.databaseRecord);
-
-    if (storeAll) {
-      records.reverse();
-    }
-    this.databaseWorker.postMessage({
-      command: "store",
-      favorites: records
-    });
-  }
-
-  /**
-   * @param {Post[]} posts
-   */
-  updateFavorites(posts) {
-    this.databaseWorker.postMessage({
-      command: "update",
-      favorites: posts.map(post => post.databaseRecord)
-    });
+    this.database.loadAllFavorites();
   }
 
   /**
@@ -825,16 +449,24 @@ onmessage = (message) => {
 
   /**
    * @param {Boolean} value
+   * @param {Number} delay
    */
-  toggleStatusText(value) {
-    document.getElementById("favorites-fetch-progress-label").style.display = value ? "inline-block" : "none";
+  async toggleStatusText(value, delay) {
+    if (delay !== undefined && delay > 0) {
+      await Utils.sleep(delay);
+    }
+    document.getElementById("favorites-load-status-label").style.display = value ? "inline-block" : "none";
   }
 
   /**
    * @param {String} text
+   * @param {Number} delay
    */
-  setStatusText(text) {
-    document.getElementById("favorites-fetch-progress-label").textContent = text;
+  async setStatusText(text, delay) {
+    if (delay !== undefined && delay > 0) {
+      await Utils.sleep(delay);
+    }
+    document.getElementById("favorites-load-status-label").textContent = text;
   }
 
   resetMatchCount() {
@@ -885,7 +517,7 @@ onmessage = (message) => {
         insertedPosts.push(post);
       }
     }
-    this.paginator.createPaginationMenu(this.paginator.currentPageNumber, this.getPostsMatchedByLastSearch());
+    this.paginator.createPaginationMenu(this.paginator.currentPageNumber, this.getFavoritesMatchedByLastSearch);
     setTimeout(() => {
       dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
         detail: {
@@ -995,7 +627,7 @@ onmessage = (message) => {
 
   onSortingParametersChanged() {
     this.searchFlags.sortingParametersWereChanged = true;
-    const matchedPosts = this.getPostsMatchedByLastSearch();
+    const matchedPosts = this.getFavoritesMatchedByLastSearch;
 
     this.paginateSearchResults(matchedPosts);
     dispatchEvent(new Event("sortingParametersChanged"));
@@ -1007,7 +639,7 @@ onmessage = (message) => {
   onAllowedRatingsChanged(allowedRatings) {
     this.allowedRatings = allowedRatings;
     this.searchFlags.allowedRatingsWereChanged = true;
-    const matchedPosts = this.getPostsMatchedByLastSearch();
+    const matchedPosts = this.getFavoritesMatchedByLastSearch;
 
     this.paginateSearchResults(matchedPosts);
   }
@@ -1035,7 +667,7 @@ onmessage = (message) => {
   }
 
   updateMetadataInDatabase() {
-    this.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
+    this.database.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }
 

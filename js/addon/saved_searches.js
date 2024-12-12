@@ -189,18 +189,8 @@ class SavedSearches {
     if (SavedSearches.disabled) {
       return;
     }
-    this.initialize();
-  }
-
-  initialize() {
     this.insertHTML();
-    this.saveButton = document.getElementById("save-custom-search-button");
-    this.textarea = document.getElementById("saved-searches-input");
-    this.savedSearchesList = document.getElementById("saved-search-list");
-    this.stopEditingButton = document.getElementById("stop-editing-saved-search-button");
-    this.importButton = document.getElementById("import-saved-search-button");
-    this.exportButton = document.getElementById("export-saved-search-button");
-    this.saveSearchResultsButton = document.getElementById("save-results-button");
+    this.extractHTMLElements();
     this.addEventListeners();
     this.loadSavedSearches();
   }
@@ -224,6 +214,16 @@ class SavedSearches {
     );
 
     document.getElementById("bottom-panel-2").insertAdjacentElement("afterbegin", options);
+  }
+
+  extractHTMLElements() {
+    this.saveButton = document.getElementById("save-custom-search-button");
+    this.textarea = document.getElementById("saved-searches-input");
+    this.savedSearchesList = document.getElementById("saved-search-list");
+    this.stopEditingButton = document.getElementById("stop-editing-saved-search-button");
+    this.importButton = document.getElementById("import-saved-search-button");
+    this.exportButton = document.getElementById("export-saved-search-button");
+    this.saveSearchResultsButton = document.getElementById("save-results-button");
   }
 
   addEventListeners() {

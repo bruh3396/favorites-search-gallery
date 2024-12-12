@@ -766,7 +766,7 @@ class Caption {
    * @param {Function} onProblematicTagsCorrected
    */
   correctAllProblematicTagsFromThumb(thumb, onProblematicTagsCorrected) {
-    fetch(`https://rule34.xxx/index.php?page=post&s=view&id=${thumb.id}`)
+    fetch(Utils.getPostPageURL(thumb.id))
       .then((response) => {
         return response.text();
       })

@@ -41,7 +41,6 @@ class HoldButton extends HTMLElement {
     }
     this.addEventListeners();
     this.setPollingTime(this.getAttribute("pollingtime"));
-
   }
 
   attributeChangedCallback(name, oldValue, newValue) {

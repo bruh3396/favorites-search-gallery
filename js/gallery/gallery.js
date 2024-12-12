@@ -106,7 +106,7 @@ class Gallery {
 
     &.loaded {
 
-      div {
+      div, a {
         outline: 2px solid transparent;
         animation: outlineGlow 1s forwards;
       }
@@ -1115,8 +1115,7 @@ onmessage = (message) => {
       }
       return this.loopAtEndOfGalleryValue;
     },
-    debugEnabled: false,
-    developerMode: true
+    debugEnabled: false
   };
   static keyHeldDownTraversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
   static backgroundRenderingOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
@@ -1124,12 +1123,83 @@ onmessage = (message) => {
   static cursorVisibilityCooldown = new Cooldown(Gallery.settings.cursorVisibilityCooldownTime);
   static imageExtensionAssignmentCooldown = new Cooldown(Gallery.settings.imageExtensionAssignmentCooldownTime);
   static finishedLoading = Utils.onSearchPage();
-
+  static imageExtensions = Gallery.loadDiscoveredImageExtensions();
+  static recentlyDiscoveredImageExtensionCount = 0;
   /**
    * @returns {Boolean}
    */
   static get disabled() {
     return (Utils.onMobileDevice() && Utils.onSearchPage()) || Utils.getPerformanceProfile() > 0 || Utils.onPostPage();
+  }
+
+  /**
+   * @returns {Object.<String, Number>}
+   */
+  static loadDiscoveredImageExtensions() {
+    return JSON.parse(localStorage.getItem(Gallery.localStorageKeys.imageExtensions)) || {};
+  }
+
+  /**
+   * @param {String | Number} id
+   * @returns {String}
+   */
+  static getImageExtension(id) {
+    return Gallery.extensionDecodings[Gallery.imageExtensions[parseInt(id)]];
+  }
+
+  /**
+   * @param {String | Number} id
+   * @param {String} extension
+   */
+  static setImageExtension(id, extension) {
+    Gallery.imageExtensions[parseInt(id)] = Gallery.extensionEncodings[extension];
+  }
+
+  /**
+   * @param {String} id
+   * @returns {Boolean}
+   */
+  static extensionIsKnown(id) {
+    return Gallery.getImageExtension(id) !== undefined;
+  }
+
+  static updateStoredImageExtensions() {
+    Gallery.recentlyDiscoveredImageExtensionCount += 1;
+
+    if (Gallery.recentlyDiscoveredImageExtensionCount >= Gallery.settings.extensionsFoundBeforeSavingCount) {
+      this.storeAllImageExtensions();
+    }
+  }
+
+  static storeAllImageExtensions() {
+    if (!Utils.onFavoritesPage()) {
+      return;
+    }
+    Gallery.recentlyDiscoveredImageExtensionCount = 0;
+    localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(Gallery.imageExtensions));
+  }
+
+  /**
+   * @param {String} id
+   * @param {String} extension
+   */
+  static assignImageExtension(id, extension) {
+    if (Gallery.extensionIsKnown(id)) {
+      return;
+    }
+    Gallery.imageExtensionAssignmentCooldown.restart();
+    Gallery.setImageExtension(id, extension);
+    Gallery.updateStoredImageExtensions();
+  }
+
+  static {
+    Utils.addStaticInitializer(() => {
+      Gallery.imageExtensionAssignmentCooldown.onCooldownEnd = () => {
+        if (Gallery.recentlyDiscoveredImageExtensionCount > 0) {
+          Gallery.storeAllImageExtensions();
+        }
+      };
+    });
   }
 
   /**
@@ -1153,7 +1223,7 @@ onmessage = (message) => {
    */
   lowResolutionContext;
   /**
-   * @type {HTMLDivElement}
+   * @type {HTMLAnchorElement}
    */
   videoContainer;
   /**
@@ -1165,7 +1235,7 @@ onmessage = (message) => {
    */
   gifContainer;
   /**
-   * @type {HTMLDivElement}
+   * @type {HTMLAnchorElement}
    */
   background;
   /**
@@ -1283,7 +1353,7 @@ onmessage = (message) => {
     this.createWebWorkers();
     this.createVideoBackgrounds();
     this.addEventListeners();
-    this.loadDiscoveredImageExtensions();
+    this.createImageRendererMessageHandler();
     this.prepareSearchPage();
     this.insertHTML();
     this.updateBackgroundOpacity(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
@@ -1324,11 +1394,6 @@ onmessage = (message) => {
     Gallery.backgroundRenderingOnPageChangeCooldown.onDebounceEnd = () => {
       this.onPageChange();
     };
-    Gallery.imageExtensionAssignmentCooldown.onCooldownEnd = () => {
-      if (this.recentlyDiscoveredImageExtensionCount > 0) {
-        this.storeAllImageExtensions();
-      }
-    };
   }
 
   setMainCanvasResolution() {
@@ -1367,7 +1432,6 @@ onmessage = (message) => {
   addEventListeners() {
     this.addGalleryEventListeners();
     this.addFavoritesLoaderEventListeners();
-    this.addWebWorkerMessageHandlers();
     this.addMobileEventListeners();
     this.addMemoryManagementEventListeners();
   }
@@ -1400,16 +1464,15 @@ onmessage = (message) => {
         this.currentlySelectedThumbIndex = this.getIndexFromThumb(thumb);
       }
 
+      if (event.ctrlKey && event.button === Utils.clickCodes.left) {
+        return;
+      }
+
       switch (event.button) {
         case Utils.clickCodes.left:
           if (this.inGallery) {
             if (Utils.isVideo(this.getSelectedThumb()) && !Utils.onMobileDevice()) {
               return;
-            }
-
-            if (event.ctrlKey) {
-              // this.zoomOnMainCanvas(event);
-              // return;
             }
             this.exitGallery();
             this.toggleAllVisibility(false);
@@ -1571,7 +1634,6 @@ onmessage = (message) => {
           break;
 
         case "Control":
-
           this.setGalleryCursor(zoomedIn ? "zoom-out" : "zoom-in");
           break;
 
@@ -1690,9 +1752,9 @@ onmessage = (message) => {
       this.deleteAllRenders();
       this.renderImagesInTheBackground();
     });
-    window.addEventListener("metadataFetched", (event) => {
-      this.assignImageExtension(event.detail.id, event.detail.extension);
-    });
+    // window.addEventListener("metadataFetched", (event) => {
+    //   Gallery.assignImageExtension(event.detail.id, event.detail.extension);
+    // });
     window.addEventListener("didNotChangePageInGallery", (event) => {
       if (this.inGallery) {
         this.setNextSelectedThumbIndex(event.detail);
@@ -1701,7 +1763,7 @@ onmessage = (message) => {
     });
   }
 
-  addWebWorkerMessageHandlers() {
+  createImageRendererMessageHandler() {
     this.imageRenderer.onmessage = (message) => {
       message = message.data;
 
@@ -1715,7 +1777,7 @@ onmessage = (message) => {
           break;
 
         case "extensionFound":
-          this.assignImageExtension(message.id, message.extension);
+          Gallery.assignImageExtension(message.id, message.extension);
           break;
 
         default:
@@ -1811,22 +1873,12 @@ onmessage = (message) => {
     });
   }
 
-  loadDiscoveredImageExtensions() {
-    this.imageExtensions = JSON.parse(localStorage.getItem(Gallery.localStorageKeys.imageExtensions)) || {};
-  }
-
   async prepareSearchPage() {
     if (!Utils.onSearchPage()) {
       return;
     }
-    const thumbs = Array.from(document.querySelectorAll(".thumb"));
-
-    for (const thumb of thumbs) {
-      Utils.removeTitleFromImage(Utils.getImageFromThumb(thumb));
-      Utils.assignContentType(thumb);
-      thumb.id = Utils.removeNonNumericCharacters(Utils.getIdFromThumb(thumb));
-    }
-    await this.findImageExtensionsOnSearchPage();
+    await Utils.findImageExtensionsOnSearchPage();
+    dispatchEvent(new Event("foundExtensionsOnSearchPage"));
     this.renderImagesInTheBackground();
   }
 
@@ -1886,11 +1938,11 @@ onmessage = (message) => {
   insertOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="gallery-container">
-              <div id="original-video-container">
+              <a id="original-video-container">
                 <video id="video-player-0" width="100%" height="100%" autoplay muted loop controlsList="nofullscreen" active></video>
-              </div>
+              </a>
               <img id="original-gif-container" class="focused"></img>
-              <div id="original-content-background"></div>
+              <a id="original-content-background"></a>
           </div>
       `;
 
@@ -1928,6 +1980,12 @@ onmessage = (message) => {
   }
 
   addVideoPlayerEventListeners() {
+    this.videoContainer.onclick = (event) => {
+      if (!event.ctrlKey) {
+        event.preventDefault();
+      }
+    };
+
     for (const video of this.videoPlayers) {
       video.addEventListener("mousemove", () => {
         if (!video.hasAttribute("controls")) {
@@ -1936,7 +1994,11 @@ onmessage = (message) => {
       }, {
         passive: true
       });
-      video.addEventListener("click", () => {
+      video.addEventListener("click", (event) => {
+        if (event.ctrlKey) {
+          return;
+        }
+
         if (video.paused) {
           video.play().catch(() => { });
         } else {
@@ -2156,7 +2218,7 @@ onmessage = (message) => {
       Utils.getImageFromThumb(thumb).setAttribute("gif", true);
       return;
     }
-    this.assignImageExtension(message.id, message.extension);
+    Gallery.assignImageExtension(message.id, message.extension);
     this.drawMainCanvasOnRenderCompleted(thumb);
   }
 
@@ -2276,56 +2338,6 @@ onmessage = (message) => {
     }
   }
 
-  findImageExtensionsOnSearchPage() {
-    const searchPageAPIURL = this.getSearchPageAPIURL();
-    return fetch(searchPageAPIURL)
-      .then((response) => {
-        if (response.ok) {
-          return response.text();
-        }
-        return null;
-      })
-      .then((html) => {
-        if (html === null) {
-          console.error(`Failed to fetch: ${searchPageAPIURL}`);
-        }
-        const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
-        const posts = Array.from(dom.getElementsByTagName(Utils.favoriteItemClassName));
-
-        for (const post of posts) {
-          const tags = post.getAttribute("tags");
-          const id = post.getAttribute("id");
-          const originalImageURL = post.getAttribute("file_url");
-          const tagSet = Utils.convertToTagSet(tags);
-          const thumb = document.getElementById(id);
-
-          if (!tagSet.has("video") && originalImageURL.endsWith("mp4") && thumb !== null) {
-            const image = Utils.getImageFromThumb(thumb);
-
-            image.setAttribute("tags", `${image.getAttribute("tags")} video`);
-            Utils.setContentType(image, "video");
-          } else if (!tagSet.has("gif") && originalImageURL.endsWith("gif") && thumb !== null) {
-            const image = Utils.getImageFromThumb(thumb);
-
-            image.setAttribute("tags", `${image.getAttribute("tags")} gif`);
-            Utils.setContentType(image, "gif");
-          }
-          const isAnImage = Utils.getContentType(tags) === "image";
-          const isBlacklisted = originalImageURL === "https://api-cdn.rule34.xxx/images//";
-
-          if (!isAnImage || isBlacklisted) {
-            continue;
-          }
-          const extension = Utils.getExtensionFromImageURL(originalImageURL);
-
-          this.assignImageExtension(id, extension);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
-
   async findImageExtensionsInTheBackground() {
     await Utils.sleep(1000);
     const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(Array.from(Post.allPosts.values()));
@@ -2336,7 +2348,7 @@ onmessage = (message) => {
       while (idsWithUnknownExtensions.length > 0 && Gallery.finishedLoading) {
         const id = idsWithUnknownExtensions.pop();
 
-        if (id !== undefined && id !== null && !this.extensionIsKnown(id)) {
+        if (id !== undefined && id !== null && !Gallery.extensionIsKnown(id)) {
           this.imageRenderer.postMessage({
             action: "findExtension",
             id
@@ -2346,79 +2358,6 @@ onmessage = (message) => {
       }
     }
     Gallery.settings.extensionsFoundBeforeSavingCount = 0;
-  }
-
-  /**
-   * @param {String} id
-   * @param {String} extension
-   */
-  assignImageExtension(id, extension) {
-    if (this.imageExtensions[parseInt(id)] !== undefined) {
-      return;
-    }
-    Gallery.imageExtensionAssignmentCooldown.restart();
-    this.setImageExtension(id, extension);
-    this.updateStoredImageExtensions();
-  }
-
-  updateStoredImageExtensions() {
-    this.recentlyDiscoveredImageExtensionCount += 1;
-
-    if (this.recentlyDiscoveredImageExtensionCount >= Gallery.settings.extensionsFoundBeforeSavingCount) {
-      this.storeAllImageExtensions();
-    }
-  }
-
-  storeAllImageExtensions() {
-    if (!Utils.onFavoritesPage()) {
-      return;
-    }
-    this.recentlyDiscoveredImageExtensionCount = 0;
-    localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(this.imageExtensions));
-  }
-
-  /**
-   * @param {String | Number} id
-   * @returns {String}
-   */
-  getImageExtension(id) {
-    return Gallery.extensionDecodings[this.imageExtensions[parseInt(id)]];
-  }
-
-  /**
-   * @param {String | Number} id
-   * @param {String} extension
-   */
-  setImageExtension(id, extension) {
-    this.imageExtensions[parseInt(id)] = Gallery.extensionEncodings[extension];
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Boolean}
-   */
-  extensionIsKnown(id) {
-    return this.getImageExtension(id) !== undefined;
-  }
-
-  /**
-   * @returns {String}
-   */
-  getSearchPageAPIURL() {
-    const postsPerPage = 42;
-    const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
-    let blacklistedTags = ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
-    let pageNumber = (/&pid=(\d+)/).exec(location.href);
-    let searchTags = (/&tags=([^&]*)/).exec(location.href);
-
-    pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
-    searchTags = searchTags === null ? "" : searchTags[1];
-
-    if (searchTags === "all") {
-      searchTags = "";
-      blacklistedTags = "";
-    }
-    return `${apiURL}&tags=${searchTags}${blacklistedTags}&pid=${pageNumber}`;
   }
 
   enumerateThumbs() {
@@ -2482,7 +2421,7 @@ onmessage = (message) => {
    */
   openPostInNewPage(thumb) {
     thumb = thumb === undefined || thumb === null ? this.getSelectedThumb() : thumb;
-    Utils.openPostInNewPage(Utils.getIdFromThumb(thumb));
+    Utils.openPostInNewTab(Utils.getIdFromThumb(thumb));
   }
 
   unFavoriteSelectedContent() {
@@ -2539,6 +2478,7 @@ onmessage = (message) => {
     setTimeout(() => {
       this.recentlyEnteredGallery = false;
     }, 300);
+    this.setupOriginalImageLinkInGallery();
   }
 
   exitGallery() {
@@ -2621,6 +2561,7 @@ onmessage = (message) => {
       this.toggleOriginalVideoContainer(false);
       this.showOriginalImage(selectedThumb);
     }
+    this.setupOriginalImageLinkInGallery();
   }
 
   /**
@@ -3222,7 +3163,7 @@ onmessage = (message) => {
       action: "render",
       imageURL: Utils.getOriginalImageURLFromThumb(thumb),
       id: thumb.id,
-      extension: this.getImageExtension(thumb.id),
+      extension: Gallery.getImageExtension(thumb.id),
       fetchDelay: this.getBaseImageFetchDelay(thumb.id),
       thumbURL: Utils.getImageFromThumb(thumb).src.replace("us.rule", "rule"),
       pixelCount: this.getPixelCount(thumb),
@@ -3515,7 +3456,7 @@ onmessage = (message) => {
       return Gallery.settings.throttledImageFetchDelay;
     }
 
-    if (this.extensionIsKnown(id)) {
+    if (Gallery.extensionIsKnown(id)) {
       return Gallery.settings.imageFetchDelayWhenExtensionKnown;
     }
     return Gallery.settings.imageFetchDelay;
@@ -3555,7 +3496,7 @@ onmessage = (message) => {
    */
   getIdsWithUnknownExtensions(thumbs) {
     return thumbs
-      .filter(thumb => Utils.isImage(thumb) && !this.extensionIsKnown(thumb.id))
+      .filter(thumb => Utils.isImage(thumb) && !Gallery.extensionIsKnown(thumb.id))
       .map(thumb => thumb.id);
   }
 
@@ -3639,7 +3580,7 @@ onmessage = (message) => {
    * @param {String} cursor
    */
   setGalleryCursor(cursor) {
-    this.background.style.cursor = cursor;
+    // this.background.style.cursor = cursor;
   }
 
   /**
@@ -3664,5 +3605,17 @@ onmessage = (message) => {
         }
       }
     `, "main-canvas-zoom");
+  }
+
+  async setupOriginalImageLinkInGallery() {
+    const thumb = this.getSelectedThumb();
+
+    if (thumb === null || thumb === undefined) {
+      return;
+    }
+    const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
+    const container = Utils.isVideo(thumb) ? this.videoContainer : this.background;
+
+    container.href = imageURL;
   }
 }

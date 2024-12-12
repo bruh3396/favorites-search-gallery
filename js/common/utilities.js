@@ -274,14 +274,32 @@ class Utils {
    */
   static staticInitializers = [];
 
-  static initialize() {
+  /**
+   * @type {Boolean}
+   */
+  static get disabled() {
     if (Utils.onPostPage()) {
-      return;
+      return true;
     }
-    const enableOnSearchPages = Utils.getPreference("enableOnSearchPages", false) && Utils.getPerformanceProfile() === 0;
 
-    if (!enableOnSearchPages && Utils.onSearchPage()) {
-      throw new Error("Disabled on search pages");
+    if (Utils.onFavoritesPage()) {
+      return false;
+    }
+    // const enabledOnSearchPages = Utils.getPreference("enableOnSearchPages", false) && Utils.getPerformanceProfile() === 0;
+    const enabledOnSearchPages = Utils.getPreference("enableOnSearchPages", false);
+    return !enabledOnSearchPages;
+  }
+
+  /**
+   * @type {Boolean}
+   */
+  static get enabled() {
+    return !Utils.disabled;
+  }
+
+  static initialize() {
+    if (Utils.disabled) {
+      throw new Error("Favorites Search Gallery disabled");
     }
     Utils.invokeStaticInitializers();
     Utils.removeUnusedScripts();
@@ -289,7 +307,9 @@ class Utils {
     Utils.setupCustomWebComponents();
     Utils.toggleFancyImageHovering(true);
     Utils.setTheme();
+    Utils.prepareSearchPage();
     Utils.prefetchAdjacentSearchPages();
+    Utils.setupOriginalImageLinksOnSearchPage();
   }
 
   /**
@@ -1722,7 +1742,7 @@ Tag modifications and saved searches will be preserved.
           localStorage.removeItem(key);
         }
       });
-      indexedDB.deleteDatabase(FavoritesLoader.databaseName);
+      indexedDB.deleteDatabase(FavoritesDatabaseWrapper.databaseName);
     }
   }
 
@@ -1730,15 +1750,15 @@ Tag modifications and saved searches will be preserved.
    * @param {String} id
    * @returns {String}
    */
-  static getPostPageURLFromPostId(id) {
+  static getPostPageURL(id) {
     return `https://rule34.xxx/index.php?page=post&s=view&id=${id}`;
   }
 
   /**
    * @param {String} id
    */
-  static openPostInNewPage(id) {
-    window.open(Utils.getPostPageURLFromPostId(id), "_blank");
+  static openPostInNewTab(id) {
+    window.open(Utils.getPostPageURL(id), "_blank");
   }
 
   /**
@@ -1760,5 +1780,230 @@ Tag modifications and saved searches will be preserved.
    */
   static loadAllowedRatings() {
     return parseInt(Utils.getPreference("allowedRatings", 7));
+  }
+
+  /**
+   * @param {Set} a
+   * @param {Set} b
+   * @returns {Set}
+   */
+  static symmetricDifference(a, b) {
+    return Utils.union(Utils.difference(a, b), Utils.difference(b, a));
+  }
+
+  static clearOriginalFavoritesPage() {
+    const thumbs = Array.from(document.getElementsByClassName("thumb"));
+    let content = document.getElementById("content");
+
+    if (content === null && thumbs.length > 0) {
+      content = thumbs[0].closest("body>div");
+    }
+
+    if (content !== null) {
+      content.remove();
+    }
+    setTimeout(() => {
+      dispatchEvent(new CustomEvent("originalFavoritesCleared", {
+        detail: thumbs
+      }));
+    }, 1000);
+  }
+
+  /**
+   * @param {String} id
+   * @returns {String}
+   */
+  static getPostAPIURL(id) {
+    return `https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=${id}`;
+  }
+
+  /**
+   * @returns {Promise<String>}
+   */
+  static getImageExtension(thumb) {
+    if (Utils.isVideo(thumb)) {
+      return "mp4";
+    }
+
+    if (Utils.isGif(thumb)) {
+      return "gif";
+    }
+
+    if (Gallery.extensionIsKnown(thumb.id)) {
+      return Gallery.getImageExtension(thumb.id);
+    }
+    return Utils.fetchImageExtension(thumb);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {Promise<String>}
+   */
+  static fetchImageExtension(thumb) {
+    return fetch(Utils.getPostAPIURL(thumb.id))
+      .then((response) => {
+        return response.text();
+      })
+      .then((html) => {
+        const dom = new DOMParser().parseFromString(html, "text/html");
+        const metadata = dom.querySelector("post");
+        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
+
+        Gallery.assignImageExtension(thumb.id, extension);
+        return extension;
+      })
+      .catch((error) => {
+        console.error(error);
+        return "jpg";
+      });
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {Promise<String>}
+   */
+  static async getOriginalImageURLWithExtension(thumb) {
+    const extension = await Utils.getImageExtension(thumb);
+    return Utils.getOriginalImageURL(thumb.querySelector("img").src).replace(".jpg", `.${extension}`);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  static async openOriginalImageInNewTab(thumb) {
+    try {
+      const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
+
+      window.open(imageURL);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /**
+   * @returns {String}
+   */
+  static getSearchPageAPIURL() {
+    const postsPerPage = 42;
+    const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
+    let blacklistedTags = ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
+    let pageNumber = (/&pid=(\d+)/).exec(location.href);
+    let searchTags = (/&tags=([^&]*)/).exec(location.href);
+
+    pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
+    searchTags = searchTags === null ? "" : searchTags[1];
+
+    if (searchTags === "all") {
+      searchTags = "";
+      blacklistedTags = "";
+    }
+    return `${apiURL}&tags=${searchTags}${blacklistedTags}&pid=${pageNumber}`;
+  }
+
+  static findImageExtensionsOnSearchPage() {
+    const searchPageAPIURL = Utils.getSearchPageAPIURL();
+    return fetch(searchPageAPIURL)
+      .then((response) => {
+        if (response.ok) {
+          return response.text();
+        }
+        return null;
+      })
+      .then((html) => {
+        if (html === null) {
+          console.error(`Failed to fetch: ${searchPageAPIURL}`);
+        }
+        const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+        const posts = Array.from(dom.getElementsByTagName("post"));
+
+        for (const post of posts) {
+          const tags = post.getAttribute("tags");
+          const id = post.getAttribute("id");
+          const originalImageURL = post.getAttribute("file_url");
+          const tagSet = Utils.convertToTagSet(tags);
+          const thumb = document.getElementById(id);
+
+          if (!tagSet.has("video") && originalImageURL.endsWith("mp4") && thumb !== null) {
+            const image = Utils.getImageFromThumb(thumb);
+
+            image.setAttribute("tags", `${image.getAttribute("tags")} video`);
+            Utils.setContentType(image, "video");
+          } else if (!tagSet.has("gif") && originalImageURL.endsWith("gif") && thumb !== null) {
+            const image = Utils.getImageFromThumb(thumb);
+
+            image.setAttribute("tags", `${image.getAttribute("tags")} gif`);
+            Utils.setContentType(image, "gif");
+          }
+          const isAnImage = Utils.getContentType(tags) === "image";
+          const isBlacklisted = originalImageURL === "https://api-cdn.rule34.xxx/images//";
+
+          if (!isAnImage || isBlacklisted) {
+            continue;
+          }
+          const extension = Utils.getExtensionFromImageURL(originalImageURL);
+
+          Gallery.assignImageExtension(id, extension);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  static async setupOriginalImageLinksOnSearchPage() {
+    if (Gallery.disabled) {
+      await Utils.findImageExtensionsOnSearchPage();
+      Utils.setupOriginalImageLinksOnSearchPageHelper();
+    } else {
+      window.addEventListener("foundExtensionsOnSearchPage", () => {
+        Utils.setupOriginalImageLinksOnSearchPageHelper();
+      }, {
+        once: true
+      });
+    }
+  }
+
+  static async setupOriginalImageLinksOnSearchPageHelper() {
+    try {
+      for (const thumb of Utils.getAllThumbs()) {
+        await Utils.setupOriginalImageLinkOnSearchPage(thumb);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  static async setupOriginalImageLinkOnSearchPage(thumb) {
+    const anchor = thumb.querySelector("a");
+    const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
+    const thumbURL = anchor.href;
+
+    anchor.href = imageURL;
+    anchor.onclick = (event) => {
+      if (!event.ctrlKey) {
+        event.preventDefault();
+      }
+    };
+    anchor.onmousedown = (event) => {
+      if (!event.ctrlKey) {
+        if (event.button === Utils.clickCodes.left && Gallery.disabled) {
+          document.location = thumbURL;
+        } else if (event.button === Utils.clickCodes.middle) {
+          window.open(thumbURL);
+        }
+        event.preventDefault();
+      }
+    };
+  }
+
+  static prepareSearchPage() {
+    for (const thumb of Utils.getAllThumbs()) {
+      Utils.removeTitleFromImage(Utils.getImageFromThumb(thumb));
+      Utils.assignContentType(thumb);
+      thumb.id = Utils.removeNonNumericCharacters(Utils.getIdFromThumb(thumb));
+    }
   }
 }

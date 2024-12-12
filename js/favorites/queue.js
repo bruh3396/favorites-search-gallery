@@ -19,7 +19,7 @@ class FetchedFavoritesQueue {
   /**
    * @type {Number}
    */
-  get lowestPageNumberInQueue() {
+  get lowestEnqueuedPageNumber() {
     return this.queue[0].pageNumber;
   }
 
@@ -34,13 +34,13 @@ class FetchedFavoritesQueue {
    * @type {Boolean}
    */
   get allPreviousPagesWereDequeued() {
-    return this.nextPageNumberToDequeue === this.lowestPageNumberInQueue;
+    return this.nextPageNumberToDequeue === this.lowestEnqueuedPageNumber;
   }
 
   /**
    * @type {Boolean}
    */
-  get queueIsEmpty() {
+  get isEmpty() {
     return this.queue.length === 0;
   }
 
@@ -48,7 +48,7 @@ class FetchedFavoritesQueue {
    * @type {Boolean}
    */
   get canDequeue() {
-    return !this.queueIsEmpty && this.allPreviousPagesWereDequeued;
+    return !this.isEmpty && this.allPreviousPagesWereDequeued;
   }
 
   /**
@@ -65,15 +65,15 @@ class FetchedFavoritesQueue {
    */
   enqueue(request) {
     this.queue.push(request);
-    this.sortQueueBySmallestPageNumber();
-    this.emptyQueue();
+    this.sortByLowestPageNumber();
+    this.tryDequeuingAll();
   }
 
-  sortQueueBySmallestPageNumber() {
+  sortByLowestPageNumber() {
     this.queue.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
   }
 
-  emptyQueue() {
+  tryDequeuingAll() {
     if (this.dequeuing) {
       return;
     }

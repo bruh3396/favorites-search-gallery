@@ -109,6 +109,7 @@ class FavoritesFetcher {
       favorites = favorites.concat(newFavorites);
 
       if (allNewFavoritesFound) {
+        this.storedFavoriteIds = null;
         this.onAllFavoritesPageRequestsCompleted(favorites);
         return;
       }

@@ -49,7 +49,7 @@ class WildcardSearchTag extends SearchTag {
   /**
    * @type {RegExp}
    */
-  regex;
+  matchRegex;
   /**
    * @type {Boolean}
    */
@@ -71,7 +71,7 @@ class WildcardSearchTag extends SearchTag {
    */
   constructor(searchTag) {
     super(searchTag);
-    this.regex = this.createWildcardRegex();
+    this.matchRegex = this.createWildcardRegex();
     this.equivalentToStartsWith = WildcardSearchTag.startsWithRegex.test(searchTag);
     this.startsWithPrefix = this.value.slice(0, -1);
   }
@@ -121,7 +121,7 @@ class WildcardSearchTag extends SearchTag {
    */
   matchesWildcard(post) {
     for (const tag of post.tagSet.values()) {
-      if (this.regex.test(tag)) {
+      if (this.matchRegex.test(tag)) {
         return !this.negated;
       }
     }
@@ -210,11 +210,10 @@ class SearchCommand {
     const searchTags = [];
 
     for (const tag of tags) {
-      if (uniqueTags.has(tag)) {
-        continue;
+      if (!uniqueTags.has(tag)) {
+        uniqueTags.add(tag);
+        searchTags.push(SearchCommand.createSearchTag(tag));
       }
-      uniqueTags.add(tag);
-      searchTags.push(SearchCommand.createSearchTag(tag));
     }
     return searchTags;
   }

@@ -157,14 +157,14 @@ class PostMetadata {
    * @type {String}
    */
   get apiURL() {
-    return `https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=${this.id}`;
+    return Utils.getPostAPIURL(this.id);
   }
 
   /**
    * @type {String}
    */
   get postURL() {
-    return `https://rule34.xxx/index.php?page=post&s=view&id=${this.id}`;
+    return Utils.getPostPageURL(this.id);
   }
 
   /**
@@ -271,12 +271,13 @@ class PostMetadata {
         const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {
-          dispatchEvent(new CustomEvent("metadataFetched", {
-            detail: {
-              id: this.id,
-              extension
-            }
-          }));
+          // dispatchEvent(new CustomEvent("metadataFetched", {
+          //   detail: {
+          //     id: this.id,
+          //     extension
+          //   }
+          // }));
+          Gallery.assignImageExtension(this.id, extension);
         }
 
         if (missingInDatabase) {

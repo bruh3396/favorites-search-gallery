@@ -20,6 +20,7 @@ This script is still in development, please let me know if you experience a bug,
 2. Install this script using Tampermonkey
 3. Go to any favorites page, it should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
 4. Enjoy
+
 ## Features
 
 * Search favorites with the the same [syntax](#search-syntax) as the normal search pages (including meta tags):
@@ -45,6 +46,7 @@ This script is still in development, please let me know if you experience a bug,
 * Sort by score, width, height, rating, id, date uploaded, or date changed
 * Filter by rating: safe, questionable, explicit, or any combination of the three
 * Add/Remove favorites while in gallery
+* Redirect to original images in new tabs
 
 ## Recommended Specs:
 | Metric | Recommended |
@@ -59,13 +61,16 @@ This script is still in development, please let me know if you experience a bug,
 | :-------- | :-------- | :-------- |
 | Left Click, Touch | Enlarge thumbnail content and enter gallery | Clicked on a thumbnail |
 | Middle Click | Open post page of thumbnail in new tab | Clicked on a thumbnail |
+| Ctrl Left Click | Open original content in new tab and stay on current tab | Clicked on a thumbnail |
+| Ctrl Shift Left Click | Open original content in new tab and move to new tab | Clicked on a thumbnail |
 | Middle Click | Toggle "Enlarge on Hover" option | Did **NOT** click on a thumbnail or tag in details |
 | Scroll Wheel | Change background opacity | Cursor hovering over thumbnail with "Enlarge on Hover" enabled |
 | Shift + Scroll Wheel | Change column count | |
 | Left Click | Add tag to search | Clicked on a tag in details |
 | Right Click | Add negated tag to search | Clicked on a tag in details |
 | Middle Click | Quick search tag | Clicked on a tag in details |
-| Ctrl Click | Search site for tag in new tab | Clicked on a tag in details |
+| Ctrl Left Click | Search site for tag in new tab | Clicked on a tag in details |
+
 
 ### Gallery Controls
 | Input                                 | Function                                       | Condition              |
@@ -75,7 +80,9 @@ This script is still in development, please let me know if you experience a bug,
 | Escape                                |                                    |                        |
 | Right Click                           | Exit gallery, Enable "Enlarge on Hover" option |                        |
 | Middle Click                          | Open post page of thumbnail in new tab         |                        |
-| Double Click                          | Exit gallery         | Content is a video                       |
+| Double Left Click                          | Exit gallery         | Content is a video                       |
+| Ctrl Left  Click                          | Open original content in new tab and stay on current tab         |                        |
+| Ctrl Shift Left Click | Open original content in new tab and move to new tab |  |
 
 
 ### Gallery Hotkeys
