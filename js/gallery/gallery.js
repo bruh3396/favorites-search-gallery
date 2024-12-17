@@ -21,7 +21,9 @@ class Gallery {
   }
 
   #gallery-container {
-    >canvas,img {
+
+    >canvas,
+    img {
       float: left;
       overflow: hidden;
       pointer-events: none;
@@ -35,13 +37,15 @@ class Gallery {
   }
 
   #original-video-container {
+    cursor: default;
+
     video {
       top: 0;
       left: 0;
       display: none;
-      position:fixed;
-      z-index:9998;
-      pointer-events:none;
+      position: fixed;
+      z-index: 9998;
+      pointer-events: none;
     }
   }
 
@@ -94,6 +98,11 @@ class Gallery {
     z-index: 999;
     display: none;
     pointer-events: none;
+    cursor: default;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
   }
 </style>
 `;
@@ -116,7 +125,8 @@ class Gallery {
       }
     }
 
-    >div>canvas {
+    >a
+    >canvas {
       position: absolute;
       top: 0;
       left: 0;
@@ -172,12 +182,9 @@ class Gallery {
     videoVolume: "videoVolume",
     videoMuted: "videoMuted"
   };
-  static localStorageKeys = {
-    imageExtensions: "imageExtensions"
-  };
   static webWorkers = {
     renderer:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -225,11 +232,6 @@ class RenderRequest {
    */
   abortController;
   /**
-   * @type {Boolean}
-   */
-  hasStarted;
-
-  /**
    * @type {Number}
    */
   get estimatedMegabyteSize() {
@@ -261,7 +263,6 @@ class RenderRequest {
     this.canvas = request.canvas;
     this.resolutionFraction = request.resolutionFraction;
     this.abortController = new AbortController();
-    this.hasStarted = false;
   }
 }
 
@@ -696,16 +697,23 @@ class ImageRenderer {
     this.context.lineJoin = "miter";
   }
 
+  renderMultipleImages(message) {
+    const batchRenderRequest = new BatchRenderRequest(message);
+
+    this.thumbUpscaler.collectCanvases(batchRenderRequest);
+    this.abortOutdatedFetchRequests(batchRenderRequest);
+    this.deleteRendersNotInNewRequests(batchRenderRequest);
+    this.removeStartedRenderRequests(batchRenderRequest);
+    this.batchRenderRequest = batchRenderRequest;
+    this.renderMultipleImagesHelper(batchRenderRequest);
+  }
+
   /**
    * @param {BatchRenderRequest} batchRenderRequest
    */
-  async renderMultipleImages(batchRenderRequest) {
-    const batchRequestId = batchRenderRequest.id;
-
-    this.removeCompletedRenderRequests(batchRenderRequest);
-
+  async renderMultipleImagesHelper(batchRenderRequest) {
     for (const request of batchRenderRequest.renderRequests) {
-      if (request.hasStarted || this.renders.has(request.id)) {
+      if (this.renders.has(request.id)) {
         continue;
       }
       this.renders.set(request.id, {
@@ -716,10 +724,7 @@ class ImageRenderer {
     }
 
     for (const request of batchRenderRequest.renderRequests) {
-      if (this.isApartOfOutdatedBatchRequest(batchRequestId) || request.hasStarted) {
-        continue;
-      }
-      this.renderImage(request, batchRequestId);
+      this.renderImage(request);
       await sleep(request.fetchDelay);
     }
   }
@@ -728,14 +733,10 @@ class ImageRenderer {
    * @param {RenderRequest} request
    * @param {Number} batchRequestId
    */
-  async renderImage(request, batchRequestId) {
+  async renderImage(request) {
     this.incompleteRenderRequests.set(request.id, request);
     await ImageFetcher.setOriginalImageURLAndExtension(request);
     let blob;
-
-    if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
-      return;
-    }
 
     try {
       blob = await ImageFetcher.fetchImageBlob(request);
@@ -750,15 +751,8 @@ class ImageRenderer {
       }
       return;
     }
-
-    if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
-      return;
-    }
     const imageBitmap = await createImageBitmap(blob);
 
-    if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
-      return;
-    }
     this.renders.set(request.id, {
       completed: true,
       imageBitmap,
@@ -781,24 +775,9 @@ class ImageRenderer {
    * @param {String} id
    * @returns {Boolean}
    */
-  renderIsFinished(id) {
+  renderHasCompleted(id) {
     const render = this.renders.get(id);
     return render !== undefined && render.completed;
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Boolean}
-   */
-  isApartOfOutdatedBatchRequest(id) {
-    if (id === undefined || id === null) {
-      return false;
-    }
-
-    if (!this.hasBatchRenderRequest) {
-      return true;
-    }
-    return this.batchRenderRequest.renderRequestIds.has(id);
   }
 
   /**
@@ -923,25 +902,18 @@ class ImageRenderer {
   }
 
   /**
-   * @param {BatchRenderRequest} newBatchRenderRequest
+   * @param {BatchRenderRequest} batchRenderRequest
    */
-  markRenderRequestsThatHaveAlreadyStarted(newBatchRenderRequest) {
-    if (!this.hasBatchRenderRequest) {
-      return;
-    }
-    const previousRequestIds = this.batchRenderRequest.renderRequestIds;
-
-    newBatchRenderRequest.renderRequests.forEach((request) => {
-      request.hasStarted = previousRequestIds.has(request.id);
-    });
+  removeStartedRenderRequests(batchRenderRequest) {
+    batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
+      .filter(request => !this.renders.has(request.id));
   }
-
   /**
    * @param {BatchRenderRequest} batchRenderRequest
    */
   removeCompletedRenderRequests(batchRenderRequest) {
     batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
-      .filter(request => !this.renderIsFinished(request.id));
+      .filter(request => !this.renderHasCompleted(request.id));
   }
 
   upscaleAllRenderedThumbs() {
@@ -951,8 +923,6 @@ class ImageRenderer {
   }
 
   onmessage(message) {
-    let batchRenderRequest;
-
     switch (message.action) {
       case "render":
         this.renderRequest = new RenderRequest(message);
@@ -962,13 +932,7 @@ class ImageRenderer {
         break;
 
       case "renderMultiple":
-        batchRenderRequest = new BatchRenderRequest(message);
-        this.thumbUpscaler.collectCanvases(batchRenderRequest);
-        this.abortOutdatedFetchRequests(batchRenderRequest);
-        this.markRenderRequestsThatHaveAlreadyStarted(batchRenderRequest);
-        this.deleteRendersNotInNewRequests(batchRenderRequest);
-        this.batchRenderRequest = batchRenderRequest;
-        this.renderMultipleImages(batchRenderRequest);
+        this.renderMultipleImages(message);
         break;
 
       case "deleteAllRenders":
@@ -1031,21 +995,6 @@ onmessage = (message) => {
     search: Utils.onMobileDevice() ? "7680x4320" : "3840x2160",
     favorites: "7680x4320"
   };
-  static htmlAttributes = {
-    thumbIndex: "index"
-  };
-  static extensionDecodings = {
-    0: "jpg",
-    1: "png",
-    2: "jpeg",
-    3: "gif"
-  };
-  static extensionEncodings = {
-    "jpg": 0,
-    "png": 1,
-    "jpeg": 2,
-    "gif": 3
-  };
   static swipeControls = {
     threshold: 60,
     touchStart: {
@@ -1091,14 +1040,13 @@ onmessage = (message) => {
   static settings = {
     maxImagesToRenderInBackground: 50,
     maxImagesToRenderAround: Utils.onMobileDevice() ? 2 : 50,
-    megabyteLimit: Utils.onMobileDevice() ? 0 : 375,
+    megabyteLimit: Utils.onMobileDevice() ? 0 : 400,
     minImagesToRender: Utils.onMobileDevice() ? 3 : 8,
     imageFetchDelay: 250,
     throttledImageFetchDelay: 400,
     imageFetchDelayWhenExtensionKnown: 25,
     upscaledThumbResolutionFraction: 4,
     upscaledAnimatedThumbResolutionFraction: 6,
-    extensionsFoundBeforeSavingCount: 100,
     animatedThumbsToUpscaleRange: 20,
     animatedThumbsToUpscaleDiscrete: 20,
     traversalCooldownTime: 300,
@@ -1121,85 +1069,12 @@ onmessage = (message) => {
   static backgroundRenderingOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
   static addOrRemoveFavoriteCooldown = new Cooldown(Gallery.settings.addFavoriteCooldownTime, true);
   static cursorVisibilityCooldown = new Cooldown(Gallery.settings.cursorVisibilityCooldownTime);
-  static imageExtensionAssignmentCooldown = new Cooldown(Gallery.settings.imageExtensionAssignmentCooldownTime);
   static finishedLoading = Utils.onSearchPage();
-  static imageExtensions = Gallery.loadDiscoveredImageExtensions();
-  static recentlyDiscoveredImageExtensionCount = 0;
   /**
    * @returns {Boolean}
    */
   static get disabled() {
     return (Utils.onMobileDevice() && Utils.onSearchPage()) || Utils.getPerformanceProfile() > 0 || Utils.onPostPage();
-  }
-
-  /**
-   * @returns {Object.<String, Number>}
-   */
-  static loadDiscoveredImageExtensions() {
-    return JSON.parse(localStorage.getItem(Gallery.localStorageKeys.imageExtensions)) || {};
-  }
-
-  /**
-   * @param {String | Number} id
-   * @returns {String}
-   */
-  static getImageExtension(id) {
-    return Gallery.extensionDecodings[Gallery.imageExtensions[parseInt(id)]];
-  }
-
-  /**
-   * @param {String | Number} id
-   * @param {String} extension
-   */
-  static setImageExtension(id, extension) {
-    Gallery.imageExtensions[parseInt(id)] = Gallery.extensionEncodings[extension];
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Boolean}
-   */
-  static extensionIsKnown(id) {
-    return Gallery.getImageExtension(id) !== undefined;
-  }
-
-  static updateStoredImageExtensions() {
-    Gallery.recentlyDiscoveredImageExtensionCount += 1;
-
-    if (Gallery.recentlyDiscoveredImageExtensionCount >= Gallery.settings.extensionsFoundBeforeSavingCount) {
-      this.storeAllImageExtensions();
-    }
-  }
-
-  static storeAllImageExtensions() {
-    if (!Utils.onFavoritesPage()) {
-      return;
-    }
-    Gallery.recentlyDiscoveredImageExtensionCount = 0;
-    localStorage.setItem(Gallery.localStorageKeys.imageExtensions, JSON.stringify(Gallery.imageExtensions));
-  }
-
-  /**
-   * @param {String} id
-   * @param {String} extension
-   */
-  static assignImageExtension(id, extension) {
-    if (Gallery.extensionIsKnown(id)) {
-      return;
-    }
-    Gallery.imageExtensionAssignmentCooldown.restart();
-    Gallery.setImageExtension(id, extension);
-    Gallery.updateStoredImageExtensions();
-  }
-
-  static {
-    Utils.addStaticInitializer(() => {
-      Gallery.imageExtensionAssignmentCooldown.onCooldownEnd = () => {
-        if (Gallery.recentlyDiscoveredImageExtensionCount > 0) {
-          Gallery.storeAllImageExtensions();
-        }
-      };
-    });
   }
 
   /**
@@ -1777,7 +1652,7 @@ onmessage = (message) => {
           break;
 
         case "extensionFound":
-          Gallery.assignImageExtension(message.id, message.extension);
+          Utils.assignImageExtension(message.id, message.extension);
           break;
 
         default:
@@ -2218,7 +2093,7 @@ onmessage = (message) => {
       Utils.getImageFromThumb(thumb).setAttribute("gif", true);
       return;
     }
-    Gallery.assignImageExtension(message.id, message.extension);
+    Utils.assignImageExtension(message.id, message.extension);
     this.drawMainCanvasOnRenderCompleted(thumb);
   }
 
@@ -2348,7 +2223,7 @@ onmessage = (message) => {
       while (idsWithUnknownExtensions.length > 0 && Gallery.finishedLoading) {
         const id = idsWithUnknownExtensions.pop();
 
-        if (id !== undefined && id !== null && !Gallery.extensionIsKnown(id)) {
+        if (id !== undefined && id !== null && !Utils.extensionIsKnown(id)) {
           this.imageRenderer.postMessage({
             action: "findExtension",
             id
@@ -2456,7 +2331,8 @@ onmessage = (message) => {
       return;
     }
     Utils.showFullscreenIcon(Utils.icons.heartMinus);
-    removeFavoriteButton.click();
+    this.onFavoriteAddedOrDeleted(selectedThumb.id);
+    Utils.removeFavorite(selectedThumb.id);
   }
 
   enterGallery() {
@@ -3163,7 +3039,7 @@ onmessage = (message) => {
       action: "render",
       imageURL: Utils.getOriginalImageURLFromThumb(thumb),
       id: thumb.id,
-      extension: Gallery.getImageExtension(thumb.id),
+      extension: Utils.getImageExtension(thumb.id),
       fetchDelay: this.getBaseImageFetchDelay(thumb.id),
       thumbURL: Utils.getImageFromThumb(thumb).src.replace("us.rule", "rule"),
       pixelCount: this.getPixelCount(thumb),
@@ -3456,7 +3332,7 @@ onmessage = (message) => {
       return Gallery.settings.throttledImageFetchDelay;
     }
 
-    if (Gallery.extensionIsKnown(id)) {
+    if (Utils.extensionIsKnown(id)) {
       return Gallery.settings.imageFetchDelayWhenExtensionKnown;
     }
     return Gallery.settings.imageFetchDelay;
@@ -3496,7 +3372,7 @@ onmessage = (message) => {
    */
   getIdsWithUnknownExtensions(thumbs) {
     return thumbs
-      .filter(thumb => Utils.isImage(thumb) && !Gallery.extensionIsKnown(thumb.id))
+      .filter(thumb => Utils.isImage(thumb) && !Utils.extensionIsKnown(thumb.id))
       .map(thumb => thumb.id);
   }
 
@@ -3565,15 +3441,22 @@ onmessage = (message) => {
 
       case Utils.addedFavoriteStatuses.success:
         svg = Utils.icons.heartPlus;
-        dispatchEvent(new CustomEvent("favoriteAddedOrDeleted", {
-          detail: selectedThumb.id
-        }));
+        this.onFavoriteAddedOrDeleted(selectedThumb.id);
         break;
 
       default:
         break;
     }
     Utils.showFullscreenIcon(svg);
+  }
+
+  /**
+   * @param {String} id
+   */
+  onFavoriteAddedOrDeleted(id) {
+    dispatchEvent(new CustomEvent("favoriteAddedOrDeleted", {
+      detail: id
+    }));
   }
 
   /**

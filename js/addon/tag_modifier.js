@@ -17,7 +17,7 @@ class TagModifier {
     .favorite.tag-modifier-selected {
       outline: 2px dashed white !important;
 
-      >div {
+      >div, >a {
         opacity: 1;
         filter: grayscale(0%);
       }
@@ -301,7 +301,9 @@ class TagModifier {
         cursor: pointer;
         outline: 1px solid black;
 
-        > div {
+        > div,
+        >a
+         {
           outline: none !important;
 
           > img {

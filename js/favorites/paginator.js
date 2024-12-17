@@ -30,6 +30,8 @@ class FavoritesPaginator {
     this.currentPageNumber = 1;
     this.favoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 3 : 5;
+    this.insertPaginationMenuContainer();
+    this.createPaginationMenu(1, []);
   }
 
   /**
@@ -148,7 +150,7 @@ class FavoritesPaginator {
       this.paginationLabel = document.getElementById("pagination-label");
     }
 
-    if (favoriteCount <= this.maxFavoritesPerPage) {
+    if (favoriteCount <= this.maxFavoritesPerPage || isNaN(start) || isNaN(end)) {
       this.paginationLabel.textContent = "";
       return;
     }

@@ -45,11 +45,6 @@ class RenderRequest {
    */
   abortController;
   /**
-   * @type {Boolean}
-   */
-  hasStarted;
-
-  /**
    * @type {Number}
    */
   get estimatedMegabyteSize() {
@@ -81,7 +76,6 @@ class RenderRequest {
     this.canvas = request.canvas;
     this.resolutionFraction = request.resolutionFraction;
     this.abortController = new AbortController();
-    this.hasStarted = false;
   }
 }
 
@@ -516,16 +510,23 @@ class ImageRenderer {
     this.context.lineJoin = "miter";
   }
 
+  renderMultipleImages(message) {
+    const batchRenderRequest = new BatchRenderRequest(message);
+
+    this.thumbUpscaler.collectCanvases(batchRenderRequest);
+    this.abortOutdatedFetchRequests(batchRenderRequest);
+    this.deleteRendersNotInNewRequests(batchRenderRequest);
+    this.removeStartedRenderRequests(batchRenderRequest);
+    this.batchRenderRequest = batchRenderRequest;
+    this.renderMultipleImagesHelper(batchRenderRequest);
+  }
+
   /**
    * @param {BatchRenderRequest} batchRenderRequest
    */
-  async renderMultipleImages(batchRenderRequest) {
-    const batchRequestId = batchRenderRequest.id;
-
-    this.removeCompletedRenderRequests(batchRenderRequest);
-
+  async renderMultipleImagesHelper(batchRenderRequest) {
     for (const request of batchRenderRequest.renderRequests) {
-      if (request.hasStarted || this.renders.has(request.id)) {
+      if (this.renders.has(request.id)) {
         continue;
       }
       this.renders.set(request.id, {
@@ -536,10 +537,7 @@ class ImageRenderer {
     }
 
     for (const request of batchRenderRequest.renderRequests) {
-      if (this.isApartOfOutdatedBatchRequest(batchRequestId) || request.hasStarted) {
-        continue;
-      }
-      this.renderImage(request, batchRequestId);
+      this.renderImage(request);
       await sleep(request.fetchDelay);
     }
   }
@@ -548,14 +546,10 @@ class ImageRenderer {
    * @param {RenderRequest} request
    * @param {Number} batchRequestId
    */
-  async renderImage(request, batchRequestId) {
+  async renderImage(request) {
     this.incompleteRenderRequests.set(request.id, request);
     await ImageFetcher.setOriginalImageURLAndExtension(request);
     let blob;
-
-    if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
-      return;
-    }
 
     try {
       blob = await ImageFetcher.fetchImageBlob(request);
@@ -570,15 +564,8 @@ class ImageRenderer {
       }
       return;
     }
-
-    if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
-      return;
-    }
     const imageBitmap = await createImageBitmap(blob);
 
-    if (this.isApartOfOutdatedBatchRequest(batchRequestId)) {
-      return;
-    }
     this.renders.set(request.id, {
       completed: true,
       imageBitmap,
@@ -601,24 +588,9 @@ class ImageRenderer {
    * @param {String} id
    * @returns {Boolean}
    */
-  renderIsFinished(id) {
+  renderHasCompleted(id) {
     const render = this.renders.get(id);
     return render !== undefined && render.completed;
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Boolean}
-   */
-  isApartOfOutdatedBatchRequest(id) {
-    if (id === undefined || id === null) {
-      return false;
-    }
-
-    if (!this.hasBatchRenderRequest) {
-      return true;
-    }
-    return this.batchRenderRequest.renderRequestIds.has(id);
   }
 
   /**
@@ -743,25 +715,18 @@ class ImageRenderer {
   }
 
   /**
-   * @param {BatchRenderRequest} newBatchRenderRequest
+   * @param {BatchRenderRequest} batchRenderRequest
    */
-  markRenderRequestsThatHaveAlreadyStarted(newBatchRenderRequest) {
-    if (!this.hasBatchRenderRequest) {
-      return;
-    }
-    const previousRequestIds = this.batchRenderRequest.renderRequestIds;
-
-    newBatchRenderRequest.renderRequests.forEach((request) => {
-      request.hasStarted = previousRequestIds.has(request.id);
-    });
+  removeStartedRenderRequests(batchRenderRequest) {
+    batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
+      .filter(request => !this.renders.has(request.id));
   }
-
   /**
    * @param {BatchRenderRequest} batchRenderRequest
    */
   removeCompletedRenderRequests(batchRenderRequest) {
     batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
-      .filter(request => !this.renderIsFinished(request.id));
+      .filter(request => !this.renderHasCompleted(request.id));
   }
 
   upscaleAllRenderedThumbs() {
@@ -771,8 +736,6 @@ class ImageRenderer {
   }
 
   onmessage(message) {
-    let batchRenderRequest;
-
     switch (message.action) {
       case "render":
         this.renderRequest = new RenderRequest(message);
@@ -782,13 +745,7 @@ class ImageRenderer {
         break;
 
       case "renderMultiple":
-        batchRenderRequest = new BatchRenderRequest(message);
-        this.thumbUpscaler.collectCanvases(batchRenderRequest);
-        this.abortOutdatedFetchRequests(batchRenderRequest);
-        this.markRenderRequestsThatHaveAlreadyStarted(batchRenderRequest);
-        this.deleteRendersNotInNewRequests(batchRenderRequest);
-        this.batchRenderRequest = batchRenderRequest;
-        this.renderMultipleImages(batchRenderRequest);
+        this.renderMultipleImages(message);
         break;
 
       case "deleteAllRenders":

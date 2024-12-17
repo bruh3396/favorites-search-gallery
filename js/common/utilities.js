@@ -165,6 +165,12 @@ class Utils {
   }
 </style>
 `;
+  static localStorageKeys = {
+    imageExtensions: "imageExtensions"
+  };
+  static settings = {
+    extensionsFoundBeforeSavingCount: 100
+  };
   static favoritesSearchGalleryContainer = Utils.createFavoritesSearchGalleryContainer();
   static idsToRemoveOnReloadLocalStorageKey = "recentlyRemovedIds";
   static tagBlacklist = Utils.getTagBlacklist();
@@ -269,6 +275,24 @@ class Utils {
   };
   static customTags = Utils.loadCustomTags();
   static favoriteItemClassName = "favorite";
+  static imageExtensions = Utils.loadDiscoveredImageExtensions();
+  /**
+   * @type {Cooldown}
+   */
+  static imageExtensionAssignmentCooldown;
+  static recentlyDiscoveredImageExtensionCount = 0;
+  static extensionDecodings = {
+    0: "jpg",
+    1: "png",
+    2: "jpeg",
+    3: "gif"
+  };
+  static extensionEncodings = {
+    "jpg": 0,
+    "png": 1,
+    "jpeg": 2,
+    "gif": 3
+  };
   /**
    * @type {Function[]}
    */
@@ -285,7 +309,6 @@ class Utils {
     if (Utils.onFavoritesPage()) {
       return false;
     }
-    // const enabledOnSearchPages = Utils.getPreference("enableOnSearchPages", false) && Utils.getPerformanceProfile() === 0;
     const enabledOnSearchPages = Utils.getPreference("enableOnSearchPages", false);
     return !enabledOnSearchPages;
   }
@@ -310,6 +333,7 @@ class Utils {
     Utils.prepareSearchPage();
     Utils.prefetchAdjacentSearchPages();
     Utils.setupOriginalImageLinksOnSearchPage();
+    Utils.initializeImageExtensionAssignmentCooldown();
   }
 
   /**
@@ -508,7 +532,7 @@ class Utils {
    */
   static getExtensionFromImageURL(imageURL) {
     try {
-      return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
+      return (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL)[1];
 
     } catch (error) {
       return "jpg";
@@ -1820,7 +1844,7 @@ Tag modifications and saved searches will be preserved.
   /**
    * @returns {Promise<String>}
    */
-  static getImageExtension(thumb) {
+  static getImageExtensionFromThumb(thumb) {
     if (Utils.isVideo(thumb)) {
       return "mp4";
     }
@@ -1829,8 +1853,8 @@ Tag modifications and saved searches will be preserved.
       return "gif";
     }
 
-    if (Gallery.extensionIsKnown(thumb.id)) {
-      return Gallery.getImageExtension(thumb.id);
+    if (Utils.extensionIsKnown(thumb.id)) {
+      return Utils.getImageExtension(thumb.id);
     }
     return Utils.fetchImageExtension(thumb);
   }
@@ -1849,7 +1873,7 @@ Tag modifications and saved searches will be preserved.
         const metadata = dom.querySelector("post");
         const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
-        Gallery.assignImageExtension(thumb.id, extension);
+        Utils.assignImageExtension(thumb.id, extension);
         return extension;
       })
       .catch((error) => {
@@ -1863,7 +1887,7 @@ Tag modifications and saved searches will be preserved.
    * @returns {Promise<String>}
    */
   static async getOriginalImageURLWithExtension(thumb) {
-    const extension = await Utils.getImageExtension(thumb);
+    const extension = await Utils.getImageExtensionFromThumb(thumb);
     return Utils.getOriginalImageURL(thumb.querySelector("img").src).replace(".jpg", `.${extension}`);
   }
 
@@ -1942,7 +1966,7 @@ Tag modifications and saved searches will be preserved.
           }
           const extension = Utils.getExtensionFromImageURL(originalImageURL);
 
-          Gallery.assignImageExtension(id, extension);
+          Utils.assignImageExtension(id, extension);
         }
       })
       .catch((error) => {
@@ -1951,6 +1975,10 @@ Tag modifications and saved searches will be preserved.
   }
 
   static async setupOriginalImageLinksOnSearchPage() {
+    if (!Utils.onSearchPage()) {
+      return;
+    }
+
     if (Gallery.disabled) {
       await Utils.findImageExtensionsOnSearchPage();
       Utils.setupOriginalImageLinksOnSearchPageHelper();
@@ -2000,10 +2028,87 @@ Tag modifications and saved searches will be preserved.
   }
 
   static prepareSearchPage() {
+    if (!Utils.onSearchPage()) {
+      return;
+    }
+
     for (const thumb of Utils.getAllThumbs()) {
       Utils.removeTitleFromImage(Utils.getImageFromThumb(thumb));
       Utils.assignContentType(thumb);
       thumb.id = Utils.removeNonNumericCharacters(Utils.getIdFromThumb(thumb));
     }
+  }
+
+  /**
+   * @returns {Object.<String, Number>}
+   */
+  static loadDiscoveredImageExtensions() {
+    return JSON.parse(localStorage.getItem(Utils.localStorageKeys.imageExtensions)) || {};
+  }
+
+  /**
+   * @param {String | Number} id
+   * @returns {String}
+   */
+  static getImageExtension(id) {
+    return Utils.extensionDecodings[Utils.imageExtensions[parseInt(id)]];
+  }
+
+  /**
+   * @param {String | Number} id
+   * @param {String} extension
+   */
+  static setImageExtension(id, extension) {
+    Utils.imageExtensions[parseInt(id)] = Utils.extensionEncodings[extension];
+  }
+
+  /**
+   * @param {String} id
+   * @returns {Boolean}
+   */
+  static extensionIsKnown(id) {
+    return Utils.getImageExtension(id) !== undefined;
+  }
+
+  static updateStoredImageExtensions() {
+    Utils.recentlyDiscoveredImageExtensionCount += 1;
+
+    if (Utils.recentlyDiscoveredImageExtensionCount >= Utils.settings.extensionsFoundBeforeSavingCount) {
+      this.storeAllImageExtensions();
+    }
+  }
+
+  static storeAllImageExtensions() {
+    if (!Utils.onFavoritesPage()) {
+      return;
+    }
+    Utils.recentlyDiscoveredImageExtensionCount = 0;
+    localStorage.setItem(Utils.localStorageKeys.imageExtensions, JSON.stringify(Utils.imageExtensions));
+  }
+
+  static isAnAnimatedExtension(extension) {
+    return extension === "mp4" || extension === "gif";
+  }
+
+  /**
+   * @param {String} id
+   * @param {String} extension
+   */
+  static assignImageExtension(id, extension) {
+    if (Utils.extensionIsKnown(id) || Utils.isAnAnimatedExtension(extension)) {
+      return;
+    }
+    Utils.imageExtensionAssignmentCooldown.restart();
+    Utils.setImageExtension(id, extension);
+    Utils.updateStoredImageExtensions();
+  }
+
+  static initializeImageExtensionAssignmentCooldown() {
+    Utils.imageExtensionAssignmentCooldown = new Cooldown(1000);
+    Utils.imageExtensionAssignmentCooldown.onCooldownEnd = () => {
+      if (Utils.recentlyDiscoveredImageExtensionCount > 0) {
+        Utils.storeAllImageExtensions();
+      }
+    };
   }
 }

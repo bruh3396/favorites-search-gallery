@@ -60,7 +60,7 @@ class InactivePost {
     this.id = Utils.getIdFromThumb(element);
     const image = Utils.getImageFromThumb(element);
 
-    this.src = image.src;
+    this.src = image.src || image.getAttribute("data-cfsrc");
     this.tags = this.preprocessTags(image);
   }
 
@@ -75,7 +75,7 @@ class InactivePost {
 
   instantiateMetadata() {
     if (this.fromRecord) {
-      return new PostMetadata(this.id, this.metadata);
+      return new PostMetadata(this.id, this.metadata || null);
     }
     const favoritesMetadata = new PostMetadata(this.id);
     return favoritesMetadata;
@@ -209,6 +209,14 @@ class Post {
       apiTagSet.add("video");
     } else if (fileURL.endsWith("gif")) {
       apiTagSet.add("gif");
+    } else if (!apiTagSet.has("animated_png")) {
+      if (apiTagSet.has("video")) {
+        apiTagSet.delete("video");
+      }
+
+      if (apiTagSet.has("animated")) {
+        apiTagSet.delete("animated");
+      }
     }
     postTagSet.delete(id);
 
@@ -451,29 +459,6 @@ class Post {
     this.swapAddOrRemoveButton();
   }
 
-  /**
-   *
-   * @returns {Promise<String>}
-   */
-  fetchImageExtension() {
-    return fetch(this.metadata.apiURL)
-      .then((response) => {
-        return response.text();
-      })
-      .then((html) => {
-        const dom = new DOMParser().parseFromString(html, "text/html");
-        const metadata = dom.querySelector("post");
-        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
-
-        Gallery.assignImageExtension(this.id, extension);
-        return extension;
-      })
-      .catch((error) => {
-        console.error(error);
-        return "jpg";
-      });
-  }
-
   swapAddOrRemoveButton() {
     const isRemoveButton = this.addOrRemoveButton.classList.contains("remove-favorite-button");
 
@@ -489,7 +474,10 @@ class Post {
     this.image.src = inactivePost.src;
     this.image.classList.add(Utils.getContentType(inactivePost.tags || Utils.convertToTagString(this.tagSet)));
     this.root.id = inactivePost.id;
-    this.container.href = await Utils.getOriginalImageURLWithExtension(this.root);
+
+    if (!Utils.onMobileDevice()) {
+      this.container.href = await Utils.getOriginalImageURLWithExtension(this.root);
+    }
   }
 
   /**

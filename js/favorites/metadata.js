@@ -271,13 +271,7 @@ class PostMetadata {
         const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {
-          // dispatchEvent(new CustomEvent("metadataFetched", {
-          //   detail: {
-          //     id: this.id,
-          //     extension
-          //   }
-          // }));
-          Gallery.assignImageExtension(this.id, extension);
+          Utils.assignImageExtension(this.id, extension);
         }
 
         if (missingInDatabase) {

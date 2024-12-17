@@ -28,11 +28,10 @@ class FavoritesDatabase {
   constructor(objectStoreName, version) {
     this.objectStoreName = objectStoreName;
     this.version = version;
-    this.createObjectStore();
   }
 
   createObjectStore() {
-    this.openConnection((event) => {
+    return this.openConnection((event) => {
       /**
        * @type {IDBDatabase}
        */
@@ -111,13 +110,14 @@ class FavoritesDatabase {
    */
   async loadFavorites(idsToDelete) {
     let loadedFavorites = {};
+    let database;
 
     await this.openConnection()
       .then(async(connectionEvent) => {
         /**
          * @type {IDBDatabase}
          */
-        const database = connectionEvent.target.result;
+        database = connectionEvent.target.result;
         const transaction = database.transaction(this.objectStoreName, "readwrite");
         const objectStore = transaction.objectStore(this.objectStoreName);
         const index = objectStore.index("id");
@@ -157,6 +157,14 @@ class FavoritesDatabase {
         getAllRequest.onerror = (event) => {
           console.error(event);
         };
+      }).catch(async(error) => {
+        this.version += 1;
+
+        if (error.name === "NotFoundError") {
+          database.close();
+          await this.createObjectStore();
+        }
+        this.loadFavorites(idsToDelete);
       });
   }
 

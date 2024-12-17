@@ -1,29 +1,9 @@
-class DatabaseStatus {
-  /**
-   * @type {Number}
-   */
-  version;
-  /**
-   * @type {Boolean}
-   */
-  objectStoreIsEmpty;
-
-  /**
-   * @param {Number} version
-   * @param {Boolean} objectStoreIsEmpty
-   */
-  constructor(version, objectStoreIsEmpty) {
-    this.version = version;
-    this.objectStoreIsEmpty = objectStoreIsEmpty;
-  }
-}
-
 class FavoritesDatabaseWrapper {
   static databaseName = "Favorites";
   static objectStoreName = `user${Utils.getFavoritesPageId()}`;
   static webWorkers = {
     database:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -54,11 +34,10 @@ class FavoritesDatabase {
   constructor(objectStoreName, version) {
     this.objectStoreName = objectStoreName;
     this.version = version;
-    this.createObjectStore();
   }
 
   createObjectStore() {
-    this.openConnection((event) => {
+    return this.openConnection((event) => {
       /**
        * @type {IDBDatabase}
        */
@@ -137,13 +116,14 @@ class FavoritesDatabase {
    */
   async loadFavorites(idsToDelete) {
     let loadedFavorites = {};
+    let database;
 
     await this.openConnection()
       .then(async(connectionEvent) => {
         /**
          * @type {IDBDatabase}
          */
-        const database = connectionEvent.target.result;
+        database = connectionEvent.target.result;
         const transaction = database.transaction(this.objectStoreName, "readwrite");
         const objectStore = transaction.objectStore(this.objectStoreName);
         const index = objectStore.index("id");
@@ -183,6 +163,14 @@ class FavoritesDatabase {
         getAllRequest.onerror = (event) => {
           console.error(event);
         };
+      }).catch(async(error) => {
+        this.version += 1;
+
+        if (error.name === "NotFoundError") {
+          database.close();
+          await this.createObjectStore();
+        }
+        this.loadFavorites(idsToDelete);
       });
   }
 
@@ -287,6 +275,14 @@ onmessage = (message) => {
    * @type {Worker}
    */
   databaseWorker;
+  /**
+   * @type {String[]}
+   */
+  favoriteIdsRequiringMetadataDatabaseUpdate;
+  /**
+   * @type {Number}
+   */
+  newMetadataReceivedTimeout;
 
   /**
    * @param {Function} onFavoritesStored
@@ -295,11 +291,19 @@ onmessage = (message) => {
   constructor(onFavoritesStored, onFavoritesLoaded) {
     this.onFavoritesStored = onFavoritesStored;
     this.onFavoritesLoaded = onFavoritesLoaded;
-    this.databaseWorker = new Worker(Utils.getWorkerURL(FavoritesDatabaseWrapper.webWorkers.database));
-    this.createDatabaseMessageHandler();
+    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
+    this.addEventListeners();
+    this.initializeDatabase();
   }
 
-  createDatabaseMessageHandler() {
+  addEventListeners() {
+    window.addEventListener("missingMetadata", (event) => {
+      this.addNewMetadata(event.detail);
+    });
+  }
+
+  initializeDatabase() {
+    this.databaseWorker = new Worker(Utils.getWorkerURL(FavoritesDatabaseWrapper.webWorkers.database));
     this.databaseWorker.onmessage = (message) => {
       switch (message.data.response) {
         case "finishedLoading":
@@ -314,61 +318,11 @@ onmessage = (message) => {
           break;
       }
     };
-  }
-
-  async initializeDatabase() {
-    const status = await this.getDatabaseStatus();
-
     this.databaseWorker.postMessage({
       command: "create",
       objectStoreName: FavoritesDatabaseWrapper.objectStoreName,
-      version: status.version
+      version: 1
     });
-    return status;
-  }
-
-  /**
-   * @returns {Promise<DatabaseStatus>}
-   */
-  getDatabaseStatus() {
-    return window.indexedDB.databases()
-      .then((rule34Databases) => {
-        const favoritesDatabases = rule34Databases
-          .filter(database => database.name === FavoritesDatabaseWrapper.databaseName);
-
-        if (favoritesDatabases.length !== 1) {
-          return new DatabaseStatus(1, true);
-        }
-        const foundDatabase = favoritesDatabases[0];
-        return new Promise((resolve, reject) => {
-          const databaseRequest = indexedDB.open(
-            FavoritesDatabaseWrapper.databaseName,
-            foundDatabase.version
-          );
-
-          databaseRequest.onsuccess = resolve;
-          databaseRequest.onerror = reject;
-        }).then((event) => {
-          const database = event.target.result;
-          const objectStoreExists = database.objectStoreNames.contains(FavoritesDatabaseWrapper.objectStoreName);
-          const version = database.version;
-
-          if (!objectStoreExists) {
-            database.close();
-            return new DatabaseStatus(database.version + 1, true);
-          }
-          const countRequest = database
-            .transaction(FavoritesDatabaseWrapper.objectStoreName, "readonly")
-            .objectStore(FavoritesDatabaseWrapper.objectStoreName).count();
-          return new Promise((resolve, reject) => {
-            countRequest.onsuccess = resolve;
-            countRequest.onerror = reject;
-          }).then((countEvent) => {
-            database.close();
-            return new DatabaseStatus(version, countEvent.target.result === 0);
-          });
-        });
-      });
   }
 
   /**
@@ -388,7 +342,7 @@ onmessage = (message) => {
    * @param {Post[]} favorites
    */
   storeAllFavorites(favorites) {
-    this.storeFavorites(favorites.reverse());
+    this.storeFavorites(favorites.slice().reverse());
   }
 
   /**
@@ -408,6 +362,33 @@ onmessage = (message) => {
       command: "load",
       idsToDelete: this.getIdsToDeleteOnReload()
     });
+  }
+
+  /**
+   * @param {String} postId
+   */
+  addNewMetadata(postId) {
+    if (!Post.allPosts.has(postId)) {
+      return;
+    }
+    const batchSize = 500;
+    const waitTime = 1000;
+
+    clearTimeout(this.newMetadataReceivedTimeout);
+    this.favoriteIdsRequiringMetadataDatabaseUpdate.push(postId);
+
+    if (this.favoriteIdsRequiringMetadataDatabaseUpdate.length >= batchSize) {
+      this.updateMetadataInDatabase();
+      return;
+    }
+    this.newMetadataReceivedTimeout = setTimeout(() => {
+      this.updateMetadataInDatabase();
+    }, waitTime);
+  }
+
+  updateMetadataInDatabase() {
+    this.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
+    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }
 
   /**

@@ -176,7 +176,7 @@ class FavoritesMenu {
         display: block;
         overflow: hidden;
         position: relative;
-
+        cursor: default;
 
         >img:first-child {
           width: 100%;
@@ -613,7 +613,7 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
                     <span class="option-hint"> (S)</span>
                   </label>
                 </div>
-                <div>
+                <div id="show-hints-container">
                   <label class="checkbox" title="Show hotkeys and shortcuts">
                     <input type="checkbox" id="show-hints-checkbox"> Hotkey Hints
                     <span class="option-hint"> (H)</span>
@@ -734,13 +734,21 @@ Lower numbers improve responsiveness">
 </div>
 `;
 
-static get disabled() {
-  return !Utils.onFavoritesPage();
-}
+  static get disabled() {
+    return !Utils.onFavoritesPage();
+  }
 
-/**
- * @type {Number}
- */
+  static {
+    Utils.addStaticInitializer(() => {
+      if (Utils.onFavoritesPage()) {
+        Utils.insertFavoritesSearchGalleryHTML("afterbegin", FavoritesMenu.uiHTML);
+      }
+    });
+  }
+
+  /**
+   * @type {Number}
+   */
   maxSearchHistoryLength;
   /**
    * @type {Object.<PropertyKey, String>}
@@ -783,7 +791,7 @@ static get disabled() {
     if (FavoritesMenu.disabled) {
       return;
     }
-    this.insertHTML();
+    this.configureMobileUI();
     this.initializeFields();
     this.extractUIElements();
     this.setMainButtonInteractability(false);
@@ -791,14 +799,9 @@ static get disabled() {
     this.loadFavoritesPagePreferences();
     this.removePaginatorFromFavoritesPage();
     this.configureAddOrRemoveButtonOptionVisibility();
-    this.configureMobileUI();
     this.configureDesktopUI();
     this.addEventListenersToWhatsNewMenu();
     this.addHintsOption();
-  }
-
-  insertHTML() {
-    Utils.insertFavoritesSearchGalleryHTML("afterbegin", FavoritesMenu.uiHTML);
   }
 
   initializeFields() {
@@ -1304,8 +1307,10 @@ static get disabled() {
     if (!Utils.onMobileDevice()) {
       return;
     }
-    this.inputs.performanceProfile.parentElement.style.display = "none";
     Utils.insertStyleHTML(`
+      #performance-profile-container, #show-hints-container {
+        display: none !important;
+      }
         .thumb, .favorite {
           > div > canvas {
             display: none;
@@ -1324,10 +1329,6 @@ static get disabled() {
               width: 95% !important;
             }
           }
-        }
-
-        #favorites-search-gallery-content {
-          padding-top: 300px;
         }
 
         #mobile-container {
@@ -1352,22 +1353,31 @@ static get disabled() {
           display: block !important;
           margin-left: 10px !important;
         }
+
+        input[type="checkbox"] {
+          width: 25px;
+          height: 25px;
+          }
+        }
+
+        #sort-ascending {
+          width: 25px;
+          height: 25px;
+        }
         `, "mobile");
 
     const mobileUIContainer = document.createElement("div");
 
     mobileUIContainer.id = "mobile-container";
-
     mobileUIContainer.appendChild(document.getElementById("header"));
     mobileUIContainer.appendChild(document.getElementById("favorites-search-gallery-menu"));
-    Utils.insertFavoritesSearchGalleryHTML("afterbegin", mobileUIContainer);
+    Utils.insertFavoritesSearchGalleryHTML("afterbegin", mobileUIContainer.innerHTML);
 
     const helpLinksContainer = document.getElementById("help-links-container");
 
     if (helpLinksContainer !== null) {
       helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
     }
-    this.checkboxes.showHotkeyHints.parentElement.style.display = "none";
   }
 
   configureDesktopUI() {

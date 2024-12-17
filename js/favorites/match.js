@@ -72,8 +72,9 @@ class WildcardSearchTag extends SearchTag {
   constructor(searchTag) {
     super(searchTag);
     this.matchRegex = this.createWildcardRegex();
-    this.equivalentToStartsWith = WildcardSearchTag.startsWithRegex.test(searchTag);
     this.startsWithPrefix = this.value.slice(0, -1);
+    this.equivalentToStartsWith = WildcardSearchTag.startsWithRegex.test(searchTag);
+    this.matches = this.equivalentToStartsWith ? this.matchesPrefix : this.matchesWildcard;
   }
 
   /**
@@ -85,17 +86,6 @@ class WildcardSearchTag extends SearchTag {
     } catch {
       return WildcardSearchTag.unmatchableRegex;
     }
-  }
-
-  /**
-   * @param {Post} post
-   * @returns {Boolean}
-   */
-  matches(post) {
-    if (this.equivalentToStartsWith) {
-      return this.matchesPrefix(post);
-    }
-    return this.matchesWildcard(post);
   }
 
   /**

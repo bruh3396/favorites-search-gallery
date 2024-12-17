@@ -1,10 +1,9 @@
 class FavoritesLoader {
   static states = {
     initial: 0,
-    retrievingDatabaseStatus: 1,
-    fetchingFavorites: 2,
-    loadingFavoritesFromDatabase: 3,
-    allFavoritesLoaded: 4
+    fetchingFavorites: 1,
+    loadingFavoritesFromDatabase: 2,
+    allFavoritesLoaded: 3
   };
   static currentState = FavoritesLoader.states.initial;
   static tagNegation = {
@@ -31,11 +30,11 @@ class FavoritesLoader {
   /**
    * @type {Number}
    */
-  matchedFavoritesCount;
+  searchResultCount;
   /**
    * @type {Number | null}
    */
-  expectedFavoritesCount;
+  expectedTotalFavoritesCount;
   /**
    * @type {String}
    */
@@ -48,14 +47,6 @@ class FavoritesLoader {
    * @type {Number}
    */
   allowedRatings;
-  /**
-   * @type {String[]}
-   */
-  favoriteIdsRequiringMetadataDatabaseUpdate;
-  /**
-   * @type {Number}
-   */
-  newMetadataReceivedTimeout;
   /**
    * @type {FavoritesFetcher}
    */
@@ -131,11 +122,10 @@ class FavoritesLoader {
     this.allFavorites = [];
     this.latestSearchResults = [];
     this.searchResultsWhileFetching = [];
-    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
     this.matchCountLabel = document.getElementById("match-count-label");
     this.allowedRatings = Utils.loadAllowedRatings();
-    this.expectedFavoritesCount = null;
-    this.matchedFavoritesCount = 0;
+    this.expectedTotalFavoritesCount = null;
+    this.searchResultCount = 0;
     this.searchQuery = "";
   }
 
@@ -161,9 +151,6 @@ class FavoritesLoader {
     window.addEventListener("modifiedTags", () => {
       this.searchFlags.tagsWereModified = true;
     });
-    window.addEventListener("missingMetadata", (event) => {
-      this.addNewMetadata(event.detail);
-    });
     window.addEventListener("reachedEndOfGallery", (event) => {
       this.paginator.changePageWhileInGallery(event.detail, this.latestSearchResults);
     });
@@ -184,7 +171,7 @@ class FavoritesLoader {
         const favoritesURL = Array.from(table.querySelectorAll("a")).find(a => a.href.includes("page=favorites&s=view"));
         const favoritesCount = parseInt(favoritesURL.textContent);
 
-        this.expectedFavoritesCount = favoritesCount;
+        this.expectedTotalFavoritesCount = favoritesCount;
       })
       .catch(() => {
         console.error(`Could not find total favorites count from ${profileURL}, are you logged in?`);
@@ -213,10 +200,7 @@ class FavoritesLoader {
   showSearchResults() {
     switch (FavoritesLoader.currentState) {
       case FavoritesLoader.states.initial:
-        this.loadAllFavorites();
-        break;
-
-      case FavoritesLoader.states.retrievingDatabaseStatus:
+        this.loadAllFavoritesFromDatabase();
         break;
 
       case FavoritesLoader.states.fetchingFavorites:
@@ -243,17 +227,6 @@ class FavoritesLoader {
 
   showSearchResultsAfterAllFavoritesLoaded() {
     this.paginateSearchResults(this.getSearchResults(this.allFavorites));
-  }
-
-  async loadAllFavorites() {
-    FavoritesLoader.currentState = FavoritesLoader.states.retrievingDatabaseStatus;
-    const databaseStatus = await this.database.initializeDatabase();
-
-    if (databaseStatus.objectStoreIsEmpty) {
-      this.fetchAllFavorites();
-    } else {
-      this.loadAllFavoritesFromDatabase();
-    }
   }
 
   /**
@@ -320,8 +293,8 @@ class FavoritesLoader {
   updateStatusWhileFetching() {
     let statusText = `Fetching Favorites ${this.allFavorites.length}`;
 
-    if (this.expectedFavoritesCount !== null) {
-      statusText = `${statusText} / ${this.expectedFavoritesCount}`;
+    if (this.expectedTotalFavoritesCount !== null) {
+      statusText = `${statusText} / ${this.expectedTotalFavoritesCount}`;
     }
     this.setStatusText(statusText);
   }
@@ -375,11 +348,17 @@ class FavoritesLoader {
   }
 
   /**
-   * @param {Object[]} favorites
+   * @param {Object[]} records
    */
-  onAllFavoritesLoadedFromDatabase(favorites) {
-    this.paginateSearchResults(this.reconstructContent(favorites));
+  onAllFavoritesLoadedFromDatabase(records) {
     this.toggleLoadingUI(false);
+
+    if (records.length === 0) {
+      this.fetchAllFavorites();
+      return;
+    }
+    this.setStatusText("All favorites loaded");
+    this.paginateSearchResults(this.deserializeFavorites(records));
     this.onAllFavoritesLoaded();
     setTimeout(() => {
       this.fetchNewFavoritesOnReload();
@@ -403,21 +382,17 @@ class FavoritesLoader {
   toggleLoadingUI(value) {
     this.showLoadingWheel(value);
     this.paginator.toggleContentVisibility(!value);
-    this.setStatusText(value ? "Loading favorites" : "All favorites loaded");
   }
 
   /**
-   * @param {Object[]} databaseRecords
+   * @param {Object[]} records
    * @returns {Post[]}}
    */
-  reconstructContent(databaseRecords) {
-    if (databaseRecords === null) {
-      return null;
-    }
+  deserializeFavorites(records) {
     const searchCommand = new SearchCommand(this.finalSearchQuery);
     const searchResults = [];
 
-    for (const record of databaseRecords) {
+    for (const record of records) {
       const post = new Post(record, true);
       const isBlacklisted = !searchCommand.matches(post);
 
@@ -437,6 +412,7 @@ class FavoritesLoader {
   loadAllFavoritesFromDatabase() {
     FavoritesLoader.currentState = FavoritesLoader.states.loadingFavoritesFromDatabase;
     this.toggleLoadingUI(true);
+    this.setStatusText("Loading favorites");
     this.database.loadAllFavorites();
   }
 
@@ -480,10 +456,10 @@ class FavoritesLoader {
     if (!this.matchCountLabelExists) {
       return;
     }
-    this.matchedFavoritesCount = value === undefined ? this.getSearchResults(this.allFavorites).length : value;
-    const suffix = this.matchedFavoritesCount === 1 ? "Match" : "Matches";
+    this.searchResultCount = value === undefined ? this.getSearchResults(this.allFavorites).length : value;
+    const suffix = this.searchResultCount === 1 ? "Match" : "Matches";
 
-    this.matchCountLabel.textContent = `${this.matchedFavoritesCount} ${suffix}`;
+    this.matchCountLabel.textContent = `${this.searchResultCount} ${suffix}`;
   }
 
   /**
@@ -493,8 +469,8 @@ class FavoritesLoader {
     if (!this.matchCountLabelExists) {
       return;
     }
-    this.matchedFavoritesCount += value === undefined ? 1 : value;
-    this.matchCountLabel.textContent = `${this.matchedFavoritesCount} Matches`;
+    this.searchResultCount += value === undefined ? 1 : value;
+    this.matchCountLabel.textContent = `${this.searchResultCount} Matches`;
   }
 
   /**
@@ -642,33 +618,6 @@ class FavoritesLoader {
     const matchedPosts = this.getFavoritesMatchedByLastSearch;
 
     this.paginateSearchResults(matchedPosts);
-  }
-
-  /**
-   * @param {String} postId
-   */
-  addNewMetadata(postId) {
-    if (!Post.allPosts.has(postId)) {
-      return;
-    }
-    const batchSize = 500;
-    const waitTime = 1000;
-
-    clearTimeout(this.newMetadataReceivedTimeout);
-    this.favoriteIdsRequiringMetadataDatabaseUpdate.push(postId);
-
-    if (this.favoriteIdsRequiringMetadataDatabaseUpdate.length >= batchSize) {
-      this.updateMetadataInDatabase();
-      return;
-    }
-    this.newMetadataReceivedTimeout = setTimeout(() => {
-      this.updateMetadataInDatabase();
-    }, waitTime);
-  }
-
-  updateMetadataInDatabase() {
-    this.database.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
-    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }
 
   /**
