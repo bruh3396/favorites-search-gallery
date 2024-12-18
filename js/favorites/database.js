@@ -3,7 +3,7 @@ class FavoritesDatabaseWrapper {
   static objectStoreName = `user${Utils.getFavoritesPageId()}`;
   static webWorkers = {
     database:
-      `
+`
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -114,11 +114,11 @@ class FavoritesDatabase {
   /**
    * @param {String[]} idsToDelete
    */
-  async loadFavorites(idsToDelete) {
+  loadFavorites(idsToDelete) {
     let loadedFavorites = {};
     let database;
 
-    await this.openConnection()
+    this.openConnection()
       .then(async(connectionEvent) => {
         /**
          * @type {IDBDatabase}
@@ -233,14 +233,15 @@ class FavoritesDatabase {
 /**
  * @type {FavoritesDatabase}
  */
-let favoritesDatabase;
+const favoritesDatabase = new FavoritesDatabase(null, 1);
 
 onmessage = (message) => {
   const request = message.data;
 
   switch (request.command) {
     case "create":
-      favoritesDatabase = new FavoritesDatabase(request.objectStoreName, request.version);
+      favoritesDatabase.objectStoreName = request.objectStoreName;
+      favoritesDatabase.version = request.version;
       break;
 
     case "store":

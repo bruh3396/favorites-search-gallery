@@ -183,31 +183,17 @@ class FavoritesMenu {
           z-index: 1;
         }
 
-        /* &:has(.add-or-remove-button:hover) {
-          outline-style: solid !important;
-          outline-width: 5px !important;
-        }
-
-        &:has(.remove-favorite-button:hover) {
-          outline-color: red !important;
-
-          >.remove-favorite-button {
-            color: red;
-          }
-        }
-
-        &:has(.add-favorite-button:hover) {
-          outline-color: hotpink !important;
-
-          >.add-favorite-button {
-            svg {
-              fill: hotpink;
-            }
-          }
-        } */
-
         >a>div {
           height: 100%;
+        }
+
+        >canvas {
+          width: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          z-index: 1;
         }
       }
 

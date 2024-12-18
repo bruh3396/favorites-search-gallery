@@ -30,8 +30,6 @@ class FavoritesPaginator {
     this.currentPageNumber = 1;
     this.favoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 3 : 5;
-    this.insertPaginationMenuContainer();
-    this.createPaginationMenu(1, []);
   }
 
   /**

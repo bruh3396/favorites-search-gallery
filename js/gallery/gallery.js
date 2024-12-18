@@ -65,27 +65,12 @@ class Gallery {
     font-size: 15px;
   }
 
+
   #resolution-dropdown {
     text-align: center;
     width: 160px;
     height: 25px;
     cursor: pointer;
-  }
-
-  .favorite,
-  .thumb {
-
-    >div,
-    >a {
-      >canvas {
-        width: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        z-index: 1;
-      }
-    }
   }
 
   #original-content-background {

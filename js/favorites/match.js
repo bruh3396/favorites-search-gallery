@@ -161,13 +161,7 @@ class MetadataSearchTag extends SearchTag {
    * @returns {Boolean}
    */
   matches(post) {
-    const metadata = PostMetadata.allMetadata.get(post.id);
-
-    if (metadata === undefined) {
-      return false;
-    }
-
-    if (metadata.satisfiesExpression(this.expression)) {
+    if (post.metadata.satisfiesExpression(this.expression)) {
       return !this.negated;
     }
     return this.negated;

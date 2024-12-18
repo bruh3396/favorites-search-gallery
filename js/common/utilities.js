@@ -138,6 +138,11 @@ class Utils {
       appearance: none;
       margin: 0;
     }
+
+    input[type=number] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
   }
 
   .fullscreen-icon {
@@ -1375,7 +1380,11 @@ class Utils {
    * @param {HTMLInputElement | HTMLTextAreaElement} input
    */
   static hideAwesomplete(input) {
-    Utils.getAwesompleteFromInput(input).querySelector("ul").setAttribute("hidden", "");
+    const awesomplete = Utils.getAwesompleteFromInput(input);
+
+    if (awesomplete !== null) {
+      awesomplete.querySelector("ul").setAttribute("hidden", "");
+    }
   }
 
   /**
