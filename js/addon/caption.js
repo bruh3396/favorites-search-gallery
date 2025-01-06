@@ -110,11 +110,11 @@ class Caption {
     5: "metadata"
   };
   static template = `
-     <ul id="caption-list">
-         <li id="caption-id" style="display: block;"><h6>ID</h6></li>
-         ${Caption.getCategoryHeaderHTML()}
-     </ul>
- `;
+    <ul id="caption-list">
+        <li id="caption-id" style="display: block;"><h6>ID</h6></li>
+        ${Caption.getCategoryHeaderHTML()}
+    </ul>
+  `;
   static findCategoriesOnPageChangeCooldown = new Cooldown(3000, true);
   static saveTagCategoriesCooldown = new Cooldown(1000);
   /**
@@ -122,8 +122,8 @@ class Caption {
    */
   static tagCategoryAssociations;
   static settings = {
-    tagFetchDelayAfterFinishedLoading: 5,
-    tagFetchDelayBeforeFinishedLoading: 40
+    tagFetchDelayAfterFinishedLoading: 50,
+    tagFetchDelayBeforeFinishedLoading: 100
   };
   static flags = {
     finishedLoading: false
@@ -604,13 +604,15 @@ class Caption {
   tagOnClick(tagName, event) {
     switch (event.button) {
       case Utils.clickCodes.left:
-        this.tagOnClickHelper(tagName, event);
+        if (event.shiftKey) {
+          this.searchForTag(tagName);
+        } else {
+          this.tagOnClickHelper(tagName, event);
+        }
         break;
 
       case Utils.clickCodes.middle:
-        dispatchEvent(new CustomEvent("searchForTag", {
-          detail: tagName
-        }));
+        this.searchForTag(tagName);
         break;
 
       case Utils.clickCodes.right:
@@ -620,6 +622,15 @@ class Caption {
       default:
         break;
     }
+  }
+
+  /**
+   * @param {String} tagName
+   */
+  searchForTag(tagName) {
+    dispatchEvent(new CustomEvent("searchForTag", {
+      detail: tagName
+    }));
   }
 
   /**

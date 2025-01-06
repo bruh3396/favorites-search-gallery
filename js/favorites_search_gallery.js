@@ -7,3 +7,5 @@ const savedSearches = new SavedSearches();
 const caption = new Caption();
 const tagModifier = new TagModifier();
 const awesompleteWrapper = new AwesompleteWrapper();
+
+Utils.postProcess();

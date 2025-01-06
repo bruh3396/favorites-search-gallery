@@ -135,7 +135,7 @@ class Post {
     Post.template.className = Utils.favoriteItemClassName;
     Post.template.innerHTML = `
         <${containerTagName}>
-          <img loading="lazy">
+          <img>
           ${buttonHTML}
           ${canvasHTML}
         </${containerTagName}>
@@ -515,8 +515,9 @@ class Post {
       }
       const middleClick = event.button === Utils.clickCodes.middle;
       const leftClick = event.button === Utils.clickCodes.left;
+      const shiftClick = leftClick && event.shiftKey;
 
-      if (middleClick || (leftClick && !Utils.galleryEnabled())) {
+      if (middleClick || shiftClick || (leftClick && !Utils.galleryEnabled())) {
         Utils.openPostInNewTab(this.id);
       }
     });

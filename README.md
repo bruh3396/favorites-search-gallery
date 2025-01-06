@@ -56,10 +56,10 @@ This script is still in development, please let me know if you experience a bug,
 | Download Speed | 75Mb/s |
 
 ## Controls
-### General Controls
+### General Controls (Desktop)
 | Input | Function | Condition |
 | :-------- | :-------- | :-------- |
-| Left Click, Touch | Enlarge thumbnail content and enter gallery | Clicked on a thumbnail |
+| Left Click | Enlarge thumbnail content and enter gallery | Clicked on a thumbnail |
 | Middle Click | Open post page of thumbnail in new tab | Clicked on a thumbnail |
 | Ctrl Left Click | Open original content in new tab and stay on current tab | Clicked on a thumbnail |
 | Ctrl Shift Left Click | Open original content in new tab and move to new tab | Clicked on a thumbnail |
@@ -71,21 +71,31 @@ This script is still in development, please let me know if you experience a bug,
 | Middle Click | Quick search tag | Clicked on a tag in details |
 | Ctrl Left Click | Search site for tag in new tab | Clicked on a tag in details |
 
+### General Controls (Mobile)
+| Input | Function | Condition |
+| :-------- | :-------- | :-------- |
+| Touch | Enlarge thumbnail content and enter gallery | Clicked on a thumbnail and gallery enabled |
+| Touch | Open thumbnail post in new page | Clicked on a thumbnail and gallery disabled |
 
-### Gallery Controls
+
+### Gallery Controls (Desktop)
 | Input                                 | Function                                       | Condition              |
 | :-------------------------------------| :----------------------------------------------| :----------------------|
-| Arrow Keys, Scroll Wheel, AD, Swipe | Traverse gallery                               |                        |
-| Left Click, Touch                     | Exit gallery                                   | Content is not a video |
-| Escape                                |                                    |                        |
+| Arrow Keys, Scroll Wheel, AD   | Traverse gallery                               |                        |
+| Escape                                |    Exit gallery                                |                        |
 | Right Click                           | Exit gallery, Enable "Enlarge on Hover" option |                        |
 | Middle Click                          | Open post page of thumbnail in new tab         |                        |
 | Double Left Click                          | Exit gallery         | Content is a video                       |
 | Ctrl Left  Click                          | Open original content in new tab and stay on current tab         |                        |
 | Ctrl Shift Left Click | Open original content in new tab and move to new tab |  |
 
+### Gallery Controls (Mobile)
+| Input                                 | Function                                       | Condition              |
+| :-------------------------------------| :----------------------------------------------| :----------------------|
+| Tap Left/Right Edge of Screen    | Traverse gallery                               |                        |
+| Swipe Up/Down                       | Exit gallery                                   |  |
 
-### Gallery Hotkeys
+### Gallery Hotkeys (Desktop)
 
 | Key | Function                       | Condition                          |
 |-----|--------------------------------|------------------------------------|
@@ -98,7 +108,7 @@ This script is still in development, please let me know if you experience a bug,
 
 
 
-### General Hotkeys
+### General Hotkeys (Desktop)
 
 | Key | Function        |
 | :---| :---------------|

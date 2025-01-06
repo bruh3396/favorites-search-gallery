@@ -341,6 +341,10 @@ class Utils {
     Utils.initializeImageExtensionAssignmentCooldown();
   }
 
+  static postProcess() {
+    dispatchEvent(new Event("postProcess"));
+  }
+
   /**
    * @param {String} key
    * @param {any} value
@@ -628,6 +632,7 @@ class Utils {
 
   /**
    * @param {any[]} array
+   * @returns {any[]}
    */
   static shuffleArray(array) {
     let maxIndex = array.length;
@@ -644,6 +649,7 @@ class Utils {
           array[maxIndex]
         ];
     }
+    return array;
   }
 
   /**
@@ -752,12 +758,11 @@ class Utils {
       optionIsVisible = "none";
     }
     placeToInsert.insertAdjacentHTML("beforeend", `
-    <div id="${optionId}" style="display: ${optionIsVisible}">
-      <label class="checkbox" title="${optionTitle}">
-
-      <input id="${checkboxId}" type="checkbox"> ${optionText}<span class="option-hint"> ${optionHint}</span></label>
-    </div>
-  `);
+      <div id="${optionId}" style="display: ${optionIsVisible}">
+        <label class="checkbox" title="${optionTitle}">
+        <input id="${checkboxId}" type="checkbox"><span> ${optionText}</span><span class="option-hint"> ${optionHint}</span></label>
+      </div>
+    `);
     const newOptionsCheckbox = document.getElementById(checkboxId);
 
     newOptionsCheckbox.checked = optionIsChecked;
@@ -902,49 +907,49 @@ class Utils {
 
     if (value) {
       html = `
-    #favorites-search-gallery-content {
-      padding: 40px 40px 30px !important;
-      grid-gap: 2.5em !important;
-    }
-
-    .favorite,
-    .thumb {
-      >a,
-      >span,
-      >div {
-        box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        transition: transform 0.2s ease-in-out;
-        position: relative;
-
-        &::after {
-          content: '';
-          position: absolute;
-          z-index: -1;
-          width: 100%;
-          height: 100%;
-          opacity: 0;
-          top: 0;
-          left: 0;
-          border-radius: 5px;
-          box-shadow: 5px 10px 15px rgba(0,0,0,0.45);
-          transition: opacity 0.3s ease-in-out;
+        #favorites-search-gallery-content {
+          padding: 40px 40px 30px !important;
+          grid-gap: 1cqw !important;
         }
 
-        &:hover {
-          outline: none !important;
-          transform: scale(1.05, 1.05);
-          z-index: 10;
+        .favorite,
+        .thumb {
+          >a,
+          >span,
+          >div {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease-in-out;
+            position: relative;
 
-          img {
-            outline: none !important;
-          }
+            &::after {
+              content: '';
+              position: absolute;
+              z-index: -1;
+              width: 100%;
+              height: 100%;
+              opacity: 0;
+              top: 0;
+              left: 0;
+              border-radius: 5px;
+              box-shadow: 5px 10px 15px rgba(0,0,0,0.45);
+              transition: opacity 0.3s ease-in-out;
+            }
 
-          &::after {
-            opacity: 1;
+            &:hover {
+              outline: none !important;
+              transform: scale(1.05, 1.05);
+              z-index: 10;
+
+              img {
+                outline: none !important;
+              }
+
+              &::after {
+                opacity: 1;
+              }
+            }
           }
         }
-      }
-    }
     `;
     }
     Utils.insertStyleHTML(html, "fancy-image-hovering");
@@ -956,20 +961,20 @@ class Utils {
     const gifSelector = Utils.onFavoritesPage() ? "&:has(img.gif)" : ">img.gif";
 
     Utils.insertStyleHTML(`
-    .favorite, .thumb {
+      .favorite, .thumb {
 
-      >a,
-      >div {
-        ${videoSelector} {
-            outline: ${size}px solid blue;
-        }
+        >a,
+        >div {
+          ${videoSelector} {
+              outline: ${size}px solid blue;
+          }
 
-        ${gifSelector} {
-          outline: 2px solid hotpink;
+          ${gifSelector} {
+            outline: 2px solid hotpink;
+          }
         }
       }
-    }
-    `, "video-gif-borders");
+      `, "video-gif-borders");
   }
 
   static removeInlineImgStyles() {
@@ -986,26 +991,26 @@ class Utils {
           element.classList.add("dark-green-gradient");
 
           Utils.insertStyleHTML(`
-          input[type=number] {
-            background-color: #303030;
-            color: white;
-          }
-
-          .number {
-            background-color: #303030;
-
-            >hold-button,
-            button {
+            input[type=number] {
+              background-color: #303030;
               color: white;
             }
-          }
 
-          #favorites-pagination-container {
-            >button {
-              border: 1px solid white !important;
-              color: white !important;
+            .number {
+              background-color: #303030;
+
+              >hold-button,
+              button {
+                color: white;
+              }
             }
-          }
+
+            #favorites-pagination-container {
+              >button {
+                border: 1px solid white !important;
+                color: white !important;
+              }
+            }
           `, "dark-theme");
         }
       }
@@ -1761,11 +1766,9 @@ class Utils {
   }
 
   static deletePersistentData() {
-    const message = `
-Are you sure you want to reset?
-This will delete all cached favorites, and preferences.
-Tag modifications and saved searches will be preserved.
-  `;
+    const desktopSuffix = Utils.onMobileDevice() ? "" : " Tag modifications and saved searches will be preserved.";
+
+    const message = `Are you sure you want to reset? This will delete all cached favorites, and preferences.${desktopSuffix}`;
 
     if (confirm(message)) {
       const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
@@ -2025,13 +2028,18 @@ Tag modifications and saved searches will be preserved.
       }
     };
     anchor.onmousedown = (event) => {
-      if (!event.ctrlKey) {
-        if (event.button === Utils.clickCodes.left && Gallery.disabled) {
-          document.location = thumbURL;
-        } else if (event.button === Utils.clickCodes.middle) {
-          window.open(thumbURL);
-        }
-        event.preventDefault();
+      if (event.ctrlKey) {
+        return;
+      }
+      event.preventDefault();
+      const middleClick = event.button === Utils.clickCodes.middle;
+      const leftClick = event.button === Utils.clickCodes.left;
+      const shiftClick = leftClick && event.shiftKey;
+
+      if (leftClick && Gallery.disabled) {
+        document.location = thumbURL;
+      } else if (middleClick || shiftClick) {
+        window.open(thumbURL);
       }
     };
   }

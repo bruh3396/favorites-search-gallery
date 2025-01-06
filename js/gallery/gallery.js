@@ -45,7 +45,6 @@ class Gallery {
       display: none;
       position: fixed;
       z-index: 9998;
-      pointer-events: none;
     }
   }
 
@@ -64,7 +63,6 @@ class Gallery {
   option {
     font-size: 15px;
   }
-
 
   #resolution-dropdown {
     text-align: center;
@@ -88,6 +86,28 @@ class Gallery {
     -khtml-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
+  }
+
+  #original-content-background-link-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: red;
+    z-index: 10001;
+    pointer-events: none;
+    cursor: default;
+    display: none;
+    opacity: 0;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+  }
+
+  #original-gif-container {
+    z-index: 9995;
   }
 </style>
 `;
@@ -976,9 +996,10 @@ onmessage = (message) => {
 
 `
   };
-  static mainCanvasResolutions = {
-    search: Utils.onMobileDevice() ? "7680x4320" : "3840x2160",
-    favorites: "7680x4320"
+  static canvasResolutions = {
+    search: "3840x2160",
+    favorites: Utils.onMobileDevice() ? "1920x1080" : "7680x4320",
+    low: Utils.onMobileDevice() ? "640x360" : "1280:720"
   };
   static swipeControls = {
     threshold: 60,
@@ -1022,14 +1043,15 @@ onmessage = (message) => {
       }
     }
   };
+  static commonVideoAttributes = "width=\"100%\" height=\"100%\" autoplay muted loop controlsList=\"nofullscreen\" webkit-playsinline playsinline";
   static settings = {
     maxImagesToRenderInBackground: 50,
-    maxImagesToRenderAround: Utils.onMobileDevice() ? 2 : 50,
+    maxImagesToRenderAround: Utils.onMobileDevice() ? 3 : 50,
     megabyteLimit: Utils.onMobileDevice() ? 0 : 400,
     minImagesToRender: Utils.onMobileDevice() ? 3 : 8,
     imageFetchDelay: 250,
     throttledImageFetchDelay: 400,
-    imageFetchDelayWhenExtensionKnown: 25,
+    imageFetchDelayWhenExtensionKnown: Utils.onMobileDevice() ? 50 : 25,
     upscaledThumbResolutionFraction: 4,
     upscaledAnimatedThumbResolutionFraction: 6,
     animatedThumbsToUpscaleRange: 20,
@@ -1039,7 +1061,7 @@ onmessage = (message) => {
     addFavoriteCooldownTime: 250,
     cursorVisibilityCooldownTime: 500,
     imageExtensionAssignmentCooldownTime: 1000,
-    additionalVideoPlayerCount: Utils.onMobileDevice() ? 0 : 2,
+    additionalVideoPlayerCount: Utils.onMobileDevice() ? 2 : 2,
     renderAroundAggressively: true,
     loopAtEndOfGalleryValue: false,
     get loopAtEndOfGallery() {
@@ -1095,6 +1117,10 @@ onmessage = (message) => {
    */
   gifContainer;
   /**
+   * @type {HTMLDivElement}
+   */
+  originalImageLinkMask;
+  /**
    * @type {HTMLAnchorElement}
    */
   background;
@@ -1123,7 +1149,7 @@ onmessage = (message) => {
    */
   transferredCanvases;
   /**
-   * @type {Map.<String, {start: Number, end:Number}>}
+   * @type {Map.<String, VideoClip>}
    */
   videoClips;
   /**
@@ -1218,7 +1244,8 @@ onmessage = (message) => {
     this.insertHTML();
     this.updateBackgroundOpacity(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
     this.loadVideoClips();
-    this.setMainCanvasOrientation();
+    this.setOrientation();
+    this.createMobileTapControls();
   }
 
   initializeFields() {
@@ -1257,7 +1284,7 @@ onmessage = (message) => {
   }
 
   setMainCanvasResolution() {
-    const resolution = Utils.onSearchPage() ? Gallery.mainCanvasResolutions.search : Gallery.mainCanvasResolutions.favorites;
+    const resolution = Utils.onSearchPage() ? Gallery.canvasResolutions.search : Gallery.canvasResolutions.favorites;
     const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
 
     this.mainCanvas.width = dimensions[0];
@@ -1310,9 +1337,12 @@ onmessage = (message) => {
 
     // eslint-disable-next-line complexity
     document.addEventListener("mousedown", (event) => {
-      const autoplayMenu = document.getElementById("autoplay-menu");
+      if (this.autoplayMenuWasClicked(event)) {
+        return;
+      }
+      const clickedOnTapControls = event.target.classList.contains("mobile-tap-control");
 
-      if (autoplayMenu !== null && autoplayMenu.contains(event.target)) {
+      if (clickedOnTapControls) {
         return;
       }
       const clickedOnAnImage = event.target.tagName.toLowerCase() === "img" && !event.target.parentElement.classList.contains("add-or-remove-button");
@@ -1330,6 +1360,11 @@ onmessage = (message) => {
 
       switch (event.button) {
         case Utils.clickCodes.left:
+          if (event.shiftKey && (this.inGallery || clickedOnAThumb)) {
+            this.openPostInNewPage();
+            return;
+          }
+
           if (this.inGallery) {
             if (Utils.isVideo(this.getSelectedThumb()) && !Utils.onMobileDevice()) {
               return;
@@ -1339,7 +1374,7 @@ onmessage = (message) => {
             return;
           }
 
-          if (thumb === null) {
+          if (!clickedOnAThumb) {
             return;
           }
 
@@ -1353,17 +1388,16 @@ onmessage = (message) => {
           this.toggleAllVisibility(true);
           this.enterGallery();
           this.showOriginalContent(thumb);
+
+          if (Utils.onMobileDevice()) {
+            this.renderImagesAround(thumb);
+          }
           break;
 
         case Utils.clickCodes.middle:
           event.preventDefault();
 
-          if (this.inGallery) {
-            this.openPostInNewPage();
-            return;
-          }
-
-          if (clickedOnAThumb && Utils.onSearchPage()) {
+          if (this.inGallery || (clickedOnAThumb && Utils.onSearchPage())) {
             this.openPostInNewPage();
             return;
           }
@@ -1450,6 +1484,10 @@ onmessage = (message) => {
           }
           break;
 
+        case "Control":
+          this.toggleCtrlClickOpenMediaInNewTab(true);
+          break;
+
         default:
           break;
       }
@@ -1493,10 +1531,6 @@ onmessage = (message) => {
           this.toggleAllVisibility(false);
           break;
 
-        case "Control":
-          this.setGalleryCursor(zoomedIn ? "zoom-out" : "zoom-in");
-          break;
-
         default:
           break;
       }
@@ -1511,12 +1545,21 @@ onmessage = (message) => {
       switch (event.key) {
         case "Control":
           this.setGalleryCursor("default");
+          this.toggleCtrlClickOpenMediaInNewTab(false);
           break;
 
         default:
           break;
       }
     });
+  }
+
+  /**
+   * @param {MouseEvent | TouchEvent} event
+   */
+  autoplayMenuWasClicked(event) {
+    const autoplayMenu = document.getElementById("autoplay-menu");
+    return autoplayMenu !== null && autoplayMenu.contains(event.target);
   }
 
   addFavoritesLoaderEventListeners() {
@@ -1612,9 +1655,6 @@ onmessage = (message) => {
       this.deleteAllRenders();
       this.renderImagesInTheBackground();
     });
-    // window.addEventListener("metadataFetched", (event) => {
-    //   Gallery.assignImageExtension(event.detail.id, event.detail.extension);
-    // });
     window.addEventListener("didNotChangePageInGallery", (event) => {
       if (this.inGallery) {
         this.setNextSelectedThumbIndex(event.detail);
@@ -1663,57 +1703,179 @@ onmessage = (message) => {
       passive: false
     });
     document.addEventListener("touchend", (event) => {
-      if (!this.inGallery) {
+      if (!this.inGallery ||
+        event.target.classList.contains("mobile-tap-control") ||
+        this.autoplayMenuWasClicked(event)
+      ) {
         return;
       }
       event.preventDefault();
       Gallery.swipeControls.set(event, false);
 
-      if (Gallery.swipeControls.up) {
+      if (Gallery.swipeControls.up || Gallery.swipeControls.down) {
         this.exitGallery();
         this.toggleAllVisibility(false);
-      } else if (Gallery.swipeControls.left) {
-        this.traverseGallery(Gallery.directions.right, false);
-      } else if (Gallery.swipeControls.right) {
-        this.traverseGallery(Gallery.directions.left, false);
-      } else {
-        this.exitGallery();
-        this.toggleAllVisibility(false);
+        return;
       }
+
+      if (Utils.isVideo(this.getSelectedThumb())) {
+        return;
+      }
+
+      if (Gallery.swipeControls.left) {
+        this.traverseGallery(Gallery.directions.right, false);
+        return;
+      }
+
+      if (Gallery.swipeControls.right) {
+        this.traverseGallery(Gallery.directions.left, false);
+
+      }
+      // this.exitGallery();
+      // this.toggleAllVisibility(false);
+
     }, {
       passive: false
     });
 
     window.addEventListener("orientationchange", () => {
       if (this.imageRenderer !== null && this.imageRenderer !== undefined) {
-        this.setMainCanvasOrientation();
+        this.setOrientation();
       }
     }, {
       passive: true
     });
   }
 
-  setMainCanvasOrientation() {
+  setOrientation() {
     if (!Utils.onMobileDevice()) {
       return;
     }
     const usingLandscapeOrientation = window.screen.orientation.angle === 90;
 
+    this.setGifOrientation(usingLandscapeOrientation);
+    this.swapMainCanvasDimensions(usingLandscapeOrientation);
+    this.swapLowResolutionCanvasDimensions(usingLandscapeOrientation);
+    this.redrawCanvasesOnOrientationChange();
+  }
+
+  /**
+   * @param {Boolean} usingLandscapeOrientation
+   */
+  swapMainCanvasDimensions(usingLandscapeOrientation) {
     this.imageRenderer.postMessage({
       action: "changeCanvasOrientation",
       usingLandscapeOrientation
     });
+  }
 
+  /**
+   * @param {Boolean} usingLandscapeOrientation
+   */
+  setGifOrientation(usingLandscapeOrientation) {
+    const orientationId = "main-orientation";
+
+    if (usingLandscapeOrientation) {
+      Utils.insertStyleHTML(`
+            #original-gif-container, #main-canvas, #low-resolution-canvas {
+                height: 100vh !important;
+                width: auto !important;
+            }
+            `, orientationId);
+    } else {
+      Utils.insertStyleHTML(`
+            #original-gif-container, #main-canvas, #low-resolution-canvas {
+                width: 100vw !important;
+                height: auto !important;
+            }
+            `, orientationId);
+    }
+  }
+
+  /**
+   * @param {Boolean} usingLandscapeOrientation
+   */
+  swapLowResolutionCanvasDimensions(usingLandscapeOrientation) {
+    if (usingLandscapeOrientation === (this.lowResolutionCanvas.width > this.lowResolutionCanvas.height)) {
+      return;
+    }
+    const temp = this.lowResolutionCanvas.height;
+
+    this.lowResolutionCanvas.height = this.lowResolutionCanvas.width;
+    this.lowResolutionCanvas.width = temp;
+  }
+
+  redrawCanvasesOnOrientationChange() {
     if (!this.inGallery) {
       return;
     }
-
     const thumb = this.getSelectedThumb();
 
     if (thumb === undefined || thumb === null) {
       return;
     }
+    this.drawLowResolutionCanvas(thumb);
     this.imageRenderer.postMessage(this.getRenderRequest(thumb));
+  }
+
+  createMobileTapControls() {
+    if (!Utils.onMobileDevice()) {
+      return;
+    }
+    const tapControlContainer = document.createElement("div");
+    const leftTap = document.createElement("div");
+    const rightTap = document.createElement("div");
+
+    leftTap.className = "mobile-tap-control";
+    rightTap.className = "mobile-tap-control";
+    leftTap.id = "left-mobile-tap-control";
+    rightTap.id = "right-mobile-tap-control";
+    tapControlContainer.appendChild(leftTap);
+    tapControlContainer.appendChild(rightTap);
+    this.originalContentContainer.appendChild(tapControlContainer);
+    Utils.insertStyleHTML(`
+            .mobile-tap-control {
+                position: fixed;
+                top: 50%;
+                height: 65vh;
+                width: 25vw;
+                opacity: 0;
+                background: red;
+                z-index: 9999;
+                color: red;
+                transform: translateY(-50%);
+            }
+
+            #left-mobile-tap-control {
+                left: 0;
+            }
+
+            #right-mobile-tap-control {
+                right: 0;
+            }
+        `);
+    this.toggleTapTraversal(false);
+    leftTap.ontouchstart = () => {
+      if (this.inGallery) {
+        this.traverseGallery(Gallery.directions.left, false);
+      }
+    };
+    rightTap.ontouchstart = () => {
+      if (this.inGallery) {
+        this.traverseGallery(Gallery.directions.right, false);
+      }
+    };
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleTapTraversal(value) {
+    Utils.insertStyleHTML(`
+            .mobile-tap-control {
+                pointer-events: ${value ? "auto" : "none"};
+            }
+        `);
   }
 
   addMemoryManagementEventListeners() {
@@ -1775,8 +1937,8 @@ onmessage = (message) => {
     };
 
     if (Utils.onMobileDevice()) {
-      optionId = "open-post-in-new-page-on-mobile";
-      optionText = "Enlarge on Click";
+      optionId = "mobile-gallery-checkbox";
+      optionText = "Gallery";
       optionTitle = "View full resolution images/play videos when a thumbnail is clicked";
       optionIsChecked = this.enlargeOnClickOnMobile;
       onOptionChanged = (event) => {
@@ -1799,9 +1961,10 @@ onmessage = (message) => {
     const originalContentContainerHTML = `
           <div id="gallery-container">
               <a id="original-video-container">
-                <video id="video-player-0" width="100%" height="100%" autoplay muted loop controlsList="nofullscreen" active></video>
+                <video ${Gallery.commonVideoAttributes} active></video>
               </a>
-              <img id="original-gif-container" class="focused"></img>
+              <img id="original-gif-container"></img>
+              <a id="original-content-background-link-mask"></a>
               <a id="original-content-background"></a>
           </div>
       `;
@@ -1811,6 +1974,8 @@ onmessage = (message) => {
     this.originalContentContainer.insertBefore(this.lowResolutionCanvas, this.originalContentContainer.firstChild);
     this.originalContentContainer.insertBefore(this.mainCanvas, this.originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");
+
+    this.originalImageLinkMask = document.getElementById("original-content-background-link-mask");
     this.videoContainer = document.getElementById("original-video-container");
     this.addAdditionalVideoPlayers();
     this.videoPlayers = Array.from(this.videoContainer.querySelectorAll("video"));
@@ -1819,8 +1984,8 @@ onmessage = (message) => {
     this.gifContainer = document.getElementById("original-gif-container");
     this.mainCanvas.id = "main-canvas";
     this.lowResolutionCanvas.id = "low-resolution-canvas";
-    this.lowResolutionCanvas.width = this.mainCanvas.width;
-    this.lowResolutionCanvas.height = this.mainCanvas.height;
+    this.lowResolutionCanvas.width = Utils.onMobileDevice() ? 320 : 1280;
+    this.lowResolutionCanvas.height = Utils.onMobileDevice() ? 180 : 720;
     this.toggleOriginalContentVisibility(false);
     this.addBackgroundEventListeners();
 
@@ -1832,7 +1997,7 @@ onmessage = (message) => {
   }
 
   addAdditionalVideoPlayers() {
-    const videoPlayerHTML = "<video width=\"100%\" height=\"100%\" autoplay muted loop controlsList=\"nofullscreen\"></video>";
+    const videoPlayerHTML = `<video ${Gallery.commonVideoAttributes}></video>`;
 
     for (let i = 0; i < Gallery.settings.additionalVideoPlayerCount; i += 1) {
       this.videoContainer.insertAdjacentHTML("beforeend", videoPlayerHTML);
@@ -1892,6 +2057,14 @@ onmessage = (message) => {
           this.toggleAllVisibility(false);
         }
       });
+
+      if (Utils.onMobileDevice()) {
+        video.addEventListener("touchend", () => {
+          this.toggleVideoControls(true);
+        }, {
+          passive: true
+        });
+      }
     }
   }
 
@@ -1970,19 +2143,23 @@ onmessage = (message) => {
   }
 
   renderImagesInTheBackground() {
-    if (Utils.onMobileDevice() && !this.enlargeOnClickOnMobile) {
+    if (Utils.onMobileDevice()) {
       return;
     }
-    const animatedThumbsToUpscale = Utils.getAllThumbs()
+    const thumbs = Utils.getAllThumbs();
+
+    if (Utils.onSearchPage()) {
+      this.renderImages(thumbs.filter(thumb => Utils.isImage(thumb)).slice(0, 50));
+      return;
+    }
+    const animatedThumbs = thumbs
       .slice(0, Gallery.settings.animatedThumbsToUpscaleDiscrete)
       .filter(thumb => !Utils.isImage(thumb));
 
-    this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
-
-    const imageThumbsToRender = this.getUnrenderedImageThumbs()
-      .slice(0, Gallery.settings.maxImagesToRenderInBackground);
-
-    this.renderImages(imageThumbsToRender);
+    if (thumbs.length > 0) {
+      this.upscaleAnimatedThumbs(animatedThumbs);
+      this.renderImagesAround(thumbs[0]);
+    }
   }
 
   onPageChange() {
@@ -2154,16 +2331,6 @@ onmessage = (message) => {
   }
 
   /**
-   * @returns {HTMLElement[]}
-   */
-  getUnrenderedImageThumbs() {
-    const thumbs = Utils.getAllThumbs().filter((thumb) => {
-      return Utils.isImage(thumb) && !this.renderHasStarted(thumb);
-    });
-    return thumbs;
-  }
-
-  /**
    * @param {HTMLElement} thumb
    * @returns {HTMLCanvasElement}
    */
@@ -2323,6 +2490,7 @@ onmessage = (message) => {
   enterGallery() {
     const selectedThumb = this.getSelectedThumb();
 
+    this.toggleTapTraversal(true);
     this.lastSelectedThumbIndexBeforeEnteringGallery = this.currentlySelectedThumbIndex;
     this.background.style.pointerEvents = "auto";
 
@@ -2346,12 +2514,14 @@ onmessage = (message) => {
     if (Gallery.settings.debugEnabled) {
       Utils.getAllThumbs().forEach(thumb => thumb.classList.remove("debug-selected"));
     }
+    this.toggleTapTraversal(false);
     this.toggleCursorVisibility(true);
     this.toggleVideoControls(false);
     this.background.style.pointerEvents = "none";
+    this.originalImageLinkMask.style.pointerEvents = "none";
     const thumbIndex = this.getIndexOfThumbUnderCursor();
 
-    if (thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGallery) {
+    if (Utils.onMobileDevice() || thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGallery) {
       this.hideOriginalContent();
 
       if (thumbIndex !== null && this.showOriginalContentOnHover) {
@@ -2364,7 +2534,6 @@ onmessage = (message) => {
     }, 300);
     this.inGallery = false;
     this.autoplayController.stop();
-    this.setGalleryCursor("default");
     document.dispatchEvent(new Event("mousemove"));
   }
 
@@ -2423,6 +2592,10 @@ onmessage = (message) => {
       this.showOriginalImage(selectedThumb);
     }
     this.setupOriginalImageLinkInGallery();
+
+    if (Utils.onMobileDevice()) {
+      this.toggleVideoControls(false);
+    }
   }
 
   /**
@@ -2492,6 +2665,7 @@ onmessage = (message) => {
     this.mainCanvas.style.visibility = "hidden";
     this.lowResolutionCanvas.style.visibility = "hidden";
     this.gifContainer.src = "";
+    this.gifContainer.style.visibility = "hidden";
   }
 
   /**
@@ -2595,6 +2769,7 @@ onmessage = (message) => {
     );
 
   }
+
   /**
    * @param {HTMLElement} initialThumb
    * @param {Number} limit
@@ -2635,16 +2810,16 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   createVideoClip(video, thumb) {
-    const clip = this.videoClips.get(thumb.id);
+    const videoClip = this.videoClips.get(thumb.id);
 
-    if (clip === undefined) {
+    if (videoClip === undefined) {
       video.ontimeupdate = null;
       return;
     }
     video.ontimeupdate = () => {
-      if (video.currentTime < clip.start || video.currentTime > clip.end) {
+      if (video.currentTime < videoClip.start || video.currentTime > videoClip.end) {
         video.removeAttribute("controls");
-        video.currentTime = clip.start;
+        video.currentTime = videoClip.start;
       }
     };
   }
@@ -2722,6 +2897,9 @@ onmessage = (message) => {
     this.gifContainer.src = originalSource;
 
     if (this.showOriginalContentOnHover) {
+      this.toggleOriginalGIF(true);
+      this.lowResolutionCanvas.style.visibility = "hidden";
+      this.mainCanvas.style.visibility = "hidden";
       this.gifContainer.style.visibility = "visible";
     }
   }
@@ -2746,6 +2924,7 @@ onmessage = (message) => {
       }
     }
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
+    this.toggleOriginalGIF(false);
   }
 
   /**
@@ -2768,7 +2947,7 @@ onmessage = (message) => {
     if (Gallery.settings.loopAtEndOfGallery || this.latestSearchResults.length === 0) {
       return adjacentImageThumbs.concat(this.getAdjacentImageThumbsOnCurrentPage(initialThumb));
     }
-    return adjacentImageThumbs.concat(this.getAdjacentImageThumbThroughoutAllPages(initialThumb));
+    return adjacentImageThumbs.concat(this.getAdjacentImageThumbsThroughoutAllPages(initialThumb));
   }
 
   /**
@@ -2789,7 +2968,7 @@ onmessage = (message) => {
    * @param {HTMLElement} initialThumb
    * @returns {HTMLElement[]}
    */
-  getAdjacentImageThumbThroughoutAllPages(initialThumb) {
+  getAdjacentImageThumbsThroughoutAllPages(initialThumb) {
     return this.getAdjacentSearchResults(
       initialThumb,
       Gallery.settings.maxImagesToRenderAround,
@@ -2802,10 +2981,10 @@ onmessage = (message) => {
   /**
    * @param {HTMLElement} initialThumb
    * @param {Number} limit
-   * @param {Function} additionalQualifier
+   * @param {Function} qualifier
    * @returns {HTMLElement[]}
    */
-  getAdjacentThumbs(initialThumb, limit, additionalQualifier) {
+  getAdjacentThumbs(initialThumb, limit, qualifier) {
     const adjacentThumbs = [];
     let currentThumb = initialThumb;
     let previousThumb = initialThumb;
@@ -2822,7 +3001,7 @@ onmessage = (message) => {
       currentThumb = traverseForward ? nextThumb : previousThumb;
 
       if (currentThumb !== null) {
-        if (this.isVisible(currentThumb) && additionalQualifier(currentThumb)) {
+        if (qualifier(currentThumb)) {
           adjacentThumbs.push(currentThumb);
         }
       }
@@ -2850,15 +3029,15 @@ onmessage = (message) => {
       } else {
         previousThumb = this.getAdjacentThumbLooped(previousThumb, false);
       }
-      traverseForward = !traverseForward;
       currentThumb = traverseForward ? nextThumb : previousThumb;
+      traverseForward = !traverseForward;
 
       if (currentThumb === undefined || discoveredIds.has(currentThumb.id)) {
         break;
       }
       discoveredIds.add(currentThumb.id);
 
-      if (this.isVisible(currentThumb) && additionalQualifier(currentThumb)) {
+      if (additionalQualifier(currentThumb)) {
         adjacentThumbs.push(currentThumb);
       }
     }
@@ -2887,10 +3066,6 @@ onmessage = (message) => {
    */
   getAdjacentThumbLooped(thumb, forward) {
     let adjacentThumb = this.getAdjacentThumb(thumb, forward);
-
-    while (adjacentThumb !== null && !this.isVisible(adjacentThumb)) {
-      adjacentThumb = this.getAdjacentThumb(adjacentThumb, forward);
-    }
 
     if (adjacentThumb === null) {
       adjacentThumb = forward ? this.visibleThumbs[0] : this.visibleThumbs[this.visibleThumbs.length - 1];
@@ -2970,14 +3145,6 @@ onmessage = (message) => {
       i = i < 0 ? this.latestSearchResults.length - 1 : i;
     }
     return i;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Boolean}
-   */
-  isVisible(thumb) {
-    return thumb.style.display !== "none";
   }
 
   /**
@@ -3109,10 +3276,13 @@ onmessage = (message) => {
    */
   toggleBackgroundVisibility(value) {
     if (value === undefined) {
-      this.background.style.display = this.background.style.display === "block" ? "none" : "block";
+      value = this.background.style.display === "block";
+      this.background.style.display = value ? "none" : "block";
+      this.originalImageLinkMask.style.display = value ? "none" : "block";
       return;
     }
     this.background.style.display = value ? "block" : "none";
+    this.originalImageLinkMask.style.display = value ? "block" : "none";
   }
 
   /**
@@ -3166,19 +3336,15 @@ onmessage = (message) => {
   toggleVideoControls(value) {
     const video = this.getActiveVideoPlayer();
 
-    if (value === undefined) {
-      video.style.pointerEvents = video.style.pointerEvents === "auto" ? "none" : "auto";
-
-      if (video.hasAttribute("controls")) {
-        video.removeAttribute("controls");
-      }
-      return;
-    }
-    video.style.pointerEvents = value ? "auto" : "none";
-
     if (Utils.onMobileDevice()) {
-      video.controls = value ? "controls" : false;
-    } else if (!value) {
+      if (value) {
+        video.setAttribute("controls", "");
+      }
+    } else {
+      video.style.pointerEvents = value ? "auto" : "none";
+    }
+
+    if (!value) {
       video.removeAttribute("controls");
     }
   }
@@ -3228,6 +3394,7 @@ onmessage = (message) => {
     }
     this.videoPlayers[0].setAttribute("active", "");
   }
+
   /**
    * @returns {HTMLVideoElement}
    */
@@ -3256,9 +3423,12 @@ onmessage = (message) => {
    */
   toggleOriginalGIF(value) {
     if (value === undefined) {
-      this.gifContainer.style.visibility = this.gifContainer.style.visibility === "visible" ? "hidden" : "visible";
-    } else {
-      this.gifContainer.style.visibility = value ? "visible" : "hidden";
+      value = this.gifContainer.style.visibility !== "visible";
+    }
+    this.gifContainer.style.visibility = value ? "visible" : "hidden";
+
+    if (Utils.onMobileDevice()) {
+      this.gifContainer.style.zIndex = value ? "9995" : "0";
     }
   }
 
@@ -3365,9 +3535,6 @@ onmessage = (message) => {
    * @param {String} id
    */
   drawLowResolutionCanvas(thumb) {
-    if (Utils.onMobileDevice()) {
-      return;
-    }
     const image = Utils.getImageFromThumb(thumb);
 
     if (!Utils.imageIsLoaded(image)) {
@@ -3385,9 +3552,6 @@ onmessage = (message) => {
   }
 
   clearLowResolutionCanvas() {
-    if (Utils.onMobileDevice()) {
-      return;
-    }
     this.lowResolutionContext.clearRect(0, 0, this.lowResolutionCanvas.width, this.lowResolutionCanvas.height);
   }
 
@@ -3444,37 +3608,6 @@ onmessage = (message) => {
     }));
   }
 
-  /**
-   * @param {String} cursor
-   */
-  setGalleryCursor(cursor) {
-    // this.background.style.cursor = cursor;
-  }
-
-  /**
-   * @param {MouseEvent} event
-   */
-  zoomOnMainCanvas(event) {
-    const style = document.getElementById("main-canvas-zoom-fsg-style");
-
-    if (style !== null) {
-      style.remove();
-      return;
-    }
-    const x = 100 * Utils.roundToTwoDecimalPlaces(event.clientX / window.innerWidth);
-    const y = 100 * Utils.roundToTwoDecimalPlaces(event.clientY / window.innerHeight);
-
-    Utils.insertStyleHTML(`
-      #gallery-container {
-        canvas,
-        img {
-          transform-origin: ${x}% ${y}%;
-          transform: translate(-50%, -50%) scale(4) !important;
-        }
-      }
-    `, "main-canvas-zoom");
-  }
-
   async setupOriginalImageLinkInGallery() {
     const thumb = this.getSelectedThumb();
 
@@ -3482,8 +3615,18 @@ onmessage = (message) => {
       return;
     }
     const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
-    const container = Utils.isVideo(thumb) ? this.videoContainer : this.background;
 
-    container.href = imageURL;
+    this.originalImageLinkMask.style.pointerEvents = "none";
+    this.originalImageLinkMask.setAttribute("href", imageURL);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleCtrlClickOpenMediaInNewTab(value) {
+    if (!this.inGallery) {
+      return;
+    }
+    this.originalImageLinkMask.style.pointerEvents = value ? "auto" : "none";
   }
 }

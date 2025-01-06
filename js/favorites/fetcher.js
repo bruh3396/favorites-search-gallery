@@ -2,15 +2,19 @@ class FavoritesFetcher {
   /**
    * @type {Function}
    */
-  onAllFavoritesPageRequestsCompleted;
+  onAllRequestsCompleted;
   /**
    * @type {Function}
    */
-  onFavoritesPageRequestCompleted;
+  onRequestCompleted;
+  /**
+   * @type {Set.<Number>}
+   */
+  pendingRequestPageNumbers;
   /**
    * @type {FavoritesPageRequest[]}
    */
-  failedFavoritesPageRequests;
+  failedRequests;
   /**
    * @type {Set.<String>}
    */
@@ -18,82 +22,98 @@ class FavoritesFetcher {
   /**
    * @type {Number}
    */
-  currentFavoritesPageNumber;
+  currentPageNumber;
   /**
    * @type {Boolean}
    */
-  fetchedAnEmptyFavoritesPage;
+  fetchedAnEmptyPage;
 
   /**
    * @type {Boolean}
    */
-  get hasFailedFavoritesPageRequests() {
-    return this.failedFavoritesPageRequests.length > 0;
+  get hasFailedRequests() {
+    return this.failedRequests.length > 0;
   }
 
   /**
    * @type {Boolean}
    */
-  get hasNotFetchedAllFavoritesPages() {
-    return !this.fetchedAnEmptyFavoritesPage;
+  get hasNotFetchedAll() {
+    return !this.fetchedAnEmptyPage;
   }
 
   /**
    * @type {Boolean}
    */
-  get allFavoritesPageRequestsHaveNotCompleted() {
-    return this.hasNotFetchedAllFavoritesPages || this.hasFailedFavoritesPageRequests;
+  get allRequestsHaveStarted() {
+    return this.fetchedAnEmptyPage;
+  }
+
+  /**
+   * @type {Boolean}
+   */
+  get someRequestsAreStillPending() {
+    return this.pendingRequestPageNumbers.size > 0;
+  }
+
+  /**
+   * @type {Boolean}
+   */
+  get allRequestsHaveCompleted() {
+    return this.allRequestsHaveStarted && !this.hasFailedRequests && !this.someRequestsAreStillPending;
   }
 
   /**
    * @type {FavoritesPageRequest}
    */
-  get oldestFailedFavoritesPageFetchRequest() {
-    return this.failedFavoritesPageRequests.shift();
+  get oldestFailedFetchRequest() {
+    return this.failedRequests.shift();
   }
 
   /**
    * @type {FavoritesPageRequest}
    */
-  get newFavoritesPageFetchRequest() {
-    const request = new FavoritesPageRequest(this.currentFavoritesPageNumber);
+  get newFetchRequest() {
+    const request = new FavoritesPageRequest(this.currentPageNumber);
 
-    this.currentFavoritesPageNumber += 1;
+    this.pendingRequestPageNumbers.add(request.pageNumber);
+    this.currentPageNumber += 1;
     return request;
   }
 
   /**
    * @type {FavoritesPageRequest | null}
    */
-  get currentFetchRequest() {
-    if (this.hasFailedFavoritesPageRequests) {
-      return this.oldestFailedFavoritesPageFetchRequest;
+  get nextFetchRequest() {
+    if (this.hasFailedRequests) {
+      return this.oldestFailedFetchRequest;
     }
 
-    if (this.hasNotFetchedAllFavoritesPages) {
-      return this.newFavoritesPageFetchRequest;
+    if (this.hasNotFetchedAll) {
+      return this.newFetchRequest;
     }
     return null;
   }
 
   /**
-   * @param {Function} onAllFavoritesPageRequestsCompleted
-   * @param {Function} onFavoritesPageRequestCompleted
+   * @param {Function} onAllRequestsCompleted
+   * @param {Function} onRequestCompleted
    */
-  constructor(onAllFavoritesPageRequestsCompleted, onFavoritesPageRequestCompleted) {
-    this.onAllFavoritesPageRequestsCompleted = onAllFavoritesPageRequestsCompleted;
-    this.onFavoritesPageRequestCompleted = onFavoritesPageRequestCompleted;
+  constructor(onAllRequestsCompleted, onRequestCompleted) {
+    this.onAllRequestsCompleted = onAllRequestsCompleted;
+    this.onRequestCompleted = onRequestCompleted;
     this.storedFavoriteIds = new Set();
-    this.failedFavoritesPageRequests = [];
-    this.currentFavoritesPageNumber = 0;
-    this.fetchedAnEmptyFavoritesPage = false;
+    this.pendingRequestPageNumbers = new Set();
+    this.failedRequests = [];
+    this.currentPageNumber = 0;
+    this.fetchedAnEmptyPage = false;
   }
 
   async fetchAllFavorites() {
-    while (this.allFavoritesPageRequestsHaveNotCompleted) {
-      await this.fetchFavoritesPage(this.currentFetchRequest);
+    while (!this.allRequestsHaveCompleted) {
+      await this.fetchFavoritesPage(this.nextFetchRequest);
     }
-    this.onAllFavoritesPageRequestsCompleted();
+    this.onAllRequestsCompleted();
   }
 
   /**
@@ -110,7 +130,7 @@ class FavoritesFetcher {
 
       if (allNewFavoritesFound) {
         this.storedFavoriteIds = null;
-        this.onAllFavoritesPageRequestsCompleted(favorites);
+        this.onAllRequestsCompleted(favorites);
         return;
       }
     }
@@ -120,7 +140,7 @@ class FavoritesFetcher {
    * @returns {Promise.<{allNewFavoritesFound: Boolean, newFavorites: Post[]}>}
    */
   fetchNewFavoritesOnReload() {
-    return fetch(this.newFavoritesPageFetchRequest.url)
+    return fetch(this.newFetchRequest.url)
       .then((response) => {
         return response.text();
       })
@@ -156,7 +176,8 @@ class FavoritesFetcher {
    */
   async fetchFavoritesPage(request) {
     if (request === null) {
-      console.error("Error: null fetch request");
+      // console.error("Error: null fetch request, possibly waiting for completions");
+      await Utils.sleep(200);
       return;
     }
     fetch(request.url)
@@ -189,12 +210,13 @@ class FavoritesFetcher {
    */
   onFavoritesPageRequestSuccess(request, html) {
     request.fetchedFavorites = FavoritesParser.extractFavorites(html);
+    this.pendingRequestPageNumbers.delete(request.pageNumber);
     const favoritesPageIsEmpty = request.fetchedFavorites.length === 0;
 
-    this.fetchedAnEmptyFavoritesPage = this.fetchedAnEmptyFavoritesPage || favoritesPageIsEmpty;
+    this.fetchedAnEmptyPage = this.fetchedAnEmptyPage || favoritesPageIsEmpty;
 
     if (!favoritesPageIsEmpty) {
-      this.onFavoritesPageRequestCompleted(request);
+      this.onRequestCompleted(request);
     }
   }
 
@@ -205,6 +227,6 @@ class FavoritesFetcher {
   onFavoritesPageRequestFail(request, error) {
     console.error(error);
     request.onFail();
-    this.failedFavoritesPageRequests.push(request);
+    this.failedRequests.push(request);
   }
 }

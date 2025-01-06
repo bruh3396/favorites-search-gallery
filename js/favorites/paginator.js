@@ -29,7 +29,7 @@ class FavoritesPaginator {
     this.paginationMenu = this.createPaginationMenuContainer();
     this.currentPageNumber = 1;
     this.favoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
-    this.maxPageNumberButtons = Utils.onMobileDevice() ? 3 : 5;
+    this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
   }
 
   /**
@@ -86,7 +86,7 @@ class FavoritesPaginator {
     const nextPageButton = document.getElementById("next-page");
     const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtons &&
       nextPageButton !== null && nextPageButton.style.display !== "none" &&
-      nextPageButton.style.visibility !== "hidden";
+      nextPageButton.style.visibility !== "hidden" && !nextPageButton.disabled;
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
       this.createPaginationMenu(this.currentPageNumber, favorites);
@@ -298,7 +298,7 @@ class FavoritesPaginator {
       return;
     }
     const html = `
-      <input type="number" placeholder="page" style="width: 4em;" id="goto-page-input">
+      <input type="number" placeholder="#" style="width: 4em;" id="goto-page-input">
       <button id="goto-page-button">Go</button>
     `;
     const container = document.createElement("span");
@@ -388,19 +388,19 @@ class FavoritesPaginator {
     const lastNumberExists = this.lastPageNumberButtonExists(pageCount);
 
     if (firstNumberExists && lastNumberExists) {
-      previousPage.style.visibility = "hidden";
-      firstPage.style.visibility = "hidden";
-      nextPage.style.visibility = "hidden";
-      finalPage.style.visibility = "hidden";
+      previousPage.disabled = true;
+      firstPage.disabled = true;
+      nextPage.disabled = true;
+      finalPage.disabled = true;
     } else {
       if (firstNumberExists) {
-        previousPage.style.visibility = "hidden";
-        firstPage.style.visibility = "hidden";
+        previousPage.disabled = true;
+        firstPage.disabled = true;
       }
 
       if (lastNumberExists) {
-        nextPage.style.visibility = "hidden";
-        finalPage.style.visibility = "hidden";
+        nextPage.disabled = true;
+        finalPage.disabled = true;
       }
     }
   }

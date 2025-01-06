@@ -276,7 +276,7 @@ class FavoritesMenu {
       padding: 0px 20px 30px 20px;
       display: grid !important;
       grid-template-columns: repeat(10, 1fr);
-      grid-gap: 1em;
+      grid-gap: 0.5cqw;
     }
 
     #help-links-container {
@@ -367,22 +367,19 @@ class FavoritesMenu {
 
     #additional-favorite-options {
       >div:not(:last-child) {
-        padding-bottom: 10px;
+        margin-bottom: 10px;
       }
 
       select {
         cursor: pointer;
         min-height: 25px;
+        width: 150px;
       }
     }
 
     .number-label-container {
       display: inline-block;
       min-width: 130px;
-    }
-
-    #performance-profile {
-      width: 150px;
     }
 
     #show-ui-div {
@@ -440,7 +437,6 @@ class FavoritesMenu {
 
     #favorites-load-status {
       >label {
-        display: inline-block;
         width: 140px;
       }
     }
@@ -484,7 +480,7 @@ class FavoritesMenu {
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
-      <h2 style="display: inline;">Search Favorites</h2>
+      <h2 style="display: inline;" id="search-header">Search Favorites</h2>
       <span id="favorites-load-status" style="margin-left: 5px;">
         <label id="match-count-label"></label>
         <label id="pagination-label" style="margin-left: 10px;"></label>
@@ -551,13 +547,14 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
         </span>
       </div>
       <div>
-        <textarea name="tags" id="favorites-search-box" placeholder="Search with Tags and/or IDs"
+        <textarea name="tags" id="favorites-search-box" placeholder="Search favorites"
           spellcheck="false"></textarea>
       </div>
       <div id="left-favorites-panel-bottom-row">
         <div id="bottom-panel-1">
           <label class="checkbox" title="Show more options">
-            <input type="checkbox" id="options-checkbox"> More Options
+            <input type="checkbox" id="options-checkbox">
+            <span id="more-options-label"> More Options</span>
             <span class="option-hint"> (O)</span>
           </label>
           <div class="options-container">
@@ -566,42 +563,46 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
                 <div>
                   <label class="checkbox" title="Enable gallery and other features on search pages">
                     <input type="checkbox" id="enable-on-search-pages">
-                    Enhance Search Pages
+                    <span> Enhance Search Pages</span>
                   </label>
                 </div>
                 <div style="display: none;">
                   <label class="checkbox" title="Toggle remove buttons">
                     <input type="checkbox" id="show-remove-favorite-buttons">
-                    Remove Buttons
+                    <span> Remove Buttons</span>
                     <span class="option-hint"> (R)</span>
                   </label>
                 </div>
                 <div style="display: none;">
                   <label class="checkbox" title="Toggle add favorite buttons">
                     <input type="checkbox" id="show-add-favorite-buttons">
-                    Add Favorite Buttons
+                    <span> Add Favorite Buttons</span>
                     <span class="option-hint"> (R)</span>
                   </label>
                 </div>
                 <div>
                   <label class="checkbox" title="Exclude favorites with blacklisted tags from search">
-                    <input type="checkbox" id="filter-blacklist-checkbox"> Exclude Blacklist
+                    <input type="checkbox" id="filter-blacklist-checkbox">
+                    <span> Exclude Blacklist</span>
                   </label>
                 </div>
                 <div>
                   <label class="checkbox" title="Enable fancy image hovering (experimental)">
-                    <input type="checkbox" id="fancy-image-hovering-checkbox"> Fancy Hovering
+                    <input type="checkbox" id="fancy-image-hovering-checkbox">
+                    <span> Fancy Hovering</span>
                   </label>
                 </div>
                 <div style="display: none;">
                   <label class="checkbox" title="Enable fancy image hovering (experimental)">
-                    <input type="checkbox" id="statistic-hint-checkbox"> Statistics
+                    <input type="checkbox" id="statistic-hint-checkbox">
+                    <span> Statistics</span>
                     <span class="option-hint"> (S)</span>
                   </label>
                 </div>
                 <div id="show-hints-container">
                   <label class="checkbox" title="Show hotkeys and shortcuts">
-                    <input type="checkbox" id="show-hints-checkbox"> Hotkey Hints
+                    <input type="checkbox" id="show-hints-checkbox">
+                    <span> Hotkey Hints</span>
                     <span class="option-hint"> (H)</span>
                   </label>
                 </div>
@@ -619,13 +620,14 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
                 <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
                 <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
                 <div style="position: relative;">
-                  <select id="sorting-method" style="width: 150px;">
+                  <select id="sorting-method">
                     <option value="default">Default</option>
                     <option value="score">Score</option>
                     <option value="width">Width</option>
                     <option value="height">Height</option>
                     <option value="create">Date Uploaded</option>
                     <option value="change">Date Changed</option>
+                    <option value="random">Random</option>
                   </select>
                   <input type="checkbox" id="sort-ascending">
                 </div>
@@ -777,8 +779,8 @@ Lower numbers improve responsiveness">
     if (FavoritesMenu.disabled) {
       return;
     }
-    this.configureMobileUI();
     this.initializeFields();
+    this.configureMobileUI();
     this.extractUIElements();
     this.setMainButtonInteractability(false);
     this.addEventListenersToFavoritesPage();
@@ -881,6 +883,7 @@ Lower numbers improve responsiveness">
     if (this.searchHistory.length > 0) {
       this.inputs.searchBox.value = this.searchHistory[0];
     }
+    this.updateVisibilityOfSearchClearButton();
     this.inputs.findFavorite.value = Utils.getPreference(this.preferences.findFavorite, "");
     this.inputs.columnCount.value = Utils.getPreference(this.preferences.columnCount, Utils.defaults.columnCount);
     this.changeColumnCount(this.inputs.columnCount.value);
@@ -980,7 +983,7 @@ Lower numbers improve responsiveness">
         case "Enter":
           if (Utils.awesompleteIsUnselected(this.inputs.searchBox)) {
             event.preventDefault();
-            this.buttons.search.click();
+            this.buttons.search.dispatchEvent(new Event("click"));
           } else {
             Utils.clearAwesompleteSelection(this.inputs.searchBox);
           }
@@ -1024,6 +1027,11 @@ Lower numbers improve responsiveness">
     };
     this.buttons.clear.onclick = () => {
       this.inputs.searchBox.value = "";
+
+      if (Utils.onMobileDevice()) {
+        this.inputs.searchBox.focus();
+      }
+      this.updateVisibilityOfSearchClearButton();
     };
     this.checkboxes.filterBlacklist.onchange = () => {
       Utils.setPreference(this.preferences.excludeBlacklist, this.checkboxes.filterBlacklist.checked);
@@ -1034,7 +1042,13 @@ Lower numbers improve responsiveness">
       favoritesLoader.invertSearchResults();
     };
     this.buttons.reset.onclick = () => {
-      Utils.deletePersistentData();
+      if (Utils.onMobileDevice()) {
+        setTimeout(() => {
+          Utils.deletePersistentData();
+        }, 10);
+      } else {
+        Utils.deletePersistentData();
+      }
     };
     this.inputs.findFavorite.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -1056,7 +1070,7 @@ Lower numbers improve responsiveness">
       window.location.reload();
     };
     this.inputs.resultsPerPage.onchange = () => {
-      this.changeResultsPerPage(parseInt(this.inputs.resultsPerPage.value), false);
+      this.changeResultsPerPage(parseInt(this.inputs.resultsPerPage.value));
     };
 
     if (!Utils.onMobileDevice()) {
@@ -1198,9 +1212,13 @@ Lower numbers improve responsiveness">
    * @param {Boolean} value
    */
   toggleFavoritesOptions(value) {
-    document.querySelectorAll(".options-container").forEach((option) => {
-      option.style.display = value ? "block" : "none";
-    });
+    if (Utils.onMobileDevice()) {
+      document.getElementById("left-favorites-panel-bottom-row").classList.toggle("hidden", !value);
+    } else {
+      document.querySelectorAll(".options-container").forEach((option) => {
+        option.style.display = value ? "block" : "none";
+      });
+    }
   }
 
   toggleAddOrRemoveButtons() {
@@ -1238,7 +1256,9 @@ Lower numbers improve responsiveness">
       this.inputs.columnCount.value = Utils.getPreference(this.preferences.columnCount, Utils.defaults.columnCount);
       return;
     }
-    count = Utils.clamp(parseInt(count), 4, 20);
+    const minimumColumns = Utils.onMobileDevice() ? 1 : 4;
+
+    count = Utils.clamp(parseInt(count), minimumColumns, 20);
     Utils.insertStyleHTML(`
       #favorites-search-gallery-content {
         grid-template-columns: repeat(${count}, 1fr) !important;
@@ -1294,75 +1314,657 @@ Lower numbers improve responsiveness">
       return;
     }
     Utils.insertStyleHTML(`
-      #performance-profile-container, #show-hints-container {
-        display: none !important;
-      }
+        #performance-profile-container, #show-hints-container {
+          display: none !important;
+        }
         .thumb, .favorite {
-          > div > canvas {
+        > div > canvas {
             display: none;
-          }
+        }
         }
 
-        .checkbox {
-          input[type="checkbox"] {
-            margin-right: 10px;
+          #more-options-label {
+            margin-left: 6px;
           }
-        }
 
-        #favorites-search-gallery-menu-panels {
-          >div {
-            textarea {
-              width: 95% !important;
+          .checkbox {
+            margin-bottom: 8px;
+            input[type="checkbox"] {
+              margin-right: 10px;
             }
           }
-        }
 
-        #mobile-container {
-          position: fixed !important;
-          z-index: 30;
-          width: 100vw;
-        }
+          #mobile-container {
+            position: fixed !important;
+            z-index: 30;
+            width: 100vw;
+            top: 0px;
+            left: 0px;
+          }
 
         #show-ui-div {
-          display: none;
+            display: none;
         }
 
         #favorites-search-gallery-menu-panels {
-          display: block !important;
+            display: block !important;
         }
 
         #right-favorites-panel {
-          margin-left: 0px !important;
+            margin-left: 0px !important;
         }
 
         #left-favorites-panel-bottom-row {
-          display: block !important;
-          margin-left: 10px !important;
+            margin: 4px 0px 0px 0px !important;
         }
 
-        input[type="checkbox"] {
-          width: 25px;
-          height: 25px;
-          }
+        #bottom-panel-2 {
+            margin-right: 5px;
         }
 
-        #sort-ascending {
-          width: 25px;
-          height: 25px;
-        }
-        `, "mobile");
+            #search-header {
+                display: none !important;
+            }
 
+            #left-favorites-panel-top-row {
+                display: none !important;
+            }
+
+            #favorites-search-gallery-content {
+                grid-gap: 1.2cqw;
+           }
+
+           #favorites-search-gallery-menu {
+                padding: 2px 5px 3px 5px;
+                top: 0;
+                left: 0;
+                width: 100vw;
+
+
+                &.fixed {
+                    position: fixed;
+                    margin-top: 0;
+                }
+            }
+
+           #favorites-load-status-label {
+                display: inline;
+           }
+
+           #left-favorites-panel-top-row {
+           }
+
+           textarea {
+           border-radius: 0px;
+            height: 50px;
+            padding: 8px 0px 8px 10px !important;
+           }
+
+           body {
+            width: 100% !important;
+           }
+
+           #favorites-pagination-container>button {
+                font-size: 25px;
+            }
+
+            #goto-page-input {
+                top: -4px;
+                position: relative;
+                height: 25px;
+                width: 1em !important;
+                text-align: center;
+                font-size: 16px;
+            }
+
+            #goto-page-button {
+            display: none;
+                height: 36px;
+                position: absolute;
+                margin-left: 5px;
+            }
+
+            #additional-favorite-options {
+                .number {
+                    display: none;
+                }
+            }
+
+            #results-per-page-container {
+                margin-bottom: 10px;
+            }
+
+            #bottom-panel-3,
+            #bottom-panel-4 {
+                flex: none !important;
+            }
+
+            #rating-container {
+                position: relative;
+                left: -5px;
+                top: -2px;
+                display: none;
+            }
+
+            #favorites-pagination-container>button {
+                &[disabled] {
+                    opacity: 0.25;
+                    pointer-events: none;
+                }
+            }
+
+            html {
+                -webkit-tap-highlight-color: transparent;
+            }
+
+             #additional-favorite-options {
+                    select {
+                    width: 120px;
+                    }
+                }
+
+            .add-or-remove-button {
+                filter: none;
+                width: 60%;
+            }
+
+            #left-favorites-panel-bottom-row {
+                height: 150px;
+                overflow: hidden;
+                    transition: height 0.2s ease;
+                    -webkit-transition: height 0.2s ease;
+                    -moz-transition: height 0.2s ease;
+                    -ms-transition: height 0.2s ease;
+                    -o-transition: height 0.2s ease;
+                        transition: height 0.2s ease;
+
+                    &.hidden {
+                        height: 0px;
+                    }
+                }
+            #favorites-search-gallery-content.sticky {
+                transition: margin 0.2s ease;
+            }
+          `, "mobile");
+
+    const bottomPanel2 = document.getElementById("bottom-panel-2");
+
+    bottomPanel2.parentElement.appendChild(bottomPanel2);
+
+    try {
+      document.getElementById("bottom-panel-1").querySelector(".options-container")
+        .appendChild(document.getElementById("rating-container"));
+      document.getElementById("sorting-method").parentElement.style.marginTop = "-5px";
+      document.getElementById("more-options-label").textContent = " Options";
+      const optionsCheckbox = document.getElementById("options-checkbox");
+      const optionsCheckboxWrapper = optionsCheckbox.parentElement;
+      const topRow = document.getElementById("left-favorites-panel-top-row");
+
+      optionsCheckbox.style.marginRight = "3px";
+      optionsCheckboxWrapper.style.display = "inline";
+      optionsCheckboxWrapper.style.marginLeft = "5px";
+      topRow.insertBefore(optionsCheckboxWrapper, topRow.lastElementChild);
+    } catch (error) {
+      console.error(error);
+    }
+    const experimentalLayoutEnabled = Utils.getCookie("experiment-mobile-layout", "true");
+    const headerInset = 0;
+
+    if (experimentalLayoutEnabled === "true") {
+      Utils.insertStyleHTML(`
+                input[type="checkbox"] {
+                    height: 18px;
+                }
+
+                #favorites-search-gallery-menu {
+                    margin-top: -${headerInset}px;
+                }
+            `, "experimental-mobile");
+    } else {
+
+      Utils.insertStyleHTML(`
+                input[type="checkbox"] {
+                    width: 25px;
+                    height: 25px;
+                }
+
+
+            `, "non-experimental-mobile");
+    }
     const mobileUIContainer = document.createElement("div");
+    const header = document.getElementById("header");
+    const menu = document.getElementById("favorites-search-gallery-menu");
+    const headerHeight = header === null ? 0 : header.getBoundingClientRect().height - headerInset;
 
-    mobileUIContainer.id = "mobile-container";
-    mobileUIContainer.appendChild(document.getElementById("header"));
-    mobileUIContainer.appendChild(document.getElementById("favorites-search-gallery-menu"));
-    Utils.insertFavoritesSearchGalleryHTML("afterbegin", mobileUIContainer.innerHTML);
+    mobileUIContainer.id = "mobile-header";
+    Utils.favoritesSearchGalleryContainer.insertAdjacentElement("afterbegin", mobileUIContainer);
+
+    if (header !== null) {
+      mobileUIContainer.appendChild(header);
+    }
+    mobileUIContainer.appendChild(menu);
 
     const helpLinksContainer = document.getElementById("help-links-container");
 
     if (helpLinksContainer !== null) {
       helpLinksContainer.innerHTML = "<a href=\"https://github.com/bruh3396/favorites-search-gallery#controls\" target=\"_blank\">Help</a>";
+    }
+
+    window.addEventListener("scroll", async() => {
+      if (window.scrollY > headerHeight && document.getElementById("sticky-header-fsg-style") === null) {
+        Utils.insertStyleHTML(
+          `
+                    #favorites-search-gallery-menu {
+                        position: fixed;
+                        margin-top: 0;
+                    }
+                    `
+          , "sticky-header"
+        );
+        this.updateOptionContentMargin();
+        await Utils.sleep(1);
+        document.getElementById("favorites-search-gallery-content").classList.add("sticky");
+
+      } else if (window.scrollY <= headerHeight && document.getElementById("sticky-header-fsg-style") !== null) {
+        document.getElementById("sticky-header-fsg-style").remove();
+        document.getElementById("favorites-search-gallery-content").classList.remove("sticky");
+        this.removeOptionContentMargin();
+      }
+    }, {
+      passive: true
+    });
+    this.createResultsPerPageSelect();
+    this.createColumnResizeSelect();
+    this.createMobileSearchBar();
+
+    document.getElementById("options-checkbox").addEventListener("change", (event) => {
+      const menuIsSticky = document.getElementById("favorites-search-gallery-content").classList.contains("sticky");
+      const margin = event.target.checked ? 261 : 111;
+
+      if (menuIsSticky) {
+        Utils.sleep(1);
+        this.updateOptionContentMargin(margin);
+      }
+    });
+
+    window.addEventListener("postProcess", () => {
+      this.createMobileToggleSwitches();
+    }, {
+      once: true
+    });
+  }
+
+  createResultsPerPageSelect() {
+    const resultsPerPageSelectHTML = `
+            <select id="results-per-page-select">
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2000">2000</option>
+                <option value="5000">5000</option>
+            </select>
+        `;
+
+    document.getElementById("results-per-page-container").querySelector(".number")
+      .insertAdjacentHTML("afterend", resultsPerPageSelectHTML);
+    const resultsPerPageSelect = document.getElementById("results-per-page-select");
+
+    resultsPerPageSelect.value = Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage);
+    resultsPerPageSelect.onchange = () => {
+      this.changeResultsPerPage(parseInt(resultsPerPageSelect.value));
+    };
+  }
+
+  createColumnResizeSelect() {
+    const columnResizeSelect = document.createElement("select");
+    const columnResizeNumberInput = document.getElementById("column-resize-container").querySelector(".number");
+
+    for (let i = 1; i <= 10; i += 1) {
+      const option = document.createElement("option");
+
+      option.value = i;
+      option.textContent = i;
+      columnResizeSelect.appendChild(option);
+    }
+    columnResizeSelect.value = Utils.getPreference(this.preferences.columnCount, Utils.defaults.columnCount);
+    columnResizeSelect.onchange = () => {
+      this.changeColumnCount(parseInt(columnResizeSelect.value));
+    };
+    columnResizeNumberInput.insertAdjacentElement("afterend", columnResizeSelect);
+  }
+
+  createMobileSearchBar() {
+    document.getElementById("clear-button").remove();
+    document.getElementById("search-button").remove();
+    document.getElementById("options-checkbox").remove();
+    document.getElementById("reset-button").remove();
+
+    Utils.insertStyleHTML(`
+        #mobile-toolbar-row {
+            display: flex;
+            align-items: center;
+
+            svg {
+                -webkit-transition: .6s;
+                transition: .6s;
+                fill: ${Utils.usingDarkTheme() ? "white" : "black"};
+                transform: scale(0.85);
+            }
+
+            input[type="checkbox"]:checked + label {
+                svg {
+                    fill: #0075FF;
+                }
+                color: #0075FF;
+            }
+        }
+        .search-bar-container {
+            background-color: ${Utils.usingDarkTheme() ? "#303030" : "white"};
+            align-content: center;
+            width: 100%;
+            height: 40px;
+            border-radius: 50px;
+            padding-left: 10px;
+            padding-right: 10px;
+            flex: 1;
+        }
+
+        .search-bar-items {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+
+            > div {
+                min-width: 40px;
+                width: 100%;
+                height: 100%;
+                display: block;
+                align-content: center;
+            }
+        }
+
+        .search-icon-container {
+            flex: 0;
+            min-width: 40px;
+        }
+
+        .search-bar-input-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .search-bar-input {
+            flex: 1;
+            border: none;
+            box-sizing: content-box;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            outline: none !important;
+            border: none !important;
+            font-size: 18px !important;
+            width: 100%;
+
+            &:focus, &:focus-visible {
+                background: none !important;
+                border: none !important;
+                outline: none !important;
+            }
+        }
+
+        .search-clear-container {
+            visibility: hidden;
+        }
+
+        .circle-icon-container {
+            padding: 0;
+            margin: 0;
+            align-content: center;
+            border-radius: 50%;
+
+            &:active {
+                background-color: #0075FF;
+            }
+        }
+
+        .toolbar-button {
+          flex: 0;
+          min-width: 40px;
+          height: 100%;
+        }
+
+        #options-checkbox {
+            display: none;
+        }
+
+        .mobile-toolbar-checkbox-label {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #reset-button {
+          transition: none !important;
+
+          svg {
+            transition: none !important;
+          }
+
+          &:active {
+            svg {
+              fill: #0075FF;
+            }
+          }
+        }
+
+        .
+        `, "mobile-toolbar");
+
+    const searchBar = document.getElementById("favorites-search-box");
+    const mobileSearchBarHTML = `
+               <div id="mobile-toolbar-row">
+                    <div class="search-bar-container">
+                        <div class="search-bar-items">
+                            <div class="toolbar-button">
+                                <div class="circle-icon-container">
+                                    <svg class="search-icon" id="search-button" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="search-bar-input-container">
+                                <input type="text" id="favorites-search-box" class="search-bar-input" needs-autocomplete placeholder="Search favorites">
+                            </div>
+                            <div class="toolbar-button search-clear-container">
+                                <div class="circle-icon-container">
+                                    <svg id="clear-button" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="toolbar-button">
+                                <input type="checkbox" id="options-checkbox">
+                                <label for="options-checkbox" class="mobile-toolbar-checkbox-label"><svg id="options-menu-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#5f6368"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg></label>
+                            </div>
+                            <div class="toolbar-button">
+                                  <div id="reset-button">
+                                    <svg  style="transform: scale(0.65);" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-84 31.5-156.5T197-763l56 56q-44 44-68.5 102T160-480q0 134 93 227t227 93q134 0 227-93t93-227q0-67-24.5-125T707-707l56-56q54 54 85.5 126.5T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm-40-360v-440h80v440h-80Z"/></svg>
+                                  </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        `;
+
+    searchBar.insertAdjacentHTML("afterend", mobileSearchBarHTML);
+    searchBar.remove();
+    document.getElementById("favorites-search-box").addEventListener("input", () => {
+      this.updateVisibilityOfSearchClearButton();
+    });
+  }
+
+  async createMobileToggleSwitches() {
+    await Utils.sleep(1);
+    Utils.insertStyleHTML(`
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            transform: scale(.75);
+            align-content: center;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #0075FF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #0075FF;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .toggle-switch-label {
+            margin-left: 60px;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        #sort-ascending {
+            width: 0 !important;
+            height: 0 !important;
+            position: static !important;
+        }
+
+            `, "mobile-toggle-switch");
+
+    const checkboxes = Array.from(document.querySelectorAll(".checkbox"))
+      .filter(checkbox => checkbox.getBoundingClientRect().width > 0);
+
+    for (const hint of Array.from(document.querySelectorAll(".option-hint"))) {
+      hint.remove();
+    }
+
+    for (const checkbox of checkboxes) {
+      const label = checkbox.querySelector("span");
+      const input = checkbox.querySelector("input");
+      const slider = document.createElement("span");
+
+      if (input === null) {
+        continue;
+      }
+      slider.className = "slider round";
+      checkbox.className = "toggle-switch";
+      input.insertAdjacentElement("afterend", slider);
+
+      if (label !== null) {
+        label.className = "toggle-switch-label";
+      }
+    }
+
+    const sortAscendingCheckbox = document.getElementById("sort-ascending");
+
+    if (sortAscendingCheckbox !== null) {
+      const container = document.createElement("span");
+      const toggleSwitch = document.createElement("label");
+      const slider = document.createElement("span");
+
+      toggleSwitch.className = "toggle-switch";
+      toggleSwitch.style.transform = "scale(0.6)";
+      toggleSwitch.style.marginLeft = "-12px";
+      slider.className = "slider round";
+      sortAscendingCheckbox.insertAdjacentElement("beforebegin", container);
+      container.appendChild(toggleSwitch);
+      toggleSwitch.appendChild(sortAscendingCheckbox);
+      toggleSwitch.appendChild(slider);
+      sortAscendingCheckbox.insertAdjacentElement("afterend", slider);
+
+    }
+  }
+
+  updateVisibilityOfSearchClearButton() {
+    if (!Utils.onMobileDevice()) {
+      return;
+    }
+    const clearButtonContainer = document.querySelector(".search-clear-container");
+
+    if (clearButtonContainer === null) {
+      return;
+    }
+
+    const clearButtonIsHidden = getComputedStyle(clearButtonContainer).visibility === "hidden";
+    const searchBarIsEmpty = this.inputs.searchBox.value === "";
+    const styleId = "search-clear-button-visibility";
+
+    if (searchBarIsEmpty && !clearButtonIsHidden) {
+      Utils.insertStyleHTML(".search-clear-container {visibility: hidden}", styleId);
+    } else if (!searchBarIsEmpty && clearButtonIsHidden) {
+      Utils.insertStyleHTML(".search-clear-container {visibility: visible}", styleId);
+    }
+  }
+
+  /**
+   * @param {Number} margin
+   */
+  updateOptionContentMargin(margin) {
+    margin = margin === undefined ? document.getElementById("favorites-search-gallery-menu").getBoundingClientRect().height + 11 : margin;
+    Utils.insertStyleHTML(`
+            #favorites-search-gallery-content {
+                margin-top: ${margin}px;
+            }
+        `, "options-content-margin");
+  }
+
+  removeOptionContentMargin() {
+    const optionsContentMargin = document.getElementById("options-content-margin-fsg-style");
+
+    if (optionsContentMargin !== null) {
+      optionsContentMargin.remove();
     }
   }
 

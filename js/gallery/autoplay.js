@@ -457,9 +457,7 @@ class Autoplay {
       this.pause();
     };
     this.ui.changeDirectionButton.onclick = () => {
-      Autoplay.settings.moveForward = !Autoplay.settings.moveForward;
-      this.ui.changeDirectionMask.container.classList.toggle("upper-right", Autoplay.settings.moveForward);
-      Utils.setPreference(Autoplay.preferences.direction, Autoplay.settings.moveForward);
+      this.toggleDirection();
     };
 
     this.ui.menu.onmouseenter = () => {
@@ -485,6 +483,20 @@ class Autoplay {
         this.startViewTimer(this.currentThumb);
       }
     };
+  }
+
+  /**
+   * @param {Boolean} forward
+   */
+  toggleDirection(forward) {
+    const directionHasNotChanged = forward === Autoplay.settings.moveForward;
+
+    if (directionHasNotChanged) {
+      return;
+    }
+    Autoplay.settings.moveForward = !Autoplay.settings.moveForward;
+    this.ui.changeDirectionMask.container.classList.toggle("upper-right", Autoplay.settings.moveForward);
+    Utils.setPreference(Autoplay.preferences.direction, Autoplay.settings.moveForward);
   }
 
   /**
@@ -672,6 +684,13 @@ class Autoplay {
         case "p":
           this.showMenu();
           this.pause();
+          break;
+
+        case " ":
+          if (this.currentThumb !== null && !Utils.isVideo(this.currentThumb)) {
+            this.showMenu();
+            this.pause();
+          }
           break;
 
         default:

@@ -82,7 +82,7 @@ class FavoritesLoader {
    * @type {Boolean}
    */
   get matchCountLabelExists() {
-    if (this.matchCountLabel === null) {
+    if (this.matchCountLabel === null || !document.contains(this.matchCountLabel)) {
       this.matchCountLabel = document.getElementById("match-count-label");
 
       if (this.matchCountLabel === null) {
@@ -167,11 +167,11 @@ class FavoritesLoader {
         throw new Error(response.status);
       })
       .then((html) => {
-        const table = new DOMParser().parseFromString(html, "text/html").querySelector("table");
-        const favoritesURL = Array.from(table.querySelectorAll("a")).find(a => a.href.includes("page=favorites&s=view"));
+        const favoritesURL = Array.from(new DOMParser().parseFromString(html, "text/html").querySelectorAll("a"))
+          .find(a => a.href.includes("page=favorites&s=view"));
         const favoritesCount = parseInt(favoritesURL.textContent);
 
-        this.expectedTotalFavoritesCount = favoritesCount;
+        this.expectedTotalFavoritesCount = Math.max(favoritesCount - 2, 0);
       })
       .catch(() => {
         console.error(`Could not find total favorites count from ${profileURL}, are you logged in?`);
@@ -249,7 +249,7 @@ class FavoritesLoader {
   }
 
   fetchNewFavoritesOnReload() {
-    this.fetcher.onAllFavoritesPageRequestsCompleted = (newFavorites) => {
+    this.fetcher.onAllRequestsCompleted = (newFavorites) => {
       this.addNewFavoritesOnReload(newFavorites);
     };
     this.fetcher.fetchAllNewFavoritesOnReload(this.allFavoriteIds);
@@ -291,7 +291,8 @@ class FavoritesLoader {
   }
 
   updateStatusWhileFetching() {
-    let statusText = `Fetching Favorites ${this.allFavorites.length}`;
+    const prefix = Utils.onMobileDevice() ? "" : "Favorites ";
+    let statusText = `Fetching ${prefix}${this.allFavorites.length}`;
 
     if (this.expectedTotalFavoritesCount !== null) {
       statusText = `${statusText} / ${this.expectedTotalFavoritesCount}`;
@@ -559,6 +560,10 @@ class FavoritesLoader {
     }
     const sortedPosts = posts.slice();
     const sortingMethod = Utils.getSortingMethod();
+
+    if (sortingMethod === "random") {
+      return Utils.shuffleArray(sortedPosts);
+    }
 
     if (sortingMethod !== "default") {
       sortedPosts.sort((b, a) => {

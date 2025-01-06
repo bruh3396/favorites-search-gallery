@@ -303,7 +303,7 @@ class TagModifier {
 
         > div,
         >a
-         {
+        {
           outline: none !important;
 
           > img {
@@ -312,7 +312,7 @@ class TagModifier {
 
           pointer-events:none;
           opacity: 0.6;
-          filter: grayscale(90%);
+          filter: grayscale(40%);
           transition: none !important;
         }
       }
