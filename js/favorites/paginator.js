@@ -55,16 +55,12 @@ class FavoritesPaginator {
 
   insertPaginationMenuContainer() {
     if (document.getElementById(this.paginationMenu.id) === null) {
+      const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
 
-      if (Utils.onMobileDevice()) {
-        document.getElementById("favorites-search-gallery-menu").insertAdjacentElement("afterbegin", this.paginationMenu);
-      } else {
-        const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
-
-        placeToInsertPagination.insertAdjacentElement("afterend", this.paginationMenu);
-        placeToInsertPagination.remove();
-      }
+      placeToInsertPagination.insertAdjacentElement("afterend", this.paginationMenu);
+      placeToInsertPagination.remove();
     }
+
   }
 
   /**
@@ -120,6 +116,10 @@ class FavoritesPaginator {
 
     if (FavoritesLoader.currentState !== FavoritesLoader.states.loadingFavoritesFromDatabase) {
       dispatchEvent(new Event("changedPage"));
+    }
+
+    if (Utils.onMobileDevice()) {
+      this.paginationMenu.blur();
     }
   }
 
@@ -358,7 +358,7 @@ class FavoritesPaginator {
     }
     this.content.innerHTML = "";
     this.content.appendChild(newContent);
-    window.scrollTo(0, 0);
+    window.scrollTo(0, Utils.onMobileDevice() ? 10 : 0);
   }
 
   /**

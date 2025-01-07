@@ -104,6 +104,11 @@ class Gallery {
     -khtml-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
+
+    &.active {
+      /* opacity: 0.2; */
+      pointer-events: all;
+    }
   }
 
   #original-gif-container {
@@ -1337,7 +1342,7 @@ onmessage = (message) => {
 
     // eslint-disable-next-line complexity
     document.addEventListener("mousedown", (event) => {
-      if (this.autoplayMenuWasClicked(event)) {
+      if (this.clickedOnAutoplayMenu(event)) {
         return;
       }
       const clickedOnTapControls = event.target.classList.contains("mobile-tap-control");
@@ -1385,13 +1390,14 @@ onmessage = (message) => {
             }
             this.deleteAllRenders();
           }
-          this.toggleAllVisibility(true);
-          this.enterGallery();
-          this.showOriginalContent(thumb);
 
           if (Utils.onMobileDevice()) {
             this.renderImagesAround(thumb);
           }
+
+          this.toggleAllVisibility(true);
+          this.enterGallery();
+          this.showOriginalContent(thumb);
           break;
 
         case Utils.clickCodes.middle:
@@ -1485,7 +1491,9 @@ onmessage = (message) => {
           break;
 
         case "Control":
-          this.toggleCtrlClickOpenMediaInNewTab(true);
+          if (!event.repeat) {
+            this.toggleCtrlClickOpenMediaInNewTab(true);
+          }
           break;
 
         default:
@@ -1544,7 +1552,6 @@ onmessage = (message) => {
 
       switch (event.key) {
         case "Control":
-          this.setGalleryCursor("default");
           this.toggleCtrlClickOpenMediaInNewTab(false);
           break;
 
@@ -1552,12 +1559,15 @@ onmessage = (message) => {
           break;
       }
     });
+    window.addEventListener("blur", () => {
+      this.toggleCtrlClickOpenMediaInNewTab(false);
+    });
   }
 
   /**
    * @param {MouseEvent | TouchEvent} event
    */
-  autoplayMenuWasClicked(event) {
+  clickedOnAutoplayMenu(event) {
     const autoplayMenu = document.getElementById("autoplay-menu");
     return autoplayMenu !== null && autoplayMenu.contains(event.target);
   }
@@ -1697,22 +1707,30 @@ onmessage = (message) => {
       if (!this.inGallery) {
         return;
       }
-      event.preventDefault();
+
+      if (!this.clickedOnAutoplayMenu(event)) {
+        event.preventDefault();
+      }
       Gallery.swipeControls.set(event, true);
     }, {
       passive: false
     });
     document.addEventListener("touchend", (event) => {
       if (!this.inGallery ||
-        event.target.classList.contains("mobile-tap-control") ||
-        this.autoplayMenuWasClicked(event)
+        // event.target.classList.contains("mobile-tap-control") ||
+        this.clickedOnAutoplayMenu(event)
       ) {
         return;
       }
       event.preventDefault();
       Gallery.swipeControls.set(event, false);
 
-      if (Gallery.swipeControls.up || Gallery.swipeControls.down) {
+      if (Gallery.swipeControls.up) {
+        this.autoplayController.showMenu();
+        return;
+      }
+
+      if (Gallery.swipeControls.down) {
         this.exitGallery();
         this.toggleAllVisibility(false);
         return;
@@ -1855,12 +1873,12 @@ onmessage = (message) => {
             }
         `);
     this.toggleTapTraversal(false);
-    leftTap.ontouchstart = () => {
+    leftTap.ontouchend = () => {
       if (this.inGallery) {
         this.traverseGallery(Gallery.directions.left, false);
       }
     };
-    rightTap.ontouchstart = () => {
+    rightTap.ontouchend = () => {
       if (this.inGallery) {
         this.traverseGallery(Gallery.directions.right, false);
       }
@@ -1875,7 +1893,7 @@ onmessage = (message) => {
             .mobile-tap-control {
                 pointer-events: ${value ? "auto" : "none"};
             }
-        `);
+        `, "tap-traversal");
   }
 
   addMemoryManagementEventListeners() {
@@ -2518,16 +2536,22 @@ onmessage = (message) => {
     this.toggleCursorVisibility(true);
     this.toggleVideoControls(false);
     this.background.style.pointerEvents = "none";
-    this.originalImageLinkMask.style.pointerEvents = "none";
+    this.toggleCtrlClickOpenMediaInNewTab(false);
     const thumbIndex = this.getIndexOfThumbUnderCursor();
 
-    if (Utils.onMobileDevice() || thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGallery) {
+    if (Utils.onMobileDevice()) {
+      this.hideOriginalContent();
+      this.deleteAllRenders();
+    }
+
+    if (!Utils.onMobileDevice() && thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGallery) {
       this.hideOriginalContent();
 
       if (thumbIndex !== null && this.showOriginalContentOnHover) {
         this.showOriginalContent(this.visibleThumbs[thumbIndex]);
       }
     }
+
     this.recentlyExitedGallery = true;
     setTimeout(() => {
       this.recentlyExitedGallery = false;
@@ -3616,7 +3640,7 @@ onmessage = (message) => {
     }
     const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
 
-    this.originalImageLinkMask.style.pointerEvents = "none";
+    this.toggleCtrlClickOpenMediaInNewTab(false);
     this.originalImageLinkMask.setAttribute("href", imageURL);
   }
 
@@ -3624,9 +3648,9 @@ onmessage = (message) => {
    * @param {Boolean} value
    */
   toggleCtrlClickOpenMediaInNewTab(value) {
-    if (!this.inGallery) {
+    if (!this.inGallery && value) {
       return;
     }
-    this.originalImageLinkMask.style.pointerEvents = value ? "auto" : "none";
+    this.originalImageLinkMask.classList.toggle("active", value);
   }
 }

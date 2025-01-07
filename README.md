@@ -16,10 +16,29 @@ This script is still in development, please let me know if you experience a bug,
 
 ## Getting Started
 
-1. Install Tampermonkey
-2. Install this script using Tampermonkey
-3. Go to any favorites page, it should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
-4. Enjoy
+### Desktop
+* Install Tampermonkey in any browser
+* If using Chrome/Edge, enable "Developer Mode" in your browser
+  * Extensions > Manage Extensions > Developer Mode
+* Install this script using Tampermonkey
+* Go to any favorites page, it should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
+
+### Mobile iOS
+* Install "Userscripts" on the Apple App Store
+* Enable Userscripts in Safari
+  * Settings > Apps > Safari > Extensions > Userscripts > Allow Extension & Allow in Private Browsing
+* On Tampermonkey in Safari, click green "Install this script" button
+  * Click "I already have a user script manager..."
+  * Click extension icon in Safari's address bar
+  * Click "Userscripts" > "Tap to Install"
+  * Scroll down, click "Install"
+* Go to any favorites page, it should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
+
+### Mobile Android
+* Install Firefox on the Google Play Store
+* Install Tampermonkey Extension and enable it in Firefox
+* Click green "Install this script" button\
+* Go to any favorites page, it should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
 
 ## Features
 
@@ -93,14 +112,15 @@ This script is still in development, please let me know if you experience a bug,
 | Input                                 | Function                                       | Condition              |
 | :-------------------------------------| :----------------------------------------------| :----------------------|
 | Tap Left/Right Edge of Screen    | Traverse gallery                               |                        |
-| Swipe Up/Down                       | Exit gallery                                   |  |
+| Swipe Down                       | Exit gallery                                   |  |
+| Swipe Up                       | Show autoplay menu                                   |  |
 
 ### Gallery Hotkeys (Desktop)
 
 | Key | Function                       | Condition                          |
 |-----|--------------------------------|------------------------------------|
 | F   | Add favorite                   |                                    |
-| X   | Remove favorite                | "Remove Button" option checked     |
+| X   | Remove favorite                | "Remove Buttons" option checked     |
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
 | P   | Stop/start autoplay            | Autoplay option checked            |
@@ -204,11 +224,10 @@ Q: What browsers are supported?
 **A: Chrome, Edge, and Firefox are supported.**
 
 Q: Does it work on mobile/Android/iOS?<br>
-**A: Yes, but only search  and gallery are enabled. Tooltips and captions are disabled to improve performance.**<br>
+**A: Yes**<br>
 * Requires a mobile browser that supports Tampermonkey or Userscripts
   * Firefox on Android.
   * [Userscripts](https://github.com/quoid/userscripts) on iOS.
-* Still a new feature and somewhat laggy. I plan to optimize it further.
 * Has an option to disable gallery on lower performance devices.
 
 Q: Why am I experiencing lag?<br>

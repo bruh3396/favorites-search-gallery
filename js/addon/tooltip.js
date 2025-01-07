@@ -70,7 +70,6 @@ class Tooltip {
     this.defaultTransition = this.tooltip.style.transition;
     this.searchTagColorCodes = {};
     this.currentImage = null;
-    this.setTheme();
     this.addEventListeners();
     this.addFavoritesOptions();
     this.assignColorsToMatchedTags();
@@ -149,13 +148,6 @@ class Tooltip {
     }, {
       once: true
     });
-  }
-
-  setTheme() {
-    if (Utils.usingDarkTheme()) {
-      this.tooltip.classList.remove("light-green-gradient");
-      this.tooltip.classList.add("dark-green-gradient");
-    }
   }
 
   assignColorsToMatchedTags() {

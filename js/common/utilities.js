@@ -9,6 +9,7 @@ class Utils {
   .dark-green-gradient {
     background: linear-gradient(to bottom, #5e715e, #293129);
     color: white;
+    fill: white;
   }
 
   img {
@@ -260,7 +261,29 @@ class Utils {
           outline: none;
         }
       }
-    }`
+    }`,
+    darkTheme: `
+    input[type=number] {
+      background-color: #303030;
+      color: white;
+      }
+
+    .number {
+      background-color: #303030;
+
+      >hold-button,
+      button {
+        color: white;
+      }
+    }
+
+    #favorites-pagination-container {
+      >button {
+        border: 1px solid white !important;
+        color: white !important;
+      }
+    }
+  `
   };
   static typeableInputs = new Set([
     "color",
@@ -984,37 +1007,50 @@ class Utils {
   }
 
   static setTheme() {
-    setTimeout(() => {
-      if (Utils.usingDarkTheme()) {
-        for (const element of document.querySelectorAll(".light-green-gradient")) {
-          element.classList.remove("light-green-gradient");
-          element.classList.add("dark-green-gradient");
+    window.addEventListener("postProcess", () => {
+      Utils.toggleDarkTheme(Utils.usingDarkTheme());
+    });
+  }
 
-          Utils.insertStyleHTML(`
-            input[type=number] {
-              background-color: #303030;
-              color: white;
-            }
+  /**
+   * @param {Boolean} value
+   */
+  static toggleDarkTheme(value) {
+    Utils.insertStyleHTML(value ? Utils.styles.darkTheme : "", "dark-theme");
+    Utils.toggleDarkStyleSheet(value);
+    const currentTheme = value ? "light-green-gradient" : "dark-green-gradient";
+    const targetTheme = value ? "dark-green-gradient" : "light-green-gradient";
 
-            .number {
-              background-color: #303030;
+    for (const element of document.querySelectorAll(`.${currentTheme}`)) {
+        element.classList.remove(currentTheme);
+        element.classList.add(targetTheme);
+    }
+    this.setCookie("theme", value ? "dark" : "light");
+  }
 
-              >hold-button,
-              button {
-                color: white;
-              }
-            }
+  static toggleDarkStyleSheet(value) {
+    const platform = Utils.onMobileDevice() ? "mobile" : "desktop";
+    const darkSuffix = value ? "-dark" : "";
 
-            #favorites-pagination-container {
-              >button {
-                border: 1px solid white !important;
-                color: white !important;
-              }
-            }
-          `, "dark-theme");
-        }
-      }
-    }, 10);
+    Utils.setStyleSheet(`https://rule34.xxx//css/${platform}${darkSuffix}.css?44`);
+  }
+
+  /**
+   * @param {String} url
+   */
+  static setStyleSheet(url) {
+    const styleSheet = this.getMainStyleSheet();
+
+    if (styleSheet !== null && styleSheet !== undefined) {
+      styleSheet.href = url;
+    }
+  }
+
+  /**
+   * @returns {HTMLLinkElement}
+   */
+  static getMainStyleSheet() {
+    return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
   }
 
   /**
@@ -1145,9 +1181,13 @@ class Utils {
     const rect = element.getBoundingClientRect();
     const menu = document.getElementById("favorites-search-gallery-menu");
     const favoritesSearchHeight = menu === null ? 0 : menu.getBoundingClientRect().height;
+    let top = rect.top + window.scrollY + (rect.height / 2) - (window.innerHeight / 2) - (favoritesSearchHeight / 2);
 
+    if (Utils.onMobileDevice()) {
+      top = Math.max(1, top);
+    }
     window.scroll({
-      top: rect.top + window.scrollY + (rect.height / 2) - (window.innerHeight / 2) - (favoritesSearchHeight / 2),
+      top,
       behavior: smoothTransition ? "smooth" : "instant"
     });
 
@@ -2127,5 +2167,12 @@ class Utils {
         Utils.storeAllImageExtensions();
       }
     };
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  static usingIOS() {
+    return (/iPhone|iPad|iPod/).test(navigator.userAgent);
   }
 }

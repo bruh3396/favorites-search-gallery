@@ -150,6 +150,12 @@ class Autoplay {
           }
         }
       }
+
+      select {
+        /* height: 25px; */
+        font-size: larger;
+        width: 10ch;
+      }
     }
 
     #autoplay-settings-button.settings-menu-opened {
@@ -236,7 +242,7 @@ class Autoplay {
   static settings = {
     imageViewDuration: Utils.getPreference(Autoplay.preferences.imageDuration, 3000),
     minimumVideoDuration: Utils.getPreference(Autoplay.preferences.minimumVideoDuration, 5000),
-    menuVisibilityDuration: 500,
+    menuVisibilityDuration: Utils.onMobileDevice() ? 1500 : 500,
     moveForward: Utils.getPreference(Autoplay.preferences.direction, true),
 
     get imageViewDurationInSeconds() {
@@ -252,7 +258,8 @@ class Autoplay {
    * @type {Boolean}
    */
   static get disabled() {
-    return Utils.onMobileDevice();
+    return false;
+    // return Utils.onMobileDevice();
   }
 
   /**
@@ -328,6 +335,8 @@ class Autoplay {
     this.initializeFields();
     this.initializeTimers();
     this.insertHTML();
+    this.configureMobileUi();
+    this.extractUiElements();
     this.setMenuIconImageSources();
     this.loadAutoplaySettingsIntoUI();
     this.addEventListeners();
@@ -355,7 +364,7 @@ class Autoplay {
     };
     this.eventListenersAbortController = new AbortController();
     this.currentThumb = null;
-    this.active = Utils.getPreference(Autoplay.preferences.active, false);
+    this.active = Utils.getPreference(Autoplay.preferences.active, Utils.onMobileDevice());
     this.paused = Utils.getPreference(Autoplay.preferences.paused, false);
     this.menuIsPersistent = false;
     this.menuIsVisible = false;
@@ -386,18 +395,6 @@ class Autoplay {
 
   insertMenuHTML() {
     Utils.insertFavoritesSearchGalleryHTML("afterbegin", Autoplay.autoplayHTML);
-    this.ui.container = document.getElementById("autoplay-container");
-    this.ui.menu = document.getElementById("autoplay-menu");
-    this.ui.settingsButton = document.getElementById("autoplay-settings-button");
-    this.ui.settingsMenu.container = document.getElementById("autoplay-settings-menu");
-    this.ui.settingsMenu.imageDurationInput = document.getElementById("autoplay-image-duration-input");
-    this.ui.settingsMenu.minimumVideoDurationInput = document.getElementById("autoplay-minimum-animated-duration-input");
-    this.ui.playButton = document.getElementById("autoplay-play-button");
-    this.ui.changeDirectionButton = document.getElementById("autoplay-change-direction-button");
-    this.ui.changeDirectionMask.container = document.getElementById("autoplay-change-direction-mask-container");
-    this.ui.changeDirectionMask.image = document.getElementById("autoplay-change-direction-mask");
-    this.ui.imageProgressBar = document.getElementById("autoplay-image-progress-bar");
-    this.ui.videoProgressBar = document.getElementById("autoplay-video-progress-bar");
   }
 
   insertOptionHTML() {
@@ -431,6 +428,78 @@ class Autoplay {
       `, "autoplay-video-progress-bar-animation");
   }
 
+  extractUiElements() {
+    this.ui.container = document.getElementById("autoplay-container");
+    this.ui.menu = document.getElementById("autoplay-menu");
+    this.ui.settingsButton = document.getElementById("autoplay-settings-button");
+    this.ui.settingsMenu.container = document.getElementById("autoplay-settings-menu");
+    this.ui.settingsMenu.imageDurationInput = document.getElementById("autoplay-image-duration-input");
+    this.ui.settingsMenu.minimumVideoDurationInput = document.getElementById("autoplay-minimum-animated-duration-input");
+    this.ui.playButton = document.getElementById("autoplay-play-button");
+    this.ui.changeDirectionButton = document.getElementById("autoplay-change-direction-button");
+    this.ui.changeDirectionMask.container = document.getElementById("autoplay-change-direction-mask-container");
+    this.ui.changeDirectionMask.image = document.getElementById("autoplay-change-direction-mask");
+    this.ui.imageProgressBar = document.getElementById("autoplay-image-progress-bar");
+    this.ui.videoProgressBar = document.getElementById("autoplay-video-progress-bar");
+  }
+
+  configureMobileUi() {
+    this.createViewDurationSelects();
+  }
+
+  createViewDurationSelects() {
+    const imageViewDurationSelect = this.createDurationSelect(1, 60);
+    const videoViewDurationSelect = this.createDurationSelect(0, 60);
+    const imageViewDurationInput = document.getElementById("autoplay-image-duration-input").parentElement;
+    const videoViewDurationInput = document.getElementById("autoplay-minimum-animated-duration-input").parentElement;
+
+    imageViewDurationSelect.value = Autoplay.settings.imageViewDurationInSeconds;
+    videoViewDurationSelect.value = Autoplay.settings.minimumVideoDurationInSeconds;
+    imageViewDurationInput.insertAdjacentElement("afterend", imageViewDurationSelect);
+    videoViewDurationInput.insertAdjacentElement("afterend", videoViewDurationSelect);
+    imageViewDurationInput.remove();
+    videoViewDurationInput.remove();
+    imageViewDurationSelect.id = "autoplay-image-duration-input";
+    videoViewDurationSelect.id = "autoplay-minimum-animated-duration-input";
+  }
+
+  /**
+   * @param {Number} minimum
+   * @param {Number} maximum
+   * @returns {HTMLSelectElement}
+   */
+  createDurationSelect(minimum, maximum) {
+    const select = document.createElement("select");
+
+    for (let i = minimum; i <= maximum; i += 1) {
+      const option = document.createElement("option");
+
+      switch (true) {
+        case i <= 5:
+          break;
+
+        case i <= 20:
+          i += 4;
+          break;
+
+          case i <= 30:
+          i += 9;
+          break;
+
+        default:
+          i += 29;
+          break;
+      }
+      option.value = i;
+      option.innerText = i;
+      select.append(option);
+    }
+    select.ontouchstart = () => {
+      select.dispatchEvent(new Event("mousedown"));
+    };
+    return select;
+  }
+
   setMenuIconImageSources() {
     this.ui.playButton.src = this.paused ? Autoplay.menuIconImageURLs.play : Autoplay.menuIconImageURLs.pause;
     this.ui.settingsButton.src = Autoplay.menuIconImageURLs.tune;
@@ -450,6 +519,14 @@ class Autoplay {
   }
 
   addMenuEventListeners() {
+    this.addDesktopMenuEventListeners();
+    this.addMobileMenuEventListeners();
+  }
+
+  addDesktopMenuEventListeners() {
+    if (Utils.onMobileDevice()) {
+      return;
+    }
     this.ui.settingsButton.onclick = () => {
       this.toggleSettingMenu();
     };
@@ -459,12 +536,32 @@ class Autoplay {
     this.ui.changeDirectionButton.onclick = () => {
       this.toggleDirection();
     };
-
     this.ui.menu.onmouseenter = () => {
       this.toggleMenuPersistence(true);
     };
     this.ui.menu.onmouseleave = () => {
       this.toggleMenuPersistence(false);
+    };
+  }
+
+  addMobileMenuEventListeners() {
+    if (!Utils.onMobileDevice()) {
+      return;
+    }
+    this.ui.settingsButton.ontouchstart = () => {
+      this.toggleSettingMenu();
+      const settingsMenuIsVisible = this.ui.settingsMenu.container.classList.contains("visible");
+
+      this.toggleMenuPersistence(settingsMenuIsVisible);
+      this.menuVisibilityTimer.restart();
+    };
+    this.ui.playButton.ontouchstart = () => {
+      this.pause();
+      this.menuVisibilityTimer.restart();
+    };
+    this.ui.changeDirectionButton.ontouchstart = () => {
+      this.toggleDirection();
+      this.menuVisibilityTimer.restart();
     };
   }
 
