@@ -444,6 +444,9 @@ class Autoplay {
   }
 
   configureMobileUi() {
+    if (!Utils.onMobileDevice()) {
+      return;
+    }
     this.createViewDurationSelects();
   }
 

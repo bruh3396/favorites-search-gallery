@@ -6,8 +6,8 @@ class FavoritesParser {
    * @returns {Post[]}
    */
   static extractFavorites(favoritesPageHTML) {
-    const elements = FavoritesParser.extractFavoriteElements(favoritesPageHTML);
-    return elements.map(element => new Post(element, false));
+    const favorites = FavoritesParser.extractFavoriteElements(favoritesPageHTML);
+    return favorites.map(favorite => new Post(favorite, false));
   }
 
   /**

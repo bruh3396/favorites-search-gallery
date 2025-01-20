@@ -82,7 +82,8 @@ class WildcardSearchTag extends SearchTag {
    */
   createWildcardRegex() {
     try {
-      return new RegExp(`^${this.value.replaceAll(/\*/g, ".*")}$`);
+      const regex = Utils.escapeParenthesis(this.value.replaceAll(/\*/g, ".*"));
+      return new RegExp(`^${regex}$`);
     } catch {
       return WildcardSearchTag.unmatchableRegex;
     }
@@ -228,7 +229,7 @@ class SearchCommand {
    * @param {String} searchQuery
    */
   constructor(searchQuery) {
-    this.isEmpty = searchQuery.trim() === "";
+    this.isEmpty = Utils.isEmptyString(searchQuery);
 
     if (this.isEmpty) {
       return;

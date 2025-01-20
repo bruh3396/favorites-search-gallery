@@ -534,9 +534,17 @@ class TagModifier {
         for (const record of tagModifications) {
           TagModifier.tagModifications.set(record.id, record.tags);
         }
+        this.restoreMissingCustomTags();
       };
       database.close();
     };
+  }
+
+  restoreMissingCustomTags() {
+    // const allCustomTags = Array.from(TagModifier.tagModifications.values()).join(" ");
+    // const allUniqueCustomTags = new Set(allCustomTags.split(" "));
+
+    // Utils.setCustomTags(Array.from(allUniqueCustomTags).join(" "));
   }
 
   resetTagModifications() {

@@ -9,7 +9,6 @@ class Utils {
   .dark-green-gradient {
     background: linear-gradient(to bottom, #5e715e, #293129);
     color: white;
-    fill: white;
   }
 
   img {
@@ -167,6 +166,24 @@ class Utils {
       >img {
         pointer-events: all;
       }
+    }
+  }
+
+  .blink {
+    animation: blink 0.35s step-start infinite;
+  }
+
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
     }
   }
 </style>
@@ -1022,8 +1039,8 @@ class Utils {
     const targetTheme = value ? "dark-green-gradient" : "light-green-gradient";
 
     for (const element of document.querySelectorAll(`.${currentTheme}`)) {
-        element.classList.remove(currentTheme);
-        element.classList.add(targetTheme);
+      element.classList.remove(currentTheme);
+      element.classList.add(targetTheme);
     }
     this.setCookie("theme", value ? "dark" : "light");
   }
@@ -1083,7 +1100,7 @@ class Utils {
           container.appendChild(Utils.createPrefetchLink(sibling.href));
         }
       }
-      container.id = "search-page-prefetch";
+      container.id = id;
       document.head.appendChild(container);
     } catch (error) {
       console.error(error);
@@ -1339,7 +1356,7 @@ class Utils {
       })
       .catch((error) => {
         console.error(error);
-        return false;
+        return true;
       });
   }
 
@@ -1401,24 +1418,6 @@ class Utils {
   static removeFavorite(id) {
     Utils.setIdToBeRemovedOnReload(id);
     fetch(`https://rule34.xxx/index.php?page=favorites&s=delete&id=${id}`);
-  }
-
-  /**
-   * @param {HTMLInputElement | HTMLTextAreaElement} input
-   * @param {String} suggestion
-   */
-  static insertSuggestion(input, suggestion) {
-    const cursorAtEnd = input.selectionStart === input.value.length;
-    const firstHalf = input.value.slice(0, input.selectionStart);
-    const secondHalf = input.value.slice(input.selectionStart);
-    const firstHalfWithPrefixRemoved = firstHalf.replace(/(\s?)(-?)\S+$/, "$1$2");
-    const combinedHalves = Utils.removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf}`);
-    const result = cursorAtEnd ? `${combinedHalves} ` : combinedHalves;
-    const selectionStart = firstHalfWithPrefixRemoved.length + suggestion.length + 1;
-
-    input.value = result;
-    input.selectionStart = selectionStart;
-    input.selectionEnd = selectionStart;
   }
 
   /**
@@ -1511,6 +1510,30 @@ class Utils {
       c.delete(element);
     }
     return c;
+  }
+
+  /**
+   * @param {Set} a
+   * @param {Set} b
+   * @returns {Set}
+   */
+  static intersection(a, b) {
+    const c = new Set();
+
+    for (const element of a.values()) {
+      if (b.has(element)) {
+        c.add(element);
+      }
+    }
+    return c;
+  }
+
+  /**
+   * @param {Set} a
+   * @returns {Set}
+   */
+  static sortSet(a) {
+    return new Set(Array.from(a).sort());
   }
 
   static removeUnusedScripts() {
@@ -2174,5 +2197,21 @@ class Utils {
    */
   static usingIOS() {
     return (/iPhone|iPad|iPod/).test(navigator.userAgent);
+  }
+
+  /**
+   * @param {String} str
+   * @returns {Boolean}
+   */
+  static isEmptyString(str) {
+    return str.trim() === "";
+  }
+
+  /**
+   * @param {String} str
+   * @returns {String}
+   */
+  static escapeParenthesis(str) {
+    return str.replaceAll(/([()])/g, "\\$&");
   }
 }

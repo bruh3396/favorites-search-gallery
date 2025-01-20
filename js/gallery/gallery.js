@@ -194,7 +194,7 @@ class Gallery {
   };
   static webWorkers = {
     renderer:
-`
+      `
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
@@ -1616,7 +1616,7 @@ onmessage = (message) => {
     }, {
       once: true
     });
-    window.addEventListener("favoritesLoaded", () => {
+    window.addEventListener("favoritesLoaded", async() => {
       Gallery.backgroundRenderingOnPageChangeCooldown.waitTime = 1000;
       Gallery.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
@@ -1624,6 +1624,7 @@ onmessage = (message) => {
       this.findImageExtensionsInTheBackground();
 
       if (!this.favoritesWereFetched) {
+        await Utils.sleep(50);
         this.renderImagesInTheBackground();
       }
     }, {
@@ -1757,16 +1758,15 @@ onmessage = (message) => {
     });
 
     window.addEventListener("orientationchange", () => {
-      if (this.imageRenderer !== null && this.imageRenderer !== undefined) {
-        this.setOrientation();
-      }
+      this.setOrientation();
+      this.preventMobileAddressBarInGallery();
     }, {
       passive: true
     });
   }
 
   setOrientation() {
-    if (!Utils.onMobileDevice()) {
+    if (!Utils.onMobileDevice() || this.imageRenderer === null || this.imageRenderer === undefined) {
       return;
     }
     const usingLandscapeOrientation = window.screen.orientation.angle === 90;
@@ -1775,6 +1775,13 @@ onmessage = (message) => {
     this.swapMainCanvasDimensions(usingLandscapeOrientation);
     this.swapLowResolutionCanvasDimensions(usingLandscapeOrientation);
     this.redrawCanvasesOnOrientationChange();
+  }
+
+  preventMobileAddressBarInGallery() {
+    if (!Utils.onMobileDevice || !this.inGallery || window.scrollY > 10) {
+      return;
+    }
+    window.scrollTo(0, 10);
   }
 
   /**
@@ -3589,6 +3596,21 @@ onmessage = (message) => {
   }
 
   loadVideoClips() {
+    window.addEventListener("postProcess", () => {
+      setTimeout(() => {
+        let storedVideoClips;
+
+        try {
+          storedVideoClips = JSON.parse(localStorage.getItem("storedVideoClips") || "{}");
+
+          for (const [id, videoClip] of Object.entries(storedVideoClips)) {
+            this.videoClips.set(id, new VideoClip(videoClip));
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }, 50);
+    });
   }
 
   /**

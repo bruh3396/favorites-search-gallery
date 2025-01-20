@@ -19,7 +19,7 @@ class FetchedFavoritesQueue {
   /**
    * @type {Number}
    */
-  get lowestEnqueuedPageNumber() {
+  get smallestEnqueuedPageNumber() {
     return this.queue[0].pageNumber;
   }
 
@@ -34,7 +34,7 @@ class FetchedFavoritesQueue {
    * @type {Boolean}
    */
   get allPreviousPagesWereDequeued() {
-    return this.nextPageNumberToDequeue === this.lowestEnqueuedPageNumber;
+    return this.nextPageNumberToDequeue === this.smallestEnqueuedPageNumber;
   }
 
   /**

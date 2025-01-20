@@ -1,94 +1,3 @@
-class InactivePost {
-  /**
-   * @param {String} compressedSource
-   * @param {String} id
-   * @returns {String}
-   */
-  static decompressThumbSource(compressedSource, id) {
-    compressedSource = compressedSource.split("_");
-    return `https://us.rule34.xxx/thumbnails//${compressedSource[0]}/thumbnail_${compressedSource[1]}.jpg?${id}`;
-  }
-
-  /**
-   * @type {String}
-   */
-  id;
-  /**
-   * @type {String}
-   */
-  tags;
-  /**
-   * @type {String}
-   */
-  src;
-  /**
-   * @type {String}
-   */
-  metadata;
-  /**
-   * @type {Boolean}
-   */
-  fromRecord;
-
-  /**
-   * @param {HTMLElement | Object} favorite
-   */
-  constructor(favorite, fromRecord) {
-    this.fromRecord = fromRecord;
-
-    if (fromRecord) {
-      this.populateAttributesFromDatabaseRecord(favorite);
-    } else {
-      this.populateAttributesFromHTMLElement(favorite);
-    }
-  }
-
-  /**
-   * @param {{id: String, tags: String, src: String, metadata: String}} record
-   */
-  populateAttributesFromDatabaseRecord(record) {
-    this.id = record.id;
-    this.tags = record.tags;
-    this.src = InactivePost.decompressThumbSource(record.src, record.id);
-    this.metadata = record.metadata;
-  }
-
-  /**
-   * @param {HTMLElement} element
-   */
-  populateAttributesFromHTMLElement(element) {
-    this.id = Utils.getIdFromThumb(element);
-    const image = Utils.getImageFromThumb(element);
-
-    this.src = image.src || image.getAttribute("data-cfsrc");
-    this.tags = this.preprocessTags(image);
-  }
-
-  /**
-   * @param {HTMLImageElement} image
-   * @returns {String}
-   */
-  preprocessTags(image) {
-    const tags = Utils.correctMisspelledTags(image.title || image.getAttribute("tags"));
-    return Utils.removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
-  }
-
-  instantiateMetadata() {
-    if (this.fromRecord) {
-      return new PostMetadata(this.id, this.metadata || null);
-    }
-    const favoritesMetadata = new PostMetadata(this.id);
-    return favoritesMetadata;
-  }
-
-  clear() {
-    this.id = null;
-    this.tags = null;
-    this.src = null;
-    this.metadata = null;
-  }
-}
-
 class Post {
   /**
    * @type {Map.<String, Post>}
@@ -97,7 +6,7 @@ class Post {
   /**
    * @type {RegExp}
    */
-  static thumbSourceCompressionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
+  static thumbnailSourceCompressionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
   /**
    * @type {HTMLElement}
    */
@@ -110,6 +19,9 @@ class Post {
    * @type {String}
    */
   static addFavoriteButtonHTML;
+  /**
+   * @type {String}
+   */
   static currentSortingMethod = Utils.getPreference("sortingMethod", "default");
   static settings = {
     deferHTMLElementCreation: true
@@ -135,7 +47,7 @@ class Post {
     Post.template.className = Utils.favoriteItemClassName;
     Post.template.innerHTML = `
         <${containerTagName}>
-          <img>
+          <img loading="lazy">
           ${buttonHTML}
           ${canvasHTML}
         </${containerTagName}>
@@ -145,7 +57,7 @@ class Post {
   static addEventListeners() {
     window.addEventListener("favoriteAddedOrDeleted", (event) => {
       const id = event.detail;
-      const post = this.allPosts.get(id);
+      const post = Post.allPosts.get(id);
 
       if (post !== undefined) {
         post.swapAddOrRemoveButton();
@@ -158,6 +70,11 @@ class Post {
       for (const post of posts) {
         post.createMetadataHint();
       }
+    });
+    window.addEventListener("favoritesLoaded", () => {
+      Post.enumerateAllPosts();
+    }, {
+      once: true
     });
   }
 
@@ -225,6 +142,16 @@ class Post {
     }
   }
 
+  static enumerateAllPosts() {
+    const allPosts = Array.from(Post.allPosts.values()).reverse();
+    let i = 1;
+
+    for (const post of allPosts) {
+      post.index = i;
+      i += 1;
+    }
+  }
+
   /**
    * @type {Map.<String, Post>}
    */
@@ -282,11 +209,7 @@ class Post {
   /**
    * @type {Set.<String>}
    */
-  additionalTags;
-  /**
-   * @type {Number}
-   */
-  originalTagsLength;
+  additionalTagSet;
   /**
    * @type {Boolean}
    */
@@ -295,6 +218,10 @@ class Post {
    * @type {PostMetadata}
    */
   metadata;
+  /**
+   * @type {Number}
+   */
+  index;
 
   /**
    * @type {String}
@@ -308,7 +235,7 @@ class Post {
    */
   get compressedThumbSource() {
     const source = this.inactivePost === null ? this.image.src : this.inactivePost.src;
-    return source.match(Post.thumbSourceCompressionRegex).splice(1).join("_");
+    return source.match(Post.thumbnailSourceCompressionRegex).splice(1).join("_");
   }
 
   /**
@@ -327,17 +254,7 @@ class Post {
    * @type {Set.<String>}
    */
   get originalTagSet() {
-    const originalTags = new Set();
-    let count = 0;
-
-    for (const tag of this.tagSet.values()) {
-      if (count >= this.originalTagsLength) {
-        break;
-      }
-      count += 1;
-      originalTags.add(tag);
-    }
-    return originalTags;
+    return Utils.difference(this.tagSet, this.additionalTagSet);
   }
 
   /**
@@ -351,7 +268,7 @@ class Post {
    * @type {String}
    */
   get additionalTagsString() {
-    return Utils.convertToTagString(this.additionalTags);
+    return Utils.convertToTagString(this.additionalTagSet);
   }
 
   /**
@@ -369,6 +286,7 @@ class Post {
     this.inactivePost = null;
     this.essentialAttributesPopulated = false;
     this.htmlElementCreated = false;
+    this.index = 0;
   }
 
   /**
@@ -490,9 +408,9 @@ class Post {
   }
 
   initializeAdditionalTags() {
-    this.additionalTags = Utils.convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
+    this.additionalTagSet = Utils.convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
 
-    if (this.additionalTags.size !== 0) {
+    if (this.additionalTagSet.size !== 0) {
       this.combineOriginalAndAdditionalTags();
     }
   }
@@ -570,8 +488,7 @@ class Post {
   }
 
   combineOriginalAndAdditionalTags() {
-    this.tagSet = this.originalTagSet;
-    this.tagSet = Utils.union(this.tagSet, this.additionalTags);
+    this.tagSet = Utils.sortSet(Utils.union(this.originalTagSet, this.additionalTagSet));
   }
 
   /**
@@ -579,10 +496,10 @@ class Post {
    * @returns {String}
    */
   addAdditionalTags(newTags) {
-    const newTagsSet = Utils.convertToTagSet(newTags);
+    const newTagsSet = Utils.difference(Utils.convertToTagSet(newTags), this.tagSet);
 
     if (newTagsSet.size > 0) {
-      this.additionalTags = Utils.union(this.additionalTags, newTagsSet);
+      this.additionalTagSet = Utils.union(this.additionalTagSet, newTagsSet);
       this.combineOriginalAndAdditionalTags();
     }
     return this.additionalTagsString;
@@ -593,20 +510,20 @@ class Post {
    * @returns {String}
    */
   removeAdditionalTags(tagsToRemove) {
-    const tagsToRemoveSet = Utils.convertToTagSet(tagsToRemove);
+    const tagsToRemoveSet = Utils.intersection(Utils.convertToTagSet(tagsToRemove), this.additionalTagSet);
 
     if (tagsToRemoveSet.size > 0) {
-      this.additionalTags = Utils.difference(this.additionalTags, tagsToRemoveSet);
-      this.combineOriginalAndAdditionalTags();
+      this.tagSet = Utils.difference(this.tagSet, tagsToRemoveSet);
+      this.additionalTagSet = Utils.difference(this.additionalTagSet, tagsToRemoveSet);
     }
     return this.additionalTagsString;
   }
 
   resetAdditionalTags() {
-    if (this.additionalTags.size === 0) {
+    if (this.additionalTagSet.size === 0) {
       return;
     }
-    this.additionalTags = new Set();
+    this.additionalTagSet = new Set();
     this.combineOriginalAndAdditionalTags();
   }
 
@@ -645,12 +562,12 @@ class Post {
         return Utils.convertTimestampToDate(this.metadata.lastChangedTimestamp * 1000);
 
       default:
-        return this.id;
+        return this.index;
     }
   }
 
   async createMetadataHint() {
-    // await sleep(200);
+    // await Utils.sleep(200);
     // let hint = this.getMetadataHintElement();
 
     // if (hint === null) {

@@ -62,11 +62,11 @@ class AwesompleteWrapper {
       list: [],
       filter: (suggestion, _) => {
         // eslint-disable-next-line new-cap
-        return Awesomplete_.FILTER_STARTSWITH(suggestion.value, this.getCurrentTag(awesomplete.input));
+        return Awesomplete_.FILTER_STARTSWITH(suggestion.value, this.getCurrentTag(awesomplete.input).replaceAll("*", ""));
       },
       sort: false,
       item: (suggestion, tags) => {
-        const html = tags.trim() === "" ? suggestion.label : suggestion.label.replace(RegExp(Awesomplete_.$.regExpEscape(tags.trim()), "gi"), "<mark>$&</mark>");
+        const html = Utils.isEmptyString(tags) ? suggestion.label : suggestion.label.replace(RegExp(Awesomplete_.$.regExpEscape(tags.trim()), "gi"), "<mark>$&</mark>");
         return Awesomplete_.$.create("li", {
           innerHTML: html,
           "aria-selected": "false",
@@ -74,7 +74,7 @@ class AwesompleteWrapper {
         });
       },
       replace: (suggestion) => {
-        Utils.insertSuggestion(awesomplete.input, Utils.removeSavedSearchPrefix(decodeEntities(suggestion.value)));
+        this.insertSuggestion(awesomplete.input, Utils.removeSavedSearchPrefix(decodeEntities(suggestion.value)));
       }
     });
 
@@ -116,12 +116,12 @@ class AwesompleteWrapper {
    * @param {Awesomplete_} awesomplete
    */
   populateAwesompleteList(inputId, prefix, awesomplete) {
-    if (prefix.trim() === "") {
+    if (Utils.isEmptyString(prefix)) {
       return;
     }
     const savedSearchSuggestions = this.getSavedSearchesForAutocompleteList(inputId, prefix);
 
-    prefix = prefix.replace(/^-/, "");
+    prefix = prefix.replace(/^[-*]*/, "");
 
     fetch(`https://ac.rule34.xxx/autocomplete.php?q=${prefix}`)
       .then((response) => {
@@ -151,7 +151,7 @@ class AwesompleteWrapper {
    * @returns {String}
    */
   getLastTag(searchQuery) {
-    const lastTag = searchQuery.match(/[^ -][^ ]*$/);
+    const lastTag = searchQuery.match(/[^ -]\S*$/);
     return lastTag === null ? "" : lastTag[0];
   }
 
@@ -170,5 +170,23 @@ class AwesompleteWrapper {
   getLastTagWithHyphen(searchQuery) {
     const lastTag = searchQuery.match(/[^ ]*$/);
     return lastTag === null ? "" : lastTag[0];
+  }
+
+  /**
+   * @param {HTMLInputElement | HTMLTextAreaElement} input
+   * @param {String} suggestion
+   */
+  insertSuggestion(input, suggestion) {
+    const cursorAtEnd = input.selectionStart === input.value.length;
+    const firstHalf = input.value.slice(0, input.selectionStart);
+    const secondHalf = input.value.slice(input.selectionStart);
+    const firstHalfWithPrefixRemoved = firstHalf.replace(/(\s?)(-?\*?)\S+$/, "$1$2");
+    const combinedHalves = Utils.removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf}`);
+    const result = cursorAtEnd ? `${combinedHalves} ` : combinedHalves;
+    const selectionStart = firstHalfWithPrefixRemoved.length + suggestion.length + 1;
+
+    input.value = result;
+    input.selectionStart = selectionStart;
+    input.selectionEnd = selectionStart;
   }
 }

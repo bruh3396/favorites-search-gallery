@@ -151,7 +151,7 @@ class Caption {
   static encodeTagCategory(tagCategory) {
     for (const [encoding, category] of Object.entries(Caption.tagCategoryEncodings)) {
       if (category === tagCategory) {
-        return encoding;
+        return parseInt(encoding);
       }
     }
     return 0;
@@ -347,6 +347,11 @@ class Caption {
     }, {
       once: true
     });
+    window.addEventListener("favoritesLoadedFromDatabase", () => {
+      this.findTagCategoriesOnPageChange();
+    }, {
+      once: true
+    });
     window.addEventListener("favoritesFetched", () => {
       this.addEventListenersToThumbs.bind(this)();
     });
@@ -369,7 +374,7 @@ class Caption {
         .split(" ")
         .filter(tagName => !Utils.isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
 
-      this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
+      this.findTagCategories(tagNames, () => {
         Caption.saveTagCategoriesCooldown.restart();
       });
     }, {
@@ -714,19 +719,19 @@ class Caption {
     }
 
     if (unknownThumbTags.length > 0) {
-      this.findTagCategories(unknownThumbTags, 3, () => {
+      this.findTagCategories(unknownThumbTags, () => {
         this.addTags(tagNames, thumb);
-      });
+      }, 3);
       return;
     }
     this.addTags(tagNames, thumb);
   }
 
   /**
-   * @param {String[]} tagNames
+   * @param {Set.<String>} tags
    * @param {HTMLElement} thumb
    */
-  addTags(tagNames, thumb) {
+  addTags(tags, thumb) {
     Caption.saveTagCategoriesCooldown.restart();
 
     if (this.currentThumbId !== thumb.id) {
@@ -736,8 +741,9 @@ class Caption {
     if (thumb.getElementsByClassName("caption-tag").length > 1) {
       return;
     }
+    tags = Array.from(tags).reverse();
 
-    for (const tagName of tagNames) {
+    for (const tagName of tags) {
       const category = this.getTagCategory(tagName);
 
       this.addTag(category, tagName);
@@ -823,17 +829,17 @@ class Caption {
   findTagCategoriesOnPageChange() {
     const tagNames = this.getTagNamesWithUnknownCategories(Utils.getAllThumbs().slice(0, 200));
 
-    this.findTagCategories(tagNames, Caption.tagFetchDelay, () => {
+    this.findTagCategories(tagNames, () => {
       Caption.saveTagCategoriesCooldown.restart();
     });
   }
 
   /**
    * @param {String[]} tagNames
-   * @param {Number} fetchDelay
    * @param {Function} onAllCategoriesFound
+   * @param {Number} fetchDelay
    */
-  async findTagCategories(tagNames, fetchDelay, onAllCategoriesFound) {
+  async findTagCategories(tagNames, onAllCategoriesFound, fetchDelay) {
     const parser = new DOMParser();
     const lastTagName = tagNames[tagNames.length - 1];
     const uniqueTagNames = new Set(tagNames);
@@ -886,7 +892,7 @@ class Caption {
       } catch (error) {
         console.error(error);
       }
-      await Utils.sleep(fetchDelay);
+      await Utils.sleep(fetchDelay || Caption.tagFetchDelay);
     }
   }
 

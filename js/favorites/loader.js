@@ -24,6 +24,10 @@ class FavoritesLoader {
    */
   latestSearchResults;
   /**
+   * @type {Post[]}
+   */
+  searchResultsWhileFetching;
+  /**
    * @type {HTMLLabelElement}
    */
   matchCountLabel;
@@ -39,10 +43,6 @@ class FavoritesLoader {
    * @type {String}
    */
   searchQuery;
-  /**
-   * @type {Post[]}
-   */
-  searchResultsWhileFetching;
   /**
    * @type {Number}
    */
@@ -131,7 +131,7 @@ class FavoritesLoader {
 
   initializeComponents() {
     this.fetchedQueue = new FetchedFavoritesQueue((request) => {
-      this.processFetchedFavorites(request.fetchedFavorites);
+      this.processFetchedFavorites(request.favorites);
     });
     this.fetcher = new FavoritesFetcher(() => {
       this.onAllFavoritesFetched();
@@ -281,8 +281,8 @@ class FavoritesLoader {
   fetchAllFavorites() {
     FavoritesLoader.currentState = FavoritesLoader.states.fetchingFavorites;
     this.paginator.toggleContentVisibility(true);
-    this.paginator.insertPaginationMenuContainer();
-    this.paginator.createPaginationMenu(1, []);
+    this.paginator.insertPaginationMenu();
+    this.paginator.updatePaginationMenu(1, []);
     this.fetcher.fetchAllFavorites();
     dispatchEvent(new Event("readyToSearch"));
     setTimeout(() => {
@@ -360,6 +360,7 @@ class FavoritesLoader {
     }
     this.setStatusText("All favorites loaded");
     this.paginateSearchResults(this.deserializeFavorites(records));
+    dispatchEvent(new Event("favoritesLoadedFromDatabase"));
     this.onAllFavoritesLoaded();
     setTimeout(() => {
       this.fetchNewFavoritesOnReload();
@@ -421,7 +422,11 @@ class FavoritesLoader {
    * @param {Boolean} value
    */
   showLoadingWheel(value) {
-    document.getElementById("loading-wheel").style.display = value ? "flex" : "none";
+    Utils.insertStyleHTML(`
+      #loading-wheel {
+        display: ${value ? "flex" : "none"};
+      }
+      `, "loading-wheel-display");
   }
 
   /**
@@ -494,7 +499,7 @@ class FavoritesLoader {
         insertedPosts.push(post);
       }
     }
-    this.paginator.createPaginationMenu(this.paginator.currentPageNumber, this.getFavoritesMatchedByLastSearch);
+    this.paginator.updatePaginationMenu(this.paginator.currentPageNumber, this.getFavoritesMatchedByLastSearch);
     setTimeout(() => {
       dispatchEvent(new CustomEvent("newFavoritesFetchedOnReload", {
         detail: {
@@ -522,12 +527,12 @@ class FavoritesLoader {
     if (!this.searchFlags.aNewSearchCouldProduceDifferentResults) {
       return;
     }
-    searchResults = this.sortPosts(searchResults);
+    searchResults = this.sortSearchResults(searchResults);
     searchResults = this.getResultsWithAllowedRatings(searchResults);
     this.latestSearchResults = searchResults;
     this.updateMatchCount(searchResults.length);
     this.paginator.paginate(searchResults);
-    this.searchFlags.resetFlagsImplyingDifferentSearchResults();
+    this.searchFlags.reset();
     dispatchEvent(new CustomEvent("newSearchResults", {
       detail: searchResults
     }));
@@ -542,19 +547,10 @@ class FavoritesLoader {
   }
 
   /**
-   * @param {Number} value
-   */
-  updateResultsPerPage(value) {
-    this.paginator.maxFavoritesPerPage = value;
-    this.searchFlags.recentlyChangedResultsPerPage = true;
-    this.searchFavorites();
-  }
-
-  /**
    * @param {Post[]} posts
    * @returns {Post[]}
    */
-  sortPosts(posts) {
+  sortSearchResults(posts) {
     if (this.searchFlags.searchResultsAreShuffled) {
       return posts;
     }
@@ -562,48 +558,83 @@ class FavoritesLoader {
     const sortingMethod = Utils.getSortingMethod();
 
     if (sortingMethod === "random") {
-      return Utils.shuffleArray(sortedPosts);
+      this.randomizePosts(sortedPosts);
+    } else {
+      this.sortPosts(sortedPosts, sortingMethod);
     }
 
-    if (sortingMethod !== "default") {
-      sortedPosts.sort((b, a) => {
-        switch (sortingMethod) {
-          case "score":
-            return a.metadata.score - b.metadata.score;
-
-          case "width":
-            return a.metadata.width - b.metadata.width;
-
-          case "height":
-            return a.metadata.height - b.metadata.height;
-
-          case "create":
-            return a.metadata.creationTimestamp - b.metadata.creationTimestamp;
-
-          case "change":
-            return a.metadata.lastChangedTimestamp - b.metadata.lastChangedTimestamp;
-
-          case "id":
-            return a.metadata.id - b.metadata.id;
-
-          default:
-            return 0;
-        }
-      });
-    }
-
-    if (this.sortAscending()) {
+    if (this.sortByAscending()) {
       sortedPosts.reverse();
     }
     return sortedPosts;
   }
 
   /**
+   * @param {Post[]} posts
+   */
+  randomizePosts(posts) {
+    // if (!this.searchFlags.recentlyChangedResultsPerPage && !this.searchFlags.recentlyChangedSortAscending) {
+    Utils.shuffleArray(posts);
+    // }
+  }
+
+  /**
+   * @param {Post[]} posts
+   * @param {String} sortingMethod
+   */
+  sortPosts(posts, sortingMethod) {
+    if (sortingMethod === "default") {
+      return;
+    }
+    posts.sort((b, a) => {
+      switch (sortingMethod) {
+        case "score":
+          return a.metadata.score - b.metadata.score;
+
+        case "width":
+          return a.metadata.width - b.metadata.width;
+
+        case "height":
+          return a.metadata.height - b.metadata.height;
+
+        case "create":
+          return a.metadata.creationTimestamp - b.metadata.creationTimestamp;
+
+        case "change":
+          return a.metadata.lastChangedTimestamp - b.metadata.lastChangedTimestamp;
+
+        case "id":
+          return a.metadata.id - b.metadata.id;
+
+        default:
+          return 0;
+      }
+    });
+  }
+
+  /**
    * @returns {Boolean}
    */
-  sortAscending() {
+  sortByAscending() {
     const sortFavoritesAscending = document.getElementById("sort-ascending");
     return sortFavoritesAscending === null ? false : sortFavoritesAscending.checked;
+  }
+
+  /**
+   * @param {Number} value
+   */
+  onResultsPerPageChanged(value) {
+    this.paginator.maxFavoritesPerPage = value;
+    this.searchFlags.recentlyChangedResultsPerPage = true;
+    this.searchFavorites();
+  }
+
+  /**
+   * @param {Number} value
+   */
+  onSortAscendingChanged(value) {
+    this.searchFlags.recentlyChangedSortAscending = true;
+    this.searchFavorites();
   }
 
   onSortingParametersChanged() {
@@ -668,6 +699,6 @@ class FavoritesLoader {
    * @param {String} id
    */
   findFavorite(id) {
-    this.paginator.findFavorite(id);
+    this.paginator.findFavorite(id, this.latestSearchResults);
   }
 }

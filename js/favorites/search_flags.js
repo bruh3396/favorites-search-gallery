@@ -36,6 +36,10 @@ class FavoritesSearchFlags {
    */
   allowedRatingsWereChanged;
   /**
+   * @type {Boolean}
+   */
+  recentlyChangedSortAscending;
+  /**
    * @type {String}
    */
   searchQuery;
@@ -70,6 +74,7 @@ class FavoritesSearchFlags {
       this.searchResultsWereShuffled ||
       this.searchResultsWereInverted ||
       this.recentlyChangedResultsPerPage ||
+      this.recentlyChangedSortAscending ||
       this.tagsWereModified ||
       this.excludeBlacklistWasClicked ||
       this.sortingParametersWereChanged ||
@@ -87,11 +92,12 @@ class FavoritesSearchFlags {
     this.excludeBlacklistWasClicked = false;
     this.sortingParametersWereChanged = false;
     this.allowedRatingsWereChanged = false;
+    this.recentlyChangedSortAscending = false;
     this.searchQuery = "";
     this.previousSearchQuery = "";
   }
 
-  resetFlagsImplyingDifferentSearchResults() {
+  reset() {
     this.searchResultsWereShuffled = this.searchResultsAreShuffled;
     this.searchResultsWereInverted = this.searchResultsAreInverted;
     this.tagsWereModified = false;
@@ -101,6 +107,7 @@ class FavoritesSearchFlags {
     this.searchResultsAreShuffled = false;
     this.searchResultsAreInverted = false;
     this.recentlyChangedResultsPerPage = false;
+    this.recentlyChangedSortAscending = false;
     this.previousSearchQuery = this.searchQuery;
   }
 }

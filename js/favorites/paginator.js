@@ -10,7 +10,7 @@ class FavoritesPaginator {
   /**
    * @type {HTMLLabelElement}
    */
-  paginationLabel;
+  rangeLabel;
   /**
    * @type {Number}
    */
@@ -29,6 +29,7 @@ class FavoritesPaginator {
     this.paginationMenu = this.createPaginationMenuContainer();
     this.currentPageNumber = 1;
     this.favoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
+    this.maxFavoritesPerPage = 50;
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
   }
 
@@ -47,27 +48,26 @@ class FavoritesPaginator {
    * @returns {HTMLDivElement}
    */
   createPaginationMenuContainer() {
-    const container = document.createElement("span");
+    const menu = document.createElement("span");
 
-    container.id = "favorites-pagination-container";
-    return container;
+    menu.id = "favorites-pagination-container";
+    return menu;
   }
 
-  insertPaginationMenuContainer() {
+  insertPaginationMenu() {
     if (document.getElementById(this.paginationMenu.id) === null) {
       const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
 
       placeToInsertPagination.insertAdjacentElement("afterend", this.paginationMenu);
       placeToInsertPagination.remove();
     }
-
   }
 
   /**
    * @param {Post[]} favorites
    */
   paginate(favorites) {
-    this.insertPaginationMenuContainer();
+    this.insertPaginationMenu();
     this.changePage(1, favorites);
   }
 
@@ -85,7 +85,7 @@ class FavoritesPaginator {
       nextPageButton.style.visibility !== "hidden" && !nextPageButton.disabled;
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
-      this.createPaginationMenu(this.currentPageNumber, favorites);
+      this.updatePaginationMenu(this.currentPageNumber, favorites);
     } else {
       this.updateTraversalButtonEventListeners(favorites);
       this.updatePageNumberButtonEventListeners(favorites);
@@ -102,7 +102,7 @@ class FavoritesPaginator {
     for (const favorite of favoritesToAdd) {
       favorite.insertAtEndOfContent(this.content);
     }
-    this.setPaginationLabel(this.currentPageNumber, favorites.length);
+    this.updateRangeLabel(this.currentPageNumber, favorites.length);
   }
 
   /**
@@ -111,7 +111,7 @@ class FavoritesPaginator {
    */
   changePage(pageNumber, favorites) {
     this.currentPageNumber = pageNumber;
-    this.createPaginationMenu(pageNumber, favorites);
+    this.updatePaginationMenu(pageNumber, favorites);
     this.showFavorites(pageNumber, favorites);
 
     if (FavoritesLoader.currentState !== FavoritesLoader.states.loadingFavoritesFromDatabase) {
@@ -127,9 +127,9 @@ class FavoritesPaginator {
    * @param {Number} pageNumber
    * @param {Post[]} favorites
    */
-  createPaginationMenu(pageNumber, favorites) {
+  updatePaginationMenu(pageNumber, favorites) {
     this.paginationMenu.innerHTML = "";
-    this.setPaginationLabel(pageNumber, favorites.length);
+    this.updateRangeLabel(pageNumber, favorites.length);
     this.createPageNumberButtons(pageNumber, favorites);
     this.createPageTraversalButtons(favorites);
     this.createGotoSpecificPageInputs(favorites);
@@ -139,20 +139,20 @@ class FavoritesPaginator {
    * @param {Number} pageNumber
    * @param {Number} favoriteCount
    */
-  setPaginationLabel(pageNumber, favoriteCount) {
+  updateRangeLabel(pageNumber, favoriteCount) {
     const range = this.getPaginationRange(pageNumber);
     const start = range.start;
     const end = Math.min(range.end, favoriteCount);
 
-    if (this.paginationLabel === undefined) {
-      this.paginationLabel = document.getElementById("pagination-label");
+    if (this.rangeLabel === undefined) {
+      this.rangeLabel = document.getElementById("pagination-range-label");
     }
 
     if (favoriteCount <= this.maxFavoritesPerPage || isNaN(start) || isNaN(end)) {
-      this.paginationLabel.textContent = "";
+      this.rangeLabel.textContent = "";
       return;
     }
-    this.paginationLabel.textContent = `${start + 1} - ${end}`;
+    this.rangeLabel.textContent = `${start + 1} - ${end}`;
   }
 
   /**
@@ -298,7 +298,7 @@ class FavoritesPaginator {
       return;
     }
     const html = `
-      <input type="number" placeholder="#" style="width: 4em;" id="goto-page-input">
+      <input type="number" placeholder="#" id="goto-page-input">
       <button id="goto-page-button">Go</button>
     `;
     const container = document.createElement("span");
@@ -452,23 +452,37 @@ class FavoritesPaginator {
 
   /**
    * @param {Number} id
+   * @param {Post[]} favorites
    */
-  findFavorite(id) {
-    // const favorites = this.latestSearchResults;
-    // const favoriteIds = favorites.map(favorite => favorite.id);
-    // const index = favoriteIds.indexOf(id);
+  async findFavorite(id, favorites) {
+    const favoriteIds = favorites.map(favorite => favorite.id);
+    const index = favoriteIds.indexOf(id);
+    const favoriteNotFound = index === -1;
 
-    // if (index === -1) {
-    //   return;
-    // }
-    // const pageNumber = Math.floor(index / this.favoritesPerPage) + 1;
+    if (favoriteNotFound) {
+      return;
+    }
+    const pageNumber = Math.floor(index / this.favoritesPerPage) + 1;
 
-    // dispatchEvent(new CustomEvent("foundFavorite", {
-    //   detail: id
-    // }));
-    // this.changePage(pageNumber, favorites);
-    // setTimeout(() => {
-    //   scrollToThumb(id, true, false);
-    // }, 600);
+    dispatchEvent(new CustomEvent("foundFavorite", {
+      detail: id
+    }));
+
+    if (this.currentPageNumber !== pageNumber) {
+      this.changePage(pageNumber, favorites);
+    }
+
+    await Utils.sleep(150);
+    Utils.scrollToThumb(id, false, false);
+    await Utils.sleep(50);
+    Utils.scrollToThumb(id, false, false);
+    const thumb = document.getElementById(id);
+
+    if (thumb === null || thumb.classList.contains("blink")) {
+      return;
+    }
+    thumb.classList.add("blink");
+    await Utils.sleep(1500);
+    thumb.classList.remove("blink");
   }
 }

@@ -38,13 +38,6 @@ class FavoritesFetcher {
   /**
    * @type {Boolean}
    */
-  get hasNotFetchedAll() {
-    return !this.fetchedAnEmptyPage;
-  }
-
-  /**
-   * @type {Boolean}
-   */
   get allRequestsHaveStarted() {
     return this.fetchedAnEmptyPage;
   }
@@ -52,15 +45,15 @@ class FavoritesFetcher {
   /**
    * @type {Boolean}
    */
-  get someRequestsAreStillPending() {
-    return this.pendingRequestPageNumbers.size > 0;
+  get someRequestsArePending() {
+    return this.pendingRequestPageNumbers.size > 0 || this.hasFailedRequests;
   }
 
   /**
    * @type {Boolean}
    */
   get allRequestsHaveCompleted() {
-    return this.allRequestsHaveStarted && !this.hasFailedRequests && !this.someRequestsAreStillPending;
+    return this.allRequestsHaveStarted && !this.someRequestsArePending;
   }
 
   /**
@@ -89,7 +82,7 @@ class FavoritesFetcher {
       return this.oldestFailedFetchRequest;
     }
 
-    if (this.hasNotFetchedAll) {
+    if (!this.allRequestsHaveStarted) {
       return this.newFetchRequest;
     }
     return null;
@@ -176,7 +169,7 @@ class FavoritesFetcher {
    */
   async fetchFavoritesPage(request) {
     if (request === null) {
-      // console.error("Error: null fetch request, possibly waiting for completions");
+      console.error("Null favorites page fetch request");
       await Utils.sleep(200);
       return;
     }
@@ -209,9 +202,10 @@ class FavoritesFetcher {
    * @param {String} html
    */
   onFavoritesPageRequestSuccess(request, html) {
-    request.fetchedFavorites = FavoritesParser.extractFavorites(html);
+    request.favorites = FavoritesParser.extractFavorites(html);
+
     this.pendingRequestPageNumbers.delete(request.pageNumber);
-    const favoritesPageIsEmpty = request.fetchedFavorites.length === 0;
+    const favoritesPageIsEmpty = request.favorites.length === 0;
 
     this.fetchedAnEmptyPage = this.fetchedAnEmptyPage || favoritesPageIsEmpty;
 

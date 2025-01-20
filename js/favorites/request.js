@@ -10,7 +10,7 @@ class FavoritesPageRequest {
   /**
    * @type {Post[]}
    */
-  fetchedFavorites;
+  favorites;
 
   /**
    * @type {String}
@@ -23,7 +23,7 @@ class FavoritesPageRequest {
    * @type {Number}
    */
   get retryDelay() {
-    return (7 ** (this.retryCount)) + 250;
+    return (7 ** (this.retryCount)) + 200;
   }
 
   /**
@@ -32,7 +32,7 @@ class FavoritesPageRequest {
   constructor(pageNumber) {
     this.pageNumber = pageNumber;
     this.retryCount = 0;
-    this.fetchedFavorites = [];
+    this.favorites = [];
   }
 
   onFail() {

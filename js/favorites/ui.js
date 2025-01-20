@@ -84,7 +84,7 @@ class FavoritesMenu {
       }
     }
 
-    .loading-wheel {
+    #loading-wheel {
       border: 16px solid #f3f3f3;
       border-top: 16px solid #3498db;
       border-radius: 50%;
@@ -153,6 +153,10 @@ class FavoritesMenu {
       width: 55%;
       padding: 2px 0px;
       border-bottom-left-radius: 4px;
+      text-shadow: none;
+    }
+    #statistic-hint-container {
+      display: none;
     }
 
     img {
@@ -238,6 +242,7 @@ class FavoritesMenu {
     }
 
     #find-favorite {
+      display: none;
       margin-top: 7px;
 
       >input {
@@ -259,6 +264,7 @@ class FavoritesMenu {
         font-size: 14px;
         color: black;
         font-weight: normal;
+        width: 6ch;
 
         &:hover {
           background-color: #93b393;
@@ -268,6 +274,10 @@ class FavoritesMenu {
           border: none !important;
           font-weight: bold;
           pointer-events: none;
+        }
+
+        &[disabled] {
+          background-color: transparent !important;
         }
       }
     }
@@ -474,11 +484,14 @@ class FavoritesMenu {
     }
 
     body {
-
       &:fullscreen,
       &::backdrop {
         background-color: var(--c-bg);
       }
+    }
+
+    #goto-page-input {
+      width: 5ch;
     }
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
@@ -486,7 +499,7 @@ class FavoritesMenu {
       <h2 style="display: inline;" id="search-header">Search Favorites</h2>
       <span id="favorites-load-status" style="margin-left: 5px;">
         <label id="match-count-label"></label>
-        <label id="pagination-label" style="margin-left: 10px;"></label>
+        <label id="pagination-range-label" style="margin-left: 10px;"></label>
         <label id="favorites-load-status-label"></label>
       </span>
       <div id="left-favorites-panel-top-row">
@@ -499,7 +512,7 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
         <button title="Delete cached favorites and reset preferences" id="reset-button">Reset</button>
         <span id="favorites-pagination-placeholder"></span>
         <span id="help-links-container">
-          <a href="https://github.com/bruh3396/favorites-search-gallery#controls" target="_blank">Help</a>
+          <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
           <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
             target="_blank">Feedback</a>
           <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
@@ -513,6 +526,7 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
                   <li>Improved/fixed mobile UI</li>
                   <li>Improved mobile controls</li>
                   <li>Added gallery autoplay for mobile</li>
+                  <li>Added sort by random (auto shuffle)</li>
                   <li>Added dark theme option</li>
                   <li>Minor UI fixes</li>
                   <li>Minor gallery fixes</li>
@@ -567,7 +581,7 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
                     <span> Fancy Hovering</span>
                   </label>
                 </div>
-                <div style="display: none;">
+                <div id="statistic-hint-container">
                   <label class="checkbox" title="Enable fancy image hovering (experimental)">
                     <input type="checkbox" id="statistic-hint-checkbox">
                     <span> Statistics</span>
@@ -683,7 +697,7 @@ Lower numbers improve responsiveness">
             </label>
           </div>
           <div class="options-container">
-            <span id="find-favorite" style="display: none;">
+            <span id="find-favorite">
               <button title="Find favorite favorite using its ID" id="find-favorite-button"
                 style="white-space: nowrap;">Find</button>
               <input type="number" id="find-favorite-input" placeholder="ID">
@@ -698,7 +712,7 @@ Lower numbers improve responsiveness">
     </div>
     <div id="right-favorites-panel"></div>
   </div>
-  <div class="loading-wheel" id="loading-wheel" style="display: none;"></div>
+  <div id="loading-wheel"></div>
 </div>
 `;
 
@@ -708,7 +722,7 @@ Lower numbers improve responsiveness">
 
   static {
     Utils.addStaticInitializer(() => {
-      if (Utils.onFavoritesPage()) {
+      if (!FavoritesMenu.disabled) {
         Utils.insertFavoritesSearchGalleryHTML("afterbegin", FavoritesMenu.uiHTML);
       }
     });
@@ -1141,7 +1155,9 @@ Lower numbers improve responsiveness">
       passive: true
     });
     window.addEventListener("load", () => {
-      this.inputs.searchBox.focus();
+      if (!Utils.onMobileDevice()) {
+        this.inputs.searchBox.focus();
+      }
     }, {
       once: true
     });
@@ -1278,7 +1294,7 @@ Lower numbers improve responsiveness">
     resultsPerPage = Utils.clamp(resultsPerPage, 50, 5000);
     this.inputs.resultsPerPage.value = resultsPerPage;
     Utils.setPreference(this.preferences.resultsPerPage, resultsPerPage);
-    favoritesLoader.updateResultsPerPage(resultsPerPage);
+    favoritesLoader.onResultsPerPageChanged(resultsPerPage);
   }
 
   /**
@@ -1323,8 +1339,9 @@ Lower numbers improve responsiveness">
     this.createMobileSearchBar();
     this.createControlsGuide();
     this.createPaginationFooter();
-    this.createMobileToggleSwitches();
+    this.createToggleSwitches();
     // this.createMobileButtonRow();
+    this.createMobileSymbolRow();
   }
 
   configureMobileStyle() {
@@ -1336,6 +1353,16 @@ Lower numbers improve responsiveness">
       #search-header,
       #left-favorites-panel-top-row  {
         display: none !important;
+      }
+
+      #favorites-pagination-container>button {
+        &:active, &:focus {
+          background-color: slategray;
+        }
+
+        &:hover {
+          background-color: transparent;
+        }
       }
 
       .thumb,
@@ -1415,7 +1442,6 @@ Lower numbers improve responsiveness">
       #favorites-pagination-container>button {
         text-align: center;
         font-size: 16px;
-        width: 30px;
         height: 30px;
       }
 
@@ -1639,6 +1665,7 @@ Lower numbers improve responsiveness">
             background: none;
 
             svg {
+                fill: black;
                 -webkit-transition: none;
                 transition: none;
                 transform: scale(0.85);
@@ -1649,6 +1676,12 @@ Lower numbers improve responsiveness">
                     fill: #0075FF;
                 }
                 color: #0075FF;
+            }
+
+            .dark-green-gradient {
+              svg {
+                fill: white;
+              }
             }
         }
         .search-bar-container {
@@ -1828,6 +1861,7 @@ Lower numbers improve responsiveness">
   createPaginationFooter() {
     Utils.insertStyleHTML(`
       #mobile-footer {
+        z-index: 3;
         position: fixed;
         width: 100%;
         bottom: 0;
@@ -1872,6 +1906,15 @@ Lower numbers improve responsiveness">
       #pagination-number:active {
         opacity: 0.5;
         filter: none !important;
+      }
+
+      #favorites-pagination-container {
+        display: flex;
+
+        >span, >button {
+          width: unset;
+          flex: 1;
+        }
       }
       `, "mobile-footer");
     const footerHTML = `
@@ -2057,7 +2100,7 @@ Lower numbers improve responsiveness">
     };
   }
 
-  createMobileToggleSwitches() {
+  createToggleSwitches() {
     window.addEventListener("postProcess", () => {
       setTimeout(() => {
         this.createMobileToggleSwitchesHelper();
@@ -2221,6 +2264,97 @@ Lower numbers improve responsiveness">
     document.getElementById("left-favorites-panel-bottom-row").insertAdjacentHTML("afterbegin", html);
   }
 
+  createMobileSymbolRow() {
+    Utils.insertStyleHTML(`
+      #mobile-symbol-container {
+        display: flex;
+        gap: 10px;
+        text-align: center;
+        height: 0;
+        overflow: hidden;
+        width: 100%;
+        transition: height .2s ease;
+
+        >button {
+          font-size: 20px;
+          padding: 0;
+          margin: 0;
+          font-weight: bold;
+          text-align: center;
+          flex: 1;
+          height: 100% !important;
+        }
+
+        &.active {
+          height: 30px;
+        }
+      }
+      `);
+    document.getElementById("left-favorites-panel")
+      .insertAdjacentHTML("afterbegin", `
+        <div id="mobile-symbol-container">
+          <button>-</button>
+          <button>*</button>
+          <button>_</button>
+          <button>(</button>
+          <button>)</button>
+          <button>~</button>
+        </div>
+        `);
+    const mobileSymbolContainer = document.getElementById("mobile-symbol-container");
+    /**
+     * @type {HTMLInputElement}
+     */
+
+    const searchBar = document.getElementById("favorites-search-box");
+
+    for (const button of Array.from(document.getElementById("mobile-symbol-container").querySelectorAll("button"))) {
+      button.addEventListener("blur", async(event) => {
+        await Utils.sleep(0);
+
+        if (document.activeElement.id !== "favorites-search-box" && !mobileSymbolContainer.contains(document.activeElement)) {
+          mobileSymbolContainer.classList.toggle("active", false);
+        }
+      });
+
+      button.addEventListener("click", () => {
+        const value = searchBar.value;
+        const selectionStart = searchBar.selectionStart;
+
+        searchBar.value = value.slice(0, selectionStart) + button.textContent + value.slice(selectionStart);
+        this.updateVisibilityOfSearchClearButton();
+        searchBar.selectionStart = selectionStart + 1;
+        searchBar.selectionEnd = selectionStart + 1;
+        searchBar.focus();
+      }, {
+        passive: true
+      });
+    }
+
+    window.addEventListener("postProcess", () => {
+
+      searchBar.addEventListener("focus", () => {
+        document.getElementById("mobile-symbol-container").classList.toggle("active", true);
+      }, {
+        passive: true
+      });
+
+      searchBar.addEventListener("blur", async(event) => {
+        await Utils.sleep(10);
+
+        if (document.activeElement.id !== "favorites-search-box" && !mobileSymbolContainer.contains(document.activeElement)) {
+          mobileSymbolContainer.classList.toggle("active", false);
+        }
+      });
+    }, {
+      once: true
+    });
+  }
+
+  clickedOnSearchItem(event) {
+
+  }
+
   updateVisibilityOfSearchClearButton() {
     if (!Utils.onMobileDevice()) {
       return;
@@ -2284,6 +2418,10 @@ Lower numbers improve responsiveness">
         width: 20px;
         height: 20px;
       }
+        #favorites-pagination-container>button {
+          height: 32px;
+        }
+
     `, "desktop");
   }
 
