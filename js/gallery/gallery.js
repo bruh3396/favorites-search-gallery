@@ -6,20 +6,6 @@ class Gallery {
     overflow-x: hidden;
   }
 
-  .focused {
-    transition: none;
-    float: left;
-    overflow: hidden;
-    z-index: 9997;
-    pointer-events: none;
-    position: fixed;
-    height: 100vh;
-    margin: 0;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
   #gallery-container {
 
     >canvas,
@@ -56,19 +42,16 @@ class Gallery {
     z-index: 9997;
   }
 
+  #original-gif-container {
+    z-index: 9995;
+  }
+
   a.hide {
     cursor: default;
   }
 
   option {
     font-size: 15px;
-  }
-
-  #resolution-dropdown {
-    text-align: center;
-    width: 160px;
-    height: 25px;
-    cursor: pointer;
   }
 
   #original-content-background {
@@ -106,13 +89,8 @@ class Gallery {
     -o-user-drag: none;
 
     &.active {
-      /* opacity: 0.2; */
       pointer-events: all;
     }
-  }
-
-  #original-gif-container {
-    z-index: 9995;
   }
 </style>
 `;
@@ -188,818 +166,7 @@ class Gallery {
     showOnHover: "showImagesWhenHovering",
     backgroundOpacity: "galleryBackgroundOpacity",
     resolution: "galleryResolution",
-    enlargeOnClick: "enlargeOnClick",
-    videoVolume: "videoVolume",
-    videoMuted: "videoMuted"
-  };
-  static webWorkers = {
-    renderer:
-      `
-/* eslint-disable prefer-template */
-/**
- * @param {Number} milliseconds
- * @returns {Promise}
- */
-function sleep(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
-
-class RenderRequest {
-  /**
-   * @type {String}
-   */
-  id;
-  /**
-   * @type {String}
-   */
-  imageURL;
-  /**
-   * @type {String}
-   */
-  extension;
-  /**
-   * @type {String}
-   */
-  thumbURL;
-  /**
-   * @type {String}
-   */
-  fetchDelay;
-  /**
-   * @type {Number}
-   */
-  pixelCount;
-  /**
-   * @type {OffscreenCanvas}
-   */
-  canvas;
-  /**
-   * @type {Number}
-   */
-  resolutionFraction;
-  /**
-   * @type {AbortController}
-   */
-  abortController;
-  /**
-   * @type {Number}
-   */
-  get estimatedMegabyteSize() {
-    const rgb = 3;
-    const bytes = rgb * this.pixelCount;
-    const numberOfBytesInMegabyte = 1048576;
-    return bytes / numberOfBytesInMegabyte;
-  }
-
-  /**
-   * @param {{
-   *  id: String,
-   *  imageURL: String,
-   *  extension: String,
-   *  thumbURL: String,
-   *  fetchDelay: String,
-   *  pixelCount: Number,
-   *  canvas: OffscreenCanvas,
-   *  resolutionFraction: Number
-   * }} request
-   */
-  constructor(request) {
-    this.id = request.id;
-    this.imageURL = request.imageURL;
-    this.extension = request.extension;
-    this.thumbURL = request.thumbURL;
-    this.fetchDelay = request.fetchDelay;
-    this.pixelCount = request.pixelCount;
-    this.canvas = request.canvas;
-    this.resolutionFraction = request.resolutionFraction;
-    this.abortController = new AbortController();
-  }
-}
-
-class BatchRenderRequest {
-  static settings = {
-    megabyteMemoryLimit: 1000,
-    minimumRequestCount: 10
-  };
-
-  /**
-   * @type {String}
-   */
-  id;
-  /**
-   * @type {String}
-   */
-  requestType;
-  /**
-   * @type {RenderRequest[]}
-   */
-  renderRequests;
-  /**
-   * @type {RenderRequest[]}
-   */
-  originalRenderRequests;
-
-  get renderRequestIds() {
-    return new Set(this.renderRequests.map(request => request.id));
-  }
-
-  /**
-   * @param {{
-   *  id: String,
-   *  requestType: String,
-   *  renderRequests: {
-   *   id: String,
-   *   imageURL: String,
-   *   extension: String,
-   *   thumbURL: String,
-   *   fetchDelay: String,
-   *   pixelCount: Number,
-   *   canvas: OffscreenCanvas,
-   *   resolutionFraction: Number
-   *  }[]
-   * }} batchRequest
-   */
-  constructor(batchRequest) {
-    this.id = batchRequest.id;
-    this.requestType = batchRequest.requestType;
-    this.renderRequests = batchRequest.renderRequests.map(r => new RenderRequest(r));
-    this.originalRenderRequests = this.renderRequests;
-    this.truncateRenderRequestsExceedingMemoryLimit();
-  }
-
-  truncateRenderRequestsExceedingMemoryLimit() {
-    const truncatedRequests = [];
-    let currentMegabyteSize = 0;
-
-    for (const request of this.renderRequests) {
-      const overMemoryLimit = currentMegabyteSize < BatchRenderRequest.settings.megabyteMemoryLimit;
-      const underMinimumRequestCount = truncatedRequests.length < BatchRenderRequest.settings.minimumRequestCount;
-
-      if (overMemoryLimit || underMinimumRequestCount) {
-        truncatedRequests.push(request);
-        currentMegabyteSize += request.estimatedMegabyteSize;
-      } else {
-        postMessage({
-          action: "renderDeleted",
-          id: request.id
-        });
-      }
-    }
-    this.renderRequests = truncatedRequests;
-  }
-}
-
-class ImageFetcher {
-  /**
-   * @type {Set.<String>}
-   */
-  static idsToFetchFromPostPages = new Set();
-
-  /**
-   * @type {Number}
-   */
-  static get postPageFetchDelay() {
-    return ImageFetcher.idsToFetchFromPostPages.size * 250;
-  }
-
-  /**
-   * @param {RenderRequest} request
-   */
-  static async setOriginalImageURLAndExtension(request) {
-    if (request.extension !== null && request.extension !== undefined) {
-      request.imageURL = request.imageURL.replace("jpg", request.extension);
-    } else {
-      // eslint-disable-next-line require-atomic-updates
-      request.imageURL = await ImageFetcher.getOriginalImageURL(request.id);
-      request.extension = ImageFetcher.getExtensionFromImageURL(request.imageURL);
-    }
-  }
-
-  /**
-   * @param {String} id
-   * @returns {String}
-   */
-  static getOriginalImageURL(id) {
-    const apiURL = "https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + id;
-    return fetch(apiURL)
-      .then((response) => {
-        if (response.ok) {
-          return response.text();
-        }
-        throw new Error(response.status + ": " + id);
-      })
-      .then((html) => {
-        return (/ file_url="(.*?)"/).exec(html)[1].replace("api-cdn.", "");
-      }).catch(() => {
-        return ImageFetcher.getOriginalImageURLFromPostPage(id);
-      });
-  }
-
-  /**
-   * @param {String} id
-   * @returns {String}
-   */
-  static async getOriginalImageURLFromPostPage(id) {
-    const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + id;
-
-    ImageFetcher.idsToFetchFromPostPages.add(id);
-    await sleep(ImageFetcher.postPageFetchDelay);
-    return fetch(postPageURL)
-      .then((response) => {
-        if (response.ok) {
-          return response.text();
-        }
-        throw new Error(response.status + ": " + postPageURL);
-      })
-      .then((html) => {
-        ImageFetcher.idsToFetchFromPostPages.delete(id);
-        return (/itemprop="image" content="(.*)"/g).exec(html)[1].replace("us.rule34", "rule34");
-      }).catch((error) => {
-        if (error.message.includes("503")) {
-          return ImageFetcher.getOriginalImageURLFromPostPage(id);
-        }
-        console.error({
-          error,
-          url: postPageURL
-        });
-        return "https://rule34.xxx/images/r34chibi.png";
-      });
-  }
-
-  /**
-   * @param {String} imageURL
-   * @returns {String}
-   */
-  static getExtensionFromImageURL(imageURL) {
-    try {
-      return (/\.(png|jpg|jpeg|gif)/g).exec(imageURL)[1];
-    } catch (error) {
-      return "jpg";
-    }
-  }
-
-  /**
-   * @param {RenderRequest} request
-   * @returns {Promise}
-   */
-  static fetchImage(request) {
-    return fetch(request.imageURL, {
-      signal: request.abortController.signal
-    });
-  }
-
-  /**
-   * @param {RenderRequest} request
-   * @returns {Blob}
-   */
-  static async fetchImageBlob(request) {
-    const response = await ImageFetcher.fetchImage(request);
-    return response.blob();
-  }
-
-  /**
-   * @param {String} id
-   * @returns {String}
-   */
-  static async findImageExtensionFromId(id) {
-    const imageURL = await ImageFetcher.getOriginalImageURL(id);
-    const extension = ImageFetcher.getExtensionFromImageURL(imageURL);
-
-    postMessage({
-      action: "extensionFound",
-      id,
-      extension
-    });
-  }
-}
-
-class ThumbUpscaler {
-  static settings = {
-    maxCanvasHeight: 16000
-  };
-  /**
-   * @type {Map.<String, OffscreenCanvas>}
-   */
-  canvases = new Map();
-  /**
-   * @type {Number}
-   */
-  screenWidth;
-  /**
-   * @type {Boolean}
-   */
-  onSearchPage;
-
-  /**
-   * @param {Number} screenWidth
-   * @param {Boolean} onSearchPage
-   */
-  constructor(screenWidth, onSearchPage) {
-    this.screenWidth = screenWidth;
-    this.onSearchPage = onSearchPage;
-  }
-
-  /**
-   * @param {{id: String, imageURL: String, canvas: OffscreenCanvas, resolutionFraction: Number}[]} message
-   */
-  async upscaleMultipleAnimatedCanvases(message) {
-    const requests = message.map(r => new RenderRequest(r));
-
-    requests.forEach((request) => {
-      this.collectCanvas(request);
-    });
-
-    for (const request of requests) {
-      ImageFetcher.fetchImage(request)
-        .then((response) => {
-          return response.blob();
-        })
-        .then((blob) => {
-          createImageBitmap(blob)
-            .then((imageBitmap) => {
-              this.upscale(request, imageBitmap);
-            });
-        });
-      await sleep(50);
-    }
-  }
-
-  /**
-   * @param {RenderRequest} request
-   * @param {ImageBitmap} imageBitmap
-   */
-  upscale(request, imageBitmap) {
-    if (this.onSearchPage || imageBitmap === undefined || !this.canvases.has(request.id)) {
-      return;
-    }
-    this.setCanvasDimensions(request, imageBitmap);
-    this.drawCanvas(request.id, imageBitmap);
-  }
-
-  /**
-   * @param {RenderRequest} request
-   * @param {ImageBitmap} imageBitmap
-   */
-  setCanvasDimensions(request, imageBitmap) {
-    const canvas = this.canvases.get(request.id);
-    let width = this.screenWidth / request.resolutionFraction;
-    let height = (width / imageBitmap.width) * imageBitmap.height;
-
-    if (width > imageBitmap.width) {
-      width = imageBitmap.width;
-      height = imageBitmap.height;
-    }
-
-    if (height > ThumbUpscaler.settings.maxCanvasHeight) {
-      width *= (ThumbUpscaler.settings.maxCanvasHeight / height);
-      height = ThumbUpscaler.settings.maxCanvasHeight;
-    }
-    canvas.width = width;
-    canvas.height = height;
-  }
-
-  /**
-   * @param {String} id
-   * @param {ImageBitmap} imageBitmap
-   */
-  drawCanvas(id, imageBitmap) {
-    const canvas = this.canvases.get(id);
-    const context = canvas.getContext("2d");
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(
-      imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
-      0, 0, canvas.width, canvas.height
-    );
-  }
-
-  deleteAllCanvases() {
-    for (const [id, canvas] of this.canvases.entries()) {
-      this.deleteCanvas(id, canvas);
-    }
-    this.canvases.clear();
-  }
-
-  /**
-   * @param {String} id
-   * @param {OffscreenCanvas} canvas
-   */
-  deleteCanvas(id, canvas) {
-    const context = canvas.getContext("2d");
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    canvas.width = 0;
-    canvas.height = 0;
-    canvas = null;
-    this.canvases.set(id, canvas);
-    this.canvases.delete(id);
-  }
-
-  /**
-   * @param {RenderRequest} request
-   */
-  collectCanvas(request) {
-    if (request.canvas === undefined) {
-      return;
-    }
-
-    if (!this.canvases.has(request.id)) {
-      this.canvases.set(request.id, request.canvas);
-    }
-  }
-
-  /**
-   * @param {BatchRenderRequest} batchRequest
-   */
-  collectCanvases(batchRequest) {
-    batchRequest.originalRenderRequests.forEach((request) => {
-      this.collectCanvas(request);
-    });
-  }
-}
-
-class ImageRenderer {
-  /**
-   * @type {OffscreenCanvas}
-   */
-  canvas;
-  /**
-   * @type {CanvasRenderingContext2D}
-   */
-  context;
-  /**
-   * @type {ThumbUpscaler}
-   */
-  thumbUpscaler;
-  /**
-   * @type {RenderRequest}
-   */
-  renderRequest;
-  /**
-   * @type {BatchRenderRequest}
-   */
-  batchRenderRequest;
-  /**
-   * @type {Map.<String, RenderRequest>}
-   */
-  incompleteRenderRequests;
-  /**
-   * @type {Map.<String, {completed: Boolean, imageBitmap: ImageBitmap, request: RenderRequest}>}
-   */
-  renders;
-  /**
-   * @type {String}
-   */
-  lastRequestedDrawId;
-  /**
-   * @type {String}
-   */
-  currentlyDrawnId;
-  /**
-   * @type {Boolean}
-   */
-  onMobileDevice;
-  /**
-   * @type {Boolean}
-   */
-  onSearchPage;
-  /**
-   * @type {Boolean}
-   */
-  usingLandscapeOrientation;
-
-  /**
-   * @type {Boolean}
-   */
-  get hasRenderRequest() {
-    return this.renderRequest !== undefined &&
-      this.renderRequest !== null;
-  }
-
-  /**
-   * @type {Boolean}
-   */
-  get hasBatchRenderRequest() {
-    return this.batchRenderRequest !== undefined &&
-      this.batchRenderRequest !== null;
-  }
-
-  /**
-   * @param {{canvas: OffscreenCanvas, screenWidth: Number, onMobileDevice: Boolean, onSearchPage: Boolean }} message
-   */
-  constructor(message) {
-    this.canvas = message.canvas;
-    this.context = this.canvas.getContext("2d");
-    this.thumbUpscaler = new ThumbUpscaler(message.screenWidth, message.onSearchPage);
-    this.renders = new Map();
-    this.incompleteRenderRequests = new Map();
-    this.lastRequestedDrawId = "";
-    this.currentlyDrawnId = "";
-    this.onMobileDevice = message.onMobileDevice;
-    this.onSearchPage = message.onSearchPage;
-    this.usingLandscapeOrientation = true;
-    this.configureCanvasQuality();
-  }
-
-  configureCanvasQuality() {
-    this.context.imageSmoothingEnabled = true;
-    this.context.imageSmoothingQuality = "high";
-    this.context.lineJoin = "miter";
-  }
-
-  renderMultipleImages(message) {
-    const batchRenderRequest = new BatchRenderRequest(message);
-
-    this.thumbUpscaler.collectCanvases(batchRenderRequest);
-    this.abortOutdatedFetchRequests(batchRenderRequest);
-    this.deleteRendersNotInNewRequests(batchRenderRequest);
-    this.removeStartedRenderRequests(batchRenderRequest);
-    this.batchRenderRequest = batchRenderRequest;
-    this.renderMultipleImagesHelper(batchRenderRequest);
-  }
-
-  /**
-   * @param {BatchRenderRequest} batchRenderRequest
-   */
-  async renderMultipleImagesHelper(batchRenderRequest) {
-    for (const request of batchRenderRequest.renderRequests) {
-      if (this.renders.has(request.id)) {
-        continue;
-      }
-      this.renders.set(request.id, {
-        completed: false,
-        imageBitmap: undefined,
-        request
-      });
-    }
-
-    for (const request of batchRenderRequest.renderRequests) {
-      this.renderImage(request);
-      await sleep(request.fetchDelay);
-    }
-  }
-
-  /**
-   * @param {RenderRequest} request
-   * @param {Number} batchRequestId
-   */
-  async renderImage(request) {
-    this.incompleteRenderRequests.set(request.id, request);
-    await ImageFetcher.setOriginalImageURLAndExtension(request);
-    let blob;
-
-    try {
-      blob = await ImageFetcher.fetchImageBlob(request);
-    } catch (error) {
-      if (error.name === "AbortError") {
-        this.deleteRender(request.id);
-      } else {
-        console.error({
-          error,
-          request
-        });
-      }
-      return;
-    }
-    const imageBitmap = await createImageBitmap(blob);
-
-    this.renders.set(request.id, {
-      completed: true,
-      imageBitmap,
-      request
-    });
-    this.incompleteRenderRequests.delete(request.id);
-    this.thumbUpscaler.upscale(request, imageBitmap);
-    postMessage({
-      action: "renderCompleted",
-      extension: request.extension,
-      id: request.id
-    });
-
-    if (this.lastRequestedDrawId === request.id) {
-      this.drawCanvas(request.id);
-    }
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Boolean}
-   */
-  renderHasCompleted(id) {
-    const render = this.renders.get(id);
-    return render !== undefined && render.completed;
-  }
-
-  /**
-   * @param {String} id
-   */
-  drawCanvas(id) {
-    const render = this.renders.get(id);
-
-    if (render === undefined || render.imageBitmap === undefined) {
-      this.clearCanvas();
-      return;
-    }
-
-    if (this.currentlyDrawnId === id) {
-      return;
-    }
-
-    if (render.completed) {
-      this.currentlyDrawnCanvasId = id;
-    }
-    const ratio = Math.min(this.canvas.width / render.imageBitmap.width, this.canvas.height / render.imageBitmap.height);
-    const centerShiftX = (this.canvas.width - (render.imageBitmap.width * ratio)) / 2;
-    const centerShiftY = (this.canvas.height - (render.imageBitmap.height * ratio)) / 2;
-
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.context.drawImage(
-      render.imageBitmap, 0, 0, render.imageBitmap.width, render.imageBitmap.height,
-      centerShiftX, centerShiftY, render.imageBitmap.width * ratio, render.imageBitmap.height * ratio
-    );
-  }
-
-  /**
-   * @param {Boolean} usingLandscapeOrientation
-   */
-  changeCanvasOrientation(usingLandscapeOrientation) {
-    if (usingLandscapeOrientation !== this.usingLandscapeOrientation) {
-      this.swapCanvasOrientation();
-    }
-  }
-
-  swapCanvasOrientation() {
-    const temp = this.canvas.width;
-
-    this.canvas.width = this.canvas.height;
-    this.canvas.height = temp;
-    this.usingLandscapeOrientation = !this.usingLandscapeOrientation;
-  }
-
-  clearCanvas() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  deleteAllRenders() {
-    this.thumbUpscaler.deleteAllCanvases();
-    this.abortAllFetchRequests();
-
-    for (const id of this.renders.keys()) {
-      this.deleteRender(id, true);
-    }
-    this.batchRenderRequest = undefined;
-    this.renderRequest = undefined;
-    this.renders.clear();
-  }
-
-  /**
-   * @param {BatchRenderRequest} newBatchRenderRequest
-   */
-  deleteRendersNotInNewRequests(newBatchRenderRequest) {
-    const idsToRender = newBatchRenderRequest.renderRequestIds;
-
-    for (const id of this.renders.keys()) {
-      if (!idsToRender.has(id)) {
-        this.deleteRender(id);
-      }
-    }
-  }
-
-  /**
-   * @param {String} id
-   * @param {Boolean} initiatedByMainThread
-   */
-  deleteRender(id, initiatedByMainThread = false) {
-    if (!this.renders.has(id)) {
-      return;
-    }
-    const imageBitmap = this.renders.get(id).imageBitmap;
-
-    if (imageBitmap !== null && imageBitmap !== undefined) {
-      imageBitmap.close();
-    }
-    this.renders.set(id, null);
-    this.renders.delete(id);
-
-    if (initiatedByMainThread) {
-      return;
-    }
-    postMessage({
-      action: "renderDeleted",
-      id
-    });
-  }
-
-  /**
-   * @param {BatchRenderRequest} newBatchRenderRequest
-   */
-  abortOutdatedFetchRequests(newBatchRenderRequest) {
-    const newIds = newBatchRenderRequest.renderRequestIds;
-
-    for (const [id, request] of this.incompleteRenderRequests.entries()) {
-      if (!newIds.has(id)) {
-        request.abortController.abort();
-        this.incompleteRenderRequests.delete(id);
-      }
-    }
-  }
-
-  abortAllFetchRequests() {
-    for (const request of this.incompleteRenderRequests.values()) {
-      request.abortController.abort();
-    }
-    this.incompleteRenderRequests.clear();
-  }
-
-  /**
-   * @param {BatchRenderRequest} batchRenderRequest
-   */
-  removeStartedRenderRequests(batchRenderRequest) {
-    batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
-      .filter(request => !this.renders.has(request.id));
-  }
-  /**
-   * @param {BatchRenderRequest} batchRenderRequest
-   */
-  removeCompletedRenderRequests(batchRenderRequest) {
-    batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
-      .filter(request => !this.renderHasCompleted(request.id));
-  }
-
-  upscaleAllRenderedThumbs() {
-    for (const render of this.renders.values()) {
-      this.thumbUpscaler.upscale(render.request, render.imageBitmap);
-    }
-  }
-
-  onmessage(message) {
-    switch (message.action) {
-      case "render":
-        this.renderRequest = new RenderRequest(message);
-        this.lastRequestedDrawId = message.id;
-        this.thumbUpscaler.collectCanvas(this.renderRequest);
-        this.renderImage(this.renderRequest);
-        break;
-
-      case "renderMultiple":
-        this.renderMultipleImages(message);
-        break;
-
-      case "deleteAllRenders":
-        this.deleteAllRenders();
-        break;
-
-      case "drawMainCanvas":
-        this.lastRequestedDrawId = message.id;
-        this.drawCanvas(message.id);
-        break;
-
-      case "clearMainCanvas":
-        this.clearCanvas();
-        break;
-
-      case "upscaleAnimatedThumbs":
-        this.thumbUpscaler.upscaleMultipleAnimatedCanvases(message.upscaleRequests);
-        break;
-
-      case "changeCanvasOrientation":
-        this.changeCanvasOrientation(message.usingLandscapeOrientation);
-        break;
-
-      case "upscaleAllRenderedThumbs":
-        this.upscaleAllRenderedThumbs();
-        break;
-
-      default:
-        break;
-    }
-  }
-}
-
-/**
- * @type {ImageRenderer}
- */
-let imageRenderer;
-
-onmessage = (message) => {
-  switch (message.data.action) {
-    case "initialize":
-      BatchRenderRequest.settings.megabyteMemoryLimit = message.data.megabyteLimit;
-      BatchRenderRequest.settings.minimumRequestCount = message.data.minimumImagesToRender;
-      imageRenderer = new ImageRenderer(message.data);
-      break;
-
-    case "findExtension":
-      ImageFetcher.findImageExtensionFromId(message.data.id);
-      break;
-
-    default:
-      imageRenderer.onmessage(message.data);
-      break;
-  }
-};
-
-`
+    enlargeOnClick: "enlargeOnClick"
   };
   static canvasResolutions = {
     search: "3840x2160",
@@ -1083,40 +250,16 @@ onmessage = (message) => {
   static cursorVisibilityCooldown = new Cooldown(Gallery.settings.cursorVisibilityCooldownTime);
   static finishedLoading = Utils.onSearchPage();
   /**
+   * @type {HTMLElement[]}
+   */
+  static visibleThumbs;
+  /**
    * @returns {Boolean}
    */
   static get disabled() {
     return (Utils.onMobileDevice() && Utils.onSearchPage()) || Utils.getPerformanceProfile() > 0 || Utils.onPostPage();
   }
 
-  /**
-   * @type {Autoplay}
-   */
-  autoplayController;
-  /**
-   * @type {HTMLDivElement}
-   */
-  originalContentContainer;
-  /**
-   * @type {HTMLCanvasElement}
-   */
-  mainCanvas;
-  /**
-   * @type {HTMLCanvasElement}
-   */
-  lowResolutionCanvas;
-  /**
-   * @type {CanvasRenderingContext2D}
-   */
-  lowResolutionContext;
-  /**
-   * @type {HTMLAnchorElement}
-   */
-  videoContainer;
-  /**
-   * @type {HTMLVideoElement[]}
-   */
-  videoPlayers;
   /**
    * @type {HTMLImageElement}
    */
@@ -1138,41 +281,9 @@ onmessage = (message) => {
    */
   lastEnteredThumb;
   /**
-   * @type {Worker}
-   */
-  imageRenderer;
-  /**
-   * @type {Set.<String>}
-   */
-  startedRenders;
-  /**
-   * @type {Set.<String>}
-   */
-  completedRenders;
-  /**
-   * @type {Map.<String, HTMLCanvasElement>}
-   */
-  transferredCanvases;
-  /**
-   * @type {Map.<String, VideoClip>}
-   */
-  videoClips;
-  /**
    * @type {Map.<String, String>}
    */
   enumeratedThumbs;
-  /**
-   * @type {HTMLElement[]}
-   */
-  visibleThumbs;
-  /**
-   * @type {Post[]}
-   */
-  latestSearchResults;
-  /**
-   * @type {Object.<Number, String>}
-   */
-  imageExtensions;
   /**
    * @type {String}
    */
@@ -1225,6 +336,18 @@ onmessage = (message) => {
    * @type {Boolean}
    */
   enlargeOnClickOnMobile;
+  /**
+   * @type {Autoplay}
+   */
+  autoplayController;
+  /**
+   * @type {VideoController}
+   */
+  videoController;
+  /**
+   * @type {Renderer}
+   */
+  renderer;
 
   /**
    * @type {Boolean}
@@ -1237,36 +360,22 @@ onmessage = (message) => {
     if (Gallery.disabled) {
       return;
     }
-    this.createAutoplayController();
     this.initializeFields();
     this.initializeTimers();
-    this.setMainCanvasResolution();
-    this.createWebWorkers();
-    this.createVideoBackgrounds();
     this.addEventListeners();
-    this.createImageRendererMessageHandler();
     this.prepareSearchPage();
     this.insertHTML();
+    this.initializeComponents();
+    this.toggleOriginalContentVisibility(false);
     this.updateBackgroundOpacity(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
-    this.loadVideoClips();
-    this.setOrientation();
     this.createMobileTapControls();
   }
 
   initializeFields() {
-    this.mainCanvas = document.createElement("canvas");
-    this.lowResolutionCanvas = document.createElement("canvas");
-    this.lowResolutionContext = this.lowResolutionCanvas.getContext("2d");
     this.thumbUnderCursor = null;
     this.lastEnteredThumb = null;
-    this.startedRenders = new Set();
-    this.completedRenders = new Set();
-    this.transferredCanvases = new Map();
-    this.videoClips = new Map();
     this.enumeratedThumbs = new Map();
-    this.visibleThumbs = [];
-    this.latestSearchResults = [];
-    this.imageExtensions = {};
+    Gallery.visibleThumbs = [];
     this.foundFavoriteId = null;
     this.changedPageInGalleryDirection = null;
     this.recentlyDiscoveredImageExtensionCount = 0;
@@ -1282,43 +391,16 @@ onmessage = (message) => {
     this.enlargeOnClickOnMobile = Utils.getPreference(Gallery.preferences.enlargeOnClick, true);
   }
 
+  initializeComponents() {
+    this.renderer = new Renderer();
+    this.videoController = new VideoController();
+    this.createAutoplayController();
+  }
+
   initializeTimers() {
     Gallery.backgroundRenderingOnPageChangeCooldown.onDebounceEnd = () => {
       this.onPageChange();
     };
-  }
-
-  setMainCanvasResolution() {
-    const resolution = Utils.onSearchPage() ? Gallery.canvasResolutions.search : Gallery.canvasResolutions.favorites;
-    const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
-
-    this.mainCanvas.width = dimensions[0];
-    this.mainCanvas.height = dimensions[1];
-  }
-
-  createWebWorkers() {
-    const offscreenCanvas = this.mainCanvas.transferControlToOffscreen();
-
-    this.imageRenderer = new Worker(Utils.getWorkerURL(Gallery.webWorkers.renderer));
-    this.imageRenderer.postMessage({
-      action: "initialize",
-      canvas: offscreenCanvas,
-      onMobileDevice: Utils.onMobileDevice(),
-      screenWidth: window.screen.width,
-      megabyteLimit: Gallery.settings.megabyteLimit,
-      minimumImagesToRender: Gallery.settings.minImagesToRender,
-      onSearchPage: Utils.onSearchPage()
-    }, [offscreenCanvas]);
-  }
-
-  createVideoBackgrounds() {
-    document.createElement("canvas").toBlob((blob) => {
-      const videoBackgroundURL = URL.createObjectURL(blob);
-
-      for (const video of this.videoPlayers) {
-        video.setAttribute("poster", videoBackgroundURL);
-      }
-    });
   }
 
   addEventListeners() {
@@ -1388,7 +470,7 @@ onmessage = (message) => {
               this.openPostInNewPage(thumb);
               return;
             }
-            this.deleteAllRenders();
+            this.renderer.deleteAllRenders();
           }
 
           if (Utils.onMobileDevice()) {
@@ -1476,7 +558,7 @@ onmessage = (message) => {
 
         case " ":
           if (Utils.isVideo(this.getSelectedThumb())) {
-            const video = this.getActiveVideoPlayer();
+            const video = this.videoController.getActiveVideoPlayer();
 
             if (video === document.activeElement) {
               return;
@@ -1519,7 +601,7 @@ onmessage = (message) => {
 
         case "m":
           if (Utils.isVideo(this.getSelectedThumb())) {
-            this.getActiveVideoPlayer().muted = !this.getActiveVideoPlayer().muted;
+            this.videoController.getActiveVideoPlayer().muted = !this.videoController.getActiveVideoPlayer().muted;
           }
           break;
 
@@ -1562,6 +644,12 @@ onmessage = (message) => {
     window.addEventListener("blur", () => {
       this.toggleCtrlClickOpenMediaInNewTab(false);
     });
+    window.addEventListener("dblclick", () => {
+      if (this.inGallery && !this.recentlyEnteredGallery) {
+        this.exitGallery();
+        this.toggleAllVisibility(false);
+      }
+    });
   }
 
   /**
@@ -1594,8 +682,8 @@ onmessage = (message) => {
       if (thumbs.length > 0) {
         const thumb = thumbs[0];
 
-        this.upscaleAnimatedThumbsAround(thumb);
-        this.renderImages(thumbs
+        this.renderer.upscaleAnimatedThumbsAround(thumb);
+        this.renderer.renderImages(thumbs
           .filter(t => Utils.isImage(t))
           .slice(0, 20));
       }
@@ -1607,10 +695,10 @@ onmessage = (message) => {
       setTimeout(() => {
         const thumb = document.querySelector(`.${Utils.favoriteItemClassName}`);
 
-        this.renderImagesInTheBackground();
+        this.renderer.renderImagesInTheBackground();
 
         if (thumb !== null && !Gallery.finishedLoading) {
-          this.upscaleAnimatedThumbsAround(thumb);
+          this.renderer.upscaleAnimatedThumbsAround(thumb);
         }
       }, 650);
     }, {
@@ -1621,33 +709,26 @@ onmessage = (message) => {
       Gallery.finishedLoading = true;
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateThumbs();
-      this.findImageExtensionsInTheBackground();
+      this.renderer.findImageExtensionsInTheBackground();
 
       if (!this.favoritesWereFetched) {
         await Utils.sleep(50);
-        this.renderImagesInTheBackground();
+        this.renderer.renderImagesInTheBackground();
       }
     }, {
       once: true
-    });
-    window.addEventListener("newSearchResults", (event) => {
-      this.latestSearchResults = event.detail;
     });
     window.addEventListener("changedPage", () => {
       this.initializeThumbsForHovering.bind(this)();
       this.enumerateThumbs();
 
       if (this.changedPageWhileInGallery) {
-        setTimeout(() => {
-          this.imageRenderer.postMessage({
-            action: "upscaleAllRenderedThumbs"
-          });
-        }, 100);
+        this.renderer.upscaleAllRenderedThumbs();
       } else {
-        this.clearMainCanvas();
-        this.clearVideoSources();
+        this.renderer.clearMainCanvas();
+        this.videoController.clearVideoSources();
         this.toggleOriginalContentVisibility(false);
-        this.deleteAllRenders();
+        this.renderer.deleteAllRenders();
 
         if (Gallery.settings.debugEnabled) {
           Utils.getAllThumbs().forEach((thumb) => {
@@ -1663,8 +744,8 @@ onmessage = (message) => {
     });
     window.addEventListener("shuffle", () => {
       this.enumerateThumbs();
-      this.deleteAllRenders();
-      this.renderImagesInTheBackground();
+      this.renderer.deleteAllRenders();
+      this.renderer.renderImagesInTheBackground();
     });
     window.addEventListener("didNotChangePageInGallery", (event) => {
       if (this.inGallery) {
@@ -1674,35 +755,12 @@ onmessage = (message) => {
     });
   }
 
-  createImageRendererMessageHandler() {
-    this.imageRenderer.onmessage = (message) => {
-      message = message.data;
-
-      switch (message.action) {
-        case "renderCompleted":
-          this.onRenderCompleted(message);
-          break;
-
-        case "renderDeleted":
-          this.onRenderDeleted(message);
-          break;
-
-        case "extensionFound":
-          Utils.assignImageExtension(message.id, message.extension);
-          break;
-
-        default:
-          break;
-      }
-    };
-  }
-
   addMobileEventListeners() {
     if (!Utils.onMobileDevice()) {
       return;
     }
     window.addEventListener("blur", () => {
-      this.deleteAllRenders();
+      this.renderer.deleteAllRenders();
     });
     document.addEventListener("touchstart", (event) => {
       if (!this.inGallery) {
@@ -1756,25 +814,12 @@ onmessage = (message) => {
     }, {
       passive: false
     });
-
     window.addEventListener("orientationchange", () => {
-      this.setOrientation();
+      this.renderer.setOrientation();
       this.preventMobileAddressBarInGallery();
     }, {
       passive: true
     });
-  }
-
-  setOrientation() {
-    if (!Utils.onMobileDevice() || this.imageRenderer === null || this.imageRenderer === undefined) {
-      return;
-    }
-    const usingLandscapeOrientation = window.screen.orientation.angle === 90;
-
-    this.setGifOrientation(usingLandscapeOrientation);
-    this.swapMainCanvasDimensions(usingLandscapeOrientation);
-    this.swapLowResolutionCanvasDimensions(usingLandscapeOrientation);
-    this.redrawCanvasesOnOrientationChange();
   }
 
   preventMobileAddressBarInGallery() {
@@ -1782,65 +827,6 @@ onmessage = (message) => {
       return;
     }
     window.scrollTo(0, 10);
-  }
-
-  /**
-   * @param {Boolean} usingLandscapeOrientation
-   */
-  swapMainCanvasDimensions(usingLandscapeOrientation) {
-    this.imageRenderer.postMessage({
-      action: "changeCanvasOrientation",
-      usingLandscapeOrientation
-    });
-  }
-
-  /**
-   * @param {Boolean} usingLandscapeOrientation
-   */
-  setGifOrientation(usingLandscapeOrientation) {
-    const orientationId = "main-orientation";
-
-    if (usingLandscapeOrientation) {
-      Utils.insertStyleHTML(`
-            #original-gif-container, #main-canvas, #low-resolution-canvas {
-                height: 100vh !important;
-                width: auto !important;
-            }
-            `, orientationId);
-    } else {
-      Utils.insertStyleHTML(`
-            #original-gif-container, #main-canvas, #low-resolution-canvas {
-                width: 100vw !important;
-                height: auto !important;
-            }
-            `, orientationId);
-    }
-  }
-
-  /**
-   * @param {Boolean} usingLandscapeOrientation
-   */
-  swapLowResolutionCanvasDimensions(usingLandscapeOrientation) {
-    if (usingLandscapeOrientation === (this.lowResolutionCanvas.width > this.lowResolutionCanvas.height)) {
-      return;
-    }
-    const temp = this.lowResolutionCanvas.height;
-
-    this.lowResolutionCanvas.height = this.lowResolutionCanvas.width;
-    this.lowResolutionCanvas.width = temp;
-  }
-
-  redrawCanvasesOnOrientationChange() {
-    if (!this.inGallery) {
-      return;
-    }
-    const thumb = this.getSelectedThumb();
-
-    if (thumb === undefined || thumb === null) {
-      return;
-    }
-    this.drawLowResolutionCanvas(thumb);
-    this.imageRenderer.postMessage(this.getRenderRequest(thumb));
   }
 
   createMobileTapControls() {
@@ -1851,13 +837,14 @@ onmessage = (message) => {
     const leftTap = document.createElement("div");
     const rightTap = document.createElement("div");
 
+    tapControlContainer.id = "tap-control-container";
     leftTap.className = "mobile-tap-control";
     rightTap.className = "mobile-tap-control";
     leftTap.id = "left-mobile-tap-control";
     rightTap.id = "right-mobile-tap-control";
     tapControlContainer.appendChild(leftTap);
     tapControlContainer.appendChild(rightTap);
-    this.originalContentContainer.appendChild(tapControlContainer);
+    document.getElementById("gallery-container").appendChild(tapControlContainer);
     Utils.insertStyleHTML(`
             .mobile-tap-control {
                 position: fixed;
@@ -1909,12 +896,12 @@ onmessage = (message) => {
     }
     window.addEventListener("blur", () => {
       this.leftPage = true;
-      this.deleteAllRenders();
-      this.clearInactiveVideoSources();
+      this.renderer.deleteAllRenders();
+      this.videoController.clearInactiveVideoSources();
     });
     window.addEventListener("focus", () => {
       if (this.leftPage) {
-        this.renderImagesInTheBackground();
+        this.renderer.renderImagesInTheBackground();
         this.leftPage = false;
       }
     });
@@ -1926,7 +913,7 @@ onmessage = (message) => {
     }
     await Utils.findImageExtensionsOnSearchPage();
     dispatchEvent(new Event("foundExtensionsOnSearchPage"));
-    this.renderImagesInTheBackground();
+    this.renderer.renderImagesInTheBackground();
   }
 
   insertHTML() {
@@ -1985,6 +972,8 @@ onmessage = (message) => {
   insertOriginalContentContainerHTML() {
     const originalContentContainerHTML = `
           <div id="gallery-container">
+              <canvas id="main-canvas"></canvas>
+              <canvas id="low-resolution-canvas"></canvas>
               <a id="original-video-container">
                 <video ${Gallery.commonVideoAttributes} active></video>
               </a>
@@ -1996,100 +985,19 @@ onmessage = (message) => {
 
     Utils.insertFavoritesSearchGalleryHTML("afterbegin", originalContentContainerHTML);
     this.originalContentContainer = document.getElementById("gallery-container");
-    this.originalContentContainer.insertBefore(this.lowResolutionCanvas, this.originalContentContainer.firstChild);
-    this.originalContentContainer.insertBefore(this.mainCanvas, this.originalContentContainer.firstChild);
     this.background = document.getElementById("original-content-background");
-
     this.originalImageLinkMask = document.getElementById("original-content-background-link-mask");
-    this.videoContainer = document.getElementById("original-video-container");
     this.addAdditionalVideoPlayers();
-    this.videoPlayers = Array.from(this.videoContainer.querySelectorAll("video"));
-    this.addVideoPlayerEventListeners();
-    this.loadVideoVolume();
     this.gifContainer = document.getElementById("original-gif-container");
-    this.mainCanvas.id = "main-canvas";
-    this.lowResolutionCanvas.id = "low-resolution-canvas";
-    this.lowResolutionCanvas.width = Utils.onMobileDevice() ? 320 : 1280;
-    this.lowResolutionCanvas.height = Utils.onMobileDevice() ? 180 : 720;
-    this.toggleOriginalContentVisibility(false);
     this.addBackgroundEventListeners();
-
-    if (Autoplay.disabled || !this.autoplayController.active || this.autoplayController.paused) {
-      this.toggleVideoLooping(true);
-    } else {
-      this.toggleVideoLooping(false);
-    }
   }
 
   addAdditionalVideoPlayers() {
     const videoPlayerHTML = `<video ${Gallery.commonVideoAttributes}></video>`;
+    const videoContainer = document.getElementById("original-video-container");
 
     for (let i = 0; i < Gallery.settings.additionalVideoPlayerCount; i += 1) {
-      this.videoContainer.insertAdjacentHTML("beforeend", videoPlayerHTML);
-    }
-  }
-
-  addVideoPlayerEventListeners() {
-    this.videoContainer.onclick = (event) => {
-      if (!event.ctrlKey) {
-        event.preventDefault();
-      }
-    };
-
-    for (const video of this.videoPlayers) {
-      video.addEventListener("mousemove", () => {
-        if (!video.hasAttribute("controls")) {
-          video.setAttribute("controls", "");
-        }
-      }, {
-        passive: true
-      });
-      video.addEventListener("click", (event) => {
-        if (event.ctrlKey) {
-          return;
-        }
-
-        if (video.paused) {
-          video.play().catch(() => { });
-        } else {
-          video.pause();
-        }
-      }, {
-        passive: true
-      });
-      video.addEventListener("volumechange", (event) => {
-        if (!event.target.hasAttribute("active")) {
-          return;
-        }
-        Utils.setPreference(Gallery.preferences.videoVolume, video.volume);
-        Utils.setPreference(Gallery.preferences.videoMuted, video.muted);
-
-        for (const v of this.getInactiveVideoPlayers()) {
-          v.volume = video.volume;
-          v.muted = video.muted;
-        }
-      }, {
-        passive: true
-      });
-      video.addEventListener("ended", () => {
-        this.autoplayController.onVideoEnded();
-      }, {
-        passive: true
-      });
-      video.addEventListener("dblclick", () => {
-        if (this.inGallery && !this.recentlyEnteredGallery) {
-          this.exitGallery();
-          this.toggleAllVisibility(false);
-        }
-      });
-
-      if (Utils.onMobileDevice()) {
-        video.addEventListener("touchend", () => {
-          this.toggleVideoControls(true);
-        }, {
-          passive: true
-        });
-      }
+      videoContainer.insertAdjacentHTML("beforeend", videoPlayerHTML);
     }
   }
 
@@ -2110,13 +1018,6 @@ onmessage = (message) => {
     };
   }
 
-  loadVideoVolume() {
-    const video = this.getActiveVideoPlayer();
-
-    video.volume = parseFloat(Utils.getPreference(Gallery.preferences.videoVolume, 1));
-    video.muted = Utils.getPreference(Gallery.preferences.videoMuted, true);
-  }
-
   /**
    * @param {Number} opacity
    */
@@ -2128,16 +1029,16 @@ onmessage = (message) => {
   createAutoplayController() {
     const subscribers = new AutoplayListenerList(
       () => {
-        this.toggleVideoLooping(false);
+        this.videoController.toggleVideoLooping(false);
       },
       () => {
-        this.toggleVideoLooping(true);
+        this.videoController.toggleVideoLooping(true);
       },
       () => {
-        this.toggleVideoLooping(true);
+        this.videoController.toggleVideoLooping(true);
       },
       () => {
-        this.toggleVideoLooping(false);
+        this.videoController.toggleVideoLooping(false);
       },
       () => {
         if (this.inGallery) {
@@ -2148,12 +1049,18 @@ onmessage = (message) => {
       },
       () => {
         if (this.inGallery && Utils.isVideo(this.getSelectedThumb())) {
-          this.playOriginalVideo(this.getSelectedThumb());
+          this.videoController.playOriginalVideo(this.getSelectedThumb());
         }
       }
     );
 
     this.autoplayController = new Autoplay(subscribers);
+
+    if (Autoplay.disabled || !this.autoplayController.active || this.autoplayController.paused) {
+      this.videoController.toggleVideoLooping(true);
+    } else {
+      this.videoController.toggleVideoLooping(false);
+    }
   }
 
   /**
@@ -2167,26 +1074,6 @@ onmessage = (message) => {
     }
   }
 
-  renderImagesInTheBackground() {
-    if (Utils.onMobileDevice()) {
-      return;
-    }
-    const thumbs = Utils.getAllThumbs();
-
-    if (Utils.onSearchPage()) {
-      this.renderImages(thumbs.filter(thumb => Utils.isImage(thumb)).slice(0, 50));
-      return;
-    }
-    const animatedThumbs = thumbs
-      .slice(0, Gallery.settings.animatedThumbsToUpscaleDiscrete)
-      .filter(thumb => !Utils.isImage(thumb));
-
-    if (thumbs.length > 0) {
-      this.upscaleAnimatedThumbs(animatedThumbs);
-      this.renderImagesAround(thumbs[0]);
-    }
-  }
-
   onPageChange() {
     this.onPageChangeHelper();
     this.foundFavoriteId = null;
@@ -2194,7 +1081,7 @@ onmessage = (message) => {
   }
 
   onPageChangeHelper() {
-    if (this.visibleThumbs.length <= 0) {
+    if (Gallery.visibleThumbs.length <= 0) {
       return;
     }
 
@@ -2209,7 +1096,7 @@ onmessage = (message) => {
     }
     setTimeout(() => {
       if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
-        this.renderImagesInTheBackground();
+        this.renderer.renderImagesInTheBackground();
       }
     }, 100);
   }
@@ -2218,7 +1105,7 @@ onmessage = (message) => {
     if (this.changedPageInGalleryDirection === "ArrowRight") {
       this.currentlySelectedThumbIndex = 0;
     } else {
-      this.currentlySelectedThumbIndex = this.visibleThumbs.length - 1;
+      this.currentlySelectedThumbIndex = Gallery.visibleThumbs.length - 1;
     }
     this.traverseGalleryHelper();
   }
@@ -2231,155 +1118,6 @@ onmessage = (message) => {
     }
   }
 
-  /**
-   * @param {HTMLElement[]} imagesToRender
-   */
-  renderImages(imagesToRender) {
-    const renderRequests = imagesToRender.map(image => this.getRenderRequest(image));
-    const canvases = Utils.onSearchPage() ? [] : renderRequests
-      .filter(request => request.canvas !== undefined)
-      .map(request => request.canvas);
-
-    this.imageRenderer.postMessage({
-      action: "renderMultiple",
-      id: this.currentBatchRenderRequestId,
-      renderRequests,
-      requestType: "none"
-    }, canvases);
-    this.currentBatchRenderRequestId += 1;
-
-    if (this.currentBatchRenderRequestId >= 1000) {
-      this.currentBatchRenderRequestId = 0;
-    }
-  }
-
-  /**
-   * @param {Object} message
-   */
-  onRenderCompleted(message) {
-    const thumb = document.getElementById(message.id);
-
-    this.completedRenders.add(message.id);
-
-    if (Gallery.settings.debugEnabled) {
-
-      if (Gallery.settings.loopAtEndOfGallery) {
-        if (thumb !== null) {
-          thumb.classList.add("loaded");
-        }
-      } else {
-        const post = Post.allPosts.get(message.id);
-
-        if (post !== undefined && post.root !== undefined) {
-          post.root.classList.add("loaded");
-        }
-      }
-    }
-
-    if (thumb !== null && message.extension === "gif") {
-      Utils.getImageFromThumb(thumb).setAttribute("gif", true);
-      return;
-    }
-    Utils.assignImageExtension(message.id, message.extension);
-    this.drawMainCanvasOnRenderCompleted(thumb);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  drawMainCanvasOnRenderCompleted(thumb) {
-    if (thumb === null) {
-      return;
-    }
-    const mainCanvasIsVisible = this.showOriginalContentOnHover || this.inGallery;
-
-    if (!mainCanvasIsVisible) {
-      return;
-    }
-    const selectedThumb = this.getSelectedThumb();
-    const selectedThumbIsImage = selectedThumb !== undefined && Utils.isImage(selectedThumb);
-
-    if (!selectedThumbIsImage) {
-      return;
-    }
-
-    if (selectedThumb.id === thumb.id) {
-      this.drawMainCanvas(thumb);
-    }
-  }
-
-  onRenderDeleted(message) {
-    const thumb = document.getElementById(message.id);
-
-    if (thumb !== null) {
-      if (Gallery.settings.debugEnabled) {
-        thumb.classList.remove("loaded");
-      }
-    }
-    this.startedRenders.delete(message.id);
-    this.completedRenders.delete(message.id);
-  }
-
-  deleteAllRenders() {
-    this.startedRenders.clear();
-    this.completedRenders.clear();
-    this.deleteAllTransferredCanvases();
-    this.imageRenderer.postMessage({
-      action: "deleteAllRenders"
-    });
-
-    if (Gallery.settings.debugEnabled) {
-      if (Gallery.settings.loopAtEndOfGallery) {
-        for (const thumb of this.visibleThumbs) {
-          thumb.classList.remove("loaded");
-        }
-      } else {
-        for (const post of Post.allPosts.values()) {
-          if (post.root !== undefined) {
-            post.root.classList.remove("loaded");
-          }
-        }
-      }
-    }
-  }
-
-  deleteAllTransferredCanvases() {
-    if (Utils.onSearchPage()) {
-      return;
-    }
-
-    for (const id of this.transferredCanvases.keys()) {
-      this.transferredCanvases.get(id).remove();
-      this.transferredCanvases.delete(id);
-    }
-    this.transferredCanvases.clear();
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {HTMLCanvasElement}
-   */
-  getCanvasFromThumb(thumb) {
-    let canvas = thumb.querySelector("canvas");
-
-    if (canvas === null) {
-      canvas = document.createElement("canvas");
-      thumb.children[0].appendChild(canvas);
-    }
-    return canvas;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {HTMLCanvasElement}
-   */
-  getOffscreenCanvasFromThumb(thumb) {
-    const canvas = this.getCanvasFromThumb(thumb);
-
-    this.transferredCanvases.set(thumb.id, canvas);
-    return canvas.transferControlToOffscreen();
-  }
-
   hideCaptionsWhenShowingOriginalContent() {
     for (const caption of document.getElementsByClassName("caption")) {
       if (this.showOriginalContentOnHover) {
@@ -2390,34 +1128,12 @@ onmessage = (message) => {
     }
   }
 
-  async findImageExtensionsInTheBackground() {
-    await Utils.sleep(1000);
-    const idsWithUnknownExtensions = this.getIdsWithUnknownExtensions(Array.from(Post.allPosts.values()));
-
-    while (idsWithUnknownExtensions.length > 0) {
-      await Utils.sleep(3000);
-
-      while (idsWithUnknownExtensions.length > 0 && Gallery.finishedLoading) {
-        const id = idsWithUnknownExtensions.pop();
-
-        if (id !== undefined && id !== null && !Utils.extensionIsKnown(id)) {
-          this.imageRenderer.postMessage({
-            action: "findExtension",
-            id
-          });
-          await Utils.sleep(10);
-        }
-      }
-    }
-    Gallery.settings.extensionsFoundBeforeSavingCount = 0;
-  }
-
   enumerateThumbs() {
-    this.visibleThumbs = Utils.getAllThumbs();
+    Gallery.visibleThumbs = Utils.getAllThumbs();
     this.enumeratedThumbs.clear();
 
-    for (let i = 0; i < this.visibleThumbs.length; i += 1) {
-      this.enumerateThumb(this.visibleThumbs[i], i);
+    for (let i = 0; i < Gallery.visibleThumbs.length; i += 1) {
+      this.enumerateThumb(Gallery.visibleThumbs[i], i);
     }
   }
 
@@ -2463,7 +1179,7 @@ onmessage = (message) => {
       if (this.inGallery || Utils.enteredOverCaptionTag(event)) {
         return;
       }
-      this.stopAllVideos();
+      this.videoController.stopAllVideos();
       this.hideOriginalContent();
     };
   }
@@ -2520,7 +1236,7 @@ onmessage = (message) => {
     this.background.style.pointerEvents = "auto";
 
     if (Utils.isVideo(selectedThumb)) {
-      this.toggleVideoControls(true);
+      this.videoController.toggleVideoControls(true);
     }
     this.inGallery = true;
     dispatchEvent(new CustomEvent("showOriginalContent", {
@@ -2541,21 +1257,21 @@ onmessage = (message) => {
     }
     this.toggleTapTraversal(false);
     this.toggleCursorVisibility(true);
-    this.toggleVideoControls(false);
+    this.videoController.toggleVideoControls(false);
     this.background.style.pointerEvents = "none";
     this.toggleCtrlClickOpenMediaInNewTab(false);
     const thumbIndex = this.getIndexOfThumbUnderCursor();
 
     if (Utils.onMobileDevice()) {
       this.hideOriginalContent();
-      this.deleteAllRenders();
+      this.renderer.deleteAllRenders();
     }
 
     if (!Utils.onMobileDevice() && thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGallery) {
       this.hideOriginalContent();
 
       if (thumbIndex !== null && this.showOriginalContentOnHover) {
-        this.showOriginalContent(this.visibleThumbs[thumbIndex]);
+        this.showOriginalContent(Gallery.visibleThumbs[thumbIndex]);
       }
     }
 
@@ -2597,35 +1313,38 @@ onmessage = (message) => {
 
     this.autoplayController.startViewTimer(selectedThumb);
     this.clearOriginalContentSources();
-    this.stopAllVideos();
+    this.videoController.stopAllVideos();
 
     if (Gallery.settings.debugEnabled) {
       selectedThumb.classList.add("debug-selected");
     }
-    this.upscaleAnimatedThumbsAround(selectedThumb);
+    this.renderer.upscaleAnimatedThumbsAround(selectedThumb);
     this.renderImagesAround(selectedThumb);
-    this.preloadInactiveVideoPlayers(selectedThumb);
+
+    if (this.inGallery && Gallery.settings.additionalVideoPlayerCount > 0) {
+      this.videoController.preloadInactiveVideoPlayers(selectedThumb);
+    }
 
     if (!Utils.usingFirefox()) {
       Utils.scrollToThumb(selectedThumb.id, false, true);
     }
 
     if (Utils.isVideo(selectedThumb)) {
-      this.toggleVideoControls(true);
+      this.videoController.toggleVideoControls(true);
       this.showOriginalVideo(selectedThumb);
     } else if (Utils.isGif(selectedThumb)) {
-      this.toggleVideoControls(false);
-      this.toggleOriginalVideoContainer(false);
+      this.videoController.toggleVideoControls(false);
+      this.videoController.toggleVideoContainer(false);
       this.showOriginalGIF(selectedThumb);
     } else {
-      this.toggleVideoControls(false);
-      this.toggleOriginalVideoContainer(false);
+      this.videoController.toggleVideoControls(false);
+      this.videoController.toggleVideoContainer(false);
       this.showOriginalImage(selectedThumb);
     }
     this.setupOriginalImageLinkInGallery();
 
     if (Utils.onMobileDevice()) {
-      this.toggleVideoControls(false);
+      this.videoController.toggleVideoControls(false);
     }
   }
 
@@ -2634,7 +1353,7 @@ onmessage = (message) => {
    * @returns {Boolean}
    */
   reachedEndOfGallery(direction) {
-    if (direction === Gallery.directions.right && this.currentlySelectedThumbIndex >= this.visibleThumbs.length - 1) {
+    if (direction === Gallery.directions.right && this.currentlySelectedThumbIndex >= Gallery.visibleThumbs.length - 1) {
       return true;
     }
 
@@ -2651,10 +1370,10 @@ onmessage = (message) => {
   setNextSelectedThumbIndex(direction) {
     if (direction === Gallery.directions.left || direction === Gallery.directions.a) {
       this.currentlySelectedThumbIndex -= 1;
-      this.currentlySelectedThumbIndex = this.currentlySelectedThumbIndex < 0 ? this.visibleThumbs.length - 1 : this.currentlySelectedThumbIndex;
+      this.currentlySelectedThumbIndex = this.currentlySelectedThumbIndex < 0 ? Gallery.visibleThumbs.length - 1 : this.currentlySelectedThumbIndex;
     } else {
       this.currentlySelectedThumbIndex += 1;
-      this.currentlySelectedThumbIndex = this.currentlySelectedThumbIndex >= this.visibleThumbs.length ? 0 : this.currentlySelectedThumbIndex;
+      this.currentlySelectedThumbIndex = this.currentlySelectedThumbIndex >= Gallery.visibleThumbs.length ? 0 : this.currentlySelectedThumbIndex;
     }
     return false;
   }
@@ -2686,15 +1405,14 @@ onmessage = (message) => {
     this.toggleBackgroundVisibility(false);
     this.toggleScrollbarVisibility(true);
     this.clearOriginalContentSources();
-    this.stopAllVideos();
-    this.clearMainCanvas();
-    this.toggleOriginalVideoContainer(false);
+    this.videoController.stopAllVideos();
+    this.renderer.clearCanvases();
+    this.videoController.toggleVideoContainer(false);
     this.toggleOriginalGIF(false);
   }
 
   clearOriginalContentSources() {
-    this.mainCanvas.style.visibility = "hidden";
-    this.lowResolutionCanvas.style.visibility = "hidden";
+    this.renderer.clearCanvases();
     this.gifContainer.src = "";
     this.gifContainer.style.visibility = "hidden";
   }
@@ -2714,7 +1432,7 @@ onmessage = (message) => {
    */
   showOriginalContent(thumb) {
     this.currentlySelectedThumbIndex = this.getIndexFromThumb(thumb);
-    this.upscaleAnimatedThumbsAroundDiscrete(thumb);
+    this.renderer.upscaleAnimatedThumbsAroundDiscrete(thumb);
 
     if (!this.inGallery && Gallery.settings.renderAroundAggressively) {
       this.renderImagesAround(thumb);
@@ -2741,180 +1459,12 @@ onmessage = (message) => {
     if (!this.showOriginalContentOnHover) {
       return;
     }
-    this.toggleMainCanvas(false);
-    this.videoContainer.style.display = "block";
-    this.playOriginalVideo(thumb);
+    this.renderer.toggleMainCanvas(false);
+    this.videoController.playOriginalVideo(thumb);
 
     if (!this.inGallery) {
-      this.toggleVideoControls(false);
+      this.videoController.toggleVideoControls(false);
     }
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   */
-  preloadInactiveVideoPlayers(initialThumb) {
-    if (!this.inGallery || Gallery.settings.additionalVideoPlayerCount < 1) {
-      return;
-    }
-    this.setActiveVideoPlayer(initialThumb);
-    const inactiveVideoPlayers = this.getInactiveVideoPlayers();
-    const videoThumbsAroundInitialThumb = this.getAdjacentVideoThumbs(initialThumb, inactiveVideoPlayers.length);
-    const loadedVideoSources = new Set(inactiveVideoPlayers
-      .map(video => video.src)
-      .filter(src => src !== ""));
-    const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => this.getVideoSource(thumb)));
-    const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(this.getVideoSource(thumb)));
-    const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
-
-    for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
-      this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
-    }
-    this.stopAllVideos();
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentVideoThumbs(initialThumb, limit) {
-    if (Gallery.settings.loopAtEndOfGallery) {
-      return this.getAdjacentVideoThumbsOnCurrentPage(initialThumb, limit);
-    }
-    return this.getAdjacentVideoThumbsThroughoutAllPages(initialThumb, limit);
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentVideoThumbsOnCurrentPage(initialThumb, limit) {
-    return this.getAdjacentThumbsLooped(
-      initialThumb,
-      limit,
-      (t) => {
-        return Utils.isVideo(t) && t.id !== initialThumb.id;
-      }
-    );
-
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentVideoThumbsThroughoutAllPages(initialThumb, limit) {
-    return this.getAdjacentSearchResults(
-      initialThumb,
-      limit,
-      (t) => {
-        return Utils.isVideo(t) && t.id !== initialThumb.id;
-      }
-    );
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {String}
-   */
-  getVideoSource(thumb) {
-    return Utils.getOriginalImageURLFromThumb(thumb).replace("jpg", "mp4");
-  }
-
-  /**
-   * @param {HTMLVideoElement} video
-   * @param {HTMLElement} thumb
-   */
-  setVideoSource(video, thumb) {
-    if (this.videoPlayerHasSource(video, thumb)) {
-      return;
-    }
-    this.createVideoClip(video, thumb);
-    video.src = this.getVideoSource(thumb);
-  }
-
-  /**
-   * @param {HTMLVideoElement} video
-   * @param {HTMLElement} thumb
-   */
-  createVideoClip(video, thumb) {
-    const videoClip = this.videoClips.get(thumb.id);
-
-    if (videoClip === undefined) {
-      video.ontimeupdate = null;
-      return;
-    }
-    video.ontimeupdate = () => {
-      if (video.currentTime < videoClip.start || video.currentTime > videoClip.end) {
-        video.removeAttribute("controls");
-        video.currentTime = videoClip.start;
-      }
-    };
-  }
-
-  clearVideoSources() {
-    for (const video of this.videoPlayers) {
-      video.src = "";
-    }
-  }
-
-  clearInactiveVideoSources() {
-    const videoPlayers = this.inGallery ? this.getInactiveVideoPlayers() : this.videoPlayers;
-
-    for (const video of videoPlayers) {
-      video.src = "";
-    }
-  }
-
-  /**
-   * @param {HTMLVideoElement} video
-   * @returns {String | null}
-   */
-  getSourceIdFromVideo(video) {
-    const regex = /\.mp4\?(\d+)/;
-    const match = regex.exec(video.src);
-
-    if (match === null) {
-      return null;
-    }
-    return match[1];
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  playOriginalVideo(thumb) {
-    this.stopAllVideos();
-    const video = this.getActiveVideoPlayer();
-
-    this.setVideoSource(video, thumb);
-    video.style.display = "block";
-    video.play().catch(() => { });
-    this.toggleVideoControls(true);
-  }
-
-  stopAllVideos() {
-    for (const video of this.videoPlayers) {
-      this.stopVideo(video);
-    }
-  }
-
-  stopAllInactiveVideos() {
-    for (const video of this.getInactiveVideoPlayers()) {
-      this.stopVideo(video);
-    }
-  }
-
-  /**
-   * @param {HTMLVideoElement} video
-   */
-  stopVideo(video) {
-    video.style.display = "none";
-    video.pause();
-    video.removeAttribute("controls");
   }
 
   /**
@@ -2929,8 +1479,7 @@ onmessage = (message) => {
 
     if (this.showOriginalContentOnHover) {
       this.toggleOriginalGIF(true);
-      this.lowResolutionCanvas.style.visibility = "hidden";
-      this.mainCanvas.style.visibility = "hidden";
+      this.renderer.clearCanvases();
       this.gifContainer.style.visibility = "visible";
     }
   }
@@ -2939,19 +1488,19 @@ onmessage = (message) => {
    * @param {HTMLElement} thumb
    */
   showOriginalImage(thumb) {
-    if (this.renderIsCompleted(thumb)) {
-      this.clearLowResolutionCanvas();
-      this.drawMainCanvas(thumb);
-    } else if (this.renderHasStarted(thumb)) {
-      this.drawLowResolutionCanvas(thumb);
-      this.clearMainCanvas();
-      this.drawMainCanvas(thumb);
+    if (this.renderer.renderIsCompleted(thumb)) {
+      this.renderer.clearLowResolutionCanvas();
+      this.renderer.drawMainCanvas(thumb);
+    } else if (this.renderer.renderHasStarted(thumb)) {
+      this.renderer.drawLowResolutionCanvas(thumb);
+      this.renderer.clearMainCanvas();
+      this.renderer.drawMainCanvas(thumb);
     } else {
-      this.drawLowResolutionCanvas(thumb);
-      this.renderOriginalImage(thumb);
+      this.renderer.drawLowResolutionCanvas(thumb);
+      this.renderer.renderOriginalImage(thumb);
 
       if (!this.inGallery && !Gallery.settings.renderAroundAggressively) {
-        this.renderImagesAround(thumb);
+        this.renderer.renderImagesAround(thumb);
       }
     }
     this.toggleOriginalContentVisibility(this.showOriginalContentOnHover);
@@ -2965,7 +1514,7 @@ onmessage = (message) => {
     if (Utils.onSearchPage() || (Utils.onMobileDevice() && !this.enlargeOnClickOnMobile)) {
       return;
     }
-    this.renderImages(this.getAdjacentImageThumbs(initialThumb));
+    this.renderer.renderImages(this.getAdjacentImageThumbs(initialThumb));
   }
 
   /**
@@ -2975,330 +1524,21 @@ onmessage = (message) => {
   getAdjacentImageThumbs(initialThumb) {
     const adjacentImageThumbs = Utils.isImage(initialThumb) ? [initialThumb] : [];
 
-    if (Gallery.settings.loopAtEndOfGallery || this.latestSearchResults.length === 0) {
-      return adjacentImageThumbs.concat(this.getAdjacentImageThumbsOnCurrentPage(initialThumb));
+    if (Gallery.settings.loopAtEndOfGallery || ThumbSelector.latestSearchResults.length === 0) {
+      return adjacentImageThumbs.concat(ThumbSelector.getAdjacentImageThumbsOnCurrentPage(initialThumb));
     }
-    return adjacentImageThumbs.concat(this.getAdjacentImageThumbsThroughoutAllPages(initialThumb));
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentImageThumbsOnCurrentPage(initialThumb) {
-    return this.getAdjacentThumbsLooped(
-      initialThumb,
-      Gallery.settings.maxImagesToRenderAround,
-      (thumb) => {
-        return Utils.isImage(thumb);
-      }
-    );
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentImageThumbsThroughoutAllPages(initialThumb) {
-    return this.getAdjacentSearchResults(
-      initialThumb,
-      Gallery.settings.maxImagesToRenderAround,
-      (post) => {
-        return Utils.isImage(post);
-      }
-    );
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @param {Function} qualifier
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentThumbs(initialThumb, limit, qualifier) {
-    const adjacentThumbs = [];
-    let currentThumb = initialThumb;
-    let previousThumb = initialThumb;
-    let nextThumb = initialThumb;
-    let traverseForward = true;
-
-    while (currentThumb !== null && adjacentThumbs.length < limit) {
-      if (traverseForward) {
-        nextThumb = this.getAdjacentThumb(nextThumb, true);
-      } else {
-        previousThumb = this.getAdjacentThumb(previousThumb, false);
-      }
-      traverseForward = this.getTraversalDirection(previousThumb, traverseForward, nextThumb);
-      currentThumb = traverseForward ? nextThumb : previousThumb;
-
-      if (currentThumb !== null) {
-        if (qualifier(currentThumb)) {
-          adjacentThumbs.push(currentThumb);
-        }
-      }
-    }
-    return adjacentThumbs;
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @param {Function} additionalQualifier
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentThumbsLooped(initialThumb, limit, additionalQualifier) {
-    const adjacentThumbs = [];
-    const discoveredIds = new Set();
-    let currentThumb = initialThumb;
-    let previousThumb = initialThumb;
-    let nextThumb = initialThumb;
-    let traverseForward = true;
-
-    while (currentThumb !== null && adjacentThumbs.length < limit) {
-      if (traverseForward) {
-        nextThumb = this.getAdjacentThumbLooped(nextThumb, true);
-      } else {
-        previousThumb = this.getAdjacentThumbLooped(previousThumb, false);
-      }
-      currentThumb = traverseForward ? nextThumb : previousThumb;
-      traverseForward = !traverseForward;
-
-      if (currentThumb === undefined || discoveredIds.has(currentThumb.id)) {
-        break;
-      }
-      discoveredIds.add(currentThumb.id);
-
-      if (additionalQualifier(currentThumb)) {
-        adjacentThumbs.push(currentThumb);
-      }
-    }
-    return adjacentThumbs;
-  }
-
-  /**
-   * @param {HTMLElement} previousThumb
-   * @param {HTMLElement} traverseForward
-   * @param {HTMLElement} nextThumb
-   * @returns {Boolean}
-   */
-  getTraversalDirection(previousThumb, traverseForward, nextThumb) {
-    if (previousThumb === null) {
-      traverseForward = true;
-    } else if (nextThumb === null) {
-      traverseForward = false;
-    }
-    return !traverseForward;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @param {Boolean} forward
-   * @returns {HTMLElement}
-   */
-  getAdjacentThumbLooped(thumb, forward) {
-    let adjacentThumb = this.getAdjacentThumb(thumb, forward);
-
-    if (adjacentThumb === null) {
-      adjacentThumb = forward ? this.visibleThumbs[0] : this.visibleThumbs[this.visibleThumbs.length - 1];
-    }
-    return adjacentThumb;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @param {Boolean} forward
-   * @returns {HTMLElement}
-   */
-  getAdjacentThumb(thumb, forward) {
-    return forward ? thumb.nextElementSibling : thumb.previousElementSibling;
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @param {Function} additionalQualifier
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentSearchResults(initialThumb, limit, additionalQualifier) {
-    const initialSearchResultIndex = this.latestSearchResults.findIndex(post => post.id === initialThumb.id);
-
-    if (initialSearchResultIndex === -1) {
-      return [];
-    }
-    const adjacentSearchResults = [];
-    const discoveredIds = new Set();
-
-    let currentSearchResult;
-    let currentIndex;
-    let forward = true;
-    let previousIndex = initialSearchResultIndex;
-    let nextIndex = initialSearchResultIndex;
-
-    while (adjacentSearchResults.length < limit) {
-      if (forward) {
-        nextIndex = this.getAdjacentSearchResultIndex(nextIndex, true);
-        currentIndex = nextIndex;
-        forward = false;
-      } else {
-        previousIndex = this.getAdjacentSearchResultIndex(previousIndex, false);
-        currentIndex = previousIndex;
-        forward = true;
-      }
-      currentSearchResult = this.latestSearchResults[currentIndex];
-
-      if (discoveredIds.has(currentSearchResult.id)) {
-        break;
-      }
-      discoveredIds.add(currentSearchResult.id);
-
-      if (additionalQualifier(currentSearchResult)) {
-        adjacentSearchResults.push(currentSearchResult);
-      }
-    }
-
-    for (const searchResult of adjacentSearchResults) {
-      searchResult.activateHTMLElement();
-    }
-    return adjacentSearchResults.map(post => post.root);
-  }
-
-  /**
-   * @param {Number} i
-   * @param {Boolean} forward
-   * @returns {Number}
-   */
-  getAdjacentSearchResultIndex(i, forward) {
-    if (forward) {
-      i += 1;
-      i = i >= this.latestSearchResults.length ? 0 : i;
-    } else {
-      i -= 1;
-      i = i < 0 ? this.latestSearchResults.length - 1 : i;
-    }
-    return i;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Boolean}
-   */
-  renderHasStarted(thumb) {
-    return this.startedRenders.has(thumb.id);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Boolean}
-   */
-  renderIsCompleted(thumb) {
-    return this.completedRenders.has(thumb.id);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Boolean}
-   */
-  canvasIsTransferrable(thumb) {
-    return !Utils.onMobileDevice() && !Utils.onSearchPage() && !this.transferredCanvases.has(thumb.id) && document.getElementById(thumb.id) !== null;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {{
-   *  action: String,
-   *  imageURL: String,
-   *  id: String,
-   *  extension: String,
-   *  fetchDelay: Number,
-   *  thumbURL: String,
-   *  pixelCount: Number,
-   *  canvas: OffscreenCanvas
-   *  resolutionFraction: Number
-   *  windowDimensions: {width: Number, height:Number}
-   * }}
-   */
-  getRenderRequest(thumb) {
-    const request = {
-      action: "render",
-      imageURL: Utils.getOriginalImageURLFromThumb(thumb),
-      id: thumb.id,
-      extension: Utils.getImageExtension(thumb.id),
-      fetchDelay: this.getBaseImageFetchDelay(thumb.id),
-      thumbURL: Utils.getImageFromThumb(thumb).src.replace("us.rule", "rule"),
-      pixelCount: this.getPixelCount(thumb),
-      resolutionFraction: Gallery.settings.upscaledThumbResolutionFraction
-    };
-
-    this.startedRenders.add(thumb.id);
-
-    if (this.canvasIsTransferrable(thumb)) {
-      request.canvas = this.getOffscreenCanvasFromThumb(thumb);
-    }
-
-    if (Utils.onMobileDevice()) {
-      request.windowDimensions = {
-        width: window.innerWidth,
-        height: window.innerHeight
-      };
-    }
-    return request;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Number}
-   */
-  getPixelCount(thumb) {
-    if (Utils.onSearchPage()) {
-      return 0;
-    }
-    const defaultPixelCount = 2073600;
-    const pixelCount = Post.getPixelCount(thumb.id);
-    return pixelCount === 0 ? defaultPixelCount : pixelCount;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  renderOriginalImage(thumb) {
-    if (Utils.onSearchPage()) {
-      return;
-    }
-
-    if (this.canvasIsTransferrable(thumb)) {
-      const request = this.getRenderRequest(thumb);
-
-      this.imageRenderer.postMessage(request, [request.canvas]);
-    } else {
-      this.imageRenderer.postMessage(this.getRenderRequest(thumb));
-    }
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  drawMainCanvas(thumb) {
-    this.imageRenderer.postMessage({
-      action: "drawMainCanvas",
-      id: thumb.id
-    });
-  }
-
-  clearMainCanvas() {
-    this.imageRenderer.postMessage({
-      action: "clearMainCanvas"
-    });
+    return adjacentImageThumbs.concat(ThumbSelector.getAdjacentImageThumbsThroughoutAllPages(initialThumb));
   }
 
   /**
    * @param {Boolean} value
    */
   toggleOriginalContentVisibility(value) {
-    this.toggleMainCanvas(value);
+    this.renderer.toggleMainCanvas(value);
     this.toggleOriginalGIF(value);
 
-    if (!value) {
-      this.toggleOriginalVideoContainer(false);
+    if (!value && this.videoController !== undefined) {
+      this.videoController.toggleVideoContainer(false);
     }
   }
 
@@ -3364,94 +1604,6 @@ onmessage = (message) => {
   /**
    * @param {Boolean} value
    */
-  toggleVideoControls(value) {
-    const video = this.getActiveVideoPlayer();
-
-    if (Utils.onMobileDevice()) {
-      if (value) {
-        video.setAttribute("controls", "");
-      }
-    } else {
-      video.style.pointerEvents = value ? "auto" : "none";
-    }
-
-    if (!value) {
-      video.removeAttribute("controls");
-    }
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleMainCanvas(value) {
-    if (value === undefined) {
-      this.mainCanvas.style.visibility = this.mainCanvas.style.visibility === "visible" ? "hidden" : "visible";
-      this.lowResolutionCanvas.style.visibility = this.mainCanvas.style.visibility === "visible" ? "hidden" : "visible";
-    } else {
-      this.mainCanvas.style.visibility = value ? "visible" : "hidden";
-      this.lowResolutionCanvas.style.visibility = value ? "visible" : "hidden";
-    }
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleOriginalVideoContainer(value) {
-    if (value !== undefined) {
-      this.videoContainer.style.display = value ? "block" : "none";
-      return;
-    }
-
-    if (!this.currentlyHoveringOverVideoThumb() || this.videoContainer.style.display === "block") {
-      this.videoContainer.style.display = "none";
-    } else {
-      this.videoContainer.style.display = "block";
-    }
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  setActiveVideoPlayer(thumb) {
-    for (const video of this.videoPlayers) {
-      video.removeAttribute("active");
-    }
-
-    for (const video of this.videoPlayers) {
-      if (this.videoPlayerHasSource(video, thumb)) {
-        video.setAttribute("active", "");
-        return;
-      }
-    }
-    this.videoPlayers[0].setAttribute("active", "");
-  }
-
-  /**
-   * @returns {HTMLVideoElement}
-   */
-  getActiveVideoPlayer() {
-    return this.videoPlayers.find(video => video.hasAttribute("active")) || this.videoPlayers[0];
-  }
-
-  /**
-   * @param {HTMLVideoElement} video
-   * @param {HTMLElement} thumb
-   * @returns {Boolean}
-   */
-  videoPlayerHasSource(video, thumb) {
-    return video.src === this.getVideoSource(thumb);
-  }
-
-  /**
-   * @returns {HTMLVideoElement[]}
-   */
-  getInactiveVideoPlayers() {
-    return this.videoPlayers.filter(video => !video.hasAttribute("active"));
-  }
-
-  /**
-   * @param {Boolean} value
-   */
   toggleOriginalGIF(value) {
     if (value === undefined) {
       value = this.gifContainer.style.visibility !== "visible";
@@ -3474,143 +1626,7 @@ onmessage = (message) => {
    * @returns {HTMLElement}
    */
   getSelectedThumb() {
-    return this.visibleThumbs[this.currentlySelectedThumbIndex];
-  }
-
-  /**
-   * @param {HTMLElement[]} animatedThumbs
-   */
-  upscaleAnimatedThumbs(animatedThumbs) {
-    if (Utils.onMobileDevice()) {
-      return;
-    }
-    const upscaleRequests = [];
-
-    for (const thumb of animatedThumbs) {
-      if (!this.canvasIsTransferrable(thumb)) {
-        continue;
-      }
-      let imageURL = Utils.getOriginalImageURL(Utils.getImageFromThumb(thumb).src);
-
-      if (Utils.isGif(thumb)) {
-        imageURL = imageURL.replace("jpg", "gif");
-      }
-      upscaleRequests.push({
-        id: thumb.id,
-        imageURL,
-        canvas: this.getOffscreenCanvasFromThumb(thumb),
-        resolutionFraction: Gallery.settings.upscaledAnimatedThumbResolutionFraction
-      });
-    }
-
-    this.imageRenderer.postMessage({
-      action: "upscaleAnimatedThumbs",
-      upscaleRequests
-    }, upscaleRequests.map(request => request.canvas));
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Number}
-   */
-  getBaseImageFetchDelay(id) {
-    if (Utils.onFavoritesPage() && !Gallery.finishedLoading) {
-      return Gallery.settings.throttledImageFetchDelay;
-    }
-
-    if (Utils.extensionIsKnown(id)) {
-      return Gallery.settings.imageFetchDelayWhenExtensionKnown;
-    }
-    return Gallery.settings.imageFetchDelay;
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  upscaleAnimatedThumbsAround(thumb) {
-    if (!Utils.onFavoritesPage() || Utils.onMobileDevice()) {
-      return;
-    }
-    const animatedThumbsToUpscale = this.getAdjacentThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
-      return !Utils.isImage(t) && !this.transferredCanvases.has(t.id);
-    });
-
-    this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  upscaleAnimatedThumbsAroundDiscrete(thumb) {
-    if (!Utils.onFavoritesPage() || Utils.onMobileDevice()) {
-      return;
-    }
-    const animatedThumbsToUpscale = this.getAdjacentThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (_) => {
-      return true;
-    }).filter(t => !Utils.isImage(t) && !this.transferredCanvases.has(t.id));
-
-    this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
-  }
-
-  /**
-   * @param {Post[]} thumbs
-   * @returns {String[]}
-   */
-  getIdsWithUnknownExtensions(thumbs) {
-    return thumbs
-      .filter(thumb => Utils.isImage(thumb) && !Utils.extensionIsKnown(thumb.id))
-      .map(thumb => thumb.id);
-  }
-
-  /**
-   * @param {String} id
-   */
-  drawLowResolutionCanvas(thumb) {
-    const image = Utils.getImageFromThumb(thumb);
-
-    if (!Utils.imageIsLoaded(image)) {
-      return;
-    }
-    const ratio = Math.min(this.lowResolutionCanvas.width / image.naturalWidth, this.lowResolutionCanvas.height / image.naturalHeight);
-    const centerShiftX = (this.lowResolutionCanvas.width - (image.naturalWidth * ratio)) / 2;
-    const centerShiftY = (this.lowResolutionCanvas.height - (image.naturalHeight * ratio)) / 2;
-
-    this.clearLowResolutionCanvas();
-    this.lowResolutionContext.drawImage(
-      image, 0, 0, image.naturalWidth, image.naturalHeight,
-      centerShiftX, centerShiftY, image.naturalWidth * ratio, image.naturalHeight * ratio
-    );
-  }
-
-  clearLowResolutionCanvas() {
-    this.lowResolutionContext.clearRect(0, 0, this.lowResolutionCanvas.width, this.lowResolutionCanvas.height);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleVideoLooping(value) {
-    for (const video of this.videoPlayers) {
-      video.toggleAttribute("loop", value);
-    }
-  }
-
-  loadVideoClips() {
-    window.addEventListener("postProcess", () => {
-      setTimeout(() => {
-        let storedVideoClips;
-
-        try {
-          storedVideoClips = JSON.parse(localStorage.getItem("storedVideoClips") || "{}");
-
-          for (const [id, videoClip] of Object.entries(storedVideoClips)) {
-            this.videoClips.set(id, new VideoClip(videoClip));
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      }, 50);
-    });
+    return Gallery.visibleThumbs[this.currentlySelectedThumbIndex];
   }
 
   /**

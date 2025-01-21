@@ -799,6 +799,9 @@ class Autoplay {
     }, {
       signal: this.eventListenersAbortController.signal
     });
+    window.addEventListener("videoEnded", () => {
+      this.onVideoEnded();
+    });
   }
 
   removeAutoplayEventListeners() {

@@ -12,3 +12,4 @@ package.json
 eslint.config.mjs
 manifest.json
 awesomplete.min.js
+web_workers.js

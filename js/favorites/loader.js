@@ -154,6 +154,9 @@ class FavoritesLoader {
     window.addEventListener("reachedEndOfGallery", (event) => {
       this.paginator.changePageWhileInGallery(event.detail, this.latestSearchResults);
     });
+    window.addEventListener("missingMetadata", (event) => {
+      this.database.addNewMetadata(event.detail);
+    });
   }
 
   setExpectedFavoritesCount() {

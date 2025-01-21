@@ -1980,13 +1980,14 @@ class Utils {
   }
 
   /**
+   * @param {Number} desiredPageNumber
    * @returns {String}
    */
-  static getSearchPageAPIURL() {
+  static getSearchPageAPIURL(desiredPageNumber) {
     const postsPerPage = 42;
     const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
-    let blacklistedTags = ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
-    let pageNumber = (/&pid=(\d+)/).exec(location.href);
+    const blacklistedTags = ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
+    let pageNumber = desiredPageNumber === undefined ? (/&pid=(\d+)/).exec(location.href) : desiredPageNumber;
     let searchTags = (/&tags=([^&]*)/).exec(location.href);
 
     pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
@@ -1994,13 +1995,15 @@ class Utils {
 
     if (searchTags === "all") {
       searchTags = "";
-      blacklistedTags = "";
     }
     return `${apiURL}&tags=${searchTags}${blacklistedTags}&pid=${pageNumber}`;
   }
 
-  static findImageExtensionsOnSearchPage() {
-    const searchPageAPIURL = Utils.getSearchPageAPIURL();
+  /**
+   * @param {Number} pageNumber
+   */
+  static findImageExtensionsOnSearchPage(pageNumber) {
+    const searchPageAPIURL = Utils.getSearchPageAPIURL(pageNumber);
     return fetch(searchPageAPIURL)
       .then((response) => {
         if (response.ok) {
@@ -2190,6 +2193,16 @@ class Utils {
         Utils.storeAllImageExtensions();
       }
     };
+  }
+
+  /**
+   * @param {Post[]} thumbs
+   * @returns {String[]}
+   */
+  static getIdsWithUnknownExtensions(thumbs) {
+    return thumbs
+      .filter(thumb => Utils.isImage(thumb) && !Utils.extensionIsKnown(thumb.id))
+      .map(thumb => thumb.id);
   }
 
   /**
