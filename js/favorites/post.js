@@ -23,9 +23,6 @@ class Post {
    * @type {String}
    */
   static currentSortingMethod = Utils.getPreference("sortingMethod", "default");
-  static settings = {
-    deferHTMLElementCreation: true
-  };
 
   static {
     Utils.addStaticInitializer(() => {
@@ -93,23 +90,6 @@ class Post {
 
   /**
    * @param {String} id
-   * @returns {String}
-   */
-  static getExtensionFromPost(id) {
-    const post = Post.allPosts.get(id);
-
-    if (post === undefined) {
-      return undefined;
-    }
-
-    if (post.metadata.isEmpty()) {
-      return undefined;
-    }
-    return post.metadata.extension;
-  }
-
-  /**
-   * @param {String} id
    * @param {String} apiTags
    * @param {String} fileURL
    */
@@ -138,7 +118,7 @@ class Post {
     postTagSet.delete(id);
 
     if (Utils.symmetricDifference(apiTagSet, postTagSet).size > 0) {
-      post.initializeTags(Utils.convertToTagString(apiTagSet));
+      post.initializeTagSet(Utils.convertToTagString(apiTagSet));
     }
   }
 
@@ -195,13 +175,9 @@ class Post {
    */
   inactivePost;
   /**
-   * @type {Boolean}
+   * @type {PostMetadata}
    */
-  essentialAttributesPopulated;
-  /**
-   * @type {Boolean}
-   */
-  htmlElementCreated;
+  metadata;
   /**
    * @type {Set.<String>}
    */
@@ -213,22 +189,19 @@ class Post {
   /**
    * @type {Boolean}
    */
-  matchedByMostRecentSearch;
+  essentialAttributesArePopulated;
   /**
-   * @type {PostMetadata}
+   * @type {Boolean}
    */
-  metadata;
+  htmlElementCreated;
+  /**
+   * @type {Boolean}
+   */
+  matchedByMostRecentSearch;
   /**
    * @type {Number}
    */
   index;
-
-  /**
-   * @type {String}
-   */
-  get href() {
-    return Utils.getPostPageURL(this.id);
-  }
 
   /**
    * @type {String}
@@ -277,55 +250,38 @@ class Post {
    */
   constructor(thumb, fromRecord) {
     this.initializeFields();
-    this.initialize(new InactivePost(thumb, fromRecord));
+    this.inactivePost = new InactivePost(thumb, fromRecord);
+    this.populateEssentialAttributes();
     this.setMatched(true);
     this.addInstanceToAllPosts();
   }
 
   initializeFields() {
     this.inactivePost = null;
-    this.essentialAttributesPopulated = false;
+    this.essentialAttributesArePopulated = false;
     this.htmlElementCreated = false;
     this.index = 0;
   }
 
-  /**
-   * @param {InactivePost} inactivePost
-   */
-  initialize(inactivePost) {
-    if (Post.settings.deferHTMLElementCreation) {
-      this.inactivePost = inactivePost;
-      this.populateEssentialAttributes(inactivePost);
-    } else {
-      this.createHTMLElement(inactivePost);
-    }
-  }
-
-  /**
-   * @param {InactivePost} inactivePost
-   */
-  populateEssentialAttributes(inactivePost) {
-    if (this.essentialAttributesPopulated) {
+  populateEssentialAttributes() {
+    if (this.essentialAttributesArePopulated) {
       return;
     }
-    this.essentialAttributesPopulated = true;
-    this.id = inactivePost.id;
-    this.metadata = inactivePost.instantiateMetadata();
-    this.initializeTags(inactivePost.tags);
-    this.deleteConsumedProperties(inactivePost);
+    this.essentialAttributesArePopulated = true;
+    this.id = this.inactivePost.id;
+    this.metadata = this.inactivePost.instantiateMetadata();
+    this.initializeTagSet(this.inactivePost.tags);
+    this.deleteConsumedPropertiesFromInactivePost();
   }
 
-  /**
-   * @param {InactivePost} inactivePost
-   */
-  createHTMLElement(inactivePost) {
+  createHTMLElement() {
     if (this.htmlElementCreated) {
       return;
     }
     this.htmlElementCreated = true;
     this.instantiateTemplate();
-    this.populateEssentialAttributes(inactivePost);
-    this.populateHTMLAttributes(inactivePost);
+    this.populateEssentialAttributes();
+    this.populateHTMLAttributes();
     this.setupAddOrRemoveButton(Utils.userIsOnTheirOwnFavoritesPage());
     this.setupClickLink();
     this.deleteInactivePost();
@@ -385,29 +341,29 @@ class Post {
     this.setupAddOrRemoveButton(!isRemoveButton);
   }
 
-  /**
-   * @param {InactivePost} inactivePost
-   */
-  async populateHTMLAttributes(inactivePost) {
-    this.image.src = inactivePost.src;
-    this.image.classList.add(Utils.getContentType(inactivePost.tags || Utils.convertToTagString(this.tagSet)));
-    this.root.id = inactivePost.id;
+  populateHTMLAttributes() {
+    this.image.src = this.inactivePost.src;
+    this.image.classList.add(Utils.getContentType(this.inactivePost.tags || Utils.convertToTagString(this.tagSet)));
+    this.root.id = this.inactivePost.id;
 
     if (!Utils.onMobileDevice()) {
-      this.container.href = await Utils.getOriginalImageURLWithExtension(this.root);
+      Utils.getOriginalImageURLWithExtension(this.root)
+        .then((url) => {
+          this.container.href = url;
+        });
     }
   }
 
   /**
    * @param {String} tags
    */
-  initializeTags(tags) {
+  initializeTagSet(tags) {
     this.tagSet = Utils.convertToTagSet(`${this.id} ${tags}`);
     this.originalTagsLength = this.tagSet.size;
-    this.initializeAdditionalTags();
+    this.initializeAdditionalTagSet();
   }
 
-  initializeAdditionalTags() {
+  initializeAdditionalTagSet() {
     this.additionalTagSet = Utils.convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
 
     if (this.additionalTagSet.size !== 0) {
@@ -415,12 +371,9 @@ class Post {
     }
   }
 
-  /**
-   * @param {InactivePost} inactivePost
-   */
-  deleteConsumedProperties(inactivePost) {
-    inactivePost.metadata = null;
-    inactivePost.tags = null;
+  deleteConsumedPropertiesFromInactivePost() {
+    this.inactivePost.metadata = null;
+    this.inactivePost.tags = null;
   }
 
   setupClickLink() {
@@ -477,7 +430,7 @@ class Post {
   }
 
   toggleMatched() {
-    this.matchedByMostRecentSearch = !this.matchedByMostRecentSearch;
+    this.setMatched(!this.matchedByMostRecentSearch);
   }
 
   /**

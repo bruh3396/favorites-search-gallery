@@ -83,14 +83,14 @@ class FavoritesPaginator {
     const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtons &&
       nextPageButton !== null && nextPageButton.style.display !== "none" &&
       nextPageButton.style.visibility !== "hidden" && !nextPageButton.disabled;
+    const onLastPage = (pageCount === this.currentPageNumber);
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
       this.updatePaginationMenu(this.currentPageNumber, favorites);
     } else {
-      this.updateTraversalButtonEventListeners(favorites);
+      this.updateArrowButtonEventListeners(favorites);
       this.updatePageNumberButtonEventListeners(favorites);
     }
-    const onLastPage = (pageCount === this.currentPageNumber);
 
     if (!onLastPage) {
       return;
@@ -314,13 +314,13 @@ class FavoritesPaginator {
       }
     };
     this.paginationMenu.appendChild(container);
-    this.updateTraversalButtonEventListeners(favorites);
+    this.updateArrowButtonEventListeners(favorites);
   }
 
   /**
    * @param {Post[]} favorites
    */
-  updateTraversalButtonEventListeners(favorites) {
+  updateArrowButtonEventListeners(favorites) {
     const gotoPageButton = document.getElementById("goto-page-button");
     const finalPageButton = document.getElementById("final-page");
     const input = document.getElementById("goto-page-input");

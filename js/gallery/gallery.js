@@ -242,6 +242,7 @@ class Gallery {
       }
       return this.loopAtEndOfGalleryValue;
     },
+    infiniteSearchPages: true,
     debugEnabled: false
   };
   static keyHeldDownTraversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
@@ -348,6 +349,10 @@ class Gallery {
    * @type {Renderer}
    */
   renderer;
+  /**
+   * @type {Number}
+   */
+  currentSearchPageNumber;
 
   /**
    * @type {Boolean}
@@ -389,6 +394,7 @@ class Gallery {
     this.favoritesWereFetched = false;
     this.showOriginalContentOnHover = Utils.getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = Utils.getPreference(Gallery.preferences.enlargeOnClick, true);
+    this.currentSearchPageNumber = this.getCurrentSearchPageNumber();
   }
 
   initializeComponents() {
@@ -413,7 +419,7 @@ class Gallery {
   addGalleryEventListeners() {
     window.addEventListener("load", () => {
       if (Utils.onSearchPage()) {
-        this.initializeThumbsForHovering.bind(this)();
+        this.addEventListenersToThumbs.bind(this)();
         this.enumerateThumbs();
       }
       this.hideCaptionsWhenShowingOriginalContent();
@@ -665,14 +671,14 @@ class Gallery {
       return;
     }
     window.addEventListener("favoritesFetched", () => {
-      this.initializeThumbsForHovering.bind(this)();
+      this.addEventListenersToThumbs.bind(this)();
       this.enumerateThumbs();
     });
     window.addEventListener("newFavoritesFetchedOnReload", (event) => {
       if (event.detail.empty) {
         return;
       }
-      this.initializeThumbsForHovering.bind(this)(event.detail.thumbs);
+      this.addEventListenersToThumbs.bind(this)(event.detail.thumbs);
       this.enumerateThumbs();
       /**
        * @type {HTMLElement[]}
@@ -707,7 +713,7 @@ class Gallery {
     window.addEventListener("favoritesLoaded", async() => {
       Gallery.backgroundRenderingOnPageChangeCooldown.waitTime = 1000;
       Gallery.finishedLoading = true;
-      this.initializeThumbsForHovering.bind(this)();
+      this.addEventListenersToThumbs.bind(this)();
       this.enumerateThumbs();
       this.renderer.findImageExtensionsInTheBackground();
 
@@ -719,7 +725,7 @@ class Gallery {
       once: true
     });
     window.addEventListener("changedPage", () => {
-      this.initializeThumbsForHovering.bind(this)();
+      this.addEventListenersToThumbs.bind(this)();
       this.enumerateThumbs();
 
       if (this.changedPageWhileInGallery) {
@@ -1066,7 +1072,7 @@ class Gallery {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  initializeThumbsForHovering(thumbs) {
+  addEventListenersToThumbs(thumbs) {
     const thumbElements = thumbs === undefined ? Utils.getAllThumbs() : thumbs;
 
     for (const thumbElement of thumbElements) {
@@ -1297,13 +1303,20 @@ class Gallery {
       return;
     }
 
-    if (!Gallery.settings.loopAtEndOfGallery && this.reachedEndOfGallery(direction) && Gallery.finishedLoading) {
+    if (Utils.onSearchPage()) {
+      if (this.reachedEndOfGallery(direction) && Gallery.settings.infiniteSearchPages) {
+        this.changedPageInGalleryDirection = direction;
+        this.softLoadNextSearchPage(direction);
+        return;
+      }
+    } else if (!Gallery.settings.loopAtEndOfGallery && this.reachedEndOfGallery(direction) && Gallery.finishedLoading) {
       this.changedPageInGalleryDirection = direction;
       dispatchEvent(new CustomEvent("reachedEndOfGallery", {
         detail: direction
       }));
       return;
     }
+
     this.setNextSelectedThumbIndex(direction);
     this.traverseGalleryHelper();
   }
@@ -1361,6 +1374,102 @@ class Gallery {
       return true;
     }
     return false;
+  }
+
+  /**
+   * @returns {Number}
+   */
+  getCurrentSearchPageNumber() {
+    const match = (/&pid=(\d+)/).exec(location.href);
+
+    if (match === undefined || match === null) {
+      return 0;
+    }
+    return Math.floor(parseInt(match[1]) / 42);
+  }
+
+  /**
+   * @returns {Number}
+   */
+  getNextSearchPageNumber() {
+    return this.currentSearchPageNumber + 1;
+  }
+
+  /**
+   * @param {String} direction
+   */
+  setNextSearchPageNumber(direction) {
+    if (direction === "ArrowRight") {
+      this.currentSearchPageNumber += 1;
+    } else {
+      this.currentSearchPageNumber -= 1;
+    }
+  }
+
+  /**
+   * @param {String} direction
+   */
+  softLoadNextSearchPage(direction) {
+    this.setNextSearchPageNumber(direction);
+
+    console.log(direction);
+
+    if (direction === "ArrowRight") {
+      this.currentlySelectedThumbIndex = 0;
+    } else {
+      this.currentlySelectedThumbIndex = Gallery.visibleThumbs.length - 1;
+    }
+
+    Utils.findImageExtensionsOnSearchPage(this.currentSearchPageNumber, (html) => {
+      this.createAllSearchPageThumbs(html);
+      this.addEventListenersToThumbs();
+      this.enumerateThumbs();
+      this.renderer.deleteAllRenders();
+      this.renderer.clearMainCanvas();
+      this.renderer.renderImagesInTheBackground();
+      console.log(this.getSelectedThumb(), this.currentlySelectedThumbIndex);
+      this.traverseGalleryHelper();
+    });
+  }
+
+  /**
+   * @param {String} html
+   */
+  createAllSearchPageThumbs(html) {
+    const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+    const posts = Array.from(dom.getElementsByTagName("post"));
+    const firstThumb = document.querySelector(".thumb");
+
+    const imageContainer = firstThumb.parentElement;
+
+    imageContainer.innerHTML = "";
+
+    for (const post of posts) {
+      imageContainer.appendChild(this.createSearchPageThumb(post));
+    }
+  }
+
+  createSearchPageThumb(post) {
+    const tags = post.getAttribute("tags").trim();
+    const id = post.getAttribute("id").trim();
+    const thumbURL = post.getAttribute("preview_url").replace("api-cdn.", "");
+
+    const thumb = document.createElement("span");
+    const anchor = document.createElement("a");
+    const image = document.createElement("img");
+
+    thumb.appendChild(anchor);
+    anchor.appendChild(image);
+
+    thumb.id = id;
+    thumb.className = "thumb";
+
+    anchor.id = `p${id}`;
+    anchor.href = Utils.getPostPageURL(id);
+
+    image.src = thumbURL;
+    image.setAttribute("tags", tags);
+    return thumb;
   }
 
   /**
@@ -1511,6 +1620,25 @@ class Gallery {
    * @param {HTMLElement} initialThumb
    */
   renderImagesAround(initialThumb) {
+    if (Utils.onSearchPage()) {
+      this.renderImagesAroundOnSearchPage(initialThumb);
+    } else {
+      this.renderImagesAroundOnFavoritesPage(initialThumb);
+    }
+
+  }
+
+  /**
+   * @param {HTMLElement} initialThumb
+   */
+  renderImagesAroundOnSearchPage(initialThumb) {
+  }
+
+  /**
+   *
+   * @param {HTMLElement} initialThumb
+   */
+  renderImagesAroundOnFavoritesPage(initialThumb) {
     if (Utils.onSearchPage() || (Utils.onMobileDevice() && !this.enlargeOnClickOnMobile)) {
       return;
     }

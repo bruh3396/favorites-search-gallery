@@ -1042,7 +1042,7 @@ class Utils {
       element.classList.remove(currentTheme);
       element.classList.add(targetTheme);
     }
-    this.setCookie("theme", value ? "dark" : "light");
+    Utils.setCookie("theme", value ? "dark" : "light");
   }
 
   static toggleDarkStyleSheet(value) {
@@ -1056,7 +1056,7 @@ class Utils {
    * @param {String} url
    */
   static setStyleSheet(url) {
-    const styleSheet = this.getMainStyleSheet();
+    const styleSheet = Utils.getMainStyleSheet();
 
     if (styleSheet !== null && styleSheet !== undefined) {
       styleSheet.href = url;
@@ -1987,10 +1987,17 @@ class Utils {
     const postsPerPage = 42;
     const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
     const blacklistedTags = ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
-    let pageNumber = desiredPageNumber === undefined ? (/&pid=(\d+)/).exec(location.href) : desiredPageNumber;
     let searchTags = (/&tags=([^&]*)/).exec(location.href);
+    let pageNumber;
 
-    pageNumber = pageNumber === null ? 0 : Math.floor(parseInt(pageNumber[1]) / postsPerPage);
+    if (desiredPageNumber === undefined) {
+      const pageNumberMatch = (/&pid=(\d+)/).exec(location.href);
+
+      pageNumber = pageNumberMatch === null ? 0 : Math.floor(parseInt(pageNumberMatch[1]) / postsPerPage);
+    } else {
+      pageNumber = desiredPageNumber;
+    }
+
     searchTags = searchTags === null ? "" : searchTags[1];
 
     if (searchTags === "all") {
@@ -2001,8 +2008,9 @@ class Utils {
 
   /**
    * @param {Number} pageNumber
+   * @param {Function} callback
    */
-  static findImageExtensionsOnSearchPage(pageNumber) {
+  static findImageExtensionsOnSearchPage(pageNumber, callback) {
     const searchPageAPIURL = Utils.getSearchPageAPIURL(pageNumber);
     return fetch(searchPageAPIURL)
       .then((response) => {
@@ -2046,6 +2054,11 @@ class Utils {
 
           Utils.assignImageExtension(id, extension);
         }
+
+        if (callback !== undefined) {
+          return callback(html);
+        }
+        return null;
       })
       .catch((error) => {
         console.error(error);
@@ -2157,7 +2170,7 @@ class Utils {
     Utils.recentlyDiscoveredImageExtensionCount += 1;
 
     if (Utils.recentlyDiscoveredImageExtensionCount >= Utils.settings.extensionsFoundBeforeSavingCount) {
-      this.storeAllImageExtensions();
+      Utils.storeAllImageExtensions();
     }
   }
 
@@ -2226,5 +2239,28 @@ class Utils {
    */
   static escapeParenthesis(str) {
     return str.replaceAll(/([()])/g, "\\$&");
+  }
+
+  /**
+   * @returns {Promise.<Number>}
+   */
+  static getExpectedFavoritesCount() {
+    const profileURL = `https://rule34.xxx/index.php?page=account&s=profile&id=${Utils.getFavoritesPageId()}`;
+    return fetch(profileURL)
+      .then((response) => {
+        if (response.ok) {
+          return response.text();
+        }
+        throw new Error(response.status);
+      })
+      .then((html) => {
+        const favoritesURL = Array.from(new DOMParser().parseFromString(html, "text/html").querySelectorAll("a"))
+          .find(a => a.href.includes("page=favorites&s=view"));
+        return parseInt(favoritesURL.textContent);
+      })
+      .catch(() => {
+        console.error(`Could not find total favorites count from ${profileURL}, are you logged in?`);
+        return null;
+      });
   }
 }

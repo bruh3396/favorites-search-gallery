@@ -873,7 +873,7 @@ Lower numbers improve responsiveness">
 
     if (Utils.userIsOnTheirOwnFavoritesPage()) {
       this.checkboxes.filterBlacklist.checked = Utils.getPreference(this.preferences.excludeBlacklist, false);
-      favoritesLoader.toggleTagBlacklistExclusion(this.checkboxes.filterBlacklist.checked);
+      favoritesLoader.onOptionChanged("blacklist", this.checkboxes.filterBlacklist.checked);
     } else {
       this.checkboxes.filterBlacklist.checked = true;
       this.checkboxes.filterBlacklist.parentElement.style.display = "none";
@@ -991,16 +991,16 @@ Lower numbers improve responsiveness">
           }
           break;
 
-        case "ArrowUp":
+        // case "ArrowUp":
 
-        case "ArrowDown":
-          if (Utils.awesompleteIsVisible(this.inputs.searchBox)) {
-            this.updateLastSearchQuery();
-          } else {
-            event.preventDefault();
-            this.traverseFavoritesSearchHistory(event.key);
-          }
-          break;
+        // case "ArrowDown":
+        //   if (Utils.awesompleteIsVisible(this.inputs.searchBox)) {
+        //     this.updateLastSearchQuery();
+        //   } else {
+        //     event.preventDefault();
+        //     this.traverseFavoritesSearchHistory(event.key);
+        //   }
+        //   break;
 
         default:
           this.updateLastSearchQuery();
@@ -1037,8 +1037,7 @@ Lower numbers improve responsiveness">
     };
     this.checkboxes.filterBlacklist.onchange = () => {
       Utils.setPreference(this.preferences.excludeBlacklist, this.checkboxes.filterBlacklist.checked);
-      favoritesLoader.toggleTagBlacklistExclusion(this.checkboxes.filterBlacklist.checked);
-      favoritesLoader.searchFavorites();
+      favoritesLoader.onOptionChanged("blacklist", this.checkboxes.filterBlacklist.checked);
     };
     this.buttons.invert.onclick = () => {
       favoritesLoader.invertSearchResults();
@@ -1086,11 +1085,11 @@ Lower numbers improve responsiveness">
     };
     this.checkboxes.sortAscending.onchange = () => {
       Utils.setPreference(this.preferences.sortAscending, this.checkboxes.sortAscending.checked);
-      favoritesLoader.onSortingParametersChanged();
+      favoritesLoader.onOptionChanged("sortingParameters");
     };
     this.inputs.sortingMethod.onchange = () => {
       Utils.setPreference(this.preferences.sortingMethod, this.inputs.sortingMethod.value);
-      favoritesLoader.onSortingParametersChanged();
+      favoritesLoader.onOptionChanged("sortingParameters");
     };
     this.inputs.allowedRatings.onchange = () => {
       this.changeAllowedRatings();
@@ -1294,7 +1293,7 @@ Lower numbers improve responsiveness">
     resultsPerPage = Utils.clamp(resultsPerPage, 50, 5000);
     this.inputs.resultsPerPage.value = resultsPerPage;
     Utils.setPreference(this.preferences.resultsPerPage, resultsPerPage);
-    favoritesLoader.onResultsPerPageChanged(resultsPerPage);
+    favoritesLoader.onOptionChanged("resultsPerPage", resultsPerPage);
   }
 
   /**
@@ -2474,7 +2473,7 @@ Lower numbers improve responsiveness">
     }
 
     Utils.setPreference(this.preferences.allowedRatings, allowedRatings);
-    favoritesLoader.onAllowedRatingsChanged(allowedRatings);
+    favoritesLoader.onOptionChanged("allowedRatings", allowedRatings);
     this.preventUserFromUncheckingAllRatings(allowedRatings);
   }
 

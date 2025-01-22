@@ -42,7 +42,6 @@ class Renderer {
     this.setCanvasResolutions();
     this.createWebWorker();
     this.setOrientation();
-    this.createImageRendererMessageHandler();
   }
 
   initializeFields() {
