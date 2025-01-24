@@ -156,6 +156,8 @@ class Renderer {
   }
 
   clearCanvases() {
+    // this.clearMainCanvas();
+    // this.clearLowResolutionCanvas();
     this.mainCanvas.style.visibility = "hidden";
     this.lowResolutionCanvas.style.visibility = "hidden";
   }
@@ -175,6 +177,25 @@ class Renderer {
       renderRequests,
       requestType: "none"
     }, canvases);
+    this.currentBatchRenderRequestId += 1;
+
+    if (this.currentBatchRenderRequestId >= 1000) {
+      this.currentBatchRenderRequestId = 0;
+    }
+  }
+
+  /**
+   * @param {CompactPost[]} imagesToRender
+   */
+  renderImagesFromSearchPagePosts(imagesToRender) {
+    const renderRequests = imagesToRender.map(image => this.getRenderRequestFromSearchPagePost(image));
+
+    this.imageRenderer.postMessage({
+      action: "renderMultiple",
+      id: this.currentBatchRenderRequestId,
+      renderRequests,
+      requestType: "none"
+    }, []);
     this.currentBatchRenderRequestId += 1;
 
     if (this.currentBatchRenderRequestId >= 1000) {
@@ -222,6 +243,33 @@ class Renderer {
       };
     }
     return request;
+  }
+
+  /**
+   * @param {CompactPost} post
+   * @returns {{
+   *  action: String,
+   *  imageURL: String,
+   *  id: String,
+   *  extension: String,
+   *  fetchDelay: Number,
+   *  thumbURL: String,
+   *  pixelCount: Number,
+   *  resolutionFraction: Number
+   * }}
+   */
+  getRenderRequestFromSearchPagePost(post) {
+    this.startedRenders.add(post.id);
+    return {
+      action: "render",
+      imageURL: Utils.getOriginalImageURL(post.thumbURL),
+      id: post.id,
+      extension: post.extension,
+      fetchDelay: this.getBaseImageFetchDelay(post.id),
+      thumbURL: post.thumbURL,
+      pixelCount: post.pixelCount,
+      resolutionFraction: Gallery.settings.upscaledThumbResolutionFraction
+    };
   }
 
   /**
@@ -486,10 +534,6 @@ class Renderer {
    * @param {HTMLElement} thumb
    */
   renderOriginalImage(thumb) {
-    if (Utils.onSearchPage()) {
-      return;
-    }
-
     if (this.canvasIsTransferrable(thumb)) {
       const request = this.getRenderRequest(thumb);
 

@@ -1,4 +1,5 @@
 class Gallery {
+  // TODO move UI bits to separate class
   static galleryHTML = `
 <style>
   body {
@@ -242,7 +243,7 @@ class Gallery {
       }
       return this.loopAtEndOfGalleryValue;
     },
-    infiniteSearchPages: true,
+    endlessSearchPageGallery: true,
     debugEnabled: false
   };
   static keyHeldDownTraversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
@@ -350,9 +351,17 @@ class Gallery {
    */
   renderer;
   /**
+   * @type {PostLoader}
+   */
+  postLoader;
+  /**
    * @type {Number}
    */
   currentSearchPageNumber;
+  /**
+   * @type {HTMLElement}
+   */
+  searchPageImageContainer;
 
   /**
    * @type {Boolean}
@@ -368,9 +377,9 @@ class Gallery {
     this.initializeFields();
     this.initializeTimers();
     this.addEventListeners();
-    this.prepareSearchPage();
     this.insertHTML();
     this.initializeComponents();
+    this.initializeSearchPage();
     this.toggleOriginalContentVisibility(false);
     this.updateBackgroundOpacity(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
     this.createMobileTapControls();
@@ -395,11 +404,29 @@ class Gallery {
     this.showOriginalContentOnHover = Utils.getPreference(Gallery.preferences.showOnHover, true);
     this.enlargeOnClickOnMobile = Utils.getPreference(Gallery.preferences.enlargeOnClick, true);
     this.currentSearchPageNumber = this.getCurrentSearchPageNumber();
+    this.searchPageImageContainer = this.getSearchPageImageContainer();
+  }
+
+  /**
+   * @returns {HTMLElement}
+   */
+  getSearchPageImageContainer() {
+    if (!Utils.onSearchPage()) {
+      return null;
+    }
+
+    const thumb = document.querySelector(".thumb");
+
+    if (thumb !== null) {
+      return thumb.parentElement;
+    }
+    return document.querySelector(".image-list");
   }
 
   initializeComponents() {
     this.renderer = new Renderer();
     this.videoController = new VideoController();
+    this.postLoader = new PostLoader();
     this.createAutoplayController();
   }
 
@@ -499,6 +526,11 @@ class Gallery {
           if (!clickedOnAThumb && !clickedOnACaptionTag) {
             this.toggleAllVisibility();
             Utils.setPreference(Gallery.preferences.showOnHover, this.showOriginalContentOnHover);
+
+            if (!this.showOriginalContentOnHover) {
+              this.renderer.clearMainCanvas();
+              this.renderer.clearLowResolutionCanvas();
+            }
           }
           break;
 
@@ -674,22 +706,24 @@ class Gallery {
       this.addEventListenersToThumbs.bind(this)();
       this.enumerateThumbs();
     });
-    window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-      if (event.detail.empty) {
+    window.addEventListener("newFavoritesFoundOnReload", (event) => {
+      const favorites = event.detail;
+
+      if (favorites.length === 0) {
         return;
       }
-      this.addEventListenersToThumbs.bind(this)(event.detail.thumbs);
+      this.addEventListenersToThumbs.bind(this)(favorites);
       this.enumerateThumbs();
       /**
        * @type {HTMLElement[]}
        */
-      const thumbs = event.detail.thumbs.reverse();
+      const reversedFavorites = favorites.reverse();
 
-      if (thumbs.length > 0) {
-        const thumb = thumbs[0];
+      if (reversedFavorites.length > 0) {
+        const favorite = reversedFavorites[0];
 
-        this.renderer.upscaleAnimatedThumbsAround(thumb);
-        this.renderer.renderImages(thumbs
+        this.renderer.upscaleAnimatedThumbsAround(favorite);
+        this.renderer.renderImages(reversedFavorites
           .filter(t => Utils.isImage(t))
           .slice(0, 20));
       }
@@ -901,25 +935,42 @@ class Gallery {
       return;
     }
     window.addEventListener("blur", () => {
+      if (Gallery.settings.endlessSearchPageGallery) {
+        return;
+      }
       this.leftPage = true;
       this.renderer.deleteAllRenders();
       this.videoController.clearInactiveVideoSources();
     });
     window.addEventListener("focus", () => {
-      if (this.leftPage) {
+      if (this.leftPage && !Gallery.settings.endlessSearchPageGallery) {
         this.renderer.renderImagesInTheBackground();
         this.leftPage = false;
       }
     });
   }
 
-  async prepareSearchPage() {
+  async initializeSearchPage() {
     if (!Utils.onSearchPage()) {
       return;
     }
-    await Utils.findImageExtensionsOnSearchPage();
-    dispatchEvent(new Event("foundExtensionsOnSearchPage"));
-    this.renderer.renderImagesInTheBackground();
+
+    if (Gallery.settings.endlessSearchPageGallery) {
+      window.addEventListener("load", async() => {
+        await Utils.sleep(1000);
+        await this.postLoader.loadCurrentChunk();
+        const thumb = document.querySelector(".thumb");
+
+        if (thumb !== null) {
+          this.renderImagesAroundOnSearchPage(thumb);
+        }
+      });
+
+    } else {
+      await Utils.findImageExtensionsOnSearchPage();
+      dispatchEvent(new Event("foundExtensionsOnSearchPage"));
+      this.renderer.renderImagesInTheBackground();
+    }
   }
 
   insertHTML() {
@@ -1104,7 +1155,7 @@ class Gallery {
       if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
         this.renderer.renderImagesInTheBackground();
       }
-    }, 100);
+    }, 50);
   }
 
   onPageChangedInGallery() {
@@ -1304,7 +1355,7 @@ class Gallery {
     }
 
     if (Utils.onSearchPage()) {
-      if (this.reachedEndOfGallery(direction) && Gallery.settings.infiniteSearchPages) {
+      if (this.reachedEndOfGallery(direction) && Gallery.settings.endlessSearchPageGallery) {
         this.changedPageInGalleryDirection = direction;
         this.softLoadNextSearchPage(direction);
         return;
@@ -1316,7 +1367,6 @@ class Gallery {
       }));
       return;
     }
-
     this.setNextSelectedThumbIndex(direction);
     this.traverseGalleryHelper();
   }
@@ -1398,38 +1448,45 @@ class Gallery {
   /**
    * @param {String} direction
    */
-  setNextSearchPageNumber(direction) {
+  softLoadNextSearchPage(direction) {
+    const initialSearchPageNumber = this.currentSearchPageNumber;
+    const initialSelectedIndex = this.currentlySelectedThumbIndex;
+
     if (direction === "ArrowRight") {
+      this.currentlySelectedThumbIndex = 0;
       this.currentSearchPageNumber += 1;
     } else {
       this.currentSearchPageNumber -= 1;
     }
-  }
 
-  /**
-   * @param {String} direction
-   */
-  softLoadNextSearchPage(direction) {
-    this.setNextSearchPageNumber(direction);
+    const fragment = this.postLoader.getThumbsFromSearchPageNumber(this.currentSearchPageNumber);
 
-    console.log(direction);
-
-    if (direction === "ArrowRight") {
-      this.currentlySelectedThumbIndex = 0;
-    } else {
-      this.currentlySelectedThumbIndex = Gallery.visibleThumbs.length - 1;
+    if (this.searchPageImageContainer === null) {
+      console.error("Null image container");
+      this.currentSearchPageNumber = initialSearchPageNumber;
+      this.currentlySelectedThumbIndex = initialSelectedIndex;
+      return;
     }
 
-    Utils.findImageExtensionsOnSearchPage(this.currentSearchPageNumber, (html) => {
-      this.createAllSearchPageThumbs(html);
-      this.addEventListenersToThumbs();
-      this.enumerateThumbs();
-      this.renderer.deleteAllRenders();
-      this.renderer.clearMainCanvas();
-      this.renderer.renderImagesInTheBackground();
-      console.log(this.getSelectedThumb(), this.currentlySelectedThumbIndex);
-      this.traverseGalleryHelper();
-    });
+    if (fragment.children.length === 0) {
+      console.error("Post chunk not loaded");
+      this.currentSearchPageNumber = initialSearchPageNumber;
+      this.currentlySelectedThumbIndex = initialSelectedIndex;
+      return;
+    }
+    window.history.replaceState(null, "", location.origin + location.pathname + location.search.replace(/pid=\d+/, `pid=${this.currentSearchPageNumber * 42}`));
+    // window.history.go(-1);
+    this.searchPageImageContainer.innerHTML = "";
+    this.searchPageImageContainer.appendChild(fragment);
+    this.addEventListenersToThumbs();
+    this.enumerateThumbs();
+
+    if (direction !== "ArrowRight") {
+      this.currentlySelectedThumbIndex = Gallery.visibleThumbs.length - 1;
+    }
+    // this.renderer.deleteAllRenders();
+    // this.renderer.renderImagesInTheBackground();
+    this.traverseGalleryHelper();
   }
 
   /**
@@ -1625,13 +1682,18 @@ class Gallery {
     } else {
       this.renderImagesAroundOnFavoritesPage(initialThumb);
     }
-
   }
 
   /**
-   * @param {HTMLElement} initialThumb
+   * @param {HTMLElement} thumb
    */
-  renderImagesAroundOnSearchPage(initialThumb) {
+  renderImagesAroundOnSearchPage(thumb) {
+    if (Utils.onMobileDevice()) {
+      return;
+    }
+    const posts = this.postLoader.getPostsAround(thumb);
+
+    this.renderer.renderImagesFromSearchPagePosts(posts);
   }
 
   /**
