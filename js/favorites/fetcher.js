@@ -112,12 +112,13 @@ class FavoritesFetcher {
   /**
    * @param {Set.<String>} storedFavoriteIds
    */
-  async fetchAllNewFavoritesOnReload(storedFavoriteIds) {
+  async fetchNewFavoritesOnReload(storedFavoriteIds) {
+    await Utils.sleep(100);
     this.storedFavoriteIds = storedFavoriteIds;
     let favorites = [];
 
     while (true) {
-      const {allNewFavoritesFound, newFavorites} = await this.fetchNewFavoritesOnReload();
+      const {allNewFavoritesFound, newFavorites} = await this.fetchNewFavoritesOnReloadHelper();
 
       favorites = favorites.concat(newFavorites);
 
@@ -132,7 +133,7 @@ class FavoritesFetcher {
   /**
    * @returns {Promise.<{allNewFavoritesFound: Boolean, newFavorites: Post[]}>}
    */
-  fetchNewFavoritesOnReload() {
+  fetchNewFavoritesOnReloadHelper() {
     return fetch(this.newFetchRequest.url)
       .then((response) => {
         return response.text();
@@ -148,7 +149,7 @@ class FavoritesFetcher {
    */
   extractNewFavorites(html) {
     const newFavorites = [];
-    const fetchedFavorites = FavoritesParser.extractFavorites(html);
+    const fetchedFavorites = FavoritesExtractor.extractFavorites(html);
     let allNewFavoritesFound = fetchedFavorites.length === 0;
 
     for (const favorite of fetchedFavorites) {
@@ -169,7 +170,6 @@ class FavoritesFetcher {
    */
   async fetchFavoritesPage(request) {
     if (request === null) {
-      console.error("Null favorites page fetch request");
       await Utils.sleep(200);
       return;
     }
@@ -202,7 +202,7 @@ class FavoritesFetcher {
    * @param {String} html
    */
   onFavoritesPageRequestSuccess(request, html) {
-    request.favorites = FavoritesParser.extractFavorites(html);
+    request.favorites = FavoritesExtractor.extractFavorites(html);
 
     this.pendingRequestPageNumbers.delete(request.pageNumber);
     const favoritesPageIsEmpty = request.favorites.length === 0;
@@ -220,7 +220,7 @@ class FavoritesFetcher {
    */
   onFavoritesPageRequestFail(request, error) {
     console.error(error);
-    request.onFail();
+    request.incrementRetryCount();
     this.failedRequests.push(request);
   }
 }

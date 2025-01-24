@@ -450,7 +450,7 @@ class SavedSearches {
 
   saveSearchResultsAsCustomSearch() {
     const searchResultIds = Array.from(Post.allPosts.values())
-      .filter(post => post.matchedByMostRecentSearch)
+      .filter(post => post.matchedByLatestSearch)
       .map(post => post.id);
 
     if (searchResultIds.length === 0) {

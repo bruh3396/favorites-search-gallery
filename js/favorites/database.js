@@ -1,4 +1,4 @@
-class FavoritesDatabaseWrapper {
+class FavoritesDatabaseInterface {
   static databaseName = "Favorites";
   static objectStoreName = `user${Utils.getFavoritesPageId()}`;
   /**
@@ -38,7 +38,7 @@ class FavoritesDatabaseWrapper {
     this.databaseWorker.onmessage = (message) => {
       switch (message.data.response) {
         case "finishedLoading":
-          this.onFavoritesLoaded(message.data.favorites);
+          this.onFavoritesLoaded(this.deserializeFavorites(message.data.favorites));
           break;
 
         case "finishedStoring":
@@ -51,22 +51,16 @@ class FavoritesDatabaseWrapper {
     };
     this.databaseWorker.postMessage({
       command: "create",
-      objectStoreName: FavoritesDatabaseWrapper.objectStoreName,
+      objectStoreName: FavoritesDatabaseInterface.objectStoreName,
       version: 1
     });
   }
 
-  /**
-   * @returns {String[]}
-   */
-  getIdsToDeleteOnReload() {
-    if (Utils.userIsOnTheirOwnFavoritesPage()) {
-      const idsToDelete = Utils.getIdsToDeleteOnReload();
-
-      Utils.clearIdsToDeleteOnReload();
-      return idsToDelete;
-    }
-    return [];
+  loadAllFavorites() {
+    this.databaseWorker.postMessage({
+      command: "load",
+      idsToDelete: this.getIdsToDeleteOnReload()
+    });
   }
 
   /**
@@ -88,11 +82,27 @@ class FavoritesDatabaseWrapper {
     });
   }
 
-  loadAllFavorites() {
+  /**
+   * @param {Post[]} posts
+   */
+  updateFavorites(posts) {
     this.databaseWorker.postMessage({
-      command: "load",
-      idsToDelete: this.getIdsToDeleteOnReload()
+      command: "update",
+      favorites: posts.map(post => post.databaseRecord)
     });
+  }
+
+  /**
+   * @returns {String[]}
+   */
+  getIdsToDeleteOnReload() {
+    if (Utils.userIsOnTheirOwnFavoritesPage()) {
+      const idsToDelete = Utils.getIdsToDeleteOnReload();
+
+      Utils.clearIdsToDeleteOnReload();
+      return idsToDelete;
+    }
+    return [];
   }
 
   /**
@@ -123,12 +133,10 @@ class FavoritesDatabaseWrapper {
   }
 
   /**
-   * @param {Post[]} posts
+   * @param {Object[]} records
+   * @returns {Post[]}}
    */
-  updateFavorites(posts) {
-    this.databaseWorker.postMessage({
-      command: "update",
-      favorites: posts.map(post => post.databaseRecord)
-    });
+  deserializeFavorites(records) {
+    return records.map(record => new Post(record, true));
   }
 }

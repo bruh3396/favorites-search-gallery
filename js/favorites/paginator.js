@@ -6,11 +6,11 @@ class FavoritesPaginator {
   /**
    * @type {HTMLElement}
    */
-  paginationMenu;
+  menu;
   /**
    * @type {HTMLLabelElement}
    */
-  rangeLabel;
+  rangeIndicator;
   /**
    * @type {Number}
    */
@@ -26,10 +26,9 @@ class FavoritesPaginator {
 
   constructor() {
     this.content = this.createContentContainer();
-    this.paginationMenu = this.createPaginationMenuContainer();
+    this.menu = this.createMenuContainer();
     this.currentPageNumber = 1;
-    this.favoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
-    this.maxFavoritesPerPage = 50;
+    this.maxFavoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
   }
 
@@ -47,19 +46,19 @@ class FavoritesPaginator {
   /**
    * @returns {HTMLDivElement}
    */
-  createPaginationMenuContainer() {
+  createMenuContainer() {
     const menu = document.createElement("span");
 
     menu.id = "favorites-pagination-container";
     return menu;
   }
 
-  insertPaginationMenu() {
-    if (document.getElementById(this.paginationMenu.id) === null) {
-      const placeToInsertPagination = document.getElementById("favorites-pagination-placeholder");
+  insertMenu() {
+    if (document.getElementById(this.menu.id) === null) {
+      const placeToInsertMenu = document.getElementById("favorites-pagination-placeholder");
 
-      placeToInsertPagination.insertAdjacentElement("afterend", this.paginationMenu);
-      placeToInsertPagination.remove();
+      placeToInsertMenu.insertAdjacentElement("afterend", this.menu);
+      placeToInsertMenu.remove();
     }
   }
 
@@ -67,7 +66,7 @@ class FavoritesPaginator {
    * @param {Post[]} favorites
    */
   paginate(favorites) {
-    this.insertPaginationMenu();
+    this.insertMenu();
     this.changePage(1, favorites);
   }
 
@@ -86,10 +85,10 @@ class FavoritesPaginator {
     const onLastPage = (pageCount === this.currentPageNumber);
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
-      this.updatePaginationMenu(this.currentPageNumber, favorites);
+      this.updateMenu(this.currentPageNumber, favorites);
     } else {
       this.updateArrowButtonEventListeners(favorites);
-      this.updatePageNumberButtonEventListeners(favorites);
+      this.updateNumberTraversalButtonEventListeners(favorites);
     }
 
     if (!onLastPage) {
@@ -102,7 +101,7 @@ class FavoritesPaginator {
     for (const favorite of favoritesToAdd) {
       favorite.insertAtEndOfContent(this.content);
     }
-    this.updateRangeLabel(this.currentPageNumber, favorites.length);
+    this.updateRangeIndicator(this.currentPageNumber, favorites.length);
   }
 
   /**
@@ -111,27 +110,20 @@ class FavoritesPaginator {
    */
   changePage(pageNumber, favorites) {
     this.currentPageNumber = pageNumber;
-    this.updatePaginationMenu(pageNumber, favorites);
+    this.updateMenu(pageNumber, favorites);
     this.showFavorites(pageNumber, favorites);
-
-    if (FavoritesLoader.currentState !== FavoritesLoader.states.loadingFavoritesFromDatabase) {
-      dispatchEvent(new Event("changedPage"));
-    }
-
-    if (Utils.onMobileDevice()) {
-      this.paginationMenu.blur();
-    }
+    dispatchEvent(new Event("changedPageRaw"));
   }
 
   /**
    * @param {Number} pageNumber
    * @param {Post[]} favorites
    */
-  updatePaginationMenu(pageNumber, favorites) {
-    this.paginationMenu.innerHTML = "";
-    this.updateRangeLabel(pageNumber, favorites.length);
-    this.createPageNumberButtons(pageNumber, favorites);
-    this.createPageTraversalButtons(favorites);
+  updateMenu(pageNumber, favorites) {
+    this.menu.innerHTML = "";
+    this.updateRangeIndicator(pageNumber, favorites.length);
+    this.createNumberTraversalButtons(pageNumber, favorites);
+    this.createArrowTraversalButtons(favorites);
     this.createGotoSpecificPageInputs(favorites);
   }
 
@@ -139,20 +131,20 @@ class FavoritesPaginator {
    * @param {Number} pageNumber
    * @param {Number} favoriteCount
    */
-  updateRangeLabel(pageNumber, favoriteCount) {
+  updateRangeIndicator(pageNumber, favoriteCount) {
     const range = this.getPaginationRange(pageNumber);
     const start = range.start;
     const end = Math.min(range.end, favoriteCount);
 
-    if (this.rangeLabel === undefined) {
-      this.rangeLabel = document.getElementById("pagination-range-label");
+    if (this.rangeIndicator === undefined) {
+      this.rangeIndicator = document.getElementById("pagination-range-label");
     }
 
     if (favoriteCount <= this.maxFavoritesPerPage || isNaN(start) || isNaN(end)) {
-      this.rangeLabel.textContent = "";
+      this.rangeIndicator.textContent = "";
       return;
     }
-    this.rangeLabel.textContent = `${start + 1} - ${end}`;
+    this.rangeIndicator.textContent = `${start + 1} - ${end}`;
   }
 
   /**
@@ -186,13 +178,13 @@ class FavoritesPaginator {
    * @param {Number} pageNumber
    * @param {Post[]} favorites
    */
-  createPageNumberButtons(pageNumber, favorites) {
+  createNumberTraversalButtons(pageNumber, favorites) {
     const pageCount = this.getPageCount(favorites.length);
     let numberOfButtonsCreated = 0;
 
     for (let i = pageNumber; i <= pageCount && numberOfButtonsCreated < this.maxPageNumberButtons; i += 1) {
       numberOfButtonsCreated += 1;
-      this.createPageNumberButton(pageNumber, i, favorites);
+      this.createNumberTraversalButton(pageNumber, i, favorites);
     }
 
     if (numberOfButtonsCreated >= this.maxPageNumberButtons) {
@@ -201,7 +193,7 @@ class FavoritesPaginator {
 
     for (let j = pageNumber - 1; j >= 1 && numberOfButtonsCreated < this.maxPageNumberButtons; j -= 1) {
       numberOfButtonsCreated += 1;
-      this.createPageNumberButton(pageNumber, j, favorites, "afterbegin");
+      this.createNumberTraversalButton(pageNumber, j, favorites, "afterbegin");
     }
   }
 
@@ -211,7 +203,7 @@ class FavoritesPaginator {
    * @param {Post[]} favorites
    * @param {InsertPosition} position
    */
-  createPageNumberButton(currentPageNumber, pageNumber, favorites, position = "beforeend") {
+  createNumberTraversalButton(currentPageNumber, pageNumber, favorites, position = "beforeend") {
     const pageNumberButton = document.createElement("button");
     const selected = currentPageNumber === pageNumber;
 
@@ -222,14 +214,14 @@ class FavoritesPaginator {
     pageNumberButton.onclick = () => {
       this.changePage(pageNumber, favorites);
     };
-    this.paginationMenu.insertAdjacentElement(position, pageNumberButton);
+    this.menu.insertAdjacentElement(position, pageNumberButton);
     pageNumberButton.textContent = pageNumber;
   }
 
   /**
    * @param {Post[]} favorites
    */
-  updatePageNumberButtonEventListeners(favorites) {
+  updateNumberTraversalButtonEventListeners(favorites) {
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
 
     for (const pageNumberButton of pageNumberButtons) {
@@ -244,7 +236,7 @@ class FavoritesPaginator {
   /**
    * @param {Post[]} favorites
    */
-  createPageTraversalButtons(favorites) {
+  createArrowTraversalButtons(favorites) {
     const pageCount = this.getPageCount(favorites.length);
     const previousPage = document.createElement("button");
     const firstPage = document.createElement("button");
@@ -282,19 +274,19 @@ class FavoritesPaginator {
     finalPage.onclick = () => {
       this.changePage(pageCount, favorites);
     };
-    this.paginationMenu.insertAdjacentElement("afterbegin", previousPage);
-    this.paginationMenu.insertAdjacentElement("afterbegin", firstPage);
-    this.paginationMenu.appendChild(nextPage);
-    this.paginationMenu.appendChild(finalPage);
+    this.menu.insertAdjacentElement("afterbegin", previousPage);
+    this.menu.insertAdjacentElement("afterbegin", firstPage);
+    this.menu.appendChild(nextPage);
+    this.menu.appendChild(finalPage);
 
-    this.updateVisibilityOfPageTraversalButtons(previousPage, firstPage, nextPage, finalPage, this.getPageCount(favorites.length));
+    this.updateArrowTraversalButtonInteractability(previousPage, firstPage, nextPage, finalPage, this.getPageCount(favorites.length));
   }
 
   /**
    * @param {Post[]} favorites
    */
   createGotoSpecificPageInputs(favorites) {
-    if (this.firstPageNumberButtonExists() && this.lastPageNumberButtonExists(this.getPageCount(favorites.length))) {
+    if (this.firstNumberTraversalButtonExists() && this.lastNumberTraversalButtonExists(this.getPageCount(favorites.length))) {
       return;
     }
     const html = `
@@ -313,7 +305,7 @@ class FavoritesPaginator {
         button.click();
       }
     };
-    this.paginationMenu.appendChild(container);
+    this.menu.appendChild(container);
     this.updateArrowButtonEventListeners(favorites);
   }
 
@@ -364,7 +356,7 @@ class FavoritesPaginator {
   /**
    * @returns {Boolean}
    */
-  firstPageNumberButtonExists() {
+  firstNumberTraversalButtonExists() {
     return document.getElementById("favorites-page-1") !== null;
   }
 
@@ -372,7 +364,7 @@ class FavoritesPaginator {
    * @param {Number} pageCount
    * @returns {Boolean}
    */
-  lastPageNumberButtonExists(pageCount) {
+  lastNumberTraversalButtonExists(pageCount) {
     return document.getElementById(`favorites-page-${pageCount}`) !== null;
   }
 
@@ -383,9 +375,9 @@ class FavoritesPaginator {
    * @param {HTMLButtonElement} finalPage
    * @param {Number} pageCount
    */
-  updateVisibilityOfPageTraversalButtons(previousPage, firstPage, nextPage, finalPage, pageCount) {
-    const firstNumberExists = this.firstPageNumberButtonExists();
-    const lastNumberExists = this.lastPageNumberButtonExists(pageCount);
+  updateArrowTraversalButtonInteractability(previousPage, firstPage, nextPage, finalPage, pageCount) {
+    const firstNumberExists = this.firstNumberTraversalButtonExists();
+    const lastNumberExists = this.lastNumberTraversalButtonExists(pageCount);
 
     if (firstNumberExists && lastNumberExists) {
       previousPage.disabled = true;
@@ -462,7 +454,7 @@ class FavoritesPaginator {
     if (favoriteNotFound) {
       return;
     }
-    const pageNumber = Math.floor(index / this.favoritesPerPage) + 1;
+    const pageNumber = Math.floor(index / this.maxFavoritesPerPage) + 1;
 
     dispatchEvent(new CustomEvent("foundFavorite", {
       detail: id

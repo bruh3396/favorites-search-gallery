@@ -1,4 +1,4 @@
-class FavoritesParser {
+class FavoritesExtractor {
   static parser = new DOMParser();
 
   /**
@@ -6,7 +6,7 @@ class FavoritesParser {
    * @returns {Post[]}
    */
   static extractFavorites(favoritesPageHTML) {
-    const favorites = FavoritesParser.extractFavoriteElements(favoritesPageHTML);
+    const favorites = FavoritesExtractor.extractFavoriteElements(favoritesPageHTML);
     return favorites.map(favorite => new Post(favorite, false));
   }
 
@@ -15,7 +15,7 @@ class FavoritesParser {
    * @returns {HTMLElement[]}
    */
   static extractFavoriteElements(favoritesPageHTML) {
-    const dom = FavoritesParser.parser.parseFromString(favoritesPageHTML, "text/html");
+    const dom = FavoritesExtractor.parser.parseFromString(favoritesPageHTML, "text/html");
     const thumbs = Array.from(dom.getElementsByClassName("thumb"));
 
     if (thumbs.length > 0) {

@@ -141,9 +141,11 @@ class Tooltip {
       this.currentImage = null;
       this.addEventListenersToThumbs.bind(this)();
     });
-    window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-      if (!event.detail.empty) {
-        this.addEventListenersToThumbs.bind(this)(event.detail.thumbs);
+    window.addEventListener("newFavoritesFoundOnReload", (event) => {
+      const favorites = event.detail;
+
+      if (favorites.length > 0) {
+        this.addEventListenersToThumbs.bind(this)(favorites);
       }
     }, {
       once: true

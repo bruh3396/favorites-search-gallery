@@ -156,7 +156,7 @@ class FavoritesMenu {
       text-shadow: none;
     }
     #statistic-hint-container {
-      display: none;
+      /* display: none; */
     }
 
     img {
@@ -469,7 +469,7 @@ class FavoritesMenu {
       }
     }
 
-    #sort-ascending {
+    #sort-ascending-checkbox {
       position: absolute;
       top: -2px;
       left: 150px;
@@ -613,18 +613,18 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
             <div id="additional-favorite-options">
               <div id="sort-container" title="Change sorting order of search results">
                 <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
-                <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+                <label style="margin-left:  22px;" for="sort-ascending-checkbox">Ascending</label>
                 <div style="position: relative;">
                   <select id="sorting-method">
                     <option value="default">Default</option>
                     <option value="score">Score</option>
                     <option value="width">Width</option>
                     <option value="height">Height</option>
-                    <option value="create">Date Uploaded</option>
-                    <option value="change">Date Changed</option>
+                    <option value="creationTimestamp">Date Uploaded</option>
+                    <option value="lastChangedTimestamp">Date Changed</option>
                     <option value="random">Random</option>
                   </select>
-                  <input type="checkbox" id="sort-ascending">
+                  <input type="checkbox" id="sort-ascending-checkbox">
                 </div>
               </div>
               <div id="results-columns-container">
@@ -837,7 +837,7 @@ Lower numbers improve responsiveness">
       showUI: document.getElementById("show-ui"),
       fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
       enableOnSearchPages: document.getElementById("enable-on-search-pages"),
-      sortAscending: document.getElementById("sort-ascending"),
+      sortAscending: document.getElementById("sort-ascending-checkbox"),
       explicitRating: document.getElementById("explicit-rating-checkbox"),
       questionableRating: document.getElementById("questionable-rating-checkbox"),
       safeRating: document.getElementById("safe-rating-checkbox"),
@@ -873,7 +873,6 @@ Lower numbers improve responsiveness">
 
     if (Utils.userIsOnTheirOwnFavoritesPage()) {
       this.checkboxes.filterBlacklist.checked = Utils.getPreference(this.preferences.excludeBlacklist, false);
-      favoritesLoader.onOptionChanged("blacklist", this.checkboxes.filterBlacklist.checked);
     } else {
       this.checkboxes.filterBlacklist.checked = true;
       this.checkboxes.filterBlacklist.parentElement.style.display = "none";
@@ -901,9 +900,7 @@ Lower numbers improve responsiveness">
       }
     }
 
-    const resultsPerPage = parseInt(Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage));
-
-    this.changeResultsPerPage(resultsPerPage);
+    this.inputs.resultsPerPage.value = Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage);
 
     if (Utils.onMobileDevice()) {
       Utils.toggleFancyImageHovering(false);
@@ -991,16 +988,16 @@ Lower numbers improve responsiveness">
           }
           break;
 
-        // case "ArrowUp":
+        case "ArrowUp":
 
-        // case "ArrowDown":
-        //   if (Utils.awesompleteIsVisible(this.inputs.searchBox)) {
-        //     this.updateLastSearchQuery();
-        //   } else {
-        //     event.preventDefault();
-        //     this.traverseFavoritesSearchHistory(event.key);
-        //   }
-        //   break;
+        case "ArrowDown":
+          if (Utils.awesompleteIsVisible(this.inputs.searchBox)) {
+            this.updateLastSearchQuery();
+          } else {
+            event.preventDefault();
+            this.traverseFavoritesSearchHistory(event.key);
+          }
+          break;
 
         default:
           this.updateLastSearchQuery();
@@ -2178,7 +2175,7 @@ Lower numbers improve responsiveness">
             font-size: 16px;
         }
 
-        #sort-ascending {
+        #sort-ascending-checkbox {
             width: 0 !important;
             height: 0 !important;
             position: static !important;
@@ -2208,7 +2205,7 @@ Lower numbers improve responsiveness">
         label.className = "toggle-switch-label";
       }
     }
-    const sortAscendingCheckbox = document.getElementById("sort-ascending");
+    const sortAscendingCheckbox = document.getElementById("sort-ascending-checkbox");
 
     if (sortAscendingCheckbox !== null) {
       const container = document.createElement("span");
@@ -2413,7 +2410,7 @@ Lower numbers improve responsiveness">
         }
       }
 
-      #sort-ascending {
+      #sort-ascending-checkbox {
         width: 20px;
         height: 20px;
       }

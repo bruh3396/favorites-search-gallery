@@ -380,7 +380,10 @@ class TagModifier {
   }
 
   selectAll() {
-    for (const post of Post.postsMatchedBySearch.values()) {
+    const postsMatchedByLatestSearch = Array.from(Post.allPosts.values())
+      .filter(post => post.matchedByLatestSearch);
+
+    for (const post of postsMatchedByLatestSearch) {
       this.toggleThumbSelection(post, true);
     }
   }

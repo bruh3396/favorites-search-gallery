@@ -266,7 +266,7 @@ class PostMetadata {
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
         if (PostMetadata.settings.verifyTags) {
-          Post.verifyTags(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
+          Post.correctTags(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
         }
         const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
@@ -361,14 +361,8 @@ class PostMetadata {
    * @returns {Boolean}
    */
   satisfiesExpression(expression) {
-    const metricMap = {
-      "id": this.id,
-      "width": this.width,
-      "height": this.height,
-      "score": this.score
-    };
-    const metricValue = metricMap[expression.metric] || 0;
-    const value = metricMap[expression.value] || expression.value;
+    const metricValue = this[expression.metric] || 0;
+    const value = this[expression.value] || expression.value;
     return this.evaluateExpression(metricValue, expression.operator, value);
   }
 

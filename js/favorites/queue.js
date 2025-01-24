@@ -10,7 +10,7 @@ class FetchedFavoritesQueue {
   /**
    * @type {Number}
    */
-  lastDequeuedPageNumber;
+  mostRecentlyDequeuedPageNumber;
   /**
    * @type {Boolean}
    */
@@ -27,7 +27,7 @@ class FetchedFavoritesQueue {
    * @type {Number}
    */
   get nextPageNumberToDequeue() {
-    return this.lastDequeuedPageNumber + 1;
+    return this.mostRecentlyDequeuedPageNumber + 1;
   }
 
   /**
@@ -56,7 +56,7 @@ class FetchedFavoritesQueue {
    */
   constructor(onDequeue) {
     this.onDequeue = onDequeue;
-    this.lastDequeuedPageNumber = -1;
+    this.mostRecentlyDequeuedPageNumber = -1;
     this.queue = [];
   }
 
@@ -86,7 +86,7 @@ class FetchedFavoritesQueue {
   }
 
   dequeue() {
-    this.lastDequeuedPageNumber += 1;
+    this.mostRecentlyDequeuedPageNumber += 1;
     this.onDequeue(this.queue.shift());
   }
 }

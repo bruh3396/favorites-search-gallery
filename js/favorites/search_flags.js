@@ -2,6 +2,10 @@ class FavoritesSearchFlags {
   /**
    * @type {Boolean}
    */
+  allFavoritesLoaded;
+  /**
+   * @type {Boolean}
+   */
   searchResultsAreShuffled;
   /**
    * @type {Boolean}
@@ -66,9 +70,16 @@ class FavoritesSearchFlags {
   /**
    * @type {Boolean}
    */
+  get searchQueryHasChanged() {
+    return this.searchQuery !== this.previousSearchQuery;
+  }
+
+  /**
+   * @type {Boolean}
+   */
   get aNewSearchCouldProduceDifferentResults() {
-    return this.searchQuery !== this.previousSearchQuery ||
-      FavoritesLoader.currentState !== FavoritesLoader.states.allFavoritesLoaded ||
+    return this.searchQueryHasChanged ||
+      !this.allFavoritesLoaded ||
       this.searchResultsAreShuffled ||
       this.searchResultsAreInverted ||
       this.searchResultsWereShuffled ||
@@ -83,6 +94,7 @@ class FavoritesSearchFlags {
   }
 
   constructor() {
+    this.allFavoritesLoaded = false;
     this.searchResultsAreShuffled = false;
     this.searchResultsAreInverted = false;
     this.searchResultsWereShuffled = false;

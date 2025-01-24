@@ -300,7 +300,52 @@ class Utils {
         color: white !important;
       }
     }
-  `
+  `,
+    fancyHovering: `
+     #favorites-search-gallery-content {
+          padding: 40px 40px 30px !important;
+          grid-gap: 1cqw !important;
+        }
+
+        .favorite,
+        .thumb {
+          >a,
+          >span,
+          >div {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease-in-out;
+            position: relative;
+
+            &::after {
+              content: '';
+              position: absolute;
+              z-index: -1;
+              width: 100%;
+              height: 100%;
+              opacity: 0;
+              top: 0;
+              left: 0;
+              border-radius: 5px;
+              box-shadow: 5px 10px 15px rgba(0,0,0,0.45);
+              transition: opacity 0.3s ease-in-out;
+            }
+
+            &:hover {
+              outline: none !important;
+              transform: scale(1.05, 1.05);
+              z-index: 10;
+
+              img {
+                outline: none !important;
+              }
+
+              &::after {
+                opacity: 1;
+              }
+            }
+          }
+        }
+    `
   };
   static typeableInputs = new Set([
     "color",
@@ -943,56 +988,7 @@ class Utils {
     if (Utils.onMobileDevice() || Utils.onSearchPage()) {
       value = false;
     }
-    let html = "";
-
-    if (value) {
-      html = `
-        #favorites-search-gallery-content {
-          padding: 40px 40px 30px !important;
-          grid-gap: 1cqw !important;
-        }
-
-        .favorite,
-        .thumb {
-          >a,
-          >span,
-          >div {
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-            transition: transform 0.2s ease-in-out;
-            position: relative;
-
-            &::after {
-              content: '';
-              position: absolute;
-              z-index: -1;
-              width: 100%;
-              height: 100%;
-              opacity: 0;
-              top: 0;
-              left: 0;
-              border-radius: 5px;
-              box-shadow: 5px 10px 15px rgba(0,0,0,0.45);
-              transition: opacity 0.3s ease-in-out;
-            }
-
-            &:hover {
-              outline: none !important;
-              transform: scale(1.05, 1.05);
-              z-index: 10;
-
-              img {
-                outline: none !important;
-              }
-
-              &::after {
-                opacity: 1;
-              }
-            }
-          }
-        }
-    `;
-    }
-    Utils.insertStyleHTML(html, "fancy-image-hovering");
+    Utils.insertStyleHTML(value ? Utils.styles.fancyHovering : "", "fancy-image-hovering");
   }
 
   static configureVideoOutlines() {
@@ -1082,6 +1078,10 @@ class Utils {
 
   static prefetchAdjacentSearchPages() {
     if (!Utils.onSearchPage()) {
+      return;
+    }
+
+    if (!Gallery.disabled && Gallery.settings.endlessSearchPageGallery) {
       return;
     }
     const id = "search-page-prefetch";
@@ -1841,7 +1841,7 @@ class Utils {
           localStorage.removeItem(key);
         }
       });
-      indexedDB.deleteDatabase(FavoritesDatabaseWrapper.databaseName);
+      indexedDB.deleteDatabase(FavoritesDatabaseInterface.databaseName);
     }
   }
 
@@ -2262,5 +2262,26 @@ class Utils {
         console.error(`Could not find total favorites count from ${profileURL}, are you logged in?`);
         return null;
       });
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  static toggleLoadingWheel(value) {
+    Utils.insertStyleHTML(`
+          #loading-wheel {
+            display: ${value ? "flex" : "none"};
+          }
+          `, "loading-wheel-display");
+  }
+
+  /**
+   * @param {String} name
+   * @param {Object} detail
+   */
+  static broadcastEvent(name, detail = {}) {
+    dispatchEvent(new CustomEvent(name, {
+      detail
+    }));
   }
 }

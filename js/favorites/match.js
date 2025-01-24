@@ -252,6 +252,24 @@ class SearchCommand {
   }
 
   /**
+   * @param {Post[]} posts
+   * @returns {Post[]}
+   */
+  getSearchResults(posts) {
+    const results = [];
+
+    for (const post of posts) {
+      if (this.matches(post)) {
+        results.push(post);
+        post.setMatched(true);
+      } else {
+        post.setMatched(false);
+      }
+    }
+    return results;
+  }
+
+  /**
    * @param {Post} post
    * @returns {Boolean}
    */

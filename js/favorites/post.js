@@ -10,7 +10,7 @@ class Post {
   /**
    * @type {HTMLElement}
    */
-  static template;
+  static htmlTemplate;
   /**
    * @type {String}
    */
@@ -19,10 +19,6 @@ class Post {
    * @type {String}
    */
   static addFavoriteButtonHTML;
-  /**
-   * @type {String}
-   */
-  static currentSortingMethod = Utils.getPreference("sortingMethod", "default");
 
   static {
     Utils.addStaticInitializer(() => {
@@ -40,11 +36,11 @@ class Post {
     const canvasHTML = Utils.getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
     const containerTagName = "a";
 
-    Post.template = new DOMParser().parseFromString("", "text/html").createElement("div");
-    Post.template.className = Utils.favoriteItemClassName;
-    Post.template.innerHTML = `
+    Post.htmlTemplate = new DOMParser().parseFromString("", "text/html").createElement("div");
+    Post.htmlTemplate.className = Utils.favoriteItemClassName;
+    Post.htmlTemplate.innerHTML = `
         <${containerTagName}>
-          <img loading="lazy">
+          <img>
           ${buttonHTML}
           ${canvasHTML}
         </${containerTagName}>
@@ -61,7 +57,6 @@ class Post {
       }
     });
     window.addEventListener("sortingParametersChanged", () => {
-      Post.currentSortingMethod = Utils.getSortingMethod();
       const posts = Utils.getAllThumbs().map(thumb => Post.allPosts.get(thumb.id));
 
       for (const post of posts) {
@@ -93,7 +88,7 @@ class Post {
    * @param {String} apiTags
    * @param {String} fileURL
    */
-  static verifyTags(id, apiTags, fileURL) {
+  static correctTags(id, apiTags, fileURL) {
     const post = Post.allPosts.get(id);
 
     if (post === undefined) {
@@ -130,20 +125,6 @@ class Post {
       post.index = i;
       i += 1;
     }
-  }
-
-  /**
-   * @type {Map.<String, Post>}
-   */
-  static get postsMatchedBySearch() {
-    const posts = new Map();
-
-    for (const [id, post] of Post.allPosts.entries()) {
-      if (post.matchedByMostRecentSearch) {
-        posts.set(id, post);
-      }
-    }
-    return posts;
   }
 
   /**
@@ -187,6 +168,10 @@ class Post {
    */
   additionalTagSet;
   /**
+   * @type {Number}
+   */
+  index;
+  /**
    * @type {Boolean}
    */
   essentialAttributesArePopulated;
@@ -197,11 +182,7 @@ class Post {
   /**
    * @type {Boolean}
    */
-  matchedByMostRecentSearch;
-  /**
-   * @type {Number}
-   */
-  index;
+  matchedByLatestSearch;
 
   /**
    * @type {String}
@@ -258,9 +239,9 @@ class Post {
 
   initializeFields() {
     this.inactivePost = null;
+    this.index = 0;
     this.essentialAttributesArePopulated = false;
     this.htmlElementCreated = false;
-    this.index = 0;
   }
 
   populateEssentialAttributes() {
@@ -294,7 +275,7 @@ class Post {
   }
 
   instantiateTemplate() {
-    this.root = Post.template.cloneNode(true);
+    this.root = Post.htmlTemplate.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
     this.addOrRemoveButton = this.root.children[0].children[1];
@@ -430,14 +411,14 @@ class Post {
   }
 
   toggleMatched() {
-    this.setMatched(!this.matchedByMostRecentSearch);
+    this.setMatched(!this.matchedByLatestSearch);
   }
 
   /**
    * @param {Boolean} value
    */
   setMatched(value) {
-    this.matchedByMostRecentSearch = value;
+    this.matchedByLatestSearch = value;
   }
 
   combineOriginalAndAdditionalTags() {
@@ -498,7 +479,7 @@ class Post {
    * @returns {String}
    */
   getMetadataHintValue() {
-    switch (Post.currentSortingMethod) {
+    switch (Utils.getSortingMethod()) {
       case "score":
         return this.metadata.score;
 
@@ -508,10 +489,10 @@ class Post {
       case "height":
         return this.metadata.height;
 
-      case "create":
+      case "creationTimestamp":
         return Utils.convertTimestampToDate(this.metadata.creationTimestamp);
 
-      case "change":
+      case "lastChangedTimestamp":
         return Utils.convertTimestampToDate(this.metadata.lastChangedTimestamp * 1000);
 
       default:

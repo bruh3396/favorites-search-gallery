@@ -380,9 +380,11 @@ class Caption {
     }, {
       once: true
     });
-    window.addEventListener("newFavoritesFetchedOnReload", (event) => {
-      if (!event.detail.empty) {
-        this.addEventListenersToThumbs.bind(this)(event.detail.thumbs);
+    window.addEventListener("newFavoritesFoundOnReload", (event) => {
+      const favorites = event.detail;
+
+      if (favorites.length > 0) {
+        this.addEventListenersToThumbs.bind(this)(favorites);
       }
     }, {
       once: true
@@ -827,6 +829,9 @@ class Caption {
   }
 
   findTagCategoriesOnPageChange() {
+    if (!Caption.flags.finishedLoading) {
+      return;
+    }
     const tagNames = this.getTagNamesWithUnknownCategories(Utils.getAllThumbs().slice(0, 200));
 
     this.findTagCategories(tagNames, () => {

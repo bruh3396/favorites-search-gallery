@@ -35,7 +35,7 @@ class FavoritesPageRequest {
     this.favorites = [];
   }
 
-  onFail() {
+  incrementRetryCount() {
     this.retryCount += 1;
   }
 }
