@@ -11,5 +11,5 @@ package-lock.json
 package.json
 eslint.config.mjs
 manifest.json
-awesomplete.min.js
+*.min.js
 web_workers.js

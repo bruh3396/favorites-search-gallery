@@ -121,9 +121,14 @@ class Caption {
    * @type {Object.<String, Number>}
    */
   static tagCategoryAssociations;
+  /**
+   * @type {Set.<String>}
+   */
+  static pendingRequests = new Set();
   static settings = {
-    tagFetchDelayAfterFinishedLoading: 50,
-    tagFetchDelayBeforeFinishedLoading: 100
+    tagFetchDelayAfterFinishedLoading: 5,
+    tagFetchDelayBeforeFinishedLoading: 50,
+    maxPendingRequestsAllowed: 100
   };
   static flags = {
     finishedLoading: false
@@ -357,7 +362,7 @@ class Caption {
     });
     window.addEventListener("changedPage", () => {
       this.addEventListenersToThumbs.bind(this)();
-      this.abortController.abort("ChangedPage");
+      this.abortAllRequests("Changed Page");
       this.abortController = new AbortController();
 
       if (Caption.findCategoriesOnPageChangeCooldown.ready) {
@@ -372,7 +377,7 @@ class Caption {
         .map(thumb => Utils.getImageFromThumb(thumb).title)
         .join(" ")
         .split(" ")
-        .filter(tagName => !Utils.isNumber(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
+        .filter(tagName => !Utils.isOnlyDigits(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
 
       this.findTagCategories(tagNames, () => {
         Caption.saveTagCategoriesCooldown.restart();
@@ -389,7 +394,7 @@ class Caption {
     }, {
       once: true
     });
-    window.addEventListener("captionOverrideEnd", () => {
+    window.addEventListener("captionsReEnabled", () => {
       if (this.currentThumb !== null) {
         this.attachToThumb(this.currentThumb);
       }
@@ -506,7 +511,7 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   resizeFont(thumb) {
-    const columnInput = document.getElementById("column-resize-input");
+    const columnInput = document.getElementById("column-count");
     const heightCanBeDerivedWithoutRect = this.thumbMetadataExists(thumb) && columnInput !== null;
     let height;
 
@@ -645,22 +650,22 @@ class Caption {
    * @param {MouseEvent} mouseEvent
    */
   tagOnClickHelper(value, mouseEvent) {
+    if (Utils.onSearchPage()) {
+      return;
+    }
+
     if (mouseEvent.ctrlKey) {
       Utils.openSearchPage(value);
       return;
     }
-    const searchBox = Utils.onSearchPage() ? document.getElementsByName("tags")[0] : document.getElementById("favorites-search-box");
-    const searchBoxDoesNotIncludeTag = true;
-
     navigator.clipboard.writeText(value);
+    const currentSearchBoxValue = Utils.getMainSearchBoxValue();
 
-    if (searchBoxDoesNotIncludeTag) {
-      searchBox.value += ` ${value}`;
-      searchBox.focus();
-      value = searchBox.value;
-      searchBox.value = "";
-      searchBox.value = value;
-    }
+    Utils.setMainSearchBoxValue(`${currentSearchBoxValue} ${value}`);
+    Utils.focusMainSearchBox();
+    // value = searchBox.value;
+    // searchBox.value = "";
+    // searchBox.value = value;
   }
 
   /**
@@ -840,6 +845,15 @@ class Caption {
   }
 
   /**
+   * @param {String} reason
+   */
+  abortAllRequests(reason) {
+    this.abortController.abort(reason);
+    this.abortController = new AbortController();
+    Caption.pendingRequests.clear();
+  }
+
+  /**
    * @param {String[]} tagNames
    * @param {Function} onAllCategoriesFound
    * @param {Number} fetchDelay
@@ -850,9 +864,14 @@ class Caption {
     const uniqueTagNames = new Set(tagNames);
 
     for (const tagName of uniqueTagNames) {
-      if (Utils.isNumber(tagName) && tagName.length > 5) {
+      if (Utils.isOnlyDigits(tagName) && tagName.length > 5) {
         Caption.tagCategoryAssociations[tagName] = 0;
         continue;
+      }
+
+      if (Caption.pendingRequests.size > Caption.settings.maxPendingRequestsAllowed) {
+        this.abortAllRequests(`Too many pending requests: ${Caption.pendingRequests.size}`);
+        return;
       }
 
       if (tagName.includes("'")) {
@@ -869,6 +888,7 @@ class Caption {
       const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
 
       try {
+        Caption.pendingRequests.add(tagName);
         fetch(apiURL, {
           signal: this.abortController.signal
         })
@@ -879,6 +899,7 @@ class Caption {
             throw new Error(response.statusText);
           })
           .then((html) => {
+            Caption.pendingRequests.delete(tagName);
             const dom = parser.parseFromString(html, "text/html");
             const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
 
@@ -895,6 +916,7 @@ class Caption {
             onAllCategoriesFound();
           });
       } catch (error) {
+        Caption.pendingRequests.delete(tagName);
         console.error(error);
       }
       await Utils.sleep(fetchDelay || Caption.tagFetchDelay);

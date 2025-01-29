@@ -195,6 +195,7 @@ class Utils {
     extensionsFoundBeforeSavingCount: 100
   };
   static favoritesSearchGalleryContainer = Utils.createFavoritesSearchGalleryContainer();
+  static mainSearchBoxId = "favorites-search-box";
   static idsToRemoveOnReloadLocalStorageKey = "recentlyRemovedIds";
   static tagBlacklist = Utils.getTagBlacklist();
   static preferencesLocalStorageKey = "preferences";
@@ -245,10 +246,6 @@ class Utils {
     changeDirectionAlt: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#0075FF\"><path d=\"M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z\"/></svg>",
     tune: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z\"/></svg>",
     settings: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z\"/></svg>"
-  };
-  static defaults = {
-    columnCount: 6,
-    resultsPerPage: 200
   };
   static addedFavoriteStatuses = {
     error: 0,
@@ -399,7 +396,7 @@ class Utils {
     if (Utils.onFavoritesPage()) {
       return false;
     }
-    const enabledOnSearchPages = Utils.getPreference("enableOnSearchPages", false);
+    const enabledOnSearchPages = Utils.getPreference("enhanceSearchPages", false);
     return !enabledOnSearchPages;
   }
 
@@ -410,7 +407,14 @@ class Utils {
     return !Utils.disabled;
   }
 
-  static initialize() {
+  /**
+   * @type {String}
+   */
+  static get itemClassName() {
+    return Utils.onSearchPage() ? "thumb" : Utils.favoriteItemClassName;
+  }
+
+  static setup() {
     if (Utils.disabled) {
       throw new Error("Favorites Search Gallery disabled");
     }
@@ -418,9 +422,8 @@ class Utils {
     Utils.removeUnusedScripts();
     Utils.insertCommonStyleHTML();
     Utils.setupCustomWebComponents();
-    Utils.toggleFancyImageHovering(true);
     Utils.setTheme();
-    Utils.prepareSearchPage();
+    Utils.initializeSearchPage();
     Utils.prefetchAdjacentSearchPages();
     Utils.setupOriginalImageLinksOnSearchPage();
     Utils.initializeImageExtensionAssignmentCooldown();
@@ -530,7 +533,7 @@ class Utils {
 
   /**
    * @param {Number} milliseconds
-   * @returns
+   * @returns {Promise}
    */
   static sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -581,8 +584,7 @@ class Utils {
    * @returns {HTMLElement}
    */
   static getThumbFromImage(image) {
-    const className = Utils.onSearchPage() ? "thumb" : Utils.favoriteItemClassName;
-    return image.closest(`.${className}`);
+    return image.closest(`.${Utils.itemClassName}`);
   }
 
   /**
@@ -597,8 +599,7 @@ class Utils {
    * @returns {HTMLElement[]}
    */
   static getAllThumbs() {
-    const className = Utils.onSearchPage() ? "thumb" : Utils.favoriteItemClassName;
-    return Array.from(document.getElementsByClassName(className));
+    return Array.from(document.getElementsByClassName(Utils.itemClassName));
   }
 
   /**
@@ -845,7 +846,9 @@ class Utils {
     placeToInsert.insertAdjacentHTML("beforeend", `
       <div id="${optionId}" style="display: ${optionIsVisible}">
         <label class="checkbox" title="${optionTitle}">
-        <input id="${checkboxId}" type="checkbox"><span> ${optionText}</span><span class="option-hint"> ${optionHint}</span></label>
+        <input id="${checkboxId}" type="checkbox">
+        <span> ${optionText}</span>
+        <span class="option-hint"> ${optionHint}</span></label>
       </div>
     `);
     const newOptionsCheckbox = document.getElementById(checkboxId);
@@ -995,22 +998,28 @@ class Utils {
     const size = Utils.onMobileDevice() ? 2 : 3;
     const videoSelector = Utils.onFavoritesPage() ? "&:has(img.video)" : ">img.video";
     const gifSelector = Utils.onFavoritesPage() ? "&:has(img.gif)" : ">img.gif";
+    const videoRule = `${videoSelector} {outline: ${size}px solid blue}`;
+    const gifRule = `${gifSelector} {outline: ${size}px solid hotpink}`;
 
     Utils.insertStyleHTML(`
-      .favorite, .thumb {
-
-        >a,
-        >div {
-          ${videoSelector} {
-              outline: ${size}px solid blue;
-          }
-
-          ${gifSelector} {
-            outline: 2px solid hotpink;
+      #favorites-search-gallery-content {
+        &.masonry,
+        &.row
+        {
+          >.favorite {
+            ${videoRule}
+            ${gifRule}
           }
         }
-      }
-      `, "video-gif-borders");
+      &.grid .favorite, .thumb {
+        >a,
+        >div {
+          ${videoRule}
+
+          ${gifRule}
+        }
+      }ideo-gif-border
+      `, "vs");
   }
 
   static removeInlineImgStyles() {
@@ -1185,10 +1194,9 @@ class Utils {
 
   /**
    * @param {String[]} postId
-   * @param {Boolean} endingAnimation
    * @param {Boolean} smoothTransition
    */
-  static scrollToThumb(postId, endingAnimation, smoothTransition) {
+  static scrollToThumb(postId, smoothTransition) {
     const element = document.getElementById(postId);
     const elementIsNotAThumb = element === null || (!element.classList.contains("thumb") && !element.classList.contains(Utils.favoriteItemClassName));
 
@@ -1207,16 +1215,6 @@ class Utils {
       top,
       behavior: smoothTransition ? "smooth" : "instant"
     });
-
-    if (!endingAnimation) {
-      return;
-    }
-    const image = Utils.getImageFromThumb(element);
-
-    image.classList.add("found");
-    setTimeout(() => {
-      image.classList.remove("found");
-    }, 2000);
   }
 
   /**
@@ -1356,7 +1354,7 @@ class Utils {
       })
       .catch((error) => {
         console.error(error);
-        return true;
+        return false;
       });
   }
 
@@ -1390,7 +1388,7 @@ class Utils {
    * @param {String} string
    * @returns {Boolean}
    */
-  static isNumber(string) {
+  static isOnlyDigits(string) {
     return (/^\d+$/).test(string);
   }
 
@@ -1599,13 +1597,16 @@ class Utils {
     Utils.setupCustomNumberWebComponents();
   }
 
-  static async setupCustomNumberWebComponents() {
-    await Utils.sleep(400);
-    const numberComponents = Array.from(document.querySelectorAll(".number"));
+  static setupCustomNumberWebComponents() {
+    // window.addEventListener("postProcess", () => {
+    //   const numberComponents = Array.from(document.querySelectorAll(".number"));
 
-    for (const element of numberComponents) {
-      const numberComponent = new NumberComponent(element);
-    }
+    //   for (const element of numberComponents) {
+    //     const numberComponent = new NumberComponent(element);
+    //   }
+    // }, {
+    //   once: true
+    // });
   }
 
   /**
@@ -1747,14 +1748,6 @@ class Utils {
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     return `${year}-${month}-${day}`;
-  }
-
-  /**
-   * @returns {String}
-   */
-  static getSortingMethod() {
-    const sortingMethodSelect = document.getElementById("sorting-method");
-    return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
   }
 
   /**
@@ -2123,7 +2116,7 @@ class Utils {
     };
   }
 
-  static prepareSearchPage() {
+  static initializeSearchPage() {
     if (!Utils.onSearchPage()) {
       return;
     }
@@ -2226,11 +2219,11 @@ class Utils {
   }
 
   /**
-   * @param {String} str
+   * @param {String} string
    * @returns {Boolean}
    */
-  static isEmptyString(str) {
-    return str.trim() === "";
+  static isEmptyString(string) {
+    return string.trim() === "";
   }
 
   /**
@@ -2283,5 +2276,157 @@ class Utils {
     dispatchEvent(new CustomEvent(name, {
       detail
     }));
+  }
+
+  /**
+   * @param {String} string
+   */
+  static convertDashedToCamelCase(string) {
+    return string.replace(/-([a-z])/g, (match) => match[1].toUpperCase());
+  }
+
+  /**
+   * @param {String} searchQuery
+   * @returns {String}
+   */
+  static formatSearchQueryIds(searchQuery) {
+    return searchQuery.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
+  }
+
+  /**
+   * @param {String} value
+   */
+  static setMainSearchBoxValue(value) {
+    const searchBox = document.getElementById(Utils.mainSearchBoxId);
+
+    if (searchBox !== null) {
+      searchBox.value = value;
+      searchBox.dispatchEvent(new CustomEvent("updatedProgrammatically"));
+    }
+  }
+
+  /**
+   * @returns {String}
+   */
+  static getMainSearchBoxValue() {
+    const searchBox = document.getElementById(Utils.mainSearchBoxId);
+    return searchBox === null ? "" : searchBox.value;
+  }
+
+  /**
+   * @returns {String}
+   */
+  static focusMainSearchBox() {
+    const searchBox = document.getElementById(Utils.mainSearchBoxId);
+
+    if (searchBox !== null) {
+      searchBox.focus();
+    }
+  }
+
+  /**
+   * @param {HTMLElement} element
+   * @param {String} tagName
+   * @returns {Boolean}
+   */
+  static hasTagName(element, tagName) {
+    return element.tagName !== undefined && element.tagName.toLowerCase() === tagName;
+  }
+
+  static scrollToTop() {
+    window.scrollTo(0, Utils.onMobileDevice() ? 10 : 0);
+  }
+
+  /**
+   * @param {Number} value
+   * @param {Number} fromMin
+   * @param {Number} fromMax
+   * @param {Number} toMin
+   * @param {Number} toMax
+   * @returns
+   */
+  static mapRange(value, fromMin, fromMax, toMin, toMax) {
+    return Math.round(toMin + (((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin)));
+  }
+
+  /**
+   * @param {HTMLElement} element
+   * @returns {Boolean}
+   */
+  static isThumbItem(element) {
+    return element.classList.contains(Utils.itemClassName);
+  }
+
+  /**
+   * @param {Array} array
+   * @param {Number} index
+   * @returns {Boolean}
+   */
+  static indexInBounds(array, index) {
+    return index >= 0 && index < array.length;
+  }
+
+  /**
+   * @param {Array} array
+   * @param {Number} startIndex
+   * @param {Number} limit
+   * @returns
+   */
+  static getElementsAroundIndex(array, startIndex, limit) {
+    if (!Utils.indexInBounds(array, startIndex) || limit === 0) {
+      return [];
+    }
+    const result = [array[startIndex]];
+    let i = 1;
+
+    while (result.length < limit) {
+      const leftIndex = startIndex - i;
+      const rightIndex = startIndex + i;
+      const leftIndexInBounds = Utils.indexInBounds(array, leftIndex);
+      const rightIndexInBounds = Utils.indexInBounds(array, rightIndex);
+      const bothIndexesOutOfBounds = !leftIndexInBounds && !rightIndexInBounds;
+
+      if (bothIndexesOutOfBounds) {
+        break;
+      }
+
+      if (leftIndexInBounds) {
+        result.push(array[leftIndex]);
+      }
+
+      if (rightIndexInBounds && result.length < limit) {
+        result.push(array[rightIndex]);
+      }
+      i += 1;
+    }
+    return result;
+  }
+
+  /**
+   * @param {Array} array
+   * @param {Number} startIndex
+   * @param {Number} limit
+   * @returns
+   */
+  static getWrappedElementsAroundIndex(array, startIndex, limit) {
+    if (!Utils.indexInBounds(array, startIndex) || limit === 0) {
+      return [];
+    }
+    const result = [array[startIndex]];
+    let i = 1;
+
+    while (result.length < limit && result.length < array.length) {
+      const leftIndex = (startIndex - i + array.length) % array.length;
+      const rightIndex = (startIndex + i) % array.length;
+
+      result.push(array[leftIndex]);
+
+      if (result.length < limit && result.length < array.length) {
+        result.push(array[rightIndex]);
+      }
+
+      i += 1;
+    }
+    return result;
   }
 }

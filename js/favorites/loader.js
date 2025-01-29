@@ -66,10 +66,6 @@ class FavoritesLoader {
    * @type {Number}
    */
   allowedRatings;
-  /**
-   * @type {Number}
-   */
-  expectedTotalFavoritesCount;
 
   /**
    * @type {String}
@@ -118,9 +114,8 @@ class FavoritesLoader {
       return;
     }
     this.initializeFields();
-    this.initializeComponents();
+    this.integrateComponents();
     this.addEventListeners();
-    this.setExpectedFavoritesCount();
     Utils.clearOriginalFavoritesPage();
     this.searchFavorites();
   }
@@ -130,14 +125,13 @@ class FavoritesLoader {
     this.latestSearchResults = [];
     this.searchResultsWhileFetching = [];
     this.allowedRatings = Utils.loadAllowedRatings();
-    this.expectedTotalFavoritesCount = null;
     this.searchQuery = "";
     this.negatedTagBlacklist = Utils.negateTags(Utils.tagBlacklist);
     this.excludeBlacklistedTags = !Utils.userIsOnTheirOwnFavoritesPage() || Utils.getPreference("excludeBlacklist", false);
     this.currentState = FavoritesLoader.states.initial;
   }
 
-  initializeComponents() {
+  integrateComponents() {
     this.status = new FavoritesLoaderStatus();
     this.fetchedQueue = new FetchedFavoritesQueue((request) => {
       this.processFetchedFavorites(request.favorites);
@@ -147,16 +141,25 @@ class FavoritesLoader {
     }, (request) => {
       this.fetchedQueue.enqueue(request);
     });
-    this.paginator = new FavoritesPaginator();
+    this.paginator = new FavoritesPaginator(() => {
+      if (this.currentState !== FavoritesLoader.states.loadingFavoritesFromDatabase) {
+        Utils.broadcastEvent("changedPage");
+      }
+    });
     this.searchFlags = new FavoritesSearchFlags();
     this.database = new FavoritesDatabaseInterface(() => {
-      this.status.notifyAllFavoritesStored();
+      this.status.notifyAllFavoritesSaved();
     }, (favorites) => {
       this.processFavoritesLoadedFromDatabase(favorites);
     });
   }
 
   addEventListeners() {
+    this.addGlobalEventListeners();
+    this.addFavoritesMenuEventListenersEventListener();
+  }
+
+  addGlobalEventListeners() {
     window.addEventListener("modifiedTags", () => {
       this.searchFlags.tagsWereModified = true;
     });
@@ -164,20 +167,19 @@ class FavoritesLoader {
       this.paginator.changePageWhileInGallery(event.detail, this.latestSearchResults);
     });
     window.addEventListener("missingMetadata", (event) => {
-      this.database.addNewMetadata(event.detail);
-    });
-    window.addEventListener("changedPageRaw", () => {
-      if (this.currentState !== FavoritesLoader.states.loadingFavoritesFromDatabase) {
-        dispatchEvent(new Event("changedPage"));
-      }
+      this.database.updateMetadataInDatabase(event.detail);
     });
   }
 
-  setExpectedFavoritesCount() {
-    Utils.getExpectedFavoritesCount()
-      .then((favoritesCount) => {
-        this.expectedTotalFavoritesCount = favoritesCount;
-      });
+  addFavoritesMenuEventListenersEventListener() {
+    window.addEventListener("favoritesLoader", (event) => {
+      const func = event.detail.func;
+      const args = event.detail.args;
+
+      if (this[func] !== undefined && typeof this[func] === "function") {
+        this[func](args);
+      }
+    });
   }
 
   /**
@@ -186,7 +188,7 @@ class FavoritesLoader {
   searchFavorites(searchQuery) {
     this.setSearchQuery(searchQuery);
     dispatchEvent(new Event("searchStarted"));
-    this.handleSearchByState();
+    this.loadSearchResults();
   }
 
   /**
@@ -199,7 +201,7 @@ class FavoritesLoader {
     }
   }
 
-  handleSearchByState() {
+  loadSearchResults() {
     switch (this.currentState) {
       case FavoritesLoader.states.initial:
         this.showSearchResultsAfterLoadingFromDatabase();
@@ -223,7 +225,7 @@ class FavoritesLoader {
 
   showSearchResultsAfterLoadingFromDatabase() {
     this.currentState = FavoritesLoader.states.loadingFavoritesFromDatabase;
-    this.toggleLoadingIndicator(true);
+    Utils.toggleLoadingWheel(true);
     this.status.setStatus("Loading favorites");
     this.database.loadAllFavorites();
   }
@@ -240,12 +242,14 @@ class FavoritesLoader {
   /**
    * @param {Post[]} searchResults
    */
-
   showSearchResults(searchResults) {
     if (!this.searchFlags.aNewSearchCouldProduceDifferentResults) {
       return;
     }
-    searchResults = this.sortPosts(searchResults);
+
+    if (!this.searchFlags.searchResultsAreShuffled) {
+      searchResults = FavoritesSorter.sort(searchResults);
+    }
     searchResults = this.filterResultsByAllowedRatings(searchResults);
     this.latestSearchResults = searchResults;
     this.status.setMatchCount(searchResults.length);
@@ -260,7 +264,7 @@ class FavoritesLoader {
   processFavoritesLoadedFromDatabase(favorites) {
     const noFavoritesFound = favorites.length === 0;
 
-    this.toggleLoadingIndicator(false);
+    Utils.toggleLoadingWheel(false);
     this.status.enableSearchButtons();
 
     if (noFavoritesFound) {
@@ -272,22 +276,16 @@ class FavoritesLoader {
     this.allFavorites = Utils.userIsOnTheirOwnFavoritesPage() ? favorites : nonBlackListedFavorites;
     this.status.setStatus("All favorites loaded");
     this.showSearchResults(nonBlackListedFavorites);
-    dispatchEvent(new Event("favoritesLoadedFromDatabase"));
+    Utils.broadcastEvent("favoritesLoadedFromDatabase");
     this.currentState = FavoritesLoader.states.allFavoritesLoaded;
     this.searchFlags.allFavoritesLoaded = true;
     Utils.broadcastEvent("favoritesLoaded");
     this.fetchNewFavoritesOnReload();
   }
 
-  setupPaginationMenu() {
-    this.paginator.toggleContentVisibility(true);
-    this.paginator.insertMenu();
-    this.paginator.updateMenu(1, []);
-  }
-
   startFetchingAllFavorites() {
     this.currentState = FavoritesLoader.states.fetchingFavorites;
-    this.setupPaginationMenu();
+    this.paginator.setupPageSelectionMenu();
     Utils.broadcastEvent("startedFetchingFavorites");
     this.fetcher.fetchAllFavorites();
   }
@@ -296,18 +294,15 @@ class FavoritesLoader {
    * @param {Post[]} favorites
    */
   processFetchedFavorites(favorites) {
+    this.allFavorites = this.allFavorites.concat(favorites);
+    Utils.broadcastEvent("favoritesFetched", favorites.map(post => post.root));
     const matchedFavorites = this.searchCommand.getSearchResults(favorites);
 
     this.searchResultsWhileFetching = this.searchResultsWhileFetching.concat(matchedFavorites);
     const searchResults = this.filterResultsByAllowedRatings(this.searchResultsWhileFetching);
 
-    this.status.setMatchCount(searchResults.length);
-    this.allFavorites = this.allFavorites.concat(favorites);
     this.paginator.paginateWhileFetching(searchResults);
-    this.updateStatusWhileFetching();
-    dispatchEvent(new CustomEvent("favoritesFetched", {
-      detail: favorites.map(post => post.root)
-    }));
+    this.status.updateStatusWhileFetching(this.allFavorites.length, searchResults.length);
   }
 
   processAllFetchedFavorites() {
@@ -344,24 +339,6 @@ class FavoritesLoader {
     this.insertNewFavoritesFoundOnReload(newFavorites);
   }
 
-  updateStatusWhileFetching() {
-    const prefix = Utils.onMobileDevice() ? "" : "Favorites ";
-    let statusText = `Fetching ${prefix}${this.allFavorites.length}`;
-
-    if (this.expectedTotalFavoritesCount !== null) {
-      statusText = `${statusText} / ${this.expectedTotalFavoritesCount}`;
-    }
-    this.status.setStatus(statusText);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleLoadingIndicator(value) {
-    this.paginator.toggleContentVisibility(!value);
-    Utils.toggleLoadingWheel(value);
-  }
-
   /**
    * @param {Post[]} newFavorites
    */
@@ -377,33 +354,21 @@ class FavoritesLoader {
     }
 
     for (const favorite of newFavorites) {
-      if (this.ratingIsAllowed(favorite) && searchCommand.matches(favorite)) {
+      if (favorite.withinRatings(this.allowedRatings) && searchCommand.matches(favorite)) {
         this.paginator.insertNewFavorite(favorite);
         insertedFavorites.push(favorite);
       }
     }
-    this.paginator.updateMenu(this.paginator.currentPageNumber, this.favoritesMatchedByLatestSearch);
+    this.paginator.updatePageSelectionMenu(this.paginator.currentPageNumber, this.favoritesMatchedByLatestSearch);
     Utils.broadcastEvent("newFavoritesFoundOnReload", insertedFavorites.map(post => post.root));
     Utils.broadcastEvent("newSearchResults", this.latestSearchResults);
   }
 
   /**
-   * @param {Post[]} posts
-   * @returns {Post[]}
+   * @param {{option: String, value: Object}} param
    */
-  sortPosts(posts) {
-    if (this.searchFlags.searchResultsAreShuffled) {
-      return posts;
-    }
-    return FavoritesSorter.sort(posts);
-  }
-
-  /**
-   * @param {String} name
-   * @param {any} value
-   */
-  onOptionChanged(name, value) {
-    switch (name) {
+  onOptionChanged({option, value}) {
+    switch (option) {
       case "blacklist":
         this.excludeBlacklistedTags = value;
         this.searchFlags.excludeBlacklistWasClicked = true;
@@ -429,21 +394,9 @@ class FavoritesLoader {
         break;
 
       default:
-        console.error(name);
+        console.error(`Unknown option: ${option}`);
         break;
     }
-  }
-
-  /**
-   * @param {Post} post
-   * @returns {Boolean}
-   */
-  ratingIsAllowed(post) {
-    if (this.allRatingsAreAllowed) {
-      return true;
-    }
-    // eslint-disable-next-line no-bitwise
-    return (post.metadata.rating & this.allowedRatings) > 0;
   }
 
   /**
@@ -451,16 +404,13 @@ class FavoritesLoader {
    * @returns {Post[]}
    */
   filterResultsByAllowedRatings(searchResults) {
-    if (this.allRatingsAreAllowed) {
-      return searchResults;
-    }
-    return searchResults.filter(post => this.ratingIsAllowed(post));
+    return this.allRatingsAreAllowed ? searchResults : searchResults.filter(post => post.withinRatings(this.allowedRatings));
   }
 
   invertSearchResults() {
     this.status.setMatchCount(0);
     this.allFavorites.forEach((post) => {
-      post.toggleMatched();
+      post.toggleMatchedByMostRecentSearch();
     });
     const invertedSearchResults = this.favoritesMatchedByLatestSearch;
 
@@ -480,7 +430,18 @@ class FavoritesLoader {
   /**
    * @param {String} id
    */
-  findFavorite(id) {
+  revealFavorite(id) {
     this.paginator.findFavorite(id, this.latestSearchResults);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  changeLayout(value) {
+    this.paginator.changeLayout(value);
+  }
+
+  updateMasonry() {
+    this.paginator.updateMasonry();
   }
 }

@@ -34,7 +34,16 @@ class FavoritesDatabaseInterface {
   }
 
   initializeDatabase() {
+    this.createDatabaseWorker();
+    this.connectDatabaseMessagesToCallbacks();
+    this.sendObjectStoreNameToDatabase();
+  }
+
+  createDatabaseWorker() {
     this.databaseWorker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.database));
+  }
+
+  connectDatabaseMessagesToCallbacks() {
     this.databaseWorker.onmessage = (message) => {
       switch (message.data.response) {
         case "finishedLoading":
@@ -49,6 +58,9 @@ class FavoritesDatabaseInterface {
           break;
       }
     };
+  }
+
+  sendObjectStoreNameToDatabase() {
     this.databaseWorker.postMessage({
       command: "create",
       objectStoreName: FavoritesDatabaseInterface.objectStoreName,
@@ -73,22 +85,22 @@ class FavoritesDatabaseInterface {
   /**
    * @param {Post[]} favorites
    */
-  async storeFavorites(favorites) {
-    await Utils.sleep(500);
-
-    this.databaseWorker.postMessage({
-      command: "store",
-      favorites: favorites.map(post => post.databaseRecord)
-    });
+  storeFavorites(favorites) {
+    setTimeout(() => {
+      this.databaseWorker.postMessage({
+        command: "store",
+        favorites: favorites.map(favorite => favorite.databaseRecord)
+      });
+    }, 500);
   }
 
   /**
-   * @param {Post[]} posts
+   * @param {Post[]} favorites
    */
-  updateFavorites(posts) {
+  updateFavorites(favorites) {
     this.databaseWorker.postMessage({
       command: "update",
-      favorites: posts.map(post => post.databaseRecord)
+      favorites: favorites.map(favorite => favorite.databaseRecord)
     });
   }
 
@@ -106,28 +118,28 @@ class FavoritesDatabaseInterface {
   }
 
   /**
-   * @param {String} postId
+   * @param {String} id
    */
-  addNewMetadata(postId) {
-    if (!Post.allPosts.has(postId)) {
+  updateMetadataInDatabase(id) {
+    if (!Post.allPosts.has(id)) {
       return;
     }
     const batchSize = 500;
     const waitTime = 1000;
 
     clearTimeout(this.newMetadataReceivedTimeout);
-    this.favoriteIdsRequiringMetadataDatabaseUpdate.push(postId);
+    this.favoriteIdsRequiringMetadataDatabaseUpdate.push(id);
 
     if (this.favoriteIdsRequiringMetadataDatabaseUpdate.length >= batchSize) {
-      this.updateMetadataInDatabase();
+      this.batchUpdateMetadataInDatabase();
       return;
     }
     this.newMetadataReceivedTimeout = setTimeout(() => {
-      this.updateMetadataInDatabase();
+      this.batchUpdateMetadataInDatabase();
     }, waitTime);
   }
 
-  updateMetadataInDatabase() {
+  batchUpdateMetadataInDatabase() {
     this.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }

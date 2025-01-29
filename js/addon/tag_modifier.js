@@ -34,7 +34,7 @@ class TagModifier {
   </style>
   <div id="tag-modifier-option-container">
     <label class="checkbox" title="Add or remove custom or official tags to favorites">
-      <input type="checkbox" id="tag-modifier-option-checkbox">Modify Tags<span class="option-hint"></span>
+      <input type="checkbox" id="tag-modifier-option-checkbox"> Modify Tags<span class="option-hint"></span>
     </label>
   </div>
   <div id="tag-modifier-ui-container">

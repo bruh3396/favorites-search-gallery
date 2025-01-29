@@ -23,15 +23,27 @@ class Post {
   static {
     Utils.addStaticInitializer(() => {
       if (Utils.onFavoritesPage()) {
-        Post.createTemplates();
+        Post.createHTMLTemplates();
         Post.addEventListeners();
       }
     });
   }
 
-  static createTemplates() {
+  static createHTMLTemplates() {
+    Post.createAddFavoriteButtonHTMLTemplate();
+    Post.createRemoveFavoriteButtonHTMLTemplate();
+    Post.createPostHTMLTemplate();
+  }
+
+  static createRemoveFavoriteButtonHTMLTemplate() {
     Post.removeFavoriteButtonHTML = `<img class="remove-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Utils.icons.heartMinus)}>`;
+  }
+
+  static createAddFavoriteButtonHTMLTemplate() {
     Post.addFavoriteButtonHTML = `<img class="add-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Utils.icons.heartPlus)}>`;
+  }
+
+  static createPostHTMLTemplate() {
     const buttonHTML = Utils.userIsOnTheirOwnFavoritesPage() ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
     const canvasHTML = Utils.getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
     const containerTagName = "a";
@@ -40,7 +52,7 @@ class Post {
     Post.htmlTemplate.className = Utils.favoriteItemClassName;
     Post.htmlTemplate.innerHTML = `
         <${containerTagName}>
-          <img>
+          <img loading="lazy">
           ${buttonHTML}
           ${canvasHTML}
         </${containerTagName}>
@@ -48,6 +60,12 @@ class Post {
   }
 
   static addEventListeners() {
+    Post.swapAddOrRemoveButtonsWhenFavoritesAreAddedOrRemovedExternally();
+    Post.synchronizeStatisticHintsWithCurrentSortingMethod();
+    Post.enumerateAllPostsWhenLoadingFinishes();
+  }
+
+  static swapAddOrRemoveButtonsWhenFavoritesAreAddedOrRemovedExternally() {
     window.addEventListener("favoriteAddedOrDeleted", (event) => {
       const id = event.detail;
       const post = Post.allPosts.get(id);
@@ -56,13 +74,19 @@ class Post {
         post.swapAddOrRemoveButton();
       }
     });
+  }
+
+  static synchronizeStatisticHintsWithCurrentSortingMethod() {
     window.addEventListener("sortingParametersChanged", () => {
       const posts = Utils.getAllThumbs().map(thumb => Post.allPosts.get(thumb.id));
 
       for (const post of posts) {
-        post.createMetadataHint();
+        post.createStatisticHint();
       }
     });
+  }
+
+  static enumerateAllPostsWhenLoadingFinishes() {
     window.addEventListener("favoritesLoaded", () => {
       Post.enumerateAllPosts();
     }, {
@@ -88,7 +112,7 @@ class Post {
    * @param {String} apiTags
    * @param {String} fileURL
    */
-  static correctTags(id, apiTags, fileURL) {
+  static validateExtractedTagsAgainstAPI(id, apiTags, fileURL) {
     const post = Post.allPosts.get(id);
 
     if (post === undefined) {
@@ -174,7 +198,7 @@ class Post {
   /**
    * @type {Boolean}
    */
-  essentialAttributesArePopulated;
+  attributesNeededForSearchArePopulated;
   /**
    * @type {Boolean}
    */
@@ -198,7 +222,7 @@ class Post {
   get databaseRecord() {
     return {
       id: this.id,
-      tags: this.originalTagsString,
+      tags: this.originalTagString,
       src: this.compressedThumbSource,
       metadata: this.metadata.json
     };
@@ -214,14 +238,14 @@ class Post {
   /**
    * @type {Set.<String>}
    */
-  get originalTagsString() {
+  get originalTagString() {
     return Utils.convertToTagString(this.originalTagSet);
   }
 
   /**
    * @type {String}
    */
-  get additionalTagsString() {
+  get additionalTagString() {
     return Utils.convertToTagString(this.additionalTagSet);
   }
 
@@ -232,23 +256,23 @@ class Post {
   constructor(thumb, fromRecord) {
     this.initializeFields();
     this.inactivePost = new InactivePost(thumb, fromRecord);
-    this.populateEssentialAttributes();
-    this.setMatched(true);
+    this.populateAttributesNeededForSearch();
+    this.setAsMatchedByMostRecentSearch(true);
     this.addInstanceToAllPosts();
   }
 
   initializeFields() {
     this.inactivePost = null;
     this.index = 0;
-    this.essentialAttributesArePopulated = false;
+    this.attributesNeededForSearchArePopulated = false;
     this.htmlElementCreated = false;
   }
 
-  populateEssentialAttributes() {
-    if (this.essentialAttributesArePopulated) {
+  populateAttributesNeededForSearch() {
+    if (this.attributesNeededForSearchArePopulated) {
       return;
     }
-    this.essentialAttributesArePopulated = true;
+    this.attributesNeededForSearchArePopulated = true;
     this.id = this.inactivePost.id;
     this.metadata = this.inactivePost.instantiateMetadata();
     this.initializeTagSet(this.inactivePost.tags);
@@ -260,11 +284,11 @@ class Post {
       return;
     }
     this.htmlElementCreated = true;
-    this.instantiateTemplate();
-    this.populateEssentialAttributes();
+    this.instantiateHTMLTemplate();
+    this.populateAttributesNeededForSearch();
     this.populateHTMLAttributes();
     this.setupAddOrRemoveButton(Utils.userIsOnTheirOwnFavoritesPage());
-    this.setupClickLink();
+    this.openAssociatedPostInNewTabWhenClicked();
     this.deleteInactivePost();
   }
 
@@ -274,7 +298,7 @@ class Post {
     }
   }
 
-  instantiateTemplate() {
+  instantiateHTMLTemplate() {
     this.root = Post.htmlTemplate.cloneNode(true);
     this.container = this.root.children[0];
     this.image = this.root.children[0].children[0];
@@ -348,7 +372,7 @@ class Post {
     this.additionalTagSet = Utils.convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
 
     if (this.additionalTagSet.size !== 0) {
-      this.combineOriginalAndAdditionalTags();
+      this.combineOriginalAndAdditionalTagSets();
     }
   }
 
@@ -357,7 +381,7 @@ class Post {
     this.inactivePost.tags = null;
   }
 
-  setupClickLink() {
+  openAssociatedPostInNewTabWhenClicked() {
     if (!Utils.onFavoritesPage()) {
       return;
     }
@@ -389,7 +413,7 @@ class Post {
     if (this.inactivePost !== null) {
       this.createHTMLElement(this.inactivePost, true);
     }
-    this.createMetadataHint();
+    this.createStatisticHint();
     content.appendChild(this.root);
   }
 
@@ -400,7 +424,7 @@ class Post {
     if (this.inactivePost !== null) {
       this.createHTMLElement(this.inactivePost, true);
     }
-    this.createMetadataHint();
+    this.createStatisticHint();
     content.insertAdjacentElement("afterbegin", this.root);
   }
 
@@ -410,18 +434,18 @@ class Post {
     }
   }
 
-  toggleMatched() {
-    this.setMatched(!this.matchedByLatestSearch);
+  toggleMatchedByMostRecentSearch() {
+    this.setAsMatchedByMostRecentSearch(!this.matchedByLatestSearch);
   }
 
   /**
    * @param {Boolean} value
    */
-  setMatched(value) {
+  setAsMatchedByMostRecentSearch(value) {
     this.matchedByLatestSearch = value;
   }
 
-  combineOriginalAndAdditionalTags() {
+  combineOriginalAndAdditionalTagSets() {
     this.tagSet = Utils.sortSet(Utils.union(this.originalTagSet, this.additionalTagSet));
   }
 
@@ -434,9 +458,9 @@ class Post {
 
     if (newTagsSet.size > 0) {
       this.additionalTagSet = Utils.union(this.additionalTagSet, newTagsSet);
-      this.combineOriginalAndAdditionalTags();
+      this.combineOriginalAndAdditionalTagSets();
     }
-    return this.additionalTagsString;
+    return this.additionalTagString;
   }
 
   /**
@@ -450,7 +474,7 @@ class Post {
       this.tagSet = Utils.difference(this.tagSet, tagsToRemoveSet);
       this.additionalTagSet = Utils.difference(this.additionalTagSet, tagsToRemoveSet);
     }
-    return this.additionalTagsString;
+    return this.additionalTagString;
   }
 
   resetAdditionalTags() {
@@ -458,13 +482,13 @@ class Post {
       return;
     }
     this.additionalTagSet = new Set();
-    this.combineOriginalAndAdditionalTags();
+    this.combineOriginalAndAdditionalTagSets();
   }
 
   /**
    * @returns {HTMLDivElement}
    */
-  getMetadataHintElement() {
+  getStatisticHintElement() {
     return this.container.querySelector(".statistic-hint");
   }
 
@@ -472,14 +496,14 @@ class Post {
    * @returns {Boolean}
    */
   hasStatisticHint() {
-    return this.getMetadataHintElement() !== null;
+    return this.getStatisticHintElement() !== null;
   }
 
   /**
    * @returns {String}
    */
-  getMetadataHintValue() {
-    switch (Utils.getSortingMethod()) {
+  getStatisticHintValue() {
+    switch (FavoritesSorter.sortingMethod) {
       case "score":
         return this.metadata.score;
 
@@ -500,7 +524,7 @@ class Post {
     }
   }
 
-  async createMetadataHint() {
+  async createStatisticHint() {
     // await Utils.sleep(200);
     // let hint = this.getMetadataHintElement();
 
@@ -510,5 +534,14 @@ class Post {
     //   this.container.appendChild(hint);
     // }
     // hint.textContent = this.getMetadataHintValue();
+  }
+
+  /**
+   * @param {Number} ratings
+   * @returns {Boolean}
+   */
+  withinRatings(ratings) {
+    // eslint-disable-next-line no-bitwise
+    return (this.metadata.rating & ratings) > 0;
   }
 }

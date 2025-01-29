@@ -30,7 +30,8 @@ class PostLoader {
    */
   static get searchURIFragment() {
     const match = (/&tags=([^&]*)/).exec(location.href);
-    return match === null ? "" : match[1];
+    const tags = match === null ? "" : match[1];
+    return tags === "all" ? "" : tags;
   }
 
   /**
@@ -71,6 +72,9 @@ class PostLoader {
     await this.loadAdjacentChunks(this.currentAPIPageNumber);
   }
 
+  /**
+   * @param {Number} pageNumber
+   */
   async loadAdjacentChunks(pageNumber) {
     const previousPageNumber = Math.max(0, pageNumber - 1);
     const nextPageNumber = pageNumber + 1;
@@ -144,14 +148,15 @@ class PostLoader {
   }
 
   /**
+   * @param {Array} array
    * @param {Number} startIndex
-   * @returns {CompactPost[]}
+   * @param {Number} range
+   * @returns {Array}
    */
-  getPostsAroundIndex(startIndex) {
-    const range = 42;
+  getPostsAroundIndex(array, startIndex, range) {
     const result = [];
 
-    result.push(this.loadedPosts[startIndex]);
+    result.push(array[startIndex]);
     let i = 1;
 
     while (result.length < range) {
@@ -166,11 +171,11 @@ class PostLoader {
       }
 
       if (leftIndexInBounds) {
-        result.push(this.loadedPosts[leftIndex]);
+        result.push(array[leftIndex]);
       }
 
       if (rightIndexInBounds && result.length <= range) {
-        result.push(this.loadedPosts[rightIndex]);
+        result.push(array[rightIndex]);
       }
       i += 1;
     }

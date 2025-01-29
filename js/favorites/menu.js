@@ -1,5 +1,5 @@
 class FavoritesMenu {
-  static uiHTML = `
+  static menuHTML = `
 <div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
   <style>
     #favorites-search-gallery-menu {
@@ -14,6 +14,12 @@ class FavoritesMenu {
         -webkit-appearance: none;
         appearance: none;
         margin: 0;
+      }
+
+      select {
+        cursor: pointer;
+        min-height: 25px;
+        width: 150px;
       }
     }
 
@@ -115,7 +121,6 @@ class FavoritesMenu {
       position: absolute;
       left: 0;
       top: 0;
-      width: 40%;
       font-weight: bold;
       background: none;
       border: none;
@@ -155,9 +160,10 @@ class FavoritesMenu {
       border-bottom-left-radius: 4px;
       text-shadow: none;
     }
-    #statistic-hint-container {
-      /* display: none; */
-    }
+
+    /* #statistic-hint-container {
+      display: none;
+    } */
 
     img {
       -webkit-user-drag: none;
@@ -206,36 +212,7 @@ class FavoritesMenu {
       }
     }
 
-    .found {
-      opacity: 1;
-      animation: wiggle 2s;
-    }
-
-    @keyframes wiggle {
-
-      10%,
-      90% {
-        transform: translate3d(-2px, 0, 0);
-      }
-
-      20%,
-      80% {
-        transform: translate3d(4px, 0, 0);
-      }
-
-      30%,
-      50%,
-      70% {
-        transform: translate3d(-8px, 0, 0);
-      }
-
-      40%,
-      60% {
-        transform: translate3d(8px, 0, 0);
-      }
-    }
-
-    #column-resize-container {
+    #column-count-container {
       >div {
         align-content: center;
       }
@@ -284,15 +261,88 @@ class FavoritesMenu {
 
     #favorites-search-gallery-content {
       padding: 0px 20px 30px 20px;
-      display: grid !important;
-      grid-template-columns: repeat(10, 1fr);
-      grid-gap: 0.5cqw;
+      --transition-duration: 0.3s;
+
+      &.grid {
+        display: grid !important;
+        grid-template-columns: repeat(10, 1fr);
+        grid-gap: 0.35cqw;
+
+        .add-or-remove-button {
+          width: 40%;
+        }
+      }
+
+      &.row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        >.favorite,
+        >.spacer {
+          height: 300px;
+          flex: 1 1 auto;
+          border-radius: 10px;
+          overflow: hidden;
+
+          /* transition: height var(--transition-duration) linear; */
+        }
+
+        >.spacer {
+          width: 300px;
+          /* background: gray; */
+          pointer-events: none;
+        }
+
+        >.favorite {
+
+          >a,
+          >div {
+
+            width: 100%;
+            height: 100%;
+
+            >img:first-child {
+              object-fit: cover;
+              width: 100%;
+              height: 100%;
+              vertical-align: middle;
+            }
+
+            >canvas {
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+        }
+      }
+
+      &.masonry {
+        margin: 0 auto;
+
+        >.favorite {
+          width: 200px;
+          margin-bottom: 10px;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        >.favorite img:first-child {
+          width: 100%;
+        }
+
+        .add-or-remove-button {
+          height: 40%;
+        }
+
+      }
     }
 
     #help-links-container {
       >a:not(:last-child)::after {
         content: " |";
       }
+
       margin-top: 17px;
     }
 
@@ -382,12 +432,6 @@ class FavoritesMenu {
       >div:not(:last-child) {
         margin-bottom: 10px;
       }
-
-      select {
-        cursor: pointer;
-        min-height: 25px;
-        width: 150px;
-      }
     }
 
     .number-label-container {
@@ -395,13 +439,17 @@ class FavoritesMenu {
       min-width: 130px;
     }
 
-    #show-ui-div {
-      &.ui-hidden {
-        max-width: 100vw;
+    #show-ui-container.ui-hidden {
+      label {
         text-align: center;
-        align-content: center;
       }
+      max-width: 100vw;
+      text-align: center;
+      align-content: center;
     }
+
+
+
 
     #rating-container {
       white-space: nowrap;
@@ -419,15 +467,15 @@ class FavoritesMenu {
         position: relative;
       }
 
-      >label[for="explicit-rating-checkbox"] {
+      >label[for="explicit-rating"] {
         border-radius: 7px 0px 0px 7px;
       }
 
-      >label[for="questionable-rating-checkbox"] {
+      >label[for="questionable-rating"] {
         margin-left: -3px;
       }
 
-      >label[for="safe-rating-checkbox"] {
+      >label[for="safe-rating"] {
         margin-left: -3px;
         border-radius: 0px 7px 7px 0px;
       }
@@ -469,10 +517,12 @@ class FavoritesMenu {
       }
     }
 
-    #sort-ascending-checkbox {
+    #sort-ascending {
       position: absolute;
-      top: -2px;
+      top: 15px;
       left: 150px;
+      width: 20px;
+      height: 20px;
     }
 
     #find-favorite-input {
@@ -484,6 +534,8 @@ class FavoritesMenu {
     }
 
     body {
+      overflow-x: hidden;
+
       &:fullscreen,
       &::backdrop {
         background-color: var(--c-bg);
@@ -492,6 +544,14 @@ class FavoritesMenu {
 
     #goto-page-input {
       width: 5ch;
+    }
+
+    #left-favorites-panel-top-row>button:not(:last-of-type) {
+      margin-right: 5px;
+    }
+
+    #sort-container {
+      position: relative;
     }
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
@@ -503,13 +563,6 @@ class FavoritesMenu {
         <label id="favorites-load-status-label"></label>
       </span>
       <div id="left-favorites-panel-top-row">
-        <button title="Search favorites
-ctrl+click/right-click: Search all of rule34 in a new tab"
-          id="search-button">Search</button>
-        <button title="Randomize order of search results" id="shuffle-button">Shuffle</button>
-        <button title="Show results not matched by search" id="invert-button">Invert</button>
-        <button title="Empty the search box" id="clear-button">Clear</button>
-        <button title="Delete cached favorites and reset preferences" id="reset-button">Reset</button>
         <span id="favorites-pagination-placeholder"></span>
         <span id="help-links-container">
           <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
@@ -522,85 +575,24 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
             <div id="whats-new-container" class="light-green-gradient">
               <h4>1.18:</h4>
               <h5>Features:</h5>
-                <ul>
-                  <li>Improved/fixed mobile UI</li>
-                  <li>Improved mobile controls</li>
-                  <li>Added gallery autoplay for mobile</li>
-                  <li>Added sort by random (auto shuffle)</li>
-                  <li>Added dark theme option</li>
-                  <li>Minor UI fixes</li>
-                  <li>Minor gallery fixes</li>
-                </ul>
+              <ul>
+                <li>Improved/fixed mobile UI</li>
+                <li>Improved mobile controls</li>
+                <li>Added gallery autoplay for mobile</li>
+                <li>Added sort by random (auto shuffle)</li>
+                <li>Added dark theme option</li>
+                <li>Minor UI fixes</li>
+                <li>Minor gallery fixes</li>
+              </ul>
             </div>
           </a>
         </span>
       </div>
-      <div>
-        <textarea name="tags" id="favorites-search-box" placeholder="Search favorites"
-          spellcheck="false"></textarea>
-      </div>
       <div id="left-favorites-panel-bottom-row">
         <div id="bottom-panel-1">
-          <label class="checkbox" title="Show more options">
-            <input type="checkbox" id="options-checkbox">
-            <span id="more-options-label"> More Options</span>
-            <span class="option-hint"> (O)</span>
-          </label>
           <div class="options-container">
             <div id="main-favorite-options-container">
               <div id="favorite-options">
-                <div>
-                  <label class="checkbox" title="Enable gallery and other features on search pages">
-                    <input type="checkbox" id="enable-on-search-pages">
-                    <span> Enhance Search Pages</span>
-                  </label>
-                </div>
-                <div style="display: none;">
-                  <label class="checkbox" title="Toggle remove buttons">
-                    <input type="checkbox" id="show-remove-favorite-buttons">
-                    <span> Remove Buttons</span>
-                    <span class="option-hint"> (R)</span>
-                  </label>
-                </div>
-                <div style="display: none;">
-                  <label class="checkbox" title="Toggle add favorite buttons">
-                    <input type="checkbox" id="show-add-favorite-buttons">
-                    <span> Add Favorite Buttons</span>
-                    <span class="option-hint"> (R)</span>
-                  </label>
-                </div>
-                <div>
-                  <label class="checkbox" title="Exclude favorites with blacklisted tags from search">
-                    <input type="checkbox" id="filter-blacklist-checkbox">
-                    <span> Exclude Blacklist</span>
-                  </label>
-                </div>
-                <div>
-                  <label class="checkbox" title="Enable fancy image hovering (experimental)">
-                    <input type="checkbox" id="fancy-image-hovering-checkbox">
-                    <span> Fancy Hovering</span>
-                  </label>
-                </div>
-                <div id="statistic-hint-container">
-                  <label class="checkbox" title="Enable fancy image hovering (experimental)">
-                    <input type="checkbox" id="statistic-hint-checkbox">
-                    <span> Statistics</span>
-                    <span class="option-hint"> (S)</span>
-                  </label>
-                </div>
-                <div id="show-hints-container">
-                  <label class="checkbox" title="Show hotkeys and shortcuts">
-                    <input type="checkbox" id="show-hints-checkbox">
-                    <span> Hotkey Hints</span>
-                    <span class="option-hint"> (H)</span>
-                  </label>
-                </div>
-                <div>
-                  <label class="checkbox" title="Toggle dark theme">
-                    <input type="checkbox" id="dark-theme-checkbox">
-                    <span> Dark Theme</span>
-                  </label>
-                </div>
               </div>
               <div id="dynamic-favorite-options">
               </div>
@@ -613,19 +605,8 @@ ctrl+click/right-click: Search all of rule34 in a new tab"
             <div id="additional-favorite-options">
               <div id="sort-container" title="Change sorting order of search results">
                 <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
-                <label style="margin-left:  22px;" for="sort-ascending-checkbox">Ascending</label>
-                <div style="position: relative;">
-                  <select id="sorting-method">
-                    <option value="default">Default</option>
-                    <option value="score">Score</option>
-                    <option value="width">Width</option>
-                    <option value="height">Height</option>
-                    <option value="creationTimestamp">Date Uploaded</option>
-                    <option value="lastChangedTimestamp">Date Changed</option>
-                    <option value="random">Random</option>
-                  </select>
-                  <input type="checkbox" id="sort-ascending-checkbox">
-                </div>
+                <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+                <br>
               </div>
               <div id="results-columns-container">
                 <div id="results-per-page-container" style="display: inline-block;"
@@ -635,32 +616,14 @@ Lower numbers improve responsiveness">
                     <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
                   </span>
                   <br>
-                  <span class="number">
-                    <hold-button class="number-arrow-down" pollingtime="50">
-                      <span>&lt;</span>
-                    </hold-button>
-                    <input type="number" id="results-per-page-input" min="100" max="10000" step="50">
-                    <hold-button class="number-arrow-up" pollingtime="50">
-                      <span>&gt;</span>
-                    </hold-button>
-                  </span>
                 </div>
-                <div id="column-resize-container" title="Set the number of favorites per row"
+                <div id="column-count-container" title="Set the number of favorites per row"
                   style="display: inline-block;">
                   <div>
                     <span class="number-label-container">
-                      <label>Columns</label>
+                      <label id="column-count-label">Columns</label>
                     </span>
                     <br>
-                    <span class="number">
-                      <hold-button class="number-arrow-down" pollingtime="50">
-                        <span>&lt;</span>
-                      </hold-button>
-                      <input type="number" id="column-resize-input" min="2" max="20">
-                      <hold-button class="number-arrow-up" pollingtime="50">
-                        <span>&gt;</span>
-                      </hold-button>
-                    </span>
                   </div>
                 </div>
               </div>
@@ -668,33 +631,24 @@ Lower numbers improve responsiveness">
                 <label>Rating</label>
                 <br>
                 <div id="allowed-ratings" class="not-highlightable">
-                  <input type="checkbox" id="explicit-rating-checkbox" checked>
-                  <label for="explicit-rating-checkbox">Explicit</label>
-                  <input type="checkbox" id="questionable-rating-checkbox" checked>
-                  <label for="questionable-rating-checkbox">Questionable</label>
-                  <input type="checkbox" id="safe-rating-checkbox" checked>
-                  <label for="safe-rating-checkbox" style="margin: -3px;">Safe</label>
+                  <input type="checkbox" id="explicit-rating" checked>
+                  <label for="explicit-rating">Explicit</label>
+                  <input type="checkbox" id="questionable-rating" checked>
+                  <label for="questionable-rating">Questionable</label>
+                  <input type="checkbox" id="safe-rating" checked>
+                  <label for="safe-rating" style="margin: -3px;">Safe</label>
                 </div>
               </div>
               <div id="performance-profile-container" title="Improve performance by disabling features">
                 <label for="performance-profile">Performance Profile</label>
                 <br>
-                <select id="performance-profile">
-                  <option value="0">Normal</option>
-                  <option value="1">Low (no gallery)</option>
-                  <option value="2">Potato (only search)</option>
-                </select>
               </div>
             </div>
           </div>
         </div>
 
         <div id="bottom-panel-3">
-          <div id="show-ui-div">
-            <label class="checkbox" title="Toggle UI">
-              <input type="checkbox" id="show-ui">UI
-              <span class="option-hint"> (U)</span>
-            </label>
+          <div id="show-ui-wrapper">
           </div>
           <div class="options-container">
             <span id="find-favorite">
@@ -702,6 +656,10 @@ Lower numbers improve responsiveness">
                 style="white-space: nowrap;">Find</button>
               <input type="number" id="find-favorite-input" placeholder="ID">
             </span>
+            <div id="layout-container">
+              <label>Layout</label>
+              <br>
+            </div>
           </div>
         </div>
 
@@ -723,7 +681,7 @@ Lower numbers improve responsiveness">
   static {
     Utils.addStaticInitializer(() => {
       if (!FavoritesMenu.disabled) {
-        Utils.insertFavoritesSearchGalleryHTML("afterbegin", FavoritesMenu.uiHTML);
+        Utils.insertFavoritesSearchGalleryHTML("afterbegin", FavoritesMenu.menuHTML);
       }
     });
   }
@@ -733,594 +691,13 @@ Lower numbers improve responsiveness">
     mobileMenuBaseHeight: 56
   };
 
-  /**
-   * @type {Number}
-   */
-  maxSearchHistoryLength;
-  /**
-   * @type {Object.<PropertyKey, String>}
-   */
-  preferences;
-  /**
-   * @type {Object.<PropertyKey, String>}
-   */
-  localStorageKeys;
-  /**
-   * @type {Object.<PropertyKey, HTMLButtonElement>}
-   */
-  buttons;
-  /**
-   * @type {Object.<PropertyKey, HTMLInputElement}
-   */
-  checkboxes;
-  /**
-   * @type {Object.<PropertyKey, HTMLInputElement}
-   */
-  inputs;
-  /**
-   * @type {Cooldown}
-   */
-  columnWheelResizeCaptionCooldown;
-  /**
-   * @type {String[]}
-   */
-  searchHistory;
-  /**
-   * @type {Number}
-   */
-  searchHistoryIndex;
-  /**
-   * @type {String}
-   */
-  lastSearchQuery;
-
   constructor() {
     if (FavoritesMenu.disabled) {
       return;
     }
-    this.initializeFields();
-    this.configureMobileUI();
-    this.extractUIElements();
-    this.setMainButtonInteractability(false);
-    this.addEventListenersToFavoritesPage();
-    this.loadFavoritesPagePreferences();
-    this.removePaginatorFromFavoritesPage();
-    this.configureAddOrRemoveButtonOptionVisibility();
+    // this.configureMobileUI();
     this.configureDesktopUI();
-    this.addEventListenersToWhatsNewMenu();
-    this.addHintsOption();
-  }
-
-  initializeFields() {
-    this.maxSearchHistoryLength = 100;
-    this.searchHistory = [];
-    this.searchHistoryIndex = 0;
-    this.lastSearchQuery = "";
-    this.preferences = {
-      showAddOrRemoveButtons: Utils.userIsOnTheirOwnFavoritesPage() ? "showRemoveButtons" : "showAddFavoriteButtons",
-      showOptions: "showOptions",
-      excludeBlacklist: "excludeBlacklist",
-      searchHistory: "favoritesSearchHistory",
-      findFavorite: "findFavorite",
-      thumbSize: "thumbSize",
-      columnCount: "columnCount",
-      showUI: "showUI",
-      performanceProfile: "performanceProfile",
-      resultsPerPage: "resultsPerPage",
-      fancyImageHovering: "fancyImageHovering",
-      enableOnSearchPages: "enableOnSearchPages",
-      sortAscending: "sortAscending",
-      sortingMethod: "sortingMethod",
-      allowedRatings: "allowedRatings",
-      showHotkeyHints: "showHotkeyHints",
-      showStatisticHints: "showStatisticHints"
-    };
-    this.localStorageKeys = {
-      searchHistory: "favoritesSearchHistory"
-    };
-    this.columnWheelResizeCaptionCooldown = new Cooldown(500, true);
-  }
-
-  extractUIElements() {
-    this.buttons = {
-      search: document.getElementById("search-button"),
-      shuffle: document.getElementById("shuffle-button"),
-      clear: document.getElementById("clear-button"),
-      invert: document.getElementById("invert-button"),
-      reset: document.getElementById("reset-button"),
-      findFavorite: document.getElementById("find-favorite-button")
-    };
-    this.checkboxes = {
-      showOptions: document.getElementById("options-checkbox"),
-      showAddOrRemoveButtons: Utils.userIsOnTheirOwnFavoritesPage() ? document.getElementById("show-remove-favorite-buttons") : document.getElementById("show-add-favorite-buttons"),
-      filterBlacklist: document.getElementById("filter-blacklist-checkbox"),
-      showUI: document.getElementById("show-ui"),
-      fancyImageHovering: document.getElementById("fancy-image-hovering-checkbox"),
-      enableOnSearchPages: document.getElementById("enable-on-search-pages"),
-      sortAscending: document.getElementById("sort-ascending-checkbox"),
-      explicitRating: document.getElementById("explicit-rating-checkbox"),
-      questionableRating: document.getElementById("questionable-rating-checkbox"),
-      safeRating: document.getElementById("safe-rating-checkbox"),
-      showHotkeyHints: document.getElementById("show-hints-checkbox"),
-      showStatisticHints: document.getElementById("statistic-hint-checkbox"),
-      darkTheme: document.getElementById("dark-theme-checkbox")
-    };
-    this.inputs = {
-      searchBox: document.getElementById("favorites-search-box"),
-      findFavorite: document.getElementById("find-favorite-input"),
-      columnCount: document.getElementById("column-resize-input"),
-      performanceProfile: document.getElementById("performance-profile"),
-      resultsPerPage: document.getElementById("results-per-page-input"),
-      sortingMethod: document.getElementById("sorting-method"),
-      allowedRatings: document.getElementById("allowed-ratings")
-    };
-  }
-
-  loadFavoritesPagePreferences() {
-    const userIsLoggedIn = Utils.getUserId() !== null;
-    const showAddOrRemoveButtonsDefault = !Utils.userIsOnTheirOwnFavoritesPage() && userIsLoggedIn;
-    const addOrRemoveFavoriteButtonsAreVisible = Utils.getPreference(this.preferences.showAddOrRemoveButtons, showAddOrRemoveButtonsDefault);
-
-    this.checkboxes.showAddOrRemoveButtons.checked = addOrRemoveFavoriteButtonsAreVisible;
-    setTimeout(() => {
-      this.toggleAddOrRemoveButtons();
-    }, 100);
-
-    const showOptions = Utils.getPreference(this.preferences.showOptions, false);
-
-    this.checkboxes.showOptions.checked = showOptions;
-    this.toggleFavoritesOptions(showOptions);
-
-    if (Utils.userIsOnTheirOwnFavoritesPage()) {
-      this.checkboxes.filterBlacklist.checked = Utils.getPreference(this.preferences.excludeBlacklist, false);
-    } else {
-      this.checkboxes.filterBlacklist.checked = true;
-      this.checkboxes.filterBlacklist.parentElement.style.display = "none";
-    }
-    this.searchHistory = JSON.parse(localStorage.getItem(this.localStorageKeys.searchHistory)) || [];
-
-    if (this.searchHistory.length > 0) {
-      this.inputs.searchBox.value = this.searchHistory[0];
-    }
-    this.updateVisibilityOfSearchClearButton();
-    this.inputs.findFavorite.value = Utils.getPreference(this.preferences.findFavorite, "");
-    this.inputs.columnCount.value = Utils.getPreference(this.preferences.columnCount, Utils.defaults.columnCount);
-    this.changeColumnCount(this.inputs.columnCount.value);
-
-    const showUI = Utils.getPreference(this.preferences.showUI, true);
-
-    this.checkboxes.showUI.checked = showUI;
-    this.toggleUI(showUI);
-
-    const performanceProfile = Utils.getPerformanceProfile();
-
-    for (const option of this.inputs.performanceProfile.children) {
-      if (parseInt(option.value) === performanceProfile) {
-        option.selected = "selected";
-      }
-    }
-
-    this.inputs.resultsPerPage.value = Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage);
-
-    if (Utils.onMobileDevice()) {
-      Utils.toggleFancyImageHovering(false);
-      this.checkboxes.fancyImageHovering.parentElement.style.display = "none";
-      this.checkboxes.enableOnSearchPages.parentElement.style.display = "none";
-    } else {
-      const fancyImageHovering = Utils.getPreference(this.preferences.fancyImageHovering, false);
-
-      this.checkboxes.fancyImageHovering.checked = fancyImageHovering;
-      Utils.toggleFancyImageHovering(fancyImageHovering);
-    }
-
-    this.checkboxes.enableOnSearchPages.checked = Utils.getPreference(this.preferences.enableOnSearchPages, false);
-    this.checkboxes.sortAscending.checked = Utils.getPreference(this.preferences.sortAscending, false);
-
-    const sortingMethod = Utils.getPreference(this.preferences.sortingMethod, "default");
-
-    for (const option of this.inputs.sortingMethod) {
-      if (option.value === sortingMethod) {
-        option.selected = "selected";
-      }
-    }
-    const allowedRatings = Utils.loadAllowedRatings();
-
-    // eslint-disable-next-line no-bitwise
-    this.checkboxes.explicitRating.checked = (allowedRatings & 4) === 4;
-    // eslint-disable-next-line no-bitwise
-    this.checkboxes.questionableRating.checked = (allowedRatings & 2) === 2;
-    // eslint-disable-next-line no-bitwise
-    this.checkboxes.safeRating.checked = (allowedRatings & 1) === 1;
-    this.preventUserFromUncheckingAllRatings(allowedRatings);
-
-    const showStatisticHints = Utils.getPreference(this.preferences.showStatisticHints, false);
-
-    this.checkboxes.showStatisticHints.checked = showStatisticHints;
-    this.toggleStatisticHints(showStatisticHints);
-
-    this.checkboxes.darkTheme.checked = Utils.usingDarkTheme();
-  }
-
-  removePaginatorFromFavoritesPage() {
-    if (!Utils.onFavoritesPage()) {
-      return;
-    }
-    const paginator = document.getElementById("paginator");
-    const pi = document.getElementById("pi");
-
-    if (paginator !== null) {
-      paginator.remove();
-    }
-
-    if (pi !== null) {
-      pi.remove();
-    }
-  }
-
-  addEventListenersToFavoritesPage() {
-    this.buttons.search.onclick = (event) => {
-      const query = this.inputs.searchBox.value;
-
-      if (event.ctrlKey) {
-        const queryWithFormattedIds = query.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
-
-        Utils.openSearchPage(queryWithFormattedIds);
-      } else {
-        Utils.hideAwesomplete(this.inputs.searchBox);
-        favoritesLoader.searchFavorites(query);
-        this.addToFavoritesSearchHistory(query);
-      }
-    };
-    this.buttons.search.addEventListener("contextmenu", (event) => {
-      const queryWithFormattedIds = this.inputs.searchBox.value.replace(/(?:^|\s)(\d+)(?:$|\s)/g, " id:$1 ");
-
-      Utils.openSearchPage(queryWithFormattedIds);
-      event.preventDefault();
-    });
-    this.inputs.searchBox.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case "Enter":
-          if (Utils.awesompleteIsUnselected(this.inputs.searchBox)) {
-            event.preventDefault();
-            this.buttons.search.dispatchEvent(new Event("click"));
-          } else {
-            Utils.clearAwesompleteSelection(this.inputs.searchBox);
-          }
-          break;
-
-        case "ArrowUp":
-
-        case "ArrowDown":
-          if (Utils.awesompleteIsVisible(this.inputs.searchBox)) {
-            this.updateLastSearchQuery();
-          } else {
-            event.preventDefault();
-            this.traverseFavoritesSearchHistory(event.key);
-          }
-          break;
-
-        default:
-          this.updateLastSearchQuery();
-          break;
-      }
-    });
-    this.inputs.searchBox.addEventListener("wheel", (event) => {
-      if (event.shiftKey || event.ctrlKey) {
-        return;
-      }
-      const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
-
-      this.traverseFavoritesSearchHistory(direction);
-      event.preventDefault();
-    });
-    this.checkboxes.showOptions.onchange = () => {
-      this.toggleFavoritesOptions(this.checkboxes.showOptions.checked);
-      Utils.setPreference(this.preferences.showOptions, this.checkboxes.showOptions.checked);
-    };
-    this.checkboxes.showAddOrRemoveButtons.onchange = () => {
-      this.toggleAddOrRemoveButtons();
-      Utils.setPreference(this.preferences.showAddOrRemoveButtons, this.checkboxes.showAddOrRemoveButtons.checked);
-    };
-    this.buttons.shuffle.onclick = () => {
-      favoritesLoader.shuffleSearchResults();
-    };
-    this.buttons.clear.onclick = () => {
-      this.inputs.searchBox.value = "";
-
-      if (Utils.onMobileDevice()) {
-        this.inputs.searchBox.focus();
-      }
-      this.updateVisibilityOfSearchClearButton();
-    };
-    this.checkboxes.filterBlacklist.onchange = () => {
-      Utils.setPreference(this.preferences.excludeBlacklist, this.checkboxes.filterBlacklist.checked);
-      favoritesLoader.onOptionChanged("blacklist", this.checkboxes.filterBlacklist.checked);
-    };
-    this.buttons.invert.onclick = () => {
-      favoritesLoader.invertSearchResults();
-    };
-    this.buttons.reset.onclick = () => {
-      if (Utils.onMobileDevice()) {
-        setTimeout(() => {
-          Utils.deletePersistentData();
-        }, 10);
-      } else {
-        Utils.deletePersistentData();
-      }
-    };
-    this.inputs.findFavorite.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        this.buttons.findFavorite.click();
-      }
-    });
-    this.buttons.findFavorite.onclick = () => {
-      favoritesLoader.findFavorite(this.inputs.findFavorite.value);
-      Utils.setPreference(this.preferences.findFavorite, this.inputs.findFavorite.value);
-    };
-    this.inputs.columnCount.onchange = () => {
-      this.changeColumnCount(parseInt(this.inputs.columnCount.value));
-    };
-    this.checkboxes.showUI.onchange = () => {
-      this.toggleUI(this.checkboxes.showUI.checked);
-    };
-    this.inputs.performanceProfile.onchange = () => {
-      Utils.setPreference(this.preferences.performanceProfile, parseInt(this.inputs.performanceProfile.value));
-      window.location.reload();
-    };
-    this.inputs.resultsPerPage.onchange = () => {
-      this.changeResultsPerPage(parseInt(this.inputs.resultsPerPage.value));
-    };
-
-    if (!Utils.onMobileDevice()) {
-      this.checkboxes.fancyImageHovering.onchange = () => {
-        Utils.toggleFancyImageHovering(this.checkboxes.fancyImageHovering.checked);
-        Utils.setPreference(this.preferences.fancyImageHovering, this.checkboxes.fancyImageHovering.checked);
-      };
-    }
-    this.checkboxes.enableOnSearchPages.onchange = () => {
-      Utils.setPreference(this.preferences.enableOnSearchPages, this.checkboxes.enableOnSearchPages.checked);
-    };
-    this.checkboxes.sortAscending.onchange = () => {
-      Utils.setPreference(this.preferences.sortAscending, this.checkboxes.sortAscending.checked);
-      favoritesLoader.onOptionChanged("sortingParameters");
-    };
-    this.inputs.sortingMethod.onchange = () => {
-      Utils.setPreference(this.preferences.sortingMethod, this.inputs.sortingMethod.value);
-      favoritesLoader.onOptionChanged("sortingParameters");
-    };
-    this.inputs.allowedRatings.onchange = () => {
-      this.changeAllowedRatings();
-    };
-    window.addEventListener("wheel", (event) => {
-      if (!event.shiftKey) {
-        return;
-      }
-      const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
-      const columnAddend = delta > 0 ? -1 : 1;
-
-      if (this.columnWheelResizeCaptionCooldown.ready) {
-        Utils.forceHideCaptions(true);
-      }
-      this.changeColumnCount(parseInt(this.inputs.columnCount.value) + columnAddend);
-    }, {
-      passive: true
-    });
-    this.columnWheelResizeCaptionCooldown.onDebounceEnd = () => {
-      Utils.forceHideCaptions(false);
-    };
-    this.columnWheelResizeCaptionCooldown.onCooldownEnd = () => {
-      if (!this.columnWheelResizeCaptionCooldown.debouncing) {
-        Utils.forceHideCaptions(false);
-      }
-    };
-    window.addEventListener("readyToSearch", () => {
-      this.setMainButtonInteractability(true);
-    }, {
-      once: true
-    });
-    document.addEventListener("keydown", (event) => {
-      if (!Utils.isHotkeyEvent(event)) {
-        return;
-      }
-
-      switch (event.key.toLowerCase()) {
-        case "r":
-          this.checkboxes.showAddOrRemoveButtons.click();
-          break;
-
-        case "u":
-          this.checkboxes.showUI.click();
-          break;
-
-        case "o":
-          this.checkboxes.showOptions.click();
-          break;
-
-        case "h":
-          this.checkboxes.showHotkeyHints.click();
-          break;
-
-        case "s":
-          // this.FAVORITE_CHECKBOXES.showStatisticHints.click();
-          break;
-
-        default:
-          break;
-      }
-    }, {
-      passive: true
-    });
-    window.addEventListener("load", () => {
-      if (!Utils.onMobileDevice()) {
-        this.inputs.searchBox.focus();
-      }
-    }, {
-      once: true
-    });
-    this.checkboxes.showStatisticHints.onchange = () => {
-      this.toggleStatisticHints(this.checkboxes.showStatisticHints.checked);
-      Utils.setPreference(this.preferences.showStatisticHints, this.checkboxes.showStatisticHints.checked);
-    };
-    window.addEventListener("searchForTag", (event) => {
-      this.inputs.searchBox.value = event.detail;
-      this.buttons.search.click();
-    });
-    this.checkboxes.darkTheme.onchange = () => {
-      Utils.toggleDarkTheme(this.checkboxes.darkTheme.checked);
-    };
-  }
-
-  configureAddOrRemoveButtonOptionVisibility() {
-    this.checkboxes.showAddOrRemoveButtons.parentElement.parentElement.style.display = "block";
-  }
-
-  updateLastSearchQuery() {
-    if (this.inputs.searchBox.value !== this.lastSearchQuery) {
-      this.lastSearchQuery = this.inputs.searchBox.value;
-    }
-    this.searchHistoryIndex = -1;
-  }
-
-  /**
-   * @param {String} newSearch
-   */
-  addToFavoritesSearchHistory(newSearch) {
-    newSearch = newSearch.trim();
-    this.searchHistory = this.searchHistory.filter(search => search !== newSearch);
-    this.searchHistory.unshift(newSearch);
-    this.searchHistory.length = Math.min(this.searchHistory.length, this.maxSearchHistoryLength);
-    localStorage.setItem(this.localStorageKeys.searchHistory, JSON.stringify(this.searchHistory));
-  }
-
-  /**
-   * @param {String} direction
-   */
-  traverseFavoritesSearchHistory(direction) {
-    if (this.searchHistory.length > 0) {
-      if (direction === "ArrowUp") {
-        this.searchHistoryIndex = Math.min(this.searchHistoryIndex + 1, this.searchHistory.length - 1);
-      } else {
-        this.searchHistoryIndex = Math.max(this.searchHistoryIndex - 1, -1);
-      }
-
-      if (this.searchHistoryIndex === -1) {
-        this.inputs.searchBox.value = this.lastSearchQuery;
-      } else {
-        this.inputs.searchBox.value = this.searchHistory[this.searchHistoryIndex];
-      }
-    }
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleFavoritesOptions(value) {
-    if (Utils.onMobileDevice()) {
-      document.getElementById("left-favorites-panel-bottom-row").classList.toggle("hidden", !value);
-
-      const mobileButtonRow = document.getElementById("mobile-button-row");
-
-      if (mobileButtonRow !== null) {
-        mobileButtonRow.style.display = value ? "" : "none";
-      }
-    } else {
-      document.querySelectorAll(".options-container").forEach((option) => {
-        option.style.display = value ? "block" : "none";
-      });
-    }
-  }
-
-  toggleAddOrRemoveButtons() {
-    const value = this.checkboxes.showAddOrRemoveButtons.checked;
-
-    this.toggleAddOrRemoveButtonVisibility(value);
-    Utils.toggleThumbHoverOutlines(value);
-    Utils.forceHideCaptions(value);
-
-    if (!value) {
-      dispatchEvent(new Event("captionOverrideEnd"));
-    }
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleAddOrRemoveButtonVisibility(value) {
-    const visibility = value ? "visible" : "hidden";
-
-    Utils.insertStyleHTML(`
-        .add-or-remove-button {
-          visibility: ${visibility} !important;
-        }
-      `, "add-or-remove-button-visibility");
-  }
-
-  /**
-   * @param {Number} count
-   */
-  changeColumnCount(count) {
-    count = parseInt(count);
-
-    if (isNaN(count)) {
-      this.inputs.columnCount.value = Utils.getPreference(this.preferences.columnCount, Utils.defaults.columnCount);
-      return;
-    }
-    const minimumColumns = Utils.onMobileDevice() ? 1 : 4;
-
-    count = Utils.clamp(parseInt(count), minimumColumns, 20);
-    Utils.insertStyleHTML(`
-      #favorites-search-gallery-content {
-        grid-template-columns: repeat(${count}, 1fr) !important;
-      }
-      `, "column-count");
-    this.inputs.columnCount.value = count;
-    Utils.setPreference(this.preferences.columnCount, count);
-  }
-
-  /**
-   * @param {Number} resultsPerPage
-   */
-  changeResultsPerPage(resultsPerPage) {
-    resultsPerPage = parseInt(resultsPerPage);
-
-    if (isNaN(resultsPerPage)) {
-      this.inputs.resultsPerPage.value = Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage);
-      return;
-    }
-    resultsPerPage = Utils.clamp(resultsPerPage, 50, 5000);
-    this.inputs.resultsPerPage.value = resultsPerPage;
-    Utils.setPreference(this.preferences.resultsPerPage, resultsPerPage);
-    favoritesLoader.onOptionChanged("resultsPerPage", resultsPerPage);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleUI(value) {
-    const menu = document.getElementById("favorites-search-gallery-menu");
-    const menuPanels = document.getElementById("favorites-search-gallery-menu-panels");
-    const header = document.getElementById("header");
-    const showUIDiv = document.getElementById("show-ui-div");
-    const showUIContainer = document.getElementById("bottom-panel-3");
-
-    if (value) {
-      if (header !== null) {
-        header.style.display = "";
-      }
-      showUIContainer.insertAdjacentElement("afterbegin", showUIDiv);
-      menuPanels.style.display = "flex";
-      menu.removeAttribute("style");
-    } else {
-      menu.appendChild(showUIDiv);
-
-      if (header !== null) {
-        header.style.display = "none";
-      }
-      menuPanels.style.display = "none";
-      menu.style.background = getComputedStyle(document.body).background;
-    }
-    showUIDiv.classList.toggle("ui-hidden", !value);
-    Utils.setPreference(this.preferences.showUI, value);
+    this.setMainButtonInteractability(true);
   }
 
   configureMobileUI() {
@@ -1336,7 +713,6 @@ Lower numbers improve responsiveness">
     this.createControlsGuide();
     this.createPaginationFooter();
     this.createToggleSwitches();
-    // this.createMobileButtonRow();
     this.createMobileSymbolRow();
   }
 
@@ -1655,7 +1031,7 @@ Lower numbers improve responsiveness">
     document.getElementById("reset-button").remove();
 
     Utils.insertStyleHTML(`
-        #mobile-toolbar-row {
+        .mobile-toolbar-row {
             display: flex;
             align-items: center;
             background: none;
@@ -2224,42 +1600,6 @@ Lower numbers improve responsiveness">
     }
   }
 
-  createMobileButtonRow() {
-    const buttonHeight = 30;
-
-    Utils.insertStyleHTML(`
-        #mobile-button-row {
-          padding: 0;
-          position: absolute;
-          width: 98%;
-          display: flex;
-          gap: 10px;
-          padding: 0px 20px;
-
-          >button, >div {
-            font-size: 20px;
-            flex: 1;
-            height: ${buttonHeight}px;
-            border-radius: 30px;
-          }
-        }
-
-        #left-favorites-panel-bottom-row>div:not(:first-child) {
-          margin-top:${buttonHeight}px
-        }
-      `, "mobile-button");
-
-    const html = `
-      <div id="mobile-button-row">
-        <button>Reset</button>
-        <button>Help</button>
-        <button>Shuffle</button>
-      </div>
-      `;
-
-    document.getElementById("left-favorites-panel-bottom-row").insertAdjacentHTML("afterbegin", html);
-  }
-
   createMobileSymbolRow() {
     Utils.insertStyleHTML(`
       #mobile-symbol-container {
@@ -2347,10 +1687,6 @@ Lower numbers improve responsiveness">
     });
   }
 
-  clickedOnSearchItem(event) {
-
-  }
-
   updateVisibilityOfSearchClearButton() {
     if (!Utils.onMobileDevice()) {
       return;
@@ -2421,76 +1757,6 @@ Lower numbers improve responsiveness">
     `, "desktop");
   }
 
-  addEventListenersToWhatsNewMenu() {
-    if (Utils.onMobileDevice()) {
-      return;
-    }
-    const whatsNew = document.getElementById("whats-new-link");
-
-    if (whatsNew === null) {
-      return;
-    }
-    whatsNew.onclick = () => {
-      if (whatsNew.classList.contains("persistent")) {
-        whatsNew.classList.remove("persistent");
-        whatsNew.classList.add("hidden");
-      } else {
-        whatsNew.classList.add("persistent");
-      }
-      return false;
-    };
-
-    whatsNew.onblur = () => {
-      whatsNew.classList.remove("persistent");
-      whatsNew.classList.add("hidden");
-    };
-
-    whatsNew.onmouseenter = () => {
-      whatsNew.classList.remove("hidden");
-    };
-
-    whatsNew.onmouseleave = () => {
-      whatsNew.classList.add("hidden");
-    };
-  }
-
-  changeAllowedRatings() {
-    let allowedRatings = 0;
-
-    if (this.checkboxes.explicitRating.checked) {
-      allowedRatings += 4;
-    }
-
-    if (this.checkboxes.questionableRating.checked) {
-      allowedRatings += 2;
-    }
-
-    if (this.checkboxes.safeRating.checked) {
-      allowedRatings += 1;
-    }
-
-    Utils.setPreference(this.preferences.allowedRatings, allowedRatings);
-    favoritesLoader.onOptionChanged("allowedRatings", allowedRatings);
-    this.preventUserFromUncheckingAllRatings(allowedRatings);
-  }
-
-  /**
-   * @param {Number} allowedRatings
-   */
-  preventUserFromUncheckingAllRatings(allowedRatings) {
-    if (allowedRatings === 4) {
-      this.checkboxes.explicitRating.nextElementSibling.style.pointerEvents = "none";
-    } else if (allowedRatings === 2) {
-      this.checkboxes.questionableRating.nextElementSibling.style.pointerEvents = "none";
-    } else if (allowedRatings === 1) {
-      this.checkboxes.safeRating.nextElementSibling.style.pointerEvents = "none";
-    } else {
-      this.checkboxes.explicitRating.nextElementSibling.removeAttribute("style");
-      this.checkboxes.questionableRating.nextElementSibling.removeAttribute("style");
-      this.checkboxes.safeRating.nextElementSibling.removeAttribute("style");
-    }
-  }
-
   setMainButtonInteractability(value) {
     const container = document.getElementById("left-favorites-panel-top-row");
 
@@ -2502,41 +1768,5 @@ Lower numbers improve responsiveness">
     for (const button of mainButtons) {
       button.disabled = !value;
     }
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleOptionHints(value) {
-    const html = value ? "" : ".option-hint {display:none;}";
-
-    Utils.insertStyleHTML(html, "option-hint-visibility");
-  }
-
-  async addHintsOption() {
-    this.toggleOptionHints(false);
-
-    await Utils.sleep(50);
-
-    if (Utils.onMobileDevice()) {
-      return;
-    }
-    const optionHintsEnabled = Utils.getPreference(this.preferences.showHotkeyHints, false);
-
-    this.checkboxes.showHotkeyHints.checked = optionHintsEnabled;
-    this.checkboxes.showHotkeyHints.onchange = () => {
-      this.toggleOptionHints(this.checkboxes.showHotkeyHints.checked);
-      Utils.setPreference(this.preferences.showHotkeyHints, this.checkboxes.showHotkeyHints.checked);
-    };
-    this.toggleOptionHints(optionHintsEnabled);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleStatisticHints(value) {
-    const html = value ? "" : ".statistic-hint {display:none;}";
-
-    Utils.insertStyleHTML(html, "statistic-hint-visibility");
   }
 }

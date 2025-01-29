@@ -556,6 +556,7 @@ class ImageRenderer {
     } catch (error) {
       if (error.name === "AbortError") {
         this.deleteRender(request.id);
+        this.notifyMainThreadOfRenderDeletion(request.id);
       } else {
         console.error({
           error,
@@ -648,7 +649,7 @@ class ImageRenderer {
     this.abortAllFetchRequests();
 
     for (const id of this.renders.keys()) {
-      this.deleteRender(id, true);
+      this.deleteRender(id);
     }
     this.batchRenderRequest = undefined;
     this.renderRequest = undefined;
@@ -664,15 +665,15 @@ class ImageRenderer {
     for (const id of this.renders.keys()) {
       if (!idsToRender.has(id)) {
         this.deleteRender(id);
+        this.notifyMainThreadOfRenderDeletion(id);
       }
     }
   }
 
   /**
    * @param {String} id
-   * @param {Boolean} initiatedByMainThread
    */
-  deleteRender(id, initiatedByMainThread = false) {
+  deleteRender(id) {
     if (!this.renders.has(id)) {
       return;
     }
@@ -683,10 +684,12 @@ class ImageRenderer {
     }
     this.renders.set(id, null);
     this.renders.delete(id);
+  }
 
-    if (initiatedByMainThread) {
-      return;
-    }
+  /**
+   * @param {String} id
+   */
+  notifyMainThreadOfRenderDeletion(id) {
     postMessage({
       action: "renderDeleted",
       id
@@ -790,6 +793,10 @@ onmessage = (message) => {
       BatchRenderRequest.settings.megabyteMemoryLimit = message.data.megabyteLimit;
       BatchRenderRequest.settings.minimumRequestCount = message.data.minimumImagesToRender;
       imageRenderer = new ImageRenderer(message.data);
+      setInterval(() => {
+        // console.log(imageRenderer.renders.size);
+      }, 1000);
+
       break;
 
     case "findExtension":

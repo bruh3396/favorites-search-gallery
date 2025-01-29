@@ -22,7 +22,7 @@ class FavoritesPageRequest {
   /**
    * @type {Number}
    */
-  get retryDelay() {
+  get fetchDelay() {
     return (7 ** (this.retryCount)) + 200;
   }
 

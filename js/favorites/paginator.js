@@ -6,7 +6,7 @@ class FavoritesPaginator {
   /**
    * @type {HTMLElement}
    */
-  menu;
+  pageSelectionMenu;
   /**
    * @type {HTMLLabelElement}
    */
@@ -23,13 +23,33 @@ class FavoritesPaginator {
    * @type {Number}
    */
   maxPageNumberButtons;
+  /**
+   * @type {Masonry}
+   */
+  masonry;
+  /**
+   * @type {Function}
+   */
+  onPageChange;
 
-  constructor() {
+  /**
+   * @type {Boolean}
+   */
+  get usingMasonry() {
+    return this.content.classList.contains("masonry");
+  }
+
+  /**
+   * @param {Function} onPageChange
+   */
+  constructor(onPageChange) {
     this.content = this.createContentContainer();
-    this.menu = this.createMenuContainer();
+    this.pageSelectionMenu = this.createPageSelectionMenuContainer();
     this.currentPageNumber = 1;
-    this.maxFavoritesPerPage = Utils.getPreference("resultsPerPage", Utils.defaults.resultsPerPage);
+    this.maxFavoritesPerPage = Utils.getPreference("resultsPerPage", 200);
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
+    this.masonry = null;
+    this.onPageChange = onPageChange;
   }
 
   /**
@@ -39,6 +59,7 @@ class FavoritesPaginator {
     const content = document.createElement("div");
 
     content.id = "favorites-search-gallery-content";
+    content.className = Utils.getPreference("layoutSelect", "grid");
     Utils.favoritesSearchGalleryContainer.appendChild(content);
     return content;
   }
@@ -46,27 +67,32 @@ class FavoritesPaginator {
   /**
    * @returns {HTMLDivElement}
    */
-  createMenuContainer() {
+  createPageSelectionMenuContainer() {
     const menu = document.createElement("span");
 
     menu.id = "favorites-pagination-container";
     return menu;
   }
 
-  insertMenu() {
-    if (document.getElementById(this.menu.id) === null) {
+  insertPageSelectionMenu() {
+    if (document.getElementById(this.pageSelectionMenu.id) === null) {
       const placeToInsertMenu = document.getElementById("favorites-pagination-placeholder");
 
-      placeToInsertMenu.insertAdjacentElement("afterend", this.menu);
+      placeToInsertMenu.insertAdjacentElement("afterend", this.pageSelectionMenu);
       placeToInsertMenu.remove();
     }
+  }
+
+  setupPageSelectionMenu() {
+    this.insertPageSelectionMenu();
+    this.updatePageSelectionMenu(1, []);
   }
 
   /**
    * @param {Post[]} favorites
    */
   paginate(favorites) {
-    this.insertMenu();
+    this.insertPageSelectionMenu();
     this.changePage(1, favorites);
   }
 
@@ -85,7 +111,7 @@ class FavoritesPaginator {
     const onLastPage = (pageCount === this.currentPageNumber);
 
     if (needsToCreateNewPage && !alreadyAtMaxPageNumberButtons) {
-      this.updateMenu(this.currentPageNumber, favorites);
+      this.updatePageSelectionMenu(this.currentPageNumber, favorites);
     } else {
       this.updateArrowButtonEventListeners(favorites);
       this.updateNumberTraversalButtonEventListeners(favorites);
@@ -101,6 +127,9 @@ class FavoritesPaginator {
     for (const favorite of favoritesToAdd) {
       favorite.insertAtEndOfContent(this.content);
     }
+
+    this.removeSpacers();
+    this.forceActivateMasonry();
     this.updateRangeIndicator(this.currentPageNumber, favorites.length);
   }
 
@@ -110,17 +139,17 @@ class FavoritesPaginator {
    */
   changePage(pageNumber, favorites) {
     this.currentPageNumber = pageNumber;
-    this.updateMenu(pageNumber, favorites);
+    this.updatePageSelectionMenu(pageNumber, favorites);
     this.showFavorites(pageNumber, favorites);
-    dispatchEvent(new Event("changedPageRaw"));
+    this.onPageChange();
   }
 
   /**
    * @param {Number} pageNumber
    * @param {Post[]} favorites
    */
-  updateMenu(pageNumber, favorites) {
-    this.menu.innerHTML = "";
+  updatePageSelectionMenu(pageNumber, favorites) {
+    this.pageSelectionMenu.innerHTML = "";
     this.updateRangeIndicator(pageNumber, favorites.length);
     this.createNumberTraversalButtons(pageNumber, favorites);
     this.createArrowTraversalButtons(favorites);
@@ -214,7 +243,7 @@ class FavoritesPaginator {
     pageNumberButton.onclick = () => {
       this.changePage(pageNumber, favorites);
     };
-    this.menu.insertAdjacentElement(position, pageNumberButton);
+    this.pageSelectionMenu.insertAdjacentElement(position, pageNumberButton);
     pageNumberButton.textContent = pageNumber;
   }
 
@@ -274,10 +303,10 @@ class FavoritesPaginator {
     finalPage.onclick = () => {
       this.changePage(pageCount, favorites);
     };
-    this.menu.insertAdjacentElement("afterbegin", previousPage);
-    this.menu.insertAdjacentElement("afterbegin", firstPage);
-    this.menu.appendChild(nextPage);
-    this.menu.appendChild(finalPage);
+    this.pageSelectionMenu.insertAdjacentElement("afterbegin", previousPage);
+    this.pageSelectionMenu.insertAdjacentElement("afterbegin", firstPage);
+    this.pageSelectionMenu.appendChild(nextPage);
+    this.pageSelectionMenu.appendChild(finalPage);
 
     this.updateArrowTraversalButtonInteractability(previousPage, firstPage, nextPage, finalPage, this.getPageCount(favorites.length));
   }
@@ -305,7 +334,7 @@ class FavoritesPaginator {
         button.click();
       }
     };
-    this.menu.appendChild(container);
+    this.pageSelectionMenu.appendChild(container);
     this.updateArrowButtonEventListeners(favorites);
   }
 
@@ -325,7 +354,7 @@ class FavoritesPaginator {
     gotoPageButton.onclick = () => {
       let pageNumber = parseInt(input.value);
 
-      if (!Utils.isNumber(pageNumber)) {
+      if (!Utils.isOnlyDigits(pageNumber)) {
         return;
       }
       pageNumber = Utils.clamp(pageNumber, 1, pageCount);
@@ -350,7 +379,22 @@ class FavoritesPaginator {
     }
     this.content.innerHTML = "";
     this.content.appendChild(newContent);
-    window.scrollTo(0, Utils.onMobileDevice() ? 10 : 0);
+    this.forceActivateMasonry();
+
+    if (this.content.className === "row") {
+      this.addSpacers();
+    }
+    Utils.scrollToTop();
+  }
+
+  forceActivateMasonry() {
+    if (this.usingMasonry) {
+      this.deactivateMasonry();
+      this.activateMasonry();
+      imagesLoaded(this.content).on("always", () => {
+        this.updateMasonry();
+      });
+    }
   }
 
   /**
@@ -465,9 +509,9 @@ class FavoritesPaginator {
     }
 
     await Utils.sleep(150);
-    Utils.scrollToThumb(id, false, false);
+    Utils.scrollToThumb(id, false);
     await Utils.sleep(50);
-    Utils.scrollToThumb(id, false, false);
+    Utils.scrollToThumb(id, false);
     const thumb = document.getElementById(id);
 
     if (thumb === null || thumb.classList.contains("blink")) {
@@ -476,5 +520,69 @@ class FavoritesPaginator {
     thumb.classList.add("blink");
     await Utils.sleep(1500);
     thumb.classList.remove("blink");
+  }
+
+  /**
+   *
+   * @param {"grid" | "row" | "masonry"} layout
+   */
+  changeLayout(layout) {
+    this.content.className = layout;
+
+    if (layout === "row") {
+      this.addSpacers();
+    } else {
+      this.removeSpacers();
+    }
+
+    if (layout === "masonry") {
+      this.activateMasonry();
+    } else {
+      this.deactivateMasonry();
+    }
+  }
+
+  activateMasonry() {
+    this.masonry = new Masonry(this.content, {
+      itemSelector: ".favorite",
+      columnWidth: ".favorite",
+      gutter: 10,
+      horizontalOrder: true,
+      isFitWidth: true
+    });
+  }
+
+  deactivateMasonry() {
+    if (this.masonry !== null) {
+      this.masonry.destroy();
+      this.masonry = null;
+    }
+  }
+
+  updateMasonry() {
+    if (this.masonry !== null) {
+      this.masonry.layout();
+    }
+  }
+
+  addSpacers() {
+    this.removeSpacers();
+
+    for (let i = 0; i < 8; i += 1) {
+      this.content.appendChild(this.createSpacer());
+    }
+  }
+
+  removeSpacers() {
+    for (const spacer of Array.from(document.getElementsByClassName("spacer"))) {
+      spacer.remove();
+    }
+  }
+
+  createSpacer() {
+    const spacer = document.createElement("div");
+
+    spacer.className = "spacer";
+    return spacer;
   }
 }

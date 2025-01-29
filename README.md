@@ -7,6 +7,7 @@
 [Controls](#controls)<br>
 [Search Syntax](#search-syntax)<br>
 [FAQ](#faq)
+[Credits](#credits)<br>
 
 ## About
 
@@ -37,7 +38,7 @@ This script is still in development, please let me know if you experience a bug,
 ### Mobile Android
 * Install Firefox on the Google Play Store
 * Install Tampermonkey Extension and enable it in Firefox
-* Click green "Install this script" button\
+* Click green "Install this script" button
 * Go to any favorites page, it should end with: **index.php?page=favorites&s=view&id=<span style="color:blue">\<ID\></span>**
 
 ## Features
@@ -238,3 +239,9 @@ Q: Why am I experiencing lag?<br>
 * Improve responsiveness and performance by:
   * Reducing the "Results per Page" option.
   * Lowering the "Performance Profile" option.
+
+## Credits
+
+**Masonry**: A cascading grid layout library by David DeSandro. [Website](https://masonry.desandro.com/) | [GitHub Repository](https://github.com/desandro/masonry)<br>
+**imagesLoaded**: A JavaScript plugin to detect when images have been loaded, by David DeSandro. [Website](https://imagesloaded.desandro.com/) | [GitHub Repository](https://github.com/desandro/imagesloaded)<br>
+**Awesomplete**: An ultra-lightweight, customizable, simple autocomplete widget with zero dependencies, by Lea Verou. [Website](https://leaverou.github.io/awesomplete/) | [GitHub Repository](https://github.com/LeaVerou/awesomplete)

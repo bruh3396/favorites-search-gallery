@@ -261,9 +261,9 @@ class SearchCommand {
     for (const post of posts) {
       if (this.matches(post)) {
         results.push(post);
-        post.setMatched(true);
+        post.setAsMatchedByMostRecentSearch(true);
       } else {
-        post.setMatched(false);
+        post.setAsMatchedByMostRecentSearch(false);
       }
     }
     return results;

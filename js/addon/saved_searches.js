@@ -229,6 +229,7 @@ class SavedSearches {
   addEventListeners() {
     this.saveButton.onclick = () => {
       this.saveSearch(this.textarea.value.trim());
+      this.storeSavedSearches();
     };
     this.textarea.addEventListener("keydown", (event) => {
       switch (event.key) {
@@ -268,9 +269,8 @@ class SavedSearches {
 
   /**
    * @param {String} newSavedSearch
-   * @param {Boolean} updateLocalStorage
    */
-  saveSearch(newSavedSearch, updateLocalStorage = true) {
+  saveSearch(newSavedSearch) {
     if (newSavedSearch === "" || newSavedSearch === undefined) {
       return;
     }
@@ -297,18 +297,11 @@ class SavedSearches {
     newListItem.appendChild(savedSearchLabel);
     this.savedSearchesList.insertBefore(newListItem, this.savedSearchesList.firstChild);
     savedSearchLabel.onclick = () => {
-      const searchBox = document.getElementById("favorites-search-box");
+      const initialSearchBoxValue = Utils.getMainSearchBoxValue();
+      const optionalSpace = initialSearchBoxValue === "" ? "" : " ";
 
       navigator.clipboard.writeText(savedSearchLabel.innerText);
-
-      if (searchBox === null) {
-        return;
-      }
-
-      if (searchBox.value !== "") {
-        searchBox.value += " ";
-      }
-      searchBox.value += savedSearchLabel.innerText;
+      Utils.setMainSearchBoxValue(`${initialSearchBoxValue}${optionalSpace}${savedSearchLabel.innerText}`);
     };
     removeButton.onclick = () => {
       if (this.inEditMode()) {
@@ -340,10 +333,6 @@ class SavedSearches {
       this.stopEditingSavedSearches(newListItem);
     };
     this.textarea.value = "";
-
-    if (updateLocalStorage) {
-      this.storeSavedSearches();
-    }
   }
 
   /**
@@ -370,6 +359,7 @@ class SavedSearches {
     this.saveButton.textContent = "Save";
     this.saveButton.onclick = () => {
       this.saveSearch(this.textarea.value.trim());
+      this.storeSavedSearches();
     };
     this.textarea.value = "";
     this.exportButton.style.display = "";
@@ -394,7 +384,7 @@ class SavedSearches {
     }
 
     for (let i = savedSearches.length - 1; i >= 0; i -= 1) {
-      this.saveSearch(savedSearches[i], false);
+      this.saveSearch(savedSearches[i]);
     }
   }
 
@@ -414,6 +404,7 @@ class SavedSearches {
       for (let i = searches.length - 1; i >= 0; i -= 1) {
         this.saveSearch(searches[i]);
       }
+      this.storeSavedSearches();
     }, {
       once: true
     });
@@ -465,5 +456,6 @@ class SavedSearches {
     const customSearch = `( ${searchResultIds.join(" ~ ")} )`;
 
     this.saveSearch(customSearch);
+    this.storeSavedSearches();
   }
 }

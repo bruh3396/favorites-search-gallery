@@ -181,9 +181,9 @@ class FavoritesFetcher {
         this.onFavoritesPageRequestSuccess(request, html);
       })
       .catch((error) => {
-        this.onFavoritesPageRequestFail(request, error);
+        this.onFavoritesPageRequestError(request, error);
       });
-    await Utils.sleep(request.retryDelay);
+    await Utils.sleep(request.fetchDelay);
   }
 
   /**
@@ -218,7 +218,7 @@ class FavoritesFetcher {
    * @param {FavoritesPageRequest} request
    * @param {Error} error
    */
-  onFavoritesPageRequestFail(request, error) {
+  onFavoritesPageRequestError(request, error) {
     console.error(error);
     request.incrementRetryCount();
     this.failedRequests.push(request);

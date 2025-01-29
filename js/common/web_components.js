@@ -70,8 +70,6 @@ class HoldButton extends HTMLElement {
         this.holdingDown = true;
         this.startPolling();
       }
-    }, {
-      passive: true
     });
 
     this.addEventListener("mouseup", (event) => {
@@ -79,8 +77,6 @@ class HoldButton extends HTMLElement {
         this.holdingDown = false;
         this.stopPolling();
       }
-    }, {
-      passive: true
     });
 
     this.addEventListener("mouseleave", () => {
@@ -89,8 +85,6 @@ class HoldButton extends HTMLElement {
         this.holdingDown = false;
       }
       this.stopPolling();
-    }, {
-      passive: true
     });
   }
 
@@ -130,7 +124,15 @@ class NumberComponent {
   /**
    * @type {Number}
    */
-  increment;
+  stepSize;
+  /**
+   * @type {{min: Number, max: Number}}
+   */
+  range;
+  /**
+   * @type {Number}
+   */
+  defaultValue;
 
   /**
    * @type {Boolean}
@@ -140,7 +142,7 @@ class NumberComponent {
   }
 
   /**
-   * @param {HTMLDivElement} element
+   * @param {HTMLElement} element
    */
   constructor(element) {
     this.connectSubElements(element);
@@ -152,11 +154,18 @@ class NumberComponent {
     if (!this.allSubComponentsConnected) {
       return;
     }
-    this.increment = Utils.roundToTwoDecimalPlaces(parseFloat(this.input.getAttribute("step")) || 1);
+    this.stepSize = Utils.roundToTwoDecimalPlaces(parseFloat(this.input.getAttribute("step")) || 1);
 
     if (this.input.onchange === null) {
       this.input.onchange = () => { };
     }
+
+    this.range = {
+      min: parseFloat(this.input.getAttribute("min")) || 0,
+      max: parseFloat(this.input.getAttribute("max")) || 100
+    };
+    this.defaultValue = parseFloat(this.input.getAttribute("defaultValue")) || 1;
+    this.setValue(this.defaultValue);
   }
 
   /**
@@ -173,34 +182,26 @@ class NumberComponent {
       return;
     }
     this.upArrow.onmousehold = () => {
-      this.incrementInput(true);
+      this.increment();
     };
     this.downArrow.onmousehold = () => {
-      this.incrementInput(false);
+      this.decrement();
     };
     this.upArrow.addEventListener("mousedown", (event) => {
       if (event.button === 0) {
-        this.incrementInput(true);
+        this.increment();
       }
-    }, {
-      passive: true
     });
     this.downArrow.addEventListener("mousedown", (event) => {
       if (event.button === 0) {
-        this.incrementInput(false);
+        this.decrement();
       }
-    }, {
-      passive: true
     });
     this.upArrow.addEventListener("mouseup", () => {
       this.input.onchange();
-    }, {
-      passive: true
     });
     this.downArrow.addEventListener("mouseup", () => {
       this.input.onchange();
-    }, {
-      passive: true
     });
     this.upArrow.onMouseLeaveWhileHoldingDown = () => {
       this.input.onchange();
@@ -208,15 +209,26 @@ class NumberComponent {
     this.downArrow.onMouseLeaveWhileHoldingDown = () => {
       this.input.onchange();
     };
+    this.input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        this.setValue(this.input.value);
+      }
+    });
+  }
+
+  increment() {
+    this.setValue((parseFloat(this.input.value) || 1) + this.stepSize);
+  }
+
+  decrement() {
+    this.setValue((parseFloat(this.input.value) || 1) - this.stepSize);
   }
 
   /**
-   * @param {Boolean} add
+   * @param {Number} value
    */
-  incrementInput(add) {
-    const currentValue = parseFloat(this.input.value) || 1;
-    const incrementedValue = add ? currentValue + this.increment : currentValue - this.increment;
-
-    this.input.value = Utils.clamp(incrementedValue, 0, 9999);
+  setValue(value) {
+    value = Number(isNaN(value) ? this.range.min : value);
+    this.input.value = Utils.clamp(parseFloat(value), this.range.min, this.range.max);
   }
 }

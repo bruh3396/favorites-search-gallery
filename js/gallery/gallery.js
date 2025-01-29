@@ -1,5 +1,4 @@
 class Gallery {
-  // TODO move UI bits to separate class
   static galleryHTML = `
 <style>
   body {
@@ -244,7 +243,9 @@ class Gallery {
       return this.loopAtEndOfGalleryValue;
     },
     endlessSearchPageGallery: true,
-    debugEnabled: false
+    debugEnabled: false,
+    idleInteractionTimeout: 250,
+    renderOnInteractionEnd: true
   };
   static keyHeldDownTraversalCooldown = new Cooldown(Gallery.settings.traversalCooldownTime);
   static backgroundRenderingOnPageChangeCooldown = new Cooldown(Gallery.settings.renderOnPageChangeCooldownTime, true);
@@ -347,13 +348,17 @@ class Gallery {
    */
   videoController;
   /**
-   * @type {Renderer}
+   * @type {RendererInterface}
    */
   renderer;
   /**
    * @type {PostLoader}
    */
   postLoader;
+  /**
+   * @type {InteractionTracker}
+   */
+  interactionTracker;
   /**
    * @type {Number}
    */
@@ -424,9 +429,17 @@ class Gallery {
   }
 
   initializeComponents() {
-    this.renderer = new Renderer();
+    this.renderer = new RendererInterface();
     this.videoController = new VideoController();
     this.postLoader = new PostLoader();
+
+    if (Gallery.settings.renderOnInteractionEnd) {
+      this.interactionTracker = new InteractionTracker(Gallery.settings.idleInteractionTimeout, () => {
+        if (this.thumbUnderCursor !== null) {
+          this.renderImagesAround(this.thumbUnderCursor);
+        }
+      });
+    }
     this.createAutoplayController();
   }
 
@@ -555,7 +568,7 @@ class Gallery {
         const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
         const direction = delta > 0 ? Gallery.directions.left : Gallery.directions.right;
 
-        this.traverseGallery.bind(this)(direction, false);
+        this.navigate.bind(this)(direction, false);
       } else if (this.thumbUnderCursor !== null && this.showOriginalContentOnHover) {
         let opacity = parseFloat(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
 
@@ -585,7 +598,7 @@ class Gallery {
         case Gallery.directions.left:
 
         case Gallery.directions.right:
-          this.traverseGallery(event.key, event.repeat);
+          this.navigate(event.key, event.repeat);
           break;
 
         case "X":
@@ -682,8 +695,8 @@ class Gallery {
     window.addEventListener("blur", () => {
       this.toggleCtrlClickOpenMediaInNewTab(false);
     });
-    window.addEventListener("dblclick", () => {
-      if (this.inGallery && !this.recentlyEnteredGallery) {
+    window.addEventListener("dblclick", (event) => {
+      if (this.inGallery && !this.recentlyEnteredGallery && !this.clickedOnAutoplayMenu(event)) {
         this.exitGallery();
         this.toggleAllVisibility(false);
       }
@@ -790,7 +803,7 @@ class Gallery {
     window.addEventListener("didNotChangePageInGallery", (event) => {
       if (this.inGallery) {
         this.setNextSelectedThumbIndex(event.detail);
-        this.traverseGalleryHelper();
+        this.navigateHelper();
       }
     });
   }
@@ -840,12 +853,12 @@ class Gallery {
       }
 
       if (Gallery.swipeControls.left) {
-        this.traverseGallery(Gallery.directions.right, false);
+        this.navigate(Gallery.directions.right, false);
         return;
       }
 
       if (Gallery.swipeControls.right) {
-        this.traverseGallery(Gallery.directions.left, false);
+        this.navigate(Gallery.directions.left, false);
 
       }
       // this.exitGallery();
@@ -909,12 +922,12 @@ class Gallery {
     this.toggleTapTraversal(false);
     leftTap.ontouchend = () => {
       if (this.inGallery) {
-        this.traverseGallery(Gallery.directions.left, false);
+        this.navigate(Gallery.directions.left, false);
       }
     };
     rightTap.ontouchend = () => {
       if (this.inGallery) {
-        this.traverseGallery(Gallery.directions.right, false);
+        this.navigate(Gallery.directions.right, false);
       }
     };
   }
@@ -957,7 +970,6 @@ class Gallery {
 
     if (Gallery.settings.endlessSearchPageGallery) {
       window.addEventListener("load", async() => {
-        await Utils.sleep(1000);
         await this.postLoader.loadCurrentChunk();
         const thumb = document.querySelector(".thumb");
 
@@ -1101,12 +1113,12 @@ class Gallery {
         if (this.inGallery) {
           const direction = Autoplay.settings.moveForward ? Gallery.directions.right : Gallery.directions.left;
 
-          this.traverseGallery(direction, false);
+          this.navigate(direction, false);
         }
       },
       () => {
         if (this.inGallery && Utils.isVideo(this.getSelectedThumb())) {
-          this.videoController.playOriginalVideo(this.getSelectedThumb());
+          this.videoController.playVideo(this.getSelectedThumb());
         }
       }
     );
@@ -1151,11 +1163,12 @@ class Gallery {
       this.onFavoriteFound();
       return;
     }
-    setTimeout(() => {
-      if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
+
+    if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
+      imagesLoaded(document.body).on("always", () => {
         this.renderer.renderImagesInTheBackground();
-      }
-    }, 50);
+      });
+    }
   }
 
   onPageChangedInGallery() {
@@ -1164,7 +1177,7 @@ class Gallery {
     } else {
       this.currentlySelectedThumbIndex = Gallery.visibleThumbs.length - 1;
     }
-    this.traverseGalleryHelper();
+    this.navigateHelper();
   }
 
   onFavoriteFound() {
@@ -1233,11 +1246,16 @@ class Gallery {
     image.onmouseout = (event) => {
       this.thumbUnderCursor = null;
 
+      if (event.relatedTarget !== null && event.relatedTarget.closest("#gallery-container") === null) {
+        // this.thumbUnderCursor = null;
+      }
+
       if (this.inGallery || Utils.enteredOverCaptionTag(event)) {
         return;
       }
       this.videoController.stopAllVideos();
       this.hideOriginalContent();
+      this.renderer.clearCanvases();
     };
   }
 
@@ -1326,6 +1344,7 @@ class Gallery {
 
     if (!Utils.onMobileDevice() && thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGallery) {
       this.hideOriginalContent();
+      this.renderer.clearCanvases();
 
       if (thumbIndex !== null && this.showOriginalContentOnHover) {
         this.showOriginalContent(Gallery.visibleThumbs[thumbIndex]);
@@ -1345,7 +1364,7 @@ class Gallery {
    * @param {String} direction
    * @param {Boolean} keyIsHeldDown
    */
-  traverseGallery(direction, keyIsHeldDown) {
+  navigate(direction, keyIsHeldDown) {
     if (Gallery.settings.debugEnabled) {
       this.getSelectedThumb().classList.remove("debug-selected");
     }
@@ -1355,12 +1374,12 @@ class Gallery {
     }
 
     if (Utils.onSearchPage()) {
-      if (this.reachedEndOfGallery(direction) && Gallery.settings.endlessSearchPageGallery) {
+      if (this.reachedEnd(direction) && Gallery.settings.endlessSearchPageGallery) {
         this.changedPageInGalleryDirection = direction;
         this.softLoadNextSearchPage(direction);
         return;
       }
-    } else if (!Gallery.settings.loopAtEndOfGallery && this.reachedEndOfGallery(direction) && Gallery.finishedLoading) {
+    } else if (!Gallery.settings.loopAtEndOfGallery && this.reachedEnd(direction) && Gallery.finishedLoading) {
       this.changedPageInGalleryDirection = direction;
       dispatchEvent(new CustomEvent("reachedEndOfGallery", {
         detail: direction
@@ -1368,10 +1387,10 @@ class Gallery {
       return;
     }
     this.setNextSelectedThumbIndex(direction);
-    this.traverseGalleryHelper();
+    this.navigateHelper();
   }
 
-  traverseGalleryHelper() {
+  navigateHelper() {
     const selectedThumb = this.getSelectedThumb();
 
     this.autoplayController.startViewTimer(selectedThumb);
@@ -1389,7 +1408,7 @@ class Gallery {
     }
 
     if (!Utils.usingFirefox()) {
-      Utils.scrollToThumb(selectedThumb.id, false, true);
+      Utils.scrollToThumb(selectedThumb.id, true);
     }
 
     if (Utils.isVideo(selectedThumb)) {
@@ -1415,7 +1434,7 @@ class Gallery {
    * @param {String} direction
    * @returns {Boolean}
    */
-  reachedEndOfGallery(direction) {
+  reachedEnd(direction) {
     if (direction === Gallery.directions.right && this.currentlySelectedThumbIndex >= Gallery.visibleThumbs.length - 1) {
       return true;
     }
@@ -1486,7 +1505,7 @@ class Gallery {
     }
     // this.renderer.deleteAllRenders();
     // this.renderer.renderImagesInTheBackground();
-    this.traverseGalleryHelper();
+    this.navigateHelper();
   }
 
   /**
@@ -1572,13 +1591,13 @@ class Gallery {
     this.toggleScrollbarVisibility(true);
     this.clearOriginalContentSources();
     this.videoController.stopAllVideos();
-    this.renderer.clearCanvases();
+    this.renderer.hideCanvases();
     this.videoController.toggleVideoContainer(false);
     this.toggleOriginalGIF(false);
   }
 
   clearOriginalContentSources() {
-    this.renderer.clearCanvases();
+    this.renderer.hideCanvases();
     this.gifContainer.src = "";
     this.gifContainer.style.visibility = "hidden";
   }
@@ -1598,9 +1617,12 @@ class Gallery {
    */
   showOriginalContent(thumb) {
     this.currentlySelectedThumbIndex = this.getIndexFromThumb(thumb);
-    this.renderer.upscaleAnimatedThumbsAroundDiscrete(thumb);
 
-    if (!this.inGallery && Gallery.settings.renderAroundAggressively) {
+    if (this.inGallery || !Gallery.settings.renderOnInteractionEnd) {
+      this.renderer.upscaleAnimatedThumbsAround(thumb);
+    }
+
+    if (!this.inGallery && Gallery.settings.renderAroundAggressively && !Gallery.settings.renderOnInteractionEnd) {
       this.renderImagesAround(thumb);
     }
 
@@ -1626,7 +1648,7 @@ class Gallery {
       return;
     }
     this.renderer.toggleMainCanvas(false);
-    this.videoController.playOriginalVideo(thumb);
+    this.videoController.playVideo(thumb);
 
     if (!this.inGallery) {
       this.videoController.toggleVideoControls(false);
@@ -1645,7 +1667,7 @@ class Gallery {
 
     if (this.showOriginalContentOnHover) {
       this.toggleOriginalGIF(true);
-      this.renderer.clearCanvases();
+      this.renderer.hideCanvases();
       this.gifContainer.style.visibility = "visible";
     }
   }
@@ -1704,20 +1726,7 @@ class Gallery {
     if (Utils.onSearchPage() || (Utils.onMobileDevice() && !this.enlargeOnClickOnMobile)) {
       return;
     }
-    this.renderer.renderImages(this.getAdjacentImageThumbs(initialThumb));
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentImageThumbs(initialThumb) {
-    const adjacentImageThumbs = Utils.isImage(initialThumb) ? [initialThumb] : [];
-
-    if (Gallery.settings.loopAtEndOfGallery || ThumbSelector.latestSearchResults.length === 0) {
-      return adjacentImageThumbs.concat(ThumbSelector.getAdjacentImageThumbsOnCurrentPage(initialThumb));
-    }
-    return adjacentImageThumbs.concat(ThumbSelector.getAdjacentImageThumbsThroughoutAllPages(initialThumb));
+    this.renderer.renderImagesAround(initialThumb);
   }
 
   /**

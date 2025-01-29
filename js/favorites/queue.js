@@ -66,14 +66,14 @@ class FetchedFavoritesQueue {
   enqueue(request) {
     this.queue.push(request);
     this.sortByLowestPageNumber();
-    this.dequeueAll();
+    this.drainQueue();
   }
 
   sortByLowestPageNumber() {
     this.queue.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
   }
 
-  dequeueAll() {
+  drainQueue() {
     if (this.dequeuing) {
       return;
     }

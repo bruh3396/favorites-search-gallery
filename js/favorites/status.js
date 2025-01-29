@@ -10,45 +10,42 @@ class FavoritesLoaderStatus {
   /**
    * @type {Number}
    */
-  matchCount;
-
-  /**
-   * @type {Boolean}
-   */
-  get matchCountIndicatorElementExists() {
-    if (this.matchCountIndicator === null || !document.contains(this.matchCountIndicator)) {
-      this.matchCountIndicator = document.getElementById("match-count-label");
-
-      if (this.matchCountIndicator === null) {
-        return false;
-      }
-    }
-    return true;
-  }
+  expectedTotalFavoritesCount;
 
   constructor() {
+    this.initializeFields();
+    this.extractElements();
+  }
+
+  initializeFields() {
+    this.setExpectedFavoritesCount();
+  }
+
+  extractElements() {
     this.matchCountIndicator = document.getElementById("match-count-label");
     this.statusIndicator = document.getElementById("favorites-load-status-label");
-    this.matchCount = 0;
+  }
+
+  setExpectedFavoritesCount() {
+    Utils.getExpectedFavoritesCount()
+      .then((favoritesCount) => {
+        this.expectedTotalFavoritesCount = favoritesCount;
+      });
   }
 
   /**
    * @param {String} text
-   * @param {Number} delay
    */
-  async setStatus(text, delay) {
-    if (delay !== undefined && delay > 0) {
-      await Utils.sleep(delay);
-    }
-    document.getElementById("favorites-load-status-label").textContent = text;
+  setStatus(text) {
+    this.statusIndicator.textContent = text;
   }
 
   /**
    * @param {Boolean} value
    * @param {Number} delay
    */
-  async toggleStatusVisibility(value, delay) {
-    if (delay !== undefined && delay > 0) {
+  async toggleStatusVisibility(value, delay = 0) {
+    if (delay > 0) {
       await Utils.sleep(delay);
     }
     this.statusIndicator.style.display = value ? "inline-block" : "none";
@@ -58,18 +55,30 @@ class FavoritesLoaderStatus {
    * @param {Number} value
    */
   setMatchCount(value) {
-    if (this.matchCountIndicatorElementExists) {
-      this.matchCount = value === undefined ? this.getSearchResults(this.allFavorites).length : value;
-      this.matchCountIndicator.textContent = `${this.matchCount} ${this.matchCount === 1 ? "Match" : "Matches"}`;
-    }
+    this.matchCountIndicator.textContent = `${value} ${value === 1 ? "Match" : "Matches"}`;
   }
 
   enableSearchButtons() {
     dispatchEvent(new Event("readyToSearch"));
   }
 
-  notifyAllFavoritesStored() {
+  notifyAllFavoritesSaved() {
     this.setStatus("All favorites saved");
     this.toggleStatusVisibility(false, 1000);
+  }
+
+  /**
+   * @param {Number} favoritesFoundCount
+   * @param {Number} searchResultsCount
+   */
+  updateStatusWhileFetching(favoritesFoundCount, searchResultsCount) {
+    const prefix = Utils.onMobileDevice() ? "" : "Favorites ";
+    let statusText = `Fetching ${prefix}${favoritesFoundCount}`;
+
+    if (this.expectedTotalFavoritesCount !== null) {
+      statusText = `${statusText} / ${this.expectedTotalFavoritesCount}`;
+    }
+    this.setStatus(statusText);
+    this.setMatchCount(searchResultsCount);
   }
 }

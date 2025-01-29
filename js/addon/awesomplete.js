@@ -75,6 +75,7 @@ class AwesompleteWrapper {
       },
       replace: (suggestion) => {
         this.insertSuggestion(awesomplete.input, Utils.removeSavedSearchPrefix(decodeEntities(suggestion.value)));
+        awesomplete.input.dispatchEvent(new CustomEvent("setProgrammatically"));
       }
     });
 
@@ -104,7 +105,7 @@ class AwesompleteWrapper {
   }
 
   getSavedSearchesForAutocompleteList(inputId, prefix) {
-    if (Utils.onMobileDevice() || !this.showSavedSearchSuggestions || inputId !== "favorites-search-box") {
+    if (Utils.onMobileDevice() || !this.showSavedSearchSuggestions || inputId !== Utils.mainSearchBoxId) {
       return [];
     }
     return Utils.getSavedSearchesForAutocompleteList(prefix);

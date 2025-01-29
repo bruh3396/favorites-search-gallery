@@ -156,7 +156,11 @@ class Tooltip {
     if (Utils.onSearchPage()) {
       this.assignColorsToMatchedTagsOnSearchPage();
     } else {
-      this.searchBox = document.getElementById("favorites-search-box");
+      this.searchBox = document.getElementById(Utils.mainSearchBoxId);
+
+      if (this.searchBox === null) {
+        return;
+      }
       this.assignColorsToMatchedTagsOnFavoritesPage();
       this.searchBox.addEventListener("input", () => {
         this.assignColorsToMatchedTagsOnFavoritesPage();

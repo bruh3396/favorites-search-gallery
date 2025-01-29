@@ -1,4 +1,4 @@
-class Renderer {
+class RendererInterface {
   /**
    * @type {HTMLCanvasElement}
    */
@@ -155,11 +155,14 @@ class Renderer {
     this.lowResolutionContext.clearRect(0, 0, this.lowResolutionCanvas.width, this.lowResolutionCanvas.height);
   }
 
-  clearCanvases() {
-    // this.clearMainCanvas();
-    // this.clearLowResolutionCanvas();
+  hideCanvases() {
     this.mainCanvas.style.visibility = "hidden";
     this.lowResolutionCanvas.style.visibility = "hidden";
+  }
+
+  clearCanvases() {
+    this.clearMainCanvas();
+    this.clearLowResolutionCanvas();
   }
 
   /**
@@ -326,23 +329,9 @@ class Renderer {
     if (!Utils.onFavoritesPage() || Utils.onMobileDevice()) {
       return;
     }
-    const animatedThumbsToUpscale = ThumbSelector.getAdjacentThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
+    const animatedThumbsToUpscale = ThumbSelector.getThumbsAroundOnCurrentPage(thumb, Gallery.settings.animatedThumbsToUpscaleRange, (t) => {
       return !Utils.isImage(t) && !this.transferredCanvases.has(t.id);
     });
-
-    this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  upscaleAnimatedThumbsAroundDiscrete(thumb) {
-    if (!Utils.onFavoritesPage() || Utils.onMobileDevice()) {
-      return;
-    }
-    const animatedThumbsToUpscale = ThumbSelector.getAdjacentThumbs(thumb, Gallery.settings.animatedThumbsToUpscaleDiscrete, (_) => {
-      return true;
-    }).filter(t => !Utils.isImage(t) && !this.transferredCanvases.has(t.id));
 
     this.upscaleAnimatedThumbs(animatedThumbsToUpscale);
   }
@@ -477,20 +466,18 @@ class Renderer {
     if (Utils.onSearchPage() || (Utils.onMobileDevice())) {
       return;
     }
-    this.renderImages(this.getAdjacentImageThumbs(initialThumb));
+    this.renderImages(this.getImageThumbsAround(initialThumb));
   }
 
   /**
    * @param {HTMLElement} initialThumb
    * @returns {HTMLElement[]}
    */
-  getAdjacentImageThumbs(initialThumb) {
-    const adjacentImageThumbs = Utils.isImage(initialThumb) ? [initialThumb] : [];
-
+  getImageThumbsAround(initialThumb) {
     if (Gallery.settings.loopAtEndOfGallery || ThumbSelector.latestSearchResults.length === 0) {
-      return adjacentImageThumbs.concat(ThumbSelector.getAdjacentImageThumbsOnCurrentPage(initialThumb));
+      return ThumbSelector.getImageThumbsAroundOnCurrentPage(initialThumb);
     }
-    return adjacentImageThumbs.concat(ThumbSelector.getAdjacentImageThumbsThroughoutAllPages(initialThumb));
+    return ThumbSelector.getImageThumbsAroundThroughoutAllPages(initialThumb);
   }
 
   /**

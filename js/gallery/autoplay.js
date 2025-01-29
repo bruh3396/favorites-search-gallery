@@ -208,17 +208,17 @@ class Autoplay {
       <div>
         <label for="autoplay-image-duration-input">Image/GIF Duration</label>
         <span class="number">
-          <hold-button class="number-arrow-down" pollingtime="100"><span>&lt;</span></hold-button>
+          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
           <input type="number" id="autoplay-image-duration-input" min="1" max="60" step="1">
-          <hold-button class="number-arrow-up" pollingtime="100"><span>&gt;</span></hold-button>
+          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
         </span>
       </div>
       <div>
         <label for="autoplay-minimum-video-duration-input">Minimum Video Duration</label>
         <span class="number">
-          <hold-button class="number-arrow-down" pollingtime="100"><span>&lt;</span></hold-button>
-          <input type="number" id="autoplay-minimum-animated-duration-input" min="1" max="60" step="1">
-          <hold-button class="number-arrow-up" pollingtime="100"><span>&gt;</span></hold-button>
+          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+          <input type="number" id="autoplay-minimum-animated-duration-input" min="0" max="60" step="1">
+          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
         </span>
       </div>
     </div>
@@ -338,8 +338,9 @@ class Autoplay {
     this.configureMobileUi();
     this.extractUiElements();
     this.setMenuIconImageSources();
-    this.loadAutoplaySettingsIntoUI();
+    this.setupNumberComponents();
     this.addEventListeners();
+    this.loadAutoplaySettingsIntoUI();
   }
 
   /**
@@ -485,7 +486,7 @@ class Autoplay {
           i += 4;
           break;
 
-          case i <= 30:
+        case i <= 30:
           i += 9;
           break;
 
@@ -514,6 +515,16 @@ class Autoplay {
   loadAutoplaySettingsIntoUI() {
     this.ui.settingsMenu.imageDurationInput.value = Autoplay.settings.imageViewDurationInSeconds;
     this.ui.settingsMenu.minimumVideoDurationInput.value = Autoplay.settings.minimumVideoDurationInSeconds;
+  }
+
+  setupNumberComponents() {
+    for (const input of [this.ui.settingsMenu.imageDurationInput, this.ui.settingsMenu.minimumVideoDurationInput]) {
+      const element = input.closest(".number");
+
+      if (element !== null) {
+        const numberComponent = new NumberComponent(element);
+      }
+    }
   }
 
   addEventListeners() {

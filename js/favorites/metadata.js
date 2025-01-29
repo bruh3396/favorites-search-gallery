@@ -28,7 +28,7 @@ class MetadataSearchExpression {
    * @returns {String | Number}
    */
   setValue(value) {
-    if (!Utils.isNumber(value)) {
+    if (!Utils.isOnlyDigits(value)) {
       return value;
     }
 
@@ -44,6 +44,10 @@ class PostMetadata {
    * @type {Map.<String, PostMetadata>}
    */
   static allMetadata = new Map();
+  /**
+   * @type {Set.<String>}
+   */
+  static pendingRequests = new Set();
   static parser = new DOMParser();
   /**
    * @type {PostMetadata[]}
@@ -63,14 +67,8 @@ class PostMetadata {
   static settings = {
     verifyTags: true
   };
-  /**
-   * @param {PostMetadata} missingMetadata
-   */
-  static async fetchMissingMetadata(missingMetadata) {
-    if (missingMetadata !== undefined) {
-      PostMetadata.missingMetadataFetchQueue.push(missingMetadata);
-    }
 
+  static async fetchAllMissingMetadata() {
     if (PostMetadata.currentlyFetchingFromQueue) {
       return;
     }
@@ -82,7 +80,10 @@ class PostMetadata {
       if (metadata.postIsDeleted) {
         metadata.populateMetadataFromPost();
       } else {
-        metadata.populateMetadataFromAPI(true);
+        metadata.populateMetadataFromAPI()
+          .then(() => {
+            Utils.broadcastEvent("missingMetadata", metadata.id);
+          });
       }
       await Utils.sleep(metadata.fetchDelay);
     }
@@ -113,7 +114,7 @@ class PostMetadata {
         window.addEventListener("favoritesLoaded", () => {
           PostMetadata.allFavoritesLoaded = true;
           PostMetadata.missingMetadataFetchQueue = PostMetadata.missingMetadataFetchQueue.concat(PostMetadata.deletedPostFetchQueue);
-          PostMetadata.fetchMissingMetadata();
+          PostMetadata.fetchAllMissingMetadata();
         }, {
           once: true
         });
@@ -228,28 +229,43 @@ class PostMetadata {
    * @param {Object.<String, String>} record
    */
   populateMetadata(record) {
-    if (record === undefined) {
-      this.populateMetadataFromAPI();
-    } else if (record === null) {
-      PostMetadata.fetchMissingMetadata(this, true);
-    } else {
-      this.populateMetadataFromRecord(JSON.parse(record));
+    const databaseRecordHasNoMetadata = record === null;
+    const databaseRecordDoesNotExist = record === undefined;
 
-      if (this.isEmpty) {
-        PostMetadata.fetchMissingMetadata(this, true);
-      }
+    if (databaseRecordDoesNotExist) {
+      this.populateMetadataFromAPI();
+      return;
+    }
+
+    if (databaseRecordHasNoMetadata) {
+      this.addInstanceToMissingMetadataQueue();
+      PostMetadata.fetchAllMissingMetadata();
+      return;
+    }
+    this.populateMetadataFromRecord(JSON.parse(record));
+    const databaseRecordHasEmptyMetadata = this.isEmpty;
+
+    if (databaseRecordHasEmptyMetadata) {
+      this.addInstanceToMissingMetadataQueue();
+      PostMetadata.fetchAllMissingMetadata();
     }
   }
 
   /**
    * @param {Boolean} missingInDatabase
    */
-  populateMetadataFromAPI(missingInDatabase = false) {
-    fetch(this.apiURL)
+  populateMetadataFromAPI() {
+    if (PostMetadata.pendingRequests > 249) {
+      this.addInstanceToMissingMetadataQueue();
+      return Utils.sleep(0);
+    }
+    PostMetadata.pendingRequests.add(this.id);
+    return fetch(this.apiURL)
       .then((response) => {
         return response.text();
       })
       .then((html) => {
+        PostMetadata.pendingRequests.delete(this.id);
         const dom = PostMetadata.parser.parseFromString(html, "text/html");
         const metadata = dom.querySelector("post");
 
@@ -266,18 +282,12 @@ class PostMetadata {
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
 
         if (PostMetadata.settings.verifyTags) {
-          Post.correctTags(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
+          Post.validateExtractedTagsAgainstAPI(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
         }
         const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
 
         if (extension !== "mp4") {
           Utils.assignImageExtension(this.id, extension);
-        }
-
-        if (missingInDatabase) {
-          dispatchEvent(new CustomEvent("missingMetadata", {
-            detail: this.id
-          }));
         }
       })
       .catch((error) => {
@@ -398,5 +408,9 @@ class PostMetadata {
     if (!PostMetadata.allMetadata.has(this.id)) {
       PostMetadata.allMetadata.set(this.id, this);
     }
+  }
+
+  addInstanceToMissingMetadataQueue() {
+    PostMetadata.missingMetadataFetchQueue.push(this);
   }
 }

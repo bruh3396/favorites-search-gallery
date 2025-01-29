@@ -19,8 +19,9 @@ class VideoController {
   constructor() {
     this.initializeFields();
     this.extractElements();
-    this.createVideoBackgrounds();
-    this.addVideoPlayerEventListeners();
+    this.preventVideoPlayersFromFlashingWhenLoaded();
+    this.addEventListenersToVideoContainer();
+    this.addEventListenersToVideoPlayers();
     this.loadVideoVolume();
     this.loadVideoClips();
   }
@@ -34,7 +35,7 @@ class VideoController {
     this.videoPlayers = Array.from(document.querySelectorAll("#original-video-container>video"));
   }
 
-  createVideoBackgrounds() {
+  preventVideoPlayersFromFlashingWhenLoaded() {
     document.createElement("canvas").toBlob((blob) => {
       const videoBackgroundURL = URL.createObjectURL(blob);
 
@@ -44,65 +45,114 @@ class VideoController {
     });
   }
 
-  addVideoPlayerEventListeners() {
+  addEventListenersToVideoContainer() {
+    this.preventDefaultBehaviorWhenControlKeyIsPressed();
+  }
+
+  addEventListenersToVideoPlayers() {
+    for (const video of this.videoPlayers) {
+      this.addEventListenerToVideoPlayer(video);
+    }
+  }
+
+  /**
+   * @param {HTMLVideoElement} video
+   */
+  addEventListenerToVideoPlayer(video) {
+    this.revealControlsWhenMouseMoves(video);
+    this.pauseWhenClicked(video);
+    this.updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video);
+    this.broadcastEnding(video);
+    this.broadcastDoubleClick(video);
+    this.revealControlsWhenTouched(video);
+  }
+
+  preventDefaultBehaviorWhenControlKeyIsPressed() {
     this.videoContainer.onclick = (event) => {
       if (!event.ctrlKey) {
         event.preventDefault();
       }
     };
+  }
 
-    for (const video of this.videoPlayers) {
-      video.addEventListener("mousemove", () => {
-        if (!video.hasAttribute("controls")) {
-          video.setAttribute("controls", "");
-        }
-      }, {
-        passive: true
-      });
-      video.addEventListener("click", (event) => {
-        if (event.ctrlKey) {
-          return;
-        }
-
-        if (video.paused) {
-          video.play().catch(() => { });
-        } else {
-          video.pause();
-        }
-      }, {
-        passive: true
-      });
-      video.addEventListener("volumechange", (event) => {
-        if (!event.target.hasAttribute("active")) {
-          return;
-        }
-        Utils.setPreference(VideoController.preferences.videoVolume, video.volume);
-        Utils.setPreference(VideoController.preferences.videoMuted, video.muted);
-
-        for (const v of this.getInactiveVideoPlayers()) {
-          v.volume = video.volume;
-          v.muted = video.muted;
-        }
-      }, {
-        passive: true
-      });
-      video.addEventListener("ended", () => {
-        dispatchEvent(new Event("videoEnded"));
-      }, {
-        passive: true
-      });
-      video.addEventListener("dblclick", () => {
-        dispatchEvent(new Event("videoDoubleClicked"));
-      });
-
-      if (Utils.onMobileDevice()) {
-        video.addEventListener("touchend", () => {
-          this.toggleVideoControls(true);
-        }, {
-          passive: true
-        });
-      }
+  /**
+   * @param {Video} video
+   */
+  revealControlsWhenMouseMoves(video) {
+    if (Utils.onMobileDevice()) {
+      return;
     }
+    video.addEventListener("mousemove", () => {
+      if (!video.hasAttribute("controls")) {
+        video.setAttribute("controls", "");
+      }
+    }, {
+      passive: true
+    });
+  }
+
+  /**
+   * @param {Video} video
+   */
+  pauseWhenClicked(video) {
+    video.addEventListener("click", (event) => {
+      if (event.ctrlKey) {
+        return;
+      }
+
+      if (video.paused) {
+        video.play().catch(() => { });
+      } else {
+        video.pause();
+      }
+    }, {
+      passive: true
+    });
+  }
+
+  /**
+   * @param {Video} video
+   */
+  updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video) {
+    video.addEventListener("volumechange", (event) => {
+      if (!event.target.hasAttribute("active")) {
+        return;
+      }
+      Utils.setPreference(VideoController.preferences.videoVolume, video.volume);
+      Utils.setPreference(VideoController.preferences.videoMuted, video.muted);
+
+      for (const v of this.getInactiveVideoPlayers()) {
+        v.volume = video.volume;
+        v.muted = video.muted;
+      }
+    }, {
+      passive: true
+    });
+  }
+
+  broadcastEnding(video) {
+    video.addEventListener("ended", () => {
+      dispatchEvent(new Event("videoEnded"));
+    }, {
+      passive: true
+    });
+  }
+
+  broadcastDoubleClick(video) {
+    video.addEventListener("dblclick", () => {
+      dispatchEvent(new Event("videoDoubleClicked"));
+    });
+  }
+
+  revealControlsWhenTouched(video) {
+    if (!Utils.onMobileDevice()) {
+      return;
+    }
+    video.addEventListener("touchend", () => {
+      this.toggleVideoControls(true);
+    }, {
+      passive: true
+    });
   }
 
   loadVideoVolume() {
@@ -147,7 +197,7 @@ class VideoController {
   /**
    * @param {HTMLElement} thumb
    */
-  playOriginalVideo(thumb) {
+  playVideo(thumb) {
     this.videoContainer.style.display = "block";
     this.stopAllVideos();
     const video = this.getActiveVideoPlayer();
@@ -200,9 +250,9 @@ class VideoController {
    */
   getAdjacentVideoThumbs(initialThumb, limit) {
     if (Gallery.settings.loopAtEndOfGallery) {
-      return ThumbSelector.getAdjacentVideoThumbsOnCurrentPage(initialThumb, limit);
+      return ThumbSelector.getVideoThumbsAroundOnCurrentPage(initialThumb, limit);
     }
-    return ThumbSelector.getAdjacentVideoThumbsThroughoutAllPages(initialThumb, limit);
+    return ThumbSelector.getVideoThumbsAroundThroughoutAllPages(initialThumb, limit);
   }
 
   /**
