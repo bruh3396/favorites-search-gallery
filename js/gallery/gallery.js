@@ -236,6 +236,7 @@ class Gallery {
     additionalVideoPlayerCount: Utils.onMobileDevice() ? 2 : 2,
     renderAroundAggressively: true,
     loopAtEndOfGalleryValue: false,
+    scrollWhileNavigatingGallery: false && !Utils.usingFirefox(),
     get loopAtEndOfGallery() {
       if (!Utils.onFavoritesPage() || !Gallery.finishedLoading) {
         return true;
@@ -639,7 +640,6 @@ class Gallery {
       if (!this.inGallery) {
         return;
       }
-      const zoomedIn = document.getElementById("main-canvas-zoom") !== null;
 
       switch (event.key) {
         case "F":
@@ -1276,7 +1276,7 @@ class Gallery {
     if (selectedThumb === null) {
       return;
     }
-    const removeFavoriteButton = Utils.getRemoveFavoriteButtonFromThumb(selectedThumb);
+    const removeFavoriteButton = selectedThumb.querySelector(".remove-favorite-button");
 
     if (removeFavoriteButton === null) {
       return;
@@ -1340,6 +1340,14 @@ class Gallery {
     if (Utils.onMobileDevice()) {
       this.hideOriginalContent();
       this.renderer.deleteAllRenders();
+    }
+
+    if (!Gallery.settings.scrollWhileNavigatingGallery) {
+      const selectedThumb = this.getSelectedThumb();
+
+      if (selectedThumb !== null && selectedThumb !== undefined) {
+        Utils.smoothScrollToElement(selectedThumb, 250);
+      }
     }
 
     if (!Utils.onMobileDevice() && thumbIndex !== this.lastSelectedThumbIndexBeforeEnteringGallery) {
@@ -1407,7 +1415,7 @@ class Gallery {
       this.videoController.preloadInactiveVideoPlayers(selectedThumb);
     }
 
-    if (!Utils.usingFirefox()) {
+    if (Gallery.settings.scrollWhileNavigatingGallery) {
       Utils.scrollToThumb(selectedThumb.id, true);
     }
 

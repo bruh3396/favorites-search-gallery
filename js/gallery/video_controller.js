@@ -4,7 +4,7 @@ class VideoController {
     videoMuted: "videoMuted"
   };
   /**
-   * @type {HTMLAnchorElement}
+   * @type {HTMLElement | null}
    */
   videoContainer;
   /**
@@ -17,8 +17,9 @@ class VideoController {
   videoClips;
 
   constructor() {
-    this.initializeFields();
-    this.extractElements();
+    this.videoContainer = document.getElementById("original-video-container");
+    this.videoPlayers = Array.from(document.querySelectorAll("#original-video-container>video"));
+    this.videoClips = new Map();
     this.preventVideoPlayersFromFlashingWhenLoaded();
     this.addEventListenersToVideoContainer();
     this.addEventListenersToVideoPlayers();
@@ -26,17 +27,11 @@ class VideoController {
     this.loadVideoClips();
   }
 
-  initializeFields() {
-    this.videoClips = new Map();
-  }
-
-  extractElements() {
-    this.videoContainer = document.getElementById("original-video-container");
-    this.videoPlayers = Array.from(document.querySelectorAll("#original-video-container>video"));
-  }
-
   preventVideoPlayersFromFlashingWhenLoaded() {
     document.createElement("canvas").toBlob((blob) => {
+      if (blob === null) {
+        return;
+      }
       const videoBackgroundURL = URL.createObjectURL(blob);
 
       for (const video of this.videoPlayers) {
@@ -68,6 +63,9 @@ class VideoController {
   }
 
   preventDefaultBehaviorWhenControlKeyIsPressed() {
+    if (this.videoContainer === null) {
+      return;
+    }
     this.videoContainer.onclick = (event) => {
       if (!event.ctrlKey) {
         event.preventDefault();
@@ -76,7 +74,7 @@ class VideoController {
   }
 
   /**
-   * @param {Video} video
+   * @param {HTMLVideoElement} video
    */
   revealControlsWhenMouseMoves(video) {
     if (Utils.onMobileDevice()) {
@@ -92,7 +90,7 @@ class VideoController {
   }
 
   /**
-   * @param {Video} video
+   * @param {HTMLVideoElement} video
    */
   pauseWhenClicked(video) {
     video.addEventListener("click", (event) => {
@@ -111,11 +109,15 @@ class VideoController {
   }
 
   /**
-   * @param {Video} video
+   * @param {HTMLVideoElement} video
    */
   updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video) {
     video.addEventListener("volumechange", (event) => {
-      if (!event.target.hasAttribute("active")) {
+      if (!(event.target instanceof HTMLVideoElement)) {
+        return;
+      }
+
+      if (event.target === null || !event.target.hasAttribute("active")) {
         return;
       }
       Utils.setPreference(VideoController.preferences.videoVolume, video.volume);
@@ -130,6 +132,9 @@ class VideoController {
     });
   }
 
+  /**
+   * @param {HTMLVideoElement} video
+   */
   broadcastEnding(video) {
     video.addEventListener("ended", () => {
       dispatchEvent(new Event("videoEnded"));
@@ -138,12 +143,18 @@ class VideoController {
     });
   }
 
+  /**
+   * @param {HTMLVideoElement} video
+   */
   broadcastDoubleClick(video) {
     video.addEventListener("dblclick", () => {
       dispatchEvent(new Event("videoDoubleClicked"));
     });
   }
 
+  /**
+   * @param {HTMLVideoElement} video
+   */
   revealControlsWhenTouched(video) {
     if (!Utils.onMobileDevice()) {
       return;
@@ -158,8 +169,8 @@ class VideoController {
   loadVideoVolume() {
     const video = this.getActiveVideoPlayer();
 
-    video.volume = parseFloat(Utils.getPreference(VideoController.preferences.videoVolume, 1));
-    video.muted = Utils.getPreference(VideoController.preferences.videoMuted, true);
+    video.volume = Number((Utils.getPreference(VideoController.preferences.videoVolume, 1)));
+    video.muted = Boolean(Utils.getPreference(VideoController.preferences.videoMuted, true));
   }
 
   loadVideoClips() {
@@ -198,7 +209,7 @@ class VideoController {
    * @param {HTMLElement} thumb
    */
   playVideo(thumb) {
-    this.videoContainer.style.display = "block";
+    this.toggleVideoContainer(true);
     this.stopAllVideos();
     const video = this.getActiveVideoPlayer();
 
@@ -340,7 +351,6 @@ class VideoController {
   }
 
   clearInactiveVideoSources() {
-    // const videoPlayers = this.inGallery ? this.getInactiveVideoPlayers() : this.videoPlayers;
     const videoPlayers = this.getInactiveVideoPlayers();
 
     for (const video of videoPlayers) {
@@ -367,15 +377,8 @@ class VideoController {
    * @param {Boolean} value
    */
   toggleVideoContainer(value) {
-    if (value !== undefined) {
+    if (this.videoContainer !== null) {
       this.videoContainer.style.display = value ? "block" : "none";
-      return;
-    }
-
-    if (!this.currentlyHoveringOverVideoThumb() || this.videoContainer.style.display === "block") {
-      this.videoContainer.style.display = "none";
-    } else {
-      this.videoContainer.style.display = "block";
     }
   }
 }

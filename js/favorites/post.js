@@ -236,7 +236,7 @@ class Post {
   }
 
   /**
-   * @type {Set.<String>}
+   * @type {String}
    */
   get originalTagString() {
     return Utils.convertToTagString(this.originalTagSet);
@@ -250,7 +250,7 @@ class Post {
   }
 
   /**
-   * @param {HTMLElement | Object} thumb
+   * @param {HTMLElement | {id: String, tags: String, src: String, metadata: String}} thumb
    * @param {Boolean} fromRecord
    */
   constructor(thumb, fromRecord) {
@@ -393,7 +393,8 @@ class Post {
       const leftClick = event.button === Utils.clickCodes.left;
       const shiftClick = leftClick && event.shiftKey;
 
-      if (middleClick || shiftClick || (leftClick && !Utils.galleryEnabled())) {
+      // TODO: remove Gallery reference
+      if (middleClick || shiftClick || (leftClick && Gallery.disabled)) {
         Utils.openPostInNewTab(this.id);
       }
     });
@@ -401,13 +402,12 @@ class Post {
 
   deleteInactivePost() {
     if (this.inactivePost !== null) {
-      this.inactivePost.clear();
       this.inactivePost = null;
     }
   }
 
   /**
-   * @param {HTMLElement} content
+   * @param {DocumentFragment} content
    */
   insertAtEndOfContent(content) {
     if (this.inactivePost !== null) {
@@ -486,7 +486,7 @@ class Post {
   }
 
   /**
-   * @returns {HTMLDivElement}
+   * @returns {HTMLDivElement | null}
    */
   getStatisticHintElement() {
     return this.container.querySelector(".statistic-hint");

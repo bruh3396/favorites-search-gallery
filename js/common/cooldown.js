@@ -1,6 +1,6 @@
 class Cooldown {
   /**
-   * @type {Number}
+   * @type {Timeout}
    */
   timeout;
   /**

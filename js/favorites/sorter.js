@@ -4,7 +4,11 @@ class FavoritesSorter {
    */
   static get sortByAscending() {
     const sortByAscendingCheckbox = document.getElementById("sort-ascending");
-    return sortByAscendingCheckbox === null ? false : sortByAscendingCheckbox.checked;
+
+    if (sortByAscendingCheckbox !== null && sortByAscendingCheckbox instanceof HTMLInputElement) {
+        return sortByAscendingCheckbox.checked;
+    }
+    return false;
   }
 
   /**
@@ -12,7 +16,11 @@ class FavoritesSorter {
    */
   static get sortingMethod() {
     const sortingMethodSelect = document.getElementById("sorting-method");
-    return sortingMethodSelect === null ? "default" : sortingMethodSelect.value;
+
+    if (sortingMethodSelect !== null && sortingMethodSelect instanceof HTMLSelectElement) {
+      return sortingMethodSelect.value;
+    }
+    return "default";
   }
 
   /**
@@ -27,6 +35,7 @@ class FavoritesSorter {
       return Utils.shuffleArray(postsToSort);
     }
     postsToSort.sort((postA, postB) => {
+      // @ts-ignore
       return (postB.metadata[sortingMethod] - postA.metadata[sortingMethod]) || 0;
     });
     return FavoritesSorter.sortByAscending ? postsToSort.reverse() : postsToSort;

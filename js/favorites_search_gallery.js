@@ -1,6 +1,6 @@
 Utils.setup();
-const favoritesLoader = new FavoritesLoader();
-const favoritesMenu2 = new FavoriteMenu2();
+const favoritesController = new FavoritesController();
+const favoritesMenu2 = new FavoritesUI();
 const favoritesMenu = new FavoritesMenu();
 const gallery = new Gallery();
 const tooltip = new Tooltip();

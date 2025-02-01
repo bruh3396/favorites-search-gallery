@@ -70,7 +70,7 @@ class CompactPost {
    * @param {HTMLElement} post
    */
   constructor(post) {
-    this.id = post.getAttribute("id");
+    this.id = post.getAttribute("id") || "NA";
     this.thumbURL = post.getAttribute("preview_url").replace("api-cdn.", "");
     this.extension = Utils.getExtensionFromImageURL(post.getAttribute("file_url"));
     this.tags = CompactPost.getAnimatedTags(post);

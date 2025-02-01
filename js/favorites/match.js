@@ -82,7 +82,7 @@ class WildcardSearchTag extends SearchTag {
    */
   createWildcardRegex() {
     try {
-      const regex = Utils.escapeParenthesis(this.value.replaceAll(/\*/g, ".*"));
+      const regex = Utils.escapeParenthesis(this.value.replace(/\*/g, ".*"));
       return new RegExp(`^${regex}$`);
     } catch {
       return WildcardSearchTag.unmatchableRegex;
@@ -137,7 +137,6 @@ class MetadataSearchTag extends SearchTag {
 
   /**
    * @param {String} searchTag
-   * @param {Boolean} inOrGroup
    */
   constructor(searchTag) {
     super(searchTag);
@@ -150,6 +149,10 @@ class MetadataSearchTag extends SearchTag {
    */
   createExpression(searchTag) {
     const extractedExpression = MetadataSearchTag.regex.exec(searchTag);
+
+    if (extractedExpression === null) {
+      return new MetadataSearchExpression("width", ":", "0");
+    }
     return new MetadataSearchExpression(
       extractedExpression[1],
       extractedExpression[2],
@@ -187,7 +190,6 @@ class SearchCommand {
 
   /**
    * @param {String[]} tags
-   * @param {Boolean} isOrGroup
    * @returns {SearchTag[]}
    */
   static createSearchTagGroup(tags) {
@@ -230,6 +232,8 @@ class SearchCommand {
    */
   constructor(searchQuery) {
     this.isEmpty = Utils.isEmptyString(searchQuery);
+    this.orGroups = [];
+    this.remainingSearchTags = [];
 
     if (this.isEmpty) {
       return;

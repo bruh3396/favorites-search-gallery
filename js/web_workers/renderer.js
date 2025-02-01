@@ -1,7 +1,7 @@
 /* eslint-disable prefer-template */
 /**
  * @param {Number} milliseconds
- * @returns {Promise}
+ * @returns {Promise.<any>}
  */
 function sleep(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -180,7 +180,7 @@ class ImageFetcher {
 
   /**
    * @param {String} id
-   * @returns {String}
+   * @returns {Promise.<String>}
    */
   static getOriginalImageURL(id) {
     const apiURL = "https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=" + id;
@@ -200,7 +200,7 @@ class ImageFetcher {
 
   /**
    * @param {String} id
-   * @returns {String}
+   * @returns {Promise<String>}
    */
   static async getOriginalImageURLFromPostPage(id) {
     const postPageURL = "https://rule34.xxx/index.php?page=post&s=view&id=" + id;
@@ -243,7 +243,7 @@ class ImageFetcher {
 
   /**
    * @param {RenderRequest} request
-   * @returns {Promise}
+   * @returns {Promise<Response>}
    */
   static fetchImage(request) {
     return fetch(request.imageURL, {
@@ -253,7 +253,7 @@ class ImageFetcher {
 
   /**
    * @param {RenderRequest} request
-   * @returns {Blob}
+   * @returns {Promise.<Blob>}
    */
   static async fetchImageBlob(request) {
     const response = await ImageFetcher.fetchImage(request);
@@ -262,7 +262,6 @@ class ImageFetcher {
 
   /**
    * @param {String} id
-   * @returns {String}
    */
   static async findImageExtensionFromId(id) {
     const imageURL = await ImageFetcher.getOriginalImageURL(id);
@@ -367,7 +366,15 @@ class ThumbUpscaler {
    */
   drawCanvas(id, imageBitmap) {
     const canvas = this.canvases.get(id);
+
+    if (canvas === undefined) {
+      return;
+    }
     const context = canvas.getContext("2d");
+
+    if (context === null) {
+      return;
+    }
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(
@@ -544,7 +551,6 @@ class ImageRenderer {
 
   /**
    * @param {RenderRequest} request
-   * @param {Number} batchRequestId
    */
   async renderImage(request) {
     this.incompleteRenderRequests.set(request.id, request);
@@ -677,10 +683,14 @@ class ImageRenderer {
     if (!this.renders.has(id)) {
       return;
     }
-    const imageBitmap = this.renders.get(id).imageBitmap;
+    const render = this.renders.get(id);
 
-    if (imageBitmap !== null && imageBitmap !== undefined) {
-      imageBitmap.close();
+    if (render === undefined) {
+      return;
+    }
+
+    if (render.imageBitmap !== null && render.imageBitmap !== undefined) {
+      render.imageBitmap.close();
     }
     this.renders.set(id, null);
     this.renders.delete(id);
@@ -794,7 +804,6 @@ onmessage = (message) => {
       BatchRenderRequest.settings.minimumRequestCount = message.data.minimumImagesToRender;
       imageRenderer = new ImageRenderer(message.data);
       setInterval(() => {
-        // console.log(imageRenderer.renders.size);
       }, 1000);
 
       break;

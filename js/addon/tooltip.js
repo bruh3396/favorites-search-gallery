@@ -64,7 +64,7 @@ class Tooltip {
     if (Tooltip.disabled) {
       return;
     }
-    this.visible = Utils.getPreference("showTooltip", true);
+    this.visible = Boolean(Utils.getPreference("showTooltip", true));
     Utils.insertFavoritesSearchGalleryHTML("afterbegin", Tooltip.tooltipHTML);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;

@@ -5,8 +5,8 @@ class InactivePost {
    * @returns {String}
    */
   static decompressThumbnailSource(compressedSource, id) {
-    compressedSource = compressedSource.split("_");
-    return `https://us.rule34.xxx/thumbnails//${compressedSource[0]}/thumbnail_${compressedSource[1]}.jpg?${id}`;
+    const splitSource = compressedSource.split("_");
+    return `https://us.rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg?${id}`;
   }
 
   /**
@@ -31,9 +31,14 @@ class InactivePost {
   createdFromDatabaseRecord;
 
   /**
-   * @param {HTMLElement | Object} favorite
+   * @param {HTMLElement | {id: String, tags: String, src: String, metadata: String}} favorite
+   * @param {Boolean} createFromRecord
    */
   constructor(favorite, createFromRecord) {
+    this.id = "";
+    this.tags = "";
+    this.src = "";
+    this.metadata = "";
     this.createdFromDatabaseRecord = createFromRecord;
 
     if (createFromRecord) {
@@ -60,7 +65,7 @@ class InactivePost {
     this.id = Utils.getIdFromThumb(element);
     const image = Utils.getImageFromThumb(element);
 
-    this.src = image.src || image.getAttribute("data-cfsrc");
+    this.src = image.src || image.getAttribute("data-cfsrc") || "";
     this.tags = this.preprocessTags(image);
   }
 
@@ -69,7 +74,7 @@ class InactivePost {
    * @returns {String}
    */
   preprocessTags(image) {
-    const tags = Utils.correctMisspelledTags(image.title || image.getAttribute("tags"));
+    const tags = image.title || image.getAttribute("tags") || "";
     return Utils.removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
   }
 
@@ -77,14 +82,7 @@ class InactivePost {
     if (this.createdFromDatabaseRecord) {
       return new PostMetadata(this.id, this.metadata || null);
     }
-    const favoritesMetadata = new PostMetadata(this.id);
+    const favoritesMetadata = new PostMetadata(this.id, undefined);
     return favoritesMetadata;
-  }
-
-  clear() {
-    this.id = null;
-    this.tags = null;
-    this.src = null;
-    this.metadata = null;
   }
 }

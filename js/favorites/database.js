@@ -18,29 +18,29 @@ class FavoritesDatabaseInterface {
    */
   favoriteIdsRequiringMetadataDatabaseUpdate;
   /**
-   * @type {Number}
+   * @type {Timeout}
    */
   newMetadataReceivedTimeout;
 
   /**
-   * @param {Function} onFavoritesStored
-   * @param {Function} onFavoritesLoaded
+   *
+   * @param {{onFavoritesStored: Function, onFavoritesLoaded: Function}} param
    */
-  constructor(onFavoritesStored, onFavoritesLoaded) {
+  constructor({onFavoritesStored, onFavoritesLoaded}) {
+    this.databaseWorker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.database));
     this.onFavoritesStored = onFavoritesStored;
     this.onFavoritesLoaded = onFavoritesLoaded;
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
+    this.newMetadataReceivedTimeout = null;
     this.initializeDatabase();
   }
 
   initializeDatabase() {
-    this.createDatabaseWorker();
     this.connectDatabaseMessagesToCallbacks();
     this.sendObjectStoreNameToDatabase();
   }
 
   createDatabaseWorker() {
-    this.databaseWorker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.database));
   }
 
   connectDatabaseMessagesToCallbacks() {
@@ -140,13 +140,17 @@ class FavoritesDatabaseInterface {
   }
 
   batchUpdateMetadataInDatabase() {
-    this.updateFavorites(this.favoriteIdsRequiringMetadataDatabaseUpdate.map(id => Post.allPosts.get(id)));
+    const favoritesToUpdate = this.favoriteIdsRequiringMetadataDatabaseUpdate
+      .map(id => Post.allPosts.get(id))
+      .filter(post => post !== undefined);
+
+    this.updateFavorites(favoritesToUpdate);
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }
 
   /**
-   * @param {Object[]} records
-   * @returns {Post[]}}
+   * @param {{ id: string; tags: string; src: string; metadata: string; }[]} records
+   * @returns {Post[]}
    */
   deserializeFavorites(records) {
     return records.map(record => new Post(record, true));

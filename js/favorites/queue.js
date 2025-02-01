@@ -52,12 +52,13 @@ class FetchedFavoritesQueue {
   }
 
   /**
-   * @param {Function}
+   * @param {{onDequeue: Function}} param
    */
-  constructor(onDequeue) {
+  constructor({onDequeue}) {
     this.onDequeue = onDequeue;
     this.mostRecentlyDequeuedPageNumber = -1;
     this.queue = [];
+    this.dequeuing = false;
   }
 
   /**

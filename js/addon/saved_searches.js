@@ -373,8 +373,8 @@ class SavedSearches {
   }
 
   loadSavedSearches() {
-    const savedSearches = JSON.parse(localStorage.getItem(SavedSearches.localStorageKeys.savedSearches)) || [];
-    const firstUse = Utils.getPreference(SavedSearches.preferences.tutorial, true);
+    const savedSearches = JSON.parse(localStorage.getItem(SavedSearches.localStorageKeys.savedSearches) || "[]");
+    const firstUse = Boolean(Utils.getPreference(SavedSearches.preferences.tutorial, true));
 
     Utils.setPreference(SavedSearches.preferences.tutorial, false);
 

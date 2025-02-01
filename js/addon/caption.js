@@ -371,20 +371,6 @@ class Caption {
         }, 100);
       }
     });
-    window.addEventListener("originalFavoritesCleared", (event) => {
-      const thumbs = event.detail;
-      const tagNames = Array.from(thumbs)
-        .map(thumb => Utils.getImageFromThumb(thumb).title)
-        .join(" ")
-        .split(" ")
-        .filter(tagName => !Utils.isOnlyDigits(tagName) && Caption.tagCategoryAssociations[tagName] === undefined);
-
-      this.findTagCategories(tagNames, () => {
-        Caption.saveTagCategoriesCooldown.restart();
-      });
-    }, {
-      once: true
-    });
     window.addEventListener("newFavoritesFoundOnReload", (event) => {
       const favorites = event.detail;
 
@@ -520,11 +506,21 @@ class Caption {
     } else {
       height = Utils.getImageFromThumb(thumb).getBoundingClientRect().height;
     }
+    const fancyImageHoveringStyle = document.getElementById("fancy-image-hovering-fsg-style");
+    const fancyHoveringEnabled = fancyImageHoveringStyle !== null && fancyImageHoveringStyle.innerHTML.length > 10;
     const captionListRect = this.caption.children[0].getBoundingClientRect();
     const ratio = height / captionListRect.height;
     const scale = ratio > 1 ? Math.sqrt(ratio) : ratio * 0.85;
+    const finalScale = fancyHoveringEnabled ? scale * 1 : scale;
 
-    this.caption.parentElement.style.fontSize = `${Utils.roundToTwoDecimalPlaces(scale)}em`;
+    // console.log({
+    //   fancyHoveringEnabled,
+    //   fancyImageHoveringStyle,
+    //   scale,
+    //   finalScale
+    // });
+
+    this.caption.parentElement.style.fontSize = `${Utils.roundToTwoDecimalPlaces(finalScale)}em`;
   }
 
   /**
@@ -688,7 +684,7 @@ class Caption {
    * @returns {Boolean}
    */
   getVisibilityPreference() {
-    return Utils.getPreference(Caption.preferences.visibility, true);
+    return Boolean(Utils.getPreference(Caption.preferences.visibility, true));
   }
 
   /**

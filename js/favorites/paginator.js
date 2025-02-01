@@ -10,6 +10,7 @@ class FavoritesPaginator {
   /**
    * @type {HTMLLabelElement}
    */
+  // @ts-ignore
   rangeIndicator;
   /**
    * @type {Number}
@@ -40,16 +41,25 @@ class FavoritesPaginator {
   }
 
   /**
+   * @type {Boolean}
+   */
+  get usingHorizontalLayout() {
+    return this.content.classList.contains("row");
+  }
+
+  /**
    * @param {Function} onPageChange
    */
   constructor(onPageChange) {
     this.content = this.createContentContainer();
     this.pageSelectionMenu = this.createPageSelectionMenuContainer();
     this.currentPageNumber = 1;
-    this.maxFavoritesPerPage = Utils.getPreference("resultsPerPage", 200);
+    this.maxFavoritesPerPage = Number(Utils.getPreference("resultsPerPage", 200));
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
     this.masonry = null;
     this.onPageChange = onPageChange;
+    this.setupPageSelectionMenu();
+    this.updateMasonryOnWindowResize();
   }
 
   /**
@@ -59,13 +69,13 @@ class FavoritesPaginator {
     const content = document.createElement("div");
 
     content.id = "favorites-search-gallery-content";
-    content.className = Utils.getPreference("layoutSelect", "grid");
+    content.className = String(Utils.getPreference("layoutSelect", "grid"));
     Utils.favoritesSearchGalleryContainer.appendChild(content);
     return content;
   }
 
   /**
-   * @returns {HTMLDivElement}
+   * @returns {HTMLSpanElement}
    */
   createPageSelectionMenuContainer() {
     const menu = document.createElement("span");
@@ -75,9 +85,9 @@ class FavoritesPaginator {
   }
 
   insertPageSelectionMenu() {
-    if (document.getElementById(this.pageSelectionMenu.id) === null) {
-      const placeToInsertMenu = document.getElementById("favorites-pagination-placeholder");
+    const placeToInsertMenu = document.getElementById("favorites-pagination-placeholder");
 
+    if (placeToInsertMenu !== null) {
       placeToInsertMenu.insertAdjacentElement("afterend", this.pageSelectionMenu);
       placeToInsertMenu.remove();
     }
@@ -88,11 +98,21 @@ class FavoritesPaginator {
     this.updatePageSelectionMenu(1, []);
   }
 
+  updateMasonryOnWindowResize() {
+    window.addEventListener("resize", () => {
+      const columnInput = document.getElementById("column-count");
+
+      if (columnInput !== null) {
+        this.changeColumnCount(columnInput);
+      }
+      this.updateMasonry();
+    });
+  }
+
   /**
    * @param {Post[]} favorites
    */
   paginate(favorites) {
-    this.insertPageSelectionMenu();
     this.changePage(1, favorites);
   }
 
@@ -101,12 +121,14 @@ class FavoritesPaginator {
    */
   paginateWhileFetching(favorites) {
     const pageNumberButtons = document.getElementsByClassName("pagination-number");
+    // @ts-ignore
     const lastPageButtonNumber = pageNumberButtons.length > 0 ? parseInt(pageNumberButtons[pageNumberButtons.length - 1].textContent) : 1;
     const pageCount = this.getPageCount(favorites.length);
     const needsToCreateNewPage = pageCount > lastPageButtonNumber;
     const nextPageButton = document.getElementById("next-page");
     const alreadyAtMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= this.maxPageNumberButtons &&
       nextPageButton !== null && nextPageButton.style.display !== "none" &&
+      // @ts-ignore
       nextPageButton.style.visibility !== "hidden" && !nextPageButton.disabled;
     const onLastPage = (pageCount === this.currentPageNumber);
 
@@ -125,6 +147,7 @@ class FavoritesPaginator {
       .filter(favorite => document.getElementById(favorite.id) === null);
 
     for (const favorite of favoritesToAdd) {
+      // @ts-ignore
       favorite.insertAtEndOfContent(this.content);
     }
 
@@ -166,6 +189,7 @@ class FavoritesPaginator {
     const end = Math.min(range.end, favoriteCount);
 
     if (this.rangeIndicator === undefined) {
+      // @ts-ignore
       this.rangeIndicator = document.getElementById("pagination-range-label");
     }
 
@@ -244,21 +268,23 @@ class FavoritesPaginator {
       this.changePage(pageNumber, favorites);
     };
     this.pageSelectionMenu.insertAdjacentElement(position, pageNumberButton);
-    pageNumberButton.textContent = pageNumber;
+    pageNumberButton.textContent = String(pageNumber);
   }
 
   /**
    * @param {Post[]} favorites
    */
   updateNumberTraversalButtonEventListeners(favorites) {
-    const pageNumberButtons = document.getElementsByClassName("pagination-number");
+    const pageNumberButtons = Array.from(document.getElementsByClassName("pagination-number"));
 
     for (const pageNumberButton of pageNumberButtons) {
       const pageNumber = parseInt(Utils.removeNonNumericCharacters(pageNumberButton.id));
 
-      pageNumberButton.onclick = () => {
-        this.changePage(pageNumber, favorites);
-      };
+      if (pageNumberButton instanceof HTMLElement) {
+        pageNumberButton.onclick = () => {
+          this.changePage(pageNumber, favorites);
+        };
+      }
     }
   }
 
@@ -318,17 +344,16 @@ class FavoritesPaginator {
     if (this.firstNumberTraversalButtonExists() && this.lastNumberTraversalButtonExists(this.getPageCount(favorites.length))) {
       return;
     }
-    const html = `
-      <input type="number" placeholder="#" id="goto-page-input">
-      <button id="goto-page-button">Go</button>
-    `;
     const container = document.createElement("span");
+    const input = document.createElement("input");
+    const button = document.createElement("button");
 
     container.title = "Goto specific page";
-    container.innerHTML = html;
-    const input = container.children[0];
-    const button = container.children[1];
-
+    input.type = "number";
+    input.placeholder = "#";
+    input.id = "goto-page-input";
+    button.textContent = "Go";
+    button.id = "goto-page-button";
     input.onkeydown = (event) => {
       if (event.key === "Enter") {
         button.click();
@@ -351,12 +376,16 @@ class FavoritesPaginator {
       return;
     }
 
-    gotoPageButton.onclick = () => {
-      let pageNumber = parseInt(input.value);
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
 
-      if (!Utils.isOnlyDigits(pageNumber)) {
+    gotoPageButton.onclick = () => {
+      if (!Utils.isOnlyDigits(input.value)) {
         return;
       }
+      let pageNumber = parseInt(input.value);
+
       pageNumber = Utils.clamp(pageNumber, 1, pageCount);
       this.changePage(pageNumber, favorites);
 
@@ -380,10 +409,8 @@ class FavoritesPaginator {
     this.content.innerHTML = "";
     this.content.appendChild(newContent);
     this.forceActivateMasonry();
+    this.addSpacers();
 
-    if (this.content.className === "row") {
-      this.addSpacers();
-    }
     Utils.scrollToTop();
   }
 
@@ -391,6 +418,7 @@ class FavoritesPaginator {
     if (this.usingMasonry) {
       this.deactivateMasonry();
       this.activateMasonry();
+      // @ts-ignore
       imagesLoaded(this.content).on("always", () => {
         this.updateMasonry();
       });
@@ -442,7 +470,7 @@ class FavoritesPaginator {
   }
 
   /**
-   * @param {String} direction
+   * @param {"ArrowRight" | "ArrowLeft"} direction
    * @param {Post[]} favorites
    */
   changePageWhileInGallery(direction, favorites) {
@@ -473,21 +501,20 @@ class FavoritesPaginator {
   }
 
   /**
-   * @param {Boolean} value
+   * @param {Post[]} searchResults
    */
-  toggleContentVisibility(value) {
-    this.content.style.display = value ? "" : "none";
+  insertNewSearchResults(searchResults) {
+    for (const searchResult of searchResults) {
+      searchResult.insertAtBeginningOfContent(this.content);
+    }
+
+    if (this.usingMasonry) {
+      this.forceActivateMasonry();
+    }
   }
 
   /**
-   * @param {Post} favorite
-   */
-  insertNewFavorite(favorite) {
-    favorite.insertAtBeginningOfContent(this.content);
-  }
-
-  /**
-   * @param {Number} id
+   * @param {String} id
    * @param {Post[]} favorites
    */
   async findFavorite(id, favorites) {
@@ -507,23 +534,18 @@ class FavoritesPaginator {
     if (this.currentPageNumber !== pageNumber) {
       this.changePage(pageNumber, favorites);
     }
-
-    await Utils.sleep(150);
-    Utils.scrollToThumb(id, false);
-    await Utils.sleep(50);
-    Utils.scrollToThumb(id, false);
     const thumb = document.getElementById(id);
 
     if (thumb === null || thumb.classList.contains("blink")) {
       return;
     }
+    Utils.smoothScrollToElement(thumb, 300);
     thumb.classList.add("blink");
     await Utils.sleep(1500);
     thumb.classList.remove("blink");
   }
 
   /**
-   *
    * @param {"grid" | "row" | "masonry"} layout
    */
   changeLayout(layout) {
@@ -546,7 +568,7 @@ class FavoritesPaginator {
     this.masonry = new Masonry(this.content, {
       itemSelector: ".favorite",
       columnWidth: ".favorite",
-      gutter: 10,
+      gutter: 5,
       horizontalOrder: true,
       isFitWidth: true
     });
@@ -566,6 +588,9 @@ class FavoritesPaginator {
   }
 
   addSpacers() {
+    if (!this.usingHorizontalLayout) {
+      return;
+    }
     this.removeSpacers();
 
     for (let i = 0; i < 8; i += 1) {
@@ -584,5 +609,46 @@ class FavoritesPaginator {
 
     spacer.className = "spacer";
     return spacer;
+  }
+
+  /**
+   * @param {HTMLInputElement} input
+   */
+  changeColumnCount(input) {
+    const columnCount = parseFloat(input.value);
+    const width = Math.floor(window.innerWidth / columnCount) - 15;
+    const min = parseInt(input.getAttribute("min") || "1");
+    const max = parseInt(input.getAttribute("max") || "5");
+    const height = Utils.mapRange(columnCount, min, max, 400, 75);
+
+    Utils.insertStyleHTML(`
+      #favorites-search-gallery-content {
+        &.grid {
+          grid-template-columns: repeat(${columnCount}, 1fr) !important;
+        }
+
+        &.row  {
+          >.favorite,>.spacer {
+            height: ${height}px;
+          }
+          >.spacer {
+            height: ${height}px;
+            width: ${height}px;
+          }
+        }
+
+        &.masonry>.favorite {
+          width: ${width}px !important;
+        }
+      }
+      `, "column-count");
+    this.updateMasonry();
+  }
+
+  /**
+   * @param {Number} resultsPerPage
+   */
+  changeResultsPerPage(resultsPerPage) {
+    this.maxFavoritesPerPage = resultsPerPage;
   }
 }

@@ -23,7 +23,7 @@ class FavoritesDatabase {
 
   /**
    * @param {String} objectStoreName
-   * @param {Number | String} version
+   * @param {Number} version
    */
   constructor(objectStoreName, version) {
     this.objectStoreName = objectStoreName;
@@ -53,7 +53,7 @@ class FavoritesDatabase {
    * @param {Function} onUpgradeNeeded
    * @returns {Promise}
    */
-  openConnection(onUpgradeNeeded) {
+  openConnection(onUpgradeNeeded = () => {}) {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.name, this.version);
 
@@ -64,7 +64,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
+   * @param {[{id: String, tags: String, src: String, metadata: String, type: String}]} favorites
    */
   storeFavorites(favorites) {
     this.openConnection()
@@ -169,7 +169,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {[{id: String, tags: String, src: String, metadata: String}]} favorites
+   * @param {[{id: String, tags: String, src: String, metadata: String, type: String}]} favorites
    */
   updateFavorites(favorites) {
     this.openConnection()
@@ -213,7 +213,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, metadata: String}} favorite
+   * @param {{id: String, tags: String, src: String, metadata: String, type: String}} favorite
    */
   addContentTypeToFavorite(favorite) {
     const tags = favorite.tags + " ";
@@ -227,7 +227,7 @@ class FavoritesDatabase {
 /**
  * @type {FavoritesDatabase}
  */
-const favoritesDatabase = new FavoritesDatabase(null, 1);
+const favoritesDatabase = new FavoritesDatabase("user", 1);
 
 onmessage = (message) => {
   const request = message.data;

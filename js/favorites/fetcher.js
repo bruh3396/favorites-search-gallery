@@ -8,6 +8,10 @@ class FavoritesFetcher {
    */
   onRequestCompleted;
   /**
+   * @type {Function}
+   */
+  onFavoritesFoundOnReload;
+  /**
    * @type {Set.<Number>}
    */
   pendingRequestPageNumbers;
@@ -57,10 +61,10 @@ class FavoritesFetcher {
   }
 
   /**
-   * @type {FavoritesPageRequest}
+   * @type {FavoritesPageRequest | null}
    */
   get oldestFailedFetchRequest() {
-    return this.failedRequests.shift();
+    return this.failedRequests.shift() || null;
   }
 
   /**
@@ -89,12 +93,12 @@ class FavoritesFetcher {
   }
 
   /**
-   * @param {Function} onAllRequestsCompleted
-   * @param {Function} onRequestCompleted
+   * @param {{onAllRequestsCompleted: Function, onRequestCompleted: Function, onFavoritesFoundOnReload: Function}} parameter
    */
-  constructor(onAllRequestsCompleted, onRequestCompleted) {
+  constructor({onAllRequestsCompleted, onRequestCompleted, onFavoritesFoundOnReload}) {
     this.onAllRequestsCompleted = onAllRequestsCompleted;
     this.onRequestCompleted = onRequestCompleted;
+    this.onFavoritesFoundOnReload = onFavoritesFoundOnReload;
     this.storedFavoriteIds = new Set();
     this.pendingRequestPageNumbers = new Set();
     this.failedRequests = [];
@@ -115,6 +119,9 @@ class FavoritesFetcher {
   async fetchNewFavoritesOnReload(storedFavoriteIds) {
     await Utils.sleep(100);
     this.storedFavoriteIds = storedFavoriteIds;
+    /**
+     * @type {Post[]}
+     */
     let favorites = [];
 
     while (true) {
@@ -123,8 +130,8 @@ class FavoritesFetcher {
       favorites = favorites.concat(newFavorites);
 
       if (allNewFavoritesFound) {
-        this.storedFavoriteIds = null;
-        this.onAllRequestsCompleted(favorites);
+        this.storedFavoriteIds.clear();
+        this.onFavoritesFoundOnReload(favorites);
         return;
       }
     }
@@ -166,7 +173,7 @@ class FavoritesFetcher {
   }
 
   /**
-   * @param {FavoritesPageRequest} request
+   * @param {FavoritesPageRequest | null} request
    */
   async fetchFavoritesPage(request) {
     if (request === null) {

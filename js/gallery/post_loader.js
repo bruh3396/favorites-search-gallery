@@ -3,6 +3,23 @@ class PostLoader {
    * @type {DOMParser}
    */
   static parser = new DOMParser();
+
+  /**
+   * @type {String}
+   */
+  static get searchURIFragment() {
+    const match = (/&tags=([^&]*)/).exec(location.href);
+    const tags = match === null ? "" : match[1];
+    return tags === "all" ? "" : tags;
+  }
+
+  /**
+   * @type {String}
+   */
+  static get blacklistURIFragment() {
+    return ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
+  }
+
   static constants = {
     chunkSize: 42,
     searchPageSize: 42,
@@ -16,22 +33,6 @@ class PostLoader {
    */
   static getPostChunkAPIURL(pageNumber) {
     return `${PostLoader.constants.apiURL}&pid=${pageNumber}&limit=${PostLoader.constants.chunkSize}&tags=${PostLoader.constants.tagsURIFragment}`;
-  }
-
-  /**
-   * @type {String}
-   */
-  static get blacklistURIFragment() {
-    return ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
-  }
-
-  /**
-   * @type {String}
-   */
-  static get searchURIFragment() {
-    const match = (/&tags=([^&]*)/).exec(location.href);
-    const tags = match === null ? "" : match[1];
-    return tags === "all" ? "" : tags;
   }
 
   /**
@@ -84,6 +85,9 @@ class PostLoader {
     this.loadChunk(previousPageNumber);
   }
 
+  /**
+   * @param {Number} pageNumber
+   */
   async loadChunk(pageNumber) {
     if (this.chunks.has(pageNumber)) {
       return;
@@ -108,7 +112,7 @@ class PostLoader {
         const dom = PostLoader.parser.parseFromString(html, "text/html");
         const posts = [];
 
-        for (const post of dom.querySelectorAll("post")) {
+        for (const post of Array.from(dom.querySelectorAll("post"))) {
           posts.push(new CompactPost(post));
         }
         return posts;
@@ -116,10 +120,18 @@ class PostLoader {
   }
 
   updateLoadedPosts() {
+    const sortedChunkKeys = Array.from(this.chunks.keys()).sort();
+    /**
+     * @type {CompactPost[]}
+     */
     let posts = [];
 
-    for (const i of Array.from(this.chunks.keys()).sort()) {
-      posts = posts.concat(this.chunks.get(i));
+    for (const i of sortedChunkKeys) {
+      const chunk = this.chunks.get(i);
+
+      if (chunk !== undefined) {
+        posts = posts.concat(chunk);
+      }
     }
     this.loadedPosts = posts;
   }
@@ -136,7 +148,7 @@ class PostLoader {
     }
     this.currentSearchOffset = index;
     this.loadCurrentChunk();
-    return this.getPostsAroundIndex(index);
+    return Utils.getElementsAroundIndex(this.loadedPosts, index, 42);
   }
 
   /**
@@ -145,41 +157,6 @@ class PostLoader {
    */
   indexInBounds(index) {
     return index >= 0 && index < this.loadedPosts.length;
-  }
-
-  /**
-   * @param {Array} array
-   * @param {Number} startIndex
-   * @param {Number} range
-   * @returns {Array}
-   */
-  getPostsAroundIndex(array, startIndex, range) {
-    const result = [];
-
-    result.push(array[startIndex]);
-    let i = 1;
-
-    while (result.length < range) {
-      const leftIndex = startIndex - i;
-      const rightIndex = startIndex + i;
-      const leftIndexInBounds = this.indexInBounds(leftIndex);
-      const rightIndexInBounds = this.indexInBounds(rightIndex);
-      const bothIndexesOutOfBounds = !leftIndexInBounds && !rightIndexInBounds;
-
-      if (bothIndexesOutOfBounds) {
-        break;
-      }
-
-      if (leftIndexInBounds) {
-        result.push(array[leftIndex]);
-      }
-
-      if (rightIndexInBounds && result.length <= range) {
-        result.push(array[rightIndex]);
-      }
-      i += 1;
-    }
-    return result;
   }
 
   /**

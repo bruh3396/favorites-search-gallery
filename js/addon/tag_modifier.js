@@ -95,7 +95,7 @@ class TagModifier {
     if (Utils.onFavoritesPage()) {
       return false;
     }
-    return Utils.getPreference(TagModifier.preferences.modifyTagsOutsideFavoritesPage, false);
+    return Boolean(Utils.getPreference(TagModifier.preferences.modifyTagsOutsideFavoritesPage, false));
   }
 
   /**

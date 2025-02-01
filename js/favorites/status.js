@@ -1,35 +1,29 @@
-class FavoritesLoaderStatus {
+class FavoritesStatusBar {
   /**
-   * @type {HTMLLabelElement}
+   * @type {HTMLElement | null}
    */
   matchCountIndicator;
   /**
-   * @type {HTMLLabelElement}
+   * @type {HTMLElement | null}
    */
   statusIndicator;
   /**
-   * @type {Number}
+   * @type {Number | null}
    */
   expectedTotalFavoritesCount;
+  /**
+   * @type {Timeout}
+   */
+  statusTimeout;
 
   constructor() {
-    this.initializeFields();
-    this.extractElements();
-  }
-
-  initializeFields() {
-    this.setExpectedFavoritesCount();
-  }
-
-  extractElements() {
     this.matchCountIndicator = document.getElementById("match-count-label");
     this.statusIndicator = document.getElementById("favorites-load-status-label");
-  }
-
-  setExpectedFavoritesCount() {
+    this.statusTimeout = null;
+    this.expectedTotalFavoritesCount = null;
     Utils.getExpectedFavoritesCount()
-      .then((favoritesCount) => {
-        this.expectedTotalFavoritesCount = favoritesCount;
+      .then((expectedTotalFavoritesCount) => {
+        this.expectedTotalFavoritesCount = expectedTotalFavoritesCount;
       });
   }
 
@@ -37,24 +31,25 @@ class FavoritesLoaderStatus {
    * @param {String} text
    */
   setStatus(text) {
-    this.statusIndicator.textContent = text;
-  }
-
-  /**
-   * @param {Boolean} value
-   * @param {Number} delay
-   */
-  async toggleStatusVisibility(value, delay = 0) {
-    if (delay > 0) {
-      await Utils.sleep(delay);
+    if (this.statusIndicator === null) {
+      console.error("Status indicator is null");
+      return;
     }
-    this.statusIndicator.style.display = value ? "inline-block" : "none";
+    this.statusIndicator.textContent = text;
+    clearTimeout(this.statusTimeout);
+    this.statusTimeout = setTimeout(() => {
+      this.setStatus("");
+    }, 1500);
   }
 
   /**
    * @param {Number} value
    */
   setMatchCount(value) {
+    if (this.matchCountIndicator === null) {
+      console.error("Match count indicator is null");
+      return;
+    }
     this.matchCountIndicator.textContent = `${value} ${value === 1 ? "Match" : "Matches"}`;
   }
 
@@ -62,16 +57,11 @@ class FavoritesLoaderStatus {
     dispatchEvent(new Event("readyToSearch"));
   }
 
-  notifyAllFavoritesSaved() {
-    this.setStatus("All favorites saved");
-    this.toggleStatusVisibility(false, 1000);
-  }
-
   /**
-   * @param {Number} favoritesFoundCount
    * @param {Number} searchResultsCount
+   * @param {Number} favoritesFoundCount
    */
-  updateStatusWhileFetching(favoritesFoundCount, searchResultsCount) {
+  updateStatusWhileFetching(searchResultsCount, favoritesFoundCount) {
     const prefix = Utils.onMobileDevice() ? "" : "Favorites ";
     let statusText = `Fetching ${prefix}${favoritesFoundCount}`;
 

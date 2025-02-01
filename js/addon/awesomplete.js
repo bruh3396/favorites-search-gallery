@@ -25,7 +25,7 @@ class AwesompleteWrapper {
   }
 
   initializeFields() {
-    this.showSavedSearchSuggestions = Utils.getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false);
+    this.showSavedSearchSuggestions = Boolean(Utils.getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false));
   }
 
   insertHTML() {
@@ -75,7 +75,7 @@ class AwesompleteWrapper {
       },
       replace: (suggestion) => {
         this.insertSuggestion(awesomplete.input, Utils.removeSavedSearchPrefix(decodeEntities(suggestion.value)));
-        awesomplete.input.dispatchEvent(new CustomEvent("setProgrammatically"));
+        awesomplete.input.dispatchEvent(new CustomEvent("updatedProgrammatically"));
       }
     });
 

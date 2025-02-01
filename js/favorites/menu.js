@@ -161,10 +161,6 @@ class FavoritesMenu {
       text-shadow: none;
     }
 
-    /* #statistic-hint-container {
-      display: none;
-    } */
-
     img {
       -webkit-user-drag: none;
       -khtml-user-drag: none;
@@ -553,6 +549,79 @@ class FavoritesMenu {
     #sort-container {
       position: relative;
     }
+
+    .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            transform: scale(.8);
+            align-content: center;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #0075FF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #0075FF;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .toggle-switch-label {
+            margin-left: 60px;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        /* #sort-ascending-checkbox {
+            width: 0 !important;
+            height: 0 !important;
+            position: static !important;
+        } */
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
@@ -627,10 +696,10 @@ Lower numbers improve responsiveness">
                   </div>
                 </div>
               </div>
-              <div id="rating-container" title="Filter search results by rating">
+              <div id="rating-container" title="Filter search results by rating" >
                 <label>Rating</label>
                 <br>
-                <div id="allowed-ratings" class="not-highlightable">
+                <div id="allowed-ratings" class="not-highlightable" data-action="changeAllowedRatings">
                   <input type="checkbox" id="explicit-rating" checked>
                   <label for="explicit-rating">Explicit</label>
                   <input type="checkbox" id="questionable-rating" checked>
@@ -1483,81 +1552,6 @@ Lower numbers improve responsiveness">
   }
 
   createMobileToggleSwitchesHelper() {
-    Utils.insertStyleHTML(`
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-            transform: scale(.75);
-            align-content: center;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        input:checked + .slider {
-            background-color: #0075FF;
-        }
-
-        input:focus + .slider {
-            box-shadow: 0 0 1px #0075FF;
-        }
-
-        input:checked + .slider:before {
-            -webkit-transform: translateX(26px);
-            -ms-transform: translateX(26px);
-            transform: translateX(26px);
-        }
-
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round:before {
-            border-radius: 50%;
-        }
-
-        .toggle-switch-label {
-            margin-left: 60px;
-            margin-top: 20px;
-            font-size: 16px;
-        }
-
-        #sort-ascending-checkbox {
-            width: 0 !important;
-            height: 0 !important;
-            position: static !important;
-        }
-
-            `, "mobile-toggle-switch");
     const checkboxes = Array.from(document.querySelectorAll(".checkbox"))
       .filter(checkbox => checkbox.getBoundingClientRect().width > 0);
 
@@ -1750,9 +1744,9 @@ Lower numbers improve responsiveness">
         width: 20px;
         height: 20px;
       }
-        #favorites-pagination-container>button {
-          height: 32px;
-        }
+      #favorites-pagination-container>button {
+        height: 32px;
+      }
 
     `, "desktop");
   }
