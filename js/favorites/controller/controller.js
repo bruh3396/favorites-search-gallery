@@ -58,8 +58,7 @@ class FavoritesController {
     //   this.searchFlags.tagsWereModified = true;
     // });
     window.addEventListener("reachedEndOfGallery", (event) => {
-      console.log(0);
-      this.network.sendMessage(Channels.favorites.controllerToView, "changePageInGallery", event.detail);
+      this.network.sendMessage(Channels.favorites.controllerToView, "changePageInGallery", /** @type {CustomEvent} */ (event).detail);
     });
     // window.addEventListener("missingMetadata", (event) => {
     //   this.database.updateMetadataInDatabase(event.detail);
@@ -87,7 +86,7 @@ class FavoritesController {
   }
 
   /**
-   * @param {{searchResults: Post[], allFavorites: Post[]}}
+   * @param {{searchResults: Post[], allFavorites: Post[]}} param
    */
   onNewSearchResultsFound({searchResults, allFavorites}) {
     this.network.sendMessage(Channels.favorites.controllerToView, "updateSearchResultsWhileFetching", {

@@ -9,7 +9,6 @@ class AwesompleteWrapper {
   static get disabled() {
     return !Utils.onFavoritesPage();
   }
-
   /**
    * @type {Boolean}
    */
@@ -19,13 +18,9 @@ class AwesompleteWrapper {
     if (AwesompleteWrapper.disabled) {
       return;
     }
-    this.initializeFields();
+    this.showSavedSearchSuggestions = Boolean(Utils.getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false));
     this.insertHTML();
     this.addAwesompleteToInputs();
-  }
-
-  initializeFields() {
-    this.showSavedSearchSuggestions = Boolean(Utils.getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false));
   }
 
   insertHTML() {
@@ -161,7 +156,8 @@ class AwesompleteWrapper {
    * @returns {String}
    */
   getCurrentTagWithHyphen(input) {
-    return this.getLastTagWithHyphen(input.value.slice(0, input.selectionStart));
+    const selectionStart = input.selectionStart || undefined;
+    return this.getLastTagWithHyphen(input.value.slice(0, selectionStart));
   }
 
   /**
@@ -178,9 +174,10 @@ class AwesompleteWrapper {
    * @param {String} suggestion
    */
   insertSuggestion(input, suggestion) {
-    const cursorAtEnd = input.selectionStart === input.value.length;
-    const firstHalf = input.value.slice(0, input.selectionStart);
-    const secondHalf = input.value.slice(input.selectionStart);
+    const initialSelectionStart = input.selectionStart || undefined;
+    const cursorAtEnd = initialSelectionStart === input.value.length;
+    const firstHalf = input.value.slice(0, initialSelectionStart);
+    const secondHalf = input.value.slice(initialSelectionStart);
     const firstHalfWithPrefixRemoved = firstHalf.replace(/(\s?)(-?\*?)\S+$/, "$1$2");
     const combinedHalves = Utils.removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf}`);
     const result = cursorAtEnd ? `${combinedHalves} ` : combinedHalves;

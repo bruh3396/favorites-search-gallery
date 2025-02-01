@@ -1,10 +1,47 @@
 class FavoritesMenuUI {
   static setup() {
+    FavoritesMenuUI.setupRatingFilter();
+
     if (Utils.onMobileDevice()) {
       FavoritesMenuMobileUI.create();
-    } else {
-      FavoritesMenuDesktopUI.create();
+      return;
     }
+    FavoritesMenuDesktopUI.create();
+  }
+
+  static setupRatingFilter() {
+    const ratingFilter = document.getElementById("allowed-ratings");
+
+    if (ratingFilter === null) {
+      return;
+    }
+    const allowedRatings = Utils.loadAllowedRatings();
+
+    // @ts-ignore
+    // eslint-disable-next-line no-bitwise
+    ratingFilter.querySelector("#explicit-rating").checked = (allowedRatings & 4) === 4;
+
+    // @ts-ignore
+    // eslint-disable-next-line no-bitwise
+    ratingFilter.querySelector("#questionable-rating").checked = (allowedRatings & 2) === 2;
+
+    // @ts-ignore
+    // eslint-disable-next-line no-bitwise
+    ratingFilter.querySelector("#safe-rating").checked = (allowedRatings & 1) === 1;
+
+    ratingFilter.dispatchEvent(new CustomEvent("uiController", {
+      bubbles: true,
+      detail: allowedRatings
+    }));
+    ratingFilter.onclick = (event) => {
+      // @ts-ignore
+      if (!Utils.hasTagName(event.target, "label")) {
+        ratingFilter.dispatchEvent(new CustomEvent("uiController", {
+          bubbles: true,
+          detail: allowedRatings
+        }));
+      }
+    };
   }
 }
 
@@ -38,7 +75,7 @@ class FavoritesMenuDesktopUI {
     ],
     "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "onSortingParametersChanged", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, defaultValue: false}],
     "numberComponent": [
-      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "changeColumnCount", defaultValue: 6, min: 1, max: 20, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "changeColumnCount", defaultValue: 6, min: 4, max: 20, step: 1, pollingTime: 50, invokeActionOnCreation: true},
       {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "changeResultsPerPage", defaultValue: 20, min: 50, max: 500, step: 50, pollingTime: 50, invokeActionOnCreation: false}
     ]
   };

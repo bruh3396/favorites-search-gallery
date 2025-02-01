@@ -102,10 +102,10 @@ class FavoritesPaginator {
     window.addEventListener("resize", () => {
       const columnInput = document.getElementById("column-count");
 
-      if (columnInput !== null) {
+      if (columnInput !== null && (columnInput instanceof HTMLInputElement)) {
         this.changeColumnCount(columnInput);
       }
-      this.updateMasonry();
+        this.updateMasonry();
     });
   }
 
@@ -570,7 +570,8 @@ class FavoritesPaginator {
       columnWidth: ".favorite",
       gutter: 5,
       horizontalOrder: true,
-      isFitWidth: true
+      isFitWidth: true,
+      resize: false
     });
   }
 

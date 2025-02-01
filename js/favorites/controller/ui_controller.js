@@ -7,7 +7,6 @@ class FavoritesUIController {
     FavoritesUIController.setupMenuEvents();
     FavoritesUIController.setupCheckboxHotkeys();
     FavoritesUIController.setupGlobalListeners();
-    FavoritesUIController.setupRatingFilter();
   }
 
   static setupMenuEvents() {
@@ -22,31 +21,6 @@ class FavoritesUIController {
         FavoritesUIController.invokeAction(event);
       }
     });
-  }
-
-  static setupRatingFilter() {
-    const ratingFilter = document.getElementById("allowed-ratings");
-
-    if (ratingFilter === null) {
-      return;
-    }
-    const allowedRatings = Utils.loadAllowedRatings();
-
-    // eslint-disable-next-line no-bitwise
-    ratingFilter.querySelector("#explicit-rating").checked = (allowedRatings & 4) === 4;
-    // eslint-disable-next-line no-bitwise
-    ratingFilter.querySelector("#questionable-rating").checked = (allowedRatings & 2) === 2;
-    // eslint-disable-next-line no-bitwise
-    ratingFilter.querySelector("#safe-rating").checked = (allowedRatings & 1) === 1;
-
-    FavoritesUIController.changeAllowedRatings(ratingFilter);
-    ratingFilter.onclick = (event) => {
-      if (!Utils.hasTagName(event.target, "label")) {
-        console.log(allowedRatings);
-        ratingFilter.dispatchEvent(new CustomEvent("controller", {bubbles: true, detail: allowedRatings}));
-        // FavoritesUIController.changeAllowedRatings(ratingFilter);
-      }
-    };
   }
 
   /**
@@ -80,12 +54,7 @@ class FavoritesUIController {
 
   static setupQuickSearchForTag() {
     window.addEventListener("searchForTag", (event) => {
-      const searchBox = SearchHistoryOld.state.searchBox;
 
-      if (searchBox !== null) {
-        searchBox.value = event.detail;
-        FavoritesUIController.search({ctrlKey: false});
-      }
     });
   }
 
@@ -110,8 +79,7 @@ class FavoritesUIController {
       if (!event.shiftKey) {
         return;
       }
-      const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
-      const columnAddend = delta > 0 ? -1 : 1;
+      const columnAddend = -event.deltaY > 0 ? -1 : 1;
 
       if (cooldown.ready) {
         Utils.forceHideCaptions(true);
@@ -137,25 +105,6 @@ class FavoritesUIController {
 
   static reset() {
     Utils.deletePersistentData();
-  }
-
-  static navigateSearchHistory(event) {
-    const searchBox = event.target;
-
-    if (Utils.awesompleteIsVisible(searchBox)) {
-      return;
-    }
-    event.preventDefault();
-    const searchHistory = SearchHistoryOld.state.searchHistory;
-
-    if (event.key === "ArrowUp") {
-      SearchHistoryOld.incrementSearchHistoryIndex();
-    } else {
-      SearchHistoryOld.decrementSearchHistoryIndex();
-    }
-    const index = SearchHistoryOld.state.searchHistoryIndex;
-
-    searchBox.value = searchHistory[index] || SearchHistoryOld.state.lastEditedSearchQuery;
   }
 
   /**
@@ -241,15 +190,16 @@ class FavoritesUIController {
   }
 
   /**
-   * @param {HTMLElement} target
+   * @param {CustomEvent} event
    */
-  static changeAllowedRatings(target) {
-    const explicit = target.querySelector("#explicit-rating");
-    const questionable = target.querySelector("#questionable-rating");
-    const safe = target.querySelector("#safe-rating");
+  static changeAllowedRatings(event) {
+    const explicit = event.target.querySelector("#explicit-rating");
+    const questionable = event.target.querySelector("#questionable-rating");
+    const safe = event.target.querySelector("#safe-rating");
     const allowedRatings = (4 * Number(explicit.checked)) + (2 * Number(questionable.checked)) + Number(safe.checked);
 
     Utils.setPreference("allowedRatings", allowedRatings);
+    event.target.dispatchEvent(new CustomEvent("controller", {bubbles: true, detail: allowedRatings}));
 
     switch (allowedRatings) {
       case 4:

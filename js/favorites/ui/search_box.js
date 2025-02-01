@@ -11,10 +11,15 @@ class SearchBox {
    * @type {String}
    */
   id;
+  /**
+   * @type {SearchHistoryOld}
+   */
+  searchHistory;
 
   constructor() {
     this.parent = document.getElementById("left-favorites-panel-top-row");
     this.id = Utils.mainSearchBoxId;
+    this.searchHistory = new SearchHistoryOld();
     this.searchBox = this.createMainSearchBox();
   }
 
@@ -149,5 +154,24 @@ class SearchBox {
       }
     });
     return searchBar;
+  }
+
+  navigateSearchHistory(event) {
+    const searchBox = event.target;
+
+    if (Utils.awesompleteIsVisible(searchBox)) {
+      return;
+    }
+    event.preventDefault();
+    const searchHistory = SearchHistoryOld.state.searchHistory;
+
+    if (event.key === "ArrowUp") {
+      SearchHistoryOld.incrementSearchHistoryIndex();
+    } else {
+      SearchHistoryOld.decrementSearchHistoryIndex();
+    }
+    const index = SearchHistoryOld.state.searchHistoryIndex;
+
+    searchBox.value = searchHistory[index] || SearchHistoryOld.state.lastEditedSearchQuery;
   }
 }

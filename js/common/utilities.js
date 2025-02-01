@@ -2235,12 +2235,13 @@ class Utils {
   static handleMessage(receiver, message) {
     if (typeof receiver[message.name] === "function") {
       receiver[message.name](message.detail);
-      console.log(receiver, message);
+      // console.log(message);
     } else {
-      console.error("Unknown message received:", {
-        receiver,
-        message
-      });
+      // console.error(message);
+      // console.error("Unknown message received:", {
+      //   receiver,
+      //   message
+      // });
     }
   }
 
