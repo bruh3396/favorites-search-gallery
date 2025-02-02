@@ -1,6 +1,6 @@
-/* eslint-disable object-property-newline */
-/* eslint-disable object-curly-newline */
 class FavoritesUIController {
+  /* eslint-disable object-property-newline */
+  /* eslint-disable object-curly-newline */
   static hotkeys = {};
 
   static setup() {
@@ -48,17 +48,10 @@ class FavoritesUIController {
   }
 
   static setupGlobalListeners() {
-    FavoritesUIController.setupQuickSearchForTag();
-    FavoritesUIController.changeColumnCountOnShiftScroll();
+    FavoritesUIController.updateColumnCountOnShiftScroll();
   }
 
-  static setupQuickSearchForTag() {
-    window.addEventListener("searchForTag", (event) => {
-
-    });
-  }
-
-  static changeColumnCountOnShiftScroll() {
+  static updateColumnCountOnShiftScroll() {
     const cooldown = new Cooldown(500, true);
 
     cooldown.onDebounceEnd = () => {
@@ -96,6 +89,9 @@ class FavoritesUIController {
    * @param {Event} event
    */
   static invokeAction(event) {
+    if (!(event.target instanceof HTMLElement)) {
+      return;
+    }
     const action = event.target.dataset.action;
 
     if (action !== null && action !== undefined && FavoritesUIController[action] !== undefined) {
@@ -111,13 +107,18 @@ class FavoritesUIController {
    * @param {CustomEvent} event
    */
   static toggleFancyThumbHovering(event) {
-    Utils.insertStyleHTML(event.target.checked ? Utils.styles.fancyHovering : "", "fancy-image-hovering");
+    if (event.target instanceof HTMLInputElement) {
+      Utils.insertStyleHTML(event.target.checked ? Utils.styles.fancyHovering : "", "fancy-image-hovering");
+    }
   }
 
   /**
    * @param {CustomEvent} event
    */
   static toggleOptionHotkeyHints(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
     const html = event.target.checked ? "" : ".option-hint {display:none;}";
 
     Utils.insertStyleHTML(html, "option-hint-visibility");
@@ -127,10 +128,18 @@ class FavoritesUIController {
    * @param {CustomEvent} event
    */
   static toggleDarkTheme(event) {
-    Utils.toggleDarkTheme(event.target.checked);
+    if (event.target instanceof HTMLInputElement) {
+      Utils.toggleDarkTheme(event.target.checked);
+    }
   }
 
+  /**
+   * @param {CustomEvent} event
+   */
   static toggleStatisticHints(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
     const html = event.target.checked ? "" : ".statistic-hint {display:none;}";
 
     Utils.insertStyleHTML(html, "statistic-hint-visibility");
@@ -140,13 +149,23 @@ class FavoritesUIController {
     window.location.reload();
   }
 
+  /**
+   * @param {CustomEvent} event
+   */
   static toggleUI(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
     const checked = event.target.checked;
     const menu = document.getElementById("favorites-search-gallery-menu");
     const panels = document.getElementById("favorites-search-gallery-menu-panels");
     const header = document.getElementById("header");
     const container = document.getElementById("show-ui-container");
     const bottomPanel3 = document.getElementById("bottom-panel-3");
+
+    if (menu === null || panels === null || container === null || bottomPanel3 === null) {
+      return;
+    }
 
     if (checked) {
       if (header !== null) {
@@ -171,6 +190,9 @@ class FavoritesUIController {
    * @param {CustomEvent} event
    */
   static toggleOptions(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
     const value = event.target.checked;
 
     if (Utils.onMobileDevice()) {
@@ -226,6 +248,9 @@ class FavoritesUIController {
    * @param {CustomEvent} event
    */
   static toggleAddOrRemoveButtons(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
     const visibility = event.target.checked ? "visible" : "hidden";
 
     Utils.insertStyleHTML(`
@@ -233,14 +258,25 @@ class FavoritesUIController {
           visibility: ${visibility} !important;
         }
       `, "add-or-remove-button-visibility");
+    Utils.forceHideCaptions(event.target.checked);
   }
 
-  static search() {
+  /**
+   * @param {CustomEvent} event
+   * @returns
+   */
+  static search(event) {
     const searchBox = document.getElementById(Utils.mainSearchBoxId);
 
     if (searchBox === null || (!(searchBox instanceof HTMLTextAreaElement) && !(searchBox instanceof HTMLInputElement))) {
       return;
     }
+
+    if (event.detail.rightClick || event.detail.ctrlKey) {
+      Utils.openSearchPage(searchBox.value);
+      return;
+    }
+
     searchBox.dispatchEvent(new KeyboardEvent("keydown", {
       key: "Enter",
       bubbles: true

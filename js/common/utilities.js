@@ -511,14 +511,13 @@ class Utils {
    * @param {Boolean} value
    */
   static forceHideCaptions(value) {
-    for (const caption of Array.from(document.getElementsByClassName("caption"))) {
-      if (value) {
-        caption.classList.add("remove");
-        caption.classList.add("inactive");
-      } else {
-        caption.classList.remove("remove");
-      }
-    }
+    Utils.insertStyleHTML(`
+        .caption {
+          display: ${value ? "none" : ""} !important;
+        }
+      `, "caption-hiding");
+
+      document.getElementById("caption-hiding-fsg-style");
   }
 
   /**
@@ -907,19 +906,21 @@ class Utils {
             ${gifRule}
           }
         }
-      &.grid .favorite, .thumb {
+      }
+
+      #favorites-search-gallery-content.grid .favorite, .thumb {
         >a,
         >div {
           ${videoRule}
 
           ${gifRule}
         }
-      }ideo-gif-border
-      `, "vs");
+      }
+      `, "video-gif-borders");
   }
 
   static removeInlineImgStyles() {
-    for (const image of document.getElementsByTagName("img")) {
+    for (const image of Array.from(document.getElementsByTagName("img"))) {
       image.removeAttribute("style");
     }
   }
@@ -2231,18 +2232,14 @@ class Utils {
   /**
    * @param {any} receiver
    * @param {Message} message
+   * @returns {any}
    */
   static handleMessage(receiver, message) {
     if (typeof receiver[message.name] === "function") {
-      receiver[message.name](message.detail);
-      // console.log(message);
-    } else {
-      // console.error(message);
-      // console.error("Unknown message received:", {
-      //   receiver,
-      //   message
-      // });
+      return receiver[message.name](message.detail);
     }
+    // console.error(message);
+    return {};
   }
 
   /**
@@ -2292,4 +2289,19 @@ class Utils {
 
     requestAnimationFrame(scroll);
   }
+
+  /**
+   * @param {HTMLElement} element
+   * @returns {Boolean}
+   */
+  static elementIsInView(element) {
+    const rect = element.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
 }

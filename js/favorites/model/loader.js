@@ -67,6 +67,7 @@ class FavoritesLoader {
        */
       onFavoritesFoundOnReload: (favorites) => {
         this.sendMessageToModel("onFavoritesFoundOnReload", favorites);
+        this.allFavorites = favorites.concat(this.allFavorites);
 
         if (favorites.length > 0) {
           this.database.storeFavorites(favorites);
@@ -121,5 +122,12 @@ class FavoritesLoader {
 
   loadFavorites() {
     this.database.loadAllFavorites();
+  }
+
+  /**
+   * @param {String} id
+   */
+  updateMetadataInDatabase(id) {
+    this.database.updateMetadataInDatabase(id);
   }
 }

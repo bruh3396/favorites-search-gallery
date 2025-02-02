@@ -12,15 +12,16 @@ class SearchBox {
    */
   id;
   /**
-   * @type {SearchHistoryOld}
+   * @type {SearchHistory}
    */
   searchHistory;
 
   constructor() {
     this.parent = document.getElementById("left-favorites-panel-top-row");
     this.id = Utils.mainSearchBoxId;
-    this.searchHistory = new SearchHistoryOld();
+    this.searchHistory = new SearchHistory(30);
     this.searchBox = this.createMainSearchBox();
+    this.addEventListenersToSearchBox();
   }
 
   /**
@@ -33,43 +34,7 @@ class SearchBox {
     searchBox.placeholder = "Search Favorites";
     searchBox.spellcheck = false;
     searchBox.dataset.action = "getSearchResults";
-    searchBox.value = "";
-    searchBox.addEventListener("updatedProgrammatically", () => {
-      // SearchHistoryOld.updateLastEditedSearchQuery(searchBox.value);
-    });
-    searchBox.addEventListener("keyup", (event) => {
-      if (event.key.length === 1 || event.key === "Backspace" || event.key === "Delete") {
-        // SearchHistoryOld.updateLastEditedSearchQuery(searchBox.value);
-      }
-    });
-    searchBox.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case "Enter":
-          if (Utils.awesompleteIsSelected(searchBox)) {
-            return;
-          }
-          event.preventDefault();
-
-          if (event.repeat) {
-            return;
-          }
-          searchBox.dispatchEvent(new CustomEvent("controller", {
-            bubbles: true,
-            detail: searchBox.value
-          }));
-          break;
-
-        case "ArrowUp":
-
-        case "ArrowDown":
-          // FavoritesMenuEventHandler.navigateSearchHistory(event);
-          break;
-
-        default:
-          // SearchHistoryOld.resetSearchHistoryIndex();
-          break;
-      }
-    });
+    searchBox.value = this.searchHistory.lastEditedQuery;
 
     if (this.parent !== null) {
       this.parent.insertAdjacentElement("afterend", searchBox);
@@ -132,7 +97,7 @@ class SearchBox {
     if (this.parent !== null) {
       this.parent.insertAdjacentHTML("afterbegin", html);
     }
-    const searchBar = document.getElementById(id);
+    const searchBar = document.getElementById(this.id);
 
     if (searchBar === null || !(searchBar instanceof HTMLInputElement)) {
       return document.createElement("input");
@@ -156,22 +121,83 @@ class SearchBox {
     return searchBar;
   }
 
-  navigateSearchHistory(event) {
-    const searchBox = event.target;
+  addEventListenersToSearchBox() {
+    window.addEventListener("searchForTag", (event) => {
+      this.searchBox.value = event.detail;
+      this.updateLastEditedSearchQuery();
+      this.executeSearch();
+    });
+    this.searchBox.addEventListener("updatedProgrammatically", () => {
+      this.updateLastEditedSearchQuery();
+    });
+    this.updateLastEditedSearchQueryOnInput();
+    this.searchBox.addEventListener("keydown", (event) => {
+      if (!(event instanceof KeyboardEvent)) {
+        return;
+      }
 
-    if (Utils.awesompleteIsVisible(searchBox)) {
-      return;
-    }
-    event.preventDefault();
-    const searchHistory = SearchHistoryOld.state.searchHistory;
+      switch (event.key) {
+        case "Enter":
+          if (Utils.awesompleteIsSelected(this.searchBox)) {
+            return;
+          }
+          event.preventDefault();
 
-    if (event.key === "ArrowUp") {
-      SearchHistoryOld.incrementSearchHistoryIndex();
-    } else {
-      SearchHistoryOld.decrementSearchHistoryIndex();
-    }
-    const index = SearchHistoryOld.state.searchHistoryIndex;
+          if (event.repeat) {
+            return;
+          }
+          this.executeSearch();
+          break;
 
-    searchBox.value = searchHistory[index] || SearchHistoryOld.state.lastEditedSearchQuery;
+        case "ArrowUp":
+
+        case "ArrowDown":
+          if (Utils.awesompleteIsVisible(this.searchBox)) {
+            return;
+          }
+          event.preventDefault();
+          this.searchHistory.navigate(event.key);
+          this.searchBox.value = this.searchHistory.selectedQuery;
+          break;
+
+        default:
+          break;
+      }
+    });
+    this.searchBox.addEventListener("wheel", (event) => {
+      if (event.shiftKey || event.ctrlKey) {
+        return;
+      }
+      const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
+
+      this.searchHistory.navigate(direction);
+      this.searchBox.value = this.searchHistory.selectedQuery;
+      event.preventDefault();
+    });
+  }
+
+  updateLastEditedSearchQueryOnInput() {
+    this.searchBox.addEventListener("keyup", (event) => {
+      if (!(event instanceof KeyboardEvent)) {
+        return;
+      }
+
+      if (event.key.length === 1 || event.key === "Backspace" || event.key === "Delete") {
+        this.updateLastEditedSearchQuery();
+      }
+    });
+  }
+
+  updateLastEditedSearchQuery() {
+    this.searchHistory.updateLastEditedSearchQuery(this.searchBox.value);
+  }
+
+  executeSearch() {
+    this.searchBox.dispatchEvent(new CustomEvent("controller", {
+      bubbles: true,
+      detail: this.searchBox.value
+    }));
+    this.searchHistory.add(this.searchBox.value);
+    Utils.hideAwesomplete(this.searchBox);
   }
 }

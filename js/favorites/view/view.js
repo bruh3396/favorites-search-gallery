@@ -77,14 +77,15 @@ class FavoritesView {
    * @param {"grid" | "row" | "masonry"} layout
    */
   changeLayout(layout) {
+    this.network.sendMessage(Channels.favorites.viewToController, "onLayoutChanged", layout === "masonry");
     this.paginator.changeLayout(layout);
   }
 
   /**
    * @param {HTMLInputElement} input
    */
-  changeColumnCount(input) {
-    this.paginator.changeColumnCount(input);
+  updateColumnCount(input) {
+    this.paginator.updateColumnCount(input);
   }
 
   /**
@@ -98,14 +99,18 @@ class FavoritesView {
   /**
    * @param {HTMLInputElement} input
    */
-  changeResultsPerPage(input) {
-    this.paginator.changeResultsPerPage(parseInt(input.value));
+  updateResultsPerPage(input) {
+    this.paginator.updateResultsPerPage(parseInt(input.value));
   }
 
   /**
-   * @param {"ArrowRight" | "ArrowLeft"} direction
+   * @param {{direction: String, searchResults: Post[]}} message
    */
-  changePageInGallery(event) {
-    // this.paginator.changePageWhileInGallery(direction, favorites);
+  changePageInGallery(message) {
+    const success = this.paginator.changePageWhileInGallery(message.direction, message.searchResults);
+
+    if (!success) {
+      this.network.sendMessage(Channels.favorites.viewToController, "didNotChangePageWhileInGallery", message.direction);
+    }
   }
 }

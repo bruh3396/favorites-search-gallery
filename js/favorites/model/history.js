@@ -1,75 +1,108 @@
-class SearchHistoryOld {
-  static state = {
-    get searchQuery() {
-      return this.searchBox === null ? "" : this.searchBox.value;
-    },
-    searchHistory: [],
-    searchHistoryIndex: -1,
-    lastEditedSearchQuery: "",
-    searchBox: null
-  };
+class SearchHistory {
+  /**
+   * @type {String[]}
+   */
+  history;
+  /**
+   * @type {Number}
+   */
+  index;
+  /**
+   * @type {String}
+   */
+  lastEditedQuery;
+  /**
+   * @type {Number}
+   */
+  depth;
 
-  static settings = {
-    maxSearchHistoryLength: 50
-  };
-
-  static loadState() {
-    SearchHistoryOld.loadSearchHistory();
-    SearchHistoryOld.loadLastEditedSearchQuery();
+  /**
+   * @type {String}
+   */
+  get selectedQuery() {
+    if (Utils.indexInBounds(this.history, this.index)) {
+      return this.history[this.index];
+    }
+    return this.lastEditedQuery;
   }
 
-  static loadSearchHistory() {
-    SearchHistoryOld.state.searchHistory = JSON.parse(localStorage.getItem("searchHistory")) || [];
+  /**
+   * @param {Number} depth
+   */
+  constructor(depth) {
+    this.index = -1;
+    this.history = this.loadSearchHistory();
+    this.lastEditedQuery = this.loadLastEditedQuery();
+    this.depth = depth;
   }
 
-  static loadLastEditedSearchQuery() {
-    SearchHistoryOld.state.lastEditedSearchQuery = localStorage.getItem("lastEditedSearchQuery") || "";
+  /**
+   * @returns {String[]}
+   */
+  loadSearchHistory() {
+    return JSON.parse(localStorage.getItem("searchHistory") || "[]");
   }
 
-  static getLatestSearchQuery() {
-
+  /**
+   * @returns {String}
+   */
+  loadLastEditedQuery() {
+    return localStorage.getItem("lastEditedSearchQuery") || "";
   }
 
   /**
    * @param {String} searchQuery
    */
-  static addSearchToHistory(searchQuery) {
+  add(searchQuery) {
     if (Utils.isEmptyString(searchQuery)) {
       return;
     }
-    const searchHistory = SearchHistoryOld.state.searchHistory;
+    const searchHistory = this.history.slice();
     const cleanedSearchQuery = Utils.removeExtraWhiteSpace(searchQuery);
     const searchHistoryWithoutQuery = searchHistory.filter(search => search !== cleanedSearchQuery);
     const searchHistoryWithQueryAtFront = [searchQuery].concat(searchHistoryWithoutQuery);
-    const truncatedSearchHistory = searchHistoryWithQueryAtFront.slice(0, SearchHistoryOld.settings.maxSearchHistoryLength);
+    const truncatedSearchHistory = searchHistoryWithQueryAtFront.slice(0, this.depth);
 
-    SearchHistoryOld.state.searchHistory = truncatedSearchHistory;
+    this.history = truncatedSearchHistory;
+    localStorage.setItem("searchHistory", JSON.stringify(this.history));
   }
 
-  static saveSearchHistory() {
-    localStorage.setItem("searchHistory", JSON.stringify(SearchHistoryOld.state.searchHistory));
+  /**
+   * @param {String} searchQuery
+   */
+  updateLastEditedSearchQuery(searchQuery) {
+    this.lastEditedQuery = searchQuery;
+    this.resetIndex();
+    localStorage.setItem("lastEditedSearchQuery", this.lastEditedQuery);
   }
 
-  static updateLastEditedSearchQuery(searchQuery) {
-    SearchHistoryOld.state.lastEditedSearchQuery = searchQuery;
-    localStorage.setItem("lastEditedSearchQuery", SearchHistoryOld.state.lastEditedSearchQuery);
+  resetIndex() {
+    this.index = -1;
   }
 
-  static resetSearchHistoryIndex() {
-    SearchHistoryOld.state.searchHistoryIndex = -1;
+  incrementIndex() {
+    this.index = Math.min(this.index + 1, this.history.length - 1);
   }
 
-  static incrementSearchHistoryIndex() {
-    const nextIndex = SearchHistoryOld.state.searchHistoryIndex + 1;
+  decrementIndex() {
+    this.index = Math.max(this.index - 1, -1);
+  }
 
-    if (nextIndex < SearchHistoryOld.state.searchHistory.length) {
-      SearchHistoryOld.state.searchHistoryIndex = nextIndex;
+  /**
+   * @param {String} direction
+   */
+  navigate(direction) {
+    if (direction === "ArrowUp") {
+      const selectedQuery = this.selectedQuery;
+
+      this.incrementIndex();
+      const queryHasNotChanged = this.selectedQuery === selectedQuery;
+
+      if (queryHasNotChanged) {
+        this.incrementIndex();
+      }
+      return;
     }
-  }
-
-  static decrementSearchHistoryIndex() {
-    const previousIndex = SearchHistoryOld.state.searchHistoryIndex - 1;
-
-    SearchHistoryOld.state.searchHistoryIndex = Math.max(previousIndex, -1);
+    this.decrementIndex();
   }
 }

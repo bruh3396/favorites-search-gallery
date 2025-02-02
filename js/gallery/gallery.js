@@ -236,7 +236,7 @@ class Gallery {
     additionalVideoPlayerCount: Utils.onMobileDevice() ? 2 : 2,
     renderAroundAggressively: true,
     loopAtEndOfGalleryValue: false,
-    scrollWhileNavigatingGallery: false && !Utils.usingFirefox(),
+    masonryEnabled: Utils.getPreference("layoutSelect", "masonry") === "masonry",
     get loopAtEndOfGallery() {
       if (!Utils.onFavoritesPage() || !Gallery.finishedLoading) {
         return true;
@@ -452,7 +452,7 @@ class Gallery {
 
   addEventListeners() {
     this.addGalleryEventListeners();
-    this.addFavoritesLoaderEventListeners();
+    this.addFavoritesControllerEventListeners();
     this.addMobileEventListeners();
     this.addMemoryManagementEventListeners();
   }
@@ -711,7 +711,7 @@ class Gallery {
     return autoplayMenu !== null && autoplayMenu.contains(event.target);
   }
 
-  addFavoritesLoaderEventListeners() {
+  addFavoritesControllerEventListeners() {
     if (Utils.onSearchPage()) {
       return;
     }
@@ -805,6 +805,9 @@ class Gallery {
         this.setNextSelectedThumbIndex(event.detail);
         this.navigateHelper();
       }
+    });
+    window.addEventListener("masonryEnabled", (event) => {
+      Gallery.settings.masonryEnabled = event.detail;
     });
   }
 
@@ -1177,6 +1180,11 @@ class Gallery {
     } else {
       this.currentlySelectedThumbIndex = Gallery.visibleThumbs.length - 1;
     }
+    const selectedThumb = this.getSelectedThumb();
+
+    if (selectedThumb !== null) {
+      Utils.scrollToThumb(selectedThumb.id, false);
+    }
     this.navigateHelper();
   }
 
@@ -1342,10 +1350,10 @@ class Gallery {
       this.renderer.deleteAllRenders();
     }
 
-    if (!Gallery.settings.scrollWhileNavigatingGallery) {
+    if (Gallery.settings.masonryEnabled) {
       const selectedThumb = this.getSelectedThumb();
 
-      if (selectedThumb !== null && selectedThumb !== undefined) {
+      if (selectedThumb !== null && selectedThumb !== undefined && !Utils.elementIsInView(selectedThumb)) {
         Utils.smoothScrollToElement(selectedThumb, 250);
       }
     }
@@ -1415,7 +1423,7 @@ class Gallery {
       this.videoController.preloadInactiveVideoPlayers(selectedThumb);
     }
 
-    if (Gallery.settings.scrollWhileNavigatingGallery) {
+    if (!Gallery.settings.masonryEnabled) {
       Utils.scrollToThumb(selectedThumb.id, true);
     }
 

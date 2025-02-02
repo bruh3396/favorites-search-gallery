@@ -20,6 +20,7 @@ class FavoritesMenu {
         cursor: pointer;
         min-height: 25px;
         width: 150px;
+        margin-top: 2px;
       }
     }
 
@@ -215,7 +216,7 @@ class FavoritesMenu {
     }
 
     #find-favorite {
-      display: none;
+      /* display: none; */
       margin-top: 7px;
 
       >input {
@@ -272,7 +273,7 @@ class FavoritesMenu {
       &.row {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 5px;
 
         >.favorite,
         >.spacer {
@@ -311,11 +312,14 @@ class FavoritesMenu {
             }
           }
         }
+
+        .add-or-remove-button {
+          height: 40%;
+        }
       }
 
       &.masonry {
         margin: 0 auto;
-
         >.favorite {
           width: 200px;
           margin-bottom: 10px;
@@ -328,7 +332,7 @@ class FavoritesMenu {
         }
 
         .add-or-remove-button {
-          height: 40%;
+          width: 40%;
         }
 
       }
@@ -515,7 +519,7 @@ class FavoritesMenu {
 
     #sort-ascending {
       position: absolute;
-      top: 15px;
+      top: 18px;
       left: 150px;
       width: 20px;
       height: 20px;
@@ -622,6 +626,12 @@ class FavoritesMenu {
             height: 0 !important;
             position: static !important;
         } */
+
+        .inline-option-container {
+          > div {
+            display: inline-block;
+          }
+        }
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
@@ -672,13 +682,19 @@ class FavoritesMenu {
         <div id="bottom-panel-2">
           <div id="additional-favorite-options-container" class="options-container">
             <div id="additional-favorite-options">
-              <div id="sort-container" title="Change sorting order of search results">
-                <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
-                <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
-                <br>
+              <div id="layout-sort--container" class="inline-option-container">
+                <div id="layout-container">
+                  <label>Layout</label>
+                  <br>
+                </div>
+                <div id="sort-container" title="Change sorting order of search results">
+                  <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
+                  <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+                  <br>
+                </div>
               </div>
-              <div id="results-columns-container">
-                <div id="results-per-page-container" style="display: inline-block;"
+              <div id="results-columns-container" class="inline-option-container">
+                <div id="results-per-page-container"
                   title="Set the maximum number of search results to display on each page
 Lower numbers improve responsiveness">
                   <span class="number-label-container">
@@ -686,8 +702,7 @@ Lower numbers improve responsiveness">
                   </span>
                   <br>
                 </div>
-                <div id="column-count-container" title="Set the number of favorites per row"
-                  style="display: inline-block;">
+                <div id="column-count-container" title="Set the number of favorites per row">
                   <div>
                     <span class="number-label-container">
                       <label id="column-count-label">Columns</label>
@@ -725,10 +740,6 @@ Lower numbers improve responsiveness">
                 style="white-space: nowrap;">Find</button>
               <input type="number" id="find-favorite-input" placeholder="ID">
             </span>
-            <div id="layout-container">
-              <label>Layout</label>
-              <br>
-            </div>
           </div>
         </div>
 
@@ -1071,7 +1082,7 @@ Lower numbers improve responsiveness">
 
     resultsPerPageSelect.value = Utils.getPreference(this.preferences.resultsPerPage, Utils.defaults.resultsPerPage);
     resultsPerPageSelect.onchange = () => {
-      this.changeResultsPerPage(parseInt(resultsPerPageSelect.value));
+      this.updateResultsPerPage(parseInt(resultsPerPageSelect.value));
     };
   }
 

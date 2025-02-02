@@ -54,7 +54,7 @@ class FavoritesPaginator {
     this.content = this.createContentContainer();
     this.pageSelectionMenu = this.createPageSelectionMenuContainer();
     this.currentPageNumber = 1;
-    this.maxFavoritesPerPage = Number(Utils.getPreference("resultsPerPage", 200));
+    this.maxFavoritesPerPage = Number(Utils.getPreference("resultsPerPage", 150));
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
     this.masonry = null;
     this.onPageChange = onPageChange;
@@ -103,7 +103,7 @@ class FavoritesPaginator {
       const columnInput = document.getElementById("column-count");
 
       if (columnInput !== null && (columnInput instanceof HTMLInputElement)) {
-        this.changeColumnCount(columnInput);
+        this.updateColumnCount(columnInput);
       }
         this.updateMasonry();
     });
@@ -470,8 +470,9 @@ class FavoritesPaginator {
   }
 
   /**
-   * @param {"ArrowRight" | "ArrowLeft"} direction
+   * @param {String} direction
    * @param {Post[]} favorites
+   * @returns {Boolean}
    */
   changePageWhileInGallery(direction, favorites) {
     const pageCount = this.getPageCount(favorites.length);
@@ -480,24 +481,22 @@ class FavoritesPaginator {
     const onlyOnePage = onFirstPage && onLastPage;
 
     if (onlyOnePage) {
-      dispatchEvent(new CustomEvent("didNotChangePageInGallery", {
-        detail: direction
-      }));
-      return;
+      return false;
     }
 
     if (onLastPage && direction === "ArrowRight") {
       this.changePage(1, favorites);
-      return;
+      return true;
     }
 
     if (onFirstPage && direction === "ArrowLeft") {
       this.changePage(pageCount, favorites);
-      return;
+      return true;
     }
     const newPageNumber = direction === "ArrowRight" ? this.currentPageNumber + 1 : this.currentPageNumber - 1;
 
     this.changePage(newPageNumber, favorites);
+    return true;
   }
 
   /**
@@ -615,7 +614,7 @@ class FavoritesPaginator {
   /**
    * @param {HTMLInputElement} input
    */
-  changeColumnCount(input) {
+  updateColumnCount(input) {
     const columnCount = parseFloat(input.value);
     const width = Math.floor(window.innerWidth / columnCount) - 15;
     const min = parseInt(input.getAttribute("min") || "1");
@@ -638,8 +637,12 @@ class FavoritesPaginator {
           }
         }
 
-        &.masonry>.favorite {
-          width: ${width}px !important;
+        &.masonry {
+          margin: 0 auto !important;
+
+          >.favorite {
+            width: ${width}px;
+          }
         }
       }
       `, "column-count");
@@ -649,7 +652,7 @@ class FavoritesPaginator {
   /**
    * @param {Number} resultsPerPage
    */
-  changeResultsPerPage(resultsPerPage) {
+  updateResultsPerPage(resultsPerPage) {
     this.maxFavoritesPerPage = resultsPerPage;
   }
 }

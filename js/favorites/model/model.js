@@ -101,12 +101,11 @@ class FavoritesModel {
    * @param {Number} allowedRatings
    */
   changeAllowedRatings(allowedRatings) {
-    console.log(allowedRatings);
     this.filter.allowedRatings = allowedRatings;
     this.sendSearchResults();
   }
 
-  changeResultsPerPage() {
+  updateResultsPerPage() {
     setTimeout(() => {
       this.network.sendMessage(Channels.favorites.modelToController, "onSearchResultsReady", this.latestSearchResults);
     }, 0);
@@ -123,5 +122,25 @@ class FavoritesModel {
     const invertedSearchResults = this.loader.allFavorites.filter(favorite => favorite.matchedByLatestSearch);
 
     this.network.sendMessage(Channels.favorites.modelToController, "onSearchResultsReady", invertedSearchResults);
+  }
+
+  /**
+   * @param {String} direction
+   */
+  getSearchResultsForPageChangeInGallery(direction) {
+    this.network.sendMessage(
+      Channels.favorites.modelToController, "onGalleryPageChangeSearchResultsReady",
+      {
+        direction,
+        searchResults: this.latestSearchResults
+      }
+    );
+  }
+
+  /**
+   * @param {String} id
+   */
+  updateMetadata(id) {
+    this.network.sendMessage(Channels.favorites.modelToLoader, "updateMetadataInDatabase", id);
   }
 }

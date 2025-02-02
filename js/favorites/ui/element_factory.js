@@ -17,11 +17,27 @@ class ElementFactory {
     if (button === null || !(button instanceof HTMLButtonElement)) {
       return;
     }
-    button.onclick = () => {
+    button.onclick = (event) => {
+      event.preventDefault();
+
       button.dispatchEvent(new CustomEvent(template.handler, {
-        bubbles: true
+        bubbles: true,
+        detail: {
+          ctrlKey: event.ctrlKey
+        }
       }));
     };
+
+    button.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+
+      button.dispatchEvent(new CustomEvent(template.handler, {
+        bubbles: true,
+        detail: {
+          rightClick: true
+        }
+      }));
+    });
   }
 
   /**

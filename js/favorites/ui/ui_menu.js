@@ -29,10 +29,6 @@ class FavoritesMenuUI {
     // eslint-disable-next-line no-bitwise
     ratingFilter.querySelector("#safe-rating").checked = (allowedRatings & 1) === 1;
 
-    ratingFilter.dispatchEvent(new CustomEvent("uiController", {
-      bubbles: true,
-      detail: allowedRatings
-    }));
     ratingFilter.onclick = (event) => {
       // @ts-ignore
       if (!Utils.hasTagName(event.target, "label")) {
@@ -58,7 +54,7 @@ class FavoritesMenuDesktopUI {
     ],
     "checkboxOption": [
       {id: "options", parentId: "bottom-panel-1", textContent: "More Options", title: "Show more options", action: "toggleOptions", enabled: true, defaultValue: false, hotkey: "O", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "show-ui", parentId: "show-ui-wrapper", textContent: "UI", title: "Toggle UI", action: "toggleUI", enabled: true, defaultValue: true, hotkey: "U", invokeActionOnCreation: true, savePreference: true},
+      {id: "show-ui", parentId: "show-ui-wrapper", textContent: "UI", title: "Toggle UI", action: "toggleUI", enabled: true, defaultValue: true, hotkey: "U", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "enhance-search-pages", parentId: "favorite-options", textContent: "Enhance Search Pages", title: "Enable gallery and other features on search pages", action: "not needed", enabled: true, defaultValue: false, hotkey: "", invokeActionOnCreation: false, savePreference: true},
       {id: "show-remove-favorite-buttons", parentId: "favorite-options", textContent: "Remove Buttons", title: "Toggle remove favorite buttons", action: "toggleAddOrRemoveButtons", enabled: Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: false, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "show-add-favorite-buttons", parentId: "favorite-options", textContent: "Add Favorite Buttons", title: "Toggle add favorite buttons", action: "toggleAddOrRemoveButtons", enabled: !Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: true, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
@@ -75,8 +71,8 @@ class FavoritesMenuDesktopUI {
     ],
     "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "onSortingParametersChanged", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, defaultValue: false}],
     "numberComponent": [
-      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "changeColumnCount", defaultValue: 6, min: 4, max: 20, step: 1, pollingTime: 50, invokeActionOnCreation: true},
-      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "changeResultsPerPage", defaultValue: 20, min: 50, max: 500, step: 50, pollingTime: 50, invokeActionOnCreation: false}
+      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "updateColumnCount", defaultValue: 6, min: 4, max: 20, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "updateResultsPerPage", defaultValue: 150, min: 50, max: 500, step: 50, pollingTime: 50, invokeActionOnCreation: false}
     ]
   };
 

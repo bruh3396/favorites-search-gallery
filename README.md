@@ -90,6 +90,8 @@ This script is still in development, please let me know if you experience a bug,
 | Right Click | Add negated tag to search | Clicked on a tag in details |
 | Middle Click | Quick search tag | Clicked on a tag in details |
 | Ctrl Left Click | Search site for tag in new tab | Clicked on a tag in details |
+| Right Click | Search site for current query in new tab | Clicked on "Search" button |
+| Ctrl Click | Search site for current query in new tab, stay on current tab | Clicked on "Search" button |
 
 ### General Controls (Mobile)
 | Input | Function | Condition |

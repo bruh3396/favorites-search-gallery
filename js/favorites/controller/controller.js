@@ -40,7 +40,7 @@ class FavoritesController {
       return;
     }
     menu.addEventListener("controller", (event) => {
-        this.routeMenuEventThroughNetwork(event);
+      this.routeMenuEventThroughNetwork(event);
     });
   }
 
@@ -58,11 +58,11 @@ class FavoritesController {
     //   this.searchFlags.tagsWereModified = true;
     // });
     window.addEventListener("reachedEndOfGallery", (event) => {
-      this.network.sendMessage(Channels.favorites.controllerToView, "changePageInGallery", /** @type {CustomEvent} */ (event).detail);
+      this.network.sendMessage(Channels.favorites.controllerToModel, "getSearchResultsForPageChangeInGallery", /** @type {CustomEvent} */(event).detail);
     });
-    // window.addEventListener("missingMetadata", (event) => {
-    //   this.database.updateMetadataInDatabase(event.detail);
-    // });
+    window.addEventListener("missingMetadata", (event) => {
+      this.network.sendMessage(Channels.favorites.controllerToModel, "updateMetadata", event.detail);
+    });
   }
 
   start() {
@@ -131,5 +131,28 @@ class FavoritesController {
 
   onPageChanged() {
     Utils.broadcastEvent("changedPage");
+  }
+
+  /**
+   * @param {{direction: String, searchResults: Post[]}} message
+   */
+  onGalleryPageChangeSearchResultsReady(message) {
+    this.network.sendMessage(Channels.favorites.controllerToView, "changePageInGallery", message);
+  }
+
+  /**
+   * @param {String} direction
+   */
+  didNotChangePageWhileInGallery(direction) {
+    dispatchEvent(new CustomEvent("didNotChangePageInGallery", {
+      detail: direction
+    }));
+  }
+
+  /**
+   * @param {Boolean} masonryEnabled
+   */
+  onLayoutChanged(masonryEnabled) {
+    Utils.broadcastEvent("masonryEnabled", masonryEnabled);
   }
 }
