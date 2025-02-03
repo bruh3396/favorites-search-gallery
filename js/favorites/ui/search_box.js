@@ -20,7 +20,7 @@ class SearchBox {
     this.parent = document.getElementById("left-favorites-panel-top-row");
     this.id = Utils.mainSearchBoxId;
     this.searchHistory = new SearchHistory(30);
-    this.searchBox = this.createMainSearchBox();
+    this.searchBox = Utils.onMobileDevice() ? this.createMobileSearchBar() : this.createMainSearchBox();
     this.addEventListenersToSearchBox();
   }
 
@@ -33,7 +33,7 @@ class SearchBox {
     searchBox.id = this.id;
     searchBox.placeholder = "Search Favorites";
     searchBox.spellcheck = false;
-    searchBox.dataset.action = "getSearchResults";
+    searchBox.dataset.action = "searchFavorites";
     searchBox.value = this.searchHistory.lastEditedQuery;
 
     if (this.parent !== null) {

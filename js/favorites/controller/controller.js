@@ -3,141 +3,170 @@ class FavoritesController {
     return !Utils.onFavoritesPage();
   }
   /**
-   * @type {EventEmitter}
-   */
-  network;
-  /**
    * @type {FavoritesModel}
    */
+  // @ts-ignore
   model;
   /**
    * @type {FavoritesView}
    */
+  // @ts-ignore
   view;
+  /**
+   * @type {Boolean}
+   */
+  // @ts-ignore
+  changedPageOnce;
 
   constructor() {
     if (FavoritesController.disabled) {
       return;
     }
-    this.network = new EventEmitter();
-    this.model = new FavoritesModel(this.network);
-    this.view = new FavoritesView(this.network);
-    this.setupNetwork();
-    this.routeMenuEventsThroughNetwork();
-    this.routeGlobalEventsThroughNetwork();
-    this.start();
+    this.model = new FavoritesModel();
+    this.view = new FavoritesView({
+      onPageChange: this.onPageChange.bind(this)
+    });
+    this.changedPageOnce = false;
+    this.listenToMenuEvents();
+    this.listenToGlobalEvents();
+    this.view.clearOriginalFavorites();
+    this.loadAllFavorites();
   }
 
-  setupNetwork() {
-    this.network.on(Channels.favorites.modelToController, (/** @type {Message} */ message) => Utils.handleMessage(this, message));
-    this.network.on(Channels.favorites.viewToController, (/** @type {Message} */ message) => Utils.handleMessage(this, message));
+  onPageChange() {
+    if (this.changedPageOnce) {
+      Utils.broadcastEvent("changedPage");
+    }
+    this.changedPageOnce = true;
   }
 
-  routeMenuEventsThroughNetwork() {
+  listenToMenuEvents() {
     const menu = document.getElementById("favorites-search-gallery-menu");
 
-    if (menu === null) {
-      return;
+    if (menu !== null) {
+      // @ts-ignore
+      menu.addEventListener("controller", Utils.debounce((/** @type {CustomEvent} */ event) => {
+        if (!(event.target instanceof HTMLElement)) {
+          return;
+        }
+        const action = event.target.dataset.action || "none";
+
+        if (typeof this[action] === "function") {
+          this[action](event.detail);
+        }
+      }, 50));
     }
-    menu.addEventListener("controller", (event) => {
-      this.routeMenuEventThroughNetwork(event);
+  }
+
+  listenToGlobalEvents() {
+    // @ts-ignore
+    window.addEventListener("reachedEndOfGallery", (/** @type {CustomEvent} */event) => {
+      const direction = event.detail;
+      const success = this.view.changePageInGallery({
+        direction,
+        searchResults: this.model.getLatestSearchResults()
+      });
+
+      if (!success) {
+        this.didNotChangePageWhileInGallery(direction);
+      }
     });
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
-  routeMenuEventThroughNetwork(event) {
-    for (const channel of [Channels.favorites.controllerToView, Channels.favorites.controllerToModel]) {
-      this.network.sendMessage(channel, event.target.dataset.action, event.detail);
-    }
-  }
-
-  routeGlobalEventsThroughNetwork() {
-    // window.addEventListener("modifiedTags", () => {
-    //   this.searchFlags.tagsWereModified = true;
+    // window.addEventListener("missingMetadata", (event) => {
+    //   this.model.addMissingMetadata(event.detail);
     // });
-    window.addEventListener("reachedEndOfGallery", (event) => {
-      this.network.sendMessage(Channels.favorites.controllerToModel, "getSearchResultsForPageChangeInGallery", /** @type {CustomEvent} */(event).detail);
-    });
-    window.addEventListener("missingMetadata", (event) => {
-      this.network.sendMessage(Channels.favorites.controllerToModel, "updateMetadata", event.detail);
-    });
   }
 
-  start() {
-    this.network.sendMessage(Channels.favorites.controllerToView, "clearOriginalFavoritesContent", {});
-    this.network.sendMessage(Channels.favorites.controllerToModel, "loadFavorites", {});
-  }
-
-  onFinishedAccessingDatabase() {
-    this.network.sendMessage(Channels.favorites.controllerToView, "hideLoadingWheel", {});
-  }
-
-  /**
-   * @param {String} message
-   */
-  notify(message) {
-    this.network.sendMessage(Channels.favorites.controllerToView, "showNotification", message);
-  }
-
-  onStartedFetchingFavorites() {
-    Utils.broadcastEvent("startedFetchingFavorites");
-  }
-
-  /**
-   * @param {{searchResults: Post[], allFavorites: Post[]}} param
-   */
-  onNewSearchResultsFound({searchResults, allFavorites}) {
-    this.network.sendMessage(Channels.favorites.controllerToView, "updateSearchResultsWhileFetching", {
-      searchResults,
-      allFavorites
-    });
-    Utils.broadcastEvent("favoritesFetched");
-    Utils.broadcastEvent("newSearchResults", searchResults);
+  loadAllFavorites() {
+    this.model.loadAllFavorites()
+      .then((searchResults) => {
+        this.processLoadedSearchResults(searchResults);
+        return this.model.findNewFavoritesOnReload();
+      })
+      .then((newFavoritesFound) => {
+        this.processFavoritesFoundOnReload(newFavoritesFound);
+        throw new PromiseChainExit();
+      })
+      .catch((emptyFavoritesDatabaseError) => {
+        return this.findAllFavorites(emptyFavoritesDatabaseError);
+      })
+      .then(() => {
+        this.onAllFavoritesFound();
+        throw new PromiseChainExit();
+      })
+      .catch((chainExitError) => {
+        this.broadcastAllFavoritesLoaded(chainExitError);
+      });
   }
 
   /**
    * @param {Post[]} searchResults
    */
-  onSearchResultsReady(searchResults) {
-    this.network.sendMessage(Channels.favorites.controllerToView, "showSearchResults", searchResults);
+  showSearchResults(searchResults) {
     Utils.broadcastEvent("newSearchResults", searchResults);
+    this.view.showSearchResults(searchResults);
+  }
+
+  /**
+   * @param {Post[]} searchResults
+   */
+  processLoadedSearchResults(searchResults) {
+    this.view.hideLoadingWheel();
+    Utils.broadcastEvent("favoritesLoadedFromDatabase");
+    this.showSearchResults(searchResults);
+  }
+
+  /**
+   * @param {{newFavorites: Post[], newSearchResults: Post[]}} result
+   */
+  processFavoritesFoundOnReload(result) {
+    this.view.insertNewSearchResultsOnReload(result);
+    this.model.storeNewFavorites(result.newFavorites)
+      .then(() => {
+        if (result.newFavorites.length > 0) {
+          this.view.showNotification("New favorites saved");
+        }
+      });
+    Utils.broadcastEvent("newSearchResults", this.model.getLatestSearchResults());
+  }
+
+  /**
+   * @param {EmptyFavoritesDatabase} error
+   * @returns {Promise.<void>}
+   */
+  findAllFavorites(error) {
+    if ((error instanceof EmptyFavoritesDatabase)) {
+      this.view.hideLoadingWheel();
+      this.changedPageOnce = true;
+      Utils.broadcastEvent("startedFetchingFavorites");
+      return this.model.fetchAllFavorites(this.onSearchResultsFound.bind(this));
+    }
+    throw error;
   }
 
   onAllFavoritesFound() {
-    this.notify("Saving Favorites");
-    Utils.broadcastEvent("favoritesLoaded");
-  }
-
-  onFavoritesLoaded() {
-    this.notify("All favorites loaded");
-    this.network.sendMessage(Channels.favorites.controllerToModel, "getSearchResults", "");
-    Utils.broadcastEvent("favoritesLoadedFromDatabase");
-    Utils.broadcastEvent("favoritesLoaded");
-  }
-
-  /**
-   * @param {{newFavoritesCount: Number, newSearchResults: Post[], allSearchResults: Post[]}}
-   */
-  onFavoritesFoundOnReload({newSearchResults, newFavoritesCount, allSearchResults}) {
-    this.network.sendMessage(Channels.favorites.controllerToView, "insertNewSearchResultsOnReload", {
-      newSearchResults,
-      newFavoritesCount
+    this.view.showNotification("Saving favorites");
+    this.model.storeAllFavorites().then(() => {
+      this.view.showNotification("All favorites saved");
     });
-    Utils.broadcastEvent("newFavoritesFoundOnReload", newSearchResults.map(post => post.root));
-    Utils.broadcastEvent("newSearchResults", allSearchResults);
-  }
-
-  onPageChanged() {
-    Utils.broadcastEvent("changedPage");
   }
 
   /**
-   * @param {{direction: String, searchResults: Post[]}} message
+   * @param {PromiseChainExit} error
    */
-  onGalleryPageChangeSearchResultsReady(message) {
-    this.network.sendMessage(Channels.favorites.controllerToView, "changePageInGallery", message);
+  broadcastAllFavoritesLoaded(error) {
+    if (!(error instanceof PromiseChainExit)) {
+      throw error;
+    }
+    Utils.broadcastEvent("favoritesLoaded");
+  }
+
+  onSearchResultsFound() {
+    this.view.updateSearchResultsWhileFetching({
+      searchResults: this.model.getLatestSearchResults(),
+      allFavorites: this.model.getAllFavorites()
+    });
+    Utils.broadcastEvent("favoritesFetched");
+    Utils.broadcastEvent("newSearchResults", this.model.getLatestSearchResults());
   }
 
   /**
@@ -150,9 +179,68 @@ class FavoritesController {
   }
 
   /**
-   * @param {Boolean} masonryEnabled
+   * @param {String} searchQuery
    */
-  onLayoutChanged(masonryEnabled) {
-    Utils.broadcastEvent("masonryEnabled", masonryEnabled);
+  searchFavorites(searchQuery) {
+    this.showSearchResults(this.model.getSearchResults(searchQuery));
+  }
+
+  shuffleSearchResults() {
+    this.showSearchResults(this.model.getShuffledSearchResults());
+  }
+
+  invertSearchResults() {
+    this.showSearchResults(this.model.getInvertedSearchResults());
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleBlacklist(value) {
+    this.model.toggleBlacklist(value);
+    this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
+  }
+
+  /**
+   * @param {"masonry" | "row" | "grid" } layout
+   */
+  changeLayout(layout) {
+    this.view.changeLayout(layout);
+  }
+
+  onSortingParametersChanged() {
+    this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
+  }
+
+  /**
+   * @param {HTMLInputElement} input
+   */
+  updateResultsPerPage(input) {
+    const resultsPerPage = parseInt(input.value);
+
+    this.view.updateResultsPerPage(resultsPerPage);
+    this.showSearchResults(this.model.getLatestSearchResults());
+  }
+
+  /**
+   * @param {HTMLInputElement} input
+   */
+  updateColumnCount(input) {
+    this.view.updateColumnCount(input);
+  }
+
+  /**
+   * @param {HTMLInputElement} input
+   */
+  updateRowSize(input) {
+    this.view.updateRowSize(input);
+  }
+
+  /**
+   * @param {Number} allowedRatings
+   */
+  changeAllowedRatings(allowedRatings) {
+    this.model.changeAllowedRatings(allowedRatings);
+    this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
   }
 }

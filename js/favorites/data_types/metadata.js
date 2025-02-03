@@ -36,6 +36,10 @@ class PostMetadata {
     while (PostMetadata.missingMetadataFetchQueue.length > 0) {
       const metadata = this.missingMetadataFetchQueue.pop();
 
+      if (metadata === undefined) {
+        continue;
+      }
+
       if (metadata.postIsDeleted) {
         metadata.populateMetadataFromPost();
       } else {
@@ -169,12 +173,6 @@ class PostMetadata {
    */
   constructor(id, record) {
     this.id = id;
-    this.setDefaults();
-    this.populateMetadata(record);
-    this.addInstanceToAllMetadata();
-  }
-
-  setDefaults() {
     this.width = 0;
     this.height = 0;
     this.score = 0;
@@ -182,6 +180,8 @@ class PostMetadata {
     this.lastChangedTimestamp = 0;
     this.rating = 4;
     this.postIsDeleted = false;
+    this.populateMetadata(record);
+    this.addInstanceToAllMetadata();
   }
 
   /**
@@ -210,11 +210,8 @@ class PostMetadata {
     }
   }
 
-  /**
-   * @param {Boolean} missingInDatabase
-   */
   populateMetadataFromAPI() {
-    if (PostMetadata.pendingRequests > 99) {
+    if (PostMetadata.pendingRequests.size > 99) {
       this.addInstanceToMissingMetadataQueue();
       return Utils.sleep(0);
     }
@@ -233,17 +230,17 @@ class PostMetadata {
             cause: "DeletedMetadata"
           });
         }
-        this.width = parseInt(metadata.getAttribute("width"));
-        this.height = parseInt(metadata.getAttribute("height"));
-        this.score = parseInt(metadata.getAttribute("score"));
-        this.rating = PostMetadata.encodeRating(metadata.getAttribute("rating"));
-        this.creationTimestamp = Date.parse(metadata.getAttribute("created_at"));
-        this.lastChangedTimestamp = parseInt(metadata.getAttribute("change"));
+        this.width = parseInt(metadata.getAttribute("width") || "0");
+        this.height = parseInt(metadata.getAttribute("height") || "0");
+        this.score = parseInt(metadata.getAttribute("score") || "0");
+        this.rating = PostMetadata.encodeRating(metadata.getAttribute("rating") || "0");
+        this.creationTimestamp = Date.parse(metadata.getAttribute("created_at") || "0");
+        this.lastChangedTimestamp = parseInt(metadata.getAttribute("change") || "0");
 
         if (PostMetadata.settings.verifyTags) {
-          Post.validateExtractedTagsAgainstAPI(this.id, metadata.getAttribute("tags"), metadata.getAttribute("file_url"));
+          Post.validateExtractedTagsAgainstAPI(this.id, metadata.getAttribute("tags") || "", metadata.getAttribute("file_url") || "");
         }
-        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
+        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url") || "");
 
         if (extension !== "mp4") {
           Utils.assignImageExtension(this.id, extension);
@@ -283,7 +280,7 @@ class PostMetadata {
         const dom = PostMetadata.parser.parseFromString(html, "text/html");
         const statistics = dom.getElementById("stats");
 
-        if (statistics === null) {
+        if (statistics === null || statistics.textContent === null) {
           return;
         }
         const textContent = Utils.replaceLineBreaks(statistics.textContent.trim(), " ");
@@ -310,19 +307,6 @@ class PostMetadata {
       .catch((error) => {
         console.error(error);
       });
-  }
-
-  /**
-   * @param {{metric: String, operator: String, value: String, negated: Boolean}[]} filters
-   * @returns {Boolean}
-   */
-  satisfiesAllFilters(filters) {
-    for (const expression of filters) {
-      if (!this.satisfiesExpression(expression)) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**

@@ -126,9 +126,9 @@ class Caption {
    */
   static pendingRequests = new Set();
   static settings = {
-    tagFetchDelayAfterFinishedLoading: 5,
-    tagFetchDelayBeforeFinishedLoading: 50,
-    maxPendingRequestsAllowed: 100
+    tagFetchDelayAfterFinishedLoading: 25,
+    tagFetchDelayBeforeFinishedLoading: 100,
+    maxPendingRequestsAllowed: 50
   };
   static flags = {
     finishedLoading: false
@@ -511,14 +511,7 @@ class Caption {
     const captionListRect = this.caption.children[0].getBoundingClientRect();
     const ratio = height / captionListRect.height;
     const scale = ratio > 1 ? Math.sqrt(ratio) : ratio * 0.85;
-    const finalScale = fancyHoveringEnabled ? scale * 1 : scale;
-
-    // console.log({
-    //   fancyHoveringEnabled,
-    //   fancyImageHoveringStyle,
-    //   scale,
-    //   finalScale
-    // });
+    const finalScale = fancyHoveringEnabled ? scale * 0.8 : scale;
 
     this.caption.parentElement.style.fontSize = `${Utils.roundToTwoDecimalPlaces(finalScale)}em`;
   }
@@ -752,7 +745,9 @@ class Caption {
       this.addTag(category, tagName);
     }
     this.resizeFont(thumb);
-    this.animate(true);
+    setTimeout(() => {
+      this.animate(true);
+    }, 0);
   }
 
   /**

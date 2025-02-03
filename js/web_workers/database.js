@@ -1,12 +1,4 @@
 /* eslint-disable prefer-template */
-/**
- * @param {Number} milliseconds
- * @returns {Promise}
- */
-function sleep(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
-
 class FavoritesDatabase {
   /**
    * @type {String}
@@ -31,15 +23,14 @@ class FavoritesDatabase {
   }
 
   createObjectStore() {
-    return this.openConnection((event) => {
+    this.openConnection((event) => {
       /**
        * @type {IDBDatabase}
        */
       const database = event.target.result;
-      const objectStore = database
-        .createObjectStore(this.objectStoreName, {
-          autoIncrement: true
-        });
+      const objectStore = database.createObjectStore(this.objectStoreName, {
+        autoIncrement: true
+      });
 
       objectStore.createIndex("id", "id", {
         unique: true
@@ -51,121 +42,162 @@ class FavoritesDatabase {
 
   /**
    * @param {Function} onUpgradeNeeded
-   * @returns {Promise}
+   * @returns {Promise.<any>}
    */
-  openConnection(onUpgradeNeeded = () => {}) {
+  openConnection(onUpgradeNeeded = () => { }) {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.name, this.version);
 
       request.onsuccess = resolve;
       request.onerror = reject;
+      // @ts-ignore
       request.onupgradeneeded = onUpgradeNeeded;
     });
   }
 
   /**
+   * @param {IDBDatabase} database
+   * @returns {{index: IDBIndex, objectStore: IDBObjectStore, transaction: IDBTransaction}}
+   */
+  createReadWriteTransaction(database) {
+    const transaction = database.transaction(this.objectStoreName, "readwrite");
+    const objectStore = transaction.objectStore(this.objectStoreName);
+    const index = objectStore.index("id");
+    return {
+      index,
+      objectStore,
+      transaction
+    };
+  }
+
+  /**
+   * @param {String[]} idsToDelete
+   * @param {IDBIndex} index
+   * @param {IDBObjectStore} objectStore
+   */
+  async deleteFavorites(idsToDelete, index, objectStore) {
+    for (const id of idsToDelete) {
+      const deleteRequest = index.getKey(id);
+
+      await new Promise((resolve, reject) => {
+        deleteRequest.onsuccess = resolve;
+        deleteRequest.onerror = reject;
+      }).then((indexEvent) => {
+        const primaryKey = indexEvent.target.result;
+
+        if (primaryKey !== undefined) {
+          objectStore.delete(primaryKey);
+        }
+      }).catch((error) => {
+        console.error(error);
+      });
+    }
+  }
+
+  /**
+   * @param {IDBDatabase} database
+   * @param {IDBTransaction} transaction
+   * @param {IDBObjectStore} objectStore
+   * @returns {Promise.<any>}
+   */
+  getAllFavorites(database, transaction, objectStore) {
+    return new Promise((resolve, reject) => {
+      transaction.onerror = (event) => {
+        console.error(event);
+        reject(event);
+      };
+      const getAllRequest = objectStore.getAll();
+
+      getAllRequest.onsuccess = (event) => {
+        // @ts-ignore
+        database.close();
+        resolve(event.target.result.reverse());
+      };
+      getAllRequest.onerror = (event) => {
+        database.close();
+        reject(event);
+      };
+    });
+  }
+
+  /**
+   * @param {any} error
+   * @returns {Promise.<void>}
+   */
+  async incrementVersionOnLoad(error) {
+    this.version += 1;
+
+    if (error.name === "NotFoundError") {
+      await this.createObjectStore();
+    }
+  }
+
+  /**
+   * @param {String[]} idsToDelete
+   * @returns {Promise.<any>}
+   */
+  loadFavorites(idsToDelete) {
+    /**
+     * @type {IDBDatabase}
+     */
+    let database;
+    return this.openConnection()
+      .then(async(connectionEvent) => {
+        database = connectionEvent.target.result;
+        const {index, objectStore, transaction} = this.createReadWriteTransaction(database);
+
+        await this.deleteFavorites(idsToDelete, index, objectStore);
+        return this.getAllFavorites(database, transaction, objectStore);
+      }).catch(async(error) => {
+        await this.incrementVersionOnLoad(error);
+        database?.close();
+        return this.loadFavorites(idsToDelete);
+      });
+  }
+
+  /**
    * @param {[{id: String, tags: String, src: String, metadata: String, type: String}]} favorites
+   * @returns {Promise.<void>}
    */
   storeFavorites(favorites) {
-    this.openConnection()
+    return this.openConnection()
       .then((connectionEvent) => {
         /**
          * @type {IDBDatabase}
          */
         const database = connectionEvent.target.result;
-        const transaction = database.transaction(this.objectStoreName, "readwrite");
-        const objectStore = transaction.objectStore(this.objectStoreName);
+        const {objectStore, transaction} = this.createReadWriteTransaction(database);
+        return new Promise((resolve, reject) => {
+          transaction.onerror = (event) => {
+            reject(event);
+          };
 
-        transaction.oncomplete = () => {
-          postMessage({
-            response: "finishedStoring"
+          favorites.forEach(favorite => {
+            this.addContentTypeToFavorite(favorite);
+            objectStore.put(favorite);
           });
-          database.close();
-        };
 
-        transaction.onerror = (event) => {
-          console.error(event);
-        };
-
-        favorites.forEach(favorite => {
-          this.addContentTypeToFavorite(favorite);
-          objectStore.put(favorite);
+          transaction.oncomplete = () => {
+            database.close();
+            resolve(0);
+          };
         });
 
       })
       .catch((event) => {
-        const error = event.target.error;
-
-        if (error.name === "VersionError") {
-          this.version += 1;
-          this.storeFavorites(favorites);
-        } else {
-          console.error(error);
-        }
+        this.incrementVersionOnStore(event, favorites);
       });
   }
 
-  /**
-   * @param {String[]} idsToDelete
-   */
-  loadFavorites(idsToDelete) {
-    let loadedFavorites = {};
-    let database;
+  incrementVersionOnStore(event, favorites) {
+    const error = event.target.error;
 
-    this.openConnection()
-      .then(async(connectionEvent) => {
-        /**
-         * @type {IDBDatabase}
-         */
-        database = connectionEvent.target.result;
-        const transaction = database.transaction(this.objectStoreName, "readwrite");
-        const objectStore = transaction.objectStore(this.objectStoreName);
-        const index = objectStore.index("id");
-
-        transaction.onerror = (event) => {
-          console.error(event);
-        };
-        transaction.oncomplete = () => {
-          postMessage({
-            response: "finishedLoading",
-            favorites: loadedFavorites
-          });
-          database.close();
-        };
-
-        for (const id of idsToDelete) {
-          const deleteRequest = index.getKey(id);
-
-          await new Promise((resolve, reject) => {
-            deleteRequest.onsuccess = resolve;
-            deleteRequest.onerror = reject;
-          }).then((indexEvent) => {
-            const primaryKey = indexEvent.target.result;
-
-            if (primaryKey !== undefined) {
-              objectStore.delete(primaryKey);
-            }
-          }).catch((error) => {
-            console.error(error);
-          });
-        }
-        const getAllRequest = objectStore.getAll();
-
-        getAllRequest.onsuccess = (event) => {
-          loadedFavorites = event.target.result.reverse();
-        };
-        getAllRequest.onerror = (event) => {
-          console.error(event);
-        };
-      }).catch(async(error) => {
-        this.version += 1;
-
-        if (error.name === "NotFoundError") {
-          database.close();
-          await this.createObjectStore();
-        }
-        this.loadFavorites(idsToDelete);
-      });
+    if (error.name === "VersionError") {
+      this.version += 1;
+      this.storeFavorites(favorites);
+    } else {
+      console.error(event);
+    }
   }
 
   /**
@@ -229,28 +261,48 @@ class FavoritesDatabase {
  */
 const favoritesDatabase = new FavoritesDatabase("user", 1);
 
-onmessage = (message) => {
+self.addEventListener("message", (message) => {
   const request = message.data;
 
   switch (request.command) {
     case "create":
       favoritesDatabase.objectStoreName = request.objectStoreName;
       favoritesDatabase.version = request.version;
-      break;
-
-    case "store":
-      favoritesDatabase.storeFavorites(request.favorites);
+      self.postMessage({
+        id: request.id,
+        response: "done"
+      });
       break;
 
     case "load":
-      favoritesDatabase.loadFavorites(request.idsToDelete);
+      favoritesDatabase.loadFavorites(request.idsToDelete)
+        .then((favorites) => {
+          self.postMessage({
+            id: request.id,
+            response: favorites
+          });
+
+        });
       break;
 
-    case "update":
-      favoritesDatabase.updateFavorites(request.favorites);
+    case "store":
+      favoritesDatabase.storeFavorites(request.favorites)
+        .then(() => {
+          self.postMessage({
+            id: request.id
+          });
+        });
       break;
+
+    // case "update":
+    //   favoritesDatabase.updateFavorites(request.favorites);
+    //   break;
 
     default:
+      self.postMessage({
+        id: request.id,
+        response: "Favorites database command not found: " + request.command
+      });
       break;
   }
-};
+});

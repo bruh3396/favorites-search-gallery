@@ -411,7 +411,7 @@ class Post {
    */
   insertAtEndOfContent(content) {
     if (this.inactivePost !== null) {
-      this.createHTMLElement(this.inactivePost, true);
+      this.createHTMLElement();
     }
     this.createStatisticHint();
     content.appendChild(this.root);
@@ -422,7 +422,7 @@ class Post {
    */
   insertAtBeginningOfContent(content) {
     if (this.inactivePost !== null) {
-      this.createHTMLElement(this.inactivePost, true);
+      this.createHTMLElement();
     }
     this.createStatisticHint();
     content.insertAdjacentElement("afterbegin", this.root);
@@ -505,13 +505,13 @@ class Post {
   getStatisticHintValue() {
     switch (FavoritesSorter.sortingMethod) {
       case "score":
-        return this.metadata.score;
+        return String(this.metadata.score);
 
       case "width":
-        return this.metadata.width;
+        return String(this.metadata.width);
 
       case "height":
-        return this.metadata.height;
+        return String(this.metadata.height);
 
       case "creationTimestamp":
         return Utils.convertTimestampToDate(this.metadata.creationTimestamp);
@@ -520,7 +520,7 @@ class Post {
         return Utils.convertTimestampToDate(this.metadata.lastChangedTimestamp * 1000);
 
       default:
-        return this.index;
+        return String(this.index);
     }
   }
 

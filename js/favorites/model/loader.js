@@ -1,16 +1,8 @@
 class FavoritesLoader {
   /**
-   * @type {EventEmitter}
-   */
-  network;
-  /**
    * @type {FavoritesFetcher}
    */
   fetcher;
-  /**
-   * @type {FetchedFavoritesQueue}
-   */
-  fetchedQueue;
   /**
    * @type {FavoritesDatabaseInterface}
    */
@@ -27,90 +19,47 @@ class FavoritesLoader {
     return new Set(Array.from(this.allFavorites.values()).map(post => post.id));
   }
 
-  /**
-   * @type {Post[]}
-   */
-  get favoritesMatchedByLatestSearch() {
-    return this.allFavorites.filter(post => post.matchedByLatestSearch);
+  constructor() {
+    this.allFavorites = [];
+    this.fetcher = new FavoritesFetcher();
+    this.database = new FavoritesDatabaseInterface();
   }
 
   /**
-   * @param {EventEmitter} network
+   * @returns {Promise.<Post[]>}
    */
-  constructor(network) {
-    this.network = network;
-    this.allFavorites = [];
-    this.network.on(Channels.favorites.modelToLoader, (/** @type {Message} */ message) => Utils.handleMessage(this, message));
-
-    this.fetchedQueue = new FetchedFavoritesQueue({
-      /**
-       * @param {FavoritesPageRequest} request
-       */
-      onDequeue: (request) => {
-        this.allFavorites = this.allFavorites.concat(request.favorites);
-        this.sendMessageToModel("onFavoritesFound", request.favorites);
-      }
-    });
-    this.fetcher = new FavoritesFetcher({
-      onAllRequestsCompleted: () => {
-        this.database.storeAllFavorites(this.allFavorites);
-        this.relayMessageThroughModel("onAllFavoritesFound");
-      },
-      /**
-       * @param {FavoritesPageRequest} request
-       */
-      onRequestCompleted: (request) => {
-        this.fetchedQueue.enqueue(request);
-      },
-      /**
-       * @param {Post[]} favorites
-       */
-      onFavoritesFoundOnReload: (favorites) => {
-        this.sendMessageToModel("onFavoritesFoundOnReload", favorites);
-        this.allFavorites = favorites.concat(this.allFavorites);
-
-        if (favorites.length > 0) {
-          this.database.storeFavorites(favorites);
-        }
-      }
-    });
-    this.database = new FavoritesDatabaseInterface({
-      onFavoritesStored: () => {
-        setTimeout(() => {
-          this.sendMessageToModel("notify", "All favorites saved");
-        }, 500);
-      },
-      /**
-       * @param {Post[]} favorites
-       */
-      onFavoritesLoaded: (favorites) => {
-        this.relayMessageThroughModel("onFinishedAccessingDatabase");
-
+  loadAllFavorites() {
+    return this.database.loadAllFavorites()
+      .then((favorites) => {
         if (favorites.length === 0) {
-          this.relayMessageThroughModel("onStartedFetchingFavorites");
-          this.fetcher.fetchAllFavorites();
-          return;
+          throw new EmptyFavoritesDatabase();
         }
         this.allFavorites = favorites;
-        this.fetcher.fetchNewFavoritesOnReload(this.allFavoriteIds);
-        this.relayMessageThroughModel("onFavoritesLoaded");
-      }
-    });
+        return favorites;
+      });
   }
 
   /**
-   * @param {String} name
-   * @param {Object} detail
+   * @param {Function} onFavoritesFound
+   * @returns {Promise.<void>}
    */
-  sendMessageToModel(name, detail) {
-    this.network.sendMessage(Channels.favorites.loaderToModel, name, detail);
+  fetchAllFavorites(onFavoritesFound) {
+    const onFavoritesFoundHelper = (/** @type {Post[]} */ favorites) => {
+      this.allFavorites = this.allFavorites.concat(favorites);
+      return onFavoritesFound(favorites);
+    };
+    return this.fetcher.fetchAllFavorites(onFavoritesFoundHelper);
   }
 
   /**
-   * @param {String} message
+   * @returns {Promise.<Post[]>}
    */
-  relayMessageThroughModel(message) {
-    this.network.sendMessage(Channels.favorites.loaderToModel, "relay", message);
+  fetchFavoritesOnReload() {
+    return this.fetcher.fetchNewFavoritesOnReload(this.allFavoriteIds)
+      .then((newFavorites) => {
+        this.allFavorites = newFavorites.concat(this.allFavorites);
+        return newFavorites;
+      });
   }
 
   /**
@@ -120,8 +69,19 @@ class FavoritesLoader {
     return this.allFavorites;
   }
 
-  loadFavorites() {
-    this.database.loadAllFavorites();
+  /**
+   * @returns {Promise.<void>}
+   */
+  storeAllFavorites() {
+    return this.database.storeAllFavorites(this.allFavorites);
+  }
+
+  /**
+   * @param {Post[]} newFavorites
+   * @returns {Promise.<void>}
+   */
+  storeNewFavorites(newFavorites) {
+    return this.database.storeFavorites(newFavorites);
   }
 
   /**

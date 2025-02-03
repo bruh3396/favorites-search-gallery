@@ -14,7 +14,7 @@ class FavoritesFilter {
   /**
    * @type {Boolean}
    */
-  excludeBlacklistedTags;
+  useTagBlacklist;
   /**
    * @type {Number}
    */
@@ -29,7 +29,7 @@ class FavoritesFilter {
 
   constructor() {
     this.negatedTagBlacklist = Utils.negateTags(Utils.tagBlacklist);
-    this.excludeBlacklistedTags = !Utils.userIsOnTheirOwnFavoritesPage() || Boolean(Utils.getPreference("excludeBlacklist", false));
+    this.useTagBlacklist = !Utils.userIsOnTheirOwnFavoritesPage() || Boolean(Utils.getPreference("excludeBlacklist", false));
     this.allowedRatings = Utils.loadAllowedRatings();
     this.searchCommand = this.getSearchCommand("");
     this.searchQuery = "";
@@ -48,7 +48,7 @@ class FavoritesFilter {
    * @returns {SearchCommand}
    */
   getSearchCommand(searchQuery) {
-    searchQuery = this.excludeBlacklistedTags ? `${searchQuery} ${this.negatedTagBlacklist}` : searchQuery;
+    searchQuery = this.useTagBlacklist ? `${searchQuery} ${this.negatedTagBlacklist}` : searchQuery;
     return new SearchCommand(searchQuery);
   }
 
@@ -65,7 +65,7 @@ class FavoritesFilter {
    * @param {Boolean} value
    */
   toggleBlacklist(value) {
-    this.excludeBlacklistedTags = value;
+    this.useTagBlacklist = value;
     this.setSearchCommand(this.searchQuery);
   }
 

@@ -2,14 +2,6 @@ class FavoritesDatabaseInterface {
   static databaseName = "Favorites";
   static objectStoreName = `user${Utils.getFavoritesPageId()}`;
   /**
-   * @type {Function}
-   */
-  onFavoritesStored;
-  /**
-   * @type {Function}
-   */
-  onFavoritesLoaded;
-  /**
    * @type {Worker}
    */
   databaseWorker;
@@ -22,42 +14,11 @@ class FavoritesDatabaseInterface {
    */
   newMetadataReceivedTimeout;
 
-  /**
-   *
-   * @param {{onFavoritesStored: Function, onFavoritesLoaded: Function}} param
-   */
-  constructor({onFavoritesStored, onFavoritesLoaded}) {
+  constructor() {
     this.databaseWorker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.database));
-    this.onFavoritesStored = onFavoritesStored;
-    this.onFavoritesLoaded = onFavoritesLoaded;
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
     this.newMetadataReceivedTimeout = null;
-    this.initializeDatabase();
-  }
-
-  initializeDatabase() {
-    this.connectDatabaseMessagesToCallbacks();
     this.sendObjectStoreNameToDatabase();
-  }
-
-  createDatabaseWorker() {
-  }
-
-  connectDatabaseMessagesToCallbacks() {
-    this.databaseWorker.onmessage = (message) => {
-      switch (message.data.response) {
-        case "finishedLoading":
-          this.onFavoritesLoaded(this.deserializeFavorites(message.data.favorites));
-          break;
-
-        case "finishedStoring":
-          this.onFavoritesStored();
-          break;
-
-        default:
-          break;
-      }
-    };
   }
 
   sendObjectStoreNameToDatabase() {
@@ -68,30 +29,39 @@ class FavoritesDatabaseInterface {
     });
   }
 
+  /**
+   * @returns {Promise.<Post[]>}
+   */
   loadAllFavorites() {
-    this.databaseWorker.postMessage({
+    return Utils.sendPostedMessage(this.databaseWorker, {
       command: "load",
       idsToDelete: this.getIdsToDeleteOnReload()
+    })
+    .then((records) => {
+      return this.deserializeFavorites(records);
     });
   }
 
   /**
    * @param {Post[]} favorites
+   * @returns {Promise.<void>}
    */
   storeAllFavorites(favorites) {
-    this.storeFavorites(favorites.slice().reverse());
+    return this.storeFavorites(favorites.slice().reverse());
   }
 
   /**
    * @param {Post[]} favorites
+   * @returns {Promise.<void>}
    */
   storeFavorites(favorites) {
-    setTimeout(() => {
-      this.databaseWorker.postMessage({
-        command: "store",
-        favorites: favorites.map(favorite => favorite.databaseRecord)
+    return Utils.sleep(500)
+      .then(() => {
+        Utils.sendPostedMessage(this.databaseWorker, {
+          command: "store",
+          favorites: favorites.map(favorite => favorite.databaseRecord)
+        });
       });
-    }, 500);
   }
 
   /**

@@ -1,9 +1,5 @@
 class FavoritesView {
   /**
-   * @type {EventEmitter}
-   */
-  network;
-  /**
    * @type {FavoritesPaginator}
    */
   paginator;
@@ -13,18 +9,14 @@ class FavoritesView {
   statusBar;
 
   /**
-   * @param {EventEmitter} network
+   * @param {{onPageChange: Function}} param
    */
-  constructor(network) {
-    this.network = network;
-    this.paginator = new FavoritesPaginator(() => {
-      this.network.sendMessage(Channels.favorites.viewToController, "onPageChanged", {});
-    });
+  constructor({onPageChange}) {
+    this.paginator = new FavoritesPaginator(onPageChange);
     this.statusBar = new FavoritesStatusBar();
-    this.network.on(Channels.favorites.controllerToView, (/** @type {Message} */ message) => Utils.handleMessage(this, message));
   }
 
-  clearOriginalFavoritesContent() {
+  clearOriginalFavorites() {
     const thumbs = Array.from(document.getElementsByClassName("thumb"));
     let content = document.getElementById("content");
 
@@ -61,10 +53,11 @@ class FavoritesView {
   }
 
   /**
-   * @param {{newSearchResults: Post[], newFavoritesCount: Number}} parameter
+   * @param {{newSearchResults: Post[], newFavorites: Post[]}} parameter
    */
-  insertNewSearchResultsOnReload({newSearchResults, newFavoritesCount}) {
+  insertNewSearchResultsOnReload({newSearchResults, newFavorites}) {
     this.paginator.insertNewSearchResults(newSearchResults.reverse());
+    const newFavoritesCount = newFavorites.length;
 
     if (newFavoritesCount > 0) {
       const pluralSuffix = newFavoritesCount > 1 ? "s" : "";
@@ -77,7 +70,6 @@ class FavoritesView {
    * @param {"grid" | "row" | "masonry"} layout
    */
   changeLayout(layout) {
-    this.network.sendMessage(Channels.favorites.viewToController, "onLayoutChanged", layout === "masonry");
     this.paginator.changeLayout(layout);
   }
 
@@ -89,28 +81,32 @@ class FavoritesView {
   }
 
   /**
-   * @param {Post[]} favorites
+   * @param {HTMLInputElement} input
    */
-  showSearchResults(favorites) {
-    this.statusBar.setMatchCount(favorites.length);
-    this.paginator.paginate(favorites);
+  updateRowSize(input) {
+    this.paginator.updateRowSize(input);
   }
 
   /**
-   * @param {HTMLInputElement} input
+   * @param {Post[]} searchResults
    */
-  updateResultsPerPage(input) {
-    this.paginator.updateResultsPerPage(parseInt(input.value));
+  showSearchResults(searchResults) {
+    this.statusBar.setMatchCount(searchResults.length);
+    this.paginator.paginate(searchResults);
+  }
+
+  /**
+   * @param {Number} resultsPerPage
+   */
+  updateResultsPerPage(resultsPerPage) {
+    this.paginator.updateResultsPerPage(resultsPerPage);
   }
 
   /**
    * @param {{direction: String, searchResults: Post[]}} message
+   * @returns {Boolean}
    */
   changePageInGallery(message) {
-    const success = this.paginator.changePageWhileInGallery(message.direction, message.searchResults);
-
-    if (!success) {
-      this.network.sendMessage(Channels.favorites.viewToController, "didNotChangePageWhileInGallery", message.direction);
-    }
+    return this.paginator.changePageWhileInGallery(message.direction, message.searchResults);
   }
 }

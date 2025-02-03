@@ -31,13 +31,4 @@ class EventEmitter {
       }
     }
   }
-
-  /**
-   * @param {String} channel
-   * @param {String} name
-   * @param {Object} detail
-   */
-  sendMessage(channel, name, detail) {
-    this.emit(channel, new Message(channel, name, detail));
-  }
 }

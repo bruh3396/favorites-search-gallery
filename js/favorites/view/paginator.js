@@ -69,7 +69,7 @@ class FavoritesPaginator {
     const content = document.createElement("div");
 
     content.id = "favorites-search-gallery-content";
-    content.className = String(Utils.getPreference("layoutSelect", "grid"));
+    content.className = String(Utils.getPreference("layoutSelect", "masonry"));
     Utils.favoritesSearchGalleryContainer.appendChild(content);
     return content;
   }
@@ -359,6 +359,8 @@ class FavoritesPaginator {
         button.click();
       }
     };
+    container.appendChild(input);
+    container.appendChild(button);
     this.pageSelectionMenu.appendChild(container);
     this.updateArrowButtonEventListeners(favorites);
   }
@@ -567,7 +569,7 @@ class FavoritesPaginator {
     this.masonry = new Masonry(this.content, {
       itemSelector: ".favorite",
       columnWidth: ".favorite",
-      gutter: 5,
+      gutter: 10,
       horizontalOrder: true,
       isFitWidth: true,
       resize: false
@@ -617,24 +619,11 @@ class FavoritesPaginator {
   updateColumnCount(input) {
     const columnCount = parseFloat(input.value);
     const width = Math.floor(window.innerWidth / columnCount) - 15;
-    const min = parseInt(input.getAttribute("min") || "1");
-    const max = parseInt(input.getAttribute("max") || "5");
-    const height = Utils.mapRange(columnCount, min, max, 400, 75);
 
     Utils.insertStyleHTML(`
       #favorites-search-gallery-content {
         &.grid {
           grid-template-columns: repeat(${columnCount}, 1fr) !important;
-        }
-
-        &.row  {
-          >.favorite,>.spacer {
-            height: ${height}px;
-          }
-          >.spacer {
-            height: ${height}px;
-            width: ${height}px;
-          }
         }
 
         &.masonry {
@@ -647,6 +636,30 @@ class FavoritesPaginator {
       }
       `, "column-count");
     this.updateMasonry();
+  }
+
+  /**
+   * @param {HTMLInputElement} input
+   */
+  updateRowSize(input) {
+    const rowSize = parseFloat(input.value);
+    const min = parseInt(input.getAttribute("min") || "1");
+    const max = parseInt(input.getAttribute("max") || "5");
+    const pixelSize = Math.round(Utils.mapRange(rowSize, min, max, 100, 400));
+
+    Utils.insertStyleHTML(`
+      #favorites-search-gallery-content {
+        &.row  {
+          >.favorite,>.spacer {
+            height: ${pixelSize}px;
+          }
+          >.spacer {
+            height: ${pixelSize}px;
+            width: ${pixelSize}px;
+          }
+        }
+      }
+      `, "row-size");
   }
 
   /**

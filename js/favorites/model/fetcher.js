@@ -1,16 +1,8 @@
 class FavoritesFetcher {
   /**
-   * @type {Function}
+   * @type {FetchedFavoritesQueue}
    */
-  onAllRequestsCompleted;
-  /**
-   * @type {Function}
-   */
-  onRequestCompleted;
-  /**
-   * @type {Function}
-   */
-  onFavoritesFoundOnReload;
+  fetchedQueue;
   /**
    * @type {Set.<Number>}
    */
@@ -92,13 +84,10 @@ class FavoritesFetcher {
     return null;
   }
 
-  /**
-   * @param {{onAllRequestsCompleted: Function, onRequestCompleted: Function, onFavoritesFoundOnReload: Function}} parameter
-   */
-  constructor({onAllRequestsCompleted, onRequestCompleted, onFavoritesFoundOnReload}) {
-    this.onAllRequestsCompleted = onAllRequestsCompleted;
-    this.onRequestCompleted = onRequestCompleted;
-    this.onFavoritesFoundOnReload = onFavoritesFoundOnReload;
+  constructor() {
+    this.fetchedQueue = new FetchedFavoritesQueue({
+      onDequeue: () => { }
+    });
     this.storedFavoriteIds = new Set();
     this.pendingRequestPageNumbers = new Set();
     this.failedRequests = [];
@@ -106,15 +95,23 @@ class FavoritesFetcher {
     this.fetchedAnEmptyPage = false;
   }
 
-  async fetchAllFavorites() {
+  /**
+   * @param {Function} onFavoritesFound
+   * @returns {Promise.<void>}
+   */
+  async fetchAllFavorites(onFavoritesFound) {
+    this.fetchedQueue.onDequeue = (/** @type {FavoritesPageRequest} */ request) => {
+      onFavoritesFound(request.favorites);
+    };
+
     while (!this.allRequestsHaveCompleted) {
       await this.fetchFavoritesPage(this.nextFetchRequest);
     }
-    this.onAllRequestsCompleted();
   }
 
   /**
    * @param {Set.<String>} storedFavoriteIds
+   * @returns {Promise.<Post[]>}
    */
   async fetchNewFavoritesOnReload(storedFavoriteIds) {
     await Utils.sleep(100);
@@ -131,8 +128,7 @@ class FavoritesFetcher {
 
       if (allNewFavoritesFound) {
         this.storedFavoriteIds.clear();
-        this.onFavoritesFoundOnReload(favorites);
-        return;
+        return favorites;
       }
     }
   }
@@ -217,7 +213,7 @@ class FavoritesFetcher {
     this.fetchedAnEmptyPage = this.fetchedAnEmptyPage || favoritesPageIsEmpty;
 
     if (!favoritesPageIsEmpty) {
-      this.onRequestCompleted(request);
+      this.fetchedQueue.enqueue(request);
     }
   }
 

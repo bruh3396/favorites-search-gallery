@@ -517,7 +517,7 @@ class Utils {
         }
       `, "caption-hiding");
 
-      document.getElementById("caption-hiding-fsg-style");
+    document.getElementById("caption-hiding-fsg-style");
   }
 
   /**
@@ -2230,19 +2230,6 @@ class Utils {
   }
 
   /**
-   * @param {any} receiver
-   * @param {Message} message
-   * @returns {any}
-   */
-  static handleMessage(receiver, message) {
-    if (typeof receiver[message.name] === "function") {
-      return receiver[message.name](message.detail);
-    }
-    // console.error(message);
-    return {};
-  }
-
-  /**
    * @param {any} templates
    */
   static createDynamicElements(templates) {
@@ -2304,4 +2291,54 @@ class Utils {
     );
   }
 
+  /**
+   * @param {Worker} worker
+   * @param {Object} message
+   * @returns {Promise.<any>}
+   */
+  static sendPostedMessage(worker, message) {
+    return new Promise((resolve) => {
+      const id = Date.now() + Math.random();
+      const handleMessage = (event) => {
+        if (event.data.id === id) {
+          worker.removeEventListener("message", handleMessage);
+          resolve(event.data.response);
+        }
+      };
+
+      worker.addEventListener("message", handleMessage);
+      worker.postMessage({
+        ...message,
+        id
+      });
+    });
+  }
+
+  /**
+   * @param {Function} func
+   * @param {Number} delay
+   * @returns {Function}
+   */
+  static debounce(func, delay) {
+    let timeoutId;
+    let firstCall = true;
+    let calledDuringDebounce = false;
+    return (...args) => {
+      if (firstCall) {
+        Reflect.apply(func, this, args);
+        firstCall = false;
+      } else {
+        calledDuringDebounce = true;
+      }
+
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (calledDuringDebounce) {
+          Reflect.apply(func, this, args);
+          calledDuringDebounce = false;
+        }
+        firstCall = true;
+      }, delay);
+    };
+  }
 }

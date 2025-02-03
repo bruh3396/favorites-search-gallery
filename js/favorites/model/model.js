@@ -1,9 +1,5 @@
 class FavoritesModel {
   /**
-   * @type {EventEmitter}
-   */
-  network;
-  /**
    * @type {FavoritesLoader}
    */
   loader;
@@ -16,77 +12,115 @@ class FavoritesModel {
    */
   latestSearchResults;
 
-  /**
-   * @param {EventEmitter} network
-   */
-  constructor(network) {
-    this.network = network;
-    this.loader = new FavoritesLoader(this.network);
+  constructor() {
+    this.loader = new FavoritesLoader();
     this.filter = new FavoritesFilter();
     this.latestSearchResults = [];
-    this.network.on(Channels.favorites.controllerToModel, (/** @type {Message} */ message) => Utils.handleMessage(this, message));
-    this.network.on(Channels.favorites.loaderToModel, (/** @type {Message} */ message) => Utils.handleMessage(this, message));
   }
 
   /**
-   * @param {String} message
+   * @returns {Promise.<Post[]>}
    */
-  notify(message) {
-    this.network.sendMessage(Channels.favorites.modelToController, "notify", message);
+  loadAllFavorites() {
+    return this.loader.loadAllFavorites()
+      .then(() => {
+        return this.getSearchResults("");
+      });
   }
 
   /**
-   * @param {String} message
+   * @param {Function} onSearchResultsFound
+   * @returns {Promise.<void>}
    */
-  relay(message) {
-    this.network.sendMessage(Channels.favorites.modelToController, message, {});
-  }
-
-  loadFavorites() {
-    this.network.sendMessage(Channels.favorites.modelToLoader, "loadFavorites", {});
+  fetchAllFavorites(onSearchResultsFound) {
+    const onFavoritesFound = (/** @type {Post[]} */ favorites) => {
+      this.latestSearchResults = this.latestSearchResults.concat(this.filter.filterFavorites(favorites));
+      return onSearchResultsFound();
+    };
+    return this.loader.fetchAllFavorites(onFavoritesFound);
   }
 
   /**
-   * @param {Post[]} favorites
+   * @returns {Promise.<{newFavorites: Post[], newSearchResults: Post[]}>}
    */
-  onFavoritesFound(favorites) {
-    this.latestSearchResults = this.latestSearchResults.concat(this.filter.filterFavorites(favorites));
-    this.network.sendMessage(Channels.favorites.modelToController, "onNewSearchResultsFound", {
-      searchResults: this.latestSearchResults,
-      allFavorites: this.loader.getAllFavorites()
-    });
+  findNewFavoritesOnReload() {
+    return this.loader.fetchFavoritesOnReload()
+      .then((newFavorites) => {
+        const newSearchResults = this.filter.filterFavorites(newFavorites);
+
+        this.latestSearchResults = newSearchResults.concat(this.latestSearchResults);
+        return {
+          newFavorites,
+          newSearchResults
+        };
+      });
   }
 
   /**
-   * @param {Post[]} favorites
+   * @param {Post[]} newFavorites
+   * @returns {Promise.<void>}
    */
-  onFavoritesFoundOnReload(favorites) {
-    const searchResults = this.filter.filterFavorites(favorites);
-
-    this.latestSearchResults = searchResults.concat(this.latestSearchResults);
-    this.network.sendMessage(Channels.favorites.modelToController, "onFavoritesFoundOnReload", {
-      newFavoritesCount: favorites.length,
-      newSearchResults: searchResults,
-      allSearchResults: this.latestSearchResults
-    });
+  storeNewFavorites(newFavorites) {
+    return this.loader.storeNewFavorites(newFavorites);
   }
 
-  onSortingParametersChanged() {
-    this.sendSearchResults();
+  /**
+   * @returns {Post[]}
+   */
+  getAllFavorites() {
+    return this.loader.allFavorites;
+  }
+
+  /**
+   * @returns {Promise.<void>}
+   */
+  storeAllFavorites() {
+    return this.loader.storeAllFavorites();
+  }
+
+  /**
+   * @returns {Post[]}
+   */
+  getLatestSearchResults() {
+    return this.latestSearchResults;
   }
 
   /**
    * @param {String} searchQuery
+   * @returns {Post[]}
    */
   getSearchResults(searchQuery) {
     this.filter.setSearchCommand(searchQuery);
-    this.sendSearchResults();
+    return this.getSearchResultsFromPreviousQuery();
   }
 
-  sendSearchResults() {
-    this.latestSearchResults = this.filter.filterFavorites(this.loader.getAllFavorites());
-    this.latestSearchResults = FavoritesSorter.sort(this.latestSearchResults);
-    this.network.sendMessage(Channels.favorites.modelToController, "onSearchResultsReady", this.latestSearchResults);
+  /**
+   * @returns {Post[]}
+   */
+  getSearchResultsFromPreviousQuery() {
+    const favorites = this.filter.filterFavorites(this.loader.getAllFavorites());
+
+    this.latestSearchResults = FavoritesSorter.sort(favorites);
+    return this.latestSearchResults;
+  }
+
+  /**
+   * @returns {Post[]}
+   */
+  getShuffledSearchResults() {
+    this.latestSearchResults = Utils.shuffleArray(this.latestSearchResults);
+    return Utils.shuffleArray(this.latestSearchResults);
+  }
+
+  /**
+   * @returns {Post[]}
+   */
+  getInvertedSearchResults() {
+    for (const favorite of this.loader.getAllFavorites()) {
+      favorite.toggleMatchedByMostRecentSearch();
+    }
+    return this.loader.getAllFavorites()
+      .filter(favorite => favorite.matchedByLatestSearch);
   }
 
   /**
@@ -94,53 +128,19 @@ class FavoritesModel {
    */
   toggleBlacklist(value) {
     this.filter.toggleBlacklist(value);
-    this.sendSearchResults();
   }
 
   /**
    * @param {Number} allowedRatings
    */
   changeAllowedRatings(allowedRatings) {
-    this.filter.allowedRatings = allowedRatings;
-    this.sendSearchResults();
-  }
-
-  updateResultsPerPage() {
-    setTimeout(() => {
-      this.network.sendMessage(Channels.favorites.modelToController, "onSearchResultsReady", this.latestSearchResults);
-    }, 0);
-  }
-
-  shuffleSearchResults() {
-    this.network.sendMessage(Channels.favorites.modelToController, "onSearchResultsReady", Utils.shuffleArray(this.latestSearchResults));
-  }
-
-  invertSearchResults() {
-    for (const favorite of this.loader.allFavorites) {
-      favorite.toggleMatchedByMostRecentSearch();
-    }
-    const invertedSearchResults = this.loader.allFavorites.filter(favorite => favorite.matchedByLatestSearch);
-
-    this.network.sendMessage(Channels.favorites.modelToController, "onSearchResultsReady", invertedSearchResults);
-  }
-
-  /**
-   * @param {String} direction
-   */
-  getSearchResultsForPageChangeInGallery(direction) {
-    this.network.sendMessage(
-      Channels.favorites.modelToController, "onGalleryPageChangeSearchResultsReady",
-      {
-        direction,
-        searchResults: this.latestSearchResults
-      }
-    );
+    this.filter.setAllowedRatings(allowedRatings);
   }
 
   /**
    * @param {String} id
    */
   updateMetadata(id) {
-    this.network.sendMessage(Channels.favorites.modelToLoader, "updateMetadataInDatabase", id);
+    this.loader.updateMetadataInDatabase(id);
   }
 }

@@ -6,15 +6,15 @@ class FavoritesExtractor {
    * @returns {Post[]}
    */
   static extractFavorites(favoritesPageHTML) {
-    const favorites = FavoritesExtractor.extractFavoriteElements(favoritesPageHTML);
-    return favorites.map(favorite => new Post(favorite, false));
+    const elements = FavoritesExtractor.extractFavoriteLikeElements(favoritesPageHTML);
+    return elements.map(element => new Post(element, false));
   }
 
   /**
    * @param {String} favoritesPageHTML
    * @returns {HTMLElement[]}
    */
-  static extractFavoriteElements(favoritesPageHTML) {
+  static extractFavoriteLikeElements(favoritesPageHTML) {
     const dom = FavoritesExtractor.parser.parseFromString(favoritesPageHTML, "text/html");
     const thumbs = Array.from(dom.querySelectorAll(".thumb"));
 
@@ -24,6 +24,6 @@ class FavoritesExtractor {
     return Array.from(dom.querySelectorAll("img"))
       .filter(image => image.src.includes("thumbnail_"))
       .map(image => image.parentElement)
-      .filter(parent => parent !== null);
+      .filter(thumb => thumb !== null);
   }
 }

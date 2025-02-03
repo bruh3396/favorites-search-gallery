@@ -1,6 +1,4 @@
 class FavoritesUIController {
-  /* eslint-disable object-property-newline */
-  /* eslint-disable object-curly-newline */
   static hotkeys = {};
 
   static setup() {
@@ -43,7 +41,9 @@ class FavoritesUIController {
         return;
       }
       target.checked = !target.checked;
-      FavoritesUIController.invokeAction({target});
+      FavoritesUIController.invokeAction({
+        target
+      });
     });
   }
 
@@ -63,23 +63,31 @@ class FavoritesUIController {
       }
     };
     window.addEventListener("wheel", (event) => {
-      const columnInput = document.getElementById("column-count");
+      const layoutSelect = document.getElementById("layout-select");
+      const usingRowLayout = layoutSelect !== null && layoutSelect instanceof HTMLSelectElement && layoutSelect.value === "row";
+      const id = usingRowLayout ? "row-size" : "column-count";
+      const input = document.getElementById(id);
 
-      if (columnInput === null || !(columnInput instanceof HTMLInputElement)) {
+      if (input === null || !(input instanceof HTMLInputElement)) {
         return;
       }
 
       if (!event.shiftKey) {
         return;
       }
-      const columnAddend = -event.deltaY > 0 ? -1 : 1;
+      const addend = (-event.deltaY > 0 ? -1 : 1) * (usingRowLayout ? -1 : 1);
 
       if (cooldown.ready) {
         Utils.forceHideCaptions(true);
       }
-      columnInput.value = String(parseInt(columnInput.value) + columnAddend);
-      columnInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-      columnInput.dispatchEvent(new Event("change", {bubbles: true}));
+      input.value = String(parseInt(input.value) + addend);
+      input.dispatchEvent(new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true
+      }));
+      input.dispatchEvent(new Event("change", {
+        bubbles: true
+      }));
     }, {
       passive: true
     });
@@ -221,7 +229,10 @@ class FavoritesUIController {
     const allowedRatings = (4 * Number(explicit.checked)) + (2 * Number(questionable.checked)) + Number(safe.checked);
 
     Utils.setPreference("allowedRatings", allowedRatings);
-    event.target.dispatchEvent(new CustomEvent("controller", {bubbles: true, detail: allowedRatings}));
+    event.target.dispatchEvent(new CustomEvent("controller", {
+      bubbles: true,
+      detail: allowedRatings
+    }));
 
     switch (allowedRatings) {
       case 4:
@@ -285,5 +296,27 @@ class FavoritesUIController {
 
   static clear() {
     Utils.setMainSearchBoxValue("");
+  }
+
+  /**
+   * @param {CustomEvent} event
+   */
+  static changeLayout(event) {
+    const layout = event.detail;
+    const rowSizeContainer = document.getElementById("row-size-container");
+    const columnCountContainer = document.getElementById("column-count-container");
+    const usingRowLayout = layout === "row";
+
+    if (columnCountContainer !== null && rowSizeContainer !== null) {
+      columnCountContainer.style.display = usingRowLayout ? "none" : "";
+      rowSizeContainer.style.display = usingRowLayout ? "" : "none";
+    }
+
+    if (event.target !== null) {
+      event.target.dispatchEvent(new CustomEvent("controller", {
+        bubbles: true,
+        detail: layout
+      }));
+    }
   }
 }

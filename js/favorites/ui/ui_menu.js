@@ -66,12 +66,13 @@ class FavoritesMenuDesktopUI {
     ],
     "select": [
       {id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "onSortingParametersChanged", position: "beforeend", invokeActionOnCreation: false, optionPairs: [["default", "Default"], ["score", "Score"], ["width", "Width"], ["height", "Height"], ["creationTimestamp", "Date Uploaded"], ["lastChangedTimestamp", "Date Changed"], ["random", "Random"]]},
-      {id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, optionPairs: [["masonry", "Masonry (Vertical)"], ["row", "Row (Horizontal)"], ["grid", "Grid (Legacy)"]]},
+      {id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, optionPairs: [["masonry", "Masonry"], ["row", "Row"], ["grid", "Grid"]], handler: "uiController"},
       {id: "performance-profile", parentId: "performance-profile-container", title: "Improve performance by disabling features", action: "changePerformanceProfile", position: "beforeend", invokeActionOnCreation: false, optionPairs: [["0", "Normal"], ["1", "Low (no gallery)"], ["2", "Potato (only search)"]], handler: "uiController"}
     ],
     "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "onSortingParametersChanged", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, defaultValue: false}],
     "numberComponent": [
       {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "updateColumnCount", defaultValue: 6, min: 4, max: 20, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "row-size", parentId: "row-size-container", position: "beforeend", action: "updateRowSize", defaultValue: 5, min: 1, max: 10, step: 1, pollingTime: 50, invokeActionOnCreation: true},
       {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "updateResultsPerPage", defaultValue: 150, min: 50, max: 500, step: 50, pollingTime: 50, invokeActionOnCreation: false}
     ]
   };

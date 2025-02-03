@@ -18,8 +18,6 @@ class ElementFactory {
       return;
     }
     button.onclick = (event) => {
-      event.preventDefault();
-
       button.dispatchEvent(new CustomEvent(template.handler, {
         bubbles: true,
         detail: {

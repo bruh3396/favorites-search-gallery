@@ -273,7 +273,7 @@ class FavoritesMenu {
       &.row {
         display: flex;
         flex-wrap: wrap;
-        gap: 5px;
+        gap: 10px;
 
         >.favorite,
         >.spacer {
@@ -706,6 +706,14 @@ Lower numbers improve responsiveness">
                   <div>
                     <span class="number-label-container">
                       <label id="column-count-label">Columns</label>
+                    </span>
+                    <br>
+                  </div>
+                </div>
+                <div id="row-size-container" title="Set the height of each row">
+                  <div>
+                    <span class="number-label-container">
+                      <label id="row-size-label">Row height</label>
                     </span>
                     <br>
                   </div>
