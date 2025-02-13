@@ -1,15 +1,5 @@
 class InactivePost {
   /**
-   * @param {String} compressedSource
-   * @param {String} id
-   * @returns {String}
-   */
-  static decompressThumbnailSource(compressedSource, id) {
-    const splitSource = compressedSource.split("_");
-    return `https://us.rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg?${id}`;
-  }
-
-  /**
    * @type {String}
    */
   id;
@@ -32,19 +22,19 @@ class InactivePost {
 
   /**
    * @param {HTMLElement | {id: String, tags: String, src: String, metadata: String}} favorite
-   * @param {Boolean} createFromRecord
    */
-  constructor(favorite, createFromRecord) {
+  constructor(favorite) {
     this.id = "";
     this.tags = "";
     this.src = "";
     this.metadata = "";
-    this.createdFromDatabaseRecord = createFromRecord;
+    this.createdFromDatabaseRecord = false;
 
-    if (createFromRecord) {
-      this.populateAttributesFromDatabaseRecord(favorite);
-    } else {
+    if (favorite instanceof HTMLElement) {
       this.populateAttributesFromHTMLElement(favorite);
+    } else {
+      this.createdFromDatabaseRecord = true;
+      this.populateAttributesFromDatabaseRecord(favorite);
     }
   }
 
@@ -54,7 +44,7 @@ class InactivePost {
   populateAttributesFromDatabaseRecord(record) {
     this.id = record.id;
     this.tags = record.tags;
-    this.src = InactivePost.decompressThumbnailSource(record.src, record.id);
+    this.src = Utils.decompressThumbnailSource(record.src, record.id);
     this.metadata = record.metadata;
   }
 
@@ -65,15 +55,23 @@ class InactivePost {
     this.id = Utils.getIdFromThumb(element);
     const image = Utils.getImageFromThumb(element);
 
-    this.src = image.src || image.getAttribute("data-cfsrc") || "";
+    if (image === null) {
+      return;
+    }
+    const source = image.src || image.getAttribute("data-cfsrc") || "";
+
+    this.src = Utils.cleanThumbnailSource(source, this.id);
     this.tags = this.preprocessTags(image);
   }
 
   /**
-   * @param {HTMLImageElement} image
+   * @param {HTMLImageElement | null} image
    * @returns {String}
    */
   preprocessTags(image) {
+    if (image === null) {
+      return "";
+    }
     const tags = image.title || image.getAttribute("tags") || "";
     return Utils.removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
   }

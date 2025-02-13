@@ -1,66 +1,4 @@
 class TagModifier {
-  static tagModifierHTML = `
-<div id="tag-modifier-container">
-  <style>
-    #tag-modifier-ui-container {
-      display: none;
-
-      >* {
-        margin-top: 10px;
-      }
-    }
-
-    #tag-modifier-ui-textarea {
-      width: 80%;
-    }
-
-    .favorite.tag-modifier-selected {
-      outline: 2px dashed white !important;
-
-      >div, >a {
-        opacity: 1;
-        filter: grayscale(0%);
-      }
-    }
-
-    #tag-modifier-ui-status-label {
-      visibility: hidden;
-    }
-
-    .tag-type-custom>a,
-    .tag-type-custom {
-      color: hotpink;
-    }
-  </style>
-  <div id="tag-modifier-option-container">
-    <label class="checkbox" title="Add or remove custom or official tags to favorites">
-      <input type="checkbox" id="tag-modifier-option-checkbox"> Modify Tags<span class="option-hint"></span>
-    </label>
-  </div>
-  <div id="tag-modifier-ui-container">
-    <label id="tag-modifier-ui-status-label">No Status</label>
-    <textarea id="tag-modifier-ui-textarea" placeholder="tags" spellcheck="false"></textarea>
-    <div id="tag-modifier-buttons">
-      <span id="tag-modifier-ui-modification-buttons">
-        <button id="tag-modifier-ui-add" title="Add tags to selected favorites">Add</button>
-        <button id="tag-modifier-remove" title="Remove tags from selected favorites">Remove</button>
-      </span>
-      <span id="tag-modifier-ui-selection-buttons">
-        <button id="tag-modifier-ui-select-all" title="Select all favorites for tag modification">Select all</button>
-        <button id="tag-modifier-ui-un-select-all" title="Unselect all favorites for tag modification">Unselect
-          all</button>
-      </span>
-    </div>
-    <div id="tag-modifier-ui-reset-button-container">
-      <button id="tag-modifier-reset" title="Reset tag modifications">Reset</button>
-    </div>
-    <div id="tag-modifier-ui-configuration" style="display: none;">
-      <button id="tag-modifier-import" title="Import modified tags">Import</button>
-      <button id="tag-modifier-export" title="Export modified tags">Export</button>
-    </div>
-  </div>
-</div>
-`;
   /**
    * @type {String}
    */
@@ -152,7 +90,7 @@ class TagModifier {
     if (!Utils.onFavoritesPage()) {
       return;
     }
-    Utils.insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", TagModifier.tagModifierHTML);
+    Utils.insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", HTMLStrings.tagModifier);
     this.favoritesOption.container = document.getElementById("tag-modifier-container");
     this.favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox");
     this.favoritesUI.container = document.getElementById("tag-modifier-ui-container");

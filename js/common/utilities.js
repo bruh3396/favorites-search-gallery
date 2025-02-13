@@ -1,193 +1,4 @@
 class Utils {
-  static utilitiesHTML = `
-<style>
-  .light-green-gradient {
-    background: linear-gradient(to bottom, #aae5a4, #89e180);
-    color: black;
-  }
-
-  .dark-green-gradient {
-    background: linear-gradient(to bottom, #5e715e, #293129);
-    color: white;
-  }
-
-  img {
-    border: none !important;
-  }
-
-  .not-highlightable {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-
-  input[type=number] {
-    border: 1px solid #767676;
-    border-radius: 2px;
-  }
-
-  .size-calculation-div {
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    visibility: hidden;
-    transition: none !important;
-    transform: scale(1.05, 1.05);
-  }
-
-  .number {
-    white-space: nowrap;
-    position: relative;
-    margin-top: 5px;
-    border: 1px solid;
-    padding: 0;
-    border-radius: 20px;
-    background-color: white;
-
-    >hold-button,
-    button {
-      position: relative;
-      top: 0;
-      left: 0;
-      font-size: inherit;
-      outline: none;
-      background: none;
-      cursor: pointer;
-      border: none;
-      margin: 0px 8px;
-      padding: 0;
-
-      &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 200%;
-        height: 100%;
-        /* outline: 1px solid greenyellow; */
-        /* background-color: hotpink; */
-      }
-
-      &:hover {
-        >span {
-          color: #0075FF;
-        }
-
-      }
-
-      >span {
-        font-weight: bold;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        position: relative;
-        pointer-events: none;
-        border: none;
-        outline: none;
-        top: 0;
-        z-index: 5;
-        font-size: 1.2em !important;
-      }
-
-      &.number-arrow-up {
-        >span {
-          transition: left .1s ease;
-          left: 0;
-        }
-
-        &:hover>span {
-          left: 3px;
-        }
-      }
-
-      &.number-arrow-down {
-        >span {
-          transition: right .1s ease;
-          right: 0;
-        }
-
-        &:hover>span {
-          right: 3px;
-        }
-      }
-    }
-
-    >input[type="number"] {
-      font-size: inherit;
-      text-align: center;
-      width: 2ch;
-      padding: 0;
-      margin: 0;
-      font-weight: bold;
-      padding: 3px;
-      background: none;
-      border: none;
-
-      &:focus {
-        outline: none;
-      }
-    }
-
-    >input[type="number"]::-webkit-outer-spin-button,
-    >input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      appearance: none;
-      margin: 0;
-    }
-
-    input[type=number] {
-      appearance: textfield;
-      -moz-appearance: textfield;
-    }
-  }
-
-  .fullscreen-icon {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10010;
-    pointer-events: none;
-    width: 30vw;
-  }
-
-  input[type="checkbox"] {
-    accent-color: #0075FF;
-  }
-
-  .thumb {
-    >a {
-      pointer-events: none;
-
-      >img {
-        pointer-events: all;
-      }
-    }
-  }
-
-  .blink {
-    animation: blink 0.35s step-start infinite;
-  }
-
-  @keyframes blink {
-    0% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0;
-    }
-
-    100% {
-      opacity: 1;
-    }
-  }
-</style>
-`;
   static localStorageKeys = {
     imageExtensions: "imageExtensions",
     preferences: "preferences"
@@ -343,6 +154,10 @@ class Utils {
   static customTags = Utils.loadCustomTags();
   static favoriteItemClassName = "favorite";
   static imageExtensions = Utils.loadDiscoveredImageExtensions();
+  /**
+   * @type {RegExp}
+   */
+  static thumbnailSourceCompressionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
   /**
    * @type {Cooldown}
    */
@@ -532,8 +347,8 @@ class Utils {
   }
 
   /**
-   * @param {HTMLImageElement} image
-   * @returns {HTMLElement}
+   * @param {HTMLElement} image
+   * @returns {HTMLElement | null}
    */
   static getThumbFromImage(image) {
     return image.closest(`.${Utils.itemClassName}`);
@@ -541,17 +356,18 @@ class Utils {
 
   /**
    * @param {HTMLElement} thumb
-   * @returns {HTMLImageElement}
+   * @returns {HTMLImageElement | null}
    */
   static getImageFromThumb(thumb) {
     return thumb.querySelector("img");
   }
 
   /**
-   * @returns {Element[]}
+   * @returns {HTMLElement[]}
    */
   static getAllThumbs() {
-    return Array.from(document.getElementsByClassName(Utils.itemClassName));
+    return Array.from(document.getElementsByClassName(Utils.itemClassName))
+      .filter(thumb => thumb instanceof HTMLElement);
   }
 
   /**
@@ -870,7 +686,7 @@ class Utils {
   }
 
   static insertCommonStyleHTML() {
-    Utils.insertStyleHTML(Utils.utilitiesHTML, "common");
+    Utils.insertStyleHTML(HTMLStrings.utilities, "common");
     setTimeout(() => {
       if (Utils.onSearchPage()) {
         Utils.removeInlineImgStyles();
@@ -899,7 +715,8 @@ class Utils {
     Utils.insertStyleHTML(`
       #favorites-search-gallery-content {
         &.masonry,
-        &.row
+        &.row,
+        &.square
         {
           >.favorite {
             ${videoRule}
@@ -1703,7 +1520,7 @@ class Utils {
     for (const initializer of Utils.staticInitializers) {
       initializer();
     }
-    Utils.staticInitializers = null;
+    Utils.staticInitializers = [];
   }
 
   /**
@@ -1911,6 +1728,10 @@ class Utils {
    */
   static async setupOriginalImageLinkOnSearchPage(thumb) {
     const anchor = thumb.querySelector("a");
+
+    if (anchor === null) {
+      return;
+    }
     const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
     const thumbURL = anchor.href;
 
@@ -2132,7 +1953,7 @@ class Utils {
   }
 
   /**
-   * @param {HTMLElement} element
+   * @param {HTMLElement | EventTarget} element
    * @param {String} tagName
    * @returns {Boolean}
    */
@@ -2317,9 +2138,9 @@ class Utils {
   /**
    * @param {Function} func
    * @param {Number} delay
-   * @returns {Function}
+   * @returns {any}
    */
-  static debounce(func, delay) {
+  static debounceAfterFirstCall(func, delay) {
     let timeoutId;
     let firstCall = true;
     let calledDuringDebounce = false;
@@ -2340,5 +2161,138 @@ class Utils {
         firstCall = true;
       }, delay);
     };
+  }
+
+  /**
+   * @param {Function} func
+   * @param {Number} delay
+   * @returns {any}
+   */
+  static debounceAlways(func, delay) {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        Reflect.apply(func, this, args);
+      }, delay);
+    };
+  }
+
+  /**
+   * @param {Number} margin
+   */
+  static updateOptionContentMargin(margin) {
+    const menu = document.getElementById("favorites-search-gallery-menu");
+
+    if (menu === null) {
+      return;
+    }
+    margin = margin === undefined ? menu.getBoundingClientRect().height + 11 : margin;
+    Utils.insertStyleHTML(`
+        #favorites-search-gallery-content {
+            margin-top: ${margin}px;
+        }`, "options-content-margin");
+  }
+
+  /**
+   * @param {String} compressedSource
+   * @param {String} id
+   * @returns {String}
+   */
+  static decompressThumbnailSource(compressedSource, id) {
+    const splitSource = compressedSource.split("_");
+    return `https://rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg?${id}`;
+  }
+
+  /**
+   * @param {String} source
+   * @returns {String}
+   */
+  static compressThumbSource(source) {
+    const match = source.match(Utils.thumbnailSourceCompressionRegex);
+    return match === null ? "" : match.splice(1).join("_");
+  }
+
+  /**
+   * @param {String} source
+   * @param {String} id
+   * @returns {String}
+   */
+  static cleanThumbnailSource(source, id) {
+    return Utils.decompressThumbnailSource(Utils.compressThumbSource(source), id);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {String}
+   */
+  static getGIFSource(thumb) {
+    const tags = Utils.getTagsFromThumb(thumb);
+    const extension = tags.has("animated_png") ? "png" : "gif";
+    return Utils.getOriginalImageURLFromThumb(thumb).replace("jpg", extension);
+  }
+
+  /**
+   * @param {MouseEvent} mouseEvent
+   * @returns {HTMLElement | null}
+   */
+  static getThumbUnderCursor(mouseEvent) {
+    if (!(mouseEvent.target instanceof HTMLElement) || mouseEvent.target.matches(".caption-tag")) {
+      return null;
+    }
+    const thumbSelector = Utils.onSearchPage() ? ".thumb img" : ".favorite img:first-child";
+    const image = mouseEvent.target.matches(thumbSelector) ? mouseEvent.target : null;
+    const thumb = image === null ? null : Utils.getThumbFromImage(image);
+    return thumb;
+  }
+
+  /**
+   * @param {DOMRectReadOnly} rect1
+   * @param {DOMRectReadOnly} rect2
+   * @returns {Number}
+   */
+  static getDistance(rect1, rect2) {
+    const x1 = rect1.left + (rect1.width / 2);
+    const y1 = rect1.top + (rect1.height / 2);
+    const x2 = rect2.left + (rect2.width / 2);
+    const y2 = rect2.top + (rect2.height / 2);
+    return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2));
+  }
+
+  /**
+   * @param {DOMRectReadOnly} rect1
+   * @param {DOMRectReadOnly} rect2
+   * @returns {Number}
+   */
+  static getDistanceByYThenX(rect1, rect2) {
+    const y1 = rect1.top + (rect1.height / 2);
+    const y2 = rect2.top + (rect2.height / 2);
+
+    if (y1 !== y2) {
+      return Math.abs(y1 - y2) + 10000;
+    }
+    const x1 = rect1.left + (rect1.width / 2);
+    const x2 = rect2.left + (rect2.width / 2);
+    return Math.abs(x1 - x2);
+  }
+
+   /**
+    * @param {CanvasRenderingContext2D | null} context
+    * @param {ImageBitmap} imageBitmap
+    */
+   static drawCanvas(context, imageBitmap) {
+    if (context === null) {
+      return;
+    }
+    const canvas = context.canvas;
+    const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
+    const centerShiftX = (canvas.width - (imageBitmap.width * ratio)) / 2;
+    const centerShiftY = (canvas.height - (imageBitmap.height * ratio)) / 2;
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(
+      imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
+      centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
+    );
   }
 }

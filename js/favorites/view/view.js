@@ -9,7 +9,7 @@ class FavoritesView {
   statusBar;
 
   /**
-   * @param {{onPageChange: Function}} param
+   * @param {{onPageChange: Function}} onPageChange
    */
   constructor({onPageChange}) {
     this.paginator = new FavoritesPaginator(onPageChange);
@@ -46,18 +46,19 @@ class FavoritesView {
 
   /**
    * @param {{searchResults: Post[], allFavorites: Post[]}} parameter
+   * @returns {HTMLElement[]}
    */
   updateSearchResultsWhileFetching({searchResults, allFavorites}) {
     this.statusBar.updateStatusWhileFetching(searchResults.length, allFavorites.length);
-    this.paginator.paginateWhileFetching(searchResults);
+    return this.paginator.paginateWhileFetching(searchResults);
   }
 
   /**
-   * @param {{newSearchResults: Post[], newFavorites: Post[]}} parameter
+   * @param {{newSearchResults: Post[], newFavorites: Post[], allSearchResults: Post[]}} results
    */
-  insertNewSearchResultsOnReload({newSearchResults, newFavorites}) {
-    this.paginator.insertNewSearchResults(newSearchResults.reverse());
-    const newFavoritesCount = newFavorites.length;
+  insertNewSearchResultsOnReload(results) {
+    this.paginator.insertNewSearchResults(results);
+    const newFavoritesCount = results.newFavorites.length;
 
     if (newFavoritesCount > 0) {
       const pluralSuffix = newFavoritesCount > 1 ? "s" : "";
@@ -67,7 +68,7 @@ class FavoritesView {
   }
 
   /**
-   * @param {"grid" | "row" | "masonry"} layout
+   * @param {"masonry" | "row" | "square" | "grid" } layout
    */
   changeLayout(layout) {
     this.paginator.changeLayout(layout);
@@ -108,5 +109,9 @@ class FavoritesView {
    */
   changePageInGallery(message) {
     return this.paginator.changePageWhileInGallery(message.direction, message.searchResults);
+  }
+
+  gotoNextPage() {
+    this.paginator.gotoNextPage();
   }
 }

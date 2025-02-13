@@ -213,7 +213,7 @@ class Post {
    */
   get compressedThumbSource() {
     const source = this.inactivePost === null ? this.image.src : this.inactivePost.src;
-    return source.match(Post.thumbnailSourceCompressionRegex).splice(1).join("_");
+    return Utils.compressThumbSource(source);
   }
 
   /**
@@ -294,7 +294,7 @@ class Post {
 
   activateHTMLElement() {
     if (this.inactivePost !== null) {
-      this.createHTMLElement(this.inactivePost);
+      this.createHTMLElement();
     }
   }
 
@@ -377,8 +377,8 @@ class Post {
   }
 
   deleteConsumedPropertiesFromInactivePost() {
-    this.inactivePost.metadata = null;
-    this.inactivePost.tags = null;
+    this.inactivePost.metadata = "";
+    this.inactivePost.tags = "";
   }
 
   openAssociatedPostInNewTabWhenClicked() {
@@ -402,18 +402,17 @@ class Post {
 
   deleteInactivePost() {
     if (this.inactivePost !== null) {
-      this.inactivePost = null;
+      // this.inactivePost = null;
     }
   }
 
   /**
-   * @param {DocumentFragment} content
+   * @param {DocumentFragment | HTMLElement} content
    */
   insertAtEndOfContent(content) {
     if (this.inactivePost !== null) {
       this.createHTMLElement();
     }
-    this.createStatisticHint();
     content.appendChild(this.root);
   }
 
@@ -424,7 +423,6 @@ class Post {
     if (this.inactivePost !== null) {
       this.createHTMLElement();
     }
-    this.createStatisticHint();
     content.insertAdjacentElement("afterbegin", this.root);
   }
 
@@ -483,57 +481,6 @@ class Post {
     }
     this.additionalTagSet = new Set();
     this.combineOriginalAndAdditionalTagSets();
-  }
-
-  /**
-   * @returns {HTMLDivElement | null}
-   */
-  getStatisticHintElement() {
-    return this.container.querySelector(".statistic-hint");
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  hasStatisticHint() {
-    return this.getStatisticHintElement() !== null;
-  }
-
-  /**
-   * @returns {String}
-   */
-  getStatisticHintValue() {
-    switch (FavoritesSorter.sortingMethod) {
-      case "score":
-        return String(this.metadata.score);
-
-      case "width":
-        return String(this.metadata.width);
-
-      case "height":
-        return String(this.metadata.height);
-
-      case "creationTimestamp":
-        return Utils.convertTimestampToDate(this.metadata.creationTimestamp);
-
-      case "lastChangedTimestamp":
-        return Utils.convertTimestampToDate(this.metadata.lastChangedTimestamp * 1000);
-
-      default:
-        return String(this.index);
-    }
-  }
-
-  async createStatisticHint() {
-    // await Utils.sleep(200);
-    // let hint = this.getMetadataHintElement();
-
-    // if (hint === null) {
-    //   hint = document.createElement("div");
-    //   hint.className = "statistic-hint";
-    //   this.container.appendChild(hint);
-    // }
-    // hint.textContent = this.getMetadataHintValue();
   }
 
   /**

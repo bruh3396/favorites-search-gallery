@@ -18,7 +18,7 @@ class VideoController {
 
   constructor() {
     this.videoContainer = document.getElementById("original-video-container");
-    this.videoPlayers = Array.from(document.querySelectorAll("#original-video-container>video"));
+    this.videoPlayers = Array.from(document.querySelectorAll("#video-container>video"));
     this.videoClips = new Map();
     this.preventVideoPlayersFromFlashingWhenLoaded();
     this.addEventListenersToVideoContainer();

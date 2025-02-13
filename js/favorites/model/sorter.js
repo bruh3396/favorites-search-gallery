@@ -2,42 +2,44 @@ class FavoritesSorter {
   /**
    * @type {Boolean}
    */
-  static get sortByAscending() {
-    const sortByAscendingCheckbox = document.getElementById("sort-ascending");
-
-    if (sortByAscendingCheckbox !== null && sortByAscendingCheckbox instanceof HTMLInputElement) {
-        return sortByAscendingCheckbox.checked;
-    }
-    return false;
-  }
-
+  useAscendingOrder;
   /**
    * @type {String}
    */
-  static get sortingMethod() {
-    const sortingMethodSelect = document.getElementById("sorting-method");
+  sortingMethod;
 
-    if (sortingMethodSelect !== null && sortingMethodSelect instanceof HTMLSelectElement) {
-      return sortingMethodSelect.value;
-    }
-    return "default";
+  constructor() {
+    this.useAscendingOrder = Boolean(Utils.getPreference("sortAscending", false));
+    this.sortingMethod = Utils.getPreference("sortingMethod", "default");
   }
 
   /**
-   * @param {Post[]} posts
+   * @param {Boolean} value
+   */
+  setAscendingOrder(value) {
+    this.useAscendingOrder = value;
+  }
+
+  /**
+   * @param {String} value
+   */
+  setSortingMethod(value) {
+    this.sortingMethod = value;
+  }
+
+  /**
+   * @param {Post[]} favorites
    * @returns {Post[]}
    */
-  static sort(posts) {
-    const postsToSort = posts.slice();
-    const sortingMethod = FavoritesSorter.sortingMethod;
+  sortFavorites(favorites) {
+    const postsToSort = favorites.slice();
 
-    if (sortingMethod === "random") {
+    if (this.sortingMethod === "random") {
       return Utils.shuffleArray(postsToSort);
     }
     postsToSort.sort((postA, postB) => {
-      // @ts-ignore
-      return (postB.metadata[sortingMethod] - postA.metadata[sortingMethod]) || 0;
+      return (postB.metadata[this.sortingMethod] - postA.metadata[this.sortingMethod]) || 0;
     });
-    return FavoritesSorter.sortByAscending ? postsToSort.reverse() : postsToSort;
+    return this.useAscendingOrder ? postsToSort.reverse() : postsToSort;
   }
 }

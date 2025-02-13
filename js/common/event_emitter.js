@@ -1,11 +1,11 @@
 class EventEmitter {
   /**
-   * @type {Object.<String, Function[]>}
+   * @type {Map.<String, Function[].}
    */
   listeners;
 
   constructor() {
-    this.listeners = {};
+    this.listeners = new Map();
   }
 
   /**
@@ -13,21 +13,37 @@ class EventEmitter {
    * @param {Function} callback
    */
   on(event, callback) {
-    if (this.listeners[event] === undefined) {
-      this.listeners[event] = [];
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
     }
-    this.listeners[event].push(callback);
+    // @ts-ignore
+    this.listeners.get(event).push(callback);
   }
 
   /**
    * @param {String} event
-   * @param {Object} detail
+   * @param {Function} callback
    */
-  emit(event, detail) {
-    if (this.listeners[event] !== undefined) {
-      for (const callback of this.listeners[event]) {
+  off(event, callback) {
+    if (this.listeners.has(event)) {
+      // @ts-ignore
+      const callbacks = this.listeners.get(event)
+        .filter(cb => cb !== callback);
+
+      this.listeners.set(event, callbacks);
+    }
+  }
+
+  /**
+   * @param {String} event
+   * @param  {...any} args
+   */
+  emit(event, ...args) {
+    if (this.listeners.has(event)) {
+      // @ts-ignore
+      for (const callback of this.listeners.get(event)) {
         // eslint-disable-next-line callback-return
-        callback(detail);
+        callback(...args);
       }
     }
   }

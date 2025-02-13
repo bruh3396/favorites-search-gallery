@@ -36,6 +36,15 @@ class FavoritesFilter {
   }
 
   /**
+   * @param {Post[]} favorites
+   * @returns {Post[]}
+   */
+  filterFavorites(favorites) {
+    const results = this.searchCommand.getSearchResults(favorites);
+    return this.allRatingsAreAllowed ? results : results.filter(result => result.withinRatings(this.allowedRatings));
+  }
+
+  /**
    * @param {String} searchQuery
    */
   setSearchCommand(searchQuery) {
@@ -49,16 +58,7 @@ class FavoritesFilter {
    */
   getSearchCommand(searchQuery) {
     searchQuery = this.useTagBlacklist ? `${searchQuery} ${this.negatedTagBlacklist}` : searchQuery;
-    return new SearchCommand(searchQuery);
-  }
-
-  /**
-   * @param {Post[]} favorites
-   * @returns {Post[]}
-   */
-  filterFavorites(favorites) {
-    const results = this.searchCommand.getSearchResults(favorites);
-    return this.allRatingsAreAllowed ? results : results.filter(result => result.withinRatings(this.allowedRatings));
+    return new SearchCommand(`${searchQuery} -video -animated`);
   }
 
   /**

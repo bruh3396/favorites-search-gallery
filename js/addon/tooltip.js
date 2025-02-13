@@ -65,7 +65,7 @@ class Tooltip {
       return;
     }
     this.visible = Boolean(Utils.getPreference("showTooltip", true));
-    Utils.insertFavoritesSearchGalleryHTML("afterbegin", Tooltip.tooltipHTML);
+    Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.tooltip);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;
     this.searchTagColorCodes = {};

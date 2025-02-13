@@ -1,94 +1,4 @@
 class Caption {
-  static captionHTML = `
-<style>
-  .caption {
-    overflow: hidden;
-    pointer-events: none;
-    background: rgba(0, 0, 0, .75);
-    z-index: 15;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: -100%;
-    left: 0px;
-    top: 0px;
-    text-align: left;
-    transform: translateX(-100%);
-    /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
-    transition: transform .35s ease;
-    padding-top: 0.5ch;
-    padding-left: 7px;
-
-    h6 {
-      display: block;
-      color: white;
-      padding-top: 0px;
-    }
-
-    li {
-      width: fit-content;
-      list-style-type: none;
-      display: inline-block;
-    }
-
-    &.active {
-        transform: translateX(0%);
-    }
-
-    &.transition-completed {
-      .caption-tag {
-        pointer-events: all;
-      }
-    }
-  }
-
-  .caption.hide {
-    display: none;
-  }
-
-  .caption.inactive {
-    display: none;
-  }
-
-  .caption-tag {
-    pointer-events: none;
-    color: #6cb0ff;
-    word-wrap: break-word;
-
-    &:hover {
-      text-decoration-line: underline;
-      cursor: pointer;
-    }
-  }
-
-  .artist-tag {
-    color: #f0a0a0;
-  }
-
-  .character-tag {
-    color: #f0f0a0;
-  }
-
-  .copyright-tag {
-    color: #EFA1CF;
-  }
-
-  .metadata-tag {
-    color: #8FD9ED;
-  }
-
-  .caption-wrapper {
-    pointer-events: none;
-    position: absolute !important;
-    overflow: hidden;
-    top: -1px;
-    left: -1px;
-    width: 102%;
-    height: 102%;
-    display: block !important;
-  }
-</style>
-`;
   static preferences = {
     visibility: "showCaptions"
   };
@@ -126,9 +36,9 @@ class Caption {
    */
   static pendingRequests = new Set();
   static settings = {
-    tagFetchDelayAfterFinishedLoading: 25,
+    tagFetchDelayAfterFinishedLoading: 30,
     tagFetchDelayBeforeFinishedLoading: 100,
-    maxPendingRequestsAllowed: 50
+    maxPendingRequestsAllowed: 75
   };
   static flags = {
     finishedLoading: false
@@ -247,7 +157,7 @@ class Caption {
   }
 
   insertHTML() {
-    Utils.insertStyleHTML(Caption.captionHTML, "caption");
+    Utils.insertStyleHTML(HTMLStrings.caption, "caption");
     Utils.createFavoritesOption(
       "show-captions",
       "Details",

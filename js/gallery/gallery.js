@@ -1,161 +1,4 @@
 class Gallery {
-  static galleryHTML = `
-<style>
-  body {
-    width: 99.5vw;
-    overflow-x: hidden;
-  }
-
-  #gallery-container {
-
-    >canvas,
-    img {
-      float: left;
-      overflow: hidden;
-      pointer-events: none;
-      position: fixed;
-      height: 100vh;
-      margin: 0;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-  }
-
-  #original-video-container {
-    cursor: default;
-
-    video {
-      top: 0;
-      left: 0;
-      display: none;
-      position: fixed;
-      z-index: 9998;
-    }
-  }
-
-  #low-resolution-canvas {
-    z-index: 9996;
-  }
-
-  #main-canvas {
-    z-index: 9997;
-  }
-
-  #original-gif-container {
-    z-index: 9995;
-  }
-
-  a.hide {
-    cursor: default;
-  }
-
-  option {
-    font-size: 15px;
-  }
-
-  #original-content-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-    z-index: 999;
-    display: none;
-    pointer-events: none;
-    cursor: default;
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-  }
-
-  #original-content-background-link-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: red;
-    z-index: 10001;
-    pointer-events: none;
-    cursor: default;
-    display: none;
-    opacity: 0;
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-
-    &.active {
-      pointer-events: all;
-    }
-  }
-</style>
-`;
-  static galleryDebugHTML = `
-  .thumb,
-  .favorite {
-    &.debug-selected {
-      outline: 3px solid #0075FF !important;
-    }
-
-    &.loaded {
-
-      div, a {
-        outline: 2px solid transparent;
-        animation: outlineGlow 1s forwards;
-      }
-
-      .image {
-        opacity: 1;
-      }
-    }
-
-    >a
-    >canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      z-index: 1;
-      visibility: hidden;
-    }
-
-    .image {
-      opacity: 0.4;
-      transition: transform 0.1s ease-in-out, opacity 0.5s ease;
-    }
-
-  }
-
-  .image.loaded {
-    animation: outlineGlow 1s forwards;
-    opacity: 1;
-  }
-
-  @keyframes outlineGlow {
-    0% {
-      outline-color: transparent;
-    }
-
-    100% {
-      outline-color: turquoise;
-    }
-  }
-
-  #main-canvas, #low-resolution-canvas {
-    opacity: 0.25;
-  }
-
-  #original-video-container {
-    video {
-      opacity: 0.15;
-    }
-  }
-
-  `;
   static directions = {
     d: "d",
     a: "a",
@@ -219,7 +62,7 @@ class Gallery {
   static settings = {
     maxImagesToRenderInBackground: 50,
     maxImagesToRenderAround: Utils.onMobileDevice() ? 3 : 50,
-    megabyteLimit: Utils.onMobileDevice() ? 0 : 400,
+    megabyteLimit: Utils.onMobileDevice() ? 0 : 800,
     minImagesToRender: Utils.onMobileDevice() ? 3 : 8,
     imageFetchDelay: 250,
     throttledImageFetchDelay: 400,
@@ -349,7 +192,7 @@ class Gallery {
    */
   videoController;
   /**
-   * @type {RendererInterface}
+   * @type {GalleryCanvasRenderer}
    */
   renderer;
   /**
@@ -378,17 +221,17 @@ class Gallery {
 
   constructor() {
     if (Gallery.disabled) {
-      return;
+
     }
-    this.initializeFields();
-    this.initializeTimers();
-    this.addEventListeners();
-    this.insertHTML();
-    this.initializeComponents();
-    this.initializeSearchPage();
-    this.toggleOriginalContentVisibility(false);
-    this.updateBackgroundOpacity(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
-    this.createMobileTapControls();
+    // this.initializeFields();
+    // this.initializeTimers();
+    // this.addEventListeners();
+    // this.insertHTML();
+    // this.initializeComponents();
+    // this.initializeSearchPage();
+    // this.toggleOriginalContentVisibility(false);
+    // this.updateBackgroundOpacity(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
+    // this.createMobileTapControls();
   }
 
   initializeFields() {
@@ -430,7 +273,7 @@ class Gallery {
   }
 
   initializeComponents() {
-    this.renderer = new RendererInterface();
+    this.renderer = new GalleryCanvasRenderer(this.originalContentContainer);
     this.videoController = new VideoController();
     this.postLoader = new PostLoader();
 
@@ -569,12 +412,12 @@ class Gallery {
         const delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
         const direction = delta > 0 ? Gallery.directions.left : Gallery.directions.right;
 
-        this.navigate.bind(this)(direction, false);
+        this.navigate.bind(this)(direction);
       } else if (this.thumbUnderCursor !== null && this.showOriginalContentOnHover) {
         let opacity = parseFloat(Utils.getPreference(Gallery.preferences.backgroundOpacity, 1));
 
         opacity -= event.deltaY * 0.0005;
-        opacity = Utils.clamp(opacity, "0", "1");
+        opacity = Utils.clamp(opacity, 0, 1);
         this.updateBackgroundOpacity(opacity);
       }
     }, {
@@ -599,7 +442,9 @@ class Gallery {
         case Gallery.directions.left:
 
         case Gallery.directions.right:
-          this.navigate(event.key, event.repeat);
+          if (event.repeat && Gallery.keyHeldDownTraversalCooldown.ready) {
+            this.navigate(event.key);
+          }
           break;
 
         case "X":
@@ -762,7 +607,6 @@ class Gallery {
       Gallery.finishedLoading = true;
       this.addEventListenersToThumbs.bind(this)();
       this.enumerateThumbs();
-      this.renderer.findImageExtensionsInTheBackground();
 
       if (!this.favoritesWereFetched) {
         await Utils.sleep(50);
@@ -856,12 +700,12 @@ class Gallery {
       }
 
       if (Gallery.swipeControls.left) {
-        this.navigate(Gallery.directions.right, false);
+        this.navigate(Gallery.directions.right);
         return;
       }
 
       if (Gallery.swipeControls.right) {
-        this.navigate(Gallery.directions.left, false);
+        this.navigate(Gallery.directions.left);
 
       }
       // this.exitGallery();
@@ -925,12 +769,12 @@ class Gallery {
     this.toggleTapTraversal(false);
     leftTap.ontouchend = () => {
       if (this.inGallery) {
-        this.navigate(Gallery.directions.left, false);
+        this.navigate(Gallery.directions.left);
       }
     };
     rightTap.ontouchend = () => {
       if (this.inGallery) {
-        this.navigate(Gallery.directions.right, false);
+        this.navigate(Gallery.directions.right);
       }
     };
   }
@@ -997,12 +841,12 @@ class Gallery {
   }
 
   insertStyleHTML() {
-    Utils.insertStyleHTML(Gallery.galleryHTML, "gallery");
+    Utils.insertStyleHTML(HTMLStrings.gallery, "gallery");
   }
 
   insertDebugHTML() {
     if (Gallery.settings.debugEnabled) {
-      Utils.insertStyleHTML(Gallery.galleryDebugHTML, "gallery-debug");
+      Utils.insertStyleHTML(HTMLStrings.galleryDebug, "gallery-debug");
     }
   }
 
@@ -1094,8 +938,8 @@ class Gallery {
    * @param {Number} opacity
    */
   updateBackgroundOpacity(opacity) {
-    this.background.style.opacity = opacity;
-    Utils.setPreference(Gallery.preferences.backgroundOpacity, opacity);
+    this.background.style.opacity = String(opacity);
+    Utils.setPreference(Gallery.preferences.backgroundOpacity, String(opacity));
   }
 
   createAutoplayController() {
@@ -1116,7 +960,7 @@ class Gallery {
         if (this.inGallery) {
           const direction = Autoplay.settings.moveForward ? Gallery.directions.right : Gallery.directions.left;
 
-          this.navigate(direction, false);
+          this.navigate(direction);
         }
       },
       () => {
@@ -1378,15 +1222,10 @@ class Gallery {
 
   /**
    * @param {String} direction
-   * @param {Boolean} keyIsHeldDown
    */
-  navigate(direction, keyIsHeldDown) {
+  navigate(direction) {
     if (Gallery.settings.debugEnabled) {
       this.getSelectedThumb().classList.remove("debug-selected");
-    }
-
-    if (keyIsHeldDown && !Gallery.keyHeldDownTraversalCooldown.ready) {
-      return;
     }
 
     if (Utils.onSearchPage()) {

@@ -5,18 +5,11 @@ class FavoritesController {
   /**
    * @type {FavoritesModel}
    */
-  // @ts-ignore
   model;
   /**
    * @type {FavoritesView}
    */
-  // @ts-ignore
   view;
-  /**
-   * @type {Boolean}
-   */
-  // @ts-ignore
-  changedPageOnce;
 
   constructor() {
     if (FavoritesController.disabled) {
@@ -26,54 +19,66 @@ class FavoritesController {
     this.view = new FavoritesView({
       onPageChange: this.onPageChange.bind(this)
     });
-    this.changedPageOnce = false;
-    this.listenToMenuEvents();
-    this.listenToGlobalEvents();
+    this.addEventListeners();
     this.view.clearOriginalFavorites();
+    this.broadcastConfiguration();
     this.loadAllFavorites();
   }
 
   onPageChange() {
-    if (this.changedPageOnce) {
-      Utils.broadcastEvent("changedPage");
-    }
-    this.changedPageOnce = true;
+    Utils.broadcastEvent("changedPage");
+    GlobalEvents.favorites.emit("changedPage");
   }
 
-  listenToMenuEvents() {
+  addEventListeners() {
+    this.addEventListenersToMenu();
+    this.addGlobalEventListeners();
+  }
+
+  addEventListenersToMenu() {
     const menu = document.getElementById("favorites-search-gallery-menu");
 
-    if (menu !== null) {
-      // @ts-ignore
-      menu.addEventListener("controller", Utils.debounce((/** @type {CustomEvent} */ event) => {
-        if (!(event.target instanceof HTMLElement)) {
-          return;
-        }
-        const action = event.target.dataset.action || "none";
-
-        if (typeof this[action] === "function") {
-          this[action](event.detail);
-        }
-      }, 50));
+    if (menu === null) {
+      return;
     }
+    // @ts-ignore
+    menu.addEventListener("controller", (/** @type {CustomEvent} */ event) => {
+      if (!(event.target instanceof HTMLElement)) {
+        return;
+      }
+      const action = event.target.dataset.action || "none";
+
+      if (typeof this[action] === "function") {
+        this[action](event.detail);
+      }
+    });
   }
 
-  listenToGlobalEvents() {
+  addGlobalEventListeners() {
     // @ts-ignore
     window.addEventListener("reachedEndOfGallery", (/** @type {CustomEvent} */event) => {
       const direction = event.detail;
-      const success = this.view.changePageInGallery({
+      const pageWasChanged = this.view.changePageInGallery({
         direction,
         searchResults: this.model.getLatestSearchResults()
       });
 
-      if (!success) {
-        this.didNotChangePageWhileInGallery(direction);
+      if (!pageWasChanged) {
+        dispatchEvent(new CustomEvent("didNotChangePageInGallery", {
+          detail: direction
+        }));
       }
     });
-    // window.addEventListener("missingMetadata", (event) => {
-    //   this.model.addMissingMetadata(event.detail);
-    // });
+    // @ts-ignore
+    window.addEventListener("missingMetadata", (/** @type CustomEvent */ event) => {
+      this.model.updateMetadata(event.detail);
+    });
+  }
+
+  broadcastConfiguration() {
+    window.addEventListener("postProcess", () => {
+      GlobalEvents.favorites.emit("layoutChanged", Utils.getPreference("layoutSelect", "masonry"));
+    });
   }
 
   loadAllFavorites() {
@@ -116,17 +121,17 @@ class FavoritesController {
   }
 
   /**
-   * @param {{newFavorites: Post[], newSearchResults: Post[]}} result
+   * @param {{newFavorites: Post[], newSearchResults: Post[], allSearchResults: Post[]}} results
    */
-  processFavoritesFoundOnReload(result) {
-    this.view.insertNewSearchResultsOnReload(result);
-    this.model.storeNewFavorites(result.newFavorites)
+  processFavoritesFoundOnReload(results) {
+    this.view.insertNewSearchResultsOnReload(results);
+    this.model.storeNewFavorites(results.newFavorites)
       .then(() => {
-        if (result.newFavorites.length > 0) {
+        if (results.newFavorites.length > 0) {
           this.view.showNotification("New favorites saved");
         }
       });
-    Utils.broadcastEvent("newSearchResults", this.model.getLatestSearchResults());
+    Utils.broadcastEvent("newSearchResults", results.allSearchResults);
   }
 
   /**
@@ -136,7 +141,6 @@ class FavoritesController {
   findAllFavorites(error) {
     if ((error instanceof EmptyFavoritesDatabase)) {
       this.view.hideLoadingWheel();
-      this.changedPageOnce = true;
       Utils.broadcastEvent("startedFetchingFavorites");
       return this.model.fetchAllFavorites(this.onSearchResultsFound.bind(this));
     }
@@ -157,25 +161,19 @@ class FavoritesController {
     if (!(error instanceof PromiseChainExit)) {
       throw error;
     }
-    Utils.broadcastEvent("favoritesLoaded");
+    // Utils.broadcastEvent("favoritesLoaded");
+    GlobalEvents.favorites.emit("favoritesLoaded");
   }
 
   onSearchResultsFound() {
-    this.view.updateSearchResultsWhileFetching({
+    const addedSearchResults = this.view.updateSearchResultsWhileFetching({
       searchResults: this.model.getLatestSearchResults(),
       allFavorites: this.model.getAllFavorites()
     });
+
+    GlobalEvents.favorites.emit("resultsAddedToCurrentPage", addedSearchResults);
     Utils.broadcastEvent("favoritesFetched");
     Utils.broadcastEvent("newSearchResults", this.model.getLatestSearchResults());
-  }
-
-  /**
-   * @param {String} direction
-   */
-  didNotChangePageWhileInGallery(direction) {
-    dispatchEvent(new CustomEvent("didNotChangePageInGallery", {
-      detail: direction
-    }));
   }
 
   /**
@@ -202,13 +200,26 @@ class FavoritesController {
   }
 
   /**
-   * @param {"masonry" | "row" | "grid" } layout
+   * @param {"masonry" | "row" | "square" | "grid" } layout
    */
   changeLayout(layout) {
+    GlobalEvents.favorites.emit("layoutChanged", layout);
     this.view.changeLayout(layout);
   }
 
-  onSortingParametersChanged() {
+  /**
+   * @param {String} sortingMethod
+   */
+  updateSortingMethod(sortingMethod) {
+    this.model.updateSortingMethod(sortingMethod);
+    this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleSortAscending(value) {
+    this.model.toggleSortAscending(value);
     this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
   }
 

@@ -68,7 +68,7 @@ class SearchBox {
                       </div>
                   </div>
                   <div>
-                      <input type="checkbox" id="options-checkbox">
+                      <input type="checkbox" id="options-checkbox" data-action="toggleOptions">
                       <label for="options-checkbox" class="mobile-toolbar-checkbox-label">
                         <svg id="options-menu-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#5f6368">
                           <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/>
@@ -95,7 +95,7 @@ class SearchBox {
         `;
 
     if (this.parent !== null) {
-      this.parent.insertAdjacentHTML("afterbegin", html);
+      this.parent.insertAdjacentHTML("afterend", html);
     }
     const searchBar = document.getElementById(this.id);
 
@@ -118,11 +118,43 @@ class SearchBox {
         Utils.insertStyleHTML(".search-clear-container {visibility: visible}", styleId);
       }
     });
+
+    const options = document.getElementById("options-checkbox");
+    const content = document.getElementById("favorites-search-gallery-content");
+
+    if (options instanceof HTMLInputElement) {
+      options.checked = Boolean(Utils.getPreference("showOptions", false));
+    }
+
+    if (options !== null && content !== null && options instanceof HTMLInputElement) {
+      options.dispatchEvent(new CustomEvent("uiController", {
+        bubbles: true
+      }));
+      options.addEventListener("change", () => {
+        const menuIsSticky = content.classList.contains("sticky");
+        const margin = options.checked ? FavoritesMenu.settings.mobileMenuBaseHeight + FavoritesMenu.settings.mobileMenuExpandedHeight : FavoritesMenu.settings.mobileMenuBaseHeight;
+
+        if (menuIsSticky) {
+          Utils.sleep(1);
+          Utils.updateOptionContentMargin(margin);
+        }
+
+        Utils.setPreference("showOptions", options.checked);
+
+        options.dispatchEvent(new CustomEvent("uiController", {
+          bubbles: true
+        }));
+      });
+
+    }
     return searchBar;
   }
 
   addEventListenersToSearchBox() {
     window.addEventListener("searchForTag", (event) => {
+      if (!(event instanceof CustomEvent)) {
+        return;
+      }
       this.searchBox.value = event.detail;
       this.updateLastEditedSearchQuery();
       this.executeSearch();
@@ -165,7 +197,7 @@ class SearchBox {
       }
     });
     this.searchBox.addEventListener("wheel", (event) => {
-      if (event.shiftKey || event.ctrlKey) {
+      if (!(event instanceof WheelEvent) || event.shiftKey || event.ctrlKey) {
         return;
       }
       const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
@@ -177,15 +209,15 @@ class SearchBox {
   }
 
   updateLastEditedSearchQueryOnInput() {
-    this.searchBox.addEventListener("keyup", (event) => {
+    this.searchBox.addEventListener("keyup", Utils.debounceAfterFirstCall((event) => {
       if (!(event instanceof KeyboardEvent)) {
         return;
       }
 
       if (event.key.length === 1 || event.key === "Backspace" || event.key === "Delete") {
-        this.updateLastEditedSearchQuery();
+        this.searchHistory.updateLastEditedSearchQuery(this.searchBox.value);
       }
-    });
+    }, 500));
   }
 
   updateLastEditedSearchQuery() {

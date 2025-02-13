@@ -6,7 +6,7 @@ class FavoritesExtractor {
    * @returns {Post[]}
    */
   static extractFavorites(favoritesPageHTML) {
-    const elements = FavoritesExtractor.extractFavoriteLikeElements(favoritesPageHTML);
+    const elements = FavoritesExtractor.extractFavoriteElements(favoritesPageHTML);
     return elements.map(element => new Post(element, false));
   }
 
@@ -14,7 +14,7 @@ class FavoritesExtractor {
    * @param {String} favoritesPageHTML
    * @returns {HTMLElement[]}
    */
-  static extractFavoriteLikeElements(favoritesPageHTML) {
+  static extractFavoriteElements(favoritesPageHTML) {
     const dom = FavoritesExtractor.parser.parseFromString(favoritesPageHTML, "text/html");
     const thumbs = Array.from(dom.querySelectorAll(".thumb"));
 

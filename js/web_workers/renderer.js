@@ -287,18 +287,13 @@ class ThumbUpscaler {
    * @type {Number}
    */
   screenWidth;
-  /**
-   * @type {Boolean}
-   */
-  onSearchPage;
 
   /**
    * @param {Number} screenWidth
    * @param {Boolean} onSearchPage
    */
-  constructor(screenWidth, onSearchPage) {
+  constructor(screenWidth) {
     this.screenWidth = screenWidth;
-    this.onSearchPage = onSearchPage;
   }
 
   /**
@@ -331,7 +326,7 @@ class ThumbUpscaler {
    * @param {ImageBitmap} imageBitmap
    */
   upscale(request, imageBitmap) {
-    if (this.onSearchPage || imageBitmap === undefined || !this.canvases.has(request.id)) {
+    if (imageBitmap === undefined || !this.canvases.has(request.id)) {
       return;
     }
     this.setCanvasDimensions(request, imageBitmap);
@@ -375,8 +370,6 @@ class ThumbUpscaler {
     if (context === null) {
       return;
     }
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(
       imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
       0, 0, canvas.width, canvas.height
@@ -442,11 +435,11 @@ class ImageRenderer {
    */
   thumbUpscaler;
   /**
-   * @type {RenderRequest}
+   * @type {RenderRequest | undefined}
    */
   renderRequest;
   /**
-   * @type {BatchRenderRequest}
+   * @type {BatchRenderRequest | undefined}
    */
   batchRenderRequest;
   /**
@@ -468,14 +461,6 @@ class ImageRenderer {
   /**
    * @type {Boolean}
    */
-  onMobileDevice;
-  /**
-   * @type {Boolean}
-   */
-  onSearchPage;
-  /**
-   * @type {Boolean}
-   */
   usingLandscapeOrientation;
 
   /**
@@ -494,19 +479,21 @@ class ImageRenderer {
       this.batchRenderRequest !== null;
   }
 
+  constructor() {
+    onmessage = this.processMessage.bind(this);
+  }
+
   /**
-   * @param {{canvas: OffscreenCanvas, screenWidth: Number, onMobileDevice: Boolean, onSearchPage: Boolean }} message
+   * @param {{canvas: OffscreenCanvas, screenWidth: Number }} message
    */
-  constructor(message) {
+  setup(message) {
     this.canvas = message.canvas;
     this.context = this.canvas.getContext("2d");
-    this.thumbUpscaler = new ThumbUpscaler(message.screenWidth, message.onSearchPage);
+    this.thumbUpscaler = new ThumbUpscaler(message.screenWidth);
     this.renders = new Map();
     this.incompleteRenderRequests = new Map();
     this.lastRequestedDrawId = "";
     this.currentlyDrawnId = "";
-    this.onMobileDevice = message.onMobileDevice;
-    this.onSearchPage = message.onSearchPage;
     this.usingLandscapeOrientation = true;
     this.configureCanvasQuality();
   }
@@ -521,9 +508,9 @@ class ImageRenderer {
     const batchRenderRequest = new BatchRenderRequest(message);
 
     this.thumbUpscaler.collectCanvases(batchRenderRequest);
-    this.abortOutdatedFetchRequests(batchRenderRequest);
-    this.deleteRendersNotInNewRequests(batchRenderRequest);
-    this.removeStartedRenderRequests(batchRenderRequest);
+    this.abortFetchRequestsNotInNewBatch(batchRenderRequest);
+    this.deleteRendersNotInNewBatch(batchRenderRequest);
+    this.skipAlreadyStartedRenderRequests(batchRenderRequest);
     this.batchRenderRequest = batchRenderRequest;
     this.renderMultipleImagesHelper(batchRenderRequest);
   }
@@ -562,7 +549,7 @@ class ImageRenderer {
     } catch (error) {
       if (error.name === "AbortError") {
         this.deleteRender(request.id);
-        this.notifyMainThreadOfRenderDeletion(request.id);
+        this.notifyMainThreadOfRenderDeleted(request.id);
       } else {
         console.error({
           error,
@@ -665,15 +652,15 @@ class ImageRenderer {
   /**
    * @param {BatchRenderRequest} newBatchRenderRequest
    */
-  deleteRendersNotInNewRequests(newBatchRenderRequest) {
+  deleteRendersNotInNewBatch(newBatchRenderRequest) {
     const idsToRender = newBatchRenderRequest.renderRequestIds;
+    const idsToDelete = Array.from(this.renders.keys())
+      .filter(id => !idsToRender.has(id));
 
-    for (const id of this.renders.keys()) {
-      if (!idsToRender.has(id)) {
+    for (const id of idsToDelete) {
         this.deleteRender(id);
-        this.notifyMainThreadOfRenderDeletion(id);
-      }
     }
+    this.notifyMainThreadOfMultipleRendersDeleted(idsToDelete);
   }
 
   /**
@@ -699,7 +686,7 @@ class ImageRenderer {
   /**
    * @param {String} id
    */
-  notifyMainThreadOfRenderDeletion(id) {
+  notifyMainThreadOfRenderDeleted(id) {
     postMessage({
       action: "renderDeleted",
       id
@@ -707,9 +694,19 @@ class ImageRenderer {
   }
 
   /**
+   * @param {String[]} ids
+   */
+  notifyMainThreadOfMultipleRendersDeleted(ids) {
+    postMessage({
+      action: "multipleRendersDeleted",
+      ids
+    });
+  }
+
+  /**
    * @param {BatchRenderRequest} newBatchRenderRequest
    */
-  abortOutdatedFetchRequests(newBatchRenderRequest) {
+  abortFetchRequestsNotInNewBatch(newBatchRenderRequest) {
     const newIds = newBatchRenderRequest.renderRequestIds;
 
     for (const [id, request] of this.incompleteRenderRequests.entries()) {
@@ -730,7 +727,7 @@ class ImageRenderer {
   /**
    * @param {BatchRenderRequest} batchRenderRequest
    */
-  removeStartedRenderRequests(batchRenderRequest) {
+  skipAlreadyStartedRenderRequests(batchRenderRequest) {
     batchRenderRequest.renderRequests = batchRenderRequest.renderRequests
       .filter(request => !this.renders.has(request.id));
   }
@@ -748,8 +745,16 @@ class ImageRenderer {
     }
   }
 
-  onmessage(message) {
+  processMessage(message) {
+    message = message.data;
+
     switch (message.action) {
+      case "initialize":
+        BatchRenderRequest.settings.megabyteMemoryLimit = message.megabyteLimit;
+        BatchRenderRequest.settings.minimumRequestCount = message.minimumImagesToRender;
+        this.setup(message);
+        break;
+
       case "render":
         this.renderRequest = new RenderRequest(message);
         this.lastRequestedDrawId = message.id;
@@ -792,28 +797,4 @@ class ImageRenderer {
   }
 }
 
-/**
- * @type {ImageRenderer}
- */
-let imageRenderer;
-
-onmessage = (message) => {
-  switch (message.data.action) {
-    case "initialize":
-      BatchRenderRequest.settings.megabyteMemoryLimit = message.data.megabyteLimit;
-      BatchRenderRequest.settings.minimumRequestCount = message.data.minimumImagesToRender;
-      imageRenderer = new ImageRenderer(message.data);
-      setInterval(() => {
-      }, 1000);
-
-      break;
-
-    case "findExtension":
-      ImageFetcher.findImageExtensionFromId(message.data.id);
-      break;
-
-    default:
-      imageRenderer.onmessage(message.data);
-      break;
-  }
-};
+const imageRenderer = new ImageRenderer();

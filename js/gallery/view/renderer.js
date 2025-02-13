@@ -1,4 +1,8 @@
-class RendererInterface {
+class GalleryCanvasRenderer {
+  /**
+   * @type {HTMLDivElement}
+   */
+  canvasContainer;
   /**
    * @type {HTMLCanvasElement}
    */
@@ -36,12 +40,32 @@ class RendererInterface {
    */
   lastRequestedRenderId;
 
-  constructor() {
+  /**
+   * @param {HTMLElement} galleryContainer
+   */
+  constructor(galleryContainer) {
+    this.createCanvases(galleryContainer);
     this.initializeFields();
-    this.extractElements();
     this.setCanvasResolutions();
     this.createWebWorker();
     this.setOrientation();
+  }
+
+  /**
+   *
+   * @param {HTMLElement} galleryContainer
+   */
+  createCanvases(galleryContainer) {
+    this.canvasContainer = document.createElement("div");
+    this.mainCanvas = document.createElement("canvas");
+    this.lowResolutionCanvas = document.createElement("canvas");
+    this.canvasContainer.id = "main-image-container";
+    this.mainCanvas.id = "main-image";
+    this.lowResolutionCanvas.id = "low-resolution-main-image";
+    this.canvasContainer.appendChild(this.mainCanvas);
+    this.canvasContainer.appendChild(this.lowResolutionCanvas);
+    this.lowResolutionContext = this.lowResolutionCanvas.getContext("2d") || new CanvasRenderingContext2D();
+    galleryContainer.insertAdjacentElement("afterbegin", this.canvasContainer);
   }
 
   initializeFields() {
@@ -49,12 +73,6 @@ class RendererInterface {
     this.completedRenders = new Set();
     this.transferredCanvases = new Map();
     this.lastRequestedRenderId = "";
-  }
-
-  extractElements() {
-    this.mainCanvas = document.getElementById("main-canvas");
-    this.lowResolutionCanvas = document.getElementById("low-resolution-canvas");
-    this.lowResolutionContext = this.lowResolutionCanvas.getContext("2d");
   }
 
   setCanvasResolutions() {
@@ -81,6 +99,10 @@ class RendererInterface {
 
         case "renderDeleted":
           this.onRenderDeleted(message);
+          break;
+
+        case "multipleRendersDeleted":
+          this.onMultipleRendersDeleted(message);
           break;
 
         case "extensionFound":
@@ -112,6 +134,24 @@ class RendererInterface {
     this.swapMainCanvasDimensions(usingLandscapeOrientation);
     this.swapLowResolutionCanvasDimensions(usingLandscapeOrientation);
     this.redrawCanvasesOnOrientationChange();
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  showImage(thumb) {
+    if (this.renderIsCompleted(thumb)) {
+      this.clearLowResolutionCanvas();
+      this.drawMainCanvas(thumb);
+    } else if (this.renderHasStarted(thumb)) {
+      this.drawLowResolutionCanvas(thumb);
+      this.clearMainCanvas();
+      this.drawMainCanvas(thumb);
+    } else {
+      this.clearMainCanvas();
+      this.drawLowResolutionCanvas(thumb);
+      this.renderOriginalImage(thumb);
+    }
   }
 
   /**
@@ -280,14 +320,15 @@ class RendererInterface {
    * @returns {Number}
    */
   getBaseImageFetchDelay(id) {
-    if (Utils.onFavoritesPage() && !Gallery.finishedLoading) {
-      return Gallery.settings.throttledImageFetchDelay;
-    }
+    // if (Utils.onFavoritesPage() && !Gallery.finishedLoading) {
+    //   return Gallery.settings.throttledImageFetchDelay;
+    // }
 
-    if (Utils.extensionIsKnown(id)) {
-      return Gallery.settings.imageFetchDelayWhenExtensionKnown;
-    }
-    return Gallery.settings.imageFetchDelay;
+    // if (Utils.extensionIsKnown(id)) {
+    //   return Gallery.settings.imageFetchDelayWhenExtensionKnown;
+    // }
+    // return Gallery.settings.imageFetchDelay;
+    return Gallery.settings.imageFetchDelayWhenExtensionKnown;
   }
 
   /**
@@ -406,6 +447,21 @@ class RendererInterface {
     }
     this.startedRenders.delete(message.id);
     this.completedRenders.delete(message.id);
+  }
+
+  onMultipleRendersDeleted(message) {
+    for (const id of message.ids) {
+      this.startedRenders.delete(id);
+      this.completedRenders.delete(id);
+
+      const thumb = document.getElementById(id);
+
+      if (thumb !== null) {
+        if (Gallery.settings.debugEnabled) {
+          thumb.classList.remove("loaded");
+        }
+      }
+    }
   }
 
   /**
@@ -574,14 +630,14 @@ class RendererInterface {
 
     if (usingLandscapeOrientation) {
       Utils.insertStyleHTML(`
-        #original-gif-container, #main-canvas, #low-resolution-canvas {
+        #original-gif-container, #main-image, #low-resolution-main-image {
             height: 100vh !important;
             width: auto !important;
         }
         `, orientationId);
     } else {
       Utils.insertStyleHTML(`
-        #original-gif-container, #main-canvas, #low-resolution-canvas {
+        #original-gif-container, #main-image, #low-resolution-main-image {
             width: 100vw !important;
             height: auto !important;
         }
@@ -597,27 +653,6 @@ class RendererInterface {
     }
     this.drawLowResolutionCanvas(thumb);
     this.imageRenderer.postMessage(this.getRenderRequest(thumb));
-  }
-
-  async findImageExtensionsInTheBackground() {
-    await Utils.sleep(1000);
-    const idsWithUnknownExtensions = Utils.getIdsWithUnknownExtensions(Array.from(Post.allPosts.values()));
-
-    while (idsWithUnknownExtensions.length > 0) {
-      await Utils.sleep(3000);
-
-      while (idsWithUnknownExtensions.length > 0 && Gallery.finishedLoading) {
-        const id = idsWithUnknownExtensions.pop();
-
-        if (id !== undefined && id !== null && !Utils.extensionIsKnown(id)) {
-          this.imageRenderer.postMessage({
-            action: "findExtension",
-            id
-          });
-          await Utils.sleep(10);
-        }
-      }
-    }
   }
 
   upscaleAllRenderedThumbs() {

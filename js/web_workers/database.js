@@ -294,9 +294,9 @@ self.addEventListener("message", (message) => {
         });
       break;
 
-    // case "update":
-    //   favoritesDatabase.updateFavorites(request.favorites);
-    //   break;
+    case "update":
+      favoritesDatabase.updateFavorites(request.favorites);
+      break;
 
     default:
       self.postMessage({

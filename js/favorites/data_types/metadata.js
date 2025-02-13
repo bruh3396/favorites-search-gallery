@@ -19,7 +19,7 @@ class PostMetadata {
   static currentlyFetchingFromQueue = false;
   static allFavoritesLoaded = false;
   static fetchDelay = {
-    normal: 10,
+    normal: 25,
     deleted: 300
   };
   static postStatisticsRegex = /Posted:\s*(\S+\s\S+).*Size:\s*(\d+)x(\d+).*Rating:\s*(\S+).*Score:\s*(\d+)/gm;
@@ -211,7 +211,7 @@ class PostMetadata {
   }
 
   populateMetadataFromAPI() {
-    if (PostMetadata.pendingRequests.size > 99) {
+    if (PostMetadata.pendingRequests.size > 200) {
       this.addInstanceToMissingMetadataQueue();
       return Utils.sleep(0);
     }
@@ -226,6 +226,7 @@ class PostMetadata {
         const metadata = dom.querySelector("post");
 
         if (metadata === null) {
+          // @ts-ignore
           throw new Error(`metadata is null - ${this.apiURL}`, {
             cause: "DeletedMetadata"
           });

@@ -37,9 +37,9 @@ class FavoritesDatabaseInterface {
       command: "load",
       idsToDelete: this.getIdsToDeleteOnReload()
     })
-    .then((records) => {
-      return this.deserializeFavorites(records);
-    });
+      .then((records) => {
+        return this.deserializeFavorites(records);
+      });
   }
 
   /**
@@ -47,7 +47,7 @@ class FavoritesDatabaseInterface {
    * @returns {Promise.<void>}
    */
   storeAllFavorites(favorites) {
-    return this.storeFavorites(favorites.slice().reverse());
+    return this.storeFavorites(favorites);
   }
 
   /**
@@ -59,7 +59,10 @@ class FavoritesDatabaseInterface {
       .then(() => {
         Utils.sendPostedMessage(this.databaseWorker, {
           command: "store",
-          favorites: favorites.map(favorite => favorite.databaseRecord)
+          favorites: favorites
+            .slice()
+            .reverse()
+            .map(favorite => favorite.databaseRecord)
         });
       });
   }
@@ -94,7 +97,7 @@ class FavoritesDatabaseInterface {
     if (!Post.allPosts.has(id)) {
       return;
     }
-    const batchSize = 500;
+    const batchSize = 100;
     const waitTime = 1000;
 
     clearTimeout(this.newMetadataReceivedTimeout);

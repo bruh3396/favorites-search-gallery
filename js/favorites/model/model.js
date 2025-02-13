@@ -8,6 +8,10 @@ class FavoritesModel {
    */
   filter;
   /**
+   * @type {FavoritesSorter}
+   */
+  sorter;
+  /**
    * @type {Post[]}
    */
   latestSearchResults;
@@ -15,6 +19,7 @@ class FavoritesModel {
   constructor() {
     this.loader = new FavoritesLoader();
     this.filter = new FavoritesFilter();
+    this.sorter = new FavoritesSorter();
     this.latestSearchResults = [];
   }
 
@@ -41,7 +46,7 @@ class FavoritesModel {
   }
 
   /**
-   * @returns {Promise.<{newFavorites: Post[], newSearchResults: Post[]}>}
+   * @returns {Promise.<{newFavorites: Post[], newSearchResults: Post[], allSearchResults: Post[]}>}
    */
   findNewFavoritesOnReload() {
     return this.loader.fetchFavoritesOnReload()
@@ -51,7 +56,8 @@ class FavoritesModel {
         this.latestSearchResults = newSearchResults.concat(this.latestSearchResults);
         return {
           newFavorites,
-          newSearchResults
+          newSearchResults,
+          allSearchResults: this.latestSearchResults
         };
       });
   }
@@ -68,7 +74,7 @@ class FavoritesModel {
    * @returns {Post[]}
    */
   getAllFavorites() {
-    return this.loader.allFavorites;
+    return this.loader.getAllFavorites();
   }
 
   /**
@@ -100,7 +106,7 @@ class FavoritesModel {
   getSearchResultsFromPreviousQuery() {
     const favorites = this.filter.filterFavorites(this.loader.getAllFavorites());
 
-    this.latestSearchResults = FavoritesSorter.sort(favorites);
+    this.latestSearchResults = this.sorter.sortFavorites(favorites);
     return this.latestSearchResults;
   }
 
@@ -135,6 +141,20 @@ class FavoritesModel {
    */
   changeAllowedRatings(allowedRatings) {
     this.filter.setAllowedRatings(allowedRatings);
+  }
+
+  /**
+   * @param {String} sortingMethod
+   */
+  updateSortingMethod(sortingMethod) {
+    this.sorter.setSortingMethod(sortingMethod);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleSortAscending(value) {
+    this.sorter.setAscendingOrder(value);
   }
 
   /**

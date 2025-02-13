@@ -319,4 +319,14 @@ class FavoritesUIController {
       }));
     }
   }
+
+  /**
+   * @param {CustomEvent} event
+   */
+  static toggleHeader(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    Utils.insertStyleHTML(`#header {display: ${event.target.checked ? "block" : "none"}}`, "hide-header");
+  }
 }
