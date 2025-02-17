@@ -9,10 +9,10 @@ class FavoritesView {
   statusBar;
 
   /**
-   * @param {{onPageChange: Function}} onPageChange
+   * @param {{onPageChange: Function, onLayoutCompleted: Function}} callbacks
    */
-  constructor({onPageChange}) {
-    this.paginator = new FavoritesPaginator(onPageChange);
+  constructor({onPageChange, onLayoutCompleted}) {
+    this.paginator = new FavoritesPaginator(onPageChange, onLayoutCompleted);
     this.statusBar = new FavoritesStatusBar();
   }
 

@@ -482,7 +482,7 @@ class HTMLStrings {
       &.row {
         display: flex;
         flex-wrap: wrap;
-        gap: 7px;
+        gap: 11px;
 
         >.favorite,
         >.spacer {
@@ -709,13 +709,10 @@ class HTMLStrings {
 
     #favorites-load-status {
       >label {
-        width: 140px;
+        display: inline-block;
+        min-width: 100px;
+        margin-right: 20px;
       }
-    }
-
-    #favorites-load-status-label {
-      /* color: #3498db; */
-      padding-left: 20px;
     }
 
     #main-favorite-options-container {
@@ -849,7 +846,6 @@ class HTMLStrings {
       <h2 style="display: inline;" id="search-header">Search Favorites</h2>
       <span id="favorites-load-status" style="margin-left: 5px;">
         <label id="match-count-label"></label>
-        <label id="pagination-range-label"></label>
         <label id="favorites-load-status-label"></label>
       </span>
       <div id="left-favorites-panel-top-row">
@@ -1173,11 +1169,14 @@ Lower numbers improve responsiveness">
       top: 0;
       left: 0;
       position: fixed;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
     }
 
     canvas,
     img {
-      /* float: left; */
       overflow: hidden;
       pointer-events: none;
       height: 100vh;
@@ -1185,26 +1184,6 @@ Lower numbers improve responsiveness">
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-    }
-  }
-
-  #main-image-container {
-    z-index: 9;
-
-    >canvas:first-child {
-      z-index: 2;
-    }
-  }
-
-  #gif-container {
-    z-index: 8;
-  }
-
-  #video-container {
-    z-index: 10;
-
-    video {
-      display: none;
     }
   }
 
@@ -1216,18 +1195,22 @@ Lower numbers improve responsiveness">
     font-size: 15px;
   }
 
-  #original-content-background {
-    width: 100%;
-    height: 100%;
+  #gallery-background {
     background: black;
-    z-index: 999;
+    z-index: -1;
     display: none;
     pointer-events: none;
     cursor: default;
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
+    width: 100vw;
+    height: 100vh;
+
+    &.active {
+      pointer-events: all;
+    }
+
+    &.visible {
+      display: block;
+    }
   }
 
   #original-content-background-link-mask {
@@ -1241,10 +1224,7 @@ Lower numbers improve responsiveness">
     cursor: default;
     display: none;
     opacity: 0;
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
+
 
     &.active {
       pointer-events: all;

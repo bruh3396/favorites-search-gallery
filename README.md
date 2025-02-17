@@ -245,5 +245,4 @@ Q: Why am I experiencing lag?<br>
 ## Credits
 
 **Masonry**: A cascading grid layout library by David DeSandro. [Website](https://masonry.desandro.com/) | [GitHub Repository](https://github.com/desandro/masonry)<br>
-**imagesLoaded**: A JavaScript plugin to detect when images have been loaded, by David DeSandro. [Website](https://imagesloaded.desandro.com/) | [GitHub Repository](https://github.com/desandro/imagesloaded)<br>
 **Awesomplete**: An ultra-lightweight, customizable, simple autocomplete widget with zero dependencies, by Lea Verou. [Website](https://leaverou.github.io/awesomplete/) | [GitHub Repository](https://github.com/LeaVerou/awesomplete)

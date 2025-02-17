@@ -19,18 +19,18 @@ class FavoritesMenuDesktopUI {
       {id: "fancy-thumb-hovering", parentId: "favorite-options", textContent: "Fancy Hovering", title: "Enable fancy thumbnail hovering", action: "toggleFancyThumbHovering", enabled: true, defaultValue: false, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "statistic-hint", parentId: "favorite-options", textContent: "Show Statistics", title: "Show statistics for each favorite", action: "none", enabled: false, defaultValue: false, hotkey: "S", invokeActionOnCreation: false, savePreference: true},
       {id: "show-hints", parentId: "favorite-options", textContent: "Hotkey Hints", title: "Show hotkeys", action: "toggleOptionHotkeyHints", enabled: true, defaultValue: false, hotkey: "H", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "toggle-header", parentId: "dynamic-favorite-options", textContent: "Header", title: "Toggle site header", action: "toggleHeader", enabled: true, defaultValue: true, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "toggle-header", parentId: "dynamic-favorite-options", textContent: "Header", title: "Toggle site header", action: "toggleHeader", enabled: false, defaultValue: true, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "dark-theme", parentId: "favorite-options", textContent: "Dark Theme", title: "Toggle dark theme", action: "toggleDarkTheme", enabled: true, defaultValue: Utils.usingDarkTheme(), hotkey: "", invokeActionOnCreation: false, savePreference: false, handler: "uiController"}
     ],
     "select": [
       {id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "updateSortingMethod", position: "beforeend", invokeActionOnCreation: false, optionPairs: [["default", "Default"], ["score", "Score"], ["width", "Width"], ["height", "Height"], ["creationTimestamp", "Date Uploaded"], ["lastChangedTimestamp", "Date Changed"], ["random", "Random"]]},
-      {id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, optionPairs: [["masonry", "Masonry"], ["row", "River"], ["square", "Square"], ["grid", "Legacy"]], handler: "uiController"},
+      {id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, optionPairs: [["row", "River"], ["masonry", "Masonry"], ["square", "Square"], ["grid", "Legacy"]], handler: "uiController"},
       {id: "performance-profile", parentId: "performance-profile-container", title: "Improve performance by disabling features", action: "changePerformanceProfile", position: "beforeend", invokeActionOnCreation: false, optionPairs: [["0", "Normal"], ["1", "Low (no gallery)"], ["2", "Potato (only search)"]], handler: "uiController"}
     ],
     "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "toggleSortAscending", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, defaultValue: false}],
     "numberComponent": [
       {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "updateColumnCount", defaultValue: 6, min: 4, max: 20, step: 1, pollingTime: 50, invokeActionOnCreation: true},
-      {id: "row-size", parentId: "row-size-container", position: "beforeend", action: "updateRowSize", defaultValue: 3, min: 1, max: 10, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "row-size", parentId: "row-size-container", position: "beforeend", action: "updateRowSize", defaultValue: 7, min: 1, max: 10, step: 1, pollingTime: 50, invokeActionOnCreation: true},
       {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "updateResultsPerPage", defaultValue: 150, min: 50, max: 500, step: 50, pollingTime: 50, invokeActionOnCreation: false}
     ]
   };

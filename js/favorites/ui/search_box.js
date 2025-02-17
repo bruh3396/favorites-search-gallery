@@ -209,13 +209,13 @@ class SearchBox {
   }
 
   updateLastEditedSearchQueryOnInput() {
-    this.searchBox.addEventListener("keyup", Utils.debounceAfterFirstCall((event) => {
+    this.searchBox.addEventListener("keyup", Utils.debounceAfterFirstCall((/** @type {KeyboardEvent} */ event) => {
       if (!(event instanceof KeyboardEvent)) {
         return;
       }
 
       if (event.key.length === 1 || event.key === "Backspace" || event.key === "Delete") {
-        this.searchHistory.updateLastEditedSearchQuery(this.searchBox.value);
+        this.updateLastEditedSearchQuery();
       }
     }, 500));
   }
@@ -230,6 +230,7 @@ class SearchBox {
       detail: this.searchBox.value
     }));
     this.searchHistory.add(this.searchBox.value);
+    this.updateLastEditedSearchQuery();
     Utils.hideAwesomplete(this.searchBox);
   }
 }

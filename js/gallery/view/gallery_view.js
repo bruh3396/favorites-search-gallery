@@ -1,82 +1,124 @@
 class GalleryView {
   /**
-   * @type {GalleryContent}
+   * @type {HTMLElement}
    */
-  content;
+  container;
   /**
-   * @type {GallerySimpleRenderer}
+   * @type {GalleryRenderer}
    */
   renderer;
+  /**
+   * @type {GalleryUI}
+   */
+  ui;
 
   constructor() {
+    this.createContainer();
+    this.createComponents();
+  }
+
+  createComponents() {
+    this.renderer = new GalleryRenderer(this.container);
+    this.ui = new GalleryUI(this.container);
+  }
+
+  createContainer() {
     Utils.insertStyleHTML(HTMLStrings.gallery, "gallery");
-    this.content = new GalleryContent();
-    this.renderer = new GallerySimpleRenderer(this.content.container);
+    this.container = document.createElement("div");
+    this.container.id = "gallery-container";
+    Utils.favoritesSearchGalleryContainer.insertAdjacentElement("afterbegin", this.container);
   }
 
   /**
-   * @param {HTMLElement | null} thumb
+   * @param {HTMLElement} thumb
+   */
+  showContentInGallery(thumb) {
+    this.showContent(thumb);
+    this.ui.updateUIInGallery(thumb);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
    */
   showContent(thumb) {
-    if (thumb === null) {
-      this.hideContent();
-      return;
-    }
-    this.showContentByType(thumb);
+    this.toggleVisibility(true);
+    this.renderer.showContent(thumb);
+    this.ui.show();
   }
 
   hideContent() {
-    this.content.toggle(false);
-    this.content.clear();
+    this.toggleVisibility(false);
+    this.renderer.clear();
+    this.ui.hide();
   }
 
   /**
    * @param {HTMLElement} thumb
    */
-  showContentByType(thumb) {
-    this.content.toggle(true);
+  enterGallery(thumb) {
+    this.renderer.showContent(thumb);
+    this.ui.enterGallery(thumb);
+    this.toggleVisibility(true);
+  }
 
-    if (Utils.isVideo(thumb)) {
-      this.showVideo(thumb);
-      return;
-    }
-
-    if (Utils.isGif(thumb)) {
-      this.showGIF(thumb);
-      return;
-    }
-    this.showImage(thumb);
+  exitGallery() {
+    this.renderer.clear();
+    this.ui.exitGallery();
+    this.toggleVisibility(false);
   }
 
   /**
-   * @param {HTMLElement} thumb
+   * @param {Boolean} value
    */
-  showVideo(thumb) {
-
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  showGIF(thumb) {
-    this.content.mainGIF.src = Utils.getGIFSource(thumb);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  showImage(thumb) {
-    this.renderer.showImage(thumb);
+  toggleVisibility(value) {
+    this.container.style.display = value ? "" : "none";
   }
 
   /**
    * @param {HTMLElement[]} thumbs
    */
-  renderImagesInViewport(thumbs) {
-    this.renderer.renderImages(thumbs);
+  preloadContent(thumbs) {
+    this.renderer.preloadContent(thumbs);
+  }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  preloadContentInGallery(thumbs) {
+    this.renderer.preloadContentInGallery(thumbs);
   }
 
   handlePageChange() {
-    this.renderer.deleteAllRenders();
+    this.renderer.handlePageChange();
+  }
+
+  handlePageChangeInGallery() {
+    this.renderer.handlePageChangeInGallery();
+    this.ui.scrollToLastVisitedThumb();
+  }
+
+  toggleBackgroundOpacity() {
+    this.ui.toggleBackgroundOpacity();
+  }
+
+  /**
+   * @param {WheelEvent} event
+   */
+  updateBackgroundOpacity(event) {
+    this.ui.updateBackgroundOpacityFromEvent(event);
+  }
+
+  /**
+   * @param {Number} status
+   */
+  showAddedFavoriteStatus(status) {
+    this.ui.showAddedFavoriteStatus(status);
+  }
+
+  /**
+   * @param {Number} status
+   */
+  showRemovedFavoriteStatus(status) {
+    this.ui.showRemovedFavoriteStatus(status);
   }
 }

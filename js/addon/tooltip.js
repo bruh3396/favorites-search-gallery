@@ -137,7 +137,7 @@ class Tooltip {
     }, {
       once: true
     });
-    window.addEventListener("changedPage", () => {
+    GlobalEvents.favorites.on("changedPage", () => {
       this.currentImage = null;
       this.addEventListenersToThumbs.bind(this)();
     });
@@ -175,7 +175,8 @@ class Tooltip {
   /**
    * @param {HTMLCollectionOf.<Element>} thumbs
    */
-  addEventListenersToThumbs(thumbs) {
+  async addEventListenersToThumbs(thumbs) {
+    await Utils.sleep(10);
     thumbs = thumbs === undefined ? Utils.getAllThumbs() : thumbs;
 
     for (const thumb of thumbs) {

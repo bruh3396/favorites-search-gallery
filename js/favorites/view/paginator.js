@@ -32,9 +32,9 @@ class FavoritesPaginator {
    */
   onPageChange;
   /**
-   * @type {Boolean}
+   * @type {Function}
    */
-  changedPageOnce;
+  onLayoutCompleted;
 
   /**
    * @type {Boolean}
@@ -52,8 +52,9 @@ class FavoritesPaginator {
 
   /**
    * @param {Function} onPageChange
+   * @param {Function} onLayoutCompleted
    */
-  constructor(onPageChange) {
+  constructor(onPageChange, onLayoutCompleted) {
     this.content = this.createContentContainer();
     this.pageSelectionMenu = this.createPageSelectionMenuContainer();
     this.rangeIndicator = this.createRangeIndicator();
@@ -62,7 +63,7 @@ class FavoritesPaginator {
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
     this.masonry = null;
     this.onPageChange = onPageChange;
-    this.changedPageOnce = false;
+    this.onLayoutCompleted = onLayoutCompleted;
     this.insertPageSelectionMenu();
     this.updatePageSelectionMenu(1, []);
     this.updateLayoutOnWindowResize();
@@ -75,17 +76,17 @@ class FavoritesPaginator {
     const content = document.createElement("div");
 
     content.id = "favorites-search-gallery-content";
-    content.classList.add(String(Utils.getPreference("layoutSelect", "masonry")));
+    content.classList.add(Utils.loadFavoritesLayout());
     Utils.favoritesSearchGalleryContainer.appendChild(content);
     return content;
   }
 
   createRangeIndicator() {
     const rangeIndicator = document.createElement("label");
-    const parent = document.getElementById("favorites-load-status");
+    const parent = document.getElementById("match-count-label");
 
     if (parent !== null) {
-      parent.insertAdjacentElement("beforeend", rangeIndicator);
+      parent.insertAdjacentElement("afterend", rangeIndicator);
     }
     rangeIndicator.id = "pagination-range-label";
     return rangeIndicator;
@@ -181,11 +182,8 @@ class FavoritesPaginator {
     this.currentPageNumber = pageNumber;
     this.updatePageSelectionMenu(pageNumber, favorites);
     this.showFavorites(pageNumber, favorites);
-
-    if (this.changedPageOnce) {
-      this.onPageChange();
-    }
-    this.changedPageOnce = true;
+    this.onPageChange();
+    this.onLayoutCompletedWrapper();
   }
 
   /**
@@ -436,9 +434,10 @@ class FavoritesPaginator {
     if (this.usingMasonry) {
       this.deactivateMasonry();
       this.activateMasonry();
-      imagesLoaded(this.content).on("always", () => {
-        this.updateMasonry();
-      });
+      Utils.waitForAllThumbnailsToLoad()
+        .then(() => {
+          this.updateMasonry();
+        });
     }
   }
 
@@ -589,6 +588,9 @@ class FavoritesPaginator {
       isFitWidth: true,
       resize: false
     });
+    this.masonry.on("layoutComplete", () => {
+      this.onLayoutCompleted();
+    });
   }
 
   deactivateMasonry() {
@@ -693,5 +695,12 @@ class FavoritesPaginator {
       return;
     }
     nextPageButton.click();
+  }
+
+  onLayoutCompletedWrapper() {
+    if (this.usingMasonry && this.masonry !== null) {
+      return;
+    }
+    this.onLayoutCompleted();
   }
 }

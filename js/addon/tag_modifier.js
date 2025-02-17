@@ -179,7 +179,7 @@ class TagModifier {
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
     });
-    window.addEventListener("changedPage", () => {
+    GlobalEvents.favorites.on("changedPage", () => {
       this.highlightSelectedThumbsOnPageChange();
     });
   }

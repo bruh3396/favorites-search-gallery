@@ -1,63 +1,116 @@
 class GalleryModel {
   static states = {
-    HOVER: 0,
+    SHOWING_CONTENT_ON_HOVER: 0,
     IN_GALLERY: 1,
     IDLE: 2
   };
-  /**
-   * @type {Map.<String, Number>}
-   */
-  enumeratedThumbs;
-  /**
-   * @type {HTMLElement | null}
-   */
-  thumbUnderCursor;
-  /**
-   * @type {HTMLElement | null}
-   */
-  lastThumbUnderCursor;
+
   /**
    * @type {Number}
    */
   currentState;
+  /**
+   * @type {Number}
+   */
+  currentIndex;
+  /**
+   * @type {ThumbSelector}
+   */
+  thumbSelector;
+
+  /**
+   * @type {HTMLElement | undefined}
+   */
+  get currentThumb() {
+    return this.thumbSelector.thumbsOnCurrentPage[this.currentIndex];
+  }
+
+  /**
+   * @type {Boolean}
+   */
+  get currentlyViewingVideo() {
+    return this.currentState === GalleryModel.states.IN_GALLERY && this.currentThumb !== undefined && Utils.isVideo(this.currentThumb);
+  }
 
   constructor() {
-    this.enumeratedThumbs = new Map();
-    this.thumbUnderCursor = null;
-    this.lastThumbUnderCursor = null;
-    this.currentState = GalleryModel.states.HOVER;
+    this.currentState = GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
+    this.currentIndex = 0;
+    this.thumbSelector = new ThumbSelector();
   }
 
   /**
-   * @returns {Number}
+   * @param {HTMLElement} thumb
    */
-  getCurrentState() {
-    return this.currentState;
+  enterGallery(thumb) {
+    this.currentIndex = this.thumbSelector.getIndexFromThumb(thumb);
+    this.currentState = GalleryModel.states.IN_GALLERY;
   }
 
-  /**
-   * @param {HTMLElement | null} thumb
-   */
-  setThumbUnderCursor(thumb) {
-    this.thumbUnderCursor = thumb;
+  exitGallery() {
+    this.currentState = GalleryModel.states.IDLE;
+  }
 
-    if (thumb !== null) {
-      this.lastThumbUnderCursor = thumb;
+  showContentOnHover() {
+    this.currentState = GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
+  }
+
+  toggleShowContentOnHover() {
+    if (this.currentState === GalleryModel.states.SHOWING_CONTENT_ON_HOVER) {
+      this.currentState = GalleryModel.states.IDLE;
+      return;
     }
+    this.currentState = GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
   }
 
   /**
-   * @returns {HTMLElement | null}
+   * @param {String} direction
+   * @returns {HTMLElement | undefined}
    */
-  getLastThumbUnderCursor() {
-    return this.lastThumbUnderCursor;
+  navigate(direction) {
+    this.currentIndex += GalleryConstants.forwardNavigationKeys.has(direction) ? 1 : -1;
+    return this.currentThumb;
   }
 
-  enumerateThumbs() {
-    const thumbs = Utils.getAllThumbs();
+  /**
+   * @param {String} direction
+   * @returns {HTMLElement | undefined}
+   */
+  navigateAfterPageChange(direction) {
+    this.currentIndex = GalleryConstants.forwardNavigationKeys.has(direction) ? 0 : this.thumbSelector.thumbsOnCurrentPage.length - 1;
+    return this.currentThumb;
+  }
 
-    for (let i = 0; i < thumbs.length; i += 1) {
-      this.enumeratedThumbs.set(thumbs[i].id, i);
-    }
+  /**
+   * @returns {Post[]}
+   */
+  getSearchResults() {
+    return this.thumbSelector.latestSearchResults;
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {HTMLElement[]}
+   */
+  getSearchResultsAround(thumb) {
+    return this.thumbSelector.getSearchResultsAround(thumb);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {HTMLElement[]}
+   */
+  getThumbsAroundOnCurrentPage(thumb) {
+    return this.thumbSelector.getThumbsAroundOnCurrentPage(thumb);
+  }
+
+  /**
+   * @param {Post[]} searchResults
+   */
+  setSearchResults(searchResults) {
+    this.thumbSelector.setLatestSearchResults(searchResults);
+  }
+
+  updateCurrentPageThumbs() {
+    this.thumbSelector.setCurrentPageThumbs(Utils.getAllThumbs());
   }
 }

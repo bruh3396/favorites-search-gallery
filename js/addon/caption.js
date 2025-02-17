@@ -270,7 +270,7 @@ class Caption {
     window.addEventListener("favoritesFetched", () => {
       this.addEventListenersToThumbs.bind(this)();
     });
-    window.addEventListener("changedPage", () => {
+    GlobalEvents.favorites.on("changedPage", () => {
       this.addEventListenersToThumbs.bind(this)();
       this.abortAllRequests("Changed Page");
       this.abortController = new AbortController();

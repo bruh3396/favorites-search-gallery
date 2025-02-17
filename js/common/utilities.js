@@ -41,6 +41,11 @@ class Utils {
     notLoggedIn: 2,
     success: 3
   };
+  static removedFavoriteStatuses = {
+    error: 0,
+    removeNotAllowed: 1,
+    success: 3
+  };
   static styles = {
     thumbHoverOutline: `
     .favorite,
@@ -386,6 +391,7 @@ class Utils {
     return thumbURL
       .replace("thumbnails", "/images")
       .replace("thumbnail_", "")
+      // .replace("wimg.", "")
       .replace("us.rule34", "rule34");
   }
 
@@ -463,6 +469,14 @@ class Utils {
    */
   static isImage(thumb) {
     return !Utils.isVideo(thumb) && !Utils.isGif(thumb);
+  }
+
+  /**
+   * @param {HTMLElement | Post} thumb
+   * @returns {Boolean}
+   */
+  static isAnimated(thumb) {
+    return !Utils.isImage(thumb);
   }
 
   /**
@@ -2083,6 +2097,9 @@ class Utils {
     const distance = targetY - startY;
     const startTime = performance.now();
 
+    /**
+     * @param {Number} currentTime
+     */
     function scroll(currentTime) {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
@@ -2179,6 +2196,24 @@ class Utils {
   }
 
   /**
+   * @param {Function} func
+   * @param {Number} delay
+   * @returns {any}
+   */
+  static throttle(func, delay) {
+    let throttling = false;
+    return (...args) => {
+      if (!throttling) {
+        func(...args);
+        throttling = true;
+        setTimeout(() => {
+          throttling = false;
+        }, delay);
+      }
+    };
+  }
+
+  /**
    * @param {Number} margin
    */
   static updateOptionContentMargin(margin) {
@@ -2201,7 +2236,7 @@ class Utils {
    */
   static decompressThumbnailSource(compressedSource, id) {
     const splitSource = compressedSource.split("_");
-    return `https://rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg?${id}`;
+    return `https://us.rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg?${id}`;
   }
 
   /**
@@ -2276,11 +2311,11 @@ class Utils {
     return Math.abs(x1 - x2);
   }
 
-   /**
-    * @param {CanvasRenderingContext2D | null} context
-    * @param {ImageBitmap} imageBitmap
-    */
-   static drawCanvas(context, imageBitmap) {
+  /**
+   * @param {CanvasRenderingContext2D | null} context
+   * @param {ImageBitmap} imageBitmap
+   */
+  static drawCanvas(context, imageBitmap) {
     if (context === null) {
       return;
     }
@@ -2294,5 +2329,95 @@ class Utils {
       imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
       centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
     );
+  }
+
+  /**
+   * @param {String} dimensionString
+   * @returns {{x: Number, y: Number}}
+   */
+  static getDimensions(dimensionString) {
+    const match = dimensionString.match(/^(\d+)x(\d+)$/);
+    const [x, y] = match ? [parseInt(match[1]), parseInt(match[2])] : [0, 0];
+    return {
+      x,
+      y
+    };
+  }
+
+  /**
+   * @returns {Promise.<any>}
+   */
+  static waitForAllThumbnailsToLoad() {
+    const unloadedImages = Utils.getAllThumbs()
+      .map(thumb => Utils.getImageFromThumb(thumb))
+      .filter(image => image instanceof HTMLImageElement)
+      .filter(image => !Utils.imageIsLoaded(image));
+    return Promise.all(unloadedImages
+      .map(image => new Promise(resolve => {
+        image.addEventListener("load", resolve, {
+          once: true
+        });
+        image.addEventListener("error", resolve, {
+          once: true
+        });
+      })));
+  }
+
+  /**
+   * @returns {String}
+   */
+  static loadFavoritesLayout() {
+    return Utils.getPreference("layoutSelect", "masonry");
+  }
+
+  /**
+   * @param {HTMLElement | undefined} thumb
+   * @returns {Promise.<{status: Number, id: String}>}
+   */
+  static addFavoriteInGallery(thumb) {
+    if (thumb === undefined) {
+      return Promise.resolve({
+        status: Utils.addedFavoriteStatuses.error,
+        id: ""
+      });
+    }
+    return Utils.addFavorite(thumb.id)
+      .then((status) => {
+        return {
+          status,
+          id: thumb === undefined ? "" : thumb.id
+        };
+      });
+  }
+
+  /**
+   * @param {HTMLElement | undefined} thumb
+   * @returns {Promise.<{status: Number, id: String}>}
+   */
+  static removeFavoriteInGallery(thumb) {
+    const status = {
+      status: Utils.removedFavoriteStatuses.error,
+      id: ""
+    };
+
+    if (thumb === undefined) {
+      return Promise.resolve(status);
+    }
+    const removeFavoriteButton = thumb.querySelector(".remove-favorite-button");
+    const showRemoveFavoriteCheckbox = document.getElementById("show-remove-favorite-buttons");
+
+    if (removeFavoriteButton === null || showRemoveFavoriteCheckbox === null) {
+      return Promise.resolve(status);
+    }
+    const allowedToRemoveFavorites = (showRemoveFavoriteCheckbox instanceof HTMLInputElement) && showRemoveFavoriteCheckbox.checked;
+
+    if (!allowedToRemoveFavorites) {
+      status.status = Utils.removedFavoriteStatuses.removeNotAllowed;
+      return Promise.resolve(status);
+    }
+    status.status = Utils.removedFavoriteStatuses.success;
+    status.id = thumb.id;
+    Utils.removeFavorite(thumb.id);
+    return Promise.resolve(status);
   }
 }

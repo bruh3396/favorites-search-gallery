@@ -3,8 +3,10 @@ class VideoController {
     videoVolume: "videoVolume",
     videoMuted: "videoMuted"
   };
+  static commonVideoAttributes = "width=\"100%\" height=\"100%\" autoplay muted loop controlsList=\"nofullscreen\" webkit-playsinline playsinline";
+
   /**
-   * @type {HTMLElement | null}
+   * @type {HTMLElement}
    */
   videoContainer;
   /**
@@ -16,15 +18,58 @@ class VideoController {
    */
   videoClips;
 
-  constructor() {
-    this.videoContainer = document.getElementById("original-video-container");
-    this.videoPlayers = Array.from(document.querySelectorAll("#video-container>video"));
+  /**
+   * @param {HTMLElement} container
+   */
+  constructor(container) {
     this.videoClips = new Map();
+    this.createVideoContainer(container);
+    this.createVideoPlayers();
     this.preventVideoPlayersFromFlashingWhenLoaded();
     this.addEventListenersToVideoContainer();
     this.addEventListenersToVideoPlayers();
-    this.loadVideoVolume();
     this.loadVideoClips();
+  }
+
+  /**
+   * @param {HTMLElement} container
+   */
+  createVideoContainer(container) {
+    this.videoContainer = document.createElement("div");
+    container.id = "video-container";
+    container.appendChild(this.videoContainer);
+  }
+
+  createVideoPlayers() {
+    this.videoPlayers = [];
+    const volume = Number((Utils.getPreference(VideoController.preferences.videoVolume, 1)));
+    const muted = Boolean(Utils.getPreference(VideoController.preferences.videoMuted, true));
+
+    this.createVideoPlayer(volume, muted);
+
+    for (let i = 0; i < GalleryConstants.additionalVideoPlayerCount; i += 1) {
+      this.createVideoPlayer(volume, muted);
+    }
+  }
+
+  /**
+   * @param {Number} volume
+   * @param {Boolean} muted
+   */
+  createVideoPlayer(volume, muted) {
+    const video = document.createElement("video");
+
+    video.setAttribute("width", "100%");
+    video.setAttribute("height", "100%");
+    video.autoplay = true;
+    video.volume = volume;
+    video.muted = muted;
+    video.loop = true;
+    video.playsInline = true;
+    video.setAttribute("controlsList", "nofullscreen");
+    video.setAttribute("webkit-playsinline", "");
+    this.videoPlayers.push(video);
+    this.videoContainer.appendChild(video);
   }
 
   preventVideoPlayersFromFlashingWhenLoaded() {
@@ -166,13 +211,6 @@ class VideoController {
     });
   }
 
-  loadVideoVolume() {
-    const video = this.getActiveVideoPlayer();
-
-    video.volume = Number((Utils.getPreference(VideoController.preferences.videoVolume, 1)));
-    video.muted = Boolean(Utils.getPreference(VideoController.preferences.videoMuted, true));
-  }
-
   loadVideoClips() {
     window.addEventListener("postProcess", () => {
       setTimeout(() => {
@@ -209,6 +247,7 @@ class VideoController {
    * @param {HTMLElement} thumb
    */
   playVideo(thumb) {
+    this.setActiveVideoPlayer(thumb);
     this.toggleVideoContainer(true);
     this.stopAllVideos();
     const video = this.getActiveVideoPlayer();
@@ -230,17 +269,26 @@ class VideoController {
    */
   stopVideo(video) {
     video.style.display = "none";
+    this.pauseVideo(video);
+  }
+
+  /**
+   * @param {HTMLVideoElement} video
+   */
+  pauseVideo(video) {
     video.pause();
     video.removeAttribute("controls");
   }
 
   /**
-   * @param {HTMLElement} initialThumb
+   * @param {HTMLElement[]} thumbs
    */
-  preloadInactiveVideoPlayers(initialThumb) {
-    this.setActiveVideoPlayer(initialThumb);
+  preloadVideoPlayers(thumbs) {
+    const activeVideoPlayer = this.getActiveVideoPlayer();
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
-    const videoThumbsAroundInitialThumb = this.getAdjacentVideoThumbs(initialThumb, inactiveVideoPlayers.length);
+    const videoThumbsAroundInitialThumb = thumbs
+    .filter(thumb => Utils.isVideo(thumb) && !this.videoPlayerHasSource(activeVideoPlayer, thumb))
+    .slice(0, inactiveVideoPlayers.length);
     const loadedVideoSources = new Set(inactiveVideoPlayers
       .map(video => video.src)
       .filter(src => src !== ""));
@@ -250,20 +298,9 @@ class VideoController {
 
     for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
       this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
+      this.pauseVideo(freeInactiveVideoPlayers[i]);
     }
-    this.stopAllVideos();
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @returns {HTMLElement[]}
-   */
-  getAdjacentVideoThumbs(initialThumb, limit) {
-    if (Gallery.settings.loopAtEndOfGallery) {
-      return ThumbSelector.getVideoThumbsAroundOnCurrentPage(initialThumb, limit);
-    }
-    return ThumbSelector.getVideoThumbsAroundThroughoutAllPages(initialThumb, limit);
+    // this.stopAllVideos();
   }
 
   /**
@@ -342,7 +379,7 @@ class VideoController {
         video.setAttribute("controls", "");
       }
     } else {
-      video.style.pointerEvents = value ? "auto" : "none";
+      // video.style.pointerEvents = value ? "auto" : "none";
     }
 
     if (!value) {

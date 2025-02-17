@@ -79,7 +79,7 @@ class Gallery {
     additionalVideoPlayerCount: Utils.onMobileDevice() ? 2 : 2,
     renderAroundAggressively: true,
     loopAtEndOfGalleryValue: false,
-    masonryEnabled: Utils.getPreference("layoutSelect", "masonry") === "masonry",
+    masonryEnabled: Utils.loadFavoritesLayout() === "masonry",
     get loopAtEndOfGallery() {
       if (!Utils.onFavoritesPage() || !Gallery.finishedLoading) {
         return true;
@@ -1012,9 +1012,9 @@ class Gallery {
     }
 
     if (Gallery.backgroundRenderingOnPageChangeCooldown.ready) {
-      imagesLoaded(document.body).on("always", () => {
-        this.renderer.renderImagesInTheBackground();
-      });
+      // imagesLoaded(document.body).on("always", () => {
+      //   this.renderer.renderImagesInTheBackground();
+      // });
     }
   }
 
@@ -1259,7 +1259,7 @@ class Gallery {
     this.renderImagesAround(selectedThumb);
 
     if (this.inGallery && Gallery.settings.additionalVideoPlayerCount > 0) {
-      this.videoController.preloadInactiveVideoPlayers(selectedThumb);
+      // this.videoController.preloadInactiveVideoPlayers(selectedThumb);
     }
 
     if (!Gallery.settings.masonryEnabled) {

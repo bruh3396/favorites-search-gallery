@@ -52,7 +52,7 @@ class Post {
     Post.htmlTemplate.className = Utils.favoriteItemClassName;
     Post.htmlTemplate.innerHTML = `
         <${containerTagName}>
-          <img loading="lazy">
+          <img>
           ${buttonHTML}
           ${canvasHTML}
         </${containerTagName}>
@@ -61,36 +61,15 @@ class Post {
 
   static addEventListeners() {
     Post.swapAddOrRemoveButtonsWhenFavoritesAreAddedOrRemovedExternally();
-    Post.synchronizeStatisticHintsWithCurrentSortingMethod();
-    Post.enumerateAllPostsWhenLoadingFinishes();
   }
 
   static swapAddOrRemoveButtonsWhenFavoritesAreAddedOrRemovedExternally() {
-    window.addEventListener("favoriteAddedOrDeleted", (event) => {
-      const id = event.detail;
+    GlobalEvents.gallery.on("favoriteAddedOrDeleted", (/** @type {String} */ id) => {
       const post = Post.allPosts.get(id);
 
       if (post !== undefined) {
         post.swapAddOrRemoveButton();
       }
-    });
-  }
-
-  static synchronizeStatisticHintsWithCurrentSortingMethod() {
-    window.addEventListener("sortingParametersChanged", () => {
-      const posts = Utils.getAllThumbs().map(thumb => Post.allPosts.get(thumb.id));
-
-      for (const post of posts) {
-        post.createStatisticHint();
-      }
-    });
-  }
-
-  static enumerateAllPostsWhenLoadingFinishes() {
-    window.addEventListener("favoritesLoaded", () => {
-      Post.enumerateAllPosts();
-    }, {
-      once: true
     });
   }
 
@@ -141,16 +120,6 @@ class Post {
     }
   }
 
-  static enumerateAllPosts() {
-    const allPosts = Array.from(Post.allPosts.values()).reverse();
-    let i = 1;
-
-    for (const post of allPosts) {
-      post.index = i;
-      i += 1;
-    }
-  }
-
   /**
    * @type {String}
    */
@@ -191,10 +160,6 @@ class Post {
    * @type {Set.<String>}
    */
   additionalTagSet;
-  /**
-   * @type {Number}
-   */
-  index;
   /**
    * @type {Boolean}
    */
@@ -263,7 +228,6 @@ class Post {
 
   initializeFields() {
     this.inactivePost = null;
-    this.index = 0;
     this.attributesNeededForSearchArePopulated = false;
     this.htmlElementCreated = false;
   }
@@ -289,6 +253,7 @@ class Post {
     this.populateHTMLAttributes();
     this.setupAddOrRemoveButton(Utils.userIsOnTheirOwnFavoritesPage());
     this.openAssociatedPostInNewTabWhenClicked();
+    this.presetCanvasDimensions();
     this.deleteInactivePost();
   }
 
@@ -392,12 +357,22 @@ class Post {
       const middleClick = event.button === Utils.clickCodes.middle;
       const leftClick = event.button === Utils.clickCodes.left;
       const shiftClick = leftClick && event.shiftKey;
+      const galleryDisabled = Utils.getPerformanceProfile() > 0;
 
-      // TODO: remove Gallery reference
-      if (middleClick || shiftClick || (leftClick && Gallery.disabled)) {
+      if (middleClick || shiftClick || (leftClick && galleryDisabled)) {
+        event.preventDefault();
         Utils.openPostInNewTab(this.id);
       }
     });
+  }
+
+  presetCanvasDimensions() {
+    const canvas = this.root.querySelector("canvas");
+
+    if (canvas === null || this.metadata.isEmpty) {
+      return;
+    }
+    canvas.dataset.size = `${this.metadata.width}x${this.metadata.height}`;
   }
 
   deleteInactivePost() {

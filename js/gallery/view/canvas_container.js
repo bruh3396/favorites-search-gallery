@@ -1,75 +1,51 @@
 class GalleryCanvas {
   /**
-   * @type {HTMLDivElement}
+   * @type {HTMLElement}
    */
   container;
   /**
    * @type {HTMLCanvasElement}
    */
-  mainCanvas;
-  /**
-   * @type {HTMLCanvasElement}
-   */
-  lowResolutionCanvas;
+  canvas;
   /**
    * @type {CanvasRenderingContext2D}
    */
-  mainContext;
-  /**
-   * @type {CanvasRenderingContext2D}
-   */
-  lowResolutionContext;
+  context;
 
   /**
-   * @param {HTMLElement} galleryContainer
+   * @param {HTMLElement} container
    */
-  constructor(galleryContainer) {
-    this.createCanvases();
-    this.createContexts();
-    this.insertCanvases(galleryContainer);
-    this.setCanvasResolutions();
+  constructor(container) {
+    this.container = container;
+    this.create();
+    this.setResolution();
   }
 
-  createCanvases() {
-    this.container = document.createElement("div");
-    this.mainCanvas = document.createElement("canvas");
-    this.lowResolutionCanvas = document.createElement("canvas");
+  create() {
+    this.canvas = document.createElement("canvas");
+    this.context = this.canvas.getContext("2d") || new CanvasRenderingContext2D();
+    this.container.id = "canvas-container";
+    this.container.appendChild(this.canvas);
+
   }
 
-  createContexts() {
-    this.mainContext = this.mainCanvas.getContext("2d") || new CanvasRenderingContext2D();
-    this.lowResolutionContext = this.lowResolutionCanvas.getContext("2d") || new CanvasRenderingContext2D();
-  }
+  setResolution() {
+    const dimensions = GalleryConstants.mainCanvasDimensions;
 
-  /**
-   * @param {HTMLElement} galleryContainer
-   */
-  insertCanvases(galleryContainer) {
-    this.container.appendChild(this.mainCanvas);
-    galleryContainer.insertAdjacentElement("afterbegin", this.container);
-  }
-
-  setCanvasResolutions() {
-    const resolution = Utils.onSearchPage() ? Gallery.canvasResolutions.search : Gallery.canvasResolutions.favorites;
-    const dimensions = resolution.split("x").map(dimension => parseFloat(dimension));
-
-    this.mainCanvas.width = dimensions[0];
-    this.mainCanvas.height = dimensions[1];
-    this.lowResolutionCanvas.width = Utils.onMobileDevice() ? 320 : 1280;
-    this.lowResolutionCanvas.height = Utils.onMobileDevice() ? 180 : 720;
+    this.canvas.width = dimensions.x;
+    this.canvas.height = dimensions.y;
   }
 
   /**
-   * @param {ImageBitmap} imageBitmap
+   * @param {ImageBitmap | null} imageBitmap
    */
-  drawMainCanvas(imageBitmap) {
-    Utils.drawCanvas(this.mainContext, imageBitmap);
+  draw(imageBitmap) {
+    if (imageBitmap !== null) {
+      Utils.drawCanvas(this.context, imageBitmap);
+    }
   }
 
-  /**
-   * @param {ImageBitmap} imageBitmap
-   */
-  drawLowResolutionCanvas(imageBitmap) {
-    Utils.drawCanvas(this.lowResolutionContext, imageBitmap);
+  clear() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }

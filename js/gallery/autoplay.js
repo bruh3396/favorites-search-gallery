@@ -64,11 +64,11 @@ class Autoplay {
     moveForward: Utils.getPreference(Autoplay.preferences.direction, true),
 
     get imageViewDurationInSeconds() {
-      return Utils.millisecondsToSeconds(this.imageViewDuration);
+      return Utils.millisecondsToSeconds(Number(this.imageViewDuration));
     },
 
     get minimumVideoDurationInSeconds() {
-      return Utils.millisecondsToSeconds(this.minimumVideoDuration);
+      return Utils.millisecondsToSeconds(Number(this.minimumVideoDuration));
     }
   };
 
@@ -77,7 +77,6 @@ class Autoplay {
    */
   static get disabled() {
     return false;
-    // return Utils.onMobileDevice();
   }
 
   /**

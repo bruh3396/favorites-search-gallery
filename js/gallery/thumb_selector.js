@@ -2,25 +2,60 @@ class ThumbSelector {
   /**
    * @type {Post[]}
    */
-  static latestSearchResults = [];
+  latestSearchResults;
+  /**
+   * @type {HTMLElement[]}
+   */
+  thumbsOnCurrentPage;
+  /**
+   * @type {Map.<String, Number>}
+   */
+  enumeratedThumbsOnCurrentPage;
 
-  static {
-    Utils.addStaticInitializer(() => {
-      window.addEventListener("newSearchResults", (event) => {
-        ThumbSelector.latestSearchResults = event.detail;
-      });
-    });
+  constructor() {
+    this.latestSearchResults = [];
+    this.thumbsOnCurrentPage = [];
+    this.enumeratedThumbs = new Map();
+  }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  setCurrentPageThumbs(thumbs) {
+    this.thumbsOnCurrentPage = thumbs;
+    this.enumerateCurrentPageThumbs();
+  }
+
+  /**
+   * @param {Post[]} searchResults
+   */
+  setLatestSearchResults(searchResults) {
+    this.latestSearchResults = searchResults;
+  }
+
+  enumerateCurrentPageThumbs() {
+    for (let i = 0; i < this.thumbsOnCurrentPage.length; i += 1) {
+      this.enumeratedThumbs.set(this.thumbsOnCurrentPage[i].id, i);
+    }
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {Number}
+   */
+  getIndexFromThumb(thumb) {
+    return this.enumeratedThumbs.get(thumb.id) || 0;
   }
 
   /**
    * @param {HTMLElement} initialThumb
    * @returns {HTMLElement[]}
    */
-  static getImageThumbsAroundOnCurrentPage(initialThumb) {
-    return ThumbSelector.getThumbsAroundWrappedOnCurrentPage(
+  getImageThumbsAroundOnCurrentPage(initialThumb) {
+    return this.getThumbsAroundWrappedOnCurrentPage(
       initialThumb,
-      Gallery.settings.maxImagesToRenderAround,
-      (thumb) => {
+      GalleryConstants.maxImagesToRenderAroundInGallery,
+      (/** @type {Post | HTMLElement} */ thumb) => {
         return Utils.isImage(thumb);
       }
     );
@@ -30,11 +65,11 @@ class ThumbSelector {
    * @param {HTMLElement} initialThumb
    * @returns {HTMLElement[]}
    */
-  static getImageThumbsAroundThroughoutAllPages(initialThumb) {
-    return ThumbSelector.getThumbsAroundThroughoutAllPages(
+  getImageThumbsAroundThroughoutAllPages(initialThumb) {
+    return this.getThumbsAroundThroughoutAllPages(
       initialThumb,
-      Gallery.settings.maxImagesToRenderAround,
-      (post) => {
+      GalleryConstants.maxImagesToRenderAroundInGallery,
+      (/** @type {HTMLElement | Post} */ post) => {
         return Utils.isImage(post);
       }
     );
@@ -42,29 +77,14 @@ class ThumbSelector {
 
   /**
    * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @param {Function} qualifier
    * @returns {HTMLElement[]}
    */
-  static getThumbsAroundOnCurrentPage(initialThumb, limit, qualifier) {
-    const index = Gallery.visibleThumbs.findIndex(thumb => thumb.id === initialThumb.id);
-    const adjacentThumbs = Utils.getElementsAroundIndex(Gallery.visibleThumbs, index, 100);
-    return adjacentThumbs
-      .filter(thumb => qualifier(thumb))
-      .slice(0, limit);
-  }
-
-  /**
-   * @param {HTMLElement} initialThumb
-   * @param {Number} limit
-   * @returns {HTMLElement[]}
-   */
-  static getVideoThumbsAroundOnCurrentPage(initialThumb, limit) {
-    return ThumbSelector.getThumbsAroundWrappedOnCurrentPage(
+  getThumbsAroundOnCurrentPage(initialThumb) {
+    return this.getThumbsAroundWrappedOnCurrentPage(
       initialThumb,
-      limit,
-      (t) => {
-        return Utils.isVideo(t) && t.id !== initialThumb.id;
+      GalleryConstants.maxImagesToRenderAroundInGallery,
+      () => {
+        return true;
       }
     );
   }
@@ -74,12 +94,27 @@ class ThumbSelector {
    * @param {Number} limit
    * @returns {HTMLElement[]}
    */
-  static getVideoThumbsAroundThroughoutAllPages(initialThumb, limit) {
-    return ThumbSelector.getThumbsAroundThroughoutAllPages(
+  getVideoThumbsAroundOnCurrentPage(initialThumb, limit) {
+    return this.getThumbsAroundWrappedOnCurrentPage(
       initialThumb,
       limit,
-      (t) => {
-        return Utils.isVideo(t) && t.id !== initialThumb.id;
+      (/** @type {Post | HTMLElement} */ thumb) => {
+        return Utils.isVideo(thumb) && thumb.id !== initialThumb.id;
+      }
+    );
+  }
+
+  /**
+   * @param {HTMLElement} initialThumb
+   * @param {Number} limit
+   * @returns {HTMLElement[]}
+   */
+  getVideoThumbsAroundThroughoutAllPages(initialThumb, limit) {
+    return this.getThumbsAroundThroughoutAllPages(
+      initialThumb,
+      limit,
+      (/** @type {Post | HTMLElement} */ thumb) => {
+        return Utils.isVideo(thumb) && thumb.id !== initialThumb.id;
       }
     );
   }
@@ -90,9 +125,9 @@ class ThumbSelector {
    * @param {Function} qualifier
    * @returns {HTMLElement[]}
    */
-  static getThumbsAroundWrappedOnCurrentPage(initialThumb, limit, qualifier) {
-    const startIndex = Gallery.visibleThumbs.findIndex(thumb => thumb.id === initialThumb.id);
-    return Utils.getWrappedElementsAroundIndex(Gallery.visibleThumbs, startIndex, 100)
+  getThumbsAroundWrappedOnCurrentPage(initialThumb, limit, qualifier) {
+    const startIndex = this.thumbsOnCurrentPage.findIndex(thumb => thumb.id === initialThumb.id);
+    return Utils.getWrappedElementsAroundIndex(this.thumbsOnCurrentPage, startIndex, 100)
       .filter(thumb => qualifier(thumb))
       .slice(0, limit);
   }
@@ -103,14 +138,29 @@ class ThumbSelector {
    * @param {Function} qualifier
    * @returns {HTMLElement[]}
    */
-  static getThumbsAroundThroughoutAllPages(initialThumb, limit, qualifier) {
-    const startIndex = ThumbSelector.latestSearchResults.findIndex(post => post.id === initialThumb.id);
-    const adjacentSearchResults = Utils.getWrappedElementsAroundIndex(ThumbSelector.latestSearchResults, startIndex, 50)
+  getThumbsAroundThroughoutAllPages(initialThumb, limit, qualifier) {
+    const startIndex = this.latestSearchResults.findIndex(post => post.id === initialThumb.id);
+    const adjacentSearchResults = Utils.getWrappedElementsAroundIndex(this.latestSearchResults, startIndex, 50)
       .filter(thumb => qualifier(thumb))
       .slice(0, limit);
 
     for (const searchResult of adjacentSearchResults) {
       searchResult.activateHTMLElement();
+    }
+    return adjacentSearchResults.map(post => post.root);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @param {Number} limit
+   * @returns {HTMLElement[]}
+   */
+  getSearchResultsAround(thumb, limit = 50) {
+    const startIndex = this.latestSearchResults.findIndex(post => post.id === thumb.id);
+    const adjacentSearchResults = Utils.getWrappedElementsAroundIndex(this.latestSearchResults, startIndex, limit);
+
+    for (const result of adjacentSearchResults) {
+      result.activateHTMLElement();
     }
     return adjacentSearchResults.map(post => post.root);
   }
