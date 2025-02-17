@@ -109,7 +109,7 @@ class GalleryController {
    * @param {HTMLElement | null} thumb
    */
   preloadVisibleImagesAround(thumb) {
-    if (thumb === null) {
+    if (thumb === null || this.model.recentlyExitedGallery) {
       return;
     }
     this.visibleThumbTracker.setCenterThumb(thumb);

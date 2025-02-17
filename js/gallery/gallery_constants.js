@@ -13,8 +13,10 @@ class GalleryConstants {
   static get mainCanvasDimensions() {
     return Utils.getDimensions(GalleryConstants.mainCanvasResolution);
   }
-  static upscaledThumbCanvasWidth = 600;
+  static upscaledThumbCanvasWidth = 800;
   static maxUpscaledThumbCanvasHeight = 16000;
+  static upscaleDelay = 80;
+  static upscaleThumbsWithWorker = false;
   static imageMegabyteLimit = 750;
   static minimumPreloadedImagesCount = 6;
   static visibleThumbsDownwardScrollPixelGenerosity = 500;

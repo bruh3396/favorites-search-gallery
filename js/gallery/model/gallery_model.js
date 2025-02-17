@@ -17,6 +17,10 @@ class GalleryModel {
    * @type {ThumbSelector}
    */
   thumbSelector;
+  /**
+   * @type {Boolean}
+   */
+  recentlyExitedGallery;
 
   /**
    * @type {HTMLElement | undefined}
@@ -36,6 +40,7 @@ class GalleryModel {
     this.currentState = GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
     this.currentIndex = 0;
     this.thumbSelector = new ThumbSelector();
+    this.recentlyExitedGallery = false;
   }
 
   /**
@@ -44,10 +49,15 @@ class GalleryModel {
   enterGallery(thumb) {
     this.currentIndex = this.thumbSelector.getIndexFromThumb(thumb);
     this.currentState = GalleryModel.states.IN_GALLERY;
+
   }
 
   exitGallery() {
     this.currentState = GalleryModel.states.IDLE;
+    this.recentlyExitedGallery = true;
+    setTimeout(() => {
+      this.recentlyExitedGallery = false;
+    }, 10);
   }
 
   showContentOnHover() {

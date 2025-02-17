@@ -53,7 +53,7 @@ class GalleryUI {
     FavoritesLayoutObserver.waitForLayoutToComplete()
       .then(() => {
         if (this.lastVisitedThumb !== null) {
-          Utils.scrollToThumb(this.lastVisitedThumb.id, true);
+          Utils.scrollToThumb(this.lastVisitedThumb.id, false);
         }
       });
 

@@ -931,6 +931,7 @@ class Utils {
     if (Utils.onMobileDevice()) {
       top = Math.max(1, top);
     }
+
     window.scroll({
       top,
       behavior: smoothTransition ? "smooth" : "instant"
