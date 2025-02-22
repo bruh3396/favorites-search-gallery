@@ -13,12 +13,13 @@ class GalleryConstants {
   static get mainCanvasDimensions() {
     return Utils.getDimensions(GalleryConstants.mainCanvasResolution);
   }
-  static upscaledThumbCanvasWidth = 800;
+  static upscaledThumbCanvasWidth = 900;
+  static minUpscaledThumbCanvasWidth = 200;
+  static maxUpscaledThumbCanvasWidth = 2500;
   static maxUpscaledThumbCanvasHeight = 16000;
-  static upscaleDelay = 80;
-  static upscaleThumbsWithWorker = false;
-  static imageMegabyteLimit = 750;
-  static minimumPreloadedImagesCount = 6;
+  static upscaleDelay = 100;
+  static imageMegabyteLimit = 550;
+  static minimumPreloadedImageCount = 5;
   static visibleThumbsDownwardScrollPixelGenerosity = 500;
   static navigationThrottleTime = 250;
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
@@ -27,4 +28,6 @@ class GalleryConstants {
   static navigationKeys = Utils.union(GalleryConstants.forwardNavigationKeys, GalleryConstants.backwardNavigationKeys);
   static maxImagesToRenderAroundInGallery = Utils.onMobileDevice() ? 3 : 50;
   static additionalVideoPlayerCount = Utils.onMobileDevice() ? 2 : 2;
+  static endlessSearchPageGallery = false;
+  static idleInteractionDuration = 500;
 }

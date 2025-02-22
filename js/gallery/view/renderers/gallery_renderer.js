@@ -90,4 +90,8 @@ class GalleryRenderer {
       renderer.handlePageChangeInGallery();
     }
   }
+
+  handleFavoritesResize() {
+    this.imageRenderer.handleFavoritesResize();
+  }
 }

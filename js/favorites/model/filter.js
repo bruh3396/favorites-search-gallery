@@ -58,8 +58,7 @@ class FavoritesFilter {
    */
   getSearchCommand(searchQuery) {
     searchQuery = this.useTagBlacklist ? `${searchQuery} ${this.negatedTagBlacklist}` : searchQuery;
-    // return new SearchCommand(searchQuery);
-    return new SearchCommand(`${searchQuery} -video -animated`);
+    return new SearchCommand(searchQuery);
   }
 
   /**

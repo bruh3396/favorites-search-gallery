@@ -4,17 +4,33 @@ class InteractionTracker {
    */
   onInteractionStopped;
   /**
-   * @type {Number}
+   * @type {Function}
    */
-  idleTimeout;
+  onMouseMoveStopped;
+  /**
+   * @type {Function}
+   */
+  onScrollingStopped;
+  /**
+   * @type {Function}
+   */
+  onNoInteractionOnStart;
   /**
    * @type {Number}
    */
-  mouseTimer;
+  idleDuration;
   /**
-   * @type {Number}
+   * @type {Timeout}
    */
-  scrollTimer;
+  mouseTimeout;
+  /**
+   * @type {Timeout}
+   */
+  scrollTimeout;
+  /**
+   * @type {Timeout}
+   */
+  interactionOnStartTimeout;
   /**
    * @type {Boolean}
    */
@@ -23,44 +39,96 @@ class InteractionTracker {
    * @type {Boolean}
    */
   scrolling;
+  /**
+   * @type {AbortController}
+   */
+  abortController;
 
   /**
-   * @param {Number} idleTimeout
+   * @param {Number} idleDuration
    * @param {Function} onInteractionStopped
+   * @param {Function} onMouseMoveStopped
+   * @param {Function} onScrollingStopped
+   * @param {Function} onNoInteractionOnStart
    */
-  constructor(idleTimeout, onInteractionStopped) {
-    this.idleTimeout = idleTimeout;
+  constructor(idleDuration, onInteractionStopped, onMouseMoveStopped, onScrollingStopped, onNoInteractionOnStart) {
+    this.idleDuration = idleDuration;
     this.onInteractionStopped = onInteractionStopped;
+    this.onMouseMoveStopped = onMouseMoveStopped;
+    this.onScrollingStopped = onScrollingStopped;
+    this.onNoInteractionOnStart = onNoInteractionOnStart;
     this.mouseIsMoving = false;
     this.scrolling = false;
-    this.trackInteraction();
+    this.abortController = new AbortController();
   }
 
-  trackInteraction() {
-    window.addEventListener("scroll", () => {
-      this.scrolling = true;
-      clearTimeout(this.scrollTimer);
-      this.scrollTimer = setTimeout(() => {
-        this.scrolling = false;
+  start() {
+    this.toggle(true);
+  }
 
-        if (!this.mouseIsMoving) {
-          this.onInteractionStopped();
-        }
-      }, this.idleTimeout);
-    }, {
-      passive: true
-    });
-    window.addEventListener("mousemove", () => {
-      clearTimeout(this.mouseTimer);
-      this.mouseTimer = setTimeout(() => {
-        this.mouseIsMoving = false;
+  stop() {
+    this.toggle(false);
+  }
 
-        if (!this.scrolling) {
-          this.onInteractionStopped();
-        }
-      }, this.idleTimeout);
-    }, {
-      passive: true
+  /**
+   * @param {Boolean} value
+   */
+  toggle(value) {
+    if (value) {
+      this.abortController = new AbortController();
+      this.startInteractionOnStartTimer();
+      this.trackMouseMove();
+      // this.trackScroll();
+      return;
+    }
+    this.abortController.abort();
+  }
+
+  startInteractionOnStartTimer() {
+    this.interactionOnStartTimeout = setTimeout(() => {
+      this.onNoInteractionOnStart();
+    }, this.idleDuration);
+  }
+
+  trackMouseMove() {
+    window.addEventListener("mousemove", this.onMouseMove.bind(this), {
+      passive: true,
+      signal: this.abortController.signal
     });
+  }
+
+  trackScroll() {
+    window.addEventListener("scroll", this.onScroll.bind(this), {
+      passive: true,
+      signal: this.abortController.signal
+    });
+  }
+
+  onMouseMove() {
+    this.mouseIsMoving = true;
+    clearTimeout(this.interactionOnStartTimeout);
+    clearTimeout(this.mouseTimeout);
+    this.mouseTimeout = setTimeout(() => {
+      this.mouseIsMoving = false;
+      this.onMouseMoveStopped();
+
+      if (!this.scrolling) {
+        this.onInteractionStopped();
+      }
+    }, this.idleDuration);
+  }
+
+  onScroll() {
+    this.scrolling = true;
+    clearTimeout(this.interactionOnStartTimeout);
+    clearTimeout(this.scrollTimeout);
+    this.scrollTimer = setTimeout(() => {
+      this.scrolling = false;
+      this.onScrollingStopped();
+
+      if (!this.mouseIsMoving) {
+        this.onInteractionStopped();
+      }
+    }, this.idleDuration);
   }
 }

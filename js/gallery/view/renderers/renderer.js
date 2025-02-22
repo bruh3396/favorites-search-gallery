@@ -20,16 +20,16 @@ class Renderer {
     this.show(thumb);
   }
 
+  stop() {
+    this.container.style.display = "none";
+    this.clear();
+  }
+
   /**
    * @param {HTMLElement} thumb
    */
   show(thumb) {
     console.error(`Not Implemented: ${thumb}`);
-  }
-
-  stop() {
-    this.container.style.display = "none";
-    this.clear();
   }
 
   clear() {

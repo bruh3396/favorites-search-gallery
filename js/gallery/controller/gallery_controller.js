@@ -8,15 +8,23 @@ class GalleryController {
    */
   view;
   /**
+   * @type {InteractionTracker}
+   */
+  interactionTracker;
+  /**
    * @type {VisibleThumbTracker}
    */
   visibleThumbTracker;
+  /**
+   * @type {AutoplayController}
+   */
+  autoplayController;
 
   /**
-   * @returns {Boolean}
+   * @type {Boolean}
    */
   static get disabled() {
-    return (Utils.onMobileDevice() && Utils.onSearchPage()) || Utils.getPerformanceProfile() > 0 || Utils.onPostPage();
+    return Utils.galleryIsDisabled();
   }
 
   constructor() {
@@ -25,7 +33,49 @@ class GalleryController {
     }
     this.model = new GalleryModel();
     this.view = new GalleryView();
+    this.interactionTracker = this.createInteractionTracker();
+    this.autoplayController = this.createAutoplayController();
     this.addEventListeners();
+  }
+
+  /**
+   * @returns {InteractionTracker}
+   */
+  createInteractionTracker() {
+    const doNothing = () => { };
+    const hideCursor = () => {
+      this.executeFunctionBasedOnGalleryState({
+        gallery: () => {
+          this.view.toggleCursor(false);
+        }
+      });
+    };
+    return new InteractionTracker(
+      GalleryConstants.idleInteractionDuration,
+      doNothing,
+      hideCursor,
+      doNothing,
+      hideCursor
+    );
+  }
+
+  /**
+   * @returns {AutoplayController}
+   */
+  createAutoplayController() {
+    const events = new AutoplayEvents({
+      onEnable: this.disableVideoLooping.bind(this),
+      onDisable: this.enableVideoLooping.bind(this),
+      onPause: this.enableVideoLooping.bind(this),
+      onResume: this.disableVideoLooping.bind(this),
+      onComplete: (/** @type {String} */ direction) => {
+        this.executeFunctionBasedOnGalleryState({
+          gallery: this.navigate.bind(this)
+        }, direction);
+      },
+      onVideoEndedEarly: this.restartVideoThatEndedEarly.bind(this)
+    });
+    return new AutoplayController(events);
   }
 
   addEventListeners() {
@@ -36,9 +86,14 @@ class GalleryController {
 
   addCommonEventListeners() {
     this.showThumbsWhenTheyAreHoveredOver();
-    this.setupClickHandlers();
+    this.setupMouseDownHandler();
+    this.setupContextMenuClickHandler();
     this.setupKeydownHandler();
+    this.setupKeyUpHandler();
     this.setupWheelHandler();
+    this.setupMouseMoveHandler();
+    this.setupCustomUiEventHandler();
+    // this.setupFavoritesResizeHandler();
   }
 
   addFavoritesPageEventListeners() {
@@ -49,6 +104,7 @@ class GalleryController {
     this.keepTrackOfLatestSearchResults();
     this.setupPageChangeHandler();
     this.keepVisibleThumbsPreloaded();
+    this.setupFavoritesOptionHandler();
   }
 
   addSearchPageEventListeners() {
@@ -64,6 +120,9 @@ class GalleryController {
     });
     GlobalEvents.favorites.on("newSearchResults", (/** @type {Post[]} */ searchResults) => {
       this.model.setSearchResults(searchResults);
+    });
+    GlobalEvents.favorites.on("newFavoritesFoundOnReload", () => {
+      this.visibleThumbTracker.observeAllThumbsOnPage();
     });
   }
 
@@ -99,32 +158,6 @@ class GalleryController {
     });
   }
 
-  preloadVisibleImages() {
-    if (this.model.currentState !== GalleryModel.states.IN_GALLERY) {
-      this.view.preloadContent(this.visibleThumbTracker.getVisibleThumbs());
-    }
-  }
-
-  /**
-   * @param {HTMLElement | null} thumb
-   */
-  preloadVisibleImagesAround(thumb) {
-    if (thumb === null || this.model.recentlyExitedGallery) {
-      return;
-    }
-    this.visibleThumbTracker.setCenterThumb(thumb);
-    this.preloadVisibleImages();
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  preloadContentInGalleryAround(thumb) {
-    const thumbsToPreload = Utils.onFavoritesPage() ? this.model.getSearchResultsAround(thumb) : this.model.getThumbsAroundOnCurrentPage(thumb);
-
-    this.view.preloadContentInGallery(thumbsToPreload);
-  }
-
   showThumbsWhenTheyAreHoveredOver() {
     document.addEventListener("mouseover", (event) => {
       this.executeFunctionBasedOnGalleryState({
@@ -149,18 +182,225 @@ class GalleryController {
     });
   }
 
+  setupFavoritesOptionHandler() {
+    GlobalEvents.favorites.on("showOnHover", () => {
+      this.model.toggleShowContentOnHover();
+    });
+  }
+
+  setupContextMenuClickHandler() {
+    document.addEventListener("contextmenu", (event) => {
+      this.executeFunctionBasedOnGalleryState({
+        gallery: () => {
+          event.preventDefault();
+          this.exitGallery();
+          setTimeout(() => {
+            this.model.showContentOnHover();
+            this.broadcastShowContentOnHover(true);
+          }, 0);
+        }
+      }, new ClickEvent(event));
+    });
+  }
+
+  setupMouseDownHandler() {
+    const onMouseDownInGallery = (/** @type {ClickEvent} */ clickEvent) => {
+      if (clickEvent.ctrlKey) {
+        return;
+      }
+
+      if (clickEvent.leftClick && !this.model.currentlyViewingVideo && !this.autoplayController.clickedOnMenu(clickEvent.originalEvent)) {
+        this.exitGallery();
+        return;
+      }
+
+      if (clickEvent.rightClick) {
+        clickEvent.originalEvent.preventDefault();
+        return;
+      }
+
+      if (clickEvent.middleClick && this.model.currentThumb !== undefined) {
+        Utils.openPostInNewTab(this.model.currentThumb.id);
+      }
+    };
+    const onMouseDownOutOfGallery = (/** @type {ClickEvent} */ clickEvent) => {
+      if (clickEvent.leftClick && clickEvent.thumb !== null && !clickEvent.ctrlKey) {
+        clickEvent.originalEvent.preventDefault();
+        this.enterGallery(clickEvent.thumb);
+        return;
+      }
+
+      if (clickEvent.middleClick && clickEvent.thumb === null) {
+        clickEvent.originalEvent.preventDefault();
+        this.toggleShowContentOnHover();
+      }
+    };
+
+    document.addEventListener("mousedown", (event) => {
+      this.executeFunctionBasedOnGalleryState({
+        hover: onMouseDownOutOfGallery,
+        idle: onMouseDownOutOfGallery,
+        gallery: onMouseDownInGallery
+      }, new ClickEvent(event));
+    });
+  }
+
+  setupKeydownHandler() {
+    const onKeyDownInGallery = (/** @type {KeyboardEvent} */ event) => {
+      if (GalleryConstants.navigationKeys.has(event.key)) {
+        this.navigate(event.key);
+        return;
+      }
+
+      if (GalleryConstants.exitKeys.has(event.key)) {
+        this.exitGallery();
+        return;
+      }
+
+      switch (event.key.toLowerCase()) {
+        case "b":
+          this.view.toggleBackgroundOpacity();
+          break;
+
+        case "f":
+          Utils.addFavoriteInGallery(this.model.currentThumb)
+            .then(({status, id}) => {
+              this.view.showAddedFavoriteStatus(status);
+              GlobalEvents.gallery.emit("favoriteAddedOrDeleted", id);
+            });
+          break;
+
+        case "x":
+          Utils.removeFavoriteInGallery(this.model.currentThumb)
+            .then(({status, id}) => {
+              this.view.showRemovedFavoriteStatus(status);
+              GlobalEvents.gallery.emit("favoriteAddedOrDeleted", id);
+            });
+          break;
+
+        case "control":
+          this.view.toggleOriginalContentLink(true);
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    const onKeyDown = (/** @type {KeyboardEvent} */ event) => {
+      this.executeFunctionBasedOnGalleryState({
+        gallery: onKeyDownInGallery
+      }, event);
+
+    };
+    const throttledOnKeyDown = Utils.throttle(onKeyDown, GalleryConstants.navigationThrottleTime);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.repeat) {
+        throttledOnKeyDown(event);
+      } else {
+        onKeyDown(event);
+      }
+    });
+  }
+
+  setupKeyUpHandler() {
+    const onKeyUpInGallery = (/** @type {KeyboardEvent} */ event) => {
+      if (event.key === "Control") {
+        this.view.toggleOriginalContentLink(false);
+      }
+    };
+
+    document.addEventListener("keyup", (event) => {
+      this.executeFunctionBasedOnGalleryState({
+        gallery: onKeyUpInGallery
+      }, event);
+    });
+  }
+
+  setupWheelHandler() {
+    document.addEventListener("wheel", (wheelevent) => {
+      this.executeFunctionBasedOnGalleryState({
+        hover: (/** @type {WheelEvent} */ event) => {
+          this.view.updateBackgroundOpacity(event);
+        },
+        gallery: (/** @type {WheelEvent} */ event) => {
+          this.navigate(event.deltaY > 0 ? "ArrowRight" : "ArrowLeft");
+        }
+      }, wheelevent);
+    }, {
+      passive: true
+    });
+  }
+
+  setupMouseMoveHandler() {
+    const onMouseMove = Utils.throttle(() => {
+      this.executeFunctionBasedOnGalleryState({
+        gallery: () => {
+          this.view.toggleCursor(true);
+        }
+      });
+    }, 100);
+
+    document.addEventListener("mousemove", onMouseMove);
+  }
+
+  setupCustomUiEventHandler() {
+    // @ts-ignore
+    this.view.container.addEventListener("galleyController", (/** @type CustomEvent */ event) => {
+      switch (event.detail) {
+        case "doubleClickedVideo":
+          this.exitGallery();
+          break;
+
+        default:
+          break;
+      }
+    });
+  }
+
+  setupFavoritesResizeHandler() {
+    const onFavoritesResized = Utils.debounceAlways(() => {
+      this.view.handleFavoritesResize();
+      this.preloadVisibleImages();
+    }, 200);
+
+    GlobalEvents.favorites.on("favoritesResized", onFavoritesResized);
+  }
+
+  /**
+   * @param {{idle?: Function , hover?: Function , gallery?: Function }} executors
+   * @param  {...any} args
+   */
+  executeFunctionBasedOnGalleryState({idle, hover, gallery}, ...args) {
+    const executor = {
+      [GalleryModel.states.IDLE]: idle,
+      [GalleryModel.states.SHOWING_CONTENT_ON_HOVER]: hover,
+      [GalleryModel.states.IN_GALLERY]: gallery
+    }[this.model.currentState];
+
+    if (executor) {
+      executor(...args);
+    }
+  }
+
   /**
    * @param {HTMLElement} thumb
    */
   enterGallery(thumb) {
     this.model.enterGallery(thumb);
     this.view.enterGallery(thumb);
+    this.interactionTracker.start();
+    this.autoplayController.start(thumb);
     this.preloadContentInGalleryAround(thumb);
+    this.broadcastShowContentOnHover(false);
   }
 
   exitGallery() {
     this.model.exitGallery();
     this.view.exitGallery();
+    this.interactionTracker.stop();
+    this.autoplayController.stop();
   }
 
   /**
@@ -178,14 +418,6 @@ class GalleryController {
       return this.changeFavoritesPageThenNavigate(direction);
     }
     return this.changeSearchPageThenNavigate(direction);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  finishNavigating(thumb) {
-    this.view.showContentInGallery(thumb);
-    this.preloadContentInGalleryAround(thumb);
   }
 
   /**
@@ -236,145 +468,59 @@ class GalleryController {
     }
   }
 
-  setupClickHandlers() {
-    this.setupMouseDownHandler();
-    this.setupContextMenuClickHandler();
+  /**
+   * @param {HTMLElement} thumb
+   */
+  finishNavigating(thumb) {
+    this.view.showContentInGallery(thumb);
+    this.autoplayController.startViewTimer(thumb);
+    this.preloadContentInGalleryAround(thumb);
   }
 
-  setupContextMenuClickHandler() {
-    document.addEventListener("contextmenu", (event) => {
-      this.executeFunctionBasedOnGalleryState({
-        gallery: () => {
-          event.preventDefault();
-          this.exitGallery();
-          setTimeout(() => {
-            this.model.showContentOnHover();
-          }, 0);
-        }
-      }, new ClickEvent(event));
-    });
-  }
-
-  setupMouseDownHandler() {
-    const onMouseDownInGallery = (/** @type {ClickEvent} */ clickEvent) => {
-      if (clickEvent.leftClick && !this.model.currentlyViewingVideo) {
-        this.exitGallery();
-        return;
-      }
-
-      if (clickEvent.rightClick) {
-        clickEvent.originalEvent.preventDefault();
-        return;
-      }
-
-      if (clickEvent.middleClick && this.model.currentThumb !== undefined) {
-        Utils.openPostInNewTab(this.model.currentThumb.id);
-      }
-    };
-    const onMouseDownOutOfGallery = (/** @type {ClickEvent} */ clickEvent) => {
-      if (clickEvent.leftClick && clickEvent.thumb !== null && !clickEvent.ctrlKey) {
-        this.enterGallery(clickEvent.thumb);
-        return;
-      }
-
-      if (clickEvent.middleClick && clickEvent.thumb === null) {
-        clickEvent.originalEvent.preventDefault();
-        this.model.toggleShowContentOnHover();
-      }
-    };
-
-    document.addEventListener("mousedown", (event) => {
-      this.executeFunctionBasedOnGalleryState({
-        hover: onMouseDownOutOfGallery,
-        idle: onMouseDownOutOfGallery,
-        gallery: onMouseDownInGallery
-      }, new ClickEvent(event));
-    });
-  }
-
-  setupKeydownHandler() {
-    const onKeyDownInGallery = (/** @type {KeyboardEvent} */ event) => {
-      if (GalleryConstants.navigationKeys.has(event.key)) {
-        this.navigate(event.key);
-        return;
-      }
-
-      if (GalleryConstants.exitKeys.has(event.key)) {
-        this.exitGallery();
-        return;
-      }
-
-      switch (event.key.toLowerCase()) {
-        case "b":
-          this.view.toggleBackgroundOpacity();
-          break;
-
-        case "f":
-          Utils.addFavoriteInGallery(this.model.currentThumb)
-            .then(({status, id}) => {
-              this.view.showAddedFavoriteStatus(status);
-              GlobalEvents.gallery.emit("favoriteAddedOrDeleted", id);
-            });
-          break;
-
-        case "x":
-          Utils.removeFavoriteInGallery(this.model.currentThumb)
-            .then(({status, id}) => {
-              this.view.showRemovedFavoriteStatus(status);
-              GlobalEvents.gallery.emit("favoriteAddedOrDeleted", id);
-            });
-          break;
-
-        default:
-          break;
-      }
-    };
-
-    const onKeyDown = (/** @type {KeyboardEvent} */ event) => {
-      this.executeFunctionBasedOnGalleryState({
-        gallery: onKeyDownInGallery
-      }, event);
-
-    };
-    const throttledOnKeyDown = Utils.throttle(onKeyDown, GalleryConstants.navigationThrottleTime);
-
-    document.addEventListener("keydown", (event) => {
-      if (event.repeat) {
-        throttledOnKeyDown(event);
-      } else {
-        onKeyDown(event);
-      }
-    });
-  }
-
-  setupWheelHandler() {
-    document.addEventListener("wheel", (wheelevent) => {
-      this.executeFunctionBasedOnGalleryState({
-        hover: (/** @type {WheelEvent} */ event) => {
-          this.view.updateBackgroundOpacity(event);
-        },
-        gallery: (/** @type {WheelEvent} */ event) => {
-          this.navigate(event.deltaY > 0 ? "ArrowRight" : "ArrowLeft");
-        }
-      }, wheelevent);
-    }, {
-      passive: true
-    });
+  preloadVisibleImages() {
+    if (this.model.currentState !== GalleryModel.states.IN_GALLERY) {
+      this.view.preloadContent(this.visibleThumbTracker.getVisibleThumbs());
+    }
   }
 
   /**
-   * @param {{idle?: Function , hover?: Function , gallery?: Function }} executors
-   * @param  {...any} args
+   * @param {HTMLElement | null} thumb
    */
-  executeFunctionBasedOnGalleryState({idle, hover, gallery}, ...args) {
-    const executor = {
-      [GalleryModel.states.IDLE]: idle,
-      [GalleryModel.states.SHOWING_CONTENT_ON_HOVER]: hover,
-      [GalleryModel.states.IN_GALLERY]: gallery
-    }[this.model.currentState];
-
-    if (executor) {
-      executor(...args);
+  preloadVisibleImagesAround(thumb) {
+    if (thumb === null || this.model.recentlyExitedGallery) {
+      return;
     }
+    this.visibleThumbTracker.setCenterThumb(thumb);
+    this.preloadVisibleImages();
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  preloadContentInGalleryAround(thumb) {
+    const thumbsToPreload = Utils.onFavoritesPage() ? this.model.getSearchResultsAround(thumb) : this.model.getThumbsAroundOnCurrentPage(thumb);
+
+    this.view.preloadContentInGallery(thumbsToPreload);
+  }
+
+  toggleShowContentOnHover() {
+    this.model.toggleShowContentOnHover();
+    this.broadcastShowContentOnHover(this.model.currentState === GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  broadcastShowContentOnHover(value) {
+    GlobalEvents.gallery.emit("showOnHover", value);
+  }
+
+  enableVideoLooping() {
+  }
+
+  disableVideoLooping() {
+  }
+
+  restartVideoThatEndedEarly() {
   }
 }

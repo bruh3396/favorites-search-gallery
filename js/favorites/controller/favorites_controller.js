@@ -219,6 +219,7 @@ class FavoritesController {
   updateResultsPerPage(input) {
     const resultsPerPage = parseInt(input.value);
 
+    GlobalEvents.favorites.emit("resultsPerPageChanged", resultsPerPage);
     this.view.updateResultsPerPage(resultsPerPage);
     this.showSearchResults(this.model.getLatestSearchResults());
   }
@@ -227,13 +228,15 @@ class FavoritesController {
    * @param {HTMLInputElement} input
    */
   updateColumnCount(input) {
+    GlobalEvents.favorites.emit("favoritesResized");
     this.view.updateColumnCount(input);
   }
 
   /**
    * @param {HTMLInputElement} input
    */
-  updateRowSize(input) {
+ updateRowSize(input) {
+    GlobalEvents.favorites.emit("favoritesResized");
     this.view.updateRowSize(input);
   }
 
@@ -243,5 +246,12 @@ class FavoritesController {
   changeAllowedRatings(allowedRatings) {
     this.model.changeAllowedRatings(allowedRatings);
     this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
+  }
+
+  /**
+   * @param {String} id
+   */
+  findFavorite(id) {
+    this.view.findFavorite(id, this.model.getLatestSearchResults());
   }
 }

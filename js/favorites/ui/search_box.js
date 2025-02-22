@@ -196,16 +196,16 @@ class SearchBox {
           break;
       }
     });
-    this.searchBox.addEventListener("wheel", (event) => {
-      if (!(event instanceof WheelEvent) || event.shiftKey || event.ctrlKey) {
-        return;
-      }
-      const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
+    // this.searchBox.addEventListener("wheel", (event) => {
+    //   if (!(event instanceof WheelEvent) || event.shiftKey || event.ctrlKey) {
+    //     return;
+    //   }
+    //   const direction = event.deltaY > 0 ? "ArrowDown" : "ArrowUp";
 
-      this.searchHistory.navigate(direction);
-      this.searchBox.value = this.searchHistory.selectedQuery;
-      event.preventDefault();
-    });
+    //   this.searchHistory.navigate(direction);
+    //   this.searchBox.value = this.searchHistory.selectedQuery;
+    //   event.preventDefault();
+    // });
   }
 
   updateLastEditedSearchQueryOnInput() {

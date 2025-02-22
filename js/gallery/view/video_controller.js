@@ -193,7 +193,10 @@ class VideoController {
    */
   broadcastDoubleClick(video) {
     video.addEventListener("dblclick", () => {
-      dispatchEvent(new Event("videoDoubleClicked"));
+      video.dispatchEvent(new CustomEvent("galleyController", {
+        detail: "doubleClickedVideo",
+        bubbles: true
+      }));
     });
   }
 
@@ -287,8 +290,8 @@ class VideoController {
     const activeVideoPlayer = this.getActiveVideoPlayer();
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
     const videoThumbsAroundInitialThumb = thumbs
-    .filter(thumb => Utils.isVideo(thumb) && !this.videoPlayerHasSource(activeVideoPlayer, thumb))
-    .slice(0, inactiveVideoPlayers.length);
+      .filter(thumb => Utils.isVideo(thumb) && !this.videoPlayerHasSource(activeVideoPlayer, thumb))
+      .slice(0, inactiveVideoPlayers.length);
     const loadedVideoSources = new Set(inactiveVideoPlayers
       .map(video => video.src)
       .filter(src => src !== ""));

@@ -4,6 +4,10 @@ class GalleryUI {
    */
   background;
   /**
+   * @type {HTMLAnchorElement}
+   */
+  originalContentLink;
+  /**
    * @type {HTMLElement | null}
    */
   lastVisitedThumb;
@@ -16,26 +20,50 @@ class GalleryUI {
    * @param {HTMLElement} galleryContainer
    */
   constructor(galleryContainer) {
+    this.background = this.createBackground(galleryContainer);
+    this.originalContentLink = this.createOriginalContentLink(galleryContainer);
     this.lastVisitedThumb = null;
-    this.createBackground(galleryContainer);
     this.toggleVideoPointerEvents(false);
+  }
+
+  createUiContainer(galleryContainer) {
+    const container = document.createElement("div");
+
+    container.id = "gallery-ui";
+    galleryContainer.appendChild(container);
+    return container;
   }
 
   /**
    * @param {HTMLElement} galleryContainer
+   * @return {HTMLElement}
    */
   createBackground(galleryContainer) {
-    this.background = document.createElement("div");
-    this.background.id = "gallery-background";
-    this.background.style.opacity = Utils.getPreference("galleryBackgroundOpacity", "1");
-    galleryContainer.appendChild(this.background);
+    const background = document.createElement("div");
+
+    background.id = "gallery-background";
+    background.style.opacity = Utils.getPreference("galleryBackgroundOpacity", "1");
+    galleryContainer.appendChild(background);
+    return background;
+  }
+
+  /**
+   * @param {HTMLElement} galleryContainer
+   * @return {HTMLAnchorElement}
+   */
+  createOriginalContentLink(galleryContainer) {
+    const originalContentLink = document.createElement("a");
+
+    originalContentLink.id = "gallery-original-content-link";
+    galleryContainer.appendChild(originalContentLink);
+    return originalContentLink;
   }
 
   /**
    * @param {HTMLElement} thumb
    */
   enterGallery(thumb) {
-    this.lastVisitedThumb = thumb;
+    this.setLastVisitedThumb(thumb);
     this.toggleActiveBackground(true);
     this.toggleScrollbar(false);
     this.toggleVideoPointerEvents(true);
@@ -46,14 +74,14 @@ class GalleryUI {
     this.toggleScrollbar(true);
     this.scrollToLastVisitedThumb();
     this.toggleVideoPointerEvents(false);
+    this.toggleCursor(true);
   }
 
   scrollToLastVisitedThumb() {
-    // if (this.usingMasonryLayout && this.lastVisitedThumb !== null) {
     FavoritesLayoutObserver.waitForLayoutToComplete()
       .then(() => {
-        if (this.lastVisitedThumb !== null) {
-          Utils.scrollToThumb(this.lastVisitedThumb.id, false);
+        if (this.lastVisitedThumb !== null && this.usingMasonryLayout) {
+          this.scrollToNextThumb(this.lastVisitedThumb);
         }
       });
 
@@ -109,12 +137,12 @@ class GalleryUI {
    * @param {HTMLElement} thumb
    */
   updateUIInGallery(thumb) {
-    this.lastVisitedThumb = thumb;
+    this.setLastVisitedThumb(thumb);
 
     if (this.usingMasonryLayout || Utils.usingFirefox()) {
       return;
     }
-    Utils.scrollToThumb(thumb.id, true);
+    this.scrollToNextThumb(thumb);
   }
 
   /**
@@ -169,5 +197,52 @@ class GalleryUI {
       default:
         break;
     }
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  setLastVisitedThumb(thumb) {
+    this.lastVisitedThumb = thumb;
+    Utils.getOriginalImageURLWithExtension(thumb)
+      .then((url) => {
+        this.originalContentLink.href = url;
+      });
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleOriginalContentLink(value) {
+    this.originalContentLink.classList.toggle("active", value);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  scrollToNextThumb(thumb) {
+    const previousThumb = thumb.previousElementSibling;
+    const nextThumb = thumb.nextElementSibling;
+
+    if (!(previousThumb instanceof HTMLElement) || !(nextThumb instanceof HTMLElement)) {
+      return;
+    }
+    const previousYDistance = Math.abs(thumb.offsetTop - previousThumb.offsetTop);
+    const nextYDistance = Math.abs(thumb.offsetTop - nextThumb.offsetTop);
+
+    if (previousYDistance < 10 && nextYDistance < 10) {
+      return;
+    }
+    thumb.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleCursor(value) {
+    this.background.style.cursor = value ? "default" : "none";
   }
 }

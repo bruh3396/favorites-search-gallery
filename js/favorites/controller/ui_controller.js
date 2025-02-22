@@ -15,6 +15,7 @@ class FavoritesUIController {
     }
 
     menu.addEventListener("uiController", (event) => {
+      // @ts-ignore
       if (!Utils.hasTagName(event.target, "label")) {
         FavoritesUIController.invokeAction(event);
       }
@@ -41,6 +42,7 @@ class FavoritesUIController {
         return;
       }
       target.checked = !target.checked;
+      // @ts-ignore
       FavoritesUIController.invokeAction({
         target
       });
@@ -49,6 +51,18 @@ class FavoritesUIController {
 
   static setupGlobalListeners() {
     FavoritesUIController.updateColumnCountOnShiftScroll();
+    FavoritesUIController.updateShowOnHoverOptionTriggeredFromGallery();
+  }
+
+  static updateShowOnHoverOptionTriggeredFromGallery() {
+    GlobalEvents.gallery.on("showOnHover", (/** @type {Boolean} */ value) => {
+      const showOnHoverCheckbox = document.getElementById("show-on-hover");
+
+      if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
+        showOnHoverCheckbox.checked = value;
+        Utils.setPreference("showOnHover", value);
+      }
+    });
   }
 
   static updateColumnCountOnShiftScroll() {
@@ -223,12 +237,16 @@ class FavoritesUIController {
    * @param {CustomEvent} event
    */
   static changeAllowedRatings(event) {
+    // @ts-ignore
     const explicit = event.target.querySelector("#explicit-rating");
+    // @ts-ignore
     const questionable = event.target.querySelector("#questionable-rating");
+    // @ts-ignore
     const safe = event.target.querySelector("#safe-rating");
     const allowedRatings = (4 * Number(explicit.checked)) + (2 * Number(questionable.checked)) + Number(safe.checked);
 
     Utils.setPreference("allowedRatings", allowedRatings);
+    // @ts-ignore
     event.target.dispatchEvent(new CustomEvent("controller", {
       bubbles: true,
       detail: allowedRatings
@@ -328,5 +346,15 @@ class FavoritesUIController {
       return;
     }
     Utils.insertStyleHTML(`#header {display: ${event.target.checked ? "block" : "none"}}`, "hide-header");
+  }
+
+  /**
+   * @param {CustomEvent} event
+   */
+  static toggleShowOnHover(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    GlobalEvents.favorites.emit("showOnHover", event.target.checked);
   }
 }

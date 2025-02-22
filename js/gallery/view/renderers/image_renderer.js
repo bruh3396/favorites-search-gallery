@@ -59,16 +59,20 @@ class GalleryImageRenderer extends Renderer {
   handlePageChange() {
     this.imageCreator.clearAllImages();
     this.thumbUpscaler.clear();
-    this.thumbUpscaler.presetDimensionsOfAllThumbCanvases();
+    this.thumbUpscaler.presetAllCanvasDimensions();
   }
 
   handlePageChangeInGallery() {
     this.imageCreator.clearAnimatedImages();
     this.thumbUpscaler.clear();
     setTimeout(() => {
-      this.thumbUpscaler.presetDimensionsOfAllThumbCanvases();
+      this.thumbUpscaler.presetAllCanvasDimensions();
       this.upscaleThumbsWithAvailableImages();
     }, 10);
+  }
+
+  handleFavoritesResize() {
+    this.thumbUpscaler.changeUpscaledResolution();
   }
 
   upscaleThumbsWithAvailableImages() {

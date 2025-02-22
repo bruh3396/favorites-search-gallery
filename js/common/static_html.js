@@ -406,7 +406,7 @@ class HTMLStrings {
     }
 
     #find-favorite {
-      display: none;
+      /* display: none; */
       margin-top: 7px;
 
       >input {
@@ -1200,7 +1200,7 @@ Lower numbers improve responsiveness">
     z-index: -1;
     display: none;
     pointer-events: none;
-    cursor: default;
+    cursor: none;
     width: 100vw;
     height: 100vh;
 
@@ -1213,20 +1213,20 @@ Lower numbers improve responsiveness">
     }
   }
 
-  #original-content-background-link-mask {
+  #gallery-original-content-link {
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: red;
-    z-index: 10001;
+    z-index: 1;
     pointer-events: none;
     cursor: default;
-    display: none;
     opacity: 0;
 
 
     &.active {
+      opacity: 0.5;
       pointer-events: all;
     }
   }

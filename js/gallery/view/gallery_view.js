@@ -97,6 +97,11 @@ class GalleryView {
     this.ui.scrollToLastVisitedThumb();
   }
 
+  handleFavoritesResize() {
+    this.renderer.handleFavoritesResize();
+    this.renderer.handlePageChange();
+  }
+
   toggleBackgroundOpacity() {
     this.ui.toggleBackgroundOpacity();
   }
@@ -120,5 +125,19 @@ class GalleryView {
    */
   showRemovedFavoriteStatus(status) {
     this.ui.showRemovedFavoriteStatus(status);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleOriginalContentLink(value) {
+    this.ui.toggleOriginalContentLink(value);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleCursor(value) {
+    this.ui.toggleCursor(value);
   }
 }

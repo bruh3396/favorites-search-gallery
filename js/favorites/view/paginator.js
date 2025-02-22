@@ -548,12 +548,16 @@ class FavoritesPaginator {
     if (this.currentPageNumber !== pageNumber) {
       this.changePage(pageNumber, favorites);
     }
+    await FavoritesLayoutObserver.waitForLayoutToComplete();
     const thumb = document.getElementById(id);
 
     if (thumb === null || thumb.classList.contains("blink")) {
       return;
     }
-    Utils.smoothScrollToElement(thumb, 300);
+    thumb.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
     thumb.classList.add("blink");
     await Utils.sleep(1500);
     thumb.classList.remove("blink");

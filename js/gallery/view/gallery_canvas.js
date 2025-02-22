@@ -17,11 +17,11 @@ class GalleryCanvas {
    */
   constructor(container) {
     this.container = container;
-    this.create();
+    this.createCanvas();
     this.setResolution();
   }
 
-  create() {
+  createCanvas() {
     this.canvas = document.createElement("canvas");
     this.context = this.canvas.getContext("2d") || new CanvasRenderingContext2D();
     this.container.id = "canvas-container";

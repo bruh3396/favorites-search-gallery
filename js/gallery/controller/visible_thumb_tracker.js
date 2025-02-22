@@ -32,7 +32,7 @@ class VisibleThumbTracker {
    * @returns {Function}
    */
   createVisibleThumbsChangedCallback(onVisibleThumbsChanged) {
-    onVisibleThumbsChanged = Utils.debounceAfterFirstCall(onVisibleThumbsChanged, 250);
+    onVisibleThumbsChanged = Utils.debounceAlways(onVisibleThumbsChanged, 250);
     return (/** @type {IntersectionObserverEntry[]}*/ entries) => {
       this.updateVisibleThumbs(entries);
       onVisibleThumbsChanged();

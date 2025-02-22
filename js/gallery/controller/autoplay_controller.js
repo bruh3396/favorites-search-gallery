@@ -1,4 +1,4 @@
-class AutoplayListenerList {
+class AutoplayEvents {
   /**
    * @type {Function}
    */
@@ -25,14 +25,10 @@ class AutoplayListenerList {
   onVideoEndedBeforeMinimumViewTime;
 
   /**
-   * @param {Function} onEnable
-   * @param {Function} onDisable
-   * @param {Function} onPause
-   * @param {Function} onResume
-   * @param {Function} onComplete
-   * @param {Function} onVideoEndedEarly
+   *
+   * @param {{onEnable: Function, onDisable: Function, onPause: Function, onResume: Function, onComplete: Function, onVideoEndedEarly: Function}} events
    */
-  constructor(onEnable, onDisable, onPause, onResume, onComplete, onVideoEndedEarly) {
+  constructor({onEnable, onDisable, onPause, onResume, onComplete, onVideoEndedEarly}) {
     this.onEnable = onEnable;
     this.onDisable = onDisable;
     this.onPause = onPause;
@@ -42,7 +38,7 @@ class AutoplayListenerList {
   }
 }
 
-class Autoplay {
+class AutoplayController {
   static preferences = {
     active: "autoplayActive",
     paused: "autoplayPaused",
@@ -58,10 +54,10 @@ class Autoplay {
     tune: Utils.createObjectURLFromSvg(Utils.icons.tune)
   };
   static settings = {
-    imageViewDuration: Utils.getPreference(Autoplay.preferences.imageDuration, 3000),
-    minimumVideoDuration: Utils.getPreference(Autoplay.preferences.minimumVideoDuration, 5000),
+    imageViewDuration: Utils.getPreference(AutoplayController.preferences.imageDuration, 3000),
+    minimumVideoDuration: Utils.getPreference(AutoplayController.preferences.minimumVideoDuration, 5000),
     menuVisibilityDuration: Utils.onMobileDevice() ? 1500 : 500,
-    moveForward: Utils.getPreference(Autoplay.preferences.direction, true),
+    moveForward: Utils.getPreference(AutoplayController.preferences.direction, true),
 
     get imageViewDurationInSeconds() {
       return Utils.millisecondsToSeconds(Number(this.imageViewDuration));
@@ -101,7 +97,7 @@ class Autoplay {
    */
   ui;
   /**
-   * @type {AutoplayListenerList}
+   * @type {AutoplayEvents}
    */
   events;
   /**
@@ -142,10 +138,10 @@ class Autoplay {
   menuIsVisible;
 
   /**
-   * @param {AutoplayListenerList} events
+   * @param {AutoplayEvents} events
    */
   constructor(events) {
-    if (Autoplay.disabled) {
+    if (AutoplayController.disabled) {
       return;
     }
     this.initializeEvents(events);
@@ -161,7 +157,7 @@ class Autoplay {
   }
 
   /**
-   * @param {AutoplayListenerList} events
+   * @param {AutoplayEvents} events
    */
   initializeEvents(events) {
     this.events = events;
@@ -170,7 +166,7 @@ class Autoplay {
 
     this.events.onComplete = () => {
       if (this.active && !this.paused) {
-        onComplete();
+        onComplete(AutoplayController.settings.moveForward ? "ArrowRight" : "ArrowLeft");
       }
     };
   }
@@ -182,16 +178,16 @@ class Autoplay {
     };
     this.eventListenersAbortController = new AbortController();
     this.currentThumb = null;
-    this.active = Utils.getPreference(Autoplay.preferences.active, Utils.onMobileDevice());
-    this.paused = Utils.getPreference(Autoplay.preferences.paused, false);
+    this.active = Utils.getPreference(AutoplayController.preferences.active, Utils.onMobileDevice());
+    this.paused = Utils.getPreference(AutoplayController.preferences.paused, false);
     this.menuIsPersistent = false;
     this.menuIsVisible = false;
   }
 
   initializeTimers() {
-    this.imageViewTimer = new Cooldown(Autoplay.settings.imageViewDuration);
-    this.menuVisibilityTimer = new Cooldown(Autoplay.settings.menuVisibilityDuration);
-    this.videoViewTimer = new Cooldown(Autoplay.settings.minimumVideoDuration);
+    this.imageViewTimer = new Cooldown(AutoplayController.settings.imageViewDuration);
+    this.menuVisibilityTimer = new Cooldown(AutoplayController.settings.menuVisibilityDuration);
+    this.videoViewTimer = new Cooldown(AutoplayController.settings.minimumVideoDuration);
 
     this.imageViewTimer.onCooldownEnd = () => { };
     this.menuVisibilityTimer.onCooldownEnd = () => {
@@ -231,7 +227,7 @@ class Autoplay {
   insertImageProgressHTML() {
     Utils.insertStyleHTML(`
       #autoplay-image-progress-bar.animated {
-          transition: width ${Autoplay.settings.imageViewDurationInSeconds}s linear;
+          transition: width ${AutoplayController.settings.imageViewDurationInSeconds}s linear;
           width: 100%;
       }
       `, "autoplay-image-progress-bar-animation");
@@ -240,7 +236,7 @@ class Autoplay {
   insertVideoProgressHTML() {
     Utils.insertStyleHTML(`
       #autoplay-video-progress-bar.animated {
-          transition: width ${Autoplay.settings.minimumVideoDurationInSeconds}s linear;
+          transition: width ${AutoplayController.settings.minimumVideoDurationInSeconds}s linear;
           width: 100%;
       }
       `, "autoplay-video-progress-bar-animation");
@@ -274,8 +270,8 @@ class Autoplay {
     const imageViewDurationInput = document.getElementById("autoplay-image-duration-input").parentElement;
     const videoViewDurationInput = document.getElementById("autoplay-minimum-animated-duration-input").parentElement;
 
-    imageViewDurationSelect.value = Autoplay.settings.imageViewDurationInSeconds;
-    videoViewDurationSelect.value = Autoplay.settings.minimumVideoDurationInSeconds;
+    imageViewDurationSelect.value = AutoplayController.settings.imageViewDurationInSeconds;
+    videoViewDurationSelect.value = AutoplayController.settings.minimumVideoDurationInSeconds;
     imageViewDurationInput.insertAdjacentElement("afterend", imageViewDurationSelect);
     videoViewDurationInput.insertAdjacentElement("afterend", videoViewDurationSelect);
     imageViewDurationInput.remove();
@@ -322,16 +318,16 @@ class Autoplay {
   }
 
   setMenuIconImageSources() {
-    this.ui.playButton.src = this.paused ? Autoplay.menuIconImageURLs.play : Autoplay.menuIconImageURLs.pause;
-    this.ui.settingsButton.src = Autoplay.menuIconImageURLs.tune;
-    this.ui.changeDirectionButton.src = Autoplay.menuIconImageURLs.changeDirection;
-    this.ui.changeDirectionMask.image.src = Autoplay.menuIconImageURLs.changeDirectionAlt;
-    this.ui.changeDirectionMask.container.classList.toggle("upper-right", Autoplay.settings.moveForward);
+    this.ui.playButton.src = this.paused ? AutoplayController.menuIconImageURLs.play : AutoplayController.menuIconImageURLs.pause;
+    this.ui.settingsButton.src = AutoplayController.menuIconImageURLs.tune;
+    this.ui.changeDirectionButton.src = AutoplayController.menuIconImageURLs.changeDirection;
+    this.ui.changeDirectionMask.image.src = AutoplayController.menuIconImageURLs.changeDirectionAlt;
+    this.ui.changeDirectionMask.container.classList.toggle("upper-right", AutoplayController.settings.moveForward);
   }
 
   loadAutoplaySettingsIntoUI() {
-    this.ui.settingsMenu.imageDurationInput.value = Autoplay.settings.imageViewDurationInSeconds;
-    this.ui.settingsMenu.minimumVideoDurationInput.value = Autoplay.settings.minimumVideoDurationInSeconds;
+    this.ui.settingsMenu.imageDurationInput.value = AutoplayController.settings.imageViewDurationInSeconds;
+    this.ui.settingsMenu.minimumVideoDurationInput.value = AutoplayController.settings.minimumVideoDurationInSeconds;
   }
 
   setupNumberComponents() {
@@ -417,14 +413,14 @@ class Autoplay {
    * @param {Boolean} forward
    */
   toggleDirection(forward) {
-    const directionHasNotChanged = forward === Autoplay.settings.moveForward;
+    const directionHasNotChanged = forward === AutoplayController.settings.moveForward;
 
     if (directionHasNotChanged) {
       return;
     }
-    Autoplay.settings.moveForward = !Autoplay.settings.moveForward;
-    this.ui.changeDirectionMask.container.classList.toggle("upper-right", Autoplay.settings.moveForward);
-    Utils.setPreference(Autoplay.preferences.direction, Autoplay.settings.moveForward);
+    AutoplayController.settings.moveForward = !AutoplayController.settings.moveForward;
+    this.ui.changeDirectionMask.container.classList.toggle("upper-right", AutoplayController.settings.moveForward);
+    Utils.setPreference(AutoplayController.preferences.direction, AutoplayController.settings.moveForward);
   }
 
   /**
@@ -460,7 +456,7 @@ class Autoplay {
    * @param {Boolean} value
    */
   toggle(value) {
-    Utils.setPreference(Autoplay.preferences.active, value);
+    Utils.setPreference(AutoplayController.preferences.active, value);
     this.active = value;
 
     if (value) {
@@ -474,14 +470,14 @@ class Autoplay {
     let durationInSeconds = parseFloat(this.ui.settingsMenu.imageDurationInput.value);
 
     if (isNaN(durationInSeconds)) {
-      durationInSeconds = Autoplay.settings.imageViewDurationInSeconds;
+      durationInSeconds = AutoplayController.settings.imageViewDurationInSeconds;
     }
     const duration = Math.round(Utils.clamp(durationInSeconds * 1000, 1000, 60000));
 
-    Utils.setPreference(Autoplay.preferences.imageDuration, duration);
-    Autoplay.settings.imageViewDuration = duration;
+    Utils.setPreference(AutoplayController.preferences.imageDuration, duration);
+    AutoplayController.settings.imageViewDuration = duration;
     this.imageViewTimer.waitTime = duration;
-    this.ui.settingsMenu.imageDurationInput.value = Autoplay.settings.imageViewDurationInSeconds;
+    this.ui.settingsMenu.imageDurationInput.value = AutoplayController.settings.imageViewDurationInSeconds;
     this.insertImageProgressHTML();
   }
 
@@ -489,14 +485,14 @@ class Autoplay {
     let durationInSeconds = parseFloat(this.ui.settingsMenu.minimumVideoDurationInput.value);
 
     if (isNaN(durationInSeconds)) {
-      durationInSeconds = Autoplay.settings.minimumVideoDurationInSeconds;
+      durationInSeconds = AutoplayController.settings.minimumVideoDurationInSeconds;
     }
     const duration = Math.round(Utils.clamp(durationInSeconds * 1000, 0, 60000));
 
-    Utils.setPreference(Autoplay.preferences.minimumVideoDuration, duration);
-    Autoplay.settings.minimumVideoDuration = duration;
+    Utils.setPreference(AutoplayController.preferences.minimumVideoDuration, duration);
+    AutoplayController.settings.minimumVideoDuration = duration;
     this.videoViewTimer.waitTime = duration;
-    this.ui.settingsMenu.minimumVideoDurationInput.value = Autoplay.settings.minimumVideoDurationInSeconds;
+    this.ui.settingsMenu.minimumVideoDurationInput.value = AutoplayController.settings.minimumVideoDurationInSeconds;
     this.insertVideoProgressHTML();
   }
 
@@ -509,7 +505,7 @@ class Autoplay {
     }
     this.currentThumb = thumb;
 
-    if (!this.active || Autoplay.disabled || this.paused) {
+    if (!this.active || AutoplayController.disabled || this.paused) {
       return;
     }
 
@@ -548,7 +544,7 @@ class Autoplay {
    * @param {HTMLElement} thumb
    */
   start(thumb) {
-    if (!this.active || Autoplay.disabled) {
+    if (!this.active || AutoplayController.disabled) {
       return;
     }
     this.addAutoplayEventListeners();
@@ -558,7 +554,7 @@ class Autoplay {
   }
 
   stop() {
-    if (Autoplay.disabled) {
+    if (AutoplayController.disabled) {
       return;
     }
     this.ui.container.style.visibility = "hidden";
@@ -570,16 +566,16 @@ class Autoplay {
 
   pause() {
     this.paused = !this.paused;
-    Utils.setPreference(Autoplay.preferences.paused, this.paused);
+    Utils.setPreference(AutoplayController.preferences.paused, this.paused);
 
     if (this.paused) {
-      this.ui.playButton.src = Autoplay.menuIconImageURLs.play;
+      this.ui.playButton.src = AutoplayController.menuIconImageURLs.play;
       this.ui.playButton.title = "Resume Autoplay";
       this.stopImageViewTimer();
       this.stopVideoViewTimer();
       this.events.onPause();
     } else {
-      this.ui.playButton.src = Autoplay.menuIconImageURLs.pause;
+      this.ui.playButton.src = AutoplayController.menuIconImageURLs.pause;
       this.ui.playButton.title = "Pause Autoplay";
       this.startViewTimer(this.currentThumb);
       this.events.onResume();
@@ -657,7 +653,7 @@ class Autoplay {
     this.stopImageProgressBar();
     setTimeout(() => {
       this.ui.imageProgressBar.classList.add("animated");
-    }, 10);
+    }, 20);
   }
 
   stopImageProgressBar() {
@@ -668,10 +664,16 @@ class Autoplay {
     this.stopVideoProgressBar();
     setTimeout(() => {
       this.ui.videoProgressBar.classList.add("animated");
-    }, 10);
+    }, 20);
   }
 
   stopVideoProgressBar() {
     this.ui.videoProgressBar.classList.remove("animated");
+  }
+  /**
+   * @param {MouseEvent | TouchEvent} event
+   */
+  clickedOnMenu(event) {
+    return this.ui.menu !== null && this.ui.menu.contains(event.target);
   }
 }

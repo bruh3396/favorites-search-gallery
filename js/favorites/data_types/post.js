@@ -357,9 +357,8 @@ class Post {
       const middleClick = event.button === Utils.clickCodes.middle;
       const leftClick = event.button === Utils.clickCodes.left;
       const shiftClick = leftClick && event.shiftKey;
-      const galleryDisabled = Utils.getPerformanceProfile() > 0;
 
-      if (middleClick || shiftClick || (leftClick && galleryDisabled)) {
+      if (middleClick || shiftClick || (leftClick && Utils.galleryIsDisabled())) {
         event.preventDefault();
         Utils.openPostInNewTab(this.id);
       }

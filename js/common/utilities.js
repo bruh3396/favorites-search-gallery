@@ -162,7 +162,7 @@ class Utils {
   /**
    * @type {RegExp}
    */
-  static thumbnailSourceCompressionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
+  static thumbnailSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
   /**
    * @type {Cooldown}
    */
@@ -380,18 +380,20 @@ class Utils {
    * @returns {String}
    */
   static getOriginalImageURLFromThumb(thumb) {
-    return Utils.getOriginalImageURL(Utils.getImageFromThumb(thumb).src);
+    return Utils.getOriginalImageURL(thumb);
   }
 
   /**
-   * @param {String} thumbURL
+   * @param {HTMLElement} thumb
    * @returns {String}
    */
-  static getOriginalImageURL(thumbURL) {
-    return thumbURL
+  static getOriginalImageURL(thumb) {
+    const image = Utils.getImageFromThumb(thumb);
+    const thumbSource = image === null ? "" : image.src;
+    const cleanedThumbSource = Utils.cleanThumbnailSource(thumbSource, thumb.id);
+    return cleanedThumbSource
       .replace("thumbnails", "/images")
       .replace("thumbnail_", "")
-      // .replace("wimg.", "")
       .replace("us.rule34", "rule34");
   }
 
@@ -400,23 +402,26 @@ class Utils {
    * @returns {String}
    */
   static getExtensionFromImageURL(imageURL) {
-    try {
-      return (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL)[1];
-
-    } catch (error) {
-      return "jpg";
-    }
+    const match = (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL);
+    return match === null ? "jpg" : match[1];
   }
 
   /**
-   * @param {Element | Post} thumb
+   * @param {HTMLElement | Post} thumb
    * @returns {Set.<String>}
    */
   static getTagsFromThumb(thumb) {
-    if (Utils.onSearchPage()) {
+    if (this.onSearchPage()) {
+      if (!(thumb instanceof HTMLElement)) {
+        return new Set();
+      }
       const image = Utils.getImageFromThumb(thumb);
+
+      if (image === null) {
+        return new Set();
+      }
       const tags = image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
-      return Utils.convertToTagSet(tags);
+      return Utils.convertToTagSet(tags || "");
     }
     const post = Post.allPosts.get(thumb.id);
     return post === undefined ? new Set() : new Set(post.tagSet);
@@ -460,7 +465,8 @@ class Utils {
     if (thumb instanceof Post) {
       return false;
     }
-    return Utils.getImageFromThumb(thumb).hasAttribute("gif");
+    const image = this.getImageFromThumb(thumb);
+    return image !== null && image.hasAttribute("gif");
   }
 
   /**
@@ -519,7 +525,7 @@ class Utils {
 
   /**
    * @param {HTMLInputElement | HTMLTextAreaElement} input
-   * @returns {HTMLDivElement | null}
+   * @returns {HTMLElement | null}
    */
   static getAwesompleteFromInput(input) {
     const awesomplete = input.parentElement;
@@ -821,7 +827,7 @@ class Utils {
       return;
     }
 
-    if (!Gallery.disabled && Gallery.settings.endlessSearchPageGallery) {
+    if (Utils.galleryIsEnabled() && GalleryConstants.endlessSearchPageGallery) {
       return;
     }
     const id = "search-page-prefetch";
@@ -905,37 +911,11 @@ class Utils {
   }
 
   /**
-   * @param {Event} event
+   * @param {MouseEvent} event
    * @returns {Boolean}
    */
   static enteredOverCaptionTag(event) {
     return event.relatedTarget !== null && event.relatedTarget.classList.contains("caption-tag");
-  }
-
-  /**
-   * @param {String} id
-   * @param {Boolean} smoothTransition
-   */
-  static scrollToThumb(id, smoothTransition) {
-    const element = document.getElementById(id);
-    const elementIsNotAThumb = element === null || (!element.classList.contains("thumb") && !element.classList.contains(Utils.favoriteItemClassName));
-
-    if (elementIsNotAThumb) {
-      return;
-    }
-    const rect = element.getBoundingClientRect();
-    const menu = document.getElementById("favorites-search-gallery-menu");
-    const favoritesSearchHeight = menu === null ? 0 : menu.getBoundingClientRect().height;
-    let top = rect.top + window.scrollY + (rect.height / 2) - (window.innerHeight / 2) - (favoritesSearchHeight / 2);
-
-    if (Utils.onMobileDevice()) {
-      top = Math.max(1, top);
-    }
-
-    window.scroll({
-      top,
-      behavior: smoothTransition ? "smooth" : "instant"
-    });
   }
 
   /**
@@ -1563,19 +1543,20 @@ class Utils {
   }
 
   /**
+   * @param {HTMLElement} thumb
    * @returns {Promise<String>}
    */
   static getImageExtensionFromThumb(thumb) {
     if (Utils.isVideo(thumb)) {
-      return "mp4";
+      return Promise.resolve("mp4");
     }
 
     if (Utils.isGif(thumb)) {
-      return "gif";
+      return Promise.resolve("gif");
     }
 
     if (Utils.extensionIsKnown(thumb.id)) {
-      return Utils.getImageExtension(thumb.id);
+      return Promise.resolve(Utils.getImageExtension(thumb.id));
     }
     return Utils.fetchImageExtension(thumb);
   }
@@ -1609,7 +1590,7 @@ class Utils {
    */
   static async getOriginalImageURLWithExtension(thumb) {
     const extension = await Utils.getImageExtensionFromThumb(thumb);
-    return Utils.getOriginalImageURL(thumb.querySelector("img").src).replace(".jpg", `.${extension}`);
+    return Utils.getOriginalImageURL(thumb).replace(".jpg", `.${extension}`);
   }
 
   /**
@@ -1716,7 +1697,7 @@ class Utils {
       return;
     }
 
-    if (Gallery.disabled) {
+    if (Utils.galleryIsDisabled()) {
       await Utils.findImageExtensionsOnSearchPage();
       Utils.setupOriginalImageLinksOnSearchPageHelper();
     } else {
@@ -1765,7 +1746,7 @@ class Utils {
       const leftClick = event.button === Utils.clickCodes.left;
       const shiftClick = leftClick && event.shiftKey;
 
-      if (leftClick && Gallery.disabled) {
+      if (leftClick && Utils.galleryIsDisabled()) {
         document.location = thumbURL;
       } else if (middleClick || shiftClick) {
         window.open(thumbURL);
@@ -2087,37 +2068,6 @@ class Utils {
 
   /**
    * @param {HTMLElement} element
-   * @param {Number} duration
-   */
-  static smoothScrollToElement(element, duration) {
-    const elementY = element.getBoundingClientRect().top + window.scrollY;
-    const offset = (window.innerHeight / 2) - (element.offsetHeight / 2);
-    const targetY = elementY - offset;
-
-    const startY = window.scrollY;
-    const distance = targetY - startY;
-    const startTime = performance.now();
-
-    /**
-     * @param {Number} currentTime
-     */
-    function scroll(currentTime) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = 0.5 - (0.5 * Math.cos(Math.PI * progress));
-
-      window.scrollTo(0, startY + (distance * ease));
-
-      if (progress < 1) {
-        requestAnimationFrame(scroll);
-      }
-    }
-
-    requestAnimationFrame(scroll);
-  }
-
-  /**
-   * @param {HTMLElement} element
    * @returns {Boolean}
    */
   static elementIsInView(element) {
@@ -2420,5 +2370,35 @@ class Utils {
     status.id = thumb.id;
     Utils.removeFavorite(thumb.id);
     return Promise.resolve(status);
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  static galleryIsDisabled() {
+    return (Utils.onMobileDevice() && Utils.onSearchPage()) || Utils.getPerformanceProfile() > 0 || Utils.onPostPage();
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  static galleryIsEnabled() {
+    return !Utils.galleryIsDisabled();
+  }
+
+  /**
+   * @param {Number[]} numbers
+   * @returns {Number}
+   */
+  static sum(numbers) {
+    return numbers.reduce((partialSum, newAddend) => partialSum + newAddend, 0);
+  }
+
+  /**
+   * @param {Number[]} numbers
+   * @returns {Number}
+   */
+  static average(numbers) {
+    return numbers.length === 0 ? 0 : Utils.sum(numbers) / numbers.length;
   }
 }

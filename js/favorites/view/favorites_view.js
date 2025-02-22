@@ -114,4 +114,12 @@ class FavoritesView {
   gotoNextPage() {
     this.paginator.gotoNextPage();
   }
+
+  /**
+   * @param {String} id
+   * @param {Post[]} searchResults
+   */
+  findFavorite(id, searchResults) {
+    this.paginator.findFavorite(id, searchResults);
+  }
 }

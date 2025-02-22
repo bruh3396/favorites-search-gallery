@@ -11,17 +11,11 @@ class GalleryThumbnailUpscaler {
    * @type {Boolean}
    */
   currentlyUpscaling;
-  /**
-   * @type {Worker}
-   */
-  offscreenUpscaler;
 
   constructor() {
     this.canvases = new Map();
     this.upscaleQueue = [];
     this.currentlyUpscaling = false;
-    this.offscreenUpscaler = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.offscreenThumbUpscaler));
-    this.upscale = GalleryConstants.upscaleThumbsWithWorker ? this.upscaleWithWorker : this.upscale;
   }
 
   /**
@@ -29,39 +23,9 @@ class GalleryThumbnailUpscaler {
    */
   upscale(request) {
     if (this.requestIsValid(request)) {
-      this.addToUpscaleQueue(request);
+      // this.addToUpscaleQueue(request);
+      this.finishUpscale(request);
     }
-  }
-
-  /**
-   * @param {ImageRequest} request
-   */
-  async upscaleWithWorker(request) {
-    if (this.requestIsInvalid(request) || !(request.imageBitmap instanceof ImageBitmap)) {
-      return;
-    }
-    const offscreenCanvas = this.getOffscreenCanvas(request);
-    const canvasIsTransferrable = offscreenCanvas !== null;
-    const clonedImageBitmap = await createImageBitmap(request.imageBitmap);
-
-    this.canvases.set(request.id, offscreenCanvas || new OffscreenCanvas(0, 0));
-    const message = {
-      action: "upscale",
-      id: request.id,
-      imageBitmap: clonedImageBitmap,
-      canvas: offscreenCanvas
-    };
-    const transferrableObjects = canvasIsTransferrable ? [offscreenCanvas, clonedImageBitmap] : [];
-
-    this.offscreenUpscaler.postMessage(message, transferrableObjects);
-  }
-
-  /**
-   * @param {ImageRequest} request
-   * @returns {Boolean}
-   */
-  requestIsInvalid(request) {
-    return document.getElementById(request.id) === null || this.canvases.has(request.id);
   }
 
   /**
@@ -69,24 +33,32 @@ class GalleryThumbnailUpscaler {
    * @returns {Boolean}
    */
   requestIsValid(request) {
-    return !this.requestIsInvalid(request);
+    return document.getElementById(request.id) !== null && !this.canvases.has(request.id);
   }
 
   /**
    * @param {ImageRequest} request
-   * @returns {OffscreenCanvas | null}
    */
-  getOffscreenCanvas(request) {
-    if (request.thumb === null) {
-      return null;
-    }
-    const canvas = request.thumb.querySelector("canvas");
+  addToUpscaleQueue(request) {
+    this.upscaleQueue.push(request);
+    this.drainUpscaleQueue();
+  }
 
-    if (canvas === null || this.isTransferred(canvas)) {
-      return null;
+  async drainUpscaleQueue() {
+    if (this.currentlyUpscaling) {
+      return;
     }
-    canvas.dataset.transferred = "";
-    return canvas.transferControlToOffscreen();
+    this.currentlyUpscaling = true;
+
+    while (this.upscaleQueue.length > 0) {
+      const request = this.upscaleQueue.shift();
+
+      if (request !== undefined) {
+        this.finishUpscale(request);
+      }
+      await Utils.sleep(GalleryConstants.upscaleDelay);
+    }
+    this.currentlyUpscaling = false;
   }
 
   /**
@@ -111,52 +83,6 @@ class GalleryThumbnailUpscaler {
   }
 
   /**
-   * @param {HTMLCanvasElement | null} canvas
-   */
-  isTransferred(canvas) {
-    return (canvas instanceof HTMLCanvasElement) && canvas.dataset.transferred !== undefined;
-  }
-
-  presetDimensionsOfAllThumbCanvases() {
-    for (const item of this.getAllCanvasDimensions()) {
-        this.setThumbCanvasDimensions(item.canvas, item.width, item.height);
-    }
-  }
-
-  /**
-   * @returns {{id: String, canvas: HTMLCanvasElement, width: Number, height: Number}[]}
-   */
-  getAllCanvasDimensions() {
-    const thumbs = Utils.getAllThumbs();
-    const messages = [];
-
-    for (const thumb of thumbs) {
-      const canvas = thumb.querySelector("canvas");
-
-      if (canvas === null || canvas.dataset.size === undefined || this.isTransferred(canvas)) {
-        continue;
-      }
-      const dimensions = Utils.getDimensions(canvas.dataset.size);
-
-      messages.push({
-        id: thumb.id,
-        canvas,
-        width: dimensions.x,
-        height: dimensions.y
-      });
-    }
-    return messages;
-  }
-
-  getCanvasDimensions() {
-
-  }
-
-  presetDimensionsOfAllThumbCanvasesWithWorker() {
-
-  }
-
-  /**
    * @param {HTMLCanvasElement} canvas
    * @param {ImageBitmap} imageBitmap
    */
@@ -165,6 +91,40 @@ class GalleryThumbnailUpscaler {
       this.setThumbCanvasDimensions(canvas, imageBitmap.width, imageBitmap.height);
     }
   }
+
+  presetAllCanvasDimensions() {
+    this.presetCanvasDimensions(Utils.getAllThumbs());
+  }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  presetCanvasDimensions(thumbs) {
+    for (const canvas of this.getCanvasDimensions(thumbs)) {
+      this.setThumbCanvasDimensions(canvas.canvas, canvas.width, canvas.height);
+    }
+  }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   * @returns {{canvas: HTMLCanvasElement, width: Number, height: Number}[]}
+   */
+  getCanvasDimensions(thumbs) {
+    return thumbs
+      .map(thumb => thumb.querySelector("canvas"))
+      .filter(canvas => canvas !== null)
+      .filter(canvas => canvas.dataset.size !== undefined)
+      .map((canvas) => {
+        // @ts-ignore
+        const dimensions = Utils.getDimensions(canvas.dataset.size);
+        return ({
+          canvas,
+          width: dimensions.x,
+          height: dimensions.y
+        });
+      });
+  }
+
   /**
    * @param {HTMLCanvasElement} canvas
    * @param {Number} width
@@ -213,28 +173,13 @@ class GalleryThumbnailUpscaler {
     canvas.height = 0;
   }
 
-  /**
-   * @param {ImageRequest} request
-   */
-  addToUpscaleQueue(request) {
-    this.upscaleQueue.push(request);
-    this.drainUpscaleQueue();
-  }
+  changeUpscaledResolution() {
+    const firstTenFavorites = Utils.getAllThumbs().slice(0, 10);
+    const firstTenFavoriteWidths = firstTenFavorites.map(favorite => favorite.offsetWidth);
+    const averageWidth = Math.round(Utils.average(firstTenFavoriteWidths));
+    const scaledWidth = averageWidth * 2.5;
+    const finalWidth = Utils.clamp(scaledWidth, GalleryConstants.minUpscaledThumbCanvasWidth, GalleryConstants.maxUpscaledThumbCanvasWidth);
 
-  async drainUpscaleQueue() {
-    if (this.currentlyUpscaling) {
-      return;
-    }
-    this.currentlyUpscaling = true;
-
-    while (this.upscaleQueue.length > 0) {
-      const request = this.upscaleQueue.shift();
-
-      if (request !== undefined) {
-        this.finishUpscale(request);
-      }
-      await Utils.sleep(GalleryConstants.upscaleDelay);
-    }
-    this.currentlyUpscaling = false;
+    GalleryConstants.upscaledThumbCanvasWidth = finalWidth;
   }
 }

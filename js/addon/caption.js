@@ -25,7 +25,6 @@ class Caption {
         ${Caption.getCategoryHeaderHTML()}
     </ul>
   `;
-  static findCategoriesOnPageChangeCooldown = new Cooldown(3000, true);
   static saveTagCategoriesCooldown = new Cooldown(1000);
   /**
    * @type {Object.<String, Number>}
@@ -134,9 +133,6 @@ class Caption {
 
   initializeFields() {
     Caption.tagCategoryAssociations = this.loadSavedTags();
-    Caption.findCategoriesOnPageChangeCooldown.onDebounceEnd = () => {
-      this.findTagCategoriesOnPageChange();
-    };
     Caption.saveTagCategoriesCooldown.onCooldownEnd = () => {
       this.saveTagCategories();
     };
@@ -189,7 +185,6 @@ class Caption {
 
   addEventListeners() {
     this.addAllPageEventListeners();
-    this.addSearchPageEventListeners();
     this.addFavoritesPageEventListeners();
   }
 
@@ -214,7 +209,6 @@ class Caption {
         this.caption.classList.remove("hide");
       }
     });
-
     document.addEventListener("keydown", (event) => {
       if (event.key.toLowerCase() !== "d" || !Utils.isHotkeyEvent(event)) {
         return;
@@ -240,86 +234,45 @@ class Caption {
     }, {
       passive: true
     });
-  }
+    document.addEventListener("mouseover", (event) => {
+      const thumb = Utils.getThumbUnderCursor(event);
 
-  addSearchPageEventListeners() {
-    if (!Utils.onSearchPage()) {
-      return;
-    }
-    window.addEventListener("load", () => {
-      this.addEventListenersToThumbs.bind(this)();
-    }, {
-      once: true,
-      passive: true
+      if (thumb !== null) {
+        this.currentThumb = thumb;
+        this.attachToThumb(thumb);
+      }
+    });
+    document.addEventListener("mouseout", (event) => {
+      const thumb = Utils.getThumbUnderCursor(event);
+
+      if (thumb !== null && !Utils.enteredOverCaptionTag(event)) {
+        this.currentThumb = null;
+        this.removeFromThumb(thumb);
+      }
     });
   }
 
   addFavoritesPageEventListeners() {
-    window.addEventListener("favoritesLoaded", () => {
-      this.addEventListenersToThumbs.bind(this)();
+    GlobalEvents.favorites.on("favoritesLoaded", () => {
       Caption.flags.finishedLoading = true;
-      Caption.findCategoriesOnPageChangeCooldown.waitTime = 1000;
-    }, {
-      once: true
     });
-    window.addEventListener("favoritesLoadedFromDatabase", () => {
+    GlobalEvents.favorites.on("favoritesLoadedFromDatabase", () => {
+      Caption.flags.finishedLoading = true;
       this.findTagCategoriesOnPageChange();
-    }, {
-      once: true
     });
-    window.addEventListener("favoritesFetched", () => {
-      this.addEventListenersToThumbs.bind(this)();
-    });
-    GlobalEvents.favorites.on("changedPage", () => {
-      this.addEventListenersToThumbs.bind(this)();
+    GlobalEvents.favorites.on("changedPage", Utils.debounceAfterFirstCall(() => {
       this.abortAllRequests("Changed Page");
       this.abortController = new AbortController();
+      setTimeout(() => {
+        this.findTagCategoriesOnPageChange();
+      }, 100);
+    }, 2000));
 
-      if (Caption.findCategoriesOnPageChangeCooldown.ready) {
-        setTimeout(() => {
-          this.findTagCategoriesOnPageChange();
-        }, 100);
-      }
-    });
-    window.addEventListener("newFavoritesFoundOnReload", (event) => {
-      const favorites = event.detail;
-
-      if (favorites.length > 0) {
-        this.addEventListenersToThumbs.bind(this)(favorites);
-      }
-    }, {
-      once: true
-    });
-    window.addEventListener("captionsReEnabled", () => {
+    GlobalEvents.favorites.on("captionsReEnabled", () => {
       if (this.currentThumb !== null) {
         this.attachToThumb(this.currentThumb);
       }
     });
-  }
-
-  /**
-   * @param {HTMLElement[]} thumbs
-   */
-  async addEventListenersToThumbs(thumbs) {
-    await Utils.sleep(500);
-    thumbs = thumbs === undefined ? Utils.getAllThumbs() : thumbs;
-
-    for (const thumb of thumbs) {
-      const imageContainer = Utils.getImageFromThumb(thumb).parentElement;
-
-      if (imageContainer.onmouseenter !== null) {
-        continue;
-      }
-      imageContainer.onmouseenter = () => {
-        this.currentThumb = thumb;
-        this.attachToThumb(thumb);
-      };
-
-      imageContainer.onmouseleave = () => {
-        this.currentThumb = null;
-        this.removeFromThumb(thumb);
-      };
-    }
   }
 
   /**
@@ -742,7 +695,7 @@ class Caption {
 
     this.findTagCategories(tagNames, () => {
       Caption.saveTagCategoriesCooldown.restart();
-    });
+    }, Caption.tagFetchDelay);
   }
 
   /**

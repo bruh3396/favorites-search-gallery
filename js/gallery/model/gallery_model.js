@@ -37,10 +37,20 @@ class GalleryModel {
   }
 
   constructor() {
-    this.currentState = GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
+    this.currentState = this.getStartState();
     this.currentIndex = 0;
     this.thumbSelector = new ThumbSelector();
     this.recentlyExitedGallery = false;
+  }
+
+  /**
+   * @returns {Number}
+   */
+  getStartState() {
+    if (Utils.getPreference("showOnHover", true)) {
+      return GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
+    }
+    return GalleryModel.states.IDLE;
   }
 
   /**

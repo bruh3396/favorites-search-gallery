@@ -70,7 +70,7 @@ class GalleryImageCreator {
     for (const request of requests) {
       accumulatedMegabytes += request.isImage ? request.megabytes : 0;
       const underMemoryLimit = accumulatedMegabytes < GalleryConstants.imageMegabyteLimit;
-      const underMinimumThumbCount = truncatedRequests.length < GalleryConstants.minimumPreloadedImagesCount;
+      const underMinimumThumbCount = truncatedRequests.length < GalleryConstants.minimumPreloadedImageCount;
 
       if (underMemoryLimit || underMinimumThumbCount) {
         truncatedRequests.push(request);
