@@ -125,7 +125,7 @@ class Post {
    */
   id;
   /**
-   * @type {HTMLDivElement}
+   * @type {HTMLElement}
    */
   root;
   /**
@@ -216,11 +216,10 @@ class Post {
 
   /**
    * @param {HTMLElement | {id: String, tags: String, src: String, metadata: String}} thumb
-   * @param {Boolean} fromRecord
    */
-  constructor(thumb, fromRecord) {
+  constructor(thumb) {
     this.initializeFields();
-    this.inactivePost = new InactivePost(thumb, fromRecord);
+    this.inactivePost = new InactivePost(thumb);
     this.populateAttributesNeededForSearch();
     this.setAsMatchedByMostRecentSearch(true);
     this.addInstanceToAllPosts();
@@ -315,13 +314,6 @@ class Post {
     this.image.src = this.inactivePost.src;
     this.image.classList.add(Utils.getContentType(this.inactivePost.tags || Utils.convertToTagString(this.tagSet)));
     this.root.id = this.inactivePost.id;
-
-    if (!Utils.onMobileDevice()) {
-      Utils.getOriginalImageURLWithExtension(this.root)
-        .then((url) => {
-          this.container.href = url;
-        });
-    }
   }
 
   /**
@@ -350,6 +342,12 @@ class Post {
     if (!Utils.onFavoritesPage()) {
       return;
     }
+
+    this.container.onclick = (event) => {
+      if (event.ctrlKey) {
+        Utils.openOriginalImageInNewTab(this.root);
+      }
+    };
     this.container.addEventListener("mousedown", (event) => {
       if (event.ctrlKey) {
         return;

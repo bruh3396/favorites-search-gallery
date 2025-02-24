@@ -9,7 +9,7 @@ class CompactPost {
    * @returns {String}
    */
   static getAnimatedTags(post) {
-    const originalTagSet = Utils.convertToTagSet(post.getAttribute("tags").trim());
+    const originalTagSet = Utils.convertToTagSet((post.getAttribute("tags") || "").trim());
     return Utils.convertToTagString(Utils.intersection(originalTagSet, CompactPost.animatedTagsSet));
   }
 
@@ -18,8 +18,8 @@ class CompactPost {
    * @returns {Number}
    */
   static getPixelCount(post) {
-    const width = parseInt(post.getAttribute("width")) || 0;
-    const height = parseInt(post.getAttribute("height")) || 0;
+    const width = parseInt(post.getAttribute("width") || "0");
+    const height = parseInt(post.getAttribute("height") || "0");
     return width * height;
   }
 
@@ -43,11 +43,18 @@ class CompactPost {
    * @type {Number}
    */
   pixelCount;
+  /**
+   * @type {HTMLElement | null}
+   */
+  savedHTMLElement;
 
   /**
    * @type {HTMLElement}
    */
   get htmlElement() {
+    if (this.savedHTMLElement !== null) {
+      return this.savedHTMLElement;
+    }
     const thumb = document.createElement("span");
     const anchor = document.createElement("a");
     const image = document.createElement("img");
@@ -63,6 +70,7 @@ class CompactPost {
 
     image.src = this.thumbURL;
     image.setAttribute("tags", this.tags);
+    this.savedHTMLElement = thumb;
     return thumb;
   }
 
@@ -71,10 +79,11 @@ class CompactPost {
    */
   constructor(post) {
     this.id = post.getAttribute("id") || "NA";
-    this.thumbURL = post.getAttribute("preview_url").replace("api-cdn.", "");
-    this.extension = Utils.getExtensionFromImageURL(post.getAttribute("file_url"));
+    this.thumbURL = (post.getAttribute("preview_url") || "").replace("api-cdn.", "");
+    this.extension = Utils.getExtensionFromImageURL(post.getAttribute("file_url") || "");
     this.tags = CompactPost.getAnimatedTags(post);
     this.pixelCount = CompactPost.getPixelCount(post);
+    this.savedHTMLElement = null;
     Utils.assignImageExtension(this.id, this.extension);
   }
 }

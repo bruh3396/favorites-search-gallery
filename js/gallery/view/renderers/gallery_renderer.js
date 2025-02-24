@@ -94,4 +94,15 @@ class GalleryRenderer {
   handleFavoritesResize() {
     this.imageRenderer.handleFavoritesResize();
   }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleVideoLooping(value) {
+    this.videoRenderer.toggleVideoLooping(value);
+  }
+
+  restartVideo() {
+    this.videoRenderer.restartVideo();
+  }
 }

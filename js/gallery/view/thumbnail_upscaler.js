@@ -33,7 +33,9 @@ class GalleryThumbnailUpscaler {
    * @returns {Boolean}
    */
   requestIsValid(request) {
-    return document.getElementById(request.id) !== null && !this.canvases.has(request.id);
+    const thumbIsOnPage = document.getElementById(request.id) !== null;
+    const thumbIsLowResolution = !this.canvases.has(request.id);
+    return thumbIsOnPage && thumbIsLowResolution && Utils.onFavoritesPage() && request.isOriginalResolution;
   }
 
   /**
@@ -100,6 +102,10 @@ class GalleryThumbnailUpscaler {
    * @param {HTMLElement[]} thumbs
    */
   presetCanvasDimensions(thumbs) {
+    if (!Utils.onFavoritesPage()) {
+      return;
+    }
+
     for (const canvas of this.getCanvasDimensions(thumbs)) {
       this.setThumbCanvasDimensions(canvas.canvas, canvas.width, canvas.height);
     }

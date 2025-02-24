@@ -7,7 +7,7 @@ class FavoritesExtractor {
    */
   static extractFavorites(favoritesPageHTML) {
     const elements = FavoritesExtractor.extractFavoriteElements(favoritesPageHTML);
-    return elements.map(element => new Post(element, false));
+    return elements.map(element => new Post(element));
   }
 
   /**

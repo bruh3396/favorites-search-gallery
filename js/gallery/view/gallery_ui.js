@@ -4,10 +4,6 @@ class GalleryUI {
    */
   background;
   /**
-   * @type {HTMLAnchorElement}
-   */
-  originalContentLink;
-  /**
    * @type {HTMLElement | null}
    */
   lastVisitedThumb;
@@ -21,11 +17,13 @@ class GalleryUI {
    */
   constructor(galleryContainer) {
     this.background = this.createBackground(galleryContainer);
-    this.originalContentLink = this.createOriginalContentLink(galleryContainer);
     this.lastVisitedThumb = null;
     this.toggleVideoPointerEvents(false);
   }
 
+  /**
+   * @param {HTMLElement} galleryContainer
+   */
   createUiContainer(galleryContainer) {
     const container = document.createElement("div");
 
@@ -48,18 +46,6 @@ class GalleryUI {
   }
 
   /**
-   * @param {HTMLElement} galleryContainer
-   * @return {HTMLAnchorElement}
-   */
-  createOriginalContentLink(galleryContainer) {
-    const originalContentLink = document.createElement("a");
-
-    originalContentLink.id = "gallery-original-content-link";
-    galleryContainer.appendChild(originalContentLink);
-    return originalContentLink;
-  }
-
-  /**
    * @param {HTMLElement} thumb
    */
   enterGallery(thumb) {
@@ -67,6 +53,7 @@ class GalleryUI {
     this.toggleActiveBackground(true);
     this.toggleScrollbar(false);
     this.toggleVideoPointerEvents(true);
+    this.toggleMenu(true);
   }
 
   exitGallery() {
@@ -75,6 +62,7 @@ class GalleryUI {
     this.scrollToLastVisitedThumb();
     this.toggleVideoPointerEvents(false);
     this.toggleCursor(true);
+    this.toggleMenu(false);
   }
 
   scrollToLastVisitedThumb() {
@@ -130,6 +118,11 @@ class GalleryUI {
    * @param {Boolean} value
    */
   toggleScrollbar(value) {
+    // Utils.insertStyleHTML(`
+    //   html {
+    //     overflow-y: ${value ? "auto" : "hidden"};
+    //   }
+    //   `, "scrollbar");
     document.body.style.overflowY = value ? "auto" : "hidden";
   }
 
@@ -204,17 +197,6 @@ class GalleryUI {
    */
   setLastVisitedThumb(thumb) {
     this.lastVisitedThumb = thumb;
-    Utils.getOriginalImageURLWithExtension(thumb)
-      .then((url) => {
-        this.originalContentLink.href = url;
-      });
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleOriginalContentLink(value) {
-    this.originalContentLink.classList.toggle("active", value);
   }
 
   /**
@@ -244,5 +226,16 @@ class GalleryUI {
    */
   toggleCursor(value) {
     this.background.style.cursor = value ? "default" : "none";
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleMenu(value) {
+    Utils.insertStyleHTML(`
+      #gallery-menu {
+        display: ${value ? "flex" : "none"};
+      }
+      `, "gallery-menu-visibility");
   }
 }

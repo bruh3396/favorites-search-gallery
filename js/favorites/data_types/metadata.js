@@ -23,10 +23,6 @@ class PostMetadata {
     deleted: 300
   };
   static postStatisticsRegex = /Posted:\s*(\S+\s\S+).*Size:\s*(\d+)x(\d+).*Rating:\s*(\S+).*Score:\s*(\d+)/gm;
-  static settings = {
-    verifyTags: true
-  };
-
   static async fetchAllMissingMetadata() {
     if (PostMetadata.currentlyFetchingFromQueue) {
       return;
@@ -237,10 +233,8 @@ class PostMetadata {
         this.rating = PostMetadata.encodeRating(metadata.getAttribute("rating") || "0");
         this.creationTimestamp = Date.parse(metadata.getAttribute("created_at") || "0");
         this.lastChangedTimestamp = parseInt(metadata.getAttribute("change") || "0");
+        Post.validateExtractedTagsAgainstAPI(this.id, metadata.getAttribute("tags") || "", metadata.getAttribute("file_url") || "");
 
-        if (PostMetadata.settings.verifyTags) {
-          Post.validateExtractedTagsAgainstAPI(this.id, metadata.getAttribute("tags") || "", metadata.getAttribute("file_url") || "");
-        }
         const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url") || "");
 
         if (extension !== "mp4") {

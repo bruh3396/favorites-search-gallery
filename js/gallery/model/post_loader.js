@@ -64,13 +64,17 @@ class PostLoader {
   }
 
   constructor() {
+    if (!Utils.onSearchPage()) {
+      return;
+    }
     this.chunks = new Map();
     this.loadedPosts = [];
     this.currentSearchOffset = PostLoader.initialSearchOffset;
+    // this.loadCurrentChunk();
   }
 
-  async loadCurrentChunk() {
-    await this.loadAdjacentChunks(this.currentAPIPageNumber);
+  loadCurrentChunk() {
+    return this.loadAdjacentChunks(this.currentAPIPageNumber);
   }
 
   /**
@@ -113,7 +117,9 @@ class PostLoader {
         const posts = [];
 
         for (const post of Array.from(dom.querySelectorAll("post"))) {
-          posts.push(new CompactPost(post));
+          if (post instanceof HTMLElement) {
+            posts.push(new CompactPost(post));
+          }
         }
         return posts;
       });
@@ -152,25 +158,12 @@ class PostLoader {
   }
 
   /**
-   * @param {Number} index
-   * @returns {Boolean}
-   */
-  indexInBounds(index) {
-    return index >= 0 && index < this.loadedPosts.length;
-  }
-
-  /**
    * @param {Number} pageNumber
-   * @returns {DocumentFragment}
+   * @returns {HTMLElement[]}
    */
   getThumbsFromSearchPageNumber(pageNumber) {
     const pageOffset = pageNumber * PostLoader.constants.searchPageSize;
-    const fragment = document.createDocumentFragment();
     const posts = this.loadedPosts.slice(pageOffset, pageOffset + PostLoader.constants.searchPageSize);
-
-    for (const post of posts) {
-      fragment.appendChild(post.htmlElement);
-    }
-    return fragment;
+    return posts.map(post => post.htmlElement);
   }
 }

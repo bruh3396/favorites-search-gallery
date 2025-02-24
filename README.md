@@ -105,7 +105,7 @@ This script is still in development, please let me know if you experience a bug,
 | :-------------------------------------| :----------------------------------------------| :----------------------|
 | Arrow Keys, Scroll Wheel, AD   | Traverse gallery                               |                        |
 | Escape                                |    Exit gallery                                |                        |
-| Right Click                           | Exit gallery, Enable "Enlarge on Hover" option |                        |
+| Right Click                           | Exit gallery |                        |
 | Middle Click                          | Open post page of thumbnail in new tab         |                        |
 | Double Left Click                          | Exit gallery         | Content is a video                       |
 | Ctrl Left  Click                          | Open original content in new tab and stay on current tab         |                        |

@@ -14,9 +14,17 @@ class GalleryModel {
    */
   currentIndex;
   /**
+   * @type {Number}
+   */
+  currentSearchPageNumber;
+  /**
    * @type {ThumbSelector}
    */
   thumbSelector;
+  /**
+   * @type {PostLoader}
+   */
+  postLoader;
   /**
    * @type {Boolean}
    */
@@ -39,7 +47,9 @@ class GalleryModel {
   constructor() {
     this.currentState = this.getStartState();
     this.currentIndex = 0;
+    this.currentSearchPageNumber = 0;
     this.thumbSelector = new ThumbSelector();
+    this.postLoader = new PostLoader();
     this.recentlyExitedGallery = false;
   }
 
@@ -59,7 +69,6 @@ class GalleryModel {
   enterGallery(thumb) {
     this.currentIndex = this.thumbSelector.getIndexFromThumb(thumb);
     this.currentState = GalleryModel.states.IN_GALLERY;
-
   }
 
   exitGallery() {
@@ -87,7 +96,7 @@ class GalleryModel {
    * @returns {HTMLElement | undefined}
    */
   navigate(direction) {
-    this.currentIndex += GalleryConstants.forwardNavigationKeys.has(direction) ? 1 : -1;
+    this.currentIndex += this.isForward(direction) ? 1 : -1;
     return this.currentThumb;
   }
 
@@ -96,8 +105,16 @@ class GalleryModel {
    * @returns {HTMLElement | undefined}
    */
   navigateAfterPageChange(direction) {
-    this.currentIndex = GalleryConstants.forwardNavigationKeys.has(direction) ? 0 : this.thumbSelector.thumbsOnCurrentPage.length - 1;
+    this.currentIndex = this.isForward(direction) ? 0 : this.thumbSelector.thumbsOnCurrentPage.length - 1;
     return this.currentThumb;
+  }
+
+  /**
+   * @param {String} direction
+   * @returns {Boolean}
+   */
+  isForward(direction) {
+    return GalleryConstants.forwardNavigationKeys.has(direction);
   }
 
   /**
@@ -111,15 +128,11 @@ class GalleryModel {
    * @param {HTMLElement} thumb
    * @returns {HTMLElement[]}
    */
-  getSearchResultsAround(thumb) {
-    return this.thumbSelector.getSearchResultsAround(thumb);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {HTMLElement[]}
-   */
-  getThumbsAroundOnCurrentPage(thumb) {
+  getThumbsAround(thumb) {
+    if (Utils.onFavoritesPage()) {
+      return this.thumbSelector.getSearchResultsAround(thumb);
+    }
+    // return this.postLoader.getPostsAround(thumb).map(post => post.htmlElement);
     return this.thumbSelector.getThumbsAroundOnCurrentPage(thumb);
   }
 
@@ -130,7 +143,26 @@ class GalleryModel {
     this.thumbSelector.setLatestSearchResults(searchResults);
   }
 
-  updateCurrentPageThumbs() {
-    this.thumbSelector.setCurrentPageThumbs(Utils.getAllThumbs());
+  indexCurrentPageThumbs() {
+    this.thumbSelector.indexCurrentPageThumbs(Utils.getAllThumbs());
+  }
+
+  /**
+   * @param {String} direction
+   */
+  getThumbsFromAdjacentSearchPage(direction) {
+    let nextSearchPageNumber = this.currentSearchPageNumber;
+
+    if (this.isForward(direction)) {
+      nextSearchPageNumber += 1;
+    } else {
+      nextSearchPageNumber -= 1;
+    }
+    const thumbs = this.postLoader.getThumbsFromSearchPageNumber(nextSearchPageNumber);
+
+    if (thumbs.length > 0) {
+      this.currentSearchPageNumber = nextSearchPageNumber;
+    }
+    return thumbs;
   }
 }

@@ -29,5 +29,6 @@ class GalleryConstants {
   static maxImagesToRenderAroundInGallery = Utils.onMobileDevice() ? 3 : 50;
   static additionalVideoPlayerCount = Utils.onMobileDevice() ? 2 : 2;
   static endlessSearchPageGallery = false;
-  static idleInteractionDuration = 500;
+  static idleInteractionDuration = 1000;
+  static galleryMenuVisibilityTime = 1000;
 }

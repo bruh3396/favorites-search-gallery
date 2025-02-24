@@ -31,7 +31,7 @@ class GalleryImageRenderer extends Renderer {
    * @param {HTMLElement} thumb
    */
   show(thumb) {
-    const imageRequest = this.imageCreator.getImage(thumb);
+    const imageRequest = this.imageCreator.getImageRequest(thumb);
     const requestHasNotStarted = imageRequest === undefined;
 
     this.lastShownId = thumb.id;

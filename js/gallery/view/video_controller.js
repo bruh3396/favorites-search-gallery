@@ -193,8 +193,8 @@ class VideoController {
    */
   broadcastDoubleClick(video) {
     video.addEventListener("dblclick", () => {
-      video.dispatchEvent(new CustomEvent("galleyController", {
-        detail: "doubleClickedVideo",
+      video.dispatchEvent(new CustomEvent("galleryController", {
+        detail: "exitGallery",
         bubbles: true
       }));
     });
@@ -420,5 +420,9 @@ class VideoController {
     if (this.videoContainer !== null) {
       this.videoContainer.style.display = value ? "block" : "none";
     }
+  }
+
+  restartActiveVideo() {
+    this.getActiveVideoPlayer().play().catch();
   }
 }

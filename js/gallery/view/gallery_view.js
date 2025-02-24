@@ -11,6 +11,14 @@ class GalleryView {
    * @type {GalleryUI}
    */
   ui;
+  /**
+   * @type {GalleryMenu}
+   */
+  menu;
+  /**
+   * @type {SearchPageCreator}
+   */
+  searchPageCreator;
 
   constructor() {
     this.createContainer();
@@ -20,6 +28,9 @@ class GalleryView {
   createComponents() {
     this.renderer = new GalleryRenderer(this.container);
     this.ui = new GalleryUI(this.container);
+    this.menu = new GalleryMenu(this.container);
+    this.searchPageCreator = new SearchPageCreator();
+    this.toggleVisibility(false);
   }
 
   createContainer() {
@@ -102,6 +113,10 @@ class GalleryView {
     this.renderer.handlePageChange();
   }
 
+  handleMouseMoveInGallery() {
+    this.toggleCursor(true);
+  }
+
   toggleBackgroundOpacity() {
     this.ui.toggleBackgroundOpacity();
   }
@@ -130,14 +145,25 @@ class GalleryView {
   /**
    * @param {Boolean} value
    */
-  toggleOriginalContentLink(value) {
-    this.ui.toggleOriginalContentLink(value);
+  toggleCursor(value) {
+    this.ui.toggleCursor(value);
   }
 
   /**
    * @param {Boolean} value
    */
-  toggleCursor(value) {
-    this.ui.toggleCursor(value);
+  toggleVideoLooping(value) {
+    this.renderer.toggleVideoLooping(value);
+  }
+
+  restartVideo() {
+    this.renderer.restartVideo();
+  }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  createSearchPage(thumbs) {
+    this.searchPageCreator.createSearchPage(thumbs);
   }
 }

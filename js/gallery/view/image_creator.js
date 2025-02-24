@@ -25,7 +25,7 @@ class GalleryImageCreator {
    * @param {HTMLElement} thumb
    * @returns {ImageRequest | undefined}
    */
-  getImage(thumb) {
+  getImageRequest(thumb) {
     return this.imageRequests.get(thumb.id);
   }
 
@@ -166,9 +166,10 @@ class GalleryImageCreator {
     }
     const lowResolutionRequest = new ImageRequest(thumb);
 
+    lowResolutionRequest.markAsLowResolution();
     createImageBitmap(image)
       .then((imageBitmap) => {
-        const originalResolutionRequest = this.getImage(thumb);
+        const originalResolutionRequest = this.getImageRequest(thumb);
 
         if (originalResolutionRequest === undefined || originalResolutionRequest.isIncomplete) {
           lowResolutionRequest.complete(imageBitmap);

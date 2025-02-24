@@ -126,6 +126,6 @@ class FavoritesDatabaseInterface {
    * @returns {Post[]}
    */
   deserializeFavorites(records) {
-    return records.map(record => new Post(record, true));
+    return records.map(record => new Post(record));
   }
 }

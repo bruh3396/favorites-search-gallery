@@ -20,6 +20,10 @@ class ImageRequest {
    */
   isImage;
   /**
+   * @type {Boolean}
+   */
+  isLowResolution;
+  /**
    * @type {HTMLElement}
    */
   thumb;
@@ -53,6 +57,13 @@ class ImageRequest {
   }
 
   /**
+   * @type {Boolean}
+   */
+  get isOriginalResolution() {
+    return !this.isLowResolution;
+  }
+
+  /**
    * @param {HTMLElement} thumb
    */
   constructor(thumb) {
@@ -61,6 +72,7 @@ class ImageRequest {
     this.abortController = new AbortController();
     this.cancelled = false;
     this.isImage = Utils.isImage(thumb);
+    this.isLowResolution = false;
     this.thumb = thumb;
   }
 
@@ -73,6 +85,10 @@ class ImageRequest {
 
   cancel() {
     this.cancelled = true;
+  }
+
+  markAsLowResolution() {
+    this.isLowResolution = true;
   }
 
   abortIfCancelled() {

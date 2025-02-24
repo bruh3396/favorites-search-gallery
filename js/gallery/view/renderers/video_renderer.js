@@ -27,7 +27,7 @@ class GalleryVideoRenderer extends Renderer {
     this.videoController.clearVideoSources();
   }
 
-  handlePageChangeInGallery() {}
+  handlePageChangeInGallery() { }
 
   /**
    * @param {HTMLElement[]} thumbs
@@ -35,4 +35,15 @@ class GalleryVideoRenderer extends Renderer {
   preloadVideos(thumbs) {
     this.videoController.preloadVideoPlayers(thumbs);
   }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleVideoLooping(value) {
+    this.videoController.toggleVideoLooping(value);
+  }
+
+   restartVideo() {
+    this.videoController.restartActiveVideo();
+   }
 }

@@ -198,17 +198,6 @@ class Caption {
     this.caption.addEventListener("transitionstart", () => {
       this.caption.classList.add("transitioning");
     });
-    window.addEventListener("showOriginalContent", (event) => {
-      const thumb = this.caption.parentElement;
-
-      if (event.detail) {
-        this.removeFromThumb(thumb);
-
-        this.caption.classList.add("hide");
-      } else {
-        this.caption.classList.remove("hide");
-      }
-    });
     document.addEventListener("keydown", (event) => {
       if (event.key.toLowerCase() !== "d" || !Utils.isHotkeyEvent(event)) {
         return;

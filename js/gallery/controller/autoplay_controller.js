@@ -594,8 +594,10 @@ class AutoplayController {
     this.imageViewTimer.onCooldownEnd = () => {
       this.events.onComplete();
     };
-    document.addEventListener("mousemove", () => {
-      this.showMenu();
+    document.addEventListener("mousemove", (event) => {
+      if (!Utils.overGalleryMenu(event)) {
+        this.showMenu();
+      }
     }, {
       signal: this.eventListenersAbortController.signal
     });
@@ -669,11 +671,5 @@ class AutoplayController {
 
   stopVideoProgressBar() {
     this.ui.videoProgressBar.classList.remove("animated");
-  }
-  /**
-   * @param {MouseEvent | TouchEvent} event
-   */
-  clickedOnMenu(event) {
-    return this.ui.menu !== null && this.ui.menu.contains(event.target);
   }
 }

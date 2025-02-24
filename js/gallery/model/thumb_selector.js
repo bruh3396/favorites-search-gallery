@@ -21,7 +21,7 @@ class ThumbSelector {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  setCurrentPageThumbs(thumbs) {
+  indexCurrentPageThumbs(thumbs) {
     this.thumbsOnCurrentPage = thumbs;
     this.enumerateCurrentPageThumbs();
   }
