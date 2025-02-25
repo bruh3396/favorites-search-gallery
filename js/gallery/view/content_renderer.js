@@ -1,4 +1,4 @@
-class GalleryRenderer {
+class GalleryContentRenderer {
   /**
    * @type {GalleryImageRenderer}
    */
@@ -13,7 +13,7 @@ class GalleryRenderer {
   gifRenderer;
 
   /**
-   * @type {Renderer[]}
+   * @type {AbstractRenderer[]}
    */
   get renderers() {
     return [this.imageRenderer, this.videoRenderer, this.gifRenderer];
@@ -31,24 +31,24 @@ class GalleryRenderer {
   /**
    * @param {HTMLElement} thumb
    */
-  showContent(thumb) {
+  render(thumb) {
     switch (true) {
       case Utils.isVideo(thumb):
-        return this.render(this.videoRenderer, thumb);
+        return this.startRenderer(this.videoRenderer, thumb);
 
       case Utils.isGif(thumb):
-        return this.render(this.gifRenderer, thumb);
+        return this.startRenderer(this.gifRenderer, thumb);
 
       default:
-        return this.render(this.imageRenderer, thumb);
+        return this.startRenderer(this.imageRenderer, thumb);
     }
   }
 
   /**
-   * @param {Renderer} targetRenderer
+   * @param {AbstractRenderer} targetRenderer
    * @param {HTMLElement} thumb
    */
-  render(targetRenderer, thumb) {
+  startRenderer(targetRenderer, thumb) {
     for (const renderer of this.renderers) {
       if (renderer === targetRenderer) {
         renderer.start(thumb);
@@ -89,10 +89,6 @@ class GalleryRenderer {
     for (const renderer of this.renderers) {
       renderer.handlePageChangeInGallery();
     }
-  }
-
-  handleFavoritesResize() {
-    this.imageRenderer.handleFavoritesResize();
   }
 
   /**

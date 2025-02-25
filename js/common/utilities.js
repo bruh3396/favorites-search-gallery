@@ -2421,7 +2421,7 @@ class Utils {
     if (Utils.inFullscreen()) {
       document.exitFullscreen();
     } else {
-      document.body.requestFullscreen();
+      document.documentElement.requestFullscreen();
     }
   }
 

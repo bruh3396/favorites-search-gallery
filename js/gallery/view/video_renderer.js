@@ -1,4 +1,4 @@
-class GalleryVideoRenderer extends Renderer {
+class GalleryVideoRenderer extends AbstractRenderer {
   /**
    * @type {VideoController}
    */

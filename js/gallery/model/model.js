@@ -22,9 +22,9 @@ class GalleryModel {
    */
   thumbSelector;
   /**
-   * @type {PostLoader}
+   * @type {SearchPageLoader}
    */
-  postLoader;
+  searchPageLoader;
   /**
    * @type {Boolean}
    */
@@ -49,7 +49,7 @@ class GalleryModel {
     this.currentIndex = 0;
     this.currentSearchPageNumber = 0;
     this.thumbSelector = new ThumbSelector();
-    this.postLoader = new PostLoader();
+    this.searchPageLoader = new SearchPageLoader();
     this.recentlyExitedGallery = false;
   }
 
@@ -151,18 +151,23 @@ class GalleryModel {
    * @param {String} direction
    */
   getThumbsFromAdjacentSearchPage(direction) {
-    let nextSearchPageNumber = this.currentSearchPageNumber;
+    // let nextSearchPageNumber = this.currentSearchPageNumber;
 
-    if (this.isForward(direction)) {
-      nextSearchPageNumber += 1;
-    } else {
-      nextSearchPageNumber -= 1;
-    }
-    const thumbs = this.postLoader.getThumbsFromSearchPageNumber(nextSearchPageNumber);
+    // if (this.isForward(direction)) {
+    //   nextSearchPageNumber += 1;
+    // } else {
+    //   nextSearchPageNumber -= 1;
+    // }
+    // const thumbs = this.postLoader.getThumbsFromSearchPageNumber(nextSearchPageNumber);
 
-    if (thumbs.length > 0) {
-      this.currentSearchPageNumber = nextSearchPageNumber;
-    }
-    return thumbs;
+    // if (thumbs.length > 0) {
+    //   this.currentSearchPageNumber = nextSearchPageNumber;
+    // }
+    // return thumbs;
+    return [];
+  }
+
+  getAdjacentSearchPageHTML(direction) {
+
   }
 }

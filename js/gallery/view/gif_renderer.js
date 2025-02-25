@@ -1,4 +1,4 @@
-class GalleryGifRenderer extends Renderer {
+class GalleryGifRenderer extends AbstractRenderer {
   /**
    * @type {HTMLImageElement}
    */

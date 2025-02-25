@@ -103,7 +103,6 @@ class GalleryController {
     this.setupWheelHandler();
     this.setupMouseMoveHandler();
     this.setupCustomUiEventHandler();
-    // this.setupFavoritesResizeHandler();
   }
 
   addFavoritesPageEventListeners() {
@@ -282,6 +281,10 @@ class GalleryController {
           this.removeCurrentFavorite();
           break;
 
+        case "e":
+          Utils.toggleFullscreen();
+          break;
+
         default:
           break;
       }
@@ -369,15 +372,6 @@ class GalleryController {
           break;
       }
     });
-  }
-
-  setupFavoritesResizeHandler() {
-    const onFavoritesResized = Utils.debounceAlways(() => {
-      this.view.handleFavoritesResize();
-      this.preloadVisibleContent();
-    }, 200);
-
-    GlobalEvents.favorites.on("favoritesResized", onFavoritesResized);
   }
 
   /**

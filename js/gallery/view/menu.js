@@ -8,27 +8,31 @@ class GalleryMenuButtonTemplate {
    * @param {String} param.action
    * @param {Boolean} param.enabled
    * @param {String} param.handler
+   * @param {String} param.hint
+   * @param {String} param.color
    */
-  constructor({id, icon, action = "none", enabled = true, handler = "galleryController"}) {
+  constructor({id, icon, action = "none", enabled = true, handler = "galleryController", hint = "", color = "white"}) {
     this.id = id;
     this.icon = icon;
     this.action = action;
     this.enabled = enabled;
     this.handler = handler;
+    this.hint = hint;
+    this.color = color;
   }
 }
 
 class GalleryMenu {
   static buttons = [
-    {id: "exit-gallery", icon: Utils.icons.exit, action: "exitGallery", enabled: true, handler: "galleryController"},
-    {id: "fullscreen-gallery", icon: Utils.icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu"},
-    {id: "open-in-new-gallery", icon: Utils.icons.openInNew, action: "openPost", enabled: true, handler: "galleryController"},
-    {id: "download-gallery", icon: Utils.icons.download, action: "download", enabled: true, handler: "galleryController"},
-    {id: "add-favorite-gallery", icon: Utils.icons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController"},
-    {id: "remove-favorite-gallery", icon: Utils.icons.heartMinus, action: "removeFavorite", enabled: false, handler: "galleryController"},
-    {id: "dock-gallery", icon: Utils.icons.dock, action: "toggleDockPosition", enabled: false, handler: "galleryMenu"},
-    {id: "toggle-background-gallery", icon: Utils.icons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController"},
-    {id: "pin-gallery", icon: Utils.icons.pin, action: "pin", enabled: true, handler: "galleryMenu"}
+    {id: "exit-gallery", icon: Utils.icons.exit, action: "exitGallery", enabled: true, handler: "galleryController", hint: "Exit (Escape, Right-Click)", color: "red"},
+    {id: "fullscreen-gallery", icon: Utils.icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen", color: "#0075FF"},
+    {id: "open-in-new-gallery", icon: Utils.icons.openInNew, action: "openPost", enabled: true, handler: "galleryController", hint: "Open Post (Middle-Click)", color: "lightgreen"},
+    {id: "download-gallery", icon: Utils.icons.download, action: "download", enabled: true, handler: "galleryController", hint: "Open Original (Ctrl + Left-Click)", color: "lightskyblue"},
+    {id: "add-favorite-gallery", icon: Utils.icons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController", hint: "Add Favorite (F)", color: "hotpink"},
+    {id: "remove-favorite-gallery", icon: Utils.icons.heartMinus, action: "removeFavorite", enabled: false, handler: "galleryController", hint: "Remove Favorite (X)", color: "red"},
+    {id: "dock-gallery", icon: Utils.icons.dock, action: "toggleDockPosition", enabled: false, handler: "galleryMenu", hint: "Change Position", color: ""},
+    {id: "toggle-background-gallery", icon: Utils.icons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController", hint: "Toggle Background (B)", color: "gold"},
+    {id: "pin-gallery", icon: Utils.icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "#0075FF"}
   ];
 
   /**
@@ -44,11 +48,11 @@ class GalleryMenu {
    * @param {HTMLElement} galleryContainer
    */
   constructor(galleryContainer) {
-    this.createContainer(galleryContainer);
-    this.createButtons();
+    this.container = this.createContainer(galleryContainer);
     this.menuVisibilityTimeout = null;
-    this.addEventListeners();
     this.loadPreferences();
+    this.createButtons();
+    this.addEventListeners();
   }
 
   loadPreferences() {
@@ -81,11 +85,6 @@ class GalleryMenu {
           break;
       }
     });
-
-    document.addEventListener("fullscreenchange", () => {
-      this.updateFullscreenIcon();
-    });
-
     document.addEventListener("mousemove", Utils.throttle(() => {
       this.reveal();
     }, 250));
@@ -95,25 +94,17 @@ class GalleryMenu {
     });
   }
 
-  updateFullscreenIcon() {
-    // const icon = document.querySelector("#fullscreen-gallery img");
-
-    // if (!(icon instanceof HTMLImageElement)) {
-    //   return;
-    // }
-    // const fullScreenEnabled = Utils.inFullscreen();
-
-    // icon.src = fullScreenEnabled ? GalleryMenu.iconURLs.fullscreenExit : GalleryMenu.iconURLs.fullscreenEnter;
-  }
-
   /**
    * @param {HTMLElement} galleryContainer
+   * @returns {HTMLElement}
    */
   createContainer(galleryContainer) {
-    this.container = document.createElement("div");
-    this.container.id = "gallery-menu";
-    this.container.className = "gallery-sub-menu";
-    galleryContainer.appendChild(this.container);
+    const container = document.createElement("div");
+
+    container.id = "gallery-menu";
+    container.className = "gallery-sub-menu";
+    galleryContainer.appendChild(container);
+    return container;
   }
 
   createButtons() {
@@ -142,10 +133,25 @@ class GalleryMenu {
     button.innerHTML = template.icon;
     button.id = template.id;
     button.className = "gallery-menu-button";
+    button.dataset.hint = template.hint;
     this.container.appendChild(button);
     button.onclick = () => {
       button.dispatchEvent(new CustomEvent(template.handler, {bubbles: true, detail: template.action}));
     };
+
+    Utils.insertStyleHTML(`
+        #${template.id}:hover {
+          &::after {
+            outline: 2px solid ${template.color};
+          }
+
+          color: ${template.color};
+
+          >svg {
+            fill: ${template.color};
+          }
+        }
+      `, template.id);
     return button;
   }
 

@@ -178,14 +178,4 @@ class GalleryThumbnailUpscaler {
     canvas.width = 0;
     canvas.height = 0;
   }
-
-  changeUpscaledResolution() {
-    const firstTenFavorites = Utils.getAllThumbs().slice(0, 10);
-    const firstTenFavoriteWidths = firstTenFavorites.map(favorite => favorite.offsetWidth);
-    const averageWidth = Math.round(Utils.average(firstTenFavoriteWidths));
-    const scaledWidth = averageWidth * 2.5;
-    const finalWidth = Utils.clamp(scaledWidth, GalleryConstants.minUpscaledThumbCanvasWidth, GalleryConstants.maxUpscaledThumbCanvasWidth);
-
-    GalleryConstants.upscaledThumbCanvasWidth = finalWidth;
-  }
 }

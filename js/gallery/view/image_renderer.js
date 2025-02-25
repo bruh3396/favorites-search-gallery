@@ -1,4 +1,4 @@
-class GalleryImageRenderer extends Renderer {
+class GalleryImageRenderer extends AbstractRenderer {
   /**
    * @type {GalleryCanvas}
    */
@@ -69,10 +69,6 @@ class GalleryImageRenderer extends Renderer {
       this.thumbUpscaler.presetAllCanvasDimensions();
       this.upscaleThumbsWithAvailableImages();
     }, 10);
-  }
-
-  handleFavoritesResize() {
-    this.thumbUpscaler.changeUpscaledResolution();
   }
 
   upscaleThumbsWithAvailableImages() {

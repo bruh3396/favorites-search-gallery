@@ -265,7 +265,7 @@ class HTMLStrings {
 
     textarea {
       max-width: 100%;
-      height: 50px;
+      height: 30px;
       width: 99%;
       padding: 10px;
       border-radius: 6px;
@@ -1239,7 +1239,8 @@ Lower numbers improve responsiveness">
   }
 
   :root {
-    --gallery-menu-background: rgba(0, 0, 0, 0.75);
+    /* --gallery-menu-background: rgba(0, 0, 0, 0.75); */
+    --gallery-menu-background: rgba(0, 0, 0, 1);
     --gallery-menu-size: 80px;
   }
 
@@ -1364,7 +1365,7 @@ Lower numbers improve responsiveness">
 
     &:hover {
       opacity: 1;
-      transform: scale(1.35);
+      transform: scale(1.20);
     }
 
     >img,
@@ -1376,38 +1377,44 @@ Lower numbers improve responsiveness">
     }
   }
 
-  #exit-gallery:hover>svg {
-    fill: red;
+  .gallery-menu-button::after {
+    content: attr(data-hint);
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    background: black;
+    padding: 2px 6px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    font-size: larger;
+    transition: opacity 0.35s ease-in-out;
+    border-radius: 3px;
   }
 
-  #fullscreen-gallery:hover>svg {
-    fill: #0075FF;
+  .gallery-menu-button:hover::after {
+    opacity: 1;
+    visibility: visible;
   }
 
-  #open-in-new-gallery:hover>svg {
-    fill: lightgreen;
+  :root {
+    --exit-gallery-color: red;
+    --fullscreen-gallery-color: #0075FF;
+    --open-in-new-gallery-color: lightgreen;
+    --download-gallery-color: lightskyblue;
+    --add-favorite-gallery-hover-color: hotpink;
+    --toggle-background-gallery-color: gold;
+    --pin-gallery-color: #0075FF;
+    --default-svg-fill: white;
+    --outline-width: 1px;
   }
 
-  #download-gallery:hover>svg {
-    fill:lightskyblue;
-  }
 
   #add-favorite-gallery {
     >svg {
       fill: white;
     }
-
-    &:hover>svg {
-      fill: hotpink;
-    }
-  }
-
-  #toggle-background-gallery:hover>svg {
-    fill: gold;
-  }
-
-  #pin-gallery:hover>svg {
-    fill: #0075FF;
   }
 </style>
 `;
