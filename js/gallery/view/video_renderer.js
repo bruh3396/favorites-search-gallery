@@ -43,7 +43,11 @@ class GalleryVideoRenderer extends AbstractRenderer {
     this.videoController.toggleVideoLooping(value);
   }
 
-   restartVideo() {
+  restartVideo() {
     this.videoController.restartActiveVideo();
-   }
+  }
+
+  toggleVideoPause() {
+    this.videoController.toggleActiveVideoPause();
+  }
 }

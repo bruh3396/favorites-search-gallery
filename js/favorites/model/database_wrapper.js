@@ -2,9 +2,9 @@ class FavoritesDatabaseInterface {
   static databaseName = "Favorites";
   static objectStoreName = `user${Utils.getFavoritesPageId()}`;
   /**
-   * @type {Worker}
+   * @type {FavoritesDatabase}
    */
-  databaseWorker;
+  database;
   /**
    * @type {String[]}
    */
@@ -15,28 +15,16 @@ class FavoritesDatabaseInterface {
   newMetadataReceivedTimeout;
 
   constructor() {
-    this.databaseWorker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.database));
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
     this.newMetadataReceivedTimeout = null;
-    this.sendObjectStoreNameToDatabase();
-  }
-
-  sendObjectStoreNameToDatabase() {
-    this.databaseWorker.postMessage({
-      command: "create",
-      objectStoreName: FavoritesDatabaseInterface.objectStoreName,
-      version: 1
-    });
+    this.database = new FavoritesDatabase(FavoritesDatabaseInterface.objectStoreName, 1);
   }
 
   /**
    * @returns {Promise.<Post[]>}
    */
   loadAllFavorites() {
-    return Utils.sendPostedMessage(this.databaseWorker, {
-      command: "load",
-      idsToDelete: this.getIdsToDeleteOnReload()
-    })
+    return this.database.loadFavorites(this.getIdsToDeleteOnReload())
       .then((records) => {
         return this.deserializeFavorites(records);
       });
@@ -55,15 +43,13 @@ class FavoritesDatabaseInterface {
    * @returns {Promise.<void>}
    */
   storeFavorites(favorites) {
+    const posts = favorites
+    .slice()
+    .reverse()
+    .map(favorite => favorite.databaseRecord);
     return Utils.sleep(500)
       .then(() => {
-        Utils.sendPostedMessage(this.databaseWorker, {
-          command: "store",
-          favorites: favorites
-            .slice()
-            .reverse()
-            .map(favorite => favorite.databaseRecord)
-        });
+        this.database.storeFavorites(posts);
       });
   }
 
@@ -71,10 +57,7 @@ class FavoritesDatabaseInterface {
    * @param {Post[]} favorites
    */
   updateFavorites(favorites) {
-    this.databaseWorker.postMessage({
-      command: "update",
-      favorites: favorites.map(favorite => favorite.databaseRecord)
-    });
+    this.database.updateFavorites(favorites.map(favorite => favorite.databaseRecord));
   }
 
   /**

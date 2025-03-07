@@ -161,4 +161,8 @@ class GalleryView {
   createSearchPage(searchPage) {
     this.searchPageCreator.createSearchPage(searchPage);
   }
+
+  toggleVideoPause() {
+    this.renderer.toggleVideoPause();
+  }
 }

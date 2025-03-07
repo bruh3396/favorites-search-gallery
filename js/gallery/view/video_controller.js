@@ -105,6 +105,9 @@ class VideoController {
     this.broadcastEnding(video);
     this.broadcastDoubleClick(video);
     this.revealControlsWhenTouched(video);
+    video.addEventListener("keydown", (event) => {
+      console.log(event.key);
+    });
   }
 
   preventDefaultBehaviorWhenControlKeyIsPressed() {
@@ -142,15 +145,21 @@ class VideoController {
       if (event.ctrlKey) {
         return;
       }
-
-      if (video.paused) {
-        video.play().catch(() => { });
-      } else {
-        video.pause();
-      }
+      this.toggleVideoPause(video);
     }, {
       passive: true
     });
+  }
+
+  /**
+   * @param {HTMLVideoElement} video
+   */
+  toggleVideoPause(video) {
+    if (video.paused) {
+      video.play().catch(() => { });
+    } else {
+      video.pause();
+    }
   }
 
   /**
@@ -419,6 +428,12 @@ class VideoController {
   toggleVideoContainer(value) {
     if (this.videoContainer !== null) {
       this.videoContainer.style.display = value ? "block" : "none";
+    }
+  }
+
+  toggleActiveVideoPause() {
+    if (document.activeElement !== this.getActiveVideoPlayer()) {
+      this.toggleVideoPause(this.getActiveVideoPlayer());
     }
   }
 

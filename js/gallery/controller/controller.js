@@ -303,6 +303,10 @@ class GalleryController {
           this.model.openOriginalContentInNewTab();
           break;
 
+        case " ":
+          this.view.toggleVideoPause();
+          break;
+
         default:
           break;
       }

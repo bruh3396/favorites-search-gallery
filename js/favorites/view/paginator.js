@@ -124,6 +124,7 @@ class FavoritesPaginator {
         this.updateRowSize(rowInput);
       }
 
+      this.updateLastRow();
       this.updateMasonry();
     }, 100));
   }
@@ -168,7 +169,6 @@ class FavoritesPaginator {
     for (const favorite of favoritesToAdd) {
       favorite.insertAtEndOfContent(this.content);
     }
-    this.removeFlexItemSpacers();
     this.forceActivateMasonry();
     this.updateRangeIndicator(this.currentPageNumber, favorites.length);
     return favoritesToAdd.map(favorite => favorite.root);
@@ -425,8 +425,7 @@ class FavoritesPaginator {
     this.content.innerHTML = "";
     this.content.appendChild(newContent);
     this.forceActivateMasonry();
-    this.addFlexItemSpacers();
-
+    this.updateLastRow();
     Utils.scrollToTop();
   }
 
@@ -567,9 +566,7 @@ class FavoritesPaginator {
     this.content.classList.add(layout);
 
     if (layout === "row") {
-      this.addFlexItemSpacers();
-    } else {
-      this.removeFlexItemSpacers();
+      this.updateLastRow();
     }
 
     if (layout === "masonry") {
@@ -606,28 +603,32 @@ class FavoritesPaginator {
     }
   }
 
-  addFlexItemSpacers() {
-    if (!this.usingHorizontalLayout) {
-      return;
-    }
-    this.removeFlexItemSpacers();
+  async updateLastRow() {
+    // if (!this.usingHorizontalLayout) {
+    //   return;
+    // }
+    // await Utils.sleep(100);
+    // await FavoritesLayoutObserver.waitForLayoutToComplete();
+    // await Utils.sleep(100);
+    // const items = Array.from(this.content.querySelectorAll(`.${Utils.itemClassName}`))
+    //   .filter(item => item instanceof HTMLElement)
+    //   .reverse();
 
-    for (let i = 0; i < 8; i += 1) {
-      this.content.appendChild(this.createSpacer());
-    }
-  }
+    // if (items.length === 0) {
+    //   return;
+    // }
 
-  removeFlexItemSpacers() {
-    for (const spacer of Array.from(document.getElementsByClassName("spacer"))) {
-      spacer.remove();
-    }
-  }
+    // for (const item of items) {
+    //   item.classList.remove("last-row");
+    // }
+    // const lastRowY = items[0].offsetTop;
 
-  createSpacer() {
-    const spacer = document.createElement("div");
-
-    spacer.className = "spacer";
-    return spacer;
+    // for (const item of items) {
+    //   if (item.offsetTop !== lastRowY) {
+    //     break;
+    //   }
+    //   item.classList.add("last-row");
+    // }
   }
 
   /**
@@ -679,6 +680,7 @@ class FavoritesPaginator {
         }
       }
       `, "row-size");
+    this.updateLastRow();
   }
 
   /**

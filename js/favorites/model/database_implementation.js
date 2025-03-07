@@ -156,7 +156,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {[{id: String, tags: String, src: String, metadata: String, type: String}]} favorites
+   * @param {{id: String, tags: String, src: String, metadata: String}[]} favorites
    * @returns {Promise.<void>}
    */
   storeFavorites(favorites) {
@@ -201,7 +201,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {[{id: String, tags: String, src: String, metadata: String, type: String}]} favorites
+   * @param {{id: String, tags: String, src: String, metadata: String}[]} favorites
    */
   updateFavorites(favorites) {
     this.openConnection()
@@ -245,7 +245,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, metadata: String, type: String}} favorite
+   * @param {{id: String, tags: String, src: String, metadata: String}} favorite
    */
   addContentTypeToFavorite(favorite) {
     const tags = favorite.tags + " ";
@@ -255,54 +255,3 @@ class FavoritesDatabase {
     favorite.type = isGif ? "gif" : isAnimated ? "video" : "image";
   }
 }
-
-/**
- * @type {FavoritesDatabase}
- */
-const favoritesDatabase = new FavoritesDatabase("user", 1);
-
-self.addEventListener("message", (message) => {
-  const request = message.data;
-
-  switch (request.command) {
-    case "create":
-      favoritesDatabase.objectStoreName = request.objectStoreName;
-      favoritesDatabase.version = request.version;
-      self.postMessage({
-        id: request.id,
-        response: "done"
-      });
-      break;
-
-    case "load":
-      favoritesDatabase.loadFavorites(request.idsToDelete)
-        .then((favorites) => {
-          self.postMessage({
-            id: request.id,
-            response: favorites
-          });
-
-        });
-      break;
-
-    case "store":
-      favoritesDatabase.storeFavorites(request.favorites)
-        .then(() => {
-          self.postMessage({
-            id: request.id
-          });
-        });
-      break;
-
-    case "update":
-      favoritesDatabase.updateFavorites(request.favorites);
-      break;
-
-    default:
-      self.postMessage({
-        id: request.id,
-        response: "Favorites database command not found: " + request.command
-      });
-      break;
-  }
-});

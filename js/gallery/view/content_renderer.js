@@ -101,4 +101,8 @@ class GalleryContentRenderer {
   restartVideo() {
     this.videoRenderer.restartVideo();
   }
+
+  toggleVideoPause() {
+    this.videoRenderer.toggleVideoPause();
+  }
 }

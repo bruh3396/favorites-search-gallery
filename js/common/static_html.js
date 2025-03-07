@@ -497,11 +497,15 @@ class HTMLStrings {
 
         >.favorite,
         >.spacer {
+
+          &.last-row {
+            flex: 0 1 auto;
+            /* opacity: 0.1; */
+          }
           height: 300px;
           flex: 1 1 auto;
           border-radius: 10px;
           overflow: hidden;
-
           /* transition: height var(--transition-duration) linear; */
         }
 
