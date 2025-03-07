@@ -19,6 +19,7 @@ class GalleryConstants {
   static maxUpscaledThumbCanvasHeight = 16000;
   static upscaleDelay = 100;
   static imageMegabyteLimit = 550;
+  static searchPagePreloadedImageCount = 42;
   static minimumPreloadedImageCount = 5;
   static visibleThumbsDownwardScrollPixelGenerosity = 500;
   static navigationThrottleTime = 250;

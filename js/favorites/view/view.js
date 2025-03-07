@@ -111,8 +111,11 @@ class FavoritesView {
     return this.paginator.changePageWhileInGallery(message.direction, message.searchResults);
   }
 
-  gotoNextPage() {
-    this.paginator.gotoNextPage();
+  /**
+   * @param {String} direction
+   */
+  changePageOutOfGallery(direction) {
+    this.paginator.gotoAdjacentPage(direction);
   }
 
   /**

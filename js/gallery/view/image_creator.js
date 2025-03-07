@@ -43,9 +43,7 @@ class GalleryImageCreator {
    * @param {HTMLElement[]} thumbs
    */
   createNewImages(thumbs) {
-    const requests = this.getRequestsFromThumbs(thumbs);
-    const truncatedRequests = this.truncateImagesExceedingMemoryLimit(requests);
-    const finalRequests = this.filterAnimatedRequestsOnSearchPage(truncatedRequests);
+    const finalRequests = this.getFinalImageRequests(thumbs);
 
     this.deleteOutdatedImages(finalRequests);
     this.createImages(this.removeAlreadyCreatedImages(finalRequests));
@@ -55,8 +53,20 @@ class GalleryImageCreator {
    * @param {HTMLElement[]} thumbs
    * @returns {ImageRequest[]}
    */
-  getRequestsFromThumbs(thumbs) {
-    return thumbs.map(thumb => new ImageRequest(thumb));
+  getFinalImageRequests(thumbs) {
+    const requests = thumbs.map(thumb => new ImageRequest(thumb));
+    return this.truncateImageRequests(requests);
+  }
+
+  /**
+   * @param {ImageRequest[]} requests
+   * @returns {ImageRequest[]}
+   */
+  truncateImageRequests(requests) {
+    if (Utils.onFavoritesPage()) {
+      return this.truncateImagesExceedingMemoryLimit(requests);
+    }
+    return this.truncateImagesOnSearchPage(requests);
   }
 
   /**
@@ -83,12 +93,11 @@ class GalleryImageCreator {
 
   /**
    * @param {ImageRequest[]} requests
+   * @returns {ImageRequest[]}
    */
-  filterAnimatedRequestsOnSearchPage(requests) {
-    if (Utils.onSearchPage()) {
-      return requests.filter(request => !request.isAnimated);
-    }
-    return requests;
+  truncateImagesOnSearchPage(requests) {
+    return requests.slice(0, GalleryConstants.searchPagePreloadedImageCount)
+    .filter(request => !request.isAnimated);
   }
 
   /**

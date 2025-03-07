@@ -1,8 +1,4 @@
 class AwesompleteWrapper {
-  static preferences = {
-    savedSearchSuggestions: "savedSearchSuggestions"
-  };
-
   /**
    * @type {Boolean}
    */
@@ -18,7 +14,7 @@ class AwesompleteWrapper {
     if (AwesompleteWrapper.disabled) {
       return;
     }
-    this.showSavedSearchSuggestions = Boolean(Utils.getPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, false));
+    this.showSavedSearchSuggestions = Boolean(Utils.getPreference("savedSearchSuggestions", false));
     this.insertHTML();
     this.addAwesompleteToInputs();
   }

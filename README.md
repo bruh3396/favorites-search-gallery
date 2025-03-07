@@ -106,7 +106,7 @@ This script is still in development, please let me know if you experience a bug,
 | Arrow Keys, Scroll Wheel, AD   | Traverse gallery                               |                        |
 | Escape                                |    Exit gallery                                |                        |
 | Right Click                           | Exit gallery |                        |
-| Middle Click                          | Open post page of thumbnail in new tab         |                        |
+| Middle Click                          | Open post in new tab         |                        |
 | Double Left Click                          | Exit gallery         | Content is a video                       |
 | Ctrl Left  Click                          | Open original content in new tab and stay on current tab         |                        |
 | Ctrl Shift Left Click | Open original content in new tab and move to new tab |  |
@@ -122,11 +122,14 @@ This script is still in development, please let me know if you experience a bug,
 
 | Key | Function                       | Condition                          |
 |-----|--------------------------------|------------------------------------|
-| F   | Add favorite                   |                                    |
+| E   | Add favorite                   |                                    |
 | X   | Remove favorite                | "Remove Buttons" option checked     |
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
 | P   | Stop/start autoplay            | Autoplay option checked            |
+| F   | Toggle fullscreen            |             |
+| Q   | Open original content in new tab            |             |
+| G   | Open post in new tab            |             |
 
 
 

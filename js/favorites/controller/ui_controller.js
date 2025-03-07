@@ -345,7 +345,7 @@ class FavoritesUIController {
     if (!(event.target instanceof HTMLInputElement)) {
       return;
     }
-    Utils.insertStyleHTML(`#header {display: ${event.target.checked ? "block" : "none"}}`, "hide-header");
+    Utils.insertStyleHTML(`#header {display: ${event.target.checked ? "block" : "none"}}`, "header");
   }
 
   /**
@@ -356,5 +356,15 @@ class FavoritesUIController {
       return;
     }
     GlobalEvents.favorites.emit("showOnHover", event.target.checked);
+  }
+
+  /**
+   * @param {CustomEvent} event
+   */
+  static toggleGalleryMenu(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    Utils.toggleGalleryMenu(event.target.checked);
   }
 }

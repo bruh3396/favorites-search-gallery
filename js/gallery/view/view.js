@@ -156,9 +156,9 @@ class GalleryView {
   }
 
   /**
-   * @param {HTMLElement[]} thumbs
+   * @param {SearchPage} searchPage
    */
-  createSearchPage(thumbs) {
-    this.searchPageCreator.createSearchPage(thumbs);
+  createSearchPage(searchPage) {
+    this.searchPageCreator.createSearchPage(searchPage);
   }
 }

@@ -25,13 +25,14 @@ class GalleryMenuButtonTemplate {
 class GalleryMenu {
   static buttons = [
     {id: "exit-gallery", icon: Utils.icons.exit, action: "exitGallery", enabled: true, handler: "galleryController", hint: "Exit (Escape, Right-Click)", color: "red"},
-    {id: "fullscreen-gallery", icon: Utils.icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen", color: "#0075FF"},
-    {id: "open-in-new-gallery", icon: Utils.icons.openInNew, action: "openPost", enabled: true, handler: "galleryController", hint: "Open Post (Middle-Click)", color: "lightgreen"},
-    {id: "download-gallery", icon: Utils.icons.download, action: "download", enabled: true, handler: "galleryController", hint: "Open Original (Ctrl + Left-Click)", color: "lightskyblue"},
-    {id: "add-favorite-gallery", icon: Utils.icons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController", hint: "Add Favorite (F)", color: "hotpink"},
+    {id: "fullscreen-gallery", icon: Utils.icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen (F)", color: "#0075FF"},
+    {id: "open-in-new-gallery", icon: Utils.icons.openInNew, action: "openPost", enabled: true, handler: "galleryController", hint: "Open Post (Middle-Click, G)", color: "lightgreen"},
+    {id: "download-gallery", icon: Utils.icons.download, action: "download", enabled: true, handler: "galleryController", hint: "Open Original (Ctrl + Left-Click, Q)", color: "lightskyblue"},
+    {id: "add-favorite-gallery", icon: Utils.icons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController", hint: "Add Favorite (E)", color: "hotpink"},
     {id: "remove-favorite-gallery", icon: Utils.icons.heartMinus, action: "removeFavorite", enabled: false, handler: "galleryController", hint: "Remove Favorite (X)", color: "red"},
     {id: "dock-gallery", icon: Utils.icons.dock, action: "toggleDockPosition", enabled: false, handler: "galleryMenu", hint: "Change Position", color: ""},
     {id: "toggle-background-gallery", icon: Utils.icons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController", hint: "Toggle Background (B)", color: "gold"},
+    {id: "search-gallery", icon: Utils.icons.search, action: "search", enabled: false, handler: "galleryController", hint: "Search", color: "cyan"},
     {id: "pin-gallery", icon: Utils.icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "#0075FF"}
   ];
 
@@ -63,6 +64,8 @@ class GalleryMenu {
     if (Utils.getPreference("galleryMenuPin", false)) {
       this.togglePin();
     }
+
+    Utils.toggleGalleryMenu(Boolean(Utils.getPreference("enableGalleryMenu", true)));
   }
 
   addEventListeners() {

@@ -541,10 +541,6 @@ class FavoritesPaginator {
     }
     const pageNumber = Math.floor(index / this.maxFavoritesPerPage) + 1;
 
-    dispatchEvent(new CustomEvent("foundFavorite", {
-      detail: id
-    }));
-
     if (this.currentPageNumber !== pageNumber) {
       this.changePage(pageNumber, favorites);
     }
@@ -692,13 +688,17 @@ class FavoritesPaginator {
     this.maxFavoritesPerPage = resultsPerPage;
   }
 
-  gotoNextPage() {
-    const nextPageButton = document.getElementById("next-page");
+  /**
+   * @param {String} direction
+   */
+  gotoAdjacentPage(direction) {
+    const id = direction === "ArrowRight" ? "next-page" : "previous-page";
+    const adjacentPageButton = document.getElementById(id);
 
-    if (nextPageButton === null || !(nextPageButton instanceof HTMLButtonElement) || nextPageButton.disabled) {
+    if (adjacentPageButton === null || !(adjacentPageButton instanceof HTMLButtonElement) || adjacentPageButton.disabled) {
       return;
     }
-    nextPageButton.click();
+    adjacentPageButton.click();
   }
 
   onLayoutCompletedWrapper() {

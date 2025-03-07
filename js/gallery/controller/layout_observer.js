@@ -52,12 +52,7 @@ class FavoritesLayoutObserver {
       return Promise.resolve();
     }
     return new Promise(resolve => {
-      const onLayoutCompleted = () => {
-        GlobalEvents.favorites.off("layoutCompleted", onLayoutCompleted);
-        resolve();
-      };
-
-      GlobalEvents.favorites.on("layoutCompleted", onLayoutCompleted);
+      GlobalEvents.favorites.once("layoutCompleted", resolve);
     });
   }
 }

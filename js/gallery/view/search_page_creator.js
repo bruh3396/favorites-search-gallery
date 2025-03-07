@@ -2,19 +2,19 @@ class SearchPageCreator {
   /**
    * @type {HTMLElement | null}
    */
-  imageContainer;
+  thumbContainer;
 
   constructor() {
     if (!Utils.onSearchPage()) {
       return;
     }
-    this.imageContainer = this.getImageContainer();
+    this.thumbContainer = this.getMainThumbnailContainer();
   }
 
   /**
    * @returns {HTMLElement | null}
    */
-  getImageContainer() {
+  getMainThumbnailContainer() {
     const thumb = document.querySelector(".thumb");
 
     if (thumb !== null) {
@@ -24,16 +24,55 @@ class SearchPageCreator {
   }
 
   /**
-   * @param {HTMLElement[]} thumbs
+   * @param {SearchPage} searchPage
    */
-  createSearchPage(thumbs) {
-    if (this.imageContainer === null) {
+  createSearchPage(searchPage) {
+    this.insertNewThumbs(searchPage);
+    this.updatePaginator(searchPage);
+    this.updateAddressBar(searchPage);
+  }
+
+  /**
+   * @param {SearchPage} searchPage
+   */
+  insertNewThumbs(searchPage) {
+    if (this.thumbContainer === null) {
       return;
     }
-    this.imageContainer.innerHTML = "";
+    this.thumbContainer.innerHTML = "";
 
-    for (const thumb of thumbs) {
-      this.imageContainer.appendChild(thumb);
+    for (const thumb of searchPage.thumbs) {
+      this.thumbContainer.appendChild(thumb);
     }
+  }
+
+  /**
+   * @param {SearchPage} searchPage
+   */
+  updatePaginator(searchPage) {
+    if (searchPage.paginator === null) {
+      return;
+    }
+    const currentPaginator = document.getElementById("paginator");
+    const placeToInsert = currentPaginator || this.thumbContainer;
+
+    if (placeToInsert === null) {
+      return;
+    }
+    placeToInsert.insertAdjacentElement("afterend", searchPage.paginator);
+
+    if (currentPaginator !== null) {
+      currentPaginator.remove();
+    }
+  }
+
+  /**
+   * @param {SearchPage} searchPage
+   */
+  updateAddressBar(searchPage) {
+    const baseURL = location.origin + location.pathname;
+    const searchFragment = `${location.search.replace(/&pid=\d+/g, "")}&pid=${searchPage.pageNumber * 42}`;
+
+    window.history.replaceState(null, "", baseURL + searchFragment);
   }
 }

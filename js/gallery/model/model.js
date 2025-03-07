@@ -45,11 +45,10 @@ class GalleryModel {
   }
 
   constructor() {
-    this.currentState = this.getStartState();
-    this.currentIndex = 0;
-    this.currentSearchPageNumber = 0;
     this.thumbSelector = new ThumbSelector();
     this.searchPageLoader = new SearchPageLoader();
+    this.currentState = this.getStartState();
+    this.currentIndex = 0;
     this.recentlyExitedGallery = false;
   }
 
@@ -76,7 +75,7 @@ class GalleryModel {
     this.recentlyExitedGallery = true;
     setTimeout(() => {
       this.recentlyExitedGallery = false;
-    }, 10);
+    }, 500);
   }
 
   showContentOnHover() {
@@ -96,6 +95,7 @@ class GalleryModel {
    * @returns {HTMLElement | undefined}
    */
   navigate(direction) {
+    this.searchPageLoader.preloadSearchPages();
     this.currentIndex += this.isForward(direction) ? 1 : -1;
     return this.currentThumb;
   }
@@ -132,8 +132,7 @@ class GalleryModel {
     if (Utils.onFavoritesPage()) {
       return this.thumbSelector.getSearchResultsAround(thumb);
     }
-    // return this.postLoader.getPostsAround(thumb).map(post => post.htmlElement);
-    return this.thumbSelector.getThumbsAroundOnCurrentPage(thumb);
+    return this.searchPageLoader.getThumbsAround(thumb);
   }
 
   /**
@@ -147,27 +146,31 @@ class GalleryModel {
     this.thumbSelector.indexCurrentPageThumbs(Utils.getAllThumbs());
   }
 
-  /**
-   * @param {String} direction
-   */
-  getThumbsFromAdjacentSearchPage(direction) {
-    // let nextSearchPageNumber = this.currentSearchPageNumber;
-
-    // if (this.isForward(direction)) {
-    //   nextSearchPageNumber += 1;
-    // } else {
-    //   nextSearchPageNumber -= 1;
-    // }
-    // const thumbs = this.postLoader.getThumbsFromSearchPageNumber(nextSearchPageNumber);
-
-    // if (thumbs.length > 0) {
-    //   this.currentSearchPageNumber = nextSearchPageNumber;
-    // }
-    // return thumbs;
-    return [];
+  preloadSearchPages() {
+    this.searchPageLoader.preloadSearchPages();
   }
 
-  getAdjacentSearchPageHTML(direction) {
+  clampCurrentIndex() {
+    this.currentIndex = Utils.clamp(this.currentIndex, 0, this.thumbSelector.thumbsOnCurrentPage.length - 1);
+  }
 
+  /**
+   * @param {String} direction;
+   * @returns {SearchPage | null}
+   */
+  navigateSearchPages(direction) {
+    return this.searchPageLoader.navigateSearchPages(direction);
+  }
+
+  openPostInNewTab() {
+    if (this.currentThumb !== undefined) {
+      Utils.openPostInNewTab(this.currentThumb.id);
+    }
+  }
+
+  openOriginalContentInNewTab() {
+    if (this.currentThumb !== undefined) {
+      Utils.openOriginalImageInNewTab(this.currentThumb);
+    }
   }
 }

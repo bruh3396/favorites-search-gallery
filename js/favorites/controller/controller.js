@@ -34,6 +34,7 @@ class FavoritesController {
   addEventListeners() {
     this.addEventListenersToMenu();
     this.addGlobalEventListeners();
+    this.addKeyDownEventListeners();
   }
 
   addEventListenersToMenu() {
@@ -67,6 +68,49 @@ class FavoritesController {
     window.addEventListener("missingMetadata", (/** @type CustomEvent */ event) => {
       this.model.updateMetadata(event.detail);
     });
+  }
+
+  addKeyDownEventListeners() {
+    document.addEventListener("keydown", (event) => {
+      switch (event.key) {
+        case "ArrowRight":
+
+        case "ArrowLeft":
+          if (!event.repeat) {
+            this.changePageWithArrowKey(event.key);
+          }
+          break;
+
+        default:
+          break;
+      }
+    });
+  }
+
+  /**
+   * @param {String} direction
+   */
+  changePageWithArrowKey(direction) {
+    if (Utils.isTypeableInput(document.activeElement)) {
+      return;
+    }
+
+    if (Utils.galleryIsDisabled()) {
+      this.view.changePageOutOfGallery(direction);
+      return;
+    }
+    GlobalEvents.gallery.timeout("inGalleryResponse", 100)
+      .then((inGallery) => {
+        if (!inGallery) {
+          this.view.changePageOutOfGallery(direction);
+        }
+      })
+      .catch((error) => {
+        if (!(error instanceof PromiseTimeoutError)) {
+          console.error(error);
+        }
+      });
+    GlobalEvents.favorites.emit("inGalleryRequest");
   }
 
   loadAllFavorites() {
@@ -235,7 +279,7 @@ class FavoritesController {
   /**
    * @param {HTMLInputElement} input
    */
- updateRowSize(input) {
+  updateRowSize(input) {
     GlobalEvents.favorites.emit("favoritesResized");
     this.view.updateRowSize(input);
   }

@@ -242,10 +242,10 @@ class Caption {
   }
 
   addFavoritesPageEventListeners() {
-    GlobalEvents.favorites.on("favoritesLoaded", () => {
+    GlobalEvents.favorites.once("favoritesLoaded", () => {
       Caption.flags.finishedLoading = true;
     });
-    GlobalEvents.favorites.on("favoritesLoadedFromDatabase", () => {
+    GlobalEvents.favorites.once("favoritesLoadedFromDatabase", () => {
       Caption.flags.finishedLoading = true;
       this.findTagCategoriesOnPageChange();
     });
@@ -297,6 +297,7 @@ class Caption {
       event.preventDefault();
       event.stopPropagation();
       this.tagOnClick(thumb.id, event);
+      GlobalEvents.caption.emit("idClicked", thumb.id);
     };
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
     thumb.children[0].appendChild(this.captionWrapper);

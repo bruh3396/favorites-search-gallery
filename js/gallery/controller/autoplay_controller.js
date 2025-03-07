@@ -230,6 +230,10 @@ class AutoplayController {
           transition: width ${AutoplayController.settings.imageViewDurationInSeconds}s linear;
           width: 100%;
       }
+
+      body.autoplay::before {
+        animation: progress ${AutoplayController.settings.imageViewDurationInSeconds}s linear forwards
+      }
       `, "autoplay-image-progress-bar-animation");
   }
 
@@ -655,11 +659,13 @@ class AutoplayController {
     this.stopImageProgressBar();
     setTimeout(() => {
       this.ui.imageProgressBar.classList.add("animated");
+      document.body.classList.add("autoplay");
     }, 20);
   }
 
   stopImageProgressBar() {
     this.ui.imageProgressBar.classList.remove("animated");
+    document.body.classList.remove("autoplay");
   }
 
   startVideoProgressBar() {

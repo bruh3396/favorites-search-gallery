@@ -203,7 +203,7 @@ class HTMLStrings {
     #favorites-search-gallery-menu {
       position: sticky;
       top: 0;
-      padding: 10px;
+      padding: 10px 20px;
       z-index: 30;
       margin-bottom: 10px;
 
@@ -265,8 +265,8 @@ class HTMLStrings {
 
     textarea {
       max-width: 100%;
-      height: 30px;
-      width: 99%;
+      height: 50px;
+      width: 98%;
       padding: 10px;
       border-radius: 6px;
       resize: vertical;
@@ -458,7 +458,8 @@ class HTMLStrings {
       padding: 0px 20px 30px 20px;
       --transition-duration: 0.3s;
 
-      &.grid, &.square {
+      &.grid,
+      &.square {
         display: grid !important;
         grid-template-columns: repeat(10, 1fr);
         grid-gap: 0.35cqw;
@@ -474,11 +475,13 @@ class HTMLStrings {
           overflow: hidden;
           aspect-ratio: 1 / 1;
 
-          >a, >div {
+          >a,
+          >div {
             width: 100%;
             height: 100%;
 
-            >img:first-child, >canvas {
+            >img:first-child,
+            >canvas {
               width: 100%;
               height: 100%;
               object-fit: cover;
@@ -552,6 +555,10 @@ class HTMLStrings {
         .add-or-remove-button {
           width: 40%;
         }
+
+      }
+
+      &.masonry-lite {
 
       }
     }
@@ -770,7 +777,7 @@ class HTMLStrings {
       display: inline-block;
       width: 60px;
       height: 34px;
-      transform: scale(.75);
+      transform: scale(.70);
       align-content: center;
     }
 
@@ -1029,7 +1036,38 @@ Lower numbers improve responsiveness">
       height: 100%;
       background-color: steelblue;
       z-index: 1;
+
+      /* position: fixed !important;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 4px;
+      background: #ff5733;
+      z-index: 1; */
     }
+
+    body.autoplay::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 4px;
+      background: #ff5733;
+      animation: progress 5s linear forwards;
+      z-index: 9999;
+    }
+
+    @keyframes progress {
+      from {
+        width: 0;
+      }
+
+      to {
+        width: 100%;
+      }
+    }
+
 
     #autoplay-video-progress-bar {
       background-color: royalblue;
@@ -1257,7 +1295,7 @@ Lower numbers improve responsiveness">
     background: transparent;
     transform: translateY(-100%);
     opacity: 0;
-    transition: transform 0.45s cubic-bezier(0, 0, 0.25, 1), opacity 0.4s cubic-bezier(0, 0, 0.25, 1);
+    transition: transform 0.4s cubic-bezier(0, 0, 0.25, 1), opacity 0.25s cubic-bezier(0, 0, 0.25, 1);
 
     #dock-gallery {
 
@@ -1277,7 +1315,7 @@ Lower numbers improve responsiveness">
 
     &.dock-left {
       width: var(--gallery-menu-size);
-      height: 100vw;
+      height: 100vh;
       top: 0;
       left: 0;
       transform: translateX(-100%);
@@ -1302,7 +1340,6 @@ Lower numbers improve responsiveness">
         flex-direction: column;
         justify-content: flex-start;
         margin: 0;
-        border-bottom-left-radius: 6px;
       }
 
       .gallery-menu-button {
@@ -1365,7 +1402,7 @@ Lower numbers improve responsiveness">
 
     &:hover {
       opacity: 1;
-      transform: scale(1.20);
+      transform: scale(1.25);
     }
 
     >img,
@@ -1391,6 +1428,7 @@ Lower numbers improve responsiveness">
     font-size: larger;
     transition: opacity 0.35s ease-in-out;
     border-radius: 3px;
+    pointer-events: none;
   }
 
   .gallery-menu-button:hover::after {
@@ -1414,6 +1452,16 @@ Lower numbers improve responsiveness">
   #add-favorite-gallery {
     >svg {
       fill: white;
+    }
+  }
+
+  @keyframes glowSwipe {
+    0% {
+      left: -100%;
+    }
+
+    100% {
+      left: 100%;
     }
   }
 </style>

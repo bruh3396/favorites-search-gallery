@@ -19,6 +19,7 @@ class GalleryUI {
     this.background = this.createBackground(galleryContainer);
     this.lastVisitedThumb = null;
     this.toggleVideoPointerEvents(false);
+    this.toggleMenu(false);
   }
 
   /**
@@ -209,12 +210,7 @@ class GalleryUI {
     if (!(previousThumb instanceof HTMLElement) || !(nextThumb instanceof HTMLElement)) {
       return;
     }
-    const previousYDistance = Math.abs(thumb.offsetTop - previousThumb.offsetTop);
-    const nextYDistance = Math.abs(thumb.offsetTop - nextThumb.offsetTop);
 
-    if (previousYDistance < 10 && nextYDistance < 10) {
-      return;
-    }
     thumb.scrollIntoView({
       behavior: "smooth",
       block: "center"

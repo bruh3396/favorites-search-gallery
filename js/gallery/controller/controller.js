@@ -114,6 +114,8 @@ class GalleryController {
     this.setupPageChangeHandler();
     this.keepVisibleThumbsPreloaded();
     this.setupFavoritesOptionHandler();
+    this.setupGalleryStateResponder();
+
   }
 
   addSearchPageEventListeners() {
@@ -131,8 +133,9 @@ class GalleryController {
     GlobalEvents.favorites.on("newSearchResults", (/** @type {Post[]} */ searchResults) => {
       this.model.setSearchResults(searchResults);
     });
-    GlobalEvents.favorites.on("newFavoritesFoundOnReload", () => {
+    GlobalEvents.favorites.once("newFavoritesFoundOnReload", () => {
       this.visibleThumbTracker?.observeAllThumbsOnPage();
+      this.model.indexCurrentPageThumbs();
     });
   }
 
@@ -191,6 +194,12 @@ class GalleryController {
     });
   }
 
+  setupGalleryStateResponder() {
+    GlobalEvents.favorites.on("inGalleryRequest", () => {
+      GlobalEvents.gallery.emit("inGalleryResponse", this.model.currentState === GalleryModel.states.IN_GALLERY);
+    });
+  }
+
   setupContextMenuClickHandler() {
     document.addEventListener("contextmenu", (event) => {
       this.executeFunctionBasedOnGalleryState({
@@ -218,8 +227,8 @@ class GalleryController {
         return;
       }
 
-      if (clickEvent.middleClick && this.model.currentThumb !== undefined) {
-        Utils.openPostInNewTab(this.model.currentThumb.id);
+      if (clickEvent.middleClick) {
+        this.model.openPostInNewTab();
       }
     };
     const onMouseDownOutOfGallery = (/** @type {ClickEvent} */ clickEvent) => {
@@ -248,8 +257,8 @@ class GalleryController {
     document.addEventListener("click", (event) => {
       this.executeFunctionBasedOnGalleryState({
         gallery: (/** @type {MouseEvent} */ mouseEvent) => {
-          if (mouseEvent.ctrlKey && this.model.currentThumb !== undefined) {
-            Utils.openOriginalImageInNewTab(this.model.currentThumb);
+          if (mouseEvent.ctrlKey) {
+            this.model.openOriginalContentInNewTab();
           }
         }
       }, event);
@@ -259,6 +268,7 @@ class GalleryController {
   setupKeydownHandler() {
     const onKeyDownInGallery = (/** @type {KeyboardEvent} */ event) => {
       if (GalleryConstants.navigationKeys.has(event.key)) {
+        event.stopImmediatePropagation();
         this.navigate(event.key);
         return;
       }
@@ -273,7 +283,7 @@ class GalleryController {
           this.view.toggleBackgroundOpacity();
           break;
 
-        case "f":
+        case "e":
           this.addCurrentFavorite();
           break;
 
@@ -281,8 +291,16 @@ class GalleryController {
           this.removeCurrentFavorite();
           break;
 
-        case "e":
+        case "f":
           Utils.toggleFullscreen();
+          break;
+
+        case "g":
+          this.model.openPostInNewTab();
+          break;
+
+        case "q":
+          this.model.openOriginalContentInNewTab();
           break;
 
         default:
@@ -345,15 +363,11 @@ class GalleryController {
           break;
 
         case "openPost":
-          if (this.model.currentThumb !== undefined) {
-            Utils.openPostInNewTab(this.model.currentThumb.id);
-          }
+          this.model.openPostInNewTab();
           break;
 
         case "download":
-          if (this.model.currentThumb !== undefined) {
-            Utils.openOriginalImageInNewTab(this.model.currentThumb);
-          }
+          this.model.openOriginalContentInNewTab();
           break;
 
         case "addFavorite":
@@ -446,7 +460,6 @@ class GalleryController {
   changeFavoritesPageInGallery(direction) {
     return new Promise((resolve, reject) => {
       const onPageChangeInGallery = () => {
-        GlobalEvents.favorites.off("pageChangeResponse", onPageChangeInGallery);
         const thumb = this.model.navigateAfterPageChange(direction);
 
         if (thumb === undefined) {
@@ -456,7 +469,7 @@ class GalleryController {
         }
       };
 
-      GlobalEvents.favorites.on("pageChangeResponse", onPageChangeInGallery);
+      GlobalEvents.favorites.once("pageChangeResponse", onPageChangeInGallery);
       GlobalEvents.gallery.emit("requestPageChange", direction);
     });
   }
@@ -465,12 +478,15 @@ class GalleryController {
    * @param {String} direction
    */
   changeSearchPageInGallery(direction) {
-    const thumbs = this.model.getThumbsFromAdjacentSearchPage(direction);
+    const searchPage = this.model.navigateSearchPages(direction);
 
-    if (thumbs.length > 0) {
-      this.view.createSearchPage(thumbs);
-      this.handlePageChange();
+    if (searchPage === null) {
+      this.model.clampCurrentIndex();
+      return;
     }
+    this.model.preloadSearchPages();
+    this.view.createSearchPage(searchPage);
+    this.handlePageChange();
     const thumb = this.model.navigateAfterPageChange(direction);
 
     if (thumb === undefined) {

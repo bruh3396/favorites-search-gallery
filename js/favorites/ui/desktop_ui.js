@@ -16,12 +16,13 @@ class FavoritesMenuDesktopUI {
       {id: "show-remove-favorite-buttons", parentId: "favorite-options", textContent: "Remove Buttons", title: "Toggle remove favorite buttons", action: "toggleAddOrRemoveButtons", enabled: Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: false, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "show-add-favorite-buttons", parentId: "favorite-options", textContent: "Add Favorite Buttons", title: "Toggle add favorite buttons", action: "toggleAddOrRemoveButtons", enabled: !Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: true, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "exclude-blacklist", parentId: "favorite-options", textContent: "Exclude Blacklist", title: "Exclude favorites with blacklisted tags from search", action: "toggleBlacklist", enabled: Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: false, hotkey: "", invokeActionOnCreation: false, savePreference: true},
-      {id: "fancy-thumb-hovering", parentId: "favorite-options", textContent: "Fancy Hovering", title: "Enable fancy thumbnail hovering", action: "toggleFancyThumbHovering", enabled: true, defaultValue: false, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "fancy-thumb-hovering", parentId: "favorite-options", textContent: "Fancy Hovering", title: "Enable fancy thumbnail hovering", action: "toggleFancyThumbHovering", enabled: false, defaultValue: false, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "statistic-hint", parentId: "favorite-options", textContent: "Show Statistics", title: "Show statistics for each favorite", action: "none", enabled: false, defaultValue: false, hotkey: "S", invokeActionOnCreation: false, savePreference: true},
       {id: "show-hints", parentId: "favorite-options", textContent: "Hotkey Hints", title: "Show hotkeys", action: "toggleOptionHotkeyHints", enabled: true, defaultValue: false, hotkey: "H", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "toggle-header", parentId: "dynamic-favorite-options", textContent: "Header", title: "Toggle site header", action: "toggleHeader", enabled: true, defaultValue: true, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "toggle-header", parentId: "dynamic-favorite-options", textContent: "Header", title: "Toggle site header", action: "toggleHeader", enabled: false, defaultValue: true, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "dark-theme", parentId: "favorite-options", textContent: "Dark Theme", title: "Toggle dark theme", action: "toggleDarkTheme", enabled: true, defaultValue: Utils.usingDarkTheme(), hotkey: "", invokeActionOnCreation: false, savePreference: false, handler: "uiController"},
-      {id: "show-on-hover", parentId: "dynamic-favorite-options", textContent: "Fullscreen on Hover", title: "View full resolution images or play videos and GIFs when hovering over a thumbnail", action: "toggleShowOnHover", enabled: Utils.galleryIsEnabled(), defaultValue: true, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"}
+      {id: "show-on-hover", parentId: "dynamic-favorite-options", textContent: "Fullscreen on Hover", title: "View full resolution images or play videos and GIFs when hovering over a thumbnail", action: "toggleShowOnHover", enabled: Utils.galleryIsEnabled(), defaultValue: true, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"},
+      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Sidebar", title: "Show sidebar in gallery", action: "toggleGalleryMenu", enabled: Utils.galleryIsEnabled(), defaultValue: true, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"}
     ],
     "select": [
       {id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "updateSortingMethod", position: "beforeend", invokeActionOnCreation: false, optionPairs: [["default", "Default"], ["score", "Score"], ["width", "Width"], ["height", "Height"], ["creationTimestamp", "Date Uploaded"], ["lastChangedTimestamp", "Date Changed"], ["random", "Random"]]},
@@ -44,8 +45,6 @@ class FavoritesMenuDesktopUI {
   static setupStaticElements() {
     FavoritesMenuDesktopUI.setupWhatsNewMenu();
     FavoritesMenuDesktopUI.setupFindFavorite();
-    // FavoritesMenuDesktopUI.disableMasonryLayoutWhenResultsPerPageTooHigh();
-
   }
 
   static setupWhatsNewMenu() {
@@ -105,42 +104,8 @@ class FavoritesMenuDesktopUI {
     findFavoriteInput.oninput = Utils.debounceAlways(() => {
       Utils.setPreference("findFavorite", findFavoriteInput.value);
     }, 1000);
-  }
-
-  static disableMasonryLayoutWhenResultsPerPageTooHigh() {
-    const layoutSelect = document.getElementById("layout-select");
-    const resultsPerPageInput = document.getElementById("results-per-page");
-    const maxResultsPerPageForMasonry = 500;
-
-    if (!(layoutSelect instanceof HTMLSelectElement) || !(resultsPerPageInput instanceof HTMLInputElement)) {
-      return;
-    }
-    const masonryOption = Array.from(layoutSelect.querySelectorAll("option")).find(option => option.value === "masonry");
-
-    if (!(masonryOption instanceof HTMLOptionElement)) {
-      return;
-    }
-    const originalMasonryTextContent = masonryOption.textContent;
-    const disabledMasonryTextContent = `${originalMasonryTextContent} (requires <= 500 results per page)`;
-    const originalMaxResultsPerPage = parseFloat(resultsPerPageInput.getAttribute("max") || String(maxResultsPerPageForMasonry));
-
-    GlobalEvents.favorites.on("resultsPerPageChanged", (/** @type {Number} */ resultsPerPage) => {
-      if (layoutSelect.value === "masonry" && resultsPerPage > maxResultsPerPageForMasonry) {
-        resultsPerPageInput.value = String(maxResultsPerPageForMasonry);
-        resultsPerPageInput.dispatchEvent(new Event("change"));
-        return;
-      }
-
-      if (resultsPerPage > maxResultsPerPageForMasonry && !masonryOption.disabled) {
-        masonryOption.disabled = true;
-        masonryOption.textContent = disabledMasonryTextContent;
-        return;
-      }
-
-       if (resultsPerPage <= maxResultsPerPageForMasonry && masonryOption.disabled) {
-        masonryOption.disabled = false;
-        masonryOption.textContent = originalMasonryTextContent;
-      }
+    GlobalEvents.caption.on("idClicked", (/** @type {String} */ id) => {
+      findFavoriteInput.value = id;
     });
   }
 }

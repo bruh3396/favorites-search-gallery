@@ -41,6 +41,7 @@ class Utils {
     pin: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FFFFFF\"><path d=\"m640-480 80 80v80H520v240l-40 40-40-40v-240H240v-80l80-80v-280h-40v-80h400v80h-40v280Zm-286 80h252l-46-46v-314H400v314l-46 46Zm126 0Z\"/></svg>",
     dock: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FFFFFF\"><path d=\"M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm440-80h120v-560H640v560Zm-80 0v-560H200v560h360Zm80 0h120-120Z\"/></svg>",
     bulb: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FFFFFF\"><path d=\"M480-80q-26 0-47-12.5T400-126q-33 0-56.5-23.5T320-206v-142q-59-39-94.5-103T190-590q0-121 84.5-205.5T480-880q121 0 205.5 84.5T770-590q0 77-35.5 140T640-348v142q0 33-23.5 56.5T560-126q-12 21-33 33.5T480-80Zm-80-126h160v-36H400v36Zm0-76h160v-38H400v38Zm-8-118h58v-108l-88-88 42-42 76 76 76-76 42 42-88 88v108h58q54-26 88-76.5T690-590q0-88-61-149t-149-61q-88 0-149 61t-61 149q0 63 34 113.5t88 76.5Zm88-162Zm0-38Z\"/></svg>",
+    search: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"#FFFFFF\"><path d=\"M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z\"/></svg>",
     settings: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\" fill=\"white\"><path d=\"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z\"/></svg>"
   };
   static addedFavoriteStatuses = {
@@ -224,7 +225,7 @@ class Utils {
     Utils.insertCommonStyleHTML();
     Utils.setTheme();
     Utils.initializeSearchPage();
-    Utils.prefetchAdjacentSearchPages();
+    // Utils.prefetchAdjacentSearchPages();
     Utils.setupOriginalImageLinksOnSearchPage();
     Utils.initializeImageExtensionAssignmentCooldown();
   }
@@ -1152,10 +1153,13 @@ class Utils {
   }
 
   /**
-   * @param {HTMLElement} element
+   * @param {HTMLElement | Element | null} element
    * @returns {Boolean}
    */
   static isTypeableInput(element) {
+    if (!(element instanceof HTMLElement)) {
+      return false;
+    }
     const tagName = element.tagName.toLowerCase();
 
     if (tagName === "textarea") {
@@ -1766,12 +1770,26 @@ class Utils {
     if (!Utils.onSearchPage()) {
       return;
     }
+    Utils.prepareSearchPageThumbs(Utils.getAllThumbs());
+  }
 
-    for (const thumb of Utils.getAllThumbs()) {
-      Utils.removeTitleFromImage(Utils.getImageFromThumb(thumb));
-      Utils.assignContentType(thumb);
-      thumb.id = Utils.removeNonNumericCharacters(Utils.getIdFromThumb(thumb));
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  static prepareSearchPageThumbs(thumbs) {
+    for (const thumb of thumbs) {
+      Utils.prepareSearchPageThumb(thumb);
     }
+  }
+
+  static prepareSearchPageThumb(thumb) {
+    const image = this.getImageFromThumb(thumb);
+
+    if (image !== null) {
+      Utils.removeTitleFromImage(image);
+    }
+    Utils.assignContentType(thumb);
+    thumb.id = Utils.removeNonNumericCharacters(Utils.getIdFromThumb(thumb));
   }
 
   /**
@@ -2434,5 +2452,26 @@ class Utils {
       return false;
     }
     return event.target.classList.contains(".gallery-sub-menu") || event.target.closest(".gallery-sub-menu") !== null;
+  }
+
+  /**
+   * @template T
+   * @param {Promise<T>} promise
+   * @param {number} milliseconds
+   * @returns {Promise<T>}
+   */
+  static withTimeout(promise, milliseconds) {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new PromiseTimeoutError()), milliseconds));
+    return Promise.race([promise, timeout]);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  static toggleGalleryMenu(value) {
+    Utils.insertStyleHTML(`
+        #gallery-menu {
+          display: ${value ? "block" : "none"} !important;
+        }`, "enable-gallery-menu");
   }
 }
