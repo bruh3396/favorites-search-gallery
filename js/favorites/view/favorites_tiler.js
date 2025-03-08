@@ -16,10 +16,6 @@ class FavoritesTiler {
    */
   gridTiler;
   /**
-   * @type {FavoritesMasonryTiler}
-   */
-  masonryTiler;
-  /**
    * @type {FavoritesRowTiler}
    */
   rowTiler;
@@ -28,15 +24,15 @@ class FavoritesTiler {
    */
   squareTiler;
   /**
-   * @type {FavoritesMasonryLiteTiler}
+   * @type {FavoritesColumnTiler}
    */
-  masonryLiteTiler;
+  columnTiler;
 
   /**
    * @type {Tiler[]}
    */
   get tilers() {
-    return [this.gridTiler, this.masonryTiler, this.rowTiler, this.squareTiler, this.masonryLiteTiler];
+    return [this.gridTiler, this.rowTiler, this.squareTiler, this.columnTiler];
   }
 
   /**
@@ -54,10 +50,9 @@ class FavoritesTiler {
     this.currentLayout = this.loadLayout();
     this.onLayoutCompleted = onLayoutCompleted;
     this.gridTiler = new FavoritesGridTiler(this.container);
-    this.masonryTiler = new FavoritesMasonryTiler(this.container, onLayoutCompleted);
     this.rowTiler = new FavoritesRowTiler(this.container);
     this.squareTiler = new FavoritesSquareTiler(this.container);
-    this.masonryLiteTiler = new FavoritesMasonryLiteTiler(this.container);
+    this.columnTiler = new FavoritesColumnTiler(this.container);
   }
 
   /**
@@ -99,9 +94,7 @@ class FavoritesTiler {
   }
 
   alertLayoutCompleted() {
-    if (this.currentLayout !== "masonry") {
-      this.onLayoutCompleted();
-    }
+    this.onLayoutCompleted();
   }
 
   /**
@@ -141,11 +134,10 @@ class FavoritesTiler {
    */
   loadLayout() {
     return {
-      masonry: "masonry",
       row: "row",
       square: "square",
       grid: "grid",
-      "masonry-lite": "masonry-lite"
-    }[Utils.getPreference("layoutSelect", "masonry")] || "masonry";
+      column: "column"
+    }[Utils.getPreference("layoutSelect", "column")] || "column";
   }
 }

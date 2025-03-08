@@ -28,9 +28,8 @@ class FavoritesMenuDesktopUI {
       {
         id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true,
         optionPairs: [
-          ["masonry-lite", "Masonry v2"],
+          ["column", "Waterfall"],
           ["row", "River"],
-          // ["masonry", "Masonry"],
           ["square", "Square"],
           ["grid", "Legacy"]
         ], handler: "uiController"

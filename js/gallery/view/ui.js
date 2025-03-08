@@ -8,8 +8,8 @@ class GalleryUI {
    */
   lastVisitedThumb;
 
-  get usingMasonryLayout() {
-    return Utils.onFavoritesPage() && FavoritesLayoutObserver.currentLayout.startsWith("masonry");
+  get usingColumnLayout() {
+    return Utils.onFavoritesPage() && FavoritesLayoutObserver.currentLayout === "column";
   }
 
   /**
@@ -69,7 +69,7 @@ class GalleryUI {
   scrollToLastVisitedThumb() {
     FavoritesLayoutObserver.waitForLayoutToComplete()
       .then(() => {
-        if (this.lastVisitedThumb !== null && this.usingMasonryLayout) {
+        if (this.lastVisitedThumb !== null && this.usingColumnLayout) {
           this.scrollToNextThumb(this.lastVisitedThumb);
         }
       });
@@ -133,7 +133,7 @@ class GalleryUI {
   updateUIInGallery(thumb) {
     this.setLastVisitedThumb(thumb);
 
-    if (this.usingMasonryLayout || Utils.usingFirefox()) {
+    if (this.usingColumnLayout || Utils.usingFirefox()) {
       return;
     }
     this.scrollToNextThumb(thumb);

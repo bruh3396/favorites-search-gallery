@@ -746,7 +746,6 @@ class Utils {
 
     Utils.insertStyleHTML(`
       #favorites-search-gallery-content {
-        &.masonry,
         &.row,
         &.square
         {
@@ -2347,7 +2346,7 @@ class Utils {
    * @returns {String}
    */
   static loadFavoritesLayout() {
-    return Utils.getPreference("layoutSelect", "masonry");
+    return Utils.getPreference("layoutSelect", Defaults.favoritesLayout);
   }
 
   /**

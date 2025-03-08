@@ -1,4 +1,4 @@
-class FavoritesMasonryLiteTiler extends Tiler {
+class FavoritesColumnTiler extends Tiler {
   /**
    * @type {HTMLElement[]}
    */
@@ -17,7 +17,7 @@ class FavoritesMasonryLiteTiler extends Tiler {
    */
   constructor(container) {
     super(container);
-    this.className = "masonry-lite";
+    this.className = "column";
     this.columns = [];
     this.columnCount = parseInt(Utils.getPreference("columnCount", Defaults.columnCount));
     this.useDefaultColumnCountSetter = true;

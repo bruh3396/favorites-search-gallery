@@ -456,8 +456,7 @@ class HTMLStrings {
 
     #favorites-search-gallery-content {
       padding: 0px 20px 30px 20px;
-      --transition-duration: 0.3s;
-      --gutter: 6px;
+      --gutter: 5px;
 
       &.grid,
       &.square {
@@ -507,7 +506,6 @@ class HTMLStrings {
           flex: 1 1 auto;
           border-radius: 10px;
           overflow: hidden;
-          /* transition: height var(--transition-duration) linear; */
         }
 
         .favorite {
@@ -537,27 +535,7 @@ class HTMLStrings {
         }
       }
 
-      &.masonry {
-        margin: 0 auto;
-
-        .favorite {
-          width: 200px;
-          margin-bottom: 10px;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .favorite img:first-child {
-          width: 100%;
-        }
-
-        .add-or-remove-button {
-          width: 40%;
-        }
-
-      }
-
-      &.masonry-lite {
+      &.column {
         display: grid;
         grid-template-columns: repeat(10, 1fr);
         gap: var(--gutter);
