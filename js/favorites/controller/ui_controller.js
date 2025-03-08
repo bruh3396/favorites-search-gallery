@@ -3,7 +3,7 @@ class FavoritesUIController {
 
   static setup() {
     FavoritesUIController.setupMenuEvents();
-    FavoritesUIController.setupCheckboxHotkeys();
+    FavoritesUIController.setupHotkeys();
     FavoritesUIController.setupGlobalListeners();
   }
 
@@ -33,19 +33,52 @@ class FavoritesUIController {
     FavoritesUIController.hotkeys[hotkey.toLocaleLowerCase()] = element;
   }
 
-  static setupCheckboxHotkeys() {
-    document.addEventListener("keydown", (event) => {
+  static setupHotkeys() {
+    const processCheckboxHotkey = async(/** @type {KeyboardEvent} */ event) => {
       const hotkey = event.key.toLowerCase();
       const target = FavoritesUIController.hotkeys[hotkey];
 
       if (!Utils.isHotkeyEvent(event) || target === undefined) {
         return;
       }
+
+      const inGallery = await Utils.inGallery();
+
+      if (inGallery) {
+        return;
+      }
+
       target.checked = !target.checked;
       // @ts-ignore
       FavoritesUIController.invokeAction({
         target
       });
+    };
+
+    const processGeneralHotkeyEvent = async(/** @type {KeyboardEvent} */ event) => {
+      const inGallery = await Utils.inGallery();
+
+      if (inGallery) {
+        return;
+      }
+
+      switch (event.key.toLowerCase()) {
+        case "s":
+          event.stopImmediatePropagation();
+          event.stopPropagation();
+          setTimeout(() => {
+            Utils.focusMainSearchBox();
+          }, 0);
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", (event) => {
+      processCheckboxHotkey(event);
+      processGeneralHotkeyEvent(event);
     });
   }
 
@@ -76,7 +109,7 @@ class FavoritesUIController {
         Utils.forceHideCaptions(false);
       }
     };
-    window.addEventListener("wheel", (event) => {
+    window.addEventListener("wheel", async(event) => {
       const layoutSelect = document.getElementById("layout-select");
       const usingRowLayout = layoutSelect !== null && layoutSelect instanceof HTMLSelectElement && layoutSelect.value === "row";
       const id = usingRowLayout ? "row-size" : "column-count";
@@ -87,6 +120,11 @@ class FavoritesUIController {
       }
 
       if (!event.shiftKey) {
+        return;
+      }
+      const inGallery = await Utils.inGallery();
+
+      if (inGallery) {
         return;
       }
       const addend = (-event.deltaY > 0 ? -1 : 1) * (usingRowLayout ? -1 : 1);

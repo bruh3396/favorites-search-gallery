@@ -109,7 +109,6 @@ class GalleryController {
     if (!Utils.onFavoritesPage()) {
       return;
     }
-    this.preloadThumbsWhenTheyAreHoveredOver();
     this.keepTrackOfLatestSearchResults();
     this.setupPageChangeHandler();
     this.keepVisibleThumbsPreloaded();
@@ -179,11 +178,13 @@ class GalleryController {
         return;
       }
       this.view.showContent(thumb);
+      this.preloadVisibleContentAround(Utils.getThumbUnderCursor(event));
     };
 
     document.addEventListener("mouseover", (event) => {
       this.executeFunctionBasedOnGalleryState({
-        hover: onMouseOverHover
+        hover: onMouseOverHover,
+        idle: this.preloadVisibleContentAround.bind(this)
       }, event);
     });
   }
@@ -336,7 +337,9 @@ class GalleryController {
           this.view.updateBackgroundOpacity(event);
         },
         gallery: (/** @type {WheelEvent} */ event) => {
-          this.navigate(event.deltaY > 0 ? "ArrowRight" : "ArrowLeft");
+          if (!wheelevent.shiftKey) {
+            this.navigate(event.deltaY > 0 ? "ArrowRight" : "ArrowLeft");
+          }
         }
       }, wheelevent);
     }, {
@@ -517,15 +520,6 @@ class GalleryController {
     });
     GlobalEvents.favorites.on("resultsAddedToCurrentPage", (/** @type {HTMLElement[]} */ results) => {
       this.visibleThumbTracker?.observe(results);
-    });
-  }
-
-  preloadThumbsWhenTheyAreHoveredOver() {
-    document.addEventListener("mouseover", (event) => {
-      this.executeFunctionBasedOnGalleryState({
-        idle: this.preloadVisibleContentAround.bind(this),
-        hover: this.preloadVisibleContentAround.bind(this)
-      }, Utils.getThumbUnderCursor(event));
     });
   }
 

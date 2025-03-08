@@ -105,9 +105,6 @@ class VideoController {
     this.broadcastEnding(video);
     this.broadcastDoubleClick(video);
     this.revealControlsWhenTouched(video);
-    video.addEventListener("keydown", (event) => {
-      console.log(event.key);
-    });
   }
 
   preventDefaultBehaviorWhenControlKeyIsPressed() {

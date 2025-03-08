@@ -1,4 +1,11 @@
 class GalleryModel {
+  /**
+   * @type {{
+   *   SHOWING_CONTENT_ON_HOVER: 0,
+   *   IN_GALLERY: 1,
+   *   IDLE: 2
+   * }}
+   */
   static states = {
     SHOWING_CONTENT_ON_HOVER: 0,
     IN_GALLERY: 1,
@@ -6,7 +13,7 @@ class GalleryModel {
   };
 
   /**
-   * @type {Number}
+   * @type {FavoritesGalleryState}
    */
   currentState;
   /**
@@ -47,19 +54,46 @@ class GalleryModel {
   constructor() {
     this.thumbSelector = new ThumbSelector();
     this.searchPageLoader = new SearchPageLoader();
-    this.currentState = this.getStartState();
+    this.changeState(this.getStartState());
     this.currentIndex = 0;
     this.recentlyExitedGallery = false;
   }
 
   /**
-   * @returns {Number}
+   * @returns {FavoritesGalleryState}
    */
   getStartState() {
-    if (Utils.getPreference("showOnHover", true)) {
+    if (Utils.getPreference("showOnHover", Defaults.showOnHover)) {
       return GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
     }
     return GalleryModel.states.IDLE;
+  }
+
+  /**
+   * @param {FavoritesGalleryState} state
+   */
+  changeState(state) {
+    this.currentState = state;
+    this.onStateChange();
+  }
+
+  onStateChange() {
+    switch (this.currentState) {
+      case GalleryModel.states.IDLE:
+        Utils.forceHideCaptions(false);
+        break;
+
+      case GalleryModel.states.SHOWING_CONTENT_ON_HOVER:
+        Utils.forceHideCaptions(true);
+        break;
+
+      case GalleryModel.states.IN_GALLERY:
+        Utils.forceHideCaptions(true);
+        break;
+
+      default:
+        break;
+    }
   }
 
   /**
@@ -67,11 +101,11 @@ class GalleryModel {
    */
   enterGallery(thumb) {
     this.currentIndex = this.thumbSelector.getIndexFromThumb(thumb);
-    this.currentState = GalleryModel.states.IN_GALLERY;
+    this.changeState(GalleryModel.states.IN_GALLERY);
   }
 
   exitGallery() {
-    this.currentState = GalleryModel.states.IDLE;
+    this.changeState(GalleryModel.states.IDLE);
     this.recentlyExitedGallery = true;
     setTimeout(() => {
       this.recentlyExitedGallery = false;
@@ -79,15 +113,15 @@ class GalleryModel {
   }
 
   showContentOnHover() {
-    this.currentState = GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
+    this.changeState(GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
   }
 
   toggleShowContentOnHover() {
     if (this.currentState === GalleryModel.states.SHOWING_CONTENT_ON_HOVER) {
-      this.currentState = GalleryModel.states.IDLE;
+      this.changeState(GalleryModel.states.IDLE);
       return;
     }
-    this.currentState = GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
+    this.changeState(GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
   }
 
   /**

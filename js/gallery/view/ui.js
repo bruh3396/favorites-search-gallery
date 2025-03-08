@@ -9,7 +9,7 @@ class GalleryUI {
   lastVisitedThumb;
 
   get usingMasonryLayout() {
-    return Utils.onFavoritesPage() && FavoritesLayoutObserver.currentLayout === "masonry";
+    return Utils.onFavoritesPage() && FavoritesLayoutObserver.currentLayout.startsWith("masonry");
   }
 
   /**
@@ -230,7 +230,7 @@ class GalleryUI {
   toggleMenu(value) {
     Utils.insertStyleHTML(`
       #gallery-menu {
-        display: ${value ? "flex" : "none"};
+        display: ${value ? "flex" : "none"} !important;
       }
       `, "gallery-menu-visibility");
   }

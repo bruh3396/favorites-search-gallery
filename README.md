@@ -144,6 +144,7 @@ This script is still in development, please let me know if you experience a bug,
 | O   | Toggle more options  |
 | R   | Toggle add/remove favorite buttons |
 | H   | Toggle hints |
+| S   | Focus search box |
 
 
 ## Search Syntax

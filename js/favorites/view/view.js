@@ -7,13 +7,31 @@ class FavoritesView {
    * @type {FavoritesStatusBar}
    */
   statusBar;
+  /**
+   * @type {FavoritesTiler}
+   */
+  tiler;
 
   /**
    * @param {{onPageChange: Function, onLayoutCompleted: Function}} callbacks
    */
   constructor({onPageChange, onLayoutCompleted}) {
-    this.paginator = new FavoritesPaginator(onPageChange, onLayoutCompleted);
+    this.tiler = new FavoritesTiler(onLayoutCompleted);
     this.statusBar = new FavoritesStatusBar();
+    this.paginator = this.createPaginator(onPageChange);
+  }
+
+  /**
+   * @param {Function} onPageChange
+   * @returns {FavoritesPaginator}
+   */
+  createPaginator(onPageChange) {
+    return new FavoritesPaginator((/** @type {Post[]} */ favorites) => {
+      Utils.scrollToTop();
+      this.tiler.tile(Utils.getThumbsFromPosts(favorites));
+      onPageChange();
+      this.tiler.alertLayoutCompleted();
+    });
   }
 
   clearOriginalFavorites() {
@@ -50,16 +68,26 @@ class FavoritesView {
    */
   updateSearchResultsWhileFetching({searchResults, allFavorites}) {
     this.statusBar.updateStatusWhileFetching(searchResults.length, allFavorites.length);
-    return this.paginator.paginateWhileFetching(searchResults);
+    const addedSearchResults = this.paginator.paginateWhileFetching(searchResults);
+    const thumbs = Utils.getThumbsFromPosts(addedSearchResults);
+
+    this.tiler.addToBottom(thumbs);
+    return thumbs;
   }
 
   /**
    * @param {{newSearchResults: Post[], newFavorites: Post[], allSearchResults: Post[]}} results
    */
   insertNewSearchResultsOnReload(results) {
-    this.paginator.insertNewSearchResults(results);
-    const newFavoritesCount = results.newFavorites.length;
+    this.paginator.updatePaginationMenuWHenNewFavoritesAddedOnReload(results.allSearchResults);
+    this.tiler.addToTop(Utils.getThumbsFromPosts(results.newSearchResults));
+    this.notifyNewFavoritesFound(results.newFavorites.length);
+  }
 
+  /**
+   * @param {Number} newFavoritesCount
+   */
+  notifyNewFavoritesFound(newFavoritesCount) {
     if (newFavoritesCount > 0) {
       const pluralSuffix = newFavoritesCount > 1 ? "s" : "";
 
@@ -68,24 +96,28 @@ class FavoritesView {
   }
 
   /**
-   * @param {"masonry" | "row" | "square" | "grid" } layout
+   * @param {FavoritesLayout} layout
    */
   changeLayout(layout) {
-    this.paginator.changeLayout(layout);
+    this.tiler.changeLayout(layout);
   }
 
   /**
    * @param {HTMLInputElement} input
    */
   updateColumnCount(input) {
-    this.paginator.updateColumnCount(input);
+    this.tiler.updateColumnCount(parseFloat(input.value));
   }
 
   /**
    * @param {HTMLInputElement} input
    */
   updateRowSize(input) {
-    this.paginator.updateRowSize(input);
+    const rowSize = parseFloat(input.value);
+    const minRowSize = parseInt(input.getAttribute("min") || "1");
+    const maxRowSize = parseInt(input.getAttribute("max") || "5");
+
+    this.tiler.updateRowSize(rowSize, minRowSize, maxRowSize);
   }
 
   /**

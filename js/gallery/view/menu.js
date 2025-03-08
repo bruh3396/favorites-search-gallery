@@ -65,7 +65,7 @@ class GalleryMenu {
       this.togglePin();
     }
 
-    Utils.toggleGalleryMenu(Boolean(Utils.getPreference("enableGalleryMenu", true)));
+    Utils.toggleGalleryMenu(Boolean(Utils.getPreference("enableGalleryMenu", Defaults.galleryMenuEnabled)));
   }
 
   addEventListeners() {

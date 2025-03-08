@@ -457,12 +457,13 @@ class HTMLStrings {
     #favorites-search-gallery-content {
       padding: 0px 20px 30px 20px;
       --transition-duration: 0.3s;
+      --gutter: 6px;
 
       &.grid,
       &.square {
         display: grid !important;
         grid-template-columns: repeat(10, 1fr);
-        grid-gap: 0.35cqw;
+        grid-gap: var(--gutter);
 
         .add-or-remove-button {
           width: 40%;
@@ -470,7 +471,7 @@ class HTMLStrings {
       }
 
       &.square {
-        >.favorite {
+        .favorite {
           border-radius: 10px !important;
           overflow: hidden;
           aspect-ratio: 1 / 1;
@@ -493,15 +494,15 @@ class HTMLStrings {
       &.row {
         display: flex;
         flex-wrap: wrap;
-        gap: 11px;
+        gap: var(--gutter);
 
-        >.favorite,
-        >.spacer {
+        .favorite {
 
           &.last-row {
             flex: 0 1 auto;
             /* opacity: 0.1; */
           }
+
           height: 300px;
           flex: 1 1 auto;
           border-radius: 10px;
@@ -509,13 +510,7 @@ class HTMLStrings {
           /* transition: height var(--transition-duration) linear; */
         }
 
-        >.spacer {
-          width: 300px;
-          /* background: gray; */
-          pointer-events: none;
-        }
-
-        >.favorite {
+        .favorite {
 
           >a,
           >div {
@@ -545,14 +540,14 @@ class HTMLStrings {
       &.masonry {
         margin: 0 auto;
 
-        >.favorite {
+        .favorite {
           width: 200px;
           margin-bottom: 10px;
           border-radius: 10px;
           overflow: hidden;
         }
 
-        >.favorite img:first-child {
+        .favorite img:first-child {
           width: 100%;
         }
 
@@ -563,7 +558,26 @@ class HTMLStrings {
       }
 
       &.masonry-lite {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: var(--gutter);
+        margin-right: 15px;
 
+        .ml-column {
+          display: flex;
+          flex-direction: column;
+          flex: 0 0 25%;
+          gap: var(--gutter);
+
+          .favorite {
+            border-radius: 10px;
+            overflow: hidden;
+          }
+        }
+
+        .add-or-remove-button {
+          width: 40%;
+        }
       }
     }
 

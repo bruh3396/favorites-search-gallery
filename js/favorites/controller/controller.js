@@ -68,6 +68,18 @@ class FavoritesController {
     window.addEventListener("missingMetadata", (/** @type CustomEvent */ event) => {
       this.model.updateMetadata(event.detail);
     });
+    window.addEventListener("resize", Utils.debounceAfterFirstCall(() => {
+      const columnInput = document.getElementById("column-count");
+      const rowInput = document.getElementById("row-size");
+
+      if (columnInput !== null && (columnInput instanceof HTMLInputElement)) {
+        this.updateColumnCount(columnInput);
+      }
+
+      if (rowInput !== null && (rowInput instanceof HTMLInputElement)) {
+        this.updateRowSize(rowInput);
+      }
+    }, 100));
   }
 
   addKeyDownEventListeners() {
@@ -234,7 +246,7 @@ class FavoritesController {
   }
 
   /**
-   * @param {"masonry" | "row" | "square" | "grid" } layout
+   * @param {FavoritesLayout} layout
    */
   changeLayout(layout) {
     GlobalEvents.favorites.emit("layoutChanged", layout);

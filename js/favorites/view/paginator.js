@@ -1,9 +1,5 @@
 class FavoritesPaginator {
   /**
-   * @type {HTMLDivElement}
-   */
-  content;
-  /**
    * @type {HTMLElement}
    */
   pageSelectionMenu;
@@ -24,49 +20,22 @@ class FavoritesPaginator {
    */
   maxPageNumberButtons;
   /**
-   * @type {Masonry}
-   */
-  masonry;
-  /**
    * @type {Function}
    */
   onPageChange;
-  /**
-   * @type {Function}
-   */
-  onLayoutCompleted;
-
-  /**
-   * @type {Boolean}
-   */
-  get usingMasonry() {
-    return this.content.classList.contains("masonry");
-  }
-
-  /**
-   * @type {Boolean}
-   */
-  get usingHorizontalLayout() {
-    return this.content.classList.contains("row");
-  }
 
   /**
    * @param {Function} onPageChange
-   * @param {Function} onLayoutCompleted
    */
-  constructor(onPageChange, onLayoutCompleted) {
-    this.content = this.createContentContainer();
+  constructor(onPageChange) {
     this.pageSelectionMenu = this.createPageSelectionMenuContainer();
     this.rangeIndicator = this.createRangeIndicator();
     this.currentPageNumber = 1;
-    this.maxFavoritesPerPage = Number(Utils.getPreference("resultsPerPage", 150));
+    this.maxFavoritesPerPage = Number(Utils.getPreference("resultsPerPage", Defaults.resultsPerPage));
     this.maxPageNumberButtons = Utils.onMobileDevice() ? 4 : 5;
-    this.masonry = null;
     this.onPageChange = onPageChange;
-    this.onLayoutCompleted = onLayoutCompleted;
     this.insertPageSelectionMenu();
     this.updatePageSelectionMenu(1, []);
-    this.updateLayoutOnWindowResize();
   }
 
   /**
@@ -111,24 +80,6 @@ class FavoritesPaginator {
     }
   }
 
-  updateLayoutOnWindowResize() {
-    window.addEventListener("resize", Utils.debounceAfterFirstCall(() => {
-      const columnInput = document.getElementById("column-count");
-      const rowInput = document.getElementById("row-size");
-
-      if (columnInput !== null && (columnInput instanceof HTMLInputElement)) {
-        this.updateColumnCount(columnInput);
-      }
-
-      if (rowInput !== null && (rowInput instanceof HTMLInputElement)) {
-        this.updateRowSize(rowInput);
-      }
-
-      this.updateLastRow();
-      this.updateMasonry();
-    }, 100));
-  }
-
   /**
    * @param {Post[]} favorites
    */
@@ -138,10 +89,9 @@ class FavoritesPaginator {
 
   /**
    * @param {Post[]} favorites
-   * @returns {HTMLElement[]}
+   * @returns {Post[]}
    */
   paginateWhileFetching(favorites) {
-    // this.changedPageOnce = true;
     const pageNumberButtons = Array.from(document.getElementsByClassName("pagination-number"));
     const lastPageNumberButton = pageNumberButtons[pageNumberButtons.length - 1];
     const lastPageButtonNumber = parseInt(lastPageNumberButton.textContent || "1");
@@ -166,12 +116,8 @@ class FavoritesPaginator {
     const favoritesToAdd = favorites.slice(range.start, range.end)
       .filter(favorite => document.getElementById(favorite.id) === null);
 
-    for (const favorite of favoritesToAdd) {
-      favorite.insertAtEndOfContent(this.content);
-    }
-    this.forceActivateMasonry();
     this.updateRangeIndicator(this.currentPageNumber, favorites.length);
-    return favoritesToAdd.map(favorite => favorite.root);
+    return favoritesToAdd;
   }
 
   /**
@@ -181,9 +127,7 @@ class FavoritesPaginator {
   changePage(pageNumber, favorites) {
     this.currentPageNumber = pageNumber;
     this.updatePageSelectionMenu(pageNumber, favorites);
-    this.showFavorites(pageNumber, favorites);
-    this.onPageChange();
-    this.onLayoutCompletedWrapper();
+    this.onPageChange(this.getCurrentPageFavorites(pageNumber, favorites));
   }
 
   /**
@@ -347,7 +291,6 @@ class FavoritesPaginator {
     this.pageSelectionMenu.insertAdjacentElement("afterbegin", firstPage);
     this.pageSelectionMenu.appendChild(nextPage);
     this.pageSelectionMenu.appendChild(finalPage);
-
     this.updateArrowTraversalButtonInteractability(previousPage, firstPage, nextPage, finalPage, this.getPageCount(favorites.length));
   }
 
@@ -414,30 +357,12 @@ class FavoritesPaginator {
   /**
    * @param {Number} pageNumber
    * @param {Post[]} favorites
+   * @returns {Post[]}
    */
-  showFavorites(pageNumber, favorites) {
+  getCurrentPageFavorites(pageNumber, favorites) {
     const {start, end} = this.getPaginationRange(pageNumber);
-    const newContent = document.createDocumentFragment();
-
-    for (const favorite of favorites.slice(start, end)) {
-      favorite.insertAtEndOfContent(newContent);
-    }
-    this.content.innerHTML = "";
-    this.content.appendChild(newContent);
-    this.forceActivateMasonry();
-    this.updateLastRow();
-    Utils.scrollToTop();
-  }
-
-  forceActivateMasonry() {
-    if (this.usingMasonry) {
-      this.deactivateMasonry();
-      this.activateMasonry();
-      Utils.waitForAllThumbnailsToLoad()
-        .then(() => {
-          this.updateMasonry();
-        });
-    }
+    return favorites
+      .slice(start, end);
   }
 
   /**
@@ -515,15 +440,10 @@ class FavoritesPaginator {
   }
 
   /**
-   * @param {{newSearchResults: Post[], newFavorites: Post[], allSearchResults: Post[]}} results
+   * @param {Post[]} allSearchResults
    */
-  insertNewSearchResults(results) {
-    for (const searchResult of results.newSearchResults.reverse()) {
-      searchResult.insertAtBeginningOfContent(this.content);
-    }
-
-    this.updatePageSelectionMenu(this.currentPageNumber, results.allSearchResults);
-    this.forceActivateMasonry();
+  updatePaginationMenuWHenNewFavoritesAddedOnReload(allSearchResults) {
+    this.updatePageSelectionMenu(this.currentPageNumber, allSearchResults);
   }
 
   /**
@@ -559,131 +479,6 @@ class FavoritesPaginator {
   }
 
   /**
-   * @param {"masonry" | "row" | "square" | "grid" } layout
-   */
-  changeLayout(layout) {
-    this.content.classList.remove("grid", "row", "masonry", "square");
-    this.content.classList.add(layout);
-
-    if (layout === "row") {
-      this.updateLastRow();
-    }
-
-    if (layout === "masonry") {
-      this.activateMasonry();
-    } else {
-      this.deactivateMasonry();
-    }
-  }
-
-  activateMasonry() {
-    this.masonry = new Masonry(this.content, {
-      itemSelector: ".favorite",
-      columnWidth: ".favorite",
-      gutter: 10,
-      horizontalOrder: true,
-      isFitWidth: true,
-      resize: false
-    });
-    this.masonry.on("layoutComplete", () => {
-      this.onLayoutCompleted();
-    });
-  }
-
-  deactivateMasonry() {
-    if (this.masonry !== null) {
-      this.masonry.destroy();
-      this.masonry = null;
-    }
-  }
-
-  updateMasonry() {
-    if (this.masonry !== null) {
-      this.masonry.layout();
-    }
-  }
-
-  async updateLastRow() {
-    // if (!this.usingHorizontalLayout) {
-    //   return;
-    // }
-    // await Utils.sleep(100);
-    // await FavoritesLayoutObserver.waitForLayoutToComplete();
-    // await Utils.sleep(100);
-    // const items = Array.from(this.content.querySelectorAll(`.${Utils.itemClassName}`))
-    //   .filter(item => item instanceof HTMLElement)
-    //   .reverse();
-
-    // if (items.length === 0) {
-    //   return;
-    // }
-
-    // for (const item of items) {
-    //   item.classList.remove("last-row");
-    // }
-    // const lastRowY = items[0].offsetTop;
-
-    // for (const item of items) {
-    //   if (item.offsetTop !== lastRowY) {
-    //     break;
-    //   }
-    //   item.classList.add("last-row");
-    // }
-  }
-
-  /**
-   * @param {HTMLInputElement} input
-   */
-  updateColumnCount(input) {
-    const columnCount = parseFloat(input.value);
-    const width = Math.floor(window.innerWidth / columnCount) - 15;
-
-    Utils.insertStyleHTML(`
-      #favorites-search-gallery-content {
-        &.grid, &.square {
-          grid-template-columns: repeat(${columnCount}, 1fr) !important;
-        }
-
-        &.masonry {
-          margin: 0 auto !important;
-
-          >.favorite {
-            width: ${width}px;
-          }
-        }
-      }
-      `, "column-count");
-    this.updateMasonry();
-  }
-
-  /**
-   * @param {HTMLInputElement} input
-   */
-  updateRowSize(input) {
-    const rowSize = parseFloat(input.value);
-    const min = parseInt(input.getAttribute("min") || "1");
-    const max = parseInt(input.getAttribute("max") || "5");
-    const minWidth = Math.floor(window.innerWidth / 20);
-    const maxWidth = Math.floor(window.innerWidth / 4);
-    const pixelSize = Math.round(Utils.mapRange(rowSize, min, max, minWidth, maxWidth));
-
-    Utils.insertStyleHTML(`
-      #favorites-search-gallery-content {
-        &.row  {
-          >.favorite,>.spacer {
-            height: ${pixelSize}px;
-          }
-          >.spacer {
-            height: ${pixelSize}px;
-            width: ${pixelSize}px;
-          }
-        }
-      }
-      `, "row-size");
-    this.updateLastRow();
-  }
-
-  /**
    * @param {Number} resultsPerPage
    */
   updateResultsPerPage(resultsPerPage) {
@@ -701,12 +496,5 @@ class FavoritesPaginator {
       return;
     }
     adjacentPageButton.click();
-  }
-
-  onLayoutCompletedWrapper() {
-    if (this.usingMasonry && this.masonry !== null) {
-      return;
-    }
-    this.onLayoutCompleted();
   }
 }
