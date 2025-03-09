@@ -1,5 +1,5 @@
-/* eslint-disable prefer-template */
 class FavoritesDatabase {
+  /* eslint-disable prefer-template */
   /**
    * @type {String}
    */

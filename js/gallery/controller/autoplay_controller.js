@@ -47,11 +47,11 @@ class AutoplayController {
     direction: "autoplayForward"
   };
   static menuIconImageURLs = {
-    play: Utils.createObjectURLFromSvg(Utils.icons.play),
-    pause: Utils.createObjectURLFromSvg(Utils.icons.pause),
-    changeDirection: Utils.createObjectURLFromSvg(Utils.icons.changeDirection),
-    changeDirectionAlt: Utils.createObjectURLFromSvg(Utils.icons.changeDirectionAlt),
-    tune: Utils.createObjectURLFromSvg(Utils.icons.tune)
+    play: Utils.createObjectURLFromSvg(Icons.play),
+    pause: Utils.createObjectURLFromSvg(Icons.pause),
+    changeDirection: Utils.createObjectURLFromSvg(Icons.changeDirection),
+    changeDirectionAlt: Utils.createObjectURLFromSvg(Icons.changeDirectionAlt),
+    tune: Utils.createObjectURLFromSvg(Icons.tune)
   };
   static settings = {
     imageViewDuration: Utils.getPreference(AutoplayController.preferences.imageDuration, 3000),
@@ -161,12 +161,15 @@ class AutoplayController {
    */
   initializeEvents(events) {
     this.events = events;
-
     const onComplete = events.onComplete;
+    /**
+     * @type {NavigationKey}
+     */
+    const direction = AutoplayController.settings.moveForward ? "ArrowRight" : "ArrowLeft";
 
     this.events.onComplete = () => {
       if (this.active && !this.paused) {
-        onComplete(AutoplayController.settings.moveForward ? "ArrowRight" : "ArrowLeft");
+        onComplete(direction);
       }
     };
   }
@@ -659,7 +662,7 @@ class AutoplayController {
     this.stopImageProgressBar();
     setTimeout(() => {
       this.ui.imageProgressBar.classList.add("animated");
-      document.body.classList.add("autoplay");
+      // document.body.classList.add("autoplay");
     }, 20);
   }
 

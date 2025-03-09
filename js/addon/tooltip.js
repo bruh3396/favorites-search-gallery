@@ -129,7 +129,7 @@ class Tooltip {
     if (!Utils.onFavoritesPage()) {
       return;
     }
-    window.addEventListener("favoritesFetched", () => {
+    GlobalEvents.favorites.on("resultsAddedToCurrentPage", () => {
       this.addEventListenersToThumbs.bind(this)();
     });
     window.addEventListener("favoritesLoaded", () => {

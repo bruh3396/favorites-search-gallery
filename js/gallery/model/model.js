@@ -125,30 +125,22 @@ class GalleryModel {
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    * @returns {HTMLElement | undefined}
    */
   navigate(direction) {
     this.searchPageLoader.preloadSearchPages();
-    this.currentIndex += this.isForward(direction) ? 1 : -1;
+    this.currentIndex += Types.isForwardNavigationKey(direction) ? 1 : -1;
     return this.currentThumb;
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    * @returns {HTMLElement | undefined}
    */
   navigateAfterPageChange(direction) {
-    this.currentIndex = this.isForward(direction) ? 0 : this.thumbSelector.thumbsOnCurrentPage.length - 1;
+    this.currentIndex = Types.isForwardNavigationKey(direction) ? 0 : this.thumbSelector.thumbsOnCurrentPage.length - 1;
     return this.currentThumb;
-  }
-
-  /**
-   * @param {String} direction
-   * @returns {Boolean}
-   */
-  isForward(direction) {
-    return GalleryConstants.forwardNavigationKeys.has(direction);
   }
 
   /**
@@ -189,7 +181,7 @@ class GalleryModel {
   }
 
   /**
-   * @param {String} direction;
+   * @param {NavigationKey} direction;
    * @returns {SearchPage | null}
    */
   navigateSearchPages(direction) {

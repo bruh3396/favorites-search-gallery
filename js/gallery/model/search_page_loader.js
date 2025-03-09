@@ -39,7 +39,7 @@ class SearchPageLoader {
   }
 
   /**
-   * @param {String} direction;
+   * @param {NavigationKey} direction;
    * @returns {SearchPage | null}
    */
   navigateSearchPages(direction) {
@@ -54,11 +54,11 @@ class SearchPageLoader {
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    * @returns {Number}
    */
   getAdjacentSearchPageNumber(direction) {
-    const forward = GalleryConstants.forwardNavigationKeys.has(direction);
+    const forward = Types.isForwardNavigationKey(direction);
     return forward ? this.currentPageNumber + 1 : this.currentPageNumber - 1;
   }
 
@@ -112,7 +112,7 @@ class SearchPageLoader {
     return this.fetchSearchPage(pageNumber)
       .then((html) => {
         this.registerNewPage(pageNumber, html);
-      }).catch((error) => {
+      }).catch(() => {
         this.fetchedPageNumbers.delete(pageNumber);
         this.searchPages.delete(pageNumber);
       });

@@ -8,6 +8,9 @@ class GalleryUI {
    */
   lastVisitedThumb;
 
+  /**
+   * @type {Boolean}
+   */
   get usingColumnLayout() {
     return Utils.onFavoritesPage() && FavoritesLayoutObserver.currentLayout === "column";
   }
@@ -165,9 +168,9 @@ class GalleryUI {
    */
   showAddedFavoriteStatus(status) {
     const icon = {
-      [Utils.addedFavoriteStatuses.alreadyAdded]: Utils.icons.heartCheck,
-      [Utils.addedFavoriteStatuses.success]: Utils.icons.heartPlus
-    }[status] || Utils.icons.error;
+      [Utils.addedFavoriteStatuses.alreadyAdded]: Icons.heartCheck,
+      [Utils.addedFavoriteStatuses.success]: Icons.heartPlus
+    }[status] || Icons.error;
 
     Utils.showFullscreenIcon(icon);
   }
@@ -178,11 +181,11 @@ class GalleryUI {
   showRemovedFavoriteStatus(status) {
     switch (status) {
       case Utils.removedFavoriteStatuses.success:
-        Utils.showFullscreenIcon(Utils.icons.heartMinus);
+        Utils.showFullscreenIcon(Icons.heartMinus);
         break;
 
       case Utils.removedFavoriteStatuses.removeNotAllowed:
-        Utils.showFullscreenIcon(Utils.icons.warning, 1000);
+        Utils.showFullscreenIcon(Icons.warning, 1000);
         setTimeout(() => {
           alert("The \"Remove Buttons\" option must be checked to use this hotkey");
         }, 20);

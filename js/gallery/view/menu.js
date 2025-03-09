@@ -24,16 +24,17 @@ class GalleryMenuButtonTemplate {
 
 class GalleryMenu {
   static buttons = [
-    {id: "exit-gallery", icon: Utils.icons.exit, action: "exitGallery", enabled: true, handler: "galleryController", hint: "Exit (Escape, Right-Click)", color: "red"},
-    {id: "fullscreen-gallery", icon: Utils.icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen (F)", color: "#0075FF"},
-    {id: "open-in-new-gallery", icon: Utils.icons.openInNew, action: "openPost", enabled: true, handler: "galleryController", hint: "Open Post (Middle-Click, G)", color: "lightgreen"},
-    {id: "download-gallery", icon: Utils.icons.download, action: "download", enabled: true, handler: "galleryController", hint: "Open Original (Ctrl + Left-Click, Q)", color: "lightskyblue"},
-    {id: "add-favorite-gallery", icon: Utils.icons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController", hint: "Add Favorite (E)", color: "hotpink"},
-    {id: "remove-favorite-gallery", icon: Utils.icons.heartMinus, action: "removeFavorite", enabled: false, handler: "galleryController", hint: "Remove Favorite (X)", color: "red"},
-    {id: "dock-gallery", icon: Utils.icons.dock, action: "toggleDockPosition", enabled: false, handler: "galleryMenu", hint: "Change Position", color: ""},
-    {id: "toggle-background-gallery", icon: Utils.icons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController", hint: "Toggle Background (B)", color: "gold"},
-    {id: "search-gallery", icon: Utils.icons.search, action: "search", enabled: false, handler: "galleryController", hint: "Search", color: "cyan"},
-    {id: "pin-gallery", icon: Utils.icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "#0075FF"}
+    {id: "exit-gallery", icon: Icons.exit, action: "exitGallery", enabled: true, handler: "galleryController", hint: "Exit (Escape, Right-Click)", color: "red"},
+    {id: "fullscreen-gallery", icon: Icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen (F)", color: "#0075FF"},
+    {id: "open-in-new-gallery", icon: Icons.openInNew, action: "openPost", enabled: true, handler: "galleryController", hint: "Open Post (Middle-Click, G)", color: "lightgreen"},
+    {id: "download-gallery", icon: Icons.download, action: "download", enabled: true, handler: "galleryController", hint: "Open Original (Ctrl + Left-Click, Q)", color: "lightskyblue"},
+    {id: "add-favorite-gallery", icon: Icons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController", hint: "Add Favorite (E)", color: "hotpink"},
+    {id: "remove-favorite-gallery", icon: Icons.heartMinus, action: "removeFavorite", enabled: false, handler: "galleryController", hint: "Remove Favorite (X)", color: "red"},
+    {id: "dock-gallery", icon: Icons.dock, action: "toggleDockPosition", enabled: false, handler: "galleryMenu", hint: "Change Position", color: ""},
+    {id: "toggle-background-gallery", icon: Icons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController", hint: "Toggle Background (B)", color: "gold"},
+    {id: "search-gallery", icon: Icons.search, action: "search", enabled: false, handler: "galleryController", hint: "Search", color: "cyan"},
+    {id: "background-color-gallery", icon: Icons.palette, action: "changeBackgroundColor", enabled: true, handler: "galleryMenu", hint: "Background Color", color: "orange"},
+    {id: "pin-gallery", icon: Icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "cyan"}
   ];
 
   /**
@@ -53,6 +54,7 @@ class GalleryMenu {
     this.menuVisibilityTimeout = null;
     this.loadPreferences();
     this.createButtons();
+    this.createColorPicker();
     this.addEventListeners();
   }
 
@@ -142,7 +144,8 @@ class GalleryMenu {
       button.dispatchEvent(new CustomEvent(template.handler, {bubbles: true, detail: template.action}));
     };
 
-    Utils.insertStyleHTML(`
+    if (template.color !== "") {
+      Utils.insertStyleHTML(`
         #${template.id}:hover {
           &::after {
             outline: 2px solid ${template.color};
@@ -155,7 +158,31 @@ class GalleryMenu {
           }
         }
       `, template.id);
+    }
     return button;
+  }
+
+  createColorPicker() {
+    const button = document.getElementById("background-color-gallery");
+
+    if (!(button instanceof HTMLElement)) {
+      return;
+    }
+    const colorPicker = document.createElement("input");
+
+    colorPicker.type = "color";
+    colorPicker.id = "gallery-menu-background-color-picker";
+    button.onclick = () => {
+      colorPicker.click();
+    };
+    colorPicker.onchange = () => {
+      Utils.insertStyleHTML(`
+        #gallery-background, #gallery-menu, #gallery-menu-button-container {
+          background: ${colorPicker.value} !important;
+        }
+      `, "gallery-background-color");
+    };
+    button.insertAdjacentElement("afterbegin", colorPicker);
   }
 
   reveal() {

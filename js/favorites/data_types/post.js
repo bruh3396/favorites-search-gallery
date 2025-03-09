@@ -36,11 +36,11 @@ class Post {
   }
 
   static createRemoveFavoriteButtonHTMLTemplate() {
-    Post.removeFavoriteButtonHTML = `<img class="remove-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Utils.icons.heartMinus)}>`;
+    Post.removeFavoriteButtonHTML = `<img class="remove-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Icons.heartMinus)}>`;
   }
 
   static createAddFavoriteButtonHTMLTemplate() {
-    Post.addFavoriteButtonHTML = `<img class="add-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Utils.icons.heartPlus)}>`;
+    Post.addFavoriteButtonHTML = `<img class="add-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Icons.heartPlus)}>`;
   }
 
   static createPostHTMLTemplate() {
@@ -115,7 +115,7 @@ class Post {
     }
     postTagSet.delete(id);
 
-    if (Utils.symmetricDifference(apiTagSet, postTagSet).size > 0) {
+    if (SetUtils.symmetricDifference(apiTagSet, postTagSet).size > 0) {
       post.initializeTagSet(Utils.convertToTagString(apiTagSet));
     }
   }
@@ -197,7 +197,7 @@ class Post {
    * @type {Set.<String>}
    */
   get originalTagSet() {
-    return Utils.difference(this.tagSet, this.additionalTagSet);
+    return SetUtils.difference(this.tagSet, this.additionalTagSet);
   }
 
   /**
@@ -416,7 +416,7 @@ class Post {
   }
 
   combineOriginalAndAdditionalTagSets() {
-    this.tagSet = Utils.sortSet(Utils.union(this.originalTagSet, this.additionalTagSet));
+    this.tagSet = SetUtils.sort(SetUtils.union(this.originalTagSet, this.additionalTagSet));
   }
 
   /**
@@ -424,10 +424,10 @@ class Post {
    * @returns {String}
    */
   addAdditionalTags(newTags) {
-    const newTagsSet = Utils.difference(Utils.convertToTagSet(newTags), this.tagSet);
+    const newTagsSet = SetUtils.difference(Utils.convertToTagSet(newTags), this.tagSet);
 
     if (newTagsSet.size > 0) {
-      this.additionalTagSet = Utils.union(this.additionalTagSet, newTagsSet);
+      this.additionalTagSet = SetUtils.union(this.additionalTagSet, newTagsSet);
       this.combineOriginalAndAdditionalTagSets();
     }
     return this.additionalTagString;
@@ -438,11 +438,11 @@ class Post {
    * @returns {String}
    */
   removeAdditionalTags(tagsToRemove) {
-    const tagsToRemoveSet = Utils.intersection(Utils.convertToTagSet(tagsToRemove), this.additionalTagSet);
+    const tagsToRemoveSet = SetUtils.intersection(Utils.convertToTagSet(tagsToRemove), this.additionalTagSet);
 
     if (tagsToRemoveSet.size > 0) {
-      this.tagSet = Utils.difference(this.tagSet, tagsToRemoveSet);
-      this.additionalTagSet = Utils.difference(this.additionalTagSet, tagsToRemoveSet);
+      this.tagSet = SetUtils.difference(this.tagSet, tagsToRemoveSet);
+      this.additionalTagSet = SetUtils.difference(this.additionalTagSet, tagsToRemoveSet);
     }
     return this.additionalTagString;
   }

@@ -4,7 +4,7 @@ class FavoritesLayoutObserver {
    */
   static layoutCompleted;
   /**
-   * @type {String}
+   * @type {FavoriteLayout}
    */
   static currentLayout;
 
@@ -32,7 +32,9 @@ class FavoritesLayoutObserver {
 
   static listenForLayoutChanges() {
     GlobalEvents.favorites.on("layoutChanged", (/** @type {String} */ layout) => {
-      FavoritesLayoutObserver.currentLayout = layout;
+      if (Types.isFavoritesLayout(layout)) {
+        FavoritesLayoutObserver.currentLayout = layout;
+      }
     });
   }
 
@@ -48,11 +50,13 @@ class FavoritesLayoutObserver {
    * @returns {Promise.<void>}
    */
   static waitForLayoutToCompleteHelper() {
-    if (FavoritesLayoutObserver.layoutCompleted) {
-      return Promise.resolve();
-    }
-    return new Promise(resolve => {
-      GlobalEvents.favorites.once("layoutCompleted", resolve);
-    });
+    return Promise.resolve();
+
+    // if (FavoritesLayoutObserver.layoutCompleted) {
+    //   return Promise.resolve();
+    // }
+    // return new Promise(resolve => {
+    //   GlobalEvents.favorites.once("layoutCompleted", resolve);
+    // });
   }
 }

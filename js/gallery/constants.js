@@ -18,15 +18,11 @@ class GalleryConstants {
   static maxUpscaledThumbCanvasWidth = 2500;
   static maxUpscaledThumbCanvasHeight = 16000;
   static upscaleDelay = 100;
-  static imageMegabyteLimit = 550;
+  static imageMegabyteLimit = 600;
   static searchPagePreloadedImageCount = 42;
   static minimumPreloadedImageCount = 5;
   static visibleThumbsDownwardScrollPixelGenerosity = 500;
   static navigationThrottleTime = 250;
-  static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
-  static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);
-  static exitKeys = new Set(["Escape", "Delete", "Backspace"]);
-  static navigationKeys = Utils.union(GalleryConstants.forwardNavigationKeys, GalleryConstants.backwardNavigationKeys);
   static maxImagesToRenderAroundInGallery = Utils.onMobileDevice() ? 3 : 50;
   static additionalVideoPlayerCount = Utils.onMobileDevice() ? 2 : 2;
   static endlessSearchPageGallery = false;

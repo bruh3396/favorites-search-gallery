@@ -38,9 +38,9 @@ class FavoritesMenuDesktopUI {
     ],
     "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "toggleSortAscending", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, defaultValue: false}],
     "numberComponent": [
-      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "updateColumnCount", defaultValue: Defaults.columnCount, min: 4, max: 20, step: 1, pollingTime: 50, invokeActionOnCreation: true},
-      {id: "row-size", parentId: "row-size-container", position: "beforeend", action: "updateRowSize", defaultValue: Defaults.rowSize, min: 1, max: 10, step: 1, pollingTime: 50, invokeActionOnCreation: true},
-      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "updateResultsPerPage", defaultValue: Defaults.resultsPerPage, min: 50, max: 7000, step: 50, pollingTime: 50, invokeActionOnCreation: false}
+      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "updateColumnCount", defaultValue: Defaults.columnCount, min: Defaults.minColumnCount, max: Defaults.maxColumnCount, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "row-size", parentId: "row-size-container", position: "beforeend", action: "updateRowSize", defaultValue: Defaults.rowSize, min: Defaults.minRowSize, max: Defaults.maxRowSize, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "updateResultsPerPage", defaultValue: Defaults.resultsPerPage, min: Defaults.minResultsPerPage, max: Defaults.maxResultsPerPage, step: Defaults.resultsPerPageStep, pollingTime: 50, invokeActionOnCreation: false}
     ]
   };
 

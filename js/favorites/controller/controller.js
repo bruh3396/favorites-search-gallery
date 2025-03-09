@@ -16,28 +16,19 @@ class FavoritesController {
       return;
     }
     this.model = new FavoritesModel();
-    this.view = new FavoritesView({
-      onPageChange: this.onPageChange.bind(this),
-      onLayoutCompleted: () => {
-        GlobalEvents.favorites.emit("layoutCompleted");
-      }
-    });
+    this.view = new FavoritesView();
     this.addEventListeners();
-    this.view.clearOriginalFavorites();
     this.loadAllFavorites();
   }
 
-  onPageChange() {
-    GlobalEvents.favorites.emit("changedPage");
-  }
-
   addEventListeners() {
-    this.addEventListenersToMenu();
+    this.addEventListenersToMainMenu();
+    this.addEventListenersToPaginationMenu();
     this.addGlobalEventListeners();
     this.addKeyDownEventListeners();
   }
 
-  addEventListenersToMenu() {
+  addEventListenersToMainMenu() {
     const menu = document.getElementById("favorites-search-gallery-menu");
 
     if (menu === null) {
@@ -56,18 +47,48 @@ class FavoritesController {
     });
   }
 
+  addEventListenersToPaginationMenu() {
+    // @ts-ignore
+    this.view.getPaginationMenu().addEventListener("controller", (/** @type {CustomEvent} */event) => {
+      if (!(event.target instanceof HTMLElement)) {
+        return;
+      }
+      const action = event.target.dataset.action;
+
+      if (action === "gotoPage") {
+        this.changePage(parseInt(event.detail));
+        return;
+      }
+
+      if (action === "gotoRelativePage" && this.model.gotoRelativePage(event.detail)) {
+        this.showCurrentPage();
+      }
+    });
+  }
+
   addGlobalEventListeners() {
+    this.setupPageChangingInGallery();
+    this.updateMissingMetadataWhenAvailable();
+    this.updateLayoutWhenOptionsChange();
+  }
+
+  setupPageChangingInGallery() {
     GlobalEvents.gallery.on("requestPageChange", (/** @type {String} */ direction) => {
-      this.view.changePageInGallery({
-        direction,
-        searchResults: this.model.getLatestSearchResults()
-      });
+      if (Types.isNavigationKey(direction)) {
+        this.gotoAdjacentPage(direction);
+      }
       GlobalEvents.favorites.emit("pageChangeResponse");
     });
+  }
+
+  updateMissingMetadataWhenAvailable() {
     // @ts-ignore
     window.addEventListener("missingMetadata", (/** @type CustomEvent */ event) => {
       this.model.updateMetadata(event.detail);
     });
+  }
+
+  updateLayoutWhenOptionsChange() {
     window.addEventListener("resize", Utils.debounceAfterFirstCall(() => {
       const columnInput = document.getElementById("column-count");
       const rowInput = document.getElementById("row-size");
@@ -84,45 +105,25 @@ class FavoritesController {
 
   addKeyDownEventListeners() {
     document.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case "ArrowRight":
-
-        case "ArrowLeft":
-          if (!event.repeat) {
-            this.changePageWithArrowKey(event.key);
-          }
-          break;
-
-        default:
-          break;
+      if (Types.isNavigationKey(event.key) && !event.repeat) {
+        this.changePageWithArrowKey(event.key);
       }
     });
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    */
   changePageWithArrowKey(direction) {
-    if (Utils.isTypeableInput(document.activeElement)) {
+    if (Types.isTypeableInput(document.activeElement)) {
       return;
     }
-
-    if (Utils.galleryIsDisabled()) {
-      this.view.changePageOutOfGallery(direction);
-      return;
-    }
-    GlobalEvents.gallery.timeout("inGalleryResponse", 100)
+    Utils.inGallery()
       .then((inGallery) => {
         if (!inGallery) {
-          this.view.changePageOutOfGallery(direction);
-        }
-      })
-      .catch((error) => {
-        if (!(error instanceof PromiseTimeoutError)) {
-          console.error(error);
+          this.gotoAdjacentPage(direction);
         }
       });
-    GlobalEvents.favorites.emit("inGalleryRequest");
   }
 
   loadAllFavorites() {
@@ -153,7 +154,36 @@ class FavoritesController {
    */
   showSearchResults(searchResults) {
     GlobalEvents.favorites.emit("newSearchResults", searchResults);
-    this.view.showSearchResults(searchResults);
+    this.model.paginate(searchResults);
+    this.view.setMatchCount(searchResults.length);
+    this.changePage(1);
+  }
+
+  /**
+   * @param {Number} pageNumber
+   */
+  changePage(pageNumber) {
+    this.model.changePage(pageNumber);
+    this.showCurrentPage();
+  }
+
+  showCurrentPage() {
+    this.view.showSearchResults(this.model.getFavoritesOnCurrentPage());
+    this.view.createPageSelectionMenu(this.model.getPaginationParameters());
+    this.broadcastPageChange();
+  }
+
+  /**
+   * @param {NavigationKey} direction
+   */
+  gotoAdjacentPage(direction) {
+    if (this.model.gotoAdjacentPage(direction)) {
+      this.showCurrentPage();
+    }
+  }
+
+  broadcastPageChange() {
+    GlobalEvents.favorites.emit("changedPage");
   }
 
   /**
@@ -175,6 +205,7 @@ class FavoritesController {
           this.view.showNotification("New favorites saved");
         }
       });
+    this.model.paginate(this.model.getLatestSearchResults());
     GlobalEvents.favorites.emit("newFavoritesFoundOnReload", results.newSearchResults);
     GlobalEvents.favorites.emit("newSearchResults", results.allSearchResults);
   }
@@ -210,16 +241,23 @@ class FavoritesController {
   }
 
   onSearchResultsFound() {
-    const addedSearchResults = this.view.updateSearchResultsWhileFetching({
-      searchResults: this.model.getLatestSearchResults(),
-      allFavorites: this.model.getAllFavorites()
-    });
-
-    if (addedSearchResults.length > 0) {
-      GlobalEvents.favorites.emit("resultsAddedToCurrentPage", addedSearchResults);
-    }
-    Utils.broadcastEvent("favoritesFetched");
+    this.model.paginate(this.model.getLatestSearchResults());
+    this.view.updateStatusWhileFetching(this.model.getLatestSearchResults().length, this.model.getAllFavorites().length);
+    this.view.createPageSelectionMenuWhileFetching(this.model.getPaginationParameters());
+    this.addNewlyFetchedSearchResultsToCurrentPage();
     GlobalEvents.favorites.emit("newSearchResults", this.model.getLatestSearchResults());
+  }
+
+  addNewlyFetchedSearchResultsToCurrentPage() {
+    if (!this.model.onFinalPage()) {
+      return;
+    }
+    const newFavorites = this.model.getFavoritesOnCurrentPage()
+      .filter(favorite => document.getElementById(favorite.id) === null);
+    const thumbs = Utils.getThumbsFromPosts(newFavorites);
+
+    this.view.insertNewSearchResultsWhileFetching(thumbs);
+    GlobalEvents.favorites.emit("resultsAddedToCurrentPage", thumbs);
   }
 
   /**
@@ -246,11 +284,13 @@ class FavoritesController {
   }
 
   /**
-   * @param {FavoritesLayout} layout
+   * @param {any} layout
    */
   changeLayout(layout) {
-    GlobalEvents.favorites.emit("layoutChanged", layout);
-    this.view.changeLayout(layout);
+    if (Types.isFavoritesLayout(layout)) {
+      GlobalEvents.favorites.emit("layoutChanged", layout);
+      this.view.changeLayout(layout);
+    }
   }
 
   /**
@@ -273,10 +313,7 @@ class FavoritesController {
    * @param {HTMLInputElement} input
    */
   updateResultsPerPage(input) {
-    const resultsPerPage = parseInt(input.value);
-
-    GlobalEvents.favorites.emit("resultsPerPageChanged", resultsPerPage);
-    this.view.updateResultsPerPage(resultsPerPage);
+    this.model.updateResultsPerPage(parseInt(input.value));
     this.showSearchResults(this.model.getLatestSearchResults());
   }
 
@@ -308,6 +345,9 @@ class FavoritesController {
    * @param {String} id
    */
   findFavorite(id) {
-    this.view.findFavorite(id, this.model.getLatestSearchResults());
+    if (this.model.gotoPageWithFavorite(id)) {
+      this.showCurrentPage();
+    }
+    this.view.revealFavorite(id);
   }
 }

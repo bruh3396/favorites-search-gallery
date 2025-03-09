@@ -12,6 +12,10 @@ class FavoritesModel {
    */
   sorter;
   /**
+   * @type {FavoritesPaginator}
+   */
+  paginator;
+  /**
    * @type {Post[]}
    */
   latestSearchResults;
@@ -20,6 +24,7 @@ class FavoritesModel {
     this.loader = new FavoritesLoader();
     this.filter = new FavoritesFilter();
     this.sorter = new FavoritesSorter();
+    this.paginator = new FavoritesPaginator();
     this.latestSearchResults = [];
   }
 
@@ -130,6 +135,65 @@ class FavoritesModel {
   }
 
   /**
+   * @param {Post[]} searchResults
+   */
+  paginate(searchResults) {
+    this.paginator.paginate(searchResults);
+  }
+
+  /**
+   * @param {Number} pageNumber
+   */
+  changePage(pageNumber) {
+    this.paginator.changePage(pageNumber);
+  }
+
+  /**
+   * @returns {Post[]}
+   */
+  getFavoritesOnCurrentPage() {
+    return this.paginator.getFavoritesOnCurrentPage();
+  }
+
+  /**
+   * @param {NavigationKey} direction
+   * @returns {Boolean}
+   */
+  gotoAdjacentPage(direction) {
+    return this.paginator.gotoAdjacentPage(direction);
+  }
+
+  /**
+   * @param {String} relation
+   * @returns {Boolean}
+   */
+  gotoRelativePage(relation) {
+    return this.paginator.gotoRelativePage(relation);
+  }
+
+  /**
+   * @param {String} id
+   * @returns {Boolean}
+   */
+  gotoPageWithFavorite(id) {
+    return this.paginator.gotoPageWithFavorite(id);
+  }
+
+  /**
+   * @returns {FavoritesPaginationParameters}
+   */
+  getPaginationParameters() {
+    return this.paginator.paginationParameters;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  onFinalPage() {
+    return this.paginator.onFinalPage;
+  }
+
+  /**
    * @param {Boolean} value
    */
   toggleBlacklist(value) {
@@ -162,5 +226,12 @@ class FavoritesModel {
    */
   updateMetadata(id) {
     this.loader.updateMetadataInDatabase(id);
+  }
+
+  /**
+   * @param {Number} resultsPerPage
+   */
+  updateResultsPerPage(resultsPerPage) {
+    this.paginator.updateResultsPerPage(resultsPerPage);
   }
 }

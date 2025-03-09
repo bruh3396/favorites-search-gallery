@@ -194,6 +194,28 @@ class HTMLStrings {
       opacity: 1;
     }
   }
+
+  html::before {
+    content: "";
+    position: fixed;
+    z-index: 10000;
+    opacity: 0.1;
+    background: black;
+    transition: opacity 0.2s linear;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  html.fullscreen-effect::before {
+    opacity: 1;
+  }
+
+  html.transition-disabled::before {
+    transition: none;
+}
 </style>
 `;
 
@@ -456,7 +478,7 @@ class HTMLStrings {
 
     #favorites-search-gallery-content {
       padding: 0px 20px 30px 20px;
-      --gutter: 5px;
+      --gutter: 8px;
 
       &.grid,
       &.square {
@@ -1433,15 +1455,7 @@ Lower numbers improve responsiveness">
   }
 
   :root {
-    --exit-gallery-color: red;
-    --fullscreen-gallery-color: #0075FF;
-    --open-in-new-gallery-color: lightgreen;
-    --download-gallery-color: lightskyblue;
-    --add-favorite-gallery-hover-color: hotpink;
-    --toggle-background-gallery-color: gold;
-    --pin-gallery-color: #0075FF;
-    --default-svg-fill: white;
-    --outline-width: 1px;
+    --rainbow: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
   }
 
 
@@ -1459,6 +1473,14 @@ Lower numbers improve responsiveness">
     100% {
       left: 100%;
     }
+  }
+
+  #gallery-menu-background-color-picker {
+    position: absolute;
+    visibility: hidden;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
   }
 </style>
 `;

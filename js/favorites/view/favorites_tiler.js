@@ -4,13 +4,9 @@ class FavoritesTiler {
    */
   container;
   /**
-   * @type {FavoritesLayout}
+   * @type {FavoriteLayout}
    */
   currentLayout;
-  /**
-   * @type {Function}
-   */
-  onLayoutCompleted;
   /**
    * @type {FavoritesGridTiler}
    */
@@ -42,13 +38,9 @@ class FavoritesTiler {
     return this.tilers.find(tiler => tiler.className === this.currentLayout) || this.rowTiler;
   }
 
-  /**
-   * @param {Function} onLayoutCompleted
-   */
-  constructor(onLayoutCompleted) {
+  constructor() {
     this.container = this.createContentContainer();
-    this.currentLayout = this.loadLayout();
-    this.onLayoutCompleted = onLayoutCompleted;
+    this.currentLayout = Utils.loadFavoritesLayout();
     this.gridTiler = new FavoritesGridTiler(this.container);
     this.rowTiler = new FavoritesRowTiler(this.container);
     this.squareTiler = new FavoritesSquareTiler(this.container);
@@ -81,7 +73,7 @@ class FavoritesTiler {
   }
 
   /**
-   * @param {FavoritesLayout} layout
+   * @param {FavoriteLayout} layout
    */
   changeLayout(layout) {
     if (this.currentLayout === layout) {
@@ -91,10 +83,6 @@ class FavoritesTiler {
     this.container.className = layout;
     this.currentLayout = layout;
     this.currentTiler.onSelected();
-  }
-
-  alertLayoutCompleted() {
-    this.onLayoutCompleted();
   }
 
   /**
@@ -127,17 +115,5 @@ class FavoritesTiler {
     content.classList.add(Utils.loadFavoritesLayout());
     Utils.favoritesSearchGalleryContainer.appendChild(content);
     return content;
-  }
-
-  /**
-   * @returns {FavoritesLayout}
-   */
-  loadLayout() {
-    return {
-      row: "row",
-      square: "square",
-      grid: "grid",
-      column: "column"
-    }[Utils.getPreference("layoutSelect", "column")] || "column";
   }
 }

@@ -1,6 +1,6 @@
 class FavoritesView {
   /**
-   * @type {FavoritesPaginator}
+   * @type {FavoritesPaginationMenu}
    */
   paginator;
   /**
@@ -12,26 +12,11 @@ class FavoritesView {
    */
   tiler;
 
-  /**
-   * @param {{onPageChange: Function, onLayoutCompleted: Function}} callbacks
-   */
-  constructor({onPageChange, onLayoutCompleted}) {
-    this.tiler = new FavoritesTiler(onLayoutCompleted);
+  constructor() {
+    this.tiler = new FavoritesTiler();
     this.statusBar = new FavoritesStatusBar();
-    this.paginator = this.createPaginator(onPageChange);
-  }
-
-  /**
-   * @param {Function} onPageChange
-   * @returns {FavoritesPaginator}
-   */
-  createPaginator(onPageChange) {
-    return new FavoritesPaginator((/** @type {Post[]} */ favorites) => {
-      Utils.scrollToTop();
-      this.tiler.tile(Utils.getThumbsFromPosts(favorites));
-      onPageChange();
-      this.tiler.alertLayoutCompleted();
-    });
+    this.paginator = new FavoritesPaginationMenu();
+    this.clearOriginalFavorites();
   }
 
   clearOriginalFavorites() {
@@ -63,23 +48,25 @@ class FavoritesView {
   }
 
   /**
-   * @param {{searchResults: Post[], allFavorites: Post[]}} parameter
-   * @returns {HTMLElement[]}
+   * @param {Number} searchResultCount
+   * @param {Number} totalFavoritesCount
    */
-  updateSearchResultsWhileFetching({searchResults, allFavorites}) {
-    this.statusBar.updateStatusWhileFetching(searchResults.length, allFavorites.length);
-    const addedSearchResults = this.paginator.paginateWhileFetching(searchResults);
-    const thumbs = Utils.getThumbsFromPosts(addedSearchResults);
+  updateStatusWhileFetching(searchResultCount, totalFavoritesCount) {
+    this.statusBar.updateStatusWhileFetching(searchResultCount, totalFavoritesCount);
+  }
 
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  insertNewSearchResultsWhileFetching(thumbs) {
     this.tiler.addToBottom(thumbs);
-    return thumbs;
   }
 
   /**
    * @param {{newSearchResults: Post[], newFavorites: Post[], allSearchResults: Post[]}} results
    */
   insertNewSearchResultsOnReload(results) {
-    this.paginator.updatePaginationMenuWHenNewFavoritesAddedOnReload(results.allSearchResults);
+    // this.paginator.updatePaginationMenuWHenNewFavoritesAddedOnReload(results.allSearchResults);
     this.tiler.addToTop(Utils.getThumbsFromPosts(results.newSearchResults));
     this.notifyNewFavoritesFound(results.newFavorites.length);
   }
@@ -96,7 +83,7 @@ class FavoritesView {
   }
 
   /**
-   * @param {FavoritesLayout} layout
+   * @param {FavoriteLayout} layout
    */
   changeLayout(layout) {
     this.tiler.changeLayout(layout);
@@ -124,37 +111,54 @@ class FavoritesView {
    * @param {Post[]} searchResults
    */
   showSearchResults(searchResults) {
-    this.statusBar.setMatchCount(searchResults.length);
-    this.paginator.paginate(searchResults);
+    this.tiler.tile(Utils.getThumbsFromPosts(searchResults));
+    Utils.scrollToTop();
   }
 
   /**
-   * @param {Number} resultsPerPage
+   * @param {Number} matchCount
    */
-  updateResultsPerPage(resultsPerPage) {
-    this.paginator.updateResultsPerPage(resultsPerPage);
+  setMatchCount(matchCount) {
+    this.statusBar.setMatchCount(matchCount);
   }
 
   /**
-   * @param {{direction: String, searchResults: Post[]}} message
-   * @returns {Boolean}
+   * @param {FavoritesPaginationParameters} parameters
    */
-  changePageInGallery(message) {
-    return this.paginator.changePageWhileInGallery(message.direction, message.searchResults);
+  createPageSelectionMenu(parameters) {
+    this.paginator.create(parameters);
   }
 
   /**
-   * @param {String} direction
+   * @param {FavoritesPaginationParameters} parameters
    */
-  changePageOutOfGallery(direction) {
-    this.paginator.gotoAdjacentPage(direction);
+  createPageSelectionMenuWhileFetching(parameters) {
+    this.paginator.update(parameters);
   }
 
   /**
    * @param {String} id
-   * @param {Post[]} searchResults
    */
-  findFavorite(id, searchResults) {
-    this.paginator.findFavorite(id, searchResults);
+  async revealFavorite(id) {
+    await Utils.waitForAllThumbnailsToLoad();
+    const thumb = document.getElementById(id);
+
+    if (thumb === null || thumb.classList.contains("blink")) {
+      return;
+    }
+    thumb.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+    thumb.classList.add("blink");
+    await Utils.sleep(1500);
+    thumb.classList.remove("blink");
+  }
+
+  /**
+   * @returns {HTMLElement}
+   */
+  getPaginationMenu() {
+    return this.paginator.container;
   }
 }

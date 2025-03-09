@@ -76,7 +76,7 @@ class GalleryController {
       onResume: () => {
         this.view.toggleVideoLooping(false);
       },
-      onComplete: (/** @type {String} */ direction) => {
+      onComplete: (/** @type {NavigationKey} */ direction) => {
         this.executeFunctionBasedOnGalleryState({
           gallery: this.navigate.bind(this)
         }, direction);
@@ -268,13 +268,13 @@ class GalleryController {
 
   setupKeydownHandler() {
     const onKeyDownInGallery = (/** @type {KeyboardEvent} */ event) => {
-      if (GalleryConstants.navigationKeys.has(event.key)) {
+      if (Types.isNavigationKey(event.key)) {
         event.stopImmediatePropagation();
         this.navigate(event.key);
         return;
       }
 
-      if (GalleryConstants.exitKeys.has(event.key)) {
+      if (Types.isExitKey(event.key)) {
         this.exitGallery();
         return;
       }
@@ -431,7 +431,7 @@ class GalleryController {
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    */
   navigate(direction) {
     const thumb = this.model.navigate(direction);
@@ -448,7 +448,7 @@ class GalleryController {
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    */
   changeFavoritesPageThenNavigate(direction) {
     this.changeFavoritesPageInGallery(direction)
@@ -461,7 +461,7 @@ class GalleryController {
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    * @returns {Promise.<HTMLElement>}
    */
   changeFavoritesPageInGallery(direction) {
@@ -476,13 +476,15 @@ class GalleryController {
         }
       };
 
-      GlobalEvents.favorites.once("pageChangeResponse", onPageChangeInGallery);
+      GlobalEvents.favorites.timeout("pageChangeResponse", 50)
+        .then(onPageChangeInGallery)
+        .catch(onPageChangeInGallery);
       GlobalEvents.gallery.emit("requestPageChange", direction);
     });
   }
 
   /**
-   * @param {String} direction
+   * @param {NavigationKey} direction
    */
   changeSearchPageInGallery(direction) {
     const searchPage = this.model.navigateSearchPages(direction);
