@@ -59,15 +59,15 @@ class GalleryMenu {
   }
 
   loadPreferences() {
-    if (Utils.getPreference("galleryMenuDockLeft", true)) {
+    if (Preferences.dockGalleryMenuLeft.value) {
       this.toggleDockPosition();
     }
 
-    if (Utils.getPreference("galleryMenuPin", false)) {
+    if (Preferences.galleryMenuPinned.value) {
       this.togglePin();
     }
 
-    Utils.toggleGalleryMenu(Boolean(Utils.getPreference("enableGalleryMenu", Defaults.galleryMenuEnabled)));
+    Utils.toggleGalleryMenu(Preferences.galleryMenuEnabled.value);
   }
 
   addEventListeners() {
@@ -181,6 +181,7 @@ class GalleryMenu {
           background: ${colorPicker.value} !important;
         }
       `, "gallery-background-color");
+      Preferences.backgroundColor.set(colorPicker.value);
     };
     button.insertAdjacentElement("afterbegin", colorPicker);
   }
@@ -207,14 +208,10 @@ class GalleryMenu {
   }
 
   togglePin() {
-    const pinned = this.container.classList.toggle("pinned");
-
-    Utils.setPreference("galleryMenuPin", pinned);
+    Preferences.galleryMenuPinned.set(this.container.classList.toggle("pinned"));
   }
 
   toggleDockPosition() {
-    const dockLeft = this.container.classList.toggle("dock-left");
-
-    Utils.setPreference("galleryMenuDockLeft", dockLeft);
+    Preferences.dockGalleryMenuLeft.set(this.container.classList.toggle("dock-left"));
   }
 }

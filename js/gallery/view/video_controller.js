@@ -1,8 +1,4 @@
 class VideoController {
-  static preferences = {
-    videoVolume: "videoVolume",
-    videoMuted: "videoMuted"
-  };
   static commonVideoAttributes = "width=\"100%\" height=\"100%\" autoplay muted loop controlsList=\"nofullscreen\" webkit-playsinline playsinline";
 
   /**
@@ -42,8 +38,8 @@ class VideoController {
 
   createVideoPlayers() {
     this.videoPlayers = [];
-    const volume = Number((Utils.getPreference(VideoController.preferences.videoVolume, 1)));
-    const muted = Boolean(Utils.getPreference(VideoController.preferences.videoMuted, true));
+    const volume = Preferences.videoVolume.value;
+    const muted = Preferences.videoMuted.value;
 
     this.createVideoPlayer(volume, muted);
 
@@ -171,8 +167,8 @@ class VideoController {
       if (event.target === null || !event.target.hasAttribute("active")) {
         return;
       }
-      Utils.setPreference(VideoController.preferences.videoVolume, video.volume);
-      Utils.setPreference(VideoController.preferences.videoMuted, video.muted);
+      Preferences.videoVolume.set(video.volume);
+      Preferences.videoMuted.set(video.muted);
 
       for (const v of this.getInactiveVideoPlayers()) {
         v.volume = video.volume;

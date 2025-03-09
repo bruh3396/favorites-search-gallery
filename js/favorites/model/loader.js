@@ -4,7 +4,7 @@ class FavoritesLoader {
    */
   fetcher;
   /**
-   * @type {FavoritesDatabaseInterface}
+   * @type {FavoritesDatabaseWrapper}
    */
   database;
   /**
@@ -22,7 +22,7 @@ class FavoritesLoader {
   constructor() {
     this.allFavorites = [];
     this.fetcher = new FavoritesFetcher();
-    this.database = new FavoritesDatabaseInterface();
+    this.database = new FavoritesDatabaseWrapper();
   }
 
   /**

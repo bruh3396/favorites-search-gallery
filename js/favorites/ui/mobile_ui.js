@@ -10,15 +10,26 @@ class FavoritesMenuMobileUI {
       {id: "reset-button", parentId: "left-favorites-panel-top-row", textContent: "Reset", title: "Delete cached favorites and reset preferences", action: "reset", enabled: true, handler: "uiController"}
     ],
     "toggleSwitch": [
-      {id: "show-remove-favorite-buttons", parentId: "favorite-options", textContent: "Remove Buttons", title: "Toggle remove favorite buttons", action: "toggleAddOrRemoveButtons", enabled: Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: Defaults.showRemoveFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "show-add-favorite-buttons", parentId: "favorite-options", textContent: "Add Favorite Buttons", title: "Toggle add favorite buttons", action: "toggleAddOrRemoveButtons", enabled: !Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: Defaults.showAddFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "exclude-blacklist", parentId: "favorite-options", textContent: "Exclude Blacklist", title: "Exclude favorites with blacklisted tags from search", action: "toggleBlacklist", enabled: Utils.userIsOnTheirOwnFavoritesPage(), defaultValue: Defaults.excludeBlacklist, hotkey: "", invokeActionOnCreation: false, savePreference: true},
+      {id: "show-remove-favorite-buttons", parentId: "favorite-options", textContent: "Remove Buttons", title: "Toggle remove favorite buttons", action: "toggleAddOrRemoveButtons", enabled: Utils.userIsOnTheirOwnFavoritesPage(), preference: Preferences.showRemoveFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "show-add-favorite-buttons", parentId: "favorite-options", textContent: "Add Favorite Buttons", title: "Toggle add favorite buttons", action: "toggleAddOrRemoveButtons", enabled: !Utils.userIsOnTheirOwnFavoritesPage(), preference: Preferences.showAddFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "exclude-blacklist", parentId: "favorite-options", textContent: "Exclude Blacklist", title: "Exclude favorites with blacklisted tags from search", action: "toggleBlacklist", enabled: Utils.userIsOnTheirOwnFavoritesPage(), preference: Preferences.excludeBlacklist, hotkey: "", invokeActionOnCreation: false, savePreference: true},
       {id: "dark-theme", parentId: "favorite-options", textContent: "Dark Theme", title: "Toggle dark theme", action: "toggleDarkTheme", enabled: true, defaultValue: Utils.usingDarkTheme(), hotkey: "", invokeActionOnCreation: false, savePreference: false, handler: "uiController"}
     ],
     "select": [
-      {id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "updateSortingMethod", position: "beforeend", invokeActionOnCreation: false, optionPairs: [["default", "Default"], ["score", "Score"], ["width", "Width"], ["height", "Height"], ["creationTimestamp", "Date Uploaded"], ["lastChangedTimestamp", "Date Changed"], ["random", "Random"]]},
       {
-        id: "results-per-page", parentId: "results-per-page-container", title: "Change results per page", action: "none", position: "beforeend", invokeActionOnCreation: true, handler: "uiController",
+        id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "updateSortingMethod", position: "beforeend", invokeActionOnCreation: false, preference: Preferences.sortingMethod,
+        optionPairs: [
+          ["default", "Default"],
+          ["score", "Score"],
+          ["width", "Width"],
+          ["height", "Height"],
+          ["creationTimestamp", "Date Uploaded"],
+          ["lastChangedTimestamp", "Date Changed"],
+          ["random", "Random"]
+        ]
+      },
+      {
+        id: "results-per-page", parentId: "results-per-page-container", title: "Change results per page", action: "none", position: "beforeend", invokeActionOnCreation: true, handler: "uiController", preference: Preferences.resultsPerPage,
         optionPairs:
           [
             ["50", "50"],
@@ -31,7 +42,7 @@ class FavoritesMenuMobileUI {
           ]
       },
       {
-        id: "column-count", parentId: "column-count-container", title: "Change column count", action: "none", position: "beforeend", invokeActionOnCreation: true, handler: "uiController",
+        id: "column-count", parentId: "column-count-container", title: "Change column count", action: "none", position: "beforeend", invokeActionOnCreation: true, handler: "uiController", preference: Preferences.columnCount,
         optionPairs:
           [
             ["1", "1"],
@@ -46,9 +57,17 @@ class FavoritesMenuMobileUI {
             ["10", "10"]
           ]
       },
-      {id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, optionPairs: [["column", "Column"], ["row", "River"], ["grid", "Grid"]], handler: "uiController"}
+      {
+        id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, preference: Preferences.favoriteLayout,
+        optionPairs: [
+          ["column", "Column"],
+          ["row", "River"],
+          ["grid", "Grid"]
+        ],
+        handler: "uiController"
+      }
     ],
-    "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "toggleSortAscending", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, defaultValue: Defaults.sortAscending}]
+    "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "toggleSortAscending", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, preference: Preferences.sortAscending}]
   };
 
   static create() {

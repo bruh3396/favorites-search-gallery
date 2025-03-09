@@ -111,6 +111,7 @@ class FavoritesDatabase {
       getAllRequest.onsuccess = (event) => {
         // @ts-ignore
         database.close();
+        // @ts-ignore
         resolve(event.target.result.reverse());
       };
       getAllRequest.onerror = (event) => {
@@ -221,6 +222,7 @@ class FavoritesDatabase {
 
           this.addContentTypeToFavorite(favorite);
           index.onsuccess = (indexEvent) => {
+            // @ts-ignore
             const primaryKey = indexEvent.target.result;
 
             favoritesObjectStore.put(favorite, primaryKey);
@@ -252,6 +254,7 @@ class FavoritesDatabase {
     const isAnimated = tags.includes("animated ") || tags.includes("video ");
     const isGif = isAnimated && !tags.includes("video ");
 
+    // @ts-ignore
     favorite.type = isGif ? "gif" : isAnimated ? "video" : "image";
   }
 }

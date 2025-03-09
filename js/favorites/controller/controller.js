@@ -73,11 +73,11 @@ class FavoritesController {
   }
 
   setupPageChangingInGallery() {
-    GlobalEvents.gallery.on("requestPageChange", (/** @type {String} */ direction) => {
+    Events.gallery.on("requestPageChange", (/** @type {String} */ direction) => {
       if (Types.isNavigationKey(direction)) {
         this.gotoAdjacentPage(direction);
       }
-      GlobalEvents.favorites.emit("pageChangeResponse");
+      Events.favorites.emit("pageChangeResponse");
     });
   }
 
@@ -130,7 +130,7 @@ class FavoritesController {
     this.model.loadAllFavorites()
       .then((searchResults) => {
         this.processLoadedSearchResults(searchResults);
-        GlobalEvents.favorites.emit("favoritesLoadedFromDatabase");
+        Events.favorites.emit("favoritesLoadedFromDatabase");
         return this.model.findNewFavoritesOnReload();
       })
       .then((newFavoritesFound) => {
@@ -153,7 +153,7 @@ class FavoritesController {
    * @param {Post[]} searchResults
    */
   showSearchResults(searchResults) {
-    GlobalEvents.favorites.emit("newSearchResults", searchResults);
+    Events.favorites.emit("newSearchResults", searchResults);
     this.model.paginate(searchResults);
     this.view.setMatchCount(searchResults.length);
     this.changePage(1);
@@ -183,7 +183,7 @@ class FavoritesController {
   }
 
   broadcastPageChange() {
-    GlobalEvents.favorites.emit("changedPage");
+    Events.favorites.emit("changedPage");
   }
 
   /**
@@ -206,8 +206,8 @@ class FavoritesController {
         }
       });
     this.model.paginate(this.model.getLatestSearchResults());
-    GlobalEvents.favorites.emit("newFavoritesFoundOnReload", results.newSearchResults);
-    GlobalEvents.favorites.emit("newSearchResults", results.allSearchResults);
+    Events.favorites.emit("newFavoritesFoundOnReload", results.newSearchResults);
+    Events.favorites.emit("newSearchResults", results.allSearchResults);
   }
 
   /**
@@ -237,7 +237,7 @@ class FavoritesController {
     if (!(error instanceof PromiseChainExit)) {
       throw error;
     }
-    GlobalEvents.favorites.emit("favoritesLoaded");
+    Events.favorites.emit("favoritesLoaded");
   }
 
   onSearchResultsFound() {
@@ -245,7 +245,7 @@ class FavoritesController {
     this.view.updateStatusWhileFetching(this.model.getLatestSearchResults().length, this.model.getAllFavorites().length);
     this.view.createPageSelectionMenuWhileFetching(this.model.getPaginationParameters());
     this.addNewlyFetchedSearchResultsToCurrentPage();
-    GlobalEvents.favorites.emit("newSearchResults", this.model.getLatestSearchResults());
+    Events.favorites.emit("newSearchResults", this.model.getLatestSearchResults());
   }
 
   addNewlyFetchedSearchResultsToCurrentPage() {
@@ -257,7 +257,7 @@ class FavoritesController {
     const thumbs = Utils.getThumbsFromPosts(newFavorites);
 
     this.view.insertNewSearchResultsWhileFetching(thumbs);
-    GlobalEvents.favorites.emit("resultsAddedToCurrentPage", thumbs);
+    Events.favorites.emit("resultsAddedToCurrentPage", thumbs);
   }
 
   /**
@@ -288,7 +288,7 @@ class FavoritesController {
    */
   changeLayout(layout) {
     if (Types.isFavoritesLayout(layout)) {
-      GlobalEvents.favorites.emit("layoutChanged", layout);
+      Events.favorites.emit("layoutChanged", layout);
       this.view.changeLayout(layout);
     }
   }
@@ -321,7 +321,7 @@ class FavoritesController {
    * @param {HTMLInputElement} input
    */
   updateColumnCount(input) {
-    GlobalEvents.favorites.emit("favoritesResized");
+    Events.favorites.emit("favoritesResized");
     this.view.updateColumnCount(input);
   }
 
@@ -329,7 +329,7 @@ class FavoritesController {
    * @param {HTMLInputElement} input
    */
   updateRowSize(input) {
-    GlobalEvents.favorites.emit("favoritesResized");
+    Events.favorites.emit("favoritesResized");
     this.view.updateRowSize(input);
   }
 

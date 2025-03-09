@@ -11,9 +11,6 @@ class TagModifier {
    * @type {Map.<String, String>}
    */
   static tagModifications = new Map();
-  static preferences = {
-    modifyTagsOutsideFavoritesPage: "modifyTagsOutsideFavoritesPage"
-  };
 
   /**
    * @type {Boolean}
@@ -26,14 +23,7 @@ class TagModifier {
    * @type {Boolean}
    */
   static get disabled() {
-    if (Utils.onMobileDevice()) {
-      return true;
-    }
-
-    if (Utils.onFavoritesPage()) {
-      return false;
-    }
-    return Boolean(Utils.getPreference(TagModifier.preferences.modifyTagsOutsideFavoritesPage, false));
+    return Utils.onMobileDevice() || !Utils.onFavoritesPage();
   }
 
   /**
@@ -179,7 +169,7 @@ class TagModifier {
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
     });
-    GlobalEvents.favorites.on("changedPage", () => {
+    Events.favorites.on("changedPage", () => {
       this.highlightSelectedThumbsOnPageChange();
     });
   }

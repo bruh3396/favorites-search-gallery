@@ -39,13 +39,6 @@ class AutoplayEvents {
 }
 
 class AutoplayController {
-  static preferences = {
-    active: "autoplayActive",
-    paused: "autoplayPaused",
-    imageDuration: "autoplayImageDuration",
-    minimumVideoDuration: "autoplayMinimumVideoDuration",
-    direction: "autoplayForward"
-  };
   static menuIconImageURLs = {
     play: Utils.createObjectURLFromSvg(Icons.play),
     pause: Utils.createObjectURLFromSvg(Icons.pause),
@@ -54,17 +47,16 @@ class AutoplayController {
     tune: Utils.createObjectURLFromSvg(Icons.tune)
   };
   static settings = {
-    imageViewDuration: Utils.getPreference(AutoplayController.preferences.imageDuration, 3000),
-    minimumVideoDuration: Utils.getPreference(AutoplayController.preferences.minimumVideoDuration, 5000),
+    imageViewDuration: Preferences.autoplayImageDuration.value,
+    minimumVideoDuration: Preferences.autoplayMinimumVideoDuration.value,
     menuVisibilityDuration: Utils.onMobileDevice() ? 1500 : 500,
-    moveForward: Utils.getPreference(AutoplayController.preferences.direction, true),
 
     get imageViewDurationInSeconds() {
-      return Utils.millisecondsToSeconds(Number(this.imageViewDuration));
+      return Utils.millisecondsToSeconds(this.imageViewDuration);
     },
 
     get minimumVideoDurationInSeconds() {
-      return Utils.millisecondsToSeconds(Number(this.minimumVideoDuration));
+      return Utils.millisecondsToSeconds(this.minimumVideoDuration);
     }
   };
 
@@ -165,7 +157,7 @@ class AutoplayController {
     /**
      * @type {NavigationKey}
      */
-    const direction = AutoplayController.settings.moveForward ? "ArrowRight" : "ArrowLeft";
+    const direction = Preferences.autoplayForward.value ? "ArrowRight" : "ArrowLeft";
 
     this.events.onComplete = () => {
       if (this.active && !this.paused) {
@@ -181,8 +173,8 @@ class AutoplayController {
     };
     this.eventListenersAbortController = new AbortController();
     this.currentThumb = null;
-    this.active = Utils.getPreference(AutoplayController.preferences.active, Utils.onMobileDevice());
-    this.paused = Utils.getPreference(AutoplayController.preferences.paused, false);
+    this.active = Preferences.autoplayActive.value;
+    this.paused = Preferences.autoplayPaused.value;
     this.menuIsPersistent = false;
     this.menuIsVisible = false;
   }
@@ -329,7 +321,7 @@ class AutoplayController {
     this.ui.settingsButton.src = AutoplayController.menuIconImageURLs.tune;
     this.ui.changeDirectionButton.src = AutoplayController.menuIconImageURLs.changeDirection;
     this.ui.changeDirectionMask.image.src = AutoplayController.menuIconImageURLs.changeDirectionAlt;
-    this.ui.changeDirectionMask.container.classList.toggle("upper-right", AutoplayController.settings.moveForward);
+    this.ui.changeDirectionMask.container.classList.toggle("upper-right", Preferences.autoplayForward.value);
   }
 
   loadAutoplaySettingsIntoUI() {
@@ -420,14 +412,13 @@ class AutoplayController {
    * @param {Boolean} forward
    */
   toggleDirection(forward) {
-    const directionHasNotChanged = forward === AutoplayController.settings.moveForward;
+    const directionHasNotChanged = forward === Preferences.autoplayForward.value;
 
     if (directionHasNotChanged) {
       return;
     }
-    AutoplayController.settings.moveForward = !AutoplayController.settings.moveForward;
-    this.ui.changeDirectionMask.container.classList.toggle("upper-right", AutoplayController.settings.moveForward);
-    Utils.setPreference(AutoplayController.preferences.direction, AutoplayController.settings.moveForward);
+    Preferences.autoplayForward.set(!Preferences.autoplayForward.value);
+    this.ui.changeDirectionMask.container.classList.toggle("upper-right", Preferences.autoplayForward.value);
   }
 
   /**
@@ -463,7 +454,7 @@ class AutoplayController {
    * @param {Boolean} value
    */
   toggle(value) {
-    Utils.setPreference(AutoplayController.preferences.active, value);
+    Preferences.autoplayActive.set(value);
     this.active = value;
 
     if (value) {
@@ -481,7 +472,7 @@ class AutoplayController {
     }
     const duration = Math.round(Utils.clamp(durationInSeconds * 1000, 1000, 60000));
 
-    Utils.setPreference(AutoplayController.preferences.imageDuration, duration);
+    Preferences.autoplayImageDuration.set(duration);
     AutoplayController.settings.imageViewDuration = duration;
     this.imageViewTimer.waitTime = duration;
     this.ui.settingsMenu.imageDurationInput.value = AutoplayController.settings.imageViewDurationInSeconds;
@@ -496,7 +487,7 @@ class AutoplayController {
     }
     const duration = Math.round(Utils.clamp(durationInSeconds * 1000, 0, 60000));
 
-    Utils.setPreference(AutoplayController.preferences.minimumVideoDuration, duration);
+    Preferences.autoplayMinimumVideoDuration.set(duration);
     AutoplayController.settings.minimumVideoDuration = duration;
     this.videoViewTimer.waitTime = duration;
     this.ui.settingsMenu.minimumVideoDurationInput.value = AutoplayController.settings.minimumVideoDurationInSeconds;
@@ -573,7 +564,7 @@ class AutoplayController {
 
   pause() {
     this.paused = !this.paused;
-    Utils.setPreference(AutoplayController.preferences.paused, this.paused);
+    Preferences.autoplayPaused.set(this.paused);
 
     if (this.paused) {
       this.ui.playButton.src = AutoplayController.menuIconImageURLs.play;

@@ -64,7 +64,7 @@ class Tooltip {
     if (Tooltip.disabled) {
       return;
     }
-    this.visible = Boolean(Utils.getPreference("showTooltip", true));
+    this.visible = Preferences.tooltipVisibility.value;
     Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.tooltip);
     this.tooltip = document.getElementById("tooltip");
     this.defaultTransition = this.tooltip.style.transition;
@@ -129,7 +129,7 @@ class Tooltip {
     if (!Utils.onFavoritesPage()) {
       return;
     }
-    GlobalEvents.favorites.on("resultsAddedToCurrentPage", () => {
+    Events.favorites.on("resultsAddedToCurrentPage", () => {
       this.addEventListenersToThumbs.bind(this)();
     });
     window.addEventListener("favoritesLoaded", () => {
@@ -137,7 +137,7 @@ class Tooltip {
     }, {
       once: true
     });
-    GlobalEvents.favorites.on("changedPage", () => {
+    Events.favorites.on("changedPage", () => {
       this.currentImage = null;
       this.addEventListenersToThumbs.bind(this)();
     });
@@ -426,7 +426,7 @@ class Tooltip {
     if (value === undefined) {
       value = !this.visible;
     }
-    Utils.setPreference("showTooltip", value);
+    Preferences.tooltipVisibility.set(value);
     this.visible = value;
   }
 

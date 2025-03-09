@@ -126,20 +126,20 @@ class GalleryController {
   }
 
   keepTrackOfLatestSearchResults() {
-    GlobalEvents.favorites.on("resultsAddedToCurrentPage", () => {
+    Events.favorites.on("resultsAddedToCurrentPage", () => {
       this.model.indexCurrentPageThumbs();
     });
-    GlobalEvents.favorites.on("newSearchResults", (/** @type {Post[]} */ searchResults) => {
+    Events.favorites.on("newSearchResults", (/** @type {Post[]} */ searchResults) => {
       this.model.setSearchResults(searchResults);
     });
-    GlobalEvents.favorites.once("newFavoritesFoundOnReload", () => {
+    Events.favorites.once("newFavoritesFoundOnReload", () => {
       this.visibleThumbTracker?.observeAllThumbsOnPage();
       this.model.indexCurrentPageThumbs();
     });
   }
 
   setupPageChangeHandler() {
-    GlobalEvents.favorites.on("changedPage", () => {
+    Events.favorites.on("changedPage", () => {
       this.handlePageChange();
     });
   }
@@ -190,14 +190,14 @@ class GalleryController {
   }
 
   setupFavoritesOptionHandler() {
-    GlobalEvents.favorites.on("showOnHover", () => {
+    Events.favorites.on("showOnHover", () => {
       this.model.toggleShowContentOnHover();
     });
   }
 
   setupGalleryStateResponder() {
-    GlobalEvents.favorites.on("inGalleryRequest", () => {
-      GlobalEvents.gallery.emit("inGalleryResponse", this.model.currentState === GalleryModel.states.IN_GALLERY);
+    Events.favorites.on("inGalleryRequest", () => {
+      Events.gallery.emit("inGalleryResponse", this.model.currentState === GalleryModel.states.IN_GALLERY);
     });
   }
 
@@ -476,10 +476,10 @@ class GalleryController {
         }
       };
 
-      GlobalEvents.favorites.timeout("pageChangeResponse", 50)
+      Events.favorites.timeout("pageChangeResponse", 50)
         .then(onPageChangeInGallery)
         .catch(onPageChangeInGallery);
-      GlobalEvents.gallery.emit("requestPageChange", direction);
+      Events.gallery.emit("requestPageChange", direction);
     });
   }
 
@@ -520,7 +520,7 @@ class GalleryController {
         this.preloadVisibleContent();
       }
     });
-    GlobalEvents.favorites.on("resultsAddedToCurrentPage", (/** @type {HTMLElement[]} */ results) => {
+    Events.favorites.on("resultsAddedToCurrentPage", (/** @type {HTMLElement[]} */ results) => {
       this.visibleThumbTracker?.observe(results);
     });
   }
@@ -553,7 +553,7 @@ class GalleryController {
     Utils.removeFavoriteInGallery(this.model.currentThumb)
       .then(({status, id}) => {
         this.view.showRemovedFavoriteStatus(status);
-        GlobalEvents.gallery.emit("favoriteAddedOrDeleted", id);
+        Events.gallery.emit("favoriteAddedOrDeleted", id);
       });
   }
 
@@ -561,7 +561,7 @@ class GalleryController {
     Utils.addFavoriteInGallery(this.model.currentThumb)
       .then(({status, id}) => {
         this.view.showAddedFavoriteStatus(status);
-        GlobalEvents.gallery.emit("favoriteAddedOrDeleted", id);
+        Events.gallery.emit("favoriteAddedOrDeleted", id);
       });
   }
 
@@ -574,6 +574,6 @@ class GalleryController {
    * @param {Boolean} value
    */
   broadcastShowContentOnHover(value) {
-    GlobalEvents.gallery.emit("showOnHover", value);
+    Events.gallery.emit("showOnHover", value);
   }
 }

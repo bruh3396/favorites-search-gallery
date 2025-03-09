@@ -19,7 +19,7 @@ class FavoritesColumnTiler extends Tiler {
     super(container);
     this.className = "column";
     this.columns = [];
-    this.columnCount = parseInt(Utils.getPreference("columnCount", Defaults.columnCount));
+    this.columnCount = Preferences.columnCount.value;
     this.useDefaultColumnCountSetter = true;
     this.originalGetAllThumbs = Utils.getAllThumbs;
   }

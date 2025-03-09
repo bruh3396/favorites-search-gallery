@@ -64,7 +64,7 @@ class Post {
   }
 
   static swapAddOrRemoveButtonsWhenFavoritesAreAddedOrRemovedExternally() {
-    GlobalEvents.gallery.on("favoriteAddedOrDeleted", (/** @type {String} */ id) => {
+    Events.gallery.on("favoriteAddedOrDeleted", (/** @type {String} */ id) => {
       const post = Post.allPosts.get(id);
 
       if (post !== undefined) {

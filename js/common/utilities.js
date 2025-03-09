@@ -184,8 +184,7 @@ class Utils {
     if (Utils.onFavoritesPage()) {
       return false;
     }
-    const enabledOnSearchPages = Boolean(Utils.getPreference("enhanceSearchPages", false));
-    return !enabledOnSearchPages;
+    return !Preferences.enhanceSearchPages.value;
   }
 
   /**
@@ -241,32 +240,6 @@ class Utils {
       }
     }
     return defaultValue === undefined ? null : defaultValue;
-  }
-
-  /**
-   * @param {String} key
-   * @param {any} value
-   */
-  static setPreference(key, value) {
-    const preferences = JSON.parse(localStorage.getItem(Utils.localStorageKeys.preferences) || "{}");
-
-    preferences[key] = value;
-    localStorage.setItem(Utils.localStorageKeys.preferences, JSON.stringify(preferences));
-  }
-
-  /**
-   * @param {String} key
-   * @param {any} defaultValue
-   * @returns {String}
-   */
-  static getPreference(key, defaultValue) {
-    const preferences = JSON.parse(localStorage.getItem(Utils.localStorageKeys.preferences) || "{}");
-    const preference = preferences[key];
-
-    if (preference === undefined) {
-      return defaultValue === undefined ? "" : defaultValue;
-    }
-    return preference;
   }
 
   /**
@@ -972,7 +945,7 @@ class Utils {
    * @returns {Number}
    */
   static getPerformanceProfile() {
-    return parseInt(Utils.getPreference("performanceProfile", 0));
+    return parseInt(Preferences.performanceProfile.value);
   }
 
   /**
@@ -1371,7 +1344,7 @@ class Utils {
           localStorage.removeItem(key);
         }
       });
-      indexedDB.deleteDatabase(FavoritesDatabaseInterface.databaseName);
+      indexedDB.deleteDatabase(FavoritesDatabaseWrapper.databaseName);
     }
   }
 
@@ -1408,7 +1381,7 @@ class Utils {
    * @returns {Number}
    */
   static loadAllowedRatings() {
-    return parseInt(Utils.getPreference("allowedRatings", 7));
+    return parseInt(Preferences.allowedRatings.value);
   }
 
   /**
@@ -2209,7 +2182,7 @@ class Utils {
    * @returns {FavoriteLayout}
    */
   static loadFavoritesLayout() {
-    const layout = Utils.getPreference("layoutSelect", "");
+    const layout = Preferences.favoriteLayout.value;
     return Types.isFavoritesLayout(layout) ? layout : "column";
   }
 
@@ -2369,14 +2342,14 @@ class Utils {
       return Promise.resolve(false);
     }
     return new Promise((resolve) => {
-      GlobalEvents.gallery.timeout("inGalleryResponse", 10)
+      Events.gallery.timeout("inGalleryResponse", 10)
         .then((inGallery) => {
           resolve(inGallery);
         })
         .catch(() => {
           resolve(false);
         });
-      GlobalEvents.favorites.emit("inGalleryRequest");
+      Events.favorites.emit("inGalleryRequest");
     });
   }
 

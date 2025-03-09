@@ -14,7 +14,7 @@ class AwesompleteWrapper {
     if (AwesompleteWrapper.disabled) {
       return;
     }
-    this.showSavedSearchSuggestions = Boolean(Utils.getPreference("savedSearchSuggestions", false));
+    this.showSavedSearchSuggestions = Preferences.savedSearchSuggestions.value;
     this.insertHTML();
     this.addAwesompleteToInputs();
   }
@@ -27,7 +27,7 @@ class AwesompleteWrapper {
       this.showSavedSearchSuggestions,
       (event) => {
         this.showSavedSearchSuggestions = event.target.checked;
-        Utils.setPreference(AwesompleteWrapper.preferences.savedSearchSuggestions, event.target.checked);
+        Preferences.savedSearchSuggestions.set(event.target.checked);
       },
       false
     );

@@ -1,4 +1,4 @@
-class FavoritesDatabaseInterface {
+class FavoritesDatabaseWrapper {
   static databaseName = "Favorites";
   static objectStoreName = `user${Utils.getFavoritesPageId()}`;
   /**
@@ -17,7 +17,7 @@ class FavoritesDatabaseInterface {
   constructor() {
     this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
     this.newMetadataReceivedTimeout = null;
-    this.database = new FavoritesDatabase(FavoritesDatabaseInterface.objectStoreName, 1);
+    this.database = new FavoritesDatabase(FavoritesDatabaseWrapper.objectStoreName, 1);
   }
 
   /**

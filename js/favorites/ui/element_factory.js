@@ -56,11 +56,13 @@ class ElementFactory {
 
     const preferenceName = Utils.convertDashedToCamelCase(template.id);
 
-    checkbox.checked = Boolean(Utils.getPreference(preferenceName, template.defaultValue));
+    if (template.preference !== null) {
+      checkbox.checked = template.preference.value;
+    }
 
     checkbox.addEventListener("change", () => {
-      if (template.savePreference) {
-        Utils.setPreference(preferenceName, checkbox.checked);
+      if (template.savePreference && template.preference !== null) {
+        template.preference.set(checkbox.checked);
       }
       checkbox.dispatchEvent(new CustomEvent(template.handler, {
         bubbles: true,
@@ -127,9 +129,12 @@ class ElementFactory {
     if (select === null || !(select instanceof HTMLSelectElement)) {
       return;
     }
-    const preferenceName = Utils.convertDashedToCamelCase(template.id);
 
-    select.value = Utils.getPreference(preferenceName, template.optionPairs[0][0]);
+    if (template.preference === null) {
+      select.value = template.optionPairs[0][0];
+    } else {
+      select.value = template.preference.value;
+    }
 
     if (template.invokeActionOnCreation) {
       select.dispatchEvent(new CustomEvent(template.handler, {
@@ -143,7 +148,10 @@ class ElementFactory {
         bubbles: true,
         detail: select.value
       }));
-      Utils.setPreference(preferenceName, select.value);
+
+      if (template.preference !== null) {
+        template.preference.set(select.value);
+      }
     };
   }
 
@@ -189,16 +197,15 @@ class ElementFactory {
     if (parent === null) {
       return;
     }
-    const preferenceName = Utils.convertDashedToCamelCase(template.id);
     const numberComponentId = `${template.id}-number`;
+    const defaultValue = template.preference === null ? 1 : template.preference.value;
 
-    template.defaultValue = Utils.getPreference(preferenceName, template.defaultValue);
     const html = `
       <span class="number" id="${numberComponentId}">
         <hold-button class="number-arrow-down" pollingtime="${template.pollingTime}">
           <span>&lt;</span>
         </hold-button>
-        <input id="${template.id}" data-action="${template.action}" type="number" min="${template.min}" max="${template.max}" step="${template.step}" defaultValue="${Utils.getPreference(preferenceName, template.defaultValue)}">
+        <input id="${template.id}" data-action="${template.action}" type="number" min="${template.min}" max="${template.max}" step="${template.step}" defaultValue="${defaultValue}">
         <hold-button class="number-arrow-up" pollingtime="${template.pollingTime}">
           <span>&gt;</span>
         </hold-button>
@@ -218,7 +225,7 @@ class ElementFactory {
       return;
     }
 
-    numberInput.value = String(template.defaultValue);
+    numberInput.value = defaultValue;
     numberInput.dispatchEvent(new KeyboardEvent("keydown", {
       key: "Enter",
       bubbles: true
@@ -236,7 +243,10 @@ class ElementFactory {
         bubbles: true,
         detail: numberInput
       }));
-      Utils.setPreference(preferenceName, parseFloat(numberInput.value));
+
+      if (template.preference !== null) {
+        template.preference.set(parseFloat(numberInput.value));
+      }
     };
   }
 }

@@ -44,7 +44,7 @@ class GalleryUI {
     const background = document.createElement("div");
 
     background.id = "gallery-background";
-    background.style.opacity = Utils.getPreference("galleryBackgroundOpacity", "1");
+    background.style.opacity = Preferences.backgroundOpacity.value;
     galleryContainer.appendChild(background);
     return background;
   }
@@ -146,7 +146,7 @@ class GalleryUI {
    * @param {WheelEvent} event
    */
   updateBackgroundOpacityFromEvent(event) {
-    let opacity = parseFloat(Utils.getPreference("galleryBackgroundOpacity", 1));
+    let opacity = parseFloat(Preferences.backgroundOpacity.value);
 
     opacity -= event.deltaY * 0.0005;
     opacity = Utils.clamp(opacity, 0, 1);
@@ -159,8 +159,8 @@ class GalleryUI {
   updateBackgroundOpacity(opacity) {
     const opacityString = String(opacity);
 
-    this.background.style.opacity = String(opacityString);
-    Utils.setPreference("galleryBackgroundOpacity", String(opacityString));
+    this.background.style.opacity = opacityString;
+    Preferences.backgroundOpacity.set(opacityString);
   }
 
   /**

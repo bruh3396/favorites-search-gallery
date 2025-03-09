@@ -9,8 +9,8 @@ class FavoritesSorter {
   sortingMethod;
 
   constructor() {
-    this.useAscendingOrder = Boolean(Utils.getPreference("sortAscending", false));
-    this.sortingMethod = Utils.getPreference("sortingMethod", "default");
+    this.useAscendingOrder = Preferences.sortAscending.value;
+    this.sortingMethod = Preferences.sortingMethod.value;
   }
 
   /**

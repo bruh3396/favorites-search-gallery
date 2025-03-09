@@ -63,7 +63,7 @@ class GalleryModel {
    * @returns {FavoritesGalleryState}
    */
   getStartState() {
-    if (Utils.getPreference("showOnHover", Defaults.showOnHover)) {
+    if (Preferences.showOnHover.value) {
       return GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
     }
     return GalleryModel.states.IDLE;

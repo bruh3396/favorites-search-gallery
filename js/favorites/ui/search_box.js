@@ -123,7 +123,7 @@ class SearchBox {
     const content = document.getElementById("favorites-search-gallery-content");
 
     if (options instanceof HTMLInputElement) {
-      options.checked = Boolean(Utils.getPreference("showOptions", false));
+      options.checked = Preferences.showOptions.value;
     }
 
     if (options !== null && content !== null && options instanceof HTMLInputElement) {
@@ -138,9 +138,7 @@ class SearchBox {
           Utils.sleep(1);
           Utils.updateOptionContentMargin(margin);
         }
-
-        Utils.setPreference("showOptions", options.checked);
-
+        Preferences.showOptions.set(options.checked);
         options.dispatchEvent(new CustomEvent("uiController", {
           bubbles: true
         }));

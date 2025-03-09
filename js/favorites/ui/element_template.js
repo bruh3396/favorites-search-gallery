@@ -11,13 +11,13 @@ class ElementTemplate {
    * @param {String} param.hotkey
    * @param {Boolean} param.invokeActionOnCreation
    * @param {Boolean} param.savePreference
-   * @param {Object} param.defaultValue
    * @param {Boolean} param.enabled
    * @param {Array.<[String, String]>} param.optionPairs
    * @param {Number} param.min
    * @param {Number} param.max
    * @param {Number} param.step
    * @param {Number} param.pollingTime
+   * @param {Preference | null} param.preference
    */
   constructor({id,
     parentId,
@@ -30,12 +30,12 @@ class ElementTemplate {
     hotkey = "none",
     invokeActionOnCreation = false,
     savePreference = true,
-    defaultValue = {},
     optionPairs = [],
     min = 0,
     max = 100,
     step = 1,
-    pollingTime = 50}) {
+    pollingTime = 50,
+    preference = null}) {
     this.id = id;
     this.parentId = parentId;
     this.position = position;
@@ -47,11 +47,11 @@ class ElementTemplate {
     this.hotkey = hotkey;
     this.invokeActionOnCreation = invokeActionOnCreation;
     this.savePreference = savePreference;
-    this.defaultValue = defaultValue;
     this.optionPairs = optionPairs;
     this.min = min;
     this.max = max;
     this.step = step;
     this.pollingTime = pollingTime;
+    this.preference = preference;
   }
 }

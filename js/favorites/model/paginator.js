@@ -60,7 +60,7 @@ class FavoritesPaginator {
 
   constructor() {
     this.currentPageNumber = 1;
-    this.resultsPerPage = Number(Utils.getPreference("resultsPerPage", Defaults.resultsPerPage));
+    this.resultsPerPage = Preferences.resultsPerPage.value;
     this.favorites = [];
   }
 

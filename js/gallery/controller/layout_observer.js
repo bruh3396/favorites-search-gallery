@@ -19,19 +19,19 @@ class FavoritesLayoutObserver {
   }
 
   static invalidateLayoutCompletionOnPageChange() {
-    GlobalEvents.favorites.on("changedPage", () => {
+    Events.favorites.on("changedPage", () => {
       FavoritesLayoutObserver.layoutCompleted = false;
     });
   }
 
   static listenForLayoutCompletion() {
-    GlobalEvents.favorites.on("layoutCompleted", () => {
+    Events.favorites.on("layoutCompleted", () => {
       FavoritesLayoutObserver.layoutCompleted = true;
     });
   }
 
   static listenForLayoutChanges() {
-    GlobalEvents.favorites.on("layoutChanged", (/** @type {String} */ layout) => {
+    Events.favorites.on("layoutChanged", (/** @type {String} */ layout) => {
       if (Types.isFavoritesLayout(layout)) {
         FavoritesLayoutObserver.currentLayout = layout;
       }

@@ -1,7 +1,4 @@
 class Caption {
-  static preferences = {
-    visibility: "showCaptions"
-  };
   static localStorageKeys = {
     tagCategories: "tagCategories"
   };
@@ -180,7 +177,7 @@ class Caption {
     } else if (!this.caption.classList.contains("disabled")) {
       this.caption.classList.add("disabled");
     }
-    Utils.setPreference(Caption.preferences.visibility, value);
+    Preferences.captionVisibility.set(value);
   }
 
   addEventListeners() {
@@ -242,14 +239,14 @@ class Caption {
   }
 
   addFavoritesPageEventListeners() {
-    GlobalEvents.favorites.once("favoritesLoaded", () => {
+    Events.favorites.once("favoritesLoaded", () => {
       Caption.flags.finishedLoading = true;
     });
-    GlobalEvents.favorites.once("favoritesLoadedFromDatabase", () => {
+    Events.favorites.once("favoritesLoadedFromDatabase", () => {
       Caption.flags.finishedLoading = true;
       this.findTagCategoriesOnPageChange();
     });
-    GlobalEvents.favorites.on("changedPage", Utils.debounceAfterFirstCall(() => {
+    Events.favorites.on("changedPage", Utils.debounceAfterFirstCall(() => {
       this.abortAllRequests("Changed Page");
       this.abortController = new AbortController();
       setTimeout(() => {
@@ -257,7 +254,7 @@ class Caption {
       }, 100);
     }, 2000));
 
-    GlobalEvents.favorites.on("captionsReEnabled", () => {
+    Events.favorites.on("captionsReEnabled", () => {
       if (this.currentThumb !== null) {
         this.attachToThumb(this.currentThumb);
       }
@@ -297,7 +294,7 @@ class Caption {
       event.preventDefault();
       event.stopPropagation();
       this.tagOnClick(thumb.id, event);
-      GlobalEvents.caption.emit("idClicked", thumb.id);
+      Events.caption.emit("idClicked", thumb.id);
     };
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
     thumb.children[0].appendChild(this.captionWrapper);
@@ -530,7 +527,7 @@ class Caption {
    * @returns {Boolean}
    */
   getVisibilityPreference() {
-    return Boolean(Utils.getPreference(Caption.preferences.visibility, true));
+    return Boolean(Preferences.captionVisibility.value);
   }
 
   /**

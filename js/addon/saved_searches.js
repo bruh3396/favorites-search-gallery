@@ -1,11 +1,4 @@
 class SavedSearches {
-  static preferences = {
-    textareaWidth: "savedSearchesTextAreaWidth",
-    textareaHeight: "savedSearchesTextAreaHeight",
-    savedSearches: "savedSearches",
-    visibility: "savedSearchVisibility",
-    tutorial: "savedSearchesTutorial"
-  };
   static localStorageKeys = {
     savedSearches: "savedSearches"
   };
@@ -55,7 +48,7 @@ class SavedSearches {
   }
 
   insertHTML() {
-    const showSavedSearches = Utils.getPreference(SavedSearches.preferences.visibility, false);
+    const showSavedSearches = Boolean(Preferences.savedSearchVisibility.value);
     const savedSearchesContainer = document.getElementById("right-favorites-panel");
 
     Utils.insertHTMLAndExtractStyle(savedSearchesContainer, "beforeend", HTMLStrings.savedSearches);
@@ -67,7 +60,7 @@ class SavedSearches {
       showSavedSearches,
       (e) => {
         savedSearchesContainer.style.display = e.target.checked ? "block" : "none";
-        Utils.setPreference(SavedSearches.preferences.visibility, e.target.checked);
+        Preferences.savedSearchVisibility.set(e.target.checked);
       },
       true
     );
@@ -233,9 +226,9 @@ class SavedSearches {
 
   loadSavedSearches() {
     const savedSearches = JSON.parse(localStorage.getItem(SavedSearches.localStorageKeys.savedSearches) || "[]");
-    const firstUse = Boolean(Utils.getPreference(SavedSearches.preferences.tutorial, true));
+    const firstUse = Boolean(Preferences.savedSearchesTutorial.value);
 
-    Utils.setPreference(SavedSearches.preferences.tutorial, false);
+    Preferences.savedSearchesTutorial.set(false);
 
     if (firstUse && savedSearches.length === 0) {
       this.createTutorialSearches();
