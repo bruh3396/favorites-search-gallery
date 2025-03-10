@@ -49,7 +49,7 @@ class AutoplayController {
   static settings = {
     imageViewDuration: Preferences.autoplayImageDuration.value,
     minimumVideoDuration: Preferences.autoplayMinimumVideoDuration.value,
-    menuVisibilityDuration: Utils.onMobileDevice() ? 1500 : 500,
+    menuVisibilityDuration: Flags.onMobileDevice ? 1500 : 500,
 
     get imageViewDurationInSeconds() {
       return Utils.millisecondsToSeconds(this.imageViewDuration);
@@ -257,7 +257,7 @@ class AutoplayController {
   }
 
   configureMobileUi() {
-    if (!Utils.onMobileDevice()) {
+    if (!Flags.onMobileDevice) {
       return;
     }
     this.createViewDurationSelects();
@@ -350,7 +350,7 @@ class AutoplayController {
   }
 
   addDesktopMenuEventListeners() {
-    if (Utils.onMobileDevice()) {
+    if (Flags.onMobileDevice) {
       return;
     }
     this.ui.settingsButton.onclick = () => {
@@ -371,7 +371,7 @@ class AutoplayController {
   }
 
   addMobileMenuEventListeners() {
-    if (!Utils.onMobileDevice()) {
+    if (!Flags.onMobileDevice) {
       return;
     }
     this.ui.settingsButton.ontouchstart = () => {

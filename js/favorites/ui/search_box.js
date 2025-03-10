@@ -20,7 +20,7 @@ class SearchBox {
     this.parent = document.getElementById("left-favorites-panel-top-row");
     this.id = Utils.mainSearchBoxId;
     this.searchHistory = new SearchHistory(30);
-    this.searchBox = Utils.onMobileDevice() ? this.createMobileSearchBar() : this.createMainSearchBox();
+    this.searchBox = Flags.onMobileDevice ? this.createMobileSearchBar() : this.createMainSearchBox();
     this.addEventListenersToSearchBox();
   }
 

@@ -6,7 +6,7 @@ class SavedSearches {
    * @type {Boolean}
    */
   static get disabled() {
-    return !Utils.onFavoritesPage() || Utils.onMobileDevice();
+    return !Flags.onFavoritesPage || Flags.onMobileDevice;
   }
   /**
    * @type {HTMLTextAreaElement}

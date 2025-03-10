@@ -1,10 +1,10 @@
 class SearchPageLoader {
   /**
-   * @type {Map.<Number, SearchPage>}
+   * @type {Map<Number, SearchPage>}
    */
   searchPages;
   /**
-   * @type {Set.<Number>}
+   * @type {Set<Number>}
    */
   fetchedPageNumbers;
   /**
@@ -25,7 +25,7 @@ class SearchPageLoader {
   allThumbs;
 
   constructor() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
     this.searchPages = new Map();
@@ -89,7 +89,7 @@ class SearchPageLoader {
   }
 
   async preloadSearchPages() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
     const previousPageNumber = Math.max(0, this.currentPageNumber - 1);
@@ -102,7 +102,7 @@ class SearchPageLoader {
 
   /**
    * @param {Number} pageNumber
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   loadSearchPage(pageNumber) {
     if (this.pageHasAlreadyBeenFetched(pageNumber)) {
@@ -137,7 +137,7 @@ class SearchPageLoader {
 
   /**
    * @param {Number} pageNumber
-   * @returns {Promise.<String>}
+   * @returns {Promise<String>}
    */
   fetchSearchPage(pageNumber) {
     return fetch(this.getSearchPageURL(pageNumber))

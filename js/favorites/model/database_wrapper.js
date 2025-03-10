@@ -21,7 +21,7 @@ class FavoritesDatabaseWrapper {
   }
 
   /**
-   * @returns {Promise.<Post[]>}
+   * @returns {Promise<Post[]>}
    */
   loadAllFavorites() {
     return this.database.loadFavorites(this.getIdsToDeleteOnReload())
@@ -32,7 +32,7 @@ class FavoritesDatabaseWrapper {
 
   /**
    * @param {Post[]} favorites
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   storeAllFavorites(favorites) {
     return this.storeFavorites(favorites);
@@ -40,7 +40,7 @@ class FavoritesDatabaseWrapper {
 
   /**
    * @param {Post[]} favorites
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   storeFavorites(favorites) {
     const posts = favorites
@@ -64,7 +64,7 @@ class FavoritesDatabaseWrapper {
    * @returns {String[]}
    */
   getIdsToDeleteOnReload() {
-    if (Utils.userIsOnTheirOwnFavoritesPage()) {
+    if (Flags.userIsOnTheirOwnFavoritesPage) {
       const idsToDelete = Utils.getIdsToDeleteOnReload();
 
       Utils.clearIdsToDeleteOnReload();

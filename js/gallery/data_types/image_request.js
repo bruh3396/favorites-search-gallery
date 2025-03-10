@@ -105,7 +105,7 @@ class ImageRequest {
   }
 
   /**
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   start() {
     return Utils.getOriginalImageURLWithExtension(this.thumb)

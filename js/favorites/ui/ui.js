@@ -3,13 +3,13 @@ class FavoritesUI {
    * @type {Boolean}
    */
   static get disabled() {
-    return !Utils.onFavoritesPage();
+    return !Flags.onFavoritesPage;
   }
 
   static {
     Utils.addStaticInitializer(() => {
       if (!FavoritesUI.disabled) {
-        const style = Utils.onMobileDevice() ? HTMLStrings.mobile : HTMLStrings.desktop;
+        const style = Flags.onMobileDevice ? HTMLStrings.mobile : HTMLStrings.desktop;
 
         Utils.insertStyleHTML(style, "desktop-mobile");
         Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.favorites);
@@ -25,7 +25,7 @@ class FavoritesUI {
     FavoritesUI.setupRatingFilter();
     this.searchBox = new SearchBox();
 
-    if (Utils.onMobileDevice()) {
+    if (Flags.onMobileDevice) {
       FavoritesMenuMobileUI.create();
       return;
     }

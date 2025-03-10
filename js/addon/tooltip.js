@@ -28,11 +28,11 @@ class Tooltip {
    * @type {Boolean}
    */
   static get disabled() {
-    return Utils.onMobileDevice() || Utils.getPerformanceProfile() > 1 || Utils.onPostPage();
+    return Flags.onMobileDevice || Preferences.performanceProfile.value > 1 || Flags.onPostPage;
   }
 
   /**
-   * @type {HTMLDivElement}
+   * @type {HTMLElement}
    */
   tooltip;
   /**
@@ -44,11 +44,11 @@ class Tooltip {
    */
   visible;
   /**
-   * @type {Object.<String,String>}
+   * @type {Object<String,String>}
    */
   searchTagColorCodes;
   /**
-   * @type {HTMLTextAreaElement}
+   * @type {HTMLTextAreaElement | null}
    */
   searchBox;
   /**
@@ -56,7 +56,7 @@ class Tooltip {
    */
   previousSearch;
   /**
-   * @type {HTMLImageElement}
+   * @type {HTMLImageElement | null}
    */
   currentImage;
 
@@ -66,7 +66,7 @@ class Tooltip {
     }
     this.visible = Preferences.tooltipVisibility.value;
     Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.tooltip);
-    this.tooltip = document.getElementById("tooltip");
+    this.tooltip = this.createTooltip();
     this.defaultTransition = this.tooltip.style.transition;
     this.searchTagColorCodes = {};
     this.currentImage = null;
@@ -75,19 +75,38 @@ class Tooltip {
     this.assignColorsToMatchedTags();
   }
 
-  addEventListeners() {
-    this.addAllPageEventListeners();
-    this.addSearchPageEventListeners();
-    this.addFavoritesPageEventListeners();
+  /**
+   * @returns {HTMLSpanElement}
+   */
+  createTooltip() {
+    const tooltip = document.createElement("span");
+    const container = document.getElementById("tooltip-container");
+
+    tooltip.className = "light-green-gradient";
+    tooltip.id = "tooltip";
+
+    if (container !== null) {
+      container.appendChild(tooltip);
+    }
+    return tooltip;
   }
 
-  addAllPageEventListeners() {
+  addEventListeners() {
+    this.addCommonEventListeners();
+  }
+
+  addCommonEventListeners() {
+    this.addKeyDownEventListener();
+    this.addMouseOverEventListener();
+  }
+
+  addKeyDownEventListener() {
     document.addEventListener("keydown", (event) => {
       if (event.key.toLowerCase() !== "t" || !Utils.isHotkeyEvent(event)) {
         return;
       }
 
-      if (Utils.onFavoritesPage()) {
+      if (Flags.onFavoritesPage) {
         const showTooltipsCheckbox = document.getElementById("show-tooltips-checkbox");
 
         if (showTooltipsCheckbox !== null) {
@@ -101,7 +120,7 @@ class Tooltip {
             }
           }
         }
-      } else if (Utils.onSearchPage()) {
+      } else if (Flags.onSearchPage) {
         this.toggleVisibility();
 
         if (this.currentImage !== null) {
@@ -113,96 +132,53 @@ class Tooltip {
     });
   }
 
-  addSearchPageEventListeners() {
-    if (!Utils.onSearchPage()) {
-      return;
-    }
-    window.addEventListener("load", () => {
-      this.addEventListenersToThumbs.bind(this)();
-    }, {
-      once: true,
-      passive: true
-    });
-  }
-
-  addFavoritesPageEventListeners() {
-    if (!Utils.onFavoritesPage()) {
-      return;
-    }
-    Events.favorites.on("resultsAddedToCurrentPage", () => {
-      this.addEventListenersToThumbs.bind(this)();
-    });
-    window.addEventListener("favoritesLoaded", () => {
-      this.addEventListenersToThumbs.bind(this)();
-    }, {
-      once: true
-    });
-    Events.favorites.on("changedPage", () => {
-      this.currentImage = null;
-      this.addEventListenersToThumbs.bind(this)();
-    });
-    window.addEventListener("newFavoritesFoundOnReload", (event) => {
-      const favorites = event.detail;
-
-      if (favorites.length > 0) {
-        this.addEventListenersToThumbs.bind(this)(favorites);
+  addMouseOverEventListener() {
+    Events.document.mouseOver.on((clickEvent) => {
+      if (clickEvent.thumb === null) {
+        this.hide();
+        this.currentImage = null;
+        return;
       }
-    }, {
-      once: true
+
+      if (Utils.enteredOverCaptionTag(clickEvent.originalEvent)) {
+        return;
+      }
+      const image = Utils.getImageFromThumb(clickEvent.thumb);
+
+      if (image === null) {
+        return;
+      }
+      this.currentImage = image;
+
+      if (this.visible) {
+        this.show(image);
+      }
     });
   }
 
   assignColorsToMatchedTags() {
-    if (Utils.onSearchPage()) {
+    if (Flags.onSearchPage) {
       this.assignColorsToMatchedTagsOnSearchPage();
-    } else {
-      this.searchBox = document.getElementById(Utils.mainSearchBoxId);
+      return;
+    }
+    const searchBox = document.getElementById(Utils.mainSearchBoxId);
 
-      if (this.searchBox === null) {
-        return;
-      }
+    if (!(searchBox instanceof HTMLTextAreaElement)) {
+      return;
+    }
+    this.searchBox = searchBox;
+
+    if (Utils === null) {
+      return;
+    }
+    this.assignColorsToMatchedTagsOnFavoritesPage();
+    this.searchBox.addEventListener("input", () => {
       this.assignColorsToMatchedTagsOnFavoritesPage();
-      this.searchBox.addEventListener("input", () => {
-        this.assignColorsToMatchedTagsOnFavoritesPage();
-      });
-      window.addEventListener("searchStarted", () => {
-        this.assignColorsToMatchedTagsOnFavoritesPage();
-      });
+    });
+    window.addEventListener("searchStarted", () => {
+      this.assignColorsToMatchedTagsOnFavoritesPage();
+    });
 
-    }
-  }
-
-  /**
-   * @param {HTMLCollectionOf.<Element>} thumbs
-   */
-  async addEventListenersToThumbs(thumbs) {
-    await Utils.sleep(10);
-    thumbs = thumbs === undefined ? Utils.getAllThumbs() : thumbs;
-
-    for (const thumb of thumbs) {
-      const image = Utils.getImageFromThumb(thumb);
-
-      if (image.onmouseenter !== null) {
-        continue;
-      }
-
-      image.onmouseenter = (event) => {
-        if (Utils.enteredOverCaptionTag(event)) {
-          return;
-        }
-        this.currentImage = image;
-
-        if (this.visible) {
-          this.show(image);
-        }
-      };
-      image.onmouseleave = (event) => {
-        if (!Utils.enteredOverCaptionTag(event)) {
-          this.currentImage = null;
-          this.hide();
-        }
-      };
-    }
   }
 
   /**
@@ -420,9 +396,9 @@ class Tooltip {
   }
 
   /**
-   * @param {Boolean} value
+   * @param {Boolean | undefined} value
    */
-  toggleVisibility(value) {
+  toggleVisibility(value = undefined) {
     if (value === undefined) {
       value = !this.visible;
     }

@@ -4,7 +4,7 @@ class FavoritesFetcher {
    */
   fetchedQueue;
   /**
-   * @type {Set.<Number>}
+   * @type {Set<Number>}
    */
   pendingRequestPageNumbers;
   /**
@@ -12,7 +12,7 @@ class FavoritesFetcher {
    */
   failedRequests;
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   storedFavoriteIds;
   /**
@@ -97,7 +97,7 @@ class FavoritesFetcher {
 
   /**
    * @param {Function} onFavoritesFound
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   async fetchAllFavorites(onFavoritesFound) {
     this.fetchedQueue.onDequeue = (/** @type {FavoritesPageRequest} */ request) => {
@@ -110,8 +110,8 @@ class FavoritesFetcher {
   }
 
   /**
-   * @param {Set.<String>} storedFavoriteIds
-   * @returns {Promise.<Post[]>}
+   * @param {Set<String>} storedFavoriteIds
+   * @returns {Promise<Post[]>}
    */
   async fetchNewFavoritesOnReload(storedFavoriteIds) {
     await Utils.sleep(100);
@@ -134,7 +134,7 @@ class FavoritesFetcher {
   }
 
   /**
-   * @returns {Promise.<{allNewFavoritesFound: Boolean, newFavorites: Post[]}>}
+   * @returns {Promise<{allNewFavoritesFound: Boolean, newFavorites: Post[]}>}
    */
   fetchNewFavoritesOnReloadHelper() {
     return fetch(this.newFetchRequest.url)
@@ -191,7 +191,7 @@ class FavoritesFetcher {
 
   /**
    * @param {Response} response
-   * @returns {Promise.<String>}
+   * @returns {Promise<String>}
    */
   onFavoritesPageRequestResponse(response) {
     if (response.ok) {

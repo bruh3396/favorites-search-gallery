@@ -10,17 +10,6 @@ class Utils {
   static mainSearchBoxId = "favorites-search-box";
   static idsToRemoveOnReloadLocalStorageKey = "recentlyRemovedIds";
   static tagBlacklist = Utils.getTagBlacklist();
-  static flags = {
-    onSearchPage: location.href.includes("page=post&s=list"),
-    onFavoritesPage: location.href.includes("page=favorites"),
-    onPostPage: location.href.includes("page=post&s=view"),
-    usingFirefox: navigator.userAgent.toLowerCase().includes("firefox"),
-    onMobileDevice: (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent),
-    userIsOnTheirOwnFavoritesPage: Utils.getUserId() === Utils.getFavoritesPageId()
-  };
-  static secondaryFlags = {
-    galleryIsDisabled: (Utils.onMobileDevice() && Utils.onSearchPage()) || Utils.getPerformanceProfile() > 0 || Utils.onPostPage()
-  };
   static addedFavoriteStatuses = {
     error: 0,
     alreadyAdded: 1,
@@ -156,17 +145,25 @@ class Utils {
    */
   static imageExtensionAssignmentCooldown;
   static recentlyDiscoveredImageExtensionCount = 0;
+  /**
+   * @type {Record<Number, MediaExtension>}
+   */
   static extensionDecodings = {
     0: "jpg",
     1: "png",
     2: "jpeg",
-    3: "gif"
+    3: "gif",
+    4: "mp4"
   };
+  /**
+   * @type {Record<MediaExtension, Number>}
+   */
   static extensionEncodings = {
     "jpg": 0,
     "png": 1,
     "jpeg": 2,
-    "gif": 3
+    "gif": 3,
+    "mp4": 4
   };
   /**
    * @type {Function[]}
@@ -177,11 +174,11 @@ class Utils {
    * @type {Boolean}
    */
   static get disabled() {
-    if (Utils.onPostPage()) {
+    if (Flags.onPostPage) {
       return true;
     }
 
-    if (Utils.onFavoritesPage()) {
+    if (Flags.onFavoritesPage) {
       return false;
     }
     return !Preferences.enhanceSearchPages.value;
@@ -191,7 +188,7 @@ class Utils {
    * @type {String}
    */
   static get itemClassName() {
-    return Utils.onSearchPage() ? "thumb" : Utils.favoriteItemClassName;
+    return Flags.onSearchPage ? "thumb" : Utils.favoriteItemClassName;
   }
 
   static setup() {
@@ -258,13 +255,6 @@ class Utils {
   }
 
   /**
-   * @returns {Boolean}
-   */
-  static userIsOnTheirOwnFavoritesPage() {
-    return Utils.flags.userIsOnTheirOwnFavoritesPage;
-  }
-
-  /**
    * @param {Number} value
    * @param {Number} min
    * @param {Number} max
@@ -281,7 +271,7 @@ class Utils {
 
   /**
    * @param {Number} milliseconds
-   * @returns {Promise.<any>}
+   * @returns {Promise<any>}
    */
   static sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -359,19 +349,23 @@ class Utils {
 
   /**
    * @param {String} imageURL
-   * @returns {String}
+   * @returns {MediaExtension}
    */
   static getExtensionFromImageURL(imageURL) {
     const match = (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL);
-    return match === null ? "jpg" : match[1];
+
+    if (match === null || !Types.isMediaExtension(match[1])) {
+      return Settings.defaultExtension;
+    }
+    return match[1];
   }
 
   /**
    * @param {HTMLElement | Post} thumb
-   * @returns {Set.<String>}
+   * @returns {Set<String>}
    */
   static getTagsFromThumb(thumb) {
-    if (this.onSearchPage()) {
+    if (Flags.onSearchPage) {
       if (!(thumb instanceof HTMLElement)) {
         return new Set();
       }
@@ -389,7 +383,7 @@ class Utils {
 
   /**
    * @param {String} tag
-   * @param {Set.<String>} tags
+   * @param {Set<String>} tags
    * @returns
    */
   static includesTag(tag, tags) {
@@ -538,29 +532,8 @@ class Utils {
       return true;
     }
     const somethingIsSelected = searchSuggestions.map(li => li.getAttribute("aria-selected"))
-      .some(element => element === true || element === "true");
+      .some(element => element === "true");
     return !somethingIsSelected;
-  }
-
-  /**
-   * @param {HTMLInputElement | HTMLTextAreaElement} input
-   * @returns
-   */
-  static clearAwesompleteSelection(input) {
-    const awesomplete = input.parentElement;
-
-    if (awesomplete === null) {
-      return;
-    }
-    const searchSuggestions = Array.from(awesomplete.querySelectorAll("li"));
-
-    if (searchSuggestions.length === 0) {
-      return;
-    }
-
-    for (const li of searchSuggestions) {
-      li.setAttribute("aria-selected", false);
-    }
   }
 
   /**
@@ -574,21 +547,22 @@ class Utils {
    * @returns {HTMLElement | null}
    */
   static createFavoritesOption(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible, optionHint = "") {
-    const id = Utils.onMobileDevice() ? "favorite-options" : "dynamic-favorite-options";
+    const id = Flags.onMobileDevice ? "favorite-options" : "dynamic-favorite-options";
     const placeToInsert = document.getElementById(id);
     const checkboxId = `${optionId}-checkbox`;
+    let display;
 
     if (placeToInsert === null) {
       return null;
     }
 
     if (optionIsVisible === undefined || optionIsVisible) {
-      optionIsVisible = "block";
+      display = "block";
     } else {
-      optionIsVisible = "none";
+      display = "none";
     }
     placeToInsert.insertAdjacentHTML("beforeend", `
-      <div id="${optionId}" style="display: ${optionIsVisible}">
+      <div id="${optionId}" style="display: ${display}">
         <label class="checkbox" title="${optionTitle}">
         <input id="${checkboxId}" type="checkbox">
         <span> ${optionText}</span>
@@ -597,37 +571,20 @@ class Utils {
     `);
     const newOptionsCheckbox = document.getElementById(checkboxId);
 
-    newOptionsCheckbox.checked = optionIsChecked;
-    newOptionsCheckbox.onchange = onOptionChanged;
+    if (newOptionsCheckbox instanceof HTMLInputElement) {
+      newOptionsCheckbox.checked = optionIsChecked;
+      newOptionsCheckbox.onchange = () => {
+        onOptionChanged();
+      };
+    }
     return document.getElementById(optionId);
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  static onSearchPage() {
-    return Utils.flags.onSearchPage;
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  static onFavoritesPage() {
-    return Utils.flags.onFavoritesPage;
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  static onPostPage() {
-    return Utils.flags.onPostPage;
   }
 
   /**
    * @returns {String[]}
    */
   static getIdsToDeleteOnReload() {
-    return JSON.parse(localStorage.getItem(Utils.idsToRemoveOnReloadLocalStorageKey)) || [];
+    return JSON.parse(localStorage.getItem(Utils.idsToRemoveOnReloadLocalStorageKey) || "[]");
   }
 
   /**
@@ -646,9 +603,9 @@ class Utils {
 
   /**
    * @param {String} html
-   * @param {String} id
+   * @param {String | undefined} id
    */
-  static insertStyleHTML(html, id) {
+  static insertStyleHTML(html, id = undefined) {
     const style = document.createElement("style");
 
     style.textContent = html.replace("<style>", "").replace("</style>", "");
@@ -668,7 +625,7 @@ class Utils {
   static insertCommonStyleHTML() {
     Utils.insertStyleHTML(HTMLStrings.utilities, "common");
     setTimeout(() => {
-      if (Utils.onSearchPage()) {
+      if (Flags.onSearchPage) {
         Utils.removeInlineImgStyles();
       }
       Utils.configureVideoOutlines();
@@ -679,23 +636,24 @@ class Utils {
    * @param {Boolean} value
    */
   static toggleFancyImageHovering(value) {
-    if (Utils.onMobileDevice() || Utils.onSearchPage()) {
+    if (Flags.onMobileDevice || Flags.onSearchPage) {
       value = false;
     }
     Utils.insertStyleHTML(value ? Utils.styles.fancyHovering : "", "fancy-image-hovering");
   }
 
   static configureVideoOutlines() {
-    const size = Utils.onMobileDevice() ? 2 : 3;
-    const videoSelector = Utils.onFavoritesPage() ? "&:has(img.video)" : ">img.video";
-    const gifSelector = Utils.onFavoritesPage() ? "&:has(img.gif)" : ">img.gif";
+    const size = Flags.onMobileDevice ? 2 : 3;
+    const videoSelector = Flags.onFavoritesPage ? "&:has(img.video)" : ">img.video";
+    const gifSelector = Flags.onFavoritesPage ? "&:has(img.gif)" : ">img.gif";
     const videoRule = `${videoSelector} {outline: ${size}px solid blue}`;
     const gifRule = `${gifSelector} {outline: ${size}px solid hotpink}`;
 
     Utils.insertStyleHTML(`
       #favorites-search-gallery-content {
         &.row,
-        &.square
+        &.square,
+        &.column
         {
           .favorite {
             ${videoRule}
@@ -747,7 +705,7 @@ class Utils {
    * @param {Boolean} value
    */
   static toggleDarkStyleSheet(value) {
-    const platform = Utils.onMobileDevice() ? "mobile" : "desktop";
+    const platform = Flags.onMobileDevice ? "mobile" : "desktop";
     const darkSuffix = value ? "-dark" : "";
 
     Utils.setStyleSheet(`https://rule34.xxx//css/${platform}${darkSuffix}.css?44`);
@@ -843,7 +801,7 @@ class Utils {
    * @returns {Boolean}
    */
   static enteredOverCaptionTag(event) {
-    return event.relatedTarget !== null && event.relatedTarget.classList.contains("caption-tag");
+    return event.relatedTarget instanceof HTMLElement && event.relatedTarget !== null && event.relatedTarget.classList.contains("caption-tag");
   }
 
   /**
@@ -851,10 +809,14 @@ class Utils {
    */
   static assignContentType(thumb) {
     const image = Utils.getImageFromThumb(thumb);
+
+    if (image === null) {
+      return;
+    }
     const tagAttribute = image.hasAttribute("tags") ? "tags" : "title";
     const tags = image.getAttribute(tagAttribute);
 
-    Utils.setContentType(image, Utils.getContentType(tags));
+    Utils.setContentType(image, Utils.getContentType(tags || ""));
   }
 
   /**
@@ -928,29 +890,8 @@ class Utils {
   }
 
   /**
-   * @returns {Boolean}
-   */
-  static usingFirefox() {
-    return Utils.flags.usingFirefox;
-  }
-
-  /**
-   * @returns  {Boolean}
-   */
-  static onMobileDevice() {
-    return Utils.flags.onMobileDevice;
-  }
-
-  /**
-   * @returns {Number}
-   */
-  static getPerformanceProfile() {
-    return parseInt(Preferences.performanceProfile.value);
-  }
-
-  /**
    * @param {String} tagName
-   * @returns {Promise.<Boolean>}
+   * @returns {Promise<Boolean>}
    */
   static isOfficialTag(tagName) {
     const tagPageURL = `https://rule34.xxx/index.php?page=tags&s=list&tags=${tagName}`;
@@ -1008,7 +949,7 @@ class Utils {
 
   /**
    * @param {String} id
-   * @returns {Promise.<Number>}
+   * @returns {Promise<Number>}
    */
   static addFavorite(id) {
     fetch(`https://rule34.xxx/index.php?page=post&s=vote&id=${id}&type=up`);
@@ -1039,7 +980,7 @@ class Utils {
     const awesomplete = Utils.getAwesompleteFromInput(input);
 
     if (awesomplete !== null) {
-      awesomplete.querySelector("ul").setAttribute("hidden", "");
+      awesomplete.querySelector("ul")?.setAttribute("hidden", "");
     }
   }
 
@@ -1080,7 +1021,7 @@ class Utils {
   }
 
   static removeUnusedScripts() {
-    if (!Utils.onFavoritesPage()) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
     const scripts = Array.from(document.querySelectorAll("script"));
@@ -1094,7 +1035,7 @@ class Utils {
 
   /**
    * @param {String} tagString
-   * @returns {Set.<String>}
+   * @returns {Set<String>}
    */
   static convertToTagSet(tagString) {
     tagString = Utils.removeExtraWhiteSpace(tagString);
@@ -1106,7 +1047,7 @@ class Utils {
   }
 
   /**
-   * @param {Set.<String>} tagSet
+   * @param {Set<String>} tagSet
    * @returns {String}
    */
   static convertToTagString(tagSet) {
@@ -1139,7 +1080,7 @@ class Utils {
   }
 
   /**
-   * @returns {Set.<String>}
+   * @returns {Set<String>}
    */
   static loadCustomTags() {
     return new Set(JSON.parse(localStorage.getItem("customTags") || "[]"));
@@ -1167,6 +1108,7 @@ class Utils {
    */
   static getSavedSearchValues() {
     return Array.from(document.getElementsByClassName("save-search-label"))
+      .filter(element => element instanceof HTMLElement)
       .map(element => element.innerText);
   }
 
@@ -1296,7 +1238,7 @@ class Utils {
    * @returns {String}
    */
   static removeNonNumericCharacters(str) {
-    return str.replaceAll(/\D/g, "");
+    return str.replace(/\D/g, "");
   }
 
   /**
@@ -1332,7 +1274,7 @@ class Utils {
   }
 
   static deletePersistentData() {
-    const desktopSuffix = Utils.onMobileDevice() ? "" : " Tag modifications and saved searches will be preserved.";
+    const desktopSuffix = Flags.onMobileDevice ? "" : " Tag modifications and saved searches will be preserved.";
 
     const message = `Are you sure you want to reset? This will delete all cached favorites, and preferences.${desktopSuffix}`;
 
@@ -1381,7 +1323,7 @@ class Utils {
    * @returns {Number}
    */
   static loadAllowedRatings() {
-    return parseInt(Preferences.allowedRatings.value);
+    return Preferences.allowedRatings.value;
   }
 
   /**
@@ -1394,7 +1336,7 @@ class Utils {
 
   /**
    * @param {HTMLElement} thumb
-   * @returns {Promise<String>}
+   * @returns {Promise<MediaExtension>}
    */
   static getImageExtensionFromThumb(thumb) {
     if (Utils.isVideo(thumb)) {
@@ -1413,9 +1355,10 @@ class Utils {
 
   /**
    * @param {HTMLElement} thumb
-   * @returns {Promise<String>}
+   * @returns {Promise<MediaExtension>}
    */
   static fetchImageExtension(thumb) {
+    const defaultExtension = "jpg";
     return fetch(Utils.getPostAPIURL(thumb.id))
       .then((response) => {
         return response.text();
@@ -1423,14 +1366,23 @@ class Utils {
       .then((html) => {
         const dom = new DOMParser().parseFromString(html, "text/html");
         const metadata = dom.querySelector("post");
-        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url"));
+
+        if (metadata === null) {
+          return defaultExtension;
+        }
+        const fileURL = metadata.getAttribute("file_url");
+
+        if (fileURL === null) {
+          return defaultExtension;
+        }
+        const extension = Utils.getExtensionFromImageURL(fileURL);
 
         Utils.assignImageExtension(thumb.id, extension);
         return extension;
       })
       .catch((error) => {
         console.error(error);
-        return "jpg";
+        return defaultExtension;
       });
   }
 
@@ -1457,14 +1409,14 @@ class Utils {
   }
 
   /**
-   * @param {Number} desiredPageNumber
+   * @param {Number | undefined} desiredPageNumber
    * @returns {String}
    */
   static getSearchPageAPIURL(desiredPageNumber) {
     const postsPerPage = 42;
     const apiURL = `https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&limit=${postsPerPage}`;
     const blacklistedTags = ` ${Utils.negateTags(Utils.tagBlacklist)}`.replace(/\s-/g, "+-");
-    let searchTags = (/&tags=([^&]*)/).exec(location.href);
+    const searchTags = (/&tags=([^&]*)/).exec(location.href);
     let pageNumber;
 
     if (desiredPageNumber === undefined) {
@@ -1474,20 +1426,19 @@ class Utils {
     } else {
       pageNumber = desiredPageNumber;
     }
+    let tags = searchTags === null ? "" : searchTags[1];
 
-    searchTags = searchTags === null ? "" : searchTags[1];
-
-    if (searchTags === "all") {
-      searchTags = "";
+    if (tags === "all") {
+      tags = "";
     }
-    return `${apiURL}&tags=${searchTags}${blacklistedTags}&pid=${pageNumber}`;
+    return `${apiURL}&tags=${tags}${blacklistedTags}&pid=${pageNumber}`;
   }
 
   /**
-   * @param {Number} pageNumber
-   * @param {Function} callback
+   * @param {Number | undefined} pageNumber
+   * @param {Function | undefined} callback
    */
-  static findImageExtensionsOnSearchPage(pageNumber, callback) {
+  static findImageExtensionsOnSearchPage(pageNumber = undefined, callback = undefined) {
     const searchPageAPIURL = Utils.getSearchPageAPIURL(pageNumber);
     return fetch(searchPageAPIURL)
       .then((response) => {
@@ -1507,16 +1458,27 @@ class Utils {
           const tags = post.getAttribute("tags");
           const id = post.getAttribute("id");
           const originalImageURL = post.getAttribute("file_url");
+
+          if (id === null || tags === null || originalImageURL === null) {
+            return;
+          }
           const tagSet = Utils.convertToTagSet(tags);
           const thumb = document.getElementById(id);
 
+          if (thumb === null) {
+            return;
+          }
+          const image = Utils.getImageFromThumb(thumb);
+
+          if (image === null) {
+            return;
+          }
+
           if (!tagSet.has("video") && originalImageURL.endsWith("mp4") && thumb !== null) {
-            const image = Utils.getImageFromThumb(thumb);
 
             image.setAttribute("tags", `${image.getAttribute("tags")} video`);
             Utils.setContentType(image, "video");
           } else if (!tagSet.has("gif") && originalImageURL.endsWith("gif") && thumb !== null) {
-            const image = Utils.getImageFromThumb(thumb);
 
             image.setAttribute("tags", `${image.getAttribute("tags")} gif`);
             Utils.setContentType(image, "gif");
@@ -1533,9 +1495,9 @@ class Utils {
         }
 
         if (callback !== undefined) {
-          return callback(html);
+          // eslint-disable-next-line callback-return
+          callback(html);
         }
-        return null;
       })
       .catch((error) => {
         console.error(error);
@@ -1543,13 +1505,13 @@ class Utils {
   }
 
   static async setupOriginalImageLinksOnSearchPage() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
 
-    if (Utils.galleryIsDisabled()) {
-      await Utils.findImageExtensionsOnSearchPage();
+    if (Flags.galleryDisabled) {
       Utils.setupOriginalImageLinksOnSearchPageHelper();
+      await Utils.findImageExtensionsOnSearchPage();
     } else {
       window.addEventListener("foundExtensionsOnSearchPage", () => {
         Utils.setupOriginalImageLinksOnSearchPageHelper();
@@ -1596,7 +1558,7 @@ class Utils {
       const leftClick = event.button === Utils.clickCodes.left;
       const shiftClick = leftClick && event.shiftKey;
 
-      if (leftClick && Utils.galleryIsDisabled()) {
+      if (leftClick && Flags.galleryDisabled) {
         document.location = thumbURL;
       } else if (middleClick || shiftClick) {
         window.open(thumbURL);
@@ -1605,7 +1567,7 @@ class Utils {
   }
 
   static initializeSearchPage() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
     Utils.prepareSearchPageThumbs(Utils.getAllThumbs());
@@ -1631,15 +1593,15 @@ class Utils {
   }
 
   /**
-   * @returns {Object.<String, Number>}
+   * @returns {Record<String, Number>}
    */
   static loadDiscoveredImageExtensions() {
-    return JSON.parse(localStorage.getItem(Utils.localStorageKeys.imageExtensions)) || {};
+    return JSON.parse(localStorage.getItem(Utils.localStorageKeys.imageExtensions) || "{}");
   }
 
   /**
    * @param {String | Number} id
-   * @returns {String}
+   * @returns {MediaExtension}
    */
   static getImageExtension(id) {
     return Utils.extensionDecodings[Utils.imageExtensions[Number(id)]];
@@ -1647,10 +1609,10 @@ class Utils {
 
   /**
    * @param {String | Number} id
-   * @param {String} extension
+   * @param {MediaExtension} extension
    */
   static setImageExtension(id, extension) {
-    Utils.imageExtensions[parseInt(id)] = Utils.extensionEncodings[extension];
+    Utils.imageExtensions[String(id)] = Utils.extensionEncodings[extension];
   }
 
   /**
@@ -1670,7 +1632,7 @@ class Utils {
   }
 
   static storeAllImageExtensions() {
-    if (!Utils.onFavoritesPage()) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
     Utils.recentlyDiscoveredImageExtensionCount = 0;
@@ -1679,7 +1641,7 @@ class Utils {
 
   /**
    * @param {String} id
-   * @param {String} extension
+   * @param {MediaExtension} extension
    */
   static assignImageExtension(id, extension) {
     if (Utils.extensionIsKnown(id) || extension === "mp4" || extension === "gif") {
@@ -1729,11 +1691,11 @@ class Utils {
    * @returns {String}
    */
   static escapeParenthesis(str) {
-    return str.replaceAll(/([()])/g, "\\$&");
+    return str.replace(/([()])/g, "\\$&");
   }
 
   /**
-   * @returns {Promise.<Number>}
+   * @returns {Promise<Number | null>}
    */
   static getExpectedFavoritesCount() {
     const profileURL = `https://rule34.xxx/index.php?page=account&s=profile&id=${Utils.getFavoritesPageId()}`;
@@ -1742,11 +1704,15 @@ class Utils {
         if (response.ok) {
           return response.text();
         }
-        throw new Error(response.status);
+        throw new Error(String(response.status));
       })
       .then((html) => {
         const favoritesURL = Array.from(new DOMParser().parseFromString(html, "text/html").querySelectorAll("a"))
           .find(a => a.href.includes("page=favorites&s=view"));
+
+        if (favoritesURL === undefined || favoritesURL.textContent === null) {
+          return 0;
+        }
         return parseInt(favoritesURL.textContent);
       })
       .catch(() => {
@@ -1818,11 +1784,11 @@ class Utils {
    * @returns {Boolean}
    */
   static hasTagName(element, tagName) {
-    return element.tagName !== undefined && element.tagName.toLowerCase() === tagName;
+    return element instanceof HTMLElement && element.tagName !== undefined && element.tagName.toLowerCase() === tagName;
   }
 
   static scrollToTop() {
-    window.scrollTo(0, Utils.onMobileDevice() ? 10 : 0);
+    window.scrollTo(0, Flags.onMobileDevice ? 10 : 0);
   }
 
   /**
@@ -1947,7 +1913,7 @@ class Utils {
   /**
    * @param {Worker} worker
    * @param {Object} message
-   * @returns {Promise.<any>}
+   * @returns {Promise<any>}
    */
   static sendPostedMessage(worker, message) {
     return new Promise((resolve) => {
@@ -2090,8 +2056,8 @@ class Utils {
     if (!(mouseEvent.target instanceof HTMLElement) || mouseEvent.target.matches(".caption-tag")) {
       return null;
     }
-    const thumbSelector = Utils.onSearchPage() ? ".thumb img" : ".favorite img:first-child";
-    const image = mouseEvent.target.matches(thumbSelector) ? mouseEvent.target : null;
+    const imageSelector = Flags.onSearchPage ? ".thumb img" : ".favorite img:first-child";
+    const image = mouseEvent.target.matches(imageSelector) ? mouseEvent.target : null;
     const thumb = image === null ? null : Utils.getThumbFromImage(image);
     return thumb;
   }
@@ -2160,7 +2126,7 @@ class Utils {
   }
 
   /**
-   * @returns {Promise.<any>}
+   * @returns {Promise<any>}
    */
   static waitForAllThumbnailsToLoad() {
     const unloadedImages = Utils.getAllThumbs()
@@ -2188,7 +2154,7 @@ class Utils {
 
   /**
    * @param {HTMLElement | undefined} thumb
-   * @returns {Promise.<{status: Number, id: String}>}
+   * @returns {Promise<{status: Number, id: String}>}
    */
   static addFavoriteInGallery(thumb) {
     if (thumb === undefined) {
@@ -2208,7 +2174,7 @@ class Utils {
 
   /**
    * @param {HTMLElement | undefined} thumb
-   * @returns {Promise.<{status: Number, id: String}>}
+   * @returns {Promise<{status: Number, id: String}>}
    */
   static removeFavoriteInGallery(thumb) {
     const status = {
@@ -2235,20 +2201,6 @@ class Utils {
     status.id = thumb.id;
     Utils.removeFavorite(thumb.id);
     return Promise.resolve(status);
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  static galleryIsDisabled() {
-    return Utils.secondaryFlags.galleryIsDisabled;
-  }
-
-  /**
-   * @returns {Boolean}
-   */
-  static galleryIsEnabled() {
-    return !Utils.galleryIsDisabled();
   }
 
   /**
@@ -2335,21 +2287,21 @@ class Utils {
   }
 
   /**
-   * @returns {Promise.<Boolean>}
+   * @returns {Promise<Boolean>}
    */
   static inGallery() {
-    if (Utils.galleryIsDisabled()) {
+    if (Flags.galleryDisabled) {
       return Promise.resolve(false);
     }
     return new Promise((resolve) => {
-      Events.gallery.timeout("inGalleryResponse", 10)
+      Events.gallery.inGalleryResponse.timeout(10)
         .then((inGallery) => {
           resolve(inGallery);
         })
         .catch(() => {
           resolve(false);
         });
-      Events.favorites.emit("inGalleryRequest");
+      Events.favorites.inGalleryRequest.emit();
     });
   }
 

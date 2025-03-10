@@ -29,7 +29,7 @@ class FavoritesModel {
   }
 
   /**
-   * @returns {Promise.<Post[]>}
+   * @returns {Promise<Post[]>}
    */
   loadAllFavorites() {
     return this.loader.loadAllFavorites()
@@ -40,7 +40,7 @@ class FavoritesModel {
 
   /**
    * @param {Function} onSearchResultsFound
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   fetchAllFavorites(onSearchResultsFound) {
     const onFavoritesFound = (/** @type {Post[]} */ favorites) => {
@@ -51,7 +51,7 @@ class FavoritesModel {
   }
 
   /**
-   * @returns {Promise.<{newFavorites: Post[], newSearchResults: Post[], allSearchResults: Post[]}>}
+   * @returns {Promise<{newFavorites: Post[], newSearchResults: Post[], allSearchResults: Post[]}>}
    */
   findNewFavoritesOnReload() {
     return this.loader.fetchFavoritesOnReload()
@@ -69,7 +69,7 @@ class FavoritesModel {
 
   /**
    * @param {Post[]} newFavorites
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   storeNewFavorites(newFavorites) {
     return this.loader.storeNewFavorites(newFavorites);
@@ -83,7 +83,7 @@ class FavoritesModel {
   }
 
   /**
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   storeAllFavorites() {
     return this.loader.storeAllFavorites();

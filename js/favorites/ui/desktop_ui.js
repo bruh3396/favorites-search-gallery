@@ -13,15 +13,15 @@ class FavoritesMenuDesktopUI {
       {id: "options", parentId: "bottom-panel-1", textContent: "More Options", title: "Show more options", action: "toggleOptions", enabled: true, preference: Preferences.showOptions, hotkey: "O", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "show-ui", parentId: "show-ui-wrapper", textContent: "UI", title: "Toggle UI", action: "toggleUI", enabled: true, preference: Preferences.showUI, hotkey: "U", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "enhance-search-pages", parentId: "favorite-options", textContent: "Enhance Search Pages", title: "Enable gallery and other features on search pages", action: "not needed", enabled: true, preference: Preferences.enhanceSearchPages, hotkey: "", invokeActionOnCreation: false, savePreference: true},
-      {id: "show-remove-favorite-buttons", parentId: "favorite-options", textContent: "Remove Buttons", title: "Toggle remove favorite buttons", action: "toggleAddOrRemoveButtons", enabled: Utils.userIsOnTheirOwnFavoritesPage(), preference: Preferences.showRemoveFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "show-add-favorite-buttons", parentId: "favorite-options", textContent: "Add Favorite Buttons", title: "Toggle add favorite buttons", action: "toggleAddOrRemoveButtons", enabled: !Utils.userIsOnTheirOwnFavoritesPage(), preference: Preferences.showAddFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "exclude-blacklist", parentId: "favorite-options", textContent: "Exclude Blacklist", title: "Exclude favorites with blacklisted tags from search", action: "toggleBlacklist", enabled: Utils.userIsOnTheirOwnFavoritesPage(), preference: Preferences.excludeBlacklist, hotkey: "", invokeActionOnCreation: false, savePreference: true},
+      {id: "show-remove-favorite-buttons", parentId: "favorite-options", textContent: "Remove Buttons", title: "Toggle remove favorite buttons", action: "toggleAddOrRemoveButtons", enabled: Flags.userIsOnTheirOwnFavoritesPage, preference: Preferences.showRemoveFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "show-add-favorite-buttons", parentId: "favorite-options", textContent: "Add Favorite Buttons", title: "Toggle add favorite buttons", action: "toggleAddOrRemoveButtons", enabled: !Flags.userIsOnTheirOwnFavoritesPage, preference: Preferences.showAddFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "exclude-blacklist", parentId: "favorite-options", textContent: "Exclude Blacklist", title: "Exclude favorites with blacklisted tags from search", action: "toggleBlacklist", enabled: Flags.userIsOnTheirOwnFavoritesPage, preference: Preferences.excludeBlacklist, hotkey: "", invokeActionOnCreation: false, savePreference: true},
       {id: "fancy-thumb-hovering", parentId: "favorite-options", textContent: "Fancy Hovering", title: "Enable fancy thumbnail hovering", action: "toggleFancyThumbHovering", enabled: false, preference: Preferences.fancyThumbHovering, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "show-hints", parentId: "favorite-options", textContent: "Hotkey Hints", title: "Show hotkeys", action: "toggleOptionHotkeyHints", enabled: true, preference: Preferences.showHints, hotkey: "H", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "toggle-header", parentId: "dynamic-favorite-options", textContent: "Header", title: "Toggle site header", action: "toggleHeader", enabled: false, preference: Preferences.showHeader, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "dark-theme", parentId: "favorite-options", textContent: "Dark Theme", title: "Toggle dark theme", action: "toggleDarkTheme", enabled: true, defaultValue: Utils.usingDarkTheme(), hotkey: "", invokeActionOnCreation: false, savePreference: false, handler: "uiController"},
-      {id: "show-on-hover", parentId: "dynamic-favorite-options", textContent: "Fullscreen on Hover", title: "View full resolution images or play videos and GIFs when hovering over a thumbnail", action: "toggleShowOnHover", enabled: Utils.galleryIsEnabled(), preference: Preferences.showOnHover, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"},
-      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Sidebar", title: "Show sidebar in gallery", action: "toggleGalleryMenu", enabled: Utils.galleryIsEnabled(), preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"}
+      {id: "show-on-hover", parentId: "dynamic-favorite-options", textContent: "Fullscreen on Hover", title: "View full resolution images or play videos and GIFs when hovering over a thumbnail", action: "toggleShowOnHover", enabled: Flags.galleryEnabled, preference: Preferences.showOnHover, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"},
+      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Sidebar", title: "Show sidebar in gallery", action: "toggleGalleryMenu", enabled: Flags.galleryEnabled, preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"}
     ],
     "select": [
       {
@@ -57,9 +57,9 @@ class FavoritesMenuDesktopUI {
     ],
     "checkbox": [{id: "sort-ascending", parentId: "sort-container", action: "toggleSortAscending", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, preference: Preferences.sortAscending}],
     "numberComponent": [
-      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "updateColumnCount", preference: Preferences.columnCount, min: Defaults.minColumnCount, max: Defaults.maxColumnCount, step: 1, pollingTime: 50, invokeActionOnCreation: true},
-      {id: "row-size", parentId: "row-size-container", position: "beforeend", action: "updateRowSize", preference: Preferences.rowSize, min: Defaults.minRowSize, max: Defaults.maxRowSize, step: 1, pollingTime: 50, invokeActionOnCreation: true},
-      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "updateResultsPerPage", preference: Preferences.resultsPerPage, min: Defaults.minResultsPerPage, max: Defaults.maxResultsPerPage, step: Defaults.resultsPerPageStep, pollingTime: 50, invokeActionOnCreation: false}
+      {id: "column-count", parentId: "column-count-container", position: "beforeend", action: "updateColumnCount", preference: Preferences.columnCount, min: Settings.minColumnCount, max: Settings.maxColumnCount, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "row-size", parentId: "row-size-container", position: "beforeend", action: "updateRowSize", preference: Preferences.rowSize, min: Settings.minRowSize, max: Settings.maxRowSize, step: 1, pollingTime: 50, invokeActionOnCreation: true},
+      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", action: "updateResultsPerPage", preference: Preferences.resultsPerPage, min: Settings.minResultsPerPage, max: Settings.maxResultsPerPage, step: Settings.resultsPerPageStep, pollingTime: 50, invokeActionOnCreation: false}
     ]
   };
 
@@ -74,7 +74,7 @@ class FavoritesMenuDesktopUI {
   }
 
   static setupWhatsNewMenu() {
-    if (Utils.onMobileDevice()) {
+    if (Flags.onMobileDevice) {
       return;
     }
     const whatsNew = document.getElementById("whats-new-link");
@@ -130,7 +130,7 @@ class FavoritesMenuDesktopUI {
     findFavoriteInput.oninput = Utils.debounceAlways(() => {
       Preferences.favoriteFinder.set(findFavoriteInput.value);
     }, 1000);
-    Events.caption.on("idClicked", (/** @type {String} */ id) => {
+    Events.caption.idClicked.on((id) => {
       findFavoriteInput.value = id;
     });
   }

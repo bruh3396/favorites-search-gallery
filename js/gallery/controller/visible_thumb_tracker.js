@@ -1,6 +1,6 @@
 class VisibleThumbTracker {
   /**
-   * @type {Map.<String, IntersectionObserverEntry>}
+   * @type {Map<String, IntersectionObserverEntry>}
    */
   visibleThumbs;
   /**
@@ -81,7 +81,7 @@ class VisibleThumbTracker {
    * @returns {String}
    */
   getFinalRootMargin(topMargin) {
-    const bottomMargin = GalleryConstants.visibleThumbsDownwardScrollPixelGenerosity;
+    const bottomMargin = GallerySettings.visibleThumbsDownwardScrollPixelGenerosity;
     return `${topMargin}px 0px ${bottomMargin}px 0px`;
   }
 

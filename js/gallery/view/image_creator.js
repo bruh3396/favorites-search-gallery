@@ -1,10 +1,10 @@
 class GalleryImageCreator {
   /**
-   * @type {Map.<String, ImageRequest>}
+   * @type {Map<String, ImageRequest>}
    */
   imageRequests;
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   animatedRequestIds;
   /**
@@ -63,7 +63,7 @@ class GalleryImageCreator {
    * @returns {ImageRequest[]}
    */
   truncateImageRequests(requests) {
-    if (Utils.onFavoritesPage()) {
+    if (Flags.onFavoritesPage) {
       return this.truncateImagesExceedingMemoryLimit(requests);
     }
     return this.truncateImagesOnSearchPage(requests);
@@ -79,8 +79,8 @@ class GalleryImageCreator {
 
     for (const request of requests) {
       accumulatedMegabytes += request.isImage ? request.megabytes : 0;
-      const underMemoryLimit = accumulatedMegabytes < GalleryConstants.imageMegabyteLimit;
-      const underMinimumThumbCount = truncatedRequests.length < GalleryConstants.minimumPreloadedImageCount;
+      const underMemoryLimit = accumulatedMegabytes < GallerySettings.imageMegabyteLimit;
+      const underMinimumThumbCount = truncatedRequests.length < GallerySettings.minimumPreloadedImageCount;
 
       if (underMemoryLimit || underMinimumThumbCount) {
         truncatedRequests.push(request);
@@ -96,7 +96,7 @@ class GalleryImageCreator {
    * @returns {ImageRequest[]}
    */
   truncateImagesOnSearchPage(requests) {
-    return requests.slice(0, GalleryConstants.searchPagePreloadedImageCount)
+    return requests.slice(0, GallerySettings.searchPagePreloadedImageCount)
     .filter(request => !request.isAnimated);
   }
 

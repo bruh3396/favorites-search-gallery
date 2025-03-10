@@ -1,96 +1,106 @@
+/**
+ * @template V
+ */
 class EventEmitter {
   /**
-   * @type {Map.<String, Function[]>}
+   * @type {Set<((argument: V) => void)>}
    */
   listeners;
   /**
-   * @type {Set.<Function>}
+   * @type {Set<(argument: V) => void>}
    */
   oneTimeListeners;
+  /**
+   * @type {Boolean}
+   */
+  enabled;
 
-  constructor() {
-    this.listeners = new Map();
+  /**
+   * @param {Boolean} enabled
+   */
+  constructor(enabled = true) {
+    this.listeners = new Set();
     this.oneTimeListeners = new Set();
+    this.enabled = enabled;
+    this.guardMethods();
   }
 
   /**
-   * @param {String} event
-   * @param {Function} callback
+   * @returns {void}
    */
-  on(event, callback) {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
-    }
-    // @ts-ignore
-    this.listeners.get(event).push(callback);
-  }
-
-  /**
-   * @param {String} event
-   * @param {Function} callback
-   */
-  off(event, callback) {
-    if (this.listeners.has(event)) {
-      // @ts-ignore
-      const callbacks = this.listeners.get(event)
-        .filter(cb => cb !== callback);
-
-      this.listeners.set(event, callbacks);
+  guardMethods() {
+    for (const method of [this.on, this.once, this.timeout]) {
+      this[method.name] = this.guardMethod(method);
     }
   }
 
   /**
-   * @param {String} event
-   * @param  {...any} args
+   * @param {Function} method
+   * @returns {Function}
    */
-  emit(event, ...args) {
-    const listeners = this.listeners.get(event);
+  guardMethod(method) {
+    return this.enabled ? method : () => {
+    };
+  }
 
-    if (listeners === undefined) {
-      return;
+  /**
+   * @param {(argument: V) => void} callback
+   */
+  on(callback) {
+    if (!this.listeners.has(callback)) {
+      this.listeners.add(callback);
     }
-    const persistentListeners = listeners.filter(listener => !this.oneTimeListeners.has(listener));
+  }
 
-    if (persistentListeners.length === 0) {
-      this.listeners.delete(event);
-    } else {
-      this.listeners.set(event, persistentListeners);
-    }
+  /**
+   * @param {((argument: V) => void)} callback
+   */
+  off(callback) {
+    this.listeners.delete(callback);
+  }
 
-    for (const callback of listeners) {
+  /**
+   * @param {V} argument
+   */
+  emit(argument) {
+    for (const callback of this.listeners.keys()) {
       // eslint-disable-next-line callback-return
-      callback(...args);
-      this.oneTimeListeners.delete(callback);
+      callback(argument);
     }
+    this.removeOneTimeListeners();
+  }
+
+  removeOneTimeListeners() {
+    this.listeners = SetUtils.difference(this.listeners, this.oneTimeListeners);
+    this.oneTimeListeners.clear();
   }
 
   /**
-   * @param {String} event
-   * @param {Function} callback
+   * @param {(argument: V) => void} callback
    */
-  once(event, callback) {
+  once(callback) {
     this.oneTimeListeners.add(callback);
-    this.on(event, callback);
+    this.on(callback);
   }
 
   /**
-   * @param {String} event
-   * @param {Number} milliseconds
-   * @returns {Promise.<any>}
+   * @param {number} milliseconds
+   * @returns {Promise<V>}
    */
-  timeout(event, milliseconds) {
+  timeout(milliseconds) {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        this.off(event, listener);
+        this.off(listener);
         reject(new PromiseTimeoutError());
       }, milliseconds);
+
       const listener = (args) => {
-        this.off(event, listener);
+        this.off(listener);
         clearTimeout(timer);
         resolve(args);
       };
 
-      this.on(event, listener);
+      this.on(listener);
     });
   }
 }

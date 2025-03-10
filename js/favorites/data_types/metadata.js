@@ -1,10 +1,10 @@
 class PostMetadata {
   /**
-   * @type {Map.<String, PostMetadata>}
+   * @type {Map<String, PostMetadata>}
    */
   static allMetadata = new Map();
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   static pendingRequests = new Set();
   static parser = new DOMParser();
@@ -69,7 +69,7 @@ class PostMetadata {
 
   static {
     Utils.addStaticInitializer(() => {
-      if (Utils.onFavoritesPage()) {
+      if (Flags.onFavoritesPage) {
         window.addEventListener("favoritesLoaded", () => {
           PostMetadata.allFavoritesLoaded = true;
           PostMetadata.missingMetadataFetchQueue = PostMetadata.missingMetadataFetchQueue.concat(PostMetadata.deletedPostFetchQueue);
@@ -165,7 +165,7 @@ class PostMetadata {
 
   /**
    * @param {String} id
-   * @param {Object.<String, String>} record
+   * @param {Object<String, String>} record
    */
   constructor(id, record) {
     this.id = id;
@@ -181,7 +181,7 @@ class PostMetadata {
   }
 
   /**
-   * @param {Object.<String, String>} record
+   * @param {Object<String, String>} record
    */
   populateMetadata(record) {
     const databaseRecordHasNoMetadata = record === null;
@@ -254,7 +254,7 @@ class PostMetadata {
   }
 
   /**
-   * @param {Object.<String, String>} record
+   * @param {Object<String, String>} record
    */
   populateMetadataFromRecord(record) {
     this.width = record.width;

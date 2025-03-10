@@ -5,7 +5,7 @@ class SearchPageCreator {
   thumbContainer;
 
   constructor() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
     this.thumbContainer = this.getMainThumbnailContainer();

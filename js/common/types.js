@@ -1,31 +1,19 @@
 class Types {
-  /**
-   * @typedef {"row" | "square" | "grid" | "column"} FavoriteLayout
-   */
+  /** @typedef {"row" | "square" | "grid" | "column"} FavoriteLayout */
 
-  /**
-   * @typedef {0 | 1 | 2} FavoritesGalleryState
-   */
+  /** @typedef {0 | 1 | 2} FavoritesGalleryState */
 
-  /**
-   * @typedef {"a" | "A" | "ArrowLeft"} BackwardNavigationKey
-   */
+  /** @typedef {"a" | "A" | "ArrowLeft"} BackwardNavigationKey */
 
-  /**
-   * @typedef {"d" | "D" | "ArrowRight"} ForwardNavigationKey
-   */
+  /** @typedef {"d" | "D" | "ArrowRight"} ForwardNavigationKey */
 
-  /**
-   * @typedef {BackwardNavigationKey | ForwardNavigationKey} NavigationKey
-   */
+  /** @typedef {BackwardNavigationKey | ForwardNavigationKey} NavigationKey */
 
-  /**
-   * @typedef {"Escape" | "Delete" | "Backspace"} ExitKey
-   */
+  /** @typedef {"Escape" | "Delete" | "Backspace"} ExitKey */
 
-  /**
-   * @typedef {any} TypeableInput
-   */
+  /** @typedef {any} TypeableInput */
+
+  /** @typedef {"jpg" | "png" | "jpeg" | "gif" | "mp4"} MediaExtension */
 
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
@@ -33,6 +21,7 @@ class Types {
   static navigationKeys = SetUtils.union(Types.forwardNavigationKeys, Types.backwardNavigationKeys);
   static exitKeys = new Set(["Escape", "Delete", "Backspace"]);
   static typeableInputs = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
+  static mediaExtensions = new Set(["jpg", "png", "jpeg", "gif", "mp4"]);
   /**
    * @param {any} object
    * @returns {object is FavoriteLayout}
@@ -87,5 +76,13 @@ class Types {
       return true;
     }
     return tagName === "input" && Types.typeableInputs.has(object.getAttribute("type") || "");
+  }
+
+  /**
+   * @param {any} object
+   * @returns {object is MediaExtension}
+   */
+  static isMediaExtension(object) {
+    return Types.mediaExtensions.has(object);
   }
 }

@@ -24,11 +24,11 @@ class Caption {
   `;
   static saveTagCategoriesCooldown = new Cooldown(1000);
   /**
-   * @type {Object.<String, Number>}
+   * @type {Object<String, Number>}
    */
   static tagCategoryAssociations;
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   static pendingRequests = new Set();
   static settings = {
@@ -72,7 +72,7 @@ class Caption {
    * @type {Boolean}
    */
   static get disabled() {
-    return !Utils.onFavoritesPage() || Utils.onMobileDevice() || Utils.getPerformanceProfile() > 1;
+    return !Flags.onFavoritesPage || Flags.onMobileDevice || Preferences.performanceProfile.value > 1;
   }
 
   /**
@@ -101,11 +101,11 @@ class Caption {
    */
   caption;
   /**
-   * @type {HTMLElement}
+   * @type {HTMLElement | null}
    */
   currentThumb;
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   problematicTags;
   /**
@@ -200,7 +200,7 @@ class Caption {
         return;
       }
 
-      if (Utils.onFavoritesPage()) {
+      if (Flags.onFavoritesPage) {
         const showCaptionsCheckbox = document.getElementById("show-captions-checkbox");
 
         if (showCaptionsCheckbox !== null) {
@@ -214,18 +214,21 @@ class Caption {
             }
           }
         }
-      } else if (Utils.onSearchPage()) {
+      } else if (Flags.onSearchPage) {
         // this.toggleVisibility();
       }
     }, {
       passive: true
     });
-    document.addEventListener("mouseover", (event) => {
-      const thumb = Utils.getThumbUnderCursor(event);
-
-      if (thumb !== null) {
-        this.currentThumb = thumb;
-        this.attachToThumb(thumb);
+    Events.document.mouseOver.on((clickEvent) => {
+      if (clickEvent.thumb === null) {
+        if (this.currentThumb !== null) {
+          this.removeFromThumb(this.currentThumb);
+        }
+        this.currentThumb = null;
+      } else {
+        this.attachToThumb(clickEvent.thumb);
+        this.currentThumb = clickEvent.thumb;
       }
     });
     document.addEventListener("mouseout", (event) => {
@@ -239,14 +242,14 @@ class Caption {
   }
 
   addFavoritesPageEventListeners() {
-    Events.favorites.once("favoritesLoaded", () => {
+    Events.favorites.favoritesLoaded.once(() => {
       Caption.flags.finishedLoading = true;
     });
-    Events.favorites.once("favoritesLoadedFromDatabase", () => {
+    Events.favorites.favoritesLoadedFromDatabase.once(() => {
       Caption.flags.finishedLoading = true;
       this.findTagCategoriesOnPageChange();
     });
-    Events.favorites.on("changedPage", Utils.debounceAfterFirstCall(() => {
+    Events.favorites.pageChange.on(Utils.debounceAfterFirstCall(() => {
       this.abortAllRequests("Changed Page");
       this.abortController = new AbortController();
       setTimeout(() => {
@@ -254,7 +257,7 @@ class Caption {
       }, 100);
     }, 2000));
 
-    Events.favorites.on("captionsReEnabled", () => {
+    Events.favorites.captionsReEnabled.on(() => {
       if (this.currentThumb !== null) {
         this.attachToThumb(this.currentThumb);
       }
@@ -294,7 +297,7 @@ class Caption {
       event.preventDefault();
       event.stopPropagation();
       this.tagOnClick(thumb.id, event);
-      Events.caption.emit("idClicked", thumb.id);
+      Events.caption.idClicked.emit(thumb.id);
     };
     captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
     thumb.children[0].appendChild(this.captionWrapper);
@@ -371,7 +374,7 @@ class Caption {
    * @returns {Boolean}
    */
   thumbMetadataExists(thumb) {
-    if (Utils.onSearchPage()) {
+    if (Flags.onSearchPage) {
       return false;
     }
     const post = Post.allPosts.get(thumb.id);
@@ -438,7 +441,7 @@ class Caption {
   }
 
   /**
-   * @returns {Object.<String, Number>}
+   * @returns {Object<String, Number>}
    */
   loadSavedTags() {
     return JSON.parse(localStorage.getItem(Caption.localStorageKeys.tagCategories) || "{}");
@@ -489,7 +492,7 @@ class Caption {
    * @param {MouseEvent} mouseEvent
    */
   tagOnClickHelper(value, mouseEvent) {
-    if (Utils.onSearchPage()) {
+    if (Flags.onSearchPage) {
       return;
     }
 
@@ -574,7 +577,7 @@ class Caption {
   }
 
   /**
-   * @param {Set.<String>} tags
+   * @param {Set<String>} tags
    * @param {HTMLElement} thumb
    */
   addTags(tags, thumb) {
@@ -651,7 +654,7 @@ class Caption {
 
   /**
    * @param {String} html
-   * @returns {Map.<String, String>}
+   * @returns {Map<String, String>}
    */
   getTagCategoryMapFromPostPage(html) {
     const dom = new DOMParser().parseFromString(html, "text/html");

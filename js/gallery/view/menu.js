@@ -191,7 +191,7 @@ class GalleryMenu {
     clearTimeout(this.menuVisibilityTimeout);
     this.menuVisibilityTimeout = setTimeout(() => {
       this.hide();
-    }, GalleryConstants.galleryMenuVisibilityTime);
+    }, GallerySettings.galleryMenuVisibilityTime);
   }
 
   hide() {

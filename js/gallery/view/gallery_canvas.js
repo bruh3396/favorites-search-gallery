@@ -30,7 +30,7 @@ class GalleryCanvas {
   }
 
   setResolution() {
-    const dimensions = GalleryConstants.mainCanvasDimensions;
+    const dimensions = GallerySettings.mainCanvasDimensions;
 
     this.canvas.width = dimensions.x;
     this.canvas.height = dimensions.y;

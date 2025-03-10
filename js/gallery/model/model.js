@@ -155,7 +155,7 @@ class GalleryModel {
    * @returns {HTMLElement[]}
    */
   getThumbsAround(thumb) {
-    if (Utils.onFavoritesPage()) {
+    if (Flags.onFavoritesPage) {
       return this.thumbSelector.getSearchResultsAround(thumb);
     }
     return this.searchPageLoader.getThumbsAround(thumb);

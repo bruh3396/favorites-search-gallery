@@ -10,7 +10,7 @@ class VideoController {
    */
   videoPlayers;
   /**
-   * @type {Map.<String, VideoClip>}
+   * @type {Map<String, VideoClip>}
    */
   videoClips;
 
@@ -43,7 +43,7 @@ class VideoController {
 
     this.createVideoPlayer(volume, muted);
 
-    for (let i = 0; i < GalleryConstants.additionalVideoPlayerCount; i += 1) {
+    for (let i = 0; i < GallerySettings.additionalVideoPlayerCount; i += 1) {
       this.createVideoPlayer(volume, muted);
     }
   }
@@ -118,7 +118,7 @@ class VideoController {
    * @param {HTMLVideoElement} video
    */
   revealControlsWhenMouseMoves(video) {
-    if (Utils.onMobileDevice()) {
+    if (Flags.onMobileDevice) {
       return;
     }
     video.addEventListener("mousemove", () => {
@@ -206,7 +206,7 @@ class VideoController {
    * @param {HTMLVideoElement} video
    */
   revealControlsWhenTouched(video) {
-    if (!Utils.onMobileDevice()) {
+    if (!Flags.onMobileDevice) {
       return;
     }
     video.addEventListener("touchend", () => {
@@ -379,7 +379,7 @@ class VideoController {
   toggleVideoControls(value) {
     const video = this.getActiveVideoPlayer();
 
-    if (Utils.onMobileDevice()) {
+    if (Flags.onMobileDevice) {
       if (value) {
         video.setAttribute("controls", "");
       }

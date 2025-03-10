@@ -13,7 +13,7 @@ class SearchPage {
    */
   paginator;
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   ids;
   /**

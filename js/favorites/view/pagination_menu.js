@@ -61,7 +61,7 @@ class FavoritesPaginationMenu {
    */
   update(parameters) {
     const nextPageButton = document.getElementById("next-page");
-    const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= Defaults.maxPageNumberButtonCount &&
+    const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= Settings.maxPageNumberButtonCount &&
       nextPageButton !== null && nextPageButton instanceof HTMLButtonElement && !nextPageButton.disabled;
 
     if (atMaxPageNumberButtons) {
@@ -87,16 +87,16 @@ class FavoritesPaginationMenu {
   createNumberTraversalButtons(currentPageNumber, finalPageNumber) {
     let numberOfButtonsCreated = 0;
 
-    for (let i = currentPageNumber; i <= finalPageNumber && numberOfButtonsCreated < Defaults.maxPageNumberButtonCount; i += 1) {
+    for (let i = currentPageNumber; i <= finalPageNumber && numberOfButtonsCreated < Settings.maxPageNumberButtonCount; i += 1) {
       numberOfButtonsCreated += 1;
       this.createNumberTraversalButton(currentPageNumber, i, "beforeend");
     }
 
-    if (numberOfButtonsCreated >= Defaults.maxPageNumberButtonCount) {
+    if (numberOfButtonsCreated >= Settings.maxPageNumberButtonCount) {
       return;
     }
 
-    for (let j = currentPageNumber - 1; j >= 1 && numberOfButtonsCreated < Defaults.maxPageNumberButtonCount; j -= 1) {
+    for (let j = currentPageNumber - 1; j >= 1 && numberOfButtonsCreated < Settings.maxPageNumberButtonCount; j -= 1) {
       numberOfButtonsCreated += 1;
       this.createNumberTraversalButton(currentPageNumber, j, "afterbegin");
     }

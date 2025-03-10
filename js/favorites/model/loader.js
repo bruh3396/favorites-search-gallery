@@ -13,7 +13,7 @@ class FavoritesLoader {
   allFavorites;
 
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   get allFavoriteIds() {
     return new Set(Array.from(this.allFavorites.values()).map(post => post.id));
@@ -26,7 +26,7 @@ class FavoritesLoader {
   }
 
   /**
-   * @returns {Promise.<Post[]>}
+   * @returns {Promise<Post[]>}
    */
   loadAllFavorites() {
     return this.database.loadAllFavorites()
@@ -41,7 +41,7 @@ class FavoritesLoader {
 
   /**
    * @param {Function} onFavoritesFound
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   fetchAllFavorites(onFavoritesFound) {
     const onFavoritesFoundHelper = (/** @type {Post[]} */ favorites) => {
@@ -52,7 +52,7 @@ class FavoritesLoader {
   }
 
   /**
-   * @returns {Promise.<Post[]>}
+   * @returns {Promise<Post[]>}
    */
   fetchFavoritesOnReload() {
     return this.fetcher.fetchNewFavoritesOnReload(this.allFavoriteIds)
@@ -70,7 +70,7 @@ class FavoritesLoader {
   }
 
   /**
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   storeAllFavorites() {
     return this.database.storeAllFavorites(this.allFavorites);
@@ -78,7 +78,7 @@ class FavoritesLoader {
 
   /**
    * @param {Post[]} newFavorites
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   storeNewFavorites(newFavorites) {
     return this.database.storeFavorites(newFavorites);

@@ -1566,7 +1566,6 @@ Lower numbers improve responsiveness">
       opacity: 1;
     }
   </style>
-  <span id="tooltip" class="light-green-gradient"></span>
 </div>
 `;
 

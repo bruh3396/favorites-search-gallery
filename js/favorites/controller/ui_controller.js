@@ -88,7 +88,7 @@ class FavoritesUIController {
   }
 
   static updateShowOnHoverOptionTriggeredFromGallery() {
-    Events.gallery.on("showOnHover", (/** @type {Boolean} */ value) => {
+    Events.gallery.showOnHover.on((value) => {
       const showOnHoverCheckbox = document.getElementById("show-on-hover");
 
       if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
@@ -255,7 +255,7 @@ class FavoritesUIController {
     }
     const value = event.target.checked;
 
-    if (Utils.onMobileDevice()) {
+    if (Flags.onMobileDevice) {
       document.getElementById("left-favorites-panel-bottom-row")?.classList.toggle("hidden", !value);
       Utils.insertStyleHTML(`
             #mobile-button-row {
@@ -393,7 +393,7 @@ class FavoritesUIController {
     if (!(event.target instanceof HTMLInputElement)) {
       return;
     }
-    Events.favorites.emit("showOnHover", event.target.checked);
+    Events.favorites.showOnHover.emit(event.target.checked);
   }
 
   /**

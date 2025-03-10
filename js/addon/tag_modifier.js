@@ -8,7 +8,7 @@ class TagModifier {
    */
   static objectStoreName = "additionalTags";
   /**
-   * @type {Map.<String, String>}
+   * @type {Map<String, String>}
    */
   static tagModifications = new Map();
 
@@ -23,7 +23,7 @@ class TagModifier {
    * @type {Boolean}
    */
   static get disabled() {
-    return Utils.onMobileDevice() || !Utils.onFavoritesPage();
+    return Flags.onMobileDevice || !Flags.onFavoritesPage;
   }
 
   /**
@@ -77,7 +77,7 @@ class TagModifier {
   }
 
   insertFavoritesPageHTML() {
-    if (!Utils.onFavoritesPage()) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
     Utils.insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4"), "beforeend", HTMLStrings.tagModifier);
@@ -96,14 +96,14 @@ class TagModifier {
   }
 
   insertSearchPageHTML() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
     1;
   }
 
   insertPostPageHTML() {
-    if (!Utils.onPostPage()) {
+    if (!Flags.onPostPage) {
       return;
     }
     const contentContainer = document.querySelector(".flexi");
@@ -153,7 +153,7 @@ class TagModifier {
   }
 
   addFavoritesPageEventListeners() {
-    if (!Utils.onFavoritesPage()) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
     this.favoritesOption.checkbox.onchange = (event) => {
@@ -169,20 +169,20 @@ class TagModifier {
     window.addEventListener("searchStarted", () => {
       this.unSelectAll();
     });
-    Events.favorites.on("changedPage", () => {
+    Events.favorites.pageChange.on(() => {
       this.highlightSelectedThumbsOnPageChange();
     });
   }
 
   addSearchPageEventListeners() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
     1;
   }
 
   addPostPageEventListeners() {
-    if (!Utils.onPostPage()) {
+    if (!Flags.onPostPage) {
       return;
     }
     1;

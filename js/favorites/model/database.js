@@ -42,7 +42,7 @@ class FavoritesDatabase {
 
   /**
    * @param {Function} onUpgradeNeeded
-   * @returns {Promise.<any>}
+   * @returns {Promise<any>}
    */
   openConnection(onUpgradeNeeded = () => { }) {
     return new Promise((resolve, reject) => {
@@ -98,7 +98,7 @@ class FavoritesDatabase {
    * @param {IDBDatabase} database
    * @param {IDBTransaction} transaction
    * @param {IDBObjectStore} objectStore
-   * @returns {Promise.<any>}
+   * @returns {Promise<any>}
    */
   getAllFavorites(database, transaction, objectStore) {
     return new Promise((resolve, reject) => {
@@ -123,7 +123,7 @@ class FavoritesDatabase {
 
   /**
    * @param {any} error
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   async incrementVersionOnLoad(error) {
     this.version += 1;
@@ -135,7 +135,7 @@ class FavoritesDatabase {
 
   /**
    * @param {String[]} idsToDelete
-   * @returns {Promise.<any>}
+   * @returns {Promise<any>}
    */
   loadFavorites(idsToDelete) {
     /**
@@ -158,7 +158,7 @@ class FavoritesDatabase {
 
   /**
    * @param {{id: String, tags: String, src: String, metadata: String}[]} favorites
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   storeFavorites(favorites) {
     return this.openConnection()

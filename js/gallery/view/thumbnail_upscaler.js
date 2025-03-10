@@ -1,6 +1,6 @@
 class GalleryThumbnailUpscaler {
   /**
-   * @type {Map.<String, HTMLCanvasElement | OffscreenCanvas>}
+   * @type {Map<String, HTMLCanvasElement | OffscreenCanvas>}
    */
   canvases;
   /**
@@ -35,7 +35,7 @@ class GalleryThumbnailUpscaler {
   requestIsValid(request) {
     const thumbIsOnPage = document.getElementById(request.id) !== null;
     const thumbIsLowResolution = !this.canvases.has(request.id);
-    return thumbIsOnPage && thumbIsLowResolution && Utils.onFavoritesPage() && request.isOriginalResolution;
+    return thumbIsOnPage && thumbIsLowResolution && Flags.onFavoritesPage && request.isOriginalResolution;
   }
 
   /**
@@ -58,7 +58,7 @@ class GalleryThumbnailUpscaler {
       if (request !== undefined) {
         this.finishUpscale(request);
       }
-      await Utils.sleep(GalleryConstants.upscaleDelay);
+      await Utils.sleep(GallerySettings.upscaleDelay);
     }
     this.currentlyUpscaling = false;
   }
@@ -102,7 +102,7 @@ class GalleryThumbnailUpscaler {
    * @param {HTMLElement[]} thumbs
    */
   presetCanvasDimensions(thumbs) {
-    if (!Utils.onFavoritesPage()) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
 
@@ -137,8 +137,8 @@ class GalleryThumbnailUpscaler {
    * @param {Number} height
    */
   setThumbCanvasDimensions(canvas, width, height) {
-    const maxHeight = GalleryConstants.maxUpscaledThumbCanvasHeight;
-    let targetWidth = GalleryConstants.upscaledThumbCanvasWidth;
+    const maxHeight = GallerySettings.maxUpscaledThumbCanvasHeight;
+    let targetWidth = GallerySettings.upscaledThumbCanvasWidth;
     let targetHeight = (targetWidth / width) * height;
 
     if (targetWidth > width) {

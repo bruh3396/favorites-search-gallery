@@ -1,6 +1,6 @@
 class Post {
   /**
-   * @type {Map.<String, Post>}
+   * @type {Map<String, Post>}
    */
   static allPosts = new Map();
   /**
@@ -22,7 +22,7 @@ class Post {
 
   static {
     Utils.addStaticInitializer(() => {
-      if (Utils.onFavoritesPage()) {
+      if (Flags.onFavoritesPage) {
         Post.createHTMLTemplates();
         Post.addEventListeners();
       }
@@ -44,8 +44,8 @@ class Post {
   }
 
   static createPostHTMLTemplate() {
-    const buttonHTML = Utils.userIsOnTheirOwnFavoritesPage() ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
-    const canvasHTML = Utils.getPerformanceProfile() > 0 ? "" : "<canvas></canvas>";
+    const buttonHTML = Flags.userIsOnTheirOwnFavoritesPage ? Post.removeFavoriteButtonHTML : Post.addFavoriteButtonHTML;
+    const canvasHTML = Preferences.performanceProfile.value > 0 ? "" : "<canvas></canvas>";
     const containerTagName = "a";
 
     Post.htmlTemplate = new DOMParser().parseFromString("", "text/html").createElement("div");
@@ -64,7 +64,7 @@ class Post {
   }
 
   static swapAddOrRemoveButtonsWhenFavoritesAreAddedOrRemovedExternally() {
-    Events.gallery.on("favoriteAddedOrDeleted", (/** @type {String} */ id) => {
+    Events.gallery.favoriteAddedOrDeleted.on((id) => {
       const post = Post.allPosts.get(id);
 
       if (post !== undefined) {
@@ -145,7 +145,7 @@ class Post {
    */
   statisticHint;
   /**
-   * @type {InactivePost}
+   * @type {InactivePost | null}
    */
   inactivePost;
   /**
@@ -153,11 +153,11 @@ class Post {
    */
   metadata;
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   tagSet;
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   additionalTagSet;
   /**
@@ -194,7 +194,7 @@ class Post {
   }
 
   /**
-   * @type {Set.<String>}
+   * @type {Set<String>}
    */
   get originalTagSet() {
     return SetUtils.difference(this.tagSet, this.additionalTagSet);
@@ -232,7 +232,7 @@ class Post {
   }
 
   populateAttributesNeededForSearch() {
-    if (this.attributesNeededForSearchArePopulated) {
+    if (this.attributesNeededForSearchArePopulated || this.inactivePost === null) {
       return;
     }
     this.attributesNeededForSearchArePopulated = true;
@@ -250,7 +250,7 @@ class Post {
     this.instantiateHTMLTemplate();
     this.populateAttributesNeededForSearch();
     this.populateHTMLAttributes();
-    this.setupAddOrRemoveButton(Utils.userIsOnTheirOwnFavoritesPage());
+    this.setupAddOrRemoveButton(Flags.userIsOnTheirOwnFavoritesPage);
     this.openAssociatedPostInNewTabWhenClicked();
     this.presetCanvasDimensions();
     this.deleteInactivePost();
@@ -263,9 +263,13 @@ class Post {
   }
 
   instantiateHTMLTemplate() {
+    // @ts-ignore
     this.root = Post.htmlTemplate.cloneNode(true);
+    // @ts-ignore
     this.container = this.root.children[0];
+    // @ts-ignore
     this.image = this.root.children[0].children[0];
+    // @ts-ignore
     this.addOrRemoveButton = this.root.children[0].children[1];
   }
 
@@ -306,11 +310,15 @@ class Post {
     const isRemoveButton = this.addOrRemoveButton.classList.contains("remove-favorite-button");
 
     this.addOrRemoveButton.outerHTML = isRemoveButton ? Post.addFavoriteButtonHTML : Post.removeFavoriteButtonHTML;
+    // @ts-ignore
     this.addOrRemoveButton = this.root.children[0].children[1];
     this.setupAddOrRemoveButton(!isRemoveButton);
   }
 
   populateHTMLAttributes() {
+    if (this.inactivePost === null) {
+      return;
+    }
     this.image.src = this.inactivePost.src;
     this.image.classList.add(Utils.getContentType(this.inactivePost.tags || Utils.convertToTagString(this.tagSet)));
     this.root.id = this.inactivePost.id;
@@ -334,12 +342,14 @@ class Post {
   }
 
   deleteConsumedPropertiesFromInactivePost() {
-    this.inactivePost.metadata = "";
-    this.inactivePost.tags = "";
+    if (this.inactivePost !== null) {
+      this.inactivePost.metadata = "";
+      this.inactivePost.tags = "";
+    }
   }
 
   openAssociatedPostInNewTabWhenClicked() {
-    if (!Utils.onFavoritesPage()) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
 
@@ -356,7 +366,7 @@ class Post {
       const leftClick = event.button === Utils.clickCodes.left;
       const shiftClick = leftClick && event.shiftKey;
 
-      if (middleClick || shiftClick || (leftClick && Utils.galleryIsDisabled())) {
+      if (middleClick || shiftClick || (leftClick && Flags.galleryDisabled)) {
         event.preventDefault();
         Utils.openPostInNewTab(this.id);
       }

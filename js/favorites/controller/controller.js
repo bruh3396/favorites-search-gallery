@@ -1,6 +1,6 @@
 class FavoritesController {
   static get disabled() {
-    return !Utils.onFavoritesPage();
+    return !Flags.onFavoritesPage;
   }
   /**
    * @type {FavoritesModel}
@@ -73,11 +73,9 @@ class FavoritesController {
   }
 
   setupPageChangingInGallery() {
-    Events.gallery.on("requestPageChange", (/** @type {String} */ direction) => {
-      if (Types.isNavigationKey(direction)) {
-        this.gotoAdjacentPage(direction);
-      }
-      Events.favorites.emit("pageChangeResponse");
+    Events.gallery.requestPageChange.on((direction) => {
+      this.gotoAdjacentPage(direction);
+      Events.favorites.pageChangeResponse.emit();
     });
   }
 
@@ -130,7 +128,7 @@ class FavoritesController {
     this.model.loadAllFavorites()
       .then((searchResults) => {
         this.processLoadedSearchResults(searchResults);
-        Events.favorites.emit("favoritesLoadedFromDatabase");
+        Events.favorites.favoritesLoadedFromDatabase.emit();
         return this.model.findNewFavoritesOnReload();
       })
       .then((newFavoritesFound) => {
@@ -153,14 +151,13 @@ class FavoritesController {
    * @param {Post[]} searchResults
    */
   showSearchResults(searchResults) {
-    Events.favorites.emit("newSearchResults", searchResults);
+    Events.favorites.newSearchResults.emit(searchResults);
     this.model.paginate(searchResults);
     this.view.setMatchCount(searchResults.length);
     this.changePage(1);
   }
 
-  /**
-   * @param {Number} pageNumber
+  /**   * @param {Number} pageNumber
    */
   changePage(pageNumber) {
     this.model.changePage(pageNumber);
@@ -183,7 +180,7 @@ class FavoritesController {
   }
 
   broadcastPageChange() {
-    Events.favorites.emit("changedPage");
+    Events.favorites.pageChange.emit();
   }
 
   /**
@@ -206,13 +203,13 @@ class FavoritesController {
         }
       });
     this.model.paginate(this.model.getLatestSearchResults());
-    Events.favorites.emit("newFavoritesFoundOnReload", results.newSearchResults);
-    Events.favorites.emit("newSearchResults", results.allSearchResults);
+    Events.favorites.newFavoritesFoundOnReload.emit(results.newSearchResults);
+    Events.favorites.newSearchResults.emit(results.allSearchResults);
   }
 
   /**
    * @param {EmptyFavoritesDatabase} error
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   findAllFavorites(error) {
     if ((error instanceof EmptyFavoritesDatabase)) {
@@ -237,7 +234,7 @@ class FavoritesController {
     if (!(error instanceof PromiseChainExit)) {
       throw error;
     }
-    Events.favorites.emit("favoritesLoaded");
+    Events.favorites.favoritesLoaded.emit();
   }
 
   onSearchResultsFound() {
@@ -245,7 +242,7 @@ class FavoritesController {
     this.view.updateStatusWhileFetching(this.model.getLatestSearchResults().length, this.model.getAllFavorites().length);
     this.view.createPageSelectionMenuWhileFetching(this.model.getPaginationParameters());
     this.addNewlyFetchedSearchResultsToCurrentPage();
-    Events.favorites.emit("newSearchResults", this.model.getLatestSearchResults());
+    Events.favorites.newSearchResults.emit(this.model.getLatestSearchResults());
   }
 
   addNewlyFetchedSearchResultsToCurrentPage() {
@@ -257,7 +254,7 @@ class FavoritesController {
     const thumbs = Utils.getThumbsFromPosts(newFavorites);
 
     this.view.insertNewSearchResultsWhileFetching(thumbs);
-    Events.favorites.emit("resultsAddedToCurrentPage", thumbs);
+    Events.favorites.resultsAddedToCurrentPage.emit(thumbs);
   }
 
   /**
@@ -288,7 +285,7 @@ class FavoritesController {
    */
   changeLayout(layout) {
     if (Types.isFavoritesLayout(layout)) {
-      Events.favorites.emit("layoutChanged", layout);
+      Events.favorites.layoutChanged.emit(layout);
       this.view.changeLayout(layout);
     }
   }
@@ -321,7 +318,7 @@ class FavoritesController {
    * @param {HTMLInputElement} input
    */
   updateColumnCount(input) {
-    Events.favorites.emit("favoritesResized");
+    Events.favorites.favoritesResized.emit();
     this.view.updateColumnCount(input);
   }
 
@@ -329,7 +326,7 @@ class FavoritesController {
    * @param {HTMLInputElement} input
    */
   updateRowSize(input) {
-    Events.favorites.emit("favoritesResized");
+    Events.favorites.favoritesResized.emit();
     this.view.updateRowSize(input);
   }
 

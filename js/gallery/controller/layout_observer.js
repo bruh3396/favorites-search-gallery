@@ -19,19 +19,19 @@ class FavoritesLayoutObserver {
   }
 
   static invalidateLayoutCompletionOnPageChange() {
-    Events.favorites.on("changedPage", () => {
+    Events.favorites.pageChange.on(() => {
       FavoritesLayoutObserver.layoutCompleted = false;
     });
   }
 
   static listenForLayoutCompletion() {
-    Events.favorites.on("layoutCompleted", () => {
+    Events.favorites.layoutCompleted.on(() => {
       FavoritesLayoutObserver.layoutCompleted = true;
     });
   }
 
   static listenForLayoutChanges() {
-    Events.favorites.on("layoutChanged", (/** @type {String} */ layout) => {
+    Events.favorites.layoutChanged.on((layout) => {
       if (Types.isFavoritesLayout(layout)) {
         FavoritesLayoutObserver.currentLayout = layout;
       }
@@ -39,7 +39,7 @@ class FavoritesLayoutObserver {
   }
 
   /**
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   static waitForLayoutToComplete() {
     return Utils.waitForAllThumbnailsToLoad()
@@ -47,7 +47,7 @@ class FavoritesLayoutObserver {
   }
 
   /**
-   * @returns {Promise.<void>}
+   * @returns {Promise<void>}
    */
   static waitForLayoutToCompleteHelper() {
     return Promise.resolve();
@@ -56,7 +56,7 @@ class FavoritesLayoutObserver {
     //   return Promise.resolve();
     // }
     // return new Promise(resolve => {
-    //   GlobalEvents.favorites.once("layoutCompleted", resolve);
+    //   GlobalEvents.fv.layoutCompleted.once(resolve);
     // });
   }
 }

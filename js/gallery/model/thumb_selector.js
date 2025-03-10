@@ -8,7 +8,7 @@ class ThumbSelector {
    */
   thumbsOnCurrentPage;
   /**
-   * @type {Map.<String, Number>}
+   * @type {Map<String, Number>}
    */
   enumeratedThumbsOnCurrentPage;
 
@@ -54,7 +54,7 @@ class ThumbSelector {
   getImageThumbsAroundOnCurrentPage(initialThumb) {
     return this.getThumbsAroundWrappedOnCurrentPage(
       initialThumb,
-      GalleryConstants.maxImagesToRenderAroundInGallery,
+      GallerySettings.maxImagesToRenderAroundInGallery,
       (/** @type {Post | HTMLElement} */ thumb) => {
         return Utils.isImage(thumb);
       }
@@ -68,7 +68,7 @@ class ThumbSelector {
   getImageThumbsAroundThroughoutAllPages(initialThumb) {
     return this.getThumbsAroundThroughoutAllPages(
       initialThumb,
-      GalleryConstants.maxImagesToRenderAroundInGallery,
+      GallerySettings.maxImagesToRenderAroundInGallery,
       (/** @type {HTMLElement | Post} */ post) => {
         return Utils.isImage(post);
       }
@@ -82,7 +82,7 @@ class ThumbSelector {
   getThumbsAroundOnCurrentPage(initialThumb) {
     return this.getThumbsAroundWrappedOnCurrentPage(
       initialThumb,
-      GalleryConstants.maxImagesToRenderAroundInGallery,
+      GallerySettings.maxImagesToRenderAroundInGallery,
       () => {
         return true;
       }

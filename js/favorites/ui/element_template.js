@@ -12,7 +12,7 @@ class ElementTemplate {
    * @param {Boolean} param.invokeActionOnCreation
    * @param {Boolean} param.savePreference
    * @param {Boolean} param.enabled
-   * @param {Array.<[String, String]>} param.optionPairs
+   * @param {Array<[String, String]>} param.optionPairs
    * @param {Number} param.min
    * @param {Number} param.max
    * @param {Number} param.step

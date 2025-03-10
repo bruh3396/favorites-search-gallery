@@ -24,7 +24,7 @@ class GalleryController {
    * @type {Boolean}
    */
   static get disabled() {
-    return Utils.galleryIsDisabled();
+    return Flags.galleryDisabled;
   }
 
   constructor() {
@@ -51,7 +51,7 @@ class GalleryController {
       });
     };
     return new InteractionTracker(
-      GalleryConstants.idleInteractionDuration,
+      GallerySettings.idleInteractionDuration,
       doNothing,
       hideCursor,
       doNothing,
@@ -106,7 +106,7 @@ class GalleryController {
   }
 
   addFavoritesPageEventListeners() {
-    if (!Utils.onFavoritesPage()) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
     this.keepTrackOfLatestSearchResults();
@@ -118,7 +118,7 @@ class GalleryController {
   }
 
   addSearchPageEventListeners() {
-    if (!Utils.onSearchPage()) {
+    if (!Flags.onSearchPage) {
       return;
     }
     this.indexThumbsAfterSearchPageLoads();
@@ -126,20 +126,20 @@ class GalleryController {
   }
 
   keepTrackOfLatestSearchResults() {
-    Events.favorites.on("resultsAddedToCurrentPage", () => {
+    Events.favorites.resultsAddedToCurrentPage.on(() => {
       this.model.indexCurrentPageThumbs();
     });
-    Events.favorites.on("newSearchResults", (/** @type {Post[]} */ searchResults) => {
+    Events.favorites.newSearchResults.on((searchResults) => {
       this.model.setSearchResults(searchResults);
     });
-    Events.favorites.once("newFavoritesFoundOnReload", () => {
+    Events.favorites.newFavoritesFoundOnReload.once(() => {
       this.visibleThumbTracker?.observeAllThumbsOnPage();
       this.model.indexCurrentPageThumbs();
     });
   }
 
   setupPageChangeHandler() {
-    Events.favorites.on("changedPage", () => {
+    Events.favorites.pageChange.on(() => {
       this.handlePageChange();
     });
   }
@@ -170,34 +170,32 @@ class GalleryController {
   }
 
   setupMouseOverHandler() {
-    const onMouseOverHover = (/** @type {MouseEvent} */ event) => {
-      const thumb = Utils.getThumbUnderCursor(event);
-
+    const onMouseOverHover = (/** @type {HTMLElement | null} */ thumb) => {
       if (thumb === null) {
         this.view.hideContent();
         return;
       }
       this.view.showContent(thumb);
-      this.preloadVisibleContentAround(Utils.getThumbUnderCursor(event));
+      this.preloadVisibleContentAround(thumb);
     };
 
-    document.addEventListener("mouseover", (event) => {
+    Events.document.mouseOver.on((clickEvent) => {
       this.executeFunctionBasedOnGalleryState({
         hover: onMouseOverHover,
         idle: this.preloadVisibleContentAround.bind(this)
-      }, event);
+      }, clickEvent.thumb);
     });
   }
 
   setupFavoritesOptionHandler() {
-    Events.favorites.on("showOnHover", () => {
+    Events.favorites.showOnHover.on(() => {
       this.model.toggleShowContentOnHover();
     });
   }
 
   setupGalleryStateResponder() {
-    Events.favorites.on("inGalleryRequest", () => {
-      Events.gallery.emit("inGalleryResponse", this.model.currentState === GalleryModel.states.IN_GALLERY);
+    Events.favorites.inGalleryRequest.on(() => {
+      Events.gallery.inGalleryResponse.emit(this.model.currentState === GalleryModel.states.IN_GALLERY);
     });
   }
 
@@ -319,7 +317,7 @@ class GalleryController {
       }, event);
 
     };
-    const throttledOnKeyDown = Utils.throttle(onKeyDown, GalleryConstants.navigationThrottleTime);
+    const throttledOnKeyDown = Utils.throttle(onKeyDown, GallerySettings.navigationThrottleTime);
 
     document.addEventListener("keydown", (event) => {
       if (event.repeat) {
@@ -396,10 +394,11 @@ class GalleryController {
   }
 
   /**
-   * @param {{idle?: Function , hover?: Function , gallery?: Function }} executors
-   * @param  {...any} args
+   * @template V
+   * @param {{idle?: (argument: V) => void, hover?: (argument: V) => void , gallery?: (argument: V) => void }} executors
+   * @param  {V | undefined} args
    */
-  executeFunctionBasedOnGalleryState({idle, hover, gallery}, ...args) {
+  executeFunctionBasedOnGalleryState({idle, hover, gallery}, args = undefined) {
     const executor = {
       [GalleryModel.states.IDLE]: idle,
       [GalleryModel.states.SHOWING_CONTENT_ON_HOVER]: hover,
@@ -407,7 +406,8 @@ class GalleryController {
     }[this.model.currentState];
 
     if (executor) {
-      executor(...args);
+      // @ts-ignore
+      executor(args);
     }
   }
 
@@ -441,7 +441,7 @@ class GalleryController {
       return this.completeNavigation(thumb);
     }
 
-    if (Utils.onFavoritesPage()) {
+    if (Flags.onFavoritesPage) {
       return this.changeFavoritesPageThenNavigate(direction);
     }
     return this.changeSearchPageInGallery(direction);
@@ -462,7 +462,7 @@ class GalleryController {
 
   /**
    * @param {NavigationKey} direction
-   * @returns {Promise.<HTMLElement>}
+   * @returns {Promise<HTMLElement>}
    */
   changeFavoritesPageInGallery(direction) {
     return new Promise((resolve, reject) => {
@@ -476,10 +476,10 @@ class GalleryController {
         }
       };
 
-      Events.favorites.timeout("pageChangeResponse", 50)
+      Events.favorites.pageChangeResponse.timeout(50)
         .then(onPageChangeInGallery)
         .catch(onPageChangeInGallery);
-      Events.gallery.emit("requestPageChange", direction);
+      Events.gallery.requestPageChange.emit(direction);
     });
   }
 
@@ -520,7 +520,7 @@ class GalleryController {
         this.preloadVisibleContent();
       }
     });
-    Events.favorites.on("resultsAddedToCurrentPage", (/** @type {HTMLElement[]} */ results) => {
+    Events.favorites.resultsAddedToCurrentPage.on((/** @type {HTMLElement[]} */ results) => {
       this.visibleThumbTracker?.observe(results);
     });
   }
@@ -553,7 +553,7 @@ class GalleryController {
     Utils.removeFavoriteInGallery(this.model.currentThumb)
       .then(({status, id}) => {
         this.view.showRemovedFavoriteStatus(status);
-        Events.gallery.emit("favoriteAddedOrDeleted", id);
+        Events.gallery.favoriteAddedOrDeleted.emit(id);
       });
   }
 
@@ -561,7 +561,7 @@ class GalleryController {
     Utils.addFavoriteInGallery(this.model.currentThumb)
       .then(({status, id}) => {
         this.view.showAddedFavoriteStatus(status);
-        Events.gallery.emit("favoriteAddedOrDeleted", id);
+        Events.gallery.favoriteAddedOrDeleted.emit(id);
       });
   }
 
@@ -574,6 +574,6 @@ class GalleryController {
    * @param {Boolean} value
    */
   broadcastShowContentOnHover(value) {
-    Events.gallery.emit("showOnHover", value);
+    Events.gallery.showOnHover.emit(value);
   }
 }

@@ -36,7 +36,7 @@ class HoldButton extends HTMLElement {
   holdingDown = false;
 
   connectedCallback() {
-    if (Utils.onMobileDevice()) {
+    if (Flags.onMobileDevice) {
       return;
     }
     this.addEventListeners();

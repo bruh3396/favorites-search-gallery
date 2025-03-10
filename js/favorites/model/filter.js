@@ -29,7 +29,7 @@ class FavoritesFilter {
 
   constructor() {
     this.negatedTagBlacklist = Utils.negateTags(Utils.tagBlacklist);
-    this.useTagBlacklist = !Utils.userIsOnTheirOwnFavoritesPage() || Preferences.excludeBlacklist.value;
+    this.useTagBlacklist = !Flags.userIsOnTheirOwnFavoritesPage || Preferences.excludeBlacklist.value;
     this.allowedRatings = Utils.loadAllowedRatings();
     this.searchCommand = this.getSearchCommand("");
     this.searchQuery = "";

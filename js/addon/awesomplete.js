@@ -3,7 +3,7 @@ class AwesompleteWrapper {
    * @type {Boolean}
    */
   static get disabled() {
-    return !Utils.onFavoritesPage();
+    return !Flags.onFavoritesPage;
   }
   /**
    * @type {Boolean}
@@ -96,7 +96,7 @@ class AwesompleteWrapper {
   }
 
   getSavedSearchesForAutocompleteList(inputId, prefix) {
-    if (Utils.onMobileDevice() || !this.showSavedSearchSuggestions || inputId !== Utils.mainSearchBoxId) {
+    if (Flags.onMobileDevice || !this.showSavedSearchSuggestions || inputId !== Utils.mainSearchBoxId) {
       return [];
     }
     return Utils.getSavedSearchesForAutocompleteList(prefix);

@@ -62,7 +62,7 @@ class FavoritesStatusBar {
    * @param {Number} favoritesFoundCount
    */
   updateStatusWhileFetching(searchResultsCount, favoritesFoundCount) {
-    const prefix = Utils.onMobileDevice() ? "" : "Favorites ";
+    const prefix = Flags.onMobileDevice ? "" : "Favorites ";
     let statusText = `Fetching ${prefix}${favoritesFoundCount}`;
 
     if (this.expectedTotalFavoritesCount !== null) {

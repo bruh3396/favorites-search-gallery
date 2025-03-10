@@ -12,7 +12,7 @@ class GalleryUI {
    * @type {Boolean}
    */
   get usingColumnLayout() {
-    return Utils.onFavoritesPage() && FavoritesLayoutObserver.currentLayout === "column";
+    return Flags.onFavoritesPage && FavoritesLayoutObserver.currentLayout === "column";
   }
 
   /**
@@ -136,7 +136,7 @@ class GalleryUI {
   updateUIInGallery(thumb) {
     this.setLastVisitedThumb(thumb);
 
-    if (this.usingColumnLayout || Utils.usingFirefox()) {
+    if (this.usingColumnLayout || Flags.usingFirefox) {
       return;
     }
     this.scrollToNextThumb(thumb);
