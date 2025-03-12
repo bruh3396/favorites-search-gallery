@@ -1,40 +1,41 @@
 class MetadataSearchExpression {
   /**
-   * @type {String}
+   * @type {SearchableMetadataMetric}
    */
   metric;
   /**
-   * @type {String}
+   * @type {MetadataComparator}
    */
   operator;
   /**
-   * @type {String | Number}
+   * @type {SearchableMetadataMetric}
    */
-  value;
+  relativeValue;
+  /**
+   * @type {Number}
+   */
+  numericValue;
+  /**
+   * @type {Boolean}
+   */
+  hasRelativeValue;
 
   /**
    * @param {String} metric
-   * @param {String} operator
-   * @param {String} value
+   * @param {MetadataComparator} comparator
+   * @param {SearchableMetadataMetric | Number} value
    */
-  constructor(metric, operator, value) {
-    this.metric = metric;
-    this.operator = operator;
-    this.value = this.setValue(value);
-  }
+  constructor(metric, comparator, value) {
+    this.metric = Types.isSearchableMetadataMetric(metric) ? metric : "id";
+    this.operator = comparator;
+    this.hasRelativeValue = Types.isSearchableMetadataMetric(value);
 
-  /**
-   * @param {String} value
-   * @returns {String | Number}
-   */
-  setValue(value) {
-    if (!Utils.isOnlyDigits(value)) {
-      return value;
+    if (Types.isSearchableMetadataMetric(value)) {
+      this.numericValue = 0;
+      this.relativeValue = value;
+    } else {
+      this.numericValue = value;
+      this.relativeValue = "id";
     }
-
-    if (this.metric === "id" && this.operator === ":") {
-      return value;
-    }
-    return parseInt(value);
   }
 }

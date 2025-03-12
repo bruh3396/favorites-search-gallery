@@ -15,6 +15,12 @@ class Types {
 
   /** @typedef {"jpg" | "png" | "jpeg" | "gif" | "mp4"} MediaExtension */
 
+  /** @typedef {"default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random"} MetadataMetric */
+
+  /** @typedef {"id" | "score" | "width" | "height" } SearchableMetadataMetric */
+
+  /** @typedef {":" | ":<" | ":>"} MetadataComparator */
+
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);
@@ -22,6 +28,9 @@ class Types {
   static exitKeys = new Set(["Escape", "Delete", "Backspace"]);
   static typeableInputs = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
   static mediaExtensions = new Set(["jpg", "png", "jpeg", "gif", "mp4"]);
+  static metadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
+  static searchableMetadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
+  static metadataComparators = new Set([":", ":<", ":>"]);
   /**
    * @param {any} object
    * @returns {object is FavoriteLayout}
@@ -84,5 +93,29 @@ class Types {
    */
   static isMediaExtension(object) {
     return Types.mediaExtensions.has(object);
+  }
+
+  /**
+   * @param {any} object
+   * @returns {object is MetadataMetric}
+   */
+  static isMetadataMetric(object) {
+    return Types.metadataMetrics.has(object);
+  }
+
+  /**
+   * @param {any} object
+   * @returns {object is SearchableMetadataMetric}
+   */
+  static isSearchableMetadataMetric(object) {
+    return Types.searchableMetadataMetrics.has(object);
+  }
+
+  /**
+   * @param {any} object
+   * @returns {object is MetadataComparator}
+   */
+  static isMetadataComparator(object) {
+    return Types.metadataComparators.has(object);
   }
 }

@@ -90,12 +90,12 @@ class GalleryMenu {
           break;
       }
     });
-    document.addEventListener("mousemove", Utils.throttle(() => {
+    Events.document.mousemove.on(Utils.throttle(() => {
       this.reveal();
     }, 250));
 
-    document.addEventListener("mouseover", (event) => {
-      this.togglePersistence(event);
+    Events.document.mouseover.on((mouseOverEvent) => {
+      this.togglePersistence(mouseOverEvent.originalEvent);
     });
   }
 
@@ -164,6 +164,16 @@ class GalleryMenu {
 
   createColorPicker() {
     const button = document.getElementById("background-color-gallery");
+    const toggleMouseDown = (/** @type {Boolean} */ value) => {
+      value;
+      // if (value) {
+      //   Events.document.click.resume();
+      //   Events.document.mouseDown.resume();
+      // } else {
+      //   Events.document.click.freeze();
+      //   Events.document.mouseDown.freeze();
+      // }
+    };
 
     if (!(button instanceof HTMLElement)) {
       return;
@@ -173,16 +183,22 @@ class GalleryMenu {
     colorPicker.type = "color";
     colorPicker.id = "gallery-menu-background-color-picker";
     button.onclick = () => {
+      toggleMouseDown(false);
       colorPicker.click();
     };
-    colorPicker.onchange = () => {
-      Utils.insertStyleHTML(`
-        #gallery-background, #gallery-menu, #gallery-menu-button-container {
-          background: ${colorPicker.value} !important;
-        }
-      `, "gallery-background-color");
-      Preferences.backgroundColor.set(colorPicker.value);
+    colorPicker.oninput = () => {
+      Utils.setColorScheme(colorPicker.value);
     };
+    colorPicker.onblur = () => {
+      toggleMouseDown(true);
+    };
+    colorPicker.onchange = () => {
+      toggleMouseDown(true);
+    };
+
+    if (Preferences.colorScheme.defaultValue !== Preferences.colorScheme.value) {
+      Utils.setColorScheme(Preferences.colorScheme.value);
+    }
     button.insertAdjacentElement("afterbegin", colorPicker);
   }
 

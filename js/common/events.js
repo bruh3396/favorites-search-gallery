@@ -2,6 +2,7 @@ class Events {
   static favorites = {
     /** @type {EventEmitter<void>} */ pageChange: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ favoritesLoadedFromDatabase: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ startedFetchingFavorites: new EventEmitter(true),
     /** @type {EventEmitter<Post[]>} */ newSearchResults: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ favoritesLoaded: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ inGalleryRequest: new EventEmitter(true),
@@ -27,12 +28,42 @@ class Events {
   };
 
   static document = {
-    /** @type {EventEmitter<ClickEvent>} */ mouseOver: new EventEmitter(true)
+    /** @type {EventEmitter<FavoritesMouseEvent>} */ mouseover: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ click: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ mousedown: new EventEmitter(true),
+    /** @type {EventEmitter<FavoritesKeyboardEvent>} */ keydown: new EventEmitter(true),
+    /** @type {EventEmitter<FavoritesWheelEvent>} */ wheel: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ contextmenu: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ mousemove: new EventEmitter(true)
   };
 
   static setupDocumentEvents() {
     document.addEventListener("mouseover", (event) => {
-      Events.document.mouseOver.emit(new ClickEvent(event));
+      Events.document.mouseover.emit(new FavoritesMouseEvent(event));
+    }, {
+      passive: true
+    });
+    document.addEventListener("click", (event) => {
+      Events.document.click.emit(event);
+    });
+    document.addEventListener("mousedown", (event) => {
+      Events.document.mousedown.emit(event);
+    });
+    document.addEventListener("mousemove", (event) => {
+      Events.document.mousemove.emit(event);
+    }, {
+      passive: true
+    });
+    document.addEventListener("keydown", (event) => {
+      Events.document.keydown.emit(new FavoritesKeyboardEvent(event));
+    });
+    document.addEventListener("wheel", (event) => {
+      Events.document.wheel.emit(new FavoritesWheelEvent(event));
+    }, {
+      passive: true
+    });
+    document.addEventListener("contextmenu", (event) => {
+      Events.document.contextmenu.emit(event);
     });
   }
 

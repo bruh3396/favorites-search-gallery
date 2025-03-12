@@ -102,9 +102,9 @@ class FavoritesController {
   }
 
   addKeyDownEventListeners() {
-    document.addEventListener("keydown", (event) => {
-      if (Types.isNavigationKey(event.key) && !event.repeat) {
-        this.changePageWithArrowKey(event.key);
+    Events.document.keydown.on((event) => {
+      if ((event.originalEvent.key === "ArrowRight" || event.originalEvent.key === "ArrowLeft") && !event.originalEvent.repeat) {
+        this.changePageWithArrowKey(event.originalEvent.key);
       }
     });
   }
@@ -214,7 +214,7 @@ class FavoritesController {
   findAllFavorites(error) {
     if ((error instanceof EmptyFavoritesDatabase)) {
       this.view.hideLoadingWheel();
-      Utils.broadcastEvent("startedFetchingFavorites");
+      Events.favorites.startedFetchingFavorites.emit();
       return this.model.fetchAllFavorites(this.onSearchResultsFound.bind(this));
     }
     throw error;
@@ -293,9 +293,11 @@ class FavoritesController {
   /**
    * @param {String} sortingMethod
    */
-  updateSortingMethod(sortingMethod) {
-    this.model.updateSortingMethod(sortingMethod);
-    this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
+  setSortingMethod(sortingMethod) {
+    if (Types.isMetadataMetric(sortingMethod)) {
+      this.model.setSortingMethod(sortingMethod);
+      this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
+    }
   }
 
   /**

@@ -563,7 +563,7 @@ class HTMLStrings {
         gap: var(--gutter);
         margin-right: 15px;
 
-        .ml-column {
+        .favorites-column {
           display: flex;
           flex-direction: column;
           flex: 0 0 25%;
@@ -1222,6 +1222,14 @@ Lower numbers improve responsiveness">
     overflow-x: hidden;
   }
 
+  video::-webkit-media-controls-panel {
+    background: transparent !important;
+  }
+
+  video::-webkit-media-controls-enclosure {
+    background: transparent !important;
+  }
+
   #gallery-container {
     z-index: 9000;
     position: fixed;
@@ -1463,6 +1471,7 @@ Lower numbers improve responsiveness">
     >svg {
       fill: white;
     }
+
   }
 
   @keyframes glowSwipe {

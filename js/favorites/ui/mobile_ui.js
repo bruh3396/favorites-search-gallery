@@ -17,7 +17,7 @@ class FavoritesMenuMobileUI {
     ],
     "select": [
       {
-        id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "updateSortingMethod", position: "beforeend", invokeActionOnCreation: false, preference: Preferences.sortingMethod,
+        id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "setSortingMethod", position: "beforeend", invokeActionOnCreation: false, preference: Preferences.sortingMethod,
         optionPairs: [
           ["default", "Default"],
           ["score", "Score"],
@@ -58,7 +58,7 @@ class FavoritesMenuMobileUI {
           ]
       },
       {
-        id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, preference: Preferences.favoriteLayout,
+        id: "layout-select", parentId: "layout-container", title: "Change layout", action: "changeLayout", position: "beforeend", invokeActionOnCreation: true, preference: Preferences.layout,
         optionPairs: [
           ["column", "Column"],
           ["row", "River"],

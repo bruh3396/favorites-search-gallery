@@ -14,6 +14,17 @@ class EventEmitter {
    * @type {Boolean}
    */
   enabled;
+  /**
+   * @type {Boolean}
+   */
+  frozen;
+
+  /**
+   * @type {Boolean}
+   */
+  get disabled() {
+    return !this.enabled;
+  }
 
   /**
    * @param {Boolean} enabled
@@ -22,33 +33,31 @@ class EventEmitter {
     this.listeners = new Set();
     this.oneTimeListeners = new Set();
     this.enabled = enabled;
-    this.guardMethods();
-  }
-
-  /**
-   * @returns {void}
-   */
-  guardMethods() {
-    for (const method of [this.on, this.once, this.timeout]) {
-      this[method.name] = this.guardMethod(method);
-    }
-  }
-
-  /**
-   * @param {Function} method
-   * @returns {Function}
-   */
-  guardMethod(method) {
-    return this.enabled ? method : () => {
-    };
+    this.frozen = false;
   }
 
   /**
    * @param {(argument: V) => void} callback
+   * @param {AddEventListenerOptions | undefined} options
    */
-  on(callback) {
-    if (!this.listeners.has(callback)) {
-      this.listeners.add(callback);
+  on(callback, options = undefined) {
+    if (this.disabled) {
+      return;
+    }
+    this.listeners.add(callback);
+
+    if (options === undefined) {
+      return;
+    }
+
+    if (options.once) {
+      this.oneTimeListeners.add(callback);
+    }
+
+    if (options.signal) {
+      options.signal.addEventListener("abort", () => {
+        this.off(callback);
+      });
     }
   }
 
@@ -63,8 +72,11 @@ class EventEmitter {
    * @param {V} argument
    */
   emit(argument) {
+    if (this.disabled || this.frozen) {
+      return;
+    }
+
     for (const callback of this.listeners.keys()) {
-      // eslint-disable-next-line callback-return
       callback(argument);
     }
     this.removeOneTimeListeners();
@@ -73,14 +85,6 @@ class EventEmitter {
   removeOneTimeListeners() {
     this.listeners = SetUtils.difference(this.listeners, this.oneTimeListeners);
     this.oneTimeListeners.clear();
-  }
-
-  /**
-   * @param {(argument: V) => void} callback
-   */
-  once(callback) {
-    this.oneTimeListeners.add(callback);
-    this.on(callback);
   }
 
   /**
@@ -94,13 +98,23 @@ class EventEmitter {
         reject(new PromiseTimeoutError());
       }, milliseconds);
 
-      const listener = (args) => {
+      const listener = (/** @type {V} */ args) => {
         this.off(listener);
         clearTimeout(timer);
         resolve(args);
       };
 
-      this.on(listener);
+      this.on(listener, {
+        once: true
+      });
     });
+  }
+
+  freeze() {
+    this.frozen = true;
+  }
+
+  resume() {
+    this.frozen = false;
   }
 }

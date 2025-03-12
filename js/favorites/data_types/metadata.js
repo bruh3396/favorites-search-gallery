@@ -309,8 +309,8 @@ class PostMetadata {
    * @returns {Boolean}
    */
   satisfiesExpression(expression) {
-    const metricValue = this[expression.metric] || 0;
-    const value = this[expression.value] || expression.value;
+    const metricValue = this.getMetric(expression.metric);
+    const value = expression.hasRelativeValue ? this.getMetric(expression.relativeValue) : expression.numericValue;
     return this.evaluateExpression(metricValue, expression.operator, value);
   }
 
@@ -350,5 +350,34 @@ class PostMetadata {
 
   addInstanceToMissingMetadataQueue() {
     PostMetadata.missingMetadataFetchQueue.push(this);
+  }
+
+  /**
+   * @param {MetadataMetric} metric
+   * @returns {Number}
+   */
+  getMetric(metric) {
+    switch (metric) {
+      case "score":
+        return this.score;
+
+      case "width":
+        return this.width;
+
+      case "height":
+        return this.height;
+
+      case "lastChangedTimestamp":
+        return this.lastChangedTimestamp;
+
+      case "creationTimestamp":
+        return this.creationTimestamp;
+
+      case "id":
+        return Number(this.id);
+
+      default:
+        return 0;
+    }
   }
 }

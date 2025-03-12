@@ -28,7 +28,7 @@ class FavoritesColumnTiler extends Tiler {
    * @type {Boolean}
    */
   get inactive() {
-    return document.querySelector(".ml-column") === null;
+    return document.querySelector(".favorites-column") === null;
   }
 
   /**
@@ -42,9 +42,9 @@ class FavoritesColumnTiler extends Tiler {
    * @param {HTMLElement[]} items
    */
   tile(items) {
+    this.clearContainer();
     this.createColumns();
     this.addItemsToColumns(items);
-    this.container.innerHTML = "";
     this.addColumnsToContainer();
     this.updateGetAllThumbsImplementation();
   }
@@ -55,7 +55,7 @@ class FavoritesColumnTiler extends Tiler {
     for (let i = 0; i < this.columnCount; i += 1) {
       const column = document.createElement("div");
 
-      column.classList.add("ml-column");
+      column.classList.add("favorites-column");
       this.columns.push(column);
     }
   }
@@ -77,6 +77,10 @@ class FavoritesColumnTiler extends Tiler {
 
       this.columns[columnIndex].appendChild(item);
     }
+  }
+
+  clearContainer() {
+    this.container.innerHTML = "";
   }
 
   addColumnsToContainer() {

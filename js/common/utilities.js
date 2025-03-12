@@ -181,7 +181,7 @@ class Utils {
     if (Flags.onFavoritesPage) {
       return false;
     }
-    return !Preferences.enhanceSearchPages.value;
+    return !Preferences.enableOnSearchPages.value;
   }
 
   /**
@@ -573,8 +573,8 @@ class Utils {
 
     if (newOptionsCheckbox instanceof HTMLInputElement) {
       newOptionsCheckbox.checked = optionIsChecked;
-      newOptionsCheckbox.onchange = () => {
-        onOptionChanged();
+      newOptionsCheckbox.onchange = (event) => {
+        onOptionChanged(event);
       };
     }
     return document.getElementById(optionId);
@@ -801,7 +801,17 @@ class Utils {
    * @returns {Boolean}
    */
   static enteredOverCaptionTag(event) {
-    return event.relatedTarget instanceof HTMLElement && event.relatedTarget !== null && event.relatedTarget.classList.contains("caption-tag");
+    if (!(event.relatedTarget instanceof HTMLElement) || !(event.target instanceof HTMLElement)) {
+      return false;
+    }
+    return event.relatedTarget.classList.contains("caption-tag") || event.target.classList.contains("caption-tag");
+  }
+
+  /**
+   * @param {any} element
+   */
+  static insideOfThumb(element) {
+    return element instanceof HTMLElement && element.closest(`.${Utils.itemClassName}`) !== null;
   }
 
   /**
@@ -921,11 +931,12 @@ class Utils {
   }
 
   /**
-   * @param {Map} map
+   * @param {Map<any, any>} map
    * @returns {Object}
    */
   static mapToObject(map) {
     return Array.from(map).reduce((object, [key, value]) => {
+      // @ts-ignore
       object[key] = value;
       return object;
     }, {});
@@ -933,7 +944,7 @@ class Utils {
 
   /**
    * @param {Object} object
-   * @returns {Map}
+   * @returns {Map<any, any>}
    */
   static objectToMap(object) {
     return new Map(Object.entries(object));
@@ -1182,6 +1193,9 @@ class Utils {
     return matchedSavedSearches;
   }
 
+  /**
+   * @param {String} suggestion
+   */
   static removeSavedSearchPrefix(suggestion) {
     return suggestion.replace(/^\S+_saved_search /, "");
   }
@@ -1495,7 +1509,7 @@ class Utils {
         }
 
         if (callback !== undefined) {
-          // eslint-disable-next-line callback-return
+
           callback(html);
         }
       })
@@ -1582,6 +1596,9 @@ class Utils {
     }
   }
 
+  /**
+   * @param {HTMLElement} thumb
+   */
   static prepareSearchPageThumb(thumb) {
     const image = this.getImageFromThumb(thumb);
 
@@ -1918,7 +1935,7 @@ class Utils {
   static sendPostedMessage(worker, message) {
     return new Promise((resolve) => {
       const id = Date.now() + Math.random();
-      const handleMessage = (event) => {
+      const handleMessage = (/** @type {{ data: { id: number; response: any; }; }} */ event) => {
         if (event.data.id === id) {
           worker.removeEventListener("message", handleMessage);
           resolve(event.data.response);
@@ -1939,10 +1956,11 @@ class Utils {
    * @returns {any}
    */
   static debounceAfterFirstCall(func, delay) {
+    /** @type {Timeout} */
     let timeoutId;
     let firstCall = true;
     let calledDuringDebounce = false;
-    return (...args) => {
+    return (/** @type {any} */ ...args) => {
       if (firstCall) {
         Reflect.apply(func, this, args);
         firstCall = false;
@@ -1967,8 +1985,9 @@ class Utils {
    * @returns {any}
    */
   static debounceAlways(func, delay) {
+    /** @type {Timeout} */
     let timeoutId;
-    return (...args) => {
+    return (/** @type {any} */ ...args) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         Reflect.apply(func, this, args);
@@ -1983,7 +2002,7 @@ class Utils {
    */
   static throttle(func, delay) {
     let throttling = false;
-    return (...args) => {
+    return (/** @type {any} */ ...args) => {
       if (!throttling) {
         func(...args);
         throttling = true;
@@ -2113,10 +2132,16 @@ class Utils {
   }
 
   /**
-   * @param {String} dimensionString
+   * @param {String | undefined} dimensionString
    * @returns {{x: Number, y: Number}}
    */
   static getDimensions(dimensionString) {
+    if (dimensionString === undefined) {
+      return {
+        x: 100,
+        y: 100
+      };
+    }
     const match = dimensionString.match(/^(\d+)x(\d+)$/);
     const [x, y] = match ? [parseInt(match[1]), parseInt(match[2])] : [0, 0];
     return {
@@ -2148,7 +2173,7 @@ class Utils {
    * @returns {FavoriteLayout}
    */
   static loadFavoritesLayout() {
-    const layout = Preferences.favoriteLayout.value;
+    const layout = Preferences.layout.value;
     return Types.isFavoritesLayout(layout) ? layout : "column";
   }
 
@@ -2315,4 +2340,211 @@ class Utils {
       return post.root;
     });
   }
+
+  /**
+   * @param {HTMLElement | null} thumb
+   * @returns {Promise<String>}
+   */
+  static getMedianHexColor(thumb) {
+    const defaultColor = Promise.resolve("white");
+    const useCleanOrigin = true;
+
+    if (thumb === null) {
+      return defaultColor;
+    }
+    const image = Utils.getImageFromThumb(thumb);
+
+    if (image === null) {
+      return defaultColor;
+    }
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    if (context === null) {
+      return defaultColor;
+    }
+    const getMedianHexColor = (/** @type {HTMLImageElement} */ img) => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      context.drawImage(img, 0, 0);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = [];
+
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        const r = imageData.data[i];
+        const g = imageData.data[i + 1];
+        const b = imageData.data[i + 2];
+        // eslint-disable-next-line no-bitwise
+        const hex = `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
+
+        pixels.push(hex);
+      }
+      pixels.sort();
+      const medianIndex = Math.floor(pixels.length / 2);
+      return pixels[medianIndex];
+    };
+
+    if (useCleanOrigin) {
+      return Utils.getCleanOriginThumbImage(image).then(getMedianHexColor);
+    }
+    image.crossOrigin = "Anonymous";
+    return Promise.resolve(getMedianHexColor(image));
+  }
+
+  /**
+   * @param {HTMLImageElement} image
+   * @returns {Promise<HTMLImageElement>}
+   */
+  static getCleanOriginThumbImage(image) {
+    return Utils.loadImage(image.src.replace("us.", ""));
+  }
+
+  /**
+   * @param {String} color
+   */
+  static setColorScheme(color) {
+    Utils.setGalleryBackgroundColor(color);
+    Preferences.colorScheme.set(color);
+    // Utils.setGradient(color);
+  }
+
+  /**
+   * @param {String} color
+   */
+  static setGalleryBackgroundColor(color) {
+    Utils.insertStyleHTML(`
+        #gallery-background,
+        #gallery-menu,
+        #gallery-menu-button-container,
+        #autoplay-menu,
+        #autoplay-settings-menu {
+          background: ${color} !important;
+        }
+
+        .gallery-menu-button:not(:hover) {
+          >svg {
+              fill: ${color} !important;
+              filter: invert(100%);
+            }
+        }
+
+
+      `, "gallery-background-color");
+  }
+
+  /**
+   * @param {String} color
+   */
+  static setGradient(color) {
+    const isHex = (/^#[0-9A-Fa-f]{6}$/).test(color);
+    const hexColor = isHex ? color : Utils.getHexColor(color);
+    const gradient = Utils.createGradient(hexColor);
+
+    Utils.insertStyleHTML(`
+        .light-green-gradient, .dark-green-gradient {
+          background: linear-gradient(to bottom, ${gradient.light}, ${gradient.dark}) !important;
+        }
+
+        body {
+          background: ${gradient.light} !important;
+        }
+      `, "gradient-background");
+  }
+
+  /**
+   * @param {String} hexColor
+   * @returns {{light: String, dark: String}}
+   */
+  static createGradient(hexColor) {
+    hexColor = hexColor.substring(1);
+    const colorValue = parseInt(hexColor, 16);
+    return {
+      light: Utils.getHexString(colorValue),
+      dark: Utils.getHexString(Utils.darkenColor(colorValue, 20))
+    };
+  }
+
+  /**
+   *
+   * @param {Number} hexNumber
+   * @returns {String}
+   */
+  static getHexString(hexNumber) {
+    return `#${hexNumber.toString(16).padStart(6, "0")}`;
+  }
+
+  /**
+   * @param {String} color
+   * @returns {String}
+   */
+  static getHexColor(color) {
+    const element = document.createElement("div");
+
+    element.style.color = color;
+    document.body.appendChild(element);
+    const computedColor = window.getComputedStyle(element).color;
+
+    document.body.removeChild(element);
+
+    const rgbValues = computedColor.match(/\d+/g);
+    // @ts-ignore
+    const r = parseInt(rgbValues[0]);
+    // @ts-ignore
+    const g = parseInt(rgbValues[1]);
+    // @ts-ignore
+    const b = parseInt(rgbValues[2]);
+    // eslint-disable-next-line no-bitwise
+    return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
+  }
+
+  /**
+   * @param {Number} hex
+   * @param {Number} percent
+   * @returns {Number}
+   */
+  static darkenColor(hex, percent) {
+    // eslint-disable-next-line no-bitwise
+    let r = (hex >> 16) & 0xFF;
+    // eslint-disable-next-line no-bitwise
+    let g = (hex >> 8) & 0xFF;
+    // eslint-disable-next-line no-bitwise
+    let b = hex & 0xFF;
+
+    r = Math.max(0, r - (r * percent / 100));
+    g = Math.max(0, g - (g * percent / 100));
+    b = Math.max(0, b - (b * percent / 100));
+    // eslint-disable-next-line no-bitwise
+    return (r << 16) | (g << 8) | b;
+  }
+
+  /**
+   * @param {String} hex
+   */
+  static brightenColor(hex) {
+    hex = hex.substring(1);
+    const percent = 26;
+    let r = parseInt(hex.slice(0, 2), 16);
+    let g = parseInt(hex.slice(2, 4), 16);
+    let b = parseInt(hex.slice(4, 6), 16);
+
+    r = Math.min(255, Math.floor(r + ((percent / 100) * (255 - r))));
+    g = Math.min(255, Math.floor(g + ((percent / 100) * (255 - g))));
+    b = Math.min(255, Math.floor(b + ((percent / 100) * (255 - b))));
+    return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  }
+
+  /**
+   * @param {String} source
+   * @returns {Promise<HTMLImageElement>}
+   */
+  static loadImage(source) {
+    const image = new Image();
+
+    image.src = source;
+    return new Promise((resolve, reject) => {
+      image.onload = () => resolve(image);
+      image.onerror = (error) => reject(error);
+    });
+  }
+
 }

@@ -36,6 +36,7 @@ class GalleryController {
     this.interactionTracker = this.createInteractionTracker();
     this.autoplayController = this.createAutoplayController();
     this.addEventListeners();
+    this.debounceVisibleContentPreloading();
   }
 
   /**
@@ -132,9 +133,11 @@ class GalleryController {
     Events.favorites.newSearchResults.on((searchResults) => {
       this.model.setSearchResults(searchResults);
     });
-    Events.favorites.newFavoritesFoundOnReload.once(() => {
+    Events.favorites.newFavoritesFoundOnReload.on(() => {
       this.visibleThumbTracker?.observeAllThumbsOnPage();
       this.model.indexCurrentPageThumbs();
+    }, {
+      once: true
     });
   }
 
@@ -163,6 +166,12 @@ class GalleryController {
     });
   }
 
+  debounceVisibleContentPreloading() {
+    const preloadContent = this.preloadVisibleContent.bind(this);
+
+    this.preloadVisibleContent = Utils.debounceAlways(preloadContent, GallerySettings.preloadContentDebounceTime);
+  }
+
   freeMemoryWhenWhenLeavingSearchPage() {
     window.addEventListener("blur", () => {
       this.view.handlePageChange();
@@ -179,11 +188,11 @@ class GalleryController {
       this.preloadVisibleContentAround(thumb);
     };
 
-    Events.document.mouseOver.on((clickEvent) => {
+    Events.document.mouseover.on((mouseOverEvent) => {
       this.executeFunctionBasedOnGalleryState({
         hover: onMouseOverHover,
         idle: this.preloadVisibleContentAround.bind(this)
-      }, clickEvent.thumb);
+      }, mouseOverEvent.thumb);
     });
   }
 
@@ -200,62 +209,61 @@ class GalleryController {
   }
 
   setupContextMenuClickHandler() {
-    document.addEventListener("contextmenu", (event) => {
+    Events.document.contextmenu.on((event) => {
       this.executeFunctionBasedOnGalleryState({
         gallery: () => {
           event.preventDefault();
           this.exitGallery();
         }
-      }, new ClickEvent(event));
+      });
     });
   }
 
   setupMouseDownHandler() {
-    const onMouseDownInGallery = (/** @type {ClickEvent} */ clickEvent) => {
-      if (clickEvent.ctrlKey || Utils.overGalleryMenu(clickEvent.originalEvent)) {
+    const onMouseDownInGallery = (/** @type {FavoritesMouseEvent} */ event) => {
+      if (event.ctrlKey || Utils.overGalleryMenu(event.originalEvent)) {
         return;
       }
 
-      if (clickEvent.leftClick && !this.model.currentlyViewingVideo) {
+      if (event.leftClick && !this.model.currentlyViewingVideo) {
         this.exitGallery();
         return;
       }
 
-      if (clickEvent.rightClick) {
-        clickEvent.originalEvent.preventDefault();
+      if (event.rightClick) {
         return;
       }
 
-      if (clickEvent.middleClick) {
+      if (event.middleClick) {
         this.model.openPostInNewTab();
       }
     };
-    const onMouseDownOutOfGallery = (/** @type {ClickEvent} */ clickEvent) => {
-      if (clickEvent.leftClick && clickEvent.thumb !== null && !clickEvent.ctrlKey) {
-        clickEvent.originalEvent.preventDefault();
-        this.enterGallery(clickEvent.thumb);
+    const onMouseDownOutOfGallery = (/** @type {FavoritesMouseEvent} */ event) => {
+      if (event.leftClick && event.thumb !== null && !event.ctrlKey) {
+        event.originalEvent.preventDefault();
+        this.enterGallery(event.thumb);
         return;
       }
 
-      if (clickEvent.middleClick && clickEvent.thumb === null) {
-        clickEvent.originalEvent.preventDefault();
+      if (event.middleClick && event.thumb === null) {
+        event.originalEvent.preventDefault();
         this.toggleShowContentOnHover();
       }
     };
 
-    document.addEventListener("mousedown", (event) => {
+    Events.document.mousedown.on((event) => {
       this.executeFunctionBasedOnGalleryState({
         hover: onMouseDownOutOfGallery,
         idle: onMouseDownOutOfGallery,
         gallery: onMouseDownInGallery
-      }, new ClickEvent(event));
+      }, new FavoritesMouseEvent(event));
     });
   }
 
   setupClickHandler() {
-    document.addEventListener("click", (event) => {
+    Events.document.click.on((event) => {
       this.executeFunctionBasedOnGalleryState({
-        gallery: (/** @type {MouseEvent} */ mouseEvent) => {
+        gallery: (mouseEvent) => {
           if (mouseEvent.ctrlKey) {
             this.model.openOriginalContentInNewTab();
           }
@@ -303,7 +311,9 @@ class GalleryController {
           break;
 
         case " ":
-          this.view.toggleVideoPause();
+          if (this.model.currentThumb !== undefined && Utils.isVideo(this.model.currentThumb)) {
+            this.view.toggleVideoPause();
+          }
           break;
 
         default:
@@ -319,24 +329,24 @@ class GalleryController {
     };
     const throttledOnKeyDown = Utils.throttle(onKeyDown, GallerySettings.navigationThrottleTime);
 
-    document.addEventListener("keydown", (event) => {
-      if (event.repeat) {
-        throttledOnKeyDown(event);
+    Events.document.keydown.on((event) => {
+      if (event.originalEvent.repeat) {
+        throttledOnKeyDown(event.originalEvent);
       } else {
-        onKeyDown(event);
+        onKeyDown(event.originalEvent);
       }
     });
   }
 
   setupWheelHandler() {
-    document.addEventListener("wheel", (wheelevent) => {
+    Events.document.wheel.on((wheelevent) => {
       this.executeFunctionBasedOnGalleryState({
-        hover: (/** @type {WheelEvent} */ event) => {
-          this.view.updateBackgroundOpacity(event);
+        hover: (event) => {
+          this.view.updateBackgroundOpacity(event.originalEvent);
         },
-        gallery: (/** @type {WheelEvent} */ event) => {
-          if (!wheelevent.shiftKey) {
-            this.navigate(event.deltaY > 0 ? "ArrowRight" : "ArrowLeft");
+        gallery: (event) => {
+          if (!wheelevent.originalEvent.shiftKey) {
+            this.navigate(event.direction);
           }
         }
       }, wheelevent);
@@ -352,9 +362,9 @@ class GalleryController {
           this.view.handleMouseMoveInGallery();
         }
       });
-    }, 100);
+    }, 250);
 
-    document.addEventListener("mousemove", onMouseMove);
+    Events.document.mousemove.on(onMouseMove);
   }
 
   setupCustomUiEventHandler() {

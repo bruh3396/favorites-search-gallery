@@ -19,11 +19,11 @@ class HoldButton extends HTMLElement {
   static maxPollingTime = 500;
 
   /**
-   * @type {Number}
+   * @type {Timeout}
    */
   intervalId;
   /**
-   * @type {Number}
+   * @type {Timeout}
    */
   timeoutId;
   /**
@@ -40,10 +40,23 @@ class HoldButton extends HTMLElement {
       return;
     }
     this.addEventListeners();
-    this.setPollingTime(this.getAttribute("pollingtime"));
+    this.initializePollingTime();
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  initializePollingTime() {
+    const pollingTime = this.getAttribute("pollingtime");
+
+    if (pollingTime !== null) {
+      this.setPollingTime(pollingTime);
+    }
+  }
+
+  /**
+   * @param {String} name
+   * @param {String} _
+   * @param {String} newValue
+   */
+  attributeChangedCallback(name, _, newValue) {
     switch (name) {
       case "pollingtime":
         this.setPollingTime(newValue);
@@ -135,52 +148,39 @@ class NumberComponent {
   defaultValue;
 
   /**
-   * @type {Boolean}
-   */
-  get allSubComponentsConnected() {
-    return this.input !== null && this.upArrow !== null && this.downArrow !== null;
-  }
-
-  /**
    * @param {HTMLElement} element
    */
   constructor(element) {
-    this.connectSubElements(element);
+    this.extractSubElements(element);
     this.initializeFields();
     this.addEventListeners();
   }
 
   initializeFields() {
-    if (!this.allSubComponentsConnected) {
-      return;
-    }
-    this.stepSize = Utils.roundToTwoDecimalPlaces(parseFloat(this.input.getAttribute("step")) || 1);
+    this.stepSize = Utils.roundToTwoDecimalPlaces(parseFloat(this.input.getAttribute("step") || "1"));
 
     if (this.input.onchange === null) {
       this.input.onchange = () => { };
     }
 
     this.range = {
-      min: parseFloat(this.input.getAttribute("min")) || 0,
-      max: parseFloat(this.input.getAttribute("max")) || 100
+      min: parseFloat(this.input.getAttribute("min") || "0"),
+      max: parseFloat(this.input.getAttribute("max") || "100")
     };
-    this.defaultValue = parseFloat(this.input.getAttribute("defaultValue")) || 1;
+    this.defaultValue = parseFloat(this.input.getAttribute("defaultValue") || "1");
     this.setValue(this.defaultValue);
   }
 
   /**
-   * @param {HTMLDivElement} element
+   * @param {HTMLElement} element
    */
-  connectSubElements(element) {
-    this.input = element.querySelector("input");
-    this.upArrow = element.querySelector(".number-arrow-up");
-    this.downArrow = element.querySelector(".number-arrow-down");
+  extractSubElements(element) {
+    this.input = element.querySelector("input") || document.createElement("input");
+    this.upArrow = element.querySelector(".number-arrow-up") || new HoldButton();
+    this.downArrow = element.querySelector(".number-arrow-down") || new HoldButton();
   }
 
   addEventListeners() {
-    if (!this.allSubComponentsConnected) {
-      return;
-    }
     this.upArrow.onmousehold = () => {
       this.increment();
     };
@@ -198,22 +198,26 @@ class NumberComponent {
       }
     });
     this.upArrow.addEventListener("mouseup", () => {
-      this.input.onchange();
+      this.onChange();
     });
     this.downArrow.addEventListener("mouseup", () => {
-      this.input.onchange();
+      this.onChange();
     });
     this.upArrow.onMouseLeaveWhileHoldingDown = () => {
-      this.input.onchange();
+      this.onChange();
     };
     this.downArrow.onMouseLeaveWhileHoldingDown = () => {
-      this.input.onchange();
+      this.onChange();
     };
     this.input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
-        this.setValue(this.input.value);
+        this.setValue(Number(this.input.value));
       }
     });
+  }
+
+  onChange() {
+    this.input.dispatchEvent(new Event("change"));
   }
 
   increment() {
@@ -229,6 +233,6 @@ class NumberComponent {
    */
   setValue(value) {
     value = Number(isNaN(value) ? this.range.min : value);
-    this.input.value = Utils.clamp(parseFloat(value), this.range.min, this.range.max);
+    this.input.value = String(Utils.clamp(value, this.range.min, this.range.max));
   }
 }

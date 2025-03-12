@@ -226,9 +226,9 @@ class SavedSearches {
 
   loadSavedSearches() {
     const savedSearches = JSON.parse(localStorage.getItem(SavedSearches.localStorageKeys.savedSearches) || "[]");
-    const firstUse = Boolean(Preferences.savedSearchesTutorial.value);
+    const firstUse = Boolean(Preferences.savedSearchTutorial.value);
 
-    Preferences.savedSearchesTutorial.set(false);
+    Preferences.savedSearchTutorial.set(false);
 
     if (firstUse && savedSearches.length === 0) {
       this.createTutorialSearches();
@@ -241,9 +241,12 @@ class SavedSearches {
   }
 
   createTutorialSearches() {
+    /**
+     * @type {String[]}
+     */
     const searches = [];
 
-    window.addEventListener("startedFetchingFavorites", async() => {
+    Events.favorites.startedFetchingFavorites.on(async() => {
       await Utils.sleep(1000);
       const postIds = Utils.getAllThumbs().map(thumb => thumb.id);
 

@@ -8,7 +8,7 @@ class GalleryImageRenderer extends AbstractRenderer {
    */
   imageCreator;
   /**
-   * @type {GalleryThumbnailUpscaler}
+   * @type {MainUpscaler}
    */
   thumbUpscaler;
   /**
@@ -23,7 +23,7 @@ class GalleryImageRenderer extends AbstractRenderer {
     super(galleryContainer);
     this.canvas = new GalleryCanvas(this.container);
     this.imageCreator = new GalleryImageCreator(this.onImageCreated.bind(this));
-    this.thumbUpscaler = new GalleryThumbnailUpscaler();
+    this.thumbUpscaler = new MainUpscaler();
     this.lastShownId = "";
   }
 
@@ -47,6 +47,10 @@ class GalleryImageRenderer extends AbstractRenderer {
       return;
     }
     this.canvas.draw(imageRequest.imageBitmap);
+
+    if (imageRequest.accentColor !== null) {
+      Utils.setColorScheme(imageRequest.accentColor);
+    }
   }
 
   /**
@@ -59,14 +63,14 @@ class GalleryImageRenderer extends AbstractRenderer {
   handlePageChange() {
     this.imageCreator.clearAllImages();
     this.thumbUpscaler.clear();
-    this.thumbUpscaler.presetAllCanvasDimensions();
+    this.thumbUpscaler.onPageChange();
   }
 
   handlePageChangeInGallery() {
     this.imageCreator.clearAnimatedImages();
     this.thumbUpscaler.clear();
     setTimeout(() => {
-      this.thumbUpscaler.presetAllCanvasDimensions();
+      this.thumbUpscaler.onPageChange();
       this.upscaleThumbsWithAvailableImages();
     }, 10);
   }

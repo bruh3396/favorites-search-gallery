@@ -208,9 +208,9 @@ class FavoritesModel {
   }
 
   /**
-   * @param {String} sortingMethod
+   * @param {MetadataMetric} sortingMethod
    */
-  updateSortingMethod(sortingMethod) {
+  setSortingMethod(sortingMethod) {
     this.sorter.setSortingMethod(sortingMethod);
   }
 

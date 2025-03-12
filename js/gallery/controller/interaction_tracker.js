@@ -91,7 +91,7 @@ class InteractionTracker {
   }
 
   trackMouseMove() {
-    window.addEventListener("mousemove", this.onMouseMove.bind(this), {
+    Events.document.mousemove.on(this.onMouseMove.bind(this), {
       passive: true,
       signal: this.abortController.signal
     });

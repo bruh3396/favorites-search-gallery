@@ -27,6 +27,10 @@ class ImageRequest {
    * @type {HTMLElement}
    */
   thumb;
+  /**
+   * @type {String | null}
+   */
+  accentColor;
 
   /**
    * @type {Boolean}
@@ -74,6 +78,7 @@ class ImageRequest {
     this.isImage = Utils.isImage(thumb);
     this.isLowResolution = false;
     this.thumb = thumb;
+    this.accentColor = null;
   }
 
   /**
@@ -108,24 +113,41 @@ class ImageRequest {
    * @returns {Promise<void>}
    */
   start() {
+    this.createAccentColor();
+    return this.createImageBitmap();
+  }
+
+  createAccentColor() {
+    if (GallerySettings.createImageAccentColors) {
+      Utils.getMedianHexColor(this.thumb)
+        .then((color) => {
+          this.accentColor = color;
+        });
+    }
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  createImageBitmap() {
     return Utils.getOriginalImageURLWithExtension(this.thumb)
-    .then((url) => {
-      url = url.replace(".mp4", ".jpg");
-      this.abortIfCancelled();
-      return fetch(url, {
-        signal: this.abortController.signal
+      .then((url) => {
+        url = url.replace(".mp4", ".jpg");
+        this.abortIfCancelled();
+        return fetch(url, {
+          signal: this.abortController.signal
+        });
+      })
+      .then((response) => {
+        this.abortIfCancelled();
+        return response.blob();
+      })
+      .then((blob) => {
+        this.abortIfCancelled();
+        return createImageBitmap(blob);
+      })
+      .then((imageBitmap) => {
+        this.imageBitmap = imageBitmap;
       });
-    })
-    .then((response) => {
-      this.abortIfCancelled();
-      return response.blob();
-    })
-    .then((blob) => {
-      this.abortIfCancelled();
-      return createImageBitmap(blob);
-    })
-    .then((imageBitmap) => {
-      this.imageBitmap = imageBitmap;
-    });
   }
 }

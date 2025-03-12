@@ -2,6 +2,8 @@
  * @template T
  */
 class Preference {
+  static mainKey = "preferences";
+
   /**
    * @type {String}
    */
@@ -16,17 +18,13 @@ class Preference {
    * @type {T}
    */
   get value() {
-    const storedValue = localStorage.getItem(this.key);
+    const preferences = JSON.parse(localStorage.getItem(Preference.mainKey) || "{}");
+    const storedValue = preferences[this.key];
 
-    if (storedValue === null) {
+    if (storedValue === null || storedValue === undefined) {
       return this.defaultValue;
     }
-
-    try {
-      return JSON.parse(storedValue);
-    } catch (e) {
-      return this.defaultValue;
-    }
+    return storedValue;
   }
 
   /**
@@ -42,6 +40,9 @@ class Preference {
    * @param {T} value
    */
   set(value) {
-    localStorage.setItem(this.key, JSON.stringify(value));
+    const preferences = JSON.parse(localStorage.getItem(Preference.mainKey) || "{}");
+
+    preferences[this.key] = value;
+    localStorage.setItem(Preference.mainKey, JSON.stringify(preferences));
   }
 }

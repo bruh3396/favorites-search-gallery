@@ -34,11 +34,11 @@ class FavoritesUIController {
   }
 
   static setupHotkeys() {
-    const processCheckboxHotkey = async(/** @type {KeyboardEvent} */ event) => {
-      const hotkey = event.key.toLowerCase();
+    const processCheckboxHotkey = async(/** @type {FavoritesKeyboardEvent} */ event) => {
+      const hotkey = event.key;
       const target = FavoritesUIController.hotkeys[hotkey];
 
-      if (!Utils.isHotkeyEvent(event) || target === undefined) {
+      if (!event.isHotkey || target === undefined) {
         return;
       }
 
@@ -55,7 +55,7 @@ class FavoritesUIController {
       });
     };
 
-    const processGeneralHotkeyEvent = async(/** @type {KeyboardEvent} */ event) => {
+    const processGeneralHotkeyEvent = async(/** @type {FavoritesKeyboardEvent} */ event) => {
       const inGallery = await Utils.inGallery();
 
       if (inGallery) {
@@ -64,8 +64,8 @@ class FavoritesUIController {
 
       switch (event.key.toLowerCase()) {
         case "s":
-          event.stopImmediatePropagation();
-          event.stopPropagation();
+          event.originalEvent.stopImmediatePropagation();
+          event.originalEvent.stopPropagation();
           setTimeout(() => {
             Utils.focusMainSearchBox();
           }, 0);
@@ -76,7 +76,7 @@ class FavoritesUIController {
       }
     };
 
-    document.addEventListener("keydown", (event) => {
+    Events.document.keydown.on((event) => {
       processCheckboxHotkey(event);
       processGeneralHotkeyEvent(event);
     });

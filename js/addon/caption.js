@@ -177,7 +177,7 @@ class Caption {
     } else if (!this.caption.classList.contains("disabled")) {
       this.caption.classList.add("disabled");
     }
-    Preferences.captionVisibility.set(value);
+    Preferences.showCaptions.set(value);
   }
 
   addEventListeners() {
@@ -195,59 +195,54 @@ class Caption {
     this.caption.addEventListener("transitionstart", () => {
       this.caption.classList.add("transitioning");
     });
-    document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() !== "d" || !Utils.isHotkeyEvent(event)) {
+    Events.document.keydown.on((event) => {
+      if (event.key !== "d" || !event.isHotkey || !Flags.onFavoritesPage) {
         return;
       }
+      const showCaptionsCheckbox = document.getElementById("show-captions-checkbox");
 
-      if (Flags.onFavoritesPage) {
-        const showCaptionsCheckbox = document.getElementById("show-captions-checkbox");
-
-        if (showCaptionsCheckbox !== null) {
-          showCaptionsCheckbox.click();
-
-          if (this.currentThumb !== null && !this.caption.classList.contains("remove")) {
-            if (showCaptionsCheckbox.checked) {
-              this.attachToThumbHelper(this.currentThumb);
-            } else {
-              this.removeFromThumbHelper(this.currentThumb);
-            }
-          }
-        }
-      } else if (Flags.onSearchPage) {
-        // this.toggleVisibility();
+      if (!(showCaptionsCheckbox instanceof HTMLInputElement)) {
+        return;
       }
-    }, {
-      passive: true
+      showCaptionsCheckbox.click();
+
+      if (this.currentThumb !== null && !this.caption.classList.contains("remove")) {
+        if (showCaptionsCheckbox.checked) {
+          this.attachToThumbHelper(this.currentThumb);
+        } else {
+          this.removeFromThumbHelper(this.currentThumb);
+        }
+      }
     });
-    Events.document.mouseOver.on((clickEvent) => {
-      if (clickEvent.thumb === null) {
+    Events.document.mouseover.on((mouseOverEvent) => {
+      if (mouseOverEvent.insideOfThumb) {
+        const insideOfDifferentThumb = this.currentThumb !== null && mouseOverEvent.thumb !== null && this.currentThumb.id !== mouseOverEvent.thumb.id;
+
+        if (insideOfDifferentThumb) {
+          this.removeFromThumb(this.currentThumb);
+        }
+        this.attachToThumb(mouseOverEvent.thumb);
+        this.currentThumb = mouseOverEvent.thumb;
+      } else {
         if (this.currentThumb !== null) {
           this.removeFromThumb(this.currentThumb);
         }
         this.currentThumb = null;
-      } else {
-        this.attachToThumb(clickEvent.thumb);
-        this.currentThumb = clickEvent.thumb;
-      }
-    });
-    document.addEventListener("mouseout", (event) => {
-      const thumb = Utils.getThumbUnderCursor(event);
-
-      if (thumb !== null && !Utils.enteredOverCaptionTag(event)) {
-        this.currentThumb = null;
-        this.removeFromThumb(thumb);
       }
     });
   }
 
   addFavoritesPageEventListeners() {
-    Events.favorites.favoritesLoaded.once(() => {
+    Events.favorites.favoritesLoaded.on(() => {
       Caption.flags.finishedLoading = true;
+    }, {
+      once: true
     });
-    Events.favorites.favoritesLoadedFromDatabase.once(() => {
+    Events.favorites.favoritesLoadedFromDatabase.on(() => {
       Caption.flags.finishedLoading = true;
       this.findTagCategoriesOnPageChange();
+    }, {
+      once: true
     });
     Events.favorites.pageChange.on(Utils.debounceAfterFirstCall(() => {
       this.abortAllRequests("Changed Page");
@@ -265,7 +260,7 @@ class Caption {
   }
 
   /**
-   * @param {HTMLElement} thumb
+   * @param {HTMLElement | null} thumb
    */
   attachToThumb(thumb) {
     if (this.hidden || thumb === null) {
@@ -305,10 +300,10 @@ class Caption {
   }
 
   /**
-   * @param {HTMLElement} thumb
+   * @param {HTMLElement | null} thumb
    */
   removeFromThumb(thumb) {
-    if (this.hidden) {
+    if (this.hidden || thumb === null) {
       return;
     }
 
@@ -319,11 +314,9 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   removeFromThumbHelper(thumb) {
-    if (thumb !== null && thumb !== undefined) {
-      this.animateRemoval(thumb);
-    }
-    this.animate(false);
+    this.animateRemoval(thumb);
     this.caption.classList.add("inactive");
+    this.animate(false);
     this.caption.classList.remove("transition-completed");
   }
 
@@ -417,6 +410,10 @@ class Caption {
     }
     const header = document.getElementById(this.getCategoryHeaderId(tagCategory));
     const tag = document.createElement("li");
+
+    if (header === null) {
+      return;
+    }
 
     tag.className = `${tagCategory}-tag caption-tag`;
     tag.textContent = this.replaceUnderscoresWithSpaces(tagName);
@@ -530,7 +527,7 @@ class Caption {
    * @returns {Boolean}
    */
   getVisibilityPreference() {
-    return Boolean(Preferences.captionVisibility.value);
+    return Boolean(Preferences.showCaptions.value);
   }
 
   /**

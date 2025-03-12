@@ -1,3 +1,6 @@
+/**
+ * @template T
+ */
 class ElementTemplate {
   /**
    * @param {Object} param
@@ -17,7 +20,8 @@ class ElementTemplate {
    * @param {Number} param.max
    * @param {Number} param.step
    * @param {Number} param.pollingTime
-   * @param {Preference | null} param.preference
+   * @param {Preference<T> | null} param.preference
+   * @param {T | null} param.defaultValue
    */
   constructor({id,
     parentId,
@@ -35,7 +39,8 @@ class ElementTemplate {
     max = 100,
     step = 1,
     pollingTime = 50,
-    preference = null}) {
+    preference = null,
+    defaultValue = null}) {
     this.id = id;
     this.parentId = parentId;
     this.position = position;
@@ -53,5 +58,6 @@ class ElementTemplate {
     this.step = step;
     this.pollingTime = pollingTime;
     this.preference = preference;
+    this.defaultValue = defaultValue;
   }
 }

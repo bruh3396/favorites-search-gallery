@@ -49,7 +49,7 @@ class AutoplayController {
   static settings = {
     imageViewDuration: Preferences.autoplayImageDuration.value,
     minimumVideoDuration: Preferences.autoplayMinimumVideoDuration.value,
-    menuVisibilityDuration: Flags.onMobileDevice ? 1500 : 500,
+    menuVisibilityDuration: Flags.onMobileDevice ? 1500 : 1000,
 
     get imageViewDurationInSeconds() {
       return Utils.millisecondsToSeconds(this.imageViewDuration);
@@ -592,19 +592,19 @@ class AutoplayController {
     this.imageViewTimer.onCooldownEnd = () => {
       this.events.onComplete();
     };
-    document.addEventListener("mousemove", (event) => {
+    Events.document.mousemove.on(Utils.throttle((/** @type {MouseEvent} */ event) => {
       if (!Utils.overGalleryMenu(event)) {
         this.showMenu();
       }
-    }, {
+    }, 250), {
       signal: this.eventListenersAbortController.signal
     });
-    document.addEventListener("keydown", (event) => {
-      if (!Utils.isHotkeyEvent(event)) {
+    Events.document.keydown.on((event) => {
+      if (!event.isHotkey) {
         return;
       }
 
-      switch (event.key.toLowerCase()) {
+      switch (event.key) {
         case "p":
           this.showMenu();
           this.pause();

@@ -2,7 +2,7 @@ class ElementFactory {
 
   static stopErrors = {};
   /**
-   * @param {ElementTemplate} template
+   * @param {ElementTemplate<void>} template
    */
   static createButton(template) {
     const parent = document.getElementById(template.parentId);
@@ -39,7 +39,7 @@ class ElementFactory {
   }
 
   /**
-   * @param {ElementTemplate} template
+   * @param {ElementTemplate<Boolean>} template
    */
   static createCheckbox(template) {
     const parent = document.getElementById(template.parentId);
@@ -54,9 +54,11 @@ class ElementFactory {
     checkbox.dataset.action = template.action;
     parent.insertAdjacentElement(template.position, checkbox);
 
-    const preferenceName = Utils.convertDashedToCamelCase(template.id);
-
-    if (template.preference !== null) {
+    if (template.preference === null) {
+      if (template.defaultValue) {
+        checkbox.checked = template.defaultValue;
+      }
+    } else {
       checkbox.checked = template.preference.value;
     }
 
@@ -80,7 +82,7 @@ class ElementFactory {
   }
 
   /**
-   * @param {ElementTemplate} template
+   * @param {ElementTemplate<Boolean>} template
    */
   static createCheckboxOption(template) {
     const parent = document.getElementById(template.parentId);
@@ -106,7 +108,7 @@ class ElementFactory {
   }
 
   /**
-   * @param {ElementTemplate} template
+   * @param {ElementTemplate<String>} template
    */
   static createSelect(template) {
     const parent = document.getElementById(template.parentId);
@@ -156,7 +158,7 @@ class ElementFactory {
   }
 
   /**
-   * @param {ElementTemplate} template
+   * @param {ElementTemplate<Boolean>} template
    */
   static createToggleSwitch(template) {
     const parent = document.getElementById(template.parentId);
@@ -189,7 +191,7 @@ class ElementFactory {
   }
 
   /**
-   * @param {ElementTemplate} template
+   * @param {ElementTemplate<Number>} template
    */
   static createNumberComponent(template) {
     const parent = document.getElementById(template.parentId);
@@ -225,7 +227,7 @@ class ElementFactory {
       return;
     }
 
-    numberInput.value = defaultValue;
+    numberInput.value = String(defaultValue);
     numberInput.dispatchEvent(new KeyboardEvent("keydown", {
       key: "Enter",
       bubbles: true

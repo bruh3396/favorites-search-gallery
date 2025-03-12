@@ -4,7 +4,7 @@ class FavoritesSorter {
    */
   useAscendingOrder;
   /**
-   * @type {String}
+   * @type {MetadataMetric}
    */
   sortingMethod;
 
@@ -21,7 +21,7 @@ class FavoritesSorter {
   }
 
   /**
-   * @param {String} value
+   * @param {MetadataMetric} value
    */
   setSortingMethod(value) {
     this.sortingMethod = value;
@@ -38,7 +38,7 @@ class FavoritesSorter {
       return Utils.shuffleArray(postsToSort);
     }
     postsToSort.sort((postA, postB) => {
-      return (postB.metadata[this.sortingMethod] - postA.metadata[this.sortingMethod]) || 0;
+      return (postB.metadata.getMetric(this.sortingMethod) - postA.metadata.getMetric(this.sortingMethod));
     });
     return this.useAscendingOrder ? postsToSort.reverse() : postsToSort;
   }

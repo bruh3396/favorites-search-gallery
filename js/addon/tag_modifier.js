@@ -266,8 +266,8 @@ class TagModifier {
       return;
     }
 
-    document.addEventListener("click", (event) => {
-      if (!event.target.classList.contains(Utils.favoriteItemClassName)) {
+    Events.document.click.on((event) => {
+      if (!(event.target instanceof HTMLElement) || !event.target.classList.contains(Utils.favoriteItemClassName)) {
         return;
       }
       const post = Post.allPosts.get(event.target.id);
@@ -278,7 +278,6 @@ class TagModifier {
     }, {
       signal: this.tagEditModeAbortController.signal
     });
-
   }
 
   /**
@@ -318,9 +317,9 @@ class TagModifier {
 
   /**
    * @param {Post} post
-   * @param {Boolean} value
+   * @param {Boolean | undefined} value
    */
-  toggleThumbSelection(post, value) {
+  toggleThumbSelection(post, value = undefined) {
     this.atLeastOneFavoriteIsSelected = true;
 
     if (value === undefined) {

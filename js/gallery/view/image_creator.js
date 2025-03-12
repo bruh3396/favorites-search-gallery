@@ -188,12 +188,14 @@ class GalleryImageCreator {
   }
 
   clearAllImages() {
-    for (const [id, request] of this.imageRequests.entries()) {
-      request.close();
-      this.imageRequests.delete(id);
-    }
-    this.imageRequests.clear();
-    this.clearAnimatedImages();
+    setTimeout(() => {
+      for (const [id, request] of this.imageRequests.entries()) {
+        request.close();
+        this.imageRequests.delete(id);
+      }
+      this.imageRequests.clear();
+      this.clearAnimatedImages();
+    }, 0);
   }
 
   clearAnimatedImages() {

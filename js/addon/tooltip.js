@@ -64,7 +64,7 @@ class Tooltip {
     if (Tooltip.disabled) {
       return;
     }
-    this.visible = Preferences.tooltipVisibility.value;
+    this.visible = Preferences.showTooltip.value;
     Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.tooltip);
     this.tooltip = this.createTooltip();
     this.defaultTransition = this.tooltip.style.transition;
@@ -101,26 +101,32 @@ class Tooltip {
   }
 
   addKeyDownEventListener() {
-    document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() !== "t" || !Utils.isHotkeyEvent(event)) {
+    Events.document.keydown.on((event) => {
+      if (event.key !== "t" || !event.isHotkey) {
         return;
       }
 
       if (Flags.onFavoritesPage) {
         const showTooltipsCheckbox = document.getElementById("show-tooltips-checkbox");
 
-        if (showTooltipsCheckbox !== null) {
-          showTooltipsCheckbox.click();
-
-          if (this.currentImage !== null) {
-            if (this.visible) {
-              this.show(this.currentImage);
-            } else {
-              this.hide();
-            }
-          }
+        if (showTooltipsCheckbox === null) {
+          return;
         }
-      } else if (Flags.onSearchPage) {
+        showTooltipsCheckbox.click();
+
+        if (this.currentImage === null) {
+          return;
+        }
+
+        if (this.visible) {
+          this.show(this.currentImage);
+        } else {
+          this.hide();
+        }
+        return;
+      }
+
+      if (Flags.onSearchPage) {
         this.toggleVisibility();
 
         if (this.currentImage !== null) {
@@ -133,17 +139,17 @@ class Tooltip {
   }
 
   addMouseOverEventListener() {
-    Events.document.mouseOver.on((clickEvent) => {
-      if (clickEvent.thumb === null) {
+    Events.document.mouseover.on((mouseOverEvent) => {
+      if (mouseOverEvent.thumb === null) {
         this.hide();
         this.currentImage = null;
         return;
       }
 
-      if (Utils.enteredOverCaptionTag(clickEvent.originalEvent)) {
+      if (Utils.enteredOverCaptionTag(mouseOverEvent.originalEvent)) {
         return;
       }
-      const image = Utils.getImageFromThumb(clickEvent.thumb);
+      const image = Utils.getImageFromThumb(mouseOverEvent.thumb);
 
       if (image === null) {
         return;
@@ -402,7 +408,7 @@ class Tooltip {
     if (value === undefined) {
       value = !this.visible;
     }
-    Preferences.tooltipVisibility.set(value);
+    Preferences.showTooltip.set(value);
     this.visible = value;
   }
 

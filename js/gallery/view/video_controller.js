@@ -69,7 +69,13 @@ class VideoController {
   }
 
   preventVideoPlayersFromFlashingWhenLoaded() {
-    document.createElement("canvas").toBlob((blob) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    if (context !== null) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    canvas.toBlob((blob) => {
       if (blob === null) {
         return;
       }

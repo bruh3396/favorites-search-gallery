@@ -1,21 +1,11 @@
-class GalleryThumbnailUpscaler {
+class MainUpscaler {
   /**
    * @type {Map<String, HTMLCanvasElement | OffscreenCanvas>}
    */
   canvases;
-  /**
-   * @type {ImageRequest[]}
-   */
-  upscaleQueue;
-  /**
-   * @type {Boolean}
-   */
-  currentlyUpscaling;
 
   constructor() {
     this.canvases = new Map();
-    this.upscaleQueue = [];
-    this.currentlyUpscaling = false;
   }
 
   /**
@@ -23,44 +13,18 @@ class GalleryThumbnailUpscaler {
    */
   upscale(request) {
     if (this.requestIsValid(request)) {
-      // this.addToUpscaleQueue(request);
       this.finishUpscale(request);
     }
   }
 
   /**
-   * @param {ImageRequest} request\
+   * @param {ImageRequest} request
    * @returns {Boolean}
    */
   requestIsValid(request) {
     const thumbIsOnPage = document.getElementById(request.id) !== null;
     const thumbIsLowResolution = !this.canvases.has(request.id);
     return thumbIsOnPage && thumbIsLowResolution && Flags.onFavoritesPage && request.isOriginalResolution;
-  }
-
-  /**
-   * @param {ImageRequest} request
-   */
-  addToUpscaleQueue(request) {
-    this.upscaleQueue.push(request);
-    this.drainUpscaleQueue();
-  }
-
-  async drainUpscaleQueue() {
-    if (this.currentlyUpscaling) {
-      return;
-    }
-    this.currentlyUpscaling = true;
-
-    while (this.upscaleQueue.length > 0) {
-      const request = this.upscaleQueue.shift();
-
-      if (request !== undefined) {
-        this.finishUpscale(request);
-      }
-      await Utils.sleep(GallerySettings.upscaleDelay);
-    }
-    this.currentlyUpscaling = false;
   }
 
   /**
@@ -94,7 +58,7 @@ class GalleryThumbnailUpscaler {
     }
   }
 
-  presetAllCanvasDimensions() {
+  onPageChange() {
     this.presetCanvasDimensions(Utils.getAllThumbs());
   }
 
@@ -121,7 +85,6 @@ class GalleryThumbnailUpscaler {
       .filter(canvas => canvas !== null)
       .filter(canvas => canvas.dataset.size !== undefined)
       .map((canvas) => {
-        // @ts-ignore
         const dimensions = Utils.getDimensions(canvas.dataset.size);
         return ({
           canvas,
@@ -159,8 +122,6 @@ class GalleryThumbnailUpscaler {
       this.clearCanvas(canvas);
     }
     this.canvases.clear();
-    this.upscaleQueue = [];
-    this.currentlyUpscaling = false;
   }
 
   /**
