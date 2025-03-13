@@ -1,33 +1,27 @@
 class InactivePost {
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   id;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   tags;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   src;
-  /**
-   * @type {String}
-   */
+  /** @type {FavoritesDatabaseMetadataRecord | null} */
   metadata;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   createdFromDatabaseRecord;
 
   /**
-   * @param {HTMLElement | {id: String, tags: String, src: String, metadata: String}} favorite
+   * @param {HTMLElement | FavoritesDatabaseRecord} favorite
    */
   constructor(favorite) {
+    // console.trace({
+    //   favorite,
+    //   isHTMLElement: favorite instanceof HTMLElement
+    // });
     this.id = "";
     this.tags = "";
     this.src = "";
-    this.metadata = "";
+    this.metadata = null;
     this.createdFromDatabaseRecord = false;
 
     if (favorite instanceof HTMLElement) {
@@ -39,13 +33,13 @@ class InactivePost {
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, metadata: String}} record
+   * @param {FavoritesDatabaseRecord} record
    */
   populateAttributesFromDatabaseRecord(record) {
     this.id = record.id;
     this.tags = record.tags;
     this.src = Utils.decompressThumbnailSource(record.src, record.id);
-    this.metadata = record.metadata;
+    this.metadata = JSON.parse(record.metadata);
   }
 
   /**
@@ -76,7 +70,7 @@ class InactivePost {
     return Utils.removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
   }
 
-  instantiateMetadata() {
+  createMetadata() {
     if (this.createdFromDatabaseRecord) {
       return new PostMetadata(this.id, this.metadata || null);
     }

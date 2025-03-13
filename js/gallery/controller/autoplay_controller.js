@@ -203,7 +203,7 @@ class AutoplayController {
   }
 
   insertMenuHTML() {
-    Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.autoplay);
+    FavoritesSearchGalleryContainer.insertHTML("afterbegin", HTMLStrings.autoplay);
   }
 
   insertOptionHTML() {
@@ -592,14 +592,14 @@ class AutoplayController {
     this.imageViewTimer.onCooldownEnd = () => {
       this.events.onComplete();
     };
-    Events.document.mousemove.on(Utils.throttle((/** @type {MouseEvent} */ event) => {
+    Events.global.mousemove.on(Utils.throttle((/** @type {MouseEvent} */ event) => {
       if (!Utils.overGalleryMenu(event)) {
         this.showMenu();
       }
     }, 250), {
       signal: this.eventListenersAbortController.signal
     });
-    Events.document.keydown.on((event) => {
+    Events.global.keydown.on((event) => {
       if (!event.isHotkey) {
         return;
       }

@@ -97,6 +97,25 @@ class SearchBox {
     if (this.parent !== null) {
       this.parent.insertAdjacentHTML("afterend", html);
     }
+
+    const searchButton = document.getElementById("search-button");
+
+    if (searchButton instanceof Element) {
+      const searchButtonContainer = searchButton.parentElement;
+
+      if (searchButtonContainer !== null) {
+        searchButton.onclick = (event) => {
+          searchButtonContainer.dataset.action = "search";
+          searchButtonContainer.dispatchEvent(new CustomEvent("uiController", {
+            bubbles: true,
+            detail: {
+              ctrlKey: event.ctrlKey
+            }
+          }));
+        };
+      }
+    }
+
     const searchBar = document.getElementById(this.id);
 
     if (searchBar === null || !(searchBar instanceof HTMLInputElement)) {
@@ -130,19 +149,19 @@ class SearchBox {
       options.dispatchEvent(new CustomEvent("uiController", {
         bubbles: true
       }));
-      options.addEventListener("change", () => {
-        const menuIsSticky = content.classList.contains("sticky");
-        const margin = options.checked ? FavoritesMenu.settings.mobileMenuBaseHeight + FavoritesMenu.settings.mobileMenuExpandedHeight : FavoritesMenu.settings.mobileMenuBaseHeight;
+      // options.addEventListener("change", () => {
+      //   const menuIsSticky = content.classList.contains("sticky");
+      //   const margin = options.checked ? FavoritesMenu.settings.mobileMenuBaseHeight + FavoritesMenu.settings.mobileMenuExpandedHeight : FavoritesMenu.settings.mobileMenuBaseHeight;
 
-        if (menuIsSticky) {
-          Utils.sleep(1);
-          Utils.updateOptionContentMargin(margin);
-        }
-        Preferences.showOptions.set(options.checked);
-        options.dispatchEvent(new CustomEvent("uiController", {
-          bubbles: true
-        }));
-      });
+      //   if (menuIsSticky) {
+      //     Utils.sleep(1);
+      //     Utils.updateOptionContentMargin(margin);
+      //   }
+      //   Preferences.showOptions.set(options.checked);
+      //   options.dispatchEvent(new CustomEvent("uiController", {
+      //     bubbles: true
+      //   }));
+      // });
 
     }
     return searchBar;
@@ -213,12 +232,12 @@ class SearchBox {
   }
 
   executeSearch() {
+    this.searchHistory.add(this.searchBox.value);
+    this.updateLastEditedSearchQuery();
+    Utils.hideAwesomplete(this.searchBox);
     this.searchBox.dispatchEvent(new CustomEvent("controller", {
       bubbles: true,
       detail: this.searchBox.value
     }));
-    this.searchHistory.add(this.searchBox.value);
-    this.updateLastEditedSearchQuery();
-    Utils.hideAwesomplete(this.searchBox);
   }
 }

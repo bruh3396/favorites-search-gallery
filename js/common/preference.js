@@ -2,7 +2,7 @@
  * @template T
  */
 class Preference {
-  static mainKey = "preferences";
+  static localStorageKey = "preferences";
 
   /**
    * @type {String}
@@ -18,7 +18,7 @@ class Preference {
    * @type {T}
    */
   get value() {
-    const preferences = JSON.parse(localStorage.getItem(Preference.mainKey) || "{}");
+    const preferences = JSON.parse(localStorage.getItem(Preference.localStorageKey) || "{}");
     const storedValue = preferences[this.key];
 
     if (storedValue === null || storedValue === undefined) {
@@ -40,9 +40,9 @@ class Preference {
    * @param {T} value
    */
   set(value) {
-    const preferences = JSON.parse(localStorage.getItem(Preference.mainKey) || "{}");
+    const preferences = JSON.parse(localStorage.getItem(Preference.localStorageKey) || "{}");
 
     preferences[this.key] = value;
-    localStorage.setItem(Preference.mainKey, JSON.stringify(preferences));
+    localStorage.setItem(Preference.localStorageKey, JSON.stringify(preferences));
   }
 }

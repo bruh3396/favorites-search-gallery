@@ -35,7 +35,7 @@ class TagModifier {
    */
   favoritesOption;
   /**
-   * @type { {container: HTMLDivElement,
+   * @type {{container: HTMLDivElement,
    * textarea:  HTMLTextAreaElement,
    * statusLabel: HTMLLabelElement,
    * add: HTMLButtonElement,
@@ -166,7 +166,7 @@ class TagModifier {
     this.favoritesUI.reset.onclick = this.resetTagModifications.bind(this);
     this.favoritesUI.import.onclick = this.importTagModifications.bind(this);
     this.favoritesUI.export.onclick = this.exportTagModifications.bind(this);
-    window.addEventListener("searchStarted", () => {
+    Events.favorites.newSearchResults.on(() => {
       this.unSelectAll();
     });
     Events.favorites.pageChange.on(() => {
@@ -266,7 +266,7 @@ class TagModifier {
       return;
     }
 
-    Events.document.click.on((event) => {
+    Events.global.click.on((event) => {
       if (!(event.target instanceof HTMLElement) || !event.target.classList.contains(Utils.favoriteItemClassName)) {
         return;
       }

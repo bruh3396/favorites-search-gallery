@@ -13,6 +13,7 @@ class Events {
     /** @type {EventEmitter<void>} */ favoritesResized: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ layoutCompleted: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ showOnHover: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ missingMetadata: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true)
   };
 
@@ -27,7 +28,8 @@ class Events {
     /** @type {EventEmitter<String>} */ idClicked: new EventEmitter(true)
   };
 
-  static document = {
+  static global = {
+    /** @type {EventEmitter<void>} */ postProcess: new EventEmitter(true),
     /** @type {EventEmitter<FavoritesMouseEvent>} */ mouseover: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ click: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ mousedown: new EventEmitter(true),
@@ -37,37 +39,57 @@ class Events {
     /** @type {EventEmitter<MouseEvent>} */ mousemove: new EventEmitter(true)
   };
 
-  static setupDocumentEvents() {
-    document.addEventListener("mouseover", (event) => {
-      Events.document.mouseover.emit(new FavoritesMouseEvent(event));
+  static window = {
+    /** @type {EventEmitter<FocusEvent>} */ focus: new EventEmitter(true),
+    /** @type {EventEmitter<FocusEvent>} */ blur: new EventEmitter(true)
+  };
+
+  static setupGlobalEvents() {
+    const container = Flags.onFavoritesPage ? FavoritesSearchGalleryContainer.container : document.documentElement;
+
+    container.addEventListener("mouseover", (event) => {
+      Events.global.mouseover.emit(new FavoritesMouseEvent(event));
     }, {
       passive: true
     });
-    document.addEventListener("click", (event) => {
-      Events.document.click.emit(event);
+    container.addEventListener("click", (event) => {
+      Events.global.click.emit(event);
+      console.log("click");
     });
-    document.addEventListener("mousedown", (event) => {
-      Events.document.mousedown.emit(event);
+    container.addEventListener("mousedown", (event) => {
+      Events.global.mousedown.emit(event);
     });
-    document.addEventListener("mousemove", (event) => {
-      Events.document.mousemove.emit(event);
+    container.addEventListener("mousemove", (event) => {
+      Events.global.mousemove.emit(event);
     }, {
       passive: true
     });
     document.addEventListener("keydown", (event) => {
-      Events.document.keydown.emit(new FavoritesKeyboardEvent(event));
+      Events.global.keydown.emit(new FavoritesKeyboardEvent(event));
+      console.log("keydown");
     });
-    document.addEventListener("wheel", (event) => {
-      Events.document.wheel.emit(new FavoritesWheelEvent(event));
+    container.addEventListener("wheel", (event) => {
+      Events.global.wheel.emit(new FavoritesWheelEvent(event));
     }, {
       passive: true
     });
-    document.addEventListener("contextmenu", (event) => {
-      Events.document.contextmenu.emit(event);
+    container.addEventListener("contextmenu", (event) => {
+      Events.global.contextmenu.emit(event);
+    });
+  }
+
+  static setupWindowEvents() {
+    window.addEventListener("focus", (event) => {
+      Events.window.focus.emit(event);
+    });
+    window.addEventListener("blur", (event) => {
+      Events.window.focus.emit(event);
     });
   }
 
   static {
-    this.setupDocumentEvents();
+
+    Utils.addStaticInitializer(this.setupGlobalEvents);
+    Utils.addStaticInitializer(this.setupWindowEvents);
   }
 }

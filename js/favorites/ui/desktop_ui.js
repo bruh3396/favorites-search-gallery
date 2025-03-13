@@ -7,6 +7,7 @@ class FavoritesMenuDesktopUI {
       {id: "shuffle-button", parentId: "left-favorites-panel-top-row", textContent: "Shuffle", title: "Randomize order of search results", action: "shuffleSearchResults", enabled: true},
       {id: "invert-button", parentId: "left-favorites-panel-top-row", textContent: "Invert", title: "Show results not matched by latest search", action: "invertSearchResults", enabled: true},
       {id: "clear-button", parentId: "left-favorites-panel-top-row", textContent: "Clear", title: "Empty the search box", action: "clear", enabled: true, handler: "uiController"},
+      {id: "download-button", parentId: "left-favorites-panel-top-row", textContent: "Download", title: "Download search results", action: "downloadSearchResults", enabled: true, handler: "controller"},
       {id: "reset-button", parentId: "left-favorites-panel-top-row", textContent: "Reset", title: "Delete cached favorites and reset preferences", action: "reset", enabled: true, handler: "uiController"}
     ],
     "checkboxOption": [
@@ -21,7 +22,7 @@ class FavoritesMenuDesktopUI {
       {id: "toggle-header", parentId: "dynamic-favorite-options", textContent: "Header", title: "Toggle site header", action: "toggleHeader", enabled: true, preference: Preferences.showHeader, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "dark-theme", parentId: "favorite-options", textContent: "Dark Theme", title: "Toggle dark theme", action: "toggleDarkTheme", enabled: true, defaultValue: Utils.usingDarkTheme(), hotkey: "", invokeActionOnCreation: false, savePreference: false, handler: "uiController"},
       {id: "show-on-hover", parentId: "dynamic-favorite-options", textContent: "Fullscreen on Hover", title: "View full resolution images or play videos and GIFs when hovering over a thumbnail", action: "toggleShowOnHover", enabled: Flags.galleryEnabled, preference: Preferences.showOnHover, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"},
-      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Sidebar", title: "Show sidebar in gallery", action: "toggleGalleryMenu", enabled: Flags.galleryEnabled, preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"}
+      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Menu", title: "Show menu in gallery", action: "toggleGalleryMenu", enabled: Flags.galleryEnabled && Settings.galleryMenuEnabled, preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"}
     ],
     "select": [
       {

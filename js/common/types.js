@@ -21,6 +21,10 @@ class Types {
 
   /** @typedef {":" | ":<" | ":>"} MetadataComparator */
 
+  /** @typedef {{width: Number, height: Number, score: Number, rating: Number, create: Number, change: Number, deleted: Boolean}} FavoritesDatabaseMetadataRecord */
+
+  /** @typedef {{id: String, tags: String, src: String, metadata: String}} FavoritesDatabaseRecord */
+
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);

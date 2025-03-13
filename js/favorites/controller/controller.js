@@ -41,7 +41,9 @@ class FavoritesController {
       }
       const action = event.target.dataset.action || "none";
 
+      // @ts-ignore
       if (typeof this[action] === "function") {
+        // @ts-ignore
         this[action](event.detail);
       }
     });
@@ -80,9 +82,8 @@ class FavoritesController {
   }
 
   updateMissingMetadataWhenAvailable() {
-    // @ts-ignore
-    window.addEventListener("missingMetadata", (/** @type CustomEvent */ event) => {
-      this.model.updateMetadata(event.detail);
+    Events.favorites.missingMetadata.on((id) => {
+      this.model.updateMetadata(id);
     });
   }
 
@@ -102,7 +103,7 @@ class FavoritesController {
   }
 
   addKeyDownEventListeners() {
-    Events.document.keydown.on((event) => {
+    Events.global.keydown.on((event) => {
       if ((event.originalEvent.key === "ArrowRight" || event.originalEvent.key === "ArrowLeft") && !event.originalEvent.repeat) {
         this.changePageWithArrowKey(event.originalEvent.key);
       }
@@ -348,5 +349,35 @@ class FavoritesController {
       this.showCurrentPage();
     }
     this.view.revealFavorite(id);
+  }
+
+  downloadSearchResults() {
+    const posts = this.model.getLatestSearchResults();
+    const postCount = posts.length;
+
+    if (postCount === 0) {
+      return;
+    }
+    let fetchedCount = 0;
+    const zippedCount = 0;
+
+    console.log("fetch");
+    const onFetch = () => {
+      fetchedCount += 1;
+      console.log(`fetch ${fetchedCount}/${postCount}`);
+    };
+    const onFetchEnd = () => {
+      console.log("fetch end");
+      console.log("zip start");
+    };
+    const onZipEnd = () => {
+      console.log("zip end");
+    };
+
+    Downloader.downloadPosts(posts, {
+      onFetch,
+      onFetchEnd,
+      onZipEnd
+    });
   }
 }

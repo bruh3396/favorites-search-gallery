@@ -15,6 +15,7 @@ class FavoritesUIController {
     }
 
     menu.addEventListener("uiController", (event) => {
+
       // @ts-ignore
       if (!Utils.hasTagName(event.target, "label")) {
         FavoritesUIController.invokeAction(event);
@@ -76,7 +77,7 @@ class FavoritesUIController {
       }
     };
 
-    Events.document.keydown.on((event) => {
+    Events.global.keydown.on((event) => {
       processCheckboxHotkey(event);
       processGeneralHotkeyEvent(event);
     });
@@ -333,6 +334,7 @@ class FavoritesUIController {
    * @returns
    */
   static search(event) {
+    console.log(2);
     const searchBox = document.getElementById(Utils.mainSearchBoxId);
 
     if (searchBox === null || (!(searchBox instanceof HTMLTextAreaElement) && !(searchBox instanceof HTMLInputElement))) {

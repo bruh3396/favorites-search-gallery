@@ -248,4 +248,12 @@ Q: Why am I experiencing lag?<br>
 
 ## Credits
 
-**Awesomplete**: An ultra-lightweight, customizable, simple autocomplete widget with zero dependencies, by Lea Verou. [Website](https://leaverou.github.io/awesomplete/) | [GitHub Repository](https://github.com/LeaVerou/awesomplete)
+**Awesomplete**: [Website](https://leaverou.github.io/awesomplete/) | [GitHub Repository](https://github.com/LeaVerou/awesomplete) | [MIT License](https://opensource.org/licenses/MIT)<br>
+Copyright (c) 2013-2025, Lea Verou
+
+
+**Zip.js**: [Website](https://gildas-lormeau.github.io/zip.js/) | [GitHub Repository](https://github.com/gildas-lormeau/zip.js) | [License](https://github.com/gildas-lormeau/zip.js/blob/master/LICENSE)
+Copyright (c) 2010-2024 Gildas Lormeau
+
+
+

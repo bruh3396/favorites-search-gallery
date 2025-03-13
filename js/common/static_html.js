@@ -86,7 +86,6 @@ class HTMLStrings {
         >span {
           color: #0075FF;
         }
-
       }
 
       >span {
@@ -436,7 +435,7 @@ class HTMLStrings {
     }
 
     #find-favorite {
-      /* display: none; */
+      display: none;
       margin-top: 7px;
 
       >input {

@@ -86,6 +86,9 @@ class SearchCommand {
    * @returns {Post[]}
    */
   getSearchResults(posts) {
+    if (this.isEmpty) {
+      return posts;
+    }
     const results = [];
 
     for (const post of posts) {
@@ -104,10 +107,6 @@ class SearchCommand {
    * @returns {Boolean}
    */
   matches(post) {
-    if (this.isEmpty) {
-      return true;
-    }
-
     if (!this.matchesAllRemainingSearchTags(post)) {
       return false;
     }

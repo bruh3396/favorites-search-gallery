@@ -90,11 +90,11 @@ class GalleryMenu {
           break;
       }
     });
-    Events.document.mousemove.on(Utils.throttle(() => {
+    Events.global.mousemove.on(Utils.throttle(() => {
       this.reveal();
     }, 250));
 
-    Events.document.mouseover.on((mouseOverEvent) => {
+    Events.global.mouseover.on((mouseOverEvent) => {
       this.togglePersistence(mouseOverEvent.originalEvent);
     });
   }

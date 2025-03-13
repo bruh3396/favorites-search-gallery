@@ -76,11 +76,11 @@ class FavoritesMenuMobileUI {
   }
 
   static addStyles() {
-    Utils.insertStyleHTML(`
-      #left-favorites-panel-bottom-row {
-        height: ${FavoritesMenu.settings.mobileMenuExpandedHeight}px;
-      }
-          `, "left-bottom-row");
+    // Utils.insertStyleHTML(`
+    //   #left-favorites-panel-bottom-row {
+    //     height: ${FavoritesMenu.settings.mobileMenuExpandedHeight}px;
+    //   }
+    //       `, "left-bottom-row");
   }
 
   static setupStickyMenu() {
@@ -88,27 +88,26 @@ class FavoritesMenuMobileUI {
     const headerHeight = header === null ? 0 : header.getBoundingClientRect().height;
 
     window.addEventListener("scroll", async() => {
-      if (window.scrollY > headerHeight && document.getElementById("sticky-header-fsg-style") === null) {
-        Utils.insertStyleHTML(
-          `
-          #favorites-search-gallery-menu {
-              position: fixed;
-              margin-top: 0;
-          }`,
-          "sticky-header"
-        );
-        this.updateOptionContentMargin();
-        await Utils.sleep(1);
-        document.getElementById("favorites-search-gallery-content").classList.add("sticky");
+      // if (window.scrollY > headerHeight && document.getElementById("sticky-header-fsg-style") === null) {
+      //   Utils.insertStyleHTML(
+      //     `
+      //     #favorites-search-gallery-menu {
+      //         position: fixed;
+      //         margin-top: 0;
+      //     }`,
+      //     "sticky-header"
+      //   );
+      //   this.updateOptionContentMargin();
+      //   await Utils.sleep(1);
+      //   document.getElementById("favorites-search-gallery-content").classList.add("sticky");
 
-      } else if (window.scrollY <= headerHeight && document.getElementById("sticky-header-fsg-style") !== null) {
-        document.getElementById("sticky-header-fsg-style").remove();
-        document.getElementById("favorites-search-gallery-content").classList.remove("sticky");
-        this.removeOptionContentMargin();
-      }
+      // } else if (window.scrollY <= headerHeight && document.getElementById("sticky-header-fsg-style") !== null) {
+      //   document.getElementById("sticky-header-fsg-style").remove();
+      //   document.getElementById("favorites-search-gallery-content").classList.remove("sticky");
+      //   this.removeOptionContentMargin();
+      // }
     }, {
       passive: true
     });
   }
-
 }

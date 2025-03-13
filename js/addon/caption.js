@@ -195,7 +195,7 @@ class Caption {
     this.caption.addEventListener("transitionstart", () => {
       this.caption.classList.add("transitioning");
     });
-    Events.document.keydown.on((event) => {
+    Events.global.keydown.on((event) => {
       if (event.key !== "d" || !event.isHotkey || !Flags.onFavoritesPage) {
         return;
       }
@@ -214,7 +214,7 @@ class Caption {
         }
       }
     });
-    Events.document.mouseover.on((mouseOverEvent) => {
+    Events.global.mouseover.on((mouseOverEvent) => {
       if (mouseOverEvent.insideOfThumb) {
         const insideOfDifferentThumb = this.currentThumb !== null && mouseOverEvent.thumb !== null && this.currentThumb.id !== mouseOverEvent.thumb.id;
 

@@ -12,7 +12,7 @@ class FavoritesUI {
         const style = Flags.onMobileDevice ? HTMLStrings.mobile : HTMLStrings.desktop;
 
         Utils.insertStyleHTML(style, "desktop-mobile");
-        Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.favorites);
+        FavoritesSearchGalleryContainer.insertHTML("afterbegin", HTMLStrings.favorites);
       }
     });
   }

@@ -39,7 +39,7 @@ class PostMetadata {
       if (metadata.postIsDeleted) {
         metadata.populateMetadataFromPost();
       } else {
-        metadata.populateMetadataFromAPI()
+        metadata.fetchMetadataFromAPI()
           .then(() => {
             Utils.broadcastEvent("missingMetadata", metadata.id);
           });
@@ -116,13 +116,6 @@ class PostMetadata {
   /**
    * @type {String}
    */
-  get apiURL() {
-    return Utils.getPostAPIURL(this.id);
-  }
-
-  /**
-   * @type {String}
-   */
   get postURL() {
     return Utils.getPostPageURL(this.id);
   }
@@ -165,7 +158,7 @@ class PostMetadata {
 
   /**
    * @param {String} id
-   * @param {Object<String, String>} record
+   * @param {FavoritesDatabaseMetadataRecord | undefined | null} record
    */
   constructor(id, record) {
     this.id = id;
@@ -181,14 +174,14 @@ class PostMetadata {
   }
 
   /**
-   * @param {Object<String, String>} record
+   * @param {FavoritesDatabaseMetadataRecord | undefined | null} record
    */
   populateMetadata(record) {
     const databaseRecordHasNoMetadata = record === null;
     const databaseRecordDoesNotExist = record === undefined;
 
     if (databaseRecordDoesNotExist) {
-      this.populateMetadataFromAPI();
+      this.fetchMetadataFromAPI();
       return;
     }
 
@@ -197,7 +190,7 @@ class PostMetadata {
       PostMetadata.fetchAllMissingMetadata();
       return;
     }
-    this.populateMetadataFromRecord(JSON.parse(record));
+    this.populateMetadataFromRecord(record);
     const databaseRecordHasEmptyMetadata = this.isEmpty;
 
     if (databaseRecordHasEmptyMetadata) {
@@ -206,56 +199,75 @@ class PostMetadata {
     }
   }
 
-  populateMetadataFromAPI() {
+  fetchMetadataFromAPI() {
     if (PostMetadata.pendingRequests.size > 200) {
       this.addInstanceToMissingMetadataQueue();
       return Utils.sleep(0);
     }
     PostMetadata.pendingRequests.add(this.id);
-    return fetch(this.apiURL)
-      .then((response) => {
-        return response.text();
-      })
-      .then((html) => {
+    return new APIPost(this.id).fetch()
+      .then((apiPost) => {
         PostMetadata.pendingRequests.delete(this.id);
-        const dom = PostMetadata.parser.parseFromString(html, "text/html");
-        const metadata = dom.querySelector("post");
+        this.checkIfEmpty(apiPost);
+        this.populateMetadataFromAPI(apiPost);
+        this.assignExtension(apiPost);
 
-        if (metadata === null) {
-          // @ts-ignore
-          throw new Error(`metadata is null - ${this.apiURL}`, {
-            cause: "DeletedMetadata"
-          });
-        }
-        this.width = parseInt(metadata.getAttribute("width") || "0");
-        this.height = parseInt(metadata.getAttribute("height") || "0");
-        this.score = parseInt(metadata.getAttribute("score") || "0");
-        this.rating = PostMetadata.encodeRating(metadata.getAttribute("rating") || "0");
-        this.creationTimestamp = Date.parse(metadata.getAttribute("created_at") || "0");
-        this.lastChangedTimestamp = parseInt(metadata.getAttribute("change") || "0");
-        Post.validateExtractedTagsAgainstAPI(this.id, metadata.getAttribute("tags") || "", metadata.getAttribute("file_url") || "");
-
-        const extension = Utils.getExtensionFromImageURL(metadata.getAttribute("file_url") || "");
-
-        if (extension !== "mp4") {
-          Utils.assignImageExtension(this.id, extension);
-        }
-      })
-      .catch((error) => {
-        if (error.cause === "DeletedMetadata") {
-          this.postIsDeleted = true;
-          PostMetadata.deletedPostFetchQueue.push(this);
-        } else if (error.message === "Failed to fetch") {
-          PostMetadata.missingMetadataFetchQueue.push(this);
-        } else {
-          console.error(error);
-        }
+      }).catch((error) => {
+        this.handleAPIFailure(error);
       });
   }
 
   /**
-   * @param {Object<String, String>} record
+   * @param {APIPost} apiPost
    */
+  checkIfEmpty(apiPost) {
+    if (apiPost.isEmpty) {
+      // @ts-ignore
+      throw new Error(`metadata is null - ${apiPost.url}`, {
+        cause: "DeletedMetadata"
+      });
+    }
+  }
+
+  /**
+   * @param {APIPost} apiPost
+   */
+  assignExtension(apiPost) {
+    if (apiPost.extension !== "mp4") {
+      Utils.assignImageExtension(this.id, apiPost.extension);
+    }
+  }
+
+  /**
+   * @param {APIPost} apiPost
+   */
+  populateMetadataFromAPI(apiPost) {
+    this.width = apiPost.width;
+    this.height = apiPost.height;
+    this.score = apiPost.score;
+    this.rating = PostMetadata.encodeRating(apiPost.rating);
+    this.creationTimestamp = Date.parse(apiPost.createdAt);
+    this.lastChangedTimestamp = apiPost.change;
+    Post.validateExtractedTagsAgainstAPI(this.id, apiPost.tags, apiPost.fileURL);
+  }
+
+  /**
+   * @param {any} error
+   */
+  handleAPIFailure(error) {
+    if (error.cause === "DeletedMetadata") {
+      this.postIsDeleted = true;
+      PostMetadata.deletedPostFetchQueue.push(this);
+    } else if (error.message === "Failed to fetch") {
+      PostMetadata.missingMetadataFetchQueue.push(this);
+    } else {
+      console.error(error);
+    }
+  }
+
+/**
+ * @param {FavoritesDatabaseMetadataRecord} record
+ */
   populateMetadataFromRecord(record) {
     this.width = record.width;
     this.height = record.height;

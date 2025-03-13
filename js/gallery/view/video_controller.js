@@ -223,7 +223,7 @@ class VideoController {
   }
 
   loadVideoClips() {
-    window.addEventListener("postProcess", () => {
+    Events.global.postProcess.on(() => {
       setTimeout(() => {
         let storedVideoClips;
 

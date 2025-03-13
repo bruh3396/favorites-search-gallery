@@ -43,6 +43,7 @@ class FavoritesColumnTiler extends Tiler {
    */
   tile(items) {
     this.clearContainer();
+    this.deleteColumns();
     this.createColumns();
     this.addItemsToColumns(items);
     this.addColumnsToContainer();
@@ -50,8 +51,6 @@ class FavoritesColumnTiler extends Tiler {
   }
 
   createColumns() {
-    this.deleteColumns();
-
     for (let i = 0; i < this.columnCount; i += 1) {
       const column = document.createElement("div");
 
@@ -72,11 +71,16 @@ class FavoritesColumnTiler extends Tiler {
    */
   addItemsToColumns(items) {
     for (let i = 0; i < items.length; i += 1) {
-      const columnIndex = i % this.columnCount;
-      const item = items[i];
-
-      this.columns[columnIndex].appendChild(item);
+      this.addItemToColumn(i, items[i]);
     }
+  }
+
+  /**
+   * @param {Number} itemIndex
+   * @param {HTMLElement} item
+   */
+  addItemToColumn(itemIndex, item) {
+    this.columns[itemIndex % this.columnCount].appendChild(item);
   }
 
   clearContainer() {
@@ -162,9 +166,31 @@ class FavoritesColumnTiler extends Tiler {
    * @param {HTMLElement[]} items
    */
   addToBottom(items) {
-    if (this.active) {
-      this.deactivate();
+    if (this.inactive) {
+      this.tile(items);
+      return;
     }
-    this.tile(Utils.getAllThumbs().concat(items));
+    this.addNewItemsToColumns(items);
+  }
+
+  /**
+   * @param {HTMLElement[]} items
+   */
+  addNewItemsToColumns(items) {
+    const columnIndexOffset = this.getIndexOfNextAvailableColumn();
+
+    for (let i = 0; i < items.length; i += 1) {
+      this.addItemToColumn(i + columnIndexOffset, items[i]);
+    }
+  }
+
+  /**
+   * @returns {Number}
+   */
+  getIndexOfNextAvailableColumn() {
+    const columnLengths = this.columns.map(column => column.children.length);
+    const minColumnLength = Math.min(...columnLengths);
+    const firstIndexWithMinimumLength = columnLengths.findIndex(length => length === minColumnLength);
+    return firstIndexWithMinimumLength === -1 ? 0 : firstIndexWithMinimumLength;
   }
 }

@@ -157,7 +157,7 @@ class NumberComponent {
   }
 
   initializeFields() {
-    this.stepSize = Utils.roundToTwoDecimalPlaces(parseFloat(this.input.getAttribute("step") || "1"));
+    this.stepSize = Math.round(parseFloat(this.input.getAttribute("step") || "1"));
 
     if (this.input.onchange === null) {
       this.input.onchange = () => { };
@@ -221,18 +221,47 @@ class NumberComponent {
   }
 
   increment() {
-    this.setValue((parseFloat(this.input.value) || 1) + this.stepSize);
+    this.setValue(this.getSnapMax(this.getSanitizedValue()));
   }
 
   decrement() {
-    this.setValue((parseFloat(this.input.value) || 1) - this.stepSize);
+    const value = this.getSanitizedValue();
+
+    if (value % this.stepSize === 0) {
+      this.setValue(value - this.stepSize);
+      return;
+    }
+    this.setValue(this.getSnapMin(value));
   }
 
   /**
    * @param {Number} value
    */
   setValue(value) {
-    value = Number(isNaN(value) ? this.range.min : value);
     this.input.value = String(Utils.clamp(value, this.range.min, this.range.max));
+  }
+
+  /**
+   * @param {Number} value
+   * @returns {Number}
+   */
+  getSnapMin(value) {
+    return Math.floor(value / this.stepSize) * this.stepSize;
+  }
+
+  /**
+   * @param {Number} value
+   * @returns {Number}
+   */
+  getSnapMax(value) {
+    return this.getSnapMin(value) + this.stepSize;
+  }
+
+  /**
+   * @returns {Number}
+   */
+  getSanitizedValue() {
+    const value = parseFloat(this.input.value);
+    return isNaN(value) ? this.range.min : value;
   }
 }

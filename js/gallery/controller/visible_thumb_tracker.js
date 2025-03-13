@@ -101,7 +101,7 @@ class VisibleThumbTracker {
       resizedOnce = true;
     }, 300);
 
-    window.addEventListener("postProcess", () => {
+    Events.global.postProcess.on(() => {
       const resizeObserver = new ResizeObserver(onMenuResized);
 
       resizeObserver.observe(menu);

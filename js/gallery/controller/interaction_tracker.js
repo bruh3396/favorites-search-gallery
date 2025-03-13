@@ -78,7 +78,7 @@ class InteractionTracker {
       this.abortController = new AbortController();
       this.startInteractionOnStartTimer();
       this.trackMouseMove();
-      // this.trackScroll();
+      this.trackScroll();
       return;
     }
     this.abortController.abort();
@@ -91,7 +91,7 @@ class InteractionTracker {
   }
 
   trackMouseMove() {
-    Events.document.mousemove.on(this.onMouseMove.bind(this), {
+    Events.global.mousemove.on(this.onMouseMove.bind(this), {
       passive: true,
       signal: this.abortController.signal
     });
@@ -122,7 +122,7 @@ class InteractionTracker {
     this.scrolling = true;
     clearTimeout(this.interactionOnStartTimeout);
     clearTimeout(this.scrollTimeout);
-    this.scrollTimer = setTimeout(() => {
+    this.scrollTimeout = setTimeout(() => {
       this.scrolling = false;
       this.onScrollingStopped();
 

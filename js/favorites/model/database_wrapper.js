@@ -105,7 +105,7 @@ class FavoritesDatabaseWrapper {
   }
 
   /**
-   * @param {{ id: string; tags: string; src: string; metadata: string; }[]} records
+   * @param {FavoritesDatabaseRecord[]} records
    * @returns {Post[]}
    */
   deserializeFavorites(records) {

@@ -182,7 +182,7 @@ class Post {
   }
 
   /**
-   * @type {{id: String, tags: String, src: String, metadata: String}}
+   * @type {FavoritesDatabaseRecord}
    */
   get databaseRecord() {
     return {
@@ -215,11 +215,18 @@ class Post {
   }
 
   /**
-   * @param {HTMLElement | {id: String, tags: String, src: String, metadata: String}} thumb
+   * @type {String}
    */
-  constructor(thumb) {
+  get thumbURL() {
+    return this.inactivePost === null ? this.image.src : this.inactivePost.src;
+  }
+
+  /**
+   * @param {HTMLElement | FavoritesDatabaseRecord} entity
+   */
+  constructor(entity) {
     this.initializeFields();
-    this.inactivePost = new InactivePost(thumb);
+    this.inactivePost = new InactivePost(entity);
     this.populateAttributesNeededForSearch();
     this.setAsMatchedByMostRecentSearch(true);
     this.addInstanceToAllPosts();
@@ -237,7 +244,8 @@ class Post {
     }
     this.attributesNeededForSearchArePopulated = true;
     this.id = this.inactivePost.id;
-    this.metadata = this.inactivePost.instantiateMetadata();
+    this.metadata = this.inactivePost.createMetadata();
+    // console.trace(this.metadata);
     this.initializeTagSet(this.inactivePost.tags);
     this.deleteConsumedPropertiesFromInactivePost();
   }
@@ -343,7 +351,7 @@ class Post {
 
   deleteConsumedPropertiesFromInactivePost() {
     if (this.inactivePost !== null) {
-      this.inactivePost.metadata = "";
+      this.inactivePost.metadata = null;
       this.inactivePost.tags = "";
     }
   }
@@ -379,6 +387,7 @@ class Post {
     if (canvas === null || this.metadata.isEmpty) {
       return;
     }
+    // console.trace(this.metadata);
     canvas.dataset.size = `${this.metadata.width}x${this.metadata.height}`;
   }
 
@@ -472,5 +481,28 @@ class Post {
   withinRatings(ratings) {
     // eslint-disable-next-line no-bitwise
     return (this.metadata.rating & ratings) > 0;
+  }
+
+  /**
+   * @returns {Promise<{url: String, extension: String}>}
+   */
+  async getOriginalFileURL() {
+    const thumbURL = this.inactivePost === null ? this.image.src : this.inactivePost.src;
+    const isVideo = SetUtils.intersection(Constants.videoTagSet, this.tagSet).size > 0;
+    const isAnimated = SetUtils.intersection(Constants.animatedTagSet, this.tagSet).size > 0;
+    let extension;
+
+    if (isVideo) {
+      extension = "mp4";
+    } else if (isAnimated) {
+      extension = "gif";
+    } else {
+      extension = await Utils.getImageExtensionFromId(this.id);
+    }
+    const url = Utils.getOriginalImageURLFromIdAndThumbURL(this.id, thumbURL).replace(".jpg", `.${extension}`);
+    return {
+      url,
+      extension
+    };
   }
 }

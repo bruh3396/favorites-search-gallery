@@ -113,7 +113,7 @@ class FavoritesTiler {
 
     content.id = "favorites-search-gallery-content";
     content.classList.add(Utils.loadFavoritesLayout());
-    Utils.favoritesSearchGalleryContainer.appendChild(content);
+    FavoritesSearchGalleryContainer.insertElement("beforeend", content);
     return content;
   }
 }

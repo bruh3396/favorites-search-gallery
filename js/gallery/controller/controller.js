@@ -188,7 +188,7 @@ class GalleryController {
       this.preloadVisibleContentAround(thumb);
     };
 
-    Events.document.mouseover.on((mouseOverEvent) => {
+    Events.global.mouseover.on((mouseOverEvent) => {
       this.executeFunctionBasedOnGalleryState({
         hover: onMouseOverHover,
         idle: this.preloadVisibleContentAround.bind(this)
@@ -209,7 +209,7 @@ class GalleryController {
   }
 
   setupContextMenuClickHandler() {
-    Events.document.contextmenu.on((event) => {
+    Events.global.contextmenu.on((event) => {
       this.executeFunctionBasedOnGalleryState({
         gallery: () => {
           event.preventDefault();
@@ -251,7 +251,7 @@ class GalleryController {
       }
     };
 
-    Events.document.mousedown.on((event) => {
+    Events.global.mousedown.on((event) => {
       this.executeFunctionBasedOnGalleryState({
         hover: onMouseDownOutOfGallery,
         idle: onMouseDownOutOfGallery,
@@ -261,7 +261,7 @@ class GalleryController {
   }
 
   setupClickHandler() {
-    Events.document.click.on((event) => {
+    Events.global.click.on((event) => {
       this.executeFunctionBasedOnGalleryState({
         gallery: (mouseEvent) => {
           if (mouseEvent.ctrlKey) {
@@ -329,7 +329,7 @@ class GalleryController {
     };
     const throttledOnKeyDown = Utils.throttle(onKeyDown, GallerySettings.navigationThrottleTime);
 
-    Events.document.keydown.on((event) => {
+    Events.global.keydown.on((event) => {
       if (event.originalEvent.repeat) {
         throttledOnKeyDown(event.originalEvent);
       } else {
@@ -339,7 +339,7 @@ class GalleryController {
   }
 
   setupWheelHandler() {
-    Events.document.wheel.on((wheelevent) => {
+    Events.global.wheel.on((wheelevent) => {
       this.executeFunctionBasedOnGalleryState({
         hover: (event) => {
           this.view.updateBackgroundOpacity(event.originalEvent);
@@ -364,7 +364,7 @@ class GalleryController {
       });
     }, 250);
 
-    Events.document.mousemove.on(onMouseMove);
+    Events.global.mousemove.on(onMouseMove);
   }
 
   setupCustomUiEventHandler() {

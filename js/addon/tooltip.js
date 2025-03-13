@@ -28,7 +28,7 @@ class Tooltip {
    * @type {Boolean}
    */
   static get disabled() {
-    return Flags.onMobileDevice || Preferences.performanceProfile.value > 1 || Flags.onPostPage;
+    return Flags.onMobileDevice || Preferences.performanceProfile.value > 1 || Flags.onPostPage; lg;
   }
 
   /**
@@ -65,7 +65,7 @@ class Tooltip {
       return;
     }
     this.visible = Preferences.showTooltip.value;
-    Utils.insertFavoritesSearchGalleryHTML("afterbegin", HTMLStrings.tooltip);
+    FavoritesSearchGalleryContainer.insertHTML("afterbegin", HTMLStrings.tooltip);
     this.tooltip = this.createTooltip();
     this.defaultTransition = this.tooltip.style.transition;
     this.searchTagColorCodes = {};
@@ -101,7 +101,7 @@ class Tooltip {
   }
 
   addKeyDownEventListener() {
-    Events.document.keydown.on((event) => {
+    Events.global.keydown.on((event) => {
       if (event.key !== "t" || !event.isHotkey) {
         return;
       }
@@ -139,7 +139,7 @@ class Tooltip {
   }
 
   addMouseOverEventListener() {
-    Events.document.mouseover.on((mouseOverEvent) => {
+    Events.global.mouseover.on((mouseOverEvent) => {
       if (mouseOverEvent.thumb === null) {
         this.hide();
         this.currentImage = null;
@@ -181,10 +181,9 @@ class Tooltip {
     this.searchBox.addEventListener("input", () => {
       this.assignColorsToMatchedTagsOnFavoritesPage();
     });
-    window.addEventListener("searchStarted", () => {
+    Events.favorites.newSearchResults.on(() => {
       this.assignColorsToMatchedTagsOnFavoritesPage();
     });
-
   }
 
   /**

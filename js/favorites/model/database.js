@@ -157,7 +157,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, metadata: String}[]} favorites
+   * @param {FavoritesDatabaseRecord[]} favorites
    * @returns {Promise<void>}
    */
   storeFavorites(favorites) {
@@ -202,7 +202,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, metadata: String}[]} favorites
+   * @param {FavoritesDatabaseRecord[]} favorites
    */
   updateFavorites(favorites) {
     this.openConnection()
@@ -247,7 +247,7 @@ class FavoritesDatabase {
   }
 
   /**
-   * @param {{id: String, tags: String, src: String, metadata: String}} favorite
+   * @param {FavoritesDatabaseRecord} favorite
    */
   addContentTypeToFavorite(favorite) {
     const tags = favorite.tags + " ";

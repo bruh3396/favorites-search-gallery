@@ -37,7 +37,7 @@ class GalleryView {
     Utils.insertStyleHTML(HTMLStrings.gallery, "gallery");
     this.container = document.createElement("div");
     this.container.id = "gallery-container";
-    Utils.favoritesSearchGalleryContainer.insertAdjacentElement("afterbegin", this.container);
+    FavoritesSearchGalleryContainer.insertElement("afterbegin", this.container);
   }
 
   /**

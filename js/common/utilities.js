@@ -6,7 +6,6 @@ class Utils {
   static settings = {
     extensionsFoundBeforeSavingCount: 100
   };
-  static favoritesSearchGalleryContainer = Utils.createFavoritesSearchGalleryContainer();
   static mainSearchBoxId = "favorites-search-box";
   static idsToRemoveOnReloadLocalStorageKey = "recentlyRemovedIds";
   static tagBlacklist = Utils.getTagBlacklist();
@@ -22,28 +21,6 @@ class Utils {
     success: 3
   };
   static styles = {
-    thumbHoverOutline: `
-    .favorite,
-    .thumb {
-      >a,
-      >span,
-      >div {
-        &:hover {
-          outline: 3px solid #0075FF !important;
-        }
-      }
-    }`,
-    thumbHoverOutlineDisabled: `
-    .favorite,
-    .thumb {
-      >a,
-      >span,
-      >div:not(:has(img.video)) {
-        &:hover {
-          outline: none;
-        }
-      }
-    }`,
     darkTheme: `
     input[type=number] {
       background-color: #303030;
@@ -204,10 +181,6 @@ class Utils {
     Utils.initializeImageExtensionAssignmentCooldown();
   }
 
-  static postProcess() {
-    dispatchEvent(new Event("postProcess"));
-  }
-
   /**
    * @param {String} key
    * @param {any} value
@@ -339,8 +312,17 @@ class Utils {
    */
   static getOriginalImageURL(thumb) {
     const image = Utils.getImageFromThumb(thumb);
-    const thumbSource = image === null ? "" : image.src;
-    const cleanedThumbSource = Utils.cleanThumbnailSource(thumbSource, thumb.id);
+    const thumbURL = image === null ? "" : image.src;
+    return Utils.getOriginalImageURLFromIdAndThumbURL(thumb.id, thumbURL);
+  }
+
+  /**
+   * @param {String} id
+   * @param {String} thumbURL
+   * @returns {String}
+   */
+  static getOriginalImageURLFromIdAndThumbURL(id, thumbURL) {
+    const cleanedThumbSource = Utils.cleanThumbnailSource(thumbURL, id);
     return cleanedThumbSource
       .replace("thumbnails", "/images")
       .replace("thumbnail_", "")
@@ -419,7 +401,7 @@ class Utils {
     if (thumb instanceof Post) {
       return false;
     }
-    const image = this.getImageFromThumb(thumb);
+    const image = Utils.getImageFromThumb(thumb);
     return image !== null && image.hasAttribute("gif");
   }
 
@@ -680,7 +662,7 @@ class Utils {
   }
 
   static setTheme() {
-    window.addEventListener("postProcess", () => {
+    Events.global.postProcess.on(() => {
       Utils.toggleDarkTheme(Utils.usingDarkTheme());
     });
   }
@@ -1213,17 +1195,6 @@ class Utils {
   }
 
   /**
-   * @returns {HTMLDivElement}
-   */
-  static createFavoritesSearchGalleryContainer() {
-    const container = document.createElement("div");
-
-    container.id = "favorites-search-gallery";
-    document.body.appendChild(container);
-    return container;
-  }
-
-  /**
    * @param {HTMLElement} element
    * @param {InsertPosition} position
    * @param {String} html
@@ -1237,14 +1208,6 @@ class Utils {
       style.remove();
     }
     element.insertAdjacentHTML(position, dom.body.innerHTML);
-  }
-
-  /**
-   * @param {InsertPosition} position
-   * @param {String} html
-   */
-  static insertFavoritesSearchGalleryHTML(position, html) {
-    Utils.insertHTMLAndExtractStyle(Utils.favoritesSearchGalleryContainer, position, html);
   }
 
   /**
@@ -1360,43 +1323,29 @@ class Utils {
     if (Utils.isGif(thumb)) {
       return Promise.resolve("gif");
     }
-
-    if (Utils.extensionIsKnown(thumb.id)) {
-      return Promise.resolve(Utils.getImageExtension(thumb.id));
-    }
-    return Utils.fetchImageExtension(thumb);
+    return Utils.getImageExtensionFromId(thumb.id);
   }
 
   /**
-   * @param {HTMLElement} thumb
+   * @param {String} id
    * @returns {Promise<MediaExtension>}
    */
-  static fetchImageExtension(thumb) {
-    const defaultExtension = "jpg";
-    return fetch(Utils.getPostAPIURL(thumb.id))
-      .then((response) => {
-        return response.text();
-      })
-      .then((html) => {
-        const dom = new DOMParser().parseFromString(html, "text/html");
-        const metadata = dom.querySelector("post");
+  static getImageExtensionFromId(id) {
+    if (Utils.extensionIsKnown(id)) {
+      return Promise.resolve(Utils.getImageExtension(id));
+    }
+    return Utils.fetchImageExtension(id);
+  }
 
-        if (metadata === null) {
-          return defaultExtension;
-        }
-        const fileURL = metadata.getAttribute("file_url");
-
-        if (fileURL === null) {
-          return defaultExtension;
-        }
-        const extension = Utils.getExtensionFromImageURL(fileURL);
-
-        Utils.assignImageExtension(thumb.id, extension);
-        return extension;
-      })
-      .catch((error) => {
-        console.error(error);
-        return defaultExtension;
+  /**
+   * @param {String} id
+   * @returns {Promise<MediaExtension>}
+   */
+  static fetchImageExtension(id) {
+    return new APIPost(id).fetch()
+      .then((apiPost) => {
+        Utils.assignImageExtension(id, apiPost.extension);
+        return apiPost.extension;
       });
   }
 
@@ -1420,6 +1369,15 @@ class Utils {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  /**
+   * @param {String} id
+   * @param {String} thumbURL
+   */
+  static async getOriginalImageURLWithExtensionFromIdAndThumbURL(id, thumbURL) {
+    const extension = await this.getImageExtensionFromId(id);
+    return Utils.getOriginalImageURLFromIdAndThumbURL(id, thumbURL).replace(".jpg", `.${extension}`);
   }
 
   /**
@@ -1600,7 +1558,7 @@ class Utils {
    * @param {HTMLElement} thumb
    */
   static prepareSearchPageThumb(thumb) {
-    const image = this.getImageFromThumb(thumb);
+    const image = Utils.getImageFromThumb(thumb);
 
     if (image !== null) {
       Utils.removeTitleFromImage(image);
@@ -2547,4 +2505,18 @@ class Utils {
     });
   }
 
+  /**
+   * @template V
+   * @param {V[]} array
+   * @param {Number} chunkSize
+   * @returns {V[][]}
+   */
+  static splitIntoChunks(array, chunkSize) {
+    const result = [];
+
+    for (let i = 0; i < array.length; i += chunkSize) {
+      result.push(array.slice(i, i + chunkSize));
+    }
+    return result;
+  }
 }

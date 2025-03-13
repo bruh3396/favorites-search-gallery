@@ -8,4 +8,4 @@ const caption = new Caption();
 const tagModifier = new TagModifier();
 const awesompleteWrapper = new AwesompleteWrapper();
 
-Utils.postProcess();
+Events.global.postProcess.emit();
