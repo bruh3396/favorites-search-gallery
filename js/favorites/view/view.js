@@ -1,15 +1,9 @@
 class FavoritesView {
-  /**
-   * @type {FavoritesPaginationMenu}
-   */
+  /** @type {FavoritesPaginationMenu} */
   paginator;
-  /**
-   * @type {FavoritesStatusBar}
-   */
+  /** @type {FavoritesStatusBar} */
   statusBar;
-  /**
-   * @type {FavoritesTiler}
-   */
+  /** @type {FavoritesTiler} */
   tiler;
 
   constructor() {

@@ -1,16 +1,10 @@
 class GalleryUI {
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   background;
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   lastVisitedThumb;
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get usingColumnLayout() {
     return Flags.onFavoritesPage && FavoritesLayoutObserver.currentLayout === "column";
   }

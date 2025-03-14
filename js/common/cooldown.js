@@ -1,31 +1,17 @@
 class Cooldown {
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   timeout;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   waitTime;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   skipCooldown;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   debounce;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   debouncing;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onDebounceEnd;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onCooldownEnd;
 
   get ready() {

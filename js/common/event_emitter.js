@@ -2,26 +2,16 @@
  * @template V
  */
 class EventEmitter {
-  /**
-   * @type {Set<((argument: V) => void)>}
-   */
+  /** @type {Set<((argument: V) => void)>} */
   listeners;
-  /**
-   * @type {Set<(argument: V) => void>}
-   */
+  /** @type {Set<(argument: V) => void>} */
   oneTimeListeners;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   enabled;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   frozen;
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get disabled() {
     return !this.enabled;
   }

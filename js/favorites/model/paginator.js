@@ -1,20 +1,12 @@
 class FavoritesPaginator {
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   currentPageNumber;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   resultsPerPage;
-  /**
-   * @type {Post[]}
-   */
+  /** @type {Post[]} */
   favorites;
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get pageCount() {
     const favoriteCount = this.favorites.length;
 
@@ -29,30 +21,22 @@ class FavoritesPaginator {
     return Math.floor(pageCount) + 1;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get onFirstPage() {
     return this.currentPageNumber === 1;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get onFinalPage() {
     return this.currentPageNumber === this.pageCount;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get onlyOnePage() {
     return this.onFirstPage && this.onFinalPage;
   }
 
-  /**
-   * @type {FavoritesPaginationParameters}
-   */
+  /** @type {FavoritesPaginationParameters} */
   get paginationParameters() {
     const {start, end} = this.getCurrentPageRange();
     return new FavoritesPaginationParameters(this.currentPageNumber, this.pageCount, this.favorites.length, start, end);

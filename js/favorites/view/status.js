@@ -1,19 +1,11 @@
 class FavoritesStatusBar {
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   matchCountIndicator;
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   statusIndicator;
-  /**
-   * @type {Number | null}
-   */
+  /** @type {Number | null} */
   expectedTotalFavoritesCount;
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   statusTimeout;
 
   constructor() {

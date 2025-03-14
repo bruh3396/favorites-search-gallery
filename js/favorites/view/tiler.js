@@ -1,15 +1,9 @@
 class Tiler {
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   container;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   className;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   useDefaultColumnCountSetter;
 
   /**
@@ -77,6 +71,4 @@ class Tiler {
   onSelected() { }
 
   deactivate() { }
-
-  refresh() { }
 }

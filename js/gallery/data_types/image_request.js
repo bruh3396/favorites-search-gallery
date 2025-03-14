@@ -1,68 +1,42 @@
 class ImageRequest {
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   id;
-  /**
-   * @type {ImageBitmap | null}
-   */
+  /** @type {ImageBitmap | null} */
   imageBitmap;
-  /**
-   * @type {AbortController}
-   */
+  /** @type {AbortController} */
   abortController;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   cancelled;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   isImage;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   isLowResolution;
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   thumb;
-  /**
-   * @type {String | null}
-   */
+  /** @type {String | null} */
   accentColor;
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get hasCompleted() {
     return this.imageBitmap instanceof ImageBitmap;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isIncomplete() {
     return !this.hasCompleted;
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get megabytes() {
     return Post.getPixelCount(this.id) / 220000;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isAnimated() {
     return !this.isImage;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isOriginalResolution() {
     return !this.isLowResolution;
   }

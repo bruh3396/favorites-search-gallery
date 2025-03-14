@@ -1,7 +1,5 @@
 class FavoritesUI {
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return !Flags.onFavoritesPage;
   }

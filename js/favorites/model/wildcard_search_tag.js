@@ -2,22 +2,14 @@ class WildcardSearchTag extends SearchTag {
   static unmatchableRegex = /^\b$/;
   static startsWithRegex = /^[^*]*\*$/;
 
-  /**
-   * @type {RegExp}
-   */
+  /** @type {RegExp} */
   matchRegex;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   equivalentToStartsWith;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   startsWithPrefix;
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get cost() {
     return this.equivalentToStartsWith ? 10 : 20;
   }

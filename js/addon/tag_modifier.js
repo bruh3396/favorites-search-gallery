@@ -1,38 +1,54 @@
 class TagModifier {
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   static databaseName = "AdditionalTags";
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   static objectStoreName = "additionalTags";
-  /**
-   * @type {Map<String, String>}
-   */
+  /** @type {Map<String, String>} */
   static tagModifications = new Map();
+  /** @type {Database<TagModificationDatabaseRecord>} */
+  static database = new Database(TagModifier.databaseName, 12);
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get currentlyModifyingTags() {
     return document.getElementById("tag-edit-mode") !== null;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return Flags.onMobileDevice || !Flags.onFavoritesPage;
   }
 
-  /**
-   * @type {AbortController}
-   */
+  /** @type {TagModificationDatabaseRecord[]} */
+  static get databaseRecords() {
+    return Array.from(TagModifier.tagModifications.entries())
+      .map((entry) => ({
+        id: entry[0],
+        tags: entry[1]
+      }));
+  }
+
+  static storeTagModifications() {
+    TagModifier.database.store(TagModifier.databaseRecords, TagModifier.objectStoreName);
+  }
+
+  static async loadTagModifications() {
+    const records = await TagModifier.database.load(TagModifier.objectStoreName);
+
+    console.log("TagModifier: got records");
+
+    for (const record of records) {
+      TagModifier.tagModifications.set(record.id, record.tags);
+    }
+    Events.favorites.tagModificationsLoaded.emit();
+  }
+
+  static {
+    Utils.addStaticInitializer(TagModifier.loadTagModifications);
+  }
+
+  /** @type {AbortController} */
   tagEditModeAbortController;
-  /**
-   * @type {{container: HTMLDivElement, checkbox: HTMLInputElement}}
-   */
+  /** @type {{container: HTMLDivElement, checkbox: HTMLInputElement}} */
   favoritesOption;
   /**
    * @type {{container: HTMLDivElement,
@@ -47,25 +63,21 @@ class TagModifier {
    * export: HTMLButtonElement}}
    */
   favoritesUI;
-  /**
-   * @type {Post[]}
-   */
+  /** @type {Post[]} */
   selectedPosts;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   atLeastOneFavoriteIsSelected;
 
   constructor() {
     if (TagModifier.disabled) {
       return;
     }
+
     this.tagEditModeAbortController = new AbortController();
     this.favoritesOption = {};
     this.favoritesUI = {};
     this.selectedPosts = [];
     this.atLeastOneFavoriteIsSelected = false;
-    this.loadTagModifications();
     this.insertHTML();
     this.addEventListeners();
   }
@@ -397,77 +409,7 @@ class TagModifier {
     this.showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);
     dispatchEvent(new Event("modifiedTags"));
     Utils.setCustomTags(tagsToModify);
-    this.storeTagModifications();
-  }
-
-  createDatabase(event) {
-    /**
-     * @type {IDBDatabase}
-     */
-    const database = event.target.result;
-
-    database
-      .createObjectStore(TagModifier.objectStoreName, {
-        keyPath: "id"
-      });
-  }
-
-  storeTagModifications() {
-    const request = indexedDB.open(TagModifier.databaseName, 1);
-
-    request.onupgradeneeded = this.createDatabase;
-    request.onsuccess = (event) => {
-      /**
-       * @type {IDBDatabase}
-       */
-      const database = event.target.result;
-      const objectStore = database
-        .transaction(TagModifier.objectStoreName, "readwrite")
-        .objectStore(TagModifier.objectStoreName);
-      const idsWithNoTagModifications = [];
-
-      for (const [id, tags] of TagModifier.tagModifications) {
-        if (tags === "") {
-          idsWithNoTagModifications.push(id);
-          objectStore.delete(id);
-        } else {
-          objectStore.put({
-            id,
-            tags
-          });
-        }
-      }
-
-      for (const id of idsWithNoTagModifications) {
-        TagModifier.tagModifications.delete(id);
-      }
-      database.close();
-    };
-  }
-
-  loadTagModifications() {
-    const request = indexedDB.open(TagModifier.databaseName, 1);
-
-    request.onupgradeneeded = this.createDatabase;
-    request.onsuccess = (event) => {
-      /**
-       * @type {IDBDatabase}
-       */
-      const database = event.target.result;
-      const objectStore = database
-        .transaction(TagModifier.objectStoreName, "readonly")
-        .objectStore(TagModifier.objectStoreName);
-
-      objectStore.getAll().onsuccess = (successEvent) => {
-        const tagModifications = successEvent.target.result;
-
-        for (const record of tagModifications) {
-          TagModifier.tagModifications.set(record.id, record.tags);
-        }
-        this.restoreMissingCustomTags();
-      };
-      database.close();
-    };
+    TagModifier.storeTagModifications();
   }
 
   restoreMissingCustomTags() {

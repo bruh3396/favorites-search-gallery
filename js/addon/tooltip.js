@@ -24,40 +24,24 @@ class Tooltip {
   <span id="tooltip" class="light-green-gradient"></span>
 </div>
 `;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return Flags.onMobileDevice || Preferences.performanceProfile.value > 1 || Flags.onPostPage; lg;
   }
 
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   tooltip;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   defaultTransition;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   visible;
-  /**
-   * @type {Object<String,String>}
-   */
+  /** @type {Object<String,String>} */
   searchTagColorCodes;
-  /**
-   * @type {HTMLTextAreaElement | null}
-   */
+  /** @type {HTMLTextAreaElement | null} */
   searchBox;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   previousSearch;
-  /**
-   * @type {HTMLImageElement | null}
-   */
+  /** @type {HTMLImageElement | null} */
   currentImage;
 
   constructor() {

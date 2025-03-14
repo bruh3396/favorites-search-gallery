@@ -1,20 +1,12 @@
 class PostMetadata {
-  /**
-   * @type {Map<String, PostMetadata>}
-   */
+  /** @type {Map<String, PostMetadata>} */
   static allMetadata = new Map();
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   static pendingRequests = new Set();
   static parser = new DOMParser();
-  /**
-   * @type {PostMetadata[]}
-   */
+  /** @type {PostMetadata[]} */
   static missingMetadataFetchQueue = [];
-  /**
-   * @type {PostMetadata[]}
-   */
+  /** @type {PostMetadata[]} */
   static deletedPostFetchQueue = [];
   static currentlyFetchingFromQueue = false;
   static allFavoritesLoaded = false;
@@ -80,63 +72,39 @@ class PostMetadata {
       }
     });
   }
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   id;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   width;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   height;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   score;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   rating;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   creationTimestamp;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   lastChangedTimestamp;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   postIsDeleted;
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get postURL() {
     return Utils.getPostPageURL(this.id);
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get fetchDelay() {
     return this.postIsDeleted ? PostMetadata.fetchDelay.deleted : PostMetadata.fetchDelay.normal;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isEmpty() {
     return this.width === 0 && this.height === 0;
   }
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get json() {
     return JSON.stringify({
       width: this.width,
@@ -149,9 +117,7 @@ class PostMetadata {
     });
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get pixelCount() {
     return this.width * this.height;
   }

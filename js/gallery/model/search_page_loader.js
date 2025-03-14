@@ -1,27 +1,15 @@
 class SearchPageLoader {
-  /**
-   * @type {Map<Number, SearchPage>}
-   */
+  /** @type {Map<Number, SearchPage>} */
   searchPages;
-  /**
-   * @type {Set<Number>}
-   */
+  /** @type {Set<Number>} */
   fetchedPageNumbers;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   initialPageNumber;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   currentPageNumber;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   initialURL;
-  /**
-   * @type {HTMLElement[]}
-   */
+  /** @type {HTMLElement[]} */
   allThumbs;
 
   constructor() {
@@ -159,9 +147,7 @@ class SearchPageLoader {
 
   updateAllThumbs() {
     const sortedPageNumbers = Array.from(this.searchPages.keys()).sort();
-    /**
-     * @type {HTMLElement[]}
-     */
+    /** @type {HTMLElement[]} */
     let thumbs = [];
 
     for (const pageNumber of sortedPageNumbers) {

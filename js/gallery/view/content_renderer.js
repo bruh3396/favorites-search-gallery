@@ -1,20 +1,12 @@
 class GalleryContentRenderer {
-  /**
-   * @type {GalleryImageRenderer}
-   */
+  /** @type {GalleryImageRenderer} */
   imageRenderer;
-  /**
-   * @type {GalleryVideoRenderer}
-   */
+  /** @type {GalleryVideoRenderer} */
   videoRenderer;
-  /**
-   * @type {GalleryGifRenderer}
-   */
+  /** @type {GalleryGifRenderer} */
   gifRenderer;
 
-  /**
-   * @type {AbstractRenderer[]}
-   */
+  /** @type {AbstractRenderer[]} */
   get renderers() {
     return [this.imageRenderer, this.videoRenderer, this.gifRenderer];
   }

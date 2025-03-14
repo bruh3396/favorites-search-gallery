@@ -1,27 +1,17 @@
 class FavoritesPageRequest {
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   pageNumber;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   retryCount;
-  /**
-   * @type {Post[]}
-   */
+  /** @type {Post[]} */
   favorites;
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get url() {
     return `${document.location.href}&pid=${this.pageNumber * 50}`;
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get fetchDelay() {
     return (7 ** (this.retryCount)) + 200;
   }

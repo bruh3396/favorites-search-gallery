@@ -5,3 +5,7 @@ class PromiseChainExit extends Error {}
 class ImageBitmapRequestCancelled extends Error {}
 
 class PromiseTimeoutError extends Error {}
+
+class IndexedDBUnexpectedError extends Error {}
+
+class UnknownObjectStoreError extends Error {}

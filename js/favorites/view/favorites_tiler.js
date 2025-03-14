@@ -1,39 +1,23 @@
 class FavoritesTiler {
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   container;
-  /**
-   * @type {FavoriteLayout}
-   */
+  /** @type {FavoriteLayout} */
   currentLayout;
-  /**
-   * @type {FavoritesGridTiler}
-   */
+  /** @type {FavoritesGridTiler} */
   gridTiler;
-  /**
-   * @type {FavoritesRowTiler}
-   */
+  /** @type {FavoritesRowTiler} */
   rowTiler;
-  /**
-   * @type {FavoritesSquareTiler}
-   */
+  /** @type {FavoritesSquareTiler} */
   squareTiler;
-  /**
-   * @type {FavoritesColumnTiler}
-   */
+  /** @type {FavoritesColumnTiler} */
   columnTiler;
 
-  /**
-   * @type {Tiler[]}
-   */
+  /** @type {Tiler[]} */
   get tilers() {
     return [this.gridTiler, this.rowTiler, this.squareTiler, this.columnTiler];
   }
 
-  /**
-   * @type {Tiler}
-   */
+  /** @type {Tiler} */
   get currentTiler() {
     return this.tilers.find(tiler => tiler.className === this.currentLayout) || this.rowTiler;
   }
@@ -52,10 +36,6 @@ class FavoritesTiler {
    */
   tile(favorites) {
     this.currentTiler.tile(favorites);
-  }
-
-  refresh() {
-    this.currentTiler.refresh();
   }
 
   /**

@@ -1,20 +1,12 @@
 class FavoritesLoader {
-  /**
-   * @type {FavoritesFetcher}
-   */
+  /** @type {FavoritesFetcher} */
   fetcher;
-  /**
-   * @type {FavoritesDatabaseWrapper}
-   */
+  /** @type {FavoritesDatabase} */
   database;
-  /**
-   * @type {Post[]}
-   */
+  /** @type {Post[]} */
   allFavorites;
 
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   get allFavoriteIds() {
     return new Set(Array.from(this.allFavorites.values()).map(post => post.id));
   }
@@ -22,7 +14,7 @@ class FavoritesLoader {
   constructor() {
     this.allFavorites = [];
     this.fetcher = new FavoritesFetcher();
-    this.database = new FavoritesDatabaseWrapper();
+    this.database = new FavoritesDatabase();
   }
 
   /**

@@ -1,19 +1,11 @@
 class SearchBox {
-  /**
-   * @type {HTMLTextAreaElement | HTMLInputElement}
-   */
+  /** @type {HTMLTextAreaElement | HTMLInputElement} */
   searchBox;
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   parent;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   id;
-  /**
-   * @type {SearchHistory}
-   */
+  /** @type {SearchHistory} */
   searchHistory;
 
   constructor() {

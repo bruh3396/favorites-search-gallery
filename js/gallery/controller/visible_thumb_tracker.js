@@ -1,19 +1,11 @@
 class VisibleThumbTracker {
-  /**
-   * @type {Map<String, IntersectionObserverEntry>}
-   */
+  /** @type {Map<String, IntersectionObserverEntry>} */
   visibleThumbs;
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   centerThumb;
-  /**
-   * @type {IntersectionObserver}
-   */
+  /** @type {IntersectionObserver} */
   intersectionObserver;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onVisibleThumbsChanged;
 
   /**

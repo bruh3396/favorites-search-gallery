@@ -1,15 +1,9 @@
 class GalleryCanvas {
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   container;
-  /**
-   * @type {HTMLCanvasElement}
-   */
+  /** @type {HTMLCanvasElement} */
   canvas;
-  /**
-   * @type {CanvasRenderingContext2D}
-   */
+  /** @type {CanvasRenderingContext2D} */
   context;
 
   /**

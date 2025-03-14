@@ -4,19 +4,13 @@
 class Preference {
   static localStorageKey = "preferences";
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   key;
 
-  /**
-   * @type {T}
-   */
+  /** @type {T} */
   defaultValue;
 
-  /**
-   * @type {T}
-   */
+  /** @type {T} */
   get value() {
     const preferences = JSON.parse(localStorage.getItem(Preference.localStorageKey) || "{}");
     const storedValue = preferences[this.key];

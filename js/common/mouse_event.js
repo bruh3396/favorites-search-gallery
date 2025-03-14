@@ -1,35 +1,19 @@
 class FavoritesMouseEvent {
-  /**
-   * @type {MouseEvent}
-   */
+  /** @type {MouseEvent} */
   originalEvent;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   leftClick;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   rightClick;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   middleClick;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   ctrlKey;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   shiftKey;
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   thumb;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   insideOfThumb;
 
   /**

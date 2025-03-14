@@ -1,28 +1,16 @@
 class FavoritesFilter {
-  /**
-   * @type {SearchCommand}
-   */
+  /** @type {SearchCommand} */
   searchCommand;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   searchQuery;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   negatedTagBlacklist;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   useTagBlacklist;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   allowedRatings;
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get allRatingsAreAllowed() {
     return this.allowedRatings === 7;
   }

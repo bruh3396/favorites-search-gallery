@@ -1,11 +1,7 @@
 class FavoritesWheelEvent {
-  /**
-   * @type {WheelEvent}
-   */
+  /** @type {WheelEvent} */
   originalEvent;
-  /**
-   * @type {NavigationKey}
-   */
+  /** @type {NavigationKey} */
   direction;
 
   /**

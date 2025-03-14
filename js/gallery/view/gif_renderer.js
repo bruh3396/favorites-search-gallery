@@ -1,7 +1,5 @@
 class GalleryGifRenderer extends AbstractRenderer {
-  /**
-   * @type {HTMLImageElement}
-   */
+  /** @type {HTMLImageElement} */
   gif;
 
   /**

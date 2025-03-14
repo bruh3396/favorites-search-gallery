@@ -1,27 +1,15 @@
 class AutoplayEvents {
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onEnable;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onDisable;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onPause;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onResume;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onComplete;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onVideoEndedBeforeMinimumViewTime;
 
   /**
@@ -60,9 +48,7 @@ class AutoplayController {
     }
   };
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return false;
   }
@@ -88,45 +74,25 @@ class AutoplayController {
    * }}
    */
   ui;
-  /**
-   * @type {AutoplayEvents}
-   */
+  /** @type {AutoplayEvents} */
   events;
-  /**
-   * @type {AbortController}
-   */
+  /** @type {AbortController} */
   eventListenersAbortController;
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   currentThumb;
-  /**
-   * @type {Cooldown}
-   */
+  /** @type {Cooldown} */
   imageViewTimer;
-  /**
-   * @type {Cooldown}
-   */
+  /** @type {Cooldown} */
   menuVisibilityTimer;
-  /**
-   * @type {Cooldown}
-   */
+  /** @type {Cooldown} */
   videoViewTimer;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   active;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   paused;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   menuIsPersistent;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   menuIsVisible;
 
   /**
@@ -154,9 +120,7 @@ class AutoplayController {
   initializeEvents(events) {
     this.events = events;
     const onComplete = events.onComplete;
-    /**
-     * @type {NavigationKey}
-     */
+    /** @type {NavigationKey} */
     const direction = Preferences.autoplayForward.value ? "ArrowRight" : "ArrowLeft";
 
     this.events.onComplete = () => {

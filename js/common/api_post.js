@@ -33,13 +33,9 @@ class APIPost {
     return value !== "false";
   }
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   id;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   isEmpty;
 
   height = 0;
@@ -65,14 +61,10 @@ class APIPost {
   previewWidth = 0;
   previewHeight = 0;
 
-  /**
-   * @type {MediaExtension}
-   */
+  /** @type {MediaExtension} */
   extension = "jpg";
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get url() {
     return `https://api.rule34.xxx//index.php?page=dapi&s=post&q=index&id=${this.id}`;
   }

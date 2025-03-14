@@ -1,11 +1,19 @@
-Utils.setup();
-const favoritesController = new FavoritesController();
-const favoritesUI = new FavoritesUI();
-const galleryController = new GalleryController();
-const tooltip = new Tooltip();
-const savedSearches = new SavedSearches();
-const caption = new Caption();
-const tagModifier = new TagModifier();
-const awesompleteWrapper = new AwesompleteWrapper();
+class FavoritesSearchGallery {
+  /* eslint-disable no-new */
+  constructor() {
+    Utils.setup();
 
-Events.global.postProcess.emit();
+    new FavoritesController();
+    new FavoritesUI();
+    new GalleryController();
+    new Tooltip();
+    new SavedSearches();
+    new Caption();
+    new TagModifier();
+    new AwesompleteWrapper();
+
+    Events.global.postProcess.emit();
+  }
+}
+
+new FavoritesSearchGallery();

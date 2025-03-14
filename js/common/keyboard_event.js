@@ -1,15 +1,9 @@
 class FavoritesKeyboardEvent {
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   key;
-  /**
-   * @type {KeyboardEvent}
-   */
+  /** @type {KeyboardEvent} */
   originalEvent;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   isHotkey;
 
   /**

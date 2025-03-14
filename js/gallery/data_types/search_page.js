@@ -1,43 +1,27 @@
 class SearchPage {
   static parser = new DOMParser();
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   html;
-  /**
-   * @type {HTMLElement[]}
-   */
+  /** @type {HTMLElement[]} */
   thumbs;
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   paginator;
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   ids;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   pageNumber;
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isEmpty() {
     return this.thumbs.length === 0;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isLastPage() {
     return this.thumbs.length < 42;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isFirstPage() {
     return this.pageNumber === 0;
   }

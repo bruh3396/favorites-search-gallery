@@ -14,6 +14,7 @@ class Events {
     /** @type {EventEmitter<void>} */ layoutCompleted: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ showOnHover: new EventEmitter(true),
     /** @type {EventEmitter<String>} */ missingMetadata: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ tagModificationsLoaded: new EventEmitter(false),
     /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true)
   };
 
@@ -54,7 +55,6 @@ class Events {
     });
     container.addEventListener("click", (event) => {
       Events.global.click.emit(event);
-      console.log("click");
     });
     container.addEventListener("mousedown", (event) => {
       Events.global.mousedown.emit(event);
@@ -66,7 +66,6 @@ class Events {
     });
     document.addEventListener("keydown", (event) => {
       Events.global.keydown.emit(new FavoritesKeyboardEvent(event));
-      console.log("keydown");
     });
     container.addEventListener("wheel", (event) => {
       Events.global.wheel.emit(new FavoritesWheelEvent(event));
@@ -88,7 +87,6 @@ class Events {
   }
 
   static {
-
     Utils.addStaticInitializer(this.setupGlobalEvents);
     Utils.addStaticInitializer(this.setupWindowEvents);
   }

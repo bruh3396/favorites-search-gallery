@@ -1,20 +1,12 @@
 class DownloadRequest {
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   id;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   url;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   extension;
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get filename() {
     return `${this.id}.${this.extension}`;
   }

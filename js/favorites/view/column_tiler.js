@@ -1,15 +1,9 @@
 class FavoritesColumnTiler extends Tiler {
-  /**
-   * @type {HTMLElement[]}
-   */
+  /** @type {HTMLElement[]} */
   columns;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   columnCount;
-  /**
-   * @type {() => HTMLElement[]}
-   */
+  /** @type {() => HTMLElement[]} */
   originalGetAllThumbs;
 
   /**
@@ -24,16 +18,12 @@ class FavoritesColumnTiler extends Tiler {
     this.originalGetAllThumbs = Utils.getAllThumbs;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get inactive() {
     return document.querySelector(".favorites-column") === null;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get active() {
     return !this.inactive;
   }

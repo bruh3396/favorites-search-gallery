@@ -25,6 +25,8 @@ class Types {
 
   /** @typedef {{id: String, tags: String, src: String, metadata: String}} FavoritesDatabaseRecord */
 
+  /** @typedef {{id: String, tags: String}} TagModificationDatabaseRecord */
+
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);

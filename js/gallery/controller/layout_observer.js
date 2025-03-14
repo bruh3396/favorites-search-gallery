@@ -1,11 +1,7 @@
 class FavoritesLayoutObserver {
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static layoutCompleted;
-  /**
-   * @type {FavoriteLayout}
-   */
+  /** @type {FavoriteLayout} */
   static currentLayout;
 
   static {

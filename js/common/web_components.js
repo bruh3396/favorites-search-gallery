@@ -5,34 +5,20 @@ class HoldButton extends HTMLElement {
     });
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   static defaultPollingTime = 100;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   static minPollingTime = 40;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   static maxPollingTime = 500;
 
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   intervalId;
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   timeoutId;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   pollingTime = HoldButton.defaultPollingTime;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   holdingDown = false;
 
   connectedCallback() {
@@ -122,29 +108,17 @@ class HoldButton extends HTMLElement {
 }
 
 class NumberComponent {
-  /**
-   * @type {HTMLInputElement}
-   */
+  /** @type {HTMLInputElement} */
   input;
-  /**
-   * @type {HoldButton}
-   */
+  /** @type {HoldButton} */
   upArrow;
-  /**
-   * @type {HoldButton}
-   */
+  /** @type {HoldButton} */
   downArrow;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   stepSize;
-  /**
-   * @type {{min: Number, max: Number}}
-   */
+  /** @type {{min: Number, max: Number}} */
   range;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   defaultValue;
 
   /**

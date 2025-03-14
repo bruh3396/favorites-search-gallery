@@ -1,25 +1,15 @@
 class FavoritesPaginationParameters {
   static emptyFavoritesPaginationParameters = new FavoritesPaginationParameters(1, 1, 0, 0, 0);
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   currentPageNumber;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   finalPageNumber;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   favoritesCount;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   startIndex;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   endIndex;
 
   /**

@@ -1,23 +1,15 @@
 class SearchTag {
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   value;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   negated;
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get cost() {
     return 0;
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get finalCost() {
     return this.negated ? this.cost + 1 : this.cost;
   }

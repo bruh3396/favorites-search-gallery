@@ -1,11 +1,7 @@
 class FavoritesSorter {
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   useAscendingOrder;
-  /**
-   * @type {MetadataMetric}
-   */
+  /** @type {MetadataMetric} */
   sortingMethod;
 
   constructor() {

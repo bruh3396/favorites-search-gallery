@@ -2,39 +2,23 @@ class SavedSearches {
   static localStorageKeys = {
     savedSearches: "savedSearches"
   };
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return !Flags.onFavoritesPage || Flags.onMobileDevice;
   }
-  /**
-   * @type {HTMLTextAreaElement}
-   */
+  /** @type {HTMLTextAreaElement} */
   textarea;
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   savedSearchesList;
-  /**
-   * @type {HTMLButtonElement}
-   */
+  /** @type {HTMLButtonElement} */
   stopEditingButton;
-  /**
-   * @type {HTMLButtonElement}
-   */
+  /** @type {HTMLButtonElement} */
   saveButton;
-  /**
-   * @type {HTMLButtonElement}
-   */
+  /** @type {HTMLButtonElement} */
   importButton;
-  /**
-   * @type {HTMLButtonElement}
-   */
+  /** @type {HTMLButtonElement} */
   exportButton;
-  /**
-   * @type {HTMLButtonElement}
-   */
+  /** @type {HTMLButtonElement} */
   saveSearchResultsButton;
 
   constructor() {
@@ -241,9 +225,7 @@ class SavedSearches {
   }
 
   createTutorialSearches() {
-    /**
-     * @type {String[]}
-     */
+    /** @type {String[]} */
     const searches = [];
 
     Events.favorites.startedFetchingFavorites.on(async() => {

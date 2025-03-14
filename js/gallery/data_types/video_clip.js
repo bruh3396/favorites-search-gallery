@@ -1,11 +1,7 @@
 class VideoClip {
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   start;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   end;
 
   /**

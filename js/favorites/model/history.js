@@ -1,24 +1,14 @@
 class SearchHistory {
-  /**
-   * @type {String[]}
-   */
+  /** @type {String[]} */
   history;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   index;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   lastEditedQuery;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   depth;
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get selectedQuery() {
     if (Utils.indexInBounds(this.history, this.index)) {
       return this.history[this.index];

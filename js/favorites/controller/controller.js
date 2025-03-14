@@ -2,13 +2,9 @@ class FavoritesController {
   static get disabled() {
     return !Flags.onFavoritesPage;
   }
-  /**
-   * @type {FavoritesModel}
-   */
+  /** @type {FavoritesModel} */
   model;
-  /**
-   * @type {FavoritesView}
-   */
+  /** @type {FavoritesView} */
   view;
 
   constructor() {

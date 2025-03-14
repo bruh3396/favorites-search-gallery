@@ -1,7 +1,5 @@
 class MainUpscaler {
-  /**
-   * @type {Map<String, HTMLCanvasElement | OffscreenCanvas>}
-   */
+  /** @type {Map<String, HTMLCanvasElement | OffscreenCanvas>} */
   canvases;
 
   constructor() {

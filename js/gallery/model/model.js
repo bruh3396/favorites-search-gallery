@@ -12,41 +12,25 @@ class GalleryModel {
     IDLE: 2
   };
 
-  /**
-   * @type {FavoritesGalleryState}
-   */
+  /** @type {FavoritesGalleryState} */
   currentState;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   currentIndex;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   currentSearchPageNumber;
-  /**
-   * @type {ThumbSelector}
-   */
+  /** @type {ThumbSelector} */
   thumbSelector;
-  /**
-   * @type {SearchPageLoader}
-   */
+  /** @type {SearchPageLoader} */
   searchPageLoader;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   recentlyExitedGallery;
 
-  /**
-   * @type {HTMLElement | undefined}
-   */
+  /** @type {HTMLElement | undefined} */
   get currentThumb() {
     return this.thumbSelector.thumbsOnCurrentPage[this.currentIndex];
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get currentlyViewingVideo() {
     return this.currentState === GalleryModel.states.IN_GALLERY && this.currentThumb !== undefined && Utils.isVideo(this.currentThumb);
   }

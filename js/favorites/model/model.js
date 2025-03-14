@@ -1,23 +1,13 @@
 class FavoritesModel {
-  /**
-   * @type {FavoritesLoader}
-   */
+  /** @type {FavoritesLoader} */
   loader;
-  /**
-   * @type {FavoritesFilter}
-   */
+  /** @type {FavoritesFilter} */
   filter;
-  /**
-   * @type {FavoritesSorter}
-   */
+  /** @type {FavoritesSorter} */
   sorter;
-  /**
-   * @type {FavoritesPaginator}
-   */
+  /** @type {FavoritesPaginator} */
   paginator;
-  /**
-   * @type {Post[]}
-   */
+  /** @type {Post[]} */
   latestSearchResults;
 
   constructor() {

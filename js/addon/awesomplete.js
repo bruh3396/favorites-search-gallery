@@ -1,13 +1,9 @@
 class AwesompleteWrapper {
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return !Flags.onFavoritesPage;
   }
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   showSavedSearchSuggestions;
 
   constructor() {

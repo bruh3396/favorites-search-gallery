@@ -1,14 +1,10 @@
 class MetadataSearchTag extends SearchTag {
   static regex = /^-?(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)$/;
 
-  /**
-   * @type {MetadataSearchExpression}
-   */
+  /** @type {MetadataSearchExpression} */
   expression;
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get cost() {
     return 0;
   }

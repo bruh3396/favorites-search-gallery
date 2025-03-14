@@ -1,28 +1,16 @@
 class GalleryController {
-  /**
-   * @type {GalleryModel}
-   */
+  /** @type {GalleryModel} */
   model;
-  /**
-   * @type {GalleryView}
-   */
+  /** @type {GalleryView} */
   view;
-  /**
-   * @type {InteractionTracker}
-   */
+  /** @type {InteractionTracker} */
   interactionTracker;
-  /**
-   * @type {VisibleThumbTracker | null}
-   */
+  /** @type {VisibleThumbTracker | null} */
   visibleThumbTracker;
-  /**
-   * @type {AutoplayController}
-   */
+  /** @type {AutoplayController} */
   autoplayController;
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return Flags.galleryDisabled;
   }
@@ -545,7 +533,7 @@ class GalleryController {
    * @param {HTMLElement | null} thumb
    */
   preloadVisibleContentAround(thumb) {
-    if (thumb === null || this.model.recentlyExitedGallery || this.visibleThumbTracker === null) {
+    if (thumb === null || this.model.recentlyExitedGallery || this.visibleThumbTracker === null || !Flags.onFavoritesPage) {
       return;
     }
     this.visibleThumbTracker.setCenterThumb(thumb);

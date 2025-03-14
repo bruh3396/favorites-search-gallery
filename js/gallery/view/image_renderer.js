@@ -1,19 +1,11 @@
 class GalleryImageRenderer extends AbstractRenderer {
-  /**
-   * @type {GalleryCanvas}
-   */
+  /** @type {GalleryCanvas} */
   canvas;
-  /**
-   * @type {GalleryImageCreator}
-   */
+  /** @type {GalleryImageCreator} */
   imageCreator;
-  /**
-   * @type {MainUpscaler}
-   */
+  /** @type {MainUpscaler} */
   thumbUpscaler;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   lastShownId;
 
   /**

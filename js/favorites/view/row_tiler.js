@@ -7,16 +7,12 @@ class FavoritesRowTiler extends Tiler {
     this.className = "row";
   }
 
-  refresh() {
-    this.updateLastRow();
-  }
-
   /**
    * @param {HTMLElement[]} items
    */
   tile(items) {
     super.tile(items);
-    this.updateLastRow();
+    this.markItemsOnLastRow();
   }
 
   /**
@@ -24,32 +20,57 @@ class FavoritesRowTiler extends Tiler {
    */
   addToBottom(items) {
     super.addToBottom(items);
-    this.updateLastRow();
+    this.markItemsOnLastRow();
   }
 
-  updateLastRow() {
-    // await Utils.sleep(100);
-    // await FavoritesLayoutObserver.waitForLayoutToComplete();
-    // await Utils.sleep(100);
-    const items = Array.from(this.container.querySelectorAll(`.${Utils.itemClassName}`))
-      .filter(item => item instanceof HTMLElement)
-      .reverse();
+  onSelected() {
+    this.markItemsOnLastRow();
+  }
+
+  async markItemsOnLastRow() {
+    await Utils.waitForAllThumbnailsToLoad();
+    const items = Utils.getAllThumbs();
 
     if (items.length === 0) {
       return;
     }
+    this.unMarkAllItemsAsLastRow(items);
+    this.markItemsAsLastRow(this.getItemsOnLastRow(items));
+  }
 
+  /**
+   * @param {HTMLElement[]} items
+   */
+  unMarkAllItemsAsLastRow(items) {
     for (const item of items) {
       item.classList.remove("last-row");
     }
+  }
+
+  /**
+   * @param {HTMLElement[]} items
+   */
+  markItemsAsLastRow(items) {
+    for (const item of items) {
+      item.classList.add("last-row");
+    }
+  }
+
+  /**
+   * @param {HTMLElement[]} items
+   */
+  getItemsOnLastRow(items) {
+    items = items.slice().reverse();
+    const itemsOnLastRow = [];
     const lastRowY = items[0].offsetTop;
 
     for (const item of items) {
       if (item.offsetTop !== lastRowY) {
         break;
       }
-      item.classList.add("last-row");
+      itemsOnLastRow.push(item);
     }
+    return itemsOnLastRow;
   }
 
   /**

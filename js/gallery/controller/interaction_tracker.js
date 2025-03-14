@@ -1,47 +1,25 @@
 class InteractionTracker {
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onInteractionStopped;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onMouseMoveStopped;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onScrollingStopped;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onNoInteractionOnStart;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   idleDuration;
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   mouseTimeout;
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   scrollTimeout;
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   interactionOnStartTimeout;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   mouseIsMoving;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   scrolling;
-  /**
-   * @type {AbortController}
-   */
+  /** @type {AbortController} */
   abortController;
 
   /**

@@ -1,67 +1,43 @@
 class FavoritesFetcher {
-  /**
-   * @type {FetchedFavoritesQueue}
-   */
+  /** @type {FetchedFavoritesQueue} */
   fetchedQueue;
-  /**
-   * @type {Set<Number>}
-   */
+  /** @type {Set<Number>} */
   pendingRequestPageNumbers;
-  /**
-   * @type {FavoritesPageRequest[]}
-   */
+  /** @type {FavoritesPageRequest[]} */
   failedRequests;
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   storedFavoriteIds;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   currentPageNumber;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   fetchedAnEmptyPage;
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get hasFailedRequests() {
     return this.failedRequests.length > 0;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get allRequestsHaveStarted() {
     return this.fetchedAnEmptyPage;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get someRequestsArePending() {
     return this.pendingRequestPageNumbers.size > 0 || this.hasFailedRequests;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get allRequestsHaveCompleted() {
     return this.allRequestsHaveStarted && !this.someRequestsArePending;
   }
 
-  /**
-   * @type {FavoritesPageRequest | null}
-   */
+  /** @type {FavoritesPageRequest | null} */
   get oldestFailedFetchRequest() {
     return this.failedRequests.shift() || null;
   }
 
-  /**
-   * @type {FavoritesPageRequest}
-   */
+  /** @type {FavoritesPageRequest} */
   get newFetchRequest() {
     const request = new FavoritesPageRequest(this.currentPageNumber);
 
@@ -70,9 +46,7 @@ class FavoritesFetcher {
     return request;
   }
 
-  /**
-   * @type {FavoritesPageRequest | null}
-   */
+  /** @type {FavoritesPageRequest | null} */
   get nextFetchRequest() {
     if (this.hasFailedRequests) {
       return this.oldestFailedFetchRequest;
@@ -116,9 +90,7 @@ class FavoritesFetcher {
   async fetchNewFavoritesOnReload(storedFavoriteIds) {
     await Utils.sleep(100);
     this.storedFavoriteIds = storedFavoriteIds;
-    /**
-     * @type {Post[]}
-     */
+    /** @type {Post[]} */
     let favorites = [];
 
     while (true) {

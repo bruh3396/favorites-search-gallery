@@ -1,7 +1,5 @@
 class GalleryVideoRenderer extends AbstractRenderer {
-  /**
-   * @type {VideoController}
-   */
+  /** @type {VideoController} */
   videoController;
 
   /**

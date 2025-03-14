@@ -1,7 +1,5 @@
 class AbstractRenderer {
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   container;
 
   /**

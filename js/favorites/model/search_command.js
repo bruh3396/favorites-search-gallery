@@ -40,17 +40,11 @@ class SearchCommand {
     });
   }
 
-  /**
-   * @type {SearchTag[][]}
-   */
+  /** @type {SearchTag[][]} */
   orGroups;
-  /**
-   * @type {SearchTag[]}
-   */
+  /** @type {SearchTag[]} */
   remainingSearchTags;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   isEmpty;
 
   /**

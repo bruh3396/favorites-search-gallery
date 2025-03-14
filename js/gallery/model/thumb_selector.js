@@ -1,15 +1,9 @@
 class ThumbSelector {
-  /**
-   * @type {Post[]}
-   */
+  /** @type {Post[]} */
   latestSearchResults;
-  /**
-   * @type {HTMLElement[]}
-   */
+  /** @type {HTMLElement[]} */
   thumbsOnCurrentPage;
-  /**
-   * @type {Map<String, Number>}
-   */
+  /** @type {Map<String, Number>} */
   enumeratedThumbsOnCurrentPage;
 
   constructor() {

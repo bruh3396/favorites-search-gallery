@@ -43,9 +43,14 @@ class Downloader {
 
     for (const chunk of chunks) {
       await Promise.all(chunk.map(async(request) => {
-        const blob = await request.blob();
 
-        await Downloader.zipFile(zipWriter, request, blob);
+        try {
+          const blob = await request.blob();
+
+          await Downloader.zipFile(zipWriter, request, blob);
+        } catch (error) {
+          console.error(error);
+        }
 
         if (onFetch) {
           onFetch();
@@ -74,9 +79,7 @@ class Downloader {
    */
   static async getDownloadRequests(posts) {
     const chunks = Utils.splitIntoChunks(posts, 100);
-    /**
-     * @type {DownloadRequest[]}
-     */
+    /** @type {DownloadRequest[]} */
     let result = [];
 
     for (const chunk of chunks) {

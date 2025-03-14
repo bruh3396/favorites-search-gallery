@@ -1,23 +1,13 @@
 class GalleryView {
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   container;
-  /**
-   * @type {GalleryContentRenderer}
-   */
+  /** @type {GalleryContentRenderer} */
   renderer;
-  /**
-   * @type {GalleryUI}
-   */
+  /** @type {GalleryUI} */
   ui;
-  /**
-   * @type {GalleryMenu}
-   */
+  /** @type {GalleryMenu} */
   menu;
-  /**
-   * @type {SearchPageCreator}
-   */
+  /** @type {SearchPageCreator} */
   searchPageCreator;
 
   constructor() {

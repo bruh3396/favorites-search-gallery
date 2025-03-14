@@ -1,17 +1,11 @@
 class VideoController {
   static commonVideoAttributes = "width=\"100%\" height=\"100%\" autoplay muted loop controlsList=\"nofullscreen\" webkit-playsinline playsinline";
 
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   videoContainer;
-  /**
-   * @type {HTMLVideoElement[]}
-   */
+  /** @type {HTMLVideoElement[]} */
   videoPlayers;
-  /**
-   * @type {Map<String, VideoClip>}
-   */
+  /** @type {Map<String, VideoClip>} */
   videoClips;
 
   /**

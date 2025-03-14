@@ -1,11 +1,7 @@
 class FavoritesPaginationMenu {
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   container;
-  /**
-   * @type {HTMLLabelElement}
-   */
+  /** @type {HTMLLabelElement} */
   rangeIndicator;
 
   constructor() {

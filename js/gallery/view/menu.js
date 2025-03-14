@@ -37,13 +37,9 @@ class GalleryMenu {
     {id: "pin-gallery", icon: Icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "cyan"}
   ];
 
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   container;
-  /**
-   * @type {Timeout}
-   */
+  /** @type {Timeout} */
   menuVisibilityTimeout;
 
   /**

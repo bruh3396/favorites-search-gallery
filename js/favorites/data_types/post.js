@@ -1,23 +1,13 @@
 class Post {
-  /**
-   * @type {Map<String, Post>}
-   */
+  /** @type {Map<String, Post>} */
   static allPosts = new Map();
-  /**
-   * @type {RegExp}
-   */
+  /** @type {RegExp} */
   static thumbnailSourceCompressionRegex = /thumbnails\/\/([0-9]+)\/thumbnail_([0-9a-f]+)/;
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   static htmlTemplate;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   static removeFavoriteButtonHTML;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   static addFavoriteButtonHTML;
 
   static {
@@ -120,70 +110,40 @@ class Post {
     }
   }
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   id;
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   root;
-  /**
-   * @type {HTMLAnchorElement}
-   */
+  /** @type {HTMLAnchorElement} */
   container;
-  /**
-   * @type {HTMLImageElement}
-   */
+  /** @type {HTMLImageElement} */
   image;
-  /**
-   * @type {HTMLImageElement}
-   */
+  /** @type {HTMLImageElement} */
   addOrRemoveButton;
-  /**
-   * @type {HTMLDivElement}
-   */
+  /** @type {HTMLDivElement} */
   statisticHint;
-  /**
-   * @type {InactivePost | null}
-   */
+  /** @type {InactivePost | null} */
   inactivePost;
-  /**
-   * @type {PostMetadata}
-   */
+  /** @type {PostMetadata} */
   metadata;
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   tagSet;
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   additionalTagSet;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   attributesNeededForSearchArePopulated;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   htmlElementCreated;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   matchedByLatestSearch;
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get compressedThumbSource() {
     const source = this.inactivePost === null ? this.image.src : this.inactivePost.src;
     return Utils.compressThumbSource(source);
   }
 
-  /**
-   * @type {FavoritesDatabaseRecord}
-   */
+  /** @type {FavoritesDatabaseRecord} */
   get databaseRecord() {
     return {
       id: this.id,
@@ -193,30 +153,22 @@ class Post {
     };
   }
 
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   get originalTagSet() {
     return SetUtils.difference(this.tagSet, this.additionalTagSet);
   }
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get originalTagString() {
     return Utils.convertToTagString(this.originalTagSet);
   }
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get additionalTagString() {
     return Utils.convertToTagString(this.additionalTagSet);
   }
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   get thumbURL() {
     return this.inactivePost === null ? this.image.src : this.inactivePost.src;
   }

@@ -1,23 +1,13 @@
 class MetadataSearchExpression {
-  /**
-   * @type {SearchableMetadataMetric}
-   */
+  /** @type {SearchableMetadataMetric} */
   metric;
-  /**
-   * @type {MetadataComparator}
-   */
+  /** @type {MetadataComparator} */
   operator;
-  /**
-   * @type {SearchableMetadataMetric}
-   */
+  /** @type {SearchableMetadataMetric} */
   relativeValue;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   numericValue;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   hasRelativeValue;
 
   /**

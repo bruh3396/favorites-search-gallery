@@ -113,18 +113,12 @@ class Utils {
   static fullscreenEffectClassName = "fullscreen-effect";
   static transitionDisableClassName = "transition-disabled";
   static imageExtensions = Utils.loadDiscoveredImageExtensions();
-  /**
-   * @type {RegExp}
-   */
+  /** @type {RegExp} */
   static thumbnailSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
-  /**
-   * @type {Cooldown}
-   */
+  /** @type {Cooldown} */
   static imageExtensionAssignmentCooldown;
   static recentlyDiscoveredImageExtensionCount = 0;
-  /**
-   * @type {Record<Number, MediaExtension>}
-   */
+  /** @type {Record<Number, MediaExtension>} */
   static extensionDecodings = {
     0: "jpg",
     1: "png",
@@ -132,9 +126,7 @@ class Utils {
     3: "gif",
     4: "mp4"
   };
-  /**
-   * @type {Record<MediaExtension, Number>}
-   */
+  /** @type {Record<MediaExtension, Number>} */
   static extensionEncodings = {
     "jpg": 0,
     "png": 1,
@@ -142,14 +134,10 @@ class Utils {
     "gif": 3,
     "mp4": 4
   };
-  /**
-   * @type {Function[]}
-   */
+  /** @type {Function[]} */
   static staticInitializers = [];
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     if (Flags.onPostPage) {
       return true;
@@ -161,9 +149,7 @@ class Utils {
     return !Preferences.enableOnSearchPages.value;
   }
 
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   static get itemClassName() {
     return Flags.onSearchPage ? "thumb" : Utils.favoriteItemClassName;
   }
@@ -1263,7 +1249,7 @@ class Utils {
           localStorage.removeItem(key);
         }
       });
-      indexedDB.deleteDatabase(FavoritesDatabaseWrapper.databaseName);
+      indexedDB.deleteDatabase(FavoritesDatabase.databaseName);
     }
   }
 

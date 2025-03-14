@@ -1,15 +1,9 @@
 class GalleryImageCreator {
-  /**
-   * @type {Map<String, ImageRequest>}
-   */
+  /** @type {Map<String, ImageRequest>} */
   imageRequests;
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   animatedRequestIds;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onImageCreated;
 
   /**

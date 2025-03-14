@@ -1,7 +1,5 @@
 class SearchPageCreator {
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   thumbContainer;
 
   constructor() {

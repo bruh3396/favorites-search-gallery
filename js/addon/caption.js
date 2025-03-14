@@ -23,13 +23,9 @@ class Caption {
     </ul>
   `;
   static saveTagCategoriesCooldown = new Cooldown(1000);
-  /**
-   * @type {Object<String, Number>}
-   */
+  /** @type {Object<String, Number>} */
   static tagCategoryAssociations;
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   static pendingRequests = new Set();
   static settings = {
     tagFetchDelayAfterFinishedLoading: 30,
@@ -68,23 +64,17 @@ class Caption {
     return 0;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   static get disabled() {
     return !Flags.onFavoritesPage || Flags.onMobileDevice || Preferences.performanceProfile.value > 1;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get hidden() {
     return this.caption.classList.contains("hide") || this.caption.classList.contains("disabled") || this.caption.classList.contains("remove");
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   static get tagFetchDelay() {
     if (Caption.flags.finishedLoading) {
       return Caption.settings.tagFetchDelayAfterFinishedLoading;
@@ -92,29 +82,17 @@ class Caption {
     return Caption.settings.tagFetchDelayBeforeFinishedLoading;
   }
 
-  /**
-   * @type {HTMLDivElement}
-   */
+  /** @type {HTMLDivElement} */
   captionWrapper;
-  /**
-   * @type {HTMLDivElement}
-   */
+  /** @type {HTMLDivElement} */
   caption;
-  /**
-   * @type {HTMLElement | null}
-   */
+  /** @type {HTMLElement | null} */
   currentThumb;
-  /**
-   * @type {Set<String>}
-   */
+  /** @type {Set<String>} */
   problematicTags;
-  /**
-   * @type {String}
-   */
+  /** @type {String} */
   currentThumbId;
-  /**
-   * @type {AbortController}
-   */
+  /** @type {AbortController} */
   abortController;
 
   constructor() {

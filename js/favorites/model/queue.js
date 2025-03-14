@@ -1,52 +1,34 @@
 class FetchedFavoritesQueue {
-  /**
-   * @type {FavoritesPageRequest[]}
-   */
+  /** @type {FavoritesPageRequest[]} */
   queue;
-  /**
-   * @type {Function}
-   */
+  /** @type {Function} */
   onDequeue;
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   mostRecentlyDequeuedPageNumber;
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   dequeuing;
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get smallestEnqueuedPageNumber() {
     return this.queue[0].pageNumber;
   }
 
-  /**
-   * @type {Number}
-   */
+  /** @type {Number} */
   get nextPageNumberToDequeue() {
     return this.mostRecentlyDequeuedPageNumber + 1;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get allPreviousPagesWereDequeued() {
     return this.nextPageNumberToDequeue === this.smallestEnqueuedPageNumber;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get isEmpty() {
     return this.queue.length === 0;
   }
 
-  /**
-   * @type {Boolean}
-   */
+  /** @type {Boolean} */
   get canDequeue() {
     return !this.isEmpty && this.allPreviousPagesWereDequeued;
   }
