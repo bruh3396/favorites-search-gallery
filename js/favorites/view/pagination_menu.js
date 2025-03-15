@@ -220,4 +220,20 @@ class FavoritesPaginationMenu {
       }
     }
   }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggle(value) {
+    const html = `
+      #favorites-pagination-container,
+      #results-per-page-container,
+      #find-favorite
+      {
+        display: none !important;
+      }
+    `;
+
+    Utils.insertStyleHTML(value ? "" : html, "pagination-menu-enable");
+  }
 }

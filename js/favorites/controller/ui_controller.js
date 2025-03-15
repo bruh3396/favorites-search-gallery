@@ -1,4 +1,5 @@
 class FavoritesUIController {
+  /** @type {Record<String, HTMLElement>} */
   static hotkeys = {};
 
   static setup() {
@@ -39,7 +40,7 @@ class FavoritesUIController {
       const hotkey = event.key;
       const target = FavoritesUIController.hotkeys[hotkey];
 
-      if (!event.isHotkey || target === undefined) {
+      if (!event.isHotkey || target === undefined || !(target instanceof HTMLInputElement)) {
         return;
       }
 
@@ -155,7 +156,9 @@ class FavoritesUIController {
     }
     const action = event.target.dataset.action;
 
+    // @ts-ignore
     if (action !== null && action !== undefined && FavoritesUIController[action] !== undefined) {
+      // @ts-ignore
       FavoritesUIController[action](event);
     }
   }
@@ -334,7 +337,6 @@ class FavoritesUIController {
    * @returns
    */
   static search(event) {
-    console.log(2);
     const searchBox = document.getElementById(Utils.mainSearchBoxId);
 
     if (searchBox === null || (!(searchBox instanceof HTMLTextAreaElement) && !(searchBox instanceof HTMLInputElement))) {

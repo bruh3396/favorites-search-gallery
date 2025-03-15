@@ -20,6 +20,7 @@ class Preferences {
   static rowSize = new Preference("rowSize", 4);
   static dockGalleryMenuLeft = new Preference("dockGalleryMenuLeft", true);
   static showUI = new Preference("showUI", true);
+  static infiniteScroll = new Preference("infiniteScroll", false);
   static galleryMenuPinned = new Preference("galleryMenuPinned", true);
   static galleryMenuEnabled = new Preference("galleryMenuEnabled", Settings.galleryMenuEnabled);
   static showRemoveFavoriteButtons = new Preference("showRemoveFavoriteButtons", false);

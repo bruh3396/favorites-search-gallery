@@ -162,6 +162,7 @@ class Utils {
     Utils.removeUnusedScripts();
     Utils.insertCommonStyleHTML();
     Utils.setTheme();
+    Utils.setTitle();
     Utils.initializeSearchPage();
     Utils.setupOriginalImageLinksOnSearchPage();
     Utils.initializeImageExtensionAssignmentCooldown();
@@ -651,6 +652,12 @@ class Utils {
     Events.global.postProcess.on(() => {
       Utils.toggleDarkTheme(Utils.usingDarkTheme());
     });
+  }
+
+  static setTitle() {
+    if (Flags.onFavoritesPage && Flags.onDesktopDevice) {
+      document.title = "Favorites Search Gallery";
+    }
   }
 
   /**

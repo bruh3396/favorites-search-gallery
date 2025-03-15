@@ -20,7 +20,7 @@ class GallerySettings {
   static upscaleDelay = 100;
   static imageMegabyteLimit = 500;
   static searchPagePreloadedImageCount = 42;
-  static minimumPreloadedImageCount = 12;
+  static minimumPreloadedImageCount = 5;
   static visibleThumbsDownwardScrollPixelGenerosity = 600;
   static navigationThrottleTime = 250;
   static maxImagesToRenderAroundInGallery = Flags.onMobileDevice ? 3 : 50;

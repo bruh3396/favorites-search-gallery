@@ -52,7 +52,7 @@ class FavoritesView {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  insertNewSearchResultsWhileFetching(thumbs) {
+  insertNewSearchResults(thumbs) {
     this.tiler.addToBottom(thumbs);
   }
 
@@ -109,6 +109,10 @@ class FavoritesView {
     Utils.scrollToTop();
   }
 
+  clear() {
+    this.showSearchResults([]);
+  }
+
   /**
    * @param {Number} matchCount
    */
@@ -154,5 +158,12 @@ class FavoritesView {
    */
   getPaginationMenu() {
     return this.paginator.container;
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  togglePaginationMenu(value) {
+    this.paginator.toggle(value);
   }
 }

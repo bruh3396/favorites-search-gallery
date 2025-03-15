@@ -194,11 +194,11 @@ class HTMLStrings {
     }
   }
 
-  html::before {
+  /* html::before {
     content: "";
     position: fixed;
     z-index: 10000;
-    opacity: 0.1;
+    opacity: 0;
     background: black;
     transition: opacity 0.2s linear;
     pointer-events: none;
@@ -206,7 +206,7 @@ class HTMLStrings {
     left: 0;
     width: 100%;
     height: 100%;
-  }
+  } */
 
   html.fullscreen-effect::before {
     opacity: 1;

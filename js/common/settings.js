@@ -9,7 +9,7 @@ class Settings {
   static maxPageNumberButtonCount = 5;
   /** @type {MediaExtension} */
   static defaultExtension = "jpg";
-  static galleryMenuEnabled = false;
+  static galleryMenuEnabled = true;
 }
 
 class Constants {

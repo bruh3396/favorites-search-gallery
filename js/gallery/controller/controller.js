@@ -520,6 +520,7 @@ class GalleryController {
     });
     Events.favorites.resultsAddedToCurrentPage.on((/** @type {HTMLElement[]} */ results) => {
       this.visibleThumbTracker?.observe(results);
+      this.view.handleResultsAddedToCurrentPage(results);
     });
   }
 

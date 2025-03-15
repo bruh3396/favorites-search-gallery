@@ -56,7 +56,7 @@ class MainUpscaler {
     }
   }
 
-  onPageChange() {
+  handlePageChange() {
     this.presetCanvasDimensions(Utils.getAllThumbs());
   }
 

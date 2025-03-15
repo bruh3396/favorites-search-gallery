@@ -64,7 +64,7 @@ class GalleryUI {
   }
 
   scrollToLastVisitedThumb() {
-    FavoritesLayoutObserver.waitForLayoutToComplete()
+    Utils.waitForAllThumbnailsToLoad()
       .then(() => {
         if (this.lastVisitedThumb !== null && this.usingColumnLayout) {
           this.scrollToNextThumb(this.lastVisitedThumb);

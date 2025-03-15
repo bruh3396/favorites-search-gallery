@@ -9,6 +9,8 @@ class FavoritesModel {
   paginator;
   /** @type {Post[]} */
   latestSearchResults;
+  /** @type {Boolean} */
+  infiniteScroll;
 
   constructor() {
     this.loader = new FavoritesLoader();
@@ -16,6 +18,7 @@ class FavoritesModel {
     this.sorter = new FavoritesSorter();
     this.paginator = new FavoritesPaginator();
     this.latestSearchResults = [];
+    this.infiniteScroll = false;
   }
 
   /**
@@ -223,5 +226,58 @@ class FavoritesModel {
    */
   updateResultsPerPage(resultsPerPage) {
     this.paginator.updateResultsPerPage(resultsPerPage);
+  }
+
+  downloadSearchResults() {
+    const posts = this.latestSearchResults;
+    const postCount = posts.length;
+
+    if (postCount === 0) {
+      return;
+    }
+    let fetchedCount = 0;
+    // const zippedCount = 0;
+
+    // console.log("fetch");
+    const onFetch = () => {
+      fetchedCount += 1;
+      // console.log(`fetch ${fetchedCount}/${postCount}`);
+    };
+    const onFetchEnd = () => {
+      // console.log("fetch end");
+      // console.log("zip start");
+    };
+    const onZipEnd = () => {
+      // console.log("zip end");
+    };
+
+    Downloader.downloadPosts(posts, {
+      onFetch,
+      onFetchEnd,
+      onZipEnd
+    });
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleInfiniteScroll(value) {
+    this.infiniteScroll = value;
+  }
+
+  /** @returns {Post[]} */
+  getNextWaterfallBatch() {
+    const batch = [];
+
+    for (const favorite of this.latestSearchResults) {
+      if (document.getElementById(favorite.id) === null) {
+        batch.push(favorite);
+      }
+
+      if (batch.length > 150) {
+        break;
+      }
+    }
+    return batch;
   }
 }

@@ -206,7 +206,7 @@ class VideoController {
    * @param {HTMLVideoElement} video
    */
   revealControlsWhenTouched(video) {
-    if (!Flags.onMobileDevice) {
+    if (Flags.onDesktopDevice) {
       return;
     }
     video.addEventListener("touchend", () => {

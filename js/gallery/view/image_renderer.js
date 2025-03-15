@@ -55,16 +55,23 @@ class GalleryImageRenderer extends AbstractRenderer {
   handlePageChange() {
     this.imageCreator.clearAllImages();
     this.thumbUpscaler.clear();
-    this.thumbUpscaler.onPageChange();
+    this.thumbUpscaler.handlePageChange();
   }
 
   handlePageChangeInGallery() {
     this.imageCreator.clearAnimatedImages();
     this.thumbUpscaler.clear();
     setTimeout(() => {
-      this.thumbUpscaler.onPageChange();
+      this.thumbUpscaler.handlePageChange();
       this.upscaleThumbsWithAvailableImages();
     }, 10);
+  }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  handleResultsAddedToCurrentPage(thumbs) {
+    this.thumbUpscaler.presetCanvasDimensions(thumbs);
   }
 
   upscaleThumbsWithAvailableImages() {

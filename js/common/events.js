@@ -14,7 +14,6 @@ class Events {
     /** @type {EventEmitter<void>} */ layoutCompleted: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ showOnHover: new EventEmitter(true),
     /** @type {EventEmitter<String>} */ missingMetadata: new EventEmitter(true),
-    /** @type {EventEmitter<void>} */ tagModificationsLoaded: new EventEmitter(false),
     /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true)
   };
 

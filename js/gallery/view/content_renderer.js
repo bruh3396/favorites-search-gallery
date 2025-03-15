@@ -84,6 +84,13 @@ class GalleryContentRenderer {
   }
 
   /**
+   * @param {HTMLElement[]} thumbs
+   */
+  handleResultsAddedToCurrentPage(thumbs) {
+    this.imageRenderer.handleResultsAddedToCurrentPage(thumbs);
+  }
+
+  /**
    * @param {Boolean} value
    */
   toggleVideoLooping(value) {

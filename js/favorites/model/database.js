@@ -21,11 +21,7 @@ class FavoritesDatabase {
   async loadAllFavorites() {
     const records = await this.database.load(FavoritesDatabase.objectStoreName);
 
-    console.log("Favorites: got records");
-
     await this.database.deleteRecords(this.getIdsToDeleteOnReload(), FavoritesDatabase.objectStoreName);
-    console.log("Favorites: deleted stale records");
-    console.log("Favorites: creating posts");
     return this.deserialize(records);
   }
 

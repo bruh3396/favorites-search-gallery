@@ -155,4 +155,11 @@ class GalleryView {
   toggleVideoPause() {
     this.renderer.toggleVideoPause();
   }
+
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  handleResultsAddedToCurrentPage(thumbs) {
+    this.renderer.handleResultsAddedToCurrentPage(thumbs);
+  }
 }

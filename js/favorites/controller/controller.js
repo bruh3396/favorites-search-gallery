@@ -6,6 +6,8 @@ class FavoritesController {
   model;
   /** @type {FavoritesView} */
   view;
+  /** @type {FavoritesPageBottomObserver} */
+  pageBottomObserver;
 
   constructor() {
     if (FavoritesController.disabled) {
@@ -13,8 +15,16 @@ class FavoritesController {
     }
     this.model = new FavoritesModel();
     this.view = new FavoritesView();
+    this.pageBottomObserver = new FavoritesPageBottomObserver(this.onPageBottomReached.bind(this));
     this.addEventListeners();
     this.loadAllFavorites();
+  }
+
+  onPageBottomReached() {
+    if (!this.model.infiniteScroll) {
+      return;
+    }
+    this.showInfiniteScrollSearchResults();
   }
 
   addEventListeners() {
@@ -54,7 +64,8 @@ class FavoritesController {
       const action = event.target.dataset.action;
 
       if (action === "gotoPage") {
-        this.changePage(parseInt(event.detail));
+        this.model.changePage(parseInt(event.detail));
+        this.showCurrentPage();
         return;
       }
 
@@ -149,19 +160,44 @@ class FavoritesController {
    */
   showSearchResults(searchResults) {
     Events.favorites.newSearchResults.emit(searchResults);
-    this.model.paginate(searchResults);
     this.view.setMatchCount(searchResults.length);
-    this.changePage(1);
+
+    if (this.model.infiniteScroll) {
+      this.view.clear();
+      this.showInfiniteScrollSearchResults();
+      return;
+    }
+    this.showPaginatedSearchResults(searchResults);
   }
 
-  /**   * @param {Number} pageNumber
+  showInfiniteScrollSearchResults() {
+    const thumbs = Utils.getThumbsFromPosts(this.model.getNextWaterfallBatch());
+
+    if (thumbs.length === 0) {
+      return;
+    }
+    this.view.insertNewSearchResults(thumbs);
+    Events.favorites.resultsAddedToCurrentPage.emit(thumbs);
+
+    Utils.waitForAllThumbnailsToLoad()
+      .then(() => {
+        this.pageBottomObserver.observeBottomElements();
+      });
+  }
+
+  /**
+   * @param {Post[]} searchResults
    */
-  changePage(pageNumber) {
-    this.model.changePage(pageNumber);
+  showPaginatedSearchResults(searchResults) {
+    this.model.paginate(searchResults);
+    this.model.changePage(1);
     this.showCurrentPage();
   }
 
   showCurrentPage() {
+    if (this.model.infiniteScroll) {
+      return;
+    }
     this.view.showSearchResults(this.model.getFavoritesOnCurrentPage());
     this.view.createPageSelectionMenu(this.model.getPaginationParameters());
     this.broadcastPageChange();
@@ -232,6 +268,7 @@ class FavoritesController {
       throw error;
     }
     Events.favorites.favoritesLoaded.emit();
+    this.pageBottomObserver.observeBottomElements();
   }
 
   onSearchResultsFound() {
@@ -250,7 +287,7 @@ class FavoritesController {
       .filter(favorite => document.getElementById(favorite.id) === null);
     const thumbs = Utils.getThumbsFromPosts(newFavorites);
 
-    this.view.insertNewSearchResultsWhileFetching(thumbs);
+    this.view.insertNewSearchResults(thumbs);
     Events.favorites.resultsAddedToCurrentPage.emit(thumbs);
   }
 
@@ -278,12 +315,18 @@ class FavoritesController {
   }
 
   /**
-   * @param {any} layout
+   * @param {String} layout
    */
   changeLayout(layout) {
-    if (Types.isFavoritesLayout(layout)) {
-      Events.favorites.layoutChanged.emit(layout);
-      this.view.changeLayout(layout);
+    if (!Types.isFavoritesLayout(layout)) {
+      return;
+    }
+    Events.favorites.layoutChanged.emit(layout);
+    this.view.changeLayout(layout);
+
+    if (this.model.infiniteScroll) {
+      this.pageBottomObserver.disconnect();
+      this.pageBottomObserver.observeBottomElements();
     }
   }
 
@@ -348,32 +391,15 @@ class FavoritesController {
   }
 
   downloadSearchResults() {
-    const posts = this.model.getLatestSearchResults();
-    const postCount = posts.length;
+    this.model.downloadSearchResults();
+  }
 
-    if (postCount === 0) {
-      return;
-    }
-    let fetchedCount = 0;
-    const zippedCount = 0;
-
-    console.log("fetch");
-    const onFetch = () => {
-      fetchedCount += 1;
-      console.log(`fetch ${fetchedCount}/${postCount}`);
-    };
-    const onFetchEnd = () => {
-      console.log("fetch end");
-      console.log("zip start");
-    };
-    const onZipEnd = () => {
-      console.log("zip end");
-    };
-
-    Downloader.downloadPosts(posts, {
-      onFetch,
-      onFetchEnd,
-      onZipEnd
-    });
+  /**
+   * @param {Boolean} value
+   */
+  toggleInfiniteScroll(value) {
+    this.model.toggleInfiniteScroll(value);
+    this.view.togglePaginationMenu(!value);
+    this.showSearchResults(this.model.getLatestSearchResults());
   }
 }

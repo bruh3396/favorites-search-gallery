@@ -73,8 +73,7 @@ class VisibleThumbTracker {
    * @returns {String}
    */
   getFinalRootMargin(topMargin) {
-    const bottomMargin = GallerySettings.visibleThumbsDownwardScrollPixelGenerosity;
-    return `${topMargin}px 0px ${bottomMargin}px 0px`;
+    return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPixelGenerosity}px 0px`;
   }
 
   updateRootMarginWhenMenuResizes() {
@@ -113,7 +112,7 @@ class VisibleThumbTracker {
     this.intersectionObserver.disconnect();
     this.visibleThumbs.clear();
 
-    FavoritesLayoutObserver.waitForLayoutToComplete()
+    Utils.waitForAllThumbnailsToLoad()
       .then(() => {
         this.observe(Utils.getAllThumbs());
       });

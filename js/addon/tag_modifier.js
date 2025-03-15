@@ -34,12 +34,9 @@ class TagModifier {
   static async loadTagModifications() {
     const records = await TagModifier.database.load(TagModifier.objectStoreName);
 
-    console.log("TagModifier: got records");
-
     for (const record of records) {
       TagModifier.tagModifications.set(record.id, record.tags);
     }
-    Events.favorites.tagModificationsLoaded.emit();
   }
 
   static {

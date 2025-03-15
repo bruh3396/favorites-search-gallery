@@ -221,7 +221,7 @@ class AutoplayController {
   }
 
   configureMobileUi() {
-    if (!Flags.onMobileDevice) {
+    if (Flags.onDesktopDevice) {
       return;
     }
     this.createViewDurationSelects();
@@ -335,7 +335,7 @@ class AutoplayController {
   }
 
   addMobileMenuEventListeners() {
-    if (!Flags.onMobileDevice) {
+    if (Flags.onDesktopDevice) {
       return;
     }
     this.ui.settingsButton.ontouchstart = () => {
