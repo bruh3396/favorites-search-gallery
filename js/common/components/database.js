@@ -1,5 +1,5 @@
 /**
- * @template R
+ * @template V
  */
 class Database {
   /** @type {String} */
@@ -18,7 +18,7 @@ class Database {
 
   /**
    * @param {String} objectStoreName
-   * @returns {Promise<R[]>}
+   * @returns {Promise<V[]>}
    */
   async load(objectStoreName) {
     const database = await this.open(objectStoreName);
@@ -26,7 +26,7 @@ class Database {
   }
 
   /**
-   * @param {(R & {id: String})[]} records
+   * @param {(V & {id: String})[]} records
    * @param {String} objectStoreName
    * @returns {Promise<void>}
    */
@@ -47,7 +47,7 @@ class Database {
   }
 
   /**
-   * @param {(R & {id: String})[]} records
+   * @param {(V & {id: String})[]} records
    * @param {String} objectStoreName
    */
   async update(records, objectStoreName) {
@@ -93,7 +93,7 @@ class Database {
   /**
    * @param {IDBDatabase} database
    * @param {String} objectStoreName
-   * @returns {Promise<R[]>}
+   * @returns {Promise<V[]>}
    */
   getAllRecords(database, objectStoreName) {
     const transaction = database.transaction(objectStoreName, "readwrite");

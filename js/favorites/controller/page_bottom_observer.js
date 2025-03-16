@@ -19,7 +19,7 @@ class FavoritesPageBottomObserver {
   createIntersectionObserver() {
     this.intersectionObserver = new IntersectionObserver(this.onIntersectionChanged.bind(this), {
       threshold: [0.1],
-      rootMargin: "0% 0% 40% 0%"
+      rootMargin: "0% 0% 50% 0%"
     });
   }
 
@@ -33,6 +33,11 @@ class FavoritesPageBottomObserver {
 
   disconnect() {
     this.intersectionObserver.disconnect();
+  }
+
+  refresh() {
+    this.disconnect();
+    this.observeBottomElements();
   }
 
   /**

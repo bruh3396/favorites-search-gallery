@@ -92,17 +92,6 @@ class Utils {
         }
     `
   };
-  static typeableInputs = new Set([
-    "color",
-    "email",
-    "number",
-    "password",
-    "search",
-    "tel",
-    "text",
-    "url",
-    "datetime"
-  ]);
   static clickCodes = {
     left: 0,
     middle: 1,
@@ -110,8 +99,6 @@ class Utils {
   };
   static customTags = Utils.loadCustomTags();
   static favoriteItemClassName = "favorite";
-  static fullscreenEffectClassName = "fullscreen-effect";
-  static transitionDisableClassName = "transition-disabled";
   static imageExtensions = Utils.loadDiscoveredImageExtensions();
   /** @type {RegExp} */
   static thumbnailSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
@@ -137,27 +124,12 @@ class Utils {
   /** @type {Function[]} */
   static staticInitializers = [];
 
-  /** @type {Boolean} */
-  static get disabled() {
-    if (Flags.onPostPage) {
-      return true;
-    }
-
-    if (Flags.onFavoritesPage) {
-      return false;
-    }
-    return !Preferences.enableOnSearchPages.value;
-  }
-
   /** @type {String} */
   static get itemClassName() {
     return Flags.onSearchPage ? "thumb" : Utils.favoriteItemClassName;
   }
 
   static setup() {
-    if (Utils.disabled) {
-      throw new Error("Favorites Search Gallery disabled");
-    }
     Utils.invokeStaticInitializers();
     Utils.removeUnusedScripts();
     Utils.insertCommonStyleHTML();

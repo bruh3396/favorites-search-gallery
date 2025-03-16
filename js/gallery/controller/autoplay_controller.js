@@ -48,11 +48,6 @@ class AutoplayController {
     }
   };
 
-  /** @type {Boolean} */
-  static get disabled() {
-    return false;
-  }
-
   /**
    * @type {{
    * container: HTMLDivElement,
@@ -99,9 +94,6 @@ class AutoplayController {
    * @param {AutoplayEvents} events
    */
   constructor(events) {
-    if (AutoplayController.disabled) {
-      return;
-    }
     this.initializeEvents(events);
     this.initializeFields();
     this.initializeTimers();
@@ -467,7 +459,7 @@ class AutoplayController {
     }
     this.currentThumb = thumb;
 
-    if (!this.active || AutoplayController.disabled || this.paused) {
+    if (!this.active || this.paused) {
       return;
     }
 
@@ -506,7 +498,7 @@ class AutoplayController {
    * @param {HTMLElement} thumb
    */
   start(thumb) {
-    if (!this.active || AutoplayController.disabled) {
+    if (!this.active) {
       return;
     }
     this.addAutoplayEventListeners();
@@ -516,9 +508,6 @@ class AutoplayController {
   }
 
   stop() {
-    if (AutoplayController.disabled) {
-      return;
-    }
     this.ui.container.style.visibility = "hidden";
     this.removeAutoplayEventListeners();
     this.stopImageViewTimer();

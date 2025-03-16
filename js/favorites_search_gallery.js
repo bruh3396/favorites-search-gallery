@@ -1,8 +1,10 @@
 class FavoritesSearchGallery {
   /* eslint-disable no-new */
   constructor() {
+    if (Flags.favoritesSearchGalleryDisabled) {
+      throw new Error("Favorites Search Gallery disabled");
+    }
     Utils.setup();
-
     new FavoritesController();
     new FavoritesUI();
     new GalleryController();
@@ -11,7 +13,6 @@ class FavoritesSearchGallery {
     new Caption();
     new TagModifier();
     new AwesompleteWrapper();
-
     Events.global.postProcess.emit();
   }
 }

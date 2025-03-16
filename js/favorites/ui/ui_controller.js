@@ -16,7 +16,6 @@ class FavoritesUIController {
     }
 
     menu.addEventListener("uiController", (event) => {
-
       // @ts-ignore
       if (!Utils.hasTagName(event.target, "label")) {
         FavoritesUIController.invokeAction(event);
@@ -408,5 +407,15 @@ class FavoritesUIController {
       return;
     }
     Utils.toggleGalleryMenu(event.target.checked);
+  }
+
+  /**
+   * @param {CustomEvent} event
+   */
+  static toggleTooltips(event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    Events.favorites.tooltipsToggled.emit(event.target.checked);
   }
 }

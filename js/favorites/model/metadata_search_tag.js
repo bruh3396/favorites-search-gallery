@@ -1,4 +1,11 @@
 class MetadataSearchTag extends SearchTag {
+  /**
+   * @param {String} tag
+   * @returns {Boolean}
+   */
+  static is(tag) {
+    return MetadataSearchTag.regex.test(tag);
+  }
   static regex = /^-?(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)$/;
 
   /** @type {MetadataSearchExpression} */

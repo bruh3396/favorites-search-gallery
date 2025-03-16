@@ -6,7 +6,7 @@
 [Recommended Specs](#recommended-specs)<br>
 [Controls](#controls)<br>
 [Search Syntax](#search-syntax)<br>
-[FAQ](#faq)
+[FAQ](#faq)<br>
 [Credits](#credits)<br>
 
 ## About

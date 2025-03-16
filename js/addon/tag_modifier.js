@@ -13,11 +13,6 @@ class TagModifier {
     return document.getElementById("tag-edit-mode") !== null;
   }
 
-  /** @type {Boolean} */
-  static get disabled() {
-    return Flags.onMobileDevice || !Flags.onFavoritesPage;
-  }
-
   /** @type {TagModificationDatabaseRecord[]} */
   static get databaseRecords() {
     return Array.from(TagModifier.tagModifications.entries())
@@ -66,7 +61,7 @@ class TagModifier {
   atLeastOneFavoriteIsSelected;
 
   constructor() {
-    if (TagModifier.disabled) {
+    if (Flags.tagModifierDisabled) {
       return;
     }
 

@@ -27,6 +27,12 @@ class Types {
 
   /** @typedef {{id: String, tags: String}} TagModificationDatabaseRecord */
 
+  /** @typedef {{action: String}} WorkerMessage */
+
+  /** @typedef {(UpscaleRequest | {requests: UpscaleRequest[]} | {width: Number, maxHeight: Number}) & WorkerMessage} UpscaleMessage */
+
+  /** @typedef {Record<String, Set<String>>} AliasMap */
+
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);

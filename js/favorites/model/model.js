@@ -18,7 +18,7 @@ class FavoritesModel {
     this.sorter = new FavoritesSorter();
     this.paginator = new FavoritesPaginator();
     this.latestSearchResults = [];
-    this.infiniteScroll = false;
+    this.infiniteScroll = Preferences.infiniteScroll.value;
   }
 
   /**
@@ -266,7 +266,7 @@ class FavoritesModel {
   }
 
   /** @returns {Post[]} */
-  getNextWaterfallBatch() {
+  getNextInfiniteScrollBatch() {
     const batch = [];
 
     for (const favorite of this.latestSearchResults) {
@@ -274,7 +274,7 @@ class FavoritesModel {
         batch.push(favorite);
       }
 
-      if (batch.length > 150) {
+      if (batch.length >= 100) {
         break;
       }
     }

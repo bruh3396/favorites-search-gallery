@@ -1,4 +1,11 @@
 class WildcardSearchTag extends SearchTag {
+  /**
+   * @param {String} tag
+   * @returns {Boolean}
+   */
+  static is(tag) {
+    return tag.includes("*");
+  }
   static unmatchableRegex = /^\b$/;
   static startsWithRegex = /^[^*]*\*$/;
 

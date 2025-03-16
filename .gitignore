@@ -7,11 +7,8 @@ scripts
 tampermonkey*
 .prettierrc
 node_modules
-package-lock.json
-package.json
 eslint.config.mjs
-manifest.json
 *.min.js
 web_workers.js
-jsconfig.json
 globals.d.ts
+*json

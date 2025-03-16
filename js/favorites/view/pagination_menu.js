@@ -9,6 +9,7 @@ class FavoritesPaginationMenu {
     this.rangeIndicator = this.createRangeIndicator();
     this.insert();
     this.create(FavoritesPaginationParameters.emptyFavoritesPaginationParameters);
+    this.toggle(!Preferences.infiniteScroll.value);
   }
 
   createRangeIndicator() {
@@ -228,7 +229,8 @@ class FavoritesPaginationMenu {
     const html = `
       #favorites-pagination-container,
       #results-per-page-container,
-      #find-favorite
+      #find-favorite,
+      #pagination-range-label
       {
         display: none !important;
       }

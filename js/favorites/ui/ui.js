@@ -1,12 +1,7 @@
 class FavoritesUI {
-  /** @type {Boolean} */
-  static get disabled() {
-    return !Flags.onFavoritesPage;
-  }
-
   static {
     Utils.addStaticInitializer(() => {
-      if (!FavoritesUI.disabled) {
+      if (Flags.onFavoritesPage) {
         const style = Flags.onMobileDevice ? HTMLStrings.mobile : HTMLStrings.desktop;
 
         Utils.insertStyleHTML(style, "desktop-mobile");
@@ -16,7 +11,7 @@ class FavoritesUI {
   }
 
   constructor() {
-    if (FavoritesUI.disabled) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
     FavoritesUIController.setup();

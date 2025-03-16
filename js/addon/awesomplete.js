@@ -1,13 +1,9 @@
 class AwesompleteWrapper {
   /** @type {Boolean} */
-  static get disabled() {
-    return !Flags.onFavoritesPage;
-  }
-  /** @type {Boolean} */
   showSavedSearchSuggestions;
 
   constructor() {
-    if (AwesompleteWrapper.disabled) {
+    if (Flags.awesompleteDisabled) {
       return;
     }
     this.showSavedSearchSuggestions = Preferences.savedSearchSuggestions.value;

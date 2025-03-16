@@ -2,10 +2,6 @@ class SavedSearches {
   static localStorageKeys = {
     savedSearches: "savedSearches"
   };
-  /** @type {Boolean} */
-  static get disabled() {
-    return !Flags.onFavoritesPage || Flags.onMobileDevice;
-  }
   /** @type {HTMLTextAreaElement} */
   textarea;
   /** @type {HTMLElement} */
@@ -22,7 +18,7 @@ class SavedSearches {
   saveSearchResultsButton;
 
   constructor() {
-    if (SavedSearches.disabled) {
+    if (Flags.savedSearchesDisabled) {
       return;
     }
     this.insertHTML();

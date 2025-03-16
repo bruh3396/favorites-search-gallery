@@ -4,12 +4,16 @@ class SearchCommand {
    * @returns {SearchTag}
    */
   static createSearchTag(tag) {
-    if (MetadataSearchTag.regex.test(tag)) {
+    if (MetadataSearchTag.is(tag)) {
       return new MetadataSearchTag(tag);
     }
 
-    if (tag.includes("*")) {
+    if (WildcardSearchTag.is(tag)) {
       return new WildcardSearchTag(tag);
+    }
+
+    if (AliasedSearchTag.is(tag)) {
+      return new AliasedSearchTag(tag);
     }
     return new SearchTag(tag);
   }
@@ -19,7 +23,9 @@ class SearchCommand {
    * @returns {SearchTag[]}
    */
   static createSearchTagGroup(tags) {
+    /** @type {Set<String>} */
     const uniqueTags = new Set();
+    /** @type {SearchTag[]} */
     const searchTags = [];
 
     for (const tag of tags) {

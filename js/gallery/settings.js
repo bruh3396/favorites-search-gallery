@@ -13,9 +13,7 @@ class GallerySettings {
   static get mainCanvasDimensions() {
     return Utils.getDimensions(GallerySettings.mainCanvasResolution);
   }
-  static upscaledThumbCanvasWidth = 800;
-  static minUpscaledThumbCanvasWidth = 200;
-  static maxUpscaledThumbCanvasWidth = 2500;
+  static upscaledThumbCanvasWidth = 600;
   static maxUpscaledThumbCanvasHeight = 16000;
   static upscaleDelay = 100;
   static imageMegabyteLimit = 500;
@@ -26,7 +24,9 @@ class GallerySettings {
   static maxImagesToRenderAroundInGallery = Flags.onMobileDevice ? 3 : 50;
   static additionalVideoPlayerCount = Flags.onMobileDevice ? 2 : 2;
   static idleInteractionDuration = 1000;
-  static galleryMenuVisibilityTime = 1000;
+  static menuVisibilityTime = 1000;
+  static maxVisibleThumbsBeforeStoppingPreload = 125;
   static preloadContentDebounceTime = 250;
+  static useOffscreenThumbUpscaler = false;
   static createImageAccentColors = false;
 }

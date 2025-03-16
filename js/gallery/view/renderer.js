@@ -1,4 +1,4 @@
-class AbstractRenderer {
+class Renderer {
   /** @type {HTMLElement} */
   container;
 

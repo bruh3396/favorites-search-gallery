@@ -1,4 +1,13 @@
 class SearchTag {
+  /**
+   * @param {String} tag
+   * @returns {Boolean}
+   */
+  // @ts-ignore
+  static is(tag) {
+    return true;
+  }
+
   /** @type {String} */
   value;
   /** @type {Boolean} */

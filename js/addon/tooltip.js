@@ -1,34 +1,4 @@
 class Tooltip {
-  static tooltipHTML = `
-<div id="tooltip-container">
-  <style>
-    #tooltip {
-      max-width: 750px;
-      border: 1px solid black;
-      padding: 0.25em;
-      position: absolute;
-      box-sizing: border-box;
-      z-index: 25;
-      pointer-events: none;
-      visibility: hidden;
-      opacity: 0;
-      transition: visibility 0s, opacity 0.25s linear;
-      font-size: 1.05em;
-    }
-
-    #tooltip.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-  </style>
-  <span id="tooltip" class="light-green-gradient"></span>
-</div>
-`;
-  /** @type {Boolean} */
-  static get disabled() {
-    return Flags.onMobileDevice || Preferences.performanceProfile.value > 1 || Flags.onPostPage; lg;
-  }
-
   /** @type {HTMLElement} */
   tooltip;
   /** @type {String} */
@@ -37,7 +7,7 @@ class Tooltip {
   visible;
   /** @type {Object<String,String>} */
   searchTagColorCodes;
-  /** @type {HTMLTextAreaElement | null} */
+  /** @type {HTMLTextAreaElement} */
   searchBox;
   /** @type {String} */
   previousSearch;
@@ -45,7 +15,7 @@ class Tooltip {
   currentImage;
 
   constructor() {
-    if (Tooltip.disabled) {
+    if (Flags.tooltipDisabled) {
       return;
     }
     this.visible = Preferences.showTooltip.value;
@@ -55,7 +25,6 @@ class Tooltip {
     this.searchTagColorCodes = {};
     this.currentImage = null;
     this.addEventListeners();
-    this.addFavoritesOptions();
     this.assignColorsToMatchedTags();
   }
 
@@ -77,11 +46,21 @@ class Tooltip {
 
   addEventListeners() {
     this.addCommonEventListeners();
+    this.addFavoritesPageEventListeners();
   }
 
   addCommonEventListeners() {
     this.addKeyDownEventListener();
     this.addMouseOverEventListener();
+  }
+
+  addFavoritesPageEventListeners() {
+    if (!Flags.onFavoritesPage) {
+      return;
+    }
+    Events.favorites.tooltipsToggled.on((value) => {
+      this.toggleVisibility(value);
+    });
   }
 
   addKeyDownEventListener() {
@@ -369,19 +348,6 @@ class Tooltip {
       }
     }
     return undefined;
-  }
-
-  addFavoritesOptions() {
-    Utils.createFavoritesOption(
-      "show-tooltips",
-      " Tooltips",
-      "Show tags when hovering over a thumbnail and see which ones were matched by a search",
-      this.visible, (event) => {
-        this.toggleVisibility(event.target.checked);
-      },
-      true,
-      "(T)"
-    );
   }
 
   /**

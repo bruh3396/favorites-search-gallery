@@ -1,9 +1,9 @@
-class GalleryImageRenderer extends AbstractRenderer {
+class GalleryImageRenderer extends Renderer {
   /** @type {GalleryCanvas} */
   canvas;
   /** @type {GalleryImageCreator} */
   imageCreator;
-  /** @type {MainUpscaler} */
+  /** @type {ThumbUpscaler} */
   thumbUpscaler;
   /** @type {String} */
   lastShownId;
@@ -15,7 +15,7 @@ class GalleryImageRenderer extends AbstractRenderer {
     super(galleryContainer);
     this.canvas = new GalleryCanvas(this.container);
     this.imageCreator = new GalleryImageCreator(this.onImageCreated.bind(this));
-    this.thumbUpscaler = new MainUpscaler();
+    this.thumbUpscaler = GallerySettings.useOffscreenThumbUpscaler ? new OffscreenThumbUpscaler() : new MainThumbUpscaler();
     this.lastShownId = "";
   }
 
@@ -54,13 +54,11 @@ class GalleryImageRenderer extends AbstractRenderer {
 
   handlePageChange() {
     this.imageCreator.clearAllImages();
-    this.thumbUpscaler.clear();
     this.thumbUpscaler.handlePageChange();
   }
 
   handlePageChangeInGallery() {
     this.imageCreator.clearAnimatedImages();
-    this.thumbUpscaler.clear();
     setTimeout(() => {
       this.thumbUpscaler.handlePageChange();
       this.upscaleThumbsWithAvailableImages();

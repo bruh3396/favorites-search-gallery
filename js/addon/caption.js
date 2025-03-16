@@ -65,11 +65,6 @@ class Caption {
   }
 
   /** @type {Boolean} */
-  static get disabled() {
-    return !Flags.onFavoritesPage || Flags.onMobileDevice || Preferences.performanceProfile.value > 1;
-  }
-
-  /** @type {Boolean} */
   get hidden() {
     return this.caption.classList.contains("hide") || this.caption.classList.contains("disabled") || this.caption.classList.contains("remove");
   }
@@ -96,7 +91,7 @@ class Caption {
   abortController;
 
   constructor() {
-    if (Caption.disabled) {
+    if (Flags.captionsDisabled) {
       return;
     }
     this.initializeFields();

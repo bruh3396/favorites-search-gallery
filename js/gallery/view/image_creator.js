@@ -139,7 +139,7 @@ class GalleryImageCreator {
         this.completeImageRequest(request);
       })
       .catch((error) => {
-        if (error instanceof ImageBitmapRequestCancelled) {
+        if (error instanceof ImageBitmapRequestCancelledError) {
           this.imageRequests.delete(request.id);
           return;
         }

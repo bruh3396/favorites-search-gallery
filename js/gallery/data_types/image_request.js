@@ -73,7 +73,7 @@ class ImageRequest {
   abortIfCancelled() {
     if (this.cancelled) {
       this.abortController.abort();
-      throw new ImageBitmapRequestCancelled();
+      throw new ImageBitmapRequestCancelledError();
     }
   }
 
@@ -123,5 +123,16 @@ class ImageRequest {
       .then((imageBitmap) => {
         this.imageBitmap = imageBitmap;
       });
+  }
+
+  /**
+   * @returns {Promise<UpscaleRequest>}
+   */
+  async getUpscaleRequest() {
+    if (!(this.imageBitmap instanceof ImageBitmap)) {
+      throw new Error("Tried to create upscale request without image bitmap");
+    }
+    const imageBitmapClone = await createImageBitmap(this.imageBitmap);
+    return new UpscaleRequest(this.thumb, imageBitmapClone);
   }
 }

@@ -4,7 +4,8 @@ class Preferences {
   static savedSearchTutorial = new Preference("savedSearchTutorial", false);
   static showCaptions = new Preference("showCaptions", false);
   static showTooltip = new Preference("showTooltip", false);
-  static showOnHover = new Preference("showOnHover", true);
+  static showOnHover = new Preference("showOnHover", false);
+  static tagAliasing = new Preference("tagAliasing", true);
   static allowedRatings = new Preference("allowedRatings", 7);
   static favoriteFinder = new Preference("findFavorite", "");
   static enableOnSearchPages = new Preference("enableOnSearchPages", false);
@@ -16,11 +17,11 @@ class Preferences {
   /** @type {Preference<MetadataMetric>}*/
   static sortingMethod = new Preference("sortingMethod", "default");
   static showOptions = new Preference("showOptions", false);
-  static columnCount = new Preference("columnCount", 5);
+  static columnCount = new Preference("columnCount", 6);
   static rowSize = new Preference("rowSize", 4);
   static dockGalleryMenuLeft = new Preference("dockGalleryMenuLeft", true);
   static showUI = new Preference("showUI", true);
-  static infiniteScroll = new Preference("infiniteScroll", false);
+  static infiniteScroll = new Preference("infiniteScroll", true);
   static galleryMenuPinned = new Preference("galleryMenuPinned", true);
   static galleryMenuEnabled = new Preference("galleryMenuEnabled", Settings.galleryMenuEnabled);
   static showRemoveFavoriteButtons = new Preference("showRemoveFavoriteButtons", false);

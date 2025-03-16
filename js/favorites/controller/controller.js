@@ -1,30 +1,33 @@
 class FavoritesController {
-  static get disabled() {
-    return !Flags.onFavoritesPage;
-  }
   /** @type {FavoritesModel} */
   model;
   /** @type {FavoritesView} */
   view;
-  /** @type {FavoritesPageBottomObserver} */
-  pageBottomObserver;
+  /** @type {FavoritesPaginationController} */
+  paginationController;
+  /** @type {FavoritesInfiniteScrollController} */
+  infiniteScrollController;
+
+  /** @type {FavoritesSecondaryController} */
+  get secondaryController() {
+    return this.model.infiniteScroll ? this.infiniteScrollController : this.paginationController;
+  }
+
+  /** @type {FavoritesSecondaryController[]} */
+  get secondaryControllers() {
+    return [this.infiniteScrollController, this.paginationController];
+  }
 
   constructor() {
-    if (FavoritesController.disabled) {
+    if (!Flags.onFavoritesPage) {
       return;
     }
     this.model = new FavoritesModel();
     this.view = new FavoritesView();
-    this.pageBottomObserver = new FavoritesPageBottomObserver(this.onPageBottomReached.bind(this));
+    this.paginationController = new FavoritesPaginationController(this.model, this.view);
+    this.infiniteScrollController = new FavoritesInfiniteScrollController(this.model, this.view);
     this.addEventListeners();
     this.loadAllFavorites();
-  }
-
-  onPageBottomReached() {
-    if (!this.model.infiniteScroll) {
-      return;
-    }
-    this.showInfiniteScrollSearchResults();
   }
 
   addEventListeners() {
@@ -58,20 +61,7 @@ class FavoritesController {
   addEventListenersToPaginationMenu() {
     // @ts-ignore
     this.view.getPaginationMenu().addEventListener("controller", (/** @type {CustomEvent} */event) => {
-      if (!(event.target instanceof HTMLElement)) {
-        return;
-      }
-      const action = event.target.dataset.action;
-
-      if (action === "gotoPage") {
-        this.model.changePage(parseInt(event.detail));
-        this.showCurrentPage();
-        return;
-      }
-
-      if (action === "gotoRelativePage" && this.model.gotoRelativePage(event.detail)) {
-        this.showCurrentPage();
-      }
+      this.secondaryController.handlePaginationMenuEvent(event);
     });
   }
 
@@ -83,8 +73,7 @@ class FavoritesController {
 
   setupPageChangingInGallery() {
     Events.gallery.requestPageChange.on((direction) => {
-      this.gotoAdjacentPage(direction);
-      Events.favorites.pageChangeResponse.emit();
+      this.secondaryController.handlePageChangeRequest(direction);
     });
   }
 
@@ -99,11 +88,11 @@ class FavoritesController {
       const columnInput = document.getElementById("column-count");
       const rowInput = document.getElementById("row-size");
 
-      if (columnInput !== null && (columnInput instanceof HTMLInputElement)) {
+      if (columnInput instanceof HTMLInputElement) {
         this.updateColumnCount(columnInput);
       }
 
-      if (rowInput !== null && (rowInput instanceof HTMLInputElement)) {
+      if (rowInput instanceof HTMLInputElement) {
         this.updateRowSize(rowInput);
       }
     }, 100));
@@ -127,7 +116,7 @@ class FavoritesController {
     Utils.inGallery()
       .then((inGallery) => {
         if (!inGallery) {
-          this.gotoAdjacentPage(direction);
+          this.secondaryController.gotoAdjacentPage(direction);
         }
       });
   }
@@ -141,79 +130,18 @@ class FavoritesController {
       })
       .then((newFavoritesFound) => {
         this.processFavoritesFoundOnReload(newFavoritesFound);
-        throw new PromiseChainExit();
+        throw new PromiseChainExitError();
       })
       .catch((emptyFavoritesDatabaseError) => {
         return this.findAllFavorites(emptyFavoritesDatabaseError);
       })
       .then(() => {
         this.onAllFavoritesFound();
-        throw new PromiseChainExit();
+        throw new PromiseChainExitError();
       })
       .catch((chainExitError) => {
         this.broadcastAllFavoritesLoaded(chainExitError);
       });
-  }
-
-  /**
-   * @param {Post[]} searchResults
-   */
-  showSearchResults(searchResults) {
-    Events.favorites.newSearchResults.emit(searchResults);
-    this.view.setMatchCount(searchResults.length);
-
-    if (this.model.infiniteScroll) {
-      this.view.clear();
-      this.showInfiniteScrollSearchResults();
-      return;
-    }
-    this.showPaginatedSearchResults(searchResults);
-  }
-
-  showInfiniteScrollSearchResults() {
-    const thumbs = Utils.getThumbsFromPosts(this.model.getNextWaterfallBatch());
-
-    if (thumbs.length === 0) {
-      return;
-    }
-    this.view.insertNewSearchResults(thumbs);
-    Events.favorites.resultsAddedToCurrentPage.emit(thumbs);
-
-    Utils.waitForAllThumbnailsToLoad()
-      .then(() => {
-        this.pageBottomObserver.observeBottomElements();
-      });
-  }
-
-  /**
-   * @param {Post[]} searchResults
-   */
-  showPaginatedSearchResults(searchResults) {
-    this.model.paginate(searchResults);
-    this.model.changePage(1);
-    this.showCurrentPage();
-  }
-
-  showCurrentPage() {
-    if (this.model.infiniteScroll) {
-      return;
-    }
-    this.view.showSearchResults(this.model.getFavoritesOnCurrentPage());
-    this.view.createPageSelectionMenu(this.model.getPaginationParameters());
-    this.broadcastPageChange();
-  }
-
-  /**
-   * @param {NavigationKey} direction
-   */
-  gotoAdjacentPage(direction) {
-    if (this.model.gotoAdjacentPage(direction)) {
-      this.showCurrentPage();
-    }
-  }
-
-  broadcastPageChange() {
-    Events.favorites.pageChange.emit();
   }
 
   /**
@@ -241,11 +169,11 @@ class FavoritesController {
   }
 
   /**
-   * @param {EmptyFavoritesDatabase} error
+   * @param {EmptyFavoritesDatabaseError} error
    * @returns {Promise<void>}
    */
   findAllFavorites(error) {
-    if ((error instanceof EmptyFavoritesDatabase)) {
+    if ((error instanceof EmptyFavoritesDatabaseError)) {
       this.view.hideLoadingWheel();
       Events.favorites.startedFetchingFavorites.emit();
       return this.model.fetchAllFavorites(this.onSearchResultsFound.bind(this));
@@ -261,19 +189,23 @@ class FavoritesController {
   }
 
   /**
-   * @param {PromiseChainExit} error
+   * @param {PromiseChainExitError} error
    */
   broadcastAllFavoritesLoaded(error) {
-    if (!(error instanceof PromiseChainExit)) {
+    if (!(error instanceof PromiseChainExitError)) {
       throw error;
     }
     Events.favorites.favoritesLoaded.emit();
-    this.pageBottomObserver.observeBottomElements();
   }
 
   onSearchResultsFound() {
-    this.model.paginate(this.model.getLatestSearchResults());
     this.view.updateStatusWhileFetching(this.model.getLatestSearchResults().length, this.model.getAllFavorites().length);
+    Events.favorites.newSearchResults.emit(this.model.getLatestSearchResults());
+    this.secondaryController.handleNewSearchResultsFound();
+  }
+
+  onSearchResultsFoundUsingPagination() {
+    this.model.paginate(this.model.getLatestSearchResults());
     this.view.createPageSelectionMenuWhileFetching(this.model.getPaginationParameters());
     this.addNewlyFetchedSearchResultsToCurrentPage();
     Events.favorites.newSearchResults.emit(this.model.getLatestSearchResults());
@@ -296,6 +228,15 @@ class FavoritesController {
    */
   searchFavorites(searchQuery) {
     this.showSearchResults(this.model.getSearchResults(searchQuery));
+  }
+
+  /**
+   * @param {Post[]} searchResults
+   */
+  showSearchResults(searchResults) {
+    Events.favorites.newSearchResults.emit(searchResults);
+    this.view.setMatchCount(searchResults.length);
+    this.secondaryController.showSearchResults(searchResults);
   }
 
   shuffleSearchResults() {
@@ -323,11 +264,6 @@ class FavoritesController {
     }
     Events.favorites.layoutChanged.emit(layout);
     this.view.changeLayout(layout);
-
-    if (this.model.infiniteScroll) {
-      this.pageBottomObserver.disconnect();
-      this.pageBottomObserver.observeBottomElements();
-    }
   }
 
   /**
@@ -384,10 +320,7 @@ class FavoritesController {
    * @param {String} id
    */
   findFavorite(id) {
-    if (this.model.gotoPageWithFavorite(id)) {
-      this.showCurrentPage();
-    }
-    this.view.revealFavorite(id);
+    this.secondaryController.findFavorite(id);
   }
 
   downloadSearchResults() {
@@ -398,8 +331,19 @@ class FavoritesController {
    * @param {Boolean} value
    */
   toggleInfiniteScroll(value) {
+    this.resetSeccondaryControllers();
     this.model.toggleInfiniteScroll(value);
     this.view.togglePaginationMenu(!value);
+
+    if (value) {
+      Events.favorites.pageChange.emit();
+    }
     this.showSearchResults(this.model.getLatestSearchResults());
+  }
+
+  resetSeccondaryControllers() {
+    for (const controller of this.secondaryControllers) {
+      controller.reset();
+    }
   }
 }

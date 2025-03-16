@@ -10,13 +10,8 @@ class GalleryController {
   /** @type {AutoplayController} */
   autoplayController;
 
-  /** @type {Boolean} */
-  static get disabled() {
-    return Flags.galleryDisabled;
-  }
-
   constructor() {
-    if (GalleryController.disabled) {
+    if (Flags.galleryDisabled) {
       return;
     }
     this.model = new GalleryModel();
@@ -525,8 +520,13 @@ class GalleryController {
   }
 
   preloadVisibleContent() {
-    if (this.model.currentState !== GalleryModel.states.IN_GALLERY && this.visibleThumbTracker !== null) {
-      this.view.preloadContent(this.visibleThumbTracker.getVisibleThumbs());
+    if (this.model.currentState === GalleryModel.states.IN_GALLERY || this.visibleThumbTracker === null) {
+      return;
+    }
+    const thumbs = this.visibleThumbTracker.getVisibleThumbs();
+
+    if (thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload) {
+      this.view.preloadContent(thumbs);
     }
   }
 

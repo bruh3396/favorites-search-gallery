@@ -14,7 +14,8 @@ class Events {
     /** @type {EventEmitter<void>} */ layoutCompleted: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ showOnHover: new EventEmitter(true),
     /** @type {EventEmitter<String>} */ missingMetadata: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true)
+    /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ tooltipsToggled: new EventEmitter(true)
   };
 
   static gallery = {

@@ -1,9 +1,9 @@
-class MainUpscaler {
-  /** @type {Map<String, HTMLCanvasElement | OffscreenCanvas>} */
-  canvases;
+class ThumbUpscaler {
+  /** @type {Set<String>} */
+  drawnCanvasIds;
 
   constructor() {
-    this.canvases = new Map();
+    this.drawnCanvasIds = new Set();
   }
 
   /**
@@ -12,6 +12,11 @@ class MainUpscaler {
   upscale(request) {
     if (this.requestIsValid(request)) {
       this.finishUpscale(request);
+      this.drawnCanvasIds.add(request.id);
+
+      if (request.isAnimated) {
+        request.close();
+      }
     }
   }
 
@@ -21,30 +26,14 @@ class MainUpscaler {
    */
   requestIsValid(request) {
     const thumbIsOnPage = document.getElementById(request.id) !== null;
-    const thumbIsLowResolution = !this.canvases.has(request.id);
-    return thumbIsOnPage && thumbIsLowResolution && Flags.onFavoritesPage && request.isOriginalResolution;
+    return thumbIsOnPage && Flags.onFavoritesPage && request.isOriginalResolution && request.hasCompleted && !this.drawnCanvasIds.has(request.id);
   }
 
   /**
    * @param {ImageRequest} request
    */
-  finishUpscale(request) {
-    if (request.imageBitmap === null) {
-      return;
-    }
-    const canvas = request.thumb.querySelector("canvas");
-
-    if (canvas === null) {
-      return;
-    }
-    this.canvases.set(request.id, canvas);
-    this.setCanvasDimensionsFromImageBitmap(canvas, request.imageBitmap);
-    Utils.drawCanvas(canvas.getContext("2d"), request.imageBitmap);
-
-    if (request.isAnimated) {
-      request.close();
-    }
-  }
+  // @ts-ignore
+  finishUpscale(request) { }
 
   /**
    * @param {HTMLCanvasElement} canvas
@@ -57,6 +46,7 @@ class MainUpscaler {
   }
 
   handlePageChange() {
+    this.clear();
     this.presetCanvasDimensions(Utils.getAllThumbs());
   }
 
@@ -68,24 +58,30 @@ class MainUpscaler {
       return;
     }
 
-    for (const canvas of this.getCanvasDimensions(thumbs)) {
-      this.setThumbCanvasDimensions(canvas.canvas, canvas.width, canvas.height);
+    for (const item of this.getCanvasDimensions(thumbs)) {
+      if (UpscaleRequest.transferredCanvasIds.has(item.id)) {
+        continue;
+      }
+      this.setThumbCanvasDimensions(item.canvas, item.width, item.height);
     }
   }
 
   /**
    * @param {HTMLElement[]} thumbs
-   * @returns {{canvas: HTMLCanvasElement, width: Number, height: Number}[]}
+   * @returns {{id: String, canvas: HTMLCanvasElement, width: Number, height: Number}[]}
    */
   getCanvasDimensions(thumbs) {
     return thumbs
-      .map(thumb => thumb.querySelector("canvas"))
-      .filter(canvas => canvas !== null)
-      .filter(canvas => canvas.dataset.size !== undefined)
-      .map((canvas) => {
-        const dimensions = Utils.getDimensions(canvas.dataset.size);
+      .map(thumb => ({
+        id: thumb.id,
+        canvas: thumb.querySelector("canvas") || new HTMLCanvasElement()
+      }))
+      .filter(item => item.canvas.dataset.size !== undefined)
+      .map((item) => {
+        const dimensions = Utils.getDimensions(item.canvas.dataset.size);
         return ({
-          canvas,
+          id: item.id,
+          canvas: item.canvas,
           width: dimensions.x,
           height: dimensions.y
         });
@@ -116,25 +112,9 @@ class MainUpscaler {
   }
 
   clear() {
-    for (const canvas of this.canvases.values()) {
-      this.clearCanvas(canvas);
-    }
-    this.canvases.clear();
+    this.drawnCanvasIds.clear();
+    this.clearHelper();
   }
 
-  /**
-   * @param {HTMLCanvasElement | OffscreenCanvas} canvas
-   */
-  clearCanvas(canvas) {
-    if (canvas instanceof OffscreenCanvas) {
-      return;
-    }
-    const context = canvas.getContext("2d");
-
-    if (context !== null) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    canvas.width = 0;
-    canvas.height = 0;
-  }
+  clearHelper() { }
 }

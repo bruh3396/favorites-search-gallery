@@ -8,8 +8,8 @@ class SetUtils {
   static union(a, b) {
     const c = new Set(a);
 
-    for (const element of b.values()) {
-      c.add(element);
+    for (const v of b.values()) {
+      c.add(v);
     }
     return c;
   }
@@ -23,8 +23,8 @@ class SetUtils {
   static difference(a, b) {
     const c = new Set(a);
 
-    for (const element of b.values()) {
-      c.delete(element);
+    for (const v of b.values()) {
+      c.delete(v);
     }
     return c;
   }
@@ -48,12 +48,27 @@ class SetUtils {
   static intersection(a, b) {
     const c = new Set();
 
-    for (const element of a.values()) {
-      if (b.has(element)) {
-        c.add(element);
+    for (const v of a.values()) {
+      if (b.has(v)) {
+        c.add(v);
       }
     }
     return c;
+  }
+
+  /**
+   * @template T
+   * @param {Set<T>} a
+   * @param {Set<T>} b
+   * @returns {Boolean}
+   */
+  static hasIntersection(a, b) {
+    for (const v of a.values()) {
+      if (b.has(v)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

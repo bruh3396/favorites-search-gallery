@@ -4,15 +4,12 @@ class FavoritesDatabase {
 
   /** @type {Database<FavoritesDatabaseRecord>} */
   database;
-  /** @type {String[]} */
-  favoriteIdsRequiringMetadataDatabaseUpdate;
-  /** @type {Timeout} */
-  newMetadataReceivedTimeout;
+  /** @type {BatchExecutor<Post>} */
+  metadataUpdater;
 
   constructor() {
-    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
-    this.newMetadataReceivedTimeout = null;
     this.database = new Database(FavoritesDatabase.databaseName);
+    this.metadataUpdater = new BatchExecutor(100, 1000, this.updateFavorites.bind(this));
   }
 
   /**
@@ -68,31 +65,11 @@ class FavoritesDatabase {
    * @param {String} id
    */
   updateMetadataInDatabase(id) {
-    if (!Post.allPosts.has(id)) {
-      return;
+    const post = Post.allPosts.get(id);
+
+    if (post !== undefined) {
+      this.metadataUpdater.add(post);
     }
-    const batchSize = 100;
-    const waitTime = 1000;
-
-    clearTimeout(this.newMetadataReceivedTimeout);
-    this.favoriteIdsRequiringMetadataDatabaseUpdate.push(id);
-
-    if (this.favoriteIdsRequiringMetadataDatabaseUpdate.length >= batchSize) {
-      this.batchUpdateMetadataInDatabase();
-      return;
-    }
-    this.newMetadataReceivedTimeout = setTimeout(() => {
-      this.batchUpdateMetadataInDatabase();
-    }, waitTime);
-  }
-
-  batchUpdateMetadataInDatabase() {
-    const favoritesToUpdate = this.favoriteIdsRequiringMetadataDatabaseUpdate
-      .map(id => Post.allPosts.get(id))
-      .filter(post => post !== undefined);
-
-    this.updateFavorites(favoritesToUpdate);
-    this.favoriteIdsRequiringMetadataDatabaseUpdate = [];
   }
 
   /**

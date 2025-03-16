@@ -24,7 +24,7 @@ class FavoritesLoader {
     return this.database.loadAllFavorites()
       .then((favorites) => {
         if (favorites.length === 0) {
-          throw new EmptyFavoritesDatabase();
+          throw new EmptyFavoritesDatabaseError();
         }
         this.allFavorites = favorites;
         return favorites;

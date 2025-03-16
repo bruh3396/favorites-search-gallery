@@ -6,7 +6,7 @@ class GalleryContentRenderer {
   /** @type {GalleryGifRenderer} */
   gifRenderer;
 
-  /** @type {AbstractRenderer[]} */
+  /** @type {Renderer[]} */
   get renderers() {
     return [this.imageRenderer, this.videoRenderer, this.gifRenderer];
   }
@@ -37,7 +37,7 @@ class GalleryContentRenderer {
   }
 
   /**
-   * @param {AbstractRenderer} targetRenderer
+   * @param {Renderer} targetRenderer
    * @param {HTMLElement} thumb
    */
   startRenderer(targetRenderer, thumb) {
