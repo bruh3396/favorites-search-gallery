@@ -105,7 +105,7 @@ class Post {
     }
     postTagSet.delete(id);
 
-    if (SetUtils.symmetricDifference(apiTagSet, postTagSet).size > 0) {
+    if (apiTagSet.symmetricDifference(postTagSet).size > 0) {
       post.initializeTagSet(Utils.convertToTagString(apiTagSet));
     }
   }
@@ -155,7 +155,7 @@ class Post {
 
   /** @type {Set<String>} */
   get originalTagSet() {
-    return SetUtils.difference(this.tagSet, this.additionalTagSet);
+    return this.tagSet.difference(this.additionalTagSet);
   }
 
   /** @type {String} */
@@ -387,7 +387,9 @@ class Post {
   }
 
   combineOriginalAndAdditionalTagSets() {
-    this.tagSet = SetUtils.sort(SetUtils.union(this.originalTagSet, this.additionalTagSet));
+    const union = this.originalTagSet.union(this.additionalTagSet);
+
+    this.tagSet = new Set(Array.from(union).sort());
   }
 
   /**
@@ -395,10 +397,10 @@ class Post {
    * @returns {String}
    */
   addAdditionalTags(newTags) {
-    const newTagsSet = SetUtils.difference(Utils.convertToTagSet(newTags), this.tagSet);
+    const newTagsSet = Utils.convertToTagSet(newTags).difference(this.tagSet);
 
     if (newTagsSet.size > 0) {
-      this.additionalTagSet = SetUtils.union(this.additionalTagSet, newTagsSet);
+      this.additionalTagSet = this.additionalTagSet.union(newTagsSet);
       this.combineOriginalAndAdditionalTagSets();
     }
     return this.additionalTagString;
@@ -409,11 +411,11 @@ class Post {
    * @returns {String}
    */
   removeAdditionalTags(tagsToRemove) {
-    const tagsToRemoveSet = SetUtils.intersection(Utils.convertToTagSet(tagsToRemove), this.additionalTagSet);
+    const tagsToRemoveSet = Utils.convertToTagSet(tagsToRemove).intersection(this.additionalTagSet);
 
     if (tagsToRemoveSet.size > 0) {
-      this.tagSet = SetUtils.difference(this.tagSet, tagsToRemoveSet);
-      this.additionalTagSet = SetUtils.difference(this.additionalTagSet, tagsToRemoveSet);
+      this.tagSet = this.tagSet.difference(tagsToRemoveSet);
+      this.additionalTagSet = this.additionalTagSet.difference(tagsToRemoveSet);
     }
     return this.additionalTagString;
   }
@@ -440,8 +442,8 @@ class Post {
    */
   async getOriginalFileURL() {
     const thumbURL = this.inactivePost === null ? this.image.src : this.inactivePost.src;
-    const isVideo = SetUtils.intersection(Constants.videoTagSet, this.tagSet).size > 0;
-    const isAnimated = SetUtils.intersection(Constants.animatedTagSet, this.tagSet).size > 0;
+    const isVideo = !Constants.videoTagSet.isDisjointFrom(this.tagSet);
+    const isAnimated = !Constants.animatedTagSet.isDisjointFrom(this.tagSet);
     let extension;
 
     if (isVideo) {

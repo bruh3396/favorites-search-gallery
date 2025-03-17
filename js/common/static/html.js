@@ -224,7 +224,7 @@ class HTMLStrings {
     #favorites-search-gallery-menu {
       position: sticky;
       top: 0;
-      padding: 10px 20px;
+      padding: 10px;
       z-index: 30;
       margin-bottom: 10px;
 
@@ -477,13 +477,13 @@ class HTMLStrings {
 
     #favorites-search-gallery-content {
       padding: 0px 20px 30px 20px;
-      --gutter: 8px;
+      --gutter: 12px;
 
       &.grid,
       &.square {
         display: grid !important;
         grid-template-columns: repeat(10, 1fr);
-        grid-gap: var(--gutter);
+        grid-gap: 0.5cqw;
 
         .add-or-remove-button {
           width: 40%;
@@ -886,16 +886,35 @@ class HTMLStrings {
           <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
 
             <div id="whats-new-container" class="light-green-gradient">
-              <h4>1.18:</h4>
+              <h4>1.19:</h4>
               <h5>Features:</h5>
               <ul>
-                <li>Improved/fixed mobile UI</li>
-                <li>Improved mobile controls</li>
-                <li>Added gallery autoplay for mobile</li>
-                <li>Added sort by random (auto shuffle)</li>
-                <li>Added dark theme option</li>
-                <li>Minor UI fixes</li>
-                <li>Minor gallery fixes</li>
+                <li>New favorites layouts</li>
+                  <ul>
+                    <li>Waterfall (column)</li>
+                    <li>River (row)</li>
+                    <li>Square</li>
+                    <li>Legacy (grid)</li>
+                  </ul>
+                <li>Infinite favorites scroll option added</li>
+                <ul>
+                  <li>Page option still available</li>
+                </ul>
+                <li>Infinite gallery on search pages</li>
+                <ul>
+                  <li>Go to next search page without ever exiting gallery</li>
+                </ul>
+                <li>Download images</li>
+                <ul>
+                  <li>Expiremental for now</li>
+                </ul>
+                <li>New gallery hotkeys</li>
+                <ul>
+                  <li>F: Fullscreen</li>
+                  <li>G: Open post</li>
+                  <li>Q: Open original</li>
+                  <li>E: favorite</li>
+                </ul>
               </ul>
             </div>
           </a>

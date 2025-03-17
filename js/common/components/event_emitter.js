@@ -73,7 +73,7 @@ class EventEmitter {
   }
 
   removeOneTimeListeners() {
-    this.listeners = SetUtils.difference(this.listeners, this.oneTimeListeners);
+    this.listeners = this.listeners.difference(this.oneTimeListeners);
     this.oneTimeListeners.clear();
   }
 

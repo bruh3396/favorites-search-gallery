@@ -1,31 +1,3 @@
-class AutoplayEvents {
-  /** @type {Function} */
-  onEnable;
-  /** @type {Function} */
-  onDisable;
-  /** @type {Function} */
-  onPause;
-  /** @type {Function} */
-  onResume;
-  /** @type {Function} */
-  onComplete;
-  /** @type {Function} */
-  onVideoEndedBeforeMinimumViewTime;
-
-  /**
-   *
-   * @param {{onEnable: Function, onDisable: Function, onPause: Function, onResume: Function, onComplete: Function, onVideoEndedEarly: Function}} events
-   */
-  constructor({onEnable, onDisable, onPause, onResume, onComplete, onVideoEndedEarly}) {
-    this.onEnable = onEnable;
-    this.onDisable = onDisable;
-    this.onPause = onPause;
-    this.onResume = onResume;
-    this.onComplete = onComplete;
-    this.onVideoEndedBeforeMinimumViewTime = onVideoEndedEarly;
-  }
-}
-
 class AutoplayController {
   static menuIconImageURLs = {
     play: Utils.createObjectURLFromSvg(Icons.play),
@@ -289,8 +261,8 @@ class AutoplayController {
     for (const input of [this.ui.settingsMenu.imageDurationInput, this.ui.settingsMenu.minimumVideoDurationInput]) {
       const element = input.closest(".number");
 
-      if (element !== null) {
-        const numberComponent = new NumberComponent(element);
+      if (element instanceof HTMLElement) {
+        new NumberComponent(element);
       }
     }
   }

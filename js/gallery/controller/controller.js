@@ -508,11 +508,7 @@ class GalleryController {
   }
 
   keepVisibleThumbsPreloaded() {
-    this.visibleThumbTracker = new VisibleThumbTracker({
-      onVisibleThumbsChanged: () => {
-        this.preloadVisibleContent();
-      }
-    });
+    this.visibleThumbTracker = new VisibleThumbTracker(this.preloadVisibleContent.bind(this));
     Events.favorites.resultsAddedToCurrentPage.on((/** @type {HTMLElement[]} */ results) => {
       this.visibleThumbTracker?.observe(results);
       this.view.handleResultsAddedToCurrentPage(results);

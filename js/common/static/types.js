@@ -33,10 +33,12 @@ class Types {
 
   /** @typedef {Record<String, Set<String>>} AliasMap */
 
+  /** @typedef {{min: Number, max: Number}}  NumberRange */
+
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);
-  static navigationKeys = SetUtils.union(Types.forwardNavigationKeys, Types.backwardNavigationKeys);
+  static navigationKeys = Types.forwardNavigationKeys.union(Types.backwardNavigationKeys);
   static exitKeys = new Set(["Escape", "Delete", "Backspace"]);
   static typeableInputs = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
   static mediaExtensions = new Set(["jpg", "png", "jpeg", "gif", "mp4"]);

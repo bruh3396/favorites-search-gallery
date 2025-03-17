@@ -127,11 +127,6 @@ This script is still in development, please let me know if you experience a bug,
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
 | P   | Stop/start autoplay            | Autoplay option checked            |
-| F   | Toggle fullscreen            |             |
-| Q   | Open original content in new tab            |             |
-| G   | Open post in new tab            |             |
-
-
 
 
 ### General Hotkeys (Desktop)
@@ -144,7 +139,7 @@ This script is still in development, please let me know if you experience a bug,
 | O   | Toggle more options  |
 | R   | Toggle add/remove favorite buttons |
 | H   | Toggle hints |
-| S   | Focus search box |
+
 
 
 ## Search Syntax
@@ -248,11 +243,11 @@ Q: Why am I experiencing lag?<br>
 
 ## Credits
 
-**Awesomplete**: [Website](https://leaverou.github.io/awesomplete/) | [GitHub Repository](https://github.com/LeaVerou/awesomplete) | [MIT License](https://opensource.org/licenses/MIT)<br>
+**Awesomplete**: [Website](https://leaverou.github.io/awesomplete/) | [GitHub Repository](https://github.com/LeaVerou/awesomplete)<br>
 Copyright (c) 2013-2025, Lea Verou
 
 
-**Zip.js**: [Website](https://gildas-lormeau.github.io/zip.js/) | [GitHub Repository](https://github.com/gildas-lormeau/zip.js) | [License](https://github.com/gildas-lormeau/zip.js/blob/master/LICENSE)
+**Zip.js**: [Website](https://gildas-lormeau.github.io/zip.js/) | [GitHub Repository](https://github.com/gildas-lormeau/zip.js)<br>
 Copyright (c) 2010-2024 Gildas Lormeau
 
 

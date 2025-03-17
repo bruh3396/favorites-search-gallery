@@ -75,6 +75,21 @@ class Database {
   }
 
   /**
+   * @param {String[]} ids
+   * @param {String} objectStoreName
+   */
+  async delete(ids, objectStoreName) {
+    const database = await this.open(objectStoreName);
+    const transaction = database.transaction(objectStoreName, "readwrite");
+    const objectStore = transaction.objectStore(objectStoreName);
+    const index = objectStore.index("id");
+
+    for (const id of ids) {
+      await this.deleteRecord(index, id, objectStore);
+    }
+  }
+
+  /**
    * @param {String} objectStoreName
    * @returns {Promise<IDBDatabase>}
    */
@@ -205,21 +220,6 @@ class Database {
     objectStore.createIndex("id", "id", {
       unique: true
     });
-  }
-
-  /**
-   * @param {String[]} ids
-   * @param {String} objectStoreName
-   */
-  async deleteRecords(ids, objectStoreName) {
-    const database = await this.open(objectStoreName);
-    const transaction = database.transaction(objectStoreName, "readwrite");
-    const objectStore = transaction.objectStore(objectStoreName);
-    const index = objectStore.index("id");
-
-    for (const id of ids) {
-      await this.deleteRecord(index, id, objectStore);
-    }
   }
 
   /**

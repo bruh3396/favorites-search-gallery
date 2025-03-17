@@ -5,7 +5,7 @@ class Preferences {
   static showCaptions = new Preference("showCaptions", false);
   static showTooltip = new Preference("showTooltip", false);
   static showOnHover = new Preference("showOnHover", false);
-  static tagAliasing = new Preference("tagAliasing", true);
+  static tagAliasing = new Preference("tagAliasing", false);
   static allowedRatings = new Preference("allowedRatings", 7);
   static favoriteFinder = new Preference("findFavorite", "");
   static enableOnSearchPages = new Preference("enableOnSearchPages", false);

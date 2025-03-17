@@ -23,6 +23,7 @@ class FavoritesInfiniteScrollController extends FavoritesSecondaryController {
   showSearchResults() {
     this.view.clear();
     this.showNextBatch();
+    Events.favorites.pageChange.emit();
   }
 
   handleBottomOfPageReached() {

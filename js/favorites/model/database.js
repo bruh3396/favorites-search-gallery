@@ -18,7 +18,7 @@ class FavoritesDatabase {
   async loadAllFavorites() {
     const records = await this.database.load(FavoritesDatabase.objectStoreName);
 
-    await this.database.deleteRecords(this.getIdsToDeleteOnReload(), FavoritesDatabase.objectStoreName);
+    await this.database.delete(this.getIdsToDeleteOnReload(), FavoritesDatabase.objectStoreName);
     return this.deserialize(records);
   }
 

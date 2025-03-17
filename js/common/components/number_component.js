@@ -7,7 +7,7 @@ class NumberComponent {
   downArrow;
   /** @type {Number} */
   stepSize;
-  /** @type {{min: Number, max: Number}} */
+  /** @type {NumberRange} */
   range;
   /** @type {Number} */
   defaultValue;

@@ -122,7 +122,7 @@ class GalleryImageCreator {
   async createImages(requests) {
     for (const request of requests) {
       this.createImage(request);
-      await Utils.sleep(40);
+      await Utils.yield();
     }
   }
 

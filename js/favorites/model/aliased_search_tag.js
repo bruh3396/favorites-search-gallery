@@ -28,10 +28,6 @@ class AliasedSearchTag extends SearchTag {
    * @returns {Boolean}
    */
   matches(post) {
-    // if (SetUtils.hasIntersection(this.aliases, post.tagSet)) {
-    //   return !this.negated;
-    // }
-    // return this.negated;
     if (this.aliases.isDisjointFrom(post.tagSet)) {
       return this.negated;
     }

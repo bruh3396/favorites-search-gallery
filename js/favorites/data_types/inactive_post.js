@@ -39,7 +39,7 @@ class InactivePost {
     this.id = record.id;
     this.tags = record.tags;
     this.src = Utils.decompressThumbnailSource(record.src, record.id);
-    this.metadata = JSON.parse(record.metadata);
+    this.metadata = record.metadata === undefined ? null : JSON.parse(record.metadata);
   }
 
   /**

@@ -9,9 +9,9 @@ class VisibleThumbTracker {
   onVisibleThumbsChanged;
 
   /**
-   * @param {{onVisibleThumbsChanged: Function}} parameter
+   * @param {Function} onVisibleThumbsChanged
    */
-  constructor({onVisibleThumbsChanged}) {
+  constructor(onVisibleThumbsChanged) {
     this.onVisibleThumbsChanged = this.createVisibleThumbsChangedCallback(onVisibleThumbsChanged);
     this.visibleThumbs = new Map();
     this.centerThumb = null;

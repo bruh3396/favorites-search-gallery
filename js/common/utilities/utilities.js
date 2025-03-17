@@ -932,7 +932,7 @@ class Utils {
   }
 
   /**
-   * @param {HTMLInputElement | HTMLTextAreaElement} input
+   * @param {HTMLTextAreaElement} input
    */
   static hideAwesomplete(input) {
     const awesomplete = Utils.getAwesompleteFromInput(input);
@@ -2483,5 +2483,12 @@ class Utils {
       result.push(array.slice(i, i + chunkSize));
     }
     return result;
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  static yield() {
+    return Utils.sleep(0);
   }
 }

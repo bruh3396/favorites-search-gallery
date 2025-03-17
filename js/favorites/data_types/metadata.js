@@ -11,7 +11,7 @@ class PostMetadata {
   static currentlyFetchingFromQueue = false;
   static allFavoritesLoaded = false;
   static fetchDelay = {
-    normal: 25,
+    normal: 2,
     deleted: 300
   };
   static postStatisticsRegex = /Posted:\s*(\S+\s\S+).*Size:\s*(\d+)x(\d+).*Rating:\s*(\S+).*Score:\s*(\d+)/gm;

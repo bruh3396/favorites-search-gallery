@@ -17,7 +17,7 @@ class AwesompleteWrapper {
       "Saved Suggestions",
       "Show saved search suggestions in autocomplete dropdown",
       this.showSavedSearchSuggestions,
-      (event) => {
+      (/** @type {{ target: { checked: boolean; }; }} */ event) => {
         this.showSavedSearchSuggestions = event.target.checked;
         Preferences.savedSearchSuggestions.set(event.target.checked);
       },
@@ -37,7 +37,7 @@ class AwesompleteWrapper {
   }
 
   /**
-   * @param {HTMLElement} input
+   * @param {HTMLTextAreaElement | HTMLInputElement} input
    */
   addAwesompleteToInput(input) {
     const awesomplete = new Awesomplete_(input, {
