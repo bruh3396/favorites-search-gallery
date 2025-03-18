@@ -2,6 +2,7 @@ class FavoritesMenuDesktopUI {
   /* eslint-disable object-property-newline */
   /* eslint-disable object-curly-newline */
   static template = {
+    /** @type {ElementTemplateParams<any>[]} */
     "button": [
       {id: "search-button", parentId: "left-favorites-panel-top-row", textContent: "Search", title: "Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab", action: "search", enabled: true, handler: "uiController"},
       {id: "shuffle-button", parentId: "left-favorites-panel-top-row", textContent: "Shuffle", title: "Randomize order of search results", action: "shuffleSearchResults", enabled: true},
@@ -10,6 +11,7 @@ class FavoritesMenuDesktopUI {
       {id: "download-button", parentId: "left-favorites-panel-top-row", textContent: "Download", title: "Download search results", action: "downloadSearchResults", enabled: true, handler: "controller"},
       {id: "reset-button", parentId: "left-favorites-panel-top-row", textContent: "Reset", title: "Delete cached favorites and reset preferences", action: "reset", enabled: true, handler: "uiController"}
     ],
+    /** @type {ElementTemplateParams<Boolean>[]} */
     "checkboxOption": [
       {id: "options", parentId: "bottom-panel-1", textContent: "More Options", title: "Show more options", action: "toggleOptions", enabled: true, preference: Preferences.showOptions, hotkey: "O", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "show-ui", parentId: "show-ui-wrapper", textContent: "UI", title: "Toggle UI", action: "toggleUI", enabled: true, preference: Preferences.showUI, hotkey: "U", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
@@ -21,12 +23,15 @@ class FavoritesMenuDesktopUI {
       {id: "fancy-thumb-hovering", parentId: "favorite-options", textContent: "Fancy Hovering", title: "Enable fancy thumbnail hovering", action: "toggleFancyThumbHovering", enabled: false, preference: Preferences.fancyThumbHovering, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "show-hints", parentId: "favorite-options", textContent: "Hotkey Hints", title: "Show hotkeys", action: "toggleOptionHotkeyHints", enabled: true, preference: Preferences.showHints, hotkey: "H", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
       {id: "toggle-header", parentId: "dynamic-favorite-options", textContent: "Header", title: "Toggle site header", action: "toggleHeader", enabled: false, preference: Preferences.showHeader, hotkey: "", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
-      {id: "show-tooltips", parentId: "dynamic-favorite-options", textContent: "Tooltips", title: "Show tags when hovering over a thumbnail and see which ones were matched by a search", action: "toggleTooltips", enabled: Flags.tooltipEnabled, preference: Preferences.showTooltip, hotkey: "t", invokeActionOnCreation: true, savePreference: true, handler: "uiController"},
+      {id: "show-tooltips", parentId: "dynamic-favorite-options", textContent: "Tooltips", title: "Show tags when hovering over a thumbnail and see which ones were matched by a search", action: "toggleTooltips", enabled: Flags.tooltipEnabled, preference: Preferences.showTooltip, hotkey: "t", invokeActionOnCreation: true, savePreference: true, eventEmitter: Events.favorites.tooltipsToggled},
       {id: "dark-theme", parentId: "favorite-options", textContent: "Dark Theme", title: "Toggle dark theme", action: "toggleDarkTheme", enabled: true, defaultValue: Utils.usingDarkTheme(), hotkey: "", invokeActionOnCreation: false, savePreference: false, handler: "uiController"},
-      {id: "show-on-hover", parentId: "dynamic-favorite-options", textContent: "Fullscreen on Hover", title: "View full resolution images or play videos and GIFs when hovering over a thumbnail", action: "toggleShowOnHover", enabled: Flags.galleryEnabled, preference: Preferences.showOnHover, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"},
-      {id: "use-aliases", parentId: "dynamic-favorite-options", textContent: "Aliases", title: "Alias similar tags", action: "toggleAliasing", enabled: false, preference: Preferences.tagAliasing, hotkey: "A", invokeActionOnCreation: false, savePreference: true, handler: "uiController"},
-      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Menu", title: "Show menu in gallery", action: "toggleGalleryMenu", enabled: Flags.galleryEnabled && Settings.galleryMenuEnabled, preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true, handler: "uiController"}
+      {id: "show-on-hover", parentId: "dynamic-favorite-options", textContent: "Fullscreen on Hover", title: "View full resolution images or play videos and GIFs when hovering over a thumbnail", enabled: Flags.galleryEnabled, preference: Preferences.showOnHover, hotkey: "", invokeActionOnCreation: false, savePreference: true, eventEmitter: Events.favorites.showOnHoverToggled},
+      {id: "show-captions", parentId: "dynamic-favorite-options", textContent: "Details", title: "Show details when hovering over thumbnail", enabled: Flags.captionsEnabled, preference: Preferences.showCaptions, hotkey: "d", invokeActionOnCreation: false, savePreference: true, eventEmitter: Events.favorites.captionsToggled},
+      {id: "enable-autoplay", parentId: "dynamic-favorite-options", textContent: "Autoplay", title: "Enable autoplay in gallery", enabled: Flags.galleryEnabled, preference: Preferences.autoplayActive, hotkey: "", invokeActionOnCreation: false, savePreference: true, eventEmitter: Events.favorites.autoplayToggled},
+      {id: "use-aliases", parentId: "dynamic-favorite-options", textContent: "Aliases", title: "Alias similar tags", action: "toggleAliasing", enabled: false, preference: Preferences.tagAliasing, hotkey: "A", invokeActionOnCreation: false, savePreference: true},
+      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Menu", title: "Show menu in gallery", action: "toggleGalleryMenu", enabled: Flags.galleryEnabled && Settings.galleryMenuEnabled, preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true}
     ],
+    /** @type {ElementTemplateParams<String | Number>[]} */
     "select": [
       {
         id: "sorting-method", parentId: "sort-container", title: "Change sorting order of search results", action: "setSortingMethod", position: "beforeend", invokeActionOnCreation: false, preference: Preferences.sortingMethod,

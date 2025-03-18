@@ -125,26 +125,12 @@ class AutoplayController {
 
   insertHTML() {
     this.insertMenuHTML();
-    this.insertOptionHTML();
     this.insertImageProgressHTML();
     this.insertVideoProgressHTML();
   }
 
   insertMenuHTML() {
     FavoritesSearchGalleryContainer.insertHTML("afterbegin", HTMLStrings.autoplay);
-  }
-
-  insertOptionHTML() {
-    Utils.createFavoritesOption(
-      "autoplay",
-      "Autoplay",
-      "Enable autoplay in gallery",
-      this.active,
-      (event) => {
-        this.toggle(event.target.checked);
-      },
-      true
-    );
   }
 
   insertImageProgressHTML() {
@@ -270,6 +256,7 @@ class AutoplayController {
   addEventListeners() {
     this.addMenuEventListeners();
     this.addSettingsMenuEventListeners();
+    this.addFavoritesPageEventListeners();
   }
 
   addMenuEventListeners() {
@@ -334,6 +321,12 @@ class AutoplayController {
         this.startViewTimer(this.currentThumb);
       }
     };
+  }
+
+  addFavoritesPageEventListeners() {
+    Events.favorites.autoplayToggled.on((value) => {
+      this.toggle(value);
+    });
   }
 
   /**

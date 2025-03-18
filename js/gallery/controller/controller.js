@@ -5,7 +5,7 @@ class GalleryController {
   view;
   /** @type {InteractionTracker} */
   interactionTracker;
-  /** @type {VisibleThumbTracker | null} */
+  /** @type {VisibleThumbObserver | null} */
   visibleThumbTracker;
   /** @type {AutoplayController} */
   autoplayController;
@@ -180,7 +180,7 @@ class GalleryController {
   }
 
   setupFavoritesOptionHandler() {
-    Events.favorites.showOnHover.on(() => {
+    Events.favorites.showOnHoverToggled.on(() => {
       this.model.toggleShowContentOnHover();
     });
   }
@@ -508,7 +508,7 @@ class GalleryController {
   }
 
   keepVisibleThumbsPreloaded() {
-    this.visibleThumbTracker = new VisibleThumbTracker(this.preloadVisibleContent.bind(this));
+    this.visibleThumbTracker = new VisibleThumbObserver(this.preloadVisibleContent.bind(this));
     Events.favorites.resultsAddedToCurrentPage.on((/** @type {HTMLElement[]} */ results) => {
       this.visibleThumbTracker?.observe(results);
       this.view.handleResultsAddedToCurrentPage(results);

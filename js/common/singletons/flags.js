@@ -18,4 +18,5 @@ class Flags {
   static favoritesSearchGalleryDisabled = !Flags.favoritesSearchGalleryEnabled;
   static galleryEnabled = !Flags.galleryDisabled;
   static tooltipEnabled = !Flags.tooltipDisabled;
+  static captionsEnabled = !Flags.captionsDisabled;
 }

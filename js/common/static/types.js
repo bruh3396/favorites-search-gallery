@@ -15,6 +15,10 @@ class Types {
 
   /** @typedef {"jpg" | "png" | "jpeg" | "gif" | "mp4"} MediaExtension */
 
+  /** @typedef {"gif" | "mp4"} AnimatedExtension */
+
+  /** @typedef {{id: String, extension: MediaExtension}} MediaExtensionMapping */
+
   /** @typedef {"default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random"} MetadataMetric */
 
   /** @typedef {"id" | "score" | "width" | "height" } SearchableMetadataMetric */
@@ -35,6 +39,29 @@ class Types {
 
   /** @typedef {{min: Number, max: Number}}  NumberRange */
 
+/** @template T
+ *  @typedef {{
+ *    id: String,
+ *    parentId: String,
+ *    position?: InsertPosition,
+ *    textContent?: String,
+ *    title?: String,
+ *    handler?: String,
+ *    action?: String,
+ *    hotkey?: String,
+ *    invokeActionOnCreation?: Boolean,
+ *    savePreference?: Boolean,
+ *    enabled?: Boolean,
+ *    optionPairs?: Array<[String, String]>,
+ *    min?: Number,
+ *    max?: Number,
+ *    step?: Number,
+ *    pollingTime?: Number,
+ *    preference?: Preference<T> | null,
+ *    defaultValue?: T | null,
+ *    eventEmitter?: EventEmitter<T> | null
+ *  }} ElementTemplateParams<T>
+ */
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);
@@ -42,6 +69,7 @@ class Types {
   static exitKeys = new Set(["Escape", "Delete", "Backspace"]);
   static typeableInputs = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
   static mediaExtensions = new Set(["jpg", "png", "jpeg", "gif", "mp4"]);
+  static animatedExtensions = new Set(["gif", "mp4"]);
   static metadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
   static searchableMetadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
   static metadataComparators = new Set([":", ":<", ":>"]);
@@ -107,6 +135,14 @@ class Types {
    */
   static isMediaExtension(object) {
     return Types.mediaExtensions.has(object);
+  }
+
+  /**
+   * @param {any} object
+   * @returns {object is MediaExtension}
+   */
+  static isAnimatedExtension(object) {
+    return Types.animatedExtensions.has(object);
   }
 
   /**

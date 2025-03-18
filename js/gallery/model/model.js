@@ -180,7 +180,7 @@ class GalleryModel {
 
   openOriginalContentInNewTab() {
     if (this.currentThumb !== undefined) {
-      Utils.openOriginalImageInNewTab(this.currentThumb);
+      ImageUtils.openOriginalImageInNewTab(this.currentThumb);
     }
   }
 }

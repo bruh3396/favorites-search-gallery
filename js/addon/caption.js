@@ -85,7 +85,7 @@ class Caption {
   currentThumb;
   /** @type {Set<String>} */
   problematicTags;
-  /** @type {String} */
+  /** @type {String | null} */
   currentThumbId;
   /** @type {AbortController} */
   abortController;
@@ -124,17 +124,6 @@ class Caption {
 
   insertHTML() {
     Utils.insertStyleHTML(HTMLStrings.caption, "caption");
-    Utils.createFavoritesOption(
-      "show-captions",
-      "Details",
-      "Show details when hovering over thumbnail",
-      this.getVisibilityPreference(),
-      (event) => {
-        this.toggleVisibility(event.target.checked);
-      },
-      true,
-      "(D)"
-    );
   }
 
   /**
@@ -154,11 +143,11 @@ class Caption {
   }
 
   addEventListeners() {
-    this.addAllPageEventListeners();
+    this.addCommonEventListeners();
     this.addFavoritesPageEventListeners();
   }
 
-  addAllPageEventListeners() {
+  addCommonEventListeners() {
     this.caption.addEventListener("transitionend", () => {
       if (this.caption.classList.contains("active")) {
         this.caption.classList.add("transition-completed");
@@ -168,19 +157,11 @@ class Caption {
     this.caption.addEventListener("transitionstart", () => {
       this.caption.classList.add("transitioning");
     });
-    Events.global.keydown.on((event) => {
-      if (event.key !== "d" || !event.isHotkey || !Flags.onFavoritesPage) {
-        return;
-      }
-      const showCaptionsCheckbox = document.getElementById("show-captions-checkbox");
-
-      if (!(showCaptionsCheckbox instanceof HTMLInputElement)) {
-        return;
-      }
-      showCaptionsCheckbox.click();
+    Events.favorites.captionsToggled.on((value) => {
+      this.toggleVisibility(value);
 
       if (this.currentThumb !== null && !this.caption.classList.contains("remove")) {
-        if (showCaptionsCheckbox.checked) {
+        if (value) {
           this.attachToThumbHelper(this.currentThumb);
         } else {
           this.removeFromThumbHelper(this.currentThumb);
@@ -475,9 +456,6 @@ class Caption {
 
     Utils.setMainSearchBoxValue(`${currentSearchBoxValue} ${value}`);
     Utils.focusMainSearchBox();
-    // value = searchBox.value;
-    // searchBox.value = "";
-    // searchBox.value = value;
   }
 
   /**
@@ -500,7 +478,7 @@ class Caption {
    * @returns {Boolean}
    */
   getVisibilityPreference() {
-    return Boolean(Preferences.showCaptions.value);
+    return Preferences.showCaptions.value;
   }
 
   /**
@@ -721,7 +699,7 @@ class Caption {
               this.setAsProblematic(tagName);
               return;
             }
-            Caption.tagCategoryAssociations[tagName] = parseInt(encoding);
+            Caption.tagCategoryAssociations[tagName] = parseInt(encoding || "0");
 
             if (tagName === lastTagName) {
               onAllCategoriesFound();

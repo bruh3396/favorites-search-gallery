@@ -37,19 +37,22 @@ class GalleryImageCreator {
    * @param {HTMLElement[]} thumbs
    */
   createNewImages(thumbs) {
-    const finalRequests = this.getFinalImageRequests(thumbs);
+    const requests = this.getImageRequestsFromThumbs(thumbs);
+    const truncatedRequests = this.truncateImageRequests(requests);
 
-    this.deleteOutdatedImages(finalRequests);
-    this.createImages(this.removeAlreadyCreatedImages(finalRequests));
+    this.deleteOutdatedRequests(truncatedRequests);
+    const newRequests = this.removeAlreadyStartedRequests(truncatedRequests);
+
+    this.markRequestsAsStarted(newRequests);
+    this.createImages(newRequests);
   }
 
   /**
    * @param {HTMLElement[]} thumbs
    * @returns {ImageRequest[]}
    */
-  getFinalImageRequests(thumbs) {
-    const requests = thumbs.map(thumb => new ImageRequest(thumb));
-    return this.truncateImageRequests(requests);
+  getImageRequestsFromThumbs(thumbs) {
+    return thumbs.map(thumb => new ImageRequest(thumb));
   }
 
   /**
@@ -91,13 +94,13 @@ class GalleryImageCreator {
    */
   truncateImagesOnSearchPage(requests) {
     return requests.slice(0, GallerySettings.searchPagePreloadedImageCount)
-    .filter(request => !request.isAnimated);
+      .filter(request => !request.isAnimated);
   }
 
   /**
    * @param {ImageRequest[]} requests
    */
-  deleteOutdatedImages(requests) {
+  deleteOutdatedRequests(requests) {
     const idsToCreate = new Set(requests.map(thumb => thumb.id));
 
     for (const [id, request] of this.imageRequests.entries()) {
@@ -111,7 +114,7 @@ class GalleryImageCreator {
   /**
    * @param {ImageRequest[]} requests
    */
-  removeAlreadyCreatedImages(requests) {
+  removeAlreadyStartedRequests(requests) {
     return requests
       .filter(request => !this.animatedRequestIds.has(request.id) && !this.imageRequests.has(request.id));
   }
@@ -122,7 +125,7 @@ class GalleryImageCreator {
   async createImages(requests) {
     for (const request of requests) {
       this.createImage(request);
-      await Utils.yield();
+      await Utils.sleep(50);
     }
   }
 
@@ -145,6 +148,15 @@ class GalleryImageCreator {
         }
         throw error;
       });
+  }
+
+  /**
+   * @param {ImageRequest[]} requests
+   */
+  markRequestsAsStarted(requests) {
+    for (const request of requests) {
+      this.saveRequest(request);
+    }
   }
 
   /**

@@ -1,11 +1,4 @@
 class Utils {
-  static localStorageKeys = {
-    imageExtensions: "imageExtensions",
-    preferences: "preferences"
-  };
-  static settings = {
-    extensionsFoundBeforeSavingCount: 100
-  };
   static mainSearchBoxId = "favorites-search-box";
   static idsToRemoveOnReloadLocalStorageKey = "recentlyRemovedIds";
   static tagBlacklist = Utils.getTagBlacklist();
@@ -99,28 +92,6 @@ class Utils {
   };
   static customTags = Utils.loadCustomTags();
   static favoriteItemClassName = "favorite";
-  static imageExtensions = Utils.loadDiscoveredImageExtensions();
-  /** @type {RegExp} */
-  static thumbnailSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
-  /** @type {Cooldown} */
-  static imageExtensionAssignmentCooldown;
-  static recentlyDiscoveredImageExtensionCount = 0;
-  /** @type {Record<Number, MediaExtension>} */
-  static extensionDecodings = {
-    0: "jpg",
-    1: "png",
-    2: "jpeg",
-    3: "gif",
-    4: "mp4"
-  };
-  /** @type {Record<MediaExtension, Number>} */
-  static extensionEncodings = {
-    "jpg": 0,
-    "png": 1,
-    "jpeg": 2,
-    "gif": 3,
-    "mp4": 4
-  };
   /** @type {Function[]} */
   static staticInitializers = [];
 
@@ -137,7 +108,6 @@ class Utils {
     Utils.setTitle();
     Utils.initializeSearchPage();
     Utils.setupOriginalImageLinksOnSearchPage();
-    Utils.initializeImageExtensionAssignmentCooldown();
   }
 
   /**
@@ -258,37 +228,6 @@ class Utils {
   }
 
   /**
-   * @param {HTMLElement} thumb
-   * @returns {String}
-   */
-  static getOriginalImageURLFromThumb(thumb) {
-    return Utils.getOriginalImageURL(thumb);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {String}
-   */
-  static getOriginalImageURL(thumb) {
-    const image = Utils.getImageFromThumb(thumb);
-    const thumbURL = image === null ? "" : image.src;
-    return Utils.getOriginalImageURLFromIdAndThumbURL(thumb.id, thumbURL);
-  }
-
-  /**
-   * @param {String} id
-   * @param {String} thumbURL
-   * @returns {String}
-   */
-  static getOriginalImageURLFromIdAndThumbURL(id, thumbURL) {
-    const cleanedThumbSource = Utils.cleanThumbnailSource(thumbURL, id);
-    return cleanedThumbSource
-      .replace("thumbnails", "/images")
-      .replace("thumbnail_", "")
-      .replace("us.rule34", "rule34");
-  }
-
-  /**
    * @param {String} imageURL
    * @returns {MediaExtension}
    */
@@ -307,19 +246,35 @@ class Utils {
    */
   static getTagsFromThumb(thumb) {
     if (Flags.onSearchPage) {
-      if (!(thumb instanceof HTMLElement)) {
-        return new Set();
-      }
-      const image = Utils.getImageFromThumb(thumb);
-
-      if (image === null) {
-        return new Set();
-      }
-      const tags = image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
-      return Utils.convertToTagSet(tags || "");
+      return Utils.getTagsFromThumbOnSearchPage(thumb);
     }
+    return Utils.getTagsFromThumbOnFavoritesPage(thumb);
+  }
+
+  /**
+   * @param {Post | HTMLElement} thumb
+   * @returns {Set<String>}
+   */
+  static getTagsFromThumbOnFavoritesPage(thumb) {
     const post = Post.allPosts.get(thumb.id);
     return post === undefined ? new Set() : new Set(post.tagSet);
+  }
+
+  /**
+   * @param {HTMLElement | Post} thumb
+   * @returns {Set<String>}
+   */
+  static getTagsFromThumbOnSearchPage(thumb) {
+    if (!(thumb instanceof HTMLElement)) {
+      return new Set();
+    }
+    const image = Utils.getImageFromThumb(thumb);
+
+    if (image === null) {
+      return new Set();
+    }
+    const tags = image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
+    return Utils.convertToTagSet(tags || "");
   }
 
   /**
@@ -1229,6 +1184,7 @@ class Utils {
         }
       });
       indexedDB.deleteDatabase(FavoritesDatabase.databaseName);
+      indexedDB.deleteDatabase(Extensions.databaseName);
     }
   }
 
@@ -1277,75 +1233,6 @@ class Utils {
   }
 
   /**
-   * @param {HTMLElement} thumb
-   * @returns {Promise<MediaExtension>}
-   */
-  static getImageExtensionFromThumb(thumb) {
-    if (Utils.isVideo(thumb)) {
-      return Promise.resolve("mp4");
-    }
-
-    if (Utils.isGif(thumb)) {
-      return Promise.resolve("gif");
-    }
-    return Utils.getImageExtensionFromId(thumb.id);
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Promise<MediaExtension>}
-   */
-  static getImageExtensionFromId(id) {
-    if (Utils.extensionIsKnown(id)) {
-      return Promise.resolve(Utils.getImageExtension(id));
-    }
-    return Utils.fetchImageExtension(id);
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Promise<MediaExtension>}
-   */
-  static fetchImageExtension(id) {
-    return new APIPost(id).fetch()
-      .then((apiPost) => {
-        Utils.assignImageExtension(id, apiPost.extension);
-        return apiPost.extension;
-      });
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   * @returns {Promise<String>}
-   */
-  static async getOriginalImageURLWithExtension(thumb) {
-    const extension = await Utils.getImageExtensionFromThumb(thumb);
-    return Utils.getOriginalImageURL(thumb).replace(".jpg", `.${extension}`);
-  }
-
-  /**
-   * @param {HTMLElement} thumb
-   */
-  static async openOriginalImageInNewTab(thumb) {
-    try {
-      const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
-
-      window.open(imageURL);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  /**
-   * @param {String} id
-   * @param {String} thumbURL
-   */
-  static async getOriginalImageURLWithExtensionFromIdAndThumbURL(id, thumbURL) {
-    const extension = await this.getImageExtensionFromId(id);
-    return Utils.getOriginalImageURLFromIdAndThumbURL(id, thumbURL).replace(".jpg", `.${extension}`);
-  }
-
-  /**
    * @param {Number | undefined} desiredPageNumber
    * @returns {String}
    */
@@ -1373,72 +1260,23 @@ class Utils {
 
   /**
    * @param {Number | undefined} pageNumber
-   * @param {Function | undefined} callback
+   * @returns {Promise<void>}
    */
-  static findImageExtensionsOnSearchPage(pageNumber = undefined, callback = undefined) {
+  static async findImageExtensionsOnSearchPage(pageNumber = undefined) {
     const searchPageAPIURL = Utils.getSearchPageAPIURL(pageNumber);
-    return fetch(searchPageAPIURL)
-      .then((response) => {
-        if (response.ok) {
-          return response.text();
-        }
-        return null;
-      })
-      .then((html) => {
-        if (html === null) {
-          console.error(`Failed to fetch: ${searchPageAPIURL}`);
-        }
-        const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
-        const posts = Array.from(dom.getElementsByTagName("post"));
+    const response = await fetch(searchPageAPIURL);
 
-        for (const post of posts) {
-          const tags = post.getAttribute("tags");
-          const id = post.getAttribute("id");
-          const originalImageURL = post.getAttribute("file_url");
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${searchPageAPIURL}`);
+      return;
+    }
+    const html = await response.text();
+    const dom = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
 
-          if (id === null || tags === null || originalImageURL === null) {
-            return;
-          }
-          const tagSet = Utils.convertToTagSet(tags);
-          const thumb = document.getElementById(id);
-
-          if (thumb === null) {
-            return;
-          }
-          const image = Utils.getImageFromThumb(thumb);
-
-          if (image === null) {
-            return;
-          }
-
-          if (!tagSet.has("video") && originalImageURL.endsWith("mp4") && thumb !== null) {
-
-            image.setAttribute("tags", `${image.getAttribute("tags")} video`);
-            Utils.setContentType(image, "video");
-          } else if (!tagSet.has("gif") && originalImageURL.endsWith("gif") && thumb !== null) {
-
-            image.setAttribute("tags", `${image.getAttribute("tags")} gif`);
-            Utils.setContentType(image, "gif");
-          }
-          const isAnImage = Utils.getContentType(tags) === "image";
-          const isBlacklisted = originalImageURL === "https://api-cdn.rule34.xxx/images//";
-
-          if (!isAnImage || isBlacklisted) {
-            continue;
-          }
-          const extension = Utils.getExtensionFromImageURL(originalImageURL);
-
-          Utils.assignImageExtension(id, extension);
-        }
-
-        if (callback !== undefined) {
-
-          callback(html);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    Array.from(dom.getElementsByTagName("post"))
+      .filter(post => post instanceof HTMLElement)
+      .map(post => new APIPost(post.id, post))
+      .forEach(post => Extensions.set(post.id, post.extension));
   }
 
   static async setupOriginalImageLinksOnSearchPage() {
@@ -1477,7 +1315,7 @@ class Utils {
     if (anchor === null) {
       return;
     }
-    const imageURL = await Utils.getOriginalImageURLWithExtension(thumb);
+    const imageURL = await ImageUtils.getOriginalImageURLWithExtension(thumb);
     const thumbURL = anchor.href;
 
     anchor.href = imageURL;
@@ -1530,85 +1368,6 @@ class Utils {
     }
     Utils.assignContentType(thumb);
     thumb.id = Utils.removeNonNumericCharacters(Utils.getIdFromThumb(thumb));
-  }
-
-  /**
-   * @returns {Record<String, Number>}
-   */
-  static loadDiscoveredImageExtensions() {
-    return JSON.parse(localStorage.getItem(Utils.localStorageKeys.imageExtensions) || "{}");
-  }
-
-  /**
-   * @param {String | Number} id
-   * @returns {MediaExtension}
-   */
-  static getImageExtension(id) {
-    return Utils.extensionDecodings[Utils.imageExtensions[Number(id)]];
-  }
-
-  /**
-   * @param {String | Number} id
-   * @param {MediaExtension} extension
-   */
-  static setImageExtension(id, extension) {
-    Utils.imageExtensions[String(id)] = Utils.extensionEncodings[extension];
-  }
-
-  /**
-   * @param {String} id
-   * @returns {Boolean}
-   */
-  static extensionIsKnown(id) {
-    return Utils.getImageExtension(id) !== undefined;
-  }
-
-  static updateStoredImageExtensions() {
-    Utils.recentlyDiscoveredImageExtensionCount += 1;
-
-    if (Utils.recentlyDiscoveredImageExtensionCount >= Utils.settings.extensionsFoundBeforeSavingCount) {
-      Utils.storeAllImageExtensions();
-    }
-  }
-
-  static storeAllImageExtensions() {
-    if (!Flags.onFavoritesPage) {
-      return;
-    }
-    Utils.recentlyDiscoveredImageExtensionCount = 0;
-    localStorage.setItem(Utils.localStorageKeys.imageExtensions, JSON.stringify(Utils.imageExtensions));
-  }
-
-  /**
-   * @param {String} id
-   * @param {MediaExtension} extension
-   */
-  static assignImageExtension(id, extension) {
-    if (Utils.extensionIsKnown(id) || extension === "mp4" || extension === "gif") {
-      return;
-    }
-    Utils.imageExtensionAssignmentCooldown.restart();
-    Utils.setImageExtension(id, extension);
-    Utils.updateStoredImageExtensions();
-  }
-
-  static initializeImageExtensionAssignmentCooldown() {
-    Utils.imageExtensionAssignmentCooldown = new Cooldown(1000);
-    Utils.imageExtensionAssignmentCooldown.onCooldownEnd = () => {
-      if (Utils.recentlyDiscoveredImageExtensionCount > 0) {
-        Utils.storeAllImageExtensions();
-      }
-    };
-  }
-
-  /**
-   * @param {Post[]} thumbs
-   * @returns {String[]}
-   */
-  static getIdsWithUnknownExtensions(thumbs) {
-    return thumbs
-      .filter(thumb => Utils.isImage(thumb) && !Utils.extensionIsKnown(thumb.id))
-      .map(thumb => thumb.id);
   }
 
   /**
@@ -1953,41 +1712,13 @@ class Utils {
   }
 
   /**
-   * @param {String} compressedSource
-   * @param {String} id
-   * @returns {String}
-   */
-  static decompressThumbnailSource(compressedSource, id) {
-    const splitSource = compressedSource.split("_");
-    return `https://us.rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg?${id}`;
-  }
-
-  /**
-   * @param {String} source
-   * @returns {String}
-   */
-  static compressThumbSource(source) {
-    const match = source.match(Utils.thumbnailSourceCompressionRegex);
-    return match === null ? "" : match.splice(1).join("_");
-  }
-
-  /**
-   * @param {String} source
-   * @param {String} id
-   * @returns {String}
-   */
-  static cleanThumbnailSource(source, id) {
-    return Utils.decompressThumbnailSource(Utils.compressThumbSource(source), id);
-  }
-
-  /**
    * @param {HTMLElement} thumb
    * @returns {String}
    */
   static getGIFSource(thumb) {
     const tags = Utils.getTagsFromThumb(thumb);
     const extension = tags.has("animated_png") ? "png" : "gif";
-    return Utils.getOriginalImageURLFromThumb(thumb).replace("jpg", extension);
+    return ImageUtils.getOriginalImageURL(thumb).replace("jpg", extension);
   }
 
   /**
@@ -2483,12 +2214,5 @@ class Utils {
       result.push(array.slice(i, i + chunkSize));
     }
     return result;
-  }
-
-  /**
-   * @returns {Promise<void>}
-   */
-  static yield() {
-    return Utils.sleep(0);
   }
 }

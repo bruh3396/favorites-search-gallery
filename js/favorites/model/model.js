@@ -274,7 +274,7 @@ class FavoritesModel {
         batch.push(favorite);
       }
 
-      if (batch.length >= 100) {
+      if (batch.length >= 25) {
         break;
       }
     }

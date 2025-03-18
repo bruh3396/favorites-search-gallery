@@ -71,10 +71,12 @@ class APIPost {
 
   /**
    * @param {String} id
+   * @param {HTMLElement | null} post
    */
-  constructor(id) {
+  constructor(id, post = null) {
     this.id = id;
     this.isEmpty = true;
+    this.populate(post);
   }
 
   /**
@@ -84,10 +86,17 @@ class APIPost {
     const response = await fetch(this.url);
     const html = await response.text();
     const dom = APIPost.parser.parseFromString(html, "text/html");
-    const post = dom.querySelector("post");
 
+    this.populate(dom.querySelector("post"));
+    return this;
+  }
+
+  /**
+   * @param {HTMLElement | null} post
+   */
+  populate(post) {
     if (post === null) {
-      return this;
+      return;
     }
     this.height = APIPost.getNumber("height", post);
     this.score = APIPost.getNumber("score", post);
@@ -111,8 +120,7 @@ class APIPost {
     this.hasComments = APIPost.getBoolean("has_comments", post);
     this.previewWidth = APIPost.getNumber("preview_width", post);
     this.previewHeight = APIPost.getNumber("preview_height", post);
-    this.extension = Utils.getExtensionFromImageURL(this.fileURL);
+    this.extension = ImageUtils.getExtensionFromImageURL(this.fileURL);
     this.isEmpty = false;
-    return this;
   }
 }

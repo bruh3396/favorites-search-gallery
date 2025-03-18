@@ -15,7 +15,7 @@ class GallerySettings {
   }
   static upscaledThumbCanvasWidth = 850;
   static maxUpscaledThumbCanvasHeight = 16000;
-  static imageMegabyteLimit = 450;
+  static imageMegabyteLimit = 375;
   static searchPagePreloadedImageCount = 42;
   static minimumPreloadedImageCount = 5;
   static visibleThumbsDownwardScrollPixelGenerosity = 600;
@@ -25,7 +25,7 @@ class GallerySettings {
   static idleInteractionDuration = 1000;
   static menuVisibilityTime = 1000;
   static maxVisibleThumbsBeforeStoppingPreload = 100;
-  static preloadContentDebounceTime = 400;
+  static preloadContentDebounceTime = 500;
   static useOffscreenThumbUpscaler = false;
   static createImageAccentColors = false;
 }

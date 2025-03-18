@@ -140,7 +140,7 @@ class Post {
   /** @type {String} */
   get compressedThumbSource() {
     const source = this.inactivePost === null ? this.image.src : this.inactivePost.src;
-    return Utils.compressThumbSource(source);
+    return ImageUtils.compressThumbSource(source);
   }
 
   /** @type {FavoritesDatabaseRecord} */
@@ -197,7 +197,6 @@ class Post {
     this.attributesNeededForSearchArePopulated = true;
     this.id = this.inactivePost.id;
     this.metadata = this.inactivePost.createMetadata();
-    // console.trace(this.metadata);
     this.initializeTagSet(this.inactivePost.tags);
     this.deleteConsumedPropertiesFromInactivePost();
   }
@@ -315,7 +314,7 @@ class Post {
 
     this.container.onclick = (event) => {
       if (event.ctrlKey) {
-        Utils.openOriginalImageInNewTab(this.root);
+        ImageUtils.openOriginalImageInNewTab(this.root);
       }
     };
     this.container.addEventListener("mousedown", (event) => {
@@ -339,7 +338,6 @@ class Post {
     if (canvas === null || this.metadata.isEmpty) {
       return;
     }
-    // console.trace(this.metadata);
     canvas.dataset.size = `${this.metadata.width}x${this.metadata.height}`;
   }
 
@@ -451,9 +449,9 @@ class Post {
     } else if (isAnimated) {
       extension = "gif";
     } else {
-      extension = await Utils.getImageExtensionFromId(this.id);
+      extension = await ImageUtils.getImageExtensionFromId(this.id);
     }
-    const url = Utils.getOriginalImageURLFromIdAndThumbURL(this.id, thumbURL).replace(".jpg", `.${extension}`);
+    const url = ImageUtils.getOriginalImageURLFromIdAndThumbURL(this.id, thumbURL).replace(".jpg", `.${extension}`);
     return {
       url,
       extension

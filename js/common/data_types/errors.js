@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 class EmptyFavoritesDatabaseError extends Error {}
 
 class PromiseChainExitError extends Error {}

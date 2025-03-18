@@ -1,6 +1,4 @@
 class ElementFactory {
-
-  static stopErrors = {};
   /**
    * @param {ElementTemplate<void>} template
    */
@@ -66,10 +64,15 @@ class ElementFactory {
       if (template.savePreference && template.preference !== null) {
         template.preference.set(checkbox.checked);
       }
+
+      if (template.eventEmitter !== null) {
+        template.eventEmitter.emit(checkbox.checked);
+      }
       checkbox.dispatchEvent(new CustomEvent(template.handler, {
         bubbles: true,
         detail: checkbox.checked
       }));
+
     });
     FavoritesUIController.registerCheckboxHotkey(template.hotkey, checkbox);
 
@@ -79,6 +82,7 @@ class ElementFactory {
         detail: checkbox.checked
       }));
     }
+
   }
 
   /**

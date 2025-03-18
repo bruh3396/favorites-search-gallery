@@ -33,7 +33,7 @@ class PostMetadata {
       } else {
         metadata.fetchMetadataFromAPI()
           .then(() => {
-            Utils.broadcastEvent("missingMetadata", metadata.id);
+            Events.favorites.missingMetadata.emit(metadata.id);
           });
       }
       await Utils.sleep(metadata.fetchDelay);
@@ -176,8 +176,7 @@ class PostMetadata {
         PostMetadata.pendingRequests.delete(this.id);
         this.checkIfEmpty(apiPost);
         this.populateMetadataFromAPI(apiPost);
-        this.assignExtension(apiPost);
-
+        Extensions.set(this.id, apiPost.extension);
       }).catch((error) => {
         this.handleAPIFailure(error);
       });
@@ -192,15 +191,6 @@ class PostMetadata {
       throw new Error(`metadata is null - ${apiPost.url}`, {
         cause: "DeletedMetadata"
       });
-    }
-  }
-
-  /**
-   * @param {APIPost} apiPost
-   */
-  assignExtension(apiPost) {
-    if (apiPost.extension !== "mp4") {
-      Utils.assignImageExtension(this.id, apiPost.extension);
     }
   }
 

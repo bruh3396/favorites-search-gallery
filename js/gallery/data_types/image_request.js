@@ -104,7 +104,7 @@ class ImageRequest {
    * @returns {Promise<void>}
    */
   createImageBitmap() {
-    return Utils.getOriginalImageURLWithExtension(this.thumb)
+    return ImageUtils.getOriginalImageURLWithExtension(this.thumb)
       .then((url) => {
         url = url.replace(".mp4", ".jpg");
         this.abortIfCancelled();

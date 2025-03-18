@@ -288,7 +288,7 @@ class VideoController {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  preloadVideoPlayers(thumbs) {
+  async preloadVideoPlayers(thumbs) {
     const activeVideoPlayer = this.getActiveVideoPlayer();
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
     const videoThumbsAroundInitialThumb = thumbs
@@ -302,6 +302,7 @@ class VideoController {
     const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
 
     for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
+      await Utils.sleep(50);
       this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
       this.pauseVideo(freeInactiveVideoPlayers[i]);
     }
@@ -322,7 +323,7 @@ class VideoController {
    * @returns {String}
    */
   getVideoSource(thumb) {
-    return Utils.getOriginalImageURLFromThumb(thumb).replace("jpg", "mp4");
+    return ImageUtils.getOriginalImageURL(thumb).replace("jpg", "mp4");
   }
 
   /**

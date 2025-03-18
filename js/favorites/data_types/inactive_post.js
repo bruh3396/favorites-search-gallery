@@ -14,10 +14,6 @@ class InactivePost {
    * @param {HTMLElement | FavoritesDatabaseRecord} favorite
    */
   constructor(favorite) {
-    // console.trace({
-    //   favorite,
-    //   isHTMLElement: favorite instanceof HTMLElement
-    // });
     this.id = "";
     this.tags = "";
     this.src = "";
@@ -38,7 +34,7 @@ class InactivePost {
   populateAttributesFromDatabaseRecord(record) {
     this.id = record.id;
     this.tags = record.tags;
-    this.src = Utils.decompressThumbnailSource(record.src, record.id);
+    this.src = ImageUtils.decompressThumbnailSource(record.src, record.id);
     this.metadata = record.metadata === undefined ? null : JSON.parse(record.metadata);
   }
 
@@ -54,7 +50,7 @@ class InactivePost {
     }
     const source = image.src || image.getAttribute("data-cfsrc") || "";
 
-    this.src = Utils.cleanThumbnailSource(source, this.id);
+    this.src = ImageUtils.cleanThumbnailSource(source, this.id);
     this.tags = this.preprocessTags(image);
   }
 

@@ -477,7 +477,7 @@ class HTMLStrings {
 
     #favorites-search-gallery-content {
       padding: 0px 20px 30px 20px;
-      --gutter: 12px;
+      --gutter: 8px;
 
       &.grid,
       &.square {

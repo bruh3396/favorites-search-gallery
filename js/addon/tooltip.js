@@ -60,23 +60,8 @@ class Tooltip {
     }
     Events.favorites.tooltipsToggled.on((value) => {
       this.toggleVisibility(value);
-    });
-  }
-
-  addKeyDownEventListener() {
-    Events.global.keydown.on((event) => {
-      if (event.key !== "t" || !event.isHotkey) {
-        return;
-      }
 
       if (Flags.onFavoritesPage) {
-        const showTooltipsCheckbox = document.getElementById("show-tooltips-checkbox");
-
-        if (showTooltipsCheckbox === null) {
-          return;
-        }
-        showTooltipsCheckbox.click();
-
         if (this.currentImage === null) {
           return;
         }
@@ -96,9 +81,11 @@ class Tooltip {
           this.hide();
         }
       }
-    }, {
-      passive: true
     });
+  }
+
+  addKeyDownEventListener() {
+
   }
 
   addMouseOverEventListener() {

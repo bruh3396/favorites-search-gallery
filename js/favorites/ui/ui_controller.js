@@ -159,6 +159,8 @@ class FavoritesUIController {
     if (action !== null && action !== undefined && FavoritesUIController[action] !== undefined) {
       // @ts-ignore
       FavoritesUIController[action](event);
+    } else if (event.target instanceof HTMLInputElement) {
+      event.target.dispatchEvent(new Event("change"));
     }
   }
 
@@ -392,30 +394,10 @@ class FavoritesUIController {
   /**
    * @param {CustomEvent} event
    */
-  static toggleShowOnHover(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    Events.favorites.showOnHover.emit(event.target.checked);
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
   static toggleGalleryMenu(event) {
     if (!(event.target instanceof HTMLInputElement)) {
       return;
     }
     Utils.toggleGalleryMenu(event.target.checked);
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
-  static toggleTooltips(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    Events.favorites.tooltipsToggled.emit(event.target.checked);
   }
 }

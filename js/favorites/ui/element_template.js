@@ -2,26 +2,9 @@
  * @template T
  */
 class ElementTemplate {
+
   /**
-   * @param {Object} param
-   * @param {String} param.id
-   * @param {String} param.parentId
-   * @param {InsertPosition} param.position
-   * @param {String} param.textContent
-   * @param {String} param.title
-   * @param {String} param.handler
-   * @param {String} param.action
-   * @param {String} param.hotkey
-   * @param {Boolean} param.invokeActionOnCreation
-   * @param {Boolean} param.savePreference
-   * @param {Boolean} param.enabled
-   * @param {Array<[String, String]>} param.optionPairs
-   * @param {Number} param.min
-   * @param {Number} param.max
-   * @param {Number} param.step
-   * @param {Number} param.pollingTime
-   * @param {Preference<T> | null} param.preference
-   * @param {T | null} param.defaultValue
+   * @param {ElementTemplateParams<T>} param0
    */
   constructor({id,
     parentId,
@@ -40,7 +23,8 @@ class ElementTemplate {
     step = 1,
     pollingTime = 50,
     preference = null,
-    defaultValue = null}) {
+    defaultValue = null,
+    eventEmitter = null}) {
     this.id = id;
     this.parentId = parentId;
     this.position = position;
@@ -59,5 +43,6 @@ class ElementTemplate {
     this.pollingTime = pollingTime;
     this.preference = preference;
     this.defaultValue = defaultValue;
+    this.eventEmitter = eventEmitter;
   }
 }

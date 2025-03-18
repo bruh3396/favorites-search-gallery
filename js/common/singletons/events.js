@@ -12,10 +12,12 @@ class Events {
     /** @type {EventEmitter<FavoriteLayout>} */ layoutChanged: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ favoritesResized: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ layoutCompleted: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ showOnHover: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ showOnHoverToggled: new EventEmitter(true),
     /** @type {EventEmitter<String>} */ missingMetadata: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ tooltipsToggled: new EventEmitter(true)
+    /** @type {EventEmitter<Boolean>} */ tooltipsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ autoplayToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ captionsToggled: new EventEmitter(true)
   };
 
   static gallery = {

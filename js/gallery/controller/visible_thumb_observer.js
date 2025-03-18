@@ -1,4 +1,4 @@
-class VisibleThumbTracker {
+class VisibleThumbObserver {
   /** @type {Map<String, IntersectionObserverEntry>} */
   visibleThumbs;
   /** @type {HTMLElement | null} */

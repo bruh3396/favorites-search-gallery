@@ -175,7 +175,9 @@ class Database {
    * @returns {Promise<IDBDatabase>}
    */
   handleIDBOpenError(request, objectStoreName) {
-    if (request instanceof IDBOpenDBRequest || request instanceof DOMException || request instanceof UnknownObjectStoreError) {
+    const validTypes = [IDBOpenDBRequest, DOMException, UnknownObjectStoreError];
+
+    if (validTypes.some(type => request instanceof type)) {
       this.version += 1;
       return this.open(objectStoreName);
     }
