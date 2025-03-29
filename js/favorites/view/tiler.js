@@ -62,11 +62,9 @@ class Tiler {
 
   /**
    * @param {Number} rowSize
-   * @param {number} minRowSize
-   * @param {number} maxRowSize
    */
   // @ts-ignore
-  setRowSize(rowSize, minRowSize, maxRowSize) { }
+  setRowSize(rowSize) { }
 
   onSelected() { }
 

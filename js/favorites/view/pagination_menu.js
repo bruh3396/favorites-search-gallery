@@ -175,6 +175,16 @@ class FavoritesPaginationMenu {
     input.id = "goto-page-input";
     button.textContent = "Go";
     button.id = "goto-page-button";
+    button.dataset.action = "gotoPage";
+    button.onclick = () => {
+      if (!Utils.isOnlyDigits(input.value)) {
+        return;
+      }
+      button.dispatchEvent(new CustomEvent("controller", {
+        detail: parseInt(input.value),
+        bubbles: true
+      }));
+    };
     input.onkeydown = (event) => {
       if (event.key === "Enter") {
         button.click();

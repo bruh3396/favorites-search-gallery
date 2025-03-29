@@ -84,21 +84,17 @@ class FavoritesView {
   }
 
   /**
-   * @param {HTMLInputElement} input
+   * @param {Number} columnCount
    */
-  updateColumnCount(input) {
-    this.tiler.updateColumnCount(parseFloat(input.value));
+  updateColumnCount(columnCount) {
+    this.tiler.updateColumnCount(columnCount);
   }
 
   /**
-   * @param {HTMLInputElement} input
+   * @param {Number} rowSize
    */
-  updateRowSize(input) {
-    const rowSize = parseFloat(input.value);
-    const minRowSize = parseInt(input.getAttribute("min") || "1");
-    const maxRowSize = parseInt(input.getAttribute("max") || "5");
-
-    this.tiler.updateRowSize(rowSize, minRowSize, maxRowSize);
+  updateRowSize(rowSize) {
+    this.tiler.updateRowSize(rowSize);
   }
 
   /**

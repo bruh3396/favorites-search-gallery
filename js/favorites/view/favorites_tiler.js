@@ -24,6 +24,7 @@ class FavoritesTiler {
 
   constructor() {
     this.container = this.createContentContainer();
+    this.addStyles();
     this.currentLayout = Utils.loadFavoritesLayout();
     this.gridTiler = new FavoritesGridTiler(this.container);
     this.rowTiler = new FavoritesRowTiler(this.container);
@@ -76,12 +77,10 @@ class FavoritesTiler {
 
   /**
    * @param {Number} rowSize
-   * @param {number} minRowSize
-   * @param {number} maxRowSize
    */
-  updateRowSize(rowSize, minRowSize, maxRowSize) {
+  updateRowSize(rowSize) {
     for (const tiler of this.tilers) {
-      tiler.setRowSize(rowSize, minRowSize, maxRowSize);
+      tiler.setRowSize(rowSize);
     }
   }
 
@@ -95,5 +94,20 @@ class FavoritesTiler {
     content.classList.add(Utils.loadFavoritesLayout());
     FavoritesSearchGalleryContainer.insertElement("beforeend", content);
     return content;
+  }
+
+  addStyles() {
+    const style = `
+    #favorites-search-gallery-content {
+      &.row, &.column, &.column .favorites-column, &.square, &.grid {
+        gap: ${Settings.gutter}px;
+      }
+
+      &.column {
+        margin-right: ${Flags.onDesktopDevice ? Settings.contentRightMargin : 0}px;
+      }
+    }`;
+
+    Utils.insertStyleHTML(style, "tiler-style");
   }
 }

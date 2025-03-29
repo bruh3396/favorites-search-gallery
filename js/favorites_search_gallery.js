@@ -1,5 +1,4 @@
 class FavoritesSearchGallery {
-  /* eslint-disable no-new */
   constructor() {
     if (Flags.favoritesSearchGalleryDisabled) {
       throw new Error("Favorites Search Gallery disabled");

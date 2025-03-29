@@ -11,13 +11,25 @@ class Events {
     /** @type {EventEmitter<HTMLElement[]>} */ resultsAddedToCurrentPage: new EventEmitter(true),
     /** @type {EventEmitter<FavoriteLayout>} */ layoutChanged: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ favoritesResized: new EventEmitter(true),
-    /** @type {EventEmitter<void>} */ layoutCompleted: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ showOnHoverToggled: new EventEmitter(true),
     /** @type {EventEmitter<String>} */ missingMetadata: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ tooltipsToggled: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ autoplayToggled: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ captionsToggled: new EventEmitter(true)
+    /** @type {EventEmitter<Boolean>} */ captionsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ sortAscendingToggled: new EventEmitter(true),
+    /** @type {EventEmitter<MetadataMetric>} */ sortingMethodChanged: new EventEmitter(true),
+    /** @type {EventEmitter<PerformanceProfile>} */ performanceProfileChanged: new EventEmitter(true),
+    /** @type {EventEmitter<Number>} */ resultsPerPageChanged: new EventEmitter(true),
+    /** @type {EventEmitter<Rating>} */ allowedRatingsChanged: new EventEmitter(true),
+    /** @type {EventEmitter<Number>} */ columnCountChanged: new EventEmitter(true),
+    /** @type {EventEmitter<Number>} */ rowSizeChanged: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ blacklistToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ infiniteScrollToggled: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ downloadButtonClicked: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ invertButtonClicked: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ shuffleButtonClicked: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ savedSearchesToggled: new EventEmitter(true)
   };
 
   static gallery = {
@@ -50,6 +62,17 @@ class Events {
   static setupGlobalEvents() {
     const container = Flags.onFavoritesPage ? FavoritesSearchGalleryContainer.container : document.documentElement;
 
+    Events.setupGlobalDesktopEvents(container);
+    // Events.setupGlobalMobileEvents(container);
+  }
+
+  /**
+   * @param {HTMLElement} container
+   */
+  static setupGlobalDesktopEvents(container) {
+    if (!Flags.onDesktopDevice) {
+      return;
+    }
     container.addEventListener("mouseover", (event) => {
       Events.global.mouseover.emit(new FavoritesMouseEvent(event));
     }, {
@@ -79,6 +102,16 @@ class Events {
     });
   }
 
+  // /**
+  //  * @param {HTMLElement} container
+  //  */
+  // static setupGlobalMobileEvents(container) {
+  //   // if (!Flags.onMobileDevice) {
+
+  //   // }
+
+  // }
+
   static setupWindowEvents() {
     window.addEventListener("focus", (event) => {
       Events.window.focus.emit(event);
@@ -89,7 +122,7 @@ class Events {
   }
 
   static {
-    Utils.addStaticInitializer(this.setupGlobalEvents);
-    Utils.addStaticInitializer(this.setupWindowEvents);
+    Utils.addStaticInitializer(Events.setupGlobalEvents);
+    Utils.addStaticInitializer(Events.setupWindowEvents);
   }
 }

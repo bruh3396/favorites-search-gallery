@@ -21,6 +21,7 @@ class FavoritesUIController {
         FavoritesUIController.invokeAction(event);
       }
     });
+    Events.favorites.layoutChanged.on(FavoritesUIController.changeLayout);
   }
 
   /**
@@ -100,27 +101,24 @@ class FavoritesUIController {
   }
 
   static updateColumnCountOnShiftScroll() {
-    const cooldown = new Cooldown(500, true);
+    let currentLayout = Preferences.layout.value;
+    let timeout = setTimeout(Constants.doNothing, 0);
 
-    cooldown.onDebounceEnd = () => {
-      Utils.forceHideCaptions(false);
-    };
-    cooldown.onCooldownEnd = () => {
-      if (!cooldown.debouncing) {
-        Utils.forceHideCaptions(false);
+    Events.favorites.layoutChanged.on((newLayout => {
+      currentLayout = newLayout;
+    }));
+
+    Events.global.wheel.on(async(wheelEvent) => {
+      const event = wheelEvent.originalEvent;
+
+      if (!event.shiftKey) {
+        return;
       }
-    };
-    window.addEventListener("wheel", async(event) => {
-      const layoutSelect = document.getElementById("layout-select");
-      const usingRowLayout = layoutSelect !== null && layoutSelect instanceof HTMLSelectElement && layoutSelect.value === "row";
+      const usingRowLayout = currentLayout === "row";
       const id = usingRowLayout ? "row-size" : "column-count";
       const input = document.getElementById(id);
 
       if (input === null || !(input instanceof HTMLInputElement)) {
-        return;
-      }
-
-      if (!event.shiftKey) {
         return;
       }
       const inGallery = await Utils.inGallery();
@@ -130,9 +128,12 @@ class FavoritesUIController {
       }
       const addend = (-event.deltaY > 0 ? -1 : 1) * (usingRowLayout ? -1 : 1);
 
-      if (cooldown.ready) {
-        Utils.forceHideCaptions(true);
-      }
+      Utils.forceHideCaptions(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        Utils.forceHideCaptions(false);
+      }, 500);
+
       input.value = String(parseInt(input.value) + addend);
       input.dispatchEvent(new KeyboardEvent("keydown", {
         key: "Enter",
@@ -210,10 +211,6 @@ class FavoritesUIController {
     Utils.insertStyleHTML(html, "statistic-hint-visibility");
   }
 
-  static changePerformanceProfile() {
-    window.location.reload();
-  }
-
   /**
    * @param {CustomEvent} event
    */
@@ -279,46 +276,6 @@ class FavoritesUIController {
   /**
    * @param {CustomEvent} event
    */
-  static changeAllowedRatings(event) {
-    // @ts-ignore
-    const explicit = event.target.querySelector("#explicit-rating");
-    // @ts-ignore
-    const questionable = event.target.querySelector("#questionable-rating");
-    // @ts-ignore
-    const safe = event.target.querySelector("#safe-rating");
-    const allowedRatings = (4 * Number(explicit.checked)) + (2 * Number(questionable.checked)) + Number(safe.checked);
-
-    Preferences.allowedRatings.set(allowedRatings);
-    // @ts-ignore
-    event.target.dispatchEvent(new CustomEvent("controller", {
-      bubbles: true,
-      detail: allowedRatings
-    }));
-
-    switch (allowedRatings) {
-      case 4:
-        explicit.nextElementSibling.style.pointerEvents = "none";
-        break;
-
-      case 2:
-        questionable.nextElementSibling.style.pointerEvents = "none";
-        break;
-
-      case 1:
-        safe.nextElementSibling.style.pointerEvents = "none";
-        break;
-
-      default:
-        for (const element of [explicit, questionable, safe]) {
-          element.nextElementSibling.removeAttribute("style");
-        }
-        break;
-    }
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
   static toggleAddOrRemoveButtons(event) {
     if (!(event.target instanceof HTMLInputElement)) {
       return;
@@ -335,7 +292,6 @@ class FavoritesUIController {
 
   /**
    * @param {CustomEvent} event
-   * @returns
    */
   static search(event) {
     const searchBox = document.getElementById(Utils.mainSearchBoxId);
@@ -360,10 +316,9 @@ class FavoritesUIController {
   }
 
   /**
-   * @param {CustomEvent} event
+   * @param {FavoriteLayout} layout
    */
-  static changeLayout(event) {
-    const layout = event.detail;
+  static changeLayout(layout) {
     const rowSizeContainer = document.getElementById("row-size-container");
     const columnCountContainer = document.getElementById("column-count-container");
     const usingRowLayout = layout === "row";
@@ -371,13 +326,6 @@ class FavoritesUIController {
     if (columnCountContainer !== null && rowSizeContainer !== null) {
       columnCountContainer.style.display = usingRowLayout ? "none" : "";
       rowSizeContainer.style.display = usingRowLayout ? "" : "none";
-    }
-
-    if (event.target !== null) {
-      event.target.dispatchEvent(new CustomEvent("controller", {
-        bubbles: true,
-        detail: layout
-      }));
     }
   }
 

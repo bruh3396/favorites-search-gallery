@@ -59,7 +59,7 @@ class FavoritesPaginator {
    * @param {Number} pageNumber
    */
   changePage(pageNumber) {
-    this.currentPageNumber = pageNumber;
+    this.currentPageNumber = Utils.clamp(pageNumber, 1, this.pageCount);
   }
 
   /**
@@ -83,7 +83,7 @@ class FavoritesPaginator {
   /**
    * @param {Number} resultsPerPage
    */
-  updateResultsPerPage(resultsPerPage) {
+  changeResultsPerPage(resultsPerPage) {
     this.resultsPerPage = resultsPerPage;
   }
 

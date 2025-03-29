@@ -124,9 +124,11 @@ class FavoritesColumnTiler extends Tiler {
       const row = Math.floor(i / this.columnCount);
       const item = matrix[column][row];
 
-      result.push(item);
+      if (item instanceof HTMLElement) {
+        result.push(item);
+      }
     }
-    return result.filter(item => item instanceof HTMLElement);
+    return result;
   }
 
   onSelected() {

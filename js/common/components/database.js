@@ -11,7 +11,7 @@ class Database {
    * @param {String} name
    * @param {Number} version
    */
-  constructor(name, version = 2) {
+  constructor(name, version = 1) {
     this.name = name;
     this.version = version;
   }

@@ -435,7 +435,7 @@ class HTMLStrings {
     }
 
     #find-favorite {
-      display: none;
+      /* display: none; */
       margin-top: 7px;
 
       >input {
@@ -477,7 +477,6 @@ class HTMLStrings {
 
     #favorites-search-gallery-content {
       padding: 0px 20px 30px 20px;
-      --gutter: 8px;
 
       &.grid,
       &.square {
@@ -514,7 +513,6 @@ class HTMLStrings {
       &.row {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--gutter);
 
         .favorite {
 
@@ -559,14 +557,12 @@ class HTMLStrings {
       &.column {
         display: grid;
         grid-template-columns: repeat(10, 1fr);
-        gap: var(--gutter);
         margin-right: 15px;
 
         .favorites-column {
           display: flex;
           flex-direction: column;
           flex: 0 0 25%;
-          gap: var(--gutter);
 
           .favorite {
             border-radius: 10px;
@@ -712,14 +708,14 @@ class HTMLStrings {
 
       >label[for="explicit-rating"] {
         border-radius: 7px 0px 0px 7px;
+        margin-right: 2px;
       }
 
       >label[for="questionable-rating"] {
-        margin-left: -3px;
+        margin-right: 2px;
       }
 
       >label[for="safe-rating"] {
-        margin-left: -3px;
         border-radius: 0px 7px 7px 0px;
       }
 
@@ -794,7 +790,7 @@ class HTMLStrings {
       display: inline-block;
       width: 60px;
       height: 34px;
-      transform: scale(.70);
+      transform: scale(.75);
       align-content: center;
     }
 
@@ -856,12 +852,6 @@ class HTMLStrings {
       font-size: 16px;
     }
 
-    /* #sort-ascending-checkbox {
-            width: 0 !important;
-            height: 0 !important;
-            position: static !important;
-        } */
-
     .inline-option-container {
       >div {
         display: inline-block;
@@ -890,12 +880,12 @@ class HTMLStrings {
               <h5>Features:</h5>
               <ul>
                 <li>New favorites layouts</li>
-                  <ul>
-                    <li>Waterfall (column)</li>
-                    <li>River (row)</li>
-                    <li>Square</li>
-                    <li>Legacy (grid)</li>
-                  </ul>
+                <ul>
+                  <li>Waterfall (column)</li>
+                  <li>River (row)</li>
+                  <li>Square</li>
+                  <li>Legacy (grid)</li>
+                </ul>
                 <li>Infinite favorites scroll option added</li>
                 <ul>
                   <li>Page option still available</li>
@@ -913,7 +903,7 @@ class HTMLStrings {
                   <li>F: Fullscreen</li>
                   <li>G: Open post</li>
                   <li>Q: Open original</li>
-                  <li>E: favorite</li>
+                  <li>E: Add favorite</li>
                 </ul>
               </ul>
             </div>
@@ -935,15 +925,18 @@ class HTMLStrings {
         <div id="bottom-panel-2">
           <div id="additional-favorite-options-container" class="options-container">
             <div id="additional-favorite-options">
-              <div id="layout-sort--container" class="inline-option-container">
+              <div id="layout-sort-container" class="inline-option-container">
                 <div id="layout-container">
                   <label>Layout</label>
                   <br>
                 </div>
                 <div id="sort-container" title="Change sorting order of search results">
-                  <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
-                  <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
-                  <br>
+                  <span id="sort-labels">
+                    <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
+                    <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+                  </span>
+                  <div id="sort-inputs">
+                  </div>
                 </div>
               </div>
               <div id="results-columns-container" class="inline-option-container">
@@ -973,16 +966,6 @@ Lower numbers improve responsiveness">
                 </div>
               </div>
               <div id="rating-container" title="Filter search results by rating">
-                <label>Rating</label>
-                <br>
-                <div id="allowed-ratings" class="not-highlightable" data-action="changeAllowedRatings">
-                  <input type="checkbox" id="explicit-rating" checked>
-                  <label for="explicit-rating">Explicit</label>
-                  <input type="checkbox" id="questionable-rating" checked>
-                  <label for="questionable-rating">Questionable</label>
-                  <input type="checkbox" id="safe-rating" checked>
-                  <label for="safe-rating" style="margin: -3px;">Safe</label>
-                </div>
               </div>
               <div id="performance-profile-container" title="Improve performance by disabling features">
                 <label for="performance-profile">Performance Profile</label>
@@ -1584,7 +1567,7 @@ Lower numbers improve responsiveness">
       pointer-events: none;
       visibility: hidden;
       opacity: 0;
-      transition: visibility 0s, opacity 0.25s linear;
+      /* transition: visibility 0s, opacity 0.25s linear; */
       font-size: 1.05em;
     }
 
@@ -1927,7 +1910,9 @@ Lower numbers improve responsiveness">
   #show-ui-div,
   #search-header,
   #row-size-container,
-  #left-favorites-panel-top-row {
+  #left-favorites-panel-top-row,
+  #find-favorite,
+  #layout-container {
     display: none !important;
   }
 
@@ -2011,6 +1996,10 @@ Lower numbers improve responsiveness">
     border-radius: 0px;
     height: 50px;
     padding: 8px 0px 8px 10px !important;
+  }
+
+  select {
+    width: 120px !important;
   }
 
   body {
@@ -2258,6 +2247,14 @@ Lower numbers improve responsiveness">
     >svg {
       transform: scale(0.75);
     }
+  }
+
+  #sort-ascending-toggle-switch {
+    transform: scale(0.6) !important;
+  }
+
+  #sort-inputs {
+    margin-top: -5px;
   }
 </style>
 `;

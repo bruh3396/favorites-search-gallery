@@ -116,15 +116,14 @@ class FavoritesModel {
     return Utils.shuffleArray(this.latestSearchResults);
   }
 
-  /**
-   * @returns {Post[]}
-   */
-  getInvertedSearchResults() {
+  invertSearchResults() {
     for (const favorite of this.loader.getAllFavorites()) {
       favorite.toggleMatchedByMostRecentSearch();
     }
-    return this.loader.getAllFavorites()
+    const searchResults = this.loader.getAllFavorites()
       .filter(favorite => favorite.matchedByLatestSearch);
+
+    this.latestSearchResults = this.filter.filterFavoritesByRating(searchResults);
   }
 
   /**
@@ -194,7 +193,7 @@ class FavoritesModel {
   }
 
   /**
-   * @param {Number} allowedRatings
+   * @param {Rating} allowedRatings
    */
   changeAllowedRatings(allowedRatings) {
     this.filter.setAllowedRatings(allowedRatings);
@@ -224,8 +223,8 @@ class FavoritesModel {
   /**
    * @param {Number} resultsPerPage
    */
-  updateResultsPerPage(resultsPerPage) {
-    this.paginator.updateResultsPerPage(resultsPerPage);
+  changeResultsPerPage(resultsPerPage) {
+    this.paginator.changeResultsPerPage(resultsPerPage);
   }
 
   downloadSearchResults() {

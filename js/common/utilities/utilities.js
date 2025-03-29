@@ -433,50 +433,6 @@ class Utils {
   }
 
   /**
-   * @param {String} optionId
-   * @param {String} optionText
-   * @param {String} optionTitle
-   * @param {Boolean} optionIsChecked
-   * @param {Function} onOptionChanged
-   * @param {Boolean} optionIsVisible
-   * @param {String} optionHint
-   * @returns {HTMLElement | null}
-   */
-  static createFavoritesOption(optionId, optionText, optionTitle, optionIsChecked, onOptionChanged, optionIsVisible, optionHint = "") {
-    const id = Flags.onMobileDevice ? "favorite-options" : "dynamic-favorite-options";
-    const placeToInsert = document.getElementById(id);
-    const checkboxId = `${optionId}-checkbox`;
-    let display;
-
-    if (placeToInsert === null) {
-      return null;
-    }
-
-    if (optionIsVisible === undefined || optionIsVisible) {
-      display = "block";
-    } else {
-      display = "none";
-    }
-    placeToInsert.insertAdjacentHTML("beforeend", `
-      <div id="${optionId}" style="display: ${display}">
-        <label class="checkbox" title="${optionTitle}">
-        <input id="${checkboxId}" type="checkbox">
-        <span> ${optionText}</span>
-        <span class="option-hint"> ${optionHint}</span></label>
-      </div>
-    `);
-    const newOptionsCheckbox = document.getElementById(checkboxId);
-
-    if (newOptionsCheckbox instanceof HTMLInputElement) {
-      newOptionsCheckbox.checked = optionIsChecked;
-      newOptionsCheckbox.onchange = (event) => {
-        onOptionChanged(event);
-      };
-    }
-    return document.getElementById(optionId);
-  }
-
-  /**
    * @returns {String[]}
    */
   static getIdsToDeleteOnReload() {
@@ -484,12 +440,16 @@ class Utils {
   }
 
   /**
-   * @param {String} postId
+   * @param {String} id
    */
-  static setIdToBeRemovedOnReload(postId) {
+  static setIdToBeRemovedOnReload(id) {
     const idsToRemoveOnReload = Utils.getIdsToDeleteOnReload();
 
-    idsToRemoveOnReload.push(postId);
+    if (idsToRemoveOnReload.includes(id)) {
+      return;
+    }
+
+    idsToRemoveOnReload.push(id);
     localStorage.setItem(Utils.idsToRemoveOnReloadLocalStorageKey, JSON.stringify(idsToRemoveOnReload));
   }
 
@@ -1185,6 +1145,7 @@ class Utils {
       });
       indexedDB.deleteDatabase(FavoritesDatabase.databaseName);
       indexedDB.deleteDatabase(Extensions.databaseName);
+      indexedDB.deleteDatabase(Caption.databaseName);
     }
   }
 
@@ -1215,13 +1176,6 @@ class Utils {
       initializer();
     }
     Utils.staticInitializers = [];
-  }
-
-  /**
-   * @returns {Number}
-   */
-  static loadAllowedRatings() {
-    return Preferences.allowedRatings.value;
   }
 
   /**
@@ -2214,5 +2168,16 @@ class Utils {
       result.push(array.slice(i, i + chunkSize));
     }
     return result;
+  }
+
+  /**
+   * @param {HTMLInputElement | HTMLSelectElement | Number} input
+   * @returns {Number}
+   */
+  static getNumericInputValue(input) {
+    if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement) {
+      return parseInt(input.value);
+    }
+    return input;
   }
 }

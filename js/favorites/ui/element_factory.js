@@ -1,6 +1,8 @@
 class ElementFactory {
+  static handlerName = "uiController";
+
   /**
-   * @param {ElementTemplate<void>} template
+   * @param {ElementTemplate<MouseEvent>} template
    */
   static createButton(template) {
     const parent = document.getElementById(template.parentId);
@@ -16,23 +18,31 @@ class ElementFactory {
       return;
     }
     button.onclick = (event) => {
-      button.dispatchEvent(new CustomEvent(template.handler, {
+      button.dispatchEvent(new CustomEvent(ElementFactory.handlerName, {
         bubbles: true,
         detail: {
           ctrlKey: event.ctrlKey
         }
       }));
+
+      if (template.eventEmitter !== null) {
+        template.eventEmitter.emit(event);
+      }
     };
 
     button.addEventListener("contextmenu", (event) => {
       event.preventDefault();
 
-      button.dispatchEvent(new CustomEvent(template.handler, {
+      button.dispatchEvent(new CustomEvent(ElementFactory.handlerName, {
         bubbles: true,
         detail: {
           rightClick: true
         }
       }));
+
+      if (template.eventEmitter !== null) {
+        template.eventEmitter.emit(event);
+      }
     });
   }
 
@@ -46,16 +56,27 @@ class ElementFactory {
       return;
     }
     const checkbox = document.createElement("input");
+    const emitEvent = () => {
+      if (template.action !== "none" && template.action !== undefined) {
+        checkbox.dispatchEvent(new CustomEvent(ElementFactory.handlerName, {
+          bubbles: true,
+          detail: checkbox.checked
+        }));
+      }
+
+      if (template.eventEmitter !== null) {
+        template.eventEmitter.emit(checkbox.checked);
+      }
+    };
 
     checkbox.id = template.id;
     checkbox.type = "checkbox";
     checkbox.dataset.action = template.action;
     parent.insertAdjacentElement(template.position, checkbox);
+    FavoritesUIController.registerCheckboxHotkey(template.hotkey, checkbox);
 
     if (template.preference === null) {
-      if (template.defaultValue) {
-        checkbox.checked = template.defaultValue;
-      }
+      checkbox.checked = template.defaultValue ? template.defaultValue : false;
     } else {
       checkbox.checked = template.preference.value;
     }
@@ -64,25 +85,14 @@ class ElementFactory {
       if (template.savePreference && template.preference !== null) {
         template.preference.set(checkbox.checked);
       }
-
-      if (template.eventEmitter !== null) {
-        template.eventEmitter.emit(checkbox.checked);
-      }
-      checkbox.dispatchEvent(new CustomEvent(template.handler, {
-        bubbles: true,
-        detail: checkbox.checked
-      }));
-
+      emitEvent();
     });
-    FavoritesUIController.registerCheckboxHotkey(template.hotkey, checkbox);
 
     if (template.invokeActionOnCreation) {
-      checkbox.dispatchEvent(new CustomEvent(template.handler, {
-        bubbles: true,
-        detail: checkbox.checked
-      }));
+      Events.global.postProcess.on(() => {
+        emitEvent();
+      });
     }
-
   }
 
   /**
@@ -112,7 +122,7 @@ class ElementFactory {
   }
 
   /**
-   * @param {ElementTemplate<String>} template
+   * @param {ElementTemplate<String | Number>} template
    */
   static createSelect(template) {
     const parent = document.getElementById(template.parentId);
@@ -120,8 +130,7 @@ class ElementFactory {
     if (parent === null) {
       return;
     }
-
-    const optionsHTML = template.optionPairs
+    const optionsHTML = Array.from(Object.entries(template.optionPairs))
       .map(([value, text]) => `<option value="${value}">${text}</option>`)
       .join("\n");
     const selectHTML = `
@@ -135,25 +144,28 @@ class ElementFactory {
     if (select === null || !(select instanceof HTMLSelectElement)) {
       return;
     }
+    const emitEvent = () => {
+      if (template.eventEmitter !== null) {
+        template.eventEmitter.emit(select.value);
+      }
+
+      if (template.preference !== null) {
+        template.preference.set(select.value);
+      }
+    };
 
     if (template.preference === null) {
-      select.value = template.optionPairs[0][0];
+      select.value = String(Object.values(template.optionPairs)[0]);
     } else {
-      select.value = template.preference.value;
+      select.value = String(template.preference.value);
     }
 
     if (template.invokeActionOnCreation) {
-      select.dispatchEvent(new CustomEvent(template.handler, {
-        bubbles: true,
-        detail: select.value
-      }));
+      emitEvent();
     }
 
     select.onchange = () => {
-      select.dispatchEvent(new CustomEvent(template.handler, {
-        bubbles: true,
-        detail: select.value
-      }));
+      emitEvent();
 
       if (template.preference !== null) {
         template.preference.set(select.value);
@@ -171,17 +183,15 @@ class ElementFactory {
       return;
     }
     const toggleSwitchId = `${template.id}-toggle-switch`;
+    const switchHTML = `
+    <label id="${toggleSwitchId}" class="toggle-switch" title="${template.title}">
+        <span class="slider round"></span>
+        <span class="toggle-switch-label"> ${template.textContent}</span>
+    </label>`;
+    const switchContainerHTML = `<div id="${template.id}-toggle-switch-container">${switchHTML}</div>`;
+    const html = template.useContainer ? switchContainerHTML : switchHTML;
 
-    parent
-      .insertAdjacentHTML(
-        template.position,
-        `<div id="${template.id}-toggle-switch-container">
-          <label id="${toggleSwitchId}" class="toggle-switch" title="${template.title}">
-            <span class="slider round"></span>
-            <span class="toggle-switch-label"> ${template.textContent}</span>
-          </label>
-        </div>`
-      );
+    parent.insertAdjacentHTML(template.position, html);
     template.position = "afterbegin";
     template.parentId = toggleSwitchId;
     ElementFactory.createCheckbox(template);
@@ -226,6 +236,17 @@ class ElementFactory {
     }
     const numberComponent = new NumberComponent(element);
     const numberInput = numberComponent.input;
+    const emitEvent = () => {
+      const value = parseFloat(numberInput.value);
+
+      if (template.eventEmitter !== null) {
+        template.eventEmitter.emit(value);
+      }
+
+      if (template.preference !== null) {
+        template.preference.set(value);
+      }
+    };
 
     if (numberInput === null) {
       return;
@@ -238,21 +259,12 @@ class ElementFactory {
     }));
 
     if (template.invokeActionOnCreation) {
-      numberInput.dispatchEvent(new CustomEvent(template.handler, {
-        bubbles: true,
-        detail: numberInput
-      }));
+      emitEvent();
     }
 
     numberInput.onchange = () => {
-      numberInput.dispatchEvent(new CustomEvent(template.handler, {
-        bubbles: true,
-        detail: numberInput
-      }));
-
-      if (template.preference !== null) {
-        template.preference.set(parseFloat(numberInput.value));
-      }
+      emitEvent();
+      template.preference?.set(parseFloat(numberInput.value));
     };
   }
 }

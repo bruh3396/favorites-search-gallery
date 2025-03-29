@@ -39,29 +39,40 @@ class Types {
 
   /** @typedef {{min: Number, max: Number}}  NumberRange */
 
-/** @template T
- *  @typedef {{
- *    id: String,
- *    parentId: String,
- *    position?: InsertPosition,
- *    textContent?: String,
- *    title?: String,
- *    handler?: String,
- *    action?: String,
- *    hotkey?: String,
- *    invokeActionOnCreation?: Boolean,
- *    savePreference?: Boolean,
- *    enabled?: Boolean,
- *    optionPairs?: Array<[String, String]>,
- *    min?: Number,
- *    max?: Number,
- *    step?: Number,
- *    pollingTime?: Number,
- *    preference?: Preference<T> | null,
- *    defaultValue?: T | null,
- *    eventEmitter?: EventEmitter<T> | null
- *  }} ElementTemplateParams<T>
- */
+  /** @typedef {"general" | "artist" | "unknown" | "copyright" | "character" | "metadata"} TagCategory */
+
+  /** @typedef {{id: String, category: TagCategory}} TagCategoryMapping */
+
+  /** @typedef {0 | 1 | 2} PerformanceProfile  */
+
+  /** @typedef {1 | 2 | 3 | 4 | 5 | 6 | 7} Rating  */
+
+  /** @typedef {{input: HTMLInputElement, label: HTMLLabelElement}} RatingElement */
+
+  /**
+   * @template T
+   *  @typedef {{
+   *    id: String,
+   *    parentId: String,
+   *    position?: InsertPosition,
+   *    textContent?: String,
+   *    title?: String,
+   *    action?: String,
+   *    hotkey?: String,
+   *    invokeActionOnCreation?: Boolean,
+   *    savePreference?: Boolean,
+   *    enabled?: Boolean,
+   *    optionPairs?: Record<T & (String|Number), String>,
+   *    min?: Number,
+   *    max?: Number,
+   *    step?: Number,
+   *    pollingTime?: Number,
+   *    preference?: Preference<T> | null,
+   *    defaultValue?: T | null,
+   *    eventEmitter?: EventEmitter<T> | null,
+   *    useContainer?: Boolean,
+   *  }} ElementTemplateParams<T>
+   */
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);
@@ -73,6 +84,8 @@ class Types {
   static metadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
   static searchableMetadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
   static metadataComparators = new Set([":", ":<", ":>"]);
+  static tagCategories = new Set(["general", "artist", "unknown", "copyright", "character", "metadata"]);
+
   /**
    * @param {any} object
    * @returns {object is FavoriteLayout}
@@ -167,5 +180,21 @@ class Types {
    */
   static isMetadataComparator(object) {
     return Types.metadataComparators.has(object);
+  }
+
+  /**
+   * @param {any} object
+   * @returns {object is TagCategory}
+   */
+  static isTagCategory(object) {
+    return this.tagCategories.has(object);
+  }
+
+  /**
+   * @param {any} object
+   * @returns {object is Rating}
+   */
+  static isRating(object) {
+    return Number.isInteger(object) && object >= 1 && object <= 7;
   }
 }

@@ -1,10 +1,11 @@
 class Extensions {
   static {
+    Utils.addStaticInitializer(Extensions.convertFromLocalStorageToIndexedDB);
     Utils.addStaticInitializer(Extensions.load);
   }
 
   /** @type {String} */
-  static databaseName = "Extensions";
+  static databaseName = "ImageExtensions";
   /** @type {String} */
   static objectStoreName = "extensionMappings";
   /** @type {Map<String, MediaExtension>} */
@@ -61,5 +62,31 @@ class Extensions {
     for (const mapping of mappings) {
       Extensions.map.set(mapping.id, mapping.extension);
     }
+  }
+
+  static convertFromLocalStorageToIndexedDB() {
+    const extensionMappingsString = localStorage.getItem("imageExtensions");
+
+    if (extensionMappingsString === null) {
+      return;
+    }
+    /** @type {Record<String, 0 | 1 | 2 | 3 | 4>} */
+    const extensionMappings = JSON.parse(extensionMappingsString);
+    const extensionDecodings = {
+      0: "jpg",
+      1: "png",
+      2: "jpeg",
+      3: "gif",
+      4: "mp4"
+    };
+
+    for (const [id, extensionEncoding] of Object.entries(extensionMappings)) {
+      const extension = extensionDecodings[extensionEncoding];
+
+      if (Types.isMediaExtension(extension)) {
+        Extensions.set(id, extension);
+      }
+    }
+    localStorage.removeItem("imageExtensions");
   }
 }

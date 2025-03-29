@@ -7,7 +7,7 @@ class FavoritesFilter {
   negatedTagBlacklist;
   /** @type {Boolean} */
   useTagBlacklist;
-  /** @type {Number} */
+  /** @type {Rating} */
   allowedRatings;
 
   /** @type {Boolean} */
@@ -18,7 +18,7 @@ class FavoritesFilter {
   constructor() {
     this.negatedTagBlacklist = Utils.negateTags(Utils.tagBlacklist);
     this.useTagBlacklist = !Flags.userIsOnTheirOwnFavoritesPage || Preferences.excludeBlacklist.value;
-    this.allowedRatings = Utils.loadAllowedRatings();
+    this.allowedRatings = Preferences.allowedRatings.value;
     this.searchCommand = this.getSearchCommand("");
     this.searchQuery = "";
   }
@@ -29,7 +29,15 @@ class FavoritesFilter {
    */
   filterFavorites(favorites) {
     const results = this.searchCommand.getSearchResults(favorites);
-    return this.allRatingsAreAllowed ? results : results.filter(result => result.withinRatings(this.allowedRatings));
+    return this.allRatingsAreAllowed ? results : this.filterFavoritesByRating(results);
+  }
+
+  /**
+   * @param {Post[]} favorites
+   * @returns {Post[]}
+   */
+  filterFavoritesByRating(favorites) {
+    return favorites.filter(result => result.withinRating(this.allowedRatings));
   }
 
   /**
@@ -58,7 +66,7 @@ class FavoritesFilter {
   }
 
   /**
-   * @param {Number} allowedRatings
+   * @param {Rating} allowedRatings
    */
   setAllowedRatings(allowedRatings) {
     this.allowedRatings = allowedRatings;

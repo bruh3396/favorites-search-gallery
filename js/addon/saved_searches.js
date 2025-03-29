@@ -2,19 +2,19 @@ class SavedSearches {
   static localStorageKeys = {
     savedSearches: "savedSearches"
   };
-  /** @type {HTMLTextAreaElement} */
+  /** @type {HTMLElement} */
   textarea;
   /** @type {HTMLElement} */
   savedSearchesList;
-  /** @type {HTMLButtonElement} */
+  /** @type {HTMLElement} */
   stopEditingButton;
-  /** @type {HTMLButtonElement} */
+  /** @type {HTMLElement} */
   saveButton;
-  /** @type {HTMLButtonElement} */
+  /** @type {HTMLElement} */
   importButton;
-  /** @type {HTMLButtonElement} */
+  /** @type {HTMLElement} */
   exportButton;
-  /** @type {HTMLButtonElement} */
+  /** @type {HTMLElement} */
   saveSearchResultsButton;
 
   constructor() {
@@ -28,34 +28,17 @@ class SavedSearches {
   }
 
   insertHTML() {
-    const showSavedSearches = Boolean(Preferences.savedSearchVisibility.value);
-    const savedSearchesContainer = document.getElementById("right-favorites-panel");
-
-    Utils.insertHTMLAndExtractStyle(savedSearchesContainer, "beforeend", HTMLStrings.savedSearches);
-    document.getElementById("right-favorites-panel").style.display = showSavedSearches ? "block" : "none";
-    const options = Utils.createFavoritesOption(
-      "show-saved-searches",
-      "Saved Searches",
-      "Toggle saved searches",
-      showSavedSearches,
-      (e) => {
-        savedSearchesContainer.style.display = e.target.checked ? "block" : "none";
-        Preferences.savedSearchVisibility.set(e.target.checked);
-      },
-      true
-    );
-
-    document.getElementById("bottom-panel-2").insertAdjacentElement("afterbegin", options);
+    Utils.insertHTMLAndExtractStyle(document.getElementById("right-favorites-panel") || document.createElement("div"), "beforeend", HTMLStrings.savedSearches);
   }
 
   extractHTMLElements() {
-    this.saveButton = document.getElementById("save-custom-search-button");
-    this.textarea = document.getElementById("saved-searches-input");
-    this.savedSearchesList = document.getElementById("saved-search-list");
-    this.stopEditingButton = document.getElementById("stop-editing-saved-search-button");
-    this.importButton = document.getElementById("import-saved-search-button");
-    this.exportButton = document.getElementById("export-saved-search-button");
-    this.saveSearchResultsButton = document.getElementById("save-results-button");
+    this.saveButton = document.getElementById("save-custom-search-button") || document.createElement("button");
+    this.textarea = document.getElementById("saved-searches-input") || document.createElement("textarea");
+    this.savedSearchesList = document.getElementById("saved-search-list") || document.createElement("ul");
+    this.stopEditingButton = document.getElementById("stop-editing-saved-search-button") || document.createElement("button");
+    this.importButton = document.getElementById("import-saved-search-button") || document.createElement("button");
+    this.exportButton = document.getElementById("export-saved-search-button") || document.createElement("button");
+    this.saveSearchResultsButton = document.getElementById("save-results-button") || document.createElement("button");
   }
 
   addEventListeners() {
@@ -97,6 +80,16 @@ class SavedSearches {
     this.saveSearchResultsButton.onclick = () => {
       this.saveSearchResultsAsCustomSearch();
     };
+    Events.favorites.savedSearchesToggled.on((value) => {
+      const html = `
+        #right-favorites-panel {
+          display: ${value ? "block" : "none"};
+        }
+      `;
+
+      Utils.insertStyleHTML(html, "saved-searches-visibility");
+      Preferences.showSavedSearches.set(value);
+    });
   }
 
   /**

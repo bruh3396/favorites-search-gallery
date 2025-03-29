@@ -12,26 +12,26 @@ class ElementTemplate {
     textContent = "",
     title = "",
     enabled = true,
-    handler = "controller",
     action = "none",
     hotkey = "none",
     invokeActionOnCreation = false,
     savePreference = true,
-    optionPairs = [],
+    // @ts-ignore
+    optionPairs = {},
     min = 0,
     max = 100,
     step = 1,
     pollingTime = 50,
     preference = null,
     defaultValue = null,
-    eventEmitter = null}) {
+    eventEmitter = null,
+    useContainer = true}) {
     this.id = id;
     this.parentId = parentId;
     this.position = position;
     this.textContent = textContent;
     this.title = title;
     this.enabled = enabled;
-    this.handler = handler;
     this.action = action;
     this.hotkey = hotkey;
     this.invokeActionOnCreation = invokeActionOnCreation;
@@ -44,5 +44,6 @@ class ElementTemplate {
     this.preference = preference;
     this.defaultValue = defaultValue;
     this.eventEmitter = eventEmitter;
+    this.useContainer = useContainer;
   }
 }

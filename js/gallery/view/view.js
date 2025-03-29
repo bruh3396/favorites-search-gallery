@@ -5,8 +5,6 @@ class GalleryView {
   renderer;
   /** @type {GalleryUI} */
   ui;
-  /** @type {GalleryMenu} */
-  menu;
   /** @type {SearchPageCreator} */
   searchPageCreator;
 
@@ -18,7 +16,6 @@ class GalleryView {
   createComponents() {
     this.renderer = new GalleryContentRenderer(this.container);
     this.ui = new GalleryUI(this.container);
-    this.menu = new GalleryMenu(this.container);
     this.searchPageCreator = new SearchPageCreator();
     this.toggleVisibility(false);
   }

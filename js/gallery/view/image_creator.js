@@ -194,14 +194,12 @@ class GalleryImageCreator {
   }
 
   clearAllImages() {
-    setTimeout(() => {
-      for (const [id, request] of this.imageRequests.entries()) {
-        request.close();
-        this.imageRequests.delete(id);
-      }
-      this.imageRequests.clear();
-      this.clearAnimatedImages();
-    }, 0);
+    for (const [id, request] of this.imageRequests.entries()) {
+      request.close();
+      this.imageRequests.delete(id);
+    }
+    this.imageRequests.clear();
+    this.clearAnimatedImages();
   }
 
   clearAnimatedImages() {

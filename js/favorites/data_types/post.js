@@ -342,29 +342,7 @@ class Post {
   }
 
   deleteInactivePost() {
-    if (this.inactivePost !== null) {
-      // this.inactivePost = null;
-    }
-  }
-
-  /**
-   * @param {DocumentFragment | HTMLElement} content
-   */
-  insertAtEndOfContent(content) {
-    if (this.inactivePost !== null) {
-      this.createHTMLElement();
-    }
-    content.appendChild(this.root);
-  }
-
-  /**
-   * @param {HTMLElement} content
-   */
-  insertAtBeginningOfContent(content) {
-    if (this.inactivePost !== null) {
-      this.createHTMLElement();
-    }
-    content.insertAdjacentElement("afterbegin", this.root);
+    this.inactivePost = null;
   }
 
   addInstanceToAllPosts() {
@@ -427,12 +405,12 @@ class Post {
   }
 
   /**
-   * @param {Number} ratings
+   * @param {Rating} rating
    * @returns {Boolean}
    */
-  withinRatings(ratings) {
+  withinRating(rating) {
     // eslint-disable-next-line no-bitwise
-    return (this.metadata.rating & ratings) > 0;
+    return (this.metadata.rating & rating) > 0;
   }
 
   /**

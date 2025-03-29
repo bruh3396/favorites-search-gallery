@@ -413,7 +413,7 @@ class GalleryController {
     this.interactionTracker.start();
     this.autoplayController.start(thumb);
     this.preloadContentInGalleryAround(thumb);
-    this.broadcastShowContentOnHover(false);
+    Events.gallery.showOnHover.emit(false);
   }
 
   exitGallery() {
@@ -562,13 +562,6 @@ class GalleryController {
 
   toggleShowContentOnHover() {
     this.model.toggleShowContentOnHover();
-    this.broadcastShowContentOnHover(this.model.currentState === GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  broadcastShowContentOnHover(value) {
-    Events.gallery.showOnHover.emit(value);
+    Events.gallery.showOnHover.emit(this.model.currentState === GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
   }
 }

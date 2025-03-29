@@ -1,6 +1,8 @@
 class GalleryUI {
   /** @type {HTMLElement} */
   background;
+  /** @type {GalleryMenu} */
+  menu;
   /** @type {HTMLElement | null} */
   lastVisitedThumb;
 
@@ -14,6 +16,7 @@ class GalleryUI {
    */
   constructor(galleryContainer) {
     this.background = this.createBackground(galleryContainer);
+    this.menu = new GalleryMenu(galleryContainer);
     this.lastVisitedThumb = null;
     this.toggleVideoPointerEvents(false);
     this.toggleMenu(false);
@@ -70,7 +73,6 @@ class GalleryUI {
           this.scrollToNextThumb(this.lastVisitedThumb);
         }
       });
-
   }
 
   /**
@@ -116,11 +118,6 @@ class GalleryUI {
    * @param {Boolean} value
    */
   toggleScrollbar(value) {
-    // Utils.insertStyleHTML(`
-    //   html {
-    //     overflow-y: ${value ? "auto" : "hidden"};
-    //   }
-    //   `, "scrollbar");
     document.body.style.overflowY = value ? "auto" : "hidden";
   }
 

@@ -1,28 +1,7 @@
-class GalleryMenuButtonTemplate {
+class GalleryMenu {
   /* eslint-disable object-property-newline */
   /* eslint-disable object-curly-newline */
-  /**
-   * @param {Object} param
-   * @param {String} param.id
-   * @param {String} param.icon
-   * @param {String} param.action
-   * @param {Boolean} param.enabled
-   * @param {String} param.handler
-   * @param {String} param.hint
-   * @param {String} param.color
-   */
-  constructor({id, icon, action = "none", enabled = true, handler = "galleryController", hint = "", color = "white"}) {
-    this.id = id;
-    this.icon = icon;
-    this.action = action;
-    this.enabled = enabled;
-    this.handler = handler;
-    this.hint = hint;
-    this.color = color;
-  }
-}
 
-class GalleryMenu {
   static buttons = [
     {id: "exit-gallery", icon: Icons.exit, action: "exitGallery", enabled: true, handler: "galleryController", hint: "Exit (Escape, Right-Click)", color: "red"},
     {id: "fullscreen-gallery", icon: Icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen (F)", color: "#0075FF"},
@@ -137,7 +116,10 @@ class GalleryMenu {
     button.dataset.hint = template.hint;
     this.container.appendChild(button);
     button.onclick = () => {
-      button.dispatchEvent(new CustomEvent(template.handler, {bubbles: true, detail: template.action}));
+      button.dispatchEvent(new CustomEvent(template.handler, {
+        bubbles: true,
+        detail: template.action
+      }));
     };
 
     if (template.color !== "") {

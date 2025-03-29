@@ -16,9 +16,8 @@ class FavoritesDatabase {
    * @returns {Promise<Post[]>}
    */
   async loadAllFavorites() {
+    await this.deleteFavorites();
     const records = await this.database.load(FavoritesDatabase.objectStoreName);
-
-    await this.database.delete(this.getIdsToDeleteOnReload(), FavoritesDatabase.objectStoreName);
     return this.deserialize(records);
   }
 
@@ -49,16 +48,14 @@ class FavoritesDatabase {
   }
 
   /**
-   * @returns {String[]}
+   * @returns {Promise<void>}
    */
-  getIdsToDeleteOnReload() {
-    if (Flags.userIsOnTheirOwnFavoritesPage) {
-      const idsToDelete = Utils.getIdsToDeleteOnReload();
-
-      Utils.clearIdsToDeleteOnReload();
-      return idsToDelete;
+  async deleteFavorites() {
+    if (!Flags.userIsOnTheirOwnFavoritesPage) {
+      return;
     }
-    return [];
+    await this.database.delete(Utils.getIdsToDeleteOnReload(), FavoritesDatabase.objectStoreName);
+    Utils.clearIdsToDeleteOnReload();
   }
 
   /**

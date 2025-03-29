@@ -2,29 +2,22 @@ class Caption {
   static localStorageKeys = {
     tagCategories: "tagCategories"
   };
+
+  /** @type {Set<TagCategory>} */
   static importantTagCategories = new Set([
     "copyright",
     "character",
     "artist",
     "metadata"
   ]);
-  static tagCategoryEncodings = {
-    0: "general",
-    1: "artist",
-    2: "unknown",
-    3: "copyright",
-    4: "character",
-    5: "metadata"
-  };
   static template = `
     <ul id="caption-list">
         <li id="caption-id" style="display: block;"><h6>ID</h6></li>
         ${Caption.getCategoryHeaderHTML()}
     </ul>
   `;
-  static saveTagCategoriesCooldown = new Cooldown(1000);
-  /** @type {Object<String, Number>} */
-  static tagCategoryAssociations;
+  /** @type {Record<String, TagCategory>} */
+  static tagCategoryMappings = {};
   /** @type {Set<String>} */
   static pendingRequests = new Set();
   static settings = {
@@ -36,6 +29,21 @@ class Caption {
     finishedLoading: false
   };
 
+  /** @type {Record<Number, TagCategory>} */
+  static tagCategoryDecodings = {
+    0: "general",
+    1: "artist",
+    2: "unknown",
+    3: "copyright",
+    4: "character",
+    5: "metadata"
+  };
+  static databaseName = "TagCategories";
+  static objectStoreName = "tagMappings";
+  /** @type {Database<TagCategoryMapping>} */
+  static database = new Database(Caption.databaseName);
+  /** @type {BatchExecutor<TagCategoryMapping>} */
+  static scheduler = new BatchExecutor(500, 2000, Caption.saveTagCategories);
   /**
    * @returns {String}
    */
@@ -52,16 +60,10 @@ class Caption {
   }
 
   /**
-   * @param {String} tagCategory
-   * @returns {Number}
+   * @param {TagCategoryMapping[]} mappings
    */
-  static encodeTagCategory(tagCategory) {
-    for (const [encoding, category] of Object.entries(Caption.tagCategoryEncodings)) {
-      if (category === tagCategory) {
-        return parseInt(encoding);
-      }
-    }
-    return 0;
+  static saveTagCategories(mappings) {
+    Caption.database.store(mappings, Caption.objectStoreName);
   }
 
   /** @type {Boolean} */
@@ -102,10 +104,7 @@ class Caption {
   }
 
   initializeFields() {
-    Caption.tagCategoryAssociations = this.loadSavedTags();
-    Caption.saveTagCategoriesCooldown.onCooldownEnd = () => {
-      this.saveTagCategories();
-    };
+    this.loadTagCategoryMappings();
     this.currentThumb = null;
     this.problematicTags = new Set();
     this.currentThumbId = null;
@@ -223,6 +222,9 @@ class Caption {
     this.attachToThumbHelper(thumb);
   }
 
+  /**
+   * @param {HTMLElement} thumb
+   */
   attachToThumbHelper(thumb) {
     thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
     this.caption.classList.remove("inactive");
@@ -248,7 +250,7 @@ class Caption {
       this.tagOnClick(thumb.id, event);
       Events.caption.idClicked.emit(thumb.id);
     };
-    captionIdHeader.insertAdjacentElement("afterend", captionIdTag);
+    captionIdHeader?.insertAdjacentElement("afterend", captionIdTag);
     thumb.children[0].appendChild(this.captionWrapper);
     this.populateTags(thumb);
   }
@@ -279,11 +281,19 @@ class Caption {
    */
   animateRemoval(thumb) {
     const captionWrapperClone = this.captionWrapper.cloneNode(true);
+
+    if (!(captionWrapperClone instanceof HTMLElement)) {
+      return;
+    }
     const captionClone = captionWrapperClone.children[0];
 
     thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
     captionWrapperClone.classList.add("caption-wrapper-clone");
     captionWrapperClone.querySelectorAll("*").forEach(element => element.removeAttribute("id"));
+
+    if (!(captionClone instanceof HTMLElement)) {
+      return;
+    }
     captionClone.ontransitionend = () => {
       captionWrapperClone.remove();
     };
@@ -299,12 +309,14 @@ class Caption {
   resizeFont(thumb) {
     const columnInput = document.getElementById("column-count");
     const heightCanBeDerivedWithoutRect = this.thumbMetadataExists(thumb) && columnInput !== null;
-    let height;
+    const image = Utils.getImageFromThumb(thumb);
+    let height = 200;
 
-    if (heightCanBeDerivedWithoutRect) {
+    if (heightCanBeDerivedWithoutRect && columnInput instanceof HTMLInputElement) {
       height = this.estimateThumbHeightFromMetadata(thumb, columnInput);
-    } else {
-      height = Utils.getImageFromThumb(thumb).getBoundingClientRect().height;
+    } else if (image !== null) {
+
+      height = image.getBoundingClientRect().height;
     }
     const fancyImageHoveringStyle = document.getElementById("fancy-image-hovering-fsg-style");
     const fancyHoveringEnabled = fancyImageHoveringStyle !== null && fancyImageHoveringStyle.innerHTML.length > 10;
@@ -313,7 +325,9 @@ class Caption {
     const scale = ratio > 1 ? Math.sqrt(ratio) : ratio * 0.85;
     const finalScale = fancyHoveringEnabled ? scale * 0.8 : scale;
 
-    this.caption.parentElement.style.fontSize = `${Utils.roundToTwoDecimalPlaces(finalScale)}em`;
+    if (this.caption !== null && this.caption.parentElement !== null) {
+      this.caption.parentElement.style.fontSize = `${Utils.roundToTwoDecimalPlaces(finalScale)}em`;
+    }
   }
 
   /**
@@ -347,6 +361,10 @@ class Caption {
    */
   estimateThumbHeightFromMetadata(thumb, columnInput) {
     const post = Post.allPosts.get(thumb.id);
+
+    if (post === undefined) {
+      return 200;
+    }
     const gridGap = 16;
     const columnCount = Math.max(1, parseInt(columnInput.value));
     const thumbWidthEstimate = (window.innerWidth - (columnCount * gridGap)) / columnCount;
@@ -355,7 +373,7 @@ class Caption {
   }
 
   /**
-   * @param {String} tagCategory
+   * @param {TagCategory} tagCategory
    * @param {String} tagName
    */
   addTag(tagCategory, tagName) {
@@ -391,15 +409,16 @@ class Caption {
     };
   }
 
-  /**
-   * @returns {Object<String, Number>}
-   */
-  loadSavedTags() {
-    return JSON.parse(localStorage.getItem(Caption.localStorageKeys.tagCategories) || "{}");
+  async loadTagCategoryMappings() {
+    const mappings = await Caption.database.load(Caption.objectStoreName);
+
+    for (const mapping of mappings) {
+      Caption.tagCategoryMappings[mapping.id] = mapping.category;
+    }
   }
 
-  saveTagCategories() {
-    localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(Caption.tagCategoryAssociations));
+  saveTagCategoryMappings() {
+    localStorage.setItem(Caption.localStorageKeys.tagCategories, JSON.stringify(Caption.tagCategoryMappings));
   }
 
   /**
@@ -529,8 +548,6 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   addTags(tags, thumb) {
-    Caption.saveTagCategoriesCooldown.restart();
-
     if (this.currentThumbId !== thumb.id) {
       return;
     }
@@ -538,9 +555,8 @@ class Caption {
     if (thumb.getElementsByClassName("caption-tag").length > 1) {
       return;
     }
-    tags = Array.from(tags).reverse();
 
-    for (const tagName of tags) {
+    for (const tagName of Array.from(tags).reverse()) {
       const category = this.getTagCategory(tagName);
 
       this.addTag(category, tagName);
@@ -553,15 +569,10 @@ class Caption {
 
   /**
    * @param {String} tagName
-   * @returns {String}
+   * @returns {TagCategory}
    */
   getTagCategory(tagName) {
-    const encoding = Caption.tagCategoryAssociations[tagName];
-
-    if (encoding === undefined) {
-      return "general";
-    }
-    return Caption.tagCategoryEncodings[encoding];
+    return Caption.tagCategoryMappings[tagName] || "general";
   }
 
   /**
@@ -590,7 +601,7 @@ class Caption {
         const tagCategoryMap = this.getTagCategoryMapFromPostPage(html);
 
         for (const [tagName, tagCategory] of tagCategoryMap.entries()) {
-          Caption.tagCategoryAssociations[tagName] = Caption.encodeTagCategory(tagCategory);
+          this.addTagCategoryMapping(tagName, Types.isTagCategory(tagCategory) ? tagCategory : "general");
           this.problematicTags.delete(tagName);
         }
         onProblematicTagsCorrected();
@@ -609,7 +620,7 @@ class Caption {
     return Array.from(dom.querySelectorAll(".tag"))
       .reduce((map, element) => {
         const tagCategory = element.classList[0].replace("tag-type-", "");
-        const tagName = this.replaceSpacesWithUnderscores(element.children[1].textContent);
+        const tagName = this.replaceSpacesWithUnderscores(element.children[1].textContent || "");
 
         map.set(tagName, tagCategory);
         return map;
@@ -620,7 +631,7 @@ class Caption {
    * @param {String} tag
    */
   setAsProblematic(tag) {
-    if (Caption.tagCategoryAssociations[tag] === undefined && !Utils.customTags.has(tag)) {
+    if (Caption.tagCategoryMappings[tag] === undefined && !Utils.customTags.has(tag)) {
       this.problematicTags.add(tag);
     }
   }
@@ -631,9 +642,7 @@ class Caption {
     }
     const tagNames = this.getTagNamesWithUnknownCategories(Utils.getAllThumbs().slice(0, 200));
 
-    this.findTagCategories(tagNames, () => {
-      Caption.saveTagCategoriesCooldown.restart();
-    }, Caption.tagFetchDelay);
+    this.findTagCategories(tagNames, Constants.doNothing, Caption.tagFetchDelay);
   }
 
   /**
@@ -657,7 +666,7 @@ class Caption {
 
     for (const tagName of uniqueTagNames) {
       if (Utils.isOnlyDigits(tagName) && tagName.length > 5) {
-        Caption.tagCategoryAssociations[tagName] = 0;
+        this.addTagCategoryMapping(tagName, "general");
         continue;
       }
 
@@ -699,12 +708,13 @@ class Caption {
               this.setAsProblematic(tagName);
               return;
             }
-            Caption.tagCategoryAssociations[tagName] = parseInt(encoding || "0");
+            this.addTagCategoryMapping(tagName, this.decodeTagCategory(parseInt(encoding || "0")));
 
             if (tagName === lastTagName) {
               onAllCategoriesFound();
             }
-          }).catch(() => {
+          }).catch((error) => {
+            console.error(error);
             onAllCategoriesFound();
           });
       } catch (error) {
@@ -740,6 +750,37 @@ class Caption {
    * @returns
    */
   tagCategoryIsUnknown(thumb, tagName) {
-    return tagName !== thumb.id && Caption.tagCategoryAssociations[tagName] === undefined && !Utils.customTags.has(tagName);
+    return tagName !== thumb.id && Caption.tagCategoryMappings[tagName] === undefined && !Utils.customTags.has(tagName);
+  }
+
+  /**
+   * @param {String} tagCategory
+   * @returns {TagCategory}
+   */
+  convertToTagCategory(tagCategory) {
+    return Types.isTagCategory(tagCategory) ? tagCategory : "general";
+  }
+
+  /**
+   * @param {Number} encoding
+   * @returns {TagCategory}
+   */
+  decodeTagCategory(encoding) {
+    return Caption.tagCategoryDecodings[encoding] || "general";
+  }
+
+  /**
+   * @param {String} id
+   * @param {TagCategory} category
+   */
+  addTagCategoryMapping(id, category) {
+    if (Caption.tagCategoryMappings[id] !== undefined) {
+      return;
+    }
+    Caption.tagCategoryMappings[id] = category;
+    Caption.scheduler.add({
+      id,
+      category
+    });
   }
 }

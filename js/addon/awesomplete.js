@@ -7,22 +7,7 @@ class AwesompleteWrapper {
       return;
     }
     this.showSavedSearchSuggestions = Preferences.savedSearchSuggestions.value;
-    this.insertHTML();
     this.addAwesompleteToInputs();
-  }
-
-  insertHTML() {
-    Utils.createFavoritesOption(
-      "show-saved-search-suggestions",
-      "Saved Suggestions",
-      "Show saved search suggestions in autocomplete dropdown",
-      this.showSavedSearchSuggestions,
-      (/** @type {{ target: { checked: boolean; }; }} */ event) => {
-        this.showSavedSearchSuggestions = event.target.checked;
-        Preferences.savedSearchSuggestions.set(event.target.checked);
-      },
-      false
-    );
   }
 
   addAwesompleteToInputs() {

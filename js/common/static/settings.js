@@ -10,4 +10,6 @@ class Settings {
   /** @type {MediaExtension} */
   static defaultExtension = "jpg";
   static galleryMenuEnabled = false;
+  static gutter = 5;
+  static contentRightMargin = 15;
 }
