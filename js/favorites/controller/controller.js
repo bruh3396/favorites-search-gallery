@@ -132,6 +132,7 @@ class FavoritesController {
     this.setupPageChangingInGallery();
     this.updateMissingMetadataWhenAvailable();
     this.updateLayoutWhenOptionsChange();
+    this.updateDatabaseWhenFavoriteRemoved();
   }
 
   setupPageChangingInGallery() {
@@ -161,6 +162,11 @@ class FavoritesController {
     }, 100));
   }
 
+  updateDatabaseWhenFavoriteRemoved() {
+    Events.favorites.favoriteRemoved.on(async(id) => {
+      await this.model.deleteFavorite(id);
+    });
+  }
   addKeyDownEventListeners() {
     Events.global.keydown.on((event) => {
       if ((event.originalEvent.key === "ArrowRight" || event.originalEvent.key === "ArrowLeft") && !event.originalEvent.repeat) {

@@ -95,13 +95,8 @@ class Post {
     } else if (fileURL.endsWith("gif")) {
       apiTagSet.add("gif");
     } else if (!apiTagSet.has("animated_png")) {
-      if (apiTagSet.has("video")) {
-        apiTagSet.delete("video");
-      }
-
-      if (apiTagSet.has("animated")) {
-        apiTagSet.delete("animated");
-      }
+      apiTagSet.delete("video");
+      apiTagSet.delete("animated");
     }
     postTagSet.delete(id);
 
@@ -139,8 +134,7 @@ class Post {
 
   /** @type {String} */
   get compressedThumbSource() {
-    const source = this.inactivePost === null ? this.image.src : this.inactivePost.src;
-    return ImageUtils.compressThumbSource(source);
+    return ImageUtils.compressThumbSource(this.thumbURL);
   }
 
   /** @type {FavoritesDatabaseRecord} */

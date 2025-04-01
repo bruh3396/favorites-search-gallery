@@ -12,4 +12,6 @@ class Settings {
   static galleryMenuEnabled = false;
   static gutter = 5;
   static contentRightMargin = 15;
+  static infiniteScrollBatchSize = 50;
+  static infiniteScrollObserverRootMargin = "75%";
 }

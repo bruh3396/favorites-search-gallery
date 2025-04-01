@@ -15,8 +15,8 @@ class FavoritesMenuDesktopUI {
     "checkboxOption": [
       {id: "options", parentId: "bottom-panel-1", textContent: "More Options", title: "Show more options", action: "toggleOptions", enabled: true, preference: Preferences.showOptions, hotkey: "O", invokeActionOnCreation: true, savePreference: true},
       {id: "show-ui", parentId: "show-ui-wrapper", textContent: "UI", title: "Toggle UI", action: "toggleUI", enabled: true, preference: Preferences.showUI, hotkey: "U", invokeActionOnCreation: true, savePreference: true},
-      {id: "infinite-scroll", parentId: "favorite-options", textContent: "Infinite Scroll", title: "Use infinite scroll (waterfall) instead of pages", enabled: true, preference: Preferences.infiniteScroll, hotkey: "", invokeActionOnCreation: false, savePreference: true, eventEmitter: Events.favorites.infiniteScrollToggled},
       {id: "enhance-search-pages", parentId: "favorite-options", textContent: "Enhance Search Pages", title: "Enable gallery and other features on search pages", enabled: true, preference: Preferences.enableOnSearchPages, hotkey: "", invokeActionOnCreation: false, savePreference: true},
+      {id: "infinite-scroll", parentId: "favorite-options", textContent: "Infinite Scroll", title: "Use infinite scroll (waterfall) instead of pages", enabled: true, preference: Preferences.infiniteScroll, hotkey: "", invokeActionOnCreation: false, savePreference: true, eventEmitter: Events.favorites.infiniteScrollToggled},
       {id: "show-remove-favorite-buttons", parentId: "favorite-options", textContent: "Remove Buttons", title: "Toggle remove favorite buttons", action: "toggleAddOrRemoveButtons", enabled: Flags.userIsOnTheirOwnFavoritesPage, preference: Preferences.showRemoveFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true},
       {id: "show-add-favorite-buttons", parentId: "favorite-options", textContent: "Add Favorite Buttons", title: "Toggle add favorite buttons", action: "toggleAddOrRemoveButtons", enabled: !Flags.userIsOnTheirOwnFavoritesPage, preference: Preferences.showAddFavoriteButtons, hotkey: "R", invokeActionOnCreation: true, savePreference: true},
       {id: "exclude-blacklist", parentId: "favorite-options", textContent: "Exclude Blacklist", title: "Exclude favorites with blacklisted tags from search", enabled: Flags.userIsOnTheirOwnFavoritesPage, preference: Preferences.excludeBlacklist, hotkey: "", invokeActionOnCreation: false, savePreference: true, eventEmitter: Events.favorites.blacklistToggled},
@@ -53,10 +53,10 @@ class FavoritesMenuDesktopUI {
         id: "layout-select", parentId: "layout-container", title: "Change layout", position: "beforeend", invokeActionOnCreation: true, preference: Preferences.layout, eventEmitter: Events.favorites.layoutChanged,
         optionPairs:
         {
-          row: "Row",
+          row: "River",
           square: "Square",
-          grid: "Grid",
-          column: "Column"
+          grid: "Legacy",
+          column: "Waterfall"
         }
       },
       {

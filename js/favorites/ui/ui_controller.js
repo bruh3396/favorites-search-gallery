@@ -85,7 +85,7 @@ class FavoritesUIController {
   }
 
   static setupGlobalListeners() {
-    FavoritesUIController.updateColumnCountOnShiftScroll();
+    FavoritesUIController.changeColumnCountOnShiftScroll();
     FavoritesUIController.updateShowOnHoverOptionTriggeredFromGallery();
   }
 
@@ -100,7 +100,7 @@ class FavoritesUIController {
     });
   }
 
-  static updateColumnCountOnShiftScroll() {
+  static changeColumnCountOnShiftScroll() {
     let currentLayout = Preferences.layout.value;
     let timeout = setTimeout(Constants.doNothing, 0);
 
@@ -133,7 +133,6 @@ class FavoritesUIController {
       timeout = setTimeout(() => {
         Utils.forceHideCaptions(false);
       }, 500);
-
       input.value = String(parseInt(input.value) + addend);
       input.dispatchEvent(new KeyboardEvent("keydown", {
         key: "Enter",

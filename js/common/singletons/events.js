@@ -29,7 +29,9 @@ class Events {
     /** @type {EventEmitter<MouseEvent>} */ downloadButtonClicked: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ invertButtonClicked: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ shuffleButtonClicked: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ savedSearchesToggled: new EventEmitter(true)
+    /** @type {EventEmitter<Boolean>} */ savedSearchesToggled: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ favoriteRemoved: new EventEmitter(true)
+
   };
 
   static gallery = {
@@ -92,7 +94,7 @@ class Events {
     document.addEventListener("keydown", (event) => {
       Events.global.keydown.emit(new FavoritesKeyboardEvent(event));
     });
-    container.addEventListener("wheel", (event) => {
+    document.addEventListener("wheel", (event) => {
       Events.global.wheel.emit(new FavoritesWheelEvent(event));
     }, {
       passive: true

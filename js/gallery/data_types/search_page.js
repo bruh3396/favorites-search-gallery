@@ -1,5 +1,6 @@
 class SearchPage {
   static parser = new DOMParser();
+
   /** @type {String} */
   html;
   /** @type {HTMLElement[]} */
@@ -36,8 +37,8 @@ class SearchPage {
     this.html = html;
     this.thumbs = Array.from(dom.querySelectorAll(".thumb"));
     this.pageNumber = pageNumber;
-    Utils.prepareSearchPageThumbs(this.thumbs);
     this.paginator = dom.getElementById("paginator");
     this.ids = new Set(this.thumbs.map(thumb => thumb.id));
+    SearchPageUtils.prepareThumbs(this.thumbs);
   }
 }

@@ -60,6 +60,10 @@ class FavoritesTiler {
     if (this.currentLayout === layout) {
       return;
     }
+
+    if (Flags.onMobileDevice) {
+      layout = "column";
+    }
     this.currentTiler.deactivate();
     this.container.className = layout;
     this.currentLayout = layout;

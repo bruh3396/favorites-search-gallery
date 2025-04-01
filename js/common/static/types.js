@@ -49,6 +49,8 @@ class Types {
 
   /** @typedef {{input: HTMLInputElement, label: HTMLLabelElement}} RatingElement */
 
+  /** @typedef {{apiPost: APIPost, thumb: HTMLElement}} APIThumb */
+
   /**
    * @template T
    *  @typedef {{
@@ -152,7 +154,7 @@ class Types {
 
   /**
    * @param {any} object
-   * @returns {object is MediaExtension}
+   * @returns {object is AnimatedExtension}
    */
   static isAnimatedExtension(object) {
     return Types.animatedExtensions.has(object);

@@ -16,7 +16,7 @@ class FavoritesDatabase {
    * @returns {Promise<Post[]>}
    */
   async loadAllFavorites() {
-    await this.deleteFavorites();
+    // await this.deleteFavorites();
     const records = await this.database.load(FavoritesDatabase.objectStoreName);
     return this.deserialize(records);
   }
@@ -48,17 +48,6 @@ class FavoritesDatabase {
   }
 
   /**
-   * @returns {Promise<void>}
-   */
-  async deleteFavorites() {
-    if (!Flags.userIsOnTheirOwnFavoritesPage) {
-      return;
-    }
-    await this.database.delete(Utils.getIdsToDeleteOnReload(), FavoritesDatabase.objectStoreName);
-    Utils.clearIdsToDeleteOnReload();
-  }
-
-  /**
    * @param {String} id
    */
   updateMetadataInDatabase(id) {
@@ -75,5 +64,13 @@ class FavoritesDatabase {
    */
   deserialize(records) {
     return records.map(record => new Post(record));
+  }
+
+  /**
+   * @param {String} id;
+   * @returns {Promise<void>}
+   */
+  deleteFavorite(id) {
+    return this.database.deleteRecords([id], FavoritesDatabase.objectStoreName);
   }
 }

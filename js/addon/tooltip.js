@@ -210,7 +210,7 @@ class Tooltip {
    */
   getTags(image) {
     const thumb = Utils.getThumbFromImage(image);
-    const tags = Utils.getTagsFromThumb(thumb);
+    const tags = Utils.getTagSetFromThumb(thumb);
 
     if (this.searchTagColorCodes[thumb.id] === undefined) {
       tags.delete(thumb.id);

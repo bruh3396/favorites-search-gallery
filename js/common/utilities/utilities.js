@@ -1,6 +1,5 @@
 class Utils {
   static mainSearchBoxId = "favorites-search-box";
-  static idsToRemoveOnReloadLocalStorageKey = "recentlyRemovedIds";
   static tagBlacklist = Utils.getTagBlacklist();
   static addedFavoriteStatuses = {
     error: 0,
@@ -193,9 +192,13 @@ class Utils {
   }
 
   /**
-   * @param {HTMLImageElement} image
+   * @param {HTMLImageElement | null} image
    */
   static removeTitleFromImage(image) {
+    if (image === null) {
+      return;
+    }
+
     if (image.hasAttribute("title")) {
       image.setAttribute("tags", image.title);
 
@@ -244,37 +247,69 @@ class Utils {
    * @param {HTMLElement | Post} thumb
    * @returns {Set<String>}
    */
-  static getTagsFromThumb(thumb) {
+  static getTagSetFromThumb(thumb) {
     if (Flags.onSearchPage) {
-      return Utils.getTagsFromThumbOnSearchPage(thumb);
+      return Utils.getTagSetFromThumbOnSearchPage(thumb);
     }
-    return Utils.getTagsFromThumbOnFavoritesPage(thumb);
+    return Utils.getTagSetFromThumbOnFavoritesPage(thumb);
   }
 
   /**
    * @param {Post | HTMLElement} thumb
    * @returns {Set<String>}
    */
-  static getTagsFromThumbOnFavoritesPage(thumb) {
+  static getTagSetFromThumbOnFavoritesPage(thumb) {
     const post = Post.allPosts.get(thumb.id);
     return post === undefined ? new Set() : new Set(post.tagSet);
+  }
+
+  /**
+   * @param {HTMLElement} image
+   * @returns {String}
+   */
+  static getTagAttributeFromImage(image) {
+    return image.hasAttribute("tags") ? "tags" : "title";
+  }
+
+  /**
+   * @param {HTMLElement | Post} thumb
+   * @returns {String}
+   */
+  static getTagsFromThumbOnSearchPage(thumb) {
+    if (!(thumb instanceof HTMLElement)) {
+      return "";
+    }
+    const image = Utils.getImageFromThumb(thumb);
+
+    if (image === null) {
+      return "";
+    }
+    const tagAttribute = Utils.getTagAttributeFromImage(image);
+    return image.getAttribute(tagAttribute) || "";
   }
 
   /**
    * @param {HTMLElement | Post} thumb
    * @returns {Set<String>}
    */
-  static getTagsFromThumbOnSearchPage(thumb) {
-    if (!(thumb instanceof HTMLElement)) {
-      return new Set();
+  static getTagSetFromThumbOnSearchPage(thumb) {
+    return Utils.convertToTagSet(Utils.getTagsFromThumbOnSearchPage(thumb));
+  }
+
+  /**
+   * @param {HTMLElement | null} thumb
+   * @param {String} tags
+   */
+  static setThumbTagsOnSearchPage(thumb, tags) {
+    if (thumb === null) {
+      return;
     }
     const image = Utils.getImageFromThumb(thumb);
 
     if (image === null) {
-      return new Set();
+      return;
     }
-    const tags = image.hasAttribute("tags") ? image.getAttribute("tags") : image.title;
-    return Utils.convertToTagSet(tags || "");
+    image.setAttribute(Utils.getTagAttributeFromImage(image), tags);
   }
 
   /**
@@ -291,7 +326,7 @@ class Utils {
    * @returns {Boolean}
    */
   static isVideo(thumb) {
-    const tags = Utils.getTagsFromThumb(thumb);
+    const tags = Utils.getTagSetFromThumb(thumb);
     return tags.has("video") || tags.has("mp4");
   }
 
@@ -303,7 +338,7 @@ class Utils {
     if (Utils.isVideo(thumb)) {
       return false;
     }
-    const tags = Utils.getTagsFromThumb(thumb);
+    const tags = Utils.getTagSetFromThumb(thumb);
     return tags.has("gif") || tags.has("animated") || tags.has("animated_png") || Utils.hasGifAttribute(thumb);
   }
 
@@ -430,31 +465,6 @@ class Utils {
     const somethingIsSelected = searchSuggestions.map(li => li.getAttribute("aria-selected"))
       .some(element => element === "true");
     return !somethingIsSelected;
-  }
-
-  /**
-   * @returns {String[]}
-   */
-  static getIdsToDeleteOnReload() {
-    return JSON.parse(localStorage.getItem(Utils.idsToRemoveOnReloadLocalStorageKey) || "[]");
-  }
-
-  /**
-   * @param {String} id
-   */
-  static setIdToBeRemovedOnReload(id) {
-    const idsToRemoveOnReload = Utils.getIdsToDeleteOnReload();
-
-    if (idsToRemoveOnReload.includes(id)) {
-      return;
-    }
-
-    idsToRemoveOnReload.push(id);
-    localStorage.setItem(Utils.idsToRemoveOnReloadLocalStorageKey, JSON.stringify(idsToRemoveOnReload));
-  }
-
-  static clearIdsToDeleteOnReload() {
-    localStorage.removeItem(Utils.idsToRemoveOnReloadLocalStorageKey);
   }
 
   /**
@@ -842,7 +852,7 @@ class Utils {
    * @param {String} id
    */
   static removeFavorite(id) {
-    Utils.setIdToBeRemovedOnReload(id);
+    Events.favorites.favoriteRemoved.emit(id);
     fetch(`https://rule34.xxx/index.php?page=favorites&s=delete&id=${id}`);
   }
 
@@ -1317,9 +1327,7 @@ class Utils {
   static prepareSearchPageThumb(thumb) {
     const image = Utils.getImageFromThumb(thumb);
 
-    if (image !== null) {
-      Utils.removeTitleFromImage(image);
-    }
+    Utils.removeTitleFromImage(image);
     Utils.assignContentType(thumb);
     thumb.id = Utils.removeNonNumericCharacters(Utils.getIdFromThumb(thumb));
   }
@@ -1670,7 +1678,7 @@ class Utils {
    * @returns {String}
    */
   static getGIFSource(thumb) {
-    const tags = Utils.getTagsFromThumb(thumb);
+    const tags = Utils.getTagSetFromThumb(thumb);
     const extension = tags.has("animated_png") ? "png" : "gif";
     return ImageUtils.getOriginalImageURL(thumb).replace("jpg", extension);
   }

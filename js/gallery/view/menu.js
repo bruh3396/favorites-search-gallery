@@ -13,7 +13,7 @@ class GalleryMenu {
     {id: "toggle-background-gallery", icon: Icons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController", hint: "Toggle Background (B)", color: "gold"},
     {id: "search-gallery", icon: Icons.search, action: "search", enabled: false, handler: "galleryController", hint: "Search", color: "cyan"},
     {id: "background-color-gallery", icon: Icons.palette, action: "changeBackgroundColor", enabled: true, handler: "galleryMenu", hint: "Background Color", color: "orange"},
-    {id: "pin-gallery", icon: Icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "cyan"}
+    {id: "pin-gallery", icon: Icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "#0075FF"}
   ];
 
   /** @type {HTMLElement} */

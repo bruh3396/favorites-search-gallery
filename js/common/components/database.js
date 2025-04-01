@@ -49,6 +49,7 @@ class Database {
   /**
    * @param {(V & {id: String})[]} records
    * @param {String} objectStoreName
+   * @returns {Promise<void>}
    */
   async update(records, objectStoreName) {
     const database = await this.open(objectStoreName);
@@ -77,8 +78,9 @@ class Database {
   /**
    * @param {String[]} ids
    * @param {String} objectStoreName
+   * @returns {Promise<void>}
    */
-  async delete(ids, objectStoreName) {
+  async deleteRecords(ids, objectStoreName) {
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(objectStoreName);
@@ -87,6 +89,29 @@ class Database {
     for (const id of ids) {
       await this.deleteRecord(index, id, objectStore);
     }
+  }
+
+  /**
+   * @param {IDBIndex} index
+   * @param {String} id
+   * @param {IDBObjectStore} objectStore
+   * @returns {Promise<void>}
+   */
+  async deleteRecord(index, id, objectStore) {
+    const deleteRequest = index.getKey(id);
+
+    await new Promise((resolve, reject) => {
+      deleteRequest.onsuccess = resolve;
+      deleteRequest.onerror = reject;
+    }).then((indexEvent) => {
+      const primaryKey = indexEvent.target.result;
+
+      if (primaryKey !== undefined) {
+        objectStore.delete(primaryKey);
+      }
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   /**
@@ -221,28 +246,6 @@ class Database {
 
     objectStore.createIndex("id", "id", {
       unique: true
-    });
-  }
-
-  /**
-   * @param {IDBIndex} index
-   * @param {String} id
-   * @param {IDBObjectStore} objectStore
-   */
-  async deleteRecord(index, id, objectStore) {
-    const deleteRequest = index.getKey(id);
-
-    await new Promise((resolve, reject) => {
-      deleteRequest.onsuccess = resolve;
-      deleteRequest.onerror = reject;
-    }).then((indexEvent) => {
-      const primaryKey = indexEvent.target.result;
-
-      if (primaryKey !== undefined) {
-        objectStore.delete(primaryKey);
-      }
-    }).catch((error) => {
-      console.error(error);
     });
   }
 }

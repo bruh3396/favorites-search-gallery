@@ -143,4 +143,31 @@ class ImageUtils {
     const extension = await this.getImageExtensionFromId(id);
     return ImageUtils.getOriginalImageURLFromIdAndThumbURL(id, thumbURL).replace(".jpg", `.${extension}`);
   }
+
+  /**
+   * @param {Post[]} posts
+   */
+  static preloadImagesFromPosts(posts) {
+    setTimeout(() => {
+      ImageUtils.preloadImages(posts.map(post => post.thumbURL));
+    }, 100);
+  }
+
+  /**
+   * @param {String[]} imageURLs
+   */
+  static preloadImages(imageURLs) {
+    for (const imageURL of imageURLs) {
+      ImageUtils.preloadImage(imageURL);
+    }
+  }
+
+  /**
+   * @param {String} imageURL
+   */
+  static preloadImage(imageURL) {
+    const preloadedImage = new Image();
+
+    preloadedImage.src = imageURL;
+  }
 }

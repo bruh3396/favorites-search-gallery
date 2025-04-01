@@ -279,4 +279,12 @@ class FavoritesModel {
     }
     return batch;
   }
+
+  /**
+   * @param {String} id
+   * @returns {Promise<void>}
+   */
+  deleteFavorite(id) {
+    return this.loader.deleteFavorite(id);
+  }
 }

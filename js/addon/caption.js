@@ -519,7 +519,7 @@ class Caption {
    * @param {HTMLElement} thumb
    */
   populateTags(thumb) {
-    const tagNames = Utils.getTagsFromThumb(thumb);
+    const tagNames = Utils.getTagSetFromThumb(thumb);
 
     tagNames.delete(thumb.id);
     const unknownThumbTags = Array.from(tagNames)
@@ -733,7 +733,7 @@ class Caption {
     const tagNamesWithUnknownCategories = new Set();
 
     for (const thumb of thumbs) {
-      const tagNames = Array.from(Utils.getTagsFromThumb(thumb));
+      const tagNames = Array.from(Utils.getTagSetFromThumb(thumb));
 
       for (const tagName of tagNames) {
         if (this.tagCategoryIsUnknown(thumb, tagName)) {

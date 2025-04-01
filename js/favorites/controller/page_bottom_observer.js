@@ -19,7 +19,7 @@ class FavoritesPageBottomObserver {
   createIntersectionObserver() {
     this.intersectionObserver = new IntersectionObserver(this.onIntersectionChanged.bind(this), {
       threshold: [0.1],
-      rootMargin: "0% 0% 50% 0%"
+      rootMargin: `0% 0% ${Settings.infiniteScrollObserverRootMargin} 0%`
     });
   }
 

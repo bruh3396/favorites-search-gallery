@@ -1306,7 +1306,7 @@ Lower numbers improve responsiveness">
   :root {
     /* --gallery-menu-background: rgba(0, 0, 0, 0.75); */
     --gallery-menu-background: rgba(0, 0, 0, 1);
-    --gallery-menu-size: 80px;
+    --gallery-menu-size: 70px;
   }
 
   #gallery-menu {
@@ -1386,7 +1386,7 @@ Lower numbers improve responsiveness">
 
         >img,
         >svg {
-          fill: #0075FF;
+          /* fill: #0075FF; */
           transform: rotateZ(90deg) !important;
         }
       }
@@ -1973,6 +1973,7 @@ Lower numbers improve responsiveness">
 
   #favorites-search-gallery-content {
     grid-gap: 1.2cqw;
+    padding: 0px 5px 20px  5px !important;
   }
 
   #favorites-search-gallery-menu {
@@ -2085,6 +2086,7 @@ Lower numbers improve responsiveness">
     -ms-transition: height 0.2s ease;
     -o-transition: height 0.2s ease;
     transition: height 0.2s ease;
+    height: 200px;
 
     &.hidden {
       height: 0px;
@@ -2140,7 +2142,10 @@ Lower numbers improve responsiveness">
     padding-left: 10px;
     padding-right: 10px;
     flex: 1;
-    background: white;
+
+    &.light-green-gradient {
+      background: white !important;
+    }
 
     &.dark-green-gradient {
       background: #303030;

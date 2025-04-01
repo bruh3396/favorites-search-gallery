@@ -15,7 +15,7 @@ class GallerySettings {
   }
   static upscaledThumbCanvasWidth = 850;
   static maxUpscaledThumbCanvasHeight = 16000;
-  static imageMegabyteLimit = 500;
+  static imageMegabyteLimit = 750;
   static searchPagePreloadedImageCount = 42;
   static minimumPreloadedImageCount = 5;
   static visibleThumbsDownwardScrollPixelGenerosity = 600;

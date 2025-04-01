@@ -82,4 +82,12 @@ class FavoritesLoader {
   updateMetadataInDatabase(id) {
     this.database.updateMetadataInDatabase(id);
   }
+
+  /**
+   * @param {String} id
+   * @returns {Promise<void>}
+   */
+  deleteFavorite(id) {
+    return this.database.deleteFavorite(id);
+  }
 }

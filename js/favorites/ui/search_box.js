@@ -226,6 +226,7 @@ class SearchBox {
   executeSearch() {
     this.searchHistory.add(this.searchBox.value);
     this.updateLastEditedSearchQuery();
+    // @ts-ignore
     Utils.hideAwesomplete(this.searchBox);
     this.searchBox.dispatchEvent(new CustomEvent("controller", {
       bubbles: true,

@@ -33,6 +33,19 @@ class APIPost {
     return value !== "false";
   }
 
+  /**
+   * @param {HTMLElement[]} thumbs
+   * @returns {Promise<APIThumb[]>}
+   */
+  static fetchAll(thumbs) {
+    return Promise.all(thumbs.map((thumb) => {
+      return new APIPost(thumb.id).fetch().then((apiPost) => ({
+        apiPost,
+        thumb
+      }));
+    }));
+  }
+
   /** @type {String} */
   id;
   /** @type {Boolean} */
