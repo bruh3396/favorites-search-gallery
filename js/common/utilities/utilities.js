@@ -231,19 +231,6 @@ class Utils {
   }
 
   /**
-   * @param {String} imageURL
-   * @returns {MediaExtension}
-   */
-  static getExtensionFromImageURL(imageURL) {
-    const match = (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL);
-
-    if (match === null || !Types.isMediaExtension(match[1])) {
-      return Settings.defaultExtension;
-    }
-    return match[1];
-  }
-
-  /**
    * @param {HTMLElement | Post} thumb
    * @returns {Set<String>}
    */
@@ -996,9 +983,9 @@ class Utils {
   }
 
   /**
-   * @param {{label: String, value: String, type: String}[]} officialTags
+   * @param {AwesompleteSuggestion[]} officialTags
    * @param {String} searchQuery
-   * @returns {{label: String, value: String, type: String}[]}
+   * @returns {AwesompleteSuggestion[]}
    */
   static addCustomTagsToAutocompleteList(officialTags, searchQuery) {
     const customTags = Array.from(Utils.customTags);
@@ -1036,7 +1023,7 @@ class Utils {
 
   /**
    * @param {String} searchTag
-   * @returns {{label: String, value: String, type: String}[]}
+   * @returns {AwesompleteSuggestion[]}
    */
   static getSavedSearchesForAutocompleteList(searchTag) {
     const minimumSearchTagLength = 3;
@@ -1680,7 +1667,7 @@ class Utils {
   static getGIFSource(thumb) {
     const tags = Utils.getTagSetFromThumb(thumb);
     const extension = tags.has("animated_png") ? "png" : "gif";
-    return ImageUtils.getOriginalImageURL(thumb).replace("jpg", extension);
+    return ImageUtils.getOriginalImageURLWithoutExtension(thumb).replace("jpg", extension);
   }
 
   /**
@@ -2187,5 +2174,42 @@ class Utils {
       return parseInt(input.value);
     }
     return input;
+  }
+
+  /**
+   * @param {Number} number
+   * @param {Number} count
+   * @param {Number} min
+   * @param {Number} max
+   * @returns {Number[]}
+   */
+  static getNumbersAround(number, count, min, max) {
+    if (count <= 0) {
+      return [];
+    }
+    const numbers = [number];
+    let i = 1;
+
+    while (numbers.length < count) {
+      const left = number - i;
+      const right = number + i;
+      const leftInBounds = left >= min && left <= max;
+      const rightInBounds = right >= min && right <= max;
+      const bothOutOfBounds = !leftInBounds && !rightInBounds;
+
+      if (bothOutOfBounds) {
+        break;
+      }
+
+      if (leftInBounds) {
+        numbers.push(left);
+      }
+
+      if (rightInBounds && numbers.length < count) {
+        numbers.push(right);
+      }
+      i += 1;
+    }
+    return numbers.sort((a, b) => a - b);
   }
 }

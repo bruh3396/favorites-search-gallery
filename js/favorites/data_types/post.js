@@ -167,6 +167,26 @@ class Post {
     return this.inactivePost === null ? this.image.src : this.inactivePost.src;
   }
 
+  /** @type {Boolean} */
+  get isVideo() {
+    return !Constants.videoTagSet.isDisjointFrom(this.tagSet);
+  }
+
+  /** @type {Boolean} */
+  get isGif() {
+    return !Constants.animatedTagSet.isDisjointFrom(this.tagSet) && !this.isVideo;
+  }
+
+  /** @type {Boolean} */
+  get isAnimated() {
+    return this.isVideo || this.isGif;
+  }
+
+  /** @type {Boolean} */
+  get isImage() {
+    return !this.isAnimated;
+  }
+
   /**
    * @param {HTMLElement | FavoritesDatabaseRecord} entity
    */
@@ -412,13 +432,11 @@ class Post {
    */
   async getOriginalFileURL() {
     const thumbURL = this.inactivePost === null ? this.image.src : this.inactivePost.src;
-    const isVideo = !Constants.videoTagSet.isDisjointFrom(this.tagSet);
-    const isAnimated = !Constants.animatedTagSet.isDisjointFrom(this.tagSet);
     let extension;
 
-    if (isVideo) {
+    if (this.isVideo) {
       extension = "mp4";
-    } else if (isAnimated) {
+    } else if (this.isGif) {
       extension = "gif";
     } else {
       extension = await ImageUtils.getImageExtensionFromId(this.id);

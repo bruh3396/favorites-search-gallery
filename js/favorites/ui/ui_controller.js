@@ -60,7 +60,7 @@ class FavoritesUIController {
     const processGeneralHotkeyEvent = async(/** @type {FavoritesKeyboardEvent} */ event) => {
       const inGallery = await Utils.inGallery();
 
-      if (inGallery) {
+      if (inGallery || Types.isTypeableInput(event.originalEvent.target)) {
         return;
       }
 

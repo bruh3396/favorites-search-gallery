@@ -7,6 +7,10 @@ class FavoritesModel {
   sorter;
   /** @type {FavoritesPaginator} */
   paginator;
+  /** @type {InfiniteScrollFeeder} */
+  feeder;
+  /** @type {FavoritesDownloader} */
+  downloader;
   /** @type {Post[]} */
   latestSearchResults;
   /** @type {Boolean} */
@@ -17,6 +21,8 @@ class FavoritesModel {
     this.filter = new FavoritesFilter();
     this.sorter = new FavoritesSorter();
     this.paginator = new FavoritesPaginator();
+    this.feeder = new InfiniteScrollFeeder();
+    this.downloader = new FavoritesDownloader();
     this.latestSearchResults = [];
     this.infiniteScroll = Preferences.infiniteScroll.value;
   }
@@ -102,7 +108,7 @@ class FavoritesModel {
    * @returns {Post[]}
    */
   getSearchResultsFromPreviousQuery() {
-    const favorites = this.filter.filterFavorites(this.loader.getAllFavorites());
+    const favorites = this.filter.filterFavorites(this.getAllFavorites());
 
     this.latestSearchResults = this.sorter.sortFavorites(favorites);
     return this.latestSearchResults;
@@ -112,15 +118,14 @@ class FavoritesModel {
    * @returns {Post[]}
    */
   getShuffledSearchResults() {
-    this.latestSearchResults = Utils.shuffleArray(this.latestSearchResults);
     return Utils.shuffleArray(this.latestSearchResults);
   }
 
   invertSearchResults() {
-    for (const favorite of this.loader.getAllFavorites()) {
+    for (const favorite of this.getAllFavorites()) {
       favorite.toggleMatchedByMostRecentSearch();
     }
-    const searchResults = this.loader.getAllFavorites()
+    const searchResults = this.getAllFavorites()
       .filter(favorite => favorite.matchedByLatestSearch);
 
     this.latestSearchResults = this.filter.filterFavoritesByRating(searchResults);
@@ -228,33 +233,7 @@ class FavoritesModel {
   }
 
   downloadSearchResults() {
-    const posts = this.latestSearchResults;
-    const postCount = posts.length;
-
-    if (postCount === 0) {
-      return;
-    }
-    let fetchedCount = 0;
-    // const zippedCount = 0;
-
-    // console.log("fetch");
-    const onFetch = () => {
-      fetchedCount += 1;
-      // console.log(`fetch ${fetchedCount}/${postCount}`);
-    };
-    const onFetchEnd = () => {
-      // console.log("fetch end");
-      // console.log("zip start");
-    };
-    const onZipEnd = () => {
-      // console.log("zip end");
-    };
-
-    Downloader.downloadPosts(posts, {
-      onFetch,
-      onFetchEnd,
-      onZipEnd
-    });
+    this.downloader.downloadFavorites(this.latestSearchResults);
   }
 
   /**
@@ -264,20 +243,11 @@ class FavoritesModel {
     this.infiniteScroll = value;
   }
 
-  /** @returns {Post[]} */
+  /**
+   * @returns {Post[]}
+   */
   getNextInfiniteScrollBatch() {
-    const batch = [];
-
-    for (const favorite of this.latestSearchResults) {
-      if (document.getElementById(favorite.id) === null) {
-        batch.push(favorite);
-      }
-
-      if (batch.length >= 25) {
-        break;
-      }
-    }
-    return batch;
+    return this.feeder.getNextBatch(this.latestSearchResults);
   }
 
   /**
@@ -286,5 +256,13 @@ class FavoritesModel {
    */
   deleteFavorite(id) {
     return this.loader.deleteFavorite(id);
+  }
+
+  setSearchSubset() {
+    this.loader.setSearchSubset(this.latestSearchResults);
+  }
+
+  stopSearchSubset() {
+    this.loader.stopSearchSubset();
   }
 }

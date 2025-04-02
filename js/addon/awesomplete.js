@@ -72,6 +72,11 @@ class AwesompleteWrapper {
     };
   }
 
+  /**
+   * @param {String} inputId
+   * @param {String} prefix
+   * @returns {AwesompleteSuggestion[]}
+   */
   getSavedSearchesForAutocompleteList(inputId, prefix) {
     if (Flags.onMobileDevice || !this.showSavedSearchSuggestions || inputId !== Utils.mainSearchBoxId) {
       return [];
@@ -91,7 +96,6 @@ class AwesompleteWrapper {
     const savedSearchSuggestions = this.getSavedSearchesForAutocompleteList(inputId, prefix);
 
     prefix = prefix.replace(/^[-*]*/, "");
-
     fetch(`https://ac.rule34.xxx/autocomplete.php?q=${prefix}`)
       .then((response) => {
         if (response.ok) {
@@ -100,7 +104,6 @@ class AwesompleteWrapper {
         throw new Error(response.status);
       })
       .then((suggestions) => {
-
         const mergedSuggestions = Utils.addCustomTagsToAutocompleteList(JSON.parse(suggestions), prefix);
 
         awesomplete.list = mergedSuggestions.concat(savedSearchSuggestions);
@@ -112,7 +115,7 @@ class AwesompleteWrapper {
    * @returns {String}
    */
   getCurrentTag(input) {
-    return this.getLastTag(input.value.slice(0, input.selectionStart));
+    return this.getLastTag(input.value.slice(0, input.selectionStart || 0));
   }
 
   /**

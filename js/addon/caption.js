@@ -593,10 +593,7 @@ class Caption {
    * @param {Function} onProblematicTagsCorrected
    */
   correctAllProblematicTagsFromThumb(thumb, onProblematicTagsCorrected) {
-    fetch(Utils.getPostPageURL(thumb.id))
-      .then((response) => {
-        return response.text();
-      })
+    PostPage.fetch(thumb.id)
       .then((html) => {
         const tagCategoryMap = this.getTagCategoryMapFromPostPage(html);
 

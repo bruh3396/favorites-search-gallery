@@ -1,27 +1,12 @@
 class GalleryModel {
-  /**
-   * @type {{
-   *   SHOWING_CONTENT_ON_HOVER: 0,
-   *   IN_GALLERY: 1,
-   *   IDLE: 2
-   * }}
-   */
-  static states = {
-    SHOWING_CONTENT_ON_HOVER: 0,
-    IN_GALLERY: 1,
-    IDLE: 2
-  };
-
-  /** @type {FavoritesGalleryState} */
-  currentState;
-  /** @type {Number} */
-  currentIndex;
-  /** @type {Number} */
-  currentSearchPageNumber;
   /** @type {ThumbSelector} */
   thumbSelector;
   /** @type {SearchPageLoader} */
   searchPageLoader;
+  /** @type {GalleryStateMachine} */
+  stateMachine;
+  /** @type {Number} */
+  currentIndex;
   /** @type {Boolean} */
   recentlyExitedGallery;
 
@@ -32,52 +17,20 @@ class GalleryModel {
 
   /** @type {Boolean} */
   get currentlyViewingVideo() {
-    return this.currentState === GalleryModel.states.IN_GALLERY && this.currentThumb !== undefined && Utils.isVideo(this.currentThumb);
+    return this.currentState === GalleryStateMachine.states.IN_GALLERY && this.currentThumb !== undefined && Utils.isVideo(this.currentThumb);
+  }
+
+  /** @type {FavoritesGalleryState} */
+  get currentState() {
+    return this.stateMachine.currentState;
   }
 
   constructor() {
     this.thumbSelector = new ThumbSelector();
     this.searchPageLoader = new SearchPageLoader();
-    this.changeState(this.getStartState());
+    this.stateMachine = new GalleryStateMachine();
     this.currentIndex = 0;
     this.recentlyExitedGallery = false;
-  }
-
-  /**
-   * @returns {FavoritesGalleryState}
-   */
-  getStartState() {
-    if (Preferences.showOnHover.value) {
-      return GalleryModel.states.SHOWING_CONTENT_ON_HOVER;
-    }
-    return GalleryModel.states.IDLE;
-  }
-
-  /**
-   * @param {FavoritesGalleryState} state
-   */
-  changeState(state) {
-    this.currentState = state;
-    this.onStateChange();
-  }
-
-  onStateChange() {
-    switch (this.currentState) {
-      case GalleryModel.states.IDLE:
-        Utils.forceHideCaptions(false);
-        break;
-
-      case GalleryModel.states.SHOWING_CONTENT_ON_HOVER:
-        Utils.forceHideCaptions(true);
-        break;
-
-      case GalleryModel.states.IN_GALLERY:
-        Utils.forceHideCaptions(true);
-        break;
-
-      default:
-        break;
-    }
   }
 
   /**
@@ -85,11 +38,11 @@ class GalleryModel {
    */
   enterGallery(thumb) {
     this.currentIndex = this.thumbSelector.getIndexFromThumb(thumb);
-    this.changeState(GalleryModel.states.IN_GALLERY);
+    this.stateMachine.changeState(GalleryStateMachine.states.IN_GALLERY);
   }
 
   exitGallery() {
-    this.changeState(GalleryModel.states.IDLE);
+    this.stateMachine.changeState(GalleryStateMachine.states.IDLE);
     this.recentlyExitedGallery = true;
     setTimeout(() => {
       this.recentlyExitedGallery = false;
@@ -97,15 +50,15 @@ class GalleryModel {
   }
 
   showContentOnHover() {
-    this.changeState(GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
+    this.stateMachine.changeState(GalleryStateMachine.states.SHOWING_CONTENT_ON_HOVER);
   }
 
   toggleShowContentOnHover() {
-    if (this.currentState === GalleryModel.states.SHOWING_CONTENT_ON_HOVER) {
-      this.changeState(GalleryModel.states.IDLE);
+    if (this.currentState === GalleryStateMachine.states.SHOWING_CONTENT_ON_HOVER) {
+      this.stateMachine.changeState(GalleryStateMachine.states.IDLE);
       return;
     }
-    this.changeState(GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
+    this.stateMachine.changeState(GalleryStateMachine.states.SHOWING_CONTENT_ON_HOVER);
   }
 
   /**
@@ -113,7 +66,7 @@ class GalleryModel {
    * @returns {HTMLElement | undefined}
    */
   navigate(direction) {
-    this.searchPageLoader.preloadSearchPages();
+    this.preloadSearchPages();
     this.currentIndex += Types.isForwardNavigationKey(direction) ? 1 : -1;
     return this.currentThumb;
   }

@@ -1,4 +1,4 @@
-class FavoritesSecondaryController {
+class FavoritesDisplayController {
   /** @type {FavoritesModel} */
   model;
   /** @type {FavoritesView} */

@@ -6,7 +6,11 @@ class Settings {
   static minResultsPerPage = 1;
   static maxResultsPerPage = 10_000;
   static resultsPerPageStep = 25;
-  static maxPageNumberButtonCount = 5;
+  static desktopMaxPageNumberButtonCount = 7;
+  static mobileMaxPageNumberButtonCount = 5;
+  static get maxPageNumberButtonCount() {
+    return Flags.onMobileDevice ? Settings.mobileMaxPageNumberButtonCount : Settings.desktopMaxPageNumberButtonCount;
+  }
   /** @type {MediaExtension} */
   static defaultExtension = "jpg";
   static galleryMenuEnabled = false;
@@ -14,4 +18,10 @@ class Settings {
   static contentRightMargin = 15;
   static infiniteScrollBatchSize = 50;
   static infiniteScrollObserverRootMargin = "75%";
+  static apiTimeout = 3500;
+  static throttledMetadataAPIRequestDelay = 5;
+  static throttledExtensionAPIRequestDelay = 2;
+  static postPageRequestDelayWhileFetchingFavorites = 2500;
+  static postPageRequestDelayAfterFavoritesLoaded = 350;
+  static searchPagePostPageRequestDelay = 275;
 }

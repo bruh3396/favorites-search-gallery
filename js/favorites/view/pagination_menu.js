@@ -58,7 +58,7 @@ class FavoritesPaginationMenu {
    */
   update(parameters) {
     const nextPageButton = document.getElementById("next-page");
-    const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= Settings.maxPageNumberButtonCount &&
+    const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= Settings.desktopMaxPageNumberButtonCount &&
       nextPageButton !== null && nextPageButton instanceof HTMLButtonElement && !nextPageButton.disabled;
 
     if (atMaxPageNumberButtons) {
@@ -82,29 +82,18 @@ class FavoritesPaginationMenu {
    * @param {Number} finalPageNumber
    */
   createNumberTraversalButtons(currentPageNumber, finalPageNumber) {
-    let numberOfButtonsCreated = 0;
+    const pageNumbers = Utils.getNumbersAround(currentPageNumber, Settings.maxPageNumberButtonCount, 1, finalPageNumber);
 
-    for (let i = currentPageNumber; i <= finalPageNumber && numberOfButtonsCreated < Settings.maxPageNumberButtonCount; i += 1) {
-      numberOfButtonsCreated += 1;
-      this.createNumberTraversalButton(currentPageNumber, i, "beforeend");
-    }
-
-    if (numberOfButtonsCreated >= Settings.maxPageNumberButtonCount) {
-      return;
-    }
-
-    for (let j = currentPageNumber - 1; j >= 1 && numberOfButtonsCreated < Settings.maxPageNumberButtonCount; j -= 1) {
-      numberOfButtonsCreated += 1;
-      this.createNumberTraversalButton(currentPageNumber, j, "afterbegin");
+    for (const pageNumber of pageNumbers) {
+      this.createNumberTraversalButton(currentPageNumber, pageNumber);
     }
   }
 
   /**
    * @param {Number} currentPageNumber
    * @param {Number} pageNumber
-   * @param {InsertPosition} position
    */
-  createNumberTraversalButton(currentPageNumber, pageNumber, position) {
+  createNumberTraversalButton(currentPageNumber, pageNumber) {
     const button = document.createElement("button");
     const selected = currentPageNumber === pageNumber;
 
@@ -119,7 +108,7 @@ class FavoritesPaginationMenu {
         bubbles: true
       }));
     };
-    this.container.insertAdjacentElement(position, button);
+    this.container.appendChild(button);
     button.textContent = String(pageNumber);
   }
 

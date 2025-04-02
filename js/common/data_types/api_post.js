@@ -1,4 +1,5 @@
 class APIPost {
+  /** @type {DOMParser} */
   static parser = new DOMParser();
 
   /**
@@ -34,16 +35,34 @@ class APIPost {
   }
 
   /**
-   * @param {HTMLElement[]} thumbs
-   * @returns {Promise<APIThumb[]>}
+   * @param {String} id
+   * @param {AbortController | undefined} abortController
+   * @returns {Promise<APIPost>}
    */
-  static fetchAll(thumbs) {
-    return Promise.all(thumbs.map((thumb) => {
-      return new APIPost(thumb.id).fetch().then((apiPost) => ({
-        apiPost,
-        thumb
-      }));
-    }));
+  static async fetch(id, abortController = undefined) {
+    const apiPost = new APIPost(id);
+    const response = await fetch(apiPost.url, {
+      signal: abortController === undefined ? null : abortController.signal
+    });
+    const html = await response.text();
+    const dom = APIPost.parser.parseFromString(html, "text/html");
+
+    apiPost.populate(dom.querySelector("post"));
+    return apiPost;
+  }
+
+  /**
+   * @param {String} id
+   * @returns {Promise<APIPost>}
+   */
+  static fetchWithTimeout(id) {
+    const abortController = new AbortController();
+    const apiPromise = APIPost.fetch(id, abortController);
+    return Utils.withTimeout(apiPromise, Settings.apiTimeout)
+      .catch(() => {
+        abortController.abort();
+        return PostPage.fetchAPIPost(id);
+      });
   }
 
   /** @type {String} */
@@ -93,24 +112,13 @@ class APIPost {
   }
 
   /**
-   * @returns {Promise<APIPost>}
-   */
-  async fetch() {
-    const response = await fetch(this.url);
-    const html = await response.text();
-    const dom = APIPost.parser.parseFromString(html, "text/html");
-
-    this.populate(dom.querySelector("post"));
-    return this;
-  }
-
-  /**
    * @param {HTMLElement | null} post
    */
   populate(post) {
     if (post === null) {
       return;
     }
+
     this.height = APIPost.getNumber("height", post);
     this.score = APIPost.getNumber("score", post);
     this.fileURL = APIPost.getString("file_url", post);
@@ -133,7 +141,7 @@ class APIPost {
     this.hasComments = APIPost.getBoolean("has_comments", post);
     this.previewWidth = APIPost.getNumber("preview_width", post);
     this.previewHeight = APIPost.getNumber("preview_height", post);
-    this.extension = ImageUtils.getExtensionFromImageURL(this.fileURL);
+    this.extension = ImageUtils.getExtensionFromFileURL(this.fileURL);
     this.isEmpty = false;
   }
 }

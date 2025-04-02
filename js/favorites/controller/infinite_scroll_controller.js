@@ -1,4 +1,4 @@
-class FavoritesInfiniteScrollController extends FavoritesSecondaryController {
+class FavoritesInfiniteScrollController extends FavoritesDisplayController {
   /** @type {FavoritesPageBottomObserver} */
   pageBottomObserver;
 

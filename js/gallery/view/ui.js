@@ -70,7 +70,7 @@ class GalleryUI {
     Utils.waitForAllThumbnailsToLoad()
       .then(() => {
         if (this.lastVisitedThumb !== null && this.usingColumnLayout) {
-          this.scrollToNextThumb(this.lastVisitedThumb);
+          this.scrollToThumb(this.lastVisitedThumb);
         }
       });
   }
@@ -130,7 +130,7 @@ class GalleryUI {
     if (this.usingColumnLayout || Flags.usingFirefox) {
       return;
     }
-    this.scrollToNextThumb(thumb);
+    this.scrollToThumb(thumb);
   }
 
   /**
@@ -197,14 +197,7 @@ class GalleryUI {
   /**
    * @param {HTMLElement} thumb
    */
-  scrollToNextThumb(thumb) {
-    const previousThumb = thumb.previousElementSibling;
-    const nextThumb = thumb.nextElementSibling;
-
-    if (!(previousThumb instanceof HTMLElement) || !(nextThumb instanceof HTMLElement)) {
-      return;
-    }
-
+  scrollToThumb(thumb) {
     thumb.scrollIntoView({
       behavior: "smooth",
       block: "center"

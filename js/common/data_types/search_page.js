@@ -1,23 +1,26 @@
-class SearchPageUtils {
+class SearchPage {
+  /** @type {DOMParser} */
+  static parser = new DOMParser();
+
   /**
    * @param {HTMLElement[]} thumbs
    */
   static prepareThumbs(thumbs) {
     for (const thumb of thumbs) {
-      SearchPageUtils.prepareThumb(thumb);
+      SearchPage.prepareThumb(thumb);
     }
   }
 
   /**
    * @param {HTMLElement} thumb
    */
-  static async prepareThumb(thumb) {
+  static prepareThumb(thumb) {
     Utils.prepareSearchPageThumb(thumb);
-    const apiPost = await new APIPost(thumb.id).fetch();
-
-    Extensions.set(thumb.id, apiPost.extension);
-    SearchPageUtils.correctMediaTags(thumb, apiPost);
-
+    APIPost.fetchWithTimeout(thumb.id)
+      .then((apiPost) => {
+        Extensions.set(thumb.id, apiPost.extension);
+        SearchPage.correctMediaTags(thumb, apiPost);
+      });
   }
 
   /**
@@ -35,9 +38,9 @@ class SearchPageUtils {
     const documentThumb = document.getElementById(thumb.id);
 
     if (isImage) {
-      SearchPageUtils.removeAnimatedTags(tagSet);
-      SearchPageUtils.removeAnimatedAttributes(thumb);
-      SearchPageUtils.removeAnimatedAttributes(documentThumb);
+      SearchPage.removeAnimatedTags(tagSet);
+      SearchPage.removeAnimatedAttributes(thumb);
+      SearchPage.removeAnimatedAttributes(documentThumb);
     } else if (isVideo) {
       tagSet.add("video");
     } else if (isGif) {
@@ -74,5 +77,46 @@ class SearchPageUtils {
     }
     image.classList.remove("video");
     image.classList.remove("gif");
+  }
+
+  /** @type {String} */
+  html;
+  /** @type {HTMLElement[]} */
+  thumbs;
+  /** @type {HTMLElement | null} */
+  paginator;
+  /** @type {Set<String>} */
+  ids;
+  /** @type {Number} */
+  pageNumber;
+
+  /** @type {Boolean} */
+  get isEmpty() {
+    return this.thumbs.length === 0;
+  }
+
+  /** @type {Boolean} */
+  get isLastPage() {
+    return this.thumbs.length < 42;
+  }
+
+  /** @type {Boolean} */
+  get isFirstPage() {
+    return this.pageNumber === 0;
+  }
+
+  /**
+   * @param {Number} pageNumber
+   * @param {String} html
+   */
+  constructor(pageNumber, html) {
+    const dom = SearchPage.parser.parseFromString(html, "text/html");
+
+    this.html = html;
+    this.thumbs = Array.from(dom.querySelectorAll(".thumb"));
+    this.pageNumber = pageNumber;
+    this.paginator = dom.getElementById("paginator");
+    this.ids = new Set(this.thumbs.map(thumb => thumb.id));
+    SearchPage.prepareThumbs(this.thumbs);
   }
 }

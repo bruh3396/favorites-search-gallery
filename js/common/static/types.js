@@ -51,6 +51,8 @@ class Types {
 
   /** @typedef {{apiPost: APIPost, thumb: HTMLElement}} APIThumb */
 
+  /** @typedef {{label: String, value: String, type: String}} AwesompleteSuggestion */
+
   /**
    * @template T
    *  @typedef {{

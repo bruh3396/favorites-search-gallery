@@ -1,45 +1,6 @@
 class PostMetadata {
-  /** @type {Map<String, PostMetadata>} */
-  static allMetadata = new Map();
   /** @type {Set<String>} */
   static pendingRequests = new Set();
-  static parser = new DOMParser();
-  /** @type {PostMetadata[]} */
-  static missingMetadataFetchQueue = [];
-  /** @type {PostMetadata[]} */
-  static deletedPostFetchQueue = [];
-  static currentlyFetchingFromQueue = false;
-  static allFavoritesLoaded = false;
-  static fetchDelay = {
-    normal: 2,
-    deleted: 300
-  };
-  static postStatisticsRegex = /Posted:\s*(\S+\s\S+).*Size:\s*(\d+)x(\d+).*Rating:\s*(\S+).*Score:\s*(\d+)/gm;
-  static async fetchAllMissingMetadata() {
-    if (PostMetadata.currentlyFetchingFromQueue) {
-      return;
-    }
-    PostMetadata.currentlyFetchingFromQueue = true;
-
-    while (PostMetadata.missingMetadataFetchQueue.length > 0) {
-      const metadata = this.missingMetadataFetchQueue.pop();
-
-      if (metadata === undefined) {
-        continue;
-      }
-
-      if (metadata.postIsDeleted) {
-        metadata.populateMetadataFromPost();
-      } else {
-        metadata.fetchMetadataFromAPI()
-          .then(() => {
-            Events.favorites.missingMetadata.emit(metadata.id);
-          });
-      }
-      await Utils.sleep(metadata.fetchDelay);
-    }
-    PostMetadata.currentlyFetchingFromQueue = false;
-  }
 
   /**
    * @param {String} rating
@@ -59,19 +20,11 @@ class PostMetadata {
     }[rating] || 4;
   }
 
-  static {
-    Utils.addStaticInitializer(() => {
-      if (Flags.onFavoritesPage) {
-        window.addEventListener("favoritesLoaded", () => {
-          PostMetadata.allFavoritesLoaded = true;
-          PostMetadata.missingMetadataFetchQueue = PostMetadata.missingMetadataFetchQueue.concat(PostMetadata.deletedPostFetchQueue);
-          PostMetadata.fetchAllMissingMetadata();
-        }, {
-          once: true
-        });
-      }
-    });
+  /** @type {Boolean} */
+  static get tooManyPendingRequests() {
+    return PostMetadata.pendingRequests.size > 200;
   }
+
   /** @type {String} */
   id;
   /** @type {Number} */
@@ -92,11 +45,6 @@ class PostMetadata {
   /** @type {String} */
   get postURL() {
     return Utils.getPostPageURL(this.id);
-  }
-
-  /** @type {Number} */
-  get fetchDelay() {
-    return this.postIsDeleted ? PostMetadata.fetchDelay.deleted : PostMetadata.fetchDelay.normal;
   }
 
   /** @type {Boolean} */
@@ -135,95 +83,65 @@ class PostMetadata {
     this.lastChangedTimestamp = 0;
     this.rating = 4;
     this.postIsDeleted = false;
-    this.populateMetadata(record);
-    this.addInstanceToAllMetadata();
+    this.populate(record);
   }
 
   /**
    * @param {FavoritesDatabaseMetadataRecord | undefined | null} record
    */
-  populateMetadata(record) {
-    const databaseRecordHasNoMetadata = record === null;
-    const databaseRecordDoesNotExist = record === undefined;
+  async populate(record) {
+    const recordHasNoMetadata = record === null;
+    const recordDoesNotExist = record === undefined;
+    const recordIsValid = !recordHasNoMetadata && !recordDoesNotExist;
 
-    if (databaseRecordDoesNotExist) {
-      this.fetchMetadataFromAPI();
+    if (recordIsValid) {
+      this.populateMetadataFromRecord(record);
       return;
     }
+    const apiPost = await this.fetchPost();
 
-    if (databaseRecordHasNoMetadata) {
-      this.addInstanceToMissingMetadataQueue();
-      PostMetadata.fetchAllMissingMetadata();
-      return;
-    }
-    this.populateMetadataFromRecord(record);
-    const databaseRecordHasEmptyMetadata = this.isEmpty;
+    Extensions.set(this.id, apiPost.extension);
+    this.populateMetadataFromAPIPost(apiPost);
+    Post.validateExtractedTagsAgainstAPI(this.id, apiPost.tags, apiPost.fileURL);
 
-    if (databaseRecordHasEmptyMetadata) {
-      this.addInstanceToMissingMetadataQueue();
-      PostMetadata.fetchAllMissingMetadata();
+    if (recordHasNoMetadata) {
+      Events.favorites.foundMissingMetadata.emit(this.id);
     }
   }
 
-  fetchMetadataFromAPI() {
-    if (PostMetadata.pendingRequests.size > 200) {
-      this.addInstanceToMissingMetadataQueue();
-      return Utils.sleep(0);
+  /**
+   * @returns {Promise<APIPost>}
+   */
+  async fetchPost() {
+    if (PostMetadata.tooManyPendingRequests) {
+      await FetchQueues.postMetadata.wait();
     }
     PostMetadata.pendingRequests.add(this.id);
-    return new APIPost(this.id).fetch()
-      .then((apiPost) => {
-        PostMetadata.pendingRequests.delete(this.id);
-        this.checkIfEmpty(apiPost);
-        this.populateMetadataFromAPI(apiPost);
-        Extensions.set(this.id, apiPost.extension);
-      }).catch((error) => {
-        this.handleAPIFailure(error);
-      });
-  }
+    let apiPost = await APIPost.fetch(this.id);
 
-  /**
-   * @param {APIPost} apiPost
-   */
-  checkIfEmpty(apiPost) {
     if (apiPost.isEmpty) {
-      // @ts-ignore
-      throw new Error(`metadata is null - ${apiPost.url}`, {
-        cause: "DeletedMetadata"
-      });
+      this.postIsDeleted = true;
+      apiPost = await PostPage.fetchAPIPost(this.id);
     }
+    PostMetadata.pendingRequests.delete(this.id);
+    return apiPost;
   }
 
   /**
    * @param {APIPost} apiPost
    */
-  populateMetadataFromAPI(apiPost) {
+  populateMetadataFromAPIPost(apiPost) {
     this.width = apiPost.width;
     this.height = apiPost.height;
     this.score = apiPost.score;
     this.rating = PostMetadata.encodeRating(apiPost.rating);
     this.creationTimestamp = Date.parse(apiPost.createdAt);
     this.lastChangedTimestamp = apiPost.change;
-    Post.validateExtractedTagsAgainstAPI(this.id, apiPost.tags, apiPost.fileURL);
   }
 
   /**
-   * @param {any} error
+   * @param {FavoritesDatabaseMetadataRecord} record
    */
-  handleAPIFailure(error) {
-    if (error.cause === "DeletedMetadata") {
-      this.postIsDeleted = true;
-      PostMetadata.deletedPostFetchQueue.push(this);
-    } else if (error.message === "Failed to fetch") {
-      PostMetadata.missingMetadataFetchQueue.push(this);
-    } else {
-      console.error(error);
-    }
-  }
-
-/**
- * @param {FavoritesDatabaseMetadataRecord} record
- */
   populateMetadataFromRecord(record) {
     this.width = record.width;
     this.height = record.height;
@@ -232,44 +150,6 @@ class PostMetadata {
     this.creationTimestamp = record.create;
     this.lastChangedTimestamp = record.change;
     this.postIsDeleted = record.deleted;
-  }
-
-  populateMetadataFromPost() {
-    fetch(this.postURL)
-      .then((response) => {
-        return response.text();
-      })
-      .then((html) => {
-        const dom = PostMetadata.parser.parseFromString(html, "text/html");
-        const statistics = dom.getElementById("stats");
-
-        if (statistics === null || statistics.textContent === null) {
-          return;
-        }
-        const textContent = Utils.replaceLineBreaks(statistics.textContent.trim(), " ");
-        const match = PostMetadata.postStatisticsRegex.exec(textContent);
-
-        PostMetadata.postStatisticsRegex.lastIndex = 0;
-
-        if (!match) {
-          return;
-        }
-        this.width = parseInt(match[2]);
-        this.height = parseInt(match[3]);
-        this.score = parseInt(match[5]);
-        this.rating = PostMetadata.encodeRating(match[4]);
-        this.creationTimestamp = Date.parse(match[1]);
-        this.lastChangedTimestamp = this.creationTimestamp / 1000;
-
-        if (PostMetadata.allFavoritesLoaded) {
-          dispatchEvent(new CustomEvent("missingMetadata", {
-            detail: this.id
-          }));
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   }
 
   /**
@@ -308,16 +188,6 @@ class PostMetadata {
         break;
     }
     return result;
-  }
-
-  addInstanceToAllMetadata() {
-    if (!PostMetadata.allMetadata.has(this.id)) {
-      PostMetadata.allMetadata.set(this.id, this);
-    }
-  }
-
-  addInstanceToMissingMetadataQueue() {
-    PostMetadata.missingMetadataFetchQueue.push(this);
   }
 
   /**

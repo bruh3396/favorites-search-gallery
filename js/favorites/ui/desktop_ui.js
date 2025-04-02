@@ -9,6 +9,8 @@ class FavoritesMenuDesktopUI {
       {id: "invert-button", parentId: "left-favorites-panel-top-row", textContent: "Invert", title: "Show results not matched by latest search", enabled: true, eventEmitter: Events.favorites.invertButtonClicked},
       {id: "clear-button", parentId: "left-favorites-panel-top-row", textContent: "Clear", title: "Empty the search box", action: "clear", enabled: true},
       {id: "download-button", parentId: "left-favorites-panel-top-row", textContent: "Download", title: "Download search results", enabled: false, eventEmitter: Events.favorites.downloadButtonClicked},
+      {id: "subset-button", parentId: "left-favorites-panel-top-row", textContent: "Set Subset", title: "Make the current search results the entire set of results to search from", enabled: false, eventEmitter: Events.favorites.searchSubset},
+      {id: "stop-subset-button", parentId: "left-favorites-panel-top-row", textContent: "Stop Subset", title: "Stop subset and return entire set of results to all favorites", enabled: false, eventEmitter: Events.favorites.stopSearchSubset},
       {id: "reset-button", parentId: "left-favorites-panel-top-row", textContent: "Reset", title: "Delete cached favorites and reset preferences", action: "reset", enabled: true}
     ],
     /** @type {ElementTemplateParams<Boolean>[]} */

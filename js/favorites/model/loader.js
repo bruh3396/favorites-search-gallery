@@ -5,6 +5,10 @@ class FavoritesLoader {
   database;
   /** @type {Post[]} */
   allFavorites;
+  /** @type {Boolean} */
+  useSearchSubset = false;
+  /** @type {Post[]} */
+  subsetFavorites;
 
   /** @type {Set<String>} */
   get allFavoriteIds() {
@@ -13,6 +17,7 @@ class FavoritesLoader {
 
   constructor() {
     this.allFavorites = [];
+    this.subsetFavorites = [];
     this.fetcher = new FavoritesFetcher();
     this.database = new FavoritesDatabase();
   }
@@ -58,7 +63,7 @@ class FavoritesLoader {
    * @returns {Post[]}
    */
   getAllFavorites() {
-    return this.allFavorites;
+    return this.useSearchSubset ? this.subsetFavorites : this.allFavorites;
   }
 
   /**
@@ -89,5 +94,18 @@ class FavoritesLoader {
    */
   deleteFavorite(id) {
     return this.database.deleteFavorite(id);
+  }
+
+  /**
+   * @param {Post[]} searchResults
+   */
+  setSearchSubset(searchResults) {
+    this.useSearchSubset = true;
+    this.subsetFavorites = searchResults;
+  }
+
+  stopSearchSubset() {
+    this.useSearchSubset = false;
+    this.subsetFavorites = [];
   }
 }

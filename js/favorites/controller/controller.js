@@ -3,17 +3,19 @@ class FavoritesController {
   model;
   /** @type {FavoritesView} */
   view;
+  /** @type {FavoritesMenuController} */
+  menuController;
   /** @type {FavoritesPaginationController} */
   paginationController;
   /** @type {FavoritesInfiniteScrollController} */
   infiniteScrollController;
 
-  /** @type {FavoritesSecondaryController} */
-  get secondaryController() {
+  /** @type {FavoritesDisplayController} */
+  get displayController() {
     return this.model.infiniteScroll ? this.infiniteScrollController : this.paginationController;
   }
 
-  /** @type {FavoritesSecondaryController[]} */
+  /** @type {FavoritesDisplayController[]} */
   get secondaryControllers() {
     return [this.infiniteScrollController, this.paginationController];
   }
@@ -24,6 +26,7 @@ class FavoritesController {
     }
     this.model = new FavoritesModel();
     this.view = new FavoritesView();
+    this.menuController = new FavoritesMenuController(this);
     this.paginationController = new FavoritesPaginationController(this.model, this.view);
     this.infiniteScrollController = new FavoritesInfiniteScrollController(this.model, this.view);
     this.addEventListeners();
@@ -31,100 +34,15 @@ class FavoritesController {
   }
 
   addEventListeners() {
-    this.addEventListenersToMainMenu();
     this.addEventListenersToPaginationMenu();
     this.addGlobalEventListeners();
     this.addKeyDownEventListeners();
   }
 
-  addEventListenersToMainMenu() {
-    const menu = document.getElementById("favorites-search-gallery-menu");
-
-    if (menu === null) {
-      return;
-    }
-    // @ts-ignore
-    menu.addEventListener("controller", (/** @type {CustomEvent} */ event) => {
-      if (!(event.target instanceof HTMLElement)) {
-        return;
-      }
-      const action = event.target.dataset.action || "none";
-
-      // @ts-ignore
-      if (typeof this[action] === "function") {
-        // @ts-ignore
-        this[action](event.detail);
-      }
-    });
-    this.addButtonEventListenersToMainMenu();
-    this.addCheckboxEventListenersToMainMenu();
-    this.addNumericEventListenersToMainMenu();
-    this.addOtherEventListenersToMainMenu();
-  }
-
-  addOtherEventListenersToMainMenu() {
-    Events.favorites.sortingMethodChanged.on((sortingMethod) => {
-      this.model.setSortingMethod(sortingMethod);
-      this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
-    });
-    Events.favorites.layoutChanged.on((layout) => {
-      this.view.changeLayout(layout);
-    });
-    Events.favorites.performanceProfileChanged.on(() => {
-      window.location.reload();
-    });
-    Events.favorites.allowedRatingsChanged.on((allowedRatings) => {
-      this.model.changeAllowedRatings(allowedRatings);
-      this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
-    });
-  }
-
-  addNumericEventListenersToMainMenu() {
-    Events.favorites.columnCountChanged.on((columnCount) => {
-      this.view.updateColumnCount(columnCount);
-      Events.favorites.favoritesResized.emit();
-    });
-    Events.favorites.rowSizeChanged.on((rowSize) => {
-      this.view.updateRowSize(rowSize);
-      Events.favorites.favoritesResized.emit();
-    });
-    Events.favorites.resultsPerPageChanged.on((resultsPerPage) => {
-      this.model.changeResultsPerPage(resultsPerPage);
-      this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
-    });
-  }
-
-  addCheckboxEventListenersToMainMenu() {
-    Events.favorites.sortAscendingToggled.on((value) => {
-      this.model.toggleSortAscending(value);
-      this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
-    });
-    Events.favorites.blacklistToggled.on((value) => {
-      this.model.toggleBlacklist(value);
-      this.showSearchResults(this.model.getSearchResultsFromPreviousQuery());
-    });
-    Events.favorites.infiniteScrollToggled.on((value) => {
-      this.toggleInfiniteScroll(value);
-    });
-  }
-
-  addButtonEventListenersToMainMenu() {
-    Events.favorites.shuffleButtonClicked.on(() => {
-      this.showSearchResults(this.model.getShuffledSearchResults());
-    });
-    Events.favorites.downloadButtonClicked.on(() => {
-      this.model.downloadSearchResults();
-    });
-    Events.favorites.invertButtonClicked.on(() => {
-      this.model.invertSearchResults();
-      this.showSearchResults(this.model.getLatestSearchResults());
-    });
-  }
-
   addEventListenersToPaginationMenu() {
     // @ts-ignore
     this.view.getPaginationMenu().addEventListener("controller", (/** @type {CustomEvent} */event) => {
-      this.secondaryController.handlePaginationMenuEvent(event);
+      this.displayController.handlePaginationMenuEvent(event);
     });
   }
 
@@ -137,12 +55,12 @@ class FavoritesController {
 
   setupPageChangingInGallery() {
     Events.gallery.requestPageChange.on((direction) => {
-      this.secondaryController.handlePageChangeRequest(direction);
+      this.displayController.handlePageChangeRequest(direction);
     });
   }
 
   updateMissingMetadataWhenAvailable() {
-    Events.favorites.missingMetadata.on((id) => {
+    Events.favorites.foundMissingMetadata.on((id) => {
       this.model.updateMetadata(id);
     });
   }
@@ -185,7 +103,7 @@ class FavoritesController {
     Utils.inGallery()
       .then((inGallery) => {
         if (!inGallery) {
-          this.secondaryController.gotoAdjacentPage(direction);
+          this.displayController.gotoAdjacentPage(direction);
         }
       });
   }
@@ -270,7 +188,7 @@ class FavoritesController {
   onSearchResultsFound() {
     this.view.updateStatusWhileFetching(this.model.getLatestSearchResults().length, this.model.getAllFavorites().length);
     Events.favorites.newSearchResults.emit(this.model.getLatestSearchResults());
-    this.secondaryController.handleNewSearchResultsFound();
+    this.displayController.handleNewSearchResultsFound();
   }
 
   onSearchResultsFoundUsingPagination() {
@@ -305,14 +223,14 @@ class FavoritesController {
   showSearchResults(searchResults) {
     Events.favorites.newSearchResults.emit(searchResults);
     this.view.setMatchCount(searchResults.length);
-    this.secondaryController.showSearchResults(searchResults);
+    this.displayController.showSearchResults(searchResults);
   }
 
   /**
    * @param {String} id
    */
   findFavorite(id) {
-    this.secondaryController.findFavorite(id);
+    this.displayController.findFavorite(id);
   }
 
   /**

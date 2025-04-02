@@ -2,6 +2,7 @@ class Extensions {
   static {
     Utils.addStaticInitializer(Extensions.convertFromLocalStorageToIndexedDB);
     Utils.addStaticInitializer(Extensions.load);
+    Utils.addStaticInitializer(Extensions.findMissingExtensionsAfterFavoritesLoad);
   }
 
   /** @type {String} */
@@ -88,5 +89,35 @@ class Extensions {
       }
     }
     localStorage.removeItem("imageExtensions");
+  }
+
+  static findMissingExtensionsAfterFavoritesLoad() {
+    if (!Flags.onFavoritesPage) {
+      return;
+    }
+    Events.favorites.favoritesLoadedFromDatabase.on(async() => {
+      await Extensions.findMissingExtensions();
+    }, {
+      once: true
+    });
+  }
+
+  static async findMissingExtensions() {
+    for (const post of Array.from(Post.allPosts.values())) {
+      if (Extensions.has(post.id) || post.isAnimated) {
+        continue;
+      }
+      await FetchQueues.extensionRecovery.wait();
+      Extensions.findMissingExtension(post.id);
+    }
+  }
+
+  /**
+   * @param {String} id
+   */
+  static async findMissingExtension(id) {
+    const apiPost = await APIPost.fetch(id);
+
+    Extensions.set(id, apiPost.extension);
   }
 }

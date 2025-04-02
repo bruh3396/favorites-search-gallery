@@ -1,4 +1,4 @@
-class FavoritesPaginationController extends FavoritesSecondaryController {
+class FavoritesPaginationController extends FavoritesDisplayController {
   /**
    * @param {CustomEvent} event
    */

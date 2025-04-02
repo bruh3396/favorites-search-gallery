@@ -323,7 +323,7 @@ class VideoController {
    * @returns {String}
    */
   getVideoSource(thumb) {
-    return ImageUtils.getOriginalImageURL(thumb).replace("jpg", "mp4");
+    return ImageUtils.getOriginalImageURLWithoutExtension(thumb).replace("jpg", "mp4");
   }
 
   /**

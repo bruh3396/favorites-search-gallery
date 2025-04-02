@@ -1,6 +1,8 @@
 class ImageUtils {
   /** @type {RegExp} */
   static thumbnailSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
+  /** @type {RegExp} */
+  static imageSourceCleanupRegex = /^([^.]*\/\/)?(?:[^.]+\.)*rule34/;
 
   /**
    * @param {String} compressedSource
@@ -31,13 +33,24 @@ class ImageUtils {
   }
 
   /**
+   * @param {String} source
+   * @returns {String}
+   */
+  static cleanImageSource(source) {
+    return source.replace(ImageUtils.imageSourceCleanupRegex, "$1rule34");
+  }
+
+  /**
    * @param {HTMLElement} thumb
    * @returns {String}
    */
-  static getOriginalImageURL(thumb) {
+  static getOriginalImageURLWithoutExtension(thumb) {
     const image = Utils.getImageFromThumb(thumb);
-    const thumbURL = image === null ? "" : image.src;
-    return ImageUtils.getOriginalImageURLFromIdAndThumbURL(thumb.id, thumbURL);
+
+    if (image === null) {
+      return "";
+    }
+    return ImageUtils.getOriginalImageURLFromIdAndThumbURL(thumb.id, image.src);
   }
 
   /**
@@ -46,7 +59,7 @@ class ImageUtils {
    */
   static async getOriginalImageURLWithExtension(thumb) {
     const extension = await ImageUtils.getImageExtensionFromThumb(thumb);
-    return ImageUtils.getOriginalImageURL(thumb).replace(".jpg", `.${extension}`);
+    return ImageUtils.getOriginalImageURLWithoutExtension(thumb).replace(".jpg", `.${extension}`);
   }
 
   /**
@@ -66,7 +79,7 @@ class ImageUtils {
    * @param {String} imageURL
    * @returns {MediaExtension}
    */
-  static getExtensionFromImageURL(imageURL) {
+  static getExtensionFromFileURL(imageURL) {
     const match = (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL);
 
     if (match === null || !Types.isMediaExtension(match[1])) {
@@ -115,7 +128,7 @@ class ImageUtils {
    * @returns {Promise<MediaExtension>}
    */
   static fetchImageExtension(id) {
-    return new APIPost(id).fetch()
+    return APIPost.fetchWithTimeout(id)
       .then((apiPost) => {
         Extensions.set(id, apiPost.extension);
         return apiPost.extension;

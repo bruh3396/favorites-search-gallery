@@ -187,7 +187,7 @@ class GalleryController {
 
   setupGalleryStateResponder() {
     Events.favorites.inGalleryRequest.on(() => {
-      Events.gallery.inGalleryResponse.emit(this.model.currentState === GalleryModel.states.IN_GALLERY);
+      Events.gallery.inGalleryResponse.emit(this.model.currentState === GalleryStateMachine.states.IN_GALLERY);
     });
   }
 
@@ -393,9 +393,9 @@ class GalleryController {
    */
   executeFunctionBasedOnGalleryState({idle, hover, gallery}, args = undefined) {
     const executor = {
-      [GalleryModel.states.IDLE]: idle,
-      [GalleryModel.states.SHOWING_CONTENT_ON_HOVER]: hover,
-      [GalleryModel.states.IN_GALLERY]: gallery
+      [GalleryStateMachine.states.IDLE]: idle,
+      [GalleryStateMachine.states.SHOWING_CONTENT_ON_HOVER]: hover,
+      [GalleryStateMachine.states.IN_GALLERY]: gallery
     }[this.model.currentState];
 
     if (executor) {
@@ -516,7 +516,7 @@ class GalleryController {
   }
 
   preloadVisibleContent() {
-    if (this.model.currentState === GalleryModel.states.IN_GALLERY || this.visibleThumbTracker === null) {
+    if (this.model.currentState === GalleryStateMachine.states.IN_GALLERY || this.visibleThumbTracker === null) {
       return;
     }
     const thumbs = this.visibleThumbTracker.getVisibleThumbs();
@@ -562,6 +562,6 @@ class GalleryController {
 
   toggleShowContentOnHover() {
     this.model.toggleShowContentOnHover();
-    Events.gallery.showOnHover.emit(this.model.currentState === GalleryModel.states.SHOWING_CONTENT_ON_HOVER);
+    Events.gallery.showOnHover.emit(this.model.currentState === GalleryStateMachine.states.SHOWING_CONTENT_ON_HOVER);
   }
 }
