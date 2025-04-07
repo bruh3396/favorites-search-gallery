@@ -1,10 +1,10 @@
 class AutoplayController {
   static menuIconImageURLs = {
-    play: Utils.createObjectURLFromSvg(Icons.play),
-    pause: Utils.createObjectURLFromSvg(Icons.pause),
-    changeDirection: Utils.createObjectURLFromSvg(Icons.changeDirection),
-    changeDirectionAlt: Utils.createObjectURLFromSvg(Icons.changeDirectionAlt),
-    tune: Utils.createObjectURLFromSvg(Icons.tune)
+    play: Utils.createObjectURLFromSvg(SVGIcons.play),
+    pause: Utils.createObjectURLFromSvg(SVGIcons.pause),
+    changeDirection: Utils.createObjectURLFromSvg(SVGIcons.changeDirection),
+    changeDirectionAlt: Utils.createObjectURLFromSvg(SVGIcons.changeDirectionAlt),
+    tune: Utils.createObjectURLFromSvg(SVGIcons.tune)
   };
   static settings = {
     imageViewDuration: Preferences.autoplayImageDuration.value,
@@ -329,15 +329,7 @@ class AutoplayController {
     });
   }
 
-  /**
-   * @param {Boolean} forward
-   */
-  toggleDirection(forward) {
-    const directionHasNotChanged = forward === Preferences.autoplayForward.value;
-
-    if (directionHasNotChanged) {
-      return;
-    }
+  toggleDirection() {
     Preferences.autoplayForward.set(!Preferences.autoplayForward.value);
     this.ui.changeDirectionMask.container.classList.toggle("upper-right", Preferences.autoplayForward.value);
   }

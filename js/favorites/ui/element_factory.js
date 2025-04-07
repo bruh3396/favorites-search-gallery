@@ -73,7 +73,22 @@ class ElementFactory {
     checkbox.type = "checkbox";
     checkbox.dataset.action = template.action;
     parent.insertAdjacentElement(template.position, checkbox);
-    FavoritesUIController.registerCheckboxHotkey(template.hotkey, checkbox);
+
+    if (template.hotkey !== "" && template.eventEmitter !== null) {
+      Events.global.keydown.on(async(event) => {
+        if (event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
+          return;
+        }
+        const inGallery = await Utils.inGallery();
+
+        if (inGallery) {
+          return;
+        }
+        checkbox.checked = !checkbox.checked;
+        emitEvent();
+      });
+    }
+    // FavoritesUIController.registerCheckboxHotkey(template.hotkey, checkbox);
 
     if (template.preference === null) {
       checkbox.checked = template.defaultValue ? template.defaultValue : false;

@@ -8,20 +8,15 @@ class RatingFilter {
   /** @type {RatingElement} */
   safe;
 
-  /**
-   * @param {HTMLElement} container
-   */
-  constructor(container) {
-    this.create(container);
-  }
+  constructor() {
+    const ratingContainer = document.getElementById("rating-container");
 
-  /**
-   * @param {HTMLElement} container
-   */
-  create(container) {
-    this.createMainLabel(container);
-    container.appendChild(document.createElement("br"));
-    this.createFilter(container);
+    if (ratingContainer === null) {
+      return;
+    }
+    this.createMainLabel(ratingContainer);
+    ratingContainer.appendChild(document.createElement("br"));
+    this.createFilter(ratingContainer);
     this.changeRatingHTML(Preferences.allowedRatings.value);
     this.addEventListeners();
   }

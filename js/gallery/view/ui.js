@@ -8,7 +8,7 @@ class GalleryUI {
 
   /** @type {Boolean} */
   get usingColumnLayout() {
-    return Flags.onFavoritesPage && FavoritesLayoutObserver.currentLayout === "column";
+    return Flags.onFavoritesPage && document.querySelector("#favorites-search-gallery-content.column") !== null;
   }
 
   /**
@@ -159,9 +159,9 @@ class GalleryUI {
    */
   showAddedFavoriteStatus(status) {
     const icon = {
-      [Utils.addedFavoriteStatuses.alreadyAdded]: Icons.heartCheck,
-      [Utils.addedFavoriteStatuses.success]: Icons.heartPlus
-    }[status] || Icons.error;
+      [Utils.addedFavoriteStatuses.alreadyAdded]: SVGIcons.heartCheck,
+      [Utils.addedFavoriteStatuses.success]: SVGIcons.heartPlus
+    }[status] || SVGIcons.error;
 
     Utils.showFullscreenIcon(icon);
   }
@@ -172,11 +172,11 @@ class GalleryUI {
   showRemovedFavoriteStatus(status) {
     switch (status) {
       case Utils.removedFavoriteStatuses.success:
-        Utils.showFullscreenIcon(Icons.heartMinus);
+        Utils.showFullscreenIcon(SVGIcons.heartMinus);
         break;
 
       case Utils.removedFavoriteStatuses.removeNotAllowed:
-        Utils.showFullscreenIcon(Icons.warning, 1000);
+        Utils.showFullscreenIcon(SVGIcons.warning, 1000);
         setTimeout(() => {
           alert("The \"Remove Buttons\" option must be checked to use this hotkey");
         }, 20);
@@ -220,5 +220,16 @@ class GalleryUI {
         display: ${value ? "flex" : "none"} !important;
       }
       `, "gallery-menu-visibility");
+  }
+
+  /**
+   * @param {ImageCursor} cursor
+   */
+  setImageCursor(cursor) {
+    Utils.insertStyleHTML(`
+      #gallery-background {
+        cursor: ${cursor} !important;
+      }
+      `, "gallery-image-cursor");
   }
 }

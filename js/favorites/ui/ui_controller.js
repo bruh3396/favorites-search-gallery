@@ -4,7 +4,7 @@ class FavoritesUIController {
 
   static setup() {
     FavoritesUIController.setupMenuEvents();
-    FavoritesUIController.setupHotkeys();
+    // FavoritesUIController.setupHotkeys();
     FavoritesUIController.setupGlobalListeners();
   }
 
@@ -36,52 +36,52 @@ class FavoritesUIController {
   }
 
   static setupHotkeys() {
-    const processCheckboxHotkey = async(/** @type {FavoritesKeyboardEvent} */ event) => {
-      const hotkey = event.key;
-      const target = FavoritesUIController.hotkeys[hotkey];
+    // const processCheckboxHotkey = async(/** @type {FavoritesKeyboardEvent} */ event) => {
+    //   const hotkey = event.key;
+    //   const target = FavoritesUIController.hotkeys[hotkey];
 
-      if (!event.isHotkey || target === undefined || !(target instanceof HTMLInputElement)) {
-        return;
-      }
+    //   if (!event.isHotkey || target === undefined || !(target instanceof HTMLInputElement)) {
+    //     return;
+    //   }
 
-      const inGallery = await Utils.inGallery();
+    //   const inGallery = await Utils.inGallery();
 
-      if (inGallery) {
-        return;
-      }
+    //   if (inGallery) {
+    //     return;
+    //   }
 
-      target.checked = !target.checked;
-      // @ts-ignore
-      FavoritesUIController.invokeAction({
-        target
-      });
-    };
+    //   target.checked = !target.checked;
+    //   // @ts-ignore
+    //   FavoritesUIController.invokeAction({
+    //     target
+    //   });
+    // };
 
-    const processGeneralHotkeyEvent = async(/** @type {FavoritesKeyboardEvent} */ event) => {
-      const inGallery = await Utils.inGallery();
+    // const processGeneralHotkeyEvent = async(/** @type {FavoritesKeyboardEvent} */ event) => {
+    //   const inGallery = await Utils.inGallery();
 
-      if (inGallery || Types.isTypeableInput(event.originalEvent.target)) {
-        return;
-      }
+    //   if (inGallery || Types.isTypeableInput(event.originalEvent.target)) {
+    //     return;
+    //   }
 
-      switch (event.key.toLowerCase()) {
-        case "s":
-          event.originalEvent.stopImmediatePropagation();
-          event.originalEvent.stopPropagation();
-          setTimeout(() => {
-            Utils.focusMainSearchBox();
-          }, 0);
-          break;
+    //   switch (event.key.toLowerCase()) {
+    //     case "s":
+    //       event.originalEvent.stopImmediatePropagation();
+    //       event.originalEvent.stopPropagation();
+    //       setTimeout(() => {
+    //         Utils.focusMainSearchBox();
+    //       }, 0);
+    //       break;
 
-        default:
-          break;
-      }
-    };
+    //     default:
+    //       break;
+    //   }
+    // };
 
-    Events.global.keydown.on((event) => {
-      processCheckboxHotkey(event);
-      processGeneralHotkeyEvent(event);
-    });
+    // Events.global.keydown.on((event) => {
+    //   processCheckboxHotkey(event);
+    //   processGeneralHotkeyEvent(event);
+    // });
   }
 
   static setupGlobalListeners() {

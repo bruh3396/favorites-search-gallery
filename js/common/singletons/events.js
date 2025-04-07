@@ -53,6 +53,7 @@ class Events {
     /** @type {EventEmitter<MouseEvent>} */ click: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ mousedown: new EventEmitter(true),
     /** @type {EventEmitter<FavoritesKeyboardEvent>} */ keydown: new EventEmitter(true),
+    /** @type {EventEmitter<FavoritesKeyboardEvent>} */ keyup: new EventEmitter(true),
     /** @type {EventEmitter<FavoritesWheelEvent>} */ wheel: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ contextmenu: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ mousemove: new EventEmitter(true)
@@ -95,6 +96,9 @@ class Events {
     });
     document.addEventListener("keydown", (event) => {
       Events.global.keydown.emit(new FavoritesKeyboardEvent(event));
+    });
+    document.addEventListener("keyup", (event) => {
+      Events.global.keyup.emit(new FavoritesKeyboardEvent(event));
     });
     document.addEventListener("wheel", (event) => {
       Events.global.wheel.emit(new FavoritesWheelEvent(event));

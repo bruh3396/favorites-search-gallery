@@ -1,4 +1,4 @@
-class FavoritesMenuController {
+class FavoritesMenuEventListener {
   /** @type {FavoritesController} */
   controller;
 

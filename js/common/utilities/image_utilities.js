@@ -83,7 +83,7 @@ class ImageUtils {
     const match = (/\.(png|jpg|jpeg|gif|mp4)/g).exec(imageURL);
 
     if (match === null || !Types.isMediaExtension(match[1])) {
-      return Settings.defaultExtension;
+      return FavoritesSettings.defaultMediaExtension;
     }
     return match[1];
   }
@@ -100,7 +100,7 @@ class ImageUtils {
    * @param {HTMLElement} thumb
    * @returns {Promise<MediaExtension>}
    */
-  static getImageExtensionFromThumb(thumb) {
+  static async getImageExtensionFromThumb(thumb) {
     if (Utils.isVideo(thumb)) {
       return Promise.resolve("mp4");
     }
@@ -108,31 +108,107 @@ class ImageUtils {
     if (Utils.isGif(thumb)) {
       return Promise.resolve("gif");
     }
-    return ImageUtils.getImageExtensionFromId(thumb.id);
-  }
 
-  /**
-   * @param {String} id
-   * @returns {Promise<MediaExtension>}
-   */
-  static getImageExtensionFromId(id) {
-    if (Extensions.has(id)) {
-      // @ts-ignore
-      return Promise.resolve(Extensions.get(id));
+    if (Extensions.has(thumb.id)) {
+      return Promise.resolve(Extensions.get(thumb.id) || FavoritesSettings.defaultMediaExtension);
     }
-    return ImageUtils.fetchImageExtension(id);
+    let extension;
+
+    if (Flags.onFavoritesPage) {
+      extension = await ImageUtils.fetchImageExtension(thumb.id);
+    } else {
+      extension = await ImageUtils.bruteForceGetImageExtensionFromThumb(thumb);
+    }
+    return extension;
   }
 
   /**
    * @param {String} id
    * @returns {Promise<MediaExtension>}
    */
-  static fetchImageExtension(id) {
-    return APIPost.fetchWithTimeout(id)
+  static async fetchImageExtension(id) {
+    const apiPost = await APIPost.fetch(id);
+
+    Extensions.set(id, apiPost.extension);
+    return apiPost.extension;
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @param {String} thumb
+   */
+  static getThumbURL(thumb) {
+    const image = Utils.getImageFromThumb(thumb);
+
+    if (image === null) {
+      return "";
+    }
+    return image.src;
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {Promise<MediaExtension>}
+   */
+  static bruteForceGetImageExtensionFromThumb(thumb) {
+    return APIPost.fetchWithTimeout(thumb.id)
       .then((apiPost) => {
-        Extensions.set(id, apiPost.extension);
-        return apiPost.extension;
+        const extension = apiPost.extension;
+
+        Extensions.set(thumb.id, extension);
+        return extension;
+      })
+      .catch(async() => {
+        const extension = await ImageUtils.tryAllPossibleExtensions(thumb);
+
+        Extensions.set(thumb.id, extension);
+        return extension;
       });
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {Promise<MediaExtension>}
+   */
+  static async tryAllPossibleExtensions(thumb) {
+    const baseImageURL = ImageUtils.getBaseImageURL(thumb);
+
+    if (baseImageURL === "") {
+      return FavoritesSettings.defaultMediaExtension;
+    }
+
+    const possibleExtensions = ["jpg", "png", "jpeg"];
+
+    while (possibleExtensions.length > 0) {
+      const extension = possibleExtensions.shift();
+
+      if (extension === undefined) {
+        return FavoritesSettings.defaultMediaExtension;
+      }
+      await FetchQueues.bruteForceImageExtension.wait();
+      const imageURL = `${baseImageURL}.${extension}`;
+      const response = await fetch(imageURL);
+
+      if (response.ok && Types.isMediaExtension(extension)) {
+        return extension;
+      }
+    }
+    return FavoritesSettings.defaultMediaExtension;
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   * @returns {String}
+   */
+  static getBaseImageURL(thumb) {
+    const thumbURL = ImageUtils.getThumbURL(thumb);
+
+    if (thumbURL === "") {
+      return "";
+    }
+    return ImageUtils.getOriginalImageURLWithoutExtension(thumb)
+      .replace(".jpg", "")
+      .replace(/\?\d+$/, "");
   }
 
   /**
@@ -146,15 +222,6 @@ class ImageUtils {
     } catch (error) {
       console.error(error);
     }
-  }
-
-  /**
-   * @param {String} id
-   * @param {String} thumbURL
-   */
-  static async getOriginalImageURLWithExtensionFromIdAndThumbURL(id, thumbURL) {
-    const extension = await this.getImageExtensionFromId(id);
-    return ImageUtils.getOriginalImageURLFromIdAndThumbURL(id, thumbURL).replace(".jpg", `.${extension}`);
   }
 
   /**
@@ -182,5 +249,16 @@ class ImageUtils {
     const preloadedImage = new Image();
 
     preloadedImage.src = imageURL;
+  }
+
+  /**
+   * @param {String} id
+   * @returns {Promise<MediaExtension>}
+   */
+  static getImageExtensionFromId(id) {
+    if (Extensions.has(id)) {
+      return Promise.resolve(Extensions.get(id) || FavoritesSettings.defaultMediaExtension);
+    }
+    return ImageUtils.fetchImageExtension(id);
   }
 }

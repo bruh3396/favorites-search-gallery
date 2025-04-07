@@ -5,6 +5,8 @@ class ThrottledQueue {
   delay;
   /** @type {Boolean} */
   draining;
+  /** @type {Boolean} */
+  paused;
 
   /**
    * @param {Number} delay
@@ -42,6 +44,11 @@ class ThrottledQueue {
       if (item === undefined) {
         continue;
       }
+
+      if (this.paused) {
+        break;
+      }
+
       item.resolve();
       await Utils.sleep(this.delay);
     }
@@ -52,5 +59,14 @@ class ThrottledQueue {
    */
   setDelay(newDelay) {
     this.delay = newDelay;
+  }
+
+  pause() {
+    this.paused = true;
+  }
+
+  resume() {
+    this.paused = false;
+    this.startDraining();
   }
 }

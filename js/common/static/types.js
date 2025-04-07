@@ -21,7 +21,7 @@ class Types {
 
   /** @typedef {"default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random"} MetadataMetric */
 
-  /** @typedef {"id" | "score" | "width" | "height" } SearchableMetadataMetric */
+  /** @typedef {"id" | "score" | "width" | "height"} SearchableMetadataMetric */
 
   /** @typedef {":" | ":<" | ":>"} MetadataComparator */
 
@@ -45,6 +45,8 @@ class Types {
 
   /** @typedef {0 | 1 | 2} PerformanceProfile  */
 
+  /** @typedef {0 | 1 | 2} PostMetadataStatus  */
+
   /** @typedef {1 | 2 | 3 | 4 | 5 | 6 | 7} Rating  */
 
   /** @typedef {{input: HTMLInputElement, label: HTMLLabelElement}} RatingElement */
@@ -52,6 +54,8 @@ class Types {
   /** @typedef {{apiPost: APIPost, thumb: HTMLElement}} APIThumb */
 
   /** @typedef {{label: String, value: String, type: String}} AwesompleteSuggestion */
+
+  /** @typedef {"zoom-in" | "zoom-out" | "auto"} ImageCursor */
 
   /**
    * @template T
@@ -77,17 +81,41 @@ class Types {
    *    useContainer?: Boolean,
    *  }} ElementTemplateParams<T>
    */
+
+  /** @type {Set<FavoriteLayout>} */
   static favoriteLayouts = new Set(["row", "square", "grid", "column"]);
+
+  /** @type {Set<ForwardNavigationKey>} */
   static forwardNavigationKeys = new Set(["d", "D", "ArrowRight"]);
+
+  /** @type {Set<BackwardNavigationKey>} */
   static backwardNavigationKeys = new Set(["a", "A", "ArrowLeft"]);
+
+  /** @type {Set<NavigationKey>} */
   static navigationKeys = Types.forwardNavigationKeys.union(Types.backwardNavigationKeys);
+
+  /** @type {Set<ExitKey>} */
   static exitKeys = new Set(["Escape", "Delete", "Backspace"]);
+
+  /** @type {Set<TypeableInput>} */
   static typeableInputs = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
+
+  /** @type {Set<MediaExtension>} */
   static mediaExtensions = new Set(["jpg", "png", "jpeg", "gif", "mp4"]);
+
+  /** @type {Set<AnimatedExtension>} */
   static animatedExtensions = new Set(["gif", "mp4"]);
+
+  /** @type {Set<MetadataMetric>} */
   static metadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
-  static searchableMetadataMetrics = new Set(["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random"]);
+
+  /** @type {Set<SearchableMetadataMetric>} */
+  static searchableMetadataMetrics = new Set(["id", "score", "width", "height"]);
+
+  /** @type {Set<MetadataComparator>} */
   static metadataComparators = new Set([":", ":<", ":>"]);
+
+  /** @type {Set<TagCategory>} */
   static tagCategories = new Set(["general", "artist", "unknown", "copyright", "character", "metadata"]);
 
   /**
@@ -139,11 +167,7 @@ class Types {
       return false;
     }
     const tagName = object.tagName.toLowerCase();
-
-    if (tagName === "textarea") {
-      return true;
-    }
-    return tagName === "input" && Types.typeableInputs.has(object.getAttribute("type") || "");
+    return tagName === "textarea" || (tagName === "input" && Types.typeableInputs.has(object.getAttribute("type") || ""));
   }
 
   /**

@@ -106,9 +106,9 @@ class SavedSearches {
     const moveToTopButton = document.createElement("div");
 
     savedSearchLabel.innerText = newSavedSearch;
-    editButton.innerHTML = Icons.edit;
-    removeButton.innerHTML = Icons.delete;
-    moveToTopButton.innerHTML = Icons.upArrow;
+    editButton.innerHTML = SVGIcons.edit;
+    removeButton.innerHTML = SVGIcons.delete;
+    moveToTopButton.innerHTML = SVGIcons.upArrow;
     editButton.title = "Edit";
     removeButton.title = "Delete";
     moveToTopButton.title = "Move to top";

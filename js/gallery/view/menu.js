@@ -3,17 +3,17 @@ class GalleryMenu {
   /* eslint-disable object-curly-newline */
 
   static buttons = [
-    {id: "exit-gallery", icon: Icons.exit, action: "exitGallery", enabled: true, handler: "galleryController", hint: "Exit (Escape, Right-Click)", color: "red"},
-    {id: "fullscreen-gallery", icon: Icons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen (F)", color: "#0075FF"},
-    {id: "open-in-new-gallery", icon: Icons.openInNew, action: "openPost", enabled: true, handler: "galleryController", hint: "Open Post (Middle-Click, G)", color: "lightgreen"},
-    {id: "download-gallery", icon: Icons.download, action: "download", enabled: true, handler: "galleryController", hint: "Open Original (Ctrl + Left-Click, Q)", color: "lightskyblue"},
-    {id: "add-favorite-gallery", icon: Icons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController", hint: "Add Favorite (E)", color: "hotpink"},
-    {id: "remove-favorite-gallery", icon: Icons.heartMinus, action: "removeFavorite", enabled: false, handler: "galleryController", hint: "Remove Favorite (X)", color: "red"},
-    {id: "dock-gallery", icon: Icons.dock, action: "toggleDockPosition", enabled: false, handler: "galleryMenu", hint: "Change Position", color: ""},
-    {id: "toggle-background-gallery", icon: Icons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController", hint: "Toggle Background (B)", color: "gold"},
-    {id: "search-gallery", icon: Icons.search, action: "search", enabled: false, handler: "galleryController", hint: "Search", color: "cyan"},
-    {id: "background-color-gallery", icon: Icons.palette, action: "changeBackgroundColor", enabled: true, handler: "galleryMenu", hint: "Background Color", color: "orange"},
-    {id: "pin-gallery", icon: Icons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "#0075FF"}
+    {id: "exit-gallery", icon: SVGIcons.exit, action: "exitGallery", enabled: true, handler: "galleryController", hint: "Exit (Escape, Right-Click)", color: "red"},
+    {id: "fullscreen-gallery", icon: SVGIcons.fullscreenEnter, action: "fullscreen", enabled: true, handler: "galleryMenu", hint: "Toggle Fullscreen (F)", color: "#0075FF"},
+    {id: "open-in-new-gallery", icon: SVGIcons.openInNew, action: "openPost", enabled: true, handler: "galleryController", hint: "Open Post (Middle-Click, G)", color: "lightgreen"},
+    {id: "download-gallery", icon: SVGIcons.download, action: "download", enabled: true, handler: "galleryController", hint: "Open Original (Ctrl + Left-Click, Q)", color: "lightskyblue"},
+    {id: "add-favorite-gallery", icon: SVGIcons.heartPlus, action: "addFavorite", enabled: true, handler: "galleryController", hint: "Add Favorite (E)", color: "hotpink"},
+    {id: "remove-favorite-gallery", icon: SVGIcons.heartMinus, action: "removeFavorite", enabled: false, handler: "galleryController", hint: "Remove Favorite (X)", color: "red"},
+    {id: "dock-gallery", icon: SVGIcons.dock, action: "toggleDockPosition", enabled: false, handler: "galleryMenu", hint: "Change Position", color: ""},
+    {id: "toggle-background-gallery", icon: SVGIcons.bulb, action: "toggleBackground", enabled: true, handler: "galleryController", hint: "Toggle Background (B)", color: "gold"},
+    {id: "search-gallery", icon: SVGIcons.search, action: "search", enabled: false, handler: "galleryController", hint: "Search", color: "cyan"},
+    {id: "background-color-gallery", icon: SVGIcons.palette, action: "changeBackgroundColor", enabled: true, handler: "galleryMenu", hint: "Background Color", color: "orange"},
+    {id: "pin-gallery", icon: SVGIcons.pin, action: "pin", enabled: true, handler: "galleryMenu", hint: "Pin", color: "#0075FF"}
   ];
 
   /** @type {HTMLElement} */

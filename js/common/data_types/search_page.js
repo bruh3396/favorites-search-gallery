@@ -16,10 +16,23 @@ class SearchPage {
    */
   static prepareThumb(thumb) {
     Utils.prepareSearchPageThumb(thumb);
+    SearchPage.findImageExtension(thumb);
+  }
+
+  /**
+   * @param {HTMLElement} thumb
+   */
+  static findImageExtension(thumb) {
     APIPost.fetchWithTimeout(thumb.id)
       .then((apiPost) => {
         Extensions.set(thumb.id, apiPost.extension);
         SearchPage.correctMediaTags(thumb, apiPost);
+      })
+      .catch((error) => {
+        if (error instanceof PromiseTimeoutError) {
+          return;
+        }
+        throw error;
       });
   }
 

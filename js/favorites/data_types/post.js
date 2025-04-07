@@ -26,11 +26,11 @@ class Post {
   }
 
   static createRemoveFavoriteButtonHTMLTemplate() {
-    Post.removeFavoriteButtonHTML = `<img class="remove-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Icons.heartMinus)}>`;
+    Post.removeFavoriteButtonHTML = `<img class="remove-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(SVGIcons.heartMinus)}>`;
   }
 
   static createAddFavoriteButtonHTMLTemplate() {
-    Post.addFavoriteButtonHTML = `<img class="add-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(Icons.heartPlus)}>`;
+    Post.addFavoriteButtonHTML = `<img class="add-favorite-button add-or-remove-button" src=${Utils.createObjectURLFromSvg(SVGIcons.heartPlus)}>`;
   }
 
   static createPostHTMLTemplate() {

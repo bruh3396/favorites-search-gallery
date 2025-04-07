@@ -3,8 +3,8 @@ class FavoritesController {
   model;
   /** @type {FavoritesView} */
   view;
-  /** @type {FavoritesMenuController} */
-  menuController;
+  /** @type {FavoritesMenuEventListener} */
+  menuListener;
   /** @type {FavoritesPaginationController} */
   paginationController;
   /** @type {FavoritesInfiniteScrollController} */
@@ -26,7 +26,7 @@ class FavoritesController {
     }
     this.model = new FavoritesModel();
     this.view = new FavoritesView();
-    this.menuController = new FavoritesMenuController(this);
+    this.menuListener = new FavoritesMenuEventListener(this);
     this.paginationController = new FavoritesPaginationController(this.model, this.view);
     this.infiniteScrollController = new FavoritesInfiniteScrollController(this.model, this.view);
     this.addEventListeners();

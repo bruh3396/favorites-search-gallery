@@ -10,20 +10,18 @@ class FavoritesView {
     this.tiler = new FavoritesTiler();
     this.statusBar = new FavoritesStatusBar();
     this.paginator = new FavoritesPaginationMenu();
-    this.clearOriginalFavorites();
+    this.clearOriginalContent();
   }
 
-  clearOriginalFavorites() {
-    const thumbs = Array.from(document.getElementsByClassName("thumb"));
-    let content = document.getElementById("content");
+  clearOriginalContent() {
+    this.getOriginalContent()?.remove();
+  }
 
-    if (content === null && thumbs.length > 0) {
-      content = thumbs[0].closest("body>div");
-    }
-
-    if (content !== null) {
-      content.remove();
-    }
+  /**
+   * @returns {HTMLElement | null}
+   */
+  getOriginalContent() {
+    return document.querySelector("#content, div:has(.thumb)");
   }
 
   hideLoadingWheel() {
@@ -60,7 +58,6 @@ class FavoritesView {
    * @param {{newSearchResults: Post[], newFavorites: Post[], allSearchResults: Post[]}} results
    */
   insertNewSearchResultsOnReload(results) {
-    // this.paginator.updatePaginationMenuWHenNewFavoritesAddedOnReload(results.allSearchResults);
     this.tiler.addToTop(Utils.getThumbsFromPosts(results.newSearchResults));
     this.notifyNewFavoritesFound(results.newFavorites.length);
   }

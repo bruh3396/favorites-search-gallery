@@ -1,7 +1,7 @@
 class FavoritesMenuMobileUI {
   /* eslint-disable object-property-newline */
   /* eslint-disable object-curly-newline */
-  static template = {
+  template = {
     /** @type {ElementTemplateParams<any>[]} */
     "button": [
       {id: "search-button", parentId: "left-favorites-panel-top-row", textContent: "Search", title: "Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab", action: "search", enabled: true},
@@ -79,12 +79,12 @@ class FavoritesMenuMobileUI {
     "checkbox": []
   };
 
-  static create() {
-    Utils.createDynamicElements(FavoritesMenuMobileUI.template);
-    FavoritesMenuMobileUI.setupSearchBar();
+  constructor() {
+    Utils.createDynamicElements(this.template);
+    this.setupSearchBar();
   }
 
-  static setupStickyMenu() {
+  setupStickyMenu() {
     // const header = document.getElementById("header");
     // const headerHeight = header === null ? 0 : header.getBoundingClientRect().height;
 
@@ -112,12 +112,12 @@ class FavoritesMenuMobileUI {
     });
   }
 
-  static setupSearchBar() {
-    FavoritesMenuMobileUI.setupOptions();
-    FavoritesMenuMobileUI.setupResetButton();
+   setupSearchBar() {
+    this.setupOptions();
+    this.setupResetButton();
   }
 
-  static setupOptions() {
+   setupOptions() {
     const optionsCheckbox = document.getElementById("options-checkbox");
     const options = document.getElementById("left-favorites-panel-bottom-row");
 
@@ -129,7 +129,7 @@ class FavoritesMenuMobileUI {
     };
   }
 
-  static setupResetButton() {
+   setupResetButton() {
     const resetButton = document.getElementById("reset-button");
 
     if (resetButton === null) {

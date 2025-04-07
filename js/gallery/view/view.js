@@ -159,4 +159,11 @@ class GalleryView {
   handleResultsAddedToCurrentPage(thumbs) {
     this.renderer.handleResultsAddedToCurrentPage(thumbs);
   }
+
+  /**
+   * @param {ImageCursor} cursor
+   */
+  setImageCursor(cursor) {
+    this.ui.setImageCursor(cursor);
+  }
 }

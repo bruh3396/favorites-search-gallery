@@ -1,7 +1,7 @@
 class FavoritesMenuDesktopUI {
   /* eslint-disable object-property-newline */
   /* eslint-disable object-curly-newline */
-  static template = {
+  template = {
     /** @type {ElementTemplateParams<MouseEvent>[]} */
     "button": [
       {id: "search-button", parentId: "left-favorites-panel-top-row", textContent: "Search", title: "Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab", action: "search", enabled: true},
@@ -55,10 +55,10 @@ class FavoritesMenuDesktopUI {
         id: "layout-select", parentId: "layout-container", title: "Change layout", position: "beforeend", invokeActionOnCreation: true, preference: Preferences.layout, eventEmitter: Events.favorites.layoutChanged,
         optionPairs:
         {
+          column: "Waterfall",
           row: "River",
           square: "Square",
-          grid: "Legacy",
-          column: "Waterfall"
+          grid: "Legacy"
         }
       },
       {
@@ -75,23 +75,19 @@ class FavoritesMenuDesktopUI {
     "checkbox": [{id: "sort-ascending", parentId: "sort-inputs", position: "beforeend", hotkey: "", invokeActionOnCreation: false, savePreference: true, preference: Preferences.sortAscending, eventEmitter: Events.favorites.sortAscendingToggled}],
     /** @type {ElementTemplateParams<Number>[]} */
     "numberComponent": [
-      {id: "column-count", parentId: "column-count-container", position: "beforeend", preference: Preferences.columnCount, min: Settings.minColumnCount, max: Settings.maxColumnCount, step: 1, pollingTime: 50, invokeActionOnCreation: true, eventEmitter: Events.favorites.columnCountChanged},
-      {id: "row-size", parentId: "row-size-container", position: "beforeend", preference: Preferences.rowSize, min: Settings.minRowSize, max: Settings.maxRowSize, step: 1, pollingTime: 50, invokeActionOnCreation: true, eventEmitter: Events.favorites.rowSizeChanged},
-      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", preference: Preferences.resultsPerPage, min: Settings.minResultsPerPage, max: Settings.maxResultsPerPage, step: Settings.resultsPerPageStep, pollingTime: 50, invokeActionOnCreation: false, eventEmitter: Events.favorites.resultsPerPageChanged}
+      {id: "column-count", parentId: "column-count-container", position: "beforeend", preference: Preferences.columnCount, min: FavoritesSettings.columnCountBounds.min, max: FavoritesSettings.columnCountBounds.max, step: 1, pollingTime: 50, invokeActionOnCreation: true, eventEmitter: Events.favorites.columnCountChanged},
+      {id: "row-size", parentId: "row-size-container", position: "beforeend", preference: Preferences.rowSize, min: FavoritesSettings.rowSizeBounds.min, max: FavoritesSettings.rowSizeBounds.max, step: 1, pollingTime: 50, invokeActionOnCreation: true, eventEmitter: Events.favorites.rowSizeChanged},
+      {id: "results-per-page", parentId: "results-per-page-container", position: "beforeend", preference: Preferences.resultsPerPage, min: FavoritesSettings.resultsPerPageBounds.min, max: FavoritesSettings.resultsPerPageBounds.max, step: FavoritesSettings.resultsPerPageStep, pollingTime: 50, invokeActionOnCreation: false, eventEmitter: Events.favorites.resultsPerPageChanged}
     ]
   };
 
-  static create() {
-    Utils.createDynamicElements(FavoritesMenuDesktopUI.template);
-    FavoritesMenuDesktopUI.setupStaticElements();
+  constructor() {
+    Utils.createDynamicElements(this.template);
+    this.setupWhatsNewMenu();
+    this.setupFindFavorite();
   }
 
-  static setupStaticElements() {
-    FavoritesMenuDesktopUI.setupWhatsNewMenu();
-    FavoritesMenuDesktopUI.setupFindFavorite();
-  }
-
-  static setupWhatsNewMenu() {
+  setupWhatsNewMenu() {
     if (Flags.onMobileDevice) {
       return;
     }
@@ -124,7 +120,7 @@ class FavoritesMenuDesktopUI {
     };
   }
 
-  static setupFindFavorite() {
+  setupFindFavorite() {
     const findFavoriteButton = document.getElementById("find-favorite-button");
     const findFavoriteInput = document.getElementById("find-favorite-input");
 

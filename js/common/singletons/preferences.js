@@ -20,7 +20,7 @@ class Preferences {
   /** @type {Preference<MetadataMetric>}*/
   static sortingMethod = new Preference("sortingMethod", "default");
   static showOptions = new Preference("showOptions", false);
-  static columnCount = new Preference("columnCount", 4);
+  static columnCount = new Preference("columnCount", 6);
   static rowSize = new Preference("rowSize", 7);
   static dockGalleryMenuLeft = new Preference("dockGalleryMenuLeft", true);
   static showUI = new Preference("showUI", true);

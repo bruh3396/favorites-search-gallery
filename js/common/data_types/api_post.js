@@ -59,9 +59,9 @@ class APIPost {
     const abortController = new AbortController();
     const apiPromise = APIPost.fetch(id, abortController);
     return Utils.withTimeout(apiPromise, Settings.apiTimeout)
-      .catch(() => {
+      .catch((error) => {
         abortController.abort();
-        return PostPage.fetchAPIPost(id);
+        throw error;
       });
   }
 

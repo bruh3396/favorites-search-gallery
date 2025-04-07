@@ -10,6 +10,11 @@ class InactivePost {
   /** @type {Boolean} */
   createdFromDatabaseRecord;
 
+  /** @type {Boolean} */
+  get createdFromHTMLElement() {
+    return !this.createdFromDatabaseRecord;
+  }
+
   /**
    * @param {HTMLElement | FavoritesDatabaseRecord} favorite
    */
@@ -66,11 +71,17 @@ class InactivePost {
     return Utils.removeExtraWhiteSpace(tags).split(" ").sort().join(" ");
   }
 
+  /**
+   * @returns {PostMetadata}
+   */
   createMetadata() {
-    if (this.createdFromDatabaseRecord) {
-      return new PostMetadata(this.id, this.metadata || null);
+    if (this.createdFromHTMLElement) {
+      return new PostMetadata(this.id, PostMetadata.emptyRecord, PostMetadata.statuses.NO_FAVORITE_RECORD);
     }
-    const favoritesMetadata = new PostMetadata(this.id, undefined);
-    return favoritesMetadata;
+
+    if (this.metadata === null) {
+      return new PostMetadata(this.id, PostMetadata.emptyRecord, PostMetadata.statuses.HAS_FAVORITE_RECORD);
+    }
+    return new PostMetadata(this.id, this.metadata, PostMetadata.statuses.HAS_METADATA_RECORD);
   }
 }

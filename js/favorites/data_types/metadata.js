@@ -1,6 +1,26 @@
 class PostMetadata {
-  /** @type {Set<String>} */
-  static pendingRequests = new Set();
+  /**
+   * @type {{
+   *   NO_FAVORITE_RECORD: 0,
+   *   HAS_FAVORITE_RECORD: 1,
+   *   HAS_METADATA_RECORD: 2
+   * }}
+   */
+  static statuses = {
+    NO_FAVORITE_RECORD: 0,
+    HAS_FAVORITE_RECORD: 1,
+    HAS_METADATA_RECORD: 2
+  };
+  /** @type {FavoritesDatabaseMetadataRecord} */
+  static emptyRecord = {
+    width: 0,
+    height: 0,
+    score: 0,
+    rating: 4,
+    create: 0,
+    change: 0,
+    deleted: false
+  };
 
   /**
    * @param {String} rating
@@ -19,10 +39,35 @@ class PostMetadata {
       "s": 1
     }[rating] || 4;
   }
+  /** @type {Set<String>} */
+  static pendingRequests = new Set();
+  /** @type {PostMetadata[]} */
+  static updateQueue = [];
 
   /** @type {Boolean} */
   static get tooManyPendingRequests() {
-    return PostMetadata.pendingRequests.size > 200;
+    return PostMetadata.pendingRequests.size > 250;
+  }
+
+  static {
+    Utils.addStaticInitializer(PostMetadata.initialize);
+  }
+
+  static initialize() {
+    FetchQueues.postMetadata.pause();
+    Events.favorites.favoritesLoaded.on(() => {
+      FetchQueues.postMetadata.resume();
+      PostMetadata.fetchMissingMetadata();
+    }, {
+      once: true
+    });
+  }
+
+  static async fetchMissingMetadata() {
+    for (const metadata of PostMetadata.updateQueue) {
+      await FetchQueues.postMetadata.wait();
+      metadata.populateHelper();
+    }
   }
 
   /** @type {String} */
@@ -72,9 +117,10 @@ class PostMetadata {
 
   /**
    * @param {String} id
-   * @param {FavoritesDatabaseMetadataRecord | undefined | null} record
+   * @param {FavoritesDatabaseMetadataRecord} record
+   * @param {PostMetadataStatus} status
    */
-  constructor(id, record) {
+  constructor(id, record, status) {
     this.id = id;
     this.width = 0;
     this.height = 0;
@@ -83,47 +129,62 @@ class PostMetadata {
     this.lastChangedTimestamp = 0;
     this.rating = 4;
     this.postIsDeleted = false;
-    this.populate(record);
+    this.populate(record, status);
   }
 
   /**
-   * @param {FavoritesDatabaseMetadataRecord | undefined | null} record
+   * @param {FavoritesDatabaseMetadataRecord} record
+   * @param {PostMetadataStatus} status
    */
-  async populate(record) {
-    const recordHasNoMetadata = record === null;
-    const recordDoesNotExist = record === undefined;
-    const recordIsValid = !recordHasNoMetadata && !recordDoesNotExist;
-
-    if (recordIsValid) {
-      this.populateMetadataFromRecord(record);
+  async populate(record, status) {
+    if (status === PostMetadata.statuses.NO_FAVORITE_RECORD) {
+      this.populateHelper();
       return;
     }
+
+    if (status === PostMetadata.statuses.HAS_FAVORITE_RECORD) {
+      await FetchQueues.postMetadata.wait();
+      await this.populateHelper();
+      Events.favorites.foundMissingMetadata.emit(this.id);
+      return;
+    }
+    this.populateMetadataFromRecord(record);
+
+    if (this.isEmpty) {
+      await FetchQueues.postMetadata.wait();
+      await this.populateHelper();
+      Events.favorites.foundMissingMetadata.emit(this.id);
+    }
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  async populateHelper() {
+    if (PostMetadata.tooManyPendingRequests) {
+      PostMetadata.updateQueue.push(this);
+      return;
+    }
+    PostMetadata.pendingRequests.add(this.id);
     const apiPost = await this.fetchPost();
 
     Extensions.set(this.id, apiPost.extension);
     this.populateMetadataFromAPIPost(apiPost);
     Post.validateExtractedTagsAgainstAPI(this.id, apiPost.tags, apiPost.fileURL);
-
-    if (recordHasNoMetadata) {
-      Events.favorites.foundMissingMetadata.emit(this.id);
-    }
   }
 
   /**
    * @returns {Promise<APIPost>}
    */
   async fetchPost() {
-    if (PostMetadata.tooManyPendingRequests) {
-      await FetchQueues.postMetadata.wait();
-    }
-    PostMetadata.pendingRequests.add(this.id);
-    let apiPost = await APIPost.fetch(this.id);
+    const apiPost = await APIPost.fetch(this.id);
+
+    PostMetadata.pendingRequests.delete(this.id);
 
     if (apiPost.isEmpty) {
       this.postIsDeleted = true;
-      apiPost = await PostPage.fetchAPIPost(this.id);
+      return PostPage.fetchAPIPost(this.id);
     }
-    PostMetadata.pendingRequests.delete(this.id);
     return apiPost;
   }
 
@@ -169,25 +230,19 @@ class PostMetadata {
    * @returns {Boolean}
    */
   evaluateExpression(metricValue, operator, value) {
-    let result = false;
-
     switch (operator) {
       case ":":
-        result = metricValue === value;
-        break;
+        return metricValue === value;
 
       case ":<":
-        result = metricValue < value;
-        break;
+        return metricValue < value;
 
       case ":>":
-        result = metricValue > value;
-        break;
+        return metricValue > value;
 
       default:
-        break;
+        return false;
     }
-    return result;
   }
 
   /**

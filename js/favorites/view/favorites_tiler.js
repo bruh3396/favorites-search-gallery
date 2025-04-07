@@ -104,11 +104,11 @@ class FavoritesTiler {
     const style = `
     #favorites-search-gallery-content {
       &.row, &.column, &.column .favorites-column, &.square, &.grid {
-        gap: ${Settings.gutter}px;
+        gap: ${FavoritesSettings.thumbnailSpacing}px;
       }
 
       &.column {
-        margin-right: ${Flags.onDesktopDevice ? Settings.contentRightMargin : 0}px;
+        margin-right: ${Flags.onDesktopDevice ? FavoritesSettings.rightContentMargin : 0}px;
       }
     }`;
 

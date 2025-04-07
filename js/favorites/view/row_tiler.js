@@ -79,7 +79,7 @@ class FavoritesRowTiler extends Tiler {
   setRowSize(rowSize) {
     const minWidth = Math.floor(window.innerWidth / 20);
     const maxWidth = Math.floor(window.innerWidth / 4);
-    const pixelSize = Math.round(Utils.mapRange(rowSize, Settings.minRowSize, Settings.maxRowSize, minWidth, maxWidth));
+    const pixelSize = Math.round(Utils.mapRange(rowSize, FavoritesSettings.rowSizeBounds.min, FavoritesSettings.rowSizeBounds.max, minWidth, maxWidth));
 
     Utils.insertStyleHTML(`
       #favorites-search-gallery-content.row {
