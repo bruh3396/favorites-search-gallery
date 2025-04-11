@@ -115,8 +115,6 @@ class Post {
   image;
   /** @type {HTMLImageElement} */
   addOrRemoveButton;
-  /** @type {HTMLDivElement} */
-  statisticHint;
   /** @type {InactivePost | null} */
   inactivePost;
   /** @type {PostMetadata} */

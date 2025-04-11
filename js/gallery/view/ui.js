@@ -51,14 +51,14 @@ class GalleryUI {
    */
   enterGallery(thumb) {
     this.setLastVisitedThumb(thumb);
-    this.toggleBackgroundVisibility(true);
+    this.toggleBackground(true);
     this.toggleScrollbar(false);
     this.toggleVideoPointerEvents(true);
     this.toggleMenu(true);
   }
 
   exitGallery() {
-    this.toggleBackgroundVisibility(false);
+    this.toggleBackground(false);
     this.toggleScrollbar(true);
     this.scrollToLastVisitedThumb();
     this.toggleVideoPointerEvents(false);
@@ -89,7 +89,7 @@ class GalleryUI {
   /**
    * @param {Boolean} value
    */
-  toggleBackgroundVisibility(value) {
+  toggleBackground(value) {
     this.background.classList.toggle("visible", value);
   }
 

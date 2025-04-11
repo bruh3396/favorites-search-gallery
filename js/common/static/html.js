@@ -1196,6 +1196,7 @@ Lower numbers improve responsiveness">
   }
 
   #gallery-container {
+    pointer-events: none;
     z-index: 9000;
     position: fixed;
     top: 0;
@@ -1240,7 +1241,7 @@ Lower numbers improve responsiveness">
 
   .fullscreen-image {
     position: relative !important;
-    pointer-events: all;
+    pointer-events: none;
     height: 100%;
     margin: 0;
     left: 50% !important;
@@ -1273,23 +1274,6 @@ Lower numbers improve responsiveness">
 
     &.visible {
       display: block;
-    }
-  }
-
-  #gallery-original-content-link {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: red;
-    z-index: 1;
-    pointer-events: none;
-    cursor: default;
-    opacity: 0;
-
-
-    &.active {
-      /* opacity: 0.5; */
       pointer-events: all;
     }
   }

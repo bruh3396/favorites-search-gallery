@@ -302,7 +302,7 @@ class VideoController {
     const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
 
     for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
-      await Utils.sleep(50);
+      await Utils.sleep(100);
       this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
       this.pauseVideo(freeInactiveVideoPlayers[i]);
     }

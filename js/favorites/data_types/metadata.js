@@ -73,6 +73,8 @@ class PostMetadata {
   /** @type {String} */
   id;
   /** @type {Number} */
+  numericId;
+  /** @type {Number} */
   width;
   /** @type {Number} */
   height;
@@ -122,6 +124,7 @@ class PostMetadata {
    */
   constructor(id, record, status) {
     this.id = id;
+    this.numericId = parseInt(id);
     this.width = 0;
     this.height = 0;
     this.score = 0;
@@ -267,7 +270,7 @@ class PostMetadata {
         return this.creationTimestamp;
 
       case "id":
-        return 0;
+        return this.numericId;
 
       default:
         return 0;

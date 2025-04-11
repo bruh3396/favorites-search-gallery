@@ -67,7 +67,6 @@ class SearchCommand {
     this.orGroups = orGroups.map(orGroup => SearchCommand.createSearchTagGroup(orGroup));
     this.remainingSearchTags = SearchCommand.createSearchTagGroup(remainingSearchTags);
     this.optimize();
-    console.log(this);
   }
 
   /**
