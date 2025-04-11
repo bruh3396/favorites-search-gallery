@@ -45,10 +45,6 @@ class FavoritesStatusBar {
     this.matchCountIndicator.textContent = `${value} ${value === 1 ? "Match" : "Matches"}`;
   }
 
-  enableSearchButtons() {
-    dispatchEvent(new Event("readyToSearch"));
-  }
-
   /**
    * @param {Number} searchResultsCount
    * @param {Number} favoritesFoundCount

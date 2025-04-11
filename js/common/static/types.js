@@ -65,7 +65,6 @@ class Types {
    *    position?: InsertPosition,
    *    textContent?: String,
    *    title?: String,
-   *    action?: String,
    *    hotkey?: String,
    *    invokeActionOnCreation?: Boolean,
    *    savePreference?: Boolean,
@@ -77,8 +76,9 @@ class Types {
    *    pollingTime?: Number,
    *    preference?: Preference<T> | null,
    *    defaultValue?: T | null,
-   *    eventEmitter?: EventEmitter<T> | null,
+   *    event?: EventEmitter<T> | null,
    *    useContainer?: Boolean,
+   *    rightClickEnabled?: Boolean,
    *  }} ElementTemplateParams<T>
    */
 

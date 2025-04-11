@@ -6,6 +6,8 @@ class Database {
   name;
   /** @type {Number} */
   version;
+  /** @type {Boolean} */
+  locked;
 
   /**
    * @param {String} name
@@ -14,6 +16,7 @@ class Database {
   constructor(name, version = 1) {
     this.name = name;
     this.version = version;
+    this.locked = false;
   }
 
   /**
@@ -31,13 +34,16 @@ class Database {
    * @returns {Promise<void>}
    */
   async store(records, objectStoreName) {
+    if (this.locked) {
+      return Promise.reject(new LockedDatabaseError());
+    }
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(objectStoreName);
     return new Promise((resolve, reject) => {
       transaction.onerror = reject;
       records.forEach(record => {
-        objectStore.put(record);
+        this.addRecord(objectStore, record);
       });
       transaction.oncomplete = () => {
         database.close();
@@ -52,27 +58,46 @@ class Database {
    * @returns {Promise<void>}
    */
   async update(records, objectStoreName) {
+    if (this.locked) {
+      return Promise.reject(new LockedDatabaseError());
+    }
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(objectStoreName);
     const index = objectStore.index("id");
     let updatedCount = 0;
+    return new Promise((resolve, reject) => {
+      transaction.onerror = reject;
+      records.forEach(record => {
+        const i = index.getKey(record.id);
 
-    records.forEach(record => {
-      const i = index.getKey(record.id);
+        i.onsuccess = (indexEvent) => {
+          /** @type {IDBValidKey} */
+          // @ts-ignore
+          const primaryKey = indexEvent.target.result;
 
-      i.onsuccess = (indexEvent) => {
-        // @ts-ignore
-        const primaryKey = indexEvent.target.result;
-
-        objectStore.put(record, primaryKey);
-        updatedCount += 1;
-
-        if (updatedCount >= records.length) {
+          this.addRecord(objectStore, record, primaryKey);
+          updatedCount += 1;
+        };
+        transaction.oncomplete = () => {
           database.close();
-        }
-      };
+          resolve();
+        };
+      });
     });
+
+  }
+
+  /**
+   * @param {IDBObjectStore} objectStore
+   * @param {V} record
+   * @param {IDBValidKey | undefined} key
+   */
+  addRecord(objectStore, record, key = undefined) {
+    if (this.locked) {
+      throw new LockedDatabaseError();
+    }
+    objectStore.put(record, key);
   }
 
   /**
@@ -247,5 +272,15 @@ class Database {
     objectStore.createIndex("id", "id", {
       unique: true
     });
+  }
+
+  lock() {
+    this.locked = true;
+  }
+
+  async delete() {
+    this.lock();
+    await Utils.yield();
+    indexedDB.deleteDatabase(this.name);
   }
 }

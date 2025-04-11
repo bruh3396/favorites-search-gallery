@@ -3,14 +3,12 @@ class GalleryController {
   model;
   /** @type {GalleryView} */
   view;
-  /** @type {InteractionTracker} */
+  /** @type {InteractionTracker | null} */
   interactionTracker;
   /** @type {VisibleThumbObserver | null} */
   visibleThumbTracker;
   /** @type {AutoplayController} */
   autoplayController;
-  /** @type {GalleryInputListener} */
-  inputListener;
 
   constructor() {
     if (Flags.galleryDisabled) {
@@ -19,16 +17,19 @@ class GalleryController {
     this.model = new GalleryModel();
     this.view = new GalleryView();
     this.interactionTracker = this.createInteractionTracker();
+    this.visibleThumbTracker = this.createVisibleThumbTracker();
     this.autoplayController = this.createAutoplayController();
-    this.inputListener = new GalleryInputListener(this);
     this.addEventListeners();
     this.debounceVisibleContentPreloading();
   }
 
   /**
-   * @returns {InteractionTracker}
+   * @returns {InteractionTracker | null}
    */
   createInteractionTracker() {
+    if (Flags.onMobileDevice) {
+      return null;
+    }
     const doNothing = () => { };
     // const hideCursor = () => {
     //   this.executeFunctionBasedOnGalleryState({
@@ -76,9 +77,36 @@ class GalleryController {
     return new AutoplayController(events);
   }
 
+  /**
+   * @returns {VisibleThumbObserver | null}
+   */
+  createVisibleThumbTracker() {
+    return Flags.onMobileDevice ? null : new VisibleThumbObserver(this.preloadVisibleContent.bind(this));
+  }
+
   addEventListeners() {
+    this.addInputEventListeners();
     this.addFavoritesPageEventListeners();
     this.addSearchPageEventListeners();
+  }
+
+  addInputEventListeners() {
+    this.addDesktopInputEventListeners();
+  }
+
+  addDesktopInputEventListeners() {
+    if (!Flags.onDesktopDevice) {
+      return;
+    }
+    this.setupMouseOverHandler();
+    this.setupMouseDownHandler();
+    this.setupClickHandler();
+    this.setupContextMenuClickHandler();
+    this.setupKeydownHandler();
+    this.setupKeyupHandler();
+    this.setupWheelHandler();
+    this.setupMouseMoveHandler();
+    this.setupCustomUiEventHandler();
   }
 
   addFavoritesPageEventListeners() {
@@ -90,7 +118,6 @@ class GalleryController {
     this.keepVisibleThumbsPreloaded();
     this.setupFavoritesOptionHandler();
     this.setupGalleryStateResponder();
-
   }
 
   addSearchPageEventListeners() {
@@ -101,36 +128,21 @@ class GalleryController {
     this.freeMemoryWhenWhenLeavingSearchPage();
   }
 
-  keepTrackOfLatestSearchResults() {
-    Events.favorites.resultsAddedToCurrentPage.on(() => {
-      this.model.indexCurrentPageThumbs();
-    });
-    Events.favorites.newSearchResults.on((searchResults) => {
-      this.model.setSearchResults(searchResults);
-    });
-    Events.favorites.newFavoritesFoundOnReload.on(() => {
-      this.visibleThumbTracker?.observeAllThumbsOnPage();
-      this.model.indexCurrentPageThumbs();
-    }, {
-      once: true
-    });
-  }
+  setupMouseOverHandler() { }
+  setupMouseDownHandler() { }
+  setupClickHandler() { }
+  setupContextMenuClickHandler() { }
+  setupKeydownHandler() { }
+  setupKeyupHandler() { }
+  setupWheelHandler() { }
+  setupMouseMoveHandler() { }
+  setupCustomUiEventHandler() { }
+  keepTrackOfLatestSearchResults() { }
+  setupPageChangeHandler() { }
+  handlePageChange() { }
+  setupFavoritesOptionHandler() { }
+  setupGalleryStateResponder() {
 
-  setupPageChangeHandler() {
-    Events.favorites.pageChange.on(() => {
-      this.handlePageChange();
-    });
-  }
-
-  handlePageChange() {
-    this.visibleThumbTracker?.resetCenterThumb();
-    this.visibleThumbTracker?.observeAllThumbsOnPage();
-    this.model.indexCurrentPageThumbs();
-    this.executeFunctionBasedOnGalleryState({
-      idle: this.view.handlePageChange.bind(this.view),
-      hover: this.view.handlePageChange.bind(this.view),
-      gallery: this.view.handlePageChangeInGallery.bind(this.view)
-    });
   }
 
   indexThumbsAfterSearchPageLoads() {
@@ -150,18 +162,6 @@ class GalleryController {
   freeMemoryWhenWhenLeavingSearchPage() {
     window.addEventListener("blur", () => {
       this.view.handlePageChange();
-    });
-  }
-
-  setupFavoritesOptionHandler() {
-    Events.favorites.showOnHoverToggled.on(() => {
-      this.model.toggleShowContentOnHover();
-    });
-  }
-
-  setupGalleryStateResponder() {
-    Events.favorites.inGalleryRequest.on(() => {
-      Events.gallery.inGalleryResponse.emit(this.model.currentState === GalleryStateMachine.states.IN_GALLERY);
     });
   }
 
@@ -189,17 +189,20 @@ class GalleryController {
   enterGallery(thumb) {
     this.model.enterGallery(thumb);
     this.view.enterGallery(thumb);
-    this.interactionTracker.start();
+    this.interactionTracker?.start();
     this.autoplayController.start(thumb);
     this.preloadContentInGalleryAround(thumb);
     Events.gallery.showOnHover.emit(false);
+    Events.gallery.enteredGallery.emit();
   }
 
   exitGallery() {
     this.model.exitGallery();
     this.view.exitGallery();
-    this.interactionTracker.stop();
-    this.autoplayController.stop();
+    this.interactionTracker?.stop();
+    this.autoplayController?.stop();
+    this.toggleGalleryImageZoom(false);
+    Events.gallery.exitedGallery.emit();
   }
 
   /**
@@ -287,7 +290,9 @@ class GalleryController {
   }
 
   keepVisibleThumbsPreloaded() {
-    this.visibleThumbTracker = new VisibleThumbObserver(this.preloadVisibleContent.bind(this));
+    if (Flags.onMobileDevice) {
+      return;
+    }
     Events.favorites.resultsAddedToCurrentPage.on((/** @type {HTMLElement[]} */ results) => {
       this.visibleThumbTracker?.observe(results);
       this.view.handleResultsAddedToCurrentPage(results);
@@ -301,7 +306,7 @@ class GalleryController {
     const thumbs = this.visibleThumbTracker.getVisibleThumbs();
 
     if (thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload) {
-      this.view.preloadContent(thumbs);
+      this.view.preloadContentOutOfGallery(thumbs);
     }
   }
 
@@ -342,5 +347,16 @@ class GalleryController {
   toggleShowContentOnHover() {
     this.model.toggleShowContentOnHover();
     Events.gallery.showOnHover.emit(this.model.currentState === GalleryStateMachine.states.SHOWING_CONTENT_ON_HOVER);
+  }
+
+  /**
+   * @param {Boolean | undefined} value
+   * @returns {Boolean}
+   */
+  toggleGalleryImageZoom(value = undefined) {
+    const zoomedIn = this.view.toggleZoom(value);
+
+    Events.global.wheel.toggle(!zoomedIn);
+    return zoomedIn;
   }
 }

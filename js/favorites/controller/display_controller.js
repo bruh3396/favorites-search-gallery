@@ -24,12 +24,6 @@ class FavoritesDisplayController {
   changeLayout() { }
 
   /**
-   * @param {CustomEvent} event
-   */
-  // @ts-ignore
-  handlePaginationMenuEvent(event) { }
-
-  /**
    * @param {String} id
    */
   // @ts-ignore
@@ -48,6 +42,12 @@ class FavoritesDisplayController {
    */
   // @ts-ignore
   gotoAdjacentPage(direction) { }
+
+  /**
+   * @param {NavigationKey} direction
+   */
+  // @ts-ignore
+  gotoAdjacentPageDebounced(direction) { }
 
   reset() {}
 }

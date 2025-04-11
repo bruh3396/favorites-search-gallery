@@ -1,103 +1,36 @@
-class FavoritesUIController {
-  /** @type {Record<String, HTMLElement>} */
-  static hotkeys = {};
-
+class FavoritesMenuController {
   static setup() {
-    FavoritesUIController.setupMenuEvents();
-    // FavoritesUIController.setupHotkeys();
-    FavoritesUIController.setupGlobalListeners();
+    FavoritesMenuController.addEventListeners();
   }
 
-  static setupMenuEvents() {
-    const menu = document.getElementById("favorites-search-gallery-menu");
-
-    if (menu === null) {
-      return;
-    }
-
-    menu.addEventListener("uiController", (event) => {
-      // @ts-ignore
-      if (!Utils.hasTagName(event.target, "label")) {
-        FavoritesUIController.invokeAction(event);
-      }
-    });
-    Events.favorites.layoutChanged.on(FavoritesUIController.changeLayout);
+  static addEventListeners() {
+    FavoritesMenuController.changeColumnCountOnShiftScroll();
+    Events.gallery.showOnHover.on(FavoritesMenuController.updateShowOnHoverOptionTriggeredFromGallery);
+    Events.favorites.hintsToggled.on(FavoritesMenuController.toggleOptionHotkeyHints);
+    Events.favorites.darkThemeToggled.on(Utils.toggleDarkTheme);
+    Events.favorites.uiToggled.on(FavoritesMenuController.toggleUI);
+    Events.favorites.optionsToggled.on(FavoritesMenuController.toggleOptions);
+    Events.favorites.removeButtonsToggled.on(FavoritesMenuController.toggleAddOrRemoveButtons);
+    Events.favorites.addButtonsToggled.on(FavoritesMenuController.toggleAddOrRemoveButtons);
+    Events.favorites.layoutChanged.on(FavoritesMenuController.changeLayout);
+    Events.favorites.galleryMenuToggled.on(Utils.toggleGalleryMenu);
+    Events.favorites.headerToggled.on(FavoritesMenuController.toggleHeader);
+    Events.favorites.fancyHoveringToggled.on(FavoritesMenuController.toggleFancyThumbHovering);
+    Events.favorites.clearButtonClicked.on(Utils.clearMainSearchBox);
+    Events.gallery.enteredGallery.on(Utils.blurMainSearchBox);
   }
 
   /**
-   * @param {String} hotkey
-   * @param {HTMLElement} element
+   *
+   * @param {Boolean} value
    */
-  static registerCheckboxHotkey(hotkey, element) {
-    if (hotkey === "" || hotkey === null || hotkey === undefined) {
-      return;
+  static updateShowOnHoverOptionTriggeredFromGallery(value) {
+    const showOnHoverCheckbox = document.getElementById("show-on-hover");
+
+    if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
+      showOnHoverCheckbox.checked = value;
+      Preferences.showOnHover.set(value);
     }
-    FavoritesUIController.hotkeys[hotkey.toLocaleLowerCase()] = element;
-  }
-
-  static setupHotkeys() {
-    // const processCheckboxHotkey = async(/** @type {FavoritesKeyboardEvent} */ event) => {
-    //   const hotkey = event.key;
-    //   const target = FavoritesUIController.hotkeys[hotkey];
-
-    //   if (!event.isHotkey || target === undefined || !(target instanceof HTMLInputElement)) {
-    //     return;
-    //   }
-
-    //   const inGallery = await Utils.inGallery();
-
-    //   if (inGallery) {
-    //     return;
-    //   }
-
-    //   target.checked = !target.checked;
-    //   // @ts-ignore
-    //   FavoritesUIController.invokeAction({
-    //     target
-    //   });
-    // };
-
-    // const processGeneralHotkeyEvent = async(/** @type {FavoritesKeyboardEvent} */ event) => {
-    //   const inGallery = await Utils.inGallery();
-
-    //   if (inGallery || Types.isTypeableInput(event.originalEvent.target)) {
-    //     return;
-    //   }
-
-    //   switch (event.key.toLowerCase()) {
-    //     case "s":
-    //       event.originalEvent.stopImmediatePropagation();
-    //       event.originalEvent.stopPropagation();
-    //       setTimeout(() => {
-    //         Utils.focusMainSearchBox();
-    //       }, 0);
-    //       break;
-
-    //     default:
-    //       break;
-    //   }
-    // };
-
-    // Events.global.keydown.on((event) => {
-    //   processCheckboxHotkey(event);
-    //   processGeneralHotkeyEvent(event);
-    // });
-  }
-
-  static setupGlobalListeners() {
-    FavoritesUIController.changeColumnCountOnShiftScroll();
-    FavoritesUIController.updateShowOnHoverOptionTriggeredFromGallery();
-  }
-
-  static updateShowOnHoverOptionTriggeredFromGallery() {
-    Events.gallery.showOnHover.on((value) => {
-      const showOnHoverCheckbox = document.getElementById("show-on-hover");
-
-      if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
-        showOnHoverCheckbox.checked = value;
-        Preferences.showOnHover.set(value);
-      }
-    });
   }
 
   static changeColumnCountOnShiftScroll() {
@@ -147,77 +80,23 @@ class FavoritesUIController {
   }
 
   /**
-   * @param {Event} event
+   * @param {Boolean} value
    */
-  static invokeAction(event) {
-    if (!(event.target instanceof HTMLElement)) {
-      return;
-    }
-    const action = event.target.dataset.action;
-
-    // @ts-ignore
-    if (action !== null && action !== undefined && FavoritesUIController[action] !== undefined) {
-      // @ts-ignore
-      FavoritesUIController[action](event);
-    } else if (event.target instanceof HTMLInputElement) {
-      event.target.dispatchEvent(new Event("change"));
-    }
-  }
-
-  static reset() {
-    Utils.deletePersistentData();
+  static toggleFancyThumbHovering(value) {
+    Utils.insertStyleHTML(value ? Utils.styles.fancyHovering : "", "fancy-image-hovering");
   }
 
   /**
-   * @param {CustomEvent} event
+   * @param {Boolean} value
    */
-  static toggleFancyThumbHovering(event) {
-    if (event.target instanceof HTMLInputElement) {
-      Utils.insertStyleHTML(event.target.checked ? Utils.styles.fancyHovering : "", "fancy-image-hovering");
-    }
+  static toggleOptionHotkeyHints(value) {
+    Utils.insertStyleHTML(value ? "" : ".option-hint {display:none;}", "option-hint-visibility");
   }
 
   /**
-   * @param {CustomEvent} event
+   * @param {Boolean} value
    */
-  static toggleOptionHotkeyHints(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    const html = event.target.checked ? "" : ".option-hint {display:none;}";
-
-    Utils.insertStyleHTML(html, "option-hint-visibility");
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
-  static toggleDarkTheme(event) {
-    if (event.target instanceof HTMLInputElement) {
-      Utils.toggleDarkTheme(event.target.checked);
-    }
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
-  static toggleStatisticHints(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    const html = event.target.checked ? "" : ".statistic-hint {display:none;}";
-
-    Utils.insertStyleHTML(html, "statistic-hint-visibility");
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
-  static toggleUI(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    const checked = event.target.checked;
+  static toggleUI(value) {
     const menu = document.getElementById("favorites-search-gallery-menu");
     const panels = document.getElementById("favorites-search-gallery-menu-panels");
     const header = document.getElementById("header");
@@ -228,7 +107,7 @@ class FavoritesUIController {
       return;
     }
 
-    if (checked) {
+    if (value) {
       if (header !== null) {
         header.style.display = "";
       }
@@ -244,18 +123,13 @@ class FavoritesUIController {
       panels.style.display = "none";
       menu.style.background = getComputedStyle(document.body).background;
     }
-    container.classList.toggle("ui-hidden", !checked);
+    container.classList.toggle("ui-hidden", !value);
   }
 
   /**
-   * @param {CustomEvent} event
+   * @param {Boolean} value
    */
-  static toggleOptions(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    const value = event.target.checked;
-
+  static toggleOptions(value) {
     if (Flags.onMobileDevice) {
       document.getElementById("left-favorites-panel-bottom-row")?.classList.toggle("hidden", !value);
       Utils.insertStyleHTML(`
@@ -273,45 +147,15 @@ class FavoritesUIController {
   }
 
   /**
-   * @param {CustomEvent} event
+   * @param {Boolean} value
    */
-  static toggleAddOrRemoveButtons(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    const visibility = event.target.checked ? "visible" : "hidden";
-
+  static toggleAddOrRemoveButtons(value) {
     Utils.insertStyleHTML(`
         .add-or-remove-button {
-          visibility: ${visibility} !important;
+          visibility: ${value ? "visible" : "hidden"} !important;
         }
       `, "add-or-remove-button-visibility");
-    Utils.forceHideCaptions(event.target.checked);
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
-  static search(event) {
-    const searchBox = document.getElementById(Utils.mainSearchBoxId);
-
-    if (searchBox === null || (!(searchBox instanceof HTMLTextAreaElement) && !(searchBox instanceof HTMLInputElement))) {
-      return;
-    }
-
-    if (event.detail.rightClick || event.detail.ctrlKey) {
-      Utils.openSearchPage(searchBox.value);
-      return;
-    }
-
-    searchBox.dispatchEvent(new KeyboardEvent("keydown", {
-      key: "Enter",
-      bubbles: true
-    }));
-  }
-
-  static clear() {
-    Utils.setMainSearchBoxValue("");
+    Utils.forceHideCaptions(value);
   }
 
   /**
@@ -329,22 +173,9 @@ class FavoritesUIController {
   }
 
   /**
-   * @param {CustomEvent} event
+   * @param {Boolean} value
    */
-  static toggleHeader(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    Utils.insertStyleHTML(`#header {display: ${event.target.checked ? "block" : "none"}}`, "header");
-  }
-
-  /**
-   * @param {CustomEvent} event
-   */
-  static toggleGalleryMenu(event) {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    Utils.toggleGalleryMenu(event.target.checked);
+  static toggleHeader(value) {
+    Utils.insertStyleHTML(`#header {display: ${value ? "block" : "none"}}`, "header");
   }
 }

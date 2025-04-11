@@ -57,9 +57,7 @@ class FavoritesPaginationMenu {
    * @param {FavoritesPaginationParameters} parameters
    */
   update(parameters) {
-    const nextPageButton = document.getElementById("next-page");
-    const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= FavoritesSettings.maxPageNumberButtons &&
-      nextPageButton !== null && nextPageButton instanceof HTMLButtonElement && !nextPageButton.disabled;
+    const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= FavoritesSettings.maxPageNumberButtons;
 
     if (atMaxPageNumberButtons) {
       return;
@@ -72,9 +70,7 @@ class FavoritesPaginationMenu {
    * @param {Number} end
    */
   updateRangeIndicator(start, end) {
-    if (end !== 0) {
-      this.rangeIndicator.textContent = `${start + 1} - ${end}`;
-    }
+    this.rangeIndicator.textContent = end === 0 ? "" : `${start + 1} - ${end}`;
   }
 
   /**
@@ -101,12 +97,8 @@ class FavoritesPaginationMenu {
     button.title = `Goto page ${pageNumber}`;
     button.className = "pagination-number";
     button.classList.toggle("selected", selected);
-    button.dataset.action = "gotoPage";
     button.onclick = () => {
-      button.dispatchEvent(new CustomEvent("controller", {
-        detail: pageNumber,
-        bubbles: true
-      }));
+      Events.favorites.pageSelected.emit(pageNumber);
     };
     this.container.appendChild(button);
     button.textContent = String(pageNumber);
@@ -121,7 +113,7 @@ class FavoritesPaginationMenu {
     const next = this.createArrowTraversalButton("next", ">", "beforeend");
     const final = this.createArrowTraversalButton("final", ">>", "beforeend");
 
-    this.updateArrowTraversalButtonInteractability(previous, first, next, final, parameters.finalPageNumber);
+    this.updateArrowTraversalButtonInteractability(previous, first, next, final, parameters);
   }
 
   /**
@@ -136,12 +128,8 @@ class FavoritesPaginationMenu {
     button.id = `${name}-page`;
     button.title = `Goto ${name} page`;
     button.textContent = textContent;
-    button.dataset.action = "gotoRelativePage";
     button.onclick = () => {
-      button.dispatchEvent(new CustomEvent("controller", {
-        detail: name,
-        bubbles: true
-      }));
+      Events.favorites.relativePageSelected.emit(name);
     };
     this.container.insertAdjacentElement(position, button);
     return button;
@@ -164,15 +152,10 @@ class FavoritesPaginationMenu {
     input.id = "goto-page-input";
     button.textContent = "Go";
     button.id = "goto-page-button";
-    button.dataset.action = "gotoPage";
     button.onclick = () => {
-      if (!Utils.isOnlyDigits(input.value)) {
-        return;
+      if (Utils.isOnlyDigits(input.value)) {
+        Events.favorites.pageSelected.emit(Number(input.value));
       }
-      button.dispatchEvent(new CustomEvent("controller", {
-        detail: parseInt(input.value),
-        bubbles: true
-      }));
     };
     input.onkeydown = (event) => {
       if (event.key === "Enter") {
@@ -197,27 +180,17 @@ class FavoritesPaginationMenu {
    * @param {HTMLButtonElement} firstPage
    * @param {HTMLButtonElement} nextPage
    * @param {HTMLButtonElement} finalPage
-   * @param {Number} finalPageNumber
+   * @param {FavoritesPaginationParameters} parameters
    */
-  updateArrowTraversalButtonInteractability(previousPage, firstPage, nextPage, finalPage, finalPageNumber) {
-    const firstNumberExists = this.pageNumberTraversalButtonExists(1);
-    const lastNumberExists = this.pageNumberTraversalButtonExists(finalPageNumber);
-
-    if (firstNumberExists && lastNumberExists) {
+  updateArrowTraversalButtonInteractability(previousPage, firstPage, nextPage, finalPage, parameters) {
+    if (parameters.currentPageNumber === 1) {
       previousPage.disabled = true;
       firstPage.disabled = true;
+    }
+
+    if (parameters.currentPageNumber === parameters.finalPageNumber) {
       nextPage.disabled = true;
       finalPage.disabled = true;
-    } else {
-      if (firstNumberExists) {
-        previousPage.disabled = true;
-        firstPage.disabled = true;
-      }
-
-      if (lastNumberExists) {
-        nextPage.disabled = true;
-        finalPage.disabled = true;
-      }
     }
   }
 

@@ -124,8 +124,8 @@ class GalleryImageCreator {
    */
   async createImages(requests) {
     for (const request of requests) {
+      await FetchQueues.imageRequest.wait();
       this.createImage(request);
-      await Utils.sleep(50);
     }
   }
 

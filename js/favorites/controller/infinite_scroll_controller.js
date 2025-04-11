@@ -23,7 +23,7 @@ class FavoritesInfiniteScrollController extends FavoritesDisplayController {
   showSearchResults() {
     this.view.clear();
     this.showNextBatch();
-    Events.favorites.pageChange.emit();
+    Events.favorites.pageChanged.emit();
   }
 
   handleBottomOfPageReached() {
@@ -40,18 +40,21 @@ class FavoritesInfiniteScrollController extends FavoritesDisplayController {
     this.pageBottomObserver.refresh();
   }
 
-  showNextBatch() {
+  async showNextBatch() {
     const thumbs = Utils.getThumbsFromPosts(this.model.getNextInfiniteScrollBatch());
 
     if (thumbs.length === 0) {
       return;
     }
+    FetchQueues.imageRequest.pause();
+    await Utils.sleep(25);
     this.view.insertNewSearchResults(thumbs);
     Events.favorites.resultsAddedToCurrentPage.emit(thumbs);
-    Utils.waitForAllThumbnailsToLoad()
-      .then(() => {
-        this.pageBottomObserver.refresh();
-      });
+    await Utils.sleep(25);
+    await Utils.waitForAllThumbnailsToLoad();
+    this.pageBottomObserver.refresh();
+    await Utils.sleep(50);
+    FetchQueues.imageRequest.resume();
   }
 
   reset() {

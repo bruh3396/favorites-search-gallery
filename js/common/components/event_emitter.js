@@ -8,8 +8,6 @@ class EventEmitter {
   oneTimeListeners;
   /** @type {Boolean} */
   enabled;
-  /** @type {Boolean} */
-  frozen;
 
   /** @type {Boolean} */
   get disabled() {
@@ -23,7 +21,6 @@ class EventEmitter {
     this.listeners = new Set();
     this.oneTimeListeners = new Set();
     this.enabled = enabled;
-    this.frozen = false;
   }
 
   /**
@@ -62,7 +59,7 @@ class EventEmitter {
    * @param {V} argument
    */
   emit(argument) {
-    if (this.disabled || this.frozen) {
+    if (this.disabled) {
       return;
     }
 
@@ -100,11 +97,10 @@ class EventEmitter {
     });
   }
 
-  freeze() {
-    this.frozen = true;
-  }
-
-  resume() {
-    this.frozen = false;
+  /**
+   * @param {Boolean | undefined} value
+   */
+  toggle(value = undefined) {
+    this.enabled = value === undefined ? !this.enabled : value;
   }
 }

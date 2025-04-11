@@ -16,7 +16,6 @@ class FavoritesDatabase {
    * @returns {Promise<Post[]>}
    */
   async loadAllFavorites() {
-    // await this.deleteFavorites();
     const records = await this.database.load(FavoritesDatabase.objectStoreName);
     return this.deserialize(records);
   }
@@ -72,5 +71,9 @@ class FavoritesDatabase {
    */
   deleteFavorite(id) {
     return this.database.deleteRecords([id], FavoritesDatabase.objectStoreName);
+  }
+
+  delete() {
+    this.database.delete();
   }
 }

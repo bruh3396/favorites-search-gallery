@@ -266,9 +266,7 @@ class SavedSearches {
   }
 
   saveSearchResultsAsCustomSearch() {
-    const searchResultIds = Array.from(Post.allPosts.values())
-      .filter(post => post.matchedByLatestSearch)
-      .map(post => post.id);
+    const searchResultIds = FavoritesSearchResultObserver.latestSearchResults.map(post => post.id);
 
     if (searchResultIds.length === 0) {
       return;

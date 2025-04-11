@@ -108,4 +108,8 @@ class FavoritesLoader {
     this.useSearchSubset = false;
     this.subsetFavorites = [];
   }
+
+  deleteDatabase() {
+    this.database.delete();
+  }
 }

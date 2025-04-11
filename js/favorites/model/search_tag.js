@@ -36,9 +36,6 @@ class SearchTag {
    * @returns {Boolean}
    */
   matches(post) {
-    if (post.tagSet.has(this.value)) {
-      return !this.negated;
-    }
-    return this.negated;
+    return post.tagSet.has(this.value) !== this.negated;
   }
 }

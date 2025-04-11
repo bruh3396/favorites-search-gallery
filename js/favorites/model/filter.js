@@ -19,40 +19,48 @@ class FavoritesFilter {
     this.negatedTagBlacklist = Utils.negateTags(Utils.tagBlacklist);
     this.useTagBlacklist = !Flags.userIsOnTheirOwnFavoritesPage || Preferences.excludeBlacklist.value;
     this.allowedRatings = Preferences.allowedRatings.value;
-    this.searchCommand = this.getSearchCommand("");
+    this.searchCommand = this.createSearchCommand("");
     this.searchQuery = "";
+    this.filter = Utils.measureRuntime(this.filter.bind(this));
   }
 
   /**
    * @param {Post[]} favorites
    * @returns {Post[]}
    */
-  filterFavorites(favorites) {
-    const results = this.searchCommand.getSearchResults(favorites);
-    return this.allRatingsAreAllowed ? results : this.filterFavoritesByRating(results);
+  filter(favorites) {
+    return this.filterByRating(this.searchCommand.getSearchResults(favorites));
   }
 
   /**
    * @param {Post[]} favorites
    * @returns {Post[]}
    */
-  filterFavoritesByRating(favorites) {
-    return favorites.filter(result => result.withinRating(this.allowedRatings));
+  filterByRating(favorites) {
+    return this.allRatingsAreAllowed ? favorites : favorites.filter(result => result.withinRating(this.allowedRatings));
+  }
+
+  /**
+   * @param {Post[]} favorites
+   * @returns {Post[]}
+   */
+  filterOutBlacklisted(favorites) {
+    return Flags.userIsOnTheirOwnFavoritesPage ? favorites : new SearchCommand(this.negatedTagBlacklist).getSearchResults(favorites);
   }
 
   /**
    * @param {String} searchQuery
    */
-  setSearchCommand(searchQuery) {
+  setSearchQuery(searchQuery) {
     this.searchQuery = searchQuery;
-    this.searchCommand = this.getSearchCommand(searchQuery);
+    this.searchCommand = this.createSearchCommand(searchQuery);
   }
 
   /**
    * @param {String} searchQuery
    * @returns {SearchCommand}
    */
-  getSearchCommand(searchQuery) {
+  createSearchCommand(searchQuery) {
     searchQuery = this.useTagBlacklist ? `${searchQuery} ${this.negatedTagBlacklist}` : searchQuery;
     return new SearchCommand(searchQuery);
   }
@@ -60,9 +68,9 @@ class FavoritesFilter {
   /**
    * @param {Boolean} value
    */
-  toggleBlacklist(value) {
+  toggleBlacklistFiltering(value) {
     this.useTagBlacklist = value;
-    this.setSearchCommand(this.searchQuery);
+    this.setSearchQuery(this.searchQuery);
   }
 
   /**

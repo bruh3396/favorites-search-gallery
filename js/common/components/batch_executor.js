@@ -46,10 +46,10 @@ class BatchExecutor {
       this.execute();
       return;
     }
-    this.scheduleExecution();
+    this.executeAfterTimeout();
   }
 
-  scheduleExecution() {
+  executeAfterTimeout() {
     this.timer = setTimeout(() => {
       this.execute();
     }, this.timeout);
@@ -62,5 +62,10 @@ class BatchExecutor {
 
   empty() {
     this.batch = [];
+  }
+
+  reset() {
+    clearTimeout(this.timer);
+    this.empty();
   }
 }

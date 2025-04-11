@@ -1,29 +1,36 @@
 class FavoritesPaginationController extends FavoritesDisplayController {
+  /** @type {Function} */
+  debouncedShowCurrentPage;
+
   /**
-   * @param {CustomEvent} event
+   * @param {FavoritesModel} model
+   * @param {FavoritesView} view
    */
-  handlePaginationMenuEvent(event) {
-    if (!(event.target instanceof HTMLElement)) {
-      return;
-    }
-    const action = event.target.dataset.action;
+  constructor(model, view) {
+    super(model, view);
+    this.model = model;
+    this.view = view;
+    this.debouncedShowCurrentPage = Utils.debounceAfterFirstCall(this.showCurrentPageWithoutMenu.bind(this), 500);
+    this.addEventListeners();
+  }
 
-    if (action === "gotoPage") {
-      this.model.changePage(parseInt(event.detail));
+  addEventListeners() {
+    Events.favorites.pageSelected.on((pageNumber) => {
+      this.model.changePage(pageNumber);
       this.showCurrentPage();
-      return;
-    }
-
-    if (action === "gotoRelativePage" && this.model.gotoRelativePage(event.detail)) {
-      this.showCurrentPage();
-    }
+    });
+    Events.favorites.relativePageSelected.on((relativePage) => {
+      if (this.model.gotoRelativePage(relativePage)) {
+        this.showCurrentPage();
+      }
+    });
   }
 
   handleNewSearchResultsFound() {
     this.model.paginate(this.model.getLatestSearchResults());
     this.view.createPageSelectionMenuWhileFetching(this.model.getPaginationParameters());
     this.addNewlyFetchedSearchResultsToCurrentPage();
-    Events.favorites.newSearchResults.emit(this.model.getLatestSearchResults());
+    Events.favorites.searchResultsUpdated.emit(this.model.getLatestSearchResults());
   }
 
   addNewlyFetchedSearchResultsToCurrentPage() {
@@ -50,14 +57,19 @@ class FavoritesPaginationController extends FavoritesDisplayController {
   showCurrentPage() {
     this.view.showSearchResults(this.model.getFavoritesOnCurrentPage());
     this.view.createPageSelectionMenu(this.model.getPaginationParameters());
-    Events.favorites.pageChange.emit();
+    Events.favorites.pageChanged.emit();
+  }
+
+  showCurrentPageWithoutMenu() {
+    this.view.showSearchResults(this.model.getFavoritesOnCurrentPage());
+    Events.favorites.pageChanged.emit();
   }
 
   /**
    * @param {String} id
    */
   findFavorite(id) {
-    if (this.model.gotoPageWithFavorite(id)) {
+    if (this.model.gotoPageWithFavoriteId(id)) {
       this.showCurrentPage();
     }
     this.view.revealFavorite(id);
@@ -77,6 +89,16 @@ class FavoritesPaginationController extends FavoritesDisplayController {
   gotoAdjacentPage(direction) {
     if (this.model.gotoAdjacentPage(direction)) {
       this.showCurrentPage();
+    }
+  }
+
+  /**
+   * @param {NavigationKey} direction
+   */
+  gotoAdjacentPageDebounced(direction) {
+    if (this.model.gotoAdjacentPage(direction)) {
+      this.view.createPageSelectionMenu(this.model.getPaginationParameters());
+      this.debouncedShowCurrentPage();
     }
   }
 }

@@ -1,6 +1,8 @@
 class GalleryGifRenderer extends Renderer {
   /** @type {HTMLImageElement} */
   gif;
+  /** @type {HTMLImageElement[]} */
+  preloadedGIFs = [];
 
   /**
    * @param {HTMLElement} galleryContainer
@@ -9,6 +11,9 @@ class GalleryGifRenderer extends Renderer {
     super(galleryContainer);
     this.container.id = "gif-container";
     this.gif = document.createElement("img");
+    this.container.className = "fullscreen-image-container";
+    this.gif.className = "fullscreen-image";
+    this.preloadedGIFs = [];
     this.container.appendChild(this.gif);
   }
 
@@ -24,7 +29,24 @@ class GalleryGifRenderer extends Renderer {
     this.gif.src = "";
   }
 
-  handlePageChange() {}
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  preload(thumbs) {
+    const gifSources = thumbs
+      .filter((thumb) => Utils.isGif(thumb))
+      .slice(0, GallerySettings.preloadedGifCount)
+      .map((thumb) => Utils.getGIFSource(thumb));
 
-  handlePageChangeInGallery() {}
+    for (const source of gifSources) {
+      const gif = new Image();
+
+      gif.src = source;
+      this.preloadedGIFs.push(gif);
+    }
+  }
+
+  handlePageChange() { }
+
+  handlePageChangeInGallery() { }
 }

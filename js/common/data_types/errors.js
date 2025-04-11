@@ -10,3 +10,5 @@ class PromiseTimeoutError extends Error {}
 class IndexedDBUnexpectedError extends Error {}
 
 class UnknownObjectStoreError extends Error {}
+
+class LockedDatabaseError extends Error {}

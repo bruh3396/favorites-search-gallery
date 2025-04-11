@@ -2,6 +2,7 @@ class Extensions {
   static {
     Utils.addStaticInitializer(Extensions.convertFromLocalStorageToIndexedDB);
     Utils.addStaticInitializer(Extensions.load);
+    Utils.addStaticInitializer(Extensions.addEventListeners);
   }
 
   /** @type {String} */
@@ -88,5 +89,11 @@ class Extensions {
       }
     }
     localStorage.removeItem("imageExtensions");
+  }
+
+  static addEventListeners() {
+    Events.favorites.reset.on(() => {
+      Extensions.database.delete();
+    });
   }
 }

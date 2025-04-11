@@ -1,24 +1,21 @@
-class FavoritesUI {
+class FavoritesMenu {
   static {
     if (Flags.onFavoritesPage) {
-      Utils.addStaticInitializer(FavoritesUI.insertHTML);
+      Utils.addStaticInitializer(FavoritesMenu.insertHTML);
     }
   }
 
   static insertHTML() {
-      Utils.insertStyleHTML(Flags.onMobileDevice ? HTMLStrings.mobile : HTMLStrings.desktop, "desktop-mobile");
-      FavoritesSearchGalleryContainer.insertHTML("afterbegin", HTMLStrings.favorites);
+    Utils.insertStyleHTML(Flags.onMobileDevice ? HTMLStrings.mobile : HTMLStrings.desktop, "desktop-mobile");
+    FavoritesSearchGalleryContainer.insertHTML("afterbegin", HTMLStrings.favorites);
   }
 
   constructor() {
-    if (!Flags.onFavoritesPage) {
-      return;
-    }
-    const FavoritesMenuUI = Flags.onMobileDevice ? FavoritesMenuMobileUI : FavoritesMenuDesktopUI;
+    const FavoritesMenuType = Flags.onMobileDevice ? FavoritesMobileMenu : FavoritesDesktopMenu;
 
-    FavoritesUIController.setup();
-    new RatingFilter();
+    FavoritesMenuController.setup();
     new SearchBox();
-    new FavoritesMenuUI();
+    new RatingFilter();
+    new FavoritesMenuType();
   }
 }

@@ -197,7 +197,7 @@ class Caption {
     }, {
       once: true
     });
-    Events.favorites.pageChange.on(Utils.debounceAfterFirstCall(() => {
+    Events.favorites.pageChanged.on(Utils.debounceAfterFirstCall(() => {
       this.abortAllRequests("Changed Page");
       this.abortController = new AbortController();
       setTimeout(() => {
@@ -209,6 +209,9 @@ class Caption {
       if (this.currentThumb !== null) {
         this.attachToThumb(this.currentThumb);
       }
+    });
+    Events.favorites.reset.on(() => {
+      Caption.database.delete();
     });
   }
 
@@ -428,15 +431,15 @@ class Caption {
   tagOnClick(tagName, event) {
     switch (event.button) {
       case Utils.clickCodes.left:
-        if (event.shiftKey) {
-          this.searchForTag(tagName);
+        if (event.shiftKey && Utils.isOnlyDigits(tagName)) {
+          Events.favorites.findFavoriteInAllStarted.emit(tagName);
         } else {
           this.tagOnClickHelper(tagName, event);
         }
         break;
 
       case Utils.clickCodes.middle:
-        this.searchForTag(tagName);
+        Events.caption.searchForTag.emit(tagName);
         break;
 
       case Utils.clickCodes.right:
@@ -446,15 +449,6 @@ class Caption {
       default:
         break;
     }
-  }
-
-  /**
-   * @param {String} tagName
-   */
-  searchForTag(tagName) {
-    dispatchEvent(new CustomEvent("searchForTag", {
-      detail: tagName
-    }));
   }
 
   /**
@@ -710,8 +704,7 @@ class Caption {
             if (tagName === lastTagName) {
               onAllCategoriesFound();
             }
-          }).catch((error) => {
-            console.error(error);
+          }).catch(() => {
             onAllCategoriesFound();
           });
       } catch (error) {

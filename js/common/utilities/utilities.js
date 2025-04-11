@@ -172,7 +172,7 @@ class Utils {
 
   /**
    * @param {Number} milliseconds
-   * @returns {Promise<any>}
+   * @returns {Promise<void>}
    */
   static sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -396,6 +396,15 @@ class Utils {
   }
 
   /**
+   * @param {String} tags
+   * @returns {String}
+   */
+  static orTags(tags) {
+    const tagList = Utils.removeExtraWhiteSpace(tags).split(" ");
+    return `( ${tagList.join(" ~ ")} )`;
+  }
+
+  /**
    * @param {HTMLInputElement | HTMLTextAreaElement} input
    * @returns {HTMLElement | null}
    */
@@ -496,7 +505,7 @@ class Utils {
   }
 
   static configureVideoOutlines() {
-    const size = Flags.onMobileDevice ? 2 : 3;
+    const size = Flags.onMobileDevice ? 2 : 2;
     const videoSelector = Flags.onFavoritesPage ? "&:has(img.video)" : ">img.video";
     const gifSelector = Flags.onFavoritesPage ? "&:has(img.gif)" : ">img.gif";
     const videoRule = `${videoSelector} {outline: ${size}px solid blue}`;
@@ -844,7 +853,7 @@ class Utils {
   }
 
   /**
-   * @param {HTMLTextAreaElement} input
+   * @param {HTMLTextAreaElement | HTMLInputElement} input
    */
   static hideAwesomplete(input) {
     const awesomplete = Utils.getAwesompleteFromInput(input);
@@ -1127,23 +1136,23 @@ class Utils {
     return match === null ? "NA" : match[1];
   }
 
-  static deletePersistentData() {
+  /**
+   * @returns {Boolean}
+   */
+  static askToReset() {
     const desktopSuffix = Flags.onMobileDevice ? "" : " Tag modifications and saved searches will be preserved.";
-
     const message = `Are you sure you want to reset? This will delete all cached favorites, and preferences.${desktopSuffix}`;
+    return confirm(message);
+  }
 
-    if (confirm(message)) {
-      const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
+  static clearLocalStorage() {
+    const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
 
-      Object.keys(localStorage).forEach((key) => {
-        if (!persistentLocalStorageKeys.has(key)) {
-          localStorage.removeItem(key);
-        }
-      });
-      indexedDB.deleteDatabase(FavoritesDatabase.databaseName);
-      indexedDB.deleteDatabase(Extensions.databaseName);
-      indexedDB.deleteDatabase(Caption.databaseName);
-    }
+    Object.keys(localStorage).forEach((key) => {
+      if (!persistentLocalStorageKeys.has(key)) {
+        localStorage.removeItem(key);
+      }
+    });
   }
 
   /**
@@ -1238,12 +1247,6 @@ class Utils {
     if (Flags.galleryDisabled) {
       Utils.setupOriginalImageLinksOnSearchPageHelper();
       await Utils.findImageExtensionsOnSearchPage();
-    } else {
-      window.addEventListener("foundExtensionsOnSearchPage", () => {
-        Utils.setupOriginalImageLinksOnSearchPageHelper();
-      }, {
-        once: true
-      });
     }
   }
 
@@ -1402,8 +1405,12 @@ class Utils {
 
     if (searchBox !== null && (searchBox instanceof HTMLInputElement || searchBox instanceof HTMLTextAreaElement)) {
       searchBox.value = value;
-      searchBox.dispatchEvent(new CustomEvent("updatedProgrammatically"));
+      Events.favorites.searchBoxUpdated.emit();
     }
+  }
+
+  static clearMainSearchBox() {
+    Utils.setMainSearchBoxValue("");
   }
 
   /**
@@ -1423,6 +1430,14 @@ class Utils {
 
     if (searchBox !== null) {
       searchBox.focus();
+    }
+  }
+
+  static blurMainSearchBox() {
+    const searchBox = document.getElementById(Utils.mainSearchBoxId);
+
+    if (searchBox !== null) {
+      searchBox.blur();
     }
   }
 
@@ -1559,25 +1574,27 @@ class Utils {
   }
 
   /**
+   * @template T, R
    * @param {Worker} worker
-   * @param {Object} message
-   * @returns {Promise<any>}
+   * @param {T} messageToSend
+   * @param {Transferable[]} transferable
+   * @returns {Promise<R>}
    */
-  static sendPostedMessage(worker, message) {
+  static sendPostedMessage(worker, messageToSend, transferable) {
     return new Promise((resolve) => {
       const id = Date.now() + Math.random();
-      const handleMessage = (/** @type {{ data: { id: number; response: any; }; }} */ event) => {
+      const completeMessage = (/** @type {{ data: R & { id: Number}; }} */ event) => {
         if (event.data.id === id) {
-          worker.removeEventListener("message", handleMessage);
-          resolve(event.data.response);
+          worker.removeEventListener("message", completeMessage);
+          resolve(event.data);
         }
       };
 
-      worker.addEventListener("message", handleMessage);
+      worker.addEventListener("message", completeMessage);
       worker.postMessage({
-        ...message,
+        ...messageToSend,
         id
-      });
+      }, transferable);
     });
   }
 
@@ -2090,12 +2107,9 @@ class Utils {
     document.body.removeChild(element);
 
     const rgbValues = computedColor.match(/\d+/g);
-    // @ts-ignore
-    const r = parseInt(rgbValues[0]);
-    // @ts-ignore
-    const g = parseInt(rgbValues[1]);
-    // @ts-ignore
-    const b = parseInt(rgbValues[2]);
+    const r = rgbValues === null ? 0 : parseInt(rgbValues[0]);
+    const g = rgbValues === null ? 0 : parseInt(rgbValues[1]);
+    const b = rgbValues === null ? 0 : parseInt(rgbValues[2]);
     // eslint-disable-next-line no-bitwise
     return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
   }
@@ -2211,5 +2225,29 @@ class Utils {
       i += 1;
     }
     return numbers.sort((a, b) => a - b);
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  static yield() {
+    return Utils.sleep(0);
+  }
+
+  /**
+   * @template T
+   * @param {(...args: any[]) => T} fn
+   * @returns {(...args: any[]) => T}
+   */
+  static measureRuntime(fn) {
+    return (...args) => {
+      const start = performance.now();
+      const result = fn.apply(this, args);
+      const end = performance.now();
+
+      // eslint-disable-next-line no-console
+      console.log(`Runtime: ${(end - start).toFixed(3)} ms`);
+      return result;
+    };
   }
 }

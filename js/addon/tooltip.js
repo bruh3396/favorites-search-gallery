@@ -131,7 +131,7 @@ class Tooltip {
     this.searchBox.addEventListener("input", () => {
       this.assignColorsToMatchedTagsOnFavoritesPage();
     });
-    Events.favorites.newSearchResults.on(() => {
+    Events.favorites.searchResultsUpdated.on(() => {
       this.assignColorsToMatchedTagsOnFavoritesPage();
     });
   }

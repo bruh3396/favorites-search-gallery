@@ -12,7 +12,6 @@ class ElementTemplate {
     textContent = "",
     title = "",
     enabled = true,
-    action = "none",
     hotkey = "none",
     invokeActionOnCreation = false,
     savePreference = true,
@@ -24,15 +23,15 @@ class ElementTemplate {
     pollingTime = 50,
     preference = null,
     defaultValue = null,
-    eventEmitter = null,
-    useContainer = true}) {
+    event = null,
+    useContainer = true,
+    rightClickEnabled = false}) {
     this.id = id;
     this.parentId = parentId;
     this.position = position;
     this.textContent = textContent;
     this.title = title;
     this.enabled = enabled;
-    this.action = action;
     this.hotkey = hotkey;
     this.invokeActionOnCreation = invokeActionOnCreation;
     this.savePreference = savePreference;
@@ -43,7 +42,8 @@ class ElementTemplate {
     this.pollingTime = pollingTime;
     this.preference = preference;
     this.defaultValue = defaultValue;
-    this.eventEmitter = eventEmitter;
+    this.event = event;
     this.useContainer = useContainer;
+    this.rightClickEnabled = rightClickEnabled;
   }
 }

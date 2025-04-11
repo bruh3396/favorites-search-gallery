@@ -145,7 +145,7 @@ class PostMetadata {
     if (status === PostMetadata.statuses.HAS_FAVORITE_RECORD) {
       await FetchQueues.postMetadata.wait();
       await this.populateHelper();
-      Events.favorites.foundMissingMetadata.emit(this.id);
+      Events.favorites.missingMetadataFound.emit(this.id);
       return;
     }
     this.populateMetadataFromRecord(record);
@@ -153,7 +153,7 @@ class PostMetadata {
     if (this.isEmpty) {
       await FetchQueues.postMetadata.wait();
       await this.populateHelper();
-      Events.favorites.foundMissingMetadata.emit(this.id);
+      Events.favorites.missingMetadataFound.emit(this.id);
     }
   }
 
@@ -267,7 +267,7 @@ class PostMetadata {
         return this.creationTimestamp;
 
       case "id":
-        return Number(this.id);
+        return 0;
 
       default:
         return 0;

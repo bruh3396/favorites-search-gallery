@@ -160,51 +160,37 @@ class SearchBox {
   }
 
   addEventListenersToSearchBox() {
-    window.addEventListener("searchForTag", (event) => {
-      if (!(event instanceof CustomEvent)) {
-        return;
-      }
-      this.searchBox.value = event.detail;
-      this.updateLastEditedSearchQuery();
-      this.executeSearch();
+    Events.caption.searchForTag.on((tag) => {
+      this.searchBox.value = tag;
+      this.startSearch();
     });
-    this.searchBox.addEventListener("updatedProgrammatically", () => {
+    Events.favorites.searchButtonClicked.on(this.onSearchButtonClicked.bind(this));
+    Events.favorites.searchBoxUpdated.on(() => {
       this.updateLastEditedSearchQuery();
     });
-    this.updateLastEditedSearchQueryOnInput();
     this.searchBox.addEventListener("keydown", (event) => {
       if (!(event instanceof KeyboardEvent)) {
         return;
       }
 
-      switch (event.key) {
-        case "Enter":
-          if (Utils.awesompleteIsSelected(this.searchBox)) {
-            return;
-          }
+      if (event.key === "Enter") {
+        if (!event.repeat && !Utils.awesompleteIsSelected(this.searchBox)) {
           event.preventDefault();
+          this.startSearch();
+        }
+        return;
+      }
 
-          if (event.repeat) {
-            return;
-          }
-          this.executeSearch();
-          break;
-
-        case "ArrowUp":
-
-        case "ArrowDown":
-          if (Utils.awesompleteIsVisible(this.searchBox)) {
-            return;
-          }
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        if (!Utils.awesompleteIsVisible(this.searchBox)) {
           event.preventDefault();
           this.searchHistory.navigate(event.key);
           this.searchBox.value = this.searchHistory.selectedQuery;
-          break;
-
-        default:
-          break;
+        }
       }
+
     });
+    this.updateLastEditedSearchQueryOnInput();
   }
 
   updateLastEditedSearchQueryOnInput() {
@@ -223,14 +209,23 @@ class SearchBox {
     this.searchHistory.updateLastEditedSearchQuery(this.searchBox.value);
   }
 
-  executeSearch() {
+  /**
+   * @param {MouseEvent} event
+   */
+  onSearchButtonClicked(event) {
+    const mouseEvent = new FavoritesMouseEvent(event);
+
+    if (mouseEvent.rightClick || mouseEvent.ctrlKey) {
+      Utils.openSearchPage(this.searchBox.value);
+      return;
+    }
+    this.startSearch();
+  }
+
+  startSearch() {
     this.searchHistory.add(this.searchBox.value);
     this.updateLastEditedSearchQuery();
-    // @ts-ignore
     Utils.hideAwesomplete(this.searchBox);
-    this.searchBox.dispatchEvent(new CustomEvent("controller", {
-      bubbles: true,
-      detail: this.searchBox.value
-    }));
+    Events.favorites.searchStarted.emit(this.searchBox.value);
   }
 }

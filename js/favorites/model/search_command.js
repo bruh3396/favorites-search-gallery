@@ -58,8 +58,6 @@ class SearchCommand {
    */
   constructor(searchQuery) {
     this.isEmpty = Utils.isEmptyString(searchQuery);
-    this.orGroups = [];
-    this.remainingSearchTags = [];
 
     if (this.isEmpty) {
       return;
@@ -68,17 +66,8 @@ class SearchCommand {
 
     this.orGroups = orGroups.map(orGroup => SearchCommand.createSearchTagGroup(orGroup));
     this.remainingSearchTags = SearchCommand.createSearchTagGroup(remainingSearchTags);
-    this.optimizeSearchCommand();
-  }
-
-  optimizeSearchCommand() {
-    for (const orGroup of this.orGroups) {
-      SearchCommand.sortByLeastExpensive(orGroup);
-    }
-    SearchCommand.sortByLeastExpensive(this.remainingSearchTags);
-    this.orGroups.sort((a, b) => {
-      return a.length - b.length;
-    });
+    this.optimize();
+    console.log(this);
   }
 
   /**
@@ -86,20 +75,7 @@ class SearchCommand {
    * @returns {Post[]}
    */
   getSearchResults(posts) {
-    if (this.isEmpty) {
-      return posts;
-    }
-    const results = [];
-
-    for (const post of posts) {
-      if (this.matches(post)) {
-        results.push(post);
-        post.setAsMatchedByMostRecentSearch(true);
-      } else {
-        post.setAsMatchedByMostRecentSearch(false);
-      }
-    }
-    return results;
+    return this.isEmpty ? posts : posts.filter(post => this.matches(post));
   }
 
   /**
@@ -107,10 +83,7 @@ class SearchCommand {
    * @returns {Boolean}
    */
   matches(post) {
-    if (!this.matchesAllRemainingSearchTags(post)) {
-      return false;
-    }
-    return this.matchesAllOrGroups(post);
+    return this.matchesAllRemainingSearchTags(post) && this.matchesAllOrGroups(post);
   }
 
   /**
@@ -118,12 +91,7 @@ class SearchCommand {
    * @returns {Boolean}
    */
   matchesAllRemainingSearchTags(post) {
-    for (const searchTag of this.remainingSearchTags) {
-      if (!searchTag.matches(post)) {
-        return false;
-      }
-    }
-    return true;
+    return this.remainingSearchTags.every(tag => tag.matches(post));
   }
 
   /**
@@ -131,25 +99,38 @@ class SearchCommand {
    * @returns {Boolean}
    */
   matchesAllOrGroups(post) {
-    for (const orGroup of this.orGroups) {
-      if (!this.atLeastOnePostTagIsInOrGroup(orGroup, post)) {
-        return false;
-      }
-    }
-    return true;
+    return this.orGroups.every(orGroup => orGroup.some(tag => tag.matches(post)));
   }
 
-  /**
-   * @param {SearchTag[]} orGroup
-   * @param {Post} post
-   * @returns {Boolean}
-   */
-  atLeastOnePostTagIsInOrGroup(orGroup, post) {
-    for (const orTag of orGroup) {
-      if (orTag.matches(post)) {
-        return true;
+  optimize() {
+    this.simplifyOrGroupsWithOnlyOneTag();
+    this.sortSearchTagsByLeastExpensive();
+    this.sortOrGroupsByLength();
+  }
+
+  simplifyOrGroupsWithOnlyOneTag() {
+    const orGroups = [];
+
+    for (const orGroup of this.orGroups) {
+      if (orGroup.length === 1) {
+        this.remainingSearchTags.push(orGroup[0]);
+      } else {
+        orGroups.push(orGroup);
       }
     }
-    return false;
+    this.orGroups = orGroups;
+  }
+
+  sortSearchTagsByLeastExpensive() {
+    for (const tagGroup of this.orGroups) {
+      SearchCommand.sortByLeastExpensive(tagGroup);
+    }
+    SearchCommand.sortByLeastExpensive(this.remainingSearchTags);
+  }
+
+  sortOrGroupsByLength() {
+    this.orGroups.sort((a, b) => {
+      return a.length - b.length;
+    });
   }
 }

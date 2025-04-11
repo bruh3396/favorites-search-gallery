@@ -4,9 +4,9 @@ class FetchQueues {
   /** @type {ThrottledQueue} */
   static postMetadata = new ThrottledQueue(Settings.throttledMetadataAPIRequestDelay);
   /** @type {ThrottledQueue} */
-  static extensionRecovery = new ThrottledQueue(Settings.throttledExtensionAPIRequestDelay);
-  /** @type {ThrottledQueue} */
   static bruteForceImageExtension = new ThrottledQueue(Settings.bruteForceImageExtensionRequestDelay);
+  /** @type {ThrottledQueue} */
+  static imageRequest = new ThrottledQueue(Settings.imageRequestDelay);
 
   static {
     Utils.addStaticInitializer(FetchQueues.addEventListeners);

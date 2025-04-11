@@ -435,8 +435,15 @@ class HTMLStrings {
     }
 
     #find-favorite {
-      /* display: none; */
       margin-top: 7px;
+
+      >button {
+        white-space: nowrap
+      }
+
+      >button:last-of-type {
+        margin-bottom: 5px;
+      }
 
       >input {
         width: 75px;
@@ -857,6 +864,10 @@ class HTMLStrings {
         display: inline-block;
       }
     }
+
+    #sorting-method-id {
+      display: none;
+    }
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
@@ -867,48 +878,6 @@ class HTMLStrings {
       </span>
       <div id="left-favorites-panel-top-row">
         <span id="favorites-pagination-placeholder"></span>
-        <span id="help-links-container">
-          <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
-          <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
-            target="_blank">Feedback</a>
-          <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
-            Issue</a>
-          <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
-
-            <div id="whats-new-container" class="light-green-gradient">
-              <h4>1.19:</h4>
-              <h5>Features:</h5>
-              <ul>
-                <li>New favorites layouts</li>
-                <ul>
-                  <li>Waterfall (column)</li>
-                  <li>River (row)</li>
-                  <li>Square</li>
-                  <li>Legacy (grid)</li>
-                </ul>
-                <li>Infinite favorites scroll option added</li>
-                <ul>
-                  <li>Page option still available</li>
-                </ul>
-                <li>Infinite gallery on search pages</li>
-                <ul>
-                  <li>Go to next search page without ever exiting gallery</li>
-                </ul>
-                <li>Download images</li>
-                <ul>
-                  <li>Expiremental for now</li>
-                </ul>
-                <li>New gallery hotkeys</li>
-                <ul>
-                  <li>F: Fullscreen</li>
-                  <li>G: Open post</li>
-                  <li>Q: Open original</li>
-                  <li>E: Add favorite</li>
-                </ul>
-              </ul>
-            </div>
-          </a>
-        </span>
       </div>
       <div id="left-favorites-panel-bottom-row">
         <div id="bottom-panel-1">
@@ -979,11 +948,6 @@ Lower numbers improve responsiveness">
           <div id="show-ui-wrapper">
           </div>
           <div class="options-container">
-            <span id="find-favorite">
-              <button title="Find favorite favorite using its ID" id="find-favorite-button"
-                style="white-space: nowrap;">Find</button>
-              <input type="number" id="find-favorite-input" placeholder="ID">
-            </span>
           </div>
         </div>
 
@@ -1236,6 +1200,9 @@ Lower numbers improve responsiveness">
     position: fixed;
     top: 0;
     left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 
     * {
       top: 0;
@@ -1246,18 +1213,46 @@ Lower numbers improve responsiveness">
       -moz-user-drag: none;
       -o-user-drag: none;
     }
+  }
 
-    canvas,
-    img {
-      overflow: hidden;
-      pointer-events: none;
-      height: 100vh;
-      margin: 0;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+  .fullscreen-image-container {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    position: relative !important;
+
+    &.zoomed-in {
+      overflow: scroll !important;
+      pointer-events: all !important;
+
+      .fullscreen-image {
+        height: 300%;
+        left: 0 !important;
+        top: 0 !important;
+        transform: none !important;
+
+        &.zooming {
+          cursor: zoom-out;
+        }
+      }
     }
   }
+
+  .fullscreen-image {
+    position: relative !important;
+    pointer-events: all;
+    height: 100%;
+    margin: 0;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%);
+
+    &.zooming {
+      cursor: zoom-in;
+    }
+  }
+
+
 
   a.hide {
     cursor: default;
@@ -1275,10 +1270,6 @@ Lower numbers improve responsiveness">
     cursor: none;
     width: 100vw;
     height: 100vh;
-
-    &.active {
-      pointer-events: all;
-    }
 
     &.visible {
       display: block;
@@ -2262,5 +2253,49 @@ Lower numbers improve responsiveness">
     margin-top: -5px;
   }
 </style>
+`;
+
+  static help = `
+<span id="help-links-container">
+  <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
+  <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
+    target="_blank">Feedback</a>
+  <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
+    Issue</a>
+  <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
+    <div id="whats-new-container" class="light-green-gradient">
+      <h4>1.19:</h4>
+      <h5>Features:</h5>
+      <ul>
+        <li>New favorites layouts</li>
+        <ul>
+          <li>Waterfall (column)</li>
+          <li>River (row)</li>
+          <li>Square</li>
+          <li>Legacy (grid)</li>
+        </ul>
+        <li>Infinite favorites scroll option added</li>
+        <ul>
+          <li>Page option still available</li>
+        </ul>
+        <li>Infinite gallery on search pages</li>
+        <ul>
+          <li>Go to next search page without ever exiting gallery</li>
+        </ul>
+        <li>Download images</li>
+        <ul>
+          <li>Expiremental for now</li>
+        </ul>
+        <li>New gallery hotkeys</li>
+        <ul>
+          <li>F: Fullscreen</li>
+          <li>G: Open post</li>
+          <li>Q: Open original</li>
+          <li>E: Add favorite</li>
+        </ul>
+      </ul>
+    </div>
+  </a>
+</span>
 `;
 }

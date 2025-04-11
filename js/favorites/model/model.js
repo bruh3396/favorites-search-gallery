@@ -43,7 +43,7 @@ class FavoritesModel {
    */
   fetchAllFavorites(onSearchResultsFound) {
     const onFavoritesFound = (/** @type {Post[]} */ favorites) => {
-      this.latestSearchResults = this.latestSearchResults.concat(this.filter.filterFavorites(favorites));
+      this.latestSearchResults = this.latestSearchResults.concat(this.filter.filter(favorites));
       return onSearchResultsFound();
     };
     return this.loader.fetchAllFavorites(onFavoritesFound);
@@ -55,7 +55,7 @@ class FavoritesModel {
   findNewFavoritesOnReload() {
     return this.loader.fetchFavoritesOnReload()
       .then((newFavorites) => {
-        const newSearchResults = this.filter.filterFavorites(newFavorites);
+        const newSearchResults = this.filter.filter(newFavorites);
 
         this.latestSearchResults = newSearchResults.concat(this.latestSearchResults);
         return {
@@ -100,7 +100,7 @@ class FavoritesModel {
    * @returns {Post[]}
    */
   getSearchResults(searchQuery) {
-    this.filter.setSearchCommand(searchQuery);
+    this.filter.setSearchQuery(searchQuery);
     return this.getSearchResultsFromPreviousQuery();
   }
 
@@ -108,7 +108,7 @@ class FavoritesModel {
    * @returns {Post[]}
    */
   getSearchResultsFromPreviousQuery() {
-    const favorites = this.filter.filterFavorites(this.getAllFavorites());
+    const favorites = this.filter.filter(this.getAllFavorites());
 
     this.latestSearchResults = this.sorter.sortFavorites(favorites);
     return this.latestSearchResults;
@@ -122,13 +122,11 @@ class FavoritesModel {
   }
 
   invertSearchResults() {
-    for (const favorite of this.getAllFavorites()) {
-      favorite.toggleMatchedByMostRecentSearch();
-    }
-    const searchResults = this.getAllFavorites()
-      .filter(favorite => favorite.matchedByLatestSearch);
+    const searchResultIds = new Set(this.latestSearchResults.map(favorite => favorite.id));
+    const invertedSearchResults = this.getAllFavorites().filter(favorite => !searchResultIds.has(favorite.id));
+    const ratingFilteredInvertedSearchResults = this.filter.filterByRating(invertedSearchResults);
 
-    this.latestSearchResults = this.filter.filterFavoritesByRating(searchResults);
+    this.latestSearchResults = this.filter.filterOutBlacklisted(ratingFilteredInvertedSearchResults);
   }
 
   /**
@@ -172,7 +170,7 @@ class FavoritesModel {
    * @param {String} id
    * @returns {Boolean}
    */
-  gotoPageWithFavorite(id) {
+  gotoPageWithFavoriteId(id) {
     return this.paginator.gotoPageWithFavorite(id);
   }
 
@@ -194,7 +192,7 @@ class FavoritesModel {
    * @param {Boolean} value
    */
   toggleBlacklist(value) {
-    this.filter.toggleBlacklist(value);
+    this.filter.toggleBlacklistFiltering(value);
   }
 
   /**
@@ -264,5 +262,9 @@ class FavoritesModel {
 
   stopSearchSubset() {
     this.loader.stopSearchSubset();
+  }
+
+  deleteDatabase() {
+    this.loader.deleteDatabase();
   }
 }

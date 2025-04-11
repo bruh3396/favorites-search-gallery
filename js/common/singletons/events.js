@@ -1,38 +1,57 @@
 class Events {
   static favorites = {
-    /** @type {EventEmitter<void>} */ pageChange: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ searchStarted: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ searchBoxUpdated: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ pageChanged: new EventEmitter(true),
+    /** @type {EventEmitter<Number>} */ pageSelected: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ relativePageSelected: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ findFavoriteStarted: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ findFavoriteInAllStarted: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ favoritesLoadedFromDatabase: new EventEmitter(true),
-    /** @type {EventEmitter<void>} */ startedFetchingFavorites: new EventEmitter(true),
-    /** @type {EventEmitter<Post[]>} */ newSearchResults: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ favoritesLoaded: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ startedFetchingFavorites: new EventEmitter(true),
+    /** @type {EventEmitter<Post[]>} */ searchResultsUpdated: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ favoriteRemoved: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ inGalleryRequest: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ pageChangeResponse: new EventEmitter(true),
     /** @type {EventEmitter<Post[]>} */ newFavoritesFoundOnReload: new EventEmitter(true),
     /** @type {EventEmitter<HTMLElement[]>} */ resultsAddedToCurrentPage: new EventEmitter(true),
-    /** @type {EventEmitter<FavoriteLayout>} */ layoutChanged: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ missingMetadataFound: new EventEmitter(true),
     /** @type {EventEmitter<void>} */ favoritesResized: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ showOnHoverToggled: new EventEmitter(true),
-    /** @type {EventEmitter<String>} */ foundMissingMetadata: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ captionsReEnabled: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ tooltipsToggled: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ autoplayToggled: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ captionsToggled: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ sortAscendingToggled: new EventEmitter(true),
-    /** @type {EventEmitter<MetadataMetric>} */ sortingMethodChanged: new EventEmitter(true),
-    /** @type {EventEmitter<PerformanceProfile>} */ performanceProfileChanged: new EventEmitter(true),
     /** @type {EventEmitter<Number>} */ resultsPerPageChanged: new EventEmitter(true),
     /** @type {EventEmitter<Rating>} */ allowedRatingsChanged: new EventEmitter(true),
     /** @type {EventEmitter<Number>} */ columnCountChanged: new EventEmitter(true),
     /** @type {EventEmitter<Number>} */ rowSizeChanged: new EventEmitter(true),
+    /** @type {EventEmitter<FavoriteLayout>} */ layoutChanged: new EventEmitter(true),
+    /** @type {EventEmitter<MetadataMetric>} */ sortingMethodChanged: new EventEmitter(true),
+    /** @type {EventEmitter<PerformanceProfile>} */ performanceProfileChanged: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ showOnHoverToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ tooltipsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ autoplayToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ hintsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ optionsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ removeButtonsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ addButtonsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ uiToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ darkThemeToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ headerToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ captionsToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ sortAscendingToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ galleryMenuToggled: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ blacklistToggled: new EventEmitter(true),
     /** @type {EventEmitter<Boolean>} */ infiniteScrollToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ fancyHoveringToggled: new EventEmitter(true),
+    /** @type {EventEmitter<Boolean>} */ savedSearchesToggled: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ downloadButtonClicked: new EventEmitter(true),
-    /** @type {EventEmitter<MouseEvent>} */ searchSubset: new EventEmitter(true),
-    /** @type {EventEmitter<MouseEvent>} */ stopSearchSubset: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ searchSubsetClicked: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ stopSearchSubsetClicked: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ invertButtonClicked: new EventEmitter(true),
     /** @type {EventEmitter<MouseEvent>} */ shuffleButtonClicked: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ savedSearchesToggled: new EventEmitter(true),
-    /** @type {EventEmitter<String>} */ favoriteRemoved: new EventEmitter(true)
+    /** @type {EventEmitter<MouseEvent>} */ searchButtonClicked: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ clearButtonClicked: new EventEmitter(true),
+    /** @type {EventEmitter<MouseEvent>} */ resetButtonClicked: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ reset: new EventEmitter(true)
 
   };
 
@@ -40,11 +59,14 @@ class Events {
     /** @type {EventEmitter<Boolean>} */ inGalleryResponse: new EventEmitter(true),
     /** @type {EventEmitter<NavigationKey>} */ requestPageChange: new EventEmitter(true),
     /** @type {EventEmitter<String>} */ favoriteAddedOrDeleted: new EventEmitter(true),
-    /** @type {EventEmitter<Boolean>} */ showOnHover: new EventEmitter(true)
+    /** @type {EventEmitter<Boolean>} */ showOnHover: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ enteredGallery: new EventEmitter(true),
+    /** @type {EventEmitter<void>} */ exitedGallery: new EventEmitter(true)
   };
 
   static caption = {
-    /** @type {EventEmitter<String>} */ idClicked: new EventEmitter(true)
+    /** @type {EventEmitter<String>} */ idClicked: new EventEmitter(true),
+    /** @type {EventEmitter<String>} */ searchForTag: new EventEmitter(true)
   };
 
   static global = {

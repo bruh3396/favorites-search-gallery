@@ -101,7 +101,7 @@ class Post {
     postTagSet.delete(id);
 
     if (apiTagSet.symmetricDifference(postTagSet).size > 0) {
-      post.initializeTagSet(Utils.convertToTagString(apiTagSet));
+      post.initializeTagSets(Utils.convertToTagString(apiTagSet));
     }
   }
 
@@ -129,8 +129,6 @@ class Post {
   attributesNeededForSearchArePopulated;
   /** @type {Boolean} */
   htmlElementCreated;
-  /** @type {Boolean} */
-  matchedByLatestSearch;
 
   /** @type {String} */
   get compressedThumbSource() {
@@ -194,7 +192,6 @@ class Post {
     this.initializeFields();
     this.inactivePost = new InactivePost(entity);
     this.populateAttributesNeededForSearch();
-    this.setAsMatchedByMostRecentSearch(true);
     this.addInstanceToAllPosts();
   }
 
@@ -211,7 +208,7 @@ class Post {
     this.attributesNeededForSearchArePopulated = true;
     this.id = this.inactivePost.id;
     this.metadata = this.inactivePost.createMetadata();
-    this.initializeTagSet(this.inactivePost.tags);
+    this.initializeTagSets(this.inactivePost.tags);
     this.deleteConsumedPropertiesFromInactivePost();
   }
 
@@ -300,16 +297,11 @@ class Post {
   /**
    * @param {String} tags
    */
-  initializeTagSet(tags) {
+  initializeTagSets(tags) {
     this.tagSet = Utils.convertToTagSet(`${this.id} ${tags}`);
-    this.originalTagsLength = this.tagSet.size;
-    this.initializeAdditionalTagSet();
-  }
-
-  initializeAdditionalTagSet() {
     this.additionalTagSet = Utils.convertToTagSet(TagModifier.tagModifications.get(this.id) || "");
 
-    if (this.additionalTagSet.size !== 0) {
+    if (this.additionalTagSet.size > 0) {
       this.combineOriginalAndAdditionalTagSets();
     }
   }
@@ -363,17 +355,6 @@ class Post {
     if (!Post.allPosts.has(this.id)) {
       Post.allPosts.set(this.id, this);
     }
-  }
-
-  toggleMatchedByMostRecentSearch() {
-    this.setAsMatchedByMostRecentSearch(!this.matchedByLatestSearch);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  setAsMatchedByMostRecentSearch(value) {
-    this.matchedByLatestSearch = value;
   }
 
   combineOriginalAndAdditionalTagSets() {

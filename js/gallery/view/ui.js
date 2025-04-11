@@ -51,14 +51,14 @@ class GalleryUI {
    */
   enterGallery(thumb) {
     this.setLastVisitedThumb(thumb);
-    this.toggleActiveBackground(true);
+    this.toggleBackgroundVisibility(true);
     this.toggleScrollbar(false);
     this.toggleVideoPointerEvents(true);
     this.toggleMenu(true);
   }
 
   exitGallery() {
-    this.toggleActiveBackground(false);
+    this.toggleBackgroundVisibility(false);
     this.toggleScrollbar(true);
     this.scrollToLastVisitedThumb();
     this.toggleVideoPointerEvents(false);
@@ -89,8 +89,7 @@ class GalleryUI {
   /**
    * @param {Boolean} value
    */
-  toggleActiveBackground(value) {
-    this.background.classList.toggle("active", value);
+  toggleBackgroundVisibility(value) {
     this.background.classList.toggle("visible", value);
   }
 
@@ -220,16 +219,5 @@ class GalleryUI {
         display: ${value ? "flex" : "none"} !important;
       }
       `, "gallery-menu-visibility");
-  }
-
-  /**
-   * @param {ImageCursor} cursor
-   */
-  setImageCursor(cursor) {
-    Utils.insertStyleHTML(`
-      #gallery-background {
-        cursor: ${cursor} !important;
-      }
-      `, "gallery-image-cursor");
   }
 }

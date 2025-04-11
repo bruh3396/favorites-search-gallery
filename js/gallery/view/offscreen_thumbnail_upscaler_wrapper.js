@@ -1,20 +1,20 @@
-class OffscreenThumbUpscaler extends ThumbUpscaler {
+class OffscreenThumbUpscalerWrapper extends ThumbUpscaler {
   /** @type {Worker} */
   worker;
-  /** @type {BatchExecutor<UpscaleRequest>} */
-  scheduler;
+  /** @type {ThrottledQueue} */
+  upscaleQueue;
 
   constructor() {
     super();
     this.worker = this.createWorker();
-    this.scheduler = new BatchExecutor(1, 500, this.sendRequestsToWorker.bind(this));
+    this.upscaleQueue = new ThrottledQueue(50);
   }
 
   /**
    * @returns {Worker}
    */
   createWorker() {
-    const worker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.upscaler));
+    const worker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.offscreenThumbnailUpscaler));
 
     worker.postMessage({
       action: "initialize",
@@ -30,22 +30,25 @@ class OffscreenThumbUpscaler extends ThumbUpscaler {
   async finishUpscale(request) {
     const upscaleRequest = await request.getUpscaleRequest();
 
-    this.scheduler.add(upscaleRequest);
+    if (GallerySettings.sendImageBitmapsToWorker) {
+      await this.upscaleQueue.wait();
+    }
+    this.sendRequestToWorker(upscaleRequest);
   }
 
   /**
-   * @param {UpscaleRequest[]} requests
+   * @param {UpscaleRequest} request
    */
-  sendRequestsToWorker(requests) {
-    const transferable = requests.map(request => request.transferable).flat(1);
-
+  sendRequestToWorker(request) {
     this.worker.postMessage({
-      action: "upscaleMultiple",
-      requests
-    }, transferable);
+      action: "upscale",
+      request
+    }, request.transferable);
   }
 
-  clearHelper() {
+  clear() {
+    super.clear();
+    this.upscaleQueue.reset();
     this.worker.postMessage({
       action: "clear"
     });

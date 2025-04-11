@@ -13,10 +13,6 @@ class ThumbUpscaler {
     if (this.requestIsValid(request)) {
       this.finishUpscale(request);
       this.drawnCanvasIds.add(request.id);
-
-      if (request.isAnimated) {
-        request.close();
-      }
     }
   }
 
@@ -113,8 +109,5 @@ class ThumbUpscaler {
 
   clear() {
     this.drawnCanvasIds.clear();
-    this.clearHelper();
   }
-
-  clearHelper() { }
 }

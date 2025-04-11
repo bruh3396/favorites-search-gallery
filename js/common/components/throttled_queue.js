@@ -15,6 +15,7 @@ class ThrottledQueue {
     this.queue = [];
     this.delay = delay;
     this.draining = false;
+    this.paused = false;
   }
   /**
    * @returns {Promise<void>}
@@ -45,12 +46,12 @@ class ThrottledQueue {
         continue;
       }
 
+      item.resolve();
+      await Utils.sleep(this.delay);
+
       if (this.paused) {
         break;
       }
-
-      item.resolve();
-      await Utils.sleep(this.delay);
     }
   }
 
@@ -68,5 +69,11 @@ class ThrottledQueue {
   resume() {
     this.paused = false;
     this.startDraining();
+  }
+
+  reset() {
+    this.queue = [];
+    this.draining = false;
+    this.paused = false;
   }
 }

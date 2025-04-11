@@ -42,6 +42,7 @@ class GalleryView {
     this.toggleVisibility(true);
     this.renderer.render(thumb);
     this.ui.show();
+    this.renderer.toggleZoom(false);
   }
 
   hideContent() {
@@ -63,6 +64,7 @@ class GalleryView {
     this.renderer.clear();
     this.ui.exitGallery();
     this.toggleVisibility(false);
+    this.toggleZoomCursor(false);
   }
 
   /**
@@ -75,15 +77,19 @@ class GalleryView {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  preloadContent(thumbs) {
-    this.renderer.preloadContent(thumbs);
+  preloadContentOutOfGallery(thumbs) {
+    if (GallerySettings.preloadingEnabled) {
+      this.renderer.preloadContentOutOfGallery(thumbs);
+    }
   }
 
   /**
    * @param {HTMLElement[]} thumbs
    */
   preloadContentInGallery(thumbs) {
-    this.renderer.preloadContentInGallery(thumbs);
+    if (GallerySettings.preloadingEnabled) {
+      this.renderer.preloadContentInGallery(thumbs);
+    }
   }
 
   handlePageChange() {
@@ -161,9 +167,25 @@ class GalleryView {
   }
 
   /**
-   * @param {ImageCursor} cursor
+   * @param {Boolean} value
    */
-  setImageCursor(cursor) {
-    this.ui.setImageCursor(cursor);
+  toggleZoomCursor(value) {
+    this.renderer.toggleZoomCursor(value);
+  }
+
+  /**
+   * @param {Boolean | undefined} value
+   * @returns {Boolean}
+   */
+  toggleZoom(value = undefined) {
+    return this.renderer.toggleZoom(value);
+  }
+
+  /**
+   * @param {Number} x
+   * @param {Number} y
+   */
+  scrollToZoomPoint(x, y) {
+    this.renderer.scrollToZoomPoint(x, y);
   }
 }

@@ -126,13 +126,24 @@ class ImageRequest {
   }
 
   /**
-   * @returns {Promise<UpscaleRequest>}
+   * @returns {Promise<ImageBitmap | null>}
    */
-  async getUpscaleRequest() {
+  getImageBitmapClone() {
+    if (GallerySettings.fetchImageBitmapsInWorker) {
+      return Promise.resolve(null);
+    }
+
     if (!(this.imageBitmap instanceof ImageBitmap)) {
       throw new Error("Tried to create upscale request without image bitmap");
     }
-    const imageBitmapClone = await createImageBitmap(this.imageBitmap);
-    return new UpscaleRequest(this.thumb, imageBitmapClone);
+    return createImageBitmap(this.imageBitmap);
+  }
+  /**
+   * @returns {Promise<UpscaleRequest>}
+   */
+  async getUpscaleRequest() {
+    const imageBitmapClone = await this.getImageBitmapClone();
+    const imageURL = (await ImageUtils.getOriginalImageURLWithExtension(this.thumb)).replace(".mp4", ".jpg");
+    return new UpscaleRequest(this.thumb, imageBitmapClone, imageURL);
   }
 }

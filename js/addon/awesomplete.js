@@ -43,7 +43,7 @@ class AwesompleteWrapper {
       },
       replace: (suggestion) => {
         this.insertSuggestion(awesomplete.input, Utils.removeSavedSearchPrefix(decodeEntities(suggestion.value)));
-        awesomplete.input.dispatchEvent(new CustomEvent("updatedProgrammatically"));
+        Events.favorites.searchBoxUpdated.emit();
       }
     });
 

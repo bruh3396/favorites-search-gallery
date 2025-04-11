@@ -27,7 +27,7 @@ class FavoritesSettings {
   }
   /** @type {MediaExtension} */
   static defaultMediaExtension = "jpg";
-  static thumbnailSpacing = 5;
+  static thumbnailSpacing = 7;
   static rightContentMargin = 15;
   static infiniteScrollBatchSize = 50;
   static infiniteScrollMargin = "75%";

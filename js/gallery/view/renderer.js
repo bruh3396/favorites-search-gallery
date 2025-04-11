@@ -30,6 +30,13 @@ class Renderer {
     console.error(`Not Implemented: ${thumb}`);
   }
 
+  /**
+   * @param {HTMLElement[]} thumbs
+   */
+  preload(thumbs) {
+    console.error(`Not Implemented: ${thumbs.length} thumbs`);
+  }
+
   clear() {
     console.error("Not Implemented");
   }

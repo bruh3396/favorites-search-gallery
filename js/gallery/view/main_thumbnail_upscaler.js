@@ -1,27 +1,47 @@
 class MainThumbUpscaler extends ThumbUpscaler {
   /** @type {Map<String, HTMLCanvasElement>} */
   canvases;
+  /** @type {BatchExecutor<ImageRequest>} */
+  scheduler;
 
   constructor() {
     super();
     this.canvases = new Map();
+    this.scheduler = new BatchExecutor(15, 500, this.upscaleBatch.bind(this));
   }
 
   /**
    * @param {ImageRequest} request
    */
   finishUpscale(request) {
-    if (request.imageBitmap === null) {
-      return;
+    this.scheduler.add(request);
+  }
+
+  /**
+   * @param {ImageRequest[]} requests
+   */
+  upscaleBatch(requests) {
+    for (const request of requests) {
+      this.finishUpscaleHelper(request);
     }
+  }
+
+  /**
+   * @param {ImageRequest} request
+   */
+  finishUpscaleHelper(request) {
     const canvas = request.thumb.querySelector("canvas");
 
-    if (canvas === null) {
+    if (!(canvas instanceof HTMLCanvasElement) || !(request.imageBitmap instanceof ImageBitmap)) {
       return;
     }
     this.canvases.set(request.id, canvas);
     this.setCanvasDimensionsFromImageBitmap(canvas, request.imageBitmap);
     Utils.drawCanvas(canvas.getContext("2d"), request.imageBitmap);
+
+    if (request.isAnimated) {
+      request.close();
+    }
   }
 
   /**
@@ -34,11 +54,14 @@ class MainThumbUpscaler extends ThumbUpscaler {
     }
   }
 
-  clearHelper() {
+  clear() {
+    super.clear();
+
     for (const canvas of this.canvases.values()) {
       this.clearCanvas(canvas);
     }
     this.canvases.clear();
+    this.scheduler.reset();
   }
 
   /**

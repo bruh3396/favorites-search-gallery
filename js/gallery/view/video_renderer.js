@@ -30,7 +30,7 @@ class GalleryVideoRenderer extends Renderer {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  preloadVideos(thumbs) {
+  preload(thumbs) {
     this.videoController.preloadVideoPlayers(thumbs);
   }
 

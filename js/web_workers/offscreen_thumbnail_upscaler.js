@@ -1,13 +1,30 @@
 /**
- * @param {OffscreenCanvasRenderingContext2D | null} context
  * @param {UpscaleRequest} request
+ * @returns {Promise<ImageBitmap>}
  */
-function drawOffscreenCanvas(context, request) {
+async function createImageBitmapFromRequest(request) {
+  const reponse = await fetch(request.imageURL);
+  const blob = await reponse.blob();
+  return createImageBitmap(blob);
+}
+
+/**
+ * @param {UpscaleRequest} request
+ * @returns {Promise<ImageBitmap>}
+ */
+function getImageBitmapFromRequest(request) {
+  return request.imageBitmap instanceof ImageBitmap ? Promise.resolve(request.imageBitmap) : createImageBitmapFromRequest(request);
+}
+
+/**
+ * @param {OffscreenCanvasRenderingContext2D | null} context
+ * @param {ImageBitmap} imageBitmap
+ */
+function drawOffscreenCanvas(context, imageBitmap) {
   if (context === null) {
     return;
   }
   const offscreenCanvas = context.canvas;
-  const imageBitmap = request.imageBitmap;
   const ratio = Math.min(offscreenCanvas.width / imageBitmap.width, offscreenCanvas.height / imageBitmap.height);
   const centerShiftX = (offscreenCanvas.width - (imageBitmap.width * ratio)) / 2;
   const centerShiftY = (offscreenCanvas.height - (imageBitmap.height * ratio)) / 2;
@@ -41,14 +58,15 @@ function clearOffscreenCanvas(offscreenCanvas) {
 
 /**
  * @param {UpscaleRequest} request
+ * @param {ImageBitmap} imageBitmap
  */
-function setOffscreenCanvasDimensions(request) {
+function setOffscreenCanvasDimensions(request, imageBitmap) {
   if (request.hasDimensions || request.offscreenCanvas === null) {
     return;
   }
   const maxHeight = maxUpscaledThumbCanvasHeight;
-  const width = request.imageBitmap.width;
-  const height = request.imageBitmap.height;
+  const width = imageBitmap.width;
+  const height = imageBitmap.height;
   let targetWidth = upscaledThumbCanvasWidth;
   let targetHeight = (targetWidth / width) * height;
 
@@ -65,7 +83,7 @@ function setOffscreenCanvasDimensions(request) {
   request.offscreenCanvas.height = targetHeight;
 }
 
-class Upscaler {
+class OffscreenThumbUpscaler {
   /** @type {Map<String, OffscreenCanvas>} */
   offscreenCanvases;
 
@@ -89,7 +107,7 @@ class Upscaler {
 
       case "upscale":
         // @ts-ignore
-        this.upscale(request);
+        this.upscale(request.request);
         break;
 
       case "upscaleMultiple":
@@ -113,36 +131,43 @@ class Upscaler {
     for (const request of requests) {
       this.upscale(request);
     }
+    postMessage({
+      action: "upscaleMultipleDone"
+    });
   }
 
   /**
    * @param {UpscaleRequest} request
    */
-  upscale(request) {
-    this.collectOffscreenCanvas(request);
-    this.drawOffscreenCanvas(request);
+  async upscale(request) {
+    const imageBitmap = await getImageBitmapFromRequest(request);
+
+    this.collectOffscreenCanvas(request, imageBitmap);
+    this.drawOffscreenCanvas(request, imageBitmap);
   }
 
   /**
    * @param {UpscaleRequest} request
+   * @param {ImageBitmap} imageBitmap
    */
-  collectOffscreenCanvas(request) {
+  collectOffscreenCanvas(request, imageBitmap) {
     if (!this.offscreenCanvases.has(request.id) && request.offscreenCanvas !== null) {
       this.offscreenCanvases.set(request.id, request.offscreenCanvas);
-      setOffscreenCanvasDimensions(request);
+      setOffscreenCanvasDimensions(request, imageBitmap);
     }
   }
 
   /**
    * @param {UpscaleRequest} request
+   * @param {ImageBitmap} imageBitmap
    */
-  drawOffscreenCanvas(request) {
+  drawOffscreenCanvas(request, imageBitmap) {
     const offscreenCanvas = this.offscreenCanvases.get(request.id);
 
     if (offscreenCanvas === undefined) {
       return;
     }
-    drawOffscreenCanvas(offscreenCanvas.getContext("2d"), request);
+    drawOffscreenCanvas(offscreenCanvas.getContext("2d"), imageBitmap);
   }
 
   clear() {
@@ -150,10 +175,9 @@ class Upscaler {
       clearOffscreenCanvas(offscreenCanvas);
     }
   }
-
 }
 
-const upscaler = new Upscaler();
+const upscaler = new OffscreenThumbUpscaler();
 let upscaledThumbCanvasWidth = 600;
 let maxUpscaledThumbCanvasHeight = 16000;
 

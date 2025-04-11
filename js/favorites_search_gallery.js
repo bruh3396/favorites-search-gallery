@@ -1,17 +1,12 @@
 class FavoritesSearchGallery {
   constructor() {
     if (Flags.favoritesSearchGalleryDisabled) {
-      throw new Error("Favorites Search Gallery disabled");
+      throw new Error("Favorites Search Gallery Disabled");
     }
     Utils.setup();
     new FavoritesController();
-    new FavoritesUI();
     new GalleryController();
-    new Tooltip();
-    new SavedSearches();
-    new Caption();
-    new TagModifier();
-    new AwesompleteWrapper();
+    new AddonController();
     Events.global.postProcess.emit();
   }
 }

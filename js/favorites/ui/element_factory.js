@@ -1,49 +1,29 @@
 class ElementFactory {
-  static handlerName = "uiController";
-
   /**
    * @param {ElementTemplate<MouseEvent>} template
    */
   static createButton(template) {
     const parent = document.getElementById(template.parentId);
+    const eventEmitter = template.event;
 
     if (parent === null) {
       return;
     }
-    parent.insertAdjacentHTML(template.position, `<button id="${template.id}" title="${template.title}" data-action="${template.action}">${template.textContent}</button>`);
-
+    parent.insertAdjacentHTML(template.position, `<button id="${template.id}" title="${template.title}">${template.textContent}</button>`);
     const button = document.getElementById(template.id);
 
     if (button === null || !(button instanceof HTMLButtonElement)) {
       return;
     }
-    button.onclick = (event) => {
-      button.dispatchEvent(new CustomEvent(ElementFactory.handlerName, {
-        bubbles: true,
-        detail: {
-          ctrlKey: event.ctrlKey
-        }
-      }));
 
-      if (template.eventEmitter !== null) {
-        template.eventEmitter.emit(event);
-      }
-    };
-
-    button.addEventListener("contextmenu", (event) => {
-      event.preventDefault();
-
-      button.dispatchEvent(new CustomEvent(ElementFactory.handlerName, {
-        bubbles: true,
-        detail: {
-          rightClick: true
-        }
-      }));
-
-      if (template.eventEmitter !== null) {
-        template.eventEmitter.emit(event);
-      }
-    });
+    if (eventEmitter !== null) {
+      button.onclick = (event) => {
+        eventEmitter.emit(event);
+      };
+      button.oncontextmenu = template.rightClickEnabled ? (event) => {
+        eventEmitter.emit(event);
+      } : null;
+    }
   }
 
   /**
@@ -57,26 +37,23 @@ class ElementFactory {
     }
     const checkbox = document.createElement("input");
     const emitEvent = () => {
-      if (template.action !== "none" && template.action !== undefined) {
-        checkbox.dispatchEvent(new CustomEvent(ElementFactory.handlerName, {
-          bubbles: true,
-          detail: checkbox.checked
-        }));
+      if (template.event !== null) {
+        template.event.emit(checkbox.checked);
       }
-
-      if (template.eventEmitter !== null) {
-        template.eventEmitter.emit(checkbox.checked);
+    };
+    const savePreference = () => {
+      if (template.savePreference && template.preference !== null) {
+        template.preference.set(checkbox.checked);
       }
     };
 
     checkbox.id = template.id;
     checkbox.type = "checkbox";
-    checkbox.dataset.action = template.action;
     parent.insertAdjacentElement(template.position, checkbox);
 
-    if (template.hotkey !== "" && template.eventEmitter !== null) {
+    if (template.hotkey !== "" && template.event !== null) {
       Events.global.keydown.on(async(event) => {
-        if (event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
+        if (!event.isHotkey || event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
           return;
         }
         const inGallery = await Utils.inGallery();
@@ -85,10 +62,10 @@ class ElementFactory {
           return;
         }
         checkbox.checked = !checkbox.checked;
+        savePreference();
         emitEvent();
       });
     }
-    // FavoritesUIController.registerCheckboxHotkey(template.hotkey, checkbox);
 
     if (template.preference === null) {
       checkbox.checked = template.defaultValue ? template.defaultValue : false;
@@ -97,9 +74,7 @@ class ElementFactory {
     }
 
     checkbox.addEventListener("change", () => {
-      if (template.savePreference && template.preference !== null) {
-        template.preference.set(checkbox.checked);
-      }
+      savePreference();
       emitEvent();
     });
 
@@ -146,10 +121,10 @@ class ElementFactory {
       return;
     }
     const optionsHTML = Array.from(Object.entries(template.optionPairs))
-      .map(([value, text]) => `<option value="${value}">${text}</option>`)
+      .map(([value, text]) => `<option id="${template.id}-${value}" value="${value}">${text}</option>`)
       .join("\n");
     const selectHTML = `
-      <select id="${template.id}" title="${template.title}" data-action="${template.action}">
+      <select id="${template.id}" title="${template.title}">
         ${optionsHTML}
       </select>`;
 
@@ -160,8 +135,8 @@ class ElementFactory {
       return;
     }
     const emitEvent = () => {
-      if (template.eventEmitter !== null) {
-        template.eventEmitter.emit(select.value);
+      if (template.event !== null) {
+        template.event.emit(select.value);
       }
 
       if (template.preference !== null) {
@@ -176,7 +151,9 @@ class ElementFactory {
     }
 
     if (template.invokeActionOnCreation) {
-      emitEvent();
+      Events.global.postProcess.on(() => {
+        emitEvent();
+      });
     }
 
     select.onchange = () => {
@@ -236,7 +213,7 @@ class ElementFactory {
         <hold-button class="number-arrow-down" pollingtime="${template.pollingTime}">
           <span>&lt;</span>
         </hold-button>
-        <input id="${template.id}" data-action="${template.action}" type="number" min="${template.min}" max="${template.max}" step="${template.step}" defaultValue="${defaultValue}">
+        <input id="${template.id}" type="number" min="${template.min}" max="${template.max}" step="${template.step}" defaultValue="${defaultValue}">
         <hold-button class="number-arrow-up" pollingtime="${template.pollingTime}">
           <span>&gt;</span>
         </hold-button>
@@ -254,8 +231,8 @@ class ElementFactory {
     const emitEvent = () => {
       const value = parseFloat(numberInput.value);
 
-      if (template.eventEmitter !== null) {
-        template.eventEmitter.emit(value);
+      if (template.event !== null) {
+        template.event.emit(value);
       }
 
       if (template.preference !== null) {
@@ -274,7 +251,9 @@ class ElementFactory {
     }));
 
     if (template.invokeActionOnCreation) {
-      emitEvent();
+      Events.global.postProcess.on(() => {
+        emitEvent();
+      });
     }
 
     numberInput.onchange = () => {

@@ -15,7 +15,7 @@ class GalleryImageRenderer extends Renderer {
     super(galleryContainer);
     this.canvas = new GalleryCanvas(this.container);
     this.imageCreator = new GalleryImageCreator(this.onImageCreated.bind(this));
-    this.thumbUpscaler = GallerySettings.useOffscreenThumbUpscaler ? new OffscreenThumbUpscaler() : new MainThumbUpscaler();
+    this.thumbUpscaler = GallerySettings.useOffscreenThumbUpscaler ? new OffscreenThumbUpscalerWrapper() : new MainThumbUpscaler();
     this.lastShownId = "";
   }
 
@@ -48,7 +48,7 @@ class GalleryImageRenderer extends Renderer {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  preloadImages(thumbs) {
+  preload(thumbs) {
     this.imageCreator.createNewImages(thumbs);
   }
 
@@ -91,5 +91,27 @@ class GalleryImageRenderer extends Renderer {
     if (request.id === this.lastShownId) {
       this.show(request.thumb);
     }
+  }
+
+  /**
+   * @param {Boolean | undefined} value
+   * @returns {Boolean}
+   */
+  toggleZoom(value) {
+    return this.container.classList.toggle("zoomed-in", value);
+  }
+  /**
+   * @param {Boolean} value
+   */
+  toggleZoomCursor(value) {
+    this.canvas.toggleZoomCursor(value);
+  }
+
+  /**
+   * @param {Number} x
+   * @param {Number} y
+   */
+  scrollToZoomPoint(x, y) {
+     this.canvas.scrollToZoomPoint(x, y);
   }
 }

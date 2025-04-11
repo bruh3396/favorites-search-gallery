@@ -59,16 +59,17 @@ class GalleryContentRenderer {
   /**
    * @param {HTMLElement[]} thumbs
    */
-  preloadContent(thumbs) {
-    this.imageRenderer.preloadImages(thumbs);
+  preloadContentOutOfGallery(thumbs) {
+    this.imageRenderer.preload(thumbs);
   }
 
   /**
    * @param {HTMLElement[]} thumbs
    */
   preloadContentInGallery(thumbs) {
-    this.imageRenderer.preloadImages(thumbs);
-    this.videoRenderer.preloadVideos(thumbs);
+    for (const renderer of this.renderers) {
+      renderer.preload(thumbs);
+    }
   }
 
   handlePageChange() {
@@ -103,5 +104,28 @@ class GalleryContentRenderer {
 
   toggleVideoPause() {
     this.videoRenderer.toggleVideoPause();
+  }
+
+  /**
+   * @param {Boolean | undefined} value
+   * @returns {Boolean}
+   */
+  toggleZoom(value) {
+    return this.imageRenderer.toggleZoom(value);
+  }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleZoomCursor(value) {
+    this.imageRenderer.toggleZoomCursor(value);
+  }
+
+  /**
+   * @param {Number} x
+   * @param {Number} y
+   */
+  scrollToZoomPoint(x, y) {
+    this.imageRenderer.scrollToZoomPoint(x, y);
   }
 }

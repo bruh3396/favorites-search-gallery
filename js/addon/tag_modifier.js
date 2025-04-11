@@ -56,7 +56,7 @@ class TagModifier {
    */
   favoritesUI;
   /** @type {Post[]} */
-  selectedPosts;
+  currentSearchResults;
   /** @type {Boolean} */
   atLeastOneFavoriteIsSelected;
 
@@ -68,7 +68,7 @@ class TagModifier {
     this.tagEditModeAbortController = new AbortController();
     this.favoritesOption = {};
     this.favoritesUI = {};
-    this.selectedPosts = [];
+    this.currentSearchResults = [];
     this.atLeastOneFavoriteIsSelected = false;
     this.insertHTML();
     this.addEventListeners();
@@ -170,10 +170,10 @@ class TagModifier {
     this.favoritesUI.reset.onclick = this.resetTagModifications.bind(this);
     this.favoritesUI.import.onclick = this.importTagModifications.bind(this);
     this.favoritesUI.export.onclick = this.exportTagModifications.bind(this);
-    Events.favorites.newSearchResults.on(() => {
+    Events.favorites.searchResultsUpdated.on(() => {
       this.unSelectAll();
     });
-    Events.favorites.pageChange.on(() => {
+    Events.favorites.pageChanged.on(() => {
       this.highlightSelectedThumbsOnPageChange();
     });
   }
@@ -311,10 +311,7 @@ class TagModifier {
   }
 
   selectAll() {
-    const postsMatchedByLatestSearch = Array.from(Post.allPosts.values())
-      .filter(post => post.matchedByLatestSearch);
-
-    for (const post of postsMatchedByLatestSearch) {
+    for (const post of FavoritesSearchResultObserver.latestSearchResults) {
       this.toggleThumbSelection(post, true);
     }
   }

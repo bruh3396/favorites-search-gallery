@@ -37,7 +37,7 @@ class VideoController {
 
     this.createVideoPlayer(volume, muted);
 
-    for (let i = 0; i < GallerySettings.additionalVideoPlayerCount; i += 1) {
+    for (let i = 0; i < GallerySettings.preloadedVideoCount; i += 1) {
       this.createVideoPlayer(volume, muted);
     }
   }
@@ -306,7 +306,6 @@ class VideoController {
       this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
       this.pauseVideo(freeInactiveVideoPlayers[i]);
     }
-    // this.stopAllVideos();
   }
 
   /**
