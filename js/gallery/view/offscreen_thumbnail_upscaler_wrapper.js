@@ -14,14 +14,9 @@ class OffscreenThumbUpscalerWrapper extends ThumbUpscaler {
    * @returns {Worker}
    */
   createWorker() {
-    const worker = new Worker(Utils.getWorkerURL(WebWorkers.webWorkers.offscreenThumbnailUpscaler));
-
-    worker.postMessage({
-      action: "initialize",
-      maxHeight: GallerySettings.maxUpscaledThumbCanvasHeight,
-      width: GallerySettings.upscaledThumbCanvasWidth
-    });
-    return worker;
+    const workerCode = `${Utils.getWorkerCode([SharedGallerySettings])}\n${WebWorkers.webWorkers.offscreenThumbnailUpscaler}`;
+    const workerURL = Utils.getWorkerURL(workerCode);
+    return new Worker(workerURL);
   }
 
   /**

@@ -1,4 +1,4 @@
-class InactivePost {
+class PostData {
   /** @type {String} */
   id;
   /** @type {String} */
@@ -6,9 +6,13 @@ class InactivePost {
   /** @type {String} */
   src;
   /** @type {FavoritesDatabaseMetadataRecord | null} */
-  metadata;
+  metadataRecord;
   /** @type {Boolean} */
   createdFromDatabaseRecord;
+  /** @type {Boolean} */
+  cleared;
+  /** @type {String} */
+  contentType;
 
   /** @type {Boolean} */
   get createdFromHTMLElement() {
@@ -16,21 +20,23 @@ class InactivePost {
   }
 
   /**
-   * @param {HTMLElement | FavoritesDatabaseRecord} favorite
+   * @param {HTMLElement | FavoritesDatabaseRecord} object
    */
-  constructor(favorite) {
+  constructor(object) {
     this.id = "";
     this.tags = "";
     this.src = "";
-    this.metadata = null;
+    this.metadataRecord = null;
     this.createdFromDatabaseRecord = false;
+    this.cleared = false;
 
-    if (favorite instanceof HTMLElement) {
-      this.populateAttributesFromHTMLElement(favorite);
+    if (object instanceof HTMLElement) {
+      this.populateAttributesFromHTMLElement(object);
     } else {
       this.createdFromDatabaseRecord = true;
-      this.populateAttributesFromDatabaseRecord(favorite);
+      this.populateAttributesFromDatabaseRecord(object);
     }
+    this.contentType = Utils.getContentType(this.tags);
   }
 
   /**
@@ -40,7 +46,7 @@ class InactivePost {
     this.id = record.id;
     this.tags = record.tags;
     this.src = ImageUtils.decompressThumbnailSource(record.src, record.id);
-    this.metadata = record.metadata === undefined ? null : JSON.parse(record.metadata);
+    this.metadataRecord = record.metadata === undefined ? null : JSON.parse(record.metadata);
   }
 
   /**
@@ -79,9 +85,22 @@ class InactivePost {
       return new PostMetadata(this.id, PostMetadata.emptyRecord, PostMetadata.statuses.NO_FAVORITE_RECORD);
     }
 
-    if (this.metadata === null) {
+    if (this.metadataRecord === null) {
       return new PostMetadata(this.id, PostMetadata.emptyRecord, PostMetadata.statuses.HAS_FAVORITE_RECORD);
     }
-    return new PostMetadata(this.id, this.metadata, PostMetadata.statuses.HAS_METADATA_RECORD);
+    return new PostMetadata(this.id, this.metadataRecord, PostMetadata.statuses.HAS_METADATA_RECORD);
+  }
+
+  clearSearchProperties() {
+    this.tags = "";
+    this.metadataRecord = null;
+  }
+
+  clear() {
+    this.id = "";
+    this.tags = "";
+    this.src = "";
+    this.metadataRecord = null;
+    this.cleared = true;
   }
 }

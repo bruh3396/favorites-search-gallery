@@ -1220,21 +1220,23 @@ Lower numbers improve responsiveness">
     width: 100%;
     height: 100%;
     pointer-events: none;
-    position: relative !important;
+    position: relative;
+
+
 
     &.zoomed-in {
-      overflow: scroll !important;
-      pointer-events: all !important;
+      overflow: scroll;
+      pointer-events: all;
+
+      &.zooming {
+        cursor: zoom-out;
+      }
 
       .fullscreen-image {
-        height: 300%;
+        height: 250%;
         left: 0 !important;
         top: 0 !important;
         transform: none !important;
-
-        &.zooming {
-          cursor: zoom-out;
-        }
       }
     }
   }
@@ -1247,10 +1249,6 @@ Lower numbers improve responsiveness">
     left: 50% !important;
     top: 50% !important;
     transform: translate(-50%, -50%);
-
-    &.zooming {
-      cursor: zoom-in;
-    }
   }
 
 
@@ -1275,6 +1273,14 @@ Lower numbers improve responsiveness">
     &.visible {
       display: block;
       pointer-events: all;
+    }
+
+    &.zooming {
+      cursor: zoom-in !important;
+
+      &.zoomed-in {
+        pointer-events: none;
+      }
     }
   }
 
@@ -2268,7 +2274,7 @@ Lower numbers improve responsiveness">
         </ul>
         <li>Download images</li>
         <ul>
-          <li>Expiremental for now</li>
+          <li>Experimental for now</li>
         </ul>
         <li>New gallery hotkeys</li>
         <ul>
@@ -2281,5 +2287,135 @@ Lower numbers improve responsiveness">
     </div>
   </a>
 </span>
+`;
+
+static downloader = `
+<style>
+  body.download-menu-open {
+    overflow: hidden;
+  }
+
+  body.download-menu-open::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+  }
+
+  #download-menu {
+    width: 750px;
+    height: 100px;
+    /* border: 2px solid white; */
+    border: none;
+    border-radius: 20px;
+    gap: 10px;
+  }
+
+  #download-menu-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    gap: 10px;
+  }
+
+  #download-menu button {
+    width: 100%;
+    height: 4rem;
+    border-radius: 8px;
+    font-size: large;
+  }
+
+  #download-menu.downloading .download-menu-setup {
+    display: none;
+  }
+
+  #download-menu-options-container {
+    flex: 0 0 15%;
+  }
+
+  #download-menu-options-container select {
+    width: 100%;
+    font-size: 15px;
+    height: 25x;
+  }
+
+
+  #download-menu-button-container {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    flex: 0 0 15%;
+  }
+
+  #download-menu-button-container button {
+    flex: 1 1 100%;
+  }
+
+  #download-menu-status-container {
+    flex: 1 1 100%;
+    display: flex;
+    flex-direction: column;
+    margin-left: 20px;
+    gap: 2px;
+  }
+
+  #download-menu-status-container span {
+    font-size: medium;
+  }
+
+  #download-menu p {
+    color: black;
+  }
+
+  #download-menu-warning-container button {
+    margin: auto;
+    width: 10rem;
+    height: 3rem;
+    font-size: larger;
+    border-radius: 8px;
+  }
+
+  #download-menu-warning-container  {
+    text-align: center;
+  }
+</style>
+
+<div id="download-menus">
+  <dialog id="download-menu" class="light-green-gradient">
+    <div id="download-menu-container">
+      <div id="download-menu-button-container">
+        <button id="download-menu-start-download" class="download-menu-setup">Download</button>
+        <button id="download-menu-cancel-download">Cancel</button>
+      </div>
+      <div id="download-menu-options-container" class="download-menu-setup">
+        <div id="download-menu-options-batch-size-container">
+          <span>Batch Size</span>
+          <select id="download-menu-options-batch-size">
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+          </select>
+        </div>
+      </div>
+      <div id="download-menu-status-container">
+        <h1 id="download-menu-status-header"></h1>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="download-menu-warning" class="light-green-gradient">
+    <div id="download-menu-warning-container">
+      <h1>Wait for all favorites to load before downloading</h1>
+      <form method="dialog"><button>Close</button></form>
+    </div>
+  </dialog>
+</div>
+
 `;
 }

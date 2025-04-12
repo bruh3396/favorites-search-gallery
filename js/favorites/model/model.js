@@ -9,8 +9,6 @@ class FavoritesModel {
   paginator;
   /** @type {InfiniteScrollFeeder} */
   feeder;
-  /** @type {FavoritesDownloader} */
-  downloader;
   /** @type {Post[]} */
   latestSearchResults;
   /** @type {Boolean} */
@@ -22,7 +20,6 @@ class FavoritesModel {
     this.sorter = new FavoritesSorter();
     this.paginator = new FavoritesPaginator();
     this.feeder = new InfiniteScrollFeeder();
-    this.downloader = new FavoritesDownloader();
     this.latestSearchResults = [];
     this.infiniteScroll = Preferences.infiniteScroll.value;
   }
@@ -228,10 +225,6 @@ class FavoritesModel {
    */
   changeResultsPerPage(resultsPerPage) {
     this.paginator.changeResultsPerPage(resultsPerPage);
-  }
-
-  downloadSearchResults() {
-    this.downloader.downloadFavorites(this.latestSearchResults);
   }
 
   /**

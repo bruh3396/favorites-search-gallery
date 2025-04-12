@@ -27,6 +27,7 @@ class FavoritesController {
     this.model = new FavoritesModel();
     this.view = new FavoritesView();
     this.menu = new FavoritesMenu();
+    new FavoritesDownloadMenu();
     this.paginationController = new FavoritesPaginationController(this.model, this.view);
     this.infiniteScrollController = new FavoritesInfiniteScrollController(this.model, this.view);
     this.addEventListeners();

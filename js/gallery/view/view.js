@@ -170,6 +170,7 @@ class GalleryView {
    * @param {Boolean} value
    */
   toggleZoomCursor(value) {
+    this.ui.toggleZoomCursor(value);
     this.renderer.toggleZoomCursor(value);
   }
 
@@ -178,7 +179,10 @@ class GalleryView {
    * @returns {Boolean}
    */
   toggleZoom(value = undefined) {
-    return this.renderer.toggleZoom(value);
+    const zoomedIn = this.renderer.toggleZoom(value);
+
+    this.ui.toggleMenu(!zoomedIn);
+    return zoomedIn;
   }
 
   /**

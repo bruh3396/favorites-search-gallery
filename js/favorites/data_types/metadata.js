@@ -173,7 +173,7 @@ class PostMetadata {
 
     Extensions.set(this.id, apiPost.extension);
     this.populateMetadataFromAPIPost(apiPost);
-    Post.validateExtractedTagsAgainstAPI(this.id, apiPost.tags, apiPost.fileURL);
+    Post.validateExtractedTagsAgainstAPI(apiPost);
   }
 
   /**

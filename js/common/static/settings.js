@@ -7,5 +7,5 @@ class Settings {
   static postPageRequestDelayWhileFetchingFavorites = 30_000;
   static postPageRequestDelayAfterFavoritesLoaded = 400;
   static searchPagePostPageRequestDelay = 400;
-  static galleryMenuEnabled = false;
+  static galleryMenuOptionEnabled = true;
 }

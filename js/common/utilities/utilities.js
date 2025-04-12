@@ -608,6 +608,14 @@ class Utils {
   }
 
   /**
+   * @param {{ toString: function(): string }[]} classes
+   * @returns { String }
+   */
+  static getWorkerCode(classes) {
+    return classes.map((c) => c.toString()).join("\n");
+  }
+
+  /**
    * @param {String} url
    * @returns {HTMLLinkElement}
    */
@@ -2249,5 +2257,23 @@ class Utils {
       console.log(`Runtime: ${(end - start).toFixed(3)} ms`);
       return result;
     };
+  }
+
+  /**
+   * @param  {String} s
+   * @return {Number}
+   */
+  static hash(s) {
+    let hash = 0;
+
+    for (let i = 0, len = s.length; i < len; i += 1) {
+      const chr = s.charCodeAt(i);
+
+      // eslint-disable-next-line no-bitwise
+      hash = (hash << 5) - hash + chr;
+      // eslint-disable-next-line no-bitwise
+      hash |= 0;
+    }
+    return hash;
   }
 }

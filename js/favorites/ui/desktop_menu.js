@@ -8,7 +8,7 @@ class FavoritesDesktopMenu {
       {id: "shuffle-button", parentId: "left-favorites-panel-top-row", textContent: "Shuffle", title: "Randomize order of search results", enabled: true, event: Events.favorites.shuffleButtonClicked},
       {id: "invert-button", parentId: "left-favorites-panel-top-row", textContent: "Invert", title: "Show results not matched by latest search", enabled: true, event: Events.favorites.invertButtonClicked},
       {id: "clear-button", parentId: "left-favorites-panel-top-row", textContent: "Clear", title: "Empty the search box", enabled: true, event: Events.favorites.clearButtonClicked},
-      {id: "download-button", parentId: "left-favorites-panel-top-row", textContent: "Download", title: "Download search results", enabled: false, event: Events.favorites.downloadButtonClicked},
+      {id: "download-button", parentId: "left-favorites-panel-top-row", textContent: "Download", title: "Download search results", enabled: true, event: Events.favorites.downloadButtonClicked},
       {id: "subset-button", parentId: "left-favorites-panel-top-row", textContent: "Set Subset", title: "Make the current search results the entire set of results to search from", enabled: false, event: Events.favorites.searchSubsetClicked},
       {id: "stop-subset-button", parentId: "left-favorites-panel-top-row", textContent: "Stop Subset", title: "Stop subset and return entire set of results to all favorites", enabled: false, event: Events.favorites.stopSearchSubsetClicked},
       {id: "reset-button", parentId: "left-favorites-panel-top-row", textContent: "Reset", title: "Delete cached favorites and reset preferences", enabled: true, event: Events.favorites.resetButtonClicked}
@@ -33,7 +33,7 @@ class FavoritesDesktopMenu {
       {id: "use-aliases", parentId: "dynamic-favorite-options", textContent: "Aliases", title: "Alias similar tags", enabled: false, preference: Preferences.tagAliasing, hotkey: "A", invokeActionOnCreation: false, savePreference: true},
       {id: "show-saved-search-suggestions", parentId: "dynamic-favorite-options", textContent: "Saved Suggestions", title: "Show saved search suggestions in autocomplete dropdown", enabled: false, preference: Preferences.savedSearchSuggestions, hotkey: "", invokeActionOnCreation: false, savePreference: true},
       {id: "show-saved-searches", parentId: "bottom-panel-2", textContent: "Saved Searches", title: "Show saved searches", enabled: true, preference: Preferences.showSavedSearches, hotkey: "", invokeActionOnCreation: true, savePreference: true, event: Events.favorites.savedSearchesToggled},
-      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Menu", title: "Show menu in gallery", enabled: Flags.galleryEnabled && Settings.galleryMenuEnabled, preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true, event: Events.favorites.galleryMenuToggled}
+      {id: "enable-gallery-menu", parentId: "dynamic-favorite-options", textContent: "Gallery Menu", title: "Show menu in gallery", enabled: Flags.galleryEnabled && Settings.galleryMenuOptionEnabled, preference: Preferences.galleryMenuEnabled, hotkey: "", invokeActionOnCreation: false, savePreference: true, event: Events.favorites.galleryMenuToggled}
     ],
     /** @type {(ElementTemplateParams<MetadataMetric> | ElementTemplateParams<FavoriteLayout> | ElementTemplateParams<PerformanceProfile>)[]} */
     "select": [

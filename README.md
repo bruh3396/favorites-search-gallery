@@ -122,8 +122,8 @@ This script is still in development, please let me know if you experience a bug,
 
 | Key | Function                       | Condition                          |
 |-----|--------------------------------|------------------------------------|
-| E   | Add favorite                   |                                    |
-| X   | Remove favorite                | "Remove Buttons" option checked     |
+| F   | Add favorite                   |                                    |
+| X   | Remove favorite                | "Remove Buttons" option checked    |
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
 | P   | Stop/start autoplay            | Autoplay option checked            |

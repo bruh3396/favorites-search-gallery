@@ -100,11 +100,13 @@ class GalleryImageRenderer extends Renderer {
   toggleZoom(value) {
     return this.container.classList.toggle("zoomed-in", value);
   }
+
   /**
    * @param {Boolean} value
    */
   toggleZoomCursor(value) {
-    this.canvas.toggleZoomCursor(value);
+    this.container.classList.toggle("zooming", value);
+
   }
 
   /**

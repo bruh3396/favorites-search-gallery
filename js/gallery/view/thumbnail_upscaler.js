@@ -90,8 +90,8 @@ class ThumbUpscaler {
    * @param {Number} height
    */
   setThumbCanvasDimensions(canvas, width, height) {
-    const maxHeight = GallerySettings.maxUpscaledThumbCanvasHeight;
-    let targetWidth = GallerySettings.upscaledThumbCanvasWidth;
+    const maxHeight = SharedGallerySettings.maxUpscaledThumbCanvasHeight;
+    let targetWidth = SharedGallerySettings.upscaledThumbCanvasWidth;
     let targetHeight = (targetWidth / width) * height;
 
     if (targetWidth > width) {

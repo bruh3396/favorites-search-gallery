@@ -26,7 +26,7 @@ class Preferences {
   static showUI = new Preference("showUI", true);
   static infiniteScroll = new Preference("infiniteScroll", false);
   static galleryMenuPinned = new Preference("galleryMenuPinned", true);
-  static galleryMenuEnabled = new Preference("galleryMenuEnabled", Settings.galleryMenuEnabled);
+  static galleryMenuEnabled = new Preference("galleryMenuEnabled", false);
   static showRemoveFavoriteButtons = new Preference("showRemoveFavoriteButtons", false);
   static showAddFavoriteButtons = new Preference("showAddFavoriteButtons", false);
   static fancyThumbHovering = new Preference("fancyThumbHovering", true);
@@ -41,4 +41,5 @@ class Preferences {
   static autoplayImageDuration = new Preference("autoplayImageDuration", 3000);
   static autoplayMinimumVideoDuration = new Preference("autoplayMinimumVideoDuration", 5000);
   static autoplayForward = new Preference("autoplayForward", true);
+  static downloadBatchSize = new Preference("downloadBatchSize", 250);
 }

@@ -381,7 +381,7 @@ class TagModifier {
 
     for (const post of Post.allPosts.values()) {
       if (this.isSelectedForModification(post)) {
-        const additionalTags = remove ? post.removeAdditionalTags(tagsToModify) : post.addAdditionalTags(tagsToModify);
+        const additionalTags = remove ? post.tags.removeAdditionalTags(tagsToModify) : post.tags.addAdditionalTags(tagsToModify);
 
         TagModifier.tagModifications.set(post.id, additionalTags);
         modifiedTagsCount += 1;
@@ -415,7 +415,7 @@ class TagModifier {
     Utils.customTags.clear();
     indexedDB.deleteDatabase("AdditionalTags");
     Post.allPosts.forEach(post => {
-      post.resetAdditionalTags();
+      post.tags.resetAdditionalTags();
     });
     dispatchEvent(new Event("modifiedTags"));
     localStorage.removeItem("customTags");

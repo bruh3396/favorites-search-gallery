@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 class GallerySettings {
   static get mainCanvasResolution() {
     if (Flags.onMobileDevice) {
@@ -5,16 +6,11 @@ class GallerySettings {
     }
     return Flags.onSearchPage ? GallerySettings.mainCanvasResolutions.search : GallerySettings.mainCanvasResolutions.favorites;
   }
-  static get mainCanvasDimensions() {
-    return Utils.getDimensions(GallerySettings.mainCanvasResolution);
-  }
   static mainCanvasResolutions = {
     search: "3840x2160",
     favorites: "7680x4320",
     mobile: "1920x1080"
   };
-  static upscaledThumbCanvasWidth = 800;
-  static maxUpscaledThumbCanvasHeight = 16000;
   static imageMegabyteLimit = 800;
   static searchPagePreloadedImageCount = 42;
   static minimumPreloadedImageCount = 5;
@@ -32,4 +28,9 @@ class GallerySettings {
   static fetchImageBitmapsInWorker = true;
   static sendImageBitmapsToWorker = !GallerySettings.fetchImageBitmapsInWorker;
   static createImageAccentColors = false;
+}
+
+class SharedGallerySettings {
+  static upscaledThumbCanvasWidth = 800;
+  static maxUpscaledThumbCanvasHeight = 16000;
 }

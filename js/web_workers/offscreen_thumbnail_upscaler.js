@@ -3,8 +3,8 @@
  * @returns {Promise<ImageBitmap>}
  */
 async function createImageBitmapFromRequest(request) {
-  const reponse = await fetch(request.imageURL);
-  const blob = await reponse.blob();
+  const response = await fetch(request.imageURL);
+  const blob = await response.blob();
   return createImageBitmap(blob);
 }
 
@@ -64,10 +64,10 @@ function setOffscreenCanvasDimensions(request, imageBitmap) {
   if (request.hasDimensions || request.offscreenCanvas === null) {
     return;
   }
-  const maxHeight = maxUpscaledThumbCanvasHeight;
+  const maxHeight = SharedGallerySettings.maxUpscaledThumbCanvasHeight;
   const width = imageBitmap.width;
   const height = imageBitmap.height;
-  let targetWidth = upscaledThumbCanvasWidth;
+  let targetWidth = SharedGallerySettings.upscaledThumbCanvasWidth;
   let targetHeight = (targetWidth / width) * height;
 
   if (targetWidth > width) {
@@ -98,13 +98,6 @@ class OffscreenThumbUpscaler {
     const request = message.data;
 
     switch (request.action) {
-      case "initialize":
-        // @ts-ignore
-        maxUpscaledThumbCanvasHeight = request.maxHeight;
-        // @ts-ignore
-        upscaledThumbCanvasWidth = request.width;
-        break;
-
       case "upscale":
         // @ts-ignore
         this.upscale(request.request);
@@ -178,8 +171,6 @@ class OffscreenThumbUpscaler {
 }
 
 const upscaler = new OffscreenThumbUpscaler();
-let upscaledThumbCanvasWidth = 600;
-let maxUpscaledThumbCanvasHeight = 16000;
 
 onmessage = (message) => {
   upscaler.handleMessage(message);

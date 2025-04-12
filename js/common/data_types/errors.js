@@ -12,3 +12,5 @@ class IndexedDBUnexpectedError extends Error {}
 class UnknownObjectStoreError extends Error {}
 
 class LockedDatabaseError extends Error {}
+
+class DownloadAbortedError extends Error {}

@@ -19,9 +19,6 @@ class FavoritesMenuEventHandler {
         this.model.invertSearchResults();
         this.showSearchResults(this.model.getLatestSearchResults());
       });
-      Events.favorites.downloadButtonClicked.on(() => {
-        this.model.downloadSearchResults();
-      });
       Events.favorites.resetButtonClicked.on(() => {
         if (Utils.askToReset()) {
           Utils.clearLocalStorage();

@@ -220,4 +220,11 @@ class GalleryUI {
       }
       `, "gallery-menu-visibility");
   }
+
+  /**
+   * @param {Boolean} value
+   */
+  toggleZoomCursor(value) {
+    this.background.classList.toggle("zooming", value);
+  }
 }

@@ -32,7 +32,7 @@ class GalleryCanvas {
   }
 
   setResolution() {
-    const dimensions = GallerySettings.mainCanvasDimensions;
+    const dimensions = Utils.getDimensions(GallerySettings.mainCanvasResolution);
 
     this.canvas.width = dimensions.x;
     this.canvas.height = dimensions.y;
@@ -59,13 +59,6 @@ class GalleryCanvas {
 
   clear() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  /**
-   * @param {Boolean} value
-   */
-  toggleZoomCursor(value) {
-    this.canvas.classList.toggle("zooming", value);
   }
 
   /**

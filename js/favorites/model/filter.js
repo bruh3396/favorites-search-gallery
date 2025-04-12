@@ -1,6 +1,8 @@
 class FavoritesFilter {
   /** @type {SearchCommand} */
   searchCommand;
+  /** @type {SearchResultCache} */
+  resultCache;
   /** @type {String} */
   searchQuery;
   /** @type {String} */
@@ -21,7 +23,7 @@ class FavoritesFilter {
     this.allowedRatings = Preferences.allowedRatings.value;
     this.searchCommand = this.createSearchCommand("");
     this.searchQuery = "";
-    this.filter = Utils.measureRuntime(this.filter.bind(this));
+    this.resultCache = new SearchResultCache();
   }
 
   /**
@@ -29,7 +31,23 @@ class FavoritesFilter {
    * @returns {Post[]}
    */
   filter(favorites) {
-    return this.filterByRating(this.searchCommand.getSearchResults(favorites));
+    return this.filterByRating(this.filterUsingCache(favorites));
+  }
+
+  /**
+   * @param {Post[]} favorites
+   * @returns {Post[]}
+   */
+  filterUsingCache(favorites) {
+    const cachedResults = this.resultCache.get(this.searchQuery, favorites);
+
+    if (cachedResults !== null) {
+      return cachedResults;
+    }
+    const results = this.searchCommand.getSearchResults(favorites);
+
+    this.resultCache.set(this.searchQuery, favorites, results);
+    return results;
   }
 
   /**
