@@ -1,35 +1,45 @@
-class ThrottledQueue {
-  /** @type {{resolve: () => void}[]} */
-  queue;
-  /** @type {Number} */
-  delay;
-  /** @type {Boolean} */
-  draining;
-  /** @type {Boolean} */
-  paused;
+import {sleep} from "../utils/generic";
 
-  /**
-   * @param {Number} delay
-   */
-  constructor(delay) {
+export default class ThrottledQueue {
+  private queue: (() => void)[];
+  private delay: number;
+  private draining: boolean;
+  private paused: boolean;
+
+  constructor(delay: number) {
     this.queue = [];
     this.delay = delay;
     this.draining = false;
     this.paused = false;
   }
-  /**
-   * @returns {Promise<void>}
-   */
-  wait() {
+
+  public wait(): Promise<void> {
     return new Promise((resolve) => {
-      this.queue.push({
-        resolve
-      });
+      this.queue.push(resolve);
       this.startDraining();
     });
   }
 
-  async startDraining() {
+  public setDelay(newDelay: number): void {
+    this.delay = newDelay;
+  }
+
+  public pause(): void {
+    this.paused = true;
+  }
+
+  public resume(): void {
+    this.paused = false;
+    this.startDraining();
+  }
+
+  public reset(): void {
+    this.queue = [];
+    this.draining = false;
+    this.paused = false;
+  }
+
+  private async startDraining(): Promise<void> {
     if (this.draining) {
       return;
     }
@@ -38,42 +48,20 @@ class ThrottledQueue {
     this.draining = false;
   }
 
-  async drain() {
+  private async drain(): Promise<void> {
     while (this.queue.length > 0) {
-      const item = this.queue.shift();
+      const resolve = this.queue.shift();
 
-      if (item === undefined) {
+      if (resolve === undefined) {
         continue;
       }
 
-      item.resolve();
-      await Utils.sleep(this.delay);
+      resolve();
+      await sleep(this.delay);
 
       if (this.paused) {
         break;
       }
     }
-  }
-
-  /**
-   * @param {Number} newDelay
-   */
-  setDelay(newDelay) {
-    this.delay = newDelay;
-  }
-
-  pause() {
-    this.paused = true;
-  }
-
-  resume() {
-    this.paused = false;
-    this.startDraining();
-  }
-
-  reset() {
-    this.queue = [];
-    this.draining = false;
-    this.paused = false;
   }
 }

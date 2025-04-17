@@ -1,5 +1,4 @@
-class HTMLStrings {
-  static utilities = `
+  export const utilities = `
 <style>
   body {
 
@@ -217,8 +216,7 @@ class HTMLStrings {
 }
 </style>
 `;
-
-  static favorites = `
+  export const favorites = `
 <div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
   <style>
     #favorites-search-gallery-menu {
@@ -945,8 +943,7 @@ Lower numbers improve responsiveness">
   <div id="loading-wheel"></div>
 </div>
 `;
-
-  static autoplay = `
+  export const autoplay = `
 <div id="autoplay-container">
   <style>
     #autoplay-container {
@@ -1160,8 +1157,7 @@ Lower numbers improve responsiveness">
   </div>
 </div>
 `;
-
-  static gallery = `
+  export const gallery = `
 <style>
   html {
     width: 100vw;
@@ -1362,7 +1358,7 @@ Lower numbers improve responsiveness">
     }
 
     * {
-      position: static;
+      position: export const;
       -webkit-user-drag: none;
       -khtml-user-drag: none;
       -moz-user-drag: none;
@@ -1463,8 +1459,7 @@ Lower numbers improve responsiveness">
   }
 </style>
 `;
-
-  static galleryDebug = `
+  export const galleryDebug = `
 .thumb,
 .favorite {
   &.debug-selected {
@@ -1522,8 +1517,7 @@ Lower numbers improve responsiveness">
 }
 
 `;
-
-  static tooltip = `
+  export const tooltip = `
 <div id="tooltip-container">
   <style>
     #tooltip {
@@ -1547,8 +1541,7 @@ Lower numbers improve responsiveness">
   </style>
 </div>
 `;
-
-  static caption = `
+  export const caption = `
 <style>
   .caption {
     overflow: hidden;
@@ -1638,8 +1631,7 @@ Lower numbers improve responsiveness">
   }
 </style>
 `;
-
-  static savedSearches = `
+  export const savedSearches = `
 <div id="saved-searches">
   <style>
     #saved-searches-container {
@@ -1780,8 +1772,7 @@ Lower numbers improve responsiveness">
 <script>
 </script>
 `;
-
-  static tagModifier = `
+  export const tagModifier = `
 <div id="tag-modifier-container">
   <style>
     #tag-modifier-ui-container {
@@ -1843,8 +1834,7 @@ Lower numbers improve responsiveness">
   </div>
 </div>
 `;
-
-  static desktop = `
+  export const desktop = `
 <style>
   .checkbox {
     &:hover {
@@ -1870,8 +1860,7 @@ Lower numbers improve responsiveness">
   }
 </style>
 `;
-
-  static mobile = `
+  export const mobile = `
 <style>
   #performance-profile-container,
   #show-hints-container,
@@ -2232,8 +2221,7 @@ Lower numbers improve responsiveness">
   }
 </style>
 `;
-
-  static help = `
+  export const help = `
 <span id="help-links-container">
   <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
   <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
@@ -2276,8 +2264,7 @@ Lower numbers improve responsiveness">
   </a>
 </span>
 `;
-
-static downloader = `
+  export const downloader = `
 <style>
   body.download-menu-open {
     overflow: hidden;
@@ -2497,4 +2484,3 @@ static downloader = `
   </dialog>
 </div>
 `;
-}

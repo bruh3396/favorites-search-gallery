@@ -1,111 +1,64 @@
-/**
- * @template V
- */
-class Database {
-  /** @type {String} */
-  name;
-  /** @type {Number} */
-  version;
-  /** @type {Boolean} */
-  locked;
+class LockedDatabaseError extends Error { }
 
-  /**
-   * @param {String} name
-   * @param {Number} version
-   */
-  constructor(name, version = 1) {
+export default class Database<V extends { id: string }> {
+  private readonly name: string;
+  private readonly defaultObjectStoreName: string;
+  private version: number;
+  private locked: boolean;
+
+  constructor(name: string, defaultObjectStoreName: string, version: number = 1) {
     this.name = name;
+    this.defaultObjectStoreName = defaultObjectStoreName;
     this.version = version;
     this.locked = false;
   }
 
-  /**
-   * @param {String} objectStoreName
-   * @returns {Promise<V[]>}
-   */
-  async load(objectStoreName) {
-    const database = await this.open(objectStoreName);
-    return this.getAllRecords(database, objectStoreName);
+  public async load(objectStoreName: string | undefined = undefined): Promise<V[]> {
+    const database = await this.open(objectStoreName || this.defaultObjectStoreName);
+    return this.getAllRecords(database, objectStoreName || this.defaultObjectStoreName);
   }
 
-  /**
-   * @param {(V & {id: String})[]} records
-   * @param {String} objectStoreName
-   * @returns {Promise<void>}
-   */
-  async store(records, objectStoreName) {
+  public async store(records: V[], objectStoreName: string | undefined = undefined): Promise<void> {
     if (this.locked) {
       return Promise.reject(new LockedDatabaseError());
     }
+    objectStoreName = objectStoreName || this.defaultObjectStoreName;
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(objectStoreName);
     return new Promise((resolve, reject) => {
       transaction.onerror = reject;
-      records.forEach(record => {
-        this.addRecord(objectStore, record);
-      });
-      transaction.oncomplete = () => {
+      records.forEach(record => this.putRecord(objectStore, record));
+      transaction.oncomplete = (): void => {
         database.close();
         resolve();
       };
     });
   }
 
-  /**
-   * @param {(V & {id: String})[]} records
-   * @param {String} objectStoreName
-   * @returns {Promise<void>}
-   */
-  async update(records, objectStoreName) {
+  public async update(records: V[], objectStoreName: string | undefined = undefined): Promise<void> {
     if (this.locked) {
       return Promise.reject(new LockedDatabaseError());
     }
+    objectStoreName = objectStoreName || this.defaultObjectStoreName;
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(objectStoreName);
     const index = objectStore.index("id");
-    let updatedCount = 0;
     return new Promise((resolve, reject) => {
       transaction.onerror = reject;
       records.forEach(record => {
-        const i = index.getKey(record.id);
-
-        i.onsuccess = (indexEvent) => {
-          /** @type {IDBValidKey} */
-          // @ts-ignore
-          const primaryKey = indexEvent.target.result;
-
-          this.addRecord(objectStore, record, primaryKey);
-          updatedCount += 1;
-        };
-        transaction.oncomplete = () => {
+        this.updateRecord(index, record, objectStore);
+        transaction.oncomplete = (): void => {
           database.close();
           resolve();
         };
       });
     });
-
   }
 
-  /**
-   * @param {IDBObjectStore} objectStore
-   * @param {V} record
-   * @param {IDBValidKey | undefined} key
-   */
-  addRecord(objectStore, record, key = undefined) {
-    if (this.locked) {
-      throw new LockedDatabaseError();
-    }
-    objectStore.put(record, key);
-  }
-
-  /**
-   * @param {String[]} ids
-   * @param {String} objectStoreName
-   * @returns {Promise<void>}
-   */
-  async deleteRecords(ids, objectStoreName) {
+  public async deleteRecords(ids: string[], objectStoreName: string|undefined = undefined): Promise<void> {
+    objectStoreName = objectStoreName || this.defaultObjectStoreName;
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(objectStoreName);
@@ -116,60 +69,80 @@ class Database {
     }
   }
 
-  /**
-   * @param {IDBIndex} index
-   * @param {String} id
-   * @param {IDBObjectStore} objectStore
-   * @returns {Promise<void>}
-   */
-  async deleteRecord(index, id, objectStore) {
-    const deleteRequest = index.getKey(id);
+  public delete(): void {
+    this.lock();
+    setTimeout(() => {
+      indexedDB.deleteDatabase(this.name);
+    }, 0);
+  }
 
-    await new Promise((resolve, reject) => {
-      deleteRequest.onsuccess = resolve;
-      deleteRequest.onerror = reject;
-    }).then((indexEvent) => {
-      const primaryKey = indexEvent.target.result;
+  private updateRecord(index: IDBIndex, record: V, objectStore: IDBObjectStore): void {
+    index.getKey(record.id).onsuccess = (indexEvent): void => {
+      const target = indexEvent.target as IDBRequest<IDBValidKey | undefined>;
+      const primaryKey = target.result;
 
-      if (primaryKey !== undefined) {
-        objectStore.delete(primaryKey);
+      if (primaryKey === undefined) {
+        console.error(`Record with id ${record.id} not found`);
+        return;
       }
-    }).catch((error) => {
-      console.error(error);
+      this.putRecord(objectStore, record, primaryKey);
+    };
+  }
+
+  private putRecord(objectStore: IDBObjectStore, record: V, key: IDBValidKey | undefined = undefined): void {
+    if (this.locked) {
+      throw new LockedDatabaseError();
+    }
+    objectStore.put(record, key);
+  }
+
+  private deleteRecord(index: IDBIndex, id: string, objectStore: IDBObjectStore): Promise<void> {
+    return new Promise((resolve) => {
+      const request = index.getKey(id);
+
+      request.onsuccess = (event): void => {
+        const target = event.target as IDBRequest;
+        const primaryKey = target.result;
+
+        if (primaryKey !== undefined) {
+          objectStore.delete(primaryKey);
+        }
+        resolve();
+      };
+      request.onerror = (): void => {
+        console.error(request.error);
+        resolve();
+      };
     });
   }
 
-  /**
-   * @param {String} objectStoreName
-   * @returns {Promise<IDBDatabase>}
-   */
-  open(objectStoreName) {
+  private open(objectStoreName: string): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.name, this.version);
 
-      this.createIDBOpenSuccessHandler(request, resolve, reject, objectStoreName);
-      this.createIDBOpenErrorHandler(request, reject);
-      this.createIDBOpenUpgradeNeededHandler(request, objectStoreName);
-    }).catch((error) => {
-      return this.handleIDBOpenError(error, objectStoreName);
+      request.onsuccess = (): void => resolve(request.result);
+      request.onupgradeneeded = (): void => this.createObjectStore(request.result, objectStoreName);
+      request.onerror = (): void => {
+        if (request.error instanceof DOMException && request.error.name === "VersionError") {
+          this.version += 1;
+          this.open(objectStoreName).then(resolve, reject);
+          return;
+        }
+        reject(request.error);
+      };
     });
   }
 
-  /**
-   * @param {IDBDatabase} database
-   * @param {String} objectStoreName
-   * @returns {Promise<V[]>}
-   */
-  getAllRecords(database, objectStoreName) {
+  private getAllRecords(database: IDBDatabase, objectStoreName: string): Promise<V[]> {
     const transaction = database.transaction(objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(objectStoreName);
     return new Promise((resolve, reject) => {
-      transaction.onerror = (event) => {
+      transaction.onerror = (event): void => {
         reject(event);
       };
       const getAllRequest = objectStore.getAll();
 
-      getAllRequest.onsuccess = (event) => {
+      getAllRequest.onsuccess = (event): void => {
         database.close();
 
         if (!(event.target instanceof IDBRequest)) {
@@ -178,90 +151,14 @@ class Database {
         }
         resolve(event.target.result.reverse());
       };
-      getAllRequest.onerror = (event) => {
+      getAllRequest.onerror = (event): void => {
         database.close();
         reject(event);
       };
     });
   }
 
-  /**
-   * @param {IDBOpenDBRequest} request
-   * @param {(value: IDBOpenDBRequest) => void} reject
-   */
-  createIDBOpenErrorHandler(request, reject) {
-    request.onerror = (event) => {
-      if (!(event.target instanceof IDBOpenDBRequest)) {
-        throw new IndexedDBUnexpectedError();
-      }
-      reject(event.target);
-    };
-  }
-
-  /**
-   * @param {IDBOpenDBRequest} request
-   * @param {String} objectStoreName
-   */
-  createIDBOpenUpgradeNeededHandler(request, objectStoreName) {
-    request.onupgradeneeded = (event) => {
-      this.handleIDBOpenUpgradeNeeded(event, objectStoreName);
-    };
-  }
-
-  /**
-   * @param {IDBVersionChangeEvent} event
-   * @param {String} objectStoreName
-   */
-  handleIDBOpenUpgradeNeeded(event, objectStoreName) {
-    if (!(event.target instanceof IDBOpenDBRequest)) {
-      throw new IndexedDBUnexpectedError();
-    }
-    this.createObjectStore(event.target, objectStoreName);
-  }
-
-  /**
-   * @param {any} request
-   * @param {String} objectStoreName
-   * @returns {Promise<IDBDatabase>}
-   */
-  handleIDBOpenError(request, objectStoreName) {
-    const validTypes = [IDBOpenDBRequest, DOMException, UnknownObjectStoreError];
-
-    if (validTypes.some(type => request instanceof type)) {
-      this.version += 1;
-      return this.open(objectStoreName);
-    }
-    throw new IndexedDBUnexpectedError();
-  }
-
-  /**
-   * @param {IDBOpenDBRequest} request
-   * @param {(value: IDBDatabase) => void} resolve
-   * @param {(value: UnknownObjectStoreError) => void} reject
-   * @param {String} objectStoreName
-   */
-  createIDBOpenSuccessHandler(request, resolve, reject, objectStoreName) {
-    request.onsuccess = (event) => {
-      if (!(event.target instanceof IDBOpenDBRequest)) {
-        throw new IndexedDBUnexpectedError();
-      }
-
-      if (!event.target.result.objectStoreNames.contains(objectStoreName)) {
-        event.target.result.close();
-        reject(new UnknownObjectStoreError());
-        return;
-      }
-      resolve(event.target.result);
-    };
-  }
-
-  /**
-   * @param {IDBOpenDBRequest} request
-   * @param {String} objectStoreName
-   */
-  createObjectStore(request, objectStoreName) {
-    const database = request.result;
-
+  private createObjectStore(database: IDBDatabase, objectStoreName: string): void {
     if (database.objectStoreNames.contains(objectStoreName)) {
       return;
     }
@@ -274,14 +171,7 @@ class Database {
     });
   }
 
-  lock() {
+  private lock(): void {
     this.locked = true;
-  }
-
-  delete() {
-    this.lock();
-    setTimeout(() => {
-      indexedDB.deleteDatabase(this.name);
-    }, 0);
   }
 }

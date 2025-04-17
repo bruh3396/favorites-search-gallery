@@ -1,33 +1,21 @@
-/**
- * @template V
- */
-class EventEmitter {
-  /** @type {Set<((argument: V) => void)>} */
-  listeners;
-  /** @type {Set<(argument: V) => void>} */
-  oneTimeListeners;
-  /** @type {Boolean} */
-  enabled;
+import {PromiseTimeoutError} from "../types/primitives/errors";
 
-  /** @type {Boolean} */
-  get disabled() {
+export default class EventEmitter<V> {
+  private listeners: Set<(argument: V) => void>;
+  private oneTimeListeners: Set<(argument: V) => void>;
+  private enabled: boolean;
+
+  get disabled(): boolean {
     return !this.enabled;
   }
 
-  /**
-   * @param {Boolean} enabled
-   */
-  constructor(enabled = true) {
+  constructor(enabled: boolean = true) {
     this.listeners = new Set();
     this.oneTimeListeners = new Set();
     this.enabled = enabled;
   }
 
-  /**
-   * @param {(argument: V) => void} callback
-   * @param {AddEventListenerOptions | undefined} options
-   */
-  on(callback, options = undefined) {
+  public on(callback: (argument: V) => void, options: AddEventListenerOptions | undefined = undefined): void {
     if (this.disabled) {
       return;
     }
@@ -48,17 +36,11 @@ class EventEmitter {
     }
   }
 
-  /**
-   * @param {((argument: V) => void)} callback
-   */
-  off(callback) {
+  public off(callback: (argument: V) => void): void {
     this.listeners.delete(callback);
   }
 
-  /**
-   * @param {V} argument
-   */
-  emit(argument) {
+  public emit(argument: V): void {
     if (this.disabled) {
       return;
     }
@@ -69,23 +51,14 @@ class EventEmitter {
     this.removeOneTimeListeners();
   }
 
-  removeOneTimeListeners() {
-    this.listeners = this.listeners.difference(this.oneTimeListeners);
-    this.oneTimeListeners.clear();
-  }
-
-  /**
-   * @param {number} milliseconds
-   * @returns {Promise<V>}
-   */
-  timeout(milliseconds) {
+  public timeout(milliseconds: number): Promise<V> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.off(listener);
         reject(new PromiseTimeoutError());
       }, milliseconds);
 
-      const listener = (/** @type {V} */ args) => {
+      const listener = (args: V): void => {
         this.off(listener);
         clearTimeout(timer);
         resolve(args);
@@ -97,10 +70,12 @@ class EventEmitter {
     });
   }
 
-  /**
-   * @param {Boolean | undefined} value
-   */
-  toggle(value = undefined) {
+  public toggle(value: boolean | undefined = undefined): void {
     this.enabled = value === undefined ? !this.enabled : value;
+  }
+
+  private removeOneTimeListeners(): void {
+    this.listeners = this.listeners.difference(this.oneTimeListeners);
+    this.oneTimeListeners.clear();
   }
 }

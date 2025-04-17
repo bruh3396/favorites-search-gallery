@@ -1,17 +1,10 @@
-/**
- * @template T
- */
-class Preference {
-  static localStorageKey = "preferences";
+export default class Preference<T> {
+  private static localStorageKey = "preferences";
 
-  /** @type {String} */
-  key;
+  private readonly key: string;
+  public readonly defaultValue: T;
 
-  /** @type {T} */
-  defaultValue;
-
-  /** @type {T} */
-  get value() {
+  get value(): T {
     const preferences = JSON.parse(localStorage.getItem(Preference.localStorageKey) || "{}");
     const storedValue = preferences[this.key];
 
@@ -21,19 +14,12 @@ class Preference {
     return storedValue;
   }
 
-  /**
-   * @param {String} key
-   * @param {T} defaultValue
-   */
-  constructor(key, defaultValue) {
+  constructor(key: string, defaultValue: T) {
     this.key = key;
     this.defaultValue = defaultValue;
   }
 
-  /**
-   * @param {T} value
-   */
-  set(value) {
+  public set(value: T): void {
     const preferences = JSON.parse(localStorage.getItem(Preference.localStorageKey) || "{}");
 
     preferences[this.key] = value;

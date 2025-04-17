@@ -1,33 +1,30 @@
-class Timer {
-  /** @type {Timeout} */
-  timeout;
-  /** @type {Number} */
-  waitTime;
-  /** @type {Function} */
-  onTimerEnd;
+import {Timeout} from "../types/primitives/primitives";
+import {doNothing} from "../config/constants";
 
-  /**
-   * @param {Number} waitTime
-   */
-  constructor(waitTime) {
-    this.timeout = null;
+export default class Timer {
+  private readonly waitTime: number;
+  private readonly onTimerEnd: () => void;
+  private timeout: Timeout;
+
+  constructor(waitTime: number) {
     this.waitTime = waitTime;
-    this.onTimerEnd = () => { };
+    this.onTimerEnd = doNothing;
+    this.timeout = undefined;
   }
 
-  restart() {
+  public restart(): void {
     this.stop();
     this.start();
   }
 
-  stop() {
+  public stop(): void {
     clearTimeout(this.timeout);
-    this.timeout = null;
+    this.timeout = undefined;
   }
 
-  start() {
+  public start(): void {
     this.timeout = setTimeout(() => {
-      this.timeout = null;
+      this.timeout = undefined;
       this.onTimerEnd();
     }, this.waitTime);
   }

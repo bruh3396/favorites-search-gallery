@@ -1,45 +1,33 @@
-/**
- * @template V
- */
-class BatchExecutor {
-  /** @type {Number} */
-  limit;
-  /** @type {Number} */
-  timeout;
-  /** @type {(batch: V[]) => void} */
-  executor;
-  /** @type {Timeout} */
-  timer;
-  /** @type {V[]} */
-  batch;
+export class BatchExecutor<V> {
+  private limit: number;
+  private timeout: number;
+  private readonly executor: (batch: V[]) => void;
+  private timer: number | undefined;
+  private batch: V[];
 
-  /** @type {Boolean} */
-  get overLimit() {
+  get overLimit(): boolean {
     return this.batch.length >= this.limit;
   }
 
-  /**
-   * @param {Number} limit
-   * @param {Number} timeout
-   * @param {(batch: V[]) => void} executor
-   */
-  constructor(limit, timeout, executor) {
+  constructor(limit: number, timeout: number, executor: (batch: V[]) => void) {
     this.limit = limit;
     this.timeout = timeout;
     this.executor = executor;
-    this.timer = null;
+    this.timer = undefined;
     this.batch = [];
   }
 
-  /**
-   * @param {V} item
-   */
-  add(item) {
+  public add(item: V): void {
     this.batch.push(item);
     this.tryExecuting();
   }
 
-  tryExecuting() {
+  public reset(): void {
+    clearTimeout(this.timer);
+    this.empty();
+  }
+
+  private tryExecuting(): void {
     clearTimeout(this.timer);
 
     if (this.overLimit) {
@@ -49,23 +37,18 @@ class BatchExecutor {
     this.executeAfterTimeout();
   }
 
-  executeAfterTimeout() {
+  private executeAfterTimeout(): void {
     this.timer = setTimeout(() => {
       this.execute();
     }, this.timeout);
   }
 
-  execute() {
+  private execute(): void {
     this.executor(this.batch);
     this.empty();
   }
 
-  empty() {
+  private empty(): void {
     this.batch = [];
-  }
-
-  reset() {
-    clearTimeout(this.timer);
-    this.empty();
   }
 }

@@ -1,21 +1,15 @@
-class HoldButton extends HTMLElement {
+export default class HoldButton extends HTMLElement {
   static {
     customElements.define("hold-button", HoldButton);
   }
 
-  /** @type {Number} */
-  static defaultPollingTime = 100;
-  /** @type {Number} */
-  static minPollingTime = 40;
-  /** @type {Number} */
-  static maxPollingTime = 500;
+  private static defaultPollingTime: number = 100;
+  private static minPollingTime: number = 40;
+  private static maxPollingTime: number = 500;
 
-  /** @type {Timeout} */
-  intervalId;
-  /** @type {Timeout} */
-  timeoutId;
-  /** @type {Number} */
-  pollingTime = HoldButton.defaultPollingTime;
+  private intervalId: number | undefined;
+  private timeoutId: number | undefined;
+  private pollingTime = HoldButton.defaultPollingTime;
   /** @type {Boolean} */
   holdingDown = false;
 

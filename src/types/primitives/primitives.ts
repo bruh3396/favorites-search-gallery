@@ -1,0 +1,17 @@
+export type FavoriteLayout = "row" | "square" | "grid" | "column";
+export type FavoritesGalleryState = 0 | 1 | 2;
+export type BackwardNavigationKey = "a" | "A" | "ArrowLeft";
+export type ForwardNavigationKey = "d" | "D" | "ArrowRight";
+export type NavigationKey = BackwardNavigationKey | ForwardNavigationKey;
+export type ExitKey = "Escape" | "Delete" | "Backspace";
+export type MediaExtension = "jpg" | "png" | "jpeg" | "gif" | "mp4";
+export type AnimatedExtension = "gif" | "mp4";
+export type PerformanceProfile = 0 | 1 | 2;
+export type PostMetadataStatus = 0 | 1 | 2;
+export type Rating = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type ImageCursor = "zoom-in" | "zoom-out" | "auto";
+export type TagCategory = "general" | "artist" | "unknown" | "copyright" | "character" | "metadata";
+export type MetadataMetric = "default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random";
+export type SearchableMetadataMetric = "id" | "score" | "width" | "height";
+export type MetadataComparator = ":" | ":<" | ":>";
+export type Timeout = number | undefined;

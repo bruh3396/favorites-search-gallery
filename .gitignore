@@ -7,8 +7,9 @@ scripts
 tampermonkey*
 .prettierrc
 node_modules
-eslint.config.mjs
+*config*s
 *.min.js
 web_workers.js
-globals.d.ts
 *json
+*mjs
+dist
