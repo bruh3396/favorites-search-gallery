@@ -1,22 +1,22 @@
-class Flags {
-  static onSearchPage = location.href.includes("page=post&s=list");
-  static onFavoritesPage = location.href.includes("page=favorites");
-  static onPostPage = location.href.includes("page=post&s=view");
-  static usingFirefox = navigator.userAgent.toLowerCase().includes("firefox");
-  static onMobileDevice = (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent);
-  static onDesktopDevice = !Flags.onMobileDevice;
-  static userIsOnTheirOwnFavoritesPage = Utils.getUserId() === Utils.getFavoritesPageId();
+import {isUserIsOnTheirOwnFavoritesPage} from "../utils/metadata";
 
-  static galleryDisabled = (Flags.onMobileDevice && Flags.onSearchPage) || Preferences.performanceProfile.value > 0 || Flags.onPostPage;
-  static tooltipDisabled = Flags.onMobileDevice || Preferences.performanceProfile.value > 1 || Flags.onPostPage;
-  static favoritesSearchGalleryEnabled = Flags.onFavoritesPage || (Flags.onSearchPage && Preferences.enableOnSearchPages.value);
-  static tagModifierDisabled = Flags.onMobileDevice || !Flags.onFavoritesPage;
-  static savedSearchesDisabled = !Flags.onFavoritesPage || Flags.onMobileDevice;
-  static captionsDisabled = !Flags.onFavoritesPage || Flags.onMobileDevice || Preferences.performanceProfile.value > 1;
-  static awesompleteDisabled = !Flags.onFavoritesPage;
+export const onSearchPage = location.href.includes("page=post&s=list");
+export const onFavoritesPage = location.href.includes("page=favorites");
+export const onPostPage = location.href.includes("page=post&s=view");
+export const usingFirefox = navigator.userAgent.toLowerCase().includes("firefox");
+export const onMobileDevice = (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent);
+export const onDesktopDevice = !onMobileDevice;
+export const userIsOnTheirOwnFavoritesPage = isUserIsOnTheirOwnFavoritesPage();
 
-  static favoritesSearchGalleryDisabled = !Flags.favoritesSearchGalleryEnabled;
-  static galleryEnabled = !Flags.galleryDisabled;
-  static tooltipEnabled = !Flags.tooltipDisabled;
-  static captionsEnabled = !Flags.captionsDisabled;
-}
+export const galleryDisabled = (onMobileDevice && onSearchPage) || Preferences.performanceProfile.value > 0 || Flags.onPostPage;
+export const tooltipDisabled = Flags.onMobileDevice || Preferences.performanceProfile.value > 1 || Flags.onPostPage;
+export const favoritesSearchGalleryEnabled = Flags.onFavoritesPage || (Flags.onSearchPage && Preferences.enableOnSearchPages.value);
+export const tagModifierDisabled = Flags.onMobileDevice || !Flags.onFavoritesPage;
+export const savedSearchesDisabled = !Flags.onFavoritesPage || Flags.onMobileDevice;
+export const captionsDisabled = !Flags.onFavoritesPage || Flags.onMobileDevice || Preferences.performanceProfile.value > 1;
+export const awesompleteDisabled = !Flags.onFavoritesPage;
+
+export const favoritesSearchGalleryDisabled = !Flags.favoritesSearchGalleryEnabled;
+export const galleryEnabled = !Flags.galleryDisabled;
+export const tooltipEnabled = !Flags.tooltipDisabled;
+export const captionsEnabled = !Flags.captionsDisabled;

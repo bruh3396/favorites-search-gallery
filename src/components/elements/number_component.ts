@@ -1,3 +1,6 @@
+import HoldButton from "./hold_button";
+import {clamp} from "../../utils/number";
+
 export default class NumberComponent {
   private input: HTMLInputElement;
   private upArrow: HoldButton;
@@ -87,7 +90,7 @@ export default class NumberComponent {
   }
 
   private setValue(value: number): void {
-    this.input.value = String(Utils.clamp(value, this.range.min, this.range.max));
+    this.input.value = String(clamp(value, this.range.min, this.range.max));
   }
 
   private getSnapMin(value: number): number {
