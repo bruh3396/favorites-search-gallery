@@ -1,222 +1,630 @@
-  export const utilities = `
-<style>
-  body {
-
-    &:fullscreen,
-    &::backdrop {
-      background-color: var(--c-bg);
+export const AUTOPLAY_HTML = `
+<div id="autoplay-container">
+  <style>
+    #autoplay-container {
+      visibility: hidden;
     }
-  }
 
-  .light-green-gradient {
-    background: linear-gradient(to bottom, #aae5a4, #89e180);
-    color: black;
-  }
+    #autoplay-menu {
+      position: fixed;
+      left: 50%;
+      transform: translate(-50%);
+      bottom: 5%;
+      padding: 0;
+      margin: 0;
+      /* background: rgba(40, 40, 40, 1); */
+      background: var(--gallery-menu-background);
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity .25s ease-in-out;
 
-  .dark-green-gradient {
-    background: linear-gradient(to bottom, #5e715e, #293129);
-    color: white;
-  }
+      &.visible {
+        opacity: 1;
+      }
 
-  img {
-    border: none !important;
-  }
+      &.persistent {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
 
-  .not-highlightable {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
+      >div>img {
+        color: red;
+        position: relative;
+        height: 75px;
+        cursor: pointer;
+        background-color: rgba(128, 128, 128, 0);
+        margin: 5px;
+        background-size: 10%;
+        z-index: 3;
+        border-radius: 4px;
 
-  input[type=number] {
-    border: 1px solid #767676;
-    border-radius: 2px;
-  }
 
-  .size-calculation-div {
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    visibility: hidden;
-    transition: none !important;
-    transform: scale(1.05, 1.05);
-  }
+        &:hover {
+          background-color: rgba(200, 200, 200, .5);
+        }
+      }
+    }
 
-  .number {
-    white-space: nowrap;
-    position: relative;
-    margin-top: 5px;
-    border: 1px solid;
-    padding: 0;
-    border-radius: 20px;
-    background-color: white;
-
-    >hold-button,
-    button {
-      position: relative;
+    .autoplay-progress-bar {
+      position: absolute;
       top: 0;
       left: 0;
-      font-size: inherit;
-      outline: none;
-      background: none;
-      cursor: pointer;
-      border: none;
-      margin: 0px 8px;
-      padding: 0;
+      width: 0%;
+      height: 100%;
+      background-color: steelblue;
+      z-index: 1;
 
-      &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 200%;
-        height: 100%;
-        /* outline: 1px solid greenyellow; */
-        /* background-color: hotpink; */
+      /* position: fixed !important;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 4px;
+      background: #ff5733;
+      z-index: 1; */
+    }
+
+    body.autoplay::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 4px;
+      background: #ff5733;
+      animation: progress 5s linear forwards;
+      z-index: 9999;
+    }
+
+    @keyframes progress {
+      from {
+        width: 0;
       }
 
-      &:hover {
-        >span {
-          color: #0075FF;
-        }
-      }
-
-      >span {
-        font-weight: bold;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        position: relative;
-        pointer-events: none;
-        border: none;
-        outline: none;
-        top: 0;
-        z-index: 5;
-        font-size: 1.2em !important;
-      }
-
-      &.number-arrow-up {
-        >span {
-          transition: left .1s ease;
-          left: 0;
-        }
-
-        &:hover>span {
-          left: 3px;
-        }
-      }
-
-      &.number-arrow-down {
-        >span {
-          transition: right .1s ease;
-          right: 0;
-        }
-
-        &:hover>span {
-          right: 3px;
-        }
+      to {
+        width: 100%;
       }
     }
 
-    >input[type="number"] {
-      font-size: inherit;
-      text-align: center;
-      width: 2ch;
-      padding: 0;
-      margin: 0;
-      font-weight: bold;
-      padding: 3px;
-      background: none;
-      border: none;
 
-      &:focus {
-        outline: none;
+    #autoplay-video-progress-bar {
+      background-color: royalblue;
+    }
+
+    #autoplay-settings-menu {
+      visibility: hidden;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -105%);
+      border-radius: 4px;
+      font-size: 10px !important;
+      background: var(--gallery-menu-background);
+
+      &.visible {
+        visibility: visible;
+      }
+
+      >div {
+        font-size: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 10px;
+        color: white;
+
+
+        >label {
+          padding-right: 20px;
+        }
+
+        >.number {
+          background: none;
+          outline: 2px solid white;
+
+          >hold-button,
+          >button {
+            &::after {
+              width: 200%;
+              height: 130%;
+            }
+          }
+
+          >input[type="number"] {
+            color: white;
+            width: 7ch;
+          }
+        }
+      }
+
+      select {
+        /* height: 25px; */
+        font-size: larger;
+        width: 10ch;
       }
     }
 
-    >input[type="number"]::-webkit-outer-spin-button,
-    >input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      appearance: none;
-      margin: 0;
+    #autoplay-settings-button.settings-menu-opened {
+      filter: drop-shadow(6px 6px 3px #0075FF);
     }
 
-    input[type=number] {
-      appearance: textfield;
-      -moz-appearance: textfield;
+
+    #autoplay-change-direction-mask {
+      filter: drop-shadow(2px 2px 3px #0075FF);
     }
-  }
 
-  .fullscreen-icon {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10010;
-    pointer-events: none;
-    width: 30vw;
-  }
+    #autoplay-play-button:active {
+      filter: drop-shadow(2px 2px 10px #0075FF);
+    }
 
-  input[type="checkbox"] {
-    accent-color: #0075FF;
-  }
-
-  .thumb {
-    >a {
+    #autoplay-change-direction-mask-container {
       pointer-events: none;
+      opacity: 0.75;
+      height: 75px;
+      width: 75px;
+      margin: 5px;
+      border-radius: 4px;
+      right: 0;
+      bottom: 0;
+      z-index: 4;
+      position: absolute;
+      clip-path: polygon(0% 0%, 0% 100%, 100% 100%);
 
-      >img {
+      &.upper-right {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
+      }
+    }
+
+    .autoplay-settings-menu-label {
+      pointer-events: none;
+    }
+  </style>
+  <div id="autoplay-menu" class="not-highlightable gallery-sub-menu">
+    <div id="autoplay-buttons">
+      <img id="autoplay-settings-button" title="Autoplay settings">
+      <img id="autoplay-play-button" title="Pause autoplay">
+      <img id="autoplay-change-direction-button" title="Change autoplay direction">
+      <div id="autoplay-change-direction-mask-container">
+        <img id="autoplay-change-direction-mask" title="Change autoplay direction">
+      </div>
+    </div>
+    <div id="autoplay-image-progress-bar" class="autoplay-progress-bar"></div>
+    <div id="autoplay-video-progress-bar" class="autoplay-progress-bar"></div>
+    <div id="autoplay-settings-menu">
+      <div>
+        <label for="autoplay-image-duration-input">Image/GIF Duration</label>
+        <span class="number">
+          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+          <input type="number" id="autoplay-image-duration-input" min="1" max="60" step="1">
+          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+        </span>
+      </div>
+      <div>
+        <label for="autoplay-minimum-video-duration-input">Minimum Video Duration</label>
+        <span class="number">
+          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+          <input type="number" id="autoplay-minimum-animated-duration-input" min="0" max="60" step="1">
+          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+export const CAPTION_HTML = `
+<style>
+  .caption {
+    overflow: hidden;
+    pointer-events: none;
+    background: rgba(0, 0, 0, .75);
+    z-index: 15;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: -100%;
+    left: 0px;
+    top: 0px;
+    text-align: left;
+    transform: translateX(-100%);
+    /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
+    transition: transform .35s ease;
+    padding-top: 0.5ch;
+    padding-left: 7px;
+
+    h6 {
+      display: block;
+      color: white;
+      padding-top: 0px;
+    }
+
+    li {
+      width: fit-content;
+      list-style-type: none;
+      display: inline-block;
+    }
+
+    &.active {
+        transform: translateX(0%);
+    }
+
+    &.transition-completed {
+      .caption-tag {
         pointer-events: all;
       }
     }
   }
 
-  .blink {
-    animation: blink 0.35s step-start infinite;
+  .caption.hide {
+    display: none;
   }
 
-  @keyframes blink {
-    0% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0;
-    }
-
-    100% {
-      opacity: 1;
-    }
+  .caption.inactive {
+    display: none;
   }
 
-  /* html::before {
-    content: "";
-    position: fixed;
-    z-index: 10000;
-    opacity: 0;
-    background: black;
-    transition: opacity 0.2s linear;
+  .caption-tag {
     pointer-events: none;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  } */
+    color: #6cb0ff;
+    word-wrap: break-word;
 
-  html.fullscreen-effect::before {
-    opacity: 1;
+    &:hover {
+      text-decoration-line: underline;
+      cursor: pointer;
+    }
   }
 
-  html.transition-disabled::before {
-    transition: none;
-}
+  .artist-tag {
+    color: #f0a0a0;
+  }
+
+  .character-tag {
+    color: #f0f0a0;
+  }
+
+  .copyright-tag {
+    color: #EFA1CF;
+  }
+
+  .metadata-tag {
+    color: #8FD9ED;
+  }
+
+  .caption-wrapper {
+    pointer-events: none;
+    position: absolute !important;
+    overflow: hidden;
+    top: -1px;
+    left: -1px;
+    width: 102%;
+    height: 102%;
+    display: block !important;
+  }
 </style>
 `;
-  export const favorites = `
+export const DARK_THEME_HTML = `
+<style>
+  input[type=number] {
+    background-color: #303030;
+    color: white;
+  }
+
+  .number {
+    background-color: #303030;
+
+    >hold-button,
+    button {
+      color: white;
+    }
+  }
+
+  #favorites-pagination-container {
+    >button {
+      border: 1px solid white !important;
+      color: white !important;
+    }
+  }
+</style>
+`;
+export const DESKTOP_HTML = `
+<style>
+  .checkbox {
+    &:hover {
+      color: #000;
+      background: #93b393;
+      text-shadow: none;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  #sort-ascending-checkbox {
+    width: 20px;
+    height: 20px;
+  }
+
+  #favorites-pagination-container>button {
+    height: 32px;
+  }
+</style>
+`;
+export const DOWNLOADER_HTML = `
+<style>
+  body.download-menu-open {
+    overflow: hidden;
+  }
+
+  body.download-menu-open::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+  }
+
+  #download-menu {
+    background: transparent;
+
+    border: none;
+    gap: 10px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #download-menu-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    gap: 10px;
+    border-radius: 10px;
+  }
+
+  #download-menu-container-wrapper {
+    display: flex;
+    width: 450px;
+    height: 150px;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #download-menu-container-wrapper-inner {
+    display: flex;
+    padding: 10px;
+    border-radius: 8px;
+    height: 100%;
+  }
+
+  #download-menus button {
+    width: 100%;
+    height: 4rem;
+    border-radius: 8px;
+    font-size: large;
+  }
+
+  #download-menu.downloading #download-menu-buttons-start-download {
+    display: none;
+  }
+
+  #download-menu.downloading #download-menu-options {
+    display: none;
+  }
+
+  #download-menu.downloading #download-menu-status {
+    flex: 1 1 100%;
+  }
+
+  #download-menu-options {
+    flex: 1 0 25%;
+    text-align: center;
+  }
+
+  #download-menu-options select {
+    width: 100%;
+    font-size: 15px;
+    height: 25x;
+  }
+
+
+  #download-menu-buttons {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    flex: 1 0 15%;
+  }
+
+  #download-menu-buttons button {
+    flex: 1 1 100%;
+  }
+
+  #download-menu-status {
+    flex: 0 0 0%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* transition: flex 0.15s linear; */
+  }
+
+  #download-menu-status-header {
+    text-align: center;
+    margin: 0;
+    background: transparent;
+  }
+
+  #download-menu-status-header.dark-green-gradient {
+    color: white;
+  }
+
+  #download-menu-status span {
+    font-size: medium;
+  }
+
+  #download-menu p {
+    color: black;
+  }
+
+  #download-menu-warning-container button {
+    margin: auto;
+    border-radius: 8px;
+  }
+
+  #download-menu-warning-container {
+    text-align: center;
+  }
+
+  #download-menu-help {
+    display: flex;
+    flex: 0 0 5%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #download-menu-help button {
+    background: transparent;
+    width: 100%;
+    aspect-ratio: 1;
+    border: none;
+    position: relative;
+  }
+
+  #download-menu-help button:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  #download-menu-help svg {
+    background: transparent !important;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+  }
+
+  #download-menu-help svg.dark-green-gradient {
+    fill: white;
+  }
+
+  #download-menu-help-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 500px;
+    transform: translateY(100%);
+    background: gray;
+    color: black;
+  }
+</style>
+
+<div id="download-menus">
+  <dialog id="download-menu">
+    <div id="download-menu-container-wrapper">
+      <h1 id="download-menu-status-header" class="light-green-gradient">Download</h1>
+      <div id="download-menu-container-wrapper-inner" class="light-green-gradient">
+        <div id="download-menu-container">
+          <div id="download-menu-buttons">
+            <button id="download-menu-buttons-start-download">Download</button>
+            <button id="download-menu-buttons-cancel-download">Cancel</button>
+          </div>
+          <div id="download-menu-options" class="download-menu-setup">
+            <div id="download-menu-options-batch-size-container">
+              <span>Batch Size</span>
+              <select id="download-menu-options-batch-size">
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+              </select>
+            </div>
+          </div>
+          <div id="download-menu-status">
+          </div>
+          <!-- <div id="download-menu-help">
+            <button>
+              <svg class="light-green-gradient" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                <path
+                  d="M478-240q21 0 35.5-14.5T528-290q0-21-14.5-35.5T478-340q-21 0-35.5 14.5T428-290q0 21 14.5 35.5T478-240Zm-36-154h74q0-33 7.5-52t42.5-52q26-26 41-49.5t15-56.5q0-56-41-86t-97-30q-57 0-92.5 30T342-618l66 26q5-18 22.5-39t53.5-21q32 0 48 17.5t16 38.5q0 20-12 37.5T506-526q-44 39-54 59t-10 73Zm38 314q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+              </svg>
+            </button>
+          </div> -->
+        </div>
+      </div>
+    </div>
+    <!-- <div id="download-menu-help-text">
+      <p>
+        This is some text that will be displayed in the download menu. It can be used to provide information or instructions to the user.
+      </p>
+    </div> -->
+  </dialog>
+  <dialog id="download-menu-warning" class="light-green-gradient">
+    <div id="download-menu-warning-container">
+      <h1>Wait for all favorites to load before downloading</h1>
+      <form method="dialog"><button>Close</button></form>
+    </div>
+  </dialog>
+</div>
+`;
+export const FANCY_HOVERING_HTML = `
+<style>
+  #caption-list {
+    transform: scale(0.8);
+  }
+
+  #favorites-search-gallery-content {
+    padding: 40px 40px 30px !important;
+    grid-gap: 1cqw !important;
+  }
+
+  .favorite,
+  .thumb {
+
+    >a,
+    >span,
+    >div {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s ease-in-out;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        top: 0;
+        left: 0;
+        border-radius: 5px;
+        box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.45);
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      &:hover {
+        outline: none !important;
+        transform: scale(1.2, 1.2);
+        z-index: 10;
+
+        img {
+          outline: none !important;
+        }
+
+        &::after {
+          opacity: 1;
+        }
+      }
+    }
+  }
+</style>
+`;
+export const FAVORITES_HTML = `
 <div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
   <style>
     #favorites-search-gallery-menu {
@@ -892,8 +1300,7 @@
               </div>
               <div id="results-columns-container" class="inline-option-container">
                 <div id="results-per-page-container"
-                  title="Set the maximum number of search results to display on each page
-Lower numbers improve responsiveness">
+                  title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
                   <span class="number-label-container">
                     <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
                   </span>
@@ -943,221 +1350,7 @@ Lower numbers improve responsiveness">
   <div id="loading-wheel"></div>
 </div>
 `;
-  export const autoplay = `
-<div id="autoplay-container">
-  <style>
-    #autoplay-container {
-      visibility: hidden;
-    }
-
-    #autoplay-menu {
-      position: fixed;
-      left: 50%;
-      transform: translate(-50%);
-      bottom: 5%;
-      padding: 0;
-      margin: 0;
-      /* background: rgba(40, 40, 40, 1); */
-      background: var(--gallery-menu-background);
-      border-radius: 4px;
-      white-space: nowrap;
-      z-index: 10000;
-      opacity: 0;
-      transition: opacity .25s ease-in-out;
-
-      &.visible {
-        opacity: 1;
-      }
-
-      &.persistent {
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-
-      >div>img {
-        color: red;
-        position: relative;
-        height: 75px;
-        cursor: pointer;
-        background-color: rgba(128, 128, 128, 0);
-        margin: 5px;
-        background-size: 10%;
-        z-index: 3;
-        border-radius: 4px;
-
-
-        &:hover {
-          background-color: rgba(200, 200, 200, .5);
-        }
-      }
-    }
-
-    .autoplay-progress-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0%;
-      height: 100%;
-      background-color: steelblue;
-      z-index: 1;
-
-      /* position: fixed !important;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 4px;
-      background: #ff5733;
-      z-index: 1; */
-    }
-
-    body.autoplay::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 4px;
-      background: #ff5733;
-      animation: progress 5s linear forwards;
-      z-index: 9999;
-    }
-
-    @keyframes progress {
-      from {
-        width: 0;
-      }
-
-      to {
-        width: 100%;
-      }
-    }
-
-
-    #autoplay-video-progress-bar {
-      background-color: royalblue;
-    }
-
-    #autoplay-settings-menu {
-      visibility: hidden;
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translate(-50%, -105%);
-      border-radius: 4px;
-      font-size: 10px !important;
-      background: var(--gallery-menu-background);
-
-      &.visible {
-        visibility: visible;
-      }
-
-      >div {
-        font-size: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 10px;
-        color: white;
-
-
-        >label {
-          padding-right: 20px;
-        }
-
-        >.number {
-          background: none;
-          outline: 2px solid white;
-
-          >hold-button,
-          >button {
-            &::after {
-              width: 200%;
-              height: 130%;
-            }
-          }
-
-          >input[type="number"] {
-            color: white;
-            width: 7ch;
-          }
-        }
-      }
-
-      select {
-        /* height: 25px; */
-        font-size: larger;
-        width: 10ch;
-      }
-    }
-
-    #autoplay-settings-button.settings-menu-opened {
-      filter: drop-shadow(6px 6px 3px #0075FF);
-    }
-
-
-    #autoplay-change-direction-mask {
-      filter: drop-shadow(2px 2px 3px #0075FF);
-    }
-
-    #autoplay-play-button:active {
-      filter: drop-shadow(2px 2px 10px #0075FF);
-    }
-
-    #autoplay-change-direction-mask-container {
-      pointer-events: none;
-      opacity: 0.75;
-      height: 75px;
-      width: 75px;
-      margin: 5px;
-      border-radius: 4px;
-      right: 0;
-      bottom: 0;
-      z-index: 4;
-      position: absolute;
-      clip-path: polygon(0% 0%, 0% 100%, 100% 100%);
-
-      &.upper-right {
-        clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
-      }
-    }
-
-    .autoplay-settings-menu-label {
-      pointer-events: none;
-    }
-  </style>
-  <div id="autoplay-menu" class="not-highlightable gallery-sub-menu">
-    <div id="autoplay-buttons">
-      <img id="autoplay-settings-button" title="Autoplay settings">
-      <img id="autoplay-play-button" title="Pause autoplay">
-      <img id="autoplay-change-direction-button" title="Change autoplay direction">
-      <div id="autoplay-change-direction-mask-container">
-        <img id="autoplay-change-direction-mask" title="Change autoplay direction">
-      </div>
-    </div>
-    <div id="autoplay-image-progress-bar" class="autoplay-progress-bar"></div>
-    <div id="autoplay-video-progress-bar" class="autoplay-progress-bar"></div>
-    <div id="autoplay-settings-menu">
-      <div>
-        <label for="autoplay-image-duration-input">Image/GIF Duration</label>
-        <span class="number">
-          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
-          <input type="number" id="autoplay-image-duration-input" min="1" max="60" step="1">
-          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
-        </span>
-      </div>
-      <div>
-        <label for="autoplay-minimum-video-duration-input">Minimum Video Duration</label>
-        <span class="number">
-          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
-          <input type="number" id="autoplay-minimum-animated-duration-input" min="0" max="60" step="1">
-          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-  export const gallery = `
+export const GALLERY_HTML = `
 <style>
   html {
     width: 100vw;
@@ -1358,7 +1551,7 @@ Lower numbers improve responsiveness">
     }
 
     * {
-      position: export const;
+      position: static;
       -webkit-user-drag: none;
       -khtml-user-drag: none;
       -moz-user-drag: none;
@@ -1459,408 +1652,50 @@ Lower numbers improve responsiveness">
   }
 </style>
 `;
-  export const galleryDebug = `
-.thumb,
-.favorite {
-  &.debug-selected {
-    outline: 3px solid #0075FF !important;
-  }
-
-  &.loaded {
-
-    div, a {
-      outline: 2px solid transparent;
-      animation: outlineGlow 1s forwards;
-    }
-
-    .image {
-      opacity: 1;
-    }
-  }
-
-  >a
-  >canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 1;
-    visibility: hidden;
-  }
-
-  .image {
-    opacity: 0.4;
-    transition: transform 0.1s ease-in-out, opacity 0.5s ease;
-  }
-
-}
-
-.image.loaded {
-  animation: outlineGlow 1s forwards;
-  opacity: 1;
-}
-
-@keyframes outlineGlow {
-  0% {
-    outline-color: transparent;
-  }
-
-  100% {
-    outline-color: turquoise;
-  }
-}
-
-#original-video-container {
-  video {
-    opacity: 0.15;
-  }
-}
-
-`;
-  export const tooltip = `
-<div id="tooltip-container">
-  <style>
-    #tooltip {
-      max-width: 750px;
-      border: 1px solid black;
-      padding: 0.25em;
-      position: absolute;
-      box-sizing: border-box;
-      z-index: 25;
-      pointer-events: none;
-      visibility: hidden;
-      opacity: 0;
-      /* transition: visibility 0s, opacity 0.25s linear; */
-      font-size: 1.05em;
-    }
-
-    #tooltip.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-  </style>
-</div>
-`;
-  export const caption = `
-<style>
-  .caption {
-    overflow: hidden;
-    pointer-events: none;
-    background: rgba(0, 0, 0, .75);
-    z-index: 15;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: -100%;
-    left: 0px;
-    top: 0px;
-    text-align: left;
-    transform: translateX(-100%);
-    /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
-    transition: transform .35s ease;
-    padding-top: 0.5ch;
-    padding-left: 7px;
-
-    h6 {
-      display: block;
-      color: white;
-      padding-top: 0px;
-    }
-
-    li {
-      width: fit-content;
-      list-style-type: none;
-      display: inline-block;
-    }
-
-    &.active {
-        transform: translateX(0%);
-    }
-
-    &.transition-completed {
-      .caption-tag {
-        pointer-events: all;
-      }
-    }
-  }
-
-  .caption.hide {
-    display: none;
-  }
-
-  .caption.inactive {
-    display: none;
-  }
-
-  .caption-tag {
-    pointer-events: none;
-    color: #6cb0ff;
-    word-wrap: break-word;
-
-    &:hover {
-      text-decoration-line: underline;
-      cursor: pointer;
-    }
-  }
-
-  .artist-tag {
-    color: #f0a0a0;
-  }
-
-  .character-tag {
-    color: #f0f0a0;
-  }
-
-  .copyright-tag {
-    color: #EFA1CF;
-  }
-
-  .metadata-tag {
-    color: #8FD9ED;
-  }
-
-  .caption-wrapper {
-    pointer-events: none;
-    position: absolute !important;
-    overflow: hidden;
-    top: -1px;
-    left: -1px;
-    width: 102%;
-    height: 102%;
-    display: block !important;
-  }
-</style>
-`;
-  export const savedSearches = `
-<div id="saved-searches">
-  <style>
-    #saved-searches-container {
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-    }
-
-    #saved-searches-input-container {
-      margin-bottom: 10px;
-    }
-
-    #saved-searches-input {
-      flex: 15 1 auto;
-      margin-right: 10px;
-    }
-
-    #savedSearches {
-      max-width: 100%;
-
-      button {
-        flex: 1 1 auto;
-        cursor: pointer;
-      }
-    }
-
-    #saved-searches-buttons button {
-      margin-right: 1px;
-      margin-bottom: 5px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      height: 35px;
-
-      &:hover {
-        filter: brightness(140%);
-      }
-    }
-
-    #saved-search-list-container {
-      direction: rtl;
-      max-height: 200px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      margin: 0;
-      padding: 0;
-    }
-
-    #saved-search-list {
-      direction: ltr;
-      >li {
-        display: flex;
-        flex-direction: row;
-        cursor: pointer;
-        background: rgba(0, 0, 0, .1);
-
-        &:nth-child(odd) {
-          background: rgba(0, 0, 0, 0.2);
-        }
-
-        >div {
-          padding: 4px;
-          align-content: center;
-
-          svg {
-            height: 20px;
-            width: 20px;
-          }
-        }
-      }
-    }
-
-    .save-search-label {
-      flex: 1000 30px;
-      text-align: left;
-
-      &:hover {
-        color: white;
-        background: #0075FF;
-      }
-    }
-
-    .edit-saved-search-button {
-      text-align: center;
-      flex: 1 20px;
-
-      &:hover {
-        color: white;
-        background: slategray;
-      }
-    }
-
-    .remove-saved-search-button {
-      text-align: center;
-      flex: 1 20px;
-
-      &:hover {
-        color: white;
-        background: #f44336;
-      }
-    }
-
-    .move-saved-search-to-top-button {
-      text-align: center;
-
-      &:hover {
-        color: white;
-        background: steelblue;
-      }
-    }
-
-    /* .tag-type-saved>a,
-    .tag-type-saved {
-      color: lightblue;
-    } */
-  </style>
-  <h2>Saved Searches</h2>
-  <div id="saved-searches-buttons">
-    <button title="Save custom search" id="save-custom-search-button">Save</button>
-    <button id="stop-editing-saved-search-button" style="display: none;">Cancel</button>
-    <span>
-      <button title="Export all saved searches" id="export-saved-search-button">Export</button>
-      <button title="Import saved searches" id="import-saved-search-button">Import</button>
-    </span>
-    <button title="Save result ids as search" id="save-results-button">Save Results</button>
-  </div>
-  <div id="saved-searches-container">
-    <div id="saved-searches-input-container">
-      <textarea id="saved-searches-input" spellcheck="false" style="width: 97%;"
-        placeholder="Save Custom Search"></textarea>
+export const HELP_HTML = `
+<span id="help-links-container">
+  <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
+  <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
+    target="_blank">Feedback</a>
+  <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
+    Issue</a>
+  <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
+    <div id="whats-new-container" class="light-green-gradient">
+      <h4>1.19:</h4>
+      <h5>Features:</h5>
+      <ul>
+        <li>New favorites layouts</li>
+        <ul>
+          <li>Waterfall (column)</li>
+          <li>River (row)</li>
+          <li>Square</li>
+          <li>Legacy (grid)</li>
+        </ul>
+        <li>Infinite favorites scroll option added</li>
+        <ul>
+          <li>Page option still available</li>
+        </ul>
+        <li>Infinite gallery on search pages</li>
+        <ul>
+          <li>Go to next search page without ever exiting gallery</li>
+        </ul>
+        <li>Download images</li>
+        <ul>
+          <li>Expiremental for now</li>
+        </ul>
+        <li>New gallery hotkeys</li>
+        <ul>
+          <li>F: Fullscreen</li>
+          <li>G: Open post</li>
+          <li>Q: Open original</li>
+          <li>E: Add favorite</li>
+        </ul>
+      </ul>
     </div>
-    <div id="saved-search-list-container">
-      <ul id="saved-search-list"></ul>
-    </div>
-  </div>
-</div>
-<script>
-</script>
+  </a>
+</span>
 `;
-  export const tagModifier = `
-<div id="tag-modifier-container">
-  <style>
-    #tag-modifier-ui-container {
-      display: none;
-
-      >* {
-        margin-top: 10px;
-      }
-    }
-
-    #tag-modifier-ui-textarea {
-      width: 80%;
-    }
-
-    .favorite.tag-modifier-selected {
-      outline: 2px dashed white !important;
-
-      >div, >a {
-        opacity: 1;
-        filter: grayscale(0%);
-      }
-    }
-
-    #tag-modifier-ui-status-label {
-      visibility: hidden;
-    }
-
-    .tag-type-custom>a,
-    .tag-type-custom {
-      color: hotpink;
-    }
-  </style>
-  <div id="tag-modifier-option-container">
-    <label class="checkbox" title="Add or remove custom or official tags to favorites">
-      <input type="checkbox" id="tag-modifier-option-checkbox"> Modify Tags<span class="option-hint"></span>
-    </label>
-  </div>
-  <div id="tag-modifier-ui-container">
-    <label id="tag-modifier-ui-status-label">No Status</label>
-    <textarea id="tag-modifier-ui-textarea" placeholder="tags" spellcheck="false"></textarea>
-    <div id="tag-modifier-buttons">
-      <span id="tag-modifier-ui-modification-buttons">
-        <button id="tag-modifier-ui-add" title="Add tags to selected favorites">Add</button>
-        <button id="tag-modifier-remove" title="Remove tags from selected favorites">Remove</button>
-      </span>
-      <span id="tag-modifier-ui-selection-buttons">
-        <button id="tag-modifier-ui-select-all" title="Select all favorites for tag modification">Select all</button>
-        <button id="tag-modifier-ui-un-select-all" title="Unselect all favorites for tag modification">Unselect
-          all</button>
-      </span>
-    </div>
-    <div id="tag-modifier-ui-reset-button-container">
-      <button id="tag-modifier-reset" title="Reset tag modifications">Reset</button>
-    </div>
-    <div id="tag-modifier-ui-configuration" style="display: none;">
-      <button id="tag-modifier-import" title="Import modified tags">Import</button>
-      <button id="tag-modifier-export" title="Export modified tags">Export</button>
-    </div>
-  </div>
-</div>
-`;
-  export const desktop = `
-<style>
-  .checkbox {
-    &:hover {
-      color: #000;
-      background: #93b393;
-      text-shadow: none;
-      cursor: pointer;
-    }
-
-    input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  #sort-ascending-checkbox {
-    width: 20px;
-    height: 20px;
-  }
-
-  #favorites-pagination-container>button {
-    height: 32px;
-  }
-</style>
-`;
-  export const mobile = `
+export const MOBILE_HTML = `
 <style>
   #performance-profile-container,
   #show-hints-container,
@@ -2221,266 +2056,448 @@ Lower numbers improve responsiveness">
   }
 </style>
 `;
-  export const help = `
-<span id="help-links-container">
-  <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
-  <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
-    target="_blank">Feedback</a>
-  <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
-    Issue</a>
-  <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
-    <div id="whats-new-container" class="light-green-gradient">
-      <h4>1.19:</h4>
-      <h5>Features:</h5>
-      <ul>
-        <li>New favorites layouts</li>
-        <ul>
-          <li>Waterfall (column)</li>
-          <li>River (row)</li>
-          <li>Square</li>
-          <li>Legacy (grid)</li>
-        </ul>
-        <li>Infinite favorites scroll option added</li>
-        <ul>
-          <li>Page option still available</li>
-        </ul>
-        <li>Infinite gallery on search pages</li>
-        <ul>
-          <li>Go to next search page without ever exiting gallery</li>
-        </ul>
-        <li>Download images</li>
-        <ul>
-          <li>Experimental for now</li>
-        </ul>
-        <li>New gallery hotkeys</li>
-        <ul>
-          <li>F: Fullscreen</li>
-          <li>G: Open post</li>
-          <li>Q: Open original</li>
-          <li>E: Add favorite</li>
-        </ul>
-      </ul>
+export const SAVED_SEARCHES_HTML = `
+<div id="saved-searches">
+  <style>
+    #saved-searches-container {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    #saved-searches-input-container {
+      margin-bottom: 10px;
+    }
+
+    #saved-searches-input {
+      flex: 15 1 auto;
+      margin-right: 10px;
+    }
+
+    #savedSearches {
+      max-width: 100%;
+
+      button {
+        flex: 1 1 auto;
+        cursor: pointer;
+      }
+    }
+
+    #saved-searches-buttons button {
+      margin-right: 1px;
+      margin-bottom: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      height: 35px;
+
+      &:hover {
+        filter: brightness(140%);
+      }
+    }
+
+    #saved-search-list-container {
+      direction: rtl;
+      max-height: 200px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    #saved-search-list {
+      direction: ltr;
+      >li {
+        display: flex;
+        flex-direction: row;
+        cursor: pointer;
+        background: rgba(0, 0, 0, .1);
+
+        &:nth-child(odd) {
+          background: rgba(0, 0, 0, 0.2);
+        }
+
+        >div {
+          padding: 4px;
+          align-content: center;
+
+          svg {
+            height: 20px;
+            width: 20px;
+          }
+        }
+      }
+    }
+
+    .save-search-label {
+      flex: 1000 30px;
+      text-align: left;
+
+      &:hover {
+        color: white;
+        background: #0075FF;
+      }
+    }
+
+    .edit-saved-search-button {
+      text-align: center;
+      flex: 1 20px;
+
+      &:hover {
+        color: white;
+        background: slategray;
+      }
+    }
+
+    .remove-saved-search-button {
+      text-align: center;
+      flex: 1 20px;
+
+      &:hover {
+        color: white;
+        background: #f44336;
+      }
+    }
+
+    .move-saved-search-to-top-button {
+      text-align: center;
+
+      &:hover {
+        color: white;
+        background: steelblue;
+      }
+    }
+
+    /* .tag-type-saved>a,
+    .tag-type-saved {
+      color: lightblue;
+    } */
+  </style>
+  <h2>Saved Searches</h2>
+  <div id="saved-searches-buttons">
+    <button title="Save custom search" id="save-custom-search-button">Save</button>
+    <button id="stop-editing-saved-search-button" style="display: none;">Cancel</button>
+    <span>
+      <button title="Export all saved searches" id="export-saved-search-button">Export</button>
+      <button title="Import saved searches" id="import-saved-search-button">Import</button>
+    </span>
+    <button title="Save result ids as search" id="save-results-button">Save Results</button>
+  </div>
+  <div id="saved-searches-container">
+    <div id="saved-searches-input-container">
+      <textarea id="saved-searches-input" spellcheck="false" style="width: 97%;"
+        placeholder="Save Custom Search"></textarea>
     </div>
-  </a>
-</span>
+    <div id="saved-search-list-container">
+      <ul id="saved-search-list"></ul>
+    </div>
+  </div>
+</div>
+<script>
+</script>
 `;
-  export const downloader = `
+export const TAG_MODIFIER_HTML = `
+<div id="tag-modifier-container">
+  <style>
+    #tag-modifier-ui-container {
+      display: none;
+
+      >* {
+        margin-top: 10px;
+      }
+    }
+
+    #tag-modifier-ui-textarea {
+      width: 80%;
+    }
+
+    .favorite.tag-modifier-selected {
+      outline: 2px dashed white !important;
+
+      >div, >a {
+        opacity: 1;
+        filter: grayscale(0%);
+      }
+    }
+
+    #tag-modifier-ui-status-label {
+      visibility: hidden;
+    }
+
+    .tag-type-custom>a,
+    .tag-type-custom {
+      color: hotpink;
+    }
+  </style>
+  <div id="tag-modifier-option-container">
+    <label class="checkbox" title="Add or remove custom or official tags to favorites">
+      <input type="checkbox" id="tag-modifier-option-checkbox"> Modify Tags<span class="option-hint"></span>
+    </label>
+  </div>
+  <div id="tag-modifier-ui-container">
+    <label id="tag-modifier-ui-status-label">No Status</label>
+    <textarea id="tag-modifier-ui-textarea" placeholder="tags" spellcheck="false"></textarea>
+    <div id="tag-modifier-buttons">
+      <span id="tag-modifier-ui-modification-buttons">
+        <button id="tag-modifier-ui-add" title="Add tags to selected favorites">Add</button>
+        <button id="tag-modifier-remove" title="Remove tags from selected favorites">Remove</button>
+      </span>
+      <span id="tag-modifier-ui-selection-buttons">
+        <button id="tag-modifier-ui-select-all" title="Select all favorites for tag modification">Select all</button>
+        <button id="tag-modifier-ui-un-select-all" title="Unselect all favorites for tag modification">Unselect
+          all</button>
+      </span>
+    </div>
+    <div id="tag-modifier-ui-reset-button-container">
+      <button id="tag-modifier-reset" title="Reset tag modifications">Reset</button>
+    </div>
+    <div id="tag-modifier-ui-configuration" style="display: none;">
+      <button id="tag-modifier-import" title="Import modified tags">Import</button>
+      <button id="tag-modifier-export" title="Export modified tags">Export</button>
+    </div>
+  </div>
+</div>
+`;
+export const TOOLTIP_HTML = `
+<div id="tooltip-container">
+  <style>
+    #tooltip {
+      max-width: 750px;
+      border: 1px solid black;
+      padding: 0.25em;
+      position: absolute;
+      box-sizing: border-box;
+      z-index: 25;
+      pointer-events: none;
+      visibility: hidden;
+      opacity: 0;
+      /* transition: visibility 0s, opacity 0.25s linear; */
+      font-size: 1.05em;
+    }
+
+    #tooltip.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</div>
+`;
+export const UTILITIES_HTML = `
 <style>
-  body.download-menu-open {
-    overflow: hidden;
+  body {
+
+    &:fullscreen,
+    &::backdrop {
+      background-color: var(--c-bg);
+    }
   }
 
-  body.download-menu-open::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 9999;
+  .light-green-gradient {
+    background: linear-gradient(to bottom, #aae5a4, #89e180);
+    color: black;
   }
 
-  #download-menu {
-    background: transparent;
-
-    border: none;
-    gap: 10px;
-    padding: 0;
-    overflow: hidden;
-  }
-
-  #download-menu-container {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    height: 100%;
-    gap: 10px;
-    border-radius: 10px;
-  }
-
-  #download-menu-container-wrapper {
-    display: flex;
-    width: 450px;
-    height: 150px;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  #download-menu-container-wrapper-inner {
-    display: flex;
-    padding: 10px;
-    border-radius: 8px;
-    height: 100%;
-  }
-
-  #download-menus button {
-    width: 100%;
-    height: 4rem;
-    border-radius: 8px;
-    font-size: large;
-  }
-
-  #download-menu.downloading #download-menu-buttons-start-download {
-    display: none;
-  }
-
-  #download-menu.downloading #download-menu-options {
-    display: none;
-  }
-
-  #download-menu.downloading #download-menu-status {
-    flex: 1 1 100%;
-  }
-
-  #download-menu-options {
-    flex: 1 0 25%;
-    text-align: center;
-  }
-
-  #download-menu-options select {
-    width: 100%;
-    font-size: 15px;
-    height: 25x;
-  }
-
-
-  #download-menu-buttons {
-    display: flex;
-    gap: 10px;
-    flex-direction: column;
-    flex: 1 0 15%;
-  }
-
-  #download-menu-buttons button {
-    flex: 1 1 100%;
-  }
-
-  #download-menu-status {
-    flex: 0 0 0%;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    /* transition: flex 0.15s linear; */
-  }
-
-  #download-menu-status-header {
-    text-align: center;
-    margin: 0;
-    background: transparent;
-  }
-
-  #download-menu-status-header.dark-green-gradient {
+  .dark-green-gradient {
+    background: linear-gradient(to bottom, #5e715e, #293129);
     color: white;
   }
 
-  #download-menu-status span {
-    font-size: medium;
+  img {
+    border: none !important;
   }
 
-  #download-menu p {
-    color: black;
+  .not-highlightable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 
-  #download-menu-warning-container button {
-    margin: auto;
-    border-radius: 8px;
+  input[type=number] {
+    border: 1px solid #767676;
+    border-radius: 2px;
   }
 
-  #download-menu-warning-container {
-    text-align: center;
-  }
-
-  #download-menu-help {
-    display: flex;
-    flex: 0 0 5%;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #download-menu-help button {
-    background: transparent;
-    width: 100%;
-    aspect-ratio: 1;
-    border: none;
-    position: relative;
-  }
-
-  #download-menu-help button:hover {
-    background: rgba(0, 0, 0, 0.1);
-  }
-
-  #download-menu-help svg {
-    background: transparent !important;
-    position: absolute;
-    left: 50%;
-    top: 50%;
+  .size-calculation-div {
+    position: absolute !important;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    visibility: hidden;
+    transition: none !important;
+    transform: scale(1.05, 1.05);
+  }
+
+  .number {
+    white-space: nowrap;
+    position: relative;
+    margin-top: 5px;
+    border: 1px solid;
+    padding: 0;
+    border-radius: 20px;
+    background-color: white;
+
+    >hold-button,
+    button {
+      position: relative;
+      top: 0;
+      left: 0;
+      font-size: inherit;
+      outline: none;
+      background: none;
+      cursor: pointer;
+      border: none;
+      margin: 0px 8px;
+      padding: 0;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200%;
+        height: 100%;
+        /* outline: 1px solid greenyellow; */
+        /* background-color: hotpink; */
+      }
+
+      &:hover {
+        >span {
+          color: #0075FF;
+        }
+      }
+
+      >span {
+        font-weight: bold;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        position: relative;
+        pointer-events: none;
+        border: none;
+        outline: none;
+        top: 0;
+        z-index: 5;
+        font-size: 1.2em !important;
+      }
+
+      &.number-arrow-up {
+        >span {
+          transition: left .1s ease;
+          left: 0;
+        }
+
+        &:hover>span {
+          left: 3px;
+        }
+      }
+
+      &.number-arrow-down {
+        >span {
+          transition: right .1s ease;
+          right: 0;
+        }
+
+        &:hover>span {
+          right: 3px;
+        }
+      }
+    }
+
+    >input[type="number"] {
+      font-size: inherit;
+      text-align: center;
+      width: 2ch;
+      padding: 0;
+      margin: 0;
+      font-weight: bold;
+      padding: 3px;
+      background: none;
+      border: none;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    >input[type="number"]::-webkit-outer-spin-button,
+    >input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+  }
+
+  .fullscreen-icon {
+    position: fixed;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 10010;
+    pointer-events: none;
+    width: 30vw;
   }
 
-  #download-menu-help svg.dark-green-gradient {
-    fill: white;
+  input[type="checkbox"] {
+    accent-color: #0075FF;
   }
 
-  #download-menu-help-text {
-    position: absolute;
-    bottom: 0;
+  .thumb {
+    >a {
+      pointer-events: none;
+
+      >img {
+        pointer-events: all;
+      }
+    }
+  }
+
+  .blink {
+    animation: blink 0.35s step-start infinite;
+  }
+
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* html::before {
+    content: "";
+    position: fixed;
+    z-index: 10000;
+    opacity: 0;
+    background: black;
+    transition: opacity 0.2s linear;
+    pointer-events: none;
+    top: 0;
     left: 0;
-    width: 500px;
-    transform: translateY(100%);
-    background: gray;
-    color: black;
-  }
-</style>
+    width: 100%;
+    height: 100%;
+  } */
 
-<div id="download-menus">
-  <dialog id="download-menu">
-    <div id="download-menu-container-wrapper">
-      <h1 id="download-menu-status-header" class="light-green-gradient">Download</h1>
-      <div id="download-menu-container-wrapper-inner" class="light-green-gradient">
-        <div id="download-menu-container">
-          <div id="download-menu-buttons">
-            <button id="download-menu-buttons-start-download">Download</button>
-            <button id="download-menu-buttons-cancel-download">Cancel</button>
-          </div>
-          <div id="download-menu-options" class="download-menu-setup">
-            <div id="download-menu-options-batch-size-container">
-              <span>Batch Size</span>
-              <select id="download-menu-options-batch-size">
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="250">250</option>
-                <option value="500">500</option>
-                <option value="1000">1000</option>
-              </select>
-            </div>
-          </div>
-          <div id="download-menu-status">
-          </div>
-          <!-- <div id="download-menu-help">
-            <button>
-              <svg class="light-green-gradient" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
-                <path
-                  d="M478-240q21 0 35.5-14.5T528-290q0-21-14.5-35.5T478-340q-21 0-35.5 14.5T428-290q0 21 14.5 35.5T478-240Zm-36-154h74q0-33 7.5-52t42.5-52q26-26 41-49.5t15-56.5q0-56-41-86t-97-30q-57 0-92.5 30T342-618l66 26q5-18 22.5-39t53.5-21q32 0 48 17.5t16 38.5q0 20-12 37.5T506-526q-44 39-54 59t-10 73Zm38 314q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-              </svg>
-            </button>
-          </div> -->
-        </div>
-      </div>
-    </div>
-    <!-- <div id="download-menu-help-text">
-      <p>
-        This is some text that will be displayed in the download menu. It can be used to provide information or instructions to the user.
-      </p>
-    </div> -->
-  </dialog>
-  <dialog id="download-menu-warning" class="light-green-gradient">
-    <div id="download-menu-warning-container">
-      <h1>Wait for all favorites to load before downloading</h1>
-      <form method="dialog"><button>Close</button></form>
-    </div>
-  </dialog>
-</div>
+  html.fullscreen-effect::before {
+    opacity: 1;
+  }
+
+  html.transition-disabled::before {
+    transition: none;
+}
+</style>
 `;

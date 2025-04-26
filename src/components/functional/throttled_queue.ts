@@ -1,4 +1,4 @@
-import {sleep} from "../../utils/generic";
+import {sleep} from "../../utils/misc/generic";
 
 export default class ThrottledQueue {
   private queue: (() => void)[];

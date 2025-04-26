@@ -1,3 +1,6 @@
+import {ON_MOBILE_DEVICE} from "../../lib/functional/flags";
+import {clamp} from "../../utils/primitive/number";
+
 export default class HoldButton extends HTMLElement {
   static {
     customElements.define("hold-button", HoldButton);
@@ -10,18 +13,17 @@ export default class HoldButton extends HTMLElement {
   private intervalId: number | undefined;
   private timeoutId: number | undefined;
   private pollingTime = HoldButton.defaultPollingTime;
-  /** @type {Boolean} */
-  holdingDown = false;
+  private holdingDown: boolean = false;
 
-  connectedCallback() {
-    if (Flags.onMobileDevice) {
+  public connectedCallback(): void {
+    if (ON_MOBILE_DEVICE) {
       return;
     }
     this.addEventListeners();
     this.initializePollingTime();
   }
 
-  initializePollingTime() {
+  private initializePollingTime(): void {
     const pollingTime = this.getAttribute("pollingtime");
 
     if (pollingTime !== null) {
@@ -29,12 +31,7 @@ export default class HoldButton extends HTMLElement {
     }
   }
 
-  /**
-   * @param {String} name
-   * @param {String} _
-   * @param {String} newValue
-   */
-  attributeChangedCallback(name, _, newValue) {
+  public attributeChangedCallback(name: string, _: null, newValue: string): void {
     switch (name) {
       case "pollingtime":
         this.setPollingTime(newValue);
@@ -45,17 +42,14 @@ export default class HoldButton extends HTMLElement {
     }
   }
 
-  /**
-   * @param {String} newValue
-   */
-  setPollingTime(newValue) {
+  private setPollingTime(newValue: string): void {
     this.stopPolling();
     const pollingTime = parseFloat(newValue) || HoldButton.defaultPollingTime;
 
-    this.pollingTime = Utils.clamp(Math.round(pollingTime), HoldButton.minPollingTime, HoldButton.maxPollingTime);
+    this.pollingTime = clamp(Math.round(pollingTime), HoldButton.minPollingTime, HoldButton.maxPollingTime);
   }
 
-  addEventListeners() {
+  private addEventListeners(): void {
     this.addEventListener("mousedown", (event) => {
       if (event.button === 0) {
         this.holdingDown = true;
@@ -79,7 +73,7 @@ export default class HoldButton extends HTMLElement {
     });
   }
 
-  startPolling() {
+  private startPolling(): void {
     this.timeoutId = setTimeout(() => {
       this.intervalId = setInterval(() => {
         this.onmousehold();
@@ -87,14 +81,14 @@ export default class HoldButton extends HTMLElement {
     }, this.pollingTime);
   }
 
-  stopPolling() {
+  private stopPolling(): void {
     clearTimeout(this.timeoutId);
     clearInterval(this.intervalId);
   }
 
-  onmousehold() {
+  public onmousehold(): void {
   }
 
-  onMouseLeaveWhileHoldingDown() {
+  public onMouseLeaveWhileHoldingDown(): void {
   }
 }
