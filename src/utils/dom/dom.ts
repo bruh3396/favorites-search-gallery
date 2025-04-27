@@ -1,5 +1,5 @@
+import {ON_MOBILE_DEVICE, ON_SEARCH_PAGE} from "../../lib/functional/flags";
 import {Events} from "../../lib/functional/events";
-import {ON_SEARCH_PAGE} from "../../lib/functional/flags";
 import {removeNonNumericCharacters} from "../primitive/string";
 
 const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
@@ -7,7 +7,7 @@ const FAVORITE_ITEM_CLASS_NAME = "favorite";
 const DEFAULT_ITEM_CLASS_NAME = "thumb";
 
 export const ITEM_CLASS_NAME = ON_SEARCH_PAGE ? DEFAULT_ITEM_CLASS_NAME : FAVORITE_ITEM_CLASS_NAME;
-const ITEM_SELECTOR = `.${ITEM_CLASS_NAME}`;
+export const ITEM_SELECTOR = `.${ITEM_CLASS_NAME}`;
 const IMAGE_SELECTOR = `.${ITEM_CLASS_NAME} ${ON_SEARCH_PAGE ? "img" : "img:first-child"}`;
 
 export function getClosestItem(element: HTMLElement): HTMLElement | null {
@@ -59,6 +59,45 @@ export function waitForDOMToLoad(): Promise<void> {
   });
 }
 
+export function imageIsLoaded(image: HTMLImageElement): boolean {
+  return image.complete || image.naturalWidth !== 0;
+}
+
+export function imageIsLoading(image: HTMLImageElement): boolean {
+  return !imageIsLoaded(image);
+}
+
+function originalGetAllThumbs(): HTMLElement[] {
+  return Array.from(document.querySelectorAll(ITEM_SELECTOR))
+    .filter(thumb => thumb instanceof HTMLElement);
+}
+
+export let getAllThumbs = originalGetAllThumbs;
+
+export function changeGetAllTHumbsImplementation(newGetAllThumbs: () => HTMLElement[]): void {
+  getAllThumbs = newGetAllThumbs;
+}
+
+export function resetGetAllThumbsImplementation(): void {
+  getAllThumbs = originalGetAllThumbs;
+}
+
+export function waitForAllThumbnailsToLoad(): Promise<unknown[]> {
+  const unloadedImages = getAllThumbs()
+    .map(thumb => getImageFromThumb(thumb))
+    .filter(image => image instanceof HTMLImageElement)
+    .filter(image => imageIsLoading(image));
+  return Promise.all(unloadedImages
+    .map(image => new Promise(resolve => {
+      image.addEventListener("load", resolve, {
+        once: true
+      });
+      image.addEventListener("error", resolve, {
+        once: true
+      });
+    })));
+}
+
 export function getIdFromThumb(thumb: HTMLElement): string {
   const id = thumb.getAttribute("id");
 
@@ -85,4 +124,8 @@ export function getIdFromThumb(thumb: HTMLElement): string {
   }
   const match = (/\?(\d+)$/).exec(image.src);
   return match === null ? "NA" : match[1];
+}
+
+export function scrollToTop(): void {
+  window.scrollTo(0, ON_MOBILE_DEVICE ? 10 : 0);
 }

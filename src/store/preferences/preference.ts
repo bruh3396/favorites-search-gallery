@@ -1,6 +1,6 @@
 import {PreferenceStorage} from "./preference_storage";
 
-export default class Preference<T> {
+export class Preference<T> {
   private readonly key: string;
   private readonly defaultValue: T;
 

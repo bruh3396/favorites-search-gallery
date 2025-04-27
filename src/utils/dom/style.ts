@@ -1,12 +1,6 @@
-import {DARK_THEME_HTML} from "../../assets/html";
-import {ON_MOBILE_DEVICE} from "../../lib/functional/flags";
-import {setCookie} from "../../store/cookies/cookie";
-
-function getStyleSheetURL(useDark: boolean): string {
-  const platform = ON_MOBILE_DEVICE ? "mobile" : "desktop";
-  const darkSuffix = useDark ? "-dark" : "";
-  return `https://rule34.xxx//css/${platform}${darkSuffix}.css?44`;
-}
+import {DARK_THEME_HTML, SKELETON_HTML, UTILITIES_HTML} from "../../assets/html";
+import {getCookie, setCookie} from "../../store/cookies/cookie";
+import {FSG_URL} from "../../lib/api/url";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
   return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
@@ -17,7 +11,7 @@ function setStyleSheet(url: string): void {
 }
 
 function toggleDarkStyleSheet(useDark: boolean): void {
-  setStyleSheet(getStyleSheetURL(useDark));
+  setStyleSheet(FSG_URL.getStyleSheetURL(useDark));
 }
 
 function toggleLocalDarkStyles(useDark: boolean): void {
@@ -52,4 +46,21 @@ export function insertStyleHTML(html: string, id: string | undefined = undefined
     style.id = id;
   }
   document.head.appendChild(style);
+}
+
+export function setupCommonStyles(): void {
+  insertStyleHTML(SKELETON_HTML, "skeleton-style");
+  insertStyleHTML(UTILITIES_HTML, "common-style");
+  toggleDarkTheme(getCookie("theme", "") === "dark");
+}
+
+export function insertHTMLAndExtractStyle(element: HTMLElement, position: InsertPosition, html: string): void {
+  const dom = new DOMParser().parseFromString(html, "text/html");
+  const styles = Array.from(dom.querySelectorAll("style"));
+
+  for (const style of styles) {
+    insertStyleHTML(style.innerHTML);
+    style.remove();
+  }
+  element.insertAdjacentHTML(position, dom.body.innerHTML);
 }

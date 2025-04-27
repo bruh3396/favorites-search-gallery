@@ -1,5 +1,5 @@
 import {describe, expect, test} from "vitest";
-import {escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, removeExtraWhiteSpace, removeNonNumericCharacters, toCamelCase} from "../../utils/primitive/string";
+import {convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeNonNumericCharacters, toCamelCase} from "../../utils/primitive/string";
 
 describe("toCamelCase", () => {
   test("empty", () => {
@@ -252,5 +252,82 @@ describe("removeNonNumericCharacters", () => {
   test("other", () => {
     expect(removeNonNumericCharacters("P12304")).toBe("12304");
     expect(removeNonNumericCharacters("_!@0#$%^1^&*()2(?:<")).toBe("012");
+  });
+});
+
+describe("negateTags", () => {
+  test("empty", () => {
+    expect(negateTags("")).toBe("");
+  });
+
+  test("negate", () => {
+    expect(negateTags("apple")).toBe("-apple");
+    expect(negateTags("apple   ")).toBe("-apple   ");
+    expect(negateTags("apple banana")).toBe("-apple -banana");
+    expect(negateTags("apple banana cherry")).toBe("-apple -banana -cherry");
+  });
+});
+
+describe("isOnlyDigits", () => {
+  test("empty", () => {
+    expect(isOnlyDigits("")).toBe(false);
+  });
+
+  test("only digits", () => {
+    expect(isOnlyDigits("123")).toBe(true);
+    expect(isOnlyDigits("1849202")).toBe(true);
+    expect(isOnlyDigits("1234567890")).toBe(true);
+  });
+
+  test("letters and digits", () => {
+    expect(isOnlyDigits("123abc")).toBe(false);
+    expect(isOnlyDigits("abc123")).toBe(false);
+    expect(isOnlyDigits("1a2b3c")).toBe(false);
+  });
+
+  test("special characters", () => {
+    expect(isOnlyDigits("123!@#")).toBe(false);
+    expect(isOnlyDigits("!@#123")).toBe(false);
+    expect(isOnlyDigits("1!2@3#")).toBe(false);
+  });
+});
+
+describe("convertToTagSet", () => {
+  test("empty", () => {
+    expect(convertToTagSet("")).toStrictEqual(new Set());
+  });
+
+  test("single tag", () => {
+    expect(convertToTagSet("apple")).toStrictEqual(new Set(["apple"]));
+  });
+
+  test("multiple tags", () => {
+    expect(convertToTagSet("apple banana cherry")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
+  });
+
+  test("extra spaces", () => {
+    expect(convertToTagSet("  apple   banana   cherry  ")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
+  });
+
+  test("special characters", () => {
+    expect(convertToTagSet("apple!@#banana$%^cherry&*()")).toStrictEqual(new Set(["apple!@#banana$%^cherry&*()"]));
+  });
+});
+
+describe("convertToTagsString", () => {
+  test("empty", () => {
+    expect(convertToTagString(new Set())).toBe("");
+  });
+
+  test("single tag", () => {
+    expect(convertToTagString(new Set(["apple"]))).toBe("apple");
+  });
+
+  test("multiple tags", () => {
+    expect(convertToTagString(new Set(["apple", "banana", "cherry"]))).toBe("apple banana cherry");
+  });
+
+  test("special characters", () => {
+    expect(convertToTagString(new Set(["apple!@#banana$%^cherry&*()"]))).toBe("apple!@#banana$%^cherry&*()");
   });
 });

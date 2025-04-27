@@ -1,7 +1,7 @@
-import HoldButton from "./hold_button";
+import {HoldButton} from "./hold_button";
 import {clamp} from "../../utils/primitive/number";
 
-export default class NumberComponent {
+export class NumberComponent {
   private input: HTMLInputElement;
   private upArrow: HoldButton;
   private downArrow: HoldButton;

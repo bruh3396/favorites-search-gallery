@@ -1,20 +1,25 @@
+import {FavoriteTags} from "./tags";
+import {FavoritesDatabaseRecord} from "../../../../types/primitives/composites";
 import {Post} from "../../../../types/api/post";
 
 export interface Searchable {
   tags: Set<string>
 }
 
-export interface FavoriteElementI {
-    root: HTMLElement
-    container: HTMLAnchorElement
-    image: HTMLImageElement
-    addOrRemoveButton: HTMLImageElement
-    downloadButton: HTMLImageElement
-    thumbURL: string
+export interface FavoriteElement {
+  root: HTMLElement
+  container: HTMLAnchorElement
+  image: HTMLImageElement
+  addOrRemoveButton: HTMLImageElement
+  downloadButton: HTMLImageElement
+  thumbURL: string
 }
 
-export interface FavoriteI extends Searchable {
+export interface Favorite extends Searchable {
   id: string
+  databaseRecord: FavoritesDatabaseRecord
   post: Post
-  element: FavoriteElementI | null
+  favoriteTags: FavoriteTags
+  root: HTMLElement
+  element: FavoriteElement | null
 }

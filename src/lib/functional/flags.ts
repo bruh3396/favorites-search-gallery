@@ -1,4 +1,5 @@
-import Preferences from "../../store/preferences/preferences";
+import {PerformanceProfile} from "../../types/primitives/enums";
+import {Preferences} from "../../store/preferences/preferences";
 import {isUserIsOnTheirOwnFavoritesPage} from "../../utils/misc/metadata";
 
 export const ON_SEARCH_PAGE = location.href.includes("page=post&s=list");
@@ -9,12 +10,12 @@ export const ON_MOBILE_DEVICE = (/iPhone|iPad|iPod|Android/i).test(navigator.use
 export const ON_DESKTOP_DEVICE = !ON_MOBILE_DEVICE;
 export const USER_IS_ON_THEIR_OWN_FAVORITES_PAGE = isUserIsOnTheirOwnFavoritesPage();
 
-export const GALLERY_DISABLED = (ON_MOBILE_DEVICE && ON_SEARCH_PAGE) || Preferences.performanceProfile.value > 0 || ON_POST_PAGE;
-export const TOOLTIP_DISABLED = ON_MOBILE_DEVICE || Preferences.performanceProfile.value > 1 || ON_POST_PAGE;
+export const GALLERY_DISABLED = (ON_MOBILE_DEVICE && ON_SEARCH_PAGE) || ON_POST_PAGE || Preferences.performanceProfile.value !== PerformanceProfile.HIGH;
+export const TOOLTIP_DISABLED = ON_MOBILE_DEVICE || Preferences.performanceProfile.value !== PerformanceProfile.LOW || ON_POST_PAGE;
 export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.enableOnSearchPages.value);
 export const TAG_MODIFIER_DISABLED = ON_MOBILE_DEVICE || !ON_FAVORITES_PAGE;
 export const SAVED_SEARCHES_DISABLED = !ON_FAVORITES_PAGE || ON_MOBILE_DEVICE;
-export const CAPTIONS_DISABLED = !ON_FAVORITES_PAGE || ON_MOBILE_DEVICE || Preferences.performanceProfile.value > 1;
+export const CAPTIONS_DISABLED = !ON_FAVORITES_PAGE || ON_MOBILE_DEVICE || Preferences.performanceProfile.value !== PerformanceProfile.LOW;
 export const AWESOMPLETE_DISABLED = !ON_FAVORITES_PAGE;
 
 export const GALLERY_ENABLED = !GALLERY_DISABLED;

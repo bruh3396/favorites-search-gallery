@@ -1,11 +1,12 @@
-import {FavoriteLayout, MetadataMetric, NavigationKey, PerformanceProfile, Rating} from "../../types/primitives/primitives";
+import {FavoriteLayout, MetadataMetric, NavigationKey, Rating} from "../../types/primitives/primitives";
 import {ON_FAVORITES_PAGE, ON_MOBILE_DEVICE} from "../functional/flags";
-import EventEmitter from "../../components/functional/event_emitter";
-import {FAVORITES_SEARCH_GALLERY_CONTAINER} from "../favorites_page/container";
-import FavoritesKeyboardEvent from "../../types/keyboard_event";
-import FavoritesMouseEvent from "../../types/mouse_event";
-import FavoritesWheelEvent from "../../types/wheel_event";
-import {Post} from "../../types/api/post";
+import {EventEmitter} from "../../components/functional/event_emitter";
+import {FAVORITES_SEARCH_GALLERY_CONTAINER} from "../structure/container";
+import {FavoriteItem} from "../../features/favorites/types/favorite/favorite";
+import {FavoritesKeyboardEvent} from "../../types/keyboard_event";
+import {FavoritesMouseEvent} from "../../types/mouse_event";
+import {FavoritesWheelEvent} from "../../types/wheel_event";
+import {PerformanceProfile} from "../../types/primitives/enums";
 
 const favorites = {
   searchStarted: new EventEmitter<string>(true),
@@ -18,11 +19,11 @@ const favorites = {
   favoritesLoadedFromDatabase: new EventEmitter<void>(true),
   favoritesLoaded: new EventEmitter<void>(true),
   startedFetchingFavorites: new EventEmitter<void>(true),
-  searchResultsUpdated: new EventEmitter<Post[]>(true),
+  searchResultsUpdated: new EventEmitter<FavoriteItem[]>(true),
   favoriteRemoved: new EventEmitter<string>(true),
   inGalleryRequest: new EventEmitter<void>(true),
   pageChangeResponse: new EventEmitter<void>(true),
-  newFavoritesFoundOnReload: new EventEmitter<Post[]>(true),
+  newFavoritesFoundOnReload: new EventEmitter<FavoriteItem[]>(true),
   resultsAddedToCurrentPage: new EventEmitter<HTMLElement[]>(true),
   missingMetadataFound: new EventEmitter<string>(true),
   favoritesResized: new EventEmitter<void>(true),

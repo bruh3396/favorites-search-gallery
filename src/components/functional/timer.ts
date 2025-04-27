@@ -1,7 +1,7 @@
 import {Timeout} from "../../types/primitives/primitives";
 import {doNothing} from "../../config/constants";
 
-export default class Timer {
+export class Timer {
   private readonly waitTime: number;
   private readonly onTimerEnd: () => void;
   private timeout: Timeout;

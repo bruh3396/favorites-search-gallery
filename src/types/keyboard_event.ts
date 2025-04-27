@@ -1,6 +1,6 @@
 import {isHotkeyEvent} from "../utils/dom/dom";
 
-export default class FavoritesKeyboardEvent {
+export class FavoritesKeyboardEvent {
   private readonly key;
   private readonly originalEvent;
   private readonly isHotkey: boolean;

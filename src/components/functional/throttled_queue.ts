@@ -1,6 +1,6 @@
 import {sleep} from "../../utils/misc/generic";
 
-export default class ThrottledQueue {
+export class ThrottledQueue {
   private queue: (() => void)[];
   private delay: number;
   private draining: boolean;

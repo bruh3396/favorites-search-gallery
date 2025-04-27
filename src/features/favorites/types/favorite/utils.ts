@@ -1,6 +1,7 @@
 import {getIdFromThumb, getImageFromThumb} from "../../../../utils/dom/dom";
 import {FavoritesDatabaseRecord} from "../../../../types/primitives/composites";
 import {Post} from "../../../../types/api/post";
+import {decompressThumbSource} from "../../../../utils/image/image";
 import {removeExtraWhiteSpace} from "../../../../utils/primitive/string";
 
 function createEmptyPost(): Post {
@@ -42,11 +43,11 @@ export function createPostFromRawFavorite(object: HTMLElement | FavoritesDatabas
   if (object instanceof HTMLElement) {
     return createPostFromFavoritesPageThumb(object);
   }
-  return populateAttributesFromDatabaseRecord(object);
+  return createPostFromDatabaseRecord(object);
   // createdFromDatabaseRecord = true;
 }
 
-function populateAttributesFromDatabaseRecord(record: FavoritesDatabaseRecord): Post {
+function createPostFromDatabaseRecord(record: FavoritesDatabaseRecord): Post {
   // this.id = record.id;
   // this.tags = record.tags;
   // this.src = ImageUtils.decompressThumbnailSource(record.src, record.id);
@@ -55,7 +56,7 @@ function populateAttributesFromDatabaseRecord(record: FavoritesDatabaseRecord): 
 
   post.id = record.id;
   post.tags = record.tags;
-  post.previewURL = record.src;
+  post.previewURL = decompressThumbSource(record.src);
   return post;
 }
 

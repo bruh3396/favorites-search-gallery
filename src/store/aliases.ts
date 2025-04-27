@@ -1,5 +1,5 @@
 import {AliasMap} from "../types/primitives/composites";
-import Preferences from "./preferences/preferences";
+import {Preferences} from "./preferences/preferences";
 
 const ALIAS_MAP = {} as AliasMap;
 

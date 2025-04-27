@@ -743,23 +743,6 @@ export const FAVORITES_HTML = `
       }
     }
 
-    .utility-button {
-      cursor: pointer;
-      position: absolute;
-      left: 0;
-      top: 0;
-      font-weight: bold;
-      background: none;
-      border: none;
-      z-index: 2;
-      filter: grayscale(70%);
-
-      &:active,
-      &:hover {
-        filter: none !important;
-      }
-    }
-
     .download-button {
       bottom: 0 !important;
       right: 0 !important;
@@ -779,45 +762,6 @@ export const FAVORITES_HTML = `
       -o-user-drag: none;
     }
 
-    .favorite {
-      position: relative;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-
-      >a,
-      >div {
-        display: block;
-        overflow: hidden;
-        position: relative;
-        cursor: default;
-
-        >img:first-child {
-          width: 100%;
-          z-index: 1;
-        }
-
-        >a>div {
-          height: 100%;
-        }
-
-        >canvas {
-          width: 100%;
-          position: absolute;
-          top: 0;
-          left: 0;
-          pointer-events: none;
-          z-index: 1;
-        }
-      }
-
-      &.hidden {
-        display: none;
-      }
-    }
 
     #column-count-container {
       >div {
@@ -876,106 +820,7 @@ export const FAVORITES_HTML = `
       }
     }
 
-    #favorites-search-gallery-content {
-      padding: 0px 20px 30px 20px;
 
-      &.grid,
-      &.square {
-        display: grid !important;
-        grid-template-columns: repeat(10, 1fr);
-        grid-gap: 0.5cqw;
-
-        .utility-button {
-          width: 30%;
-        }
-      }
-
-      &.square {
-        .favorite {
-          border-radius: 10px !important;
-          overflow: hidden;
-          aspect-ratio: 1 / 1;
-
-          >a,
-          >div {
-            width: 100%;
-            height: 100%;
-
-            >img:first-child,
-            >canvas {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-          }
-        }
-      }
-
-      &.row {
-        display: flex;
-        flex-wrap: wrap;
-
-        .favorite {
-
-          &.last-row {
-            flex: 0 1 auto;
-            /* opacity: 0.1; */
-          }
-
-          height: 300px;
-          flex: 1 1 auto;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .favorite {
-
-          >a,
-          >div {
-
-            width: 100%;
-            height: 100%;
-
-            >img:first-child {
-              object-fit: cover;
-              width: 100%;
-              height: 100%;
-              vertical-align: middle;
-            }
-
-            >canvas {
-              height: 100%;
-              object-fit: cover;
-            }
-          }
-        }
-
-        .utility-button {
-          height: 30%;
-        }
-      }
-
-      &.column {
-        display: grid;
-        grid-template-columns: repeat(10, 1fr);
-        margin-right: 15px;
-
-        .favorites-column {
-          display: flex;
-          flex-direction: column;
-          flex: 0 0 25%;
-
-          .favorite {
-            border-radius: 10px;
-            overflow: hidden;
-          }
-        }
-
-        .utility-button {
-          width: 30%;
-        }
-      }
-    }
 
     #help-links-container {
       >a:not(:last-child)::after {
@@ -1087,9 +932,6 @@ export const FAVORITES_HTML = `
       text-align: center;
       align-content: center;
     }
-
-
-
 
     #rating-container {
       white-space: nowrap;
@@ -1347,8 +1189,173 @@ export const FAVORITES_HTML = `
     </div>
     <div id="right-favorites-panel"></div>
   </div>
-  <div id="loading-wheel"></div>
 </div>
+`;
+export const FAVORITES_CONTENT_HTML = `
+<style>
+  html {
+    width: 100vw;
+  }
+
+  #favorites-search-gallery-content {
+    padding: 0px 20px 30px 20px;
+    margin-right: 15px;
+
+
+    &.grid,
+    &.square {
+      display: grid !important;
+      grid-template-columns: repeat(10, 1fr);
+      grid-gap: 0.5cqw;
+
+      .utility-button {
+        width: 30%;
+      }
+    }
+
+    &.square {
+      .favorite {
+        border-radius: 10px !important;
+        overflow: hidden;
+        aspect-ratio: 1 / 1;
+
+        >a,
+        >div {
+          width: 100%;
+          height: 100%;
+
+          >img:first-child,
+          >canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+    }
+
+    &.row {
+      display: flex;
+      flex-wrap: wrap;
+
+      .favorite {
+
+        &.last-row {
+          flex: 0 1 auto;
+          /* opacity: 0.1; */
+        }
+
+        height: 300px;
+        flex: 1 1 auto;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .favorite {
+
+        >a,
+        >div {
+
+          width: 100%;
+          height: 100%;
+
+          >img:first-child {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            vertical-align: middle;
+          }
+
+          >canvas {
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+
+      .utility-button {
+        height: 30%;
+      }
+    }
+
+    &.column {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+
+      .favorites-column {
+        display: flex;
+        flex-direction: column;
+        flex: 0 0 25%;
+
+        .favorite {
+          border-radius: 10px;
+          overflow: hidden;
+        }
+      }
+
+      .utility-button {
+        width: 30%;
+      }
+    }
+  }
+
+  .favorite {
+    position: relative;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    >a,
+    >div {
+      display: block;
+      overflow: hidden;
+      position: relative;
+      cursor: default;
+
+      >img:first-child {
+        width: 100%;
+        z-index: 1;
+      }
+
+      >a>div {
+        height: 100%;
+      }
+
+      >canvas {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+
+    &.hidden {
+      display: none;
+    }
+  }
+
+  .utility-button {
+    cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: bold;
+    background: none;
+    border: none;
+    z-index: 2;
+    filter: grayscale(70%);
+
+    &:active,
+    &:hover {
+      filter: none !important;
+    }
+  }
+</style>
 `;
 export const GALLERY_HTML = `
 <style>
@@ -1423,8 +1430,6 @@ export const GALLERY_HTML = `
     top: 50% !important;
     transform: translate(-50%, -50%);
   }
-
-
 
   a.hide {
     cursor: default;
@@ -1681,7 +1686,7 @@ export const HELP_HTML = `
         </ul>
         <li>Download images</li>
         <ul>
-          <li>Expiremental for now</li>
+          <li>Experimental for now</li>
         </ul>
         <li>New gallery hotkeys</li>
         <ul>
@@ -2196,6 +2201,77 @@ export const SAVED_SEARCHES_HTML = `
 </div>
 <script>
 </script>
+`;
+export const SKELETON_HTML = `
+<style>
+  body {
+    background: lightgreen;
+  }
+
+  .skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 0px 30px;
+  }
+
+  .skeleton-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .skeleton-item {
+    /* width: 100%; */
+    /* aspect-ratio: 1/3; */
+    background: #555;
+    overflow: hidden;
+  }
+
+  .skeleton-item.pulse {
+    animation: pulse 2s infinite ease-in-out;
+  }
+
+  .skeleton-item.shine::after {
+    background-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0));
+    content: "";
+    position: absolute;
+    transform: translateX(-100%);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    animation: shine 2s linear alternate infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.6;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    50% {
+      transform: translateX(100%);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+</style>
 `;
 export const TAG_MODIFIER_HTML = `
 <div id="tag-modifier-container">

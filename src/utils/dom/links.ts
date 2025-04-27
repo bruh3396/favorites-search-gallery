@@ -1,13 +1,11 @@
-export function getPostPageURL(id: string): string {
-  return `https://rule34.xxx/index.php?page=post&s=view&id=${id}`;
-}
+import {FSG_URL} from "../../lib/api/url";
 
 export function openPostPage(id: string): void {
-  window.open(getPostPageURL(id), "_blank");
+  window.open(FSG_URL.createPostPageURL(id), "_blank");
 }
 
 export function openSearchPage(searchQuery: string): void {
-  window.open(`https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(searchQuery)}`);
+  window.open(FSG_URL.createSearchPageURL(searchQuery));
 }
 
 export function createObjectURLFromSvg(svg: string): string {

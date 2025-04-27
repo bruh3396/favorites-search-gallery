@@ -1,6 +1,6 @@
 import {NavigationKey} from "./primitives/primitives";
 
-export default class FavoritesWheelEvent {
+export class FavoritesWheelEvent {
   public readonly originalEvent: WheelEvent;
   public readonly direction: NavigationKey;
 

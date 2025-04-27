@@ -1,6 +1,6 @@
 import {ON_MOBILE_DEVICE} from "../lib/functional/flags";
 
-export default {
+export const FavoritesSettings = {
   columnCountBounds: {
     min: 2,
     max: 25

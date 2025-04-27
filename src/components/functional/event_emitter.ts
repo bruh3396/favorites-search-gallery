@@ -1,6 +1,6 @@
 import {PromiseTimeoutError} from "../../types/primitives/errors";
 
-export default class EventEmitter<V> {
+export class EventEmitter<V> {
   private listeners: Set<(argument: V) => void>;
   private oneTimeListeners: Set<(argument: V) => void>;
   private enabled: boolean;

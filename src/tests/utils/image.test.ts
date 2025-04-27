@@ -1,5 +1,5 @@
+import {cleanImageSource, compressThumbSource, decompressThumbSource} from "../../utils/image/image";
 import {describe, expect, test} from "vitest";
-import {cleanImageSource} from "../../utils/image/image";
 
 describe("cleanImageSource", () => {
   test("empty", () => {
@@ -24,5 +24,21 @@ describe("cleanImageSource", () => {
     const actual = cleanImageSource(source);
 
     expect(actual).toBe(expected);
+  });
+});
+
+describe("compressImageSource", () => {
+  test("normal", () => {
+    const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
+    const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
+
+    expect(decompressThumbSource(compressThumbSource(source))).toBe(expected);
+  });
+
+  test("no subdomain", () => {
+    const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
+    const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
+
+    expect(decompressThumbSource(compressThumbSource(source))).toBe(expected);
   });
 });

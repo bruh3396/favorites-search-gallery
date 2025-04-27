@@ -1,7 +1,7 @@
 import {ON_MOBILE_DEVICE} from "../../lib/functional/flags";
 import {clamp} from "../../utils/primitive/number";
 
-export default class HoldButton extends HTMLElement {
+export class HoldButton extends HTMLElement {
   static {
     customElements.define("hold-button", HoldButton);
   }

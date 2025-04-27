@@ -1,39 +1,33 @@
 import {GALLERY_DISABLED, ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE} from "../../../../lib/functional/flags";
 import {createObjectURLFromSvg, openPostPage} from "../../../../utils/dom/links";
 import {API} from "../../../../lib/api/api";
-import {CLICK_CODES} from "../../../../config/constants";
-import {FavoriteElementI} from "./interfaces";
+import {ClickCodes} from "../../../../types/primitives/enums";
+import {FavoriteElement} from "./interfaces";
 import {ITEM_CLASS_NAME} from "../../../../utils/dom/dom";
-import Icons from "../../../../assets/icons";
+import {Icons} from "../../../../assets/icons";
 import {Post} from "../../../../types/api/post";
-import Preferences from "../../../../store/preferences/preferences";
 import {getContentType} from "../../../../utils/primitive/string";
 
 let htmlTemplate: HTMLElement;
 let removeFavoriteButtonHTML: string;
 let addFavoriteButtonHTML: string;
 
-export function setupFavoriteElementTemplate(): void {
-  createHTMLTemplates();
-}
-
-function createHTMLTemplates(): void {
-  createRemoveFavoriteButtonHTMLTemplate();
-  removeFavoriteButtonHTML = createAddFavoriteButtonHTMLTemplate();
-  addFavoriteButtonHTML = createDownloadButtonHTMLTemplate();
+export function createFavoriteHTMLTemplates(): void {
+  removeFavoriteButtonHTML = createRemoveFavoriteButtonHTMLTemplate();
+  addFavoriteButtonHTML = createAddFavoriteButtonHTMLTemplate();
   createPostHTMLTemplate();
 }
 
 function createRemoveFavoriteButtonHTMLTemplate(): string {
-  return `<img class="remove-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.heartMinus)}>`;
+  return `<img class="remove-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.HEART_MINUS)}>`;
 }
 
 function createAddFavoriteButtonHTMLTemplate(): string {
-  return `<img class="add-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.heartPlus)}>`;
+  return `<img class="add-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.HEART_PLUS)}>`;
 }
 
 function createDownloadButtonHTMLTemplate(): string {
-  return ON_DESKTOP_DEVICE ? `<img class="download-button utility-button" src=${createObjectURLFromSvg(Icons.download.replace("FFFFFF", "0075FF"))}>` : "";
+  return ON_DESKTOP_DEVICE ? `<img class="download-button utility-button" src=${createObjectURLFromSvg(Icons.DOWNLOAD.replace("FFFFFF", "0075FF"))}>` : "";
 }
 
 function createPostHTMLTemplate(): void {
@@ -44,12 +38,12 @@ function createPostHTMLTemplate(): void {
           <img>
           ${USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? removeFavoriteButtonHTML : addFavoriteButtonHTML}
           ${createDownloadButtonHTMLTemplate()}
-          ${Preferences.performanceProfile.value > 0 ? "" : "<canvas></canvas>"}
+          ${GALLERY_DISABLED ? "" : "<canvas></canvas>"}
         </a>
     `;
 }
 
-export class FavoriteElement implements FavoriteElementI {
+export class FavoriteHTMLElement implements FavoriteElement {
   public root: HTMLElement;
   public container: HTMLAnchorElement;
   public image: HTMLImageElement;
@@ -84,7 +78,7 @@ export class FavoriteElement implements FavoriteElementI {
     this.addOrRemoveButton.onmousedown = (event): void => {
       event.stopPropagation();
 
-      if (event.button !== CLICK_CODES.left) {
+      if (event.button !== ClickCodes.LEFT) {
         return;
       }
 
@@ -128,8 +122,8 @@ export class FavoriteElement implements FavoriteElementI {
       if (event.ctrlKey) {
         return;
       }
-      const middleClick = event.button === CLICK_CODES.middle;
-      const leftClick = event.button === CLICK_CODES.left;
+      const middleClick = event.button === ClickCodes.MIDDLE;
+      const leftClick = event.button === ClickCodes.LEFT;
       const shiftClick = leftClick && event.shiftKey;
 
       if (middleClick || shiftClick || (leftClick && GALLERY_DISABLED)) {

@@ -1,7 +1,7 @@
 import {getThumbUnderCursor, insideOfThumb} from "../utils/dom/dom";
-import {CLICK_CODES} from "../config/constants";
+import {ClickCodes} from "./primitives/enums";
 
-export default class FavoritesMouseEvent {
+export class FavoritesMouseEvent {
   public readonly originalEvent: MouseEvent;
   public readonly leftClick: boolean;
   public readonly rightClick: boolean;
@@ -13,9 +13,9 @@ export default class FavoritesMouseEvent {
 
   constructor(event: MouseEvent) {
     this.originalEvent = event;
-    this.leftClick = event.button === CLICK_CODES.left;
-    this.rightClick = event.button === CLICK_CODES.right;
-    this.middleClick = event.button === CLICK_CODES.middle;
+    this.leftClick = event.button === ClickCodes.LEFT;
+    this.rightClick = event.button === ClickCodes.RIGHT;
+    this.middleClick = event.button === ClickCodes.MIDDLE;
     this.ctrlKey = event.ctrlKey;
     this.shiftKey = event.shiftKey;
     this.thumb = getThumbUnderCursor(event);

@@ -12,3 +12,12 @@ export function getFavoritesPageId(): string | null {
 export function isUserIsOnTheirOwnFavoritesPage(): boolean {
   return getUserId() === getFavoritesPageId();
 }
+
+export function getTagBlacklist(): string {
+  let tags = getCookie("tag_blacklist", "") || "";
+
+  for (let i = 0; i < 3; i += 1) {
+    tags = decodeURIComponent(tags).replace(/(?:^| )-/, "");
+  }
+  return tags;
+}

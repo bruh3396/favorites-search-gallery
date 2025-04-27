@@ -1,7 +1,8 @@
-import {FavoriteLayout, PerformanceProfile, Rating, SortingMethod} from "../../types/primitives/primitives";
-import Preference from "./preference";
+import {FavoriteLayout, Rating, SortingMethod} from "../../types/primitives/primitives";
+import {PerformanceProfile} from "../../types/primitives/enums";
+import {Preference} from "./preference";
 
-const Preferences = {
+export const Preferences = {
   savedSearchSuggestions: new Preference("savedSearchSuggestions", false),
   showSavedSearches: new Preference("savedSearchVisibility", false),
   savedSearchTutorial: new Preference("savedSearchTutorial", false),
@@ -12,7 +13,7 @@ const Preferences = {
   allowedRatings: new Preference<Rating>("allowedRatings", 7),
   favoriteFinder: new Preference("findFavorite", ""),
   enableOnSearchPages: new Preference("enableOnSearchPages", false),
-  performanceProfile: new Preference<PerformanceProfile>("performanceProfile", 0),
+  performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.HIGH),
   layout: new Preference<FavoriteLayout>("layout", "column"),
   excludeBlacklist: new Preference("excludeBlacklist", false),
   resultsPerPage: new Preference("resultsPerPage", 200),
@@ -43,5 +44,3 @@ const Preferences = {
   downloadBatchSize: new Preference("downloadBatchSize", 250),
   showDownloadButtons: new Preference("showDownloadButtons", false)
 };
-
-export default Preferences;

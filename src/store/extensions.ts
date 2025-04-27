@@ -3,7 +3,7 @@
 // Utils.addStaticInitializer(Extensions.addEventListeners);
 
 import {BatchExecutor} from "../components/functional/batch_executor";
-import Database from "../components/functional/database";
+import {Database} from "./database";
 import {MediaExtension} from "../types/primitives/primitives";
 import {MediaExtensionMapping} from "../types/primitives/composites";
 import {ON_FAVORITES_PAGE} from "../lib/functional/flags";
