@@ -1,5 +1,5 @@
-import {FSG_URL} from "../../../../lib/api/url";
 import {FavoriteItem} from "../../types/favorite/favorite";
+import {createFavoritesPageURL} from "../../../../lib/api/url";
 import {extractFavorites} from "./extractor";
 
 export class FavoritesPageRequest {
@@ -8,7 +8,7 @@ export class FavoritesPageRequest {
   private retryCount: number;
 
   get url(): string {
-    return FSG_URL.createFavoritesPageURL(this.pageNumber * 50);
+    return createFavoritesPageURL(this.pageNumber * 50);
   }
 
   get fetchDelay(): number {

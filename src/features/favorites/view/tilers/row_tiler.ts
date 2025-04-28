@@ -1,21 +1,12 @@
 import {getAllThumbs, waitForAllThumbnailsToLoad} from "../../../../utils/dom/dom";
-import {getRandomPositiveIntegerInRange, mapRange} from "../../../../utils/primitive/number";
 import {FavoriteLayout} from "../../../../types/primitives/primitives";
 import {FavoritesBaseTiler} from "./base_tiler";
 import {FavoritesSettings} from "../../../../config/favorites_settings";
-import {Preferences} from "../../../../store/preferences/preferences";
 import {insertStyleHTML} from "../../../../utils/dom/style";
+import {mapRange} from "../../../../utils/primitive/number";
 
 class FavoritesRowTiler extends FavoritesBaseTiler {
   public className: FavoriteLayout = "row";
-
-  protected createSkeletonItem(): HTMLElement {
-    const skeletonItem = super.createSkeletonItem();
-
-    skeletonItem.style.height = `${Preferences.rowSize.value * 50}px`;
-    skeletonItem.style.width = `${getRandomPositiveIntegerInRange(200, 600)}px`;
-    return skeletonItem;
-  }
 
   public tile(items: HTMLElement[]): void {
     super.tile(items);

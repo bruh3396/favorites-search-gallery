@@ -1,4 +1,4 @@
-import {API} from "../../../lib/api/api";
+import * as API from "../../../lib/api/api";
 import {FAVORITES_SEARCH_GALLERY_CONTAINER} from "../../../lib/structure/container";
 import {ON_MOBILE_DEVICE} from "../../../lib/functional/flags";
 import {Timeout} from "../../../types/primitives/primitives";
@@ -8,21 +8,21 @@ let statusIndicator: HTMLElement | null = null;
 let expectedTotalFavoritesCount: number | null = null;
 let statusTimeout: Timeout;
 
-function getMatchCountIndicator(): HTMLElement | null {
+export function getMatchCountIndicator(): HTMLElement | null {
   if (matchCountIndicator === null) {
     matchCountIndicator = FAVORITES_SEARCH_GALLERY_CONTAINER.querySelector("#match-count-label");
   }
   return matchCountIndicator;
 }
 
-function getStatusIndicator(): HTMLElement | null {
+export function getStatusIndicator(): HTMLElement | null {
   if (statusIndicator === null) {
     statusIndicator = FAVORITES_SEARCH_GALLERY_CONTAINER.querySelector("#favorites-load-status-label");
   }
   return statusIndicator;
 }
 
-function setStatus(text: string): void {
+export function setStatus(text: string): void {
   const indicator = getStatusIndicator();
 
   if (indicator === null) {
@@ -36,7 +36,7 @@ function setStatus(text: string): void {
   }, 1500);
 }
 
-function setMatchCount(value: number): void {
+export function setMatchCount(value: number): void {
   const indicator = getMatchCountIndicator();
 
   if (indicator === null) {
@@ -46,7 +46,7 @@ function setMatchCount(value: number): void {
   indicator.textContent = `${value} ${value === 1 ? "Match" : "Matches"}`;
 }
 
-function updateStatusWhileFetching(searchResultsCount: number, favoritesFoundCount: number): void {
+export function updateStatusWhileFetching(searchResultsCount: number, favoritesFoundCount: number): void {
   const prefix = ON_MOBILE_DEVICE ? "" : "Favorites ";
   let statusText = `Fetching ${prefix}${favoritesFoundCount}`;
 
@@ -57,17 +57,6 @@ function updateStatusWhileFetching(searchResultsCount: number, favoritesFoundCou
   setMatchCount(searchResultsCount);
 }
 
-async function setExpectedTotalFavoritesCount(): Promise<void> {
+export async function setExpectedTotalFavoritesCount(): Promise<void> {
   expectedTotalFavoritesCount = await API.getFavoritesCount();
 }
-
-function setup(): void {
-  setExpectedTotalFavoritesCount();
-}
-
-export const FavoritesStatus = {
-  setStatus,
-  setMatchCount,
-  updateStatusWhileFetching,
-  setup
-};

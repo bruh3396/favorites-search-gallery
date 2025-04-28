@@ -1,4 +1,4 @@
-import {PreferenceStorage} from "./preference_storage";
+import * as PreferenceStorage from "./preference_storage";
 
 export class Preference<T> {
   private readonly key: string;

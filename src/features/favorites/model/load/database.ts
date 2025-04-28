@@ -10,26 +10,30 @@ const OBJECT_STORE_NAME = `user${getFavoritesPageId()}`;
 const DATABASE = new Database<FavoritesDatabaseRecord>(DATABASE_NAME, OBJECT_STORE_NAME);
 const METADATA_UPDATER = new BatchExecutor(100, 1000, updateFavorites);
 
-async function loadAllFavorites(): Promise<FavoriteItem[]> {
-  return deserialize(await DATABASE.load());
+function updateFavorites(favorites: FavoriteItem[]): void {
+  DATABASE.update(favorites.map(favorite => favorite.databaseRecord));
 }
 
-function storeAllFavorites(favorites: FavoriteItem[]): Promise<void> {
-  return storeFavorites(favorites);
+function deserialize(records: FavoritesDatabaseRecord[]): FavoriteItem[] {
+  return records.map(record => new FavoriteItem(record));
 }
 
-async function storeFavorites(favorites: FavoriteItem[]): Promise<void> {
+export async function storeFavorites(favorites: FavoriteItem[]): Promise<void> {
   const records = favorites.slice().reverse().map(favorite => favorite.databaseRecord);
 
   await sleep(500);
   DATABASE.store(records);
 }
 
-function updateFavorites(favorites: FavoriteItem[]): void {
-  DATABASE.update(favorites.map(favorite => favorite.databaseRecord));
+export async function loadAllFavorites(): Promise<FavoriteItem[]> {
+  return deserialize(await DATABASE.load());
 }
 
-function updateMetadataInDatabase(id: string): void {
+export function storeAllFavorites(favorites: FavoriteItem[]): Promise<void> {
+  return storeFavorites(favorites);
+}
+
+export function updateMetadataInDatabase(id: string): void {
   const favorite = getFavorite(id);
 
   if (favorite !== undefined) {
@@ -37,23 +41,10 @@ function updateMetadataInDatabase(id: string): void {
   }
 }
 
-function deserialize(records: FavoritesDatabaseRecord[]): FavoriteItem[] {
-  return records.map(record => new FavoriteItem(record));
-}
-
-function deleteFavorite(id: string): Promise<void> {
+export function deleteFavorite(id: string): Promise<void> {
   return DATABASE.deleteRecords([id]);
 }
 
-function deleteDatabase(): void {
+export function deleteDatabase(): void {
   DATABASE.delete();
 }
-
-export const FavoritesDatabase = {
-  loadAllFavorites,
-  storeAllFavorites,
-  storeFavorites,
-  updateMetadataInDatabase,
-  deleteFavorite,
-  deleteDatabase
-};

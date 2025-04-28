@@ -36,7 +36,7 @@ function insert(): void {
   }
 }
 
-function create(parameters: FavoritesPaginationParameters): void {
+export function create(parameters: FavoritesPaginationParameters): void {
   CONTAINER.innerHTML = "";
   updateRangeIndicator(parameters.startIndex, parameters.endIndex);
   createNumberTraversalButtons(parameters.currentPageNumber, parameters.finalPageNumber);
@@ -47,7 +47,7 @@ function create(parameters: FavoritesPaginationParameters): void {
 /**
  * @param {FavoritesPaginationParameters} parameters
  */
-function update(parameters: FavoritesPaginationParameters): void {
+export function update(parameters: FavoritesPaginationParameters): void {
   const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= FavoritesSettings.maxPageNumberButtons;
 
   if (atMaxPageNumberButtons) {
@@ -153,7 +153,7 @@ function updateArrowTraversalButtonInteractability(previousPage: HTMLButtonEleme
   }
 }
 
-function toggle(value: boolean): void {
+export function toggle(value: boolean): void {
   const html = `
       #favorites-pagination-container,
       #results-per-page-container,
@@ -167,20 +167,12 @@ function toggle(value: boolean): void {
   insertStyleHTML(value ? "" : html, "pagination-menu-enable");
 }
 
-function getContainer(): HTMLElement {
+export function getContainer(): HTMLElement {
   return CONTAINER;
 }
 
-function setup(): void {
+export function setupFavoritesPaginationMenu(): void {
   insert();
   create(EMPTY_FAVORITES_PAGINATION_PARAMETERS);
   toggle(!Preferences.infiniteScroll.value);
 }
-
-export const FavoritesPaginationMenu = {
-  create,
-  update,
-  toggle,
-  getContainer,
-  setup
-};

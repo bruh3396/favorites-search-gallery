@@ -1,33 +1,34 @@
+import * as FavoritesPaginationMenu from "./pagination_menu";
+import * as FavoritesStatus from "./status";
+import * as FavoritesTiler from "./tilers/favorites_tiler";
 import {scrollToTop, waitForAllThumbnailsToLoad} from "../../../utils/dom/dom";
 import {toggleAddOrRemoveButtons, toggleDownloadButtons} from "./utils";
 import {Favorite} from "../types/favorite/interfaces";
 import {FavoriteLayout} from "../../../types/primitives/primitives";
-import {FavoritesPaginationMenu} from "./pagination_menu";
 import {FavoritesPaginationParameters} from "../types/pagination_parameters";
-import {FavoritesStatus} from "./status";
-import {FavoritesTiler} from "./tilers/favorites_tiler";
 import {Preferences} from "../../../store/preferences/preferences";
 import {USER_IS_ON_THEIR_OWN_FAVORITES_PAGE} from "../../../lib/functional/flags";
+import {setupImageSizes} from "./aspect_ratios";
 import {sleep} from "../../../utils/misc/generic";
 
-function showNotification(message: string): void {
+export function showNotification(message: string): void {
   FavoritesStatus.setStatus(message);
 }
 
-function updateStatusWhileFetching(searchResultCount: number, totalFavoritesCount: number): void {
+export function updateStatusWhileFetching(searchResultCount: number, totalFavoritesCount: number): void {
   FavoritesStatus.updateStatusWhileFetching(searchResultCount, totalFavoritesCount);
 }
 
-function insertNewSearchResults(thumbs: HTMLElement[]): void {
+export function insertNewSearchResults(thumbs: HTMLElement[]): void {
   FavoritesTiler.addItemsToBottom(thumbs);
 }
 
-function insertNewSearchResultsOnReload(results: { newSearchResults: Favorite[], newFavorites: Favorite[], allSearchResults: Favorite[] }): void {
+export function insertNewSearchResultsOnReload(results: { newSearchResults: Favorite[], newFavorites: Favorite[], allSearchResults: Favorite[] }): void {
   FavoritesTiler.addItemsToTop(results.newSearchResults.map((favorite) => favorite.root));
   notifyNewFavoritesFound(results.newFavorites.length);
 }
 
-function notifyNewFavoritesFound(newFavoritesCount: number): void {
+export function notifyNewFavoritesFound(newFavoritesCount: number): void {
   if (newFavoritesCount > 0) {
     const pluralSuffix = newFavoritesCount > 1 ? "s" : "";
 
@@ -35,40 +36,40 @@ function notifyNewFavoritesFound(newFavoritesCount: number): void {
   }
 }
 
-function changeLayout(layout: FavoriteLayout): void {
+export function changeLayout(layout: FavoriteLayout): void {
   FavoritesTiler.changeLayout(layout);
 }
 
-function updateColumnCount(columnCount: number): void {
+export function updateColumnCount(columnCount: number): void {
   FavoritesTiler.updateColumnCount(columnCount);
 }
 
-function updateRowSize(rowSize: number) : void {
+export function updateRowSize(rowSize: number) : void {
   FavoritesTiler.updateRowSize(rowSize);
 }
 
-function showSearchResults(searchResults: Favorite[]): void {
+export function showSearchResults(searchResults: Favorite[]): void {
   FavoritesTiler.tile(searchResults.map((result) => result.root));
   scrollToTop();
 }
 
-function clear(): void {
+export function clear(): void {
   showSearchResults([]);
 }
 
-function setMatchCount(matchCount: number): void {
+export function setMatchCount(matchCount: number): void {
   FavoritesStatus.setMatchCount(matchCount);
 }
 
-function createPageSelectionMenu(parameters: FavoritesPaginationParameters): void {
+export function createPageSelectionMenu(parameters: FavoritesPaginationParameters): void {
   FavoritesPaginationMenu.create(parameters);
 }
 
-function createPageSelectionMenuWhileFetching(parameters : FavoritesPaginationParameters): void {
+export function createPageSelectionMenuWhileFetching(parameters : FavoritesPaginationParameters): void {
   FavoritesPaginationMenu.update(parameters);
 }
 
-async function revealFavorite(id: string) : Promise<void> {
+export async function revealFavorite(id: string) : Promise<void> {
   await waitForAllThumbnailsToLoad();
   const thumb = document.getElementById(id);
 
@@ -84,38 +85,19 @@ async function revealFavorite(id: string) : Promise<void> {
   thumb.classList.remove("blink");
 }
 
-function getPaginationMenu(): HTMLElement {
+export function getPaginationMenu(): HTMLElement {
   return FavoritesPaginationMenu.getContainer();
 }
 
-function togglePaginationMenu(value: boolean): void {
+export function togglePaginationMenu(value: boolean): void {
   FavoritesPaginationMenu.toggle(value);
 }
 
-function setup(): void {
-  FavoritesStatus.setup();
-  FavoritesTiler.setup();
-  FavoritesPaginationMenu.setup();
+export function setupFavoritesView(): void {
+  setupImageSizes();
+  FavoritesStatus.setExpectedTotalFavoritesCount();
+  FavoritesTiler.setupFavoritesTiler();
+  FavoritesPaginationMenu.setupFavoritesPaginationMenu();
   toggleAddOrRemoveButtons(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? Preferences.showRemoveFavoriteButtons.value : Preferences.showAddFavoriteButtons.value);
   toggleDownloadButtons(Preferences.showDownloadButtons.value);
 }
-
-export const FavoritesView = {
-  showNotification,
-  updateStatusWhileFetching,
-  insertNewSearchResults,
-  insertNewSearchResultsOnReload,
-  notifyNewFavoritesFound,
-  changeLayout,
-  updateColumnCount,
-  updateRowSize,
-  showSearchResults,
-  clear,
-  setMatchCount,
-  createPageSelectionMenu,
-  createPageSelectionMenuWhileFetching,
-  revealFavorite,
-  getPaginationMenu,
-  togglePaginationMenu,
-  setup
-};

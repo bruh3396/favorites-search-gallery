@@ -12,51 +12,42 @@ let useTagBlacklist = !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.exclud
 let allowedRatings = Preferences.allowedRatings.value;
 let searchCommand = createSearchCommand();
 
-function allRatingsAreAllowed(): boolean {
+export function allRatingsAreAllowed(): boolean {
   return allowedRatings === 7;
 }
 
-function getFinalSearchQuery(): string {
+export function getFinalSearchQuery(): string {
   return useTagBlacklist ? `${searchQuery} ${NEGATED_TAG_BLACKLIST}` : searchQuery;
 }
 
-function filter(favorites: FavoriteItem[]): FavoriteItem[] {
+export function filter(favorites: FavoriteItem[]): FavoriteItem[] {
   const results = searchCommand.getSearchResults(favorites);
   return filterByRating(results);
 }
 
-function filterByRating(favorites: FavoriteItem[]): FavoriteItem[] {
+export function filterByRating(favorites: FavoriteItem[]): FavoriteItem[] {
   return allRatingsAreAllowed() ? favorites : favorites;
   // return allRatingsAreAllowed() ? favorites : favorites.filter(result => result.withinRating(allowedRatings));
 }
 
-function filterOutBlacklisted(favorites: FavoriteItem[]): FavoriteItem[] {
+export function filterOutBlacklisted(favorites: FavoriteItem[]): FavoriteItem[] {
   return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : new SearchCommand(NEGATED_TAG_BLACKLIST).getSearchResults(favorites);
 }
 
-function setSearchQuery(newSearchQuery: string): void {
+export function setSearchQuery(newSearchQuery: string): void {
   searchQuery = newSearchQuery;
   searchCommand = createSearchCommand();
 }
 
-function createSearchCommand():SearchCommand {
+export function createSearchCommand():SearchCommand {
   return new SearchCommand(getFinalSearchQuery());
 }
 
-function toggleBlacklistFiltering(value: boolean): void {
+export function toggleBlacklistFiltering(value: boolean): void {
   useTagBlacklist = value;
   searchCommand = createSearchCommand();
 }
 
-function setAllowedRatings(newAllowedRating: Rating): void {
+export function setAllowedRatings(newAllowedRating: Rating): void {
   allowedRatings = newAllowedRating;
 }
-
-export const FavoritesFilter = {
-  filter,
-  filterByRating,
-  setSearchQuery,
-  filterOutBlacklisted,
-  toggleBlacklistFiltering,
-  setAllowedRatings
-};

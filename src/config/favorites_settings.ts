@@ -20,5 +20,8 @@ export const FavoritesSettings = {
   rightContentMargin: 15,
   infiniteScrollBatchSize: 50,
   infiniteScrollMargin: "75%",
-  useSearchResultCache: false
+  useSearchResultCache: false,
+  useSidebar: false,
+  randomSkeletonAnimationTiming: true,
+  skeletonAnimationClasses: "shine"
 };

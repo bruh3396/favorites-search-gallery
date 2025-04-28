@@ -3,18 +3,13 @@ import {Preferences} from "./preferences/preferences";
 
 const ALIAS_MAP = {} as AliasMap;
 
-function get(tag: string): Set<string> | undefined {
+export function get(tag: string): Set<string> | undefined {
   return ALIAS_MAP[tag];
 }
 
-function has(tag: string): boolean {
-  return Preferences.tagAliasing.value && Aliases.get(tag) !== undefined;
+export function has(tag: string): boolean {
+  return Preferences.tagAliasing.value && get(tag) !== undefined;
 }
-
-export const Aliases = {
-  has,
-  get
-};
 
 export function setupAliases(): void {
   const aliasMap: Record<string, string[]> = JSON.parse(localStorage.getItem("aliasMap") || "{}");

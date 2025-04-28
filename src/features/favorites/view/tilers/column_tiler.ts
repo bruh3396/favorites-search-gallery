@@ -2,7 +2,6 @@ import {ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsImp
 import {FavoriteLayout} from "../../../../types/primitives/primitives";
 import {FavoritesBaseTiler} from "./base_tiler";
 import {Preferences} from "../../../../store/preferences/preferences";
-import {getRandomPositiveIntegerInRange} from "../../../../utils/primitive/number";
 
 class FavoritesColumnTiler extends FavoritesBaseTiler {
   private columns: HTMLElement[];
@@ -19,7 +18,6 @@ class FavoritesColumnTiler extends FavoritesBaseTiler {
     const skeletonItem = super.createSkeletonItem();
 
     skeletonItem.style.width = "100%";
-    skeletonItem.style.aspectRatio = `10/${getRandomPositiveIntegerInRange(5, 25)}`;
     return skeletonItem;
   }
 

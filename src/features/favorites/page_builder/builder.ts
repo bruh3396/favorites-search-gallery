@@ -1,14 +1,13 @@
-import {insertFavoritesContentContainer, insertFavoritesMenu} from "./structure";
 import {cleanOriginalFavoritesPage} from "./preparer";
-import {createFavoriteHTMLTemplates} from "../types/favorite/element";
+import {createFavoriteItemHTMLTemplates} from "../types/favorite/element";
+import {createFavoritesPageStructure} from "./structure";
 import {insertFavoritesSearchBox} from "./search_box";
 import {insertFavoritesSearchGalleryContainer} from "../../../lib/structure/container";
 
 export function buildFavoritesPage(): void {
-  insertFavoritesSearchGalleryContainer();
   cleanOriginalFavoritesPage();
-  insertFavoritesContentContainer();
-  insertFavoritesMenu();
+  insertFavoritesSearchGalleryContainer();
+  createFavoritesPageStructure();
   insertFavoritesSearchBox();
-  createFavoriteHTMLTemplates();
+  createFavoriteItemHTMLTemplates();
 }

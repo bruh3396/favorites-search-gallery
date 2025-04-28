@@ -1,6 +1,6 @@
+import * as FSG_URL from "../../lib/api/url";
 import {DARK_THEME_HTML, SKELETON_HTML, UTILITIES_HTML} from "../../assets/html";
 import {getCookie, setCookie} from "../../store/cookies/cookie";
-import {FSG_URL} from "../../lib/api/url";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
   return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];

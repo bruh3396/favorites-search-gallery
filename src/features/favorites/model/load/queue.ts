@@ -1,11 +1,11 @@
 import {FavoriteItem} from "../../types/favorite/favorite";
 import {FavoritesPageRequest} from "./request";
-import {doNothing} from "../../../../config/constants";
+import {DO_NOTHING} from "../../../../config/constants";
 
 const queue: FavoritesPageRequest[] = [];
 let mostRecentlyDequeuedPageNumber = -1;
 let dequeuing = false;
-let onDequeue: (favorites: FavoriteItem[]) => void = doNothing;
+let onDequeue: (favorites: FavoriteItem[]) => void = DO_NOTHING;
 
 function getSmallestEnqueuedPageNumber(): number {
   return queue[0].pageNumber;
@@ -51,17 +51,12 @@ function dequeue(): void {
   onDequeue(favorites);
 }
 
-function setDequeueCallback(callback: (favorites: FavoriteItem[]) => void): void {
+export function setDequeueCallback(callback: (favorites: FavoriteItem[]) => void): void {
   onDequeue = callback;
 }
 
-function enqueue(request: FavoritesPageRequest): void {
+export function enqueue(request: FavoritesPageRequest): void {
   queue.push(request);
   sortByLowestPageNumber();
   drain();
 }
-
-export const FavoritesFetchQueue = {
-  setDequeueCallback,
-  enqueue
-};

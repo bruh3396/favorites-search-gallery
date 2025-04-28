@@ -12,7 +12,7 @@ export const USER_IS_ON_THEIR_OWN_FAVORITES_PAGE = isUserIsOnTheirOwnFavoritesPa
 
 export const GALLERY_DISABLED = (ON_MOBILE_DEVICE && ON_SEARCH_PAGE) || ON_POST_PAGE || Preferences.performanceProfile.value !== PerformanceProfile.HIGH;
 export const TOOLTIP_DISABLED = ON_MOBILE_DEVICE || Preferences.performanceProfile.value !== PerformanceProfile.LOW || ON_POST_PAGE;
-export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.enableOnSearchPages.value);
+export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.enableOnSearchPages.value && !ON_MOBILE_DEVICE);
 export const TAG_MODIFIER_DISABLED = ON_MOBILE_DEVICE || !ON_FAVORITES_PAGE;
 export const SAVED_SEARCHES_DISABLED = !ON_FAVORITES_PAGE || ON_MOBILE_DEVICE;
 export const CAPTIONS_DISABLED = !ON_FAVORITES_PAGE || ON_MOBILE_DEVICE || Preferences.performanceProfile.value !== PerformanceProfile.LOW;

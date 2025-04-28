@@ -9,7 +9,7 @@ let currentPageNumber = 1;
 let resultsPerPage = Preferences.resultsPerPage.value;
 let favorites: FavoriteItem[] = [];
 
-function getPageCount(): number {
+export function getPageCount(): number {
   const favoriteCount = favorites.length;
 
   if (favoriteCount === 0) {
@@ -23,56 +23,56 @@ function getPageCount(): number {
   return Math.floor(pageCount) + 1;
 }
 
-function onFirstPage(): boolean {
+export function onFirstPage(): boolean {
   return currentPageNumber === 1;
 }
 
-function onFinalPage(): boolean {
+export function onFinalPage(): boolean {
   return currentPageNumber === getPageCount();
 }
 
-function onlyOnePage(): boolean {
+export function onlyOnePage(): boolean {
   return onFirstPage() && onFinalPage();
 }
 
-function getPaginationParameters(): FavoritesPaginationParameters {
+export function getPaginationParameters(): FavoritesPaginationParameters {
   const {start, end} = getCurrentPageRange();
   return new FavoritesPaginationParameters(currentPageNumber, getPageCount(), favorites.length, start, end);
 }
 
-function paginate(newFavorites: FavoriteItem[]): void {
+export function paginate(newFavorites: FavoriteItem[]): void {
   favorites = newFavorites;
 }
 
-function changePage(pageNumber: number): void {
+export function changePage(pageNumber: number): void {
   currentPageNumber = clamp(pageNumber, 1, getPageCount());
 }
 
-function gotoFirstPage(): void {
+export function gotoFirstPage(): void {
   changePage(1);
 }
 
-function gotoLastPage(): void {
+export function gotoLastPage(): void {
   changePage(getPageCount());
 }
 
-function getFavoritesOnCurrentPage(): FavoriteItem[] {
+export function getFavoritesOnCurrentPage(): FavoriteItem[] {
   const {start, end} = getCurrentPageRange();
   return favorites.slice(start, end);
 }
 
-function getCurrentPageRange(): { start: number; end: number } {
+export function getCurrentPageRange(): { start: number; end: number } {
   return {
     start: resultsPerPage * (currentPageNumber - 1),
     end: resultsPerPage * currentPageNumber
   };
 }
 
-function changeResultsPerPage(newResultsPerPage: number): void {
+export function changeResultsPerPage(newResultsPerPage: number): void {
   resultsPerPage = newResultsPerPage;
 }
 
-function gotoAdjacentPage(direction: NavigationKey): boolean {
+export function gotoAdjacentPage(direction: NavigationKey): boolean {
   const forward = isForwardNavigationKey(direction);
 
   if (onlyOnePage()) {
@@ -90,7 +90,7 @@ function gotoAdjacentPage(direction: NavigationKey): boolean {
   return true;
 }
 
-function gotoRelativePage(relation: string): boolean {
+export function gotoRelativePage(relation: string): boolean {
   if (onlyOnePage()) {
     return false;
   }
@@ -128,7 +128,7 @@ function gotoRelativePage(relation: string): boolean {
   }
 }
 
-function gotoPageWithFavorite(id: string): boolean {
+export function gotoPageWithFavorite(id: string): boolean {
   const favoriteIds = favorites.map(favorite => favorite.id);
   const index = favoriteIds.indexOf(id);
   const favoriteNotFound = index === -1;
@@ -145,17 +145,3 @@ function gotoPageWithFavorite(id: string): boolean {
   }
   return false;
 }
-
-export const FavoritesPaginator = {
-  paginate,
-  changePage,
-  changeResultsPerPage,
-  gotoRelativePage,
-  gotoAdjacentPage,
-  getPaginationParameters,
-  getFavoritesOnCurrentPage,
-  gotoPageWithFavorite,
-  onFinalPage,
-  onFirstPage,
-  onlyOnePage
-};

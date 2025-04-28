@@ -1,9 +1,9 @@
 import {isHotkeyEvent} from "../utils/dom/dom";
 
 export class FavoritesKeyboardEvent {
-  private readonly key;
-  private readonly originalEvent;
-  private readonly isHotkey: boolean;
+  public readonly key;
+  public readonly originalEvent;
+  public readonly isHotkey: boolean;
 
   constructor(event: KeyboardEvent) {
     this.originalEvent = event;

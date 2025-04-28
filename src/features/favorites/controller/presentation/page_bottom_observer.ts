@@ -1,4 +1,4 @@
-import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/structure";
+import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/content";
 import {FavoritesSettings} from "../../../../config/favorites_settings";
 import {ITEM_CLASS_NAME} from "../../../../utils/dom/dom";
 

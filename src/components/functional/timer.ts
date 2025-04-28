@@ -1,5 +1,5 @@
+import {DO_NOTHING} from "../../config/constants";
 import {Timeout} from "../../types/primitives/primitives";
-import {doNothing} from "../../config/constants";
 
 export class Timer {
   private readonly waitTime: number;
@@ -8,7 +8,7 @@ export class Timer {
 
   constructor(waitTime: number) {
     this.waitTime = waitTime;
-    this.onTimerEnd = doNothing;
+    this.onTimerEnd = DO_NOTHING;
     this.timeout = undefined;
   }
 

@@ -823,8 +823,14 @@ export const FAVORITES_HTML = `
 
 
     #help-links-container {
-      >a:not(:last-child)::after {
+      /* >a:not(:last-child)::after {
         content: " |";
+      } */
+      display: flex;
+      flex-direction: column;
+
+      >a {
+        font-size: x-large;
       }
 
       margin-top: 17px;
@@ -1016,8 +1022,8 @@ export const FAVORITES_HTML = `
       width: 5ch;
     }
 
-    #left-favorites-panel-top-row>button:not(:last-of-type) {
-      margin-right: 5px;
+    #left-favorites-panel-top-row {
+      margin-top: 10px;
     }
 
     #sort-container {
@@ -1108,8 +1114,8 @@ export const FAVORITES_HTML = `
         <label id="match-count-label"></label>
         <label id="favorites-load-status-label"></label>
       </span>
+      <span id="favorites-pagination-placeholder"></span>
       <div id="left-favorites-panel-top-row">
-        <span id="favorites-pagination-placeholder"></span>
       </div>
       <div id="left-favorites-panel-bottom-row">
         <div id="bottom-panel-1">
@@ -1200,7 +1206,6 @@ export const FAVORITES_CONTENT_HTML = `
   #favorites-search-gallery-content {
     padding: 0px 20px 30px 20px;
     margin-right: 15px;
-
 
     &.grid,
     &.square {
@@ -1659,11 +1664,14 @@ export const GALLERY_HTML = `
 `;
 export const HELP_HTML = `
 <span id="help-links-container">
-  <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
+  <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Controls</a>
+  <br>
   <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
     target="_blank">Feedback</a>
+  <br>
   <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
     Issue</a>
+  <br>
   <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
     <div id="whats-new-container" class="light-green-gradient">
       <h4>1.19:</h4>
@@ -2202,12 +2210,231 @@ export const SAVED_SEARCHES_HTML = `
 <script>
 </script>
 `;
-export const SKELETON_HTML = `
+export const SETTINGS_HTML = `
+<!-- <div id="favorite-options"></div>
+<div id="dynamic-favorite-options"></div>
+<div id="layout-sort-container" class="inline-option-container">
+  <div id="layout-container">
+    <label>Layout</label>
+    <br>
+  </div>
+  <div id="sort-container" title="Change sorting order of search results">
+    <span id="sort-labels">
+      <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
+      <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+    </span>
+    <div id="sort-inputs">
+    </div>
+  </div>
+</div>
+
+<div id="results-columns-container" class="inline-option-container">
+  <div id="results-per-page-container"
+    title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
+    <span class="number-label-container">
+      <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
+    </span>
+    <br>
+  </div>
+  <div id="column-count-container" title="Set the number of favorites per row">
+    <div>
+      <span class="number-label-container">
+        <label id="column-count-label">Columns</label>
+      </span>
+      <br>
+    </div>
+  </div>
+  <div id="row-size-container" title="Set the height of each row">
+    <div>
+      <span class="number-label-container">
+        <label id="row-size-label">Row height</label>
+      </span>
+      <br>
+    </div>
+  </div>
+</div>
+
+<div id="rating-container" title="Filter search results by rating">
+</div>
+
+<div id="performance-profile-container" title="Improve performance by disabling features">
+  <label for="performance-profile">Performance Profile</label>
+  <br>
+</div> -->
+<div id="favorite-options"></div>
+<div id="dynamic-favorite-options"></div>
+<div id="layout-container"><label>Layout</label><br></div>
+<div id="sort-container" title="Change sorting order of search results">
+  <span id="sort-labels">
+    <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
+    <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
+  </span>
+  <div id="sort-inputs"></div>
+</div>
+<div id="results-per-page-container"
+  title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
+  <span class="number-label-container">
+    <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
+  </span>
+  <br>
+</div>
+<div id="column-count-container" title="Set the number of favorites per row">
+  <div>
+    <span class="number-label-container">
+      <label id="column-count-label">Columns</label>
+    </span>
+    <br>
+  </div>
+</div>
+<div id="row-size-container" title="Set the height of each row">
+  <div>
+    <span class="number-label-container">
+      <label id="row-size-label">Row height</label>
+    </span>
+    <br>
+  </div>
+</div>
+<div id="rating-container" title="Filter search results by rating">
+</div>
+
+<div id="performance-profile-container" title="Improve performance by disabling features">
+  <label for="performance-profile">Performance Profile</label>
+  <br>
+</div>
+`;
+export const SIDEBAR_HTML = `
 <style>
-  body {
-    background: lightgreen;
+  :root {
+    --sidebar-width: 50px;
+    --sidebar-drawer-width: 200px;
+    --sidebar-full-width: calc(var(--sidebar-width) + var(--sidebar-drawer-width));
+    --sidebar-drawer-transition: 0.15s ease;
   }
 
+  .sidebar-container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #sidebar-content-container {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    transition: margin-left var(--sidebar-drawer-transition);
+  }
+
+  #sidebar-content-container.shifted {
+    margin-left: var(--sidebar-full-width);
+  }
+
+  .sidebar {
+    position: fixed;
+    background-color: #2e2e2e;
+    list-style-type: none;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    width: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+  }
+
+
+  .sidebar li {
+    margin: 5px 0px;
+  }
+
+  .sidebar li a {
+    color: white;
+    text-decoration: none;
+    width: 40px;
+    aspect-ratio: 1/1;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s, border-radius 0.3s;
+  }
+
+  .sidebar li a:hover {
+    background-color: #444444;
+    border-radius: 8px;
+  }
+
+  .sidebar li.active {
+    position: relative;
+  }
+
+  .sidebar li.active::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: #0075FF;
+  }
+
+  .sidebar li svg {
+    height: 90%;
+  }
+
+  .horizontal-drawer {
+    position: fixed;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0px;
+    height: 100%;
+    background-color: #2e2e2e;
+    color: white;
+    box-sizing: border-box;
+    left: var(--sidebar-width);
+    top: 0;
+    transition: width var(--sidebar-drawer-transition);
+    z-index: 200000;
+  }
+
+  .horizontal-drawer>div {
+    padding: 5px 10px;
+  }
+
+  .horizontal-drawer.open {
+    width: var(--sidebar-drawer-width);
+  }
+
+  .horizontal-drawer h2 {
+    margin-top: 0;
+  }
+
+  .drawer-title {
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+
+
+  .sidebar-separator {
+    position: relative;
+  }
+
+  .sidebar-separator::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: white;
+  }
+</style>
+`;
+export const SKELETON_HTML = `
+<style>
   .skeleton-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -2229,7 +2456,8 @@ export const SKELETON_HTML = `
   }
 
   .skeleton-item.pulse {
-    animation: pulse 2s infinite ease-in-out;
+    animation: pulse var(--skeleton-animation-duration, 1s) infinite ease-in-out;
+    animation-delay: var(--skeleton-animation-delay, 0s);
   }
 
   .skeleton-item.shine::after {
@@ -2241,7 +2469,8 @@ export const SKELETON_HTML = `
     left: 0;
     right: 0;
     top: 0;
-    animation: shine 2s linear alternate infinite;
+    animation: shine var(--skeleton-animation-duration, 1s) linear infinite;
+    animation-delay: var(--skeleton-animation-delay, 0s);
   }
 
   @keyframes pulse {
@@ -2250,7 +2479,7 @@ export const SKELETON_HTML = `
     }
 
     50% {
-      opacity: 0.6;
+      opacity: 0.5;
     }
 
     100% {
@@ -2362,7 +2591,7 @@ export const TOOLTIP_HTML = `
 export const UTILITIES_HTML = `
 <style>
   body {
-
+    overflow-x: hidden;
     &:fullscreen,
     &::backdrop {
       background-color: var(--c-bg);

@@ -1,34 +1,18 @@
+import * as FavoritesModel from "../../model/model";
+import * as FavoritesView from "../../view/view";
 import {Events} from "../../../../lib/functional/events";
 import {FavoriteItem} from "../../types/favorite/favorite";
-import {FavoritesModel} from "../../model/model";
 import {FavoritesPresenter} from "./presenter";
-import {FavoritesView} from "../../view/view";
 import {NavigationKey} from "../../../../types/primitives/primitives";
 
-class FavoritesPaginationDisplay implements FavoritesPresenter {
-    public setup(): void {
-        this.addEventListeners();
-    }
-
-    public addEventListeners(): void {
-        Events.favorites.pageSelected.on((pageNumber) => {
-            FavoritesModel.changePage(pageNumber);
-            this.showCurrentPage();
-        });
-        Events.favorites.relativePageSelected.on((relativePage) => {
-            if (FavoritesModel.gotoRelativePage(relativePage)) {
-                this.showCurrentPage();
-            }
-        });
-    }
-
+class PaginationPresenter implements FavoritesPresenter {
     public present(results: FavoriteItem[]): void {
         FavoritesModel.paginate(results);
         FavoritesModel.changePage(1);
         this.showCurrentPage();
     }
 
-    private showCurrentPage(): void {
+    public showCurrentPage(): void {
         FavoritesView.showSearchResults(FavoritesModel.getFavoritesOnCurrentPage());
         FavoritesView.createPageSelectionMenu(FavoritesModel.getPaginationParameters());
         Events.favorites.pageChanged.emit();
@@ -90,4 +74,4 @@ class FavoritesPaginationDisplay implements FavoritesPresenter {
     }
 }
 
-export const PaginationPresenter = new FavoritesPaginationDisplay();
+export const FavoritesPaginationPresenter = new PaginationPresenter();

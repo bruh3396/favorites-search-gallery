@@ -6,15 +6,15 @@ import {shuffleArray} from "../../../../utils/array/array";
 let useAscendingOrder = Preferences.sortAscending.value;
 let sortingMethod: SortingMethod = Preferences.sortingMethod.value;
 
-function setAscendingOrder(value: boolean): void {
+export function setAscendingOrder(value: boolean): void {
   useAscendingOrder = value;
 }
 
-function setSortingMethod(value: SortingMethod): void {
+export function setSortingMethod(value: SortingMethod): void {
   sortingMethod = value;
 }
 
-function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
+export function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
   const toSort = favorites.slice();
   // if (sortingMethod === "random") {
   //   return shuffleArray(toSort);
@@ -24,9 +24,3 @@ function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
   // });
   return useAscendingOrder ? toSort.reverse() : toSort;
 }
-
-export const FavoritesSorter = {
-  setAscendingOrder,
-  setSortingMethod,
-  sortFavorites
-};

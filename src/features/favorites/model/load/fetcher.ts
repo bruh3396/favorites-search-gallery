@@ -1,6 +1,6 @@
-import {API} from "../../../../lib/api/api";
+import * as FavoritesFetchQueue from "./queue";
+import * as API from "../../../../lib/api/api";
 import {FavoriteItem} from "../../types/favorite/favorite";
-import {FavoritesFetchQueue} from "./queue";
 import {FavoritesPageRequest} from "./request";
 import {extractFavorites} from "./extractor";
 import {sleep} from "../../../../utils/misc/generic";
@@ -112,7 +112,7 @@ function extractNewFavorites(html: string): { allNewFavoritesFound: boolean, new
   };
 }
 
-async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
+export async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
   FavoritesFetchQueue.setDequeueCallback(onFavoritesFound);
 
   while (!allRequestsHaveCompleted()) {
@@ -120,7 +120,7 @@ async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) =
   }
 }
 
-async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<FavoriteItem[]> {
+export async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<FavoriteItem[]> {
   await sleep(100);
   storedFavoriteIds = ids;
   let favorites: FavoriteItem[] = [];
@@ -136,8 +136,3 @@ async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<FavoriteItem
     }
   }
 }
-
-export const FavoritesFetcher = {
-  fetchAllFavorites,
-  fetchNewFavoritesOnReload
-};

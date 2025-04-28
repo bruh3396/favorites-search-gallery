@@ -1,5 +1,5 @@
 import {describe, expect, test} from "vitest";
-import {getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange} from "../../utils/primitive/number";
+import {getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, roundToTwoDecimalPlaces, seededRandom} from "../../utils/primitive/number";
 
 describe("getRandomPositiveInteger", () => {
   test("zero", () => {
@@ -52,5 +52,53 @@ describe("getRandomPositiveIntegerInRange", () => {
       expect(value).toBeLessThanOrEqual(20);
       expect(value).toBeGreaterThanOrEqual(0);
     }
+  });
+});
+
+describe("seededRandom", () => {
+  test("all cases", () => {
+    for (let i = 0; i < 100; i += 1) {
+      expect(seededRandom(i)).toBe(seededRandom(i));
+      expect(seededRandom(i)).not.toBe(seededRandom(i + 1));
+    }
+  });
+});
+
+describe("roundToTwoDecimalPlaces", () => {
+  test("zero", () => {
+    expect(roundToTwoDecimalPlaces(0)).toBe(0);
+  });
+
+  test("integer", () => {
+    expect(roundToTwoDecimalPlaces(1)).toBe(1);
+    expect(roundToTwoDecimalPlaces(-1)).toBe(-1);
+  });
+
+  test("positive", () => {
+    expect(roundToTwoDecimalPlaces(0.123456)).toBe(0.12);
+    expect(roundToTwoDecimalPlaces(0.123456789)).toBe(0.12);
+    expect(roundToTwoDecimalPlaces(0.1234)).toBe(0.12);
+    expect(roundToTwoDecimalPlaces(0.123)).toBe(0.12);
+  });
+
+  test("negative", () => {
+    expect(roundToTwoDecimalPlaces(-0.123456)).toBe(-0.12);
+    expect(roundToTwoDecimalPlaces(-0.123456789)).toBe(-0.12);
+    expect(roundToTwoDecimalPlaces(-0.1234)).toBe(-0.12);
+    expect(roundToTwoDecimalPlaces(-0.123)).toBe(-0.12);
+  });
+
+  test("positive large", () => {
+    expect(roundToTwoDecimalPlaces(123456789)).toBe(123456789);
+    expect(roundToTwoDecimalPlaces(123456789.123456)).toBe(123456789.12);
+    expect(roundToTwoDecimalPlaces(123456789.1234)).toBe(123456789.12);
+    expect(roundToTwoDecimalPlaces(123456789.123)).toBe(123456789.12);
+  });
+
+  test("negative large", () => {
+    expect(roundToTwoDecimalPlaces(-123456789)).toBe(-123456789);
+    expect(roundToTwoDecimalPlaces(-123456789.123456)).toBe(-123456789.12);
+    expect(roundToTwoDecimalPlaces(-123456789.1234)).toBe(-123456789.12);
+    expect(roundToTwoDecimalPlaces(-123456789.123)).toBe(-123456789.12);
   });
 });

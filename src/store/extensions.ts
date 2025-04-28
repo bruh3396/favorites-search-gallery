@@ -1,7 +1,3 @@
-// Utils.addStaticInitializer(Extensions.convertFromLocalStorageToIndexedDB);
-// Utils.addStaticInitializer(Extensions.load);
-// Utils.addStaticInitializer(Extensions.addEventListeners);
-
 import {BatchExecutor} from "../components/functional/batch_executor";
 import {Database} from "./database";
 import {MediaExtension} from "../types/primitives/primitives";
@@ -14,12 +10,12 @@ const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
 const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
 const WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, store);
 
-function has(id: string): boolean {
+export function has(id: string): boolean {
   return EXTENSION_MAP.has(id);
 }
 
-function set(id: string, extension: MediaExtension): void {
-  if (Extensions.has(id) || extension === "mp4" || extension === "gif") {
+export function set(id: string, extension: MediaExtension): void {
+  if (has(id) || extension === "mp4" || extension === "gif") {
     return;
   }
   EXTENSION_MAP.set(id, extension);
@@ -32,7 +28,7 @@ function set(id: string, extension: MediaExtension): void {
   }
 }
 
-function get(id: string): MediaExtension | undefined {
+export function get(id: string): MediaExtension | undefined {
   return EXTENSION_MAP.get(id);
 }
 
@@ -64,7 +60,7 @@ function convertFromLocalStorageToIndexedDB(): void {
   };
 
   for (const [id, extensionEncoding] of Object.entries(extensionMappings)) {
-    Extensions.set(id, extensionDecodings[extensionEncoding]);
+    set(id, extensionDecodings[extensionEncoding]);
   }
   localStorage.removeItem("imageExtensions");
 }
@@ -72,12 +68,6 @@ function convertFromLocalStorageToIndexedDB(): void {
 export function deleteExtensionsDatabase(): void {
   DATABASE.delete();
 }
-
-export const Extensions = {
-  has,
-  set,
-  get
-};
 
 export function setupExtensions(): void {
   convertFromLocalStorageToIndexedDB();

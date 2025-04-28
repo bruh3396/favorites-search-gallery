@@ -1,35 +1,35 @@
 import {ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE} from "../../../../lib/functional/flags";
 import {ColumnTiler} from "./column_tiler";
-import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/structure";
+import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/content";
 import {FavoriteLayout} from "../../../../types/primitives/primitives";
 import {FavoritesSettings} from "../../../../config/favorites_settings";
 import {GridTiler} from "./grid_tiler";
 import {Preferences} from "../../../../store/preferences/preferences";
 import {RowTiler} from "./row_tiler";
 import {SquareTiler} from "./square_tiler";
-import {Tiler} from "./interfaces";
+import {Tiler} from "./tiler";
 import {insertStyleHTML} from "../../../../utils/dom/style";
 
 const TILERS = [GridTiler, RowTiler, SquareTiler, ColumnTiler];
 let currentLayout: FavoriteLayout = Preferences.layout.value;
 
-function getCurrentTiler(): Tiler {
+export function getCurrentTiler(): Tiler {
   return TILERS.find(tiler => tiler.className === currentLayout) || RowTiler;
 }
 
-function tile(favorites: HTMLElement[]): void {
+export function tile(favorites: HTMLElement[]): void {
   getCurrentTiler().tile(favorites);
 }
 
-function addItemsToBottom(favorites: HTMLElement[]): void {
+export function addItemsToBottom(favorites: HTMLElement[]): void {
   getCurrentTiler().addItemsToBottom(favorites);
 }
 
-function addItemsToTop(favorites: HTMLElement[]): void {
+export function addItemsToTop(favorites: HTMLElement[]): void {
   getCurrentTiler().addItemsToTop(favorites);
 }
 
-function changeLayout(layout: FavoriteLayout): void {
+export function changeLayout(layout: FavoriteLayout): void {
   if (currentLayout === layout) {
     return;
   }
@@ -43,19 +43,19 @@ function changeLayout(layout: FavoriteLayout): void {
   getCurrentTiler().onActivation();
 }
 
-function updateColumnCount(columnCount: number): void {
+export function updateColumnCount(columnCount: number): void {
   for (const tiler of TILERS) {
     tiler.setColumnCount(columnCount);
   }
 }
 
-function updateRowSize(rowSize: number): void {
+export function updateRowSize(rowSize: number): void {
   for (const tiler of TILERS) {
     tiler.setRowSize(rowSize);
   }
 }
 
-function addStyles(): void {
+export function addStyles(): void {
   const style = `
     #favorites-search-gallery-content {
       &.row, &.column, &.column .favorites-column, &.square, &.grid {
@@ -70,12 +70,11 @@ function addStyles(): void {
   insertStyleHTML(style, "tiler-style");
 }
 
-function showSkeleton(): void {
-  // FAVORITES_CONTENT_CONTAINER.insertAdjacentElement("beforebegin", SKELETON);
+export function showSkeleton(): void {
   getCurrentTiler().showSkeleton();
 }
 
-function setup(): void {
+export function setupFavoritesTiler(): void {
   showSkeleton();
   addStyles();
   FAVORITES_CONTENT_CONTAINER.className = currentLayout;
@@ -83,13 +82,3 @@ function setup(): void {
   getCurrentTiler().setRowSize(Preferences.rowSize.value);
   getCurrentTiler().onActivation();
 }
-
-export const FavoritesTiler = {
-  tile,
-  addItemsToBottom,
-  addItemsToTop,
-  changeLayout,
-  updateColumnCount,
-  updateRowSize,
-  setup
-};

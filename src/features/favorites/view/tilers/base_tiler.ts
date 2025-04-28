@@ -1,8 +1,11 @@
-import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/structure";
+import {getSeededRandomPositiveIntegerInRange, roundToTwoDecimalPlaces} from "../../../../utils/primitive/number";
+import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/content";
 import {FavoriteLayout} from "../../../../types/primitives/primitives";
+import {FavoritesSettings} from "../../../../config/favorites_settings";
 import {ITEM_CLASS_NAME} from "../../../../utils/dom/dom";
 import {Preferences} from "../../../../store/preferences/preferences";
-import {Tiler} from "./interfaces";
+import {Tiler} from "./tiler";
+import {getNextAspectRatio} from "../aspect_ratios";
 import {insertStyleHTML} from "../../../../utils/dom/style";
 
 export abstract class FavoritesBaseTiler implements Tiler {
@@ -11,16 +14,23 @@ export abstract class FavoritesBaseTiler implements Tiler {
 
   protected createSkeletonItem(): HTMLElement {
     const skeletonItem = document.createElement("div");
+    const animationDelay = roundToTwoDecimalPlaces(Math.random() * 0.75);
+    const animationDuration = roundToTwoDecimalPlaces((Math.random()) + 0.75);
+    const aspectRatio = getNextAspectRatio() || `10/${getSeededRandomPositiveIntegerInRange(5, 20)}`;
 
-    skeletonItem.classList.add("skeleton-item");
-    skeletonItem.classList.add(ITEM_CLASS_NAME);
-    skeletonItem.classList.add("shine");
+    skeletonItem.style.aspectRatio = aspectRatio;
+
+    if (FavoritesSettings.randomSkeletonAnimationTiming) {
+      skeletonItem.style.setProperty("--skeleton-animation-delay", `${animationDelay}s`);
+      skeletonItem.style.setProperty("--skeleton-animation-duration", `${animationDuration}s`);
+    }
+    skeletonItem.className = `skeleton-item ${ITEM_CLASS_NAME} ${FavoritesSettings.skeletonAnimationClasses}`;
     return skeletonItem;
   }
 
   private createSkeletonItems(): HTMLElement[] {
     const skeletonItems = [];
-    const itemCount = Math.min(Preferences.resultsPerPage.value, 100);
+    const itemCount = Math.min(Preferences.resultsPerPage.value, 50);
 
     for (let i = 0; i < itemCount; i += 1) {
       skeletonItems.push(this.createSkeletonItem());

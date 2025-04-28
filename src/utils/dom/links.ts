@@ -1,4 +1,4 @@
-import {FSG_URL} from "../../lib/api/url";
+import * as FSG_URL from "../../lib/api/url";
 
 export function openPostPage(id: string): void {
   window.open(FSG_URL.createPostPageURL(id), "_blank");

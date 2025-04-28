@@ -1,18 +1,14 @@
+import * as FavoritesModel from "../../model/model";
+import * as FavoritesView from "../../view/view";
 import {ITEM_SELECTOR, waitForAllThumbnailsToLoad} from "../../../../utils/dom/dom";
 import {Events} from "../../../../lib/functional/events";
-import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/structure";
-import {FavoritesModel} from "../../model/model";
+import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/content";
 import {FavoritesPageBottomObserver} from "./page_bottom_observer";
 import {FavoritesPresenter} from "./presenter";
-import {FavoritesView} from "../../view/view";
 import {sleep} from "../../../../utils/misc/generic";
 
-class FavoritesInfiniteScrollPresenter implements FavoritesPresenter {
+class InfiniteScrollPresenter implements FavoritesPresenter {
   private readonly pageBottomObserver: FavoritesPageBottomObserver;
-
-  public setup(): void {
-    this.pageBottomObserver.refresh();
-  }
 
   constructor() {
     this.pageBottomObserver = new FavoritesPageBottomObserver(this.showMoreResults.bind(this));
@@ -63,4 +59,4 @@ class FavoritesInfiniteScrollPresenter implements FavoritesPresenter {
   }
 }
 
-export const InfiniteScrollPresenter = new FavoritesInfiniteScrollPresenter();
+export const FavoritesInfiniteScrollPresenter = new InfiniteScrollPresenter();

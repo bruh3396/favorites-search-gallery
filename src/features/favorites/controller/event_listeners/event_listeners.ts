@@ -1,10 +1,23 @@
+import * as FavoritesController from "../flow/controller";
+import * as FavoritesModel from "../../model/model";
 import {Events} from "../../../../lib/functional/events";
-import {FavoritesController} from "../controller";
-import {FavoritesModel} from "../../model/model";
+import {FavoritesPaginationPresenter} from "../presentation/pagination_presenter";
 
 export function addFavoritesPageEventListeners(): void {
   // addEventListenersToMainMenu();
   Events.favorites.searchStarted.on(FavoritesController.searchFavorites);
+  Events.favorites.shuffleButtonClicked.on(FavoritesController.shuffleSearchResults);
+  Events.favorites.reset.on(FavoritesModel.deleteDatabase);
+
+  Events.favorites.pageSelected.on((pageNumber) => {
+    FavoritesModel.changePage(pageNumber);
+    FavoritesPaginationPresenter.showCurrentPage();
+  });
+  Events.favorites.relativePageSelected.on((relativePage) => {
+    if (FavoritesModel.gotoRelativePage(relativePage)) {
+      FavoritesPaginationPresenter.showCurrentPage();
+    }
+  });
   addGlobalEventListeners();
   addKeyDownEventListeners();
 }

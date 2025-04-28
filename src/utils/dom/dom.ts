@@ -129,3 +129,7 @@ export function getIdFromThumb(thumb: HTMLElement): string {
 export function scrollToTop(): void {
   window.scrollTo(0, ON_MOBILE_DEVICE ? 10 : 0);
 }
+
+export function getItemCount(): number {
+  return getAllThumbs().length;
+}

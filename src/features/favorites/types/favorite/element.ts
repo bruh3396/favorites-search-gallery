@@ -1,10 +1,10 @@
+import * as API from "../../../../lib/api/api";
+import * as Icons from "../../../../assets/icons";
 import {GALLERY_DISABLED, ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE} from "../../../../lib/functional/flags";
 import {createObjectURLFromSvg, openPostPage} from "../../../../utils/dom/links";
-import {API} from "../../../../lib/api/api";
 import {ClickCodes} from "../../../../types/primitives/enums";
 import {FavoriteElement} from "./interfaces";
 import {ITEM_CLASS_NAME} from "../../../../utils/dom/dom";
-import {Icons} from "../../../../assets/icons";
 import {Post} from "../../../../types/api/post";
 import {getContentType} from "../../../../utils/primitive/string";
 
@@ -12,7 +12,7 @@ let htmlTemplate: HTMLElement;
 let removeFavoriteButtonHTML: string;
 let addFavoriteButtonHTML: string;
 
-export function createFavoriteHTMLTemplates(): void {
+export function createFavoriteItemHTMLTemplates(): void {
   removeFavoriteButtonHTML = createRemoveFavoriteButtonHTMLTemplate();
   addFavoriteButtonHTML = createAddFavoriteButtonHTMLTemplate();
   createPostHTMLTemplate();

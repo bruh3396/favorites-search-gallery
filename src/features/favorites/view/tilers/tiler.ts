@@ -1,8 +1,8 @@
 import {FavoriteLayout} from "../../../../types/primitives/primitives";
 
 export interface Tiler {
-  container: HTMLElement
-  className: FavoriteLayout
+  readonly container: HTMLElement
+  readonly className: FavoriteLayout
 
   tile: (items: HTMLElement[]) => void
   setColumnCount: (columnCount: number) => void

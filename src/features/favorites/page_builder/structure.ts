@@ -1,18 +1,20 @@
-import {DESKTOP_HTML, FAVORITES_CONTENT_HTML, FAVORITES_HTML, MOBILE_HTML} from "../../../assets/html";
-import {insertHTMLAndExtractStyle, insertStyleHTML} from "../../../utils/dom/style";
-import {FAVORITES_SEARCH_GALLERY_CONTAINER} from "../../../lib/structure/container";
-import {ON_MOBILE_DEVICE} from "../../../lib/functional/flags";
+// import {FavoritesSettings} from "../../../config/favorites_settings";
+// import {buildFavoritesSidebar} from "./sidebar-builder";
+import {insertFavoritesContentContainer} from "./content";
+import {insertFavoritesMenu} from "./menu";
+// import {insertMainSidebar} from "./sidebar";
+// import {moveHeaderToSidebar} from "./utils";
 
-export const FAVORITES_CONTENT_CONTAINER = document.createElement("div");
+// function createSideBarStructure(): void {
+//   if (FavoritesSettings.useSidebar) {
+//     insertMainSidebar();
+//     buildFavoritesSidebar();
+//     moveHeaderToSidebar();
+//   }
+// }
 
-FAVORITES_CONTENT_CONTAINER.id = "favorites-search-gallery-content";
-
-export function insertFavoritesMenu(): void {
-  insertStyleHTML(ON_MOBILE_DEVICE ? MOBILE_HTML : DESKTOP_HTML, "favorites-menu-style");
-  insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_CONTAINER, "afterbegin", FAVORITES_HTML);
-}
-
-export function insertFavoritesContentContainer(): void {
-  insertStyleHTML(FAVORITES_CONTENT_HTML);
-  FAVORITES_SEARCH_GALLERY_CONTAINER.insertAdjacentElement("beforeend", FAVORITES_CONTENT_CONTAINER);
+export function createFavoritesPageStructure(): void {
+  // createSideBarStructure();
+  insertFavoritesMenu();
+  insertFavoritesContentContainer();
 }
