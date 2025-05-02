@@ -2,7 +2,7 @@ import {FavoriteLayout, MetadataMetric, NavigationKey, Rating} from "../../types
 import {ON_FAVORITES_PAGE, ON_MOBILE_DEVICE} from "../functional/flags";
 import {EventEmitter} from "../../components/functional/event_emitter";
 import {FAVORITES_SEARCH_GALLERY_CONTAINER} from "../structure/container";
-import {FavoriteItem} from "../../features/favorites/types/favorite/favorite";
+import {FavoriteItem} from "../../features/favorites/types/favorite/favorite_item";
 import {FavoritesKeyboardEvent} from "../../types/keyboard_event";
 import {FavoritesMouseEvent} from "../../types/mouse_event";
 import {FavoritesWheelEvent} from "../../types/wheel_event";

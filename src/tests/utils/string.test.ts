@@ -1,5 +1,5 @@
-import {describe, expect, test} from "vitest";
 import {convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeNonNumericCharacters, toCamelCase} from "../../utils/primitive/string";
+import {describe, expect, test} from "vitest";
 
 describe("toCamelCase", () => {
   test("empty", () => {

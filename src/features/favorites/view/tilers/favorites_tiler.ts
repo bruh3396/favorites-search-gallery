@@ -1,13 +1,13 @@
 import {ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE} from "../../../../lib/functional/flags";
-import {ColumnTiler} from "./column_tiler";
-import {FAVORITES_CONTENT_CONTAINER} from "../../page_builder/content";
+import {ColumnTiler} from "./favorites_column_tiler";
+import {FAVORITES_CONTENT_CONTAINER} from "../../setup/page_builder/favorites_content_container";
 import {FavoriteLayout} from "../../../../types/primitives/primitives";
 import {FavoritesSettings} from "../../../../config/favorites_settings";
-import {GridTiler} from "./grid_tiler";
+import {GridTiler} from "./favorites_grid_tiler";
 import {Preferences} from "../../../../store/preferences/preferences";
-import {RowTiler} from "./row_tiler";
-import {SquareTiler} from "./square_tiler";
-import {Tiler} from "./tiler";
+import {RowTiler} from "./favorites_row_tiler";
+import {SquareTiler} from "./favorites_square_tiler";
+import {Tiler} from "./favorites_tiler_interface";
 import {insertStyleHTML} from "../../../../utils/dom/style";
 
 const TILERS = [GridTiler, RowTiler, SquareTiler, ColumnTiler];

@@ -9,7 +9,9 @@ export function toggleFavoriteSearchGalleryInteractability(value: boolean): void
 }
 
 export function insertFavoritesSearchGalleryContainer(): void {
-  document.body.appendChild(FAVORITES_SEARCH_GALLERY_CONTAINER);
+  if (document.body !== null) {
+    document.body.appendChild(FAVORITES_SEARCH_GALLERY_CONTAINER);
+  }
 
   Events.global.domLoaded.on(() => {
     document.body.appendChild(FAVORITES_SEARCH_GALLERY_CONTAINER);

@@ -6,6 +6,10 @@ import {parsePostFromPostPage as extractPostFromPostPage} from "./post_page_pars
 
 async function getHTML(url: string): Promise<string> {
   const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+  }
   return response.text();
 }
 
@@ -27,7 +31,10 @@ export function addFavorite(id: string): void {
 }
 
 export function removeFavorite(id: string): void {
-  fetch(FSG_URL.createRemoveFavoriteURL(id));
+  fetch(FSG_URL.createRemoveFavoriteURL(id), {
+    method: "GET",
+    redirect: "manual"
+  });
 }
 
 export function getFavoritesCount(): Promise<number | null> {

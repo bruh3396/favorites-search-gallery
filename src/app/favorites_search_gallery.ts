@@ -2,7 +2,7 @@ import {FAVORITES_SEARCH_GALLERY_ENABLED, ON_FAVORITES_PAGE} from "../lib/functi
 import {setupCommonStyles} from "../utils/dom/style";
 import {setupEvents} from "../lib/functional/events";
 import {setupExtensions} from "../store/extensions";
-import {setupFavoritesPage} from "../features/favorites/controller/flow/main";
+import {setupFavoritesPage} from "../features/favorites/setup/favorites_page_setup";
 
 function runFavoritesSearchGallery(): void {
   setupEvents();

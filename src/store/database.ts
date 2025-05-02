@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 class LockedDatabaseError extends Error { }
 
 export class Database<V extends { id: string }> {

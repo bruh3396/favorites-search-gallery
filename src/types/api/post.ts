@@ -23,4 +23,3 @@ export type Post = {
   previewWidth : number
   previewHeight : number
 }
-

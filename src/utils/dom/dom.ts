@@ -86,7 +86,7 @@ export function waitForAllThumbnailsToLoad(): Promise<unknown[]> {
   const unloadedImages = getAllThumbs()
     .map(thumb => getImageFromThumb(thumb))
     .filter(image => image instanceof HTMLImageElement)
-    .filter(image => imageIsLoading(image));
+    .filter(image => image.dataset.preload !== "true" && imageIsLoading(image));
   return Promise.all(unloadedImages
     .map(image => new Promise(resolve => {
       image.addEventListener("load", resolve, {

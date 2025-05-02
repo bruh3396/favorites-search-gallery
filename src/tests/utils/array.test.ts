@@ -1,5 +1,5 @@
 import {describe, expect, test} from "vitest";
-import {getNumbersAround, indexInBounds, shuffleArray} from "../../utils/array/array";
+import {getNumbersAround, indexInBounds, shuffleArray} from "../../utils/collection/array";
 
 describe("indexInBounds", () => {
   test("empty", () => {

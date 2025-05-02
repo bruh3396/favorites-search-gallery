@@ -1,6 +1,6 @@
-import {FRUITS, SEARCHABLE_EMPTY, SEARCHABLE_FRUITS, SEARCHABLE_SORTED_FRUITS, SORTED_FRUITS, createSearchable, getAllSubstrings, getPrefixes} from "./utils";
+import {FRUITS, SEARCHABLE_EMPTY, SEARCHABLE_FRUITS, SEARCHABLE_SORTED_FRUITS, SORTED_FRUITS, createSearchable, getAllSubstrings, getPrefixes} from "./test_utils";
 import {describe, expect, test} from "vitest";
-import {WildcardSearchTag} from "../wildcard_search_tag";
+import {WildcardSearchTag} from "../search_tags/wildcard_search_tag";
 
 describe("wildcardSearchTag", () => {
   test("empty", () => {
@@ -84,7 +84,7 @@ describe("wildcardSearchTag", () => {
     expect(containsTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
     expect(wildcardTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
 
-    const iterations = 1000;
+    const iterations = 5000;
     const startsWithTime = measureExecutionTime(startsWithTag, iterations);
     const containsTime = measureExecutionTime(containsTag, iterations);
     const wildcardTime = measureExecutionTime(wildcardTag, iterations);

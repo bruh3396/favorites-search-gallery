@@ -24,7 +24,7 @@ function getAspectRatio(width: number, height: number): string {
   return `${width / divisor}/${height / divisor}`;
 }
 
-export function setupImageSizes(): void {
+export function collectAspectRatios(): void {
   loadAspectRatios();
   saveAspectRatios();
 }

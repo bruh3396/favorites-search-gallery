@@ -23,5 +23,6 @@ export const FavoritesSettings = {
   useSearchResultCache: false,
   useSidebar: false,
   randomSkeletonAnimationTiming: true,
-  skeletonAnimationClasses: "shine"
+  preloadThumbnails: true,
+  skeletonAnimationClasses: "pulse"
 };

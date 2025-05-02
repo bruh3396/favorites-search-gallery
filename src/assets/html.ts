@@ -716,53 +716,6 @@ export const FAVORITES_HTML = `
       }
     }
 
-    #loading-wheel {
-      border: 16px solid #f3f3f3;
-      border-top: 16px solid #3498db;
-      border-radius: 50%;
-      width: 120px;
-      height: 120px;
-      animation: spin 1s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 9990;
-      position: fixed;
-      max-height: 100vh;
-      margin: 0;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    .download-button {
-      bottom: 0 !important;
-      right: 0 !important;
-      left: unset !important;
-      top: unset !important;
-      color: #0075FF;
-    }
-
-    .download-button svg {
-      fill: #0075FF;
-    }
-
-    img {
-      -webkit-user-drag: none;
-      -khtml-user-drag: none;
-      -moz-user-drag: none;
-      -o-user-drag: none;
-    }
-
-
     #column-count-container {
       >div {
         align-content: center;
@@ -1359,6 +1312,20 @@ export const FAVORITES_CONTENT_HTML = `
     &:hover {
       filter: none !important;
     }
+  }
+
+  .download-button {
+    top: 0 !important;
+    right: 0 !important;
+    left: unset !important;
+    top: unset !important;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
   }
 </style>
 `;
@@ -2479,7 +2446,7 @@ export const SKELETON_HTML = `
     }
 
     50% {
-      opacity: 0.5;
+      opacity: 0.65;
     }
 
     100% {
@@ -2491,6 +2458,9 @@ export const SKELETON_HTML = `
     0% {
       transform: translateX(-100%);
     }
+    /* 100% {
+      transform: translateX(100%);
+    } */
 
     50% {
       transform: translateX(100%);

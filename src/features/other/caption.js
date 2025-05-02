@@ -191,12 +191,12 @@ class Caption {
     }, {
       once: true
     });
-    Events.favorites.favoritesLoadedFromDatabase.on(() => {
-      Caption.flags.finishedLoading = true;
-      this.findTagCategoriesOnPageChange();
-    }, {
-      once: true
-    });
+    // Events.favorites.favoritesLoadedFromDatabase.on(() => {
+    //   Caption.flags.finishedLoading = true;
+    //   this.findTagCategoriesOnPageChange();
+    // }, {
+    //   once: true
+    // });
     Events.favorites.pageChanged.on(Utils.debounceAfterFirstCall(() => {
       this.abortAllRequests("Changed Page");
       this.abortController = new AbortController();
