@@ -1,0 +1,100 @@
+import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../../types/elements/menu_element";
+import { DO_NOTHING } from "../../config/constants";
+import { Events } from "../globals/events";
+
+function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
+  return {
+    ...DEFAULT_MENU_ELEMENT,
+    savePreference: true,
+    event: null,
+    defaultValue: false,
+    hotkey: "",
+    function: DO_NOTHING,
+    preference: null,
+    triggerOnCreation: false,
+    ...partial
+  };
+}
+
+export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
+  const template = createCheckboxTemplate(partial);
+  const parent = document.getElementById(template.parentId);
+
+  if (parent === null) {
+    return;
+  }
+
+  const checkbox = document.createElement("input");
+
+  checkbox.id = template.id;
+  checkbox.type = "checkbox";
+  checkbox.checked = template.preference === null ? template.defaultValue : template.preference.value;
+
+  const onChange = (): void => {
+    if (template.event !== null) {
+      template.event.emit(checkbox.checked);
+    }
+
+    if (template.savePreference && template.preference !== null) {
+      template.preference.set(checkbox.checked);
+    }
+
+    template.function(checkbox.checked);
+  };
+
+  if (template.triggerOnCreation) {
+    onChange();
+  }
+
+  checkbox.addEventListener("change", onChange);
+  parent.insertAdjacentElement(template.position, checkbox);
+
+  if (template.hotkey === "") {
+    return;
+  }
+
+  Events.document.keydown.on((event) => {
+    if (!event.isHotkey || event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
+      return;
+    }
+    // const inGallery = await Utils.inGallery();
+
+    // if (inGallery) {
+    //   return;
+    // }
+    checkbox.checked = !checkbox.checked;
+    onChange();
+  });
+}
+
+export function createCheckboxOption(partial: Partial<CheckboxElement>): void {
+  const parent = document.getElementById(partial.parentId || "not-an-id");
+
+  if (parent === null) {
+    return;
+  }
+  const container = document.createElement("div");
+  const label = document.createElement("label");
+  const span = document.createElement("span");
+  const hint = document.createElement("span");
+  const labelId = `${partial.id}-label`;
+
+  container.id = `${partial.id}-container`;
+  label.id = labelId;
+  label.className = "checkbox";
+  label.title = partial.title ?? "";
+  span.textContent = ` ${partial.textContent ?? "Missing text"}`;
+  hint.className = "option-hint";
+  hint.textContent = ` (${partial.hotkey ?? "Missing hotkey"})`;
+
+  container.appendChild(label);
+  label.appendChild(span);
+
+  if (partial.hotkey !== "" && partial.hotkey !== undefined) {
+    label.appendChild(hint);
+  }
+  parent.insertAdjacentElement(partial.position ?? "afterbegin", container);
+
+  partial.parentId = labelId;
+  createCheckboxElement(partial);
+}

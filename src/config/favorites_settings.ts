@@ -1,4 +1,4 @@
-import {ON_MOBILE_DEVICE} from "../lib/functional/flags";
+import { ON_MOBILE_DEVICE } from "../lib/globals/flags";
 
 export const FavoritesSettings = {
   columnCountBounds: {
@@ -20,9 +20,8 @@ export const FavoritesSettings = {
   rightContentMargin: 15,
   infiniteScrollBatchSize: 50,
   infiniteScrollMargin: "75%",
-  useSearchResultCache: false,
-  useSidebar: false,
   randomSkeletonAnimationTiming: true,
   preloadThumbnails: true,
+  useSearchIndex: false,
   skeletonAnimationClasses: "pulse"
 };

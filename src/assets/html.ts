@@ -329,11 +329,11 @@ export const DARK_THEME_HTML = `
 export const DESKTOP_HTML = `
 <style>
   .checkbox {
+    cursor: pointer;
     &:hover {
       color: #000;
       background: #93b393;
       text-shadow: none;
-      cursor: pointer;
     }
 
     input[type="checkbox"] {
@@ -657,30 +657,34 @@ export const FAVORITES_HTML = `
 
     #left-favorites-panel {
       flex: 10 !important;
+    }
 
-      >div:first-of-type {
-        margin-bottom: 5px;
+    #left-favorites-panel-top-row {
+      margin-bottom: 5px;
 
-        >label {
-          align-content: center;
+      >label {
+        align-content: center;
+        margin-right: 5px;
+        margin-top: 4px;
+      }
+
+      >button {
+        height: 35px;
+        border: none;
+        border-radius: 4px;
+
+        &:hover {
+          filter: brightness(140%);
+        }
+
+        &:not(:last-of-type) {
           margin-right: 5px;
-          margin-top: 4px;
         }
+      }
 
-        >button {
-          height: 35px;
-          border: none;
-          border-radius: 4px;
-
-          &:hover {
-            filter: brightness(140%);
-          }
-        }
-
-        >button[disabled] {
-          filter: none !important;
-          cursor: wait !important;
-        }
+      >button[disabled] {
+        filter: none !important;
+        cursor: wait !important;
       }
     }
 
@@ -776,17 +780,17 @@ export const FAVORITES_HTML = `
 
 
     #help-links-container {
-      /* >a:not(:last-child)::after {
+      >a:not(:last-child)::after {
         content: " |";
-      } */
-      display: flex;
+      }
+      /* display: flex;
       flex-direction: column;
 
       >a {
         font-size: x-large;
       }
 
-      margin-top: 17px;
+      margin-top: 17px; */
     }
 
     #whats-new-link {
@@ -975,9 +979,6 @@ export const FAVORITES_HTML = `
       width: 5ch;
     }
 
-    #left-favorites-panel-top-row {
-      margin-top: 10px;
-    }
 
     #sort-container {
       position: relative;
@@ -1059,6 +1060,10 @@ export const FAVORITES_HTML = `
     #sorting-method-id {
       display: none;
     }
+
+    #favorites-search-box {
+      margin-top: 5px;
+    }
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
@@ -1067,8 +1072,8 @@ export const FAVORITES_HTML = `
         <label id="match-count-label"></label>
         <label id="favorites-load-status-label"></label>
       </span>
-      <span id="favorites-pagination-placeholder"></span>
       <div id="left-favorites-panel-top-row">
+        <span id="favorites-pagination-placeholder"></span>
       </div>
       <div id="left-favorites-panel-bottom-row">
         <div id="bottom-panel-1">
@@ -1631,14 +1636,11 @@ export const GALLERY_HTML = `
 `;
 export const HELP_HTML = `
 <span id="help-links-container">
-  <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Controls</a>
-  <br>
+  <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
   <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
     target="_blank">Feedback</a>
-  <br>
   <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
     Issue</a>
-  <br>
   <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
     <div id="whats-new-container" class="light-green-gradient">
       <h4>1.19:</h4>

@@ -1,7 +1,7 @@
-import {FavoriteLayout} from "../../../../types/primitives/primitives";
-import {FavoritesBaseTiler} from "./favorites_base_tiler";
+import { BaseTiler } from "./favorites_base_tiler";
+import { FavoriteLayout } from "../../../../types/primitives/primitives";
 
-class FavoritesGridTiler extends FavoritesBaseTiler {
+class GridTiler extends BaseTiler {
   public className: FavoriteLayout = "grid";
   public skeletonStyle: Record<string, string> = {
     "width": "100%"
@@ -10,4 +10,4 @@ class FavoritesGridTiler extends FavoritesBaseTiler {
   public onDeactivation(): void {}
 }
 
-export const GridTiler = new FavoritesGridTiler();
+export const FavoritesGridTiler = new GridTiler();

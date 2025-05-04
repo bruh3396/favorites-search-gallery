@@ -1,15 +1,16 @@
-import {ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation} from "../../../../utils/dom/dom";
-import {FavoriteLayout} from "../../../../types/primitives/primitives";
-import {FavoritesBaseTiler} from "./favorites_base_tiler";
-import {Preferences} from "../../../../store/preferences/preferences";
+import { ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../../utils/dom/dom";
+import { BaseTiler } from "./favorites_base_tiler";
+import { FAVORITES_CONTENT_CONTAINER } from "../../ui/structure/favorites_content_container";
+import { FavoriteLayout } from "../../../../types/primitives/primitives";
+import { Preferences } from "../../../../store/local_storage/preferences";
 
-class FavoritesColumnTiler extends FavoritesBaseTiler {
-  private columns: HTMLElement[];
-  private columnCount: number;
+class ColumnTiler extends BaseTiler {
   public className: FavoriteLayout = "column";
   public skeletonStyle: Record<string, string> = {
     "width": "100%"
   };
+  private columns: HTMLElement[];
+  private columnCount: number;
 
   constructor() {
     super();
@@ -17,12 +18,12 @@ class FavoritesColumnTiler extends FavoritesBaseTiler {
     this.columnCount = Preferences.columnCount.value;
   }
 
-  get inactive(): boolean {
-    return document.querySelector(".favorites-column") === null;
+  private get active(): boolean {
+    return FAVORITES_CONTENT_CONTAINER.className === this.className;
   }
 
-  get active(): boolean {
-    return !this.inactive;
+  private get inactive(): boolean {
+    return !this.active;
   }
 
   public tile(items: HTMLElement[]): void {
@@ -32,6 +33,50 @@ class FavoritesColumnTiler extends FavoritesBaseTiler {
     this.addItemsToColumns(items);
     this.addColumnsToContainer();
     this.updateGetAllThumbsImplementation();
+  }
+
+  public addItemsToTop(items: HTMLElement[]): void {
+    if (this.active) {
+      this.onDeactivation();
+    }
+    this.tile(items.concat(getAllThumbs()));
+  }
+
+  public addItemsToBottom(items: HTMLElement[]): void {
+    if (this.inactive) {
+      this.tile(items);
+      return;
+    }
+    this.addNewItemsToColumns(items);
+  }
+
+  public setColumnCount(columnCount: number): void {
+    super.setColumnCount(columnCount);
+
+    if (columnCount === this.columnCount) {
+      return;
+    }
+
+    if (this.inactive) {
+      this.columnCount = columnCount;
+      return;
+    }
+    const items = this.getAllItems();
+
+    this.columnCount = columnCount;
+    this.tile(items);
+  }
+
+  public onActivation(): void {
+    this.tile(getAllThumbs());
+  }
+
+  public onDeactivation(): void {
+    const items = this.getAllItems();
+
+    this.container.innerHTML = "";
+    super.tile(items);
+    resetGetAllThumbsImplementation();
   }
 
   private createColumns(): void {
@@ -69,34 +114,6 @@ class FavoritesColumnTiler extends FavoritesBaseTiler {
       this.container.appendChild(column);
     }
   }
-  public setColumnCount(columnCount: number): void {
-    super.setColumnCount(columnCount);
-
-    if (columnCount === this.columnCount) {
-      return;
-    }
-
-    if (this.inactive) {
-      this.columnCount = columnCount;
-      return;
-    }
-    const items = this.getAllItems();
-
-    this.columnCount = columnCount;
-    this.tile(items);
-  }
-
-  public onActivation(): void {
-    this.tile(getAllThumbs());
-  }
-
-  public onDeactivation(): void {
-    const items = this.getAllItems();
-
-    this.container.innerHTML = "";
-    super.tile(items);
-    resetGetAllThumbsImplementation();
-  }
 
   private getAllItems(): HTMLElement[] {
     const itemCount = Array.from(document.querySelectorAll(ITEM_SELECTOR)).length;
@@ -119,21 +136,6 @@ class FavoritesColumnTiler extends FavoritesBaseTiler {
     changeGetAllThumbsImplementation(this.getAllItems.bind(this));
   }
 
-  public addItemsToTop(items: HTMLElement[]): void {
-    if (this.active) {
-      this.onDeactivation();
-    }
-    this.tile(items.concat(getAllThumbs()));
-  }
-
-  public addItemsToBottom(items: HTMLElement[]): void {
-    if (this.inactive) {
-      this.tile(items);
-      return;
-    }
-    this.addNewItemsToColumns(items);
-  }
-
   private addNewItemsToColumns(items: HTMLElement[]): void {
     const columnIndexOffset = this.getIndexOfNextAvailableColumn();
 
@@ -150,4 +152,4 @@ class FavoritesColumnTiler extends FavoritesBaseTiler {
   }
 }
 
-export const ColumnTiler = new FavoritesColumnTiler();
+export const FavoritesColumnTiler = new ColumnTiler();

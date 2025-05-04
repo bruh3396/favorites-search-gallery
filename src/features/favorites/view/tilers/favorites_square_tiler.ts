@@ -1,7 +1,7 @@
-import {FavoriteLayout} from "../../../../types/primitives/primitives";
-import {FavoritesBaseTiler} from "./favorites_base_tiler";
+import { BaseTiler } from "./favorites_base_tiler";
+import { FavoriteLayout } from "../../../../types/primitives/primitives";
 
-class FavoritesSquareTiler extends FavoritesBaseTiler {
+class SquareTiler extends BaseTiler {
   public className: FavoriteLayout = "square";
   public skeletonStyle: Record<string, string> = {
     "width": "100%",
@@ -12,4 +12,4 @@ class FavoritesSquareTiler extends FavoritesBaseTiler {
   public onDeactivation(): void {}
 }
 
-export const SquareTiler = new FavoritesSquareTiler();
+export const FavoritesSquareTiler = new SquareTiler();

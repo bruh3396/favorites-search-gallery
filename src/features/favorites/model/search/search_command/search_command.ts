@@ -1,75 +1,87 @@
-import {createSearchTagGroup, sortSearchTagGroup} from "./search_command_utils";
-import {extractTagGroups, isEmptyString} from "../../../../../utils/primitive/string";
-import {SearchTag} from "../search_tags/search_tag";
-import {Searchable} from "../../../types/favorite/favorite_interfaces";
-import {WildcardSearchTag} from "../search_tags/wildcard_search_tag";
-
-type SearchCommandMetadata = {
-  wildcardTags: WildcardSearchTag[];
-  normalTags: SearchTag[];
-  hasWildcardTag: boolean;
-  hasNormalTag: boolean;
-  hasOrGroup: boolean;
-}
+import { createSearchTagGroup, sortSearchTagGroup } from "./search_command_utils";
+import { extractTagGroups, isEmptyString } from "../../../../../utils/primitive/string";
+import { MetadataSearchTag } from "../search_tags/metadata_search_tag";
+import { SearchCommandMetadata } from "../../../types/metadata/search_command_metadata";
+import { SearchTag } from "../search_tags/search_tag";
+import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
 
 export class SearchCommand<T extends Searchable> {
   public orGroups: SearchTag[][] = [];
   public remainingTags: SearchTag[] = [];
   public readonly isEmpty: boolean;
-  public readonly query;
-
-  get negatedTags(): Set<string> {
-    return new Set(this.remainingTags.filter(tag => tag.negated).map(tag => tag.value));
-  }
-
-  get nonNegatedTags(): string[] {
-    return this.remainingTags.filter(tag => !tag.negated).map(tag => tag.value);
-  }
-
-  get metadata(): SearchCommandMetadata {
-    const normalTags: SearchTag[] = [];
-    const wildcardTags: WildcardSearchTag[] = [];
-
-    for (const tag of this.remainingTags) {
-      if (tag instanceof WildcardSearchTag) {
-        wildcardTags.push(tag);
-      } else if (!tag.negated) {
-        normalTags.push(tag);
-      }
-    }
-    return {
-      wildcardTags,
-      normalTags,
-      hasWildcardTag: wildcardTags.length > 0,
-      hasNormalTag: normalTags.length > 0,
-      hasOrGroup: this.orGroups.length > 0
-    };
-  }
-
-  // get tagGroups(): { orGroups: SearchTag[][]; remainingTags: SearchTag[] } {
-  //   return {
-  //     orGroups: this.orGroups,
-  //     remainingTags: this.remainingTags
-  //   };
-  // }
+  public details: SearchCommandMetadata;
+  public query;
 
   constructor(searchQuery: string) {
     this.query = searchQuery;
     this.isEmpty = isEmptyString(searchQuery);
+    this.details = this.getSearchCommandMetadata();
 
     if (this.isEmpty) {
       return;
     }
-    const {orGroups, remainingTags} = extractTagGroups(searchQuery);
+    const { orGroups, remainingTags } = extractTagGroups(searchQuery);
 
     this.orGroups = orGroups.map(orGroup => createSearchTagGroup(orGroup));
     this.remainingTags = createSearchTagGroup(remainingTags);
     this.simplifyOrGroupsWithOnlyOneTag();
     this.sortOrGroupsByLength();
+    this.details = this.getSearchCommandMetadata();
+  }
+
+  public get negatedTags(): Set<string> {
+    return new Set(this.remainingTags.filter(tag => tag.negated).map(tag => tag.value));
+  }
+
+  public get nonNegatedTags(): string[] {
+    return this.remainingTags.filter(tag => !tag.negated).map(tag => tag.value);
+  }
+
+  public get tagGroups(): { orGroups: SearchTag[][]; remainingTags: SearchTag[] } {
+    return {
+      orGroups: this.orGroups,
+      remainingTags: this.remainingTags
+    };
   }
 
   public getSearchResults(items: T[]): T[] {
     return this.isEmpty ? items : items.filter(item => this.matches(item));
+  }
+
+  private getSearchCommandMetadata(): SearchCommandMetadata {
+    const normalTags: SearchTag[] = [];
+    const wildcardTags: WildcardSearchTag[] = [];
+    const metadataTags: MetadataSearchTag[] = [];
+
+    for (const tag of this.remainingTags) {
+      if (tag instanceof WildcardSearchTag) {
+        wildcardTags.push(tag);
+      } else if (tag instanceof MetadataSearchTag) {
+        metadataTags.push(tag);
+      } else if (!tag.negated) {
+        normalTags.push(tag);
+      }
+    }
+
+    for (const orGroup of this.orGroups) {
+      for (const tag of orGroup) {
+        if (tag instanceof WildcardSearchTag) {
+          wildcardTags.push(tag);
+        } else if (tag instanceof MetadataSearchTag) {
+          metadataTags.push(tag);
+        }
+      }
+    }
+    return {
+      normalTags,
+      wildcardTags,
+      metadataTags,
+      hasNormalTag: normalTags.length > 0,
+      hasWildcardTag: wildcardTags.length > 0,
+      hasMetadataTag: metadataTags.length > 0,
+      hasOrGroup: this.orGroups.length > 0
+    };
   }
 
   private matches(item: Searchable): boolean {

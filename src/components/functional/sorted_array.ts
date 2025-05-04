@@ -1,7 +1,11 @@
 /* eslint-disable no-bitwise */
 export class SortedArray<T extends | string | number> {
   private array: T[] = [];
-  public isSorted: boolean = true;
+  private isSorted: boolean = true;
+
+  public get length(): number {
+    return this.array.length;
+  }
 
   public toArray(): T[] {
     if (this.isSorted) {
@@ -9,10 +13,6 @@ export class SortedArray<T extends | string | number> {
     }
     this.isSorted = true;
     return this.sort();
-  }
-
-  public get length(): number {
-    return this.array.length;
   }
 
   public insert(value: T): void {

@@ -11,7 +11,7 @@ export function getCookie(key: string, defaultValue: string): string {
 }
 
 export function setCookie(key: string, value: string): void {
-  let cookieString = `${key}=${value || ""}`;
+  let cookieString = `${key}=${value ?? ""}`;
   const expirationDate = new Date();
 
   expirationDate.setFullYear(expirationDate.getFullYear() + 1);

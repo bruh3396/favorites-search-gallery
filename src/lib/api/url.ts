@@ -1,5 +1,5 @@
-import {ON_MOBILE_DEVICE} from "../functional/flags";
-import {getFavoritesPageId} from "../../utils/misc/metadata";
+import { ON_MOBILE_DEVICE } from "../globals/flags";
+import { getFavoritesPageId } from "../../utils/misc/favorites_page_metadata";
 
 const POST_PAGE_URL = "https://rule34.xxx/index.php?page=post&s=view&id=";
 const SEARCH_PAGE_URL = "https://rule34.xxx/index.php?page=post&s=list&tags=";

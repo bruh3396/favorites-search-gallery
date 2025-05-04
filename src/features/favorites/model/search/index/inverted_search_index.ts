@@ -1,38 +1,38 @@
-import {ExpandedSearchCommand} from "../search_command/expanded_search_command";
-import {SearchCommand} from "../search_command/search_command";
-import {SearchTag} from "../search_tags/search_tag";
-import {Searchable} from "../../../types/favorite/favorite_interfaces";
-import {SortedArray} from "../../../../../components/functional/sorted_array";
-import {intersection} from "../../../../../utils/collection/set";
+import { ExpandedSearchCommand } from "../search_command/expanded_search_command";
+import { SearchCommand } from "../search_command/search_command";
+import { SearchTag } from "../search_tags/search_tag";
+import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { SortedArray } from "../../../../../components/functional/sorted_array";
+import { intersection } from "../../../../../utils/collection/set";
 
 const MIN_NORMAL_TAG_EXPAND_THRESHOLD = 5000;
 
 export class InvertedSearchIndex<T extends Searchable> {
-  private readonly indexedTagMap: Map<string, Set<T>>;
+  private readonly tagItemMap: Map<string, Set<T>>;
   private readonly allItems: Set<T>;
   private readonly allSortedTags: SortedArray<string>;
-  public sortOnAdd: boolean;
+  private sortTagsOnAdd: boolean;
+
+  constructor() {
+    this.tagItemMap = new Map<string, Set<T>>();
+    this.allItems = new Set<T>();
+    this.allSortedTags = new SortedArray<string>();
+    this.sortTagsOnAdd = false;
+  }
 
   public get allTags(): string[] {
     return this.allSortedTags.toArray();
-  }
-
-  constructor() {
-    this.indexedTagMap = new Map<string, Set<T>>();
-    this.allItems = new Set<T>();
-    this.allSortedTags = new SortedArray<string>();
-    this.sortOnAdd = false;
   }
 
   public add(item: T): void {
     this.allItems.add(item);
 
     for (const tag of item.tags) {
-      let indexedItems = this.indexedTagMap.get(tag);
+      let indexedItems = this.tagItemMap.get(tag);
 
       if (indexedItems === undefined) {
         indexedItems = new Set<T>();
-        this.indexedTagMap.set(tag, indexedItems);
+        this.tagItemMap.set(tag, indexedItems);
         this.addTag(tag);
       }
       indexedItems.add(item);
@@ -40,11 +40,15 @@ export class InvertedSearchIndex<T extends Searchable> {
   }
 
   public addTag(tag: string): void {
-    if (this.sortOnAdd) {
+    if (this.sortTagsOnAdd) {
       this.allSortedTags.insert(tag);
     } else {
       this.allSortedTags.push(tag);
     }
+  }
+
+  public keepIndexedTagsSorted(value: boolean): void {
+    this.sortTagsOnAdd = value;
   }
 
   public getSearchResults(searchCommand: SearchCommand<T>, items: T[]): T[] {
@@ -54,8 +58,32 @@ export class InvertedSearchIndex<T extends Searchable> {
     return searchCommand.getSearchResults(items);
   }
 
-  private shouldUseIndex(command: SearchCommand<T>): boolean {
-    const metadata = command.metadata;
+  public getSearchResultsUsingIndex(searchQuery: string, itemsToSearch: T[]): T[] {
+    const expandedCommand = new ExpandedSearchCommand(searchQuery, this.allSortedTags.toArray());
+
+    if (expandedCommand.isEmpty) {
+      return itemsToSearch;
+    }
+
+    if (expandedCommand.hasNoMatches) {
+      return [];
+    }
+    const negatedItems = this.getNegatedItems(expandedCommand);
+    let resultItems = this.filterByNonNegatedTags(this.allItems, expandedCommand);
+
+    if (resultItems.size === 0) {
+      return [];
+    }
+    resultItems = this.filterByOrGroups(resultItems, expandedCommand);
+
+    if (resultItems.size === 0) {
+      return [];
+    }
+    return itemsToSearch.filter(item => resultItems.has(item) && !negatedItems.has(item));
+  }
+
+  private shouldUseIndex(searchCommand: SearchCommand<T>): boolean {
+    const metadata = searchCommand.details;
 
     if (metadata.wildcardTags.length < 5) {
       return true;
@@ -71,7 +99,7 @@ export class InvertedSearchIndex<T extends Searchable> {
     let min = Number.MAX_VALUE;
 
     for (const tag of tags) {
-      const itemsWithTag = this.indexedTagMap.get(tag.value);
+      const itemsWithTag = this.tagItemMap.get(tag.value);
 
       if (itemsWithTag === undefined) {
         return 0;
@@ -85,35 +113,11 @@ export class InvertedSearchIndex<T extends Searchable> {
     return min;
   }
 
-  public getSearchResultsUsingIndex(searchQuery: string, itemsToSearch: T[]): T[] {
-    const expandedCommand = new ExpandedSearchCommand(searchQuery, this.allSortedTags.toArray());
-
-    if (expandedCommand.isEmpty) {
-      return itemsToSearch;
-    }
-
-    if (expandedCommand.hasNoMatches) {
-      return [];
-    }
-    const negatedItems = this.getNegatedItems(expandedCommand);
-    let result = this.filterByNonNegatedTags(this.allItems, expandedCommand);
-
-    if (result.size === 0) {
-      return [];
-    }
-    result = this.filterByOrGroups(result, expandedCommand);
-
-    if (result.size === 0) {
-      return [];
-    }
-    return itemsToSearch.filter(item => result.has(item) && !negatedItems.has(item));
-  }
-
   private getNegatedItems(command: ExpandedSearchCommand<Searchable>): Set<T> {
     const negatedItems = new Set<T>();
 
     for (const negatedTag of command.negatedTags) {
-      const itemsWithNegatedTag = this.indexedTagMap.get(negatedTag);
+      const itemsWithNegatedTag = this.tagItemMap.get(negatedTag);
 
       if (itemsWithNegatedTag === undefined) {
         continue;
@@ -128,7 +132,7 @@ export class InvertedSearchIndex<T extends Searchable> {
 
   private filterByNonNegatedTags(currentResult: Set<T>, command: ExpandedSearchCommand<Searchable>): Set<T> {
     let result = currentResult;
-    const itemSets = command.nonNegatedTags.map(tag => this.indexedTagMap.get(tag));
+    const itemSets = command.nonNegatedTags.map(tag => this.tagItemMap.get(tag));
 
     if (itemSets.some(set => set === undefined)) {
       return new Set<T>();
@@ -163,7 +167,7 @@ export class InvertedSearchIndex<T extends Searchable> {
     const allItemsInOrGroup = new Set<T>();
 
     for (const tag of orGroup) {
-      const itemsWithTag = this.indexedTagMap.get(tag.value);
+      const itemsWithTag = this.tagItemMap.get(tag.value);
 
       if (itemsWithTag === undefined) {
         continue;

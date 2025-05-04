@@ -1,9 +1,9 @@
 import * as API from "../../../../lib/api/api";
 import * as FavoritesFetchQueue from "./favorites_page_fetch_queue";
-import {FavoriteItem} from "../../types/favorite/favorite_item";
-import {FavoritesPageRequest} from "./favorites_page_request";
-import {extractFavorites} from "./favorites_extractor";
-import {sleep} from "../../../../utils/misc/generic";
+import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { FavoritesPageRequest } from "./favorites_page_request";
+import { extractFavorites } from "./favorites_extractor";
+import { sleep } from "../../../../utils/misc/async";
 
 const PENDING_PAGE_NUMBERS = new Set<number>();
 const FAILED_REQUESTS: FavoritesPageRequest[] = [];
@@ -36,7 +36,7 @@ function someRequestsAreIncomplete(): boolean {
 }
 
 function oldestFailedFetchRequest(): FavoritesPageRequest | null {
-  return FAILED_REQUESTS.shift() || null;
+  return FAILED_REQUESTS.shift() ?? null;
 }
 
 function getNewFetchRequest(): FavoritesPageRequest {

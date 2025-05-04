@@ -1,6 +1,6 @@
-import {Post} from "../../types/api/post";
+import { Post } from "../../types/api/post";
 
-class ApiParseError extends Error { }
+export class ApiParseError extends Error { }
 
 const PARSER = new DOMParser();
 
@@ -44,7 +44,7 @@ function createPostFromAPIElement(element: Element): Post {
   };
 }
 
-export function extractPost(html: string): Post {
+export function extractPostFromAPI(html: string): Post {
   const post = PARSER.parseFromString(html, "text/html").querySelector("post");
 
   if (post === null) {

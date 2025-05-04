@@ -1,11 +1,11 @@
-import {SearchCommand} from "./search_command";
-import {SearchTag} from "../search_tags/search_tag";
-import {Searchable} from "../../../types/favorite/favorite_interfaces";
-import {WildcardSearchTag} from "../search_tags/wildcard_search_tag";
+import { SearchCommand } from "./search_command";
+import { SearchTag } from "../search_tags/search_tag";
+import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
 
 export class ExpandedSearchCommand<T extends Searchable> extends SearchCommand<T> {
-  private readonly indexedTags: string[];
   public hasNoMatches: boolean;
+  private readonly indexedTags: string[];
 
   constructor(searchQuery: string, indexedTags: string[]) {
     super(searchQuery);

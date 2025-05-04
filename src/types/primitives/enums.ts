@@ -9,3 +9,9 @@ export enum ClickCodes {
   MIDDLE = 1,
   RIGHT = 2
 }
+
+export enum DiscreteRating {
+  EXPLICIT = 4,
+  QUESTIONABLE = 2,
+  SAFE = 1,
+}

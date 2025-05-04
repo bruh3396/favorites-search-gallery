@@ -1,20 +1,20 @@
-import {ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE} from "../../../../lib/functional/flags";
-import {ColumnTiler} from "./favorites_column_tiler";
-import {FAVORITES_CONTENT_CONTAINER} from "../../setup/page_builder/favorites_content_container";
-import {FavoriteLayout} from "../../../../types/primitives/primitives";
-import {FavoritesSettings} from "../../../../config/favorites_settings";
-import {GridTiler} from "./favorites_grid_tiler";
-import {Preferences} from "../../../../store/preferences/preferences";
-import {RowTiler} from "./favorites_row_tiler";
-import {SquareTiler} from "./favorites_square_tiler";
-import {Tiler} from "./favorites_tiler_interface";
-import {insertStyleHTML} from "../../../../utils/dom/style";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/globals/flags";
+import { FAVORITES_CONTENT_CONTAINER } from "../../ui/structure/favorites_content_container";
+import { FavoriteLayout } from "../../../../types/primitives/primitives";
+import { FavoritesColumnTiler } from "./favorites_column_tiler";
+import { FavoritesGridTiler } from "./favorites_grid_tiler";
+import { FavoritesRowTiler } from "./favorites_row_tiler";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { FavoritesSquareTiler } from "./favorites_square_tiler";
+import { Preferences } from "../../../../store/local_storage/preferences";
+import { Tiler } from "./favorites_tiler_interface";
+import { insertStyleHTML } from "../../../../utils/dom/style";
 
-const TILERS = [GridTiler, RowTiler, SquareTiler, ColumnTiler];
-let currentLayout: FavoriteLayout = Preferences.layout.value;
+const TILERS = [FavoritesGridTiler, FavoritesRowTiler, FavoritesSquareTiler, FavoritesColumnTiler];
+let currentLayout: FavoriteLayout = Preferences.favoritesLayout.value;
 
 export function getCurrentTiler(): Tiler {
-  return TILERS.find(tiler => tiler.className === currentLayout) || RowTiler;
+  return TILERS.find(tiler => tiler.className === currentLayout) || FavoritesRowTiler;
 }
 
 export function tile(favorites: HTMLElement[]): void {

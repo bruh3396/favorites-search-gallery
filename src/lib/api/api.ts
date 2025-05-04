@@ -1,7 +1,7 @@
 import * as FSG_URL from "./url";
 import {Post} from "../../types/api/post";
 import {extractFavoritesCount} from "./profile_page_parser";
-import {extractPost} from "./post_api_parser";
+import {extractPostFromAPI} from "./post_api_parser";
 import {parsePostFromPostPage as extractPostFromPostPage} from "./post_page_parser";
 
 async function getHTML(url: string): Promise<string> {
@@ -13,8 +13,8 @@ async function getHTML(url: string): Promise<string> {
   return response.text();
 }
 
-export async function fetchPost(id: string): Promise<Post> {
-  return extractPost(await getHTML(FSG_URL.createAPIURL("post", id)));
+export async function fetchPostFromAPI(id: string): Promise<Post> {
+  return extractPostFromAPI(await getHTML(FSG_URL.createAPIURL("post", id)));
 }
 
 export async function fetchPostFromPostPage(id: string): Promise<Post> {
@@ -31,14 +31,9 @@ export function addFavorite(id: string): void {
 }
 
 export function removeFavorite(id: string): void {
-  fetch(FSG_URL.createRemoveFavoriteURL(id), {
-    method: "GET",
-    redirect: "manual"
-  });
+  fetch(FSG_URL.createRemoveFavoriteURL(id), {method: "GET", redirect: "manual"});
 }
 
 export function getFavoritesCount(): Promise<number | null> {
-  return getHTML(FSG_URL.createProfilePageURL())
-    .then(extractFavoritesCount)
-    .catch(null);
+  return getHTML(FSG_URL.createProfilePageURL()).then(extractFavoritesCount).catch(null);
 }

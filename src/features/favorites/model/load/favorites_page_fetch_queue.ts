@@ -1,6 +1,6 @@
-import {DO_NOTHING} from "../../../../config/constants";
-import {FavoriteItem} from "../../types/favorite/favorite_item";
-import {FavoritesPageRequest} from "./favorites_page_request";
+import { DO_NOTHING } from "../../../../config/constants";
+import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { FavoritesPageRequest } from "./favorites_page_request";
 
 const queue: FavoritesPageRequest[] = [];
 let mostRecentlyDequeuedPageNumber = -1;
@@ -46,7 +46,7 @@ function drain(): void {
 function dequeue(): void {
   mostRecentlyDequeuedPageNumber += 1;
   const request = queue.shift();
-  const favorites = request?.favorites || [];
+  const favorites = request?.favorites ?? [];
 
   onDequeue(favorites);
 }

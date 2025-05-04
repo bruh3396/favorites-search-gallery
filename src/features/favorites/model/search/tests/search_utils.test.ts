@@ -1,7 +1,7 @@
-import {createSearchTag, createSearchTagGroup, isWildcardSearchTag, sortSearchTagGroup} from "../search_command/search_command_utils";
-import {describe, expect, test} from "vitest";
-import {SearchTag} from "../search_tags/search_tag";
-import {WildcardSearchTag} from "../search_tags/wildcard_search_tag";
+import { createSearchTag, createSearchTagGroup, isMetadataSearchTag, isWildcardSearchTag, sortSearchTagGroup } from "../search_command/search_command_utils";
+import { describe, expect, test } from "vitest";
+import { SearchTag } from "../search_tags/search_tag";
+import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
 
 const NORMAL_SEARCH_TAGS = [
   "",
@@ -27,6 +27,20 @@ describe("utils", () => {
   test("isWildcardSearchTag", () => {
     expect(NORMAL_SEARCH_TAGS.every(tag => !isWildcardSearchTag(tag))).toBe(true);
     expect(WILDCARD_SEARCH_TAGS.every(tag => isWildcardSearchTag(tag))).toBe(true);
+  });
+
+  test("isMetadataSearchTag", () => {
+    expect(NORMAL_SEARCH_TAGS.every(tag => !isMetadataSearchTag(tag))).toBe(true);
+    expect(WILDCARD_SEARCH_TAGS.every(tag => !isMetadataSearchTag(tag))).toBe(true);
+
+    for (const metric of ["width", "height", "id", "score"]) {
+      for (const comparator of [":", ":<", ":>"]) {
+        expect(isMetadataSearchTag(`${metric}${comparator}0`)).toBe(true);
+        expect(isMetadataSearchTag(`${metric}${comparator}${metric}`)).toBe(true);
+        expect(isMetadataSearchTag(`apple${comparator}${metric}`)).toBe(false);
+        expect(isMetadataSearchTag(`${metric}${comparator}banana`)).toBe(false);
+      }
+    }
   });
 
   test("createSearchTag", () => {

@@ -1,11 +1,11 @@
-import {getAllThumbs, waitForAllThumbnailsToLoad} from "../../../../utils/dom/dom";
-import {FavoriteLayout} from "../../../../types/primitives/primitives";
-import {FavoritesBaseTiler} from "./favorites_base_tiler";
-import {FavoritesSettings} from "../../../../config/favorites_settings";
-import {insertStyleHTML} from "../../../../utils/dom/style";
-import {mapRange} from "../../../../utils/primitive/number";
+import { getAllThumbs, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
+import { BaseTiler } from "./favorites_base_tiler";
+import { FavoriteLayout } from "../../../../types/primitives/primitives";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { insertStyleHTML } from "../../../../utils/dom/style";
+import { mapRange } from "../../../../utils/primitive/number";
 
-class FavoritesRowTiler extends FavoritesBaseTiler {
+class RowTiler extends BaseTiler {
   public className: FavoriteLayout = "row";
   public skeletonStyle: Record<string, string> = { };
 
@@ -81,4 +81,4 @@ class FavoritesRowTiler extends FavoritesBaseTiler {
   }
 }
 
-export const RowTiler = new FavoritesRowTiler();
+export const FavoritesRowTiler = new RowTiler();

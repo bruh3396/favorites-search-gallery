@@ -8,21 +8,21 @@ export class FavoritesPageRequest {
   public favorites: FavoriteItem[] = [];
   private retryCount: number;
 
-  get url(): string {
-    return createFavoritesPageURL(this.pageNumber * 50);
-  }
-
-  get fetchDelay(): number {
-    return (7 ** (this.retryCount)) + FAVORITES_PAGE_FETCH_DELAY;
-  }
-
-  get realPageNumber(): number {
-    return this.pageNumber * 50;
-  }
-
   constructor(pageNumber: number) {
     this.pageNumber = pageNumber;
     this.retryCount = 0;
+  }
+
+  public get url(): string {
+    return createFavoritesPageURL(this.pageNumber * 50);
+  }
+
+  public get fetchDelay(): number {
+    return (7 ** (this.retryCount)) + FAVORITES_PAGE_FETCH_DELAY;
+  }
+
+  public get realPageNumber(): number {
+    return this.pageNumber * 50;
   }
 
   public retry(): void {

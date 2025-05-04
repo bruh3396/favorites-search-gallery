@@ -1,17 +1,19 @@
-import * as FavoritesFilter from "./search/components/favorites_filter";
+import * as FavoritesFilter from "./search/components/favorites_search_filter";
 import * as FavoritesLoader from "./load/favorites_loader";
 import * as FavoritesPaginator from "./presentation/favorites_paginator";
 import * as FavoritesSorter from "./search/components/favorites_sorter";
 import * as InfiniteScrollFeeder from "./presentation/favorites_infinite_scroll_feeder";
-import {NavigationKey, Rating, SortingMethod} from "../../../types/primitives/primitives";
-import {FAVORITES_SEARCH_INDEX} from "./search/index/favorites_search_index";
-import {FavoriteItem} from "../types/favorite/favorite_item";
-import {FavoritesPaginationParameters} from "../types/favorite_pagination_parameters";
-import {Preferences} from "../../../store/preferences/preferences";
-import {shuffleArray} from "../../../utils/collection/array";
+import { NavigationKey, Rating, SortingMethod } from "../../../types/primitives/primitives";
+import { FAVORITES_CONTENT_CONTAINER } from "../ui/structure/favorites_content_container";
+import { FAVORITES_SEARCH_INDEX } from "./search/index/favorites_search_index";
+import { FavoriteItem } from "../types/favorite/favorite_item";
+import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
+import { ITEM_SELECTOR } from "../../../utils/dom/dom";
+import { Preferences } from "../../../store/local_storage/preferences";
+import { shuffleArray } from "../../../utils/collection/array";
 
 let latestSearchResults: FavoriteItem[] = [];
-let infiniteScroll = Preferences.infiniteScroll.value;
+let infiniteScroll = Preferences.infiniteScrollEnabled.value;
 
 export interface NewFavorites {
   newFavorites: FavoriteItem[]
@@ -32,8 +34,8 @@ export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<voi
   return FavoritesLoader.fetchAllFavorites(onFavoritesFound);
 }
 
-export async function findNewFavoritesOnReload(): Promise<NewFavorites> {
-  const newFavorites = await FavoritesLoader.fetchFavoritesOnReload();
+export async function fetchNewFavoritesOnReload(): Promise<NewFavorites> {
+  const newFavorites = await FavoritesLoader.fetchNewFavoritesOnReload();
   const newSearchResults = FavoritesFilter.filter(newFavorites);
 
   latestSearchResults = newSearchResults.concat(latestSearchResults);
@@ -148,11 +150,7 @@ export function changeResultsPerPage(resultsPerPage: number): void {
   FavoritesPaginator.changeResultsPerPage(resultsPerPage);
 }
 
-export function toggleInfiniteScroll(value: boolean): void {
-  infiniteScroll = value;
-}
-
-export function getMoreResults(): FavoriteItem[] {
+export function getMoreResults(): HTMLElement[] {
   return InfiniteScrollFeeder.getMoreResults(latestSearchResults);
 }
 
@@ -176,6 +174,14 @@ export function usingInfiniteScroll(): boolean {
   return infiniteScroll;
 }
 
-export function sortSearchIndexOnAdd(): void {
-  FAVORITES_SEARCH_INDEX.sortOnAdd = true;
+export function toggleInfiniteScroll(value: boolean): void {
+  infiniteScroll = value;
+}
+
+export function keepIndexedTagsSorted(): void {
+  FAVORITES_SEARCH_INDEX.keepIndexedTagsSorted(true);
+}
+
+export function noFavoritesAreVisible(): boolean {
+  return FAVORITES_CONTENT_CONTAINER.querySelector(ITEM_SELECTOR) === null;
 }

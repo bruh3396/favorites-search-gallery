@@ -1,11 +1,11 @@
-import {FavoriteItem} from "../../types/favorite/favorite_item";
+import { FavoriteItem } from "../../types/favorite/favorite_item";
 
-export function getMoreResults(allFavorites: FavoriteItem[]): FavoriteItem[] {
+export function getMoreResults(allFavorites: FavoriteItem[]): HTMLElement[] {
   const batch = [];
 
   for (const favorite of allFavorites) {
     if (document.getElementById(favorite.id) === null) {
-      batch.push(favorite);
+      batch.push(favorite.root);
     }
 
     if (batch.length >= 25) {

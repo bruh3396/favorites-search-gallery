@@ -1,5 +1,5 @@
-import {DO_NOTHING} from "../../config/constants";
-import {Timeout} from "../../types/primitives/primitives";
+import { DO_NOTHING } from "../../config/constants";
+import { Timeout } from "../../types/primitives/primitives";
 
 export class Timer {
   private readonly waitTime: number;

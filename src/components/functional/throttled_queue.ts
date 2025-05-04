@@ -1,4 +1,4 @@
-import {sleep} from "../../utils/misc/generic";
+import { sleep } from "../../utils/misc/async";
 
 export class ThrottledQueue {
   private queue: (() => void)[];

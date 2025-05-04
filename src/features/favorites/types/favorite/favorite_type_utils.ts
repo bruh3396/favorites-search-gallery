@@ -1,10 +1,10 @@
-import {getIdFromThumb, getImageFromThumb} from "../../../../utils/dom/dom";
-import {FavoritesDatabaseRecord} from "../../../../types/primitives/composites";
-import {Post} from "../../../../types/api/post";
-import {decompressThumbSource} from "../../../../utils/image/image";
-import {removeExtraWhiteSpace} from "../../../../utils/primitive/string";
+import { getIdFromThumb, getImageFromThumb } from "../../../../utils/dom/dom";
+import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
+import { Post } from "../../../../types/api/post";
+import { decompressThumbSource } from "../../../../utils/image/image";
+import { removeExtraWhiteSpace } from "../../../../utils/primitive/string";
 
-function createEmptyPost(): Post {
+export function createEmptyPost(): Post {
   return {
     id: "",
     height: 0,
@@ -55,7 +55,7 @@ function createPostFromDatabaseRecord(record: FavoritesDatabaseRecord): Post {
   const post = createEmptyPost();
 
   post.id = record.id;
-  post.tags = record.tags;
+  post.tags = "";
   post.previewURL = decompressThumbSource(record.src);
   return post;
 }

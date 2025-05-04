@@ -1,24 +1,15 @@
-import {EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters} from "../types/favorite_pagination_parameters";
-import {Events} from "../../../lib/functional/events";
-import {FavoritesSettings} from "../../../config/favorites_settings";
-import {Preferences} from "../../../store/preferences/preferences";
-import {getNumbersAround} from "../../../utils/collection/array";
-import {insertStyleHTML} from "../../../utils/dom/style";
-import {isOnlyDigits} from "../../../utils/primitive/string";
+import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
+import { Events } from "../../../lib/globals/events";
+import { FavoritesSettings } from "../../../config/favorites_settings";
+import { Preferences } from "../../../store/local_storage/preferences";
+import { getNumbersAround } from "../../../utils/collection/array";
+import { insertStyleHTML } from "../../../utils/dom/style";
+import { isOnlyDigits } from "../../../utils/primitive/string";
 
 const CONTAINER = createContainer();
-const RANGE_INDICATOR = createRangeIndicator();
+const RANGE_INDICATOR = document.createElement("label");
 
-function createRangeIndicator(): HTMLElement {
-  const rangeIndicator = document.createElement("label");
-  const parent = document.getElementById("match-count-label");
-
-  if (parent !== null) {
-    parent.insertAdjacentElement("afterend", rangeIndicator);
-  }
-  rangeIndicator.id = "pagination-range-label";
-  return rangeIndicator;
-}
+RANGE_INDICATOR.id = "pagination-range-label";
 
 function createContainer(): HTMLSpanElement {
   const menu = document.createElement("span");
@@ -29,6 +20,11 @@ function createContainer(): HTMLSpanElement {
 
 function insert(): void {
   const placeToInsertMenu = document.getElementById("favorites-pagination-placeholder");
+  const matchCountLabel = document.getElementById("match-count-label");
+
+  if (matchCountLabel !== null) {
+    matchCountLabel.insertAdjacentElement("afterend", RANGE_INDICATOR);
+  }
 
   if (placeToInsertMenu !== null) {
     placeToInsertMenu.insertAdjacentElement("afterend", CONTAINER);
@@ -174,5 +170,5 @@ export function getContainer(): HTMLElement {
 export function setupFavoritesPaginationMenu(): void {
   insert();
   create(EMPTY_FAVORITES_PAGINATION_PARAMETERS);
-  toggle(!Preferences.infiniteScroll.value);
+  toggle(!Preferences.infiniteScrollEnabled.value);
 }

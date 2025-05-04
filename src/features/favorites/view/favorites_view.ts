@@ -2,16 +2,16 @@ import * as FavoritesPaginationMenu from "./favorites_pagination_menu";
 import * as FavoritesPreloader from "./favorites_thumb_preloader";
 import * as FavoritesStatus from "./favorites_status_bar";
 import * as FavoritesTiler from "./tilers/favorites_tiler";
-import {scrollToTop, waitForAllThumbnailsToLoad} from "../../../utils/dom/dom";
-import {toggleAddOrRemoveButtons, toggleDownloadButtons} from "./favorites_view_utils";
-import {Favorite} from "../types/favorite/favorite_interfaces";
-import {FavoriteItem} from "../types/favorite/favorite_item";
-import {FavoriteLayout} from "../../../types/primitives/primitives";
-import {FavoritesPaginationParameters} from "../types/favorite_pagination_parameters";
-import {Preferences} from "../../../store/preferences/preferences";
-import {USER_IS_ON_THEIR_OWN_FAVORITES_PAGE} from "../../../lib/functional/flags";
-import {collectAspectRatios} from "./aspect_ratios";
-import {sleep} from "../../../utils/misc/generic";
+import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons } from "./favorites_view_utils";
+import { Favorite } from "../types/favorite/favorite_interfaces";
+import { FavoriteItem } from "../types/favorite/favorite_item";
+import { FavoriteLayout } from "../../../types/primitives/primitives";
+import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
+import { Preferences } from "../../../store/local_storage/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/globals/flags";
+import { collectAspectRatios } from "./aspect_ratios";
+import { sleep } from "../../../utils/misc/async";
 
 export function showNotification(message: string): void {
   FavoritesStatus.setStatus(message);
@@ -104,8 +104,9 @@ export function setupFavoritesView(): void {
   FavoritesStatus.setupFavoritesStatus();
   FavoritesTiler.setupFavoritesTiler();
   FavoritesPaginationMenu.setupFavoritesPaginationMenu();
-  toggleAddOrRemoveButtons(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? Preferences.showRemoveFavoriteButtons.value : Preferences.showAddFavoriteButtons.value);
-  toggleDownloadButtons(Preferences.showDownloadButtons.value);
+  updateColumnCount(Preferences.columnCount.value);
+  toggleAddOrRemoveButtons(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? Preferences.removeButtonsVisible.value : Preferences.addButtonsVisible.value);
+  toggleDownloadButtons(Preferences.downloadButtonsVisible.value);
 }
 
 export async function preloadFavorites(favorites: FavoriteItem[]): Promise<void> {

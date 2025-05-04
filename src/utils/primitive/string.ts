@@ -1,5 +1,5 @@
-import {ContentType} from "../../types/primitives/primitives";
-import {Dimensions2D} from "../../types/primitives/composites";
+import { ContentType } from "../../types/primitives/primitives";
+import { Dimensions2D } from "../../types/primitives/composites";
 const DEFAULT_DIMENSIONS_2D: Dimensions2D = {width: 100, height: 100};
 const DIMENSIONS_2D_REGEX = /^(\d+)x(\d+)$/;
 const OR_GROUP_REGEX = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
@@ -94,4 +94,8 @@ export function convertToTagString(tagSet: Set<string>): string {
     return "";
   }
   return Array.from(tagSet).sort().join(" ");
+}
+
+export function capitalize(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }

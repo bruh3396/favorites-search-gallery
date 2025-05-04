@@ -1,13 +1,16 @@
-import {clearPost, createPostFromRawFavorite} from "./favorite_type_utils";
-import {FAVORITES_SEARCH_INDEX} from "../../model/search/index/favorites_search_index";
-import {Favorite} from "./favorite_interfaces";
-import {FavoriteHTMLElement} from "./favorite_element";
-import {FavoriteTags} from "./favorite_tags";
-import {FavoritesDatabaseRecord} from "../../../../types/primitives/composites";
-import {Post} from "../../../../types/api/post";
-import {compressThumbSource} from "../../../../utils/image/image";
-import {convertToTagString} from "../../../../utils/primitive/string";
-import {getIdFromThumb} from "../../../../utils/dom/dom";
+import { clearPost, createPostFromRawFavorite } from "./favorite_type_utils";
+import { FAVORITES_SEARCH_INDEX } from "../../model/search/index/favorites_search_index";
+import { Favorite } from "./favorite_interfaces";
+import { FavoriteHTMLElement } from "./favorite_element";
+import { FavoriteMetadata } from "../metadata/favorite_metadata";
+import { FavoriteTags } from "./favorite_tags";
+import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
+import { MetricMap } from "../../../../types/interfaces/interfaces";
+import { Post } from "../../../../types/api/post";
+import { Rating } from "../../../../types/primitives/primitives";
+import { compressThumbSource } from "../../../../utils/image/image";
+import { getIdFromThumb } from "../../../../utils/dom/dom";
+
 const ALL_FAVORITES = new Map<string, FavoriteItem>();
 
 export function getFavorite(id: string): FavoriteItem | undefined {
@@ -18,41 +21,61 @@ export function getAllFavorites(): FavoriteItem[] {
   return Array.from(ALL_FAVORITES.values());
 }
 
+export function addInstanceToAllFavorites(favorite: FavoriteItem): void {
+  if (!ALL_FAVORITES.has(favorite.id)) {
+    ALL_FAVORITES.set(favorite.id, favorite);
+    FAVORITES_SEARCH_INDEX.add(favorite);
+  }
+}
+
 export class FavoriteItem implements Favorite {
   public id: string;
-  public post: Post;
-  public element: FavoriteHTMLElement | null;
-  public favoriteTags: FavoriteTags;
+  private post: Post;
+  private element: FavoriteHTMLElement | null;
+  private favoriteTags: FavoriteTags;
+  private metadata: FavoriteMetadata;
 
-  get tags(): Set<string> {
+  constructor(object: HTMLElement | FavoritesDatabaseRecord) {
+    this.id = object instanceof HTMLElement ? getIdFromThumb(object) : object.id;
+    this.post = createPostFromRawFavorite(object);
+    this.element = null;
+    this.favoriteTags = new FavoriteTags(this.post, object);
+    this.metadata = new FavoriteMetadata(this.id, object);
+    addInstanceToAllFavorites(this);
+  }
+
+  public get tags(): Set<string> {
     return this.favoriteTags.tags;
   }
 
-  get root(): HTMLElement {
+  public get root(): HTMLElement {
     if (this.element === null) {
+      this.post.tags = this.favoriteTags.tagString;
       this.element = new FavoriteHTMLElement(this.post);
     }
     clearPost(this.post);
     return this.element.root;
   }
 
-  get thumbURL(): string {
+  public get thumbURL(): string {
     return this.element === null ? this.post.previewURL : this.element.thumbURL;
   }
 
-  get databaseRecord(): FavoritesDatabaseRecord {
+  public get metrics(): MetricMap {
+    return this.metadata.metrics;
+  }
+
+  public get databaseRecord(): FavoritesDatabaseRecord {
     return {
       id: this.id,
-      tags: convertToTagString(this.tags),
-      src: compressThumbSource(this.thumbURL)
+      tags: this.tags,
+      src: compressThumbSource(this.thumbURL),
+      metadata: this.metadata.databaseRecord
     };
   }
 
-  constructor(object: HTMLElement | FavoritesDatabaseRecord) {
-    this.id = object instanceof HTMLElement ? getIdFromThumb(object) : object.id;
-    this.post = createPostFromRawFavorite(object);
-    this.element = null;
-    this.favoriteTags = new FavoriteTags(this.post);
-    FAVORITES_SEARCH_INDEX.add(this);
+  public withinRating(rating: Rating): boolean {
+    // eslint-disable-next-line no-bitwise
+    return (this.metadata.rating & rating) > 0;
   }
 }

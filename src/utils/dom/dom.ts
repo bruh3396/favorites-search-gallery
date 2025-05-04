@@ -1,6 +1,6 @@
-import {ON_MOBILE_DEVICE, ON_SEARCH_PAGE} from "../../lib/functional/flags";
-import {Events} from "../../lib/functional/events";
-import {removeNonNumericCharacters} from "../primitive/string";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../lib/globals/flags";
+import { Events } from "../../lib/globals/events";
+import { removeNonNumericCharacters } from "../primitive/string";
 
 const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
 const FAVORITE_ITEM_CLASS_NAME = "favorite";
@@ -51,7 +51,7 @@ export function waitForDOMToLoad(): Promise<void> {
     return Promise.resolve();
   }
   return new Promise((resolve) => {
-    Events.global.domLoaded.on(() => {
+    Events.document.domLoaded.on(() => {
       resolve();
     }, {
       once: true
@@ -132,4 +132,8 @@ export function scrollToTop(): void {
 
 export function getItemCount(): number {
   return getAllThumbs().length;
+}
+
+export function hasTagName(element: HTMLElement | EventTarget, tagName: string): boolean {
+  return element instanceof HTMLElement && element.tagName !== undefined && element.tagName.toLowerCase() === tagName;
 }

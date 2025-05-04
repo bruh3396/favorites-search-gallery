@@ -1,14 +1,13 @@
 import * as API from "../../../../lib/api/api";
 import * as Icons from "../../../../assets/icons";
-import {GALLERY_DISABLED, ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE} from "../../../../lib/functional/flags";
-import {createObjectURLFromSvg, openPostPage} from "../../../../utils/dom/links";
-import {ClickCodes} from "../../../../types/primitives/enums";
-import {Events} from "../../../../lib/functional/events";
-import {FavoriteElement} from "./favorite_interfaces";
-import {ITEM_CLASS_NAME} from "../../../../utils/dom/dom";
-import {Post} from "../../../../types/api/post";
-import {download} from "../../../../lib/download/downloader";
-import {getContentType} from "../../../../utils/primitive/string";
+import { GALLERY_DISABLED, ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/globals/flags";
+import { createObjectURLFromSvg, openPostPage } from "../../../../utils/dom/links";
+import { ClickCodes } from "../../../../types/primitives/enums";
+import { Events } from "../../../../lib/globals/events";
+import { FavoriteElement } from "./favorite_interfaces";
+import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
+import { Post } from "../../../../types/api/post";
+import { getContentType } from "../../../../utils/primitive/string";
 
 let htmlTemplate: HTMLElement;
 let removeFavoriteButtonHTML: string;
@@ -52,22 +51,21 @@ export class FavoriteHTMLElement implements FavoriteElement {
   public addOrRemoveButton: HTMLImageElement;
   public downloadButton: HTMLImageElement;
 
-  get thumbURL(): string {
-    return this.image.src;
-  }
-
   constructor(post: Post) {
     this.root = htmlTemplate.cloneNode(true) as HTMLElement;
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.root.children[0].children[0] as HTMLImageElement;
     this.addOrRemoveButton = this.root.children[0].children[1] as HTMLImageElement;
     this.downloadButton = this.root.children[0].children[2] as HTMLImageElement;
-
     this.populateAttributes(post);
     this.setupAddOrRemoveButton(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE);
     this.setupDownloadButton();
     this.openPostInNewTabOnClick();
     this.presetCanvasDimensions(post);
+  }
+
+  public get thumbURL(): string {
+    return this.image.src;
   }
 
   private populateAttributes(post: Post): void {

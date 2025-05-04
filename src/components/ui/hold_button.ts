@@ -1,11 +1,7 @@
-import {ON_MOBILE_DEVICE} from "../../lib/functional/flags";
-import {clamp} from "../../utils/primitive/number";
+import { ON_MOBILE_DEVICE } from "../../lib/globals/flags";
+import { clamp } from "../../utils/primitive/number";
 
 export class HoldButton extends HTMLElement {
-  static {
-    customElements.define("hold-button", HoldButton);
-  }
-
   private static defaultPollingTime: number = 100;
   private static minPollingTime: number = 40;
   private static maxPollingTime: number = 500;
@@ -15,20 +11,16 @@ export class HoldButton extends HTMLElement {
   private pollingTime = HoldButton.defaultPollingTime;
   private holdingDown: boolean = false;
 
+  static {
+    customElements.define("hold-button", HoldButton);
+  }
+
   public connectedCallback(): void {
     if (ON_MOBILE_DEVICE) {
       return;
     }
     this.addEventListeners();
     this.initializePollingTime();
-  }
-
-  private initializePollingTime(): void {
-    const pollingTime = this.getAttribute("pollingtime");
-
-    if (pollingTime !== null) {
-      this.setPollingTime(pollingTime);
-    }
   }
 
   public attributeChangedCallback(name: string, _: null, newValue: string): void {
@@ -42,9 +34,21 @@ export class HoldButton extends HTMLElement {
     }
   }
 
+  public onmousehold(): void { }
+
+  public onMouseLeaveWhileHoldingDown(): void { }
+
+  private initializePollingTime(): void {
+    const pollingTime = this.getAttribute("pollingtime");
+
+    if (pollingTime !== null) {
+      this.setPollingTime(pollingTime);
+    }
+  }
+
   private setPollingTime(newValue: string): void {
     this.stopPolling();
-    const pollingTime = parseFloat(newValue) || HoldButton.defaultPollingTime;
+    const pollingTime = parseFloat(newValue) ?? HoldButton.defaultPollingTime;
 
     this.pollingTime = clamp(Math.round(pollingTime), HoldButton.minPollingTime, HoldButton.maxPollingTime);
   }
@@ -84,11 +88,5 @@ export class HoldButton extends HTMLElement {
   private stopPolling(): void {
     clearTimeout(this.timeoutId);
     clearInterval(this.intervalId);
-  }
-
-  public onmousehold(): void {
-  }
-
-  public onMouseLeaveWhileHoldingDown(): void {
   }
 }

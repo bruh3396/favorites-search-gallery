@@ -1,8 +1,8 @@
-import {HoldButton} from "./hold_button";
-import {clamp} from "../../utils/primitive/number";
+import { HoldButton } from "./hold_button";
+import { clamp } from "../../utils/primitive/number";
 
 export class NumberComponent {
-  private input: HTMLInputElement;
+  public input: HTMLInputElement;
   private upArrow: HoldButton;
   private downArrow: HoldButton;
   private stepSize: number;
@@ -10,9 +10,9 @@ export class NumberComponent {
   private defaultValue: number;
 
   constructor(element: HTMLElement) {
-    this.input = element.querySelector("input") || document.createElement("input");
-    this.upArrow = element.querySelector(".number-arrow-up") || new HoldButton();
-    this.downArrow = element.querySelector(".number-arrow-down") || new HoldButton();
+    this.input = element.querySelector("input") ?? document.createElement("input");
+    this.upArrow = element.querySelector(".number-arrow-up") ?? new HoldButton();
+    this.downArrow = element.querySelector(".number-arrow-down") ?? new HoldButton();
     this.stepSize = 1;
     this.range = {min: 0, max: 100};
     this.defaultValue = 1;
@@ -21,17 +21,17 @@ export class NumberComponent {
   }
 
   private initializeFields(): void {
-    this.stepSize = Math.round(parseFloat(this.input.getAttribute("step") || "1"));
+    this.stepSize = Math.round(parseFloat(this.input.getAttribute("step") ?? "1"));
 
     if (this.input.onchange === null) {
       this.input.onchange = (): void => {};
     }
 
     this.range = {
-      min: parseFloat(this.input.getAttribute("min") || "0"),
-      max: parseFloat(this.input.getAttribute("max") || "100")
+      min: parseFloat(this.input.getAttribute("min") ?? "0"),
+      max: parseFloat(this.input.getAttribute("max") ?? "100")
     };
-    this.defaultValue = parseFloat(this.input.getAttribute("defaultValue") || "1");
+    this.defaultValue = parseFloat(this.input.getAttribute("defaultValue") ?? "1");
     this.setValue(this.defaultValue);
   }
 

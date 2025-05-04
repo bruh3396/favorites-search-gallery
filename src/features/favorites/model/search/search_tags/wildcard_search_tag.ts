@@ -1,6 +1,6 @@
-import {SearchTag} from "./search_tag";
-import {Searchable} from "../../../types/favorite/favorite_interfaces";
-import {escapeParenthesis} from "../../../../../utils/primitive/string";
+import { SearchTag } from "./search_tag";
+import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { escapeParenthesis } from "../../../../../utils/primitive/string";
 
 const UNMATCHABLE_REGEX = /^\b$/;
 const STARTS_WITH_REGEX = /^[^*]*\*$/;
@@ -13,15 +13,11 @@ enum WildcardMatchType {
 }
 
 export class WildcardSearchTag extends SearchTag {
+  public getMatchingTags: (tags: string[]) => string[];
   private matchRegex: RegExp;
   private matchType: WildcardMatchType;
   private startsWithPrefix: string;
   private containsSubstring: string;
-  public getMatchingTags: (tags: string[]) => string[];
-
-  get cost(): number {
-    return this.matchType.valueOf();
-  }
 
   constructor(searchTag: string) {
     super(searchTag);
@@ -34,6 +30,10 @@ export class WildcardSearchTag extends SearchTag {
     this.getMatchingTags = this.getMatchingTagsFunction();
   }
 
+  protected get cost(): number {
+    return this.matchType.valueOf();
+  }
+
   public matchesSingleTag(tag: string): boolean {
     return this.matchRegex.test(tag);
   }
@@ -43,7 +43,7 @@ export class WildcardSearchTag extends SearchTag {
       [WildcardMatchType.STARTS_WITH]: this.getMatchingTagsStartsWith,
       [WildcardMatchType.CONTAINS]: this.getMatchingTagsContains,
       [WildcardMatchType.DEFAULT]: this.getMatchingTagsRegex
-    }[this.matchType] || this.getMatchingTagsRegex;
+    }[this.matchType] ?? this.getMatchingTagsRegex;
   }
 
   private getMatchType(): WildcardMatchType {
@@ -62,7 +62,7 @@ export class WildcardSearchTag extends SearchTag {
       [WildcardMatchType.STARTS_WITH]: this.matchesStartsWith,
       [WildcardMatchType.CONTAINS]: this.matchesContains,
       [WildcardMatchType.DEFAULT]: this.matchesRegex
-    }[this.matchType] || this.matchesRegex;
+    }[this.matchType] ?? this.matchesRegex;
   }
 
   private getMatchingTagsStartsWith(tags: string[]): string[] {

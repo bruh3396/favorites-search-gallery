@@ -1,20 +1,11 @@
-import {MediaExtension, TagCategory} from "./primitives";
-
-interface IUpscaleRequest {
-  id: string
-  action: string
-  hasDimensions: boolean
-  offscreenCanvas: OffscreenCanvas | null
-  imageBitmap: ImageBitmap | null
-  imageURL: string
-  readonly transferable: OffscreenCanvas[]
-}
+import { MediaExtension, TagCategory } from "./primitives";
+import { IUpscaleRequest } from "../interfaces/interfaces";
 
 export type MediaExtensionMapping = {
   id: string
   extension: MediaExtension
 }
-export type FavoritesDatabaseMetadataRecord = {
+export type FavoritesMetadataDatabaseRecord = {
   width: number
   height: number
   score: number
@@ -25,9 +16,9 @@ export type FavoritesDatabaseMetadataRecord = {
 }
 export type FavoritesDatabaseRecord = {
   id: string
-  tags: string
+  tags: Set<string>
   src: string
-  metadata: string
+  metadata: FavoritesMetadataDatabaseRecord
 }
 export type TagModificationDatabaseRecord = {
   id: string
@@ -54,10 +45,7 @@ export type RatingElement = {
   input: HTMLInputElement
   label: HTMLLabelElement
 }
-export type APIThumb = {
-  // apiPost: APIPost
-  thumb: HTMLElement
-}
+
 export type AwesompleteSuggestion = {
   label: string
   value: string

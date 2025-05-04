@@ -1,18 +1,18 @@
-import {PromiseTimeoutError} from "../../types/primitives/errors";
+import { PromiseTimeoutError } from "../../types/primitives/errors";
 
 export class EventEmitter<V> {
   private listeners: Set<(argument: V) => void>;
   private oneTimeListeners: Set<(argument: V) => void>;
   private enabled: boolean;
 
-  get disabled(): boolean {
-    return !this.enabled;
-  }
-
   constructor(enabled: boolean = true) {
     this.listeners = new Set();
     this.oneTimeListeners = new Set();
     this.enabled = enabled;
+  }
+
+  private get disabled(): boolean {
+    return !this.enabled;
   }
 
   public on(callback: (argument: V) => void, options: AddEventListenerOptions | undefined = undefined): void {

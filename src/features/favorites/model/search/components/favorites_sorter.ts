@@ -1,9 +1,9 @@
-import {FavoriteItem} from "../../../types/favorite/favorite_item";
-import {Preferences} from "../../../../../store/preferences/preferences";
-import {SortingMethod} from "../../../../../types/primitives/primitives";
-import {shuffleArray} from "../../../../../utils/collection/array";
+import { FavoriteItem } from "../../../types/favorite/favorite_item";
+import { Preferences } from "../../../../../store/local_storage/preferences";
+import { SortingMethod } from "../../../../../types/primitives/primitives";
+import { shuffleArray } from "../../../../../utils/collection/array";
 
-let useAscendingOrder = Preferences.sortAscending.value;
+let useAscendingOrder = Preferences.sortAscendingEnabled.value;
 let sortingMethod: SortingMethod = Preferences.sortingMethod.value;
 
 export function setAscendingOrder(value: boolean): void {
@@ -20,8 +20,8 @@ export function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
   if (sortingMethod === "random") {
     return shuffleArray(toSort);
   }
-  // toSort.sort((postA, postB) => {
-  //   return (postB.metadata.getMetric(sortingMethod) - postA.metadata.getMetric(sortingMethod));
-  // });
+  toSort.sort((favoriteA, favoriteB) => {
+    return (favoriteB.metrics[sortingMethod] - favoriteA.metrics[sortingMethod]);
+  });
   return useAscendingOrder ? toSort.reverse() : toSort;
 }

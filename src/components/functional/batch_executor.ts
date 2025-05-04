@@ -1,13 +1,9 @@
 export class BatchExecutor<V> {
-  private limit: number;
-  private timeout: number;
+  private readonly limit: number;
+  private readonly timeout: number;
   private readonly executor: (batch: V[]) => void;
   private timer: number | undefined;
   private batch: V[];
-
-  get overLimit(): boolean {
-    return this.batch.length >= this.limit;
-  }
 
   constructor(limit: number, timeout: number, executor: (batch: V[]) => void) {
     this.limit = limit;
@@ -15,6 +11,10 @@ export class BatchExecutor<V> {
     this.executor = executor;
     this.timer = undefined;
     this.batch = [];
+  }
+
+  private get overLimit(): boolean {
+    return this.batch.length >= this.limit;
   }
 
   public add(item: V): void {

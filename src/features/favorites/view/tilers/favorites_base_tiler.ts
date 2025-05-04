@@ -1,22 +1,20 @@
-import {FAVORITES_CONTENT_CONTAINER} from "../../setup/page_builder/favorites_content_container";
-import {FavoriteLayout} from "../../../../types/primitives/primitives";
-import {Skeleton} from "../skeleton/skeleton";
-import {Tiler} from "./favorites_tiler_interface";
-import {insertStyleHTML} from "../../../../utils/dom/style";
+import { FAVORITES_CONTENT_CONTAINER } from "../../ui/structure/favorites_content_container";
+import { FavoriteLayout } from "../../../../types/primitives/primitives";
+import { Skeleton } from "../skeleton/skeleton";
+import { Tiler } from "./favorites_tiler_interface";
+import { insertStyleHTML } from "../../../../utils/dom/style";
 
-export abstract class FavoritesBaseTiler implements Tiler {
+export abstract class BaseTiler implements Tiler {
   public container: HTMLElement;
   public abstract className: FavoriteLayout;
   public abstract skeletonStyle: Record<string, string>;
-  public abstract onActivation(): void;
-  public abstract onDeactivation(): void;
-
-  public showSkeleton(): void {
-    this.tile(new Skeleton(this.skeletonStyle).elements);
-  }
 
   constructor() {
     this.container = FAVORITES_CONTENT_CONTAINER;
+  }
+
+  public showSkeleton(): void {
+    this.tile(new Skeleton(this.skeletonStyle).elements);
   }
 
   public tile(items: HTMLElement[]): void {
@@ -38,7 +36,7 @@ export abstract class FavoritesBaseTiler implements Tiler {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public setRowSize(rowSize: number): void {}
+  public setRowSize(rowSize: number): void { }
 
   public addItemsToTop(items: HTMLElement[]): void {
     for (const item of items.reverse()) {
@@ -51,4 +49,7 @@ export abstract class FavoritesBaseTiler implements Tiler {
       this.container.appendChild(item);
     }
   }
+
+  public abstract onActivation(): void;
+  public abstract onDeactivation(): void;
 }

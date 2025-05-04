@@ -1,6 +1,6 @@
 import * as FavoritesDatabase from "./favorites_database";
 import * as FavoritesFetcher from "./favorites_page_fetcher";
-import {FavoriteItem} from "../../types/favorite/favorite_item";
+import { FavoriteItem } from "../../types/favorite/favorite_item";
 
 let allFavorites: FavoriteItem[] = [];
 let useSearchSubset = false;
@@ -23,7 +23,7 @@ export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) 
   return FavoritesFetcher.fetchAllFavorites(onFavoritesFoundHelper);
 }
 
-export async function fetchFavoritesOnReload(): Promise<FavoriteItem[]> {
+export async function fetchNewFavoritesOnReload(): Promise<FavoriteItem[]> {
   const newFavorites = await FavoritesFetcher.fetchNewFavoritesOnReload(getAllFavoriteIds());
 
   allFavorites = newFavorites.concat(allFavorites);

@@ -7,30 +7,40 @@ function testGetSearchResults(searchQuery: string, expectedNames: string[]): voi
   expect(new SearchCommand<Fruit>(searchQuery).getSearchResults(ITEMS).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
 }
 
+function getSearchCommandWithoutQuery(searchQuery: string): SearchCommand<Fruit> {
+  const searchCommand = new SearchCommand<Fruit>(searchQuery);
+
+  searchCommand.query = "";
+  return searchCommand;
+}
+
+function testSearchCommandsAreEqual(searchQuery1: string, searchQuery2: string): void {
+  expect(getSearchCommandWithoutQuery(searchQuery1))
+    .toStrictEqual(getSearchCommandWithoutQuery(searchQuery2));
+}
+
+function testSearchCommandsAreNotEqual(searchQuery1: string, searchQuery2: string): void {
+  expect(getSearchCommandWithoutQuery(searchQuery1))
+    .not.toStrictEqual(getSearchCommandWithoutQuery(searchQuery2));
+}
+
 describe("create", () => {
   test("order", () => {
-    expect(new SearchCommand("apple ( banana ~ cherry )"))
-      .toStrictEqual(new SearchCommand("( banana ~ cherry ) apple"));
+    testSearchCommandsAreEqual("apple ( banana ~ cherry )", "( banana ~ cherry ) apple");
   });
 
   test("duplicates in or groups", () => {
-    expect(new SearchCommand("apple ( banana ~ cherry )"))
-      .toStrictEqual(new SearchCommand("( banana ~ cherry ~ cherry ) apple"));
+    testSearchCommandsAreEqual("apple ( banana ~ cherry )", "( banana ~ cherry ~ cherry ) apple");
   });
 
   test("sort or groups by length", () => {
-    const searchCommand1 = new SearchCommand("apple ( banana ~ cherry ~ pear ) ( grape ~ orange )");
-    const searchCommand2 = new SearchCommand("apple ( grape ~ orange ) ( banana ~ cherry ~ pear )");
-    const searchCommand3 = new SearchCommand("apple ( grape ~ orange ) ( banana ~ cherry )");
-    const searchCommand4 = new SearchCommand("apple  ( banana ~ cherry ) ( grape ~ orange )");
-
-    expect(searchCommand1).toStrictEqual(searchCommand2);
-    expect(searchCommand3).not.toStrictEqual(searchCommand4);
+    testSearchCommandsAreEqual("apple ( banana ~ cherry ~ pear ) ( grape ~ orange )", "apple ( grape ~ orange ) ( banana ~ cherry ~ pear )");
+    testSearchCommandsAreNotEqual("apple ( grape ~ orange ) ( banana ~ cherry )", "apple  ( banana ~ cherry ) ( grape ~ orange )");
   });
 
   test("simplify or groups of length 1", () => {
-    expect(new SearchCommand("-apple ( banana )")).toStrictEqual(new SearchCommand("banana -apple"));
-    expect(new SearchCommand("-apple ( banana* ) ( cherry )")).toStrictEqual(new SearchCommand("cherry -apple banana*"));
+    testSearchCommandsAreEqual("-apple ( banana )", "banana -apple");
+    testSearchCommandsAreEqual("-apple ( banana* ) ( cherry )", "cherry -apple banana*");
   });
 });
 
@@ -127,17 +137,5 @@ describe("getSearchResults", () => {
     testGetSearchResults("red -*red*", []);
     testGetSearchResults("red -red*", []);
     testGetSearchResults("red -*red", []);
-  });
-});
-
-describe("shouldExpand", () => {
-  test("all cases", () => {
-    // expect(new SearchCommand("apple ( banana ~ cherry )").shouldExpand).toBe(true);
-    // expect(new SearchCommand("-apple ( banana ~ cherry )").shouldExpand).toBe(true);
-    // expect(new SearchCommand("( banana ~ cherry )").shouldExpand).toBe(true);
-    // expect(new SearchCommand("app* ( banana ~ cherry )").shouldExpand).toBe(true);
-    // expect(new SearchCommand("( banana ~ cherry )").shouldExpand).toBe(true);
-    // expect(new SearchCommand("apple ( banana ~ cherry ) ( grape ~ orange ) ( kiwi ~ mango )").shouldExpand).toBe(true);
-    // expect(new SearchCommand("apple *pple* ( banana ~ che* ~ *ap* ) -red").shouldExpand).toBe(false);
   });
 });

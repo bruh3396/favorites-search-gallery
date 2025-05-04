@@ -1,7 +1,7 @@
 import {FavoriteItem} from "../../types/favorite/favorite_item";
 import {FavoritesPaginationParameters} from "../../types/favorite_pagination_parameters";
 import {NavigationKey} from "../../../../types/primitives/primitives";
-import {Preferences} from "../../../../store/preferences/preferences";
+import {Preferences} from "../../../../store/local_storage/preferences";
 import {clamp} from "../../../../utils/primitive/number";
 import {isForwardNavigationKey} from "../../../../types/primitives/equivalence";
 

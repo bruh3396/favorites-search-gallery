@@ -1,6 +1,8 @@
 import * as FSG_URL from "../../lib/api/url";
-import {DARK_THEME_HTML, SKELETON_HTML, UTILITIES_HTML} from "../../assets/html";
-import {getCookie, setCookie} from "../../store/cookies/cookie";
+import { DARK_THEME_HTML, SKELETON_HTML, UTILITIES_HTML } from "../../assets/html";
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/globals/flags";
+import { getCookie, setCookie } from "../../store/cookies/cookie";
+import { yield1 } from "../misc/async";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
   return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
@@ -24,7 +26,39 @@ function toggleLocalDarkStyles(useDark: boolean): void {
   }
 }
 
-export function toggleDarkTheme(useDark: boolean): void {
+function setupVideoAndGifOutlines(): void {
+  const size = ON_MOBILE_DEVICE ? 2 : 2;
+  const videoSelector = ON_FAVORITES_PAGE ? "&:has(img.video)" : ">img.video";
+  const gifSelector = ON_FAVORITES_PAGE ? "&:has(img.gif)" : ">img.gif";
+  const videoRule = `${videoSelector} {outline: ${size}px solid blue}`;
+  const gifRule = `${gifSelector} {outline: ${size}px solid hotpink}`;
+
+  insertStyleHTML(`
+    #favorites-search-gallery-content {
+      &.row,
+      &.square,
+      &.column
+      {
+        .favorite {
+          ${videoRule}
+          ${gifRule}
+        }
+      }
+    }
+
+    #favorites-search-gallery-content.grid .favorite, .thumb {
+      >a,
+      >div {
+        ${videoRule}
+
+        ${gifRule}
+      }
+    }
+    `, "video-gif-borders");
+}
+
+export async function toggleDarkTheme(useDark: boolean): Promise<void> {
+  await yield1();
   insertStyleHTML(useDark ? DARK_THEME_HTML : "", "dark-theme");
   toggleDarkStyleSheet(useDark);
   toggleLocalDarkStyles(useDark);
@@ -48,10 +82,8 @@ export function insertStyleHTML(html: string, id: string | undefined = undefined
   document.head.appendChild(style);
 }
 
-export function setupCommonStyles(): void {
-  insertStyleHTML(SKELETON_HTML, "skeleton-style");
-  insertStyleHTML(UTILITIES_HTML, "common-style");
-  toggleDarkTheme(getCookie("theme", "") === "dark");
+export function usingDarkTheme(): boolean {
+  return getCookie("theme", "") === "dark";
 }
 
 export function insertHTMLAndExtractStyle(element: HTMLElement, position: InsertPosition, html: string): void {
@@ -63,4 +95,10 @@ export function insertHTMLAndExtractStyle(element: HTMLElement, position: Insert
     style.remove();
   }
   element.insertAdjacentHTML(position, dom.body.innerHTML);
+}
+export function setupCommonStyles(): void {
+  insertStyleHTML(SKELETON_HTML, "skeleton-style");
+  insertStyleHTML(UTILITIES_HTML, "common-style");
+  toggleDarkTheme(usingDarkTheme());
+  setupVideoAndGifOutlines();
 }

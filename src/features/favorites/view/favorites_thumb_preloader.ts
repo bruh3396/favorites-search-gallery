@@ -1,6 +1,6 @@
-import {FavoriteItem} from "../types/favorite/favorite_item";
-import {FavoritesSettings} from "../../../config/favorites_settings";
-import {sleep} from "../../../utils/misc/generic";
+import { FavoriteItem } from "../types/favorite/favorite_item";
+import { FavoritesSettings } from "../../../config/favorites_settings";
+import { sleep } from "../../../utils/misc/async";
 
 export async function preload(favorites: FavoriteItem[]): Promise<void> {
   if (!FavoritesSettings.preloadThumbnails) {

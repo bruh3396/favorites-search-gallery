@@ -1,10 +1,6 @@
-import {FavoriteTags} from "./favorite_tags";
-import {FavoritesDatabaseRecord} from "../../../../types/primitives/composites";
-import {Post} from "../../../../types/api/post";
-
-export interface Searchable {
-  tags: Set<string>
-}
+import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
+import { Rating } from "../../../../types/primitives/primitives";
+import { SearchableWithMetrics } from "../../../../types/interfaces/interfaces";
 
 export interface FavoriteElement {
   root: HTMLElement
@@ -15,12 +11,10 @@ export interface FavoriteElement {
   thumbURL: string
 }
 
-export interface Favorite extends Searchable {
+export interface Favorite extends SearchableWithMetrics {
   id: string
-  databaseRecord: FavoritesDatabaseRecord
-  post: Post
-  favoriteTags: FavoriteTags
   root: HTMLElement
-  element: FavoriteElement | null
   thumbURL: string
+  databaseRecord: FavoritesDatabaseRecord
+  withinRating: (rating: Rating) => boolean
 }
