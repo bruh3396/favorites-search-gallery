@@ -21,6 +21,7 @@ const BUTTONS: Partial<ButtonElement>[] = [
     title: "Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab",
     position: "afterbegin",
     textContent: "Search",
+    rightClickEnabled: true,
     event: Events.favorites.searchButtonClicked
   },
   {

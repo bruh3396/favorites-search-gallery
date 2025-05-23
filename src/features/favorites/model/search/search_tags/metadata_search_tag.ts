@@ -1,13 +1,13 @@
 import { Searchable, SearchableWithMetrics } from "../../../../../types/interfaces/interfaces";
-import { MetadataSearchExpression } from "../../../types/metadata/favorite_metadata_search_expression";
+import { FavoriteMetadataSearchExpression } from "../../../types/metadata/favorite_metadata_search_expression";
 import { SearchTag } from "./search_tag";
 
 export class MetadataSearchTag extends SearchTag {
-  private expression: MetadataSearchExpression;
+  private expression: FavoriteMetadataSearchExpression;
 
   constructor(searchTag: string) {
     super(searchTag);
-    this.expression = new MetadataSearchExpression(this.value);
+    this.expression = new FavoriteMetadataSearchExpression(this.value);
   }
 
   protected get cost(): number {

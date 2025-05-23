@@ -1,3 +1,4 @@
+import * as API from "../../lib/api/api";
 import { BatchExecutor } from "../../components/functional/batch_executor";
 import { Database } from "./database";
 import { MediaExtension } from "../../types/primitives/primitives";
@@ -10,6 +11,7 @@ const OBJECT_STORE_NAME: string = "extensionMappings";
 const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
 const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
 const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
+const EXTENSION_REGEX = (/\.(png|jpg|jpeg|gif|mp4)/g);
 
 async function loadExtensions(): Promise<void> {
   for (const mapping of await DATABASE.load()) {
@@ -42,11 +44,6 @@ function moveExtensionsFromLocalStorageToIndexedDB(): void {
   localStorage.removeItem("imageExtensions");
 }
 
-function getExtensionFromPost(post: Post): MediaExtension | null {
-  const match = (/\.(png|jpg|jpeg|gif|mp4)/g).exec(post.previewURL);
-  return match === null ? null : match[1] as MediaExtension;
-}
-
 export function has(id: string): boolean {
   return EXTENSION_MAP.has(id);
 }
@@ -66,7 +63,17 @@ export function set(id: string, extension: MediaExtension): void {
   }
 }
 
-export function setFromPost(post: Post): void {
+export async function getExtensionFromThumb(thumb: HTMLElement): Promise<MediaExtension | null> {
+  const post = await API.fetchPostFromAPI(thumb.id);
+  return getExtensionFromPost(post);
+}
+
+function getExtensionFromPost(post: Post): MediaExtension | null {
+  const match = EXTENSION_REGEX.exec(post.fileURL);
+  return match === null ? null : match[1] as MediaExtension;
+}
+
+export function setExtensionFromPost(post: Post): void {
   const extension = getExtensionFromPost(post);
 
   if (extension !== null) {

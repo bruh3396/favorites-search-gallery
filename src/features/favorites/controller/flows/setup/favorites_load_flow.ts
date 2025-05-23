@@ -1,5 +1,5 @@
 import * as FavoritesModel from "../../../model/favorites_model";
-import * as FavoritesPresentationFlow from "../runtime/presentation/favorites_presentation_flow";
+import * as FavoritesPresentationFlow from "../presentation/favorites_presentation_flow";
 import * as FavoritesSearchFlow from "../runtime/favorites_search_flow";
 import * as FavoritesView from "../../../view/favorites_view";
 import { Events } from "../../../../../lib/globals/events";
@@ -8,31 +8,24 @@ import { FavoriteItem } from "../../../types/favorite/favorite_item";
 export async function loadAllFavorites(): Promise<void> {
   await loadAllFavoritesFromDatabase();
 
-  if (hasNoFavorites()) {
-    await fetchAllFavorites();
-    await saveAllFavorites();
-  } else {
+  if (hasFavorites()) {
+    Events.favorites.favoritesLoadedFromDatabase.emit();
     showLoadedFavorites();
     await loadNewFavorites();
+  } else {
+    await fetchAllFavorites();
+    await saveAllFavorites();
   }
   Events.favorites.favoritesLoaded.emit();
 }
 
 async function loadAllFavoritesFromDatabase(): Promise<void> {
-  FavoritesView.showNotification("Loading favorites");
+  FavoritesView.setStatus("Loading favorites");
   await FavoritesModel.loadAllFavoritesFromDatabase();
-
-  if (hasFavorites()) {
-    Events.favorites.favoritesLoadedFromDatabase.emit();
-  }
 }
 
 function hasFavorites(): boolean {
   return FavoritesModel.getAllFavorites().length > 0;
-}
-
-function hasNoFavorites(): boolean {
-  return !hasFavorites();
 }
 
 async function fetchAllFavorites(): Promise<void> {
@@ -42,7 +35,7 @@ async function fetchAllFavorites(): Promise<void> {
 }
 
 async function saveAllFavorites(): Promise<void> {
-  FavoritesView.showNotification("Saving favorites");
+  FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeAllFavorites();
   FavoritesView.showTemporaryNotification("All favorites saved");
 }

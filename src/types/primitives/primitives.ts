@@ -6,7 +6,6 @@ export type NavigationKey = BackwardNavigationKey | ForwardNavigationKey
 export type ExitKey = "Escape" | "Delete" | "Backspace"
 export type MediaExtension = "jpg" | "png" | "jpeg" | "gif" | "mp4"
 export type AnimatedExtension = "gif" | "mp4"
-export type PostMetadataStatus = 0 | 1 | 2
 export type Rating = 1 | 2 | 3 | 4 | 5 | 6 | 7
 export type ImageCursor = "zoom-in" | "zoom-out" | "auto"
 export type TagCategory = "general" | "artist" | "unknown" | "copyright" | "character" | "metadata"

@@ -39,7 +39,6 @@ export function createButtonElement(partial: Partial<ButtonElement>): void {
 
   if (template.rightClickEnabled) {
     button.oncontextmenu = (event): void => {
-      event.preventDefault();
       eventEmitter.emit(event);
     };
   }

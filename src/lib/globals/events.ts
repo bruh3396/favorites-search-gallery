@@ -97,13 +97,13 @@ const window1 = {
 };
 
 function setupDocumentEvents(): void {
-  const container = ON_FAVORITES_PAGE ? FAVORITES_SEARCH_GALLERY_CONTAINER : document.documentElement;
-
   broadcastDOMLoad();
-  setupGlobalDesktopEvents(container);
+  setupGlobalDesktopEvents();
 }
 
-function setupGlobalDesktopEvents(container: HTMLElement): void {
+function setupGlobalDesktopEvents(): void {
+  const container = ON_FAVORITES_PAGE ? FAVORITES_SEARCH_GALLERY_CONTAINER : document.documentElement;
+
   if (ON_MOBILE_DEVICE) {
     return;
   }

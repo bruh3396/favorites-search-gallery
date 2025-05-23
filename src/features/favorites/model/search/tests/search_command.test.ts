@@ -1,10 +1,17 @@
-import {ALL_ITEM_NAMES, ALL_TAGS, Fruit, INDEX, ITEMS} from "./test_utils";
-import {describe, expect, test} from "vitest";
-import {SearchCommand} from "../search_command/search_command";
+import { ALL_ITEM_NAMES, ALL_TAGS, Fruit, INDEX, ITEMS } from "./test_utils";
+import { describe, expect, test } from "vitest";
+import { InvertedSearchIndex } from "../../../../../components/functional/inverted_search_index";
+import { SearchCommand } from "../search_command/search_command";
 
 function testGetSearchResults(searchQuery: string, expectedNames: string[]): void {
-  expect(INDEX.getSearchResultsUsingIndex(searchQuery, ITEMS).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
-  expect(new SearchCommand<Fruit>(searchQuery).getSearchResults(ITEMS).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
+  const searchCommand = new SearchCommand<Fruit>(searchQuery);
+
+  expect(INDEX.getSearchResults(searchCommand, ITEMS).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
+  expect(searchCommand.getSearchResults(ITEMS).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
+}
+
+function testGetSearchResultsFromCustomIndex(searchQuery: string, expectedNames: string[], index: InvertedSearchIndex<Fruit>, items: Fruit[]): void {
+  expect(index.getSearchResults(new SearchCommand<Fruit>(searchQuery), items).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
 }
 
 function getSearchCommandWithoutQuery(searchQuery: string): SearchCommand<Fruit> {
@@ -137,5 +144,35 @@ describe("getSearchResults", () => {
     testGetSearchResults("red -*red*", []);
     testGetSearchResults("red -red*", []);
     testGetSearchResults("red -*red", []);
+  });
+});
+
+describe("updateIndex", () => {
+  const items: Fruit[] = [];
+
+  test("update one tag", () => {
+    const index = new InvertedSearchIndex<Fruit>();
+
+    testGetSearchResultsFromCustomIndex("red", [], index, items);
+    testGetSearchResultsFromCustomIndex("sour", [], index, items);
+
+    const apple = {
+      name: "apple",
+      tags: new Set(["red"])
+    };
+
+    items.push(apple);
+    index.add(apple);
+    testGetSearchResultsFromCustomIndex("red", ["apple"], index, items);
+    testGetSearchResultsFromCustomIndex("sour", [], index, items);
+    apple.tags = new Set(["sour"]);
+    index.update(apple, new Set(["red"]));
+    testGetSearchResultsFromCustomIndex("red", [], index, items);
+    testGetSearchResultsFromCustomIndex("sour", ["apple"], index, items);
+
+    apple.tags = new Set(["red", "sour"]);
+    index.update(apple, new Set(["red", "sour"]));
+    testGetSearchResultsFromCustomIndex("red", ["apple"], index, items);
+    testGetSearchResultsFromCustomIndex("sour", ["apple"], index, items);
   });
 });

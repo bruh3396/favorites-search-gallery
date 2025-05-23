@@ -3,11 +3,12 @@ import * as Extensions from "../../../../store/indexed_db/extensions";
 import { FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../../types/primitives/composites";
 import { DiscreteRating } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/globals/events";
+import { FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
 import { GeneralSettings } from "../../../../config/general_settings";
-import { MetricMap } from "../../../../types/interfaces/interfaces";
 import { Rating } from "../../../../types/primitives/primitives";
 import { ThrottledQueue } from "../../../../components/functional/throttled_queue";
 import { createEmptyPost } from "../favorite/favorite_type_utils";
+import { validateTags } from "../favorite/favorite_item";
 
 const PENDING_REQUESTS = new Set<string>();
 const UPDATE_QUEUE: FavoriteMetadata[] = [];
@@ -26,6 +27,14 @@ function decodeRating(rating: string): Rating {
     "S": DiscreteRating.SAFE,
     "s": DiscreteRating.SAFE
   }[rating] ?? DiscreteRating.EXPLICIT;
+}
+
+export function encodeRating(rating: number): string {
+  return {
+    [DiscreteRating.EXPLICIT]: "Explicit",
+    [DiscreteRating.QUESTIONABLE]: "Questionable",
+    [DiscreteRating.SAFE]: "Safe"
+  }[rating] ?? "Explicit";
 }
 
 function tooManyPendingRequests(): boolean {
@@ -48,7 +57,7 @@ export function setupFavoriteMetadata(): void {
 }
 
 export class FavoriteMetadata {
-  public metrics: MetricMap;
+  public metrics: FavoriteMetricMap;
   public id: string;
   public rating: Rating;
   public isDeleted: boolean;
@@ -124,7 +133,8 @@ export class FavoriteMetadata {
     const post = await API.fetchPostFromAPI(this.id).catch(createEmptyPost);
 
     PENDING_REQUESTS.delete(this.id);
-    Extensions.setFromPost(post);
+    Extensions.setExtensionFromPost(post);
+    validateTags(post);
     this.metrics.width = post.width;
     this.metrics.height = post.height;
     this.metrics.score = post.score;

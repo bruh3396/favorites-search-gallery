@@ -1,11 +1,12 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { isEmptyString, removeExtraWhiteSpace } from "../../utils/primitive/string";
+import { isEmptyString } from "../../utils/primitive/string";
 import { AWESOMPLETE_ENABLED } from "../../lib/globals/flags";
 import { Events } from "../../lib/globals/events";
 import { addAwesompleteToGlobalScope } from "./awesomplete_implementation";
 import { hideAwesomplete } from "../../utils/dom/awesomplete";
+import { getQueryWithTagReplaced } from "./autocomplete_utils";
 
 const DUMMY_ELEMENT = document.createElement("div");
 
@@ -67,18 +68,10 @@ function getCurrentTagWithHyphen(input: HTMLInputElement | HTMLTextAreaElement):
 }
 
 function insertSuggestion(input: HTMLInputElement | HTMLTextAreaElement, suggestion: string): void {
-  const initialSelectionStart = input.selectionStart || undefined;
-  const cursorAtEnd = initialSelectionStart === input.value.length;
-  const firstHalf = input.value.slice(0, initialSelectionStart);
-  const secondHalf = input.value.slice(initialSelectionStart);
-  const firstHalfWithPrefixRemoved = firstHalf.replace(/(\s?)(-?\*?)\S+$/, "$1$2");
-  const combinedHalves = removeExtraWhiteSpace(`${firstHalfWithPrefixRemoved}${suggestion} ${secondHalf}`);
-  const result = cursorAtEnd ? `${combinedHalves} ` : combinedHalves;
-  const selectionStart = firstHalfWithPrefixRemoved.length + suggestion.length + 1;
-
-  input.value = result;
-  input.selectionStart = selectionStart;
-  input.selectionEnd = selectionStart;
+  const result = getQueryWithTagReplaced(input.value, input.selectionStart ?? -1, suggestion);
+  input.value = result.result;
+  input.selectionStart = result.selectionStart;
+  input.selectionEnd = result.selectionStart;
 }
 
 function addAwesompleteToInput(input: HTMLTextAreaElement | HTMLInputElement): void {

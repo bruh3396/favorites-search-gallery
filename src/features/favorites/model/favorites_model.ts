@@ -154,6 +154,10 @@ export function getMoreResults(): HTMLElement[] {
   return InfiniteScrollFeeder.getMoreResults(latestSearchResults);
 }
 
+export function getFirstResults(): FavoriteItem[] {
+  return InfiniteScrollFeeder.getFirstResults(latestSearchResults);
+}
+
 export function deleteFavorite(id: string): Promise<void> {
   return FavoritesLoader.deleteFavorite(id);
 }

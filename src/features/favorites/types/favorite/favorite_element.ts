@@ -4,7 +4,7 @@ import { GALLERY_DISABLED, ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, USER_IS_ON_THEI
 import { createObjectURLFromSvg, openPostPage } from "../../../../utils/dom/links";
 import { ClickCodes } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/globals/events";
-import { FavoriteElement } from "./favorite_interfaces";
+import { FavoriteElement } from "./favorite_types";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
 import { Post } from "../../../../types/api/post";
 import { getContentType } from "../../../../utils/primitive/string";

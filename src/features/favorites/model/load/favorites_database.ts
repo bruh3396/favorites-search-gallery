@@ -2,6 +2,7 @@ import { FavoriteItem, getFavorite } from "../../types/favorite/favorite_item";
 import { BatchExecutor } from "../../../../components/functional/batch_executor";
 import { Database } from "../../../../store/indexed_db/database";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
+import { convertToTagSet } from "../../../../utils/primitive/string";
 import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
 import { sleep } from "../../../../utils/misc/async";
 
@@ -25,16 +26,33 @@ function getSchemaVersion(): number | null {
   return version === null ? null : parseInt(version);
 }
 
-function usingOutdatedSchema(): boolean {
-  return getSchemaVersion() !== SCHEMA_VERSION;
-}
-
 function setSchemaVersion(version: number): void {
   localStorage.setItem(SCHEMA_VERSION_LOCAL_STORAGE_KEY, version.toString());
 }
 
-function deleteOutdatedDatabase(): Promise<void> {
-  return usingOutdatedSchema() ? DATABASE.delete() : Promise.resolve();
+function usingCorrectSchema(): boolean {
+  return getSchemaVersion() === SCHEMA_VERSION;
+}
+
+async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
+  if (records.length === 0 || usingCorrectSchema()) {
+    setSchemaVersion(SCHEMA_VERSION);
+    return Promise.resolve(records);
+  }
+  records = records.map(record => ({
+    ...record,
+    tags: convertToTagSet(record.tags as unknown as string),
+    metadata: JSON.parse(record.metadata as unknown as string)
+  }));
+  await DATABASE.update(records);
+  setSchemaVersion(SCHEMA_VERSION);
+  return records;
+}
+
+export async function loadAllFavorites(): Promise<FavoriteItem[]> {
+  const records = await DATABASE.load();
+  const updatedRecords = await updateDatabaseRecords(records);
+  return deserialize(updatedRecords);
 }
 
 export async function storeFavorites(favorites: FavoriteItem[]): Promise<void> {
@@ -42,12 +60,6 @@ export async function storeFavorites(favorites: FavoriteItem[]): Promise<void> {
 
   await sleep(500);
   DATABASE.store(records);
-}
-
-export async function loadAllFavorites(): Promise<FavoriteItem[]> {
-  await deleteOutdatedDatabase();
-  setSchemaVersion(SCHEMA_VERSION);
-  return deserialize(await DATABASE.load());
 }
 
 export function storeAllFavorites(favorites: FavoriteItem[]): Promise<void> {

@@ -76,7 +76,6 @@ export class Database<V extends { id: string }> {
     this.lock();
     await sleep(0);
     indexedDB.deleteDatabase(this.name);
-    this.unlock();
   }
 
   private updateRecord(index: IDBIndex, record: V, objectStore: IDBObjectStore): void {
@@ -151,14 +150,9 @@ export class Database<V extends { id: string }> {
       };
       const getAllRequest = objectStore.getAll();
 
-      getAllRequest.onsuccess = (event): void => {
+      getAllRequest.onsuccess = (): void => {
         database.close();
-
-        if (!(event.target instanceof IDBRequest)) {
-          reject(event);
-          return;
-        }
-        resolve(event.target.result.reverse());
+        resolve(getAllRequest.result.reverse());
       };
       getAllRequest.onerror = (event): void => {
         database.close();

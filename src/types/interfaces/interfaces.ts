@@ -4,12 +4,12 @@ export interface Searchable {
   tags: Set<string>
 }
 
-export type MetricMap = {
+export type FavoriteMetricMap = {
   [key in MetadataMetric]: number;
 }
 
 export interface SearchableWithMetrics extends Searchable {
-  metrics: MetricMap
+  metrics: FavoriteMetricMap
 }
 
 export interface IUpscaleRequest {

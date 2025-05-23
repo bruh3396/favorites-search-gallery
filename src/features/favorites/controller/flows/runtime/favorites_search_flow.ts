@@ -1,5 +1,5 @@
 import * as FavoritesModel from "../../../model/favorites_model";
-import * as FavoritesPresentationFlow from "./presentation/favorites_presentation_flow";
+import * as FavoritesPresentationFlow from "../presentation/favorites_presentation_flow";
 import * as FavoritesView from "../../../view/favorites_view";
 import { Events } from "../../../../../lib/globals/events";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";

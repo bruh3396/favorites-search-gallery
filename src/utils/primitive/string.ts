@@ -52,13 +52,19 @@ export function extractTagGroups(searchQuery: string): { orGroups: string[][], r
   };
 }
 
-export function getContentType(tags: string): ContentType {
-  tags += " ";
-  const hasVideoTag = (/(?:^|\s)video(?:$|\s)/).test(tags);
-  const hasAnimatedTag = (/(?:^|\s)animated(?:$|\s)/).test(tags);
-  const isAnimated = hasAnimatedTag || hasVideoTag;
-  const isAGif = hasAnimatedTag && !hasVideoTag;
-  return isAGif ? "gif" : isAnimated ? "video" : "image";
+export function getContentType(tags: string | Set<string>): ContentType {
+  if (typeof tags === "string") {
+    tags = convertToTagSet(tags);
+  }
+
+  if (tags.has("video") || tags.has("mp4")) {
+    return "video";
+  }
+
+  if ((tags.has("gif") || tags.has("animated"))) {
+    return "gif";
+  }
+  return "image";
 }
 
 export function removeNonNumericCharacters(text: string): string {

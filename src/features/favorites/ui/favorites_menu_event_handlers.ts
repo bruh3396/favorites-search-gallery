@@ -1,63 +1,19 @@
 import { FANCY_HOVERING_HTML } from "../../../assets/html";
 import { FavoriteLayout } from "../../../types/primitives/primitives";
+import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
 import { ON_MOBILE_DEVICE } from "../../../lib/globals/flags";
 import { Preferences } from "../../../store/local_storage/preferences";
+import { getCurrentLayout } from "../view/favorites_view";
 import { insertStyleHTML } from "../../../utils/dom/style";
-// import {doNothing} from "../../config/constants";
+import { isForwardNavigationKey } from "../../../types/primitives/equivalence";
 
-function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
+export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");
 
   if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
     showOnHoverCheckbox.checked = value;
     Preferences.showOnHoverEnabled.set(value);
   }
-}
-
-function changeColumnCountOnShiftScroll(): void {
-  // let currentLayout = Preferences.favoritesLayout.value;
-  // // let timeout = setTimeout(DO_NOTHING, 0);
-
-  // Events.favorites.layoutChanged.on((newLayout => {
-  //   currentLayout = newLayout;
-  // }));
-
-  // Events.document.wheel.on(async(wheelEvent) => {
-  //   const event = wheelEvent.originalEvent;
-
-  //   if (!event.shiftKey) {
-  //     return;
-  //   }
-  //   const usingRowLayout = currentLayout === "row";
-  //   const id = usingRowLayout ? "row-size" : "column-count";
-  //   const input = document.getElementById(id);
-
-  //   // if (input === null || !(input instanceof HTMLInputElement)) {
-  //   //   return;
-  //   // }
-  //   // const inGallery = await Utils.inGallery();
-
-  //   // if (inGallery) {
-  //   //   return;
-  //   // }
-  //   const addend = (-event.deltaY > 0 ? -1 : 1) * (usingRowLayout ? -1 : 1);
-
-  //   // Utils.forceHideCaptions(true);
-  //   // clearTimeout(timeout);
-  //   // timeout = setTimeout(() => {
-  //   //   Utils.forceHideCaptions(false);
-  //   // }, 500);
-  //   input.value = String(parseInt(input.value) + addend);
-  //   input.dispatchEvent(new KeyboardEvent("keydown", {
-  //     key: "Enter",
-  //     bubbles: true
-  //   }));
-  //   input.dispatchEvent(new Event("change", {
-  //     bubbles: true
-  //   }));
-  // }, {
-  //   passive: true
-  // });
 }
 
 export function toggleFancyThumbHovering(value: boolean): void {
@@ -152,20 +108,36 @@ export function reloadWindow(): void {
   window.location.reload();
 }
 
-export function setupFavoritesMenuEvents(): void {
-  changeColumnCountOnShiftScroll();
-  // Events.gallery.showOnHover.on(updateShowOnHoverOptionTriggeredFromGallery);
-  // Events.favorites.hintsToggled.on(toggleOptionHotkeyHints);
-  // Events.favorites.darkThemeToggled.on(toggleDarkTheme);
-  // Events.favorites.uiToggled.on(toggleUI);
-  // Events.favorites.optionsToggled.on(toggleOptions);
-  // Events.favorites.removeButtonsToggled.on(toggleAddOrRemoveButtons);
-  // Events.favorites.addButtonsToggled.on(toggleAddOrRemoveButtons);
-  // Events.favorites.downloadButtonsToggled.on(toggleDownloadButtons);
-  // Events.favorites.layoutChanged.on(changeLayout);
-  // Events.favorites.galleryMenuToggled.on(Utils.toggleGalleryMenu);
-  // Events.favorites.headerToggled.on(toggleHeader);
-  // Events.favorites.fancyHoveringToggled.on(toggleFancyThumbHovering);
-  // Events.favorites.clearButtonClicked.on(Utils.clearMainSearchBox);
-  // Events.gallery.enteredGallery.on(Utils.blurMainSearchBox);
+export function changeColumnCountOnShiftScroll(wheelEvent: FavoritesWheelEvent): void {
+  const event = wheelEvent.originalEvent;
+
+  if (!event.shiftKey) {
+    return;
+  }
+  const usingRowLayout = getCurrentLayout() === "row";
+  const id = usingRowLayout ? "row-size" : "column-count";
+  const input = document.getElementById(id);
+
+  if (input === null || !(input instanceof HTMLInputElement)) {
+    return;
+  }
+  // const inGallery = await Utils.inGallery();
+
+  // if (inGallery) {
+  //   return;
+  // }
+
+  // Utils.forceHideCaptions(true);
+  // clearTimeout(timeout);
+  // timeout = setTimeout(() => {
+  //   Utils.forceHideCaptions(false);
+  // }, 500);
+  input.value = String(parseInt(input.value) + (isForwardNavigationKey(wheelEvent.direction) ? 1 : -1));
+  input.dispatchEvent(new KeyboardEvent("keydown", {
+    key: "Enter",
+    bubbles: true
+  }));
+  input.dispatchEvent(new Event("change", {
+    bubbles: true
+  }));
 }

@@ -1,4 +1,4 @@
-import { createSearchTag, createSearchTagGroup, isMetadataSearchTag, isWildcardSearchTag, sortSearchTagGroup } from "../search_command/search_command_utils";
+import { createSearchTag, createSearchTagGroup, isMetadataSearchTag, isWildcardSearchTag, sortSearchTagGroup } from "../search_command/search_command";
 import { describe, expect, test } from "vitest";
 import { SearchTag } from "../search_tags/search_tag";
 import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";

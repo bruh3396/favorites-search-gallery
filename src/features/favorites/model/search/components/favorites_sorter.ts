@@ -20,8 +20,6 @@ export function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
   if (sortingMethod === "random") {
     return shuffleArray(toSort);
   }
-  toSort.sort((favoriteA, favoriteB) => {
-    return (favoriteB.metrics[sortingMethod] - favoriteA.metrics[sortingMethod]);
-  });
+  toSort.sort((a, b) => b.metrics[sortingMethod] - a.metrics[sortingMethod]);
   return useAscendingOrder ? toSort.reverse() : toSort;
 }

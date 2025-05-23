@@ -22,6 +22,7 @@ export const FavoritesSettings = {
   infiniteScrollMargin: "75%",
   randomSkeletonAnimationTiming: true,
   preloadThumbnails: true,
-  useSearchIndex: false,
-  skeletonAnimationClasses: "pulse"
+  useSearchIndex: true,
+  skeletonAnimationClasses: "pulse",
+  infiniteScrollBatchCount: 25
 };

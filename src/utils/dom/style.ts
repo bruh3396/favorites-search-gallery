@@ -2,6 +2,7 @@ import * as FSG_URL from "../../lib/api/url";
 import { DARK_THEME_HTML, SKELETON_HTML, UTILITIES_HTML } from "../../assets/html";
 import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/globals/flags";
 import { getCookie, setCookie } from "../../store/cookies/cookie";
+import { Preferences } from "../../store/local_storage/preferences";
 import { yield1 } from "../misc/async";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
@@ -101,4 +102,28 @@ export function setupCommonStyles(): void {
   insertStyleHTML(UTILITIES_HTML, "common-style");
   toggleDarkTheme(usingDarkTheme());
   setupVideoAndGifOutlines();
+}
+
+function setGalleryBackgroundColor(color: string): void {
+  insertStyleHTML(`
+        #gallery-background,
+        #gallery-menu,
+        #gallery-menu-button-container,
+        #autoplay-menu,
+        #autoplay-settings-menu {
+          background: ${color} !important;
+        }
+
+        .gallery-menu-button:not(:hover) {
+          >svg {
+              fill: ${color} !important;
+              filter: invert(100%);
+            }
+        }
+      `, "gallery-background-color");
+}
+
+export function setColorScheme(color: string): void {
+  setGalleryBackgroundColor(color);
+  Preferences.colorScheme.set(color);
 }

@@ -1,7 +1,7 @@
 import { MetadataComparator, SearchableMetadataMetric } from "../../../../types/primitives/primitives";
 import { isMetadataComparator, isSearchableMetadataMetric } from "../../../../types/primitives/equivalence";
 
-export class MetadataSearchExpression {
+export class FavoriteMetadataSearchExpression {
   public static regex: RegExp = /^-?(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)$/;
   public metric: SearchableMetadataMetric;
   public operator: MetadataComparator;
@@ -21,7 +21,7 @@ export class MetadataSearchExpression {
   }
 
   private extractExpression(searchTag: string): { metric: SearchableMetadataMetric; operator: MetadataComparator; value: SearchableMetadataMetric | number } {
-    const extractedExpression = MetadataSearchExpression.regex.exec(searchTag);
+    const extractedExpression = FavoriteMetadataSearchExpression.regex.exec(searchTag);
 
     if (extractedExpression === null || extractedExpression.length !== 4) {
       return {

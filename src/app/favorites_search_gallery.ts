@@ -1,14 +1,13 @@
-import { FAVORITES_SEARCH_GALLERY_ENABLED, ON_FAVORITES_PAGE } from "../lib/globals/flags";
+import { FAVORITES_SEARCH_GALLERY_ENABLED } from "../lib/globals/flags";
 import { setupAutocomplete } from "../features/autocomplete/awesomplete";
-import { setupFavoritesPage } from "../features/favorites/controller/flows/setup/favorites_setup_flow";
-import { setupFavoritesSearchGallery } from "../lib/flows/setup";
+import { setupFavorites } from "../features/favorites/controller/flows/setup/favorites_setup_flow";
+import { setupGallery } from "../features/gallery/controller/flows/setup/gallery_setup_flow";
+import { setupGlobals } from "../lib/flows/setup";
 
 function runFavoritesSearchGallery(): void {
-  setupFavoritesSearchGallery();
-
-  if (ON_FAVORITES_PAGE) {
-    setupFavoritesPage();
-  }
+  setupGlobals();
+  setupFavorites();
+  setupGallery();
   setupAutocomplete();
 }
 

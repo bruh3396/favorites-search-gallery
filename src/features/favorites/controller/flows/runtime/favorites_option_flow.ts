@@ -1,8 +1,12 @@
 import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesSearchFlow from "./favorites_search_flow";
 import * as FavoritesView from "../../../view/favorites_view";
-import { Rating, SortingMethod } from "../../../../../types/primitives/primitives";
-import { FavoritesInfiniteScrollFlow } from "./presentation/infinite_scroll/favorites_infinite_scroll_flow";
+import { FavoriteLayout, Rating, SortingMethod } from "../../../../../types/primitives/primitives";
+import { FavoritesInfiniteScrollFlow } from "../presentation/favorites_infinite_scroll_flow";
+
+export function changeLayout(layout: FavoriteLayout): void {
+  FavoritesView.changeLayout(layout);
+}
 
 export function toggleInfiniteScroll(value: boolean): void {
   FavoritesInfiniteScrollFlow.reset();
@@ -29,4 +33,9 @@ export function toggleSortAscending(value: boolean): void {
 export function changeAllowedRatings(ratings: Rating): void {
   FavoritesModel.changeAllowedRatings(ratings);
   FavoritesSearchFlow.searchFavoritesWithPreviousQuery();
+}
+
+export function changeResultsPerPage(resultsPerPage: number): void {
+  FavoritesModel.changeResultsPerPage(resultsPerPage);
+  FavoritesSearchFlow.showLatestSearchResults();
 }

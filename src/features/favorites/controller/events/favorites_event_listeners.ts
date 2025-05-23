@@ -3,7 +3,7 @@ import * as FavoritesOptionsFlow from "../flows/runtime/favorites_option_flow";
 import * as FavoritesSearchFlow from "../flows/runtime/favorites_search_flow";
 import * as FavoritesView from "../../view/favorites_view";
 import { Events } from "../../../../lib/globals/events";
-import { FavoritesPaginationFlow } from "../flows/runtime/presentation/pagination/favorites_pagination_flow";
+import { FavoritesPaginationFlow } from "../flows/presentation/favorites_pagination_flow";
 
 export function addEventListenersToFavoritesPage(): void {
   Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
@@ -22,28 +22,11 @@ export function addEventListenersToFavoritesPage(): void {
 
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.toggleBlacklist);
-  Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
+  Events.favorites.layoutChanged.on(FavoritesOptionsFlow.changeLayout);
   Events.favorites.columnCountChanged.on(FavoritesView.updateColumnCount);
   Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.toggleSortAscending);
   Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.changeSortingMethod);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.changeAllowedRatings);
-  addKeyDownEventListeners();
-}
-
-function addKeyDownEventListeners(): void {
-  // Events.global.keydown.on(async (event) => {
-  //   if (!event.isHotkey) {
-  //     return;
-  //   }
-
-  //   if (event.originalEvent.key !== "ArrowRight" && event.originalEvent.key !== "ArrowLeft") {
-  //     return;
-  //   }
-  //   const inGallery = await Utils.inGallery();
-
-  //   if (inGallery) {
-  //     return;
-  //   }
-  //   this.displayController.gotoAdjacentPageDebounced(event.originalEvent.key);
-  // });
+  Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.changeResultsPerPage);
+  Events.document.wheel.on(FavoritesView.changeColumCountUsingWheel);
 }

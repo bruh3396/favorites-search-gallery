@@ -1,14 +1,13 @@
 import { clearPost, createPostFromRawFavorite } from "./favorite_type_utils";
-import { FAVORITES_SEARCH_INDEX } from "../../model/search/index/favorites_search_index";
-import { Favorite } from "./favorite_interfaces";
+import { Favorite } from "./favorite_types";
 import { FavoriteHTMLElement } from "./favorite_element";
 import { FavoriteMetadata } from "../metadata/favorite_metadata";
+import { FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
 import { FavoriteTags } from "./favorite_tags";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
-import { MetricMap } from "../../../../types/interfaces/interfaces";
 import { Post } from "../../../../types/api/post";
 import { Rating } from "../../../../types/primitives/primitives";
-import { compressThumbSource } from "../../../../utils/image/image";
+import { compressThumbSource } from "../../../../utils/content/url";
 import { getIdFromThumb } from "../../../../utils/dom/dom";
 
 const ALL_FAVORITES = new Map<string, FavoriteItem>();
@@ -24,7 +23,14 @@ export function getAllFavorites(): FavoriteItem[] {
 export function addInstanceToAllFavorites(favorite: FavoriteItem): void {
   if (!ALL_FAVORITES.has(favorite.id)) {
     ALL_FAVORITES.set(favorite.id, favorite);
-    FAVORITES_SEARCH_INDEX.add(favorite);
+  }
+}
+
+export function validateTags(post: Post): void {
+  const favorite = getFavorite(post.id);
+
+  if (favorite !== undefined) {
+    favorite.validateTags(post);
   }
 }
 
@@ -61,7 +67,7 @@ export class FavoriteItem implements Favorite {
     return this.element === null ? this.post.previewURL : this.element.thumbURL;
   }
 
-  public get metrics(): MetricMap {
+  public get metrics(): FavoriteMetricMap {
     return this.metadata.metrics;
   }
 
@@ -77,5 +83,9 @@ export class FavoriteItem implements Favorite {
   public withinRating(rating: Rating): boolean {
     // eslint-disable-next-line no-bitwise
     return (this.metadata.rating & rating) > 0;
+  }
+
+  public validateTags(post: Post): void {
+    this.favoriteTags.validateTagsAgainstAPI(post);
   }
 }

@@ -1,7 +1,7 @@
 import { DO_NOTHING } from "../../../../../config/constants";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { InvertedSearchIndex } from "./inverted_search_index";
+import { InvertedSearchIndex } from "../../../../../components/functional/inverted_search_index";
 
 class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
   constructor() {

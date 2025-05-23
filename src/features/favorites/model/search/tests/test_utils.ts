@@ -1,4 +1,4 @@
-import { InvertedSearchIndex } from "../index/inverted_search_index";
+import { InvertedSearchIndex } from "../../../../../components/functional/inverted_search_index";
 import { Searchable } from "../../../../../types/interfaces/interfaces";
 
 export function getPrefixes(word: string): string[] {

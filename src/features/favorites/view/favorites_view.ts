@@ -1,19 +1,21 @@
-import * as FavoritesPaginationMenu from "./favorites_pagination_menu";
-import * as FavoritesPreloader from "./favorites_thumb_preloader";
-import * as FavoritesStatus from "./favorites_status_bar";
-import * as FavoritesTiler from "./tilers/favorites_tiler";
+import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
+import * as FavoritesPreloader from "./content/misc/favorites_thumb_preloader";
+import * as FavoritesStatus from "./menu/favorites_status_bar";
+import * as FavoritesTiler from "./content/tilers/favorites_tiler";
+import { changeColumnCountOnShiftScroll, toggleAddOrRemoveButtons, toggleDownloadButtons } from "../ui/favorites_menu_event_handlers";
 import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons } from "./favorites_view_utils";
-import { Favorite } from "../types/favorite/favorite_interfaces";
+import { Favorite } from "../types/favorite/favorite_types";
 import { FavoriteItem } from "../types/favorite/favorite_item";
 import { FavoriteLayout } from "../../../types/primitives/primitives";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
+import { FavoritesSettings } from "../../../config/favorites_settings";
+import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
 import { Preferences } from "../../../store/local_storage/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/globals/flags";
-import { collectAspectRatios } from "./aspect_ratios";
+import { collectAspectRatios } from "./content/skeleton/aspect_ratios";
 import { sleep } from "../../../utils/misc/async";
 
-export function showNotification(message: string): void {
+export function setStatus(message: string): void {
   FavoritesStatus.setStatus(message);
 }
 
@@ -31,15 +33,7 @@ export function insertNewSearchResults(thumbs: HTMLElement[]): void {
 
 export function insertNewSearchResultsOnReload(results: { newSearchResults: Favorite[], newFavorites: Favorite[], allSearchResults: Favorite[] }): void {
   FavoritesTiler.addItemsToTop(results.newSearchResults.map((favorite) => favorite.root));
-  notifyNewFavoritesFound(results.newFavorites.length);
-}
-
-export function notifyNewFavoritesFound(newFavoritesCount: number): void {
-  if (newFavoritesCount > 0) {
-    const pluralSuffix = newFavoritesCount > 1 ? "s" : "";
-
-    showNotification(`Found ${newFavoritesCount} new favorite${pluralSuffix}`);
-  }
+  FavoritesStatus.notifyNewFavoritesFound(results.newFavorites.length);
 }
 
 export function changeLayout(layout: FavoriteLayout): void {
@@ -109,7 +103,16 @@ export function setupFavoritesView(): void {
   toggleDownloadButtons(Preferences.downloadButtonsVisible.value);
 }
 
-export async function preloadFavorites(favorites: FavoriteItem[]): Promise<void> {
-  await waitForAllThumbnailsToLoad();
-  FavoritesPreloader.preload(favorites);
+export function preloadFavorites(favorites: FavoriteItem[]): void {
+  if (FavoritesSettings.preloadThumbnails) {
+    FavoritesPreloader.preload(favorites);
+  }
+}
+
+export function getCurrentLayout(): FavoriteLayout {
+  return FavoritesTiler.getCurrentLayout();
+}
+
+export function changeColumCountUsingWheel(wheelEvent: FavoritesWheelEvent): void {
+  changeColumnCountOnShiftScroll(wheelEvent);
 }

@@ -1,6 +1,6 @@
-import {getDimensions2D, removeExtraWhiteSpace} from "../../utils/primitive/string";
-import {Post} from "../../types/api/post";
-import {cleanImageSource} from "../../utils/image/image";
+import { getDimensions2D, removeExtraWhiteSpace } from "../../utils/primitive/string";
+import { Post } from "../../types/api/post";
+import { cleanImageSource } from "../../utils/content/url";
 
   const PARSER = new DOMParser();
   const STATISTICS_REGEX = /(\S+):\s+(\S+)/g;
