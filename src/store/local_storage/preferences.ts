@@ -21,7 +21,7 @@ export const Preferences = {
   sortAscendingEnabled: new Preference("sortAscending", false),
   sortingMethod: new Preference<SortingMethod>("sortingMethod", "default"),
   optionsVisible: new Preference("showOptions", false),
-  columnCount: new Preference("columnCount", 6),
+  columnCount: new Preference("columnCount", 5),
   rowSize: new Preference("rowSize", 7),
   dockGalleryMenuLeft: new Preference("dockGalleryMenuLeft", true),
   uiVisible: new Preference("showUI", true),

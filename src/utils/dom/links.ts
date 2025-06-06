@@ -1,4 +1,5 @@
 import * as FSG_URL from "../../lib/api/url";
+import { getOriginalContentURL } from "../../lib/media_api/api";
 
 export function openPostPage(id: string): void {
   window.open(FSG_URL.createPostPageURL(id), "_blank");
@@ -6,6 +7,10 @@ export function openPostPage(id: string): void {
 
 export function openSearchPage(searchQuery: string): void {
   window.open(FSG_URL.createSearchPageURL(searchQuery));
+}
+
+export async function openOriginal(thumb: HTMLElement): Promise<void> {
+  window.open(await getOriginalContentURL(thumb), "_blank");
 }
 
 export function createObjectURLFromSvg(svg: string): string {

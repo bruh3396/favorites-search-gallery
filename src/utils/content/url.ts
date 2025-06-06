@@ -15,6 +15,6 @@ export function compressThumbSource(source: string): string {
   return match === null ? "" : match.splice(1).join("_");
 }
 
-export function getImageURLWithoutExtension(imageURL: string): string {
-  return cleanImageSource(imageURL).replace("thumbnails", "images").replace("thumbnail_", "").replace("us.rule34", "rule34");
+export function convertThumbURLToImageURL(thumbURL: string): string {
+  return cleanImageSource(thumbURL).replace("thumbnails", "images").replace("thumbnail_", "").replace("us.rule34", "rule34");
 }

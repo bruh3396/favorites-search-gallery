@@ -1419,7 +1419,6 @@ export const GALLERY_HTML = `
   #gallery-background {
     background: black;
     z-index: -1;
-    /* display: none; */
     pointer-events: none;
     cursor: none;
     width: 100vw;

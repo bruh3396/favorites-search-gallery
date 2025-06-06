@@ -1,4 +1,4 @@
-import { capitalize, convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeNonNumericCharacters, toCamelCase } from "../utils/primitive/string";
+import { capitalize, convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeNonNumericCharacters, toCamelCase } from "../utils/primitive/string";
 import { describe, expect, test } from "vitest";
 
 describe("toCamelCase", () => {
@@ -54,18 +54,18 @@ describe("removeExtraWhiteSpace", () => {
 });
 
 describe("getDimensions2D", () => {
-  const DEFAULT_DIMENSIONS = {width: 100, height: 100};
+  const DEFAULT_DIMENSIONS = { width: 100, height: 100 };
 
   test("empty", () => {
     expect(getDimensions2D("")).toStrictEqual(DEFAULT_DIMENSIONS);
   });
 
   test("square", () => {
-    expect(getDimensions2D("20x20")).toStrictEqual({width: 20, height: 20});
+    expect(getDimensions2D("20x20")).toStrictEqual({ width: 20, height: 20 });
   });
 
   test("rectangle", () => {
-    expect(getDimensions2D("1920x1080")).toStrictEqual({width: 1920, height: 1080});
+    expect(getDimensions2D("1920x1080")).toStrictEqual({ width: 1920, height: 1080 });
   });
 
   test("invalid format", () => {
@@ -352,5 +352,33 @@ describe("capitalize", () => {
     expect(capitalize("hello world")).toBe("Hello world");
     expect(capitalize("Hello world")).toBe("Hello world");
     expect(capitalize("hello World")).toBe("Hello World");
+  });
+});
+
+describe("removeFirstAndLastLines", () => {
+  test("empty", () => {
+    expect(removeFirstAndLastLines("")).toBe("");
+  });
+
+  test("less than three lines", () => {
+    const singleLine = "foo";
+    const twoLines = "foo\nbar";
+
+    expect(removeFirstAndLastLines(singleLine)).toBe("");
+    expect(removeFirstAndLastLines(twoLines)).toBe("");
+  });
+
+  test("iife", () => {
+    const code = `() => {
+console.log("Hello, World!");
+console.log("Hello, World!");
+console.log("Hello, Friend!");
+}`;
+
+    const expected = `console.log("Hello, World!");
+console.log("Hello, World!");
+console.log("Hello, Friend!");`;
+
+    expect(removeFirstAndLastLines(code)).toBe(expected);
   });
 });

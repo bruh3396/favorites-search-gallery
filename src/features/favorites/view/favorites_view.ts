@@ -4,7 +4,7 @@ import * as FavoritesStatus from "./menu/favorites_status_bar";
 import * as FavoritesTiler from "./content/tilers/favorites_tiler";
 import { changeColumnCountOnShiftScroll, toggleAddOrRemoveButtons, toggleDownloadButtons } from "../ui/favorites_menu_event_handlers";
 import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
-import { Favorite } from "../types/favorite/favorite_types";
+import { Favorite } from "../../../types/interfaces/interfaces";
 import { FavoriteItem } from "../types/favorite/favorite_item";
 import { FavoriteLayout } from "../../../types/primitives/primitives";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";

@@ -40,11 +40,6 @@ def get_html_variable_name(html_path: str) -> str:
     return variable_name.upper() + "_HTML"
 
 
-def get_web_worker_variable_name(web_worker_path: str) -> str:
-    variable_name = os.path.basename(web_worker_path).replace(".js", "")
-    return convert_snake_case_to_camel_case(variable_name)
-
-
 def insert_html_into_typescript_content(html_variable_name: str, html_content: str, typescript_content: str) -> str:
     return re.sub(
         rf"{html_variable_name}[\s\n\t]*:[\s\n\t]*`.*?`",
@@ -62,7 +57,7 @@ def read_html_file(html_path: str) -> str:
     return read_file(get_html_full_path(html_path))
 
 
-def get_html_typescript_decalration(html_path_content_pair: tuple[str, str]) -> str:
+def get_html_typescript_declaration(html_path_content_pair: tuple[str, str]) -> str:
     html_path, html_content = html_path_content_pair
     html_variable_name = get_html_variable_name(html_path)
     typescript_declaration = f"export const {html_variable_name} = `\n{html_content}\n`;"
@@ -72,22 +67,8 @@ def get_html_typescript_decalration(html_path_content_pair: tuple[str, str]) -> 
 def build_typescript_html_file() -> None:
     html_paths = os.listdir(get_full_path(HTML_DIRECTORY))
     html_content_map = [(path, read_html_file(path)) for path in html_paths]
-    typescript_content = "\n".join([get_html_typescript_decalration(html_path_content_pair) for html_path_content_pair in html_content_map]) + "\n"
+    typescript_content = "\n".join([get_html_typescript_declaration(html_path_content_pair) for html_path_content_pair in html_content_map]) + "\n"
     write_file(TYPESCRIPT_HTML_PATH, typescript_content)
-
-
-def inject_web_worker_into_typescript_file(web_worker_path: str) -> None:
-    typescript_path = "js/common/static/web_workers.js"
-    web_worker_content = read_file(web_worker_path)
-    typescript_content = read_file(typescript_path)
-    web_worker_variable_name = get_web_worker_variable_name(web_worker_path)
-    typescript_content_with_web_worker_injected = re.sub(
-        rf"{web_worker_variable_name}:[\s\n\t]*`.*?`",
-        rf"{web_worker_variable_name}:\n`\n{web_worker_content}\n`",
-        typescript_content,
-        flags=re.DOTALL,
-    )
-    write_file(typescript_path, typescript_content_with_web_worker_injected)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -104,8 +85,6 @@ def on_file_changed() -> None:
 
     if arguments.html:
         build_typescript_html_file()
-    elif arguments.worker:
-        inject_web_worker_into_typescript_file(arguments.worker)
 
     print("Post processing completed.")
 

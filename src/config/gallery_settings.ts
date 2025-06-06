@@ -19,21 +19,16 @@ export const GallerySettings = {
   preloadedGifCount: ON_MOBILE_DEVICE ? 2 : 2,
   preloadContentDebounceTime: 400,
   preloadingEnabled: true,
-  visibleThumbsDownwardScrollPixelGenerosity: 1000,
+  visibleThumbsDownwardScrollPixelGenerosity: 50,
   navigationThrottleTime: 250,
   maxImagesToRenderAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
   idleInteractionDuration: 1000,
   menuVisibilityTime: 1000,
-  maxVisibleThumbsBeforeStoppingPreload: 100,
+  maxVisibleThumbsBeforeStoppingPreload: 150,
   useOffscreenThumbUpscaler: true,
   fetchImageBitmapsInWorker: true,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },
   createImageAccentColors: false
-};
-
-export const SharedGallerySettings = {
-   upscaledThumbCanvasWidth: 800,
-   maxUpscaledThumbCanvasHeight: 16000
 };

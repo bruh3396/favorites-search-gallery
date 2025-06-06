@@ -5,7 +5,7 @@ import path from "path";
 export const webWorker = {
   name: "ts-raw-loader",
   setup(build) {
-    build.onResolve({ filter: /\.ts\?raw$/ }, args => {
+    build.onResolve({ filter: /\?raw$/ }, args => {
       let rawPath = args.path.replace(/\?raw$/, "");
 
       if (!rawPath.endsWith(".ts")) {

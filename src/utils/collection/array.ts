@@ -1,4 +1,4 @@
-import {getRandomPositiveInteger} from "../primitive/number";
+import { getRandomPositiveInteger } from "../primitive/number";
 
 export function indexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;
@@ -55,4 +55,56 @@ export function getNumbersAround(number: number, count: number, min: number, max
     i += 1;
   }
   return numbers.sort((a, b) => a - b);
+}
+
+export function getElementsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
+  if (!indexInBounds(array, startIndex) || limit === 0) {
+    return [];
+  }
+  const result = [array[startIndex]];
+  let i = 1;
+
+  while (result.length < limit) {
+    const leftIndex = startIndex - i;
+    const rightIndex = startIndex + i;
+    const leftIndexInBounds = indexInBounds(array, leftIndex);
+    const rightIndexInBounds = indexInBounds(array, rightIndex);
+    const bothIndexesOutOfBounds = !leftIndexInBounds && !rightIndexInBounds;
+
+    if (bothIndexesOutOfBounds) {
+      break;
+    }
+
+    if (leftIndexInBounds) {
+      result.push(array[leftIndex]);
+    }
+
+    if (rightIndexInBounds && result.length < limit) {
+      result.push(array[rightIndex]);
+    }
+    i += 1;
+  }
+  return result;
+}
+
+export function getWrappedElementsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
+  if (!indexInBounds(array, startIndex) || limit === 0) {
+    return [];
+  }
+  const result = [array[startIndex]];
+  let i = 1;
+
+  while (result.length < limit && result.length < array.length) {
+    const leftIndex = (startIndex - i + array.length) % array.length;
+    const rightIndex = (startIndex + i) % array.length;
+
+    result.push(array[leftIndex]);
+
+    if (result.length < limit && result.length < array.length) {
+      result.push(array[rightIndex]);
+    }
+
+    i += 1;
+  }
+  return result;
 }

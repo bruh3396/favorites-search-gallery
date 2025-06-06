@@ -1,4 +1,5 @@
-import { MetadataMetric } from "../primitives/primitives";
+import { MetadataMetric, Rating } from "../primitives/primitives";
+import { FavoritesDatabaseRecord } from "../primitives/composites";
 
 export interface Searchable {
   tags: Set<string>
@@ -20,4 +21,11 @@ export interface IUpscaleRequest {
   imageBitmap: ImageBitmap | null
   imageURL: string
   readonly transferable: OffscreenCanvas[]
+}
+export interface Favorite extends SearchableWithMetrics {
+  id: string;
+  root: HTMLElement;
+  thumbURL: string;
+  databaseRecord: FavoritesDatabaseRecord;
+  withinRating: (rating: Rating) => boolean;
 }

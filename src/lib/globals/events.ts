@@ -70,7 +70,8 @@ const gallery = {
   favoriteAddedOrDeleted: new EventEmitter<string>(true),
   showOnHover: new EventEmitter<boolean>(true),
   enteredGallery: new EventEmitter<void>(true),
-  exitedGallery: new EventEmitter<void>(true)
+  exitedGallery: new EventEmitter<void>(true),
+  visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true)
 };
 
 const caption = {

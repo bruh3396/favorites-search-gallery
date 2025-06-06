@@ -3,6 +3,7 @@ import * as FavoritesSearchFlow from "./favorites_search_flow";
 import * as FavoritesView from "../../../view/favorites_view";
 import { FavoriteLayout, Rating, SortingMethod } from "../../../../../types/primitives/primitives";
 import { FavoritesInfiniteScrollFlow } from "../presentation/favorites_infinite_scroll_flow";
+import { Preferences } from "../../../../../store/local_storage/preferences";
 
 export function changeLayout(layout: FavoriteLayout): void {
   FavoritesView.changeLayout(layout);
@@ -39,3 +40,4 @@ export function changeResultsPerPage(resultsPerPage: number): void {
   FavoritesModel.changeResultsPerPage(resultsPerPage);
   FavoritesSearchFlow.showLatestSearchResults();
 }
+

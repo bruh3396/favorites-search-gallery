@@ -1,4 +1,4 @@
-import {Timeout} from "../../types/primitives/primitives";
+import { Timeout } from "../../types/primitives/primitives";
 
 export function sleep(milliseconds: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -14,7 +14,7 @@ export function debounceAfterFirstCall<V>(this: unknown, fn: (...args: V[]) => v
   let calledDuringDebounce = false;
   return (...args: V[]): void => {
     if (firstCall) {
-      // eslint-disable-next-line no-invalid-this
+
       Reflect.apply(fn, this, args);
       firstCall = false;
     } else {
@@ -24,11 +24,34 @@ export function debounceAfterFirstCall<V>(this: unknown, fn: (...args: V[]) => v
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       if (calledDuringDebounce) {
-        // eslint-disable-next-line no-invalid-this
+
         Reflect.apply(fn, this, args);
         calledDuringDebounce = false;
       }
       firstCall = true;
     }, delay) as Timeout;
+  };
+}
+
+export function debounceAlways<V>(this: unknown, fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
+  let timeoutId: Timeout;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      Reflect.apply(fn, this, args);
+    }, delay);
+  };
+}
+
+export function throttle<V>(fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
+  let throttling = false;
+  return (/** @type {any} */ ...args) => {
+    if (!throttling) {
+      fn(...args);
+      throttling = true;
+      setTimeout(() => {
+        throttling = false;
+      }, delay);
+    }
   };
 }

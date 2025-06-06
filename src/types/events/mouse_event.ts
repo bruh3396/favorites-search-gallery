@@ -1,5 +1,5 @@
-import {getThumbUnderCursor, insideOfThumb} from "../../utils/dom/dom";
-import {ClickCodes} from "../primitives/enums";
+import { getThumbUnderCursor, insideOfThumb } from "../../utils/dom/dom";
+import { ClickCodes } from "../primitives/enums";
 
 export class FavoritesMouseEvent {
   public readonly originalEvent: MouseEvent;

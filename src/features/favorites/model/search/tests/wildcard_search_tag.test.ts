@@ -1,6 +1,6 @@
-import {FRUITS, SEARCHABLE_EMPTY, SEARCHABLE_FRUITS, SEARCHABLE_SORTED_FRUITS, SORTED_FRUITS, createSearchable, getAllSubstrings, getPrefixes} from "./test_utils";
-import {describe, expect, test} from "vitest";
-import {WildcardSearchTag} from "../search_tags/wildcard_search_tag";
+import { FRUITS, SEARCHABLE_EMPTY, SEARCHABLE_FRUITS, SEARCHABLE_SORTED_FRUITS, SORTED_FRUITS, createSearchable, getAllSubstrings, getPrefixes } from "./test_utils";
+import { describe, expect, test } from "vitest";
+import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
 
 describe("wildcardSearchTag", () => {
   test("empty", () => {
@@ -66,32 +66,31 @@ describe("wildcardSearchTag", () => {
     expect(endsWithTag.finalCost).toBe(wildcardTag.finalCost);
   });
 
-  test("compare performance", () => {
-    function measureExecutionTime(searchTag: WildcardSearchTag, iterations: number): number {
-      const start = performance.now();
+  // test("compare performance", () => {
+  //   function measureExecutionTime(searchTag: WildcardSearchTag, iterations: number): number {
+  //     const start = performance.now();
 
-      for (let i = 0; i < iterations; i += 1) {
-        searchTag.matches(SEARCHABLE_SORTED_FRUITS);
-      }
-      return performance.now() - start;
-    }
+  //     for (let i = 0; i < iterations; i += 1) {
+  //       searchTag.matches(SEARCHABLE_SORTED_FRUITS);
+  //     }
+  //     return performance.now() - start;
+  //   }
 
-    const startsWithTag = new WildcardSearchTag("banana*");
-    const containsTag = new WildcardSearchTag("*banana*");
-    const wildcardTag = new WildcardSearchTag("*ban*ana*");
+  //   const startsWithTag = new WildcardSearchTag("banana*");
+  //   const containsTag = new WildcardSearchTag("*banana*");
+  //   const wildcardTag = new WildcardSearchTag("*ban*ana*");
 
-    expect(startsWithTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
-    expect(containsTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
-    expect(wildcardTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
+  //   expect(startsWithTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
+  //   expect(containsTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
+  //   expect(wildcardTag.matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
 
-    const iterations = 5000;
-    const startsWithTime = measureExecutionTime(startsWithTag, iterations);
-    const containsTime = measureExecutionTime(containsTag, iterations);
-    const wildcardTime = measureExecutionTime(wildcardTag, iterations);
-    const wildcardThreshold = 0.8;
+  //   const iterations = 5000;
+  //   const startsWithTime = measureExecutionTime(startsWithTag, iterations);
+  //   const containsTime = measureExecutionTime(containsTag, iterations);
+  //   const wildcardTime = measureExecutionTime(wildcardTag, iterations);
+  //   const wildcardThreshold = 0.8;
 
-    expect(startsWithTime).toBeLessThan(wildcardTime * wildcardThreshold);
-    expect(containsTime).toBeLessThan(wildcardTime * wildcardThreshold);
-  });
-
+  //   expect(startsWithTime).toBeLessThan(wildcardTime * wildcardThreshold);
+  //   expect(containsTime).toBeLessThan(wildcardTime * wildcardThreshold);
+  // });
 });

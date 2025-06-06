@@ -49,6 +49,6 @@ import { webWorker } from "./worker_plugin.mjs";
   const crlfContent = contentWithoutSourceComments.replace(/\r?\n/g, "\r\n");
 
   writeFileSync(OUT_FILE, crlfContent, "utf8");
-  // writeFileSync(META_FILE, JSON.stringify(result.metafile, null, 2), "utf8");
+  writeFileSync(META_FILE, JSON.stringify(result.metafile, null, 2), "utf8");
   console.log("✔ Build completed.");
 }());

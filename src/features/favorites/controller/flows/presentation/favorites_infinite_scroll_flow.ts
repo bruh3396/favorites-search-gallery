@@ -54,6 +54,7 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     await sleep(50);
     // FetchQueues.imageRequest.resume();
   }
+
   private async showFirstResults(): Promise<void> {
     FavoritesView.showSearchResults(FavoritesModel.getFirstResults());
     await waitForAllThumbnailsToLoad();

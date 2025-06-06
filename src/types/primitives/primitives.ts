@@ -1,5 +1,4 @@
 export type FavoriteLayout = "row" | "square" | "grid" | "column"
-export type FavoritesGalleryState = 0 | 1 | 2
 export type BackwardNavigationKey = "a" | "A" | "ArrowLeft"
 export type ForwardNavigationKey = "d" | "D" | "ArrowRight"
 export type NavigationKey = BackwardNavigationKey | ForwardNavigationKey

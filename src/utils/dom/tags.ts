@@ -1,7 +1,7 @@
 import { FavoriteItem, getFavorite } from "../../features/favorites/types/favorite/favorite_item";
-import { ON_FAVORITES_PAGE } from "../../lib/globals/flags";
-import { ContentType } from "../../types/primitives/primitives";
 import { convertToTagSet, getContentType } from "../primitive/string";
+import { ContentType } from "../../types/primitives/primitives";
+import { ON_FAVORITES_PAGE } from "../../lib/globals/flags";
 import { getImageFromThumb } from "./dom";
 
 function getTagAttributeFromImage(image: HTMLImageElement): string {

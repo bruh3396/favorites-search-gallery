@@ -22,6 +22,11 @@ export function getThumbFromImage(image: HTMLElement): HTMLElement | null {
   return getClosestItem(image);
 }
 
+export function getURLFromThumb(thumb: HTMLElement): string | null {
+  const image = getImageFromThumb(thumb);
+  return image ? image.src : null;
+}
+
 export function getThumbUnderCursor(event: MouseEvent): HTMLElement | null {
   if (!(event.target instanceof HTMLElement) || event.target.matches(".caption-tag")) {
     return null;
@@ -136,4 +141,22 @@ export function getItemCount(): number {
 
 export function hasTagName(element: HTMLElement | EventTarget, tagName: string): boolean {
   return element instanceof HTMLElement && element.tagName !== undefined && element.tagName.toLowerCase() === tagName;
+}
+
+export function getRectDistance(rect1: DOMRectReadOnly, rect2: DOMRectReadOnly): number {
+  const x1 = rect1.left + (rect1.width / 2);
+  const y1 = rect1.top + (rect1.height / 2);
+  const x2 = rect2.left + (rect2.width / 2);
+  const y2 = rect2.top + (rect2.height / 2);
+  return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2));
+}
+
+export function toggleFullscreen(): void {
+  const html = document.documentElement;
+
+  if (document.fullscreenElement === null) {
+    html.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
 }

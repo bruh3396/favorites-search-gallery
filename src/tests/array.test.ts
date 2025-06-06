@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { getNumbersAround, indexInBounds, shuffleArray } from "../utils/collection/array";
+import { getElementsAroundIndex, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray } from "../utils/collection/array";
+import { getRandomPositiveInteger } from "../utils/primitive/number";
 
 describe("indexInBounds", () => {
   test("empty", () => {
@@ -28,7 +29,7 @@ describe("indexInBounds", () => {
 });
 
 describe("shuffleArray", () => {
-  const NUMBERS = Array.from({length: 1000}, (_, i) => i + 1);
+  const NUMBERS = Array.from({ length: 1000 }, (_, i) => i + 1);
   const NUMBER_SET = new Set(NUMBERS);
 
   test("empty", () => {
@@ -87,5 +88,90 @@ describe("getNumbersAround", () => {
 
   test("mix > max", () => {
     expect(getNumbersAround(40, 10, 100, 20)).toStrictEqual([]);
+  });
+});
+
+describe("getElementsAroundIndex", () => {
+  function testElementsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
+    const result = getElementsAroundIndex(array, startIndex, limit);
+
+    expect(result).toStrictEqual(expected);
+  }
+
+  test("empty", () => {
+    for (let i = 0; i < 10; i += 1) {
+      const startIndex = getRandomPositiveInteger(100);
+      const limit = getRandomPositiveInteger(100);
+
+      testElementsAroundIndex([], startIndex, limit, []);
+    }
+  });
+
+  test("index out of bounds", () => {
+    testElementsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+  });
+
+  test("limit greater than length", () => {
+    testElementsAroundIndex([1, 2], 0, 3, [1, 2]);
+  });
+
+  test("zero limit", () => {
+    testElementsAroundIndex([1, 2], 0, 0, []);
+  });
+
+  test("normal cases", () => {
+    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 1, [3]);
+    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 3, [3, 2, 4]);
+    testElementsAroundIndex([1, 2, 3, 4, 5], 0, 3, [1, 2, 3]);
+    testElementsAroundIndex([1, 2, 3, 4, 5], 4, 3, [5, 4, 3]);
+    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
+    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 4, [3, 2, 4, 1]);
+  });
+});
+
+describe("getWrappedElementsAroundIndex", () => {
+  function testWrappedElementsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
+    const result = getWrappedElementsAroundIndex(array, startIndex, limit);
+
+    expect(result).toStrictEqual(expected);
+  }
+
+  test("empty", () => {
+    for (let i = 0; i < 10; i += 1) {
+      const startIndex = getRandomPositiveInteger(100);
+      const limit = getRandomPositiveInteger(100);
+
+      testWrappedElementsAroundIndex([], startIndex, limit, []);
+    }
+  });
+
+  test("index out of bounds", () => {
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+  });
+
+  test("limit greater than length", () => {
+    testWrappedElementsAroundIndex([1, 2], 0, 3, [1, 2]);
+  });
+
+  test("zero limit", () => {
+    testWrappedElementsAroundIndex([1, 2], 0, 0, []);
+  });
+
+  test("normal cases", () => {
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 0, 5, [1, 5, 2, 4, 3]);
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 4, 5, [5, 4, 1, 3, 2]);
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 0, 1, [1]);
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 9, 10, [10, 9, 1, 8, 2, 7, 3, 6, 4, 5]);
+    testWrappedElementsAroundIndex([42], 0, 3, [42]);
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 2, 10, [3, 2, 4, 1, 5]);
+    testWrappedElementsAroundIndex([], 2, 10, []);
+    testWrappedElementsAroundIndex([], 0, 0, []);
+    testWrappedElementsAroundIndex([1], 0, 0, []);
+    testWrappedElementsAroundIndex([1], 0, 1, [1]);
+    testWrappedElementsAroundIndex([50], 0, 2, [50]);
+    testWrappedElementsAroundIndex([1, 2, 4, 5], 1, 3, [2, 1, 4]);
+    testWrappedElementsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2, [5, 4]);
   });
 });

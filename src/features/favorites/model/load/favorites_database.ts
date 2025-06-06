@@ -34,19 +34,32 @@ function usingCorrectSchema(): boolean {
   return getSchemaVersion() === SCHEMA_VERSION;
 }
 
-async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
-  if (records.length === 0 || usingCorrectSchema()) {
-    setSchemaVersion(SCHEMA_VERSION);
-    return Promise.resolve(records);
-  }
-  records = records.map(record => ({
+function convertRecordFromSerialized(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord {
+    return {
     ...record,
     tags: convertToTagSet(record.tags as unknown as string),
     metadata: JSON.parse(record.metadata as unknown as string)
-  }));
-  await DATABASE.update(records);
+  };
+}
+
+function convertRecordsFromSerialized(records: FavoritesDatabaseRecord[]): FavoritesDatabaseRecord[] {
+  return records.map(record => convertRecordFromSerialized(record));
+}
+
+async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
+  if (records.length === 0) {
+    setSchemaVersion(SCHEMA_VERSION);
+    return Promise.resolve(records);
+  }
+
+  if (usingCorrectSchema()) {
+    return Promise.resolve(records);
+  }
+  const updatedRecords = convertRecordsFromSerialized(records);
+
+  await DATABASE.update(updatedRecords);
   setSchemaVersion(SCHEMA_VERSION);
-  return records;
+  return updatedRecords;
 }
 
 export async function loadAllFavorites(): Promise<FavoriteItem[]> {

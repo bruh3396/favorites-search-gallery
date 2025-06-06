@@ -1,4 +1,5 @@
 import * as API from "../../lib/api/api";
+import { isGif, isVideo } from "../../utils/content/content_type";
 import { BatchExecutor } from "../../components/functional/batch_executor";
 import { Database } from "./database";
 import { MediaExtension } from "../../types/primitives/primitives";
@@ -44,6 +45,15 @@ function moveExtensionsFromLocalStorageToIndexedDB(): void {
   localStorage.removeItem("imageExtensions");
 }
 
+function getExtensionFromPost(post: Post): MediaExtension | null {
+  return getExtensionFromURL(post.fileURL);
+}
+
+export function getExtensionFromURL(url: string): MediaExtension | null {
+  const match = EXTENSION_REGEX.exec(url);
+  return match === null ? null : match[1] as MediaExtension;
+}
+
 export function has(id: string): boolean {
   return EXTENSION_MAP.has(id);
 }
@@ -59,18 +69,33 @@ export function set(id: string, extension: MediaExtension): void {
   EXTENSION_MAP.set(id, extension);
 
   if (ON_FAVORITES_PAGE) {
-    DATABASE_WRITE_SCHEDULER.add({ id, extension});
+    DATABASE_WRITE_SCHEDULER.add({ id, extension });
   }
 }
 
-export async function getExtensionFromThumb(thumb: HTMLElement): Promise<MediaExtension | null> {
-  const post = await API.fetchPostFromAPI(thumb.id);
-  return getExtensionFromPost(post);
-}
+export async function getExtensionFromThumb(thumb: HTMLElement): Promise<MediaExtension> {
+  if (isVideo(thumb)) {
+    return "mp4";
+  }
 
-function getExtensionFromPost(post: Post): MediaExtension | null {
-  const match = EXTENSION_REGEX.exec(post.fileURL);
-  return match === null ? null : match[1] as MediaExtension;
+  if (isGif(thumb)) {
+    return "gif";
+  }
+
+  if (has(thumb.id)) {
+    return get(thumb.id) || "jpg";
+  }
+
+  if (ON_FAVORITES_PAGE) {
+    const post = await API.fetchPostFromAPI(thumb.id);
+    const extension = getExtensionFromPost(post);
+
+    if (extension !== null) {
+      set(thumb.id, extension);
+      return extension;
+    }
+  }
+  return "jpg";
 }
 
 export function setExtensionFromPost(post: Post): void {

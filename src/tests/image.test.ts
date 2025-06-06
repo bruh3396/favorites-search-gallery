@@ -1,4 +1,4 @@
-import { cleanImageSource, compressThumbSource, decompressThumbSource, getImageURLWithoutExtension } from "../utils/content/url";
+import { cleanImageSource, compressThumbSource, convertThumbURLToImageURL, decompressThumbSource } from "../utils/content/url";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -45,13 +45,13 @@ describe("compressImageSource", () => {
 
 describe("getImageURLWithoutExtension", () => {
   test("empty", () => {
-    expect(getImageURLWithoutExtension("")).toBe("");
+    expect(convertThumbURLToImageURL("")).toBe("");
   });
 
   test("normal", () => {
     const source = "https://us.rule34.xxx/thumbnails/0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
 
-    expect(getImageURLWithoutExtension(source)).toBe(expected);
+    expect(convertThumbURLToImageURL(source)).toBe(expected);
   });
 });

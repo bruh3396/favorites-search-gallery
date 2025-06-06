@@ -1,13 +1,14 @@
 import * as API from "../../../../lib/api/api";
 import * as Icons from "../../../../assets/icons";
 import { GALLERY_DISABLED, ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/globals/flags";
-import { createObjectURLFromSvg, openPostPage } from "../../../../utils/dom/links";
+import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../../utils/dom/links";
 import { ClickCodes } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/globals/events";
 import { FavoriteElement } from "./favorite_types";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
 import { Post } from "../../../../types/api/post";
 import { getContentType } from "../../../../utils/primitive/string";
+import { downloadFromThumb } from "../../../../lib/download/downloader";
 
 let htmlTemplate: HTMLElement;
 let removeFavoriteButtonHTML: string;
@@ -57,9 +58,9 @@ export class FavoriteHTMLElement implements FavoriteElement {
     this.image = this.root.children[0].children[0] as HTMLImageElement;
     this.addOrRemoveButton = this.root.children[0].children[1] as HTMLImageElement;
     this.downloadButton = this.root.children[0].children[2] as HTMLImageElement;
+    this.downloadButton.onclick = this.download.bind(this);
     this.populateAttributes(post);
     this.setupAddOrRemoveButton(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE);
-    this.setupDownloadButton();
     this.openPostInNewTabOnClick();
     this.presetCanvasDimensions(post);
   }
@@ -116,7 +117,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
 
     this.container.onclick = (event): void => {
       if (event.ctrlKey) {
-        // ImageUtils.openOriginalImageInNewTab(this.root);
+        openOriginal(this.root);
       }
     };
     this.container.addEventListener("mousedown", (event) => {
@@ -143,8 +144,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
     canvas.dataset.size = `${post.width}x${post.height}`;
   }
 
-  private setupDownloadButton(): void {
-    this.downloadButton.onclick = (): void => {
-    };
+  private download(): void {
+    downloadFromThumb(this.root);
   }
 }

@@ -4,6 +4,7 @@ import { insertStyleHTML } from "../../../../utils/dom/style";
 
 export const GALLERY_CONTAINER = document.createElement("div");
 GALLERY_CONTAINER.id = "gallery-container";
+GALLERY_CONTAINER.style.display = "none";
 
 export function insertGalleryContainer(): void {
   insertStyleHTML(GALLERY_HTML);

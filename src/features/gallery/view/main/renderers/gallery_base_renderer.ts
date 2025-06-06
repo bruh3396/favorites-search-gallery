@@ -9,18 +9,15 @@ export abstract class GalleryBaseRenderer implements Renderer {
     GALLERY_CONTAINER.appendChild(this.container);
   }
 
-  public render(element: HTMLElement): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public display(element: HTMLElement): void {
     this.container.style.display = "block";
-    this.render_(element);
   }
 
-  public stopRender(): void {
+  public hide(): void {
     this.container.style.display = "none";
-    this.stopRender_();
   }
 
-  public abstract render_(element: HTMLElement): void;
-  public abstract stopRender_(): void;
   public abstract handlePageChange(): void;
   public abstract handlePageChangeInGallery(): void;
   public abstract preload(elements: HTMLElement[]): void;

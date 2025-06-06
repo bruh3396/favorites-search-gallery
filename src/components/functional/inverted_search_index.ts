@@ -37,15 +37,14 @@ export class InvertedSearchIndex<T extends Searchable> {
     }
   }
 
-  public update(item: T, oldTags: Set<string>): void {
-    for (const tag of oldTags) {
+  public remove(item: T): void {
+    for (const tag of item.tags) {
       const indexedItems = this.tagItemMap.get(tag);
 
       if (indexedItems !== undefined) {
         indexedItems.delete(item);
       }
     }
-    this.add(item);
   }
 
   public getSearchResults(searchCommand: SearchCommand<T>, items: T[]): T[] {

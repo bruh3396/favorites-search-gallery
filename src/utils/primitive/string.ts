@@ -105,3 +105,12 @@ export function convertToTagString(tagSet: Set<string>): string {
 export function capitalize(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
+
+export function removeFirstAndLastLines(text: string): string {
+  const lines = text.split("\n").filter(line => line.trim() !== "");
+
+  if (lines.length <= 2) {
+    return "";
+  }
+  return lines.slice(1, -1).join("\n").trim();
+}

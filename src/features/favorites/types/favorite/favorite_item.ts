@@ -1,5 +1,6 @@
 import { clearPost, createPostFromRawFavorite } from "./favorite_type_utils";
-import { Favorite } from "./favorite_types";
+import { FAVORITES_SEARCH_INDEX } from "../../model/search/index/favorites_search_index";
+import { Favorite } from "../../../../types/interfaces/interfaces";
 import { FavoriteHTMLElement } from "./favorite_element";
 import { FavoriteMetadata } from "../metadata/favorite_metadata";
 import { FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
@@ -20,17 +21,18 @@ export function getAllFavorites(): FavoriteItem[] {
   return Array.from(ALL_FAVORITES.values());
 }
 
-export function addInstanceToAllFavorites(favorite: FavoriteItem): void {
-  if (!ALL_FAVORITES.has(favorite.id)) {
-    ALL_FAVORITES.set(favorite.id, favorite);
-  }
-}
-
 export function validateTags(post: Post): void {
   const favorite = getFavorite(post.id);
 
   if (favorite !== undefined) {
     favorite.validateTags(post);
+  }
+}
+
+function registerFavorite(favorite: FavoriteItem): void {
+  if (!ALL_FAVORITES.has(favorite.id)) {
+    ALL_FAVORITES.set(favorite.id, favorite);
+    FAVORITES_SEARCH_INDEX.add(favorite);
   }
 }
 
@@ -47,7 +49,7 @@ export class FavoriteItem implements Favorite {
     this.element = null;
     this.favoriteTags = new FavoriteTags(this.post, object);
     this.metadata = new FavoriteMetadata(this.id, object);
-    addInstanceToAllFavorites(this);
+    registerFavorite(this);
   }
 
   public get tags(): Set<string> {
@@ -86,6 +88,14 @@ export class FavoriteItem implements Favorite {
   }
 
   public validateTags(post: Post): void {
-    this.favoriteTags.validateTagsAgainstAPI(post);
+    if (!this.favoriteTags.tagsAreEqual(post)) {
+      this.updateTags(post);
+    }
+  }
+
+  private updateTags(post: Post): void {
+    FAVORITES_SEARCH_INDEX.remove(this);
+    this.favoriteTags.update(post);
+    FAVORITES_SEARCH_INDEX.add(this);
   }
 }
