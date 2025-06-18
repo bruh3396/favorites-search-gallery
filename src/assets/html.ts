@@ -630,7 +630,8 @@ export const FAVORITES_HTML = `
     #favorites-search-gallery-menu {
       position: sticky;
       top: 0;
-      padding: 10px;
+      /* padding: 10px; */
+      padding: 5px;
       z-index: 30;
       margin-bottom: 10px;
 
@@ -859,7 +860,7 @@ export const FAVORITES_HTML = `
 
     #left-favorites-panel-bottom-row {
       display: flex;
-      margin-top: 10px;
+      /* margin-top: 10px; */
       flex-wrap: nowrap;
 
       >div {
@@ -867,7 +868,7 @@ export const FAVORITES_HTML = `
       }
 
       .number {
-        font-size: 16px;
+        font-size: 18px;
 
         >input {
           width: 5ch;
@@ -1079,9 +1080,9 @@ export const FAVORITES_HTML = `
         <div id="bottom-panel-1">
           <div class="options-container">
             <div id="main-favorite-options-container">
-              <div id="favorite-options">
+              <div id="favorite-options-left">
               </div>
-              <div id="dynamic-favorite-options">
+              <div id="favorite-options-right">
               </div>
             </div>
           </div>
@@ -2177,98 +2178,6 @@ export const SAVED_SEARCHES_HTML = `
 </div>
 <script>
 </script>
-`;
-export const SETTINGS_HTML = `
-<!-- <div id="favorite-options"></div>
-<div id="dynamic-favorite-options"></div>
-<div id="layout-sort-container" class="inline-option-container">
-  <div id="layout-container">
-    <label>Layout</label>
-    <br>
-  </div>
-  <div id="sort-container" title="Change sorting order of search results">
-    <span id="sort-labels">
-      <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
-      <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
-    </span>
-    <div id="sort-inputs">
-    </div>
-  </div>
-</div>
-
-<div id="results-columns-container" class="inline-option-container">
-  <div id="results-per-page-container"
-    title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
-    <span class="number-label-container">
-      <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
-    </span>
-    <br>
-  </div>
-  <div id="column-count-container" title="Set the number of favorites per row">
-    <div>
-      <span class="number-label-container">
-        <label id="column-count-label">Columns</label>
-      </span>
-      <br>
-    </div>
-  </div>
-  <div id="row-size-container" title="Set the height of each row">
-    <div>
-      <span class="number-label-container">
-        <label id="row-size-label">Row height</label>
-      </span>
-      <br>
-    </div>
-  </div>
-</div>
-
-<div id="rating-container" title="Filter search results by rating">
-</div>
-
-<div id="performance-profile-container" title="Improve performance by disabling features">
-  <label for="performance-profile">Performance Profile</label>
-  <br>
-</div> -->
-<div id="favorite-options"></div>
-<div id="dynamic-favorite-options"></div>
-<div id="layout-container"><label>Layout</label><br></div>
-<div id="sort-container" title="Change sorting order of search results">
-  <span id="sort-labels">
-    <label style="margin-right: 22px;" for="sorting-method">Sort By</label>
-    <label style="margin-left:  22px;" for="sort-ascending">Ascending</label>
-  </span>
-  <div id="sort-inputs"></div>
-</div>
-<div id="results-per-page-container"
-  title="Set the maximum number of search results to display on each page\nLower numbers improve responsiveness">
-  <span class="number-label-container">
-    <label id="results-per-page-label" for="results-per-page-input">Results per Page</label>
-  </span>
-  <br>
-</div>
-<div id="column-count-container" title="Set the number of favorites per row">
-  <div>
-    <span class="number-label-container">
-      <label id="column-count-label">Columns</label>
-    </span>
-    <br>
-  </div>
-</div>
-<div id="row-size-container" title="Set the height of each row">
-  <div>
-    <span class="number-label-container">
-      <label id="row-size-label">Row height</label>
-    </span>
-    <br>
-  </div>
-</div>
-<div id="rating-container" title="Filter search results by rating">
-</div>
-
-<div id="performance-profile-container" title="Improve performance by disabling features">
-  <label for="performance-profile">Performance Profile</label>
-  <br>
-</div>
 `;
 export const SIDEBAR_HTML = `
 <style>

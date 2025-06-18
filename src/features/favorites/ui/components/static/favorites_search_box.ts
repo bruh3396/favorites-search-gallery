@@ -137,6 +137,15 @@ function addEventListenersToSearchBox(): void {
     SEARCH_BOX.value = tag;
     startSearch();
   });
+  Events.searchBox.appendSearchBox.on((text) => {
+    const initialSearchBoxValue = SEARCH_BOX.value;
+    const optionalSpace = initialSearchBoxValue === "" ? "" : " ";
+    const newSearchBoxValue = `${initialSearchBoxValue}${optionalSpace}${text}`;
+
+    SEARCH_BOX.value = newSearchBoxValue;
+    SEARCH_HISTORY.add(newSearchBoxValue);
+    updateLastEditedSearchQuery();
+  });
   Events.favorites.searchButtonClicked.on(onSearchButtonClicked);
   Events.favorites.clearButtonClicked.on(() => {
     SEARCH_BOX.value = "";
@@ -170,14 +179,14 @@ function addEventListenersToSearchBox(): void {
 
 function updateLastEditedSearchQueryOnInput(): void {
   SEARCH_BOX.addEventListener("keyup", debounceAfterFirstCall((event: KeyboardEvent) => {
-      if (!(event instanceof KeyboardEvent)) {
-        return;
-      }
+    if (!(event instanceof KeyboardEvent)) {
+      return;
+    }
 
-      if (event.key.length === 1 || event.key === "Backspace" || event.key === "Delete") {
-        updateLastEditedSearchQuery();
-      }
-    }, 500) as EventListener);
+    if (event.key.length === 1 || event.key === "Backspace" || event.key === "Delete") {
+      updateLastEditedSearchQuery();
+    }
+  }, 500) as EventListener);
 }
 
 function updateLastEditedSearchQuery(): void {

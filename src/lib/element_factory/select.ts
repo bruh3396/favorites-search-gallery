@@ -12,6 +12,7 @@ function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T
     function: DO_NOTHING,
     triggerOnCreation: false,
     preference: null,
+    isNumeric: false,
     ...partial
   };
 }
@@ -39,14 +40,16 @@ export function createSelectElement<T extends string>(partial: Partial<SelectEle
   parent.insertAdjacentElement(template.position, select);
 
   const onChange = (): void => {
+    const value = template.isNumeric ? Number(select.value) : select.value;
+
     if (template.event !== null) {
-      template.event.emit(select.value as T);
+      template.event.emit(value as T);
     }
 
     if (template.preference !== null) {
-      template.preference.set(select.value as T);
+      template.preference.set(value as T);
     }
-    template.function(select.value as T);
+    template.function(value as T);
   };
 
   if (template.preference === null) {
@@ -54,16 +57,5 @@ export function createSelectElement<T extends string>(partial: Partial<SelectEle
   } else {
     select.value = String(template.preference.value);
   }
-
-  if (template.triggerOnCreation) {
-    // onChange();
-  }
-
-  select.onchange = (): void => {
-    onChange();
-
-    if (template.preference !== null) {
-      template.preference.set(select.value as T);
-    }
-  };
+  select.onchange = onChange;
 }

@@ -2,6 +2,7 @@ import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesView from "../../../view/favorites_view";
 import { Events } from "../../../../../lib/globals/events";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
+import { FavoritesPageRelation } from "../../../types/favorite/favorite_types";
 import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
 import { NavigationKey } from "../../../../../types/primitives/primitives";
 
@@ -17,7 +18,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
         this.showCurrentPage();
     }
 
-    public gotoRelativePage(relativePage: string): void {
+    public gotoRelativePage(relativePage: FavoritesPageRelation): void {
         if (FavoritesModel.gotoRelativePage(relativePage)) {
             this.showCurrentPage();
         }
@@ -46,7 +47,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
         Events.favorites.pageChangeResponse.emit();
     }
 
-    public reset(): void {}
+    public reset(): void { }
 
     public handleNewSearchResults(): void {
         FavoritesModel.paginate(FavoritesModel.getLatestSearchResults());

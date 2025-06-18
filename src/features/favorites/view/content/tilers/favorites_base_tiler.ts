@@ -1,6 +1,6 @@
 import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
 import { FavoriteLayout } from "../../../../../types/primitives/primitives";
-import { Skeleton } from "../skeleton/skeleton";
+import { Skeleton } from "../skeleton/favorites_skeleton";
 import { Tiler } from "./favorites_tiler_interface";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
 

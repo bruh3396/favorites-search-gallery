@@ -6,17 +6,10 @@ import { SortedArray } from "./sorted_array";
 import { intersection } from "../../utils/collection/set";
 
 export class InvertedSearchIndex<T extends Searchable> {
-  private readonly tagItemMap: Map<string, Set<T>>;
-  private readonly allItems: Set<T>;
-  private readonly allSortedTags: SortedArray<string>;
-  private sortTagsOnAdd: boolean;
-
-  constructor() {
-    this.tagItemMap = new Map<string, Set<T>>();
-    this.allItems = new Set<T>();
-    this.allSortedTags = new SortedArray<string>();
-    this.sortTagsOnAdd = false;
-  }
+  private readonly allSortedTags: SortedArray<string> = new SortedArray<string>();
+  private readonly allItems: Set<T> = new Set<T>();
+  private readonly tagItemMap: Map<string, Set<T>> = new Map<string, Set<T>>();
+  private sortTagsOnAdd: boolean = false;
 
   public get allTags(): string[] {
     return this.allSortedTags.toArray();
@@ -53,6 +46,10 @@ export class InvertedSearchIndex<T extends Searchable> {
 
   public keepIndexedTagsSorted(value: boolean): void {
     this.sortTagsOnAdd = value;
+  }
+
+  protected sortTags(): void {
+    this.allSortedTags.toArray();
   }
 
   private getSearchResultsUsingIndex(searchQuery: string, itemsToSearch: T[]): T[] {

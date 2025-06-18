@@ -9,7 +9,7 @@ import { sleep } from "../../../../utils/misc/async";
 const DATABASE_NAME = "Favorites";
 const SCHEMA_VERSION = 1;
 const SCHEMA_VERSION_LOCAL_STORAGE_KEY = "favoritesSearchGallerySchemaVersion";
-const OBJECT_STORE_NAME = `user${getFavoritesPageId()}`;
+const OBJECT_STORE_NAME = `user${getFavoritesPageId()}-${SCHEMA_VERSION}`;
 const DATABASE = new Database<FavoritesDatabaseRecord>(DATABASE_NAME, OBJECT_STORE_NAME);
 const METADATA_UPDATER = new BatchExecutor(100, 1000, updateFavorites);
 

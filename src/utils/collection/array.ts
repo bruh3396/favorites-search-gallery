@@ -108,3 +108,16 @@ export function getWrappedElementsAroundIndex<V>(array: V[], startIndex: number,
   }
   return result;
 }
+
+export function splitIntoChunks<V>(array: V[], chunkSize: number): V[][] {
+  const result: V[][] = [];
+
+  if (chunkSize <= 0) {
+    return [array];
+  }
+
+  for (let i = 0; i < array.length; i += chunkSize) {
+    result.push(array.slice(i, i + chunkSize));
+  }
+  return result;
+}

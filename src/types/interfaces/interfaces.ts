@@ -28,4 +28,5 @@ export interface Favorite extends SearchableWithMetrics {
   thumbURL: string;
   databaseRecord: FavoritesDatabaseRecord;
   withinRating: (rating: Rating) => boolean;
+  swapFavoriteButton: () => void;
 }

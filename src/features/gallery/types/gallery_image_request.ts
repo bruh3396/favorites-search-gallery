@@ -5,7 +5,6 @@ import { getFavorite } from "../../favorites/types/favorite/favorite_item";
 import { getURLFromThumb } from "../../../utils/dom/dom";
 
 const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(200);
-const LINGERING_REQUESTS: Set<ImageRequest> = new Set();
 
 export function getFavoritePixelCount(id: string): number {
   const favorite = getFavorite(id);
@@ -74,10 +73,8 @@ export class ImageRequest {
 
   public async close(): Promise<void> {
     if (this.bitmap instanceof ImageBitmap) {
-      LINGERING_REQUESTS.add(this);
       await IMAGE_BITMAP_CLOSE_QUEUE.wait();
       this.bitmap.close();
-      LINGERING_REQUESTS.delete(this);
     }
   }
 }

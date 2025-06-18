@@ -5,14 +5,14 @@ import { Database } from "./database";
 import { MediaExtension } from "../../types/primitives/primitives";
 import { MediaExtensionMapping } from "../../types/primitives/composites";
 import { ON_FAVORITES_PAGE } from "../../lib/globals/flags";
-import { Post } from "../../types/api/post";
+import { Post } from "../../types/api/api_types";
 
 const DATABASE_NAME: string = "ImageExtensions";
 const OBJECT_STORE_NAME: string = "extensionMappings";
 const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
 const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
 const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
-const EXTENSION_REGEX = (/\.(png|jpg|jpeg|gif|mp4)/g);
+const EXTENSION_REGEX = (/\.(png|jpg|jpeg|gif|mp4)/);
 
 async function loadExtensions(): Promise<void> {
   for (const mapping of await DATABASE.load()) {
@@ -83,17 +83,14 @@ export async function getExtensionFromThumb(thumb: HTMLElement): Promise<MediaEx
   }
 
   if (has(thumb.id)) {
-    return get(thumb.id) || "jpg";
+    return get(thumb.id) as MediaExtension;
   }
+  const post = await API.fetchPostFromAPI(thumb.id);
+  const extension = getExtensionFromPost(post);
 
-  if (ON_FAVORITES_PAGE) {
-    const post = await API.fetchPostFromAPI(thumb.id);
-    const extension = getExtensionFromPost(post);
-
-    if (extension !== null) {
-      set(thumb.id, extension);
-      return extension;
-    }
+  if (extension !== null) {
+    set(thumb.id, extension);
+    return extension;
   }
   return "jpg";
 }

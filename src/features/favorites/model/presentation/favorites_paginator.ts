@@ -1,9 +1,10 @@
-import {FavoriteItem} from "../../types/favorite/favorite_item";
-import {FavoritesPaginationParameters} from "../../types/favorite_pagination_parameters";
-import {NavigationKey} from "../../../../types/primitives/primitives";
-import {Preferences} from "../../../../store/local_storage/preferences";
-import {clamp} from "../../../../utils/primitive/number";
-import {isForwardNavigationKey} from "../../../../types/primitives/equivalence";
+import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
+import { FavoritesPaginationParameters } from "../../types/favorite_pagination_parameters";
+import { NavigationKey } from "../../../../types/primitives/primitives";
+import { Preferences } from "../../../../store/local_storage/preferences";
+import { clamp } from "../../../../utils/primitive/number";
+import { isForwardNavigationKey } from "../../../../types/primitives/equivalence";
 
 let currentPageNumber = 1;
 let resultsPerPage = Preferences.resultsPerPage.value;
@@ -36,8 +37,8 @@ export function onlyOnePage(): boolean {
 }
 
 export function getPaginationParameters(): FavoritesPaginationParameters {
-  const {start, end} = getCurrentPageRange();
-  return new FavoritesPaginationParameters(currentPageNumber, getPageCount(), favorites.length, start, end);
+  const { start, end } = getCurrentPageRange();
+  return { currentPageNumber, finalPageNumber: getPageCount(), favoritesCount: favorites.length, startIndex: start, endIndex: end };
 }
 
 export function paginate(newFavorites: FavoriteItem[]): void {
@@ -69,7 +70,7 @@ export function getFavoritesOnPreviousPage(): FavoriteItem[] {
 }
 
 export function getFavoritesOnPage(pageNumber: number): FavoriteItem[] {
-  const {start, end} = getPageRange(pageNumber);
+  const { start, end } = getPageRange(pageNumber);
   return favorites.slice(start, end);
 }
 
@@ -106,7 +107,7 @@ export function gotoAdjacentPage(direction: NavigationKey): boolean {
   return true;
 }
 
-export function gotoRelativePage(relation: string): boolean {
+export function gotoRelativePage(relation: FavoritesPageRelation): boolean {
   if (onlyOnePage()) {
     return false;
   }

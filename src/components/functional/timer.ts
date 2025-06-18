@@ -2,9 +2,9 @@ import { DO_NOTHING } from "../../config/constants";
 import { Timeout } from "../../types/primitives/primitives";
 
 export class Timer {
-  private readonly waitTime: number;
-  private readonly onTimerEnd: () => void;
-  private timeout: Timeout;
+  public waitTime: number;
+  public onTimerEnd: () => void;
+  public timeout: Timeout;
 
   constructor(waitTime: number) {
     this.waitTime = waitTime;

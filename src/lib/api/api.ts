@@ -1,8 +1,8 @@
 import * as FSG_URL from "./url";
-import {Post} from "../../types/api/post";
-import {extractFavoritesCount} from "./profile_page_parser";
-import {extractPostFromAPI} from "./post_api_parser";
-import {parsePostFromPostPage as extractPostFromPostPage} from "./post_page_parser";
+import { AddFavoriteStatus, Post } from "../../types/api/api_types";
+import { extractFavoritesCount } from "./profile_page_parser";
+import { extractPostFromAPI } from "./post_api_parser";
+import { parsePostFromPostPage as extractPostFromPostPage } from "./post_page_parser";
 
 async function getHTML(url: string): Promise<string> {
   const response = await fetch(url);
@@ -17,21 +17,32 @@ export async function fetchPostFromAPI(id: string): Promise<Post> {
   return extractPostFromAPI(await getHTML(FSG_URL.createAPIURL("post", id)));
 }
 
+export function fetchPostPage(id: string): Promise<string> {
+  return getHTML(FSG_URL.createPostPageURL(id));
+}
+
 export async function fetchPostFromPostPage(id: string): Promise<Post> {
-  return extractPostFromPostPage(await getHTML(FSG_URL.createPostPageURL(id)));
+  return extractPostFromPostPage(await fetchPostPage(id));
+}
+
+export function fetchPostFromAPISafe(id: string): Promise<Post> {
+  return fetchPostFromAPI(id).catch(() => {
+    return fetchPostFromPostPage(id);
+  });
 }
 
 export function fetchFavoritesPage(pageNumber: number): Promise<string> {
   return getHTML(FSG_URL.createFavoritesPageURL(pageNumber));
 }
 
-export function addFavorite(id: string): void {
-  fetch(FSG_URL.createPostPageURL(id));
-  fetch(FSG_URL.createAddFavoriteURL(id));
+export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
+  fetch(FSG_URL.createPostVoteURL(id));
+  const status = await getHTML(FSG_URL.createAddFavoriteURL(id));
+  return parseInt(status);
 }
 
-export function removeFavorite(id: string): void {
-  fetch(FSG_URL.createRemoveFavoriteURL(id), {method: "GET", redirect: "manual"});
+export function removeFavorite(id: string): Promise<Response> {
+  return fetch(FSG_URL.createRemoveFavoriteURL(id), {method: "GET", redirect: "manual"});
 }
 
 export function getFavoritesCount(): Promise<number | null> {

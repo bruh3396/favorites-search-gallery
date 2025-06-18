@@ -33,3 +33,7 @@ export function mapRange(value: number, fromMin: number, fromMax: number, toMin:
 export function roundToTwoDecimalPlaces(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
+
+export function millisecondsToSeconds(milliseconds: number): number {
+  return roundToTwoDecimalPlaces(milliseconds / 1000);
+}

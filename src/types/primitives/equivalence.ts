@@ -1,4 +1,4 @@
-import { ExitKey, ForwardNavigationKey, MetadataComparator, NavigationKey, SearchableMetadataMetric } from "./primitives";
+import { ExitKey, ForwardNavigationKey, MetadataComparator, NavigationKey, SearchableMetadataMetric, TagCategory } from "./primitives";
 
 export const FORWARD_NAVIGATION_KEYS: Set<ForwardNavigationKey> = new Set(["d", "D", "ArrowRight"]);
 export const NAVIGATION_KEYS: Set<NavigationKey> = new Set(["a", "A", "ArrowLeft", "d", "D", "ArrowRight"]);
@@ -22,4 +22,8 @@ export function isSearchableMetadataMetric(value: unknown): value is SearchableM
 
 export function isMetadataComparator(value: unknown): value is MetadataComparator {
   return value === ":" || value === ":<" || value === ":>";
+}
+
+export function isTagCategory(value: unknown): value is TagCategory {
+  return value === "general" || value === "artist" || value === "unknown" || value === "copyright" || value === "character" || value === "metadata";
 }

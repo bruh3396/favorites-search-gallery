@@ -28,7 +28,7 @@ function updateSearchCommand(): SearchCommand<FavoriteItem> {
 }
 
 function shouldUseIndex(favorites: FavoriteItem[]): boolean {
-  return FavoritesSettings.useSearchIndex && !searchCommand.details.hasMetadataTag && favorites.length > 50;
+  return FavoritesSettings.useSearchIndex && FAVORITES_SEARCH_INDEX.ready && !searchCommand.details.hasMetadataTag && favorites.length > 50;
 }
 
 export function filter(favorites: FavoriteItem[]): FavoriteItem[] {

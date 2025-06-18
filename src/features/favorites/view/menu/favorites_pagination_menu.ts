@@ -1,5 +1,6 @@
 import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../../types/favorite_pagination_parameters";
 import { Events } from "../../../../lib/globals/events";
+import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { Preferences } from "../../../../store/local_storage/preferences";
 import { getNumbersAround } from "../../../../utils/collection/array";
@@ -34,15 +35,12 @@ function insert(): void {
 
 export function create(parameters: FavoritesPaginationParameters): void {
   CONTAINER.innerHTML = "";
-  updateRangeIndicator(parameters.startIndex, parameters.endIndex);
+  updateRangeIndicator(parameters.startIndex, parameters.endIndex, parameters.favoritesCount);
   createNumberTraversalButtons(parameters.currentPageNumber, parameters.finalPageNumber);
   createArrowTraversalButtons(parameters);
   createGotoSpecificPageInputs(parameters.finalPageNumber);
 }
 
-/**
- * @param {FavoritesPaginationParameters} parameters
- */
 export function update(parameters: FavoritesPaginationParameters): void {
   const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= FavoritesSettings.maxPageNumberButtons;
 
@@ -52,7 +50,8 @@ export function update(parameters: FavoritesPaginationParameters): void {
   create(parameters);
 }
 
-function updateRangeIndicator(start: number, end: number): void {
+function updateRangeIndicator(start: number, end: number, count: number): void {
+  end = Math.min(count, end);
   RANGE_INDICATOR.textContent = end === 0 ? "" : `${start + 1} - ${end}`;
 }
 
@@ -88,7 +87,7 @@ function createArrowTraversalButtons(parameters: FavoritesPaginationParameters):
   updateArrowTraversalButtonInteractability(previous, first, next, final, parameters);
 }
 
-function createArrowTraversalButton(name: string, textContent: string, position: InsertPosition): HTMLButtonElement {
+function createArrowTraversalButton(name: FavoritesPageRelation, textContent: string, position: InsertPosition): HTMLButtonElement {
   const button = document.createElement("button");
 
   button.id = `${name}-page`;
@@ -101,9 +100,6 @@ function createArrowTraversalButton(name: string, textContent: string, position:
   return button;
 }
 
-/**
- * @param {Number} finalPageNumber
- */
 function createGotoSpecificPageInputs(finalPageNumber: number): void {
   if (pageNumberTraversalButtonExists(1) && pageNumberTraversalButtonExists(finalPageNumber)) {
     return;

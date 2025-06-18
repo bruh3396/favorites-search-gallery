@@ -1,4 +1,4 @@
 export const SharedGallerySettings = {
-  upscaledThumbCanvasWidth: 800,
+  upscaledThumbCanvasWidth: 1200,
   maxUpscaledThumbCanvasHeight: 16000
 };

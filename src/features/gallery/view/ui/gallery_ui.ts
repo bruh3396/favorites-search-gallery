@@ -1,9 +1,11 @@
+import * as Icons from "../../../../assets/icons";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/api/api_types";
 import { ON_FAVORITES_PAGE, USING_FIREFOX } from "../../../../lib/globals/flags";
 import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/primitive/number";
-import { GALLERY_CONTAINER } from "./gallery_container";
+import { blurCurrentlyFocusedElement, showFullscreenIcon, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
+import { GALLERY_CONTAINER } from "../../ui/gallery_container";
 import { Preferences } from "../../../../store/local_storage/preferences";
 import { insertStyleHTML } from "../../../../utils/dom/style";
-import { waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
 
 const background: HTMLElement = document.createElement("div");
 
@@ -18,15 +20,16 @@ function isUsingColumnLayout(): boolean {
 export function setupGalleryUI(): void {
   GALLERY_CONTAINER.appendChild(background);
   toggleVideoPointerEvents(false);
-  toggleMenu(false);
+  toggleGalleryMenuVisibility(false);
 }
 
 export function enterGallery(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
+  blurCurrentlyFocusedElement();
   toggleBackgroundInteractability(true);
   toggleScrollbar(false);
   toggleVideoPointerEvents(true);
-  toggleMenu(true);
+  toggleGalleryMenuVisibility(true);
 }
 
 export function exitGallery(): void {
@@ -35,7 +38,7 @@ export function exitGallery(): void {
   scrollToLastVisitedThumb();
   toggleVideoPointerEvents(false);
   toggleCursor(true);
-  toggleMenu(false);
+  toggleGalleryMenuVisibility(false);
 }
 
 export function scrollToLastVisitedThumb(): void {
@@ -105,31 +108,33 @@ function updateBackgroundOpacity(opacity: number): void {
   Preferences.backgroundOpacity.set(opacityString);
 }
 
-export function showAddedFavoriteStatus(status: number): void {
-  // const icon = {
-  //   [Utils.addedFavoriteStatuses.alreadyAdded]: SVGIcons.heartCheck,
-  //   [Utils.addedFavoriteStatuses.success]: SVGIcons.heartPlus
-  // }[status] || SVGIcons.error;
+export function showAddedFavoriteStatus(status: AddFavoriteStatus): void {
+  const icon = {
+    [AddFavoriteStatus.ALREADY_ADDED]: Icons.HEART_CHECK,
+    [AddFavoriteStatus.SUCCESSFULLY_ADDED]: Icons.HEART_PLUS,
+    [AddFavoriteStatus.ERROR]: Icons.ERROR,
+    [AddFavoriteStatus.NOT_LOGGED_IN]: Icons.ERROR
+  }[status] ?? Icons.ERROR;
 
-  // showFullscreenIcon(icon);
+  showFullscreenIcon(icon);
 }
 
-export function showRemovedFavoriteStatus(status: number): void {
-  // switch (status) {
-  //   case Utils.removedFavoriteStatuses.success:
-  //     Utils.showFullscreenIcon(SVGIcons.heartMinus);
-  //     break;
+export function showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
+  switch (status) {
+    case RemoveFavoriteStatus.SUCCESSFULLY_REMOVED:
+      showFullscreenIcon(Icons.HEART_MINUS);
+      break;
 
-  //   case Utils.removedFavoriteStatuses.removeNotAllowed:
-  //     Utils.showFullscreenIcon(SVGIcons.warning, 1000);
-  //     setTimeout(() => {
-  //       alert("The \"Remove Buttons\" option must be checked to use this hotkey");
-  //     }, 20);
-  //     break;
+    case RemoveFavoriteStatus.FORBIDDEN:
+      showFullscreenIcon(Icons.WARNING, 1000);
+      setTimeout(() => {
+        alert("The \"Remove Buttons\" option must be checked to use this hotkey");
+      }, 20);
+      break;
 
-  //   default:
-  //     break;
-  // }
+    default:
+      break;
+  }
 }
 
 export function setLastVisitedThumb(thumb: HTMLElement): void {
@@ -147,7 +152,7 @@ export function toggleCursor(value: boolean): void {
   background.style.cursor = value ? "default" : "none";
 }
 
-export function toggleMenu(value: boolean): void {
+export function toggleGalleryMenuVisibility(value: boolean): void {
   insertStyleHTML(`
       #gallery-menu {
         display: ${value ? "flex" : "none"} !important;

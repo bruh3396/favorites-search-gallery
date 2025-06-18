@@ -1,5 +1,6 @@
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../lib/globals/flags";
 import { Events } from "../../lib/globals/events";
+import { insertStyleHTML } from "./style";
 import { removeNonNumericCharacters } from "../primitive/string";
 
 const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
@@ -40,11 +41,8 @@ export function isHotkeyEvent(event: KeyboardEvent): boolean {
 }
 
 export function isTypeableInput(element: HTMLElement): boolean {
-  if (!(element instanceof HTMLElement)) {
-    return false;
-  }
   const tagName = element.tagName.toLowerCase();
-  return tagName === "textarea" || (tagName === "input" && TYPEABLE_INPUTS.has(element.getAttribute("type") || ""));
+  return tagName === "textarea" || (tagName === "input" && TYPEABLE_INPUTS.has(element.getAttribute("type") ?? ""));
 }
 
 export function insideOfThumb(element: unknown): boolean {
@@ -158,5 +156,40 @@ export function toggleFullscreen(): void {
     html.requestFullscreen();
   } else {
     document.exitFullscreen();
+  }
+}
+
+export function overGalleryMenu(event: MouseEvent): boolean {
+  if (!(event.target instanceof HTMLElement)) {
+    return false;
+  }
+  return event.target.classList.contains(".gallery-sub-menu") || event.target.closest(".gallery-sub-menu") !== null;
+}
+
+export function toggleGalleryMenuEnabled(value: boolean): void {
+  insertStyleHTML(`
+        #gallery-menu {
+          visibility: ${value ? "visible" : "hidden"} !important;
+        }`, "enable-gallery-menu");
+}
+
+export function showFullscreenIcon(svg: string, duration: number = 500): void {
+  const svgDocument = new DOMParser().parseFromString(svg, "image/svg+xml");
+  const svgElement = svgDocument.documentElement;
+  const svgOverlay = document.createElement("div");
+
+  svgOverlay.classList.add("fullscreen-icon");
+  svgOverlay.innerHTML = new XMLSerializer().serializeToString(svgElement);
+  document.body.appendChild(svgOverlay);
+  setTimeout(() => {
+    svgOverlay.remove();
+  }, duration);
+}
+
+export function blurCurrentlyFocusedElement(): void {
+  const activeElement = document.activeElement;
+
+  if (activeElement instanceof HTMLElement) {
+    activeElement.blur();
   }
 }

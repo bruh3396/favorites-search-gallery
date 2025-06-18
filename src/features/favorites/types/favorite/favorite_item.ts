@@ -1,12 +1,11 @@
+import { Favorite, FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
 import { clearPost, createPostFromRawFavorite } from "./favorite_type_utils";
 import { FAVORITES_SEARCH_INDEX } from "../../model/search/index/favorites_search_index";
-import { Favorite } from "../../../../types/interfaces/interfaces";
 import { FavoriteHTMLElement } from "./favorite_element";
 import { FavoriteMetadata } from "../metadata/favorite_metadata";
-import { FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
 import { FavoriteTags } from "./favorite_tags";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
-import { Post } from "../../../../types/api/post";
+import { Post } from "../../../../types/api/api_types";
 import { Rating } from "../../../../types/primitives/primitives";
 import { compressThumbSource } from "../../../../utils/content/url";
 import { getIdFromThumb } from "../../../../utils/dom/dom";
@@ -90,6 +89,12 @@ export class FavoriteItem implements Favorite {
   public validateTags(post: Post): void {
     if (!this.favoriteTags.tagsAreEqual(post)) {
       this.updateTags(post);
+    }
+  }
+
+  public swapFavoriteButton(): void {
+    if (this.element !== null) {
+      this.element.swapFavoriteButton();
     }
   }
 

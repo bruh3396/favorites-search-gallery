@@ -3,7 +3,6 @@ import { PerformanceProfile } from "../../types/primitives/enums";
 import { Preference } from "./preference";
 
 export const Preferences = {
-  savedSearchesEnabled: new Preference("savedSearchSuggestions", false),
   savedSearchesVisible: new Preference("savedSearchVisibility", false),
   savedSearchSuggestionsEnabled: new Preference("savedSearchSuggestions", false),
   savedSearchTutorialEnabled: new Preference("savedSearchTutorial", false),

@@ -7,16 +7,16 @@ export function getCurrentState(): GalleryState {
   return currentState;
 }
 
+export function changeState(state: GalleryState): void {
+  currentState = state;
+  onStateChange();
+}
+
 function getStartState(): GalleryState {
   if (Preferences.showOnHoverEnabled.value) {
     return GalleryState.SHOWING_CONTENT_ON_HOVER;
   }
   return GalleryState.IDLE;
-}
-
-export function changeState(state: GalleryState): void {
-  currentState = state;
-  onStateChange();
 }
 
 function onStateChange(): void {

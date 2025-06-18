@@ -9,15 +9,6 @@ export type VideoClip = {
   end: number
 }
 
-export interface AutoplayEvents {
-  onEnable: () => void
-  onDisable: () => void
-  onPause: () => void
-  onPlay: () => void
-  onComplete: () => void
-  onVideoEndedEarly: () => void
-}
-
 export interface Renderer {
   container: HTMLElement
   display: (element: HTMLElement) => void
@@ -27,12 +18,13 @@ export interface Renderer {
   preload: (elements: HTMLElement[]) => void
 }
 
+export type GalleryMenuAction = "exit" | "fullscreen" | "openPost" | "openOriginal" | "download" | "addFavorite" | "removeFavorite" | "toggleDockPosition" | "toggleBackground" | "search" | "changeBackgroundColor" | "pin";
+
 export type GalleryMenuButton = {
   id: string;
   icon: string;
-  action: string;
+  action: GalleryMenuAction;
   enabled: boolean;
-  handler: string;
   hint: string;
   color: string;
 };

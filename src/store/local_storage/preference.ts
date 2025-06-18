@@ -1,8 +1,8 @@
 import * as PreferenceStorage from "./preference_storage";
 
 export class Preference<T> {
+  public readonly defaultValue: T;
   private readonly key: string;
-  private readonly defaultValue: T;
 
   constructor(key: string, defaultValue: T) {
     this.key = key;

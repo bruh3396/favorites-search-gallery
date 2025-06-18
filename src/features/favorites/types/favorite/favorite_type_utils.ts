@@ -1,6 +1,6 @@
 import { getIdFromThumb, getImageFromThumb } from "../../../../utils/dom/dom";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
-import { Post } from "../../../../types/api/post";
+import { Post } from "../../../../types/api/api_types";
 import { decompressThumbSource } from "../../../../utils/content/url";
 import { removeExtraWhiteSpace } from "../../../../utils/primitive/string";
 

@@ -1,3 +1,4 @@
+import * as GalleryAutoplayController from "../../../autoplay/gallery_autoplay_controller";
 import * as GalleryFavoritesFlow from "./gallery_favorites_flow";
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
@@ -46,7 +47,7 @@ function changeSearchPageInGallery(direction: NavigationKey): void {
 
 function completeNavigation(thumb: HTMLElement): void {
   GalleryView.showContentInGallery(thumb);
-  // this.autoplayController.startViewTimer(thumb);
+  GalleryAutoplayController.startViewTimer(thumb);
   GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
 }
 
@@ -55,21 +56,17 @@ export function navigate(direction: NavigationKey): void {
   const thumbIsOnPage = thumb !== undefined;
 
   if (thumbIsOnPage) {
-    return completeNavigation(thumb);
+    completeNavigation(thumb);
+    return;
   }
 
   if (ON_FAVORITES_PAGE) {
-    return changeFavoritesPageThenNavigate(direction);
+    changeFavoritesPageThenNavigate(direction);
+    return;
   }
-  return changeSearchPageInGallery(direction);
+  changeSearchPageInGallery(direction);
 }
 
-export function changeFavoritesPageThenNavigate(direction: NavigationKey): void {
-  changeFavoritesPageInGallery(direction)
-    .then((newThumb) => {
-      completeNavigation(newThumb);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+export async function changeFavoritesPageThenNavigate(direction: NavigationKey): Promise<void> {
+  completeNavigation(await changeFavoritesPageInGallery(direction));
 }

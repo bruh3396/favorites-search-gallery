@@ -13,6 +13,7 @@ import { createButtonElement } from "../../../../../lib/element_factory/button";
 import { createNumberComponent } from "../../../../../lib/element_factory/number";
 import { createSelectElement } from "../../../../../lib/element_factory/select";
 import { prepareDynamicElements } from "./favorites_dynamic_element_utils";
+import { toggleGalleryMenuEnabled } from "../../../../../utils/dom/dom";
 import { tryResetting } from "../../../../../lib/flows/reset";
 
 const BUTTONS: Partial<ButtonElement>[] = [
@@ -104,7 +105,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "enhance-search-pages",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Enhance Search Pages",
     title: "Enable gallery and other features on search pages",
     preference: Preferences.searchPagesEnabled,
@@ -113,7 +114,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "infinite-scroll",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Infinite Scroll",
     title: "Use infinite scroll (waterfall) instead of pages",
     preference: Preferences.infiniteScrollEnabled,
@@ -122,7 +123,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "show-remove-favorite-buttons",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Remove Buttons",
     title: "Toggle remove favorite buttons",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
@@ -133,7 +134,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "show-add-favorite-buttons",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Add Favorite Buttons",
     title: "Toggle add favorite buttons",
     enabled: !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
@@ -144,7 +145,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "show-download-buttons",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Download Buttons",
     title: "Toggle download buttons",
     enabled: true,
@@ -155,7 +156,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "exclude-blacklist",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Exclude Blacklist",
     title: "Exclude favorites with blacklisted tags from search",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
@@ -165,7 +166,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "fancy-thumb-hovering",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Fancy Hovering",
     title: "Enable fancy thumbnail hovering",
     preference: Preferences.fancyThumbHoveringEnabled,
@@ -175,7 +176,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "show-hints",
-    parentId: "favorite-options",
+    parentId: "favorite-options-left",
     textContent: "Hotkey Hints",
     title: "Show hotkeys",
     preference: Preferences.hintsEnabled,
@@ -185,8 +186,48 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     function: toggleOptionHotkeyHints
   },
   {
+    id: "enable-autoplay",
+    parentId: "favorite-options-right",
+    textContent: "Autoplay",
+    title: "Enable autoplay in gallery",
+    enabled: GALLERY_ENABLED,
+    preference: Preferences.autoplayActive,
+    hotkey: "",
+    event: Events.favorites.autoplayToggled
+  },
+  {
+    id: "show-on-hover",
+    parentId: "favorite-options-right",
+    textContent: "Fullscreen on Hover",
+    title: "View full resolution images or play videos and GIFs when hovering over a thumbnail",
+    enabled: GALLERY_ENABLED,
+    preference: Preferences.showOnHoverEnabled,
+    hotkey: "",
+    event: Events.favorites.showOnHoverToggled
+  },
+  {
+    id: "show-tooltips",
+    parentId: "favorite-options-right",
+    textContent: "Tooltips",
+    title: "Show tags when hovering over a thumbnail and see which ones were matched by a search",
+    enabled: TOOLTIP_ENABLED,
+    preference: Preferences.tooltipsVisible,
+    hotkey: "T",
+    event: Events.favorites.tooltipsToggled
+  },
+  {
+    id: "show-captions",
+    parentId: "favorite-options-right",
+    textContent: "Details",
+    title: "Show details when hovering over thumbnail",
+    enabled: CAPTIONS_ENABLED,
+    preference: Preferences.captionsVisible,
+    hotkey: "D",
+    event: Events.favorites.captionsToggled
+  },
+  {
     id: "toggle-header",
-    parentId: "dynamic-favorite-options",
+    parentId: "favorite-options-right",
     textContent: "Header",
     title: "Toggle site header",
     preference: Preferences.headerEnabled,
@@ -196,18 +237,8 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     function: toggleHeader
   },
   {
-    id: "show-tooltips",
-    parentId: "dynamic-favorite-options",
-    textContent: "Tooltips",
-    title: "Show tags when hovering over a thumbnail and see which ones were matched by a search",
-    enabled: TOOLTIP_ENABLED,
-    preference: Preferences.tooltipsVisible,
-    hotkey: "T",
-    event: Events.favorites.tooltipsToggled
-  },
-  {
     id: "dark-theme",
-    parentId: "favorite-options",
+    parentId: "favorite-options-right",
     textContent: "Dark Theme",
     title: "Toggle dark theme",
     defaultValue: usingDarkTheme(),
@@ -216,38 +247,8 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     function: toggleDarkTheme
   },
   {
-    id: "show-on-hover",
-    parentId: "dynamic-favorite-options",
-    textContent: "Fullscreen on Hover",
-    title: "View full resolution images or play videos and GIFs when hovering over a thumbnail",
-    enabled: GALLERY_ENABLED,
-    preference: Preferences.showOnHoverEnabled,
-    hotkey: "",
-    event: Events.favorites.showOnHoverToggled
-  },
-  {
-    id: "show-captions",
-    parentId: "dynamic-favorite-options",
-    textContent: "Details",
-    title: "Show details when hovering over thumbnail",
-    enabled: CAPTIONS_ENABLED,
-    preference: Preferences.captionsVisible,
-    hotkey: "D",
-    event: Events.favorites.captionsToggled
-  },
-  {
-    id: "enable-autoplay",
-    parentId: "dynamic-favorite-options",
-    textContent: "Autoplay",
-    title: "Enable autoplay in gallery",
-    enabled: GALLERY_ENABLED,
-    preference: Preferences.autoplayActive,
-    hotkey: "",
-    event: Events.favorites.autoplayToggled
-  },
-  {
     id: "use-aliases",
-    parentId: "dynamic-favorite-options",
+    parentId: "favorite-options-right",
     textContent: "Aliases",
     title: "Alias similar tags",
     enabled: false,
@@ -256,10 +257,10 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "show-saved-search-suggestions",
-    parentId: "dynamic-favorite-options",
+    parentId: "favorite-options-right",
     textContent: "Saved Suggestions",
     title: "Show saved search suggestions in autocomplete dropdown",
-    enabled: false,
+    enabled: true,
     preference: Preferences.savedSearchSuggestionsEnabled,
     hotkey: "",
     savePreference: true
@@ -275,10 +276,11 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "enable-gallery-menu",
-    parentId: "dynamic-favorite-options",
+    parentId: "favorite-options-right",
     textContent: "Gallery Menu",
     title: "Show menu in gallery",
     enabled: GALLERY_ENABLED && GeneralSettings.galleryMenuOptionEnabled,
+    function: toggleGalleryMenuEnabled,
     preference: Preferences.galleryMenuEnabled,
     event: Events.favorites.galleryMenuToggled
   }
@@ -292,7 +294,7 @@ const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
     preference: Preferences.sortAscendingEnabled,
     event: Events.favorites.sortAscendingToggled
   }
-  ];
+];
 
 const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
@@ -338,6 +340,7 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<M
     preference: Preferences.performanceProfile,
     event: Events.favorites.performanceProfileChanged,
     function: reloadWindow,
+    isNumeric: true,
     options:
     {
       0: "Normal",

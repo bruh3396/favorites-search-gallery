@@ -1,6 +1,8 @@
-import { Post } from "../../types/api/post";
+/* eslint-disable max-classes-per-file */
+import { Post } from "../../types/api/api_types";
 
 export class ApiParseError extends Error { }
+export class DeletedPostError extends Error { }
 
 const PARSER = new DOMParser();
 

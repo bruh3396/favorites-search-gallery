@@ -1,5 +1,5 @@
-import {describe, expect, test} from "vitest";
-import {getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, roundToTwoDecimalPlaces, seededRandom} from "../utils/primitive/number";
+import { describe, expect, test } from "vitest";
+import { getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, roundToTwoDecimalPlaces, seededRandom } from "../utils/primitive/number";
 
 describe("getRandomPositiveInteger", () => {
   test("zero", () => {
@@ -100,5 +100,24 @@ describe("roundToTwoDecimalPlaces", () => {
     expect(roundToTwoDecimalPlaces(-123456789.123456)).toBe(-123456789.12);
     expect(roundToTwoDecimalPlaces(-123456789.1234)).toBe(-123456789.12);
     expect(roundToTwoDecimalPlaces(-123456789.123)).toBe(-123456789.12);
+  });
+});
+
+describe("millisecondsToSeconds", () => {
+  test("zero", () => {
+    expect(millisecondsToSeconds(0)).toBe(0);
+  });
+
+  test("normal cases", () => {
+    expect(millisecondsToSeconds(1000)).toBe(1);
+    expect(millisecondsToSeconds(2000)).toBe(2);
+    expect(millisecondsToSeconds(5000)).toBe(5);
+    expect(millisecondsToSeconds(500)).toBe(0.5);
+    expect(millisecondsToSeconds(123456)).toBe(123.46);
+  });
+
+  test("rounding", () => {
+    expect(millisecondsToSeconds(123.456)).toBe(0.12);
+    expect(millisecondsToSeconds(1234.567)).toBe(1.23);
   });
 });

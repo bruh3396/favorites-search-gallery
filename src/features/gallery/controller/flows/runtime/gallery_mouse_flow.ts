@@ -7,6 +7,7 @@ import * as GalleryZoomFlow from "./gallery_zoom_flow";
 import { FavoritesMouseEvent } from "../../../../../types/events/mouse_event";
 import { FavoritesWheelEvent } from "../../../../../types/events/wheel_event";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
+import { overGalleryMenu } from "../../../../../utils/dom/dom";
 import { throttle } from "../../../../../utils/misc/async";
 
 function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
@@ -19,14 +20,13 @@ function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
 }
 
 function onMouseDownInGallery(mouseEvent: FavoritesMouseEvent): void {
-  // if (mouseEvent.ctrlKey || Utils.overGalleryMenu(mouseEvent.originalEvent)) {
-  if (mouseEvent.ctrlKey) {
+  if (mouseEvent.ctrlKey || overGalleryMenu(mouseEvent.originalEvent)) {
     return;
   }
 
   if (mouseEvent.shiftKey) {
     if (GalleryZoomFlow.toggleGalleryImageZoom()) {
-      GalleryView.scrollToZoomPoint(mouseEvent.originalEvent.x, mouseEvent.originalEvent.y);
+      GalleryView.zoomToPoint(mouseEvent.originalEvent.x, mouseEvent.originalEvent.y);
     }
     return;
   }
@@ -59,11 +59,30 @@ function onMouseDownOutsideGallery(mouseEvent: FavoritesMouseEvent): void {
   }
 }
 
+function onClickInGallery(mouseEvent: MouseEvent): void {
+  if (mouseEvent.ctrlKey) {
+    GalleryModel.openOriginalInNewTab();
+  }
+}
+
+function onContextMenuInGallery(mouseEvent: MouseEvent): void {
+  mouseEvent.preventDefault();
+  GalleryStateFlow.exitGallery();
+}
+
+function onWheelWhileHoverEnabled(wheelEvent: FavoritesWheelEvent): void {
+  GalleryView.updateBackgroundOpacity(wheelEvent.originalEvent);
+}
+
+function onWheelInGallery(wheelEvent: FavoritesWheelEvent): void {
+  if (!wheelEvent.originalEvent.shiftKey) {
+    GalleryNavigationFlow.navigate(wheelEvent.direction);
+  }
+}
+
 export const onMouseMove = throttle<MouseEvent>(() => {
   executeFunctionBasedOnGalleryState({
-    gallery: () => {
-      GalleryView.handleMouseMoveInGallery();
-    }
+    gallery: GalleryView.handleMouseMoveInGallery
   });
 }, 250);
 
@@ -76,11 +95,7 @@ export function onMouseOver(mouseEvent: FavoritesMouseEvent): void {
 
 export function onClick(mouseEvent: MouseEvent): void {
   executeFunctionBasedOnGalleryState({
-    gallery: () => {
-      if (mouseEvent.ctrlKey) {
-        GalleryModel.openOriginalInNewTab();
-      }
-    }
+    gallery: onClickInGallery
   }, mouseEvent);
 }
 
@@ -94,22 +109,13 @@ export function onMouseDown(mouseEvent: MouseEvent): void {
 
 export function onContextMenu(mouseEvent: MouseEvent): void {
   executeFunctionBasedOnGalleryState({
-    gallery: () => {
-      mouseEvent.preventDefault();
-      GalleryStateFlow.exitGallery();
-    }
-  });
+    gallery: onContextMenuInGallery
+  }, mouseEvent);
 }
 
 export function onWheel(wheelEvent: FavoritesWheelEvent): void {
   executeFunctionBasedOnGalleryState({
-    hover: (event) => {
-      GalleryView.updateBackgroundOpacity(event.originalEvent);
-    },
-    gallery: (event) => {
-      if (!wheelEvent.originalEvent.shiftKey) {
-        GalleryNavigationFlow.navigate(event.direction);
-      }
-    }
+    hover: onWheelWhileHoverEnabled,
+    gallery: onWheelInGallery
   }, wheelEvent);
 }

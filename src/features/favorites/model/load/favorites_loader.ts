@@ -32,7 +32,7 @@ export async function fetchNewFavoritesOnReload(): Promise<FavoriteItem[]> {
 
 export function getAllFavorites(): FavoriteItem[] {
   return useSearchSubset ? subsetFavorites : allFavorites;
-}
+} 
 
 export function storeAllFavorites(): Promise<void> {
   return FavoritesDatabase.storeAllFavorites(allFavorites);

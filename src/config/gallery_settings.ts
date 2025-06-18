@@ -12,7 +12,7 @@ export const GallerySettings = {
     }
     return ON_SEARCH_PAGE ? GallerySettings.mainCanvasResolutions.search : GallerySettings.mainCanvasResolutions.favorites;
   },
-  imageMegabyteLimit: 800,
+  imageMegabyteLimit: 850,
   searchPagePreloadedImageCount: 42,
   minimumPreloadedImageCount: 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 2 : 2,
@@ -20,12 +20,13 @@ export const GallerySettings = {
   preloadContentDebounceTime: 400,
   preloadingEnabled: true,
   visibleThumbsDownwardScrollPixelGenerosity: 50,
+  visibleThumbsDownwardScrollPercentageGenerosity: 40,
   navigationThrottleTime: 250,
   maxImagesToRenderAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
   idleInteractionDuration: 1000,
   menuVisibilityTime: 1000,
   maxVisibleThumbsBeforeStoppingPreload: 150,
-  useOffscreenThumbUpscaler: true,
+  useOffscreenThumbUpscaler: false,
   fetchImageBitmapsInWorker: true,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;

@@ -1,19 +1,13 @@
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../lib/globals/flags";
 import { getAllThumbs, getRectDistance, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
 import { Events } from "../../../../lib/globals/events";
 import { GallerySettings } from "../../../../config/gallery_settings";
-import { ON_MOBILE_DEVICE } from "../../../../lib/globals/flags";
 import { debounceAlways } from "../../../../utils/misc/async";
 
 const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;
-let intersectionObserver: IntersectionObserver = createIntersectionObserver(getInitialFavoritesMenuHeight());
 
-export function setupVisibleThumbObserver(): void {
-  if (ON_MOBILE_DEVICE) {
-    return;
-  }
-  updateRootMarginWhenMenuResizes();
-}
+let intersectionObserver: IntersectionObserver = createIntersectionObserver(getInitialFavoritesMenuHeight());
 
 function onVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
   updateVisibleThumbs(entries);
@@ -35,12 +29,13 @@ function updateVisibleThumbs(entries: IntersectionObserverEntry[]): void {
 }
 
 function getInitialFavoritesMenuHeight(): number {
-  const menu = document.getElementById("favorites-search-gallery-menu");
+  return -200;
+  // const menu = document.getElementById("favorites-search-gallery-menu");
 
-  if (menu === null) {
-    return 0;
-  }
-  return -menu.offsetHeight;
+  // if (menu === null) {
+  //   return 0;
+  // }
+  // return -menu.offsetHeight;
 }
 
 function createIntersectionObserver(topMargin: number = 0): IntersectionObserver {
@@ -52,7 +47,8 @@ function createIntersectionObserver(topMargin: number = 0): IntersectionObserver
 }
 
 function getFinalRootMargin(topMargin: number): string {
-  return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPixelGenerosity}px 0px`;
+  // return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPixelGenerosity}px 0px`;
+  return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
 }
 
 function updateRootMarginWhenMenuResizes(): void {
@@ -77,6 +73,22 @@ function updateRootMarginWhenMenuResizes(): void {
     });
 
     resizeObserver.observe(menu);
+  });
+}
+
+function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {
+  if (centerThumb === null) {
+    return entries;
+  }
+  const centerEntry = visibleThumbs.get(centerThumb.id);
+  return centerEntry === undefined ? entries : sortByDistance(centerEntry, entries);
+}
+
+function sortByDistance(centerEntry: IntersectionObserverEntry, entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {
+  return entries.sort((a, b) => {
+    const distanceA = getRectDistance(centerEntry.boundingClientRect, a.boundingClientRect);
+    const distanceB = getRectDistance(centerEntry.boundingClientRect, b.boundingClientRect);
+    return distanceA - distanceB;
   });
 }
 
@@ -109,18 +121,9 @@ export function getVisibleThumbs(): HTMLElement[] {
     .filter(target => target instanceof HTMLElement);
 }
 
-function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {
-  if (centerThumb === null) {
-    return entries;
+export function setupVisibleThumbObserver(): void {
+  if (ON_MOBILE_DEVICE || !ON_SEARCH_PAGE) {
+    return;
   }
-  const centerEntry = visibleThumbs.get(centerThumb.id);
-  return centerEntry === undefined ? entries : sortByDistance(centerEntry, entries);
-}
-
-function sortByDistance(centerEntry: IntersectionObserverEntry, entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {
-  return entries.sort((a, b) => {
-    const distanceA = getRectDistance(centerEntry.boundingClientRect, a.boundingClientRect);
-    const distanceB = getRectDistance(centerEntry.boundingClientRect, b.boundingClientRect);
-    return distanceA - distanceB;
-  });
+  updateRootMarginWhenMenuResizes();
 }

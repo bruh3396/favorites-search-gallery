@@ -31,7 +31,7 @@ export function createAPIURL(type: string, id: string): string {
   return `${API_BASE_URL}${type}&q=index&id=${id}`;
 }
 
-export function createVoteURL(id: string): string {
+export function createPostVoteURL(id: string): string {
   return `${POST_VOTE_URL}${id}`;
 }
 

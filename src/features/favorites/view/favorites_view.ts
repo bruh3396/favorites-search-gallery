@@ -1,5 +1,6 @@
+import * as FavoritesAspectRatios from "./content/skeleton/favorites_aspect_ratio_collector";
 import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
-import * as FavoritesPreloader from "./content/misc/favorites_thumb_preloader";
+import * as FavoritesPreloader from "../../../utils/dom/thumb_preloader";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
 import * as FavoritesTiler from "./content/tilers/favorites_tiler";
 import { changeColumnCountOnShiftScroll, toggleAddOrRemoveButtons, toggleDownloadButtons } from "../ui/favorites_menu_event_handlers";
@@ -8,11 +9,10 @@ import { Favorite } from "../../../types/interfaces/interfaces";
 import { FavoriteItem } from "../types/favorite/favorite_item";
 import { FavoriteLayout } from "../../../types/primitives/primitives";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
-import { FavoritesSettings } from "../../../config/favorites_settings";
 import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
+import { GeneralSettings } from "../../../config/general_settings";
 import { Preferences } from "../../../store/local_storage/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/globals/flags";
-import { collectAspectRatios } from "./content/skeleton/aspect_ratios";
 import { sleep } from "../../../utils/misc/async";
 
 export function setStatus(message: string): void {
@@ -104,8 +104,8 @@ export function setupFavoritesView(): void {
 }
 
 export function preloadFavorites(favorites: FavoriteItem[]): void {
-  if (FavoritesSettings.preloadThumbnails) {
-    FavoritesPreloader.preload(favorites);
+  if (GeneralSettings.preloadThumbnails) {
+    FavoritesPreloader.preloadFavorites(favorites);
   }
 }
 
@@ -115,4 +115,8 @@ export function getCurrentLayout(): FavoriteLayout {
 
 export function changeColumCountUsingWheel(wheelEvent: FavoritesWheelEvent): void {
   changeColumnCountOnShiftScroll(wheelEvent);
+}
+
+export function collectAspectRatios(): void {
+  FavoritesAspectRatios.collectAspectRatios();
 }

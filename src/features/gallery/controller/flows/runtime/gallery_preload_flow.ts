@@ -11,6 +11,13 @@ export function preloadContentInGalleryAround(thumb: HTMLElement | null): void {
   }
 }
 
+export function preloadVisibleContentAround(thumb: HTMLElement | null): void {
+  if (ON_FAVORITES_PAGE && !GalleryModel.hasRecentlyExitedGallery() && thumb !== null) {
+    GalleryThumbObserver.setCenterThumb(thumb);
+    preloadVisibleContent();
+  }
+}
+
 export function preloadVisibleContent(): void {
   if (GalleryModel.getCurrentState() === GalleryState.IN_GALLERY) {
     return;
@@ -19,12 +26,5 @@ export function preloadVisibleContent(): void {
 
   if (thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload) {
     GalleryView.preloadContentOutOfGallery(thumbs);
-  }
-}
-
-export function preloadVisibleContentAround(thumb: HTMLElement | null): void {
-  if (ON_FAVORITES_PAGE && !GalleryModel.hasRecentlyExitedGallery() && thumb !== null) {
-    GalleryThumbObserver.setCenterThumb(thumb);
-    preloadVisibleContent();
   }
 }

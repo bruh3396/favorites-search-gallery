@@ -7,5 +7,6 @@ export const GeneralSettings = {
   postPageRequestDelayWhileFetchingFavorites: 30_000,
   postPageRequestDelayAfterFavoritesLoaded: 400,
   searchPagePostPageRequestDelay: 400,
+  preloadThumbnails: true,
   galleryMenuOptionEnabled: false
 };

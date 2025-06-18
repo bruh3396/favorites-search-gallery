@@ -5,7 +5,9 @@ import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "./container";
 import { FavoriteItem } from "../../features/favorites/types/favorite/favorite_item";
 import { FavoritesKeyboardEvent } from "../../types/events/keyboard_event";
 import { FavoritesMouseEvent } from "../../types/events/mouse_event";
+import { FavoritesPageRelation } from "../../features/favorites/types/favorite/favorite_types";
 import { FavoritesWheelEvent } from "../../types/events/wheel_event";
+import { GalleryMenuAction } from "../../features/gallery/types/gallery_types";
 import { PerformanceProfile } from "../../types/primitives/enums";
 
 const favorites = {
@@ -13,7 +15,7 @@ const favorites = {
   searchBoxUpdated: new EventEmitter<void>(true),
   pageChanged: new EventEmitter<void>(true),
   pageSelected: new EventEmitter<number>(true),
-  relativePageSelected: new EventEmitter<string>(true),
+  relativePageSelected: new EventEmitter<FavoritesPageRelation>(true),
   findFavoriteStarted: new EventEmitter<string>(true),
   findFavoriteInAllStarted: new EventEmitter<string>(true),
   favoritesLoadedFromDatabase: new EventEmitter<void>(true),
@@ -67,16 +69,23 @@ const favorites = {
 const gallery = {
   inGalleryResponse: new EventEmitter<boolean>(true),
   requestPageChange: new EventEmitter<NavigationKey>(true),
-  favoriteAddedOrDeleted: new EventEmitter<string>(true),
+  favoriteToggled: new EventEmitter<string>(true),
   showOnHover: new EventEmitter<boolean>(true),
   enteredGallery: new EventEmitter<void>(true),
   exitedGallery: new EventEmitter<void>(true),
-  visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true)
+  visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true),
+  galleryMenuButtonClicked: new EventEmitter<GalleryMenuAction>(true),
+  videoEnded: new EventEmitter<void>(true),
+  videoDoubleClicked: new EventEmitter<MouseEvent>(true)
 };
 
 const caption = {
   idClicked: new EventEmitter<string>(true),
   searchForTag: new EventEmitter<string>(true)
+};
+
+const searchBox = {
+  appendSearchBox: new EventEmitter<string>(true)
 };
 
 const document1 = {
@@ -165,6 +174,7 @@ export const Events = {
   favorites,
   gallery,
   caption,
+  searchBox,
   document: document1,
   window: window1,
   toggleGlobalInputEvents

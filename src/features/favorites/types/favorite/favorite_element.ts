@@ -6,9 +6,9 @@ import { ClickCodes } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/globals/events";
 import { FavoriteElement } from "./favorite_types";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
-import { Post } from "../../../../types/api/post";
-import { getContentType } from "../../../../utils/primitive/string";
+import { Post } from "../../../../types/api/api_types";
 import { downloadFromThumb } from "../../../../lib/download/downloader";
+import { getContentType } from "../../../../utils/primitive/string";
 
 let htmlTemplate: HTMLElement;
 let removeFavoriteButtonHTML: string;
@@ -49,18 +49,18 @@ export class FavoriteHTMLElement implements FavoriteElement {
   public root: HTMLElement;
   public container: HTMLAnchorElement;
   public image: HTMLImageElement;
-  public addOrRemoveButton: HTMLImageElement;
+  public favoriteButton: HTMLImageElement;
   public downloadButton: HTMLImageElement;
 
   constructor(post: Post) {
     this.root = htmlTemplate.cloneNode(true) as HTMLElement;
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.root.children[0].children[0] as HTMLImageElement;
-    this.addOrRemoveButton = this.root.children[0].children[1] as HTMLImageElement;
+    this.favoriteButton = this.root.children[0].children[1] as HTMLImageElement;
     this.downloadButton = this.root.children[0].children[2] as HTMLImageElement;
     this.downloadButton.onclick = this.download.bind(this);
     this.populateAttributes(post);
-    this.setupAddOrRemoveButton(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE);
+    this.setupFavoriteButton(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE);
     this.openPostInNewTabOnClick();
     this.presetCanvasDimensions(post);
   }
@@ -69,14 +69,22 @@ export class FavoriteHTMLElement implements FavoriteElement {
     return this.image.src;
   }
 
+  public swapFavoriteButton(): void {
+    const isRemoveButton = this.favoriteButton.classList.contains("remove-favorite-button");
+
+    this.favoriteButton.outerHTML = isRemoveButton ? addFavoriteButtonHTML : removeFavoriteButtonHTML;
+    this.favoriteButton = this.root.children[0].children[1] as HTMLImageElement;
+    this.setupFavoriteButton(!isRemoveButton);
+  }
+
   private populateAttributes(post: Post): void {
     this.image.src = post.previewURL;
     this.image.classList.add(getContentType(post.tags));
     this.root.id = post.id;
   }
 
-  private setupAddOrRemoveButton(isRemoveButton: boolean): void {
-    this.addOrRemoveButton.onmousedown = (event): void => {
+  private setupFavoriteButton(isRemoveButton: boolean): void {
+    this.favoriteButton.onmousedown = (event): void => {
       event.stopPropagation();
 
       if (event.button !== ClickCodes.LEFT) {
@@ -94,20 +102,12 @@ export class FavoriteHTMLElement implements FavoriteElement {
   private removeFavorite(): void {
     Events.favorites.favoriteRemoved.emit(this.root.id);
     API.removeFavorite(this.root.id);
-    this.swapAddOrRemoveButton();
+    this.swapFavoriteButton();
   }
 
   private addFavorite(): void {
     API.addFavorite(this.root.id);
-    this.swapAddOrRemoveButton();
-  }
-
-  private swapAddOrRemoveButton(): void {
-    const isRemoveButton = this.addOrRemoveButton.classList.contains("remove-favorite-button");
-
-    this.addOrRemoveButton.outerHTML = isRemoveButton ? addFavoriteButtonHTML : removeFavoriteButtonHTML;
-    this.addOrRemoveButton = this.root.children[0].children[1] as HTMLImageElement;
-    this.setupAddOrRemoveButton(!isRemoveButton);
+    this.swapFavoriteButton();
   }
 
   private openPostInNewTabOnClick(): void {

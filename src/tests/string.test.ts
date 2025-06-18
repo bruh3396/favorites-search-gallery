@@ -370,14 +370,14 @@ describe("removeFirstAndLastLines", () => {
 
   test("iife", () => {
     const code = `() => {
-console.log("Hello, World!");
-console.log("Hello, World!");
-console.log("Hello, Friend!");
+print("Hello, World!");
+print("Hello, World!");
+print("Hello, Friend!");
 }`;
 
-    const expected = `console.log("Hello, World!");
-console.log("Hello, World!");
-console.log("Hello, Friend!");`;
+    const expected = `print("Hello, World!");
+print("Hello, World!");
+print("Hello, Friend!");`;
 
     expect(removeFirstAndLastLines(code)).toBe(expected);
   });

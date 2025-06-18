@@ -23,6 +23,7 @@ export const FavoritesSettings = {
   randomSkeletonAnimationTiming: true,
   preloadThumbnails: true,
   useSearchIndex: true,
+  buildIndexAsynchronously: true,
   skeletonAnimationClasses: "pulse",
   infiniteScrollBatchCount: 25
 };

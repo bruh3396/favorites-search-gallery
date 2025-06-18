@@ -1,18 +1,33 @@
-import { GALLERY_ENABLED } from "../../../../../lib/globals/flags";
+import { GALLERY_DISABLED, ON_SEARCH_PAGE } from "../../../../../lib/globals/flags";
 import { addGalleryEventListeners } from "../../events/gallery_event_listeners";
-import { insertGalleryContainer } from "../../../view/ui/gallery_container";
+import { indexCurrentPageThumbs } from "../../../model/gallery_model";
+import { insertGalleryContainer } from "../../../ui/gallery_container";
+import { prepareAllThumbsOnSearchPage } from "../../../../../types/search_page";
+import { setupAutoplay } from "./gallery_autoplay_setup_flow";
+import { setupGalleryMenu } from "../../../ui/gallery_menu";
 import { setupGalleryView } from "../../../view/gallery_view";
+import { setupSearchPageLoader } from "../../../model/search_page_loader";
 import { setupVisibleThumbObserver } from "../../events/gallery_visible_thumb_observer";
+import { waitForDOMToLoad } from "../../../../../utils/dom/dom";
 
-export function setupGallery(): void {
-  if (GALLERY_ENABLED) {
-    insertGalleryContainer();
-    setupGalleryEvents();
-    setupGalleryView();
-    addGalleryEventListeners();
+export async function setupGallery(): Promise<void> {
+  if (GALLERY_DISABLED) {
+    return;
   }
+  await setupSearchPageGallery();
+  insertGalleryContainer();
+  setupVisibleThumbObserver();
+  setupGalleryView();
+  setupGalleryMenu();
+  addGalleryEventListeners();
+  setupAutoplay();
 }
 
-function setupGalleryEvents() : void {
-  setupVisibleThumbObserver();
+async function setupSearchPageGallery(): Promise<void> {
+  if (ON_SEARCH_PAGE) {
+    await waitForDOMToLoad();
+    prepareAllThumbsOnSearchPage();
+    indexCurrentPageThumbs();
+    setupSearchPageLoader();
+  }
 }

@@ -1,3 +1,4 @@
+import { insertFavoritesSearchGalleryContainer } from "../globals/container";
 import { setupCommonStyles } from "../../utils/dom/style";
 import { setupEvents } from "../globals/events";
 import { setupExtensions } from "../../store/indexed_db/extensions";
@@ -8,4 +9,5 @@ export function setupGlobals(): void {
   setupExtensions();
   setupCommonStyles();
   setupGlobalQueues();
+  insertFavoritesSearchGalleryContainer();
 }

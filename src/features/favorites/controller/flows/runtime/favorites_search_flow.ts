@@ -14,8 +14,8 @@ export function searchFavorites(searchQuery: string): void {
   showSearchResults(FavoritesModel.getSearchResults(searchQuery));
 }
 
-export function searchFavoritesWithPreviousQuery(): void {
-  showSearchResults(FavoritesModel.getSearchResultsFromPreviousQuery());
+export function searchFavoritesUsingLatestQuery(): void {
+  showSearchResults(FavoritesModel.getSearchResultsFromLatestQuery());
 }
 
 export function showLatestSearchResults(): void {

@@ -1,12 +1,14 @@
-import * as FavoritesFilter from "./search/components/favorites_search_filter";
+import * as FavoritesSearchFilter from "./search/components/favorites_search_filter";
 import * as FavoritesLoader from "./load/favorites_loader";
+import * as FavoritesMetadata from "../types/metadata/favorite_metadata";
 import * as FavoritesPaginator from "./presentation/favorites_paginator";
 import * as FavoritesSorter from "./search/components/favorites_sorter";
 import * as InfiniteScrollFeeder from "./presentation/favorites_infinite_scroll_feeder";
 import { NavigationKey, Rating, SortingMethod } from "../../../types/primitives/primitives";
 import { FAVORITES_CONTENT_CONTAINER } from "../ui/structure/favorites_content_container";
 import { FAVORITES_SEARCH_INDEX } from "./search/index/favorites_search_index";
-import { FavoriteItem } from "../types/favorite/favorite_item";
+import { FavoriteItem, getFavorite } from "../types/favorite/favorite_item";
+import { FavoritesPageRelation } from "../types/favorite/favorite_types";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
 import { ITEM_SELECTOR } from "../../../utils/dom/dom";
 import { Preferences } from "../../../store/local_storage/preferences";
@@ -28,7 +30,7 @@ export async function loadAllFavoritesFromDatabase(): Promise<FavoriteItem[]> {
 
 export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<void> {
   const onFavoritesFound = (favorites: FavoriteItem[]): void => {
-    latestSearchResults = latestSearchResults.concat(FavoritesFilter.filter(favorites));
+    latestSearchResults = latestSearchResults.concat(FavoritesSearchFilter.filter(favorites));
     return onSearchResultsFound();
   };
   return FavoritesLoader.fetchAllFavorites(onFavoritesFound);
@@ -36,7 +38,7 @@ export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<voi
 
 export async function fetchNewFavoritesOnReload(): Promise<NewFavorites> {
   const newFavorites = await FavoritesLoader.fetchNewFavoritesOnReload();
-  const newSearchResults = FavoritesFilter.filter(newFavorites);
+  const newSearchResults = FavoritesSearchFilter.filter(newFavorites);
 
   latestSearchResults = newSearchResults.concat(latestSearchResults);
   return {
@@ -63,12 +65,12 @@ export function getLatestSearchResults(): FavoriteItem[] {
 }
 
 export function getSearchResults(searchQuery: string): FavoriteItem[] {
-  FavoritesFilter.setSearchQuery(searchQuery);
-  return getSearchResultsFromPreviousQuery();
+  FavoritesSearchFilter.setSearchQuery(searchQuery);
+  return getSearchResultsFromLatestQuery();
 }
 
-export function getSearchResultsFromPreviousQuery(): FavoriteItem[] {
-  const favorites = FavoritesFilter.filter(getAllFavorites());
+export function getSearchResultsFromLatestQuery(): FavoriteItem[] {
+  const favorites = FavoritesSearchFilter.filter(getAllFavorites());
 
   latestSearchResults = FavoritesSorter.sortFavorites(favorites);
   return latestSearchResults;
@@ -81,9 +83,9 @@ export function getShuffledSearchResults(): FavoriteItem[] {
 export function invertSearchResults(): void {
   const searchResultIds = new Set(latestSearchResults.map(favorite => favorite.id));
   const invertedSearchResults = getAllFavorites().filter(favorite => !searchResultIds.has(favorite.id));
-  const ratingFilteredInvertedSearchResults = FavoritesFilter.filterByRating(invertedSearchResults);
+  const ratingFilteredInvertedSearchResults = FavoritesSearchFilter.filterByRating(invertedSearchResults);
 
-  latestSearchResults = FavoritesFilter.filterOutBlacklisted(ratingFilteredInvertedSearchResults);
+  latestSearchResults = FavoritesSearchFilter.filterOutBlacklisted(ratingFilteredInvertedSearchResults);
 }
 
 export function paginate(searchResults: FavoriteItem[]): void {
@@ -110,7 +112,7 @@ export function gotoAdjacentPage(direction: NavigationKey): boolean {
   return FavoritesPaginator.gotoAdjacentPage(direction);
 }
 
-export function gotoRelativePage(relation: string): boolean {
+export function gotoRelativePage(relation: FavoritesPageRelation): boolean {
   return FavoritesPaginator.gotoRelativePage(relation);
 }
 
@@ -127,11 +129,11 @@ export function onFinalPage(): boolean {
 }
 
 export function toggleBlacklist(value: boolean): void {
-  FavoritesFilter.toggleBlacklistFiltering(value);
+  FavoritesSearchFilter.toggleBlacklistFiltering(value);
 }
 
 export function changeAllowedRatings(allowedRatings: Rating): void {
-  FavoritesFilter.setAllowedRatings(allowedRatings);
+  FavoritesSearchFilter.setAllowedRatings(allowedRatings);
 }
 
 export function setSortingMethod(sortingMethod: SortingMethod): void {
@@ -186,6 +188,22 @@ export function keepIndexedTagsSorted(): void {
   FAVORITES_SEARCH_INDEX.keepIndexedTagsSorted(true);
 }
 
+export function buildSearchIndexAsynchronously(): void {
+  FAVORITES_SEARCH_INDEX.buildIndexAsynchronously();
+}
+
+export function buildSearchIndexSynchronously(): void {
+  FAVORITES_SEARCH_INDEX.buildIndexSynchronously();
+}
+
 export function noFavoritesAreVisible(): boolean {
   return FAVORITES_CONTENT_CONTAINER.querySelector(ITEM_SELECTOR) === null;
+}
+
+export function fetchMissingMetadata(): void {
+  FavoritesMetadata.fetchMissingMetadata();
+}
+
+export function swapFavoriteButton(id: string): void {
+  getFavorite(id)?.swapFavoriteButton();
 }

@@ -28,6 +28,7 @@ export interface StateElement<T> extends FunctionalElement<T> {
 
 export interface SelectElement<T extends (string | number)> extends MenuElement, HotkeyElement, StateElement<T> {
   options: Record<T, string>
+  isNumeric: boolean
 }
 
 export interface NumberElement extends MenuElement, StateElement<number> {

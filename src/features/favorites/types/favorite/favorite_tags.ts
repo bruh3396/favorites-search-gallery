@@ -1,6 +1,6 @@
 import { convertToTagSet, convertToTagString } from "../../../../utils/primitive/string";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
-import { Post } from "../../../../types/api/post";
+import { Post } from "../../../../types/api/api_types";
 
 function getCorrectTags(post: Post): Set<string> {
   const correctTags = convertToTagSet(post.tags);
@@ -41,7 +41,14 @@ export class FavoriteTags {
   }
 
   public tagsAreEqual(post: Post): boolean {
-    const difference = this.tags.symmetricDifference(getCorrectTags(post));
-    return difference.size === 0 || (difference.size === 1 && difference.has(this.id));
+    const correctTags = getCorrectTags(post);
+    const difference = this.tags.symmetricDifference(correctTags);
+    const equal = difference.size === 0 || (difference.size === 1 && difference.has(post.id));
+
+    if (equal) {
+      return true;
+    }
+    post.tags = convertToTagString(correctTags);
+    return false;
   }
 }

@@ -1,3 +1,4 @@
+import * as GalleryFavoriteToggleFlow from "./gallery_favorite_toggle_flow";
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
@@ -9,7 +10,9 @@ import { isVideo } from "../../../../../utils/content/content_type";
 import { throttle } from "../../../../../utils/misc/async";
 import { toggleFullscreen } from "../../../../../utils/dom/dom";
 
-function onKeyDownInGallery(event: KeyboardEvent): void {
+function onKeyDownInGallery(keyboardEvent: FavoritesKeyboardEvent): void {
+  const event = keyboardEvent.originalEvent;
+
   if (isNavigationKey(event.key)) {
     event.stopImmediatePropagation();
     GalleryNavigationFlow.navigate(event.key);
@@ -32,13 +35,13 @@ function onKeyDownInGallery(event: KeyboardEvent): void {
       GalleryView.toggleBackgroundOpacity();
       break;
 
-    // case "e":
-    //   this.addCurrentFavorite();
-    //   break;
+    case "e":
+      GalleryFavoriteToggleFlow.addFavoriteInGallery();
+      break;
 
-    // case "x":
-    //   this.removeCurrentFavorite();
-    //   break;
+    case "x":
+      GalleryFavoriteToggleFlow.removeFavoriteInGallery();
+      break;
 
     case "f":
       toggleFullscreen();
@@ -63,15 +66,36 @@ function onKeyDownInGallery(event: KeyboardEvent): void {
   }
 }
 
+function onKeyDownOutsideGallery(event: FavoritesKeyboardEvent): void {
+  if (!event.isHotkey) {
+    return;
+  }
+
+  switch (event.key.toLowerCase()) {
+    case "f":
+      toggleFullscreen();
+      break;
+
+    default:
+      break;
+  }
+}
+
 const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
   executeFunctionBasedOnGalleryState({
-    gallery: () => {
-      onKeyDownInGallery(event);
-    }
-  }, event);
+    idle: onKeyDownOutsideGallery,
+    hover: onKeyDownOutsideGallery,
+    gallery: onKeyDownInGallery
+  }, new FavoritesKeyboardEvent(event));
 };
 
-const onKeyDownThrottled = throttle(onKeyDownInGallery, 100);
+const onKeyDownThrottled = throttle(onKeyDownNoThrottle, 100);
+
+function onKeyUpInGallery(event: FavoritesKeyboardEvent): void {
+  if (event.key === "shift") {
+    GalleryView.toggleZoomCursor(false);
+  }
+}
 
 export function onKeyDown(keyboardEvent: FavoritesKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;
@@ -85,10 +109,6 @@ export function onKeyDown(keyboardEvent: FavoritesKeyboardEvent): void {
 
 export function onKeyUp(event: FavoritesKeyboardEvent): void {
   executeFunctionBasedOnGalleryState({
-    gallery: (keyEvent) => {
-      if (keyEvent.key === "shift") {
-        GalleryView.toggleZoomCursor(false);
-      }
-    }
+    gallery: onKeyUpInGallery
   }, event);
 }

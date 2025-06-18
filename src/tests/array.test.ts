@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getElementsAroundIndex, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray } from "../utils/collection/array";
+import { getElementsAroundIndex, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/collection/array";
 import { getRandomPositiveInteger } from "../utils/primitive/number";
 
 describe("indexInBounds", () => {
@@ -173,5 +173,43 @@ describe("getWrappedElementsAroundIndex", () => {
     testWrappedElementsAroundIndex([50], 0, 2, [50]);
     testWrappedElementsAroundIndex([1, 2, 4, 5], 1, 3, [2, 1, 4]);
     testWrappedElementsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2, [5, 4]);
+  });
+});
+
+describe("splitIntoChunks", () => {
+  test("empty", () => {
+    for (let i = 0; i < 10; i += 1) {
+      expect(splitIntoChunks([], 3)).toStrictEqual([]);
+    }
+  });
+
+  test("invalid chunk size", () => {
+    const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    expect(splitIntoChunks(digits, 0)).toStrictEqual([digits]);
+    expect(splitIntoChunks(digits, -1)).toStrictEqual([digits]);
+    expect(splitIntoChunks(digits, -2)).toStrictEqual([digits]);
+    expect(splitIntoChunks(digits, -2)).toStrictEqual([digits]);
+  });
+
+  test("normal cases", () => {
+    const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    expect(splitIntoChunks(digits, 1)).toStrictEqual([[1], [2], [3], [4], [5], [6], [7], [8], [9]]);
+    expect(splitIntoChunks(digits, 2)).toStrictEqual([[1, 2], [3, 4], [5, 6], [7, 8], [9]]);
+    expect(splitIntoChunks(digits, 3)).toStrictEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+    expect(splitIntoChunks(digits, 4)).toStrictEqual([[1, 2, 3, 4], [5, 6, 7, 8], [9]]);
+    expect(splitIntoChunks(digits, 5)).toStrictEqual([[1, 2, 3, 4, 5], [6, 7, 8, 9]]);
+    expect(splitIntoChunks(digits, 6)).toStrictEqual([[1, 2, 3, 4, 5, 6], [7, 8, 9]]);
+    expect(splitIntoChunks(digits, 7)).toStrictEqual([[1, 2, 3, 4, 5, 6, 7], [8, 9]]);
+    expect(splitIntoChunks(digits, 8)).toStrictEqual([[1, 2, 3, 4, 5, 6, 7, 8], [9]]);
+  });
+
+  test("chunk size greater or equal to array size", () => {
+    const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    expect(splitIntoChunks(digits, 9)).toStrictEqual([digits]);
+    expect(splitIntoChunks(digits, 10)).toStrictEqual([digits]);
+    expect(splitIntoChunks(digits, 100)).toStrictEqual([digits]);
   });
 });

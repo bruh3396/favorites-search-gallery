@@ -1,17 +1,15 @@
-export class FavoritesPaginationParameters {
-  public currentPageNumber: number;
-  public finalPageNumber: number;
-  public favoritesCount: number;
-  public startIndex: number;
-  public endIndex: number;
+export type FavoritesPaginationParameters = {
+  currentPageNumber: number
+  finalPageNumber: number
+  favoritesCount: number
+  startIndex: number
+  endIndex: number
+};
 
-  constructor(currentPageNumber: number, finalPageNumber: number, favoritesCount: number, startIndex: number, endIndex: number) {
-    this.currentPageNumber = currentPageNumber;
-    this.finalPageNumber = finalPageNumber;
-    this.favoritesCount = favoritesCount;
-    this.startIndex = startIndex;
-    this.endIndex = Math.min(this.favoritesCount, endIndex);
-  }
-}
-
-export const EMPTY_FAVORITES_PAGINATION_PARAMETERS = new FavoritesPaginationParameters(1, 1, 0, 0, 0);
+export const EMPTY_FAVORITES_PAGINATION_PARAMETERS = {
+  currentPageNumber: 1,
+  finalPageNumber: 1,
+  favoritesCount: 0,
+  startIndex: 0,
+  endIndex: 0
+};

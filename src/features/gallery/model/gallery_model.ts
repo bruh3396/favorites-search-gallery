@@ -1,10 +1,14 @@
+import * as GalleryFavoriteToggler from "./gallery_favorite_toggler";
 import * as GalleryStateMachine from "./gallery_state_machine";
-import * as ThumbSelector from "./gallery/gallery_thumb_selector";
+import * as GalleryThumbSelector from "./gallery_thumb_selector";
+import * as SearchPageLoader from "./search_page_loader";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/api/api_types";
 import { openOriginal, openPostPage } from "../../../utils/dom/links";
 import { Favorite } from "../../../types/interfaces/interfaces";
 import { GalleryState } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/primitives/primitives";
 import { ON_FAVORITES_PAGE } from "../../../lib/globals/flags";
+import { SearchPage } from "../../../types/search_page";
 import { clamp } from "../../../utils/primitive/number";
 import { downloadFromThumb } from "../../../lib/download/downloader";
 import { getAllThumbs } from "../../../utils/dom/dom";
@@ -19,7 +23,7 @@ export function hasRecentlyExitedGallery(): boolean {
 }
 
 export function getCurrentThumb(): HTMLElement | undefined {
-  return ThumbSelector.getThumbsOnCurrentPage()[currentIndex];
+  return GalleryThumbSelector.getThumbsOnCurrentPage()[currentIndex];
 }
 
 export function getCurrentState(): GalleryState {
@@ -42,7 +46,7 @@ export function isViewingVideo(): boolean {
   return currentThumb !== undefined && isVideo(currentThumb);
 }
 export function enterGallery(thumb: HTMLElement): void {
-  currentIndex = ThumbSelector.getIndexFromThumb(thumb);
+  currentIndex = GalleryThumbSelector.getIndexFromThumb(thumb);
   GalleryStateMachine.changeState(GalleryState.IN_GALLERY);
 }
 
@@ -67,46 +71,44 @@ export function toggleShowContentOnHover(): void {
 }
 
 export function navigate(direction: NavigationKey): HTMLElement | undefined {
-  preloadSearchPages();
   currentIndex += isForwardNavigationKey(direction) ? 1 : -1;
   return getCurrentThumb();
 }
 
 export function navigateAfterPageChange(direction: NavigationKey): HTMLElement | undefined {
-  currentIndex = isForwardNavigationKey(direction) ? 0 : ThumbSelector.getThumbsOnCurrentPage().length - 1;
+  currentIndex = isForwardNavigationKey(direction) ? 0 : GalleryThumbSelector.getThumbsOnCurrentPage().length - 1;
   return getCurrentThumb();
 }
 
 export function getSearchResults(): Favorite[] {
-  return ThumbSelector.getLatestSearchResults();
+  return GalleryThumbSelector.getLatestSearchResults();
 }
 
 export function getThumbsAround(thumb: HTMLElement): HTMLElement[] {
   if (ON_FAVORITES_PAGE) {
-    return ThumbSelector.getSearchResultsAround(thumb);
+    return GalleryThumbSelector.getSearchResultsAround(thumb);
   }
-  return [];
-  // return this.searchPageLoader.getThumbsAround(thumb);
+  return SearchPageLoader.getThumbsAround(thumb);
 }
 
 export function setSearchResults(searchResults: Favorite[]): void {
-  ThumbSelector.setLatestSearchResults(searchResults);
+  GalleryThumbSelector.setLatestSearchResults(searchResults);
 }
 
 export function indexCurrentPageThumbs(): void {
-  ThumbSelector.indexCurrentPageThumbs(getAllThumbs());
+  GalleryThumbSelector.indexCurrentPageThumbs(getAllThumbs());
 }
 
 export function preloadSearchPages(): void {
-  // searchPageLoader.preloadSearchPages();
+  SearchPageLoader.preloadSearchPages();
 }
 
 export function clampCurrentIndex(): void {
-  currentIndex = clamp(currentIndex, 0, ThumbSelector.getThumbsOnCurrentPage().length - 1);
+  currentIndex = clamp(currentIndex, 0, GalleryThumbSelector.getThumbsOnCurrentPage().length - 1);
 }
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
-  // return this.searchPageLoader.navigateSearchPages(direction);
+  return SearchPageLoader.navigateSearchPages(direction);
 }
 
 export function openPostInNewTab(): void {
@@ -131,4 +133,12 @@ export function downloadInGallery(): void {
   if (currentThumb !== undefined) {
     downloadFromThumb(currentThumb);
   }
+}
+
+export function addFavoriteInGallery(): Promise<AddFavoriteStatus> {
+  return GalleryFavoriteToggler.addFavoriteInGallery(getCurrentThumb());
+}
+
+export function removeFavoriteInGallery(): Promise<RemoveFavoriteStatus> {
+  return GalleryFavoriteToggler.removeFavoriteInGallery(getCurrentThumb());
 }

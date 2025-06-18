@@ -35,3 +35,13 @@ export const getTagSetFromThumb = ON_FAVORITES_PAGE ? getTagSetFromThumbOnFavori
 export function getContentTypeFromThumb(thumb: HTMLElement): ContentType {
   return getContentType(getTagSetFromThumb(thumb));
 }
+
+export function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
+  const image = getImageFromThumb(thumb);
+
+  if (image === null || !image.hasAttribute("title")) {
+    return;
+  }
+  image.setAttribute("tags", image.title);
+  image.removeAttribute("title");
+}

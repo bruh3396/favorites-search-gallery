@@ -1,5 +1,5 @@
 import { getDimensions2D, removeExtraWhiteSpace } from "../../utils/primitive/string";
-import { Post } from "../../types/api/post";
+import { Post } from "../../types/api/api_types";
 import { cleanImageSource } from "../../utils/content/url";
 
   const PARSER = new DOMParser();

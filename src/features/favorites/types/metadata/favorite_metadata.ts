@@ -1,19 +1,21 @@
-import * as API from "../../../../lib/api/api";
 import * as Extensions from "../../../../store/indexed_db/extensions";
 import { FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../../types/primitives/composites";
 import { DiscreteRating } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/globals/events";
 import { FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
 import { GeneralSettings } from "../../../../config/general_settings";
+import { Post } from "../../../../types/api/api_types";
 import { Rating } from "../../../../types/primitives/primitives";
 import { ThrottledQueue } from "../../../../components/functional/throttled_queue";
-import { createEmptyPost } from "../favorite/favorite_type_utils";
+import { fetchPostFromAPISafe } from "../../../../lib/api/api";
 import { validateTags } from "../favorite/favorite_item";
 
 const PENDING_REQUESTS = new Set<string>();
 const UPDATE_QUEUE: FavoriteMetadata[] = [];
 const MAX_PENDING_REQUESTS = 250;
 const THROTTLED_FETCH_QUEUE = new ThrottledQueue(GeneralSettings.throttledMetadataAPIRequestDelay);
+
+THROTTLED_FETCH_QUEUE.pause();
 
 function decodeRating(rating: string): Rating {
   return {
@@ -41,19 +43,13 @@ function tooManyPendingRequests(): boolean {
   return PENDING_REQUESTS.size > MAX_PENDING_REQUESTS;
 }
 
-async function fetchMissingMetadata(): Promise<void> {
+export async function fetchMissingMetadata(): Promise<void> {
+  THROTTLED_FETCH_QUEUE.resume();
+
   for (const metadata of UPDATE_QUEUE) {
     await THROTTLED_FETCH_QUEUE.wait();
     metadata.populateFromAPI();
   }
-}
-
-export function setupFavoriteMetadata(): void {
-  THROTTLED_FETCH_QUEUE.pause();
-  Events.favorites.favoritesLoaded.on(() => {
-    THROTTLED_FETCH_QUEUE.resume();
-    fetchMissingMetadata();
-  }, { once: true });
 }
 
 export class FavoriteMetadata {
@@ -130,11 +126,15 @@ export class FavoriteMetadata {
       return;
     }
     PENDING_REQUESTS.add(this.id);
-    const post = await API.fetchPostFromAPI(this.id).catch(createEmptyPost);
+    const post = await fetchPostFromAPISafe(this.id);
 
     PENDING_REQUESTS.delete(this.id);
     Extensions.setExtensionFromPost(post);
     validateTags(post);
+    this.populateFromPost(post);
+  }
+
+  private populateFromPost(post: Post): void {
     this.metrics.width = post.width;
     this.metrics.height = post.height;
     this.metrics.score = post.score;

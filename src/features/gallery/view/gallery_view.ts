@@ -1,7 +1,11 @@
-import * as GalleryRenderer from "./main/renderers/gallery_renderer";
+import * as GalleryRenderer from "./renderers/gallery_renderer";
 import * as GalleryUI from "./ui/gallery_ui";
-import { GALLERY_CONTAINER } from "./ui/gallery_container";
+import * as SearchPageCreator from "./search_page_creator";
+import { GALLERY_CONTAINER } from "../ui/gallery_container";
 import { GallerySettings } from "../../../config/gallery_settings";
+import { RemoveFavoriteStatus } from "../../../types/api/api_types";
+import { SearchPage } from "../../../types/search_page";
+import { toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -75,7 +79,7 @@ export function showAddedFavoriteStatus(status: number): void {
   GalleryUI.showAddedFavoriteStatus(status);
 }
 
-export function showRemovedFavoriteStatus(status: number): void {
+export function showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
   GalleryUI.showRemovedFavoriteStatus(status);
 }
 
@@ -92,7 +96,7 @@ export function restartVideo(): void {
 }
 
 export function createSearchPage(searchPage: SearchPage): void {
-  // this.searchPageCreator.createSearchPage(searchPage);
+  SearchPageCreator.createSearchPage(searchPage);
 }
 
 export function toggleVideoPause(): void {
@@ -111,14 +115,15 @@ export function toggleZoomCursor(value: boolean): void {
 export function toggleZoom(value: boolean | undefined = undefined): boolean {
   const zoomedIn = GalleryRenderer.toggleZoom(value);
 
-  GalleryUI.toggleMenu(!zoomedIn);
+  toggleGalleryMenuEnabled(!zoomedIn);
   return zoomedIn;
 }
 
-export function scrollToZoomPoint(x: number, y: number): void {
-  GalleryRenderer.scrollToZoomPoint(x, y);
+export function zoomToPoint(x: number, y: number): void {
+  GalleryRenderer.zoomToPoint(x, y);
 }
 
 export function setupGalleryView(): void {
   GalleryUI.setupGalleryUI();
+  SearchPageCreator.setupSearchPageCreator();
 }
