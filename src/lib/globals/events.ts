@@ -1,5 +1,4 @@
 import { FavoriteLayout, MetadataMetric, NavigationKey, Rating } from "../../types/primitives/primitives";
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "./flags";
 import { EventEmitter } from "../../components/functional/event_emitter";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "./container";
 import { FavoriteItem } from "../../features/favorites/types/favorite/favorite_item";
@@ -8,7 +7,10 @@ import { FavoritesMouseEvent } from "../../types/events/mouse_event";
 import { FavoritesPageRelation } from "../../features/favorites/types/favorite/favorite_types";
 import { FavoritesWheelEvent } from "../../types/events/wheel_event";
 import { GalleryMenuAction } from "../../features/gallery/types/gallery_types";
+import { ON_FAVORITES_PAGE } from "./flags";
 import { PerformanceProfile } from "../../types/primitives/enums";
+
+const container = ON_FAVORITES_PAGE ? FAVORITES_SEARCH_GALLERY_CONTAINER : document.documentElement;
 
 const favorites = {
   searchStarted: new EventEmitter<string>(true),
@@ -76,7 +78,13 @@ const gallery = {
   visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true),
   galleryMenuButtonClicked: new EventEmitter<GalleryMenuAction>(true),
   videoEnded: new EventEmitter<void>(true),
-  videoDoubleClicked: new EventEmitter<MouseEvent>(true)
+  videoDoubleClicked: new EventEmitter<MouseEvent>(true),
+  rightTap: new EventEmitter<void>(true),
+  leftTap: new EventEmitter<void>(true),
+  swipedUp: new EventEmitter<void>(true),
+  swipedDown: new EventEmitter<void>(true),
+  swipedLeft: new EventEmitter<void>(true),
+  swipedRight: new EventEmitter<void>(true)
 };
 
 const caption = {
@@ -94,6 +102,8 @@ const document1 = {
   mouseover: new EventEmitter<FavoritesMouseEvent>(true),
   click: new EventEmitter<MouseEvent>(true),
   mousedown: new EventEmitter<MouseEvent>(true),
+  touchStart: new EventEmitter<TouchEvent>(true),
+  touchEnd: new EventEmitter<TouchEvent>(true),
   keydown: new EventEmitter<FavoritesKeyboardEvent>(true),
   keyup: new EventEmitter<FavoritesKeyboardEvent>(true),
   wheel: new EventEmitter<FavoritesWheelEvent>(true),
@@ -103,41 +113,37 @@ const document1 = {
 
 const window1 = {
   focus: new EventEmitter<FocusEvent>(true),
-  blur: new EventEmitter<FocusEvent>(true)
+  blur: new EventEmitter<FocusEvent>(true),
+  orientationChange: new EventEmitter<Event>(true)
 };
 
 function setupDocumentEvents(): void {
   broadcastDOMLoad();
-  setupGlobalDesktopEvents();
+  setupCommonEvents();
 }
 
-function setupGlobalDesktopEvents(): void {
-  const container = ON_FAVORITES_PAGE ? FAVORITES_SEARCH_GALLERY_CONTAINER : document.documentElement;
-
-  if (ON_MOBILE_DEVICE) {
-    return;
-  }
-  container.addEventListener("mouseover", (event) => {
-    Events.document.mouseover.emit(new FavoritesMouseEvent(event));
-  }, {
-    passive: true
-  });
+function setupCommonEvents(): void {
   container.addEventListener("click", (event) => {
     Events.document.click.emit(event);
   });
   container.addEventListener("mousedown", (event) => {
     Events.document.mousedown.emit(event);
   });
-  container.addEventListener("mousemove", (event) => {
-    Events.document.mousemove.emit(event);
-  }, {
-    passive: true
-  });
   document.addEventListener("keydown", (event) => {
     Events.document.keydown.emit(new FavoritesKeyboardEvent(event));
   });
   document.addEventListener("keyup", (event) => {
     Events.document.keyup.emit(new FavoritesKeyboardEvent(event));
+  });
+    container.addEventListener("mouseover", (event) => {
+    Events.document.mouseover.emit(new FavoritesMouseEvent(event));
+  }, {
+    passive: true
+  });
+  container.addEventListener("mousemove", (event) => {
+    Events.document.mousemove.emit(event);
+  }, {
+    passive: true
   });
   document.addEventListener("wheel", (event) => {
     Events.document.wheel.emit(new FavoritesWheelEvent(event));
@@ -147,6 +153,12 @@ function setupGlobalDesktopEvents(): void {
   container.addEventListener("contextmenu", (event) => {
     Events.document.contextmenu.emit(event);
   });
+  container.addEventListener("touchstart", (event) => {
+    Events.document.touchStart.emit(event);
+  });
+  container.addEventListener("touchend", (event) => {
+    Events.document.touchEnd.emit(event);
+  });
 }
 
 function setupWindowEvents(): void {
@@ -155,6 +167,9 @@ function setupWindowEvents(): void {
   });
   window.addEventListener("blur", (event) => {
     window1.focus.emit(event);
+  });
+  window.addEventListener("orientationchange", (event) => {
+    Events.window.orientationChange.emit(event);
   });
 }
 

@@ -78,7 +78,6 @@ function insertSuggestion(input: HTMLInputElement | HTMLTextAreaElement, suggest
   const result = getQueryWithTagReplaced(input.value, input.selectionStart ?? -1, suggestion);
   input.value = result.result;
   input.selectionStart = result.selectionStart;
-  console.log(suggestion);
   input.selectionEnd = result.selectionStart;
 }
 

@@ -44,12 +44,10 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     if (moreResults.length === 0) {
       return;
     }
-    await sleep(25);
     FavoritesView.insertNewSearchResults(moreResults);
     Events.favorites.resultsAddedToCurrentPage.emit(moreResults);
     await waitForAllThumbnailsToLoad();
     this.pageBottomObserver.refresh();
-    await sleep(50);
   }
 
   private async showFirstResults(): Promise<void> {

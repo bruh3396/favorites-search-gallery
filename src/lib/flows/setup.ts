@@ -1,3 +1,4 @@
+import { decorateTab } from "../globals/tab_decorator";
 import { insertFavoritesSearchGalleryContainer } from "../globals/container";
 import { setupCommonStyles } from "../../utils/dom/style";
 import { setupEvents } from "../globals/events";
@@ -10,4 +11,5 @@ export function setupGlobals(): void {
   setupCommonStyles();
   setupGlobalQueues();
   insertFavoritesSearchGalleryContainer();
+  decorateTab();
 }

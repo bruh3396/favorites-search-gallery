@@ -28,7 +28,7 @@ export function getURLFromThumb(thumb: HTMLElement): string | null {
   return image ? image.src : null;
 }
 
-export function getThumbUnderCursor(event: MouseEvent): HTMLElement | null {
+export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement | null {
   if (!(event.target instanceof HTMLElement) || event.target.matches(".caption-tag")) {
     return null;
   }

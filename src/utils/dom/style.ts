@@ -28,11 +28,12 @@ function toggleLocalDarkStyles(useDark: boolean): void {
 }
 
 function setupVideoAndGifOutlines(): void {
-  const size = ON_MOBILE_DEVICE ? 2 : 2;
+  const size = ON_MOBILE_DEVICE ? 1 : 2;
+  const outlineOrBorder = "outline";
   const videoSelector = ON_FAVORITES_PAGE ? "&:has(img.video)" : ">img.video";
   const gifSelector = ON_FAVORITES_PAGE ? "&:has(img.gif)" : ">img.gif";
-  const videoRule = `${videoSelector} {outline: ${size}px solid blue}`;
-  const gifRule = `${gifSelector} {outline: ${size}px solid hotpink}`;
+  const videoRule = `${videoSelector} {${outlineOrBorder}: ${size}px solid blue}`;
+  const gifRule = `${gifSelector} {${outlineOrBorder}: ${size}px solid hotpink}`;
 
   insertStyleHTML(`
     #favorites-search-gallery-content {

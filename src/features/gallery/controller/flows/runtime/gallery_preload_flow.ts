@@ -1,5 +1,5 @@
 import * as GalleryModel from "../../../model/gallery_model";
-import * as GalleryThumbObserver from "../../events/gallery_visible_thumb_observer";
+import * as GalleryThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import * as GalleryView from "../../../view/gallery_view";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { GalleryState } from "../../../types/gallery_types";

@@ -2,6 +2,7 @@ import * as Extensions from "../../../../store/indexed_db/extensions";
 import * as FavoritesModel from "../../model/favorites_model";
 import * as FavoritesOptionsFlow from "../flows/runtime/favorites_option_flow";
 import * as FavoritesPostLoadFlow from "../flows/setup/favorites_post_load_flow";
+import * as FavoritesPresentationFlow from "../flows/presentation/favorites_presentation_flow";
 import * as FavoritesSearchFlow from "../flows/runtime/favorites_search_flow";
 import * as FavoritesView from "../../view/favorites_view";
 import { Events } from "../../../../lib/globals/events";
@@ -23,6 +24,8 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.reset.on(Extensions.deleteExtensionsDatabase);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
   Events.favorites.missingMetadataFound.on(FavoritesModel.updateMetadata);
+  Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.revealFavorite);
+  Events.favorites.findFavoriteInAllStarted.on(FavoritesSearchFlow.findFavoriteInAll);
 
   Events.gallery.requestPageChange.on(FavoritesPaginationFlow.handlePageChangeRequest.bind(FavoritesPaginationFlow));
   Events.gallery.showOnHover.on(updateShowOnHoverOptionTriggeredFromGallery);

@@ -22,6 +22,10 @@ export function showLatestSearchResults(): void {
   showSearchResults(FavoritesModel.getLatestSearchResults());
 }
 
+export function showAllFavorites(): void {
+  searchFavorites("");
+}
+
 export function shuffleSearchResults(): void {
   showSearchResults(FavoritesModel.getShuffledSearchResults());
 }
@@ -29,4 +33,9 @@ export function shuffleSearchResults(): void {
 export function invertSearchResults(): void {
   FavoritesModel.invertSearchResults();
   showLatestSearchResults();
+}
+
+export function findFavoriteInAll(id: string): void {
+  showAllFavorites();
+  FavoritesPresentationFlow.revealFavorite(id);
 }

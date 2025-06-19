@@ -5,9 +5,11 @@ import { insertGalleryContainer } from "../../../ui/gallery_container";
 import { prepareAllThumbsOnSearchPage } from "../../../../../types/search_page";
 import { setupAutoplay } from "./gallery_autoplay_setup_flow";
 import { setupGalleryMenu } from "../../../ui/gallery_menu";
+import { setupGalleryMobileSwipeControls } from "../../events/mobile/gallery_swipe_controls";
+import { setupGalleryMobileTapControls } from "../../events/mobile/gallery_edge_tap_controls";
 import { setupGalleryView } from "../../../view/gallery_view";
 import { setupSearchPageLoader } from "../../../model/search_page_loader";
-import { setupVisibleThumbObserver } from "../../events/gallery_visible_thumb_observer";
+import { setupVisibleThumbObserver } from "../../events/desktop/gallery_visible_thumb_observer";
 import { waitForDOMToLoad } from "../../../../../utils/dom/dom";
 
 export async function setupGallery(): Promise<void> {
@@ -17,6 +19,8 @@ export async function setupGallery(): Promise<void> {
   await setupSearchPageGallery();
   insertGalleryContainer();
   setupVisibleThumbObserver();
+  setupGalleryMobileTapControls();
+  setupGalleryMobileSwipeControls();
   setupGalleryView();
   setupGalleryMenu();
   addGalleryEventListeners();

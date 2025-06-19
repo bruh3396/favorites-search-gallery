@@ -3,6 +3,7 @@ import * as GalleryUI from "./ui/gallery_ui";
 import * as SearchPageCreator from "./search_page_creator";
 import { GALLERY_CONTAINER } from "../ui/gallery_container";
 import { GallerySettings } from "../../../config/gallery_settings";
+import { ON_DESKTOP_DEVICE } from "../../../lib/globals/flags";
 import { RemoveFavoriteStatus } from "../../../types/api/api_types";
 import { SearchPage } from "../../../types/search_page";
 import { toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
@@ -43,7 +44,7 @@ export function toggleVisibility(value: boolean): void {
 }
 
 export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
-  if (GallerySettings.preloadingEnabled) {
+  if (GallerySettings.preloadingEnabled && ON_DESKTOP_DEVICE) {
     GalleryRenderer.preloadContentOutOfGallery(thumbs);
   }
 }
@@ -121,6 +122,10 @@ export function toggleZoom(value: boolean | undefined = undefined): boolean {
 
 export function zoomToPoint(x: number, y: number): void {
   GalleryRenderer.zoomToPoint(x, y);
+}
+
+export function correctOrientation(): void {
+  GalleryRenderer.correctOrientation();
 }
 
 export function setupGalleryView(): void {

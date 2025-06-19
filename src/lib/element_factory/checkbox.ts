@@ -67,6 +67,33 @@ export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
   });
 }
 
+export function createToggleSwitch(partial: Partial<CheckboxElement>): void {
+  const template = createCheckboxTemplate(partial);
+  const parent = document.getElementById(template.parentId);
+
+  if (parent === null) {
+    return;
+  }
+  const toggleSwitchId = `${template.id}-toggle-switch`;
+  const switchHTML = `
+    <label id="${toggleSwitchId}" class="toggle-switch" title="${template.title}">
+        <span class="slider round"></span>
+        <span class="toggle-switch-label"> ${template.textContent}</span>
+    </label>`;
+
+  parent.insertAdjacentHTML(template.position, switchHTML);
+  template.position = "afterbegin";
+  template.parentId = toggleSwitchId;
+  createCheckboxElement(template);
+  const checkbox = document.getElementById(template.id);
+
+  if (checkbox !== null) {
+    checkbox.style.width = "0";
+    checkbox.style.height = "0";
+    checkbox.style.opacity = "0";
+  }
+}
+
 export function createCheckboxOption(partial: Partial<CheckboxElement>): void {
   const parent = document.getElementById(partial.parentId || "not-an-id");
 

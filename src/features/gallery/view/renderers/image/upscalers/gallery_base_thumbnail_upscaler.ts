@@ -1,5 +1,5 @@
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../../../../../lib/globals/flags";
 import { ImageRequest } from "../../../../types/gallery_image_request";
-import { ON_FAVORITES_PAGE } from "../../../../../../lib/globals/flags";
 import { SharedGallerySettings } from "../../../../../../config/shared_gallery_settings";
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_upscale_request";
 import { getAllThumbs } from "../../../../../../utils/dom/dom";
@@ -13,7 +13,7 @@ export abstract class GalleryBaseThumbUpscaler {
   }
 
   public upscale(request: ImageRequest): void {
-    if (this.requestIsValid(request)) {
+    if (ON_DESKTOP_DEVICE && this.requestIsValid(request)) {
       this.finishUpscale(request);
       this.upscaledIds.add(request.id);
     }

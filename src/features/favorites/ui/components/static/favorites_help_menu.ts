@@ -2,7 +2,7 @@ import { HELP_HTML } from "../../../../../assets/html";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/globals/flags";
 
 function insertHelpHTML(): void {
-  const parent = document.querySelector("#left-favorites-panel-top-row");
+  const parent = document.getElementById(ON_MOBILE_DEVICE ? "mobile-footer-header" : "left-favorites-panel-top-row");
 
   if (parent !== null) {
     parent.insertAdjacentHTML("beforeend", HELP_HTML);
@@ -10,12 +10,14 @@ function insertHelpHTML(): void {
 }
 
 function addEventListenersToWhatsNewMenu(): void {
-  if (ON_MOBILE_DEVICE) {
-    return;
-  }
   const whatsNew = document.getElementById("whats-new-link");
 
   if (whatsNew === null) {
+    return;
+  }
+
+  if (ON_MOBILE_DEVICE) {
+    whatsNew.remove();
     return;
   }
   whatsNew.onclick = (): boolean => {

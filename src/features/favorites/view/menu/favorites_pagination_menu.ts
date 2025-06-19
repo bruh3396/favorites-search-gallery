@@ -2,6 +2,7 @@ import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } 
 import { Events } from "../../../../lib/globals/events";
 import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { ON_DESKTOP_DEVICE } from "../../../../lib/globals/flags";
 import { Preferences } from "../../../../store/local_storage/preferences";
 import { getNumbersAround } from "../../../../utils/collection/array";
 import { insertStyleHTML } from "../../../../utils/dom/style";
@@ -19,18 +20,30 @@ function createContainer(): HTMLSpanElement {
   return menu;
 }
 
+function insertMenu(): void {
+  if (ON_DESKTOP_DEVICE) {
+    const placeToInsert = document.getElementById("favorites-pagination-placeholder");
+
+    if (placeToInsert !== null) {
+      placeToInsert.insertAdjacentElement("afterend", CONTAINER);
+      placeToInsert.remove();
+    }
+    return;
+  }
+  const footerBottom = document.getElementById("mobile-footer-bottom");
+
+  if (footerBottom !== null) {
+    footerBottom.insertAdjacentElement("afterbegin", CONTAINER);
+  }
+}
+
 function insert(): void {
-  const placeToInsertMenu = document.getElementById("favorites-pagination-placeholder");
   const matchCountLabel = document.getElementById("match-count-label");
 
   if (matchCountLabel !== null) {
     matchCountLabel.insertAdjacentElement("afterend", RANGE_INDICATOR);
   }
-
-  if (placeToInsertMenu !== null) {
-    placeToInsertMenu.insertAdjacentElement("afterend", CONTAINER);
-    placeToInsertMenu.remove();
-  }
+  insertMenu();
 }
 
 export function create(parameters: FavoritesPaginationParameters): void {
@@ -101,7 +114,7 @@ function createArrowTraversalButton(name: FavoritesPageRelation, textContent: st
 }
 
 function createGotoSpecificPageInputs(finalPageNumber: number): void {
-  if (pageNumberTraversalButtonExists(1) && pageNumberTraversalButtonExists(finalPageNumber)) {
+  if (finalPageNumber === 1) {
     return;
   }
   const container = document.createElement("span");

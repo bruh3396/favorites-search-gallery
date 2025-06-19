@@ -99,12 +99,12 @@ export function onClick(mouseEvent: MouseEvent): void {
   }, mouseEvent);
 }
 
-export function onMouseDown(mouseEvent: MouseEvent): void {
+export function onMouseDown(event: MouseEvent | TouchEvent): void {
   executeFunctionBasedOnGalleryState({
     hover: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery,
     gallery: onMouseDownInGallery
-  }, new FavoritesMouseEvent(mouseEvent));
+  }, new FavoritesMouseEvent(event));
 }
 
 export function onContextMenu(mouseEvent: MouseEvent): void {

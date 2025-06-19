@@ -86,3 +86,7 @@ export function toggleZoomCursor(value: boolean): void {
 export function zoomToPoint(x: number, y: number): void {
   GalleryImageRenderer.zoomToPoint(x, y);
 }
+
+export function correctOrientation(): void {
+  GalleryImageRenderer.correctOrientation();
+}

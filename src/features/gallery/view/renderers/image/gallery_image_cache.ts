@@ -36,11 +36,9 @@ function truncateImagesOnFavoritesPage(requests: ImageRequest[]): ImageRequest[]
 function truncateImagesExceedingMemoryLimit(requests: ImageRequest[]): ImageRequest[] {
   const truncatedRequests = [];
   let accumulatedMegabytes = 0;
-  const sizeLimit = GallerySettings.imageMegabyteLimit;
-  const minimum = GallerySettings.minimumPreloadedImageCount;
   let i = 0;
 
-  while (i < requests.length && (accumulatedMegabytes < sizeLimit || truncatedRequests.length < minimum)) {
+  while (i < requests.length && (accumulatedMegabytes < GallerySettings.imageMegabyteLimit || truncatedRequests.length < GallerySettings.minimumPreloadedImageCount)) {
     accumulatedMegabytes += requests[i].isImage ? requests[i].megabytes : 0;
     truncatedRequests.push(requests[i]);
     i += 1;

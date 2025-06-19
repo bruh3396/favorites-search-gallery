@@ -1,10 +1,25 @@
 import { clamp, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
 import { GallerySettings } from "../../../../../config/gallery_settings";
+import { ON_DESKTOP_DEVICE } from "../../../../../lib/globals/flags";
 import { drawScaledCanvasAfterClearing } from "../../../../../utils/dom/canvas";
 import { getDimensions2D } from "../../../../../utils/primitive/string";
+import { insertStyleHTML } from "../../../../../utils/dom/style";
 
 const CANVAS = document.createElement("canvas");
 const CONTEXT = CANVAS.getContext("2d") ?? new CanvasRenderingContext2D();
+const LANDSCAPE_STYLE = `
+  .fullscreen-image {
+      height: 100vh !important;
+      width: auto !important;
+  }
+  `;
+const PORTRAIT_STYLE = `
+  .fullscreen-image {
+      width: 100vw !important;
+      height: auto !important;
+  }
+  `;
+
 let container: HTMLElement;
 
 function insertGalleryCanvas(newContainer: HTMLElement): void {
@@ -14,12 +29,30 @@ function insertGalleryCanvas(newContainer: HTMLElement): void {
   container = newContainer;
 }
 
+export function correctOrientation(): void {
+  if (ON_DESKTOP_DEVICE) {
+    return;
+  }
+  const usingLandscape = window.screen.orientation.angle === 90;
+  const usingCorrectOrientation = (usingLandscape && CANVAS.width > CANVAS.height) || (!usingLandscape && CANVAS.width < CANVAS.height);
+
+  if (usingCorrectOrientation) {
+    return;
+  }
+  insertStyleHTML(usingLandscape ? LANDSCAPE_STYLE : PORTRAIT_STYLE, "gallery-canvas-orientation");
+  const tempWidth = CANVAS.width;
+
+  CANVAS.width = CANVAS.height;
+  CANVAS.height = tempWidth;
+}
+
 export function setupGalleryCanvas(newContainer: HTMLElement): void {
   CANVAS.className = "fullscreen-image";
   const dimensions = getDimensions2D(GallerySettings.mainCanvasResolution);
 
   CANVAS.width = dimensions.width;
   CANVAS.height = dimensions.height;
+  correctOrientation();
   insertGalleryCanvas(newContainer);
 }
 

@@ -1,5 +1,6 @@
 import { getThumbUnderCursor, insideOfThumb } from "../../utils/dom/dom";
 import { ClickCodes } from "../primitives/enums";
+import { convertTouchEventToMouseEvent } from "./event_utils";
 
 export class FavoritesMouseEvent {
   public readonly originalEvent: MouseEvent;
@@ -11,7 +12,10 @@ export class FavoritesMouseEvent {
   public readonly thumb: HTMLElement | null;
   public readonly insideOfThumb: boolean;
 
-  constructor(event: MouseEvent) {
+  constructor(event: MouseEvent | TouchEvent) {
+    if (event instanceof TouchEvent) {
+      event = convertTouchEventToMouseEvent(event, "mousedown");
+    }
     this.originalEvent = event;
     this.leftClick = event.button === ClickCodes.LEFT;
     this.rightClick = event.button === ClickCodes.RIGHT;

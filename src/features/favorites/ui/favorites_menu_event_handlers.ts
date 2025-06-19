@@ -54,7 +54,7 @@ export function toggleUI(value: boolean): void {
   container.classList.toggle("ui-hidden", !value);
 }
 
-export function toggleOptions(value: boolean): void {
+export function toggleFavoritesOptions(value: boolean): void {
   if (ON_MOBILE_DEVICE) {
     document.getElementById("left-favorites-panel-bottom-row")?.classList.toggle("hidden", !value);
     insertStyleHTML(`

@@ -13,6 +13,7 @@ import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
 import { GeneralSettings } from "../../../config/general_settings";
 import { Preferences } from "../../../store/local_storage/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/globals/flags";
+import { createFavoriteItemHTMLTemplates } from "../types/favorite/favorite_element";
 import { sleep } from "../../../utils/misc/async";
 
 export function setStatus(message: string): void {
@@ -94,6 +95,7 @@ export function togglePaginationMenu(value: boolean): void {
 }
 
 export function setupFavoritesView(): void {
+  createFavoriteItemHTMLTemplates();
   collectAspectRatios();
   FavoritesStatus.setupFavoritesStatus();
   FavoritesTiler.setupFavoritesTiler();

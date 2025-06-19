@@ -532,7 +532,7 @@ function removeAutoplayEventListeners(): void {
   eventListenersAbortController = new AbortController();
 }
 
-function showMenu(): void {
+export function showMenu(): void {
   toggleMenuVisibility(true);
   menuVisibilityTimer.restart();
 }

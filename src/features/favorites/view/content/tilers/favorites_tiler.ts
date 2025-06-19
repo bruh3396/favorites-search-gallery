@@ -1,4 +1,3 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/globals/flags";
 import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
 import { FavoriteLayout } from "../../../../../types/primitives/primitives";
 import { FavoritesColumnTiler } from "./favorites_column_tiler";
@@ -6,6 +5,7 @@ import { FavoritesGridTiler } from "./favorites_grid_tiler";
 import { FavoritesRowTiler } from "./favorites_row_tiler";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { FavoritesSquareTiler } from "./favorites_square_tiler";
+import { ON_DESKTOP_DEVICE } from "../../../../../lib/globals/flags";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { Tiler } from "./favorites_tiler_interface";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
@@ -36,10 +36,6 @@ export function addItemsToTop(favorites: HTMLElement[]): void {
 export function changeLayout(layout: FavoriteLayout): void {
   if (currentLayout === layout) {
     return;
-  }
-
-  if (ON_MOBILE_DEVICE) {
-    layout = "column";
   }
   getCurrentTiler().onDeactivation();
   FAVORITES_CONTENT_CONTAINER.className = layout;

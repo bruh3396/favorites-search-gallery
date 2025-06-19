@@ -19,7 +19,7 @@ class ColumnTiler extends FavoritesBaseTiler {
   }
 
   private get active(): boolean {
-    return FAVORITES_CONTENT_CONTAINER.className === this.className;
+    return FAVORITES_CONTENT_CONTAINER.classList.contains(this.className);
   }
 
   private get inactive(): boolean {

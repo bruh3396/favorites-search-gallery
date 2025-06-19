@@ -51,6 +51,14 @@ function completeNavigation(thumb: HTMLElement): void {
   GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
 }
 
+export function navigateRight(): void {
+  navigate("ArrowRight");
+}
+
+export function navigateLeft(): void {
+  navigate("ArrowLeft");
+}
+
 export function navigate(direction: NavigationKey): void {
   const thumb = GalleryModel.navigate(direction);
   const thumbIsOnPage = thumb !== undefined;

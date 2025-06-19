@@ -1,13 +1,13 @@
-import * as FavoritesSearchFilter from "./search/components/favorites_search_filter";
 import * as FavoritesLoader from "./load/favorites_loader";
 import * as FavoritesMetadata from "../types/metadata/favorite_metadata";
 import * as FavoritesPaginator from "./presentation/favorites_paginator";
+import * as FavoritesSearchFilter from "./search/components/favorites_search_filter";
 import * as FavoritesSorter from "./search/components/favorites_sorter";
 import * as InfiniteScrollFeeder from "./presentation/favorites_infinite_scroll_feeder";
+import { FavoriteItem, getFavorite } from "../types/favorite/favorite_item";
 import { NavigationKey, Rating, SortingMethod } from "../../../types/primitives/primitives";
 import { FAVORITES_CONTENT_CONTAINER } from "../ui/structure/favorites_content_container";
 import { FAVORITES_SEARCH_INDEX } from "./search/index/favorites_search_index";
-import { FavoriteItem, getFavorite } from "../types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../types/favorite/favorite_types";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
 import { ITEM_SELECTOR } from "../../../utils/dom/dom";

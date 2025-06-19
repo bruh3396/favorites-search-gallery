@@ -1,35 +1,26 @@
-class InteractionTracker {
-  /** @type {Function} */
-  onInteractionStopped;
-  /** @type {Function} */
-  onMouseMoveStopped;
-  /** @type {Function} */
-  onScrollingStopped;
-  /** @type {Function} */
-  onNoInteractionOnStart;
-  /** @type {Number} */
-  idleDuration;
-  /** @type {Timeout} */
-  mouseTimeout;
-  /** @type {Timeout} */
-  scrollTimeout;
-  /** @type {Timeout} */
-  interactionOnStartTimeout;
-  /** @type {Boolean} */
-  mouseIsMoving;
-  /** @type {Boolean} */
-  scrolling;
-  /** @type {AbortController} */
-  abortController;
+import { Events } from "../../../../../lib/globals/events";
+import { Timeout } from "../../../../../types/primitives/primitives";
 
-  /**
-   * @param {Number} idleDuration
-   * @param {Function} onInteractionStopped
-   * @param {Function} onMouseMoveStopped
-   * @param {Function} onScrollingStopped
-   * @param {Function} onNoInteractionOnStart
-   */
-  constructor(idleDuration, onInteractionStopped, onMouseMoveStopped, onScrollingStopped, onNoInteractionOnStart) {
+export class InteractionTracker {
+  public onInteractionStopped: () => void;
+  public onMouseMoveStopped: () => void;
+  public onScrollingStopped: () => void;
+  public onNoInteractionOnStart: () => void;
+  public idleDuration: number;
+  public mouseTimeout: Timeout;
+  public scrollTimeout: Timeout;
+  public interactionOnStartTimeout: Timeout;
+  public mouseIsMoving: boolean;
+  public scrolling: boolean;
+  public abortController: AbortController;
+
+  constructor(
+    idleDuration: number,
+    onInteractionStopped: () => void,
+    onMouseMoveStopped: () => void,
+    onScrollingStopped: () => void,
+    onNoInteractionOnStart: () => void
+  ) {
     this.idleDuration = idleDuration;
     this.onInteractionStopped = onInteractionStopped;
     this.onMouseMoveStopped = onMouseMoveStopped;
@@ -40,18 +31,15 @@ class InteractionTracker {
     this.abortController = new AbortController();
   }
 
-  start() {
+  public start(): void {
     this.toggle(true);
   }
 
-  stop() {
+  public stop(): void {
     this.toggle(false);
   }
 
-  /**
-   * @param {Boolean} value
-   */
-  toggle(value) {
+  public toggle(value: boolean): void {
     if (value) {
       this.abortController = new AbortController();
       this.startInteractionOnStartTimer();
@@ -62,27 +50,27 @@ class InteractionTracker {
     this.abortController.abort();
   }
 
-  startInteractionOnStartTimer() {
+   public startInteractionOnStartTimer(): void {
     this.interactionOnStartTimeout = setTimeout(() => {
       this.onNoInteractionOnStart();
     }, this.idleDuration);
   }
 
-  trackMouseMove() {
-    Events.global.mousemove.on(this.onMouseMove.bind(this), {
+   private trackMouseMove(): void {
+    Events.document.mousemove.on(this.onMouseMove.bind(this), {
       passive: true,
       signal: this.abortController.signal
     });
   }
 
-  trackScroll() {
+   private trackScroll(): void {
     window.addEventListener("scroll", this.onScroll.bind(this), {
       passive: true,
       signal: this.abortController.signal
     });
   }
 
-  onMouseMove() {
+  private onMouseMove(): void {
     this.mouseIsMoving = true;
     clearTimeout(this.interactionOnStartTimeout);
     clearTimeout(this.mouseTimeout);
@@ -96,7 +84,7 @@ class InteractionTracker {
     }, this.idleDuration);
   }
 
-  onScroll() {
+  private onScroll(): void {
     this.scrolling = true;
     clearTimeout(this.interactionOnStartTimeout);
     clearTimeout(this.scrollTimeout);

@@ -12,9 +12,9 @@ export const GallerySettings = {
     }
     return ON_SEARCH_PAGE ? GallerySettings.mainCanvasResolutions.search : GallerySettings.mainCanvasResolutions.favorites;
   },
-  imageMegabyteLimit: 850,
+  imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 650,
   searchPagePreloadedImageCount: 42,
-  minimumPreloadedImageCount: 5,
+  minimumPreloadedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 2 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 2 : 2,
   preloadContentDebounceTime: 400,

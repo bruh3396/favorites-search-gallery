@@ -302,6 +302,147 @@ export const CAPTION_HTML = `
   }
 </style>
 `;
+export const CONTROLS_HTML = `
+<style>
+  #controls-guide {
+    display: none;
+    z-index: 99999;
+    --tap-control: blue;
+    --swipe-down: red;
+    --swipe-up: green;
+    top: 0;
+    left: 0;
+    background: lightblue;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+    position: fixed;
+
+    &.active {
+      display: flex;
+    }
+  }
+
+  #controls-guide-image-container {
+    background: black;
+    width: 100%;
+    height: 100%;
+  }
+
+  #controls-guide-sample-image {
+    background: lightblue;
+    position: relative;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%);
+  }
+
+  #controls-guide-top {
+    position: relative;
+    flex: 3;
+  }
+
+  #controls-guide-bottom {
+    flex: 1;
+    min-height: 25%;
+    padding: 10px;
+    font-size: 20px;
+    align-content: center;
+  }
+
+  #controls-guide-tap-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+
+  .controls-guide-tap {
+    color: white;
+    font-size: 50px;
+    position: absolute;
+    top: 50%;
+    height: 65%;
+    width: 15%;
+    background: var(--tap-control);
+    z-index: 9999;
+    transform: translateY(-50%);
+    writing-mode: vertical-lr;
+    text-align: center;
+    opacity: 0.8;
+  }
+
+  #controls-guide-tap-right {
+    right: 0;
+  }
+
+  #controls-guide-tap-left {
+    left: 0;
+  }
+
+  #controls-guide-swipe-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    svg {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 25%;
+    }
+  }
+
+  #controls-guide-swipe-down {
+    top: 0;
+    color: var(--swipe-down);
+    fill: var(--swipe-down);
+  }
+
+  #controls-guide-swipe-up {
+    bottom: 0;
+    color: var(--swipe-up);
+    fill: var(--swipe-up);
+  }
+</style>
+
+<div id="controls-guide">
+  <div id="controls-guide-top">
+    <div id="controls-guide-tap-container">
+      <div id="controls-guide-tap-left" class="controls-guide-tap">
+        Previous
+      </div>
+      <div id="controls-guide-tap-right" class="controls-guide-tap">
+        Next
+      </div>
+    </div>
+    <div id="controls-guide-image-container">
+      <img id="controls-guide-sample-image" src="https://rule34.xxx/images/header2.png">
+    </div>
+    <div id="controls-guide-swipe-container">
+      <svg id="controls-guide-swipe-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+        <path
+          d="M180-360 40-500l42-42 70 70q-6-27-9-54t-3-54q0-82 27-159t78-141l43 43q-43 56-65.5 121.5T200-580q0 26 3 51.5t10 50.5l65-64 42 42-140 140Zm478 233q-23 8-46.5 7.5T566-131L304-253l18-40q10-20 28-32.5t40-14.5l68-5-112-307q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l148 407-100 7 131 61q7 3 15 3.5t15-1.5l157-57q31-11 45-41.5t3-61.5l-55-150q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l55 150q23 63-4.5 122.5T815-184l-157 57Zm-90-265-54-151q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l55 150-76 28Zm113-41-41-113q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l41 112-75 28Zm8 78Z" />
+      </svg>
+      <svg id="controls-guide-swipe-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+        <path
+          d="M245-400q-51-64-78-141t-27-159q0-27 3-54t9-54l-70 70-42-42 140-140 140 140-42 42-65-64q-7 25-10 50.5t-3 51.5q0 70 22.5 135.5T288-443l-43 43Zm413 273q-23 8-46.5 7.5T566-131L304-253l18-40q10-20 28-32.5t40-14.5l68-5-112-307q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l148 407-100 7 131 61q7 3 15 3.5t15-1.5l157-57q31-11 45-41.5t3-61.5l-55-150q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l55 150q23 63-4.5 122.5T815-184l-157 57Zm-90-265-54-151q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l55 150-76 28Zm113-41-41-113q-6-16 1-30.5t23-20.5q16-6 30.5 1t20.5 23l41 112-75 28Zm8 78Z" />
+      </svg>
+    </div>
+  </div>
+  <div id="controls-guide-bottom">
+    <ul style="text-align: center; list-style: none;">
+      <li style="color: var(--tap-control);">Tap edges to traverse gallery</li>
+      <li style="color: var(--swipe-down);">Swipe down to exit gallery</li>
+      <li style="color: var(--swipe-up);">Swipe up to open autoplay menu</li>
+    </ul>
+  </div>
+</div>
+`;
 export const DARK_THEME_HTML = `
 <style>
   input[type=number] {
@@ -732,12 +873,12 @@ export const FAVORITES_HTML = `
 
       >button {
         white-space: nowrap;
-        border-radius: 4px;
-        height: 30px;
+        /* border-radius: 4px; */
+        /* height: 30px; */
       }
 
       >button:last-of-type {
-        margin-left: 4px;
+        margin-left: 2px;
         margin-bottom: 5px;
       }
 
@@ -750,7 +891,7 @@ export const FAVORITES_HTML = `
     }
 
     #favorites-pagination-container {
-      padding: 0px 10px 0px 10px;
+      /* padding: 0px 10px 0px 10px; */
 
       >button {
         background: transparent;
@@ -784,6 +925,7 @@ export const FAVORITES_HTML = `
       >a:not(:last-child)::after {
         content: " |";
       }
+
       /* display: flex;
       flex-direction: column;
 
@@ -987,7 +1129,7 @@ export const FAVORITES_HTML = `
 
     .toggle-switch {
       position: relative;
-      display: inline-block;
+      display: block;
       width: 60px;
       height: 34px;
       transform: scale(.75);
@@ -1062,8 +1204,12 @@ export const FAVORITES_HTML = `
       display: none;
     }
 
-    #favorites-search-box {
+    textarea#favorites-search-box {
       margin-top: 5px;
+    }
+
+    #favorites-load-status-label.hidden {
+      display: none;
     }
   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
@@ -1648,7 +1794,7 @@ export const HELP_HTML = `
       <ul>
         <li>New favorites layouts</li>
         <ul>
-          <li>Waterfall (column)</li>
+          <li>Waterfall (column/masonry)</li>
           <li>River (row)</li>
           <li>Square</li>
           <li>Legacy (grid)</li>
@@ -1664,6 +1810,8 @@ export const HELP_HTML = `
         <li>Download images</li>
         <ul>
           <li>Experimental for now</li>
+          <li>Download single images</li>
+          <li>Download search results</li>
         </ul>
         <li>New gallery hotkeys</li>
         <ul>
@@ -1684,10 +1832,8 @@ export const MOBILE_HTML = `
   #whats-new-link,
   #show-ui-div,
   #search-header,
-  #row-size-container,
   #left-favorites-panel-top-row,
-  #favorite-finder,
-  #layout-container {
+  #favorite-finder {
     display: none !important;
   }
 
@@ -1748,7 +1894,8 @@ export const MOBILE_HTML = `
 
   #favorites-search-gallery-content {
     grid-gap: 1.2cqw;
-    padding: 0px 5px 20px  5px !important;
+    padding: 0px 5px 20px 5px !important;
+    margin-right: 0px !important;
   }
 
   #favorites-search-gallery-menu {
@@ -1868,8 +2015,12 @@ export const MOBILE_HTML = `
     }
   }
 
-  #favorites-search-gallery-content.sticky {
+  #favorites-search-gallery-content.sticky-menu-shadow {
     transition: margin 0.2s ease;
+  }
+
+  #favorites-search-gallery-content.sticky-menu {
+    margin-top: 265px !important;
   }
 
   #autoplay-settings-menu {
@@ -2033,8 +2184,125 @@ export const MOBILE_HTML = `
     transform: scale(0.6) !important;
   }
 
-  #sort-inputs {
-    margin-top: -5px;
+  #sort-inputs>.toggle-switch {
+    display: inline-block;
+  }
+
+
+  #mobile-footer {
+    padding-top: 4px;
+    z-index: 10;
+
+    position: fixed;
+    width: 100%;
+    bottom: -1px;
+    left: 0;
+    /* padding: 4px 0px; */
+
+    >div {
+      text-align: center;
+    }
+
+    &.light-green-gradient {
+      background: linear-gradient(to top, #aae5a4, #89e180);
+    }
+
+    &.dark-green-gradient {
+      background: linear-gradient(to top, #5e715e, #293129);
+
+    }
+  }
+
+  #mobile-footer-top {
+    margin-bottom: 4px;
+  }
+
+  #mobile-footer-bottom {
+    margin-bottom: 5px;
+  }
+
+  #favorites-load-status {
+    font-size: 12px !important;
+
+    >span {
+      margin-right: 10px;
+    }
+
+    >span:nth-child(odd) {
+      font-weight: bold;
+    }
+
+    >label {
+      /* width: 300px; */
+      min-width: unset !important;
+    }
+  }
+
+  #favorites-load-status-label {
+    padding-left: 0 !important;
+  }
+
+  #pagination-number:active {
+    opacity: 0.5;
+  }
+
+  #favorites-pagination-container>button {
+    min-width: 30px !important;
+    width: unset !important;
+  }
+
+  #results-per-page-container {
+    margin-bottom: unset !important;
+  }
+
+  .mobile-tap-control {
+    position: fixed;
+    top: 50% !important;
+    height: 80vh;
+    width: 30vw;
+    background: red;
+    z-index: 9999;
+    color: red;
+    transform: translateY(-50%);
+    pointer-events: all !important;
+    opacity: 0;
+  }
+
+  #left-mobile-tap-control {
+    left: 0 !important;
+    right: unset !important;
+  }
+
+  #right-mobile-tap-control {
+    right: 0 !important;
+    left: unset !important;
+  }
+
+  #mobile-symbol-container {
+    display: flex;
+    gap: 10px;
+    text-align: center;
+    height: 0;
+    overflow: hidden;
+    width: 100%;
+    transition: height .2s ease;
+    margin-bottom: 5px;
+
+    >button {
+      font-size: 20px;
+      padding: 0;
+      margin: 0;
+      font-weight: bold;
+      text-align: center;
+      flex: 1;
+      height: 100% !important;
+      border: none;
+      border-radius: 4px;
+    }
+
+    &.active {
+      height: 30px;
+    }
   }
 </style>
 `;

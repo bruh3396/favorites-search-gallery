@@ -74,6 +74,25 @@ class ImageRenderer extends GalleryBaseRenderer {
     GalleryCanvas.zoomToPoint(x, y);
   }
 
+  public correctOrientation(): void {
+    GalleryCanvas.correctOrientation();
+    this.redrawOnOrientationChange();
+  }
+
+  private redrawOnOrientationChange(): void {
+    const thumb = document.getElementById(this.lastShownId);
+
+    if (thumb === null) {
+      return;
+    }
+    const imageRequest = GalleryImageCache.getImageRequest(thumb);
+
+    if (imageRequest === undefined || imageRequest.isIncomplete) {
+      return;
+    }
+    this.draw(thumb);
+  }
+
   private draw(thumb: HTMLElement): void {
     this.lastShownId = thumb.id;
     const imageRequest = GalleryImageCache.getImageRequest(thumb);

@@ -110,7 +110,7 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*.ts", "src/features/gallery/autoplay/gallery_autoplay_controller.ts"],
+  "include": ["src/**/*.ts", "src/features/gallery/autoplay/gallery_autoplay_controller.ts", "src/features/favorites/ui/components/dynamic/favorites_mobile_dynamic_elements.js"],
   "exclude": [
     // "**/tests/**/*.ts"
   ],

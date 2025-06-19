@@ -10,7 +10,7 @@ let currentPageNumber = 1;
 let resultsPerPage = Preferences.resultsPerPage.value;
 let favorites: FavoriteItem[] = [];
 
-export function getPageCount(): number {
+function getPageCount(): number {
   const favoriteCount = favorites.length;
 
   if (favoriteCount === 0) {
@@ -53,7 +53,7 @@ export function gotoFirstPage(): void {
   changePage(1);
 }
 
-export function gotoLastPage(): void {
+function gotoLastPage(): void {
   changePage(getPageCount());
 }
 
@@ -69,16 +69,16 @@ export function getFavoritesOnPreviousPage(): FavoriteItem[] {
   return getFavoritesOnPage(currentPageNumber - 1);
 }
 
-export function getFavoritesOnPage(pageNumber: number): FavoriteItem[] {
+function getFavoritesOnPage(pageNumber: number): FavoriteItem[] {
   const { start, end } = getPageRange(pageNumber);
   return favorites.slice(start, end);
 }
 
-export function getCurrentPageRange(): { start: number; end: number } {
+function getCurrentPageRange(): { start: number; end: number } {
   return getPageRange(currentPageNumber);
 }
 
-export function getPageRange(pageNumber: number): { start: number; end: number } {
+function getPageRange(pageNumber: number): { start: number; end: number } {
   return {
     start: resultsPerPage * (pageNumber - 1),
     end: resultsPerPage * pageNumber

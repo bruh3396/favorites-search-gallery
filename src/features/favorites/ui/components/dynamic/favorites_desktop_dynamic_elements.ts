@@ -2,7 +2,7 @@ import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "..
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/globals/flags";
 import { FavoriteLayout, MetadataMetric } from "../../../../../types/primitives/primitives";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/element_factory/checkbox";
-import { hideUnusedLayoutSizer, reloadWindow, toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader, toggleOptionHotkeyHints, toggleOptions, toggleUI } from "../../favorites_menu_event_handlers";
+import { hideUnusedLayoutSizer, reloadWindow, toggleAddOrRemoveButtons, toggleDownloadButtons, toggleFavoritesOptions, toggleHeader, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
 import { Events } from "../../../../../lib/globals/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
@@ -88,7 +88,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     title: "Show more options",
     preference: Preferences.optionsVisible,
     hotkey: "O",
-    function: toggleOptions,
+    function: toggleFavoritesOptions,
     triggerOnCreation: true,
     event: Events.favorites.optionsToggled
   },
@@ -260,7 +260,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-right",
     textContent: "Saved Suggestions",
     title: "Show saved search suggestions in autocomplete dropdown",
-    enabled: true,
+    enabled: false,
     preference: Preferences.savedSearchSuggestionsEnabled,
     hotkey: "",
     savePreference: true

@@ -1,11 +1,9 @@
-import { cleanOriginalFavoritesPage } from "./favorites_page_preparer";
-import { createFavoriteItemHTMLTemplates } from "../../types/favorite/favorite_element";
-import { createFavoritesMenuElements } from "../components/favorites_menu_element_creator";
-import { createFavoritesPageStructure } from "./favorites_page_structure";
+import { buildFavoritesMenu } from "./favorites_menu_builder";
+import { cleanOriginalFavoritesPage } from "./favorites_page_cleaner";
+import { insertFavoritesContentContainer } from "./favorites_content_container";
 
 export function buildFavoritesPage(): void {
   cleanOriginalFavoritesPage();
-  createFavoritesPageStructure();
-  createFavoriteItemHTMLTemplates();
-  createFavoritesMenuElements();
+  buildFavoritesMenu();
+  insertFavoritesContentContainer();
 }

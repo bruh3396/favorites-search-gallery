@@ -1,6 +1,6 @@
 import * as API from "../../../../lib/api/api";
 import * as Icons from "../../../../assets/icons";
-import { GALLERY_DISABLED, ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/globals/flags";
+import { GALLERY_DISABLED, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/globals/flags";
 import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../../utils/dom/links";
 import { ClickCodes } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/globals/events";
@@ -29,7 +29,9 @@ function createAddFavoriteButtonHTMLTemplate(): string {
 }
 
 function createDownloadButtonHTMLTemplate(): string {
-  return ON_DESKTOP_DEVICE ? `<img class="download-button utility-button" src=${createObjectURLFromSvg(Icons.DOWNLOAD.replace("FFFFFF", "0075FF"))}>` : "";
+  const downloadHTML = `<img class="download-button utility-button" src=${createObjectURLFromSvg(Icons.DOWNLOAD.replace("FFFFFF", "0075FF"))}>`;
+  return downloadHTML;
+  // return ON_DESKTOP_DEVICE ? downloadHTML : "";
 }
 
 function createPostHTMLTemplate(): void {
