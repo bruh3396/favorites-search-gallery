@@ -1,10 +1,10 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/globals/flags";
-import { Events } from "../../../../../lib/globals/events";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { VideoClip } from "../../../types/gallery_types";
-import { convertThumbURLToImageURL } from "../../../../../utils/content/url";
-import { getURLFromThumb } from "../../../../../utils/dom/dom";
+import { convertPreviewURLToImageURL } from "../../../../../utils/content/url";
+import { getPreviewURL } from "../../../../../utils/dom/dom";
 import { isVideo } from "../../../../../utils/content/content_type";
 
 const VIDEO_PLAYERS: HTMLVideoElement[] = [];
@@ -256,7 +256,7 @@ function videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): bool
 }
 
 function getVideoSource(thumb: HTMLElement): string {
-  return convertThumbURLToImageURL(getURLFromThumb(thumb) ?? "").replace("jpg", "mp4");
+  return convertPreviewURLToImageURL(getPreviewURL(thumb) ?? "").replace("jpg", "mp4");
 }
 
 function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {

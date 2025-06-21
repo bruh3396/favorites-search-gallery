@@ -1,9 +1,9 @@
-import { decorateTab } from "../globals/tab_decorator";
-import { insertFavoritesSearchGalleryContainer } from "../globals/container";
+import { decorateTab } from "../../utils/misc/tab_decorator";
+import { insertFavoritesSearchGalleryContainer } from "../global/container";
 import { setupCommonStyles } from "../../utils/dom/style";
-import { setupEvents } from "../globals/events";
+import { setupEvents } from "../global/events/events";
 import { setupExtensions } from "../../store/indexed_db/extensions";
-import { setupGlobalQueues } from "../globals/fetch_queues";
+import { setupGlobalQueues } from "../global/fetch_queues";
 
 export function setupGlobals(): void {
   setupEvents();

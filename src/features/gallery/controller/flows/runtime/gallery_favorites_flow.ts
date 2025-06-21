@@ -1,7 +1,7 @@
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import * as GalleryView from "../../../view/gallery_view";
-import { Events } from "../../../../../lib/globals/events";
+import { Events } from "../../../../../lib/global/events/events";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 
 export function handlePageChange(): void {

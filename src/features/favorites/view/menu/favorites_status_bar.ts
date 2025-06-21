@@ -1,6 +1,6 @@
 import * as API from "../../../../lib/api/api";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/globals/container";
-import { ON_MOBILE_DEVICE } from "../../../../lib/globals/flags";
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
+import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { Timeout } from "../../../../types/primitives/primitives";
 
 let matchCountIndicator: HTMLElement;

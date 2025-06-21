@@ -1,4 +1,4 @@
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/globals/container";
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
 
 export function createFooter(): void {
   const footer = document.createElement("div");

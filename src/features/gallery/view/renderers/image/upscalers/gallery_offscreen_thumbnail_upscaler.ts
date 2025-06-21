@@ -81,10 +81,6 @@ function handleMessage(message: MessageEvent<{action: string, request: UpscaleRe
       upscale(request.request);
       break;
 
-    // case "upscaleMultiple":
-    //   upscaleMultiple(request.requests);
-    //   break;
-
     case "clear":
       clear();
       break;
@@ -93,15 +89,6 @@ function handleMessage(message: MessageEvent<{action: string, request: UpscaleRe
       break;
   }
 }
-
-// function upscaleMultiple(requests: UpscaleRequest[]): void {
-//   for (const request of requests) {
-//     upscale(request);
-//   }
-//   postMessage({
-//     action: "upscaleMultipleDone"
-//   });
-// }
 
 async function upscale(request: UpscaleRequest): Promise<void> {
   const bitmap = await getImageBitmapFromRequest(request);

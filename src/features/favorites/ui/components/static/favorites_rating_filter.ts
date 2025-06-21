@@ -1,4 +1,4 @@
-import { Events } from "../../../../../lib/globals/events";
+import { Events } from "../../../../../lib/global/events/events";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { Rating } from "../../../../../types/primitives/primitives";
 import { RatingElement } from "../../../../../types/primitives/composites";

@@ -1,4 +1,4 @@
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../../../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../../../../../lib/global/flags/intrinsic_flags";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { SharedGallerySettings } from "../../../../../../config/shared_gallery_settings";
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_upscale_request";

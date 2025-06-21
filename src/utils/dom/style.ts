@@ -1,6 +1,6 @@
 import * as FSG_URL from "../../lib/api/url";
-import { DARK_THEME_HTML, SKELETON_HTML, UTILITIES_HTML } from "../../assets/html";
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/globals/flags";
+import { COMMON_HTML, DARK_THEME_HTML, SKELETON_HTML } from "../../assets/html";
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { getCookie, setCookie } from "../../store/cookies/cookie";
 import { Preferences } from "../../store/local_storage/preferences";
 import { yield1 } from "../misc/async";
@@ -100,7 +100,7 @@ export function insertHTMLAndExtractStyle(element: HTMLElement, position: Insert
 }
 export function setupCommonStyles(): void {
   insertStyleHTML(SKELETON_HTML, "skeleton-style");
-  insertStyleHTML(UTILITIES_HTML, "common-style");
+  insertStyleHTML(COMMON_HTML, "common-style");
   toggleDarkTheme(usingDarkTheme());
   setupVideoAndGifOutlines();
 }

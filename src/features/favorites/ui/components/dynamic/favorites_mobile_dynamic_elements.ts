@@ -1,26 +1,27 @@
 import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../types/elements/menu_element";
 import { FavoriteLayout, MetadataMetric } from "../../../../../types/primitives/primitives";
-import { GALLERY_ENABLED, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/globals/flags";
 import { hideUnusedLayoutSizer, toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../favorites_menu_event_handlers";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
-import { Events } from "../../../../../lib/globals/events";
+import { Events } from "../../../../../lib/global/events/events";
+import { GALLERY_ENABLED } from "../../../../../lib/global/flags/derived_flags";
 import { PerformanceProfile } from "../../../../../types/primitives/enums";
 import { Preferences } from "../../../../../store/local_storage/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { createButtonElement } from "../../../../../lib/element_factory/button";
 import { createSelectElement } from "../../../../../lib/element_factory/select";
 import { createToggleSwitch } from "../../../../../lib/element_factory/checkbox";
 import { prepareDynamicElements } from "./favorites_dynamic_element_utils";
 
-const BUTTONS: Partial<ButtonElement>[] = [];
-// const BUTTONS: Partial<ButtonElement>[] = [
-//   {
-//     id: "download-button",
-//     parentId: "left-favorites-panel-top-row",
-//     textContent: "Download",
-//     title: "Download search results",
-//     event: Events.favorites.downloadButtonClicked
-//   }
-// ];
+const BUTTONS: Partial<ButtonElement>[] = [
+  {
+    id: "download-button",
+    parentId: "additional-favorite-options",
+    textContent: "Download",
+    title: "Download search results",
+    event: Events.favorites.downloadButtonClicked,
+    position: "beforeend"
+  }
+];
 
 const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
   {
@@ -114,6 +115,15 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     enabled: true,
     preference: Preferences.sortAscendingEnabled,
     event: Events.favorites.sortAscendingToggled
+  },
+  {
+    id: "mobile-gallery",
+    parentId: "favorite-options-left",
+    textContent: "Gallery",
+    title: "Enable gallery",
+    position: "beforeend",
+    enabled: true,
+    preference: Preferences.mobileGalleryEnabled
   }
 ];
 
@@ -230,8 +240,8 @@ function createSelects(): void {
 }
 
 export function createDynamicFavoritesMobileMenuElements(): void {
-  createButtons();
   createSelects();
   createToggleSwitches();
   hideUnusedLayoutSizer(Preferences.favoritesLayout.value);
+  createButtons();
 }

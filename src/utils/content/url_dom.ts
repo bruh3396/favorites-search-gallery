@@ -15,7 +15,7 @@ function getThumbURL(object: HTMLElement | string): string {
 }
 
 function getImageURLWithoutExtension(object: HTMLElement | string): string {
-  return url.convertThumbURLToImageURL(getThumbURL(object));
+  return url.convertPreviewURLToImageURL(getThumbURL(object));
 }
 
 export function getGIFSource(thumb: HTMLElement): string {

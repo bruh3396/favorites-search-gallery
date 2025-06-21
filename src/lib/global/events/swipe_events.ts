@@ -1,5 +1,4 @@
-import { Events } from "../../../../../lib/globals/events";
-import { ON_DESKTOP_DEVICE } from "../../../../../lib/globals/flags";
+import { Events } from "./events";
 
 const THRESHOLD = 90;
 const TOUCH_START = { x: 0, y: 0 };
@@ -59,22 +58,22 @@ function onTouchEnd(event: TouchEvent): void {
   setTouchEnd(event);
 
   if (onlySwipedUp()) {
-    Events.gallery.swipedUp.emit();
+    Events.mobile.swipedUp.emit();
     return;
   }
 
   if (onlySwipedDown()) {
-    Events.gallery.swipedDown.emit();
+    Events.mobile.swipedDown.emit();
     return;
   }
 
   if (onlySwipedLeft()) {
-    Events.gallery.swipedLeft.emit();
+    Events.mobile.swipedLeft.emit();
     return;
   }
 
   if (onlySwipedRight()) {
-    Events.gallery.swipedRight.emit();
+    Events.mobile.swipedRight.emit();
   }
 }
 
@@ -82,10 +81,7 @@ export function didSwipe(): boolean {
   return swipedDown() || swipedUp() || swipedLeft() || swipedRight();
 }
 
-export function setupGalleryMobileSwipeControls(): void {
-  if (ON_DESKTOP_DEVICE) {
-    return;
-  }
+export function setupSwipeEvents(): void {
   Events.document.touchStart.on(setTouchStart);
   Events.document.touchEnd.on(onTouchEnd);
 }

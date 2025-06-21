@@ -1,6 +1,6 @@
-import { Events } from "../../../../../lib/globals/events";
+import { Events } from "../../../../../lib/global/events/events";
 import { GALLERY_CONTAINER } from "../../../ui/gallery_container";
-import { ON_DESKTOP_DEVICE } from "../../../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { yield1 } from "../../../../../utils/misc/async";
 
 export function setupGalleryMobileTapControls(): void {

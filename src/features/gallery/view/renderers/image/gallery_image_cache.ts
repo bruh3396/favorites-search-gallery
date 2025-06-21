@@ -1,7 +1,7 @@
 import { DO_NOTHING } from "../../../../../config/constants";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
-import { ON_FAVORITES_PAGE } from "../../../../../lib/globals/flags";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { ThrottledQueue } from "../../../../../components/functional/throttled_queue";
 import { fetchImageBitmapFromThumb } from "../../../../../lib/media_api/media_api";
 import { getImageFromThumb } from "../../../../../utils/dom/dom";

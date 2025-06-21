@@ -3,7 +3,7 @@ import * as GalleryThumbObserver from "../../events/desktop/gallery_visible_thum
 import * as GalleryView from "../../../view/gallery_view";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { GalleryState } from "../../../types/gallery_types";
-import { ON_FAVORITES_PAGE } from "../../../../../lib/globals/flags";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 
 export function preloadContentInGalleryAround(thumb: HTMLElement | null): void {
   if (thumb !== null) {

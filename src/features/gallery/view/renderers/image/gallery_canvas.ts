@@ -1,6 +1,6 @@
 import { clamp, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { ON_DESKTOP_DEVICE } from "../../../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { drawScaledCanvasAfterClearing } from "../../../../../utils/dom/canvas";
 import { getDimensions2D } from "../../../../../utils/primitive/string";
 import { insertStyleHTML } from "../../../../../utils/dom/style";

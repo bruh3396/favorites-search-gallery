@@ -1,17 +1,19 @@
 import * as API from "../../lib/api/api";
-import { CAPTIONS_DISABLED, ON_SEARCH_PAGE } from "../../lib/globals/flags";
 import { capitalize, isOnlyDigits } from "../../utils/primitive/string";
 import { debounceAfterFirstCall, sleep } from "../../utils/misc/async";
 import { getAllThumbs, getImageFromThumb } from "../../utils/dom/dom";
 import { BatchExecutor } from "../../components/functional/batch_executor";
+import { CAPTIONS_DISABLED } from "../../lib/global/flags/derived_flags";
 import { CAPTION_HTML } from "../../assets/html";
 import { ClickCodes } from "../../types/primitives/enums";
 import { DO_NOTHING } from "../../config/constants";
 import { Database } from "../../store/indexed_db/database";
-import { Events } from "../../lib/globals/events";
+import { Events } from "../../lib/global/events/events";
+import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../store/local_storage/preferences";
 import { TagCategory } from "../../types/primitives/primitives";
 import { TagCategoryMapping } from "../../types/primitives/composites";
+import { createTagAPIURL } from "../../lib/api/url";
 import { getFavorite } from "../favorites/types/favorite/favorite_item";
 import { getTagSetFromThumb } from "../../utils/dom/tags";
 import { insertStyleHTML } from "../../utils/dom/style";
@@ -522,7 +524,7 @@ function abortAllRequests(reason: string): void {
   pendingRequests.clear();
 }
 
-  async function findTagCategories(tagNames: string[], onAllCategoriesFound: () => void, fetchDelay: number): Promise<void> {
+async function findTagCategories(tagNames: string[], onAllCategoriesFound: () => void, fetchDelay: number): Promise<void> {
   const parser = new DOMParser();
   const lastTagName = tagNames[tagNames.length - 1];
   const uniqueTagNames = new Set(tagNames);
@@ -549,11 +551,9 @@ function abortAllRequests(reason: string): void {
       continue;
     }
 
-    const apiURL = `https://api.rule34.xxx//index.php?page=dapi&s=tag&q=index&name=${encodeURIComponent(tagName)}`;
-
     try {
       pendingRequests.add(tagName);
-      fetch(apiURL, {
+      fetch(createTagAPIURL(tagName), {
         signal: abortController.signal
       })
         .then((response) => {

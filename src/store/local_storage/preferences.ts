@@ -1,4 +1,5 @@
 import { FavoriteLayout, Rating, SortingMethod } from "../../types/primitives/primitives";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { PerformanceProfile } from "../../types/primitives/enums";
 import { Preference } from "./preference";
 
@@ -20,13 +21,13 @@ export const Preferences = {
   sortAscendingEnabled: new Preference("sortAscending", false),
   sortingMethod: new Preference<SortingMethod>("sortingMethod", "default"),
   optionsVisible: new Preference("showOptions", false),
-  columnCount: new Preference("columnCount", 5),
+  columnCount: new Preference("columnCount", ON_MOBILE_DEVICE ? 3 : 6),
   rowSize: new Preference("rowSize", 7),
-  dockGalleryMenuLeft: new Preference("dockGalleryMenuLeft", true),
+  dockGalleryMenuLeft: new Preference("dockGalleryMenuLeft", ON_DESKTOP_DEVICE),
   uiVisible: new Preference("showUI", true),
   infiniteScrollEnabled: new Preference("infiniteScroll", false),
-  galleryMenuPinned: new Preference("galleryMenuPinned", true),
-  galleryMenuEnabled: new Preference("galleryMenuEnabled", false),
+  galleryMenuPinned: new Preference("galleryMenuPinned", ON_MOBILE_DEVICE),
+  galleryMenuEnabled: new Preference("galleryMenuEnabled", true),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   addButtonsVisible: new Preference("showAddFavoriteButtons", false),
   fancyThumbHoveringEnabled: new Preference("fancyThumbHovering", true),
@@ -42,5 +43,6 @@ export const Preferences = {
   autoplayMinimumVideoDuration: new Preference("autoplayMinimumVideoDuration", 5000),
   autoplayForward: new Preference("autoplayForward", true),
   downloadBatchSize: new Preference("downloadBatchSize", 250),
-  downloadButtonsVisible: new Preference("showDownloadButtons", false)
+  downloadButtonsVisible: new Preference("showDownloadButtons", false),
+  mobileGalleryEnabled: new Preference("mobileGalleryEnabled", true)
 };

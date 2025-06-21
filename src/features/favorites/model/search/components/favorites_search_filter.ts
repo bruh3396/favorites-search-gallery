@@ -4,7 +4,7 @@ import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { Rating } from "../../../../../types/primitives/primitives";
 import { SearchCommand } from "../search_command/search_command";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/globals/flags";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { getTagBlacklist } from "../../../../../utils/misc/favorites_page_metadata";
 import { negateTags } from "../../../../../utils/primitive/string";
 

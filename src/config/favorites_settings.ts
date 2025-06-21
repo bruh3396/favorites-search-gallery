@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE } from "../lib/globals/flags";
+import { ON_MOBILE_DEVICE } from "../lib/global/flags/intrinsic_flags";
 
 export const FavoritesSettings = {
   columnCountBounds: {
@@ -25,5 +25,6 @@ export const FavoritesSettings = {
   useSearchIndex: true,
   buildIndexAsynchronously: true,
   skeletonAnimationClasses: "pulse",
-  infiniteScrollBatchCount: 25
+  infiniteScrollBatchCount: 25,
+  favoriteFinderEnabled: false
 };

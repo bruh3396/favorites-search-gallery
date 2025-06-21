@@ -1,4 +1,4 @@
-import { cleanImageSource, compressThumbSource, decompressThumbSource } from "../utils/content/url";
+import { cleanImageSource, compressPreviewSource, decompressPreviewSource } from "../utils/content/url";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -32,13 +32,13 @@ describe("compressImageSource", () => {
     const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
 
-    expect(decompressThumbSource(compressThumbSource(source))).toBe(expected);
+    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
   });
 
   test("no subdomain", () => {
     const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
 
-    expect(decompressThumbSource(compressThumbSource(source))).toBe(expected);
+    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
   });
 });

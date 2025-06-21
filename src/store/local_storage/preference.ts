@@ -10,7 +10,7 @@ export class Preference<T> {
   }
 
   public get value(): T {
-    return PreferenceStorage.get(this.key) as T ?? this.defaultValue;
+    return PreferenceStorage.get(this.key) ?? this.defaultValue;
   }
 
   public set(value: T): void {

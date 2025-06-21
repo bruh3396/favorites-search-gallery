@@ -5,7 +5,7 @@ import * as FavoritesPostLoadFlow from "../flows/setup/favorites_post_load_flow"
 import * as FavoritesPresentationFlow from "../flows/presentation/favorites_presentation_flow";
 import * as FavoritesSearchFlow from "../flows/runtime/favorites_search_flow";
 import * as FavoritesView from "../../view/favorites_view";
-import { Events } from "../../../../lib/globals/events";
+import { Events } from "../../../../lib/global/events/events";
 import { FavoritesPaginationFlow } from "../flows/presentation/favorites_pagination_flow";
 import { updateShowOnHoverOptionTriggeredFromGallery } from "../../ui/favorites_menu_event_handlers";
 
@@ -40,5 +40,5 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.changeSortingMethod);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.changeAllowedRatings);
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.changeResultsPerPage);
-  Events.document.wheel.on(FavoritesView.changeColumCountUsingWheel);
+  Events.document.wheel.on(FavoritesView.changeFavoritesSizeUsingWheel);
 }

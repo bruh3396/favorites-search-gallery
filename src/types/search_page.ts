@@ -1,7 +1,7 @@
 import * as Extensions from "../store/indexed_db/extensions";
 import { convertToTagSet, convertToTagString, getContentType, removeNonNumericCharacters } from "../utils/primitive/string";
 import { getAllThumbs, getIdFromThumb, getImageFromThumb } from "../utils/dom/dom";
-import { ON_SEARCH_PAGE } from "../lib/globals/flags";
+import { ON_SEARCH_PAGE } from "../lib/global/flags/intrinsic_flags";
 import { Post } from "./api/api_types";
 import { fetchPostFromAPI } from "../lib/api/api";
 import { moveTagsFromTitleToTagsAttribute } from "../utils/dom/tags";

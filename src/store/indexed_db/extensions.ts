@@ -2,9 +2,10 @@ import * as API from "../../lib/api/api";
 import { isGif, isVideo } from "../../utils/content/content_type";
 import { BatchExecutor } from "../../components/functional/batch_executor";
 import { Database } from "./database";
+import { Favorite } from "../../types/interfaces/interfaces";
 import { MediaExtension } from "../../types/primitives/primitives";
 import { MediaExtensionMapping } from "../../types/primitives/composites";
-import { ON_FAVORITES_PAGE } from "../../lib/globals/flags";
+import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { Post } from "../../types/api/api_types";
 
 const DATABASE_NAME: string = "ImageExtensions";
@@ -73,23 +74,26 @@ export function set(id: string, extension: MediaExtension): void {
   }
 }
 
-export async function getExtensionFromThumb(thumb: HTMLElement): Promise<MediaExtension> {
+export function getExtension(thumb: HTMLElement | Favorite): Promise<MediaExtension> {
   if (isVideo(thumb)) {
-    return "mp4";
+    return Promise.resolve("mp4");
   }
 
   if (isGif(thumb)) {
-    return "gif";
+    return Promise.resolve("gif");
   }
+  return getExtensionFromId(thumb.id);
+}
 
-  if (has(thumb.id)) {
-    return get(thumb.id) as MediaExtension;
+export async function getExtensionFromId(id: string): Promise<MediaExtension> {
+  if (has(id)) {
+    return get(id) as MediaExtension;
   }
-  const post = await API.fetchPostFromAPI(thumb.id);
+  const post = await API.fetchPostFromAPI(id);
   const extension = getExtensionFromPost(post);
 
   if (extension !== null) {
-    set(thumb.id, extension);
+    set(id, extension);
     return extension;
   }
   return "jpg";

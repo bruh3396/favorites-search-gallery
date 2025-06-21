@@ -2,9 +2,9 @@ import { ContentType } from "../../../types/primitives/primitives";
 import { ThrottledQueue } from "../../../components/functional/throttled_queue";
 import { getContentTypeFromThumb } from "../../../utils/dom/tags";
 import { getFavorite } from "../../favorites/types/favorite/favorite_item";
-import { getURLFromThumb } from "../../../utils/dom/dom";
+import { getPreviewURL } from "../../../utils/dom/dom";
 
-const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(200);
+const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(100);
 
 export function getFavoritePixelCount(id: string): number {
   const favorite = getFavorite(id);
@@ -28,7 +28,7 @@ export class ImageRequest {
 
   constructor(thumb: HTMLElement, isLowResolution: boolean = false) {
     this.id = thumb.id;
-    this.thumbURL = getURLFromThumb(thumb) ?? "";
+    this.thumbURL = getPreviewURL(thumb) ?? "";
     this.thumb = thumb;
     this.bitmap = null;
     this.abortController = new AbortController();

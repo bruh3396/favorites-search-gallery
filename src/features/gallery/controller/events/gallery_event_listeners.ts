@@ -9,8 +9,8 @@ import * as GalleryStateFlow from "../flows/runtime/gallery_state_flow";
 import * as GallerySwipeFlow from "../flows/runtime/gallery_swipe_flow";
 import * as GalleryTouchFlow from "../flows/runtime/gallery_touch_flow";
 import * as GalleryView from "../../view/gallery_view";
-import { Events } from "../../../../lib/globals/events";
-import { ON_DESKTOP_DEVICE } from "../../../../lib/globals/flags";
+import { Events } from "../../../../lib/global/events/events";
+import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 
 export function addGalleryEventListeners(): void {
   Events.favorites.newFavoritesFoundOnReload.on(GalleryFavoritesFlow.handleNewFavoritesFoundOnReload, { once: true });
@@ -54,7 +54,7 @@ function addMobileEventListeners(): void {
   Events.gallery.rightTap.on(GalleryTouchFlow.onRightTap);
   Events.document.mousedown.on(GalleryTouchFlow.onMouseDown);
   Events.document.touchStart.on(GalleryTouchFlow.onTouchStart);
-  Events.gallery.swipedDown.on(GallerySwipeFlow.onSwipeDown);
-  Events.gallery.swipedUp.on(GalleryAutoplayController.showMenu);
+  Events.mobile.swipedDown.on(GallerySwipeFlow.onSwipeDown);
+  Events.mobile.swipedUp.on(GalleryAutoplayController.showMenu);
   Events.window.orientationChange.on(GalleryView.correctOrientation);
 }

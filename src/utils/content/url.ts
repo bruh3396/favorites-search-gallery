@@ -5,16 +5,16 @@ export function cleanImageSource(source: string): string {
   return source.replace(IMAGE_SOURCE_CLEANUP_REGEX, "$1rule34");
 }
 
-export function decompressThumbSource(compressedSource: string): string {
+export function decompressPreviewSource(compressedSource: string): string {
   const splitSource = compressedSource.split("_");
   return `https://us.rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg`;
 }
 
-export function compressThumbSource(source: string): string {
+export function compressPreviewSource(source: string): string {
   const match = source.match(THUMB_SOURCE_COMPRESSION_REGEX);
   return match === null ? "" : match.splice(1).join("_");
 }
 
-export function convertThumbURLToImageURL(thumbURL: string): string {
+export function convertPreviewURLToImageURL(thumbURL: string): string {
   return cleanImageSource(thumbURL).replace("thumbnails", "images").replace("thumbnail_", "").replace("us.rule34", "rule34");
 }

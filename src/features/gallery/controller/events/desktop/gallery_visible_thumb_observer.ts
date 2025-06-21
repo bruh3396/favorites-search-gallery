@@ -1,22 +1,31 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/globals/flags";
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { getAllThumbs, getRectDistance, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
-import { Events } from "../../../../../lib/globals/events";
+import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { debounceAlways } from "../../../../../utils/misc/async";
 
 const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;
+const intersectionObserver: IntersectionObserver = createIntersectionObserver(getInitialFavoritesMenuHeight());
+let bypassDebounce = true;
 
-let intersectionObserver: IntersectionObserver = createIntersectionObserver(getInitialFavoritesMenuHeight());
+const broadcastDebounceAlways = debounceAlways((entries: IntersectionObserverEntry[]) => {
+  Events.gallery.visibleThumbsChanged.emit(entries);
+}, GallerySettings.preloadContentDebounceTime);
+
+function broadcastVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
+  if (bypassDebounce) {
+    bypassDebounce = false;
+    Events.gallery.visibleThumbsChanged.emit(entries);
+  } else {
+    broadcastDebounceAlways(entries);
+  }
+}
 
 function onVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
   updateVisibleThumbs(entries);
   broadcastVisibleThumbsChanged(entries);
 }
-
-const broadcastVisibleThumbsChanged = debounceAlways((entries: IntersectionObserverEntry[]) => {
-  Events.gallery.visibleThumbsChanged.emit(entries);
-}, 250);
 
 function updateVisibleThumbs(entries: IntersectionObserverEntry[]): void {
   for (const entry of entries) {
@@ -30,12 +39,6 @@ function updateVisibleThumbs(entries: IntersectionObserverEntry[]): void {
 
 function getInitialFavoritesMenuHeight(): number {
   return -200;
-  // const menu = document.getElementById("favorites-search-gallery-menu");
-
-  // if (menu === null) {
-  //   return 0;
-  // }
-  // return -menu.offsetHeight;
 }
 
 function createIntersectionObserver(topMargin: number = 0): IntersectionObserver {
@@ -51,31 +54,6 @@ function getFinalRootMargin(topMargin: number): string {
   return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
 }
 
-function updateRootMarginWhenMenuResizes(): void {
-  const menu = document.getElementById("favorites-search-gallery-menu");
-  let resizedOnce = false;
-
-  if (menu === null) {
-    return;
-  }
-  const onMenuResized = debounceAlways(() => {
-    if (resizedOnce) {
-      intersectionObserver.disconnect();
-      intersectionObserver = createIntersectionObserver(-menu.offsetHeight);
-      observeAllThumbsOnPage();
-    }
-    resizedOnce = true;
-  }, 300);
-
-  Events.document.postProcess.on(() => {
-    const resizeObserver = new ResizeObserver(() => {
-      onMenuResized();
-    });
-
-    resizeObserver.observe(menu);
-  });
-}
-
 function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {
   if (centerThumb === null) {
     return entries;
@@ -89,6 +67,12 @@ function sortByDistance(centerEntry: IntersectionObserverEntry, entries: Interse
     const distanceA = getRectDistance(centerEntry.boundingClientRect, a.boundingClientRect);
     const distanceB = getRectDistance(centerEntry.boundingClientRect, b.boundingClientRect);
     return distanceA - distanceB;
+  });
+}
+
+function bypassDebounceAlwaysOnPageChange(): void {
+  Events.favorites.pageChanged.on(() => {
+    bypassDebounce = true;
   });
 }
 
@@ -122,8 +106,8 @@ export function getVisibleThumbs(): HTMLElement[] {
 }
 
 export function setupVisibleThumbObserver(): void {
-  if (ON_MOBILE_DEVICE || !ON_SEARCH_PAGE) {
+  if (ON_MOBILE_DEVICE || !ON_FAVORITES_PAGE) {
     return;
   }
-  updateRootMarginWhenMenuResizes();
+  bypassDebounceAlwaysOnPageChange();
 }

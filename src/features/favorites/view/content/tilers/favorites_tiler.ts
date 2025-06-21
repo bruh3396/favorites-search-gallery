@@ -5,7 +5,7 @@ import { FavoritesGridTiler } from "./favorites_grid_tiler";
 import { FavoritesRowTiler } from "./favorites_row_tiler";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { FavoritesSquareTiler } from "./favorites_square_tiler";
-import { ON_DESKTOP_DEVICE } from "../../../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { Tiler } from "./favorites_tiler_interface";
 import { insertStyleHTML } from "../../../../../utils/dom/style";

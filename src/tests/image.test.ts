@@ -1,4 +1,4 @@
-import { cleanImageSource, compressThumbSource, convertThumbURLToImageURL, decompressThumbSource } from "../utils/content/url";
+import { cleanImageSource, compressPreviewSource, convertPreviewURLToImageURL, decompressPreviewSource } from "../utils/content/url";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -32,26 +32,26 @@ describe("compressImageSource", () => {
     const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
 
-    expect(decompressThumbSource(compressThumbSource(source))).toBe(expected);
+    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
   });
 
   test("no subdomain", () => {
     const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
 
-    expect(decompressThumbSource(compressThumbSource(source))).toBe(expected);
+    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
   });
 });
 
 describe("getImageURLWithoutExtension", () => {
   test("empty", () => {
-    expect(convertThumbURLToImageURL("")).toBe("");
+    expect(convertPreviewURLToImageURL("")).toBe("");
   });
 
   test("normal", () => {
     const source = "https://us.rule34.xxx/thumbnails/0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
 
-    expect(convertThumbURLToImageURL(source)).toBe(expected);
+    expect(convertPreviewURLToImageURL(source)).toBe(expected);
   });
 });

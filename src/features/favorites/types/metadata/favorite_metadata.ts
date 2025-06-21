@@ -1,7 +1,7 @@
 import * as Extensions from "../../../../store/indexed_db/extensions";
 import { FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../../types/primitives/composites";
 import { DiscreteRating } from "../../../../types/primitives/enums";
-import { Events } from "../../../../lib/globals/events";
+import { Events } from "../../../../lib/global/events/events";
 import { FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
 import { GeneralSettings } from "../../../../config/general_settings";
 import { Post } from "../../../../types/api/api_types";

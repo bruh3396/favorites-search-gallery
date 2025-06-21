@@ -1,4 +1,4 @@
-import { Events } from "./events";
+import { Events } from "./events/events";
 
 export const FAVORITES_SEARCH_GALLERY_CONTAINER = document.createElement("div");
 

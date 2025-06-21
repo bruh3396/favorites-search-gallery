@@ -7,7 +7,7 @@ import { FavoriteTags } from "./favorite_tags";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
 import { Post } from "../../../../types/api/api_types";
 import { Rating } from "../../../../types/primitives/primitives";
-import { compressThumbSource } from "../../../../utils/content/url";
+import { compressPreviewSource } from "../../../../utils/content/url";
 import { getIdFromThumb } from "../../../../utils/dom/dom";
 
 const ALL_FAVORITES = new Map<string, FavoriteItem>();
@@ -76,7 +76,7 @@ export class FavoriteItem implements Favorite {
     return {
       id: this.id,
       tags: this.tags,
-      src: compressThumbSource(this.thumbURL),
+      src: compressPreviewSource(this.thumbURL),
       metadata: this.metadata.databaseRecord
     };
   }
@@ -96,6 +96,17 @@ export class FavoriteItem implements Favorite {
     if (this.element !== null) {
       this.element.swapFavoriteButton();
     }
+  }
+
+  public addAdditionalTags(newTags: string): string {
+
+  }
+
+  public removeAdditionalTags(tagsToRemove: string): string {
+  }
+
+  public resetAdditionalTags(): void {
+
   }
 
   private updateTags(post: Post): void {

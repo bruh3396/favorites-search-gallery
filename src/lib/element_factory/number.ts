@@ -1,6 +1,6 @@
 import { DEFAULT_MENU_ELEMENT, NumberElement } from "../../types/elements/menu_element";
 import { DO_NOTHING } from "../../config/constants";
-import { Events } from "../globals/events";
+import { Events } from "../global/events/events";
 import { NumberComponent } from "../../components/ui/number_component";
 
 function createNumberTemplate(partial: Partial<NumberElement>): NumberElement {

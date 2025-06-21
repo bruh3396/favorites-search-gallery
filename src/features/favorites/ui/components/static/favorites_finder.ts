@@ -1,5 +1,6 @@
-import { Events } from "../../../../../lib/globals/events";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/globals/flags";
+import { Events } from "../../../../../lib/global/events/events";
+import { FavoritesSettings } from "../../../../../config/favorites_settings";
+import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { debounceAfterFirstCall } from "../../../../../utils/misc/async";
 
@@ -10,7 +11,7 @@ let findInAllButton: HTMLButtonElement;
 let input: HTMLInputElement;
 
 export function insertFavoritesFinder(): void {
-  if (ON_MOBILE_DEVICE) {
+  if (ON_MOBILE_DEVICE || !FavoritesSettings.favoriteFinderEnabled) {
     return;
   }
   const foundParent = document.querySelector("#left-favorites-panel-top-row");

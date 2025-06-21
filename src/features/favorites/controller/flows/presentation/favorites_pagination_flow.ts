@@ -1,6 +1,6 @@
 import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesView from "../../../view/favorites_view";
-import { Events } from "../../../../../lib/globals/events";
+import { Events } from "../../../../../lib/global/events/events";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../../../types/favorite/favorite_types";
 import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";

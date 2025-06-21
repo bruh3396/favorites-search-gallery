@@ -1,8 +1,9 @@
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE, TOOLTIP_DISABLED } from "../../lib/globals/flags";
+import { TOOLTIP_DISABLED } from "../../lib/global/flags/derived_flags";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { convertToTagString, extractTagGroups, removeExtraWhiteSpace } from "../../utils/primitive/string";
 import { getImageFromThumb, getThumbFromImage } from "../../utils/dom/dom";
-import { Events } from "../../lib/globals/events";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/globals/container";
+import { Events } from "../../lib/global/events/events";
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/global/container";
 import { Preferences } from "../../store/local_storage/preferences";
 import { TOOLTIP_HTML } from "../../assets/html";
 import { getTagSetFromThumb } from "../../utils/dom/tags";

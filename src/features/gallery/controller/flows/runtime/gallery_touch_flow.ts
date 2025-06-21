@@ -1,12 +1,15 @@
 import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
 import { FavoritesMouseEvent } from "../../../../../types/events/mouse_event";
-import { didSwipe } from "../../events/mobile/gallery_swipe_controls";
+import { Preferences } from "../../../../../store/local_storage/preferences";
+import { didSwipe } from "../../../../../lib/global/events/swipe_events";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 
 function onMouseDownOutsideGallery(mouseEvent: FavoritesMouseEvent): void {
-  if (mouseEvent.thumb !== null) {
+  if (mouseEvent.thumb !== null && Preferences.mobileGalleryEnabled.value) {
     mouseEvent.originalEvent.preventDefault();
+    mouseEvent.originalEvent.stopPropagation();
+    mouseEvent.originalEvent.stopImmediatePropagation();
     GalleryStateFlow.enterGallery(mouseEvent.thumb);
   }
 }
@@ -16,7 +19,6 @@ function onTouchStartInGallery(event: TouchEvent): void {
 }
 
 export function onMouseDown(event: MouseEvent): void {
-
   executeFunctionBasedOnGalleryState({
     hover: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery

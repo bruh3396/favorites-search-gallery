@@ -1,10 +1,10 @@
 import * as Icons from "../../../assets/icons";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { clamp, millisecondsToSeconds } from "../../../utils/primitive/number";
 import { isImage, isVideo } from "../../../utils/content/content_type";
 import { AUTOPLAY_HTML } from "../../../assets/html";
-import { Events } from "../../../lib/globals/events";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/globals/container";
+import { Events } from "../../../lib/global/events/events";
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/global/container";
 import { NavigationKey } from "../../../types/primitives/primitives";
 import { NumberComponent } from "../../../components/ui/number_component";
 import { Preferences } from "../../../store/local_storage/preferences";

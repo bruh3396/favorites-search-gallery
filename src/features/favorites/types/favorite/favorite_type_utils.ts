@@ -1,7 +1,7 @@
 import { getIdFromThumb, getImageFromThumb } from "../../../../utils/dom/dom";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
 import { Post } from "../../../../types/api/api_types";
-import { decompressThumbSource } from "../../../../utils/content/url";
+import { decompressPreviewSource } from "../../../../utils/content/url";
 import { removeExtraWhiteSpace } from "../../../../utils/primitive/string";
 
 export function createEmptyPost(): Post {
@@ -71,7 +71,7 @@ function createPostFromDatabaseRecord(record: FavoritesDatabaseRecord): Post {
   post.id = record.id;
   post.height = record.metadata.height;
   post.width = record.metadata.width;
-  post.previewURL = decompressThumbSource(record.src);
+  post.previewURL = decompressPreviewSource(record.src);
   return post;
 }
 

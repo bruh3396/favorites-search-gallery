@@ -1,5 +1,6 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../lib/globals/flags";
-import { Events } from "../../lib/globals/events";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
+import { Events } from "../../lib/global/events/events";
+import { Favorite } from "../../types/interfaces/interfaces";
 import { insertStyleHTML } from "./style";
 import { removeNonNumericCharacters } from "../primitive/string";
 
@@ -23,8 +24,11 @@ export function getThumbFromImage(image: HTMLElement): HTMLElement | null {
   return getClosestItem(image);
 }
 
-export function getURLFromThumb(thumb: HTMLElement): string | null {
-  const image = getImageFromThumb(thumb);
+export function getPreviewURL(item: HTMLElement | Favorite): string | null {
+  if (!(item instanceof HTMLElement)) {
+    return item.thumbURL;
+  }
+  const image = getImageFromThumb(item);
   return image ? image.src : null;
 }
 

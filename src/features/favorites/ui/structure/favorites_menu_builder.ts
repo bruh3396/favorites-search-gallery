@@ -1,8 +1,8 @@
 import { DESKTOP_HTML, FAVORITES_HTML, MOBILE_HTML } from "../../../../assets/html";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { createFooter, moveStatusToFooter } from "./favorites_mobile_footer";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../../../utils/dom/style";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/globals/container";
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
 import { createControlsGuide } from "./favorites_mobile_control_guide";
 import { createDynamicFavoritesDesktopMenuElements } from "../components/dynamic/favorites_desktop_dynamic_elements";
 import { createDynamicFavoritesMobileMenuElements } from "../components/dynamic/favorites_mobile_dynamic_elements";

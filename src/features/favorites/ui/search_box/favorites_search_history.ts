@@ -1,5 +1,5 @@
-import { isEmptyString, removeExtraWhiteSpace } from "../../../../../utils/primitive/string";
-import { indexInBounds } from "../../../../../utils/collection/array";
+import { isEmptyString, removeExtraWhiteSpace } from "../../../../utils/primitive/string";
+import { indexInBounds } from "../../../../utils/collection/array";
 
 export class SearchHistory {
   public lastEditedQuery: string;

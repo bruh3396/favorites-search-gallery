@@ -1,5 +1,5 @@
 import { HELP_HTML } from "../../../../../assets/html";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/globals/flags";
+import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 
 function insertHelpHTML(): void {
   const parent = document.getElementById(ON_MOBILE_DEVICE ? "mobile-footer-header" : "left-favorites-panel-top-row");

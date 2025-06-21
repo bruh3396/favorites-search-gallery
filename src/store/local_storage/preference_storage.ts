@@ -1,15 +1,15 @@
 const STORAGE_KEY = "preferences";
 
-function readAll(): Record<string, unknown> {
+function readAll<V>(): Record<string, V> {
   return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
 }
 
-export function get(key: string): unknown {
-  return readAll()[key];
+export function get<V>(key: string): V {
+  return readAll<V>()[key];
 }
 
-export function set(key: string, value: unknown): void {
-  const preferences = readAll();
+export function set<V>(key: string, value: V): void {
+  const preferences = readAll<V>();
 
   preferences[key] = value;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));

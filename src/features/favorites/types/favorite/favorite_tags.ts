@@ -19,6 +19,7 @@ function getCorrectTags(post: Post): Set<string> {
 export class FavoriteTags {
   public tags: Set<string>;
   private id: string;
+  private additionalTagSet: Set<string> = new Set();
 
   constructor(post: Post, record: HTMLElement | FavoritesDatabaseRecord) {
     this.id = post.id;
@@ -31,7 +32,19 @@ export class FavoriteTags {
     post.tags = "";
   }
 
-  public get tagString(): string {
+  private get originalTagSet(): Set<string> {
+    return this.tags.difference(this.additionalTagSet);
+  }
+
+  private get originalTagString(): string {
+    return convertToTagString(this.originalTagSet);
+  }
+
+  private get additionalTagString(): string {
+    return convertToTagString(this.additionalTagSet);
+  }
+
+  private get tagString(): string {
     return convertToTagString(this.tags);
   }
 
@@ -50,5 +63,28 @@ export class FavoriteTags {
     }
     post.tags = convertToTagString(correctTags);
     return false;
+  }
+
+  public addAdditionalTags(newTags: string): string {
+    const newTagsSet = convertToTagSet(newTags).difference(this.tags);
+
+    if (newTagsSet.size > 0) {
+      this.additionalTagSet = this.additionalTagSet.union(newTagsSet);
+      this.combineOriginalAndAdditionalTagSets();
+    }
+    return this.additionalTagString;
+  }
+
+  public removeAdditionalTags(tagsToRemove: string): string {
+  }
+
+  public resetAdditionalTags(): void {
+
+  }
+
+  private combineOriginalAndAdditionalTagSets(): void {
+    const union = this.originalTagSet.union(this.additionalTagSet);
+
+    this.tags = new Set(Array.from(union).sort());
   }
 }

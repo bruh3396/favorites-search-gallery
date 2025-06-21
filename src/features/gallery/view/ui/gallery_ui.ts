@@ -1,8 +1,8 @@
 import * as Icons from "../../../../assets/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/api/api_types";
-import { ON_FAVORITES_PAGE, USING_FIREFOX } from "../../../../lib/globals/flags";
-import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/primitive/number";
+import { ON_FAVORITES_PAGE, USING_FIREFOX } from "../../../../lib/global/flags/intrinsic_flags";
 import { blurCurrentlyFocusedElement, showFullscreenIcon, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
+import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/primitive/number";
 import { GALLERY_CONTAINER } from "../../ui/gallery_container";
 import { Preferences } from "../../../../store/local_storage/preferences";
 import { insertStyleHTML } from "../../../../utils/dom/style";

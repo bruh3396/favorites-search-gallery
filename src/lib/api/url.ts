@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE } from "../globals/flags";
+import { ON_MOBILE_DEVICE } from "../global/flags/intrinsic_flags";
 import { getFavoritesPageId } from "../../utils/misc/favorites_page_metadata";
 
 const POST_PAGE_URL = "https://rule34.xxx/index.php?page=post&s=view&id=";
@@ -10,6 +10,7 @@ const POST_VOTE_URL = "https://rule34.xxx/index.php?page=post&s=vote&type=up&id=
 const REMOVE_FAVORITE_URL = "https://rule34.xxx/index.php?page=favorites&s=delete&id=";
 const ADD_FAVORITE_URL = "https://rule34.xxx/public/addfav.php?id=";
 const CSS_URL = "https://rule34.xxx//css/";
+const API_TAG_BASE_URL = "https://rule34.xxx/index.php?page=tags&s=list&tags=";
 
 export function createPostPageURL(id: string): string {
   return `${POST_PAGE_URL}${id}`;
@@ -21,6 +22,7 @@ export function createSearchPageURL(searchQuery: string): string {
 
 export function createFavoritesPageURL(pageNumber: number): string {
   return `${FAVORITES_PAGE_URL}&pid=${pageNumber}`;
+
 }
 
 export function createProfilePageURL(): string {
@@ -29,6 +31,10 @@ export function createProfilePageURL(): string {
 
 export function createAPIURL(type: string, id: string): string {
   return `${API_BASE_URL}${type}&q=index&id=${id}`;
+}
+
+export function createTagAPIURL(tagName: string): string {
+  return `${API_TAG_BASE_URL}${encodeURIComponent(tagName)}`;
 }
 
 export function createPostVoteURL(id: string): string {

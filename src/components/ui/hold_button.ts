@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE } from "../../lib/globals/flags";
+import { ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { clamp } from "../../utils/primitive/number";
 
 export class HoldButton extends HTMLElement {

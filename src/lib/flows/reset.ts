@@ -1,5 +1,5 @@
-import { Events } from "../globals/events";
-import { ON_MOBILE_DEVICE } from "../globals/flags";
+import { Events } from "../global/events/events";
+import { ON_MOBILE_DEVICE } from "../global/flags/intrinsic_flags";
 
 const PERSISTENT_LOCAL_STORAGE_KEYS = new Set(["customTags", "savedSearches"]);
 const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag modifications and saved searches will be preserved.";

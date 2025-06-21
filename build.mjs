@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 import { readFileSync, writeFileSync } from "fs";
 import { build } from "esbuild";
-import { webWorker } from "./worker_plugin.mjs";
+import { webWorker } from "./WEB_worker_plugin.mjs";
 
 (async function() {
   const ENTRY_POINT = "src/app/favorites_search_gallery.ts";
@@ -41,9 +41,7 @@ import { webWorker } from "./worker_plugin.mjs";
     plugins: [webWorker],
     loader: LOADER
   };
-
   const result = await build(BUILD_OPTIONS);
-
   const content = readFileSync(OUT_FILE, "utf8");
   const contentWithoutSourceComments = content.replace(/^\s*\/\/\s*src.*\n/gm, "");
   const crlfContent = contentWithoutSourceComments.replace(/\r?\n/g, "\r\n");

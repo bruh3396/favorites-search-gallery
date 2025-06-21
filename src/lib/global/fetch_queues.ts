@@ -1,6 +1,6 @@
-import { Events } from "./events";
+import { Events } from "./events/events";
 import { GeneralSettings } from "../../config/general_settings";
-import { ON_FAVORITES_PAGE } from "./flags";
+import { ON_FAVORITES_PAGE } from "./flags/intrinsic_flags";
 import { ThrottledQueue } from "../../components/functional/throttled_queue";
 
 export const POST_PAGE = new ThrottledQueue(ON_FAVORITES_PAGE ? GeneralSettings.postPageRequestDelayWhileFetchingFavorites : GeneralSettings.searchPagePostPageRequestDelay);

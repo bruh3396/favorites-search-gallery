@@ -1,4 +1,4 @@
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/globals/container";
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/global/container";
 import { GALLERY_HTML } from "../../../assets/html";
 import { insertStyleHTML } from "../../../utils/dom/style";
 

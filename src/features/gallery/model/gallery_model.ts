@@ -7,7 +7,7 @@ import { openOriginal, openPostPage } from "../../../utils/dom/links";
 import { Favorite } from "../../../types/interfaces/interfaces";
 import { GalleryState } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/primitives/primitives";
-import { ON_FAVORITES_PAGE } from "../../../lib/globals/flags";
+import { ON_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { SearchPage } from "../../../types/search_page";
 import { clamp } from "../../../utils/primitive/number";
 import { downloadFromThumb } from "../../../lib/download/downloader";

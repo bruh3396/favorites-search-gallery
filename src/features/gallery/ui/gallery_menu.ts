@@ -2,13 +2,14 @@ import * as Icons from "../../../assets/icons";
 import { GalleryMenuAction, GalleryMenuButton } from "../types/gallery_types";
 import { insertStyleHTML, setColorScheme } from "../../../utils/dom/style";
 import { toggleFullscreen, toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
-import { Events } from "../../../lib/globals/events";
+import { Events } from "../../../lib/global/events/events";
 import { GALLERY_CONTAINER } from "./gallery_container";
 import { GallerySettings } from "../../../config/gallery_settings";
+import { GeneralSettings } from "../../../config/general_settings";
+import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../store/local_storage/preferences";
 import { Timeout } from "../../../types/primitives/primitives";
 import { throttle } from "../../../utils/misc/async";
-import { GeneralSettings } from "../../../config/general_settings";
 
 const BUTTONS: GalleryMenuButton[] = [
   { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, hint: "Exit (Escape, Right-Click)", color: "red" },
@@ -92,10 +93,16 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   button.className = "gallery-menu-button";
   button.dataset.hint = template.hint;
   MENU.appendChild(button);
-  button.onclick = (): void => {
+  const onClick = (): void => {
     handleGalleryMenuAction(template.action);
     Events.gallery.galleryMenuButtonClicked.emit(template.action);
   };
+
+  if (ON_MOBILE_DEVICE) {
+    button.ontouchstart = onClick;
+  } else {
+    button.onclick = onClick;
+  }
 
   if (template.color !== "") {
     insertStyleHTML(`
@@ -117,16 +124,6 @@ function createButton(template: GalleryMenuButton): HTMLElement {
 
 function createColorPicker(): void {
   const button = document.getElementById("background-color-gallery");
-  // const toggleMouseDown = (value: boolean): void => {
-    // value;
-    // if (value) {
-    //   Events.document.click.resume();
-    //   Events.document.mouseDown.resume();
-    // } else {
-    //   Events.document.click.freeze();
-    //   Events.document.mouseDown.freeze();
-    // }
-  // };
 
   if (!(button instanceof HTMLElement)) {
     return;
@@ -136,17 +133,10 @@ function createColorPicker(): void {
   colorPicker.type = "color";
   colorPicker.id = "gallery-menu-background-color-picker";
   button.onclick = (): void => {
-    // toggleMouseDown(false);
     colorPicker.click();
   };
   colorPicker.oninput = (): void => {
     setColorScheme(colorPicker.value);
-  };
-  colorPicker.onblur = (): void => {
-    // toggleMouseDown(true);
-  };
-  colorPicker.onchange = (): void => {
-    // toggleMouseDown(true);
   };
 
   if (Preferences.colorScheme.defaultValue !== Preferences.colorScheme.value) {
@@ -172,15 +162,25 @@ function togglePersistence(event: MouseEvent): void {
 }
 
 function togglePin(): void {
+  if (ON_MOBILE_DEVICE) {
+    MENU.classList.add("pinned");
+    Preferences.galleryMenuPinned.set(true);
+    return;
+  }
   Preferences.galleryMenuPinned.set(MENU.classList.toggle("pinned"));
 }
 
 function toggleDockPosition(): void {
+  if (ON_MOBILE_DEVICE) {
+    MENU.classList.remove("dock-left");
+    Preferences.dockGalleryMenuLeft.set(false);
+    return;
+  }
   Preferences.dockGalleryMenuLeft.set(MENU.classList.toggle("dock-left"));
 }
 
 export function setupGalleryMenu(): void {
-  if (!GeneralSettings.galleryMenuOptionEnabled) {
+  if (!GeneralSettings.galleryMenuOptionEnabled || ON_MOBILE_DEVICE) {
     return;
   }
   GALLERY_CONTAINER.appendChild(MENU);

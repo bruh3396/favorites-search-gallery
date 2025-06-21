@@ -2,8 +2,8 @@
 // @ts-nocheck
 
 import { isEmptyString } from "../../utils/primitive/string";
-import { AWESOMPLETE_ENABLED } from "../../lib/globals/flags";
-import { Events } from "../../lib/globals/events";
+import { AWESOMPLETE_ENABLED } from "../../lib/global/flags/derived_flags";
+import { Events } from "../../lib/global/events/events";
 import { addAwesompleteToGlobalScope } from "./awesomplete_implementation";
 import { hideAwesomplete } from "../../utils/dom/awesomplete";
 import { getQueryWithTagReplaced } from "./autocomplete_utils";

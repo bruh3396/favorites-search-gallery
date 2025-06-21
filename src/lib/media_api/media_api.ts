@@ -1,6 +1,7 @@
-import { convertThumbURLToImageURL } from "../../utils/content/url";
-import { getExtensionFromThumb } from "../../store/indexed_db/extensions";
-import { getURLFromThumb } from "../../utils/dom/dom";
+import { Favorite } from "../../types/interfaces/interfaces";
+import { convertPreviewURLToImageURL } from "../../utils/content/url";
+import { getExtension } from "../../store/indexed_db/extensions";
+import { getPreviewURL } from "../../utils/dom/dom";
 
 export async function fetchImageBitmap(url: string, abortController?: AbortController): Promise<ImageBitmap> {
   const response = await fetch(url, {signal: abortController?.signal});
@@ -12,9 +13,9 @@ export async function fetchImageBitmapFromThumb(thumb: HTMLElement, abortControl
   return fetchImageBitmap(await getOriginalImageURL(thumb), abortController);
 }
 
-export async function getOriginalContentURL(thumb: HTMLElement): Promise<string> {
-  const extension = await getExtensionFromThumb(thumb);
-  const url = convertThumbURLToImageURL(getURLFromThumb(thumb) ?? "");
+export async function getOriginalContentURL(item: HTMLElement | Favorite): Promise<string> {
+  const extension = await getExtension(item);
+  const url = convertPreviewURLToImageURL(getPreviewURL(item) ?? "");
   return url.replace(".jpg", `.${extension}`);
 }
 

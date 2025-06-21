@@ -1,7 +1,7 @@
 import { getExtensionFromURL } from "../../store/indexed_db/extensions";
 import { getOriginalContentURL } from "../media_api/media_api";
 
-function downloadBlob(blob: Blob, filename: string): void {
+export function downloadBlob(blob: Blob, filename: string): void {
   const a = document.createElement("a");
 
   a.href = URL.createObjectURL(blob);

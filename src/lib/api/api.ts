@@ -35,6 +35,10 @@ export function fetchFavoritesPage(pageNumber: number): Promise<string> {
   return getHTML(FSG_URL.createFavoritesPageURL(pageNumber));
 }
 
+export function fetchTagFromAPI(tagName: string): Promise<string> {
+  return getHTML(FSG_URL.createTagAPIURL(tagName));
+}
+
 export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
   fetch(FSG_URL.createPostVoteURL(id));
   const status = await getHTML(FSG_URL.createAddFavoriteURL(id));
@@ -42,7 +46,7 @@ export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
 }
 
 export function removeFavorite(id: string): Promise<Response> {
-  return fetch(FSG_URL.createRemoveFavoriteURL(id), {method: "GET", redirect: "manual"});
+  return fetch(FSG_URL.createRemoveFavoriteURL(id), { method: "GET", redirect: "manual" });
 }
 
 export function getFavoritesCount(): Promise<number | null> {

@@ -3,10 +3,9 @@ import * as GalleryUI from "./ui/gallery_ui";
 import * as SearchPageCreator from "./search_page_creator";
 import { GALLERY_CONTAINER } from "../ui/gallery_container";
 import { GallerySettings } from "../../../config/gallery_settings";
-import { ON_DESKTOP_DEVICE } from "../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { RemoveFavoriteStatus } from "../../../types/api/api_types";
 import { SearchPage } from "../../../types/search_page";
-import { toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -115,8 +114,6 @@ export function toggleZoomCursor(value: boolean): void {
 
 export function toggleZoom(value: boolean | undefined = undefined): boolean {
   const zoomedIn = GalleryRenderer.toggleZoom(value);
-
-  toggleGalleryMenuEnabled(!zoomedIn);
   return zoomedIn;
 }
 

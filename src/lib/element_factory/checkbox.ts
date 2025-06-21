@@ -1,6 +1,7 @@
 import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../../types/elements/menu_element";
 import { DO_NOTHING } from "../../config/constants";
-import { Events } from "../globals/events";
+import { Events } from "../global/events/events";
+import { isInGallery } from "../../utils/cross_feature/gallery";
 
 function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
   return {
@@ -53,15 +54,15 @@ export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
     return;
   }
 
-  Events.document.keydown.on((event) => {
+  Events.document.keydown.on(async(event) => {
     if (!event.isHotkey || event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
       return;
     }
-    // const inGallery = await Utils.inGallery();
+    const inGallery = await isInGallery();
 
-    // if (inGallery) {
-    //   return;
-    // }
+    if (inGallery) {
+      return;
+    }
     checkbox.checked = !checkbox.checked;
     onChange();
   });

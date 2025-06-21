@@ -1,8 +1,8 @@
 import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../../types/favorite_pagination_parameters";
-import { Events } from "../../../../lib/globals/events";
+import { Events } from "../../../../lib/global/events/events";
 import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { ON_DESKTOP_DEVICE } from "../../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../store/local_storage/preferences";
 import { getNumbersAround } from "../../../../utils/collection/array";
 import { insertStyleHTML } from "../../../../utils/dom/style";

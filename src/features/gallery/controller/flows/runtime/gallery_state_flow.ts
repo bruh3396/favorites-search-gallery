@@ -3,12 +3,13 @@ import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
-import { Events } from "../../../../../lib/globals/events";
+import { Events } from "../../../../../lib/global/events/events";
+import { GalleryInteractionTracker } from "../../events/desktop/gallery_interaction_tracker";
 
 export function enterGallery(thumb: HTMLElement): void {
   GalleryModel.enterGallery(thumb);
   GalleryView.enterGallery(thumb);
-  // this.interactionTracker?.start();
+  GalleryInteractionTracker?.start();
   GalleryAutoplayController.startAutoplay(thumb);
   GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
   Events.gallery.showOnHover.emit(false);
@@ -18,7 +19,7 @@ export function enterGallery(thumb: HTMLElement): void {
 export function exitGallery(): void {
   GalleryModel.exitGallery();
   GalleryView.exitGallery();
-  // this.interactionTracker?.stop();
+  GalleryInteractionTracker?.stop();
   GalleryAutoplayController.stopAutoplay();
   GalleryZoomFlow.toggleGalleryImageZoom(false);
   Events.gallery.exitedGallery.emit();

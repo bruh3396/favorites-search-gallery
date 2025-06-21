@@ -1,12 +1,14 @@
 import * as API from "../../../../lib/api/api";
 import * as Icons from "../../../../assets/icons";
-import { GALLERY_DISABLED, ON_FAVORITES_PAGE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/globals/flags";
+import { ON_DESKTOP_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/global/flags/intrinsic_flags";
 import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../../utils/dom/links";
 import { ClickCodes } from "../../../../types/primitives/enums";
-import { Events } from "../../../../lib/globals/events";
+import { Events } from "../../../../lib/global/events/events";
 import { FavoriteElement } from "./favorite_types";
+import { GALLERY_DISABLED } from "../../../../lib/global/flags/derived_flags";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
 import { Post } from "../../../../types/api/api_types";
+import { Preferences } from "../../../../store/local_storage/preferences";
 import { downloadFromThumb } from "../../../../lib/download/downloader";
 import { getContentType } from "../../../../utils/primitive/string";
 
@@ -113,16 +115,20 @@ export class FavoriteHTMLElement implements FavoriteElement {
   }
 
   private openPostInNewTabOnClick(): void {
-    if (!ON_FAVORITES_PAGE) {
-      return;
+    if (ON_DESKTOP_DEVICE) {
+      this.openPostInNewTabOnClickDesktop();
+    } else {
+      this.openPostInNewTabOnClickMobile();
     }
+  }
 
+  private openPostInNewTabOnClickDesktop(): void {
     this.container.onclick = (event): void => {
       if (event.ctrlKey) {
         openOriginal(this.root);
       }
     };
-    this.container.addEventListener("mousedown", (event) => {
+    this.container.addEventListener("mousedown", (event: MouseEvent): void => {
       if (event.ctrlKey) {
         return;
       }
@@ -132,6 +138,14 @@ export class FavoriteHTMLElement implements FavoriteElement {
 
       if (middleClick || shiftClick || (leftClick && GALLERY_DISABLED)) {
         event.preventDefault();
+        openPostPage(this.root.id);
+      }
+    });
+  }
+
+  private openPostInNewTabOnClickMobile(): void {
+    this.container.addEventListener("mousedown", (): void => {
+      if (!Preferences.mobileGalleryEnabled.value) {
         openPostPage(this.root.id);
       }
     });

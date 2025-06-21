@@ -1,8 +1,8 @@
 import * as ICONS from "../../assets/icons";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
-import { Events } from "../../lib/globals/events";
+import { Events } from "../../lib/global/events/events";
 import { Preferences } from "../../store/local_storage/preferences";
-import { SAVED_SEARCHES_DISABLED } from "../../lib/globals/flags";
+import { SAVED_SEARCHES_DISABLED } from "../../lib/global/flags/derived_flags";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
 import { awesompleteIsUnselected } from "../../utils/dom/awesomplete";
 import { getAllThumbs } from "../../utils/dom/dom";

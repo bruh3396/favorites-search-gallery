@@ -1,5 +1,6 @@
 import { MetadataMetric, Rating } from "../primitives/primitives";
 import { FavoritesDatabaseRecord } from "../primitives/composites";
+import { Post } from "../api/api_types";
 
 export interface Searchable {
   tags: Set<string>
@@ -29,4 +30,8 @@ export interface Favorite extends SearchableWithMetrics {
   databaseRecord: FavoritesDatabaseRecord;
   withinRating: (rating: Rating) => boolean;
   swapFavoriteButton: () => void;
+  validateTags: (post: Post) => void;
+  addAdditionalTags: (newTags: string) => string
+  removeAdditionalTags: (tagsToRemove: string) => string
+  resetAdditionalTags: () => void
 }

@@ -1,11 +1,11 @@
 import { FANCY_HOVERING_HTML } from "../../../assets/html";
 import { FavoriteLayout } from "../../../types/primitives/primitives";
 import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
-import { ON_MOBILE_DEVICE } from "../../../lib/globals/flags";
+import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../store/local_storage/preferences";
 import { getCurrentLayout } from "../view/favorites_view";
 import { insertStyleHTML } from "../../../utils/dom/style";
-import { isForwardNavigationKey } from "../../../types/primitives/equivalence";
+import { isInGallery } from "../../../utils/cross_feature/gallery";
 
 export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");
@@ -108,10 +108,8 @@ export function reloadWindow(): void {
   window.location.reload();
 }
 
-export function changeColumnCountOnShiftScroll(wheelEvent: FavoritesWheelEvent): void {
-  const event = wheelEvent.originalEvent;
-
-  if (!event.shiftKey) {
+export async function changeFavoritesSizeOnShiftScroll(wheelEvent: FavoritesWheelEvent): Promise<void> {
+  if (!wheelEvent.originalEvent.shiftKey) {
     return;
   }
   const usingRowLayout = getCurrentLayout() === "row";
@@ -121,18 +119,17 @@ export function changeColumnCountOnShiftScroll(wheelEvent: FavoritesWheelEvent):
   if (input === null || !(input instanceof HTMLInputElement)) {
     return;
   }
-  // const inGallery = await Utils.inGallery();
+  const inGallery = await isInGallery();
 
-  // if (inGallery) {
-  //   return;
-  // }
+  if (inGallery) {
+    return;
+  }
+  let delta = (wheelEvent.isForward ? 1 : -1);
 
-  // Utils.forceHideCaptions(true);
-  // clearTimeout(timeout);
-  // timeout = setTimeout(() => {
-  //   Utils.forceHideCaptions(false);
-  // }, 500);
-  input.value = String(parseInt(input.value) + (isForwardNavigationKey(wheelEvent.direction) ? 1 : -1));
+  if (usingRowLayout) {
+    delta = -delta;
+  }
+  input.value = String(parseInt(input.value) + delta);
   input.dispatchEvent(new KeyboardEvent("keydown", {
     key: "Enter",
     bubbles: true

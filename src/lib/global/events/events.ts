@@ -1,14 +1,16 @@
-import { FavoriteLayout, MetadataMetric, NavigationKey, Rating } from "../../types/primitives/primitives";
-import { EventEmitter } from "../../components/functional/event_emitter";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "./container";
-import { FavoriteItem } from "../../features/favorites/types/favorite/favorite_item";
-import { FavoritesKeyboardEvent } from "../../types/events/keyboard_event";
-import { FavoritesMouseEvent } from "../../types/events/mouse_event";
-import { FavoritesPageRelation } from "../../features/favorites/types/favorite/favorite_types";
-import { FavoritesWheelEvent } from "../../types/events/wheel_event";
-import { GalleryMenuAction } from "../../features/gallery/types/gallery_types";
-import { ON_FAVORITES_PAGE } from "./flags";
-import { PerformanceProfile } from "../../types/primitives/enums";
+import { FavoriteLayout, MetadataMetric, NavigationKey, Rating } from "../../../types/primitives/primitives";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../flags/intrinsic_flags";
+import { EventEmitter } from "../../../components/functional/event_emitter";
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../container";
+import { FavoriteItem } from "../../../features/favorites/types/favorite/favorite_item";
+import { FavoritesKeyboardEvent } from "../../../types/events/keyboard_event";
+import { FavoritesMouseEvent } from "../../../types/events/mouse_event";
+import { FavoritesPageRelation } from "../../../features/favorites/types/favorite/favorite_types";
+import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
+import { GalleryMenuAction } from "../../../features/gallery/types/gallery_types";
+import { PerformanceProfile } from "../../../types/primitives/enums";
+import { setupSwipeEvents } from "./swipe_events";
+import { setupTouchHoldEvents } from "./touch_hold_events";
 
 const container = ON_FAVORITES_PAGE ? FAVORITES_SEARCH_GALLERY_CONTAINER : document.documentElement;
 
@@ -80,11 +82,7 @@ const gallery = {
   videoEnded: new EventEmitter<void>(true),
   videoDoubleClicked: new EventEmitter<MouseEvent>(true),
   rightTap: new EventEmitter<void>(true),
-  leftTap: new EventEmitter<void>(true),
-  swipedUp: new EventEmitter<void>(true),
-  swipedDown: new EventEmitter<void>(true),
-  swipedLeft: new EventEmitter<void>(true),
-  swipedRight: new EventEmitter<void>(true)
+  leftTap: new EventEmitter<void>(true)
 };
 
 const caption = {
@@ -94,6 +92,14 @@ const caption = {
 
 const searchBox = {
   appendSearchBox: new EventEmitter<string>(true)
+};
+
+const mobile = {
+  swipedUp: new EventEmitter<void>(true),
+  swipedDown: new EventEmitter<void>(true),
+  swipedLeft: new EventEmitter<void>(true),
+  swipedRight: new EventEmitter<void>(true),
+  touchHold: new EventEmitter<EventTarget>(true)
 };
 
 const document1 = {
@@ -135,7 +141,7 @@ function setupCommonEvents(): void {
   document.addEventListener("keyup", (event) => {
     Events.document.keyup.emit(new FavoritesKeyboardEvent(event));
   });
-    container.addEventListener("mouseover", (event) => {
+  container.addEventListener("mouseover", (event) => {
     Events.document.mouseover.emit(new FavoritesMouseEvent(event));
   }, {
     passive: true
@@ -173,6 +179,14 @@ function setupWindowEvents(): void {
   });
 }
 
+function setupMobileEvents(): void {
+  if (ON_DESKTOP_DEVICE) {
+    return;
+  }
+  setupTouchHoldEvents();
+  setupSwipeEvents();
+}
+
 function toggleGlobalInputEvents(value: boolean): void {
   for (const event of Object.values(Events.document)) {
     event.toggle(value);
@@ -192,10 +206,12 @@ export const Events = {
   searchBox,
   document: document1,
   window: window1,
+  mobile,
   toggleGlobalInputEvents
 };
 
 export function setupEvents(): void {
   setupDocumentEvents();
   setupWindowEvents();
+  setupMobileEvents();
 }

@@ -1,30 +1,26 @@
 import { BatchExecutor } from "../../../../../../components/functional/batch_executor";
 import { GalleryBaseThumbUpscaler } from "./gallery_base_thumbnail_upscaler";
 import { ImageRequest } from "../../../../types/gallery_image_request";
+import { ThrottledQueue } from "../../../../../../components/functional/throttled_queue";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
-import { sleep } from "../../../../../../utils/misc/async";
 
 export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
-  public canvases: Map<string, HTMLCanvasElement>;
-  public scheduler: BatchExecutor<ImageRequest>;
-
-  constructor() {
-    super();
-    this.canvases = new Map();
-    this.scheduler = new BatchExecutor(1, 500, this.upscaleBatch.bind(this));
-  }
+  public canvases: Map<string, HTMLCanvasElement> = new Map();
+  public scheduler: BatchExecutor<ImageRequest> = new BatchExecutor(1, 500, this.upscaleBatch.bind(this));
+  public drawQueue: ThrottledQueue = new ThrottledQueue(75);
 
   public finishUpscale(request: ImageRequest): void {
-    this.scheduler.add(request);
+    // this.scheduler.add(request);
+    this.finishUpscaleHelper(request);
   }
 
-  public async finishUpscaleHelper(request: ImageRequest): void {
+  public finishUpscaleHelper(request: ImageRequest): void {
     const canvas = request.thumb.querySelector("canvas");
 
     if (!(canvas instanceof HTMLCanvasElement) || !(request.bitmap instanceof ImageBitmap)) {
       return;
     }
-    await sleep(0);
+    // await this.drawQueue.wait();
     this.canvases.set(request.id, canvas);
     this.setCanvasDimensionsFromImageBitmap(canvas, request.bitmap);
     drawScaledCanvas(canvas.getContext("2d"), request.bitmap);
