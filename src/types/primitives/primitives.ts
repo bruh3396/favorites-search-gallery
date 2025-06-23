@@ -12,6 +12,6 @@ export type MetadataMetric = "default" | "id" | "score" | "width" | "height" | "
 export type SortingMethod = MetadataMetric
 export type SearchableMetadataMetric = "id" | "score" | "width" | "height"
 export type MetadataComparator = ":" | ":<" | ":>"
-export type Timeout = number | undefined
+export type Timeout = undefined | ReturnType<typeof setTimeout>
 export type ContentType = "image" | "video" | "gif"
 export type SkeletonAnimation = "pulse" | "shine"

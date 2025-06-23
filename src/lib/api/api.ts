@@ -4,7 +4,7 @@ import { extractFavoritesCount } from "./profile_page_parser";
 import { extractPostFromAPI } from "./post_api_parser";
 import { parsePostFromPostPage as extractPostFromPostPage } from "./post_page_parser";
 
-async function getHTML(url: string): Promise<string> {
+export async function getHTML(url: string): Promise<string> {
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -14,7 +14,7 @@ async function getHTML(url: string): Promise<string> {
 }
 
 export async function fetchPostFromAPI(id: string): Promise<Post> {
-  return extractPostFromAPI(await getHTML(FSG_URL.createAPIURL("post", id)));
+  return extractPostFromAPI(await getHTML(FSG_URL.createAPIURL(id)));
 }
 
 export function fetchPostPage(id: string): Promise<string> {

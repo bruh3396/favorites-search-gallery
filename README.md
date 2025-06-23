@@ -45,6 +45,7 @@ This script is still in development, please let me know if you experience a bug,
 
 * Search favorites with the the same [syntax](#search-syntax) as the normal search pages (including meta tags):
 * View full resolution images, or play videos and GIFs in a gallery (also works on search pages)
+* Download all search results at once
 * Autocompleted tag search
 * Remove favorites without reloading page
 * Add favorites from other users' favorites pages
@@ -103,18 +104,19 @@ This script is still in development, please let me know if you experience a bug,
 ### Gallery Controls (Desktop)
 | Input                                 | Function                                       | Condition              |
 | :-------------------------------------| :----------------------------------------------| :----------------------|
-| Arrow Keys, Scroll Wheel, AD   | Traverse gallery                               |                        |
+| Arrow Keys, Scroll Wheel, AD   | Navigate gallery                               |                        |
 | Escape                                |    Exit gallery                                |                        |
 | Right Click                           | Exit gallery |                        |
 | Middle Click                          | Open post in new tab         |                        |
 | Double Left Click                          | Exit gallery         | Content is a video                       |
 | Ctrl Left  Click                          | Open original content in new tab and stay on current tab         |                        |
 | Ctrl Shift Left Click | Open original content in new tab and move to new tab |  |
+| Shift Left Click | Zoom |  |
 
 ### Gallery Controls (Mobile)
 | Input                                 | Function                                       | Condition              |
 | :-------------------------------------| :----------------------------------------------| :----------------------|
-| Tap Left/Right Edge of Screen    | Traverse gallery                               |                        |
+| Tap Left/Right Edge of Screen    | Navigate gallery                               |                        |
 | Swipe Down                       | Exit gallery                                   |  |
 | Swipe Up                       | Show autoplay menu                                   |  |
 
@@ -122,11 +124,14 @@ This script is still in development, please let me know if you experience a bug,
 
 | Key | Function                       | Condition                          |
 |-----|--------------------------------|------------------------------------|
-| F   | Add favorite                   |                                    |
+| E   | Add favorite                   |                                    |
 | X   | Remove favorite                | "Remove Buttons" option checked    |
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
 | P   | Stop/start autoplay            | Autoplay option checked            |
+| G   | Open post            | Autoplay option checked            |
+| Q   | Open original            | Autoplay option checked            |
+| S   | Download  |
 
 
 ### General Hotkeys (Desktop)
@@ -139,6 +144,7 @@ This script is still in development, please let me know if you experience a bug,
 | O   | Toggle more options  |
 | R   | Toggle add/remove favorite buttons |
 | H   | Toggle hints |
+| F   | Toggle fullscreen |
 
 
 

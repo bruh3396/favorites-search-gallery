@@ -1,11 +1,11 @@
-import * as API from "../../lib/api/api";
+import * as API from "../api/api";
 import { isGif, isVideo } from "../../utils/content/content_type";
 import { BatchExecutor } from "../../components/functional/batch_executor";
-import { Database } from "./database";
+import { Database } from "../../store/indexed_db/database";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { MediaExtension } from "../../types/primitives/primitives";
 import { MediaExtensionMapping } from "../../types/primitives/composites";
-import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
+import { ON_FAVORITES_PAGE } from "./flags/intrinsic_flags";
 import { Post } from "../../types/api/api_types";
 
 const DATABASE_NAME: string = "ImageExtensions";
@@ -21,7 +21,7 @@ async function loadExtensions(): Promise<void> {
   }
 }
 
-function moveExtensionsFromLocalStorageToIndexedDB(): void {
+function transferExtensionsFromLocalStorageToIndexedDB(): void {
   const extensionMappingsString = localStorage.getItem("imageExtensions");
 
   if (extensionMappingsString === null) {
@@ -112,6 +112,6 @@ export function deleteExtensionsDatabase(): void {
 }
 
 export function setupExtensions(): void {
-  moveExtensionsFromLocalStorageToIndexedDB();
+  transferExtensionsFromLocalStorageToIndexedDB();
   loadExtensions();
 }

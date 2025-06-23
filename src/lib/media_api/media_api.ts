@@ -1,6 +1,6 @@
 import { Favorite } from "../../types/interfaces/interfaces";
 import { convertPreviewURLToImageURL } from "../../utils/content/url";
-import { getExtension } from "../../store/indexed_db/extensions";
+import { getExtension } from "../global/extensions";
 import { getPreviewURL } from "../../utils/dom/dom";
 
 export async function fetchImageBitmap(url: string, abortController?: AbortController): Promise<ImageBitmap> {

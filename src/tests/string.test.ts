@@ -1,4 +1,4 @@
-import { capitalize, convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeNonNumericCharacters, toCamelCase } from "../utils/primitive/string";
+import { capitalize, convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeLeadingHyphens, removeNonNumericCharacters, toCamelCase } from "../utils/primitive/string";
 import { describe, expect, test } from "vitest";
 
 describe("toCamelCase", () => {
@@ -380,5 +380,26 @@ print("Hello, World!");
 print("Hello, Friend!");`;
 
     expect(removeFirstAndLastLines(code)).toBe(expected);
+  });
+});
+
+describe("removeLeadingHyphen", () => {
+  test("empty", () => {
+    expect(removeLeadingHyphens("")).toBe("");
+  });
+
+  test("no hyphen", () => {
+    expect(removeLeadingHyphens("apple")).toBe("apple");
+    expect(removeLeadingHyphens("banana")).toBe("banana");
+  });
+
+  test("one hyphen", () => {
+    expect(removeLeadingHyphens("-apple")).toBe("apple");
+    expect(removeLeadingHyphens("-banana")).toBe("banana");
+  });
+
+  test("multiple hyphens", () => {
+    expect(removeLeadingHyphens("---apple")).toBe("apple");
+    expect(removeLeadingHyphens("--banana")).toBe("banana");
   });
 });

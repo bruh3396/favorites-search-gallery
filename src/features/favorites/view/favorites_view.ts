@@ -105,9 +105,15 @@ export function setupFavoritesView(): void {
   toggleDownloadButtons(Preferences.downloadButtonsVisible.value);
 }
 
-export function preloadFavorites(favorites: FavoriteItem[]): void {
+export function preloadThumbnails(favorites: FavoriteItem[]): void {
   if (GeneralSettings.preloadThumbnails) {
-    FavoritesPreloader.preloadFavorites(favorites);
+    FavoritesPreloader.preloadThumbnails(favorites);
+  }
+}
+
+export function preloadURLs(urls: string[]): void {
+  if (GeneralSettings.preloadThumbnails) {
+    FavoritesPreloader.preloadImages(urls);
   }
 }
 

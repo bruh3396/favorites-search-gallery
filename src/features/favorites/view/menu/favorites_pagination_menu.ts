@@ -142,10 +142,6 @@ function createGotoSpecificPageInputs(finalPageNumber: number): void {
   CONTAINER.appendChild(container);
 }
 
-function pageNumberTraversalButtonExists(finalPageNumber: number): boolean {
-  return document.getElementById(`favorites-page-${finalPageNumber}`) !== null;
-}
-
 function updateArrowTraversalButtonInteractability(previousPage: HTMLButtonElement, firstPage: HTMLButtonElement, nextPage: HTMLButtonElement, finalPage: HTMLButtonElement, parameters: FavoritesPaginationParameters): void {
   if (parameters.currentPageNumber === 1) {
     previousPage.disabled = true;

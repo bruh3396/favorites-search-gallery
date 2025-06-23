@@ -4,8 +4,9 @@ import { Events } from "../../lib/global/events/events";
 import { Preferences } from "../../store/local_storage/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/global/flags/derived_flags";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
-import { awesompleteIsUnselected } from "../../utils/dom/awesomplete";
+import { awesompleteIsUnselected } from "../../utils/dom/awesomplete_utils";
 import { getAllThumbs } from "../../utils/dom/dom";
+import { getSavedSearches } from "../../utils/dom/saved_searches";
 import { shuffleArray } from "../../utils/collection/array";
 import { sleep } from "../../utils/misc/async";
 
@@ -183,13 +184,7 @@ function stopEditingSavedSearches(newListItem: HTMLElement): void {
 }
 
 function storeSavedSearches(): void {
-  localStorage.setItem("savedSearches", JSON.stringify(getSavedSearchValues()));
-}
-
-function getSavedSearchValues(): string[] {
-  return Array.from(document.getElementsByClassName("save-search-label"))
-    .filter(element => element instanceof HTMLElement)
-    .map(element => element.innerText);
+  localStorage.setItem("savedSearches", JSON.stringify(getSavedSearches()));
 }
 
 function loadSavedSearches(): void {

@@ -29,4 +29,5 @@ export function setupAutoplay(): void {
   };
 
   GalleryAutoplayController.setupAutoplay(events);
+  GalleryView.toggleVideoLooping(GalleryAutoplayController.isPaused());
 }

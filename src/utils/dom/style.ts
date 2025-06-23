@@ -88,6 +88,10 @@ export function usingDarkTheme(): boolean {
   return getCookie("theme", "") === "dark";
 }
 
+export function getCurrentThemeClass(): string {
+  return usingDarkTheme() ? "dark-green-gradient" : "light-green-gradient";
+}
+
 export function insertHTMLAndExtractStyle(element: HTMLElement, position: InsertPosition, html: string): void {
   const dom = new DOMParser().parseFromString(html, "text/html");
   const styles = Array.from(dom.querySelectorAll("style"));

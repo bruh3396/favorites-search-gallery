@@ -25,49 +25,19 @@ type TagModifierUI = {
   export: HTMLButtonElement
 }
 
-const databaseName = "AdditionalTags";
-const objectStoreName = "additionalTags";
-const tagModifications: Map<string, string> = new Map();
-const database = new Database<TagModificationDatabaseRecord>(databaseName, objectStoreName, 12);
-
+const TAG_MODIFICATIONS: Map<string, string> = new Map();
+const database = new Database<TagModificationDatabaseRecord>("AdditionalTags", "additionalTags", 12);
 let tagEditModeAbortController: AbortController;
-/** @type {{container: HTMLElement, checkbox: HTMLInputElement}} */
 let favoritesOption: { container: HTMLElement, checkbox: HTMLInputElement };
 let favoritesUI: TagModifierUI;
 let latestSearchResults: Favorite[] = [];
 let atLeastOneFavoriteIsSelected: boolean;
 const selection: Set<Favorite> = new Set();
 
-export function currentlyModifyingTags(): boolean {
-  return document.getElementById("tag-edit-mode") !== null;
-}
-
-function getDatabaseRecords(): TagModificationDatabaseRecord[] {
-  return Array.from(tagModifications.entries())
-    .map((entry) => ({
-      id: entry[0],
-      tags: entry[1]
-    }));
-}
-
-function storeTagModifications(): void {
-  database.store(getDatabaseRecords());
-}
-
-async function loadTagModifications(): Promise<void> {
-  const records = await database.load();
-
-  for (const record of records) {
-    tagModifications.set(record.id, record.tags);
-  }
-}
-
 export function setupTagModifier(): void {
   if (TAG_MODIFIER_DISABLED) {
     return;
   }
-  loadTagModifications();
-
   tagEditModeAbortController = new AbortController();
   favoritesOption = {} as { container: HTMLDivElement, checkbox: HTMLInputElement };
   favoritesUI = {} as TagModifierUI;
@@ -76,11 +46,39 @@ export function setupTagModifier(): void {
   addEventListeners();
 }
 
+export async function loadTagModifications(): Promise<void> {
+  const records = await database.load();
+
+  for (const record of records) {
+    TAG_MODIFICATIONS.set(record.id, record.tags);
+  }
+}
+
+export function currentlyModifyingTags(): boolean {
+  return document.getElementById("tag-edit-mode") !== null;
+}
+
+export function getAdditionalTags(id: string): string | undefined {
+  return TAG_MODIFICATIONS.get(id);
+}
+
+function getDatabaseRecords(): TagModificationDatabaseRecord[] {
+  return Array.from(TAG_MODIFICATIONS.entries())
+    .map((entry) => ({
+      id: entry[0],
+      tags: entry[1]
+    }));
+}
+
+function storeTagModifications(): void {
+  database.update(getDatabaseRecords());
+}
+
 function insertHTML(): void {
   insertFavoritesPageHTML();
 }
 
-function insertFavoritesPageHTML(): void {
+ function insertFavoritesPageHTML(): void {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
@@ -142,7 +140,7 @@ function highlightSelectedThumbsOnPageChange(): void {
       return;
     }
 
-    if (isSelectedForModification(post)) {
+    if (isSelected(post)) {
       toggleOutline(post, true);
     }
   }
@@ -203,7 +201,7 @@ function toggleTagEditModeEventListeners(value: boolean): void {
     const favorite = getFavorite(event.target.id);
 
     if (favorite !== undefined) {
-      toggleThumbSelection(favorite);
+      select(favorite);
     }
   }, {
     signal: tagEditModeAbortController.signal
@@ -228,18 +226,18 @@ function unSelectAll(): void {
   }
 
   for (const post of getAllFavorites()) {
-    toggleThumbSelection(post, false);
+    select(post, false);
   }
   atLeastOneFavoriteIsSelected = false;
 }
 
 function selectAll(): void {
   for (const favorite of latestSearchResults) {
-    toggleThumbSelection(favorite, true);
+    select(favorite, true);
   }
 }
 
-function toggleThumbSelection(favorite: Favorite, value? : boolean): void {
+function select(favorite: Favorite, value?: boolean): void {
   atLeastOneFavoriteIsSelected = true;
 
   if (value === undefined) {
@@ -260,13 +258,12 @@ function toggleOutline(favorite: Favorite, value: boolean): void {
   }
 }
 
-function isSelectedForModification(favorite: Favorite): boolean {
+function isSelected(favorite: Favorite): boolean {
   return selection.has(favorite);
 }
 
 function removeContentTypeTags(tags: string): string {
-  return tags
-    .replace(/(?:^|\s*)(?:video|animated|mp4)(?:$|\s*)/g, "");
+  return tags.replace(/(?:^|\s*)(?:video|animated|mp4)(?:$|\s*)/g, "");
 }
 
 function addTagsToSelected(): void {
@@ -289,10 +286,10 @@ function modifyTagsOfSelected(remove: boolean): void {
   }
 
   for (const favorite of getAllFavorites()) {
-    if (isSelectedForModification(favorite)) {
-      const additionalTags = remove ? favorite.tags.removeAdditionalTags(tagsToModify) : favorite.tags.addAdditionalTags(tagsToModify);
+    if (isSelected(favorite)) {
+      const additionalTags = remove ? favorite.removeAdditionalTags(tagsToModify) : favorite.addAdditionalTags(tagsToModify);
 
-      tagModifications.set(favorite.id, additionalTags);
+      TAG_MODIFICATIONS.set(favorite.id, additionalTags);
       modifiedTagsCount += 1;
     }
   }
@@ -323,7 +320,7 @@ function resetTagModifications(): void {
   }
   indexedDB.deleteDatabase("AdditionalTags");
   getAllFavorites().forEach(favorite => {
-    favorite.tags.resetAdditionalTags();
+    favorite.resetAdditionalTags();
   });
   clearCustomTags();
 }

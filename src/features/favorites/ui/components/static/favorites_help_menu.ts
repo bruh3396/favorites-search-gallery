@@ -1,5 +1,9 @@
+import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../../lib/global/container";
 import { HELP_HTML } from "../../../../../assets/html";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { getCurrentThemeClass } from "../../../../../utils/dom/style";
+
+let dialog: HTMLDialogElement;
 
 function insertHelpHTML(): void {
   const parent = document.getElementById(ON_MOBILE_DEVICE ? "mobile-footer-header" : "left-favorites-panel-top-row");
@@ -9,7 +13,7 @@ function insertHelpHTML(): void {
   }
 }
 
-function addEventListenersToWhatsNewMenu(): void {
+function createWhatsNewMenu(): void {
   const whatsNew = document.getElementById("whats-new-link");
 
   if (whatsNew === null) {
@@ -20,31 +24,41 @@ function addEventListenersToWhatsNewMenu(): void {
     whatsNew.remove();
     return;
   }
-  whatsNew.onclick = (): boolean => {
-    if (whatsNew.classList.contains("persistent")) {
-      whatsNew.classList.remove("persistent");
-      whatsNew.classList.add("hidden");
-    } else {
-      whatsNew.classList.add("persistent");
-    }
+  createDialogWhatsNewMenu(whatsNew);
+}
+
+function createDialogWhatsNewMenu(menu: HTMLElement): void {
+  dialog = document.createElement("dialog");
+  dialog.style.padding = "5px 10px";
+  dialog.style.fontSize = "large";
+  dialog.classList.add(getCurrentThemeClass());
+  FAVORITES_SEARCH_GALLERY_CONTAINER.appendChild(dialog);
+  const whatsNewContainer = menu.querySelector("#whats-new-container");
+
+  if (whatsNewContainer === null) {
+    return;
+  }
+  whatsNewContainer.removeAttribute("id");
+
+  dialog.appendChild(whatsNewContainer);
+  const closeButton = document.createElement("button");
+
+  closeButton.textContent = "X";
+  closeButton.style.position = "absolute";
+  closeButton.style.top = "1em";
+  closeButton.style.right = "1em";
+  closeButton.addEventListener("click", () => dialog.close());
+  dialog.appendChild(closeButton);
+  menu.onmousedown = (): boolean => {
+    dialog.showModal();
     return false;
   };
-
-  whatsNew.onblur = (): void => {
-    whatsNew.classList.remove("persistent");
-    whatsNew.classList.add("hidden");
-  };
-
-  whatsNew.onmouseenter = (): void => {
-    whatsNew.classList.remove("hidden");
-  };
-
-  whatsNew.onmouseleave = (): void => {
-    whatsNew.classList.add("hidden");
+  dialog.onclick = (): void => {
+    dialog.close();
   };
 }
 
 export function createFavoritesHelpMenu(): void {
   insertHelpHTML();
-  addEventListenersToWhatsNewMenu();
+  createWhatsNewMenu();
 }

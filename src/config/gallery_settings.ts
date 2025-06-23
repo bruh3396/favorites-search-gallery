@@ -13,7 +13,7 @@ export const GallerySettings = {
     return ON_SEARCH_PAGE ? GallerySettings.mainCanvasResolutions.search : GallerySettings.mainCanvasResolutions.favorites;
   },
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 850,
-  searchPagePreloadedImageCount: 42,
+  searchPagePreloadedImageCount: ON_MOBILE_DEVICE ? 4 : 42,
   minimumPreloadedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 2 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 2 : 2,
@@ -25,11 +25,12 @@ export const GallerySettings = {
   maxImagesToRenderAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
   idleInteractionDuration: 1000,
   menuVisibilityTime: 1000,
-  maxVisibleThumbsBeforeStoppingPreload: 150,
+  maxVisibleThumbsBeforeStoppingPreload: 175,
   useOffscreenThumbUpscaler: false,
   fetchImageBitmapsInWorker: true,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },
-  createImageAccentColors: false
+  createImageAccentColors: false,
+  galleryMenuMonoColor: true
 };

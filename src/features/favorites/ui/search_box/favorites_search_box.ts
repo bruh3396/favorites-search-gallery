@@ -1,4 +1,4 @@
-import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../utils/dom/awesomplete";
+import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../utils/dom/awesomplete_utils";
 import { Events } from "../../../../lib/global/events/events";
 import { FavoritesMouseEvent } from "../../../../types/events/mouse_event";
 import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";

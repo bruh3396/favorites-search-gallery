@@ -1,12 +1,17 @@
 import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { FavoritesMouseEvent } from "../../../../../types/events/mouse_event";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { didSwipe } from "../../../../../lib/global/events/swipe_events";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 
+function galleryEnabled(): boolean {
+  return (ON_FAVORITES_PAGE && Preferences.mobileGalleryEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value);
+}
+
 function onMouseDownOutsideGallery(mouseEvent: FavoritesMouseEvent): void {
-  if (mouseEvent.thumb !== null && Preferences.mobileGalleryEnabled.value) {
+  if (mouseEvent.thumb !== null && galleryEnabled()) {
     mouseEvent.originalEvent.preventDefault();
     mouseEvent.originalEvent.stopPropagation();
     mouseEvent.originalEvent.stopImmediatePropagation();

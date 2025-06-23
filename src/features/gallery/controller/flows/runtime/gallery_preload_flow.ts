@@ -24,7 +24,7 @@ export function preloadVisibleContent(): void {
   }
   const thumbs = GalleryThumbObserver.getVisibleThumbs();
 
-  if (thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload) {
+  if (thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload && thumbs.length > 0) {
     GalleryView.preloadContentOutOfGallery(thumbs);
   }
 }

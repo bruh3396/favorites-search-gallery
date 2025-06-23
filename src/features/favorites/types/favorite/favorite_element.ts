@@ -8,7 +8,7 @@ import { FavoriteElement } from "./favorite_types";
 import { GALLERY_DISABLED } from "../../../../lib/global/flags/derived_flags";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
 import { Post } from "../../../../types/api/api_types";
-import { Preferences } from "../../../../store/local_storage/preferences";
+import { createPostPageURL } from "../../../../lib/api/url";
 import { downloadFromThumb } from "../../../../lib/download/downloader";
 import { getContentType } from "../../../../utils/primitive/string";
 
@@ -144,11 +144,16 @@ export class FavoriteHTMLElement implements FavoriteElement {
   }
 
   private openPostInNewTabOnClickMobile(): void {
-    this.container.addEventListener("mousedown", (): void => {
-      if (!Preferences.mobileGalleryEnabled.value) {
-        openPostPage(this.root.id);
-      }
-    });
+    this.container.href = createPostPageURL(this.root.id);
+    // this.container.addEventListener("mousedown", (event): void => {
+    //   if (event.target instanceof HTMLImageElement && event.target.classList.contains("utility-button")) {
+    //     return;
+    //   }
+
+    //   if (!Preferences.mobileGalleryEnabled.value) {
+    //     openPostPage(this.root.id);
+    //   }
+    // });
   }
 
   private presetCanvasDimensions(post: Post): void {

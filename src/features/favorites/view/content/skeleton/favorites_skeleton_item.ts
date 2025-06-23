@@ -8,7 +8,7 @@ function getRandomAnimationDelay(): number {
 }
 
 function getRandomAnimationDuration(): number {
-  return roundToTwoDecimalPlaces((Math.random()) + 0.7);
+  return roundToTwoDecimalPlaces((Math.random()) + 1.4);
 }
 
 function getPredictedAspectRatio(): string {

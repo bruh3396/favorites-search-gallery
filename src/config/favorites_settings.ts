@@ -26,5 +26,6 @@ export const FavoritesSettings = {
   buildIndexAsynchronously: true,
   skeletonAnimationClasses: "pulse",
   infiniteScrollBatchCount: 25,
+  infiniteScrollPreloadCount: 100,
   favoriteFinderEnabled: false
 };

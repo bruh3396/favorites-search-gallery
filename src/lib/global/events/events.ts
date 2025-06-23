@@ -161,7 +161,7 @@ function setupCommonEvents(): void {
   });
   container.addEventListener("touchstart", (event) => {
     Events.document.touchStart.emit(event);
-  });
+  }, {passive: false});
   container.addEventListener("touchend", (event) => {
     Events.document.touchEnd.emit(event);
   });

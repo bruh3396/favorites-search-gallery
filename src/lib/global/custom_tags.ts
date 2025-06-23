@@ -1,7 +1,8 @@
+import { AwesompleteSuggestion } from "../../types/primitives/composites";
 import { fetchTagFromAPI } from "../api/api";
 import { removeExtraWhiteSpace } from "../../utils/primitive/string";
 
-const CUSTOM_TAGS = new Set();
+const CUSTOM_TAGS: Set<string> = loadCustomTags();
 const PARSER = new DOMParser();
 
 export function loadCustomTags(): Set<string> {
@@ -37,4 +38,21 @@ async function isOfficialTag(tagName: string): Promise<boolean> {
     console.error(error);
     return false;
   }
+}
+
+export function addCustomTagsToAutocomplete(officialTags: AwesompleteSuggestion[], searchQuery: string): AwesompleteSuggestion[] {
+  const customTags = Array.from(CUSTOM_TAGS);
+  const officialTagValues = new Set(officialTags.map(officialTag => officialTag.value));
+  const mergedTags = officialTags;
+
+  for (const customTag of customTags) {
+    if (!officialTagValues.has(customTag) && customTag.startsWith(searchQuery)) {
+      mergedTags.unshift({
+        label: `${customTag} (custom)`,
+        value: customTag,
+        type: "custom"
+      });
+    }
+  }
+  return mergedTags;
 }

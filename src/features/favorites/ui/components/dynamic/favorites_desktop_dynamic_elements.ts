@@ -1,6 +1,5 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../types/elements/menu_element";
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../../lib/global/flags/derived_flags";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { FavoriteLayout, MetadataMetric } from "../../../../../types/primitives/primitives";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/element_factory/checkbox";
 import { hideUnusedLayoutSizer, reloadWindow, toggleAddOrRemoveButtons, toggleDownloadButtons, toggleFavoritesOptions, toggleHeader, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
@@ -10,6 +9,7 @@ import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../../config/general_settings";
 import { PerformanceProfile } from "../../../../../types/primitives/enums";
 import { Preferences } from "../../../../../store/local_storage/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { createButtonElement } from "../../../../../lib/element_factory/button";
 import { createNumberComponent } from "../../../../../lib/element_factory/number";
 import { createSelectElement } from "../../../../../lib/element_factory/select";
@@ -51,7 +51,7 @@ const BUTTONS: Partial<ButtonElement>[] = [
     id: "download-button",
     parentId: "left-favorites-panel-top-row",
     textContent: "Download",
-    title: "Download search results",
+    title: "Download search results (experimental)",
     event: Events.favorites.downloadButtonClicked
   },
   {
