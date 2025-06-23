@@ -2,7 +2,7 @@ import { FANCY_HOVERING_HTML } from "../../../assets/html";
 import { FavoriteLayout } from "../../../types/primitives/primitives";
 import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
 import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../store/local_storage/preferences";
+import { Preferences } from "../../../lib/global/preferences/preferences";
 import { getCurrentLayout } from "../view/favorites_view";
 import { insertStyleHTML } from "../../../utils/dom/style";
 import { isInGallery } from "../../../utils/cross_feature/gallery";

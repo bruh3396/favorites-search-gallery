@@ -1,10 +1,12 @@
 import { convertToTagSet, convertToTagString } from "../../../../utils/primitive/string";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
 import { Post } from "../../../../types/api/api_types";
-import { getAdditionalTags } from "../../../tag_modifier/tag_modifier";
+import { getAdditionalTags } from "../../../../lib/global/tag_modifier";
 
 function getCorrectTags(post: Post): Set<string> {
   const correctTags = convertToTagSet(post.tags);
+
+  correctTags.add(post.id);
 
   if (post.fileURL.endsWith("mp4")) {
     correctTags.add("video");
@@ -42,7 +44,7 @@ export class FavoriteTags {
   }
 
   public set(tags: string | Set<string>): void {
-    this.tags = tags instanceof Set ? tags : convertToTagSet(`${tags} ${this.id}`);
+    this.tags = tags instanceof Set ? tags : convertToTagSet(tags);
     const additionalTags = getAdditionalTags(this.id);
 
     if (additionalTags !== undefined) {

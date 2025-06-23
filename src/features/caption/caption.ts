@@ -2,15 +2,15 @@ import * as API from "../../lib/api/api";
 import { capitalize, isOnlyDigits } from "../../utils/primitive/string";
 import { debounceAfterFirstCall, sleep } from "../../utils/misc/async";
 import { getAllThumbs, getImageFromThumb } from "../../utils/dom/dom";
-import { BatchExecutor } from "../../components/functional/batch_executor";
+import { BatchExecutor } from "../../lib/components/batch_executor";
 import { CAPTIONS_DISABLED } from "../../lib/global/flags/derived_flags";
 import { CAPTION_HTML } from "../../assets/html";
 import { ClickCodes } from "../../types/primitives/enums";
 import { DO_NOTHING } from "../../config/constants";
-import { Database } from "../../store/indexed_db/database";
+import { Database } from "../../lib/components/database";
 import { Events } from "../../lib/global/events/events";
 import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../store/local_storage/preferences";
+import { Preferences } from "../../lib/global/preferences/preferences";
 import { TagCategory } from "../../types/primitives/primitives";
 import { TagCategoryMapping } from "../../types/primitives/composites";
 import { createTagAPIURL } from "../../lib/api/url";
@@ -189,7 +189,7 @@ function addFavoritesPageEventListeners(): void {
       attachToThumb(currentThumb);
     }
   });
-  Events.favorites.reset.on(() => {
+  Events.favorites.resetConfirmed.on(() => {
     DATABASE.delete();
   });
 }

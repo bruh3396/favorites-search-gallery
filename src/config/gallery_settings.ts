@@ -26,7 +26,7 @@ export const GallerySettings = {
   idleInteractionDuration: 1000,
   menuVisibilityTime: 1000,
   maxVisibleThumbsBeforeStoppingPreload: 175,
-  useOffscreenThumbUpscaler: false,
+  useOffscreenThumbUpscaler: true,
   fetchImageBitmapsInWorker: true,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;

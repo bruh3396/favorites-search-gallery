@@ -1,8 +1,8 @@
 import * as FSG_URL from "../../lib/api/url";
 import { COMMON_HTML, DARK_THEME_HTML, SKELETON_HTML } from "../../assets/html";
 import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
-import { getCookie, setCookie } from "../../store/cookies/cookie";
-import { Preferences } from "../../store/local_storage/preferences";
+import { getCookie, setCookie } from "../../lib/global/cookie";
+import { Preferences } from "../../lib/global/preferences/preferences";
 import { yield1 } from "../misc/async";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
@@ -29,11 +29,10 @@ function toggleLocalDarkStyles(useDark: boolean): void {
 
 function setupVideoAndGifOutlines(): void {
   const size = ON_MOBILE_DEVICE ? 1 : 2;
-  const outlineOrBorder = "outline";
   const videoSelector = ON_FAVORITES_PAGE ? "&:has(img.video)" : ">img.video";
   const gifSelector = ON_FAVORITES_PAGE ? "&:has(img.gif)" : ">img.gif";
-  const videoRule = `${videoSelector} {${outlineOrBorder}: ${size}px solid blue}`;
-  const gifRule = `${gifSelector} {${outlineOrBorder}: ${size}px solid hotpink}`;
+  const videoRule = `${videoSelector} {outline: ${size}px solid blue}`;
+  const gifRule = `${gifSelector} {outline: ${size}px solid hotpink}`;
 
   insertStyleHTML(`
     #favorites-search-gallery-content {
@@ -52,7 +51,6 @@ function setupVideoAndGifOutlines(): void {
       >a,
       >div {
         ${videoRule}
-
         ${gifRule}
       }
     }

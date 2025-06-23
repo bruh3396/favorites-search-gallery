@@ -16,6 +16,6 @@ function clearLocalStorage(): void {
 export function tryResetting(): void {
   if (confirm(RESET_PROMPT)) {
     clearLocalStorage();
-    Events.favorites.reset.emit();
+    Events.favorites.resetConfirmed.emit();
   }
 }

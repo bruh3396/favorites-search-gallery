@@ -50,6 +50,6 @@ export abstract class FavoritesBaseTiler implements Tiler {
     }
   }
 
-  public abstract onActivation(): void;
-  public abstract onDeactivation(): void;
+  public abstract onActivate(): void;
+  public abstract onDeactivate(): void;
 }

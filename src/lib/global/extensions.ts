@@ -1,7 +1,7 @@
 import * as API from "../api/api";
 import { isGif, isVideo } from "../../utils/content/content_type";
-import { BatchExecutor } from "../../components/functional/batch_executor";
-import { Database } from "../../store/indexed_db/database";
+import { BatchExecutor } from "../components/batch_executor";
+import { Database } from "../components/database";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { MediaExtension } from "../../types/primitives/primitives";
 import { MediaExtensionMapping } from "../../types/primitives/composites";

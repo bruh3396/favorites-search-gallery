@@ -1,4 +1,4 @@
-import { Events } from "../../lib/global/events/events";
+import { Events } from "../global/events/events";
 import { Timeout } from "../../types/primitives/primitives";
 
 export class InteractionTracker {

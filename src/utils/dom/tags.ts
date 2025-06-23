@@ -27,7 +27,7 @@ function getTagSetFromThumbOnSearchPage(thumb: HTMLElement): Set<string> {
 
 function getTagSetFromThumbOnFavoritesPage(thumb: HTMLElement): Set<string> {
   const favorite = getFavorite(thumb.id);
-  return favorite === undefined ? new Set() : favorite.tags;
+  return favorite === undefined ? new Set() : new Set(favorite.tags);
 }
 
 export const getTagSetFromThumb = ON_FAVORITES_PAGE ? getTagSetFromThumbOnFavoritesPage : getTagSetFromThumbOnSearchPage;

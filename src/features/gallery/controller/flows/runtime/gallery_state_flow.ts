@@ -12,7 +12,7 @@ export function enterGallery(thumb: HTMLElement): void {
   GalleryInteractionTracker?.start();
   GalleryAutoplayController.startAutoplay(thumb);
   GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
-  Events.gallery.showOnHover.emit(false);
+  Events.gallery.showOnHoverToggled.emit(false);
   Events.gallery.enteredGallery.emit();
 }
 
@@ -27,5 +27,5 @@ export function exitGallery(): void {
 
 export function toggleShowContentOnHover(): void {
   GalleryModel.toggleShowContentOnHover();
-  Events.gallery.showOnHover.emit(GalleryModel.showOnHoverEnabled());
+  Events.gallery.showOnHoverToggled.emit(GalleryModel.showOnHoverEnabled());
 }

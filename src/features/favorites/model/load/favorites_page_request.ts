@@ -1,7 +1,6 @@
-import {FavoriteItem} from "../../types/favorite/favorite_item";
-import {createFavoritesPageURL} from "../../../../lib/api/url";
-
-const FAVORITES_PAGE_FETCH_DELAY = 200;
+import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { createFavoritesPageURL } from "../../../../lib/api/url";
 
 export class FavoritesPageRequest {
   public readonly pageNumber: number;
@@ -18,7 +17,7 @@ export class FavoritesPageRequest {
   }
 
   public get fetchDelay(): number {
-    return (7 ** (this.retryCount)) + FAVORITES_PAGE_FETCH_DELAY;
+    return (7 ** (this.retryCount)) + FavoritesSettings.favoritesPageFetchDelay;
   }
 
   public get realPageNumber(): number {

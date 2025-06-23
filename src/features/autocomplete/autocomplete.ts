@@ -5,12 +5,12 @@ import { isEmptyString, removeLeadingHyphens } from "../../utils/primitive/strin
 import { AWESOMPLETE_ENABLED } from "../../lib/global/flags/derived_flags";
 import { AwesompleteSuggestion } from "../../types/primitives/composites";
 import { Events } from "../../lib/global/events/events";
-import { Preferences } from "../../store/local_storage/preferences";
+import { Preferences } from "../../lib/global/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../../lib/global/custom_tags";
 import { getHTML } from "../../lib/api/api";
 import { getQueryWithTagReplaced } from "./autocomplete_tag_replacer";
-import { getSavedSearchesForAutocompleteList } from "./autocomplete_saved_search";
+import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../utils/dom/awesomplete_utils";
 
 const DUMMY_ELEMENT = document.createElement("div");
@@ -32,7 +32,7 @@ function getAutocompleteSuggestions(prefix: string): Promise<AwesompleteSuggesti
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {
   const suggestions = addCustomTagsToAutocomplete(JSON.parse(html), prefix);
-  return Preferences.savedSearchSuggestionsEnabled.value ? suggestions.concat(getSavedSearchesForAutocompleteList(prefix)) : suggestions;
+  return Preferences.savedSearchSuggestionsEnabled.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
 }
 
 async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: Awesomplete_): Promise<void> {

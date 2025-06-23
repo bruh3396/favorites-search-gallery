@@ -11,7 +11,7 @@ import { FavoriteLayout } from "../../../types/primitives/primitives";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
 import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
 import { GeneralSettings } from "../../../config/general_settings";
-import { Preferences } from "../../../store/local_storage/preferences";
+import { Preferences } from "../../../lib/global/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { createFavoriteItemHTMLTemplates } from "../types/favorite/favorite_element";
 import { sleep } from "../../../utils/misc/async";

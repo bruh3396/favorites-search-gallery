@@ -1,4 +1,4 @@
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { SkeletonItem } from "./favorites_skeleton_item";
 
 export class Skeleton {

@@ -1,7 +1,7 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { VideoClip } from "../../../types/gallery_types";
 import { convertPreviewURLToImageURL } from "../../../../../utils/content/url";
 import { getPreviewURL } from "../../../../../utils/dom/dom";

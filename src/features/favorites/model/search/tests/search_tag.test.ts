@@ -1,6 +1,6 @@
-import {SEARCHABLE_EMPTY, SEARCHABLE_FRUITS} from "./test_utils";
-import {describe, expect, test} from "vitest";
-import {SearchTag} from "../search_tags/search_tag";
+import { SEARCHABLE_EMPTY, SEARCHABLE_FRUITS } from "./search_test_utils";
+import { describe, expect, test } from "vitest";
+import { SearchTag } from "../search_tags/search_tag";
 
 describe("searchTag", () => {
   test("empty", () => {

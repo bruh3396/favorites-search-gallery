@@ -1,8 +1,8 @@
-import * as Extensions from "../../../../lib/global/extensions";
 import * as FavoritesModel from "../../model/favorites_model";
 import * as FavoritesOptionsFlow from "../flows/runtime/favorites_option_flow";
 import * as FavoritesPostLoadFlow from "../flows/setup/favorites_post_load_flow";
 import * as FavoritesPresentationFlow from "../flows/presentation/favorites_presentation_flow";
+import * as FavoritesResetFlow from "../flows/runtime/favorites_reset_flow";
 import * as FavoritesSearchFlow from "../flows/runtime/favorites_search_flow";
 import * as FavoritesView from "../../view/favorites_view";
 import { Events } from "../../../../lib/global/events/events";
@@ -20,16 +20,16 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.pageSelected.on(FavoritesPaginationFlow.gotoPage.bind(FavoritesPaginationFlow));
   Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.gotoRelativePage.bind(FavoritesPaginationFlow));
 
-  Events.favorites.reset.on(FavoritesModel.deleteDatabase);
-  Events.favorites.reset.on(Extensions.deleteExtensionsDatabase);
+  Events.favorites.resetConfirmed.on(FavoritesResetFlow.resetFavorites);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
   Events.favorites.missingMetadataFound.on(FavoritesModel.updateMetadata);
   Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.revealFavorite);
   Events.favorites.findFavoriteInAllStarted.on(FavoritesSearchFlow.findFavoriteInAll);
 
-  Events.gallery.requestPageChange.on(FavoritesPaginationFlow.handlePageChangeRequest.bind(FavoritesPaginationFlow));
-  Events.gallery.showOnHover.on(updateShowOnHoverOptionTriggeredFromGallery);
+  Events.gallery.pageChangeRequested.on(FavoritesPaginationFlow.handlePageChangeRequest.bind(FavoritesPaginationFlow));
+  Events.gallery.showOnHoverToggled.on(updateShowOnHoverOptionTriggeredFromGallery);
   Events.gallery.favoriteToggled.on(FavoritesModel.swapFavoriteButton);
+  Events.tagModifier.resetConfirmed.on(FavoritesModel.resetTagModifications);
 
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.toggleBlacklist);

@@ -6,9 +6,9 @@ import { AUTOPLAY_HTML } from "../../../assets/html";
 import { Events } from "../../../lib/global/events/events";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/global/container";
 import { NavigationKey } from "../../../types/primitives/primitives";
-import { NumberComponent } from "../../../components/ui/number_component";
-import { Preferences } from "../../../store/local_storage/preferences";
-import { Timer } from "../../../components/functional/timer";
+import { NumberComponent } from "../../../lib/ui/number_component";
+import { Preferences } from "../../../lib/global/preferences/preferences";
+import { Timer } from "../../../lib/components/timer";
 import { createObjectURLFromSvg } from "../../../utils/dom/links";
 import { insertStyleHTML } from "../../../utils/dom/style";
 import { throttle } from "../../../utils/misc/async";
@@ -90,6 +90,10 @@ export function setupAutoplay(inEvents: AutoplayEvents): void {
 
 export function isPaused(): boolean {
   return paused;
+}
+
+export function isActive(): boolean {
+  return active;
 }
 
 function initializeFields(): void {

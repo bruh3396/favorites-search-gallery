@@ -1,23 +1,21 @@
 import { FavoriteItem, getFavorite } from "../../types/favorite/favorite_item";
-import { BatchExecutor } from "../../../../components/functional/batch_executor";
-import { Database } from "../../../../store/indexed_db/database";
+import { BatchExecutor } from "../../../../lib/components/batch_executor";
+import { Database } from "../../../../lib/components/database";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
 import { convertToTagSet } from "../../../../utils/primitive/string";
 import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
 import { sleep } from "../../../../utils/misc/async";
 
-const DATABASE_NAME = "Favorites";
 const SCHEMA_VERSION = 1;
 const SCHEMA_VERSION_LOCAL_STORAGE_KEY = "favoritesSearchGallerySchemaVersion";
-const OBJECT_STORE_NAME = `user${getFavoritesPageId()}`;
-const DATABASE = new Database<FavoritesDatabaseRecord>(DATABASE_NAME, OBJECT_STORE_NAME);
+const DATABASE = new Database<FavoritesDatabaseRecord>("Favorites", `user${getFavoritesPageId()}`);
 const METADATA_UPDATER = new BatchExecutor(100, 1000, updateFavorites);
 
 function updateFavorites(favorites: FavoriteItem[]): void {
   DATABASE.update(favorites.map(favorite => favorite.databaseRecord));
 }
 
-function deserialize(records: FavoritesDatabaseRecord[]): FavoriteItem[] {
+function convertToFavorites(records: FavoritesDatabaseRecord[]): FavoriteItem[] {
   return records.map(record => new FavoriteItem(record));
 }
 
@@ -34,7 +32,7 @@ function usingCorrectSchema(records: FavoritesDatabaseRecord[]): boolean {
   return getSchemaVersion() === SCHEMA_VERSION && records.length > 0 && records[0].tags instanceof Set;
 }
 
-function convertRecordFromSerialized(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord {
+function updateDatabaseRecord(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord {
     return {
     ...record,
     tags: convertToTagSet(record.tags as unknown as string),
@@ -42,11 +40,11 @@ function convertRecordFromSerialized(record: FavoritesDatabaseRecord): Favorites
   };
 }
 
-function convertRecordsFromSerialized(records: FavoritesDatabaseRecord[]): FavoritesDatabaseRecord[] {
-  return records.map(record => convertRecordFromSerialized(record));
+function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): FavoritesDatabaseRecord[] {
+  return records.map(record => updateDatabaseRecord(record));
 }
 
-async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
+async function updateDatabaseRecordsIfNeeded(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
   if (records.length === 0) {
     setSchemaVersion(SCHEMA_VERSION);
     return Promise.resolve(records);
@@ -55,7 +53,7 @@ async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promis
   if (usingCorrectSchema(records)) {
     return Promise.resolve(records);
   }
-  const updatedRecords = convertRecordsFromSerialized(records);
+  const updatedRecords = updateDatabaseRecords(records);
 
   await DATABASE.update(updatedRecords);
   setSchemaVersion(SCHEMA_VERSION);
@@ -65,8 +63,8 @@ async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promis
 export async function loadAllFavorites(): Promise<FavoriteItem[]> {
   const records = await DATABASE.load();
 
-  const updatedRecords = await updateDatabaseRecords(records);
-  return deserialize(updatedRecords);
+  const updatedRecords = await updateDatabaseRecordsIfNeeded(records);
+  return convertToFavorites(updatedRecords);
 }
 
 export async function storeFavorites(favorites: FavoriteItem[]): Promise<void> {

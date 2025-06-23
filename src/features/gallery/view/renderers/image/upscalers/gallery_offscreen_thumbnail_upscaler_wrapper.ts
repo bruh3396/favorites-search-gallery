@@ -5,7 +5,7 @@ import { ImageRequest } from "../../../../types/gallery_image_request";
 import OFFSCREEN_UPSCALER_CODE from "./gallery_offscreen_thumbnail_upscaler?raw";
 // @ts-expect-error string import
 import SHARED_GALLERY_SETTINGS_CODE from "../../../../../../config/shared_gallery_settings?raw";
-import { ThrottledQueue } from "../../../../../../components/functional/throttled_queue";
+import { ThrottledQueue } from "../../../../../../lib/components/throttled_queue";
 import { createWebWorker } from "../../../../../../utils/misc/web_worker";
 import { removeFirstAndLastLines } from "../../../../../../utils/primitive/string";
 

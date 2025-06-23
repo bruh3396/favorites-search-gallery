@@ -22,7 +22,7 @@ function changeFavoritesPageInGallery(direction: NavigationKey): Promise<HTMLEle
     Events.favorites.pageChangeResponse.timeout(50)
       .then(onPageChangeInGallery)
       .catch(onPageChangeInGallery);
-    Events.gallery.requestPageChange.emit(direction);
+    Events.gallery.pageChangeRequested.emit(direction);
   });
 }
 

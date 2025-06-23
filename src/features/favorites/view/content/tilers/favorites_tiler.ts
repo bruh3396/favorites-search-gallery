@@ -6,7 +6,7 @@ import { FavoritesRowTiler } from "./favorites_row_tiler";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { FavoritesSquareTiler } from "./favorites_square_tiler";
 import { ON_DESKTOP_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { Tiler } from "./favorites_tiler_interface";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
 
@@ -37,10 +37,10 @@ export function changeLayout(layout: FavoriteLayout): void {
   if (currentLayout === layout) {
     return;
   }
-  getCurrentTiler().onDeactivation();
+  getCurrentTiler().onDeactivate();
   FAVORITES_CONTENT_CONTAINER.className = layout;
   currentLayout = layout;
-  getCurrentTiler().onActivation();
+  getCurrentTiler().onActivate();
 }
 
 export function updateColumnCount(columnCount: number): void {
@@ -80,5 +80,5 @@ export function setupFavoritesTiler(): void {
   FAVORITES_CONTENT_CONTAINER.className = currentLayout;
   getCurrentTiler().setColumnCount(Preferences.columnCount.value);
   getCurrentTiler().setRowSize(Preferences.rowSize.value);
-  getCurrentTiler().onActivation();
+  getCurrentTiler().onActivate();
 }

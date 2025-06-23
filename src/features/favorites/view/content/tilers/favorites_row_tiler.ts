@@ -36,11 +36,11 @@ class RowTiler extends FavoritesBaseTiler {
     `, "row-size");
   }
 
-  public onActivation(): void {
+  public onActivate(): void {
     this.markItemsOnLastRow();
   }
 
-  public onDeactivation(): void {
+  public onDeactivate(): void {
   }
 
   public async markItemsOnLastRow(): Promise<void> {

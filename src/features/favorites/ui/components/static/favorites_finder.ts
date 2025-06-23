@@ -1,7 +1,7 @@
 import { Events } from "../../../../../lib/global/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { debounceAfterFirstCall } from "../../../../../utils/misc/async";
 
 let parent1: HTMLElement;

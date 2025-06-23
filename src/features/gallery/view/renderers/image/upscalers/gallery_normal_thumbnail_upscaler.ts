@@ -1,7 +1,7 @@
-import { BatchExecutor } from "../../../../../../components/functional/batch_executor";
+import { BatchExecutor } from "../../../../../../lib/components/batch_executor";
 import { GalleryBaseThumbUpscaler } from "./gallery_base_thumbnail_upscaler";
 import { ImageRequest } from "../../../../types/gallery_image_request";
-import { ThrottledQueue } from "../../../../../../components/functional/throttled_queue";
+import { ThrottledQueue } from "../../../../../../lib/components/throttled_queue";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
 
 export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {

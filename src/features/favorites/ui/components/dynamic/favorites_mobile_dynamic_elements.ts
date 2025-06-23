@@ -5,11 +5,11 @@ import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style"
 import { Events } from "../../../../../lib/global/events/events";
 import { GALLERY_ENABLED } from "../../../../../lib/global/flags/derived_flags";
 import { PerformanceProfile } from "../../../../../types/primitives/enums";
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { createButtonElement } from "../../../../../lib/element_factory/button";
-import { createSelectElement } from "../../../../../lib/element_factory/select";
-import { createToggleSwitch } from "../../../../../lib/element_factory/checkbox";
+import { createButtonElement } from "../../../../../lib/ui/button";
+import { createSelectElement } from "../../../../../lib/ui/select";
+import { createToggleSwitch } from "../../../../../lib/ui/checkbox";
 import { prepareDynamicElements } from "./favorites_dynamic_element_utils";
 
 const BUTTONS: Partial<ButtonElement>[] = [

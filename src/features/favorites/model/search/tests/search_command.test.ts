@@ -1,4 +1,4 @@
-import { ALL_ITEM_NAMES, ALL_TAGS, Fruit, INDEX, ITEMS } from "./test_utils";
+import { ALL_ITEM_NAMES, ALL_TAGS, Fruit, INDEX, ITEMS } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
 import { SearchCommand } from "../search_command/search_command";
 

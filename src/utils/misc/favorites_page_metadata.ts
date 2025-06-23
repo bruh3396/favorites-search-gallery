@@ -1,4 +1,4 @@
-import { getCookie } from "../../store/cookies/cookie";
+import { getCookie } from "../../lib/global/cookie";
 
 export function getUserId(): string {
   return getCookie("user_id", "");

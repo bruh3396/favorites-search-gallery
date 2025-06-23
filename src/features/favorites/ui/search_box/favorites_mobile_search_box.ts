@@ -1,6 +1,6 @@
 import { FAVORITES_CONTENT_CONTAINER } from "../structure/favorites_content_container";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { insertStyleHTML } from "../../../../utils/dom/style";
 import { sleep } from "../../../../utils/misc/async";
 import { toggleFavoritesOptions } from "../favorites_menu_event_handlers";

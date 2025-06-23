@@ -5,32 +5,28 @@ import { removeExtraWhiteSpace } from "../../utils/primitive/string";
 const SUGGESTION_LIMIT = 5;
 const MIN_TAG_LENGTH = 3;
 
-export function savedSearchMatchesSearchTag(searchTag: string, savedSearch: string): boolean {
-  const sanitizedSavedSearch = removeExtraWhiteSpace(savedSearch.replace(/[~())]/g, ""));
-  const savedSearchTagList = sanitizedSavedSearch.split(" ");
-
-  for (const savedSearchTag of savedSearchTagList) {
-    if (savedSearchTag.startsWith(searchTag)) {
-      return true;
-    }
-  }
-  return false;
+function getSavedSearchTagList(savedSearch: string): string[] {
+  return removeExtraWhiteSpace(savedSearch.replace(/[~())]/g, "")).split(" ");
 }
 
-export function getSavedSearchesForAutocompleteList(searchTag: string): AwesompleteSuggestion[] {
+function createAwesompleteSuggestion(searchTag: string, savedSearch: string): AwesompleteSuggestion {
+  return {
+    label: savedSearch,
+    value: `${searchTag}_saved_search ${savedSearch}`,
+    type: "saved"
+  };
+}
+
+export function savedSearchMatchesSearchTag(searchTag: string, savedSearch: string): boolean {
+  return getSavedSearchTagList(savedSearch).some(tag => tag.startsWith(searchTag));
+}
+
+export function getSavedSearchesSuggestions(searchTag: string): AwesompleteSuggestion[] {
   if (searchTag.length < MIN_TAG_LENGTH) {
     return [];
   }
-  const matchedSavedSearches: AwesompleteSuggestion[] = [];
-
-  for (const savedSearch of getSavedSearches()) {
-    if (matchedSavedSearches.length > SUGGESTION_LIMIT) {
-      break;
-    }
-
-    if (savedSearchMatchesSearchTag(searchTag, savedSearch)) {
-      matchedSavedSearches.push({ label: `${savedSearch}`, value: `${searchTag}_saved_search ${savedSearch}`, type: "saved"});
-    }
-  }
-  return matchedSavedSearches;
+  return getSavedSearches()
+    .filter(savedSearch => savedSearchMatchesSearchTag(searchTag, savedSearch))
+    .slice(0, SUGGESTION_LIMIT)
+    .map(savedSearch => createAwesompleteSuggestion(searchTag, savedSearch));
 }

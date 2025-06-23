@@ -1,6 +1,6 @@
 import { Events } from "../../../../../lib/global/events/events";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { Rating } from "../../../../../types/primitives/primitives";
 import { RatingElement } from "../../../../../types/primitives/composites";
 import { capitalize } from "../../../../../utils/primitive/string";

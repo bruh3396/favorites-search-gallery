@@ -1,5 +1,5 @@
-import { EventEmitter } from "../../components/functional/event_emitter";
-import { Preference } from "../../store/local_storage/preference";
+import { EventEmitter } from "../../lib/components/event_emitter";
+import { Preference } from "../../lib/global/preferences/preference";
 
 export interface MenuElement {
   parentId: string

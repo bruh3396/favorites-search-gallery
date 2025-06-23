@@ -2,7 +2,7 @@ import { ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsIm
 import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
 import { FavoriteLayout } from "../../../../../types/primitives/primitives";
 import { FavoritesBaseTiler } from "./favorites_base_tiler";
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
 class ColumnTiler extends FavoritesBaseTiler {
   public className: FavoriteLayout = "column";
@@ -37,7 +37,7 @@ class ColumnTiler extends FavoritesBaseTiler {
 
   public addItemsToTop(items: HTMLElement[]): void {
     if (this.active) {
-      this.onDeactivation();
+      this.onDeactivate();
     }
     this.tile(items.concat(getAllThumbs()));
   }
@@ -67,11 +67,11 @@ class ColumnTiler extends FavoritesBaseTiler {
     this.tile(items);
   }
 
-  public onActivation(): void {
+  public onActivate(): void {
     this.tile(getAllThumbs());
   }
 
-  public onDeactivation(): void {
+  public onDeactivate(): void {
     const items = this.getAllItems();
 
     this.container.innerHTML = "";

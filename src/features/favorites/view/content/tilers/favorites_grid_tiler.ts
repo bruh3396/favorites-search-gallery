@@ -6,8 +6,8 @@ class GridTiler extends FavoritesBaseTiler {
   public skeletonStyle: Record<string, string> = {
     "width": "100%"
   };
-  public onActivation(): void {}
-  public onDeactivation(): void {}
+  public onActivate(): void {}
+  public onDeactivate(): void {}
 }
 
 export const FavoritesGridTiler = new GridTiler();

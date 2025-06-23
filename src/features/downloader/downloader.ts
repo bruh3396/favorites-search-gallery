@@ -74,7 +74,7 @@ async function zipFiles(requests: DownloadRequest[], progressCallback: (request:
         await zipFile(zipWriter, request, blob);
         checkIfAborted();
       } catch (error) {
-        console.error(error);
+        console.error(request, error);
       }
 
       if (progressCallback) {

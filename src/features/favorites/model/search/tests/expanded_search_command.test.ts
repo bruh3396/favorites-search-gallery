@@ -1,7 +1,7 @@
-import {Fruit, INDEX} from "./test_utils";
-import {describe, expect, test} from "vitest";
-import {ExpandedSearchCommand} from "../search_command/expanded_search_command";
-import {SearchTag} from "../search_tags/search_tag";
+import { Fruit, INDEX } from "./search_test_utils";
+import { describe, expect, test } from "vitest";
+import { ExpandedSearchCommand } from "../search_command/expanded_search_command";
+import { SearchTag } from "../search_tags/search_tag";
 
 function getRawTagValue(searchTag: SearchTag): string {
   return searchTag.negated ? `-${searchTag.value}` : searchTag.value;

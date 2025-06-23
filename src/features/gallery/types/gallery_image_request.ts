@@ -1,5 +1,5 @@
 import { ContentType } from "../../../types/primitives/primitives";
-import { ThrottledQueue } from "../../../components/functional/throttled_queue";
+import { ThrottledQueue } from "../../../lib/components/throttled_queue";
 import { getContentTypeFromThumb } from "../../../utils/dom/tags";
 import { getFavorite } from "../../favorites/types/favorite/favorite_item";
 import { getPreviewURL } from "../../../utils/dom/dom";

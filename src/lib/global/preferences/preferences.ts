@@ -1,6 +1,6 @@
-import { FavoriteLayout, Rating, SortingMethod } from "../../types/primitives/primitives";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
-import { PerformanceProfile } from "../../types/primitives/enums";
+import { FavoriteLayout, Rating, SortingMethod } from "../../../types/primitives/primitives";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../flags/intrinsic_flags";
+import { PerformanceProfile } from "../../../types/primitives/enums";
 import { Preference } from "./preference";
 
 export const Preferences = {

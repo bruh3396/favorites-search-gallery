@@ -7,8 +7,8 @@ export interface Tiler {
   tile: (items: HTMLElement[]) => void
   setColumnCount: (columnCount: number) => void
   setRowSize: (rowSize: number) => void
-  onActivation: () => void
-  onDeactivation: () => void
+  onActivate: () => void
+  onDeactivate: () => void
   addItemsToTop: (items: HTMLElement[]) => void
   addItemsToBottom: (items: HTMLElement[]) => void
   showSkeleton: () => void

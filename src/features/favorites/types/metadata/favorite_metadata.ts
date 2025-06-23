@@ -6,7 +6,7 @@ import { FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
 import { GeneralSettings } from "../../../../config/general_settings";
 import { Post } from "../../../../types/api/api_types";
 import { Rating } from "../../../../types/primitives/primitives";
-import { ThrottledQueue } from "../../../../components/functional/throttled_queue";
+import { ThrottledQueue } from "../../../../lib/components/throttled_queue";
 import { fetchPostFromAPISafe } from "../../../../lib/api/api";
 import { validateTags } from "../favorite/favorite_item";
 

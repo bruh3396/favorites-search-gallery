@@ -1,6 +1,6 @@
 import { FavoriteLayout, MetadataMetric, NavigationKey, Rating } from "../../../types/primitives/primitives";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../flags/intrinsic_flags";
-import { EventEmitter } from "../../../components/functional/event_emitter";
+import { EventEmitter } from "../../components/event_emitter";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../container";
 import { FavoriteItem } from "../../../features/favorites/types/favorite/favorite_item";
 import { FavoritesKeyboardEvent } from "../../../types/events/keyboard_event";
@@ -67,14 +67,14 @@ const favorites = {
   searchButtonClicked: new EventEmitter<MouseEvent>(true),
   clearButtonClicked: new EventEmitter<MouseEvent>(true),
   resetButtonClicked: new EventEmitter<MouseEvent>(true),
-  reset: new EventEmitter<void>(true)
+  resetConfirmed: new EventEmitter<void>(true)
 };
 
 const gallery = {
   inGalleryResponse: new EventEmitter<boolean>(true),
-  requestPageChange: new EventEmitter<NavigationKey>(true),
+  pageChangeRequested: new EventEmitter<NavigationKey>(true),
   favoriteToggled: new EventEmitter<string>(true),
-  showOnHover: new EventEmitter<boolean>(true),
+  showOnHoverToggled: new EventEmitter<boolean>(true),
   enteredGallery: new EventEmitter<void>(true),
   exitedGallery: new EventEmitter<void>(true),
   visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true),
@@ -100,6 +100,10 @@ const mobile = {
   swipedLeft: new EventEmitter<void>(true),
   swipedRight: new EventEmitter<void>(true),
   touchHold: new EventEmitter<EventTarget>(true)
+};
+
+const tagModifier = {
+  resetConfirmed: new EventEmitter<void>(true)
 };
 
 const document1 = {
@@ -207,6 +211,7 @@ export const Events = {
   document: document1,
   window: window1,
   mobile,
+  tagModifier,
   toggleGlobalInputEvents
 };
 

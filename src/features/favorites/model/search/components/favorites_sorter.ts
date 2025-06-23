@@ -1,5 +1,5 @@
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
-import { Preferences } from "../../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { SortingMethod } from "../../../../../types/primitives/primitives";
 import { shuffleArray } from "../../../../../utils/collection/array";
 

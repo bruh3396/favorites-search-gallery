@@ -5,7 +5,7 @@ import { DownloadRequest } from "./download_request";
 import { Events } from "../../lib/global/events/events";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/global/container";
 import { Favorite } from "../../types/interfaces/interfaces";
-import { Preferences } from "../../store/local_storage/preferences";
+import { Preferences } from "../../lib/global/preferences/preferences";
 import { splitIntoChunks } from "../../utils/collection/array";
 
 let dialog: HTMLDialogElement;

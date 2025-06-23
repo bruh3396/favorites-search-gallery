@@ -8,8 +8,8 @@ class SquareTiler extends FavoritesBaseTiler {
     "height": "100%",
     "aspect-ratio": "1/1"
   };
-  public onActivation(): void {}
-  public onDeactivation(): void {}
+  public onActivate(): void {}
+  public onDeactivate(): void {}
 }
 
 export const FavoritesSquareTiler = new SquareTiler();

@@ -3,7 +3,7 @@ import { Events } from "../../../../lib/global/events/events";
 import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../store/local_storage/preferences";
+import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { getNumbersAround } from "../../../../utils/collection/array";
 import { insertStyleHTML } from "../../../../utils/dom/style";
 import { isOnlyDigits } from "../../../../utils/primitive/string";
