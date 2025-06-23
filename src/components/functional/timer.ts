@@ -12,6 +12,14 @@ export class Timer {
     this.timeout = undefined;
   }
 
+  public get isRunning(): boolean {
+    return this.timeout !== undefined;
+  }
+
+  public get isStopped(): boolean {
+    return !this.isRunning;
+  }
+
   public restart(): void {
     this.stop();
     this.start();

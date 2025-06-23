@@ -108,6 +108,15 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     event: Events.favorites.darkThemeToggled,
     function: toggleDarkTheme
   },
+    {
+    id: "enhance-search-pages",
+    parentId: "favorite-options-left",
+    textContent: "Search Page Gallery",
+    title: "Enable gallery and other features on search pages",
+    preference: Preferences.searchPagesEnabled,
+    hotkey: "",
+    savePreference: true
+  },
   {
     id: "sort-ascending",
     parentId: "sort-inputs",

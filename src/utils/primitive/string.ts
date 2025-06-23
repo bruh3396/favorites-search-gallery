@@ -114,3 +114,7 @@ export function removeFirstAndLastLines(text: string): string {
   }
   return lines.slice(1, -1).join("\n").trim();
 }
+
+export function removeLeadingHyphens(tag: string): string {
+  return tag.replace(/^[-*]*/, "");
+}

@@ -8,7 +8,7 @@ import { getImageFromThumb } from "../../../../../utils/dom/dom";
 
 const ANIMATED_REQUEST_IDS: Set<string> = new Set();
 const IMAGE_REQUESTS: Map<string, ImageRequest> = new Map();
-const FETCH_QUEUE = new ThrottledQueue(25);
+const FETCH_QUEUE = new ThrottledQueue(10);
 let onImageCreated: (request: ImageRequest) => void = DO_NOTHING;
 
 function completeImageRequest(request: ImageRequest): void {

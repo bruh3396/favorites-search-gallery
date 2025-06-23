@@ -1,4 +1,4 @@
-import * as Extensions from "../../../../store/indexed_db/extensions";
+import * as Extensions from "../../../../lib/global/extensions";
 import { FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../../types/primitives/composites";
 import { DiscreteRating } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/global/events/events";

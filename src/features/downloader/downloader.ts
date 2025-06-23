@@ -1,4 +1,4 @@
-import { DownloadRequest, getDownloadRequest } from "./download_request";
+import { DownloadRequest, createDownloadRequest } from "./download_request";
 import { DownloadAbortedError } from "../../types/primitives/errors";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { downloadBlob } from "../../lib/download/downloader";
@@ -104,7 +104,7 @@ async function getDownloadRequests(favorites: Favorite[]): Promise<DownloadReque
 
     const requests = await Promise.all(chunk.map((favorite) => {
       checkIfAborted();
-      return getDownloadRequest(favorite);
+      return createDownloadRequest(favorite);
     }));
 
     checkIfAborted();

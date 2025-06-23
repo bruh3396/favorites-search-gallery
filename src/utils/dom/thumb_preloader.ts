@@ -1,18 +1,12 @@
-import { getImageFromThumb, waitForAllThumbnailsToLoad } from "./dom";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { sleep } from "../misc/async";
+import { waitForAllThumbnailsToLoad } from "./dom";
 
-export function preloadFavorites(favorites: Favorite[]): void {
-  preloadThumbURLs(favorites.map(favorite => favorite.thumbURL));
+export function preloadThumbnails(favorites: Favorite[]): void {
+  preloadImages(favorites.map(favorite => favorite.thumbURL));
 }
 
-export function preloadThumbs(thumbs: HTMLElement[]): void {
-  const images = thumbs.map(thumb => getImageFromThumb(thumb)).filter(image => image instanceof HTMLImageElement);
-
-  preloadThumbURLs(images.map(image => image.src));
-}
-
-async function preloadThumbURLs(urls: string[]): Promise<void> {
+export async function preloadImages(urls: string[]): Promise<void> {
     await waitForAllThumbnailsToLoad();
 
   for (const url of urls) {

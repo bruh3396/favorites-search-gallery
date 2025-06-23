@@ -27,8 +27,8 @@ class PaginationFlow implements FavoritesPresentationFlow {
     public showCurrentPage(): void {
         FavoritesView.showSearchResults(FavoritesModel.getFavoritesOnCurrentPage());
         FavoritesView.createPageSelectionMenu(FavoritesModel.getPaginationParameters());
-        FavoritesView.preloadFavorites(FavoritesModel.getFavoritesOnNextPage());
-        FavoritesView.preloadFavorites(FavoritesModel.getFavoritesOnPreviousPage());
+        FavoritesView.preloadThumbnails(FavoritesModel.getFavoritesOnNextPage());
+        FavoritesView.preloadThumbnails(FavoritesModel.getFavoritesOnPreviousPage());
         Events.favorites.pageChanged.emit();
     }
 

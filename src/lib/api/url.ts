@@ -1,16 +1,21 @@
 import { ON_MOBILE_DEVICE } from "../global/flags/intrinsic_flags";
 import { getFavoritesPageId } from "../../utils/misc/favorites_page_metadata";
 
-const POST_PAGE_URL = "https://rule34.xxx/index.php?page=post&s=view&id=";
-const SEARCH_PAGE_URL = "https://rule34.xxx/index.php?page=post&s=list&tags=";
+const ORIGIN = "https://rule34.xxx";
+const API_ORIGIN = "https://api.rule34.xxx";
+
+const POST_API_URL = `${API_ORIGIN}/index.php?page=dapi&s=post&q=index&id=`;
+const TAG_API_URL = `${API_ORIGIN}/index.php?page=dapi&s=tag&q=index&name=`;
+
+const POST_PAGE_URL = `${ORIGIN}/index.php?page=post&s=view&id=`;
+const SEARCH_PAGE_URL = `${ORIGIN}/index.php?page=post&s=list&tags=`;
 const FAVORITES_PAGE_URL = document.location.href;
-const PROFILE_PAGE_URL = `https://rule34.xxx/index.php?page=account&s=profile&id=${getFavoritesPageId()}`;
-const API_BASE_URL = "https://api.rule34.xxx//index.php?page=dapi&s=";
-const POST_VOTE_URL = "https://rule34.xxx/index.php?page=post&s=vote&type=up&id=";
-const REMOVE_FAVORITE_URL = "https://rule34.xxx/index.php?page=favorites&s=delete&id=";
-const ADD_FAVORITE_URL = "https://rule34.xxx/public/addfav.php?id=";
-const CSS_URL = "https://rule34.xxx//css/";
-const API_TAG_BASE_URL = "https://rule34.xxx/index.php?page=tags&s=list&tags=";
+const PROFILE_PAGE_URL = `${ORIGIN}/index.php?page=account&s=profile&id=${getFavoritesPageId()}`;
+
+const POST_VOTE_URL = `${ORIGIN}/index.php?page=post&s=vote&type=up&id=`;
+const REMOVE_FAVORITE_URL = `${ORIGIN}/index.php?page=favorites&s=delete&id=`;
+const ADD_FAVORITE_URL = `${ORIGIN}/public/addfav.php?id=`;
+const CSS_URL = `${ORIGIN}//css/`;
 
 export function createPostPageURL(id: string): string {
   return `${POST_PAGE_URL}${id}`;
@@ -29,12 +34,12 @@ export function createProfilePageURL(): string {
   return PROFILE_PAGE_URL;
 }
 
-export function createAPIURL(type: string, id: string): string {
-  return `${API_BASE_URL}${type}&q=index&id=${id}`;
+export function createAPIURL(id: string): string {
+  return `${POST_API_URL}${id}`;
 }
 
 export function createTagAPIURL(tagName: string): string {
-  return `${API_TAG_BASE_URL}${encodeURIComponent(tagName)}`;
+  return `${TAG_API_URL}${encodeURIComponent(tagName)}`;
 }
 
 export function createPostVoteURL(id: string): string {

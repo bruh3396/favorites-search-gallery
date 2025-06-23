@@ -1,21 +1,36 @@
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 
-export function getMoreResults(allFavorites: FavoriteItem[]): HTMLElement[] {
-  const batch = [];
+export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {
+  const result = [];
 
-  for (const favorite of allFavorites) {
+  for (const favorite of favorites) {
     if (document.getElementById(favorite.id) === null) {
-      batch.push(favorite.root);
+      result.push(favorite.root);
     }
 
-    if (batch.length >= FavoritesSettings.infiniteScrollBatchCount) {
+    if (result.length >= FavoritesSettings.infiniteScrollBatchCount) {
       break;
     }
   }
-  return batch;
+  return result;
 }
 
-export function getFirstResults(allFavorites: FavoriteItem[]): FavoriteItem[] {
-  return allFavorites.slice(0, FavoritesSettings.infiniteScrollBatchCount);
+export function getFirstResults(favorites: FavoriteItem[]): FavoriteItem[] {
+  return favorites.slice(0, FavoritesSettings.infiniteScrollBatchCount);
+}
+
+export function getThumbURLsToPreload(favorites: FavoriteItem[]): string[] {
+  const result = [];
+
+  for (const favorite of favorites) {
+    if (document.getElementById(favorite.id) === null) {
+      result.push(favorite.thumbURL);
+    }
+
+    if (result.length >= FavoritesSettings.infiniteScrollPreloadCount) {
+      break;
+    }
+  }
+  return result;
 }

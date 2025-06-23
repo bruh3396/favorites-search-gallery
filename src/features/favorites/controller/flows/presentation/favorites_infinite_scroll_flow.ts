@@ -22,9 +22,6 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     this.pageBottomObserver.refresh();
   }
 
-  public revealFavorite(): void {
-  }
-
   public reset(): void {
     this.pageBottomObserver.disconnect();
   }
@@ -35,8 +32,8 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     }
   }
 
-  public handlePageChangeRequest(): void {
-  }
+  public revealFavorite(): void { }
+  public handlePageChangeRequest(): void { }
 
   private async showMoreResults(): Promise<void> {
     const moreResults = FavoritesModel.getMoreResults();
@@ -47,6 +44,10 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     FavoritesView.insertNewSearchResults(moreResults);
     Events.favorites.resultsAddedToCurrentPage.emit(moreResults);
     await waitForAllThumbnailsToLoad();
+    const urlsToPreload = FavoritesModel.getThumbURLsToPreload();
+
+    FavoritesView.preloadURLs(urlsToPreload);
+
     this.pageBottomObserver.refresh();
   }
 

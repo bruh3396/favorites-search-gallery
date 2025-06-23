@@ -88,7 +88,7 @@ export class FavoriteItem implements Favorite {
 
   public validateTags(post: Post): void {
     if (!this.favoriteTags.tagsAreEqual(post)) {
-      this.updateTags(post);
+      this.updateTags(post.tags);
     }
   }
 
@@ -99,19 +99,30 @@ export class FavoriteItem implements Favorite {
   }
 
   public addAdditionalTags(newTags: string): string {
+    FAVORITES_SEARCH_INDEX.remove(this);
+    const result = this.favoriteTags.addAdditionalTags(newTags);
 
+    FAVORITES_SEARCH_INDEX.add(this);
+    return result;
   }
 
   public removeAdditionalTags(tagsToRemove: string): string {
+    FAVORITES_SEARCH_INDEX.remove(this);
+    const result = this.favoriteTags.removeAdditionalTags(tagsToRemove);
+
+    FAVORITES_SEARCH_INDEX.add(this);
+    return result;
   }
 
   public resetAdditionalTags(): void {
-
+    FAVORITES_SEARCH_INDEX.remove(this);
+    this.favoriteTags.resetAdditionalTags();
+    FAVORITES_SEARCH_INDEX.add(this);
   }
 
-  private updateTags(post: Post): void {
+  private updateTags(tags: string): void {
     FAVORITES_SEARCH_INDEX.remove(this);
-    this.favoriteTags.update(post);
+    this.favoriteTags.update(tags);
     FAVORITES_SEARCH_INDEX.add(this);
   }
 }

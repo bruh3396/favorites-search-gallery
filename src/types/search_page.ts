@@ -1,17 +1,18 @@
-import * as Extensions from "../store/indexed_db/extensions";
+import * as Extensions from "../lib/global/extensions";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/global/flags/intrinsic_flags";
 import { convertToTagSet, convertToTagString, getContentType, removeNonNumericCharacters } from "../utils/primitive/string";
 import { getAllThumbs, getIdFromThumb, getImageFromThumb } from "../utils/dom/dom";
-import { ON_SEARCH_PAGE } from "../lib/global/flags/intrinsic_flags";
 import { Post } from "./api/api_types";
 import { fetchPostFromAPI } from "../lib/api/api";
 import { moveTagsFromTitleToTagsAttribute } from "../utils/dom/tags";
 
 const PARSER = new DOMParser();
 
-export function prepareThumbsOnSearchPage(thumbs: HTMLElement[]): void {
+export function prepareThumbsOnSearchPage(thumbs: HTMLElement[]): HTMLElement[] {
   for (const thumb of thumbs) {
     prepareThumb(thumb);
   }
+  return thumbs;
 }
 
 export function prepareAllThumbsOnSearchPage(): void {
@@ -21,8 +22,16 @@ export function prepareAllThumbsOnSearchPage(): void {
 function prepareThumb(thumb: HTMLElement): void {
   moveTagsFromTitleToTagsAttribute(thumb);
   assignContentType(thumb);
-  // findImageExtension(thumb);
   thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
+
+  if (ON_MOBILE_DEVICE) {
+    prepareMobileThumb(thumb);
+  }
+}
+
+function extractSearchPageThumbs(dom: Document): HTMLElement[] {
+  const thumbs = Array.from(dom.querySelectorAll(".thumb")).filter(thumb => thumb instanceof HTMLElement);
+  return prepareThumbsOnSearchPage(thumbs);
 }
 
 export async function findImageExtension(thumb: HTMLElement): Promise<void> {
@@ -105,6 +114,24 @@ function removeAnimatedAttributes(thumb: HTMLElement | null): void {
   image.classList.remove("gif");
 }
 
+function prepareMobileThumb(thumb: HTMLElement): void {
+  for (const script of thumb.querySelectorAll("script")) {
+    script.remove();
+  }
+  const image = getImageFromThumb(thumb);
+
+  if (image === null) {
+    return;
+  }
+  image.removeAttribute("style");
+  const altSource = image.getAttribute("data-cfsrc");
+
+  if (altSource !== null) {
+    image.setAttribute("src", altSource);
+    image.removeAttribute("data-cfsrc");
+  }
+}
+
 export class SearchPage {
   public html: string;
   public thumbs: HTMLElement[];
@@ -116,15 +143,10 @@ export class SearchPage {
     const dom = PARSER.parseFromString(html, "text/html");
 
     this.html = html;
-    this.thumbs = Array.from(dom.querySelectorAll(".thumb"));
-    prepareThumbsOnSearchPage(this.thumbs);
+    this.thumbs = extractSearchPageThumbs(dom);
     this.pageNumber = pageNumber;
     this.paginator = dom.getElementById("paginator");
     this.ids = new Set(this.thumbs.map(thumb => thumb.id));
-
-    // if (GeneralSettings.preloadThumbnails) {
-    //   preloadThumbs(this.thumbs);
-    // }
   }
 
   public get isEmpty(): boolean {

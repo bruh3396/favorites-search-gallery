@@ -156,6 +156,10 @@ export function getMoreResults(): HTMLElement[] {
   return InfiniteScrollFeeder.getMoreResults(latestSearchResults);
 }
 
+export function getThumbURLsToPreload(): string[] {
+  return InfiniteScrollFeeder.getThumbURLsToPreload(latestSearchResults);
+}
+
 export function getFirstResults(): FavoriteItem[] {
   return InfiniteScrollFeeder.getFirstResults(latestSearchResults);
 }

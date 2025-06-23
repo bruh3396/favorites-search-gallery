@@ -1,4 +1,4 @@
-import * as Extensions from "../../../../store/indexed_db/extensions";
+import * as Extensions from "../../../../lib/global/extensions";
 import * as FavoritesModel from "../../model/favorites_model";
 import * as FavoritesOptionsFlow from "../flows/runtime/favorites_option_flow";
 import * as FavoritesPostLoadFlow from "../flows/setup/favorites_post_load_flow";

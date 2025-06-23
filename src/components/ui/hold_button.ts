@@ -1,4 +1,5 @@
 import { ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
+import { Timeout } from "../../types/primitives/primitives";
 import { clamp } from "../../utils/primitive/number";
 
 export class HoldButton extends HTMLElement {
@@ -6,8 +7,8 @@ export class HoldButton extends HTMLElement {
   private static minPollingTime: number = 40;
   private static maxPollingTime: number = 500;
 
-  private intervalId: number | undefined;
-  private timeoutId: number | undefined;
+  private intervalId: Timeout;
+  private timeoutId: Timeout;
   private pollingTime = HoldButton.defaultPollingTime;
   private holdingDown: boolean = false;
 

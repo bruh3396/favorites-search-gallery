@@ -345,29 +345,3 @@ export function toggleActiveVideoPause(): void {
 export function restartActiveVideo(): void {
   getActiveVideoPlayer().play().catch();
 }
-
-// function waitForVideoToLoad(video: HTMLVideoElement): Promise<void> {
-//   return new Promise((resolve, reject) => {
-//     if (video.readyState >= 2) {
-//       resolve();
-//     } else {
-//       const onLoaded = (): void => {
-//         cleanup();
-//         resolve();
-//       };
-
-//       const onError = (): void => {
-//         cleanup();
-//         reject(new Error("Failed to load video"));
-//       };
-
-//       const cleanup = (): void => {
-//         video.removeEventListener("loadeddata", onLoaded);
-//         video.removeEventListener("error", onError);
-//       };
-
-//       video.addEventListener("loadeddata", onLoaded);
-//       video.addEventListener("error", onError);
-//     }
-//   });
-// }

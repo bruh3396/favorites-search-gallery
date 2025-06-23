@@ -1,6 +1,6 @@
 import { isGif, isVideo } from "../../utils/content/content_type";
 import { Favorite } from "../../types/interfaces/interfaces";
-import { getExtensionFromId } from "../../store/indexed_db/extensions";
+import { getExtensionFromId } from "../../lib/global/extensions";
 import { getOriginalContentURL } from "../../lib/media_api/media_api";
 
 export class DownloadRequest {
@@ -24,7 +24,7 @@ export class DownloadRequest {
   }
 }
 
-export async function getDownloadRequest(favorite: Favorite): Promise<DownloadRequest> {
+export async function createDownloadRequest(favorite: Favorite): Promise<DownloadRequest> {
   let extension;
 
   if (isVideo(favorite)) {

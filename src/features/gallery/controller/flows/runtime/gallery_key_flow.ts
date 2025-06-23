@@ -55,6 +55,10 @@ function onKeyDownInGallery(keyboardEvent: FavoritesKeyboardEvent): void {
       GalleryModel.openOriginalInNewTab();
       break;
 
+    case "s":
+      GalleryModel.downloadInGallery();
+      break;
+
     case " ":
       if (currentThumb !== undefined && isVideo(currentThumb)) {
         GalleryView.toggleVideoPause();

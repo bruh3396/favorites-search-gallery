@@ -114,7 +114,7 @@ function openWhenDownloadButtonClicked(): void {
       warningDialog.showModal();
     }
     Events.toggleGlobalInputEvents(false);
-    document.body.classList.add("download-menu-open");
+    document.body.classList.add("dialog-opened");
 
   });
 }
@@ -130,7 +130,7 @@ function setupMenuCloseHandler(): void {
     cancelButton.textContent = "Cancel";
     Events.toggleGlobalInputEvents(true);
     await yield1();
-    document.body.classList.remove("download-menu-open");
+    document.body.classList.remove("dialog-opened");
     dialog.classList.remove("downloading");
     FavoritesDownloader.abort();
     clearStatusTextRows();
@@ -140,7 +140,7 @@ function setupMenuCloseHandler(): void {
     FavoritesDownloader.reset();
   });
   warningDialog.addEventListener("close", () => {
-    document.body.classList.remove("download-menu-open");
+    document.body.classList.remove("dialog-opened");
     Events.toggleGlobalInputEvents(true);
   });
 }

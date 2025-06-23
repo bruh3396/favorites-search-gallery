@@ -1,6 +1,7 @@
 import { convertToTagSet, convertToTagString } from "../../../../utils/primitive/string";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
 import { Post } from "../../../../types/api/api_types";
+import { getAdditionalTags } from "../../../tag_modifier/tag_modifier";
 
 function getCorrectTags(post: Post): Set<string> {
   const correctTags = convertToTagSet(post.tags);
@@ -17,40 +18,41 @@ function getCorrectTags(post: Post): Set<string> {
 }
 
 export class FavoriteTags {
+  // @ts-expect-error not directly defined in constructor
   public tags: Set<string>;
   private id: string;
-  private additionalTagSet: Set<string> = new Set();
+  private additionalTags: Set<string> = new Set();
 
   constructor(post: Post, record: HTMLElement | FavoritesDatabaseRecord) {
     this.id = post.id;
-
-    if (record instanceof HTMLElement) {
-      this.tags = convertToTagSet(post.tags);
-    } else {
-      this.tags = record.tags;
-    }
+    this.set(record instanceof HTMLElement ? post.tags : record.tags);
     post.tags = "";
   }
 
-  private get originalTagSet(): Set<string> {
-    return this.tags.difference(this.additionalTagSet);
-  }
-
-  private get originalTagString(): string {
-    return convertToTagString(this.originalTagSet);
-  }
-
-  private get additionalTagString(): string {
-    return convertToTagString(this.additionalTagSet);
-  }
-
-  private get tagString(): string {
+  public get tagString(): string {
     return convertToTagString(this.tags);
   }
 
-  public update(post: Post): void {
-    this.tags = convertToTagSet(post.tags);
-    this.tags.add(post.id);
+  private get originalTagSet(): Set<string> {
+    return this.tags.difference(this.additionalTags);
+  }
+
+  private get additionalTagString(): string {
+    return convertToTagString(this.additionalTags);
+  }
+
+  public set(tags: string | Set<string>): void {
+    this.tags = tags instanceof Set ? tags : convertToTagSet(`${tags} ${this.id}`);
+    const additionalTags = getAdditionalTags(this.id);
+
+    if (additionalTags !== undefined) {
+      this.additionalTags = convertToTagSet(additionalTags);
+      this.combineOriginalAndAdditionalTagSets();
+    }
+  }
+
+  public update(tags: string): void {
+    this.set(tags);
   }
 
   public tagsAreEqual(post: Post): boolean {
@@ -65,25 +67,36 @@ export class FavoriteTags {
     return false;
   }
 
-  public addAdditionalTags(newTags: string): string {
-    const newTagsSet = convertToTagSet(newTags).difference(this.tags);
+  public addAdditionalTags(newTagString: string): string {
+    const newTags = convertToTagSet(newTagString).difference(this.tags);
 
-    if (newTagsSet.size > 0) {
-      this.additionalTagSet = this.additionalTagSet.union(newTagsSet);
+    if (newTags.size > 0) {
+      this.additionalTags = this.additionalTags.union(newTags);
       this.combineOriginalAndAdditionalTagSets();
     }
     return this.additionalTagString;
   }
 
   public removeAdditionalTags(tagsToRemove: string): string {
+    const tagsToRemoveSet = convertToTagSet(tagsToRemove).intersection(this.additionalTags);
+
+    if (tagsToRemoveSet.size > 0) {
+      this.tags = this.tags.difference(tagsToRemoveSet);
+      this.additionalTags = this.additionalTags.difference(tagsToRemoveSet);
+    }
+    return this.additionalTagString;
   }
 
   public resetAdditionalTags(): void {
-
+    if (this.additionalTags.size === 0) {
+      return;
+    }
+    this.additionalTags = new Set();
+    this.combineOriginalAndAdditionalTagSets();
   }
 
   private combineOriginalAndAdditionalTagSets(): void {
-    const union = this.originalTagSet.union(this.additionalTagSet);
+    const union = this.originalTagSet.union(this.additionalTags);
 
     this.tags = new Set(Array.from(union).sort());
   }

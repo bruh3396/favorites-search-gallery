@@ -30,8 +30,8 @@ function setSchemaVersion(version: number): void {
   localStorage.setItem(SCHEMA_VERSION_LOCAL_STORAGE_KEY, version.toString());
 }
 
-function usingCorrectSchema(): boolean {
-  return getSchemaVersion() === SCHEMA_VERSION;
+function usingCorrectSchema(records: FavoritesDatabaseRecord[]): boolean {
+  return getSchemaVersion() === SCHEMA_VERSION && records.length > 0 && records[0].tags instanceof Set;
 }
 
 function convertRecordFromSerialized(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord {
@@ -52,7 +52,7 @@ async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promis
     return Promise.resolve(records);
   }
 
-  if (usingCorrectSchema()) {
+  if (usingCorrectSchema(records)) {
     return Promise.resolve(records);
   }
   const updatedRecords = convertRecordsFromSerialized(records);
@@ -64,6 +64,7 @@ async function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): Promis
 
 export async function loadAllFavorites(): Promise<FavoriteItem[]> {
   const records = await DATABASE.load();
+
   const updatedRecords = await updateDatabaseRecords(records);
   return deserialize(updatedRecords);
 }

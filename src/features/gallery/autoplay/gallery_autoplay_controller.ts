@@ -88,6 +88,10 @@ export function setupAutoplay(inEvents: AutoplayEvents): void {
   loadAutoplaySettingsIntoUI();
 }
 
+export function isPaused(): boolean {
+  return paused;
+}
+
 function initializeFields(): void {
   ui = {
     settingsMenu: {},
@@ -477,14 +481,14 @@ function pause(): void {
 }
 
 export function onVideoEnded(): void {
-    if (!active || paused) {
+  if (!active || paused) {
     return;
   }
 
-  if (videoViewTimer.timeout === null) {
-    events.onComplete();
-  } else {
+  if (videoViewTimer.isRunning) {
     events.onVideoEndedBeforeMinimumViewTime();
+  } else {
+    events.onComplete();
   }
 }
 
@@ -495,7 +499,7 @@ function addAutoplayEventListeners(): void {
   // Events.document.mousemove.on(throttle((event) => {
   Events.document.mousemove.on(throttle<MouseEvent>(() => {
     // if (!overGalleryMenu(event)) {
-      showMenu();
+    showMenu();
     // }
   }, 250), {
     signal: eventListenersAbortController.signal

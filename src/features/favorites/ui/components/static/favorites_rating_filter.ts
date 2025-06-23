@@ -1,4 +1,5 @@
 import { Events } from "../../../../../lib/global/events/events";
+import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../../store/local_storage/preferences";
 import { Rating } from "../../../../../types/primitives/primitives";
 import { RatingElement } from "../../../../../types/primitives/composites";
@@ -12,6 +13,9 @@ const QUESTIONABLE = createRatingElement("questionable");
 const SAFE = createRatingElement("safe");
 
 export function insertFavoritesRatingFilter(): void {
+  if (ON_MOBILE_DEVICE) {
+    return;
+  }
   parentContainer = document.getElementById("rating-container") ?? parentContainer;
   parentContainer.appendChild(createLabel());
   parentContainer.appendChild(document.createElement("br"));
