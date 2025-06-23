@@ -103,6 +103,10 @@ export function toggleVideoPause(): void {
   GalleryRenderer.toggleVideoPause();
 }
 
+export function toggleVideoMute(): void {
+  GalleryRenderer.toggleVideoMute();
+}
+
 export function handleResultsAddedToCurrentPage(thumbs: HTMLElement[]): void {
   GalleryRenderer.handleResultsAddedToCurrentPage(thumbs);
 }

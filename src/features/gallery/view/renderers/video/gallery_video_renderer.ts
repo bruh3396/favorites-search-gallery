@@ -40,6 +40,10 @@ class VideoRenderer extends GalleryBaseRenderer {
   public toggleVideoPause(): void {
     VideoController.toggleActiveVideoPause();
   }
+
+  public toggleVideoMute(): void {
+    VideoController.toggleVideoMute();
+  }
 }
 
 export const GalleryVideoRenderer = new VideoRenderer();

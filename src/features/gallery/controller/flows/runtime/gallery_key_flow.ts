@@ -59,6 +59,10 @@ function onKeyDownInGallery(keyboardEvent: FavoritesKeyboardEvent): void {
       GalleryModel.downloadInGallery();
       break;
 
+    case "m":
+      GalleryView.toggleVideoMute();
+      break;
+
     case " ":
       if (currentThumb !== undefined && isVideo(currentThumb)) {
         GalleryView.toggleVideoPause();

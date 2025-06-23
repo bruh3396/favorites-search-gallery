@@ -75,6 +75,10 @@ export function toggleVideoPause(): void {
   GalleryVideoRenderer.toggleVideoPause();
 }
 
+export function toggleVideoMute(): void {
+  GalleryVideoRenderer.toggleVideoMute();
+}
+
 export function toggleZoom(value: boolean | undefined): boolean {
   return GalleryImageRenderer.toggleZoom(value);
 }

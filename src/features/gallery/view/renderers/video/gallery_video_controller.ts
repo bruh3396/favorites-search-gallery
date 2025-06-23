@@ -131,6 +131,11 @@ function toggleVideoPause(video: HTMLVideoElement): void {
   }
 }
 
+export function toggleVideoMute(): void {
+  getActiveVideoPlayer().muted = !getActiveVideoPlayer().muted;
+  Preferences.videoMuted.set(getActiveVideoPlayer().muted);
+}
+
 function updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElement): void {
   video.addEventListener("volumechange", (event) => {
     if (!(event.target instanceof HTMLVideoElement)) {
