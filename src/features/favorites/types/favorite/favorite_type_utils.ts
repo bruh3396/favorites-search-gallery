@@ -1,7 +1,7 @@
 import { getIdFromThumb, getImageFromThumb } from "../../../../utils/dom/dom";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
 import { Post } from "../../../../types/api/api_types";
-import { decompressPreviewSource } from "../../../../utils/content/url";
+import { decompressPreviewSource } from "../../../../utils/content/image_url";
 import { removeExtraWhiteSpace } from "../../../../utils/primitive/string";
 
 export function createEmptyPost(): Post {

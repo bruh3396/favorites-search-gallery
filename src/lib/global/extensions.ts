@@ -7,6 +7,10 @@ import { MediaExtension } from "../../types/primitives/primitives";
 import { MediaExtensionMapping } from "../../types/primitives/composites";
 import { ON_FAVORITES_PAGE } from "./flags/intrinsic_flags";
 import { Post } from "../../types/api/api_types";
+import { PromiseTimeoutError } from "../../types/primitives/errors";
+import { ThrottledQueue } from "../components/throttled_queue";
+import { getOriginalImageURLWithJPGExtension } from "../api/media_api";
+import { withTimeout } from "../../utils/misc/async";
 
 const DATABASE_NAME: string = "ImageExtensions";
 const OBJECT_STORE_NAME: string = "extensionMappings";
@@ -14,6 +18,8 @@ const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
 const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
 const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
 const EXTENSION_REGEX = (/\.(png|jpg|jpeg|gif|mp4)/);
+const EXTENSIONS: MediaExtension[] = ["jpg", "png", "jpeg"];
+const BRUTE_FORCE_EXTENSION_QUEUE = new ThrottledQueue(40);
 
 async function loadExtensions(): Promise<void> {
   for (const mapping of await DATABASE.load()) {
@@ -74,22 +80,45 @@ export function set(id: string, extension: MediaExtension): void {
   }
 }
 
-export function getExtension(thumb: HTMLElement | Favorite): Promise<MediaExtension> {
-  if (isVideo(thumb)) {
+export function getExtension(item: HTMLElement | Favorite): Promise<MediaExtension> {
+  if (isVideo(item)) {
     return Promise.resolve("mp4");
   }
 
-  if (isGif(thumb)) {
+  if (isGif(item)) {
     return Promise.resolve("gif");
   }
-  return getExtensionFromId(thumb.id);
+  return withTimeout(getExtensionFromId(item.id), 3000)
+    .catch((error) => {
+      if (error instanceof PromiseTimeoutError) {
+        return tryAllPossibleExtensions(item);
+      }
+      throw error;
+    });
+}
+
+async function tryAllPossibleExtensions(item: HTMLElement | Favorite): Promise<MediaExtension> {
+  const baseURL = getOriginalImageURLWithJPGExtension(item);
+
+  for (const extension of EXTENSIONS) {
+    const testURL = baseURL.replace(".jpg", `.${extension}`);
+
+    await BRUTE_FORCE_EXTENSION_QUEUE.wait();
+    const response = await fetch(testURL);
+
+    if (response.ok) {
+      set(item.id, extension);
+      return extension;
+    }
+  }
+  return "jpg";
 }
 
 export async function getExtensionFromId(id: string): Promise<MediaExtension> {
   if (has(id)) {
     return get(id) as MediaExtension;
   }
-  const post = await API.fetchPostFromAPI(id);
+  const post = await API.fetchPostFromAPISafe(id);
   const extension = getExtensionFromPost(post);
 
   if (extension !== null) {

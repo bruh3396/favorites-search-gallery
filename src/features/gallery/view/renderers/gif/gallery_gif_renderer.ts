@@ -1,6 +1,6 @@
 import { GalleryBaseRenderer } from "../gallery_base_renderer";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { getGIFSource } from "../../../../../utils/content/url_dom";
+import { getGIFSource } from "../../../../../utils/content/gif_url";
 import { isGif } from "../../../../../utils/content/content_type";
 
 class GifRenderer extends GalleryBaseRenderer {

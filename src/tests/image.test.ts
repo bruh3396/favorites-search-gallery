@@ -1,4 +1,4 @@
-import { cleanImageSource, compressPreviewSource, convertPreviewURLToImageURL, decompressPreviewSource } from "../utils/content/url";
+import { cleanImageSource, compressPreviewSource, convertPreviewURLToImageURL, decompressPreviewSource } from "../utils/content/image_url";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {

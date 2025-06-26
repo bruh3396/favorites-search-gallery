@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, roundToTwoDecimalPlaces, seededRandom } from "../utils/primitive/number";
+import { getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, randomBetween, roundToTwoDecimalPlaces, seededRandom } from "../utils/primitive/number";
 
 describe("getRandomPositiveInteger", () => {
   test("zero", () => {
@@ -119,5 +119,20 @@ describe("millisecondsToSeconds", () => {
   test("rounding", () => {
     expect(millisecondsToSeconds(123.456)).toBe(0.12);
     expect(millisecondsToSeconds(1234.567)).toBe(1.23);
+  });
+});
+
+describe("randomBetween", () => {
+  test("zero", () => {
+    expect(randomBetween(0, 0)).toBe(0);
+  });
+
+  test("normal", () => {
+    for (let i = 0; i < 100; i += 1) {
+      const value = randomBetween(0, 20);
+
+      expect(value).toBeLessThanOrEqual(20);
+      expect(value).toBeGreaterThanOrEqual(0);
+    }
   });
 });

@@ -34,6 +34,9 @@ export function onGalleryMenuAction(action: GalleryMenuAction): void {
       GalleryView.toggleBackgroundOpacity();
       break;
 
+    case "none":
+      break;
+
     default:
       break;
   }

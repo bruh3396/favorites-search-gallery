@@ -1,3 +1,4 @@
+import { PromiseTimeoutError } from "../../types/primitives/errors";
 import { Timeout } from "../../types/primitives/primitives";
 
 export function sleep(milliseconds: number): Promise<void> {
@@ -55,3 +56,27 @@ export function throttle<V>(fn: (...args: V[]) => void, delay: number): (...args
     }
   };
 }
+
+export async function runWithPools<T>(
+  items: T[],
+  poolSize: number,
+  task: (item: T, index: number) => Promise<void>
+): Promise<void> {
+  let index = 0;
+
+  async function worker(): Promise<void> {
+    while (index < items.length) {
+      const i = index;
+
+      index += 1;
+      await task(items[i], i);
+    }
+  }
+
+  await Promise.all(Array.from({ length: poolSize }, () => worker()));
+}
+
+ export function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new PromiseTimeoutError()), milliseconds));
+    return Promise.race([promise, timeout]) as Promise<T>;
+  }

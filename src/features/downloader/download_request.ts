@@ -1,6 +1,6 @@
 import { isGif, isVideo } from "../../utils/content/content_type";
 import { Favorite } from "../../types/interfaces/interfaces";
-import { getExtensionFromId } from "../../lib/global/extensions";
+import { getExtension } from "../../lib/global/extensions";
 import { getOriginalContentURL } from "../../lib/api/media_api";
 
 export class DownloadRequest {
@@ -32,7 +32,7 @@ export async function createDownloadRequest(favorite: Favorite): Promise<Downloa
   } else if (isGif(favorite)) {
     extension = "gif";
   } else {
-    extension = await getExtensionFromId(favorite.id);
+    extension = await getExtension(favorite);
   }
   const url = await getOriginalContentURL(favorite);
   return new DownloadRequest(favorite.id, url, extension);

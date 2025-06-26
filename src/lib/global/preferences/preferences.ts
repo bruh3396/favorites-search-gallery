@@ -27,7 +27,7 @@ export const Preferences = {
   uiVisible: new Preference("showUI", true),
   infiniteScrollEnabled: new Preference("infiniteScroll", false),
   galleryMenuPinned: new Preference("galleryMenuPinned", ON_MOBILE_DEVICE),
-  galleryMenuEnabled: new Preference("galleryMenuEnabled", false),
+  galleryMenuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   addButtonsVisible: new Preference("showAddFavoriteButtons", false),
   fancyThumbHoveringEnabled: new Preference("fancyThumbHovering", true),

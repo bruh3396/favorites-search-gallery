@@ -3,7 +3,7 @@ import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { VideoClip } from "../../../types/gallery_types";
-import { convertPreviewURLToImageURL } from "../../../../../utils/content/url";
+import { convertPreviewURLToImageURL } from "../../../../../utils/content/image_url";
 import { getPreviewURL } from "../../../../../utils/dom/dom";
 import { isVideo } from "../../../../../utils/content/content_type";
 

@@ -7,7 +7,7 @@ import { FavoriteTags } from "./favorite_tags";
 import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
 import { Post } from "../../../../types/api/api_types";
 import { Rating } from "../../../../types/primitives/primitives";
-import { compressPreviewSource } from "../../../../utils/content/url";
+import { compressPreviewSource } from "../../../../utils/content/image_url";
 import { getIdFromThumb } from "../../../../utils/dom/dom";
 
 const ALL_FAVORITES = new Map<string, FavoriteItem>();

@@ -8,7 +8,7 @@ import { FavoriteElement } from "./favorite_types";
 import { GALLERY_DISABLED } from "../../../../lib/global/flags/derived_flags";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
 import { Post } from "../../../../types/api/api_types";
-import { createPostPageURL } from "../../../../lib/api/url";
+import { createPostPageURL } from "../../../../lib/api/api_url";
 import { downloadFromThumb } from "../../../../lib/download/downloader";
 import { getContentType } from "../../../../utils/primitive/string";
 

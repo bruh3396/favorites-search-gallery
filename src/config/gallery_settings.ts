@@ -24,9 +24,9 @@ export const GallerySettings = {
   navigationThrottleTime: 250,
   maxImagesToRenderAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
   idleInteractionDuration: 1000,
-  menuVisibilityTime: 1000,
+  menuVisibilityTime: ON_MOBILE_DEVICE ? 2000 : 1000,
   maxVisibleThumbsBeforeStoppingPreload: 175,
-  useOffscreenThumbUpscaler: true,
+  useOffscreenThumbUpscaler: false,
   fetchImageBitmapsInWorker: true,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;

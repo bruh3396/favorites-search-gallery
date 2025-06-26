@@ -1,4 +1,4 @@
-import * as FSG_URL from "../../lib/api/url";
+import * as FSG_URL from "../../lib/api/api_url";
 import { COMMON_HTML, DARK_THEME_HTML, SKELETON_HTML } from "../../assets/html";
 import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { getCookie, setCookie } from "../../lib/global/cookie";

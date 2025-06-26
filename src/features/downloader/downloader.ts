@@ -2,7 +2,7 @@ import { DownloadRequest, createDownloadRequest } from "./download_request";
 import { DownloadAbortedError } from "../../types/primitives/errors";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { downloadBlob } from "../../lib/download/downloader";
-import { splitIntoChunks } from "../../utils/collection/array";
+import { runWithPools } from "../../utils/misc/async";
 
 interface ZipWriter {
   add: (name: string, reader: unknown, options: { compression: string }) => Promise<void>;
@@ -47,43 +47,38 @@ export async function startDownloading(favorites: Favorite[], progressCallback: 
 }
 
 async function downloadFavorites(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
-  const requests = await getDownloadRequests(favorites);
-
-  checkIfAborted();
-  const zippedBlob = await zipFiles(requests, progressCallback);
-
-  checkIfAborted();
-  downloadBlob(zippedBlob, "download.zip");
+  downloadBlob(await createTotalFavoriteBlob(favorites, progressCallback), "download.zip");
   currentlyDownloading = false;
 }
 
-async function zipFiles(requests: DownloadRequest[], progressCallback: (request: DownloadRequest) => void): Promise<Blob> {
-  const zipWriter = new zip.ZipWriter(new zip.BlobWriter("application/zip"));
-  const chunks = splitIntoChunks(requests, 10);
+async function createTotalFavoriteBlob(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void, poolSize: number = 15): Promise<Blob> {
+  const blobWriter = new zip.BlobWriter("application/zip");
+  const zipWriter = new zip.ZipWriter(blobWriter);
 
-  for (const chunk of chunks) {
-    checkIfAborted();
-
-    await Promise.all(chunk.map(async(request) => {
-      checkIfAborted();
-
-      try {
-        const blob = await request.blob();
-
-        checkIfAborted();
-        await zipFile(zipWriter, request, blob);
-        checkIfAborted();
-      } catch (error) {
-        console.error(request, error);
-      }
-
-      if (progressCallback) {
-        progressCallback(request);
-      }
-    }));
-  }
-  checkIfAborted();
+  await runWithPools(favorites, poolSize, async(favorite) => {
+    await createFavoriteBlob(favorite, zipWriter, progressCallback);
+  });
+  stopIfAborted();
   return zipWriter.close();
+}
+
+async function createFavoriteBlob(favorite: Favorite, zipWriter: ZipWriter, progressCallback: (request: DownloadRequest) => void): Promise<void> {
+  try {
+    stopIfAborted();
+    const request = await createDownloadRequest(favorite);
+
+    stopIfAborted();
+    const blob = await request.blob();
+
+    stopIfAborted();
+    await zipFile(zipWriter, request, blob);
+    stopIfAborted();
+    progressCallback?.(request);
+    stopIfAborted();
+  } catch (error) {
+    stopIfAborted();
+    console.error(error);
+  }
 }
 
 async function zipFile(zipWriter: ZipWriter, request: DownloadRequest, blob: Blob): Promise<void> {
@@ -92,28 +87,9 @@ async function zipFile(zipWriter: ZipWriter, request: DownloadRequest, blob: Blo
   await zipWriter.add(request.filename, reader, {
     compression: "STORE"
   });
-  checkIfAborted();
 }
 
-async function getDownloadRequests(favorites: Favorite[]): Promise<DownloadRequest[]> {
-  const chunks = splitIntoChunks(favorites, 100);
-  let result: DownloadRequest[] = [];
-
-  for (const chunk of chunks) {
-    checkIfAborted();
-
-    const requests = await Promise.all(chunk.map((favorite) => {
-      checkIfAborted();
-      return createDownloadRequest(favorite);
-    }));
-
-    checkIfAborted();
-    result = result.concat(requests);
-  }
-  return result;
-}
-
-function checkIfAborted(): void {
+function stopIfAborted(): void {
   if (aborted) {
     throw new DownloadAbortedError();
   }

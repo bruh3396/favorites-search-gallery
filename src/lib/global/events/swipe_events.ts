@@ -81,6 +81,10 @@ export function didSwipe(): boolean {
   return swipedDown() || swipedUp() || swipedLeft() || swipedRight();
 }
 
+export function didNotSwipe(): boolean {
+  return !didSwipe();
+}
+
 export function setupSwipeEvents(): void {
   Events.document.touchStart.on(setTouchStart);
   Events.document.touchEnd.on(onTouchEnd);

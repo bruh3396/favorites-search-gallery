@@ -13,7 +13,7 @@ import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { TagCategory } from "../../types/primitives/primitives";
 import { TagCategoryMapping } from "../../types/primitives/composites";
-import { createTagAPIURL } from "../../lib/api/url";
+import { createTagAPIURL } from "../../lib/api/api_url";
 import { getFavorite } from "../favorites/types/favorite/favorite_item";
 import { getTagSetFromThumb } from "../../utils/dom/tags";
 import { insertStyleHTML } from "../../utils/dom/style";

@@ -20,6 +20,9 @@ function onMouseDownOutsideGallery(mouseEvent: FavoritesMouseEvent): void {
 }
 
 function onTouchStartInGallery(event: TouchEvent): void {
+  if (event.target instanceof HTMLElement && event.target.closest("#gallery-menu") !== null) {
+    return;
+  }
   event.preventDefault();
 }
 

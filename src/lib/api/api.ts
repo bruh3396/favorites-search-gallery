@@ -1,4 +1,4 @@
-import * as FSG_URL from "./url";
+import * as FSG_URL from "./api_url";
 import { AddFavoriteStatus, Post } from "../../types/api/api_types";
 import { extractFavoritesCount } from "./profile_page_parser";
 import { extractPostFromAPI } from "./post_api_parser";

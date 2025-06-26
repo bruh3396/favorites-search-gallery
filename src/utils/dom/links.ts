@@ -1,4 +1,4 @@
-import * as FSG_URL from "../../lib/api/url";
+import * as FSG_URL from "../../lib/api/api_url";
 import { getOriginalContentURL } from "../../lib/api/media_api";
 
 export function openPostPage(id: string): void {

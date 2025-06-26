@@ -1,6 +1,6 @@
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { createFavoritesPageURL } from "../../../../lib/api/url";
+import { createFavoritesPageURL } from "../../../../lib/api/api_url";
 
 export class FavoritesPageRequest {
   public readonly pageNumber: number;

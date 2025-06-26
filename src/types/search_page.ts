@@ -5,6 +5,7 @@ import { getAllThumbs, getIdFromThumb, getImageFromThumb } from "../utils/dom/do
 import { Post } from "./api/api_types";
 import { fetchPostFromAPI } from "../lib/api/api";
 import { moveTagsFromTitleToTagsAttribute } from "../utils/dom/tags";
+import { sleep } from "../utils/misc/async";
 
 const PARSER = new DOMParser();
 
@@ -16,7 +17,10 @@ export function prepareThumbsOnSearchPage(thumbs: HTMLElement[]): HTMLElement[] 
 }
 
 export function prepareAllThumbsOnSearchPage(): void {
-  prepareThumbsOnSearchPage(getAllThumbs());
+  const thumbs = getAllThumbs();
+
+  prepareThumbsOnSearchPage(thumbs);
+  findImageExtensions(thumbs);
 }
 
 function prepareThumb(thumb: HTMLElement): void {
@@ -32,6 +36,13 @@ function prepareThumb(thumb: HTMLElement): void {
 function extractSearchPageThumbs(dom: Document): HTMLElement[] {
   const thumbs = Array.from(dom.querySelectorAll(".thumb")).filter(thumb => thumb instanceof HTMLElement);
   return prepareThumbsOnSearchPage(thumbs);
+}
+
+async function findImageExtensions(thumbs: HTMLElement[]): Promise<void> {
+  for (const thumb of thumbs) {
+    await sleep(5);
+    findImageExtension(thumb);
+  }
 }
 
 export async function findImageExtension(thumb: HTMLElement): Promise<void> {

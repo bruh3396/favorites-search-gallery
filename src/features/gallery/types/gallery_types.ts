@@ -18,7 +18,11 @@ export interface Renderer {
   preload: (elements: HTMLElement[]) => void
 }
 
-export type GalleryMenuAction = "exit" | "fullscreen" | "openPost" | "openOriginal" | "download" | "addFavorite" | "removeFavorite" | "toggleDockPosition" | "toggleBackground" | "search" | "changeBackgroundColor" | "pin";
+export type GalleryMenuAction = "exit" |
+"fullscreen" | "openPost" | "openOriginal" |
+"download" | "addFavorite" | "removeFavorite" |
+"toggleDockPosition" | "toggleBackground" | "search" |
+ "changeBackgroundColor" | "pin" | "none";
 
 export type GalleryMenuButton = {
   id: string;
@@ -27,4 +31,5 @@ export type GalleryMenuButton = {
   enabled: boolean;
   hint: string;
   color: string;
+  href?: string;
 };

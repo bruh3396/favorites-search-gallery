@@ -25,11 +25,11 @@ export function getThumbFromImage(image: HTMLElement): HTMLElement | null {
 }
 
 export function getPreviewURL(item: HTMLElement | Favorite): string | null {
-  if (!(item instanceof HTMLElement)) {
-    return item.thumbURL;
+  if (item instanceof HTMLElement) {
+    const image = getImageFromThumb(item);
+    return image ? image.src : null;
   }
-  const image = getImageFromThumb(item);
-  return image ? image.src : null;
+  return item.thumbURL;
 }
 
 export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement | null {

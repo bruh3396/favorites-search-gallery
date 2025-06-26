@@ -89,10 +89,6 @@ function addMouseOverEventListener(): void {
       currentImage = null;
       return;
     }
-
-    // if (Utils.enteredOverCaptionTag(mouseOverEvent.originalEvent)) {
-    //   return;
-    // }
     const image = getImageFromThumb(mouseOverEvent.thumb);
 
     if (image === null) {
@@ -183,6 +179,16 @@ function setPosition(image: HTMLImageElement): void {
 function show(image: HTMLImageElement): void {
   tooltip.innerHTML = formatHTML(getTags(image));
   setPosition(image);
+  // const thumb = getThumbFromImage(image);
+
+  // if (thumb === null) {
+  //   return;
+  // }
+  // const tags = getTags(image);
+
+  // thumb.dataset.tooltip = tags;
+  // await sleep(50);
+  // thumb.classList.add("tooltip");
 }
 
 function hide(): void {
@@ -191,6 +197,18 @@ function hide(): void {
   setTimeout(() => {
     tooltip.style.transition = defaultTransition;
   }, 5);
+  // if (currentImage === null) {
+  //   return;
+  // }
+  // const thumb = getThumbFromImage(currentImage);
+
+  // if (thumb === null) {
+  //   return;
+  // }
+  // thumb.classList.remove("tooltip");
+  // thumb.removeAttribute("data-tooltip");
+  // await sleep(50);
+  // thumb.dataset.tooltip = "";
 }
 
 function getTags(image: HTMLImageElement): string {

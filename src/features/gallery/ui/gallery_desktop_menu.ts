@@ -28,8 +28,8 @@ const BUTTONS: GalleryMenuButton[] = [
 
 const MENU: HTMLElement = document.createElement("div");
 const throttledReveal = throttle<MouseEvent>(() => {
-    reveal();
-  }, 250);
+  reveal();
+}, 250);
 let menuVisibilityTimeout: Timeout;
 
 MENU.id = "gallery-menu";
@@ -93,7 +93,6 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   button.id = template.id;
   button.className = "gallery-menu-button";
   button.dataset.hint = template.hint;
-  MENU.appendChild(button);
   const onClick = (): void => {
     handleGalleryMenuAction(template.action);
     Events.gallery.galleryMenuButtonClicked.emit(template.action);
@@ -184,7 +183,7 @@ function toggleDockPosition(): void {
   Preferences.dockGalleryMenuLeft.set(MENU.classList.toggle("dock-left"));
 }
 
-export function setupGalleryMenu(): void {
+export function setupDesktopGalleryMenu(): void {
   if (!GeneralSettings.galleryMenuOptionEnabled || ON_MOBILE_DEVICE) {
     return;
   }

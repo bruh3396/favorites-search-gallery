@@ -1,14 +1,14 @@
-import { getSeededRandomPositiveIntegerInRange, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
+import { getSeededRandomPositiveIntegerInRange, randomBetween, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ITEM_CLASS_NAME } from "../../../../../utils/dom/dom";
 import { getNextAspectRatio } from "./favorites_aspect_ratio_collector";
 
 function getRandomAnimationDelay(): number {
-  return roundToTwoDecimalPlaces(Math.random() * 0.1);
+  return roundToTwoDecimalPlaces(randomBetween(0, 0.3));
 }
 
 function getRandomAnimationDuration(): number {
-  return roundToTwoDecimalPlaces((Math.random()) + 1.4);
+  return roundToTwoDecimalPlaces(randomBetween(0.75, 1.5));
 }
 
 function getPredictedAspectRatio(): string {

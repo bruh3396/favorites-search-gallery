@@ -17,7 +17,7 @@ export const FavoritesSettings = {
   resultsPerPageStep: 25,
   maxPageNumberButtons: ON_MOBILE_DEVICE ? 5 : 5,
   defaultMediaExtension: "jpg",
-  thumbnailSpacing: 4,
+  thumbnailSpacing: 5,
   rightContentMargin: 15,
   infiniteScrollBatchSize: 50,
   infiniteScrollMargin: "75%",

@@ -37,3 +37,7 @@ export function roundToTwoDecimalPlaces(value: number): number {
 export function millisecondsToSeconds(milliseconds: number): number {
   return roundToTwoDecimalPlaces(milliseconds / 1000);
 }
+
+export function randomBetween(min: number, max: number): number {
+  return min + (Math.random() * (max - min));
+}

@@ -133,3 +133,11 @@ export function setupGalleryView(): void {
   GalleryUI.setupGalleryUI();
   SearchPageCreator.setupSearchPageCreator();
 }
+
+export function revealGalleryMenu(): void {
+  // GalleryMenu.reveal();
+}
+
+export function setLinks(links: { post: string; image: string }): void {
+  // GalleryMenu.setLinks(links);
+}

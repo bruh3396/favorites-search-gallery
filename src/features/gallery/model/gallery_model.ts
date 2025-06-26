@@ -10,8 +10,10 @@ import { NavigationKey } from "../../../types/primitives/primitives";
 import { ON_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { SearchPage } from "../../../types/search_page";
 import { clamp } from "../../../utils/primitive/number";
+import { createPostPageURL } from "../../../lib/api/api_url";
 import { downloadFromThumb } from "../../../lib/download/downloader";
 import { getAllThumbs } from "../../../utils/dom/dom";
+import { getOriginalContentURL } from "../../../lib/api/media_api";
 import { isForwardNavigationKey } from "../../../types/primitives/equivalence";
 import { isVideo } from "../../../utils/content/content_type";
 
@@ -141,4 +143,13 @@ export function addFavoriteInGallery(): Promise<AddFavoriteStatus> {
 
 export function removeFavoriteInGallery(): Promise<RemoveFavoriteStatus> {
   return GalleryFavoriteToggler.removeFavoriteInGallery(getCurrentThumb());
+}
+
+export async function getLinksFromCurrentThumb(): Promise<{ post: string; image: string }> {
+  const thumb = getCurrentThumb();
+
+  if (thumb === undefined) {
+    return { post: "", image: "" };
+  }
+  return { post: createPostPageURL(thumb.id), image: await getOriginalContentURL(thumb) };
 }

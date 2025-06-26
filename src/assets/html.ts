@@ -754,6 +754,7 @@ export const DESKTOP_HTML = `
 <style>
   .checkbox {
     cursor: pointer;
+
     &:hover {
       color: #000;
       background: #93b393;
@@ -773,6 +774,35 @@ export const DESKTOP_HTML = `
 
   #favorites-pagination-container>button {
     height: 32px;
+  }
+
+  .gallery-menu-button {
+    &:hover {
+      opacity: 1;
+      transform: scale(1.25);
+    }
+  }
+
+  .gallery-menu-button::after {
+    content: attr(data-hint);
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    background: black;
+    padding: 2px 6px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    font-size: larger;
+    transition: opacity 0.35s ease-in-out;
+    border-radius: 3px;
+    pointer-events: none;
+  }
+
+  .gallery-menu-button:hover::after {
+    opacity: 1;
+    visibility: visible;
   }
 </style>
 `;
@@ -966,6 +996,8 @@ export const DOWNLOADER_HTML = `
                 <option value="250">250</option>
                 <option value="500">500</option>
                 <option value="1000">1000</option>
+                <option value="2500">2500</option>
+                <option value="5000">5000</option>
               </select>
             </div>
           </div>
@@ -1867,7 +1899,7 @@ export const GALLERY_HTML = `
   :root {
     /* --gallery-menu-background: rgba(0, 0, 0, 0.75); */
     --gallery-menu-background: rgba(0, 0, 0, 1);
-    --gallery-menu-size: 65px;
+    --gallery-menu-size: 80px;
   }
 
   #gallery-menu {
@@ -1988,11 +2020,6 @@ export const GALLERY_HTML = `
     opacity: 0.75;
     transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1);
 
-    &:hover {
-      opacity: 1;
-      transform: scale(1.25);
-    }
-
     >img,
     svg {
       pointer-events: none;
@@ -2002,27 +2029,6 @@ export const GALLERY_HTML = `
     }
   }
 
-  .gallery-menu-button::after {
-    content: attr(data-hint);
-    position: absolute;
-    top: 50%;
-    left: 100%;
-    transform: translateY(-50%);
-    background: black;
-    padding: 2px 6px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    font-size: larger;
-    transition: opacity 0.35s ease-in-out;
-    border-radius: 3px;
-    pointer-events: none;
-  }
-
-  .gallery-menu-button:hover::after {
-    opacity: 1;
-    visibility: visible;
-  }
 
   :root {
     --rainbow: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
@@ -2052,6 +2058,17 @@ export const GALLERY_HTML = `
     left: 100%;
     top: 50%;
     transform: translateY(-50%);
+  }
+
+  #gallery-mobile-menu {
+    position: fixed;
+    pointer-events: all;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.75);
   }
 </style>
 `;
@@ -2120,7 +2137,6 @@ export const MOBILE_HTML = `
   #search-header,
   #fullscreen-gallery,
   #exit-gallery,
-  #pin-gallery,
   #background-color-gallery,
   #left-favorites-panel-top-row,
   #layout-select-row,
@@ -2559,16 +2575,22 @@ export const MOBILE_HTML = `
   }
 
   #download-button {
-    font-size: large;;
+    font-size: large;
+    border-radius: 4px;
+    border: none;
   }
 
   #download-menu-container-wrapper {
-    width: unset !important ;
+    width: unset !important;
   }
 
   #download-menu-options select {
     font-size: 30px !important;
-}
+  }
+
+  input[type="text"] {
+    font-size: 16px !important;
+  }
 </style>
 `;
 export const SAVED_SEARCHES_HTML = `
@@ -2889,7 +2911,7 @@ export const SKELETON_HTML = `
     }
 
     50% {
-      opacity: 0.65;
+      opacity: 0.5;
     }
 
     100% {
@@ -2990,12 +3012,37 @@ export const TOOLTIP_HTML = `
       pointer-events: none;
       visibility: hidden;
       opacity: 0;
-      /* transition: visibility 0s, opacity 0.25s linear; */
+      transition: visibility 0s, opacity 0.25s linear;
       font-size: 1.05em;
     }
 
     #tooltip.visible {
       visibility: visible;
+      opacity: 1;
+    }
+
+    /* .favorite {
+      overflow: unset !important;
+    } */
+
+    .favorite::after {
+      opacity: 0;
+      transition: visibility 0s, opacity 0.25s linear;
+      content: attr(data-tooltip);
+      position: absolute;
+      font-size: 12px;
+      z-index: 1000;
+      background: gray;
+      padding: 5px;
+      color: white;
+      left: 0;
+      top: 100%;
+      min-width: 500px;
+      pointer-events: none;
+
+    }
+
+    .favorite.tooltip::after {
       opacity: 1;
     }
   </style>
