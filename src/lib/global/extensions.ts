@@ -2,6 +2,7 @@ import * as API from "../api/api";
 import { isGif, isVideo } from "../../utils/content/content_type";
 import { BatchExecutor } from "../components/batch_executor";
 import { Database } from "../components/database";
+import { EXTENSION_REGEX } from "../../utils/content/image_url";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { MediaExtension } from "../../types/primitives/primitives";
 import { MediaExtensionMapping } from "../../types/primitives/composites";
@@ -17,7 +18,6 @@ const OBJECT_STORE_NAME: string = "extensionMappings";
 const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
 const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
 const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
-const EXTENSION_REGEX = (/\.(png|jpg|jpeg|gif|mp4)/);
 const EXTENSIONS: MediaExtension[] = ["jpg", "png", "jpeg"];
 const BRUTE_FORCE_EXTENSION_QUEUE = new ThrottledQueue(40);
 

@@ -1,5 +1,6 @@
 import { GallerySettings } from "../../../config/gallery_settings";
 import { ImageRequest } from "./gallery_image_request";
+import { convertImageURLToSampleURL } from "../../../utils/content/image_url";
 import { getOriginalImageURL } from "../../../lib/api/media_api";
 
 export const TRANSFERRED_CANVAS_IDS = new Set<string>();
@@ -28,6 +29,7 @@ export class UpscaleRequest {
   public offscreenCanvas: OffscreenCanvas | null;
   public bitmap: ImageBitmap | null;
   public imageURL: string;
+  public sampleURL: string;
 
   constructor(thumb: HTMLElement, bitmap: ImageBitmap | null, imageURL: string) {
     this.id = thumb.id;
@@ -36,6 +38,7 @@ export class UpscaleRequest {
     this.offscreenCanvas = this.getOffscreenCanvas(thumb);
     this.bitmap = bitmap;
     this.imageURL = imageURL;
+    this.sampleURL = convertImageURLToSampleURL(imageURL);
   }
 
   public get transferable(): OffscreenCanvas[] {

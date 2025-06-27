@@ -93,16 +93,10 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   button.id = template.id;
   button.className = "gallery-menu-button";
   button.dataset.hint = template.hint;
-  const onClick = (): void => {
+  button.onclick = (): void => {
     handleGalleryMenuAction(template.action);
     Events.gallery.galleryMenuButtonClicked.emit(template.action);
   };
-
-  if (ON_MOBILE_DEVICE) {
-    button.ontouchstart = onClick;
-  } else {
-    button.onclick = onClick;
-  }
 
   if (GallerySettings.galleryMenuMonoColor) {
     template.color = "#0075FF";
@@ -184,7 +178,7 @@ function toggleDockPosition(): void {
 }
 
 export function setupDesktopGalleryMenu(): void {
-  if (!GeneralSettings.galleryMenuOptionEnabled || ON_MOBILE_DEVICE) {
+  if (!GeneralSettings.galleryMenuOptionEnabled) {
     return;
   }
   GALLERY_CONTAINER.appendChild(MENU);

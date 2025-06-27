@@ -1,4 +1,4 @@
-import { cleanImageSource, compressPreviewSource, convertPreviewURLToImageURL, decompressPreviewSource } from "../utils/content/image_url";
+import { cleanImageSource, compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource } from "../utils/content/image_url";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -43,7 +43,7 @@ describe("compressImageSource", () => {
   });
 });
 
-describe("getImageURLWithoutExtension", () => {
+describe("convertPreviewURLToImageURL", () => {
   test("empty", () => {
     expect(convertPreviewURLToImageURL("")).toBe("");
   });
@@ -53,5 +53,18 @@ describe("getImageURLWithoutExtension", () => {
     const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
 
     expect(convertPreviewURLToImageURL(source)).toBe(expected);
+  });
+});
+
+describe("convertImageURLToSampleURL", () => {
+  test("empty", () => {
+    expect(convertImageURLToSampleURL("")).toBe("");
+  });
+
+  test("normal", () => {
+    const source = "https://us.rule34.xxx/images/0123/123456abcde09.jpeg";
+    const expected = "https://us.rule34.xxx/samples/0123/sample_123456abcde09.jpg";
+
+    expect(convertImageURLToSampleURL(source)).toBe(expected);
   });
 });

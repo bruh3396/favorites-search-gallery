@@ -1,5 +1,5 @@
+import { convertImageURLToSampleURL, convertPreviewURLToImageURL } from "../../utils/content/image_url";
 import { Favorite } from "../../types/interfaces/interfaces";
-import { convertPreviewURLToImageURL } from "../../utils/content/image_url";
 import { getExtension } from "../global/extensions";
 import { getPreviewURL } from "../../utils/dom/dom";
 
@@ -13,12 +13,19 @@ export async function fetchImageBitmapFromThumb(thumb: HTMLElement, abortControl
   return fetchImageBitmap(await getOriginalImageURL(thumb), abortController);
 }
 
-export async function getOriginalContentURL(item: HTMLElement | Favorite): Promise<string> {
-  return getOriginalImageURLWithJPGExtension(item).replace(".jpg", `.${await getExtension(item)}`);
+export async function fetchSampleImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
+  return fetchImageBitmap(convertImageURLToSampleURL(await getOriginalImageURL(thumb)), abortController)
+  .catch(() => {
+    return fetchImageBitmapFromThumb(thumb, abortController);
+  });
 }
 
 export async function getOriginalImageURL(item: HTMLElement | Favorite): Promise<string> {
   return (await getOriginalContentURL(item)).replace(".mp4", ".jpg");
+}
+
+export async function getOriginalContentURL(item: HTMLElement | Favorite): Promise<string> {
+  return getOriginalImageURLWithJPGExtension(item).replace(".jpg", `.${await getExtension(item)}`);
 }
 
 export function getOriginalImageURLWithJPGExtension(item: HTMLElement | Favorite): string {

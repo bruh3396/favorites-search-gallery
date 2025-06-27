@@ -9,7 +9,6 @@ import { setupDesktopGalleryMenu } from "../../../ui/gallery_desktop_menu";
 import { setupGalleryInteractionTracker } from "../../events/desktop/gallery_interaction_tracker";
 import { setupGalleryMobileTapControls } from "../../events/mobile/gallery_edge_tap_controls";
 import { setupGalleryView } from "../../../view/gallery_view";
-import { setupMobileGalleryMenu } from "../../../ui/gallery_mobile_menu";
 import { setupSearchPageLoader } from "../../../model/search_page_loader";
 import { setupVisibleThumbObserver } from "../../events/desktop/gallery_visible_thumb_observer";
 import { waitForDOMToLoad } from "../../../../../utils/dom/dom";
@@ -40,7 +39,7 @@ async function setupSearchPageGallery(): Promise<void> {
 
 function setupGalleryMenu(): void {
   if (ON_MOBILE_DEVICE) {
-    setupMobileGalleryMenu();
+    // setupMobileGalleryMenu();
   } else {
     setupDesktopGalleryMenu();
   }

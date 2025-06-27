@@ -1518,7 +1518,7 @@ export const FAVORITES_HTML = `
     #favorites-load-status-label.hidden {
       display: none;
     }
-  </style>
+   </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;" id="search-header">Search Favorites</h2>
