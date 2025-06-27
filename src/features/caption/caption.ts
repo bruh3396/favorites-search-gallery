@@ -180,7 +180,7 @@ function addFavoritesPageEventListeners(): void {
     abortAllRequests("Changed Page");
     abortController = new AbortController();
     setTimeout(() => {
-      findTagCategoriesOnPageChange();
+      // findTagCategoriesOnPageChange();
     }, 600);
   }, 2000));
 

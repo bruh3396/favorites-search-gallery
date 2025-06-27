@@ -23,10 +23,9 @@ export class ImageRequest {
   public abortController: AbortController;
   public cancelled: boolean;
   public contentType: ContentType;
-  public isLowResolution: boolean;
   public accentColor: string | null;
 
-  constructor(thumb: HTMLElement, isLowResolution: boolean = false) {
+  constructor(thumb: HTMLElement) {
     this.id = thumb.id;
     this.thumbURL = getPreviewURL(thumb) ?? "";
     this.thumb = thumb;
@@ -34,7 +33,6 @@ export class ImageRequest {
     this.abortController = new AbortController();
     this.cancelled = false;
     this.contentType = getContentTypeFromThumb(thumb);
-    this.isLowResolution = isLowResolution;
     this.accentColor = null;
   }
 
@@ -59,7 +57,7 @@ export class ImageRequest {
   }
 
   public get isOriginalResolution(): boolean {
-    return !this.isLowResolution;
+    return true;
   }
 
   public complete(bitmap: ImageBitmap): void {

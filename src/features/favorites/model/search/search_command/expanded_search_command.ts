@@ -15,34 +15,33 @@ export class ExpandedSearchCommand<T extends Searchable> extends SearchCommand<T
     this.expandAllOrGroupWildcardTags();
   }
 
-  private expandRemainingWildcardTags():void {
+  private expandRemainingWildcardTags(): void {
     const newRemainingTags: SearchTag[] = [];
 
-    for (const tag of this.remainingTags) {
-      if (!(tag instanceof WildcardSearchTag)) {
-          newRemainingTags.push(tag);
+    for (const tagToExpand of this.remainingTags) {
+      if (!(tagToExpand instanceof WildcardSearchTag)) {
+        newRemainingTags.push(tagToExpand);
         continue;
       }
-      const expandedWildcardTags = this.expandWildcardTag(tag);
+      const expandedTags = this.expandWildcardTag(tagToExpand);
 
-      if (tag.negated) {
-        for (const expandedNegatedTag of expandedWildcardTags) {
+      if (tagToExpand.negated) {
+        for (const expandedNegatedTag of expandedTags) {
           this.remainingTags.push(expandedNegatedTag);
         }
         continue;
       }
 
-      if (expandedWildcardTags.length > 1) {
-        this.orGroups.push(expandedWildcardTags);
-        continue;
+      if (expandedTags.length === 0) {
+        this.setAsUnmatchable();
+        return;
       }
 
-      if (expandedWildcardTags.length === 1) {
-        newRemainingTags.push(expandedWildcardTags[0]);
+      if (expandedTags.length === 1) {
+        newRemainingTags.push(expandedTags[0]);
         continue;
       }
-      this.setAsUnmatchable();
-      return;
+      this.orGroups.push(expandedTags);
     }
     this.remainingTags = newRemainingTags;
   }
@@ -85,13 +84,7 @@ export class ExpandedSearchCommand<T extends Searchable> extends SearchCommand<T
   }
 
   private expandWildcardTag(wildcardTag: WildcardSearchTag): SearchTag[] {
-    const result: SearchTag[] = [];
-
-    for (const matchingIndexedTag of wildcardTag.getMatchingTags(this.indexedTags)) {
-      const indexedTagWithNegation = wildcardTag.negated ? `-${matchingIndexedTag}` : matchingIndexedTag;
-
-      result.push(new SearchTag(indexedTagWithNegation));
-    }
-    return result;
+    return wildcardTag.getMatchingTags(this.indexedTags)
+      .map(matchingTag => new SearchTag(wildcardTag.negated ? `-${matchingTag}` : matchingTag));
   }
 }

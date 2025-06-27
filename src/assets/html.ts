@@ -2081,7 +2081,12 @@ export const HELP_HTML = `
     Issue</a>
   <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
     <div id="whats-new-container" class="light-green-gradient indented">
-      <h2>v1.19</h4>
+      <h2>v1.19.1</h2>
+       <ul>
+        <li>Fixed mass downloads slowing down over time</li>
+        <li>Fixed Firefox gallery not opening</li>
+       </ul>
+      <h2>v1.19</h2>
       <!-- <h5>Features:</h5> -->
       <h3>Favorites</h3>
       <ul>

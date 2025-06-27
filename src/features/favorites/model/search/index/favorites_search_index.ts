@@ -2,7 +2,7 @@ import { BatchExecutor } from "../../../../../lib/components/batch_executor";
 import { DO_NOTHING } from "../../../../../config/constants";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { InvertedSearchIndex } from "../../../../../lib/components/inverted_search_index";
+import { InvertedSearchIndex } from "./inverted_search_index";
 import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
 import { sleep } from "../../../../../utils/misc/async";
 import { splitIntoChunks } from "../../../../../utils/collection/array";

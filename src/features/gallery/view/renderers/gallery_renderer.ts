@@ -1,7 +1,9 @@
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { isGif, isVideo } from "../../../../utils/content/content_type";
 import { GalleryBaseRenderer } from "./gallery_base_renderer";
 import { GalleryGifRenderer } from "./gif/gallery_gif_renderer";
 import { GalleryImageRenderer } from "./image/gallery_image_renderer";
+import { GallerySettings } from "../../../../config/gallery_settings";
 import { GalleryVideoRenderer } from "./video/gallery_video_renderer";
 
 function getRenderers(): GalleryBaseRenderer[] {
@@ -31,32 +33,35 @@ function startRenderer(targetRenderer: GalleryBaseRenderer, thumb: HTMLElement):
   }
 }
 
-export function clear(): void {
+export function hide(): void {
   for (const renderer of getRenderers()) {
     renderer.hide();
   }
 }
 
+export function exitGallery(): void {
+  getRenderers().forEach(renderer => renderer.hide());
+  GalleryImageRenderer.exitGallery();
+}
+
 export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
-  GalleryImageRenderer.preload(thumbs);
+  if (GallerySettings.onlyCacheImagesInGallery || (ON_MOBILE_DEVICE && GallerySettings.upscaleOnMobile)) {
+    GalleryImageRenderer.upscale(thumbs);
+  } else if (ON_DESKTOP_DEVICE) {
+    GalleryImageRenderer.preload(thumbs);
+  }
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  for (const renderer of getRenderers()) {
-    renderer.preload(thumbs);
-  }
+  getRenderers().forEach(renderer => renderer.preload(thumbs));
 }
 
 export function handlePageChange(): void {
-  for (const renderer of getRenderers()) {
-    renderer.handlePageChange();
-  }
+  getRenderers().forEach(renderer => renderer.handlePageChange());
 }
 
 export function handlePageChangeInGallery(): void {
-  for (const renderer of getRenderers()) {
-    renderer.handlePageChangeInGallery();
-  }
+  getRenderers().forEach(renderer => renderer.handlePageChangeInGallery());
 }
 
 export function handleResultsAddedToCurrentPage(thumbs: HTMLElement[]): void {
@@ -93,4 +98,8 @@ export function zoomToPoint(x: number, y: number): void {
 
 export function correctOrientation(): void {
   GalleryImageRenderer.correctOrientation();
+}
+
+export function preloadOneImage(thumb: HTMLElement): void {
+  GalleryImageRenderer.preloadOneImage(thumb);
 }

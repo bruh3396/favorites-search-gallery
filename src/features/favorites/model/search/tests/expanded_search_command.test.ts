@@ -31,11 +31,12 @@ describe("expandWildcardTags", () => {
     testExpandWildcardTags(" ", "");
     testExpandWildcardTags(" \n\t", "");
   });
+
   test("no wildcard tags", () => {
     testExpandWildcardTags("apple", "apple");
   });
 
-  test("no matches from expanding remaining rags", () => {
+  test("no matches from expanding remaining tags", () => {
     expect(testExpandWildcardTags("foobar", "foobar").hasNoMatches).toBe(false);
     expect(testExpandWildcardTags("foobar*", "").hasNoMatches).toBe(true);
     expect(testExpandWildcardTags("foobar* ap*", "").hasNoMatches).toBe(true);

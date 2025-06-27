@@ -6,6 +6,7 @@ import * as GalleryView from "../../../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
 import { FavoritesMouseEvent } from "../../../../../types/events/mouse_event";
 import { FavoritesWheelEvent } from "../../../../../types/events/wheel_event";
+import { GallerySettings } from "../../../../../config/gallery_settings";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 import { overGalleryMenu } from "../../../../../utils/dom/dom";
 import { throttle } from "../../../../../utils/misc/async";
@@ -16,6 +17,20 @@ function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
     return;
   }
   GalleryView.display(thumb);
+  GalleryPreloadFlow.preloadVisibleContentAround(thumb);
+}
+
+function onMouseOverWhileIdle(thumb: HTMLElement | null): void {
+  if (thumb === null) {
+    return;
+  }
+
+  if (GallerySettings.onlyCacheImagesInGallery) {
+    if (GallerySettings.preloadSingleImagesWhenCachingOutsideDisabled) {
+      GalleryView.preloadOneImage(thumb);
+    }
+    return;
+  }
   GalleryPreloadFlow.preloadVisibleContentAround(thumb);
 }
 
@@ -89,7 +104,7 @@ export const onMouseMove = throttle<MouseEvent>(() => {
 export function onMouseOver(mouseEvent: FavoritesMouseEvent): void {
   executeFunctionBasedOnGalleryState({
     hover: onMouseOverWhileHoverEnabled,
-    idle: GalleryPreloadFlow.preloadVisibleContentAround
+    idle: onMouseOverWhileIdle
   }, mouseEvent.thumb);
 }
 

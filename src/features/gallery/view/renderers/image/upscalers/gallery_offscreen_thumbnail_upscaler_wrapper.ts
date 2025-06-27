@@ -1,4 +1,4 @@
-import { UpscaleRequest, getUpscaleRequest } from "../../../../types/gallery_upscale_request";
+import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../types/gallery_offscreen_upscale_request";
 import { GalleryBaseThumbUpscaler } from "./gallery_base_thumbnail_upscaler";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 // @ts-expect-error string import
@@ -37,7 +37,7 @@ export class GalleryOffscreenThumbnailUpscalerWrapper extends GalleryBaseThumbUp
     });
   }
 
-  private sendRequestToWorker(request: UpscaleRequest): void {
+  private sendRequestToWorker(request: OffscreenUpscaleRequest): void {
     this.worker.postMessage({
       action: "upscale",
       request

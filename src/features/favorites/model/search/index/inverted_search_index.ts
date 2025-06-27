@@ -1,9 +1,9 @@
-import { ExpandedSearchCommand } from "../../features/favorites/model/search/search_command/expanded_search_command";
-import { SearchCommand } from "../../features/favorites/model/search/search_command/search_command";
-import { SearchTag } from "../../features/favorites/model/search/search_tags/search_tag";
-import { Searchable } from "../../types/interfaces/interfaces";
-import { SortedArray } from "./sorted_array";
-import { intersection } from "../../utils/collection/set";
+import { ExpandedSearchCommand } from "../search_command/expanded_search_command";
+import { SearchCommand } from "../search_command/search_command";
+import { SearchTag } from "../search_tags/search_tag";
+import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { SortedArray } from "../../../../../lib/components/sorted_array";
+import { intersection } from "../../../../../utils/collection/set";
 
 export class InvertedSearchIndex<T extends Searchable> {
   private readonly allSortedTags: SortedArray<string> = new SortedArray<string>();

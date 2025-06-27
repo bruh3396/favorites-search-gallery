@@ -2,10 +2,9 @@ import * as GalleryRenderer from "./renderers/gallery_renderer";
 import * as GalleryUI from "./ui/gallery_ui";
 import * as SearchPageCreator from "./search_page_creator";
 import { GALLERY_CONTAINER } from "../ui/gallery_container";
-import { GallerySettings } from "../../../config/gallery_settings";
-import { ON_DESKTOP_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { RemoveFavoriteStatus } from "../../../types/api/api_types";
 import { SearchPage } from "../../../types/search_page";
+import { debounceAlways } from "../../../utils/misc/async";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -21,7 +20,7 @@ export function display(thumb: HTMLElement): void {
 
 export function hide(): void {
   toggleVisibility(false);
-  GalleryRenderer.clear();
+  GalleryRenderer.hide();
   GalleryUI.hide();
 }
 
@@ -32,7 +31,7 @@ export function enterGallery(thumb: HTMLElement): void {
 }
 
 export function exitGallery(): void {
-  GalleryRenderer.clear();
+  GalleryRenderer.exitGallery();
   GalleryUI.exitGallery();
   toggleVisibility(false);
   toggleZoomCursor(false);
@@ -43,15 +42,11 @@ export function toggleVisibility(value: boolean): void {
 }
 
 export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
-  if (GallerySettings.preloadingEnabled && ON_DESKTOP_DEVICE) {
-    GalleryRenderer.preloadContentOutOfGallery(thumbs);
-  }
+  GalleryRenderer.preloadContentOutOfGallery(thumbs);
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  if (GallerySettings.preloadingEnabled) {
-    GalleryRenderer.preloadContentInGallery(thumbs);
-  }
+  GalleryRenderer.preloadContentInGallery(thumbs);
 }
 
 export function handlePageChange(): void {
@@ -117,8 +112,7 @@ export function toggleZoomCursor(value: boolean): void {
 }
 
 export function toggleZoom(value: boolean | undefined = undefined): boolean {
-  const zoomedIn = GalleryRenderer.toggleZoom(value);
-  return zoomedIn;
+  return GalleryRenderer.toggleZoom(value);
 }
 
 export function zoomToPoint(x: number, y: number): void {
@@ -134,10 +128,6 @@ export function setupGalleryView(): void {
   SearchPageCreator.setupSearchPageCreator();
 }
 
-export function revealGalleryMenu(): void {
-  // GalleryMenu.reveal();
-}
-
-export function setLinks(links: { post: string; image: string }): void {
-  // GalleryMenu.setLinks(links);
-}
+export const preloadOneImage = debounceAlways((thumb: HTMLElement) => {
+  GalleryRenderer.preloadOneImage(thumb);
+}, 300);

@@ -5,15 +5,20 @@ export class ThrottledQueue {
   private delay: number;
   private draining: boolean;
   private paused: boolean;
+  private unblocked: boolean;
 
-  constructor(delay: number) {
+  constructor(delay: number, unblocked: boolean = false) {
     this.queue = [];
     this.delay = delay;
     this.draining = false;
     this.paused = false;
+    this.unblocked = unblocked;
   }
 
   public wait(): Promise<void> {
+    if (this.unblocked) {
+      return Promise.resolve();
+    }
     return new Promise((resolve) => {
       this.queue.push(resolve);
       this.startDraining();

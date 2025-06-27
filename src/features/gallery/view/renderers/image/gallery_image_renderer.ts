@@ -5,8 +5,12 @@ import { GalleryNormalThumbUpscaler } from "./upscalers/gallery_normal_thumbnail
 import { GalleryOffscreenThumbnailUpscalerWrapper } from "./upscalers/gallery_offscreen_thumbnail_upscaler_wrapper";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
+import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
+import { USING_FIREFOX } from "../../../../../lib/global/flags/intrinsic_flags";
+import { UpscaleImageRequest } from "../../../types/gallery_upscale_image_request";
 
 const UPSCALER = GallerySettings.useOffscreenThumbUpscaler ? new GalleryOffscreenThumbnailUpscalerWrapper() : new GalleryNormalThumbUpscaler();
+const UPSCALE_QUEUE = new ThrottledQueue(20, !USING_FIREFOX);
 
 class ImageRenderer extends GalleryBaseRenderer {
   public lastShownId: string;
@@ -27,6 +31,17 @@ class ImageRenderer extends GalleryBaseRenderer {
     GalleryImageCache.cacheImages(thumbs);
   }
 
+  public preloadOneImage(thumb: HTMLElement): void {
+    GalleryImageCache.cacheSingleImage(thumb);
+  }
+
+  public async upscale(thumbs: HTMLElement[]): Promise<void> {
+    for (const thumb of thumbs) {
+      await UPSCALE_QUEUE.wait();
+      UPSCALER.upscale(new UpscaleImageRequest(thumb));
+    }
+  }
+
   public handlePageChange(): void {
     GalleryImageCache.clear();
     UPSCALER.handlePageChange();
@@ -45,13 +60,17 @@ class ImageRenderer extends GalleryBaseRenderer {
   }
 
   public upscaleThumbsWithAvailableImages(): void {
-    for (const request of GalleryImageCache.getImageRequests()) {
-      UPSCALER.upscale(request);
-    }
+    GalleryImageCache.getImageRequests().forEach(request => UPSCALER.upscale(request));
   }
 
-  public clear(): void {
-    GalleryCanvas.clear();
+  public exitGallery(): void {
+    if (GallerySettings.onlyCacheImagesInGallery) {
+      GalleryImageCache.clear();
+    }
+
+    if (USING_FIREFOX) {
+      GalleryCanvas.clear();
+    }
   }
 
   public onImageCreated(request: ImageRequest): void {

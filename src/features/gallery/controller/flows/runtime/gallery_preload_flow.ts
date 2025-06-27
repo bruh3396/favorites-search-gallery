@@ -6,7 +6,7 @@ import { GalleryState } from "../../../types/gallery_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 
 export function preloadContentInGalleryAround(thumb: HTMLElement | null): void {
-  if (thumb !== null) {
+  if (thumb !== null && GallerySettings.preloadingEnabled) {
     GalleryView.preloadContentInGallery(GalleryModel.getThumbsAround(thumb));
   }
 }
@@ -18,13 +18,19 @@ export function preloadVisibleContentAround(thumb: HTMLElement | null): void {
   }
 }
 
+export function canPreloadOutsideGallery(thumbs: HTMLElement[]): boolean {
+  return GallerySettings.preloadingEnabled &&
+    thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload &&
+    thumbs.length > 0;
+}
+
 export function preloadVisibleContent(): void {
   if (GalleryModel.getCurrentState() === GalleryState.IN_GALLERY) {
     return;
   }
   const thumbs = GalleryThumbObserver.getVisibleThumbs();
 
-  if (thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload && thumbs.length > 0) {
+  if (canPreloadOutsideGallery(thumbs)) {
     GalleryView.preloadContentOutOfGallery(thumbs);
   }
 }

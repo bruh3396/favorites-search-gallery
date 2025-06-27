@@ -1,10 +1,12 @@
 import { DO_NOTHING } from "../../../../../config/constants";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
+import { LowResolutionImageRequest } from "../../../types/gallery_low_resolution_image_request";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
 import { fetchImageBitmapFromThumb } from "../../../../../lib/api/media_api";
 import { getImageFromThumb } from "../../../../../utils/dom/dom";
+import { isImage } from "../../../../../utils/content/content_type";
 
 const ANIMATED_REQUEST_IDS: Set<string> = new Set();
 const IMAGE_REQUESTS: Map<string, ImageRequest> = new Map();
@@ -127,6 +129,17 @@ export function cacheImages(thumbs: HTMLElement[]): void {
   createImages(finalRequests);
 }
 
+export function cacheSingleImage(thumb: HTMLElement): void {
+  if (IMAGE_REQUESTS.has(thumb.id) || !isImage(thumb)) {
+    return;
+  }
+   createImageFromThumb(thumb);
+
+  if (IMAGE_REQUESTS.size > GallerySettings.maxSingleImageCacheCount) {
+    removeRequest(IMAGE_REQUESTS.values().next().value as ImageRequest);
+  }
+}
+
 export function clear(): void {
   for (const request of IMAGE_REQUESTS.values()) {
     removeRequest(request);
@@ -149,7 +162,7 @@ export function createLowResolutionImage(thumb: HTMLElement): void {
   if (image === null || image.naturalWidth === 0 || image.naturalHeight === 0) {
     return;
   }
-  const lowResolutionRequest = new ImageRequest(thumb, true);
+  const lowResolutionRequest = new LowResolutionImageRequest(thumb);
 
   createImageBitmap(image)
     .then((bitmap) => {

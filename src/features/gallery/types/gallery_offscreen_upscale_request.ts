@@ -2,6 +2,7 @@ import { GallerySettings } from "../../../config/gallery_settings";
 import { ImageRequest } from "./gallery_image_request";
 import { convertImageURLToSampleURL } from "../../../utils/content/image_url";
 import { getOriginalImageURL } from "../../../lib/api/media_api";
+import { isImage } from "../../../utils/content/content_type";
 
 export const TRANSFERRED_CANVAS_IDS = new Set<string>();
 
@@ -16,13 +17,13 @@ function getImageBitmapClone(imageRequest: ImageRequest): Promise<ImageBitmap | 
   return createImageBitmap(imageRequest.bitmap);
 }
 
-export async function getUpscaleRequest(imageRequest: ImageRequest): Promise<UpscaleRequest> {
+export async function getUpscaleRequest(imageRequest: ImageRequest): Promise<OffscreenUpscaleRequest> {
   const bitmapClone = await getImageBitmapClone(imageRequest);
   const imageURL = await getOriginalImageURL(imageRequest.thumb);
-  return new UpscaleRequest(imageRequest.thumb, bitmapClone, imageURL);
+  return new OffscreenUpscaleRequest(imageRequest.thumb, bitmapClone, imageURL);
 }
 
-export class UpscaleRequest {
+export class OffscreenUpscaleRequest {
   public id: string;
   public action: string;
   public hasDimensions: boolean;
@@ -38,7 +39,7 @@ export class UpscaleRequest {
     this.offscreenCanvas = this.getOffscreenCanvas(thumb);
     this.bitmap = bitmap;
     this.imageURL = imageURL;
-    this.sampleURL = convertImageURLToSampleURL(imageURL);
+    this.sampleURL = isImage(thumb) ? convertImageURLToSampleURL(imageURL) : imageURL;
   }
 
   public get transferable(): OffscreenCanvas[] {

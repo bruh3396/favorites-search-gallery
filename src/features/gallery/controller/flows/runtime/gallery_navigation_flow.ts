@@ -3,9 +3,9 @@ import * as GalleryFavoritesFlow from "./gallery_favorites_flow";
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Events } from "../../../../../lib/global/events/events";
 import { NavigationKey } from "../../../../../types/primitives/primitives";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 
 function changeFavoritesPageInGallery(direction: NavigationKey): Promise<HTMLElement> {
   return new Promise((resolve, reject) => {
@@ -45,14 +45,10 @@ function changeSearchPageInGallery(direction: NavigationKey): void {
   }
 }
 
-async function completeNavigation(thumb: HTMLElement): Promise<void> {
+ function completeNavigation(thumb: HTMLElement): void {
   GalleryView.showContentInGallery(thumb);
   GalleryAutoplayController.startViewTimer(thumb);
   GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
-
-  if (ON_MOBILE_DEVICE) {
-    GalleryView.setLinks(await GalleryModel.getLinksFromCurrentThumb());
-  }
 }
 
 export function navigateRight(): void {

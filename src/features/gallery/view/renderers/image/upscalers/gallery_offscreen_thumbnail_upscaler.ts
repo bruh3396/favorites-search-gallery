@@ -1,19 +1,25 @@
-import { UpscaleRequest } from "../../../../types/gallery_upscale_request";
+import { OffscreenUpscaleRequest } from "../../../../types/gallery_offscreen_upscale_request";
 
 declare let SharedGallerySettings: {
-  maxUpscaledThumbCanvasHeight: number;
-  upscaledThumbCanvasWidth: number;
+  maxUpscaledThumbCanvasHeight: number
+  upscaledThumbCanvasWidth: number
+  onlyCacheImagesInGallery: true
+  upscaleUsingSamples: true
 };
 
 const OFFSCREEN_CANVASES: Map<string, OffscreenCanvas> = new Map();
 
-async function createImageBitmapFromRequest(request: UpscaleRequest): Promise<ImageBitmap> {
-  const response = await fetch(request.imageURL);
-  const blob = await response.blob();
-  return createImageBitmap(blob);
+async function createImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
+  const url = SharedGallerySettings.upscaleUsingSamples ? request.sampleURL : request.imageURL;
+  let response = await fetch(url);
+
+  if (!response.ok) {
+    response = await fetch(request.imageURL);
+  }
+  return createImageBitmap(await response.blob());
 }
 
-function getImageBitmapFromRequest(request: UpscaleRequest): Promise<ImageBitmap> {
+function getImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
   return request.bitmap instanceof ImageBitmap ? Promise.resolve(request.bitmap) : createImageBitmapFromRequest(request);
 }
 
@@ -50,7 +56,7 @@ function clearOffscreenCanvas(offscreenCanvas: OffscreenCanvas): void {
   }, 20);
 }
 
-function setOffscreenCanvasDimensions(request: UpscaleRequest, bitmap: ImageBitmap): void {
+function setOffscreenCanvasDimensions(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
   if (request.hasDimensions || request.offscreenCanvas === null) {
     return;
   }
@@ -73,7 +79,7 @@ function setOffscreenCanvasDimensions(request: UpscaleRequest, bitmap: ImageBitm
   request.offscreenCanvas.height = targetHeight;
 }
 
-function handleMessage(message: MessageEvent<{action: string, request: UpscaleRequest}>): void {
+function handleMessage(message: MessageEvent<{ action: string, request: OffscreenUpscaleRequest }>): void {
   const request = message.data;
 
   switch (request.action) {
@@ -90,21 +96,21 @@ function handleMessage(message: MessageEvent<{action: string, request: UpscaleRe
   }
 }
 
-async function upscale(request: UpscaleRequest): Promise<void> {
+async function upscale(request: OffscreenUpscaleRequest): Promise<void> {
   const bitmap = await getImageBitmapFromRequest(request);
 
   collectOffscreenCanvas(request, bitmap);
   drawOffscreenCanvasFromRequest(request, bitmap);
 }
 
-function collectOffscreenCanvas(request: UpscaleRequest, bitmap: ImageBitmap): void {
+function collectOffscreenCanvas(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
   if (!OFFSCREEN_CANVASES.has(request.id) && request.offscreenCanvas !== null) {
     OFFSCREEN_CANVASES.set(request.id, request.offscreenCanvas);
     setOffscreenCanvasDimensions(request, bitmap);
   }
 }
 
-function drawOffscreenCanvasFromRequest(request: UpscaleRequest, bitmap: ImageBitmap): void {
+function drawOffscreenCanvasFromRequest(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
   const offscreenCanvas = OFFSCREEN_CANVASES.get(request.id);
 
   if (offscreenCanvas === undefined) {

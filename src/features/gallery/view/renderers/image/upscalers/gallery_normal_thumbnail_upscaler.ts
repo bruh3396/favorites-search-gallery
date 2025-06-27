@@ -1,26 +1,29 @@
-import { BatchExecutor } from "../../../../../../lib/components/batch_executor";
+import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/api/media_api";
 import { GalleryBaseThumbUpscaler } from "./gallery_base_thumbnail_upscaler";
 import { ImageRequest } from "../../../../types/gallery_image_request";
-import { ThrottledQueue } from "../../../../../../lib/components/throttled_queue";
+import { ON_MOBILE_DEVICE } from "../../../../../../lib/global/flags/intrinsic_flags";
+import { SharedGallerySettings } from "../../../../../../config/shared_gallery_settings";
+import { UpscaleImageRequest } from "../../../../types/gallery_upscale_image_request";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
+import { isImage } from "../../../../../../utils/content/content_type";
 
 export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
   public canvases: Map<string, HTMLCanvasElement> = new Map();
-  public scheduler: BatchExecutor<ImageRequest> = new BatchExecutor(1, 500, this.upscaleBatch.bind(this));
-  public drawQueue: ThrottledQueue = new ThrottledQueue(75);
 
   public finishUpscale(request: ImageRequest): void {
-    // this.scheduler.add(request);
-    this.finishUpscaleHelper(request);
+    if (SharedGallerySettings.upscaleUsingSamples || ON_MOBILE_DEVICE) {
+      this.upscaleSampleImageRequest(request);
+    } else {
+      this.upscaleImageRequest(request);
+    }
   }
 
-  public finishUpscaleHelper(request: ImageRequest): void {
+  public upscaleImageRequest(request: ImageRequest): void {
     const canvas = request.thumb.querySelector("canvas");
 
     if (!(canvas instanceof HTMLCanvasElement) || !(request.bitmap instanceof ImageBitmap)) {
       return;
     }
-    // await this.drawQueue.wait();
     this.canvases.set(request.id, canvas);
     this.setCanvasDimensionsFromImageBitmap(canvas, request.bitmap);
     drawScaledCanvas(canvas.getContext("2d"), request.bitmap);
@@ -30,6 +33,14 @@ export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
     }
   }
 
+  public async upscaleSampleImageRequest(request: UpscaleImageRequest): Promise<void> {
+    const bitmap = isImage(request.thumb) ? await fetchSampleImageBitmapFromThumb(request.thumb) : await fetchImageBitmapFromThumb(request.thumb);
+
+    request.complete(bitmap);
+    this.upscaleImageRequest(request);
+    request.close();
+  }
+
   public clear(): void {
     super.clear();
 
@@ -37,7 +48,6 @@ export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
       this.clearCanvas(canvas);
     }
     this.canvases.clear();
-    this.scheduler.reset();
   }
 
   public setCanvasDimensionsFromImageBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap): void {
@@ -58,7 +68,7 @@ export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
 
   private upscaleBatch(requests: ImageRequest[]): void {
     for (const request of requests) {
-      this.finishUpscaleHelper(request);
+      this.upscaleImageRequest(request);
     }
   }
 }
