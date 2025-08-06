@@ -10,7 +10,7 @@ export function cleanImageSource(source: string): string {
 
 export function decompressPreviewSource(compressedSource: string): string {
   const splitSource = compressedSource.split("_");
-  return `https://us.rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg`;
+  return `https://wimg.rule34.xxx/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg`;
 }
 
 export function compressPreviewSource(source: string): string {

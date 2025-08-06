@@ -1,12 +1,12 @@
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { getAllThumbs, getRectDistance, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
 import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { debounceAlways } from "../../../../../utils/misc/async";
 
 const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;
-const intersectionObserver: IntersectionObserver = createIntersectionObserver(getInitialFavoritesMenuHeight());
+const intersectionObserver: IntersectionObserver | null = createIntersectionObserver(getInitialFavoritesMenuHeight());
 let bypassDebounce = true;
 
 const broadcastDebounceAlways = debounceAlways((entries: IntersectionObserverEntry[]) => {
@@ -41,7 +41,10 @@ function getInitialFavoritesMenuHeight(): number {
   return -200;
 }
 
-function createIntersectionObserver(topMargin: number = 0): IntersectionObserver {
+function createIntersectionObserver(topMargin: number = 0): IntersectionObserver | null {
+  if (ON_MOBILE_DEVICE) {
+    return null;
+  }
   return new IntersectionObserver(onVisibleThumbsChanged, {
     root: null,
     rootMargin: getFinalRootMargin(topMargin),
@@ -50,7 +53,6 @@ function createIntersectionObserver(topMargin: number = 0): IntersectionObserver
 }
 
 function getFinalRootMargin(topMargin: number): string {
-  // return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPixelGenerosity}px 0px`;
   return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
 }
 
@@ -77,12 +79,19 @@ function bypassDebounceAlwaysOnPageChange(): void {
 }
 
 export function observe(thumbs: HTMLElement[]): void {
+  if (intersectionObserver === null) {
+    return;
+  }
+
   for (const thumb of thumbs) {
     intersectionObserver.observe(thumb);
   }
 }
 
 export async function observeAllThumbsOnPage(): Promise<void> {
+  if (intersectionObserver === null) {
+    return;
+  }
   intersectionObserver.disconnect();
   visibleThumbs.clear();
 

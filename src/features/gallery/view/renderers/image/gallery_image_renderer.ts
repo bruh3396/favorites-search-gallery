@@ -64,10 +64,6 @@ class ImageRenderer extends GalleryBaseRenderer {
   }
 
   public exitGallery(): void {
-    if (GallerySettings.onlyCacheImagesInGallery) {
-      GalleryImageCache.clear();
-    }
-
     if (USING_FIREFOX) {
       GalleryCanvas.clear();
     }

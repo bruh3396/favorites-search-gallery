@@ -1,9 +1,7 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { isGif, isVideo } from "../../../../utils/content/content_type";
 import { GalleryBaseRenderer } from "./gallery_base_renderer";
 import { GalleryGifRenderer } from "./gif/gallery_gif_renderer";
 import { GalleryImageRenderer } from "./image/gallery_image_renderer";
-import { GallerySettings } from "../../../../config/gallery_settings";
 import { GalleryVideoRenderer } from "./video/gallery_video_renderer";
 
 function getRenderers(): GalleryBaseRenderer[] {
@@ -45,11 +43,7 @@ export function exitGallery(): void {
 }
 
 export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
-  if (GallerySettings.onlyCacheImagesInGallery || (ON_MOBILE_DEVICE && GallerySettings.upscaleOnMobile)) {
-    GalleryImageRenderer.upscale(thumbs);
-  } else if (ON_DESKTOP_DEVICE) {
     GalleryImageRenderer.preload(thumbs);
-  }
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {

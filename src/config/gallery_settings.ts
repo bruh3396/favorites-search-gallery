@@ -1,5 +1,4 @@
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/global/flags/intrinsic_flags";
-import { SharedGallerySettings } from "./shared_gallery_settings";
 
 export const GallerySettings = {
   mainCanvasResolutions: {
@@ -29,8 +28,6 @@ export const GallerySettings = {
   maxVisibleThumbsBeforeStoppingPreload: 175,
   useOffscreenThumbUpscaler: false,
   fetchImageBitmapsInWorker: true,
-  onlyCacheImagesInGallery: SharedGallerySettings.upscaleUsingSamples,
-  upscaleOnMobile: false,
   preloadSingleImagesWhenCachingOutsideDisabled: true,
   maxSingleImageCacheCount: 5,
   get sendImageBitmapsToWorker(): boolean {

@@ -6,7 +6,6 @@ import * as GalleryView from "../../../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
 import { FavoritesMouseEvent } from "../../../../../types/events/mouse_event";
 import { FavoritesWheelEvent } from "../../../../../types/events/wheel_event";
-import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 import { overGalleryMenu } from "../../../../../utils/dom/dom";
@@ -23,13 +22,6 @@ function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
 
 function onMouseOverWhileIdle(thumb: HTMLElement | null): void {
   if (thumb === null || !ON_FAVORITES_PAGE) {
-    return;
-  }
-
-  if (GallerySettings.onlyCacheImagesInGallery) {
-    if (GallerySettings.preloadSingleImagesWhenCachingOutsideDisabled) {
-      GalleryView.preloadOneImage(thumb);
-    }
     return;
   }
   GalleryPreloadFlow.preloadVisibleContentAround(thumb);
