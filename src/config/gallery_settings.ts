@@ -30,7 +30,7 @@ export const GallerySettings = {
   useOffscreenThumbUpscaler: false,
   fetchImageBitmapsInWorker: true,
   onlyCacheImagesInGallery: SharedGallerySettings.upscaleUsingSamples,
-  upscaleOnMobile: true,
+  upscaleOnMobile: false,
   preloadSingleImagesWhenCachingOutsideDisabled: true,
   maxSingleImageCacheCount: 5,
   get sendImageBitmapsToWorker(): boolean {

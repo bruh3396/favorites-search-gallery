@@ -1,5 +1,5 @@
 import * as FavoritesDatabase from "./favorites_database";
-import * as FavoritesFetcher from "./favorites_page_fetcher";
+import * as FavoritesFetcher from "./favorites_fetcher";
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 
 let allFavorites: FavoriteItem[] = [];

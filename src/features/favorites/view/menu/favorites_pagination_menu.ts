@@ -159,7 +159,8 @@ export function toggle(value: boolean): void {
       #favorites-pagination-container,
       #results-per-page-container,
       #favorite-finder,
-      #pagination-range-label
+      #pagination-range-label,
+      #favorites-bottom-navigation-buttons
       {
         display: none !important;
       }

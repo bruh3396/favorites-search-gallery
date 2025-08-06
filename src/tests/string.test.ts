@@ -1,4 +1,4 @@
-import { capitalize, convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeLeadingHyphens, removeNonNumericCharacters, toCamelCase } from "../utils/primitive/string";
+import { capitalize, convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores, toCamelCase } from "../utils/primitive/string";
 import { describe, expect, test } from "vitest";
 
 describe("toCamelCase", () => {
@@ -402,4 +402,12 @@ describe("removeLeadingHyphen", () => {
     expect(removeLeadingHyphens("---apple")).toBe("apple");
     expect(removeLeadingHyphens("--banana")).toBe("banana");
   });
+});
+
+test("replaceSpacesWithUnderscores", () => {
+  expect(replaceSpacesWithUnderscores("apple banana cherry")).toBe("apple_banana_cherry");
+  expect(replaceSpacesWithUnderscores("apple")).toBe("apple");
+  expect(replaceSpacesWithUnderscores("apple banana")).toBe("apple_banana");
+  expect(replaceSpacesWithUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
+
 });

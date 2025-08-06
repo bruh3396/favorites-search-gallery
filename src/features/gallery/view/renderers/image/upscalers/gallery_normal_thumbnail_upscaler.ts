@@ -1,7 +1,6 @@
 import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/api/media_api";
 import { GalleryBaseThumbUpscaler } from "./gallery_base_thumbnail_upscaler";
 import { ImageRequest } from "../../../../types/gallery_image_request";
-import { ON_MOBILE_DEVICE } from "../../../../../../lib/global/flags/intrinsic_flags";
 import { SharedGallerySettings } from "../../../../../../config/shared_gallery_settings";
 import { UpscaleImageRequest } from "../../../../types/gallery_upscale_image_request";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
@@ -11,7 +10,7 @@ export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
   public canvases: Map<string, HTMLCanvasElement> = new Map();
 
   public finishUpscale(request: ImageRequest): void {
-    if (SharedGallerySettings.upscaleUsingSamples || ON_MOBILE_DEVICE) {
+    if (SharedGallerySettings.upscaleUsingSamples) {
       this.upscaleSampleImageRequest(request);
     } else {
       this.upscaleImageRequest(request);

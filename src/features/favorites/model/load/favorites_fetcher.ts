@@ -1,5 +1,5 @@
 import * as API from "../../../../lib/api/api";
-import * as FavoritesFetchQueue from "./favorites_page_fetch_queue";
+import * as FavoritesFetchQueue from "./favorites_fetch_queue";
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 import { extractFavorites } from "./favorites_extractor";

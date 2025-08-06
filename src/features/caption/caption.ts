@@ -439,6 +439,16 @@ function populateTags(thumb: HTMLElement): void {
   addTags(tagNames, thumb);
 }
 
+// export function provideTags(thumb: HTMLElement): void {
+//   const tagNames = getTagSetFromThumb(thumb);
+//   const unknownThumbTags = Array.from(tagNames).filter(tagName => tagCategoryIsUnknown(thumb, tagName));
+
+//   if (unknownThumbTags.length > 0) {
+
+//   }
+
+// }
+
 function addTags(tags: Set<string>, thumb: HTMLElement): void {
   if (currentThumbId !== thumb.id) {
     return;

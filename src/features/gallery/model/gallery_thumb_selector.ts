@@ -2,6 +2,7 @@ import { isImage, isVideo } from "../../../utils/content/content_type";
 import { Favorite } from "../../../types/interfaces/interfaces";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { getWrappedElementsAroundIndex } from "../../../utils/collection/array";
+import { removeNonNumericCharacters } from "../../../utils/primitive/string";
 
 let latestSearchResults: Favorite[] = [];
 let thumbsOnCurrentPage: HTMLElement[] = [];
@@ -26,7 +27,7 @@ export function setLatestSearchResults(searchResults: Favorite[]): void {
 
 function enumerateCurrentPageThumbs(): void {
   for (let i = 0; i < thumbsOnCurrentPage.length; i += 1) {
-    enumeratedThumbs.set(thumbsOnCurrentPage[i].id, i);
+    enumeratedThumbs.set(removeNonNumericCharacters(thumbsOnCurrentPage[i].id), i);
   }
 }
 

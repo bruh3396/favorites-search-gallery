@@ -118,3 +118,7 @@ export function removeFirstAndLastLines(text: string): string {
 export function removeLeadingHyphens(tag: string): string {
   return tag.replace(/^[-*]*/, "");
 }
+
+export function replaceSpacesWithUnderscores(tagName: string): string {
+  return tagName.replaceAll(/\s/gm, "_");
+}

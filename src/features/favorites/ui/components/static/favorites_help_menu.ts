@@ -29,6 +29,7 @@ function createWhatsNewMenu(): void {
 
 function createDialogWhatsNewMenu(menu: HTMLElement): void {
   dialog = document.createElement("dialog");
+  dialog.id = "whats-new-dialog";
   dialog.style.padding = "5px 10px";
   dialog.style.fontSize = "large";
   dialog.classList.add(getCurrentThemeClass());

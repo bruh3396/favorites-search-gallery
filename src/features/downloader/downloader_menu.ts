@@ -6,6 +6,7 @@ import { Events } from "../../lib/global/events/events";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/global/container";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { Preferences } from "../../lib/global/preferences/preferences";
+import { insertHTMLAndExtractStyle } from "../../utils/dom/style";
 import { splitIntoChunks } from "../../utils/collection/array";
 
 let dialog: HTMLDialogElement;
@@ -19,7 +20,7 @@ let latestSearchResults: Favorite[] = [];
 
 export function setupDownloadMenu(): void {
   FavoritesDownloader.setupFavoritesDownloader();
-  FAVORITES_SEARCH_GALLERY_CONTAINER.insertAdjacentHTML("beforeend", DOWNLOADER_HTML);
+  insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_CONTAINER, "beforeend", DOWNLOADER_HTML);
   dialog = getDialog("download-menu");
   warningDialog = getDialog("download-menu-warning");
   downloadButton = getDownloadButton();

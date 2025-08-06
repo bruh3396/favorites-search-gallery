@@ -19,6 +19,8 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
   Events.favorites.pageSelected.on(FavoritesPaginationFlow.gotoPage.bind(FavoritesPaginationFlow));
   Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.gotoRelativePage.bind(FavoritesPaginationFlow));
+  Events.favorites.searchSubsetClicked.on(FavoritesModel.setSearchSubset);
+  Events.favorites.stopSearchSubsetClicked.on(FavoritesModel.stopSearchSubset);
 
   Events.favorites.resetConfirmed.on(FavoritesResetFlow.resetFavorites);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);

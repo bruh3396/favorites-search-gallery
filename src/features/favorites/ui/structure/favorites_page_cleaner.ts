@@ -11,7 +11,7 @@ function clearOriginalFavoritesContent(): void {
 
 function removeUnusedFavoritesPageScripts(): void {
   for (const script of document.querySelectorAll("script")) {
-    if ((/(?:fluidplayer|awesomplete)/).test(script.src || "")) {
+    if ((/(?:fluidplayer|awesomplete)/).test(script.src ?? "")) {
       script.remove();
     }
   }

@@ -1518,6 +1518,17 @@ export const FAVORITES_HTML = `
     #favorites-load-status-label.hidden {
       display: none;
     }
+
+    #favorites-bottom-navigation-buttons {
+      display: flex;
+      margin-top: auto;
+
+      &>button {
+        font-size: xx-large;
+        height: 50px;
+        flex: 1;
+      }
+    }
    </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">

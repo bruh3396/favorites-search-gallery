@@ -16,7 +16,8 @@ export function prepareThumbsOnSearchPage(thumbs: HTMLElement[]): HTMLElement[] 
   return thumbs;
 }
 
-export function prepareAllThumbsOnSearchPage(): void {
+export async function prepareAllThumbsOnSearchPage(): Promise<void> {
+  await sleep(400);
   const thumbs = getAllThumbs();
 
   prepareThumbsOnSearchPage(thumbs);
