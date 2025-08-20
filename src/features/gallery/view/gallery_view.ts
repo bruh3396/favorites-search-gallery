@@ -4,7 +4,6 @@ import * as SearchPageCreator from "./search_page_creator";
 import { GALLERY_CONTAINER } from "../ui/gallery_container";
 import { RemoveFavoriteStatus } from "../../../types/api/api_types";
 import { SearchPage } from "../../../types/search_page";
-import { debounceAlways } from "../../../utils/misc/async";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -127,7 +126,3 @@ export function setupGalleryView(): void {
   GalleryUI.setupGalleryUI();
   SearchPageCreator.setupSearchPageCreator();
 }
-
-export const preloadOneImage = debounceAlways((thumb: HTMLElement) => {
-  GalleryRenderer.preloadOneImage(thumb);
-}, 300);

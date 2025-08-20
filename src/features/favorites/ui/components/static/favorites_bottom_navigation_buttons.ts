@@ -1,11 +1,12 @@
 import { Events } from "../../../../../lib/global/events/events";
 import { FAVORITES_CONTENT_CONTAINER } from "../../structure/favorites_content_container";
+import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
 import { yield1 } from "../../../../../utils/misc/async";
 
 export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
-  if (ON_MOBILE_DEVICE) {
+  if (ON_MOBILE_DEVICE || !FavoritesSettings.bottomNavigationButtonsEnabled) {
     return;
   }
   const container = document.createElement("div");

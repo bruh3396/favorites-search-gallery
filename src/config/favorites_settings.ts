@@ -27,5 +27,6 @@ export const FavoritesSettings = {
   skeletonAnimationClasses: "pulse",
   infiniteScrollBatchCount: 25,
   infiniteScrollPreloadCount: 100,
-  favoriteFinderEnabled: false
+  favoriteFinderEnabled: false,
+  bottomNavigationButtonsEnabled: false
 };

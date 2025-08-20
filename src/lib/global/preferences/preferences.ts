@@ -14,7 +14,7 @@ export const Preferences = {
   allowedRatings: new Preference<Rating>("allowedRatings", 7),
   favoriteFinderId: new Preference("findFavorite", ""),
   searchPagesEnabled: new Preference("enableOnSearchPages", false),
-  performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.HIGH),
+  performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.NORMAL),
   favoritesLayout: new Preference<FavoriteLayout>("layout", "column"),
   excludeBlacklistEnabled: new Preference("excludeBlacklist", false),
   resultsPerPage: new Preference("resultsPerPage", 200),

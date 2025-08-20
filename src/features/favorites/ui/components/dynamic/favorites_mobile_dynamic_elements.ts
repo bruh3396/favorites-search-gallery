@@ -108,7 +108,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     event: Events.favorites.darkThemeToggled,
     function: toggleDarkTheme
   },
-    {
+  {
     id: "enhance-search-pages",
     parentId: "favorite-options-left",
     textContent: "Search Page Gallery",
@@ -144,17 +144,16 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<n
     position: "beforeend",
     preference: Preferences.sortingMethod,
     event: Events.favorites.sortingMethodChanged,
-    options:
-    {
-      default: "Default",
-      score: "Score",
-      width: "Width",
-      height: "Height",
-      creationTimestamp: "Date Uploaded",
-      lastChangedTimestamp: "Date Changed",
-      id: "ID",
-      random: "Random"
-    }
+    options: new Map<MetadataMetric, string>([
+      ["default", "Default"],
+      ["score", "Score"],
+      ["width", "Width"],
+      ["height", "Height"],
+      ["creationTimestamp", "Date Uploaded"],
+      ["lastChangedTimestamp", "Date Changed"],
+      ["id", "ID"],
+      ["random", "Random"]
+    ])
   },
   {
     id: "layout-select",
@@ -164,13 +163,12 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<n
     preference: Preferences.favoritesLayout,
     event: Events.favorites.layoutChanged,
     function: hideUnusedLayoutSizer,
-    options:
-    {
-      column: "Waterfall",
-      row: "River",
-      square: "Square",
-      grid: "Legacy"
-    }
+    options: new Map<FavoriteLayout, string>([
+      ["column", "Waterfall"],
+      ["row", "River"],
+      ["square", "Square"],
+      ["grid", "Legacy"]
+    ])
   },
   {
     id: "results-per-page", parentId: "results-per-page-container",
@@ -179,17 +177,16 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<n
     triggerOnCreation: true,
     preference: Preferences.resultsPerPage,
     event: Events.favorites.resultsPerPageChanged,
-    options:
-    {
-      5: "5",
-      10: "10",
-      20: "20",
-      50: "50",
-      100: "100",
-      200: "200",
-      500: "500",
-      1000: "1000"
-    }
+    options: new Map<number, string>([
+      [5, "5"],
+      [10, "10"],
+      [20, "20"],
+      [50, "50"],
+      [100, "100"],
+      [200, "200"],
+      [500, "500"],
+      [1000, "1000"]
+    ])
   },
   {
     id: "column-count",
@@ -198,18 +195,18 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<n
     preference: Preferences.columnCount,
     triggerOnCreation: true,
     event: Events.favorites.columnCountChanged,
-    options: {
-      1: "1",
-      2: "2",
-      3: "3",
-      4: "4",
-      5: "5",
-      6: "6",
-      7: "7",
-      8: "8",
-      9: "9",
-      10: "10"
-    }
+    options: new Map<number, string>([
+      [1, "1"],
+      [2, "2"],
+      [3, "3"],
+      [4, "4"],
+      [5, "5"],
+      [6, "6"],
+      [7, "7"],
+      [8, "8"],
+      [9, "9"],
+      [10, "10"]
+    ])
   },
   {
     id: "row-size",
@@ -218,14 +215,15 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<n
     preference: Preferences.rowSize,
     triggerOnCreation: true,
     event: Events.favorites.rowSizeChanged,
-    options: {
-      2: "2",
-      3: "3",
-      4: "4",
-      5: "5",
-      6: "6",
-      7: "7"
-    }
+    options: new Map<number, string>([
+      [1, "1"],
+      [2, "2"],
+      [3, "3"],
+      [4, "4"],
+      [5, "5"],
+      [6, "6"],
+      [7, "7"]
+    ])
   }
 ];
 

@@ -30,14 +30,14 @@ describe("cleanImageSource", () => {
 describe("compressImageSource", () => {
   test("normal", () => {
     const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-    const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
+    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
 
     expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
   });
 
   test("no subdomain", () => {
     const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-    const expected = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
+    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
 
     expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
   });

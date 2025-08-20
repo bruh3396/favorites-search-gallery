@@ -4,7 +4,7 @@ import { DO_NOTHING } from "../../config/constants";
 function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T>>): SelectElement<T> {
   return {
     ...DEFAULT_MENU_ELEMENT,
-    options: {} as Record<T, string>,
+    options: new Map(),
     savePreference: false,
     defaultValue: "" as T,
     event: null,
@@ -29,7 +29,7 @@ export function createSelectElement<T extends string>(partial: Partial<SelectEle
   select.id = template.id;
   select.title = template.title;
 
-  for (const [value, text] of Object.entries<string>(template.options)) {
+  for (const [value, text] of template.options) {
     const option = document.createElement("option");
 
     option.id = `${template.id}-${value}`;

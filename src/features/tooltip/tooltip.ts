@@ -250,7 +250,7 @@ function formatHTML(tags: string): string {
     const tagColor = getColorCode(tag);
     const tagWithSpace = `${tag} `;
 
-    if (tagColor === undefined) {
+    if (tagColor === null) {
       unmatchedTagsHTML += tagWithSpace;
       // } else if (includesTag(tag, new Set(Utils.tagBlacklist.split(" ")))) {
       // unmatchedTagsHTML += `<span style="color:red"><s><b>${tagWithSpace}</b></s></span>`;
@@ -315,23 +315,23 @@ function addColorCodedTag(tag: string, color: string): void {
   }
 }
 
-function getColorCode(tag: string): string | undefined {
+function getColorCode(tag: string): string | null {
   if (searchTagColorCodes[tag] !== undefined) {
     return searchTagColorCodes[tag];
   }
 
   for (const searchTag of Object.keys(searchTagColorCodes)) {
-    if (tagsMatchWildcardSearchTag(searchTag, [tag])) {
+    if (tagsMatchWildcardSearchTag(searchTag, tag)) {
       return searchTagColorCodes[searchTag];
     }
   }
-  return undefined;
+  return null;
 }
 
-function tagsMatchWildcardSearchTag(searchTag: string, tags: string[]): boolean {
+function tagsMatchWildcardSearchTag(searchTag: string, tag: string): boolean {
   try {
     const wildcardRegex = new RegExp(`^${searchTag.replace(/\*/g, ".*")}$`);
-    return tags.some(tag => wildcardRegex.test(tag));
+    return wildcardRegex.test(tag);
   } catch {
     return false;
   }

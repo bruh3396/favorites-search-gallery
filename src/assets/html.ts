@@ -1529,6 +1529,10 @@ export const FAVORITES_HTML = `
         flex: 1;
       }
     }
+
+    #performance-profile {
+      width: 160px !important;
+    }
    </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">

@@ -4,6 +4,8 @@ import * as GalleryView from "../../../view/gallery_view";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { GalleryState } from "../../../types/gallery_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { PerformanceProfile } from "../../../../../types/primitives/enums";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
 export function preloadContentInGalleryAround(thumb: HTMLElement | null): void {
   if (thumb !== null && GallerySettings.preloadingEnabled) {
@@ -25,6 +27,10 @@ export function canPreloadOutsideGallery(thumbs: HTMLElement[]): boolean {
 }
 
 export function preloadVisibleContent(): void {
+  if (Preferences.performanceProfile.value === PerformanceProfile.MEDIUM) {
+    return;
+  }
+
   if (GalleryModel.getCurrentState() === GalleryState.IN_GALLERY) {
     return;
   }

@@ -93,7 +93,3 @@ export function zoomToPoint(x: number, y: number): void {
 export function correctOrientation(): void {
   GalleryImageRenderer.correctOrientation();
 }
-
-export function preloadOneImage(thumb: HTMLElement): void {
-  GalleryImageRenderer.preloadOneImage(thumb);
-}

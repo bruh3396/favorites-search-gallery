@@ -305,17 +305,16 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<M
     position: "beforeend",
     preference: Preferences.sortingMethod,
     event: Events.favorites.sortingMethodChanged,
-    options:
-    {
-      default: "Default",
-      score: "Score",
-      width: "Width",
-      height: "Height",
-      creationTimestamp: "Date Uploaded",
-      lastChangedTimestamp: "Date Changed",
-      id: "ID",
-      random: "Random"
-    }
+    options: new Map<MetadataMetric, string>([
+      ["default", "Default"],
+      ["score", "Score"],
+      ["width", "Width"],
+      ["height", "Height"],
+      ["creationTimestamp", "Date Uploaded"],
+      ["lastChangedTimestamp", "Date Changed"],
+      ["id", "ID"],
+      ["random", "Random"]
+    ])
   },
   {
     id: "layout-select",
@@ -325,13 +324,12 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<M
     preference: Preferences.favoritesLayout,
     event: Events.favorites.layoutChanged,
     function: hideUnusedLayoutSizer,
-    options:
-    {
-      column: "Waterfall",
-      row: "River",
-      square: "Square",
-      grid: "Legacy"
-    }
+    options: new Map<FavoriteLayout, string>([
+      ["column", "Waterfall"],
+      ["row", "River"],
+      ["square", "Square"],
+      ["grid", "Legacy"]
+    ])
   },
   {
     id: "performance-profile",
@@ -342,12 +340,12 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<M
     event: Events.favorites.performanceProfileChanged,
     function: reloadWindow,
     isNumeric: true,
-    options:
-    {
-      0: "Normal",
-      1: "Low (no gallery)",
-      2: "Potato (only search)"
-    }
+    options: new Map<PerformanceProfile, string>([
+      [PerformanceProfile.NORMAL, "Normal"],
+      [PerformanceProfile.MEDIUM, "Medium (no upscaling)"],
+      [PerformanceProfile.LOW, "Low (no gallery)"],
+      [PerformanceProfile.POTATO, "Potato (only search)"]
+    ])
   }
 ];
 

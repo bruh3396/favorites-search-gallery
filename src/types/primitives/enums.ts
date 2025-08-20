@@ -1,7 +1,8 @@
 export enum PerformanceProfile {
-  LOW = 2,
-  MEDIUM = 1,
-  HIGH = 0
+  NORMAL = 0,
+  MEDIUM = 3,
+  LOW = 1,
+  POTATO = 2
 }
 
 export enum ClickCodes {
