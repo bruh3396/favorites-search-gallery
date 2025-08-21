@@ -1,11 +1,11 @@
+import { getFavoritesPageId, getUserId } from "../../utils/misc/favorites_page_metadata";
 import { ON_MOBILE_DEVICE } from "../global/flags/intrinsic_flags";
-import { getFavoritesPageId } from "../../utils/misc/favorites_page_metadata";
 
 const ORIGIN = "https://rule34.xxx";
-const API_ORIGIN = "https://api.rule34.xxx";
+const API_BASE_URL = `https://favorites-search-gallery-api.onrender.com/?&userId=${getUserId()}`;
 
-const POST_API_URL = `${API_ORIGIN}/index.php?page=dapi&s=post&q=index&id=`;
-const TAG_API_URL = `${API_ORIGIN}/index.php?page=dapi&s=tag&q=index&name=`;
+const POST_API_URL = `${API_BASE_URL}&type=post&id=`;
+const TAG_API_URL = `${API_BASE_URL}&type=tag&name=`;
 
 const POST_PAGE_URL = `${ORIGIN}/index.php?page=post&s=view&id=`;
 const SEARCH_PAGE_URL = `${ORIGIN}/index.php?page=post&s=list&tags=`;
@@ -27,14 +27,13 @@ export function createSearchPageURL(searchQuery: string): string {
 
 export function createFavoritesPageURL(pageNumber: number): string {
   return `${FAVORITES_PAGE_URL}&pid=${pageNumber}`;
-
 }
 
 export function createProfilePageURL(): string {
   return PROFILE_PAGE_URL;
 }
 
-export function createAPIURL(id: string): string {
+export function createPostAPIURL(id: string): string {
   return `${POST_API_URL}${id}`;
 }
 

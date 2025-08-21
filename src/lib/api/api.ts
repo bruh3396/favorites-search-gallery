@@ -1,8 +1,11 @@
 import * as FSG_URL from "./api_url";
 import { AddFavoriteStatus, Post } from "../../types/api/api_types";
+import { ThrottledQueue } from "../components/throttled_queue";
 import { extractFavoritesCount } from "./profile_page_parser";
 import { extractPostFromAPI } from "./post_api_parser";
 import { parsePostFromPostPage as extractPostFromPostPage } from "./post_page_parser";
+
+const POST_PAGE_QUEUE: ThrottledQueue = new ThrottledQueue(200);
 
 export async function getHTML(url: string): Promise<string> {
   const response = await fetch(url);
@@ -14,7 +17,7 @@ export async function getHTML(url: string): Promise<string> {
 }
 
 export async function fetchPostFromAPI(id: string): Promise<Post> {
-  return extractPostFromAPI(await getHTML(FSG_URL.createAPIURL(id)));
+  return extractPostFromAPI(await getHTML(FSG_URL.createPostAPIURL(id)));
 }
 
 export function fetchPostPage(id: string): Promise<string> {
@@ -22,6 +25,7 @@ export function fetchPostPage(id: string): Promise<string> {
 }
 
 export async function fetchPostFromPostPage(id: string): Promise<Post> {
+  await POST_PAGE_QUEUE.wait();
   return extractPostFromPostPage(await fetchPostPage(id));
 }
 
