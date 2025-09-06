@@ -3,7 +3,7 @@ import { GALLERY_DISABLED } from "../../../../../lib/global/flags/derived_flags"
 import { addGalleryEventListeners } from "../../events/gallery_event_listeners";
 import { indexCurrentPageThumbs } from "../../../model/gallery_model";
 import { insertGalleryContainer } from "../../../ui/gallery_container";
-import { prepareAllThumbsOnSearchPage } from "../../../../../types/search_page";
+import { prepareAllThumbsOnSearchPage } from "../../../../../utils/dom/search_page_utils";
 import { setupAutoplay } from "./gallery_autoplay_setup_flow";
 import { setupDesktopGalleryMenu } from "../../../ui/gallery_desktop_menu";
 import { setupGalleryInteractionTracker } from "../../events/desktop/gallery_interaction_tracker";

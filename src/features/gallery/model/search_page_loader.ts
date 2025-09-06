@@ -18,7 +18,7 @@ let allThumbs: HTMLElement[] = [];
     currentPageNumber = initialPageNumber;
     initialURL = getInitialURL();
     allThumbs = Array.from(getAllThumbs());
-    searchPages.set(initialPageNumber, new SearchPage(initialPageNumber, document.documentElement.outerHTML));
+    searchPages.set(initialPageNumber, new SearchPage(initialPageNumber, allThumbs));
     preloadSearchPages();
   }
 

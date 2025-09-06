@@ -83,6 +83,7 @@ class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
     this.ready = this.asyncItemsToAdd.size === 0;
 
     if (this.ready) {
+      this.add = super.add;
       this.keepIndexedTagsSorted(true);
       this.sortTags();
     }

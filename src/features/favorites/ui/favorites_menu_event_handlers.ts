@@ -92,12 +92,20 @@ export function toggleDownloadButtons(value: boolean): void {
 export function hideUnusedLayoutSizer(layout: FavoriteLayout): void {
   const rowSizeContainer = document.getElementById("row-size-container");
   const columnCountContainer = document.getElementById("column-count-container");
+
+  if (columnCountContainer === null || rowSizeContainer === null) {
+    return;
+  }
+
+  if (layout === "native") {
+    columnCountContainer.style.display = "none";
+    rowSizeContainer.style.display = "none";
+    return;
+  }
   const usingRowLayout = layout === "row";
 
-  if (columnCountContainer !== null && rowSizeContainer !== null) {
-    columnCountContainer.style.display = usingRowLayout ? "none" : "";
-    rowSizeContainer.style.display = usingRowLayout ? "" : "none";
-  }
+  columnCountContainer.style.display = usingRowLayout ? "none" : "";
+  rowSizeContainer.style.display = usingRowLayout ? "" : "none";
 }
 
 export function toggleHeader(value: boolean): void {

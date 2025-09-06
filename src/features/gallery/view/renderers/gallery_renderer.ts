@@ -5,10 +5,10 @@ import { GalleryImageRenderer } from "./image/gallery_image_renderer";
 import { GalleryVideoRenderer } from "./video/gallery_video_renderer";
 
 function getRenderers(): GalleryBaseRenderer[] {
-  return [GalleryImageRenderer, GalleryGifRenderer, GalleryVideoRenderer];
+  return [GalleryGifRenderer, GalleryVideoRenderer, GalleryImageRenderer];
 }
 
-export function render(thumb: HTMLElement): void {
+export function render(thumb: HTMLElement): Promise<void> {
   switch (true) {
     case isVideo(thumb):
       return startRenderer(GalleryVideoRenderer, thumb);
@@ -21,14 +21,25 @@ export function render(thumb: HTMLElement): void {
   }
 }
 
-function startRenderer(targetRenderer: GalleryBaseRenderer, thumb: HTMLElement): void {
-  for (const renderer of getRenderers()) {
-    if (renderer === targetRenderer) {
-      renderer.display(thumb);
-    } else {
-      renderer.hide();
+async function startRenderer(targetRenderer: GalleryBaseRenderer, thumb: HTMLElement): Promise<void> {
+  const nonTargetRenderers = getRenderers().filter(r => r !== targetRenderer);
+  const renderers = [targetRenderer, ...nonTargetRenderers];
+
+  nonTargetRenderers.forEach(r => r.hide());
+
+  for (const renderer of renderers) {
+    const success = await renderer.display(thumb)
+      .then(() => true)
+      .catch(() => {
+        renderer.hide();
+        return false;
+      });
+
+    if (success) {
+      return Promise.resolve();
     }
   }
+  return Promise.reject(new Error("Could not display media"));
 }
 
 export function hide(): void {
@@ -43,7 +54,7 @@ export function exitGallery(): void {
 }
 
 export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
-    GalleryImageRenderer.preload(thumbs);
+  GalleryImageRenderer.preload(thumbs);
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {

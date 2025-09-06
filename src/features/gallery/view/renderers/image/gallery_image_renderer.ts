@@ -24,9 +24,10 @@ class ImageRenderer extends GalleryBaseRenderer {
     this.lastShownId = "";
   }
 
-  public display(thumb: HTMLElement): void {
+  public display(thumb: HTMLElement): Promise<void> {
     super.display(thumb);
     this.draw(thumb);
+    return Promise.resolve();
   }
 
   public preload(thumbs: HTMLElement[]): void {

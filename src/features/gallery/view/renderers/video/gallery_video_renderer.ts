@@ -9,9 +9,9 @@ class VideoRenderer extends GalleryBaseRenderer {
     setupVideoController(this.container);
   }
 
-  public display(thumb: HTMLElement): void {
+  public display(thumb: HTMLElement): Promise<void> {
     super.display(thumb);
-    VideoController.playVideo(thumb);
+    return VideoController.playVideo(thumb);
   }
 
   public hide(): void {

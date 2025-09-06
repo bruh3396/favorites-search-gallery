@@ -33,7 +33,7 @@ export function correctOrientation(): void {
   if (ON_DESKTOP_DEVICE) {
     return;
   }
-  const usingLandscape = window.screen.orientation.angle === 90;
+  const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;
   const usingCorrectOrientation = (usingLandscape && CANVAS.width > CANVAS.height) || (!usingLandscape && CANVAS.width < CANVAS.height);
 
   if (usingCorrectOrientation) {

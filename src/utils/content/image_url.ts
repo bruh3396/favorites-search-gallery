@@ -25,3 +25,7 @@ export function convertPreviewURLToImageURL(thumbURL: string): string {
 export function convertImageURLToSampleURL(imageURL: string): string {
   return imageURL.replace("images", "samples").replace(SAMPLE_REGEX, "/sample_$1").replace(EXTENSION_REGEX, ".jpg");
 }
+
+export function removeIdFromImageURL(imageURL: string): string {
+  return imageURL.replace(/\?\d+/, "");
+}

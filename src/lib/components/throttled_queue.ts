@@ -29,15 +29,6 @@ export class ThrottledQueue {
     this.delay = newDelay;
   }
 
-  public pause(): void {
-    this.paused = true;
-  }
-
-  public resume(): void {
-    this.paused = false;
-    this.startDraining();
-  }
-
   public reset(): void {
     this.queue = [];
     this.draining = false;

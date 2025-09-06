@@ -1,6 +1,7 @@
 import * as ICONS from "../../assets/icons";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
 import { Events } from "../../lib/global/events/events";
+import { Favorite } from "../../types/interfaces/interfaces";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/global/flags/derived_flags";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
@@ -17,6 +18,7 @@ let saveButton: HTMLElement;
 let importButton: HTMLElement;
 let exportButton: HTMLElement;
 let saveSearchResultsButton: HTMLElement;
+let latestSearchResults: Favorite[] = [];
 
 export function setupSavedSearches(): void {
   if (SAVED_SEARCHES_DISABLED) {
@@ -83,6 +85,9 @@ function addEventListeners(): void {
     saveSearchResultsAsCustomSearch();
   };
   Events.favorites.savedSearchesToggled.on(toggleSavedSearchesVisibility);
+  Events.favorites.searchResultsUpdated.on((searchResults: Favorite[]): void => {
+    latestSearchResults = searchResults;
+  });
 }
 
 function toggleSavedSearchesVisibility(value: boolean): void {
@@ -252,19 +257,19 @@ function importSavedSearches(): void {
 }
 
 function saveSearchResultsAsCustomSearch(): void {
-  // const searchResultIds = FavoritesSearchResultObserver.latestSearchResults.map(post => post.id);
+  const searchResultIds = latestSearchResults.map(favorite => favorite.id);
 
-  // if (searchResultIds.length === 0) {
-  //   return;
-  // }
+  if (searchResultIds.length === 0) {
+    return;
+  }
 
-  // if (searchResultIds.length > 300) {
-  //   if (!confirm(`Are you sure you want to save ${searchResultIds.length} ids as one search?`)) {
-  //     return;
-  //   }
-  // }
-  // const customSearch = `( ${searchResultIds.join(" ~ ")} )`;
+  if (searchResultIds.length > 300) {
+    if (!confirm(`Are you sure you want to save ${searchResultIds.length} ids as one search?`)) {
+      return;
+    }
+  }
+  const customSearch = `( ${searchResultIds.join(" ~ ")} )`;
 
-  // saveSearch(customSearch);
-  // storeSavedSearches();
+  saveSearch(customSearch);
+  storeSavedSearches();
 }

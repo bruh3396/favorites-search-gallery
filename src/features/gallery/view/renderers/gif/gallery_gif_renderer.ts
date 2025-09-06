@@ -17,11 +17,14 @@ class GifRenderer extends GalleryBaseRenderer {
     this.container.appendChild(this.gif);
   }
 
-  public display(element: HTMLElement): void {
-    super.display(element);
-    this.gif.src = "";
+public display(element: HTMLElement): Promise<void> {
+  super.display(element);
+  return new Promise((resolve, reject) => {
+    this.gif.onload = (): void => resolve();
+    this.gif.onerror = (): void => reject(new Error("Failed to load gif"));
     this.gif.src = getGIFSource(element);
-  }
+  });
+}
 
   public hide(): void {
     super.hide();

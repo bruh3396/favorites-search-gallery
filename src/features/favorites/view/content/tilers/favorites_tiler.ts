@@ -2,6 +2,7 @@ import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_con
 import { FavoriteLayout } from "../../../../../types/primitives/primitives";
 import { FavoritesColumnTiler } from "./favorites_column_tiler";
 import { FavoritesGridTiler } from "./favorites_grid_tiler";
+import { FavoritesNativeTiler } from "./favorites_native_tiler";
 import { FavoritesRowTiler } from "./favorites_row_tiler";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { FavoritesSquareTiler } from "./favorites_square_tiler";
@@ -10,7 +11,7 @@ import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { Tiler } from "./favorites_tiler_interface";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
 
-const TILERS = [FavoritesGridTiler, FavoritesRowTiler, FavoritesSquareTiler, FavoritesColumnTiler];
+const TILERS = [FavoritesGridTiler, FavoritesRowTiler, FavoritesSquareTiler, FavoritesColumnTiler, FavoritesNativeTiler];
 let currentLayout: FavoriteLayout = Preferences.favoritesLayout.value;
 
 export function getCurrentTiler(): Tiler {

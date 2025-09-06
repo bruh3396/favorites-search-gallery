@@ -10,8 +10,9 @@ export abstract class GalleryBaseRenderer implements Renderer {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public display(element: HTMLElement): void {
+  public display(element: HTMLElement): Promise<void> {
     this.container.style.display = "block";
+    return Promise.resolve();
   }
 
   public hide(): void {

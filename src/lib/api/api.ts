@@ -53,6 +53,6 @@ export function removeFavorite(id: string): Promise<Response> {
   return fetch(FSG_URL.createRemoveFavoriteURL(id), { method: "GET", redirect: "manual" });
 }
 
-export function getFavoritesCount(): Promise<number | null> {
-  return getHTML(FSG_URL.createProfilePageURL()).then(extractFavoritesCount).catch(null);
+export function getFavoritesCount(id: string): Promise<number | null> {
+  return getHTML(FSG_URL.createProfilePageURL(id)).then(extractFavoritesCount).catch(null);
 }

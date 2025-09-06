@@ -328,7 +328,8 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<M
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],
-      ["grid", "Legacy"]
+      ["grid", "Legacy"],
+      ["native", "Native"]
     ])
   },
   {

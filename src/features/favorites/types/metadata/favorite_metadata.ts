@@ -15,8 +15,6 @@ const UPDATE_QUEUE: FavoriteMetadata[] = [];
 const MAX_PENDING_REQUESTS = 250;
 const THROTTLED_FETCH_QUEUE = new ThrottledQueue(GeneralSettings.throttledMetadataAPIRequestDelay);
 
-THROTTLED_FETCH_QUEUE.pause();
-
 function decodeRating(rating: string): Rating {
   return {
     "Explicit": DiscreteRating.EXPLICIT,
@@ -44,11 +42,17 @@ function tooManyPendingRequests(): boolean {
 }
 
 export async function fetchMissingMetadata(): Promise<void> {
-  THROTTLED_FETCH_QUEUE.resume();
+  while (UPDATE_QUEUE.length > 0) {
+    const metadata = UPDATE_QUEUE.shift();
 
-  for (const metadata of UPDATE_QUEUE) {
+    if (metadata === undefined) {
+      break;
+    }
     await THROTTLED_FETCH_QUEUE.wait();
-    metadata.populateFromAPI();
+    metadata.populateFromAPI()
+      .then(() => {
+        Events.favorites.missingMetadataFound.emit(metadata.id);
+      });
   }
 }
 
@@ -99,24 +103,20 @@ export class FavoriteMetadata {
     return this.metrics.width * this.metrics.height;
   }
 
-  public async populate(object: FavoritesDatabaseRecord | HTMLElement): Promise<void> {
+  public populate(object: FavoritesDatabaseRecord | HTMLElement): void {
     if (object instanceof HTMLElement) {
       this.populateFromAPI();
       return;
     }
 
     if (object.metadata === undefined) {
-      await THROTTLED_FETCH_QUEUE.wait();
-      await this.populateFromAPI();
-      Events.favorites.missingMetadataFound.emit(this.id);
+      UPDATE_QUEUE.push(this);
       return;
     }
     this.populateFromDatabase(object);
 
     if (this.isEmpty) {
-      await THROTTLED_FETCH_QUEUE.wait();
-      await this.populateFromAPI();
-      Events.favorites.missingMetadataFound.emit(this.id);
+      UPDATE_QUEUE.push(this);
     }
   }
 

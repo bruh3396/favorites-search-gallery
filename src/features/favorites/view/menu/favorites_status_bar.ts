@@ -2,6 +2,7 @@ import * as API from "../../../../lib/api/api";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
 import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { Timeout } from "../../../../types/primitives/primitives";
+import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
@@ -49,7 +50,7 @@ export function notifyNewFavoritesFound(newFavoritesCount: number): void {
 }
 
  async function setExpectedTotalFavoritesCount(): Promise<void> {
-  expectedTotalFavoritesCount = await API.getFavoritesCount();
+  expectedTotalFavoritesCount = await API.getFavoritesCount(getFavoritesPageId() ?? "");
 }
 
 export function setupFavoritesStatus(): void {

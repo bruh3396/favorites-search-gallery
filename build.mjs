@@ -12,7 +12,7 @@ import { webWorker } from "./WEB_worker_plugin.mjs";
   const BANNER = `// ==UserScript==
 // @name         Rule34 Favorites Search Gallery
 // @namespace    bruh3396
-// @version      1.19.2
+// @version      1.19.4
 // @description  Search, View, and Play Rule34 Favorites (Desktop/Android/iOS)
 // @author       bruh3396
 // @compatible   Chrome

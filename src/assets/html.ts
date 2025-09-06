@@ -1729,6 +1729,12 @@ export const FAVORITES_CONTENT_HTML = `
         width: 30%;
       }
     }
+
+    &.native {
+      display: flex;
+      flex-flow: wrap;
+      gap: 25px 10px;
+    }
   }
 
   .favorite {

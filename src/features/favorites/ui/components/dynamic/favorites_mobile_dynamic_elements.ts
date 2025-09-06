@@ -168,6 +168,7 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<n
       ["row", "River"],
       ["square", "Square"],
       ["grid", "Legacy"]
+      // ["native", "Native"]
     ])
   },
   {

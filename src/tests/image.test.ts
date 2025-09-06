@@ -1,4 +1,4 @@
-import { cleanImageSource, compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource } from "../utils/content/image_url";
+import { cleanImageSource, compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource, removeIdFromImageURL } from "../utils/content/image_url";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -66,5 +66,20 @@ describe("convertImageURLToSampleURL", () => {
     const expected = "https://us.rule34.xxx/samples/0123/sample_123456abcde09.jpg";
 
     expect(convertImageURLToSampleURL(source)).toBe(expected);
+  });
+});
+
+describe("removeIdFromImageURL", () => {
+  test("empty", () => {
+    expect(removeIdFromImageURL("")).toBe("");
+  });
+
+  test("normal", () => {
+    expect(removeIdFromImageURL("example.jpg")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?1")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?2")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?3")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?123456")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?123456")).toBe("example.jpg");
   });
 });

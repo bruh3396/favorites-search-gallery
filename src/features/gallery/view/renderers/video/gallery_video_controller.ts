@@ -206,16 +206,22 @@ function getInactiveVideoPlayers(): HTMLVideoElement[] {
   return VIDEO_PLAYERS.filter(video => !video.hasAttribute("active"));
 }
 
-export function playVideo(thumb: HTMLElement): void {
+export function playVideo(thumb: HTMLElement): Promise<void> {
   setActiveVideoPlayer(thumb);
   toggleVideoContainer(true);
   stopAllVideos();
   const video = getActiveVideoPlayer();
-
-  setVideoSource(video, thumb);
-  video.style.display = "block";
-  video.play().catch(() => { });
-  toggleVideoControls(true);
+  return new Promise((resolve, reject) => {
+    video.onloadedmetadata = (): void => resolve();
+    video.onerror = (): void => {
+      video.src = "";
+      reject(new Error("Video failed to load"));
+    };
+    setVideoSource(video, thumb);
+    video.style.display = "block";
+    video.play().catch(() => { });
+    toggleVideoControls(true);
+  });
 }
 
 export function stopAllVideos(): void {
