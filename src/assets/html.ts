@@ -1734,6 +1734,11 @@ export const FAVORITES_CONTENT_HTML = `
       display: flex;
       flex-flow: wrap;
       gap: 25px 10px;
+
+      .utility-button {
+        width:  70px;
+        aspect-ratio: 1;
+      }
     }
   }
 

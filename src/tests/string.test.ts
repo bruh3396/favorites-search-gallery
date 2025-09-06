@@ -83,6 +83,10 @@ describe("getDimensions2D", () => {
   test("invalid format with spaces", () => {
     expect(getDimensions2D("20 x 20")).toStrictEqual(DEFAULT_DIMENSIONS);
   });
+
+  test("different separator", () => {
+    expect(getDimensions2D("20/20")).toStrictEqual({ width: 20, height: 20 });
+  });
 });
 
 describe("isEmptyString", () => {

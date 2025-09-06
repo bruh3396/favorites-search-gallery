@@ -47,11 +47,17 @@ function setupVideoAndGifOutlines(): void {
       }
     }
 
-    #favorites-search-gallery-content.grid .favorite, .thumb {
-      >a,
-      >div {
-        ${videoRule}
-        ${gifRule}
+    #favorites-search-gallery-content {
+      &.grid,
+      &.native
+      {
+        .favorite, .thumb {
+          >a,
+          >div {
+            ${videoRule}
+            ${gifRule}
+          }
+        }
       }
     }
     `, "video-gif-borders");

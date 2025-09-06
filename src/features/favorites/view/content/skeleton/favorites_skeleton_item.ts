@@ -1,6 +1,8 @@
-import { getSeededRandomPositiveIntegerInRange, randomBetween, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
+import { getRandomPositiveIntegerInRange, getSeededRandomPositiveIntegerInRange, randomBetween, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
+import { Dimensions2D } from "../../../../../types/primitives/composites";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ITEM_CLASS_NAME } from "../../../../../utils/dom/dom";
+import { getDimensions2D } from "../../../../../utils/primitive/string";
 import { getNextAspectRatio } from "./favorites_aspect_ratio_collector";
 
 function getRandomAnimationDelay(): number {
@@ -15,6 +17,17 @@ function getPredictedAspectRatio(): string {
   return getNextAspectRatio() ?? `10/${getSeededRandomPositiveIntegerInRange(5, 20)}`;
 }
 
+function getPredictedDiscreteDimensions(): Dimensions2D {
+  const aspectRatio = getNextAspectRatio();
+
+  if (aspectRatio !== undefined) {
+    return getDimensions2D(aspectRatio);
+  }
+  const maximizeWidth = Math.random() < 0.5;
+  const randomDimension = getRandomPositiveIntegerInRange(125, 250);
+  return { width: maximizeWidth ? 250 : randomDimension, height: maximizeWidth ? randomDimension : 250};
+}
+
 export class SkeletonItem {
   public readonly element: HTMLElement;
 
@@ -24,10 +37,21 @@ export class SkeletonItem {
   }
 
   private setStyle(style: Record<string, string>): void {
-    this.setAspectRatio();
+    if (Object.keys(style).includes("native")) {
+      this.setDiscreteDimensions();
+    } else {
+      this.setAspectRatio();
+      this.setCustomStyle(style);
+    }
     this.setAnimation();
-    this.setCustomStyle(style);
     this.setClassName();
+  }
+
+  private setDiscreteDimensions(): void {
+    const dimensions = getPredictedDiscreteDimensions();
+
+    this.element.style.setProperty("width", `${dimensions.width}px`);
+    this.element.style.setProperty("height", `${dimensions.height}px`);
   }
 
   private setAnimation(): void {
