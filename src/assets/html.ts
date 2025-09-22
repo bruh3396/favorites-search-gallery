@@ -1649,7 +1649,7 @@ export const FAVORITES_CONTENT_HTML = `
       .favorite {
         border-radius: 10px !important;
         overflow: hidden;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 1;
 
         >a,
         >div {

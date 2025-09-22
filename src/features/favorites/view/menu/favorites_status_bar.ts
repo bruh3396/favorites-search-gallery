@@ -9,6 +9,7 @@ let statusIndicator: HTMLElement;
 let expectedTotalFavoritesCount: number | null = null;
 let statusTimeout: Timeout;
 const TEMPORARY_STATUS_TIMEOUT = 1000;
+const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "Favorites ";
 
 export function setStatus(text: string): void {
   statusIndicator.classList.remove("hidden");
@@ -31,8 +32,7 @@ export function setMatchCount(value: number): void {
 }
 
 export function updateStatusWhileFetching(searchResultsCount: number, favoritesFoundCount: number): void {
-  const prefix = ON_MOBILE_DEVICE ? "" : "Favorites ";
-  let statusText = `Fetching ${prefix}${favoritesFoundCount}`;
+  let statusText = `Fetching ${FETCHING_STATUS_PREFIX}${favoritesFoundCount}`;
 
   if (expectedTotalFavoritesCount !== null) {
     statusText = `${statusText} / ${expectedTotalFavoritesCount}`;
@@ -43,9 +43,7 @@ export function updateStatusWhileFetching(searchResultsCount: number, favoritesF
 
 export function notifyNewFavoritesFound(newFavoritesCount: number): void {
   if (newFavoritesCount > 0) {
-    const pluralSuffix = newFavoritesCount > 1 ? "s" : "";
-
-    setStatus(`Found ${newFavoritesCount} new favorite${pluralSuffix}`);
+    setStatus(`Found ${newFavoritesCount} new favorite${newFavoritesCount > 1 ? "s" : ""}`);
   }
 }
 

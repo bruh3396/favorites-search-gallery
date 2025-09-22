@@ -139,7 +139,7 @@ export function toggleSortAscending(value: boolean): void {
 }
 
 export function updateMetadata(id: string): void {
-  FavoritesLoader.updateMetadataInDatabase(id);
+  FavoritesLoader.updateMetadata(id);
 }
 
 export function changeResultsPerPage(resultsPerPage: number): void {

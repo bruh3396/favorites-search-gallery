@@ -42,8 +42,8 @@ export function storeNewFavorites(newFavorites: FavoriteItem[]): Promise<void> {
   return FavoritesDatabase.storeFavorites(newFavorites);
 }
 
-export function updateMetadataInDatabase(id: string): void {
-  FavoritesDatabase.updateMetadataInDatabase(id);
+export function updateMetadata(id: string): void {
+  FavoritesDatabase.updateMetadata(id);
 }
 
 export function deleteFavorite(id: string): Promise<void> {

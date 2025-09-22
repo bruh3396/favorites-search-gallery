@@ -37,11 +37,11 @@ async function fetchAllFavorites(): Promise<void> {
 async function saveAllFavorites(): Promise<void> {
   FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeAllFavorites();
-  FavoritesView.showTemporaryNotification("All favorites saved");
+  FavoritesView.setTemporaryStatus("All favorites saved");
 }
 
 function showLoadedFavorites(): void {
-  FavoritesView.showTemporaryNotification("Favorites loaded");
+  FavoritesView.setTemporaryStatus("Favorites loaded");
   FavoritesSearchFlow.showLatestSearchResults();
 }
 
@@ -66,5 +66,5 @@ async function loadNewFavorites(): Promise<void> {
 
 async function saveNewFavorites(newFavorites: FavoriteItem[]): Promise<void> {
   await FavoritesModel.storeNewFavorites(newFavorites);
-  FavoritesView.showTemporaryNotification("New favorites saved");
+  FavoritesView.setTemporaryStatus("New favorites saved");
 }

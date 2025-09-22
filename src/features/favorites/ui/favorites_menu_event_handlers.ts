@@ -117,7 +117,7 @@ export function reloadWindow(): void {
 }
 
 export async function changeFavoritesSizeOnShiftScroll(wheelEvent: FavoritesWheelEvent): Promise<void> {
-  if (!wheelEvent.originalEvent.shiftKey) {
+  if (!wheelEvent.originalEvent.shiftKey || getCurrentLayout() === "native") {
     return;
   }
   const usingRowLayout = getCurrentLayout() === "row";

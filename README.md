@@ -17,6 +17,9 @@ This script is still in development, please let me know if you experience a bug,
 
 ## Getting Started
 
+### Installation
+https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
+
 ### Desktop
 * Install Tampermonkey in any browser
 * If using Chrome/Edge, enable "Developer Mode" in your browser

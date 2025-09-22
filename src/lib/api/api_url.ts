@@ -2,7 +2,7 @@ import { ON_MOBILE_DEVICE } from "../global/flags/intrinsic_flags";
 import { getUserId } from "../../utils/misc/favorites_page_metadata";
 
 const ORIGIN = "https://rule34.xxx";
-const API_BASE_URL = `https://favorites-search-gallery-api.onrender.com/?&userId=${getUserId()}`;
+const API_BASE_URL = `https://favorites-search-gallery-api.onrender.com/?userId=${getUserId()}`;
 
 const POST_API_URL = `${API_BASE_URL}&type=post&id=`;
 const TAG_API_URL = `${API_BASE_URL}&type=tag&name=`;

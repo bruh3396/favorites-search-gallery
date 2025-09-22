@@ -20,7 +20,7 @@ export function setStatus(message: string): void {
   FavoritesStatus.setStatus(message);
 }
 
-export function showTemporaryNotification(message: string): void {
+export function setTemporaryStatus(message: string): void {
   FavoritesStatus.setTemporaryStatus(message);
 }
 

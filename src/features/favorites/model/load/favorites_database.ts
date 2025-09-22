@@ -32,7 +32,7 @@ function usingCorrectSchema(records: FavoritesDatabaseRecord[]): boolean {
   return getSchemaVersion() === SCHEMA_VERSION && records.length > 0 && records[0].tags instanceof Set;
 }
 
-function updateDatabaseRecord(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord {
+function updateRecord(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord {
     return {
     ...record,
     tags: convertToTagSet(record.tags as unknown as string),
@@ -40,11 +40,11 @@ function updateDatabaseRecord(record: FavoritesDatabaseRecord): FavoritesDatabas
   };
 }
 
-function updateDatabaseRecords(records: FavoritesDatabaseRecord[]): FavoritesDatabaseRecord[] {
-  return records.map(record => updateDatabaseRecord(record));
+function updateRecords(records: FavoritesDatabaseRecord[]): FavoritesDatabaseRecord[] {
+  return records.map(record => updateRecord(record));
 }
 
-async function updateDatabaseRecordsIfNeeded(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
+async function updateRecordsIfNeeded(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
   if (records.length === 0) {
     setSchemaVersion(SCHEMA_VERSION);
     return Promise.resolve(records);
@@ -53,7 +53,7 @@ async function updateDatabaseRecordsIfNeeded(records: FavoritesDatabaseRecord[])
   if (usingCorrectSchema(records)) {
     return Promise.resolve(records);
   }
-  const updatedRecords = updateDatabaseRecords(records);
+  const updatedRecords = updateRecords(records);
 
   await DATABASE.update(updatedRecords);
   setSchemaVersion(SCHEMA_VERSION);
@@ -63,7 +63,7 @@ async function updateDatabaseRecordsIfNeeded(records: FavoritesDatabaseRecord[])
 export async function loadAllFavorites(): Promise<FavoriteItem[]> {
   const records = await DATABASE.load();
 
-  const updatedRecords = await updateDatabaseRecordsIfNeeded(records);
+  const updatedRecords = await updateRecordsIfNeeded(records);
   return convertToFavorites(updatedRecords);
 }
 
@@ -78,7 +78,7 @@ export function storeAllFavorites(favorites: FavoriteItem[]): Promise<void> {
   return storeFavorites(favorites);
 }
 
-export function updateMetadataInDatabase(id: string): void {
+export function updateMetadata(id: string): void {
   const favorite = getFavorite(id);
 
   if (favorite !== undefined) {

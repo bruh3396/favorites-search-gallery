@@ -41,7 +41,7 @@ export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement
 }
 
 export function isHotkeyEvent(event: KeyboardEvent): boolean {
-  return !event.repeat && event.target instanceof HTMLElement && !isTypeableInput(event.target);
+  return !event.repeat && event.target instanceof HTMLElement && !isTypeableInput(event.target) && !event.ctrlKey;
 }
 
 export function isTypeableInput(element: HTMLElement): boolean {
