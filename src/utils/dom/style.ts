@@ -45,19 +45,25 @@ function setupVideoAndGifOutlines(): void {
           ${gifRule}
         }
       }
-    }
 
-    #favorites-search-gallery-content {
       &.grid,
       &.native
       {
-        .favorite, .thumb {
+        .favorite {
           >a,
           >div {
             ${videoRule}
             ${gifRule}
           }
         }
+      }
+    }
+
+    .thumb {
+      >a,
+      >div {
+        ${videoRule}
+        ${gifRule}
       }
     }
     `, "video-gif-borders");

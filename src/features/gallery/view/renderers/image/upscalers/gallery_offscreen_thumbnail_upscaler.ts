@@ -32,7 +32,6 @@ function drawOffscreenCanvas(context: OffscreenCanvasRenderingContext2D | null, 
   const centerShiftX = (offscreenCanvas.width - (bitmap.width * ratio)) / 2;
   const centerShiftY = (offscreenCanvas.height - (bitmap.height * ratio)) / 2;
 
-  // context.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
   context.drawImage(
     bitmap, 0, 0, bitmap.width, bitmap.height,
     centerShiftX, centerShiftY, bitmap.width * ratio, bitmap.height * ratio

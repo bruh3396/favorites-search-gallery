@@ -4,6 +4,7 @@ import { BatchExecutor } from "../components/batch_executor";
 import { Database } from "../components/database";
 import { EXTENSION_REGEX } from "../../utils/content/image_url";
 import { Favorite } from "../../types/interfaces/interfaces";
+import { GeneralSettings } from "../../config/general_settings";
 import { MediaExtension } from "../../types/primitives/primitives";
 import { MediaExtensionMapping } from "../../types/primitives/composites";
 import { ON_FAVORITES_PAGE } from "./flags/intrinsic_flags";
@@ -88,7 +89,7 @@ export function getExtension(item: HTMLElement | Favorite): Promise<MediaExtensi
   if (isGif(item)) {
     return Promise.resolve("gif");
   }
-  return withTimeout(getExtensionFromId(item.id), 3000)
+  return withTimeout(getExtensionFromId(item.id), GeneralSettings.apiTimeout)
     .catch((error) => {
       if (error instanceof PromiseTimeoutError) {
         return tryAllPossibleExtensions(item);

@@ -1,7 +1,7 @@
 import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/api/media_api";
 import { GalleryBaseThumbUpscaler } from "./gallery_base_thumbnail_upscaler";
 import { ImageRequest } from "../../../../types/gallery_image_request";
-import { SharedGallerySettings } from "../../../../../../config/shared_gallery_settings";
+import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { UpscaleImageRequest } from "../../../../types/gallery_upscale_image_request";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
 import { isImage } from "../../../../../../utils/content/content_type";

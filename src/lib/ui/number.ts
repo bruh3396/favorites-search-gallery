@@ -1,5 +1,5 @@
 import { DEFAULT_MENU_ELEMENT, NumberElement } from "../../types/elements/menu_element";
-import { DO_NOTHING } from "../../config/constants";
+import { DO_NOTHING } from "../../utils/misc/async";
 import { Events } from "../global/events/events";
 import { NumberComponent } from "./number_component";
 

@@ -1,4 +1,4 @@
-import { DO_NOTHING } from "../../config/constants";
+import { DO_NOTHING } from "../../utils/misc/async";
 import { Timeout } from "../../types/primitives/primitives";
 
 export class Timer {

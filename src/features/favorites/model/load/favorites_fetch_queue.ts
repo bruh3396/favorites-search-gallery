@@ -1,4 +1,4 @@
-import { DO_NOTHING } from "../../../../config/constants";
+import { DO_NOTHING } from "../../../../utils/misc/async";
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 

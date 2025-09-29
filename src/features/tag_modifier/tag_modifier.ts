@@ -1,6 +1,6 @@
 import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../../lib/global/tag_modifier";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
-import { DO_NOTHING } from "../../config/constants";
+import { DO_NOTHING } from "../../utils/misc/async";
 import { Events } from "../../lib/global/events/events";
 import { Favorite } from "../../types/interfaces/interfaces";
 import { ITEM_CLASS_NAME } from "../../utils/dom/dom";

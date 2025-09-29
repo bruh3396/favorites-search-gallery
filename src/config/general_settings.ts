@@ -1,5 +1,5 @@
 export const GeneralSettings = {
-  apiTimeout: 3500,
+  apiTimeout: 3000,
   throttledMetadataAPIRequestDelay: 5,
   throttledExtensionAPIRequestDelay: 2,
   bruteForceImageExtensionRequestDelay: 75,

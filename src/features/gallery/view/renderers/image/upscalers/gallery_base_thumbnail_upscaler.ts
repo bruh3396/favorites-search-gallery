@@ -1,6 +1,6 @@
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { ON_FAVORITES_PAGE } from "../../../../../../lib/global/flags/intrinsic_flags";
-import { SharedGallerySettings } from "../../../../../../config/shared_gallery_settings";
+import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_offscreen_upscale_request";
 import { getAllThumbs } from "../../../../../../utils/dom/dom";
 import { getDimensions2D } from "../../../../../../utils/primitive/string";

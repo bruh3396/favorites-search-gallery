@@ -5,7 +5,7 @@ import { FavoritesPageRequest } from "./favorites_page_request";
 import { extractFavorites } from "./favorites_extractor";
 import { sleep } from "../../../../utils/misc/async";
 
-const PENDING_PAGE_NUMBERS = new Set<number>();
+const PENDING_REQUEST_PAGE_NUMBERS = new Set<number>();
 const FAILED_REQUESTS: FavoritesPageRequest[] = [];
 let storedFavoriteIds = new Set<string>();
 let currentPageNumber = 0;
@@ -15,12 +15,16 @@ function hasFailedRequests(): boolean {
   return FAILED_REQUESTS.length > 0;
 }
 
+function hasPendingRequests(): boolean {
+  return PENDING_REQUEST_PAGE_NUMBERS.size > 0;
+}
+
 function allRequestsHaveStarted(): boolean {
   return fetchedAnEmptyPage;
 }
 
 function someRequestsArePending(): boolean {
-  return PENDING_PAGE_NUMBERS.size > 0 || hasFailedRequests();
+  return hasPendingRequests() || hasFailedRequests();
 }
 
 function noRequestsArePending(): boolean {
@@ -42,7 +46,7 @@ function oldestFailedFetchRequest(): FavoritesPageRequest | null {
 function getNewFetchRequest(): FavoritesPageRequest {
   const request = new FavoritesPageRequest(currentPageNumber);
 
-  PENDING_PAGE_NUMBERS.add(request.realPageNumber);
+  PENDING_REQUEST_PAGE_NUMBERS.add(request.realPageNumber);
   currentPageNumber += 1;
   return request;
 }
@@ -81,7 +85,7 @@ async function fetchFavoritesPageHelper(request: FavoritesPageRequest): Promise<
 
 function onFavoritesPageRequestSuccess(request: FavoritesPageRequest, html: string): void {
   request.favorites = extractFavorites(html);
-  PENDING_PAGE_NUMBERS.delete(request.realPageNumber);
+  PENDING_REQUEST_PAGE_NUMBERS.delete(request.realPageNumber);
   const favoritesPageIsEmpty = request.favorites.length === 0;
 
   fetchedAnEmptyPage = fetchedAnEmptyPage || favoritesPageIsEmpty;

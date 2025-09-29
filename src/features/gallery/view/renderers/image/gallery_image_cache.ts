@@ -1,4 +1,4 @@
-import { DO_NOTHING } from "../../../../../config/constants";
+import { DO_NOTHING } from "../../../../../utils/misc/async";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
 import { LowResolutionImageRequest } from "../../../types/gallery_low_resolution_image_request";

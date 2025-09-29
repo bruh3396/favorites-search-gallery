@@ -9,16 +9,14 @@ function getRenderers(): GalleryBaseRenderer[] {
 }
 
 export function render(thumb: HTMLElement): Promise<void> {
-  switch (true) {
-    case isVideo(thumb):
-      return startRenderer(GalleryVideoRenderer, thumb);
-
-    case isGif(thumb):
-      return startRenderer(GalleryGifRenderer, thumb);
-
-    default:
-      return startRenderer(GalleryImageRenderer, thumb);
+  if (isVideo(thumb)) {
+    return startRenderer(GalleryVideoRenderer, thumb);
   }
+
+  if (isGif(thumb)) {
+    return startRenderer(GalleryGifRenderer, thumb);
+  }
+  return startRenderer(GalleryImageRenderer, thumb);
 }
 
 async function startRenderer(targetRenderer: GalleryBaseRenderer, thumb: HTMLElement): Promise<void> {

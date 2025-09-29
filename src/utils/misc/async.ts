@@ -76,7 +76,9 @@ export async function runWithPools<T>(
   await Promise.all(Array.from({ length: poolSize }, () => worker()));
 }
 
- export function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new PromiseTimeoutError()), milliseconds));
-    return Promise.race([promise, timeout]) as Promise<T>;
-  }
+export function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new PromiseTimeoutError()), milliseconds));
+  return Promise.race([promise, timeout]) as Promise<T>;
+}
+
+export const DO_NOTHING = (): void => { };

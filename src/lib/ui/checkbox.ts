@@ -1,5 +1,5 @@
 import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../../types/elements/menu_element";
-import { DO_NOTHING } from "../../config/constants";
+import { DO_NOTHING } from "../../utils/misc/async";
 import { Events } from "../global/events/events";
 import { isInGallery } from "../../utils/cross_feature/gallery";
 

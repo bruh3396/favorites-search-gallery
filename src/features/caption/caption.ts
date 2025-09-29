@@ -1,12 +1,11 @@
 import * as API from "../../lib/api/api";
+import { DO_NOTHING, debounceAfterFirstCall, sleep } from "../../utils/misc/async";
 import { capitalize, isOnlyDigits } from "../../utils/primitive/string";
-import { debounceAfterFirstCall, sleep } from "../../utils/misc/async";
 import { getAllThumbs, getImageFromThumb } from "../../utils/dom/dom";
 import { BatchExecutor } from "../../lib/components/batch_executor";
 import { CAPTIONS_DISABLED } from "../../lib/global/flags/derived_flags";
 import { CAPTION_HTML } from "../../assets/html";
 import { ClickCodes } from "../../types/primitives/enums";
-import { DO_NOTHING } from "../../config/constants";
 import { Database } from "../../lib/components/database";
 import { Events } from "../../lib/global/events/events";
 import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
@@ -517,7 +516,7 @@ function setAsProblematic(tag: string): void {
   }
 }
 
-function findTagCategoriesOnPageChange(): void {
+export function findTagCategoriesOnPageChange(): void {
   if (!FLAGS.finishedLoading) {
     return;
   }

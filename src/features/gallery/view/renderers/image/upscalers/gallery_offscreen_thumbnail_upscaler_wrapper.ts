@@ -4,7 +4,7 @@ import { ImageRequest } from "../../../../types/gallery_image_request";
 // @ts-expect-error string import
 import OFFSCREEN_UPSCALER_CODE from "./gallery_offscreen_thumbnail_upscaler?raw";
 // @ts-expect-error string import
-import SHARED_GALLERY_SETTINGS_CODE from "../../../../../../config/shared_gallery_settings?raw";
+import SHARED_GALLERY_SETTINGS_CODE from "../../../../../../config/gallery_shared_settings?raw";
 import { ThrottledQueue } from "../../../../../../lib/components/throttled_queue";
 import { createWebWorker } from "../../../../../../utils/misc/web_worker";
 import { removeFirstAndLastLines } from "../../../../../../utils/primitive/string";
@@ -16,16 +16,13 @@ export class GalleryOffscreenThumbnailUpscalerWrapper extends GalleryBaseThumbUp
   constructor() {
     super();
     this.worker = createWebWorker(`${removeFirstAndLastLines(SHARED_GALLERY_SETTINGS_CODE)}\n${OFFSCREEN_UPSCALER_CODE}`);
-    this.upscaleQueue = new ThrottledQueue(100);
+    this.upscaleQueue = new ThrottledQueue(25);
   }
 
   public async finishUpscale(request: ImageRequest): Promise<void> {
     const upscaleRequest = await getUpscaleRequest(request);
 
-    // if (GallerySettings.sendImageBitmapsToWorker) {
-    //   await this.upscaleQueue.wait();
-    // }
-    // await this.upscaleQueue.wait();
+    await this.upscaleQueue.wait();
     this.sendRequestToWorker(upscaleRequest);
   }
 

@@ -1,5 +1,4 @@
 import { ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../../../utils/dom/dom";
-import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
 import { FavoriteLayout } from "../../../../../types/primitives/primitives";
 import { FavoritesBaseTiler } from "./favorites_base_tiler";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
@@ -19,7 +18,7 @@ class ColumnTiler extends FavoritesBaseTiler {
   }
 
   private get active(): boolean {
-    return FAVORITES_CONTENT_CONTAINER.classList.contains(this.className);
+    return this.container.classList.contains(this.className);
   }
 
   private get inactive(): boolean {
