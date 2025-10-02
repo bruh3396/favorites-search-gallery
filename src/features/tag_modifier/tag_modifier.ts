@@ -2,7 +2,7 @@ import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from 
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
 import { DO_NOTHING } from "../../utils/misc/async";
 import { Events } from "../../lib/global/events/events";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { Favorite } from "../../types/favorite_types";
 import { ITEM_CLASS_NAME } from "../../utils/dom/dom";
 import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { TAG_MODIFIER_ENABLED } from "../../lib/global/flags/derived_flags";

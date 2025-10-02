@@ -1,5 +1,4 @@
-import { ContentType } from "../../types/primitives/primitives";
-import { Dimensions2D } from "../../types/primitives/composites";
+import { ContentType, Dimensions2D } from "../../types/common_types";
 const DEFAULT_DIMENSIONS_2D: Dimensions2D = {width: 100, height: 100};
 const DIMENSIONS_2D_REGEX = /^(\d+)(?:x|\/)(\d+)$/;
 const OR_GROUP_REGEX = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;

@@ -1,13 +1,12 @@
-import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../types/elements/menu_element";
+import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../types/element_types";
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../../lib/global/flags/derived_flags";
-import { FavoriteLayout, MetadataMetric } from "../../../../../types/primitives/primitives";
+import { FavoriteLayout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/checkbox";
 import { hideUnusedLayoutSizer, reloadWindow, toggleAddOrRemoveButtons, toggleDownloadButtons, toggleFavoritesOptions, toggleHeader, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
 import { Events } from "../../../../../lib/global/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../../config/general_settings";
-import { PerformanceProfile } from "../../../../../types/primitives/enums";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { createButtonElement } from "../../../../../lib/ui/button";
@@ -405,7 +404,6 @@ function createCheckboxes(): void {
 
 function createSelects(): void {
   for (const select of prepareDynamicElements(SELECTS)) {
-    // @ts-expect-error could be SelectElement<FavoriteLayout> | SelectElement<MetadataMetric> | SelectElement<PerformanceProfile>
     createSelectElement(select);
   }
 }

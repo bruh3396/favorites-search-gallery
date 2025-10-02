@@ -1,6 +1,6 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../utils/dom/awesomplete_utils";
 import { Events } from "../../../../lib/global/events/events";
-import { FavoritesMouseEvent } from "../../../../types/events/mouse_event";
+import { FavoritesMouseEvent } from "../../../../types/input_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { SearchHistory } from "./favorites_search_history";
 import { createDesktopSearchBar } from "./favorites_desktop_search_box";

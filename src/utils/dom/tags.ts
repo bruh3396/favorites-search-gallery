@@ -1,6 +1,6 @@
 import { FavoriteItem, getFavorite } from "../../features/favorites/types/favorite/favorite_item";
 import { convertToTagSet, getContentType } from "../primitive/string";
-import { ContentType } from "../../types/primitives/primitives";
+import { ContentType } from "../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { getImageFromThumb } from "./dom";
 

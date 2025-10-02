@@ -3,7 +3,7 @@
 // @ts-nocheck
 import { isEmptyString, removeLeadingHyphens } from "../../utils/primitive/string";
 import { AWESOMPLETE_ENABLED } from "../../lib/global/flags/derived_flags";
-import { AwesompleteSuggestion } from "../../types/primitives/composites";
+import { AwesompleteSuggestion } from "../../types/common_types";
 import { Events } from "../../lib/global/events/events";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./awesomplete_implementation";

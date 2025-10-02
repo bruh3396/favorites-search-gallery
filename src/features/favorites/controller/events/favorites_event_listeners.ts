@@ -1,6 +1,6 @@
+import * as FavoritesAfterLoadFlow from "../flows/setup/favorites_after_load_flow";
 import * as FavoritesModel from "../../model/favorites_model";
 import * as FavoritesOptionsFlow from "../flows/runtime/favorites_option_flow";
-import * as FavoritesPostLoadFlow from "../flows/setup/favorites_post_load_flow";
 import * as FavoritesPresentationFlow from "../flows/presentation/favorites_presentation_flow";
 import * as FavoritesResetFlow from "../flows/runtime/favorites_reset_flow";
 import * as FavoritesSearchFlow from "../flows/runtime/favorites_search_flow";
@@ -11,8 +11,8 @@ import { updateShowOnHoverOptionTriggeredFromGallery } from "../../ui/favorites_
 
 export function addFavoritesEventsListeners(): void {
   Events.favorites.favoritesLoadedFromDatabase.on(FavoritesModel.keepIndexedTagsSorted, {once: true});
-  Events.favorites.startedFetchingFavorites.on(FavoritesPostLoadFlow.onStartedFetchingFavorites, {once: true});
-  Events.favorites.favoritesLoaded.on(FavoritesPostLoadFlow.onFavoritesLoaded, {once: true});
+  Events.favorites.startedFetchingFavorites.on(FavoritesAfterLoadFlow.onStartedFetchingFavorites, {once: true});
+  Events.favorites.favoritesLoaded.on(FavoritesAfterLoadFlow.onFavoritesLoaded, {once: true});
 
   Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
   Events.favorites.shuffleButtonClicked.on(FavoritesSearchFlow.shuffleSearchResults);

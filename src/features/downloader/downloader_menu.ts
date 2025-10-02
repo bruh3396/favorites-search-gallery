@@ -4,7 +4,7 @@ import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
 import { Events } from "../../lib/global/events/events";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/global/container";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { Favorite } from "../../types/favorite_types";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { insertHTMLAndExtractStyle } from "../../utils/dom/style";
 import { splitIntoChunks } from "../../utils/collection/array";

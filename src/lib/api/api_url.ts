@@ -30,15 +30,15 @@ export function createFavoritesPageURL(pageNumber: number): string {
 }
 
 export function createProfilePageURL(id: string): string {
-  return PROFILE_PAGE_URL + id;
+  return `${PROFILE_PAGE_URL}${id}`;
 }
 
 export function createPostAPIURL(id: string): string {
-  return POST_API_URL + id;
+  return `${POST_API_URL}${id}`;
 }
 
 export function createTagAPIURL(tagName: string): string {
-  return TAG_API_URL + encodeURIComponent(tagName);
+  return `${TAG_API_URL}${encodeURIComponent(tagName)}`;
 }
 
 export function createPostVoteURL(id: string): string {

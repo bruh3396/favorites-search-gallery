@@ -1,7 +1,7 @@
 import * as ICONS from "../../assets/icons";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
 import { Events } from "../../lib/global/events/events";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { Favorite } from "../../types/favorite_types";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/global/flags/derived_flags";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";

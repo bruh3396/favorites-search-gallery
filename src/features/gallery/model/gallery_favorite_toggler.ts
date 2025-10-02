@@ -1,5 +1,5 @@
 import * as API from "../../../lib/api/api";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/api/api_types";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite_types";
 import { Events } from "../../../lib/global/events/events";
 
 export async function addFavoriteInGallery(thumb: HTMLElement | undefined): Promise<AddFavoriteStatus> {

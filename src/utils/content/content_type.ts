@@ -1,6 +1,6 @@
 import { convertToTagString, getContentType } from "../primitive/string";
-import { ContentType } from "../../types/primitives/primitives";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { ContentType } from "../../types/common_types";
+import { Favorite } from "../../types/favorite_types";
 import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { getImageFromThumb } from "../dom/dom";
 import { getTagSetFromThumb } from "../dom/tags";

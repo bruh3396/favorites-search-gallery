@@ -8,7 +8,7 @@ import { GallerySettings } from "../../../config/gallery_settings";
 import { GeneralSettings } from "../../../config/general_settings";
 import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../lib/global/preferences/preferences";
-import { Timeout } from "../../../types/primitives/primitives";
+import { Timeout } from "../../../types/common_types";
 import { throttle } from "../../../utils/misc/async";
 
 const BUTTONS: GalleryMenuButton[] = [

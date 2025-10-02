@@ -1,5 +1,5 @@
 import { Events } from "./events";
-import { Timeout } from "../../../types/primitives/primitives";
+import { Timeout } from "../../../types/common_types";
 
 let timer: Timeout;
 let target: EventTarget | null = null;

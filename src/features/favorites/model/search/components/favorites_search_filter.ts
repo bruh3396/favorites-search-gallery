@@ -2,7 +2,7 @@ import { FAVORITES_SEARCH_INDEX } from "../index/favorites_search_index";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { Rating } from "../../../../../types/primitives/primitives";
+import { Rating } from "../../../../../types/common_types";
 import { SearchCommand } from "../search_command/search_command";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { getTagBlacklist } from "../../../../../utils/misc/favorites_page_metadata";

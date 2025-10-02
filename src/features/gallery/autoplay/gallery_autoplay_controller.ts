@@ -5,7 +5,7 @@ import { isImage, isVideo } from "../../../utils/content/content_type";
 import { AUTOPLAY_HTML } from "../../../assets/html";
 import { Events } from "../../../lib/global/events/events";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/global/container";
-import { NavigationKey } from "../../../types/primitives/primitives";
+import { NavigationKey } from "../../../types/common_types";
 import { NumberComponent } from "../../../lib/ui/number_component";
 import { Preferences } from "../../../lib/global/preferences/preferences";
 import { Timer } from "../../../lib/components/timer";

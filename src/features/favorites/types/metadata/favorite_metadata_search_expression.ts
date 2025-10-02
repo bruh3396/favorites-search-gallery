@@ -1,5 +1,5 @@
-import { MetadataComparator, SearchableMetadataMetric } from "../../../../types/primitives/primitives";
-import { isMetadataComparator, isSearchableMetadataMetric } from "../../../../types/primitives/equivalence";
+import { MetadataComparator, SearchableMetadataMetric } from "../../../../types/common_types";
+import { isMetadataComparator, isSearchableMetadataMetric } from "../../../../types/equivalence";
 
 export class FavoriteMetadataSearchExpression {
   public static regex: RegExp = /^-?(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)$/;

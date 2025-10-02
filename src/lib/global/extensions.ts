@@ -1,15 +1,13 @@
 import * as API from "../api/api";
+import { MediaExtension, MediaExtensionMapping, Post } from "../../types/common_types";
 import { isGif, isVideo } from "../../utils/content/content_type";
 import { BatchExecutor } from "../components/batch_executor";
 import { Database } from "../components/database";
 import { EXTENSION_REGEX } from "../../utils/content/image_url";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { Favorite } from "../../types/favorite_types";
 import { GeneralSettings } from "../../config/general_settings";
-import { MediaExtension } from "../../types/primitives/primitives";
-import { MediaExtensionMapping } from "../../types/primitives/composites";
 import { ON_FAVORITES_PAGE } from "./flags/intrinsic_flags";
-import { Post } from "../../types/api/api_types";
-import { PromiseTimeoutError } from "../../types/primitives/errors";
+import { PromiseTimeoutError } from "../../types/error_types";
 import { ThrottledQueue } from "../components/throttled_queue";
 import { getOriginalImageURLWithJPGExtension } from "../api/media_api";
 import { withTimeout } from "../../utils/misc/async";

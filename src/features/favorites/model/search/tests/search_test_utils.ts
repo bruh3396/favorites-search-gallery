@@ -1,5 +1,5 @@
 import { InvertedSearchIndex } from "../index/inverted_search_index";
-import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { Searchable } from "../../../../../types/common_types";
 
 export function getPrefixes(word: string): string[] {
   const prefixes: string[] = [];

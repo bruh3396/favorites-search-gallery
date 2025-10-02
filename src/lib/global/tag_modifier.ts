@@ -1,6 +1,6 @@
 import { Database } from "../components/database";
 import { Events } from "./events/events";
-import { TagModificationDatabaseRecord } from "../../types/primitives/composites";
+import { TagModificationDatabaseRecord } from "../../types/common_types";
 import { clearCustomTags } from "./custom_tags";
 
 export const TAG_MODIFICATIONS: Map<string, string> = new Map();

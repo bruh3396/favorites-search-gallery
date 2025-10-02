@@ -1,5 +1,5 @@
 import { convertImageURLToSampleURL, convertPreviewURLToImageURL, removeIdFromImageURL } from "../../utils/content/image_url";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { Favorite } from "../../types/favorite_types";
 import { getExtension } from "../global/extensions";
 import { getPreviewURL } from "../../utils/dom/dom";
 

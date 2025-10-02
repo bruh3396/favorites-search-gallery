@@ -1,6 +1,6 @@
 import { SearchCommand } from "./search_command";
 import { SearchTag } from "../search_tags/search_tag";
-import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { Searchable } from "../../../../../types/common_types";
 import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
 
 export class ExpandedSearchCommand<T extends Searchable> extends SearchCommand<T> {

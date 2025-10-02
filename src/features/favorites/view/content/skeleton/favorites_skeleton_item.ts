@@ -1,5 +1,5 @@
 import { getRandomPositiveIntegerInRange, getSeededRandomPositiveIntegerInRange, randomBetween, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
-import { Dimensions2D } from "../../../../../types/primitives/composites";
+import { Dimensions2D } from "../../../../../types/common_types";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ITEM_CLASS_NAME } from "../../../../../utils/dom/dom";
 import { getDimensions2D } from "../../../../../utils/primitive/string";

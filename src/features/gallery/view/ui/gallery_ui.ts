@@ -1,5 +1,5 @@
 import * as Icons from "../../../../assets/icons";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/api/api_types";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite_types";
 import { ON_FAVORITES_PAGE, USING_FIREFOX } from "../../../../lib/global/flags/intrinsic_flags";
 import { blurCurrentlyFocusedElement, showFullscreenIcon, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
 import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/primitive/number";

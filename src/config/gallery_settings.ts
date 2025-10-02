@@ -28,8 +28,6 @@ export const GallerySettings = {
   maxVisibleThumbsBeforeStoppingPreload: 175,
   useOffscreenThumbUpscaler: false,
   fetchImageBitmapsInWorker: true,
-  preloadSingleImagesWhenCachingOutsideDisabled: true,
-  maxSingleImageCacheCount: 5,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },

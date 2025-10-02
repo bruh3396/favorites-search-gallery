@@ -1,10 +1,9 @@
-import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../types/elements/menu_element";
-import { FavoriteLayout, MetadataMetric } from "../../../../../types/primitives/primitives";
+import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../types/element_types";
+import { FavoriteLayout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { hideUnusedLayoutSizer, toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../favorites_menu_event_handlers";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
 import { Events } from "../../../../../lib/global/events/events";
 import { GALLERY_ENABLED } from "../../../../../lib/global/flags/derived_flags";
-import { PerformanceProfile } from "../../../../../types/primitives/enums";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { createButtonElement } from "../../../../../lib/ui/button";
@@ -241,8 +240,8 @@ function createToggleSwitches(): void {
 }
 
 function createSelects(): void {
+  // @ts-expect-error don't care
   for (const select of prepareDynamicElements(SELECTS)) {
-    // @ts-expect-error could be SelectElement<FavoriteLayout> | SelectElement<MetadataMetric> | SelectElement<PerformanceProfile>
     createSelectElement(select);
   }
 }

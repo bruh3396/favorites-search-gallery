@@ -1,4 +1,4 @@
-import { Favorite } from "../../types/interfaces/interfaces";
+import { Favorite } from "../../types/favorite_types";
 import { sleep } from "../misc/async";
 import { waitForAllThumbnailsToLoad } from "./dom";
 
@@ -7,7 +7,7 @@ export function preloadThumbnails(favorites: Favorite[]): void {
 }
 
 export async function preloadImages(urls: string[]): Promise<void> {
-    await waitForAllThumbnailsToLoad();
+  await waitForAllThumbnailsToLoad();
 
   for (const url of urls) {
     await sleep(3);

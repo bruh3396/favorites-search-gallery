@@ -1,7 +1,7 @@
 import { ExpandedSearchCommand } from "../search_command/expanded_search_command";
 import { SearchCommand } from "../search_command/search_command";
 import { SearchTag } from "../search_tags/search_tag";
-import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { Searchable } from "../../../../../types/common_types";
 import { SortedArray } from "../../../../../lib/components/sorted_array";
 import { intersection } from "../../../../../utils/collection/set";
 

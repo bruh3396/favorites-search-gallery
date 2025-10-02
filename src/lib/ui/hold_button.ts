@@ -1,5 +1,5 @@
 import { ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
-import { Timeout } from "../../types/primitives/primitives";
+import { Timeout } from "../../types/common_types";
 import { clamp } from "../../utils/primitive/number";
 
 export class HoldButton extends HTMLElement {

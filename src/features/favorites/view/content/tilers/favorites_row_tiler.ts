@@ -1,5 +1,5 @@
 import { getAllThumbs, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
-import { FavoriteLayout } from "../../../../../types/primitives/primitives";
+import { FavoriteLayout } from "../../../../../types/common_types";
 import { FavoritesBaseTiler } from "./favorites_base_tiler";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { insertStyleHTML } from "../../../../../utils/dom/style";

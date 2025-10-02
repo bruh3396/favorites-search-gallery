@@ -2,7 +2,7 @@ import * as GalleryRenderer from "./renderers/gallery_renderer";
 import * as GalleryUI from "./ui/gallery_ui";
 import * as SearchPageCreator from "./search_page_creator";
 import { GALLERY_CONTAINER } from "../ui/gallery_container";
-import { RemoveFavoriteStatus } from "../../../types/api/api_types";
+import { RemoveFavoriteStatus } from "../../../types/favorite_types";
 import { SearchPage } from "../../../types/search_page";
 
 export function showContentInGallery(thumb: HTMLElement): void {

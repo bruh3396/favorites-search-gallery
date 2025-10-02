@@ -1,5 +1,5 @@
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "./intrinsic_flags";
-import { PerformanceProfile } from "../../../types/primitives/enums";
+import { PerformanceProfile } from "../../../types/common_types";
 import { Preferences } from "../preferences/preferences";
 
 export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value);

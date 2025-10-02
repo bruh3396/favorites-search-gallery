@@ -1085,7 +1085,7 @@ export const FAVORITES_HTML = `
   <style>
     #favorites-search-gallery-menu {
       position: sticky;
-      top: 0;
+      top: -1px;
       /* padding: 10px; */
       padding: 5px;
       z-index: 30;

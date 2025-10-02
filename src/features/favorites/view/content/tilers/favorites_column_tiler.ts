@@ -1,5 +1,5 @@
 import { ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../../../utils/dom/dom";
-import { FavoriteLayout } from "../../../../../types/primitives/primitives";
+import { FavoriteLayout } from "../../../../../types/common_types";
 import { FavoritesBaseTiler } from "./favorites_base_tiler";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 

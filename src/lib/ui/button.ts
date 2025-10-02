@@ -1,4 +1,4 @@
-import { ButtonElement, DEFAULT_MENU_ELEMENT } from "../../types/elements/menu_element";
+import { ButtonElement, DEFAULT_MENU_ELEMENT } from "../../types/element_types";
 import { DO_NOTHING } from "../../utils/misc/async";
 
 function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {

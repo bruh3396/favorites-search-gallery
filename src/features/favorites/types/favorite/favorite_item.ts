@@ -1,12 +1,10 @@
-import { Favorite, FavoriteMetricMap } from "../../../../types/interfaces/interfaces";
+import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "../../../../types/favorite_types";
+import { Post, Rating } from "../../../../types/common_types";
 import { clearPost, createPostFromRawFavorite } from "./favorite_type_utils";
 import { FAVORITES_SEARCH_INDEX } from "../../model/search/index/favorites_search_index";
 import { FavoriteHTMLElement } from "./favorite_element";
 import { FavoriteMetadata } from "../metadata/favorite_metadata";
 import { FavoriteTags } from "./favorite_tags";
-import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
-import { Post } from "../../../../types/api/api_types";
-import { Rating } from "../../../../types/primitives/primitives";
 import { compressPreviewSource } from "../../../../utils/content/image_url";
 import { getIdFromThumb } from "../../../../utils/dom/dom";
 

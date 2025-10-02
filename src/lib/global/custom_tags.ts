@@ -1,4 +1,4 @@
-import { AwesompleteSuggestion } from "../../types/primitives/composites";
+import { AwesompleteSuggestion } from "../../types/common_types";
 import { fetchTagFromAPI } from "../api/api";
 import { removeExtraWhiteSpace } from "../../utils/primitive/string";
 

@@ -1,8 +1,8 @@
-import { NavigationKey } from "../../../types/primitives/primitives";
+import { NavigationKey } from "../../../types/common_types";
 import { SearchPage } from "../../../types/search_page";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { getElementsAroundIndex } from "../../../utils/collection/array";
-import { isForwardNavigationKey } from "../../../types/primitives/equivalence";
+import { isForwardNavigationKey } from "../../../types/equivalence";
 
 let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;

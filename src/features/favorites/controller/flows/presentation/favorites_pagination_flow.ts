@@ -4,7 +4,7 @@ import { Events } from "../../../../../lib/global/events/events";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../../../types/favorite/favorite_types";
 import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
-import { NavigationKey } from "../../../../../types/primitives/primitives";
+import { NavigationKey } from "../../../../../types/common_types";
 
 class PaginationFlow implements FavoritesPresentationFlow {
     public present(results: FavoriteItem[]): void {

@@ -1,4 +1,4 @@
-import { AwesompleteSuggestion } from "../../types/primitives/composites";
+import { AwesompleteSuggestion } from "../../types/common_types";
 import { getSavedSearches } from "../../utils/dom/saved_searches";
 import { removeExtraWhiteSpace } from "../../utils/primitive/string";
 

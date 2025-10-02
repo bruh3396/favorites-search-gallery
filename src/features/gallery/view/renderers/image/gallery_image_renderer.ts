@@ -5,7 +5,7 @@ import { GalleryNormalThumbUpscaler } from "./upscalers/gallery_normal_thumbnail
 import { GalleryOffscreenThumbnailUpscalerWrapper } from "./upscalers/gallery_offscreen_thumbnail_upscaler_wrapper";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
-import { PerformanceProfile } from "../../../../../types/primitives/enums";
+import { PerformanceProfile } from "../../../../../types/common_types";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
 import { USING_FIREFOX } from "../../../../../lib/global/flags/intrinsic_flags";

@@ -1,5 +1,5 @@
 import { SearchTag } from "./search_tag";
-import { Searchable } from "../../../../../types/interfaces/interfaces";
+import { Searchable } from "../../../../../types/common_types";
 import { escapeParenthesis } from "../../../../../utils/primitive/string";
 
 const UNMATCHABLE_REGEX = /^\b$/;

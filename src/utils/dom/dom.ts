@@ -1,6 +1,6 @@
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { Events } from "../../lib/global/events/events";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { Favorite } from "../../types/favorite_types";
 import { insertStyleHTML } from "./style";
 import { removeNonNumericCharacters } from "../primitive/string";
 

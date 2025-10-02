@@ -4,7 +4,7 @@ import * as GalleryView from "../../../view/gallery_view";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { GalleryState } from "../../../types/gallery_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { PerformanceProfile } from "../../../../../types/primitives/enums";
+import { PerformanceProfile } from "../../../../../types/common_types";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
 export function preloadContentInGalleryAround(thumb: HTMLElement | null): void {

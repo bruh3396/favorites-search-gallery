@@ -1,4 +1,4 @@
-import { Timeout } from "../../types/primitives/primitives";
+import { Timeout } from "../../types/common_types";
 
 export class BatchExecutor<V> {
   private readonly limit: number;

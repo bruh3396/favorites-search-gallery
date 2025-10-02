@@ -1,7 +1,7 @@
 import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { FavoritesMouseEvent } from "../../../../../types/events/mouse_event";
+import { FavoritesMouseEvent } from "../../../../../types/input_types";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { didSwipe } from "../../../../../lib/global/events/swipe_events";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";

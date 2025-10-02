@@ -1,5 +1,6 @@
 import * as FSG_URL from "./api_url";
-import { AddFavoriteStatus, Post } from "../../types/api/api_types";
+import { AddFavoriteStatus } from "../../types/favorite_types";
+import { Post } from "../../types/common_types";
 import { ThrottledQueue } from "../components/throttled_queue";
 import { extractFavoritesCount } from "./profile_page_parser";
 import { extractPostFromAPI } from "./post_api_parser";

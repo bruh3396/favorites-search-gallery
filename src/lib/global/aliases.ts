@@ -1,4 +1,4 @@
-import { AliasMap } from "../../types/primitives/composites";
+import { AliasMap } from "../../types/common_types";
 import { Preferences } from "./preferences/preferences";
 
 const ALIAS_MAP = {} as AliasMap;

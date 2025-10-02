@@ -1,5 +1,5 @@
 import { isImage, isVideo } from "../../../utils/content/content_type";
-import { Favorite } from "../../../types/interfaces/interfaces";
+import { Favorite } from "../../../types/favorite_types";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { getWrappedElementsAroundIndex } from "../../../utils/collection/array";
 import { removeNonNumericCharacters } from "../../../utils/primitive/string";

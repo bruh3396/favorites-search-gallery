@@ -1,4 +1,4 @@
-import { FavoriteLayout } from "../../../../../types/primitives/primitives";
+import { FavoriteLayout } from "../../../../../types/common_types";
 import { FavoritesBaseTiler } from "./favorites_base_tiler";
 
 class NativeTiler extends FavoritesBaseTiler {

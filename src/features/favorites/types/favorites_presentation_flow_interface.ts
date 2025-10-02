@@ -1,4 +1,4 @@
-import { FavoriteLayout, NavigationKey } from "../../../types/primitives/primitives";
+import { FavoriteLayout, NavigationKey } from "../../../types/common_types";
 import { FavoriteItem } from "./favorite/favorite_item";
 
 export interface FavoritesPresentationFlow {

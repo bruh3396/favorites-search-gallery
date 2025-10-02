@@ -1,7 +1,7 @@
 import * as GalleryAutoplayController from "../../../autoplay/gallery_autoplay_controller";
 import * as GalleryNavigationFlow from "../runtime/gallery_navigation_flow";
 import * as GalleryView from "../../../view/gallery_view";
-import { NavigationKey } from "../../../../../types/primitives/primitives";
+import { NavigationKey } from "../../../../../types/common_types";
 import { executeFunctionBasedOnGalleryState } from "../runtime/gallery_runtime_flow_utils";
 
 export function setupAutoplay(): void {

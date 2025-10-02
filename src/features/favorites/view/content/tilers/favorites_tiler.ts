@@ -1,5 +1,5 @@
 import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
-import { FavoriteLayout } from "../../../../../types/primitives/primitives";
+import { FavoriteLayout } from "../../../../../types/common_types";
 import { FavoritesColumnTiler } from "./favorites_column_tiler";
 import { FavoritesGridTiler } from "./favorites_grid_tiler";
 import { FavoritesNativeTiler } from "./favorites_native_tiler";
@@ -15,7 +15,7 @@ const TILERS = [FavoritesGridTiler, FavoritesRowTiler, FavoritesSquareTiler, Fav
 let currentLayout: FavoriteLayout = Preferences.favoritesLayout.value;
 
 export function getCurrentTiler(): Tiler {
-  return TILERS.find(tiler => tiler.className === currentLayout) || FavoritesRowTiler;
+  return TILERS.find(tiler => tiler.className === currentLayout) ?? FavoritesColumnTiler;
 }
 
 export function getCurrentLayout(): FavoriteLayout {
@@ -71,13 +71,9 @@ export function addStyles(): void {
   insertStyleHTML(style, "tiler-style");
 }
 
-export function showSkeleton(): void {
-  getCurrentTiler().showSkeleton();
-}
-
 export function setupFavoritesTiler(): void {
-  showSkeleton();
   addStyles();
+  getCurrentTiler().showSkeleton();
   FAVORITES_CONTENT_CONTAINER.className = currentLayout;
   getCurrentTiler().setColumnCount(Preferences.columnCount.value);
   getCurrentTiler().setRowSize(Preferences.rowSize.value);

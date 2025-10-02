@@ -1,4 +1,4 @@
-import { ContentType } from "../../../types/primitives/primitives";
+import { ContentType } from "../../../types/common_types";
 import { ThrottledQueue } from "../../../lib/components/throttled_queue";
 import { getContentTypeFromThumb } from "../../../utils/dom/tags";
 import { getFavorite } from "../../favorites/types/favorite/favorite_item";

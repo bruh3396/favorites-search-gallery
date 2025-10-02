@@ -2,7 +2,7 @@ import * as Extensions from "../../lib/global/extensions";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { convertToTagSet, convertToTagString, getContentType, removeNonNumericCharacters } from "../primitive/string";
 import { getAllThumbs, getIdFromThumb, getImageFromThumb } from "./dom";
-import { Post } from "../../types/api/api_types";
+import { Post } from "../../types/common_types";
 import { fetchPostFromAPI } from "../../lib/api/api";
 import { moveTagsFromTitleToTagsAttribute } from "./tags";
 import { sleep } from "../misc/async";

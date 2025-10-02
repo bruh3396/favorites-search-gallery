@@ -7,7 +7,6 @@ export class SearchPage {
   public pageNumber: number;
 
   constructor(pageNumber: number, content: string | HTMLElement[]) {
-
     if (typeof content === "string") {
       const dom = PARSER.parseFromString(content, "text/html");
 
@@ -25,11 +24,11 @@ export class SearchPage {
     return this.thumbs.length === 0;
   }
 
-  public get isLastPage(): boolean {
+  public get isLast(): boolean {
     return this.thumbs.length < 42;
   }
 
-  public get isFirstPage(): boolean {
+  public get isFirst(): boolean {
     return this.pageNumber === 0;
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { Post } from "../../types/api/api_types";
+import { Post } from "../../types/common_types";
 
 export class ApiParseError extends Error { }
 export class DeletedPostError extends Error { }

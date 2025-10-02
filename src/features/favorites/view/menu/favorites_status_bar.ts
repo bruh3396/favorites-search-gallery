@@ -1,7 +1,7 @@
 import * as API from "../../../../lib/api/api";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
 import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
-import { Timeout } from "../../../../types/primitives/primitives";
+import { Timeout } from "../../../../types/common_types";
 import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
 
 let matchCountIndicator: HTMLElement;

@@ -1,10 +1,10 @@
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
 import { FavoritesPaginationParameters } from "../../types/favorite_pagination_parameters";
-import { NavigationKey } from "../../../../types/primitives/primitives";
+import { NavigationKey } from "../../../../types/common_types";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { clamp } from "../../../../utils/primitive/number";
-import { isForwardNavigationKey } from "../../../../types/primitives/equivalence";
+import { isForwardNavigationKey } from "../../../../types/equivalence";
 
 let currentPageNumber = 1;
 let resultsPerPage = Preferences.resultsPerPage.value;

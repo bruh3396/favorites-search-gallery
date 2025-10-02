@@ -1,6 +1,6 @@
 import { FANCY_HOVERING_HTML } from "../../../assets/html";
-import { FavoriteLayout } from "../../../types/primitives/primitives";
-import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
+import { FavoriteLayout } from "../../../types/common_types";
+import { FavoritesWheelEvent } from "../../../types/input_types";
 import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../lib/global/preferences/preferences";
 import { getCurrentLayout } from "../view/favorites_view";

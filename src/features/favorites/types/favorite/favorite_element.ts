@@ -1,13 +1,12 @@
 import * as API from "../../../../lib/api/api";
 import * as Icons from "../../../../assets/icons";
+import { ClickCode, Post } from "../../../../types/common_types";
 import { ON_DESKTOP_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/global/flags/intrinsic_flags";
 import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../../utils/dom/links";
-import { ClickCodes } from "../../../../types/primitives/enums";
 import { Events } from "../../../../lib/global/events/events";
 import { FavoriteElement } from "./favorite_types";
 import { GALLERY_DISABLED } from "../../../../lib/global/flags/derived_flags";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
-import { Post } from "../../../../types/api/api_types";
 import { createPostPageURL } from "../../../../lib/api/api_url";
 import { downloadFromThumb } from "../../../../lib/download/downloader";
 import { getContentType } from "../../../../utils/primitive/string";
@@ -91,7 +90,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
     this.favoriteButton.onmousedown = (event): void => {
       event.stopPropagation();
 
-      if (event.button !== ClickCodes.LEFT) {
+      if (event.button !== ClickCode.LEFT) {
         return;
       }
 
@@ -132,8 +131,8 @@ export class FavoriteHTMLElement implements FavoriteElement {
       if (event.ctrlKey) {
         return;
       }
-      const middleClick = event.button === ClickCodes.MIDDLE;
-      const leftClick = event.button === ClickCodes.LEFT;
+      const middleClick = event.button === ClickCode.MIDDLE;
+      const leftClick = event.button === ClickCode.LEFT;
       const shiftClick = leftClick && event.shiftKey;
 
       if (middleClick || shiftClick || (leftClick && GALLERY_DISABLED)) {

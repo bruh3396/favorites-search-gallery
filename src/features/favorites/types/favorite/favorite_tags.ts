@@ -1,6 +1,6 @@
 import { convertToTagSet, convertToTagString } from "../../../../utils/primitive/string";
-import { FavoritesDatabaseRecord } from "../../../../types/primitives/composites";
-import { Post } from "../../../../types/api/api_types";
+import { FavoritesDatabaseRecord } from "../../../../types/favorite_types";
+import { Post } from "../../../../types/common_types";
 import { getAdditionalTags } from "../../../../lib/global/tag_modifier";
 
 function getCorrectTags(post: Post): Set<string> {

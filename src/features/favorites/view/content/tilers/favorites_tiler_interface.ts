@@ -1,4 +1,4 @@
-import { FavoriteLayout } from "../../../../../types/primitives/primitives";
+import { FavoriteLayout } from "../../../../../types/common_types";
 
 export interface Tiler {
   readonly container: HTMLElement

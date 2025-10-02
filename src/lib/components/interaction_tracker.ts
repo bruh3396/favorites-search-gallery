@@ -1,5 +1,5 @@
 import { Events } from "../global/events/events";
-import { Timeout } from "../../types/primitives/primitives";
+import { Timeout } from "../../types/common_types";
 
 export class InteractionTracker {
   public onInteractionStopped: () => void;

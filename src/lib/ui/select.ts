@@ -1,4 +1,4 @@
-import { DEFAULT_MENU_ELEMENT, SelectElement } from "../../types/elements/menu_element";
+import { DEFAULT_MENU_ELEMENT, SelectElement } from "../../types/element_types";
 import { DO_NOTHING } from "../../utils/misc/async";
 
 function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T>>): SelectElement<T> {
@@ -8,7 +8,6 @@ function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T
     savePreference: false,
     defaultValue: "" as T,
     event: null,
-    hotkey: "",
     function: DO_NOTHING,
     triggerOnCreation: false,
     preference: null,

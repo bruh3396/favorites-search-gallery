@@ -1,14 +1,6 @@
-documentation
 experimental
 html
 .vscode
-tampermonkey*
-.prettierrc
 node_modules
-*.min.js
-web_workers.js
 dist
-*html
 package-lock.json
-eslint.config.mjs
-*mts

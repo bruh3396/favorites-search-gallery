@@ -1,6 +1,6 @@
 import { DownloadRequest, createDownloadRequest } from "./download_request";
-import { DownloadAbortedError } from "../../types/primitives/errors";
-import { Favorite } from "../../types/interfaces/interfaces";
+import { DownloadAbortedError } from "../../types/error_types";
+import { Favorite } from "../../types/favorite_types";
 import { downloadBlob } from "../../lib/download/downloader";
 import { runWithPools } from "../../utils/misc/async";
 

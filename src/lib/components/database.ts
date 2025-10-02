@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { sleep } from "../../utils/misc/async";
+import { yield1 } from "../../utils/misc/async";
 
 class LockedDatabaseError extends Error { }
 
@@ -74,7 +74,7 @@ export class Database<V extends { id: string }> {
 
   public async delete(): Promise<void> {
     this.lock();
-    await sleep(0);
+    await yield1();
     indexedDB.deleteDatabase(this.name);
   }
 

@@ -1,8 +1,7 @@
+import { TagCategory, TagCategoryMapping } from "../../types/common_types";
 import { fetchPostPage, fetchTagFromAPI } from "../api/api";
 import { BatchExecutor } from "../components/batch_executor";
 import { Database } from "../components/database";
-import { TagCategory } from "../../types/primitives/primitives";
-import { TagCategoryMapping } from "../../types/primitives/composites";
 import { getTagSetFromThumb } from "../../utils/dom/tags";
 import { replaceSpacesWithUnderscores } from "../../utils/primitive/string";
 

@@ -1,10 +1,14 @@
 import { Events } from "../../../../../lib/global/events/events";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { Rating } from "../../../../../types/primitives/primitives";
-import { RatingElement } from "../../../../../types/primitives/composites";
+import { Rating } from "../../../../../types/common_types";
 import { capitalize } from "../../../../../utils/primitive/string";
 import { hasTagName } from "../../../../../utils/dom/dom";
+
+type RatingElement = {
+  input: HTMLInputElement
+  label: HTMLLabelElement
+}
 
 let parentContainer: HTMLElement = document.createElement("div");
 const CONTAINER = createContainer();

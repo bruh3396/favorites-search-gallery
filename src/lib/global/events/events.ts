@@ -1,14 +1,11 @@
-import { FavoriteLayout, MetadataMetric, NavigationKey, Rating } from "../../../types/primitives/primitives";
+import { FavoriteLayout, MetadataMetric, NavigationKey, PerformanceProfile, Rating } from "../../../types/common_types";
+import { FavoritesKeyboardEvent, FavoritesMouseEvent, FavoritesWheelEvent } from "../../../types/input_types";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../flags/intrinsic_flags";
 import { EventEmitter } from "../../components/event_emitter";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../container";
 import { FavoriteItem } from "../../../features/favorites/types/favorite/favorite_item";
-import { FavoritesKeyboardEvent } from "../../../types/events/keyboard_event";
-import { FavoritesMouseEvent } from "../../../types/events/mouse_event";
 import { FavoritesPageRelation } from "../../../features/favorites/types/favorite/favorite_types";
-import { FavoritesWheelEvent } from "../../../types/events/wheel_event";
 import { GalleryMenuAction } from "../../../features/gallery/types/gallery_types";
-import { PerformanceProfile } from "../../../types/primitives/enums";
 import { setupSwipeEvents } from "./swipe_events";
 import { setupTouchHoldEvents } from "./touch_hold_events";
 

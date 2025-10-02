@@ -4,7 +4,7 @@ import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import { Events } from "../../../../../lib/global/events/events";
-import { NavigationKey } from "../../../../../types/primitives/primitives";
+import { NavigationKey } from "../../../../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 
 function changeFavoritesPageInGallery(direction: NavigationKey): Promise<HTMLElement> {

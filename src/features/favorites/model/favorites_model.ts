@@ -6,7 +6,7 @@ import * as FavoritesSorter from "./search/components/favorites_sorter";
 import * as InfiniteScrollFeeder from "./presentation/favorites_infinite_scroll_feeder";
 import { FavoriteItem, getFavorite } from "../types/favorite/favorite_item";
 import { FavoritesPageRelation, NewFavorites } from "../types/favorite/favorite_types";
-import { NavigationKey, Rating, SortingMethod } from "../../../types/primitives/primitives";
+import { NavigationKey, Rating, SortingMethod } from "../../../types/common_types";
 import { FAVORITES_CONTENT_CONTAINER } from "../ui/structure/favorites_content_container";
 import { FAVORITES_SEARCH_INDEX } from "./search/index/favorites_search_index";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
