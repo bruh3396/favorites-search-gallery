@@ -17,7 +17,7 @@ export function addGalleryEventListeners(): void {
 
   Events.favorites.pageChanged.on(GalleryFavoritesFlow.handlePageChange);
   Events.favorites.resultsAddedToCurrentPage.on(GalleryFavoritesFlow.handleResultsAddedToCurrentPage);
-  Events.favorites.searchResultsUpdated.on(GalleryModel.setSearchResults);
+  Events.favorites.searchResultsUpdated.on(GalleryModel.updateFavoritesPageSearchResults);
   Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowContentOnHover);
   Events.favorites.inGalleryRequest.on(GalleryFavoritesFlow.inGalleryResponse);
 
@@ -28,6 +28,9 @@ export function addGalleryEventListeners(): void {
   addPlatformDependentEventListeners();
 
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
+
+  Events.searchPage.allThumbsUpdated.on(GalleryModel.updateSearchPageThumbs);
+  Events.searchPage.returnSearchPage.on(GalleryModel.updateCurrentSearchPage);
 }
 
 function addPlatformDependentEventListeners(): void {

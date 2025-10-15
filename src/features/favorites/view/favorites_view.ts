@@ -98,6 +98,7 @@ export function setupFavoritesView(): void {
   createFavoriteItemHTMLTemplates();
   collectAspectRatios();
   FavoritesStatus.setupFavoritesStatus();
+  FavoritesTiler.showSkeleton();
   FavoritesTiler.setupFavoritesTiler();
   FavoritesPaginationMenu.setupFavoritesPaginationMenu();
   updateColumnCount(Preferences.columnCount.value);

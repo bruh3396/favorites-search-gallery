@@ -1,13 +1,12 @@
 import * as GalleryFavoriteToggler from "./gallery_favorite_toggler";
 import * as GalleryStateMachine from "./gallery_state_machine";
 import * as GalleryThumbSelector from "./gallery_thumb_selector";
-import * as SearchPageLoader from "./search_page_loader";
 import { AddFavoriteStatus, Favorite, RemoveFavoriteStatus } from "../../../types/favorite_types";
 import { openOriginal, openPostPage } from "../../../utils/dom/links";
 import { GalleryState } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
-import { SearchPage } from "../../../types/search_page";
+import { SearchPage } from "../../search_page/types/search_page";
 import { clamp } from "../../../utils/primitive/number";
 import { createPostPageURL } from "../../../lib/api/api_url";
 import { downloadFromThumb } from "../../../lib/download/downloader";
@@ -18,6 +17,7 @@ import { isVideo } from "../../../utils/content/content_type";
 
 let currentIndex = 0;
 let recentlyExitedGallery = false;
+let currentSearchPage: SearchPage | null = null;
 
 export function hasRecentlyExitedGallery(): boolean {
   return recentlyExitedGallery;
@@ -87,29 +87,33 @@ export function getSearchResults(): Favorite[] {
 
 export function getThumbsAround(thumb: HTMLElement): HTMLElement[] {
   if (ON_FAVORITES_PAGE) {
-    return GalleryThumbSelector.getSearchResultsAround(thumb);
+    return GalleryThumbSelector.getFavoritesPageSearchResultsAround(thumb);
   }
-  return SearchPageLoader.getThumbsAround(thumb);
+  return GalleryThumbSelector.getSearchPageThumbsAround(thumb);
 }
 
-export function setSearchResults(searchResults: Favorite[]): void {
-  GalleryThumbSelector.setLatestSearchResults(searchResults);
+export function updateFavoritesPageSearchResults(searchResults: Favorite[]): void {
+  GalleryThumbSelector.updateFavoritesPageSearchResults(searchResults);
+}
+
+export function updateSearchPageThumbs(thumbs: HTMLElement[]): void {
+  GalleryThumbSelector.updateSearchPageThumbs(thumbs);
+}
+
+export function updateCurrentSearchPage(searchPage: SearchPage | null): void {
+  currentSearchPage = searchPage;
 }
 
 export function indexCurrentPageThumbs(): void {
   GalleryThumbSelector.indexCurrentPageThumbs(getAllThumbs());
 }
 
-export function preloadSearchPages(): void {
-  SearchPageLoader.preloadSearchPages();
-}
-
 export function clampCurrentIndex(): void {
   currentIndex = clamp(currentIndex, 0, GalleryThumbSelector.getThumbsOnCurrentPage().length - 1);
 }
 
-export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
-  return SearchPageLoader.navigateSearchPages(direction);
+export function getCurrentSearchPage(): SearchPage | null {
+  return currentSearchPage;
 }
 
 export function openPostInNewTab(): void {

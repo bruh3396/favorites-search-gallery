@@ -1,11 +1,11 @@
 import { getAllThumbs, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
+import { BaseTiler } from "./favorites_base_tiler";
 import { FavoriteLayout } from "../../../../../types/common_types";
-import { FavoritesBaseTiler } from "./favorites_base_tiler";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
 import { mapRange } from "../../../../../utils/primitive/number";
 
-class RowTiler extends FavoritesBaseTiler {
+export class RowTiler extends BaseTiler {
   public className: FavoriteLayout = "row";
   public skeletonStyle: Record<string, string> = { };
 
@@ -80,5 +80,3 @@ class RowTiler extends FavoritesBaseTiler {
     return itemsOnLastRow;
   }
 }
-
-export const FavoritesRowTiler = new RowTiler();

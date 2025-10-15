@@ -1,26 +1,29 @@
-import { SearchPage } from "../../../types/search_page";
+import { CONTENT_CONTAINER } from "../../../lib/global/content_container";
+import { SearchPage } from "../types/search_page";
+import { tile } from "../../favorites/view/content/tilers/favorites_tiler";
 import { waitForDOMToLoad } from "../../../utils/dom/dom";
 
 let thumbContainer: HTMLElement | null = null;
 
 function getMainThumbnailContainer(): HTMLElement | null {
-  const thumb = document.querySelector(".thumb");
+  // const thumb = document.querySelector(".thumb");
 
-  if (thumb !== null) {
-    return thumb.parentElement;
-  }
+  // if (thumb !== null) {
+  //   return thumb.parentElement;
+  // }
   return document.querySelector(".image-list");
 }
 
 function insertNewThumbs(searchPage: SearchPage): void {
-  if (thumbContainer === null) {
-    return;
-  }
-  thumbContainer.innerHTML = "";
+  tile(searchPage.thumbs);
+  // if (thumbContainer === null) {
+  //   return;
+  // }
+  // thumbContainer.innerHTML = "";
 
-  for (const thumb of searchPage.thumbs) {
-    thumbContainer.appendChild(thumb);
-  }
+  // for (const thumb of searchPage.thumbs) {
+  //   thumbContainer.appendChild(thumb);
+  // }
 }
 
 function updatePaginator(searchPage: SearchPage): void {
@@ -50,6 +53,11 @@ function updateAddressBar(searchPage: SearchPage): void {
 export async function setupSearchPageCreator(): Promise<void> {
   await waitForDOMToLoad();
   thumbContainer = getMainThumbnailContainer();
+
+  if (thumbContainer !== null) {
+    thumbContainer.insertAdjacentElement("beforebegin", CONTENT_CONTAINER);
+    thumbContainer.innerHTML = "";
+  }
 }
 
 export function createSearchPage(searchPage: SearchPage): void {

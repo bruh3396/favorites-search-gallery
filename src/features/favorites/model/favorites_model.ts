@@ -7,7 +7,7 @@ import * as InfiniteScrollFeeder from "./presentation/favorites_infinite_scroll_
 import { FavoriteItem, getFavorite } from "../types/favorite/favorite_item";
 import { FavoritesPageRelation, NewFavorites } from "../types/favorite/favorite_types";
 import { NavigationKey, Rating, SortingMethod } from "../../../types/common_types";
-import { FAVORITES_CONTENT_CONTAINER } from "../ui/structure/favorites_content_container";
+import { CONTENT_CONTAINER } from "../../../lib/global/content_container";
 import { FAVORITES_SEARCH_INDEX } from "./search/index/favorites_search_index";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
 import { ITEM_SELECTOR } from "../../../utils/dom/dom";
@@ -195,7 +195,7 @@ export function buildSearchIndexSynchronously(): void {
 }
 
 export function noFavoritesAreVisible(): boolean {
-  return FAVORITES_CONTENT_CONTAINER.querySelector(ITEM_SELECTOR) === null;
+  return CONTENT_CONTAINER.querySelector(ITEM_SELECTOR) === null;
 }
 
 export function fetchMissingMetadata(): void {

@@ -6,6 +6,7 @@ import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../container";
 import { FavoriteItem } from "../../../features/favorites/types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../../../features/favorites/types/favorite/favorite_types";
 import { GalleryMenuAction } from "../../../features/gallery/types/gallery_types";
+import { SearchPage } from "../../../features/search_page/types/search_page";
 import { setupSwipeEvents } from "./swipe_events";
 import { setupTouchHoldEvents } from "./touch_hold_events";
 
@@ -74,6 +75,7 @@ const gallery = {
   showOnHoverToggled: new EventEmitter<boolean>(true),
   enteredGallery: new EventEmitter<void>(true),
   exitedGallery: new EventEmitter<void>(true),
+  navigateSearchPages: new EventEmitter<NavigationKey>(true),
   visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true),
   galleryMenuButtonClicked: new EventEmitter<GalleryMenuAction>(true),
   videoEnded: new EventEmitter<void>(true),
@@ -89,6 +91,12 @@ const caption = {
 
 const searchBox = {
   appendSearchBox: new EventEmitter<string>(true)
+};
+
+const searchPage = {
+  searchPageReady: new EventEmitter<void>(true),
+  allThumbsUpdated: new EventEmitter<HTMLElement[]>(true),
+  returnSearchPage: new EventEmitter<SearchPage | null>(true)
 };
 
 const mobile = {
@@ -205,6 +213,7 @@ export const Events = {
   gallery,
   caption,
   searchBox,
+  searchPage,
   document: document1,
   window: window1,
   mobile,

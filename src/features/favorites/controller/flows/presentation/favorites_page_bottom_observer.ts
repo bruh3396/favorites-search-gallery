@@ -1,4 +1,4 @@
-import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
+import { CONTENT_CONTAINER } from "../../../../../lib/global/content_container";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ITEM_CLASS_NAME } from "../../../../../utils/dom/dom";
 
@@ -28,7 +28,7 @@ export class FavoritesPageBottomObserver {
   }
 
   private observeBottomElements(): void {
-    const bottomElements = Array.from(FAVORITES_CONTENT_CONTAINER.querySelectorAll(`.${ITEM_CLASS_NAME}:last-child`));
+    const bottomElements = Array.from(CONTENT_CONTAINER.querySelectorAll(`.${ITEM_CLASS_NAME}:last-child`));
 
     for (const element of bottomElements) {
       this.intersectionObserver.observe(element);

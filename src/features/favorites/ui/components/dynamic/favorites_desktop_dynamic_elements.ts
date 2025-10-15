@@ -403,6 +403,7 @@ function createCheckboxes(): void {
 }
 
 function createSelects(): void {
+  //  @ts-expect-error don't care
   for (const select of prepareDynamicElements(SELECTS)) {
     createSelectElement(select);
   }

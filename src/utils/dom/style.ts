@@ -1,7 +1,8 @@
 import * as FSG_URL from "../../lib/api/api_url";
 import { COMMON_HTML, DARK_THEME_HTML, SKELETON_HTML } from "../../assets/html";
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { getCookie, setCookie } from "../../lib/global/cookie";
+import { FavoritesSettings } from "../../config/favorites_settings";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { yield1 } from "../misc/async";
 
@@ -117,6 +118,7 @@ export function setupCommonStyles(): void {
   insertStyleHTML(COMMON_HTML, "common-style");
   toggleDarkTheme(usingDarkTheme());
   setupVideoAndGifOutlines();
+  addTilerStyles();
 }
 
 function setGalleryBackgroundColor(color: string): void {
@@ -141,4 +143,19 @@ function setGalleryBackgroundColor(color: string): void {
 export function setColorScheme(color: string): void {
   setGalleryBackgroundColor(color);
   Preferences.colorScheme.set(color);
+}
+
+export function addTilerStyles(): void {
+  const style = `
+    #favorites-search-gallery-content {
+      &.row, &.column, &.column .favorites-column, &.square, &.grid {
+        gap: ${FavoritesSettings.thumbnailSpacing}px;
+      }
+
+      &.column {
+        margin-right: ${ON_DESKTOP_DEVICE ? FavoritesSettings.rightContentMargin : 0}px;
+      }
+    }`;
+
+  insertStyleHTML(style, "tiler-style");
 }

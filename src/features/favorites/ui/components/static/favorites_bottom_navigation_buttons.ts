@@ -1,5 +1,5 @@
+import { CONTENT_CONTAINER } from "../../../../../lib/global/content_container";
 import { Events } from "../../../../../lib/global/events/events";
-import { FAVORITES_CONTENT_CONTAINER } from "../../structure/favorites_content_container";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
@@ -62,5 +62,5 @@ export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
   container.appendChild(previousButton);
   container.appendChild(nextButton);
   await yield1();
-  FAVORITES_CONTENT_CONTAINER.insertAdjacentElement("afterend", container);
+  CONTENT_CONTAINER.insertAdjacentElement("afterend", container);
 }

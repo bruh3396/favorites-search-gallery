@@ -14,16 +14,16 @@ function isThumbContentType(thumb: HTMLElement, contentType: ContentType): boole
   return image !== null && getContentType(getTagSetFromThumb(thumb)) === contentType;
 }
 
-function isContentType(object: HTMLElement | Favorite, contentType: ContentType): boolean {
-  if (object instanceof HTMLElement) {
-    return isThumbContentType(object, contentType);
+function isContentType(item: HTMLElement | Favorite, contentType: ContentType): boolean {
+  if (item instanceof HTMLElement) {
+    return isThumbContentType(item, contentType);
   }
-  return isFavoriteContentType(object, contentType);
+  return isFavoriteContentType(item, contentType);
 }
 
-export const isVideo = (object: HTMLElement | Favorite): boolean => isContentType(object, "video");
-export const isGif = (object: HTMLElement | Favorite): boolean => isContentType(object, "gif");
-export const isImage = (object: HTMLElement | Favorite): boolean => isContentType(object, "image");
+export const isVideo = (item: HTMLElement | Favorite): boolean => isContentType(item, "video");
+export const isGif = (item: HTMLElement | Favorite): boolean => isContentType(item, "gif");
+export const isImage = (item: HTMLElement | Favorite): boolean => isContentType(item, "image");
 
 export function forceImageContentType(thumb: HTMLElement): void {
   if (!ON_SEARCH_PAGE) {

@@ -1,21 +1,25 @@
-import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
+import { CONTENT_CONTAINER } from "../../../../../lib/global/content_container";
+import { ColumnTiler } from "./favorites_column_tiler";
 import { FavoriteLayout } from "../../../../../types/common_types";
-import { FavoritesColumnTiler } from "./favorites_column_tiler";
-import { FavoritesGridTiler } from "./favorites_grid_tiler";
-import { FavoritesNativeTiler } from "./favorites_native_tiler";
-import { FavoritesRowTiler } from "./favorites_row_tiler";
-import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { FavoritesSquareTiler } from "./favorites_square_tiler";
-import { ON_DESKTOP_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { GridTiler } from "./favorites_grid_tiler";
+import { NativeTiler } from "./favorites_native_tiler";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
+import { RowTiler } from "./favorites_row_tiler";
+import { SquareTiler } from "./favorites_square_tiler";
 import { Tiler } from "./favorites_tiler_interface";
-import { insertStyleHTML } from "../../../../../utils/dom/style";
+import { getAllThumbs } from "../../../../../utils/dom/dom";
 
-const TILERS = [FavoritesGridTiler, FavoritesRowTiler, FavoritesSquareTiler, FavoritesColumnTiler, FavoritesNativeTiler];
+const TILERS = [
+  new ColumnTiler(),
+  new GridTiler(),
+  new RowTiler(),
+  new SquareTiler(),
+  new NativeTiler()
+];
 let currentLayout: FavoriteLayout = Preferences.favoritesLayout.value;
 
 export function getCurrentTiler(): Tiler {
-  return TILERS.find(tiler => tiler.className === currentLayout) ?? FavoritesColumnTiler;
+  return TILERS.find(tiler => tiler.className === currentLayout) ?? TILERS[0];
 }
 
 export function getCurrentLayout(): FavoriteLayout {
@@ -39,7 +43,7 @@ export function changeLayout(layout: FavoriteLayout): void {
     return;
   }
   getCurrentTiler().onDeactivate();
-  FAVORITES_CONTENT_CONTAINER.className = layout;
+  CONTENT_CONTAINER.className = layout;
   currentLayout = layout;
   getCurrentTiler().onActivate();
 }
@@ -56,26 +60,14 @@ export function updateRowSize(rowSize: number): void {
   }
 }
 
-export function addStyles(): void {
-  const style = `
-    #favorites-search-gallery-content {
-      &.row, &.column, &.column .favorites-column, &.square, &.grid {
-        gap: ${FavoritesSettings.thumbnailSpacing}px;
-      }
-
-      &.column {
-        margin-right: ${ON_DESKTOP_DEVICE ? FavoritesSettings.rightContentMargin : 0}px;
-      }
-    }`;
-
-  insertStyleHTML(style, "tiler-style");
+export function showSkeleton(): void {
+  getCurrentTiler().showSkeleton();
 }
 
 export function setupFavoritesTiler(): void {
-  addStyles();
-  getCurrentTiler().showSkeleton();
-  FAVORITES_CONTENT_CONTAINER.className = currentLayout;
+  CONTENT_CONTAINER.className = currentLayout;
   getCurrentTiler().setColumnCount(Preferences.columnCount.value);
   getCurrentTiler().setRowSize(Preferences.rowSize.value);
-  getCurrentTiler().onActivate();
+  // getCurrentTiler().onActivate();
+  tile(getAllThumbs());
 }

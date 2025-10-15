@@ -1,9 +1,9 @@
 import { ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../../../utils/dom/dom";
+import { BaseTiler } from "./favorites_base_tiler";
 import { FavoriteLayout } from "../../../../../types/common_types";
-import { FavoritesBaseTiler } from "./favorites_base_tiler";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
-class ColumnTiler extends FavoritesBaseTiler {
+export class ColumnTiler extends BaseTiler {
   public className: FavoriteLayout = "column";
   public skeletonStyle: Record<string, string> = {
     "width": "100%"
@@ -150,5 +150,3 @@ class ColumnTiler extends FavoritesBaseTiler {
     return firstIndexWithMinimumLength === -1 ? 0 : firstIndexWithMinimumLength;
   }
 }
-
-export const FavoritesColumnTiler = new ColumnTiler();

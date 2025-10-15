@@ -1,16 +1,16 @@
-import { FAVORITES_CONTENT_CONTAINER } from "../../../ui/structure/favorites_content_container";
+import { CONTENT_CONTAINER } from "../../../../../lib/global/content_container";
 import { FavoriteLayout } from "../../../../../types/common_types";
 import { Skeleton } from "../skeleton/favorites_skeleton";
 import { Tiler } from "./favorites_tiler_interface";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
 
-export abstract class FavoritesBaseTiler implements Tiler {
+export abstract class BaseTiler implements Tiler {
   public container: HTMLElement;
   public abstract className: FavoriteLayout;
   public abstract skeletonStyle: Record<string, string>;
 
   constructor() {
-    this.container = FAVORITES_CONTENT_CONTAINER;
+    this.container = CONTENT_CONTAINER;
   }
 
   public showSkeleton(): void {

@@ -1,7 +1,7 @@
+import { BaseTiler } from "./favorites_base_tiler";
 import { FavoriteLayout } from "../../../../../types/common_types";
-import { FavoritesBaseTiler } from "./favorites_base_tiler";
 
-class NativeTiler extends FavoritesBaseTiler {
+export class NativeTiler extends BaseTiler {
   public className: FavoriteLayout = "native";
   public skeletonStyle: Record<string, string> = {
     "native": ""
@@ -9,5 +9,3 @@ class NativeTiler extends FavoritesBaseTiler {
   public onActivate(): void { }
   public onDeactivate(): void { }
 }
-
-export const FavoritesNativeTiler = new NativeTiler();

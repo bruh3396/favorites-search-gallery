@@ -585,6 +585,196 @@ export const COMMON_HTML = `
   }
 </style>
 `;
+export const CONTENT_HTML = `
+<style>
+  html {
+    width: 100vw;
+  }
+
+  #favorites-search-gallery-content {
+    padding: 0px 20px 30px 20px;
+    margin-right: 15px;
+
+    &.grid,
+    &.square {
+      display: grid !important;
+      grid-template-columns: repeat(10, 1fr);
+      grid-gap: 0.5cqw;
+
+      .utility-button {
+        width: 30%;
+      }
+    }
+
+    &.square {
+      .favorite, thumb {
+        border-radius: 10px !important;
+        overflow: hidden;
+        aspect-ratio: 1;
+
+        >a,
+        >div {
+          width: 100%;
+          height: 100%;
+
+          >img:first-child,
+          >canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+    }
+
+    &.row {
+      display: flex;
+      flex-wrap: wrap;
+
+      .favorite, .thumb {
+
+        &.last-row {
+          flex: 0 1 auto;
+          /* opacity: 0.1; */
+        }
+
+        height: 300px;
+        flex: 1 1 auto;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .favorite, .thumb {
+
+        >a,
+        >div {
+
+          width: 100%;
+          height: 100%;
+
+          >img:first-child {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            vertical-align: middle;
+          }
+
+          >canvas {
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+
+      .utility-button {
+        height: 30%;
+      }
+    }
+
+    &.column {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+
+      .favorites-column {
+        display: flex;
+        flex-direction: column;
+        flex: 0 0 25%;
+
+        .favorite, .thumb {
+          border-radius: 10px;
+          overflow: hidden;
+        }
+      }
+
+      .utility-button {
+        width: 30%;
+      }
+    }
+
+    &.native {
+      display: flex;
+      flex-flow: wrap;
+      gap: 25px 10px;
+
+      .utility-button {
+        width:  70px;
+        aspect-ratio: 1;
+      }
+    }
+  }
+
+  .favorite, .thumb {
+    position: relative;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    >a,
+    >div {
+      display: block;
+      overflow: hidden;
+      position: relative;
+      cursor: default;
+
+      >img:first-child {
+        width: 100%;
+        z-index: 1;
+      }
+
+      >a>div {
+        height: 100%;
+      }
+
+      >canvas {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+
+    &.hidden {
+      display: none;
+    }
+  }
+
+  .utility-button {
+    cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: bold;
+    background: none;
+    border: none;
+    z-index: 2;
+    filter: grayscale(70%);
+
+    &:active,
+    &:hover {
+      filter: none !important;
+    }
+  }
+
+  .download-button {
+    top: 0 !important;
+    right: 0 !important;
+    left: unset !important;
+    top: unset !important;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+  }
+</style>
+`;
 export const CONTROLS_HTML = `
 <style>
   #controls-guide {
@@ -1623,196 +1813,6 @@ export const FAVORITES_HTML = `
     <div id="right-favorites-panel"></div>
   </div>
 </div>
-`;
-export const FAVORITES_CONTENT_HTML = `
-<style>
-  html {
-    width: 100vw;
-  }
-
-  #favorites-search-gallery-content {
-    padding: 0px 20px 30px 20px;
-    margin-right: 15px;
-
-    &.grid,
-    &.square {
-      display: grid !important;
-      grid-template-columns: repeat(10, 1fr);
-      grid-gap: 0.5cqw;
-
-      .utility-button {
-        width: 30%;
-      }
-    }
-
-    &.square {
-      .favorite {
-        border-radius: 10px !important;
-        overflow: hidden;
-        aspect-ratio: 1;
-
-        >a,
-        >div {
-          width: 100%;
-          height: 100%;
-
-          >img:first-child,
-          >canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-        }
-      }
-    }
-
-    &.row {
-      display: flex;
-      flex-wrap: wrap;
-
-      .favorite {
-
-        &.last-row {
-          flex: 0 1 auto;
-          /* opacity: 0.1; */
-        }
-
-        height: 300px;
-        flex: 1 1 auto;
-        border-radius: 10px;
-        overflow: hidden;
-      }
-
-      .favorite {
-
-        >a,
-        >div {
-
-          width: 100%;
-          height: 100%;
-
-          >img:first-child {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-            vertical-align: middle;
-          }
-
-          >canvas {
-            height: 100%;
-            object-fit: cover;
-          }
-        }
-      }
-
-      .utility-button {
-        height: 30%;
-      }
-    }
-
-    &.column {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-
-      .favorites-column {
-        display: flex;
-        flex-direction: column;
-        flex: 0 0 25%;
-
-        .favorite {
-          border-radius: 10px;
-          overflow: hidden;
-        }
-      }
-
-      .utility-button {
-        width: 30%;
-      }
-    }
-
-    &.native {
-      display: flex;
-      flex-flow: wrap;
-      gap: 25px 10px;
-
-      .utility-button {
-        width:  70px;
-        aspect-ratio: 1;
-      }
-    }
-  }
-
-  .favorite {
-    position: relative;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-
-    >a,
-    >div {
-      display: block;
-      overflow: hidden;
-      position: relative;
-      cursor: default;
-
-      >img:first-child {
-        width: 100%;
-        z-index: 1;
-      }
-
-      >a>div {
-        height: 100%;
-      }
-
-      >canvas {
-        width: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        z-index: 1;
-      }
-    }
-
-    &.hidden {
-      display: none;
-    }
-  }
-
-  .utility-button {
-    cursor: pointer;
-    position: absolute;
-    left: 0;
-    top: 0;
-    font-weight: bold;
-    background: none;
-    border: none;
-    z-index: 2;
-    filter: grayscale(70%);
-
-    &:active,
-    &:hover {
-      filter: none !important;
-    }
-  }
-
-  .download-button {
-    top: 0 !important;
-    right: 0 !important;
-    left: unset !important;
-    top: unset !important;
-  }
-
-  img {
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-  }
-</style>
 `;
 export const GALLERY_HTML = `
 <style>

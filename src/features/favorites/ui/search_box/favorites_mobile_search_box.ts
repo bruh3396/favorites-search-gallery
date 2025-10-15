@@ -1,4 +1,4 @@
-import { FAVORITES_CONTENT_CONTAINER } from "../structure/favorites_content_container";
+import { CONTENT_CONTAINER } from "../../../../lib/global/content_container";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { insertStyleHTML } from "../../../../utils/dom/style";
@@ -55,7 +55,7 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
     toggleFavoritesOptions(options.checked);
 
     if (!headerIsVisible) {
-      FAVORITES_CONTENT_CONTAINER.classList.toggle("sticky-menu", options.checked);
+      CONTENT_CONTAINER.classList.toggle("sticky-menu", options.checked);
     }
   });
   const stickyMenuHTML = `
@@ -73,8 +73,8 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
     insertStyleHTML(headerVisible ? "" : stickyMenuHTML, "sticky-menu");
     const optionsMenu = document.getElementById("left-favorites-panel-bottom-row");
 
-    FAVORITES_CONTENT_CONTAINER.classList.remove("sticky-menu");
-    FAVORITES_CONTENT_CONTAINER.classList.remove("sticky-menu-shadow");
+    CONTENT_CONTAINER.classList.remove("sticky-menu");
+    CONTENT_CONTAINER.classList.remove("sticky-menu-shadow");
 
     if (optionsMenu === null) {
       return;
@@ -83,10 +83,10 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
 
     if (!headerVisible) {
       if (menuIsOpen) {
-        FAVORITES_CONTENT_CONTAINER.classList.add("sticky-menu");
+        CONTENT_CONTAINER.classList.add("sticky-menu");
       }
       await sleep(30);
-      FAVORITES_CONTENT_CONTAINER.classList.add("sticky-menu-shadow");
+      CONTENT_CONTAINER.classList.add("sticky-menu-shadow");
     }
   };
 

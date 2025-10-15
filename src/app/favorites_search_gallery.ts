@@ -6,12 +6,14 @@ import { setupFavorites } from "../features/favorites/controller/flows/setup/fav
 import { setupGallery } from "../features/gallery/controller/flows/setup/gallery_setup_flow";
 import { setupGlobals } from "../lib/flows/setup";
 import { setupSavedSearches } from "../features/saved_searches/saved_searches";
+import { setupSearchPage } from "../features/search_page/controller/flows/search_page_setup_flow";
 import { setupTagModifier } from "../features/tag_modifier/tag_modifier";
 import { setupTooltip } from "../features/tooltip/tooltip";
 
 function runFavoritesSearchGallery(): void {
   setupGlobals();
   setupFavorites();
+  setupSearchPage();
   setupGallery();
   setupSavedSearches();
   setupTagModifier();

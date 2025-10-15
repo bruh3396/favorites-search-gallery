@@ -26,15 +26,14 @@ function changeFavoritesPageInGallery(direction: NavigationKey): Promise<HTMLEle
   });
 }
 
-function changeSearchPageInGallery(direction: NavigationKey): void {
-  const searchPage = GalleryModel.navigateSearchPages(direction);
+function changeSearchPageThenNavigate(direction: NavigationKey): void {
+  Events.gallery.navigateSearchPages.emit(direction);
+  const searchPage = GalleryModel.getCurrentSearchPage();
 
   if (searchPage === null) {
     GalleryModel.clampCurrentIndex();
     return;
   }
-  GalleryModel.preloadSearchPages();
-  GalleryView.createSearchPage(searchPage);
   GalleryFavoritesFlow.handlePageChange();
   const thumb = GalleryModel.navigateAfterPageChange(direction);
 
@@ -45,7 +44,7 @@ function changeSearchPageInGallery(direction: NavigationKey): void {
   }
 }
 
- function completeNavigation(thumb: HTMLElement): void {
+function completeNavigation(thumb: HTMLElement): void {
   GalleryView.showContentInGallery(thumb);
   GalleryAutoplayController.startViewTimer(thumb);
   GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
@@ -67,12 +66,15 @@ export function navigate(direction: NavigationKey): void {
     completeNavigation(thumb);
     return;
   }
+  changePageThenNavigate(direction);
+}
 
+function changePageThenNavigate(direction: NavigationKey): void {
   if (ON_FAVORITES_PAGE) {
     changeFavoritesPageThenNavigate(direction);
     return;
   }
-  changeSearchPageInGallery(direction);
+  changeSearchPageThenNavigate(direction);
 }
 
 export async function changeFavoritesPageThenNavigate(direction: NavigationKey): Promise<void> {
