@@ -32,14 +32,13 @@ export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
   checkbox.checked = template.preference === null ? template.defaultValue : template.preference.value;
 
   const onChange = (): void => {
-    if (template.event !== null) {
-      template.event.emit(checkbox.checked);
-    }
-
     if (template.savePreference && template.preference !== null) {
       template.preference.set(checkbox.checked);
     }
 
+    if (template.event !== null) {
+      template.event.emit(checkbox.checked);
+    }
     template.function(checkbox.checked);
   };
 

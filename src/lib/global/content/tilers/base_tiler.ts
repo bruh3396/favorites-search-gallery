@@ -1,12 +1,12 @@
-import { CONTENT_CONTAINER } from "../../../../../lib/global/content_container";
-import { FavoriteLayout } from "../../../../../types/common_types";
-import { Skeleton } from "../skeleton/favorites_skeleton";
-import { Tiler } from "./favorites_tiler_interface";
-import { insertStyleHTML } from "../../../../../utils/dom/style";
+import { CONTENT_CONTAINER } from "../content_container";
+import { Layout } from "../../../../types/common_types";
+import { Skeleton } from "../skeleton/skeleton";
+import { Tiler } from "./tiler_interface";
+import { insertStyleHTML } from "../../../../utils/dom/style";
 
 export abstract class BaseTiler implements Tiler {
   public container: HTMLElement;
-  public abstract className: FavoriteLayout;
+  public abstract className: Layout;
   public abstract skeletonStyle: Record<string, string>;
 
   constructor() {

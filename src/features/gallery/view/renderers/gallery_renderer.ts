@@ -8,7 +8,7 @@ function getRenderers(): GalleryBaseRenderer[] {
   return [GalleryGifRenderer, GalleryVideoRenderer, GalleryImageRenderer];
 }
 
-export function render(thumb: HTMLElement): Promise<void> {
+export function render(thumb: HTMLElement): void {
   if (isVideo(thumb)) {
     return startRenderer(GalleryVideoRenderer, thumb);
   }
@@ -19,25 +19,14 @@ export function render(thumb: HTMLElement): Promise<void> {
   return startRenderer(GalleryImageRenderer, thumb);
 }
 
-async function startRenderer(targetRenderer: GalleryBaseRenderer, thumb: HTMLElement): Promise<void> {
-  const nonTargetRenderers = getRenderers().filter(r => r !== targetRenderer);
-  const renderers = [targetRenderer, ...nonTargetRenderers];
-
-  nonTargetRenderers.forEach(r => r.hide());
-
-  for (const renderer of renderers) {
-    const success = await renderer.display(thumb)
-      .then(() => true)
-      .catch(() => {
-        renderer.hide();
-        return false;
-      });
-
-    if (success) {
-      return Promise.resolve();
+function startRenderer(targetRenderer: GalleryBaseRenderer, thumb: HTMLElement): void {
+  for (const renderer of getRenderers()) {
+    if (targetRenderer === renderer) {
+      renderer.display(thumb);
+    } else {
+      renderer.hide();
     }
   }
-  return Promise.reject(new Error("Could not display media"));
 }
 
 export function hide(): void {
@@ -101,4 +90,12 @@ export function zoomToPoint(x: number, y: number): void {
 
 export function correctOrientation(): void {
   GalleryImageRenderer.correctOrientation();
+}
+
+export function downscaleAll(): void {
+  GalleryImageRenderer.downscaleAll();
+}
+
+export function upscaleCachedImageThumbs(): void {
+  GalleryImageRenderer.upscaleCachedImageThumbs();
 }

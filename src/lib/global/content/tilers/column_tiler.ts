@@ -1,10 +1,10 @@
-import { ITEM_SELECTOR, changeGetAllTHumbsImplementation as changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../../../utils/dom/dom";
-import { BaseTiler } from "./favorites_base_tiler";
-import { FavoriteLayout } from "../../../../../types/common_types";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
+import { ITEM_SELECTOR, changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../../utils/dom/dom";
+import { BaseTiler } from "./base_tiler";
+import { Layout } from "../../../../types/common_types";
+import { Preferences } from "../../preferences/preferences";
 
 export class ColumnTiler extends BaseTiler {
-  public className: FavoriteLayout = "column";
+  public className: Layout = "column";
   public skeletonStyle: Record<string, string> = {
     "width": "100%"
   };

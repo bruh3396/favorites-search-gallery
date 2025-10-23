@@ -1,4 +1,5 @@
 import * as GalleryModel from "../../../model/gallery_model";
+import * as GallerySearchPageFlow from "../runtime/gallery_search_page_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Events } from "../../../../../lib/global/events/events";
@@ -18,9 +19,9 @@ export function setupGallery(): void {
 
   if (ON_SEARCH_PAGE) {
     Events.searchPage.searchPageReady.on(setupGalleryHelper, {once: true});
-  } else {
-    setupGalleryHelper();
+    return;
   }
+  setupGalleryHelper();
 }
 
 function setupGalleryHelper(): void {
@@ -33,6 +34,7 @@ function setupGalleryHelper(): void {
   setupGalleryMenu();
   addGalleryEventListeners();
   setupAutoplay();
+  GallerySearchPageFlow.onSearchPageCreated();
 }
 
 function setupGalleryMenu(): void {

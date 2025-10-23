@@ -1,19 +1,19 @@
-import * as FavoritesAspectRatios from "./content/skeleton/favorites_aspect_ratio_collector";
+import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
+import * as FavoritesAspectRatios from "../../../lib/global/content/skeleton/aspect_ratio_collector";
 import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
 import * as FavoritesPreloader from "../../../utils/dom/thumb_preloader";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
-import * as FavoritesTiler from "./content/tilers/favorites_tiler";
-import { changeFavoritesSizeOnShiftScroll, toggleAddOrRemoveButtons, toggleDownloadButtons } from "../ui/favorites_menu_event_handlers";
 import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons } from "../ui/favorites_menu_event_handlers";
 import { Favorite } from "../../../types/favorite_types";
 import { FavoriteItem } from "../types/favorite/favorite_item";
-import { FavoriteLayout } from "../../../types/common_types";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
-import { FavoritesWheelEvent } from "../../../types/input_types";
 import { GeneralSettings } from "../../../config/general_settings";
+import { Layout } from "../../../types/common_types";
 import { Preferences } from "../../../lib/global/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { createFavoriteItemHTMLTemplates } from "../types/favorite/favorite_element";
+import { hideUnusedLayoutSizer } from "../../../lib/global/content/tilers/tiler_event_handlers";
 import { sleep } from "../../../utils/misc/async";
 
 export function setStatus(message: string): void {
@@ -29,28 +29,20 @@ export function updateStatusWhileFetching(searchResultCount: number, totalFavori
 }
 
 export function insertNewSearchResults(thumbs: HTMLElement[]): void {
-  FavoritesTiler.addItemsToBottom(thumbs);
+  ContentTiler.addItemsToBottom(thumbs);
 }
 
 export function insertNewSearchResultsOnReload(results: { newSearchResults: Favorite[], newFavorites: Favorite[], allSearchResults: Favorite[] }): void {
-  FavoritesTiler.addItemsToTop(results.newSearchResults.map((favorite) => favorite.root));
+  ContentTiler.addItemsToTop(results.newSearchResults.map((favorite) => favorite.root));
   FavoritesStatus.notifyNewFavoritesFound(results.newFavorites.length);
 }
 
-export function changeLayout(layout: FavoriteLayout): void {
-  FavoritesTiler.changeLayout(layout);
-}
-
-export function updateColumnCount(columnCount: number): void {
-  FavoritesTiler.updateColumnCount(columnCount);
-}
-
-export function updateRowSize(rowSize: number) : void {
-  FavoritesTiler.updateRowSize(rowSize);
+export function changeLayout(layout: Layout): void {
+  ContentTiler.changeLayout(layout);
 }
 
 export function showSearchResults(searchResults: Favorite[]): void {
-  FavoritesTiler.tile(searchResults.map((result) => result.root));
+  ContentTiler.tile(searchResults.map((result) => result.root));
   scrollToTop();
 }
 
@@ -98,10 +90,10 @@ export function setupFavoritesView(): void {
   createFavoriteItemHTMLTemplates();
   collectAspectRatios();
   FavoritesStatus.setupFavoritesStatus();
-  FavoritesTiler.showSkeleton();
-  FavoritesTiler.setupFavoritesTiler();
+  ContentTiler.setupTiler();
+  ContentTiler.showSkeleton();
+  hideUnusedLayoutSizer(Preferences.favoritesLayout.value);
   FavoritesPaginationMenu.setupFavoritesPaginationMenu();
-  updateColumnCount(Preferences.columnCount.value);
   toggleAddOrRemoveButtons(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? Preferences.removeButtonsVisible.value : Preferences.addButtonsVisible.value);
   toggleDownloadButtons(Preferences.downloadButtonsVisible.value);
 }
@@ -118,12 +110,8 @@ export function preloadURLs(urls: string[]): void {
   }
 }
 
-export function getCurrentLayout(): FavoriteLayout {
-  return FavoritesTiler.getCurrentLayout();
-}
-
-export function changeFavoritesSizeUsingWheel(wheelEvent: FavoritesWheelEvent): void {
-  changeFavoritesSizeOnShiftScroll(wheelEvent);
+export function getCurrentLayout(): Layout {
+  return ContentTiler.getCurrentLayout();
 }
 
 export function collectAspectRatios(): void {

@@ -1,9 +1,12 @@
 import { Events } from "../../../lib/global/events/events";
 import { NavigationKey } from "../../../types/common_types";
 import { SearchPage } from "../types/search_page";
+import { ThrottledQueue } from "../../../lib/components/throttled_queue";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { isForwardNavigationKey } from "../../../types/equivalence";
+import { sleep } from "../../../utils/misc/async";
 
+const FETCH_QUEUE = new ThrottledQueue(250);
 let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;
 let initialPageNumber: number;
@@ -18,21 +21,28 @@ export function setupSearchPageLoader(): void {
   currentPageNumber = initialPageNumber;
   initialURL = getInitialURL();
   setAllThumbs(Array.from(getAllThumbs()));
-  searchPages.set(initialPageNumber, new SearchPage(initialPageNumber, allThumbs));
+  const searchPage = new SearchPage(initialPageNumber, allThumbs);
+
+  searchPages.set(initialPageNumber, searchPage);
   preloadSearchPages();
 }
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
-  const nextSearchPageNumber = getAdjacentSearchPageNumber(direction);
-  const searchPage = searchPages.get(nextSearchPageNumber);
+  const nextPageNumber = getAdjacentSearchPageNumber(direction);
+  const searchPage = searchPages.get(nextPageNumber);
 
-  if (searchPage === undefined || searchPage.isEmpty) {
-    Events.searchPage.returnSearchPage.emit(null);
+  if (nextPageNumber < 0) {
     return null;
   }
-  currentPageNumber = nextSearchPageNumber;
+
+  if (searchPage === undefined || searchPage.isEmpty) {
+    fetchedPageNumbers.delete(nextPageNumber);
+    searchPages.delete(nextPageNumber);
+    loadSearchPage(nextPageNumber);
+    return null;
+  }
+  currentPageNumber = nextPageNumber;
   preloadSearchPages();
-  Events.searchPage.returnSearchPage.emit(searchPage);
   return searchPage;
 }
 
@@ -47,7 +57,7 @@ export function getPageNumberFromThumb(thumb: HTMLElement): number {
       return pageNumber;
     }
   }
-  return 0;
+  return -1;
 }
 
 export async function preloadSearchPages(): Promise<void> {
@@ -59,11 +69,12 @@ export async function preloadSearchPages(): Promise<void> {
   await loadSearchPage(nextPageNumber);
 }
 
-function loadSearchPage(pageNumber: number): Promise<void> {
+async function loadSearchPage(pageNumber: number): Promise<void> {
   if (pageHasAlreadyBeenFetched(pageNumber)) {
     return Promise.resolve();
   }
   fetchedPageNumbers.add(pageNumber);
+  await FETCH_QUEUE.wait();
   return fetchSearchPage(pageNumber)
     .then((html: string) => {
       registerNewPage(pageNumber, html);
@@ -122,4 +133,49 @@ function getInitialURL(): string {
 function setAllThumbs(thumbs: HTMLElement[]): void {
   allThumbs = thumbs;
   Events.searchPage.allThumbsUpdated.emit(thumbs);
+}
+
+export async function getMoreResults(): Promise<HTMLElement[]> {
+  const currentSearchPage = searchPages.get(currentPageNumber);
+
+  if (currentSearchPage === undefined) {
+    console.error(`Current search page undefined ${currentPageNumber}`);
+    return [];
+  }
+
+  if (currentSearchPage.isFinalPage) {
+    return [];
+  }
+  currentPageNumber += 1;
+  let nextSearchPage = searchPages.get(currentPageNumber);
+
+  if (nextSearchPage === undefined) {
+    await loadSearchPage(currentPageNumber);
+  }
+
+  for (let attempts = 1; attempts < 8; attempts += 1) {
+    if (nextSearchPage === undefined) {
+      loadSearchPage(currentPageNumber);
+      await sleep(500);
+    } else {
+      break;
+    }
+    nextSearchPage = searchPages.get(currentPageNumber);
+  }
+
+  if (nextSearchPage === undefined) {
+    console.error(`Could not load next search page ${currentPageNumber}`);
+    return [];
+  }
+  loadSearchPage(currentPageNumber + 1);
+  return nextSearchPage.thumbs;
+}
+
+export function getInitialPageThumbs(): HTMLElement[] {
+  const searchPage = searchPages.get(initialPageNumber);
+  return searchPage === undefined ? [] : searchPage.thumbs;
+}
+
+export function resetCurrentPageNumber(): void {
+  currentPageNumber = initialPageNumber;
 }

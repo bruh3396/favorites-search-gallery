@@ -1,4 +1,4 @@
-import { FavoriteLayout, PerformanceProfile, Rating, SortingMethod } from "../../../types/common_types";
+import { Layout, PerformanceProfile, Rating, SortingMethod } from "../../../types/common_types";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../flags/intrinsic_flags";
 import { Preference } from "./preference";
 
@@ -14,7 +14,8 @@ export const Preferences = {
   favoriteFinderId: new Preference("findFavorite", ""),
   searchPagesEnabled: new Preference("enableOnSearchPages", false),
   performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.NORMAL),
-  favoritesLayout: new Preference<FavoriteLayout>("layout", "column"),
+  favoritesLayout: new Preference<Layout>("layout", "column"),
+  searchPageLayout: new Preference<Layout>("searchPageLayout", "column"),
   excludeBlacklistEnabled: new Preference("excludeBlacklist", false),
   resultsPerPage: new Preference("resultsPerPage", 200),
   sortAscendingEnabled: new Preference("sortAscending", false),
@@ -29,7 +30,6 @@ export const Preferences = {
   galleryMenuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   addButtonsVisible: new Preference("showAddFavoriteButtons", false),
-  fancyThumbHoveringEnabled: new Preference("fancyThumbHovering", true),
   hintsEnabled: new Preference("showHints", false),
   headerEnabled: new Preference("showHeader", true),
   colorScheme: new Preference("colorScheme", "black"),
@@ -43,5 +43,7 @@ export const Preferences = {
   autoplayForward: new Preference("autoplayForward", true),
   downloadBatchSize: new Preference("downloadBatchSize", 250),
   downloadButtonsVisible: new Preference("showDownloadButtons", false),
-  mobileGalleryEnabled: new Preference("mobileGalleryEnabled", true)
+  mobileGalleryEnabled: new Preference("mobileGalleryEnabled", true),
+  upscaleThumbsOnSearchPage: new Preference("upscaleSearchPageThumbs", false),
+  searchPageInfiniteScrollEnabled: new Preference("searchPageInfiniteScroll", false)
 };

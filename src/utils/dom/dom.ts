@@ -1,16 +1,14 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { Events } from "../../lib/global/events/events";
 import { Favorite } from "../../types/favorite_types";
+import { ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { insertStyleHTML } from "./style";
 import { removeNonNumericCharacters } from "../primitive/string";
 
 const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
-const FAVORITE_ITEM_CLASS_NAME = "favorite";
-const DEFAULT_ITEM_CLASS_NAME = "thumb";
 
-export const ITEM_CLASS_NAME = ON_SEARCH_PAGE ? DEFAULT_ITEM_CLASS_NAME : FAVORITE_ITEM_CLASS_NAME;
-export const ITEM_SELECTOR = `.${ITEM_CLASS_NAME}`;
-const IMAGE_SELECTOR = `.${ITEM_CLASS_NAME} ${ON_SEARCH_PAGE ? "img" : "img:first-child"}`;
+export const ITEM_CLASS_NAME = "favorite";
+export const ITEM_SELECTOR = ".favorite, .thumb";
+const IMAGE_SELECTOR = ".favorite img";
 
 export function getClosestItem(element: HTMLElement): HTMLElement | null {
   return element.closest(ITEM_SELECTOR);
@@ -81,7 +79,7 @@ function originalGetAllThumbs(): HTMLElement[] {
 
 export let getAllThumbs = originalGetAllThumbs;
 
-export function changeGetAllTHumbsImplementation(newGetAllThumbs: () => HTMLElement[]): void {
+export function changeGetAllThumbsImplementation(newGetAllThumbs: () => HTMLElement[]): void {
   getAllThumbs = newGetAllThumbs;
 }
 
@@ -196,4 +194,8 @@ export function blurCurrentlyFocusedElement(): void {
   if (activeElement instanceof HTMLElement) {
     activeElement.blur();
   }
+}
+
+export function reloadWindow(): void {
+  window.location.reload();
 }

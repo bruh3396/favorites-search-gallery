@@ -61,7 +61,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
     this.image = this.root.children[0].children[0] as HTMLImageElement;
     this.favoriteButton = this.root.children[0].children[1] as HTMLImageElement;
     this.downloadButton = this.root.children[0].children[2] as HTMLImageElement;
-    this.downloadButton.onclick = this.download.bind(this);
+    this.downloadButton.onmousedown = this.download.bind(this);
     this.populateAttributes(post);
     this.setupFavoriteButton(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE);
     this.openPostInNewTabOnClick();
@@ -164,7 +164,8 @@ export class FavoriteHTMLElement implements FavoriteElement {
     canvas.dataset.size = `${post.width}x${post.height}`;
   }
 
-  private download(): void {
+  private download(event: MouseEvent): void {
+    event.stopPropagation();
     downloadFromThumb(this.root);
   }
 }

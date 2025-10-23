@@ -1,4 +1,4 @@
-import { CONTENT_CONTAINER } from "../../../../../lib/global/content_container";
+import { CONTENT_CONTAINER } from "../../../../../lib/global/content/content_container";
 import { Events } from "../../../../../lib/global/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";

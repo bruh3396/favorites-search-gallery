@@ -9,7 +9,7 @@ export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {
       result.push(favorite.root);
     }
 
-    if (result.length >= FavoritesSettings.infiniteScrollBatchCount) {
+    if (result.length >= FavoritesSettings.infiniteScrollBatchSize) {
       break;
     }
   }
@@ -17,7 +17,7 @@ export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {
 }
 
 export function getFirstResults(favorites: FavoriteItem[]): FavoriteItem[] {
-  return favorites.slice(0, FavoritesSettings.infiniteScrollBatchCount);
+  return favorites.slice(0, FavoritesSettings.infiniteScrollBatchSize);
 }
 
 export function getThumbURLsToPreload(favorites: FavoriteItem[]): string[] {

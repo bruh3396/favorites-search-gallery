@@ -124,21 +124,14 @@ function assignColorsToMatchedTags(): void {
 }
 
 function setPosition(image: HTMLImageElement): void {
-  const fancyHoveringStyle = document.getElementById("fancy-image-hovering-fsg-style");
-  const imageChangesSizeOnHover = fancyHoveringStyle !== null && fancyHoveringStyle.textContent !== "";
-  let rect;
+  const imageContainer = image.parentElement as HTMLElement;
+  const sizeCalculationDiv = document.createElement("div");
 
-  if (imageChangesSizeOnHover) {
-    const imageContainer = image.parentElement as HTMLElement;
-    const sizeCalculationDiv = document.createElement("div");
+  sizeCalculationDiv.className = "size-calculation-div";
+  imageContainer.appendChild(sizeCalculationDiv);
+  const rect = sizeCalculationDiv.getBoundingClientRect();
 
-    sizeCalculationDiv.className = "size-calculation-div";
-    imageContainer.appendChild(sizeCalculationDiv);
-    rect = sizeCalculationDiv.getBoundingClientRect();
-    sizeCalculationDiv.remove();
-  } else {
-    rect = image.getBoundingClientRect();
-  }
+  sizeCalculationDiv.remove();
   const offset = 7;
   let tooltipRect;
 

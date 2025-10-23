@@ -1,37 +1,15 @@
-import { CONTENT_CONTAINER } from "../../../lib/global/content_container";
+import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
+import { Events } from "../../../lib/global/events/events";
+import { SEARCH_PAGE_INFINITE_SCROLL_HTML } from "../../../assets/html";
 import { SearchPage } from "../types/search_page";
-import { tile } from "../../favorites/view/content/tilers/favorites_tiler";
-import { waitForDOMToLoad } from "../../../utils/dom/dom";
-
-let thumbContainer: HTMLElement | null = null;
-
-function getMainThumbnailContainer(): HTMLElement | null {
-  // const thumb = document.querySelector(".thumb");
-
-  // if (thumb !== null) {
-  //   return thumb.parentElement;
-  // }
-  return document.querySelector(".image-list");
-}
-
-function insertNewThumbs(searchPage: SearchPage): void {
-  tile(searchPage.thumbs);
-  // if (thumbContainer === null) {
-  //   return;
-  // }
-  // thumbContainer.innerHTML = "";
-
-  // for (const thumb of searchPage.thumbs) {
-  //   thumbContainer.appendChild(thumb);
-  // }
-}
+import { insertStyleHTML } from "../../../utils/dom/style";
 
 function updatePaginator(searchPage: SearchPage): void {
   if (searchPage.paginator === null) {
     return;
   }
   const currentPaginator = document.getElementById("paginator");
-  const placeToInsert = currentPaginator || thumbContainer;
+  const placeToInsert = currentPaginator;
 
   if (placeToInsert === null) {
     return;
@@ -50,18 +28,13 @@ function updateAddressBar(searchPage: SearchPage): void {
   window.history.replaceState(null, "", baseURL + searchFragment);
 }
 
-export async function setupSearchPageCreator(): Promise<void> {
-  await waitForDOMToLoad();
-  thumbContainer = getMainThumbnailContainer();
-
-  if (thumbContainer !== null) {
-    thumbContainer.insertAdjacentElement("beforebegin", CONTENT_CONTAINER);
-    thumbContainer.innerHTML = "";
-  }
-}
-
 export function createSearchPage(searchPage: SearchPage): void {
-  insertNewThumbs(searchPage);
+  ContentTiler.tile(searchPage.thumbs);
   updatePaginator(searchPage);
   updateAddressBar(searchPage);
+  Events.searchPage.searchPageCreated.emit(searchPage);
+}
+
+export function toggleInfiniteScroll(value: boolean): void {
+  insertStyleHTML(value ? SEARCH_PAGE_INFINITE_SCROLL_HTML : "", "search-page-infinite-scroll");
 }

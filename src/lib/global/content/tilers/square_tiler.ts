@@ -1,8 +1,8 @@
-import { BaseTiler } from "./favorites_base_tiler";
-import { FavoriteLayout } from "../../../../../types/common_types";
+import { BaseTiler } from "./base_tiler";
+import { Layout } from "../../../../types/common_types";
 
 export class SquareTiler extends BaseTiler {
-  public className: FavoriteLayout = "square";
+  public className: Layout = "square";
   public skeletonStyle: Record<string, string> = {
     "width": "100%",
     "height": "100%",

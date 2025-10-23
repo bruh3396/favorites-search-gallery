@@ -1,5 +1,5 @@
-import { FavoriteLayout, MetadataMetric, NavigationKey, PerformanceProfile, Rating } from "../../../types/common_types";
 import { FavoritesKeyboardEvent, FavoritesMouseEvent, FavoritesWheelEvent } from "../../../types/input_types";
+import { Layout, MetadataMetric, NavigationKey, PerformanceProfile, Rating } from "../../../types/common_types";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../flags/intrinsic_flags";
 import { EventEmitter } from "../../components/event_emitter";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../container";
@@ -36,7 +36,7 @@ const favorites = {
   allowedRatingsChanged: new EventEmitter<Rating>(true),
   columnCountChanged: new EventEmitter<number>(true),
   rowSizeChanged: new EventEmitter<number>(true),
-  layoutChanged: new EventEmitter<FavoriteLayout>(true),
+  layoutChanged: new EventEmitter<Layout>(true),
   sortingMethodChanged: new EventEmitter<MetadataMetric>(true),
   performanceProfileChanged: new EventEmitter<PerformanceProfile>(true),
   showOnHoverToggled: new EventEmitter<boolean>(true),
@@ -55,7 +55,6 @@ const favorites = {
   galleryMenuToggled: new EventEmitter<boolean>(true),
   blacklistToggled: new EventEmitter<boolean>(true),
   infiniteScrollToggled: new EventEmitter<boolean>(true),
-  fancyHoveringToggled: new EventEmitter<boolean>(true),
   savedSearchesToggled: new EventEmitter<boolean>(true),
   downloadButtonClicked: new EventEmitter<MouseEvent>(true),
   searchSubsetClicked: new EventEmitter<MouseEvent>(true),
@@ -96,7 +95,12 @@ const searchBox = {
 const searchPage = {
   searchPageReady: new EventEmitter<void>(true),
   allThumbsUpdated: new EventEmitter<HTMLElement[]>(true),
-  returnSearchPage: new EventEmitter<SearchPage | null>(true)
+  returnSearchPage: new EventEmitter<SearchPage | null>(true),
+  layoutChanged: new EventEmitter<Layout>(true),
+  searchPageCreated: new EventEmitter<SearchPage>(true),
+  upscaleToggled: new EventEmitter<boolean>(true),
+  infiniteScrollToggled: new EventEmitter<boolean>(true),
+  moreResultsAdded: new EventEmitter<HTMLElement[]>(true)
 };
 
 const mobile = {

@@ -1097,7 +1097,7 @@ export const DOWNLOADER_HTML = `
     background: transparent;
   }
 
-  #download-menu-status-header.dark-green-gradient {
+  #download-menu-status-header {
     color: white;
   }
 
@@ -1217,58 +1217,6 @@ export const DOWNLOADER_HTML = `
     </div>
   </dialog>
 </div>
-`;
-export const FANCY_HOVERING_HTML = `
-<style>
-  #caption-list {
-    transform: scale(0.8);
-  }
-
-  #favorites-search-gallery-content {
-    padding: 40px 40px 30px !important;
-    grid-gap: 1cqw !important;
-  }
-
-  .favorite,
-  .thumb {
-
-    >a,
-    >span,
-    >div {
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s ease-in-out;
-      position: relative;
-
-      &::after {
-        content: '';
-        position: absolute;
-        z-index: -1;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        top: 0;
-        left: 0;
-        border-radius: 5px;
-        box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.45);
-        transition: opacity 0.3s ease-in-out;
-      }
-
-      &:hover {
-        outline: none !important;
-        transform: scale(1.2, 1.2);
-        z-index: 10;
-
-        img {
-          outline: none !important;
-        }
-
-        &::after {
-          opacity: 1;
-        }
-      }
-    }
-  }
-</style>
 `;
 export const FAVORITES_HTML = `
 <div id="favorites-search-gallery-menu" class="light-green-gradient not-highlightable">
@@ -2107,53 +2055,14 @@ export const HELP_HTML = `
     Issue</a>
   <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
     <div id="whats-new-container" class="light-green-gradient indented">
+      <h2>v1.20</h2>
+      <ul>
+        <li>Added layouts, upscaling, and infinite scroll to search pages</li>
+      </ul>
       <h2>v1.19.1</h2>
-       <ul>
+      <ul>
         <li>Fixed mass downloads slowing down over time</li>
         <li>Fixed Firefox gallery not opening</li>
-       </ul>
-      <h2>v1.19</h2>
-      <!-- <h5>Features:</h5> -->
-      <h3>Favorites</h3>
-      <ul>
-        <li>Download (experimental)</li>
-        <ul>
-          <li>Download all search results</li>
-          <li>Download individual results</li>
-        </ul>
-        <li>Layout</li>
-        <ul>
-          <li>Waterfall (column/masonry)</li>
-          <li>River (row)</li>
-          <li>Square</li>
-          <li>Legacy (grid)</li>
-        </ul>
-        <li>Infinite scroll</li>
-      </ul>
-      <h3>Gallery</h3>
-      <ul>
-        <li>Mobile gallery on search pages</li>
-        <li>Infinite gallery on search pages</li>
-        <ul>
-          <li>Automatically move to next search page without ever exiting gallery</li>
-          <li>Mimics manually going to the next page while staying in gallery</li>
-        </ul>
-        <li>Desktop side menu (experimental)</li>
-        <li>Hotkeys</li>
-        <ul>
-          <li>G: Open post</li>
-          <li>Q: Open original</li>
-          <li>E: Add favorite</li>
-          <li>S: Download</li>
-        </ul>
-        <li>Zoom (desktop) Shift+Click</li>
-      </ul>
-      <h3>General</h3>
-      <ul>
-        <li>Hotkeys</li>
-        <ul>
-          <li>F: Fullscreen</li>
-        </ul>
       </ul>
     </div>
   </a>
@@ -2764,6 +2673,52 @@ export const SAVED_SEARCHES_HTML = `
 </div>
 <script>
 </script>
+`;
+export const SEARCH_PAGE_HTML = `
+<div id="search-page-menu">
+  <style>
+    #postListDisplayOptsForm>h3 {
+      display: none;
+    }
+
+    #favorites-search-gallery-content {
+      margin: 0;
+      padding: 0;
+    }
+
+    .content {
+      flex: 1;
+    }
+
+    .search-page-option {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #search-page-mneu {
+      position: sticky;
+    }
+
+    #search-page-menu select {
+      min-width: 80px;
+    }
+  </style>
+  <h6>Favorites Search Gallery</h6>
+  <hr>
+  <div id="search-page-upscale-thumbs" class="search-page-option"><label>Upscale</label></div>
+  <div id="search-page-infinite-scroll" class="search-page-option"><label>Infinite Scroll</label></div>
+  <div id="search-page-layout" class="search-page-option"><label>Layout</label></div>
+  <div id="search-page-column-count" class="search-page-option"><label>Columns</label></div>
+  <div id="search-page-row-size" class="search-page-option"><label>Row Size</label></div>
+  <hr>
+</div>
+`;
+export const SEARCH_PAGE_INFINITE_SCROLL_HTML = `
+<style>
+  #paginator {
+    display: none !important;
+  }
+</style>
 `;
 export const SIDEBAR_HTML = `
 <style>

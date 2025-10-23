@@ -4,7 +4,6 @@ import * as FavoritesOptionsFlow from "../flows/runtime/favorites_option_flow";
 import * as FavoritesPresentationFlow from "../flows/presentation/favorites_presentation_flow";
 import * as FavoritesResetFlow from "../flows/runtime/favorites_reset_flow";
 import * as FavoritesSearchFlow from "../flows/runtime/favorites_search_flow";
-import * as FavoritesView from "../../view/favorites_view";
 import { Events } from "../../../../lib/global/events/events";
 import { FavoritesPaginationFlow } from "../flows/presentation/favorites_pagination_flow";
 import { updateShowOnHoverOptionTriggeredFromGallery } from "../../ui/favorites_menu_event_handlers";
@@ -36,11 +35,8 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.toggleBlacklist);
   Events.favorites.layoutChanged.on(FavoritesOptionsFlow.changeLayout);
-  Events.favorites.columnCountChanged.on(FavoritesView.updateColumnCount);
-  Events.favorites.rowSizeChanged.on(FavoritesView.updateRowSize);
   Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.toggleSortAscending);
   Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.changeSortingMethod);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.changeAllowedRatings);
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.changeResultsPerPage);
-  Events.document.wheel.on(FavoritesView.changeFavoritesSizeUsingWheel);
 }

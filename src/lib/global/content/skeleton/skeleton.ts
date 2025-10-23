@@ -1,5 +1,5 @@
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { SkeletonItem } from "./favorites_skeleton_item";
+import { Preferences } from "../../preferences/preferences";
+import { SkeletonItem } from "./skeleton_item";
 
 export class Skeleton {
   private readonly items: SkeletonItem[];

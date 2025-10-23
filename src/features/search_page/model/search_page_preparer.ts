@@ -11,7 +11,6 @@ import { sleep } from "../../../utils/misc/async";
 export async function prepareAllThumbsOnSearchPage(): Promise<void> {
   await waitForDOMToLoad();
   await waitForAllThumbnailsToLoad();
-  // await sleep(200);
   const thumbs = getAllThumbs();
 
   prepareSearchPageThumbs(thumbs);

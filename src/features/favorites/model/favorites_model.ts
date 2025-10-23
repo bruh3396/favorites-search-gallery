@@ -7,15 +7,13 @@ import * as InfiniteScrollFeeder from "./presentation/favorites_infinite_scroll_
 import { FavoriteItem, getFavorite } from "../types/favorite/favorite_item";
 import { FavoritesPageRelation, NewFavorites } from "../types/favorite/favorite_types";
 import { NavigationKey, Rating, SortingMethod } from "../../../types/common_types";
-import { CONTENT_CONTAINER } from "../../../lib/global/content_container";
+import { CONTENT_CONTAINER } from "../../../lib/global/content/content_container";
 import { FAVORITES_SEARCH_INDEX } from "./search/index/favorites_search_index";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
 import { ITEM_SELECTOR } from "../../../utils/dom/dom";
-import { Preferences } from "../../../lib/global/preferences/preferences";
 import { shuffleArray } from "../../../utils/collection/array";
 
 let latestSearchResults: FavoriteItem[] = [];
-let infiniteScroll = Preferences.infiniteScrollEnabled.value;
 
 export async function loadAllFavoritesFromDatabase(): Promise<FavoriteItem[]> {
   await FavoritesLoader.loadAllFavoritesFromDatabase();
@@ -172,14 +170,6 @@ export function stopSearchSubset(): void {
 
 export function deleteDatabase(): void {
   FavoritesLoader.deleteDatabase();
-}
-
-export function usingInfiniteScroll(): boolean {
-  return infiniteScroll;
-}
-
-export function toggleInfiniteScroll(value: boolean): void {
-  infiniteScroll = value;
 }
 
 export function keepIndexedTagsSorted(): void {

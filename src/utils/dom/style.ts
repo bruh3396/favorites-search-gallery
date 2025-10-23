@@ -1,8 +1,8 @@
 import * as FSG_URL from "../../lib/api/api_url";
 import { COMMON_HTML, DARK_THEME_HTML, SKELETON_HTML } from "../../assets/html";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { getCookie, setCookie } from "../../lib/global/cookie";
-import { FavoritesSettings } from "../../config/favorites_settings";
+import { GeneralSettings } from "../../config/general_settings";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { yield1 } from "../misc/async";
 
@@ -30,8 +30,10 @@ function toggleLocalDarkStyles(useDark: boolean): void {
 
 function setupVideoAndGifOutlines(): void {
   const size = ON_MOBILE_DEVICE ? 1 : 2;
-  const videoSelector = ON_FAVORITES_PAGE ? "&:has(img.video)" : ">img.video";
-  const gifSelector = ON_FAVORITES_PAGE ? "&:has(img.gif)" : ">img.gif";
+  // const videoSelector = ON_FAVORITES_PAGE ? "&:has(img.video)" : ">img.video";
+  // const gifSelector = ON_FAVORITES_PAGE ? "&:has(img.gif)" : ">img.gif";
+  const videoSelector = "&:has(img.video)";
+  const gifSelector = "&:has(img.gif)";
   const videoRule = `${videoSelector} {outline: ${size}px solid blue}`;
   const gifRule = `${gifSelector} {outline: ${size}px solid hotpink}`;
 
@@ -149,11 +151,11 @@ export function addTilerStyles(): void {
   const style = `
     #favorites-search-gallery-content {
       &.row, &.column, &.column .favorites-column, &.square, &.grid {
-        gap: ${FavoritesSettings.thumbnailSpacing}px;
+        gap: ${GeneralSettings.thumbnailSpacing}px;
       }
 
       &.column {
-        margin-right: ${ON_DESKTOP_DEVICE ? FavoritesSettings.rightContentMargin : 0}px;
+        margin-right: ${ON_DESKTOP_DEVICE ? GeneralSettings.rightContentMargin : 0}px;
       }
     }`;
 

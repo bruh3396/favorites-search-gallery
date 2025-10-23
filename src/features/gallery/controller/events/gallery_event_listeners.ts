@@ -5,6 +5,7 @@ import * as GalleryMenuFlow from "../flows/runtime/gallery_menu_flow";
 import * as GalleryModel from "../../model/gallery_model";
 import * as GalleryMouseFlow from "../flows/runtime/gallery_mouse_flow";
 import * as GalleryPreloadFlow from "../flows/runtime/gallery_preload_flow";
+import * as GallerySearchPageFlow from "../flows/runtime/gallery_search_page_flow";
 import * as GalleryStateFlow from "../flows/runtime/gallery_state_flow";
 import * as GallerySwipeFlow from "../flows/runtime/gallery_swipe_flow";
 import * as GalleryTouchFlow from "../flows/runtime/gallery_touch_flow";
@@ -31,6 +32,9 @@ export function addGalleryEventListeners(): void {
 
   Events.searchPage.allThumbsUpdated.on(GalleryModel.updateSearchPageThumbs);
   Events.searchPage.returnSearchPage.on(GalleryModel.updateCurrentSearchPage);
+  Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
+  Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
+  Events.searchPage.moreResultsAdded.on(GalleryModel.indexCurrentPageThumbs);
 }
 
 function addPlatformDependentEventListeners(): void {

@@ -1,4 +1,4 @@
-import { CONTENT_CONTAINER } from "../../../../lib/global/content_container";
+import { CONTENT_CONTAINER } from "../../../../lib/global/content/content_container";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { insertStyleHTML } from "../../../../utils/dom/style";

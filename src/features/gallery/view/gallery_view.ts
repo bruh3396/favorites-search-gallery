@@ -116,6 +116,14 @@ export function correctOrientation(): void {
   GalleryRenderer.correctOrientation();
 }
 
+export function downscaleAll(): void {
+  GalleryRenderer.downscaleAll();
+}
+
+export function upscaleCachedImageThumbs(): void {
+  GalleryRenderer.upscaleCachedImageThumbs();
+}
+
 export function setupGalleryView(): void {
   GalleryUI.setupGalleryUI();
 }

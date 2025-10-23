@@ -1,4 +1,5 @@
-import { getAllThumbs, getImageFromThumb, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
+import { getAllThumbs, getImageFromThumb, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
+
 const LOCAL_STORAGE_KEY = "aspectRatios";
 const ASPECT_RATIOS: string[] = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || "[]");
 

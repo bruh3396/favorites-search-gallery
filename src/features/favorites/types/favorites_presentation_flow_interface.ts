@@ -1,9 +1,9 @@
-import { FavoriteLayout, NavigationKey } from "../../../types/common_types";
+import { Layout, NavigationKey } from "../../../types/common_types";
 import { FavoriteItem } from "./favorite/favorite_item";
 
 export interface FavoritesPresentationFlow {
   present: (results: FavoriteItem[]) => void
-  onLayoutChanged: (layout: FavoriteLayout) => void
+  onLayoutChanged: (layout: Layout) => void
   revealFavorite: (id: string) => void
   reset: () => void
   handleNewSearchResults: () => void

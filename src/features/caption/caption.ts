@@ -278,15 +278,12 @@ function resizeFont(thumb: HTMLElement): void {
 
     height = image.getBoundingClientRect().height;
   }
-  const fancyImageHoveringStyle = document.getElementById("fancy-image-hovering-fsg-style");
-  const fancyHoveringEnabled = fancyImageHoveringStyle !== null && fancyImageHoveringStyle.innerHTML.length > 10;
   const captionListRect = caption.children[0].getBoundingClientRect();
   const ratio = height / captionListRect.height;
   const scale = ratio > 1 ? Math.sqrt(ratio) : ratio * 0.85;
-  const finalScale = fancyHoveringEnabled ? scale * 0.8 : scale;
 
   if (caption !== null && caption.parentElement !== null) {
-    caption.parentElement.style.fontSize = `${roundToTwoDecimalPlaces(finalScale)}em`;
+    caption.parentElement.style.fontSize = `${roundToTwoDecimalPlaces(scale)}em`;
   }
 }
 

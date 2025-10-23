@@ -53,7 +53,7 @@ export class InvertedSearchIndex<T extends Searchable> {
   }
 
   private getSearchResultsUsingIndex(searchQuery: string, itemsToSearch: T[]): T[] {
-    const expandedCommand = new ExpandedSearchCommand(searchQuery, this.allSortedTags.toArray());
+    const expandedCommand = new ExpandedSearchCommand(searchQuery, this.allTags);
 
     if (expandedCommand.isEmpty) {
       return itemsToSearch;

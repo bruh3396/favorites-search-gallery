@@ -1,5 +1,3 @@
-import { FANCY_HOVERING_HTML } from "../../../assets/html";
-import { FavoriteLayout } from "../../../types/common_types";
 import { FavoritesWheelEvent } from "../../../types/input_types";
 import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../lib/global/preferences/preferences";
@@ -14,10 +12,6 @@ export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): voi
     showOnHoverCheckbox.checked = value;
     Preferences.showOnHoverEnabled.set(value);
   }
-}
-
-export function toggleFancyThumbHovering(value: boolean): void {
-  insertStyleHTML(value ? FANCY_HOVERING_HTML : "", "fancy-image-hovering");
 }
 
 export function toggleOptionHotkeyHints(value: boolean): void {
@@ -89,34 +83,11 @@ export function toggleDownloadButtons(value: boolean): void {
   // Utils.forceHideCaptions(value);
 }
 
-export function hideUnusedLayoutSizer(layout: FavoriteLayout): void {
-  const rowSizeContainer = document.getElementById("row-size-container");
-  const columnCountContainer = document.getElementById("column-count-container");
-
-  if (columnCountContainer === null || rowSizeContainer === null) {
-    return;
-  }
-
-  if (layout === "native") {
-    columnCountContainer.style.display = "none";
-    rowSizeContainer.style.display = "none";
-    return;
-  }
-  const usingRowLayout = layout === "row";
-
-  columnCountContainer.style.display = usingRowLayout ? "none" : "";
-  rowSizeContainer.style.display = usingRowLayout ? "" : "none";
-}
-
 export function toggleHeader(value: boolean): void {
   insertStyleHTML(`#header {display: ${value ? "block" : "none"}}`, "header");
 }
 
-export function reloadWindow(): void {
-  window.location.reload();
-}
-
-export async function changeFavoritesSizeOnShiftScroll(wheelEvent: FavoritesWheelEvent): Promise<void> {
+export async function changeItemSizeOnShiftScroll(wheelEvent: FavoritesWheelEvent): Promise<void> {
   if (!wheelEvent.originalEvent.shiftKey || getCurrentLayout() === "native") {
     return;
   }

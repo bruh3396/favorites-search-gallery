@@ -1,5 +1,7 @@
 import { getContentType, removeNonNumericCharacters } from "../../../utils/primitive/string";
 import { getIdFromThumb, getImageFromThumb } from "../../../utils/dom/dom";
+import { GALLERY_DISABLED } from "../../../lib/global/flags/derived_flags";
+import { MAX_RESULTS_PER_SEARCH_PAGE } from "../../../lib/global/preferences/constants";
 import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { moveTagsFromTitleToTagsAttribute } from "../../../utils/dom/tags";
 
@@ -8,6 +10,7 @@ export class SearchPage {
   public paginator: HTMLElement | null;
   public ids: Set<string>;
   public pageNumber: number;
+  public isFinalPage: boolean;
 
   constructor(pageNumber: number, content: string | HTMLElement[]) {
     if (typeof content === "string") {
@@ -21,6 +24,7 @@ export class SearchPage {
     }
     this.pageNumber = pageNumber;
     this.ids = new Set(this.thumbs.map(thumb => thumb.id));
+    this.isFinalPage = this.thumbs.length < MAX_RESULTS_PER_SEARCH_PAGE;
   }
 
   public get isEmpty(): boolean {
@@ -50,12 +54,24 @@ export function prepareSearchPageThumbs(thumbs: HTMLElement[]): HTMLElement[] {
 function prepareThumb(thumb: HTMLElement): void {
   moveTagsFromTitleToTagsAttribute(thumb);
   assignContentType(thumb);
+  addCanvas(thumb);
   thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
   thumb.classList.remove("thumb");
   thumb.classList.add("favorite");
 
   if (ON_MOBILE_DEVICE) {
     prepareMobileThumb(thumb);
+  }
+}
+
+function addCanvas(thumb: HTMLElement): void {
+  if (GALLERY_DISABLED || thumb.querySelector("canvas") !== null) {
+    return;
+  }
+  const anchor = thumb.querySelector("a");
+
+  if (anchor !== null) {
+    anchor.appendChild(document.createElement("canvas"));
   }
 }
 

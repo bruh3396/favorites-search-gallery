@@ -1,9 +1,8 @@
-import { getRandomPositiveIntegerInRange, getSeededRandomPositiveIntegerInRange, randomBetween, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
-import { Dimensions2D } from "../../../../../types/common_types";
-import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { ITEM_CLASS_NAME } from "../../../../../utils/dom/dom";
-import { getDimensions2D } from "../../../../../utils/primitive/string";
-import { getNextAspectRatio } from "./favorites_aspect_ratio_collector";
+import { getRandomPositiveIntegerInRange, getSeededRandomPositiveIntegerInRange, randomBetween, roundToTwoDecimalPlaces } from "../../../../utils/primitive/number";
+import { Dimensions2D } from "../../../../types/common_types";
+import { GeneralSettings } from "../../../../config/general_settings";
+import { getDimensions2D } from "../../../../utils/primitive/string";
+import { getNextAspectRatio } from "./aspect_ratio_collector";
 
 function getRandomAnimationDelay(): number {
   return roundToTwoDecimalPlaces(randomBetween(0, 0.3));
@@ -55,7 +54,7 @@ export class SkeletonItem {
   }
 
   private setAnimation(): void {
-    if (FavoritesSettings.randomSkeletonAnimationTiming) {
+    if (GeneralSettings.randomSkeletonAnimationTiming) {
       this.element.style.setProperty("--skeleton-animation-delay", `${getRandomAnimationDelay()}s`);
       this.element.style.setProperty("--skeleton-animation-duration", `${getRandomAnimationDuration()}s`);
     }
@@ -72,6 +71,6 @@ export class SkeletonItem {
   }
 
   private setClassName(): void {
-    this.element.className = `skeleton-item ${ITEM_CLASS_NAME} ${FavoritesSettings.skeletonAnimationClasses}`;
+    this.element.className = `skeleton-item favorite ${GeneralSettings.skeletonAnimationClasses}`;
   }
 }

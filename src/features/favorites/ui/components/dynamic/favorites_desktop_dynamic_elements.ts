@@ -1,8 +1,9 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../types/element_types";
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../../lib/global/flags/derived_flags";
-import { FavoriteLayout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
+import { Layout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/checkbox";
-import { hideUnusedLayoutSizer, reloadWindow, toggleAddOrRemoveButtons, toggleDownloadButtons, toggleFavoritesOptions, toggleHeader, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
+import { reloadWindow, toggleGalleryMenuEnabled } from "../../../../../utils/dom/dom";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleFavoritesOptions, toggleHeader, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
 import { Events } from "../../../../../lib/global/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
@@ -12,8 +13,8 @@ import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/f
 import { createButtonElement } from "../../../../../lib/ui/button";
 import { createNumberComponent } from "../../../../../lib/ui/number";
 import { createSelectElement } from "../../../../../lib/ui/select";
-import { prepareDynamicElements } from "./favorites_dynamic_element_utils";
-import { toggleGalleryMenuEnabled } from "../../../../../utils/dom/dom";
+import { hideUnusedLayoutSizer } from "../../../../../lib/global/content/tilers/tiler_event_handlers";
+import { prepareDynamicElements } from "../../../../../lib/ui/element_utils";
 import { tryResetting } from "../../../../../lib/flows/reset";
 
 const BUTTONS: Partial<ButtonElement>[] = [
@@ -165,16 +166,6 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     event: Events.favorites.blacklistToggled
   },
   {
-    id: "fancy-thumb-hovering",
-    parentId: "favorite-options-left",
-    textContent: "Fancy Hovering",
-    title: "Enable fancy thumbnail hovering",
-    preference: Preferences.fancyThumbHoveringEnabled,
-    enabled: false,
-    hotkey: "",
-    event: Events.favorites.fancyHoveringToggled
-  },
-  {
     id: "show-hints",
     parentId: "favorite-options-left",
     textContent: "Hotkey Hints",
@@ -296,7 +287,7 @@ const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
   }
 ];
 
-const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -323,7 +314,7 @@ const SELECTS: (Partial<SelectElement<FavoriteLayout>> | Partial<SelectElement<M
     preference: Preferences.favoritesLayout,
     event: Events.favorites.layoutChanged,
     function: hideUnusedLayoutSizer,
-    options: new Map<FavoriteLayout, string>([
+    options: new Map<Layout, string>([
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],
@@ -355,8 +346,8 @@ const NUMBERS: Partial<NumberElement>[] = [
     parentId: "column-count-container",
     position: "beforeend",
     preference: Preferences.columnCount,
-    min: FavoritesSettings.columnCountBounds.min,
-    max: FavoritesSettings.columnCountBounds.max,
+    min: GeneralSettings.columnCountBounds.min,
+    max: GeneralSettings.columnCountBounds.max,
     step: 1,
     pollingTime: 50,
     triggerOnCreation: true,
@@ -368,8 +359,8 @@ const NUMBERS: Partial<NumberElement>[] = [
     parentId: "row-size-container",
     position: "beforeend",
     preference: Preferences.rowSize,
-    min: FavoritesSettings.rowSizeBounds.min,
-    max: FavoritesSettings.rowSizeBounds.max,
+    min: GeneralSettings.rowSizeBounds.min,
+    max: GeneralSettings.rowSizeBounds.max,
     step: 1,
     pollingTime: 50,
     triggerOnCreation: true,
@@ -427,5 +418,4 @@ export function createDynamicFavoritesDesktopMenuElements(): void {
   createSimpleCheckboxes();
   createSelects();
   createNumbers();
-  hideUnusedLayoutSizer(Preferences.favoritesLayout.value);
 }

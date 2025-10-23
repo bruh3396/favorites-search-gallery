@@ -1,16 +1,17 @@
 import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesView from "../../../view/favorites_view";
 import { Events } from "../../../../../lib/global/events/events";
-import { FavoritesPageBottomObserver } from "./favorites_page_bottom_observer";
 import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { PageBottomObserver } from "../../../../../lib/components/page_bottom_observer";
 import { sleep } from "../../../../../utils/misc/async";
 import { waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
 
 class InfiniteScrollFlow implements FavoritesPresentationFlow {
-  private readonly pageBottomObserver: FavoritesPageBottomObserver;
+  private readonly pageBottomObserver: PageBottomObserver;
 
   constructor() {
-    this.pageBottomObserver = new FavoritesPageBottomObserver(this.showMoreResults.bind(this));
+    this.pageBottomObserver = new PageBottomObserver(this.showMoreResults.bind(this));
   }
 
   public present(): void {
@@ -36,6 +37,9 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
   public handlePageChangeRequest(): void { }
 
   private async showMoreResults(): Promise<void> {
+    if (!ON_FAVORITES_PAGE) {
+      return;
+    }
     const moreResults = FavoritesModel.getMoreResults();
 
     if (moreResults.length === 0) {

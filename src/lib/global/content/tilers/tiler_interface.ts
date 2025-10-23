@@ -1,8 +1,8 @@
-import { FavoriteLayout } from "../../../../../types/common_types";
+import { Layout } from "../../../../types/common_types";
 
 export interface Tiler {
   readonly container: HTMLElement
-  readonly className: FavoriteLayout
+  readonly className: Layout
 
   tile: (items: HTMLElement[]) => void
   setColumnCount: (columnCount: number) => void

@@ -17,14 +17,11 @@ class GifRenderer extends GalleryBaseRenderer {
     this.container.appendChild(this.gif);
   }
 
-public display(element: HTMLElement): Promise<void> {
-  super.display(element);
-  return new Promise((resolve, reject) => {
-    this.gif.onload = (): void => resolve();
-    this.gif.onerror = (): void => reject(new Error("Failed to load gif"));
+  public display(element: HTMLElement): void {
+    super.display(element);
+    this.gif.src = "";
     this.gif.src = getGIFSource(element);
-  });
-}
+  }
 
   public hide(): void {
     super.hide();
@@ -38,10 +35,10 @@ public display(element: HTMLElement): Promise<void> {
       .map((element) => getGIFSource(element));
 
     for (const source of gifSources) {
-      const gif = new Image();
+      // const gif = new Image();
 
-      gif.src = source;
-      this.preloadedGIFs.push(gif);
+      // gif.src = source;
+      // this.preloadedGIFs.push(gif);
     }
   }
 

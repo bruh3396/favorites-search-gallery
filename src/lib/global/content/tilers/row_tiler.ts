@@ -1,12 +1,12 @@
-import { getAllThumbs, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
-import { BaseTiler } from "./favorites_base_tiler";
-import { FavoriteLayout } from "../../../../../types/common_types";
-import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { insertStyleHTML } from "../../../../../utils/dom/style";
-import { mapRange } from "../../../../../utils/primitive/number";
+import { getAllThumbs, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
+import { BaseTiler } from "./base_tiler";
+import { GeneralSettings } from "../../../../config/general_settings";
+import { Layout } from "../../../../types/common_types";
+import { insertStyleHTML } from "../../../../utils/dom/style";
+import { mapRange } from "../../../../utils/primitive/number";
 
 export class RowTiler extends BaseTiler {
-  public className: FavoriteLayout = "row";
+  public className: Layout = "row";
   public skeletonStyle: Record<string, string> = { };
 
   public tile(items: HTMLElement[]): void {
@@ -25,7 +25,7 @@ export class RowTiler extends BaseTiler {
   public setRowSize(rowSize: number): void {
     const minWidth = Math.floor(window.innerWidth / 20);
     const maxWidth = Math.floor(window.innerWidth / 4);
-    const pixelSize = Math.round(mapRange(rowSize, FavoritesSettings.rowSizeBounds.min, FavoritesSettings.rowSizeBounds.max, minWidth, maxWidth));
+    const pixelSize = Math.round(mapRange(rowSize, GeneralSettings.rowSizeBounds.min, GeneralSettings.rowSizeBounds.max, minWidth, maxWidth));
 
     insertStyleHTML(`
       #favorites-search-gallery-content.row {

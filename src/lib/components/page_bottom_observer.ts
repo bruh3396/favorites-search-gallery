@@ -1,8 +1,8 @@
-import { CONTENT_CONTAINER } from "../../../../../lib/global/content_container";
-import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { ITEM_CLASS_NAME } from "../../../../../utils/dom/dom";
+import { CONTENT_CONTAINER } from "../global/content/content_container";
+import { GeneralSettings } from "../../config/general_settings";
+import { ITEM_CLASS_NAME } from "../../utils/dom/dom";
 
-export class FavoritesPageBottomObserver {
+export class PageBottomObserver {
   private intersectionObserver: IntersectionObserver;
   private onBottomReached: () => void;
 
@@ -23,7 +23,7 @@ export class FavoritesPageBottomObserver {
   private createIntersectionObserver(): IntersectionObserver {
     return new IntersectionObserver(this.onIntersectionChanged.bind(this), {
       threshold: [0.1],
-      rootMargin: `0% 0% ${FavoritesSettings.infiniteScrollMargin} 0%`
+      rootMargin: `0% 0% ${GeneralSettings.infiniteScrollMargin} 0%`
     });
   }
 

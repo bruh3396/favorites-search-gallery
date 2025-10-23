@@ -32,5 +32,6 @@ export const GallerySettings = {
     return !this.fetchImageBitmapsInWorker;
   },
   createImageAccentColors: false,
-  galleryMenuMonoColor: true
+  galleryMenuMonoColor: true,
+  preloadOutsideGalleryOnSearchPage: false
 };

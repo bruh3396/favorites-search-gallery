@@ -24,10 +24,9 @@ class ImageRenderer extends GalleryBaseRenderer {
     this.lastShownId = "";
   }
 
-  public display(thumb: HTMLElement): Promise<void> {
+  public display(thumb: HTMLElement): void {
     super.display(thumb);
     this.draw(thumb);
-    return Promise.resolve();
   }
 
   public preload(thumbs: HTMLElement[]): void {
@@ -50,7 +49,7 @@ class ImageRenderer extends GalleryBaseRenderer {
     GalleryImageCache.clearAnimatedImages();
     setTimeout(() => {
       UPSCALER.handlePageChange();
-      this.upscaleThumbsWithAvailableImages();
+      this.upscaleCachedImageThumbs();
     }, 10);
   }
 
@@ -58,7 +57,7 @@ class ImageRenderer extends GalleryBaseRenderer {
     UPSCALER.presetCanvasDimensions(thumbs);
   }
 
-  public upscaleThumbsWithAvailableImages(): void {
+  public upscaleCachedImageThumbs(): void {
     GalleryImageCache.getImageRequests().forEach(request => UPSCALER.upscale(request));
   }
 
@@ -93,6 +92,10 @@ class ImageRenderer extends GalleryBaseRenderer {
   public correctOrientation(): void {
     GalleryCanvas.correctOrientation();
     this.redrawOnOrientationChange();
+  }
+
+  public downscaleAll(): void {
+    UPSCALER.clear();
   }
 
   private redrawOnOrientationChange(): void {
