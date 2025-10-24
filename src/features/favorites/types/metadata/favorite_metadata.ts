@@ -1,16 +1,14 @@
+import * as API from "../../../../lib/api/api";
 import * as Extensions from "../../../../lib/global/extensions";
 import { DiscreteRating, Post, Rating } from "../../../../types/common_types";
 import { FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../../types/favorite_types";
 import { Events } from "../../../../lib/global/events/events";
-import { GeneralSettings } from "../../../../config/general_settings";
-import { ThrottledQueue } from "../../../../lib/components/throttled_queue";
-import { fetchPostFromAPISafe } from "../../../../lib/api/api";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { splitIntoChunks } from "../../../../utils/collection/array";
 import { validateTags } from "../favorite/favorite_item";
 
-const PENDING_REQUESTS = new Set<string>();
 const UPDATE_QUEUE: FavoriteMetadata[] = [];
-const MAX_PENDING_REQUESTS = 250;
-const THROTTLED_FETCH_QUEUE = new ThrottledQueue(GeneralSettings.throttledMetadataAPIRequestDelay);
+let favoritesLoaded = false;
 
 function decodeRating(rating: string): Rating {
   return {
@@ -34,21 +32,18 @@ export function encodeRating(rating: number): string {
   }[rating] ?? "Explicit";
 }
 
-function tooManyPendingRequests(): boolean {
-  return PENDING_REQUESTS.size > MAX_PENDING_REQUESTS;
-}
+export function fetchMissingMetadata(): void {
+  favoritesLoaded = true;
 
-export async function fetchMissingMetadata(): Promise<void> {
-  while (UPDATE_QUEUE.length > 0) {
-    const metadata = UPDATE_QUEUE.shift();
-
-    if (metadata === undefined) {
-      break;
+  for (const chunk of splitIntoChunks(UPDATE_QUEUE, 50)) {
+    if (chunk.length === 0) {
+      return;
     }
-    await THROTTLED_FETCH_QUEUE.wait();
-    metadata.populateFromAPI()
-      .then(() => {
-        Events.favorites.missingMetadataFound.emit(metadata.id);
+    API.fetchMultiplePostsFromAPISafe(chunk.map(metadata => metadata.id))
+      .then((posts) => {
+        for (const metadata of chunk) {
+          metadata.processPost(posts[metadata.id]);
+        }
       });
   }
 }
@@ -102,7 +97,9 @@ export class FavoriteMetadata {
 
   public populate(object: FavoritesDatabaseRecord | HTMLElement): void {
     if (object instanceof HTMLElement) {
-      this.populateFromAPI();
+      if (!FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
+        this.populateFromAPI();
+      }
       return;
     }
 
@@ -118,17 +115,21 @@ export class FavoriteMetadata {
   }
 
   public async populateFromAPI(): Promise<void> {
-    if (tooManyPendingRequests()) {
-      UPDATE_QUEUE.push(this);
+    this.processPost(await API.fetchPostFromAPISafe(this.id));
+  }
+
+  public processPost(post: Post): void {
+    this.populateFromPost(post);
+
+    if (this.isEmpty) {
       return;
     }
-    PENDING_REQUESTS.add(this.id);
-    const post = await fetchPostFromAPISafe(this.id);
 
-    PENDING_REQUESTS.delete(this.id);
+    if (favoritesLoaded) {
+      Events.favorites.missingMetadataFound.emit(this.id);
+    }
     Extensions.setExtensionFromPost(post);
     validateTags(post);
-    this.populateFromPost(post);
   }
 
   private populateFromPost(post: Post): void {

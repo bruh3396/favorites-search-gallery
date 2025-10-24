@@ -47,6 +47,8 @@ export class FavoriteTags {
     this.tags = tags instanceof Set ? tags : convertToTagSet(tags);
     const additionalTags = getAdditionalTags(this.id);
 
+    this.correctVideTag(tags);
+
     if (additionalTags !== undefined) {
       this.additionalTags = convertToTagSet(additionalTags);
       this.combineOriginalAndAdditionalTagSets();
@@ -101,5 +103,14 @@ export class FavoriteTags {
     const union = this.originalTagSet.union(this.additionalTags);
 
     this.tags = new Set(Array.from(union).sort());
+  }
+
+  private correctVideTag(tags: string | Set<string>): void {
+    if (typeof tags === "string") {
+      if (this.tags.has("vide") && this.tags.has("animated")) {
+        this.tags.delete("vide");
+        this.tags.add("video");
+      }
+    }
   }
 }

@@ -6,7 +6,6 @@ import { Events } from "../../../lib/global/events/events";
 import { ON_SEARCH_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { Post } from "../../../types/common_types";
 import { prepareSearchPageThumbs } from "../types/search_page";
-import { sleep } from "../../../utils/misc/async";
 
 export async function prepareAllThumbsOnSearchPage(): Promise<void> {
   await waitForDOMToLoad();
@@ -19,21 +18,23 @@ export async function prepareAllThumbsOnSearchPage(): Promise<void> {
 }
 
 async function findImageExtensions(thumbs: HTMLElement[]): Promise<void> {
-  for (const thumb of thumbs) {
-    await sleep(5);
-    findImageExtension(thumb);
+  const posts = await API.fetchMultiplePostsFromAPI(thumbs.map(thumb => thumb.id));
+
+  for (const post of Object.values(posts)) {
+    if (post.width > 0) {
+      Extensions.setExtensionFromPost(post);
+      correctMediaTags(post);
+    }
   }
 }
 
-async function findImageExtension(thumb: HTMLElement): Promise<void> {
-  const post = await API.fetchPostFromAPI(thumb.id);
-
-  Extensions.setExtensionFromPost(post);
-  correctMediaTags(thumb, post);
-}
-
-function correctMediaTags(thumb: HTMLElement, post: Post): void {
+function correctMediaTags(post: Post): void {
   if (!ON_SEARCH_PAGE) {
+    return;
+  }
+  const thumb = document.getElementById(post.id);
+
+  if (thumb === null) {
     return;
   }
   const tagSet = convertToTagSet(post.tags);

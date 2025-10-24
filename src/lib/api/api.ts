@@ -1,12 +1,16 @@
 import * as FSG_URL from "./api_url";
+import { extractPostFromAPI, extractPostFromAPISafe } from "./post_api_parser";
 import { AddFavoriteStatus } from "../../types/favorite_types";
+import { ConcurrencyLimiter } from "../components/concurrency_limiter";
 import { Post } from "../../types/common_types";
-import { ThrottledQueue } from "../components/throttled_queue";
 import { extractFavoritesCount } from "./profile_page_parser";
-import { extractPostFromAPI } from "./post_api_parser";
 import { parsePostFromPostPage as extractPostFromPostPage } from "./post_page_parser";
+import { getUserId } from "../../utils/misc/favorites_page_metadata";
 
-const POST_PAGE_QUEUE: ThrottledQueue = new ThrottledQueue(200);
+const USER_ID = getUserId();
+const POST_PAGE_LIMITER = new ConcurrencyLimiter(2);
+const MULTI_POST_LIMITER = new ConcurrencyLimiter(4);
+const POST_LIMITER = new ConcurrencyLimiter(250);
 
 export async function getHTML(url: string): Promise<string> {
   const response = await fetch(url);
@@ -17,17 +21,48 @@ export async function getHTML(url: string): Promise<string> {
   return response.text();
 }
 
-export async function fetchPostFromAPI(id: string): Promise<Post> {
-  return extractPostFromAPI(await getHTML(FSG_URL.createPostAPIURL(id)));
+export function fetchPostFromAPI(id: string): Promise<Post> {
+  return POST_LIMITER.run(async() => {
+    return extractPostFromAPI(await getHTML(FSG_URL.createPostAPIURL(id)));
+  });
+}
+
+export function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
+  return MULTI_POST_LIMITER.run(async() => {
+    const response = await fetch(FSG_URL.MULTI_POST_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, userId: USER_ID })
+    });
+    const data = await response.json() as Record<string, string>;
+    const result = {} as Record<string, Post>;
+
+    for (const [id, html] of Object.entries(data)) {
+      result[id] = extractPostFromAPISafe(html);
+    }
+    return result;
+  });
+}
+
+export async function fetchMultiplePostsFromAPISafe(ids: string[]): Promise<Record<string, Post>> {
+  const posts = await fetchMultiplePostsFromAPI(ids);
+
+  for (const [id, post] of Object.entries(posts)) {
+    if (post.width === 0 && post.height === 0) {
+      posts[id] = await fetchPostFromPostPage(id);
+    }
+  }
+  return posts;
 }
 
 export function fetchPostPage(id: string): Promise<string> {
   return getHTML(FSG_URL.createPostPageURL(id));
 }
 
-export async function fetchPostFromPostPage(id: string): Promise<Post> {
-  await POST_PAGE_QUEUE.wait();
-  return extractPostFromPostPage(await fetchPostPage(id));
+export function fetchPostFromPostPage(id: string): Promise<Post> {
+  return POST_PAGE_LIMITER.run(async() => {
+    return extractPostFromPostPage(await fetchPostPage(id));
+  });
 }
 
 export function fetchPostFromAPISafe(id: string): Promise<Post> {

@@ -4,7 +4,6 @@ import { Database } from "../../../../lib/components/database";
 import { FavoritesDatabaseRecord } from "../../../../types/favorite_types";
 import { convertToTagSet } from "../../../../utils/primitive/string";
 import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
-import { sleep } from "../../../../utils/misc/async";
 
 const SCHEMA_VERSION = 1;
 const SCHEMA_VERSION_LOCAL_STORAGE_KEY = "favoritesSearchGallerySchemaVersion";
@@ -67,15 +66,8 @@ export async function loadAllFavorites(): Promise<FavoriteItem[]> {
   return convertToFavorites(updatedRecords);
 }
 
-export async function storeFavorites(favorites: FavoriteItem[]): Promise<void> {
-  const records = favorites.slice().reverse().map(favorite => favorite.databaseRecord);
-
-  await sleep(500);
-  DATABASE.store(records);
-}
-
-export function storeAllFavorites(favorites: FavoriteItem[]): Promise<void> {
-  return storeFavorites(favorites);
+export function storeFavorites(favorites: FavoriteItem[]): Promise<void> {
+  return DATABASE.store(favorites.slice().reverse().map(favorite => favorite.databaseRecord));
 }
 
 export function updateMetadata(id: string): void {

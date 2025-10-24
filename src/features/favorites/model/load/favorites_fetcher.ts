@@ -2,6 +2,7 @@ import * as API from "../../../../lib/api/api";
 import * as FavoritesFetchQueue from "./favorites_fetch_queue";
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { extractFavorites } from "./favorites_extractor";
 import { sleep } from "../../../../utils/misc/async";
 
@@ -85,6 +86,7 @@ async function fetchFavoritesPageHelper(request: FavoritesPageRequest): Promise<
 
 function onFavoritesPageRequestSuccess(request: FavoritesPageRequest, html: string): void {
   request.favorites = extractFavorites(html);
+  populateMultipleMetadataFromAPI(request.favorites);
   PENDING_REQUEST_PAGE_NUMBERS.delete(request.realPageNumber);
   const favoritesPageIsEmpty = request.favorites.length === 0;
 
@@ -99,6 +101,21 @@ function onFavoritesPageRequestError(request: FavoritesPageRequest, error: Error
   console.error(error);
   request.retry();
   FAILED_REQUESTS.push(request);
+}
+
+async function populateMultipleMetadataFromAPI(favorites: FavoriteItem[]): Promise<void> {
+  if (!FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
+    return;
+  }
+  const favoriteMap = favorites.reduce((map, favorite) => {
+    map[favorite.id] = favorite;
+    return map;
+  }, {} as Record<string, FavoriteItem>);
+  const postMap = await API.fetchMultiplePostsFromAPI(Array.from(Object.keys(favoriteMap)));
+
+  for (const [id, post] of Object.entries(postMap)) {
+    favoriteMap[id].processPost(post);
+  }
 }
 
 function fetchNewFavoritesOnReloadHelper(): Promise<{ allNewFavoritesFound: boolean, newFavorites: FavoriteItem[] }> {
@@ -140,8 +157,9 @@ export async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<Favor
   let favorites: FavoriteItem[] = [];
 
   while (true) {
-    const {allNewFavoritesFound, newFavorites} = await fetchNewFavoritesOnReloadHelper();
+    const { allNewFavoritesFound, newFavorites } = await fetchNewFavoritesOnReloadHelper();
 
+    populateMultipleMetadataFromAPI(newFavorites);
     favorites = favorites.concat(newFavorites);
 
     if (allNewFavoritesFound) {

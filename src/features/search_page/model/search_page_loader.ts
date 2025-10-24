@@ -1,12 +1,15 @@
+import * as API from "../../../lib/api/api";
+import * as Extensions from "../../../lib/global/extensions";
+import { ConcurrencyLimiter } from "../../../lib/components/concurrency_limiter";
 import { Events } from "../../../lib/global/events/events";
 import { NavigationKey } from "../../../types/common_types";
 import { SearchPage } from "../types/search_page";
-import { ThrottledQueue } from "../../../lib/components/throttled_queue";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { isForwardNavigationKey } from "../../../types/equivalence";
 import { sleep } from "../../../utils/misc/async";
 
-const FETCH_QUEUE = new ThrottledQueue(250);
+const SEARCH_PAGE_FETCH_LIMITER = new ConcurrencyLimiter(2);
+const SEARCH_PAGE_PREFETCH_LENGTH = 6;
 let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;
 let initialPageNumber: number;
@@ -60,28 +63,29 @@ export function getPageNumberFromThumb(thumb: HTMLElement): number {
   return -1;
 }
 
-export async function preloadSearchPages(): Promise<void> {
-  const previousPageNumber = Math.max(0, currentPageNumber - 1);
-  const nextPageNumber = currentPageNumber + 1;
+export function preloadSearchPages(): void {
+  loadSearchPage(currentPageNumber);
 
-  await loadSearchPage(currentPageNumber);
-  await loadSearchPage(previousPageNumber);
-  await loadSearchPage(nextPageNumber);
+  for (let i = 1; i < SEARCH_PAGE_PREFETCH_LENGTH; i += 1) {
+    loadSearchPage(currentPageNumber - i);
+    loadSearchPage(currentPageNumber + i);
+  }
 }
 
-async function loadSearchPage(pageNumber: number): Promise<void> {
-  if (pageHasAlreadyBeenFetched(pageNumber)) {
+function loadSearchPage(pageNumber: number): Promise<void> {
+  if (pageHasAlreadyBeenFetched(pageNumber) || pageNumber < 0) {
     return Promise.resolve();
   }
   fetchedPageNumbers.add(pageNumber);
-  await FETCH_QUEUE.wait();
-  return fetchSearchPage(pageNumber)
-    .then((html: string) => {
-      registerNewPage(pageNumber, html);
-    }).catch(() => {
-      fetchedPageNumbers.delete(pageNumber);
-      searchPages.delete(pageNumber);
-    });
+  return SEARCH_PAGE_FETCH_LIMITER.run(() => {
+    return fetchSearchPage(pageNumber)
+      .then((html: string) => {
+        registerNewPage(pageNumber, html);
+      }).catch(() => {
+        fetchedPageNumbers.delete(pageNumber);
+        searchPages.delete(pageNumber);
+      });
+  });
 }
 
 function pageHasAlreadyBeenFetched(pageNumber: number): boolean {
@@ -89,8 +93,21 @@ function pageHasAlreadyBeenFetched(pageNumber: number): boolean {
 }
 
 function registerNewPage(pageNumber: number, html: string): void {
-  searchPages.set(pageNumber, new SearchPage(pageNumber, html));
+  const searchPage = new SearchPage(pageNumber, html);
+
+  searchPages.set(pageNumber, searchPage);
+  findExtensionsForNewPage(searchPage);
   updateAllThumbs();
+}
+
+async function findExtensionsForNewPage(searchPage: SearchPage): Promise<void> {
+  const posts = await API.fetchMultiplePostsFromAPI(searchPage.thumbs.map(thumb => thumb.id));
+
+  for (const post of Object.values(posts)) {
+    if (post.width > 0) {
+      Extensions.setExtensionFromPost(post);
+    }
+  }
 }
 
 function fetchSearchPage(pageNumber: number): Promise<string> {

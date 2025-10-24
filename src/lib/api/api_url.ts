@@ -2,7 +2,8 @@ import { ON_MOBILE_DEVICE } from "../global/flags/intrinsic_flags";
 import { getUserId } from "../../utils/misc/favorites_page_metadata";
 
 const ORIGIN = "https://rule34.xxx";
-const API_BASE_URL = `https://favorites-search-gallery-api.onrender.com/?userId=${getUserId()}`;
+const SERVER_ORIGIN = "https://favorites-search-gallery-api.onrender.com";
+const API_BASE_URL = `${SERVER_ORIGIN}/?userId=${getUserId()}`;
 
 const POST_API_URL = `${API_BASE_URL}&type=post&id=`;
 const TAG_API_URL = `${API_BASE_URL}&type=tag&name=`;
@@ -16,6 +17,8 @@ const POST_VOTE_URL = `${ORIGIN}/index.php?page=post&s=vote&type=up&id=`;
 const REMOVE_FAVORITE_URL = `${ORIGIN}/index.php?page=favorites&s=delete&id=`;
 const ADD_FAVORITE_URL = `${ORIGIN}/public/addfav.php?id=`;
 const CSS_URL = `${ORIGIN}//css/`;
+
+export const MULTI_POST_API_URL = `${SERVER_ORIGIN}/multi-post`;
 
 export function createPostPageURL(id: string): string {
   return `${POST_PAGE_URL}${id}`;

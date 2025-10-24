@@ -13,5 +13,6 @@ export const FavoritesSettings = {
   infiniteScrollBatchSize: 25,
   infiniteScrollPreloadCount: 100,
   favoriteFinderEnabled: false,
-  bottomNavigationButtonsEnabled: false
+  bottomNavigationButtonsEnabled: false,
+  fetchMultiplePostWhileFetchingFavorites: true
 };

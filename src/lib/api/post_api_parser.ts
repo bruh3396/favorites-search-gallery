@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { Post } from "../../types/common_types";
+import { createEmptyPost } from "../../features/favorites/types/favorite/favorite_type_utils";
 
 export class ApiParseError extends Error { }
 export class DeletedPostError extends Error { }
@@ -53,4 +54,12 @@ export function extractPostFromAPI(html: string): Post {
     throw new ApiParseError();
   }
   return createPostFromAPIElement(post);
+}
+
+export function extractPostFromAPISafe(html: string): Post {
+  try {
+    return extractPostFromAPI(html);
+  } catch {
+    return createEmptyPost();
+  }
 }

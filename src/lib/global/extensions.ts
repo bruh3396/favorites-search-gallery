@@ -2,13 +2,13 @@ import * as API from "../api/api";
 import { MediaExtension, MediaExtensionMapping, Post } from "../../types/common_types";
 import { isGif, isVideo } from "../../utils/content/content_type";
 import { BatchExecutor } from "../components/batch_executor";
+import { ConcurrencyLimiter } from "../components/concurrency_limiter";
 import { Database } from "../components/database";
 import { EXTENSION_REGEX } from "../../utils/content/image_url";
 import { Favorite } from "../../types/favorite_types";
 import { GeneralSettings } from "../../config/general_settings";
 import { ON_FAVORITES_PAGE } from "./flags/intrinsic_flags";
 import { PromiseTimeoutError } from "../../types/error_types";
-import { ThrottledQueue } from "../components/throttled_queue";
 import { getOriginalImageURLWithJPGExtension } from "../api/media_api";
 import { withTimeout } from "../../utils/misc/async";
 
@@ -18,7 +18,7 @@ const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
 const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
 const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
 const EXTENSIONS: MediaExtension[] = ["jpg", "png", "jpeg"];
-const BRUTE_FORCE_EXTENSION_QUEUE = new ThrottledQueue(40);
+const BRUTE_FORCE_LIMITER = new ConcurrencyLimiter(3);
 
 async function loadExtensions(): Promise<void> {
   for (const mapping of await DATABASE.load()) {
@@ -96,21 +96,22 @@ export function getExtension(item: HTMLElement | Favorite): Promise<MediaExtensi
     });
 }
 
-async function tryAllPossibleExtensions(item: HTMLElement | Favorite): Promise<MediaExtension> {
-  const baseURL = getOriginalImageURLWithJPGExtension(item);
+function tryAllPossibleExtensions(item: HTMLElement | Favorite): Promise<MediaExtension> {
+  return BRUTE_FORCE_LIMITER.run(async() => {
+    const baseURL = getOriginalImageURLWithJPGExtension(item);
 
-  for (const extension of EXTENSIONS) {
-    const testURL = baseURL.replace(".jpg", `.${extension}`);
+    for (const extension of EXTENSIONS) {
+      const testURL = baseURL.replace(".jpg", `.${extension}`);
 
-    await BRUTE_FORCE_EXTENSION_QUEUE.wait();
-    const response = await fetch(testURL);
+      const response = await fetch(testURL);
 
-    if (response.ok) {
-      set(item.id, extension);
-      return extension;
+      if (response.ok) {
+        set(item.id, extension);
+        return extension;
+      }
     }
-  }
-  return "jpg";
+    return "jpg";
+  });
 }
 
 export async function getExtensionFromId(id: string): Promise<MediaExtension> {

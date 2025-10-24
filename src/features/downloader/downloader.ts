@@ -1,8 +1,8 @@
 import { DownloadRequest, createDownloadRequest } from "./download_request";
+import { ConcurrencyLimiter } from "../../lib/components/concurrency_limiter";
 import { DownloadAbortedError } from "../../types/error_types";
 import { Favorite } from "../../types/favorite_types";
 import { downloadBlob } from "../../lib/download/downloader";
-import { runWithPools } from "../../utils/misc/async";
 
 interface ZipWriter {
   add: (name: string, reader: unknown, options: { compression: string }) => Promise<void>;
@@ -51,12 +51,12 @@ async function downloadFavorites(favorites: Favorite[], progressCallback: (reque
   currentlyDownloading = false;
 }
 
-async function createTotalFavoriteBlob(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void, poolSize: number = 15): Promise<Blob> {
+ async function createTotalFavoriteBlob(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void): Promise<Blob> {
   const blobWriter = new zip.BlobWriter("application/zip");
   const zipWriter = new zip.ZipWriter(blobWriter);
 
-  await runWithPools(favorites, poolSize, async(favorite) => {
-    await createFavoriteBlob(favorite, zipWriter, progressCallback);
+  await new ConcurrencyLimiter(15).runAll<Favorite, void>(favorites, (favorite): Promise<void> => {
+    return createFavoriteBlob(favorite, zipWriter, progressCallback);
   });
   stopIfAborted();
   return zipWriter.close();

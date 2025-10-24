@@ -35,7 +35,7 @@ export function getAllFavorites(): FavoriteItem[] {
 }
 
 export function storeAllFavorites(): Promise<void> {
-  return FavoritesDatabase.storeAllFavorites(allFavorites);
+  return FavoritesDatabase.storeFavorites(allFavorites);
 }
 
 export function storeNewFavorites(newFavorites: FavoriteItem[]): Promise<void> {

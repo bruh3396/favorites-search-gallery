@@ -96,6 +96,10 @@ export class FavoriteItem implements Favorite {
     }
   }
 
+  public processPost(post: Post): void {
+    this.metadata.processPost(post);
+  }
+
   public addAdditionalTags(newTags: string): string {
     FAVORITES_SEARCH_INDEX.remove(this);
     const result = this.favoriteTags.addAdditionalTags(newTags);
