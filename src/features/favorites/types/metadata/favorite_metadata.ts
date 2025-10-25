@@ -3,6 +3,7 @@ import * as Extensions from "../../../../lib/global/extensions";
 import { DiscreteRating, Post, Rating } from "../../../../types/common_types";
 import { FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../../types/favorite_types";
 import { Events } from "../../../../lib/global/events/events";
+import { FAVORITES_PER_PAGE } from "../../../../lib/global/constants";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { splitIntoChunks } from "../../../../utils/collection/array";
 import { validateTags } from "../favorite/favorite_item";
@@ -35,7 +36,7 @@ export function encodeRating(rating: number): string {
 export function fetchMissingMetadata(): void {
   favoritesLoaded = true;
 
-  for (const chunk of splitIntoChunks(UPDATE_QUEUE, 50)) {
+  for (const chunk of splitIntoChunks(UPDATE_QUEUE, FAVORITES_PER_PAGE)) {
     if (chunk.length === 0) {
       return;
     }

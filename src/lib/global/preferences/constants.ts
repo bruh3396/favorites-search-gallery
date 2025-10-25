@@ -1,1 +1,0 @@
-export const MAX_RESULTS_PER_SEARCH_PAGE = 42;

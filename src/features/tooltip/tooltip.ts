@@ -6,7 +6,7 @@ import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/global/container";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { TOOLTIP_DISABLED } from "../../lib/global/flags/derived_flags";
 import { TOOLTIP_HTML } from "../../assets/html";
-import { getTagSetFromThumb } from "../../utils/dom/tags";
+import { getTagSetFromItem } from "../../utils/dom/tags";
 
 let tooltip: HTMLElement;
 let defaultTransition: string;
@@ -210,7 +210,7 @@ function getTags(image: HTMLImageElement): string {
   if (thumb === null) {
     return "";
   }
-  const tags = getTagSetFromThumb(thumb);
+  const tags = getTagSetFromItem(thumb);
 
   if (searchTagColorCodes[thumb.id] === undefined) {
     tags.delete(thumb.id);

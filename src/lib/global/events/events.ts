@@ -10,7 +10,7 @@ import { SearchPage } from "../../../features/search_page/types/search_page";
 import { setupSwipeEvents } from "./swipe_events";
 import { setupTouchHoldEvents } from "./touch_hold_events";
 
-const container = ON_FAVORITES_PAGE ? FAVORITES_SEARCH_GALLERY_CONTAINER : document.documentElement;
+const CONTAINER = ON_FAVORITES_PAGE ? FAVORITES_SEARCH_GALLERY_CONTAINER : document.documentElement;
 
 const favorites = {
   searchStarted: new EventEmitter<string>(true),
@@ -137,15 +137,10 @@ const window1 = {
 };
 
 function setupDocumentEvents(): void {
-  broadcastDOMLoad();
-  setupCommonEvents();
-}
-
-function setupCommonEvents(): void {
-  container.addEventListener("click", (event) => {
+  CONTAINER.addEventListener("click", (event) => {
     Events.document.click.emit(event);
   });
-  container.addEventListener("mousedown", (event) => {
+  CONTAINER.addEventListener("mousedown", (event) => {
     Events.document.mousedown.emit(event);
   });
   document.addEventListener("keydown", (event) => {
@@ -154,12 +149,12 @@ function setupCommonEvents(): void {
   document.addEventListener("keyup", (event) => {
     Events.document.keyup.emit(new FavoritesKeyboardEvent(event));
   });
-  container.addEventListener("mouseover", (event) => {
+  CONTAINER.addEventListener("mouseover", (event) => {
     Events.document.mouseover.emit(new FavoritesMouseEvent(event));
   }, {
     passive: true
   });
-  container.addEventListener("mousemove", (event) => {
+  CONTAINER.addEventListener("mousemove", (event) => {
     Events.document.mousemove.emit(event);
   }, {
     passive: true
@@ -169,13 +164,13 @@ function setupCommonEvents(): void {
   }, {
     passive: true
   });
-  container.addEventListener("contextmenu", (event) => {
+  CONTAINER.addEventListener("contextmenu", (event) => {
     Events.document.contextmenu.emit(event);
   });
-  container.addEventListener("touchstart", (event) => {
+  CONTAINER.addEventListener("touchstart", (event) => {
     Events.document.touchStart.emit(event);
-  }, {passive: false});
-  container.addEventListener("touchend", (event) => {
+  }, { passive: false });
+  CONTAINER.addEventListener("touchend", (event) => {
     Events.document.touchEnd.emit(event);
   });
 }
@@ -226,6 +221,7 @@ export const Events = {
 };
 
 export function setupEvents(): void {
+  broadcastDOMLoad();
   setupDocumentEvents();
   setupWindowEvents();
   setupMobileEvents();

@@ -1,6 +1,7 @@
 import { ITEM_SELECTOR, changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../../utils/dom/dom";
 import { BaseTiler } from "./base_tiler";
 import { Layout } from "../../../../types/common_types";
+import { ON_SEARCH_PAGE } from "../../flags/intrinsic_flags";
 import { Preferences } from "../../preferences/preferences";
 
 export class ColumnTiler extends BaseTiler {
@@ -14,7 +15,7 @@ export class ColumnTiler extends BaseTiler {
   constructor() {
     super();
     this.columns = [];
-    this.columnCount = Preferences.columnCount.value;
+    this.columnCount = ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value;
   }
 
   private get active(): boolean {

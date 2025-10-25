@@ -1,3 +1,4 @@
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../flags/intrinsic_flags";
 import { changeItemSizeOnShiftScroll, hideUnusedLayoutSizer } from "./tiler_event_handlers";
 import { CONTENT_CONTAINER } from "../content_container";
 import { ColumnTiler } from "./column_tiler";
@@ -5,7 +6,6 @@ import { Events } from "../../events/events";
 import { GridTiler } from "./grid_tiler";
 import { Layout } from "../../../../types/common_types";
 import { NativeTiler } from "./native_tiler";
-import { ON_FAVORITES_PAGE } from "../../flags/intrinsic_flags";
 import { Preferences } from "../../preferences/preferences";
 import { RowTiler } from "./row_tiler";
 import { SquareTiler } from "./square_tiler";
@@ -77,7 +77,7 @@ export function addTilerEventListeners(): void {
 
 export function setupTiler(): void {
   CONTENT_CONTAINER.className = currentLayout;
-  updateColumnCount(Preferences.columnCount.value);
-  updateRowSize(Preferences.rowSize.value);
+  updateColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value);
+  updateRowSize(ON_SEARCH_PAGE ? Preferences.rowSize.value : Preferences.rowSize.value);
   addTilerEventListeners();
 }

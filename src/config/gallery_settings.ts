@@ -1,4 +1,5 @@
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/global/flags/intrinsic_flags";
+import { POSTS_PER_SEARCH_PAGE } from "../lib/global/constants";
 
 export const GallerySettings = {
   mainCanvasResolutions: {
@@ -13,7 +14,7 @@ export const GallerySettings = {
     return ON_SEARCH_PAGE ? GallerySettings.mainCanvasResolutions.search : GallerySettings.mainCanvasResolutions.favorites;
   },
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 850,
-  searchPagePreloadedImageCount: ON_MOBILE_DEVICE ? 4 : 42,
+  searchPagePreloadedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_SEARCH_PAGE,
   minimumPreloadedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 2 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 2 : 2,
@@ -33,5 +34,5 @@ export const GallerySettings = {
   },
   createImageAccentColors: false,
   galleryMenuMonoColor: true,
-  preloadOutsideGalleryOnSearchPage: false
+  preloadOutsideGalleryOnSearchPage: true
 };

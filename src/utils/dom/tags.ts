@@ -1,14 +1,15 @@
-import { FavoriteItem, getFavorite } from "../../features/favorites/types/favorite/favorite_item";
 import { convertToTagSet, getContentType } from "../primitive/string";
 import { ContentType } from "../../types/common_types";
+import { Favorite } from "../../types/favorite_types";
 import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
+import { getFavorite } from "../../features/favorites/types/favorite/favorite_item";
 import { getImageFromThumb } from "./dom";
 
 function getTagAttributeFromImage(image: HTMLImageElement): string {
   return image.hasAttribute("tags") ? "tags" : "title";
 }
 
-function getTagsFromThumbOnSearchPage(thumb: HTMLElement | FavoriteItem): string {
+function getTagsFromItemOnSearchPage(thumb: HTMLElement | Favorite): string {
   if (!(thumb instanceof HTMLElement)) {
     return "";
   }
@@ -21,19 +22,19 @@ function getTagsFromThumbOnSearchPage(thumb: HTMLElement | FavoriteItem): string
   return image.getAttribute(tagAttribute) || "";
 }
 
-function getTagSetFromThumbOnSearchPage(thumb: HTMLElement): Set<string> {
-  return convertToTagSet(getTagsFromThumbOnSearchPage(thumb));
+function getTagSetFromItemOnSearchPage(thumb: HTMLElement | Favorite): Set<string> {
+  return convertToTagSet(getTagsFromItemOnSearchPage(thumb));
 }
 
-function getTagSetFromThumbOnFavoritesPage(thumb: HTMLElement): Set<string> {
-  const favorite = getFavorite(thumb.id);
+function getTagSetFromItemOnFavoritesPage(item: HTMLElement | Favorite): Set<string> {
+  const favorite = getFavorite(item.id);
   return favorite === undefined ? new Set() : new Set(favorite.tags);
 }
 
-export const getTagSetFromThumb = ON_FAVORITES_PAGE ? getTagSetFromThumbOnFavoritesPage : getTagSetFromThumbOnSearchPage;
+export const getTagSetFromItem: (item: HTMLElement | Favorite) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromItemOnFavoritesPage : getTagSetFromItemOnSearchPage;
 
 export function getContentTypeFromThumb(thumb: HTMLElement): ContentType {
-  return getContentType(getTagSetFromThumb(thumb));
+  return getContentType(getTagSetFromItem(thumb));
 }
 
 export function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {

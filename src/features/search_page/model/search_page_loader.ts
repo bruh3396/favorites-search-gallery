@@ -1,8 +1,7 @@
-import * as API from "../../../lib/api/api";
-import * as Extensions from "../../../lib/global/extensions";
 import { ConcurrencyLimiter } from "../../../lib/components/concurrency_limiter";
 import { Events } from "../../../lib/global/events/events";
 import { NavigationKey } from "../../../types/common_types";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
 import { SearchPage } from "../types/search_page";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { isForwardNavigationKey } from "../../../types/equivalence";
@@ -28,6 +27,7 @@ export function setupSearchPageLoader(): void {
 
   searchPages.set(initialPageNumber, searchPage);
   preloadSearchPages();
+  Events.searchPage.searchPageCreated.emit(searchPage);
 }
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
@@ -93,21 +93,8 @@ function pageHasAlreadyBeenFetched(pageNumber: number): boolean {
 }
 
 function registerNewPage(pageNumber: number, html: string): void {
-  const searchPage = new SearchPage(pageNumber, html);
-
-  searchPages.set(pageNumber, searchPage);
-  findExtensionsForNewPage(searchPage);
+  searchPages.set(pageNumber, new SearchPage(pageNumber, html));
   updateAllThumbs();
-}
-
-async function findExtensionsForNewPage(searchPage: SearchPage): Promise<void> {
-  const posts = await API.fetchMultiplePostsFromAPI(searchPage.thumbs.map(thumb => thumb.id));
-
-  for (const post of Object.values(posts)) {
-    if (post.width > 0) {
-      Extensions.setExtensionFromPost(post);
-    }
-  }
 }
 
 function fetchSearchPage(pageNumber: number): Promise<string> {
@@ -121,7 +108,7 @@ function fetchSearchPage(pageNumber: number): Promise<string> {
 }
 
 function getSearchPageURL(pageNumber: number): string {
-  return `${initialURL}&pid=${42 * pageNumber}`;
+  return `${initialURL}&pid=${POSTS_PER_SEARCH_PAGE * pageNumber}`;
 }
 
 function updateAllThumbs(): void {
@@ -140,7 +127,7 @@ function updateAllThumbs(): void {
 
 function getInitialPageNumber(): number {
   const match = (/&pid=(\d+)/).exec(location.href);
-  return match === null ? 0 : Math.round(parseInt(match[1]) / 42);
+  return match === null ? 0 : Math.round(parseInt(match[1]) / POSTS_PER_SEARCH_PAGE);
 }
 
 function getInitialURL(): string {
@@ -189,8 +176,12 @@ export async function getMoreResults(): Promise<HTMLElement[]> {
 }
 
 export function getInitialPageThumbs(): HTMLElement[] {
-  const searchPage = searchPages.get(initialPageNumber);
+  const searchPage = getInitialSearchPage() ?? undefined;
   return searchPage === undefined ? [] : searchPage.thumbs;
+}
+
+export function getInitialSearchPage(): SearchPage | null {
+  return searchPages.get(initialPageNumber) ?? null;
 }
 
 export function resetCurrentPageNumber(): void {

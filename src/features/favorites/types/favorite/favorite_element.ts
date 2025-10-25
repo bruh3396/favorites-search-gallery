@@ -1,5 +1,6 @@
 import * as API from "../../../../lib/api/api";
 import * as Icons from "../../../../assets/icons";
+import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../../assets/images";
 import { ClickCode, Post } from "../../../../types/common_types";
 import { ON_DESKTOP_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/global/flags/intrinsic_flags";
 import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../../utils/dom/links";
@@ -12,27 +13,13 @@ import { downloadFromThumb } from "../../../../lib/download/downloader";
 import { getContentType } from "../../../../utils/primitive/string";
 
 let htmlTemplate: HTMLElement;
-let removeFavoriteButtonHTML: string;
-let addFavoriteButtonHTML: string;
 
 export function createFavoriteItemHTMLTemplates(): void {
-  removeFavoriteButtonHTML = createRemoveFavoriteButtonHTMLTemplate();
-  addFavoriteButtonHTML = createAddFavoriteButtonHTMLTemplate();
   createPostHTMLTemplate();
 }
 
-function createRemoveFavoriteButtonHTMLTemplate(): string {
-  return `<img class="remove-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.HEART_MINUS)}>`;
-}
-
-function createAddFavoriteButtonHTMLTemplate(): string {
-  return `<img class="add-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.HEART_PLUS)}>`;
-}
-
 function createDownloadButtonHTMLTemplate(): string {
-  const downloadHTML = `<img class="download-button utility-button" src=${createObjectURLFromSvg(Icons.DOWNLOAD.replace("FFFFFF", "0075FF"))}>`;
-  return downloadHTML;
-  // return ON_DESKTOP_DEVICE ? downloadHTML : "";
+  return `<img class="download-button utility-button" src=${createObjectURLFromSvg(Icons.DOWNLOAD.replace("FFFFFF", "0075FF"))}>`;
 }
 
 function createPostHTMLTemplate(): void {
@@ -41,7 +28,7 @@ function createPostHTMLTemplate(): void {
   htmlTemplate.innerHTML = `
         <a>
           <img>
-          ${USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? removeFavoriteButtonHTML : addFavoriteButtonHTML}
+          ${USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? REMOVE_FAVORITE_IMAGE_HTML : ADD_FAVORITE_IMAGE_HTML}
           ${createDownloadButtonHTMLTemplate()}
           ${GALLERY_DISABLED ? "" : "<canvas></canvas>"}
         </a>
@@ -75,7 +62,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
   public swapFavoriteButton(): void {
     const isRemoveButton = this.favoriteButton.classList.contains("remove-favorite-button");
 
-    this.favoriteButton.outerHTML = isRemoveButton ? addFavoriteButtonHTML : removeFavoriteButtonHTML;
+    this.favoriteButton.outerHTML = isRemoveButton ? ADD_FAVORITE_IMAGE_HTML : REMOVE_FAVORITE_IMAGE_HTML;
     this.favoriteButton = this.root.children[0].children[1] as HTMLImageElement;
     this.setupFavoriteButton(!isRemoveButton);
   }

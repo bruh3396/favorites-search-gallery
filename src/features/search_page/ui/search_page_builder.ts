@@ -1,11 +1,14 @@
-import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../../utils/dom/style";
+import { insertHTMLAndExtractStyle, insertStyleHTML, toggleAddOrRemoveButtons } from "../../../utils/dom/style";
 import { CONTENT_CONTAINER } from "../../../lib/global/content/content_container";
 import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
+import { Preferences } from "../../../lib/global/preferences/preferences";
 import { SEARCH_PAGE_HTML } from "../../../assets/html";
 import { createDynamicSearchPageMenuElements } from "./search_page_dynamic_elements";
+import { prepareAllThumbsOnSearchPage } from "./search_page_preparer";
+import { styleSearchPageMenu } from "./search_page_menu_styler";
 import { waitForDOMToLoad } from "../../../utils/dom/dom";
 
-function hideNativeSearchPageThumbs(): void {
+function removeOriginalSearchPageThumbs(): void {
   const thumbContainer = document.querySelector(".image-list");
 
   if (thumbContainer !== null) {
@@ -14,7 +17,6 @@ function hideNativeSearchPageThumbs(): void {
 }
 
 function insertContentContainer(): void {
-  // hazardous: depends on site HTML
   const content = document.querySelector(".content");
 
   if (content !== null) {
@@ -42,8 +44,11 @@ function insertSearchPageHTML(): void {
 
 export async function buildSearchPage(): Promise<void> {
   await waitForDOMToLoad();
+  removeOriginalSearchPageThumbs();
   insertSearchPageHTML();
-  hideNativeSearchPageThumbs();
   insertContentContainer();
   createDynamicSearchPageMenuElements();
+  prepareAllThumbsOnSearchPage();
+  styleSearchPageMenu();
+  toggleAddOrRemoveButtons(Preferences.searchPageAddButtonsVisible.value);
 }

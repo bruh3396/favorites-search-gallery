@@ -1,19 +1,19 @@
 export class ConcurrencyLimiter {
-  private processCount = 0;
+  private activeCount = 0;
   private queue: (() => void)[] = [];
 
-  constructor(private readonly maxProcesses: number) {}
+  constructor(private readonly limit: number) {}
 
   public async run<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.processCount >= this.maxProcesses) {
+    if (this.activeCount >= this.limit) {
       await new Promise<void>(resolve => this.queue.push(resolve));
     }
 
-    this.processCount += 1;
+    this.activeCount += 1;
     try {
       return await fn();
     } finally {
-      this.processCount -= 1;
+      this.activeCount -= 1;
 
       if (this.queue.length > 0) {
         this.queue.shift()!();

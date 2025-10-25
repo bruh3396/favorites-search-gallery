@@ -1,3 +1,4 @@
+import { FAVORITES_PER_PAGE } from "../../../../../lib/global/constants";
 import { FAVORITES_SEARCH_INDEX } from "../index/favorites_search_index";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
@@ -28,7 +29,7 @@ function updateSearchCommand(): SearchCommand<FavoriteItem> {
 }
 
 function shouldUseIndex(favorites: FavoriteItem[]): boolean {
-  return FavoritesSettings.useSearchIndex && FAVORITES_SEARCH_INDEX.ready && !searchCommand.details.hasMetadataTag && favorites.length > 50;
+  return FavoritesSettings.useSearchIndex && FAVORITES_SEARCH_INDEX.ready && !searchCommand.details.hasMetadataTag && favorites.length > FAVORITES_PER_PAGE;
 }
 
 export function filter(favorites: FavoriteItem[]): FavoriteItem[] {

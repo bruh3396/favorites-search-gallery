@@ -2695,8 +2695,8 @@ export const SEARCH_PAGE_HTML = `
       justify-content: space-between;
     }
 
-    #search-page-mneu {
-      position: sticky;
+    #search-page-menu {
+      margin-top: 20px;
     }
 
     #search-page-menu select {
@@ -2707,6 +2707,10 @@ export const SEARCH_PAGE_HTML = `
   <hr>
   <div id="search-page-upscale-thumbs" class="search-page-option"><label>Upscale</label></div>
   <div id="search-page-infinite-scroll" class="search-page-option"><label>Infinite Scroll</label></div>
+  <div id="search-page-autoplay" class="search-page-option"><label>Autoplay</label></div>
+  <div id="search-page-add-favorite-buttons" class="search-page-option"><label>Favorite Buttons</label></div>
+  <div id="search-page-gallery-menu" class="search-page-option"><label>Gallery Menu</label></div>
+  <div id="search-page-performance-profile" class="search-page-option"><label>Profile</label></div>
   <div id="search-page-layout" class="search-page-option"><label>Layout</label></div>
   <div id="search-page-column-count" class="search-page-option"><label>Columns</label></div>
   <div id="search-page-row-size" class="search-page-option"><label>Row Size</label></div>
@@ -2718,6 +2722,12 @@ export const SEARCH_PAGE_INFINITE_SCROLL_HTML = `
   #paginator {
     display: none !important;
   }
+
+  /* #favorites-search-gallery-content {
+    height: 85vh !important;
+    overflow-y: auto !important;
+    padding-right: 20px !important;
+  } */
 </style>
 `;
 export const SIDEBAR_HTML = `

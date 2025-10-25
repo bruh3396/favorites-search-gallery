@@ -22,7 +22,9 @@ export const Preferences = {
   sortingMethod: new Preference<SortingMethod>("sortingMethod", "default"),
   optionsVisible: new Preference("showOptions", false),
   columnCount: new Preference("columnCount", ON_MOBILE_DEVICE ? 3 : 6),
+  searchPageColumnCount: new Preference("searchPageColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
   rowSize: new Preference("rowSize", 7),
+  searchPageRowSize: new Preference("searchPageRowSize", 7),
   dockGalleryMenuLeft: new Preference("dockGalleryMenuLeft", ON_DESKTOP_DEVICE),
   uiVisible: new Preference("showUI", true),
   infiniteScrollEnabled: new Preference("infiniteScroll", false),
@@ -30,6 +32,7 @@ export const Preferences = {
   galleryMenuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   addButtonsVisible: new Preference("showAddFavoriteButtons", false),
+  searchPageAddButtonsVisible: new Preference("showSearchPageAddFavoriteButtons", false),
   hintsEnabled: new Preference("showHints", false),
   headerEnabled: new Preference("showHeader", true),
   colorScheme: new Preference("colorScheme", "black"),
@@ -44,6 +47,6 @@ export const Preferences = {
   downloadBatchSize: new Preference("downloadBatchSize", 250),
   downloadButtonsVisible: new Preference("showDownloadButtons", false),
   mobileGalleryEnabled: new Preference("mobileGalleryEnabled", true),
-  upscaleThumbsOnSearchPage: new Preference("upscaleSearchPageThumbs", false),
+  upscaleThumbsOnSearchPage: new Preference("upscaleSearchPageThumbs", ON_DESKTOP_DEVICE),
   searchPageInfiniteScrollEnabled: new Preference("searchPageInfiniteScroll", false)
 };

@@ -12,7 +12,7 @@ import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { createTagAPIURL } from "../../lib/api/api_url";
 import { getFavorite } from "../favorites/types/favorite/favorite_item";
-import { getTagSetFromThumb } from "../../utils/dom/tags";
+import { getTagSetFromItem } from "../../utils/dom/tags";
 import { insertStyleHTML } from "../../utils/dom/style";
 import { isTagCategory } from "../../types/equivalence";
 import { openSearchPage } from "../../utils/dom/links";
@@ -409,7 +409,7 @@ function getCategoryHeaderId(tagCategory: TagCategory): string {
 }
 
 function populateTags(thumb: HTMLElement): void {
-  const tagNames = getTagSetFromThumb(thumb);
+  const tagNames = getTagSetFromItem(thumb);
 
   tagNames.delete(thumb.id);
   const unknownThumbTags = Array.from(tagNames)
@@ -593,7 +593,7 @@ function getTagNamesWithUnknownCategories(thumbs: HTMLElement[]): string[] {
   const tagNamesWithUnknownCategories: Set<string> = new Set();
 
   for (const thumb of thumbs) {
-    const tagNames = Array.from(getTagSetFromThumb(thumb));
+    const tagNames = Array.from(getTagSetFromItem(thumb));
 
     for (const tagName of tagNames) {
       if (tagCategoryIsUnknown(thumb, tagName)) {

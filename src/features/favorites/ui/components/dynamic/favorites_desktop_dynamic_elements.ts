@@ -3,8 +3,8 @@ import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../
 import { Layout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/checkbox";
 import { reloadWindow, toggleGalleryMenuEnabled } from "../../../../../utils/dom/dom";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleFavoritesOptions, toggleHeader, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
-import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
+import { toggleAddOrRemoveButtons, toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
+import { toggleDownloadButtons, toggleFavoritesOptions, toggleHeader, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
 import { Events } from "../../../../../lib/global/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../../config/general_settings";

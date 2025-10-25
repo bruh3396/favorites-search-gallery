@@ -34,7 +34,10 @@ function setupGalleryHelper(): void {
   setupGalleryMenu();
   addGalleryEventListeners();
   setupAutoplay();
-  GallerySearchPageFlow.onSearchPageCreated();
+
+  if (ON_SEARCH_PAGE) {
+    GallerySearchPageFlow.onSearchPageCreated();
+  }
 }
 
 function setupGalleryMenu(): void {

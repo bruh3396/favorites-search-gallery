@@ -161,3 +161,11 @@ export function addTilerStyles(): void {
 
   insertStyleHTML(style, "tiler-style");
 }
+
+export function toggleAddOrRemoveButtons(value: boolean): void {
+  insertStyleHTML(`
+        .remove-favorite-button, .add-favorite-button {
+          visibility: ${value ? "visible" : "hidden"} !important;
+        }
+      `, "add-or-remove-button-visibility");
+}

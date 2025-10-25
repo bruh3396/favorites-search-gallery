@@ -1,12 +1,16 @@
 import { CheckboxElement, NumberElement, SelectElement } from "../../../types/element_types";
 import { Layout, MetadataMetric, PerformanceProfile } from "../../../types/common_types";
+import { reloadWindow, toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
 import { Events } from "../../../lib/global/events/events";
+import { GALLERY_ENABLED } from "../../../lib/global/flags/derived_flags";
+import { GeneralSettings } from "../../../config/general_settings";
 import { ON_DESKTOP_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../lib/global/preferences/preferences";
 import { createCheckboxElement } from "../../../lib/ui/checkbox";
 import { createNumberComponent } from "../../../lib/ui/number";
 import { createSelectElement } from "../../../lib/ui/select";
 import { prepareDynamicElements } from "../../../lib/ui/element_utils";
+import { toggleAddOrRemoveButtons } from "../../../utils/dom/style";
 
 const CHECKBOXES: Partial<CheckboxElement>[] = [
   {
@@ -29,6 +33,39 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     event: Events.searchPage.infiniteScrollToggled,
     textContent: "",
     defaultValue: false
+  },
+  {
+    id: "enable-autoplay",
+    parentId: "search-page-autoplay",
+    position: "beforeend",
+    textContent: "Autoplay",
+    title: "Enable autoplay in gallery",
+    enabled: GALLERY_ENABLED,
+    preference: Preferences.autoplayActive,
+    hotkey: "",
+    event: Events.favorites.autoplayToggled
+  },
+  {
+    id: "show-add-favorite-buttons",
+    parentId: "search-page-add-favorite-buttons",
+    textContent: "Add Favorite Buttons",
+    title: "Toggle add favorite buttons",
+    position: "beforeend",
+    preference: Preferences.searchPageAddButtonsVisible,
+    function: toggleAddOrRemoveButtons,
+    hotkey: "R",
+    event: Events.favorites.addButtonsToggled
+  },
+  {
+    id: "enable-gallery-menu",
+    parentId: "search-page-gallery-menu",
+    textContent: "Gallery Menu",
+    title: "Show menu in gallery",
+    position: "beforeend",
+    enabled: GALLERY_ENABLED && GeneralSettings.galleryMenuOptionEnabled,
+    function: toggleGalleryMenuEnabled,
+    preference: Preferences.galleryMenuEnabled,
+    event: Events.favorites.galleryMenuToggled
   }
 ];
 const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
@@ -40,18 +77,18 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     preference: Preferences.searchPageLayout,
     event: Events.searchPage.layoutChanged,
     options: new Map<Layout, string>([
+      ["native", "Native"],
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],
-      ["grid", "Legacy"],
-      ["native", "Native"]
+      ["grid", "Legacy"]
     ])
   },
   {
     id: "column-count",
     parentId: "search-page-column-count",
     position: "beforeend",
-    preference: Preferences.columnCount,
+    preference: Preferences.searchPageColumnCount,
     event: Events.favorites.columnCountChanged,
     options: new Map<number, string>(Array.from({ length: ON_DESKTOP_DEVICE ? 25 : 10 }, (_, i) => [i + 1, String(i + 1)]))
   },
@@ -59,9 +96,26 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     id: "row-size",
     parentId: "search-page-row-size",
     position: "beforeend",
-    preference: Preferences.rowSize,
+    preference: Preferences.searchPageRowSize,
     event: Events.favorites.rowSizeChanged,
     options: new Map<number, string>(Array.from({ length: 7 }, (_, i) => [i + 1, String(i + 1)]))
+  },
+  {
+    id: "performance-profile",
+    parentId: "search-page-performance-profile",
+    title: "Improve performance by disabling features",
+    position: "beforeend",
+    preference: Preferences.performanceProfile,
+    event: Events.favorites.performanceProfileChanged,
+    function: reloadWindow,
+    enabled: ON_DESKTOP_DEVICE,
+    isNumeric: true,
+    options: new Map<PerformanceProfile, string>([
+      [PerformanceProfile.NORMAL, "Normal"],
+      [PerformanceProfile.MEDIUM, "Medium"],
+      [PerformanceProfile.LOW, "Low"],
+      [PerformanceProfile.POTATO, "Potato"]
+    ])
   }
 ];
 

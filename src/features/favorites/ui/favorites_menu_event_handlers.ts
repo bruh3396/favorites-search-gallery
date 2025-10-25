@@ -65,15 +65,6 @@ export function toggleFavoritesOptions(value: boolean): void {
         `, "options");
 }
 
-export function toggleAddOrRemoveButtons(value: boolean): void {
-  insertStyleHTML(`
-        .remove-favorite-button, .add-favorite-button {
-          visibility: ${value ? "visible" : "hidden"} !important;
-        }
-      `, "add-or-remove-button-visibility");
-  // forceHideCaptions(value);
-}
-
 export function toggleDownloadButtons(value: boolean): void {
   insertStyleHTML(`
         .download-button {

@@ -7,11 +7,7 @@ export const TAG_MODIFICATIONS: Map<string, string> = new Map();
 export const DATABASE = new Database<TagModificationDatabaseRecord>("AdditionalTags", "additionalTags", 12);
 
 export async function loadTagModifications(): Promise<void> {
-  const records = await DATABASE.load();
-
-  for (const record of records) {
-    TAG_MODIFICATIONS.set(record.id, record.tags);
-  }
+  (await DATABASE.load()).forEach(record => TAG_MODIFICATIONS.set(record.id, record.tags));
 }
 
 export function getAdditionalTags(id: string): string | undefined {
@@ -24,10 +20,7 @@ export function storeTagModifications(): void {
 
 export function getDatabaseRecords(): TagModificationDatabaseRecord[] {
   return Array.from(TAG_MODIFICATIONS.entries())
-    .map((entry) => ({
-      id: entry[0],
-      tags: entry[1]
-    }));
+    .map((entry) => ({ id: entry[0], tags: entry[1] }));
 }
 
 export function resetTagModifications(): void {

@@ -3,7 +3,7 @@ import { ContentType } from "../../types/common_types";
 import { Favorite } from "../../types/favorite_types";
 import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
 import { getImageFromThumb } from "../dom/dom";
-import { getTagSetFromThumb } from "../dom/tags";
+import { getTagSetFromItem } from "../dom/tags";
 
 function isFavoriteContentType(favorite: Favorite, contentType: ContentType): boolean {
   return getContentType(favorite.tags) === contentType;
@@ -11,7 +11,7 @@ function isFavoriteContentType(favorite: Favorite, contentType: ContentType): bo
 
 function isThumbContentType(thumb: HTMLElement, contentType: ContentType): boolean {
   const image = getImageFromThumb(thumb);
-  return image !== null && getContentType(getTagSetFromThumb(thumb)) === contentType;
+  return image !== null && getContentType(getTagSetFromItem(thumb)) === contentType;
 }
 
 function isContentType(item: HTMLElement | Favorite, contentType: ContentType): boolean {
@@ -29,7 +29,7 @@ export function forceImageContentType(thumb: HTMLElement): void {
   if (!ON_SEARCH_PAGE) {
     return;
   }
-  const tagSet = getTagSetFromThumb(thumb);
+  const tagSet = getTagSetFromItem(thumb);
 
   tagSet.delete("video");
   tagSet.delete("gif");

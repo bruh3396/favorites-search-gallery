@@ -1,9 +1,9 @@
 import * as FavoritesModel from "../../../model/favorites_model";
-import * as FavoritesView from "../../../view/favorites_view";
+import { collectAspectRatios } from "../../../../../lib/global/content/skeleton/aspect_ratio_collector";
 
 export function onFavoritesLoaded(): void {
   FavoritesModel.fetchMissingMetadata();
-  FavoritesView.collectAspectRatios();
+  collectAspectRatios();
   FavoritesModel.buildSearchIndexAsynchronously();
 }
 

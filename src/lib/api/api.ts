@@ -2,15 +2,20 @@ import * as FSG_URL from "./api_url";
 import { extractPostFromAPI, extractPostFromAPISafe } from "./post_api_parser";
 import { AddFavoriteStatus } from "../../types/favorite_types";
 import { ConcurrencyLimiter } from "../components/concurrency_limiter";
+import { FavoritesSettings } from "../../config/favorites_settings";
 import { Post } from "../../types/common_types";
 import { extractFavoritesCount } from "./profile_page_parser";
+import { extractFavoritesPageCount } from "./favorites_page_parser";
 import { parsePostFromPostPage as extractPostFromPostPage } from "./post_page_parser";
 import { getUserId } from "../../utils/misc/favorites_page_metadata";
+import { sleep } from "../../utils/misc/async";
 
 const USER_ID = getUserId();
-const POST_PAGE_LIMITER = new ConcurrencyLimiter(2);
+const POST_PAGE_LIMITER = new ConcurrencyLimiter(1);
 const MULTI_POST_LIMITER = new ConcurrencyLimiter(4);
 const POST_LIMITER = new ConcurrencyLimiter(250);
+const TAG_LIMITER = new ConcurrencyLimiter(100);
+const FAVORITES_PAGE_LIMITER = new ConcurrencyLimiter(1);
 
 export async function getHTML(url: string): Promise<string> {
   const response = await fetch(url);
@@ -27,21 +32,29 @@ export function fetchPostFromAPI(id: string): Promise<Post> {
   });
 }
 
-export function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
-  return MULTI_POST_LIMITER.run(async() => {
-    const response = await fetch(FSG_URL.MULTI_POST_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, userId: USER_ID })
-    });
-    const data = await response.json() as Record<string, string>;
-    const result = {} as Record<string, Post>;
+export async function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
+  if (FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
+    return MULTI_POST_LIMITER.run(async() => {
+      const response = await fetch(FSG_URL.MULTI_POST_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, userId: USER_ID })
+      });
+      const data = await response.json() as Record<string, string>;
+      const result = {} as Record<string, Post>;
 
-    for (const [id, html] of Object.entries(data)) {
-      result[id] = extractPostFromAPISafe(html);
-    }
-    return result;
-  });
+      for (const [id, html] of Object.entries(data)) {
+        result[id] = extractPostFromAPISafe(html);
+      }
+      return result;
+    });
+  }
+  const result: Record<string, Post> = {};
+
+  await Promise.all(ids.map(async(id) => {
+    result[id] = await fetchPostFromAPI(id);
+  }));
+  return result;
 }
 
 export async function fetchMultiplePostsFromAPISafe(ids: string[]): Promise<Record<string, Post>> {
@@ -56,13 +69,15 @@ export async function fetchMultiplePostsFromAPISafe(ids: string[]): Promise<Reco
 }
 
 export function fetchPostPage(id: string): Promise<string> {
-  return getHTML(FSG_URL.createPostPageURL(id));
+  return POST_PAGE_LIMITER.run(async(): Promise<string> => {
+    await sleep(200);
+    return getHTML(FSG_URL.createPostPageURL(id));
+  });
+
 }
 
-export function fetchPostFromPostPage(id: string): Promise<Post> {
-  return POST_PAGE_LIMITER.run(async() => {
-    return extractPostFromPostPage(await fetchPostPage(id));
-  });
+export async function fetchPostFromPostPage(id: string): Promise<Post> {
+  return extractPostFromPostPage(await fetchPostPage(id));
 }
 
 export function fetchPostFromAPISafe(id: string): Promise<Post> {
@@ -75,8 +90,16 @@ export function fetchFavoritesPage(pageNumber: number): Promise<string> {
   return getHTML(FSG_URL.createFavoritesPageURL(pageNumber));
 }
 
+export function fetchFavoritesPageSafe(pageNumber: number): Promise<string> {
+  return FAVORITES_PAGE_LIMITER.run(() => {
+    return fetchFavoritesPage(pageNumber);
+  });
+}
+
 export function fetchTagFromAPI(tagName: string): Promise<string> {
-  return getHTML(FSG_URL.createTagAPIURL(tagName));
+  return TAG_LIMITER.run(() => {
+    return getHTML(FSG_URL.createTagAPIURL(tagName));
+  });
 }
 
 export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
@@ -91,4 +114,8 @@ export function removeFavorite(id: string): Promise<Response> {
 
 export function getFavoritesCount(id: string): Promise<number | null> {
   return getHTML(FSG_URL.createProfilePageURL(id)).then(extractFavoritesCount).catch(null);
+}
+
+export function getFavoritesPageCount(): Promise<number | null> {
+  return getHTML(FSG_URL.createFavoritesPageURL(0)).then(extractFavoritesPageCount);
 }

@@ -3,6 +3,7 @@ import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
 import { LowResolutionImageRequest } from "../../../types/gallery_low_resolution_image_request";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
 import { fetchImageBitmapFromThumb } from "../../../../../lib/api/media_api";
 import { forceImageContentType } from "../../../../../utils/content/content_type";
@@ -50,7 +51,7 @@ function truncateImagesExceedingMemoryLimit(requests: ImageRequest[]): ImageRequ
 
 function truncateImagesOnSearchPage(requests: ImageRequest[]): ImageRequest[] {
   return requests.slice(0, GallerySettings.searchPagePreloadedImageCount)
-    .filter(request => !request.isAnimated);
+    .filter(request => Preferences.upscaleThumbsOnSearchPage || !request.isAnimated);
 }
 
 function removeOutdatedRequestsFromCache(newRequests: ImageRequest[]): void {
