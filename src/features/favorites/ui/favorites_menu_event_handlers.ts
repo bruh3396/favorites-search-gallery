@@ -1,9 +1,6 @@
-import { FavoritesWheelEvent } from "../../../types/input_types";
 import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../lib/global/preferences/preferences";
-import { getCurrentLayout } from "../view/favorites_view";
 import { insertStyleHTML } from "../../../utils/dom/style";
-import { isInGallery } from "../../../utils/cross_feature/gallery";
 
 export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");
@@ -63,48 +60,4 @@ export function toggleFavoritesOptions(value: boolean): void {
           display: ${value ? "block" : "none"};
         }
         `, "options");
-}
-
-export function toggleDownloadButtons(value: boolean): void {
-  insertStyleHTML(`
-        .download-button {
-          visibility: ${value ? "visible" : "hidden"} !important;
-        }
-      `, "download-button-visibility");
-  // Utils.forceHideCaptions(value);
-}
-
-export function toggleHeader(value: boolean): void {
-  insertStyleHTML(`#header {display: ${value ? "block" : "none"}}`, "header");
-}
-
-export async function changeItemSizeOnShiftScroll(wheelEvent: FavoritesWheelEvent): Promise<void> {
-  if (!wheelEvent.originalEvent.shiftKey || getCurrentLayout() === "native") {
-    return;
-  }
-  const usingRowLayout = getCurrentLayout() === "row";
-  const id = usingRowLayout ? "row-size" : "column-count";
-  const input = document.getElementById(id);
-
-  if (input === null || !(input instanceof HTMLInputElement)) {
-    return;
-  }
-  const inGallery = await isInGallery();
-
-  if (inGallery) {
-    return;
-  }
-  let delta = (wheelEvent.isForward ? 1 : -1);
-
-  if (usingRowLayout) {
-    delta = -delta;
-  }
-  input.value = String(parseInt(input.value) + delta);
-  input.dispatchEvent(new KeyboardEvent("keydown", {
-    key: "Enter",
-    bubbles: true
-  }));
-  input.dispatchEvent(new Event("change", {
-    bubbles: true
-  }));
 }

@@ -5,6 +5,7 @@ import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../../../types/favorite/favorite_types";
 import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
 import { NavigationKey } from "../../../../../types/common_types";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
 class PaginationFlow implements FavoritesPresentationFlow {
     public present(results: FavoriteItem[]): void {
@@ -43,8 +44,12 @@ class PaginationFlow implements FavoritesPresentationFlow {
     }
 
     public handlePageChangeRequest(direction: NavigationKey): void {
+        if (Preferences.infiniteScrollEnabled.value) {
+            Events.favorites.pageChangeResponse.emit(false);
+            return;
+        }
         this.gotoAdjacentPage(direction);
-        Events.favorites.pageChangeResponse.emit();
+        Events.favorites.pageChangeResponse.emit(true);
     }
 
     public reset(): void { }

@@ -31,7 +31,6 @@ export function addGalleryEventListeners(): void {
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
 
   Events.searchPage.allThumbsUpdated.on(GalleryModel.updateSearchPageThumbs);
-  Events.searchPage.returnSearchPage.on(GalleryModel.updateCurrentSearchPage);
   Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
   Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
   Events.searchPage.moreResultsAdded.on(GalleryModel.indexCurrentPageThumbs);

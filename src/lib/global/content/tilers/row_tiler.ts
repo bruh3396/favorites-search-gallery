@@ -8,6 +8,7 @@ import { mapRange } from "../../../../utils/primitive/number";
 export class RowTiler extends BaseTiler {
   public className: Layout = "row";
   public skeletonStyle: Record<string, string> = { };
+  private currentlyMarkingLastRow = false;
 
   public tile(items: HTMLElement[]): void {
     super.tile(items);
@@ -34,6 +35,7 @@ export class RowTiler extends BaseTiler {
         }
       }
     `, "row-size");
+    this.markItemsOnLastRow();
   }
 
   public onActivate(): void {
@@ -44,6 +46,10 @@ export class RowTiler extends BaseTiler {
   }
 
   public async markItemsOnLastRow(): Promise<void> {
+    if (this.currentlyMarkingLastRow) {
+      return;
+    }
+    this.currentlyMarkingLastRow = true;
     await waitForAllThumbnailsToLoad();
     const items = getAllThumbs();
 
@@ -52,6 +58,7 @@ export class RowTiler extends BaseTiler {
     }
     this.unMarkAllItemsAsLastRow(items);
     this.markItemsAsLastRow(this.getItemsOnLastRow(items));
+    this.currentlyMarkingLastRow = false;
   }
 
   public unMarkAllItemsAsLastRow(items: HTMLElement[]): void {

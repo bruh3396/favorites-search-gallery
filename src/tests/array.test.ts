@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getElementsAroundIndex, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/collection/array";
+import { getElementsAroundIndex, getNumberRange, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/collection/array";
 import { getRandomPositiveInteger } from "../utils/primitive/number";
 
 describe("indexInBounds", () => {
@@ -211,5 +211,22 @@ describe("splitIntoChunks", () => {
     expect(splitIntoChunks(digits, 9)).toStrictEqual([digits]);
     expect(splitIntoChunks(digits, 10)).toStrictEqual([digits]);
     expect(splitIntoChunks(digits, 100)).toStrictEqual([digits]);
+  });
+});
+
+describe("getNumberRange", () => {
+  test("zero", () => {
+    expect(getNumberRange(0, 0)).toStrictEqual([0]);
+  });
+
+  test("normal", () => {
+    expect(getNumberRange(0, 1)).toStrictEqual([0, 1]);
+    expect(getNumberRange(0, 0)).toStrictEqual([0]);
+    expect(getNumberRange(0, 1)).toStrictEqual([0, 1]);
+    expect(getNumberRange(1, 3)).toStrictEqual([1, 2, 3]);
+    expect(getNumberRange(5, 7)).toStrictEqual([5, 6, 7]);
+    expect(getNumberRange(-2, 2)).toStrictEqual([-2, -1, 0, 1, 2]);
+    expect(getNumberRange(3, 3)).toStrictEqual([3]);
+    expect(getNumberRange(10, 13)).toStrictEqual([10, 11, 12, 13]);
   });
 });

@@ -6,7 +6,7 @@ import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../container";
 import { FavoriteItem } from "../../../features/favorites/types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../../../features/favorites/types/favorite/favorite_types";
 import { GalleryMenuAction } from "../../../features/gallery/types/gallery_types";
-import { SearchPage } from "../../../features/search_page/types/search_page";
+import { SearchPage } from "../../../types/search_page";
 import { setupSwipeEvents } from "./swipe_events";
 import { setupTouchHoldEvents } from "./touch_hold_events";
 
@@ -26,7 +26,7 @@ const favorites = {
   searchResultsUpdated: new EventEmitter<FavoriteItem[]>(true),
   favoriteRemoved: new EventEmitter<string>(true),
   inGalleryRequest: new EventEmitter<void>(true),
-  pageChangeResponse: new EventEmitter<void>(true),
+  pageChangeResponse: new EventEmitter<boolean>(true),
   newFavoritesFoundOnReload: new EventEmitter<FavoriteItem[]>(true),
   resultsAddedToCurrentPage: new EventEmitter<HTMLElement[]>(true),
   missingMetadataFound: new EventEmitter<string>(true),

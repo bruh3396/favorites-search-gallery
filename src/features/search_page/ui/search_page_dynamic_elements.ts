@@ -9,8 +9,9 @@ import { Preferences } from "../../../lib/global/preferences/preferences";
 import { createCheckboxElement } from "../../../lib/ui/checkbox";
 import { createNumberComponent } from "../../../lib/ui/number";
 import { createSelectElement } from "../../../lib/ui/select";
+import { getNumberRange } from "../../../utils/collection/array";
 import { prepareDynamicElements } from "../../../lib/ui/element_utils";
-import { toggleAddOrRemoveButtons } from "../../../utils/dom/style";
+import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element_utils";
 
 const CHECKBOXES: Partial<CheckboxElement>[] = [
   {
@@ -90,7 +91,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     position: "beforeend",
     preference: Preferences.searchPageColumnCount,
     event: Events.favorites.columnCountChanged,
-    options: new Map<number, string>(Array.from({ length: ON_DESKTOP_DEVICE ? 25 : 10 }, (_, i) => [i + 1, String(i + 1)]))
+    options: new Map<number, string>(getNumberRange(2, ON_DESKTOP_DEVICE ? 25 : 10).map(n => [n, String(n)]))
   },
   {
     id: "row-size",
@@ -98,7 +99,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     position: "beforeend",
     preference: Preferences.searchPageRowSize,
     event: Events.favorites.rowSizeChanged,
-    options: new Map<number, string>(Array.from({ length: 7 }, (_, i) => [i + 1, String(i + 1)]))
+    options: new Map<number, string>(getNumberRange(1, 10).map(n => [n, String(n)]))
   },
   {
     id: "performance-profile",

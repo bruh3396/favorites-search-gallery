@@ -11,8 +11,8 @@ const PUBLIC_API_BASE_URL = PUBLIC_SERVER_ORIGIN;
 const PUBLIC_API_POST_URL = `${PUBLIC_API_BASE_URL}&s=post&q=index&id=`;
 const PUBLIC_API_TAG_URL = `${PUBLIC_API_BASE_URL}&s=tag&q=index&name=`;
 
-let FINAL_API_POST_URL = PRIVATE_API_POST_URL;
-let FINAL_API_TAG_URL = PRIVATE_API_TAG_URL;
+const FINAL_API_POST_URL = PRIVATE_API_POST_URL;
+const FINAL_API_TAG_URL = PRIVATE_API_TAG_URL;
 
 const ORIGIN = "https://rule34.xxx";
 const POST_PAGE_URL = `${ORIGIN}/index.php?page=post&s=view&id=`;
@@ -67,35 +67,6 @@ export function getStyleSheetURL(useDark: boolean): string {
   return `${CSS_URL}${ON_MOBILE_DEVICE ? "mobile" : "desktop"}${useDark ? "-dark" : ""}.css?44`;
 }
 
-export async function configureFinalAPI(): Promise<void> {
-  fetch(PRIVATE_API_POST_URL + 50);
-  try {
-    const response = await fetch(`${PUBLIC_API_TAG_URL}50`);
-
-    if (response.ok) {
-      FINAL_API_POST_URL = PUBLIC_API_POST_URL;
-    } else {
-      console.error(response.statusText);
-    }
-
-  } catch (error) {
-    console.error(error);
-  }
-
-  try {
-    const response = await fetch(`${PUBLIC_API_TAG_URL}1girls`);
-
-    if (response.ok) {
-      FINAL_API_TAG_URL = PUBLIC_API_TAG_URL;
-    } else {
-      console.error(response.statusText);
-    }
-
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-export function ping(): void {
-  fetch(PRIVATE_API_POST_URL + 50);
+export function getServerTestURL(): string {
+  return `${PRIVATE_API_POST_URL}50`;
 }

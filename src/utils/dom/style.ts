@@ -115,6 +115,7 @@ export function insertHTMLAndExtractStyle(element: HTMLElement, position: Insert
   }
   element.insertAdjacentHTML(position, dom.body.innerHTML);
 }
+
 export function setupCommonStyles(): void {
   insertStyleHTML(SKELETON_HTML, "skeleton-style");
   insertStyleHTML(COMMON_HTML, "common-style");
@@ -160,12 +161,4 @@ export function addTilerStyles(): void {
     }`;
 
   insertStyleHTML(style, "tiler-style");
-}
-
-export function toggleAddOrRemoveButtons(value: boolean): void {
-  insertStyleHTML(`
-        .remove-favorite-button, .add-favorite-button {
-          visibility: ${value ? "visible" : "hidden"} !important;
-        }
-      `, "add-or-remove-button-visibility");
 }

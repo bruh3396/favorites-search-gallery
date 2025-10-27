@@ -96,6 +96,7 @@ class ImageRenderer extends GalleryBaseRenderer {
 
   public downscaleAll(): void {
     UPSCALER.clear();
+    GalleryImageCache.clearAnimatedImages();
   }
 
   private redrawOnOrientationChange(): void {

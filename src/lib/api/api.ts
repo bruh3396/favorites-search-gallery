@@ -15,7 +15,7 @@ const POST_PAGE_LIMITER = new ConcurrencyLimiter(1);
 const MULTI_POST_LIMITER = new ConcurrencyLimiter(4);
 const POST_LIMITER = new ConcurrencyLimiter(250);
 const TAG_LIMITER = new ConcurrencyLimiter(100);
-const FAVORITES_PAGE_LIMITER = new ConcurrencyLimiter(1);
+const FAVORITES_PAGE_LIMITER = new ConcurrencyLimiter(2);
 
 export async function getHTML(url: string): Promise<string> {
   const response = await fetch(url);
@@ -32,29 +32,39 @@ export function fetchPostFromAPI(id: string): Promise<Post> {
   });
 }
 
-export async function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
-  if (FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
-    return MULTI_POST_LIMITER.run(async() => {
-      const response = await fetch(FSG_URL.MULTI_POST_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids, userId: USER_ID })
-      });
-      const data = await response.json() as Record<string, string>;
-      const result = {} as Record<string, Post>;
+export function fetchPostFromAPISafe(id: string): Promise<Post> {
+  return fetchPostFromAPI(id).catch(() => {
+    return fetchPostFromPostPage(id);
+  });
+}
 
-      for (const [id, html] of Object.entries(data)) {
-        result[id] = extractPostFromAPISafe(html);
-      }
-      return result;
-    });
-  }
+function fetchMultiplePostsFromAPIInOne(ids: string[]): Promise<Record<string, Post>> {
+  return MULTI_POST_LIMITER.run(async() => {
+    const response = await fetch(FSG_URL.MULTI_POST_API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids, userId: USER_ID }) });
+    const data = await response.json() as Record<string, string>;
+    const result = {} as Record<string, Post>;
+
+    for (const [id, html] of Object.entries(data)) {
+      result[id] = extractPostFromAPISafe(html);
+    }
+    return result;
+  });
+}
+
+function fetchMultiplePostsFromAPIIteratively(ids: string[]): Promise<Record<string, Post>> {
   const result: Record<string, Post> = {};
-
-  await Promise.all(ids.map(async(id) => {
+  return Promise.all(ids.map(async(id) => {
     result[id] = await fetchPostFromAPI(id);
-  }));
-  return result;
+  })).then(() => {
+    return result;
+  });
+}
+
+export function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
+  if (FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
+    return fetchMultiplePostsFromAPIInOne(ids);
+  }
+  return fetchMultiplePostsFromAPIIteratively(ids);
 }
 
 export async function fetchMultiplePostsFromAPISafe(ids: string[]): Promise<Record<string, Post>> {
@@ -78,12 +88,6 @@ export function fetchPostPage(id: string): Promise<string> {
 
 export async function fetchPostFromPostPage(id: string): Promise<Post> {
   return extractPostFromPostPage(await fetchPostPage(id));
-}
-
-export function fetchPostFromAPISafe(id: string): Promise<Post> {
-  return fetchPostFromAPI(id).catch(() => {
-    return fetchPostFromPostPage(id);
-  });
 }
 
 export function fetchFavoritesPage(pageNumber: number): Promise<string> {
@@ -118,4 +122,8 @@ export function getFavoritesCount(id: string): Promise<number | null> {
 
 export function getFavoritesPageCount(): Promise<number | null> {
   return getHTML(FSG_URL.createFavoritesPageURL(0)).then(extractFavoritesPageCount);
+}
+
+export function pingServer(): void {
+  fetch(FSG_URL.getServerTestURL());
 }

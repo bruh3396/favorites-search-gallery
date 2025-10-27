@@ -29,16 +29,19 @@ class GifRenderer extends GalleryBaseRenderer {
   }
 
   public preload(elements: HTMLElement[]): void {
+    if (!GallerySettings.gifPreloadingEnabled) {
+      return;
+    }
     const gifSources = elements
       .filter((element) => isGif(element))
       .slice(0, GallerySettings.preloadedGifCount)
       .map((element) => getGIFSource(element));
 
     for (const source of gifSources) {
-      // const gif = new Image();
+      const gif = new Image();
 
-      // gif.src = source;
-      // this.preloadedGIFs.push(gif);
+      gif.src = source;
+      this.preloadedGIFs.push(gif);
     }
   }
 

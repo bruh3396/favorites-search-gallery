@@ -1,7 +1,7 @@
 import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
 import { SEARCH_PAGE_INFINITE_SCROLL_HTML } from "../../../assets/html";
-import { SearchPage } from "../types/search_page";
+import { SearchPage } from "../../../types/search_page";
 import { insertStyleHTML } from "../../../utils/dom/style";
 
 function updatePaginator(searchPage: SearchPage): void {

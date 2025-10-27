@@ -2,7 +2,7 @@ import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
 import * as SearchPageCreator from "./search_page_creator";
 import { Layout } from "../../../types/common_types";
 import { Preferences } from "../../../lib/global/preferences/preferences";
-import { SearchPage } from "../types/search_page";
+import { SearchPage } from "../../../types/search_page";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { hideUnusedLayoutSizer } from "../../../lib/global/content/tilers/tiler_event_handlers";
 

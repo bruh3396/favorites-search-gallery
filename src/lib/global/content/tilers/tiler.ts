@@ -78,6 +78,6 @@ export function addTilerEventListeners(): void {
 export function setupTiler(): void {
   CONTENT_CONTAINER.className = currentLayout;
   updateColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value);
-  updateRowSize(ON_SEARCH_PAGE ? Preferences.rowSize.value : Preferences.rowSize.value);
+  updateRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowSize.value : Preferences.rowSize.value);
   addTilerEventListeners();
 }

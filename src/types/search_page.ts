@@ -1,13 +1,13 @@
-import * as API from "../../../lib/api/api";
-import * as Extensions from "../../../lib/global/extensions";
-import { ClickCode, Post } from "../../../types/common_types";
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/global/flags/intrinsic_flags";
-import { convertToTagSet, convertToTagString, getContentType, removeNonNumericCharacters } from "../../../utils/primitive/string";
-import { getIdFromThumb, getImageFromThumb } from "../../../utils/dom/dom";
-import { ADD_FAVORITE_IMAGE_HTML } from "../../../assets/images";
-import { GALLERY_DISABLED } from "../../../lib/global/flags/derived_flags";
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
-import { moveTagsFromTitleToTagsAttribute } from "../../../utils/dom/tags";
+import * as API from "../lib/api/api";
+import * as Extensions from "../lib/global/extensions";
+import { ClickCode, Post } from "./common_types";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/global/flags/intrinsic_flags";
+import { convertToTagSet, convertToTagString, getContentType, removeNonNumericCharacters } from "../utils/primitive/string";
+import { getIdFromThumb, getImageFromThumb } from "../utils/dom/dom";
+import { ADD_FAVORITE_IMAGE_HTML } from "../assets/images";
+import { GALLERY_DISABLED } from "../lib/global/flags/derived_flags";
+import { POSTS_PER_SEARCH_PAGE } from "../lib/global/constants";
+import { moveTagsFromTitleToTagsAttribute } from "../utils/dom/tags";
 
 export class SearchPage {
   public thumbs: HTMLElement[];

@@ -12,9 +12,8 @@ export function onUpscaleToggled(value: boolean): void {
 
     if (notUsingInfiniteScroll) {
       GalleryView.preloadContentOutOfGallery(thumbs);
-    } else {
-      GalleryView.upscaleCachedImageThumbs();
     }
+    GalleryView.upscaleCachedImageThumbs();
   } else {
     GalleryView.downscaleAll();
   }
@@ -22,10 +21,10 @@ export function onUpscaleToggled(value: boolean): void {
 
 export function onSearchPageCreated(): void {
   executeFunctionBasedOnGalleryState({
-      idle: () => {
-        if (GallerySettings.preloadOutsideGalleryOnSearchPage) {
-          GalleryView.preloadContentOutOfGallery(getAllThumbs());
-        }
+    idle: () => {
+      if (GallerySettings.preloadOutsideGalleryOnSearchPage) {
+        GalleryView.preloadContentOutOfGallery(getAllThumbs());
       }
-    });
+    }
+  });
 }

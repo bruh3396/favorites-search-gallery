@@ -2,7 +2,7 @@ import { ConcurrencyLimiter } from "../../../lib/components/concurrency_limiter"
 import { Events } from "../../../lib/global/events/events";
 import { NavigationKey } from "../../../types/common_types";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
-import { SearchPage } from "../types/search_page";
+import { SearchPage } from "../../../types/search_page";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { isForwardNavigationKey } from "../../../types/equivalence";
 import { sleep } from "../../../utils/misc/async";
@@ -81,6 +81,7 @@ function loadSearchPage(pageNumber: number): Promise<void> {
     return fetchSearchPage(pageNumber)
       .then((html: string) => {
         registerNewPage(pageNumber, html);
+        updateAllThumbs();
       }).catch(() => {
         fetchedPageNumbers.delete(pageNumber);
         searchPages.delete(pageNumber);
@@ -94,7 +95,6 @@ function pageHasAlreadyBeenFetched(pageNumber: number): boolean {
 
 function registerNewPage(pageNumber: number, html: string): void {
   searchPages.set(pageNumber, new SearchPage(pageNumber, html));
-  updateAllThumbs();
 }
 
 function fetchSearchPage(pageNumber: number): Promise<string> {

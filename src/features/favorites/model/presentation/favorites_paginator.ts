@@ -100,7 +100,6 @@ export function gotoAdjacentPage(direction: NavigationKey): boolean {
     gotoFirstPage();
   } else if (onFirstPage() && !forward) {
     gotoLastPage();
-    return true;
   } else {
     changePage(forward ? currentPageNumber + 1 : currentPageNumber - 1);
   }

@@ -3,32 +3,12 @@ import * as GalleryFavoritesFlow from "./gallery_favorites_flow";
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
-import { Events } from "../../../../../lib/global/events/events";
+import { changeFavoritesPageInGallery, getAdjacentSearchPage } from "../../../../../utils/cross_feature/cross_feature_requests";
 import { NavigationKey } from "../../../../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 
-function changeFavoritesPageInGallery(direction: NavigationKey): Promise<HTMLElement> {
-  return new Promise((resolve, reject) => {
-    const onPageChangeInGallery = (): void => {
-      const thumb = GalleryModel.navigateAfterPageChange(direction);
-
-      if (thumb === undefined) {
-        reject(new Error("Could not find favorite after changing  page"));
-      } else {
-        resolve(thumb);
-      }
-    };
-
-    Events.favorites.pageChangeResponse.timeout(50)
-      .then(onPageChangeInGallery)
-      .catch(onPageChangeInGallery);
-    Events.gallery.pageChangeRequested.emit(direction);
-  });
-}
-
-function changeSearchPageThenNavigate(direction: NavigationKey): void {
-  Events.gallery.navigateSearchPages.emit(direction);
-  const searchPage = GalleryModel.getCurrentSearchPage();
+async function changeSearchPageThenNavigate(direction: NavigationKey): Promise<void> {
+  const searchPage = await getAdjacentSearchPage(direction);
 
   if (searchPage === null) {
     GalleryModel.clampCurrentIndex();
@@ -78,5 +58,17 @@ function changePageThenNavigate(direction: NavigationKey): void {
 }
 
 export async function changeFavoritesPageThenNavigate(direction: NavigationKey): Promise<void> {
-  completeNavigation(await changeFavoritesPageInGallery(direction));
+  const usingPages = await changeFavoritesPageInGallery(direction);
+
+  if (!usingPages) {
+    GalleryModel.clampCurrentIndex();
+    return;
+  }
+  const thumb = GalleryModel.navigateAfterPageChange(direction);
+
+  if (thumb === undefined) {
+    console.error("Could not find favorite after changing  page");
+    return;
+  }
+  completeNavigation(thumb);
 }

@@ -34,5 +34,6 @@ export const GallerySettings = {
   },
   createImageAccentColors: false,
   galleryMenuMonoColor: true,
-  preloadOutsideGalleryOnSearchPage: true
+  preloadOutsideGalleryOnSearchPage: true,
+  gifPreloadingEnabled: false
 };

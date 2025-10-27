@@ -1,7 +1,7 @@
 import * as SearchPageLoader from "./search_page_loader";
 import { NavigationKey } from "../../../types/common_types";
 import { Preferences } from "../../../lib/global/preferences/preferences";
-import { SearchPage } from "../types/search_page";
+import { SearchPage } from "../../../types/search_page";
 
 const infiniteScrollEnabled = Preferences.searchPageInfiniteScrollEnabled.value;
 

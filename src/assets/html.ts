@@ -2693,6 +2693,11 @@ export const SEARCH_PAGE_HTML = `
     .search-page-option {
       display: flex;
       justify-content: space-between;
+
+      input[type="checkbox"] {
+        transform: scale(1.3);
+        cursor: pointer;
+      }
     }
 
     #search-page-menu {
@@ -2702,18 +2707,26 @@ export const SEARCH_PAGE_HTML = `
     #search-page-menu select {
       min-width: 80px;
     }
+
+    #search-page-options {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
   </style>
   <h6>Favorites Search Gallery</h6>
   <hr>
-  <div id="search-page-upscale-thumbs" class="search-page-option"><label>Upscale</label></div>
-  <div id="search-page-infinite-scroll" class="search-page-option"><label>Infinite Scroll</label></div>
-  <div id="search-page-autoplay" class="search-page-option"><label>Autoplay</label></div>
-  <div id="search-page-add-favorite-buttons" class="search-page-option"><label>Favorite Buttons</label></div>
-  <div id="search-page-gallery-menu" class="search-page-option"><label>Gallery Menu</label></div>
-  <div id="search-page-performance-profile" class="search-page-option"><label>Profile</label></div>
-  <div id="search-page-layout" class="search-page-option"><label>Layout</label></div>
-  <div id="search-page-column-count" class="search-page-option"><label>Columns</label></div>
-  <div id="search-page-row-size" class="search-page-option"><label>Row Size</label></div>
+  <div id="search-page-options">
+    <div id="search-page-upscale-thumbs" class="search-page-option"><label>Upscale</label></div>
+    <div id="search-page-infinite-scroll" class="search-page-option"><label>Infinite Scroll</label></div>
+    <div id="search-page-autoplay" class="search-page-option"><label>Autoplay</label></div>
+    <div id="search-page-add-favorite-buttons" class="search-page-option"><label>Favorite Buttons</label></div>
+    <div id="search-page-gallery-menu" class="search-page-option"><label>Gallery Menu</label></div>
+    <div id="search-page-performance-profile" class="search-page-option"><label>Profile</label></div>
+    <div id="search-page-layout" class="search-page-option"><label>Layout</label></div>
+    <div id="search-page-column-count" class="search-page-option"><label>Columns</label></div>
+    <div id="search-page-row-size" class="search-page-option"><label>Row Size</label></div>
+  </div>
   <hr>
 </div>
 `;
