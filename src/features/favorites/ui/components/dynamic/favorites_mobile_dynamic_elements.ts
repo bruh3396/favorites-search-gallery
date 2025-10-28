@@ -152,7 +152,8 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
       ["creationTimestamp", "Date Uploaded"],
       ["lastChangedTimestamp", "Date Changed"],
       ["id", "ID"],
-      ["random", "Random"]
+      ["random", "Random"],
+      ["duration", "Duration"]
     ])
   },
   {

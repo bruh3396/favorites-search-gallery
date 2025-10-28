@@ -22,6 +22,7 @@ const favorites = {
   findFavoriteInAllStarted: new EventEmitter<string>(true),
   favoritesLoadedFromDatabase: new EventEmitter<void>(true),
   favoritesLoaded: new EventEmitter<void>(true),
+  startedStoringAllFavorites: new EventEmitter<void>(true),
   startedFetchingFavorites: new EventEmitter<void>(true),
   searchResultsUpdated: new EventEmitter<FavoriteItem[]>(true),
   favoriteRemoved: new EventEmitter<string>(true),

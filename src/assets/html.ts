@@ -2055,6 +2055,22 @@ export const HELP_HTML = `
     Issue</a>
   <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
     <div id="whats-new-container" class="light-green-gradient indented">
+      <h2>v1.20.1</h2>
+      <ul>
+        <li>Added sort by duration</li>
+        <ul>
+          <li>Images anf GIFs have a duration of 0</li>
+        </ul>
+        <li>Added search by duration</li>
+        <ul>
+          <li>Examples:</li>
+          <ul>
+            <li>0 Second videos: "duration:&lt;1 video"</li>
+            <li>2 Minute+ videos: "duration:&gt;120 video"</li>
+            <li>30-60 Second videos: "duration:&gt;30 duration:&lt;30 video"</li>
+          </ul>
+        </ul>
+      </ul>
       <h2>v1.20</h2>
       <ul>
         <li>Added layouts, upscaling, and infinite scroll to search pages</li>

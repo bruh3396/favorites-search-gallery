@@ -12,6 +12,7 @@ const TEMPORARY_STATUS_TIMEOUT = 1000;
 const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "Favorites ";
 
 export function setStatus(text: string): void {
+  clearTimeout(statusTimeout);
   statusIndicator.classList.remove("hidden");
   statusIndicator.textContent = text;
 }
@@ -47,7 +48,7 @@ export function notifyNewFavoritesFound(newFavoritesCount: number): void {
   }
 }
 
- async function setExpectedTotalFavoritesCount(): Promise<void> {
+async function setExpectedTotalFavoritesCount(): Promise<void> {
   expectedTotalFavoritesCount = await API.getFavoritesCount(getFavoritesPageId() ?? "");
 }
 

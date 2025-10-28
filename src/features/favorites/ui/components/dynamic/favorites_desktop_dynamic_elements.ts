@@ -303,6 +303,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
       ["height", "Height"],
       ["creationTimestamp", "Date Uploaded"],
       ["lastChangedTimestamp", "Date Changed"],
+      ["duration", "Duration"],
       ["id", "ID"],
       ["random", "Random"]
     ])

@@ -9,8 +9,9 @@ import { FavoritesPaginationFlow } from "../flows/presentation/favorites_paginat
 import { updateShowOnHoverOptionTriggeredFromGallery } from "../../ui/favorites_menu_event_handlers";
 
 export function addFavoritesEventsListeners(): void {
-  Events.favorites.favoritesLoadedFromDatabase.on(FavoritesModel.keepIndexedTagsSorted, {once: true});
+  Events.favorites.favoritesLoadedFromDatabase.on(FavoritesAfterLoadFlow.onFavoritesLoadedFromDatabase, {once: true});
   Events.favorites.startedFetchingFavorites.on(FavoritesAfterLoadFlow.onStartedFetchingFavorites, {once: true});
+  Events.favorites.startedStoringAllFavorites.on(FavoritesAfterLoadFlow.onStartedStoringAllFavorites, {once: true});
   Events.favorites.favoritesLoaded.on(FavoritesAfterLoadFlow.onFavoritesLoaded, {once: true});
 
   Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);

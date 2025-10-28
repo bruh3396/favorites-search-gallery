@@ -1,11 +1,11 @@
 import { ExitKey, ForwardNavigationKey, MetadataComparator, NavigationKey, SearchableMetadataMetric, TagCategory } from "./common_types";
 
-const EXIT_KEYS: Set<ExitKey> = new Set(["Escape", "Delete", "Backspace"]);
-const NAVIGATION_KEYS: Set<NavigationKey> = new Set(["a", "A", "ArrowLeft", "d", "D", "ArrowRight"]);
-const FORWARD_NAVIGATION_KEYS: Set<ForwardNavigationKey> = new Set(["d", "D", "ArrowRight"]);
-const SEARCHABLE_METADATA_METRICS: Set<SearchableMetadataMetric> = new Set(["score", "width", "height", "id"]);
-const METADATA_COMPARATORS: Set<MetadataComparator> = new Set([":", ":<", ":>"]);
-const TAG_CATEGORIES: Set<TagCategory> = new Set(["general", "artist", "unknown", "copyright", "character", "metadata"]);
+export const EXIT_KEYS: Set<ExitKey> = new Set(["Escape", "Delete", "Backspace"]);
+export const NAVIGATION_KEYS: Set<NavigationKey> = new Set(["a", "A", "ArrowLeft", "d", "D", "ArrowRight"]);
+export const FORWARD_NAVIGATION_KEYS: Set<ForwardNavigationKey> = new Set(["d", "D", "ArrowRight"]);
+export const METADATA_COMPARATORS: Set<MetadataComparator> = new Set([":", ":<", ":>"]);
+export const SEARCHABLE_METADATA_METRICS: Set<SearchableMetadataMetric> = new Set(["score", "width", "height", "id", "duration"]);
+export const TAG_CATEGORIES: Set<TagCategory> = new Set(["general", "artist", "unknown", "copyright", "character", "metadata"]);
 
 export function isExitKey(value: unknown): value is ExitKey {
   return EXIT_KEYS.has(value as ExitKey);

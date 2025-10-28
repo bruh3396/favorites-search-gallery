@@ -45,8 +45,8 @@ export class FavoriteItem implements Favorite {
     this.post = createPostFromRawFavorite(object);
     this.element = null;
     this.favoriteTags = new FavoriteTags(this.post, object);
-    this.metadata = new FavoriteMetadata(this.id, object);
     registerFavorite(this);
+    this.metadata = new FavoriteMetadata(this.id, object);
   }
 
   public get tags(): Set<string> {

@@ -11,6 +11,7 @@ export type FavoritesMetadataDatabaseRecord = {
   rating: number
   create: number
   change: number
+  duration: number | undefined
   deleted: boolean
 };
 

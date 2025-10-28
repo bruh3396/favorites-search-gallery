@@ -14,6 +14,7 @@ export async function loadAllFavorites(): Promise<void> {
     await loadNewFavorites();
   } else {
     await fetchAllFavorites();
+    Events.favorites.startedStoringAllFavorites.emit();
     await saveAllFavorites();
   }
   Events.favorites.favoritesLoaded.emit();

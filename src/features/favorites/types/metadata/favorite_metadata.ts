@@ -2,14 +2,18 @@ import * as API from "../../../../lib/api/api";
 import * as Extensions from "../../../../lib/global/extensions";
 import { DiscreteRating, Post, Rating } from "../../../../types/common_types";
 import { FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../../types/favorite_types";
+import { getFavorite, validateTags } from "../favorite/favorite_item";
 import { Events } from "../../../../lib/global/events/events";
 import { FAVORITES_PER_PAGE } from "../../../../lib/global/constants";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { getVideoDurationFromFavorite } from "../../../../lib/api/api_metadata";
+import { isVideo } from "../../../../utils/content/content_type";
 import { splitIntoChunks } from "../../../../utils/collection/array";
-import { validateTags } from "../favorite/favorite_item";
 
-const UPDATE_QUEUE: FavoriteMetadata[] = [];
-let favoritesLoaded = false;
+const FETCH_UPDATE_QUEUE: FavoriteMetadata[] = [];
+const READY_UPDATE_QUEUE: FavoriteMetadata[] = [];
+let databaseWritten = false;
+let startedWritingDatabase = false;
 
 function decodeRating(rating: string): Rating {
   return {
@@ -33,20 +37,26 @@ export function encodeRating(rating: number): string {
   }[rating] ?? "Explicit";
 }
 
-export function fetchMissingMetadata(): void {
-  favoritesLoaded = true;
+export function onStartedStoringAllFavorites(): void {
+  startedWritingDatabase = true;
+}
 
-  for (const chunk of splitIntoChunks(UPDATE_QUEUE, FAVORITES_PER_PAGE)) {
-    if (chunk.length === 0) {
-      return;
-    }
-    API.fetchMultiplePostsFromAPISafe(chunk.map(metadata => metadata.id))
-      .then((posts) => {
-        for (const metadata of chunk) {
-          metadata.processPost(posts[metadata.id]);
-        }
-      });
+export async function updateMissingMetadata(): Promise<void> {
+  databaseWritten = true;
+
+  for (const metadata of READY_UPDATE_QUEUE) {
+    metadata.updateDatabase();
   }
+  const chunks = splitIntoChunks(FETCH_UPDATE_QUEUE, FAVORITES_PER_PAGE).filter(chunk => chunk.length > 0);
+
+  if (chunks.length === 0) {
+    return;
+  }
+
+  await Promise.all(chunks.map((chunk) => {
+    return API.fetchMultiplePostsFromAPISafe(chunk.map(metadata => metadata.id))
+      .then(posts => chunk.forEach(metadata => metadata.processPost(posts[metadata.id])));
+  }));
 }
 
 export class FavoriteMetadata {
@@ -64,7 +74,8 @@ export class FavoriteMetadata {
       creationTimestamp: 0,
       lastChangedTimestamp: 0,
       default: 0,
-      random: 0
+      random: 0,
+      duration: 0
     };
     this.id = id;
     this.rating = DiscreteRating.EXPLICIT;
@@ -88,7 +99,8 @@ export class FavoriteMetadata {
       rating: this.rating,
       create: this.metrics.creationTimestamp,
       change: this.metrics.lastChangedTimestamp,
-      deleted: this.isDeleted
+      deleted: this.isDeleted,
+      duration: this.metrics.duration
     };
   }
 
@@ -101,17 +113,19 @@ export class FavoriteMetadata {
       if (!FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
         this.populateFromAPI();
       }
+      this.setDuration();
       return;
     }
 
     if (object.metadata === undefined) {
-      UPDATE_QUEUE.push(this);
+      FETCH_UPDATE_QUEUE.push(this);
       return;
     }
     this.populateFromDatabase(object);
+    this.setDurationFromRecord();
 
     if (this.isEmpty) {
-      UPDATE_QUEUE.push(this);
+      FETCH_UPDATE_QUEUE.push(this);
     }
   }
 
@@ -119,18 +133,25 @@ export class FavoriteMetadata {
     this.processPost(await API.fetchPostFromAPISafe(this.id));
   }
 
-  public processPost(post: Post): void {
+  public processPost(post: Post): boolean {
     this.populateFromPost(post);
 
     if (this.isEmpty) {
-      return;
+      return false;
     }
 
-    if (favoritesLoaded) {
-      Events.favorites.missingMetadataFound.emit(this.id);
+    if (databaseWritten) {
+      this.updateDatabase();
+    } else if (startedWritingDatabase) {
+      READY_UPDATE_QUEUE.push(this);
     }
     Extensions.setExtensionFromPost(post);
     validateTags(post);
+    return true;
+  }
+
+  public updateDatabase(): void {
+    Events.favorites.missingMetadataFound.emit(this.id);
   }
 
   private populateFromPost(post: Post): void {
@@ -149,6 +170,23 @@ export class FavoriteMetadata {
     this.rating = record.metadata.rating as Rating;
     this.metrics.creationTimestamp = record.metadata.create;
     this.metrics.lastChangedTimestamp = record.metadata.change;
+    this.metrics.duration = record.metadata.duration ?? 0;
     this.isDeleted = record.metadata.deleted;
+  }
+
+  private async setDuration(): Promise<boolean> {
+    const favorite = getFavorite(this.id);
+
+    if (favorite !== undefined && isVideo(favorite) && this.metrics.duration === 0) {
+      this.metrics.duration = await getVideoDurationFromFavorite(favorite);
+      return true;
+    }
+    return false;
+  }
+
+  private async setDurationFromRecord(): Promise<void> {
+    if (await this.setDuration()) {
+      this.updateDatabase();
+    }
   }
 }

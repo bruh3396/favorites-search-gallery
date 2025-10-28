@@ -188,8 +188,12 @@ export function noFavoritesAreVisible(): boolean {
   return CONTENT_CONTAINER.querySelector(ITEM_SELECTOR) === null;
 }
 
-export function fetchMissingMetadata(): void {
-  FavoritesMetadata.fetchMissingMetadata();
+export function updateMissingMetadata(): Promise<void> {
+  return FavoritesMetadata.updateMissingMetadata();
+}
+
+export function onStartedStoringFavorites(): void {
+  FavoritesMetadata.onStartedStoringAllFavorites();
 }
 
 export function swapFavoriteButton(id: string): void {

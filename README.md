@@ -196,10 +196,12 @@ Supported:
  * width
  * height
  * id
+ * duration
 
 Notes:
-  *  "123" and "id:123" are equivalent
+  * "123" and "id:123" are equivalent
   * Score requires reset to update, but will update daily in the future (*WIP)
+  * Images and GIFs have a duration of 0
 
 ### Meta Examples
 
@@ -209,6 +211,7 @@ Notes:
 | width:1920 height:1080 -video -animated          | HD image                                                                                               |
 | height:>width video                              | portrait video                                                                                         |
 | -height:>width video                             | landscape video                                                                                        |
+| duration:>30 duration:<30 video                  | 30 second video                                                                                        |
 
 
 

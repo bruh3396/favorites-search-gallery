@@ -1,8 +1,11 @@
 import { MetadataComparator, SearchableMetadataMetric } from "../../../../types/common_types";
-import { isMetadataComparator, isSearchableMetadataMetric } from "../../../../types/equivalence";
+import { SEARCHABLE_METADATA_METRICS, isMetadataComparator, isSearchableMetadataMetric } from "../../../../types/equivalence";
+
+const METRIC_PATTERN = Array.from(SEARCHABLE_METADATA_METRICS).join("|");
 
 export class FavoriteMetadataSearchExpression {
-  public static regex: RegExp = /^-?(score|width|height|id)(:[<>]?)(\d+|score|width|height|id)$/;
+  public static regex: RegExp = new RegExp(`^-?(${METRIC_PATTERN})(:[<>]?)(\\d+|${METRIC_PATTERN})$`);
+
   public metric: SearchableMetadataMetric;
   public operator: MetadataComparator;
   public hasRelativeValue: boolean;
