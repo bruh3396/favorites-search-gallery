@@ -10,7 +10,7 @@ import { clamp } from "../../../utils/primitive/number";
 import { createPostPageURL } from "../../../lib/api/api_url";
 import { downloadFromThumb } from "../../../lib/download/downloader";
 import { getAllThumbs } from "../../../utils/dom/dom";
-import { getOriginalContentURL } from "../../../lib/api/media_api";
+import { getOriginalContentURL } from "../../../lib/api/api_content";
 import { isForwardNavigationKey } from "../../../types/equivalence";
 import { isVideo } from "../../../utils/content/content_type";
 

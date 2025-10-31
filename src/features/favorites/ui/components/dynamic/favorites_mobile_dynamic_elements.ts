@@ -1,6 +1,6 @@
 import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../types/element_types";
 import { Layout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../utils/dom/ui_element_utils";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../utils/dom/ui_element";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
 import { Events } from "../../../../../lib/global/events/events";
 import { GALLERY_ENABLED } from "../../../../../lib/global/flags/derived_flags";

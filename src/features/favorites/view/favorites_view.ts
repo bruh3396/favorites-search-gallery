@@ -3,7 +3,7 @@ import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
 import * as FavoritesPreloader from "../../../utils/dom/thumb_preloader";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
 import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons } from "../../../utils/dom/ui_element_utils";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons } from "../../../utils/dom/ui_element";
 import { Favorite } from "../../../types/favorite_types";
 import { FavoriteItem } from "../types/favorite/favorite_item";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";

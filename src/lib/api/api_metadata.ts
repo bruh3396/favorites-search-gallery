@@ -1,8 +1,8 @@
 import { ConcurrencyLimiter } from "../components/concurrency_limiter";
 import { Favorite } from "../../types/favorite_types";
-import { getOriginalImageURLWithJPGExtension } from "./media_api";
+import { getOriginalImageURLWithJPGExtension } from "./api_content";
 
-const CONCURRENCY = 10;
+const CONCURRENCY = 5;
 const VIDEO_LIMITER = new ConcurrencyLimiter(CONCURRENCY);
 const METADATA_BYTE_RANGES = [500_000, 1_000_000, 2_000_000, 4_000_000];
 const VIDEO_POOL: HTMLVideoElement[] = Array.from({ length: CONCURRENCY }, () => {

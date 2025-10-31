@@ -1,7 +1,7 @@
 import { GallerySettings } from "../../../config/gallery_settings";
 import { ImageRequest } from "./gallery_image_request";
 import { convertImageURLToSampleURL } from "../../../utils/content/image_url";
-import { getOriginalImageURL } from "../../../lib/api/media_api";
+import { getOriginalImageURL } from "../../../lib/api/api_content";
 import { isImage } from "../../../utils/content/content_type";
 
 export const TRANSFERRED_CANVAS_IDS = new Set<string>();

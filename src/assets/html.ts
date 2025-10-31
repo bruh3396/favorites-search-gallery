@@ -592,6 +592,7 @@ export const CONTENT_HTML = `
   }
 
   #favorites-search-gallery-content {
+    --radius: 5px;
     padding: 0px 20px 30px 20px;
     margin-right: 15px;
 
@@ -608,7 +609,7 @@ export const CONTENT_HTML = `
 
     &.square {
       .favorite, thumb {
-        border-radius: 10px !important;
+        border-radius: var(--radius) !important;
         overflow: hidden;
         aspect-ratio: 1;
 
@@ -640,7 +641,7 @@ export const CONTENT_HTML = `
 
         height: 300px;
         flex: 1 1 auto;
-        border-radius: 10px;
+        border-radius: var(--radius);
         overflow: hidden;
       }
 
@@ -681,7 +682,7 @@ export const CONTENT_HTML = `
         flex: 0 0 25%;
 
         .favorite, .thumb {
-          border-radius: 10px;
+          border-radius: var(--radius);
           overflow: hidden;
         }
       }

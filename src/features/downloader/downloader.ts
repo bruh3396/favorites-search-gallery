@@ -4,6 +4,8 @@ import { DownloadAbortedError } from "../../types/error_types";
 import { Favorite } from "../../types/favorite_types";
 import { downloadBlob } from "../../lib/download/downloader";
 
+const FETCH_LIMITER = new ConcurrencyLimiter(3);
+
 interface ZipWriter {
   add: (name: string, reader: unknown, options: { compression: string }) => Promise<void>;
   close: () => Promise<Blob>;
@@ -55,9 +57,7 @@ async function downloadFavorites(favorites: Favorite[], progressCallback: (reque
   const blobWriter = new zip.BlobWriter("application/zip");
   const zipWriter = new zip.ZipWriter(blobWriter);
 
-  await new ConcurrencyLimiter(15).runAll<Favorite, void>(favorites, (favorite): Promise<void> => {
-    return createFavoriteBlob(favorite, zipWriter, progressCallback);
-  });
+  await Promise.all(favorites.map(favorite => createFavoriteBlob(favorite, zipWriter, progressCallback)));
   stopIfAborted();
   return zipWriter.close();
 }
@@ -68,7 +68,12 @@ async function createFavoriteBlob(favorite: Favorite, zipWriter: ZipWriter, prog
     const request = await createDownloadRequest(favorite);
 
     stopIfAborted();
-    const blob = await request.blob();
+    const response = await FETCH_LIMITER.run(() => {
+      return fetch(request.url);
+    });
+
+    stopIfAborted();
+    const blob = await response.blob();
 
     stopIfAborted();
     await zipFile(zipWriter, request, blob);

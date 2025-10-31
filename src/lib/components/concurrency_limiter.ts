@@ -1,5 +1,5 @@
 export class ConcurrencyLimiter {
-  private activeCount = 0;
+  public activeCount = 0;
   private queue: (() => void)[] = [];
 
   constructor(private readonly limit: number) {}

@@ -1,5 +1,5 @@
 import * as FSG_URL from "./api_url";
-import { extractPostFromAPI, extractPostFromAPISafe } from "./post_api_parser";
+import { extractPostFromAPI, extractPostFromAPISafe } from "./post_parser";
 import { AddFavoriteStatus } from "../../types/favorite_types";
 import { ConcurrencyLimiter } from "../components/concurrency_limiter";
 import { FavoritesSettings } from "../../config/favorites_settings";

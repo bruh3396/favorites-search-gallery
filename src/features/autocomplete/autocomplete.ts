@@ -6,12 +6,12 @@ import { AWESOMPLETE_ENABLED } from "../../lib/global/flags/derived_flags";
 import { AwesompleteSuggestion } from "../../types/common_types";
 import { Events } from "../../lib/global/events/events";
 import { Preferences } from "../../lib/global/preferences/preferences";
-import { addAwesompleteToGlobalScope } from "./awesomplete_implementation";
+import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../../lib/global/custom_tags";
 import { getHTML } from "../../lib/api/api";
 import { getQueryWithTagReplaced } from "./autocomplete_tag_replacer";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
-import { hideAwesomplete } from "../../utils/dom/awesomplete_utils";
+import { hideAwesomplete } from "../../utils/dom/awesomplete";
 
 const DUMMY_ELEMENT = document.createElement("div");
 const AUTOCOMPLETE_API_URL = "https://ac.rule34.xxx/autocomplete.php?q=";
@@ -46,7 +46,7 @@ async function populateAwesompleteList(inputId: string, prefix: string, awesompl
 }
 
 function getCurrentTag(input: HTMLInputElement | HTMLTextAreaElement): string {
-  return getLastTag(input.value.slice(0, input.selectionStart || 0));
+  return getLastTag(input.value.slice(0, input.selectionStart ?? 0));
 }
 
 function getLastTag(searchQuery: string): string {

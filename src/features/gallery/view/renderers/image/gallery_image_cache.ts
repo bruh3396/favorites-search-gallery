@@ -5,7 +5,7 @@ import { LowResolutionImageRequest } from "../../../types/gallery_low_resolution
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
-import { fetchImageBitmapFromThumb } from "../../../../../lib/api/media_api";
+import { fetchImageBitmapFromThumb } from "../../../../../lib/api/api_content";
 import { forceImageContentType } from "../../../../../utils/content/content_type";
 import { getImageFromThumb } from "../../../../../utils/dom/dom";
 

@@ -4,11 +4,10 @@ import { ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
 import { insertStyleHTML } from "./style";
 import { removeNonNumericCharacters } from "../primitive/string";
 
-const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
-
+export const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
 export const ITEM_CLASS_NAME = "favorite";
 export const ITEM_SELECTOR = ".favorite, .thumb";
-const IMAGE_SELECTOR = ".favorite img";
+export const IMAGE_SELECTOR = ".favorite img";
 
 export function getClosestItem(element: HTMLElement): HTMLElement | null {
   return element.closest(ITEM_SELECTOR);

@@ -211,7 +211,7 @@ Notes:
 | width:1920 height:1080 -video -animated          | HD image                                                                                               |
 | height:>width video                              | portrait video                                                                                         |
 | -height:>width video                             | landscape video                                                                                        |
-| duration:>30 duration:<30 video                  | 30 second video                                                                                        |
+| duration:>30 duration:<31 video                  | 30 second video                                                                                        |
 
 
 
@@ -261,6 +261,3 @@ Copyright (c) 2013-2025, Lea Verou
 
 **Zip.js**: [Website](https://gildas-lormeau.github.io/zip.js/) | [GitHub Repository](https://github.com/gildas-lormeau/zip.js)<br>
 Copyright (c) 2010-2025 Gildas Lormeau
-
-
-

@@ -8,11 +8,11 @@ export class DeletedPostError extends Error { }
 const PARSER = new DOMParser();
 
 function parseNumber(attribute: string, post: Element): number {
-  return Number(post.getAttribute(attribute) || 0);
+  return Number(post.getAttribute(attribute) ?? 0);
 }
 
 function parseString(attribute: string, post: Element): string {
-  return String(post.getAttribute(attribute) || "");
+  return String(post.getAttribute(attribute) ?? "");
 }
 
 function parseBoolean(attribute: string, post: Element): boolean {

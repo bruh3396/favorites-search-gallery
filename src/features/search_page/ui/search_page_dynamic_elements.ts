@@ -11,7 +11,7 @@ import { createNumberComponent } from "../../../lib/ui/number";
 import { createSelectElement } from "../../../lib/ui/select";
 import { getNumberRange } from "../../../utils/collection/array";
 import { prepareDynamicElements } from "../../../lib/ui/element_utils";
-import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element_utils";
+import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element";
 
 const CHECKBOXES: Partial<CheckboxElement>[] = [
   {

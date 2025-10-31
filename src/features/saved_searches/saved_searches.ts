@@ -5,7 +5,7 @@ import { Favorite } from "../../types/favorite_types";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/global/flags/derived_flags";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
-import { awesompleteIsUnselected } from "../../utils/dom/awesomplete_utils";
+import { awesompleteIsUnselected } from "../../utils/dom/awesomplete";
 import { getAllThumbs } from "../../utils/dom/dom";
 import { getSavedSearches } from "../../utils/dom/saved_searches";
 import { shuffleArray } from "../../utils/collection/array";
@@ -193,7 +193,7 @@ function storeSavedSearches(): void {
 }
 
 function loadSavedSearches(): void {
-  const savedSearches = JSON.parse(localStorage.getItem("savedSearches") || "[]");
+  const savedSearches = JSON.parse(localStorage.getItem("savedSearches") ?? "[]");
   const firstUse = Boolean(Preferences.savedSearchTutorialEnabled.value);
 
   Preferences.savedSearchTutorialEnabled.set(false);

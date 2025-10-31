@@ -1,5 +1,5 @@
 import * as FSG_URL from "../../lib/api/api_url";
-import { getOriginalContentURL } from "../../lib/api/media_api";
+import { getOriginalContentURL } from "../../lib/api/api_content";
 
 export function openPostPage(id: string): void {
   window.open(FSG_URL.createPostPageURL(id), "_blank");

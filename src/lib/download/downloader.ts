@@ -1,5 +1,5 @@
 import { getExtensionFromURL } from "../global/extensions";
-import { getOriginalContentURL } from "../api/media_api";
+import { getOriginalContentURL } from "../api/api_content";
 
 export function downloadBlob(blob: Blob, filename: string): void {
   const a = document.createElement("a");

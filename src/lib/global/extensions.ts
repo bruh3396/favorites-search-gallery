@@ -9,7 +9,7 @@ import { Favorite } from "../../types/favorite_types";
 import { GeneralSettings } from "../../config/general_settings";
 import { ON_FAVORITES_PAGE } from "./flags/intrinsic_flags";
 import { PromiseTimeoutError } from "../../types/error_types";
-import { getOriginalImageURLWithJPGExtension } from "../api/media_api";
+import { getOriginalImageURLWithJPGExtension } from "../api/api_content";
 import { withTimeout } from "../../utils/misc/async";
 
 const DATABASE_NAME: string = "ImageExtensions";
@@ -97,21 +97,26 @@ export function getExtension(item: HTMLElement | Favorite): Promise<MediaExtensi
 }
 
 function tryAllPossibleExtensions(item: HTMLElement | Favorite): Promise<MediaExtension> {
-  return BRUTE_FORCE_LIMITER.run(async() => {
-    const baseURL = getOriginalImageURLWithJPGExtension(item);
-
-    for (const extension of EXTENSIONS) {
-      const testURL = baseURL.replace(".jpg", `.${extension}`);
-
-      const response = await fetch(testURL);
-
-      if (response.ok) {
-        set(item.id, extension);
-        return extension;
-      }
-    }
-    return "jpg";
+  return BRUTE_FORCE_LIMITER.run(() => {
+    return tryAllPossibleExtensionsHelper(item);
   });
+}
+
+async function tryAllPossibleExtensionsHelper(item: HTMLElement | Favorite): Promise<MediaExtension> {
+  const baseURL = getOriginalImageURLWithJPGExtension(item);
+
+  for (const extension of EXTENSIONS) {
+    if (await tryPossibleExtension(baseURL, extension)) {
+      set(item.id, extension);
+      return extension;
+    }
+  }
+  return "jpg";
+}
+
+async function tryPossibleExtension(url: string, extension: string): Promise<boolean> {
+  const response = await fetch(url.replace(".jpg", `.${extension}`));
+  return response.ok;
 }
 
 export async function getExtensionFromId(id: string): Promise<MediaExtension> {

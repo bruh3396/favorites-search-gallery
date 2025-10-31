@@ -8,11 +8,7 @@ export class SortedArray<T extends | string | number> {
   }
 
   public toArray(): T[] {
-    if (this.isSorted) {
-      return this.array;
-    }
-    this.isSorted = true;
-    return this.sort();
+    return this.isSorted ? this.array : this.sort();
   }
 
   public insert(value: T): void {
@@ -20,11 +16,12 @@ export class SortedArray<T extends | string | number> {
   }
 
   public push(value: T): void {
-    this.array.push(value);
     this.isSorted = false;
+    this.array.push(value);
   }
 
   private sort(): T[] {
+    this.isSorted = true;
     return this.array.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   }
 

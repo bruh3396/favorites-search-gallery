@@ -3,7 +3,7 @@ import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../
 import { Layout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/checkbox";
 import { reloadWindow, toggleGalleryMenuEnabled } from "../../../../../utils/dom/dom";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../utils/dom/ui_element_utils";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../utils/dom/ui_element";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
 import { Events } from "../../../../../lib/global/events/events";

@@ -497,7 +497,7 @@ function getTagCategoryMapFromPostPage(html: string): Map<string, string> {
   return Array.from(dom.querySelectorAll(".tag"))
     .reduce((map, element) => {
       const tagCategory = element.classList[0].replace("tag-type-", "");
-      const tagName = replaceSpacesWithUnderscores(element.children[1].textContent || "");
+      const tagName = replaceSpacesWithUnderscores(element.children[1].textContent ?? "");
 
       map.set(tagName, tagCategory);
       return map;

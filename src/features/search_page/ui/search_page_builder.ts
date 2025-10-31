@@ -6,7 +6,7 @@ import { SEARCH_PAGE_HTML } from "../../../assets/html";
 import { createDynamicSearchPageMenuElements } from "./search_page_dynamic_elements";
 import { prepareAllThumbsOnSearchPage } from "./search_page_preparer";
 import { styleSearchPageMenu } from "./search_page_menu_styler";
-import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element_utils";
+import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element";
 import { waitForDOMToLoad } from "../../../utils/dom/dom";
 
 function removeOriginalSearchPageThumbs(): void {

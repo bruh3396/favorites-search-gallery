@@ -152,19 +152,13 @@ function setupDocumentEvents(): void {
   });
   CONTAINER.addEventListener("mouseover", (event) => {
     Events.document.mouseover.emit(new FavoritesMouseEvent(event));
-  }, {
-    passive: true
-  });
+  }, { passive: true });
   CONTAINER.addEventListener("mousemove", (event) => {
     Events.document.mousemove.emit(event);
-  }, {
-    passive: true
-  });
+  }, { passive: true });
   document.addEventListener("wheel", (event) => {
     Events.document.wheel.emit(new FavoritesWheelEvent(event));
-  }, {
-    passive: true
-  });
+  }, { passive: true });
   CONTAINER.addEventListener("contextmenu", (event) => {
     Events.document.contextmenu.emit(event);
   });
@@ -205,7 +199,7 @@ function toggleGlobalInputEvents(value: boolean): void {
 function broadcastDOMLoad(): void {
   document.addEventListener("DOMContentLoaded", () => {
     Events.document.domLoaded.emit();
-  });
+  }, { once: true });
 }
 
 export const Events = {

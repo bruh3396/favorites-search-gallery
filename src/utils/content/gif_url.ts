@@ -1,4 +1,4 @@
-import { getOriginalImageURLWithJPGExtension } from "../../lib/api/media_api";
+import { getOriginalImageURLWithJPGExtension } from "../../lib/api/api_content";
 import { getTagSetFromItem } from "../dom/tags";
 
 export function getGIFSource(thumb: HTMLElement): string {
