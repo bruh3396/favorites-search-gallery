@@ -1,20 +1,22 @@
+import * as SearchPageInfiniteScrollFlow from "./search_page_infinite_scroll_flow";
 import * as SearchPageModel from "../../model/search_page_model";
 import * as SearchPageView from "../../view/search_page_view";
-import { Events } from "../../../../lib/global/events/events";
 import { NavigationKey } from "../../../../types/common_types";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
+import { SearchPage } from "../../../../types/search_page";
+import { isForwardNavigationKey } from "../../../../types/equivalence";
 
-export function navigateSearchPages(direction: NavigationKey): void {
+export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
   if (Preferences.searchPageInfiniteScrollEnabled.value) {
-    Events.searchPage.returnSearchPage.emit(null);
-    return;
+    if (isForwardNavigationKey(direction)) {
+      SearchPageInfiniteScrollFlow.showMoreResults();
+    }
+    return null;
   }
   const searchPage = SearchPageModel.navigateSearchPages(direction);
 
-  Events.searchPage.returnSearchPage.emit(searchPage);
-
-  if (searchPage === null) {
-    return;
+  if (searchPage !== null) {
+    SearchPageView.createSearchPage(searchPage);
   }
-  SearchPageView.createSearchPage(searchPage);
+  return searchPage;
 }

@@ -1,7 +1,7 @@
 import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../../types/element_types";
+import { CrossFeatureRequests } from "../../utils/cross_feature/cross_feature_requests";
 import { DO_NOTHING } from "../../utils/misc/async";
 import { Events } from "../global/events/events";
-import { isInGallery } from "../../utils/cross_feature/cross_feature_requests";
 
 function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
   return {
@@ -57,7 +57,7 @@ export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
     if (!event.isHotkey || event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
       return;
     }
-    const inGallery = await isInGallery();
+    const inGallery = await CrossFeatureRequests.inGallery.request();
 
     if (inGallery) {
       return;

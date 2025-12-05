@@ -5,9 +5,10 @@ import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesPageRelation } from "../../../types/favorite/favorite_types";
 import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
 import { NavigationKey } from "../../../../../types/common_types";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
 class PaginationFlow implements FavoritesPresentationFlow {
+    private addedFirstResults = false;
+
     public present(results: FavoriteItem[]): void {
         FavoritesModel.paginate(results);
         FavoritesModel.changePage(1);
@@ -43,13 +44,9 @@ class PaginationFlow implements FavoritesPresentationFlow {
         FavoritesView.revealFavorite(id);
     }
 
-    public handlePageChangeRequest(direction: NavigationKey): void {
-        if (Preferences.infiniteScrollEnabled.value) {
-            Events.favorites.pageChangeResponse.emit(false);
-            return;
-        }
+    public loadNewFavoritesInGallery(direction: NavigationKey): boolean {
         this.gotoAdjacentPage(direction);
-        Events.favorites.pageChangeResponse.emit(true);
+        return true;
     }
 
     public reset(): void { }
@@ -62,11 +59,16 @@ class PaginationFlow implements FavoritesPresentationFlow {
     }
 
     public addNewlyFetchedSearchResultsToCurrentPage(): void {
-        if (!FavoritesModel.onFinalPage()) {
+        if (!FavoritesModel.onFinalPage() && this.addedFirstResults) {
             return;
         }
         const newFavorites = FavoritesModel.getFavoritesOnCurrentPage()
             .filter(favorite => document.getElementById(favorite.id) === null);
+
+        if (newFavorites.length > 0) {
+            this.addedFirstResults = true;
+        }
+
         const thumbs = newFavorites.map(favorite => favorite.root);
 
         FavoritesView.insertNewSearchResults(thumbs);

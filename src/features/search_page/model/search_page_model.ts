@@ -3,18 +3,12 @@ import { NavigationKey } from "../../../types/common_types";
 import { Preferences } from "../../../lib/global/preferences/preferences";
 import { SearchPage } from "../../../types/search_page";
 
-const infiniteScrollEnabled = Preferences.searchPageInfiniteScrollEnabled.value;
-
 export function setupSearchPageModel(): void {
   SearchPageLoader.setupSearchPageLoader();
 }
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
   return SearchPageLoader.navigateSearchPages(direction);
-}
-
-export function usingInfiniteScroll(): boolean {
-  return infiniteScrollEnabled;
 }
 
 export function getMoreResults(): Promise<HTMLElement[]> {
@@ -27,4 +21,8 @@ export function getInitialPageThumbs(): HTMLElement[] {
 
 export function resetCurrentPageNumber(): void {
   SearchPageLoader.resetCurrentPageNumber();
+}
+
+export function usingInfiniteScroll(): boolean {
+  return Preferences.searchPageInfiniteScrollEnabled.value;
 }

@@ -1,10 +1,10 @@
 import * as Icons from "../../../../assets/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite_types";
-import { ON_FAVORITES_PAGE, USING_FIREFOX } from "../../../../lib/global/flags/intrinsic_flags";
 import { blurCurrentlyFocusedElement, showFullscreenIcon, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
 import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/primitive/number";
 import { GALLERY_CONTAINER } from "../../ui/gallery_container";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
+import { USING_FIREFOX } from "../../../../lib/global/flags/intrinsic_flags";
 import { insertStyleHTML } from "../../../../utils/dom/style";
 
 const background: HTMLElement = document.createElement("div");
@@ -14,7 +14,7 @@ background.style.opacity = Preferences.backgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
 
 function isUsingColumnLayout(): boolean {
-  return ON_FAVORITES_PAGE && document.querySelector("#favorites-search-gallery-content.column") !== null;
+  return document.querySelector("#favorites-search-gallery-content.column") !== null;
 }
 
 export function setupGalleryUI(): void {

@@ -5,8 +5,6 @@ import { GalleryNormalThumbUpscaler } from "./upscalers/gallery_normal_thumbnail
 import { GalleryOffscreenThumbnailUpscalerWrapper } from "./upscalers/gallery_offscreen_thumbnail_upscaler_wrapper";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
-import { PerformanceProfile } from "../../../../../types/common_types";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
 import { USING_FIREFOX } from "../../../../../lib/global/flags/intrinsic_flags";
 import { UpscaleImageRequest } from "../../../types/gallery_upscale_image_request";
@@ -53,7 +51,7 @@ class ImageRenderer extends GalleryBaseRenderer {
     }, 10);
   }
 
-  public handleResultsAddedToCurrentPage(thumbs: HTMLElement[]): void {
+  public handleFavoritesAddedToCurrentPage(thumbs: HTMLElement[]): void {
     UPSCALER.presetCanvasDimensions(thumbs);
   }
 
@@ -68,9 +66,7 @@ class ImageRenderer extends GalleryBaseRenderer {
   }
 
   public onImageCreated(request: ImageRequest): void {
-    if (Preferences.performanceProfile.value === PerformanceProfile.NORMAL) {
-      UPSCALER.upscale(request);
-    }
+    UPSCALER.upscale(request);
 
     if (request.id === this.lastShownId) {
       this.draw(request.thumb);

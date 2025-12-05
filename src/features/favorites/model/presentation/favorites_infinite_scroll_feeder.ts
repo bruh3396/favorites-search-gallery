@@ -16,6 +16,10 @@ export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {
   return result;
 }
 
+export function hasMoreResults(favorites: FavoriteItem[]): boolean {
+  return getMoreResults(favorites).length > 0;
+}
+
 export function getFirstResults(favorites: FavoriteItem[]): FavoriteItem[] {
   return favorites.slice(0, FavoritesSettings.infiniteScrollBatchSize);
 }

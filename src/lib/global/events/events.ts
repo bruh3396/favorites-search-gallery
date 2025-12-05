@@ -1,5 +1,5 @@
 import { FavoritesKeyboardEvent, FavoritesMouseEvent, FavoritesWheelEvent } from "../../../types/input_types";
-import { Layout, MetadataMetric, NavigationKey, PerformanceProfile, Rating } from "../../../types/common_types";
+import { Layout, MetadataMetric, PerformanceProfile, Rating } from "../../../types/common_types";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../flags/intrinsic_flags";
 import { EventEmitter } from "../../components/event_emitter";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../container";
@@ -26,8 +26,6 @@ const favorites = {
   startedFetchingFavorites: new EventEmitter<void>(true),
   searchResultsUpdated: new EventEmitter<FavoriteItem[]>(true),
   favoriteRemoved: new EventEmitter<string>(true),
-  inGalleryRequest: new EventEmitter<void>(true),
-  pageChangeResponse: new EventEmitter<boolean>(true),
   newFavoritesFoundOnReload: new EventEmitter<FavoriteItem[]>(true),
   resultsAddedToCurrentPage: new EventEmitter<HTMLElement[]>(true),
   missingMetadataFound: new EventEmitter<string>(true),
@@ -69,13 +67,10 @@ const favorites = {
 };
 
 const gallery = {
-  inGalleryResponse: new EventEmitter<boolean>(true),
-  pageChangeRequested: new EventEmitter<NavigationKey>(true),
   favoriteToggled: new EventEmitter<string>(true),
   showOnHoverToggled: new EventEmitter<boolean>(true),
   enteredGallery: new EventEmitter<void>(true),
   exitedGallery: new EventEmitter<void>(true),
-  navigateSearchPages: new EventEmitter<NavigationKey>(true),
   visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true),
   galleryMenuButtonClicked: new EventEmitter<GalleryMenuAction>(true),
   videoEnded: new EventEmitter<void>(true),
@@ -96,7 +91,6 @@ const searchBox = {
 const searchPage = {
   searchPageReady: new EventEmitter<void>(true),
   allThumbsUpdated: new EventEmitter<HTMLElement[]>(true),
-  returnSearchPage: new EventEmitter<SearchPage | null>(true),
   layoutChanged: new EventEmitter<Layout>(true),
   searchPageCreated: new EventEmitter<SearchPage>(true),
   upscaleToggled: new EventEmitter<boolean>(true),
@@ -109,7 +103,7 @@ const mobile = {
   swipedDown: new EventEmitter<void>(true),
   swipedLeft: new EventEmitter<void>(true),
   swipedRight: new EventEmitter<void>(true),
-  touchHold: new EventEmitter<EventTarget>(true)
+  touchHold: new EventEmitter<TouchEvent>(true)
 };
 
 const tagModifier = {

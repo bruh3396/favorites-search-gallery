@@ -4,6 +4,7 @@ import * as FavoritesOptionsFlow from "../flows/runtime/favorites_option_flow";
 import * as FavoritesPresentationFlow from "../flows/presentation/favorites_presentation_flow";
 import * as FavoritesResetFlow from "../flows/runtime/favorites_reset_flow";
 import * as FavoritesSearchFlow from "../flows/runtime/favorites_search_flow";
+import { CrossFeatureRequests } from "../../../../utils/cross_feature/cross_feature_requests";
 import { Events } from "../../../../lib/global/events/events";
 import { FavoritesPaginationFlow } from "../flows/presentation/favorites_pagination_flow";
 import { updateShowOnHoverOptionTriggeredFromGallery } from "../../ui/favorites_menu_event_handlers";
@@ -28,7 +29,6 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.revealFavorite);
   Events.favorites.findFavoriteInAllStarted.on(FavoritesSearchFlow.findFavoriteInAll);
 
-  Events.gallery.pageChangeRequested.on(FavoritesPaginationFlow.handlePageChangeRequest.bind(FavoritesPaginationFlow));
   Events.gallery.showOnHoverToggled.on(updateShowOnHoverOptionTriggeredFromGallery);
   Events.gallery.favoriteToggled.on(FavoritesModel.swapFavoriteButton);
   Events.tagModifier.resetConfirmed.on(FavoritesModel.resetTagModifications);
@@ -40,4 +40,7 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.changeSortingMethod);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.changeAllowedRatings);
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.changeResultsPerPage);
+
+  CrossFeatureRequests.loadNewFavoritesInGallery.setResponse(FavoritesPresentationFlow.loadNewFavoritesInGallery);
+  CrossFeatureRequests.infiniteScroll.setResponse(FavoritesModel.usingInfiniteScroll);
 }

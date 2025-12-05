@@ -1,4 +1,4 @@
-import { FAVORITES_SEARCH_GALLERY_ENABLED } from "../lib/global/flags/derived_flags";
+import { FAVORITES_SEARCH_GALLERY_DISABLED } from "../lib/global/flags/derived_flags";
 import { setupAutocomplete } from "../features/autocomplete/autocomplete";
 import { setupCaptions } from "../features/caption/caption";
 import { setupDownloadMenu } from "../features/downloader/downloader_menu";
@@ -11,6 +11,9 @@ import { setupTagModifier } from "../features/tag_modifier/tag_modifier";
 import { setupTooltip } from "../features/tooltip/tooltip";
 
 function runFavoritesSearchGallery(): void {
+  if (FAVORITES_SEARCH_GALLERY_DISABLED) {
+    return;
+  }
   setupGlobals();
   setupFavorites();
   setupSearchPage();
@@ -23,6 +26,4 @@ function runFavoritesSearchGallery(): void {
   setupDownloadMenu();
 }
 
-if (FAVORITES_SEARCH_GALLERY_ENABLED) {
-  runFavoritesSearchGallery();
-}
+runFavoritesSearchGallery();

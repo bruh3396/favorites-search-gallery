@@ -1,5 +1,6 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/global/flags/intrinsic_flags";
 import { ImageRequest } from "../../../../types/gallery_image_request";
+import { PerformanceProfile } from "../../../../../../types/common_types";
 import { Preferences } from "../../../../../../lib/global/preferences/preferences";
 import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_offscreen_upscale_request";
@@ -14,11 +15,7 @@ export abstract class GalleryBaseThumbUpscaler {
   }
 
   public upscale(request: ImageRequest): void {
-    if (ON_SEARCH_PAGE && !Preferences.upscaleThumbsOnSearchPage.value) {
-      return;
-    }
-
-    if (this.requestIsValid(request)) {
+    if (this.enabled() && this.requestIsValid(request)) {
       this.finishUpscale(request);
       this.upscaledIds.add(request.id);
     }
@@ -85,6 +82,13 @@ export abstract class GalleryBaseThumbUpscaler {
   private requestIsValid(request: ImageRequest): boolean {
     const thumbIsOnPage = document.getElementById(request.id) !== null;
     return thumbIsOnPage && request.isOriginalResolution && request.hasCompleted && !this.upscaledIds.has(request.id);
+  }
+
+  private enabled(): boolean {
+    if (ON_SEARCH_PAGE && !Preferences.upscaleThumbsOnSearchPage.value) {
+      return false;
+    }
+    return Preferences.performanceProfile.value === PerformanceProfile.NORMAL;
   }
 
   public abstract finishUpscale(request: ImageRequest): void;

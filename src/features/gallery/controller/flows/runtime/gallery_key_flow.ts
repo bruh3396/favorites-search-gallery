@@ -5,6 +5,7 @@ import * as GalleryStateFlow from "./gallery_state_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import { isExitKey, isNavigationKey } from "../../../../../types/equivalence";
 import { FavoritesKeyboardEvent } from "../../../../../types/input_types";
+import { GallerySettings } from "../../../../../config/gallery_settings";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 import { isVideo } from "../../../../../utils/content/content_type";
 import { throttle } from "../../../../../utils/misc/async";
@@ -97,7 +98,7 @@ const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
   }, new FavoritesKeyboardEvent(event));
 };
 
-const onKeyDownThrottled = throttle(onKeyDownNoThrottle, 100);
+const onKeyDownThrottled = throttle(onKeyDownNoThrottle, GallerySettings.galleryNavigationDelay);
 
 function onKeyUpInGallery(event: FavoritesKeyboardEvent): void {
   if (event.key === "shift") {

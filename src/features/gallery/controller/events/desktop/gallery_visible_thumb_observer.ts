@@ -1,4 +1,4 @@
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { getAllThumbs, getRectDistance, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
 import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
@@ -43,6 +43,10 @@ function getInitialFavoritesMenuHeight(): number {
 
 function createIntersectionObserver(topMargin: number = 0): IntersectionObserver | null {
   if (ON_MOBILE_DEVICE) {
+    return null;
+  }
+
+  if (ON_SEARCH_PAGE && !GallerySettings.upscaleEverythingOnSearchPage) {
     return null;
   }
   return new IntersectionObserver(onVisibleThumbsChanged, {
@@ -115,8 +119,9 @@ export function getVisibleThumbs(): HTMLElement[] {
 }
 
 export function setupVisibleThumbObserver(): void {
-  if (!ON_FAVORITES_PAGE) {
-    return;
-  }
   bypassDebounceAlwaysOnPageChange();
+
+  if (ON_SEARCH_PAGE) {
+    observeAllThumbsOnPage();
+  }
 }

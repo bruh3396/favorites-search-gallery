@@ -79,6 +79,11 @@ export function navigateAfterPageChange(direction: NavigationKey): HTMLElement |
   return getCurrentThumb();
 }
 
+export function navigateAfterAddingInfiniteScrollResults(direction: NavigationKey): HTMLElement | undefined {
+  currentIndex = isForwardNavigationKey(direction) ? currentIndex + 1 : 0;
+  return getCurrentThumb();
+}
+
 export function getSearchResults(): Favorite[] {
   return GalleryThumbSelector.getLatestSearchResults();
 }

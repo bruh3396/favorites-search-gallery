@@ -23,9 +23,9 @@ export function enableInfiniteScroll(): void {
   pageBottomObserver.refresh();
 }
 
-export async function showMoreResults(): Promise<void> {
+export async function showMoreResults(): Promise<boolean> {
   if (!Preferences.searchPageInfiniteScrollEnabled.value) {
-    return;
+    return false;
   }
   const moreResults = await SearchPageModel.getMoreResults();
 
@@ -33,5 +33,7 @@ export async function showMoreResults(): Promise<void> {
     SearchPageView.insertNewSearchResults(moreResults);
     Events.searchPage.moreResultsAdded.emit(moreResults);
     pageBottomObserver.refresh();
+    return true;
   }
+  return false;
 }

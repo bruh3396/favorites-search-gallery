@@ -2,7 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import { isEmptyString, removeLeadingHyphens } from "../../utils/primitive/string";
-import { AWESOMPLETE_ENABLED } from "../../lib/global/flags/derived_flags";
+import { AUTOCOMPLETE_DISABLED } from "../../lib/global/flags/derived_flags";
 import { AwesompleteSuggestion } from "../../types/common_types";
 import { Events } from "../../lib/global/events/events";
 import { Preferences } from "../../lib/global/preferences/preferences";
@@ -134,8 +134,9 @@ function addAwesompleteToAllInputs(): void {
 }
 
 export function setupAutocomplete(): void {
-  if (AWESOMPLETE_ENABLED) {
-    addAwesompleteToGlobalScope();
-    addAwesompleteToAllInputs();
+  if (AUTOCOMPLETE_DISABLED) {
+    return;
   }
+  addAwesompleteToGlobalScope();
+  addAwesompleteToAllInputs();
 }

@@ -5,7 +5,7 @@ import { Events } from "../../lib/global/events/events";
 import { Favorite } from "../../types/favorite_types";
 import { ITEM_CLASS_NAME } from "../../utils/dom/dom";
 import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
-import { TAG_MODIFIER_ENABLED } from "../../lib/global/flags/derived_flags";
+import { TAG_MODIFIER_DISABLED } from "../../lib/global/flags/derived_flags";
 import { TAG_MODIFIER_HTML } from "../../assets/html";
 import { removeExtraWhiteSpace } from "../../utils/primitive/string";
 import { setCustomTags } from "../../lib/global/custom_tags";
@@ -31,10 +31,11 @@ let latestSearchResults: Favorite[] = [];
 let atLeastOneFavoriteIsSelected = false;
 
 export function setupTagModifier(): void {
-  if (TAG_MODIFIER_ENABLED) {
-    insertHTML();
-    addEventListeners();
+  if (TAG_MODIFIER_DISABLED) {
+    return;
   }
+  insertHTML();
+  addEventListeners();
 }
 
 function insertHTML(): void {

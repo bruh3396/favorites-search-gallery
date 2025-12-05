@@ -2,6 +2,7 @@ import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesInfiniteScrollFlow } from "./favorites_infinite_scroll_flow";
 import { FavoritesPaginationFlow } from "./favorites_pagination_flow";
 import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
+import { NavigationKey } from "../../../../../types/common_types";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
 function getPresentationFlow(): FavoritesPresentationFlow {
@@ -22,4 +23,8 @@ export function revealFavorite(id: string): void {
 
 export function handleNewSearchResults(): void {
   getPresentationFlow().handleNewSearchResults();
+}
+
+export function loadNewFavoritesInGallery(direction: NavigationKey): boolean {
+  return getPresentationFlow().loadNewFavoritesInGallery(direction);
 }

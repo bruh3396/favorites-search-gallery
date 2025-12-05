@@ -1,6 +1,7 @@
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GallerySearchPageFlow from "../runtime/gallery_search_page_flow";
 import * as GalleryView from "../../../view/gallery_view";
+import * as GalleryVisibleThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Events } from "../../../../../lib/global/events/events";
 import { GALLERY_DISABLED } from "../../../../../lib/global/flags/derived_flags";
@@ -10,7 +11,6 @@ import { setupAutoplay } from "./gallery_autoplay_setup_flow";
 import { setupDesktopGalleryMenu } from "../../../ui/gallery_desktop_menu";
 import { setupGalleryInteractionTracker } from "../../events/desktop/gallery_interaction_tracker";
 import { setupGalleryMobileTapControls } from "../../events/mobile/gallery_edge_tap_controls";
-import { setupVisibleThumbObserver } from "../../events/desktop/gallery_visible_thumb_observer";
 
 export function setupGallery(): void {
   if (GALLERY_DISABLED) {
@@ -27,7 +27,7 @@ export function setupGallery(): void {
 function setupGalleryHelper(): void {
   GalleryModel.indexCurrentPageThumbs();
   insertGalleryContainer();
-  setupVisibleThumbObserver();
+  GalleryVisibleThumbObserver.setupVisibleThumbObserver();
   setupGalleryMobileTapControls();
   setupGalleryInteractionTracker();
   GalleryView.setupGalleryView();

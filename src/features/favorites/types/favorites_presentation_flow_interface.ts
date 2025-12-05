@@ -7,5 +7,5 @@ export interface FavoritesPresentationFlow {
   revealFavorite: (id: string) => void
   reset: () => void
   handleNewSearchResults: () => void
-  handlePageChangeRequest: (direction: NavigationKey) => void
+  loadNewFavoritesInGallery: (direction: NavigationKey) => boolean
 }

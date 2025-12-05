@@ -10,6 +10,7 @@ import * as GalleryStateFlow from "../flows/runtime/gallery_state_flow";
 import * as GallerySwipeFlow from "../flows/runtime/gallery_swipe_flow";
 import * as GalleryTouchFlow from "../flows/runtime/gallery_touch_flow";
 import * as GalleryView from "../../view/gallery_view";
+import { CrossFeatureRequests } from "../../../../utils/cross_feature/cross_feature_requests";
 import { Events } from "../../../../lib/global/events/events";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 
@@ -20,7 +21,6 @@ export function addGalleryEventListeners(): void {
   Events.favorites.resultsAddedToCurrentPage.on(GalleryFavoritesFlow.handleResultsAddedToCurrentPage);
   Events.favorites.searchResultsUpdated.on(GalleryModel.updateFavoritesPageSearchResults);
   Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowContentOnHover);
-  Events.favorites.inGalleryRequest.on(GalleryFavoritesFlow.inGalleryResponse);
 
   Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadVisibleContent);
   Events.gallery.videoEnded.on(GalleryAutoplayController.onVideoEnded);
@@ -33,7 +33,9 @@ export function addGalleryEventListeners(): void {
   Events.searchPage.allThumbsUpdated.on(GalleryModel.updateSearchPageThumbs);
   Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
   Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
-  Events.searchPage.moreResultsAdded.on(GalleryModel.indexCurrentPageThumbs);
+  Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
+
+  CrossFeatureRequests.inGallery.setResponse(GalleryModel.inGallery);
 }
 
 function addPlatformDependentEventListeners(): void {

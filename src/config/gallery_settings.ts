@@ -27,6 +27,7 @@ export const GallerySettings = {
   idleInteractionDuration: 1000,
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2000 : 1000,
   maxVisibleThumbsBeforeStoppingPreload: 175,
+  galleryNavigationDelay: 100,
   useOffscreenThumbUpscaler: false,
   fetchImageBitmapsInWorker: true,
   get sendImageBitmapsToWorker(): boolean {
@@ -35,5 +36,6 @@ export const GallerySettings = {
   createImageAccentColors: false,
   galleryMenuMonoColor: true,
   preloadOutsideGalleryOnSearchPage: true,
-  gifPreloadingEnabled: false
+  gifPreloadingEnabled: false,
+  upscaleEverythingOnSearchPage: false
 };

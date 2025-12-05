@@ -34,16 +34,22 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
   }
 
   public revealFavorite(): void { }
-  public handlePageChangeRequest(): void { }
+  public loadNewFavoritesInGallery(): boolean {
+    if (!ON_FAVORITES_PAGE || !FavoritesModel.hasMoreResults()) {
+      return false;
+    }
+    this.showMoreResults();
+    return true;
+   }
 
-  private async showMoreResults(): Promise<void> {
+  private async showMoreResults(): Promise<boolean> {
     if (!ON_FAVORITES_PAGE) {
-      return;
+      return false;
     }
     const moreResults = FavoritesModel.getMoreResults();
 
     if (moreResults.length === 0) {
-      return;
+      return false;
     }
     FavoritesView.insertNewSearchResults(moreResults);
     Events.favorites.resultsAddedToCurrentPage.emit(moreResults);
@@ -51,8 +57,8 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     const urlsToPreload = FavoritesModel.getThumbURLsToPreload();
 
     FavoritesView.preloadURLs(urlsToPreload);
-
     this.pageBottomObserver.refresh();
+    return true;
   }
 
   private async showFirstResults(): Promise<void> {

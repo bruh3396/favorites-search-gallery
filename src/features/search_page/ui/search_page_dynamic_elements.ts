@@ -119,7 +119,6 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     ])
   }
 ];
-
 const NUMBERS: Partial<NumberElement>[] = [];
 
 function createCheckboxes(): void {

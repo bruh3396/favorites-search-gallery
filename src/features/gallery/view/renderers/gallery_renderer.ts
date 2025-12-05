@@ -56,8 +56,8 @@ export function handlePageChangeInGallery(): void {
   getRenderers().forEach(renderer => renderer.handlePageChangeInGallery());
 }
 
-export function handleResultsAddedToCurrentPage(thumbs: HTMLElement[]): void {
-  GalleryImageRenderer.handleResultsAddedToCurrentPage(thumbs);
+export function handleFavoritesAddedToCurrentPage(thumbs: HTMLElement[]): void {
+  GalleryImageRenderer.handleFavoritesAddedToCurrentPage(thumbs);
 }
 
 export function toggleVideoLooping(value: boolean): void {

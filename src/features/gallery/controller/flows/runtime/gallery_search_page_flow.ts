@@ -1,4 +1,6 @@
 // import * as GalleryModel from "../../../model/gallery_model";
+import * as GalleryModel from "../../../model/gallery_model";
+import * as GalleryThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import * as GalleryView from "../../../view/gallery_view";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { POSTS_PER_SEARCH_PAGE } from "../../../../../lib/global/constants";
@@ -27,4 +29,9 @@ export function onSearchPageCreated(): void {
       }
     }
   });
+}
+
+export function handleResultsAddedToSearchPage(thumbs: HTMLElement[]): void {
+  GalleryModel.indexCurrentPageThumbs();
+  GalleryThumbObserver.observe(thumbs);
 }

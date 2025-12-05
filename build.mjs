@@ -12,7 +12,7 @@ import { webWorker } from "./WEB_worker_plugin.mjs";
   const BANNER = `// ==UserScript==
 // @name         Rule34 Favorites Search Gallery
 // @namespace    bruh3396
-// @version      1.20.3
+// @version      1.20.4
 // @description  Search, View, and Play Rule34 Favorites (Desktop/Android/iOS)
 // @author       bruh3396
 // @compatible   Chrome
@@ -43,7 +43,7 @@ import { webWorker } from "./WEB_worker_plugin.mjs";
   };
   const result = await build(BUILD_OPTIONS);
   const content = readFileSync(OUT_FILE, "utf8");
-  const contentWithoutSourceComments = content.replace(/^\s*\/\/\s*src.*\n/gm, "");
+  const contentWithoutSourceComments = content.replace(/^\s*\/\/\s*(?:src|ts-raw).*\n/gm, "");
   const crlfContent = contentWithoutSourceComments.replace(/\r?\n/g, "\r\n");
 
   writeFileSync(OUT_FILE, crlfContent, "utf8");

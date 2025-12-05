@@ -7,11 +7,12 @@ import { addSearchPageEventListeners } from "../events/search_page_event_listene
 import { buildSearchPage } from "../../ui/search_page_builder";
 
 export function setupSearchPage(): void {
-  if (ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value) {
-    buildSearchPage();
-    SearchPageModel.setupSearchPageModel();
-    SearchPageView.setupSearchPageView();
-    addSearchPageEventListeners();
-    SearchPageInfiniteScrollFlow.setupInfiniteScroll();
+  if (!ON_SEARCH_PAGE || !Preferences.searchPagesEnabled.value) {
+    return;
   }
+  buildSearchPage();
+  SearchPageModel.setupSearchPageModel();
+  SearchPageView.setupSearchPageView();
+  addSearchPageEventListeners();
+  SearchPageInfiniteScrollFlow.setupInfiniteScroll();
 }

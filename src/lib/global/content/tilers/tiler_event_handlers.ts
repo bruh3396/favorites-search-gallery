@@ -1,8 +1,8 @@
+import { CrossFeatureRequests } from "../../../../utils/cross_feature/cross_feature_requests";
 import { FavoritesWheelEvent } from "../../../../types/input_types";
 import { Layout } from "../../../../types/common_types";
 import { clamp } from "../../../../utils/primitive/number";
 import { getCurrentLayout } from "./tiler";
-import { isInGallery } from "../../../../utils/cross_feature/cross_feature_requests";
 import { sleep } from "../../../../utils/misc/async";
 
 export async function changeItemSizeOnShiftScroll(wheelEvent: FavoritesWheelEvent): Promise<void> {
@@ -16,7 +16,7 @@ export async function changeItemSizeOnShiftScroll(wheelEvent: FavoritesWheelEven
   if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLSelectElement)) {
     return;
   }
-  const inGallery = await isInGallery();
+  const inGallery = await CrossFeatureRequests.inGallery.request();
 
   if (inGallery) {
     return;

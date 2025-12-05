@@ -32,6 +32,7 @@ export function exitGallery(): void {
   GalleryUI.exitGallery();
   toggleVisibility(false);
   toggleZoomCursor(false);
+  GalleryRenderer.upscaleCachedImageThumbs();
 }
 
 export function toggleVisibility(value: boolean): void {
@@ -95,8 +96,8 @@ export function toggleVideoMute(): void {
   GalleryRenderer.toggleVideoMute();
 }
 
-export function handleResultsAddedToCurrentPage(thumbs: HTMLElement[]): void {
-  GalleryRenderer.handleResultsAddedToCurrentPage(thumbs);
+export function handleFavoritesAddedToCurrentPage(thumbs: HTMLElement[]): void {
+  GalleryRenderer.handleFavoritesAddedToCurrentPage(thumbs);
 }
 
 export function toggleZoomCursor(value: boolean): void {

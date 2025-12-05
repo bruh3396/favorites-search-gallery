@@ -5,10 +5,11 @@ import { addFavoritesEventsListeners } from "../../events/favorites_event_listen
 import { buildFavoritesPage } from "../../../ui/structure/favorites_page_builder";
 
 export function setupFavorites(): void {
-  if (ON_FAVORITES_PAGE) {
-    buildFavoritesPage();
-    FavoritesView.setupFavoritesView();
-    addFavoritesEventsListeners();
-    FavoritesLoadFlow.loadAllFavorites();
+  if (!ON_FAVORITES_PAGE) {
+    return;
   }
+  buildFavoritesPage();
+  FavoritesView.setupFavoritesView();
+  addFavoritesEventsListeners();
+  FavoritesLoadFlow.loadAllFavorites();
 }

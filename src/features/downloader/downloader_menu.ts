@@ -1,5 +1,6 @@
 import * as FavoritesDownloader from "./downloader";
 import { sleep, yield1 } from "../../utils/misc/async";
+import { DOWNLOADER_DISABLED } from "../../lib/global/flags/derived_flags";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
 import { Events } from "../../lib/global/events/events";
@@ -19,6 +20,9 @@ let favoritesLoaded: boolean;
 let latestSearchResults: Favorite[] = [];
 
 export function setupDownloadMenu(): void {
+  if (DOWNLOADER_DISABLED) {
+    return;
+  }
   FavoritesDownloader.setupFavoritesDownloader();
   insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_CONTAINER, "beforeend", DOWNLOADER_HTML);
   dialog = getDialog("download-menu");

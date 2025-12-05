@@ -592,7 +592,7 @@ export const CONTENT_HTML = `
   }
 
   #favorites-search-gallery-content {
-    --radius: 5px;
+    --radius: 7px;
     padding: 0px 20px 30px 20px;
     margin-right: 15px;
 
