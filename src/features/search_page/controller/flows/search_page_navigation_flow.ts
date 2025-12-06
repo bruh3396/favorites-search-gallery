@@ -1,6 +1,7 @@
 import * as SearchPageInfiniteScrollFlow from "./search_page_infinite_scroll_flow";
 import * as SearchPageModel from "../../model/search_page_model";
 import * as SearchPageView from "../../view/search_page_view";
+import { Events } from "../../../../lib/global/events/events";
 import { NavigationKey } from "../../../../types/common_types";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { SearchPage } from "../../../../types/search_page";
@@ -17,6 +18,7 @@ export function navigateSearchPages(direction: NavigationKey): SearchPage | null
 
   if (searchPage !== null) {
     SearchPageView.createSearchPage(searchPage);
+    Events.searchPage.pageChanged.emit(searchPage);
   }
   return searchPage;
 }

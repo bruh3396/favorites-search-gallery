@@ -82,7 +82,7 @@ function onWheelWhileHoverEnabled(wheelEvent: FavoritesWheelEvent): void {
 }
 
 function onWheelInGallery(wheelEvent: FavoritesWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey) {
+  if (!wheelEvent.originalEvent.shiftKey && !wheelEvent.originalEvent.ctrlKey) {
     GalleryNavigationFlow.navigate(wheelEvent.direction);
   }
 }

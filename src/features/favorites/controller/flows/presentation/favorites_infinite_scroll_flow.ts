@@ -52,7 +52,7 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
       return false;
     }
     FavoritesView.insertNewSearchResults(moreResults);
-    Events.favorites.resultsAddedToCurrentPage.emit(moreResults);
+    Events.favorites.favoritesAddedToCurrentPage.emit(moreResults);
     await waitForAllThumbnailsToLoad();
     const urlsToPreload = FavoritesModel.getThumbURLsToPreload();
 

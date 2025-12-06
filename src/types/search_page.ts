@@ -18,7 +18,7 @@ export class SearchPage {
       this.paginator = dom.getElementById("paginator");
     } else {
       this.thumbs = content;
-      this.paginator = null;
+      this.paginator = document.getElementById("paginator");
     }
     this.pageNumber = pageNumber;
     this.ids = new Set(this.thumbs.map(thumb => thumb.id));

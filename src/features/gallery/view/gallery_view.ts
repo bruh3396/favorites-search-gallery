@@ -53,7 +53,6 @@ export function handlePageChange(): void {
 
 export function handlePageChangeInGallery(): void {
   GalleryRenderer.handlePageChangeInGallery();
-  GalleryUI.scrollToLastVisitedThumb();
 }
 
 export function handleMouseMoveInGallery(): void {

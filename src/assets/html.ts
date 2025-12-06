@@ -2694,7 +2694,8 @@ export const SAVED_SEARCHES_HTML = `
 export const SEARCH_PAGE_HTML = `
 <div id="search-page-menu">
   <style>
-    #postListDisplayOptsForm>h3 {
+    #postListDisplayOptsForm>h3,
+    .postListSidebarRight {
       display: none;
     }
 
@@ -2752,12 +2753,6 @@ export const SEARCH_PAGE_INFINITE_SCROLL_HTML = `
   #paginator {
     display: none !important;
   }
-
-  /* #favorites-search-gallery-content {
-    height: 85vh !important;
-    overflow-y: auto !important;
-    padding-right: 20px !important;
-  } */
 </style>
 `;
 export const SIDEBAR_HTML = `

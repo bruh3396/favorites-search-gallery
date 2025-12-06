@@ -33,11 +33,11 @@ export class MetadataSearchTag extends SearchTag {
     }
   }
 
-  private getExpressionValues(item: Searchable): {metric: number, operator: string, value: number} {
+  private getExpressionValues(item: Searchable): { metric: number, operator: string, value: number } {
     const metricItem = item as Favorite;
     const metric = metricItem.metrics[this.expression.metric];
     const operator = this.expression.operator;
-    const value = this.expression.hasRelativeValue ? metricItem.metrics[this.expression.relativeMetric] : this.expression.relativeValue;
+    const value = this.expression.hasRightHandMetric ? metricItem.metrics[this.expression.rightHandMetric] : this.expression.rightHandValue;
     return { metric, operator, value };
   }
 }

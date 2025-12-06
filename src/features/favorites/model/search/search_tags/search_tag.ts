@@ -3,10 +3,12 @@ import { Searchable } from "../../../../../types/common_types";
 export class SearchTag {
   public value: string;
   public negated: boolean;
+  private originalMatches: (item: Searchable) => boolean;
 
   constructor(searchTag: string) {
     this.negated = searchTag.startsWith("-") && searchTag.length > 1;
     this.value = this.negated ? searchTag.substring(1) : searchTag;
+    this.originalMatches = this.matches;
     this.matches = this.negated ? this.matchesNegated : this.matches;
   }
 
@@ -23,6 +25,6 @@ export class SearchTag {
   }
 
   public matchesNegated(item: Searchable): boolean {
-    return !item.tags.has(this.value);
+    return !this.originalMatches(item);
   }
 }

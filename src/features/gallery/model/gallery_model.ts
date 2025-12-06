@@ -2,8 +2,8 @@ import * as GalleryFavoriteToggler from "./gallery_favorite_toggler";
 import * as GalleryStateMachine from "./gallery_state_machine";
 import * as GalleryThumbSelector from "./gallery_thumb_selector";
 import { AddFavoriteStatus, Favorite, RemoveFavoriteStatus } from "../../../types/favorite_types";
+import { GalleryBoundary, GalleryState } from "../types/gallery_types";
 import { openOriginal, openPostPage } from "../../../utils/dom/links";
-import { GalleryState } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { clamp } from "../../../utils/primitive/number";
@@ -21,7 +21,7 @@ export function hasRecentlyExitedGallery(): boolean {
   return recentlyExitedGallery;
 }
 
-export function getCurrentThumb(): HTMLElement | undefined {
+export function getCurrentThumb(): HTMLElement {
   return GalleryThumbSelector.getThumbsOnCurrentPage()[currentIndex];
 }
 
@@ -69,19 +69,40 @@ export function toggleShowContentOnHover(): void {
   GalleryStateMachine.changeState(GalleryState.SHOWING_CONTENT_ON_HOVER);
 }
 
-export function navigate(direction: NavigationKey): HTMLElement | undefined {
-  currentIndex += isForwardNavigationKey(direction) ? 1 : -1;
-  return getCurrentThumb();
+export function navigate(direction: NavigationKey): GalleryBoundary {
+  const nextIndex = isForwardNavigationKey(direction) ? currentIndex + 1 : currentIndex - 1;
+
+  setCurrentIndex(nextIndex);
+  return getBoundary(nextIndex);
 }
 
-export function navigateAfterPageChange(direction: NavigationKey): HTMLElement | undefined {
-  currentIndex = isForwardNavigationKey(direction) ? 0 : GalleryThumbSelector.getThumbsOnCurrentPage().length - 1;
-  return getCurrentThumb();
+export function navigateRight(): void {
+  setCurrentIndex(currentIndex + 1);
 }
 
-export function navigateAfterAddingInfiniteScrollResults(direction: NavigationKey): HTMLElement | undefined {
-  currentIndex = isForwardNavigationKey(direction) ? currentIndex + 1 : 0;
-  return getCurrentThumb();
+function getBoundary(index: number): GalleryBoundary {
+  if (index < 0) {
+    return GalleryBoundary.AT_LEFT_BOUNDARY;
+  }
+
+  if (index >= GalleryThumbSelector.getThumbsOnCurrentPage().length) {
+    return GalleryBoundary.AT_RIGHT_BOUNDARY;
+  }
+  return GalleryBoundary.IN_BOUNDS;
+}
+
+export function navigateAfterPageChange(direction: NavigationKey): void {
+  const nextIndex = isForwardNavigationKey(direction) ? 0 : GalleryThumbSelector.getThumbsOnCurrentPage().length - 1;
+
+  setCurrentIndex(nextIndex);
+}
+
+export function navigateToPreviousPage(): void {
+  setCurrentIndex(GalleryThumbSelector.getThumbsOnCurrentPage().length - 1);
+}
+
+export function navigateToNextPage(): void {
+  setCurrentIndex(0);
 }
 
 export function getSearchResults(): Favorite[] {
@@ -150,4 +171,8 @@ export async function getLinksFromCurrentThumb(): Promise<{ post: string; image:
     return { post: "", image: "" };
   }
   return { post: createPostPageURL(thumb.id), image: await getOriginalContentURL(thumb) };
+}
+
+function setCurrentIndex(value: number): void {
+  currentIndex = clamp(value, 0, GalleryThumbSelector.getThumbsOnCurrentPage().length - 1);
 }

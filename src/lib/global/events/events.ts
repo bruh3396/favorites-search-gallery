@@ -27,7 +27,7 @@ const favorites = {
   searchResultsUpdated: new EventEmitter<FavoriteItem[]>(true),
   favoriteRemoved: new EventEmitter<string>(true),
   newFavoritesFoundOnReload: new EventEmitter<FavoriteItem[]>(true),
-  resultsAddedToCurrentPage: new EventEmitter<HTMLElement[]>(true),
+  favoritesAddedToCurrentPage: new EventEmitter<HTMLElement[]>(true),
   missingMetadataFound: new EventEmitter<string>(true),
   favoritesResized: new EventEmitter<void>(true),
   captionsReEnabled: new EventEmitter<boolean>(true),
@@ -95,7 +95,8 @@ const searchPage = {
   searchPageCreated: new EventEmitter<SearchPage>(true),
   upscaleToggled: new EventEmitter<boolean>(true),
   infiniteScrollToggled: new EventEmitter<boolean>(true),
-  moreResultsAdded: new EventEmitter<HTMLElement[]>(true)
+  moreResultsAdded: new EventEmitter<HTMLElement[]>(true),
+  pageChanged: new EventEmitter<SearchPage>(true)
 };
 
 const mobile = {

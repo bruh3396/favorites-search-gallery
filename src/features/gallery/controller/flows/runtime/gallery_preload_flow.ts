@@ -2,7 +2,6 @@ import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import * as GalleryView from "../../../view/gallery_view";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { GalleryState } from "../../../types/gallery_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { PerformanceProfile } from "../../../../../types/common_types";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
@@ -31,7 +30,7 @@ export function preloadVisibleContent(): void {
     return;
   }
 
-  if (GalleryModel.getCurrentState() === GalleryState.IN_GALLERY) {
+  if (GalleryModel.inGallery()) {
     return;
   }
   const thumbs = GalleryThumbObserver.getVisibleThumbs();

@@ -44,7 +44,9 @@ export function onLeftTap(): void {
     return;
   }
   executeFunctionBasedOnGalleryState({
-    gallery: GalleryNavigationFlow.navigateLeft
+    gallery: () => {
+      GalleryNavigationFlow.navigate("ArrowLeft");
+    }
   });
 }
 
@@ -53,6 +55,8 @@ export function onRightTap(): void {
     return;
   }
   executeFunctionBasedOnGalleryState({
-    gallery: GalleryNavigationFlow.navigateRight
+    gallery: () => {
+      GalleryNavigationFlow.navigate("ArrowRight");
+    }
   });
 }

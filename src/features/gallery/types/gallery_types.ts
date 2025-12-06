@@ -4,6 +4,12 @@ export enum GalleryState {
   IN_GALLERY = 2
 }
 
+export enum GalleryBoundary {
+  IN_BOUNDS = 0,
+  AT_LEFT_BOUNDARY = 1,
+  AT_RIGHT_BOUNDARY = 2
+}
+
 export type VideoClip = {
   start: number
   end: number

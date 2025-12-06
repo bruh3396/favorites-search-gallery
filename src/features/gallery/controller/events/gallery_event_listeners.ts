@@ -1,4 +1,5 @@
 import * as GalleryAutoplayController from "../../autoplay/gallery_autoplay_controller";
+import * as GalleryContentFlow from "../flows/runtime/gallery_content_flow";
 import * as GalleryFavoritesFlow from "../flows/runtime/gallery_favorites_flow";
 import * as GalleryKeyFlow from "../flows/runtime/gallery_key_flow";
 import * as GalleryMenuFlow from "../flows/runtime/gallery_menu_flow";
@@ -10,32 +11,44 @@ import * as GalleryStateFlow from "../flows/runtime/gallery_state_flow";
 import * as GallerySwipeFlow from "../flows/runtime/gallery_swipe_flow";
 import * as GalleryTouchFlow from "../flows/runtime/gallery_touch_flow";
 import * as GalleryView from "../../view/gallery_view";
-import { CrossFeatureRequests } from "../../../../utils/cross_feature/cross_feature_requests";
+import { CrossFeatureRequests } from "../../../../lib/global/cross_feature_requests";
 import { Events } from "../../../../lib/global/events/events";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 
 export function addGalleryEventListeners(): void {
-  Events.favorites.newFavoritesFoundOnReload.on(GalleryFavoritesFlow.handleNewFavoritesFoundOnReload, { once: true });
+  addFavoritesEventListeners();
+  addGalleryEventListeners2();
+  addPlatformDependentEventListeners();
+  addSearchPageEventListeners();
+  addCrossFeatureRequestHandlers();
+}
 
-  Events.favorites.pageChanged.on(GalleryFavoritesFlow.handlePageChange);
-  Events.favorites.resultsAddedToCurrentPage.on(GalleryFavoritesFlow.handleResultsAddedToCurrentPage);
+function addFavoritesEventListeners(): void {
+  Events.favorites.newFavoritesFoundOnReload.on(GalleryFavoritesFlow.handleNewFavoritesFoundOnReload, { once: true });
+  Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
+  Events.favorites.favoritesAddedToCurrentPage.on(GalleryFavoritesFlow.handleFavoritesAddedToCurrentPage);
   Events.favorites.searchResultsUpdated.on(GalleryModel.updateFavoritesPageSearchResults);
   Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowContentOnHover);
+}
 
+function addGalleryEventListeners2(): void {
   Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadVisibleContent);
   Events.gallery.videoEnded.on(GalleryAutoplayController.onVideoEnded);
   Events.gallery.videoDoubleClicked.on(GalleryStateFlow.exitGallery);
-
-  addPlatformDependentEventListeners();
-
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
+}
 
+function addSearchPageEventListeners(): void {
   Events.searchPage.allThumbsUpdated.on(GalleryModel.updateSearchPageThumbs);
   Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
   Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
   Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
+  Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.reIndexThumbs);
+  Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);
+}
 
-  CrossFeatureRequests.inGallery.setResponse(GalleryModel.inGallery);
+function addCrossFeatureRequestHandlers(): void {
+  CrossFeatureRequests.inGallery.setHandler(GalleryModel.inGallery);
 }
 
 function addPlatformDependentEventListeners(): void {

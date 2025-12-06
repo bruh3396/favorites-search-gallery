@@ -13,7 +13,7 @@ background.id = "gallery-background";
 background.style.opacity = Preferences.backgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
 
-function isUsingColumnLayout(): boolean {
+function usingColumnLayout(): boolean {
   return document.querySelector("#favorites-search-gallery-content.column") !== null;
 }
 
@@ -44,7 +44,7 @@ export function exitGallery(): void {
 export function scrollToLastVisitedThumb(): void {
   waitForAllThumbnailsToLoad()
     .then(() => {
-      if (lastVisitedThumb !== null && isUsingColumnLayout()) {
+      if (lastVisitedThumb !== null && usingColumnLayout()) {
         scrollToThumb(lastVisitedThumb);
       }
     });
@@ -87,7 +87,7 @@ function toggleScrollbar(value: boolean): void {
 export function updateUIInGallery(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
 
-  if (isUsingColumnLayout() || USING_FIREFOX) {
+  if (usingColumnLayout() || USING_FIREFOX) {
     return;
   }
   scrollToThumb(thumb);
