@@ -5,7 +5,7 @@ import { Events } from "../../../../../lib/global/events/events";
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 
 export function showSearchResults(searchResults: FavoriteItem[]): void {
-  Events.favorites.searchResultsUpdated.emit(searchResults);
+  Events.favorites.searchResultsUpdated.emit();
   FavoritesView.setMatchCount(searchResults.length);
   FavoritesPresentationFlow.present(searchResults);
 }

@@ -136,7 +136,10 @@ function getInitialURL(): string {
 
 function setAllThumbs(thumbs: HTMLElement[]): void {
   allThumbs = thumbs;
-  Events.searchPage.allThumbsUpdated.emit(thumbs);
+}
+
+export function getAllSearchPageThumbs(): HTMLElement[] {
+  return allThumbs;
 }
 
 export async function getMoreResults(): Promise<HTMLElement[]> {

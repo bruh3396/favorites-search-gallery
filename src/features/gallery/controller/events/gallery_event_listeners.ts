@@ -27,7 +27,6 @@ function addFavoritesEventListeners(): void {
   Events.favorites.newFavoritesFoundOnReload.on(GalleryFavoritesFlow.handleNewFavoritesFoundOnReload, { once: true });
   Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
   Events.favorites.favoritesAddedToCurrentPage.on(GalleryFavoritesFlow.handleFavoritesAddedToCurrentPage);
-  Events.favorites.searchResultsUpdated.on(GalleryModel.updateFavoritesPageSearchResults);
   Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowContentOnHover);
 }
 
@@ -39,7 +38,6 @@ function addGalleryEventListeners2(): void {
 }
 
 function addSearchPageEventListeners(): void {
-  Events.searchPage.allThumbsUpdated.on(GalleryModel.updateSearchPageThumbs);
   Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
   Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
   Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);

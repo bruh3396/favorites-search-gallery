@@ -1,5 +1,6 @@
 import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../../lib/global/tag_modifier";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
+import { CrossFeatureRequests } from "../../lib/global/cross_feature_requests";
 import { DO_NOTHING } from "../../utils/misc/async";
 import { Events } from "../../lib/global/events/events";
 import { Favorite } from "../../types/favorite_types";
@@ -27,7 +28,6 @@ const SELECTED: Set<Favorite> = new Set();
 const UI: TagModifierUI = {} as TagModifierUI;
 const FAVORITES_OPTION = {} as { container: HTMLElement, checkbox: HTMLInputElement };
 let tagEditModeAbortController = new AbortController();
-let latestSearchResults: Favorite[] = [];
 let atLeastOneFavoriteIsSelected = false;
 
 export function setupTagModifier(): void {
@@ -79,13 +79,11 @@ function addEventListeners(): void {
   Events.favorites.pageChanged.on(() => {
     highlightSelectedThumbsOnPageChange();
   });
-  Events.favorites.searchResultsUpdated.on((searchResults: Favorite[]) => {
-    latestSearchResults = searchResults;
-  });
 }
 
 function getSelectedFavoritesOnPage(): Favorite[] {
-  return latestSearchResults.filter(favorite => document.getElementById(favorite.id) !== null && isSelected(favorite));
+  const results = CrossFeatureRequests.latestFavoritesSearchResults.request();
+  return results.filter(favorite => document.getElementById(favorite.id) !== null && isSelected(favorite));
 }
 
 function highlightSelectedThumbsOnPageChange(): void {
@@ -138,7 +136,7 @@ function toggleUI(value: boolean): void {
 }
 
 function getFavorite(id: string): Favorite | undefined {
-  return latestSearchResults.find(favorite => favorite.id === id);
+  return CrossFeatureRequests.latestFavoritesSearchResults.request().find(favorite => favorite.id === id);
 }
 
 function toggleTagEditModeEventListeners(value: boolean): void {
@@ -186,7 +184,7 @@ function unSelectAll(): void {
 }
 
 function selectAll(): void {
-  for (const favorite of latestSearchResults) {
+  for (const favorite of CrossFeatureRequests.latestFavoritesSearchResults.request()) {
     select(favorite, true);
   }
 }

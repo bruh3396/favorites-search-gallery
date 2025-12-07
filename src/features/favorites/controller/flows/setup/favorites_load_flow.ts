@@ -48,7 +48,7 @@ function showLoadedFavorites(): void {
 
 function processFetchedFavorites(): void {
   FavoritesView.updateStatusWhileFetching(FavoritesModel.getLatestSearchResults().length, FavoritesModel.getAllFavorites().length);
-  Events.favorites.searchResultsUpdated.emit(FavoritesModel.getLatestSearchResults());
+  Events.favorites.searchResultsUpdated.emit();
   FavoritesPresentationFlow.handleNewSearchResults();
 }
 
@@ -62,7 +62,7 @@ async function loadNewFavorites(): Promise<void> {
   saveNewFavorites(results.newFavorites);
   FavoritesModel.paginate(FavoritesModel.getLatestSearchResults());
   Events.favorites.newFavoritesFoundOnReload.emit(results.newSearchResults);
-  Events.favorites.searchResultsUpdated.emit(results.allSearchResults);
+  Events.favorites.searchResultsUpdated.emit();
 }
 
 async function saveNewFavorites(newFavorites: FavoriteItem[]): Promise<void> {

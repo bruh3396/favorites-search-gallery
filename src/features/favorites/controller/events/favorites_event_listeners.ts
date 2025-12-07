@@ -42,4 +42,5 @@ export function addFavoritesEventsListeners(): void {
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.changeResultsPerPage);
 
   CrossFeatureRequests.loadNewFavoritesInGallery.setHandler(FavoritesPresentationFlow.loadNewFavoritesInGallery);
+  CrossFeatureRequests.latestFavoritesSearchResults.setHandler(FavoritesModel.getLatestSearchResults);
 }

@@ -10,6 +10,7 @@ import { isOnlyDigits } from "../../../../utils/primitive/string";
 
 const CONTAINER = createContainer();
 const RANGE_INDICATOR = document.createElement("label");
+const PAGE_NUMBER_REGEX = /favorites-page-(\d+)/;
 
 RANGE_INDICATOR.id = "pagination-range-label";
 
@@ -55,9 +56,28 @@ export function create(parameters: FavoritesPaginationParameters): void {
 }
 
 export function update(parameters: FavoritesPaginationParameters): void {
-  const atMaxPageNumberButtons = document.getElementsByClassName("pagination-number").length >= FavoritesSettings.maxPageNumberButtons;
+  const pageNumberButtons = Array.from(document.getElementsByClassName("pagination-number"));
+  const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesSettings.maxPageNumberButtons;
 
-  if (atMaxPageNumberButtons) {
+  if (!atMaxPageNumberButtons) {
+    create(parameters);
+    return;
+  }
+  const middlePageNumberButton = pageNumberButtons[Math.floor(pageNumberButtons.length / 2)];
+
+  if (!(middlePageNumberButton instanceof HTMLElement)) {
+    create(parameters);
+    return;
+  }
+  const middlePageNumberMatch = PAGE_NUMBER_REGEX.exec(middlePageNumberButton.id);
+
+  if (middlePageNumberMatch === null) {
+    create(parameters);
+    return;
+  }
+  const middlePageNumber = parseInt(middlePageNumberMatch[1]);
+
+  if (parameters.currentPageNumber <= middlePageNumber) {
     return;
   }
   create(parameters);

@@ -1,15 +1,15 @@
-export class CrossFeatureRequest<K, L> {
-  private handler: (value: L) => K;
+export class CrossFeatureRequest<I, O> {
+  private handler: (value: I) => O;
 
-  constructor(defaultValue: K) {
-    this.handler = (): K => defaultValue;
+  constructor(defaultValue: O) {
+    this.handler = (): O => defaultValue;
   }
 
-  public request(value: L): K {
+  public request(value: I): O {
     return this.handler(value);
   }
 
-  public setHandler(handler: (value: L) => K): void {
+  public setHandler(handler: (value: I) => O): void {
     this.handler = handler;
   }
 }

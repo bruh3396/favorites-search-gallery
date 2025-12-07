@@ -1,11 +1,10 @@
 import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/collection/array";
 import { isImage, isVideo } from "../../../utils/content/content_type";
+import { CrossFeatureRequests } from "../../../lib/global/cross_feature_requests";
 import { Favorite } from "../../../types/favorite_types";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { removeNonNumericCharacters } from "../../../utils/primitive/string";
 
-let latestFavoritesPageSearchResults: Favorite[] = [];
-let latestSearchPageThumbs: HTMLElement[] = [];
 let thumbsOnCurrentPage: HTMLElement[] = [];
 const enumeratedThumbs: Map<string, number> = new Map();
 
@@ -13,21 +12,9 @@ export function getThumbsOnCurrentPage(): HTMLElement[] {
   return thumbsOnCurrentPage;
 }
 
-export function getLatestSearchResults(): Favorite[] {
-  return latestFavoritesPageSearchResults;
-}
-
 export function indexCurrentPageThumbs(thumbs: HTMLElement[]): void {
   thumbsOnCurrentPage = thumbs;
   enumerateCurrentPageThumbs();
-}
-
-export function updateFavoritesPageSearchResults(searchResults: Favorite[]): void {
-  latestFavoritesPageSearchResults = searchResults;
-}
-
-export function updateSearchPageThumbs(thumbs: HTMLElement[]): void {
-  latestSearchPageThumbs = thumbs;
 }
 
 function enumerateCurrentPageThumbs(): void {
@@ -98,6 +85,7 @@ function getThumbsAroundWrappedOnCurrentPage(initialThumb: HTMLElement, limit: n
 }
 
 function getThumbsAroundThroughoutAllPages(initialThumb: HTMLElement, limit: number, qualifier: (favorite: Favorite) => boolean): HTMLElement[] {
+  const latestFavoritesPageSearchResults = CrossFeatureRequests.latestFavoritesSearchResults.request();
   const startIndex = latestFavoritesPageSearchResults.findIndex(favorite => favorite.id === initialThumb.id);
   const adjacentSearchResults = getWrappedElementsAroundIndex(latestFavoritesPageSearchResults, startIndex, 50)
     .filter(thumb => qualifier(thumb))
@@ -106,13 +94,15 @@ function getThumbsAroundThroughoutAllPages(initialThumb: HTMLElement, limit: num
 }
 
 export function getFavoritesPageSearchResultsAround(thumb: HTMLElement, limit: number = 50): HTMLElement[] {
+  const latestFavoritesPageSearchResults = CrossFeatureRequests.latestFavoritesSearchResults.request();
   const startIndex = latestFavoritesPageSearchResults.findIndex(post => post.id === thumb.id);
   const adjacentSearchResults = getWrappedElementsAroundIndex(latestFavoritesPageSearchResults, startIndex, limit);
   return adjacentSearchResults.map(favorite => favorite.root);
 }
 
 export function getSearchPageThumbsAround(thumb: HTMLElement): HTMLElement[] {
-const index = latestSearchPageThumbs.findIndex(t => t.id === thumb.id);
+  const latestSearchPageThumbs = CrossFeatureRequests.latestSearchPageThumbs.request();
+  const index = latestSearchPageThumbs.findIndex(t => t.id === thumb.id);
 
   if (index === -1) {
     return [];

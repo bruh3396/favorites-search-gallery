@@ -24,7 +24,7 @@ const favorites = {
   favoritesLoaded: new EventEmitter<void>(true),
   startedStoringAllFavorites: new EventEmitter<void>(true),
   startedFetchingFavorites: new EventEmitter<void>(true),
-  searchResultsUpdated: new EventEmitter<FavoriteItem[]>(true),
+  searchResultsUpdated: new EventEmitter<void>(true),
   favoriteRemoved: new EventEmitter<string>(true),
   newFavoritesFoundOnReload: new EventEmitter<FavoriteItem[]>(true),
   favoritesAddedToCurrentPage: new EventEmitter<HTMLElement[]>(true),
@@ -90,7 +90,6 @@ const searchBox = {
 
 const searchPage = {
   searchPageReady: new EventEmitter<void>(true),
-  allThumbsUpdated: new EventEmitter<HTMLElement[]>(true),
   layoutChanged: new EventEmitter<Layout>(true),
   searchPageCreated: new EventEmitter<SearchPage>(true),
   upscaleToggled: new EventEmitter<boolean>(true),

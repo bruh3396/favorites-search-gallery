@@ -55,7 +55,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
         FavoritesModel.paginate(FavoritesModel.getLatestSearchResults());
         FavoritesView.createPageSelectionMenuWhileFetching(FavoritesModel.getPaginationParameters());
         this.addNewlyFetchedSearchResultsToCurrentPage();
-        Events.favorites.searchResultsUpdated.emit(FavoritesModel.getLatestSearchResults());
+        Events.favorites.searchResultsUpdated.emit();
     }
 
     public addNewlyFetchedSearchResultsToCurrentPage(): void {

@@ -26,3 +26,7 @@ export function resetCurrentPageNumber(): void {
 export function usingInfiniteScroll(): boolean {
   return Preferences.searchPageInfiniteScrollEnabled.value;
 }
+
+export function getAllSearchPageThumbs(): HTMLElement[] {
+  return SearchPageLoader.getAllSearchPageThumbs();
+}

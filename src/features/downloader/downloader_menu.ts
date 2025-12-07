@@ -1,5 +1,6 @@
 import * as FavoritesDownloader from "./downloader";
 import { sleep, yield1 } from "../../utils/misc/async";
+import { CrossFeatureRequests } from "../../lib/global/cross_feature_requests";
 import { DOWNLOADER_DISABLED } from "../../lib/global/flags/derived_flags";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
@@ -17,7 +18,6 @@ let cancelButton: HTMLButtonElement;
 let statusContainer: HTMLElement;
 let statusHeader: HTMLElement;
 let favoritesLoaded: boolean;
-let latestSearchResults: Favorite[] = [];
 
 export function setupDownloadMenu(): void {
   if (DOWNLOADER_DISABLED) {
@@ -48,7 +48,7 @@ function getDownloadButton(): HTMLButtonElement {
   }
   button.addEventListener("click", () => {
     button.disabled = true;
-    downloadFavorites(latestSearchResults);
+    downloadFavorites(CrossFeatureRequests.latestFavoritesSearchResults.request());
   });
   return button;
 }
@@ -97,7 +97,6 @@ function addEventListeners(): void {
   setupMenuCancelHandler();
   setupMenuCloseHandler();
   setupMenuOptions();
-  keepTrackOfSearchResults();
 }
 
 function enableAfterFavoritesLoad(): void {
@@ -114,7 +113,7 @@ function openWhenDownloadButtonClicked(): void {
     if (favoritesLoaded) {
       downloadButton.disabled = false;
       dialog.showModal();
-      statusHeader.textContent = `Download ${latestSearchResults.length} Results`;
+      statusHeader.textContent = `Download ${CrossFeatureRequests.latestFavoritesSearchResults.request().length} Results`;
     } else {
       warningDialog.showModal();
     }
@@ -152,12 +151,6 @@ function setupMenuCloseHandler(): void {
 
 function setupMenuOptions(): void {
   setupMenuBatchSizeSelect();
-}
-
-function keepTrackOfSearchResults(): void {
-  Events.favorites.searchResultsUpdated.on((results: Favorite[]) => {
-    latestSearchResults = results;
-  });
 }
 
 function setupMenuBatchSizeSelect(): void {

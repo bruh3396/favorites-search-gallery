@@ -1,7 +1,7 @@
 import * as ICONS from "../../assets/icons";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
+import { CrossFeatureRequests } from "../../lib/global/cross_feature_requests";
 import { Events } from "../../lib/global/events/events";
-import { Favorite } from "../../types/favorite_types";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/global/flags/derived_flags";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
@@ -18,7 +18,6 @@ let saveButton: HTMLElement;
 let importButton: HTMLElement;
 let exportButton: HTMLElement;
 let saveSearchResultsButton: HTMLElement;
-let latestSearchResults: Favorite[] = [];
 
 export function setupSavedSearches(): void {
   if (SAVED_SEARCHES_DISABLED) {
@@ -85,9 +84,6 @@ function addEventListeners(): void {
     saveSearchResultsAsCustomSearch();
   };
   Events.favorites.savedSearchesToggled.on(toggleSavedSearchesVisibility);
-  Events.favorites.searchResultsUpdated.on((searchResults: Favorite[]): void => {
-    latestSearchResults = searchResults;
-  });
 }
 
 function toggleSavedSearchesVisibility(value: boolean): void {
@@ -257,6 +253,7 @@ function importSavedSearches(): void {
 }
 
 function saveSearchResultsAsCustomSearch(): void {
+  const latestSearchResults = CrossFeatureRequests.latestFavoritesSearchResults.request();
   const searchResultIds = latestSearchResults.map(favorite => favorite.id);
 
   if (searchResultIds.length === 0) {
