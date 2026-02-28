@@ -4,39 +4,23 @@ import { GalleryGifRenderer } from "./gif/gallery_gif_renderer";
 import { GalleryImageRenderer } from "./image/gallery_image_renderer";
 import { GalleryVideoRenderer } from "./video/gallery_video_renderer";
 
-function getRenderers(): GalleryBaseRenderer[] {
-  return [GalleryGifRenderer, GalleryVideoRenderer, GalleryImageRenderer];
+const RENDERERS = [GalleryGifRenderer, GalleryVideoRenderer, GalleryImageRenderer];
+
+function getRenderer(thumb: HTMLElement): GalleryBaseRenderer {
+  return isVideo(thumb) ? GalleryVideoRenderer : isGif(thumb) ? GalleryGifRenderer : GalleryImageRenderer;
 }
 
 export function render(thumb: HTMLElement): void {
-  if (isVideo(thumb)) {
-    return startRenderer(GalleryVideoRenderer, thumb);
-  }
-
-  if (isGif(thumb)) {
-    return startRenderer(GalleryGifRenderer, thumb);
-  }
-  return startRenderer(GalleryImageRenderer, thumb);
-}
-
-function startRenderer(targetRenderer: GalleryBaseRenderer, thumb: HTMLElement): void {
-  for (const renderer of getRenderers()) {
-    if (targetRenderer === renderer) {
-      renderer.display(thumb);
-    } else {
-      renderer.hide();
-    }
-  }
+  hide();
+  getRenderer(thumb).display(thumb);
 }
 
 export function hide(): void {
-  for (const renderer of getRenderers()) {
-    renderer.hide();
-  }
+  RENDERERS.forEach(renderer => renderer.hide());
 }
 
 export function exitGallery(): void {
-  getRenderers().forEach(renderer => renderer.hide());
+  hide();
   GalleryImageRenderer.exitGallery();
 }
 
@@ -45,15 +29,15 @@ export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  getRenderers().forEach(renderer => renderer.preload(thumbs));
+  RENDERERS.forEach(renderer => renderer.preload(thumbs));
 }
 
 export function handlePageChange(): void {
-  getRenderers().forEach(renderer => renderer.handlePageChange());
+  RENDERERS.forEach(renderer => renderer.handlePageChange());
 }
 
 export function handlePageChangeInGallery(): void {
-  getRenderers().forEach(renderer => renderer.handlePageChangeInGallery());
+  RENDERERS.forEach(renderer => renderer.handlePageChangeInGallery());
 }
 
 export function handleFavoritesAddedToCurrentPage(thumbs: HTMLElement[]): void {

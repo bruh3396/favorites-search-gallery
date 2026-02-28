@@ -995,6 +995,10 @@ export const DESKTOP_HTML = `
     opacity: 1;
     visibility: visible;
   }
+
+  #bottom-panel-4 {
+    flex: 0 0 15% !important;
+  }
 </style>
 `;
 export const DOWNLOADER_HTML = `
@@ -1672,7 +1676,11 @@ export const FAVORITES_HTML = `
     #performance-profile {
       width: 160px !important;
     }
-   </style>
+
+    #show-ui-label {
+      margin-right: 15px;
+    }
+  </style>
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;" id="search-header">Search Favorites</h2>
@@ -1748,14 +1756,14 @@ export const FAVORITES_HTML = `
         </div>
 
         <div id="bottom-panel-3">
+
+        </div>
+
+        <div id="bottom-panel-4">
           <div id="show-ui-wrapper">
           </div>
           <div class="options-container">
           </div>
-        </div>
-
-        <div id="bottom-panel-4">
-
         </div>
       </div>
     </div>
@@ -2050,8 +2058,7 @@ export const GALLERY_HTML = `
 export const HELP_HTML = `
 <span id="help-links-container">
   <a href="https://github.com/bruh3396/favorites-search-gallery/#controls" target="_blank">Help</a>
-  <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback"
-    target="_blank">Feedback</a>
+  <!-- <a href="https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery/feedback" target="_blank">Feedback</a> -->
   <a href="https://github.com/bruh3396/favorites-search-gallery/issues" target="_blank">Report
     Issue</a>
   <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
@@ -2993,7 +3000,7 @@ export const TAG_MODIFIER_HTML = `
   </style>
   <div id="tag-modifier-option-container">
     <label class="checkbox" title="Add or remove custom or official tags to favorites">
-      <input type="checkbox" id="tag-modifier-option-checkbox"> Modify Tags<span class="option-hint"></span>
+      <input type="checkbox" id="tag-modifier-option-checkbox">Modify Tags<span class="option-hint"></span>
     </label>
   </div>
   <div id="tag-modifier-ui-container">

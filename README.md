@@ -89,7 +89,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | Ctrl Shift Left Click | Open original content in new tab and move to new tab | Clicked on a thumbnail |
 | Middle Click | Toggle "Enlarge on Hover" option | Did **NOT** click on a thumbnail or tag in details |
 | Scroll Wheel | Change background opacity | Cursor hovering over thumbnail with "Enlarge on Hover" enabled |
-| Shift Scroll Wheel | Change column count | |
+| Shift Scroll Wheel | Change column count | NOT in gallery |
 | Left Click | Add tag to search | Clicked on a tag in details |
 | Right Click | Add negated tag to search | Clicked on a tag in details |
 | Middle Click | Quick search tag | Clicked on a tag in details |
@@ -108,13 +108,12 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | Input                                 | Function                                       | Condition              |
 | :-------------------------------------| :----------------------------------------------| :----------------------|
 | Arrow Keys, Scroll Wheel, AD   | Navigate gallery                               |                        |
-| Escape                                |    Exit gallery                                |                        |
-| Right Click                           | Exit gallery |                        |
-| Middle Click                          | Open post in new tab         |                        |
+| Escape, Delete, Backspace, Right Click                                |    Exit gallery                                |                        |
 | Double Left Click                          | Exit gallery         | Content is a video                       |
+| Middle Click                          | Open post in new tab         |                        |
 | Ctrl Left Click                          | Open original content in new tab and stay on current tab         |                        |
 | Ctrl Shift Left Click | Open original content in new tab and move to new tab |  |
-| Shift Left Click | Zoom | Content is not a video |
+| Shift Left Click | Toggle zoom | Content is not a video |
 
 ### Gallery Controls (Mobile)
 | Input                                 | Function                                       | Condition              |

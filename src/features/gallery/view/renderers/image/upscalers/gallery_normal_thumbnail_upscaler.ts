@@ -64,10 +64,4 @@ export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
     canvas.width = 0;
     canvas.height = 0;
   }
-
-  private upscaleBatch(requests: ImageRequest[]): void {
-    for (const request of requests) {
-      this.upscaleImageRequest(request);
-    }
-  }
 }

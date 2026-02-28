@@ -78,7 +78,7 @@ export function createToggleSwitch(partial: Partial<CheckboxElement>): void {
   const switchHTML = `
     <label id="${toggleSwitchId}" class="toggle-switch" title="${template.title}">
         <span class="slider round"></span>
-        <span class="toggle-switch-label"> ${template.textContent}</span>
+        <span class="toggle-switch-label">${template.textContent}</span>
     </label>`;
 
   parent.insertAdjacentHTML(template.position, switchHTML);
@@ -110,7 +110,7 @@ export function createCheckboxOption(partial: Partial<CheckboxElement>): void {
   label.id = labelId;
   label.className = "checkbox";
   label.title = partial.title ?? "";
-  span.textContent = ` ${partial.textContent ?? "Missing text"}`;
+  span.textContent = `${partial.textContent ?? "Missing text"}`;
   hint.className = "option-hint";
   hint.textContent = ` (${partial.hotkey ?? "Missing hotkey"})`;
 

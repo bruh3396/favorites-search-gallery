@@ -7,12 +7,15 @@ import { isExitKey, isNavigationKey } from "../../../../../types/equivalence";
 import { FavoritesKeyboardEvent } from "../../../../../types/input_types";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
-import { isVideo } from "../../../../../utils/content/content_type";
 import { throttle } from "../../../../../utils/misc/async";
 import { toggleFullscreen } from "../../../../../utils/dom/dom";
 
 function onKeyDownInGallery(keyboardEvent: FavoritesKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;
+
+  if (event.ctrlKey) {
+    return;
+  }
 
   if (isNavigationKey(event.key)) {
     event.stopImmediatePropagation();
@@ -29,9 +32,14 @@ function onKeyDownInGallery(keyboardEvent: FavoritesKeyboardEvent): void {
     GalleryView.toggleZoomCursor(true);
     return;
   }
-  const currentThumb = GalleryModel.getCurrentThumb();
 
-  switch (event.key.toLowerCase()) {
+  if (keyboardEvent.isHotkey) {
+    executeGalleryHotkey(event.key.toLowerCase());
+  }
+}
+
+function executeGalleryHotkey(key: string): void {
+  switch (key) {
     case "b":
       GalleryView.toggleBackgroundOpacity();
       break;
@@ -65,7 +73,7 @@ function onKeyDownInGallery(keyboardEvent: FavoritesKeyboardEvent): void {
       break;
 
     case " ":
-      if (currentThumb !== undefined && isVideo(currentThumb)) {
+      if (GalleryModel.isViewingVideo()) {
         GalleryView.toggleVideoPause();
       }
       break;

@@ -15,8 +15,8 @@ export function getMoreResults(): Promise<HTMLElement[]> {
   return SearchPageLoader.getMoreResults();
 }
 
-export function getInitialPageThumbs(): HTMLElement[] {
-  return SearchPageLoader.getInitialPageThumbs();
+export function getInitialSearchPage(): SearchPage {
+  return SearchPageLoader.getInitialSearchPage();
 }
 
 export function resetCurrentPageNumber(): void {

@@ -4,7 +4,7 @@ import * as GalleryView from "../../../view/gallery_view";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 
 export function handlePageChange(): void {
-  reIndexThumbs();
+  indexThumbs();
   executeFunctionBasedOnGalleryState({
     idle: GalleryView.handlePageChange,
     hover: GalleryView.handlePageChange,
@@ -12,7 +12,7 @@ export function handlePageChange(): void {
   });
 }
 
-export function reIndexThumbs(): void {
+export function indexThumbs(): void {
   GalleryThumbObserver.resetCenterThumb();
   GalleryThumbObserver.observeAllThumbsOnPage();
   GalleryModel.indexCurrentPageThumbs();

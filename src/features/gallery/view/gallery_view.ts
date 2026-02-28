@@ -1,7 +1,7 @@
 import * as GalleryRenderer from "./renderers/gallery_renderer";
 import * as GalleryUI from "./ui/gallery_ui";
-import { GALLERY_CONTAINER } from "../ui/gallery_container";
 import { RemoveFavoriteStatus } from "../../../types/favorite_types";
+import { toggleGalleryVisibility } from "../ui/gallery_container";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -9,14 +9,14 @@ export function showContentInGallery(thumb: HTMLElement): void {
 }
 
 export function display(thumb: HTMLElement): void {
-  toggleVisibility(true);
+  toggleGalleryVisibility(true);
   GalleryRenderer.render(thumb);
   GalleryUI.show();
   GalleryRenderer.toggleZoom(false);
 }
 
 export function hide(): void {
-  toggleVisibility(false);
+  toggleGalleryVisibility(false);
   GalleryRenderer.hide();
   GalleryUI.hide();
 }
@@ -24,19 +24,17 @@ export function hide(): void {
 export function enterGallery(thumb: HTMLElement): void {
   GalleryRenderer.render(thumb);
   GalleryUI.enterGallery(thumb);
-  toggleVisibility(true);
+  toggleGalleryVisibility(true);
 }
 
 export function exitGallery(): void {
   GalleryRenderer.exitGallery();
   GalleryUI.exitGallery();
-  toggleVisibility(false);
+  toggleGalleryVisibility(false);
   toggleZoomCursor(false);
-  GalleryRenderer.upscaleCachedImageThumbs();
-}
-
-export function toggleVisibility(value: boolean): void {
-  GALLERY_CONTAINER.style.display = value ? "" : "none";
+  setTimeout(() => {
+    GalleryRenderer.upscaleCachedImageThumbs();
+  }, 10);
 }
 
 export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {

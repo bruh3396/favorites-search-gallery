@@ -1,11 +1,15 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/global/flags/intrinsic_flags";
+import { CrossFeatureRequests } from "../../../../../../lib/global/cross_feature_requests";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { PerformanceProfile } from "../../../../../../types/common_types";
 import { Preferences } from "../../../../../../lib/global/preferences/preferences";
 import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_offscreen_upscale_request";
+import { ThrottledQueue } from "../../../../../../lib/components/throttled_queue";
 import { getAllThumbs } from "../../../../../../utils/dom/dom";
 import { getDimensions2D } from "../../../../../../utils/primitive/string";
+
+const BATCH_UPSCALE_QUEUE = new ThrottledQueue(20);
 
 export abstract class GalleryBaseThumbUpscaler {
   private upscaledIds: Set<string>;
@@ -18,6 +22,13 @@ export abstract class GalleryBaseThumbUpscaler {
     if (this.enabled() && this.requestIsValid(request)) {
       this.finishUpscale(request);
       this.upscaledIds.add(request.id);
+    }
+  }
+
+  public async upscaleBatch(requests: ImageRequest[]): Promise<void> {
+    for (const request of requests) {
+      await BATCH_UPSCALE_QUEUE.wait();
+      this.upscale(request);
     }
   }
 
@@ -81,7 +92,8 @@ export abstract class GalleryBaseThumbUpscaler {
 
   private requestIsValid(request: ImageRequest): boolean {
     const thumbIsOnPage = document.getElementById(request.id) !== null;
-    return thumbIsOnPage && request.isOriginalResolution && request.hasCompleted && !this.upscaledIds.has(request.id);
+    const inGallery = CrossFeatureRequests.inGallery.request();
+    return thumbIsOnPage && request.isOriginalResolution && request.hasCompleted && !this.upscaledIds.has(request.id) && !inGallery;
   }
 
   private enabled(): boolean {

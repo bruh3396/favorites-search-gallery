@@ -11,11 +11,11 @@ export abstract class GalleryBaseRenderer implements Renderer {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public display(element: HTMLElement): void {
-    this.container.style.display = "block";
+    this.container.style.visibility = "visible";
   }
 
   public hide(): void {
-    this.container.style.display = "none";
+    this.container.style.visibility = "hidden";
   }
 
   public abstract handlePageChangeInGallery(): void;

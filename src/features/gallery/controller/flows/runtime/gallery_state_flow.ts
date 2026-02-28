@@ -25,7 +25,7 @@ export function exitGallery(): void {
   Events.gallery.exitedGallery.emit();
 }
 
-export function toggleShowContentOnHover(): void {
-  GalleryModel.toggleShowContentOnHover();
-  Events.gallery.showOnHoverToggled.emit(GalleryModel.showOnHoverEnabled());
+export function toggleShowingContentOnHover(): void {
+  GalleryModel.toggleShowingContentOnHover();
+  Events.gallery.showOnHoverToggled.emit(GalleryModel.showingContentOnHover());
 }

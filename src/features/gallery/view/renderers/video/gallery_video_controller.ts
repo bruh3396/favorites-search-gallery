@@ -241,6 +241,9 @@ function pauseVideo(video: HTMLVideoElement): void {
 }
 
 export function preloadVideoPlayers(thumbs: HTMLElement[]): void {
+  if (VIDEO_PLAYERS.length === 1) {
+    return;
+  }
   const activeVideoPlayer = getActiveVideoPlayer();
   const inactiveVideoPlayers = getInactiveVideoPlayers();
   const videoThumbsAroundInitialThumb = thumbs
@@ -320,14 +323,6 @@ function toggleVideoControls(value: boolean): void {
 
   if (!value) {
     video.removeAttribute("controls");
-  }
-}
-
-export function clearInactiveVideoSources(): void {
-  const inactivePlayers = getInactiveVideoPlayers();
-
-  for (const video of inactivePlayers) {
-    video.src = "";
   }
 }
 

@@ -15,6 +15,7 @@ let initialPageNumber: number;
 let currentPageNumber: number;
 let initialURL = getInitialURL();
 let allThumbs: HTMLElement[] = [];
+let initialSearchPage: SearchPage;
 
 export function setupSearchPageLoader(): void {
   searchPages = new Map();
@@ -23,11 +24,11 @@ export function setupSearchPageLoader(): void {
   currentPageNumber = initialPageNumber;
   initialURL = getInitialURL();
   setAllThumbs(Array.from(getAllThumbs()));
-  const searchPage = new SearchPage(initialPageNumber, allThumbs);
+  initialSearchPage = new SearchPage(initialPageNumber, allThumbs);
 
-  searchPages.set(initialPageNumber, searchPage);
+  searchPages.set(initialPageNumber, initialSearchPage);
   preloadSearchPages();
-  Events.searchPage.searchPageCreated.emit(searchPage);
+  Events.searchPage.searchPageCreated.emit(initialSearchPage);
 }
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
@@ -52,15 +53,6 @@ export function navigateSearchPages(direction: NavigationKey): SearchPage | null
 function getAdjacentSearchPageNumber(direction: NavigationKey): number {
   const forward = isForwardNavigationKey(direction);
   return forward ? currentPageNumber + 1 : currentPageNumber - 1;
-}
-
-export function getPageNumberFromThumb(thumb: HTMLElement): number {
-  for (const [pageNumber, searchPage] of searchPages.entries()) {
-    if (searchPage.ids.has(thumb.id)) {
-      return pageNumber;
-    }
-  }
-  return -1;
 }
 
 export function preloadSearchPages(): void {
@@ -178,13 +170,8 @@ export async function getMoreResults(): Promise<HTMLElement[]> {
   return nextSearchPage.thumbs;
 }
 
-export function getInitialPageThumbs(): HTMLElement[] {
-  const searchPage = getInitialSearchPage() ?? undefined;
-  return searchPage === undefined ? [] : searchPage.thumbs;
-}
-
-export function getInitialSearchPage(): SearchPage | null {
-  return searchPages.get(initialPageNumber) ?? null;
+export function getInitialSearchPage(): SearchPage {
+  return initialSearchPage;
 }
 
 export function resetCurrentPageNumber(): void {

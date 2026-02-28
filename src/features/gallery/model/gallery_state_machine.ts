@@ -9,7 +9,6 @@ export function getCurrentState(): GalleryState {
 
 export function changeState(state: GalleryState): void {
   currentState = state;
-  onStateChange();
 }
 
 function getStartState(): GalleryState {
@@ -17,23 +16,4 @@ function getStartState(): GalleryState {
     return GalleryState.SHOWING_CONTENT_ON_HOVER;
   }
   return GalleryState.IDLE;
-}
-
-function onStateChange(): void {
-  switch (currentState) {
-    case GalleryState.IDLE:
-      // Utils.forceHideCaptions(false);
-      break;
-
-    case GalleryState.SHOWING_CONTENT_ON_HOVER:
-      // Utils.forceHideCaptions(true);
-      break;
-
-    case GalleryState.IN_GALLERY:
-      // Utils.forceHideCaptions(true);
-      break;
-
-    default:
-      break;
-  }
 }

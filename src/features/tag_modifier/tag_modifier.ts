@@ -42,7 +42,7 @@ function insertHTML(): void {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
-  insertHTMLAndExtractStyle(document.getElementById("bottom-panel-4") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
+  insertHTMLAndExtractStyle(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
   FAVORITES_OPTION.container = document.getElementById("tag-modifier-container") as HTMLElement;
   FAVORITES_OPTION.checkbox = document.getElementById("tag-modifier-option-checkbox") as HTMLInputElement;
   UI.container = document.getElementById("tag-modifier-ui-container") as HTMLElement;

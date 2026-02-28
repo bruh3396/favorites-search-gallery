@@ -24,29 +24,31 @@ export function navigate(direction: NavigationKey): void {
   }
 }
 
-async function navigateAtLeftBoundary(): Promise<void> {
-  if (!usingInfiniteScroll() && await loadMoreResults("ArrowLeft")) {
+function navigateAtLeftBoundary(): void {
+  if (!usingInfiniteScroll() && loadMoreResults("ArrowLeft")) {
     GalleryModel.navigateToPreviousPage();
     finishNavigation();
   }
 }
 
-async function navigateAtRightBoundary(): Promise<void> {
-  if (await loadMoreResults("ArrowRight")) {
-    if (usingInfiniteScroll()) {
-      GalleryModel.navigateRight();
-    } else {
-      GalleryModel.navigateToNextPage();
-    }
-    finishNavigation();
+function navigateAtRightBoundary(): void {
+  if (!loadMoreResults("ArrowRight")) {
+    return;
   }
+
+  if (usingInfiniteScroll()) {
+    GalleryModel.navigate("ArrowRight");
+  } else {
+    GalleryModel.navigateToNextPage();
+  }
+  finishNavigation();
 }
 
-async function loadMoreResults(direction: NavigationKey): Promise<boolean> {
+function loadMoreResults(direction: NavigationKey): boolean {
   if (ON_FAVORITES_PAGE) {
     return CrossFeatureRequests.loadNewFavoritesInGallery.request(direction);
   }
-  return (await CrossFeatureRequests.loadNewSearchPagesInGallery.request(direction)) !== null;
+  return (CrossFeatureRequests.loadNewSearchPagesInGallery.request(direction)) !== null;
 }
 
 function finishNavigation(): void {

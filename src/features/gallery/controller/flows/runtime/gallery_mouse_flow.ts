@@ -62,7 +62,7 @@ function onMouseDownOutsideGallery(mouseEvent: FavoritesMouseEvent): void {
 
   if (mouseEvent.middleClick && mouseEvent.thumb === null) {
     mouseEvent.originalEvent.preventDefault();
-    GalleryStateFlow.toggleShowContentOnHover();
+    GalleryStateFlow.toggleShowingContentOnHover();
   }
 }
 

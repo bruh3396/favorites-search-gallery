@@ -11,7 +11,6 @@ import { CONTENT_CONTAINER } from "../../../lib/global/content/content_container
 import { FAVORITES_SEARCH_INDEX } from "./search/index/favorites_search_index";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
 import { ITEM_SELECTOR } from "../../../utils/dom/dom";
-import { Preferences } from "../../../lib/global/preferences/preferences";
 import { shuffleArray } from "../../../utils/collection/array";
 
 let latestSearchResults: FavoriteItem[] = [];
@@ -209,8 +208,4 @@ export function resetTagModifications(): void {
   getAllFavorites().forEach(favorite => {
     favorite.resetAdditionalTags();
   });
-}
-
-export function usingInfiniteScroll(): boolean {
-  return Preferences.infiniteScrollEnabled.value;
 }

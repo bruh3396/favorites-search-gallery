@@ -56,7 +56,7 @@ class ImageRenderer extends GalleryBaseRenderer {
   }
 
   public upscaleCachedImageThumbs(): void {
-    GalleryImageCache.getImageRequests().forEach(request => UPSCALER.upscale(request));
+    UPSCALER.upscaleBatch(GalleryImageCache.getImageRequests());
   }
 
   public exitGallery(): void {

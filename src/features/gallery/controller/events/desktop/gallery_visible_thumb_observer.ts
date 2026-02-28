@@ -4,9 +4,9 @@ import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { debounceAlways } from "../../../../../utils/misc/async";
 
-const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
+const VISIBLE_THUMBS: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;
-const intersectionObserver: IntersectionObserver | null = createIntersectionObserver(getInitialFavoritesMenuHeight());
+const INTERSECTION_OBSERVER: IntersectionObserver | null = createIntersectionObserver(getInitialFavoritesMenuHeight());
 let bypassDebounce = true;
 
 const broadcastDebounceAlways = debounceAlways((entries: IntersectionObserverEntry[]) => {
@@ -30,9 +30,9 @@ function onVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
 function updateVisibleThumbs(entries: IntersectionObserverEntry[]): void {
   for (const entry of entries) {
     if (entry.isIntersecting) {
-      visibleThumbs.set(entry.target.id, entry);
+      VISIBLE_THUMBS.set(entry.target.id, entry);
     } else {
-      visibleThumbs.delete(entry.target.id);
+      VISIBLE_THUMBS.delete(entry.target.id);
     }
   }
 }
@@ -64,7 +64,7 @@ function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): In
   if (centerThumb === null) {
     return entries;
   }
-  const centerEntry = visibleThumbs.get(centerThumb.id);
+  const centerEntry = VISIBLE_THUMBS.get(centerThumb.id);
   return centerEntry === undefined ? entries : sortByDistance(centerEntry, entries);
 }
 
@@ -83,21 +83,21 @@ function bypassDebounceAlwaysOnPageChange(): void {
 }
 
 export function observe(thumbs: HTMLElement[]): void {
-  if (intersectionObserver === null) {
+  if (INTERSECTION_OBSERVER === null) {
     return;
   }
 
   for (const thumb of thumbs) {
-    intersectionObserver.observe(thumb);
+    INTERSECTION_OBSERVER.observe(thumb);
   }
 }
 
 export async function observeAllThumbsOnPage(): Promise<void> {
-  if (intersectionObserver === null) {
+  if (INTERSECTION_OBSERVER === null) {
     return;
   }
-  intersectionObserver.disconnect();
-  visibleThumbs.clear();
+  INTERSECTION_OBSERVER.disconnect();
+  VISIBLE_THUMBS.clear();
 
   await waitForAllThumbnailsToLoad();
   observe(getAllThumbs());
@@ -112,7 +112,7 @@ export function resetCenterThumb(): void {
 }
 
 export function getVisibleThumbs(): HTMLElement[] {
-  const entries = Array.from(visibleThumbs.values());
+  const entries = Array.from(VISIBLE_THUMBS.values());
   return sortByDistanceFromCenterThumb(entries)
     .map(entry => entry.target)
     .filter(target => target instanceof HTMLElement);

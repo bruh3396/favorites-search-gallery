@@ -1,9 +1,8 @@
-import * as FavoritesMetadataUpdateFlow from "./favorites_metadata_update_flow";
 import * as FavoritesModel from "../../../model/favorites_model";
 import { collectAspectRatios } from "../../../../../lib/global/content/skeleton/aspect_ratio_collector";
 
 export function onFavoritesLoaded(): void {
-  FavoritesMetadataUpdateFlow.updateMissingMetadata();
+  FavoritesModel.updateMissingMetadata();
   collectAspectRatios();
   FavoritesModel.buildSearchIndexAsynchronously();
 }

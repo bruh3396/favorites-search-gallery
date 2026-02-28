@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 import { readFileSync, writeFileSync } from "fs";
 import { build } from "esbuild";
-import { webWorker } from "./WEB_worker_plugin.mjs";
+import { webWorker } from "./web_worker_plugin.mjs";
 
 (async function() {
   const ENTRY_POINT = "src/app/favorites_search_gallery.ts";
@@ -12,7 +12,7 @@ import { webWorker } from "./WEB_worker_plugin.mjs";
   const BANNER = `// ==UserScript==
 // @name         Rule34 Favorites Search Gallery
 // @namespace    bruh3396
-// @version      1.20.4
+// @version      1.20.5
 // @description  Search, View, and Play Rule34 Favorites (Desktop/Android/iOS)
 // @author       bruh3396
 // @compatible   Chrome

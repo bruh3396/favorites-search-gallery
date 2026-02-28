@@ -2,7 +2,9 @@ import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../
 import { isImage, isVideo } from "../../../utils/content/content_type";
 import { CrossFeatureRequests } from "../../../lib/global/cross_feature_requests";
 import { Favorite } from "../../../types/favorite_types";
+import { GalleryBoundary } from "../types/gallery_types";
 import { GallerySettings } from "../../../config/gallery_settings";
+import { getAllThumbs } from "../../../utils/dom/dom";
 import { removeNonNumericCharacters } from "../../../utils/primitive/string";
 
 let thumbsOnCurrentPage: HTMLElement[] = [];
@@ -12,8 +14,8 @@ export function getThumbsOnCurrentPage(): HTMLElement[] {
   return thumbsOnCurrentPage;
 }
 
-export function indexCurrentPageThumbs(thumbs: HTMLElement[]): void {
-  thumbsOnCurrentPage = thumbs;
+export function indexCurrentPageThumbs(): void {
+  thumbsOnCurrentPage = getAllThumbs();
   enumerateCurrentPageThumbs();
 }
 
@@ -108,4 +110,15 @@ export function getSearchPageThumbsAround(thumb: HTMLElement): HTMLElement[] {
     return [];
   }
   return getElementsAroundIndex(latestSearchPageThumbs, index, 100);
+}
+
+export function getBoundary(index: number): GalleryBoundary {
+    if (index < 0) {
+    return GalleryBoundary.AT_LEFT_BOUNDARY;
+  }
+
+  if (index >= thumbsOnCurrentPage.length) {
+    return GalleryBoundary.AT_RIGHT_BOUNDARY;
+  }
+  return GalleryBoundary.IN_BOUNDS;
 }

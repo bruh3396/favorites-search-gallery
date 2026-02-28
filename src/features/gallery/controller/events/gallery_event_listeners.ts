@@ -27,7 +27,7 @@ function addFavoritesEventListeners(): void {
   Events.favorites.newFavoritesFoundOnReload.on(GalleryFavoritesFlow.handleNewFavoritesFoundOnReload, { once: true });
   Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
   Events.favorites.favoritesAddedToCurrentPage.on(GalleryFavoritesFlow.handleFavoritesAddedToCurrentPage);
-  Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowContentOnHover);
+  Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowingContentOnHover);
 }
 
 function addGalleryEventListeners2(): void {
@@ -41,7 +41,7 @@ function addSearchPageEventListeners(): void {
   Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
   Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
   Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
-  Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.reIndexThumbs);
+  Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
   Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);
 }
 

@@ -4,9 +4,13 @@ import { insertStyleHTML } from "../../../utils/dom/style";
 
 export const GALLERY_CONTAINER = document.createElement("div");
 GALLERY_CONTAINER.id = "gallery-container";
-GALLERY_CONTAINER.style.display = "none";
+toggleGalleryVisibility(false);
 
 export function insertGalleryContainer(): void {
   insertStyleHTML(GALLERY_HTML);
   FAVORITES_SEARCH_GALLERY_CONTAINER.insertAdjacentElement("beforeend", GALLERY_CONTAINER);
+}
+
+export function toggleGalleryVisibility(value: boolean): void {
+  GALLERY_CONTAINER.style.visibility = value ? "" : "hidden";
 }

@@ -20,9 +20,9 @@ export function toggleUI(value: boolean): void {
   const panels = document.getElementById("favorites-search-gallery-menu-panels");
   const header = document.getElementById("header");
   const container = document.getElementById("show-ui-container");
-  const bottomPanel3 = document.getElementById("bottom-panel-3");
+  const bottomPanel4 = document.getElementById("bottom-panel-4");
 
-  if (menu === null || panels === null || container === null || bottomPanel3 === null) {
+  if (menu === null || panels === null || container === null || bottomPanel4 === null) {
     return;
   }
 
@@ -30,7 +30,7 @@ export function toggleUI(value: boolean): void {
     if (header !== null) {
       header.style.display = "";
     }
-    bottomPanel3.insertAdjacentElement("afterbegin", container);
+    bottomPanel4.insertAdjacentElement("afterbegin", container);
     panels.style.display = "flex";
     menu.removeAttribute("style");
   } else {

@@ -105,7 +105,7 @@ export class InvertedSearchIndex<T extends Searchable> {
     let result = currentResult;
     const itemSets = command.nonNegatedTags.map(tag => this.tagItemMap.get(tag));
 
-    if (itemSets.some(set => set === undefined)) {
+    if (itemSets.some(itemSet => itemSet === undefined)) {
       return new Set<T>();
     }
 

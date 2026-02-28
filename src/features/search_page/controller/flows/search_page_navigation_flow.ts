@@ -5,13 +5,10 @@ import { Events } from "../../../../lib/global/events/events";
 import { NavigationKey } from "../../../../types/common_types";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { SearchPage } from "../../../../types/search_page";
-import { isForwardNavigationKey } from "../../../../types/equivalence";
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
   if (Preferences.searchPageInfiniteScrollEnabled.value) {
-    if (isForwardNavigationKey(direction)) {
-      SearchPageInfiniteScrollFlow.showMoreResults();
-    }
+    SearchPageInfiniteScrollFlow.showMoreResults();
     return null;
   }
   const searchPage = SearchPageModel.navigateSearchPages(direction);
