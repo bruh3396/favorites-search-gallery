@@ -16,14 +16,17 @@ function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
     return;
   }
   GalleryView.display(thumb);
-  GalleryPreloadFlow.preloadVisibleContentAround(thumb);
+
+  if (ON_FAVORITES_PAGE) {
+    GalleryPreloadFlow.preloadContentOutsideGalleryAround(thumb);
+  }
 }
 
 function onMouseOverWhileIdle(thumb: HTMLElement | null): void {
   if (thumb === null || !ON_FAVORITES_PAGE) {
     return;
   }
-  GalleryPreloadFlow.preloadVisibleContentAround(thumb);
+  GalleryPreloadFlow.preloadContentOutsideGalleryAround(thumb);
 }
 
 function onMouseDownInGallery(mouseEvent: FavoritesMouseEvent): void {

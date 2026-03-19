@@ -1,41 +1,30 @@
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import * as GalleryView from "../../../view/gallery_view";
+import { DO_NOTHING } from "../../../../../utils/misc/async";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { PerformanceProfile } from "../../../../../types/common_types";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 
-export function preloadContentInGalleryAround(thumb: HTMLElement | null): void {
-  if (thumb !== null && GallerySettings.preloadingEnabled) {
-    GalleryView.preloadContentInGallery(GalleryModel.getThumbsAround(thumb));
-  }
-}
-
-export function preloadVisibleContentAround(thumb: HTMLElement | null): void {
-  if (ON_FAVORITES_PAGE && !GalleryModel.hasRecentlyExitedGallery() && thumb !== null) {
-    GalleryThumbObserver.setCenterThumb(thumb);
-    preloadVisibleContent();
-  }
-}
-
-export function canPreloadOutsideGallery(thumbs: HTMLElement[]): boolean {
-  return GallerySettings.preloadingEnabled &&
-    thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload &&
-    thumbs.length > 0;
-}
-
-export function preloadVisibleContent(): void {
-  if (Preferences.performanceProfile.value === PerformanceProfile.MEDIUM) {
-    return;
-  }
-
-  if (GalleryModel.inGallery()) {
+function preloadAllVisibleContentHelper(): void {
+  if (GalleryModel.hasRecentlyExitedGallery() || GalleryModel.inGallery()) {
     return;
   }
   const thumbs = GalleryThumbObserver.getVisibleThumbs();
 
-  if (canPreloadOutsideGallery(thumbs)) {
+  if (thumbs.length < GallerySettings.maxVisibleThumbsBeforeStoppingPreload && thumbs.length > 0) {
     GalleryView.preloadContentOutOfGallery(thumbs);
   }
+}
+
+function preloadContentInGalleryAroundHelper(thumb: HTMLElement): void {
+  GalleryView.preloadContentInGallery(GalleryModel.getThumbsAround(thumb));
+}
+
+export const preloadContentInGalleryAround = GallerySettings.preloadingEnabled ? preloadContentInGalleryAroundHelper : DO_NOTHING;
+export const preloadAllVisibleContent = (GallerySettings.preloadingEnabled || Preferences.performanceProfile.value !== PerformanceProfile.NORMAL) ? preloadAllVisibleContentHelper : DO_NOTHING;
+
+export function preloadContentOutsideGalleryAround(thumb: HTMLElement): void {
+  GalleryThumbObserver.setCenterThumb(thumb);
+  preloadAllVisibleContent();
 }

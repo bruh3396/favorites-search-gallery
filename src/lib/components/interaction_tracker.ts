@@ -5,11 +5,11 @@ export class InteractionTracker {
   public onInteractionStopped: () => void;
   public onMouseMoveStopped: () => void;
   public onScrollingStopped: () => void;
-  public onNoInteractionOnStart: () => void;
+  public onNoInteractionOnEnable: () => void;
   public idleDuration: number;
   public mouseTimeout: Timeout;
   public scrollTimeout: Timeout;
-  public interactionOnStartTimeout: Timeout;
+  public noInteractionOnEnableTimeout: Timeout;
   public mouseIsMoving: boolean;
   public scrolling: boolean;
   public abortController: AbortController;
@@ -19,40 +19,32 @@ export class InteractionTracker {
     onInteractionStopped: () => void,
     onMouseMoveStopped: () => void,
     onScrollingStopped: () => void,
-    onNoInteractionOnStart: () => void
+    onNoInteractionOnEnable: () => void
   ) {
     this.idleDuration = idleDuration;
     this.onInteractionStopped = onInteractionStopped;
     this.onMouseMoveStopped = onMouseMoveStopped;
     this.onScrollingStopped = onScrollingStopped;
-    this.onNoInteractionOnStart = onNoInteractionOnStart;
+    this.onNoInteractionOnEnable = onNoInteractionOnEnable;
     this.mouseIsMoving = false;
     this.scrolling = false;
     this.abortController = new AbortController();
   }
 
-  public start(): void {
-    this.toggle(true);
+  public enable(): void {
+    this.abortController = new AbortController();
+    this.trackMouseMove();
+    this.trackScroll();
+    this.startNoInteractionOnEnableTimer();
   }
 
-  public stop(): void {
-    this.toggle(false);
-  }
-
-  public toggle(value: boolean): void {
-    if (value) {
-      this.abortController = new AbortController();
-      this.startInteractionOnStartTimer();
-      this.trackMouseMove();
-      this.trackScroll();
-      return;
-    }
+  public disable(): void {
     this.abortController.abort();
   }
 
-  public startInteractionOnStartTimer(): void {
-    this.interactionOnStartTimeout = setTimeout(() => {
-      this.onNoInteractionOnStart();
+  private startNoInteractionOnEnableTimer(): void {
+    this.noInteractionOnEnableTimeout = setTimeout(() => {
+      this.onNoInteractionOnEnable();
     }, this.idleDuration);
   }
 
@@ -72,7 +64,7 @@ export class InteractionTracker {
 
   private onMouseMove(): void {
     this.mouseIsMoving = true;
-    clearTimeout(this.interactionOnStartTimeout);
+    clearTimeout(this.noInteractionOnEnableTimeout);
     clearTimeout(this.mouseTimeout);
     this.mouseTimeout = setTimeout(() => {
       this.mouseIsMoving = false;
@@ -86,7 +78,7 @@ export class InteractionTracker {
 
   private onScroll(): void {
     this.scrolling = true;
-    clearTimeout(this.interactionOnStartTimeout);
+    clearTimeout(this.noInteractionOnEnableTimeout);
     clearTimeout(this.scrollTimeout);
     this.scrollTimeout = setTimeout(() => {
       this.scrolling = false;

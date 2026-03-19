@@ -1,5 +1,5 @@
+import { clamp, getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, randomBetween, roundToTwoDecimalPlaces, seededRandom } from "../utils/primitive/number";
 import { describe, expect, test } from "vitest";
-import { getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, randomBetween, roundToTwoDecimalPlaces, seededRandom } from "../utils/primitive/number";
 
 describe("getRandomPositiveInteger", () => {
   test("zero", () => {
@@ -134,5 +134,35 @@ describe("randomBetween", () => {
       expect(value).toBeLessThanOrEqual(20);
       expect(value).toBeGreaterThanOrEqual(0);
     }
+  });
+});
+
+describe("clamp", () => {
+  test("zero", () => {
+    expect(clamp(0, 0, 0)).toBe(0);
+    expect(clamp(1, 0, 0)).toBe(0);
+    expect(clamp(10, 0, 0)).toBe(0);
+  });
+
+  test("invalid range", () => {
+    expect(clamp(10, 100, 0)).toBe(100);
+  });
+
+  test("no clamp", () => {
+    expect(clamp(10, 0, 20)).toBe(10);
+    expect(clamp(11, 0, 20)).toBe(11);
+    expect(clamp(12, 0, 20)).toBe(12);
+    expect(clamp(12, 12, 20)).toBe(12);
+    expect(clamp(13, -100, 20)).toBe(13);
+  });
+
+  test("clamp min", () => {
+    expect(clamp(10, 16, 20)).toBe(16);
+    expect(clamp(-1000, 16, 20)).toBe(16);
+  });
+
+  test("clamp max", () => {
+    expect(clamp(100, 16, 20)).toBe(20);
+    expect(clamp(1000, 16, 20)).toBe(20);
   });
 });

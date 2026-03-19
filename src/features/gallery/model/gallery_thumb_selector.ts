@@ -87,11 +87,9 @@ function getThumbsAroundWrappedOnCurrentPage(initialThumb: HTMLElement, limit: n
 }
 
 function getThumbsAroundThroughoutAllPages(initialThumb: HTMLElement, limit: number, qualifier: (favorite: Favorite) => boolean): HTMLElement[] {
-  const latestFavoritesPageSearchResults = CrossFeatureRequests.latestFavoritesSearchResults.request();
-  const startIndex = latestFavoritesPageSearchResults.findIndex(favorite => favorite.id === initialThumb.id);
-  const adjacentSearchResults = getWrappedElementsAroundIndex(latestFavoritesPageSearchResults, startIndex, 50)
-    .filter(thumb => qualifier(thumb))
-    .slice(0, limit);
+  const searchResults = CrossFeatureRequests.latestFavoritesSearchResults.request();
+  const startIndex = searchResults.findIndex(favorite => favorite.id === initialThumb.id);
+  const adjacentSearchResults = getWrappedElementsAroundIndex(searchResults, startIndex, 50).filter(thumb => qualifier(thumb)).slice(0, limit);
   return adjacentSearchResults.map(favorite => favorite.root);
 }
 

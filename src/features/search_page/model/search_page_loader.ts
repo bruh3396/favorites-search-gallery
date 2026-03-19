@@ -1,5 +1,4 @@
 import { ConcurrencyLimiter } from "../../../lib/components/concurrency_limiter";
-import { Events } from "../../../lib/global/events/events";
 import { NavigationKey } from "../../../types/common_types";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
 import { SearchPage } from "../../../types/search_page";
@@ -28,7 +27,6 @@ export function setupSearchPageLoader(): void {
 
   searchPages.set(initialPageNumber, initialSearchPage);
   preloadSearchPages();
-  Events.searchPage.searchPageCreated.emit(initialSearchPage);
 }
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {

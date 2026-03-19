@@ -9,22 +9,22 @@ let centerThumb: HTMLElement | null = null;
 const INTERSECTION_OBSERVER: IntersectionObserver | null = createIntersectionObserver(getInitialFavoritesMenuHeight());
 let bypassDebounce = true;
 
-const broadcastDebounceAlways = debounceAlways((entries: IntersectionObserverEntry[]) => {
-  Events.gallery.visibleThumbsChanged.emit(entries);
+const broadcastDebounceAlways = debounceAlways(() => {
+  Events.gallery.visibleThumbsChanged.emit();
 }, GallerySettings.preloadContentDebounceTime);
 
-function broadcastVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
+function broadcastVisibleThumbsChanged(): void {
   if (bypassDebounce) {
     bypassDebounce = false;
-    Events.gallery.visibleThumbsChanged.emit(entries);
+    Events.gallery.visibleThumbsChanged.emit();
   } else {
-    broadcastDebounceAlways(entries);
+    broadcastDebounceAlways();
   }
 }
 
 function onVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
   updateVisibleThumbs(entries);
-  broadcastVisibleThumbsChanged(entries);
+  broadcastVisibleThumbsChanged();
 }
 
 function updateVisibleThumbs(entries: IntersectionObserverEntry[]): void {

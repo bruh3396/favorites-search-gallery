@@ -74,6 +74,7 @@ async function fetchNextFavoritesPage(): Promise<void> {
 }
 
 async function fetchFavoritesPageHelper(request: FavoritesPageRequest): Promise<void> {
+  await sleep(request.fetchDelay);
   API.fetchFavoritesPage(request.realPageNumber)
     .then((html) => {
       onFavoritesPageRequestSuccess(request, html);
@@ -81,7 +82,6 @@ async function fetchFavoritesPageHelper(request: FavoritesPageRequest): Promise<
     .catch((error) => {
       onFavoritesPageRequestError(request, error);
     });
-  await sleep(request.fetchDelay);
 }
 
 function onFavoritesPageRequestSuccess(request: FavoritesPageRequest, html: string): void {
@@ -152,7 +152,7 @@ export async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteIt
 }
 
 export async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<FavoriteItem[]> {
-  await sleep(100);
+  await sleep(500);
   storedFavoriteIds = ids;
   let favorites: FavoriteItem[] = [];
 
@@ -166,5 +166,6 @@ export async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<Favor
       storedFavoriteIds.clear();
       return favorites;
     }
+    await sleep(FavoritesSettings.favoritesPageFetchDelay);
   }
 }

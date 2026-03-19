@@ -13,13 +13,13 @@ const UPSCALER = GallerySettings.useOffscreenThumbUpscaler ? new GalleryOffscree
 const UPSCALE_QUEUE = new ThrottledQueue(20, !USING_FIREFOX);
 
 class ImageRenderer extends GalleryBaseRenderer {
-  public lastShownId: string;
+  public lastDrawnId: string;
 
   constructor() {
     super();
     GalleryImageCache.setupGalleryImageCache(this.onImageCreated.bind(this));
     GalleryCanvas.setupGalleryCanvas(this.container);
-    this.lastShownId = "";
+    this.lastDrawnId = "";
   }
 
   public display(thumb: HTMLElement): void {
@@ -68,7 +68,7 @@ class ImageRenderer extends GalleryBaseRenderer {
   public onImageCreated(request: ImageRequest): void {
     UPSCALER.upscale(request);
 
-    if (request.id === this.lastShownId) {
+    if (request.id === this.lastDrawnId) {
       this.draw(request.thumb);
     }
   }
@@ -96,7 +96,7 @@ class ImageRenderer extends GalleryBaseRenderer {
   }
 
   private redrawOnOrientationChange(): void {
-    const thumb = document.getElementById(this.lastShownId);
+    const thumb = document.getElementById(this.lastDrawnId);
 
     if (thumb === null) {
       return;
@@ -110,7 +110,7 @@ class ImageRenderer extends GalleryBaseRenderer {
   }
 
   private draw(thumb: HTMLElement): void {
-    this.lastShownId = thumb.id;
+    this.lastDrawnId = thumb.id;
     const imageRequest = GalleryImageCache.getImageRequest(thumb);
 
     if (imageRequest === undefined) {

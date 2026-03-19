@@ -1,23 +1,24 @@
-import * as GalleryAutoplayController from "../../autoplay/gallery_autoplay_controller";
-import * as GalleryContentFlow from "../flows/runtime/gallery_content_flow";
-import * as GalleryFavoritesFlow from "../flows/runtime/gallery_favorites_flow";
-import * as GalleryKeyFlow from "../flows/runtime/gallery_key_flow";
-import * as GalleryMenuFlow from "../flows/runtime/gallery_menu_flow";
-import * as GalleryModel from "../../model/gallery_model";
-import * as GalleryMouseFlow from "../flows/runtime/gallery_mouse_flow";
-import * as GalleryPreloadFlow from "../flows/runtime/gallery_preload_flow";
-import * as GallerySearchPageFlow from "../flows/runtime/gallery_search_page_flow";
-import * as GalleryStateFlow from "../flows/runtime/gallery_state_flow";
-import * as GallerySwipeFlow from "../flows/runtime/gallery_swipe_flow";
-import * as GalleryTouchFlow from "../flows/runtime/gallery_touch_flow";
-import * as GalleryView from "../../view/gallery_view";
-import { CrossFeatureRequests } from "../../../../lib/global/cross_feature_requests";
-import { Events } from "../../../../lib/global/events/events";
-import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
+import * as GalleryAutoplayController from "../autoplay/gallery_autoplay_controller";
+import * as GalleryContentFlow from "./flows/runtime/gallery_content_flow";
+import * as GalleryFavoritesFlow from "./flows/runtime/gallery_favorites_flow";
+import * as GalleryInteractionFlow from "./flows/runtime/gallery_interaction_flow";
+import * as GalleryKeyFlow from "./flows/runtime/gallery_key_flow";
+import * as GalleryMenuFlow from "./flows/runtime/gallery_menu_flow";
+import * as GalleryModel from "../model/gallery_model";
+import * as GalleryMouseFlow from "./flows/runtime/gallery_mouse_flow";
+import * as GalleryPreloadFlow from "./flows/runtime/gallery_preload_flow";
+import * as GallerySearchPageFlow from "./flows/runtime/gallery_search_page_flow";
+import * as GalleryStateFlow from "./flows/runtime/gallery_state_flow";
+import * as GallerySwipeFlow from "./flows/runtime/gallery_swipe_flow";
+import * as GalleryTouchFlow from "./flows/runtime/gallery_touch_flow";
+import * as GalleryView from "../view/gallery_view";
+import { CrossFeatureRequests } from "../../../lib/global/cross_feature_requests";
+import { Events } from "../../../lib/global/events/events";
+import { ON_DESKTOP_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
 
-export function addGalleryEventListeners(): void {
+export function setupGalleryController(): void {
   addFavoritesEventListeners();
-  addGalleryEventListeners2();
+  addGalleryEventListeners();
   addPlatformDependentEventListeners();
   addSearchPageEventListeners();
   addCrossFeatureRequestHandlers();
@@ -30,8 +31,8 @@ function addFavoritesEventListeners(): void {
   Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowingContentOnHover);
 }
 
-function addGalleryEventListeners2(): void {
-  Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadVisibleContent);
+function addGalleryEventListeners(): void {
+  Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadAllVisibleContent);
   Events.gallery.videoEnded.on(GalleryAutoplayController.onVideoEnded);
   Events.gallery.videoDoubleClicked.on(GalleryStateFlow.exitGallery);
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
@@ -66,6 +67,7 @@ function addDesktopEventListeners(): void {
   Events.document.wheel.on(GalleryMouseFlow.onWheel);
   Events.document.keydown.on(GalleryKeyFlow.onKeyDown);
   Events.document.keyup.on(GalleryKeyFlow.onKeyUp);
+  Events.gallery.interactionStopped.on(GalleryInteractionFlow.onInteractionStopped);
 }
 
 function addMobileEventListeners(): void {

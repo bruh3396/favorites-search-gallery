@@ -1,3 +1,4 @@
+import { DO_NOTHING } from "../../../../../utils/misc/async";
 import { GalleryBaseRenderer } from "../gallery_base_renderer";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { getGIFSource } from "../../../../../utils/content/gif_url";
@@ -15,6 +16,7 @@ class GifRenderer extends GalleryBaseRenderer {
     this.gif.className = "fullscreen-image";
     this.preloadedGIFs = [];
     this.container.appendChild(this.gif);
+    this.preload = GallerySettings.gifPreloadingEnabled ? this.preload : DO_NOTHING;
   }
 
   public display(element: HTMLElement): void {
@@ -29,9 +31,6 @@ class GifRenderer extends GalleryBaseRenderer {
   }
 
   public preload(elements: HTMLElement[]): void {
-    if (!GallerySettings.gifPreloadingEnabled) {
-      return;
-    }
     const gifSources = elements
       .filter((element) => isGif(element))
       .slice(0, GallerySettings.preloadedGifCount)

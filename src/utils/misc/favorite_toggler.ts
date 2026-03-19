@@ -1,8 +1,8 @@
-import * as API from "../../../lib/api/api";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite_types";
-import { Events } from "../../../lib/global/events/events";
+import * as API from "../../lib/api/api";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../types/favorite_types";
+import { Events } from "../../lib/global/events/events";
 
-export async function addFavoriteInGallery(thumb: HTMLElement | undefined): Promise<AddFavoriteStatus> {
+export async function addFavorite(thumb: HTMLElement | undefined): Promise<AddFavoriteStatus> {
   if (thumb === undefined) {
     return Promise.resolve(AddFavoriteStatus.ERROR);
   }
@@ -14,7 +14,7 @@ export async function addFavoriteInGallery(thumb: HTMLElement | undefined): Prom
   return status;
 }
 
-export function removeFavoriteInGallery(thumb: HTMLElement | undefined): Promise<RemoveFavoriteStatus> {
+export function removeFavorite(thumb: HTMLElement | undefined): Promise<RemoveFavoriteStatus> {
   if (thumb === undefined) {
     return Promise.resolve(RemoveFavoriteStatus.ERROR);
   }

@@ -5,10 +5,10 @@ import * as GalleryVisibleThumbObserver from "../../events/desktop/gallery_visib
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
 import { Events } from "../../../../../lib/global/events/events";
 import { GALLERY_DISABLED } from "../../../../../lib/global/flags/derived_flags";
-import { addGalleryEventListeners } from "../../events/gallery_event_listeners";
 import { insertGalleryContainer } from "../../../ui/gallery_container";
 import { setupAutoplay } from "./gallery_autoplay_setup_flow";
 import { setupDesktopGalleryMenu } from "../../../ui/gallery_desktop_menu";
+import { setupGalleryController } from "../../gallery_controller";
 import { setupGalleryInteractionTracker } from "../../events/desktop/gallery_interaction_tracker";
 import { setupGalleryMobileTapControls } from "../../events/mobile/gallery_edge_tap_controls";
 
@@ -32,7 +32,7 @@ function setupGalleryHelper(): void {
   setupGalleryInteractionTracker();
   GalleryView.setupGalleryView();
   setupGalleryMenu();
-  addGalleryEventListeners();
+  setupGalleryController();
   setupAutoplay();
 
   if (ON_SEARCH_PAGE) {

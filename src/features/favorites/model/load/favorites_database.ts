@@ -14,10 +14,6 @@ function updateFavorites(favorites: FavoriteItem[]): void {
   DATABASE.update(favorites.map(favorite => favorite.databaseRecord));
 }
 
-function convertToFavorites(records: FavoritesDatabaseRecord[]): FavoriteItem[] {
-  return records.map(record => new FavoriteItem(record));
-}
-
 function getSchemaVersion(): number | null {
   const version = localStorage.getItem(SCHEMA_VERSION_LOCAL_STORAGE_KEY);
   return version === null ? null : parseInt(version);
@@ -61,9 +57,8 @@ async function updateRecordsIfNeeded(records: FavoritesDatabaseRecord[]): Promis
 
 export async function loadAllFavorites(): Promise<FavoriteItem[]> {
   const records = await DATABASE.load();
-
   const updatedRecords = await updateRecordsIfNeeded(records);
-  return convertToFavorites(updatedRecords);
+  return updatedRecords.map(record => new FavoriteItem(record));
 }
 
 export function storeFavorites(favorites: FavoriteItem[]): Promise<void> {

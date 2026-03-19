@@ -7,10 +7,10 @@ import { Preferences } from "../../../../lib/global/preferences/preferences";
 import { USING_FIREFOX } from "../../../../lib/global/flags/intrinsic_flags";
 import { insertStyleHTML } from "../../../../utils/dom/style";
 
-const background: HTMLElement = document.createElement("div");
+const BACKGROUND: HTMLElement = document.createElement("div");
 
-background.id = "gallery-background";
-background.style.opacity = Preferences.backgroundOpacity.value;
+BACKGROUND.id = "gallery-background";
+BACKGROUND.style.opacity = Preferences.backgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
 
 function usingColumnLayout(): boolean {
@@ -18,7 +18,7 @@ function usingColumnLayout(): boolean {
 }
 
 export function setupGalleryUI(): void {
-  GALLERY_CONTAINER.appendChild(background);
+  GALLERY_CONTAINER.appendChild(BACKGROUND);
   toggleVideoPointerEvents(false);
   toggleGalleryMenuVisibility(false);
 }
@@ -26,6 +26,7 @@ export function setupGalleryUI(): void {
 export function enterGallery(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
   blurCurrentlyFocusedElement();
+  toggleCursor(true);
   toggleBackgroundInteractability(true);
   toggleScrollbar(false);
   toggleVideoPointerEvents(true);
@@ -59,11 +60,11 @@ function toggleVideoPointerEvents(value: boolean): void {
 }
 
 function toggleBackgroundInteractability(value: boolean): void {
-  background.classList.toggle("in-gallery", value);
+    BACKGROUND.classList.toggle("in-gallery", value);
 }
 
 export function toggleBackgroundOpacity(): void {
-  const opacity = parseFloat(background.style.opacity);
+  const opacity = parseFloat(BACKGROUND.style.opacity);
 
   if (opacity < 1) {
     updateBackgroundOpacity(1);
@@ -104,7 +105,7 @@ export function updateBackgroundOpacityFromEvent(event: WheelEvent): void {
 function updateBackgroundOpacity(opacity: number): void {
   const opacityString = String(opacity);
 
-  background.style.opacity = opacityString;
+  BACKGROUND.style.opacity = opacityString;
   Preferences.backgroundOpacity.set(opacityString);
 }
 
@@ -149,7 +150,7 @@ function scrollToThumb(thumb: HTMLElement): void {
 }
 
 export function toggleCursor(value: boolean): void {
-  background.style.cursor = value ? "default" : "none";
+  BACKGROUND.style.cursor = value ? "default" : "none";
 }
 
 export function toggleGalleryMenuVisibility(value: boolean): void {
@@ -161,5 +162,5 @@ export function toggleGalleryMenuVisibility(value: boolean): void {
 }
 
 export function toggleZoomCursor(value: boolean): void {
-  background.classList.toggle("zooming", value);
+  BACKGROUND.classList.toggle("zooming", value);
 }

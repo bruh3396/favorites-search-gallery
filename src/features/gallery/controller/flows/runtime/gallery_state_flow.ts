@@ -9,7 +9,7 @@ import { GalleryInteractionTracker } from "../../events/desktop/gallery_interact
 export function enterGallery(thumb: HTMLElement): void {
   GalleryModel.enterGallery(thumb);
   GalleryView.enterGallery(thumb);
-  GalleryInteractionTracker?.start();
+  GalleryInteractionTracker?.enable();
   GalleryAutoplayController.startAutoplay(thumb);
   GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
   Events.gallery.showOnHoverToggled.emit(false);
@@ -19,7 +19,7 @@ export function enterGallery(thumb: HTMLElement): void {
 export function exitGallery(): void {
   GalleryModel.exitGallery();
   GalleryView.exitGallery();
-  GalleryInteractionTracker?.stop();
+  GalleryInteractionTracker?.disable();
   GalleryAutoplayController.stopAutoplay();
   GalleryZoomFlow.toggleGalleryImageZoom(false);
   Events.gallery.exitedGallery.emit();

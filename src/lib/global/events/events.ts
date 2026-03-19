@@ -71,12 +71,13 @@ const gallery = {
   showOnHoverToggled: new EventEmitter<boolean>(true),
   enteredGallery: new EventEmitter<void>(true),
   exitedGallery: new EventEmitter<void>(true),
-  visibleThumbsChanged: new EventEmitter<IntersectionObserverEntry[]>(true),
+  visibleThumbsChanged: new EventEmitter<void>(true),
   galleryMenuButtonClicked: new EventEmitter<GalleryMenuAction>(true),
   videoEnded: new EventEmitter<void>(true),
   videoDoubleClicked: new EventEmitter<MouseEvent>(true),
   rightTap: new EventEmitter<void>(true),
-  leftTap: new EventEmitter<void>(true)
+  leftTap: new EventEmitter<void>(true),
+  interactionStopped: new EventEmitter<void>(true)
 };
 
 const caption = {

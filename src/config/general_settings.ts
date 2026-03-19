@@ -15,11 +15,11 @@ export const GeneralSettings = {
   postPageRequestDelayWhileFetchingFavorites: 30_000,
   postPageRequestDelayAfterFavoritesLoaded: 400,
   searchPagePostPageRequestDelay: 400,
-  preloadThumbnails: true,
-  galleryMenuOptionEnabled: true,
   thumbnailSpacing: 6,
   rightContentMargin: 15,
   skeletonAnimationClasses: "pulse",
-  randomSkeletonAnimationTiming: true,
-  infiniteScrollMargin: "75%"
+  infiniteScrollMargin: "75%",
+  preloadThumbnails: true,
+  galleryMenuOptionEnabled: true,
+  randomSkeletonAnimationTiming: true
 };

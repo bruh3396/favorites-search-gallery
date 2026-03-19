@@ -1,7 +1,5 @@
-import * as GalleryFavoriteToggler from "./gallery_favorite_toggler";
 import * as GalleryStateMachine from "./gallery_state_machine";
 import * as GalleryThumbSelector from "./gallery_thumb_selector";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite_types";
 import { GalleryBoundary, GalleryState } from "../types/gallery_types";
 import { openOriginal, openPostPage } from "../../../utils/dom/links";
 import { NavigationKey } from "../../../types/common_types";
@@ -95,14 +93,6 @@ export function openOriginalInNewTab(): void {
 
 export function downloadInGallery(): void {
   downloadFromThumb(getCurrentThumb());
-}
-
-export function addFavoriteInGallery(): Promise<AddFavoriteStatus> {
-  return GalleryFavoriteToggler.addFavoriteInGallery(getCurrentThumb());
-}
-
-export function removeFavoriteInGallery(): Promise<RemoveFavoriteStatus> {
-  return GalleryFavoriteToggler.removeFavoriteInGallery(getCurrentThumb());
 }
 
 function setCurrentIndex(nextIndex: number): GalleryBoundary {

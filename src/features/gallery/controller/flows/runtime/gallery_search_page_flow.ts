@@ -2,6 +2,7 @@
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import * as GalleryView from "../../../view/gallery_view";
+import { DO_NOTHING } from "../../../../../utils/misc/async";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { POSTS_PER_SEARCH_PAGE } from "../../../../../lib/global/constants";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
@@ -21,13 +22,13 @@ export function onUpscaleToggled(value: boolean): void {
   }
 }
 
+const preloadOutsideGallery = GallerySettings.preloadOutsideGalleryOnSearchPage ? (): void => {
+  GalleryView.preloadContentOutOfGallery(getAllThumbs());
+} : DO_NOTHING;
+
 export function onSearchPageCreated(): void {
   executeFunctionBasedOnGalleryState({
-    idle: () => {
-      if (GallerySettings.preloadOutsideGalleryOnSearchPage) {
-        GalleryView.preloadContentOutOfGallery(getAllThumbs());
-      }
-    }
+    idle: preloadOutsideGallery
   });
 }
 

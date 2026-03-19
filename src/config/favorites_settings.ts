@@ -5,13 +5,13 @@ export const FavoritesSettings = {
     min: 1,
     max: 10_000
   },
-  favoritesPageFetchDelay: 200,
-  resultsPerPageStep: 25,
   maxPageNumberButtons: ON_MOBILE_DEVICE ? 5 : 5,
-  useSearchIndex: true,
-  buildIndexAsynchronously: true,
+  favoritesPageFetchDelay: 1000,
+  resultsPerPageStep: 25,
   infiniteScrollBatchSize: 25,
   infiniteScrollPreloadCount: 100,
+  useSearchIndex: true,
+  buildIndexAsynchronously: true,
   favoriteFinderEnabled: false,
   bottomNavigationButtonsEnabled: false,
   fetchMultiplePostWhileFetchingFavorites: true

@@ -1,8 +1,8 @@
 import * as FavoritesLoadFlow from "./favorites_load_flow";
 import * as FavoritesView from "../../../view/favorites_view";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { addFavoritesEventsListeners } from "../../events/favorites_event_listeners";
 import { buildFavoritesPage } from "../../../ui/structure/favorites_page_builder";
+import { setupFavoritesController } from "../../favorites_controller";
 
 export function setupFavorites(): void {
   if (!ON_FAVORITES_PAGE) {
@@ -10,6 +10,6 @@ export function setupFavorites(): void {
   }
   buildFavoritesPage();
   FavoritesView.setupFavoritesView();
-  addFavoritesEventsListeners();
+  setupFavoritesController();
   FavoritesLoadFlow.loadAllFavorites();
 }
