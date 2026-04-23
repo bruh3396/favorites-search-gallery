@@ -2,7 +2,7 @@ import { DownloadRequest, createDownloadRequest } from "./download_request";
 import { ConcurrencyLimiter } from "../../lib/components/concurrency_limiter";
 import { DownloadAbortedError } from "../../types/error_types";
 import { Favorite } from "../../types/favorite_types";
-import { downloadBlob } from "../../lib/download/downloader";
+import { downloadBlob } from "../../lib/global/downloader";
 
 const FETCH_LIMITER = new ConcurrencyLimiter(3);
 

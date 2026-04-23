@@ -1,4 +1,4 @@
-import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/collection/array";
+import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/primitive/array";
 import { isImage, isVideo } from "../../../utils/content/content_type";
 import { CrossFeatureRequests } from "../../../lib/global/cross_feature_requests";
 import { Favorite } from "../../../types/favorite_types";

@@ -1,4 +1,5 @@
 import * as API from "../../../../lib/api/api";
+
 import * as Icons from "../../../../assets/icons";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../../assets/images";
 import { ClickCode, Post } from "../../../../types/common_types";
@@ -9,7 +10,7 @@ import { FavoriteElement } from "./favorite_types";
 import { GALLERY_DISABLED } from "../../../../lib/global/flags/derived_flags";
 import { ITEM_CLASS_NAME } from "../../../../utils/dom/dom";
 import { createPostPageURL } from "../../../../lib/api/api_url";
-import { downloadFromThumb } from "../../../../lib/download/downloader";
+import { downloadFromThumb } from "../../../../lib/global/downloader";
 import { getContentType } from "../../../../utils/primitive/string";
 
 let htmlTemplate: HTMLElement;
@@ -109,10 +110,12 @@ export class FavoriteHTMLElement implements FavoriteElement {
   }
 
   private openPostInNewTabOnClickDesktop(): void {
+    this.container.href = createPostPageURL(this.root.id);
     this.container.onclick = (event): void => {
       if (event.ctrlKey) {
         openOriginal(this.root);
       }
+      event.preventDefault();
     };
     this.container.addEventListener("mousedown", (event: MouseEvent): void => {
       if (event.ctrlKey) {
@@ -126,6 +129,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
         event.preventDefault();
         openPostPage(this.root.id);
       }
+      event.preventDefault();
     });
   }
 

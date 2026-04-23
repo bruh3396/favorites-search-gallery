@@ -56,5 +56,9 @@ export function createSelectElement<T extends string>(partial: Partial<SelectEle
   } else {
     select.value = String(template.preference.value);
   }
+
+  if (template.triggerOnCreation) {
+    onChange();
+  }
   select.onchange = onChange;
 }

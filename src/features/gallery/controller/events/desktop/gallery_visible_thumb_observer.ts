@@ -2,11 +2,12 @@ import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/global/flag
 import { getAllThumbs, getRectDistance, waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
 import { Events } from "../../../../../lib/global/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
+import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { debounceAlways } from "../../../../../utils/misc/async";
 
 const VISIBLE_THUMBS: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;
-const INTERSECTION_OBSERVER: IntersectionObserver | null = createIntersectionObserver(getInitialFavoritesMenuHeight());
+let intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let bypassDebounce = true;
 
 const broadcastDebounceAlways = debounceAlways(() => {
@@ -41,7 +42,11 @@ function getInitialFavoritesMenuHeight(): number {
   return -200;
 }
 
-function createIntersectionObserver(topMargin: number = 0): IntersectionObserver | null {
+function getTopMargin(): number {
+  return Preferences.alternateLayout ? 0 : getInitialFavoritesMenuHeight();
+}
+
+function createIntersectionObserver(): IntersectionObserver | null {
   if (ON_MOBILE_DEVICE) {
     return null;
   }
@@ -51,13 +56,13 @@ function createIntersectionObserver(topMargin: number = 0): IntersectionObserver
   }
   return new IntersectionObserver(onVisibleThumbsChanged, {
     root: null,
-    rootMargin: getFinalRootMargin(topMargin),
+    rootMargin: getFinalRootMargin(),
     threshold: [0.1]
   });
 }
 
-function getFinalRootMargin(topMargin: number): string {
-  return `${topMargin}px 0px ${GallerySettings.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
+function getFinalRootMargin(): string {
+  return `${getTopMargin()}px 0px ${GallerySettings.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
 }
 
 function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {
@@ -83,20 +88,20 @@ function bypassDebounceAlwaysOnPageChange(): void {
 }
 
 export function observe(thumbs: HTMLElement[]): void {
-  if (INTERSECTION_OBSERVER === null) {
+  if (intersectionObserver === null) {
     return;
   }
 
   for (const thumb of thumbs) {
-    INTERSECTION_OBSERVER.observe(thumb);
+    intersectionObserver.observe(thumb);
   }
 }
 
 export async function observeAllThumbsOnPage(): Promise<void> {
-  if (INTERSECTION_OBSERVER === null) {
+  if (intersectionObserver === null) {
     return;
   }
-  INTERSECTION_OBSERVER.disconnect();
+  intersectionObserver.disconnect();
   VISIBLE_THUMBS.clear();
 
   await waitForAllThumbnailsToLoad();
@@ -120,8 +125,17 @@ export function getVisibleThumbs(): HTMLElement[] {
 
 export function setupVisibleThumbObserver(): void {
   bypassDebounceAlwaysOnPageChange();
+  Events.favorites.alternateLayoutToggled.on(adjustRootMargin);
 
   if (ON_SEARCH_PAGE) {
+    observeAllThumbsOnPage();
+  }
+}
+
+export function adjustRootMargin(): void {
+  if (intersectionObserver !== null) {
+    intersectionObserver.disconnect();
+    intersectionObserver = createIntersectionObserver();
     observeAllThumbsOnPage();
   }
 }

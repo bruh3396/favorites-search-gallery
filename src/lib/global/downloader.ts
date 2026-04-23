@@ -1,4 +1,4 @@
-import { getExtensionFromURL } from "../global/extensions";
+import { getExtensionFromURL } from "./extensions";
 import { getOriginalContentURL } from "../api/api_content";
 
 export function downloadBlob(blob: Blob, filename: string): void {

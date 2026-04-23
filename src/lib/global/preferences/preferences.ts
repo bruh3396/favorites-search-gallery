@@ -32,6 +32,9 @@ export const Preferences = {
   galleryMenuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   addButtonsVisible: new Preference("showAddFavoriteButtons", false),
+  maximizeToggleFavoriteButtons: new Preference("maximizeToggleFavoriteButtons", false),
+  alternateLayout: new Preference("alternateLayout", false),
+  slimLayout: new Preference("slimLayout", false),
   searchPageAddButtonsVisible: new Preference("showSearchPageAddFavoriteButtons", false),
   hintsEnabled: new Preference("showHints", false),
   headerEnabled: new Preference("showHeader", true),
@@ -48,5 +51,6 @@ export const Preferences = {
   downloadButtonsVisible: new Preference("showDownloadButtons", false),
   mobileGalleryEnabled: new Preference("mobileGalleryEnabled", true),
   upscaleThumbsOnSearchPage: new Preference("upscaleSearchPageThumbs", ON_DESKTOP_DEVICE),
-  searchPageInfiniteScrollEnabled: new Preference("searchPageInfiniteScroll", false)
+  searchPageInfiniteScrollEnabled: new Preference("searchPageInfiniteScroll", false),
+  desktopSearchBoxHeight: new Preference("desktopSearchBoxHeight", 50)
 };

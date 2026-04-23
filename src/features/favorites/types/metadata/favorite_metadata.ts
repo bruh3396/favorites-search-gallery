@@ -8,7 +8,7 @@ import { FAVORITES_PER_PAGE } from "../../../../lib/global/constants";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { getVideoDurationFromFavorite } from "../../../../lib/api/api_metadata";
 import { isVideo } from "../../../../utils/content/content_type";
-import { splitIntoChunks } from "../../../../utils/collection/array";
+import { splitIntoChunks } from "../../../../utils/primitive/array";
 
 const FETCH_UPDATE_QUEUE: FavoriteMetadata[] = [];
 const READY_UPDATE_QUEUE: FavoriteMetadata[] = [];
@@ -42,6 +42,8 @@ export function onStartedStoringAllFavorites(): void {
 }
 
 export async function updateMissingMetadata(): Promise<void> {
+  const deleted: FavoriteMetadata[] = [];
+
   databaseWritten = true;
 
   for (const metadata of READY_UPDATE_QUEUE) {
@@ -53,10 +55,26 @@ export async function updateMissingMetadata(): Promise<void> {
     return;
   }
 
-  await Promise.all(chunks.map((chunk) => {
-    return API.fetchMultiplePostsFromAPISafe(chunk.map(metadata => metadata.id))
-      .then(posts => chunk.forEach(metadata => metadata.processPost(posts[metadata.id])));
+  await Promise.all(chunks.map(async(chunk) => {
+    const postsMap = await API.fetchMultiplePostsFromAPI(chunk.map(metadata => metadata.id));
+
+    for (const metadata of chunk) {
+      if (!metadata.processPost(postsMap[metadata.id])) {
+        deleted.push(metadata);
+      }
+    }
   }));
+
+  for (const metadata of deleted) {
+    let post;
+
+    try {
+      post = await API.fetchPostFromPostPage(metadata.id);
+      metadata.processPost(post);
+    } catch {
+      // console.error(metadata.id);
+    }
+  }
 }
 
 export class FavoriteMetadata {

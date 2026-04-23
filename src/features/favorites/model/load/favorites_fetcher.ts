@@ -1,5 +1,6 @@
 import * as API from "../../../../lib/api/api";
 import * as FavoritesFetchQueue from "./favorites_fetch_queue";
+import { FAVORITES_PER_PAGE } from "../../../../lib/global/constants";
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
@@ -118,31 +119,6 @@ async function populateMultipleMetadataFromAPI(favorites: FavoriteItem[]): Promi
   }
 }
 
-function fetchNewFavoritesOnReloadHelper(): Promise<{ allNewFavoritesFound: boolean, newFavorites: FavoriteItem[] }> {
-  return API.fetchFavoritesPage(getNewFetchRequest().realPageNumber)
-    .then((html) => {
-      return extractNewFavorites(html);
-    });
-}
-
-function extractNewFavorites(html: string): { allNewFavoritesFound: boolean, newFavorites: FavoriteItem[] } {
-  const newFavorites = [];
-  const fetchedFavorites = extractFavorites(html);
-  let allNewFavoritesFound = fetchedFavorites.length === 0;
-
-  for (const favorite of fetchedFavorites) {
-    if (storedFavoriteIds.has(favorite.id)) {
-      allNewFavoritesFound = true;
-      break;
-    }
-    newFavorites.push(favorite);
-  }
-  return {
-    allNewFavoritesFound,
-    newFavorites
-  };
-}
-
 export async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
   FavoritesFetchQueue.setDequeueCallback(onFavoritesFound);
 
@@ -152,20 +128,34 @@ export async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteIt
 }
 
 export async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<FavoriteItem[]> {
-  await sleep(500);
   storedFavoriteIds = ids;
-  let favorites: FavoriteItem[] = [];
+  const allNewFavorites: FavoriteItem[] = [];
+  let favorites: FavoriteItem[];
+  let moreNewPagesExist;
 
-  while (true) {
-    const { allNewFavoritesFound, newFavorites } = await fetchNewFavoritesOnReloadHelper();
+  await sleep(100);
+  do {
+    favorites = await fetchNewFavoritesFromNextPage();
 
-    populateMultipleMetadataFromAPI(newFavorites);
-    favorites = favorites.concat(newFavorites);
-
-    if (allNewFavoritesFound) {
-      storedFavoriteIds.clear();
-      return favorites;
+    if (favorites.length === 0) {
+      break;
     }
-    await sleep(FavoritesSettings.favoritesPageFetchDelay);
-  }
+    moreNewPagesExist = favorites.length === FAVORITES_PER_PAGE;
+    populateMultipleMetadataFromAPI(favorites);
+    allNewFavorites.push(...favorites);
+
+    if (moreNewPagesExist) {
+      await sleep(FavoritesSettings.favoritesPageFetchDelay);
+    }
+  } while (moreNewPagesExist);
+  storedFavoriteIds.clear();
+  return allNewFavorites;
+}
+
+function fetchNewFavoritesFromNextPage(): Promise<FavoriteItem[]> {
+  return API.fetchFavoritesPage(getNewFetchRequest().realPageNumber)
+    .then((html) => {
+      const favorites = extractFavorites(html);
+      return favorites.filter(favorite => !storedFavoriteIds.has(favorite.id));
+    });
 }

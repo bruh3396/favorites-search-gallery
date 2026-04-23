@@ -2,7 +2,7 @@ import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/global/flags/intrin
 import { convertToTagString, extractTagGroups, removeExtraWhiteSpace } from "../../utils/primitive/string";
 import { getImageFromThumb, getThumbFromImage } from "../../utils/dom/dom";
 import { Events } from "../../lib/global/events/events";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/global/container";
+import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../lib/global/container";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { TOOLTIP_DISABLED } from "../../lib/global/flags/derived_flags";
 import { TOOLTIP_HTML } from "../../assets/html";
@@ -21,7 +21,7 @@ export function setupTooltip(): void {
     return;
   }
   visible = Preferences.tooltipsVisible.value;
-  FAVORITES_SEARCH_GALLERY_CONTAINER.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
+  FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
   tooltip = createTooltip();
   defaultTransition = tooltip.style.transition;
   searchTagColorCodes = {};

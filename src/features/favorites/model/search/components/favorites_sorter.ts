@@ -1,7 +1,7 @@
 import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { Preferences } from "../../../../../lib/global/preferences/preferences";
 import { SortingMethod } from "../../../../../types/common_types";
-import { shuffleArray } from "../../../../../utils/collection/array";
+import { shuffleArray } from "../../../../../utils/primitive/array";
 
 let useAscendingOrder = Preferences.sortAscendingEnabled.value;
 let sortingMethod: SortingMethod = Preferences.sortingMethod.value;

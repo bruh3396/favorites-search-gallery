@@ -3,7 +3,7 @@ import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../
 import { Layout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/checkbox";
 import { reloadWindow, toggleGalleryMenuEnabled } from "../../../../../utils/dom/dom";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../utils/dom/ui_element";
+import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../../utils/dom/ui_element";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
 import { Events } from "../../../../../lib/global/events/events";
@@ -20,7 +20,8 @@ import { tryResetting } from "../../../../../lib/flows/reset";
 
 const BUTTONS: Partial<ButtonElement>[] = [
   {
-    id: "search-button", parentId: "left-favorites-panel-top-row",
+    id: "search-button",
+    parentId: "favorites-main-buttons-container",
     title: "Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab",
     position: "afterbegin",
     textContent: "Search",
@@ -29,35 +30,35 @@ const BUTTONS: Partial<ButtonElement>[] = [
   },
   {
     id: "shuffle-button",
-    parentId: "left-favorites-panel-top-row",
+    parentId: "favorites-main-buttons-container",
     textContent: "Shuffle",
     title: "Randomize order of search results",
     event: Events.favorites.shuffleButtonClicked
   },
   {
     id: "invert-button",
-    parentId: "left-favorites-panel-top-row",
+    parentId: "favorites-main-buttons-container",
     textContent: "Invert",
     title: "Show results not matched by latest search",
     event: Events.favorites.invertButtonClicked
   },
   {
     id: "clear-button",
-    parentId: "left-favorites-panel-top-row",
+    parentId: "favorites-main-buttons-container",
     textContent: "Clear",
     title: "Empty the search box",
     event: Events.favorites.clearButtonClicked
   },
   {
     id: "download-button",
-    parentId: "left-favorites-panel-top-row",
+    parentId: "favorites-main-buttons-container",
     textContent: "Download",
     title: "Download search results (experimental)",
     event: Events.favorites.downloadButtonClicked
   },
   {
     id: "subset-button",
-    parentId: "left-favorites-panel-top-row",
+    parentId: "favorites-main-buttons-container",
     textContent: "Set Subset",
     title: "Make the current search results the entire set of results to search from",
     enabled: false,
@@ -65,7 +66,7 @@ const BUTTONS: Partial<ButtonElement>[] = [
   },
   {
     id: "stop-subset-button",
-    parentId: "left-favorites-panel-top-row",
+    parentId: "favorites-main-buttons-container",
     textContent: "Stop Subset",
     title: "Stop subset and return entire set of results to all favorites",
     enabled: false,
@@ -73,7 +74,7 @@ const BUTTONS: Partial<ButtonElement>[] = [
   },
   {
     id: "reset-button",
-    parentId: "left-favorites-panel-top-row",
+    parentId: "favorites-main-buttons-container",
     textContent: "Reset",
     title: "Delete cached favorites and reset preferences",
     function: tryResetting,
@@ -132,7 +133,8 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     preference: Preferences.removeButtonsVisible,
     hotkey: "R",
     function: toggleAddOrRemoveButtons,
-    event: Events.favorites.removeButtonsToggled
+    event: Events.favorites.removeButtonsToggled,
+    triggerOnCreation: true
   },
   {
     id: "show-add-favorite-buttons",
@@ -143,7 +145,39 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     preference: Preferences.addButtonsVisible,
     function: toggleAddOrRemoveButtons,
     hotkey: "R",
-    event: Events.favorites.addButtonsToggled
+    event: Events.favorites.addButtonsToggled,
+    triggerOnCreation: true
+  },
+  {
+    id: "maximize-toggle-favorite-buttons",
+    parentId: "favorite-options-left",
+    textContent: `Maximize ${USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? "Remove" : "Add"} Buttons`,
+    title: "Maximize toggle favorite buttons",
+    preference: Preferences.maximizeToggleFavoriteButtons,
+    function: toggleMaximizeToggleFavoriteButtons,
+    enabled: false,
+    triggerOnCreation: true
+  },
+  {
+    id: "alternate-layout",
+    parentId: "favorite-options-left",
+    textContent: "Alternate Layout",
+    title: "Toggle alternate layout",
+    preference: Preferences.alternateLayout,
+    function: toggleAlternateLayout,
+    event: Events.favorites.alternateLayoutToggled,
+    enabled: false,
+    triggerOnCreation: true
+  },
+  {
+    id: "slim-layout",
+    parentId: "favorite-options-left",
+    textContent: "Slim Layout",
+    title: "Toggle slim layout",
+    preference: Preferences.slimLayout,
+    function: toggleSlimLayout,
+    enabled: false,
+    triggerOnCreation: true
   },
   {
     id: "show-download-buttons",
@@ -154,6 +188,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     preference: Preferences.downloadButtonsVisible,
     hotkey: "",
     function: toggleDownloadButtons,
+    triggerOnCreation: true,
     event: Events.favorites.downloadButtonsToggled
   },
   {
@@ -316,6 +351,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     preference: Preferences.favoritesLayout,
     event: Events.favorites.layoutChanged,
     function: hideUnusedLayoutSizer,
+    triggerOnCreation: true,
     options: new Map<Layout, string>([
       ["column", "Waterfall"],
       ["row", "River"],
@@ -352,7 +388,6 @@ const NUMBERS: Partial<NumberElement>[] = [
     max: GeneralSettings.columnCountBounds.max,
     step: 1,
     pollingTime: 50,
-    triggerOnCreation: true,
     event: Events.favorites.columnCountChanged
   },
 
@@ -365,7 +400,6 @@ const NUMBERS: Partial<NumberElement>[] = [
     max: GeneralSettings.rowSizeBounds.max,
     step: 1,
     pollingTime: 50,
-    triggerOnCreation: true,
     event: Events.favorites.rowSizeChanged
   },
 
@@ -378,7 +412,6 @@ const NUMBERS: Partial<NumberElement>[] = [
     max: FavoritesSettings.resultsPerPageBounds.max,
     step: FavoritesSettings.resultsPerPageStep,
     pollingTime: 50,
-    triggerOnCreation: false,
     event: Events.favorites.resultsPerPageChanged
   }
 ];

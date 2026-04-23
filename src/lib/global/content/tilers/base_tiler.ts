@@ -13,6 +13,14 @@ export abstract class BaseTiler implements Tiler {
     this.container = CONTENT_CONTAINER;
   }
 
+  public get enabled(): boolean {
+    return this.container.classList.contains(this.className);
+  }
+
+  public get disabled(): boolean {
+    return !this.enabled;
+  }
+
   public showSkeleton(): void {
     this.tile(new Skeleton(this.skeletonStyle).elements);
   }

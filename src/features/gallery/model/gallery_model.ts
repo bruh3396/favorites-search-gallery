@@ -5,7 +5,7 @@ import { openOriginal, openPostPage } from "../../../utils/dom/links";
 import { NavigationKey } from "../../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { clamp } from "../../../utils/primitive/number";
-import { downloadFromThumb } from "../../../lib/download/downloader";
+import { downloadFromThumb } from "../../../lib/global/downloader";
 import { isForwardNavigationKey } from "../../../types/equivalence";
 import { isVideo } from "../../../utils/content/content_type";
 

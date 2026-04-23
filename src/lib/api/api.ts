@@ -1,30 +1,25 @@
 import * as FSG_URL from "./api_url";
 import { extractPostFromAPI, extractPostFromAPISafe } from "./post_parser";
+import { fetch429, fetch429NTimes, getHTML } from "./api_utils";
 import { AddFavoriteStatus } from "../../types/favorite_types";
 import { ConcurrencyLimiter } from "../components/concurrency_limiter";
 import { FavoritesSettings } from "../../config/favorites_settings";
+import { ON_SEARCH_PAGE } from "../global/flags/intrinsic_flags";
 import { Post } from "../../types/common_types";
+import { ThrottledQueue } from "../components/throttled_queue";
 import { extractFavoritesCount } from "./profile_page_parser";
 import { extractFavoritesPageCount } from "./favorites_page_parser";
 import { parsePostFromPostPage as extractPostFromPostPage } from "./post_page_parser";
 import { getUserId } from "../../utils/misc/favorites_page_metadata";
-import { sleep } from "../../utils/misc/async";
 
 const USER_ID = getUserId();
-const POST_PAGE_LIMITER = new ConcurrencyLimiter(1);
 const MULTI_POST_LIMITER = new ConcurrencyLimiter(4);
 const POST_LIMITER = new ConcurrencyLimiter(250);
 const TAG_LIMITER = new ConcurrencyLimiter(100);
 const FAVORITES_PAGE_LIMITER = new ConcurrencyLimiter(2);
-
-export async function getHTML(url: string): Promise<string> {
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
-  }
-  return response.text();
-}
+const FAVORITE_REMOVE_QUEUE = new ThrottledQueue(1000);
+const FAVORITE_ADD_QUEUE = new ThrottledQueue(200);
+const GENERAL_REQUEST_QUEUE = new ThrottledQueue(2000);
 
 export function fetchPostFromAPI(id: string): Promise<Post> {
   return POST_LIMITER.run(async() => {
@@ -78,12 +73,9 @@ export async function fetchMultiplePostsFromAPISafe(ids: string[]): Promise<Reco
   return posts;
 }
 
-export function fetchPostPage(id: string): Promise<string> {
-  return POST_PAGE_LIMITER.run(async(): Promise<string> => {
-    await sleep(200);
-    return getHTML(FSG_URL.createPostPageURL(id));
-  });
-
+export async function fetchPostPage(id: string): Promise<string> {
+  await GENERAL_REQUEST_QUEUE.wait();
+  return getHTML(FSG_URL.createPostPageURL(id));
 }
 
 export async function fetchPostFromPostPage(id: string): Promise<Post> {
@@ -107,13 +99,25 @@ export function fetchTagFromAPI(tagName: string): Promise<string> {
 }
 
 export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
-  fetch(FSG_URL.createPostVoteURL(id));
+  FAVORITE_REMOVE_QUEUE.cancel(id);
+
+  if (!await FAVORITE_ADD_QUEUE.wait(id)) {
+    return AddFavoriteStatus.ERROR;
+  }
+
+  if (ON_SEARCH_PAGE) {
+    fetch429(FSG_URL.createPostVoteURL(id));
+  }
   const status = await getHTML(FSG_URL.createAddFavoriteURL(id));
   return parseInt(status);
 }
 
-export function removeFavorite(id: string): Promise<Response> {
-  return fetch(FSG_URL.createRemoveFavoriteURL(id), { method: "GET", redirect: "manual" });
+export async function removeFavorite(id: string): Promise<void> {
+  FAVORITE_ADD_QUEUE.cancel(id);
+
+  if (await FAVORITE_REMOVE_QUEUE.wait(id)) {
+    fetch429NTimes(FSG_URL.createRemoveFavoriteURL(id), { method: "GET", redirect: "manual" }, 3);
+  }
 }
 
 export function getFavoritesCount(id: string): Promise<number | null> {

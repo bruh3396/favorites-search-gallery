@@ -4,7 +4,7 @@ import { FavoriteItem } from "../../../types/favorite/favorite_item";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { InvertedSearchIndex } from "./inverted_search_index";
 import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
-import { splitIntoChunks } from "../../../../../utils/collection/array";
+import { splitIntoChunks } from "../../../../../utils/primitive/array";
 
 const BATCH_SIZE = 750;
 const BATCH_SLEEP_TIME = 0;

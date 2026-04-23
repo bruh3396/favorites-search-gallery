@@ -1,3 +1,72 @@
+export const ALTERNATE_LAYOUT_HTML = `
+<style>
+  #tag-modifier-option-container,
+  #tag-modifier-ui-container,
+  #show-ui-label,
+  #show-saved-searches-container,
+  #right-favorites-panel,
+  #help-links-container,
+  #search-header,
+  #goto-page-container {
+    display: none !important;
+  }
+
+  #favorites-search-gallery {
+    display: flex;
+  }
+
+  #left-favorites-panel-bottom-row {
+    flex-direction: column;
+  }
+
+  #left-favorites-panel-top-row {
+    display: flex;
+    flex-direction: column;
+
+    .awesomplete {
+      order: 3;
+    }
+  }
+
+  #favorites-search-box {
+    order: 3;
+  }
+
+  #favorites-search-gallery-menu {
+    flex: 0 0 10%;
+    align-self: flex-start;
+    background: transparent;
+    margin-top: -5px;
+  }
+
+  .checkbox {
+    height: 24px;
+  }
+
+  #favorites-main-buttons-container {
+    order: 2;
+  }
+
+  #favorites-search-gallery-content {
+    margin-top: 20px;
+  }
+
+  #favorites-pagination-container {
+    text-align: center;
+    margin-bottom: 5px;
+
+    >button {
+      font-size: 10px;
+      margin: 0px 1px;
+      padding: 0;
+    }
+  }
+
+  #favorites-search-gallery-content {
+    width: 100%;
+  }
+</style>
+`;
 export const AUTOPLAY_HTML = `
 <div id="autoplay-container">
   <style>
@@ -608,7 +677,9 @@ export const CONTENT_HTML = `
     }
 
     &.square {
-      .favorite, thumb {
+
+      .favorite,
+      thumb {
         border-radius: var(--radius) !important;
         overflow: hidden;
         aspect-ratio: 1;
@@ -632,7 +703,8 @@ export const CONTENT_HTML = `
       display: flex;
       flex-wrap: wrap;
 
-      .favorite, .thumb {
+      .favorite,
+      .thumb {
 
         &.last-row {
           flex: 0 1 auto;
@@ -645,7 +717,8 @@ export const CONTENT_HTML = `
         overflow: hidden;
       }
 
-      .favorite, .thumb {
+      .favorite,
+      .thumb {
 
         >a,
         >div {
@@ -681,7 +754,8 @@ export const CONTENT_HTML = `
         flex-direction: column;
         flex: 0 0 25%;
 
-        .favorite, .thumb {
+        .favorite,
+        .thumb {
           border-radius: var(--radius);
           overflow: hidden;
         }
@@ -698,13 +772,14 @@ export const CONTENT_HTML = `
       gap: 25px 10px;
 
       .utility-button {
-        width:  70px;
+        width: 70px;
         aspect-ratio: 1;
       }
     }
   }
 
-  .favorite, .thumb {
+  .favorite,
+  .thumb {
     position: relative;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -964,7 +1039,7 @@ export const DESKTOP_HTML = `
   }
 
   #favorites-pagination-container>button {
-    height: 32px;
+    height: 35px;
   }
 
   .gallery-menu-button {
@@ -1267,7 +1342,9 @@ export const FAVORITES_HTML = `
         margin-right: 5px;
         margin-top: 4px;
       }
+    }
 
+    #favorites-main-buttons-container {
       >button {
         height: 35px;
         border: none;
@@ -1656,6 +1733,8 @@ export const FAVORITES_HTML = `
 
     textarea#favorites-search-box {
       margin-top: 5px;
+      min-height: 14px;
+      width: 99% !important;
     }
 
     #favorites-load-status-label.hidden {
@@ -1684,11 +1763,12 @@ export const FAVORITES_HTML = `
   <div id="favorites-search-gallery-menu-panels" style="display: flex;">
     <div id="left-favorites-panel">
       <h2 style="display: inline;" id="search-header">Search Favorites</h2>
-      <span id="favorites-load-status" style="margin-left: 5px;">
+      <span id="favorites-load-status" style="margin-left: 5px; order: 1;">
         <label id="match-count-label"></label>
         <label id="favorites-load-status-label"></label>
       </span>
       <div id="left-favorites-panel-top-row">
+        <span id="favorites-main-buttons-container"></span>
         <span id="favorites-pagination-placeholder"></span>
       </div>
       <div id="left-favorites-panel-bottom-row">
@@ -2962,6 +3042,22 @@ export const SKELETON_HTML = `
     100% {
       transform: translateX(-100%);
     }
+  }
+</style>
+`;
+export const SLIM_DESKTOP_HTML = `
+<style>
+  #search-header,
+  #help-links-container {
+    display: none !important;
+  }
+
+  #favorites-pagination-container>button,
+  #goto-page-input,
+  #goto-page-button,
+  #favorites-main-buttons-container>button {
+    height: 25px !important;
+    border-radius: 0 !important;
   }
 </style>
 `;

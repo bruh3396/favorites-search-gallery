@@ -45,6 +45,7 @@ const favorites = {
   optionsToggled: new EventEmitter<boolean>(true),
   removeButtonsToggled: new EventEmitter<boolean>(true),
   addButtonsToggled: new EventEmitter<boolean>(true),
+  alternateLayoutToggled: new EventEmitter<boolean>(true),
   downloadButtonsToggled: new EventEmitter<boolean>(true),
   uiToggled: new EventEmitter<boolean>(true),
   darkThemeToggled: new EventEmitter<boolean>(true),

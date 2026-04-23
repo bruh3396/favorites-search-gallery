@@ -1,63 +1,60 @@
 import { sleep } from "../../utils/misc/async";
 
-export class ThrottledQueue {
-  private queue: (() => void)[];
-  private delay: number;
-  private draining: boolean;
-  private paused: boolean;
-  private unblocked: boolean;
+type Waiter = {
+  id: string | null;
+  resolve: (waited: boolean) => void;
+};
 
-  constructor(delay: number, unblocked: boolean = false) {
+export class ThrottledQueue {
+  private queue: Waiter[];
+  private delay: number;
+  private drainPromise: Promise<void> | null;
+
+  constructor(delay: number) {
     this.queue = [];
     this.delay = delay;
-    this.draining = false;
-    this.paused = false;
-    this.unblocked = unblocked;
+    this.drainPromise = null;
   }
 
-  public wait(): Promise<void> {
-    if (this.unblocked) {
-      return Promise.resolve();
+  public wait(id: string | null = null): Promise<boolean> {
+    if (id !== null && this.queue.some((w) => w.id === id)) {
+      throw new Error(`ThrottledQueue: duplicate id "${id}"`);
     }
     return new Promise((resolve) => {
-      this.queue.push(resolve);
-      this.startDraining();
+      this.queue.push({ id, resolve });
+
+      if (this.drainPromise === null) {
+        this.drainPromise = this.drain().finally(() => {
+          this.drainPromise = null;
+        });
+      }
     });
   }
 
-  public setDelay(newDelay: number): void {
-    this.delay = newDelay;
+  public cancel(id: string): void {
+    const index = this.queue.findIndex((w) => w.id === id);
+
+    if (index === -1) {
+      return;
+    }
+
+    const [waiter] = this.queue.splice(index, 1);
+
+    waiter.resolve(false);
   }
 
   public reset(): void {
+    this.queue.forEach((w) => w.resolve(false));
     this.queue = [];
-    this.draining = false;
-    this.paused = false;
-  }
-
-  private async startDraining(): Promise<void> {
-    if (this.draining) {
-      return;
-    }
-    this.draining = true;
-    await this.drain();
-    this.draining = false;
   }
 
   private async drain(): Promise<void> {
     while (this.queue.length > 0) {
-      const resolve = this.queue.shift();
 
-      if (resolve === undefined) {
-        continue;
+      if (this.queue.length > 0) {
+        this.queue.shift()!.resolve(true);
       }
-
-      resolve();
       await sleep(this.delay);
-
-      if (this.paused) {
-        break;
-      }
     }
   }
 }

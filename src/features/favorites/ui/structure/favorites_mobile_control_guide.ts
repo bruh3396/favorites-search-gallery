@@ -1,10 +1,10 @@
 import { CONTROLS_HTML } from "../../../../assets/html";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
+import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../../../lib/global/container";
 import { insertHTMLAndExtractStyle } from "../../../../utils/dom/style";
 import { sleep } from "../../../../utils/misc/async";
 
 export async function createControlsGuide(): Promise<void> {
-  insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_CONTAINER, "beforeend", CONTROLS_HTML);
+  insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER, "beforeend", CONTROLS_HTML);
   const controlGuide = document.getElementById("controls-guide");
 
   if (controlGuide === null) {

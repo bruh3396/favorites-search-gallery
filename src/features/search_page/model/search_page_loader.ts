@@ -1,12 +1,12 @@
-import { ConcurrencyLimiter } from "../../../lib/components/concurrency_limiter";
 import { NavigationKey } from "../../../types/common_types";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
 import { SearchPage } from "../../../types/search_page";
+import { ThrottledQueue } from "../../../lib/components/throttled_queue";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { isForwardNavigationKey } from "../../../types/equivalence";
 import { sleep } from "../../../utils/misc/async";
 
-const SEARCH_PAGE_FETCH_LIMITER = new ConcurrencyLimiter(2);
+const SEARCH_PAGE_FETCH_LIMITER = new ThrottledQueue(1250);
 const SEARCH_PAGE_PREFETCH_LENGTH = 6;
 let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;
@@ -62,21 +62,20 @@ export function preloadSearchPages(): void {
   }
 }
 
-function loadSearchPage(pageNumber: number): Promise<void> {
+async function loadSearchPage(pageNumber: number): Promise<void> {
   if (pageHasAlreadyBeenFetched(pageNumber) || pageNumber < 0) {
     return Promise.resolve();
   }
   fetchedPageNumbers.add(pageNumber);
-  return SEARCH_PAGE_FETCH_LIMITER.run(() => {
-    return fetchSearchPage(pageNumber)
-      .then((html: string) => {
-        registerNewPage(pageNumber, html);
-        updateAllThumbs();
-      }).catch(() => {
-        fetchedPageNumbers.delete(pageNumber);
-        searchPages.delete(pageNumber);
-      });
-  });
+  await SEARCH_PAGE_FETCH_LIMITER.wait();
+  return fetchSearchPage(pageNumber)
+    .then((html: string) => {
+      registerNewPage(pageNumber, html);
+      updateAllThumbs();
+    }).catch(() => {
+      fetchedPageNumbers.delete(pageNumber);
+      searchPages.delete(pageNumber);
+    });
 }
 
 function pageHasAlreadyBeenFetched(pageNumber: number): boolean {

@@ -9,7 +9,7 @@ import { Preferences } from "../../../lib/global/preferences/preferences";
 import { createCheckboxElement } from "../../../lib/ui/checkbox";
 import { createNumberComponent } from "../../../lib/ui/number";
 import { createSelectElement } from "../../../lib/ui/select";
-import { getNumberRange } from "../../../utils/collection/array";
+import { getNumberRange } from "../../../utils/primitive/array";
 import { prepareDynamicElements } from "../../../lib/ui/element_utils";
 import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element";
 

@@ -3,7 +3,7 @@ import { SearchCommand } from "../search_command/search_command";
 import { SearchTag } from "../search_tags/search_tag";
 import { Searchable } from "../../../../../types/common_types";
 import { SortedArray } from "../../../../../lib/components/sorted_array";
-import { intersection } from "../../../../../utils/collection/set";
+import { intersection } from "../../../../../utils/primitive/set";
 
 export class InvertedSearchIndex<T extends Searchable> {
   private readonly allSortedTags: SortedArray<string> = new SortedArray<string>();

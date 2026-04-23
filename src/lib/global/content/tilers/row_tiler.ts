@@ -46,7 +46,7 @@ export class RowTiler extends BaseTiler {
   }
 
   public async markItemsOnLastRow(): Promise<void> {
-    if (this.currentlyMarkingLastRow) {
+    if (this.currentlyMarkingLastRow || this.disabled) {
       return;
     }
     this.currentlyMarkingLastRow = true;

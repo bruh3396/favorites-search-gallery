@@ -8,7 +8,7 @@ import { Events } from "../../lib/global/events/events";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../../lib/global/custom_tags";
-import { getHTML } from "../../lib/api/api";
+import { getHTML } from "../../lib/api/api_utils";
 import { getQueryWithTagReplaced } from "./autocomplete_tag_replacer";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../utils/dom/awesomplete";

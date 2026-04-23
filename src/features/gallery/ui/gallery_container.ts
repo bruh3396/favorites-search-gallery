@@ -1,4 +1,4 @@
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/global/container";
+import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../../lib/global/container";
 import { GALLERY_HTML } from "../../../assets/html";
 import { insertStyleHTML } from "../../../utils/dom/style";
 
@@ -8,7 +8,7 @@ toggleGalleryVisibility(false);
 
 export function insertGalleryContainer(): void {
   insertStyleHTML(GALLERY_HTML);
-  FAVORITES_SEARCH_GALLERY_CONTAINER.insertAdjacentElement("beforeend", GALLERY_CONTAINER);
+  FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER.insertAdjacentElement("beforeend", GALLERY_CONTAINER);
 }
 
 export function toggleGalleryVisibility(value: boolean): void {

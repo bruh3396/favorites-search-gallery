@@ -3,17 +3,13 @@ import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
 import * as FavoritesPreloader from "../../../utils/dom/thumb_preloader";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
 import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons } from "../../../utils/dom/ui_element";
 import { Favorite } from "../../../types/favorite_types";
 import { FavoriteItem } from "../types/favorite/favorite_item";
 import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
 import { GeneralSettings } from "../../../config/general_settings";
 import { Layout } from "../../../types/common_types";
-import { Preferences } from "../../../lib/global/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
 import { collectAspectRatios } from "../../../lib/global/content/skeleton/aspect_ratio_collector";
 import { createFavoriteItemHTMLTemplates } from "../types/favorite/favorite_element";
-import { hideUnusedLayoutSizer } from "../../../lib/global/content/tilers/tiler_event_handlers";
 import { sleep } from "../../../utils/misc/async";
 
 export function setStatus(message: string): void {
@@ -92,10 +88,7 @@ export function setupFavoritesView(): void {
   FavoritesStatus.setupFavoritesStatus();
   ContentTiler.setupTiler();
   ContentTiler.showSkeleton();
-  hideUnusedLayoutSizer(Preferences.favoritesLayout.value);
   FavoritesPaginationMenu.setupFavoritesPaginationMenu();
-  toggleAddOrRemoveButtons(USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? Preferences.removeButtonsVisible.value : Preferences.addButtonsVisible.value);
-  toggleDownloadButtons(Preferences.downloadButtonsVisible.value);
 }
 
 export function preloadThumbnails(favorites: FavoriteItem[]): void {

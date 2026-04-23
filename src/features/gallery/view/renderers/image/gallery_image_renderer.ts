@@ -10,7 +10,7 @@ import { USING_FIREFOX } from "../../../../../lib/global/flags/intrinsic_flags";
 import { UpscaleImageRequest } from "../../../types/gallery_upscale_image_request";
 
 const UPSCALER = GallerySettings.useOffscreenThumbUpscaler ? new GalleryOffscreenThumbnailUpscalerWrapper() : new GalleryNormalThumbUpscaler();
-const UPSCALE_QUEUE = new ThrottledQueue(20, !USING_FIREFOX);
+const UPSCALE_QUEUE = new ThrottledQueue(USING_FIREFOX ? 0 : 20);
 
 class ImageRenderer extends GalleryBaseRenderer {
   public lastDrawnId: string;

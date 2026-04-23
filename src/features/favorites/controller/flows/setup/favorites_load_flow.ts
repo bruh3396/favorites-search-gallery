@@ -53,9 +53,11 @@ function processFetchedFavorites(): void {
 }
 
 async function loadNewFavorites(): Promise<void> {
+  FavoritesView.setStatus("Finding new favorites");
   const results = await FavoritesModel.fetchNewFavoritesOnReload();
 
   if (results.newSearchResults.length === 0) {
+    FavoritesView.setTemporaryStatus("No new favorites found");
     return;
   }
   FavoritesView.insertNewSearchResultsOnReload(results);
@@ -67,5 +69,5 @@ async function loadNewFavorites(): Promise<void> {
 
 async function saveNewFavorites(newFavorites: FavoriteItem[]): Promise<void> {
   await FavoritesModel.storeNewFavorites(newFavorites);
-  FavoritesView.setTemporaryStatus("New favorites saved");
+  FavoritesView.setTemporaryStatus(`Saved ${newFavorites.length} new favorites`);
 }

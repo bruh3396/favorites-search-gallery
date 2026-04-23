@@ -4,7 +4,7 @@ import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { Preferences } from "../../../../lib/global/preferences/preferences";
-import { getNumbersAround } from "../../../../utils/collection/array";
+import { getNumbersAround } from "../../../../utils/primitive/array";
 import { insertStyleHTML } from "../../../../utils/dom/style";
 import { isOnlyDigits } from "../../../../utils/primitive/string";
 
@@ -142,6 +142,7 @@ function createGotoSpecificPageInputs(finalPageNumber: number): void {
   const button = document.createElement("button");
 
   container.title = "Goto specific page";
+  container.id = "goto-page-container";
   input.type = "number";
   input.placeholder = "#";
   input.id = "goto-page-input";

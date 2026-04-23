@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getElementsAroundIndex, getNumberRange, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/collection/array";
+import { getElementsAroundIndex, getNumberRange, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/primitive/array";
 import { getRandomPositiveInteger } from "../utils/primitive/number";
 
 describe("indexInBounds", () => {

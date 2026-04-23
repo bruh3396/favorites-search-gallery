@@ -1,4 +1,4 @@
-import { getRandomPositiveInteger } from "../primitive/number";
+import { getRandomPositiveInteger } from "./number";
 
 export function indexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;

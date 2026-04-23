@@ -42,7 +42,8 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     preference: Preferences.removeButtonsVisible,
     hotkey: "R",
     function: toggleAddOrRemoveButtons,
-    event: Events.favorites.removeButtonsToggled
+    event: Events.favorites.removeButtonsToggled,
+    triggerOnCreation: true
   },
   {
     id: "show-add-favorite-buttons",
@@ -53,7 +54,8 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     preference: Preferences.addButtonsVisible,
     function: toggleAddOrRemoveButtons,
     hotkey: "R",
-    event: Events.favorites.addButtonsToggled
+    event: Events.favorites.addButtonsToggled,
+    triggerOnCreation: true
   },
   {
     id: "show-download-buttons",
@@ -64,7 +66,8 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     preference: Preferences.downloadButtonsVisible,
     hotkey: "",
     function: toggleDownloadButtons,
-    event: Events.favorites.downloadButtonsToggled
+    event: Events.favorites.downloadButtonsToggled,
+    triggerOnCreation: true
   },
   {
     id: "exclude-blacklist",
@@ -163,6 +166,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     position: "beforeend",
     preference: Preferences.favoritesLayout,
     event: Events.favorites.layoutChanged,
+    triggerOnCreation: true,
     function: hideUnusedLayoutSizer,
     options: new Map<Layout, string>([
       ["column", "Waterfall"],
@@ -176,7 +180,6 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     id: "results-per-page", parentId: "results-per-page-container",
     title: "Change results per page",
     position: "beforeend",
-    triggerOnCreation: true,
     preference: Preferences.resultsPerPage,
     event: Events.favorites.resultsPerPageChanged,
     options: new Map<number, string>([
@@ -195,7 +198,6 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     parentId: "column-count-container",
     position: "beforeend",
     preference: Preferences.columnCount,
-    triggerOnCreation: true,
     event: Events.favorites.columnCountChanged,
     options: new Map<number, string>([
       [1, "1"],
@@ -215,7 +217,6 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     parentId: "row-size-container",
     position: "beforeend",
     preference: Preferences.rowSize,
-    triggerOnCreation: true,
     event: Events.favorites.rowSizeChanged,
     options: new Map<number, string>([
       [1, "1"],

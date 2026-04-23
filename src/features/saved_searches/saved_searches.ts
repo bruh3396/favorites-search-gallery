@@ -8,7 +8,7 @@ import { SAVED_SEARCHES_HTML } from "../../assets/html";
 import { awesompleteIsUnselected } from "../../utils/dom/awesomplete";
 import { getAllThumbs } from "../../utils/dom/dom";
 import { getSavedSearches } from "../../utils/dom/saved_searches";
-import { shuffleArray } from "../../utils/collection/array";
+import { shuffleArray } from "../../utils/primitive/array";
 import { sleep } from "../../utils/misc/async";
 
 let textarea: HTMLTextAreaElement;

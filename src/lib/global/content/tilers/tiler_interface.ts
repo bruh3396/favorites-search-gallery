@@ -13,4 +13,6 @@ export interface Tiler {
   addItemsToBottom: (items: HTMLElement[]) => void
   showSkeleton: () => void
   skeletonStyle: Record<string, string>
+  enabled: boolean
+  disabled: boolean
 }

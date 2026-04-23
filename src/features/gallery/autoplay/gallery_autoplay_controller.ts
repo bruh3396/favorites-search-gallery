@@ -4,7 +4,7 @@ import { clamp, millisecondsToSeconds } from "../../../utils/primitive/number";
 import { isImage, isVideo } from "../../../utils/content/content_type";
 import { AUTOPLAY_HTML } from "../../../assets/html";
 import { Events } from "../../../lib/global/events/events";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../lib/global/container";
+import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../../lib/global/container";
 import { NavigationKey } from "../../../types/common_types";
 import { NumberComponent } from "../../../lib/ui/number_component";
 import { Preferences } from "../../../lib/global/preferences/preferences";
@@ -147,7 +147,7 @@ function insertHTML(): void {
 }
 
 function insertMenuHTML(): void {
-  FAVORITES_SEARCH_GALLERY_CONTAINER.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
+  FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
 }
 
 function insertImageProgressHTML(): void {

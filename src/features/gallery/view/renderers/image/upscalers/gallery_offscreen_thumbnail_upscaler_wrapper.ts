@@ -22,8 +22,9 @@ export class GalleryOffscreenThumbnailUpscalerWrapper extends GalleryBaseThumbUp
   public async finishUpscale(request: ImageRequest): Promise<void> {
     const upscaleRequest = await getUpscaleRequest(request);
 
-    await this.upscaleQueue.wait();
-    this.sendRequestToWorker(upscaleRequest);
+    if (await this.upscaleQueue.wait()) {
+      this.sendRequestToWorker(upscaleRequest);
+    }
   }
 
   public clear(): void {

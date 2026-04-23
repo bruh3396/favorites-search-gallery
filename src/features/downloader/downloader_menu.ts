@@ -5,11 +5,11 @@ import { DOWNLOADER_DISABLED } from "../../lib/global/flags/derived_flags";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
 import { Events } from "../../lib/global/events/events";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../lib/global/container";
+import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../lib/global/container";
 import { Favorite } from "../../types/favorite_types";
 import { Preferences } from "../../lib/global/preferences/preferences";
 import { insertHTMLAndExtractStyle } from "../../utils/dom/style";
-import { splitIntoChunks } from "../../utils/collection/array";
+import { splitIntoChunks } from "../../utils/primitive/array";
 
 let dialog: HTMLDialogElement;
 let warningDialog: HTMLDialogElement;
@@ -24,7 +24,7 @@ export function setupDownloadMenu(): void {
     return;
   }
   FavoritesDownloader.setupFavoritesDownloader();
-  insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_CONTAINER, "beforeend", DOWNLOADER_HTML);
+  insertHTMLAndExtractStyle(FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER, "beforeend", DOWNLOADER_HTML);
   dialog = getDialog("download-menu");
   warningDialog = getDialog("download-menu-warning");
   downloadButton = getDownloadButton();
