@@ -1,5 +1,6 @@
 import * as API from "../../../../lib/api/api";
 import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
+import { NewFavorites } from "../../types/favorite/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
 import { Timeout } from "../../../../types/common_types";
 import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
@@ -11,15 +12,15 @@ let statusTimeout: Timeout;
 const TEMPORARY_STATUS_TIMEOUT = 1000;
 const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "Favorites ";
 
+function clearStatus(): void {
+  statusIndicator.textContent = "";
+  statusIndicator.classList.add("hidden");
+}
+
 export function setStatus(text: string): void {
   clearTimeout(statusTimeout);
   statusIndicator.classList.remove("hidden");
   statusIndicator.textContent = text;
-}
-
-export function clearStatus(): void {
-  statusIndicator.textContent = "";
-  statusIndicator.classList.add("hidden");
 }
 
 export function setTemporaryStatus(text: string): void {
@@ -42,7 +43,9 @@ export function updateStatusWhileFetching(searchResultsCount: number, favoritesF
   setMatchCount(searchResultsCount);
 }
 
-export function notifyNewFavoritesFound(newFavoritesCount: number): void {
+export function notifyNewFavoritesFound(newFavorites: NewFavorites): void {
+  const newFavoritesCount = newFavorites.newFavorites.length;
+
   if (newFavoritesCount > 0) {
     setStatus(`Found ${newFavoritesCount} new favorite${newFavoritesCount > 1 ? "s" : ""}`);
   }

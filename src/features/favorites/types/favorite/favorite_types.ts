@@ -14,5 +14,4 @@ export type FavoritesPageRelation = "first" | "previous" | "next" | "final";
 export interface NewFavorites {
   newFavorites: FavoriteItem[]
   newSearchResults: FavoriteItem[]
-  allSearchResults: FavoriteItem[]
 }

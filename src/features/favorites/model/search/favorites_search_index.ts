@@ -1,10 +1,10 @@
-import { DO_NOTHING, sleep } from "../../../../../utils/misc/async";
-import { BatchExecutor } from "../../../../../lib/components/batch_executor";
-import { FavoriteItem } from "../../../types/favorite/favorite_item";
-import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { InvertedSearchIndex } from "./inverted_search_index";
-import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
-import { splitIntoChunks } from "../../../../../utils/primitive/array";
+import { DO_NOTHING, sleep } from "../../../../utils/misc/async";
+import { BatchExecutor } from "../../../../lib/components/batch_executor";
+import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { InvertedSearchIndex } from "../../../../lib/components/inverted_search_index";
+import { ThrottledQueue } from "../../../../lib/components/throttled_queue";
+import { splitIntoChunks } from "../../../../utils/primitive/array";
 
 const BATCH_SIZE = 750;
 const BATCH_SLEEP_TIME = 0;
@@ -38,7 +38,7 @@ class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
     }
     this.asyncBuildStarted = true;
     await sleep(50);
-    this.keepIndexedTagsSorted(false);
+    this.doNotKeepIndexedTagsSorted();
     this.add = this.addAsynchronously;
     this.emptyAdditionsCache();
   }
@@ -83,7 +83,7 @@ class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
 
     if (this.ready) {
       this.add = super.add;
-      this.keepIndexedTagsSorted(true);
+      this.keepIndexedTagsSorted();
       this.sortTags();
     }
   }

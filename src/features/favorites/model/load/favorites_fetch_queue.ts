@@ -2,33 +2,19 @@ import { DO_NOTHING } from "../../../../utils/misc/async";
 import { FavoriteItem } from "../../types/favorite/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 
-const queue: FavoritesPageRequest[] = [];
-let mostRecentlyDequeuedPageNumber = -1;
+const QUEUE: FavoritesPageRequest[] = [];
+let lastDequeuedPage = -1;
 let dequeuing = false;
 let onDequeue: (favorites: FavoriteItem[]) => void = DO_NOTHING;
 
-function getSmallestEnqueuedPageNumber(): number {
-  return queue[0].pageNumber;
-}
-
-function getNextPageNumberToDequeue(): number {
-  return mostRecentlyDequeuedPageNumber + 1;
-}
-
-function allPreviousPagesWereDequeued(): boolean {
-  return getNextPageNumberToDequeue() === getSmallestEnqueuedPageNumber();
-}
-
-function isEmpty(): boolean {
-  return queue.length === 0;
-}
-
-function canDequeue(): boolean {
-  return !isEmpty() && allPreviousPagesWereDequeued();
-}
+const getSmallestEnqueuedPageNumber = (): number => QUEUE[0].pageNumber;
+const getNextPageNumberToDequeue = (): number => lastDequeuedPage + 1;
+const allPreviousPagesWereDequeued = (): boolean => getNextPageNumberToDequeue() === getSmallestEnqueuedPageNumber();
+const isEmpty = (): boolean => QUEUE.length === 0;
+const canDequeue = (): boolean => !isEmpty() && allPreviousPagesWereDequeued();
 
 function sortByLowestPageNumber(): void {
-  queue.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
+  QUEUE.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
 }
 
 function drain(): void {
@@ -44,8 +30,8 @@ function drain(): void {
 }
 
 function dequeue(): void {
-  mostRecentlyDequeuedPageNumber += 1;
-  const request = queue.shift();
+  lastDequeuedPage += 1;
+  const request = QUEUE.shift();
   const favorites = request?.favorites ?? [];
 
   onDequeue(favorites);
@@ -56,7 +42,7 @@ export function setDequeueCallback(callback: (favorites: FavoriteItem[]) => void
 }
 
 export function enqueue(request: FavoritesPageRequest): void {
-  queue.push(request);
+  QUEUE.push(request);
   sortByLowestPageNumber();
   drain();
 }

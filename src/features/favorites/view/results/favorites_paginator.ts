@@ -85,7 +85,7 @@ function getPageRange(pageNumber: number): { start: number; end: number } {
   };
 }
 
-export function changeResultsPerPage(newResultsPerPage: number): void {
+export function setResultsPerPage(newResultsPerPage: number): void {
   resultsPerPage = newResultsPerPage;
 }
 

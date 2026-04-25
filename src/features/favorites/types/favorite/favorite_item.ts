@@ -1,7 +1,7 @@
 import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "../../../../types/favorite_types";
 import { Post, Rating } from "../../../../types/common_types";
 import { clearPost, createPostFromRawFavorite } from "./favorite_type_utils";
-import { FAVORITES_SEARCH_INDEX } from "../../model/search/index/favorites_search_index";
+import { FAVORITES_SEARCH_INDEX } from "../../model/search/favorites_search_index";
 import { FavoriteHTMLElement } from "./favorite_element";
 import { FavoriteMetadata } from "../metadata/favorite_metadata";
 import { FavoriteTags } from "./favorite_tags";

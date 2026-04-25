@@ -4,6 +4,7 @@ import * as FavoritesOptionsFlow from "./flows/runtime/favorites_option_flow";
 import * as FavoritesPresentationFlow from "./flows/presentation/favorites_presentation_flow";
 import * as FavoritesResetFlow from "./flows/runtime/favorites_reset_flow";
 import * as FavoritesSearchFlow from "./flows/runtime/favorites_search_flow";
+import * as FavoritesView from "../view/favorites_view";
 import { CrossFeatureRequests } from "../../../lib/global/cross_feature_requests";
 import { Events } from "../../../lib/global/events/events";
 import { FavoritesPaginationFlow } from "./flows/presentation/favorites_pagination_flow";
@@ -32,19 +33,19 @@ function addButtonEventListeners(): void {
   Events.favorites.pageSelected.on(FavoritesPaginationFlow.gotoPage.bind(FavoritesPaginationFlow));
   Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.gotoRelativePage.bind(FavoritesPaginationFlow));
   Events.favorites.searchSubsetClicked.on(FavoritesModel.setSearchSubset);
-  Events.favorites.stopSearchSubsetClicked.on(FavoritesModel.stopSearchSubset);
+  Events.favorites.stopSearchSubsetClicked.on(FavoritesModel.stopSubset);
   Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.revealFavorite);
   Events.favorites.findFavoriteInAllStarted.on(FavoritesSearchFlow.findFavoriteInAll);
 }
 
 function addSettingsEventListeners(): void {
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
-  Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.toggleBlacklist);
+  Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.useBlacklist);
   Events.favorites.layoutChanged.on(FavoritesOptionsFlow.changeLayout);
-  Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.toggleSortAscending);
-  Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.changeSortingMethod);
-  Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.changeAllowedRatings);
-  Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.changeResultsPerPage);
+  Events.favorites.sortAscendingChanged.on(FavoritesOptionsFlow.setSortAscending);
+  Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.setSortingMethod);
+  Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.setAllowedRatings);
+  Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.setResultsPerPage);
 }
 
 function addMetaEventListeners(): void {
@@ -55,7 +56,7 @@ function addMetaEventListeners(): void {
 
 function addCrossFeatureEventListeners(): void {
   Events.gallery.showOnHoverToggled.on(updateShowOnHoverOptionTriggeredFromGallery);
-  Events.gallery.favoriteToggled.on(FavoritesModel.swapFavoriteButton);
+  Events.gallery.favoriteToggled.on(FavoritesView.swapFavoriteButton);
   Events.tagModifier.resetConfirmed.on(FavoritesModel.resetTagModifications);
 }
 

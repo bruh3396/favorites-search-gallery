@@ -126,7 +126,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     position: "beforeend",
     enabled: true,
     preference: Preferences.sortAscendingEnabled,
-    event: Events.favorites.sortAscendingToggled
+    event: Events.favorites.sortAscendingChanged
   },
   {
     id: "mobile-gallery",

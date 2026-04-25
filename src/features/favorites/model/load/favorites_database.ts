@@ -28,41 +28,37 @@ function usingCorrectSchema(records: FavoritesDatabaseRecord[]): boolean {
 }
 
 function updateRecord(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord {
-    return {
+  return {
     ...record,
     tags: convertToTagSet(record.tags as unknown as string),
     metadata: JSON.parse(record.metadata as unknown as string)
   };
 }
 
-function updateRecords(records: FavoritesDatabaseRecord[]): FavoritesDatabaseRecord[] {
-  return records.map(record => updateRecord(record));
-}
-
 async function updateRecordsIfNeeded(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
   if (records.length === 0) {
     setSchemaVersion(SCHEMA_VERSION);
-    return Promise.resolve(records);
+    return records;
   }
 
   if (usingCorrectSchema(records)) {
-    return Promise.resolve(records);
+    return records;
   }
-  const updatedRecords = updateRecords(records);
+  const updatedRecords = records.map(record => updateRecord(record));
 
   await DATABASE.update(updatedRecords);
   setSchemaVersion(SCHEMA_VERSION);
   return updatedRecords;
 }
 
-export async function loadAllFavorites(): Promise<FavoriteItem[]> {
+export async function getAllFavorites(): Promise<FavoriteItem[]> {
   const records = await DATABASE.load();
   const updatedRecords = await updateRecordsIfNeeded(records);
   return updatedRecords.map(record => new FavoriteItem(record));
 }
 
 export function storeFavorites(favorites: FavoriteItem[]): Promise<void> {
-  return DATABASE.store(favorites.slice().reverse().map(favorite => favorite.databaseRecord));
+  return DATABASE.store([...favorites].reverse().map(favorite => favorite.databaseRecord));
 }
 
 export function updateMetadata(id: string): void {
@@ -73,10 +69,5 @@ export function updateMetadata(id: string): void {
   }
 }
 
-export function deleteFavorite(id: string): Promise<void> {
-  return DATABASE.deleteRecords([id]);
-}
-
-export function deleteDatabase(): Promise<void> {
-  return DATABASE.delete();
-}
+export const deleteFavorite = (id: string): Promise<void> => DATABASE.deleteRecords([id]);
+export const deleteDatabase = (): Promise<void> => DATABASE.delete();

@@ -176,7 +176,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     title: "Toggle slim layout",
     preference: Preferences.slimLayout,
     function: toggleSlimLayout,
-    enabled: false,
+    // enabled: false,
     triggerOnCreation: true
   },
   {
@@ -303,7 +303,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   },
   {
     id: "enable-gallery-menu",
-    parentId: "favorite-options-left",
+    parentId: "favorite-options-right",
     textContent: "Gallery Menu",
     title: "Show menu in gallery",
     enabled: GALLERY_ENABLED && GeneralSettings.galleryMenuOptionEnabled,
@@ -319,7 +319,7 @@ const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
     parentId: "sort-inputs",
     position: "beforeend",
     preference: Preferences.sortAscendingEnabled,
-    event: Events.favorites.sortAscendingToggled
+    event: Events.favorites.sortAscendingChanged
   }
 ];
 

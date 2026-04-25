@@ -1,6 +1,6 @@
-import { MetadataSearchTag } from "../../model/search/search_tags/metadata_search_tag";
-import { SearchTag } from "../../model/search/search_tags/search_tag";
-import { WildcardSearchTag } from "../../model/search/search_tags/wildcard_search_tag";
+import { MetadataSearchTag } from "../../../../types/metadata_search_tag";
+import { SearchTag } from "../../../../types/search_tag";
+import { WildcardSearchTag } from "../../../../types/wildcard_search_tag";
 
 export type SearchCommandMetadata = {
   normalTags: SearchTag[]

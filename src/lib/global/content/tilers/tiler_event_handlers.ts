@@ -1,15 +1,15 @@
+import * as ContentTiler from "./tiler";
 import { CrossFeatureRequests } from "../../cross_feature_requests";
 import { FavoritesWheelEvent } from "../../../../types/input_types";
 import { Layout } from "../../../../types/common_types";
 import { clamp } from "../../../../utils/primitive/number";
-import { getCurrentLayout } from "./tiler";
 import { sleep } from "../../../../utils/misc/async";
 
 export function changeItemSizeOnShiftScroll(wheelEvent: FavoritesWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || getCurrentLayout() === "native") {
+  if (!wheelEvent.originalEvent.shiftKey || ContentTiler.getCurrentLayout() === "native") {
     return;
   }
-  const usingRowLayout = getCurrentLayout() === "row";
+  const usingRowLayout = ContentTiler.getCurrentLayout() === "row";
   const id = usingRowLayout ? "row-size" : "column-count";
   const input = document.getElementById(id);
 

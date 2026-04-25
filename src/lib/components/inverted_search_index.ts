@@ -1,9 +1,9 @@
-import { ExpandedSearchCommand } from "../search_command/expanded_search_command";
-import { SearchCommand } from "../search_command/search_command";
-import { SearchTag } from "../search_tags/search_tag";
-import { Searchable } from "../../../../../types/common_types";
-import { SortedArray } from "../../../../../lib/components/sorted_array";
-import { intersection } from "../../../../../utils/primitive/set";
+import { ExpandedSearchCommand } from "../../types/expanded_search_command";
+import { SearchCommand } from "../../types/search_command";
+import { SearchTag } from "../../types/search_tag";
+import { Searchable } from "../../types/common_types";
+import { SortedArray } from "./sorted_array";
+import { intersection } from "../../utils/primitive/set";
 
 export class InvertedSearchIndex<T extends Searchable> {
   private readonly allSortedTags: SortedArray<string> = new SortedArray<string>();
@@ -44,8 +44,12 @@ export class InvertedSearchIndex<T extends Searchable> {
     return this.getSearchResultsUsingIndex(searchCommand.query, items);
   }
 
-  public keepIndexedTagsSorted(value: boolean): void {
-    this.sortTagsOnAdd = value;
+  public keepIndexedTagsSorted(): void {
+    this.sortTagsOnAdd = true;
+  }
+
+  public doNotKeepIndexedTagsSorted(): void {
+    this.sortTagsOnAdd = false;
   }
 
   protected sortTags(): void {

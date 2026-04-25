@@ -1,7 +1,7 @@
-import { Favorite } from "../../../../../types/favorite_types";
-import { FavoriteMetadataSearchExpression } from "../../../types/metadata/favorite_metadata_search_expression";
+import { Favorite } from "./favorite_types";
+import { FavoriteMetadataSearchExpression } from "../features/favorites/types/metadata/favorite_metadata_search_expression";
 import { SearchTag } from "./search_tag";
-import { Searchable } from "../../../../../types/common_types";
+import { Searchable } from "./common_types";
 
 export class MetadataSearchTag extends SearchTag {
   private expression: FavoriteMetadataSearchExpression;

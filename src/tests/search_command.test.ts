@@ -1,6 +1,6 @@
 import { ALL_ITEM_NAMES, ALL_TAGS, Fruit, INDEX, ITEMS } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
-import { SearchCommand } from "../search_command/search_command";
+import { SearchCommand } from "../types/search_command";
 
 function testGetSearchResultsFromIndex(searchQuery: string, expectedNames: string[]): void {
   expect(INDEX.getSearchResults(new SearchCommand<Fruit>(searchQuery), ITEMS).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());

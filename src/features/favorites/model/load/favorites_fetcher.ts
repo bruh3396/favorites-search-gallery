@@ -13,37 +13,13 @@ let storedFavoriteIds = new Set<string>();
 let currentPageNumber = 0;
 let fetchedAnEmptyPage = false;
 
-function hasFailedRequests(): boolean {
-  return FAILED_REQUESTS.length > 0;
-}
-
-function hasPendingRequests(): boolean {
-  return PENDING_REQUEST_PAGE_NUMBERS.size > 0;
-}
-
-function allRequestsHaveStarted(): boolean {
-  return fetchedAnEmptyPage;
-}
-
-function someRequestsArePending(): boolean {
-  return hasPendingRequests() || hasFailedRequests();
-}
-
-function noRequestsArePending(): boolean {
-  return !someRequestsArePending();
-}
-
-function allRequestsHaveCompleted(): boolean {
-  return allRequestsHaveStarted() && noRequestsArePending();
-}
-
-function someRequestsAreIncomplete(): boolean {
-  return !allRequestsHaveCompleted();
-}
-
-function oldestFailedFetchRequest(): FavoritesPageRequest | null {
-  return FAILED_REQUESTS.shift() ?? null;
-}
+const hasFailedRequests = (): boolean => FAILED_REQUESTS.length > 0;
+const hasPendingRequests = (): boolean => PENDING_REQUEST_PAGE_NUMBERS.size > 0;
+const allRequestsHaveStarted = (): boolean => fetchedAnEmptyPage;
+const someRequestsArePending = (): boolean => hasPendingRequests() || hasFailedRequests();
+const noRequestsArePending = (): boolean => !someRequestsArePending();
+const allRequestsHaveCompleted = (): boolean => allRequestsHaveStarted() && noRequestsArePending();
+const someRequestsAreIncomplete = (): boolean => !allRequestsHaveCompleted();
 
 function getNewFetchRequest(): FavoritesPageRequest {
   const request = new FavoritesPageRequest(currentPageNumber);
@@ -53,36 +29,37 @@ function getNewFetchRequest(): FavoritesPageRequest {
   return request;
 }
 
-function nextFetchRequest(): FavoritesPageRequest | null {
+function nextFetchRequest(): FavoritesPageRequest | undefined {
   if (hasFailedRequests()) {
-    return oldestFailedFetchRequest();
+    return FAILED_REQUESTS.shift();
   }
 
   if (!allRequestsHaveStarted()) {
     return getNewFetchRequest();
   }
-  return null;
+  return undefined;
 }
 
 async function fetchNextFavoritesPage(): Promise<void> {
   const request = nextFetchRequest();
 
-  if (request === null) {
+  if (request === undefined) {
     await sleep(200);
     return;
   }
   await fetchFavoritesPageHelper(request);
 }
 
-async function fetchFavoritesPageHelper(request: FavoritesPageRequest): Promise<void> {
-  await sleep(request.fetchDelay);
-  API.fetchFavoritesPage(request.realPageNumber)
-    .then((html) => {
-      onFavoritesPageRequestSuccess(request, html);
-    })
-    .catch((error) => {
-      onFavoritesPageRequestError(request, error);
-    });
+function fetchFavoritesPageHelper(request: FavoritesPageRequest): Promise<void> {
+  return sleep(request.fetchDelay).then(() => {
+    API.fetchFavoritesPage(request.realPageNumber)
+      .then((html) => {
+        onFavoritesPageRequestSuccess(request, html);
+      })
+      .catch((error) => {
+        onFavoritesPageRequestError(request, error);
+      });
+  });
 }
 
 function onFavoritesPageRequestSuccess(request: FavoritesPageRequest, html: string): void {
@@ -91,7 +68,7 @@ function onFavoritesPageRequestSuccess(request: FavoritesPageRequest, html: stri
   PENDING_REQUEST_PAGE_NUMBERS.delete(request.realPageNumber);
   const favoritesPageIsEmpty = request.favorites.length === 0;
 
-  fetchedAnEmptyPage = fetchedAnEmptyPage || favoritesPageIsEmpty;
+  fetchedAnEmptyPage ||= favoritesPageIsEmpty;
 
   if (!favoritesPageIsEmpty) {
     FavoritesFetchQueue.enqueue(request);
@@ -104,19 +81,27 @@ function onFavoritesPageRequestError(request: FavoritesPageRequest, error: Error
   FAILED_REQUESTS.push(request);
 }
 
-async function populateMultipleMetadataFromAPI(favorites: FavoriteItem[]): Promise<void> {
+function populateMultipleMetadataFromAPI(favorites: FavoriteItem[]): void {
   if (!FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
     return;
   }
-  const favoriteMap = favorites.reduce((map, favorite) => {
-    map[favorite.id] = favorite;
-    return map;
-  }, {} as Record<string, FavoriteItem>);
-  const postMap = await API.fetchMultiplePostsFromAPI(Array.from(Object.keys(favoriteMap)));
+  const favoriteMap = Object.fromEntries(favorites.map(f => [f.id, f]));
 
-  for (const [id, post] of Object.entries(postMap)) {
-    favoriteMap[id].processPost(post);
-  }
+  API.fetchMultiplePostsFromAPI(Object.keys(favoriteMap))
+    .then((postMap) => {
+      for (const [id, post] of Object.entries(postMap)) {
+        favoriteMap[id].processPost(post);
+      }
+    })
+    .catch(console.error);
+}
+
+function fetchNewFavoritesFromNextPage(): Promise<FavoriteItem[]> {
+  return API.fetchFavoritesPage(getNewFetchRequest().realPageNumber)
+    .then((html) => {
+      const favorites = extractFavorites(html);
+      return favorites.filter(favorite => !storedFavoriteIds.has(favorite.id));
+    });
 }
 
 export async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
@@ -130,32 +115,23 @@ export async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteIt
 export async function fetchNewFavoritesOnReload(ids: Set<string>): Promise<FavoriteItem[]> {
   storedFavoriteIds = ids;
   const allNewFavorites: FavoriteItem[] = [];
-  let favorites: FavoriteItem[];
-  let moreNewPagesExist;
 
   await sleep(100);
-  do {
-    favorites = await fetchNewFavoritesFromNextPage();
+
+  while (true) {
+    const favorites = await fetchNewFavoritesFromNextPage();
 
     if (favorites.length === 0) {
       break;
     }
-    moreNewPagesExist = favorites.length === FAVORITES_PER_PAGE;
     populateMultipleMetadataFromAPI(favorites);
     allNewFavorites.push(...favorites);
 
-    if (moreNewPagesExist) {
-      await sleep(FavoritesSettings.favoritesPageFetchDelay);
+    if (favorites.length < FAVORITES_PER_PAGE) {
+      break;
     }
-  } while (moreNewPagesExist);
+    await sleep(FavoritesSettings.favoritesPageFetchDelay);
+  }
   storedFavoriteIds.clear();
   return allNewFavorites;
-}
-
-function fetchNewFavoritesFromNextPage(): Promise<FavoriteItem[]> {
-  return API.fetchFavoritesPage(getNewFetchRequest().realPageNumber)
-    .then((html) => {
-      const favorites = extractFavorites(html);
-      return favorites.filter(favorite => !storedFavoriteIds.has(favorite.id));
-    });
 }

@@ -3048,7 +3048,8 @@ export const SKELETON_HTML = `
 export const SLIM_DESKTOP_HTML = `
 <style>
   #search-header,
-  #help-links-container {
+  #help-links-container,
+  #site-title {
     display: none !important;
   }
 

@@ -21,16 +21,36 @@ const TILERS = [
 
 let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.searchPageLayout.value;
 
-export function getCurrentTiler(): Tiler {
+function getCurrentTiler(): Tiler {
   return TILERS.find(tiler => tiler.className === currentLayout) ?? TILERS[0];
 }
 
-export function getCurrentLayout(): Layout {
-  return currentLayout;
+function updateColumnCount(columnCount: number): void {
+  for (const tiler of TILERS) {
+    tiler.setColumnCount(columnCount);
+  }
+}
+
+function updateRowSize(rowSize: number): void {
+  for (const tiler of TILERS) {
+    tiler.setRowSize(rowSize);
+  }
+}
+
+function addTilerEventListeners(): void {
+  Events.document.wheel.on(changeItemSizeOnShiftScroll);
+  Events.favorites.columnCountChanged.on(updateColumnCount);
+  Events.favorites.rowSizeChanged.on(updateRowSize);
+  Events.favorites.layoutChanged.on(hideUnusedLayoutSizer);
+  Events.searchPage.layoutChanged.on(hideUnusedLayoutSizer);
 }
 
 export function tile(items: HTMLElement[]): void {
   getCurrentTiler().tile(items);
+}
+
+export function getCurrentLayout(): Layout {
+  return currentLayout;
 }
 
 export function addItemsToBottom(items: HTMLElement[]): void {
@@ -51,28 +71,8 @@ export function changeLayout(layout: Layout): void {
   getCurrentTiler().onActivate();
 }
 
-export function updateColumnCount(columnCount: number): void {
-  for (const tiler of TILERS) {
-    tiler.setColumnCount(columnCount);
-  }
-}
-
-export function updateRowSize(rowSize: number): void {
-  for (const tiler of TILERS) {
-    tiler.setRowSize(rowSize);
-  }
-}
-
 export function showSkeleton(): void {
   getCurrentTiler().showSkeleton();
-}
-
-export function addTilerEventListeners(): void {
-  Events.document.wheel.on(changeItemSizeOnShiftScroll);
-  Events.favorites.columnCountChanged.on(updateColumnCount);
-  Events.favorites.rowSizeChanged.on(updateRowSize);
-  Events.favorites.layoutChanged.on(hideUnusedLayoutSizer);
-  Events.searchPage.layoutChanged.on(hideUnusedLayoutSizer);
 }
 
 export function setupTiler(): void {

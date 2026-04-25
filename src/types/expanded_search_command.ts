@@ -1,7 +1,7 @@
 import { SearchCommand } from "./search_command";
-import { SearchTag } from "../search_tags/search_tag";
-import { Searchable } from "../../../../../types/common_types";
-import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
+import { SearchTag } from "./search_tag";
+import { Searchable } from "./common_types";
+import { WildcardSearchTag } from "./wildcard_search_tag";
 
 export class ExpandedSearchCommand<T extends Searchable> extends SearchCommand<T> {
   public hasNoMatches: boolean;

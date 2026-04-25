@@ -1,10 +1,10 @@
-import { extractTagGroups, isEmptyString } from "../../../../../utils/primitive/string";
-import { FavoriteMetadataSearchExpression } from "../../../types/metadata/favorite_metadata_search_expression";
-import { MetadataSearchTag } from "../search_tags/metadata_search_tag";
-import { SearchCommandMetadata } from "../../../types/metadata/search_command_metadata";
-import { SearchTag } from "../search_tags/search_tag";
-import { Searchable } from "../../../../../types/common_types";
-import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
+import { extractTagGroups, isEmptyString } from "../utils/primitive/string";
+import { FavoriteMetadataSearchExpression } from "../features/favorites/types/metadata/favorite_metadata_search_expression";
+import { MetadataSearchTag } from "./metadata_search_tag";
+import { SearchCommandMetadata } from "../features/favorites/types/metadata/search_command_metadata";
+import { SearchTag } from "./search_tag";
+import { Searchable } from "./common_types";
+import { WildcardSearchTag } from "./wildcard_search_tag";
 
 export function isWildcardSearchTag(tag: string): boolean {
   return tag.includes("*");

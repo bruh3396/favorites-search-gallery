@@ -17,5 +17,5 @@ export function onStartedFetchingFavorites(): void {
 }
 
 export function onStartedStoringAllFavorites(): void {
-  FavoritesModel.onStartedStoringFavorites();
+  FavoritesModel.onStartedStoringAllFavorites();
 }

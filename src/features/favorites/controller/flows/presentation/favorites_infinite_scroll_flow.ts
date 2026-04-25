@@ -28,14 +28,14 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
   }
 
   public handleNewSearchResults(): void {
-    if (FavoritesModel.noFavoritesAreVisible()) {
+    if (FavoritesView.noFavoritesAreVisible()) {
       this.showMoreResults();
     }
   }
 
   public revealFavorite(): void { }
   public loadNewFavoritesInGallery(): boolean {
-    if (!ON_FAVORITES_PAGE || !FavoritesModel.hasMoreResults()) {
+    if (!ON_FAVORITES_PAGE || !FavoritesView.hasMoreResults(FavoritesModel.getLatestSearchResults())) {
       return false;
     }
     this.showMoreResults();
@@ -46,7 +46,7 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     if (!ON_FAVORITES_PAGE) {
       return false;
     }
-    const moreResults = FavoritesModel.getMoreResults();
+    const moreResults = FavoritesView.getMoreResults(FavoritesModel.getLatestSearchResults());
 
     if (moreResults.length === 0) {
       return false;
@@ -54,15 +54,15 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     FavoritesView.insertNewSearchResults(moreResults);
     Events.favorites.favoritesAddedToCurrentPage.emit(moreResults);
     await waitForAllThumbnailsToLoad();
-    const urlsToPreload = FavoritesModel.getThumbURLsToPreload();
+    const urlsToPreload = FavoritesView.getThumbURLsToPreload(FavoritesModel.getLatestSearchResults());
 
-    FavoritesView.preloadURLs(urlsToPreload);
+    FavoritesView.preloadImages(urlsToPreload);
     this.pageBottomObserver.refresh();
     return true;
   }
 
   private async showFirstResults(): Promise<void> {
-    FavoritesView.showSearchResults(FavoritesModel.getFirstResults());
+    FavoritesView.showSearchResults(FavoritesView.getFirstResults(FavoritesModel.getLatestSearchResults()));
     await waitForAllThumbnailsToLoad();
     this.pageBottomObserver.refresh();
     await sleep(50);

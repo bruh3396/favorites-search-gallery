@@ -8,7 +8,7 @@ import { FavoriteItem } from "../../../types/favorite/favorite_item";
 export async function loadAllFavorites(): Promise<void> {
   await loadAllFavoritesFromDatabase();
 
-  if (hasFavorites()) {
+  if (FavoritesModel.hasFavorites()) {
     Events.favorites.favoritesLoadedFromDatabase.emit();
     showLoadedFavorites();
     await loadNewFavorites();
@@ -25,10 +25,6 @@ async function loadAllFavoritesFromDatabase(): Promise<void> {
   await FavoritesModel.loadAllFavoritesFromDatabase();
 }
 
-function hasFavorites(): boolean {
-  return FavoritesModel.getAllFavorites().length > 0;
-}
-
 async function fetchAllFavorites(): Promise<void> {
   FavoritesPresentationFlow.clear();
   Events.favorites.startedFetchingFavorites.emit();
@@ -36,6 +32,7 @@ async function fetchAllFavorites(): Promise<void> {
 }
 
 async function saveAllFavorites(): Promise<void> {
+  Events.favorites.startedStoringAllFavorites.emit();
   FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeAllFavorites();
   FavoritesView.setTemporaryStatus("All favorites saved");
@@ -43,7 +40,7 @@ async function saveAllFavorites(): Promise<void> {
 
 function showLoadedFavorites(): void {
   FavoritesView.setTemporaryStatus("Favorites loaded");
-  FavoritesSearchFlow.showLatestSearchResults();
+  FavoritesSearchFlow.searchFavorites();
 }
 
 function processFetchedFavorites(): void {
@@ -61,8 +58,9 @@ async function loadNewFavorites(): Promise<void> {
     return;
   }
   FavoritesView.insertNewSearchResultsOnReload(results);
+  FavoritesView.notifyNewFavoritesFound(results);
   saveNewFavorites(results.newFavorites);
-  FavoritesModel.paginate(FavoritesModel.getLatestSearchResults());
+  FavoritesView.paginate(FavoritesModel.getLatestSearchResults());
   Events.favorites.newFavoritesFoundOnReload.emit(results.newSearchResults);
   Events.favorites.searchResultsUpdated.emit();
 }

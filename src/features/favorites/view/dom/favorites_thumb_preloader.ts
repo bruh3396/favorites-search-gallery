@@ -1,12 +1,16 @@
-import { Favorite } from "../../types/favorite_types";
-import { sleep } from "../misc/async";
-import { waitForAllThumbnailsToLoad } from "./dom";
+import { Favorite } from "../../../../types/favorite_types";
+import { GeneralSettings } from "../../../../config/general_settings";
+import { sleep } from "../../../../utils/misc/async";
+import { waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
 
 export function preloadThumbnails(favorites: Favorite[]): void {
   preloadImages(favorites.map(favorite => favorite.thumbURL));
 }
 
 export async function preloadImages(urls: string[]): Promise<void> {
+  if (!GeneralSettings.preloadThumbnails) {
+    return;
+  }
   await waitForAllThumbnailsToLoad();
 
   for (const url of urls) {

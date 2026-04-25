@@ -51,7 +51,7 @@ const favorites = {
   darkThemeToggled: new EventEmitter<boolean>(true),
   headerToggled: new EventEmitter<boolean>(true),
   captionsToggled: new EventEmitter<boolean>(true),
-  sortAscendingToggled: new EventEmitter<boolean>(true),
+  sortAscendingChanged: new EventEmitter<boolean>(true),
   galleryMenuToggled: new EventEmitter<boolean>(true),
   blacklistToggled: new EventEmitter<boolean>(true),
   infiniteScrollToggled: new EventEmitter<boolean>(true),

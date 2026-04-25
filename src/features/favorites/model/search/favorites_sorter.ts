@@ -1,12 +1,12 @@
-import { FavoriteItem } from "../../../types/favorite/favorite_item";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { SortingMethod } from "../../../../../types/common_types";
-import { shuffleArray } from "../../../../../utils/primitive/array";
+import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { Preferences } from "../../../../lib/global/preferences/preferences";
+import { SortingMethod } from "../../../../types/common_types";
+import { shuffleArray } from "../../../../utils/primitive/array";
 
 let useAscendingOrder = Preferences.sortAscendingEnabled.value;
 let sortingMethod: SortingMethod = Preferences.sortingMethod.value;
 
-export function setAscendingOrder(value: boolean): void {
+export function setSortAscending(value: boolean): void {
   useAscendingOrder = value;
 }
 

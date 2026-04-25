@@ -1,6 +1,6 @@
 import { FRUITS, SEARCHABLE_EMPTY, SEARCHABLE_FRUITS, SEARCHABLE_SORTED_FRUITS, SORTED_FRUITS, createSearchable, getAllSubstrings, getPrefixes } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
-import { WildcardSearchTag } from "../search_tags/wildcard_search_tag";
+import { WildcardSearchTag } from "../types/wildcard_search_tag";
 
 describe("wildcardSearchTag", () => {
   test("empty", () => {

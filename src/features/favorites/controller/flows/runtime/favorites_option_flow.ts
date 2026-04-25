@@ -14,27 +14,27 @@ export function toggleInfiniteScroll(value: boolean): void {
   FavoritesSearchFlow.showLatestSearchResults();
 }
 
-export function toggleBlacklist(value: boolean): void {
-  FavoritesModel.toggleBlacklist(value);
-  FavoritesSearchFlow.searchFavoritesUsingLatestQuery();
+export function useBlacklist(value: boolean): void {
+  FavoritesModel.useBlacklist(value);
+  FavoritesSearchFlow.searchFavorites();
 }
 
-export function changeSortingMethod(sortingMethod: SortingMethod): void {
+export function setSortingMethod(sortingMethod: SortingMethod): void {
   FavoritesModel.setSortingMethod(sortingMethod);
-  FavoritesSearchFlow.searchFavoritesUsingLatestQuery();
+  FavoritesSearchFlow.searchFavorites();
 }
 
-export function toggleSortAscending(value: boolean): void {
-  FavoritesModel.toggleSortAscending(value);
-  FavoritesSearchFlow.searchFavoritesUsingLatestQuery();
+export function setSortAscending(value: boolean): void {
+  FavoritesModel.setSortAscending(value);
+  FavoritesSearchFlow.searchFavorites();
 }
 
-export function changeAllowedRatings(ratings: Rating): void {
-  FavoritesModel.changeAllowedRatings(ratings);
-  FavoritesSearchFlow.searchFavoritesUsingLatestQuery();
+export function setAllowedRatings(ratings: Rating): void {
+  FavoritesModel.setAllowedRatings(ratings);
+  FavoritesSearchFlow.searchFavorites();
 }
 
-export function changeResultsPerPage(resultsPerPage: number): void {
-  FavoritesModel.changeResultsPerPage(resultsPerPage);
+export function setResultsPerPage(resultsPerPage: number): void {
+  FavoritesView.setResultsPerPage(resultsPerPage);
   FavoritesSearchFlow.showLatestSearchResults();
 }

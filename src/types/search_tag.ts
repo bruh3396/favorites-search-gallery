@@ -1,4 +1,4 @@
-import { Searchable } from "../../../../../types/common_types";
+import { Searchable } from "./common_types";
 
 export class SearchTag {
   public value: string;

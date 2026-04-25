@@ -65,16 +65,16 @@ export async function updateMissingMetadata(): Promise<void> {
     }
   }));
 
-  for (const metadata of deleted) {
-    let post;
+  // for (const metadata of deleted) {
+  //   let post;
 
-    try {
-      post = await API.fetchPostFromPostPage(metadata.id);
-      metadata.processPost(post);
-    } catch {
-      // console.error(metadata.id);
-    }
-  }
+  //   try {
+  //     post = await API.fetchPostFromPostPage(metadata.id);
+  //     metadata.processPost(post);
+  //   } catch {
+  //     // console.error(metadata.id);
+  //   }
+  // }
 }
 
 export class FavoriteMetadata {
@@ -85,7 +85,7 @@ export class FavoriteMetadata {
 
   constructor(id: string, record: FavoritesDatabaseRecord | HTMLElement) {
     this.metrics = {
-      id: parseInt(id),
+      id: parseInt(id, 10),
       width: 0,
       height: 0,
       score: 0,

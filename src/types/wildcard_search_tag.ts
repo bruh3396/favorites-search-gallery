@@ -1,6 +1,6 @@
 import { SearchTag } from "./search_tag";
-import { Searchable } from "../../../../../types/common_types";
-import { escapeParenthesis } from "../../../../../utils/primitive/string";
+import { Searchable } from "./common_types";
+import { escapeParenthesis } from "../utils/primitive/string";
 
 const UNMATCHABLE_REGEX = /^\b$/;
 const STARTS_WITH_REGEX = /^[^*]*\*$/;

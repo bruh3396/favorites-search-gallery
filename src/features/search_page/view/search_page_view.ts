@@ -1,6 +1,5 @@
 import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
 import * as SearchPageCreator from "./search_page_creator";
-import { Layout } from "../../../types/common_types";
 import { Preferences } from "../../../lib/global/preferences/preferences";
 import { SearchPage } from "../../../types/search_page";
 import { getAllThumbs } from "../../../utils/dom/dom";
@@ -15,10 +14,6 @@ export function setupSearchPageView(): void {
 
 export function createSearchPage(searchPage: SearchPage): void {
   SearchPageCreator.createSearchPage(searchPage);
-}
-
-export function changeLayout(layout: Layout): void {
-  ContentTiler.changeLayout(layout);
 }
 
 export function insertNewSearchResults(thumbs: HTMLElement[]): void {

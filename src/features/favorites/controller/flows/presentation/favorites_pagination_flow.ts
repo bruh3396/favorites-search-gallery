@@ -10,27 +10,27 @@ class PaginationFlow implements FavoritesPresentationFlow {
     private addedFirstResults = false;
 
     public present(results: FavoriteItem[]): void {
-        FavoritesModel.paginate(results);
-        FavoritesModel.changePage(1);
+        FavoritesView.paginate(results);
+        FavoritesView.changePage(1);
         this.showCurrentPage();
     }
 
     public gotoPage(pageNumber: number): void {
-        FavoritesModel.changePage(pageNumber);
+        FavoritesView.changePage(pageNumber);
         this.showCurrentPage();
     }
 
     public gotoRelativePage(relativePage: FavoritesPageRelation): void {
-        if (FavoritesModel.gotoRelativePage(relativePage)) {
+        if (FavoritesView.gotoRelativePage(relativePage)) {
             this.showCurrentPage();
         }
     }
 
     public showCurrentPage(): void {
-        FavoritesView.showSearchResults(FavoritesModel.getFavoritesOnCurrentPage());
-        FavoritesView.createPageSelectionMenu(FavoritesModel.getPaginationParameters());
-        FavoritesView.preloadThumbnails(FavoritesModel.getFavoritesOnNextPage());
-        FavoritesView.preloadThumbnails(FavoritesModel.getFavoritesOnPreviousPage());
+        FavoritesView.showSearchResults(FavoritesView.getFavoritesOnCurrentPage());
+        FavoritesView.createPageSelectionMenu(FavoritesView.getPaginationParameters());
+        FavoritesView.preloadThumbnails(FavoritesView.getFavoritesOnNextPage());
+        FavoritesView.preloadThumbnails(FavoritesView.getFavoritesOnPreviousPage());
         Events.favorites.pageChanged.emit();
     }
 
@@ -38,7 +38,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
     }
 
     public revealFavorite(id: string): void {
-        if (FavoritesModel.gotoPageWithFavoriteId(id)) {
+        if (FavoritesView.gotoPageWithFavorite(id)) {
             this.showCurrentPage();
         }
         FavoritesView.revealFavorite(id);
@@ -52,31 +52,29 @@ class PaginationFlow implements FavoritesPresentationFlow {
     public reset(): void { }
 
     public handleNewSearchResults(): void {
-        FavoritesModel.paginate(FavoritesModel.getLatestSearchResults());
-        FavoritesView.createPageSelectionMenuWhileFetching(FavoritesModel.getPaginationParameters());
+        FavoritesView.paginate(FavoritesModel.getLatestSearchResults());
+        FavoritesView.createPageSelectionMenuWhileFetching(FavoritesView.getPaginationParameters());
         this.addNewlyFetchedSearchResultsToCurrentPage();
         Events.favorites.searchResultsUpdated.emit();
     }
 
     public addNewlyFetchedSearchResultsToCurrentPage(): void {
-        if (!FavoritesModel.onFinalPage() && this.addedFirstResults) {
+        if (!FavoritesView.onFinalPage() && this.addedFirstResults) {
             return;
         }
-        const newFavorites = FavoritesModel.getFavoritesOnCurrentPage()
-            .filter(favorite => document.getElementById(favorite.id) === null);
+        const favorites = FavoritesView.getFavoritesOnCurrentPage().filter(favorite => document.getElementById(favorite.id) === null);
 
-        if (newFavorites.length > 0) {
+        if (favorites.length > 0) {
             this.addedFirstResults = true;
         }
-
-        const thumbs = newFavorites.map(favorite => favorite.root);
+        const thumbs = favorites.map(favorite => favorite.root);
 
         FavoritesView.insertNewSearchResults(thumbs);
         Events.favorites.favoritesAddedToCurrentPage.emit(thumbs);
     }
 
     private gotoAdjacentPage(direction: NavigationKey): void {
-        if (FavoritesModel.gotoAdjacentPage(direction)) {
+        if (FavoritesView.gotoAdjacentPage(direction)) {
             this.showCurrentPage();
         }
     }
