@@ -1,4 +1,4 @@
-import * as FavoriteToggler from "../../../../../utils/misc/favorite_toggler";
+import * as FavoriteToggler from "../../../../../utils/favorite_toggler";
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryView from "../../../view/gallery_view";
 

@@ -1,4 +1,16 @@
-import { capitalize, convertToTagSet, convertToTagString, escapeParenthesis, extractTagGroups, getContentType, getDimensions2D, isEmptyString, isOnlyDigits, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores, toCamelCase } from "../utils/primitive/string";
+import { convertToTagSet, convertToTagString } from "../utils/string/tags";
+import { getDimensions2D } from "../utils/string/parse";
+import { isEmptyString } from "../utils/string/parse";
+import { removeNonNumericCharacters } from "../utils/string/parse";
+import { extractTagGroups } from "../utils/string/parse";
+import { negateTags } from "../utils/string/format";
+import { isOnlyDigits } from "../utils/string/parse";
+import { getContentType } from "../utils/string/parse";
+import { escapeParenthesis } from "../utils/string/format";
+import { removeFirstAndLastLines } from "../utils/string/format";
+import { removeLeadingHyphens, replaceSpacesWithUnderscores } from "../utils/string/format";
+import { capitalize } from "../utils/string/format";
+import { removeExtraWhiteSpace, toCamelCase } from "../utils/string/format";
 import { describe, expect, test } from "vitest";
 
 describe("toCamelCase", () => {
@@ -150,11 +162,11 @@ describe("escapeParenthesis", () => {
 });
 
 describe("extractTagGroups", () => {
-  function testTagGroups(input: string, expectedOrGroups: string[][], expectedRemainingTags: string[]): void {
+  function testTagGroups(input: string, expectedOrGroups: string[][], expectedAndTags: string[]): void {
     const result = extractTagGroups(input);
 
     expect(result.orGroups).toStrictEqual(expectedOrGroups);
-    expect(result.remainingTags).toStrictEqual(expectedRemainingTags);
+    expect(result.andTags).toStrictEqual(expectedAndTags);
   }
 
   test("empty", () => {

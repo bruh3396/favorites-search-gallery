@@ -1,6 +1,6 @@
-import { Favorite } from "../../../../types/favorite_types";
+import { Favorite } from "../../../../types/favorite_data_types";
 import { GeneralSettings } from "../../../../config/general_settings";
-import { sleep } from "../../../../utils/misc/async";
+import { sleep } from "../../../../lib/core/async/promise";
 import { waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
 
 export function preloadThumbnails(favorites: Favorite[]): void {

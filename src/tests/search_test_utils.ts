@@ -1,5 +1,7 @@
-import { InvertedSearchIndex } from "../lib/components/inverted_search_index";
+import { InvertedSearchIndex } from "../lib/search/index/inverted_search_index";
 import { Searchable } from "../types/common_types";
+
+export type Fruit = Searchable & { name: string };
 
 export function getPrefixes(word: string): string[] {
   const prefixes: string[] = [];
@@ -69,7 +71,6 @@ export const SORTED_FRUITS = new Set(Array.from(FRUITS).sort());
 export const SEARCHABLE_EMPTY = createSearchable([]);
 export const SEARCHABLE_FRUITS = createSearchable(Array.from(FRUITS));
 export const SEARCHABLE_SORTED_FRUITS = createSearchable(Array.from(SORTED_FRUITS));
-export type Fruit = Searchable & { name: string };
 
 export const ITEMS: Fruit[] = [
   {name: "apple", tags: new Set(["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"].sort())},
@@ -83,7 +84,6 @@ export const ITEMS: Fruit[] = [
   {name: "pear", tags: new Set(["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"].sort())},
   {name: "strawberry", tags: new Set(["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"].sort())}
 ];
-
 export const ALL_ITEM_NAMES = ITEMS.map(item => item.name);
 export const ALL_TAGS = ITEMS.flatMap(item => Array.from(item.tags));
 export const INDEX = new InvertedSearchIndex<Fruit>();

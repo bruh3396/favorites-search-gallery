@@ -1,6 +1,6 @@
-import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../../../../lib/global/container";
+import { OVERLAYS } from "../../../../../lib/shell";
 import { HELP_HTML } from "../../../../../assets/html";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { getCurrentThemeClass } from "../../../../../utils/dom/style";
 
 let dialog: HTMLDialogElement;
@@ -33,7 +33,7 @@ function createDialogWhatsNewMenu(menu: HTMLElement): void {
   dialog.style.padding = "5px 10px";
   dialog.style.fontSize = "large";
   dialog.classList.add(getCurrentThemeClass());
-  FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER.appendChild(dialog);
+  OVERLAYS.appendChild(dialog);
   const whatsNewContainer = menu.querySelector("#whats-new-container");
 
   if (whatsNewContainer === null) {

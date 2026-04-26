@@ -1,3 +1,5 @@
+import { GalleryMenuAction } from "../../../types/common_types";
+
 export enum GalleryState {
   IDLE = 0,
   SHOWING_CONTENT_ON_HOVER = 1,
@@ -23,12 +25,6 @@ export interface Renderer {
   handlePageChangeInGallery: () => void
   preload: (elements: HTMLElement[]) => void
 }
-
-export type GalleryMenuAction = "exit" |
-"fullscreen" | "openPost" | "openOriginal" |
-"download" | "addFavorite" | "removeFavorite" |
-"toggleDockPosition" | "toggleBackground" | "search" |
- "changeBackgroundColor" | "pin" | "none";
 
 export type GalleryMenuButton = {
   id: string;

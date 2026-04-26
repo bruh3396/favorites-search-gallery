@@ -1,15 +1,15 @@
 import { CheckboxElement, NumberElement, SelectElement } from "../../../types/element_types";
-import { Layout, MetadataMetric, PerformanceProfile } from "../../../types/common_types";
+import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../types/common_types";
 import { reloadWindow, toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
-import { Events } from "../../../lib/global/events/events";
-import { GALLERY_ENABLED } from "../../../lib/global/flags/derived_flags";
+import { Events } from "../../../lib/communication/events";
+import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralSettings } from "../../../config/general_settings";
-import { ON_DESKTOP_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../lib/global/preferences/preferences";
+import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
+import { Preferences } from "../../../lib/preferences";
 import { createCheckboxElement } from "../../../lib/ui/checkbox";
-import { createNumberComponent } from "../../../lib/ui/number";
+import { createNumberComponent } from "../../../lib/ui/number_input";
 import { createSelectElement } from "../../../lib/ui/select";
-import { getNumberRange } from "../../../utils/primitive/array";
+import { getNumberRange } from "../../../utils/primitives/array";
 import { prepareDynamicElements } from "../../../lib/ui/element_utils";
 import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element";
 
@@ -69,7 +69,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     event: Events.favorites.galleryMenuToggled
   }
 ];
-const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "layout-select",
     parentId: "search-page-layout",
@@ -77,7 +77,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     position: "beforeend",
     preference: Preferences.searchPageLayout,
     event: Events.searchPage.layoutChanged,
-    options: new Map<Layout, string>([
+    options: new Map<LayoutMode, string>([
       ["native", "Native"],
       ["column", "Waterfall"],
       ["row", "River"],

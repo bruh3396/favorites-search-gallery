@@ -1,5 +1,5 @@
-import { extractSearchPageThumbs, findSearchPageExtensions, prepareSearchPageThumbs } from "../utils/misc/search_page_utils";
-import { POSTS_PER_SEARCH_PAGE } from "../lib/global/constants";
+import { extractSearchPageThumbs, findSearchPageExtensions, prepareSearchPageThumbs } from "../utils/search_page_utils";
+import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
 
 const PARSER = new DOMParser();
 

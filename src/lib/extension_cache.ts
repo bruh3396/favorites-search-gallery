@@ -1,0 +1,125 @@
+import * as API from "./server/fetch/api";
+import { MediaExtension, MediaExtensionMapping, Post } from "../types/common_types";
+import { isGif, isVideo } from "../utils/content/content_classifier";
+import { BatchExecutor } from "./core/concurrency/batch_executor";
+import { ConcurrencyLimiter } from "./core/concurrency/concurrency_limiter";
+import { Database } from "./core/storage/database";
+import { EXTENSION_REGEX } from "./environment/constants";
+import { Favorite } from "../types/favorite_data_types";
+import { GeneralSettings } from "../config/general_settings";
+import { ON_FAVORITES_PAGE } from "./environment/environment";
+import { PromiseTimeoutError } from "../types/error_types";
+import { resolveBaseImageURL } from "./server/url/media_url_resolver";
+import { withTimeout } from "./core/async/promise";
+
+const DATABASE_NAME: string = "ImageExtensions";
+const OBJECT_STORE_NAME: string = "extensionMappings";
+const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
+const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
+const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
+const EXTENSIONS: MediaExtension[] = ["jpg", "png", "jpeg"];
+const BRUTE_FORCE_LIMITER = new ConcurrencyLimiter(3);
+
+async function loadExtensions(): Promise<void> {
+  for (const mapping of await DATABASE.load()) {
+    EXTENSION_MAP.set(mapping.id, mapping.extension);
+  }
+}
+
+function getExtensionFromPost(post: Post): MediaExtension | null {
+  return getExtensionFromURL(post.fileURL);
+}
+
+export function getExtensionFromURL(url: string): MediaExtension | null {
+  const match = EXTENSION_REGEX.exec(url);
+  return match === null ? null : match[1] as MediaExtension;
+}
+
+export function has(id: string): boolean {
+  return EXTENSION_MAP.has(id);
+}
+
+export function get(id: string): MediaExtension | undefined {
+  return EXTENSION_MAP.get(id);
+}
+
+export function set(id: string, extension: MediaExtension): void {
+  if (has(id) || extension === "mp4" || extension === "gif") {
+    return;
+  }
+  EXTENSION_MAP.set(id, extension);
+
+  if (ON_FAVORITES_PAGE) {
+    DATABASE_WRITE_SCHEDULER.add({ id, extension });
+  }
+}
+
+export function getExtension(item: HTMLElement | Favorite): Promise<MediaExtension> {
+  if (isVideo(item)) {
+    return Promise.resolve("mp4");
+  }
+
+  if (isGif(item)) {
+    return Promise.resolve("gif");
+  }
+  return withTimeout(getExtensionFromId(item.id), GeneralSettings.apiTimeout)
+    .catch((error) => {
+      if (error instanceof PromiseTimeoutError) {
+        return tryAllPossibleExtensions(item);
+      }
+      throw error;
+    });
+}
+
+function tryAllPossibleExtensions(item: HTMLElement | Favorite): Promise<MediaExtension> {
+  return BRUTE_FORCE_LIMITER.run(() => {
+    return tryAllPossibleExtensionsHelper(item);
+  });
+}
+
+async function tryAllPossibleExtensionsHelper(item: HTMLElement | Favorite): Promise<MediaExtension> {
+  const baseURL = resolveBaseImageURL(item);
+
+  for (const extension of EXTENSIONS) {
+    if (await tryPossibleExtension(baseURL, extension)) {
+      set(item.id, extension);
+      return extension;
+    }
+  }
+  return "jpg";
+}
+
+async function tryPossibleExtension(url: string, extension: string): Promise<boolean> {
+  const response = await fetch(url.replace(".jpg", `.${extension}`));
+  return response.ok;
+}
+
+export async function getExtensionFromId(id: string): Promise<MediaExtension> {
+  if (has(id)) {
+    return get(id) as MediaExtension;
+  }
+  const post = await API.fetchPostFromAPISafe(id);
+  const extension = getExtensionFromPost(post);
+
+  if (extension !== null) {
+    set(id, extension);
+    return extension;
+  }
+  return "jpg";
+}
+
+export function setExtensionFromPost(post: Post): void {
+  const extension = getExtensionFromPost(post);
+
+  if (extension !== null) {
+    set(post.id, extension);
+  }
+}
+
+export function deleteExtensionsDatabase(): void {
+  DATABASE.delete();
+}
+
+export function setupExtensions(): void {
+  loadExtensions();
+}

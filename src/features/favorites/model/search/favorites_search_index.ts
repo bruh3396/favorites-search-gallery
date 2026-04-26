@@ -1,10 +1,11 @@
-import { DO_NOTHING, sleep } from "../../../../utils/misc/async";
-import { BatchExecutor } from "../../../../lib/components/batch_executor";
-import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { BatchExecutor } from "../../../../lib/core/concurrency/batch_executor";
+import { DO_NOTHING } from "../../../../lib/environment/constants";
+import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { InvertedSearchIndex } from "../../../../lib/components/inverted_search_index";
-import { ThrottledQueue } from "../../../../lib/components/throttled_queue";
-import { splitIntoChunks } from "../../../../utils/primitive/array";
+import { InvertedSearchIndex } from "../../../../lib/search/index/inverted_search_index";
+import { ThrottledQueue } from "../../../../lib/core/concurrency/throttled_queue";
+import { sleep } from "../../../../lib/core/async/promise";
+import { splitIntoChunks } from "../../../../utils/primitives/array";
 
 const BATCH_SIZE = 750;
 const BATCH_SLEEP_TIME = 0;
@@ -32,18 +33,18 @@ class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
     this.ready = true;
   }
 
-  public async buildIndexAsynchronously(): Promise<void> {
+  public async buildIndexAsync(): Promise<void> {
     if (!FavoritesSettings.useSearchIndex || this.asyncBuildStarted) {
       return;
     }
     this.asyncBuildStarted = true;
     await sleep(50);
-    this.doNotKeepIndexedTagsSorted();
+    this.doNotKeepTagsSorted();
     this.add = this.addAsynchronously;
     this.emptyAdditionsCache();
   }
 
-  public buildIndexSynchronously(): void {
+  public buildIndexSync(): void {
     this.add = super.add;
     this.ready = true;
   }
@@ -83,8 +84,8 @@ class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
 
     if (this.ready) {
       this.add = super.add;
-      this.keepIndexedTagsSorted();
-      this.sortTags();
+      this.keepTagsSorted();
+      this.allSortedTags.toArray();
     }
   }
 }

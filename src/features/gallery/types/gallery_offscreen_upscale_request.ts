@@ -1,8 +1,8 @@
 import { GallerySettings } from "../../../config/gallery_settings";
 import { ImageRequest } from "./gallery_image_request";
-import { convertImageURLToSampleURL } from "../../../utils/content/image_url";
-import { getOriginalImageURL } from "../../../lib/api/api_content";
-import { isImage } from "../../../utils/content/content_type";
+import { convertImageURLToSampleURL } from "../../../lib/server/url/media_url_transformer";
+import { resolveImageURL } from "../../../lib/server/url/media_url_resolver";
+import { isImage } from "../../../utils/content/content_classifier";
 
 export const TRANSFERRED_CANVAS_IDS = new Set<string>();
 
@@ -19,7 +19,7 @@ function getImageBitmapClone(imageRequest: ImageRequest): Promise<ImageBitmap | 
 
 export async function getUpscaleRequest(imageRequest: ImageRequest): Promise<OffscreenUpscaleRequest> {
   const bitmapClone = await getImageBitmapClone(imageRequest);
-  const imageURL = await getOriginalImageURL(imageRequest.thumb);
+  const imageURL = await resolveImageURL(imageRequest.thumb);
   return new OffscreenUpscaleRequest(imageRequest.thumb, bitmapClone, imageURL);
 }
 

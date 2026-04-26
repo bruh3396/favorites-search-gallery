@@ -3,7 +3,7 @@ import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
-import { Events } from "../../../../../lib/global/events/events";
+import { Events } from "../../../../../lib/communication/events";
 import { GalleryInteractionTracker } from "../../events/desktop/gallery_interaction_tracker";
 
 export function enterGallery(thumb: HTMLElement): void {

@@ -1,7 +1,8 @@
-import { createSearchTag, createSearchTagGroup, isMetadataSearchTag, isWildcardSearchTag, sortSearchTagGroup } from "../types/search_command";
+import { buildSearchTagGroup, sortSearchTagGroup } from "../lib/search/query/search_query_utils";
 import { describe, expect, test } from "vitest";
-import { SearchTag } from "../types/search_tag";
-import { WildcardSearchTag } from "../types/wildcard_search_tag";
+import { isMetadataSearchTag, isWildcardSearchTag, parseSearchTag } from "../lib/search/tag/search_tag_parser";
+import { ExactSearchTag } from "../lib/search/tag/exact_search_tag";
+import { WildcardSearchTag } from "../lib/search/tag/wildcard_search_tag";
 
 const NORMAL_SEARCH_TAGS = [
   "",
@@ -44,26 +45,26 @@ describe("utils", () => {
   });
 
   test("createSearchTag", () => {
-    expect(WILDCARD_SEARCH_TAGS.every(tag => createSearchTag(tag) instanceof WildcardSearchTag)).toBe(true);
-    expect(NORMAL_SEARCH_TAGS.every(tag => createSearchTag(tag) instanceof SearchTag)).toBe(true);
+    expect(WILDCARD_SEARCH_TAGS.every(tag => parseSearchTag(tag) instanceof WildcardSearchTag)).toBe(true);
+    expect(NORMAL_SEARCH_TAGS.every(tag => parseSearchTag(tag) instanceof ExactSearchTag)).toBe(true);
   });
 
   test("createSearchTagGroup", () => {
-    expect(createSearchTagGroup(["mango", "mango", "mango", "mango"]).length).toBe(1);
-    expect(createSearchTagGroup(["mango", "mango", "mango", "-mango"]).length).toBe(2);
-    expect(createSearchTagGroup(["mango", "mango", "*mango", "-mango"]).length).toBe(3);
-    expect(createSearchTagGroup(["mangoes", "mango", "*mango", "-mango"]).length).toBe(4);
-    expect(createSearchTagGroup(["mango", "mango", "mango", "mango"])).toStrictEqual([createSearchTag("mango")]);
+    expect(buildSearchTagGroup(["mango", "mango", "mango", "mango"]).length).toBe(1);
+    expect(buildSearchTagGroup(["mango", "mango", "mango", "-mango"]).length).toBe(2);
+    expect(buildSearchTagGroup(["mango", "mango", "*mango", "-mango"]).length).toBe(3);
+    expect(buildSearchTagGroup(["mangoes", "mango", "*mango", "-mango"]).length).toBe(4);
+    expect(buildSearchTagGroup(["mango", "mango", "mango", "mango"])).toStrictEqual([parseSearchTag("mango")]);
   });
 
-  test("remaining tags", () => {
-    const searchTag = createSearchTag("mango");
-    const negatedSearchTag = createSearchTag("-mango");
-    const wildcardSearchTag = createSearchTag("*mango");
-    const wildcardNegatedSearchTag = createSearchTag("-*mango");
+  test("and tags", () => {
+    const searchTag = parseSearchTag("mango");
+    const negatedSearchTag = parseSearchTag("-mango");
+    const wildcardSearchTag = parseSearchTag("*mango");
+    const wildcardNegatedSearchTag = parseSearchTag("-*mango");
     const searchTagGroup = [wildcardSearchTag, negatedSearchTag, searchTag, wildcardNegatedSearchTag];
 
-    expect(searchTag.finalCost).toBeLessThan(wildcardSearchTag.finalCost);
+    expect(searchTag.cost).toBeLessThan(wildcardSearchTag.cost);
     expect(sortSearchTagGroup(searchTagGroup)).toStrictEqual([searchTag, negatedSearchTag, wildcardSearchTag, wildcardNegatedSearchTag]);
   });
 });

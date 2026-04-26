@@ -1,5 +1,7 @@
-import { isEmptyString, removeExtraWhiteSpace } from "../../../../utils/primitive/string";
-import { indexInBounds } from "../../../../utils/primitive/array";
+import { Storage } from "../../../../lib/core/storage";
+import { indexInBounds } from "../../../../utils/primitives/array";
+import { isEmptyString } from "../../../../utils/string/parse";
+import { removeExtraWhiteSpace } from "../../../../utils/string/format";
 
 export class SearchHistory {
   public lastEditedQuery: string;
@@ -32,13 +34,13 @@ export class SearchHistory {
     const truncatedSearchHistory = searchHistoryWithQueryAtFront.slice(0, this.depth);
 
     this.history = truncatedSearchHistory;
-    localStorage.setItem("searchHistory", JSON.stringify(this.history));
+    Storage.set("searchHistory", this.history);
   }
 
   public updateLastEditedSearchQuery(searchQuery: string): void {
     this.lastEditedQuery = searchQuery;
     this.resetIndex();
-    localStorage.setItem("lastEditedSearchQuery", this.lastEditedQuery);
+    Storage.set("lastEditedSearchQuery", this.lastEditedQuery);
   }
 
   public navigate(direction: string): void {
@@ -57,11 +59,11 @@ export class SearchHistory {
   }
 
   private loadSearchHistory(): string[] {
-    return JSON.parse(localStorage.getItem("searchHistory") || "[]");
+    return Storage.get<string[]>("searchHistory") ?? [];
   }
 
   private loadLastEditedQuery(): string {
-    return localStorage.getItem("lastEditedSearchQuery") || "";
+    return Storage.get<string>("lastEditedSearchQuery") ?? "";
   }
 
   private resetIndex(): void {

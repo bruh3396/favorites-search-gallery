@@ -1,10 +1,10 @@
-import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/api/api_content";
+import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/server/fetch/bitmap_fetcher";
 import { GalleryBaseThumbUpscaler } from "./gallery_base_thumbnail_upscaler";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { UpscaleImageRequest } from "../../../../types/gallery_upscale_image_request";
-import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
-import { isImage } from "../../../../../../utils/content/content_type";
+import { drawScaledCanvas } from "../../../../../../utils/canvas";
+import { isImage } from "../../../../../../utils/content/content_classifier";
 
 export class GalleryNormalThumbUpscaler extends GalleryBaseThumbUpscaler {
   public canvases: Map<string, HTMLCanvasElement> = new Map();

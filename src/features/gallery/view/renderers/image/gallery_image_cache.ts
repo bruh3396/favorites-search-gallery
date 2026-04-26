@@ -1,12 +1,12 @@
-import { DO_NOTHING } from "../../../../../utils/misc/async";
+import { DO_NOTHING } from "../../../../../lib/environment/constants";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
 import { LowResolutionImageRequest } from "../../../types/gallery_low_resolution_image_request";
-import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
-import { fetchImageBitmapFromThumb } from "../../../../../lib/api/api_content";
-import { forceImageContentType } from "../../../../../utils/content/content_type";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
+import { Preferences } from "../../../../../lib/preferences";
+import { ThrottledQueue } from "../../../../../lib/core/concurrency/throttled_queue";
+import { fetchImageBitmapFromThumb } from "../../../../../lib/server/fetch/bitmap_fetcher";
+import { forceImageContentType } from "../../../../../utils/content/content_classifier";
 import { getImageFromThumb } from "../../../../../utils/dom/dom";
 
 const ANIMATED_REQUEST_IDS: Set<string> = new Set();

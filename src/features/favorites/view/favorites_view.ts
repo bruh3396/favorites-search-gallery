@@ -1,25 +1,21 @@
-import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
 import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
+import * as Layout from "../../../lib/layout/layout";
 import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
-import { Favorite } from "../../../types/favorite_types";
-import { FavoritesPaginationParameters } from "../types/favorite_pagination_parameters";
-import { NewFavorites } from "../types/favorite/favorite_types";
-import { collectAspectRatios } from "../../../lib/global/content/skeleton/aspect_ratio_collector";
-import { createFavoriteItemHTMLTemplates } from "../types/favorite/favorite_element";
-import { sleep } from "../../../utils/misc/async";
+import { Favorite } from "../../../types/favorite_data_types";
+import { NewFavorites } from "../types/favorite_types";
+import { collectAspectRatios } from "../ui/skeleton/favorites_skeleton_aspect_ratio_collector";
+import { createFavoriteItemHTMLTemplates } from "../types/favorite_element";
+import { getSkeleton } from "../ui/skeleton/favorites_skeleton";
+import { sleep } from "../../../lib/core/async/promise";
 
 export function insertNewSearchResultsOnReload(results: NewFavorites): void {
-  ContentTiler.addItemsToTop(results.newSearchResults.map((favorite) => favorite.root));
+  Layout.addToTop(results.newSearchResults.map((favorite) => favorite.root));
 }
 
 export function showSearchResults(searchResults: Favorite[]): void {
-  ContentTiler.tile(searchResults.map((result) => result.root));
+  Layout.tile(searchResults.map((result) => result.root));
   scrollToTop();
-}
-
-export function createPageSelectionMenuWhileFetching(parameters: FavoritesPaginationParameters): void {
-  FavoritesPaginationMenu.update(parameters);
 }
 
 export async function revealFavorite(id: string): Promise<void> {
@@ -42,13 +38,13 @@ export function setupFavoritesView(): void {
   createFavoriteItemHTMLTemplates();
   collectAspectRatios();
   FavoritesStatus.setupFavoritesStatus();
-  ContentTiler.setupTiler();
-  ContentTiler.showSkeleton();
+  Layout.setupLayout();
+  Layout.tile(getSkeleton());
   FavoritesPaginationMenu.setupFavoritesPaginationMenu();
 }
 
-export { toggle as togglePaginationMenu, getContainer as getPaginationMenu, create as createPageSelectionMenu } from "./menu/favorites_pagination_menu";
-export { addItemsToBottom as insertNewSearchResults, changeLayout } from "../../../lib/global/content/tilers/tiler";
+export { toggle as togglePaginationMenu, getContainer as getPaginationMenu, create as createPageSelectionMenu, update as createPageSelectionMenuWhileFetching } from "./menu/favorites_pagination_menu";
+export { addToBottom as insertNewSearchResults, changeLayout } from "../../../lib/layout/layout";
 export * from "./dom/favorites_thumb_preloader";
 export * from "./menu/favorites_status_bar";
 export * from "./results/favorites_infinite_scroll_feeder";

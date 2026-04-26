@@ -1,5 +1,5 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/global/flags/intrinsic_flags";
-import { POSTS_PER_SEARCH_PAGE } from "../lib/global/constants";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
+import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
 
 export const GallerySettings = {
   mainCanvasResolutions: {

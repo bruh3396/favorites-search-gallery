@@ -1,5 +1,7 @@
-import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../lib/global/preferences/preferences";
+import { Events } from "../../../lib/communication/events";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
+import { Preferences } from "../../../lib/preferences";
+import { Storage } from "../../../lib/core/storage";
 import { insertStyleHTML } from "../../../utils/dom/style";
 
 export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
@@ -60,4 +62,21 @@ export function toggleFavoritesOptions(value: boolean): void {
           display: ${value ? "block" : "none"};
         }
         `, "options");
+}
+
+const PERSISTENT_LOCAL_STORAGE_KEYS = new Set(["customTags", "savedSearches"]);
+const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag modifications and saved searches will be preserved.";
+const RESET_PROMPT = `Are you sure you want to reset? This will delete all cached favorites, and preferences.${ON_MOBILE_DEVICE ? "" : DESKTOP_RESET_PROMPT_SUFFIX}`;
+
+function clearLocalStorage(): void {
+  Storage.keys()
+    .filter(key => !PERSISTENT_LOCAL_STORAGE_KEYS.has(key))
+    .forEach(key => Storage.remove(key));
+}
+
+export function tryResetting(): void {
+  if (confirm(RESET_PROMPT)) {
+    clearLocalStorage();
+    Events.favorites.resetConfirmed.emit();
+  }
 }

@@ -2,8 +2,8 @@ import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesPresentationFlow from "../presentation/favorites_presentation_flow";
 import * as FavoritesSearchFlow from "../runtime/favorites_search_flow";
 import * as FavoritesView from "../../../view/favorites_view";
-import { Events } from "../../../../../lib/global/events/events";
-import { FavoriteItem } from "../../../types/favorite/favorite_item";
+import { Events } from "../../../../../lib/communication/events";
+import { FavoriteItem } from "../../../types/favorite_item";
 
 export async function loadAllFavorites(): Promise<void> {
   await loadAllFavoritesFromDatabase();

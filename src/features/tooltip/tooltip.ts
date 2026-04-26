@@ -1,12 +1,14 @@
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
-import { convertToTagString, extractTagGroups, removeExtraWhiteSpace } from "../../utils/primitive/string";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { getImageFromThumb, getThumbFromImage } from "../../utils/dom/dom";
-import { Events } from "../../lib/global/events/events";
-import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../lib/global/container";
-import { Preferences } from "../../lib/global/preferences/preferences";
-import { TOOLTIP_DISABLED } from "../../lib/global/flags/derived_flags";
+import { Events } from "../../lib/communication/events";
+import { OVERLAYS } from "../../lib/shell";
+import { Preferences } from "../../lib/preferences";
+import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";
 import { TOOLTIP_HTML } from "../../assets/html";
+import { convertToTagString } from "../../utils/string/tags";
+import { extractTagGroups } from "../../utils/string/parse";
 import { getTagSetFromItem } from "../../utils/dom/tags";
+import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 let tooltip: HTMLElement;
 let defaultTransition: string;
@@ -21,7 +23,7 @@ export function setupTooltip(): void {
     return;
   }
   visible = Preferences.tooltipsVisible.value;
-  FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
+  OVERLAYS.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
   tooltip = createTooltip();
   defaultTransition = tooltip.style.transition;
   searchTagColorCodes = {};
@@ -268,11 +270,11 @@ function formatHTML(tags: string): string {
 
 function assignTagColors(searchQuery: string): void {
   searchQuery = removeNotTags(searchQuery);
-  const { orGroups, remainingTags } = extractTagGroups(searchQuery);
+  const { orGroups, andTags } = extractTagGroups(searchQuery);
 
   searchTagColorCodes = {};
   assignColorsToOrGroupTags(orGroups);
-  assignColorsToRemainingTags(remainingTags);
+  assignColorsToAndTags(andTags);
 }
 
 function assignColorsToOrGroupTags(orGroups: string[][]): void {
@@ -286,8 +288,8 @@ function assignColorsToOrGroupTags(orGroups: string[][]): void {
   }
 }
 
-function assignColorsToRemainingTags(remainingTags: string[]): void {
-  for (const tag of remainingTags) {
+function assignColorsToAndTags(andTags: string[]): void {
+  for (const tag of andTags) {
     addColorCodedTag(tag, getRandomColor());
   }
 }

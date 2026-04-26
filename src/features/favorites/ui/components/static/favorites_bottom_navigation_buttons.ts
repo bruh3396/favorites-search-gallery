@@ -1,9 +1,9 @@
-import { CONTENT_CONTAINER } from "../../../../../lib/global/content/content_container";
-import { Events } from "../../../../../lib/global/events/events";
+import { CONTENT } from "../../../../../lib/shell";
+import { Events } from "../../../../../lib/communication/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
-import { yield1 } from "../../../../../utils/misc/async";
+import { yield1 } from "../../../../../lib/core/async/promise";
 
 export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesSettings.bottomNavigationButtonsEnabled) {
@@ -62,5 +62,5 @@ export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
   container.appendChild(previousButton);
   container.appendChild(nextButton);
   await yield1();
-  CONTENT_CONTAINER.insertAdjacentElement("afterend", container);
+  CONTENT.insertAdjacentElement("afterend", container);
 }

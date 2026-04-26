@@ -1,10 +1,10 @@
-import * as FSG_URL from "../../lib/api/api_url";
-import { COMMON_HTML, DARK_THEME_HTML, SKELETON_HTML } from "../../assets/html";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
-import { getCookie, setCookie } from "../../lib/global/cookie";
+import * as FSG_URL from "../../lib/server/url/action_url_builder";
+import { COMMON_HTML, CONTENT_HTML, DARK_THEME_HTML, SKELETON_HTML } from "../../assets/html";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/environment/environment";
+import { getCookie, setCookie } from "../browser/cookie";
 import { GeneralSettings } from "../../config/general_settings";
-import { Preferences } from "../../lib/global/preferences/preferences";
-import { yield1 } from "../misc/async";
+import { Preferences } from "../../lib/preferences";
+import { yield1 } from "../../lib/core/async/promise";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
   return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
@@ -15,7 +15,7 @@ function setStyleSheet(url: string): void {
 }
 
 function toggleDarkStyleSheet(useDark: boolean): void {
-  setStyleSheet(FSG_URL.getStyleSheetURL(useDark));
+  setStyleSheet(FSG_URL.buildStyleSheetURL(useDark));
 }
 
 function toggleLocalDarkStyles(useDark: boolean): void {
@@ -116,9 +116,11 @@ export function insertHTMLAndExtractStyle(element: HTMLElement, position: Insert
   element.insertAdjacentHTML(position, dom.body.innerHTML);
 }
 
-export function setupCommonStyles(): void {
+export function setupStyles(): void {
   insertStyleHTML(SKELETON_HTML, "skeleton-style");
   insertStyleHTML(COMMON_HTML, "common-style");
+  insertStyleHTML(CONTENT_HTML, "content-style");
+
   toggleDarkTheme(usingDarkTheme());
   setupVideoAndGifOutlines();
   addTilerStyles();

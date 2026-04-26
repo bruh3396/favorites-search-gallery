@@ -1,7 +1,6 @@
-import { GALLERY_DISABLED } from "../../../lib/global/flags/derived_flags";
-import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
+import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../lib/environment/derived_environment";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { PerformanceProfile } from "../../../types/common_types";
-import { Preferences } from "../../../lib/global/preferences/preferences";
 import { insertStyleHTML } from "../../../utils/dom/style";
 
 export function styleSearchPageMenu(): void {
@@ -21,7 +20,7 @@ export function styleSearchPageMenu(): void {
     hiddenSelectors.add("#search-page-gallery-menu");
   }
 
-  if (Preferences.performanceProfile.value !== PerformanceProfile.NORMAL) {
+  if (PERFORMANCE_PROFILE !== PerformanceProfile.NORMAL) {
     hiddenSelectors.add("#search-page-upscale-thumbs");
   }
 

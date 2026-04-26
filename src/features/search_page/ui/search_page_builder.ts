@@ -1,7 +1,7 @@
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../../utils/dom/style";
-import { CONTENT_CONTAINER } from "../../../lib/global/content/content_container";
-import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../lib/global/preferences/preferences";
+import { CONTENT } from "../../../lib/shell";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
+import { Preferences } from "../../../lib/preferences";
 import { SEARCH_PAGE_HTML } from "../../../assets/html";
 import { createDynamicSearchPageMenuElements } from "./search_page_dynamic_elements";
 import { prepareAllThumbsOnSearchPage } from "./search_page_preparer";
@@ -21,7 +21,7 @@ function insertContentContainer(): void {
   const content = document.querySelector(".content");
 
   if (content !== null) {
-    content.insertAdjacentElement("afterbegin", CONTENT_CONTAINER);
+    content.insertAdjacentElement("afterbegin", CONTENT);
   }
 }
 

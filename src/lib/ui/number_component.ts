@@ -1,5 +1,5 @@
 import { HoldButton } from "./hold_button";
-import { clamp } from "../../utils/primitive/number";
+import { clamp } from "../../utils/primitives/number";
 
 export class NumberComponent {
   public input: HTMLInputElement;

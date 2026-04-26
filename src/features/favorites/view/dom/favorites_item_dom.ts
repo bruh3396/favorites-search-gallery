@@ -1,9 +1,9 @@
-import { CONTENT_CONTAINER } from "../../../../lib/global/content/content_container";
+import { CONTENT } from "../../../../lib/shell";
 import { ITEM_SELECTOR } from "../../../../utils/dom/dom";
-import { getFavorite } from "../../types/favorite/favorite_item";
+import { getFavorite } from "../../types/favorite_item";
 
 export function noFavoritesAreVisible(): boolean {
-  return CONTENT_CONTAINER.querySelector(ITEM_SELECTOR) === null;
+  return CONTENT.querySelector(ITEM_SELECTOR) === null;
 }
 
 export function swapFavoriteButton(id: string): void {

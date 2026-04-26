@@ -1,22 +1,21 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../types/element_types";
-import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../../lib/global/flags/derived_flags";
-import { Layout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
+import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../../lib/environment/derived_environment";
+import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/checkbox";
-import { reloadWindow, toggleGalleryMenuEnabled } from "../../../../../utils/dom/dom";
+import { reloadWindow, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility } from "../../../../../utils/dom/dom";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../../utils/dom/ui_element";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../../favorites_menu_event_handlers";
-import { Events } from "../../../../../lib/global/events/events";
+import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI, tryResetting } from "../../favorites_menu_event_handlers";
+import { Events } from "../../../../../lib/communication/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../../config/general_settings";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { Preferences } from "../../../../../lib/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { createButtonElement } from "../../../../../lib/ui/button";
-import { createNumberComponent } from "../../../../../lib/ui/number";
+import { createNumberComponent } from "../../../../../lib/ui/number_input";
 import { createSelectElement } from "../../../../../lib/ui/select";
-import { hideUnusedLayoutSizer } from "../../../../../lib/global/content/tilers/tiler_event_handlers";
+import { hideUnusedLayoutSizer } from "../../../../../lib/layout/layout_event_handlers";
 import { prepareDynamicElements } from "../../../../../lib/ui/element_utils";
-import { tryResetting } from "../../../../../lib/flows/reset";
 
 const BUTTONS: Partial<ButtonElement>[] = [
   {
@@ -299,7 +298,8 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     title: "Show saved searches",
     enabled: true,
     preference: Preferences.savedSearchesVisible,
-    event: Events.favorites.savedSearchesToggled
+    function: toggleSavedSearchesVisibility,
+    triggerOnCreation: true
   },
   {
     id: "enable-gallery-menu",
@@ -323,7 +323,7 @@ const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
   }
 ];
 
-const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -352,7 +352,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     event: Events.favorites.layoutChanged,
     function: hideUnusedLayoutSizer,
     triggerOnCreation: true,
-    options: new Map<Layout, string>([
+    options: new Map<LayoutMode, string>([
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],

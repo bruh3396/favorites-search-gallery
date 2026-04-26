@@ -1,24 +1,24 @@
-import { FAVORITES_PER_PAGE } from "../../../../lib/global/constants";
-import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
+import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { createFavoritesPageURL } from "../../../../lib/api/api_url";
+import { buildFavoritesPageURL } from "../../../../lib/server/url/page_url_builder";
 
 export class FavoritesPageRequest {
+
   public readonly pageNumber: number;
   public favorites: FavoriteItem[] = [];
-  private retryCount: number;
+  private retryCount = 0;
 
   constructor(pageNumber: number) {
     this.pageNumber = pageNumber;
-    this.retryCount = 0;
   }
 
   public get url(): string {
-    return createFavoritesPageURL(this.pageNumber * FAVORITES_PER_PAGE);
+    return buildFavoritesPageURL(this.realPageNumber);
   }
 
   public get fetchDelay(): number {
-    return (7 ** (this.retryCount)) + FavoritesSettings.favoritesPageFetchDelay;
+    return (FavoritesSettings.favoritesPageRetryBackoffBase ** (this.retryCount)) + FavoritesSettings.favoritesPageFetchDelay;
   }
 
   public get realPageNumber(): number {

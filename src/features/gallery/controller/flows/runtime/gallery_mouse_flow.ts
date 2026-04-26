@@ -4,11 +4,11 @@ import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
-import { FavoritesMouseEvent, FavoritesWheelEvent } from "../../../../../types/input_types";
-import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { EnhancedMouseEvent, EnhancedWheelEvent } from "../../../../../types/input_types";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 import { overGalleryMenu } from "../../../../../utils/dom/dom";
-import { throttle } from "../../../../../utils/misc/async";
+import { throttle } from "../../../../../lib/core/async/rate_limiter";
 
 function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
   if (thumb === null) {
@@ -29,7 +29,7 @@ function onMouseOverWhileIdle(thumb: HTMLElement | null): void {
   GalleryPreloadFlow.preloadContentOutsideGalleryAround(thumb);
 }
 
-function onMouseDownInGallery(mouseEvent: FavoritesMouseEvent): void {
+function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.ctrlKey || overGalleryMenu(mouseEvent.originalEvent)) {
     return;
   }
@@ -56,7 +56,7 @@ function onMouseDownInGallery(mouseEvent: FavoritesMouseEvent): void {
   }
 }
 
-function onMouseDownOutsideGallery(mouseEvent: FavoritesMouseEvent): void {
+function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey) {
     mouseEvent.originalEvent.preventDefault();
     GalleryStateFlow.enterGallery(mouseEvent.thumb);
@@ -80,11 +80,11 @@ function onContextMenuInGallery(mouseEvent: MouseEvent): void {
   GalleryStateFlow.exitGallery();
 }
 
-function onWheelWhileHoverEnabled(wheelEvent: FavoritesWheelEvent): void {
+function onWheelWhileHoverEnabled(wheelEvent: EnhancedWheelEvent): void {
   GalleryView.updateBackgroundOpacity(wheelEvent.originalEvent);
 }
 
-function onWheelInGallery(wheelEvent: FavoritesWheelEvent): void {
+function onWheelInGallery(wheelEvent: EnhancedWheelEvent): void {
   if (!wheelEvent.originalEvent.shiftKey && !wheelEvent.originalEvent.ctrlKey) {
     GalleryNavigationFlow.navigate(wheelEvent.direction);
   }
@@ -96,7 +96,7 @@ export const onMouseMove = throttle<MouseEvent>(() => {
   });
 }, 250);
 
-export function onMouseOver(mouseEvent: FavoritesMouseEvent): void {
+export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
   executeFunctionBasedOnGalleryState({
     hover: onMouseOverWhileHoverEnabled,
     idle: onMouseOverWhileIdle
@@ -114,7 +114,7 @@ export function onMouseDown(event: MouseEvent | TouchEvent): void {
     hover: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery,
     gallery: onMouseDownInGallery
-  }, new FavoritesMouseEvent(event));
+  }, new EnhancedMouseEvent(event));
 }
 
 export function onContextMenu(mouseEvent: MouseEvent): void {
@@ -123,7 +123,7 @@ export function onContextMenu(mouseEvent: MouseEvent): void {
   }, mouseEvent);
 }
 
-export function onWheel(wheelEvent: FavoritesWheelEvent): void {
+export function onWheel(wheelEvent: EnhancedWheelEvent): void {
   executeFunctionBasedOnGalleryState({
     hover: onWheelWhileHoverEnabled,
     gallery: onWheelInGallery

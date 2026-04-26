@@ -1,8 +1,8 @@
-import { Events } from "../../lib/global/events/events";
-import { Favorite } from "../../types/favorite_types";
-import { ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
+import { Events } from "../../lib/communication/events";
+import { Favorite } from "../../types/favorite_data_types";
+import { ON_MOBILE_DEVICE } from "../../lib/environment/environment";
 import { insertStyleHTML } from "./style";
-import { removeNonNumericCharacters } from "../primitive/string";
+import { removeNonNumericCharacters } from "../string/parse";
 
 export const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
 export const ITEM_CLASS_NAME = "favorite";
@@ -174,6 +174,14 @@ export function toggleGalleryMenuEnabled(value: boolean): void {
         }`, "enable-gallery-menu");
 }
 
+export function toggleSavedSearchesVisibility(value: boolean): void {
+  insertStyleHTML(`
+      #right-favorites-panel {
+        display: ${value ? "block" : "none"};
+      }
+    `, "saved-searches-visibility");
+}
+
 export function showFullscreenIcon(svg: string, duration: number = 500): void {
   const svgDocument = new DOMParser().parseFromString(svg, "image/svg+xml");
   const svgElement = svgDocument.documentElement;
@@ -197,4 +205,8 @@ export function blurCurrentlyFocusedElement(): void {
 
 export function reloadWindow(): void {
   window.location.reload();
+}
+
+export function setSiteTitle(title: string): void {
+  document.title = title;
 }

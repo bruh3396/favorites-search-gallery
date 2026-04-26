@@ -1,11 +1,12 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { Events } from "../../../../../lib/global/events/events";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
+import { Events } from "../../../../../lib/communication/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
+import { Preferences } from "../../../../../lib/preferences";
+import { Storage } from "../../../../../lib/core/storage";
 import { VideoClip } from "../../../types/gallery_types";
-import { convertPreviewURLToImageURL } from "../../../../../utils/content/image_url";
+import { convertPreviewURLToImageURL } from "../../../../../lib/server/url/media_url_transformer";
 import { getPreviewURL } from "../../../../../utils/dom/dom";
-import { isVideo } from "../../../../../utils/content/content_type";
+import { isVideo } from "../../../../../utils/content/content_classifier";
 
 const VIDEO_PLAYERS: HTMLVideoElement[] = [];
 const VIDEO_CLIPS = new Map();
@@ -187,7 +188,7 @@ function loadVideoClips(): void {
     let storedVideoClips;
 
     try {
-      storedVideoClips = JSON.parse(localStorage.getItem("storedVideoClips") || "{}");
+      storedVideoClips = Storage.get<typeof storedVideoClips>("storedVideoClips") ?? {};
 
       for (const [id, videoClip] of Object.entries(storedVideoClips)) {
         VIDEO_CLIPS.set(id, videoClip as VideoClip);

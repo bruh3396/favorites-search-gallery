@@ -1,8 +1,8 @@
-import { clamp, roundToTwoDecimalPlaces } from "../../../../../utils/primitive/number";
+import { clamp, roundToTwoDecimalPlaces } from "../../../../../utils/primitives/number";
 import { GallerySettings } from "../../../../../config/gallery_settings";
-import { ON_DESKTOP_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { drawScaledCanvasAfterClearing } from "../../../../../utils/dom/canvas";
-import { getDimensions2D } from "../../../../../utils/primitive/string";
+import { ON_DESKTOP_DEVICE } from "../../../../../lib/environment/environment";
+import { drawScaledCanvasAfterClearing } from "../../../../../utils/canvas";
+import { getDimensions2D } from "../../../../../utils/string/parse";
 import { insertStyleHTML } from "../../../../../utils/dom/style";
 
 const CANVAS = document.createElement("canvas");

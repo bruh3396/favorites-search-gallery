@@ -1,9 +1,9 @@
-import { FavoriteItem } from "../../../types/favorite/favorite_item";
+import { FavoriteItem } from "../../../types/favorite_item";
 import { FavoritesInfiniteScrollFlow } from "./favorites_infinite_scroll_flow";
 import { FavoritesPaginationFlow } from "./favorites_pagination_flow";
-import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
+import { FavoritesPresentationFlow } from "../../../types/favorite_types";
 import { NavigationKey } from "../../../../../types/common_types";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
+import { Preferences } from "../../../../../lib/preferences";
 
 function getPresentationFlow(): FavoritesPresentationFlow {
   return Preferences.infiniteScrollEnabled.value ? FavoritesInfiniteScrollFlow : FavoritesPaginationFlow;

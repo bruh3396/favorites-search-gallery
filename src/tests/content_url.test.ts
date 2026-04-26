@@ -1,9 +1,9 @@
-import { cleanImageSource, compressPreviewSource, decompressPreviewSource } from "../utils/content/image_url";
+import { normalizeImageSource, compressPreviewSource, decompressPreviewSource } from "../lib/server/url/media_url_transformer";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
   test("empty", () => {
-    expect(cleanImageSource("")).toBe("");
+    expect(normalizeImageSource("")).toBe("");
   });
 
   test("one subdomain", () => {
@@ -12,16 +12,16 @@ describe("cleanImageSource", () => {
     const source2 = "https://wimg2.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
     const expected = "https://rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
 
-    expect(cleanImageSource(source)).toBe(expected);
-    expect(cleanImageSource(source1)).toBe(expected);
-    expect(cleanImageSource(source2)).toBe(expected);
-    expect(cleanImageSource("wimg.rule34.xxx")).toBe("rule34.xxx");
+    expect(normalizeImageSource(source)).toBe(expected);
+    expect(normalizeImageSource(source1)).toBe(expected);
+    expect(normalizeImageSource(source2)).toBe(expected);
+    expect(normalizeImageSource("wimg.rule34.xxx")).toBe("rule34.xxx");
   });
 
   test("two subdomains", () => {
     const source = "https://wimg.foo.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
     const expected = "https://rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
-    const actual = cleanImageSource(source);
+    const actual = normalizeImageSource(source);
 
     expect(actual).toBe(expected);
   });

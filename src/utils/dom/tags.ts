@@ -1,8 +1,9 @@
-import { convertToTagSet, getContentType } from "../primitive/string";
+import { convertToTagSet } from "../string/tags";
+import { getContentType } from "../string/parse";
 import { ContentType } from "../../types/common_types";
-import { Favorite } from "../../types/favorite_types";
-import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
-import { getFavorite } from "../../features/favorites/types/favorite/favorite_item";
+import { Favorite } from "../../types/favorite_data_types";
+import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
+import { getFavorite } from "../../features/favorites/types/favorite_item";
 import { getImageFromThumb } from "./dom";
 
 function getTagAttributeFromImage(image: HTMLImageElement): string {

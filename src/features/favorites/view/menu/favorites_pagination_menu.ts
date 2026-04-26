@@ -1,16 +1,23 @@
-import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../../types/favorite_pagination_parameters";
-import { Events } from "../../../../lib/global/events/events";
-import { FavoritesPageRelation } from "../../types/favorite/favorite_types";
+import { FavoritesPaginationParameters } from "../../types/favorite_types";
+import { FavoritesPageRelation } from "../../../../types/favorite_data_types";
+import { Events } from "../../../../lib/communication/events";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { ON_DESKTOP_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../lib/global/preferences/preferences";
-import { getNumbersAround } from "../../../../utils/primitive/array";
+import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
+import { Preferences } from "../../../../lib/preferences";
+import { getNumbersAround } from "../../../../utils/primitives/array";
 import { insertStyleHTML } from "../../../../utils/dom/style";
-import { isOnlyDigits } from "../../../../utils/primitive/string";
+import { isOnlyDigits } from "../../../../utils/string/parse";
 
 const CONTAINER = createContainer();
 const RANGE_INDICATOR = document.createElement("label");
 const PAGE_NUMBER_REGEX = /favorites-page-(\d+)/;
+const EMPTY_FAVORITES_PAGINATION_PARAMETERS = {
+  currentPageNumber: 1,
+  finalPageNumber: 1,
+  favoritesCount: 0,
+  startIndex: 0,
+  endIndex: 0
+};
 
 RANGE_INDICATOR.id = "pagination-range-label";
 

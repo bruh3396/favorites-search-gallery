@@ -1,4 +1,4 @@
-export type Layout = "row" | "square" | "grid" | "column" | "native"
+export type LayoutMode = "row" | "square" | "grid" | "column" | "native"
 export type BackwardNavigationKey = "a" | "A" | "ArrowLeft"
 export type ForwardNavigationKey = "d" | "D" | "ArrowRight"
 export type NavigationKey = BackwardNavigationKey | ForwardNavigationKey
@@ -78,6 +78,13 @@ export enum DiscreteRating {
   QUESTIONABLE = 2,
   SAFE = 1
 }
+
 export interface Searchable {
-  tags: Set<string>;
+  tags: Set<string>
 }
+
+export type GalleryMenuAction = "exit" |
+  "fullscreen" | "openPost" | "openOriginal" |
+  "download" | "addFavorite" | "removeFavorite" |
+  "toggleDockPosition" | "toggleBackground" | "search" |
+  "changeBackgroundColor" | "pin" | "none"

@@ -1,11 +1,11 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../utils/dom/awesomplete";
-import { Events } from "../../../../lib/global/events/events";
-import { FavoritesMouseEvent } from "../../../../types/input_types";
-import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
+import { Events } from "../../../../lib/communication/events";
+import { EnhancedMouseEvent } from "../../../../types/input_types";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { SearchHistory } from "./favorites_search_history";
 import { createDesktopSearchBar } from "./favorites_desktop_search_box";
 import { createMobileSearchBar } from "./favorites_mobile_search_box";
-import { debounceAfterFirstCall } from "../../../../utils/misc/async";
+import { debounceAfterFirstCall } from "../../../../lib/core/async/rate_limiter";
 import { openSearchPage } from "../../../../utils/dom/links";
 
 let SEARCH_BOX: HTMLTextAreaElement | HTMLInputElement;
@@ -75,7 +75,7 @@ function updateLastEditedSearchQuery(): void {
 }
 
 function onSearchButtonClicked(event: MouseEvent): void {
-  const mouseEvent = new FavoritesMouseEvent(event);
+  const mouseEvent = new EnhancedMouseEvent(event);
 
   if (mouseEvent.rightClick || mouseEvent.ctrlKey) {
     openSearchPage(SEARCH_BOX.value);

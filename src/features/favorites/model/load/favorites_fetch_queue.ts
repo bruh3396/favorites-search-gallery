@@ -1,14 +1,14 @@
-import { DO_NOTHING } from "../../../../utils/misc/async";
-import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { DO_NOTHING } from "../../../../lib/environment/constants";
+import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 
 const QUEUE: FavoritesPageRequest[] = [];
-let lastDequeuedPage = -1;
-let dequeuing = false;
+let lastDequeuedPageNumber = -1;
+let draining = false;
 let onDequeue: (favorites: FavoriteItem[]) => void = DO_NOTHING;
 
-const getSmallestEnqueuedPageNumber = (): number => QUEUE[0].pageNumber;
-const getNextPageNumberToDequeue = (): number => lastDequeuedPage + 1;
+const getSmallestEnqueuedPageNumber = (): number => QUEUE[0]?.pageNumber ?? Infinity;
+const getNextPageNumberToDequeue = (): number => lastDequeuedPageNumber + 1;
 const allPreviousPagesWereDequeued = (): boolean => getNextPageNumberToDequeue() === getSmallestEnqueuedPageNumber();
 const isEmpty = (): boolean => QUEUE.length === 0;
 const canDequeue = (): boolean => !isEmpty() && allPreviousPagesWereDequeued();
@@ -18,19 +18,19 @@ function sortByLowestPageNumber(): void {
 }
 
 function drain(): void {
-  if (dequeuing) {
+  if (draining) {
     return;
   }
-  dequeuing = true;
+  draining = true;
 
   while (canDequeue()) {
     dequeue();
   }
-  dequeuing = false;
+  draining = false;
 }
 
 function dequeue(): void {
-  lastDequeuedPage += 1;
+  lastDequeuedPageNumber += 1;
   const request = QUEUE.shift();
   const favorites = request?.favorites ?? [];
 

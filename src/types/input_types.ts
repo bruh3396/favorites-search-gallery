@@ -3,7 +3,7 @@ import { ClickCode, NavigationKey } from "./common_types";
 import { getThumbUnderCursor, insideOfThumb, isHotkeyEvent } from "../utils/dom/dom";
 import { isForwardNavigationKey } from "./equivalence";
 
-export class FavoritesKeyboardEvent {
+export class EnhancedKeyboardEvent {
   public readonly key;
   public readonly originalEvent;
   public readonly isHotkey: boolean;
@@ -26,7 +26,7 @@ function convertTouchEventToMouseEvent(touchEvent: TouchEvent, type: string): Mo
   });
 }
 
-export class FavoritesMouseEvent {
+export class EnhancedMouseEvent {
   public readonly originalEvent: MouseEvent;
   public readonly leftClick: boolean;
   public readonly rightClick: boolean;
@@ -51,7 +51,7 @@ export class FavoritesMouseEvent {
   }
 }
 
-export class FavoritesWheelEvent {
+export class EnhancedWheelEvent {
   public readonly originalEvent: WheelEvent;
   public readonly direction: NavigationKey;
 

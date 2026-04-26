@@ -1,9 +1,10 @@
-import { FavoriteItem, getFavorite } from "../../types/favorite/favorite_item";
-import { BatchExecutor } from "../../../../lib/components/batch_executor";
-import { Database } from "../../../../lib/components/database";
-import { FavoritesDatabaseRecord } from "../../../../types/favorite_types";
-import { convertToTagSet } from "../../../../utils/primitive/string";
-import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
+import { FavoriteItem, getFavorite } from "../../types/favorite_item";
+import { BatchExecutor } from "../../../../lib/core/concurrency/batch_executor";
+import { Database } from "../../../../lib/core/storage/database";
+import { FavoritesDatabaseRecord } from "../../../../types/favorite_data_types";
+import { Storage } from "../../../../lib/core/storage";
+import { convertToTagSet } from "../../../../utils/string/tags";
+import { getFavoritesPageId } from "../../../../utils/favorites_page_metadata";
 
 const SCHEMA_VERSION = 1;
 const SCHEMA_VERSION_LOCAL_STORAGE_KEY = "favoritesSearchGallerySchemaVersion";
@@ -15,12 +16,12 @@ function updateFavorites(favorites: FavoriteItem[]): void {
 }
 
 function getSchemaVersion(): number | null {
-  const version = localStorage.getItem(SCHEMA_VERSION_LOCAL_STORAGE_KEY);
-  return version === null ? null : parseInt(version);
+  const version = Storage.get<number>(SCHEMA_VERSION_LOCAL_STORAGE_KEY);
+  return version === null ? null : version;
 }
 
 function setSchemaVersion(version: number): void {
-  localStorage.setItem(SCHEMA_VERSION_LOCAL_STORAGE_KEY, version.toString());
+  Storage.set(SCHEMA_VERSION_LOCAL_STORAGE_KEY, version);
 }
 
 function usingCorrectSchema(records: FavoritesDatabaseRecord[]): boolean {
@@ -35,7 +36,7 @@ function updateRecord(record: FavoritesDatabaseRecord): FavoritesDatabaseRecord 
   };
 }
 
-async function updateRecordsIfNeeded(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
+async function updateRecords(records: FavoritesDatabaseRecord[]): Promise<FavoritesDatabaseRecord[]> {
   if (records.length === 0) {
     setSchemaVersion(SCHEMA_VERSION);
     return records;
@@ -53,7 +54,7 @@ async function updateRecordsIfNeeded(records: FavoritesDatabaseRecord[]): Promis
 
 export async function getAllFavorites(): Promise<FavoriteItem[]> {
   const records = await DATABASE.load();
-  const updatedRecords = await updateRecordsIfNeeded(records);
+  const updatedRecords = await updateRecords(records);
   return updatedRecords.map(record => new FavoriteItem(record));
 }
 

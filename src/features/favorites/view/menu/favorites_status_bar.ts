@@ -1,9 +1,9 @@
-import * as API from "../../../../lib/api/api";
-import { FAVORITES_SEARCH_GALLERY_CONTAINER } from "../../../../lib/global/container";
-import { NewFavorites } from "../../types/favorite/favorite_types";
-import { ON_MOBILE_DEVICE } from "../../../../lib/global/flags/intrinsic_flags";
+import * as API from "../../../../lib/server/fetch/api";
+import { NewFavorites } from "../../types/favorite_types";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ROOT } from "../../../../lib/shell";
 import { Timeout } from "../../../../types/common_types";
-import { getFavoritesPageId } from "../../../../utils/misc/favorites_page_metadata";
+import { getFavoritesPageId } from "../../../../utils/favorites_page_metadata";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
@@ -57,6 +57,6 @@ async function setExpectedTotalFavoritesCount(): Promise<void> {
 
 export function setupFavoritesStatus(): void {
   setExpectedTotalFavoritesCount();
-  matchCountIndicator = FAVORITES_SEARCH_GALLERY_CONTAINER.querySelector("#match-count-label") ?? document.createElement("label");
-  statusIndicator = FAVORITES_SEARCH_GALLERY_CONTAINER.querySelector("#favorites-load-status-label") ?? document.createElement("label");
+  matchCountIndicator = ROOT.querySelector("#match-count-label") ?? document.createElement("label");
+  statusIndicator = ROOT.querySelector("#favorites-load-status-label") ?? document.createElement("label");
 }

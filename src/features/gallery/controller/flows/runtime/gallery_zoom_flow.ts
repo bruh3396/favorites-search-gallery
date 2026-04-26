@@ -1,5 +1,5 @@
   import * as GalleryView from "../../../view/gallery_view";
-import { Events } from "../../../../../lib/global/events/events";
+import { Events } from "../../../../../lib/communication/events";
 
   export function toggleGalleryImageZoom(value: undefined | boolean = undefined): boolean {
     const zoomedIn = GalleryView.toggleZoom(value);

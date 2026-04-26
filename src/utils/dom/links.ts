@@ -1,16 +1,16 @@
-import * as FSG_URL from "../../lib/api/api_url";
-import { getOriginalContentURL } from "../../lib/api/api_content";
+import { buildPostPageURL, buildSearchPageURL } from "../../lib/server/url/page_url_builder";
+import { resolveContentURL } from "../../lib/server/url/media_url_resolver";
 
 export function openPostPage(id: string): void {
-  window.open(FSG_URL.createPostPageURL(id), "_blank");
+  window.open(buildPostPageURL(id), "_blank");
 }
 
 export function openSearchPage(searchQuery: string): void {
-  window.open(FSG_URL.createSearchPageURL(searchQuery));
+  window.open(buildSearchPageURL(searchQuery));
 }
 
 export async function openOriginal(thumb: HTMLElement): Promise<void> {
-  window.open(await getOriginalContentURL(thumb), "_blank");
+  window.open(await resolveContentURL(thumb), "_blank");
 }
 
 export function createObjectURLFromSvg(svg: string): string {

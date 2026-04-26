@@ -1,32 +1,32 @@
 import { FRUITS, SEARCHABLE_EMPTY, SEARCHABLE_FRUITS, SEARCHABLE_SORTED_FRUITS, SORTED_FRUITS, createSearchable, getAllSubstrings, getPrefixes } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
-import { WildcardSearchTag } from "../types/wildcard_search_tag";
+import { parseWildcardSearchTag } from "../lib/search/tag/search_tag_parser";
 
 describe("wildcardSearchTag", () => {
   test("empty", () => {
-    expect(new WildcardSearchTag("*").matches(SEARCHABLE_EMPTY)).toBe(false);
+    expect(parseWildcardSearchTag("*").matches(SEARCHABLE_EMPTY)).toBe(false);
   });
 
   test("empty negated", () => {
-    expect(new WildcardSearchTag("-*").matches(SEARCHABLE_EMPTY)).toBe(true);
+    expect(parseWildcardSearchTag("-*").matches(SEARCHABLE_EMPTY)).toBe(true);
   });
 
   test("one tag", () => {
-    expect(new WildcardSearchTag("*").matches(createSearchable(["apple"]))).toBe(true);
+    expect(parseWildcardSearchTag("*").matches(createSearchable(["apple"]))).toBe(true);
   });
 
   test("match all", () => {
-    expect(new WildcardSearchTag("*").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseWildcardSearchTag("*").matches(SEARCHABLE_FRUITS)).toBe(true);
   });
 
   test("match none", () => {
-    expect(new WildcardSearchTag("-*").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseWildcardSearchTag("-*").matches(SEARCHABLE_FRUITS)).toBe(false);
   });
 
   test("matches prefix", () => {
     for (const fruit of SORTED_FRUITS) {
       for (const prefix of getPrefixes(fruit)) {
-        expect(new WildcardSearchTag(`${prefix}*`).matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
+        expect(parseWildcardSearchTag(`${prefix}*`).matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
       }
     }
   });
@@ -34,35 +34,35 @@ describe("wildcardSearchTag", () => {
   test("matches double asterisk", () => {
     for (const fruit of FRUITS) {
       for (const substring of getAllSubstrings(fruit)) {
-        expect(new WildcardSearchTag(`*${substring}*`).matches(SEARCHABLE_FRUITS)).toBe(true);
-        expect(new WildcardSearchTag(`**${substring}*`).matches(SEARCHABLE_FRUITS)).toBe(true);
-        expect(new WildcardSearchTag(`**${substring}***`).matches(SEARCHABLE_FRUITS)).toBe(true);
-        expect(new WildcardSearchTag(`*${substring}_NO_MATCH_*`).matches(SEARCHABLE_FRUITS)).toBe(false);
+        expect(parseWildcardSearchTag(`*${substring}*`).matches(SEARCHABLE_FRUITS)).toBe(true);
+        expect(parseWildcardSearchTag(`**${substring}*`).matches(SEARCHABLE_FRUITS)).toBe(true);
+        expect(parseWildcardSearchTag(`**${substring}***`).matches(SEARCHABLE_FRUITS)).toBe(true);
+        expect(parseWildcardSearchTag(`*${substring}_NO_MATCH_*`).matches(SEARCHABLE_FRUITS)).toBe(false);
       }
     }
   });
 
   test("matches inside", () => {
-    expect(new WildcardSearchTag("*b*na*").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(new WildcardSearchTag("*b*a*").matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
-    expect(new WildcardSearchTag("*bna*").matches(SEARCHABLE_SORTED_FRUITS)).toBe(false);
+    expect(parseWildcardSearchTag("*b*na*").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseWildcardSearchTag("*b*a*").matches(SEARCHABLE_SORTED_FRUITS)).toBe(true);
+    expect(parseWildcardSearchTag("*bna*").matches(SEARCHABLE_SORTED_FRUITS)).toBe(false);
   });
 
   test("compare cost", () => {
-    const startsWithTag = new WildcardSearchTag("banana*");
-    const containsTag = new WildcardSearchTag("*bana*");
-    const containsTag2 = new WildcardSearchTag("*bana*****");
-    const endsWithTag = new WildcardSearchTag("*banana");
-    const wildcardTag = new WildcardSearchTag("*b*a*");
+    const startsWithTag = parseWildcardSearchTag("banana*");
+    const containsTag = parseWildcardSearchTag("*bana*");
+    const containsTag2 = parseWildcardSearchTag("*bana*****");
+    const endsWithTag = parseWildcardSearchTag("*banana");
+    const wildcardTag = parseWildcardSearchTag("*b*a*");
 
-    expect(startsWithTag.finalCost).toBeLessThan(containsTag.finalCost);
-    expect(startsWithTag.finalCost).toBeLessThan(endsWithTag.finalCost);
-    expect(startsWithTag.finalCost).toBeLessThan(wildcardTag.finalCost);
+    expect(startsWithTag.cost).toBeLessThan(containsTag.cost);
+    expect(startsWithTag.cost).toBeLessThan(endsWithTag.cost);
+    expect(startsWithTag.cost).toBeLessThan(wildcardTag.cost);
 
-    expect(containsTag.finalCost).toBeLessThan(endsWithTag.finalCost);
-    expect(containsTag.finalCost).toBeLessThan(wildcardTag.finalCost);
-    expect(containsTag.finalCost).toBe(containsTag2.finalCost);
+    expect(containsTag.cost).toBeLessThan(endsWithTag.cost);
+    expect(containsTag.cost).toBeLessThan(wildcardTag.cost);
+    expect(containsTag.cost).toBe(containsTag2.cost);
 
-    expect(endsWithTag.finalCost).toBe(wildcardTag.finalCost);
+    expect(endsWithTag.cost).toBe(wildcardTag.cost);
   });
 });

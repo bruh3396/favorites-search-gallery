@@ -1,15 +1,15 @@
-import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../../lib/global/tag_modifier";
+import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modification_database";
 import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
-import { CrossFeatureRequests } from "../../lib/global/cross_feature_requests";
-import { DO_NOTHING } from "../../utils/misc/async";
-import { Events } from "../../lib/global/events/events";
-import { Favorite } from "../../types/favorite_types";
+import { CrossFeatureRequests } from "../../lib/communication/cross_feature_requests";
+import { DO_NOTHING } from "../../lib/environment/constants";
+import { Events } from "../../lib/communication/events";
+import { Favorite } from "../../types/favorite_data_types";
 import { ITEM_CLASS_NAME } from "../../utils/dom/dom";
-import { ON_FAVORITES_PAGE } from "../../lib/global/flags/intrinsic_flags";
-import { TAG_MODIFIER_DISABLED } from "../../lib/global/flags/derived_flags";
+import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
+import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";
 import { TAG_MODIFIER_HTML } from "../../assets/html";
-import { removeExtraWhiteSpace } from "../../utils/primitive/string";
-import { setCustomTags } from "../../lib/global/custom_tags";
+import { removeExtraWhiteSpace } from "../../utils/string/format";
+import { setCustomTags } from "../favorites/model/tags/favorites_custom_tags";
 
 type TagModifierUI = {
   container: HTMLElement

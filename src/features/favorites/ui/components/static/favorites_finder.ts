@@ -1,8 +1,8 @@
-import { Events } from "../../../../../lib/global/events/events";
+import { Events } from "../../../../../lib/communication/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { debounceAfterFirstCall } from "../../../../../utils/misc/async";
+import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
+import { Preferences } from "../../../../../lib/preferences";
+import { debounceAfterFirstCall } from "../../../../../lib/core/async/rate_limiter";
 
 let parent1: HTMLElement;
 let container: HTMLElement;

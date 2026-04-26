@@ -1,6 +1,6 @@
-import { ON_MOBILE_DEVICE } from "../../lib/global/flags/intrinsic_flags";
+import { ON_MOBILE_DEVICE } from "../environment/environment";
 import { Timeout } from "../../types/common_types";
-import { clamp } from "../../utils/primitive/number";
+import { clamp } from "../../utils/primitives/number";
 
 export class HoldButton extends HTMLElement {
   private static defaultPollingTime: number = 100;

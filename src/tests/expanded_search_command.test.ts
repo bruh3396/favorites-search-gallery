@@ -1,28 +1,28 @@
 import { Fruit, INDEX } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
-import { ExpandedSearchCommand } from "../types/expanded_search_command";
-import { SearchTag } from "../types/search_tag";
+import { AbstractSearchTag } from "../lib/search/tag/abstract_search_tag";
+import { ExpandedSearchQuery } from "../lib/search/query/expanded_search_query";
 
-function getRawTagValue(searchTag: SearchTag): string {
+function getRawTagValue(searchTag: AbstractSearchTag): string {
   return searchTag.negated ? `-${searchTag.value}` : searchTag.value;
 }
 
-function getRawTagGroup(searchTags: SearchTag[]): string[] {
+function getRawTagGroup(searchTags: AbstractSearchTag[]): string[] {
   return searchTags.map(tag => getRawTagValue(tag)).sort();
 }
 
-function getFinalSearchQuery(command: ExpandedSearchCommand<Fruit>): string {
-  const remainingTags = getRawTagGroup(command.remainingTags).sort().join(" ");
-  const orGroups = command.orGroups.map(orGroup => `( ${getRawTagGroup(orGroup).join(" ~ ")} )`).sort().join(" ");
-  return `${remainingTags} ${orGroups}`.trim();
+function getFinalSearchQuery(expandedQuery: ExpandedSearchQuery<Fruit>): string {
+  const andTags = getRawTagGroup(expandedQuery.andTags).sort().join(" ");
+  const orGroups = expandedQuery.orGroups.map(orGroup => `( ${getRawTagGroup(orGroup).join(" ~ ")} )`).sort().join(" ");
+  return `${andTags} ${orGroups}`.trim();
 }
 
-function testExpandWildcardTags(searchQuery: string, expectedQuery: string): ExpandedSearchCommand<Fruit> {
-  const expandedCommand = new ExpandedSearchCommand<Fruit>(searchQuery, INDEX.allTags);
-  const expectedCommand = new ExpandedSearchCommand<Fruit>(expectedQuery, INDEX.allTags);
+function testExpandWildcardTags(rawQuery: string, expectedRawQuery: string): ExpandedSearchQuery<Fruit> {
+  const expandedQuery = new ExpandedSearchQuery<Fruit>(rawQuery, INDEX.allTags);
+  const expectedQuery = new ExpandedSearchQuery<Fruit>(expectedRawQuery, INDEX.allTags);
 
-  expect(getFinalSearchQuery(expandedCommand)).toStrictEqual(getFinalSearchQuery(expectedCommand));
-  return expandedCommand;
+  expect(getFinalSearchQuery(expandedQuery)).toStrictEqual(getFinalSearchQuery(expectedQuery));
+  return expandedQuery;
 }
 
 describe("expandWildcardTags", () => {
@@ -36,7 +36,7 @@ describe("expandWildcardTags", () => {
     testExpandWildcardTags("apple", "apple");
   });
 
-  test("no matches from expanding remaining tags", () => {
+  test("no matches from expanding and wildcard tags", () => {
     expect(testExpandWildcardTags("foobar", "foobar").hasNoMatches).toBe(false);
     expect(testExpandWildcardTags("foobar*", "").hasNoMatches).toBe(true);
     expect(testExpandWildcardTags("foobar* ap*", "").hasNoMatches).toBe(true);
@@ -84,7 +84,7 @@ describe("expandWildcardTags", () => {
     expect(testExpandWildcardTags("( *foobar* ~ a* ) ( smo* )", "( apple ~ antioxidants ~ antioxidant ) ( smooth ~ smoothie )").hasNoMatches).toBe(false);
   });
 
-  test("expand remaining and or groups", () => {
+  test("expand and tags and or groups", () => {
     testExpandWildcardTags("*ee* *ed *pple *ple ( tag ~ on* ~ smo* )", "( green ~ sweet ~ peelable ~ seedless ) red apple ( apple ~ purple ) ( tag ~ smooth ~ smoothie )");
     testExpandWildcardTags("*ee* *ed *pple *ple ( tag ~ on* ~ smo* ) ( red ~ blue )", "( green ~ sweet ~ peelable ~ seedless ) red apple ( apple ~ purple ) ( tag ~ smooth ~ smoothie ) ( red ~ blue )");
     testExpandWildcardTags("*ee* *ed *pple *ple ( tag ~ on* ~ smo* ) ( red ~ blue ) ( apple ~ *ch* )", "( green ~ sweet ~ peelable ~ seedless ) red apple ( apple ~ purple ) ( tag ~ smooth ~ smoothie ) ( red ~ blue ) ( apple ~ cherry ~ lunch ~ crunchy  )");

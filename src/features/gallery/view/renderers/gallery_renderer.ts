@@ -1,4 +1,4 @@
-import { isGif, isVideo } from "../../../../utils/content/content_type";
+import { isGif, isVideo } from "../../../../utils/content/content_classifier";
 import { GalleryBaseRenderer } from "./gallery_base_renderer";
 import { GalleryGifRenderer } from "./gif/gallery_gif_renderer";
 import { GalleryImageRenderer } from "./image/gallery_image_renderer";

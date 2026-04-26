@@ -1,5 +1,5 @@
 import { DEFAULT_MENU_ELEMENT, SelectElement } from "../../types/element_types";
-import { DO_NOTHING } from "../../utils/misc/async";
+import { DO_NOTHING } from "../environment/constants";
 
 function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T>>): SelectElement<T> {
   return {
@@ -38,15 +38,15 @@ export function createSelectElement<T extends string>(partial: Partial<SelectEle
   }
   parent.insertAdjacentElement(template.position, select);
 
-  const onChange = (): void => {
+  const onChange = (save: boolean = true): void => {
     const value = template.isNumeric ? Number(select.value) : select.value;
+
+    if (save && template.preference !== null) {
+      template.preference.set(value as T);
+    }
 
     if (template.event !== null) {
       template.event.emit(value as T);
-    }
-
-    if (template.preference !== null) {
-      template.preference.set(value as T);
     }
     template.function(value as T);
   };
@@ -58,7 +58,9 @@ export function createSelectElement<T extends string>(partial: Partial<SelectEle
   }
 
   if (template.triggerOnCreation) {
-    onChange();
+    onChange(false);
   }
-  select.onchange = onChange;
+  select.onchange = (): void => {
+    onChange();
+  };
 }

@@ -1,13 +1,13 @@
-import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
+import * as Layout from "../../../lib/layout/layout";
 import * as SearchPageCreator from "./search_page_creator";
-import { Preferences } from "../../../lib/global/preferences/preferences";
+import { Preferences } from "../../../lib/preferences";
 import { SearchPage } from "../../../types/search_page";
 import { getAllThumbs } from "../../../utils/dom/dom";
-import { hideUnusedLayoutSizer } from "../../../lib/global/content/tilers/tiler_event_handlers";
+import { hideUnusedLayoutSizer } from "../../../lib/layout/layout_event_handlers";
 
 export function setupSearchPageView(): void {
-  ContentTiler.setupTiler();
-  ContentTiler.tile(getAllThumbs());
+  Layout.setupLayout();
+  Layout.tile(getAllThumbs());
   hideUnusedLayoutSizer(Preferences.searchPageLayout.value);
   toggleInfiniteScroll(Preferences.searchPageInfiniteScrollEnabled.value);
 }
@@ -17,7 +17,7 @@ export function createSearchPage(searchPage: SearchPage): void {
 }
 
 export function insertNewSearchResults(thumbs: HTMLElement[]): void {
-  ContentTiler.addItemsToBottom(thumbs);
+  Layout.addToBottom(thumbs);
 }
 
 export function toggleInfiniteScroll(value: boolean): void {

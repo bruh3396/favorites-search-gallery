@@ -1,8 +1,8 @@
-import { Events } from "../../../../../lib/global/events/events";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
+import { Events } from "../../../../../lib/communication/events";
+import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
+import { Preferences } from "../../../../../lib/preferences";
 import { Rating } from "../../../../../types/common_types";
-import { capitalize } from "../../../../../utils/primitive/string";
+import { capitalize } from "../../../../../utils/string/format";
 import { hasTagName } from "../../../../../utils/dom/dom";
 
 type RatingElement = {
@@ -67,9 +67,9 @@ function addEventListeners(): void {
     }
     const rating = getCurrentRating();
 
+    Preferences.allowedRatings.set(rating);
     Events.favorites.allowedRatingsChanged.emit(rating);
     preventAllRatingsFromBeingUnselected();
-    Preferences.allowedRatings.set(rating);
   };
 }
 

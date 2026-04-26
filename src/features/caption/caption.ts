@@ -1,22 +1,25 @@
-import * as API from "../../lib/api/api";
+import * as API from "../../lib/server/fetch/api";
 import { ClickCode, TagCategory, TagCategoryMapping } from "../../types/common_types";
-import { DO_NOTHING, debounceAfterFirstCall, sleep } from "../../utils/misc/async";
-import { capitalize, isOnlyDigits } from "../../utils/primitive/string";
+import { debounceAfterFirstCall } from "../../lib/core/async/rate_limiter";
+import { DO_NOTHING } from "../../lib/environment/constants";
+import { isOnlyDigits } from "../../utils/string/parse";
+import { capitalize } from "../../utils/string/format";
 import { getAllThumbs, getImageFromThumb } from "../../utils/dom/dom";
-import { BatchExecutor } from "../../lib/components/batch_executor";
-import { CAPTIONS_DISABLED } from "../../lib/global/flags/derived_flags";
+import { BatchExecutor } from "../../lib/core/concurrency/batch_executor";
+import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import { CAPTION_HTML } from "../../assets/html";
-import { Database } from "../../lib/components/database";
-import { Events } from "../../lib/global/events/events";
-import { ON_SEARCH_PAGE } from "../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../lib/global/preferences/preferences";
-import { createTagAPIURL } from "../../lib/api/api_url";
-import { getFavorite } from "../favorites/types/favorite/favorite_item";
+import { Database } from "../../lib/core/storage/database";
+import { Events } from "../../lib/communication/events";
+import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { Preferences } from "../../lib/preferences";
+import { buildTagAPIURL } from "../../lib/server/url/api_url_builder";
+import { getFavorite } from "../favorites/types/favorite_item";
 import { getTagSetFromItem } from "../../utils/dom/tags";
 import { insertStyleHTML } from "../../utils/dom/style";
 import { isTagCategory } from "../../types/equivalence";
 import { openSearchPage } from "../../utils/dom/links";
-import { roundToTwoDecimalPlaces } from "../../utils/primitive/number";
+import { roundToTwoDecimalPlaces } from "../../utils/primitives/number";
+import { sleep } from "../../lib/core/async/promise";
 
 const importantTagCategories: Set<TagCategory> = new Set([
   "copyright",
@@ -354,6 +357,8 @@ async function loadTagCategoryMappings(): Promise<void> {
 
   for (const mapping of mappings) {
     TAG_CATEGORY_MAPPINGS[mapping.id] = mapping.category;
+
+    [1].push(1);
   }
 }
 
@@ -555,7 +560,7 @@ async function findTagCategories(tagNames: string[], onAllCategoriesFound: () =>
 
     try {
       PENDING_REQUESTS.add(tagName);
-      fetch(createTagAPIURL(tagName), {
+      fetch(buildTagAPIURL(tagName), {
         signal: abortController.signal
       })
         .then((response) => {

@@ -1,13 +1,10 @@
 import * as FavoritesDatabase from "./favorites_database";
 import * as FavoritesFetcher from "./favorites_fetcher";
-import { FavoriteItem } from "../../types/favorite/favorite_item";
+import * as FavoritesReloadFetcher from "./favorites_reload_fetcher";
+import { FavoriteItem } from "../../types/favorite_item";
 
 let allFavorites: FavoriteItem[] = [];
 let subsetFavorites: FavoriteItem[] | null = null;
-
-function getAllFavoriteIds(): Set<string> {
-  return new Set(allFavorites.map(favorite => favorite.id));
-}
 
 export async function loadAllFavoritesFromDatabase(): Promise<void> {
   allFavorites = await FavoritesDatabase.getAllFavorites();
@@ -16,12 +13,13 @@ export async function loadAllFavoritesFromDatabase(): Promise<void> {
 export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
   return FavoritesFetcher.fetchAllFavorites((favorites: FavoriteItem[]): void => {
     allFavorites = [...allFavorites, ...favorites];
-    return onFavoritesFound(favorites);
+    onFavoritesFound(favorites);
   });
 }
 
 export async function fetchNewFavoritesOnReload(): Promise<FavoriteItem[]> {
-  const newFavorites = await FavoritesFetcher.fetchNewFavoritesOnReload(getAllFavoriteIds());
+  const allFavoriteIds = new Set(allFavorites.map(favorite => favorite.id));
+  const newFavorites = await FavoritesReloadFetcher.fetchNewFavoritesOnReload(allFavoriteIds);
 
   allFavorites = [...newFavorites, ...allFavorites];
   return newFavorites;

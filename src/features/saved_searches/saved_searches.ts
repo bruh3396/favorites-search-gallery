@@ -1,15 +1,16 @@
 import * as ICONS from "../../assets/icons";
-import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
-import { CrossFeatureRequests } from "../../lib/global/cross_feature_requests";
-import { Events } from "../../lib/global/events/events";
-import { Preferences } from "../../lib/global/preferences/preferences";
-import { SAVED_SEARCHES_DISABLED } from "../../lib/global/flags/derived_flags";
+import { CrossFeatureRequests } from "../../lib/communication/cross_feature_requests";
+import { Events } from "../../lib/communication/events";
+import { Preferences } from "../../lib/preferences";
+import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
 import { awesompleteIsUnselected } from "../../utils/dom/awesomplete";
 import { getAllThumbs } from "../../utils/dom/dom";
 import { getSavedSearches } from "../../utils/dom/saved_searches";
-import { shuffleArray } from "../../utils/primitive/array";
-import { sleep } from "../../utils/misc/async";
+import { insertHTMLAndExtractStyle } from "../../utils/dom/style";
+import { shuffleArray } from "../../utils/primitives/array";
+import { sleep } from "../../lib/core/async/promise";
+import { Storage } from "../../lib/core/storage";
 
 let textarea: HTMLTextAreaElement;
 let savedSearchesList: HTMLElement;
@@ -27,7 +28,6 @@ export function setupSavedSearches(): void {
   extractHTMLElements();
   addEventListeners();
   loadSavedSearches();
-  toggleSavedSearchesVisibility(Preferences.savedSearchesVisible.value);
 }
 
 function insertHTML(): void {
@@ -83,16 +83,6 @@ function addEventListeners(): void {
   saveSearchResultsButton.onclick = (): void => {
     saveSearchResultsAsCustomSearch();
   };
-  Events.favorites.savedSearchesToggled.on(toggleSavedSearchesVisibility);
-}
-
-function toggleSavedSearchesVisibility(value: boolean): void {
-  insertStyleHTML(`
-      #right-favorites-panel {
-        display: ${value ? "block" : "none"};
-      }
-    `, "saved-searches-visibility");
-  Preferences.savedSearchesVisible.set(value);
 }
 
 function saveSearch(newSavedSearch: string): void {
@@ -185,11 +175,11 @@ function stopEditingSavedSearches(newListItem: HTMLElement): void {
 }
 
 function storeSavedSearches(): void {
-  localStorage.setItem("savedSearches", JSON.stringify(getSavedSearches()));
+  Storage.set("savedSearches", getSavedSearches());
 }
 
 function loadSavedSearches(): void {
-  const savedSearches = JSON.parse(localStorage.getItem("savedSearches") ?? "[]");
+  const savedSearches = Storage.get<string[]>("savedSearches") ?? [];
   const firstUse = Boolean(Preferences.savedSearchTutorialEnabled.value);
 
   Preferences.savedSearchTutorialEnabled.set(false);

@@ -1,7 +1,7 @@
 import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../../types/element_types";
-import { CrossFeatureRequests } from "../global/cross_feature_requests";
-import { DO_NOTHING } from "../../utils/misc/async";
-import { Events } from "../global/events/events";
+import { CrossFeatureRequests } from "../communication/cross_feature_requests";
+import { DO_NOTHING } from "../environment/constants";
+import { Events } from "../communication/events";
 
 function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
   return {
@@ -31,8 +31,8 @@ export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
   checkbox.type = "checkbox";
   checkbox.checked = template.preference === null ? template.defaultValue : template.preference.value;
 
-  const onChange = (): void => {
-    if (template.savePreference && template.preference !== null) {
+  const onChange = (save: boolean = true): void => {
+    if (save && template.savePreference && template.preference !== null) {
       template.preference.set(checkbox.checked);
     }
 
@@ -43,10 +43,12 @@ export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
   };
 
   if (template.triggerOnCreation) {
-    onChange();
+    onChange(false);
   }
 
-  checkbox.addEventListener("change", onChange);
+  checkbox.addEventListener("change", (): void => {
+    onChange();
+  });
   parent.insertAdjacentElement(template.position, checkbox);
 
   if (template.hotkey === "") {

@@ -1,8 +1,8 @@
 import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesPresentationFlow from "../presentation/favorites_presentation_flow";
 import * as FavoritesView from "../../../view/favorites_view";
-import { Events } from "../../../../../lib/global/events/events";
-import { FavoriteItem } from "../../../types/favorite/favorite_item";
+import { Events } from "../../../../../lib/communication/events";
+import { FavoriteItem } from "../../../types/favorite_item";
 
 export function showSearchResults(searchResults: FavoriteItem[]): void {
   Events.favorites.searchResultsUpdated.emit();

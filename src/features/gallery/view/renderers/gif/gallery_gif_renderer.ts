@@ -1,8 +1,8 @@
-import { DO_NOTHING } from "../../../../../utils/misc/async";
+import { DO_NOTHING } from "../../../../../lib/environment/constants";
 import { GalleryBaseRenderer } from "../gallery_base_renderer";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { getGIFSource } from "../../../../../utils/content/gif_url";
-import { isGif } from "../../../../../utils/content/content_type";
+import { isGif } from "../../../../../utils/content/content_classifier";
 
 class GifRenderer extends GalleryBaseRenderer {
   private readonly gif: HTMLImageElement;

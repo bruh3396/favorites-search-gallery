@@ -1,13 +1,14 @@
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/global/flags/intrinsic_flags";
-import { CrossFeatureRequests } from "../../../../../../lib/global/cross_feature_requests";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
+import { CrossFeatureRequests } from "../../../../../../lib/communication/cross_feature_requests";
 import { ImageRequest } from "../../../../types/gallery_image_request";
+import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
 import { PerformanceProfile } from "../../../../../../types/common_types";
-import { Preferences } from "../../../../../../lib/global/preferences/preferences";
+import { Preferences } from "../../../../../../lib/preferences";
 import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_offscreen_upscale_request";
-import { ThrottledQueue } from "../../../../../../lib/components/throttled_queue";
+import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { getAllThumbs } from "../../../../../../utils/dom/dom";
-import { getDimensions2D } from "../../../../../../utils/primitive/string";
+import { getDimensions2D } from "../../../../../../utils/string/parse";
 
 const BATCH_UPSCALE_QUEUE = new ThrottledQueue(20);
 
@@ -100,7 +101,7 @@ export abstract class GalleryBaseThumbUpscaler {
     if (ON_SEARCH_PAGE && !Preferences.upscaleThumbsOnSearchPage.value) {
       return false;
     }
-    return Preferences.performanceProfile.value === PerformanceProfile.NORMAL;
+    return PERFORMANCE_PROFILE === PerformanceProfile.NORMAL;
   }
 
   public abstract finishUpscale(request: ImageRequest): void;

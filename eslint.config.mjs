@@ -209,7 +209,7 @@ export default defineConfig([
       "no-shadow-restricted-names": "error",
       "no-spaced-func": "error",
       "no-sparse-arrays": "error",
-      "no-sync": "error",
+      // "no-sync": "error",
       "no-tabs": "error",
       "no-template-curly-in-string": "error",
       "no-this-before-super": "error",
@@ -317,11 +317,6 @@ export default defineConfig([
           next: "*"
         },
         {
-          blankLine: "always",
-          prev: ["case", "default"],
-          next: "*"
-        },
-        {
           blankLine: "any",
           prev: ["const", "let", "var"],
           next: ["const", "let", "var"]
@@ -329,7 +324,7 @@ export default defineConfig([
         {
           blankLine: "always",
           prev: "*",
-          next: ["for", "if", "while", "switch", "case", "function", "class"]
+          next: ["for", "if", "while", "function", "class"]
         },
         {
           blankLine: "never",

@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE } from "../lib/global/flags/intrinsic_flags";
+import { ON_MOBILE_DEVICE } from "../lib/environment/environment";
 
 export const FavoritesSettings = {
   resultsPerPageBounds: {
@@ -10,7 +10,9 @@ export const FavoritesSettings = {
   resultsPerPageStep: 25,
   infiniteScrollBatchSize: 25,
   infiniteScrollPreloadCount: 100,
-  useSearchIndex: true,
+  reloadFetchDelay: 100,
+  favoritesPageRetryBackoffBase: 7,
+  useSearchIndex: false,
   buildIndexAsynchronously: true,
   favoriteFinderEnabled: false,
   bottomNavigationButtonsEnabled: false,

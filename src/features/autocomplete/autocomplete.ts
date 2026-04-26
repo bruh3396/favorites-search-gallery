@@ -1,17 +1,18 @@
 /* eslint-disable new-cap */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import { isEmptyString, removeLeadingHyphens } from "../../utils/primitive/string";
-import { AUTOCOMPLETE_DISABLED } from "../../lib/global/flags/derived_flags";
+import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
 import { AwesompleteSuggestion } from "../../types/common_types";
-import { Events } from "../../lib/global/events/events";
-import { Preferences } from "../../lib/global/preferences/preferences";
+import { Events } from "../../lib/communication/events";
+import { Preferences } from "../../lib/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
-import { addCustomTagsToAutocomplete } from "../../lib/global/custom_tags";
-import { getHTML } from "../../lib/api/api_utils";
+import { addCustomTagsToAutocomplete } from "../favorites/model/tags/favorites_custom_tags";
+import { getHTML } from "../../lib/server/http/http_client";
 import { getQueryWithTagReplaced } from "./autocomplete_tag_replacer";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../utils/dom/awesomplete";
+import { isEmptyString } from "../../utils/string/parse";
+import { removeLeadingHyphens } from "../../utils/string/format";
 
 const DUMMY_ELEMENT = document.createElement("div");
 const AUTOCOMPLETE_API_URL = "https://ac.rule34.xxx/autocomplete.php?q=";

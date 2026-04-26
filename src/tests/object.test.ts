@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
-import {describe, expect, test} from "vitest";
-import {convertKeysToCamelCase} from "../utils/primitive/object";
+import { describe, expect, test } from "vitest";
+import { convertKeysToCamelCase } from "../utils/primitives/object";
 
 describe("convertKeysToCamelCase", () => {
   test("empty", () => {

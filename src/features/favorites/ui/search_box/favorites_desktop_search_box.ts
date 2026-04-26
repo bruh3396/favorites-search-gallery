@@ -1,4 +1,4 @@
-import { Preferences } from "../../../../lib/global/preferences/preferences";
+import { Preferences } from "../../../../lib/preferences";
 
 export function createDesktopSearchBar(id: string, parentId: string, initialValue?: string): HTMLTextAreaElement {
   const searchBox = document.createElement("textarea");

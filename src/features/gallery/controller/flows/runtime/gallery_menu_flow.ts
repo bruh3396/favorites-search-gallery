@@ -2,7 +2,7 @@ import * as GalleryFavoriteToggleFlow from "./gallery_favorite_toggle_flow";
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryStateFlow from "./gallery_state_flow";
 import * as GalleryView from "../../../view/gallery_view";
-import { GalleryMenuAction } from "../../../types/gallery_types";
+import { GalleryMenuAction } from "../../../../../types/common_types";
 
 export function onGalleryMenuAction(action: GalleryMenuAction): void {
   switch (action) {

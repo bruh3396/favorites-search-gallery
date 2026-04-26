@@ -1,4 +1,4 @@
-import { FavoriteItem } from "../../types/favorite/favorite_item";
+import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 
 export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {

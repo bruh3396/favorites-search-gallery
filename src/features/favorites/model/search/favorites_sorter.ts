@@ -1,25 +1,13 @@
-import { FavoriteItem } from "../../types/favorite/favorite_item";
-import { Preferences } from "../../../../lib/global/preferences/preferences";
-import { SortingMethod } from "../../../../types/common_types";
-import { shuffleArray } from "../../../../utils/primitive/array";
-
-let useAscendingOrder = Preferences.sortAscendingEnabled.value;
-let sortingMethod: SortingMethod = Preferences.sortingMethod.value;
-
-export function setSortAscending(value: boolean): void {
-  useAscendingOrder = value;
-}
-
-export function setSortingMethod(value: SortingMethod): void {
-  sortingMethod = value;
-}
+import { FavoriteItem } from "../../types/favorite_item";
+import { Preferences } from "../../../../lib/preferences";
+import { shuffleArray } from "../../../../utils/primitives/array";
 
 export function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
-  const toSort = favorites.slice();
+  const sortingMethod = Preferences.sortingMethod.value;
 
   if (sortingMethod === "random") {
-    return shuffleArray(toSort);
+    return shuffleArray([...favorites]);
   }
-  toSort.sort((a, b) => b.metrics[sortingMethod] - a.metrics[sortingMethod]);
-  return useAscendingOrder ? toSort.reverse() : toSort;
+  const sorted = [...favorites].sort((a, b) => b.metrics[sortingMethod] - a.metrics[sortingMethod]);
+  return Preferences.sortAscendingEnabled.value ? sorted.reverse() : sorted;
 }

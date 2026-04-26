@@ -1,7 +1,7 @@
-import { isGif, isVideo } from "../../utils/content/content_type";
-import { Favorite } from "../../types/favorite_types";
-import { getExtension } from "../../lib/global/extensions";
-import { getOriginalContentURL } from "../../lib/api/api_content";
+import * as ExtensionCache from "../../lib/extension_cache";
+import { isGif, isVideo } from "../../utils/content/content_classifier";
+import { Favorite } from "../../types/favorite_data_types";
+import { resolveContentURL } from "../../lib/server/url/media_url_resolver";
 
 export class DownloadRequest {
   public id: string;
@@ -32,8 +32,8 @@ export async function createDownloadRequest(favorite: Favorite): Promise<Downloa
   } else if (isGif(favorite)) {
     extension = "gif";
   } else {
-    extension = await getExtension(favorite);
+    extension = await ExtensionCache.getExtension(favorite);
   }
-  const url = await getOriginalContentURL(favorite);
+  const url = await resolveContentURL(favorite);
   return new DownloadRequest(favorite.id, url, extension);
 }

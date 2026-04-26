@@ -1,5 +1,5 @@
-import * as ContentTiler from "../../../lib/global/content/tilers/tiler";
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
+import * as Layout from "../../../lib/layout/layout";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SEARCH_PAGE_INFINITE_SCROLL_HTML } from "../../../assets/html";
 import { SearchPage } from "../../../types/search_page";
 import { insertStyleHTML } from "../../../utils/dom/style";
@@ -29,7 +29,7 @@ function updateAddressBar(searchPage: SearchPage): void {
 }
 
 export function createSearchPage(searchPage: SearchPage): void {
-  ContentTiler.tile(searchPage.thumbs);
+  Layout.tile(searchPage.thumbs);
   updatePaginator(searchPage);
   updateAddressBar(searchPage);
 }

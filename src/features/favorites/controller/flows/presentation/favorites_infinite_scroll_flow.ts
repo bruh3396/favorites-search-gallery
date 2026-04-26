@@ -1,10 +1,10 @@
 import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesView from "../../../view/favorites_view";
-import { Events } from "../../../../../lib/global/events/events";
-import { FavoritesPresentationFlow } from "../../../types/favorites_presentation_flow_interface";
-import { ON_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { PageBottomObserver } from "../../../../../lib/components/page_bottom_observer";
-import { sleep } from "../../../../../utils/misc/async";
+import { Events } from "../../../../../lib/communication/events";
+import { FavoritesPresentationFlow } from "../../../types/favorite_types";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
+import { PageBottomObserver } from "../../../../../lib/core/observers/page_bottom_observer";
+import { sleep } from "../../../../../lib/core/async/promise";
 import { waitForAllThumbnailsToLoad } from "../../../../../utils/dom/dom";
 
 class InfiniteScrollFlow implements FavoritesPresentationFlow {

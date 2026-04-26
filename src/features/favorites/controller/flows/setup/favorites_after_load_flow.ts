@@ -1,19 +1,19 @@
 import * as FavoritesModel from "../../../model/favorites_model";
-import { collectAspectRatios } from "../../../../../lib/global/content/skeleton/aspect_ratio_collector";
+import { collectAspectRatios } from "../../../ui/skeleton/favorites_skeleton_aspect_ratio_collector";
 
 export function onFavoritesLoaded(): void {
   FavoritesModel.updateMissingMetadata();
   collectAspectRatios();
-  FavoritesModel.buildSearchIndexAsynchronously();
+  FavoritesModel.buildSearchIndexAsync();
 }
 
 export function onFavoritesLoadedFromDatabase(): void {
-  FavoritesModel.keepIndexedTagsSorted();
+  FavoritesModel.keepSearchIndexTagsSorted();
 }
 
 export function onStartedFetchingFavorites(): void {
-  FavoritesModel.keepIndexedTagsSorted();
-  FavoritesModel.buildSearchIndexSynchronously();
+  FavoritesModel.keepSearchIndexTagsSorted();
+  FavoritesModel.buildSearchIndexSync();
 }
 
 export function onStartedStoringAllFavorites(): void {

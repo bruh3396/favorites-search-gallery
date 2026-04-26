@@ -1,6 +1,6 @@
-import { DO_NOTHING } from "../utils/misc/async";
-import { EventEmitter } from "../lib/components/event_emitter";
-import { Preference } from "../lib/global/preferences/preference";
+import { DO_NOTHING } from "../lib/environment/constants";
+import { EventEmitter } from "../lib/core/events/event_emitter";
+import { Preference } from "../lib/core/storage/preference";
 
 export interface MenuElement<T> {
   parentId: string

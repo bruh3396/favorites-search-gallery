@@ -4,13 +4,13 @@ import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import { isExitKey, isNavigationKey } from "../../../../../types/equivalence";
-import { FavoritesKeyboardEvent } from "../../../../../types/input_types";
+import { EnhancedKeyboardEvent } from "../../../../../types/input_types";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
-import { throttle } from "../../../../../utils/misc/async";
+import { throttle } from "../../../../../lib/core/async/rate_limiter";
 import { toggleFullscreen } from "../../../../../utils/dom/dom";
 
-function onKeyDownInGallery(keyboardEvent: FavoritesKeyboardEvent): void {
+function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;
 
   if (event.ctrlKey) {
@@ -83,7 +83,7 @@ function executeGalleryHotkey(key: string): void {
   }
 }
 
-function onKeyDownOutsideGallery(event: FavoritesKeyboardEvent): void {
+function onKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
   if (!event.isHotkey) {
     return;
   }
@@ -103,18 +103,18 @@ const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
     idle: onKeyDownOutsideGallery,
     hover: onKeyDownOutsideGallery,
     gallery: onKeyDownInGallery
-  }, new FavoritesKeyboardEvent(event));
+  }, new EnhancedKeyboardEvent(event));
 };
 
 const onKeyDownThrottled = throttle(onKeyDownNoThrottle, GallerySettings.galleryNavigationDelay);
 
-function onKeyUpInGallery(event: FavoritesKeyboardEvent): void {
+function onKeyUpInGallery(event: EnhancedKeyboardEvent): void {
   if (event.key === "shift") {
     GalleryView.toggleZoomCursor(false);
   }
 }
 
-export function onKeyDown(keyboardEvent: FavoritesKeyboardEvent): void {
+export function onKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;
 
   if (event.repeat) {
@@ -124,7 +124,7 @@ export function onKeyDown(keyboardEvent: FavoritesKeyboardEvent): void {
   }
 }
 
-export function onKeyUp(event: FavoritesKeyboardEvent): void {
+export function onKeyUp(event: EnhancedKeyboardEvent): void {
   executeFunctionBasedOnGalleryState({
     gallery: onKeyUpInGallery
   }, event);

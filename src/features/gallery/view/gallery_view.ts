@@ -1,6 +1,6 @@
 import * as GalleryRenderer from "./renderers/gallery_renderer";
 import * as GalleryUI from "./ui/gallery_ui";
-import { RemoveFavoriteStatus } from "../../../types/favorite_types";
+import { RemoveFavoriteStatus } from "../../../types/favorite_data_types";
 import { toggleGalleryVisibility } from "../ui/gallery_container";
 
 export function showContentInGallery(thumb: HTMLElement): void {

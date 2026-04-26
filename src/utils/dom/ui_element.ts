@@ -1,6 +1,6 @@
 import { ALTERNATE_LAYOUT_HTML, SLIM_DESKTOP_HTML } from "../../assets/html";
 import { insertStyleHTML } from "./style";
-import { yield1 } from "../misc/async";
+import { yield1 } from "../../lib/core/async/promise";
 
 export function toggleAddOrRemoveButtons(value: boolean): void {
   insertStyleHTML(`

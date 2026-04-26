@@ -1,6 +1,6 @@
 import { AwesompleteSuggestion } from "../../types/common_types";
 import { getSavedSearches } from "../../utils/dom/saved_searches";
-import { removeExtraWhiteSpace } from "../../utils/primitive/string";
+import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 const SUGGESTION_LIMIT = 5;
 const MIN_TAG_LENGTH = 3;

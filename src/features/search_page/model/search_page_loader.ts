@@ -1,10 +1,10 @@
 import { NavigationKey } from "../../../types/common_types";
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/global/constants";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SearchPage } from "../../../types/search_page";
-import { ThrottledQueue } from "../../../lib/components/throttled_queue";
+import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { getAllThumbs } from "../../../utils/dom/dom";
 import { isForwardNavigationKey } from "../../../types/equivalence";
-import { sleep } from "../../../utils/misc/async";
+import { sleep } from "../../../lib/core/async/promise";
 
 const SEARCH_PAGE_FETCH_LIMITER = new ThrottledQueue(1250);
 const SEARCH_PAGE_PREFETCH_LENGTH = 6;

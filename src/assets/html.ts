@@ -1734,7 +1734,7 @@ export const FAVORITES_HTML = `
     textarea#favorites-search-box {
       margin-top: 5px;
       min-height: 14px;
-      width: 99% !important;
+      width: 98% !important;
     }
 
     #favorites-load-status-label.hidden {
@@ -2993,6 +2993,7 @@ export const SKELETON_HTML = `
     /* aspect-ratio: 1/3; */
     background: #555;
     overflow: hidden;
+    z-index: 0;
   }
 
   .skeleton-item.pulse {
@@ -3151,7 +3152,7 @@ export const TOOLTIP_HTML = `
     } */
 
     .favorite::after {
-      opacity: 0;
+      /* opacity: 0; */
       transition: visibility 0s, opacity 0.25s linear;
       content: attr(data-tooltip);
       position: absolute;

@@ -1,16 +1,16 @@
 import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
-import { FavoritesMouseEvent } from "../../../../../types/input_types";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { didSwipe } from "../../../../../lib/global/events/swipe_events";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../lib/environment/environment";
+import { EnhancedMouseEvent } from "../../../../../types/input_types";
+import { Preferences } from "../../../../../lib/preferences";
+import { didSwipe } from "../../../../../lib/communication/swipe_events";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 
 function galleryEnabled(): boolean {
   return (ON_FAVORITES_PAGE && Preferences.mobileGalleryEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value);
 }
 
-function onMouseDownOutsideGallery(mouseEvent: FavoritesMouseEvent): void {
+function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.thumb !== null && galleryEnabled()) {
     mouseEvent.originalEvent.preventDefault();
     mouseEvent.originalEvent.stopPropagation();
@@ -30,7 +30,7 @@ export function onMouseDown(event: MouseEvent): void {
   executeFunctionBasedOnGalleryState({
     hover: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery
-  }, new FavoritesMouseEvent(event));
+  }, new EnhancedMouseEvent(event));
 }
 
 export function onTouchStart(event: TouchEvent): void {

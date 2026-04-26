@@ -3,11 +3,11 @@ import * as GalleryThumbSelector from "./gallery_thumb_selector";
 import { GalleryBoundary, GalleryState } from "../types/gallery_types";
 import { openOriginal, openPostPage } from "../../../utils/dom/links";
 import { NavigationKey } from "../../../types/common_types";
-import { ON_FAVORITES_PAGE } from "../../../lib/global/flags/intrinsic_flags";
-import { clamp } from "../../../utils/primitive/number";
-import { downloadFromThumb } from "../../../lib/global/downloader";
+import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
+import { clamp } from "../../../utils/primitives/number";
+import { downloadFromThumb } from "../../../lib/server/fetch/content_downloader";
 import { isForwardNavigationKey } from "../../../types/equivalence";
-import { isVideo } from "../../../utils/content/content_type";
+import { isVideo } from "../../../utils/content/content_classifier";
 
 let currentIndex = 0;
 let recentlyExitedGallery = false;

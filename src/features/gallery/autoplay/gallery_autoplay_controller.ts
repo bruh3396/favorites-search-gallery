@@ -1,17 +1,17 @@
 import * as Icons from "../../../assets/icons";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
-import { clamp, millisecondsToSeconds } from "../../../utils/primitive/number";
-import { isImage, isVideo } from "../../../utils/content/content_type";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
+import { clamp, millisecondsToSeconds } from "../../../utils/primitives/number";
+import { isImage, isVideo } from "../../../utils/content/content_classifier";
 import { AUTOPLAY_HTML } from "../../../assets/html";
-import { Events } from "../../../lib/global/events/events";
-import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../../lib/global/container";
+import { Events } from "../../../lib/communication/events";
+import { OVERLAYS } from "../../../lib/shell";
 import { NavigationKey } from "../../../types/common_types";
 import { NumberComponent } from "../../../lib/ui/number_component";
-import { Preferences } from "../../../lib/global/preferences/preferences";
-import { Timer } from "../../../lib/components/timer";
+import { Preferences } from "../../../lib/preferences";
+import { Timer } from "../../../lib/core/async/timer";
 import { createObjectURLFromSvg } from "../../../utils/dom/links";
 import { insertStyleHTML } from "../../../utils/dom/style";
-import { throttle } from "../../../utils/misc/async";
+import { throttle } from "../../../lib/core/async/rate_limiter";
 
 export type AutoplayEvents = {
   onEnable: () => void
@@ -147,7 +147,7 @@ function insertHTML(): void {
 }
 
 function insertMenuHTML(): void {
-  FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
+  OVERLAYS.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
 }
 
 function insertImageProgressHTML(): void {

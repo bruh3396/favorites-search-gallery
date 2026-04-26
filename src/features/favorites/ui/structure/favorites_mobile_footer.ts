@@ -1,4 +1,4 @@
-import { FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER } from "../../../../lib/global/container";
+import { OVERLAYS } from "../../../../lib/shell";
 
 export function createFooter(): void {
   const footer = document.createElement("div");
@@ -16,7 +16,7 @@ export function createFooter(): void {
   footer.appendChild(footerTop);
   footer.appendChild(footerBottom);
 
-  FAVORITES_SEARCH_GALLERY_ADDONS_CONTAINER.appendChild(footer);
+  OVERLAYS.appendChild(footer);
 }
 
 export function moveStatusToFooter(): void {

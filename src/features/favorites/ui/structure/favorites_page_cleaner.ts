@@ -1,4 +1,4 @@
-import { sleep } from "../../../../utils/misc/async";
+import { sleep } from "../../../../lib/core/async/promise";
 import { waitForDOMToLoad } from "../../../../utils/dom/dom";
 
 function getOriginalFavoritesContent(): HTMLElement | null {

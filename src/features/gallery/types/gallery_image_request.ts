@@ -1,13 +1,13 @@
 import { ContentType } from "../../../types/common_types";
-import { ThrottledQueue } from "../../../lib/components/throttled_queue";
+import { CrossFeatureRequests } from "../../../lib/communication/cross_feature_requests";
+import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { getContentTypeFromThumb } from "../../../utils/dom/tags";
-import { getFavorite } from "../../favorites/types/favorite/favorite_item";
 import { getPreviewURL } from "../../../utils/dom/dom";
 
 const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(100);
 
 export function getFavoritePixelCount(id: string): number {
-  const favorite = getFavorite(id);
+  const favorite = CrossFeatureRequests.getFavorite.request(id);
 
   if (favorite === undefined) {
     return 0;

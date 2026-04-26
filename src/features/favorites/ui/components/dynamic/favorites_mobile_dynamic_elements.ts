@@ -1,15 +1,15 @@
 import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../types/element_types";
-import { Layout, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
+import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../utils/dom/ui_element";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
-import { Events } from "../../../../../lib/global/events/events";
-import { GALLERY_ENABLED } from "../../../../../lib/global/flags/derived_flags";
-import { Preferences } from "../../../../../lib/global/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/global/flags/intrinsic_flags";
+import { Events } from "../../../../../lib/communication/events";
+import { GALLERY_ENABLED } from "../../../../../lib/environment/derived_environment";
+import { Preferences } from "../../../../../lib/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { createButtonElement } from "../../../../../lib/ui/button";
 import { createSelectElement } from "../../../../../lib/ui/select";
 import { createToggleSwitch } from "../../../../../lib/ui/checkbox";
-import { hideUnusedLayoutSizer } from "../../../../../lib/global/content/tilers/tiler_event_handlers";
+import { hideUnusedLayoutSizer } from "../../../../../lib/layout/layout_event_handlers";
 import { prepareDynamicElements } from "../../../../../lib/ui/element_utils";
 
 const BUTTONS: Partial<ButtonElement>[] = [
@@ -139,7 +139,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
   }
 ];
 
-const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -168,7 +168,7 @@ const SELECTS: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     event: Events.favorites.layoutChanged,
     triggerOnCreation: true,
     function: hideUnusedLayoutSizer,
-    options: new Map<Layout, string>([
+    options: new Map<LayoutMode, string>([
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],

@@ -5,8 +5,8 @@ import { GalleryNormalThumbUpscaler } from "./upscalers/gallery_normal_thumbnail
 import { GalleryOffscreenThumbnailUpscalerWrapper } from "./upscalers/gallery_offscreen_thumbnail_upscaler_wrapper";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../types/gallery_image_request";
-import { ThrottledQueue } from "../../../../../lib/components/throttled_queue";
-import { USING_FIREFOX } from "../../../../../lib/global/flags/intrinsic_flags";
+import { ThrottledQueue } from "../../../../../lib/core/concurrency/throttled_queue";
+import { USING_FIREFOX } from "../../../../../lib/environment/environment";
 import { UpscaleImageRequest } from "../../../types/gallery_upscale_image_request";
 
 const UPSCALER = GallerySettings.useOffscreenThumbUpscaler ? new GalleryOffscreenThumbnailUpscalerWrapper() : new GalleryNormalThumbUpscaler();

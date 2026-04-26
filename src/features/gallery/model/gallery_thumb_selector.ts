@@ -1,11 +1,11 @@
-import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/primitive/array";
-import { isImage, isVideo } from "../../../utils/content/content_type";
-import { CrossFeatureRequests } from "../../../lib/global/cross_feature_requests";
-import { Favorite } from "../../../types/favorite_types";
+import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/primitives/array";
+import { isImage, isVideo } from "../../../utils/content/content_classifier";
+import { CrossFeatureRequests } from "../../../lib/communication/cross_feature_requests";
+import { Favorite } from "../../../types/favorite_data_types";
 import { GalleryBoundary } from "../types/gallery_types";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { getAllThumbs } from "../../../utils/dom/dom";
-import { removeNonNumericCharacters } from "../../../utils/primitive/string";
+import { removeNonNumericCharacters } from "../../../utils/string/parse";
 
 let thumbsOnCurrentPage: HTMLElement[] = [];
 const enumeratedThumbs: Map<string, number> = new Map();

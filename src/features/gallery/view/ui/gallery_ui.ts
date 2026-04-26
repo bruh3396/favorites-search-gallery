@@ -1,10 +1,10 @@
 import * as Icons from "../../../../assets/icons";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite_types";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite_data_types";
 import { blurCurrentlyFocusedElement, showFullscreenIcon, waitForAllThumbnailsToLoad } from "../../../../utils/dom/dom";
-import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/primitive/number";
+import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/primitives/number";
 import { GALLERY_CONTAINER } from "../../ui/gallery_container";
-import { Preferences } from "../../../../lib/global/preferences/preferences";
-import { USING_FIREFOX } from "../../../../lib/global/flags/intrinsic_flags";
+import { Preferences } from "../../../../lib/preferences";
+import { USING_FIREFOX } from "../../../../lib/environment/environment";
 import { insertStyleHTML } from "../../../../utils/dom/style";
 
 const BACKGROUND: HTMLElement = document.createElement("div");

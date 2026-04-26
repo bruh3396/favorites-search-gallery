@@ -1,15 +1,16 @@
 import * as Icons from "../../../assets/icons";
-import { GalleryMenuAction, GalleryMenuButton } from "../types/gallery_types";
+import { GalleryMenuButton } from "../types/gallery_types";
+import { GalleryMenuAction } from "../../../types/common_types";
 import { insertStyleHTML, setColorScheme } from "../../../utils/dom/style";
 import { toggleFullscreen, toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
-import { Events } from "../../../lib/global/events/events";
+import { Events } from "../../../lib/communication/events";
 import { GALLERY_CONTAINER } from "./gallery_container";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { GeneralSettings } from "../../../config/general_settings";
-import { ON_MOBILE_DEVICE } from "../../../lib/global/flags/intrinsic_flags";
-import { Preferences } from "../../../lib/global/preferences/preferences";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
+import { Preferences } from "../../../lib/preferences";
 import { Timeout } from "../../../types/common_types";
-import { throttle } from "../../../utils/misc/async";
+import { throttle } from "../../../lib/core/async/rate_limiter";
 
 const BUTTONS: GalleryMenuButton[] = [
   { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, hint: "Exit (Escape, Right-Click)", color: "red" },
@@ -136,10 +137,6 @@ function createColorPicker(): void {
   colorPicker.oninput = (): void => {
     setColorScheme(colorPicker.value);
   };
-
-  if (Preferences.colorScheme.defaultValue !== Preferences.colorScheme.value) {
-    setColorScheme(Preferences.colorScheme.value);
-  }
   button.insertAdjacentElement("afterbegin", colorPicker);
 }
 
