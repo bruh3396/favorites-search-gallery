@@ -1,5 +1,5 @@
 import { GalleryState } from "../types/gallery_types";
-import { Preferences } from "../../../lib/preferences";
+import { Preferences } from "../../../lib/preferences/preferences";
 
 let currentState = getStartState();
 

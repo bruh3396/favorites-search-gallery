@@ -1,6 +1,6 @@
 import { CONTROLS_HTML } from "../../../../assets/html";
 import { OVERLAYS } from "../../../../lib/shell";
-import { insertHTMLAndExtractStyle } from "../../../../utils/dom/style";
+import { insertHTMLAndExtractStyle } from "../../../../utils/dom/injector";
 import { sleep } from "../../../../lib/core/async/promise";
 
 export async function createControlsGuide(): Promise<void> {

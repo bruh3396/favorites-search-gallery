@@ -7,7 +7,7 @@ import * as GalleryZoomFlow from "./gallery_zoom_flow";
 import { EnhancedMouseEvent, EnhancedWheelEvent } from "../../../../../types/input_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
-import { overGalleryMenu } from "../../../../../utils/dom/dom";
+import { overGalleryMenu } from "../../../view/gallery_view_utils";
 import { throttle } from "../../../../../lib/core/async/rate_limiter";
 
 function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {

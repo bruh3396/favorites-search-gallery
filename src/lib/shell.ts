@@ -1,4 +1,4 @@
-import { Events } from "./communication/events";
+import { Events } from "./events/events";
 
 export const ROOT = document.createElement("div");
 ROOT.id = "favorites-search-gallery";

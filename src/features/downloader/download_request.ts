@@ -1,7 +1,7 @@
 import * as ExtensionCache from "../../lib/extension_cache";
-import { isGif, isVideo } from "../../utils/content/content_classifier";
+import { isGif, isVideo } from "../../lib/media_resolver";
 import { Favorite } from "../../types/favorite_data_types";
-import { resolveContentURL } from "../../lib/server/url/media_url_resolver";
+import { resolveMediaURL } from "../../lib/server/url/media_url_resolver";
 
 export class DownloadRequest {
   public id: string;
@@ -34,6 +34,6 @@ export async function createDownloadRequest(favorite: Favorite): Promise<Downloa
   } else {
     extension = await ExtensionCache.getExtension(favorite);
   }
-  const url = await resolveContentURL(favorite);
+  const url = await resolveMediaURL(favorite);
   return new DownloadRequest(favorite.id, url, extension);
 }

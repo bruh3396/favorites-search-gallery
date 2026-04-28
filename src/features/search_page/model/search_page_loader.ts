@@ -2,7 +2,7 @@ import { NavigationKey } from "../../../types/common_types";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SearchPage } from "../../../types/search_page";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
-import { getAllThumbs } from "../../../utils/dom/dom";
+import { getAllThumbs } from "../../../utils/dom/thumb";
 import { isForwardNavigationKey } from "../../../types/equivalence";
 import { sleep } from "../../../lib/core/async/promise";
 

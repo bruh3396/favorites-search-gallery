@@ -1,8 +1,8 @@
 import { CONTENT } from "../../../../../lib/shell";
-import { Events } from "../../../../../lib/communication/events";
+import { Events } from "../../../../../lib/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { insertStyleHTML } from "../../../../../utils/dom/style";
+import { insertStyleHTML } from "../../../../../utils/dom/injector";
 import { yield1 } from "../../../../../lib/core/async/promise";
 
 export async function setupFavoritesBottomNavigationButtons(): Promise<void> {

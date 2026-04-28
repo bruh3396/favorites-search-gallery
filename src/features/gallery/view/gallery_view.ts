@@ -1,7 +1,7 @@
 import * as GalleryRenderer from "./renderers/gallery_renderer";
-import * as GalleryUI from "./ui/gallery_ui";
+import * as GalleryUI from "./gallery_ui";
 import { RemoveFavoriteStatus } from "../../../types/favorite_data_types";
-import { toggleGalleryVisibility } from "../ui/gallery_container";
+import { toggleGalleryVisibility } from "../ui/gallery_shell";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -17,7 +17,7 @@ export function display(thumb: HTMLElement): void {
 
 export function hide(): void {
   toggleGalleryVisibility(false);
-  GalleryRenderer.hide();
+  GalleryRenderer.hideAll();
   GalleryUI.hide();
 }
 

@@ -1,15 +1,15 @@
 import * as FavoritesDownloader from "./downloader";
 import { sleep, yield1 } from "../../lib/core/async/promise";
-import { CrossFeatureRequests } from "../../lib/communication/cross_feature_requests";
+import { CrossFeatureRequests } from "../../lib/events/cross_feature_requests";
 import { DOWNLOADER_DISABLED } from "../../lib/environment/derived_environment";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
-import { Events } from "../../lib/communication/events";
+import { Events } from "../../lib/events/events";
 import { OVERLAYS } from "../../lib/shell";
 import { Favorite } from "../../types/favorite_data_types";
-import { Preferences } from "../../lib/preferences";
-import { insertHTMLAndExtractStyle } from "../../utils/dom/style";
-import { splitIntoChunks } from "../../utils/primitives/array";
+import { Preferences } from "../../lib/preferences/preferences";
+import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
+import { splitIntoChunks } from "../../utils/collection/array";
 
 let dialog: HTMLDialogElement;
 let warningDialog: HTMLDialogElement;

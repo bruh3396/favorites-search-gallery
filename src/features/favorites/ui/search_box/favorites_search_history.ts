@@ -1,6 +1,6 @@
 import { Storage } from "../../../../lib/core/storage";
-import { indexInBounds } from "../../../../utils/primitives/array";
-import { isEmptyString } from "../../../../utils/string/parse";
+import { indexInBounds } from "../../../../utils/collection/array";
+import { isEmptyString } from "../../../../utils/string/query";
 import { removeExtraWhiteSpace } from "../../../../utils/string/format";
 
 export class SearchHistory {

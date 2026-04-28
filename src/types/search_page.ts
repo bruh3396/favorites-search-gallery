@@ -1,5 +1,6 @@
-import { extractSearchPageThumbs, findSearchPageExtensions, prepareSearchPageThumbs } from "../utils/search_page_utils";
 import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
+import { cacheSearchPageExtensions } from "../features/search_page/model/search_page_extension_cacher";
+import { prepareSearchPageThumbs } from "../features/search_page/model/search_page_thumb_preparer";
 
 const PARSER = new DOMParser();
 
@@ -14,7 +15,7 @@ export class SearchPage {
     if (typeof content === "string") {
       const dom = PARSER.parseFromString(content, "text/html");
 
-      this.thumbs = prepareSearchPageThumbs(extractSearchPageThumbs(dom));
+      this.thumbs = prepareSearchPageThumbs(Array.from(dom.querySelectorAll(".thumb")));
       this.paginator = dom.getElementById("paginator");
     } else {
       this.thumbs = content;
@@ -23,7 +24,7 @@ export class SearchPage {
     this.pageNumber = pageNumber;
     this.ids = new Set(this.thumbs.map(thumb => thumb.id));
     this.isFinalPage = this.thumbs.length < POSTS_PER_SEARCH_PAGE;
-    findSearchPageExtensions(this.ids);
+    cacheSearchPageExtensions(this.ids);
   }
 
   public get isEmpty(): boolean {

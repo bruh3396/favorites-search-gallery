@@ -1,5 +1,5 @@
 import * as Icons from "./icons";
-import { createObjectURLFromSvg } from "../utils/dom/links";
+import { createObjectURLFromSvg } from "../lib/navigator";
 
 export const REMOVE_FAVORITE_IMAGE_HTML = `<img class="remove-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.HEART_MINUS)}>`;
 export const ADD_FAVORITE_IMAGE_HTML = `<img class="add-favorite-button utility-button" src=${createObjectURLFromSvg(Icons.HEART_PLUS)}>`;

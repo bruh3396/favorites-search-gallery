@@ -1,6 +1,8 @@
-import { getAllThumbs, waitForAllThumbnailsToLoad, waitForDOMToLoad } from "../../../utils/dom/dom";
-import { Events } from "../../../lib/communication/events";
-import { prepareSearchPageThumbs } from "../../../utils/search_page_utils";
+import { waitForDOMToLoad } from "../../../lib/ui/dom";
+import { waitForAllThumbnailsToLoad } from "../../../utils/dom/thumb";
+import { getAllThumbs } from "../../../utils/dom/thumb";
+import { Events } from "../../../lib/events/events";
+import { prepareSearchPageThumbs } from "../model/search_page_thumb_preparer";
 
 export async function prepareAllThumbsOnSearchPage(): Promise<void> {
   await waitForDOMToLoad();

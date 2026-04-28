@@ -1,85 +1,51 @@
-import { isGif, isVideo } from "../../../../utils/content/content_classifier";
-import { GalleryBaseRenderer } from "./gallery_base_renderer";
-import { GalleryGifRenderer } from "./gif/gallery_gif_renderer";
-import { GalleryImageRenderer } from "./image/gallery_image_renderer";
-import { GalleryVideoRenderer } from "./video/gallery_video_renderer";
+// gallery_renderer.ts
+import { isGif, isVideo } from "../../../../lib/media_resolver";
+import { GalleryAbstractController } from "./gallery_abstract_controller";
+import { GalleryGifController } from "./gif/gallery_gif_controller";
+import { GalleryImageController } from "./image/controller/gallery_image_controller";
+import { GalleryVideoController } from "./video/gallery_video_controller";
 
-const RENDERERS = [GalleryGifRenderer, GalleryVideoRenderer, GalleryImageRenderer];
+const CONTROLLERS = [GalleryImageController, GalleryVideoController, GalleryGifController];
 
-function getRenderer(thumb: HTMLElement): GalleryBaseRenderer {
-  return isVideo(thumb) ? GalleryVideoRenderer : isGif(thumb) ? GalleryGifRenderer : GalleryImageRenderer;
+function getController(thumb: HTMLElement): GalleryAbstractController {
+  return isVideo(thumb) ? GalleryVideoController : isGif(thumb) ? GalleryGifController : GalleryImageController;
 }
 
 export function render(thumb: HTMLElement): void {
-  hide();
-  getRenderer(thumb).display(thumb);
+  hideAll();
+  getController(thumb).render(thumb);
 }
 
-export function hide(): void {
-  RENDERERS.forEach(renderer => renderer.hide());
+export function hideAll(): void {
+  CONTROLLERS.forEach(c => c.hide());
 }
 
 export function exitGallery(): void {
-  hide();
-  GalleryImageRenderer.exitGallery();
-}
-
-export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
-  GalleryImageRenderer.preload(thumbs);
+  hideAll();
+  GalleryImageController.exitGallery();
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  RENDERERS.forEach(renderer => renderer.preload(thumbs));
+  CONTROLLERS.forEach(c => c.preload(thumbs));
 }
 
 export function handlePageChange(): void {
-  RENDERERS.forEach(renderer => renderer.handlePageChange());
+  CONTROLLERS.forEach(c => c.handlePageChange());
 }
 
 export function handlePageChangeInGallery(): void {
-  RENDERERS.forEach(renderer => renderer.handlePageChangeInGallery());
+  CONTROLLERS.forEach(c => c.handlePageChangeInGallery());
 }
 
-export function handleFavoritesAddedToCurrentPage(thumbs: HTMLElement[]): void {
-  GalleryImageRenderer.handleFavoritesAddedToCurrentPage(thumbs);
-}
-
-export function toggleVideoLooping(value: boolean): void {
-  GalleryVideoRenderer.toggleVideoLooping(value);
-}
-
-export function restartVideo(): void {
-  GalleryVideoRenderer.restartVideo();
-}
-
-export function toggleVideoPause(): void {
-  GalleryVideoRenderer.toggleVideoPause();
-}
-
-export function toggleVideoMute(): void {
-  GalleryVideoRenderer.toggleVideoMute();
-}
-
-export function toggleZoom(value: boolean | undefined): boolean {
-  return GalleryImageRenderer.toggleZoom(value);
-}
-
-export function toggleZoomCursor(value: boolean): void {
-  GalleryImageRenderer.toggleZoomCursor(value);
-}
-
-export function zoomToPoint(x: number, y: number): void {
-  GalleryImageRenderer.zoomToPoint(x, y);
-}
-
-export function correctOrientation(): void {
-  GalleryImageRenderer.correctOrientation();
-}
-
-export function downscaleAll(): void {
-  GalleryImageRenderer.downscaleAll();
-}
-
-export function upscaleCachedImageThumbs(): void {
-  GalleryImageRenderer.upscaleCachedImageThumbs();
-}
+export const preloadContentOutOfGallery = (thumbs: HTMLElement[]): void => GalleryImageController.preload(thumbs);
+export const handleFavoritesAddedToCurrentPage = (thumbs: HTMLElement[]): void => GalleryImageController.handleFavoritesAddedToCurrentPage(thumbs);
+export const toggleVideoLooping = (value: boolean): void => GalleryVideoController.toggleVideoLooping(value);
+export const restartVideo = (): void => GalleryVideoController.restartVideo();
+export const toggleVideoPause = (): void => GalleryVideoController.toggleVideoPause();
+export const toggleVideoMute = (): void => GalleryVideoController.toggleVideoMute();
+export const toggleZoom = (value: boolean | undefined): boolean => GalleryImageController.toggleZoom(value);
+export const toggleZoomCursor = (value: boolean): void => GalleryImageController.toggleZoomCursor(value);
+export const zoomToPoint = (x: number, y: number): void => GalleryImageController.zoomToPoint(x, y);
+export const correctOrientation = (): void => GalleryImageController.correctOrientation();
+export const downscaleAll = (): void => GalleryImageController.downscaleAll();
+export const upscaleCachedImageThumbs = (): Promise<void> => GalleryImageController.upscaleCachedImageThumbs();

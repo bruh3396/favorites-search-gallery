@@ -1,6 +1,6 @@
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "./environment";
 import { PerformanceProfile } from "../../types/common_types";
-import { Preferences } from "../preferences";
+import { Preferences } from "../preferences/preferences";
 
 export const PERFORMANCE_PROFILE = Preferences.performanceProfile.value;
 

@@ -4,14 +4,14 @@ import * as Icons from "../../../assets/icons";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { ClickCode, Post } from "../../../types/common_types";
 import { ON_DESKTOP_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/environment";
-import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../utils/dom/links";
-import { Events } from "../../../lib/communication/events";
+import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../lib/navigator";
+import { Events } from "../../../lib/events/events";
 import { FavoriteElement } from "./favorite_types";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
-import { ITEM_CLASS_NAME } from "../../../utils/dom/dom";
+import { ITEM_CLASS_NAME } from "../../../utils/dom/thumb";
 import { buildPostPageURL } from "../../../lib/server/url/page_url_builder";
-import { downloadFromThumb } from "../../../lib/server/fetch/content_downloader";
-import { getContentType } from "../../../utils/string/parse";
+import { downloadFromThumb } from "../../../lib/server/fetch/media_downloader";
+import { resolveMediaType } from "../../../lib/media_resolver";
 
 let htmlTemplate: HTMLElement;
 
@@ -70,7 +70,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
 
   private populateAttributes(post: Post): void {
     this.image.src = post.previewURL;
-    this.image.classList.add(getContentType(post.tags));
+    this.image.classList.add(resolveMediaType(post.tags));
     this.root.id = post.id;
   }
 

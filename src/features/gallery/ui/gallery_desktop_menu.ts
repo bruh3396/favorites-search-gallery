@@ -1,16 +1,16 @@
 import * as Icons from "../../../assets/icons";
+import { GalleryMenuAction, Timeout } from "../../../types/common_types";
+import { setColorScheme, toggleGalleryMenuEnabled } from "../../../lib/style";
+import { Events } from "../../../lib/events/events";
+import { GALLERY_ROOT } from "./gallery_shell";
 import { GalleryMenuButton } from "../types/gallery_types";
-import { GalleryMenuAction } from "../../../types/common_types";
-import { insertStyleHTML, setColorScheme } from "../../../utils/dom/style";
-import { toggleFullscreen, toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
-import { Events } from "../../../lib/communication/events";
-import { GALLERY_CONTAINER } from "./gallery_container";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { GeneralSettings } from "../../../config/general_settings";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
-import { Preferences } from "../../../lib/preferences";
-import { Timeout } from "../../../types/common_types";
+import { Preferences } from "../../../lib/preferences/preferences";
+import { insertStyleHTML } from "../../../utils/dom/injector";
 import { throttle } from "../../../lib/core/async/rate_limiter";
+import { toggleFullscreen } from "../../../utils/browser/window";
 
 const BUTTONS: GalleryMenuButton[] = [
   { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, hint: "Exit (Escape, Right-Click)", color: "red" },
@@ -178,7 +178,7 @@ export function setupDesktopGalleryMenu(): void {
   if (!GeneralSettings.galleryMenuOptionEnabled) {
     return;
   }
-  GALLERY_CONTAINER.appendChild(MENU);
+  GALLERY_ROOT.appendChild(MENU);
   loadPreferences();
   createButtons();
   createColorPicker();

@@ -1,16 +1,16 @@
 import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../types/element_types";
 import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../utils/dom/ui_element";
-import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
-import { Events } from "../../../../../lib/communication/events";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../lib/ui/toggles";
+import { toggleDarkTheme, usingDarkTheme } from "../../../../../lib/style";
+import { Events } from "../../../../../lib/events/events";
 import { GALLERY_ENABLED } from "../../../../../lib/environment/derived_environment";
-import { Preferences } from "../../../../../lib/preferences";
+import { Preferences } from "../../../../../lib/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
-import { createButtonElement } from "../../../../../lib/ui/button";
-import { createSelectElement } from "../../../../../lib/ui/select";
-import { createToggleSwitch } from "../../../../../lib/ui/checkbox";
+import { createButtonElement } from "../../../../../lib/ui/elements/button";
+import { createSelectElement } from "../../../../../lib/ui/elements/select";
+import { createToggleSwitch } from "../../../../../lib/ui/elements/checkbox";
 import { hideUnusedLayoutSizer } from "../../../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../../../lib/ui/element_utils";
+import { prepareDynamicElements } from "../../../../../lib/ui/elements/element_utils";
 
 const BUTTONS: Partial<ButtonElement>[] = [
   {
@@ -126,7 +126,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     position: "beforeend",
     enabled: true,
     preference: Preferences.sortAscendingEnabled,
-    event: Events.favorites.sortAscendingChanged
+    event: Events.favorites.sortAscendingToggled
   },
   {
     id: "mobile-gallery",

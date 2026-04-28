@@ -1,8 +1,8 @@
 import { toggleFavoritesOptions, tryResetting } from "../favorites_menu_event_handlers";
 import { CONTENT } from "../../../../lib/shell";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
-import { Preferences } from "../../../../lib/preferences";
-import { insertStyleHTML } from "../../../../utils/dom/style";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { insertStyleHTML } from "../../../../utils/dom/injector";
 import { sleep } from "../../../../lib/core/async/promise";
 
 export function createMobileSearchBar(id: string, parentId: string, onClick: () => void): HTMLInputElement {

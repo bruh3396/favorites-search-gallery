@@ -1,7 +1,8 @@
 import { DESKTOP_HTML, FAVORITES_HTML, MOBILE_HTML } from "../../../../assets/html";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { createFooter, moveStatusToFooter } from "./favorites_mobile_footer";
-import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../../../utils/dom/style";
+import { insertStyleHTML } from "../../../../utils/dom/injector";
+import { insertHTMLAndExtractStyle } from "../../../../utils/dom/injector";
 import { ROOT } from "../../../../lib/shell";
 import { createControlsGuide } from "./favorites_mobile_control_guide";
 import { createDynamicFavoritesDesktopMenuElements } from "../components/dynamic/favorites_desktop_dynamic_elements";

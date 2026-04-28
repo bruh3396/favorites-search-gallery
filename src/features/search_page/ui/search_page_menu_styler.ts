@@ -1,7 +1,7 @@
 import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../lib/environment/derived_environment";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { PerformanceProfile } from "../../../types/common_types";
-import { insertStyleHTML } from "../../../utils/dom/style";
+import { insertStyleHTML } from "../../../utils/dom/injector";
 
 export function styleSearchPageMenu(): void {
   const hiddenSelectors = new Set<string>();

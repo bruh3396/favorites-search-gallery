@@ -1,8 +1,8 @@
 import * as Layout from "../../../lib/layout/layout";
 import * as SearchPageCreator from "./search_page_creator";
-import { Preferences } from "../../../lib/preferences";
+import { Preferences } from "../../../lib/preferences/preferences";
 import { SearchPage } from "../../../types/search_page";
-import { getAllThumbs } from "../../../utils/dom/dom";
+import { getAllThumbs } from "../../../utils/dom/thumb";
 import { hideUnusedLayoutSizer } from "../../../lib/layout/layout_event_handlers";
 
 export function setupSearchPageView(): void {

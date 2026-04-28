@@ -1,7 +1,8 @@
 import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
 import * as Layout from "../../../lib/layout/layout";
-import { scrollToTop, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
+import { scrollToTop } from "../../../lib/ui/dom";
+import { waitForAllThumbnailsToLoad } from "../../../utils/dom/thumb";
 import { Favorite } from "../../../types/favorite_data_types";
 import { NewFavorites } from "../types/favorite_types";
 import { collectAspectRatios } from "../ui/skeleton/favorites_skeleton_aspect_ratio_collector";

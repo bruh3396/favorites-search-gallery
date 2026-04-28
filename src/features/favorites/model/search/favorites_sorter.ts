@@ -1,6 +1,6 @@
 import { FavoriteItem } from "../../types/favorite_item";
-import { Preferences } from "../../../../lib/preferences";
-import { shuffleArray } from "../../../../utils/primitives/array";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { shuffleArray } from "../../../../utils/collection/array";
 
 export function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
   const sortingMethod = Preferences.sortingMethod.value;

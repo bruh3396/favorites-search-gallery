@@ -1,14 +1,14 @@
 import * as ICONS from "../../assets/icons";
-import { CrossFeatureRequests } from "../../lib/communication/cross_feature_requests";
-import { Events } from "../../lib/communication/events";
-import { Preferences } from "../../lib/preferences";
+import { CrossFeatureRequests } from "../../lib/events/cross_feature_requests";
+import { Events } from "../../lib/events/events";
+import { Preferences } from "../../lib/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
-import { awesompleteIsUnselected } from "../../utils/dom/awesomplete";
-import { getAllThumbs } from "../../utils/dom/dom";
-import { getSavedSearches } from "../../utils/dom/saved_searches";
-import { insertHTMLAndExtractStyle } from "../../utils/dom/style";
-import { shuffleArray } from "../../utils/primitives/array";
+import { awesompleteIsUnselected } from "../../lib/ui/awesomplete";
+import { getAllThumbs } from "../../utils/dom/thumb";
+import { getSavedSearches } from "../../lib/saved_searches";
+import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
+import { shuffleArray } from "../../utils/collection/array";
 import { sleep } from "../../lib/core/async/promise";
 import { Storage } from "../../lib/core/storage";
 
@@ -113,7 +113,7 @@ function saveSearch(newSavedSearch: string): void {
   savedSearchesList.insertBefore(newListItem, savedSearchesList.firstChild);
   savedSearchLabel.onclick = (): void => {
     navigator.clipboard.writeText(savedSearchLabel.innerText);
-    Events.searchBox.appendSearchBox.emit(savedSearchLabel.innerText);
+    Events.searchBox.append.emit(savedSearchLabel.innerText);
   };
   removeButton.onclick = (): void => {
     if (inEditMode()) {

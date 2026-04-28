@@ -1,9 +1,10 @@
-import { getAllThumbs, waitForAllThumbnailsToLoad } from "../../../utils/dom/dom";
+import { waitForAllThumbnailsToLoad } from "../../../utils/dom/thumb";
+import { getAllThumbs } from "../../../utils/dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { GeneralSettings } from "../../../config/general_settings";
 import { LayoutMode } from "../../../types/common_types";
-import { insertStyleHTML } from "../../../utils/dom/style";
-import { mapRange } from "../../../utils/primitives/number";
+import { insertStyleHTML } from "../../../utils/dom/injector";
+import { mapRange } from "../../../utils/number";
 
 export class RowTiler extends AbstractTiler {
   public layoutMode: LayoutMode = "row";

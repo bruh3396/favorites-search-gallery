@@ -1,4 +1,4 @@
-import { userIsOnTheirOwnFavoritesPage } from "../../utils/favorites_page_metadata";
+import { userIsOnTheirOwnFavoritesPage } from "./environment_metadata";
 
 export const ON_SEARCH_PAGE = location.href.includes("page=post&s=list");
 export const ON_FAVORITES_PAGE = location.href.includes("page=favorites");

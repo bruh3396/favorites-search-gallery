@@ -1,4 +1,4 @@
-import { Preferences } from "../../../../lib/preferences";
+import { Preferences } from "../../../../lib/preferences/preferences";
 import { SkeletonItem } from "./favorites_skeleton_item";
 import { getSkeletonStyle } from "./favorites_skeleton_style";
 

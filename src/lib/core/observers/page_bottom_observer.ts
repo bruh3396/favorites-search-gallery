@@ -1,6 +1,6 @@
 import { CONTENT } from "../../shell";
 import { GeneralSettings } from "../../../config/general_settings";
-import { ITEM_CLASS_NAME } from "../../../utils/dom/dom";
+import { ITEM_CLASS_NAME } from "../../../utils/dom/thumb";
 
 export class PageBottomObserver {
   private intersectionObserver: IntersectionObserver;

@@ -1,8 +1,8 @@
-import { Events } from "../../../lib/communication/events";
+import { Events } from "../../../lib/events/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
-import { Preferences } from "../../../lib/preferences";
+import { Preferences } from "../../../lib/preferences/preferences";
 import { Storage } from "../../../lib/core/storage";
-import { insertStyleHTML } from "../../../utils/dom/style";
+import { insertStyleHTML } from "../../../utils/dom/injector";
 
 export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");

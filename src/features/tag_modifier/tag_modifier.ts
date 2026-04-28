@@ -1,10 +1,11 @@
 import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modification_database";
-import { insertHTMLAndExtractStyle, insertStyleHTML } from "../../utils/dom/style";
-import { CrossFeatureRequests } from "../../lib/communication/cross_feature_requests";
+import { insertStyleHTML } from "../../utils/dom/injector";
+import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
+import { CrossFeatureRequests } from "../../lib/events/cross_feature_requests";
 import { DO_NOTHING } from "../../lib/environment/constants";
-import { Events } from "../../lib/communication/events";
+import { Events } from "../../lib/events/events";
 import { Favorite } from "../../types/favorite_data_types";
-import { ITEM_CLASS_NAME } from "../../utils/dom/dom";
+import { ITEM_CLASS_NAME } from "../../utils/dom/thumb";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";
 import { TAG_MODIFIER_HTML } from "../../assets/html";
@@ -214,7 +215,7 @@ function isSelected(favorite: Favorite): boolean {
   return SELECTED.has(favorite);
 }
 
-function removeContentTypeTags(tags: string): string {
+function removeMediaTypeTags(tags: string): string {
   return tags.replace(/(?:^|\s*)(?:video|animated|mp4)(?:$|\s*)/g, "");
 }
 
@@ -228,8 +229,8 @@ function removeTagsFromSelected(): void {
 
 function modifyTagsOfSelected(remove: boolean): void {
   const tags = UI.textarea.value.toLowerCase();
-  const tagsWithoutContentTypes = removeContentTypeTags(tags);
-  const tagsToModify = removeExtraWhiteSpace(tagsWithoutContentTypes);
+  const tagsWithoutMediaTypes = removeMediaTypeTags(tags);
+  const tagsToModify = removeExtraWhiteSpace(tagsWithoutMediaTypes);
   const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
   let modifiedTagsCount = 0;
 
@@ -248,7 +249,7 @@ function modifyTagsOfSelected(remove: boolean): void {
     return;
   }
 
-  if (tags !== tagsWithoutContentTypes) {
+  if (tags !== tagsWithoutMediaTypes) {
     alert("Warning: video, animated, and mp4 tags are unchanged.\nThey cannot be modified.");
   }
   showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);

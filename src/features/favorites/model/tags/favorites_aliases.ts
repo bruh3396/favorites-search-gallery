@@ -1,5 +1,5 @@
 import { AliasMap } from "../../../../types/common_types";
-import { Preferences } from "../../../../lib/preferences";
+import { Preferences } from "../../../../lib/preferences/preferences";
 import { Storage } from "../../../../lib/core/storage";
 
 const ALIAS_MAP = {} as AliasMap;

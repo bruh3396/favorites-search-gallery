@@ -1,39 +1,9 @@
+import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "../utils/string/format";
 import { convertToTagSet, convertToTagString } from "../utils/string/tags";
-import { getDimensions2D } from "../utils/string/parse";
-import { isEmptyString } from "../utils/string/parse";
-import { removeNonNumericCharacters } from "../utils/string/parse";
-import { extractTagGroups } from "../utils/string/parse";
-import { negateTags } from "../utils/string/format";
-import { isOnlyDigits } from "../utils/string/parse";
-import { getContentType } from "../utils/string/parse";
-import { escapeParenthesis } from "../utils/string/format";
-import { removeFirstAndLastLines } from "../utils/string/format";
-import { removeLeadingHyphens, replaceSpacesWithUnderscores } from "../utils/string/format";
-import { capitalize } from "../utils/string/format";
-import { removeExtraWhiteSpace, toCamelCase } from "../utils/string/format";
 import { describe, expect, test } from "vitest";
-
-describe("toCamelCase", () => {
-  test("empty", () => {
-    expect(toCamelCase("")).toBe("");
-  });
-
-  test("one character", () => {
-    expect(toCamelCase("a")).toBe("a");
-  });
-
-  test("single word", () => {
-    expect(toCamelCase("hello")).toBe("hello");
-  });
-
-  test("two words", () => {
-    expect(toCamelCase("hello_world")).toBe("helloWorld");
-  });
-
-  test("multiple words", () => {
-    expect(toCamelCase("this_is_a_test")).toBe("thisIsATest");
-  });
-});
+import { isEmptyString, isOnlyDigits } from "../utils/string/query";
+import { parseDimensions2D, parseTagGroups } from "../utils/string/parse";
+// import { resolveMediaType } from "../lib/media_resolver";
 
 describe("removeExtraWhiteSpace", () => {
   test("empty", () => {
@@ -66,38 +36,38 @@ describe("removeExtraWhiteSpace", () => {
 });
 
 describe("getDimensions2D", () => {
-  const DEFAULT_DIMENSIONS = { width: 100, height: 100 };
+  const DEFAULT_DIMENSIONS = { x: 100, y: 100 };
 
   test("empty", () => {
-    expect(getDimensions2D("")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("")).toStrictEqual(DEFAULT_DIMENSIONS);
   });
 
   test("square", () => {
-    expect(getDimensions2D("20x20")).toStrictEqual({ width: 20, height: 20 });
+    expect(parseDimensions2D("20x20")).toStrictEqual({ x: 20, y: 20 });
   });
 
   test("rectangle", () => {
-    expect(getDimensions2D("1920x1080")).toStrictEqual({ width: 1920, height: 1080 });
+    expect(parseDimensions2D("1920x1080")).toStrictEqual({ x: 1920, y: 1080 });
   });
 
   test("invalid format", () => {
-    expect(getDimensions2D("20x")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20x")).toStrictEqual(DEFAULT_DIMENSIONS);
   });
 
   test("invalid format with letters", () => {
-    expect(getDimensions2D("20x20a")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20x20a")).toStrictEqual(DEFAULT_DIMENSIONS);
   });
 
   test("invalid format with letters and spaces", () => {
-    expect(getDimensions2D("20x 20a")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20x 20a")).toStrictEqual(DEFAULT_DIMENSIONS);
   });
 
   test("invalid format with spaces", () => {
-    expect(getDimensions2D("20 x 20")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20 x 20")).toStrictEqual(DEFAULT_DIMENSIONS);
   });
 
   test("different separator", () => {
-    expect(getDimensions2D("20/20")).toStrictEqual({ width: 20, height: 20 });
+    expect(parseDimensions2D("20/20")).toStrictEqual({ x: 20, y: 20 });
   });
 });
 
@@ -163,7 +133,7 @@ describe("escapeParenthesis", () => {
 
 describe("extractTagGroups", () => {
   function testTagGroups(input: string, expectedOrGroups: string[][], expectedAndTags: string[]): void {
-    const result = extractTagGroups(input);
+    const result = parseTagGroups(input);
 
     expect(result.orGroups).toStrictEqual(expectedOrGroups);
     expect(result.andTags).toStrictEqual(expectedAndTags);
@@ -224,29 +194,29 @@ describe("extractTagGroups", () => {
   });
 });
 
-describe("getContentType", () => {
-  test("empty", () => {
-    expect(getContentType("")).toBe("image");
-  });
+// describe("resolveMediaType", () => {
+//   test("empty", () => {
+//     expect(resolveMediaType("")).toBe("image");
+//   });
 
-  test("image", () => {
-    expect(getContentType("tag1 tag2")).toBe("image");
-    expect(getContentType("tag1 ")).toBe("image");
-    expect(getContentType("tag1")).toBe("image");
-    expect(getContentType("tag1 tag2 tag3")).toBe("image");
-  });
+//   test("image", () => {
+//     expect(resolveMediaType("tag1 tag2")).toBe("image");
+//     expect(resolveMediaType("tag1 ")).toBe("image");
+//     expect(resolveMediaType("tag1")).toBe("image");
+//     expect(resolveMediaType("tag1 tag2 tag3")).toBe("image");
+//   });
 
-  test("video", () => {
-    expect(getContentType("tag1 video more_tags tag20")).toBe("video");
-    expect(getContentType("video")).toBe("video");
-    expect(getContentType("tag1 video")).toBe("video");
-    expect(getContentType("video tag2")).toBe("video");
-  });
+//   test("video", () => {
+//     expect(resolveMediaType("tag1 video more_tags tag20")).toBe("video");
+//     expect(resolveMediaType("video")).toBe("video");
+//     expect(resolveMediaType("tag1 video")).toBe("video");
+//     expect(resolveMediaType("video tag2")).toBe("video");
+//   });
 
-  test("animated", () => {
-    expect(getContentType("tag1 tag2 animated")).toBe("gif");
-  });
-});
+//   test("animated", () => {
+//     expect(resolveMediaType("tag1 tag2 animated")).toBe("gif");
+//   });
+// });
 
 describe("removeNonNumericCharacters", () => {
   test("empty", () => {

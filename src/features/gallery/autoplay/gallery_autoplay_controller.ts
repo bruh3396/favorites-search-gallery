@@ -1,16 +1,16 @@
 import * as Icons from "../../../assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
-import { clamp, millisecondsToSeconds } from "../../../utils/primitives/number";
-import { isImage, isVideo } from "../../../utils/content/content_classifier";
+import { clamp, millisecondsToSeconds } from "../../../utils/number";
+import { isImage, isVideo } from "../../../lib/media_resolver";
 import { AUTOPLAY_HTML } from "../../../assets/html";
-import { Events } from "../../../lib/communication/events";
+import { Events } from "../../../lib/events/events";
 import { OVERLAYS } from "../../../lib/shell";
 import { NavigationKey } from "../../../types/common_types";
-import { NumberComponent } from "../../../lib/ui/number_component";
-import { Preferences } from "../../../lib/preferences";
+import { NumberComponent } from "../../../lib/ui/elements/number_component";
+import { Preferences } from "../../../lib/preferences/preferences";
 import { Timer } from "../../../lib/core/async/timer";
-import { createObjectURLFromSvg } from "../../../utils/dom/links";
-import { insertStyleHTML } from "../../../utils/dom/style";
+import { createObjectURLFromSvg } from "../../../lib/navigator";
+import { insertStyleHTML } from "../../../utils/dom/injector";
 import { throttle } from "../../../lib/core/async/rate_limiter";
 
 export type AutoplayEvents = {

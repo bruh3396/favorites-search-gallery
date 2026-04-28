@@ -1,8 +1,9 @@
-import { ContentType } from "../../../types/common_types";
-import { CrossFeatureRequests } from "../../../lib/communication/cross_feature_requests";
+import { CrossFeatureRequests } from "../../../lib/events/cross_feature_requests";
+import { MediaType } from "../../../types/common_types";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
-import { getContentTypeFromThumb } from "../../../utils/dom/tags";
-import { getPreviewURL } from "../../../utils/dom/dom";
+import { getPreviewURL } from "../../../lib/ui/dom";
+import { getTagSetFromItem } from "../../../utils/tags";
+import { resolveMediaType } from "../../../lib/media_resolver";
 
 const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(100);
 
@@ -22,7 +23,7 @@ export class ImageRequest {
   public bitmap: ImageBitmap | null;
   public abortController: AbortController;
   public cancelled: boolean;
-  public contentType: ContentType;
+  public mediaType: MediaType;
   public accentColor: string | null;
 
   constructor(thumb: HTMLElement) {
@@ -32,7 +33,7 @@ export class ImageRequest {
     this.bitmap = null;
     this.abortController = new AbortController();
     this.cancelled = false;
-    this.contentType = getContentTypeFromThumb(thumb);
+    this.mediaType = resolveMediaType(getTagSetFromItem(thumb));
     this.accentColor = null;
   }
 
@@ -41,7 +42,7 @@ export class ImageRequest {
   }
 
   public get isImage(): boolean {
-    return this.contentType === "image";
+    return this.mediaType === "image";
   }
 
   public get isAnimated(): boolean {
@@ -56,8 +57,12 @@ export class ImageRequest {
     return !this.isIncomplete;
   }
 
-  public get isOriginalResolution(): boolean {
+  public get isHighRes(): boolean {
     return true;
+  }
+
+  public get isLowRes(): boolean {
+    return !this.isHighRes;
   }
 
   public complete(bitmap: ImageBitmap): void {

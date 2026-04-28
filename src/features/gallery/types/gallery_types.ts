@@ -17,15 +17,6 @@ export type VideoClip = {
   end: number
 }
 
-export interface Renderer {
-  container: HTMLElement
-  display: (element: HTMLElement) => void
-  hide: () => void
-  handlePageChange: () => void
-  handlePageChangeInGallery: () => void
-  preload: (elements: HTMLElement[]) => void
-}
-
 export type GalleryMenuButton = {
   id: string;
   icon: string;

@@ -1,6 +1,6 @@
 import * as API from "./server/fetch/api";
 import { MediaExtension, MediaExtensionMapping, Post } from "../types/common_types";
-import { isGif, isVideo } from "../utils/content/content_classifier";
+import { isGif, isVideo } from "./media_resolver";
 import { BatchExecutor } from "./core/concurrency/batch_executor";
 import { ConcurrencyLimiter } from "./core/concurrency/concurrency_limiter";
 import { Database } from "./core/storage/database";

@@ -3,11 +3,11 @@ import { changeItemSizeOnShiftScroll, hideUnusedLayoutSizer } from "./layout_eve
 import { AbstractTiler } from "./tilers/abstract_tiler";
 import { CONTENT } from "../shell";
 import { ColumnTiler } from "./tilers/column_tiler";
-import { Events } from "../communication/events";
+import { Events } from "../events/events";
 import { GridTiler } from "./tilers/grid_tiler";
 import { LayoutMode } from "../../types/common_types";
 import { NativeTiler } from "./tilers/native_tiler";
-import { Preferences } from "../preferences";
+import { Preferences } from "../preferences/preferences";
 import { RowTiler } from "./tilers/row_tiler";
 import { SquareTiler } from "./tilers/square_tiler";
 

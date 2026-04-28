@@ -2,11 +2,11 @@ import * as GalleryAutoplayController from "../../../autoplay/gallery_autoplay_c
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
-import { CrossFeatureRequests } from "../../../../../lib/communication/cross_feature_requests";
+import { CrossFeatureRequests } from "../../../../../lib/events/cross_feature_requests";
 import { GalleryBoundary } from "../../../types/gallery_types";
 import { NavigationKey } from "../../../../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
-import { usingInfiniteScroll } from "../../../../../utils/layout";
+import { usingInfiniteScroll } from "../../../../../lib/preferences/infinite_scroll";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.navigate(direction)) {

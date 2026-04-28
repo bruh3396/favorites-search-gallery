@@ -12,7 +12,7 @@ import { ThrottledQueue } from "../../core/concurrency/throttled_queue";
 import { extractFavoritesCount } from "../parse/profile_page_parser";
 import { extractFavoritesPageCount } from "../parse/favorites_page_parser";
 import { parsePostFromPostPage as extractPostFromPostPage } from "../parse/post_page_parser";
-import { getUserId } from "../../../utils/favorites_page_metadata";
+import { getUserId } from "../../environment/environment_metadata";
 
 const USER_ID = getUserId();
 const MULTI_POST_LIMITER = new ConcurrencyLimiter(4);

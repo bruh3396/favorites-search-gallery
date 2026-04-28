@@ -1,9 +1,9 @@
-import { Events } from "../../../../../lib/communication/events";
+import { Events } from "../../../../../lib/events/events";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { Preferences } from "../../../../../lib/preferences";
+import { Preferences } from "../../../../../lib/preferences/preferences";
 import { Rating } from "../../../../../types/common_types";
 import { capitalize } from "../../../../../utils/string/format";
-import { hasTagName } from "../../../../../utils/dom/dom";
+import { hasTagName } from "../../../../../utils/dom/interaction";
 
 type RatingElement = {
   input: HTMLInputElement

@@ -1,8 +1,10 @@
-import { ITEM_SELECTOR, changeGetAllThumbsImplementation, getAllThumbs, resetGetAllThumbsImplementation } from "../../../utils/dom/dom";
+import { getAllThumbs, resetGetAllThumbsImplementation } from "../../../utils/dom/thumb";
+import { changeGetAllThumbsImplementation } from "../../../utils/dom/thumb";
+import { ITEM_SELECTOR } from "../../../utils/dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { LayoutMode } from "../../../types/common_types";
 import { ON_SEARCH_PAGE } from "../../environment/environment";
-import { Preferences } from "../../preferences";
+import { Preferences } from "../../preferences/preferences";
 
 export class ColumnTiler extends AbstractTiler {
   public layoutMode: LayoutMode = "column";

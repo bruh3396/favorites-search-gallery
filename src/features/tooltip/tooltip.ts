@@ -1,13 +1,14 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
-import { getImageFromThumb, getThumbFromImage } from "../../utils/dom/dom";
-import { Events } from "../../lib/communication/events";
+import { getThumbFromImage } from "../../utils/dom/thumb";
+import { getImageFromThumb } from "../../utils/dom/thumb";
+import { Events } from "../../lib/events/events";
 import { OVERLAYS } from "../../lib/shell";
-import { Preferences } from "../../lib/preferences";
+import { Preferences } from "../../lib/preferences/preferences";
 import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";
 import { TOOLTIP_HTML } from "../../assets/html";
 import { convertToTagString } from "../../utils/string/tags";
-import { extractTagGroups } from "../../utils/string/parse";
-import { getTagSetFromItem } from "../../utils/dom/tags";
+import { parseTagGroups } from "../../utils/string/parse";
+import { getTagSetFromItem } from "../../utils/tags";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 let tooltip: HTMLElement;
@@ -270,7 +271,7 @@ function formatHTML(tags: string): string {
 
 function assignTagColors(searchQuery: string): void {
   searchQuery = removeNotTags(searchQuery);
-  const { orGroups, andTags } = extractTagGroups(searchQuery);
+  const { orGroups, andTags } = parseTagGroups(searchQuery);
 
   searchTagColorCodes = {};
   assignColorsToOrGroupTags(orGroups);

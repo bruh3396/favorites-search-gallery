@@ -1,12 +1,12 @@
-import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../utils/dom/awesomplete";
-import { Events } from "../../../../lib/communication/events";
+import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../lib/ui/awesomplete";
+import { Events } from "../../../../lib/events/events";
 import { EnhancedMouseEvent } from "../../../../types/input_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { SearchHistory } from "./favorites_search_history";
 import { createDesktopSearchBar } from "./favorites_desktop_search_box";
 import { createMobileSearchBar } from "./favorites_mobile_search_box";
 import { debounceAfterFirstCall } from "../../../../lib/core/async/rate_limiter";
-import { openSearchPage } from "../../../../utils/dom/links";
+import { openSearchPage } from "../../../../lib/navigator";
 
 let SEARCH_BOX: HTMLTextAreaElement | HTMLInputElement;
 const PARENT_ID: string = "left-favorites-panel-top-row";
@@ -18,7 +18,7 @@ function addEventListenersToSearchBox(): void {
     SEARCH_BOX.value = tag;
     startSearch();
   });
-  Events.searchBox.appendSearchBox.on((text) => {
+  Events.searchBox.append.on((text) => {
     const initialSearchBoxValue = SEARCH_BOX.value;
     const optionalSpace = initialSearchBoxValue === "" ? "" : " ";
     const newSearchBoxValue = `${initialSearchBoxValue}${optionalSpace}${text}`;

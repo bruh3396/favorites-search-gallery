@@ -10,19 +10,12 @@ export default defineConfig([
       "node_modules/**",
       "**/*.min.js",
       "**/*.js"
-      // "**/*.mjs"
     ]
   },
   {
     files: ["**/*.{mjs,cjs,ts}"],
-    // files: ["**/*.{cjs,ts}"],
-    plugins: {
-      js
-    },
-    extends: ["js/recommended"]
-  },
-  {
-    files: ["**/*.{mjs,cjs,ts}"],
+    plugins: { js },
+    extends: ["js/recommended"],
     languageOptions: {
       globals: globals.browser
     }
@@ -549,6 +542,12 @@ export default defineConfig([
           ]
         }
       ]
+    }
+  },
+  {
+    files: ["scripts/**/*.ts"],
+    rules: {
+      "no-console": "off"
     }
   }
 ]);

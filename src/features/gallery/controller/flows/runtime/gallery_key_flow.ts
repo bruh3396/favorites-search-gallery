@@ -8,7 +8,7 @@ import { EnhancedKeyboardEvent } from "../../../../../types/input_types";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 import { throttle } from "../../../../../lib/core/async/rate_limiter";
-import { toggleFullscreen } from "../../../../../utils/dom/dom";
+import { toggleFullscreen } from "../../../../../utils/browser/window";
 
 function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;

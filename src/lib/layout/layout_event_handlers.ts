@@ -1,8 +1,8 @@
 import * as LayoutManager from "./layout";
-import { CrossFeatureRequests } from "../communication/cross_feature_requests";
+import { CrossFeatureRequests } from "../events/cross_feature_requests";
 import { EnhancedWheelEvent } from "../../types/input_types";
 import { LayoutMode } from "../../types/common_types";
-import { clamp } from "../../utils/primitives/number";
+import { clamp } from "../../utils/number";
 import { sleep } from "../core/async/promise";
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {

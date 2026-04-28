@@ -2,10 +2,10 @@ import { ALL_RATINGS_VALUE, FAVORITES_PER_PAGE } from "../../../../lib/environme
 import { FAVORITES_SEARCH_INDEX } from "./favorites_search_index";
 import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { Preferences } from "../../../../lib/preferences";
+import { Preferences } from "../../../../lib/preferences/preferences";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/environment";
-import { getTagBlacklist } from "../../../../utils/favorites_page_metadata";
+import { getTagBlacklist } from "../../../../lib/environment/environment_metadata";
 import { negateTags } from "../../../../utils/string/format";
 
 const NEGATED_TAG_BLACKLIST = negateTags(getTagBlacklist());

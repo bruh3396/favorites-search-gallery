@@ -1,6 +1,6 @@
 import * as SearchPageLoader from "./search_page_loader";
 import { NavigationKey } from "../../../types/common_types";
-import { Preferences } from "../../../lib/preferences";
+import { Preferences } from "../../../lib/preferences/preferences";
 import { SearchPage } from "../../../types/search_page";
 
 export function setupSearchPageModel(): void {

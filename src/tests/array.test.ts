@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { getElementsAroundIndex, getNumberRange, getNumbersAround, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/primitives/array";
-import { getRandomPositiveInteger } from "../utils/primitives/number";
+import { getElementsAroundIndex, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/collection/array";
+import { getNumberRange } from "../utils/number";
+import { getNumbersAround } from "../utils/number";
+import { getRandomPositiveInteger } from "../utils/number";
 
 describe("indexInBounds", () => {
   test("empty", () => {

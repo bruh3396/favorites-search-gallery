@@ -1,5 +1,7 @@
 experimental
 html
+css
+scripts/bin/
 .vscode
 node_modules
 dist

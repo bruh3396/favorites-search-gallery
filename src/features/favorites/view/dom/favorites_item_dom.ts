@@ -1,5 +1,5 @@
 import { CONTENT } from "../../../../lib/shell";
-import { ITEM_SELECTOR } from "../../../../utils/dom/dom";
+import { ITEM_SELECTOR } from "../../../../utils/dom/thumb";
 import { getFavorite } from "../../types/favorite_item";
 
 export function noFavoritesAreVisible(): boolean {

@@ -1,4 +1,4 @@
-import { getUserId } from "../../../utils/favorites_page_metadata";
+import { getUserId } from "../../environment/environment_metadata";
 
 export const USE_PRIVATE_API = true;
 

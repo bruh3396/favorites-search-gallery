@@ -34,3 +34,11 @@ export function escapeParenthesis(text: string): string {
 export function negateTags(tags: string): string {
   return tags.replace(/(\S+)/g, "-$1");
 }
+
+export function removeNonNumericCharacters(text: string): string {
+  return text.replace(/\D/g, "");
+}
+
+export function prepareSearchQuery(searchQuery: string): string {
+  return removeExtraWhiteSpace(searchQuery).toLowerCase();
+}

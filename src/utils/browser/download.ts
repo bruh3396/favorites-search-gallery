@@ -1,4 +1,3 @@
-
 export function downloadBlob(blob: Blob, filename: string): void {
   const a = document.createElement("a");
 

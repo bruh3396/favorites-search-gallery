@@ -1,5 +1,5 @@
-import { Events } from "../../../../../lib/communication/events";
-import { GALLERY_CONTAINER } from "../../../ui/gallery_container";
+import { Events } from "../../../../../lib/events/events";
+import { GALLERY_ROOT } from "../../../ui/gallery_shell";
 import { ON_DESKTOP_DEVICE } from "../../../../../lib/environment/environment";
 import { yield1 } from "../../../../../lib/core/async/promise";
 
@@ -18,7 +18,7 @@ export function setupGalleryMobileTapControls(): void {
   rightTap.id = "right-mobile-tap-control";
   tapControlContainer.appendChild(leftTap);
   tapControlContainer.appendChild(rightTap);
-  GALLERY_CONTAINER.appendChild(tapControlContainer);
+  GALLERY_ROOT.appendChild(tapControlContainer);
   leftTap.ontouchend = async(): Promise<void> => {
     await yield1();
     Events.gallery.leftTap.emit();

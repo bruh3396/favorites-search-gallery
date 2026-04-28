@@ -1,4 +1,5 @@
-import { getIdFromThumb, getImageFromThumb } from "../../../utils/dom/dom";
+import { getIdFromThumb } from "../../../utils/dom/thumb";
+import { getImageFromThumb } from "../../../utils/dom/thumb";
 import { FavoritesDatabaseRecord } from "../../../types/favorite_data_types";
 import { Post } from "../../../types/common_types";
 import { createEmptyPost } from "../../../lib/server/parse/api_post_parser";

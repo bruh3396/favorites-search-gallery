@@ -1,12 +1,12 @@
 import { FavoritesPaginationParameters } from "../../types/favorite_types";
 import { FavoritesPageRelation } from "../../../../types/favorite_data_types";
-import { Events } from "../../../../lib/communication/events";
+import { Events } from "../../../../lib/events/events";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
-import { Preferences } from "../../../../lib/preferences";
-import { getNumbersAround } from "../../../../utils/primitives/array";
-import { insertStyleHTML } from "../../../../utils/dom/style";
-import { isOnlyDigits } from "../../../../utils/string/parse";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { getNumbersAround } from "../../../../utils/number";
+import { insertStyleHTML } from "../../../../utils/dom/injector";
+import { isOnlyDigits } from "../../../../utils/string/query";
 
 const CONTAINER = createContainer();
 const RANGE_INDICATOR = document.createElement("label");

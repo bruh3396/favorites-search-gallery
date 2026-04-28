@@ -1,7 +1,7 @@
 import * as FavoritesSearchFilter from "./favorites_search_filter";
 import * as FavoritesSorter from "./favorites_sorter";
 import { FavoriteItem } from "../../types/favorite_item";
-import { shuffleArray } from "../../../../utils/primitives/array";
+import { shuffleArray } from "../../../../utils/collection/array";
 
 let latestSearchResults: FavoriteItem[] = [];
 

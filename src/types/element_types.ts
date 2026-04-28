@@ -1,5 +1,5 @@
 import { DO_NOTHING } from "../lib/environment/constants";
-import { EventEmitter } from "../lib/core/events/event_emitter";
+import { Emitter } from "../lib/events/emitter";
 import { Preference } from "../lib/core/storage/preference";
 
 export interface MenuElement<T> {
@@ -9,7 +9,7 @@ export interface MenuElement<T> {
   title: string
   position: InsertPosition
   textContent: string
-  event: EventEmitter<T> | null
+  event: Emitter<T> | null
   function: (event: T) => void
   triggerOnCreation: boolean
 }

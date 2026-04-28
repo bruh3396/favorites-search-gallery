@@ -1,6 +1,6 @@
 import { Post } from "../../../types/common_types";
 import { normalizeImageSource } from "../url/media_url_transformer";
-import { getDimensions2D } from "../../../utils/string/parse";
+import { parseDimensions2D } from "../../../utils/string/parse";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
   const PARSER = new DOMParser();
@@ -47,12 +47,12 @@ import { removeExtraWhiteSpace } from "../../../utils/string/format";
     const fileURL = getFileURL(dom);
     const tags = getTags(dom);
     const rating = getRating(statistics);
-    const dimensions = getDimensions2D(statistics.size);
+    const dimensions = parseDimensions2D(statistics.size);
     const hasNotes = statistics.notes !== undefined && statistics.notes !== "0";
     const hasCommentsValue = hasComments(dom);
     return {
       id: statistics.id,
-      height: dimensions.height,
+      height: dimensions.y,
       score: Number(statistics.score),
       fileURL,
       parentId: "",
@@ -62,7 +62,7 @@ import { removeExtraWhiteSpace } from "../../../utils/string/format";
       previewURL: "",
       rating,
       tags,
-      width: dimensions.width,
+      width: dimensions.x,
       change: 0,
       md5: "",
       creatorId: "",

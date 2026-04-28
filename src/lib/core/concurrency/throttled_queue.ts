@@ -49,10 +49,7 @@ export class ThrottledQueue {
 
   private async drain(): Promise<void> {
     while (this.queue.length > 0) {
-
-      if (this.queue.length > 0) {
-        this.queue.shift()!.resolve(true);
-      }
+      this.queue.shift()!.resolve(true);
       await sleep(this.delay);
     }
   }

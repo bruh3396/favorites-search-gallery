@@ -13,7 +13,7 @@ export type SortingMethod = MetadataMetric
 export type SearchableMetadataMetric = "id" | "score" | "width" | "height" | "duration"
 export type MetadataComparator = ":" | ":<" | ":>"
 export type Timeout = undefined | ReturnType<typeof setTimeout>
-export type ContentType = "image" | "video" | "gif"
+export type MediaType = "image" | "video" | "gif"
 export type SkeletonAnimation = "pulse" | "shine"
 export type MediaExtensionMapping = {
   id: string
@@ -34,8 +34,8 @@ export type AwesompleteSuggestion = {
   type: string
 }
 export type Dimensions2D = {
-  width: number
-  height: number
+  x: number
+  y: number
 }
 export type Post = {
   id: string

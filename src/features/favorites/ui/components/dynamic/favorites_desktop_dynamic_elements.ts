@@ -1,21 +1,21 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../types/element_types";
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../../lib/environment/derived_environment";
 import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
-import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/checkbox";
-import { reloadWindow, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility } from "../../../../../utils/dom/dom";
-import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../../utils/dom/ui_element";
-import { toggleDarkTheme, usingDarkTheme } from "../../../../../utils/dom/style";
+import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/elements/checkbox";
+import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../../lib/ui/toggles";
+import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../../lib/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI, tryResetting } from "../../favorites_menu_event_handlers";
-import { Events } from "../../../../../lib/communication/events";
+import { Events } from "../../../../../lib/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../../config/general_settings";
-import { Preferences } from "../../../../../lib/preferences";
+import { Preferences } from "../../../../../lib/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
-import { createButtonElement } from "../../../../../lib/ui/button";
-import { createNumberComponent } from "../../../../../lib/ui/number_input";
-import { createSelectElement } from "../../../../../lib/ui/select";
+import { createButtonElement } from "../../../../../lib/ui/elements/button";
+import { createNumberComponent } from "../../../../../lib/ui/elements/number_input";
+import { createSelectElement } from "../../../../../lib/ui/elements/select";
 import { hideUnusedLayoutSizer } from "../../../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../../../lib/ui/element_utils";
+import { prepareDynamicElements } from "../../../../../lib/ui/elements/element_utils";
+import { reloadWindow } from "../../../../../utils/browser/window";
 
 const BUTTONS: Partial<ButtonElement>[] = [
   {
@@ -319,7 +319,7 @@ const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
     parentId: "sort-inputs",
     position: "beforeend",
     preference: Preferences.sortAscendingEnabled,
-    event: Events.favorites.sortAscendingChanged
+    event: Events.favorites.sortAscendingToggled
   }
 ];
 

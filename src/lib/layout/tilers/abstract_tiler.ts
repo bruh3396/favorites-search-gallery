@@ -1,6 +1,6 @@
 import { CONTENT } from "../../shell";
 import { LayoutMode } from "../../../types/common_types";
-import { insertStyleHTML } from "../../../utils/dom/style";
+import { insertStyleHTML } from "../../../utils/dom/injector";
 
 export abstract class AbstractTiler {
   protected readonly container: HTMLElement;

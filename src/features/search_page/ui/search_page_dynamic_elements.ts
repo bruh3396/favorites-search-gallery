@@ -1,17 +1,18 @@
 import { CheckboxElement, NumberElement, SelectElement } from "../../../types/element_types";
 import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../types/common_types";
-import { reloadWindow, toggleGalleryMenuEnabled } from "../../../utils/dom/dom";
-import { Events } from "../../../lib/communication/events";
+import { reloadWindow } from "../../../utils/browser/window";
+import { toggleGalleryMenuEnabled } from "../../../lib/style";
+import { Events } from "../../../lib/events/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralSettings } from "../../../config/general_settings";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { Preferences } from "../../../lib/preferences";
-import { createCheckboxElement } from "../../../lib/ui/checkbox";
-import { createNumberComponent } from "../../../lib/ui/number_input";
-import { createSelectElement } from "../../../lib/ui/select";
-import { getNumberRange } from "../../../utils/primitives/array";
-import { prepareDynamicElements } from "../../../lib/ui/element_utils";
-import { toggleAddOrRemoveButtons } from "../../../utils/dom/ui_element";
+import { Preferences } from "../../../lib/preferences/preferences";
+import { createCheckboxElement } from "../../../lib/ui/elements/checkbox";
+import { createNumberComponent } from "../../../lib/ui/elements/number_input";
+import { createSelectElement } from "../../../lib/ui/elements/select";
+import { getNumberRange } from "../../../utils/number";
+import { prepareDynamicElements } from "../../../lib/ui/elements/element_utils";
+import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
 
 const CHECKBOXES: Partial<CheckboxElement>[] = [
   {

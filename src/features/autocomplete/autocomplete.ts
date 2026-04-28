@@ -3,15 +3,15 @@
 // @ts-nocheck
 import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
 import { AwesompleteSuggestion } from "../../types/common_types";
-import { Events } from "../../lib/communication/events";
-import { Preferences } from "../../lib/preferences";
+import { Events } from "../../lib/events/events";
+import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../favorites/model/tags/favorites_custom_tags";
 import { getHTML } from "../../lib/server/http/http_client";
 import { getQueryWithTagReplaced } from "./autocomplete_tag_replacer";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
-import { hideAwesomplete } from "../../utils/dom/awesomplete";
-import { isEmptyString } from "../../utils/string/parse";
+import { hideAwesomplete } from "../../lib/ui/awesomplete";
+import { isEmptyString } from "../../utils/string/query";
 import { removeLeadingHyphens } from "../../utils/string/format";
 
 const DUMMY_ELEMENT = document.createElement("div");

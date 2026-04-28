@@ -1,5 +1,6 @@
 import { buildSearchTagGroup, categorizeTags, sortSearchTagGroup } from "./search_query_utils";
-import { extractTagGroups, isEmptyString } from "../../../utils/string/parse";
+import { parseTagGroups } from "../../../utils/string/parse";
+import { isEmptyString } from "../../../utils/string/query";
 import { AbstractSearchTag } from "../tag/abstract_search_tag";
 import { SearchQueryMetadata } from "../types/search_types";
 import { Searchable } from "../../../types/common_types";
@@ -17,7 +18,7 @@ export class SearchQuery<T extends Searchable> {
     if (this.isEmpty) {
       return;
     }
-    const { orGroups, andTags } = extractTagGroups(searchQuery);
+    const { orGroups, andTags } = parseTagGroups(searchQuery);
 
     this.orGroups = orGroups.map(orGroup => buildSearchTagGroup(orGroup));
     this.andTags = buildSearchTagGroup(andTags);

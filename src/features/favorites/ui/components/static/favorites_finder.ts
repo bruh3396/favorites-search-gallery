@@ -1,7 +1,7 @@
-import { Events } from "../../../../../lib/communication/events";
+import { Events } from "../../../../../lib/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { Preferences } from "../../../../../lib/preferences";
+import { Preferences } from "../../../../../lib/preferences/preferences";
 import { debounceAfterFirstCall } from "../../../../../lib/core/async/rate_limiter";
 
 let parent1: HTMLElement;

@@ -5,8 +5,8 @@ import * as FavoritesPresentationFlow from "./flows/presentation/favorites_prese
 import * as FavoritesResetFlow from "./flows/runtime/favorites_reset_flow";
 import * as FavoritesSearchFlow from "./flows/runtime/favorites_search_flow";
 import * as FavoritesView from "../view/favorites_view";
-import { CrossFeatureRequests } from "../../../lib/communication/cross_feature_requests";
-import { Events } from "../../../lib/communication/events";
+import { CrossFeatureRequests } from "../../../lib/events/cross_feature_requests";
+import { Events } from "../../../lib/events/events";
 import { FavoritesPaginationFlow } from "./flows/presentation/favorites_pagination_flow";
 import { getFavorite } from "../types/favorite_item";
 import { updateShowOnHoverOptionTriggeredFromGallery } from "../ui/favorites_menu_event_handlers";
@@ -43,7 +43,7 @@ function addSettingsEventListeners(): void {
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.onBlacklistChanged);
   Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
-  Events.favorites.sortAscendingChanged.on(FavoritesOptionsFlow.searchFavoritesWithNewOptions);
+  Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.searchFavoritesWithNewOptions);
   Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.searchFavoritesWithNewOptions);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.searchFavoritesWithNewOptions);
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.setResultsPerPage);

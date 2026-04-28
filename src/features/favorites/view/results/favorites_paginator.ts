@@ -2,8 +2,8 @@ import { FavoritesPaginationParameters } from "../../types/favorite_types";
 import { FavoritesPageRelation } from "../../../../types/favorite_data_types";
 import { FavoriteItem } from "../../types/favorite_item";
 import { NavigationKey } from "../../../../types/common_types";
-import { Preferences } from "../../../../lib/preferences";
-import { clamp } from "../../../../utils/primitives/number";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { clamp } from "../../../../utils/number";
 import { isForwardNavigationKey } from "../../../../types/equivalence";
 
 let currentPageNumber = 1;

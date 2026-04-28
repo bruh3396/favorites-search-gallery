@@ -1,24 +1,25 @@
 import * as API from "../../lib/server/fetch/api";
 import { ClickCode, TagCategory, TagCategoryMapping } from "../../types/common_types";
-import { debounceAfterFirstCall } from "../../lib/core/async/rate_limiter";
-import { DO_NOTHING } from "../../lib/environment/constants";
-import { isOnlyDigits } from "../../utils/string/parse";
-import { capitalize } from "../../utils/string/format";
-import { getAllThumbs, getImageFromThumb } from "../../utils/dom/dom";
+import { getAllThumbs } from "../../utils/dom/thumb";
+import { getImageFromThumb } from "../../utils/dom/thumb";
 import { BatchExecutor } from "../../lib/core/concurrency/batch_executor";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import { CAPTION_HTML } from "../../assets/html";
+import { DO_NOTHING } from "../../lib/environment/constants";
 import { Database } from "../../lib/core/storage/database";
-import { Events } from "../../lib/communication/events";
+import { Events } from "../../lib/events/events";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
-import { Preferences } from "../../lib/preferences";
+import { Preferences } from "../../lib/preferences/preferences";
 import { buildTagAPIURL } from "../../lib/server/url/api_url_builder";
+import { capitalize } from "../../utils/string/format";
+import { debounceAfterFirstCall } from "../../lib/core/async/rate_limiter";
 import { getFavorite } from "../favorites/types/favorite_item";
-import { getTagSetFromItem } from "../../utils/dom/tags";
-import { insertStyleHTML } from "../../utils/dom/style";
+import { getTagSetFromItem } from "../../utils/tags";
+import { insertStyleHTML } from "../../utils/dom/injector";
+import { isOnlyDigits } from "../../utils/string/query";
 import { isTagCategory } from "../../types/equivalence";
-import { openSearchPage } from "../../utils/dom/links";
-import { roundToTwoDecimalPlaces } from "../../utils/primitives/number";
+import { openSearchPage } from "../../lib/navigator";
+import { roundToTwoDecimalPlaces } from "../../utils/number";
 import { sleep } from "../../lib/core/async/promise";
 
 const importantTagCategories: Set<TagCategory> = new Set([
@@ -183,12 +184,6 @@ function addFavoritesPageEventListeners(): void {
       // findTagCategoriesOnPageChange();
     }, 600);
   }, 2000));
-
-  Events.favorites.captionsReEnabled.on(() => {
-    if (currentThumb !== null) {
-      attachToThumb(currentThumb);
-    }
-  });
   Events.favorites.resetConfirmed.on(() => {
     DATABASE.delete();
   });
@@ -394,7 +389,7 @@ function tagOnClickHelper(value: string, mouseEvent: MouseEvent): void {
     openSearchPage(value);
     return;
   }
-  Events.searchBox.appendSearchBox.emit(value);
+  Events.searchBox.append.emit(value);
 }
 
 function replaceUnderscoresWithSpaces(tagName: string): string {

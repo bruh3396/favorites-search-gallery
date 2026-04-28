@@ -6,7 +6,7 @@ import { FavoriteHTMLElement } from "./favorite_element";
 import { FavoriteMetadata } from "./favorite_metadata";
 import { FavoriteTags } from "./favorite_tags";
 import { compressPreviewSource } from "../../../lib/server/url/media_url_transformer";
-import { getIdFromThumb } from "../../../utils/dom/dom";
+import { getIdFromThumb } from "../../../utils/dom/thumb";
 
 const ALL_FAVORITES = new Map<string, FavoriteItem>();
 

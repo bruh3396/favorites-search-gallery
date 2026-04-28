@@ -1,4 +1,4 @@
-import { clamp, getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, randomBetween, roundToTwoDecimalPlaces, seededRandom } from "../utils/primitives/number";
+import { clamp, getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, randomBetween, roundToTwoDecimalPlaces, seededRandom } from "../utils/number";
 import { describe, expect, test } from "vitest";
 
 describe("getRandomPositiveInteger", () => {

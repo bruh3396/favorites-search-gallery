@@ -3,12 +3,12 @@ import * as ExtensionCache from "../../../lib/extension_cache";
 import { DiscreteRating, Post, Rating } from "../../../types/common_types";
 import { FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../types/favorite_data_types";
 import { getFavorite, validateTags } from "./favorite_item";
-import { Events } from "../../../lib/communication/events";
+import { Events } from "../../../lib/events/events";
 import { FAVORITES_PER_PAGE } from "../../../lib/environment/constants";
 import { FavoritesSettings } from "../../../config/favorites_settings";
-import { getVideoDurationFromFavorite } from "../../../lib/server/fetch/video_duration";
-import { isVideo } from "../../../utils/content/content_classifier";
-import { splitIntoChunks } from "../../../utils/primitives/array";
+import { fetchVideoDurationFromFavorite } from "../../../lib/server/fetch/video_duration_fetcher";
+import { isVideo } from "../../../lib/media_resolver";
+import { splitIntoChunks } from "../../../utils/collection/array";
 
 const FETCH_UPDATE_QUEUE: FavoriteMetadata[] = [];
 const READY_UPDATE_QUEUE: FavoriteMetadata[] = [];
@@ -196,7 +196,7 @@ export class FavoriteMetadata {
     const favorite = getFavorite(this.id);
 
     if (favorite !== undefined && isVideo(favorite) && this.metrics.duration === 0) {
-      this.metrics.duration = await getVideoDurationFromFavorite(favorite);
+      this.metrics.duration = await fetchVideoDurationFromFavorite(favorite);
       return true;
     }
     return false;

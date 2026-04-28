@@ -1,5 +1,5 @@
 import { sleep } from "../../../../lib/core/async/promise";
-import { waitForDOMToLoad } from "../../../../utils/dom/dom";
+import { waitForDOMToLoad } from "../../../../lib/ui/dom";
 
 function getOriginalFavoritesContent(): HTMLElement | null {
   return document.querySelector("#content, div:has(.thumb)");

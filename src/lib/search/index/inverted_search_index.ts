@@ -2,8 +2,8 @@ import { AbstractSearchTag } from "../tag/abstract_search_tag";
 import { ExpandedSearchQuery } from "../query/expanded_search_query";
 import { SearchQuery } from "../query/search_query";
 import { Searchable } from "../../../types/common_types";
-import { SortedArray } from "../../core/structures/sorted_array";
-import { intersection } from "../../../utils/primitives/set";
+import { SortedArray } from "../../core/data_structures/sorted_array";
+import { intersection } from "../../../utils/collection/set";
 
 export class InvertedSearchIndex<T extends Searchable> {
   protected readonly allSortedTags: SortedArray<string> = new SortedArray<string>();

@@ -24,8 +24,8 @@ export class SkeletonItem {
   private setDiscreteDimensions(): void {
     const dimensions = getPredictedDiscreteDimensions();
 
-    this.element.style.setProperty("width", `${dimensions.width}px`);
-    this.element.style.setProperty("height", `${dimensions.height}px`);
+    this.element.style.setProperty("width", `${dimensions.x}px`);
+    this.element.style.setProperty("height", `${dimensions.y}px`);
   }
 
   private setAnimation(): void {
