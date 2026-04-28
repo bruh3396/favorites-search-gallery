@@ -1,4 +1,4 @@
-import { PromiseTimeoutError } from "../../types/error_types";
+import { PromiseTimeoutError } from "../../../types/error_types";
 
 export class Emitter<V> {
   private listeners: Set<(value: V) => void>;

@@ -1,16 +1,18 @@
-import * as GalleryModel from "../../../model/gallery_model";
-import * as GallerySearchPageFlow from "../runtime/gallery_search_page_flow";
-import * as GalleryView from "../../../view/gallery_view";
-import * as GalleryVisibleThumbObserver from "../../events/desktop/gallery_visible_thumb_observer";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/environment/environment";
-import { Events } from "../../../../../lib/events/events";
+import { Events } from "../../../../../lib/communication/events/events";
+import { GALLERY_CSS } from "../../../../../assets/css";
 import { GALLERY_DISABLED } from "../../../../../lib/environment/derived_environment";
-import { insertGalleryContainer } from "../../../ui/gallery_shell";
+import { indexCurrentPageThumbs } from "../../../model/gallery_model";
+import { insertStyle } from "../../../../../utils/dom/injector";
+import { mountGallery } from "../../../ui/gallery_shell";
+import { onSearchPageCreated } from "../runtime/gallery_search_page_flow";
 import { setupAutoplay } from "./gallery_autoplay_setup_flow";
 import { setupDesktopGalleryMenu } from "../../../ui/gallery_desktop_menu";
 import { setupGalleryController } from "../../gallery_controller";
 import { setupGalleryInteractionTracker } from "../../events/desktop/gallery_interaction_tracker";
 import { setupGalleryMobileTapControls } from "../../events/mobile/gallery_edge_tap_controls";
+import { setupGalleryView } from "../../../view/gallery_view";
+import { setupVisibleThumbObserver } from "../../events/desktop/gallery_visible_thumb_observer";
 
 export function setupGallery(): void {
   if (GALLERY_DISABLED) {
@@ -25,18 +27,19 @@ export function setupGallery(): void {
 }
 
 function setupGalleryHelper(): void {
-  GalleryModel.indexCurrentPageThumbs();
-  insertGalleryContainer();
-  GalleryVisibleThumbObserver.setupVisibleThumbObserver();
+  indexCurrentPageThumbs();
+  insertStyle(GALLERY_CSS);
+  mountGallery();
+  setupVisibleThumbObserver();
   setupGalleryMobileTapControls();
   setupGalleryInteractionTracker();
-  GalleryView.setupGalleryView();
+  setupGalleryView();
   setupGalleryMenu();
   setupGalleryController();
   setupAutoplay();
 
   if (ON_SEARCH_PAGE) {
-    GallerySearchPageFlow.onSearchPageCreated();
+    onSearchPageCreated();
   }
 }
 

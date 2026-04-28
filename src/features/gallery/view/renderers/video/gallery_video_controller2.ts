@@ -1,5 +1,5 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { Events } from "../../../../../lib/events/events";
+import { Events } from "../../../../../lib/communication/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { Preferences } from "../../../../../lib/preferences/preferences";
 import { Storage } from "../../../../../lib/core/storage";

@@ -1,4 +1,4 @@
-import { Events } from "../../events/events";
+import { Events } from "../../communication/events/events";
 import { Timeout } from "../../../types/common_types";
 
 export class InteractionTracker {

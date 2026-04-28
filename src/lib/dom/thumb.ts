@@ -1,32 +1,43 @@
-import { removeNonNumericCharacters } from "../string/format";
+import { imageIsLoading } from "../../utils/dom/image";
+import { removeNonNumericCharacters } from "../../utils/string/format";
 
 export const ITEM_CLASS_NAME = "favorite";
 export const ITEM_SELECTOR = ".favorite, .thumb";
 export const IMAGE_SELECTOR = ".favorite img";
-export let getAllThumbs = originalGetAllThumbs;
+export const COLUMN_CLASS_NAME = "actual-column";
 
 function getClosestItem(element: HTMLElement): HTMLElement | null {
   return element.closest(ITEM_SELECTOR);
 }
 
-function originalGetAllThumbs(): HTMLElement[] {
-  return Array.from(document.querySelectorAll(ITEM_SELECTOR)).filter(thumb => thumb instanceof HTMLElement);
+export function getItemsInContainer(container: HTMLElement | Document): HTMLElement[] {
+  return Array.from(container.querySelectorAll(ITEM_SELECTOR)).filter(thumb => thumb instanceof HTMLElement);
 }
 
-export function imageIsLoaded(image: HTMLImageElement): boolean {
-  return image.complete || image.naturalWidth !== 0;
+export function getItemsInMatrix(container: HTMLElement): HTMLElement[] {
+    const itemCount = Array.from(container.querySelectorAll(ITEM_SELECTOR)).length;
+    const columns = Array.from(container.children);
+    const result = [];
+    const matrix = columns.map(column => Array.from(column.querySelectorAll(ITEM_SELECTOR)));
+
+    for (let i = 0; i < itemCount; i += 1) {
+      const column = i % columns.length;
+      const row = Math.floor(i / columns.length);
+      const item = matrix[column][row];
+
+      if (item instanceof HTMLElement) {
+        result.push(item);
+      }
+    }
+    return result;
 }
 
-export function imageIsLoading(image: HTMLImageElement): boolean {
-  return !imageIsLoaded(image);
+export function getImageFromThumb(thumb: HTMLElement): HTMLImageElement | null {
+  return thumb.querySelector("img");
 }
 
-export function changeGetAllThumbsImplementation(newGetAllThumbs: () => HTMLElement[]): void {
-  getAllThumbs = newGetAllThumbs;
-}
-
-export function resetGetAllThumbsImplementation(): void {
-  getAllThumbs = originalGetAllThumbs;
+export function getThumbFromImage(image: HTMLElement): HTMLElement | null {
+  return getClosestItem(image);
 }
 
 export function getIdFromThumb(thumb: HTMLElement): string {
@@ -57,14 +68,6 @@ export function getIdFromThumb(thumb: HTMLElement): string {
   return match === null ? "NA" : match[1];
 }
 
-export function getImageFromThumb(thumb: HTMLElement): HTMLImageElement | null {
-  return thumb.querySelector("img");
-}
-
-export function getThumbFromImage(image: HTMLElement): HTMLElement | null {
-  return getClosestItem(image);
-}
-
 export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement | null {
   if (!(event.target instanceof HTMLElement) || event.target.matches(".caption-tag")) {
     return null;
@@ -77,8 +80,8 @@ export function insideOfThumb(element: unknown): boolean {
   return element instanceof HTMLElement && getClosestItem(element) !== null;
 }
 
-export function waitForAllThumbnailsToLoad(): Promise<unknown[]> {
-  const unloadedImages = getAllThumbs()
+export function waitForThumbnailsToLoadInContainer(container: HTMLElement | Document): Promise<unknown[]> {
+  const unloadedImages = getItemsInContainer(container)
     .map(thumb => getImageFromThumb(thumb))
     .filter(image => image instanceof HTMLImageElement)
     .filter(image => image.dataset.preload !== "true" && imageIsLoading(image));

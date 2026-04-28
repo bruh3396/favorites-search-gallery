@@ -5,10 +5,10 @@ import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../as
 import { ClickCode, Post } from "../../../types/common_types";
 import { ON_DESKTOP_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../lib/navigator";
-import { Events } from "../../../lib/events/events";
+import { Events } from "../../../lib/communication/events/events";
 import { FavoriteElement } from "./favorite_types";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
-import { ITEM_CLASS_NAME } from "../../../utils/dom/thumb";
+import { ITEM_CLASS_NAME } from "../../../lib/dom/thumb";
 import { buildPostPageURL } from "../../../lib/server/url/page_url_builder";
 import { downloadFromThumb } from "../../../lib/server/fetch/media_downloader";
 import { resolveMediaType } from "../../../lib/media_resolver";

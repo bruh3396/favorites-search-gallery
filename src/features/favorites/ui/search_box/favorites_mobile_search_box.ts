@@ -2,7 +2,7 @@ import { toggleFavoritesOptions, tryResetting } from "../favorites_menu_event_ha
 import { CONTENT } from "../../../../lib/shell";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { insertStyleHTML } from "../../../../utils/dom/injector";
+import { insertStyle } from "../../../../utils/dom/injector";
 import { sleep } from "../../../../lib/core/async/promise";
 
 export function createMobileSearchBar(id: string, parentId: string, onClick: () => void): HTMLInputElement {
@@ -27,9 +27,9 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
     const styleId = "search-clear-button-visibility";
 
     if (searchBarIsEmpty && !clearButtonIsHidden) {
-      insertStyleHTML(".search-clear-container {visibility: hidden}", styleId);
+      insertStyle(".search-clear-container {visibility: hidden}", styleId);
     } else if (!searchBarIsEmpty && clearButtonIsHidden) {
-      insertStyleHTML(".search-clear-container {visibility: visible}", styleId);
+      insertStyle(".search-clear-container {visibility: visible}", styleId);
     }
   });
 
@@ -69,7 +69,7 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
   const header = document.getElementById("header");
   const onHeaderVisibilityChange = async(headerVisible: boolean): Promise<void> => {
     headerIsVisible = headerVisible;
-    insertStyleHTML(headerVisible ? "" : stickyMenuHTML, "sticky-menu");
+    insertStyle(headerVisible ? "" : stickyMenuHTML, "sticky-menu");
     const optionsMenu = document.getElementById("left-favorites-panel-bottom-row");
 
     CONTENT.classList.remove("sticky-menu");

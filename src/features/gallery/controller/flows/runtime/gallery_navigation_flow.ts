@@ -2,7 +2,7 @@ import * as GalleryAutoplayController from "../../../autoplay/gallery_autoplay_c
 import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
-import { CrossFeatureRequests } from "../../../../../lib/events/cross_feature_requests";
+import { FeatureBridge } from "../../../../../lib/communication/features/feature_bridge";
 import { GalleryBoundary } from "../../../types/gallery_types";
 import { NavigationKey } from "../../../../../types/common_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
@@ -46,9 +46,9 @@ function navigateAtRightBoundary(): void {
 
 function loadMoreResults(direction: NavigationKey): boolean {
   if (ON_FAVORITES_PAGE) {
-    return CrossFeatureRequests.loadNewFavoritesInGallery.request(direction);
+    return FeatureBridge.moreFavoritesPagesExist.query(direction);
   }
-  return (CrossFeatureRequests.loadNewSearchPagesInGallery.request(direction)) !== null;
+  return (FeatureBridge.moreSearchPagesExist.query(direction)) !== null;
 }
 
 function finishNavigation(): void {

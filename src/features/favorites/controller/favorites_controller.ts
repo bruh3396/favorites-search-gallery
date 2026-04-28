@@ -5,8 +5,8 @@ import * as FavoritesPresentationFlow from "./flows/presentation/favorites_prese
 import * as FavoritesResetFlow from "./flows/runtime/favorites_reset_flow";
 import * as FavoritesSearchFlow from "./flows/runtime/favorites_search_flow";
 import * as FavoritesView from "../view/favorites_view";
-import { CrossFeatureRequests } from "../../../lib/events/cross_feature_requests";
-import { Events } from "../../../lib/events/events";
+import { FeatureBridge } from "../../../lib/communication/features/feature_bridge";
+import { Events } from "../../../lib/communication/events/events";
 import { FavoritesPaginationFlow } from "./flows/presentation/favorites_pagination_flow";
 import { getFavorite } from "../types/favorite_item";
 import { updateShowOnHoverOptionTriggeredFromGallery } from "../ui/favorites_menu_event_handlers";
@@ -62,7 +62,7 @@ function addCrossFeatureEventListeners(): void {
 }
 
 function addCrossFeatureRequestHandlers(): void {
-  CrossFeatureRequests.loadNewFavoritesInGallery.setHandler(FavoritesPresentationFlow.loadNewFavoritesInGallery);
-  CrossFeatureRequests.latestFavoritesSearchResults.setHandler(FavoritesModel.getLatestSearchResults);
-  CrossFeatureRequests.getFavorite.setHandler(getFavorite);
+  FeatureBridge.moreFavoritesPagesExist.register(FavoritesPresentationFlow.loadNewFavoritesInGallery);
+  FeatureBridge.favoritesSearchResults.register(FavoritesModel.getLatestSearchResults);
+  FeatureBridge.allFavorites.register(getFavorite);
 }

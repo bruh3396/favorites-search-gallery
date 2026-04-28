@@ -1,20 +1,20 @@
-import * as SearchPageInfiniteScrollFlow from "./search_page_infinite_scroll_flow";
-import * as SearchPageModel from "../../model/search_page_model";
-import * as SearchPageView from "../../view/search_page_view";
-import { Events } from "../../../../lib/events/events";
+import { getInitialSearchPage, setupSearchPageModel } from "../../model/search_page_model";
+import { Events } from "../../../../lib/communication/events/events";
 import { ON_SEARCH_PAGE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { buildSearchPage } from "../../ui/search_page_builder";
+import { setupInfiniteScroll } from "./search_page_infinite_scroll_flow";
 import { setupSearchPageController } from "../search_page_controller";
+import { setupSearchPageView } from "../../view/search_page_view";
 
 export function setupSearchPage(): void {
   if (!ON_SEARCH_PAGE || !Preferences.searchPagesEnabled.value) {
     return;
   }
-  buildSearchPage();
-  SearchPageModel.setupSearchPageModel();
-  Events.searchPage.searchPageCreated.emit(SearchPageModel.getInitialSearchPage());
-  SearchPageView.setupSearchPageView();
+  setupSearchPageModel();
+  setupSearchPageView();
   setupSearchPageController();
-  SearchPageInfiniteScrollFlow.setupInfiniteScroll();
+  buildSearchPage();
+  setupInfiniteScroll();
+  Events.searchPage.searchPageCreated.emit(getInitialSearchPage());
 }

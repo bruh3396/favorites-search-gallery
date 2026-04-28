@@ -1,7 +1,7 @@
 import { OVERLAYS } from "../../../../../lib/shell";
 import { HELP_HTML } from "../../../../../assets/html";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { getCurrentThemeClass } from "../../../../../lib/style";
+import { getCurrentThemeClass } from "../../../../../lib/dom/style";
 
 let dialog: HTMLDialogElement;
 

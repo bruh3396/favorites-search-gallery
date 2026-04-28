@@ -2,7 +2,7 @@ import * as Layout from "../../../lib/layout/layout";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SEARCH_PAGE_INFINITE_SCROLL_HTML } from "../../../assets/html";
 import { SearchPage } from "../../../types/search_page";
-import { insertStyleHTML } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 
 function updatePaginator(searchPage: SearchPage): void {
   if (searchPage.paginator === null) {
@@ -35,5 +35,5 @@ export function createSearchPage(searchPage: SearchPage): void {
 }
 
 export function toggleInfiniteScroll(value: boolean): void {
-  insertStyleHTML(value ? SEARCH_PAGE_INFINITE_SCROLL_HTML : "", "search-page-infinite-scroll");
+  insertStyle(value ? SEARCH_PAGE_INFINITE_SCROLL_HTML : "", "search-page-infinite-scroll");
 }

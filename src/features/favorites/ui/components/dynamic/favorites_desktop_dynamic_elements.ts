@@ -3,9 +3,9 @@ import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../
 import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/elements/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../../lib/ui/toggles";
-import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../../lib/style";
+import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../../lib/dom/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI, tryResetting } from "../../favorites_menu_event_handlers";
-import { Events } from "../../../../../lib/events/events";
+import { Events } from "../../../../../lib/communication/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../../config/general_settings";
 import { Preferences } from "../../../../../lib/preferences/preferences";

@@ -1,27 +1,28 @@
+import { LayoutMode } from "../../../../types/common_types";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SkeletonItem } from "./favorites_skeleton_item";
-import { getSkeletonStyle } from "./favorites_skeleton_style";
+import { getLayout } from "../../../../lib/layout/layout";
+
+const DEFAULT_ITEM_COUNT = 50;
 
 export class Skeleton {
   private readonly items: SkeletonItem[];
+  private readonly itemCount;
 
-  constructor(style: Record<string, string>) {
-    this.items = this.createItems(style);
+  constructor(layout: LayoutMode, itemCount = DEFAULT_ITEM_COUNT) {
+    this.itemCount = itemCount;
+    this.items = this.createItems(layout);
   }
 
   public get elements(): HTMLElement[] {
     return this.items.map((item) => item.element);
   }
 
-  private get itemCount(): number {
-    return Math.min(Preferences.resultsPerPage.value, 200);
-  }
-
-  private createItems(style: Record<string, string>): SkeletonItem[] {
-    return Array.from({length: this.itemCount}, () => new SkeletonItem(style));
+  private createItems(layout: LayoutMode): SkeletonItem[] {
+    return Array.from({length: this.itemCount}, () => new SkeletonItem(layout));
   }
 }
 
-export function getSkeleton(): HTMLElement[] {
-  return new Skeleton(getSkeletonStyle()).elements;
+export function getFavoritesSkeleton(): HTMLElement[] {
+  return new Skeleton(getLayout(), Preferences.resultsPerPage.value).elements;
 }

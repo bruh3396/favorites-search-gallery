@@ -1,6 +1,6 @@
 import * as API from "../../../lib/server/fetch/api";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite_data_types";
-import { Events } from "../../../lib/events/events";
+import { Events } from "../../../lib/communication/events/events";
 
 export async function addFavorite(thumb: HTMLElement | undefined): Promise<AddFavoriteStatus> {
   if (thumb === undefined) {

@@ -1,11 +1,11 @@
 import * as ICONS from "../../assets/icons";
-import { CrossFeatureRequests } from "../../lib/events/cross_feature_requests";
-import { Events } from "../../lib/events/events";
+import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
+import { Events } from "../../lib/communication/events/events";
 import { Preferences } from "../../lib/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
 import { awesompleteIsUnselected } from "../../lib/ui/awesomplete";
-import { getAllThumbs } from "../../utils/dom/thumb";
+import { getAllThumbs } from "../../lib/dom/thumb2";
 import { getSavedSearches } from "../../lib/saved_searches";
 import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
 import { shuffleArray } from "../../utils/collection/array";
@@ -243,7 +243,7 @@ function importSavedSearches(): void {
 }
 
 function saveSearchResultsAsCustomSearch(): void {
-  const latestSearchResults = CrossFeatureRequests.latestFavoritesSearchResults.request();
+  const latestSearchResults = FeatureBridge.favoritesSearchResults.query();
   const searchResultIds = latestSearchResults.map(favorite => favorite.id);
 
   if (searchResultIds.length === 0) {

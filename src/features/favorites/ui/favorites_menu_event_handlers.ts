@@ -1,8 +1,8 @@
-import { Events } from "../../../lib/events/events";
+import { Events } from "../../../lib/communication/events/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { Storage } from "../../../lib/core/storage";
-import { insertStyleHTML } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 
 export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");
@@ -14,7 +14,7 @@ export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): voi
 }
 
 export function toggleOptionHotkeyHints(value: boolean): void {
-  insertStyleHTML(value ? "" : ".option-hint {display:none;}", "option-hint-visibility");
+  insertStyle(value ? "" : ".option-hint {display:none;}", "option-hint-visibility");
 }
 
 export function toggleUI(value: boolean): void {
@@ -50,14 +50,14 @@ export function toggleUI(value: boolean): void {
 export function toggleFavoritesOptions(value: boolean): void {
   if (ON_MOBILE_DEVICE) {
     document.getElementById("left-favorites-panel-bottom-row")?.classList.toggle("hidden", !value);
-    insertStyleHTML(`
+    insertStyle(`
             #mobile-button-row {
               display: ${value ? "block" : "none"};
             }
             `, "options");
     return;
   }
-  insertStyleHTML(`
+  insertStyle(`
         .options-container {
           display: ${value ? "block" : "none"};
         }

@@ -1,7 +1,7 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
-import { getThumbFromImage } from "../../utils/dom/thumb";
-import { getImageFromThumb } from "../../utils/dom/thumb";
-import { Events } from "../../lib/events/events";
+import { getThumbFromImage } from "../../lib/dom/thumb";
+import { getImageFromThumb } from "../../lib/dom/thumb";
+import { Events } from "../../lib/communication/events/events";
 import { OVERLAYS } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
 import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";

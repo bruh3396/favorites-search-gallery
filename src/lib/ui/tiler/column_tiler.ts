@@ -1,20 +1,16 @@
-import { getAllThumbs, resetGetAllThumbsImplementation } from "../../../utils/dom/thumb";
-import { changeGetAllThumbsImplementation } from "../../../utils/dom/thumb";
-import { ITEM_SELECTOR } from "../../../utils/dom/thumb";
+import { COLUMN_CLASS_NAME, getItemsInContainer, getItemsInMatrix } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { LayoutMode } from "../../../types/common_types";
-import { ON_SEARCH_PAGE } from "../../environment/environment";
-import { Preferences } from "../../preferences/preferences";
 
 export class ColumnTiler extends AbstractTiler {
   public layoutMode: LayoutMode = "column";
   private columns: HTMLElement[];
   private columnCount: number;
 
-  constructor() {
-    super();
+  constructor(container: HTMLElement, columnCount: number) {
+    super(container);
     this.columns = [];
-    this.columnCount = ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value;
+    this.columnCount = columnCount;
   }
 
   public tile(items: HTMLElement[]): void {
@@ -23,14 +19,14 @@ export class ColumnTiler extends AbstractTiler {
     this.createColumns();
     this.addItemsToColumns(items);
     this.addColumnsToContainer();
-    this.updateGetAllThumbsImplementation();
   }
 
   public addItemsToTop(items: HTMLElement[]): void {
     if (this.enabled) {
-      this.deselect();
+      this.deactivate();
+      // this.activate();
     }
-    this.tile(items.concat(getAllThumbs()));
+    this.tile(items.concat(getItemsInContainer(this.container)));
   }
 
   public addItemsToBottom(items: HTMLElement[]): void {
@@ -58,23 +54,22 @@ export class ColumnTiler extends AbstractTiler {
     this.tile(items);
   }
 
-  public select(): void {
-    this.tile(getAllThumbs());
+  protected onActivate(): void {
+    this.tile(getItemsInContainer(this.container));
   }
 
-  public deselect(): void {
+  protected onDeactivate(): void {
     const items = this.getAllItems();
 
     this.container.innerHTML = "";
     super.tile(items);
-    resetGetAllThumbsImplementation();
   }
 
   private createColumns(): void {
     for (let i = 0; i < this.columnCount; i += 1) {
       const column = document.createElement("div");
 
-      column.classList.add("favorites-column");
+      column.classList.add(COLUMN_CLASS_NAME);
       this.columns.push(column);
     }
   }
@@ -107,24 +102,7 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   private getAllItems(): HTMLElement[] {
-    const itemCount = Array.from(document.querySelectorAll(ITEM_SELECTOR)).length;
-    const result = [];
-    const matrix = this.columns.map(column => Array.from(column.querySelectorAll(ITEM_SELECTOR)));
-
-    for (let i = 0; i < itemCount; i += 1) {
-      const column = i % this.columnCount;
-      const row = Math.floor(i / this.columnCount);
-      const item = matrix[column][row];
-
-      if (item instanceof HTMLElement) {
-        result.push(item);
-      }
-    }
-    return result;
-  }
-
-  private updateGetAllThumbsImplementation(): void {
-    changeGetAllThumbsImplementation(this.getAllItems.bind(this));
+    return getItemsInMatrix(this.container);
   }
 
   private addNewItemsToColumns(items: HTMLElement[]): void {

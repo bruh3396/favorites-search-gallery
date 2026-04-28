@@ -1,10 +1,10 @@
-import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../../types/input_types";
-import { Favorite, FavoritesPageRelation } from "../../types/favorite_data_types";
-import { GalleryMenuAction, LayoutMode, MetadataMetric, PerformanceProfile, Rating } from "../../types/common_types";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../environment/environment";
+import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../../../types/input_types";
+import { Favorite, FavoritesPageRelation } from "../../../types/favorite_data_types";
+import { GalleryMenuAction, LayoutMode, MetadataMetric, PerformanceProfile, Rating } from "../../../types/common_types";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../environment/environment";
 import { Emitter } from "./emitter";
-import { ROOT } from "../shell";
-import { SearchPage } from "../../types/search_page";
+import { ROOT } from "../../shell";
+import { SearchPage } from "../../../types/search_page";
 import { setupSwipeEvents } from "./swipe_events";
 import { setupTouchHoldEvents } from "./touch_hold_events";
 

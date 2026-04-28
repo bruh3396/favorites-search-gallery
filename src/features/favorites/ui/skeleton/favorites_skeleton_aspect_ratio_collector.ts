@@ -1,6 +1,6 @@
-import { waitForAllThumbnailsToLoad } from "../../../../utils/dom/thumb";
-import { getAllThumbs } from "../../../../utils/dom/thumb";
-import { getImageFromThumb } from "../../../../utils/dom/thumb";
+import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/thumb2";
+import { getAllThumbs } from "../../../../lib/dom/thumb2";
+import { getImageFromThumb } from "../../../../lib/dom/thumb";
 import { Storage } from "../../../../lib/core/storage";
 
 const LOCAL_STORAGE_KEY = "aspectRatios";

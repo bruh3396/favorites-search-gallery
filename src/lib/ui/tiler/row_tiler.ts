@@ -1,9 +1,8 @@
-import { waitForAllThumbnailsToLoad } from "../../../utils/dom/thumb";
-import { getAllThumbs } from "../../../utils/dom/thumb";
+import { getItemsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { GeneralSettings } from "../../../config/general_settings";
 import { LayoutMode } from "../../../types/common_types";
-import { insertStyleHTML } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 import { mapRange } from "../../../utils/number";
 
 export class RowTiler extends AbstractTiler {
@@ -28,17 +27,17 @@ export class RowTiler extends AbstractTiler {
     const maxWidth = Math.floor(window.innerWidth / 4);
     const pixelSize = Math.round(mapRange(rowSize, GeneralSettings.rowSizeBounds.min, GeneralSettings.rowSizeBounds.max, minWidth, maxWidth));
 
-    insertStyleHTML(`
-      #favorites-search-gallery-content.row {
+    insertStyle(`
+      #${this.container.id}.row {
         .favorite {
           height: ${pixelSize}px;
         }
       }
-    `, "row-size");
+    `, `${this.container.id}-row-size`);
     this.markItemsOnLastRow();
   }
 
-  public select(): void {
+  public onActivate(): void {
     this.markItemsOnLastRow();
   }
 
@@ -59,8 +58,8 @@ export class RowTiler extends AbstractTiler {
       return;
     }
     this.currentlyMarkingLastRow = true;
-    await waitForAllThumbnailsToLoad();
-    const items = getAllThumbs();
+    await waitForThumbnailsToLoadInContainer(this.container);
+    const items = getItemsInContainer(this.container);
 
     if (items.length === 0) {
       return;

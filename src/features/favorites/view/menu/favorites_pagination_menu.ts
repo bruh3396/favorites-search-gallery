@@ -1,23 +1,16 @@
-import { FavoritesPaginationParameters } from "../../types/favorite_types";
+import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../../types/favorite_types";
 import { FavoritesPageRelation } from "../../../../types/favorite_data_types";
-import { Events } from "../../../../lib/events/events";
+import { Events } from "../../../../lib/communication/events/events";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { getNumbersAround } from "../../../../utils/number";
-import { insertStyleHTML } from "../../../../utils/dom/injector";
+import { insertStyle } from "../../../../utils/dom/injector";
 import { isOnlyDigits } from "../../../../utils/string/query";
 
 const CONTAINER = createContainer();
 const RANGE_INDICATOR = document.createElement("label");
 const PAGE_NUMBER_REGEX = /favorites-page-(\d+)/;
-const EMPTY_FAVORITES_PAGINATION_PARAMETERS = {
-  currentPageNumber: 1,
-  finalPageNumber: 1,
-  favoritesCount: 0,
-  startIndex: 0,
-  endIndex: 0
-};
 
 RANGE_INDICATOR.id = "pagination-range-label";
 
@@ -194,7 +187,7 @@ export function toggle(value: boolean): void {
       }
     `;
 
-  insertStyleHTML(value ? "" : html, "pagination-menu-enable");
+  insertStyle(value ? "" : html, "pagination-menu-enable");
 }
 
 export function getContainer(): HTMLElement {

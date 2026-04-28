@@ -2,7 +2,7 @@ import * as Layout from "../../../lib/layout/layout";
 import * as SearchPageCreator from "./search_page_creator";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { SearchPage } from "../../../types/search_page";
-import { getAllThumbs } from "../../../utils/dom/thumb";
+import { getAllThumbs } from "../../../lib/dom/thumb2";
 import { hideUnusedLayoutSizer } from "../../../lib/layout/layout_event_handlers";
 
 export function setupSearchPageView(): void {

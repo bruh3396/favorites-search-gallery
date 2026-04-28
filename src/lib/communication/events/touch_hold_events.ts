@@ -1,5 +1,5 @@
 import { Events } from "./events";
-import { Timeout } from "../../types/common_types";
+import { Timeout } from "../../../types/common_types";
 
 let timer: Timeout;
 const THRESHOLD = 300;

@@ -1,5 +1,5 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
-import { CrossFeatureRequests } from "../../../../../../lib/events/cross_feature_requests";
+import { FeatureBridge } from "../../../../../../lib/communication/features/feature_bridge";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
 import { PerformanceProfile } from "../../../../../../types/common_types";
@@ -8,7 +8,7 @@ import { SharedGallerySettings } from "../../../../../../config/gallery_shared_s
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_offscreen_upscale_request";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { fetchBitmap } from "../controller/gallery_image_fetcher";
-import { getAllThumbs } from "../../../../../../utils/dom/thumb";
+import { getAllThumbs } from "../../../../../../lib/dom/thumb2";
 import { isImage } from "../../../../../../lib/media_resolver";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 
@@ -102,7 +102,7 @@ export abstract class GalleryAbstractUpscaler {
 
   private requestIsValid(request: ImageRequest): boolean {
     const thumbIsOnPage = document.getElementById(request.id) !== null;
-    const inGallery = CrossFeatureRequests.inGallery.request();
+    const inGallery = FeatureBridge.inGallery.query();
     return thumbIsOnPage && request.isHighRes && request.hasCompleted && !this.upscaledIds.has(request.id) && !inGallery;
   }
 

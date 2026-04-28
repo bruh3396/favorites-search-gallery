@@ -1,12 +1,12 @@
 import * as FavoritesDownloader from "./downloader";
 import { sleep, yield1 } from "../../lib/core/async/promise";
-import { CrossFeatureRequests } from "../../lib/events/cross_feature_requests";
 import { DOWNLOADER_DISABLED } from "../../lib/environment/derived_environment";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
-import { Events } from "../../lib/events/events";
-import { OVERLAYS } from "../../lib/shell";
+import { Events } from "../../lib/communication/events/events";
 import { Favorite } from "../../types/favorite_data_types";
+import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
+import { OVERLAYS } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
 import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
 import { splitIntoChunks } from "../../utils/collection/array";
@@ -48,7 +48,7 @@ function getDownloadButton(): HTMLButtonElement {
   }
   button.addEventListener("click", () => {
     button.disabled = true;
-    downloadFavorites(CrossFeatureRequests.latestFavoritesSearchResults.request());
+    downloadFavorites(FeatureBridge.favoritesSearchResults.query());
   });
   return button;
 }
@@ -113,7 +113,7 @@ function openWhenDownloadButtonClicked(): void {
     if (favoritesLoaded) {
       downloadButton.disabled = false;
       dialog.showModal();
-      statusHeader.textContent = `Download ${CrossFeatureRequests.latestFavoritesSearchResults.request().length} Results`;
+      statusHeader.textContent = `Download ${FeatureBridge.favoritesSearchResults.query().length} Results`;
     } else {
       warningDialog.showModal();
     }

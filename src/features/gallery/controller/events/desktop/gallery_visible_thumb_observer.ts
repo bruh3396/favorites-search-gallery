@@ -1,8 +1,8 @@
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/environment/environment";
 import { getRectDistance } from "../../../../../utils/dom/interaction";
-import { waitForAllThumbnailsToLoad } from "../../../../../utils/dom/thumb";
-import { getAllThumbs } from "../../../../../utils/dom/thumb";
-import { Events } from "../../../../../lib/events/events";
+import { waitForAllThumbnailsToLoad } from "../../../../../lib/dom/thumb2";
+import { getAllThumbs } from "../../../../../lib/dom/thumb2";
+import { Events } from "../../../../../lib/communication/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { Preferences } from "../../../../../lib/preferences/preferences";
 import { debounceAlways } from "../../../../../lib/core/async/rate_limiter";

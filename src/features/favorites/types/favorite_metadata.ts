@@ -3,7 +3,7 @@ import * as ExtensionCache from "../../../lib/extension_cache";
 import { DiscreteRating, Post, Rating } from "../../../types/common_types";
 import { FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../types/favorite_data_types";
 import { getFavorite, validateTags } from "./favorite_item";
-import { Events } from "../../../lib/events/events";
+import { Events } from "../../../lib/communication/events/events";
 import { FAVORITES_PER_PAGE } from "../../../lib/environment/constants";
 import { FavoritesSettings } from "../../../config/favorites_settings";
 import { fetchVideoDurationFromFavorite } from "../../../lib/server/fetch/video_duration_fetcher";

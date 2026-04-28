@@ -2,7 +2,7 @@ import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
 import { GallerySettings } from "../../../../../../config/gallery_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../../../lib/environment/environment";
 import { drawScaledCanvasAfterClearing } from "../../../../../../utils/dom/canvas";
-import { insertStyleHTML } from "../../../../../../utils/dom/injector";
+import { insertStyle } from "../../../../../../utils/dom/injector";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 
 const CANVAS = document.createElement("canvas");
@@ -43,7 +43,7 @@ export function correctOrientation(): void {
   if (usingCorrectOrientation) {
     return;
   }
-  insertStyleHTML(usingLandscape ? LANDSCAPE_STYLE : PORTRAIT_STYLE, "gallery-canvas-orientation");
+  insertStyle(usingLandscape ? LANDSCAPE_STYLE : PORTRAIT_STYLE, "gallery-canvas-orientation");
   const tempWidth = CANVAS.width;
 
   CANVAS.width = CANVAS.height;

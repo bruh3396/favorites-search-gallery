@@ -2,7 +2,7 @@ import { Favorite } from "../types/favorite_data_types";
 import { ON_FAVORITES_PAGE } from "../lib/environment/environment";
 import { convertToTagSet } from "./string/tags";
 import { getFavorite } from "../features/favorites/types/favorite_item";
-import { getImageFromThumb } from "./dom/thumb";
+import { getImageFromThumb } from "../lib/dom/thumb";
 
 function getTagAttributeFromImage(image: HTMLImageElement): string {
   return image.hasAttribute("tags") ? "tags" : "title";

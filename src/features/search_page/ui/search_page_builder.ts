@@ -1,5 +1,4 @@
-import { insertStyleHTML } from "../../../utils/dom/injector";
-import { insertHTMLAndExtractStyle } from "../../../utils/dom/injector";
+import { insertHTMLAndExtractStyle, insertStyle } from "../../../utils/dom/injector";
 import { CONTENT } from "../../../lib/shell";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
@@ -8,7 +7,6 @@ import { createDynamicSearchPageMenuElements } from "./search_page_dynamic_eleme
 import { prepareAllThumbsOnSearchPage } from "./search_page_preparer";
 import { styleSearchPageMenu } from "./search_page_menu_styler";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
-import { waitForDOMToLoad } from "../../../lib/ui/dom";
 
 function removeOriginalSearchPageThumbs(): void {
   const thumbContainer = document.querySelector(".image-list");
@@ -38,15 +36,14 @@ function insertSearchPageHTML(): void {
   insertHTMLAndExtractStyle(listItem, "beforeend", SEARCH_PAGE_HTML);
 
   if (ON_MOBILE_DEVICE) {
-    insertStyleHTML(`#search-page-upscale-thumbs {
+    insertStyle(`#search-page-upscale-thumbs {
       display: none;
     }`);
   }
 }
 
-export async function buildSearchPage(): Promise<void> {
-  await waitForDOMToLoad();
-  removeOriginalSearchPageThumbs();
+export function buildSearchPage(): void {
+  // removeOriginalSearchPageThumbs();
   insertSearchPageHTML();
   insertContentContainer();
   createDynamicSearchPageMenuElements();

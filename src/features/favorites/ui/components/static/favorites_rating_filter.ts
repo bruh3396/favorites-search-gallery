@@ -1,4 +1,4 @@
-import { Events } from "../../../../../lib/events/events";
+import { Events } from "../../../../../lib/communication/events/events";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { Preferences } from "../../../../../lib/preferences/preferences";
 import { Rating } from "../../../../../types/common_types";

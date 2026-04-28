@@ -1,5 +1,5 @@
 import { DO_NOTHING } from "../lib/environment/constants";
-import { Emitter } from "../lib/events/emitter";
+import { Emitter } from "../lib/communication/events/emitter";
 import { Preference } from "../lib/core/storage/preference";
 
 export interface MenuElement<T> {

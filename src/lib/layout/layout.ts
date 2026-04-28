@@ -1,20 +1,19 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../environment/environment";
 import { changeItemSizeOnShiftScroll, hideUnusedLayoutSizer } from "./layout_event_handlers";
-import { AbstractTiler } from "./tilers/abstract_tiler";
+import { AbstractTiler } from "../ui/tiler/abstract_tiler";
 import { CONTENT } from "../shell";
-import { ColumnTiler } from "./tilers/column_tiler";
-import { Events } from "../events/events";
-import { GridTiler } from "./tilers/grid_tiler";
+import { ColumnTiler } from "../ui/tiler/column_tiler";
+import { Events } from "../communication/events/events";
+import { GridTiler } from "../ui/tiler/grid_tiler";
 import { LayoutMode } from "../../types/common_types";
-import { NativeTiler } from "./tilers/native_tiler";
+import { NativeTiler } from "../ui/tiler/native_tiler";
 import { Preferences } from "../preferences/preferences";
-import { RowTiler } from "./tilers/row_tiler";
-import { SquareTiler } from "./tilers/square_tiler";
+import { RowTiler } from "../ui/tiler/row_tiler";
+import { SquareTiler } from "../ui/tiler/square_tiler";
 
-const COLUMN_TILER = new ColumnTiler();
-const TILERS: AbstractTiler[] = [COLUMN_TILER, new GridTiler(), new RowTiler(), new SquareTiler(), new NativeTiler()];
+const COLUMN_TILER = new ColumnTiler(CONTENT, ON_FAVORITES_PAGE ? Preferences.columnCount.value : Preferences.searchPageColumnCount.value);
+const TILERS: AbstractTiler[] = [COLUMN_TILER, new GridTiler(CONTENT), new RowTiler(CONTENT), new SquareTiler(CONTENT), new NativeTiler(CONTENT)];
 const TILER_MAP = new Map(TILERS.map(t => [t.layoutMode, t]));
-
 let currentLayout: LayoutMode = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.searchPageLayout.value;
 let currentTiler: AbstractTiler = TILER_MAP.get(currentLayout) ?? COLUMN_TILER;
 
@@ -46,11 +45,10 @@ export function changeLayout(layout: LayoutMode): void {
   if (currentLayout === layout) {
     return;
   }
-  currentTiler.deselect();
+  currentTiler.deactivate();
   currentLayout = layout;
   currentTiler = TILER_MAP.get(layout) ?? COLUMN_TILER;
-  CONTENT.className = layout;
-  currentTiler.select();
+  currentTiler.activate();
 }
 
 function addEventListeners(): void {
@@ -62,7 +60,7 @@ function addEventListeners(): void {
 }
 
 export function setupLayout(): void {
-  CONTENT.className = currentLayout;
+  currentTiler.activate();
   setColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value);
   setRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowSize.value : Preferences.rowSize.value);
   addEventListeners();

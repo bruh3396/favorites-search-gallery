@@ -1,5 +1,5 @@
 import { DO_NOTHING } from "../../../../../lib/environment/constants";
-import { Events } from "../../../../../lib/events/events";
+import { Events } from "../../../../../lib/communication/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { InteractionTracker } from "../../../../../lib/core/observers/interaction_tracker";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";

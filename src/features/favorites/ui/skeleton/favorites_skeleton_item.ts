@@ -1,13 +1,15 @@
 import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./favorites_skeleton_dimensions";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./favorites_skeleton_animation";
 import { GeneralSettings } from "../../../../config/general_settings";
+import { LayoutMode } from "../../../../types/common_types";
+import { getSkeletonStyle } from "./favorites_skeleton_style";
 
 export class SkeletonItem {
   public readonly element: HTMLElement;
 
-  constructor(style: Record<string, string>) {
+  constructor(layout: LayoutMode) {
     this.element = document.createElement("div");
-    this.setStyle(style);
+    this.setStyle(getSkeletonStyle(layout));
   }
 
   private setStyle(style: Record<string, string>): void {

@@ -1,4 +1,4 @@
-export function insertStyleHTML(html: string, id: string | undefined = undefined): void {
+export function insertStyle(html: string, id: string | undefined = undefined): void {
   const style = document.createElement("style");
 
   style.textContent = html.replace("<style>", "").replace("</style>", "");
@@ -20,7 +20,7 @@ export function insertHTMLAndExtractStyle(element: HTMLElement, position: Insert
   const styles = Array.from(dom.querySelectorAll("style"));
 
   for (const style of styles) {
-    insertStyleHTML(style.innerHTML);
+    insertStyle(style.innerHTML);
     style.remove();
   }
   element.insertAdjacentHTML(position, dom.body.innerHTML);

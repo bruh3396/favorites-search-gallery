@@ -3,7 +3,7 @@
 // @ts-nocheck
 import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
 import { AwesompleteSuggestion } from "../../types/common_types";
-import { Events } from "../../lib/events/events";
+import { Events } from "../../lib/communication/events/events";
 import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../favorites/model/tags/favorites_custom_tags";

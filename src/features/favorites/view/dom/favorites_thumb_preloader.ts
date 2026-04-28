@@ -1,7 +1,7 @@
 import { Favorite } from "../../../../types/favorite_data_types";
 import { GeneralSettings } from "../../../../config/general_settings";
 import { sleep } from "../../../../lib/core/async/promise";
-import { waitForAllThumbnailsToLoad } from "../../../../utils/dom/thumb";
+import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/thumb2";
 
 export function preloadThumbnails(favorites: Favorite[]): void {
   preloadImages(favorites.map(favorite => favorite.thumbURL));

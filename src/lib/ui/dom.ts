@@ -1,7 +1,7 @@
-import { Events } from "../events/events";
+import { Events } from "../communication/events/events";
 import { Favorite } from "../../types/favorite_data_types";
 import { ON_MOBILE_DEVICE } from "../environment/environment";
-import { getImageFromThumb } from "../../utils/dom/thumb";
+import { getImageFromThumb } from "../dom/thumb";
 
 export function getPreviewURL(item: HTMLElement | Favorite): string | null {
   if (item instanceof HTMLElement) {

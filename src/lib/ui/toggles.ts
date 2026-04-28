@@ -1,9 +1,9 @@
-import { ALTERNATE_LAYOUT_HTML, SLIM_DESKTOP_HTML } from "../../assets/html";
-import { insertStyleHTML } from "../../utils/dom/injector";
+import { DESKTOP_SIDEBAR_CSS, DESKTOP_SLIM_CSS } from "../../assets/css";
+import { insertStyle } from "../../utils/dom/injector";
 import { yield1 } from "../core/async/promise";
 
 export function toggleAddOrRemoveButtons(value: boolean): void {
-  insertStyleHTML(`
+  insertStyle(`
         .remove-favorite-button, .add-favorite-button {
           visibility: ${value ? "visible" : "hidden"} !important;
         }
@@ -11,7 +11,7 @@ export function toggleAddOrRemoveButtons(value: boolean): void {
 }
 
 export function toggleDownloadButtons(value: boolean): void {
-  insertStyleHTML(`
+  insertStyle(`
         .download-button {
           visibility: ${value ? "visible" : "hidden"} !important;
         }
@@ -19,7 +19,7 @@ export function toggleDownloadButtons(value: boolean): void {
 }
 
 export function toggleHeader(value: boolean): void {
-  insertStyleHTML(`#header {display: ${value ? "block" : "none"}}`, "header");
+  insertStyle(`#header {display: ${value ? "block" : "none"}}`, "header");
 }
 
 export function toggleMaximizeToggleFavoriteButtons(value: boolean): void {
@@ -29,16 +29,16 @@ export function toggleMaximizeToggleFavoriteButtons(value: boolean): void {
     height: 100% !important;
   }`;
 
-  insertStyleHTML(value ? html : "", "maximize-toggle-favorite-buttons");
+  insertStyle(value ? html : "", "maximize-toggle-favorite-buttons");
 }
 
 export function toggleAlternateLayout(value: boolean): void {
-  insertStyleHTML(value ? ALTERNATE_LAYOUT_HTML : "", "alternate-layout");
+  insertStyle(value ? DESKTOP_SIDEBAR_CSS : "", "alternate-layout");
 }
 
 export async function toggleSlimLayout(value: boolean): Promise<void> {
   await yield1();
-  insertStyleHTML(value ? SLIM_DESKTOP_HTML : "", "slim-layout");
+  insertStyle(value ? DESKTOP_SLIM_CSS : "", "slim-layout");
   const status = document.getElementById("favorites-load-status");
   const pagination = document.getElementById("favorites-pagination-container");
   const header = document.getElementById("search-header");

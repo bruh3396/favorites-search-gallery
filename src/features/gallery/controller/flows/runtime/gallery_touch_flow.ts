@@ -3,7 +3,7 @@ import * as GalleryStateFlow from "./gallery_state_flow";
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../lib/environment/environment";
 import { EnhancedMouseEvent } from "../../../../../types/input_types";
 import { Preferences } from "../../../../../lib/preferences/preferences";
-import { didSwipe } from "../../../../../lib/events/swipe_events";
+import { didSwipe } from "../../../../../lib/communication/events/swipe_events";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 
 function galleryEnabled(): boolean {

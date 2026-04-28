@@ -2,7 +2,7 @@ import { NavigationKey } from "../../../types/common_types";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SearchPage } from "../../../types/search_page";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
-import { getAllThumbs } from "../../../utils/dom/thumb";
+import { getAllThumbs } from "../../../lib/dom/thumb2";
 import { isForwardNavigationKey } from "../../../types/equivalence";
 import { sleep } from "../../../lib/core/async/promise";
 
@@ -22,6 +22,7 @@ export function setupSearchPageLoader(): void {
   initialPageNumber = getInitialPageNumber();
   currentPageNumber = initialPageNumber;
   initialURL = getInitialURL();
+  console.log(getAllThumbs());
   setAllThumbs(Array.from(getAllThumbs()));
   initialSearchPage = new SearchPage(initialPageNumber, allThumbs);
 

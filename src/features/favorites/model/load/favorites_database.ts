@@ -4,7 +4,7 @@ import { Database } from "../../../../lib/core/storage/database";
 import { FavoritesDatabaseRecord } from "../../../../types/favorite_data_types";
 import { Storage } from "../../../../lib/core/storage";
 import { convertToTagSet } from "../../../../utils/string/tags";
-import { getFavoritesPageId } from "../../../../lib/environment/environment_metadata";
+import { getFavoritesPageId } from "../../../../lib/environment/favorites_metadata";
 
 const SCHEMA_VERSION = 1;
 const SCHEMA_VERSION_LOCAL_STORAGE_KEY = "favoritesSearchGallerySchemaVersion";

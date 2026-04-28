@@ -1,14 +1,14 @@
 import * as Icons from "../../../assets/icons";
 import { GalleryMenuAction, Timeout } from "../../../types/common_types";
-import { setColorScheme, toggleGalleryMenuEnabled } from "../../../lib/style";
-import { Events } from "../../../lib/events/events";
+import { setColorScheme, toggleGalleryMenuEnabled } from "../../../lib/dom/style";
+import { Events } from "../../../lib/communication/events/events";
 import { GALLERY_ROOT } from "./gallery_shell";
 import { GalleryMenuButton } from "../types/gallery_types";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { GeneralSettings } from "../../../config/general_settings";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { insertStyleHTML } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 import { throttle } from "../../../lib/core/async/rate_limiter";
 import { toggleFullscreen } from "../../../utils/browser/window";
 
@@ -104,7 +104,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   }
 
   if (template.color !== "") {
-    insertStyleHTML(`
+    insertStyle(`
         #${template.id}:hover {
           &::after {
             outline: 2px solid ${template.color};

@@ -3,14 +3,14 @@ import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/environment/en
 import { clamp, millisecondsToSeconds } from "../../../utils/number";
 import { isImage, isVideo } from "../../../lib/media_resolver";
 import { AUTOPLAY_HTML } from "../../../assets/html";
-import { Events } from "../../../lib/events/events";
-import { OVERLAYS } from "../../../lib/shell";
+import { Events } from "../../../lib/communication/events/events";
 import { NavigationKey } from "../../../types/common_types";
 import { NumberComponent } from "../../../lib/ui/elements/number_component";
+import { OVERLAYS } from "../../../lib/shell";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { Timer } from "../../../lib/core/async/timer";
 import { createObjectURLFromSvg } from "../../../lib/navigator";
-import { insertStyleHTML } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 import { throttle } from "../../../lib/core/async/rate_limiter";
 
 export type AutoplayEvents = {
@@ -151,7 +151,7 @@ function insertMenuHTML(): void {
 }
 
 function insertImageProgressHTML(): void {
-  insertStyleHTML(`
+  insertStyle(`
       #autoplay-image-progress-bar.animated {
           transition: width ${CONFIG.imageViewDurationInSeconds}s linear;
           width: 100%;
@@ -164,7 +164,7 @@ function insertImageProgressHTML(): void {
 }
 
 function insertVideoProgressHTML(): void {
-  insertStyleHTML(`
+  insertStyle(`
       #autoplay-video-progress-bar.animated {
           transition: width ${CONFIG.minimumVideoDurationInSeconds}s linear;
           width: 100%;

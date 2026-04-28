@@ -1,4 +1,4 @@
-import { CrossFeatureRequests } from "../../../lib/events/cross_feature_requests";
+import { FeatureBridge } from "../../../lib/communication/features/feature_bridge";
 import { MediaType } from "../../../types/common_types";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { getPreviewURL } from "../../../lib/ui/dom";
@@ -8,7 +8,7 @@ import { resolveMediaType } from "../../../lib/media_resolver";
 const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(100);
 
 export function getFavoritePixelCount(id: string): number {
-  const favorite = CrossFeatureRequests.getFavorite.request(id);
+  const favorite = FeatureBridge.allFavorites.query(id);
 
   if (favorite === undefined) {
     return 0;

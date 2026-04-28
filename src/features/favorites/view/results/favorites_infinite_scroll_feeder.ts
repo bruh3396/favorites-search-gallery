@@ -1,19 +1,23 @@
 import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 
-export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {
-  const result = [];
+function collectUnrendered<T>(favorites: FavoriteItem[], limit: number, selector: (f: FavoriteItem) => T): T[] {
+  const result: T[] = [];
 
   for (const favorite of favorites) {
     if (document.getElementById(favorite.id) === null) {
-      result.push(favorite.root);
+      result.push(selector(favorite));
     }
 
-    if (result.length >= FavoritesSettings.infiniteScrollBatchSize) {
+    if (result.length >= limit) {
       break;
     }
   }
   return result;
+}
+
+export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {
+  return collectUnrendered(favorites, FavoritesSettings.infiniteScrollBatchSize, f => f.root);
 }
 
 export function hasMoreResults(favorites: FavoriteItem[]): boolean {
@@ -25,16 +29,5 @@ export function getFirstResults(favorites: FavoriteItem[]): FavoriteItem[] {
 }
 
 export function getThumbURLsToPreload(favorites: FavoriteItem[]): string[] {
-  const result = [];
-
-  for (const favorite of favorites) {
-    if (document.getElementById(favorite.id) === null) {
-      result.push(favorite.thumbURL);
-    }
-
-    if (result.length >= FavoritesSettings.infiniteScrollPreloadCount) {
-      break;
-    }
-  }
-  return result;
+  return collectUnrendered(favorites, FavoritesSettings.infiniteScrollPreloadCount, f => f.thumbURL);
 }

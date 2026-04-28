@@ -1,28 +1,25 @@
-import { Events } from "../../../../../lib/events/events";
+import { Events } from "../../../../../lib/communication/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { Preferences } from "../../../../../lib/preferences/preferences";
 import { debounceAfterFirstCall } from "../../../../../lib/core/async/rate_limiter";
 
-let parent1: HTMLElement;
 let container: HTMLElement;
 let findButton: HTMLButtonElement;
-let findInAllButton: HTMLButtonElement;
 let input: HTMLInputElement;
 
 export function insertFavoritesFinder(): void {
   if (ON_MOBILE_DEVICE || !FavoritesSettings.favoriteFinderEnabled) {
     return;
   }
-  const foundParent = document.querySelector("#left-favorites-panel-top-row");
+  const parent = document.querySelector("#left-favorites-panel-top-row");
 
-  if (!(foundParent instanceof HTMLElement)) {
+  if (!(parent instanceof HTMLElement)) {
     return;
   }
-  parent1 = foundParent;
   createElements();
   addEventListeners();
-  appendElements();
+  appendElements(parent);
 }
 
 function createElements(): void {
@@ -31,13 +28,8 @@ function createElements(): void {
 
   findButton = document.createElement("button");
   findButton.id = "favorite-finder-button";
-  findButton.title = "Find favorite favorite using its ID";
+  findButton.title = "Find favorite using its ID";
   findButton.textContent = "Find";
-
-  findInAllButton = document.createElement("button");
-  findInAllButton.id = "favorite-finder-in-all-button";
-  findInAllButton.title = "Find favorite favorite using its ID in all Favorites";
-  findInAllButton.textContent = "Find in All";
 
   input = document.createElement("input");
   input.id = "favorite-finder-input";
@@ -48,10 +40,6 @@ function createElements(): void {
 
 function find(): void {
   Events.favorites.findFavoriteStarted.emit(input.value);
-}
-
-function findInAll(): void {
-  Events.favorites.findFavoriteInAllStarted.emit(input.value);
 }
 
 function setFinderValue(value: string): void {
@@ -65,7 +53,6 @@ function addEventListeners(): void {
   }, 1000);
 
   findButton.onclick = find;
-  findInAllButton.onclick = findInAll;
   input.onkeydown = (event): void => {
     if (event.key === "Enter") {
       find();
@@ -77,10 +64,8 @@ function addEventListeners(): void {
   Events.caption.idClicked.on(setValue);
 }
 
-function appendElements(): void {
+function appendElements(parent: HTMLElement): void {
   container.appendChild(input);
-  // container.appendChild(document.createElement("br"));
   container.appendChild(findButton);
-  // container.appendChild(findInAllButton);
-  parent1.appendChild(container);
+  parent.appendChild(container);
 }

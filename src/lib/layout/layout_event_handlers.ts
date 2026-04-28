@@ -1,6 +1,6 @@
 import * as LayoutManager from "./layout";
-import { CrossFeatureRequests } from "../events/cross_feature_requests";
 import { EnhancedWheelEvent } from "../../types/input_types";
+import { FeatureBridge } from "../communication/features/feature_bridge";
 import { LayoutMode } from "../../types/common_types";
 import { clamp } from "../../utils/number";
 import { sleep } from "../core/async/promise";
@@ -16,7 +16,7 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
   if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLSelectElement)) {
     return;
   }
-  const inGallery = CrossFeatureRequests.inGallery.request();
+  const inGallery = FeatureBridge.inGallery.query();
 
   if (inGallery) {
     return;

@@ -5,9 +5,9 @@ import { GALLERY_ROOT } from "../ui/gallery_shell";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { USING_FIREFOX } from "../../../lib/environment/environment";
 import { blurCurrentlyFocusedElement } from "../../../utils/dom/interaction";
-import { insertStyleHTML } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 import { showFullscreenIcon } from "./gallery_view_utils";
-import { waitForAllThumbnailsToLoad } from "../../../utils/dom/thumb";
+import { waitForAllThumbnailsToLoad } from "../../../lib/dom/thumb2";
 
 const BACKGROUND: HTMLElement = document.createElement("div");
 
@@ -54,7 +54,7 @@ export function scrollToLastVisitedThumb(): void {
 }
 
 function toggleVideoPointerEvents(value: boolean): void {
-  insertStyleHTML(`
+  insertStyle(`
       video {
         pointer-events: ${value ? "auto" : "none"}
       }
@@ -156,7 +156,7 @@ export function toggleCursor(value: boolean): void {
 }
 
 export function toggleGalleryMenuVisibility(value: boolean): void {
-  insertStyleHTML(`
+  insertStyle(`
       #gallery-menu {
         display: ${value ? "flex" : "none"} !important;
       }

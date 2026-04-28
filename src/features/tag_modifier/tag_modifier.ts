@@ -1,11 +1,11 @@
 import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modification_database";
-import { insertStyleHTML } from "../../utils/dom/injector";
+import { insertStyle } from "../../utils/dom/injector";
 import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
-import { CrossFeatureRequests } from "../../lib/events/cross_feature_requests";
+import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
 import { DO_NOTHING } from "../../lib/environment/constants";
-import { Events } from "../../lib/events/events";
+import { Events } from "../../lib/communication/events/events";
 import { Favorite } from "../../types/favorite_data_types";
-import { ITEM_CLASS_NAME } from "../../utils/dom/thumb";
+import { ITEM_CLASS_NAME } from "../../lib/dom/thumb";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";
 import { TAG_MODIFIER_HTML } from "../../assets/html";
@@ -83,7 +83,7 @@ function addEventListeners(): void {
 }
 
 function getSelectedFavoritesOnPage(): Favorite[] {
-  const results = CrossFeatureRequests.latestFavoritesSearchResults.request();
+  const results = FeatureBridge.favoritesSearchResults.query();
   return results.filter(favorite => document.getElementById(favorite.id) !== null && isSelected(favorite));
 }
 
@@ -129,7 +129,7 @@ function toggleThumbInteraction(value: boolean): void {
       }
     `;
   }
-  insertStyleHTML(html, "tag-edit-mode");
+  insertStyle(html, "tag-edit-mode");
 }
 
 function toggleUI(value: boolean): void {
@@ -137,7 +137,7 @@ function toggleUI(value: boolean): void {
 }
 
 function getFavorite(id: string): Favorite | undefined {
-  return CrossFeatureRequests.latestFavoritesSearchResults.request().find(favorite => favorite.id === id);
+  return FeatureBridge.favoritesSearchResults.query().find(favorite => favorite.id === id);
 }
 
 function toggleTagEditModeEventListeners(value: boolean): void {
@@ -185,7 +185,7 @@ function unSelectAll(): void {
 }
 
 function selectAll(): void {
-  for (const favorite of CrossFeatureRequests.latestFavoritesSearchResults.request()) {
+  for (const favorite of FeatureBridge.favoritesSearchResults.query()) {
     select(favorite, true);
   }
 }

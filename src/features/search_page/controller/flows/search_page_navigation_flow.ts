@@ -1,7 +1,7 @@
 import * as SearchPageInfiniteScrollFlow from "./search_page_infinite_scroll_flow";
 import * as SearchPageModel from "../../model/search_page_model";
 import * as SearchPageView from "../../view/search_page_view";
-import { Events } from "../../../../lib/events/events";
+import { Events } from "../../../../lib/communication/events/events";
 import { NavigationKey } from "../../../../types/common_types";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SearchPage } from "../../../../types/search_page";

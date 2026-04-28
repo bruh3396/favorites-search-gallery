@@ -3,7 +3,7 @@ import { NewFavorites } from "../../types/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { ROOT } from "../../../../lib/shell";
 import { Timeout } from "../../../../types/common_types";
-import { getFavoritesPageId } from "../../../../lib/environment/environment_metadata";
+import { getFavoritesPageId } from "../../../../lib/environment/favorites_metadata";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;

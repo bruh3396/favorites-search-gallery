@@ -1,7 +1,7 @@
 import { Favorite } from "../types/favorite_data_types";
 import { MediaType } from "../types/common_types";
 import { convertToTagSet } from "../utils/string/tags";
-import { getImageFromThumb } from "../utils/dom/thumb";
+import { getImageFromThumb } from "./dom/thumb";
 import { getTagSetFromItem } from "../utils/tags";
 
 export const isVideo = (item: HTMLElement | Favorite): boolean => isMediaType(item, "video");

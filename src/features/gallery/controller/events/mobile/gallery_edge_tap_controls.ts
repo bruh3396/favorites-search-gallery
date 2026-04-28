@@ -1,4 +1,4 @@
-import { Events } from "../../../../../lib/events/events";
+import { Events } from "../../../../../lib/communication/events/events";
 import { GALLERY_ROOT } from "../../../ui/gallery_shell";
 import { ON_DESKTOP_DEVICE } from "../../../../../lib/environment/environment";
 import { yield1 } from "../../../../../lib/core/async/promise";

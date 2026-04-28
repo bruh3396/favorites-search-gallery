@@ -1,13 +1,13 @@
 import * as API from "../../lib/server/fetch/api";
 import { ClickCode, TagCategory, TagCategoryMapping } from "../../types/common_types";
-import { getAllThumbs } from "../../utils/dom/thumb";
-import { getImageFromThumb } from "../../utils/dom/thumb";
+import { getAllThumbs } from "../../lib/dom/thumb2";
+import { getImageFromThumb } from "../../lib/dom/thumb";
 import { BatchExecutor } from "../../lib/core/concurrency/batch_executor";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
-import { CAPTION_HTML } from "../../assets/html";
+import { CAPTION_CSS } from "../../assets/css";
 import { DO_NOTHING } from "../../lib/environment/constants";
 import { Database } from "../../lib/core/storage/database";
-import { Events } from "../../lib/events/events";
+import { Events } from "../../lib/communication/events/events";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { buildTagAPIURL } from "../../lib/server/url/api_url_builder";
@@ -15,12 +15,12 @@ import { capitalize } from "../../utils/string/format";
 import { debounceAfterFirstCall } from "../../lib/core/async/rate_limiter";
 import { getFavorite } from "../favorites/types/favorite_item";
 import { getTagSetFromItem } from "../../utils/tags";
-import { insertStyleHTML } from "../../utils/dom/injector";
 import { isOnlyDigits } from "../../utils/string/query";
 import { isTagCategory } from "../../types/equivalence";
 import { openSearchPage } from "../../lib/navigator";
 import { roundToTwoDecimalPlaces } from "../../utils/number";
 import { sleep } from "../../lib/core/async/promise";
+import { insertStyle } from "../../utils/dom/injector";
 
 const importantTagCategories: Set<TagCategory> = new Set([
   "copyright",
@@ -103,10 +103,6 @@ function createHTMLElement(): void {
   captionWrapper.appendChild(caption);
   document.head.appendChild(captionWrapper);
   caption.innerHTML = template;
-}
-
-function insertHTML(): void {
-  insertStyleHTML(CAPTION_HTML, "caption");
 }
 
 function toggleVisibility(value?: boolean): void {
@@ -634,7 +630,7 @@ export function setupCaptions(): void {
   }
   initializeFields();
   createHTMLElement();
-  insertHTML();
+  insertStyle(CAPTION_CSS, "caption");
   toggleVisibility(Preferences.captionsVisible.value);
   addEventListeners();
 }

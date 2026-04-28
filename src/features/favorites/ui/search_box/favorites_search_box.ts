@@ -1,5 +1,5 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../lib/ui/awesomplete";
-import { Events } from "../../../../lib/events/events";
+import { Events } from "../../../../lib/communication/events/events";
 import { EnhancedMouseEvent } from "../../../../types/input_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { SearchHistory } from "./favorites_search_history";

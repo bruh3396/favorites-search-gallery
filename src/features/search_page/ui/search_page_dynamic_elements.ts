@@ -1,8 +1,8 @@
 import { CheckboxElement, NumberElement, SelectElement } from "../../../types/element_types";
 import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../types/common_types";
 import { reloadWindow } from "../../../utils/browser/window";
-import { toggleGalleryMenuEnabled } from "../../../lib/style";
-import { Events } from "../../../lib/events/events";
+import { toggleGalleryMenuEnabled } from "../../../lib/dom/style";
+import { Events } from "../../../lib/communication/events/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralSettings } from "../../../config/general_settings";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";

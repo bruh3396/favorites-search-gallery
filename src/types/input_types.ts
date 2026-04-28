@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { ClickCode, NavigationKey } from "./common_types";
 import { isHotkeyEvent } from "../utils/dom/interaction";
-import { insideOfThumb } from "../utils/dom/thumb";
-import { getThumbUnderCursor } from "../utils/dom/thumb";
+import { insideOfThumb } from "../lib/dom/thumb";
+import { getThumbUnderCursor } from "../lib/dom/thumb";
 import { isForwardNavigationKey } from "./equivalence";
 
 export class EnhancedKeyboardEvent {
