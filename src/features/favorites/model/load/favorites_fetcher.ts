@@ -1,92 +1,114 @@
-import * as API from "../../../../lib/server/fetch/api";
-import * as FavoritesFetchQueue from "./favorites_fetch_queue";
+import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
 import { FavoriteItem } from "../../types/favorite_item";
+import { FavoritesFetchQueue } from "./favorites_fetch_queue";
 import { FavoritesPageRequest } from "./favorites_page_request";
-import { extractFavorites } from "./favorites_extractor";
-import { sleep } from "../../../../lib/core/async/promise";
+import { populateFavoritesMetadata } from "../../types/favorite_metadata";
+import { sleep } from "../../../../lib/core/scheduling/promise";
 
-const PENDING_REQUEST_PAGE_NUMBERS = new Set<number>();
-const FAILED_REQUESTS: FavoritesPageRequest[] = [];
-const PENDING_REQUESTS_POLL_INTERVAL = 200;
-let currentPageNumber = 0;
-let finalPageWasFetched = false;
+export class FavoritesFetcher {
+  private static PENDING_POLL_INTERVAL = 200;
+  private pendingRequests = new Set<number>();
+  private failedRequests: FavoritesPageRequest[] = [];
+  private currentPageNumber = 0;
+  private finalPageWasFetched = false;
+  private queue: FavoritesFetchQueue;
 
-const hasFailedRequests = (): boolean => FAILED_REQUESTS.length > 0;
-const hasPendingRequests = (): boolean => PENDING_REQUEST_PAGE_NUMBERS.size > 0;
-const allRequestsHaveStarted = (): boolean => finalPageWasFetched;
-const someRequestsArePending = (): boolean => hasPendingRequests() || hasFailedRequests();
-const noRequestsArePending = (): boolean => !someRequestsArePending();
-const allRequestsHaveCompleted = (): boolean => allRequestsHaveStarted() && noRequestsArePending();
-const someRequestsAreIncomplete = (): boolean => !allRequestsHaveCompleted();
-
-function getNewFetchRequest(): FavoritesPageRequest {
-  const request = new FavoritesPageRequest(currentPageNumber);
-
-  PENDING_REQUEST_PAGE_NUMBERS.add(request.realPageNumber);
-  currentPageNumber += 1;
-  return request;
-}
-
-function nextFetchRequest(): FavoritesPageRequest | undefined {
-  if (hasFailedRequests()) {
-    return FAILED_REQUESTS.shift();
+  constructor(onFavoritesFound: (favorites: FavoriteItem[]) => void) {
+    this.queue = new FavoritesFetchQueue(onFavoritesFound);
   }
 
-  if (!allRequestsHaveStarted()) {
-    return getNewFetchRequest();
+  private get hasFailedRequests(): boolean {
+    return this.failedRequests.length > 0;
   }
-  return undefined;
-}
 
-async function fetchNextFavoritesPage(): Promise<void> {
-  const request = nextFetchRequest();
-
-  if (request === undefined) {
-    await sleep(PENDING_REQUESTS_POLL_INTERVAL);
-    return;
+  private get hasPendingRequests(): boolean {
+    return this.pendingRequests.size > 0;
   }
-  await fetchFavoritesPage(request);
-}
 
-function fetchFavoritesPage(request: FavoritesPageRequest): Promise<void> {
-  return sleep(request.fetchDelay).then(() => {
-    API.fetchFavoritesPage(request.realPageNumber)
-      .then((html) => {
-        onFavoritesPageRequestSuccess(request, html);
-      })
-      .catch((error) => {
-        onFavoritesPageRequestError(request, error);
-      });
-  });
-}
-
-function handleFetchedPage(request: FavoritesPageRequest): void {
-  const favoritesPageIsEmpty = request.favorites.length === 0;
-
-  finalPageWasFetched ||= favoritesPageIsEmpty;
-
-  if (!favoritesPageIsEmpty) {
-    FavoritesFetchQueue.enqueue(request);
+  private get allRequestsHaveStarted(): boolean {
+    return this.finalPageWasFetched;
   }
-}
 
-function onFavoritesPageRequestSuccess(request: FavoritesPageRequest, html: string): void {
-  request.favorites = extractFavorites(html);
-  API.populateMetadata(request.favorites);
-  PENDING_REQUEST_PAGE_NUMBERS.delete(request.realPageNumber);
-  handleFetchedPage(request);
-}
+  private get someRequestsArePending(): boolean {
+    return this.hasPendingRequests || this.hasFailedRequests;
+  }
 
-function onFavoritesPageRequestError(request: FavoritesPageRequest, error: Error): void {
-  console.error(error);
-  request.retry();
-  FAILED_REQUESTS.push(request);
-}
+  private get noRequestsArePending(): boolean {
+    return !this.someRequestsArePending;
+  }
 
-export async function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
-  FavoritesFetchQueue.setDequeueCallback(onFavoritesFound);
+  private get allRequestsHaveCompleted(): boolean {
+    return this.allRequestsHaveStarted && this.noRequestsArePending;
+  }
 
-  while (someRequestsAreIncomplete()) {
-    await fetchNextFavoritesPage();
+  public async fetchAllFavorites(): Promise<void> {
+    while (!this.allRequestsHaveCompleted) {
+      await this.fetchNextFavoritesPage();
+    }
+  }
+
+  private getNewFetchRequest(): FavoritesPageRequest {
+    const request = new FavoritesPageRequest(this.currentPageNumber);
+
+    this.pendingRequests.add(request.realPageNumber);
+    this.currentPageNumber += 1;
+    return request;
+  }
+
+  private nextFetchRequest(): FavoritesPageRequest | undefined {
+    if (this.hasFailedRequests) {
+      return this.failedRequests.shift();
+    }
+
+    if (!this.allRequestsHaveStarted) {
+      return this.getNewFetchRequest();
+    }
+    return undefined;
+  }
+
+  private async fetchNextFavoritesPage(): Promise<void> {
+    const request = this.nextFetchRequest();
+
+    if (request === undefined) {
+      await sleep(FavoritesFetcher.PENDING_POLL_INTERVAL);
+      return;
+    }
+
+    await this.fetchFavoritesPage(request);
+  }
+
+  private fetchFavoritesPage(request: FavoritesPageRequest): Promise<void> {
+    return sleep(request.fetchDelay).then(() => {
+      FavoritesAPI.fetchFavoritesPage(request.realPageNumber)
+        .then((html) => {
+          this.onFavoritesPageRequestSuccess(request, html);
+        })
+        .catch((error) => {
+          this.onFavoritesPageRequestError(request, error);
+        });
+    });
+  }
+
+  private handleFetchedPage(request: FavoritesPageRequest): void {
+    const favoritesPageIsEmpty = request.favorites.length === 0;
+
+    this.finalPageWasFetched ||= favoritesPageIsEmpty;
+
+    if (!favoritesPageIsEmpty) {
+      this.queue.enqueue(request);
+    }
+  }
+
+  private onFavoritesPageRequestSuccess(request: FavoritesPageRequest, html: string): void {
+    request.complete(html);
+    populateFavoritesMetadata(request.favorites);
+    this.pendingRequests.delete(request.realPageNumber);
+    this.handleFetchedPage(request);
+  }
+
+  private onFavoritesPageRequestError(request: FavoritesPageRequest, error: Error): void {
+    console.error(error);
+    request.retry();
+    this.failedRequests.push(request);
   }
 }

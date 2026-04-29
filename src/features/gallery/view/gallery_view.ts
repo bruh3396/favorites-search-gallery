@@ -1,11 +1,11 @@
 import * as GalleryRenderer from "./renderers/gallery_renderer";
 import * as GalleryUI from "./gallery_ui";
-import { RemoveFavoriteStatus } from "../../../types/favorite_data_types";
+import { RemoveFavoriteStatus } from "../../../types/favorite";
 import { toggleGalleryVisibility } from "../ui/gallery_shell";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
-  GalleryUI.updateUIInGallery(thumb);
+  GalleryUI.updateUiInGallery(thumb);
 }
 
 export function display(thumb: HTMLElement): void {
@@ -42,6 +42,7 @@ export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
+  console.log(thumbs);
   GalleryRenderer.preloadContentInGallery(thumbs);
 }
 

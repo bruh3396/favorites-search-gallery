@@ -1,7 +1,7 @@
 import { DownloadRequest, createDownloadRequest } from "./download_request";
 import { ConcurrencyLimiter } from "../../lib/core/concurrency/concurrency_limiter";
-import { DownloadAbortedError } from "../../types/error_types";
-import { Favorite } from "../../types/favorite_data_types";
+import { DownloadAbortedError } from "../../types/errors";
+import { Favorite } from "../../types/favorite";
 import { downloadBlob } from "../../utils/browser/download";
 
 const FETCH_LIMITER = new ConcurrencyLimiter(3);

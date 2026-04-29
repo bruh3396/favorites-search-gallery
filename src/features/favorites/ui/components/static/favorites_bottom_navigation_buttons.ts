@@ -3,9 +3,9 @@ import { Events } from "../../../../../lib/communication/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { insertStyle } from "../../../../../utils/dom/injector";
-import { yield1 } from "../../../../../lib/core/async/promise";
+import { yield1 } from "../../../../../lib/core/scheduling/promise";
 
-export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
+export async function insertFavoritesBottomNavigationButtons(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesSettings.bottomNavigationButtonsEnabled) {
     return;
   }

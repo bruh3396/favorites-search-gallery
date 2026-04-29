@@ -1,5 +1,5 @@
 import { prepareSearchQuery, removeExtraWhiteSpace } from "./format";
-import { Dimensions2D } from "../../types/common_types";
+import { Dimensions2D } from "../../types/geometry";
 
 const DEFAULT_DIMENSIONS_2D: Dimensions2D = { x: 100, y: 100 };
 const DIMENSIONS_2D_REGEX = /^(\d+)(?:x|\/)(\d+)$/;

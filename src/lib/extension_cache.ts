@@ -1,24 +1,22 @@
-import * as API from "./server/fetch/api";
-import { MediaExtension, MediaExtensionMapping, Post } from "../types/common_types";
+import * as PostAPI from "./server/fetch/post_fetcher";
+import { DEFAULT_EXTENSION, EXTENSION_REGEX } from "./environment/constants";
+import { MediaExtension, MediaExtensionMapping } from "../types/media";
 import { isGif, isVideo } from "./media_resolver";
 import { BatchExecutor } from "./core/concurrency/batch_executor";
-import { ConcurrencyLimiter } from "./core/concurrency/concurrency_limiter";
 import { Database } from "./core/storage/database";
-import { EXTENSION_REGEX } from "./environment/constants";
-import { Favorite } from "../types/favorite_data_types";
+import { Favorite } from "../types/favorite";
 import { GeneralSettings } from "../config/general_settings";
 import { ON_FAVORITES_PAGE } from "./environment/environment";
-import { PromiseTimeoutError } from "../types/error_types";
-import { resolveBaseImageURL } from "./server/url/media_url_resolver";
-import { withTimeout } from "./core/async/promise";
+import { Post } from "../types/post";
+import { PromiseTimeoutError } from "../types/errors";
+import { findMediaExtension } from "./server/fetch/media_extension_finder";
+import { withTimeout } from "./core/scheduling/promise";
 
 const DATABASE_NAME: string = "ImageExtensions";
 const OBJECT_STORE_NAME: string = "extensionMappings";
 const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
 const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
 const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
-const EXTENSIONS: MediaExtension[] = ["jpg", "png", "jpeg"];
-const BRUTE_FORCE_LIMITER = new ConcurrencyLimiter(3);
 
 async function loadExtensions(): Promise<void> {
   for (const mapping of await DATABASE.load()) {
@@ -63,49 +61,31 @@ export function getExtension(item: HTMLElement | Favorite): Promise<MediaExtensi
     return Promise.resolve("gif");
   }
   return withTimeout(getExtensionFromId(item.id), GeneralSettings.apiTimeout)
-    .catch((error) => {
+    .catch(async(error) => {
       if (error instanceof PromiseTimeoutError) {
-        return tryAllPossibleExtensions(item);
+        const extension = await findMediaExtension(item);
+
+        if (extension !== null) {
+          set(item.id, extension);
+        }
+        return extension ?? DEFAULT_EXTENSION;
       }
       throw error;
     });
-}
-
-function tryAllPossibleExtensions(item: HTMLElement | Favorite): Promise<MediaExtension> {
-  return BRUTE_FORCE_LIMITER.run(() => {
-    return tryAllPossibleExtensionsHelper(item);
-  });
-}
-
-async function tryAllPossibleExtensionsHelper(item: HTMLElement | Favorite): Promise<MediaExtension> {
-  const baseURL = resolveBaseImageURL(item);
-
-  for (const extension of EXTENSIONS) {
-    if (await tryPossibleExtension(baseURL, extension)) {
-      set(item.id, extension);
-      return extension;
-    }
-  }
-  return "jpg";
-}
-
-async function tryPossibleExtension(url: string, extension: string): Promise<boolean> {
-  const response = await fetch(url.replace(".jpg", `.${extension}`));
-  return response.ok;
 }
 
 export async function getExtensionFromId(id: string): Promise<MediaExtension> {
   if (has(id)) {
     return get(id) as MediaExtension;
   }
-  const post = await API.fetchPostFromAPISafe(id);
+  const post = await PostAPI.fetchPostFromAPISafe(id);
   const extension = getExtensionFromPost(post);
 
   if (extension !== null) {
     set(id, extension);
     return extension;
   }
-  return "jpg";
+  return DEFAULT_EXTENSION;
 }
 
 export function setExtensionFromPost(post: Post): void {

@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { yield1 } from "../async/promise";
+import { yield1 } from "../scheduling/promise";
 
 class LockedDatabaseError extends Error { }
 
@@ -176,9 +176,5 @@ export class Database<V extends { id: string }> {
 
   private lock(): void {
     this.locked = true;
-  }
-
-  private unlock(): void {
-    this.locked = false;
   }
 }

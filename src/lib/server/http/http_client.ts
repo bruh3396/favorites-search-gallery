@@ -1,7 +1,7 @@
-import { TooManyRequestsError } from "../../../types/error_types";
+import { TooManyRequestsError } from "../../../types/errors";
 
-export async function getHTML(url: string): Promise<string> {
-  const response = await fetch429(url);
+export async function fetchHtml(url: string, init?: RequestInit): Promise<string> {
+  const response = await fetch429(url, init);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
@@ -17,6 +17,15 @@ export function fetch429(input: string, init?: RequestInit | undefined): Promise
       }
       return response;
     });
+}
+
+export async function fetchBlob(url: string): Promise<Blob> {
+  const response = await fetch429(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+  }
+  return response.blob();
 }
 
 export function fetch429NTimes(input: string, init: RequestInit | undefined, n: number): Promise<Response> {

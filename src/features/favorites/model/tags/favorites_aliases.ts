@@ -1,6 +1,6 @@
-import { AliasMap } from "../../../../types/common_types";
+import { AliasMap } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { Storage } from "../../../../lib/core/storage";
+import { Storage } from "../../../../lib/core/storage/storage_instance";
 
 const ALIAS_MAP = {} as AliasMap;
 
@@ -9,7 +9,7 @@ export function get(tag: string): Set<string> | undefined {
 }
 
 export function has(tag: string): boolean {
-  return Preferences.tagAliasingEnabled.value && get(tag) !== undefined;
+  return Preferences.tagAliasing.value && get(tag) !== undefined;
 }
 
 export function setupAliases(): void {

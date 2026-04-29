@@ -1,6 +1,6 @@
-import { COLUMN_CLASS_NAME, getItemsInContainer, getItemsInMatrix } from "../../dom/thumb";
+import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
-import { LayoutMode } from "../../../types/common_types";
+import { LayoutMode } from "../../../types/ui";
 
 export class ColumnTiler extends AbstractTiler {
   public layoutMode: LayoutMode = "column";
@@ -26,7 +26,7 @@ export class ColumnTiler extends AbstractTiler {
       this.deactivate();
       // this.activate();
     }
-    this.tile(items.concat(getItemsInContainer(this.container)));
+    this.tile(items.concat(getThumbsInContainer(this.container)));
   }
 
   public addItemsToBottom(items: HTMLElement[]): void {
@@ -55,7 +55,7 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   protected onActivate(): void {
-    this.tile(getItemsInContainer(this.container));
+    this.tile(getThumbsInContainer(this.container));
   }
 
   protected onDeactivate(): void {
@@ -102,7 +102,7 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   private getAllItems(): HTMLElement[] {
-    return getItemsInMatrix(this.container);
+    return getThumbsInMatrix(this.container);
   }
 
   private addNewItemsToColumns(items: HTMLElement[]): void {

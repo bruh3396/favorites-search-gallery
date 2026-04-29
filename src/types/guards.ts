@@ -1,4 +1,5 @@
-import { ExitKey, ForwardNavigationKey, MetadataComparator, NavigationKey, SearchableMetadataMetric, TagCategory } from "./common_types";
+import { ExitKey, ForwardNavigationKey, NavigationKey } from "./input";
+import { MetadataComparator, SearchableMetadataMetric, TagCategory } from "./search";
 
 export const EXIT_KEYS: Set<ExitKey> = new Set(["Escape", "Delete", "Backspace"]);
 export const NAVIGATION_KEYS: Set<NavigationKey> = new Set(["a", "A", "ArrowLeft", "d", "D", "ArrowRight"]);
@@ -6,6 +7,7 @@ export const FORWARD_NAVIGATION_KEYS: Set<ForwardNavigationKey> = new Set(["d", 
 export const METADATA_COMPARATORS: Set<MetadataComparator> = new Set([":", ":<", ":>"]);
 export const SEARCHABLE_METADATA_METRICS: Set<SearchableMetadataMetric> = new Set(["score", "width", "height", "id", "duration"]);
 export const TAG_CATEGORIES: Set<TagCategory> = new Set(["general", "artist", "unknown", "copyright", "character", "metadata"]);
+export const TYPEABLE_INPUTS = new Set(["color", "email", "number", "password", "search", "tel", "text", "url", "datetime"]);
 
 export function isExitKey(value: unknown): value is ExitKey {
   return EXIT_KEYS.has(value as ExitKey);

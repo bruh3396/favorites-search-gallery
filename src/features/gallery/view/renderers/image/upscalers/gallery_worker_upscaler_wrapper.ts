@@ -6,7 +6,7 @@ import OFFSCREEN_UPSCALER_CODE from "./gallery_worker_upscaler?raw";
 // @ts-expect-error string import
 import SHARED_GALLERY_SETTINGS_CODE from "../../../../../../config/gallery_shared_settings?raw";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
-import { createWebWorker } from "../../../../../../utils/browser/web_worker";
+import { createWebWorker } from "../../../../../../utils/browser/worker";
 import { removeFirstAndLastLines } from "../../../../../../utils/string/format";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {

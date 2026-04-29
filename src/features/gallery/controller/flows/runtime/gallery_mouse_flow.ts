@@ -4,11 +4,11 @@ import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
-import { EnhancedMouseEvent, EnhancedWheelEvent } from "../../../../../types/input_types";
+import { EnhancedMouseEvent, EnhancedWheelEvent } from "../../../../../lib/dom/input_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
 import { overGalleryMenu } from "../../../view/gallery_view_utils";
-import { throttle } from "../../../../../lib/core/async/rate_limiter";
+import { throttle } from "../../../../../lib/core/scheduling/rate_limiting";
 
 function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
   if (thumb === null) {

@@ -11,8 +11,8 @@ export function searchFavorites(allFavorites: FavoriteItem[], searchQuery?: stri
 }
 
 export function invertSearchResults(allFavorites: FavoriteItem[]): FavoriteItem[] {
-  const ids = new Set(latestSearchResults.map(f => f.id));
-  const inverted = allFavorites.filter(f => !ids.has(f.id));
+  const ids = new Set(latestSearchResults.map(favorite => favorite.id));
+  const inverted = allFavorites.filter(favorite => !ids.has(favorite.id));
   return (latestSearchResults = FavoritesSearchFilter.applyPostFilters(inverted));
 }
 

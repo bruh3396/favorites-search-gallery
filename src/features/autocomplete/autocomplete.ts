@@ -2,12 +2,12 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
-import { AwesompleteSuggestion } from "../../types/common_types";
+import { AwesompleteSuggestion } from "../../types/ui";
 import { Events } from "../../lib/communication/events/events";
 import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../favorites/model/tags/favorites_custom_tags";
-import { getHTML } from "../../lib/server/http/http_client";
+import { fetchHtml } from "../../lib/server/http/http_client";
 import { getQueryWithTagReplaced } from "./autocomplete_tag_replacer";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../lib/ui/awesomplete";
@@ -28,12 +28,12 @@ function decodeEntities(encodedString: string): string {
 }
 
 function getAutocompleteSuggestions(prefix: string): Promise<AwesompleteSuggestion[]> {
-  return getHTML(`${AUTOCOMPLETE_API_URL}${prefix}`);
+  return fetchHtml(`${AUTOCOMPLETE_API_URL}${prefix}`);
 }
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {
   const suggestions = addCustomTagsToAutocomplete(JSON.parse(html), prefix);
-  return Preferences.savedSearchSuggestionsEnabled.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
+  return Preferences.savedSearchSuggestions.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
 }
 
 async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: Awesomplete_): Promise<void> {

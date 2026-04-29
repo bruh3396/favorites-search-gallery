@@ -9,5 +9,5 @@ export function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
     return shuffleArray([...favorites]);
   }
   const sorted = [...favorites].sort((a, b) => b.metrics[sortingMethod] - a.metrics[sortingMethod]);
-  return Preferences.sortAscendingEnabled.value ? sorted.reverse() : sorted;
+  return Preferences.sortAscending.value ? sorted.reverse() : sorted;
 }

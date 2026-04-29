@@ -1,20 +1,20 @@
-import { clamp, getRandomPositiveInteger, getRandomPositiveIntegerInRange, mapRange, millisecondsToSeconds, randomBetween, roundToTwoDecimalPlaces, seededRandom } from "../utils/number";
+import { clamp, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat } from "../utils/number";
 import { describe, expect, test } from "vitest";
 
 describe("getRandomPositiveInteger", () => {
   test("zero", () => {
-    expect(getRandomPositiveInteger(0)).toBe(0);
+    expect(randomInt(0)).toBe(0);
   });
 
   test("one", () => {
-    expect(getRandomPositiveInteger(1)).toBeLessThanOrEqual(1);
-    expect(getRandomPositiveInteger(1)).toBeGreaterThanOrEqual(0);
+    expect(randomInt(1)).toBeLessThanOrEqual(1);
+    expect(randomInt(1)).toBeGreaterThanOrEqual(0);
   });
 
   test("many", () => {
     for (let i = 0; i < 100; i += 1) {
-      expect(getRandomPositiveInteger(2000)).toBeLessThanOrEqual(2000);
-      expect(getRandomPositiveInteger(2000)).toBeGreaterThanOrEqual(0);
+      expect(randomInt(2000)).toBeLessThanOrEqual(2000);
+      expect(randomInt(2000)).toBeGreaterThanOrEqual(0);
     }
   });
 });
@@ -42,12 +42,12 @@ describe("mapRange", () => {
 
 describe("getRandomPositiveIntegerInRange", () => {
   test("0 min max", () => {
-    expect(getRandomPositiveIntegerInRange(0, 0)).toBe(0);
+    expect(randomIntInRange(0, 0)).toBe(0);
   });
 
   test("range", () => {
     for (let i = 0; i < 100; i += 1) {
-      const value = getRandomPositiveIntegerInRange(0, 20);
+      const value = randomIntInRange(0, 20);
 
       expect(value).toBeLessThanOrEqual(20);
       expect(value).toBeGreaterThanOrEqual(0);
@@ -58,8 +58,8 @@ describe("getRandomPositiveIntegerInRange", () => {
 describe("seededRandom", () => {
   test("all cases", () => {
     for (let i = 0; i < 100; i += 1) {
-      expect(seededRandom(i)).toBe(seededRandom(i));
-      expect(seededRandom(i)).not.toBe(seededRandom(i + 1));
+      expect(seededRandomFloat(i)).toBe(seededRandomFloat(i));
+      expect(seededRandomFloat(i)).not.toBe(seededRandomFloat(i + 1));
     }
   });
 });

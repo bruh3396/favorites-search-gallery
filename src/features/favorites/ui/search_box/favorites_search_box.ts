@@ -1,11 +1,11 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../lib/ui/awesomplete";
+import { EnhancedMouseEvent } from "../../../../lib/dom/input_types";
 import { Events } from "../../../../lib/communication/events/events";
-import { EnhancedMouseEvent } from "../../../../types/input_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { SearchHistory } from "./favorites_search_history";
 import { createDesktopSearchBar } from "./favorites_desktop_search_box";
 import { createMobileSearchBar } from "./favorites_mobile_search_box";
-import { debounceAfterFirstCall } from "../../../../lib/core/async/rate_limiter";
+import { debounceLeading } from "../../../../lib/core/scheduling/rate_limiting";
 import { openSearchPage } from "../../../../lib/navigator";
 
 let SEARCH_BOX: HTMLTextAreaElement | HTMLInputElement;
@@ -59,7 +59,7 @@ function addEventListenersToSearchBox(): void {
 }
 
 function updateLastEditedSearchQueryOnInput(): void {
-  SEARCH_BOX.addEventListener("keyup", debounceAfterFirstCall((event: KeyboardEvent) => {
+  SEARCH_BOX.addEventListener("keyup", debounceLeading((event: KeyboardEvent) => {
     if (!(event instanceof KeyboardEvent)) {
       return;
     }

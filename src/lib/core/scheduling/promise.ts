@@ -1,4 +1,4 @@
-import { PromiseTimeoutError } from "../../../types/error_types";
+import { PromiseTimeoutError } from "../../../types/errors";
 
 export function sleep(milliseconds: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, milliseconds));

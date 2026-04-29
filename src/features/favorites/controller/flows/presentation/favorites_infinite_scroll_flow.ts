@@ -4,8 +4,8 @@ import { Events } from "../../../../../lib/communication/events/events";
 import { FavoritesPresentationFlow } from "../../../types/favorite_types";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { PageBottomObserver } from "../../../../../lib/core/observers/page_bottom_observer";
-import { sleep } from "../../../../../lib/core/async/promise";
-import { waitForAllThumbnailsToLoad } from "../../../../../lib/dom/thumb2";
+import { sleep } from "../../../../../lib/core/scheduling/promise";
+import { waitForAllThumbnailsToLoad } from "../../../../../lib/dom/content_thumb";
 
 class InfiniteScrollFlow implements FavoritesPresentationFlow {
   private readonly pageBottomObserver: PageBottomObserver;

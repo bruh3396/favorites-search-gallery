@@ -17,7 +17,7 @@ export function render(thumb: HTMLElement): void {
 }
 
 export function hideAll(): void {
-  CONTROLLERS.forEach(c => c.hide());
+  CONTROLLERS.forEach(controller => controller.hide());
 }
 
 export function exitGallery(): void {
@@ -26,15 +26,15 @@ export function exitGallery(): void {
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  CONTROLLERS.forEach(c => c.preload(thumbs));
+  CONTROLLERS.forEach(controller => controller.preload(thumbs));
 }
 
 export function handlePageChange(): void {
-  CONTROLLERS.forEach(c => c.handlePageChange());
+  CONTROLLERS.forEach(controller => controller.handlePageChange());
 }
 
 export function handlePageChangeInGallery(): void {
-  CONTROLLERS.forEach(c => c.handlePageChangeInGallery());
+  CONTROLLERS.forEach(controller => controller.handlePageChangeInGallery());
 }
 
 export const preloadContentOutOfGallery = (thumbs: HTMLElement[]): void => GalleryImageController.preload(thumbs);

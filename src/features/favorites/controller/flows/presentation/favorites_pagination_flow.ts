@@ -1,10 +1,10 @@
 import * as FavoritesModel from "../../../model/favorites_model";
 import * as FavoritesView from "../../../view/favorites_view";
-import { FavoritesPresentationFlow } from "../../../types/favorite_types";
-import { FavoritesPageRelation } from "../../../../../types/favorite_data_types";
 import { Events } from "../../../../../lib/communication/events/events";
 import { FavoriteItem } from "../../../types/favorite_item";
-import { NavigationKey } from "../../../../../types/common_types";
+import { FavoritesPageRelation } from "../../../../../types/favorite";
+import { FavoritesPresentationFlow } from "../../../types/favorite_types";
+import { NavigationKey } from "../../../../../types/input";
 
 class PaginationFlow implements FavoritesPresentationFlow {
     private addedFirstResults = false;

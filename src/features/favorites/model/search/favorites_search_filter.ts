@@ -12,7 +12,7 @@ const NEGATED_TAG_BLACKLIST = negateTags(getTagBlacklist());
 const BLACKLIST_SEARCH_QUERY = new SearchQuery<FavoriteItem>(NEGATED_TAG_BLACKLIST);
 let rawSearchQuery = "";
 
-const useBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.excludeBlacklistEnabled.value;
+const useBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.excludeBlacklist.value;
 const allRatingsAllowed = (): boolean => Preferences.allowedRatings.value === ALL_RATINGS_VALUE;
 const getFinalSearchQuery = (): string => (useBlacklist() ? `${rawSearchQuery} ${NEGATED_TAG_BLACKLIST}` : rawSearchQuery);
 const createSearchQuery = (): SearchQuery<FavoriteItem> => new SearchQuery(getFinalSearchQuery());

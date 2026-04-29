@@ -1,14 +1,14 @@
-import { insertHTMLAndExtractStyle, insertStyle } from "../../../utils/dom/injector";
+import { insertHtmlWithStyles, insertStyle } from "../../../utils/dom/injector";
 import { CONTENT } from "../../../lib/shell";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { SEARCH_PAGE_HTML } from "../../../assets/html";
 import { createDynamicSearchPageMenuElements } from "./search_page_dynamic_elements";
-import { prepareAllThumbsOnSearchPage } from "./search_page_preparer";
+import { prepareAllThumbsOnSearchPage as prepareNativeSearchPageThumbs } from "./search_page_preparer";
 import { styleSearchPageMenu } from "./search_page_menu_styler";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
 
-function removeOriginalSearchPageThumbs(): void {
+function removeNativeSearchPageThumbs(): void {
   const thumbContainer = document.querySelector(".image-list");
 
   if (thumbContainer !== null) {
@@ -33,7 +33,7 @@ function insertSearchPageHTML(): void {
   const listItem = document.createElement("li");
 
   displayOptions.appendChild(listItem);
-  insertHTMLAndExtractStyle(listItem, "beforeend", SEARCH_PAGE_HTML);
+  insertHtmlWithStyles(listItem, "beforeend", SEARCH_PAGE_HTML);
 
   if (ON_MOBILE_DEVICE) {
     insertStyle(`#search-page-upscale-thumbs {
@@ -43,11 +43,11 @@ function insertSearchPageHTML(): void {
 }
 
 export function buildSearchPage(): void {
-  // removeOriginalSearchPageThumbs();
+  // removeNativeSearchPageThumbs();
+  prepareNativeSearchPageThumbs();
   insertSearchPageHTML();
   insertContentContainer();
   createDynamicSearchPageMenuElements();
-  prepareAllThumbsOnSearchPage();
   styleSearchPageMenu();
   toggleAddOrRemoveButtons(Preferences.searchPageAddButtonsVisible.value);
 }

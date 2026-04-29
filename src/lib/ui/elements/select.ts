@@ -1,4 +1,4 @@
-import { DEFAULT_MENU_ELEMENT, SelectElement } from "../../../types/element_types";
+import { DEFAULT_MENU_ELEMENT, SelectElement } from "../element_types";
 import { DO_NOTHING } from "../../environment/constants";
 
 function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T>>): SelectElement<T> {

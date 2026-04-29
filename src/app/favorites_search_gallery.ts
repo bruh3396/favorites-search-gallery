@@ -8,9 +8,9 @@ import { setupFavorites } from "../features/favorites/controller/flows/setup/fav
 import { setupGallery } from "../features/gallery/controller/flows/setup/gallery_setup_flow";
 import { setupSavedSearches } from "../features/saved_searches/saved_searches";
 import { setupSearchPage } from "../features/search_page/controller/flows/search_page_setup_flow";
-import { setupServer } from "../lib/server/fetch/api";
+import { setupServer } from "../lib/server/fetch/post_fetcher";
 import { setupShell } from "../lib/shell";
-import { setupStyles } from "../lib/dom/style";
+import { setupStyles } from "../lib/ui/style";
 import { setupTagModifier } from "../features/tag_modifier/tag_modifier";
 import { setupTooltip } from "../features/tooltip/tooltip";
 

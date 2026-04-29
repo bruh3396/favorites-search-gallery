@@ -1,4 +1,4 @@
-import { sleep } from "../async/promise";
+import { sleep } from "../scheduling/promise";
 
 type Waiter = {
   id: string | null;

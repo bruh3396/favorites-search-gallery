@@ -1,48 +1,63 @@
-import { DO_NOTHING } from "../../../../lib/environment/constants";
 import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 
-const QUEUE: FavoritesPageRequest[] = [];
-let lastDequeuedPageNumber = -1;
-let draining = false;
-let onDequeue: (favorites: FavoriteItem[]) => void = DO_NOTHING;
+export class FavoritesFetchQueue {
+  private readonly queue: FavoritesPageRequest[] = [];
+  private lastDequeuedPageNumber = -1;
+  private flushing = false;
+  private onPageReady;
 
-const getSmallestEnqueuedPageNumber = (): number => QUEUE[0]?.pageNumber ?? Infinity;
-const getNextPageNumberToDequeue = (): number => lastDequeuedPageNumber + 1;
-const allPreviousPagesWereDequeued = (): boolean => getNextPageNumberToDequeue() === getSmallestEnqueuedPageNumber();
-const isEmpty = (): boolean => QUEUE.length === 0;
-const canDequeue = (): boolean => !isEmpty() && allPreviousPagesWereDequeued();
-
-function sortByLowestPageNumber(): void {
-  QUEUE.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
-}
-
-function drain(): void {
-  if (draining) {
-    return;
+  constructor(onPageReady: (favorites: FavoriteItem[]) => void) {
+    this.onPageReady = onPageReady;
   }
-  draining = true;
 
-  while (canDequeue()) {
-    dequeue();
+  private get headPageNumber(): number {
+    return this.queue[0]?.pageNumber ?? Infinity;
   }
-  draining = false;
-}
 
-function dequeue(): void {
-  lastDequeuedPageNumber += 1;
-  const request = QUEUE.shift();
-  const favorites = request?.favorites ?? [];
+  private get nextInOrderPageNumber(): number {
+    return this.lastDequeuedPageNumber + 1;
+  }
 
-  onDequeue(favorites);
-}
+  private get headPageIsNext(): boolean {
+    return this.nextInOrderPageNumber === this.headPageNumber;
+  }
 
-export function setDequeueCallback(callback: (favorites: FavoriteItem[]) => void): void {
-  onDequeue = callback;
-}
+  private get isEmpty(): boolean {
+    return this.queue.length === 0;
+  }
 
-export function enqueue(request: FavoritesPageRequest): void {
-  QUEUE.push(request);
-  sortByLowestPageNumber();
-  drain();
+  private get canDequeue(): boolean {
+    return !this.isEmpty && this.headPageIsNext;
+  }
+
+  public enqueue(request: FavoritesPageRequest): void {
+    this.queue.push(request);
+    this.sortByPageNumber();
+    this.flushInOrder();
+  }
+
+  private sortByPageNumber(): void {
+    this.queue.sort((request1, request2) => request1.pageNumber - request2.pageNumber);
+  }
+
+  private flushInOrder(): void {
+    if (this.flushing) {
+      return;
+    }
+    this.flushing = true;
+
+    while (this.canDequeue) {
+      this.dequeue();
+    }
+    this.flushing = false;
+  }
+
+  private dequeue(): void {
+    this.lastDequeuedPageNumber += 1;
+    const request = this.queue.shift();
+    const favorites = request?.favorites ?? [];
+
+    this.onPageReady(favorites);
+  }
 }

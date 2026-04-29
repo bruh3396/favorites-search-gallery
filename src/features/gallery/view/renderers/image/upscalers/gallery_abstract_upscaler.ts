@@ -2,13 +2,13 @@ import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environ
 import { FeatureBridge } from "../../../../../../lib/communication/features/feature_bridge";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
-import { PerformanceProfile } from "../../../../../../types/common_types";
+import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../lib/preferences/preferences";
 import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_offscreen_upscale_request";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { fetchBitmap } from "../controller/gallery_image_fetcher";
-import { getAllThumbs } from "../../../../../../lib/dom/thumb2";
+import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
 import { isImage } from "../../../../../../lib/media_resolver";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 
@@ -25,7 +25,9 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   public upscaleAnimated(thumbs: HTMLElement[]): void {
-     thumbs.filter(t => !isImage(t)).map(t => new ImageRequest(t)).forEach(r => this.directlyUpscale(r));
+     thumbs.filter(thumb => !isImage(thumb))
+     .map(thumb => new ImageRequest(thumb))
+     .forEach(request => this.directlyUpscale(request));
   }
 
   public async upscaleBatch(requests: ImageRequest[]): Promise<void> {
@@ -37,7 +39,7 @@ export abstract class GalleryAbstractUpscaler {
 
   public handlePageChange(): void {
     this.clear();
-    this.presetCanvasDimensions(getAllThumbs());
+    this.presetCanvasDimensions(getAllContentThumbs());
   }
 
   public clear(): void {
@@ -107,7 +109,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private enabled(): boolean {
-    if (ON_SEARCH_PAGE && !Preferences.upscaleThumbsOnSearchPage.value) {
+    if (ON_SEARCH_PAGE && !Preferences.searchPageUpscaleThumbs.value) {
       return false;
     }
     return PERFORMANCE_PROFILE === PerformanceProfile.NORMAL;

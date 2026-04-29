@@ -1,5 +1,6 @@
-import * as API from "../../../lib/server/fetch/api";
-import { ClickCode, Post } from "../../../types/common_types";
+import * as FavoritesAPI from "../../../lib/server/fetch/favorites_fetcher";
+import { ClickCode } from "../../../types/input";
+import { Post } from "../../../types/post";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
@@ -49,7 +50,7 @@ function addAddFavoriteButton(thumb: HTMLElement): void {
     event.stopPropagation();
 
     if (event.button === ClickCode.LEFT) {
-      API.addFavorite(thumb.id);
+      FavoritesAPI.addFavorite(thumb.id);
       button.remove();
     }
   };

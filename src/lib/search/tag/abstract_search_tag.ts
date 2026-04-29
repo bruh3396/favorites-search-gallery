@@ -1,4 +1,4 @@
-import { Searchable } from "../../../types/common_types";
+import { Searchable } from "../../../types/search";
 
 export abstract class AbstractSearchTag {
   public readonly value: string;

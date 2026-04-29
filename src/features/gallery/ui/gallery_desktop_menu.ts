@@ -1,6 +1,7 @@
 import * as Icons from "../../../assets/icons";
-import { GalleryMenuAction, Timeout } from "../../../types/common_types";
-import { setColorScheme, toggleGalleryMenuEnabled } from "../../../lib/dom/style";
+import { Timeout } from "../../../types/async";
+import { GalleryMenuAction } from "../../../types/ui";
+import { setColorScheme, toggleGalleryMenuEnabled } from "../../../lib/ui/style";
 import { Events } from "../../../lib/communication/events/events";
 import { GALLERY_ROOT } from "./gallery_shell";
 import { GalleryMenuButton } from "../types/gallery_types";
@@ -9,7 +10,7 @@ import { GeneralSettings } from "../../../config/general_settings";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { insertStyle } from "../../../utils/dom/injector";
-import { throttle } from "../../../lib/core/async/rate_limiter";
+import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../utils/browser/window";
 
 const BUTTONS: GalleryMenuButton[] = [
@@ -37,7 +38,7 @@ MENU.id = "gallery-menu";
 MENU.className = "gallery-sub-menu";
 
 function loadPreferences(): void {
-  if (Preferences.dockGalleryMenuLeft.value) {
+  if (Preferences.galleryMenuDockedLeft.value) {
     toggleDockPosition();
   }
 
@@ -168,10 +169,10 @@ function togglePin(): void {
 function toggleDockPosition(): void {
   if (ON_MOBILE_DEVICE) {
     MENU.classList.remove("dock-left");
-    Preferences.dockGalleryMenuLeft.set(false);
+    Preferences.galleryMenuDockedLeft.set(false);
     return;
   }
-  Preferences.dockGalleryMenuLeft.set(MENU.classList.toggle("dock-left"));
+  Preferences.galleryMenuDockedLeft.set(MENU.classList.toggle("dock-left"));
 }
 
 export function setupDesktopGalleryMenu(): void {

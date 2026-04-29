@@ -1,9 +1,11 @@
-import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../types/element_types";
+import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../../lib/ui/element_types";
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../../lib/environment/derived_environment";
-import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
+import { MetadataMetric } from "../../../../../types/search";
+import { PerformanceProfile } from "../../../../../types/ui";
+import { LayoutMode } from "../../../../../types/ui";
 import { createCheckboxElement, createCheckboxOption } from "../../../../../lib/ui/elements/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../../lib/ui/toggles";
-import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../../lib/dom/style";
+import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../../lib/ui/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI, tryResetting } from "../../favorites_menu_event_handlers";
 import { Events } from "../../../../../lib/communication/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
@@ -110,7 +112,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Enhance Search Pages",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.searchPagesEnabled,
+    preference: Preferences.searchPages,
     hotkey: "",
     savePreference: true
   },
@@ -119,7 +121,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Infinite Scroll",
     title: "Use infinite scroll (waterfall) instead of pages",
-    preference: Preferences.infiniteScrollEnabled,
+    preference: Preferences.infiniteScroll,
     hotkey: "",
     event: Events.favorites.infiniteScrollToggled
   },
@@ -196,7 +198,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     textContent: "Exclude Blacklist",
     title: "Exclude favorites with blacklisted tags from search",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.excludeBlacklistEnabled,
+    preference: Preferences.excludeBlacklist,
     hotkey: "",
     event: Events.favorites.blacklistToggled
   },
@@ -227,7 +229,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     textContent: "Fullscreen on Hover",
     title: "View full resolution images or play videos and GIFs when hovering over a thumbnail",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.showOnHoverEnabled,
+    preference: Preferences.showOnHover,
     hotkey: "",
     event: Events.favorites.showOnHoverToggled
   },
@@ -278,7 +280,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     textContent: "Aliases",
     title: "Alias similar tags",
     enabled: false,
-    preference: Preferences.tagAliasingEnabled,
+    preference: Preferences.tagAliasing,
     hotkey: "A"
   },
   {
@@ -287,7 +289,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     textContent: "Saved Suggestions",
     title: "Show saved search suggestions in autocomplete dropdown",
     enabled: false,
-    preference: Preferences.savedSearchSuggestionsEnabled,
+    preference: Preferences.savedSearchSuggestions,
     hotkey: "",
     savePreference: true
   },
@@ -318,7 +320,7 @@ const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
     id: "sort-ascending",
     parentId: "sort-inputs",
     position: "beforeend",
-    preference: Preferences.sortAscendingEnabled,
+    preference: Preferences.sortAscending,
     event: Events.favorites.sortAscendingToggled
   }
 ];

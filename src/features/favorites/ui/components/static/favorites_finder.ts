@@ -2,7 +2,7 @@ import { Events } from "../../../../../lib/communication/events/events";
 import { FavoritesSettings } from "../../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { Preferences } from "../../../../../lib/preferences/preferences";
-import { debounceAfterFirstCall } from "../../../../../lib/core/async/rate_limiter";
+import { debounceLeading } from "../../../../../lib/core/scheduling/rate_limiting";
 
 let container: HTMLElement;
 let findButton: HTMLButtonElement;
@@ -48,7 +48,7 @@ function setFinderValue(value: string): void {
 }
 
 function addEventListeners(): void {
-  const setValue = debounceAfterFirstCall((value : string) => {
+  const setValue = debounceLeading((value : string) => {
     setFinderValue(value);
   }, 1000);
 

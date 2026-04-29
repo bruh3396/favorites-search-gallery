@@ -1,9 +1,9 @@
 import * as LayoutManager from "./layout";
-import { EnhancedWheelEvent } from "../../types/input_types";
+import { EnhancedWheelEvent } from "../dom/input_types";
 import { FeatureBridge } from "../communication/features/feature_bridge";
-import { LayoutMode } from "../../types/common_types";
+import { LayoutMode } from "../../types/ui";
 import { clamp } from "../../utils/number";
-import { sleep } from "../core/async/promise";
+import { sleep } from "../core/scheduling/promise";
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
   if (!wheelEvent.originalEvent.shiftKey || LayoutManager.getLayout() === "native") {

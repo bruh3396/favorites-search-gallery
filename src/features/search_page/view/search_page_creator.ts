@@ -1,7 +1,7 @@
 import * as Layout from "../../../lib/layout/layout";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SEARCH_PAGE_INFINITE_SCROLL_HTML } from "../../../assets/html";
-import { SearchPage } from "../../../types/search_page";
+import { SearchPage } from "../model/search_page";
 import { insertStyle } from "../../../utils/dom/injector";
 
 function updatePaginator(searchPage: SearchPage): void {
@@ -22,10 +22,10 @@ function updatePaginator(searchPage: SearchPage): void {
 }
 
 function updateAddressBar(searchPage: SearchPage): void {
-  const baseURL = location.origin + location.pathname;
+  const baseUrl = location.origin + location.pathname;
   const searchFragment = `${location.search.replace(/&pid=\d+/g, "")}&pid=${searchPage.pageNumber * POSTS_PER_SEARCH_PAGE}`;
 
-  window.history.replaceState(null, "", baseURL + searchFragment);
+  window.history.replaceState(null, "", baseUrl + searchFragment);
 }
 
 export function createSearchPage(searchPage: SearchPage): void {

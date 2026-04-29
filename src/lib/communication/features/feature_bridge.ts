@@ -1,7 +1,7 @@
-import { Favorite } from "../../../types/favorite_data_types";
+import { Favorite } from "../../../types/favorite";
 import { FeatureQuery } from "./feature_query";
-import { NavigationKey } from "../../../types/common_types";
-import { SearchPage } from "../../../types/search_page";
+import { NavigationKey } from "../../../types/input";
+import { SearchPage } from "../../../features/search_page/model/search_page";
 
 export const FeatureBridge = {
   inGallery: new FeatureQuery<void, boolean>(false),

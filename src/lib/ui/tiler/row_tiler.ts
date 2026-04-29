@@ -1,7 +1,7 @@
-import { getItemsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
+import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { GeneralSettings } from "../../../config/general_settings";
-import { LayoutMode } from "../../../types/common_types";
+import { LayoutMode } from "../../../types/ui";
 import { insertStyle } from "../../../utils/dom/injector";
 import { mapRange } from "../../../utils/number";
 
@@ -59,7 +59,7 @@ export class RowTiler extends AbstractTiler {
     }
     this.currentlyMarkingLastRow = true;
     await waitForThumbnailsToLoadInContainer(this.container);
-    const items = getItemsInContainer(this.container);
+    const items = getThumbsInContainer(this.container);
 
     if (items.length === 0) {
       return;

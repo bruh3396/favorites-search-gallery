@@ -1,10 +1,9 @@
 import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modification_database";
-import { insertStyle } from "../../utils/dom/injector";
-import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
-import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
+import { insertHtmlWithStyles, insertStyle } from "../../utils/dom/injector";
 import { DO_NOTHING } from "../../lib/environment/constants";
 import { Events } from "../../lib/communication/events/events";
-import { Favorite } from "../../types/favorite_data_types";
+import { Favorite } from "../../types/favorite";
+import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
 import { ITEM_CLASS_NAME } from "../../lib/dom/thumb";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";
@@ -43,7 +42,7 @@ function insertHTML(): void {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
-  insertHTMLAndExtractStyle(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
+  insertHtmlWithStyles(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
   FAVORITES_OPTION.container = document.getElementById("tag-modifier-container") as HTMLElement;
   FAVORITES_OPTION.checkbox = document.getElementById("tag-modifier-option-checkbox") as HTMLInputElement;
   UI.container = document.getElementById("tag-modifier-ui-container") as HTMLElement;

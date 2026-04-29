@@ -1,4 +1,4 @@
-import { Timeout } from "../../../types/common_types";
+import { Timeout } from "../../../types/async";
 
 export class BatchExecutor<V> {
   private readonly limit: number;
@@ -13,10 +13,10 @@ export class BatchExecutor<V> {
     this.limit = limit;
     this.timeout = timeout;
     this.executor = executor;
-    this.pollingInterval = this.getPollingInterval();
+    this.pollingInterval = this.computePollingInterval();
   }
 
-  private get overLimit(): boolean {
+  private get isBatchFull(): boolean {
     return this.batch.length >= this.limit;
   }
 
@@ -24,7 +24,7 @@ export class BatchExecutor<V> {
     return performance.now() - this.lastAddTime;
   }
 
-  private get overTimeout(): boolean {
+  private get isTimedOut(): boolean {
     return this.timeSinceLastAdd >= this.timeout;
   }
 
@@ -32,7 +32,7 @@ export class BatchExecutor<V> {
     this.batch.push(item);
     this.lastAddTime = performance.now();
 
-    if (this.overLimit) {
+    if (this.isBatchFull) {
       this.execute();
       return;
     }
@@ -42,7 +42,7 @@ export class BatchExecutor<V> {
     }
 
     this.poller = setInterval(() => {
-      if (this.overTimeout) {
+      if (this.isTimedOut) {
         this.execute();
       }
     }, this.pollingInterval);
@@ -60,7 +60,7 @@ export class BatchExecutor<V> {
     this.reset();
   }
 
-  private getPollingInterval(): number {
+  private computePollingInterval(): number {
     return Math.round(Math.max(10, this.timeout / 5));
   }
 }

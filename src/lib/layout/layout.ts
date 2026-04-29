@@ -5,7 +5,7 @@ import { CONTENT } from "../shell";
 import { ColumnTiler } from "../ui/tiler/column_tiler";
 import { Events } from "../communication/events/events";
 import { GridTiler } from "../ui/tiler/grid_tiler";
-import { LayoutMode } from "../../types/common_types";
+import { LayoutMode } from "../../types/ui";
 import { NativeTiler } from "../ui/tiler/native_tiler";
 import { Preferences } from "../preferences/preferences";
 import { RowTiler } from "../ui/tiler/row_tiler";
@@ -13,7 +13,7 @@ import { SquareTiler } from "../ui/tiler/square_tiler";
 
 const COLUMN_TILER = new ColumnTiler(CONTENT, ON_FAVORITES_PAGE ? Preferences.columnCount.value : Preferences.searchPageColumnCount.value);
 const TILERS: AbstractTiler[] = [COLUMN_TILER, new GridTiler(CONTENT), new RowTiler(CONTENT), new SquareTiler(CONTENT), new NativeTiler(CONTENT)];
-const TILER_MAP = new Map(TILERS.map(t => [t.layoutMode, t]));
+const TILER_MAP = new Map(TILERS.map(tiler => [tiler.layoutMode, tiler]));
 let currentLayout: LayoutMode = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.searchPageLayout.value;
 let currentTiler: AbstractTiler = TILER_MAP.get(currentLayout) ?? COLUMN_TILER;
 

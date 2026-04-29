@@ -4,26 +4,26 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function getRandomPositiveInteger(maximum: number): number {
+export function randomInt(maximum: number): number {
   return Math.floor(Math.random() * maximum);
 }
 
-export function getRandomPositiveIntegerInRange(min: number, max: number): number {
-  return getRandomPositiveInteger(max - min) + min;
+export function randomIntInRange(min: number, max: number): number {
+  return randomInt(max - min) + min;
 }
 
-export function seededRandom(seed: number): number {
+export function seededRandomFloat(seed: number): number {
   const x = Math.sin(seed) * 4051.2948;
   return x - Math.floor(x);
 }
 
-export function getSeededRandomPositiveInteger(maximum: number): number {
+export function seededRandomInt(maximum: number): number {
   internalSeed += 1;
-  return Math.floor(seededRandom(internalSeed) * maximum);
+  return Math.floor(seededRandomFloat(internalSeed) * maximum);
 }
 
-export function getSeededRandomPositiveIntegerInRange(min: number, max: number): number {
-  return getSeededRandomPositiveInteger(max - min) + min;
+export function seededRandomIntInRange(min: number, max: number): number {
+  return seededRandomInt(max - min) + min;
 }
 
 export function mapRange(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
@@ -42,7 +42,7 @@ export function randomBetween(min: number, max: number): number {
   return min + (Math.random() * (max - min));
 }
 
-export function getNumbersAround(number: number, count: number, min: number, max: number): number[] {
+export function numbersAroundInRange(number: number, count: number, min: number, max: number): number[] {
   if (count <= 0) {
     return [];
   }
@@ -77,7 +77,7 @@ export function getNumbersAround(number: number, count: number, min: number, max
   return numbers.sort((a, b) => a - b);
 }
 
-export function getNumberRange(start: number, end: number): number[] {
+export function numberRange(start: number, end: number): number[] {
   const result: number[] = [];
 
   for (let i = start; i <= end; i += 1) {

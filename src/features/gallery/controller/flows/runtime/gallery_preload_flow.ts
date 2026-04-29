@@ -4,7 +4,7 @@ import * as GalleryView from "../../../view/gallery_view";
 import { DO_NOTHING } from "../../../../../lib/environment/constants";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { PERFORMANCE_PROFILE } from "../../../../../lib/environment/derived_environment";
-import { PerformanceProfile } from "../../../../../types/common_types";
+import { PerformanceProfile } from "../../../../../types/ui";
 
 function preloadAllVisibleContentHelper(): void {
   if (GalleryModel.hasRecentlyExitedGallery() || GalleryModel.inGallery()) {

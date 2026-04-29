@@ -19,8 +19,8 @@ function getImageBitmapClone(imageRequest: ImageRequest): Promise<ImageBitmap | 
 
 export async function getUpscaleRequest(imageRequest: ImageRequest): Promise<OffscreenUpscaleRequest> {
   const bitmapClone = await getImageBitmapClone(imageRequest);
-  const imageURL = await resolveImageURL(imageRequest.thumb);
-  return new OffscreenUpscaleRequest(imageRequest.thumb, bitmapClone, imageURL);
+  const imageUrl = await resolveImageURL(imageRequest.thumb);
+  return new OffscreenUpscaleRequest(imageRequest.thumb, bitmapClone, imageUrl);
 }
 
 export class OffscreenUpscaleRequest {
@@ -29,17 +29,17 @@ export class OffscreenUpscaleRequest {
   public hasDimensions: boolean;
   public offscreenCanvas: OffscreenCanvas | null;
   public bitmap: ImageBitmap | null;
-  public imageURL: string;
-  public sampleURL: string;
+  public imageUrl: string;
+  public sampleUrl: string;
 
-  constructor(thumb: HTMLElement, bitmap: ImageBitmap | null, imageURL: string) {
+  constructor(thumb: HTMLElement, bitmap: ImageBitmap | null, imageUrl: string) {
     this.id = thumb.id;
     this.action = "upscale";
     this.hasDimensions = false;
     this.offscreenCanvas = this.getOffscreenCanvas(thumb);
     this.bitmap = bitmap;
-    this.imageURL = imageURL;
-    this.sampleURL = isImage(thumb) ? convertImageURLToSampleURL(imageURL) : imageURL;
+    this.imageUrl = imageUrl;
+    this.sampleUrl = isImage(thumb) ? convertImageURLToSampleURL(imageUrl) : imageUrl;
   }
 
   public get transferable(): OffscreenCanvas[] {

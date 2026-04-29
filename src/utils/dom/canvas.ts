@@ -13,9 +13,6 @@ export function drawScaledCanvas(context: CanvasRenderingContext2D | null, image
   );
 }
 
-export function drawScaledCanvasAfterClearing(context: CanvasRenderingContext2D | null, imageBitmap: ImageBitmap): void {
-  if (context !== null) {
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-    drawScaledCanvas(context, imageBitmap);
-  }
+export function clearCanvas(context: CanvasRenderingContext2D | null): void {
+  context?.clearRect(0, 0, context.canvas.width, context.canvas.height);
 }

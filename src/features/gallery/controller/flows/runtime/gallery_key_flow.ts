@@ -3,11 +3,11 @@ import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryStateFlow from "./gallery_state_flow";
 import * as GalleryView from "../../../view/gallery_view";
-import { isExitKey, isNavigationKey } from "../../../../../types/equivalence";
-import { EnhancedKeyboardEvent } from "../../../../../types/input_types";
+import { isExitKey, isNavigationKey } from "../../../../../types/guards";
+import { EnhancedKeyboardEvent } from "../../../../../lib/dom/input_types";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
-import { throttle } from "../../../../../lib/core/async/rate_limiter";
+import { throttle } from "../../../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../../../utils/browser/window";
 
 function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {

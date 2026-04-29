@@ -1,8 +1,19 @@
-import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
-import { cacheSearchPageExtensions } from "../features/search_page/model/search_page_extension_cacher";
-import { prepareSearchPageThumbs } from "../features/search_page/model/search_page_thumb_preparer";
+import * as ExtensionCache from "../../../lib/extension_cache";
+import { correctMediaTags, prepareSearchPageThumbs } from "./search_page_thumb_preparer";
+import { DOM_PARSER } from "../../../utils/dom/dom_parser";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
+import { fetchMultiplePostsFromAPI } from "../../../lib/server/fetch/post_fetcher";
 
-const PARSER = new DOMParser();
+export async function cacheSearchPageExtensions(ids: Iterable<string>): Promise<void> {
+  const posts = await fetchMultiplePostsFromAPI(Array.from(ids));
+
+  for (const post of Object.values(posts)) {
+    if (post.width > 0) {
+      ExtensionCache.setExtensionFromPost(post);
+      correctMediaTags(post);
+    }
+  }
+}
 
 export class SearchPage {
   public thumbs: HTMLElement[];
@@ -13,7 +24,7 @@ export class SearchPage {
 
   constructor(pageNumber: number, content: string | HTMLElement[]) {
     if (typeof content === "string") {
-      const dom = PARSER.parseFromString(content, "text/html");
+      const dom = DOM_PARSER.parseFromString(content, "text/html");
 
       this.thumbs = prepareSearchPageThumbs(Array.from(dom.querySelectorAll(".thumb")));
       this.paginator = dom.getElementById("paginator");

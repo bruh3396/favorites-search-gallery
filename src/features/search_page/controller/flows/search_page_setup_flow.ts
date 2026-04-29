@@ -8,13 +8,13 @@ import { setupSearchPageController } from "../search_page_controller";
 import { setupSearchPageView } from "../../view/search_page_view";
 
 export function setupSearchPage(): void {
-  if (!ON_SEARCH_PAGE || !Preferences.searchPagesEnabled.value) {
+  if (!ON_SEARCH_PAGE || !Preferences.searchPages.value) {
     return;
   }
   setupSearchPageModel();
   setupSearchPageView();
-  setupSearchPageController();
   buildSearchPage();
+  setupSearchPageController();
   setupInfiniteScroll();
   Events.searchPage.searchPageCreated.emit(getInitialSearchPage());
 }

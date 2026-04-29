@@ -1,14 +1,13 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
-import { getThumbFromImage } from "../../lib/dom/thumb";
-import { getImageFromThumb } from "../../lib/dom/thumb";
+import { getImageFromThumb, getThumbFromImage } from "../../lib/dom/thumb";
 import { Events } from "../../lib/communication/events/events";
 import { OVERLAYS } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
 import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";
 import { TOOLTIP_HTML } from "../../assets/html";
 import { convertToTagString } from "../../utils/string/tags";
+import { getTagSetFromItem } from "../../lib/dom/tags";
 import { parseTagGroups } from "../../utils/string/parse";
-import { getTagSetFromItem } from "../../utils/tags";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 let tooltip: HTMLElement;
@@ -173,7 +172,7 @@ function setPosition(image: HTMLImageElement): void {
 }
 
 function show(image: HTMLImageElement): void {
-  tooltip.innerHTML = formatHTML(getTags(image));
+  tooltip.innerHTML = formatHtml(getTags(image));
   setPosition(image);
   // const thumb = getThumbFromImage(image);
 
@@ -235,7 +234,7 @@ function getRandomColor(): string {
   return color;
 }
 
-function formatHTML(tags: string): string {
+function formatHtml(tags: string): string {
   let unmatchedTagsHTML = "";
   let matchedTagsHTML = "";
 

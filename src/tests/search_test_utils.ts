@@ -1,5 +1,5 @@
 import { InvertedSearchIndex } from "../lib/search/index/inverted_search_index";
-import { Searchable } from "../types/common_types";
+import { Searchable } from "../types/search";
 
 export type Fruit = Searchable & { name: string };
 

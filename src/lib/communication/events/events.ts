@@ -1,10 +1,11 @@
-import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../../../types/input_types";
-import { Favorite, FavoritesPageRelation } from "../../../types/favorite_data_types";
-import { GalleryMenuAction, LayoutMode, MetadataMetric, PerformanceProfile, Rating } from "../../../types/common_types";
+import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../../dom/input_types";
+import { Favorite, FavoritesPageRelation } from "../../../types/favorite";
+import { GalleryMenuAction, LayoutMode, PerformanceProfile } from "../../../types/ui";
+import { MetadataMetric, Rating } from "../../../types/search";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../environment/environment";
-import { Emitter } from "./emitter";
+import { Emitter } from "../../core/scheduling/emitter";
 import { ROOT } from "../../shell";
-import { SearchPage } from "../../../types/search_page";
+import { SearchPage } from "../../../features/search_page/model/search_page";
 import { setupSwipeEvents } from "./swipe_events";
 import { setupTouchHoldEvents } from "./touch_hold_events";
 
@@ -181,14 +182,14 @@ function setupMobileEvents(): void {
   setupSwipeEvents();
 }
 
-function broadcastDOMLoad(): void {
+function broadcastDomLoad(): void {
   document.addEventListener("DOMContentLoaded", () => {
     Events.document.domLoaded.emit();
   }, { once: true });
 }
 
 export function setupEvents(): void {
-  broadcastDOMLoad();
+  broadcastDomLoad();
   setupDocumentEvents();
   setupWindowEvents();
   setupMobileEvents();

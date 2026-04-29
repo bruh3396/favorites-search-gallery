@@ -1,10 +1,10 @@
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "./environment";
-import { PerformanceProfile } from "../../types/common_types";
+import { PerformanceProfile } from "../../types/ui";
 import { Preferences } from "../preferences/preferences";
 
 export const PERFORMANCE_PROFILE = Preferences.performanceProfile.value;
 
-export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value);
+export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.searchPages.value);
 export const FAVORITES_SEARCH_GALLERY_DISABLED = !FAVORITES_SEARCH_GALLERY_ENABLED;
 
 export const GALLERY_ENABLED = (ON_FAVORITES_PAGE || ON_SEARCH_PAGE) && (PERFORMANCE_PROFILE === PerformanceProfile.NORMAL || PERFORMANCE_PROFILE === PerformanceProfile.MEDIUM);

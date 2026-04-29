@@ -1,4 +1,4 @@
-import { LayoutMode } from "../../../../types/common_types";
+import { LayoutMode } from "../../../../types/ui";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SkeletonItem } from "./favorites_skeleton_item";
 import { getLayout } from "../../../../lib/layout/layout";

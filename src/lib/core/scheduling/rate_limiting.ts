@@ -1,6 +1,6 @@
-import { Timeout } from "../../../types/common_types";
+import { Timeout } from "../../../types/async";
 
-export function debounceAfterFirstCall<V>(this: unknown, fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
+export function debounceLeading<V>(this: unknown, fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
   let timeoutId: Timeout;
   let firstCall = true;
   let calledDuringDebounce = false;
@@ -25,7 +25,7 @@ export function debounceAfterFirstCall<V>(this: unknown, fn: (...args: V[]) => v
   };
 }
 
-export function debounceAlways<V>(this: unknown, fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
+export function debounceTrailing<V>(this: unknown, fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
   let timeoutId: Timeout;
   return (...args) => {
     clearTimeout(timeoutId);
@@ -37,7 +37,7 @@ export function debounceAlways<V>(this: unknown, fn: (...args: V[]) => void, del
 
 export function throttle<V>(fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
   let throttling = false;
-  return (/** @type {any} */ ...args) => {
+  return (...args) => {
     if (!throttling) {
       fn(...args);
       throttling = true;

@@ -1,14 +1,6 @@
-import { LayoutMode, NavigationKey } from "../../../types/common_types";
+import { LayoutMode } from "../../../types/ui";
+import { NavigationKey } from "../../../types/input";
 import { FavoriteItem } from "./favorite_item";
-
-export interface FavoriteElement {
-  root: HTMLElement
-  container: HTMLAnchorElement
-  image: HTMLImageElement
-  favoriteButton: HTMLImageElement
-  downloadButton: HTMLImageElement
-  thumbURL: string
-}
 
 export interface NewFavorites {
   newFavorites: FavoriteItem[]

@@ -1,13 +1,13 @@
 import * as Icons from "../../../assets/icons";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite_data_types";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { clamp, roundToTwoDecimalPlaces } from "../../../utils/number";
 import { GALLERY_ROOT } from "../ui/gallery_shell";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { USING_FIREFOX } from "../../../lib/environment/environment";
-import { blurCurrentlyFocusedElement } from "../../../utils/dom/interaction";
+import { blurActiveElement } from "../../../utils/dom/interaction";
 import { insertStyle } from "../../../utils/dom/injector";
 import { showFullscreenIcon } from "./gallery_view_utils";
-import { waitForAllThumbnailsToLoad } from "../../../lib/dom/thumb2";
+import { waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 
 const BACKGROUND: HTMLElement = document.createElement("div");
 
@@ -27,7 +27,7 @@ export function setupGalleryUI(): void {
 
 export function enterGallery(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
-  blurCurrentlyFocusedElement();
+  blurActiveElement();
   toggleCursor(true);
   toggleBackgroundInteractability(true);
   toggleScrollbar(false);
@@ -87,7 +87,7 @@ function toggleScrollbar(value: boolean): void {
   document.body.style.overflowY = value ? "auto" : "hidden";
 }
 
-export function updateUIInGallery(thumb: HTMLElement): void {
+export function updateUiInGallery(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
 
   if (usingColumnLayout() || USING_FIREFOX) {

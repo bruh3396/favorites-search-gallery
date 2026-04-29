@@ -1,9 +1,9 @@
-import { Post } from "../../../types/common_types";
+import { DOM_PARSER } from "../../../utils/dom/dom_parser";
+import { Post } from "../../../types/post";
 import { normalizeImageSource } from "../url/media_url_transformer";
 import { parseDimensions2D } from "../../../utils/string/parse";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
-  const PARSER = new DOMParser();
   const STATISTICS_REGEX = /(\S+):\s+(\S+)/g;
 
   function getStatistics(dom: Document): Record<string, string> {
@@ -42,9 +42,9 @@ import { removeExtraWhiteSpace } from "../../../utils/string/format";
   }
 
  export function parsePostFromPostPage(html:string): Post {
-    const dom = PARSER.parseFromString(html, "text/html");
+    const dom = DOM_PARSER.parseFromString(html, "text/html");
     const statistics = getStatistics(dom);
-    const fileURL = getFileURL(dom);
+    const fileUrl = getFileURL(dom);
     const tags = getTags(dom);
     const rating = getRating(statistics);
     const dimensions = parseDimensions2D(statistics.size);
@@ -54,7 +54,7 @@ import { removeExtraWhiteSpace } from "../../../utils/string/format";
       id: statistics.id,
       height: dimensions.y,
       score: Number(statistics.score),
-      fileURL,
+      fileURL: fileUrl,
       parentId: "",
       sampleURL: "",
       sampleWidth: 0,

@@ -5,11 +5,11 @@ import * as GalleryView from "../../../view/gallery_view";
 import { DO_NOTHING, POSTS_PER_SEARCH_PAGE } from "../../../../../lib/environment/constants";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
-import { getAllThumbs } from "../../../../../lib/dom/thumb2";
+import { getAllContentThumbs } from "../../../../../lib/dom/content_thumb";
 
 export function onUpscaleToggled(value: boolean): void {
   if (value) {
-    const thumbs = getAllThumbs();
+    const thumbs = getAllContentThumbs();
     const notUsingInfiniteScroll = thumbs.length <= POSTS_PER_SEARCH_PAGE;
 
     if (notUsingInfiniteScroll) {
@@ -22,7 +22,7 @@ export function onUpscaleToggled(value: boolean): void {
 }
 
 const preloadOutsideGallery = GallerySettings.preloadOutsideGalleryOnSearchPage ? (): void => {
-  GalleryView.preloadContentOutOfGallery(getAllThumbs());
+  GalleryView.preloadContentOutOfGallery(getAllContentThumbs());
 } : DO_NOTHING;
 
 export function onSearchPageCreated(): void {

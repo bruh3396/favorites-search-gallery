@@ -1,16 +1,16 @@
 import * as ICONS from "../../assets/icons";
-import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
 import { Events } from "../../lib/communication/events/events";
+import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
 import { Preferences } from "../../lib/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
+import { Storage } from "../../lib/core/storage/storage_instance";
 import { awesompleteIsUnselected } from "../../lib/ui/awesomplete";
-import { getAllThumbs } from "../../lib/dom/thumb2";
+import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getSavedSearches } from "../../lib/saved_searches";
-import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
+import { insertHtmlWithStyles } from "../../utils/dom/injector";
 import { shuffleArray } from "../../utils/collection/array";
-import { sleep } from "../../lib/core/async/promise";
-import { Storage } from "../../lib/core/storage";
+import { sleep } from "../../lib/core/scheduling/promise";
 
 let textarea: HTMLTextAreaElement;
 let savedSearchesList: HTMLElement;
@@ -24,17 +24,17 @@ export function setupSavedSearches(): void {
   if (SAVED_SEARCHES_DISABLED) {
     return;
   }
-  insertHTML();
-  extractHTMLElements();
+  insertHtml();
+  extractHtmlElements();
   addEventListeners();
   loadSavedSearches();
 }
 
-function insertHTML(): void {
-  insertHTMLAndExtractStyle(document.getElementById("right-favorites-panel") || document.createElement("div"), "beforeend", SAVED_SEARCHES_HTML);
+function insertHtml(): void {
+  insertHtmlWithStyles(document.getElementById("right-favorites-panel") || document.createElement("div"), "beforeend", SAVED_SEARCHES_HTML);
 }
 
-function extractHTMLElements(): void {
+function extractHtmlElements(): void {
   saveButton = document.getElementById("save-custom-search-button") as HTMLElement;
   textarea = document.getElementById("saved-searches-input") as HTMLTextAreaElement;
   savedSearchesList = document.getElementById("saved-search-list") as HTMLElement;
@@ -180,9 +180,9 @@ function storeSavedSearches(): void {
 
 function loadSavedSearches(): void {
   const savedSearches = Storage.get<string[]>("savedSearches") ?? [];
-  const firstUse = Boolean(Preferences.savedSearchTutorialEnabled.value);
+  const firstUse = Boolean(Preferences.savedSearchTutorial.value);
 
-  Preferences.savedSearchTutorialEnabled.set(false);
+  Preferences.savedSearchTutorial.set(false);
 
   if (firstUse && savedSearches.length === 0) {
     createTutorialSearches();
@@ -199,7 +199,7 @@ function createTutorialSearches(): void {
 
   Events.favorites.startedFetchingFavorites.on(async(): Promise<void> => {
     await sleep(1000);
-    const postIds = getAllThumbs().map(thumb => thumb.id);
+    const postIds = getAllContentThumbs().map(thumb => thumb.id);
 
     shuffleArray(postIds);
 

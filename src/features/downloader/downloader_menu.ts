@@ -1,14 +1,14 @@
 import * as FavoritesDownloader from "./downloader";
-import { sleep, yield1 } from "../../lib/core/async/promise";
+import { sleep, yield1 } from "../../lib/core/scheduling/promise";
 import { DOWNLOADER_DISABLED } from "../../lib/environment/derived_environment";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
 import { Events } from "../../lib/communication/events/events";
-import { Favorite } from "../../types/favorite_data_types";
+import { Favorite } from "../../types/favorite";
 import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
 import { OVERLAYS } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
-import { insertHTMLAndExtractStyle } from "../../utils/dom/injector";
+import { insertHtmlWithStyles } from "../../utils/dom/injector";
 import { splitIntoChunks } from "../../utils/collection/array";
 
 let dialog: HTMLDialogElement;
@@ -24,7 +24,7 @@ export function setupDownloadMenu(): void {
     return;
   }
   FavoritesDownloader.setupFavoritesDownloader();
-  insertHTMLAndExtractStyle(OVERLAYS, "beforeend", DOWNLOADER_HTML);
+  insertHtmlWithStyles(OVERLAYS, "beforeend", DOWNLOADER_HTML);
   dialog = getDialog("download-menu");
   warningDialog = getDialog("download-menu-warning");
   downloadButton = getDownloadButton();

@@ -1,4 +1,4 @@
-import { Storage } from "../../../../lib/core/storage";
+import { Storage } from "../../../../lib/core/storage/storage_instance";
 import { indexInBounds } from "../../../../utils/collection/array";
 import { isEmptyString } from "../../../../utils/string/query";
 import { removeExtraWhiteSpace } from "../../../../utils/string/format";

@@ -1,4 +1,4 @@
-import { buildPostPageURL, buildSearchPageURL } from "./server/url/page_url_builder";
+import { buildPostPageURL, buildSearchPageURLFromQuery } from "./server/url/page_url_builder";
 import { resolveMediaURL } from "./server/url/media_url_resolver";
 
 export function openPostPage(id: string): void {
@@ -6,7 +6,7 @@ export function openPostPage(id: string): void {
 }
 
 export function openSearchPage(searchQuery: string): void {
-  window.open(buildSearchPageURL(searchQuery));
+  window.open(buildSearchPageURLFromQuery(searchQuery));
 }
 
 export async function openOriginal(thumb: HTMLElement): Promise<void> {

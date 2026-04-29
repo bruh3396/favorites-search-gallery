@@ -4,7 +4,7 @@ import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { InvertedSearchIndex } from "../../../../lib/search/index/inverted_search_index";
 import { ThrottledQueue } from "../../../../lib/core/concurrency/throttled_queue";
-import { sleep } from "../../../../lib/core/async/promise";
+import { sleep } from "../../../../lib/core/scheduling/promise";
 import { splitIntoChunks } from "../../../../utils/collection/array";
 
 const BATCH_SIZE = 750;

@@ -1,7 +1,7 @@
 import { AbstractSearchTag } from "../tag/abstract_search_tag";
 import { ExactSearchTag } from "../tag/exact_search_tag";
 import { SearchQuery } from "./search_query";
-import { Searchable } from "../../../types/common_types";
+import { Searchable } from "../../../types/search";
 import { WildcardSearchTag } from "../tag/wildcard_search_tag";
 
 export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {

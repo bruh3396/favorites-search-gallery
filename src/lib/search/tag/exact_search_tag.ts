@@ -1,5 +1,5 @@
 import { AbstractSearchTag } from "./abstract_search_tag";
-import { Searchable } from "../../../types/common_types";
+import { Searchable } from "../../../types/search";
 
 export class ExactSearchTag extends AbstractSearchTag {
   protected baseCost: number = 0;

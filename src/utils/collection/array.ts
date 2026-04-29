@@ -1,4 +1,4 @@
-import { getRandomPositiveInteger } from "../number";
+import { randomInt } from "../number";
 
 export function indexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;
@@ -9,7 +9,7 @@ export function shuffleArray<V>(array: V[]): V[] {
   let randomIndex;
 
   while (maxIndex > 0) {
-    randomIndex = getRandomPositiveInteger(maxIndex);
+    randomIndex = randomInt(maxIndex);
     maxIndex -= 1;
     [
       array[maxIndex],

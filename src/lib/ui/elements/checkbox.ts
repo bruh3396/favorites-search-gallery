@@ -1,7 +1,7 @@
-import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../../../types/element_types";
-import { FeatureBridge } from "../../communication/features/feature_bridge";
+import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../element_types";
 import { DO_NOTHING } from "../../environment/constants";
 import { Events } from "../../communication/events/events";
+import { FeatureBridge } from "../../communication/features/feature_bridge";
 
 function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
   return {
@@ -77,13 +77,13 @@ export function createToggleSwitch(partial: Partial<CheckboxElement>): void {
     return;
   }
   const toggleSwitchId = `${template.id}-toggle-switch`;
-  const switchHTML = `
+  const switchHtml = `
     <label id="${toggleSwitchId}" class="toggle-switch" title="${template.title}">
         <span class="slider round"></span>
         <span class="toggle-switch-label">${template.textContent}</span>
     </label>`;
 
-  parent.insertAdjacentHTML(template.position, switchHTML);
+  parent.insertAdjacentHTML(template.position, switchHtml);
   template.position = "afterbegin";
   template.parentId = toggleSwitchId;
   createCheckboxElement(template);

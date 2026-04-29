@@ -1,7 +1,7 @@
 import { Events } from "../../../lib/communication/events/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { Storage } from "../../../lib/core/storage";
+import { Storage } from "../../../lib/core/storage/storage_instance";
 import { insertStyle } from "../../../utils/dom/injector";
 
 export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
@@ -9,7 +9,7 @@ export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): voi
 
   if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
     showOnHoverCheckbox.checked = value;
-    Preferences.showOnHoverEnabled.set(value);
+    Preferences.showOnHover.set(value);
   }
 }
 

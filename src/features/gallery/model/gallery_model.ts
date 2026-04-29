@@ -2,11 +2,11 @@ import * as GalleryStateMachine from "./gallery_state_machine";
 import * as GalleryThumbSelector from "./gallery_thumb_selector";
 import { GalleryBoundary, GalleryState } from "../types/gallery_types";
 import { openOriginal, openPostPage } from "../../../lib/navigator";
-import { NavigationKey } from "../../../types/common_types";
+import { NavigationKey } from "../../../types/input";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { clamp } from "../../../utils/number";
 import { downloadFromThumb } from "../../../lib/server/fetch/media_downloader";
-import { isForwardNavigationKey } from "../../../types/equivalence";
+import { isForwardNavigationKey } from "../../../types/guards";
 import { isVideo } from "../../../lib/media_resolver";
 
 let currentIndex = 0;

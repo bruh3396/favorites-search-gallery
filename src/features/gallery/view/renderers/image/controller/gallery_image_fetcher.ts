@@ -1,8 +1,8 @@
-import { getImageFromThumb } from "../../../../../../lib/dom/thumb";
-import { imageIsLoaded } from "../../../../../../utils/dom/image";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { fetchImageBitmapFromThumb } from "../../../../../../lib/server/fetch/bitmap_fetcher";
+import { getImageFromThumb } from "../../../../../../lib/dom/thumb";
+import { imageIsLoaded } from "../../../../../../utils/dom/image";
 
 const FETCH_QUEUE = new ThrottledQueue(10);
 

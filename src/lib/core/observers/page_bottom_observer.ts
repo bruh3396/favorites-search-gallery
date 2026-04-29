@@ -1,4 +1,3 @@
-import { CONTENT } from "../../shell";
 import { GeneralSettings } from "../../../config/general_settings";
 import { ITEM_CLASS_NAME } from "../../dom/thumb";
 
@@ -28,7 +27,7 @@ export class PageBottomObserver {
   }
 
   private observeBottomElements(): void {
-    const bottomElements = Array.from(CONTENT.querySelectorAll(`.${ITEM_CLASS_NAME}:last-child`));
+    const bottomElements = Array.from(document.querySelectorAll(`.${ITEM_CLASS_NAME}:last-child`));
 
     for (const element of bottomElements) {
       this.intersectionObserver.observe(element);

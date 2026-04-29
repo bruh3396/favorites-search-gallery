@@ -51,7 +51,7 @@ function processFetchedFavorites(): void {
 
 async function loadNewFavorites(): Promise<void> {
   FavoritesView.setStatus("Finding new favorites");
-  const results = await FavoritesModel.fetchNewFavoritesOnReload();
+  const results = await FavoritesModel.fetchNewFavorites();
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");

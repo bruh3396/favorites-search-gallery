@@ -1,10 +1,10 @@
 import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/collection/array";
 import { isImage, isVideo } from "../../../lib/media_resolver";
-import { Favorite } from "../../../types/favorite_data_types";
+import { Favorite } from "../../../types/favorite";
 import { FeatureBridge } from "../../../lib/communication/features/feature_bridge";
 import { GalleryBoundary } from "../types/gallery_types";
 import { GallerySettings } from "../../../config/gallery_settings";
-import { getAllThumbs } from "../../../lib/dom/thumb2";
+import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { removeNonNumericCharacters } from "../../../utils/string/format";
 
 let thumbsOnCurrentPage: HTMLElement[] = [];
@@ -15,7 +15,7 @@ export function getThumbsOnCurrentPage(): HTMLElement[] {
 }
 
 export function indexCurrentPageThumbs(): void {
-  thumbsOnCurrentPage = getAllThumbs();
+  thumbsOnCurrentPage = getAllContentThumbs();
   enumerateCurrentPageThumbs();
 }
 
@@ -102,7 +102,7 @@ export function getFavoritesPageSearchResultsAround(thumb: HTMLElement, limit: n
 
 export function getSearchPageThumbsAround(thumb: HTMLElement): HTMLElement[] {
   const latestSearchPageThumbs = FeatureBridge.searchPageItems.query();
-  const index = latestSearchPageThumbs.findIndex(t => t.id === thumb.id);
+  const index = latestSearchPageThumbs.findIndex(searchPageThumb => searchPageThumb.id === thumb.id);
 
   if (index === -1) {
     return [];

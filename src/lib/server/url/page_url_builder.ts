@@ -1,4 +1,5 @@
-import { ORIGIN } from "./site_origin";
+import { ORIGIN } from "./origin";
+import { POSTS_PER_SEARCH_PAGE } from "../../environment/constants";
 import { getFavoritesPageId } from "../../environment/favorites_metadata";
 
 const POST_PAGE_URL = `${ORIGIN}/index.php?page=post&s=view&id=`;
@@ -10,7 +11,7 @@ export function buildPostPageURL(id: string): string {
   return `${POST_PAGE_URL}${id}`;
 }
 
-export function buildSearchPageURL(searchQuery: string): string {
+export function buildSearchPageURLFromQuery(searchQuery: string): string {
   return `${SEARCH_PAGE_URL}${encodeURIComponent(searchQuery)}`;
 }
 
@@ -20,4 +21,8 @@ export function buildFavoritesPageURL(pageNumber: number): string {
 
 export function buildProfilePageURL(id: string): string {
   return `${PROFILE_PAGE_URL}${id}`;
+}
+
+export function buildSearchPageURL(baseUrl: string, pageNumber: number): string {
+  return `${baseUrl}&pid=${POSTS_PER_SEARCH_PAGE * pageNumber}`;
 }

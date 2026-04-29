@@ -1,7 +1,7 @@
 import { DESKTOP_CSS, MOBILE_CSS } from "../../../../assets/css";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { createFooter, moveStatusToFooter } from "./favorites_mobile_footer";
-import { insertHTMLAndExtractStyle, insertStyle } from "../../../../utils/dom/injector";
+import { insertHtmlWithStyles, insertStyle } from "../../../../utils/dom/injector";
 import { FAVORITES_HTML } from "../../../../assets/html";
 import { ROOT } from "../../../../lib/shell";
 import { createControlsGuide } from "./favorites_mobile_control_guide";
@@ -22,7 +22,7 @@ export function buildFavoritesMenu(): void {
 }
 
 function insertFavoritesMenuHTML(): void {
-  insertHTMLAndExtractStyle(ROOT, "afterbegin", FAVORITES_HTML);
+  insertHtmlWithStyles(ROOT, "afterbegin", FAVORITES_HTML);
 }
 
 function buildDesktopFavoritesMenu(): void {

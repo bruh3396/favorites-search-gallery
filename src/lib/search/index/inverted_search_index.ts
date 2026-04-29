@@ -1,7 +1,7 @@
 import { AbstractSearchTag } from "../tag/abstract_search_tag";
 import { ExpandedSearchQuery } from "../query/expanded_search_query";
 import { SearchQuery } from "../query/search_query";
-import { Searchable } from "../../../types/common_types";
+import { Searchable } from "../../../types/search";
 import { SortedArray } from "../../core/data_structures/sorted_array";
 import { intersection } from "../../../utils/collection/set";
 

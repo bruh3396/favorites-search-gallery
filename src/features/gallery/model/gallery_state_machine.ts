@@ -12,7 +12,7 @@ export function changeState(state: GalleryState): void {
 }
 
 function getStartState(): GalleryState {
-  if (Preferences.showOnHoverEnabled.value) {
+  if (Preferences.showOnHover.value) {
     return GalleryState.SHOWING_CONTENT_ON_HOVER;
   }
   return GalleryState.IDLE;

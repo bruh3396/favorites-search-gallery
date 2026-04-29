@@ -3,7 +3,7 @@ import { CONTENT } from "../../../../lib/shell";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { insertStyle } from "../../../../utils/dom/injector";
-import { sleep } from "../../../../lib/core/async/promise";
+import { sleep } from "../../../../lib/core/scheduling/promise";
 
 export function createMobileSearchBar(id: string, parentId: string, onClick: () => void): HTMLInputElement {
   insertMobileSearchBar(id, parentId);

@@ -1,8 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { getElementsAroundIndex, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../utils/collection/array";
-import { getNumberRange } from "../utils/number";
-import { getNumbersAround } from "../utils/number";
-import { getRandomPositiveInteger } from "../utils/number";
+import { numberRange, numbersAroundInRange, randomInt } from "../utils/number";
 
 describe("indexInBounds", () => {
   test("empty", () => {
@@ -56,40 +54,40 @@ describe("shuffleArray", () => {
 
 describe("getNumbersAround", () => {
   test("empty", () => {
-    expect(getNumbersAround(0, 0, 0, 0)).toStrictEqual([]);
+    expect(numbersAroundInRange(0, 0, 0, 0)).toStrictEqual([]);
   });
 
   test("one", () => {
-    expect(getNumbersAround(0, 1, 0, 0)).toStrictEqual([0]);
-    expect(getNumbersAround(0, 1, -1, 1)).toStrictEqual([0]);
-    expect(getNumbersAround(1, 1, -1, 1)).toStrictEqual([1]);
-    expect(getNumbersAround(-1, 1, -1, 1)).toStrictEqual([-1]);
+    expect(numbersAroundInRange(0, 1, 0, 0)).toStrictEqual([0]);
+    expect(numbersAroundInRange(0, 1, -1, 1)).toStrictEqual([0]);
+    expect(numbersAroundInRange(1, 1, -1, 1)).toStrictEqual([1]);
+    expect(numbersAroundInRange(-1, 1, -1, 1)).toStrictEqual([-1]);
   });
 
   test("two", () => {
-    expect(getNumbersAround(0, 2, -1, 1)).toStrictEqual([-1, 0]);
-    expect(getNumbersAround(0, 2, -2, 2)).toStrictEqual([-1, 0]);
-    expect(getNumbersAround(1, 2, -2, 2)).toStrictEqual([0, 1]);
-    expect(getNumbersAround(-1, 2, -2, 2)).toStrictEqual([-2, -1]);
-    expect(getNumbersAround(-2, 2, -2, 2)).toStrictEqual([-2, -1]);
+    expect(numbersAroundInRange(0, 2, -1, 1)).toStrictEqual([-1, 0]);
+    expect(numbersAroundInRange(0, 2, -2, 2)).toStrictEqual([-1, 0]);
+    expect(numbersAroundInRange(1, 2, -2, 2)).toStrictEqual([0, 1]);
+    expect(numbersAroundInRange(-1, 2, -2, 2)).toStrictEqual([-2, -1]);
+    expect(numbersAroundInRange(-2, 2, -2, 2)).toStrictEqual([-2, -1]);
   });
 
   test("three", () => {
-    expect(getNumbersAround(0, 3, -1, 1)).toStrictEqual([-1, 0, 1]);
-    expect(getNumbersAround(0, 3, -2, 2)).toStrictEqual([-1, 0, 1]);
+    expect(numbersAroundInRange(0, 3, -1, 1)).toStrictEqual([-1, 0, 1]);
+    expect(numbersAroundInRange(0, 3, -2, 2)).toStrictEqual([-1, 0, 1]);
   });
 
   test("many", () => {
-    expect(getNumbersAround(40, 10, 30, 100)).toStrictEqual([40, 39, 41, 38, 42, 37, 43, 36, 44, 35].sort((a, b) => a - b));
+    expect(numbersAroundInRange(40, 10, 30, 100)).toStrictEqual([40, 39, 41, 38, 42, 37, 43, 36, 44, 35].sort((a, b) => a - b));
   });
 
   test("count = 0", () => {
-    expect(getNumbersAround(40, 0, 0, 100)).toStrictEqual([]);
-    expect(getNumbersAround(40, 0, 30, 100)).toStrictEqual([]);
+    expect(numbersAroundInRange(40, 0, 0, 100)).toStrictEqual([]);
+    expect(numbersAroundInRange(40, 0, 30, 100)).toStrictEqual([]);
   });
 
   test("mix > max", () => {
-    expect(getNumbersAround(40, 10, 100, 20)).toStrictEqual([]);
+    expect(numbersAroundInRange(40, 10, 100, 20)).toStrictEqual([]);
   });
 });
 
@@ -102,8 +100,8 @@ describe("getElementsAroundIndex", () => {
 
   test("empty", () => {
     for (let i = 0; i < 10; i += 1) {
-      const startIndex = getRandomPositiveInteger(100);
-      const limit = getRandomPositiveInteger(100);
+      const startIndex = randomInt(100);
+      const limit = randomInt(100);
 
       testElementsAroundIndex([], startIndex, limit, []);
     }
@@ -140,8 +138,8 @@ describe("getWrappedElementsAroundIndex", () => {
 
   test("empty", () => {
     for (let i = 0; i < 10; i += 1) {
-      const startIndex = getRandomPositiveInteger(100);
-      const limit = getRandomPositiveInteger(100);
+      const startIndex = randomInt(100);
+      const limit = randomInt(100);
 
       testWrappedElementsAroundIndex([], startIndex, limit, []);
     }
@@ -218,17 +216,17 @@ describe("splitIntoChunks", () => {
 
 describe("getNumberRange", () => {
   test("zero", () => {
-    expect(getNumberRange(0, 0)).toStrictEqual([0]);
+    expect(numberRange(0, 0)).toStrictEqual([0]);
   });
 
   test("normal", () => {
-    expect(getNumberRange(0, 1)).toStrictEqual([0, 1]);
-    expect(getNumberRange(0, 0)).toStrictEqual([0]);
-    expect(getNumberRange(0, 1)).toStrictEqual([0, 1]);
-    expect(getNumberRange(1, 3)).toStrictEqual([1, 2, 3]);
-    expect(getNumberRange(5, 7)).toStrictEqual([5, 6, 7]);
-    expect(getNumberRange(-2, 2)).toStrictEqual([-2, -1, 0, 1, 2]);
-    expect(getNumberRange(3, 3)).toStrictEqual([3]);
-    expect(getNumberRange(10, 13)).toStrictEqual([10, 11, 12, 13]);
+    expect(numberRange(0, 1)).toStrictEqual([0, 1]);
+    expect(numberRange(0, 0)).toStrictEqual([0]);
+    expect(numberRange(0, 1)).toStrictEqual([0, 1]);
+    expect(numberRange(1, 3)).toStrictEqual([1, 2, 3]);
+    expect(numberRange(5, 7)).toStrictEqual([5, 6, 7]);
+    expect(numberRange(-2, 2)).toStrictEqual([-2, -1, 0, 1, 2]);
+    expect(numberRange(3, 3)).toStrictEqual([3]);
+    expect(numberRange(10, 13)).toStrictEqual([10, 11, 12, 13]);
   });
 });

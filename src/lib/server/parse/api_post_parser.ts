@@ -1,9 +1,8 @@
 /* eslint-disable max-classes-per-file */
-import { Post } from "../../../types/common_types";
+import { DOM_PARSER } from "../../../utils/dom/dom_parser";
+import { Post } from "../../../types/post";
 export class ApiParseError extends Error { }
 export class DeletedPostError extends Error { }
-
-const PARSER = new DOMParser();
 
 function parseNumber(attribute: string, post: Element): number {
   return Number(post.getAttribute(attribute) ?? 0);
@@ -46,7 +45,7 @@ function createPostFromAPIElement(element: Element): Post {
 }
 
 export function extractPostFromAPI(html: string): Post {
-  const post = PARSER.parseFromString(html, "text/html").querySelector("post");
+  const post = DOM_PARSER.parseFromString(html, "text/html").querySelector("post");
 
   if (post === null) {
     throw new ApiParseError();
@@ -61,6 +60,7 @@ export function extractPostFromAPISafe(html: string): Post {
     return createEmptyPost();
   }
 }
+
 export function createEmptyPost(): Post {
   return {
     id: "",

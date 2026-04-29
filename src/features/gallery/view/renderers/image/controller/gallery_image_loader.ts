@@ -25,7 +25,7 @@ function dispose(cached: CachedRequest): void {
 }
 
 function evictStale(incoming: ImageRequest[]): void {
-  const incomingIds = new Set(incoming.map(r => r.id));
+  const incomingIds = new Set(incoming.map(request => request.id));
 
   for (const [id, cached] of CACHE.entries()) {
     if (!incomingIds.has(id)) {
@@ -36,7 +36,7 @@ function evictStale(incoming: ImageRequest[]): void {
 }
 
 function getUnseen(requests: ImageRequest[]): ImageRequest[] {
-  return requests.filter(r => !CACHE.has(r.id));
+  return requests.filter(request => !CACHE.has(request.id));
 }
 
 function limitByMemory(requests: ImageRequest[]): ImageRequest[] {
@@ -65,7 +65,7 @@ function limitRequests(requests: ImageRequest[]): ImageRequest[] {
 }
 
 function buildRequests(thumbs: HTMLElement[]): ImageRequest[] {
-  return limitRequests(thumbs.filter(t => isImage(t)).map(t => new ImageRequest(t)));
+  return limitRequests(thumbs.filter(thumb => isImage(thumb)).map(thumb => new ImageRequest(thumb)));
 }
 
 async function load(request: ImageRequest): Promise<void> {
@@ -118,6 +118,6 @@ export function getCompletions(): ImageRequest[] {
 }
 
 export function clear(): void {
-  [...CACHE.values()].forEach(c => dispose(c));
+  [...CACHE.values()].forEach(cachedRequest => dispose(cachedRequest));
   CACHE.clear();
 }

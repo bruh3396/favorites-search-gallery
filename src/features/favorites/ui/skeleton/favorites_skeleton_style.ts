@@ -1,4 +1,4 @@
-import { LayoutMode } from "../../../../types/common_types";
+import { LayoutMode } from "../../../../types/ui";
 
 const SKELETON_STYLES: Record<LayoutMode, Record<string, string>> = {
   column: { "width": "100%" },

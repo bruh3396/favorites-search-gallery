@@ -1,4 +1,4 @@
-import { sleep } from "../../../../lib/core/async/promise";
+import { sleep } from "../../../../lib/core/scheduling/promise";
 import { waitForDOMToLoad } from "../../../../lib/ui/dom";
 
 function getOriginalFavoritesContent(): HTMLElement | null {
@@ -17,7 +17,7 @@ function removeUnusedFavoritesPageScripts(): void {
   }
 }
 
-export async function cleanOriginalFavoritesPage(): Promise<void> {
+export async function clearNativeFavoritesPage(): Promise<void> {
   await waitForDOMToLoad();
   await sleep(20);
   clearOriginalFavoritesContent();

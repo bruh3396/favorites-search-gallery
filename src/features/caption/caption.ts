@@ -1,26 +1,28 @@
-import * as API from "../../lib/server/fetch/api";
-import { ClickCode, TagCategory, TagCategoryMapping } from "../../types/common_types";
-import { getAllThumbs } from "../../lib/dom/thumb2";
-import { getImageFromThumb } from "../../lib/dom/thumb";
+import * as PostAPI from "../../lib/server/fetch/post_fetcher";
+import * as TagAPI from "../../lib/server/fetch/tag_fetcher";
+import { TagCategory, TagCategoryMapping } from "../../types/search";
 import { BatchExecutor } from "../../lib/core/concurrency/batch_executor";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import { CAPTION_CSS } from "../../assets/css";
+import { ClickCode } from "../../types/input";
+import { DOM_PARSER } from "../../utils/dom/dom_parser";
 import { DO_NOTHING } from "../../lib/environment/constants";
 import { Database } from "../../lib/core/storage/database";
 import { Events } from "../../lib/communication/events/events";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Preferences } from "../../lib/preferences/preferences";
-import { buildTagAPIURL } from "../../lib/server/url/api_url_builder";
 import { capitalize } from "../../utils/string/format";
-import { debounceAfterFirstCall } from "../../lib/core/async/rate_limiter";
+import { debounceLeading } from "../../lib/core/scheduling/rate_limiting";
+import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getFavorite } from "../favorites/types/favorite_item";
-import { getTagSetFromItem } from "../../utils/tags";
+import { getImageFromThumb } from "../../lib/dom/thumb";
+import { getTagSetFromItem } from "../../lib/dom/tags";
+import { insertStyle } from "../../utils/dom/injector";
 import { isOnlyDigits } from "../../utils/string/query";
-import { isTagCategory } from "../../types/equivalence";
+import { isTagCategory } from "../../types/guards";
 import { openSearchPage } from "../../lib/navigator";
 import { roundToTwoDecimalPlaces } from "../../utils/number";
-import { sleep } from "../../lib/core/async/promise";
-import { insertStyle } from "../../utils/dom/injector";
+import { sleep } from "../../lib/core/scheduling/promise";
 
 const importantTagCategories: Set<TagCategory> = new Set([
   "copyright",
@@ -95,7 +97,7 @@ function initializeFields(): void {
   abortController = new AbortController();
 }
 
-function createHTMLElement(): void {
+function createHtmlElement(): void {
   captionWrapper = document.createElement("div");
   captionWrapper.className = "caption-wrapper";
   caption = document.createElement("div");
@@ -173,7 +175,7 @@ function addFavoritesPageEventListeners(): void {
   }, {
     once: true
   });
-  Events.favorites.pageChanged.on(debounceAfterFirstCall<void>(() => {
+  Events.favorites.pageChanged.on(debounceLeading<void>(() => {
     abortAllRequests("Changed Page");
     abortController = new AbortController();
     setTimeout(() => {
@@ -473,7 +475,7 @@ function allTagsAreProblematic(tags: string[]): boolean {
 }
 
 function correctAllProblematicTagsFromThumb(thumb: HTMLElement, onProblematicTagsCorrected: () => void): void {
-  API.fetchPostPage(thumb.id)
+  PostAPI.fetchPostPage(thumb.id)
     .then((html: string) => {
       const tagCategoryMap = getTagCategoryMapFromPostPage(html);
 
@@ -511,7 +513,7 @@ export function findTagCategoriesOnPageChange(): void {
   if (!FLAGS.finishedLoading) {
     return;
   }
-  const tagNames = getTagNamesWithUnknownCategories(getAllThumbs().slice(0, 200));
+  const tagNames = getTagNamesWithUnknownCategories(getAllContentThumbs().slice(0, 200));
 
   findTagCategories(tagNames, DO_NOTHING, getTagFetchDelay());
 }
@@ -523,7 +525,6 @@ function abortAllRequests(reason: string): void {
 }
 
 async function findTagCategories(tagNames: string[], onAllCategoriesFound: () => void, fetchDelay: number): Promise<void> {
-  const parser = new DOMParser();
   const lastTagName = tagNames[tagNames.length - 1];
   const uniqueTagNames = new Set(tagNames);
 
@@ -551,18 +552,10 @@ async function findTagCategories(tagNames: string[], onAllCategoriesFound: () =>
 
     try {
       PENDING_REQUESTS.add(tagName);
-      fetch(buildTagAPIURL(tagName), {
-        signal: abortController.signal
-      })
-        .then((response) => {
-          if (response.ok) {
-            return response.text();
-          }
-          throw new Error(response.statusText);
-        })
+      TagAPI.fetchTagFromAPI(tagName, abortController)
         .then((html) => {
           PENDING_REQUESTS.delete(tagName);
-          const dom = parser.parseFromString(html, "text/html");
+          const dom = DOM_PARSER.parseFromString(html, "text/html");
           const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
 
           if (encoding === "array") {
@@ -629,7 +622,7 @@ export function setupCaptions(): void {
     return;
   }
   initializeFields();
-  createHTMLElement();
+  createHtmlElement();
   insertStyle(CAPTION_CSS, "caption");
   toggleVisibility(Preferences.captionsVisible.value);
   addEventListeners();

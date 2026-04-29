@@ -1,7 +1,7 @@
 import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
+import { clearCanvas, drawScaledCanvas } from "../../../../../../utils/dom/canvas";
 import { GallerySettings } from "../../../../../../config/gallery_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../../../lib/environment/environment";
-import { drawScaledCanvasAfterClearing } from "../../../../../../utils/dom/canvas";
 import { insertStyle } from "../../../../../../utils/dom/injector";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 
@@ -57,7 +57,8 @@ export function mount(newContainer: HTMLElement): void {
 
 export function draw(bitmap: ImageBitmap | null): void {
   if (bitmap !== null) {
-    drawScaledCanvasAfterClearing(CONTEXT, bitmap);
+    clearCanvas(CONTEXT);
+    drawScaledCanvas(CONTEXT, bitmap);
   }
 }
 

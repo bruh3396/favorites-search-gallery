@@ -9,7 +9,7 @@ let pageBottomObserver: PageBottomObserver;
 export function setupInfiniteScroll(): void {
   pageBottomObserver = new PageBottomObserver(showMoreResults);
   Events.searchPage.searchPageReady.on(() => {
-    if (Preferences.searchPageInfiniteScrollEnabled.value) {
+    if (Preferences.searchPageInfiniteScroll.value) {
       pageBottomObserver.refresh();
     }
   }, { once: true });
@@ -24,12 +24,12 @@ export function enableInfiniteScroll(): void {
 }
 
 export async function showMoreResults(): Promise<boolean> {
-  if (!Preferences.searchPageInfiniteScrollEnabled.value) {
+  if (!Preferences.searchPageInfiniteScroll.value) {
     return false;
   }
   const moreResults = await SearchPageModel.getMoreResults();
 
-  if (moreResults.length > 0 && Preferences.searchPageInfiniteScrollEnabled.value) {
+  if (moreResults.length > 0 && Preferences.searchPageInfiniteScroll.value) {
     SearchPageView.insertNewSearchResults(moreResults);
     Events.searchPage.moreResultsAdded.emit(moreResults);
     pageBottomObserver.refresh();

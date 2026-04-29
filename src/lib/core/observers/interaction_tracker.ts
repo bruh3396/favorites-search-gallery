@@ -1,18 +1,18 @@
 import { Events } from "../../communication/events/events";
-import { Timeout } from "../../../types/common_types";
+import { Timeout } from "../../../types/async";
 
 export class InteractionTracker {
-  public onInteractionStopped: () => void;
-  public onMouseMoveStopped: () => void;
-  public onScrollingStopped: () => void;
-  public onNoInteractionOnEnable: () => void;
-  public idleDuration: number;
-  public mouseTimeout: Timeout;
-  public scrollTimeout: Timeout;
-  public noInteractionOnEnableTimeout: Timeout;
-  public mouseIsMoving: boolean;
-  public scrolling: boolean;
-  public abortController: AbortController;
+  private onInteractionStopped: () => void;
+  private onMouseMoveStopped: () => void;
+  private onScrollingStopped: () => void;
+  private onNoInteractionOnEnable: () => void;
+  private idleDuration: number;
+  private mouseTimeout: Timeout;
+  private scrollTimeout: Timeout;
+  private noInteractionOnEnableTimeout: Timeout;
+  private isMouseMoving: boolean;
+  private isScrolling: boolean;
+  private abortController: AbortController;
 
   constructor(
     idleDuration: number,
@@ -26,8 +26,8 @@ export class InteractionTracker {
     this.onMouseMoveStopped = onMouseMoveStopped;
     this.onScrollingStopped = onScrollingStopped;
     this.onNoInteractionOnEnable = onNoInteractionOnEnable;
-    this.mouseIsMoving = false;
-    this.scrolling = false;
+    this.isMouseMoving = false;
+    this.isScrolling = false;
     this.abortController = new AbortController();
   }
 
@@ -63,28 +63,28 @@ export class InteractionTracker {
   }
 
   private onMouseMove(): void {
-    this.mouseIsMoving = true;
+    this.isMouseMoving = true;
     clearTimeout(this.noInteractionOnEnableTimeout);
     clearTimeout(this.mouseTimeout);
     this.mouseTimeout = setTimeout(() => {
-      this.mouseIsMoving = false;
+      this.isMouseMoving = false;
       this.onMouseMoveStopped();
 
-      if (!this.scrolling) {
+      if (!this.isScrolling) {
         this.onInteractionStopped();
       }
     }, this.idleDuration);
   }
 
   private onScroll(): void {
-    this.scrolling = true;
+    this.isScrolling = true;
     clearTimeout(this.noInteractionOnEnableTimeout);
     clearTimeout(this.scrollTimeout);
     this.scrollTimeout = setTimeout(() => {
-      this.scrolling = false;
+      this.isScrolling = false;
       this.onScrollingStopped();
 
-      if (!this.mouseIsMoving) {
+      if (!this.isMouseMoving) {
         this.onInteractionStopped();
       }
     }, this.idleDuration);

@@ -1,4 +1,4 @@
-import { LayoutMode } from "../../../types/common_types";
+import { LayoutMode } from "../../../types/ui";
 import { insertStyle } from "../../../utils/dom/injector";
 
 export abstract class AbstractTiler {

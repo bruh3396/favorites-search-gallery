@@ -2,12 +2,12 @@ import * as SearchPageInfiniteScrollFlow from "./search_page_infinite_scroll_flo
 import * as SearchPageModel from "../../model/search_page_model";
 import * as SearchPageView from "../../view/search_page_view";
 import { Events } from "../../../../lib/communication/events/events";
-import { NavigationKey } from "../../../../types/common_types";
+import { NavigationKey } from "../../../../types/input";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { SearchPage } from "../../../../types/search_page";
+import { SearchPage } from "../../model/search_page";
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
-  if (Preferences.searchPageInfiniteScrollEnabled.value) {
+  if (Preferences.searchPageInfiniteScroll.value) {
     SearchPageInfiniteScrollFlow.showMoreResults();
     return null;
   }

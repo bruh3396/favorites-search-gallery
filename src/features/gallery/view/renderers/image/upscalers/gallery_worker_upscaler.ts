@@ -10,11 +10,11 @@ declare let SharedGallerySettings: {
 const OFFSCREEN_CANVASES: Map<string, OffscreenCanvas> = new Map();
 
 async function createImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
-  const url = SharedGallerySettings.upscaleUsingSamples ? request.sampleURL : request.imageURL;
+  const url = SharedGallerySettings.upscaleUsingSamples ? request.sampleUrl : request.imageUrl;
   let response = await fetch(url);
 
   if (!response.ok) {
-    response = await fetch(request.imageURL);
+    response = await fetch(request.imageUrl);
   }
   return createImageBitmap(await response.blob());
 }

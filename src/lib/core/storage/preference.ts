@@ -1,4 +1,4 @@
-import { Storage } from ".";
+import { Storage } from "./storage_instance";
 
 const LOCAL_STORAGE_KEY = "preferences";
 const CACHE: Record<string, unknown> = Storage.get<Record<string, unknown>>(LOCAL_STORAGE_KEY) ?? {};

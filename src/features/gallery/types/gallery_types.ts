@@ -1,4 +1,4 @@
-import { GalleryMenuAction } from "../../../types/common_types";
+import { GalleryMenuAction } from "../../../types/ui";
 
 export enum GalleryState {
   IDLE = 0,

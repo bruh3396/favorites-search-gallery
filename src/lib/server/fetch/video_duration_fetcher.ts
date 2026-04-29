@@ -1,5 +1,5 @@
 import { ConcurrencyLimiter } from "../../core/concurrency/concurrency_limiter";
-import { Favorite } from "../../../types/favorite_data_types";
+import { Favorite } from "../../../types/favorite";
 import { resolveBaseImageURL } from "../url/media_url_resolver";
 
 const CONCURRENCY = 3;

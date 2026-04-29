@@ -1,11 +1,13 @@
-import * as API from "../../../lib/server/fetch/api";
 import * as ExtensionCache from "../../../lib/extension_cache";
-import { DiscreteRating, Post, Rating } from "../../../types/common_types";
-import { FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../types/favorite_data_types";
+import * as PostAPI from "../../../lib/server/fetch/post_fetcher";
+import { DiscreteRating, Rating } from "../../../types/search";
+import { Post } from "../../../types/post";
+import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../types/favorite";
 import { getFavorite, validateTags } from "./favorite_item";
 import { Events } from "../../../lib/communication/events/events";
 import { FAVORITES_PER_PAGE } from "../../../lib/environment/constants";
 import { FavoritesSettings } from "../../../config/favorites_settings";
+import { fetchMultiplePostsFromAPI } from "../../../lib/server/fetch/post_fetcher";
 import { fetchVideoDurationFromFavorite } from "../../../lib/server/fetch/video_duration_fetcher";
 import { isVideo } from "../../../lib/media_resolver";
 import { splitIntoChunks } from "../../../utils/collection/array";
@@ -56,7 +58,7 @@ export async function updateMissingMetadata(): Promise<void> {
   }
 
   await Promise.all(chunks.map(async(chunk) => {
-    const postsMap = await API.fetchMultiplePostsFromAPI(chunk.map(metadata => metadata.id));
+    const postsMap = await PostAPI.fetchMultiplePostsFromAPI(chunk.map(metadata => metadata.id));
 
     for (const metadata of chunk) {
       if (!metadata.processPost(postsMap[metadata.id])) {
@@ -148,7 +150,7 @@ export class FavoriteMetadata {
   }
 
   public async populateFromAPI(): Promise<void> {
-    this.processPost(await API.fetchPostFromAPISafe(this.id));
+    this.processPost(await PostAPI.fetchPostFromAPISafe(this.id));
   }
 
   public processPost(post: Post): boolean {
@@ -207,4 +209,18 @@ export class FavoriteMetadata {
       this.updateDatabase();
     }
   }
+}
+export function populateFavoritesMetadata(favorites: Favorite[]): void {
+  if (!FavoritesSettings.fetchMultiplePostWhileFetchingFavorites) {
+    return;
+  }
+  const favoriteMap = new Map(favorites.map(favorite => [favorite.id, favorite]));
+
+  fetchMultiplePostsFromAPI([...favoriteMap.keys()])
+    .then((postMap) => {
+      for (const [id, post] of Object.entries(postMap)) {
+        favoriteMap.get(id)?.processPost(post);
+      }
+    })
+    .catch(console.error);
 }

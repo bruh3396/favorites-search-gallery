@@ -1,4 +1,4 @@
-import { normalizeImageSource, compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource, removeIdFromImageURL } from "../lib/server/url/media_url_transformer";
+import { compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource, normalizeImageSource, removeIdFromImageURL } from "../lib/server/url/media_url_transformer";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {

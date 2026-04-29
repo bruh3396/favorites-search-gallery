@@ -1,10 +1,10 @@
 import { DO_NOTHING } from "../../environment/constants";
-import { Timeout } from "../../../types/common_types";
+import { Timeout } from "../../../types/async";
 
 export class Timer {
   public waitTime: number;
   public onTimerEnd: () => void;
-  public timeout: Timeout;
+  private timeout: Timeout;
 
   constructor(waitTime: number) {
     this.waitTime = waitTime;

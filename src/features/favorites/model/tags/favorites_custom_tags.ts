@@ -1,10 +1,10 @@
-import { AwesompleteSuggestion } from "../../../../types/common_types";
-import { Storage } from "../../../../lib/core/storage";
-import { fetchTagFromAPI } from "../../../../lib/server/fetch/api";
+import { AwesompleteSuggestion } from "../../../../types/ui";
+import { DOM_PARSER } from "../../../../utils/dom/dom_parser";
+import { Storage } from "../../../../lib/core/storage/storage_instance";
+import { fetchTagFromAPI } from "../../../../lib/server/fetch/tag_fetcher";
 import { removeExtraWhiteSpace } from "../../../../utils/string/format";
 
 const CUSTOM_TAGS: Set<string> = loadCustomTags();
-const PARSER = new DOMParser();
 
 export function loadCustomTags(): Set<string> {
   return new Set(Storage.get<string[]>("customTags") ?? []);
@@ -32,7 +32,7 @@ export function clearCustomTags(): void {
 async function isOfficialTag(tagName: string): Promise<boolean> {
   try {
     const html = await fetchTagFromAPI(tagName);
-    const dom = PARSER.parseFromString(html, "text/html");
+    const dom = DOM_PARSER.parseFromString(html, "text/html");
     const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
     return columnOfFirstRow.length === 3;
   } catch (error) {

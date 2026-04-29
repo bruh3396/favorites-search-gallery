@@ -1,5 +1,5 @@
 import { ON_MOBILE_DEVICE } from "../../environment/environment";
-import { ORIGIN } from "./site_origin";
+import { ORIGIN } from "./origin";
 
 const CSS_VERSION = 44;
 

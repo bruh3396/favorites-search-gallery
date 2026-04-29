@@ -5,10 +5,10 @@ export function fetchImageBitmap(url: string, abortController?: AbortController)
   return fetch(url, { signal: abortController?.signal })
     .then((response) => response.blob())
     .then((blob) => createImageBitmap(blob))
-    .catch(() => fetchWIMGImageBitmap(url));
+    .catch(() => fetchWimgImageBitmap(url));
 }
 
-async function fetchWIMGImageBitmap(url: string): Promise<ImageBitmap> {
+async function fetchWimgImageBitmap(url: string): Promise<ImageBitmap> {
   const image = new Image();
 
   image.src = url.replace("rule34", "wimg.rule34");

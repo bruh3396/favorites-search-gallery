@@ -1,7 +1,7 @@
 import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./favorites_skeleton_dimensions";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./favorites_skeleton_animation";
 import { GeneralSettings } from "../../../../config/general_settings";
-import { LayoutMode } from "../../../../types/common_types";
+import { LayoutMode } from "../../../../types/ui";
 import { getSkeletonStyle } from "./favorites_skeleton_style";
 
 export class SkeletonItem {

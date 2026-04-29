@@ -12,8 +12,8 @@ import * as GalleryStateFlow from "./flows/runtime/gallery_state_flow";
 import * as GallerySwipeFlow from "./flows/runtime/gallery_swipe_flow";
 import * as GalleryTouchFlow from "./flows/runtime/gallery_touch_flow";
 import * as GalleryView from "../view/gallery_view";
-import { FeatureBridge } from "../../../lib/communication/features/feature_bridge";
 import { Events } from "../../../lib/communication/events/events";
+import { FeatureBridge } from "../../../lib/communication/features/feature_bridge";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 
 export function setupGalleryController(): void {

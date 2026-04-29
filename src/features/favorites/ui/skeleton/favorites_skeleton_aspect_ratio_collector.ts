@@ -1,7 +1,6 @@
-import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/thumb2";
-import { getAllThumbs } from "../../../../lib/dom/thumb2";
+import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
+import { Storage } from "../../../../lib/core/storage/storage_instance";
 import { getImageFromThumb } from "../../../../lib/dom/thumb";
-import { Storage } from "../../../../lib/core/storage";
 
 const LOCAL_STORAGE_KEY = "aspectRatios";
 const ASPECT_RATIOS: string[] = Storage.get<string[]>(LOCAL_STORAGE_KEY) ?? [];
@@ -12,7 +11,7 @@ function getAspectRatio(width: number, height: number): string {
 
 export async function collectAspectRatios(): Promise<void> {
   await waitForAllThumbnailsToLoad();
-  const thumbs = getAllThumbs();
+  const thumbs = getAllContentThumbs();
   const images = thumbs.map(thumb => getImageFromThumb(thumb)).filter(image => image !== null).slice(0, 50);
   const sizes = images.map(image => getAspectRatio(image.naturalWidth, image.naturalHeight));
 

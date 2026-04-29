@@ -2,11 +2,11 @@ import { FavoriteItem } from "../../../types/favorite_item";
 import { FavoritesInfiniteScrollFlow } from "./favorites_infinite_scroll_flow";
 import { FavoritesPaginationFlow } from "./favorites_pagination_flow";
 import { FavoritesPresentationFlow } from "../../../types/favorite_types";
-import { NavigationKey } from "../../../../../types/common_types";
+import { NavigationKey } from "../../../../../types/input";
 import { Preferences } from "../../../../../lib/preferences/preferences";
 
 function getPresentationFlow(): FavoritesPresentationFlow {
-  return Preferences.infiniteScrollEnabled.value ? FavoritesInfiniteScrollFlow : FavoritesPaginationFlow;
+  return Preferences.infiniteScroll.value ? FavoritesInfiniteScrollFlow : FavoritesPaginationFlow;
 }
 
 export function present(favorites: FavoriteItem[]): void {

@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { SortedArray } from "../lib/core/data_structures/sorted_array";
-import { getRandomPositiveInteger } from "../utils/number";
+import { randomInt } from "../utils/number";
 
 function testSortedArrayOrder<T extends string | number>(sortedArray: SortedArray<T>): void {
   const array = sortedArray.toArray();
@@ -20,7 +20,7 @@ describe("SortedArray", () => {
     const unsortedArray: number[] = [];
 
     for (let i = 0; i < 100; i += 1) {
-      const num = getRandomPositiveInteger(1000);
+      const num = randomInt(1000);
 
       sortedArray.insert(num);
       unsortedArray.push(num);

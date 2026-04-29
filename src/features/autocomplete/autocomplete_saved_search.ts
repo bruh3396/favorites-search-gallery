@@ -1,4 +1,4 @@
-import { AwesompleteSuggestion } from "../../types/common_types";
+import { AwesompleteSuggestion } from "../../types/ui";
 import { getSavedSearches } from "../../lib/saved_searches";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 

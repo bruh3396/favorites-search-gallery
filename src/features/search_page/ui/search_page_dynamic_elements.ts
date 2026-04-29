@@ -1,18 +1,19 @@
-import { CheckboxElement, NumberElement, SelectElement } from "../../../types/element_types";
-import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../types/common_types";
-import { reloadWindow } from "../../../utils/browser/window";
-import { toggleGalleryMenuEnabled } from "../../../lib/dom/style";
+import { CheckboxElement, NumberElement, SelectElement } from "../../../lib/ui/element_types";
 import { Events } from "../../../lib/communication/events/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralSettings } from "../../../config/general_settings";
+import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
+import { LayoutMode, PerformanceProfile } from "../../../types/ui";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { createCheckboxElement } from "../../../lib/ui/elements/checkbox";
 import { createNumberComponent } from "../../../lib/ui/elements/number_input";
 import { createSelectElement } from "../../../lib/ui/elements/select";
-import { getNumberRange } from "../../../utils/number";
+import { numberRange } from "../../../utils/number";
 import { prepareDynamicElements } from "../../../lib/ui/elements/element_utils";
+import { reloadWindow } from "../../../utils/browser/window";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
+import { toggleGalleryMenuEnabled } from "../../../lib/ui/style";
 
 const CHECKBOXES: Partial<CheckboxElement>[] = [
   {
@@ -20,7 +21,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     parentId: "search-page-upscale-thumbs",
     position: "beforeend",
     title: "Upscale thumbnails on search pages",
-    preference: Preferences.upscaleThumbsOnSearchPage,
+    preference: Preferences.searchPageUpscaleThumbs,
     event: Events.searchPage.upscaleToggled,
     textContent: "",
     enabled: ON_DESKTOP_DEVICE,
@@ -31,7 +32,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     parentId: "search-page-infinite-scroll",
     position: "beforeend",
     title: "Enable infinite scroll",
-    preference: Preferences.searchPageInfiniteScrollEnabled,
+    preference: Preferences.searchPageInfiniteScroll,
     event: Events.searchPage.infiniteScrollToggled,
     textContent: "",
     defaultValue: false
@@ -92,7 +93,7 @@ const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
     position: "beforeend",
     preference: Preferences.searchPageColumnCount,
     event: Events.favorites.columnCountChanged,
-    options: new Map<number, string>(getNumberRange(2, ON_DESKTOP_DEVICE ? 25 : 10).map(n => [n, String(n)]))
+    options: new Map<number, string>(numberRange(2, ON_DESKTOP_DEVICE ? 25 : 10).map(n => [n, String(n)]))
   },
   {
     id: "row-size",
@@ -100,7 +101,7 @@ const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
     position: "beforeend",
     preference: Preferences.searchPageRowSize,
     event: Events.favorites.rowSizeChanged,
-    options: new Map<number, string>(getNumberRange(1, 10).map(n => [n, String(n)]))
+    options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
   },
   {
     id: "performance-profile",

@@ -1,7 +1,7 @@
 import { Events } from "../../../../../lib/communication/events/events";
 import { GALLERY_ROOT } from "../../../ui/gallery_shell";
 import { ON_DESKTOP_DEVICE } from "../../../../../lib/environment/environment";
-import { yield1 } from "../../../../../lib/core/async/promise";
+import { yield1 } from "../../../../../lib/core/scheduling/promise";
 
 export function setupGalleryMobileTapControls(): void {
   if (ON_DESKTOP_DEVICE) {

@@ -1,10 +1,10 @@
 import { CONTROLS_HTML } from "../../../../assets/html";
 import { OVERLAYS } from "../../../../lib/shell";
-import { insertHTMLAndExtractStyle } from "../../../../utils/dom/injector";
-import { sleep } from "../../../../lib/core/async/promise";
+import { insertHtmlWithStyles } from "../../../../utils/dom/injector";
+import { sleep } from "../../../../lib/core/scheduling/promise";
 
 export async function createControlsGuide(): Promise<void> {
-  insertHTMLAndExtractStyle(OVERLAYS, "beforeend", CONTROLS_HTML);
+  insertHtmlWithStyles(OVERLAYS, "beforeend", CONTROLS_HTML);
   const controlGuide = document.getElementById("controls-guide");
 
   if (controlGuide === null) {

@@ -1,18 +1,17 @@
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../../../lib/environment/environment";
-import { getRectDistance } from "../../../../../utils/dom/interaction";
-import { waitForAllThumbnailsToLoad } from "../../../../../lib/dom/thumb2";
-import { getAllThumbs } from "../../../../../lib/dom/thumb2";
+import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../../../lib/dom/content_thumb";
 import { Events } from "../../../../../lib/communication/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { Preferences } from "../../../../../lib/preferences/preferences";
-import { debounceAlways } from "../../../../../lib/core/async/rate_limiter";
+import { debounceTrailing } from "../../../../../lib/core/scheduling/rate_limiting";
+import { getRectDistance } from "../../../../../utils/geometry";
 
 const VISIBLE_THUMBS: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;
 let intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let bypassDebounce = true;
 
-const broadcastDebounceAlways = debounceAlways(() => {
+const broadcastDebounceAlways = debounceTrailing(() => {
   Events.gallery.visibleThumbsChanged.emit();
 }, GallerySettings.preloadContentDebounceTime);
 
@@ -107,7 +106,7 @@ export async function observeAllThumbsOnPage(): Promise<void> {
   VISIBLE_THUMBS.clear();
 
   await waitForAllThumbnailsToLoad();
-  observe(getAllThumbs());
+  observe(getAllContentThumbs());
 }
 
 export function setCenterThumb(thumb: HTMLElement | null): void {

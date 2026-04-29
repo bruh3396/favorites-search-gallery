@@ -2,7 +2,7 @@ import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environm
 import { Events } from "../../../../../lib/communication/events/events";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { Preferences } from "../../../../../lib/preferences/preferences";
-import { Storage } from "../../../../../lib/core/storage";
+import { Storage } from "../../../../../lib/core/storage/storage_instance";
 import { VideoClip } from "../../../types/gallery_types";
 import { convertPreviewURLToImageURL } from "../../../../../lib/server/url/media_url_transformer";
 import { getPreviewURL } from "../../../../../lib/ui/dom";

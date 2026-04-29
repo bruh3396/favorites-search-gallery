@@ -1,8 +1,8 @@
 import { FeatureBridge } from "../../../lib/communication/features/feature_bridge";
-import { MediaType } from "../../../types/common_types";
+import { MediaType } from "../../../types/media";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { getPreviewURL } from "../../../lib/ui/dom";
-import { getTagSetFromItem } from "../../../utils/tags";
+import { getTagSetFromItem } from "../../../lib/dom/tags";
 import { resolveMediaType } from "../../../lib/media_resolver";
 
 const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(100);
@@ -18,7 +18,7 @@ export function getFavoritePixelCount(id: string): number {
 
 export class ImageRequest {
   public id: string;
-  public thumbURL: string;
+  public thumbUrl: string;
   public thumb: HTMLElement;
   public bitmap: ImageBitmap | null;
   public abortController: AbortController;
@@ -28,7 +28,7 @@ export class ImageRequest {
 
   constructor(thumb: HTMLElement) {
     this.id = thumb.id;
-    this.thumbURL = getPreviewURL(thumb) ?? "";
+    this.thumbUrl = getPreviewURL(thumb) ?? "";
     this.thumb = thumb;
     this.bitmap = null;
     this.abortController = new AbortController();

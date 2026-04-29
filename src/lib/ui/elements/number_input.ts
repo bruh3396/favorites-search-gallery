@@ -1,4 +1,4 @@
-import { DEFAULT_MENU_ELEMENT, NumberElement } from "../../../types/element_types";
+import { DEFAULT_MENU_ELEMENT, NumberElement } from "../element_types";
 import { DO_NOTHING } from "../../environment/constants";
 import { Events } from "../../communication/events/events";
 import { NumberComponent } from "./number_component";

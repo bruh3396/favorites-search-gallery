@@ -1,42 +1,32 @@
-import * as API from "../../../lib/server/fetch/api";
-
-import * as Icons from "../../../assets/icons";
-import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
-import { ClickCode, Post } from "../../../types/common_types";
+import * as FavoritesAPI from "../../../lib/server/fetch/favorites_fetcher";
+import { ADD_FAVORITE_IMAGE_HTML, DOWNLOAD_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { ON_DESKTOP_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/environment";
-import { createObjectURLFromSvg, openOriginal, openPostPage } from "../../../lib/navigator";
+import { openOriginal, openPostPage } from "../../../lib/navigator";
+import { ClickCode } from "../../../types/input";
 import { Events } from "../../../lib/communication/events/events";
-import { FavoriteElement } from "./favorite_types";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
 import { ITEM_CLASS_NAME } from "../../../lib/dom/thumb";
+import { Post } from "../../../types/post";
 import { buildPostPageURL } from "../../../lib/server/url/page_url_builder";
 import { downloadFromThumb } from "../../../lib/server/fetch/media_downloader";
 import { resolveMediaType } from "../../../lib/media_resolver";
 
-let htmlTemplate: HTMLElement;
+let template: HTMLElement;
 
-export function createFavoriteItemHTMLTemplates(): void {
-  createPostHTMLTemplate();
-}
-
-function createDownloadButtonHTMLTemplate(): string {
-  return `<img class="download-button utility-button" src=${createObjectURLFromSvg(Icons.DOWNLOAD.replace("FFFFFF", "0075FF"))}>`;
-}
-
-function createPostHTMLTemplate(): void {
-  htmlTemplate = new DOMParser().parseFromString("", "text/html").createElement("div");
-  htmlTemplate.className = ITEM_CLASS_NAME;
-  htmlTemplate.innerHTML = `
+export function buildFavoriteElementTemplate(): void {
+  template = new DOMParser().parseFromString("", "text/html").createElement("div");
+  template.className = ITEM_CLASS_NAME;
+  template.innerHTML = `
         <a>
           <img>
           ${USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? REMOVE_FAVORITE_IMAGE_HTML : ADD_FAVORITE_IMAGE_HTML}
-          ${createDownloadButtonHTMLTemplate()}
+          ${DOWNLOAD_IMAGE_HTML}
           ${GALLERY_DISABLED ? "" : "<canvas></canvas>"}
         </a>
     `;
 }
 
-export class FavoriteHTMLElement implements FavoriteElement {
+export class FavoriteElement {
   public root: HTMLElement;
   public container: HTMLAnchorElement;
   public image: HTMLImageElement;
@@ -44,7 +34,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
   public downloadButton: HTMLImageElement;
 
   constructor(post: Post) {
-    this.root = htmlTemplate.cloneNode(true) as HTMLElement;
+    this.root = template.cloneNode(true) as HTMLElement;
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.root.children[0].children[0] as HTMLImageElement;
     this.favoriteButton = this.root.children[0].children[1] as HTMLImageElement;
@@ -56,7 +46,7 @@ export class FavoriteHTMLElement implements FavoriteElement {
     this.presetCanvasDimensions(post);
   }
 
-  public get thumbURL(): string {
+  public get thumbUrl(): string {
     return this.image.src;
   }
 
@@ -92,12 +82,12 @@ export class FavoriteHTMLElement implements FavoriteElement {
 
   private removeFavorite(): void {
     Events.favorites.favoriteRemoved.emit(this.root.id);
-    API.removeFavorite(this.root.id);
+    FavoritesAPI.removeFavorite(this.root.id);
     this.swapFavoriteButton();
   }
 
   private addFavorite(): void {
-    API.addFavorite(this.root.id);
+    FavoritesAPI.addFavorite(this.root.id);
     this.swapFavoriteButton();
   }
 
@@ -135,15 +125,6 @@ export class FavoriteHTMLElement implements FavoriteElement {
 
   private openPostInNewTabOnClickMobile(): void {
     this.container.href = buildPostPageURL(this.root.id);
-    // this.container.addEventListener("mousedown", (event): void => {
-    //   if (event.target instanceof HTMLImageElement && event.target.classList.contains("utility-button")) {
-    //     return;
-    //   }
-
-    //   if (!Preferences.mobileGalleryEnabled.value) {
-    //     openPostPage(this.root.id);
-    //   }
-    // });
   }
 
   private presetCanvasDimensions(post: Post): void {

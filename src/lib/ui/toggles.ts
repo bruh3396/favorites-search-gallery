@@ -1,6 +1,6 @@
 import { DESKTOP_SIDEBAR_CSS, DESKTOP_SLIM_CSS } from "../../assets/css";
 import { insertStyle } from "../../utils/dom/injector";
-import { yield1 } from "../core/async/promise";
+import { yield1 } from "../core/scheduling/promise";
 
 export function toggleAddOrRemoveButtons(value: boolean): void {
   insertStyle(`

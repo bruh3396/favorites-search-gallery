@@ -1,4 +1,4 @@
-import { Searchable, SearchableMetadataMetric } from "../types/common_types";
+import { Searchable, SearchableMetadataMetric } from "../types/search";
 import { describe, expect, test } from "vitest";
 import { parseMetadataSearchTag } from "../lib/search/tag/search_tag_parser";
 

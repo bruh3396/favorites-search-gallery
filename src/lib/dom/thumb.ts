@@ -6,18 +6,18 @@ export const ITEM_SELECTOR = ".favorite, .thumb";
 export const IMAGE_SELECTOR = ".favorite img";
 export const COLUMN_CLASS_NAME = "actual-column";
 
-function getClosestItem(element: HTMLElement): HTMLElement | null {
+function getClosestThumb(element: HTMLElement): HTMLElement | null {
   return element.closest(ITEM_SELECTOR);
 }
 
-export function getItemsInContainer(container: HTMLElement | Document): HTMLElement[] {
+export function getThumbsInContainer(container: HTMLElement | Document): HTMLElement[] {
   return Array.from(container.querySelectorAll(ITEM_SELECTOR)).filter(thumb => thumb instanceof HTMLElement);
 }
 
-export function getItemsInMatrix(container: HTMLElement): HTMLElement[] {
+export function getThumbsInMatrix(container: HTMLElement): HTMLElement[] {
     const itemCount = Array.from(container.querySelectorAll(ITEM_SELECTOR)).length;
     const columns = Array.from(container.children);
-    const result = [];
+    const result: HTMLElement[] = [];
     const matrix = columns.map(column => Array.from(column.querySelectorAll(ITEM_SELECTOR)));
 
     for (let i = 0; i < itemCount; i += 1) {
@@ -37,7 +37,7 @@ export function getImageFromThumb(thumb: HTMLElement): HTMLImageElement | null {
 }
 
 export function getThumbFromImage(image: HTMLElement): HTMLElement | null {
-  return getClosestItem(image);
+  return getClosestThumb(image);
 }
 
 export function getIdFromThumb(thumb: HTMLElement): string {
@@ -77,11 +77,11 @@ export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement
 }
 
 export function insideOfThumb(element: unknown): boolean {
-  return element instanceof HTMLElement && getClosestItem(element) !== null;
+  return element instanceof HTMLElement && getClosestThumb(element) !== null;
 }
 
 export function waitForThumbnailsToLoadInContainer(container: HTMLElement | Document): Promise<unknown[]> {
-  const unloadedImages = getItemsInContainer(container)
+  const unloadedImages = getThumbsInContainer(container)
     .map(thumb => getImageFromThumb(thumb))
     .filter(image => image instanceof HTMLImageElement)
     .filter(image => image.dataset.preload !== "true" && imageIsLoading(image));

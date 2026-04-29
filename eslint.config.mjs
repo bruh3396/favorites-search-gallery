@@ -549,5 +549,11 @@ export default defineConfig([
     rules: {
       "no-console": "off"
     }
+  },
+   {
+    files: ["src/types/errors.ts"],
+    rules: {
+      "max-classes-per-file": "off"
+    }
   }
 ]);

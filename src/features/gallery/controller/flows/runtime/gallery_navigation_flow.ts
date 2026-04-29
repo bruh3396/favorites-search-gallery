@@ -4,7 +4,7 @@ import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../../../view/gallery_view";
 import { FeatureBridge } from "../../../../../lib/communication/features/feature_bridge";
 import { GalleryBoundary } from "../../../types/gallery_types";
-import { NavigationKey } from "../../../../../types/common_types";
+import { NavigationKey } from "../../../../../types/input";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { usingInfiniteScroll } from "../../../../../lib/preferences/infinite_scroll";
 

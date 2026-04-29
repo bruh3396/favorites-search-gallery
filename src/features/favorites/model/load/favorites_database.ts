@@ -1,8 +1,8 @@
 import { FavoriteItem, getFavorite } from "../../types/favorite_item";
 import { BatchExecutor } from "../../../../lib/core/concurrency/batch_executor";
 import { Database } from "../../../../lib/core/storage/database";
-import { FavoritesDatabaseRecord } from "../../../../types/favorite_data_types";
-import { Storage } from "../../../../lib/core/storage";
+import { FavoritesDatabaseRecord } from "../../../../types/favorite";
+import { Storage } from "../../../../lib/core/storage/storage_instance";
 import { convertToTagSet } from "../../../../utils/string/tags";
 import { getFavoritesPageId } from "../../../../lib/environment/favorites_metadata";
 

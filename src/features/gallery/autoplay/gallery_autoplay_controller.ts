@@ -4,14 +4,14 @@ import { clamp, millisecondsToSeconds } from "../../../utils/number";
 import { isImage, isVideo } from "../../../lib/media_resolver";
 import { AUTOPLAY_HTML } from "../../../assets/html";
 import { Events } from "../../../lib/communication/events/events";
-import { NavigationKey } from "../../../types/common_types";
+import { NavigationKey } from "../../../types/input";
 import { NumberComponent } from "../../../lib/ui/elements/number_component";
 import { OVERLAYS } from "../../../lib/shell";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { Timer } from "../../../lib/core/async/timer";
+import { Timer } from "../../../lib/core/scheduling/timer";
 import { createObjectURLFromSvg } from "../../../lib/navigator";
 import { insertStyle } from "../../../utils/dom/injector";
-import { throttle } from "../../../lib/core/async/rate_limiter";
+import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 
 export type AutoplayEvents = {
   onEnable: () => void
@@ -79,7 +79,7 @@ export function setupAutoplay(inEvents: AutoplayEvents): void {
   initializeFields();
   initializeEvents(inEvents);
   initializeTimers();
-  insertHTML();
+  insertHtml();
   configureMobileUi();
   extractUiElements();
   setMenuIconImageSources();
@@ -140,13 +140,13 @@ function initializeTimers(): void {
   };
 }
 
-function insertHTML(): void {
-  insertMenuHTML();
+function insertHtml(): void {
+  insertMenuHtml();
   insertImageProgressHTML();
   insertVideoProgressHTML();
 }
 
-function insertMenuHTML(): void {
+function insertMenuHtml(): void {
   OVERLAYS.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
 }
 

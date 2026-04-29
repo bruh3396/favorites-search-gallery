@@ -1,6 +1,6 @@
 import * as ExtensionCache from "../../lib/extension_cache";
 import { isGif, isVideo } from "../../lib/media_resolver";
-import { Favorite } from "../../types/favorite_data_types";
+import { Favorite } from "../../types/favorite";
 import { resolveMediaURL } from "../../lib/server/url/media_url_resolver";
 
 export class DownloadRequest {
@@ -16,11 +16,6 @@ export class DownloadRequest {
 
   public get filename(): string {
     return `${this.id}.${this.extension}`;
-  }
-
-  public async blob(): Promise<Blob> {
-    const response = await fetch(this.url);
-    return response.blob();
   }
 }
 

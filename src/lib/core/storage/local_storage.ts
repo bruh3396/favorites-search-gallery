@@ -1,4 +1,4 @@
-import { Store } from "./store_interface";
+import { Store } from "./store";
 
 export class LocalStorage implements Store {
   public get<V>(key: string): V | null {

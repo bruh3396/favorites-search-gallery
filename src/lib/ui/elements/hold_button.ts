@@ -1,5 +1,5 @@
 import { ON_MOBILE_DEVICE } from "../../environment/environment";
-import { Timeout } from "../../../types/common_types";
+import { Timeout } from "../../../types/async";
 import { clamp } from "../../../utils/number";
 
 export class HoldButton extends HTMLElement {

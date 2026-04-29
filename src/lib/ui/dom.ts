@@ -1,5 +1,5 @@
 import { Events } from "../communication/events/events";
-import { Favorite } from "../../types/favorite_data_types";
+import { Favorite } from "../../types/favorite";
 import { ON_MOBILE_DEVICE } from "../environment/environment";
 import { getImageFromThumb } from "../dom/thumb";
 
@@ -8,7 +8,7 @@ export function getPreviewURL(item: HTMLElement | Favorite): string | null {
     const image = getImageFromThumb(item);
     return image ? image.src : null;
   }
-  return item.thumbURL;
+  return item.thumbUrl;
 }
 
 export function scrollToTop(): void {

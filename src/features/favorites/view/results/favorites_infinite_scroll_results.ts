@@ -29,5 +29,5 @@ export function getFirstResults(favorites: FavoriteItem[]): FavoriteItem[] {
 }
 
 export function getThumbURLsToPreload(favorites: FavoriteItem[]): string[] {
-  return collectUnrendered(favorites, FavoritesSettings.infiniteScrollPreloadCount, f => f.thumbURL);
+  return collectUnrendered(favorites, FavoritesSettings.infiniteScrollPreloadCount, f => f.thumbUrl);
 }

@@ -1,10 +1,11 @@
-import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "../../../types/favorite_data_types";
-import { Post, Rating } from "../../../types/common_types";
-import { clearPost, createPostFromRawFavorite } from "./favorite_type_utils";
+import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "../../../types/favorite";
+import { clearPost, createPost } from "./favorite_post_factory";
 import { FAVORITES_SEARCH_INDEX } from "../model/search/favorites_search_index";
-import { FavoriteHTMLElement } from "./favorite_element";
+import { FavoriteElement } from "./favorite_element";
 import { FavoriteMetadata } from "./favorite_metadata";
 import { FavoriteTags } from "./favorite_tags";
+import { Post } from "../../../types/post";
+import { Rating } from "../../../types/search";
 import { compressPreviewSource } from "../../../lib/server/url/media_url_transformer";
 import { getIdFromThumb } from "../../../lib/dom/thumb";
 
@@ -36,13 +37,13 @@ function registerFavorite(favorite: FavoriteItem): void {
 export class FavoriteItem implements Favorite {
   public id: string;
   private post: Post;
-  private element: FavoriteHTMLElement | null;
+  private element: FavoriteElement | null;
   private favoriteTags: FavoriteTags;
   private metadata: FavoriteMetadata;
 
   constructor(object: HTMLElement | FavoritesDatabaseRecord) {
     this.id = object instanceof HTMLElement ? getIdFromThumb(object) : object.id;
-    this.post = createPostFromRawFavorite(object);
+    this.post = createPost(object);
     this.element = null;
     this.favoriteTags = new FavoriteTags(this.post, object);
     registerFavorite(this);
@@ -56,14 +57,14 @@ export class FavoriteItem implements Favorite {
   public get root(): HTMLElement {
     if (this.element === null) {
       this.post.tags = this.favoriteTags.tagString;
-      this.element = new FavoriteHTMLElement(this.post);
+      this.element = new FavoriteElement(this.post);
     }
     clearPost(this.post);
     return this.element.root;
   }
 
-  public get thumbURL(): string {
-    return this.element === null ? this.post.previewURL : this.element.thumbURL;
+  public get thumbUrl(): string {
+    return this.element === null ? this.post.previewURL : this.element.thumbUrl;
   }
 
   public get metrics(): FavoriteMetricMap {
@@ -74,7 +75,7 @@ export class FavoriteItem implements Favorite {
     return {
       id: this.id,
       tags: this.tags,
-      src: compressPreviewSource(this.thumbURL),
+      src: compressPreviewSource(this.thumbUrl),
       metadata: this.metadata.databaseRecord
     };
   }

@@ -1,7 +1,7 @@
 import * as SearchPageLoader from "./search_page_loader";
-import { NavigationKey } from "../../../types/common_types";
+import { NavigationKey } from "../../../types/input";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { SearchPage } from "../../../types/search_page";
+import { SearchPage } from "./search_page";
 
 export function setupSearchPageModel(): void {
   SearchPageLoader.setupSearchPageLoader();
@@ -24,7 +24,7 @@ export function resetCurrentPageNumber(): void {
 }
 
 export function usingInfiniteScroll(): boolean {
-  return Preferences.searchPageInfiniteScrollEnabled.value;
+  return Preferences.searchPageInfiniteScroll.value;
 }
 
 export function getAllSearchPageThumbs(): HTMLElement[] {

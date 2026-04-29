@@ -1,10 +1,11 @@
-import { NavigationKey } from "../../../types/common_types";
+import { NavigationKey } from "../../../types/input";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
-import { SearchPage } from "../../../types/search_page";
+import { SearchPage } from "./search_page";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
-import { getAllThumbs } from "../../../lib/dom/thumb2";
-import { isForwardNavigationKey } from "../../../types/equivalence";
-import { sleep } from "../../../lib/core/async/promise";
+import { fetchSearchPage } from "../../../lib/server/fetch/search_page_fetcher";
+import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
+import { isForwardNavigationKey } from "../../../types/guards";
+import { sleep } from "../../../lib/core/scheduling/promise";
 
 const SEARCH_PAGE_FETCH_LIMITER = new ThrottledQueue(1250);
 const SEARCH_PAGE_PREFETCH_LENGTH = 6;
@@ -12,7 +13,7 @@ let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;
 let initialPageNumber: number;
 let currentPageNumber: number;
-let initialURL = getInitialURL();
+let baseUrl = getBaseUrl();
 let allThumbs: HTMLElement[] = [];
 let initialSearchPage: SearchPage;
 
@@ -21,9 +22,8 @@ export function setupSearchPageLoader(): void {
   fetchedPageNumbers = new Set();
   initialPageNumber = getInitialPageNumber();
   currentPageNumber = initialPageNumber;
-  initialURL = getInitialURL();
-  console.log(getAllThumbs());
-  setAllThumbs(Array.from(getAllThumbs()));
+  baseUrl = getBaseUrl();
+  setAllThumbs(Array.from(getAllPageThumbs()));
   initialSearchPage = new SearchPage(initialPageNumber, allThumbs);
 
   searchPages.set(initialPageNumber, initialSearchPage);
@@ -69,7 +69,7 @@ async function loadSearchPage(pageNumber: number): Promise<void> {
   }
   fetchedPageNumbers.add(pageNumber);
   await SEARCH_PAGE_FETCH_LIMITER.wait();
-  return fetchSearchPage(pageNumber)
+  return fetchSearchPage(baseUrl, pageNumber)
     .then((html: string) => {
       registerNewPage(pageNumber, html);
       updateAllThumbs();
@@ -85,20 +85,6 @@ function pageHasAlreadyBeenFetched(pageNumber: number): boolean {
 
 function registerNewPage(pageNumber: number, html: string): void {
   searchPages.set(pageNumber, new SearchPage(pageNumber, html));
-}
-
-function fetchSearchPage(pageNumber: number): Promise<string> {
-  return fetch(getSearchPageURL(pageNumber))
-    .then((response) => {
-      if (response.ok) {
-        return response.text();
-      }
-      throw new Error(String(response.status));
-    });
-}
-
-function getSearchPageURL(pageNumber: number): string {
-  return `${initialURL}&pid=${POSTS_PER_SEARCH_PAGE * pageNumber}`;
 }
 
 function updateAllThumbs(): void {
@@ -120,7 +106,7 @@ function getInitialPageNumber(): number {
   return match === null ? 0 : Math.round(parseInt(match[1]) / POSTS_PER_SEARCH_PAGE);
 }
 
-function getInitialURL(): string {
+function getBaseUrl(): string {
   return location.href.replace(/&pid=(\d+)/, "");
 }
 

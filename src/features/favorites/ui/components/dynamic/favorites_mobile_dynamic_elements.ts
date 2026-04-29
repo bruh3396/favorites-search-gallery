@@ -1,7 +1,9 @@
-import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../types/element_types";
-import { LayoutMode, MetadataMetric, PerformanceProfile } from "../../../../../types/common_types";
+import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../lib/ui/element_types";
+import { MetadataMetric } from "../../../../../types/search";
+import { PerformanceProfile } from "../../../../../types/ui";
+import { LayoutMode } from "../../../../../types/ui";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../lib/ui/toggles";
-import { toggleDarkTheme, usingDarkTheme } from "../../../../../lib/dom/style";
+import { toggleDarkTheme, usingDarkTheme } from "../../../../../lib/ui/style";
 import { Events } from "../../../../../lib/communication/events/events";
 import { GALLERY_ENABLED } from "../../../../../lib/environment/derived_environment";
 import { Preferences } from "../../../../../lib/preferences/preferences";
@@ -29,7 +31,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Infinite Scroll",
     title: "Use infinite scroll (waterfall) instead of pages",
-    preference: Preferences.infiniteScrollEnabled,
+    preference: Preferences.infiniteScroll,
     hotkey: "",
     event: Events.favorites.infiniteScrollToggled
   },
@@ -75,7 +77,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     textContent: "Exclude Blacklist",
     title: "Exclude favorites with blacklisted tags from search",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.excludeBlacklistEnabled,
+    preference: Preferences.excludeBlacklist,
     hotkey: "",
     event: Events.favorites.blacklistToggled
   },
@@ -116,7 +118,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Search Page Gallery",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.searchPagesEnabled,
+    preference: Preferences.searchPages,
     hotkey: "",
     savePreference: true
   },
@@ -125,7 +127,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
     parentId: "sort-inputs",
     position: "beforeend",
     enabled: true,
-    preference: Preferences.sortAscendingEnabled,
+    preference: Preferences.sortAscending,
     event: Events.favorites.sortAscendingToggled
   },
   {

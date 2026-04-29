@@ -6,7 +6,7 @@ import { GeneralSettings } from "../../config/general_settings";
 import { Preferences } from "../preferences/preferences";
 import { buildStyleSheetURL } from "../server/url/action_url_builder";
 import { insertStyle } from "../../utils/dom/injector";
-import { yield1 } from "../core/async/promise";
+import { yield1 } from "../core/scheduling/promise";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
   return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
@@ -20,7 +20,7 @@ function toggleDarkStyleSheet(useDark: boolean): void {
   setStyleSheet(buildStyleSheetURL(useDark));
 }
 
-function toggleLocalDarkStyles(useDark: boolean): void {
+function toggleGreenGradientClasses(useDark: boolean): void {
   const currentTheme = useDark ? "light-green-gradient" : "dark-green-gradient";
   const targetTheme = useDark ? "dark-green-gradient" : "light-green-gradient";
 
@@ -91,7 +91,7 @@ function setGalleryBackgroundColor(color: string): void {
       `, "gallery-background-color");
 }
 
-function addDynamicTilerStyles(): void {
+function setupTilerStyles(): void {
 
   const style = `
   .row, .column, .column .actual-column, .square, .grid {
@@ -113,7 +113,7 @@ export async function toggleDarkTheme(useDark: boolean): Promise<void> {
   await yield1();
   insertStyle(useDark ? DARK_THEME_HTML : "", "dark-theme");
   toggleDarkStyleSheet(useDark);
-  toggleLocalDarkStyles(useDark);
+  toggleGreenGradientClasses(useDark);
   setCookie("theme", useDark ? "dark" : "light");
 }
 
@@ -149,5 +149,5 @@ export function setupStyles(): void {
 
   toggleDarkTheme(usingDarkTheme());
   setupVideoAndGifOutlines();
-  addDynamicTilerStyles();
+  setupTilerStyles();
 }

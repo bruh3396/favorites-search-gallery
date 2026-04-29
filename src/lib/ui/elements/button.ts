@@ -1,4 +1,4 @@
-import { ButtonElement, DEFAULT_MENU_ELEMENT } from "../../../types/element_types";
+import { ButtonElement, DEFAULT_MENU_ELEMENT } from "../element_types";
 import { DO_NOTHING } from "../../environment/constants";
 
 function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {

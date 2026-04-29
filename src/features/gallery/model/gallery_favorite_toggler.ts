@@ -1,12 +1,12 @@
-import * as API from "../../../lib/server/fetch/api";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite_data_types";
+import * as FavoritesAPI from "../../../lib/server/fetch/favorites_fetcher";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events/events";
 
 export async function addFavorite(thumb: HTMLElement | undefined): Promise<AddFavoriteStatus> {
   if (thumb === undefined) {
     return Promise.resolve(AddFavoriteStatus.ERROR);
   }
-  const status = await API.addFavorite(thumb.id);
+  const status = await FavoritesAPI.addFavorite(thumb.id);
 
   if (status === AddFavoriteStatus.SUCCESSFULLY_ADDED) {
     Events.gallery.favoriteToggled.emit(thumb.id);
@@ -29,7 +29,7 @@ export function removeFavorite(thumb: HTMLElement | undefined): Promise<RemoveFa
   if (!allowedToRemoveFavorites) {
     return Promise.resolve(RemoveFavoriteStatus.FORBIDDEN);
   }
-  API.removeFavorite(thumb.id);
+  FavoritesAPI.removeFavorite(thumb.id);
   Events.gallery.favoriteToggled.emit(thumb.id);
   Events.favorites.favoriteRemoved.emit(thumb.id);
   return Promise.resolve(RemoveFavoriteStatus.SUCCESSFULLY_REMOVED);
