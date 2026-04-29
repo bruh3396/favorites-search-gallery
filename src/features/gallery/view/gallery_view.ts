@@ -33,7 +33,7 @@ export function exitGallery(): void {
   toggleGalleryVisibility(false);
   toggleZoomCursor(false);
   setTimeout(() => {
-    GalleryRenderer.upscaleCachedImageThumbs();
+    GalleryRenderer.upscaleCachedThumbs();
   }, 10);
 }
 
@@ -42,7 +42,6 @@ export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  console.log(thumbs);
   GalleryRenderer.preloadContentInGallery(thumbs);
 }
 
@@ -119,8 +118,8 @@ export function downscaleAll(): void {
   GalleryRenderer.downscaleAll();
 }
 
-export function upscaleCachedImageThumbs(): void {
-  GalleryRenderer.upscaleCachedImageThumbs();
+export function upscaleCachedThumbs(): void {
+  GalleryRenderer.upscaleCachedThumbs();
 }
 
 export function setupGalleryView(): void {

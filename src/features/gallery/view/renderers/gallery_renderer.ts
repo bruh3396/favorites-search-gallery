@@ -48,4 +48,4 @@ export const toggleZoomCursor = (value: boolean): void => GalleryImageController
 export const zoomToPoint = (x: number, y: number): void => GalleryImageController.zoomToPoint(x, y);
 export const correctOrientation = (): void => GalleryImageController.correctOrientation();
 export const downscaleAll = (): void => GalleryImageController.downscaleAll();
-export const upscaleCachedImageThumbs = (): Promise<void> => GalleryImageController.upscaleCachedImageThumbs();
+export const upscaleCachedThumbs = (): Promise<void> => GalleryImageController.upscaleCachedThumbs();

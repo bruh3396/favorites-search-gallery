@@ -15,7 +15,7 @@ export function onUpscaleToggled(value: boolean): void {
     if (notUsingInfiniteScroll) {
       GalleryView.preloadContentOutOfGallery(thumbs);
     }
-    GalleryView.upscaleCachedImageThumbs();
+    GalleryView.upscaleCachedThumbs();
   } else {
     GalleryView.downscaleAll();
   }

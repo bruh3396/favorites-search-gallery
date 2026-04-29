@@ -6,12 +6,12 @@ import { ImageRequest } from "../../../../types/gallery_image_request";
 import { USING_FIREFOX } from "../../../../../../lib/environment/environment";
 
 class ImageController extends GalleryAbstractController {
-  private lastDrawnId: string;
+  private activeId: string;
 
   constructor() {
     super();
-    this.lastDrawnId = "";
-    GalleryImageLoader.setCompletionCallback(this.onRequestComplete.bind(this));
+    this.activeId = "";
+    GalleryImageLoader.setCompletionCallback(this.onBitmapLoaded.bind(this));
     GalleryImageCanvas.mount(this.container);
   }
 
@@ -21,13 +21,13 @@ class ImageController extends GalleryAbstractController {
   }
 
   public handlePageChange(): void {
-    GalleryImageLoader.clear();
+    GalleryImageLoader.clearCache();
     GalleryUpscaler.handlePageChange();
   }
 
   public handlePageChangeInGallery(): void {
     GalleryUpscaler.handlePageChange();
-    setTimeout(() => this.upscaleCachedImageThumbs(), 10);
+    setTimeout(() => this.upscaleCachedThumbs(), 10);
   }
 
   public exitGallery(): void {
@@ -37,7 +37,7 @@ class ImageController extends GalleryAbstractController {
   }
   public correctOrientation(): void {
     GalleryImageCanvas.correctOrientation();
-    this.redrawLastId();
+    this.redisplayActiveThumb();
   }
 
   public toggleZoomCursor(value: boolean): void {
@@ -49,36 +49,36 @@ class ImageController extends GalleryAbstractController {
   }
 
   public zoomToPoint = (x: number, y: number): void => GalleryImageCanvas.zoomToPoint(x, y);
-  public upscaleCachedImageThumbs = (): Promise<void> => GalleryUpscaler.upscaleBatch(GalleryImageLoader.getCompletions());
+  public upscaleCachedThumbs = (): Promise<void> => GalleryUpscaler.upscaleBatch(GalleryImageLoader.completedRequests());
   public handleFavoritesAddedToCurrentPage = (thumbs: HTMLElement[]): void => GalleryUpscaler.presetCanvasDimensions(thumbs);
   public downscaleAll = (): void => GalleryUpscaler.handlePageChange();
 
   protected display(thumb: HTMLElement): void {
-    this.lastDrawnId = thumb.id;
-    const cached = GalleryImageLoader.get(thumb.id);
+    this.activeId = thumb.id;
+    const cached = GalleryImageLoader.getCached(thumb.id);
 
     if (cached) {
       GalleryImageCanvas.draw(cached.request.bitmap);
       return;
     }
-    GalleryImageLoader.demand(thumb);
+    GalleryImageLoader.loadImmediate(thumb);
   }
 
-  private onRequestComplete(request: ImageRequest): void {
+  private onBitmapLoaded(request: ImageRequest): void {
     GalleryUpscaler.upscale(request);
 
-    if (request.id === this.lastDrawnId) {
+    if (request.id === this.activeId) {
       this.display(request.thumb);
     }
   }
 
-  private redrawLastId(): void {
-    const thumb = document.getElementById(this.lastDrawnId);
+  private redisplayActiveThumb(): void {
+    const thumb = document.getElementById(this.activeId);
 
     if (thumb === null) {
       return;
     }
-    const cached = GalleryImageLoader.get(thumb.id);
+    const cached = GalleryImageLoader.getCached(this.activeId);
 
     if (cached && cached.status === "complete") {
       this.display(thumb);

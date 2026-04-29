@@ -23,7 +23,7 @@ export class ColumnTiler extends AbstractTiler {
 
   public addItemsToTop(items: HTMLElement[]): void {
     if (this.enabled) {
-      this.deactivate();
+      // this.deactivate();
       // this.activate();
     }
     this.tile(items.concat(getThumbsInContainer(this.container)));
