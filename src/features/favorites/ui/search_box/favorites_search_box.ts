@@ -71,7 +71,7 @@ function updateLastEditedSearchQueryOnInput(): void {
 }
 
 function updateLastEditedSearchQuery(): void {
-  SEARCH_HISTORY.updateLastEditedSearchQuery(SEARCH_BOX.value);
+  SEARCH_HISTORY.setLastQuery(SEARCH_BOX.value);
 }
 
 function onSearchButtonClicked(event: MouseEvent): void {

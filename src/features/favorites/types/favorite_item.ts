@@ -102,7 +102,7 @@ export class FavoriteItem implements Favorite {
   }
 
   public addAdditionalTags(newTags: string): string {
-    FAVORITES_SEARCH_INDEX.remove(this);
+    FAVORITES_SEARCH_INDEX.unlinkTags(this);
     const result = this.favoriteTags.addAdditionalTags(newTags);
 
     FAVORITES_SEARCH_INDEX.add(this);
@@ -110,7 +110,7 @@ export class FavoriteItem implements Favorite {
   }
 
   public removeAdditionalTags(tagsToRemove: string): string {
-    FAVORITES_SEARCH_INDEX.remove(this);
+    FAVORITES_SEARCH_INDEX.unlinkTags(this);
     const result = this.favoriteTags.removeAdditionalTags(tagsToRemove);
 
     FAVORITES_SEARCH_INDEX.add(this);
@@ -118,13 +118,13 @@ export class FavoriteItem implements Favorite {
   }
 
   public resetAdditionalTags(): void {
-    FAVORITES_SEARCH_INDEX.remove(this);
+    FAVORITES_SEARCH_INDEX.unlinkTags(this);
     this.favoriteTags.resetAdditionalTags();
     FAVORITES_SEARCH_INDEX.add(this);
   }
 
   private updateTags(tags: string): void {
-    FAVORITES_SEARCH_INDEX.remove(this);
+    FAVORITES_SEARCH_INDEX.unlinkTags(this);
     this.favoriteTags.update(tags);
     FAVORITES_SEARCH_INDEX.add(this);
   }

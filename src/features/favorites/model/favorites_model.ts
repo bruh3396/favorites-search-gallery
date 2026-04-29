@@ -26,7 +26,7 @@ export const resetTagModifications = (): void => FavoritesSearcher.resetTagModif
 
 export const buildSearchIndexSync = (): void => FAVORITES_SEARCH_INDEX.buildIndexSync();
 export const buildSearchIndexAsync = (): Promise<void> => FAVORITES_SEARCH_INDEX.buildIndexAsync();
-export const keepSearchIndexTagsSorted = (): void => FAVORITES_SEARCH_INDEX.keepTagsSorted();
+export const keepSearchIndexTagsSorted = (): void => FAVORITES_SEARCH_INDEX.keepTagsSorted(true);
 
 export { hasFavorites, deleteDatabase, loadAllFavoritesFromDatabase, storeAllFavorites, getAllFavorites, storeNewFavorites, resetActiveFavorites as stopSubset, deleteFavorite, updateFavoriteMetadata as updateMetadata } from "./load/favorites_loader";
 export { getLatestSearchResults, onBlacklistChanged, shuffleSearchResults } from "./search/favorites_searcher";

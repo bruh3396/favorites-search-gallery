@@ -39,7 +39,7 @@ class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
     }
     this.asyncBuildStarted = true;
     await sleep(50);
-    this.doNotKeepTagsSorted();
+    this.keepTagsSorted(false);
     this.add = this.addAsynchronously;
     this.emptyAdditionsCache();
   }
@@ -84,8 +84,8 @@ class FavoritesSearchIndex extends InvertedSearchIndex<FavoriteItem> {
 
     if (this.ready) {
       this.add = super.add;
-      this.keepTagsSorted();
-      this.allSortedTags.toArray();
+      this.keepTagsSorted(true);
+      this.sortedTags.toArray();
     }
   }
 }

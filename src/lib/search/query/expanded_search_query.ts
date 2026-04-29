@@ -5,7 +5,7 @@ import { Searchable } from "../../../types/search";
 import { WildcardSearchTag } from "../tag/wildcard_search_tag";
 
 export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
-  public hasNoMatches: boolean = false;
+  private unmatchable: boolean = false;
   private readonly indexedTags: string[];
 
   constructor(searchQuery: string, indexedTags: string[]) {
@@ -15,8 +15,12 @@ export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
     this.expandAllOrGroupWildcardTags();
   }
 
+  public get isUnmatchable(): boolean {
+    return this.unmatchable;
+  }
+
   public override filter(items: T[]): T[] {
-    return this.hasNoMatches ? [] : super.filter(items);
+    return this.isUnmatchable ? [] : super.filter(items);
   }
 
   private expandAndWildcardTags(): void {
@@ -35,7 +39,7 @@ export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
       }
 
       if (expandedTags.length === 0) {
-        this.setAsUnmatchable();
+        this.markUnmatchable();
         return;
       }
 
@@ -68,7 +72,7 @@ export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
       }
 
       if (newOrGroup.length === 0) {
-        this.setAsUnmatchable();
+        this.markUnmatchable();
         return;
       }
       newOrGroups.push(newOrGroup);
@@ -76,8 +80,8 @@ export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
     this.orGroups = newOrGroups;
   }
 
-  private setAsUnmatchable(): void {
-    this.hasNoMatches = true;
+  private markUnmatchable(): void {
+    this.unmatchable = true;
     this.andTags = [];
     this.orGroups = [];
   }

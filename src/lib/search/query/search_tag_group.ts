@@ -1,8 +1,27 @@
+import { prepareSearchQuery, removeExtraWhiteSpace } from "../../../utils/string/format";
 import { AbstractSearchTag } from "../tag/abstract_search_tag";
 import { CategorizedTags } from "../types/search_types";
 import { MetadataSearchTag } from "../tag/metadata_search_tag";
 import { WildcardSearchTag } from "../tag/wildcard_search_tag";
 import { parseSearchTag } from "../tag/search_tag_parser";
+
+const OR_GROUP_REGEX = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
+
+export function parseAndTags(searchQuery: string): string[] {
+  return removeExtraWhiteSpace(searchQuery.replace(OR_GROUP_REGEX, "")).split(" ").filter((tag) => tag !== "");
+}
+
+function parseOrGroups(searchQuery: string): string[][] {
+  return Array.from(searchQuery.matchAll(OR_GROUP_REGEX)).map((orGroup) => orGroup[1].split(" ~ "));
+}
+
+export function parseTagGroups(searchQuery: string): { orGroups: string[][]; andTags: string[]; } {
+  searchQuery = prepareSearchQuery(searchQuery);
+  return {
+    orGroups: parseOrGroups(searchQuery),
+    andTags: parseAndTags(searchQuery)
+  };
+}
 
 export function buildSearchTagGroup(tags: string[]): AbstractSearchTag[] {
   return sortSearchTagGroup(Array.from(new Set(tags)).map(tag => parseSearchTag(tag)));

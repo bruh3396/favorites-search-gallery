@@ -21,7 +21,7 @@ class ImageController extends GalleryAbstractController {
   }
 
   public handlePageChange(): void {
-    GalleryImageLoader.clearCache();
+    GalleryImageLoader.clear();
     GalleryUpscaler.handlePageChange();
   }
 
@@ -55,7 +55,7 @@ class ImageController extends GalleryAbstractController {
 
   protected display(thumb: HTMLElement): void {
     this.activeId = thumb.id;
-    const cached = GalleryImageLoader.getCached(thumb.id);
+    const cached = GalleryImageLoader.get(thumb.id);
 
     if (cached) {
       GalleryImageCanvas.draw(cached.request.bitmap);
@@ -78,7 +78,7 @@ class ImageController extends GalleryAbstractController {
     if (thumb === null) {
       return;
     }
-    const cached = GalleryImageLoader.getCached(this.activeId);
+    const cached = GalleryImageLoader.get(this.activeId);
 
     if (cached && cached.status === "complete") {
       this.display(thumb);

@@ -1,10 +1,11 @@
-import { Storage } from "../../../../lib/core/storage/storage_instance";
+﻿import { Storage } from "../../../../lib/core/storage/storage_instance";
+import { clamp } from "../../../../utils/number";
 import { indexInBounds } from "../../../../utils/collection/array";
 import { isEmptyString } from "../../../../utils/string/query";
 import { removeExtraWhiteSpace } from "../../../../utils/string/format";
 
 export class SearchHistory {
-  public lastEditedQuery: string;
+  private lastQuery: string;
   private history: string[];
   private index: number;
   private readonly depth: number;
@@ -12,45 +13,47 @@ export class SearchHistory {
   constructor(depth: number) {
     this.index = -1;
     this.history = this.loadSearchHistory();
-    this.lastEditedQuery = this.loadLastEditedQuery();
+    this.lastQuery = this.loadLastEditedQuery();
     this.depth = depth;
+  }
+
+  public get lastEditedQuery(): string {
+    return this.lastQuery;
   }
 
   public get selectedQuery(): string {
     if (indexInBounds(this.history, this.index)) {
       return this.history[this.index];
     }
-    return this.lastEditedQuery;
+    return this.lastQuery;
   }
 
   public add(searchQuery: string): void {
     if (isEmptyString(searchQuery)) {
       return;
     }
-    const searchHistory = this.history.slice();
-    const cleanedSearchQuery = removeExtraWhiteSpace(searchQuery);
-    const searchHistoryWithoutQuery = searchHistory.filter(search => search !== cleanedSearchQuery);
-    const searchHistoryWithQueryAtFront = [searchQuery].concat(searchHistoryWithoutQuery);
-    const truncatedSearchHistory = searchHistoryWithQueryAtFront.slice(0, this.depth);
+    const cleaned = removeExtraWhiteSpace(searchQuery);
+    const deduped = this.history.filter(entry => entry !== cleaned);
+    const updated = [cleaned].concat(deduped).slice(0, this.depth);
 
-    this.history = truncatedSearchHistory;
+    this.history = updated;
     Storage.set("searchHistory", this.history);
   }
 
-  public updateLastEditedSearchQuery(searchQuery: string): void {
-    this.lastEditedQuery = searchQuery;
+  public setLastQuery(searchQuery: string): void {
+    this.lastQuery = searchQuery;
     this.resetIndex();
-    Storage.set("lastEditedSearchQuery", this.lastEditedQuery);
+    Storage.set("lastEditedSearchQuery", this.lastQuery);
   }
 
-  public navigate(direction: string): void {
+  public navigate(direction: "ArrowUp" | "ArrowDown"): void {
     if (direction === "ArrowUp") {
-      const selectedQuery = this.selectedQuery;
+      const previous = this.selectedQuery;
 
       this.incrementIndex();
-      const queryHasNotChanged = this.selectedQuery === selectedQuery;
 
-      if (queryHasNotChanged) {
+      // Skip duplicate entries when navigating up
+      if (this.selectedQuery === previous) {
         this.incrementIndex();
       }
       return;
@@ -71,10 +74,10 @@ export class SearchHistory {
   }
 
   private incrementIndex(): void {
-    this.index = Math.min(this.index + 1, this.history.length - 1);
+    this.index = clamp(this.index + 1, -1, this.history.length - 1);
   }
 
   private decrementIndex(): void {
-    this.index = Math.max(this.index - 1, -1);
+    this.index = clamp(this.index - 1, -1, this.history.length - 1);
   }
 }

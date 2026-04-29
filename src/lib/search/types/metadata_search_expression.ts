@@ -5,12 +5,11 @@ const METRIC_PATTERN = Array.from(SEARCHABLE_METADATA_METRICS).join("|");
 
 export class MetadataSearchExpression {
   public static regex: RegExp = new RegExp(`^-?(${METRIC_PATTERN})(:[<>]?)(\\d+|${METRIC_PATTERN})$`);
-
-  public metric: SearchableMetadataMetric;
-  public operator: MetadataComparator;
-  public hasRightHandMetric: boolean;
-  public rightHandMetric: SearchableMetadataMetric;
-  public rightHandValue: number;
+  public readonly metric: SearchableMetadataMetric;
+  public readonly operator: MetadataComparator;
+  public readonly hasRightHandMetric: boolean;
+  public readonly rightHandMetric: SearchableMetadataMetric;
+  public readonly rightHandValue: number;
 
   constructor(searchTag: string) {
     const extractedExpression = this.extractExpression(searchTag);

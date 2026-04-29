@@ -1,68 +1,68 @@
 import { SEARCHABLE_EMPTY, SEARCHABLE_FRUITS } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
-import { parsePlainSearchTag } from "../lib/search/tag/search_tag_parser";
+import { parseExactSearchTag } from "../lib/search/tag/search_tag_parser";
 
 describe("searchTag", () => {
   test("empty", () => {
-    expect(parsePlainSearchTag("").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("").matches(SEARCHABLE_FRUITS)).toBe(false);
   });
 
   test("cost relation", () => {
-    const searchTag = parsePlainSearchTag("foo");
-    const negatedSearchTag = parsePlainSearchTag("-foo");
+    const searchTag = parseExactSearchTag("foo");
+    const negatedSearchTag = parseExactSearchTag("-foo");
 
     expect(searchTag.cost).toBeLessThan(negatedSearchTag.cost);
   });
 
   test("matches", () => {
-    expect(parsePlainSearchTag("banana").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("kiwi").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("grape").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("apple").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("orange").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("mango").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("banana").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("kiwi").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("grape").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("apple").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("orange").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("mango").matches(SEARCHABLE_FRUITS)).toBe(true);
 
-    expect(parsePlainSearchTag("rose").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("tulip").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("daisy").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("lily").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("orchid").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("sunflower").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("rose").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("tulip").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("daisy").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("lily").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("orchid").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("sunflower").matches(SEARCHABLE_FRUITS)).toBe(false);
   });
 
   test("negated matches", () => {
-    expect(parsePlainSearchTag("-banana").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("-kiwi").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("-grape").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("-apple").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("-orange").matches(SEARCHABLE_FRUITS)).toBe(false);
-    expect(parsePlainSearchTag("-mango").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("-banana").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("-kiwi").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("-grape").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("-apple").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("-orange").matches(SEARCHABLE_FRUITS)).toBe(false);
+    expect(parseExactSearchTag("-mango").matches(SEARCHABLE_FRUITS)).toBe(false);
 
-    expect(parsePlainSearchTag("-rose").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("-tulip").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("-daisy").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("-lily").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("-orchid").matches(SEARCHABLE_FRUITS)).toBe(true);
-    expect(parsePlainSearchTag("-sunflower").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("-rose").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("-tulip").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("-daisy").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("-lily").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("-orchid").matches(SEARCHABLE_FRUITS)).toBe(true);
+    expect(parseExactSearchTag("-sunflower").matches(SEARCHABLE_FRUITS)).toBe(true);
   });
 
   test("negated matches with empty set", () => {
-    expect(parsePlainSearchTag("-banana").matches(SEARCHABLE_EMPTY)).toBe(true);
+    expect(parseExactSearchTag("-banana").matches(SEARCHABLE_EMPTY)).toBe(true);
   });
 
   test("only negated character", () => {
-    expect(parsePlainSearchTag("-").matches(SEARCHABLE_EMPTY)).toBe(false);
+    expect(parseExactSearchTag("-").matches(SEARCHABLE_EMPTY)).toBe(false);
   });
 
   test("space character", () => {
-    expect(parsePlainSearchTag(" ").matches(SEARCHABLE_EMPTY)).toBe(false);
+    expect(parseExactSearchTag(" ").matches(SEARCHABLE_EMPTY)).toBe(false);
   });
 
   test("multiple spaces", () => {
-    expect(parsePlainSearchTag("   ").matches(SEARCHABLE_EMPTY)).toBe(false);
+    expect(parseExactSearchTag("   ").matches(SEARCHABLE_EMPTY)).toBe(false);
   });
 
   test("non-space character", () => {
-    expect(parsePlainSearchTag("a").matches(SEARCHABLE_EMPTY)).toBe(false);
+    expect(parseExactSearchTag("a").matches(SEARCHABLE_EMPTY)).toBe(false);
   });
 });

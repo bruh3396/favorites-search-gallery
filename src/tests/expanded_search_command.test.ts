@@ -18,8 +18,8 @@ function getFinalSearchQuery(expandedQuery: ExpandedSearchQuery<Fruit>): string 
 }
 
 function testExpandWildcardTags(rawQuery: string, expectedRawQuery: string): ExpandedSearchQuery<Fruit> {
-  const expandedQuery = new ExpandedSearchQuery<Fruit>(rawQuery, INDEX.allTags);
-  const expectedQuery = new ExpandedSearchQuery<Fruit>(expectedRawQuery, INDEX.allTags);
+  const expandedQuery = new ExpandedSearchQuery<Fruit>(rawQuery, INDEX.getAllTags());
+  const expectedQuery = new ExpandedSearchQuery<Fruit>(expectedRawQuery, INDEX.getAllTags());
 
   expect(getFinalSearchQuery(expandedQuery)).toStrictEqual(getFinalSearchQuery(expectedQuery));
   return expandedQuery;

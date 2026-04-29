@@ -12,7 +12,7 @@ const COMPARATORS: Record<MetadataComparator, Comparator> = {
 };
 
 export class MetadataSearchTag extends AbstractSearchTag {
-  protected baseCost: number = 0;
+  protected override readonly baseCost: number = 0;
   private compare: Comparator;
   private getRightValue: (item: Favorite) => number;
   private getLeftValue: (item: Favorite) => number;

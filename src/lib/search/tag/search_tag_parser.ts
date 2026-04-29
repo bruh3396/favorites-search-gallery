@@ -1,16 +1,20 @@
-import { CONTAINS_REGEX, STARTS_WITH_REGEX, UNMATCHABLE_REGEX, WildcardSearchTag } from "./wildcard_search_tag";
 import { AbstractSearchTag } from "./abstract_search_tag";
 import { ExactSearchTag } from "./exact_search_tag";
 import { MetadataSearchExpression } from "../types/metadata_search_expression";
 import { MetadataSearchTag } from "./metadata_search_tag";
 import { WildcardMatchType } from "../types/search_types";
+import { WildcardSearchTag } from "./wildcard_search_tag";
 import { escapeParenthesis } from "../../../utils/string/format";
+
+const UNMATCHABLE_REGEX = /^\b$/;
+const STARTS_WITH_REGEX = /^[^*]*\*$/;
+const CONTAINS_REGEX = /^\*[^*]*\*$/;
 
 function removeDuplicateAsterisks(value: string): string {
   return value.replace(/\*+/g, "*");
 }
 
-function createWildcardRegex(value: string): RegExp {
+function buildWildcardRegex(value: string): RegExp {
   try {
     const regex = escapeParenthesis(value.replace(/\*/g, ".*"));
     return new RegExp(`^${regex}$`);
@@ -20,7 +24,7 @@ function createWildcardRegex(value: string): RegExp {
 }
 
 function getMatchType(value: string): WildcardMatchType {
-  return STARTS_WITH_REGEX.test(value) ? WildcardMatchType.STARTS_WITH : CONTAINS_REGEX.test(value) ? WildcardMatchType.CONTAINS : WildcardMatchType.DEFAULT;
+  return STARTS_WITH_REGEX.test(value) ? WildcardMatchType.PREFIX : CONTAINS_REGEX.test(value) ? WildcardMatchType.CONTAINS : WildcardMatchType.REGEX;
 }
 
 function parseNegation(tag: string): { negated: boolean; value: string; } {
@@ -28,14 +32,14 @@ function parseNegation(tag: string): { negated: boolean; value: string; } {
   return { negated, value: negated ? tag.substring(1) : tag };
 }
 
-export function parsePlainSearchTag(tag: string): ExactSearchTag {
+export function parseExactSearchTag(tag: string): ExactSearchTag {
   const { negated, value } = parseNegation(tag);
   return new ExactSearchTag(value, negated);
 }
 
 export function parseWildcardSearchTag(tag: string): WildcardSearchTag {
   const { negated, value } = parseNegation(removeDuplicateAsterisks(tag));
-  return new WildcardSearchTag(value, negated, getMatchType(value), createWildcardRegex(value), value.slice(0, -1), value.slice(1, -1));
+  return new WildcardSearchTag(value, negated, getMatchType(value), buildWildcardRegex(value), value.slice(0, -1), value.slice(1, -1));
 }
 
 export function parseMetadataSearchTag(tag: string): MetadataSearchTag {
@@ -53,5 +57,5 @@ export function isMetadataSearchTag(tag: string): boolean {
 }
 
 export function parseSearchTag(tag: string): AbstractSearchTag {
-  return isWildcardSearchTag(tag) ? parseWildcardSearchTag(tag) : isMetadataSearchTag(tag) ? parseMetadataSearchTag(tag) : parsePlainSearchTag(tag);
+  return isWildcardSearchTag(tag) ? parseWildcardSearchTag(tag) : isMetadataSearchTag(tag) ? parseMetadataSearchTag(tag) : parseExactSearchTag(tag);
 }

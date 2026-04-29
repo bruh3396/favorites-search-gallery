@@ -170,7 +170,7 @@ describe("updateIndex", () => {
     ITEMS.push(item);
     INDEX.add(item);
     testSearchUsingIndex("foo", ["foo"]);
-    INDEX.remove(item);
+    INDEX.unlinkTags(item);
     testSearchUsingIndex("foo", []);
     INDEX.add(item);
     testSearchUsingIndex("foo pur*", ["foo"]);

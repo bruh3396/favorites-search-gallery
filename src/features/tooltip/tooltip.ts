@@ -7,7 +7,7 @@ import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";
 import { TOOLTIP_HTML } from "../../assets/html";
 import { convertToTagString } from "../../utils/string/tags";
 import { getTagSetFromItem } from "../../lib/dom/tags";
-import { parseTagGroups } from "../../utils/string/parse";
+import { parseTagGroups } from "../../lib/search/query/search_tag_group";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 let tooltip: HTMLElement;

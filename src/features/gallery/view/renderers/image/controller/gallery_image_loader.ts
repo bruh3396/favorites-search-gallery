@@ -1,4 +1,5 @@
-﻿import { DO_NOTHING } from "../../../../../../lib/environment/constants";
+﻿import * as GalleryImageCache from "./gallery_image_cache";
+import { DO_NOTHING } from "../../../../../../lib/environment/constants";
 import { GallerySettings } from "../../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../../types/gallery_image_request";
 import { LowResolutionImageRequest } from "../../../../types/gallery_low_resolution_image_request";
@@ -6,45 +7,35 @@ import { ON_FAVORITES_PAGE } from "../../../../../../lib/environment/environment
 import { fetchBitmap } from "./gallery_image_fetcher";
 import { isImage } from "../../../../../../lib/media_resolver";
 
-type RequestStatus = "low-res" | "complete";
-type CachedRequest = {
-  request: ImageRequest;
-  status: RequestStatus;
-};
+export { get, completedRequests, clear } from "./gallery_image_cache";
 
-const CACHE: Map<string, CachedRequest> = new Map();
-let onRequestComplete: (request: ImageRequest) => void = DO_NOTHING;
+let onComplete: (request: ImageRequest) => void = DO_NOTHING;
 
-function addToCache(request: ImageRequest): void {
-  CACHE.set(request.id, { request, status: "low-res" });
+export function setCompletionCallback(completionCallback: (request: ImageRequest) => void): void {
+  onComplete = completionCallback;
 }
 
-function disposeRequest(cached: CachedRequest): void {
-  cached.request.close();
-  cached.request.stop();
-}
+function closeLowRes(request: ImageRequest): void {
+  const previous = GalleryImageCache.get(request.id);
 
-function evictStaleFromCache(candidates: ImageRequest[]): void {
-  const candidatesIds = new Set(candidates.map(request => request.id));
-  const staleIds = [...CACHE.keys()].filter(id => !candidatesIds.has(id));
-
-  for (const id of staleIds) {
-    const cached = CACHE.get(id);
-
-    if (cached !== undefined) {
-      disposeRequest(cached);
-      CACHE.delete(id);
-    }
+  if (previous !== undefined && previous.request.isLowRes) {
+    previous.request.close();
   }
 }
 
-function filterUnseen(requests: ImageRequest[]): ImageRequest[] {
-  return requests.filter(request => !CACHE.has(request.id));
+function onBitmapLoaded(request: ImageRequest): void {
+  const cached = GalleryImageCache.get(request.id);
+
+  if (cached?.status === "complete") {
+    return;
+  }
+  closeLowRes(request);
+  GalleryImageCache.update(request, request.isHighRes ? "complete" : "low-res");
+  onComplete(request);
 }
 
 function exceededPreloadBudget(megabytes: number, acceptedCount: number): boolean {
-  return megabytes >= GallerySettings.imageMegabyteLimit &&
-    acceptedCount >= GallerySettings.minimumPreloadedImageCount;
+  return megabytes >= GallerySettings.imageMegabyteLimit && acceptedCount >= GallerySettings.minimumPreloadedImageCount;
 }
 
 function applyMemoryLimit(requests: ImageRequest[]): ImageRequest[] {
@@ -79,33 +70,12 @@ async function fetchRequest(request: ImageRequest): Promise<void> {
   }
 }
 
-function closeLowResRequest(cached: CachedRequest | undefined): void {
-  if (cached !== undefined && cached.request.isLowRes) {
-    cached.request.close();
-  }
-}
-
-function onBitmapLoaded(request: ImageRequest): void {
-  const cached = CACHE.get(request.id);
-
-  if (cached?.status === "complete") {
-    return;
-  }
-  onRequestComplete(request);
-  CACHE.set(request.id, { request, status: request.isHighRes ? "complete" : "low-res" });
-  closeLowResRequest(cached);
-}
-
-export function setCompletionCallback(completionCallback: (request: ImageRequest) => void): void {
-  onRequestComplete = completionCallback;
-}
-
 export function preload(thumbs: HTMLElement[]): void {
   const candidates = buildPreloadRequests(thumbs);
 
-  evictStaleFromCache(candidates);
-  filterUnseen(candidates).forEach((request) => {
-    addToCache(request);
+  GalleryImageCache.evictStale(candidates);
+  GalleryImageCache.filterUnseen(candidates).forEach((request) => {
+    GalleryImageCache.add(request);
     fetchRequest(request);
   });
 }
@@ -113,29 +83,7 @@ export function preload(thumbs: HTMLElement[]): void {
 export function loadImmediate(thumb: HTMLElement): void {
   const request = new ImageRequest(thumb);
 
-  addToCache(request);
+  GalleryImageCache.add(request);
   fetchRequest(new LowResolutionImageRequest(request));
   fetchRequest(request);
-}
-
-export function getCached(id: string): CachedRequest | undefined {
-  return CACHE.get(id);
-}
-
-export function completedRequests(): ImageRequest[] {
-  const result: ImageRequest[] = [];
-
-  for (const cached of CACHE.values()) {
-    if (cached.status === "complete") {
-      result.push(cached.request);
-    }
-  }
-  return result;
-}
-
-export function clearCache(): void {
-  for (const cached of CACHE.values()) {
-    disposeRequest(cached);
-  }
-  CACHE.clear();
 }
