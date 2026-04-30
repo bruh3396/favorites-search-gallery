@@ -2,8 +2,8 @@ import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, remov
 import { convertToTagSet, convertToTagString } from "../utils/string/tags";
 import { describe, expect, test } from "vitest";
 import { isEmptyString, isOnlyDigits } from "../utils/string/query";
-import { parseDimensions2D, parseTagGroups } from "../utils/string/parse";
-// import { resolveMediaType } from "../lib/media_resolver";
+import { parseDimensions2D } from "../utils/string/parse";
+import { parseTagGroups } from "../lib/search/query/search_tag_group";
 
 describe("removeExtraWhiteSpace", () => {
   test("empty", () => {

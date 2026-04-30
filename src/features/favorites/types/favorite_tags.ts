@@ -1,7 +1,7 @@
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/post";
-import { getAdditionalTags } from "../model/tags/favorites_tag_modification_database";
+import { getAdditionalTags } from "../model/tags/favorites_tag_modifier";
 
 function getCorrectTags(post: Post): Set<string> {
   const correctTags = convertToTagSet(post.tags);

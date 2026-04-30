@@ -1,8 +1,8 @@
-import { Events } from "../../../../../lib/communication/events/events";
-import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { Preferences } from "../../../../../lib/preferences/preferences";
-import { debounceLeading } from "../../../../../lib/core/scheduling/rate_limiting";
+import { Events } from "../../../../lib/communication/events/events";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { debounceLeading } from "../../../../lib/core/scheduling/rate_limiting";
 
 let container: HTMLElement;
 let findButton: HTMLButtonElement;

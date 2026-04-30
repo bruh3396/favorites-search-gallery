@@ -31,4 +31,4 @@ export const keepSearchIndexTagsSorted = (): void => FAVORITES_SEARCH_INDEX.keep
 export { hasFavorites, deleteDatabase, loadAllFavoritesFromDatabase, storeAllFavorites, getAllFavorites, storeNewFavorites, resetActiveFavorites as stopSubset, deleteFavorite, updateFavoriteMetadata as updateMetadata } from "./load/favorites_loader";
 export { getLatestSearchResults, onBlacklistChanged, shuffleSearchResults } from "./search/favorites_searcher";
 export { onStartedStoringAllFavorites, updateMissingMetadata } from "../types/favorite_metadata";
-export { loadTagModifications } from "./tags/favorites_tag_modification_database";
+export { loadTagModifications } from "./tags/favorites_tag_modifier";

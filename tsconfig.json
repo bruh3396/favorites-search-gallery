@@ -112,6 +112,6 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": [
-    "src/tests/**/*.ts"
+    // "src/tests/**/*.ts"
   ],
 }

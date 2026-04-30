@@ -1,18 +1,17 @@
-import { ButtonElement, CheckboxElement, SelectElement } from "../../../../../lib/ui/element_types";
-import { MetadataMetric } from "../../../../../types/search";
-import { PerformanceProfile } from "../../../../../types/ui";
-import { LayoutMode } from "../../../../../types/ui";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../../lib/ui/toggles";
-import { toggleDarkTheme, usingDarkTheme } from "../../../../../lib/ui/style";
-import { Events } from "../../../../../lib/communication/events/events";
-import { GALLERY_ENABLED } from "../../../../../lib/environment/derived_environment";
-import { Preferences } from "../../../../../lib/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
-import { createButtonElement } from "../../../../../lib/ui/elements/button";
-import { createSelectElement } from "../../../../../lib/ui/elements/select";
-import { createToggleSwitch } from "../../../../../lib/ui/elements/checkbox";
-import { hideUnusedLayoutSizer } from "../../../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../../../lib/ui/elements/element_utils";
+import { ButtonElement, CheckboxElement, SelectElement } from "../../../../lib/ui/element_types";
+import { LayoutMode, PerformanceProfile } from "../../../../types/ui";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../lib/ui/toggles";
+import { toggleDarkTheme, usingDarkTheme } from "../../../../lib/ui/style";
+import { Events } from "../../../../lib/communication/events/events";
+import { GALLERY_ENABLED } from "../../../../lib/environment/derived_environment";
+import { MetadataMetric } from "../../../../types/search";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/environment";
+import { createButtonElement } from "../../../../lib/ui/elements/button";
+import { createSelectElement } from "../../../../lib/ui/elements/select";
+import { createToggleSwitch } from "../../../../lib/ui/elements/checkbox";
+import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
+import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 
 const BUTTONS: Partial<ButtonElement>[] = [
   {

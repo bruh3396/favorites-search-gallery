@@ -1,9 +1,9 @@
-import { CONTENT } from "../../../../../lib/shell";
-import { Events } from "../../../../../lib/communication/events/events";
-import { FavoritesSettings } from "../../../../../config/favorites_settings";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { insertStyle } from "../../../../../utils/dom/injector";
-import { yield1 } from "../../../../../lib/core/scheduling/promise";
+import { CONTENT } from "../../../../lib/shell";
+import { Events } from "../../../../lib/communication/events/events";
+import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { insertStyle } from "../../../../utils/dom/injector";
+import { yield1 } from "../../../../lib/core/scheduling/promise";
 
 export async function insertFavoritesBottomNavigationButtons(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesSettings.bottomNavigationButtonsEnabled) {

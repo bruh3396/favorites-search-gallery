@@ -1,4 +1,4 @@
-import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modification_database";
+import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modifier";
 import { insertHtmlWithStyles, insertStyle } from "../../utils/dom/injector";
 import { DO_NOTHING } from "../../lib/environment/constants";
 import { Events } from "../../lib/communication/events/events";

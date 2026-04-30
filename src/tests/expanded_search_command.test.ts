@@ -37,9 +37,9 @@ describe("expandWildcardTags", () => {
   });
 
   test("no matches from expanding and wildcard tags", () => {
-    expect(testExpandWildcardTags("foobar", "foobar").hasNoMatches).toBe(false);
-    expect(testExpandWildcardTags("foobar*", "").hasNoMatches).toBe(true);
-    expect(testExpandWildcardTags("foobar* ap*", "").hasNoMatches).toBe(true);
+    expect(testExpandWildcardTags("foobar", "foobar").isUnmatchable).toBe(false);
+    expect(testExpandWildcardTags("foobar*", "").isUnmatchable).toBe(true);
+    expect(testExpandWildcardTags("foobar* ap*", "").isUnmatchable).toBe(true);
   });
 
   test("one wildcard tag expands to multiple", () => {
@@ -79,9 +79,9 @@ describe("expandWildcardTags", () => {
   });
 
   test("unmatchable or group", () => {
-    expect(testExpandWildcardTags("( *foobar* ) ( smo* )", "").hasNoMatches).toBe(true);
-    expect(testExpandWildcardTags("( *foobar* ~ foobar ) ( smo* )", "foobar ( smooth ~ smoothie )").hasNoMatches).toBe(false);
-    expect(testExpandWildcardTags("( *foobar* ~ a* ) ( smo* )", "( apple ~ antioxidants ~ antioxidant ) ( smooth ~ smoothie )").hasNoMatches).toBe(false);
+    expect(testExpandWildcardTags("( *foobar* ) ( smo* )", "").isUnmatchable).toBe(true);
+    expect(testExpandWildcardTags("( *foobar* ~ foobar ) ( smo* )", "foobar ( smooth ~ smoothie )").isUnmatchable).toBe(false);
+    expect(testExpandWildcardTags("( *foobar* ~ a* ) ( smo* )", "( apple ~ antioxidants ~ antioxidant ) ( smooth ~ smoothie )").isUnmatchable).toBe(false);
   });
 
   test("expand and tags and or groups", () => {
@@ -91,7 +91,7 @@ describe("expandWildcardTags", () => {
   });
 
   test("expand negated wildcard", () => {
-    expect(testExpandWildcardTags("-*foobar*", "").hasNoMatches).toBe(false);
+    expect(testExpandWildcardTags("-*foobar*", "").isUnmatchable).toBe(false);
     testExpandWildcardTags("-*ee*", "-green -sweet -peelable -seedless");
   });
 });

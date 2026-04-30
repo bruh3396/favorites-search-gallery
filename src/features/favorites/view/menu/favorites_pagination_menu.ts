@@ -4,9 +4,9 @@ import { FavoritesPageRelation } from "../../../../types/favorite";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { numbersAroundInRange } from "../../../../utils/number";
 import { insertStyle } from "../../../../utils/dom/injector";
 import { isOnlyDigits } from "../../../../utils/string/query";
+import { numbersAroundInRange } from "../../../../utils/number";
 
 const CONTAINER = createContainer();
 const RANGE_INDICATOR = document.createElement("label");

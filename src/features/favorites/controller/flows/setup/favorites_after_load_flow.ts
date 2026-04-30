@@ -1,5 +1,5 @@
 import * as FavoritesModel from "../../../model/favorites_model";
-import { collectAspectRatios } from "../../../ui/skeleton/favorites_skeleton_aspect_ratio_collector";
+import { collectAspectRatios } from "../../../view/skeleton/favorites_skeleton_aspect_ratio_collector";
 
 export function onFavoritesLoaded(): void {
   FavoritesModel.updateMissingMetadata();

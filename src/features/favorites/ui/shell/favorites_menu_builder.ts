@@ -4,10 +4,13 @@ import { createFooter, moveStatusToFooter } from "./favorites_mobile_footer";
 import { insertHtmlWithStyles, insertStyle } from "../../../../utils/dom/injector";
 import { FAVORITES_HTML } from "../../../../assets/html";
 import { ROOT } from "../../../../lib/shell";
+import { buildFavoritesHelpBar } from "../components/favorites_help_bar";
 import { createControlsGuide } from "./favorites_mobile_control_guide";
-import { createDynamicFavoritesDesktopMenuElements } from "../components/dynamic/favorites_desktop_dynamic_elements";
-import { createDynamicFavoritesMobileMenuElements } from "../components/dynamic/favorites_mobile_dynamic_elements";
-import { createStaticFavoritesMenuElements } from "../components/static/favorites_menu_static_element_creator";
+import { createDynamicFavoritesDesktopMenuElements } from "../components/favorites_desktop_dynamic_elements";
+import { createDynamicFavoritesMobileMenuElements } from "../components/favorites_mobile_dynamic_elements";
+import { insertFavoritesFinder } from "../components/favorites_finder";
+import { insertFavoritesRatingFilter } from "../components/favorites_rating_filter";
+import { setupFavoritesSearchBox } from "../search_box/favorites_search_box";
 
 export function buildFavoritesMenu(): void {
   insertStyle(ON_MOBILE_DEVICE ? MOBILE_CSS : DESKTOP_CSS, "favorites-menu-style");
@@ -18,7 +21,10 @@ export function buildFavoritesMenu(): void {
   } else {
     buildMobileFavoritesMenu();
   }
-  createStaticFavoritesMenuElements();
+  insertFavoritesFinder();
+  buildFavoritesHelpBar();
+  insertFavoritesRatingFilter();
+  setupFavoritesSearchBox();
 }
 
 function insertFavoritesMenuHTML(): void {

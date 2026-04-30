@@ -1,4 +1,4 @@
-import { buildSearchTagGroup, sortSearchTagGroup } from "../lib/search/query/search_query_utils";
+import { buildSearchTagGroup, sortSearchTagGroup } from "../lib/search/query/search_tag_group";
 import { describe, expect, test } from "vitest";
 import { isMetadataSearchTag, isWildcardSearchTag, parseSearchTag } from "../lib/search/tag/search_tag_parser";
 import { ExactSearchTag } from "../lib/search/tag/exact_search_tag";

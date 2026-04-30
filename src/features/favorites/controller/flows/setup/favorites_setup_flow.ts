@@ -1,5 +1,5 @@
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
-import { buildFavoritesPage } from "../../../ui/structure/favorites_page_builder";
+import { buildFavoritesPage } from "../../../ui/shell/favorites_page_builder";
 import { loadAllFavorites } from "./favorites_load_flow";
 import { loadTagModifications } from "../../../model/favorites_model";
 import { setupFavoritesController } from "../../favorites_controller";

@@ -1,7 +1,7 @@
-import { HELP_HTML } from "../../../../../assets/html";
-import { ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { OVERLAYS } from "../../../../../lib/shell";
-import { getCurrentThemeClass } from "../../../../../lib/ui/style";
+import { HELP_HTML } from "../../../../assets/html";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { OVERLAYS } from "../../../../lib/shell";
+import { getCurrentThemeClass } from "../../../../lib/ui/style";
 
 let dialog: HTMLDialogElement;
 
@@ -13,7 +13,7 @@ function insertHelpHTML(): void {
   }
 }
 
-function createWhatsNewMenu(): void {
+function buildWhatsNewMenu(): void {
   const whatsNew = document.getElementById("whats-new-link");
 
   if (whatsNew === null) {
@@ -24,10 +24,10 @@ function createWhatsNewMenu(): void {
     whatsNew.remove();
     return;
   }
-  createDialogWhatsNewMenu(whatsNew);
+  buildDialogWhatsNewMenu(whatsNew);
 }
 
-function createDialogWhatsNewMenu(menu: HTMLElement): void {
+function buildDialogWhatsNewMenu(menu: HTMLElement): void {
   dialog = document.createElement("dialog");
   dialog.id = "whats-new-dialog";
   dialog.style.padding = "5px 10px";
@@ -59,7 +59,7 @@ function createDialogWhatsNewMenu(menu: HTMLElement): void {
   };
 }
 
-export function createFavoritesHelpMenu(): void {
+export function buildFavoritesHelpBar(): void {
   insertHelpHTML();
-  createWhatsNewMenu();
+  buildWhatsNewMenu();
 }

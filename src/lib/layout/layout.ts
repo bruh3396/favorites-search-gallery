@@ -1,15 +1,15 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../environment/environment";
 import { changeItemSizeOnShiftScroll, hideUnusedLayoutSizer } from "./layout_event_handlers";
-import { AbstractTiler } from "../ui/tiler/abstract_tiler";
+import { AbstractTiler } from "../ui/tilers/abstract_tiler";
 import { CONTENT } from "../shell";
-import { ColumnTiler } from "../ui/tiler/column_tiler";
+import { ColumnTiler } from "../ui/tilers/column_tiler";
 import { Events } from "../communication/events/events";
-import { GridTiler } from "../ui/tiler/grid_tiler";
+import { GridTiler } from "../ui/tilers/grid_tiler";
 import { LayoutMode } from "../../types/ui";
-import { NativeTiler } from "../ui/tiler/native_tiler";
+import { NativeTiler } from "../ui/tilers/native_tiler";
 import { Preferences } from "../preferences/preferences";
-import { RowTiler } from "../ui/tiler/row_tiler";
-import { SquareTiler } from "../ui/tiler/square_tiler";
+import { RowTiler } from "../ui/tilers/row_tiler";
+import { SquareTiler } from "../ui/tilers/square_tiler";
 
 const COLUMN_TILER = new ColumnTiler(CONTENT, ON_FAVORITES_PAGE ? Preferences.columnCount.value : Preferences.searchPageColumnCount.value);
 const TILERS: AbstractTiler[] = [COLUMN_TILER, new GridTiler(CONTENT), new RowTiler(CONTENT), new SquareTiler(CONTENT), new NativeTiler(CONTENT)];

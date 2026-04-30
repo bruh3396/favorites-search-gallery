@@ -1,9 +1,8 @@
-import { buildSearchTagGroup, categorizeTags, sortSearchTagGroup } from "./search_tag_group";
+import { buildSearchTagGroup, categorizeTags, parseTagGroups, sortSearchTagGroup } from "./search_tag_group";
 import { AbstractSearchTag } from "../tag/abstract_search_tag";
 import { SearchQueryMetadata } from "../types/search_types";
 import { Searchable } from "../../../types/search";
 import { isEmptyString } from "../../../utils/string/query";
-import { parseTagGroups } from "./search_tag_group";
 
 export class SearchQuery<T extends Searchable> {
   public readonly rawQuery: string;
