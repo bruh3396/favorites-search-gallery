@@ -1,6 +1,6 @@
+import * as FavoritesSearchEngine from "./favorites_search_engine";
 import { ALL_RATINGS_VALUE, FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
-import { FAVORITES_SEARCH_INDEX } from "./favorites_search_index";
-import { FavoriteItem } from "../../types/favorite_item";
+import { FavoriteItem } from "../../type/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
@@ -23,12 +23,12 @@ function updateSearchQuery(): void {
   searchQuery = createSearchQuery();
 }
 
-function shouldUseIndex(favorites: FavoriteItem[]): boolean {
-  return FavoritesSettings.useSearchIndex && FAVORITES_SEARCH_INDEX.ready && !searchQuery.metadata.hasMetadataTag && favorites.length > FAVORITES_PER_PAGE;
+function shouldUseEngine(favorites: FavoriteItem[]): boolean {
+  return FavoritesSettings.useSearchEngine && FavoritesSearchEngine.ready && !searchQuery.metadata.hasMetadataTag && favorites.length > FAVORITES_PER_PAGE;
 }
 
 function filterOutBlacklisted(favorites: FavoriteItem[]): FavoriteItem[] {
-  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : BLACKLIST_SEARCH_QUERY.filter(favorites);
+  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : BLACKLIST_SEARCH_QUERY.apply(favorites);
 }
 
 function filterByRating(favorites: FavoriteItem[]): FavoriteItem[] {
@@ -37,7 +37,7 @@ function filterByRating(favorites: FavoriteItem[]): FavoriteItem[] {
 }
 
 export function filter(favorites: FavoriteItem[]): FavoriteItem[] {
-  const results = shouldUseIndex(favorites) ? FAVORITES_SEARCH_INDEX.search(searchQuery, favorites) : searchQuery.filter(favorites);
+  const results = shouldUseEngine(favorites) ? FavoritesSearchEngine.search(searchQuery, favorites) : searchQuery.apply(favorites);
   return filterByRating(results);
 }
 

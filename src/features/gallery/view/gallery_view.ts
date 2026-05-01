@@ -1,7 +1,11 @@
+import * as GalleryDesktopMenu from "./shell/gallery_desktop_menu";
 import * as GalleryRenderer from "./renderers/gallery_renderer";
-import * as GalleryUI from "./gallery_ui";
+import * as GalleryUI from "./shell/gallery_ui";
+import { mountGallery, toggleGalleryVisibility } from "./shell/gallery_shell";
+import { GALLERY_CSS } from "../../../assets/css";
+import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { RemoveFavoriteStatus } from "../../../types/favorite";
-import { toggleGalleryVisibility } from "../ui/gallery_shell";
+import { insertStyle } from "../../../utils/dom/injector";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -123,5 +127,11 @@ export function upscaleCachedThumbs(): void {
 }
 
 export function setupGalleryView(): void {
+  insertStyle(GALLERY_CSS);
+  mountGallery();
   GalleryUI.setupGalleryUI();
+
+  if (ON_DESKTOP_DEVICE) {
+    GalleryDesktopMenu.setupDesktopGalleryMenu();
+  }
 }

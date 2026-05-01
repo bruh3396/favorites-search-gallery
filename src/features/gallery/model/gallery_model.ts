@@ -1,6 +1,6 @@
 import * as GalleryStateMachine from "./gallery_state_machine";
 import * as GalleryThumbSelector from "./gallery_thumb_selector";
-import { GalleryBoundary, GalleryState } from "../types/gallery_types";
+import { GalleryBoundary, GalleryState } from "../type/gallery_types";
 import { openOriginal, openPostPage } from "../../../lib/navigator";
 import { NavigationKey } from "../../../types/input";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
@@ -11,6 +11,8 @@ import { isVideo } from "../../../lib/media_resolver";
 
 let currentIndex = 0;
 let recentlyExitedGallery = false;
+
+export {addFavorite, removeFavorite} from "./gallery_favorite_toggler";
 
 export function hasRecentlyExitedGallery(): boolean {
   return recentlyExitedGallery;
@@ -102,4 +104,8 @@ function setCurrentIndex(nextIndex: number): GalleryBoundary {
 
 function getLastIndex(): number {
   return GalleryThumbSelector.getThumbsOnCurrentPage().length - 1;
+}
+
+export function setupGalleryModel(): void {
+  indexCurrentPageThumbs();
 }

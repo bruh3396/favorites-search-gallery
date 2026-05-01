@@ -3,7 +3,7 @@ import { Searchable, SearchableMetadataMetric } from "../types/search";
 import { describe, test } from "vitest";
 import { ExactSearchTag } from "../lib/search/tag/exact_search_tag";
 import { Favorite } from "../types/favorite";
-import { MetadataSearchExpression } from "../lib/search/types/metadata_search_expression";
+import { MetadataSearchExpression } from "../lib/search/type/metadata_search_expression";
 import { MetadataSearchTag } from "../lib/search/tag/metadata_search_tag";
 
 function benchmark(label: string, fn: () => void): void {

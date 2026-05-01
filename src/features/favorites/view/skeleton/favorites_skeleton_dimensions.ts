@@ -1,6 +1,6 @@
 import { randomIntInRange, seededRandomIntInRange } from "../../../../utils/number";
 import { Dimensions2D } from "../../../../types/geometry";
-import { getNextAspectRatio } from "./favorites_skeleton_aspect_ratio_collector";
+import { getNextAspectRatio } from "./favorites_aspect_ratio_collector";
 import { parseDimensions2D } from "../../../../utils/string/parse";
 
 export function getPredictedAspectRatio(): string {

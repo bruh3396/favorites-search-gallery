@@ -1,5 +1,5 @@
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
-import { FavoriteItem } from "../../types/favorite_item";
+import { FavoriteItem } from "../../type/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { extractFavoriteElements } from "../../../../lib/server/parse/favorites_page_parser";
 

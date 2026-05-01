@@ -1,4 +1,4 @@
-import { FavoriteItem, getFavorite } from "../../types/favorite_item";
+import { FavoriteItem, getFavorite } from "../../type/favorite_item";
 import { BatchExecutor } from "../../../../lib/core/concurrency/batch_executor";
 import { Database } from "../../../../lib/core/storage/database";
 import { FavoritesDatabaseRecord } from "../../../../types/favorite";

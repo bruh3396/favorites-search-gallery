@@ -1,6 +1,6 @@
 import * as FavoritesDatabase from "./favorites_database";
 import * as FavoritesReloadFetcher from "./favorites_reload_fetcher";
-import { FavoriteItem } from "../../types/favorite_item";
+import { FavoriteItem } from "../../type/favorite_item";
 import { FavoritesFetcher } from "./favorites_fetcher";
 
 let allFavorites: FavoriteItem[] = [];

@@ -1,6 +1,6 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { getImageFromThumb, getThumbFromImage } from "../../lib/dom/thumb";
-import { Events } from "../../lib/communication/events/events";
+import { Events } from "../../lib/communication/events";
 import { OVERLAYS } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
 import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";

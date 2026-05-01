@@ -1,4 +1,4 @@
-import { OffscreenUpscaleRequest } from "../../../../types/gallery_offscreen_upscale_request";
+import { OffscreenUpscaleRequest } from "../../../../type/gallery_offscreen_upscale_request";
 
 declare let SharedGallerySettings: {
   maxUpscaledThumbCanvasHeight: number

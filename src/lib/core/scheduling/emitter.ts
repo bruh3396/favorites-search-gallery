@@ -1,9 +1,9 @@
 import { PromiseTimeoutError } from "../../../types/errors";
 
 export class Emitter<V> {
-  private listeners: Set<(value: V) => void>;
-  private onceListeners: Set<(value: V) => void>;
-  private enabled: boolean;
+  protected listeners: Set<(value: V) => void>;
+  protected onceListeners: Set<(value: V) => void>;
+  protected enabled: boolean;
 
   constructor(enabled: boolean = true) {
     this.listeners = new Set();

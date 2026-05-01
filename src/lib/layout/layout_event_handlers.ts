@@ -1,6 +1,6 @@
 import * as LayoutManager from "./layout";
 import { EnhancedWheelEvent } from "../dom/input_types";
-import { FeatureBridge } from "../communication/features/feature_bridge";
+import { FeatureBridge } from "../communication/feature_bridge";
 import { LayoutMode } from "../../types/ui";
 import { clamp } from "../../utils/number";
 import { sleep } from "../core/scheduling/promise";

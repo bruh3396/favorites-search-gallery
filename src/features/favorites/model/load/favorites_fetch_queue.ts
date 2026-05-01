@@ -1,4 +1,4 @@
-import { FavoriteItem } from "../../types/favorite_item";
+import { FavoriteItem } from "../../type/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 
 export class FavoritesFetchQueue {

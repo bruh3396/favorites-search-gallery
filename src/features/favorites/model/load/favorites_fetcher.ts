@@ -1,8 +1,8 @@
 import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
-import { FavoriteItem } from "../../types/favorite_item";
+import { FavoriteItem } from "../../type/favorite_item";
 import { FavoritesFetchQueue } from "./favorites_fetch_queue";
 import { FavoritesPageRequest } from "./favorites_page_request";
-import { populateFavoritesMetadata } from "../../types/favorite_metadata";
+import { populateFavoritesMetadata } from "../../type/favorite_metadata";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
 export class FavoritesFetcher {

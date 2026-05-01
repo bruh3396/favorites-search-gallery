@@ -1,4 +1,5 @@
-import { InvertedSearchIndex } from "../lib/search/index/inverted_search_index";
+import { InvertedIndex } from "../lib/core/data_structures/inverted_index";
+import { SearchEngine } from "../lib/search/engine/search_engine";
 import { Searchable } from "../types/search";
 
 export type Fruit = Searchable & { name: string };
@@ -86,8 +87,9 @@ export const ITEMS: Fruit[] = [
 ];
 export const ALL_ITEM_NAMES = ITEMS.map(item => item.name);
 export const ALL_TAGS = ITEMS.flatMap(item => Array.from(item.tags));
-export const INDEX = new InvertedSearchIndex<Fruit>();
+export const INDEX = new InvertedIndex<Fruit>(fruit => fruit.tags);
+export const ENGINE = new SearchEngine<Fruit>(INDEX);
 
 for (const item of ITEMS) {
-  INDEX.add(item);
+  INDEX.addDoc(item);
 }

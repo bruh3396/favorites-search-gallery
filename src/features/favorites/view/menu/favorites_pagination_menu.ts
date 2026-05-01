@@ -1,5 +1,5 @@
-import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../../types/favorite_types";
-import { Events } from "../../../../lib/communication/events/events";
+import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../../type/favorite_types";
+import { Events } from "../../../../lib/communication/events";
 import { FavoritesPageRelation } from "../../../../types/favorite";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";

@@ -1,6 +1,6 @@
 import * as ICONS from "../../assets/icons";
-import { Events } from "../../lib/communication/events/events";
-import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
+import { Events } from "../../lib/communication/events";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { Preferences } from "../../lib/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";

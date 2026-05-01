@@ -1,11 +1,11 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
-import { FeatureBridge } from "../../../../../../lib/communication/features/feature_bridge";
-import { ImageRequest } from "../../../../types/gallery_image_request";
+import { FeatureBridge } from "../../../../../../lib/communication/feature_bridge";
+import { ImageRequest } from "../../../../type/gallery_image_request";
 import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
 import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../lib/preferences/preferences";
 import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
-import { TRANSFERRED_CANVAS_IDS } from "../../../../types/gallery_offscreen_upscale_request";
+import { TRANSFERRED_CANVAS_IDS } from "../../../../type/gallery_offscreen_upscale_request";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { fetchBitmap } from "../controller/gallery_image_fetcher";
 import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";

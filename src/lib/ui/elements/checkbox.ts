@@ -1,7 +1,7 @@
 import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../element_types";
 import { DO_NOTHING } from "../../environment/constants";
-import { Events } from "../../communication/events/events";
-import { FeatureBridge } from "../../communication/features/feature_bridge";
+import { Events } from "../../communication/events";
+import { FeatureBridge } from "../../communication/feature_bridge";
 
 function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
   return {

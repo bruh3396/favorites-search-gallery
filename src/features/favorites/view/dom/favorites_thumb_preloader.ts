@@ -1,5 +1,6 @@
 import { Favorite } from "../../../../types/favorite";
 import { GeneralSettings } from "../../../../config/general_settings";
+import { preloadImage } from "../../../../utils/dom/image";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
 
@@ -17,10 +18,4 @@ export async function preloadImages(urls: string[]): Promise<void> {
     await sleep(3);
     preloadImage(url);
   }
-}
-
-function preloadImage(url: string): void {
-  const img = new Image();
-
-  img.src = url;
 }

@@ -2,7 +2,7 @@ import * as GalleryImageCanvas from "./gallery_image_canvas";
 import * as GalleryImageLoader from "./gallery_image_loader";
 import * as GalleryUpscaler from "../upscalers/gallery_upscaler";
 import { GalleryAbstractController } from "../../gallery_abstract_controller";
-import { ImageRequest } from "../../../../types/gallery_image_request";
+import { ImageRequest } from "../../../../type/gallery_image_request";
 import { USING_FIREFOX } from "../../../../../../lib/environment/environment";
 
 class ImageController extends GalleryAbstractController {
@@ -57,11 +57,11 @@ class ImageController extends GalleryAbstractController {
     this.activeId = thumb.id;
     const cached = GalleryImageLoader.get(thumb.id);
 
-    if (cached) {
-      GalleryImageCanvas.draw(cached.request.bitmap);
+    if (cached === undefined || cached.request.isIncomplete) {
+      GalleryImageLoader.loadImmediate(thumb);
       return;
     }
-    GalleryImageLoader.loadImmediate(thumb);
+    GalleryImageCanvas.draw(cached.request.bitmap);
   }
 
   private onBitmapLoaded(request: ImageRequest): void {

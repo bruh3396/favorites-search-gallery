@@ -1,6 +1,6 @@
-import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../types/gallery_offscreen_upscale_request";
+import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../type/gallery_offscreen_upscale_request";
 import { GalleryAbstractUpscaler } from "./gallery_abstract_upscaler";
-import { ImageRequest } from "../../../../types/gallery_image_request";
+import { ImageRequest } from "../../../../type/gallery_image_request";
 // @ts-expect-error string import
 import OFFSCREEN_UPSCALER_CODE from "./gallery_worker_upscaler?raw";
 // @ts-expect-error string import

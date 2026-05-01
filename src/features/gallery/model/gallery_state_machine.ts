@@ -1,4 +1,4 @@
-import { GalleryState } from "../types/gallery_types";
+import { GalleryState } from "../type/gallery_types";
 import { Preferences } from "../../../lib/preferences/preferences";
 
 let currentState = getStartState();

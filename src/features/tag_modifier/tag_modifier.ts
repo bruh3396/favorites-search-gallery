@@ -1,9 +1,9 @@
 import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modifier";
 import { insertHtmlWithStyles, insertStyle } from "../../utils/dom/injector";
 import { DO_NOTHING } from "../../lib/environment/constants";
-import { Events } from "../../lib/communication/events/events";
+import { Events } from "../../lib/communication/events";
 import { Favorite } from "../../types/favorite";
-import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { ITEM_CLASS_NAME } from "../../lib/dom/thumb";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";

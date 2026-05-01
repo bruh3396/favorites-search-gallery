@@ -1,6 +1,5 @@
 import { DEFAULT_MENU_ELEMENT, NumberElement } from "../element_types";
 import { DO_NOTHING } from "../../environment/constants";
-import { Events } from "../../communication/events/events";
 import { NumberComponent } from "./number_component";
 
 function createNumberTemplate(partial: Partial<NumberElement>): NumberElement {
@@ -71,12 +70,6 @@ export function createNumberComponent(partial: Partial<NumberElement>): void {
     key: "Enter",
     bubbles: true
   }));
-
-  if (template.triggerOnCreation) {
-    Events.document.postProcess.on(() => {
-      emitEvent();
-    });
-  }
 
   numberInput.onchange = (): void => {
     emitEvent();

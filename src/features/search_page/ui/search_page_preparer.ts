@@ -1,4 +1,4 @@
-import { Events } from "../../../lib/communication/events/events";
+import { Events } from "../../../lib/communication/events";
 import { ITEM_SELECTOR } from "../../../lib/dom/thumb";
 import { prepareSearchPageThumbs } from "../model/search_page_thumb_preparer";
 import { waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";

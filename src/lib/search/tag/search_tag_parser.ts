@@ -1,8 +1,8 @@
 import { AbstractSearchTag } from "./abstract_search_tag";
 import { ExactSearchTag } from "./exact_search_tag";
-import { MetadataSearchExpression } from "../types/metadata_search_expression";
+import { MetadataSearchExpression } from "../type/metadata_search_expression";
 import { MetadataSearchTag } from "./metadata_search_tag";
-import { WildcardMatchType } from "../types/search_types";
+import { WildcardMatchType } from "../type/search_types";
 import { WildcardSearchTag } from "./wildcard_search_tag";
 import { escapeParenthesis } from "../../../utils/string/format";
 

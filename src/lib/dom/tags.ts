@@ -1,5 +1,5 @@
 import { Favorite } from "../../types/favorite";
-import { FeatureBridge } from "../communication/features/feature_bridge";
+import { FeatureBridge } from "../communication/feature_bridge";
 import { ON_FAVORITES_PAGE } from "../environment/environment";
 import { convertToTagSet } from "../../utils/string/tags";
 import { getImageFromThumb } from "./thumb";

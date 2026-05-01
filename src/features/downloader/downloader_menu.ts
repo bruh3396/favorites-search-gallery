@@ -3,9 +3,10 @@ import { sleep, yield1 } from "../../lib/core/scheduling/promise";
 import { DOWNLOADER_DISABLED } from "../../lib/environment/derived_environment";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
-import { Events } from "../../lib/communication/events/events";
+import { Events } from "../../lib/communication/events";
+import { toggleGlobalInputEvents } from "../../lib/communication/dom_event_bridge";
 import { Favorite } from "../../types/favorite";
-import { FeatureBridge } from "../../lib/communication/features/feature_bridge";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { OVERLAYS } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
 import { insertHtmlWithStyles } from "../../utils/dom/injector";
@@ -117,7 +118,7 @@ function openWhenDownloadButtonClicked(): void {
     } else {
       warningDialog.showModal();
     }
-    Events.toggleGlobalInputEvents(false);
+    toggleGlobalInputEvents(false);
     document.body.classList.add("dialog-opened");
 
   });
@@ -132,7 +133,7 @@ function setupMenuCancelHandler(): void {
 function setupMenuCloseHandler(): void {
   dialog.addEventListener("close", async() => {
     cancelButton.textContent = "Cancel";
-    Events.toggleGlobalInputEvents(true);
+    toggleGlobalInputEvents(true);
     await yield1();
     document.body.classList.remove("dialog-opened");
     dialog.classList.remove("downloading");
@@ -145,7 +146,7 @@ function setupMenuCloseHandler(): void {
   });
   warningDialog.addEventListener("close", () => {
     document.body.classList.remove("dialog-opened");
-    Events.toggleGlobalInputEvents(true);
+    toggleGlobalInputEvents(true);
   });
 }
 

@@ -1,6 +1,6 @@
 import { buildSearchTagGroup, categorizeTags, parseTagGroups, sortSearchTagGroup } from "./search_tag_group";
 import { AbstractSearchTag } from "../tag/abstract_search_tag";
-import { SearchQueryMetadata } from "../types/search_types";
+import { SearchQueryMetadata } from "../type/search_types";
 import { Searchable } from "../../../types/search";
 import { isEmptyString } from "../../../utils/string/query";
 
@@ -44,7 +44,7 @@ export class SearchQuery<T extends Searchable> {
     return this.andTags.filter(tag => !tag.negated).map(tag => tag.value);
   }
 
-  public filter(items: T[]): T[] {
+  public apply(items: T[]): T[] {
     return this.isEmpty ? items : items.filter(item => this.matchesAndTags(item) && this.matchesOrGroups(item));
   }
 

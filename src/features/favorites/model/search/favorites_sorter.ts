@@ -1,4 +1,4 @@
-import { FavoriteItem } from "../../types/favorite_item";
+import { FavoriteItem } from "../../type/favorite_item";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { shuffleArray } from "../../../../utils/collection/array";
 

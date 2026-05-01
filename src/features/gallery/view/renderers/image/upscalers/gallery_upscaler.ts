@@ -1,7 +1,7 @@
-import { GalleryMainThreadUpscaler } from "./gallery_main_thread__upscaler";
+import { GalleryMainThreadUpscaler } from "./gallery_main_thread_upscaler";
 import { GallerySettings } from "../../../../../../config/gallery_settings";
 import { GalleryWorkerUpscalerWrapper } from "./gallery_worker_upscaler_wrapper";
-import { ImageRequest } from "../../../../types/gallery_image_request";
+import { ImageRequest } from "../../../../type/gallery_image_request";
 
 const UPSCALER = GallerySettings.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper() : new GalleryMainThreadUpscaler();
 

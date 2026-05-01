@@ -3,7 +3,7 @@ import { changeItemSizeOnShiftScroll, hideUnusedLayoutSizer } from "./layout_eve
 import { AbstractTiler } from "../ui/tilers/abstract_tiler";
 import { CONTENT } from "../shell";
 import { ColumnTiler } from "../ui/tilers/column_tiler";
-import { Events } from "../communication/events/events";
+import { Events } from "../communication/events";
 import { GridTiler } from "../ui/tilers/grid_tiler";
 import { LayoutMode } from "../../types/ui";
 import { NativeTiler } from "../ui/tilers/native_tiler";

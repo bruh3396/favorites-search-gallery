@@ -1,4 +1,4 @@
-﻿import { ImageRequest } from "../../../../types/gallery_image_request";
+﻿import { ImageRequest } from "../../../../type/gallery_image_request";
 
 export type RequestStatus = "low-res" | "complete";
 export type CachedRequest = {
@@ -8,35 +8,36 @@ export type CachedRequest = {
 
 const CACHE: Map<string, CachedRequest> = new Map();
 
-export function add(request: ImageRequest): void {
-  CACHE.set(request.id, { request, status: "low-res" });
+function release(cached: CachedRequest | undefined): void {
+  cached?.request.close();
+  cached?.request.stop();
 }
 
-export function update(request: ImageRequest, status: RequestStatus): void {
-  CACHE.set(request.id, { request, status });
-}
-
-export function dispose(cached: CachedRequest): void {
-  cached.request.close();
-  cached.request.stop();
-}
-
-export function evictStale(candidates: ImageRequest[]): void {
+function evictStale(candidates: ImageRequest[]): void {
   const candidateIds = new Set(candidates.map(request => request.id));
-  const staleIds = [...CACHE.keys()].filter(id => !candidateIds.has(id));
 
-  for (const id of staleIds) {
-    const cached = CACHE.get(id);
-
-    if (cached !== undefined) {
-      dispose(cached);
+  for (const [id, cached] of CACHE.entries()) {
+    if (!candidateIds.has(id)) {
+      release(cached);
       CACHE.delete(id);
     }
   }
 }
 
-export function filterUnseen(requests: ImageRequest[]): ImageRequest[] {
-  return requests.filter(request => !CACHE.has(request.id));
+export function sync(candidates: ImageRequest[]): ImageRequest[] {
+  evictStale(candidates);
+  const unseen = candidates.filter(request => !CACHE.has(request.id));
+
+  unseen.forEach(request => register(request));
+  return unseen;
+}
+
+export function register(request: ImageRequest): void {
+  CACHE.set(request.id, { request, status: "low-res" });
+}
+
+export function set(request: ImageRequest, status: RequestStatus): void {
+  CACHE.set(request.id, { request, status });
 }
 
 export function get(id: string): CachedRequest | undefined {
@@ -44,19 +45,10 @@ export function get(id: string): CachedRequest | undefined {
 }
 
 export function completedRequests(): ImageRequest[] {
-  const result: ImageRequest[] = [];
-
-  for (const cached of CACHE.values()) {
-    if (cached.status === "complete") {
-      result.push(cached.request);
-    }
-  }
-  return result;
+  return [...CACHE.values()].filter(cached => cached.status === "complete").map(cached => cached.request);
 }
 
 export function clear(): void {
-  for (const cached of CACHE.values()) {
-    dispose(cached);
-  }
+  [...CACHE.values()].forEach(cached => release(cached));
   CACHE.clear();
 }

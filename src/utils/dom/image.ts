@@ -5,3 +5,9 @@ export function imageIsLoaded(image: HTMLImageElement): boolean {
 export function imageIsLoading(image: HTMLImageElement): boolean {
   return !imageIsLoaded(image);
 }
+
+export function preloadImage(url: string): void {
+  const img = new Image();
+
+  img.src = url;
+}

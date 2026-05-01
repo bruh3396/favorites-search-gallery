@@ -1,10 +1,10 @@
 import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
-import { FavoriteItem } from "../../types/favorite_item";
+import { FavoriteItem } from "../../type/favorite_item";
 import { FavoritesPageRequest } from "./favorites_page_request";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { extractFavoriteElements } from "../../../../lib/server/parse/favorites_page_parser";
-import { populateFavoritesMetadata } from "../../types/favorite_metadata";
+import { populateFavoritesMetadata } from "../../type/favorite_metadata";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
 const isEmptyPage = (favorites: FavoriteItem[]): boolean => favorites.length === 0;

@@ -545,7 +545,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["scripts/**/*.ts"],
+    files: ["scripts/**/*.ts", "src/tests/**/*.ts"],
     rules: {
       "no-console": "off"
     }

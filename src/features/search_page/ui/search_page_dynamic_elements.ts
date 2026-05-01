@@ -1,5 +1,5 @@
 import { CheckboxElement, NumberElement, SelectElement } from "../../../lib/ui/element_types";
-import { Events } from "../../../lib/communication/events/events";
+import { Events } from "../../../lib/communication/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralSettings } from "../../../config/general_settings";
 import { MetadataMetric } from "../../../types/search";

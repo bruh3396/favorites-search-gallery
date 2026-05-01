@@ -1,4 +1,4 @@
-import { Events } from "../communication/events/events";
+import { Events } from "../communication/events";
 import { Favorite } from "../../types/favorite";
 import { ON_MOBILE_DEVICE } from "../environment/environment";
 import { getImageFromThumb } from "../dom/thumb";
@@ -16,14 +16,7 @@ export function scrollToTop(): void {
 }
 
 export function waitForDOMToLoad(): Promise<void> {
-  if (document.readyState !== "loading") {
-    return Promise.resolve();
-  }
   return new Promise((resolve) => {
-    Events.document.domLoaded.on(() => {
-      resolve();
-    }, {
-      once: true
-    });
+    Events.document.domLoaded.on(() => resolve(), { once: true });
   });
 }

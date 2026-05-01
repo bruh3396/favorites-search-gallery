@@ -1,5 +1,5 @@
 import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
-import { NewFavorites } from "../../types/favorite_types";
+import { NewFavorites } from "../../type/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { ROOT } from "../../../../lib/shell";
 import { Timeout } from "../../../../types/async";

@@ -1,4 +1,4 @@
-import { Events } from "../../communication/events/events";
+import { Events } from "../../communication/events";
 import { Timeout } from "../../../types/async";
 
 export class InteractionTracker {

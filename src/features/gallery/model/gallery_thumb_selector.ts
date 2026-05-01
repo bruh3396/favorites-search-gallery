@@ -1,8 +1,8 @@
 import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/collection/array";
 import { isImage, isVideo } from "../../../lib/media_resolver";
 import { Favorite } from "../../../types/favorite";
-import { FeatureBridge } from "../../../lib/communication/features/feature_bridge";
-import { GalleryBoundary } from "../types/gallery_types";
+import { FeatureBridge } from "../../../lib/communication/feature_bridge";
+import { GalleryBoundary } from "../type/gallery_types";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { removeNonNumericCharacters } from "../../../utils/string/format";

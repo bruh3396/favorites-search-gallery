@@ -1,4 +1,4 @@
-import { GALLERY_ROOT } from "../../ui/gallery_shell";
+import { GALLERY_ROOT } from "../shell/gallery_shell";
 
 export abstract class GalleryAbstractController {
   public readonly container: HTMLElement;

@@ -1,5 +1,5 @@
 import { AbstractSearchTag } from "../tag/abstract_search_tag";
-import { CategorizedTags } from "../types/search_types";
+import { CategorizedTags } from "../type/search_types";
 import { MetadataSearchTag } from "../tag/metadata_search_tag";
 import { WildcardSearchTag } from "../tag/wildcard_search_tag";
 import { parseSearchTag } from "../tag/search_tag_parser";

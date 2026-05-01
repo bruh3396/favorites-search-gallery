@@ -1,5 +1,5 @@
 import { getInitialSearchPage, setupSearchPageModel } from "../../model/search_page_model";
-import { Events } from "../../../../lib/communication/events/events";
+import { Events } from "../../../../lib/communication/events";
 import { ON_SEARCH_PAGE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { buildSearchPage } from "../../ui/search_page_builder";

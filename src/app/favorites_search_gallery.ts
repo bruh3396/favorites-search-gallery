@@ -2,10 +2,10 @@ import { FAVORITES_SEARCH_GALLERY_DISABLED } from "../lib/environment/derived_en
 import { setupAutocomplete } from "../features/autocomplete/autocomplete";
 import { setupCaptions } from "../features/caption/caption";
 import { setupDownloadMenu } from "../features/downloader/downloader_menu";
-import { setupEvents } from "../lib/communication/events/events";
+import { setupEvents } from "../lib/communication/dom_event_bridge";
 import { setupExtensions } from "../lib/extension_cache";
-import { setupFavorites } from "../features/favorites/controller/flows/setup/favorites_setup_flow";
-import { setupGallery } from "../features/gallery/controller/flows/setup/gallery_setup_flow";
+import { setupFavorites } from "../features/favorites/favorites_setup";
+import { setupGallery } from "../features/gallery/gallery_setup";
 import { setupSavedSearches } from "../features/saved_searches/saved_searches";
 import { setupSearchPage } from "../features/search_page/controller/flows/search_page_setup_flow";
 import { setupServer } from "../lib/server/fetch/post_fetcher";
@@ -23,6 +23,7 @@ function runFavoritesSearchGallery(): void {
   setupExtensions();
   setupStyles();
   setupShell();
+
   setupFavorites();
   setupSearchPage();
   setupGallery();
