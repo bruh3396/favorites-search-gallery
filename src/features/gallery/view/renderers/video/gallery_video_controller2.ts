@@ -8,11 +8,11 @@ import { convertPreviewURLToImageURL } from "../../../../../lib/server/url/media
 import { getPreviewURL } from "../../../../../lib/ui/dom";
 import { isVideo } from "../../../../../lib/media_resolver";
 
-const VIDEO_PLAYERS: HTMLVideoElement[] = [];
-const VIDEO_CLIPS = new Map();
-const VIDEO_CONTAINER: HTMLElement = document.createElement("div");
+const videoPlayers: HTMLVideoElement[] = [];
+const videoClips = new Map();
+const videoContainer: HTMLElement = document.createElement("div");
 
-VIDEO_CONTAINER.id = "video-container-inner";
+videoContainer.id = "video-container-inner";
 
 function createVideoPlayer(volume: number, muted: boolean): void {
   const video = document.createElement("video");
@@ -26,8 +26,8 @@ function createVideoPlayer(volume: number, muted: boolean): void {
   video.playsInline = true;
   video.setAttribute("controlsList", "nofullscreen");
   video.setAttribute("webkit-playsinline", "");
-  VIDEO_PLAYERS.push(video);
-  VIDEO_CONTAINER.appendChild(video);
+  videoPlayers.push(video);
+  videoContainer.appendChild(video);
 }
 
 function createVideoPlayers(): void {
@@ -54,14 +54,14 @@ function preventVideoPlayersFromFlashingWhenLoaded(): void {
     }
     const videoBackgroundURL = URL.createObjectURL(blob);
 
-    for (const video of VIDEO_PLAYERS) {
+    for (const video of videoPlayers) {
       video.setAttribute("poster", videoBackgroundURL);
     }
   });
 }
 
 function preventDefaultBehaviorWhenControlKeyIsPressed(): void {
-  VIDEO_CONTAINER.onclick = (event): void => {
+  videoContainer.onclick = (event): void => {
     if (!event.ctrlKey) {
       event.preventDefault();
     }
@@ -73,7 +73,7 @@ function addEventListenersToVideoContainer(): void {
 }
 
 function insertVideoContainer(container: HTMLElement): void {
-  container.appendChild(VIDEO_CONTAINER);
+  container.appendChild(videoContainer);
 }
 
 export function setupVideoController(container: HTMLElement): void {
@@ -86,7 +86,7 @@ export function setupVideoController(container: HTMLElement): void {
 }
 
 function addEventListenersToVideoPlayers(): void {
-  for (const video of VIDEO_PLAYERS) {
+  for (const video of videoPlayers) {
     addEventListenerToVideoPlayer(video);
   }
 }
@@ -191,7 +191,7 @@ function loadVideoClips(): void {
       storedVideoClips = Storage.get<typeof storedVideoClips>("storedVideoClips") ?? {};
 
       for (const [id, videoClip] of Object.entries(storedVideoClips)) {
-        VIDEO_CLIPS.set(id, videoClip as VideoClip);
+        videoClips.set(id, videoClip as VideoClip);
       }
     } catch (error) {
       console.error(error);
@@ -200,11 +200,11 @@ function loadVideoClips(): void {
 }
 
 function getActiveVideoPlayer(): HTMLVideoElement {
-  return VIDEO_PLAYERS.find(video => video.hasAttribute("active")) || VIDEO_PLAYERS[0];
+  return videoPlayers.find(video => video.hasAttribute("active")) || videoPlayers[0];
 }
 
 function getInactiveVideoPlayers(): HTMLVideoElement[] {
-  return VIDEO_PLAYERS.filter(video => !video.hasAttribute("active"));
+  return videoPlayers.filter(video => !video.hasAttribute("active"));
 }
 
 export function playVideo(thumb: HTMLElement): Promise<void> {
@@ -226,7 +226,7 @@ export function playVideo(thumb: HTMLElement): Promise<void> {
 }
 
 export function stopAllVideos(): void {
-  for (const video of VIDEO_PLAYERS) {
+  for (const video of videoPlayers) {
     stopVideo(video);
   }
 }
@@ -242,7 +242,7 @@ function pauseVideo(video: HTMLVideoElement): void {
 }
 
 export function preloadVideoPlayers(thumbs: HTMLElement[]): void {
-  if (VIDEO_PLAYERS.length === 1) {
+  if (videoPlayers.length === 1) {
     return;
   }
   const activeVideoPlayer = getActiveVideoPlayer();
@@ -283,7 +283,7 @@ function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {
 }
 
 function createVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {
-  const videoClip = VIDEO_CLIPS.get(thumb.id);
+  const videoClip = videoClips.get(thumb.id);
 
   if (videoClip === undefined) {
     video.ontimeupdate = null;
@@ -298,17 +298,17 @@ function createVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {
 }
 
 function setActiveVideoPlayer(thumb: HTMLElement): void {
-  for (const video of VIDEO_PLAYERS) {
+  for (const video of videoPlayers) {
     video.removeAttribute("active");
   }
 
-  for (const video of VIDEO_PLAYERS) {
+  for (const video of videoPlayers) {
     if (videoPlayerHasSource(video, thumb)) {
       video.setAttribute("active", "");
       return;
     }
   }
-  VIDEO_PLAYERS[0].setAttribute("active", "");
+  videoPlayers[0].setAttribute("active", "");
 }
 
 function toggleVideoControls(value: boolean): void {
@@ -328,19 +328,19 @@ function toggleVideoControls(value: boolean): void {
 }
 
 export function clearVideoSources(): void {
-  for (const video of VIDEO_PLAYERS) {
+  for (const video of videoPlayers) {
     video.src = "";
   }
 }
 
 export function toggleVideoLooping(value: boolean): void {
-  for (const video of VIDEO_PLAYERS) {
+  for (const video of videoPlayers) {
     video.toggleAttribute("loop", value);
   }
 }
 
 function toggleVideoContainer(value: boolean): void {
-  VIDEO_CONTAINER.style.display = value ? "block" : "none";
+  videoContainer.style.display = value ? "block" : "none";
 }
 
 export function toggleActiveVideoPause(): void {

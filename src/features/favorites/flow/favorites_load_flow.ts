@@ -3,39 +3,48 @@ import * as FavoritesPresentationFlow from "./favorites_presentation_flow";
 import * as FavoritesSearchFlow from "./favorites_search_flow";
 import * as FavoritesView from "../view/favorites_view";
 import { Events } from "../../../lib/communication/events";
-import { FavoriteItem } from "../type/favorite_item";
+import { Favorite } from "../../../types/favorite";
 
 export async function loadAllFavorites(): Promise<void> {
-  await loadAllFavoritesFromDatabase();
+  await loadDatabaseFavorites();
 
   if (FavoritesModel.hasFavorites()) {
-    Events.favorites.favoritesLoadedFromDatabase.emit();
-    showLoadedFavorites();
-    await loadNewFavorites();
+    await handleExistingFavorites();
   } else {
-    await fetchAllFavorites();
-    Events.favorites.startedStoringAllFavorites.emit();
-    await saveAllFavorites();
+    await fetchFavorites();
   }
+  FavoritesView.collectAspectRatios();
   Events.favorites.favoritesLoaded.emit();
 }
 
-async function loadAllFavoritesFromDatabase(): Promise<void> {
+async function handleExistingFavorites(): Promise<void> {
+  FavoritesModel.onDatabaseWritten();
+  Events.favorites.favoritesLoadedFromDatabase.emit();
+  showLoadedFavorites();
+  await loadNewFavorites();
+}
+
+async function fetchFavorites(): Promise<void> {
+  await fetchAllFavorites();
+  await saveAllFavorites();
+}
+
+async function loadDatabaseFavorites(): Promise<void> {
   FavoritesView.setStatus("Loading favorites");
-  await FavoritesModel.loadAllFavoritesFromDatabase();
+  await FavoritesModel.loadDatabaseFavorites();
 }
 
 async function fetchAllFavorites(): Promise<void> {
   FavoritesPresentationFlow.clear();
   Events.favorites.startedFetchingFavorites.emit();
-  await FavoritesModel.fetchAllFavorites(processFetchedFavorites);
+  await FavoritesModel.fetchAllFavorites(handleFetchedFavoritesPage);
 }
 
 async function saveAllFavorites(): Promise<void> {
-  Events.favorites.startedStoringAllFavorites.emit();
   FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeAllFavorites();
   FavoritesView.setTemporaryStatus("All favorites saved");
+  FavoritesModel.onDatabaseWritten();
 }
 
 function showLoadedFavorites(): void {
@@ -43,8 +52,11 @@ function showLoadedFavorites(): void {
   FavoritesSearchFlow.searchFavorites();
 }
 
-function processFetchedFavorites(): void {
-  FavoritesView.updateStatusWhileFetching(FavoritesModel.getLatestSearchResults().length, FavoritesModel.getAllFavorites().length);
+function handleFetchedFavoritesPage(): void {
+  FavoritesView.updateStatusWhileFetching(
+    FavoritesModel.getLatestSearchResults().length,
+    FavoritesModel.getAllFavorites().length
+  );
   Events.favorites.searchResultsUpdated.emit();
   FavoritesPresentationFlow.handleNewSearchResults();
 }
@@ -65,7 +77,7 @@ async function loadNewFavorites(): Promise<void> {
   Events.favorites.searchResultsUpdated.emit();
 }
 
-async function saveNewFavorites(newFavorites: FavoriteItem[]): Promise<void> {
+async function saveNewFavorites(newFavorites: Favorite[]): Promise<void> {
   await FavoritesModel.storeNewFavorites(newFavorites);
   FavoritesView.setTemporaryStatus(`Saved ${newFavorites.length} new favorites`);
 }

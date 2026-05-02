@@ -1,5 +1,5 @@
-import { toggleFavoritesOptions, tryResetting } from "../../view/update/favorites_menu_event_handlers";
-import { CONTENT } from "../../../../lib/shell";
+﻿import * as FavoritesView from "../../view/favorites_view";
+import { Content } from "../../../../lib/shell";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { insertStyle } from "../../../../utils/dom/injector";
@@ -37,7 +37,7 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
     searchBar.value = "";
     searchBar.dispatchEvent(new Event("input"));
   };
-  resetButton.onclick = tryResetting;
+  resetButton.onclick = FavoritesView.tryResetting;
 
   const options = document.getElementById("options-checkbox");
 
@@ -46,15 +46,15 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
   }
   let headerIsVisible = true;
 
-  toggleFavoritesOptions(Preferences.optionsVisible.value);
+  FavoritesView.toggleFavoritesOptions(Preferences.optionsVisible.value);
   options.checked = Preferences.optionsVisible.value;
 
   options.addEventListener("change", () => {
     Preferences.optionsVisible.set(options.checked);
-    toggleFavoritesOptions(options.checked);
+    FavoritesView.toggleFavoritesOptions(options.checked);
 
     if (!headerIsVisible) {
-      CONTENT.classList.toggle("sticky-menu", options.checked);
+      Content.classList.toggle("sticky-menu", options.checked);
     }
   });
   const stickyMenuHTML = `
@@ -72,8 +72,8 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
     insertStyle(headerVisible ? "" : stickyMenuHTML, "sticky-menu");
     const optionsMenu = document.getElementById("left-favorites-panel-bottom-row");
 
-    CONTENT.classList.remove("sticky-menu");
-    CONTENT.classList.remove("sticky-menu-shadow");
+    Content.classList.remove("sticky-menu");
+    Content.classList.remove("sticky-menu-shadow");
 
     if (optionsMenu === null) {
       return;
@@ -82,10 +82,10 @@ export function createMobileSearchBar(id: string, parentId: string, onClick: () 
 
     if (!headerVisible) {
       if (menuIsOpen) {
-        CONTENT.classList.add("sticky-menu");
+        Content.classList.add("sticky-menu");
       }
       await sleep(30);
-      CONTENT.classList.add("sticky-menu-shadow");
+      Content.classList.add("sticky-menu-shadow");
     }
   };
 
@@ -192,7 +192,6 @@ function createMobileSymbolRow(searchBox: HTMLInputElement): void {
       const selectionStart = searchBox.selectionStart ?? 0;
 
       searchBox.value = value.slice(0, selectionStart) + button.textContent + value.slice(selectionStart);
-      // this.updateVisibilityOfSearchClearButton();
       searchBox.selectionStart = selectionStart + 1;
       searchBox.selectionEnd = selectionStart + 1;
       searchBox.focus();

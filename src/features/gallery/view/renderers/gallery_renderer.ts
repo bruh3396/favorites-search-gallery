@@ -5,7 +5,7 @@ import { GalleryGifController } from "./gif/gallery_gif_controller";
 import { GalleryImageController } from "./image/controller/gallery_image_controller";
 import { GalleryVideoController } from "./video/gallery_video_controller";
 
-const CONTROLLERS = [GalleryImageController, GalleryVideoController, GalleryGifController];
+const controllers = [GalleryImageController, GalleryVideoController, GalleryGifController];
 
 function getController(thumb: HTMLElement): GalleryAbstractController {
   return isVideo(thumb) ? GalleryVideoController : isGif(thumb) ? GalleryGifController : GalleryImageController;
@@ -17,7 +17,7 @@ export function render(thumb: HTMLElement): void {
 }
 
 export function hideAll(): void {
-  CONTROLLERS.forEach(controller => controller.hide());
+  controllers.forEach(controller => controller.hide());
 }
 
 export function exitGallery(): void {
@@ -26,15 +26,15 @@ export function exitGallery(): void {
 }
 
 export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  CONTROLLERS.forEach(controller => controller.preload(thumbs));
+  controllers.forEach(controller => controller.preload(thumbs));
 }
 
 export function handlePageChange(): void {
-  CONTROLLERS.forEach(controller => controller.handlePageChange());
+  controllers.forEach(controller => controller.handlePageChange());
 }
 
 export function handlePageChangeInGallery(): void {
-  CONTROLLERS.forEach(controller => controller.handlePageChangeInGallery());
+  controllers.forEach(controller => controller.handlePageChangeInGallery());
 }
 
 export const preloadContentOutOfGallery = (thumbs: HTMLElement[]): void => GalleryImageController.preload(thumbs);

@@ -8,7 +8,7 @@ let container: HTMLElement;
 let findButton: HTMLButtonElement;
 let input: HTMLInputElement;
 
-export function insertFavoritesFinder(): void {
+export function setupFavoritesFinder(): void {
   if (ON_MOBILE_DEVICE || !FavoritesSettings.favoriteFinderEnabled) {
     return;
   }
@@ -25,12 +25,10 @@ export function insertFavoritesFinder(): void {
 function createElements(): void {
   container = document.createElement("span");
   container.id = "favorite-finder";
-
   findButton = document.createElement("button");
   findButton.id = "favorite-finder-button";
   findButton.title = "Find favorite using its ID";
   findButton.textContent = "Find";
-
   input = document.createElement("input");
   input.id = "favorite-finder-input";
   input.type = "number";
@@ -38,7 +36,7 @@ function createElements(): void {
   input.placeholder = "ID";
 }
 
-function find(): void {
+function triggerFind(): void {
   Events.favorites.findFavoriteStarted.emit(input.value);
 }
 
@@ -48,18 +46,16 @@ function setFinderValue(value: string): void {
 }
 
 function addEventListeners(): void {
-  const setValue = debounceLeading((value : string) => {
-    setFinderValue(value);
-  }, 1000);
+  const setValue = debounceLeading(setFinderValue, 1000);
 
-  findButton.onclick = find;
+  findButton.onclick = triggerFind;
   input.onkeydown = (event): void => {
     if (event.key === "Enter") {
-      find();
+      triggerFind();
     }
   };
-  input.oninput = ((event: Event): void => {
-    setValue((event.target as HTMLInputElement).value);
+  input.oninput = ((): void => {
+    setValue(input.value);
   });
   Events.caption.idClicked.on(setValue);
 }

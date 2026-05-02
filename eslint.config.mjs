@@ -1,4 +1,4 @@
-import { defineConfig } from "eslint/config";
+﻿import { defineConfig } from "eslint/config";
 import globals from "globals";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -550,10 +550,25 @@ export default defineConfig([
       "no-console": "off"
     }
   },
-   {
+  {
     files: ["src/types/errors.ts"],
     rules: {
       "max-classes-per-file": "off"
+    }
+  },
+  {
+    files: ["src/lib/core/data_structures/sorted_array.ts", "src/features/favorites/type/favorite_item.ts"],
+    rules: {
+      "no-bitwise": "off"
+    }
+  },
+  {
+    files: ["src/features/autocomplete/autocomplete.ts"],
+    rules: {
+      "no-underscore-dangle": "off",
+      "new-cap": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off"
     }
   }
 ]);

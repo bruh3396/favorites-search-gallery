@@ -4,7 +4,7 @@ import { Preferences } from "../../../../lib/preferences/preferences";
 import { Storage } from "../../../../lib/core/storage/storage_instance";
 import { insertStyle } from "../../../../utils/dom/injector";
 
-export function updateShowOnHoverOptionTriggeredFromGallery(value: boolean): void {
+export function syncShowOnHoverFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");
 
   if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
@@ -64,13 +64,13 @@ export function toggleFavoritesOptions(value: boolean): void {
         `, "options");
 }
 
-const PERSISTENT_LOCAL_STORAGE_KEYS = new Set(["customTags", "savedSearches"]);
 const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag modifications and saved searches will be preserved.";
 const RESET_PROMPT = `Are you sure you want to reset? This will delete all cached favorites, and preferences.${ON_MOBILE_DEVICE ? "" : DESKTOP_RESET_PROMPT_SUFFIX}`;
+const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
 
 function clearLocalStorage(): void {
   Storage.keys()
-    .filter(key => !PERSISTENT_LOCAL_STORAGE_KEYS.has(key))
+    .filter(key => !persistentLocalStorageKeys.has(key))
     .forEach(key => Storage.remove(key));
 }
 

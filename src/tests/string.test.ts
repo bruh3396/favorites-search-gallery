@@ -36,10 +36,10 @@ describe("removeExtraWhiteSpace", () => {
 });
 
 describe("getDimensions2D", () => {
-  const DEFAULT_DIMENSIONS = { x: 100, y: 100 };
+  const defaultDimensions = { x: 100, y: 100 };
 
   test("empty", () => {
-    expect(parseDimensions2D("")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("")).toStrictEqual(defaultDimensions);
   });
 
   test("square", () => {
@@ -51,19 +51,19 @@ describe("getDimensions2D", () => {
   });
 
   test("invalid format", () => {
-    expect(parseDimensions2D("20x")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20x")).toStrictEqual(defaultDimensions);
   });
 
   test("invalid format with letters", () => {
-    expect(parseDimensions2D("20x20a")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20x20a")).toStrictEqual(defaultDimensions);
   });
 
   test("invalid format with letters and spaces", () => {
-    expect(parseDimensions2D("20x 20a")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20x 20a")).toStrictEqual(defaultDimensions);
   });
 
   test("invalid format with spaces", () => {
-    expect(parseDimensions2D("20 x 20")).toStrictEqual(DEFAULT_DIMENSIONS);
+    expect(parseDimensions2D("20 x 20")).toStrictEqual(defaultDimensions);
   });
 
   test("different separator", () => {

@@ -1,8 +1,8 @@
-import { TYPEABLE_INPUTS } from "../../types/guards";
+import { typeableInputs } from "../../types/guards";
 
 function isTypeableInput(element: HTMLElement): boolean {
   const tagName = element.tagName.toLowerCase();
-  return tagName === "textarea" || (tagName === "input" && TYPEABLE_INPUTS.has(element.getAttribute("type") ?? ""));
+  return tagName === "textarea" || (tagName === "input" && typeableInputs.has(element.getAttribute("type") ?? ""));
 }
 
 export function isHotkeyEvent(event: KeyboardEvent): boolean {

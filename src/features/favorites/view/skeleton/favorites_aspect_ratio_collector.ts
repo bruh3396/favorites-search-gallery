@@ -3,7 +3,7 @@ import { Storage } from "../../../../lib/core/storage/storage_instance";
 import { getImageFromThumb } from "../../../../lib/dom/thumb";
 
 const LOCAL_STORAGE_KEY = "aspectRatios";
-const ASPECT_RATIOS: string[] = Storage.get<string[]>(LOCAL_STORAGE_KEY) ?? [];
+const aspectRatios: string[] = Storage.get<string[]>(LOCAL_STORAGE_KEY) ?? [];
 
 function getAspectRatio(width: number, height: number): string {
   return `${width}/${height}`;
@@ -19,5 +19,5 @@ export async function collectAspectRatios(): Promise<void> {
 }
 
 export function getNextAspectRatio(): string | undefined {
-  return ASPECT_RATIOS.pop();
+  return aspectRatios.pop();
 }

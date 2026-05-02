@@ -30,8 +30,8 @@ export function createSearchable(tags: string[]): Searchable {
   };
 }
 
-export const EMPTY = new Set<string>();
-export const FRUITS = new Set([
+export const empty = new Set<string>();
+export const fruits = new Set([
   "grape",
   "banana",
   "apple",
@@ -68,12 +68,12 @@ export const FRUITS = new Set([
   "kiwano",
   "clementine"
 ]);
-export const SORTED_FRUITS = new Set(Array.from(FRUITS).sort());
-export const SEARCHABLE_EMPTY = createSearchable([]);
-export const SEARCHABLE_FRUITS = createSearchable(Array.from(FRUITS));
-export const SEARCHABLE_SORTED_FRUITS = createSearchable(Array.from(SORTED_FRUITS));
+export const sortedFruits = new Set(Array.from(fruits).sort());
+export const searchableEmpty = createSearchable([]);
+export const searchableFruits = createSearchable(Array.from(fruits));
+export const searchableSortedFruits = createSearchable(Array.from(sortedFruits));
 
-export const ITEMS: Fruit[] = [
+export const fruitItems: Fruit[] = [
   {name: "apple", tags: new Set(["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"].sort())},
   {name: "banana", tags: new Set(["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast"].sort())},
   {name: "cherry", tags: new Set(["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert"].sort())},
@@ -85,11 +85,11 @@ export const ITEMS: Fruit[] = [
   {name: "pear", tags: new Set(["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"].sort())},
   {name: "strawberry", tags: new Set(["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"].sort())}
 ];
-export const ALL_ITEM_NAMES = ITEMS.map(item => item.name);
-export const ALL_TAGS = ITEMS.flatMap(item => Array.from(item.tags));
-export const INDEX = new InvertedIndex<Fruit>(fruit => fruit.tags);
-export const ENGINE = new SearchEngine<Fruit>(INDEX);
+export const allItemNames = fruitItems.map(item => item.name);
+export const allTags = fruitItems.flatMap(item => Array.from(item.tags));
+export const index = new InvertedIndex<Fruit>(fruit => fruit.tags);
+export const engine = new SearchEngine<Fruit>(index);
 
-for (const item of ITEMS) {
-  INDEX.addDoc(item);
+for (const item of fruitItems) {
+  index.addDoc(item);
 }

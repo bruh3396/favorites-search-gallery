@@ -1,4 +1,3 @@
-import * as FavoritesSearchEngine from "../model/search/favorites_search_engine";
 import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "../../../types/favorite";
 import { clearPost, createPost } from "./favorite_post_factory";
 import { FavoriteElement } from "./favorite_element";
@@ -9,44 +8,18 @@ import { Rating } from "../../../types/search";
 import { compressPreviewSource } from "../../../lib/server/url/media_url_transformer";
 import { getIdFromThumb } from "../../../lib/dom/thumb";
 
-const ALL_FAVORITES = new Map<string, FavoriteItem>();
-
-export function getFavorite(id: string): FavoriteItem | undefined {
-  return ALL_FAVORITES.get(id);
-}
-
-export function getAllFavorites(): FavoriteItem[] {
-  return Array.from(ALL_FAVORITES.values());
-}
-
-export function validateTags(post: Post): void {
-  const favorite = getFavorite(post.id);
-
-  if (favorite !== undefined) {
-    favorite.validateTags(post);
-  }
-}
-
-function registerFavorite(favorite: FavoriteItem): void {
-  if (!ALL_FAVORITES.has(favorite.id)) {
-    ALL_FAVORITES.set(favorite.id, favorite);
-    FavoritesSearchEngine.addItem(favorite);
-  }
-}
-
 export class FavoriteItem implements Favorite {
-  public id: string;
-  private post: Post;
+  public readonly id: string;
+  public readonly metadata: FavoriteMetadata;
+  private readonly post: Post;
+  private readonly favoriteTags: FavoriteTags;
   private element: FavoriteElement | null;
-  private favoriteTags: FavoriteTags;
-  private metadata: FavoriteMetadata;
 
-  constructor(object: HTMLElement | FavoritesDatabaseRecord) {
+  constructor(object: HTMLElement | FavoritesDatabaseRecord, additionalTags?: string) {
     this.id = object instanceof HTMLElement ? getIdFromThumb(object) : object.id;
     this.post = createPost(object);
+    this.favoriteTags = new FavoriteTags(this.post, object, additionalTags);
     this.element = null;
-    this.favoriteTags = new FavoriteTags(this.post, object);
-    registerFavorite(this);
     this.metadata = new FavoriteMetadata(this.id, object);
   }
 
@@ -58,8 +31,8 @@ export class FavoriteItem implements Favorite {
     if (this.element === null) {
       this.post.tags = this.favoriteTags.tagString;
       this.element = new FavoriteElement(this.post);
+      clearPost(this.post);
     }
-    clearPost(this.post);
     return this.element.root;
   }
 
@@ -72,60 +45,14 @@ export class FavoriteItem implements Favorite {
   }
 
   public get databaseRecord(): FavoritesDatabaseRecord {
-    return {
-      id: this.id,
-      tags: this.tags,
-      src: compressPreviewSource(this.thumbUrl),
-      metadata: this.metadata.databaseRecord
-    };
+    return { id: this.id, tags: this.tags, src: compressPreviewSource(this.thumbUrl), metadata: this.metadata.databaseRecord };
   }
 
-  public withinRating(rating: Rating): boolean {
-    // eslint-disable-next-line no-bitwise
-    return (this.metadata.rating & rating) > 0;
-  }
-
-  public validateTags(post: Post): void {
-    if (!this.favoriteTags.tagsAreEqual(post)) {
-      this.updateTags(post.tags);
-    }
-  }
-
-  public swapFavoriteButton(): void {
-    if (this.element !== null) {
-      this.element.swapFavoriteButton();
-    }
-  }
-
-  public processPost(post: Post): void {
-    this.metadata.processPost(post);
-  }
-
-  public addAdditionalTags(newTags: string): string {
-    FavoritesSearchEngine.removeItem(this);
-    const result = this.favoriteTags.addAdditionalTags(newTags);
-
-    FavoritesSearchEngine.addItem(this);
-    return result;
-  }
-
-  public removeAdditionalTags(tagsToRemove: string): string {
-    FavoritesSearchEngine.removeItem(this);
-    const result = this.favoriteTags.removeAdditionalTags(tagsToRemove);
-
-    FavoritesSearchEngine.addItem(this);
-    return result;
-  }
-
-  public resetAdditionalTags(): void {
-    FavoritesSearchEngine.removeItem(this);
-    this.favoriteTags.resetAdditionalTags();
-    FavoritesSearchEngine.addItem(this);
-  }
-
-  private updateTags(tags: string): void {
-    FavoritesSearchEngine.removeItem(this);
-    this.favoriteTags.update(tags);
-    FavoritesSearchEngine.addItem(this);
-  }
+  public swapFavoriteButton = (): void => this.element?.swapFavoriteButton();
+  public validateTags = (post: Post): void => this.favoriteTags.validate(post);
+  public withinRating = (rating: Rating): boolean => (this.metadata.rating & rating) > 0;
+  public populateMetadata = (post: Post): void => this.metadata.populateFromPost(post);
+  public addAdditionalTags = (newTags: string): string => this.favoriteTags.addAdditionalTags(newTags);
+  public removeAdditionalTags = (tagsToRemove: string): string => this.favoriteTags.removeAdditionalTags(tagsToRemove);
+  public resetAdditionalTags = (): void => this.favoriteTags.resetAdditionalTags();
 }

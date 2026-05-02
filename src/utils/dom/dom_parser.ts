@@ -1,1 +1,1 @@
-export const DOM_PARSER = new DOMParser();
+export const domParser = new DOMParser();

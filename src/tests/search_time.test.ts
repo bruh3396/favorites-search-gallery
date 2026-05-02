@@ -13,7 +13,6 @@ function benchmark(label: string, fn: () => void): void {
 
   const end = performance.now();
 
-  // eslint-disable-next-line no-console
   console.info(`${label}: ${end - start}ms`);
 }
 
@@ -102,7 +101,7 @@ describe.skip("MetadataSearchTag benchmark", () => {
     };
   }
 
-  const HD = createMetadataSearchable({ width: 1920, height: 1080, score: 50, id: 1000, duration: 120 });
+  const hd = createMetadataSearchable({ width: 1920, height: 1080, score: 50, id: 1000, duration: 120 });
   const ITERATIONS = 100_000_000;
 
   test("MetadataSearchTag benchmark", () => {
@@ -116,19 +115,19 @@ describe.skip("MetadataSearchTag benchmark", () => {
     benchmark("Simple", () => {
 
       for (let i = 0; i < ITERATIONS; i += 1) {
-        simple.matches(HD);
+        simple.matches(hd);
       }
     });
 
     benchmark("Dynamic", () => {
       for (let i = 0; i < ITERATIONS; i += 1) {
-        dynamic.matches(HD);
+        dynamic.matches(hd);
       }
     });
 
     benchmark("BasicNegation", () => {
       for (let i = 0; i < ITERATIONS; i += 1) {
-        basic.matches(HD);
+        basic.matches(hd);
       }
     });
   });
@@ -141,13 +140,13 @@ describe.skip("MetadataSearchTag benchmark", () => {
 
     benchmark("SearchTag (pre bound)", () => {
       for (let i = 0; i < ITERATIONS; i += 1) {
-        dynamic.matches(HD);
+        dynamic.matches(hd);
       }
     });
 
     benchmark("SearchTagBranch (branching)", () => {
       for (let i = 0; i < ITERATIONS; i += 1) {
-        branch.matches(HD);
+        branch.matches(hd);
       }
     });
   });

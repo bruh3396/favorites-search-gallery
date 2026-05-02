@@ -4,7 +4,7 @@ import { convertImageURLToSampleURL } from "../../../lib/server/url/media_url_tr
 import { isImage } from "../../../lib/media_resolver";
 import { resolveImageURL } from "../../../lib/server/url/media_url_resolver";
 
-export const TRANSFERRED_CANVAS_IDS = new Set<string>();
+export const transferredCanvasIds = new Set<string>();
 
 function getImageBitmapClone(imageRequest: ImageRequest): Promise<ImageBitmap | null> {
   if (GallerySettings.fetchImageBitmapsInWorker) {
@@ -47,10 +47,10 @@ export class OffscreenUpscaleRequest {
   }
 
   public getOffscreenCanvas(thumb: HTMLElement): OffscreenCanvas | null {
-    if (TRANSFERRED_CANVAS_IDS.has(this.id)) {
+    if (transferredCanvasIds.has(this.id)) {
       return null;
     }
-    TRANSFERRED_CANVAS_IDS.add(this.id);
+    transferredCanvasIds.add(this.id);
     const canvas = thumb.querySelector("canvas");
 
     if (canvas === null) {

@@ -1,14 +1,14 @@
 ﻿import * as GalleryImageCache from "./gallery_image_cache";
-import { DO_NOTHING } from "../../../../../../lib/environment/constants";
 import { GallerySettings } from "../../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../../type/gallery_image_request";
 import { LowResolutionImageRequest } from "../../../../type/gallery_low_resolution_image_request";
 import { ON_FAVORITES_PAGE } from "../../../../../../lib/environment/environment";
+import { doNothing } from "../../../../../../lib/environment/constants";
 import { fetchBitmap } from "./gallery_image_fetcher";
 import { isImage } from "../../../../../../lib/media_resolver";
 export { get, completedRequests, clear } from "./gallery_image_cache";
 
-let onComplete: (request: ImageRequest) => void = DO_NOTHING;
+let onComplete: (request: ImageRequest) => void = doNothing;
 
 export function setCompletionCallback(completionCallback: (request: ImageRequest) => void): void {
   onComplete = completionCallback;

@@ -1,4 +1,4 @@
-import { Store } from "./store";
+import { Store } from "../../../types/store";
 
 export class LocalStorage implements Store {
   public get<V>(key: string): V | null {

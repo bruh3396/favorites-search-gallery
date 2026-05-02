@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "node scripts/bin/userscript_builder || (tsc --project scripts/tsconfig.json && node scripts/bin/userscript_builder)",
-    "test": "vitest --run",
+    "test": "npx vitest --run && tsc --noEmit",
     "build-and-test": "npm run build && npm run test",
     "visualize": "npx esbuild-visualizer --metadata dist/meta.json --template treemap --filename .\\dist\\stats.html --open",
     "embed-ts": "(node scripts/bin/static_ts_embedder.js || (tsc --project scripts/tsconfig.json && node scripts/bin/static_ts_embedder.js)) && npm run build && npm run test",

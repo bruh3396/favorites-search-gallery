@@ -1,10 +1,10 @@
 import { AwesompleteSuggestion } from "../../../../types/ui";
-import { DOM_PARSER } from "../../../../utils/dom/dom_parser";
 import { Storage } from "../../../../lib/core/storage/storage_instance";
+import { domParser } from "../../../../utils/dom/dom_parser";
 import { fetchTagFromAPI } from "../../../../lib/server/fetch/tag_fetcher";
 import { removeExtraWhiteSpace } from "../../../../utils/string/format";
 
-const CUSTOM_TAGS: Set<string> = loadCustomTags();
+const allCustomTags: Set<string> = loadCustomTags();
 
 export function loadCustomTags(): Set<string> {
   return new Set(Storage.get<string[]>("customTags") ?? []);
@@ -12,27 +12,27 @@ export function loadCustomTags(): Set<string> {
 
 export async function setCustomTags(tags: string): Promise<void> {
   for (const tag of removeExtraWhiteSpace(tags).split(" ")) {
-    if (tag === "" || CUSTOM_TAGS.has(tag)) {
+    if (tag === "" || allCustomTags.has(tag)) {
       continue;
     }
     const isAnOfficialTag = await isOfficialTag(tag);
 
     if (!isAnOfficialTag) {
-      CUSTOM_TAGS.add(tag);
+      allCustomTags.add(tag);
     }
   }
-  Storage.set("customTags", [...CUSTOM_TAGS]);
+  Storage.set("customTags", [...allCustomTags]);
 }
 
 export function clearCustomTags(): void {
-  CUSTOM_TAGS.clear();
+  allCustomTags.clear();
   Storage.remove("customTags");
 }
 
 async function isOfficialTag(tagName: string): Promise<boolean> {
   try {
     const html = await fetchTagFromAPI(tagName);
-    const dom = DOM_PARSER.parseFromString(html, "text/html");
+    const dom = domParser.parseFromString(html, "text/html");
     const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
     return columnOfFirstRow.length === 3;
   } catch (error) {
@@ -42,7 +42,7 @@ async function isOfficialTag(tagName: string): Promise<boolean> {
 }
 
 export function addCustomTagsToAutocomplete(officialTags: AwesompleteSuggestion[], searchQuery: string): AwesompleteSuggestion[] {
-  const customTags = Array.from(CUSTOM_TAGS);
+  const customTags = Array.from(allCustomTags);
   const officialTagValues = new Set(officialTags.map(officialTag => officialTag.value));
   const mergedTags = officialTags;
 

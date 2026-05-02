@@ -1,4 +1,4 @@
-import { OVERLAYS } from "../../../../lib/shell";
+import { Overlays } from "../../../../lib/shell";
 
 export function createFooter(): void {
   const footer = document.createElement("div");
@@ -16,7 +16,7 @@ export function createFooter(): void {
   footer.appendChild(footerTop);
   footer.appendChild(footerBottom);
 
-  OVERLAYS.appendChild(footer);
+  Overlays.appendChild(footer);
 }
 
 export function moveStatusToFooter(): void {

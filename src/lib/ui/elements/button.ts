@@ -1,12 +1,12 @@
-import { ButtonElement, DEFAULT_MENU_ELEMENT } from "../element_types";
-import { DO_NOTHING } from "../../environment/constants";
+import { ButtonElement, defaultMenuElement } from "../element_types";
+import { doNothing } from "../../environment/constants";
 
 function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {
   return {
-    ...DEFAULT_MENU_ELEMENT,
+    ...defaultMenuElement,
     event: null,
     hotkey: "",
-    function: DO_NOTHING,
+    function: doNothing,
     triggerOnCreation: false,
     rightClickEnabled: false,
     ...partial

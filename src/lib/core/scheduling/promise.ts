@@ -4,7 +4,7 @@ export function sleep(milliseconds: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
-export function yield1(): Promise<void> {
+export function yieldControl(): Promise<void> {
   return sleep(0);
 }
 

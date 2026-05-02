@@ -1,4 +1,4 @@
-const DEFAULT_BOUNDARIES = { start: 0, end: 0 };
+const defaultBoundaries = { start: 0, end: 0 };
 
 function isNegatedLeftTagBoundary(text: string, index: number): boolean {
   return text[index] === "-" && (text[index - 1] === " " || text[index - 1] === undefined);
@@ -32,7 +32,7 @@ function getRightTagBoundary(selectionStart: number, text: string): number {
 
 export function getTagBoundary(text: string, selectionStart: number): { start: number, end: number } {
   if (selectionStart < 0 || selectionStart > text.length || text.length === 0) {
-    return DEFAULT_BOUNDARIES;
+    return defaultBoundaries;
   }
   return {
     start: getLeftTagBoundary(selectionStart, text),

@@ -6,9 +6,9 @@ import { WildcardMatchType } from "../type/search_types";
 import { WildcardSearchTag } from "./wildcard_search_tag";
 import { escapeParenthesis } from "../../../utils/string/format";
 
-const UNMATCHABLE_REGEX = /^\b$/;
-const STARTS_WITH_REGEX = /^[^*]*\*$/;
-const CONTAINS_REGEX = /^\*[^*]*\*$/;
+const unmatchableRegex = /^\b$/;
+const startsWithRegex = /^[^*]*\*$/;
+const containsRegex = /^\*[^*]*\*$/;
 
 function removeDuplicateAsterisks(value: string): string {
   return value.replace(/\*+/g, "*");
@@ -19,12 +19,12 @@ function buildWildcardRegex(value: string): RegExp {
     const regex = escapeParenthesis(value.replace(/\*/g, ".*"));
     return new RegExp(`^${regex}$`);
   } catch {
-    return UNMATCHABLE_REGEX;
+    return unmatchableRegex;
   }
 }
 
 function getMatchType(value: string): WildcardMatchType {
-  return STARTS_WITH_REGEX.test(value) ? WildcardMatchType.PREFIX : CONTAINS_REGEX.test(value) ? WildcardMatchType.CONTAINS : WildcardMatchType.REGEX;
+  return startsWithRegex.test(value) ? WildcardMatchType.PREFIX : containsRegex.test(value) ? WildcardMatchType.CONTAINS : WildcardMatchType.REGEX;
 }
 
 function parseNegation(tag: string): { negated: boolean; value: string; } {

@@ -5,15 +5,11 @@ import { getPreviewURL } from "../../../lib/ui/dom";
 import { getTagSetFromItem } from "../../../lib/dom/tags";
 import { resolveMediaType } from "../../../lib/media_resolver";
 
-const IMAGE_BITMAP_CLOSE_QUEUE = new ThrottledQueue(50);
+const imageBitmapCloseQueue = new ThrottledQueue(50);
 
 export function getFavoritePixelCount(id: string): number {
   const favorite = FeatureBridge.allFavorites.query(id);
-
-  if (favorite === undefined) {
-    return 0;
-  }
-  return favorite.metrics.width * favorite.metrics.height;
+  return favorite ? favorite.metrics.width * favorite.metrics.height : 0;
 }
 
 export class ImageRequest {
@@ -76,7 +72,7 @@ export class ImageRequest {
 
   public async close(): Promise<void> {
     if (this.bitmap instanceof ImageBitmap) {
-      await IMAGE_BITMAP_CLOSE_QUEUE.wait();
+      await imageBitmapCloseQueue.wait();
       this.bitmap.close();
     }
   }

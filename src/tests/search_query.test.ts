@@ -1,17 +1,17 @@
-import { ALL_ITEM_NAMES, ALL_TAGS, ENGINE, Fruit, INDEX, ITEMS } from "./search_test_utils";
+import { Fruit, allItemNames, allTags, engine, fruitItems, index } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
 import { SearchQuery } from "../lib/search/query/search_query";
 
 function testSearchEngine(searchQuery: string, expectedNames: string[]): void {
-  expect(ENGINE.search(new SearchQuery<Fruit>(searchQuery), ITEMS).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
+  expect(engine.search(new SearchQuery<Fruit>(searchQuery), fruitItems).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());
 }
 
 function testSearch(rawQuery: string, expectedNames: string[]): void {
   const searchQuery = new SearchQuery<Fruit>(rawQuery);
   const expected = expectedNames.slice().sort();
 
-  expect(ENGINE.search(searchQuery, ITEMS).map(item => item.name).sort()).toEqual(expected);
-  expect(searchQuery.apply(ITEMS).map(item => item.name).sort()).toEqual(expected);
+  expect(engine.search(searchQuery, fruitItems).map(item => item.name).sort()).toEqual(expected);
+  expect(searchQuery.apply(fruitItems).map(item => item.name).sort()).toEqual(expected);
 }
 
 function testSearchQueriesAreEqual(searchQuery1: string, searchQuery2: string): void {
@@ -70,18 +70,18 @@ describe("create", () => {
 
 describe("filter", () => {
   test("empty", () => {
-    testSearch("", ALL_ITEM_NAMES);
-    testSearch(" ", ALL_ITEM_NAMES);
-    testSearch(" \n\t", ALL_ITEM_NAMES);
+    testSearch("", allItemNames);
+    testSearch(" ", allItemNames);
+    testSearch(" \n\t", allItemNames);
   });
 
   test("all", () => {
-    testSearch("*", ALL_ITEM_NAMES);
-    testSearch("**", ALL_ITEM_NAMES);
+    testSearch("*", allItemNames);
+    testSearch("**", allItemNames);
   });
 
   test("names", () => {
-    for (const item of ITEMS) {
+    for (const item of fruitItems) {
       testSearch(item.name, [item.name]);
     }
   });
@@ -96,7 +96,7 @@ describe("filter", () => {
     testSearch("red banana", []);
 
     testSearch("12345", []);
-    testSearch("-12345", ALL_ITEM_NAMES);
+    testSearch("-12345", allItemNames);
 
   });
 
@@ -142,15 +142,15 @@ describe("filter", () => {
   });
 
   test("all tags", () => {
-    const orAllQuery = `( ${Array.from(ALL_TAGS).join(" ~ ")} )`;
-    const andAllQuery = `${Array.from(ALL_TAGS).join(" ")}`;
+    const orAllQuery = `( ${Array.from(allTags).join(" ~ ")} )`;
+    const andAllQuery = `${Array.from(allTags).join(" ")}`;
 
-    testSearch(orAllQuery, ALL_ITEM_NAMES);
+    testSearch(orAllQuery, allItemNames);
     testSearch(andAllQuery, []);
 
-    for (const tag of ALL_TAGS) {
-      testSearch(tag, ITEMS.filter(item => item.tags.has(tag)).map(item => item.name));
-      testSearch(`-${tag}`, ITEMS.filter(item => !item.tags.has(tag)).map(item => item.name));
+    for (const tag of allTags) {
+      testSearch(tag, fruitItems.filter(item => item.tags.has(tag)).map(item => item.name));
+      testSearch(`-${tag}`, fruitItems.filter(item => !item.tags.has(tag)).map(item => item.name));
     }
   });
 
@@ -168,12 +168,12 @@ describe("updateIndex", () => {
   test("remove item", () => {
     const item = {name: "foo", tags: new Set<string>(["green", "purple", "sour", "sweet", "foo"])};
 
-    ITEMS.push(item);
-    INDEX.addDoc(item);
+    fruitItems.push(item);
+    index.addDoc(item);
     testSearchEngine("foo", ["foo"]);
-    INDEX.removeDoc(item);
+    index.removeDoc(item);
     testSearchEngine("foo", []);
-    INDEX.addDoc(item);
+    index.addDoc(item);
     testSearchEngine("foo pur*", ["foo"]);
   });
 });

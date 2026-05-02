@@ -5,7 +5,7 @@ import { MetadataSearchExpression } from "../type/metadata_search_expression";
 
 type Comparator = (a: number, b: number) => boolean;
 
-const COMPARATORS: Record<MetadataComparator, Comparator> = {
+const comparators: Record<MetadataComparator, Comparator> = {
   ":": (a, b) => a === b,
   ":<": (a, b) => a < b,
   ":>": (a, b) => a > b
@@ -19,7 +19,7 @@ export class MetadataSearchTag extends AbstractSearchTag {
 
   constructor(value: string, negated: boolean, expression: MetadataSearchExpression) {
     super(value, negated);
-    this.compare = COMPARATORS[expression.operator];
+    this.compare = comparators[expression.operator];
     this.getLeftValue = (item): number => item.metrics[expression.metric];
     this.getRightValue = expression.hasRightHandMetric ? (item): number => item.metrics[expression.rightHandMetric] : (): number => expression.rightHandValue;
   }

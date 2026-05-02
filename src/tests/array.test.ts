@@ -29,8 +29,8 @@ describe("indexInBounds", () => {
 });
 
 describe("shuffleArray", () => {
-  const NUMBERS = Array.from({ length: 1000 }, (_, i) => i + 1);
-  const NUMBER_SET = new Set(NUMBERS);
+  const numbers = Array.from({ length: 1000 }, (_, i) => i + 1);
+  const numberSet = new Set(numbers);
 
   test("empty", () => {
     expect(shuffleArray([])).toStrictEqual([]);
@@ -41,13 +41,13 @@ describe("shuffleArray", () => {
   });
 
   test("many", () => {
-    const shuffled = shuffleArray(NUMBERS.slice());
+    const shuffled = shuffleArray(numbers.slice());
 
-    expect(shuffled).toHaveLength(NUMBERS.length);
-    expect(shuffled).not.toStrictEqual(NUMBERS);
+    expect(shuffled).toHaveLength(numbers.length);
+    expect(shuffled).not.toStrictEqual(numbers);
 
-    for (const num of NUMBERS) {
-      expect(NUMBER_SET.has(num)).toBe(true);
+    for (const num of numbers) {
+      expect(numberSet.has(num)).toBe(true);
     }
   });
 });

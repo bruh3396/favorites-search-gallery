@@ -1,8 +1,8 @@
 import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix, waitForThumbnailsToLoadInContainer } from "./thumb";
-import { CONTENT } from "../shell";
+import { Content } from "../shell";
 
 function usingColumnLayout(): boolean {
-  return CONTENT.querySelector(`.${COLUMN_CLASS_NAME}`) !== null;
+  return Content.querySelector(`.${COLUMN_CLASS_NAME}`) !== null;
 }
 
 export function waitForAllThumbnailsToLoad(): Promise<unknown[]> {
@@ -10,7 +10,7 @@ export function waitForAllThumbnailsToLoad(): Promise<unknown[]> {
 }
 
 export function getAllContentThumbs(): HTMLElement[] {
-  return usingColumnLayout() ? getThumbsInMatrix(CONTENT) : getThumbsInContainer(CONTENT);
+  return usingColumnLayout() ? getThumbsInMatrix(Content) : getThumbsInContainer(Content);
 }
 
 export function getAllPageThumbs(): HTMLElement[] {

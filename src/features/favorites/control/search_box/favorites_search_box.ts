@@ -11,7 +11,7 @@ import { openSearchPage } from "../../../../lib/navigator";
 let SEARCH_BOX: HTMLTextAreaElement | HTMLInputElement;
 const PARENT_ID: string = "left-favorites-panel-top-row";
 const ID: string = "favorites-search-box";
-const SEARCH_HISTORY: SearchHistory = new SearchHistory(30);
+const searchHistory: SearchHistory = new SearchHistory(30);
 
 function addEventListenersToSearchBox(): void {
   Events.caption.searchForTag.on((tag) => {
@@ -24,7 +24,7 @@ function addEventListenersToSearchBox(): void {
     const newSearchBoxValue = `${initialSearchBoxValue}${optionalSpace}${text}`;
 
     SEARCH_BOX.value = newSearchBoxValue;
-    SEARCH_HISTORY.add(newSearchBoxValue);
+    searchHistory.add(newSearchBoxValue);
     updateLastEditedSearchQuery();
   });
   Events.favorites.searchButtonClicked.on(onSearchButtonClicked);
@@ -50,8 +50,8 @@ function addEventListenersToSearchBox(): void {
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       if (!awesompleteIsVisible(SEARCH_BOX)) {
         event.preventDefault();
-        SEARCH_HISTORY.navigate(event.key);
-        SEARCH_BOX.value = SEARCH_HISTORY.selectedQuery;
+        searchHistory.navigate(event.key);
+        SEARCH_BOX.value = searchHistory.selectedQuery;
       }
     }
   });
@@ -71,7 +71,7 @@ function updateLastEditedSearchQueryOnInput(): void {
 }
 
 function updateLastEditedSearchQuery(): void {
-  SEARCH_HISTORY.setLastQuery(SEARCH_BOX.value);
+  searchHistory.setLastQuery(SEARCH_BOX.value);
 }
 
 function onSearchButtonClicked(event: MouseEvent): void {
@@ -85,13 +85,13 @@ function onSearchButtonClicked(event: MouseEvent): void {
 }
 
 function startSearch(): void {
-  SEARCH_HISTORY.add(SEARCH_BOX.value);
+  searchHistory.add(SEARCH_BOX.value);
   updateLastEditedSearchQuery();
   hideAwesomplete(SEARCH_BOX);
   Events.favorites.searchStarted.emit(SEARCH_BOX.value);
 }
 
 export function setupFavoritesSearchBox(): void {
-  SEARCH_BOX = ON_MOBILE_DEVICE ? createMobileSearchBar(ID, PARENT_ID, startSearch) : createDesktopSearchBar(ID, PARENT_ID, SEARCH_HISTORY.lastEditedQuery);
+  SEARCH_BOX = ON_MOBILE_DEVICE ? createMobileSearchBar(ID, PARENT_ID, startSearch) : createDesktopSearchBar(ID, PARENT_ID, searchHistory.lastEditedQuery);
   addEventListenersToSearchBox();
 }

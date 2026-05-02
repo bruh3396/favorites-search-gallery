@@ -5,14 +5,14 @@ import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_e
 import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../lib/preferences/preferences";
 import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
-import { TRANSFERRED_CANVAS_IDS } from "../../../../type/gallery_offscreen_upscale_request";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { fetchBitmap } from "../controller/gallery_image_fetcher";
 import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
 import { isImage } from "../../../../../../lib/media_resolver";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
+import { transferredCanvasIds } from "../../../../type/gallery_offscreen_upscale_request";
 
-const BATCH_UPSCALE_QUEUE = new ThrottledQueue(20);
+const batchUpscaleQueue = new ThrottledQueue(20);
 
 export abstract class GalleryAbstractUpscaler {
   private upscaledIds: Set<string> = new Set();
@@ -32,7 +32,7 @@ export abstract class GalleryAbstractUpscaler {
 
   public async upscaleBatch(requests: ImageRequest[]): Promise<void> {
     for (const request of requests) {
-      await BATCH_UPSCALE_QUEUE.wait();
+      await batchUpscaleQueue.wait();
       this.upscale(request);
     }
   }
@@ -53,7 +53,7 @@ export abstract class GalleryAbstractUpscaler {
     }
 
     for (const item of this.getCanvasDimensions(thumbs)) {
-      if (TRANSFERRED_CANVAS_IDS.has(item.id)) {
+      if (transferredCanvasIds.has(item.id)) {
         continue;
       }
       this.setThumbCanvasDimensions(item.canvas, item.width, item.height);

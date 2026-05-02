@@ -1,10 +1,10 @@
 import { MetadataComparator, SearchableMetadataMetric } from "../../../types/search";
-import { SEARCHABLE_METADATA_METRICS, isMetadataComparator, isSearchableMetadataMetric } from "../../../types/guards";
+import { isMetadataComparator, isSearchableMetadataMetric, searchableMetadataMetrics } from "../../../types/guards";
 
-const METRIC_PATTERN = Array.from(SEARCHABLE_METADATA_METRICS).join("|");
+const metricPattern = Array.from(searchableMetadataMetrics).join("|");
 
 export class MetadataSearchExpression {
-  public static regex: RegExp = new RegExp(`^-?(${METRIC_PATTERN})(:[<>]?)(\\d+|${METRIC_PATTERN})$`);
+  public static regex: RegExp = new RegExp(`^-?(${metricPattern})(:[<>]?)(\\d+|${metricPattern})$`);
   public readonly metric: SearchableMetadataMetric;
   public readonly operator: MetadataComparator;
   public readonly hasRightHandMetric: boolean;

@@ -1,8 +1,8 @@
-import { DO_NOTHING } from "../../../lib/environment/constants";
 import { Events } from "../../../lib/communication/events";
 import { GallerySettings } from "../../../config/gallery_settings";
 import { InteractionTracker } from "../../../lib/core/observers/interaction_tracker";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
+import { doNothing } from "../../../lib/environment/constants";
 
 export let GalleryInteractionTracker: InteractionTracker | null = null;
 
@@ -16,9 +16,9 @@ export function setupGalleryInteractionTracker(): void {
 
   GalleryInteractionTracker = new InteractionTracker(
     GallerySettings.idleInteractionDuration,
-    DO_NOTHING,
+    doNothing,
     onInteractionStopped,
-    DO_NOTHING,
+    doNothing,
     onInteractionStopped
   );
 }

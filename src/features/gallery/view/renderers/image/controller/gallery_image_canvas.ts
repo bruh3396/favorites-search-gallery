@@ -5,15 +5,15 @@ import { ON_DESKTOP_DEVICE } from "../../../../../../lib/environment/environment
 import { insertStyle } from "../../../../../../utils/dom/injector";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 
-const CANVAS = document.createElement("canvas");
-const CONTEXT = CANVAS.getContext("2d") ?? new CanvasRenderingContext2D();
-const LANDSCAPE_STYLE = `
+const mainCanvas = document.createElement("canvas");
+const mainContext = mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
+const landscapeStyle = `
   .fullscreen-image {
       height: 100vh !important;
       width: auto !important;
   }
   `;
-const PORTRAIT_STYLE = `
+const portraitStyle = `
   .fullscreen-image {
       width: 100vw !important;
       height: auto !important;
@@ -22,14 +22,14 @@ const PORTRAIT_STYLE = `
 let container: HTMLElement;
 const dimensions = parseDimensions2D(GallerySettings.mainCanvasResolution);
 
-CANVAS.className = "fullscreen-image";
-CANVAS.width = dimensions.x;
-CANVAS.height = dimensions.y;
+mainCanvas.className = "fullscreen-image";
+mainCanvas.width = dimensions.x;
+mainCanvas.height = dimensions.y;
 
 function insertGalleryCanvas(newContainer: HTMLElement): void {
   newContainer.id = "canvas-container";
   newContainer.className = "fullscreen-image-container";
-  newContainer.appendChild(CANVAS);
+  newContainer.appendChild(mainCanvas);
   container = newContainer;
 }
 
@@ -38,16 +38,16 @@ export function correctOrientation(): void {
     return;
   }
   const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;
-  const usingCorrectOrientation = (usingLandscape && CANVAS.width > CANVAS.height) || (!usingLandscape && CANVAS.width < CANVAS.height);
+  const usingCorrectOrientation = (usingLandscape && mainCanvas.width > mainCanvas.height) || (!usingLandscape && mainCanvas.width < mainCanvas.height);
 
   if (usingCorrectOrientation) {
     return;
   }
-  insertStyle(usingLandscape ? LANDSCAPE_STYLE : PORTRAIT_STYLE, "gallery-canvas-orientation");
-  const tempWidth = CANVAS.width;
+  insertStyle(usingLandscape ? landscapeStyle : portraitStyle, "gallery-canvas-orientation");
+  const tempWidth = mainCanvas.width;
 
-  CANVAS.width = CANVAS.height;
-  CANVAS.height = tempWidth;
+  mainCanvas.width = mainCanvas.height;
+  mainCanvas.height = tempWidth;
 }
 
 export function mount(newContainer: HTMLElement): void {
@@ -57,13 +57,13 @@ export function mount(newContainer: HTMLElement): void {
 
 export function draw(bitmap: ImageBitmap | null): void {
   if (bitmap !== null) {
-    clearCanvas(CONTEXT);
-    drawScaledCanvas(CONTEXT, bitmap);
+    clearCanvas(mainContext);
+    drawScaledCanvas(mainContext, bitmap);
   }
 }
 
 export function clear(): void {
-  CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
+  mainContext.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 }
 
 export function zoomToPoint(x: number, y: number): void {

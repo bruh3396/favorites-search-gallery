@@ -11,10 +11,10 @@ type RatingElement = {
 }
 
 let parentContainer: HTMLElement = document.createElement("div");
-const CONTAINER = createContainer();
-const EXPLICIT = createRatingElement("explicit");
-const QUESTIONABLE = createRatingElement("questionable");
-const SAFE = createRatingElement("safe");
+const mainContainer = createContainer();
+const explicit = createRatingElement("explicit");
+const questionable = createRatingElement("questionable");
+const safe = createRatingElement("safe");
 
 export function insertFavoritesRatingFilter(): void {
   if (ON_MOBILE_DEVICE) {
@@ -23,7 +23,7 @@ export function insertFavoritesRatingFilter(): void {
   parentContainer = document.getElementById("rating-container") ?? parentContainer;
   parentContainer.appendChild(createLabel());
   parentContainer.appendChild(document.createElement("br"));
-  parentContainer.appendChild(CONTAINER);
+  parentContainer.appendChild(mainContainer);
   changeWhichRatingsAreSelected(Preferences.allowedRatings.value);
   addEventListeners();
 }
@@ -52,8 +52,8 @@ function createRatingElement(ratingName: string): RatingElement {
   input.id = `${ratingName}-rating`;
   label.htmlFor = input.id;
   label.textContent = capitalize(ratingName);
-  CONTAINER.appendChild(input);
-  CONTAINER.appendChild(label);
+  mainContainer.appendChild(input);
+  mainContainer.appendChild(label);
   return {
     input,
     label
@@ -61,7 +61,7 @@ function createRatingElement(ratingName: string): RatingElement {
 }
 
 function addEventListeners(): void {
-  CONTAINER.onclick = (event): void => {
+  mainContainer.onclick = (event): void => {
     if (event.target === null || hasTagName(event.target, "label")) {
       return;
     }
@@ -74,36 +74,36 @@ function addEventListeners(): void {
 }
 
 function getCurrentRating(): Rating {
-  const rating = (4 * Number(EXPLICIT.input.checked)) + (2 * Number(QUESTIONABLE.input.checked)) + Number(SAFE.input.checked);
+  const rating = (4 * Number(explicit.input.checked)) + (2 * Number(questionable.input.checked)) + Number(safe.input.checked);
   return rating as Rating;
 }
 
 function changeWhichRatingsAreSelected(rating: Rating): void {
   // eslint-disable-next-line no-bitwise
-  EXPLICIT.input.checked = (rating & 4) === 4;
+  explicit.input.checked = (rating & 4) === 4;
   // eslint-disable-next-line no-bitwise
-  QUESTIONABLE.input.checked = (rating & 2) === 2;
+  questionable.input.checked = (rating & 2) === 2;
   // eslint-disable-next-line no-bitwise
-  SAFE.input.checked = (rating & 1) === 1;
+  safe.input.checked = (rating & 1) === 1;
   preventAllRatingsFromBeingUnselected();
 }
 
 function preventAllRatingsFromBeingUnselected(): void {
   switch (getCurrentRating()) {
     case 4:
-      EXPLICIT.label.style.pointerEvents = "none";
+      explicit.label.style.pointerEvents = "none";
       break;
 
     case 2:
-      QUESTIONABLE.label.style.pointerEvents = "none";
+      questionable.label.style.pointerEvents = "none";
       break;
 
     case 1:
-      SAFE.label.style.pointerEvents = "none";
+      safe.label.style.pointerEvents = "none";
       break;
 
     default:
-      for (const element of [EXPLICIT, QUESTIONABLE, SAFE]) {
+      for (const element of [explicit, questionable, safe]) {
         element.label.removeAttribute("style");
       }
       break;

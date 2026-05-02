@@ -1,7 +1,7 @@
 import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
 import { NewFavorites } from "../../type/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { ROOT } from "../../../../lib/shell";
+import { Root } from "../../../../lib/shell";
 import { Timeout } from "../../../../types/async";
 import { getFavoritesPageId } from "../../../../lib/environment/favorites_metadata";
 
@@ -57,6 +57,6 @@ async function setExpectedTotalFavoritesCount(): Promise<void> {
 
 export function setupFavoritesStatus(): void {
   setExpectedTotalFavoritesCount();
-  matchCountIndicator = ROOT.querySelector("#match-count-label") ?? document.createElement("label");
-  statusIndicator = ROOT.querySelector("#favorites-load-status-label") ?? document.createElement("label");
+  matchCountIndicator = Root.querySelector("#match-count-label") ?? document.createElement("label");
+  statusIndicator = Root.querySelector("#favorites-load-status-label") ?? document.createElement("label");
 }

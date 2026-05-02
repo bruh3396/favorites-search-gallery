@@ -3,17 +3,17 @@ import { Events } from "./events";
 type Point = { x: number; y: number };
 
 const THRESHOLD = 90;
-const START: Point = { x: 0, y: 0 };
-const END: Point = { x: 0, y: 0 };
+const start: Point = { x: 0, y: 0 };
+const end: Point = { x: 0, y: 0 };
 
 function setTouchStart(event: TouchEvent): void {
-  START.x = event.changedTouches[0].screenX;
-  START.y = event.changedTouches[0].screenY;
+  start.x = event.changedTouches[0].screenX;
+  start.y = event.changedTouches[0].screenY;
 }
 
 function getSwipeDirection(): "up" | "down" | "left" | "right" | null {
-  const dx = END.x - START.x;
-  const dy = END.y - START.y;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
 
   if (Math.abs(dx) < THRESHOLD && Math.abs(dy) < THRESHOLD) {
     return null;
@@ -26,8 +26,8 @@ function getSwipeDirection(): "up" | "down" | "left" | "right" | null {
 }
 
 function onTouchEnd(event: TouchEvent): void {
-  END.x = event.changedTouches[0].screenX;
-  END.y = event.changedTouches[0].screenY;
+  end.x = event.changedTouches[0].screenX;
+  end.y = event.changedTouches[0].screenY;
 
   switch (getSwipeDirection()) {
     case "up":

@@ -12,9 +12,7 @@ export const FavoritesSettings = {
   infiniteScrollPreloadCount: 100,
   reloadFetchDelay: 100,
   favoritesPageRetryBackoffBase: 7,
-  useSearchEngine: true,
   buildIndexAsync: true,
-  favoriteFinderEnabled: false,
-  bottomNavigationButtonsEnabled: false,
-  fetchMultiplePostWhileFetchingFavorites: true
+  favoriteFinderEnabled: true,
+  bottomNavigationButtonsEnabled: false
 };

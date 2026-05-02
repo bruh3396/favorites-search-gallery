@@ -1,14 +1,12 @@
 import { NavigationKey } from "../../../types/input";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SearchPage } from "./search_page";
-import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { fetchSearchPage } from "../../../lib/server/fetch/search_page_fetcher";
 import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
 import { isForwardNavigationKey } from "../../../types/guards";
 import { sleep } from "../../../lib/core/scheduling/promise";
 
-const SEARCH_PAGE_FETCH_LIMITER = new ThrottledQueue(1250);
-const SEARCH_PAGE_PREFETCH_LENGTH = 6;
+const searchPagePrefetchLength = 6;
 let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;
 let initialPageNumber: number;
@@ -57,18 +55,17 @@ function getAdjacentSearchPageNumber(direction: NavigationKey): number {
 export function preloadSearchPages(): void {
   loadSearchPage(currentPageNumber);
 
-  for (let i = 1; i < SEARCH_PAGE_PREFETCH_LENGTH; i += 1) {
+  for (let i = 1; i < searchPagePrefetchLength; i += 1) {
     loadSearchPage(currentPageNumber - i);
     loadSearchPage(currentPageNumber + i);
   }
 }
 
-async function loadSearchPage(pageNumber: number): Promise<void> {
+function loadSearchPage(pageNumber: number): Promise<void> {
   if (pageHasAlreadyBeenFetched(pageNumber) || pageNumber < 0) {
     return Promise.resolve();
   }
   fetchedPageNumbers.add(pageNumber);
-  await SEARCH_PAGE_FETCH_LIMITER.wait();
   return fetchSearchPage(baseUrl, pageNumber)
     .then((html: string) => {
       registerNewPage(pageNumber, html);

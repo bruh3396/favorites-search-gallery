@@ -1,4 +1,4 @@
-import { FavoriteItem } from "../type/favorite_item";
+import { Favorite } from "../../../types/favorite";
 import { FavoritesInfiniteScrollFlow } from "./favorites_infinite_scroll_flow";
 import { FavoritesPaginationFlow } from "./favorites_pagination_flow";
 import { FavoritesPresentationFlow } from "../type/favorite_types";
@@ -9,7 +9,7 @@ function getPresentationFlow(): FavoritesPresentationFlow {
   return Preferences.infiniteScroll.value ? FavoritesInfiniteScrollFlow : FavoritesPaginationFlow;
 }
 
-export function present(favorites: FavoriteItem[]): void {
+export function present(favorites: Favorite[]): void {
   getPresentationFlow().present(favorites);
 }
 

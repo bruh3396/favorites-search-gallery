@@ -5,16 +5,16 @@ import { BatchExecutor } from "../../lib/core/concurrency/batch_executor";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import { CAPTION_CSS } from "../../assets/css";
 import { ClickCode } from "../../types/input";
-import { DOM_PARSER } from "../../utils/dom/dom_parser";
-import { DO_NOTHING } from "../../lib/environment/constants";
 import { Database } from "../../lib/core/storage/database";
 import { Events } from "../../lib/communication/events";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { capitalize } from "../../utils/string/format";
 import { debounceLeading } from "../../lib/core/scheduling/rate_limiting";
+import { doNothing } from "../../lib/environment/constants";
+import { domParser } from "../../utils/dom/dom_parser";
 import { getAllContentThumbs } from "../../lib/dom/content_thumb";
-import { getFavorite } from "../favorites/type/favorite_item";
 import { getImageFromThumb } from "../../lib/dom/thumb";
 import { getTagSetFromItem } from "../../lib/dom/tags";
 import { insertStyle } from "../../utils/dom/injector";
@@ -36,17 +36,17 @@ const template = `
         ${getCategoryHeaderHTML()}
     </ul>
   `;
-const TAG_CATEGORY_MAPPINGS: Record<string, TagCategory> = {};
-const PENDING_REQUESTS: Set<string> = new Set();
-const SETTINGS = {
+const tagCategoryMappings: Record<string, TagCategory> = {};
+const pendingRequests: Set<string> = new Set();
+const settings = {
   tagFetchDelayAfterFinishedLoading: 35,
   tagFetchDelayBeforeFinishedLoading: 100,
   maxPendingRequestsAllowed: 100
 };
-const FLAGS = {
+const flags = {
   finishedLoading: false
 };
-const TAG_CATEGORY_DECODINGS: Record<number, TagCategory> = {
+const tagCategoryDecodings: Record<number, TagCategory> = {
   0: "general",
   1: "artist",
   2: "unknown",
@@ -54,8 +54,8 @@ const TAG_CATEGORY_DECODINGS: Record<number, TagCategory> = {
   4: "character",
   5: "metadata"
 };
-const DATABASE = new Database<TagCategoryMapping>("TagCategories", "tagMappings");
-const DATABASE_WRITE_SCHEDULER = new BatchExecutor<TagCategoryMapping>(500, 2000, saveTagCategories);
+const database = new Database<TagCategoryMapping>("TagCategories", "tagMappings");
+const databaseWriteScheduler = new BatchExecutor<TagCategoryMapping>(500, 2000, saveTagCategories);
 
 let captionWrapper: HTMLElement;
 let caption: HTMLElement;
@@ -77,7 +77,7 @@ function getCategoryHeaderHTML(): string {
 }
 
 function saveTagCategories(mappings: TagCategoryMapping[]): void {
-  DATABASE.store(mappings);
+  database.store(mappings);
 }
 
 function isHidden(): boolean {
@@ -85,10 +85,10 @@ function isHidden(): boolean {
 }
 
 function getTagFetchDelay(): number {
-  if (FLAGS.finishedLoading) {
-    return SETTINGS.tagFetchDelayAfterFinishedLoading;
+  if (flags.finishedLoading) {
+    return settings.tagFetchDelayAfterFinishedLoading;
   }
-  return SETTINGS.tagFetchDelayBeforeFinishedLoading;
+  return settings.tagFetchDelayBeforeFinishedLoading;
 }
 
 function initializeFields(): void {
@@ -166,12 +166,12 @@ function addCommonEventListeners(): void {
 
 function addFavoritesPageEventListeners(): void {
   Events.favorites.favoritesLoaded.on(() => {
-    FLAGS.finishedLoading = true;
+    flags.finishedLoading = true;
   }, {
     once: true
   });
   Events.favorites.favoritesLoadedFromDatabase.on(() => {
-    FLAGS.finishedLoading = true;
+    flags.finishedLoading = true;
   }, {
     once: true
   });
@@ -183,7 +183,7 @@ function addFavoritesPageEventListeners(): void {
     }, 600);
   }, 2000));
   Events.favorites.resetConfirmed.on(() => {
-    DATABASE.delete();
+    database.delete();
   });
 }
 
@@ -287,7 +287,7 @@ function thumbMetadataExists(thumb: HTMLElement): boolean {
   if (ON_SEARCH_PAGE) {
     return false;
   }
-  const favorite = getFavorite(thumb.id);
+  const favorite = FeatureBridge.allFavorites.query(thumb.id);
 
   if (favorite === undefined) {
     return false;
@@ -300,7 +300,7 @@ function thumbMetadataExists(thumb: HTMLElement): boolean {
 }
 
 function estimateThumbHeightFromMetadata(thumb: HTMLElement, columnInput: HTMLInputElement): number {
-  const favorite = getFavorite(thumb.id);
+  const favorite = FeatureBridge.allFavorites.query(thumb.id);
 
   if (favorite === undefined) {
     return 200;
@@ -346,10 +346,10 @@ function addTag(tagCategory: TagCategory, tagName: string): void {
 }
 
 async function loadTagCategoryMappings(): Promise<void> {
-  const mappings = await DATABASE.load();
+  const mappings = await database.load();
 
   for (const mapping of mappings) {
-    TAG_CATEGORY_MAPPINGS[mapping.id] = mapping.category;
+    tagCategoryMappings[mapping.id] = mapping.category;
 
     [1].push(1);
   }
@@ -462,7 +462,7 @@ function addTags(tags: Set<string>, thumb: HTMLElement): void {
 }
 
 function getTagCategory(tagName: string): TagCategory {
-  return TAG_CATEGORY_MAPPINGS[tagName] ?? "general";
+  return tagCategoryMappings[tagName] ?? "general";
 }
 
 function allTagsAreProblematic(tags: string[]): boolean {
@@ -504,24 +504,24 @@ function getTagCategoryMapFromPostPage(html: string): Map<string, string> {
 
 function setAsProblematic(tag: string): void {
   // if (tagCategoryMappings[tag] === undefined && !Utils.customTags.has(tag)) {
-  if (TAG_CATEGORY_MAPPINGS[tag] === undefined) {
+  if (tagCategoryMappings[tag] === undefined) {
     problematicTags.add(tag);
   }
 }
 
 export function findTagCategoriesOnPageChange(): void {
-  if (!FLAGS.finishedLoading) {
+  if (!flags.finishedLoading) {
     return;
   }
   const tagNames = getTagNamesWithUnknownCategories(getAllContentThumbs().slice(0, 200));
 
-  findTagCategories(tagNames, DO_NOTHING, getTagFetchDelay());
+  findTagCategories(tagNames, doNothing, getTagFetchDelay());
 }
 
 function abortAllRequests(reason: string): void {
   abortController.abort(reason);
   abortController = new AbortController();
-  PENDING_REQUESTS.clear();
+  pendingRequests.clear();
 }
 
 async function findTagCategories(tagNames: string[], onAllCategoriesFound: () => void, fetchDelay: number): Promise<void> {
@@ -534,8 +534,8 @@ async function findTagCategories(tagNames: string[], onAllCategoriesFound: () =>
       continue;
     }
 
-    if (PENDING_REQUESTS.size > SETTINGS.maxPendingRequestsAllowed) {
-      abortAllRequests(`Too many pending requests: ${PENDING_REQUESTS.size}`);
+    if (pendingRequests.size > settings.maxPendingRequestsAllowed) {
+      abortAllRequests(`Too many pending requests: ${pendingRequests.size}`);
       return;
     }
 
@@ -551,11 +551,11 @@ async function findTagCategories(tagNames: string[], onAllCategoriesFound: () =>
     }
 
     try {
-      PENDING_REQUESTS.add(tagName);
+      pendingRequests.add(tagName);
       TagAPI.fetchTagFromAPI(tagName, abortController)
         .then((html) => {
-          PENDING_REQUESTS.delete(tagName);
-          const dom = DOM_PARSER.parseFromString(html, "text/html");
+          pendingRequests.delete(tagName);
+          const dom = domParser.parseFromString(html, "text/html");
           const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
 
           if (encoding === "array") {
@@ -571,7 +571,7 @@ async function findTagCategories(tagNames: string[], onAllCategoriesFound: () =>
           onAllCategoriesFound();
         });
     } catch (error) {
-      PENDING_REQUESTS.delete(tagName);
+      pendingRequests.delete(tagName);
       console.error(error);
     }
     await sleep(fetchDelay ?? getTagFetchDelay());
@@ -595,7 +595,7 @@ function getTagNamesWithUnknownCategories(thumbs: HTMLElement[]): string[] {
 
 function tagCategoryIsUnknown(thumb: HTMLElement, tagName: string): boolean {
   // return tagName !== thumb.id && tagCategoryMappings[tagName] === undefined && !Utils.customTags.has(tagName);
-  return tagName !== thumb.id && TAG_CATEGORY_MAPPINGS[tagName] === undefined;
+  return tagName !== thumb.id && tagCategoryMappings[tagName] === undefined;
 }
 
 // function convertToTagCategory(tagCategory: string): TagCategory {
@@ -603,15 +603,15 @@ function tagCategoryIsUnknown(thumb: HTMLElement, tagName: string): boolean {
 // }
 
 function decodeTagCategory(encoding: number): TagCategory {
-  return TAG_CATEGORY_DECODINGS[encoding] ?? "general";
+  return tagCategoryDecodings[encoding] ?? "general";
 }
 
 function addTagCategoryMapping(id: string, category: TagCategory): void {
-  if (TAG_CATEGORY_MAPPINGS[id] !== undefined) {
+  if (tagCategoryMappings[id] !== undefined) {
     return;
   }
-  TAG_CATEGORY_MAPPINGS[id] = category;
-  DATABASE_WRITE_SCHEDULER.add({
+  tagCategoryMappings[id] = category;
+  databaseWriteScheduler.add({
     id,
     category
   });

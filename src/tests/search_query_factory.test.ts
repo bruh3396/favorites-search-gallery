@@ -4,7 +4,7 @@ import { isMetadataSearchTag, isWildcardSearchTag, parseSearchTag } from "../lib
 import { ExactSearchTag } from "../lib/search/tag/exact_search_tag";
 import { WildcardSearchTag } from "../lib/search/tag/wildcard_search_tag";
 
-const NORMAL_SEARCH_TAGS = [
+const normalSearchTags = [
   "",
   "m",
   "mango",
@@ -14,7 +14,7 @@ const NORMAL_SEARCH_TAGS = [
   "cherry"
 ];
 
-const WILDCARD_SEARCH_TAGS = [
+const wildcardSearchTags = [
   "*",
   "*mango",
   "*mango*",
@@ -26,13 +26,13 @@ const WILDCARD_SEARCH_TAGS = [
 
 describe("utils", () => {
   test("isWildcardSearchTag", () => {
-    expect(NORMAL_SEARCH_TAGS.every(tag => !isWildcardSearchTag(tag))).toBe(true);
-    expect(WILDCARD_SEARCH_TAGS.every(tag => isWildcardSearchTag(tag))).toBe(true);
+    expect(normalSearchTags.every(tag => !isWildcardSearchTag(tag))).toBe(true);
+    expect(wildcardSearchTags.every(tag => isWildcardSearchTag(tag))).toBe(true);
   });
 
   test("isMetadataSearchTag", () => {
-    expect(NORMAL_SEARCH_TAGS.every(tag => !isMetadataSearchTag(tag))).toBe(true);
-    expect(WILDCARD_SEARCH_TAGS.every(tag => !isMetadataSearchTag(tag))).toBe(true);
+    expect(normalSearchTags.every(tag => !isMetadataSearchTag(tag))).toBe(true);
+    expect(wildcardSearchTags.every(tag => !isMetadataSearchTag(tag))).toBe(true);
 
     for (const metric of ["width", "height", "id", "score", "duration"]) {
       for (const comparator of [":", ":<", ":>"]) {
@@ -45,8 +45,8 @@ describe("utils", () => {
   });
 
   test("createSearchTag", () => {
-    expect(WILDCARD_SEARCH_TAGS.every(tag => parseSearchTag(tag) instanceof WildcardSearchTag)).toBe(true);
-    expect(NORMAL_SEARCH_TAGS.every(tag => parseSearchTag(tag) instanceof ExactSearchTag)).toBe(true);
+    expect(wildcardSearchTags.every(tag => parseSearchTag(tag) instanceof WildcardSearchTag)).toBe(true);
+    expect(normalSearchTags.every(tag => parseSearchTag(tag) instanceof ExactSearchTag)).toBe(true);
   });
 
   test("createSearchTagGroup", () => {

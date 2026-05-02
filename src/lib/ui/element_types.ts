@@ -1,6 +1,6 @@
-import { DO_NOTHING } from "../environment/constants";
 import { Emitter } from "../core/scheduling/emitter";
 import { Preference } from "../core/storage/preference";
+import { doNothing } from "../environment/constants";
 
 export interface MenuElement<T> {
   parentId: string
@@ -42,7 +42,7 @@ export interface NumberElement extends StateMenuElement<number> {
   pollingTime: number
 }
 
-export const DEFAULT_MENU_ELEMENT: MenuElement<void> = {
+export const defaultMenuElement: MenuElement<void> = {
   parentId: "",
   id: "",
   enabled: true,
@@ -50,6 +50,6 @@ export const DEFAULT_MENU_ELEMENT: MenuElement<void> = {
   position: "afterbegin",
   textContent: "",
   event: null,
-  function: DO_NOTHING,
+  function: doNothing,
   triggerOnCreation: false
 };

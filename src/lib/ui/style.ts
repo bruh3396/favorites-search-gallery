@@ -6,7 +6,7 @@ import { GeneralSettings } from "../../config/general_settings";
 import { Preferences } from "../preferences/preferences";
 import { buildStyleSheetURL } from "../server/url/action_url_builder";
 import { insertStyle } from "../../utils/dom/injector";
-import { yield1 } from "../core/scheduling/promise";
+import { yieldControl } from "../core/scheduling/promise";
 
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
   return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
@@ -110,7 +110,7 @@ export function usingDarkTheme(): boolean {
 }
 
 export async function toggleDarkTheme(useDark: boolean): Promise<void> {
-  await yield1();
+  await yieldControl();
   insertStyle(useDark ? DARK_THEME_HTML : "", "dark-theme");
   toggleDarkStyleSheet(useDark);
   toggleGreenGradientClasses(useDark);

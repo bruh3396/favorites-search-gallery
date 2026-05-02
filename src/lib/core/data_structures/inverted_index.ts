@@ -5,10 +5,7 @@ export class InvertedIndex<Doc> {
   private readonly indexedDocs: Set<Doc> = new Set<Doc>();
   private readonly docsByTerm: Map<string, Set<Doc>> = new Map<string, Set<Doc>>();
 
-  constructor(
-    private readonly extractTerms: (doc: Doc) => Iterable<string>,
-    private maintainingSortOrder: boolean = false
-  ) { }
+  constructor(private readonly extractTerms: (doc: Doc) => Iterable<string>, private maintainingSortOrder: boolean = false) { }
 
   public getIndexedTerms(): string[] {
     return this.indexedTerms.toArray();
@@ -47,6 +44,10 @@ export class InvertedIndex<Doc> {
 
   public maintainSortOrder(value: boolean): void {
     this.maintainingSortOrder = value;
+  }
+
+  public sortTerms(): void {
+    this.indexedTerms.sort();
   }
 
   private addTerm(term: string): void {

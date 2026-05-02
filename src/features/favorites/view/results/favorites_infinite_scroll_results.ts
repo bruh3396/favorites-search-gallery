@@ -1,7 +1,7 @@
-import { FavoriteItem } from "../../type/favorite_item";
+import { Favorite } from "../../../../types/favorite";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 
-function collectUnrendered<T>(favorites: FavoriteItem[], limit: number, selector: (f: FavoriteItem) => T): T[] {
+function collectUnrendered<T>(favorites: Favorite[], limit: number, selector: (f: Favorite) => T): T[] {
   const result: T[] = [];
 
   for (const favorite of favorites) {
@@ -16,18 +16,18 @@ function collectUnrendered<T>(favorites: FavoriteItem[], limit: number, selector
   return result;
 }
 
-export function getMoreResults(favorites: FavoriteItem[]): HTMLElement[] {
+export function getMoreResults(favorites: Favorite[]): HTMLElement[] {
   return collectUnrendered(favorites, FavoritesSettings.infiniteScrollBatchSize, f => f.root);
 }
 
-export function hasMoreResults(favorites: FavoriteItem[]): boolean {
+export function hasMoreResults(favorites: Favorite[]): boolean {
   return getMoreResults(favorites).length > 0;
 }
 
-export function getFirstResults(favorites: FavoriteItem[]): FavoriteItem[] {
+export function getFirstResults(favorites: Favorite[]): Favorite[] {
   return favorites.slice(0, FavoritesSettings.infiniteScrollBatchSize);
 }
 
-export function getThumbURLsToPreload(favorites: FavoriteItem[]): string[] {
+export function getThumbURLsToPreload(favorites: Favorite[]): string[] {
   return collectUnrendered(favorites, FavoritesSettings.infiniteScrollPreloadCount, f => f.thumbUrl);
 }

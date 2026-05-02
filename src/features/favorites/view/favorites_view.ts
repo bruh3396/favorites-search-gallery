@@ -1,13 +1,14 @@
-import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
+﻿import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
 import * as Layout from "../../../lib/layout/layout";
 import { Favorite } from "../../../types/favorite";
 import { NewFavorites } from "../type/favorite_types";
 import { buildFavoriteElementTemplate } from "../type/favorite_element";
-import { collectAspectRatios } from "./skeleton/favorites_aspect_ratio_collector";
+import { buildFavoritesMenu } from "./shell/favorites_menu_builder";
+import { clearNativeFavoritesPage } from "./shell/favorites_page_cleaner";
 import { getFavoritesSkeleton } from "./skeleton/favorites_skeleton";
+import { insertFavoritesBottomNavigationButtons } from "../control/components/favorites_bottom_navigation_buttons";
 import { scrollToTop } from "../../../lib/ui/dom";
-import { setupFavoritesShell } from "./shell/favorites_shell";
 import { sleep } from "../../../lib/core/scheduling/promise";
 import { waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 
@@ -37,9 +38,10 @@ export async function revealFavorite(id: string): Promise<void> {
 }
 
 export function setupFavoritesView(): void {
-  setupFavoritesShell();
+  clearNativeFavoritesPage();
+  buildFavoritesMenu();
+  insertFavoritesBottomNavigationButtons();
   buildFavoriteElementTemplate();
-  collectAspectRatios();
   FavoritesStatus.setupFavoritesStatus();
   Layout.setupLayout();
   Layout.tile(getFavoritesSkeleton());
@@ -53,3 +55,5 @@ export * from "./menu/favorites_status_bar";
 export * from "./results/favorites_infinite_scroll_results";
 export * from "./results/favorites_paginator";
 export * from "./dom/favorites_item_dom";
+export { collectAspectRatios } from "./skeleton/favorites_aspect_ratio_collector";
+export { syncShowOnHoverFromGallery, toggleFavoritesOptions, tryResetting } from "./update/favorites_menu_event_handlers";

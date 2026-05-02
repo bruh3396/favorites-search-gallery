@@ -18,7 +18,7 @@ import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handl
 import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 import { reloadWindow } from "../../../../utils/browser/window";
 
-const BUTTONS: Partial<ButtonElement>[] = [
+const buttons: Partial<ButtonElement>[] = [
   {
     id: "search-button",
     parentId: "favorites-main-buttons-container",
@@ -57,20 +57,20 @@ const BUTTONS: Partial<ButtonElement>[] = [
     event: Events.favorites.downloadButtonClicked
   },
   {
-    id: "subset-button",
+    id: "set-active_favorites_button",
     parentId: "favorites-main-buttons-container",
     textContent: "Set Subset",
     title: "Make the current search results the entire set of results to search from",
     enabled: false,
-    event: Events.favorites.searchSubsetClicked
+    event: Events.favorites.setActiveFavoritesClicked
   },
   {
-    id: "stop-subset-button",
+    id: "reset-active_favorites_button",
     parentId: "favorites-main-buttons-container",
     textContent: "Stop Subset",
-    title: "Stop subset and return entire set of results to all favorites",
+    title: "Reset active favorites to all",
     enabled: false,
-    event: Events.favorites.stopSearchSubsetClicked
+    event: Events.favorites.resetActiveFavoritesClicked
   },
   {
     id: "reset-button",
@@ -83,7 +83,7 @@ const BUTTONS: Partial<ButtonElement>[] = [
 
 ];
 
-const CHECKBOXES: Partial<CheckboxElement>[] = [
+const checkboxes: Partial<CheckboxElement>[] = [
   {
     id: "options",
     parentId: "bottom-panel-1",
@@ -314,7 +314,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
   }
 ];
 
-const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
+const simpleCheckboxes: Partial<CheckboxElement>[] = [
   {
     id: "sort-ascending",
     parentId: "sort-inputs",
@@ -324,7 +324,7 @@ const SIMPLE_CHECKBOXES: Partial<CheckboxElement>[] = [
   }
 ];
 
-const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -379,7 +379,7 @@ const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
   }
 ];
 
-const NUMBERS: Partial<NumberElement>[] = [
+const numbers: Partial<NumberElement>[] = [
   {
     id: "column-count",
     parentId: "column-count-container",
@@ -418,32 +418,32 @@ const NUMBERS: Partial<NumberElement>[] = [
 ];
 
 function createButtons(): void {
-  for (const button of prepareDynamicElements(BUTTONS)) {
+  for (const button of prepareDynamicElements(buttons)) {
     createButtonElement(button);
   }
 }
 
 function createCheckboxes(): void {
-  for (const checkbox of prepareDynamicElements(CHECKBOXES)) {
+  for (const checkbox of prepareDynamicElements(checkboxes)) {
     createCheckboxOption(checkbox);
   }
 }
 
 function createSelects(): void {
   //  @ts-expect-error don't care
-  for (const select of prepareDynamicElements(SELECTS)) {
+  for (const select of prepareDynamicElements(selects)) {
     createSelectElement(select);
   }
 }
 
 function createNumbers(): void {
-  for (const number of prepareDynamicElements(NUMBERS)) {
+  for (const number of prepareDynamicElements(numbers)) {
     createNumberComponent(number);
   }
 }
 
 function createSimpleCheckboxes(): void {
-  for (const checkbox of prepareDynamicElements(SIMPLE_CHECKBOXES)) {
+  for (const checkbox of prepareDynamicElements(simpleCheckboxes)) {
     createCheckboxElement(checkbox);
   }
 }

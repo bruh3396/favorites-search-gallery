@@ -7,7 +7,7 @@ declare let SharedGallerySettings: {
   upscaleUsingSamples: true
 };
 
-const OFFSCREEN_CANVASES: Map<string, OffscreenCanvas> = new Map();
+const offscreenCanvases: Map<string, OffscreenCanvas> = new Map();
 
 async function createImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
   const url = SharedGallerySettings.upscaleUsingSamples ? request.sampleUrl : request.imageUrl;
@@ -103,14 +103,14 @@ async function upscale(request: OffscreenUpscaleRequest): Promise<void> {
 }
 
 function collectOffscreenCanvas(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
-  if (!OFFSCREEN_CANVASES.has(request.id) && request.offscreenCanvas !== null) {
-    OFFSCREEN_CANVASES.set(request.id, request.offscreenCanvas);
+  if (!offscreenCanvases.has(request.id) && request.offscreenCanvas !== null) {
+    offscreenCanvases.set(request.id, request.offscreenCanvas);
     setOffscreenCanvasDimensions(request, bitmap);
   }
 }
 
 function drawOffscreenCanvasFromRequest(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
-  const offscreenCanvas = OFFSCREEN_CANVASES.get(request.id);
+  const offscreenCanvas = offscreenCanvases.get(request.id);
 
   if (offscreenCanvas === undefined) {
     return;
@@ -119,7 +119,7 @@ function drawOffscreenCanvasFromRequest(request: OffscreenUpscaleRequest, bitmap
 }
 
 function clear(): void {
-  for (const offscreenCanvas of OFFSCREEN_CANVASES.values()) {
+  for (const offscreenCanvas of offscreenCanvases.values()) {
     clearOffscreenCanvas(offscreenCanvas);
   }
 }

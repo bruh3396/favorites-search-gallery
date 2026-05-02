@@ -2,10 +2,10 @@ import { AliasMap } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Storage } from "../../../../lib/core/storage/storage_instance";
 
-const ALIAS_MAP = {} as AliasMap;
+const aliasMap = {} as AliasMap;
 
 export function get(tag: string): Set<string> | undefined {
-  return ALIAS_MAP[tag];
+  return aliasMap[tag];
 }
 
 export function has(tag: string): boolean {
@@ -13,9 +13,9 @@ export function has(tag: string): boolean {
 }
 
 export function setupAliases(): void {
-  const aliasMap: Record<string, string[]> = Storage.get<Record<string, string[]>>("aliasMap") ?? {};
+  const aMap: Record<string, string[]> = Storage.get<Record<string, string[]>>("aliasMap") ?? {};
 
-  for (const [tag, aliases] of Object.entries(aliasMap)) {
-    ALIAS_MAP[tag] = new Set(aliases);
+  for (const [tag, aliases] of Object.entries(aMap)) {
+    aliasMap[tag] = new Set(aliases);
   }
 }

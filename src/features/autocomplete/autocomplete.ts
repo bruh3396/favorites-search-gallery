@@ -1,8 +1,5 @@
-/* eslint-disable new-cap */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+﻿import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "../../types/ui";
 import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
-import { AwesompleteSuggestion } from "../../types/ui";
 import { Events } from "../../lib/communication/events";
 import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
@@ -14,20 +11,22 @@ import { hideAwesomplete } from "../../lib/ui/awesomplete";
 import { isEmptyString } from "../../utils/string/query";
 import { removeLeadingHyphens } from "../../utils/string/format";
 
-const DUMMY_ELEMENT = document.createElement("div");
+declare const Awesomplete_: AwesompleteConstructor;
+
 const AUTOCOMPLETE_API_URL = "https://ac.rule34.xxx/autocomplete.php?q=";
+const dummyElement = document.createElement("div");
 
 function decodeEntities(encodedString: string): string {
   encodedString = encodedString.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, "");
   encodedString = encodedString.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, "");
   encodedString = encodedString.replace(/\w+_saved_search\s*/, "");
-  DUMMY_ELEMENT.innerHTML = encodedString;
-  encodedString = DUMMY_ELEMENT.textContent ?? "";
-  DUMMY_ELEMENT.textContent = "";
+  dummyElement.innerHTML = encodedString;
+  encodedString = dummyElement.textContent ?? "";
+  dummyElement.textContent = "";
   return encodedString;
 }
 
-function getAutocompleteSuggestions(prefix: string): Promise<AwesompleteSuggestion[]> {
+function getAutocompleteSuggestions(prefix: string): Promise<string> {
   return fetchHtml(`${AUTOCOMPLETE_API_URL}${prefix}`);
 }
 
@@ -36,7 +35,7 @@ function getFinalAutocompleteSuggestions(html: string, prefix: string): Awesompl
   return Preferences.savedSearchSuggestions.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
 }
 
-async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: Awesomplete_): Promise<void> {
+async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: AwesompleteInstance): Promise<void> {
   if (isEmptyString(prefix)) {
     return;
   }
@@ -73,16 +72,15 @@ function insertSuggestion(input: HTMLInputElement | HTMLTextAreaElement, suggest
   input.selectionEnd = result.selectionStart;
 }
 
-function createAwesompleteInstance(input: HTMLTextAreaElement | HTMLInputElement): Awesomplete_ {
+function createAwesompleteInstance(input: HTMLTextAreaElement | HTMLInputElement): AwesompleteInstance {
   const awesomplete = new Awesomplete_(input, {
     minChars: 1,
     list: [],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    filter: (suggestion: AwesompleteSuggestion, _: unknown): void => {
+    filter: (suggestion: AwesompleteSuggestion, _: unknown): boolean => {
       return Awesomplete_.FILTER_STARTSWITH(suggestion.value, getCurrentTag(awesomplete.input).replaceAll("*", ""));
     },
     sort: false,
-    item: (suggestion: AwesompleteSuggestion, tags: string): void => {
+    item: (suggestion: AwesompleteSuggestion, tags: string): HTMLElement => {
       const html = isEmptyString(tags) ? suggestion.label : suggestion.label.replace(RegExp(Awesomplete_.$.regExpEscape(tags.trim()), "gi"), "<mark>$&</mark>");
       return Awesomplete_.$.create("li", {
         innerHTML: html,
@@ -102,16 +100,18 @@ function addAwesompleteToInput(input: HTMLTextAreaElement | HTMLInputElement): v
   addEventListenersToInput(input, createAwesompleteInstance(input));
 }
 
-function addEventListenersToInput(input: HTMLTextAreaElement | HTMLInputElement, awesomplete: Awesomplete_): void {
-  input.addEventListener("keydown", (event: KeyboardEvent) => {
-    switch (event.key) {
+function addEventListenersToInput(input: HTMLTextAreaElement | HTMLInputElement, awesomplete: AwesompleteInstance): void {
+  input.addEventListener("keydown", (event: Event) => {
+    const keyEvent = event as KeyboardEvent;
+
+    switch (keyEvent.key) {
       case "Tab":
         if (!awesomplete.isOpened || awesomplete.suggestions.length === 0) {
           return;
         }
         awesomplete.next();
         awesomplete.select();
-        event.preventDefault();
+        keyEvent.preventDefault();
         break;
 
       case "Escape":

@@ -1,5 +1,5 @@
 import { insertHtmlWithStyles, insertStyle } from "../../../utils/dom/injector";
-import { CONTENT } from "../../../lib/shell";
+import { Content } from "../../../lib/shell";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { SEARCH_PAGE_HTML } from "../../../assets/html";
@@ -17,10 +17,10 @@ function removeNativeSearchPageThumbs(): void {
 }
 
 function insertContentContainer(): void {
-  const content = document.querySelector(".content");
+  const nativeContent = document.querySelector(".content");
 
-  if (content !== null) {
-    content.insertAdjacentElement("afterbegin", CONTENT);
+  if (nativeContent !== null) {
+    nativeContent.insertAdjacentElement("afterbegin", Content);
   }
 }
 
@@ -43,7 +43,7 @@ function insertSearchPageHTML(): void {
 }
 
 export function buildSearchPage(): void {
-  // removeNativeSearchPageThumbs();
+  removeNativeSearchPageThumbs();
   prepareNativeSearchPageThumbs();
   insertSearchPageHTML();
   insertContentContainer();

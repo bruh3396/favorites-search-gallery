@@ -1,23 +1,23 @@
 import { Timeout } from "../../../types/async";
 
 export class BatchExecutor<V> {
-  private readonly limit: number;
-  private readonly timeout: number;
-  private readonly executor: (batch: V[]) => void;
+  private readonly maxBatchSize: number;
+  private readonly flushDelay: number;
+  private readonly onFlush: (batch: V[]) => void;
   private readonly pollingInterval: number;
   private lastAddTime: number = 0;
-  private poller: Timeout = undefined;
+  private pollerHandle: Timeout = undefined;
   private batch: V[] = [];
 
-  constructor(limit: number, timeout: number, executor: (batch: V[]) => void) {
-    this.limit = limit;
-    this.timeout = timeout;
-    this.executor = executor;
-    this.pollingInterval = this.computePollingInterval();
+  constructor(maxBatchSize: number, flushDelay: number, onFlush: (batch: V[]) => void) {
+    this.maxBatchSize = maxBatchSize;
+    this.flushDelay = flushDelay;
+    this.onFlush = onFlush;
+    this.pollingInterval = Math.round(Math.max(10, flushDelay / 5));
   }
 
   private get isBatchFull(): boolean {
-    return this.batch.length >= this.limit;
+    return this.batch.length >= this.maxBatchSize;
   }
 
   private get timeSinceLastAdd(): number {
@@ -25,7 +25,7 @@ export class BatchExecutor<V> {
   }
 
   private get isTimedOut(): boolean {
-    return this.timeSinceLastAdd >= this.timeout;
+    return this.timeSinceLastAdd >= this.flushDelay;
   }
 
   public add(item: V): void {
@@ -37,30 +37,25 @@ export class BatchExecutor<V> {
       return;
     }
 
-    if (this.poller !== undefined) {
+    if (this.pollerHandle !== undefined) {
       return;
     }
 
-    this.poller = setInterval(() => {
+    this.pollerHandle = setInterval(() => {
       if (this.isTimedOut) {
         this.execute();
       }
     }, this.pollingInterval);
-
   }
 
   public reset(): void {
-    clearInterval(this.poller);
-    this.poller = undefined;
+    clearInterval(this.pollerHandle);
+    this.pollerHandle = undefined;
     this.batch = [];
   }
 
   private execute(): void {
-    this.executor(this.batch);
+    this.onFlush(this.batch);
     this.reset();
-  }
-
-  private computePollingInterval(): number {
-    return Math.round(Math.max(10, this.timeout / 5));
   }
 }

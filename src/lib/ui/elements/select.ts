@@ -1,14 +1,14 @@
-import { DEFAULT_MENU_ELEMENT, SelectElement } from "../element_types";
-import { DO_NOTHING } from "../../environment/constants";
+import { SelectElement, defaultMenuElement } from "../element_types";
+import { doNothing } from "../../environment/constants";
 
 function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T>>): SelectElement<T> {
   return {
-    ...DEFAULT_MENU_ELEMENT,
+    ...defaultMenuElement,
     options: new Map(),
     savePreference: false,
     defaultValue: "" as T,
     event: null,
-    function: DO_NOTHING,
+    function: doNothing,
     triggerOnCreation: false,
     preference: null,
     isNumeric: false,

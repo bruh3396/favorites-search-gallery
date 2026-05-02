@@ -1,6 +1,6 @@
 import { LayoutMode } from "../../../../types/ui";
 
-const SKELETON_STYLES: Record<LayoutMode, Record<string, string>> = {
+const skeletonStyles: Record<LayoutMode, Record<string, string>> = {
   column: { "width": "100%" },
   grid: { "width": "100%" },
   row: {},
@@ -9,5 +9,5 @@ const SKELETON_STYLES: Record<LayoutMode, Record<string, string>> = {
 };
 
 export function getSkeletonStyle(layoutMode: LayoutMode): Record<string, string> {
-  return SKELETON_STYLES[layoutMode];
+  return skeletonStyles[layoutMode];
 }

@@ -1,4 +1,4 @@
-import { DOM_PARSER } from "./dom_parser";
+import { domParser } from "./dom_parser";
 
 export function insertStyle(html: string, id: string | undefined = undefined): void {
   const style = document.createElement("style");
@@ -18,7 +18,7 @@ export function insertStyle(html: string, id: string | undefined = undefined): v
 }
 
 export function insertHtmlWithStyles(element: HTMLElement, position: InsertPosition, html: string): void {
-  const dom = DOM_PARSER.parseFromString(html, "text/html");
+  const dom = domParser.parseFromString(html, "text/html");
   const styles = Array.from(dom.querySelectorAll("style"));
 
   for (const style of styles) {

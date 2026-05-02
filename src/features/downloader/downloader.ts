@@ -4,7 +4,7 @@ import { DownloadAbortedError } from "../../types/errors";
 import { Favorite } from "../../types/favorite";
 import { downloadBlob } from "../../utils/browser/download";
 
-const FETCH_LIMITER = new ConcurrencyLimiter(3);
+const fetchLimiter = new ConcurrencyLimiter(3);
 
 interface ZipWriter {
   add: (name: string, reader: unknown, options: { compression: string }) => Promise<void>;
@@ -68,7 +68,7 @@ async function createFavoriteBlob(favorite: Favorite, zipWriter: ZipWriter, prog
     const request = await createDownloadRequest(favorite);
 
     stopIfAborted();
-    const response = await FETCH_LIMITER.run(() => {
+    const response = await fetchLimiter.run(() => {
       return fetch(request.url);
     });
 

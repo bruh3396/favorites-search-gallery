@@ -1,6 +1,6 @@
 import { DESKTOP_SIDEBAR_CSS, DESKTOP_SLIM_CSS } from "../../assets/css";
 import { insertStyle } from "../../utils/dom/injector";
-import { yield1 } from "../core/scheduling/promise";
+import { yieldControl } from "../core/scheduling/promise";
 
 export function toggleAddOrRemoveButtons(value: boolean): void {
   insertStyle(`
@@ -37,7 +37,7 @@ export function toggleAlternateLayout(value: boolean): void {
 }
 
 export async function toggleSlimLayout(value: boolean): Promise<void> {
-  await yield1();
+  await yieldControl();
   insertStyle(value ? DESKTOP_SLIM_CSS : "", "slim-layout");
   const status = document.getElementById("favorites-load-status");
   const pagination = document.getElementById("favorites-pagination-container");

@@ -5,18 +5,18 @@ import { WildcardSearchTag } from "../tag/wildcard_search_tag";
 import { parseSearchTag } from "../tag/search_tag_parser";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
-const OR_GROUP_REGEX = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
+const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 
 export function normalizeSearchQuery(searchQuery: string): string {
   return removeExtraWhiteSpace(searchQuery).toLowerCase();
 }
 
 function parseAndTags(searchQuery: string): string[] {
-  return removeExtraWhiteSpace(searchQuery.replace(OR_GROUP_REGEX, "")).split(" ").filter((tag) => tag !== "");
+  return removeExtraWhiteSpace(searchQuery.replace(orGroupRegex, "")).split(" ").filter((tag) => tag !== "");
 }
 
 function parseOrGroups(searchQuery: string): string[][] {
-  return Array.from(searchQuery.matchAll(OR_GROUP_REGEX)).map((orGroup) => orGroup[1].split(" ~ "));
+  return Array.from(searchQuery.matchAll(orGroupRegex)).map((orGroup) => orGroup[1].split(" ~ "));
 }
 
 export function parseTagGroups(searchQuery: string): { orGroups: string[][]; andTags: string[]; } {

@@ -6,7 +6,7 @@ import { AUTOPLAY_HTML } from "../../../assets/html";
 import { Events } from "../../../lib/communication/events";
 import { NavigationKey } from "../../../types/input";
 import { NumberComponent } from "../../../lib/ui/elements/number_component";
-import { OVERLAYS } from "../../../lib/shell";
+import { Overlays } from "../../../lib/shell";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { Timer } from "../../../lib/core/scheduling/timer";
 import { createObjectURLFromSvg } from "../../../lib/navigator";
@@ -41,7 +41,7 @@ type AutoplayMenuElements = {
   videoProgressBar: HTMLElement
 }
 
-const MENU_ICONS = {
+const menuIcons = {
   play: createObjectURLFromSvg(Icons.PLAY),
   pause: createObjectURLFromSvg(Icons.PAUSE),
   changeDirection: createObjectURLFromSvg(Icons.CHANGE_DIRECTION),
@@ -49,7 +49,7 @@ const MENU_ICONS = {
   tune: createObjectURLFromSvg(Icons.TUNE)
 };
 
-const CONFIG = {
+const config = {
   imageViewDuration: Preferences.autoplayImageDuration.value,
   minimumVideoDuration: Preferences.autoplayMinimumVideoDuration.value,
   menuVisibilityDuration: ON_MOBILE_DEVICE ? 1500 : 1000,
@@ -125,9 +125,9 @@ function initializeEvents(inEvents: AutoplayEvents): void {
 }
 
 function initializeTimers(): void {
-  imageViewTimer = new Timer(CONFIG.imageViewDuration);
-  menuVisibilityTimer = new Timer(CONFIG.menuVisibilityDuration);
-  videoViewTimer = new Timer(CONFIG.minimumVideoDuration);
+  imageViewTimer = new Timer(config.imageViewDuration);
+  menuVisibilityTimer = new Timer(config.menuVisibilityDuration);
+  videoViewTimer = new Timer(config.minimumVideoDuration);
 
   imageViewTimer.onTimerEnd = (): void => { };
   menuVisibilityTimer.onTimerEnd = (): void => {
@@ -147,18 +147,18 @@ function insertHtml(): void {
 }
 
 function insertMenuHtml(): void {
-  OVERLAYS.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
+  Overlays.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
 }
 
 function insertImageProgressHTML(): void {
   insertStyle(`
       #autoplay-image-progress-bar.animated {
-          transition: width ${CONFIG.imageViewDurationInSeconds}s linear;
+          transition: width ${config.imageViewDurationInSeconds}s linear;
           width: 100%;
       }
 
       body.autoplay::before {
-        animation: progress ${CONFIG.imageViewDurationInSeconds}s linear forwards
+        animation: progress ${config.imageViewDurationInSeconds}s linear forwards
       }
       `, "autoplay-image-progress-bar-animation");
 }
@@ -166,7 +166,7 @@ function insertImageProgressHTML(): void {
 function insertVideoProgressHTML(): void {
   insertStyle(`
       #autoplay-video-progress-bar.animated {
-          transition: width ${CONFIG.minimumVideoDurationInSeconds}s linear;
+          transition: width ${config.minimumVideoDurationInSeconds}s linear;
           width: 100%;
       }
       `, "autoplay-video-progress-bar-animation");
@@ -200,8 +200,8 @@ function createViewDurationSelects(): void {
   const imageViewDurationInput = (document.getElementById("autoplay-image-duration-input") as HTMLElement).parentElement as HTMLElement;
   const videoViewDurationInput = (document.getElementById("autoplay-minimum-animated-duration-input") as HTMLElement).parentElement as HTMLElement;
 
-  imageViewDurationSelect.value = String(CONFIG.imageViewDurationInSeconds);
-  videoViewDurationSelect.value = String(CONFIG.minimumVideoDurationInSeconds);
+  imageViewDurationSelect.value = String(config.imageViewDurationInSeconds);
+  videoViewDurationSelect.value = String(config.minimumVideoDurationInSeconds);
   imageViewDurationInput.insertAdjacentElement("afterend", imageViewDurationSelect);
   videoViewDurationInput.insertAdjacentElement("afterend", videoViewDurationSelect);
   imageViewDurationInput.remove();
@@ -243,16 +243,16 @@ function createDurationSelect(minimum: number, maximum: number): HTMLSelectEleme
 }
 
 function setMenuIconImageSources(): void {
-  ui.playButton.src = paused ? MENU_ICONS.play : MENU_ICONS.pause;
-  ui.settingsButton.src = MENU_ICONS.tune;
-  ui.changeDirectionButton.src = MENU_ICONS.changeDirection;
-  ui.changeDirectionMask.image.src = MENU_ICONS.changeDirectionAlt;
+  ui.playButton.src = paused ? menuIcons.play : menuIcons.pause;
+  ui.settingsButton.src = menuIcons.tune;
+  ui.changeDirectionButton.src = menuIcons.changeDirection;
+  ui.changeDirectionMask.image.src = menuIcons.changeDirectionAlt;
   ui.changeDirectionMask.container.classList.toggle("upper-right", Preferences.autoplayForward.value);
 }
 
 function loadAutoplaySettingsIntoUI(): void {
-  ui.settingsMenu.imageDurationInput.value = String(CONFIG.imageViewDurationInSeconds);
-  ui.settingsMenu.minimumVideoDurationInput.value = String(CONFIG.minimumVideoDurationInSeconds);
+  ui.settingsMenu.imageDurationInput.value = String(config.imageViewDurationInSeconds);
+  ui.settingsMenu.minimumVideoDurationInput.value = String(config.minimumVideoDurationInSeconds);
 }
 
 function setupNumberComponents(): void {
@@ -381,14 +381,14 @@ function setImageViewDuration(): void {
   let durationInSeconds = parseFloat(ui.settingsMenu.imageDurationInput.value);
 
   if (isNaN(durationInSeconds)) {
-    durationInSeconds = CONFIG.imageViewDurationInSeconds;
+    durationInSeconds = config.imageViewDurationInSeconds;
   }
   const duration = Math.round(clamp(durationInSeconds * 1000, 1000, 60000));
 
   Preferences.autoplayImageDuration.set(duration);
-  CONFIG.imageViewDuration = duration;
+  config.imageViewDuration = duration;
   imageViewTimer.waitTime = duration;
-  ui.settingsMenu.imageDurationInput.value = String(CONFIG.imageViewDurationInSeconds);
+  ui.settingsMenu.imageDurationInput.value = String(config.imageViewDurationInSeconds);
   insertImageProgressHTML();
 }
 
@@ -396,14 +396,14 @@ function setMinimumVideoViewDuration(): void {
   let durationInSeconds = parseFloat(ui.settingsMenu.minimumVideoDurationInput.value);
 
   if (isNaN(durationInSeconds)) {
-    durationInSeconds = CONFIG.minimumVideoDurationInSeconds;
+    durationInSeconds = config.minimumVideoDurationInSeconds;
   }
   const duration = Math.round(clamp(durationInSeconds * 1000, 0, 60000));
 
   Preferences.autoplayMinimumVideoDuration.set(duration);
-  CONFIG.minimumVideoDuration = duration;
+  config.minimumVideoDuration = duration;
   videoViewTimer.waitTime = duration;
-  ui.settingsMenu.minimumVideoDurationInput.value = String(CONFIG.minimumVideoDurationInSeconds);
+  ui.settingsMenu.minimumVideoDurationInput.value = String(config.minimumVideoDurationInSeconds);
   insertVideoProgressHTML();
 }
 
@@ -471,13 +471,13 @@ function pause(): void {
   Preferences.autoplayPaused.set(paused);
 
   if (paused) {
-    ui.playButton.src = MENU_ICONS.play;
+    ui.playButton.src = menuIcons.play;
     ui.playButton.title = "Resume Autoplay";
     stopImageViewTimer();
     stopVideoViewTimer();
     events.onPause();
   } else {
-    ui.playButton.src = MENU_ICONS.pause;
+    ui.playButton.src = menuIcons.pause;
     ui.playButton.title = "Pause Autoplay";
     startViewTimer(currentThumb);
     events.onResume();

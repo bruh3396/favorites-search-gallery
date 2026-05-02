@@ -1,44 +1,40 @@
-import * as FavoritesSearchFilter from "./favorites_search_filter";
+﻿import * as FavoritesSearchFilter from "./favorites_search_filter";
 import * as FavoritesSorter from "./favorites_sorter";
-import { FavoriteItem } from "../../type/favorite_item";
+import { Favorite } from "../../../../types/favorite";
 import { shuffleArray } from "../../../../utils/collection/array";
 
-let latestSearchResults: FavoriteItem[] = [];
+let latestSearchResults: Favorite[] = [];
 
-export function searchFavorites(allFavorites: FavoriteItem[], searchQuery?: string): FavoriteItem[] {
+export function searchFavorites(allFavorites: Favorite[], searchQuery?: string): Favorite[] {
   FavoritesSearchFilter.setSearchQuery(searchQuery);
   return (latestSearchResults = FavoritesSorter.sortFavorites(FavoritesSearchFilter.filter(allFavorites)));
 }
 
-export function invertSearchResults(allFavorites: FavoriteItem[]): FavoriteItem[] {
+export function invertSearchResults(allFavorites: Favorite[]): Favorite[] {
   const ids = new Set(latestSearchResults.map(favorite => favorite.id));
   const inverted = allFavorites.filter(favorite => !ids.has(favorite.id));
   return (latestSearchResults = FavoritesSearchFilter.applyPostFilters(inverted));
 }
 
-export function shuffleSearchResults(): FavoriteItem[] {
+export function shuffleSearchResults(): Favorite[] {
   return (latestSearchResults = shuffleArray(latestSearchResults));
 }
 
-export function appendSearchResults(favorites: FavoriteItem[]): FavoriteItem[] {
+export function appendSearchResults(favorites: Favorite[]): Favorite[] {
   const newSearchResults = FavoritesSearchFilter.filter(favorites);
 
   latestSearchResults = [...latestSearchResults, ...newSearchResults];
   return newSearchResults;
 }
 
-export function prependSearchResults(newFavorites: FavoriteItem[]): FavoriteItem[] {
+export function prependSearchResults(newFavorites: Favorite[]): Favorite[] {
   const newSearchResults = FavoritesSearchFilter.filter(newFavorites);
 
   latestSearchResults = [...newSearchResults, ...latestSearchResults];
   return newSearchResults;
 }
 
-export const getLatestSearchResults = (): FavoriteItem[] => latestSearchResults;
+export const getLatestSearchResults = (): Favorite[] => latestSearchResults;
 export const onBlacklistChanged = (): void => FavoritesSearchFilter.onBlacklistChanged();
-
-export function resetTagModifications(favorites: FavoriteItem[]): void {
-  for (const favorite of favorites) {
-    favorite.resetAdditionalTags();
-  }
-}
+export const index = (favorites: Favorite[]): void => FavoritesSearchFilter.index(favorites);
+export const deferSearchEngineIndexing = (): void => FavoritesSearchFilter.deferSearchEngineIndexing();

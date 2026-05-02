@@ -1,12 +1,12 @@
-import { EXTENSION_REGEX } from "../../environment/constants";
 import { THUMBNAIL_ORIGIN } from "./origin";
+import { extensionRegex } from "../../environment/constants";
 
-const IMAGE_SOURCE_NORMALIZATION_REGEX = /^([^.]*\/\/)?(?:[^.]+\.)*rule34/;
-const THUMB_SOURCE_COMPRESSION_REGEX = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
-const SAMPLE_REGEX = /\/([^/]+)$/;
+const imageSourceNormalizationRegex = /^([^.]*\/\/)?(?:[^.]+\.)*rule34/;
+const thumbSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
+const sampleRegex = /\/([^/]+)$/;
 
 export function normalizeImageSource(source: string): string {
-  return source.replace(IMAGE_SOURCE_NORMALIZATION_REGEX, "$1rule34");
+  return source.replace(imageSourceNormalizationRegex, "$1rule34");
 }
 
 export function decompressPreviewSource(compressedSource: string): string {
@@ -15,7 +15,7 @@ export function decompressPreviewSource(compressedSource: string): string {
 }
 
 export function compressPreviewSource(source: string): string {
-  const match = source.match(THUMB_SOURCE_COMPRESSION_REGEX);
+  const match = source.match(thumbSourceCompressionRegex);
   return match === null ? "" : match.splice(1).join("_");
 }
 
@@ -27,7 +27,7 @@ export function convertPreviewURLToImageURL(thumbUrl: string): string {
 }
 
 export function convertImageURLToSampleURL(imageUrl: string): string {
-  return imageUrl.replace("images", "samples").replace(SAMPLE_REGEX, "/sample_$1").replace(EXTENSION_REGEX, ".jpg");
+  return imageUrl.replace("images", "samples").replace(sampleRegex, "/sample_$1").replace(extensionRegex, ".jpg");
 }
 
 export function removeIdFromImageURL(imageUrl: string): string {

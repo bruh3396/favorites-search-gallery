@@ -1,7 +1,7 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { getImageFromThumb, getThumbFromImage } from "../../lib/dom/thumb";
 import { Events } from "../../lib/communication/events";
-import { OVERLAYS } from "../../lib/shell";
+import { Overlays } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
 import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";
 import { TOOLTIP_HTML } from "../../assets/html";
@@ -23,7 +23,7 @@ export function setupTooltip(): void {
     return;
   }
   visible = Preferences.tooltipsVisible.value;
-  OVERLAYS.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
+  Overlays.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
   tooltip = createTooltip();
   defaultTransition = tooltip.style.transition;
   searchTagColorCodes = {};

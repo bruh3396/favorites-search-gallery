@@ -1,3 +1,16 @@
+export type SlimPost = {
+  id: string
+  width: number
+  height: number
+  score: number
+  rating: string
+  change: number
+  createdAt: string
+  tags: string
+  fileURL: string
+  previewURL: string
+}
+
 export type Post = {
   id: string
   height: number

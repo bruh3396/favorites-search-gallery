@@ -1,11 +1,10 @@
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
-import { FavoriteItem } from "../../type/favorite_item";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { extractFavoriteElements } from "../../../../lib/server/parse/favorites_page_parser";
 
 export class FavoritesPageRequest {
   public readonly pageNumber: number;
-  public favorites: FavoriteItem[] = [];
+  public elements: HTMLElement[] = [];
   private retryCount = 0;
 
   constructor(pageNumber: number) {
@@ -21,7 +20,7 @@ export class FavoritesPageRequest {
   }
 
   public complete(html: string): void {
-    this.favorites = extractFavoriteElements(html).map(favorite => new FavoriteItem(favorite));
+    this.elements = extractFavoriteElements(html);
   }
 
   public retry(): void {

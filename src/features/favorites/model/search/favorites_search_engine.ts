@@ -1,99 +1,64 @@
-import { BatchExecutor } from "../../../../lib/core/concurrency/batch_executor";
-import { DO_NOTHING } from "../../../../lib/environment/constants";
-import { FavoriteItem } from "../../type/favorite_item";
-import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
+import { Favorite } from "../../../../types/favorite";
 import { InvertedIndex } from "../../../../lib/core/data_structures/inverted_index";
 import { SearchEngine } from "../../../../lib/search/engine/search_engine";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
-import { ThrottledQueue } from "../../../../lib/core/concurrency/throttled_queue";
-import { sleep } from "../../../../lib/core/scheduling/promise";
-import { splitIntoChunks } from "../../../../utils/collection/array";
+import { yieldControl } from "../../../../lib/core/scheduling/promise";
 
-const BATCH_SIZE = 750;
-const BATCH_SLEEP_TIME = 0;
+export class FavoriteIndex {
+  private static readonly INDEX_BATCH_SIZE = 500;
+  private state: "indexing" | "ready" = "ready";
+  private readonly index: InvertedIndex<Favorite>;
+  private readonly engine: SearchEngine<Favorite>;
+  private deferred: Favorite[] = [];
 
-const INDEX = new InvertedIndex<FavoriteItem>(favorite => favorite.tags, !FavoritesSettings.buildIndexAsync);
-const ENGINE = new SearchEngine(INDEX);
-
-const batchExecutor: BatchExecutor<FavoriteItem> = new BatchExecutor<FavoriteItem>(BATCH_SIZE, 100, addBatch);
-const addQueue: ThrottledQueue = new ThrottledQueue(BATCH_SLEEP_TIME);
-const asyncItemsToAdd: Set<FavoriteItem> = new Set<FavoriteItem>();
-const cachedAsyncItemsToAdd: FavoriteItem[] = [];
-let asyncBuildStarted: boolean = false;
-
-export const removeItem = INDEX.removeDoc.bind(INDEX);
-export let addItem: (item: FavoriteItem) => void = INDEX.addDoc.bind(INDEX);
-export let ready = false;
-
-export function search(searchQuery: SearchQuery<FavoriteItem>, candidates: FavoriteItem[]): FavoriteItem[] {
-  return ENGINE.search(searchQuery, candidates);
-}
-
-export function setup(): void {
-  if (!FavoritesSettings.useSearchEngine) {
-    addItem = DO_NOTHING;
-    return;
+  constructor() {
+    this.index = new InvertedIndex<Favorite>(favorite => favorite.tags, false);
+    this.engine = new SearchEngine(this.index);
   }
 
-  if (FavoritesSettings.buildIndexAsync) {
-    addItem = cacheAdditionsWhileFavoritesAreLoading;
-    return;
+  public get isReady(): boolean {
+    return this.state === "ready";
   }
-  ready = true;
-}
 
-export async function buildIndexAsync(): Promise<void> {
-  if (!FavoritesSettings.useSearchEngine || asyncBuildStarted) {
-    return;
+  public search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
+    const canUseEngine = this.isReady && !searchQuery.metadata.hasMetadataTag && candidates.length > FAVORITES_PER_PAGE;
+    return canUseEngine ? this.engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
   }
-  asyncBuildStarted = true;
-  await sleep(50);
-  INDEX.maintainSortOrder(false);
-  addItem = addAsynchronously;
-  emptyAdditionsCache();
-}
 
-export function buildIndexSync(): void {
-  addItem = INDEX.addDoc.bind(INDEX);
-  ready = true;
-}
-
-function emptyAdditionsCache(): void {
-  const chunks = splitIntoChunks(cachedAsyncItemsToAdd, BATCH_SIZE);
-
-  for (const chunk of chunks) {
-    for (const item of chunk) {
-      asyncItemsToAdd.add(item);
+  public add(doc: Favorite): void {
+    if (this.state === "ready") {
+      this.index.addDoc(doc);
+      return;
     }
+
+    if (this.deferred.length === 0) {
+      Promise.resolve().then(() => this.finishIndexing());
+    }
+    this.deferred.push(doc);
   }
 
-  for (const chunk of chunks) {
-    addBatch(chunk);
+  public remove(doc: Favorite): void {
+    this.index.removeDoc(doc);
+  }
+
+  public deferIndexing(): void {
+    this.state = "indexing";
+    this.index.maintainSortOrder(false);
+  }
+
+  private async finishIndexing(): Promise<void> {
+    for (let i = 0; i < this.deferred.length; i += FavoriteIndex.INDEX_BATCH_SIZE) {
+      const batch = this.deferred.slice(i, i + FavoriteIndex.INDEX_BATCH_SIZE);
+
+      batch.forEach(doc => this.index.addDoc(doc));
+      await yieldControl();
+    }
+    this.deferred = [];
+    this.index.maintainSortOrder(true);
+    this.index.sortTerms();
+    this.state = "ready";
   }
 }
 
-function cacheAdditionsWhileFavoritesAreLoading(item: FavoriteItem): void {
-  cachedAsyncItemsToAdd.push(item);
-}
-
-function addAsynchronously(item: FavoriteItem): void {
-  ready = false;
-  asyncItemsToAdd.add(item);
-  batchExecutor.add(item);
-}
-
-async function addBatch(batch: FavoriteItem[]): Promise<void> {
-  await addQueue.wait();
-
-  for (const item of batch) {
-    INDEX.addDoc(item);
-    asyncItemsToAdd.delete(item);
-  }
-  ready = asyncItemsToAdd.size === 0;
-
-  if (ready) {
-    addItem = INDEX.addDoc.bind(INDEX);
-    INDEX.maintainSortOrder(true);
-    INDEX.getIndexedTerms();
-  }
-}
+export const FavoritesSearchEngine = new FavoriteIndex();

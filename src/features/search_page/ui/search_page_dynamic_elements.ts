@@ -1,10 +1,10 @@
 import { CheckboxElement, NumberElement, SelectElement } from "../../../lib/ui/element_types";
+import { LayoutMode, PerformanceProfile } from "../../../types/ui";
 import { Events } from "../../../lib/communication/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralSettings } from "../../../config/general_settings";
 import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { LayoutMode, PerformanceProfile } from "../../../types/ui";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { createCheckboxElement } from "../../../lib/ui/elements/checkbox";
 import { createNumberComponent } from "../../../lib/ui/elements/number_input";
@@ -15,7 +15,7 @@ import { reloadWindow } from "../../../utils/browser/window";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
 import { toggleGalleryMenuEnabled } from "../../../lib/ui/style";
 
-const CHECKBOXES: Partial<CheckboxElement>[] = [
+const checkboxes: Partial<CheckboxElement>[] = [
   {
     id: "search-page-upscale",
     parentId: "search-page-upscale-thumbs",
@@ -71,7 +71,7 @@ const CHECKBOXES: Partial<CheckboxElement>[] = [
     event: Events.favorites.galleryMenuToggled
   }
 ];
-const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "layout-select",
     parentId: "search-page-layout",
@@ -121,23 +121,23 @@ const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
     ])
   }
 ];
-const NUMBERS: Partial<NumberElement>[] = [];
+const numbers: Partial<NumberElement>[] = [];
 
 function createCheckboxes(): void {
-  for (const checkbox of prepareDynamicElements(CHECKBOXES)) {
+  for (const checkbox of prepareDynamicElements(checkboxes)) {
     createCheckboxElement(checkbox);
   }
 }
 
 function createNumbers(): void {
-  for (const number of prepareDynamicElements(NUMBERS)) {
+  for (const number of prepareDynamicElements(numbers)) {
     createNumberComponent(number);
   }
 }
 
 function createSelects(): void {
   //  @ts-expect-error don't care
-  for (const select of prepareDynamicElements(SELECTS)) {
+  for (const select of prepareDynamicElements(selects)) {
     createSelectElement(select);
   }
 }

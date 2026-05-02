@@ -1,7 +1,7 @@
 import * as ExtensionCache from "../../../lib/extension_cache";
 import { correctMediaTags, prepareSearchPageThumbs } from "./search_page_thumb_preparer";
-import { DOM_PARSER } from "../../../utils/dom/dom_parser";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
+import { domParser } from "../../../utils/dom/dom_parser";
 import { fetchMultiplePostsFromAPI } from "../../../lib/server/fetch/post_fetcher";
 
 export async function cacheSearchPageExtensions(ids: Iterable<string>): Promise<void> {
@@ -22,14 +22,14 @@ export class SearchPage {
   public pageNumber: number;
   public isFinalPage: boolean;
 
-  constructor(pageNumber: number, content: string | HTMLElement[]) {
-    if (typeof content === "string") {
-      const dom = DOM_PARSER.parseFromString(content, "text/html");
+  constructor(pageNumber: number, nativeContent: string | HTMLElement[]) {
+    if (typeof nativeContent === "string") {
+      const dom = domParser.parseFromString(nativeContent, "text/html");
 
       this.thumbs = prepareSearchPageThumbs(Array.from(dom.querySelectorAll(".thumb")));
       this.paginator = dom.getElementById("paginator");
     } else {
-      this.thumbs = content;
+      this.thumbs = nativeContent;
       this.paginator = document.getElementById("paginator");
     }
     this.pageNumber = pageNumber;

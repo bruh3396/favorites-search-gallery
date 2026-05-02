@@ -1,7 +1,6 @@
 import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
 import { Events } from "../../../../lib/communication/events";
-import { GALLERY_ROOT } from "./gallery_shell";
 import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../type/gallery_types";
 import { GallerySettings } from "../../../../config/gallery_settings";
@@ -9,11 +8,12 @@ import { GeneralSettings } from "../../../../config/general_settings";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Timeout } from "../../../../types/async";
+import { galleryRoot } from "./gallery_shell";
 import { insertStyle } from "../../../../utils/dom/injector";
 import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../../utils/browser/window";
 
-const BUTTONS: GalleryMenuButton[] = [
+const buttons: GalleryMenuButton[] = [
   { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, hint: "Exit (Escape, Right-Click)", color: "red" },
   { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: true, hint: "Toggle Fullscreen (F)", color: "#0075FF" },
   { id: "open-in-new-gallery", icon: Icons.OPEN_IN_NEW, action: "openPost", enabled: true, hint: "Open Post (Middle-Click, G)", color: "lightgreen" },
@@ -28,14 +28,14 @@ const BUTTONS: GalleryMenuButton[] = [
   { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: true, hint: "Pin Menu", color: "#0075FF" }
 ];
 
-const MENU: HTMLElement = document.createElement("div");
+const menu: HTMLElement = document.createElement("div");
 const throttledReveal = throttle<MouseEvent>(() => {
   reveal();
 }, 250);
 let menuVisibilityTimeout: Timeout;
 
-MENU.id = "gallery-menu";
-MENU.className = "gallery-sub-menu";
+menu.id = "gallery-menu";
+menu.className = "gallery-sub-menu";
 
 function loadPreferences(): void {
   if (Preferences.galleryMenuDockedLeft.value) {
@@ -80,12 +80,12 @@ function createButtons(): void {
 
   buttonContainer.id = "gallery-menu-button-container";
 
-  for (const template of BUTTONS) {
+  for (const template of buttons) {
     if (template.enabled) {
       buttonContainer.appendChild(createButton(template));
     }
   }
-  MENU.appendChild(buttonContainer);
+  menu.appendChild(buttonContainer);
 }
 
 function createButton(template: GalleryMenuButton): HTMLElement {
@@ -142,7 +142,7 @@ function createColorPicker(): void {
 }
 
 function reveal(): void {
-  MENU.classList.add("active");
+  menu.classList.add("active");
   clearTimeout(menuVisibilityTimeout);
   menuVisibilityTimeout = setTimeout(() => {
     hide();
@@ -150,36 +150,36 @@ function reveal(): void {
 }
 
 function hide(): void {
-  MENU.classList.remove("active");
+  menu.classList.remove("active");
 }
 
 function togglePersistence(event: MouseEvent): void {
-  MENU.classList.toggle("persistent", event.target instanceof HTMLElement && MENU.contains(event.target));
+  menu.classList.toggle("persistent", event.target instanceof HTMLElement && menu.contains(event.target));
 }
 
 function togglePin(): void {
   if (ON_MOBILE_DEVICE) {
-    MENU.classList.add("pinned");
+    menu.classList.add("pinned");
     Preferences.galleryMenuPinned.set(true);
     return;
   }
-  Preferences.galleryMenuPinned.set(MENU.classList.toggle("pinned"));
+  Preferences.galleryMenuPinned.set(menu.classList.toggle("pinned"));
 }
 
 function toggleDockPosition(): void {
   if (ON_MOBILE_DEVICE) {
-    MENU.classList.remove("dock-left");
+    menu.classList.remove("dock-left");
     Preferences.galleryMenuDockedLeft.set(false);
     return;
   }
-  Preferences.galleryMenuDockedLeft.set(MENU.classList.toggle("dock-left"));
+  Preferences.galleryMenuDockedLeft.set(menu.classList.toggle("dock-left"));
 }
 
 export function setupDesktopGalleryMenu(): void {
   if (!GeneralSettings.galleryMenuOptionEnabled) {
     return;
   }
-  GALLERY_ROOT.appendChild(MENU);
+  galleryRoot.appendChild(menu);
   loadPreferences();
   createButtons();
   createColorPicker();

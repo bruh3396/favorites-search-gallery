@@ -1,7 +1,7 @@
 import { Storage } from "./storage_instance";
 
 const LOCAL_STORAGE_KEY = "preferences";
-const CACHE: Record<string, unknown> = Storage.get<Record<string, unknown>>(LOCAL_STORAGE_KEY) ?? {};
+const cache: Record<string, unknown> = Storage.get<Record<string, unknown>>(LOCAL_STORAGE_KEY) ?? {};
 
 export class Preference<T> {
   private readonly key: string;
@@ -13,11 +13,11 @@ export class Preference<T> {
   }
 
   public get value(): T {
-    return (CACHE[this.key] as T) ?? this.defaultValue;
+    return (cache[this.key] as T) ?? this.defaultValue;
   }
 
   public set(value: T): void {
-    CACHE[this.key] = value;
-    Storage.set(LOCAL_STORAGE_KEY, CACHE);
+    cache[this.key] = value;
+    Storage.set(LOCAL_STORAGE_KEY, cache);
   }
 }

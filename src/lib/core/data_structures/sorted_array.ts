@@ -1,6 +1,5 @@
-/* eslint-disable no-bitwise */
 export class SortedArray<T extends | string | number> {
-  private array: T[] = [];
+  private readonly array: T[] = [];
   private isSorted: boolean = true;
 
   public get length(): number {
@@ -20,7 +19,7 @@ export class SortedArray<T extends | string | number> {
     this.array.push(value);
   }
 
-  private sort(): T[] {
+  public sort(): T[] {
     this.isSorted = true;
     return this.array.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   }

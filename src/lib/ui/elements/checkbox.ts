@@ -1,16 +1,16 @@
-import { CheckboxElement, DEFAULT_MENU_ELEMENT } from "../element_types";
-import { DO_NOTHING } from "../../environment/constants";
+import { CheckboxElement, defaultMenuElement } from "../element_types";
 import { Events } from "../../communication/events";
 import { FeatureBridge } from "../../communication/feature_bridge";
+import { doNothing } from "../../environment/constants";
 
 function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
   return {
-    ...DEFAULT_MENU_ELEMENT,
+    ...defaultMenuElement,
     savePreference: true,
     event: null,
     defaultValue: false,
     hotkey: "",
-    function: DO_NOTHING,
+    function: doNothing,
     preference: null,
     triggerOnCreation: false,
     ...partial

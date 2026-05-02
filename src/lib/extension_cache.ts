@@ -1,5 +1,5 @@
 import * as PostAPI from "./server/fetch/post_fetcher";
-import { DEFAULT_EXTENSION, EXTENSION_REGEX } from "./environment/constants";
+import { DEFAULT_EXTENSION, extensionRegex } from "./environment/constants";
 import { MediaExtension, MediaExtensionMapping } from "../types/media";
 import { isGif, isVideo } from "./media_resolver";
 import { BatchExecutor } from "./core/concurrency/batch_executor";
@@ -14,13 +14,13 @@ import { withTimeout } from "./core/scheduling/promise";
 
 const DATABASE_NAME: string = "ImageExtensions";
 const OBJECT_STORE_NAME: string = "extensionMappings";
-const EXTENSION_MAP: Map<string, MediaExtension> = new Map();
-const DATABASE: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
-const DATABASE_WRITE_SCHEDULER: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, DATABASE.update.bind(DATABASE));
+const extensionMap: Map<string, MediaExtension> = new Map();
+const database: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
+const writeScheduler: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, database.update.bind(database));
 
 async function loadExtensions(): Promise<void> {
-  for (const mapping of await DATABASE.load()) {
-    EXTENSION_MAP.set(mapping.id, mapping.extension);
+  for (const mapping of await database.load()) {
+    extensionMap.set(mapping.id, mapping.extension);
   }
 }
 
@@ -29,26 +29,26 @@ function getExtensionFromPost(post: Post): MediaExtension | null {
 }
 
 export function getExtensionFromURL(url: string): MediaExtension | null {
-  const match = EXTENSION_REGEX.exec(url);
+  const match = extensionRegex.exec(url);
   return match === null ? null : match[1] as MediaExtension;
 }
 
 export function has(id: string): boolean {
-  return EXTENSION_MAP.has(id);
+  return extensionMap.has(id);
 }
 
 export function get(id: string): MediaExtension | undefined {
-  return EXTENSION_MAP.get(id);
+  return extensionMap.get(id);
 }
 
 export function set(id: string, extension: MediaExtension): void {
   if (has(id) || extension === "mp4" || extension === "gif") {
     return;
   }
-  EXTENSION_MAP.set(id, extension);
+  extensionMap.set(id, extension);
 
   if (ON_FAVORITES_PAGE) {
-    DATABASE_WRITE_SCHEDULER.add({ id, extension });
+    writeScheduler.add({ id, extension });
   }
 }
 
@@ -97,7 +97,7 @@ export function setExtensionFromPost(post: Post): void {
 }
 
 export function deleteExtensionsDatabase(): void {
-  DATABASE.delete();
+  database.delete();
 }
 
 export function setupExtensions(): void {

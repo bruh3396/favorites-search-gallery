@@ -1,11 +1,11 @@
 import * as FavoritesAPI from "../../../lib/server/fetch/favorites_fetcher";
-import { ClickCode } from "../../../types/input";
-import { Post } from "../../../types/post";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
 import { ADD_FAVORITE_IMAGE_HTML } from "../../../assets/images";
+import { ClickCode } from "../../../types/input";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
+import { Post } from "../../../types/post";
 import { removeNonNumericCharacters } from "../../../utils/string/format";
 import { resolveMediaType } from "../../../lib/media_resolver";
 

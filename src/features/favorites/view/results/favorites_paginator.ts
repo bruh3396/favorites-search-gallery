@@ -1,5 +1,4 @@
-import { FavoriteItem } from "../../type/favorite_item";
-import { FavoritesPageRelation } from "../../../../types/favorite";
+import { Favorite, FavoritesPageRelation } from "../../../../types/favorite";
 import { FavoritesPaginationParameters } from "../../type/favorite_types";
 import { NavigationKey } from "../../../../types/input";
 import { Preferences } from "../../../../lib/preferences/preferences";
@@ -10,17 +9,17 @@ type PageRange = { start: number; end: number };
 
 let currentPageNumber = 1;
 let resultsPerPage = Preferences.resultsPerPage.value;
-let favorites: FavoriteItem[] = [];
+let favorites: Favorite[] = [];
 
 export const countPages = (): number => Math.ceil(favorites.length / resultsPerPage) || 1;
 export const onFirstPage = (): boolean => currentPageNumber === 1;
 export const onFinalPage = (): boolean => currentPageNumber === countPages();
 export const onlyOnePage = (): boolean => onFirstPage() && onFinalPage();
-export const getFavoritesOnCurrentPage = (): FavoriteItem[] => getFavoritesOnPage(currentPageNumber);
-export const getFavoritesOnNextPage = (): FavoriteItem[] => getFavoritesOnPage(currentPageNumber + 1);
-export const getFavoritesOnPreviousPage = (): FavoriteItem[] => getFavoritesOnPage(currentPageNumber - 1);
+export const getFavoritesOnCurrentPage = (): Favorite[] => getFavoritesOnPage(currentPageNumber);
+export const getFavoritesOnNextPage = (): Favorite[] => getFavoritesOnPage(currentPageNumber + 1);
+export const getFavoritesOnPreviousPage = (): Favorite[] => getFavoritesOnPage(currentPageNumber - 1);
 
-export function setFavorites(newFavorites: FavoriteItem[]): void {
+export function setFavorites(newFavorites: Favorite[]): void {
   favorites = newFavorites;
 }
 
@@ -32,7 +31,7 @@ function getPageRange(pageNumber: number): PageRange {
   return { start: resultsPerPage * (pageNumber - 1), end: resultsPerPage * pageNumber };
 }
 
-function getFavoritesOnPage(pageNumber: number): FavoriteItem[] {
+function getFavoritesOnPage(pageNumber: number): Favorite[] {
   const { start, end } = getPageRange(pageNumber);
   return favorites.slice(start, end);
 }

@@ -1,6 +1,6 @@
 import { HELP_HTML } from "../../../../assets/html";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { OVERLAYS } from "../../../../lib/shell";
+import { Overlays } from "../../../../lib/shell";
 import { getCurrentThemeClass } from "../../../../lib/ui/style";
 
 let dialog: HTMLDialogElement;
@@ -33,7 +33,7 @@ function buildDialogWhatsNewMenu(menu: HTMLElement): void {
   dialog.style.padding = "5px 10px";
   dialog.style.fontSize = "large";
   dialog.classList.add(getCurrentThemeClass());
-  OVERLAYS.appendChild(dialog);
+  Overlays.appendChild(dialog);
   const whatsNewContainer = menu.querySelector("#whats-new-container");
 
   if (whatsNewContainer === null) {

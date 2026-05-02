@@ -1,15 +1,14 @@
-import * as FavoritesModel from "../model/favorites_model";
+﻿import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
+import { Favorite, FavoritesPageRelation } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";
-import { FavoriteItem } from "../type/favorite_item";
-import { FavoritesPageRelation } from "../../../types/favorite";
 import { FavoritesPresentationFlow } from "../type/favorite_types";
 import { NavigationKey } from "../../../types/input";
 
 class PaginationFlow implements FavoritesPresentationFlow {
     private addedFirstResults = false;
 
-    public present(results: FavoriteItem[]): void {
+    public present(results: Favorite[]): void {
         FavoritesView.setFavorites(results);
         FavoritesView.gotoPage(1);
         this.showCurrentPage();
@@ -58,7 +57,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
         Events.favorites.searchResultsUpdated.emit();
     }
 
-    public addNewlyFetchedSearchResultsToCurrentPage(): void {
+    private addNewlyFetchedSearchResultsToCurrentPage(): void {
         if (!FavoritesView.onFinalPage() && this.addedFirstResults) {
             return;
         }
@@ -81,3 +80,6 @@ class PaginationFlow implements FavoritesPresentationFlow {
 }
 
 export const FavoritesPaginationFlow = new PaginationFlow();
+
+export const gotoPage = (pageNumber: number): void => FavoritesPaginationFlow.gotoPage(pageNumber);
+export const gotoRelativePage = (relativePage: FavoritesPageRelation): void => FavoritesPaginationFlow.gotoRelativePage(relativePage);

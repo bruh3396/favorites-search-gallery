@@ -1,7 +1,7 @@
 import { Events } from "../../../lib/communication/events";
-import { GALLERY_ROOT } from "../view/shell/gallery_shell";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { yield1 } from "../../../lib/core/scheduling/promise";
+import { galleryRoot } from "../view/shell/gallery_shell";
+import { yieldControl } from "../../../lib/core/scheduling/promise";
 
 export function setupGalleryMobileTapControls(): void {
   if (ON_DESKTOP_DEVICE) {
@@ -18,13 +18,13 @@ export function setupGalleryMobileTapControls(): void {
   rightTap.id = "right-mobile-tap-control";
   tapControlContainer.appendChild(leftTap);
   tapControlContainer.appendChild(rightTap);
-  GALLERY_ROOT.appendChild(tapControlContainer);
+  galleryRoot.appendChild(tapControlContainer);
   leftTap.ontouchend = async(): Promise<void> => {
-    await yield1();
+    await yieldControl();
     Events.gallery.leftTap.emit();
   };
   rightTap.ontouchend = async(): Promise<void> => {
-    await yield1();
+    await yieldControl();
     Events.gallery.rightTap.emit();
   };
 }

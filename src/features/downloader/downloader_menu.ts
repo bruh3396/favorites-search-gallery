@@ -1,16 +1,16 @@
 import * as FavoritesDownloader from "./downloader";
-import { sleep, yield1 } from "../../lib/core/scheduling/promise";
+import { sleep, yieldControl } from "../../lib/core/scheduling/promise";
 import { DOWNLOADER_DISABLED } from "../../lib/environment/derived_environment";
 import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
 import { Events } from "../../lib/communication/events";
-import { toggleGlobalInputEvents } from "../../lib/communication/dom_event_bridge";
 import { Favorite } from "../../types/favorite";
 import { FeatureBridge } from "../../lib/communication/feature_bridge";
-import { OVERLAYS } from "../../lib/shell";
+import { Overlays } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
 import { insertHtmlWithStyles } from "../../utils/dom/injector";
 import { splitIntoChunks } from "../../utils/collection/array";
+import { toggleGlobalInputEvents } from "../../lib/communication/dom_event_bridge";
 
 let dialog: HTMLDialogElement;
 let warningDialog: HTMLDialogElement;
@@ -25,7 +25,7 @@ export function setupDownloadMenu(): void {
     return;
   }
   FavoritesDownloader.setupFavoritesDownloader();
-  insertHtmlWithStyles(OVERLAYS, "beforeend", DOWNLOADER_HTML);
+  insertHtmlWithStyles(Overlays, "beforeend", DOWNLOADER_HTML);
   dialog = getDialog("download-menu");
   warningDialog = getDialog("download-menu-warning");
   downloadButton = getDownloadButton();
@@ -134,7 +134,7 @@ function setupMenuCloseHandler(): void {
   dialog.addEventListener("close", async() => {
     cancelButton.textContent = "Cancel";
     toggleGlobalInputEvents(true);
-    await yield1();
+    await yieldControl();
     document.body.classList.remove("dialog-opened");
     dialog.classList.remove("downloading");
     FavoritesDownloader.abort();

@@ -1,4 +1,4 @@
-import { FAVORITES_PAGE_LIMITER, FAVORITE_ADD_QUEUE, FAVORITE_REMOVE_QUEUE } from "./rate_limiter";
+import { FavoriteRemoveQueue, favoriteAddQueue, favoritesPageLimiter } from "./rate_limiter";
 import { buildAddFavoriteURL, buildPostVoteURL, buildRemoveFavoriteURL } from "../url/action_url_builder";
 import { buildFavoritesPageURL, buildProfilePageURL } from "../url/page_url_builder";
 import { fetch429, fetch429NTimes, fetchHtml } from "../http/http_client";
@@ -12,15 +12,15 @@ export function fetchFavoritesPage(pageNumber: number): Promise<string> {
 }
 
 export function fetchFavoritesPageSafe(pageNumber: number): Promise<string> {
-  return FAVORITES_PAGE_LIMITER.run(() => {
+  return favoritesPageLimiter.run(() => {
     return fetchFavoritesPage(pageNumber);
   });
 }
 
 export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
-  FAVORITE_REMOVE_QUEUE.cancel(id);
+  FavoriteRemoveQueue.cancel(id);
 
-  if (!await FAVORITE_ADD_QUEUE.wait(id)) {
+  if (!await favoriteAddQueue.wait(id)) {
     return AddFavoriteStatus.ERROR;
   }
 
@@ -32,9 +32,9 @@ export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
 }
 
 export async function removeFavorite(id: string): Promise<void> {
-  FAVORITE_ADD_QUEUE.cancel(id);
+  favoriteAddQueue.cancel(id);
 
-  if (await FAVORITE_REMOVE_QUEUE.wait(id)) {
+  if (await FavoriteRemoveQueue.wait(id)) {
     fetch429NTimes(buildRemoveFavoriteURL(id), { method: "GET", redirect: "manual" }, 3);
   }
 }

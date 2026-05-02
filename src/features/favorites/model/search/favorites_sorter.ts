@@ -1,8 +1,8 @@
-import { FavoriteItem } from "../../type/favorite_item";
+import { Favorite } from "../../../../types/favorite";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { shuffleArray } from "../../../../utils/collection/array";
 
-export function sortFavorites(favorites: FavoriteItem[]): FavoriteItem[] {
+export function sortFavorites(favorites: Favorite[]): Favorite[] {
   const sortingMethod = Preferences.sortingMethod.value;
 
   if (sortingMethod === "random") {

@@ -1,13 +1,13 @@
-import { DEFAULT_MENU_ELEMENT, NumberElement } from "../element_types";
-import { DO_NOTHING } from "../../environment/constants";
+import { NumberElement, defaultMenuElement } from "../element_types";
 import { NumberComponent } from "./number_component";
+import { doNothing } from "../../environment/constants";
 
 function createNumberTemplate(partial: Partial<NumberElement>): NumberElement {
   return {
-    ...DEFAULT_MENU_ELEMENT,
+    ...defaultMenuElement,
     savePreference: false,
     event: null,
-    function: DO_NOTHING,
+    function: doNothing,
     triggerOnCreation: false,
     preference: null,
     min: 0,

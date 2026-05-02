@@ -2,9 +2,7 @@ import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
 import { Events } from "../../../lib/communication/events";
 import { FavoritesPresentationFlow } from "../type/favorite_types";
-import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { PageBottomObserver } from "../../../lib/core/observers/page_bottom_observer";
-import { sleep } from "../../../lib/core/scheduling/promise";
 import { waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 
 class InfiniteScrollFlow implements FavoritesPresentationFlow {
@@ -34,38 +32,31 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
   }
 
   public revealFavorite(): void { }
+
   public loadNewFavoritesInGallery(): boolean {
-    if (!ON_FAVORITES_PAGE || !FavoritesView.hasMoreResults(FavoritesModel.getLatestSearchResults())) {
+    if (!FavoritesView.hasMoreResults(FavoritesModel.getLatestSearchResults())) {
       return false;
     }
     this.showMoreResults();
     return true;
-   }
+  }
 
-  private async showMoreResults(): Promise<boolean> {
-    if (!ON_FAVORITES_PAGE) {
-      return false;
-    }
+  private async showMoreResults(): Promise<void> {
     const moreResults = FavoritesView.getMoreResults(FavoritesModel.getLatestSearchResults());
 
-    if (moreResults.length === 0) {
-      return false;
+    if (moreResults.length > 0) {
+      FavoritesView.insertNewSearchResults(moreResults);
+      Events.favorites.favoritesAddedToCurrentPage.emit(moreResults);
+      await waitForAllThumbnailsToLoad();
+      FavoritesView.preloadImages(FavoritesView.getThumbURLsToPreload(FavoritesModel.getLatestSearchResults()));
+      this.pageBottomObserver.refresh();
     }
-    FavoritesView.insertNewSearchResults(moreResults);
-    Events.favorites.favoritesAddedToCurrentPage.emit(moreResults);
-    await waitForAllThumbnailsToLoad();
-    const urlsToPreload = FavoritesView.getThumbURLsToPreload(FavoritesModel.getLatestSearchResults());
-
-    FavoritesView.preloadImages(urlsToPreload);
-    this.pageBottomObserver.refresh();
-    return true;
   }
 
   private async showFirstResults(): Promise<void> {
     FavoritesView.showSearchResults(FavoritesView.getFirstResults(FavoritesModel.getLatestSearchResults()));
     await waitForAllThumbnailsToLoad();
     this.pageBottomObserver.refresh();
-    await sleep(50);
   }
 }
 

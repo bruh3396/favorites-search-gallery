@@ -27,11 +27,11 @@ export interface Favorite extends Searchable {
   databaseRecord: FavoritesDatabaseRecord
   withinRating: (rating: Rating) => boolean
   swapFavoriteButton: () => void
-  validateTags: (post: Post) => void
+  validateTags: (post: Post, additionalTags?: string) => void
   addAdditionalTags: (newTags: string) => string
   removeAdditionalTags: (tagsToRemove: string) => string
   resetAdditionalTags: () => void
-  processPost: (post: Post) => void
+  populateMetadata: (post: Post) => void
   metrics: FavoriteMetricMap
 }
 export enum AddFavoriteStatus {

@@ -6,7 +6,7 @@ import { Preferences } from "../../../lib/preferences/preferences";
 import { debounceTrailing } from "../../../lib/core/scheduling/rate_limiting";
 import { getRectDistance } from "../../../utils/geometry";
 
-const VISIBLE_THUMBS: Map<string, IntersectionObserverEntry> = new Map();
+const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;
 let intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let bypassDebounce = true;
@@ -32,9 +32,9 @@ function onVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
 function updateVisibleThumbs(entries: IntersectionObserverEntry[]): void {
   for (const entry of entries) {
     if (entry.isIntersecting) {
-      VISIBLE_THUMBS.set(entry.target.id, entry);
+      visibleThumbs.set(entry.target.id, entry);
     } else {
-      VISIBLE_THUMBS.delete(entry.target.id);
+      visibleThumbs.delete(entry.target.id);
     }
   }
 }
@@ -70,7 +70,7 @@ function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): In
   if (centerThumb === null) {
     return entries;
   }
-  const centerEntry = VISIBLE_THUMBS.get(centerThumb.id);
+  const centerEntry = visibleThumbs.get(centerThumb.id);
   return centerEntry === undefined ? entries : sortByDistance(centerEntry, entries);
 }
 
@@ -103,7 +103,7 @@ export async function observeAllThumbsOnPage(): Promise<void> {
     return;
   }
   intersectionObserver.disconnect();
-  VISIBLE_THUMBS.clear();
+  visibleThumbs.clear();
 
   await waitForAllThumbnailsToLoad();
   observe(getAllContentThumbs());
@@ -118,7 +118,7 @@ export function resetCenterThumb(): void {
 }
 
 export function getVisibleThumbs(): HTMLElement[] {
-  const entries = Array.from(VISIBLE_THUMBS.values());
+  const entries = Array.from(visibleThumbs.values());
   return sortByDistanceFromCenterThumb(entries)
     .map(entry => entry.target)
     .filter(target => target instanceof HTMLElement);

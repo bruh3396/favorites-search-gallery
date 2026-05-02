@@ -1,6 +1,5 @@
-import { TAG_MODIFICATIONS, resetTagModifications, storeTagModifications } from "../favorites/model/tags/favorites_tag_modifier";
+﻿import { addTagsToFavorite, removeTagsFromFavorite, resetTagModifications, storeTagModifications, tagModifications } from "../favorites/model/tags/favorites_tag_modifier";
 import { insertHtmlWithStyles, insertStyle } from "../../utils/dom/injector";
-import { DO_NOTHING } from "../../lib/environment/constants";
 import { Events } from "../../lib/communication/events";
 import { Favorite } from "../../types/favorite";
 import { FeatureBridge } from "../../lib/communication/feature_bridge";
@@ -8,8 +7,8 @@ import { ITEM_CLASS_NAME } from "../../lib/dom/thumb";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";
 import { TAG_MODIFIER_HTML } from "../../assets/html";
+import { doNothing } from "../../lib/environment/constants";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
-import { setCustomTags } from "../favorites/model/tags/favorites_custom_tags";
 
 type TagModifierUI = {
   container: HTMLElement
@@ -24,9 +23,9 @@ type TagModifierUI = {
   export: HTMLButtonElement
 }
 
-const SELECTED: Set<Favorite> = new Set();
-const UI: TagModifierUI = {} as TagModifierUI;
-const FAVORITES_OPTION = {} as { container: HTMLElement, checkbox: HTMLInputElement };
+const selected: Set<Favorite> = new Set();
+const ui: TagModifierUI = {} as TagModifierUI;
+const favoritesOption = {} as { container: HTMLElement, checkbox: HTMLInputElement };
 let tagEditModeAbortController = new AbortController();
 let atLeastOneFavoriteIsSelected = false;
 
@@ -43,36 +42,42 @@ function insertHTML(): void {
     return;
   }
   insertHtmlWithStyles(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
-  FAVORITES_OPTION.container = document.getElementById("tag-modifier-container") as HTMLElement;
-  FAVORITES_OPTION.checkbox = document.getElementById("tag-modifier-option-checkbox") as HTMLInputElement;
-  UI.container = document.getElementById("tag-modifier-ui-container") as HTMLElement;
-  UI.statusLabel = document.getElementById("tag-modifier-ui-status-label") as HTMLLabelElement;
-  UI.textarea = document.getElementById("tag-modifier-ui-textarea") as HTMLTextAreaElement;
-  UI.add = document.getElementById("tag-modifier-ui-add") as HTMLButtonElement;
-  UI.remove = document.getElementById("tag-modifier-remove") as HTMLButtonElement;
-  UI.reset = document.getElementById("tag-modifier-reset") as HTMLButtonElement;
-  UI.selectAll = document.getElementById("tag-modifier-ui-select-all") as HTMLButtonElement;
-  UI.unSelectAll = document.getElementById("tag-modifier-ui-un-select-all") as HTMLButtonElement;
-  UI.import = document.getElementById("tag-modifier-import") as HTMLButtonElement;
-  UI.export = document.getElementById("tag-modifier-export") as HTMLButtonElement;
+  favoritesOption.container = document.getElementById("tag-modifier-container") as HTMLElement;
+  favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox") as HTMLInputElement;
+  ui.container = document.getElementById("tag-modifier-ui-container") as HTMLElement;
+  ui.statusLabel = document.getElementById("tag-modifier-ui-status-label") as HTMLLabelElement;
+  ui.textarea = document.getElementById("tag-modifier-ui-textarea") as HTMLTextAreaElement;
+  ui.add = document.getElementById("tag-modifier-ui-add") as HTMLButtonElement;
+  ui.remove = document.getElementById("tag-modifier-remove") as HTMLButtonElement;
+  ui.reset = document.getElementById("tag-modifier-reset") as HTMLButtonElement;
+  ui.selectAll = document.getElementById("tag-modifier-ui-select-all") as HTMLButtonElement;
+  ui.unSelectAll = document.getElementById("tag-modifier-ui-un-select-all") as HTMLButtonElement;
+  ui.import = document.getElementById("tag-modifier-import") as HTMLButtonElement;
+  ui.export = document.getElementById("tag-modifier-export") as HTMLButtonElement;
 }
 
 function addEventListeners(): void {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
-  FAVORITES_OPTION.checkbox.onchange = (event): void => {
+  favoritesOption.checkbox.onchange = (event): void => {
     if (event.target instanceof HTMLInputElement) {
       toggleTagEditMode(event.target.checked);
     }
   };
-  UI.selectAll.onclick = selectAll;
-  UI.unSelectAll.onclick = unSelectAll;
-  UI.add.onclick = addTagsToSelected;
-  UI.remove.onclick = removeTagsFromSelected;
-  UI.reset.onclick = resetTagModifications;
-  UI.import.onclick = DO_NOTHING;
-  UI.export.onclick = DO_NOTHING;
+  ui.selectAll.onclick = selectAll;
+  ui.unSelectAll.onclick = unSelectAll;
+  ui.add.onclick = addTagsToSelected;
+  ui.remove.onclick = removeTagsFromSelected;
+  ui.reset.onclick = (): void => {
+    if (!confirm("Are you sure you want to delete all tag modifications?")) {
+      return;
+    }
+    resetTagModifications();
+    Events.tagModifier.resetConfirmed.emit();
+  };
+  ui.import.onclick = doNothing;
+  ui.export.onclick = doNothing;
   Events.favorites.searchResultsUpdated.on(() => {
     unSelectAll();
   });
@@ -98,7 +103,7 @@ function toggleTagEditMode(value: boolean): void {
   toggleThumbInteraction(value);
   toggleUI(value);
   toggleTagEditModeEventListeners(value);
-  UI.unSelectAll.click();
+  ui.unSelectAll.click();
 }
 
 function toggleThumbInteraction(value: boolean): void {
@@ -132,7 +137,7 @@ function toggleThumbInteraction(value: boolean): void {
 }
 
 function toggleUI(value: boolean): void {
-  UI.container.style.display = value ? "block" : "none";
+  ui.container.style.display = value ? "block" : "none";
 }
 
 function getFavorite(id: string): Favorite | undefined {
@@ -161,13 +166,13 @@ function toggleTagEditModeEventListeners(value: boolean): void {
 }
 
 function showStatus(text: string): void {
-  UI.statusLabel.style.visibility = "visible";
-  UI.statusLabel.textContent = text;
+  ui.statusLabel.style.visibility = "visible";
+  ui.statusLabel.textContent = text;
   setTimeout(() => {
-    const statusHasNotChanged = UI.statusLabel.textContent === text;
+    const statusHasNotChanged = ui.statusLabel.textContent === text;
 
     if (statusHasNotChanged) {
-      UI.statusLabel.style.visibility = "hidden";
+      ui.statusLabel.style.visibility = "hidden";
     }
   }, 1000);
 }
@@ -177,7 +182,7 @@ function unSelectAll(): void {
     return;
   }
 
-  for (const favorite of SELECTED) {
+  for (const favorite of selected) {
     select(favorite, false);
   }
   atLeastOneFavoriteIsSelected = false;
@@ -193,13 +198,13 @@ function select(favorite: Favorite, value?: boolean): void {
   atLeastOneFavoriteIsSelected = true;
 
   if (value === undefined) {
-    value = !SELECTED.has(favorite);
+    value = !selected.has(favorite);
   }
 
   if (value) {
-    SELECTED.add(favorite);
+    selected.add(favorite);
   } else {
-    SELECTED.delete(favorite);
+    selected.delete(favorite);
   }
   toggleOutline(favorite, value);
 }
@@ -211,7 +216,7 @@ function toggleOutline(favorite: Favorite, value: boolean): void {
 }
 
 function isSelected(favorite: Favorite): boolean {
-  return SELECTED.has(favorite);
+  return selected.has(favorite);
 }
 
 function removeMediaTypeTags(tags: string): string {
@@ -227,7 +232,7 @@ function removeTagsFromSelected(): void {
 }
 
 function modifyTagsOfSelected(remove: boolean): void {
-  const tags = UI.textarea.value.toLowerCase();
+  const tags = ui.textarea.value.toLowerCase();
   const tagsWithoutMediaTypes = removeMediaTypeTags(tags);
   const tagsToModify = removeExtraWhiteSpace(tagsWithoutMediaTypes);
   const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
@@ -237,10 +242,10 @@ function modifyTagsOfSelected(remove: boolean): void {
     return;
   }
 
-  for (const favorite of SELECTED) {
-    const additionalTags = remove ? favorite.removeAdditionalTags(tagsToModify) : favorite.addAdditionalTags(tagsToModify);
+  for (const favorite of selected) {
+    const additionalTags = remove ? removeTagsFromFavorite(favorite, tagsToModify) : addTagsToFavorite(favorite, tagsToModify);
 
-    TAG_MODIFICATIONS.set(favorite.id, additionalTags);
+    tagModifications.set(favorite.id, additionalTags);
     modifiedTagsCount += 1;
   }
 
@@ -253,6 +258,6 @@ function modifyTagsOfSelected(remove: boolean): void {
   }
   showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);
   dispatchEvent(new Event("modifiedTags"));
-  setCustomTags(tagsToModify);
+  FeatureBridge.setCustomTags.query(tagsToModify);
   storeTagModifications();
 }

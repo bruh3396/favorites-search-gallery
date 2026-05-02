@@ -4,14 +4,14 @@ import { fetchImageBitmapFromThumb } from "../../../../../../lib/server/fetch/bi
 import { getImageFromThumb } from "../../../../../../lib/dom/thumb";
 import { imageIsLoaded } from "../../../../../../utils/dom/image";
 
-const FETCH_QUEUE = new ThrottledQueue(10);
+const fetchQueue = new ThrottledQueue(10);
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
 async function fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
-  await FETCH_QUEUE.wait();
+  await fetchQueue.wait();
 
   try {
     request.complete(await fetchImageBitmapFromThumb(request.thumb, request.abortController));

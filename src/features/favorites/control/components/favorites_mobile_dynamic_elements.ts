@@ -13,7 +13,7 @@ import { createToggleSwitch } from "../../../../lib/ui/elements/checkbox";
 import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
 import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 
-const BUTTONS: Partial<ButtonElement>[] = [
+const buttons: Partial<ButtonElement>[] = [
   {
     id: "download-button",
     parentId: "additional-favorite-options",
@@ -24,7 +24,7 @@ const BUTTONS: Partial<ButtonElement>[] = [
   }
 ];
 
-const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
+const toggleSwitches: Partial<CheckboxElement>[] = [
   {
     id: "infinite-scroll",
     parentId: "favorite-options-left",
@@ -140,7 +140,7 @@ const TOGGLE_SWITCHES: Partial<CheckboxElement>[] = [
   }
 ];
 
-const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -232,20 +232,20 @@ const SELECTS: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<numbe
 ];
 
 function createButtons(): void {
-  for (const button of prepareDynamicElements(BUTTONS)) {
+  for (const button of prepareDynamicElements(buttons)) {
     createButtonElement(button);
   }
 }
 
 function createToggleSwitches(): void {
-  for (const checkbox of prepareDynamicElements(TOGGLE_SWITCHES)) {
+  for (const checkbox of prepareDynamicElements(toggleSwitches)) {
     createToggleSwitch(checkbox);
   }
 }
 
 function createSelects(): void {
   // @ts-expect-error don't care
-  for (const select of prepareDynamicElements(SELECTS)) {
+  for (const select of prepareDynamicElements(selects)) {
     createSelectElement(select);
   }
 }

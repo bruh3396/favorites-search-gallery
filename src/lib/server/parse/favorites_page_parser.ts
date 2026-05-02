@@ -1,7 +1,7 @@
-import { DOM_PARSER } from "../../../utils/dom/dom_parser";
+import { domParser } from "../../../utils/dom/dom_parser";
 
 export function extractFavoritesPageCount(html: string): number | null {
-  const dom = DOM_PARSER.parseFromString(html, "text/html");
+  const dom = domParser.parseFromString(html, "text/html");
   const paginator = dom.querySelector("[name=\"lastpage\"]");
 
   if (paginator === null) {
@@ -28,7 +28,7 @@ function extractThumbImageElements(dom: Document): HTMLElement[] {
 }
 
 export function extractFavoriteElements(html: string): HTMLElement[] {
-  const dom = DOM_PARSER.parseFromString(html, "text/html");
+  const dom = domParser.parseFromString(html, "text/html");
   const thumbs = extractThumbElements(dom);
   return thumbs.length > 0 ? thumbs : extractThumbImageElements(dom);
 }

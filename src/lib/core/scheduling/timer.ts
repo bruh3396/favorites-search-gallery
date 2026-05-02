@@ -1,5 +1,5 @@
-import { DO_NOTHING } from "../../environment/constants";
 import { Timeout } from "../../../types/async";
+import { doNothing } from "../../environment/constants";
 
 export class Timer {
   public waitTime: number;
@@ -8,7 +8,7 @@ export class Timer {
 
   constructor(waitTime: number) {
     this.waitTime = waitTime;
-    this.onTimerEnd = DO_NOTHING;
+    this.onTimerEnd = doNothing;
     this.timeout = undefined;
   }
 

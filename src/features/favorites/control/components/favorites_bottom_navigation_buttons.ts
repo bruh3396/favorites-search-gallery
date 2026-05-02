@@ -1,9 +1,9 @@
-import { CONTENT } from "../../../../lib/shell";
+import { Content } from "../../../../lib/shell";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { insertStyle } from "../../../../utils/dom/injector";
-import { yield1 } from "../../../../lib/core/scheduling/promise";
+import { yieldControl } from "../../../../lib/core/scheduling/promise";
 
 export async function insertFavoritesBottomNavigationButtons(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesSettings.bottomNavigationButtonsEnabled) {
@@ -61,6 +61,6 @@ export async function insertFavoritesBottomNavigationButtons(): Promise<void> {
 
   container.appendChild(previousButton);
   container.appendChild(nextButton);
-  await yield1();
-  CONTENT.insertAdjacentElement("afterend", container);
+  await yieldControl();
+  Content.insertAdjacentElement("afterend", container);
 }

@@ -7,6 +7,7 @@ export const FeatureBridge = {
   inGallery: new FeatureQuery<void, boolean>(false),
   allFavorites: new FeatureQuery<string, Favorite | undefined>(undefined),
   favoritesSearchResults: new FeatureQuery<void, Favorite[]>([]),
+  setCustomTags: new FeatureQuery<string, void>(undefined),
   moreFavoritesPagesExist: new FeatureQuery<NavigationKey, boolean>(false),
   moreSearchPagesExist: new FeatureQuery<NavigationKey, SearchPage | null>(null),
   searchPageItems: new FeatureQuery<void, HTMLElement[]>([])

@@ -1,18 +1,28 @@
-import * as FavoritesLoader from "./load/favorites_loader";
-import * as FavoritesSearchEngine from "./search/favorites_search_engine";
-import * as FavoritesSearchResults from "./search/favorites_search_results";
+﻿import * as FavoritesLoader from "./load/favorites_loader";
+import * as FavoritesMetadataFetcher from "./load/favorites_metadata_fetcher";
+import * as FavoritesSearchState from "./search/favorites_search_coordinator";
 import * as FavoritesTagModifier from "./tags/favorites_tag_modifier";
-import { FavoriteItem } from "../type/favorite_item";
+import { Favorite } from "../../../types/favorite";
 import { NewFavorites } from "../type/favorite_types";
 
 export function setupFavoritesModel(): void {
-  FavoritesSearchEngine.setup();
+  FavoritesMetadataFetcher.initialize(FavoritesLoader.updateFavorite);
   FavoritesTagModifier.loadTagModifications();
+}
+
+export function loadDatabaseFavorites(): Promise<void> {
+  return FavoritesLoader.loadDatabaseFavorites((allFavorites) => {
+    FavoritesSearchState.deferSearchEngineIndexing();
+    FavoritesSearchState.index(allFavorites);
+    FavoritesMetadataFetcher.fetchMissingMetadata(allFavorites);
+  });
 }
 
 export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<void> {
   return FavoritesLoader.fetchAllFavorites((favorites) => {
-    FavoritesSearchResults.appendSearchResults(favorites);
+    FavoritesSearchState.index(favorites);
+    FavoritesMetadataFetcher.fetchMissingMetadata(favorites);
+    FavoritesSearchState.appendSearchResults(favorites);
     onSearchResultsFound();
   });
 }
@@ -20,20 +30,20 @@ export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<voi
 export function fetchNewFavorites(): Promise<NewFavorites> {
   return FavoritesLoader.fetchNewFavorites()
     .then((newFavorites) => {
-      const newSearchResults = FavoritesSearchResults.prependSearchResults(newFavorites);
-      return {newFavorites, newSearchResults};
+      FavoritesSearchState.index(newFavorites);
+      FavoritesMetadataFetcher.fetchMissingMetadata(newFavorites);
+      const newSearchResults = FavoritesSearchState.prependSearchResults(newFavorites);
+      return { newFavorites, newSearchResults };
     });
 }
 
-export const searchFavorites = (searchQuery?: string): FavoriteItem[] => FavoritesSearchResults.searchFavorites(FavoritesLoader.getActiveFavorites(), searchQuery);
-export const invertSearchResults = (): FavoriteItem[] => FavoritesSearchResults.invertSearchResults(FavoritesLoader.getActiveFavorites());
-export const setSearchSubset = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchResults.getLatestSearchResults());
-export const resetTagModifications = (): void => FavoritesSearchResults.resetTagModifications(FavoritesLoader.getActiveFavorites());
+export const searchFavorites = (searchQuery?: string): Favorite[] => FavoritesSearchState.searchFavorites(FavoritesLoader.getActiveFavorites(), searchQuery);
+export const invertSearchResults = (): Favorite[] => FavoritesSearchState.invertSearchResults(FavoritesLoader.getActiveFavorites());
+export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchState.getLatestSearchResults());
+export const resetTagModifications = (): void => FavoritesTagModifier.resetAllFavoriteTags(FavoritesLoader.getAllFavorites());
 
-export const buildSearchIndexSync = (): void => FavoritesSearchEngine.buildIndexSync();
-export const buildSearchIndexAsync = (): Promise<void> => FavoritesSearchEngine.buildIndexAsync();
-
-export { hasFavorites, deleteDatabase, loadAllFavoritesFromDatabase, storeAllFavorites, getAllFavorites, storeNewFavorites, resetActiveFavorites as stopSubset, deleteFavorite, updateFavoriteMetadata as updateMetadata } from "./load/favorites_loader";
-export { getLatestSearchResults, onBlacklistChanged, shuffleSearchResults } from "./search/favorites_search_results";
-export { onStartedStoringAllFavorites, updateMissingMetadata, onFinishedStoringAllFavorites } from "../type/favorite_metadata";
+export { hasFavorites, deleteDatabase, storeAllFavorites, getAllFavorites, storeNewFavorites, resetActiveFavorites, deleteFavorite, getFavorite } from "./load/favorites_loader";
+export { getLatestSearchResults, onBlacklistChanged, shuffleSearchResults } from "./search/favorites_search_coordinator";
+export { onDatabaseWritten } from "./load/favorites_metadata_fetcher";
 export { loadTagModifications } from "./tags/favorites_tag_modifier";
+export { setCustomTags } from "./tags/favorites_custom_tags";

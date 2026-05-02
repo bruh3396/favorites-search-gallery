@@ -1,6 +1,6 @@
-import { DO_NOTHING } from "../../../../../lib/environment/constants";
 import { GalleryAbstractController } from "../gallery_abstract_controller";
 import { GallerySettings } from "../../../../../config/gallery_settings";
+import { doNothing } from "../../../../../lib/environment/constants";
 import { isGif } from "../../../../../lib/media_resolver";
 import { resolveGifUrl } from "../../../../../lib/server/url/media_url_resolver";
 
@@ -16,7 +16,7 @@ class GifController extends GalleryAbstractController {
     this.gif.className = "fullscreen-image";
     this.preloadedGifs = [];
     this.container.appendChild(this.gif);
-    this.preload = GallerySettings.gifPreloadingEnabled ? this.preload : DO_NOTHING;
+    this.preload = GallerySettings.gifPreloadingEnabled ? this.preload : doNothing;
   }
 
   public hide(): void {

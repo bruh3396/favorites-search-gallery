@@ -1,7 +1,6 @@
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/post";
-import { getAdditionalTags } from "../model/tags/favorites_tag_modifier";
 
 function getCorrectTags(post: Post): Set<string> {
   const correctTags = convertToTagSet(post.tags);
@@ -20,14 +19,11 @@ function getCorrectTags(post: Post): Set<string> {
 }
 
 export class FavoriteTags {
-  // @ts-expect-error not directly defined in constructor
-  public tags: Set<string>;
-  private id: string;
+  public tags: Set<string> = new Set();
   private additionalTags: Set<string> = new Set();
 
-  constructor(post: Post, record: HTMLElement | FavoritesDatabaseRecord) {
-    this.id = post.id;
-    this.set(record instanceof HTMLElement ? post.tags : record.tags);
+  constructor(post: Post, record: HTMLElement | FavoritesDatabaseRecord, additionalTags?: string) {
+    this.set(record instanceof HTMLElement ? post.tags : record.tags, additionalTags);
     post.tags = "";
   }
 
@@ -43,11 +39,9 @@ export class FavoriteTags {
     return convertToTagString(this.additionalTags);
   }
 
-  public set(tags: string | Set<string>): void {
+  public set(tags: string | Set<string>, additionalTags?: string): void {
     this.tags = tags instanceof Set ? tags : convertToTagSet(tags);
-    const additionalTags = getAdditionalTags(this.id);
-
-    this.correctVideTag(tags);
+    this.correctVideoTag(tags);
 
     if (additionalTags !== undefined) {
       this.additionalTags = convertToTagSet(additionalTags);
@@ -55,8 +49,10 @@ export class FavoriteTags {
     }
   }
 
-  public update(tags: string): void {
-    this.set(tags);
+  public validate(post: Post): void {
+    if (!this.tagsAreEqual(post)) {
+      this.set(post.tags);
+    }
   }
 
   public tagsAreEqual(post: Post): boolean {
@@ -105,12 +101,10 @@ export class FavoriteTags {
     this.tags = new Set(sorted);
   }
 
-  private correctVideTag(tags: string | Set<string>): void {
-    if (typeof tags === "string") {
-      if (this.tags.has("vide") && this.tags.has("animated")) {
-        this.tags.delete("vide");
-        this.tags.add("video");
-      }
+  private correctVideoTag(tags: string | Set<string>): void {
+    if (typeof tags === "string" && this.tags.has("vide") && this.tags.has("animated")) {
+      this.tags.delete("vide");
+      this.tags.add("video");
     }
   }
 }

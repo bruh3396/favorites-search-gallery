@@ -1,11 +1,11 @@
-import { CONTENT } from "../../../../lib/shell";
+import { Content } from "../../../../lib/shell";
+import { Favorite } from "../../../../types/favorite";
 import { ITEM_SELECTOR } from "../../../../lib/dom/thumb";
-import { getFavorite } from "../../type/favorite_item";
 
 export function noFavoritesAreVisible(): boolean {
-  return CONTENT.querySelector(ITEM_SELECTOR) === null;
+  return Content.querySelector(ITEM_SELECTOR) === null;
 }
 
-export function swapFavoriteButton(id: string): void {
-  getFavorite(id)?.swapFavoriteButton();
+export function swapFavoriteButton(favorite: Favorite | undefined): void {
+  favorite?.swapFavoriteButton();
 }

@@ -1,4 +1,4 @@
-import { EMPTY_FAVORITES_PAGINATION_PARAMETERS, FavoritesPaginationParameters } from "../../type/favorite_types";
+import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../type/favorite_types";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesPageRelation } from "../../../../types/favorite";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
@@ -196,6 +196,6 @@ export function getContainer(): HTMLElement {
 
 export function setupFavoritesPaginationMenu(): void {
   insert();
-  create(EMPTY_FAVORITES_PAGINATION_PARAMETERS);
+  create(emptyFavoritesPageParameters);
   toggle(!Preferences.infiniteScroll.value);
 }

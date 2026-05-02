@@ -1,17 +1,17 @@
-import { EnhancedKeyboardEvent, EnhancedWheelEvent } from "../dom/input_types";
+import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../dom/input_types";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../environment/environment";
 import { Events } from "./events";
-import { ROOT } from "../shell";
+import { Root } from "../shell";
 import { setupSwipeEvents } from "./swipe_events";
 import { setupTouchHoldEvents } from "./touch_hold_events";
 
-const CONTAINER = ON_FAVORITES_PAGE ? ROOT : document.documentElement;
+const container = ON_FAVORITES_PAGE ? Root : document.documentElement;
 
 function setupDocumentEvents(): void {
-  CONTAINER.addEventListener("click", (event) => {
+  container.addEventListener("click", (event) => {
     Events.document.click.emit(event);
   });
-  CONTAINER.addEventListener("mousedown", (event) => {
+  container.addEventListener("mousedown", (event) => {
     Events.document.mousedown.emit(event);
   });
   document.addEventListener("keydown", (event) => {
@@ -20,9 +20,24 @@ function setupDocumentEvents(): void {
   document.addEventListener("keyup", (event) => {
     Events.document.keyup.emit(new EnhancedKeyboardEvent(event));
   });
+  container.addEventListener("mouseover", (event) => {
+    Events.document.mouseover.emit(new EnhancedMouseEvent(event));
+  }, { passive: true });
+  container.addEventListener("mousemove", (event) => {
+    Events.document.mousemove.emit(event);
+  }, { passive: true });
   document.addEventListener("wheel", (event) => {
     Events.document.wheel.emit(new EnhancedWheelEvent(event));
   }, { passive: true });
+  container.addEventListener("contextmenu", (event) => {
+    Events.document.contextmenu.emit(event);
+  });
+  container.addEventListener("touchstart", (event) => {
+    Events.document.touchStart.emit(event);
+  }, { passive: false });
+  container.addEventListener("touchend", (event) => {
+    Events.document.touchEnd.emit(event);
+  });
 }
 
 function setupWindowEvents(): void {

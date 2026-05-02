@@ -1,10 +1,10 @@
-import { DOM_PARSER } from "../../../utils/dom/dom_parser";
 import { Post } from "../../../types/post";
+import { domParser } from "../../../utils/dom/dom_parser";
 import { normalizeImageSource } from "../url/media_url_transformer";
 import { parseDimensions2D } from "../../../utils/string/parse";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
-  const STATISTICS_REGEX = /(\S+):\s+(\S+)/g;
+  const statisticRegex = /(\S+):\s+(\S+)/g;
 
   function getStatistics(dom: Document): Record<string, string> {
     const stats = dom.querySelector("#stats");
@@ -13,7 +13,7 @@ import { removeExtraWhiteSpace } from "../../../utils/string/format";
       return {};
     }
     const textContent = removeExtraWhiteSpace(stats.textContent || "");
-    const matches = Array.from(textContent.matchAll(STATISTICS_REGEX));
+    const matches = Array.from(textContent.matchAll(statisticRegex));
     const entries = matches.map(match => [match[1].toLowerCase(), match[2]]);
     return Object.fromEntries(entries);
   }
@@ -42,7 +42,7 @@ import { removeExtraWhiteSpace } from "../../../utils/string/format";
   }
 
  export function parsePostFromPostPage(html:string): Post {
-    const dom = DOM_PARSER.parseFromString(html, "text/html");
+    const dom = domParser.parseFromString(html, "text/html");
     const statistics = getStatistics(dom);
     const fileUrl = getFileURL(dom);
     const tags = getTags(dom);

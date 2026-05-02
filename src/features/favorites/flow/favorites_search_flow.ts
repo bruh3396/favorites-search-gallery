@@ -2,9 +2,9 @@ import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesPresentationFlow from "./favorites_presentation_flow";
 import * as FavoritesView from "../view/favorites_view";
 import { Events } from "../../../lib/communication/events";
-import { FavoriteItem } from "../type/favorite_item";
+import { Favorite } from "../../../types/favorite";
 
-export function showSearchResults(searchResults: FavoriteItem[]): void {
+export function showSearchResults(searchResults: Favorite[]): void {
   Events.favorites.searchResultsUpdated.emit();
   FavoritesView.setMatchCount(searchResults.length);
   FavoritesPresentationFlow.present(searchResults);
@@ -26,7 +26,7 @@ export function invertSearchResults(): void {
   showSearchResults(FavoritesModel.invertSearchResults());
 }
 
-export function findFavoriteInAll(id: string): void {
+export function revealFavoriteInAll(id: string): void {
   searchFavorites("");
   FavoritesPresentationFlow.revealFavorite(id);
 }

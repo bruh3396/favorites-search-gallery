@@ -1,4 +1,4 @@
-import { Fruit, INDEX } from "./search_test_utils";
+import { Fruit, index } from "./search_test_utils";
 import { describe, expect, test } from "vitest";
 import { AbstractSearchTag } from "../lib/search/tag/abstract_search_tag";
 import { ResolvedSearchQuery } from "../lib/search/query/resolved_search_query";
@@ -18,8 +18,8 @@ function getFinalSearchQuery(resolvedQuery: ResolvedSearchQuery<Fruit>): string 
 }
 
 function testResolveSearchQuery(rawQuery: string, expectedRawQuery: string): ResolvedSearchQuery<Fruit> {
-  const resolvedQuery = new ResolvedSearchQuery<Fruit>(rawQuery, INDEX.getIndexedTerms());
-  const expectedQuery = new ResolvedSearchQuery<Fruit>(expectedRawQuery, INDEX.getIndexedTerms());
+  const resolvedQuery = new ResolvedSearchQuery<Fruit>(rawQuery, index.getIndexedTerms());
+  const expectedQuery = new ResolvedSearchQuery<Fruit>(expectedRawQuery, index.getIndexedTerms());
 
   expect(getFinalSearchQuery(resolvedQuery)).toStrictEqual(getFinalSearchQuery(expectedQuery));
   return resolvedQuery;

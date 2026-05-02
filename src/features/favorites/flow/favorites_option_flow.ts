@@ -11,7 +11,7 @@ export function toggleInfiniteScroll(value: boolean): void {
 
 export function onBlacklistChanged(): void {
   FavoritesModel.onBlacklistChanged();
-  searchFavoritesWithNewOptions();
+  researchFavorites();
 }
 
 export function setResultsPerPage(resultsPerPage: number): void {
@@ -19,6 +19,6 @@ export function setResultsPerPage(resultsPerPage: number): void {
   FavoritesSearchFlow.showLatestSearchResults();
 }
 
-export function searchFavoritesWithNewOptions(): void {
+export function researchFavorites(): void {
   FavoritesSearchFlow.searchFavorites();
 }

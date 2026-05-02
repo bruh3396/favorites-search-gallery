@@ -23,7 +23,6 @@ function runFavoritesSearchGallery(): void {
   setupExtensions();
   setupStyles();
   setupShell();
-
   setupFavorites();
   setupSearchPage();
   setupGallery();
