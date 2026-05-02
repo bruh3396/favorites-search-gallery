@@ -1,5 +1,5 @@
 // gallery_renderer.ts
-import { isGif, isVideo } from "../../../../lib/media_resolver";
+import { isGif, isVideo } from "../../../../lib/media/media_resolver";
 import { GalleryAbstractController } from "./gallery_abstract_controller";
 import { GalleryGifController } from "./gif/gallery_gif_controller";
 import { GalleryImageController } from "./image/controller/gallery_image_controller";

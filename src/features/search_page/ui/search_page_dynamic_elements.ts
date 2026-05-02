@@ -6,11 +6,11 @@ import { GeneralSettings } from "../../../config/general_settings";
 import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { createCheckboxElement } from "../../../lib/ui/elements/checkbox";
-import { createNumberComponent } from "../../../lib/ui/elements/number_input";
-import { createSelectElement } from "../../../lib/ui/elements/select";
+import { buildCheckboxElement } from "../../../lib/ui/element/checkbox";
+import { buildNumberComponent } from "../../../lib/ui/element/number_input";
+import { buildSelectElement } from "../../../lib/ui/element/select";
 import { numberRange } from "../../../utils/number";
-import { prepareDynamicElements } from "../../../lib/ui/elements/element_utils";
+import { prepareDynamicElements } from "../../../lib/ui/element/element_utils";
 import { reloadWindow } from "../../../utils/browser/window";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
 import { toggleGalleryMenuEnabled } from "../../../lib/ui/style";
@@ -125,20 +125,20 @@ const numbers: Partial<NumberElement>[] = [];
 
 function createCheckboxes(): void {
   for (const checkbox of prepareDynamicElements(checkboxes)) {
-    createCheckboxElement(checkbox);
+    buildCheckboxElement(checkbox);
   }
 }
 
 function createNumbers(): void {
   for (const number of prepareDynamicElements(numbers)) {
-    createNumberComponent(number);
+    buildNumberComponent(number);
   }
 }
 
 function createSelects(): void {
   //  @ts-expect-error don't care
   for (const select of prepareDynamicElements(selects)) {
-    createSelectElement(select);
+    buildSelectElement(select);
   }
 }
 

@@ -1,4 +1,4 @@
-import * as ExtensionCache from "../../../lib/extension_cache";
+import * as ExtensionCache from "../../../lib/media/extension_cache";
 import * as FavoritesModel from "../model/favorites_model";
 
 export function resetFavorites(): void {

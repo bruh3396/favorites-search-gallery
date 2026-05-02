@@ -1,7 +1,7 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../lib/ui/element_types";
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../lib/environment/derived_environment";
 import { LayoutMode, PerformanceProfile } from "../../../../types/ui";
-import { createCheckboxElement, createCheckboxOption } from "../../../../lib/ui/elements/checkbox";
+import { buildCheckboxElement, buildCheckboxOption } from "../../../../lib/ui/element/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI, tryResetting } from "../../view/update/favorites_menu_event_handlers";
@@ -11,11 +11,11 @@ import { GeneralSettings } from "../../../../config/general_settings";
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/environment";
-import { createButtonElement } from "../../../../lib/ui/elements/button";
-import { createNumberComponent } from "../../../../lib/ui/elements/number_input";
-import { createSelectElement } from "../../../../lib/ui/elements/select";
+import { buildButtonElement } from "../../../../lib/ui/element/button";
+import { buildNumberComponent } from "../../../../lib/ui/element/number_input";
+import { buildSelectElement } from "../../../../lib/ui/element/select";
 import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
+import { prepareDynamicElements } from "../../../../lib/ui/element/element_utils";
 import { reloadWindow } from "../../../../utils/browser/window";
 
 const buttons: Partial<ButtonElement>[] = [
@@ -417,41 +417,11 @@ const numbers: Partial<NumberElement>[] = [
   }
 ];
 
-function createButtons(): void {
-  for (const button of prepareDynamicElements(buttons)) {
-    createButtonElement(button);
-  }
-}
-
-function createCheckboxes(): void {
-  for (const checkbox of prepareDynamicElements(checkboxes)) {
-    createCheckboxOption(checkbox);
-  }
-}
-
-function createSelects(): void {
-  //  @ts-expect-error don't care
-  for (const select of prepareDynamicElements(selects)) {
-    createSelectElement(select);
-  }
-}
-
-function createNumbers(): void {
-  for (const number of prepareDynamicElements(numbers)) {
-    createNumberComponent(number);
-  }
-}
-
-function createSimpleCheckboxes(): void {
-  for (const checkbox of prepareDynamicElements(simpleCheckboxes)) {
-    createCheckboxElement(checkbox);
-  }
-}
-
 export function createFavoritesDesktopMenuElements(): void {
-  createButtons();
-  createCheckboxes();
-  createSimpleCheckboxes();
-  createSelects();
-  createNumbers();
+  prepareDynamicElements(buttons).forEach(buildButtonElement);
+  prepareDynamicElements(checkboxes).forEach(buildCheckboxOption);
+  prepareDynamicElements(simpleCheckboxes).forEach(buildCheckboxElement);
+  // @ts-expect-error don't care
+  prepareDynamicElements(selects).forEach(buildSelectElement);
+  prepareDynamicElements(numbers).forEach(buildNumberComponent);
 }

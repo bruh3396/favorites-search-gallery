@@ -1,25 +1,11 @@
-import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
+﻿import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/post";
-
-function getCorrectTags(post: Post): Set<string> {
-  const correctTags = convertToTagSet(post.tags);
-
-  correctTags.add(post.id);
-
-  if (post.fileURL.endsWith("mp4")) {
-    correctTags.add("video");
-  } else if (post.fileURL.endsWith("gif")) {
-    correctTags.add("gif");
-  } else if (!correctTags.has("animated_png")) {
-    correctTags.delete("video");
-    correctTags.delete("animated");
-  }
-  return correctTags;
-}
+import { getCorrectTags } from "../../../lib/media/media_tag_validator";
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();
+  private baseTags: Set<string> = new Set();
   private additionalTags: Set<string> = new Set();
 
   constructor(post: Post, record: HTMLElement | FavoritesDatabaseRecord, additionalTags?: string) {
@@ -31,22 +17,17 @@ export class FavoriteTags {
     return convertToTagString(this.tags);
   }
 
-  private get originalTagSet(): Set<string> {
-    return this.tags.difference(this.additionalTags);
-  }
-
-  private get additionalTagString(): string {
-    return convertToTagString(this.additionalTags);
-  }
-
   public set(tags: string | Set<string>, additionalTags?: string): void {
-    this.tags = tags instanceof Set ? tags : convertToTagSet(tags);
-    this.correctVideoTag(tags);
+    this.baseTags = tags instanceof Set ? tags : convertToTagSet(tags);
+
+    if (!(tags instanceof Set)) {
+      this.correctVideoTag();
+    }
 
     if (additionalTags !== undefined) {
       this.additionalTags = convertToTagSet(additionalTags);
-      this.combineOriginalAndAdditionalTagSets();
     }
+    this.mergeTags();
   }
 
   public validate(post: Post): void {
@@ -55,7 +36,35 @@ export class FavoriteTags {
     }
   }
 
-  public tagsAreEqual(post: Post): boolean {
+  public addAdditionalTags(newTagString: string): string {
+    const newTags = convertToTagSet(newTagString).difference(this.tags);
+
+    if (newTags.size > 0) {
+      this.additionalTags = this.additionalTags.union(newTags);
+      this.mergeTags();
+    }
+    return convertToTagString(this.additionalTags);
+  }
+
+  public removeAdditionalTags(tagsToRemove: string): string {
+    const tagsToRemoveSet = convertToTagSet(tagsToRemove).intersection(this.additionalTags);
+
+    if (tagsToRemoveSet.size > 0) {
+      this.additionalTags = this.additionalTags.difference(tagsToRemoveSet);
+      this.mergeTags();
+    }
+    return convertToTagString(this.additionalTags);
+  }
+
+  public resetAdditionalTags(): void {
+    if (this.additionalTags.size === 0) {
+      return;
+    }
+    this.additionalTags = new Set();
+    this.mergeTags();
+  }
+
+  private tagsAreEqual(post: Post): boolean {
     const correctTags = getCorrectTags(post);
     const difference = this.tags.symmetricDifference(correctTags);
     const equal = difference.size === 0 || (difference.size === 1 && difference.has(post.id));
@@ -67,44 +76,16 @@ export class FavoriteTags {
     return false;
   }
 
-  public addAdditionalTags(newTagString: string): string {
-    const newTags = convertToTagSet(newTagString).difference(this.tags);
-
-    if (newTags.size > 0) {
-      this.additionalTags = this.additionalTags.union(newTags);
-      this.combineOriginalAndAdditionalTagSets();
-    }
-    return this.additionalTagString;
-  }
-
-  public removeAdditionalTags(tagsToRemove: string): string {
-    const tagsToRemoveSet = convertToTagSet(tagsToRemove).intersection(this.additionalTags);
-
-    if (tagsToRemoveSet.size > 0) {
-      this.tags = this.tags.difference(tagsToRemoveSet);
-      this.additionalTags = this.additionalTags.difference(tagsToRemoveSet);
-    }
-    return this.additionalTagString;
-  }
-
-  public resetAdditionalTags(): void {
-    if (this.additionalTags.size === 0) {
-      return;
-    }
-    this.additionalTags = new Set();
-    this.combineOriginalAndAdditionalTagSets();
-  }
-
-  private combineOriginalAndAdditionalTagSets(): void {
-    const sorted = Array.from(this.originalTagSet.union(this.additionalTags)).sort();
+  private mergeTags(): void {
+    const sorted = Array.from(this.baseTags.union(this.additionalTags)).sort();
 
     this.tags = new Set(sorted);
   }
 
-  private correctVideoTag(tags: string | Set<string>): void {
-    if (typeof tags === "string" && this.tags.has("vide") && this.tags.has("animated")) {
-      this.tags.delete("vide");
-      this.tags.add("video");
+  private correctVideoTag(): void {
+    if (this.baseTags.has("vide") && this.baseTags.has("animated")) {
+      this.baseTags.delete("vide");
+      this.baseTags.add("video");
     }
   }
 }

@@ -7,7 +7,7 @@ import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { clamp } from "../../../utils/number";
 import { downloadFromThumb } from "../../../lib/server/fetch/media_downloader";
 import { isForwardNavigationKey } from "../../../types/guards";
-import { isVideo } from "../../../lib/media_resolver";
+import { isVideo } from "../../../lib/media/media_resolver";
 
 let currentIndex = 0;
 let recentlyExitedGallery = false;

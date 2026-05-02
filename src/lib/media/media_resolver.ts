@@ -1,8 +1,8 @@
-import { Favorite } from "../types/favorite";
-import { MediaType } from "../types/media";
-import { convertToTagSet } from "../utils/string/tags";
-import { getImageFromThumb } from "./dom/thumb";
-import { getTagSetFromItem } from "./dom/tags";
+import { Favorite } from "../../types/favorite";
+import { MediaType } from "../../types/media";
+import { convertToTagSet } from "../../utils/string/tags";
+import { getImageFromThumb } from "../dom/thumb";
+import { getTagSetFromItem } from "../dom/tags";
 
 export const isVideo = (item: HTMLElement | Favorite): boolean => isMediaType(item, "video");
 export const isGif = (item: HTMLElement | Favorite): boolean => isMediaType(item, "gif");

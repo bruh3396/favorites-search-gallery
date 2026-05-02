@@ -1,11 +1,11 @@
 import * as Icons from "../../../assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { clamp, millisecondsToSeconds } from "../../../utils/number";
-import { isImage, isVideo } from "../../../lib/media_resolver";
+import { isImage, isVideo } from "../../../lib/media/media_resolver";
 import { AUTOPLAY_HTML } from "../../../assets/html";
 import { Events } from "../../../lib/communication/events";
 import { NavigationKey } from "../../../types/input";
-import { NumberComponent } from "../../../lib/ui/elements/number_component";
+import { NumberComponent } from "../../../lib/ui/element/number_component";
 import { Overlays } from "../../../lib/shell";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { Timer } from "../../../lib/core/scheduling/timer";

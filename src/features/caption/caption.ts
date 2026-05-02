@@ -1,7 +1,7 @@
 import * as PostAPI from "../../lib/server/fetch/post_fetcher";
 import * as TagAPI from "../../lib/server/fetch/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
-import { BatchExecutor } from "../../lib/core/concurrency/batch_executor";
+import { CoalescingExecutor } from "../../lib/core/concurrency/coalescing_executor";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import { CAPTION_CSS } from "../../assets/css";
 import { ClickCode } from "../../types/input";
@@ -55,7 +55,7 @@ const tagCategoryDecodings: Record<number, TagCategory> = {
   5: "metadata"
 };
 const database = new Database<TagCategoryMapping>("TagCategories", "tagMappings");
-const databaseWriteScheduler = new BatchExecutor<TagCategoryMapping>(500, 2000, saveTagCategories);
+const databaseWriteScheduler = new CoalescingExecutor<TagCategoryMapping>(500, 2000, saveTagCategories);
 
 let captionWrapper: HTMLElement;
 let caption: HTMLElement;

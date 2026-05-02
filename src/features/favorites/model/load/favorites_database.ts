@@ -1,10 +1,10 @@
 import { Favorite, FavoritesDatabaseRecord } from "../../../../types/favorite";
-import { BatchExecutor } from "../../../../lib/core/concurrency/batch_executor";
+import { CoalescingExecutor } from "../../../../lib/core/concurrency/coalescing_executor";
 import { Database } from "../../../../lib/core/storage/database";
 import { getFavoritesPageId } from "../../../../lib/environment/favorites_metadata";
 
 const database = new Database<FavoritesDatabaseRecord>("Favorites", `user${getFavoritesPageId()}`);
-const updateScheduler = new BatchExecutor(100, 1000, updateFavorites);
+const updateScheduler = new CoalescingExecutor(100, 1000, updateFavorites);
 
 function updateFavorites(favorites: Favorite[]): void {
   database.update(favorites.map(favorite => favorite.databaseRecord));

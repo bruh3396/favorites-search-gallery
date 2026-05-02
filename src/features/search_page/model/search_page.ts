@@ -1,4 +1,4 @@
-import * as ExtensionCache from "../../../lib/extension_cache";
+import * as ExtensionCache from "../../../lib/media/extension_cache";
 import { correctMediaTags, prepareSearchPageThumbs } from "./search_page_thumb_preparer";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { domParser } from "../../../utils/dom/dom_parser";

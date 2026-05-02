@@ -19,7 +19,7 @@ function createNumberTemplate(partial: Partial<NumberElement>): NumberElement {
   };
 }
 
-export function createNumberComponent(partial: Partial<NumberElement>): void {
+export function buildNumberComponent(partial: Partial<NumberElement>): void {
   const template = createNumberTemplate(partial);
   const parent = document.getElementById(template.parentId);
 

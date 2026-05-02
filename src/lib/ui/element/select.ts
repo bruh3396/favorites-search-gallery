@@ -16,7 +16,7 @@ function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T
   };
 }
 
-export function createSelectElement<T extends string>(partial: Partial<SelectElement<T>>): void {
+export function buildSelectElement<T extends string>(partial: Partial<SelectElement<T>>): void {
   const template = createSelectTemplate(partial);
   const parent = document.getElementById(template.parentId);
 

@@ -6,17 +6,23 @@ import { Searchable } from "../../../types/search";
 import { intersection } from "../../../utils/collection/set";
 
 export class SearchEngine<T extends Searchable> {
+  private resolvedQuery: ResolvedSearchQuery<T> = new ResolvedSearchQuery<T>("", []);
+
   constructor(private readonly index: InvertedIndex<T>) { }
 
   public search(searchQuery: SearchQuery<T>, candidates: T[]): T[] {
-    const resolvedQuery = new ResolvedSearchQuery<T>(searchQuery.rawQuery, this.index.getIndexedTerms());
-    return resolvedQuery.isEmpty ? candidates : resolvedQuery.isUnmatchable ? [] : this.findMatchingItems(resolvedQuery, candidates);
+    this.resolvedQuery = this.resolveSearchQuery(searchQuery);
+    return this.resolvedQuery.isEmpty ? candidates : this.resolvedQuery.isUnmatchable ? [] : this.findMatchingItems(candidates);
   }
 
-  private findMatchingItems(resolvedQuery: ResolvedSearchQuery<T>, candidates: T[]): T[] {
-    const exclusions = this.collectItemsWithAnyTag(resolvedQuery.negatedTags);
-    const andMatches = this.findItemsWithAllTags(resolvedQuery.positiveAndTags);
-    const matches = this.findItemsMatchingAllOrGroups(andMatches, resolvedQuery.orGroups);
+  private resolveSearchQuery(searchQuery: SearchQuery<T>): ResolvedSearchQuery<T> {
+    return searchQuery.rawQuery === this.resolvedQuery.rawQuery ? this.resolvedQuery : new ResolvedSearchQuery<T>(searchQuery.rawQuery, this.index.getIndexedTerms());
+  }
+
+  private findMatchingItems(candidates: T[]): T[] {
+    const exclusions = this.collectItemsWithAnyTag(this.resolvedQuery.negatedTags);
+    const andMatches = this.findItemsWithAllTags(this.resolvedQuery.positiveAndTags);
+    const matches = this.findItemsMatchingAllOrGroups(andMatches, this.resolvedQuery.orGroups);
     return matches.size === 0 ? [] : candidates.filter(candidate => matches.has(candidate) && !exclusions.has(candidate));
   }
 
@@ -24,13 +30,7 @@ export class SearchEngine<T extends Searchable> {
     const matches = new Set<T>();
 
     for (const tag of tags) {
-      const items = this.index.getDocsForTerm(tag);
-
-      if (items) {
-        for (const item of items) {
-          matches.add(item);
-        }
-      }
+      this.index.getDocsForTerm(tag)?.forEach(doc => matches.add(doc));
     }
     return matches;
   }

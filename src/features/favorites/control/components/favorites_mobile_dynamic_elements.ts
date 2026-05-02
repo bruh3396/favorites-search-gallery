@@ -7,11 +7,11 @@ import { GALLERY_ENABLED } from "../../../../lib/environment/derived_environment
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/environment";
-import { createButtonElement } from "../../../../lib/ui/elements/button";
-import { createSelectElement } from "../../../../lib/ui/elements/select";
-import { createToggleSwitch } from "../../../../lib/ui/elements/checkbox";
+import { buildButtonElement } from "../../../../lib/ui/element/button";
+import { buildSelectElement } from "../../../../lib/ui/element/select";
+import { createToggleSwitch } from "../../../../lib/ui/element/checkbox";
 import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
+import { prepareDynamicElements } from "../../../../lib/ui/element/element_utils";
 
 const buttons: Partial<ButtonElement>[] = [
   {
@@ -233,7 +233,7 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<numbe
 
 function createButtons(): void {
   for (const button of prepareDynamicElements(buttons)) {
-    createButtonElement(button);
+    buildButtonElement(button);
   }
 }
 
@@ -246,7 +246,7 @@ function createToggleSwitches(): void {
 function createSelects(): void {
   // @ts-expect-error don't care
   for (const select of prepareDynamicElements(selects)) {
-    createSelectElement(select);
+    buildSelectElement(select);
   }
 }
 

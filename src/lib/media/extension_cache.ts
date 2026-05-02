@@ -1,22 +1,22 @@
-import * as PostAPI from "./server/fetch/post_fetcher";
-import { DEFAULT_EXTENSION, extensionRegex } from "./environment/constants";
-import { MediaExtension, MediaExtensionMapping } from "../types/media";
+import * as PostAPI from "../server/fetch/post_fetcher";
+import { DEFAULT_EXTENSION, extensionRegex } from "../environment/constants";
+import { MediaExtension, MediaExtensionMapping } from "../../types/media";
 import { isGif, isVideo } from "./media_resolver";
-import { BatchExecutor } from "./core/concurrency/batch_executor";
-import { Database } from "./core/storage/database";
-import { Favorite } from "../types/favorite";
-import { GeneralSettings } from "../config/general_settings";
-import { ON_FAVORITES_PAGE } from "./environment/environment";
-import { Post } from "../types/post";
-import { PromiseTimeoutError } from "../types/errors";
-import { findMediaExtension } from "./server/fetch/media_extension_finder";
-import { withTimeout } from "./core/scheduling/promise";
+import { CoalescingExecutor } from "../core/concurrency/coalescing_executor";
+import { Database } from "../core/storage/database";
+import { Favorite } from "../../types/favorite";
+import { GeneralSettings } from "../../config/general_settings";
+import { ON_FAVORITES_PAGE } from "../environment/environment";
+import { Post } from "../../types/post";
+import { PromiseTimeoutError } from "../../types/errors";
+import { findMediaExtension } from "../server/fetch/media_extension_finder";
+import { withTimeout } from "../core/scheduling/promise";
 
 const DATABASE_NAME: string = "ImageExtensions";
 const OBJECT_STORE_NAME: string = "extensionMappings";
 const extensionMap: Map<string, MediaExtension> = new Map();
 const database: Database<MediaExtensionMapping> = new Database(DATABASE_NAME, OBJECT_STORE_NAME);
-const writeScheduler: BatchExecutor<MediaExtensionMapping> = new BatchExecutor(100, 2000, database.update.bind(database));
+const writeScheduler: CoalescingExecutor<MediaExtensionMapping> = new CoalescingExecutor(100, 2000, database.update.bind(database));
 
 async function loadExtensions(): Promise<void> {
   for (const mapping of await database.load()) {

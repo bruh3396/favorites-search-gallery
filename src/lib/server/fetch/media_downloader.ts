@@ -1,4 +1,4 @@
-import * as ExtensionCache from "../../extension_cache";
+import * as ExtensionCache from "../../media/extension_cache";
 import { DEFAULT_EXTENSION } from "../../environment/constants";
 import { download } from "../../../utils/browser/download";
 import { resolveMediaURL } from "../url/media_url_resolver";

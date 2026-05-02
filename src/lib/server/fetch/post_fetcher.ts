@@ -1,7 +1,7 @@
 ﻿import { MULTI_POST_SLIM_API_URL, buildServerTestURL } from "../url/api_url_builder";
 import { Post, SlimPost } from "../../../types/post";
 import { generalPageRequestQueue, multiPostLimiter } from "./rate_limiter";
-import { BatchExecutor } from "../../core/concurrency/batch_executor";
+import { CoalescingExecutor } from "../../core/concurrency/coalescing_executor";
 import { USER_ID } from "../../environment/favorites_environment";
 import { buildPostPageURL } from "../url/page_url_builder";
 import { fetchHtml } from "../http/http_client";
@@ -14,7 +14,7 @@ const MULTI_POST_BATCH_SIZE = 50;
 const MULTI_POST_FLUSH_DELAY = 1500;
 
 const pendingPosts = new Map<string, PostResolver>();
-const postBatchExecutor = new BatchExecutor<string>(MULTI_POST_BATCH_SIZE, MULTI_POST_FLUSH_DELAY, flushPostBatch);
+const postBatchExecutor = new CoalescingExecutor<string>(MULTI_POST_BATCH_SIZE, MULTI_POST_FLUSH_DELAY, flushPostBatch);
 
 async function fetchSlimPosts(ids: string[]): Promise<Record<string, SlimPost>> {
   const response = await fetch(MULTI_POST_SLIM_API_URL, {

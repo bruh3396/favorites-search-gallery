@@ -1,4 +1,3 @@
-import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
 import { Favorite } from "../../../../types/favorite";
 import { InvertedIndex } from "../../../../lib/core/data_structures/inverted_index";
 import { SearchEngine } from "../../../../lib/search/engine/search_engine";
@@ -22,7 +21,7 @@ export class FavoriteIndex {
   }
 
   public search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
-    const canUseEngine = this.isReady && !searchQuery.metadata.hasMetadataTag && candidates.length > FAVORITES_PER_PAGE;
+    const canUseEngine = this.isReady && !searchQuery.metadata.hasMetadataTag;
     return canUseEngine ? this.engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
   }
 

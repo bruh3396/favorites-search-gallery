@@ -39,7 +39,7 @@ export function parseExactSearchTag(tag: string): ExactSearchTag {
 
 export function parseWildcardSearchTag(tag: string): WildcardSearchTag {
   const { negated, value } = parseNegation(removeDuplicateAsterisks(tag));
-  return new WildcardSearchTag(value, negated, getMatchType(value), buildWildcardRegex(value), value.slice(0, -1), value.slice(1, -1));
+  return new WildcardSearchTag(value, negated, getMatchType(value), buildWildcardRegex(value));
 }
 
 export function parseMetadataSearchTag(tag: string): MetadataSearchTag {

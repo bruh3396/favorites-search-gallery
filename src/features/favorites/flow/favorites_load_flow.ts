@@ -17,21 +17,20 @@ export async function loadAllFavorites(): Promise<void> {
   Events.favorites.favoritesLoaded.emit();
 }
 
-async function handleExistingFavorites(): Promise<void> {
+function loadDatabaseFavorites(): Promise<void> {
+  FavoritesView.setStatus("Loading favorites");
+  return FavoritesModel.loadDatabaseFavorites();
+}
+
+function handleExistingFavorites(): Promise<void> {
   FavoritesModel.onDatabaseWritten();
   Events.favorites.favoritesLoadedFromDatabase.emit();
   showLoadedFavorites();
-  await loadNewFavorites();
+  return loadNewFavorites();
 }
 
-async function fetchFavorites(): Promise<void> {
-  await fetchAllFavorites();
-  await saveAllFavorites();
-}
-
-async function loadDatabaseFavorites(): Promise<void> {
-  FavoritesView.setStatus("Loading favorites");
-  await FavoritesModel.loadDatabaseFavorites();
+function fetchFavorites(): Promise<void> {
+  return fetchAllFavorites().then(saveAllFavorites);
 }
 
 async function fetchAllFavorites(): Promise<void> {

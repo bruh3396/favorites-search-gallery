@@ -6,7 +6,7 @@ import { Storage } from "../../../../../lib/core/storage/storage_instance";
 import { VideoClip } from "../../../type/gallery_types";
 import { convertPreviewURLToImageURL } from "../../../../../lib/server/url/media_url_transformer";
 import { getPreviewURL } from "../../../../../lib/ui/dom";
-import { isVideo } from "../../../../../lib/media_resolver";
+import { isVideo } from "../../../../../lib/media/media_resolver";
 
 const videoPlayers: HTMLVideoElement[] = [];
 const videoClips = new Map();

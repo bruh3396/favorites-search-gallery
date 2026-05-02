@@ -1,6 +1,6 @@
 import { convertPreviewURLToImageURL, removeIdFromImageURL } from "./media_url_transformer";
 import { Favorite } from "../../../types/favorite";
-import { getExtension } from "../../extension_cache";
+import { getExtension } from "../../media/extension_cache";
 import { getPreviewURL } from "../../ui/dom";
 import { getTagSetFromItem } from "../../dom/tags";
 

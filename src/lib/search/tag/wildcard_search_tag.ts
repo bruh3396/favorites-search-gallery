@@ -9,13 +9,13 @@ export class WildcardSearchTag extends AbstractSearchTag {
   private readonly prefix: string;
   private readonly substring: string;
 
-  constructor(value: string, negated: boolean, matchType: WildcardMatchType, regex: RegExp, prefix: string, substring: string) {
+  constructor(value: string, negated: boolean, matchType: WildcardMatchType, regex: RegExp) {
     super(value, negated);
     this.baseCost = matchType;
     this.matchType = matchType;
     this.regex = regex;
-    this.prefix = prefix;
-    this.substring = substring;
+    this.prefix = value.slice(0, -1);
+    this.substring = value.slice(1, -1);
     this.optimize();
   }
 

@@ -7,7 +7,7 @@ import { ClickCode } from "../../../types/input";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
 import { Post } from "../../../types/post";
 import { removeNonNumericCharacters } from "../../../utils/string/format";
-import { resolveMediaType } from "../../../lib/media_resolver";
+import { resolveMediaType } from "../../../lib/media/media_resolver";
 
 function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
   const image = getImageFromThumb(thumb);

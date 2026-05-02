@@ -3,7 +3,7 @@ import { MediaType } from "../../../types/media";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { getPreviewURL } from "../../../lib/ui/dom";
 import { getTagSetFromItem } from "../../../lib/dom/tags";
-import { resolveMediaType } from "../../../lib/media_resolver";
+import { resolveMediaType } from "../../../lib/media/media_resolver";
 
 const imageBitmapCloseQueue = new ThrottledQueue(50);
 

@@ -8,7 +8,7 @@ import { SharedGallerySettings } from "../../../../../../config/gallery_shared_s
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { fetchBitmap } from "../controller/gallery_image_fetcher";
 import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
-import { isImage } from "../../../../../../lib/media_resolver";
+import { isImage } from "../../../../../../lib/media/media_resolver";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 import { transferredCanvasIds } from "../../../../type/gallery_offscreen_upscale_request";
 

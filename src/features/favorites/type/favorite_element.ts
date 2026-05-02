@@ -9,7 +9,7 @@ import { ITEM_CLASS_NAME } from "../../../lib/dom/thumb";
 import { Post } from "../../../types/post";
 import { buildPostPageURL } from "../../../lib/server/url/page_url_builder";
 import { downloadFromThumb } from "../../../lib/server/fetch/media_downloader";
-import { resolveMediaType } from "../../../lib/media_resolver";
+import { resolveMediaType } from "../../../lib/media/media_resolver";
 
 let template: HTMLElement;
 

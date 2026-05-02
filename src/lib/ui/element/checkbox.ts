@@ -17,7 +17,7 @@ function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElem
   };
 }
 
-export function createCheckboxElement(partial: Partial<CheckboxElement>): void {
+export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
   const template = createCheckboxTemplate(partial);
   const parent = document.getElementById(template.parentId);
 
@@ -86,7 +86,7 @@ export function createToggleSwitch(partial: Partial<CheckboxElement>): void {
   parent.insertAdjacentHTML(template.position, switchHtml);
   template.position = "afterbegin";
   template.parentId = toggleSwitchId;
-  createCheckboxElement(template);
+  buildCheckboxElement(template);
   const checkbox = document.getElementById(template.id);
 
   if (checkbox !== null) {
@@ -96,7 +96,7 @@ export function createToggleSwitch(partial: Partial<CheckboxElement>): void {
   }
 }
 
-export function createCheckboxOption(partial: Partial<CheckboxElement>): void {
+export function buildCheckboxOption(partial: Partial<CheckboxElement>): void {
   const parent = document.getElementById(partial.parentId || "not-an-id");
 
   if (parent === null) {
@@ -125,5 +125,5 @@ export function createCheckboxOption(partial: Partial<CheckboxElement>): void {
   parent.insertAdjacentElement(partial.position ?? "afterbegin", container);
 
   partial.parentId = labelId;
-  createCheckboxElement(partial);
+  buildCheckboxElement(partial);
 }

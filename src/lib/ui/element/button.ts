@@ -13,7 +13,7 @@ function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {
   };
 }
 
-export function createButtonElement(partial: Partial<ButtonElement>): void {
+export function buildButtonElement(partial: Partial<ButtonElement>): void {
   const template = createButtonTemplate(partial);
   const parent = document.getElementById(template.parentId);
 
