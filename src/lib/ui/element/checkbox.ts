@@ -69,7 +69,7 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
   });
 }
 
-export function createToggleSwitch(partial: Partial<CheckboxElement>): void {
+export function buildToggleSwitch(partial: Partial<CheckboxElement>): void {
   const template = createCheckboxTemplate(partial);
   const parent = document.getElementById(template.parentId);
 

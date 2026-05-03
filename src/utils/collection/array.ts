@@ -86,3 +86,7 @@ export function splitIntoChunks<V>(array: V[], chunkSize: number): V[][] {
   }
   return result;
 }
+
+export function randomElement<V>(array: V[] | string): V | string {
+  return array[randomInt(array.length)];
+}

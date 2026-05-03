@@ -10,6 +10,6 @@ export function reloadWindow(): void {
   window.location.reload();
 }
 
-export function setTitle(title: string): void {
+export function setSiteTitle(title: string): void {
   document.title = title;
 }

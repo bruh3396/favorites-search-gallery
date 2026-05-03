@@ -9,7 +9,6 @@ import { StickyEmitter } from "../core/scheduling/sticky_emitter";
 export const Events = {
   favorites: {
     searchStarted: new Emitter<string>(),
-    searchBoxUpdated: new Emitter<void>(),
     pageChanged: new Emitter<void>(),
     pageSelected: new Emitter<number>(),
     relativePageSelected: new Emitter<FavoritesPageRelation>(),

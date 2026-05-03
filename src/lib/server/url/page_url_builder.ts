@@ -1,10 +1,10 @@
+import { FAVORITES_PAGE_ID } from "../../environment/favorites_metadata";
 import { ORIGIN } from "./origin";
 import { POSTS_PER_SEARCH_PAGE } from "../../environment/constants";
-import { getFavoritesPageId } from "../../environment/favorites_metadata";
 
 const POST_PAGE_URL = `${ORIGIN}/index.php?page=post&s=view&id=`;
 const SEARCH_PAGE_URL = `${ORIGIN}/index.php?page=post&s=list&tags=`;
-const FAVORITES_PAGE_URL = `${ORIGIN}/index.php?page=favorites&s=view&id=${getFavoritesPageId()}`;
+const FAVORITES_PAGE_URL = `${ORIGIN}/index.php?page=favorites&s=view&id=${FAVORITES_PAGE_ID}`;
 const PROFILE_PAGE_URL = `${ORIGIN}/index.php?page=account&s=profile&id=`;
 
 export function buildPostPageURL(id: string): string {

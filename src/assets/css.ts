@@ -1040,7 +1040,7 @@ export const SKELETON_CSS = `
 export const TILE_CSS = `
   .row,
   .column,
-  .column .actual-column,
+  .column .tiled-column,
   .square,
   .grid {
     gap: 6px;
@@ -1129,7 +1129,7 @@ export const TILE_CSS = `
     display: grid;
     grid-template-columns: repeat(10, 1fr);
 
-    .actual-column {
+    .tiled-column {
       display: flex;
       flex-direction: column;
       flex: 0 0 25%;
@@ -1156,4 +1156,49 @@ export const TILE_CSS = `
       aspect-ratio: 1;
     }
   }
+`;
+export const TOOLTIP_CSS = `
+#tooltip {
+  max-width: 750px;
+  border: 1px solid black;
+  padding: 0.25em;
+  position: absolute;
+  box-sizing: border-box;
+  z-index: 25;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s, opacity 0.25s linear;
+  font-size: 1.05em;
+}
+
+#tooltip.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* .favorite {
+      overflow: unset !important;
+    } */
+
+.favorite::after {
+  /* opacity: 0; */
+  transition: visibility 0s, opacity 0.25s linear;
+  content: attr(data-tooltip);
+  position: absolute;
+  font-size: 12px;
+  z-index: 1000;
+  background: gray;
+  padding: 5px;
+  color: white;
+  left: 0;
+  top: 100%;
+  min-width: 500px;
+  pointer-events: none;
+
+}
+
+.favorite.tooltip::after {
+  opacity: 1;
+}
 `;

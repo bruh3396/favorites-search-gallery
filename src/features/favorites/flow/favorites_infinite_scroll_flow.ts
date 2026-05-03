@@ -31,9 +31,9 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     }
   }
 
-  public revealFavorite(): void { }
+  public reveal(): void { }
 
-  public loadNewFavoritesInGallery(): boolean {
+  public presentWhileNavigatingGallery(): boolean {
     if (!FavoritesView.hasMoreResults(FavoritesModel.getLatestSearchResults())) {
       return false;
     }

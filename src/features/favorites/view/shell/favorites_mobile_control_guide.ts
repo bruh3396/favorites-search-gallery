@@ -3,7 +3,7 @@ import { Overlays } from "../../../../lib/shell";
 import { insertHtmlWithStyles } from "../../../../utils/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
-export async function createControlsGuide(): Promise<void> {
+export async function buildControlsGuide(): Promise<void> {
   insertHtmlWithStyles(Overlays, "beforeend", CONTROLS_HTML);
   const controlGuide = document.getElementById("controls-guide");
 

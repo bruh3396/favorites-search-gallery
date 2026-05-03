@@ -1,11 +1,10 @@
 ﻿import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "../../types/ui";
 import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
-import { Events } from "../../lib/communication/events";
 import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../favorites/model/tags/favorites_custom_tags";
 import { fetchHtml } from "../../lib/server/http/http_client";
-import { getQueryWithTagReplaced } from "./autocomplete_tag_replacer";
+import { replaceTagInText } from "./autocomplete_tag_replacer";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../lib/ui/awesomplete";
 import { isEmptyString } from "../../utils/string/query";
@@ -65,7 +64,7 @@ function getCurrentTagWithHyphen(input: HTMLInputElement | HTMLTextAreaElement):
 }
 
 function insertSuggestion(input: HTMLInputElement | HTMLTextAreaElement, suggestion: string): void {
-  const result = getQueryWithTagReplaced(input.value, input.selectionStart ?? -1, suggestion);
+  const result = replaceTagInText(input.value, input.selectionStart ?? -1, suggestion);
 
   input.value = result.result;
   input.selectionStart = result.selectionStart;
@@ -90,7 +89,7 @@ function createAwesompleteInstance(input: HTMLTextAreaElement | HTMLInputElement
     },
     replace: (suggestion: AwesompleteSuggestion): void => {
       insertSuggestion(awesomplete.input, decodeEntities(suggestion.value));
-      Events.favorites.searchBoxUpdated.emit();
+      awesomplete.input.dispatchEvent(new Event("input"));
     }
   });
   return awesomplete;

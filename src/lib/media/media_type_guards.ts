@@ -1,8 +1,8 @@
 import { Favorite } from "../../types/favorite";
 import { MediaType } from "../../types/media";
-import { convertToTagSet } from "../../utils/string/tags";
 import { getImageFromThumb } from "../dom/thumb";
 import { getTagSetFromItem } from "../dom/tags";
+import { resolveMediaType } from "./media_type_resolver";
 
 export const isVideo = (item: HTMLElement | Favorite): boolean => isMediaType(item, "video");
 export const isGif = (item: HTMLElement | Favorite): boolean => isMediaType(item, "gif");
@@ -18,13 +18,4 @@ function isThumbMediaType(thumb: HTMLElement, mediaType: MediaType): boolean {
 
 function isMediaType(item: HTMLElement | Favorite, mediaType: MediaType): boolean {
   return (item instanceof HTMLElement) ? isThumbMediaType(item, mediaType) : isFavoriteMediaType(item, mediaType);
-}
-
-export function resolveMediaType(tags: string | Set<string>): MediaType {
-  const tagSet = typeof tags === "string" ? convertToTagSet(tags) : tags;
-
-  if (tagSet.has("video") || tagSet.has("mp4")) {
-    return "video";
-  }
-  return (tagSet.has("gif") || tagSet.has("animated")) ? "gif" : "image";
 }

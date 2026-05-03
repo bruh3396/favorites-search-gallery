@@ -557,7 +557,11 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/lib/core/data_structures/sorted_array.ts", "src/features/favorites/type/favorite_item.ts"],
+    files: [
+      "src/lib/core/data_structures/sorted_array.ts",
+      "src/features/favorites/type/favorite_item.ts",
+      "src/features/favorites/control/components/favorites_rating_filter.ts"
+    ],
     rules: {
       "no-bitwise": "off"
     }

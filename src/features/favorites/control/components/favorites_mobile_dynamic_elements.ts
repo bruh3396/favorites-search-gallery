@@ -6,10 +6,10 @@ import { Events } from "../../../../lib/communication/events";
 import { GALLERY_ENABLED } from "../../../../lib/environment/derived_environment";
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/environment";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
 import { buildButtonElement } from "../../../../lib/ui/element/button";
 import { buildSelectElement } from "../../../../lib/ui/element/select";
-import { createToggleSwitch } from "../../../../lib/ui/element/checkbox";
+import { buildToggleSwitch } from "../../../../lib/ui/element/checkbox";
 import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
 import { prepareDynamicElements } from "../../../../lib/ui/element/element_utils";
 
@@ -174,7 +174,6 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<numbe
       ["row", "River"],
       ["square", "Square"],
       ["grid", "Legacy"]
-      // ["native", "Native"]
     ])
   },
   {
@@ -231,27 +230,9 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<numbe
   }
 ];
 
-function createButtons(): void {
-  for (const button of prepareDynamicElements(buttons)) {
-    buildButtonElement(button);
-  }
-}
-
-function createToggleSwitches(): void {
-  for (const checkbox of prepareDynamicElements(toggleSwitches)) {
-    createToggleSwitch(checkbox);
-  }
-}
-
-function createSelects(): void {
+export function buildFavoritesMobileMenuElements(): void {
+  prepareDynamicElements(buttons).forEach(buildButtonElement);
+  prepareDynamicElements(toggleSwitches).forEach(buildToggleSwitch);
   // @ts-expect-error don't care
-  for (const select of prepareDynamicElements(selects)) {
-    buildSelectElement(select);
-  }
-}
-
-export function createFavoritesMobileMenuElements(): void {
-  createSelects();
-  createToggleSwitches();
-  createButtons();
+  prepareDynamicElements(selects).forEach(buildSelectElement);
 }

@@ -1,7 +1,7 @@
 import * as PostAPI from "../server/fetch/post_fetcher";
 import { DEFAULT_EXTENSION, extensionRegex } from "../environment/constants";
 import { MediaExtension, MediaExtensionMapping } from "../../types/media";
-import { isGif, isVideo } from "./media_resolver";
+import { isGif, isVideo } from "./media_type_guards";
 import { CoalescingExecutor } from "../core/concurrency/coalescing_executor";
 import { Database } from "../core/storage/database";
 import { Favorite } from "../../types/favorite";

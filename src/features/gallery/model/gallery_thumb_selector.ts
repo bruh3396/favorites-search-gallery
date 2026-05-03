@@ -1,5 +1,5 @@
 import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/collection/array";
-import { isImage, isVideo } from "../../../lib/media/media_resolver";
+import { isImage, isVideo } from "../../../lib/media/media_type_guards";
 import { Favorite } from "../../../types/favorite";
 import { FeatureBridge } from "../../../lib/communication/feature_bridge";
 import { GalleryBoundary } from "../type/gallery_types";

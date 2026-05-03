@@ -94,7 +94,7 @@ function setGalleryBackgroundColor(color: string): void {
 function setupTilerStyles(): void {
 
   const style = `
-  .row, .column, .column .actual-column, .square, .grid {
+  .row, .column, .column .tiled-column, .square, .grid {
     gap: ${GeneralSettings.thumbnailSpacing}px !important;
   }
 

@@ -1,4 +1,3 @@
-// import * as GalleryModel from "../../../model/gallery_model";
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryThumbObserver from "../control/gallery_visible_thumb_observer";
 import * as GalleryView from "../view/gallery_view";

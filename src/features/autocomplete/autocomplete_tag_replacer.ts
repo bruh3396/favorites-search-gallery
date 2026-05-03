@@ -34,10 +34,7 @@ export function getTagBoundary(text: string, selectionStart: number): { start: n
   if (selectionStart < 0 || selectionStart > text.length || text.length === 0) {
     return defaultBoundaries;
   }
-  return {
-    start: getLeftTagBoundary(selectionStart, text),
-    end: getRightTagBoundary(selectionStart, text)
-  };
+  return {start: getLeftTagBoundary(selectionStart, text), end: getRightTagBoundary(selectionStart, text)};
 }
 
 export function replaceTag(text: string, selectionStart: number, replacement: string): string {
@@ -50,7 +47,7 @@ export function replaceTag(text: string, selectionStart: number, replacement: st
   return `${firstHalf}${replacement}${secondHalf}`;
 }
 
-export function getQueryWithTagReplaced(text: string, selectionStart: number, replacement: string): { result: string, selectionStart: number } {
+export function replaceTagInText(text: string, selectionStart: number, replacement: string): { result: string, selectionStart: number } {
   if (selectionStart < 0 || selectionStart > text.length) {
     return { result: text, selectionStart };
   }
@@ -58,8 +55,5 @@ export function getQueryWithTagReplaced(text: string, selectionStart: number, re
   const firstHalf = text.slice(0, start);
   const secondHalf = text.slice(end, text.length);
   const result = `${firstHalf}${replacement}${secondHalf}`;
-  return {
-    result,
-    selectionStart: firstHalf.length + replacement.length
-  };
+  return {result, selectionStart: firstHalf.length + replacement.length};
 }

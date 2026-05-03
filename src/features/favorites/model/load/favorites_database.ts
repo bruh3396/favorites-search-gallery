@@ -1,9 +1,9 @@
 import { Favorite, FavoritesDatabaseRecord } from "../../../../types/favorite";
 import { CoalescingExecutor } from "../../../../lib/core/concurrency/coalescing_executor";
 import { Database } from "../../../../lib/core/storage/database";
-import { getFavoritesPageId } from "../../../../lib/environment/favorites_metadata";
+import { FAVORITES_PAGE_ID } from "../../../../lib/environment/favorites_metadata";
 
-const database = new Database<FavoritesDatabaseRecord>("Favorites", `user${getFavoritesPageId()}`);
+const database = new Database<FavoritesDatabaseRecord>("Favorites", `user${FAVORITES_PAGE_ID}`);
 const updateScheduler = new CoalescingExecutor(100, 1000, updateFavorites);
 
 function updateFavorites(favorites: Favorite[]): void {

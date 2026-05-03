@@ -4,7 +4,7 @@ import { removeNonNumericCharacters } from "../../utils/string/format";
 export const ITEM_CLASS_NAME = "favorite";
 export const ITEM_SELECTOR = ".favorite, .thumb";
 export const IMAGE_SELECTOR = ".favorite img";
-export const COLUMN_CLASS_NAME = "actual-column";
+export const COLUMN_CLASS_NAME = "tiled-column";
 
 function getClosestThumb(element: HTMLElement): HTMLElement | null {
   return element.closest(ITEM_SELECTOR);

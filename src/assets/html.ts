@@ -2510,6 +2510,50 @@ export const TAG_MODIFIER_HTML = `
   </div>
 </div>
 `;
+export const TOOLBAR_HTML = `
+<div id="mobile-toolbar-row" class="light-green-gradient">
+  <div class="search-bar-container light-green-gradient">
+    <div class="search-bar-items">
+      <div>
+        <div class="circle-icon-container">
+          <svg class="search-icon" id="search-button" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+            <path
+              d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+          </svg>
+        </div>
+      </div>
+      <div class="search-bar-input-container">
+        <input type="text" id="favorites-search-box" class="search-bar-input" needs-autocomplete
+          placeholder="Search Favorites">
+      </div>
+      <div class="toolbar-button search-clear-container">
+        <div class="circle-icon-container">
+          <svg id="clear-button" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+            <path
+              d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+          </svg>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="options-checkbox" data-action="toggleOptions">
+        <label for="options-checkbox" class="mobile-toolbar-checkbox-label">
+          <svg id="options-menu-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+            <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+          </svg>
+        </label>
+      </div>
+      <div>
+        <div id="reset-button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+            <path
+              d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-84 31.5-156.5T197-763l56 56q-44 44-68.5 102T160-480q0 134 93 227t227 93q134 0 227-93t93-227q0-67-24.5-125T707-707l56-56q54 54 85.5 126.5T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm-40-360v-440h80v440h-80Z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
 export const TOOLTIP_HTML = `
 <div id="tooltip-container">
   <style>

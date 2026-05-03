@@ -16,7 +16,7 @@ const explicit = createRatingElement("explicit");
 const questionable = createRatingElement("questionable");
 const safe = createRatingElement("safe");
 
-export function insertFavoritesRatingFilter(): void {
+export function setupFavoritesRatingFilter(): void {
   if (ON_MOBILE_DEVICE) {
     return;
   }
@@ -79,29 +79,20 @@ function getCurrentRating(): Rating {
 }
 
 function changeWhichRatingsAreSelected(rating: Rating): void {
-  // eslint-disable-next-line no-bitwise
   explicit.input.checked = (rating & 4) === 4;
-  // eslint-disable-next-line no-bitwise
   questionable.input.checked = (rating & 2) === 2;
-  // eslint-disable-next-line no-bitwise
   safe.input.checked = (rating & 1) === 1;
   preventAllRatingsFromBeingUnselected();
 }
 
 function preventAllRatingsFromBeingUnselected(): void {
   switch (getCurrentRating()) {
-    case 4:
-      explicit.label.style.pointerEvents = "none";
+    case 4: explicit.label.style.pointerEvents = "none";
       break;
-
-    case 2:
-      questionable.label.style.pointerEvents = "none";
+    case 2: questionable.label.style.pointerEvents = "none";
       break;
-
-    case 1:
-      safe.label.style.pointerEvents = "none";
+    case 1: safe.label.style.pointerEvents = "none";
       break;
-
     default:
       for (const element of [explicit, questionable, safe]) {
         element.label.removeAttribute("style");

@@ -26,8 +26,8 @@ export const emptyFavoritesPageParameters = {
 export interface FavoritesPresentationFlow {
   present: (results: Favorite[]) => void;
   onLayoutChanged: (layout: LayoutMode) => void;
-  revealFavorite: (id: string) => void;
+  reveal: (id: string) => void;
   reset: () => void;
   handleNewSearchResults: () => void;
-  loadNewFavoritesInGallery: (direction: NavigationKey) => boolean;
+  presentWhileNavigatingGallery: (direction: NavigationKey) => boolean;
 }

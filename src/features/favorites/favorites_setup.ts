@@ -29,7 +29,7 @@ function addEventListeners(): void {
   Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.gotoRelativePage);
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
-  Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.revealFavorite);
+  Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.reveal);
   Events.favorites.findFavoriteInAllStarted.on(FavoritesSearchFlow.revealFavoriteInAll);
 
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
@@ -40,6 +40,7 @@ function addEventListeners(): void {
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.researchFavorites);
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.setResultsPerPage);
 
+  Events.favorites.resetButtonClicked.on(FavoritesView.tryResetting);
   Events.favorites.resetConfirmed.on(FavoritesResetFlow.resetFavorites);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
 
@@ -47,7 +48,7 @@ function addEventListeners(): void {
   Events.gallery.favoriteToggled.on(FavoritesGalleryFlow.swapFavoriteButton);
   Events.tagModifier.resetConfirmed.on(FavoritesModel.resetTagModifications);
 
-  FeatureBridge.moreFavoritesPagesExist.register(FavoritesPresentationFlow.loadNewFavoritesInGallery);
+  FeatureBridge.moreFavoritesPagesExist.register(FavoritesPresentationFlow.presentWhileNavigatingGallery);
   FeatureBridge.favoritesSearchResults.register(FavoritesModel.getLatestSearchResults);
   FeatureBridge.allFavorites.register(FavoritesModel.getFavorite);
   FeatureBridge.setCustomTags.register(FavoritesModel.setCustomTags);

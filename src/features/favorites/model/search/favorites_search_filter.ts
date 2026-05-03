@@ -1,19 +1,18 @@
-﻿import { ALL_RATINGS_VALUE } from "../../../../lib/environment/constants";
+﻿import { BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
+import { ALL_RATINGS_VALUE } from "../../../../lib/environment/constants";
 import { Favorite } from "../../../../types/favorite";
 import { FavoritesSearchEngine } from "./favorites_search_engine";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/environment";
-import { getTagBlacklist } from "../../../../lib/environment/favorites_metadata";
 import { negateTags } from "../../../../utils/string/format";
 
-const NEGATED_TAG_BLACKLIST = negateTags(getTagBlacklist());
-const blacklistSearchQuery = new SearchQuery<Favorite>(NEGATED_TAG_BLACKLIST);
+const NEGATED_BLACKLISTED_TAGS = negateTags(BLACKLISTED_TAGS);
+const blacklistSearchQuery = new SearchQuery<Favorite>(NEGATED_BLACKLISTED_TAGS);
 let currentSearchQuery = "";
 
 const shouldUseBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.excludeBlacklist.value;
 const areAllRatingsAllowed = (): boolean => Preferences.allowedRatings.value === ALL_RATINGS_VALUE;
-const finalSearchQuery = (): string => (shouldUseBlacklist() ? `${currentSearchQuery} ${NEGATED_TAG_BLACKLIST}` : currentSearchQuery);
+const finalSearchQuery = (): string => (shouldUseBlacklist() ? `${currentSearchQuery} ${NEGATED_BLACKLISTED_TAGS}` : currentSearchQuery);
 const createSearchQuery = (): SearchQuery<Favorite> => new SearchQuery(finalSearchQuery());
 
 let searchQuery: SearchQuery<Favorite> = createSearchQuery();

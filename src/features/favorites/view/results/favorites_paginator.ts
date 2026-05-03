@@ -57,17 +57,7 @@ export function gotoAdjacentPage(direction: NavigationKey): boolean {
   if (onlyOnePage()) {
     return false;
   }
-  const forward = isForwardNavigationKey(direction);
-
-  if (forward && onFinalPage()) {
-    gotoFirstPage();
-  } else if (forward) {
-    gotoPage(currentPageNumber + 1);
-  } else if (onFirstPage()) {
-    gotoLastPage();
-  } else {
-    gotoPage(currentPageNumber - 1);
-  }
+  gotoPage((currentPageNumber + (isForwardNavigationKey(direction) ? 1 : -1) + countPages()) % countPages());
   return true;
 }
 
@@ -76,13 +66,21 @@ export function gotoRelativePage(relation: FavoritesPageRelation): boolean {
     return false;
   }
 
+  if (((relation === "first") && onFirstPage()) || ((relation === "final") && onFinalPage())) {
+    return false;
+  }
   switch (relation) {
-    case "previous": return !onFirstPage() && (gotoPage(currentPageNumber - 1), true);
-    case "first": return !onFirstPage() && (gotoFirstPage(), true);
-    case "next": return !onFinalPage() && (gotoPage(currentPageNumber + 1), true);
-    case "final": return !onFinalPage() && (gotoLastPage(), true);
+    case "previous": gotoPage((currentPageNumber - 1 + countPages()) % countPages());
+      break;
+    case "first": gotoFirstPage();
+      break;
+    case "next": gotoPage((currentPageNumber + 1) % countPages());
+      break;
+    case "final": gotoLastPage();
+      break;
     default: return false;
   }
+  return true;
 }
 
 export function gotoPageWithFavorite(id: string): boolean {

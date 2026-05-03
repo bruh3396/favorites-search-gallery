@@ -5,7 +5,12 @@ export function fetchImageBitmap(url: string, abortController?: AbortController)
   return fetch(url, { signal: abortController?.signal })
     .then((response) => response.blob())
     .then((blob) => createImageBitmap(blob))
-    .catch(() => fetchWimgImageBitmap(url));
+    .catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw error;
+      }
+      return fetchWimgImageBitmap(url);
+    });
 }
 
 async function fetchWimgImageBitmap(url: string): Promise<ImageBitmap> {

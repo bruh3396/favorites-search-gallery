@@ -6,7 +6,7 @@ import { Storage } from "../../../../../lib/core/storage/storage_instance";
 import { VideoClip } from "../../../type/gallery_types";
 import { convertPreviewURLToImageURL } from "../../../../../lib/server/url/media_url_transformer";
 import { getPreviewURL } from "../../../../../lib/ui/dom";
-import { isVideo } from "../../../../../lib/media/media_resolver";
+import { isVideo } from "../../../../../lib/media/media_type_guards";
 
 const videoPlayers: HTMLVideoElement[] = [];
 const videoClips = new Map();
@@ -258,9 +258,6 @@ export function preloadVideoPlayers(thumbs: HTMLElement[]): void {
   const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
 
   for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
-    // await sleep(10);
-    // await waitForVideoToLoad(getActiveVideoPlayer());
-    // await sleep(10);
     setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
     pauseVideo(freeInactiveVideoPlayers[i]);
   }

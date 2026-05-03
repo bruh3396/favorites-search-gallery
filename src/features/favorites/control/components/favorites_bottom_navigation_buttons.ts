@@ -5,7 +5,7 @@ import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { insertStyle } from "../../../../utils/dom/injector";
 import { yieldControl } from "../../../../lib/core/scheduling/promise";
 
-export async function insertFavoritesBottomNavigationButtons(): Promise<void> {
+export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesSettings.bottomNavigationButtonsEnabled) {
     return;
   }
@@ -16,13 +16,10 @@ export async function insertFavoritesBottomNavigationButtons(): Promise<void> {
   container.id = "favorites-bottom-navigation-buttons";
   previousButton.id = "favorites-bottom-previous-button";
   nextButton.id = "favorites-bottom-next-button";
-
   previousButton.disabled = true;
   nextButton.disabled = true;
-
   previousButton.textContent = "Previous";
   nextButton.textContent = "Next";
-
   previousButton.title = "Next page";
   nextButton.title = "Previous page";
 

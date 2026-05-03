@@ -1,5 +1,5 @@
 import * as ExtensionCache from "../../lib/media/extension_cache";
-import { isGif, isVideo } from "../../lib/media/media_resolver";
+import { isGif, isVideo } from "../../lib/media/media_type_guards";
 import { Favorite } from "../../types/favorite";
 import { resolveMediaURL } from "../../lib/server/url/media_url_resolver";
 

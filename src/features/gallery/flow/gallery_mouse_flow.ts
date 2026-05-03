@@ -23,10 +23,10 @@ function onMouseOverWhileHoverEnabled(thumb: HTMLElement | null): void {
 }
 
 function onMouseOverWhileIdle(thumb: HTMLElement | null): void {
-  if (thumb === null || !ON_FAVORITES_PAGE) {
-    return;
-  }
-  GalleryPreloadFlow.preloadContentOutsideGalleryAround(thumb);
+  // if (thumb === null || !ON_FAVORITES_PAGE) {
+  //   return;
+  // }
+  // GalleryPreloadFlow.preloadContentOutsideGalleryAround(thumb);
 }
 
 function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {

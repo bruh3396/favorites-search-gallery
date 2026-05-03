@@ -1,15 +1,15 @@
-export function drawScaledCanvas(context: CanvasRenderingContext2D | null, imageBitmap: ImageBitmap): void {
+export function drawScaledCanvas(context: CanvasRenderingContext2D | null, bitmap: ImageBitmap): void {
   if (context === null) {
     return;
   }
   const canvas = context.canvas;
-  const ratio = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
-  const centerShiftX = (canvas.width - (imageBitmap.width * ratio)) / 2;
-  const centerShiftY = (canvas.height - (imageBitmap.height * ratio)) / 2;
+  const ratio = Math.min(canvas.width / bitmap.width, canvas.height / bitmap.height);
+  const centerShiftX = (canvas.width - (bitmap.width * ratio)) / 2;
+  const centerShiftY = (canvas.height - (bitmap.height * ratio)) / 2;
 
   context.drawImage(
-    imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height,
-    centerShiftX, centerShiftY, imageBitmap.width * ratio, imageBitmap.height * ratio
+    bitmap, 0, 0, bitmap.width, bitmap.height,
+    centerShiftX, centerShiftY, bitmap.width * ratio, bitmap.height * ratio
   );
 }
 

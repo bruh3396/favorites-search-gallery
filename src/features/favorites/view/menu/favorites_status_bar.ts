@@ -1,9 +1,9 @@
 import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
+import { FAVORITES_PAGE_ID } from "../../../../lib/environment/favorites_metadata";
 import { NewFavorites } from "../../type/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Root } from "../../../../lib/shell";
 import { Timeout } from "../../../../types/async";
-import { getFavoritesPageId } from "../../../../lib/environment/favorites_metadata";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
@@ -52,7 +52,7 @@ export function notifyNewFavoritesFound(newFavorites: NewFavorites): void {
 }
 
 async function setExpectedTotalFavoritesCount(): Promise<void> {
-  expectedTotalFavoritesCount = await FavoritesAPI.fetchFavoritesCount(getFavoritesPageId() ?? "");
+  expectedTotalFavoritesCount = await FavoritesAPI.fetchFavoritesCount(FAVORITES_PAGE_ID ?? "");
 }
 
 export function setupFavoritesStatus(): void {

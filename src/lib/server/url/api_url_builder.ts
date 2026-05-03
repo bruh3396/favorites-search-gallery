@@ -1,4 +1,4 @@
-import { getUserId } from "../../environment/favorites_metadata";
+import { USER_ID } from "../../environment/favorites_metadata";
 
 export const USE_PRIVATE_API = true;
 
@@ -8,7 +8,7 @@ const PUBLIC_API_POST_URL = `${PUBLIC_API_BASE_URL}&s=post&q=index&id=`;
 const PUBLIC_API_TAG_URL = `${PUBLIC_API_BASE_URL}&s=tag&q=index&name=`;
 
 const PRIVATE_SERVER_ORIGIN = "https://favorites-search-gallery-api.onrender.com";
-const PRIVATE_API_BASE_URL = `${PRIVATE_SERVER_ORIGIN}/?userId=${getUserId()}`;
+const PRIVATE_API_BASE_URL = `${PRIVATE_SERVER_ORIGIN}/?userId=${USER_ID}`;
 const PRIVATE_API_TAG_URL = `${PRIVATE_API_BASE_URL}&type=tag&name=`;
 const PRIVATE_API_POST_URL = `${PRIVATE_API_BASE_URL}&type=post&id=`;
 

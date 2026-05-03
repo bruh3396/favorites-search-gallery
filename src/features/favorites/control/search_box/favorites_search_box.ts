@@ -1,97 +1,13 @@
-import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "../../../../lib/ui/awesomplete";
-import { EnhancedMouseEvent } from "../../../../lib/dom/input_types";
-import { Events } from "../../../../lib/communication/events";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { SearchHistory } from "./favorites_search_history";
-import { createDesktopSearchBar } from "./favorites_desktop_search_box";
-import { createMobileSearchBar } from "./favorites_mobile_search_box";
-import { debounceLeading } from "../../../../lib/core/scheduling/rate_limiting";
-import { openSearchPage } from "../../../../lib/navigator";
+import { FavoritesDesktopSearchBox } from "./favorites_desktop_search_box";
+import { FavoritesMobileSearchBox } from "./favorites_mobile_search_box";
+import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 
-let SEARCH_BOX: HTMLTextAreaElement | HTMLInputElement;
-const PARENT_ID: string = "left-favorites-panel-top-row";
-const ID: string = "favorites-search-box";
-const searchHistory: SearchHistory = new SearchHistory(30);
-
-function addEventListenersToSearchBox(): void {
-  Events.caption.searchForTag.on((tag) => {
-    SEARCH_BOX.value = tag;
-    startSearch();
-  });
-  Events.searchBox.append.on((text) => {
-    const initialSearchBoxValue = SEARCH_BOX.value;
-    const optionalSpace = initialSearchBoxValue === "" ? "" : " ";
-    const newSearchBoxValue = `${initialSearchBoxValue}${optionalSpace}${text}`;
-
-    SEARCH_BOX.value = newSearchBoxValue;
-    searchHistory.add(newSearchBoxValue);
-    updateLastEditedSearchQuery();
-  });
-  Events.favorites.searchButtonClicked.on(onSearchButtonClicked);
-  Events.favorites.clearButtonClicked.on(() => {
-    SEARCH_BOX.value = "";
-  });
-  Events.favorites.searchBoxUpdated.on(() => {
-    updateLastEditedSearchQuery();
-  });
-  SEARCH_BOX.addEventListener("keydown", (event) => {
-    if (!(event instanceof KeyboardEvent)) {
-      return;
-    }
-
-    if (event.key === "Enter") {
-      if (!event.repeat && awesompleteIsUnselected(SEARCH_BOX)) {
-        event.preventDefault();
-        startSearch();
-      }
-      return;
-    }
-
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      if (!awesompleteIsVisible(SEARCH_BOX)) {
-        event.preventDefault();
-        searchHistory.navigate(event.key);
-        SEARCH_BOX.value = searchHistory.selectedQuery;
-      }
-    }
-  });
-  updateLastEditedSearchQueryOnInput();
-}
-
-function updateLastEditedSearchQueryOnInput(): void {
-  SEARCH_BOX.addEventListener("keyup", debounceLeading((event: KeyboardEvent) => {
-    if (!(event instanceof KeyboardEvent)) {
-      return;
-    }
-
-    if (event.key.length === 1 || event.key === "Backspace" || event.key === "Delete") {
-      updateLastEditedSearchQuery();
-    }
-  }, 500) as EventListener);
-}
-
-function updateLastEditedSearchQuery(): void {
-  searchHistory.setLastQuery(SEARCH_BOX.value);
-}
-
-function onSearchButtonClicked(event: MouseEvent): void {
-  const mouseEvent = new EnhancedMouseEvent(event);
-
-  if (mouseEvent.rightClick || mouseEvent.ctrlKey) {
-    openSearchPage(SEARCH_BOX.value);
-    return;
-  }
-  startSearch();
-}
-
-function startSearch(): void {
-  searchHistory.add(SEARCH_BOX.value);
-  updateLastEditedSearchQuery();
-  hideAwesomplete(SEARCH_BOX);
-  Events.favorites.searchStarted.emit(SEARCH_BOX.value);
-}
+const PARENT_ID = "left-favorites-panel-top-row";
 
 export function setupFavoritesSearchBox(): void {
-  SEARCH_BOX = ON_MOBILE_DEVICE ? createMobileSearchBar(ID, PARENT_ID, startSearch) : createDesktopSearchBar(ID, PARENT_ID, searchHistory.lastEditedQuery);
-  addEventListenersToSearchBox();
+  if (ON_DESKTOP_DEVICE) {
+    new FavoritesDesktopSearchBox(PARENT_ID);
+  } else {
+    new FavoritesMobileSearchBox(PARENT_ID);
+  }
 }

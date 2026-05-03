@@ -5,11 +5,11 @@ function getOriginalFavoritesContent(): HTMLElement | null {
   return document.querySelector("#content, div:has(.thumb)");
 }
 
-function clearOriginalFavoritesContent(): void {
+function removeNativeFavorites(): void {
   getOriginalFavoritesContent()?.remove();
 }
 
-function removeUnusedFavoritesPageScripts(): void {
+function removeUnusedScripts(): void {
   for (const script of document.querySelectorAll("script")) {
     if ((/(?:fluidplayer|awesomplete)/).test(script.src ?? "")) {
       script.remove();
@@ -17,9 +17,9 @@ function removeUnusedFavoritesPageScripts(): void {
   }
 }
 
-export async function clearNativeFavoritesPage(): Promise<void> {
+export async function cleanNativeFavoritesPage(): Promise<void> {
   await waitForDOMToLoad();
   await sleep(20);
-  clearOriginalFavoritesContent();
-  removeUnusedFavoritesPageScripts();
+  removeNativeFavorites();
+  removeUnusedScripts();
 }

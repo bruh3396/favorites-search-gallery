@@ -28,5 +28,5 @@ export function invertSearchResults(): void {
 
 export function revealFavoriteInAll(id: string): void {
   searchFavorites("");
-  FavoritesPresentationFlow.revealFavorite(id);
+  FavoritesPresentationFlow.reveal(id);
 }

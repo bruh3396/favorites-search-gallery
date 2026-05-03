@@ -34,7 +34,7 @@ function fetchFavorites(): Promise<void> {
 }
 
 async function fetchAllFavorites(): Promise<void> {
-  FavoritesPresentationFlow.clear();
+  FavoritesPresentationFlow.presentNothing();
   Events.favorites.startedFetchingFavorites.emit();
   await FavoritesModel.fetchAllFavorites(handleFetchedFavoritesPage);
 }

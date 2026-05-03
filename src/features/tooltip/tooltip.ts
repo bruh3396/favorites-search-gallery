@@ -8,6 +8,7 @@ import { TOOLTIP_HTML } from "../../assets/html";
 import { convertToTagString } from "../../utils/string/tags";
 import { getTagSetFromItem } from "../../lib/dom/tags";
 import { parseTagGroups } from "../../lib/search/query/search_tag_group";
+import { randomPurpleColor } from "../../utils/string/color";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 let tooltip: HTMLElement;
@@ -46,45 +47,6 @@ function createTooltip(): HTMLElement {
 }
 
 function addEventListeners(): void {
-  addCommonEventListeners();
-  addFavoritesPageEventListeners();
-}
-
-function addCommonEventListeners(): void {
-  addMouseOverEventListener();
-}
-
-function addFavoritesPageEventListeners(): void {
-  if (!ON_FAVORITES_PAGE) {
-    return;
-  }
-  Events.favorites.tooltipsToggled.on((value) => {
-    toggleVisibility(value);
-
-    if (ON_FAVORITES_PAGE) {
-      if (currentImage === null) {
-        return;
-      }
-
-      if (visible) {
-        show(currentImage);
-      } else {
-        hide();
-      }
-      return;
-    }
-
-    if (ON_SEARCH_PAGE) {
-      toggleVisibility();
-
-      if (currentImage !== null) {
-        hide();
-      }
-    }
-  });
-}
-
-function addMouseOverEventListener(): void {
   Events.document.mouseover.on((mouseOverEvent) => {
     if (mouseOverEvent.thumb === null) {
       hide();
@@ -102,6 +64,22 @@ function addMouseOverEventListener(): void {
       show(image);
     }
   });
+  Events.favorites.tooltipsToggled.on((value) => {
+    toggleVisibility(value);
+
+    if (ON_FAVORITES_PAGE) {
+      if (currentImage === null) {
+        return;
+      }
+
+      if (visible) {
+        show(currentImage);
+      } else {
+        hide();
+      }
+    }
+  });
+
 }
 
 function assignColorsToMatchedTags(): void {
@@ -174,16 +152,6 @@ function setPosition(image: HTMLImageElement): void {
 function show(image: HTMLImageElement): void {
   tooltip.innerHTML = formatHtml(getTags(image));
   setPosition(image);
-  // const thumb = getThumbFromImage(image);
-
-  // if (thumb === null) {
-  //   return;
-  // }
-  // const tags = getTags(image);
-
-  // thumb.dataset.tooltip = tags;
-  // await sleep(50);
-  // thumb.classList.add("tooltip");
 }
 
 function hide(): void {
@@ -192,18 +160,6 @@ function hide(): void {
   setTimeout(() => {
     tooltip.style.transition = defaultTransition;
   }, 5);
-  // if (currentImage === null) {
-  //   return;
-  // }
-  // const thumb = getThumbFromImage(currentImage);
-
-  // if (thumb === null) {
-  //   return;
-  // }
-  // thumb.classList.remove("tooltip");
-  // thumb.removeAttribute("data-tooltip");
-  // await sleep(50);
-  // thumb.dataset.tooltip = "";
 }
 
 function getTags(image: HTMLImageElement): string {
@@ -220,20 +176,6 @@ function getTags(image: HTMLImageElement): string {
   return convertToTagString(tags);
 }
 
-function getRandomColor(): string {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-
-  for (let i = 0; i < 6; i += 1) {
-    if (i === 2 || i === 3) {
-      color += "0";
-    } else {
-      color += letters[Math.floor(Math.random() * letters.length)];
-    }
-  }
-  return color;
-}
-
 function formatHtml(tags: string): string {
   let unmatchedTagsHTML = "";
   let matchedTagsHTML = "";
@@ -247,18 +189,9 @@ function formatHtml(tags: string): string {
 
     if (tagColor === null) {
       unmatchedTagsHTML += tagWithSpace;
-      // } else if (includesTag(tag, new Set(Utils.tagBlacklist.split(" ")))) {
-      // unmatchedTagsHTML += `<span style="color:red"><s><b>${tagWithSpace}</b></s></span>`;
     } else {
       matchedTagsHTML += `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>`;
     }
-    // if (tagColor !== undefined) {
-    //   matchedTagsHTML += `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>`;
-    // // } else if (includesTag(tag, new Set(Utils.tagBlacklist.split(" ")))) {
-    //   // unmatchedTagsHTML += `<span style="color:red"><s><b>${tagWithSpace}</b></s></span>`;
-    // } else {
-    //   unmatchedTagsHTML += tagWithSpace;
-    // }
   }
   const html = matchedTagsHTML + unmatchedTagsHTML;
 
@@ -280,7 +213,7 @@ function assignTagColors(searchQuery: string): void {
 function assignColorsToOrGroupTags(orGroups: string[][]): void {
 
   for (const orGroup of orGroups) {
-    const color = getRandomColor();
+    const color = randomPurpleColor();
 
     for (const tag of orGroup) {
       addColorCodedTag(tag, color);
@@ -290,7 +223,7 @@ function assignColorsToOrGroupTags(orGroups: string[][]): void {
 
 function assignColorsToAndTags(andTags: string[]): void {
   for (const tag of andTags) {
-    addColorCodedTag(tag, getRandomColor());
+    addColorCodedTag(tag, randomPurpleColor());
   }
 }
 
@@ -298,12 +231,8 @@ function removeNotTags(tags: string): string {
   return tags.replace(/(?:^| )-\S+/gm, "");
 }
 
-function sanitizeTags(tags: string): string {
-  return tags.toLowerCase().trim();
-}
-
 function addColorCodedTag(tag: string, color: string): void {
-  tag = sanitizeTags(tag);
+  tag = tag.toLowerCase().trim();
 
   if (searchTagColorCodes[tag] === undefined) {
     searchTagColorCodes[tag] = color;

@@ -59,7 +59,7 @@ function buildDialogWhatsNewMenu(menu: HTMLElement): void {
   };
 }
 
-export function insertFavoritesHelpBar(): void {
+export function setupFavoritesHelpBar(): void {
   insertHelpHTML();
   buildWhatsNewMenu();
 }

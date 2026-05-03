@@ -4,7 +4,7 @@ import { Favorite } from "../../../../types/favorite";
 import { FavoriteItem } from "../../type/favorite_item";
 import { Post } from "../../../../types/post";
 import { fetchVideoDurationFromFavorite } from "../../../../lib/server/fetch/video_duration_fetcher";
-import { isVideo } from "../../../../lib/media/media_resolver";
+import { isVideo } from "../../../../lib/media/media_type_guards";
 
 let onMetadataUpdated: (favorite: Favorite) => void = () => undefined;
 let isDatabaseWritten = false;

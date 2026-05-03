@@ -2,7 +2,7 @@
 import { Post, SlimPost } from "../../../types/post";
 import { generalPageRequestQueue, multiPostLimiter } from "./rate_limiter";
 import { CoalescingExecutor } from "../../core/concurrency/coalescing_executor";
-import { USER_ID } from "../../environment/favorites_environment";
+import { USER_ID } from "../../environment/favorites_metadata";
 import { buildPostPageURL } from "../url/page_url_builder";
 import { fetchHtml } from "../http/http_client";
 import { parsePostFromPostPage } from "../parse/post_page_parser";

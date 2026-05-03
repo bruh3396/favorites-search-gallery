@@ -5,26 +5,10 @@ import { FavoritesPresentationFlow } from "../type/favorite_types";
 import { NavigationKey } from "../../../types/input";
 import { Preferences } from "../../../lib/preferences/preferences";
 
-function getPresentationFlow(): FavoritesPresentationFlow {
-  return Preferences.infiniteScroll.value ? FavoritesInfiniteScrollFlow : FavoritesPaginationFlow;
-}
+const currentPresenter = (): FavoritesPresentationFlow => (Preferences.infiniteScroll.value ? FavoritesInfiniteScrollFlow : FavoritesPaginationFlow);
 
-export function present(favorites: Favorite[]): void {
-  getPresentationFlow().present(favorites);
-}
-
-export function clear(): void {
-  getPresentationFlow().present([]);
-}
-
-export function revealFavorite(id: string): void {
-  getPresentationFlow().revealFavorite(id);
-}
-
-export function handleNewSearchResults(): void {
-  getPresentationFlow().handleNewSearchResults();
-}
-
-export function loadNewFavoritesInGallery(direction: NavigationKey): boolean {
-  return getPresentationFlow().loadNewFavoritesInGallery(direction);
-}
+export const present = (favorites: Favorite[]): void => currentPresenter().present(favorites);
+export const presentNothing = (): void => currentPresenter().present([]);
+export const reveal = (id: string): void => currentPresenter().reveal(id);
+export const handleNewSearchResults = (): void => currentPresenter().handleNewSearchResults();
+export const presentWhileNavigatingGallery = (direction: NavigationKey): boolean => currentPresenter().presentWhileNavigatingGallery(direction);

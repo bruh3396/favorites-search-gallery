@@ -10,7 +10,7 @@ import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../config/general_settings";
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/environment";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
 import { buildButtonElement } from "../../../../lib/ui/element/button";
 import { buildNumberComponent } from "../../../../lib/ui/element/number_input";
 import { buildSelectElement } from "../../../../lib/ui/element/select";
@@ -176,7 +176,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Toggle slim layout",
     preference: Preferences.slimLayout,
     function: toggleSlimLayout,
-    // enabled: false,
     triggerOnCreation: true
   },
   {
@@ -417,7 +416,7 @@ const numbers: Partial<NumberElement>[] = [
   }
 ];
 
-export function createFavoritesDesktopMenuElements(): void {
+export function buildFavoritesDesktopMenuElements(): void {
   prepareDynamicElements(buttons).forEach(buildButtonElement);
   prepareDynamicElements(checkboxes).forEach(buildCheckboxOption);
   prepareDynamicElements(simpleCheckboxes).forEach(buildCheckboxElement);

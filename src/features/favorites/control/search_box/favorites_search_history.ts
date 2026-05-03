@@ -52,7 +52,6 @@ export class SearchHistory {
 
       this.incrementIndex();
 
-      // Skip duplicate entries when navigating up
       if (this.selectedQuery === previous) {
         this.incrementIndex();
       }
