@@ -1,4 +1,4 @@
-﻿import * as FavoritesSearchFilter from "./favorites_search_filter";
+import * as FavoritesSearchFilter from "./favorites_search_filter";
 import * as FavoritesSorter from "./favorites_sorter";
 import { Favorite } from "../../../../types/favorite";
 import { shuffleArray } from "../../../../utils/collection/array";

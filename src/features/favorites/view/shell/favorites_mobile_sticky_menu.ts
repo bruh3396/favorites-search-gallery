@@ -1,4 +1,4 @@
-﻿import { Content } from "../../../../lib/shell";
+import { Content } from "../../../../lib/shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { insertStyle } from "../../../../utils/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";

@@ -1,4 +1,4 @@
-﻿import * as FavoritesModel from "../model/favorites_model";
+import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
 import { Favorite, FavoritesPageRelation } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";

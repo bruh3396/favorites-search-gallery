@@ -1,4 +1,4 @@
-﻿import { Database } from "../../../../lib/core/storage/database";
+import { Database } from "../../../../lib/core/storage/database";
 import { Favorite } from "../../../../types/favorite";
 import { FavoritesSearchEngine } from "../search/favorites_search_engine";
 import { TagModificationDatabaseRecord } from "../../../../types/search";

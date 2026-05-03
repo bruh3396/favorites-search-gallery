@@ -1,4 +1,4 @@
-﻿import { ImageRequest } from "../../../../type/gallery_image_request";
+import { ImageRequest } from "../../../../type/gallery_image_request";
 
 export type RequestStatus = "low-res" | "complete";
 export type CachedRequest = {

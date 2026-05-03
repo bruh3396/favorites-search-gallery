@@ -1,4 +1,4 @@
-﻿import * as FavoritesGalleryFlow from "./flow/favorites_gallery_flow";
+import * as FavoritesGalleryFlow from "./flow/favorites_gallery_flow";
 import * as FavoritesLoadFlow from "./flow/favorites_load_flow";
 import * as FavoritesModel from "./model/favorites_model";
 import * as FavoritesOptionsFlow from "./flow/favorites_option_flow";

@@ -1,4 +1,4 @@
-﻿import { Storage } from "../../../../lib/core/storage/storage_instance";
+import { Storage } from "../../../../lib/core/storage/storage_instance";
 import { clamp } from "../../../../utils/number";
 import { indexInBounds } from "../../../../utils/collection/array";
 import { isEmptyString } from "../../../../utils/string/query";

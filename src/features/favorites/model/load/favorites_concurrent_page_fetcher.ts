@@ -1,4 +1,4 @@
-﻿import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
+import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
 import { FavoritesPageRequest } from "./favorites_page_request";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 

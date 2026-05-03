@@ -1,4 +1,4 @@
-﻿import { addTagsToFavorite, removeTagsFromFavorite, resetTagModifications, storeTagModifications, tagModifications } from "../favorites/model/tags/favorites_tag_modifier";
+import { addTagsToFavorite, removeTagsFromFavorite, resetTagModifications, storeTagModifications, tagModifications } from "../favorites/model/tags/favorites_tag_modifier";
 import { insertHtmlWithStyles, insertStyle } from "../../utils/dom/injector";
 import { Events } from "../../lib/communication/events";
 import { Favorite } from "../../types/favorite";

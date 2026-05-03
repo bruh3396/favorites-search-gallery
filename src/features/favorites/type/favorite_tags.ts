@@ -1,4 +1,4 @@
-﻿import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
+import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/post";
 import { getCorrectTags } from "../../../lib/media/media_tag_validator";

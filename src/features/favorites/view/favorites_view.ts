@@ -1,4 +1,4 @@
-﻿import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
+import * as FavoritesPaginationMenu from "./menu/favorites_pagination_menu";
 import * as FavoritesShell from "./shell/favorites_shell";
 import * as FavoritesStatus from "./menu/favorites_status_bar";
 import * as Layout from "../../../lib/layout/layout";

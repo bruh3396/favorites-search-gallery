@@ -1,4 +1,4 @@
-﻿import { MULTI_POST_SLIM_API_URL, buildServerTestURL } from "../url/api_url_builder";
+import { MULTI_POST_SLIM_API_URL, buildServerTestURL } from "../url/api_url_builder";
 import { Post, SlimPost } from "../../../types/post";
 import { generalPageRequestQueue, multiPostLimiter } from "./rate_limiter";
 import { CoalescingExecutor } from "../../core/concurrency/coalescing_executor";

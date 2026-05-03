@@ -1,4 +1,4 @@
-﻿import * as GalleryImageCache from "./gallery_image_cache";
+import * as GalleryImageCache from "./gallery_image_cache";
 import { GallerySettings } from "../../../../../../config/gallery_settings";
 import { ImageRequest } from "../../../../type/gallery_image_request";
 import { LowResolutionImageRequest } from "../../../../type/gallery_low_resolution_image_request";

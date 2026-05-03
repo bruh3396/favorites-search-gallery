@@ -1,14 +1,14 @@
-﻿import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "../../types/ui";
+import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "../../types/ui";
 import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../favorites/model/tags/favorites_custom_tags";
 import { fetchHtml } from "../../lib/server/http/http_client";
-import { replaceTagInText } from "./autocomplete_tag_replacer";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../lib/ui/awesomplete";
 import { isEmptyString } from "../../utils/string/query";
 import { removeLeadingHyphens } from "../../utils/string/format";
+import { replaceTagInText } from "./autocomplete_tag_replacer";
 
 declare const Awesomplete_: AwesompleteConstructor;
 
