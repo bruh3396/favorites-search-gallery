@@ -11,7 +11,7 @@ import { slimPostToPost } from "../parse/api_post_parser";
 type PostResolver = { resolve: (post: Post) => void; reject: (reason: unknown) => void };
 
 const MULTI_POST_BATCH_SIZE = 50;
-const MULTI_POST_FLUSH_DELAY = 1500;
+const MULTI_POST_FLUSH_DELAY = 1250;
 
 const pendingPosts = new Map<string, PostResolver>();
 const postBatchExecutor = new CoalescingExecutor<string>(MULTI_POST_BATCH_SIZE, MULTI_POST_FLUSH_DELAY, flushPostBatch);

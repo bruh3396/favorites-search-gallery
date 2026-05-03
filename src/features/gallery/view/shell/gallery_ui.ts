@@ -1,11 +1,11 @@
 import * as Icons from "../../../../assets/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite";
 import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/number";
+import { GalleryRoot } from "./gallery_shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { USING_FIREFOX } from "../../../../lib/environment/environment";
 import { blurActiveElement } from "../../../../utils/dom/interaction";
-import { galleryRoot } from "./gallery_shell";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { insertStyle } from "../../../../lib/dom/injector";
 import { showFullscreenIcon } from "../gallery_view_utils";
 import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
 
@@ -20,7 +20,7 @@ function usingColumnLayout(): boolean {
 }
 
 export function setupGalleryUI(): void {
-  galleryRoot.appendChild(background);
+  GalleryRoot.appendChild(background);
   toggleVideoPointerEvents(false);
   toggleGalleryMenuVisibility(false);
 }

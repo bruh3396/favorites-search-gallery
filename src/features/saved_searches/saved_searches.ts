@@ -1,6 +1,6 @@
 import * as ICONS from "../../assets/icons";
 import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { Preferences } from "../../lib/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import { SAVED_SEARCHES_HTML } from "../../assets/html";
@@ -8,7 +8,7 @@ import { Storage } from "../../lib/core/storage/storage_instance";
 import { awesompleteIsUnselected } from "../../lib/ui/awesomplete";
 import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getSavedSearches } from "../../lib/saved_searches";
-import { insertHtmlWithStyles } from "../../utils/dom/injector";
+import { insertHtmlWithStyles } from "../../lib/dom/injector";
 import { shuffleArray } from "../../utils/collection/array";
 import { sleep } from "../../lib/core/scheduling/promise";
 
@@ -243,7 +243,7 @@ function importSavedSearches(): void {
 }
 
 function saveSearchResultsAsCustomSearch(): void {
-  const latestSearchResults = FeatureBridge.favoritesSearchResults.query();
+  const latestSearchResults = FeatureQueries.favoritesSearchResults.query();
   const searchResultIds = latestSearchResults.map(favorite => favorite.id);
 
   if (searchResultIds.length === 0) {

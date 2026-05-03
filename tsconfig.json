@@ -106,7 +106,5 @@
     "src/**/*.ts"
   ],
   "exclude": [
-    // "src/features/autocomplete/autocomplete.ts",
-    // "src/tests/**/*.ts".
-  ],
+  ]
 }

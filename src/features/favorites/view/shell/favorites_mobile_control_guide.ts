@@ -1,6 +1,6 @@
 import { CONTROLS_HTML } from "../../../../assets/html";
 import { Overlays } from "../../../../lib/shell";
-import { insertHtmlWithStyles } from "../../../../utils/dom/injector";
+import { insertHtmlWithStyles } from "../../../../lib/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
 export async function buildControlsGuide(): Promise<void> {

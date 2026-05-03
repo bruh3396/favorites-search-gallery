@@ -1,14 +1,15 @@
-import { addTagsToFavorite, removeTagsFromFavorite, resetTagModifications, storeTagModifications, tagModifications } from "../favorites/model/tags/favorites_tag_modifier";
-import { insertHtmlWithStyles, insertStyle } from "../../utils/dom/injector";
+import { addTagsToFavorite, removeTagsFromFavorite, resetAllFavoriteTags, resetTagModifications, setAdditionalTags, storeTagModifications } from "../../lib/tags/tag_modifier";
+import { insertHtmlWithStyles, insertStyle } from "../../lib/dom/injector";
 import { Events } from "../../lib/communication/events";
 import { Favorite } from "../../types/favorite";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { ITEM_CLASS_NAME } from "../../lib/dom/thumb";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";
 import { TAG_MODIFIER_HTML } from "../../assets/html";
 import { doNothing } from "../../lib/environment/constants";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
+import { setCustomTags } from "../../lib/tags/custom_tags";
 
 type TagModifierUI = {
   container: HTMLElement
@@ -74,7 +75,7 @@ function addEventListeners(): void {
       return;
     }
     resetTagModifications();
-    Events.tagModifier.resetConfirmed.emit();
+    resetAllFavoriteTags(FeatureQueries.allFavorites.query());
   };
   ui.import.onclick = doNothing;
   ui.export.onclick = doNothing;
@@ -87,7 +88,7 @@ function addEventListeners(): void {
 }
 
 function getSelectedFavoritesOnPage(): Favorite[] {
-  const results = FeatureBridge.favoritesSearchResults.query();
+  const results = FeatureQueries.favoritesSearchResults.query();
   return results.filter(favorite => document.getElementById(favorite.id) !== null && isSelected(favorite));
 }
 
@@ -141,7 +142,7 @@ function toggleUI(value: boolean): void {
 }
 
 function getFavorite(id: string): Favorite | undefined {
-  return FeatureBridge.favoritesSearchResults.query().find(favorite => favorite.id === id);
+  return FeatureQueries.favoritesSearchResults.query().find(favorite => favorite.id === id);
 }
 
 function toggleTagEditModeEventListeners(value: boolean): void {
@@ -189,7 +190,7 @@ function unSelectAll(): void {
 }
 
 function selectAll(): void {
-  for (const favorite of FeatureBridge.favoritesSearchResults.query()) {
+  for (const favorite of FeatureQueries.favoritesSearchResults.query()) {
     select(favorite, true);
   }
 }
@@ -245,7 +246,7 @@ function modifyTagsOfSelected(remove: boolean): void {
   for (const favorite of selected) {
     const additionalTags = remove ? removeTagsFromFavorite(favorite, tagsToModify) : addTagsToFavorite(favorite, tagsToModify);
 
-    tagModifications.set(favorite.id, additionalTags);
+    setAdditionalTags(favorite.id, additionalTags);
     modifiedTagsCount += 1;
   }
 
@@ -258,6 +259,6 @@ function modifyTagsOfSelected(remove: boolean): void {
   }
   showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);
   dispatchEvent(new Event("modifiedTags"));
-  FeatureBridge.setCustomTags.query(tagsToModify);
+  setCustomTags(tagsToModify);
   storeTagModifications();
 }

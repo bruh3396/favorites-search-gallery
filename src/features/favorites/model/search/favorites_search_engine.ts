@@ -16,13 +16,9 @@ export class FavoriteIndex {
     this.engine = new SearchEngine(this.index);
   }
 
-  public get isReady(): boolean {
-    return this.state === "ready";
-  }
-
   public search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
-    const canUseEngine = this.isReady && !searchQuery.metadata.hasMetadataTag;
-    return canUseEngine ? this.engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
+    const isEngineEligible = this.state === "ready" && !searchQuery.metadata.hasMetadataTag;
+    return isEngineEligible ? this.engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
   }
 
   public add(doc: Favorite): void {

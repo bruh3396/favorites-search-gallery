@@ -5,7 +5,7 @@ Tooltip.id = "tooltip";
 Tooltip.className = "light-green-gradient";
 TooltipContainer.id = "tooltip-container";
 
-function mountTooltip(): void {
+export function mountTooltip(): void {
   const container = document.getElementById("tooltip-container");
 
   if (container !== null) {

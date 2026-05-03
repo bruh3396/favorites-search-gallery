@@ -1,4 +1,4 @@
-import { insertHtmlWithStyles, insertStyle } from "../../../utils/dom/injector";
+import { insertHtmlWithStyles, insertStyle } from "../../../lib/dom/injector";
 import { Content } from "../../../lib/shell";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";

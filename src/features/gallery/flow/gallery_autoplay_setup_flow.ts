@@ -2,7 +2,7 @@ import * as GalleryAutoplayController from "../control/gallery_autoplay_controll
 import * as GalleryNavigationFlow from "./gallery_navigation_flow";
 import * as GalleryView from "../view/gallery_view";
 import { NavigationKey } from "../../../types/input";
-import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
+import { executeByGalleryState } from "./gallery_state_executor";
 
 export function setupAutoplay(): void {
   const events: GalleryAutoplayController.AutoplayEvents = {
@@ -19,7 +19,7 @@ export function setupAutoplay(): void {
       GalleryView.toggleVideoLooping(false);
     },
     onComplete: (direction?: NavigationKey) => {
-      executeFunctionBasedOnGalleryState({
+      executeByGalleryState({
         gallery: GalleryNavigationFlow.navigate
       }, direction);
     },

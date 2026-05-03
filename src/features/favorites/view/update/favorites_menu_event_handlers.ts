@@ -2,7 +2,7 @@ import { Events } from "../../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Storage } from "../../../../lib/core/storage/storage_instance";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { insertStyle } from "../../../../lib/dom/injector";
 
 export function syncShowOnHoverFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");

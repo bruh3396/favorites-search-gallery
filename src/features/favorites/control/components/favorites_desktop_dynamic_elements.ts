@@ -4,7 +4,7 @@ import { LayoutMode, PerformanceProfile } from "../../../../types/ui";
 import { buildCheckboxElement, buildCheckboxOption } from "../../../../lib/ui/element/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI, tryResetting } from "../../view/update/favorites_menu_event_handlers";
+import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../../view/update/favorites_menu_event_handlers";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { GeneralSettings } from "../../../../config/general_settings";
@@ -77,7 +77,6 @@ const buttons: Partial<ButtonElement>[] = [
     parentId: "favorites-main-buttons-container",
     textContent: "Reset",
     title: "Delete cached favorites and reset preferences",
-    function: tryResetting,
     event: Events.favorites.resetButtonClicked
   }
 

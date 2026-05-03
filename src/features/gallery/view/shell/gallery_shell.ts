@@ -1,13 +1,13 @@
 import { Overlays } from "../../../../lib/shell";
 
-export const galleryRoot = document.createElement("div");
-galleryRoot.id = "gallery-container";
+export const GalleryRoot = document.createElement("div");
+GalleryRoot.id = "gallery-container";
 toggleGalleryVisibility(false);
 
 export function mountGallery(): void {
-  Overlays.insertAdjacentElement("beforeend", galleryRoot);
+  Overlays.insertAdjacentElement("beforeend", GalleryRoot);
 }
 
 export function toggleGalleryVisibility(value: boolean): void {
-  galleryRoot.style.visibility = value ? "" : "hidden";
+  GalleryRoot.style.visibility = value ? "" : "hidden";
 }

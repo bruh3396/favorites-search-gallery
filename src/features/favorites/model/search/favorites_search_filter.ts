@@ -17,10 +17,6 @@ const createSearchQuery = (): SearchQuery<Favorite> => new SearchQuery(finalSear
 
 let searchQuery: SearchQuery<Favorite> = createSearchQuery();
 
-function updateSearchQuery(): void {
-  searchQuery = createSearchQuery();
-}
-
 function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {
   return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : blacklistSearchQuery.apply(favorites);
 }
@@ -37,6 +33,10 @@ export function applyPostFilters(favorites: Favorite[]): Favorite[] {
   return filterOutBlacklisted(filterByRating(favorites));
 }
 
+export function updateSearchQuery(): void {
+  searchQuery = createSearchQuery();
+}
+
 export function setSearchQuery(newSearchQuery?: string): void {
   if (newSearchQuery !== undefined) {
     currentSearchQuery = newSearchQuery;
@@ -44,6 +44,6 @@ export function setSearchQuery(newSearchQuery?: string): void {
   }
 }
 
-export const onBlacklistChanged = (): void => updateSearchQuery();
-export const index = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.add(f));
-export const deferSearchEngineIndexing = (): void => FavoritesSearchEngine.deferIndexing();
+export const addToIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.add(f));
+export const removeFromIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.remove(f));
+export const deferIndexing = (): void => FavoritesSearchEngine.deferIndexing();

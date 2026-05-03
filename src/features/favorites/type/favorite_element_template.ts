@@ -2,7 +2,7 @@ import { ADD_FAVORITE_IMAGE_HTML, DOWNLOAD_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTM
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
 import { ITEM_CLASS_NAME } from "../../../lib/dom/thumb";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/favorites_metadata";
-import { domParser } from "../../../utils/dom/dom_parser";
+import { domParser } from "../../../lib/dom/dom_parser";
 
 export const favoriteElementTemplate: HTMLElement = domParser.parseFromString("", "text/html").createElement("div");
 

@@ -1,5 +1,5 @@
-import { buildSearchTagGroup, categorizeTags, parseTagGroups, sortSearchTagGroup } from "./search_tag_group";
-import { AbstractSearchTag } from "../tag/abstract_search_tag";
+import { buildTagGroup, categorizeTags, parseTagGroups, sortTagGroup } from "../parse/tag_group_parser";
+import { AbstractTag } from "../tag/abstract_tag";
 import { SearchQueryMetadata } from "../type/search_types";
 import { Searchable } from "../../../types/search";
 import { isEmptyString } from "../../../utils/string/query";
@@ -7,8 +7,8 @@ import { isEmptyString } from "../../../utils/string/query";
 export class SearchQuery<T extends Searchable> {
   public readonly rawQuery: string;
   public readonly isEmpty: boolean;
-  public orGroups: AbstractSearchTag[][] = [];
-  public andTags: AbstractSearchTag[] = [];
+  public orGroups: AbstractTag[][] = [];
+  public andTags: AbstractTag[] = [];
 
   constructor(searchQuery: string) {
     this.rawQuery = searchQuery;
@@ -19,8 +19,8 @@ export class SearchQuery<T extends Searchable> {
     }
     const { orGroups, andTags } = parseTagGroups(searchQuery);
 
-    this.orGroups = orGroups.map(orGroup => buildSearchTagGroup(orGroup));
-    this.andTags = buildSearchTagGroup(andTags);
+    this.orGroups = orGroups.map(orGroup => buildTagGroup(orGroup));
+    this.andTags = buildTagGroup(andTags);
     this.flattenSingleTagOrGroups();
     this.orGroups.sort((a, b) => a.length - b.length);
   }
@@ -48,8 +48,12 @@ export class SearchQuery<T extends Searchable> {
     return this.isEmpty ? items : items.filter(item => this.matchesAndTags(item) && this.matchesOrGroups(item));
   }
 
+  public equals(other: SearchQuery<T>): boolean {
+    return this.rawQuery === other.rawQuery;
+  }
+
   private flattenSingleTagOrGroups(): void {
-    const multiTagOrGroups: AbstractSearchTag[][] = [];
+    const multiTagOrGroups: AbstractTag[][] = [];
 
     for (const orGroup of this.orGroups) {
       if (orGroup.length === 1) {
@@ -59,7 +63,7 @@ export class SearchQuery<T extends Searchable> {
       }
     }
     this.orGroups = multiTagOrGroups;
-    this.andTags = sortSearchTagGroup(this.andTags);
+    this.andTags = sortTagGroup(this.andTags);
   }
 
   private matchesAndTags(item: Searchable): boolean {

@@ -1,7 +1,7 @@
 import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/server/fetch/bitmap_fetcher";
 import { GalleryAbstractUpscaler } from "./gallery_abstract_upscaler";
+import { GalleryUpscaleSettings } from "../../../../../../config/gallery_shared_settings";
 import { ImageRequest } from "../../../../type/gallery_image_request";
-import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { UpscaleImageRequest } from "../../../../type/gallery_upscale_image_request";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
 import { isImage } from "../../../../../../lib/media/media_type_guards";
@@ -9,7 +9,7 @@ import { isImage } from "../../../../../../lib/media/media_type_guards";
 export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   private readonly canvases: Map<string, HTMLCanvasElement> = new Map();
 
-  protected clear2(): void {
+  protected reset(): void {
     for (const canvas of this.canvases.values()) {
       this.clearCanvas(canvas);
     }
@@ -17,7 +17,7 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   }
 
   protected finishUpscale(request: ImageRequest): void {
-    if (SharedGallerySettings.upscaleUsingSamples) {
+    if (GalleryUpscaleSettings.upscaleUsingSamples) {
       this.upscaleSampleImageRequest(request);
     } else {
       this.upscaleFullImageRequest(request);

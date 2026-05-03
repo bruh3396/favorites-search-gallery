@@ -1,4 +1,4 @@
-import { AbstractSearchTag } from "../tag/abstract_search_tag";
+import { AbstractTag } from "../tag/abstract_tag";
 import { InvertedIndex } from "../../core/data_structures/inverted_index";
 import { ResolvedSearchQuery } from "../query/resolved_search_query";
 import { SearchQuery } from "../query/search_query";
@@ -6,23 +6,18 @@ import { Searchable } from "../../../types/search";
 import { intersection } from "../../../utils/collection/set";
 
 export class SearchEngine<T extends Searchable> {
-  private resolvedQuery: ResolvedSearchQuery<T> = new ResolvedSearchQuery<T>("", []);
 
   constructor(private readonly index: InvertedIndex<T>) { }
 
   public search(searchQuery: SearchQuery<T>, candidates: T[]): T[] {
-    this.resolvedQuery = this.resolveSearchQuery(searchQuery);
-    return this.resolvedQuery.isEmpty ? candidates : this.resolvedQuery.isUnmatchable ? [] : this.findMatchingItems(candidates);
+    const resolvedQuery = new ResolvedSearchQuery<T>(searchQuery.rawQuery, this.index.getIndexedTerms());
+    return resolvedQuery.isEmpty ? candidates : resolvedQuery.isUnmatchable ? [] : this.findMatchingItems(resolvedQuery, candidates);
   }
 
-  private resolveSearchQuery(searchQuery: SearchQuery<T>): ResolvedSearchQuery<T> {
-    return searchQuery.rawQuery === this.resolvedQuery.rawQuery ? this.resolvedQuery : new ResolvedSearchQuery<T>(searchQuery.rawQuery, this.index.getIndexedTerms());
-  }
-
-  private findMatchingItems(candidates: T[]): T[] {
-    const exclusions = this.collectItemsWithAnyTag(this.resolvedQuery.negatedTags);
-    const andMatches = this.findItemsWithAllTags(this.resolvedQuery.positiveAndTags);
-    const matches = this.findItemsMatchingAllOrGroups(andMatches, this.resolvedQuery.orGroups);
+  private findMatchingItems(resolvedQuery: ResolvedSearchQuery<T>, candidates: T[]): T[] {
+    const exclusions = this.collectItemsWithAnyTag(resolvedQuery.negatedTags);
+    const andMatches = this.findItemsWithAllTags(resolvedQuery.positiveAndTags);
+    const matches = this.findItemsMatchingAllOrGroups(andMatches, resolvedQuery.orGroups);
     return matches.size === 0 ? [] : candidates.filter(candidate => matches.has(candidate) && !exclusions.has(candidate));
   }
 
@@ -54,7 +49,7 @@ export class SearchEngine<T extends Searchable> {
     return narrowed;
   }
 
-  private findItemsMatchingAllOrGroups(candidates: Set<T>, orGroups: AbstractSearchTag[][]): Set<T> {
+  private findItemsMatchingAllOrGroups(candidates: Set<T>, orGroups: AbstractTag[][]): Set<T> {
     if (candidates.size === 0) {
       return new Set<T>();
     }

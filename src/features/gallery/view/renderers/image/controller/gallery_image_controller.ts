@@ -11,7 +11,7 @@ class ImageController extends GalleryAbstractController {
   constructor() {
     super();
     this.activeId = "";
-    GalleryImageLoader.setCompletionCallback(this.onBitmapLoaded.bind(this));
+    GalleryImageLoader.setCompletionCallback((r) => this.onBitmapLoaded(r));
     GalleryImageCanvas.mount(this.container);
   }
 

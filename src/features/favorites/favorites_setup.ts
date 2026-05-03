@@ -1,4 +1,4 @@
-import * as FavoritesGalleryFlow from "./flow/favorites_gallery_flow";
+import * as FavoritesInterFeatureFlow from "./flow/favorites_inter_feature_flow";
 import * as FavoritesLoadFlow from "./flow/favorites_load_flow";
 import * as FavoritesModel from "./model/favorites_model";
 import * as FavoritesOptionsFlow from "./flow/favorites_option_flow";
@@ -8,7 +8,7 @@ import * as FavoritesResetFlow from "./flow/favorites_reset_flow";
 import * as FavoritesSearchFlow from "./flow/favorites_search_flow";
 import * as FavoritesView from "./view/favorites_view";
 import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 
 export function setupFavorites(): void {
@@ -45,11 +45,12 @@ function addEventListeners(): void {
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
 
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
-  Events.gallery.favoriteToggled.on(FavoritesGalleryFlow.swapFavoriteButton);
-  Events.tagModifier.resetConfirmed.on(FavoritesModel.resetTagModifications);
+  Events.gallery.favoriteToggled.on(FavoritesInterFeatureFlow.swapFavoriteButton);
+  Events.tagModifier.needsReIndex.on(FavoritesInterFeatureFlow.addToIndex);
+  Events.tagModifier.needsDeIndex.on(FavoritesInterFeatureFlow.removeFromIndex);
 
-  FeatureBridge.moreFavoritesPagesExist.register(FavoritesPresentationFlow.presentWhileNavigatingGallery);
-  FeatureBridge.favoritesSearchResults.register(FavoritesModel.getLatestSearchResults);
-  FeatureBridge.allFavorites.register(FavoritesModel.getFavorite);
-  FeatureBridge.setCustomTags.register(FavoritesModel.setCustomTags);
+  FeatureQueries.moreFavoritesPagesExist.register(FavoritesPresentationFlow.presentWhileNavigatingGallery);
+  FeatureQueries.favoritesSearchResults.register(FavoritesModel.getLatestSearchResults);
+  FeatureQueries.getFavorite.register(FavoritesModel.getFavorite);
+  FeatureQueries.allFavorites.register(FavoritesModel.getAllFavorites);
 }

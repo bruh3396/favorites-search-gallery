@@ -5,28 +5,28 @@ import { removeExtraWhiteSpace } from "../../utils/string/format";
 const SUGGESTION_LIMIT = 5;
 const MIN_TAG_LENGTH = 3;
 
-function getSavedSearchTagList(savedSearch: string): string[] {
+function getSavedTagList(savedSearch: string): string[] {
   return removeExtraWhiteSpace(savedSearch.replace(/[~())]/g, "")).split(" ");
 }
 
-function createAwesompleteSuggestion(searchTag: string, savedSearch: string): AwesompleteSuggestion {
+function createAwesompleteSuggestion(tag: string, savedSearch: string): AwesompleteSuggestion {
   return {
     label: savedSearch,
-    value: `${searchTag}_saved_search ${savedSearch}`,
+    value: `${tag}_saved_search ${savedSearch}`,
     type: "saved"
   };
 }
 
-export function savedSearchMatchesSearchTag(searchTag: string, savedSearch: string): boolean {
-  return getSavedSearchTagList(savedSearch).some(tag => tag.startsWith(searchTag));
+export function savedSearchMatchesTag(tag: string, savedSearch: string): boolean {
+  return getSavedTagList(savedSearch).some(t => t.startsWith(tag));
 }
 
-export function getSavedSearchesSuggestions(searchTag: string): AwesompleteSuggestion[] {
-  if (searchTag.length < MIN_TAG_LENGTH) {
+export function getSavedSearchesSuggestions(tag: string): AwesompleteSuggestion[] {
+  if (tag.length < MIN_TAG_LENGTH) {
     return [];
   }
   return getSavedSearches()
-    .filter(savedSearch => savedSearchMatchesSearchTag(searchTag, savedSearch))
+    .filter(savedSearch => savedSearchMatchesTag(tag, savedSearch))
     .slice(0, SUGGESTION_LIMIT)
-    .map(savedSearch => createAwesompleteSuggestion(searchTag, savedSearch));
+    .map(savedSearch => createAwesompleteSuggestion(tag, savedSearch));
 }

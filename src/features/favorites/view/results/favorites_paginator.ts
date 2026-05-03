@@ -1,4 +1,4 @@
-import { Favorite, FavoritesPageRelation } from "../../../../types/favorite";
+import { Favorite, PageRelation } from "../../../../types/favorite";
 import { FavoritesPaginationParameters } from "../../type/favorite_types";
 import { NavigationKey } from "../../../../types/input";
 import { Preferences } from "../../../../lib/preferences/preferences";
@@ -61,20 +61,23 @@ export function gotoAdjacentPage(direction: NavigationKey): boolean {
   return true;
 }
 
-export function gotoRelativePage(relation: FavoritesPageRelation): boolean {
+export function gotoRelativePage(relation: PageRelation): boolean {
   if (onlyOnePage()) {
     return false;
   }
 
-  if (((relation === "first") && onFirstPage()) || ((relation === "final") && onFinalPage())) {
+  if ((
+    (relation === "first" || relation === "previous") && onFirstPage()) ||
+    ((relation === "final" || relation === "next") && onFinalPage())) {
     return false;
   }
+
   switch (relation) {
-    case "previous": gotoPage((currentPageNumber - 1 + countPages()) % countPages());
+    case "previous": gotoPage(currentPageNumber - 1);
       break;
     case "first": gotoFirstPage();
       break;
-    case "next": gotoPage((currentPageNumber + 1) % countPages());
+    case "next": gotoPage(currentPageNumber + 1);
       break;
     case "final": gotoLastPage();
       break;

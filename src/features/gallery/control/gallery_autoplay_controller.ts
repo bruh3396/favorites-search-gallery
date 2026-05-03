@@ -10,7 +10,7 @@ import { Overlays } from "../../../lib/shell";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { Timer } from "../../../lib/core/scheduling/timer";
 import { createObjectURLFromSvg } from "../../../lib/navigator";
-import { insertStyle } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../lib/dom/injector";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 
 export type AutoplayEvents = {

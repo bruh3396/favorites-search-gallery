@@ -1,7 +1,7 @@
 import { AbstractFavoritesSearchBox } from "./favorites_abstract_search_box";
 import { Events } from "../../../../lib/communication/events";
 import { TOOLBAR_HTML } from "../../../../assets/html";
-import { setupMobileStickyMenu } from "../../view/shell/favorites_mobile_sticky_menu";
+import { setupMobileStickyMenu } from "./favorites_mobile_sticky_menu";
 import { setupMobileSymbolRow } from "./favorites_mobile_symbol_row";
 
 export class FavoritesMobileSearchBox extends AbstractFavoritesSearchBox {

@@ -12,7 +12,7 @@ import { favoriteElementTemplate } from "./favorite_element_template";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
 
 export class FavoriteElement {
-  private readonly root: HTMLElement;
+  public readonly root: HTMLElement;
   private readonly container: HTMLAnchorElement;
   private readonly image: HTMLImageElement;
   private favoriteButton: HTMLImageElement;
@@ -48,7 +48,7 @@ export class FavoriteElement {
     this.container.href = buildPostPageURL(this.root.id);
 
     if (ON_DESKTOP_DEVICE) {
-      this.container.onclick = (event): void => this.handleClick(event);
+      this.container.onclick = (event: MouseEvent): void => this.handleClick(event);
       this.container.addEventListener("mousedown", (event): void => this.handleMouseDown(event));
     }
   }
@@ -75,7 +75,7 @@ export class FavoriteElement {
     this.swapFavoriteButton();
   }
 
-  private handleClick(event: PointerEvent): void {
+  private handleClick(event: MouseEvent): void {
     if (event.ctrlKey) {
       openOriginal(this.root);
     }

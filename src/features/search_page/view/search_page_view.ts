@@ -1,7 +1,7 @@
 import * as Layout from "../../../lib/layout/layout";
 import * as SearchPageCreator from "./search_page_creator";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { SearchPage } from "../model/search_page";
+import { SearchPage } from "../type/search_page";
 import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
 import { hideUnusedLayoutSizer } from "../../../lib/layout/layout_event_handlers";
 

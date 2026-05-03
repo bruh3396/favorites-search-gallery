@@ -1,10 +1,10 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
-import { FeatureBridge } from "../../../../../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../../../../../lib/communication/feature_queries";
+import { GalleryUpscaleSettings } from "../../../../../../config/gallery_shared_settings";
 import { ImageRequest } from "../../../../type/gallery_image_request";
 import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
 import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../lib/preferences/preferences";
-import { SharedGallerySettings } from "../../../../../../config/gallery_shared_settings";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
 import { fetchBitmap } from "../controller/gallery_image_fetcher";
 import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
@@ -15,6 +15,7 @@ import { transferredCanvasIds } from "../../../../type/gallery_offscreen_upscale
 const batchUpscaleQueue = new ThrottledQueue(20);
 
 export abstract class GalleryAbstractUpscaler {
+  protected readonly upscaleQueue: ThrottledQueue = new ThrottledQueue(GalleryUpscaleSettings.upscaleDelay);
   private upscaledIds: Set<string> = new Set();
 
   public upscale(request: ImageRequest): void {
@@ -25,9 +26,10 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   public upscaleAnimated(thumbs: HTMLElement[]): void {
-     thumbs.filter(thumb => !isImage(thumb))
-     .map(thumb => new ImageRequest(thumb))
-     .forEach(request => this.directlyUpscale(request));
+    thumbs
+      .filter(thumb => !isImage(thumb) && this.requestIsValid(thumb))
+      .map(thumb => new ImageRequest(thumb))
+      .forEach(request => this.directlyUpscale(request));
   }
 
   public async upscaleBatch(requests: ImageRequest[]): Promise<void> {
@@ -43,8 +45,9 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   public clear(): void {
+    this.upscaleQueue.reset();
     this.upscaledIds.clear();
-    this.clear2();
+    this.reset();
   }
 
   public presetCanvasDimensions(thumbs: HTMLElement[]): void {
@@ -61,8 +64,8 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   protected setThumbCanvasDimensions(canvas: HTMLCanvasElement, width: number, height: number): void {
-    const maxHeight = SharedGallerySettings.maxUpscaledThumbCanvasHeight;
-    let targetWidth = SharedGallerySettings.upscaledThumbCanvasWidth;
+    const maxHeight = GalleryUpscaleSettings.maxUpscaledThumbCanvasHeight;
+    let targetWidth = GalleryUpscaleSettings.upscaledThumbCanvasWidth;
     let targetHeight = (targetWidth / width) * height;
 
     if (targetWidth > width) {
@@ -102,10 +105,15 @@ export abstract class GalleryAbstractUpscaler {
       });
   }
 
-  private requestIsValid(request: ImageRequest): boolean {
-    const thumbIsOnPage = document.getElementById(request.id) !== null;
-    const inGallery = FeatureBridge.inGallery.query();
-    return thumbIsOnPage && request.isHighRes && request.hasCompleted && !this.upscaledIds.has(request.id) && !inGallery;
+  private requestIsValid(request: ImageRequest | HTMLElement): boolean {
+    const thumbIsOffPage = document.getElementById(request.id) === null;
+    const inGallery = FeatureQueries.inGallery.query();
+    const seen = this.upscaledIds.has(request.id);
+
+    if (seen || inGallery || thumbIsOffPage) {
+      return false;
+    }
+    return (request instanceof HTMLElement) ? true : request.isHighRes && request.hasCompleted;
   }
 
   private enabled(): boolean {
@@ -115,6 +123,6 @@ export abstract class GalleryAbstractUpscaler {
     return PERFORMANCE_PROFILE === PerformanceProfile.NORMAL;
   }
 
-  protected abstract clear2(): void;
+  protected abstract reset(): void;
   protected abstract finishUpscale(request: ImageRequest): void;
 }

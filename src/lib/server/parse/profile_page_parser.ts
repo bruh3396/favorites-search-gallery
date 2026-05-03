@@ -1,4 +1,4 @@
-import { domParser } from "../../../utils/dom/dom_parser";
+import { domParser } from "../../dom/dom_parser";
 
 export function extractFavoritesCount(html: string): number {
   const favoritesUrl = Array.from(domParser.parseFromString(html, "text/html").querySelectorAll("a"))

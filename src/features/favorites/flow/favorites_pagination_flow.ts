@@ -1,6 +1,6 @@
 import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
-import { Favorite, FavoritesPageRelation } from "../../../types/favorite";
+import { Favorite, PageRelation } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";
 import { FavoritesPresentationFlow } from "../type/favorite_types";
 import { NavigationKey } from "../../../types/input";
@@ -19,7 +19,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
     this.showCurrentPage();
   }
 
-  public gotoRelativePage(relativePage: FavoritesPageRelation): void {
+  public gotoRelativePage(relativePage: PageRelation): void {
     if (FavoritesView.gotoRelativePage(relativePage)) {
       this.showCurrentPage();
     }
@@ -81,4 +81,4 @@ class PaginationFlow implements FavoritesPresentationFlow {
 
 export const FavoritesPaginationFlow = new PaginationFlow();
 export const gotoPage = (pageNumber: number): void => FavoritesPaginationFlow.gotoPage(pageNumber);
-export const gotoRelativePage = (relativePage: FavoritesPageRelation): void => FavoritesPaginationFlow.gotoRelativePage(relativePage);
+export const gotoRelativePage = (relativePage: PageRelation): void => FavoritesPaginationFlow.gotoRelativePage(relativePage);

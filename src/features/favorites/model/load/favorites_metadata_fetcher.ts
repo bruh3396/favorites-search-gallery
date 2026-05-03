@@ -1,4 +1,4 @@
-import * as ExtensionCache from "../../../../lib/media/extension_cache";
+import * as ExtensionResolver from "../../../../lib/media/media_extension_resolver";
 import * as PostAPI from "../../../../lib/server/fetch/post_fetcher";
 import { Favorite } from "../../../../types/favorite";
 import { FavoriteItem } from "../../type/favorite_item";
@@ -54,7 +54,7 @@ function processPostMap(postMap: Record<string, Post>, favoriteMap: Map<string, 
     }
     favorite.validateTags(post);
     favorite.populateMetadata(post);
-    ExtensionCache.setExtensionFromPost(post);
+    ExtensionResolver.setExtensionFromPost(post);
 
     if (isDatabaseWritten) {
       onMetadataUpdated(favorite);

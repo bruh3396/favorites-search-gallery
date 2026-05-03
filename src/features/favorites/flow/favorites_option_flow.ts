@@ -10,7 +10,7 @@ export function toggleInfiniteScroll(value: boolean): void {
 }
 
 export function onBlacklistChanged(): void {
-  FavoritesModel.onBlacklistChanged();
+  FavoritesModel.updateSearchQuery();
   researchFavorites();
 }
 

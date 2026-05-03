@@ -560,7 +560,8 @@ export default defineConfig([
     files: [
       "src/lib/core/data_structures/sorted_array.ts",
       "src/features/favorites/type/favorite_item.ts",
-      "src/features/favorites/control/components/favorites_rating_filter.ts"
+      "src/features/favorites/control/components/favorites_rating_filter.ts",
+      "src/lib/search/tag/wildcard_tag.ts"
     ],
     rules: {
       "no-bitwise": "off"

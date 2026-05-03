@@ -17,7 +17,7 @@ async function probeExtensions(item: HTMLElement | Favorite): Promise<MediaExten
 }
 
 async function probeExtension(url: string, extension: string): Promise<boolean> {
-  const response = await fetch(url.replace(".jpg", `.${extension}`)).catch();
+  const response = await fetch(url.replace(".jpg", `.${extension}`), { method: "HEAD" }).catch();
   return response.ok;
 }
 

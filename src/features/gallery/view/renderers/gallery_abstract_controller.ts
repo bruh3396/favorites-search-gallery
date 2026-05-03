@@ -1,11 +1,11 @@
-import { galleryRoot } from "../shell/gallery_shell";
+import { GalleryRoot } from "../shell/gallery_shell";
 
 export abstract class GalleryAbstractController {
   public readonly container: HTMLElement;
 
   constructor() {
     this.container = document.createElement("div");
-    galleryRoot.appendChild(this.container);
+    GalleryRoot.appendChild(this.container);
   }
 
   public render(element: HTMLElement): void {

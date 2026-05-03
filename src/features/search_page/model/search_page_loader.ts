@@ -1,6 +1,6 @@
 import { NavigationKey } from "../../../types/input";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
-import { SearchPage } from "./search_page";
+import { SearchPage } from "../type/search_page";
 import { fetchSearchPage } from "../../../lib/server/fetch/search_page_fetcher";
 import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
 import { isForwardNavigationKey } from "../../../types/guards";

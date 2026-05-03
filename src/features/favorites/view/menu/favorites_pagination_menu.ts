@@ -1,10 +1,10 @@
 import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../type/favorite_types";
 import { Events } from "../../../../lib/communication/events";
-import { FavoritesPageRelation } from "../../../../types/favorite";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
+import { PageRelation } from "../../../../types/favorite";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { insertStyle } from "../../../../lib/dom/injector";
 import { isOnlyDigits } from "../../../../utils/string/query";
 import { numbersAroundInRange } from "../../../../utils/number";
 
@@ -120,7 +120,7 @@ function createArrowTraversalButtons(parameters: FavoritesPaginationParameters):
   updateArrowTraversalButtonInteractability(previous, first, next, final, parameters);
 }
 
-function createArrowTraversalButton(name: FavoritesPageRelation, textContent: string, position: InsertPosition): HTMLButtonElement {
+function createArrowTraversalButton(name: PageRelation, textContent: string, position: InsertPosition): HTMLButtonElement {
   const button = document.createElement("button");
 
   button.id = `${name}-page`;

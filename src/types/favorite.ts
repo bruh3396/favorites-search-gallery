@@ -46,4 +46,4 @@ export enum RemoveFavoriteStatus {
   FORBIDDEN = 1,
   SUCCESSFULLY_REMOVED = 2
 }
-export type FavoritesPageRelation = "first" | "previous" | "next" | "final";
+export type PageRelation = "first" | "previous" | "next" | "final";

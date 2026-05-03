@@ -5,7 +5,7 @@ import { mountGallery, toggleGalleryVisibility } from "./shell/gallery_shell";
 import { GALLERY_CSS } from "../../../assets/css";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { RemoveFavoriteStatus } from "../../../types/favorite";
-import { insertStyle } from "../../../utils/dom/injector";
+import { insertStyle } from "../../../lib/dom/injector";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);

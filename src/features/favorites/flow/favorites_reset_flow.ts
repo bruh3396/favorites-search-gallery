@@ -1,7 +1,7 @@
-import * as ExtensionCache from "../../../lib/media/extension_cache";
+import * as ExtensionResolver from "../../../lib/media/media_extension_resolver";
 import * as FavoritesModel from "../model/favorites_model";
 
 export function resetFavorites(): void {
   FavoritesModel.deleteDatabase();
-  ExtensionCache.deleteExtensionsDatabase();
+  ExtensionResolver.deleteExtensionsDatabase();
 }

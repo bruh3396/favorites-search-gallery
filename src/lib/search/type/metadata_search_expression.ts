@@ -11,8 +11,8 @@ export class MetadataSearchExpression {
   public readonly rightHandMetric: SearchableMetadataMetric;
   public readonly rightHandValue: number;
 
-  constructor(searchTag: string) {
-    const extractedExpression = this.extractExpression(searchTag);
+  constructor(tag: string) {
+    const extractedExpression = this.extractExpression(tag);
     const value = extractedExpression.value;
 
     this.metric = extractedExpression.metric;
@@ -29,8 +29,8 @@ export class MetadataSearchExpression {
     }
   }
 
-  private extractExpression(searchTag: string): { metric: SearchableMetadataMetric; operator: MetadataComparator; value: SearchableMetadataMetric | number } {
-    const extractedExpression = MetadataSearchExpression.regex.exec(searchTag);
+  private extractExpression(tag: string): { metric: SearchableMetadataMetric; operator: MetadataComparator; value: SearchableMetadataMetric | number } {
+    const extractedExpression = MetadataSearchExpression.regex.exec(tag);
 
     if (extractedExpression === null || extractedExpression.length !== 4) {
       return {

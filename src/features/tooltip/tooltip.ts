@@ -7,14 +7,14 @@ import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";
 import { TOOLTIP_HTML } from "../../assets/html";
 import { convertToTagString } from "../../utils/string/tags";
 import { getTagSetFromItem } from "../../lib/dom/tags";
-import { parseTagGroups } from "../../lib/search/query/search_tag_group";
+import { parseTagGroups } from "../../lib/search/parse/tag_group_parser";
 import { randomPurpleColor } from "../../utils/string/color";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 let tooltip: HTMLElement;
 let defaultTransition: string;
 let visible: boolean;
-let searchTagColorCodes: Record<string, string>;
+let tagColorCodes: Record<string, string>;
 let searchBox: HTMLTextAreaElement;
 let previousSearch: string;
 let currentImage: HTMLImageElement | null;
@@ -27,7 +27,7 @@ export function setupTooltip(): void {
   Overlays.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
   tooltip = createTooltip();
   defaultTransition = tooltip.style.transition;
-  searchTagColorCodes = {};
+  tagColorCodes = {};
   currentImage = null;
   addEventListeners();
   assignColorsToMatchedTags();
@@ -170,7 +170,7 @@ function getTags(image: HTMLImageElement): string {
   }
   const tags = getTagSetFromItem(thumb);
 
-  if (searchTagColorCodes[thumb.id] === undefined) {
+  if (tagColorCodes[thumb.id] === undefined) {
     tags.delete(thumb.id);
   }
   return convertToTagString(tags);
@@ -205,7 +205,7 @@ function assignTagColors(searchQuery: string): void {
   searchQuery = removeNotTags(searchQuery);
   const { orGroups, andTags } = parseTagGroups(searchQuery);
 
-  searchTagColorCodes = {};
+  tagColorCodes = {};
   assignColorsToOrGroupTags(orGroups);
   assignColorsToAndTags(andTags);
 }
@@ -234,28 +234,28 @@ function removeNotTags(tags: string): string {
 function addColorCodedTag(tag: string, color: string): void {
   tag = tag.toLowerCase().trim();
 
-  if (searchTagColorCodes[tag] === undefined) {
-    searchTagColorCodes[tag] = color;
+  if (tagColorCodes[tag] === undefined) {
+    tagColorCodes[tag] = color;
   }
 }
 
 function getColorCode(tag: string): string | null {
-  if (searchTagColorCodes[tag] !== undefined) {
-    return searchTagColorCodes[tag];
+  if (tagColorCodes[tag] !== undefined) {
+    return tagColorCodes[tag];
   }
 
-  for (const searchTag of Object.keys(searchTagColorCodes)) {
-    if (tagsMatchWildcardSearchTag(searchTag, tag)) {
-      return searchTagColorCodes[searchTag];
+  for (const knownTags of Object.keys(tagColorCodes)) {
+    if (tagsMatchWildcardTag(knownTags, tag)) {
+      return tagColorCodes[knownTags];
     }
   }
   return null;
 }
 
-function tagsMatchWildcardSearchTag(searchTag: string, tag: string): boolean {
+function tagsMatchWildcardTag(query: string, rawTag: string): boolean {
   try {
-    const wildcardRegex = new RegExp(`^${searchTag.replace(/\*/g, ".*")}$`);
-    return wildcardRegex.test(tag);
+    const wildcardRegex = new RegExp(`^${query.replace(/\*/g, ".*")}$`);
+    return wildcardRegex.test(rawTag);
   } catch {
     return false;
   }

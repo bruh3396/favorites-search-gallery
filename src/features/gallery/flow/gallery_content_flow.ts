@@ -1,11 +1,11 @@
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryThumbObserver from "../control/gallery_visible_thumb_observer";
 import * as GalleryView from "../view/gallery_view";
-import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
+import { executeByGalleryState } from "./gallery_state_executor";
 
 export function handlePageChange(): void {
   indexThumbs();
-  executeFunctionBasedOnGalleryState({
+  executeByGalleryState({
     idle: GalleryView.handlePageChange,
     hover: GalleryView.handlePageChange,
     gallery: GalleryView.handlePageChangeInGallery

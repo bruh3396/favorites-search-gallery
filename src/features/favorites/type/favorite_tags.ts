@@ -1,7 +1,7 @@
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/post";
-import { getCorrectTags } from "../../../lib/media/media_tag_validator";
+import { correctTags } from "../../../lib/media/media_tag_validator";
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();
@@ -65,21 +65,19 @@ export class FavoriteTags {
   }
 
   private tagsAreEqual(post: Post): boolean {
-    const correctTags = getCorrectTags(post);
-    const difference = this.tags.symmetricDifference(correctTags);
+    const validTags = correctTags(post);
+    const difference = this.tags.symmetricDifference(validTags);
     const equal = difference.size === 0 || (difference.size === 1 && difference.has(post.id));
 
     if (equal) {
       return true;
     }
-    post.tags = convertToTagString(correctTags);
+    post.tags = convertToTagString(validTags);
     return false;
   }
 
   private mergeTags(): void {
-    const sorted = Array.from(this.baseTags.union(this.additionalTags)).sort();
-
-    this.tags = new Set(sorted);
+    this.tags = new Set(Array.from(this.baseTags.union(this.additionalTags)).sort());
   }
 
   private correctVideoTag(): void {

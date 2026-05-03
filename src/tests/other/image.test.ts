@@ -1,0 +1,85 @@
+import { compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource, normalizeImageSource, removeIdFromImageURL } from "../../lib/server/url/media_url_transformer";
+import { describe, expect, test } from "vitest";
+
+describe("cleanImageSource", () => {
+  test("empty", () => {
+    expect(normalizeImageSource("")).toBe("");
+  });
+
+  test("one subdomain", () => {
+    const source = "https://wimg.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
+    const source1 = "https://wimg1.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
+    const source2 = "https://wimg2.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
+    const expected = "https://rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
+
+    expect(normalizeImageSource(source)).toBe(expected);
+    expect(normalizeImageSource(source1)).toBe(expected);
+    expect(normalizeImageSource(source2)).toBe(expected);
+    expect(normalizeImageSource("wimg.rule34.xxx")).toBe("rule34.xxx");
+  });
+
+  test("two subdomains", () => {
+    const source = "https://wimg.foo.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
+    const expected = "https://rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
+    const actual = normalizeImageSource(source);
+
+    expect(actual).toBe(expected);
+  });
+});
+
+describe("compressImageSource", () => {
+  test("normal", () => {
+    const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
+    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
+
+    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
+  });
+
+  test("no subdomain", () => {
+    const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
+    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
+
+    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
+  });
+});
+
+describe("convertPreviewURLToImageURL", () => {
+  test("empty", () => {
+    expect(convertPreviewURLToImageURL("")).toBe("");
+  });
+
+  test("normal", () => {
+    const source = "https://us.rule34.xxx/thumbnails/0123/thumbnail_123456abcde09.jpg?11187914";
+    const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
+
+    expect(convertPreviewURLToImageURL(source)).toBe(expected);
+  });
+});
+
+describe("convertImageURLToSampleURL", () => {
+  test("empty", () => {
+    expect(convertImageURLToSampleURL("")).toBe("");
+  });
+
+  test("normal", () => {
+    const source = "https://us.rule34.xxx/images/0123/123456abcde09.jpeg";
+    const expected = "https://us.rule34.xxx/samples/0123/sample_123456abcde09.jpg";
+
+    expect(convertImageURLToSampleURL(source)).toBe(expected);
+  });
+});
+
+describe("removeIdFromImageURL", () => {
+  test("empty", () => {
+    expect(removeIdFromImageURL("")).toBe("");
+  });
+
+  test("normal", () => {
+    expect(removeIdFromImageURL("example.jpg")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?1")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?2")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?3")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?123456")).toBe("example.jpg");
+    expect(removeIdFromImageURL("example.jpg?123456")).toBe("example.jpg");
+  });
+});

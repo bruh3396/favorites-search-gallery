@@ -1,23 +1,23 @@
 import * as PostAPI from "../../lib/server/fetch/post_fetcher";
 import * as TagAPI from "../../lib/server/fetch/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
-import { CoalescingExecutor } from "../../lib/core/concurrency/coalescing_executor";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import { CAPTION_CSS } from "../../assets/css";
 import { ClickCode } from "../../types/input";
+import { CoalescingExecutor } from "../../lib/core/concurrency/coalescing_executor";
 import { Database } from "../../lib/core/storage/database";
 import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { capitalize } from "../../utils/string/format";
 import { debounceLeading } from "../../lib/core/scheduling/rate_limiting";
 import { doNothing } from "../../lib/environment/constants";
-import { domParser } from "../../utils/dom/dom_parser";
+import { domParser } from "../../lib/dom/dom_parser";
 import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getImageFromThumb } from "../../lib/dom/thumb";
 import { getTagSetFromItem } from "../../lib/dom/tags";
-import { insertStyle } from "../../utils/dom/injector";
+import { insertStyle } from "../../lib/dom/injector";
 import { isOnlyDigits } from "../../utils/string/query";
 import { isTagCategory } from "../../types/guards";
 import { openSearchPage } from "../../lib/navigator";
@@ -287,7 +287,7 @@ function thumbMetadataExists(thumb: HTMLElement): boolean {
   if (ON_SEARCH_PAGE) {
     return false;
   }
-  const favorite = FeatureBridge.allFavorites.query(thumb.id);
+  const favorite = FeatureQueries.getFavorite.query(thumb.id);
 
   if (favorite === undefined) {
     return false;
@@ -300,7 +300,7 @@ function thumbMetadataExists(thumb: HTMLElement): boolean {
 }
 
 function estimateThumbHeightFromMetadata(thumb: HTMLElement, columnInput: HTMLInputElement): number {
-  const favorite = FeatureBridge.allFavorites.query(thumb.id);
+  const favorite = FeatureQueries.getFavorite.query(thumb.id);
 
   if (favorite === undefined) {
     return 200;

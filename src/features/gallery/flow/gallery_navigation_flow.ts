@@ -2,7 +2,7 @@ import * as GalleryAutoplayController from "../control/gallery_autoplay_controll
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../view/gallery_view";
-import { FeatureBridge } from "../../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../../lib/communication/feature_queries";
 import { GalleryBoundary } from "../type/gallery_types";
 import { NavigationKey } from "../../../types/input";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
@@ -10,16 +10,11 @@ import { usingInfiniteScroll } from "../../../lib/preferences/infinite_scroll";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.navigate(direction)) {
-    case GalleryBoundary.AT_LEFT_BOUNDARY:
-      navigateAtLeftBoundary();
+    case GalleryBoundary.AT_LEFT_BOUNDARY: navigateAtLeftBoundary();
       break;
-
-    case GalleryBoundary.AT_RIGHT_BOUNDARY:
-      navigateAtRightBoundary();
+    case GalleryBoundary.AT_RIGHT_BOUNDARY: navigateAtRightBoundary();
       break;
-
-    default:
-      finishNavigation();
+    default: finishNavigation();
       break;
   }
 }
@@ -46,9 +41,9 @@ function navigateAtRightBoundary(): void {
 
 function loadMoreResults(direction: NavigationKey): boolean {
   if (ON_FAVORITES_PAGE) {
-    return FeatureBridge.moreFavoritesPagesExist.query(direction);
+    return FeatureQueries.moreFavoritesPagesExist.query(direction);
   }
-  return (FeatureBridge.moreSearchPagesExist.query(direction)) !== null;
+  return (FeatureQueries.moreSearchPagesExist.query(direction)) !== null;
 }
 
 function finishNavigation(): void {
@@ -56,5 +51,5 @@ function finishNavigation(): void {
 
   GalleryView.showContentInGallery(thumb);
   GalleryAutoplayController.startViewTimer(thumb);
-  GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
+  GalleryPreloadFlow.preloadInGalleryAround(thumb);
 }

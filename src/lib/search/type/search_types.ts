@@ -1,6 +1,6 @@
-import { AbstractSearchTag } from "../tag/abstract_search_tag";
-import { MetadataSearchTag } from "../tag/metadata_search_tag";
-import { WildcardSearchTag } from "../tag/wildcard_search_tag";
+import { AbstractTag } from "../tag/abstract_tag";
+import { MetadataTag } from "../tag/metadata_tag";
+import { WildcardTag } from "../tag/wildcard_tag";
 
 export type SearchQueryMetadata = {
   hasPositiveAndTag: boolean
@@ -10,13 +10,13 @@ export type SearchQueryMetadata = {
 };
 
 export type CategorizedTags = {
-  positiveTags: AbstractSearchTag[]
-  wildcardTags: WildcardSearchTag[]
-  metadataTags: MetadataSearchTag[]
+  positiveTags: AbstractTag[]
+  wildcardTags: WildcardTag[]
+  metadataTags: MetadataTag[]
 };
 
 export enum WildcardMatchType {
   PREFIX = 10,
-  CONTAINS = 15,
+  INCLUDES = 15,
   REGEX = 20
 }

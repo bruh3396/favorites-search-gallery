@@ -11,7 +11,7 @@ export function enterGallery(thumb: HTMLElement): void {
   GalleryView.enterGallery(thumb);
   GalleryInteractionTracker?.enable();
   GalleryAutoplayController.startAutoplay(thumb);
-  GalleryPreloadFlow.preloadContentInGalleryAround(thumb);
+  GalleryPreloadFlow.preloadInGalleryAround(thumb);
   Events.gallery.showOnHoverOverridden.emit(false);
   Events.gallery.enteredGallery.emit();
 }

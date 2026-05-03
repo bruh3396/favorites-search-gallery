@@ -2,7 +2,7 @@ import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } fr
 import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
-import { addCustomTagsToAutocomplete } from "../favorites/model/tags/favorites_custom_tags";
+import { addCustomTagsToAutocomplete } from "../../lib/tags/custom_tags";
 import { fetchHtml } from "../../lib/server/http/http_client";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../lib/ui/awesomplete";

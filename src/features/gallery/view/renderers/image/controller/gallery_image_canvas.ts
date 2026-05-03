@@ -2,7 +2,7 @@ import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
 import { clearCanvas, drawScaledCanvas } from "../../../../../../utils/dom/canvas";
 import { GallerySettings } from "../../../../../../config/gallery_settings";
 import { ON_DESKTOP_DEVICE } from "../../../../../../lib/environment/environment";
-import { insertStyle } from "../../../../../../utils/dom/injector";
+import { insertStyle } from "../../../../../../lib/dom/injector";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 
 const mainCanvas = document.createElement("canvas");

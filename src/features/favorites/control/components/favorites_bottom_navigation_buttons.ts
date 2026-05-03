@@ -2,7 +2,7 @@ import { Content } from "../../../../lib/shell";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { insertStyle } from "../../../../lib/dom/injector";
 import { yieldControl } from "../../../../lib/core/scheduling/promise";
 
 export async function setupFavoritesBottomNavigationButtons(): Promise<void> {

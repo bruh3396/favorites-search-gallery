@@ -1,9 +1,9 @@
 import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../dom/input_types";
-import { Favorite, FavoritesPageRelation } from "../../types/favorite";
+import { Favorite, PageRelation } from "../../types/favorite";
 import { GalleryMenuAction, LayoutMode, PerformanceProfile } from "../../types/ui";
 import { MetadataMetric, Rating } from "../../types/search";
 import { Emitter } from "../core/scheduling/emitter";
-import { SearchPage } from "../../features/search_page/model/search_page";
+import { SearchPage } from "../../features/search_page/type/search_page";
 import { StickyEmitter } from "../core/scheduling/sticky_emitter";
 
 export const Events = {
@@ -11,7 +11,7 @@ export const Events = {
     searchStarted: new Emitter<string>(),
     pageChanged: new Emitter<void>(),
     pageSelected: new Emitter<number>(),
-    relativePageSelected: new Emitter<FavoritesPageRelation>(),
+    relativePageSelected: new Emitter<PageRelation>(),
     findFavoriteStarted: new Emitter<string>(),
     findFavoriteInAllStarted: new Emitter<string>(),
     favoritesLoadedFromDatabase: new StickyEmitter<void>(),
@@ -94,7 +94,8 @@ export const Events = {
     touchHold: new Emitter<TouchEvent>()
   },
   tagModifier: {
-    resetConfirmed: new Emitter<void>()
+    needsReIndex: new Emitter<Favorite>(),
+    needsDeIndex: new Emitter<Favorite>()
   },
   document: {
     domLoaded: new StickyEmitter<void>(),

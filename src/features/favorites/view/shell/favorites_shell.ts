@@ -1,6 +1,6 @@
 import { DESKTOP_CSS, MOBILE_CSS } from "../../../../assets/css";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { insertHtmlWithStyles, insertStyle } from "../../../../utils/dom/injector";
+import { insertHtmlWithStyles, insertStyle } from "../../../../lib/dom/injector";
 import { FAVORITES_HTML } from "../../../../assets/html";
 import { Root } from "../../../../lib/shell";
 import { buildControlsGuide } from "./favorites_mobile_control_guide";

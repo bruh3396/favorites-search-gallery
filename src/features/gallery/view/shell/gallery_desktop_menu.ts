@@ -3,13 +3,13 @@ import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/sty
 import { Events } from "../../../../lib/communication/events";
 import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../type/gallery_types";
+import { GalleryRoot } from "./gallery_shell";
 import { GallerySettings } from "../../../../config/gallery_settings";
 import { GeneralSettings } from "../../../../config/general_settings";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Timeout } from "../../../../types/async";
-import { galleryRoot } from "./gallery_shell";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { insertStyle } from "../../../../lib/dom/injector";
 import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../../utils/browser/window";
 
@@ -179,7 +179,7 @@ export function setupDesktopGalleryMenu(): void {
   if (!GeneralSettings.galleryMenuOptionEnabled) {
     return;
   }
-  galleryRoot.appendChild(menu);
+  GalleryRoot.appendChild(menu);
   loadPreferences();
   createButtons();
   createColorPicker();

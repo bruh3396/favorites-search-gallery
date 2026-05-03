@@ -1,4 +1,4 @@
-import { FeatureBridge } from "../../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../../lib/communication/feature_queries";
 import { MediaType } from "../../../types/media";
 import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { getPreviewURL } from "../../../lib/ui/dom";
@@ -8,7 +8,7 @@ import { resolveMediaType } from "../../../lib/media/media_type_resolver";
 const imageBitmapCloseQueue = new ThrottledQueue(50);
 
 export function getFavoritePixelCount(id: string): number {
-  const favorite = FeatureBridge.allFavorites.query(id);
+  const favorite = FeatureQueries.getFavorite.query(id);
   return favorite ? favorite.metrics.width * favorite.metrics.height : 0;
 }
 

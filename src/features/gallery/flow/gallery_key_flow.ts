@@ -6,9 +6,25 @@ import * as GalleryView from "../view/gallery_view";
 import { isExitKey, isNavigationKey } from "../../../types/guards";
 import { EnhancedKeyboardEvent } from "../../../lib/dom/input_types";
 import { GallerySettings } from "../../../config/gallery_settings";
-import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
+import { executeByGalleryState } from "./gallery_state_executor";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../utils/browser/window";
+
+const hotKeyHandlers: Record<string, () => void> = {
+  b: GalleryView.toggleBackgroundOpacity,
+  e: GalleryFavoriteToggleFlow.addFavoriteInGallery,
+  x: GalleryFavoriteToggleFlow.removeFavoriteInGallery,
+  f: toggleFullscreen,
+  g: GalleryModel.openPostInNewTab,
+  q: GalleryModel.openOriginalInNewTab,
+  s: GalleryModel.downloadInGallery,
+  m: GalleryView.toggleVideoMute,
+  " ": () => {
+    if (GalleryModel.isViewingVideo()) {
+      GalleryView.toggleVideoPause();
+    }
+  }
+};
 
 function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;
@@ -34,72 +50,18 @@ function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   }
 
   if (keyboardEvent.isHotkey) {
-    executeGalleryHotkey(event.key.toLowerCase());
-  }
-}
-
-function executeGalleryHotkey(key: string): void {
-  switch (key) {
-    case "b":
-      GalleryView.toggleBackgroundOpacity();
-      break;
-
-    case "e":
-      GalleryFavoriteToggleFlow.addFavoriteInGallery();
-      break;
-
-    case "x":
-      GalleryFavoriteToggleFlow.removeFavoriteInGallery();
-      break;
-
-    case "f":
-      toggleFullscreen();
-      break;
-
-    case "g":
-      GalleryModel.openPostInNewTab();
-      break;
-
-    case "q":
-      GalleryModel.openOriginalInNewTab();
-      break;
-
-    case "s":
-      GalleryModel.downloadInGallery();
-      break;
-
-    case "m":
-      GalleryView.toggleVideoMute();
-      break;
-
-    case " ":
-      if (GalleryModel.isViewingVideo()) {
-        GalleryView.toggleVideoPause();
-      }
-      break;
-
-    default:
-      break;
+    hotKeyHandlers[event.key.toLowerCase()]?.();
   }
 }
 
 function onKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
-  if (!event.isHotkey) {
-    return;
-  }
-
-  switch (event.key.toLowerCase()) {
-    case "f":
-      toggleFullscreen();
-      break;
-
-    default:
-      break;
+  if (event.isHotkey && event.key.toLowerCase() === "f") {
+    toggleFullscreen();
   }
 }
 
 const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
-  executeFunctionBasedOnGalleryState({
+  executeByGalleryState({
     idle: onKeyDownOutsideGallery,
     hover: onKeyDownOutsideGallery,
     gallery: onKeyDownInGallery
@@ -115,17 +77,13 @@ function onKeyUpInGallery(event: EnhancedKeyboardEvent): void {
 }
 
 export function onKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
-  const event = keyboardEvent.originalEvent;
-
-  if (event.repeat) {
-    onKeyDownThrottled(event);
+  if (keyboardEvent.originalEvent.repeat) {
+    onKeyDownThrottled(keyboardEvent.originalEvent);
   } else {
-    onKeyDownNoThrottle(event);
+    onKeyDownNoThrottle(keyboardEvent.originalEvent);
   }
 }
 
 export function onKeyUp(event: EnhancedKeyboardEvent): void {
-  executeFunctionBasedOnGalleryState({
-    gallery: onKeyUpInGallery
-  }, event);
+  executeByGalleryState({ gallery: onKeyUpInGallery }, event);
 }

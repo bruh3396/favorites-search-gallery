@@ -5,10 +5,10 @@ import { DOWNLOADER_HTML } from "../../assets/html";
 import { DownloadRequest } from "./download_request";
 import { Events } from "../../lib/communication/events";
 import { Favorite } from "../../types/favorite";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { Overlays } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
-import { insertHtmlWithStyles } from "../../utils/dom/injector";
+import { insertHtmlWithStyles } from "../../lib/dom/injector";
 import { splitIntoChunks } from "../../utils/collection/array";
 import { toggleGlobalInputEvents } from "../../lib/communication/dom_event_bridge";
 
@@ -49,7 +49,7 @@ function getDownloadButton(): HTMLButtonElement {
   }
   button.addEventListener("click", () => {
     button.disabled = true;
-    downloadFavorites(FeatureBridge.favoritesSearchResults.query());
+    downloadFavorites(FeatureQueries.favoritesSearchResults.query());
   });
   return button;
 }
@@ -114,7 +114,7 @@ function openWhenDownloadButtonClicked(): void {
     if (favoritesLoaded) {
       downloadButton.disabled = false;
       dialog.showModal();
-      statusHeader.textContent = `Download ${FeatureBridge.favoritesSearchResults.query().length} Results`;
+      statusHeader.textContent = `Download ${FeatureQueries.favoritesSearchResults.query().length} Results`;
     } else {
       warningDialog.showModal();
     }

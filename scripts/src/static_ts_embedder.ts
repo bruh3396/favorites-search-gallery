@@ -13,7 +13,11 @@ const EMBED_CONFIGS: EmbedConfig[] = [
 ];
 
 function embedAll(): void {
-  EMBED_CONFIGS.forEach(config => writeFileSync(config.destination, generateTsModule(config)));
+  EMBED_CONFIGS.forEach(config => writeFileSync(config.destination, toCRLF(generateTsModule(config))));
+}
+
+function toCRLF(str: string): string {
+  return str.replace(/\r?\n/g, "\r\n");
 }
 
 function generateTsModule(config: EmbedConfig): string {

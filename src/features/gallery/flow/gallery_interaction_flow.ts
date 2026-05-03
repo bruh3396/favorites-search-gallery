@@ -1,10 +1,6 @@
 import * as GalleryView from "../view/gallery_view";
-import { executeFunctionBasedOnGalleryState } from "./gallery_runtime_flow_utils";
+import { executeByGalleryState } from "./gallery_state_executor";
 
 export function onInteractionStopped(): void {
-      executeFunctionBasedOnGalleryState({
-        gallery: () => {
-          GalleryView.toggleCursor(false);
-        }
-      });
+  executeByGalleryState({ gallery: () => GalleryView.toggleCursor(false) });
 }

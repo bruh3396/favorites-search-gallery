@@ -1,18 +1,18 @@
 import { Post } from "../../types/post";
 import { convertToTagSet } from "../../utils/string/tags";
 
-export function getCorrectTags(post: Post): Set<string> {
-  const correctTags = convertToTagSet(post.tags);
+export function correctTags(post: Post): Set<string> {
+  const validTags = convertToTagSet(post.tags);
 
-  correctTags.add(post.id);
+  validTags.add(post.id);
 
   if (post.fileURL.endsWith("mp4")) {
-    correctTags.add("video");
+    validTags.add("video");
   } else if (post.fileURL.endsWith("gif")) {
-    correctTags.add("gif");
-  } else if (!correctTags.has("animated_png")) {
-    correctTags.delete("video");
-    correctTags.delete("animated");
+    validTags.add("gif");
+  } else if (!validTags.has("animated_png")) {
+    validTags.delete("video");
+    validTags.delete("animated");
   }
-  return correctTags;
+  return validTags;
 }

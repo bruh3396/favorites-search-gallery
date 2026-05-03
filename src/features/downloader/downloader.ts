@@ -1,4 +1,4 @@
-import { DownloadRequest, createDownloadRequest } from "./download_request";
+import { DownloadRequest, toDownloadRequest } from "./download_request";
 import { ConcurrencyLimiter } from "../../lib/core/concurrency/concurrency_limiter";
 import { DownloadAbortedError } from "../../types/errors";
 import { Favorite } from "../../types/favorite";
@@ -65,7 +65,7 @@ async function downloadFavorites(favorites: Favorite[], progressCallback: (reque
 async function createFavoriteBlob(favorite: Favorite, zipWriter: ZipWriter, progressCallback: (request: DownloadRequest) => void): Promise<void> {
   try {
     stopIfAborted();
-    const request = await createDownloadRequest(favorite);
+    const request = await toDownloadRequest(favorite);
 
     stopIfAborted();
     const response = await fetchLimiter.run(() => {

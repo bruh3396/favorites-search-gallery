@@ -1,15 +1,15 @@
 import { convertPreviewURLToImageURL, removeIdFromImageURL } from "./media_url_transformer";
 import { Favorite } from "../../../types/favorite";
-import { getExtension } from "../../media/extension_cache";
 import { getPreviewURL } from "../../ui/dom";
 import { getTagSetFromItem } from "../../dom/tags";
+import { resolveExtension } from "../../media/media_extension_resolver";
 
 export async function resolveImageURL(item: HTMLElement | Favorite): Promise<string> {
   return (await resolveMediaURL(item)).replace(".mp4", ".jpg");
 }
 
 export async function resolveMediaURL(item: HTMLElement | Favorite): Promise<string> {
-  return resolveBaseImageURL(item).replace(".jpg", `.${await getExtension(item)}`);
+  return resolveBaseImageURL(item).replace(".jpg", `.${await resolveExtension(item)}`);
 }
 
 export function resolveGifUrl(thumb: HTMLElement | Favorite): string {

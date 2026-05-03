@@ -35,6 +35,7 @@ export function prependSearchResults(newFavorites: Favorite[]): Favorite[] {
 }
 
 export const getLatestSearchResults = (): Favorite[] => latestSearchResults;
-export const onBlacklistChanged = (): void => FavoritesSearchFilter.onBlacklistChanged();
-export const index = (favorites: Favorite[]): void => FavoritesSearchFilter.index(favorites);
-export const deferSearchEngineIndexing = (): void => FavoritesSearchFilter.deferSearchEngineIndexing();
+export const updateSearchQuery = (): void => FavoritesSearchFilter.updateSearchQuery();
+export const addToIndex = (favorites: Favorite[]): void => FavoritesSearchFilter.addToIndex(favorites);
+export const removeFromIndex = (favorites: Favorite[]): void => FavoritesSearchFilter.removeFromIndex(favorites);
+export const deferIndexing = (): void => FavoritesSearchFilter.deferIndexing();
