@@ -1,5 +1,5 @@
-import { THUMBNAIL_ORIGIN } from "./origin";
-import { extensionRegex } from "../../environment/constants";
+import { THUMBNAIL_ORIGIN } from "../remote/url/origin";
+import { extensionRegex } from "../environment/constants";
 
 const imageSourceNormalizationRegex = /^([^.]*\/\/)?(?:[^.]+\.)*rule34/;
 const thumbSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;

@@ -3,9 +3,9 @@ import { clearPost, createPost } from "./favorite_post_factory";
 import { FavoriteElement } from "./favorite_element";
 import { FavoriteMetadata } from "./favorite_metadata";
 import { FavoriteTags } from "./favorite_tags";
-import { Post } from "../../../types/post";
+import { Post } from "../../../types/api";
 import { Rating } from "../../../types/search";
-import { compressPreviewSource } from "../../../lib/server/url/media_url_transformer";
+import { compressPreviewSource } from "../../../lib/media/media_url_transformer";
 import { getIdFromThumb } from "../../../lib/dom/thumb";
 
 export class FavoriteItem implements Favorite {

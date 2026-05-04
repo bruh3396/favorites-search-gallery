@@ -1,6 +1,6 @@
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
-import { Post } from "../../../types/post";
+import { Post } from "../../../types/api";
 import { correctTags } from "../../../lib/media/media_tag_validator";
 
 export class FavoriteTags {

@@ -1,7 +1,7 @@
 import { NavigationKey } from "../../../types/input";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { SearchPage } from "../type/search_page";
-import { fetchSearchPage } from "../../../lib/server/fetch/search_page_fetcher";
+import { fetchSearchPage } from "../../../lib/remote/rule34/search_page_fetcher";
 import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
 import { isForwardNavigationKey } from "../../../types/guards";
 import { sleep } from "../../../lib/core/scheduling/promise";

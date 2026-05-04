@@ -8,7 +8,7 @@ import { setupFavorites } from "../features/favorites/favorites_setup";
 import { setupGallery } from "../features/gallery/gallery_setup";
 import { setupSavedSearches } from "../features/saved_searches/saved_searches";
 import { setupSearchPage } from "../features/search_page/search_page_setup";
-import { setupServer } from "../lib/server/fetch/post_fetcher";
+import { setupServer } from "../lib/remote/api/server_client";
 import { setupShell } from "../lib/shell";
 import { setupStyles } from "../lib/ui/style";
 import { setupTagModifier } from "../features/tag_modifier/tag_modifier";

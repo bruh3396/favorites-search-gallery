@@ -1,4 +1,5 @@
 experimental
+.env
 html
 css
 scripts/bin/

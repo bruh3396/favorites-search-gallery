@@ -4,7 +4,7 @@ import { ImageRequest } from "../../../../type/gallery_image_request";
 // @ts-expect-error string import
 import OFFSCREEN_UPSCALER_CODE from "./gallery_worker_upscaler?raw";
 // @ts-expect-error string import
-import SHARED_GALLERY_SETTINGS_CODE from "../../../../../../config/gallery_shared_settings?raw";
+import SHARED_GALLERY_SETTINGS_CODE from "../../../../../../config/gallery_upscale_settings?raw";
 import { createWorker } from "../../../../../../utils/browser/worker";
 import { removeFirstAndLastLines } from "../../../../../../utils/string/format";
 

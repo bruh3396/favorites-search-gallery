@@ -1,9 +1,9 @@
 import * as ExtensionResolver from "../../../../lib/media/media_extension_resolver";
-import * as PostAPI from "../../../../lib/server/fetch/post_fetcher";
+import * as PostAPI from "../../../../lib/remote/api/post_fetcher";
 import { Favorite } from "../../../../types/favorite";
 import { FavoriteItem } from "../../type/favorite_item";
-import { Post } from "../../../../types/post";
-import { fetchVideoDurationFromFavorite } from "../../../../lib/server/fetch/video_duration_fetcher";
+import { Post } from "../../../../types/api";
+import { fetchVideoDurationFromFavorite } from "../../../../lib/remote/rule34/video_duration_fetcher";
 import { isVideo } from "../../../../lib/media/media_type_guards";
 
 let onMetadataUpdated: (favorite: Favorite) => void = () => undefined;

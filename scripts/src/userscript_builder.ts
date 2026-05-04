@@ -1,14 +1,25 @@
 import { BuildOptions, build } from "esbuild";
-import { readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { rawTsPlugin } from "./raw_ts_plugin";
 
-const ENTRY_POINT = "src/app/favorites_search_gallery.ts";
+const SCRIPT_VERSION = "1.21";
+
+function loadEnv(): Record<string, string> {
+  const file = existsSync(".env") ? ".env" : ".env.example";
+  const entries = readFileSync(file, "utf8").split("\n").filter(line => line.includes("="));
+  return Object.fromEntries(entries.map(line => line.trim().split("=")));
+}
+
+function buildDefine(): Record<string, string> {
+  const env = Object.fromEntries(Object.entries(loadEnv()).map(([key, value]) => [key, JSON.stringify(value === "true")]));
+  return { ...env, SCRIPT_VERSION: JSON.stringify(SCRIPT_VERSION) };
+}
+
 const OUT_FILE = "dist/favorites_search_gallery.user.js";
-const META_FILE = "dist/meta.json";
 const USERSCRIPT_HEADER = `// ==UserScript==
 // @name         Rule34 Favorites Search Gallery
 // @namespace    bruh3396
-// @version      1.20.7
+// @version      ${SCRIPT_VERSION}
 // @description  Search, View, and Play Rule34 Favorites (Desktop/Android/iOS)
 // @author       bruh3396
 // @compatible   Chrome
@@ -21,7 +32,7 @@ const USERSCRIPT_HEADER = `// ==UserScript==
 
 // ==/UserScript==`;
 const BUILD_OPTIONS: BuildOptions = {
-  entryPoints: [ENTRY_POINT],
+  entryPoints: ["src/app/favorites_search_gallery.ts"],
   bundle: true,
   metafile: true,
   outfile: OUT_FILE,
@@ -31,6 +42,7 @@ const BUILD_OPTIONS: BuildOptions = {
   banner: {
     js: USERSCRIPT_HEADER
   },
+  define: buildDefine(),
   plugins: [rawTsPlugin],
   loader: {
     ".svg": "text"
@@ -44,7 +56,7 @@ async function buildUserscript(): Promise<void> {
   const crlfContent = contentWithoutSourceComments.replace(/\r?\n/g, "\r\n");
 
   writeFileSync(OUT_FILE, crlfContent, "utf8");
-  writeFileSync(META_FILE, JSON.stringify(result.metafile, null, 2), "utf8");
+  writeFileSync("dist/meta.json", JSON.stringify(result.metafile, null, 2), "utf8");
   console.log("✔ Build completed.");
 }
 

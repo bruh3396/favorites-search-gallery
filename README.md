@@ -130,9 +130,10 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
 | P   | Stop/start autoplay            | Autoplay option checked            |
-| G   | Open post            |             |
-| Q   | Open original            |             |
-| S   | Download  |
+| G   | Exit gallery                   |                                    |
+| W   | Open post                      |                                    |
+| Q   | Open original                  |                                    |
+| S   | Download                       |                                    |
 
 
 ### General Hotkeys (Desktop)
@@ -146,6 +147,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | R   | Toggle add/remove favorite buttons |
 | H   | Toggle hints |
 | F   | Toggle fullscreen |
+| G   | Enter gallery |
 
 
 

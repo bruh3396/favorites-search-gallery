@@ -41,7 +41,6 @@ export const searchFavorites = (searchQuery?: string): Favorite[] => FavoritesSe
 export const invertSearchResults = (): Favorite[] => FavoritesSearchCoordinator.invertSearchResults(FavoritesLoader.getActiveFavorites());
 export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getLatestSearchResults());
 
-export { hasFavorites, deleteDatabase, storeAllFavorites, getAllFavorites, storeNewFavorites, resetActiveFavorites, deleteFavorite, getFavorite } from "./load/favorites_loader";
-export { getLatestSearchResults, updateSearchQuery, shuffleSearchResults } from "./search/favorites_search_coordinator";
-export { onDatabaseWritten } from "./load/favorites_metadata_fetcher";
-export { removeFromIndex, addToIndex } from "./search/favorites_search_coordinator";
+export * from "./load/favorites_loader";
+export * from "./load/favorites_metadata_fetcher";
+export * from "./search/favorites_search_coordinator";

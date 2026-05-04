@@ -1,6 +1,6 @@
-import { Post } from "../../../types/post";
+import { Post } from "../../../types/api";
 import { domParser } from "../../dom/dom_parser";
-import { normalizeImageSource } from "../url/media_url_transformer";
+import { normalizeImageSource } from "../../media/media_url_transformer";
 import { parseDimensions2D } from "../../../utils/string/parse";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 

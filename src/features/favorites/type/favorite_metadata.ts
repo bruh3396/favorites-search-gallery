@@ -1,6 +1,6 @@
 import { DiscreteRating, Rating, decodeRating } from "../../../types/search";
 import { FavoriteMetricMap, FavoritesDatabaseRecord, FavoritesMetadataDatabaseRecord } from "../../../types/favorite";
-import { Post } from "../../../types/post";
+import { Post } from "../../../types/api";
 
 export class FavoriteMetadata {
   public readonly metrics: FavoriteMetricMap;

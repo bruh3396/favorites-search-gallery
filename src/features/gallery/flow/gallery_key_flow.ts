@@ -10,20 +10,28 @@ import { executeByGalleryState } from "./gallery_state_executor";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../utils/browser/window";
 
-const hotKeyHandlers: Record<string, () => void> = {
+function pauseVideo(): void {
+  if (GalleryModel.isViewingVideo()) {
+    GalleryView.toggleVideoPause();
+  }
+}
+
+const inGalleryHotkeyHandlers: Record<string, () => void> = {
   b: GalleryView.toggleBackgroundOpacity,
   e: GalleryFavoriteToggleFlow.addFavoriteInGallery,
-  x: GalleryFavoriteToggleFlow.removeFavoriteInGallery,
   f: toggleFullscreen,
-  g: GalleryModel.openPostInNewTab,
+  g: GalleryStateFlow.exitGallery,
+  m: GalleryView.toggleVideoMute,
   q: GalleryModel.openOriginalInNewTab,
   s: GalleryModel.downloadInGallery,
-  m: GalleryView.toggleVideoMute,
-  " ": () => {
-    if (GalleryModel.isViewingVideo()) {
-      GalleryView.toggleVideoPause();
-    }
-  }
+  w: GalleryModel.openPostInNewTab,
+  x: GalleryFavoriteToggleFlow.removeFavoriteInGallery,
+  " ": pauseVideo
+};
+
+const outsideGalleryHotkeyHandlers: Record<string, () => void> = {
+  g: GalleryStateFlow.reEnterGallery,
+  f: toggleFullscreen
 };
 
 function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
@@ -50,13 +58,13 @@ function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   }
 
   if (keyboardEvent.isHotkey) {
-    hotKeyHandlers[event.key.toLowerCase()]?.();
+    inGalleryHotkeyHandlers[event.key.toLowerCase()]?.();
   }
 }
 
 function onKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
-  if (event.isHotkey && event.key.toLowerCase() === "f") {
-    toggleFullscreen();
+  if (event.isHotkey) {
+    outsideGalleryHotkeyHandlers[event.key.toLowerCase()]?.();
   }
 }
 

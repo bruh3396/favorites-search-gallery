@@ -1,5 +1,5 @@
-import { convertImageURLToSampleURL } from "../url/media_url_transformer";
-import { resolveImageURL } from "../url/media_url_resolver";
+import { convertImageURLToSampleURL } from "../../media/media_url_transformer";
+import { resolveImageURL } from "../../media/media_url_resolver";
 
 export function fetchImageBitmap(url: string, abortController?: AbortController): Promise<ImageBitmap> {
   return fetch(url, { signal: abortController?.signal })
@@ -30,7 +30,5 @@ export async function fetchImageBitmapFromThumb(thumb: HTMLElement, abortControl
 
 export async function fetchSampleImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
   return fetchImageBitmap(convertImageURLToSampleURL(await resolveImageURL(thumb)), abortController)
-    .catch(() => {
-      return fetchImageBitmapFromThumb(thumb, abortController);
-    });
+    .catch(() => fetchImageBitmapFromThumb(thumb, abortController));
 }

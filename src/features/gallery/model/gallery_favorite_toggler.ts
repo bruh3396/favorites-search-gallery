@@ -1,4 +1,4 @@
-import * as FavoritesAPI from "../../../lib/server/fetch/favorites_fetcher";
+import * as FavoritesAPI from "../../../lib/remote/rule34/favorites_fetcher";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";
 

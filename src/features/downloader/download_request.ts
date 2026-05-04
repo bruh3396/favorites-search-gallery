@@ -1,6 +1,6 @@
 import * as ExtensionResolver from "../../lib/media/media_extension_resolver";
 import { Favorite } from "../../types/favorite";
-import { resolveMediaURL } from "../../lib/server/url/media_url_resolver";
+import { resolveMediaURL } from "../../lib/media/media_url_resolver";
 
 export class DownloadRequest {
   constructor(private readonly id: string, public url: string, public extension: string) {}

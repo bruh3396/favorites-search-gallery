@@ -1,11 +1,12 @@
-import { MULTI_POST_SLIM_API_URL, buildServerTestURL } from "../url/api_url_builder";
-import { Post, SlimPost } from "../../../types/post";
-import { generalPageRequestQueue, multiPostLimiter } from "./rate_limiter";
+import { Post } from "../../../types/api";
+import { SlimPost } from "../../../types/api";
+import { generalPageRequestQueue, multiPostLimiter } from "../http/rate_limiter";
 import { CoalescingExecutor } from "../../core/concurrency/coalescing_executor";
-import { USER_ID } from "../../environment/favorites_metadata";
+import { MULTI_POST_SLIM_API_URL } from "../url/api_url_builder";
 import { buildPostPageURL } from "../url/page_url_builder";
 import { fetchHtml } from "../http/http_client";
 import { parsePostFromPostPage } from "../parse/post_page_parser";
+import { postToServer } from "./server_client";
 import { slimPostToPost } from "../parse/api_post_parser";
 
 type PostResolver = { resolve: (post: Post) => void; reject: (reason: unknown) => void };
@@ -17,10 +18,7 @@ const pendingPosts = new Map<string, PostResolver>();
 const postBatchExecutor = new CoalescingExecutor<string>(MULTI_POST_BATCH_SIZE, MULTI_POST_FLUSH_DELAY, flushPostBatch);
 
 async function fetchSlimPosts(ids: string[]): Promise<Record<string, SlimPost>> {
-  const response = await fetch(MULTI_POST_SLIM_API_URL, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ids, userId: USER_ID })
-  });
+  const response = await postToServer(MULTI_POST_SLIM_API_URL, { ids });
   return response.json() as Promise<Record<string, SlimPost>>;
 }
 
@@ -66,8 +64,4 @@ function fetchPostFromPostPage(id: string): Promise<Post> {
 export async function fetchPostPage(id: string): Promise<string> {
   await generalPageRequestQueue.wait();
   return fetchHtml(buildPostPageURL(id));
-}
-
-export function setupServer(): void {
-  fetch(buildServerTestURL());
 }

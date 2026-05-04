@@ -1,4 +1,5 @@
 import { getCookie } from "../../utils/browser/cookie";
+import { version } from "../../config/script_version";
 
 function getFavoritesPageId(): string | null {
   const match = (/(?:&|\?)id=(\d+)/).exec(window.location.href);
@@ -18,3 +19,4 @@ export const USER_ID = getCookie("user_id", "");
 export const FAVORITES_PAGE_ID = getFavoritesPageId();
 export const USER_IS_ON_THEIR_OWN_FAVORITES_PAGE = USER_ID === FAVORITES_PAGE_ID;
 export const BLACKLISTED_TAGS = getTagBlacklist();
+export const REQUEST_METADATA = { userId: USER_ID, version };

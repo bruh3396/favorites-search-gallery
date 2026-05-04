@@ -1,9 +1,9 @@
 import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
+import { noItemsAreVisible, waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 import { Events } from "../../../lib/communication/events";
 import { FavoritesPresentationFlow } from "../type/favorite_types";
 import { PageBottomObserver } from "../../../lib/core/observers/page_bottom_observer";
-import { waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 
 class InfiniteScrollFlow implements FavoritesPresentationFlow {
   private readonly pageBottomObserver: PageBottomObserver;
@@ -26,7 +26,7 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
   }
 
   public handleNewSearchResults(): void {
-    if (FavoritesView.noFavoritesAreVisible()) {
+    if (noItemsAreVisible()) {
       this.showMoreResults();
     }
   }

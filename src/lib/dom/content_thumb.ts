@@ -1,4 +1,4 @@
-import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix, waitForThumbnailsToLoadInContainer } from "./thumb";
+import { COLUMN_CLASS_NAME, ITEM_SELECTOR, getThumbsInContainer, getThumbsInMatrix, waitForThumbnailsToLoadInContainer } from "./thumb";
 import { Content } from "../shell";
 
 function usingColumnLayout(): boolean {
@@ -15,4 +15,8 @@ export function getAllContentThumbs(): HTMLElement[] {
 
 export function getAllPageThumbs(): HTMLElement[] {
   return getThumbsInContainer(document);
+}
+
+export function noItemsAreVisible(): boolean {
+  return Content.querySelector(ITEM_SELECTOR) === null;
 }

@@ -4,32 +4,33 @@ import { Favorite, PageRelation } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";
 import { FavoritesPresentationFlow } from "../type/favorite_types";
 import { NavigationKey } from "../../../types/input";
+import { revealItem } from "../../../lib/ui/dom";
 
 class PaginationFlow implements FavoritesPresentationFlow {
   private addedFirstResults = false;
 
   public present(results: Favorite[]): void {
     FavoritesView.setFavorites(results);
-    FavoritesView.gotoPage(1);
+    FavoritesView.goToPage(1);
     this.showCurrentPage();
   }
 
-  public gotoPage(pageNumber: number): void {
-    FavoritesView.gotoPage(pageNumber);
+  public goToPage(pageNumber: number): void {
+    FavoritesView.goToPage(pageNumber);
     this.showCurrentPage();
   }
 
-  public gotoRelativePage(relativePage: PageRelation): void {
-    if (FavoritesView.gotoRelativePage(relativePage)) {
+  public goToRelativePage(relativePage: PageRelation): void {
+    if (FavoritesView.goToRelativePage(relativePage)) {
       this.showCurrentPage();
     }
   }
 
   public showCurrentPage(): void {
-    FavoritesView.showSearchResults(FavoritesView.getFavoritesOnCurrentPage());
+    FavoritesView.showSearchResults(FavoritesView.currentPageFavorites());
     FavoritesView.createPageSelectionMenu(FavoritesView.getPaginationParameters());
-    FavoritesView.preloadThumbnails(FavoritesView.getFavoritesOnNextPage());
-    FavoritesView.preloadThumbnails(FavoritesView.getFavoritesOnPreviousPage());
+    FavoritesView.preloadThumbnails(FavoritesView.nextPageFavorites());
+    FavoritesView.preloadThumbnails(FavoritesView.previousPageFavorites());
     Events.favorites.pageChanged.emit();
   }
 
@@ -37,14 +38,14 @@ class PaginationFlow implements FavoritesPresentationFlow {
   }
 
   public reveal(id: string): void {
-    if (FavoritesView.gotoPageWithFavorite(id)) {
+    if (FavoritesView.goToPageWithFavorite(id)) {
       this.showCurrentPage();
     }
-    FavoritesView.revealFavorite(id);
+    revealItem(id);
   }
 
   public presentWhileNavigatingGallery(direction: NavigationKey): boolean {
-    this.gotoAdjacentPage(direction);
+    this.goToAdjacentPage(direction);
     return true;
   }
 
@@ -61,7 +62,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
     if (!FavoritesView.onFinalPage() && this.addedFirstResults) {
       return;
     }
-    const favorites = FavoritesView.getFavoritesOnCurrentPage().filter(favorite => document.getElementById(favorite.id) === null);
+    const favorites = FavoritesView.currentPageFavorites().filter(favorite => document.getElementById(favorite.id) === null);
 
     if (favorites.length > 0) {
       this.addedFirstResults = true;
@@ -72,13 +73,13 @@ class PaginationFlow implements FavoritesPresentationFlow {
     Events.favorites.favoritesAddedToCurrentPage.emit(thumbs);
   }
 
-  private gotoAdjacentPage(direction: NavigationKey): void {
-    if (FavoritesView.gotoAdjacentPage(direction)) {
+  private goToAdjacentPage(direction: NavigationKey): void {
+    if (FavoritesView.goToAdjacentPage(direction)) {
       this.showCurrentPage();
     }
   }
 }
 
 export const FavoritesPaginationFlow = new PaginationFlow();
-export const gotoPage = (pageNumber: number): void => FavoritesPaginationFlow.gotoPage(pageNumber);
-export const gotoRelativePage = (relativePage: PageRelation): void => FavoritesPaginationFlow.gotoRelativePage(relativePage);
+export const goToPage = (pageNumber: number): void => FavoritesPaginationFlow.goToPage(pageNumber);
+export const goToRelativePage = (relativePage: PageRelation): void => FavoritesPaginationFlow.goToRelativePage(relativePage);

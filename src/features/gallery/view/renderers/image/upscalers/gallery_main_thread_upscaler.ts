@@ -1,6 +1,6 @@
-import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/server/fetch/bitmap_fetcher";
+import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/remote/rule34/bitmap_fetcher";
 import { GalleryAbstractUpscaler } from "./gallery_abstract_upscaler";
-import { GalleryUpscaleSettings } from "../../../../../../config/gallery_shared_settings";
+import { GalleryUpscaleSettings } from "../../../../../../config/gallery_upscale_settings";
 import { ImageRequest } from "../../../../type/gallery_image_request";
 import { UpscaleImageRequest } from "../../../../type/gallery_upscale_image_request";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
@@ -24,6 +24,15 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
     }
   }
 
+  private async upscaleSampleImageRequest(request: ImageRequest): Promise<void> {
+    const upscaleRequest = new UpscaleImageRequest(request.thumb);
+    const bitmap = isImage(upscaleRequest.thumb) ? await fetchSampleImageBitmapFromThumb(upscaleRequest.thumb) : await fetchImageBitmapFromThumb(upscaleRequest.thumb);
+
+    upscaleRequest.complete(bitmap);
+    this.upscaleFullImageRequest(upscaleRequest);
+    upscaleRequest.close();
+  }
+
   private upscaleFullImageRequest(request: ImageRequest): void {
     const canvas = request.thumb.querySelector("canvas");
 
@@ -37,14 +46,6 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
     if (request.isAnimated) {
       request.close();
     }
-  }
-
-  private async upscaleSampleImageRequest(request: UpscaleImageRequest): Promise<void> {
-    const bitmap = isImage(request.thumb) ? await fetchSampleImageBitmapFromThumb(request.thumb) : await fetchImageBitmapFromThumb(request.thumb);
-
-    request.complete(bitmap);
-    this.upscaleFullImageRequest(request);
-    request.close();
   }
 
   private setCanvasDimensionsFromImageBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap): void {

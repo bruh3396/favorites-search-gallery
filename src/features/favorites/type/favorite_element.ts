@@ -1,13 +1,13 @@
-import * as FavoritesAPI from "../../../lib/server/fetch/favorites_fetcher";
+import * as FavoritesAPI from "../../../lib/remote/rule34/favorites_fetcher";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { openOriginal, openPostPage } from "../../../lib/navigator";
 import { ClickCode } from "../../../types/input";
 import { Events } from "../../../lib/communication/events";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { Post } from "../../../types/post";
-import { buildPostPageURL } from "../../../lib/server/url/page_url_builder";
-import { downloadFromThumb } from "../../../lib/server/fetch/media_downloader";
+import { Post } from "../../../types/api";
+import { buildPostPageURL } from "../../../lib/remote/url/page_url_builder";
+import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
 import { favoriteElementTemplate } from "./favorite_element_template";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
 

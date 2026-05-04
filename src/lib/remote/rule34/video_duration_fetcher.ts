@@ -1,6 +1,6 @@
 import { ConcurrencyLimiter } from "../../core/concurrency/concurrency_limiter";
 import { Favorite } from "../../../types/favorite";
-import { resolveBaseImageURL } from "../url/media_url_resolver";
+import { resolveBaseImageURL } from "../../media/media_url_resolver";
 
 const CONCURRENCY = 3;
 const videoLimiter = new ConcurrencyLimiter(CONCURRENCY);
@@ -17,9 +17,7 @@ export function fetchVideoDurationFromFavorite(favorite: Favorite): Promise<numb
 }
 
 export function fetchVideoDuration(url: string): Promise<number> {
-  return videoLimiter.run(() => {
-    return fetchVideoDurationWithIncreasingByteRanges(url);
-  });
+  return videoLimiter.run(() => fetchVideoDurationWithIncreasingByteRanges(url));
 }
 
 function fetchVideoDurationWithIncreasingByteRanges(url: string): Promise<number> {

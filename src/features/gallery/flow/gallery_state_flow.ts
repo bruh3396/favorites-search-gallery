@@ -25,6 +25,14 @@ export function exitGallery(): void {
   Events.gallery.exitedGallery.emit();
 }
 
+export function reEnterGallery(): void {
+  const thumb = GalleryModel.getCurrentThumb();
+
+  if (thumb) {
+    enterGallery(thumb);
+  }
+}
+
 export function toggleShowingContentOnHover(): void {
   GalleryModel.toggleShowingContentOnHover();
   Events.gallery.showOnHoverOverridden.emit(GalleryModel.showingContentOnHover());

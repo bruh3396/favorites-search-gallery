@@ -3,7 +3,7 @@ import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment
 import { Preferences } from "../../lib/preferences/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../../lib/tags/custom_tags";
-import { fetchHtml } from "../../lib/server/http/http_client";
+import { fetchHtml } from "../../lib/remote/http/http_client";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
 import { hideAwesomplete } from "../../lib/ui/awesomplete";
 import { isEmptyString } from "../../utils/string/query";

@@ -9,8 +9,8 @@ import { GeneralSettings } from "../../../../config/general_settings";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Timeout } from "../../../../types/async";
+import { debounceTrailing } from "../../../../lib/core/scheduling/rate_limiting";
 import { insertStyle } from "../../../../lib/dom/injector";
-import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../../utils/browser/window";
 
 const buttons: GalleryMenuButton[] = [
@@ -29,9 +29,7 @@ const buttons: GalleryMenuButton[] = [
 ];
 
 const menu: HTMLElement = document.createElement("div");
-const throttledReveal = throttle<MouseEvent>(() => {
-  reveal();
-}, 250);
+const debouncedReveal = debounceTrailing<MouseEvent>(reveal, 1000);
 let menuVisibilityTimeout: Timeout;
 
 menu.id = "gallery-menu";
@@ -49,8 +47,7 @@ function loadPreferences(): void {
 }
 
 function addEventListeners(): void {
-  Events.document.mousemove.on(throttledReveal);
-
+  Events.document.mousemove.on(debouncedReveal);
   Events.document.mouseover.on((mouseOverEvent) => {
     togglePersistence(mouseOverEvent.originalEvent);
   });

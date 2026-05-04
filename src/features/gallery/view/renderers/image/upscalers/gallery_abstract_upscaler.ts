@@ -1,6 +1,6 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
 import { FeatureQueries } from "../../../../../../lib/communication/feature_queries";
-import { GalleryUpscaleSettings } from "../../../../../../config/gallery_shared_settings";
+import { GalleryUpscaleSettings } from "../../../../../../config/gallery_upscale_settings";
 import { ImageRequest } from "../../../../type/gallery_image_request";
 import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
 import { PerformanceProfile } from "../../../../../../types/ui";

@@ -1,7 +1,6 @@
 import { AwesompleteSuggestion } from "../../types/ui";
 import { Storage } from "../core/storage/storage_instance";
-import { domParser } from "../dom/dom_parser";
-import { fetchTagFromAPI } from "../server/fetch/tag_fetcher";
+import { fetchTagFromAPI } from "../remote/api/tag_fetcher";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 const STORAGE_KEY = "customTags";
@@ -28,10 +27,8 @@ export function clearCustomTags(): void {
 
 async function isOfficialTag(tagName: string): Promise<boolean> {
   try {
-    const html = await fetchTagFromAPI(tagName);
-    const dom = domParser.parseFromString(html, "text/html");
-    const columnOfFirstRow = dom.getElementsByClassName("highlightable")[0].getElementsByTagName("td");
-    return columnOfFirstRow.length === 3;
+    const tag = await fetchTagFromAPI(tagName);
+    return tag !== null;
   } catch (error) {
     console.error(error);
     return false;

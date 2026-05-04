@@ -1,5 +1,5 @@
-import * as PostAPI from "../../lib/server/fetch/post_fetcher";
-import * as TagAPI from "../../lib/server/fetch/tag_fetcher";
+import * as PostAPI from "../../lib/remote/api/post_fetcher";
+import * as TagAPI from "../../lib/remote/api/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import { CAPTION_CSS } from "../../assets/css";
@@ -552,7 +552,7 @@ async function findTagCategories(tagNames: string[], onAllCategoriesFound: () =>
 
     try {
       pendingRequests.add(tagName);
-      TagAPI.fetchTagFromAPI(tagName, abortController)
+      TagAPI.fetchRawTagXML(tagName, abortController)
         .then((html) => {
           pendingRequests.delete(tagName);
           const dom = domParser.parseFromString(html, "text/html");

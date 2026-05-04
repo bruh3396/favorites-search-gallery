@@ -19,14 +19,16 @@
   ],
   "scripts": {
     "compile-scripts": "tsc --project scripts/tsconfig.json",
+    "delete-compiled-scripts": "if exist scripts\\bin del /q scripts\\bin\\*.js",
     "build": "node scripts/bin/userscript_builder || (npm run compile-scripts && node scripts/bin/userscript_builder)",
     "test": "npx vitest --run",
     "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
     "continuous-integration": "npm run build && npm run test && npm run typecheck",
     "embed": "(node scripts/bin/static_ts_embedder.js || (npm run compile-scripts && node scripts/bin/static_ts_embedder.js)) && npm run continuous-integration",
+    "fix-lf": "node -e \"const fs=require('fs'),path=require('path'),g=(d)=>{for(const f of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,f.name);if(f.isDirectory()&&f.name!=='node_modules'&&f.name!=='dist')g(p);else if(f.name.endsWith('.ts')){const c=fs.readFileSync(p,'utf8');if(c.includes('\\r\\n'))continue;fs.writeFileSync(p,c.replace(/\\n/g,'\\r\\n'),'utf8');console.log('Fixed:',p)}}};g('src')\"",
     "lint": "npx eslint src/",
     "audit": "tsx .scripts/project_auditor.ts",
-    "full-integration": "npm run compile-scripts && npm run embed && npm run lint && npm run audit",
+    "release": "npm run compile-scripts && npm run embed && npm run lint && npm run audit",
     "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open",
     "performance": "tsx src/tests/performance.ts"
   },

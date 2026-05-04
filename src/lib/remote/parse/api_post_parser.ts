@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import { Post, SlimPost } from "../../../types/post";
+import { Post } from "../../../types/api";
+import { SlimPost } from "../../../types/api";
 export class ApiParseError extends Error { }
 export class DeletedPostError extends Error { }
 

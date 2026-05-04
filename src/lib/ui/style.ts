@@ -4,7 +4,7 @@ import { SKELETON_CSS, TILE_CSS } from "../../assets/css";
 import { getCookie, setCookie } from "../../utils/browser/cookie";
 import { GeneralSettings } from "../../config/general_settings";
 import { Preferences } from "../preferences/preferences";
-import { buildStyleSheetURL } from "../server/url/action_url_builder";
+import { buildStyleSheetURL } from "../remote/url/action_url_builder";
 import { insertStyle } from "../dom/injector";
 import { yieldControl } from "../core/scheduling/promise";
 

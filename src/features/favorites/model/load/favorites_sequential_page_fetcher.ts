@@ -1,8 +1,8 @@
-import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
+import * as FavoritesAPI from "../../../../lib/remote/rule34/favorites_fetcher";
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
 import { FavoritesPageRequest } from "./favorites_page_request";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { extractFavoriteElements } from "../../../../lib/server/parse/favorites_page_parser";
+import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
 import { getIdFromThumb } from "../../../../lib/dom/thumb";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 

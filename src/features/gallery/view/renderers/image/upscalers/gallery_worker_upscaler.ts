@@ -3,8 +3,8 @@ import { OffscreenUpscaleRequest } from "../../../../type/gallery_offscreen_upsc
 declare let GalleryUpscaleSettings: {
   maxUpscaledThumbCanvasHeight: number
   upscaledThumbCanvasWidth: number
-  onlyCacheImagesInGallery: true
-  upscaleUsingSamples: true
+  onlyCacheImagesInGallery: boolean
+  upscaleUsingSamples: boolean
 };
 
 const offscreenCanvases: Map<string, OffscreenCanvas> = new Map();

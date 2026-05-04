@@ -1,8 +1,7 @@
 import * as ExtensionResolver from "../../../lib/media/media_extension_resolver";
-import { correctMediaTags, prepareSearchPageThumbs } from "../model/search_page_thumb_preparer";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { domParser } from "../../../lib/dom/dom_parser";
-import { fetchMultiplePostsFromAPI } from "../../../lib/server/fetch/post_fetcher";
+import { prepareSearchPageThumbs } from "../model/search_page_thumb_preparer";
 
 export class SearchPage {
   public thumbs: HTMLElement[];
@@ -40,13 +39,8 @@ export class SearchPage {
   }
 
   private async cacheExtensions(): Promise<void> {
-    const posts = await fetchMultiplePostsFromAPI(Array.from(this.ids));
-
-    for (const post of Object.values(posts)) {
-      if (post.width > 0) {
-        ExtensionResolver.setExtensionFromPost(post);
-        correctMediaTags(post);
-      }
+    for (const thumb of this.thumbs) {
+      await ExtensionResolver.resolveExtension(thumb);
     }
   }
 }

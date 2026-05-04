@@ -1,4 +1,5 @@
 import { TooManyRequestsError } from "../../../types/errors";
+import { sleep } from "../../core/scheduling/promise";
 
 export async function fetchHtml(url: string, init?: RequestInit): Promise<string> {
   const response = await fetch429(url, init);
@@ -29,8 +30,9 @@ export async function fetchBlob(url: string): Promise<Blob> {
 }
 
 export function fetch429NTimes(input: string, init: RequestInit | undefined, n: number): Promise<Response> {
-  return fetch429(input, init).catch((error) => {
+  return fetch429(input, init).catch(async(error) => {
     if (error instanceof TooManyRequestsError && n > 1) {
+      await sleep(2000);
       return fetch429NTimes(input, init, n - 1);
     }
     throw error;

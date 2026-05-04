@@ -27,11 +27,11 @@ export const GallerySettings = {
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2000 : 1000,
   maxVisibleThumbsBeforeStoppingPreload: 175,
   galleryNavigationDelay: 100,
-  fetchImageBitmapsInWorker: true,
+  fetchImageBitmapsInWorker: false,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },
-  useOffscreenThumbUpscaler: false,
+  useOffscreenThumbUpscaler: true,
   preloadingEnabled: true,
   createImageAccentColors: false,
   galleryMenuMonoColor: true,

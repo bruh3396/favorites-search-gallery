@@ -1,5 +1,3 @@
-import * as FavoritesAPI from "../../../../lib/server/fetch/favorites_fetcher";
-import { FAVORITES_PAGE_ID } from "../../../../lib/environment/favorites_metadata";
 import { NewFavorites } from "../../type/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Root } from "../../../../lib/shell";
@@ -10,7 +8,7 @@ let statusIndicator: HTMLElement;
 let expectedTotalFavoritesCount: number | null = null;
 let statusTimeout: Timeout;
 const TEMPORARY_STATUS_TIMEOUT = 1000;
-const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "Favorites ";
+const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "all favorites ";
 
 function clearStatus(): void {
   statusIndicator.textContent = "";
@@ -51,12 +49,11 @@ export function notifyNewFavoritesFound(newFavorites: NewFavorites): void {
   }
 }
 
-async function setExpectedTotalFavoritesCount(): Promise<void> {
-  expectedTotalFavoritesCount = await FavoritesAPI.fetchFavoritesCount(FAVORITES_PAGE_ID ?? "");
+export function setExpectedTotalFavoritesCount(count: number | null): void {
+  expectedTotalFavoritesCount = count;
 }
 
 export function setupFavoritesStatus(): void {
-  setExpectedTotalFavoritesCount();
   matchCountIndicator = Root.querySelector("#match-count-label") ?? document.createElement("label");
   statusIndicator = Root.querySelector("#favorites-load-status-label") ?? document.createElement("label");
 }

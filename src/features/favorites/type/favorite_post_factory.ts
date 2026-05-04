@@ -1,8 +1,8 @@
 import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
-import { Post } from "../../../types/post";
-import { createEmptyPost } from "../../../lib/server/parse/api_post_parser";
-import { decompressPreviewSource } from "../../../lib/server/url/media_url_transformer";
+import { Post } from "../../../types/api";
+import { createEmptyPost } from "../../../lib/remote/parse/api_post_parser";
+import { decompressPreviewSource } from "../../../lib/media/media_url_transformer";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
 function normalizeTags(image: HTMLElement, id: string): string {

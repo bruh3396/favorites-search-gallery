@@ -1,5 +1,5 @@
-import { buildPostPageURL, buildSearchPageURLFromQuery } from "./server/url/page_url_builder";
-import { resolveMediaURL } from "./server/url/media_url_resolver";
+import { buildPostPageURL, buildSearchPageURLFromQuery } from "./remote/url/page_url_builder";
+import { resolveMediaURL } from "./media/media_url_resolver";
 
 export function openPostPage(id: string): void {
   window.open(buildPostPageURL(id), "_blank");

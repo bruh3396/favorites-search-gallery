@@ -25,12 +25,11 @@ function addEventListeners(): void {
   Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
   Events.favorites.shuffleButtonClicked.on(FavoritesSearchFlow.shuffleSearchResults);
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
-  Events.favorites.pageSelected.on(FavoritesPaginationFlow.gotoPage);
-  Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.gotoRelativePage);
-  Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
-  Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
   Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.reveal);
   Events.favorites.findFavoriteInAllStarted.on(FavoritesSearchFlow.revealFavoriteInAll);
+
+  Events.favorites.pageSelected.on(FavoritesPaginationFlow.goToPage);
+  Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.goToRelativePage);
 
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.onBlacklistChanged);
@@ -39,6 +38,8 @@ function addEventListeners(): void {
   Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.researchFavorites);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.researchFavorites);
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.setResultsPerPage);
+  Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
+  Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
 
   Events.favorites.resetButtonClicked.on(FavoritesView.tryResetting);
   Events.favorites.resetConfirmed.on(FavoritesResetFlow.resetFavorites);

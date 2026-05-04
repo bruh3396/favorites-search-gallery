@@ -1,4 +1,4 @@
-import { Post } from "../../types/post";
+import { Post } from "../../types/api";
 import { convertToTagSet } from "../../utils/string/tags";
 
 export function correctTags(post: Post): Set<string> {

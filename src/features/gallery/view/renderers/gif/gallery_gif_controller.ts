@@ -2,7 +2,7 @@ import { GalleryAbstractController } from "../gallery_abstract_controller";
 import { GallerySettings } from "../../../../../config/gallery_settings";
 import { doNothing } from "../../../../../lib/environment/constants";
 import { isGif } from "../../../../../lib/media/media_type_guards";
-import { resolveGifUrl } from "../../../../../lib/server/url/media_url_resolver";
+import { resolveGifUrl } from "../../../../../lib/media/media_url_resolver";
 
 class GifController extends GalleryAbstractController {
   private readonly gif: HTMLImageElement;

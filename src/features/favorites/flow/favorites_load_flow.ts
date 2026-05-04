@@ -4,6 +4,7 @@ import * as FavoritesSearchFlow from "./favorites_search_flow";
 import * as FavoritesView from "../view/favorites_view";
 import { Events } from "../../../lib/communication/events";
 import { Favorite } from "../../../types/favorite";
+import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
   await loadDatabaseFavorites();
@@ -30,6 +31,7 @@ function handleExistingFavorites(): Promise<void> {
 }
 
 function fetchFavorites(): Promise<void> {
+  fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
   return fetchAllFavorites().then(saveAllFavorites);
 }
 

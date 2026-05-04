@@ -1,6 +1,6 @@
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
 import { FavoritesSettings } from "../../../../config/favorites_settings";
-import { extractFavoriteElements } from "../../../../lib/server/parse/favorites_page_parser";
+import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
 
 export class FavoritesPageRequest {
   public readonly pageNumber: number;
