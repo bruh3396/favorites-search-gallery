@@ -1,50 +1,25 @@
-import { Post, SlimPost } from "../../../types/api";
+import { Post, PostResponse } from "../../../types/api";
 import { generalPageRequestQueue, postLimiter } from "../http/rate_limiter";
-import { CoalescingExecutor } from "../../core/concurrency/coalescing_executor";
+import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
 import { POST_API_URL } from "../url/api_url_builder";
 import { buildPostPageURL } from "../url/page_url_builder";
+import { fetchFromServer } from "./server_client";
 import { fetchHtml } from "../http/http_client";
 import { parsePostFromPostPage } from "../parse/post_page_parser";
-import { postToServer } from "./server_client";
-import { slimPostToPost } from "../parse/api_post_parser";
+import { postResponseToPost } from "../parse/api_post_parser";
 
-type PostResolver = { resolve: (post: Post) => void; reject: (reason: unknown) => void };
+const postFetcher = new CoalescingResolver<PostResponse>(50, 1250, postLimiter, fetchPostBatch);
 
-const BATCH_SIZE = 50;
-const FLUSH_DELAY = 1250;
-
-const pendingPosts = new Map<string, PostResolver>();
-const postBatchExecutor = new CoalescingExecutor<string>(BATCH_SIZE, FLUSH_DELAY, flushPostBatch);
-
-async function fetchSlimPosts(ids: string[]): Promise<Record<string, SlimPost>> {
-  const response = await postToServer(POST_API_URL, { ids });
-  return response.json() as Promise<Record<string, SlimPost>>;
+export function fetchPost(id: string): Promise<Post> {
+  return postFetcher.resolve(id).then(postResponseToPost);
 }
 
-function resolvePostBatch(data: Record<string, SlimPost>): void {
-  for (const [id, slim] of Object.entries(data)) {
-    pendingPosts.get(id)?.resolve(slimPostToPost(slim));
-    pendingPosts.delete(id);
-  }
+function fetchPostBatch(ids: string[]): Promise<Record<string, PostResponse>> {
+  return fetchFromServer(POST_API_URL, { ids }).then(r => r.json() as Promise<Record<string, PostResponse>>);
 }
 
-function rejectPostBatch(ids: string[], error: unknown): void {
-  for (const id of ids) {
-    pendingPosts.get(id)?.reject(error);
-    pendingPosts.delete(id);
-  }
-}
-
-function flushPostBatch(ids: string[]): void {
-  postLimiter.run(async() => resolvePostBatch(await fetchSlimPosts(ids)))
-    .catch((error: unknown) => rejectPostBatch(ids, error));
-}
-
-function fetchPostFromAPI(id: string): Promise<Post> {
-  return new Promise<Post>((resolve, reject) => {
-    pendingPosts.set(id, { resolve, reject });
-    postBatchExecutor.add(id);
-  });
+export function fetchPostSafe(id: string): Promise<Post> {
+  return fetchPost(id).catch(fetchPostFromPostPage);
 }
 
 function fetchPostFromPostPage(id: string): Promise<Post> {
@@ -54,13 +29,4 @@ function fetchPostFromPostPage(id: string): Promise<Post> {
 export async function fetchPostPage(id: string): Promise<string> {
   await generalPageRequestQueue.wait();
   return fetchHtml(buildPostPageURL(id));
-}
-
-export function fetchPostFromAPISafe(id: string): Promise<Post> {
-  return fetchPostFromAPI(id).catch(fetchPostFromPostPage);
-}
-
-export function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
-  return Promise.all(ids.map(async(id) => [id, await fetchPostFromAPI(id)]))
-    .then(entries => Object.fromEntries(entries));
 }

@@ -9,6 +9,10 @@ import { isVideo } from "../../../../lib/media/media_type_guards";
 let onMetadataUpdated: (favorite: Favorite) => void = () => undefined;
 let isDatabaseWritten = false;
 
+function isEmpty(post: Post): boolean {
+  return post.width === 0 || post.tags === "";
+}
+
 export function initialize(callback: (favorite: Favorite) => void): void {
   onMetadataUpdated = callback;
 }
@@ -23,14 +27,11 @@ export function fetchMissingMetadata(favorites: FavoriteItem[]): void {
 }
 
 function fetchMetadata(favorites: FavoriteItem[]): void {
-  if (favorites.length === 0) {
-    return;
+  for (const favorite of favorites) {
+    PostAPI.fetchPost(favorite.id)
+      .then(post => processPost(favorite, post))
+      .catch(console.error);
   }
-  const favoriteMap = new Map(favorites.map(f => [f.id, f]));
-
-  PostAPI.fetchMultiplePostsFromAPI([...favoriteMap.keys()])
-    .then(postMap => processPostMap(postMap, favoriteMap))
-    .catch(console.error);
 }
 
 function fetchDurations(favorites: FavoriteItem[]): void {
@@ -45,19 +46,15 @@ function fetchDurations(favorites: FavoriteItem[]): void {
   });
 }
 
-function processPostMap(postMap: Record<string, Post>, favoriteMap: Map<string, FavoriteItem>): void {
-  for (const [id, post] of Object.entries(postMap)) {
-    const favorite = favoriteMap.get(id);
+function processPost(favorite: FavoriteItem, post: Post): void {
+  if (isEmpty(post)) {
+    return;
+  }
+  favorite.validateTags(post);
+  favorite.populateMetadata(post);
+  ExtensionResolver.setExtensionFromPost(post);
 
-    if (favorite === undefined) {
-      continue;
-    }
-    favorite.validateTags(post);
-    favorite.populateMetadata(post);
-    ExtensionResolver.setExtensionFromPost(post);
-
-    if (isDatabaseWritten) {
-      onMetadataUpdated(favorite);
-    }
+  if (isDatabaseWritten) {
+    onMetadataUpdated(favorite);
   }
 }

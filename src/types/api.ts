@@ -24,7 +24,7 @@ export type Post = {
   previewHeight: number
 }
 
-export type SlimPost = {
+export type CompactPost = {
   id: string
   width: number
   height: number
@@ -36,5 +36,10 @@ export type SlimPost = {
   fileURL: string
   previewURL: string
 }
+
+export type PostResponse =
+  | { status: "ok"; post: CompactPost }
+  | { status: "deleted" }
+  | { status: "rate_limited" }
 
 export type Tag = { type: number; } | null;

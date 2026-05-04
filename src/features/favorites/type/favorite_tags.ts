@@ -31,7 +31,7 @@ export class FavoriteTags {
   }
 
   public validate(post: Post): void {
-    if (!this.tagsAreEqual(post)) {
+    if (post.tags !== "" && !this.tagsAreEqual(post)) {
       this.set(post.tags);
     }
   }

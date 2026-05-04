@@ -1,22 +1,28 @@
 /* eslint-disable max-classes-per-file */
-import { Post } from "../../../types/api";
-import { SlimPost } from "../../../types/api";
+import { Post, PostResponse } from "../../../types/api";
 export class ApiParseError extends Error { }
 export class DeletedPostError extends Error { }
 
-export function slimPostToPost(slim: SlimPost): Post {
+export function postResponseToPost(response: PostResponse): Post {
+  if (response.status === "deleted") {
+    throw new DeletedPostError();
+  }
+
+  if (response.status === "rate_limited") {
+    throw new ApiParseError();
+  }
   return {
     ...createEmptyPost(),
-    id: slim.id,
-    width: slim.width,
-    height: slim.height,
-    score: slim.score,
-    rating: slim.rating,
-    change: slim.change,
-    createdAt: slim.createdAt,
-    tags: slim.tags,
-    fileURL: slim.fileURL,
-    previewURL: slim.previewURL
+    id: response.post.id,
+    width: response.post.width,
+    height: response.post.height,
+    score: response.post.score,
+    rating: response.post.rating,
+    change: response.post.change,
+    createdAt: response.post.createdAt,
+    tags: response.post.tags,
+    fileURL: response.post.fileURL,
+    previewURL: response.post.previewURL
   };
 }
 

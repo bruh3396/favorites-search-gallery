@@ -1,4 +1,5 @@
 experimental
+src/tests/playground/
 .env
 html
 css

@@ -6,7 +6,11 @@ export class CoalescingExecutor<V> {
   private intervalHandle: Timeout;
   private batch: V[] = [];
 
-  constructor(private readonly batchSize: number, private readonly flushDelay: number, private readonly onFlush: (batch: V[]) => void) {
+  constructor(
+    private readonly batchSize: number,
+    private readonly flushDelay: number,
+    private readonly onFlush: (batch: V[]) => void
+  ) {
     this.checkInterval = Math.round(Math.max(10, flushDelay / 5));
   }
 

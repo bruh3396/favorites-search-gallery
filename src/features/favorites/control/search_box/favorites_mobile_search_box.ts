@@ -18,6 +18,7 @@ export class FavoritesMobileSearchBox extends AbstractFavoritesSearchBox {
     }
     searchButton.onclick = this.startSearch;
     resetButton.onclick = (event): void => Events.favorites.resetButtonClicked.emit(event);
+    this.searchBox = searchBox;
     this.wireClearButton(clearButton);
 
     if (optionsCheckbox instanceof HTMLInputElement) {

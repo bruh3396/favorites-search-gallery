@@ -26,7 +26,7 @@ export class FavoriteElement {
     this.downloadButton = this.container.children[2] as HTMLImageElement;
     this.populateAttributes(post);
     this.downloadButton.onmousedown = (event): void => this.download(event);
-    this.favoriteButton.onmousedown = (event): void => this.handleFavoriteButtonClick(event);
+    this.setFavoriteButtonHandler();
     this.presetCanvasDimensions(post);
     this.setupNavigationClick();
   }
@@ -42,6 +42,11 @@ export class FavoriteElement {
   public swapFavoriteButton(): void {
     this.favoriteButton.outerHTML = this.hasRemoveButton ? ADD_FAVORITE_IMAGE_HTML : REMOVE_FAVORITE_IMAGE_HTML;
     this.favoriteButton = this.container.children[1] as HTMLImageElement;
+    this.setFavoriteButtonHandler();
+  }
+
+  private setFavoriteButtonHandler(): void {
+    this.favoriteButton.onmousedown = (event): void => this.handleFavoriteButtonClick(event);
   }
 
   private setupNavigationClick(): void {

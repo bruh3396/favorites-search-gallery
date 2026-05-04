@@ -1,7 +1,7 @@
 import { PING_URL } from "../url/api_url_builder";
 import { REQUEST_METADATA } from "../../environment/favorites_metadata";
 
-export function postToServer(url: string, body: object): Promise<Response> {
+export function fetchFromServer(url: string, body: object): Promise<Response> {
   return fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -10,5 +10,5 @@ export function postToServer(url: string, body: object): Promise<Response> {
 }
 
 export function setupServer(): void {
-  postToServer(PING_URL, {});
+  fetchFromServer(PING_URL, {});
 }
