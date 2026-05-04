@@ -31,7 +31,7 @@ export const GallerySettings = {
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },
-  useOffscreenThumbUpscaler: true,
+  useOffscreenThumbUpscaler: false,
   preloadingEnabled: true,
   createImageAccentColors: false,
   galleryMenuMonoColor: true,

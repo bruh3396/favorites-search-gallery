@@ -39,7 +39,7 @@ export type CompactPost = {
 
 export type PostResponse =
   | { status: "ok"; post: CompactPost }
-  | { status: "deleted" }
-  | { status: "rate_limited" }
+  | { status: "deleted", id: string }
+  | { status: "rate_limited", id: string }
 
 export type Tag = { type: number; } | null;

@@ -1618,31 +1618,15 @@ export const HELP_HTML = `
     Issue</a>
   <a id="whats-new-link" href="" class="hidden light-green-gradient">What's new?
     <div id="whats-new-container" class="light-green-gradient indented">
-      <h2>v1.20.1</h2>
+      <h2>v1.21</h2>
       <ul>
-        <li>Added sort by duration</li>
+        <li>Under the Hood</li>
         <ul>
-          <li>Images anf GIFs have a duration of 0</li>
-        </ul>
-        <li>Added search by duration</li>
-        <ul>
-          <li>Examples:</li>
-          <ul>
-            <li>0 Second videos: "duration:&lt;1 video"</li>
-            <li>2 Minute+ videos: "duration:&gt;120 video"</li>
-            <li>30-60 Second videos: "duration:&gt;30 duration:&lt;30 video"</li>
-          </ul>
+          <li>Internal improvements and stability fixes</li>
+          <li>Improved handling of new Rule34 rate limits</li>
         </ul>
       </ul>
-      <h2>v1.20</h2>
-      <ul>
-        <li>Added layouts, upscaling, and infinite scroll to search pages</li>
-      </ul>
-      <h2>v1.19.1</h2>
-      <ul>
-        <li>Fixed mass downloads slowing down over time</li>
-        <li>Fixed Firefox gallery not opening</li>
-      </ul>
+
     </div>
   </a>
 </span>

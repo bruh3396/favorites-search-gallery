@@ -1,4 +1,4 @@
-import { PromiseTimeoutError } from "../../../types/errors";
+import { withTimeout } from "./promise";
 
 export class Emitter<V> {
   protected listeners: Set<(value: V) => void>;
@@ -47,23 +47,14 @@ export class Emitter<V> {
     this.removeOneTimeListeners();
   }
 
-  public timeout(milliseconds: number): Promise<V> {
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        this.off(handler);
-        reject(new PromiseTimeoutError());
-      }, milliseconds);
-
-      const handler = (value: V): void => {
-        this.off(handler);
-        clearTimeout(timer);
-        resolve(value);
-      };
-
-      this.on(handler, {
-        once: true
-      });
+  public next(): Promise<V> {
+    return new Promise((resolve) => {
+      this.on(resolve, { once: true });
     });
+  }
+
+  public nextWithTimeout(milliseconds: number): Promise<V> {
+    return withTimeout(this.next(), milliseconds);
   }
 
   public toggle(value: boolean | undefined = undefined): void {

@@ -13,7 +13,6 @@ import { Preferences } from "../../lib/preferences/preferences";
 import { capitalize } from "../../utils/string/format";
 import { debounceLeading } from "../../lib/core/scheduling/rate_limiting";
 import { doNothing } from "../../lib/environment/constants";
-import { domParser } from "../../lib/dom/dom_parser";
 import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getImageFromThumb } from "../../lib/dom/thumb";
 import { getTagSetFromItem } from "../../lib/dom/tags";
@@ -306,7 +305,7 @@ function estimateThumbHeightFromMetadata(thumb: HTMLElement, columnInput: HTMLIn
     return 200;
   }
   const gridGap = 16;
-  const columnCount = Math.max(1, parseInt(columnInput.value));
+  const columnCount = Math.max(1, parseInt(columnInput.value, 10));
   const thumbWidthEstimate = (window.innerWidth - (columnCount * gridGap)) / columnCount;
   const thumbWidthScale = favorite.metrics.width / thumbWidthEstimate;
   return favorite.metrics.height / thumbWidthScale;
@@ -474,8 +473,9 @@ function allTagsAreProblematic(tags: string[]): boolean {
   return tags.length > 0;
 }
 
-function correctAllProblematicTagsFromThumb(thumb: HTMLElement, onProblematicTagsCorrected: () => void): void {
-  PostAPI.fetchPostPage(thumb.id)
+async function correctAllProblematicTagsFromThumb(thumb: HTMLElement, onProblematicTagsCorrected: () => void): Promise<void> {
+  await Events.favorites.favoritesLoaded.next();
+  PostAPI.fetchPostPageHtml(thumb.id)
     .then((html: string) => {
       const tagCategoryMap = getTagCategoryMapFromPostPage(html);
 

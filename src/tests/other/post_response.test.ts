@@ -1,6 +1,7 @@
-﻿import { ApiParseError, DeletedPostError, postResponseToPost } from "../../lib/remote/parse/api_post_parser";
+import { ApiParseError, DeletedPostError } from "../../types/errors";
 import { CompactPost, PostResponse } from "../../types/api";
 import { describe, expect, test } from "vitest";
+import { postResponseToPost } from "../../lib/remote/parse/api_post_parser";
 
 const compactPost: CompactPost = {
   id: "123",
@@ -31,10 +32,10 @@ describe("postResponseToPost", () => {
   });
 
   test("deleted throws DeletedPostError", () => {
-    expect(() => postResponseToPost({ status: "deleted" })).toThrow(DeletedPostError);
+    expect(() => postResponseToPost({ status: "deleted", id: "foo" })).toThrow(DeletedPostError);
   });
 
   test("rate_limited throws ApiParseError", () => {
-    expect(() => postResponseToPost({ status: "rate_limited" })).toThrow(ApiParseError);
+    expect(() => postResponseToPost({ status: "rate_limited", id: "bar" })).toThrow(ApiParseError);
   });
 });

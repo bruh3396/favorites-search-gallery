@@ -23,16 +23,15 @@ import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { GALLERY_DISABLED } from "../../lib/environment/derived_environment";
 
-export function setupGallery(): void {
+export async function setupGallery(): Promise<void> {
   if (GALLERY_DISABLED) {
     return;
   }
 
   if (ON_SEARCH_PAGE) {
-    Events.searchPage.searchPageReady.on(performGallerySetup, { once: true });
-  } else {
-    performGallerySetup();
+    await Events.searchPage.searchPageReady.next();
   }
+  performGallerySetup();
 }
 
 function performGallerySetup(): void {

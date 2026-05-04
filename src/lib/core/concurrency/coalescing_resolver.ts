@@ -1,4 +1,4 @@
-﻿import { CoalescingExecutor } from "./coalescing_executor";
+import { CoalescingExecutor } from "./coalescing_executor";
 import { ConcurrencyLimiter } from "./concurrency_limiter";
 
 type PromiseCallback<V> = {

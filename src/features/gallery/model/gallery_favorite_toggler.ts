@@ -1,4 +1,4 @@
-import * as FavoritesAPI from "../../../lib/remote/rule34/favorites_fetcher";
+import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";
 
@@ -6,7 +6,7 @@ export async function addFavorite(thumb: HTMLElement | undefined): Promise<AddFa
   if (thumb === undefined) {
     return Promise.resolve(AddFavoriteStatus.ERROR);
   }
-  const status = await FavoritesAPI.addFavorite(thumb.id);
+  const status = await FavoritesActions.addFavorite(thumb.id);
 
   if (status === AddFavoriteStatus.SUCCESSFULLY_ADDED) {
     Events.gallery.favoriteToggled.emit(thumb.id);
@@ -29,7 +29,7 @@ export function removeFavorite(thumb: HTMLElement | undefined): Promise<RemoveFa
   if (!allowedToRemoveFavorites) {
     return Promise.resolve(RemoveFavoriteStatus.FORBIDDEN);
   }
-  FavoritesAPI.removeFavorite(thumb.id);
+  FavoritesActions.removeFavorite(thumb.id);
   Events.gallery.favoriteToggled.emit(thumb.id);
   Events.favorites.favoriteRemoved.emit(thumb.id);
   return Promise.resolve(RemoveFavoriteStatus.SUCCESSFULLY_REMOVED);

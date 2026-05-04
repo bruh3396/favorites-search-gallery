@@ -12,3 +12,15 @@ export function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promi
   const timeout = new Promise((_, reject) => setTimeout(() => reject(new PromiseTimeoutError()), milliseconds));
   return Promise.race([promise, timeout]) as Promise<T>;
 }
+
+export async function withExponentialBackoff<T>(task: () => Promise<T>, maxAttempts: number, baseDelayMs = 1000): Promise<T> {
+  try {
+    return await task();
+  } catch (error) {
+    if (maxAttempts <= 1) {
+      throw error;
+    }
+    await sleep(baseDelayMs);
+    return withExponentialBackoff(task, maxAttempts - 1, baseDelayMs * 2);
+  }
+}

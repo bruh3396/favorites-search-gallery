@@ -1,4 +1,4 @@
-import { compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource, normalizeImageSource, removeIdFromImageURL } from "../../lib/media/media_url_transformer";
+import { compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource, normalizeImageSource, removeIdFromImageURL, toWimgURL } from "../../lib/media/media_url_transformer";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -66,6 +66,32 @@ describe("convertImageURLToSampleURL", () => {
     const expected = "https://us.rule34.xxx/samples/0123/sample_123456abcde09.jpg";
 
     expect(convertImageURLToSampleURL(source)).toBe(expected);
+  });
+});
+
+describe("toWimgURL", () => {
+  test("no subdomain", () => {
+    expect(toWimgURL("https://rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+  });
+
+  test("with subdomain", () => {
+    expect(toWimgURL("https://us.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+  });
+
+  test("already wimg", () => {
+    expect(toWimgURL("https://wimg.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+  });
+
+  test("rule34 in path does not get replaced", () => {
+    expect(toWimgURL("https://rule34.xxx/rule34/images/abc.jpg")).toBe("https://wimg.rule34.xxx/rule34/images/abc.jpg");
+  });
+
+  test("rule34 in query string does not get replaced", () => {
+    expect(toWimgURL("https://rule34.xxx/images/abc.jpg?tag=rule34")).toBe("https://wimg.rule34.xxx/images/abc.jpg?tag=rule34");
+  });
+
+  test("invalid url returns original", () => {
+    expect(toWimgURL("not-a-url")).toBe("not-a-url");
   });
 });
 

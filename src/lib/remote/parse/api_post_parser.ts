@@ -1,7 +1,5 @@
-/* eslint-disable max-classes-per-file */
+import { ApiParseError, DeletedPostError } from "../../../types/errors";
 import { Post, PostResponse } from "../../../types/api";
-export class ApiParseError extends Error { }
-export class DeletedPostError extends Error { }
 
 export function postResponseToPost(response: PostResponse): Post {
   if (response.status === "deleted") {

@@ -5,6 +5,7 @@ import { FavoriteItem } from "../../type/favorite_item";
 import { Post } from "../../../../types/api";
 import { fetchVideoDurationFromFavorite } from "../../../../lib/remote/rule34/video_duration_fetcher";
 import { isVideo } from "../../../../lib/media/media_type_guards";
+import { withExponentialBackoff } from "../../../../lib/core/scheduling/promise";
 
 let onMetadataUpdated: (favorite: Favorite) => void = () => undefined;
 let isDatabaseWritten = false;
@@ -28,7 +29,7 @@ export function fetchMissingMetadata(favorites: FavoriteItem[]): void {
 
 function fetchMetadata(favorites: FavoriteItem[]): void {
   for (const favorite of favorites) {
-    PostAPI.fetchPost(favorite.id)
+    withExponentialBackoff(() => PostAPI.fetchPostWithFallback(favorite.id), 5)
       .then(post => processPost(favorite, post))
       .catch(console.error);
   }

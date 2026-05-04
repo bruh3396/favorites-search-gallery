@@ -75,7 +75,7 @@ export function update(parameters: FavoritesPaginationParameters): void {
     create(parameters);
     return;
   }
-  const middlePageNumber = parseInt(middlePageNumberMatch[1]);
+  const middlePageNumber = parseInt(middlePageNumberMatch[1], 10);
 
   if (parameters.currentPageNumber <= middlePageNumber) {
     return;

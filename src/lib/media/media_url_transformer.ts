@@ -33,3 +33,14 @@ export function convertImageURLToSampleURL(imageUrl: string): string {
 export function removeIdFromImageURL(imageUrl: string): string {
   return imageUrl.replace(/\?\d+/, "");
 }
+
+export function toWimgURL(url: string): string {
+  try {
+    const parsed = new URL(url);
+
+    parsed.hostname = parsed.hostname.replace(/^([^.]+\.)*rule34\.xxx$/, "wimg.rule34.xxx");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}

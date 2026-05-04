@@ -1,4 +1,4 @@
-import * as FavoritesAPI from "../../../lib/remote/rule34/favorites_fetcher";
+import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
@@ -50,7 +50,7 @@ function addAddFavoriteButton(thumb: HTMLElement): void {
     event.stopPropagation();
 
     if (event.button === ClickCode.LEFT) {
-      FavoritesAPI.addFavorite(thumb.id);
+      FavoritesActions.addFavorite(thumb.id);
       button.remove();
     }
   };

@@ -1,3 +1,4 @@
+import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import * as FavoritesAPI from "../../../lib/remote/rule34/favorites_fetcher";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { openOriginal, openPostPage } from "../../../lib/navigator";
@@ -73,9 +74,9 @@ export class FavoriteElement {
 
     if (this.hasRemoveButton) {
       Events.favorites.favoriteRemoved.emit(this.root.id);
-      FavoritesAPI.removeFavorite(this.root.id);
+      FavoritesActions.removeFavorite(this.root.id);
     } else {
-      FavoritesAPI.addFavorite(this.root.id);
+      FavoritesActions.addFavorite(this.root.id);
     }
     this.swapFavoriteButton();
   }

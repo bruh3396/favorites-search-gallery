@@ -13,7 +13,7 @@ export function extractFavoritesPageCount(html: string): number | null {
     return null;
   }
   const match = onclick.match(/pid=(\d+)/);
-  return match ? parseInt(match[1]) : null;
+  return match ? parseInt(match[1], 10) : null;
 }
 
 function extractThumbElements(dom: Document): HTMLElement[] {

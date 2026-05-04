@@ -6,5 +6,5 @@ export const tagLimiter = new ConcurrencyLimiter(4);
 export const extensionProbeLimiter = new ConcurrencyLimiter(3);
 
 export const favoriteAddQueue = new ThrottledQueue(200);
-export const FavoriteRemoveQueue = new ThrottledQueue(1000);
+export const favoriteRemoveQueue = new ThrottledQueue(1000);
 export const generalPageRequestQueue = new ThrottledQueue(2000);

@@ -13,6 +13,6 @@ export const FavoritesSettings = {
   reloadFetchDelay: 100,
   favoritesPageRetryBackoffBase: 7,
   buildIndexAsync: true,
-  favoriteFinderEnabled: true,
+  favoriteFinderEnabled: false,
   bottomNavigationButtonsEnabled: false
 };

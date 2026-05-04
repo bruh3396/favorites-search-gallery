@@ -7,5 +7,5 @@ export function extractFavoritesCount(html: string): number {
   if (favoritesUrl === undefined || favoritesUrl.textContent === null) {
     return 0;
   }
-  return parseInt(favoritesUrl.textContent);
+  return parseInt(favoritesUrl.textContent, 10);
 }

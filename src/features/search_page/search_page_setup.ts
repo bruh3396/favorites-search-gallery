@@ -18,7 +18,6 @@ export function setupSearchPage(): void {
   setupSearchPageModel();
   setupSearchPageView();
   buildSearchPage();
-
   setupInfiniteScroll();
   addEventListeners();
 }

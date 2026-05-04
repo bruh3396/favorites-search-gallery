@@ -8,8 +8,8 @@ export function parseDimensions2D(dimensionString: string): Dimensions2D {
 
   if (match) {
     return {
-      x: parseInt(match[1]),
-      y: parseInt(match[2])
+      x: parseInt(match[1], 10),
+      y: parseInt(match[2], 10)
     };
   }
   return defaultDimensions2D;

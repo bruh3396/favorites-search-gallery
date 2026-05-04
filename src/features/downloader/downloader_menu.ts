@@ -163,7 +163,7 @@ function setupMenuBatchSizeSelect(): void {
   batchSizeSelect.value = String(Preferences.downloadBatchSize.value);
 
   batchSizeSelect.addEventListener("change", () => {
-    Preferences.downloadBatchSize.set(parseInt(batchSizeSelect.value));
+    Preferences.downloadBatchSize.set(parseInt(batchSizeSelect.value, 10));
   });
 }
 

@@ -100,7 +100,7 @@ function updateAllThumbs(): void {
 
 function getInitialPageNumber(): number {
   const match = (/&pid=(\d+)/).exec(location.href);
-  return match === null ? 0 : Math.round(parseInt(match[1]) / POSTS_PER_SEARCH_PAGE);
+  return match === null ? 0 : Math.round(parseInt(match[1], 10) / POSTS_PER_SEARCH_PAGE);
 }
 
 function getBaseUrl(): string {
