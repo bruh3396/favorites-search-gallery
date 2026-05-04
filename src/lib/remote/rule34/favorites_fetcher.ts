@@ -1,4 +1,4 @@
-import { FavoriteRemoveQueue, favoriteAddQueue, favoritesPageLimiter, generalPageRequestQueue } from "../http/rate_limiter";
+import { FavoriteRemoveQueue, favoriteAddQueue, generalPageRequestQueue } from "../http/rate_limiter";
 import { buildAddFavoriteURL, buildPostVoteURL, buildRemoveFavoriteURL } from "../url/action_url_builder";
 import { buildFavoritesPageURL, buildProfilePageURL } from "../url/page_url_builder";
 import { fetch429, fetch429NTimes, fetchHtml } from "../http/http_client";
@@ -11,10 +11,6 @@ import { yieldControl } from "../../core/scheduling/promise";
 
 export function fetchFavoritesPage(pageNumber: number): Promise<string> {
   return fetchHtml(buildFavoritesPageURL(pageNumber));
-}
-
-export function fetchFavoritesPageSafe(pageNumber: number): Promise<string> {
-  return favoritesPageLimiter.run(() => fetchFavoritesPage(pageNumber));
 }
 
 export async function addFavorite(id: string): Promise<AddFavoriteStatus> {

@@ -552,17 +552,15 @@ async function findTagCategories(tagNames: string[], onAllCategoriesFound: () =>
 
     try {
       pendingRequests.add(tagName);
-      TagAPI.fetchRawTagXML(tagName, abortController)
-        .then((html) => {
+      TagAPI.fetchTagFromAPI(tagName)
+        .then((tag) => {
           pendingRequests.delete(tagName);
-          const dom = domParser.parseFromString(html, "text/html");
-          const encoding = dom.getElementsByTagName("tag")[0].getAttribute("type");
 
-          if (encoding === "array") {
+          if (tag === null) {
             setAsProblematic(tagName);
             return;
           }
-          addTagCategoryMapping(tagName, decodeTagCategory(parseInt(encoding ?? "0")));
+          addTagCategoryMapping(tagName, decodeTagCategory(tag.type));
 
           if (tagName === lastTagName) {
             onAllCategoriesFound();

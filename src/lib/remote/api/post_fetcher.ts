@@ -1,8 +1,7 @@
-import { Post } from "../../../types/api";
-import { SlimPost } from "../../../types/api";
-import { generalPageRequestQueue, multiPostLimiter } from "../http/rate_limiter";
+import { Post, SlimPost } from "../../../types/api";
+import { generalPageRequestQueue, postLimiter } from "../http/rate_limiter";
 import { CoalescingExecutor } from "../../core/concurrency/coalescing_executor";
-import { MULTI_POST_SLIM_API_URL } from "../url/api_url_builder";
+import { POST_API_URL } from "../url/api_url_builder";
 import { buildPostPageURL } from "../url/page_url_builder";
 import { fetchHtml } from "../http/http_client";
 import { parsePostFromPostPage } from "../parse/post_page_parser";
@@ -11,14 +10,14 @@ import { slimPostToPost } from "../parse/api_post_parser";
 
 type PostResolver = { resolve: (post: Post) => void; reject: (reason: unknown) => void };
 
-const MULTI_POST_BATCH_SIZE = 50;
-const MULTI_POST_FLUSH_DELAY = 1250;
+const BATCH_SIZE = 50;
+const FLUSH_DELAY = 1250;
 
 const pendingPosts = new Map<string, PostResolver>();
-const postBatchExecutor = new CoalescingExecutor<string>(MULTI_POST_BATCH_SIZE, MULTI_POST_FLUSH_DELAY, flushPostBatch);
+const postBatchExecutor = new CoalescingExecutor<string>(BATCH_SIZE, FLUSH_DELAY, flushPostBatch);
 
 async function fetchSlimPosts(ids: string[]): Promise<Record<string, SlimPost>> {
-  const response = await postToServer(MULTI_POST_SLIM_API_URL, { ids });
+  const response = await postToServer(POST_API_URL, { ids });
   return response.json() as Promise<Record<string, SlimPost>>;
 }
 
@@ -37,7 +36,7 @@ function rejectPostBatch(ids: string[], error: unknown): void {
 }
 
 function flushPostBatch(ids: string[]): void {
-  multiPostLimiter.run(async() => resolvePostBatch(await fetchSlimPosts(ids)))
+  postLimiter.run(async() => resolvePostBatch(await fetchSlimPosts(ids)))
     .catch((error: unknown) => rejectPostBatch(ids, error));
 }
 
@@ -48,15 +47,6 @@ function fetchPostFromAPI(id: string): Promise<Post> {
   });
 }
 
-export function fetchPostFromAPISafe(id: string): Promise<Post> {
-  return fetchPostFromAPI(id).catch(fetchPostFromPostPage);
-}
-
-export function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
-  return Promise.all(ids.map(async(id) => [id, await fetchPostFromAPI(id)]))
-    .then(entries => Object.fromEntries(entries));
-}
-
 function fetchPostFromPostPage(id: string): Promise<Post> {
   return fetchPostPage(id).then(parsePostFromPostPage);
 }
@@ -64,4 +54,13 @@ function fetchPostFromPostPage(id: string): Promise<Post> {
 export async function fetchPostPage(id: string): Promise<string> {
   await generalPageRequestQueue.wait();
   return fetchHtml(buildPostPageURL(id));
+}
+
+export function fetchPostFromAPISafe(id: string): Promise<Post> {
+  return fetchPostFromAPI(id).catch(fetchPostFromPostPage);
+}
+
+export function fetchMultiplePostsFromAPI(ids: string[]): Promise<Record<string, Post>> {
+  return Promise.all(ids.map(async(id) => [id, await fetchPostFromAPI(id)]))
+    .then(entries => Object.fromEntries(entries));
 }
