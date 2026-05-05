@@ -1,11 +1,11 @@
-import * as FavoritesPaginationMenu from "./navigation/favorites_page_navigator";
+import * as FavoritesPaginationMenu from "./navigation/navigator";
 import * as FavoritesShell from "./shell/favorites_shell";
-import * as FavoritesStatus from "./status/favorites_status";
+import * as FavoritesStatus from "./status/status";
 import * as Layout from "../../../lib/layout/layout";
 import { Favorite } from "../../../types/favorite";
-import { NewFavorites } from "../type/favorite_types";
-import { buildFavoriteElementTemplate } from "../type/favorite_element_template";
-import { getFavoritesSkeleton } from "./skeleton/favorites_skeleton";
+import { NewFavorites } from "../types/favorite_types";
+import { buildFavoriteElementTemplate } from "../types/favorite_element_template";
+import { getFavoritesSkeleton } from "./skeleton/skeleton";
 import { scrollToTop } from "../../../lib/ui/dom";
 
 export function insertNewSearchResultsOnReload(results: NewFavorites): void {
@@ -26,13 +26,13 @@ export function setupFavoritesView(): void {
   FavoritesPaginationMenu.setupFavoritesPaginationMenu();
 }
 
-export { toggle as togglePaginationMenu, getContainer as getPaginationMenu, create as createPageSelectionMenu, update as createPageSelectionMenuWhileFetching } from "./navigation/favorites_page_navigator";
+export { toggle as togglePaginationMenu, getContainer as getPaginationMenu, create as createPageSelectionMenu, update as createPageSelectionMenuWhileFetching } from "./navigation/navigator";
 export { addToBottom as insertNewSearchResults, changeLayout } from "../../../lib/layout/layout";
 
-export * from "./update/favorites_thumb_preloader";
-export * from "./status/favorites_status";
-export * from "./navigation/favorites_infinite_scroll";
-export * from "./navigation/favorites_paginator";
+export * from "./update/thumb_preloader";
+export * from "./status/status";
+export * from "./navigation/infinite_scroll";
+export * from "./navigation/paginator";
 export * from "./update/favorites_item_update";
-export * from "./skeleton/favorites_aspect_ratio_collector";
-export * from "./update/favorites_menu_event_handlers";
+export * from "./skeleton/aspect_ratio_collector";
+export * from "./update/menu_event_handlers";

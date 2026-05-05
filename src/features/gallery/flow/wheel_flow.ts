@@ -1,0 +1,18 @@
+import * as GalleryNavigationFlow from "./navigation_flow";
+import * as GalleryView from "../view/gallery_view";
+import { EnhancedWheelEvent } from "../../../lib/dom/input_types";
+import { executeByGalleryState } from "./state_executor";
+
+export function onWheel(wheelEvent: EnhancedWheelEvent): void {
+  executeByGalleryState(
+    {
+      hover: (event) => GalleryView.updateBackgroundOpacity(event.originalEvent),
+      gallery: (event) => {
+        if (!event.originalEvent.shiftKey && !event.originalEvent.ctrlKey) {
+          GalleryNavigationFlow.navigate(event.direction);
+        }
+      }
+    },
+    wheelEvent
+  );
+}

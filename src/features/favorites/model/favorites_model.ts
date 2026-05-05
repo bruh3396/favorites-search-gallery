@@ -1,8 +1,8 @@
-import * as FavoritesLoader from "./load/favorites_loader";
-import * as FavoritesMetadataFetcher from "./load/favorites_metadata_fetcher";
-import * as FavoritesSearchCoordinator from "./search/favorites_search_coordinator";
+import * as FavoritesLoader from "./load/loader";
+import * as FavoritesMetadataFetcher from "./load/metadata_fetcher";
+import * as FavoritesSearchCoordinator from "./search/search_coordinator";
 import { Favorite } from "../../../types/favorite";
-import { NewFavorites } from "../type/favorite_types";
+import { NewFavorites } from "../types/favorite_types";
 import { loadTagModifications } from "../../../lib/tags/tag_modifier";
 
 export function setupFavoritesModel(): void {
@@ -41,6 +41,6 @@ export const searchFavorites = (searchQuery?: string): Favorite[] => FavoritesSe
 export const invertSearchResults = (): Favorite[] => FavoritesSearchCoordinator.invertSearchResults(FavoritesLoader.getActiveFavorites());
 export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getLatestSearchResults());
 
-export * from "./load/favorites_loader";
-export * from "./load/favorites_metadata_fetcher";
-export * from "./search/favorites_search_coordinator";
+export * from "./load/loader";
+export * from "./load/metadata_fetcher";
+export * from "./search/search_coordinator";

@@ -3,7 +3,7 @@ import { Favorite, PageRelation } from "../../types/favorite";
 import { GalleryMenuAction, LayoutMode, PerformanceProfile } from "../../types/ui";
 import { MetadataMetric, Rating } from "../../types/search";
 import { Emitter } from "../core/scheduling/emitter";
-import { SearchPage } from "../../features/search_page/type/search_page";
+import { SearchPage } from "../../features/search_page/types/search_page";
 import { StickyEmitter } from "../core/scheduling/sticky_emitter";
 
 export const Events = {

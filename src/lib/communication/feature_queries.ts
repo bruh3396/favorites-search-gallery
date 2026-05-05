@@ -1,7 +1,7 @@
 import { Favorite } from "../../types/favorite";
 import { FeatureQuery } from "./feature_query";
 import { NavigationKey } from "../../types/input";
-import { SearchPage } from "../../features/search_page/type/search_page";
+import { SearchPage } from "../../features/search_page/types/search_page";
 
 export const FeatureQueries = {
   inGallery: new FeatureQuery<void, boolean>(false),

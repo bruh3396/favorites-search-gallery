@@ -1,13 +1,13 @@
-import * as GalleryDesktopMenu from "./shell/gallery_desktop_menu";
-import * as GalleryRenderer from "./renderers/gallery_renderer";
-import * as GalleryUI from "./shell/gallery_ui";
-import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/gallery_shell";
+import * as GalleryDesktopMenu from "./shell/desktop_menu";
+import * as GalleryRenderer from "./renderers/renderer";
+import * as GalleryUI from "./shell/ui";
+import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";
 import { GALLERY_CSS } from "../../../assets/css";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { RemoveFavoriteStatus } from "../../../types/favorite";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { insertStyle } from "../../../lib/dom/injector";
-export { overGalleryMenu } from "./gallery_view_utils";
+export { overGalleryMenu } from "./view_utils";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
