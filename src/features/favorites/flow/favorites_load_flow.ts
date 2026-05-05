@@ -2,12 +2,14 @@ import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesPresentationFlow from "./favorites_presentation_flow";
 import * as FavoritesSearchFlow from "./favorites_search_flow";
 import * as FavoritesView from "../view/favorites_view";
+import * as PostAPI from "../../../lib/remote/api/post_fetcher";
 import { Events } from "../../../lib/communication/events";
 import { Favorite } from "../../../types/favorite";
 import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
   await loadDatabaseFavorites();
+  Events.favorites.favoritesFoundInDatabase.emit(FavoritesModel.hasFavorites());
 
   if (FavoritesModel.hasFavorites()) {
     await handleExistingFavorites();
@@ -25,12 +27,12 @@ function loadDatabaseFavorites(): Promise<void> {
 
 function handleExistingFavorites(): Promise<void> {
   FavoritesModel.onDatabaseWritten();
-  Events.favorites.favoritesLoadedFromDatabase.emit();
   showLoadedFavorites();
   return loadNewFavorites();
 }
 
 function fetchFavorites(): Promise<void> {
+  PostAPI.setPostPageGate(Events.favorites.favoritesLoaded.wait());
   fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
   return fetchAllFavorites().then(saveAllFavorites);
 }

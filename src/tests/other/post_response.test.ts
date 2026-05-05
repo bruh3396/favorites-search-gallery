@@ -1,5 +1,5 @@
-import { ApiParseError, DeletedPostError } from "../../types/errors";
 import { CompactPost, PostResponse } from "../../types/api";
+import { DeletedPostError, RateLimitedError } from "../../types/errors";
 import { describe, expect, test } from "vitest";
 import { postResponseToPost } from "../../lib/remote/parse/api_post_parser";
 
@@ -36,6 +36,6 @@ describe("postResponseToPost", () => {
   });
 
   test("rate_limited throws ApiParseError", () => {
-    expect(() => postResponseToPost({ status: "rate_limited", id: "bar" })).toThrow(ApiParseError);
+    expect(() => postResponseToPost({ status: "rate_limited", id: "bar" })).toThrow(RateLimitedError);
   });
 });

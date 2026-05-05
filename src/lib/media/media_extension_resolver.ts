@@ -1,12 +1,12 @@
 import { DEFAULT_EXTENSION, extensionRegex } from "../environment/constants";
 import { ImageExtension, MediaExtension, MediaExtensionMapping } from "../../types/media";
+import { extensionProbeLimiter, extensionProbeQueue } from "../remote/http/rate_limiter";
 import { isGif, isVideo } from "./media_type_guards";
 import { CoalescingExecutor } from "../core/concurrency/coalescing_executor";
 import { Database } from "../core/storage/database";
 import { Favorite } from "../../types/favorite";
 import { ON_FAVORITES_PAGE } from "../environment/environment";
 import { Post } from "../../types/api";
-import { extensionProbeLimiter } from "../remote/http/rate_limiter";
 import { resolveBaseImageURL } from "./media_url_resolver";
 
 const IMAGE_EXTENSIONS: ImageExtension[] = ["jpg", "png", "jpeg"];
@@ -32,7 +32,8 @@ async function probeExtensions(item: HTMLElement | Favorite): Promise<ImageExten
   return null;
 }
 
-function findMediaExtension(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
+async function findMediaExtension(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
+  await extensionProbeQueue.wait();
   return extensionProbeLimiter.run(() => probeExtensions(item));
 }
 

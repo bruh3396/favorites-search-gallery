@@ -37,7 +37,7 @@ export function handlePageChangeInGallery(): void {
 }
 
 export const preloadContentOutOfGallery = (thumbs: HTMLElement[]): void => GalleryImageController.preload(thumbs);
-export const handleFavoritesAddedToCurrentPage = (thumbs: HTMLElement[]): void => GalleryImageController.handleFavoritesAddedToCurrentPage(thumbs);
+export const presetCanvasDimensions = (thumbs: HTMLElement[]): void => GalleryImageController.presetCanvasDimensions(thumbs);
 export const toggleVideoLooping = (value: boolean): void => GalleryVideoController.toggleVideoLooping(value);
 export const restartVideo = (): void => GalleryVideoController.restartVideo();
 export const toggleVideoPause = (): void => GalleryVideoController.toggleVideoPause();

@@ -1,15 +1,15 @@
 import * as GalleryAutoplayController from "../control/gallery_autoplay_controller";
+import * as GalleryInteractionTracker from "../control/gallery_interaction_tracker";
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryPreloadFlow from "./gallery_preload_flow";
 import * as GalleryView from "../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
 import { Events } from "../../../lib/communication/events";
-import { GalleryInteractionTracker } from "../control/gallery_interaction_tracker";
 
 export function enterGallery(thumb: HTMLElement): void {
   GalleryModel.enterGallery(thumb);
   GalleryView.enterGallery(thumb);
-  GalleryInteractionTracker?.enable();
+  GalleryInteractionTracker.enableInteractionTracking();
   GalleryAutoplayController.startAutoplay(thumb);
   GalleryPreloadFlow.preloadInGalleryAround(thumb);
   Events.gallery.showOnHoverOverridden.emit(false);
@@ -19,7 +19,7 @@ export function enterGallery(thumb: HTMLElement): void {
 export function exitGallery(): void {
   GalleryModel.exitGallery();
   GalleryView.exitGallery();
-  GalleryInteractionTracker?.disable();
+  GalleryInteractionTracker.disableInteractionTracking();
   GalleryAutoplayController.stopAutoplay();
   GalleryZoomFlow.toggleGalleryImageZoom(false);
   Events.gallery.exitedGallery.emit();

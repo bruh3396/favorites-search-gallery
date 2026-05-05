@@ -1,9 +1,36 @@
 import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/api";
-import { createEmptyPost } from "../../../lib/remote/parse/api_post_parser";
 import { decompressPreviewSource } from "../../../lib/media/media_url_transformer";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
+
+export function createEmptyPost(): Post {
+  return {
+    id: "",
+    height: 0,
+    score: 0,
+    fileURL: "",
+    parentId: "",
+    sampleURL: "",
+    sampleWidth: 0,
+    sampleHeight: 0,
+    previewURL: "",
+    rating: "",
+    tags: "",
+    width: 0,
+    change: 0,
+    md5: "",
+    creatorId: "",
+    hasChildren: false,
+    createdAt: "",
+    status: "",
+    source: "",
+    hasNotes: false,
+    hasComments: false,
+    previewWidth: 0,
+    previewHeight: 0
+  };
+}
 
 function normalizeTags(image: HTMLElement, id: string): string {
   const tags = image.title || image.getAttribute("tags") || "";

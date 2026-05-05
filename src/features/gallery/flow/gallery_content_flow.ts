@@ -17,3 +17,9 @@ export function indexThumbs(): void {
   GalleryThumbObserver.observeAllThumbsOnPage();
   GalleryModel.indexCurrentPageThumbs();
 }
+
+export function handleNewContent(elements: HTMLElement[]): void {
+  GalleryThumbObserver.observe(elements);
+  GalleryModel.indexCurrentPageThumbs();
+  GalleryView.presetCanvasDimensions(elements);
+}

@@ -1,8 +1,9 @@
-import { Post, PostResponse } from "../../../types/api";
+﻿import { Post, PostResponse } from "../../../types/api";
 import { generalPageRequestQueue, postLimiter } from "../http/rate_limiter";
 import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
 import { DeletedPostError } from "../../../types/errors";
-import { POST_API_URL } from "../url/api_url_builder";
+import { POST_API_URL } from "../url/api_urls";
+import { ServerSettings } from "../../../config/server_settings";
 import { buildPostPageURL } from "../url/page_url_builder";
 import { fetchFromServer } from "./server_client";
 import { fetchHtml } from "../http/http_client";
@@ -10,9 +11,16 @@ import { parsePostFromPostPage } from "../parse/post_page_parser";
 import { postResponseToPost } from "../parse/api_post_parser";
 
 const postFetcher = new CoalescingResolver<PostResponse>(
-  50, 2000, postLimiter,
-  (ids) => fetchFromServer(POST_API_URL, { ids }).then(r => r.json() as Promise<Record<string, PostResponse>>)
+  ServerSettings.apiBatchSize,
+  ServerSettings.apiBatchFlushDelay,
+  (ids) => postLimiter.run(() => fetchFromServer(POST_API_URL, { ids }))
 );
+
+let postPageGate: Promise<void> = Promise.resolve();
+
+export function setPostPageGate(gate: Promise<void>): void {
+  postPageGate = gate;
+}
 
 function fetchPostFromAPI(id: string): Promise<Post> {
   return postFetcher.resolve(id).then(postResponseToPost);
@@ -32,6 +40,7 @@ export function fetchPostFromPostPage(id: string): Promise<Post> {
 }
 
 export async function fetchPostPageHtml(id: string): Promise<string> {
+  await postPageGate;
   await generalPageRequestQueue.wait();
   return fetchHtml(buildPostPageURL(id));
 }

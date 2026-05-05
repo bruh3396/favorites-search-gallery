@@ -29,8 +29,8 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
   let value = parseInt(input.value, 10) + delta;
 
   if (input instanceof HTMLSelectElement) {
-    const smallestOption = parseInt(input.querySelector("option", 10)?.value ?? "1");
-    const largestOption = parseInt((input.querySelector("option:last-child", 10) as HTMLOptionElement)?.value ?? "1");
+    const smallestOption = parseInt(input.querySelector("option")?.value ?? "1");
+    const largestOption = parseInt((input.querySelector("option:last-child") as HTMLOptionElement)?.value ?? "1");
 
     value = clamp(value, smallestOption, largestOption);
   }

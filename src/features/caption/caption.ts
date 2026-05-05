@@ -169,7 +169,7 @@ function addFavoritesPageEventListeners(): void {
   }, {
     once: true
   });
-  Events.favorites.favoritesLoadedFromDatabase.on(() => {
+  Events.favorites.favoritesFoundInDatabase.on(() => {
     flags.finishedLoading = true;
   }, {
     once: true
@@ -474,7 +474,7 @@ function allTagsAreProblematic(tags: string[]): boolean {
 }
 
 async function correctAllProblematicTagsFromThumb(thumb: HTMLElement, onProblematicTagsCorrected: () => void): Promise<void> {
-  await Events.favorites.favoritesLoaded.next();
+  await Events.favorites.favoritesLoaded.wait();
   PostAPI.fetchPostPageHtml(thumb.id)
     .then((html: string) => {
       const tagCategoryMap = getTagCategoryMapFromPostPage(html);

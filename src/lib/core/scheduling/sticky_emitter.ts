@@ -10,6 +10,14 @@ export class StickyEmitter<V> extends Emitter<V> {
     super.emit(value);
   }
 
+  public wait(): Promise<V> {
+    return super.next();
+  }
+
+  public override next(): Promise<V> {
+    throw new Error("Use wait() on StickyEmitter instead of next()");
+  }
+
   public override on(callback: (value: V) => void, options: AddEventListenerOptions | undefined = undefined): void {
     super.on(callback, options);
 

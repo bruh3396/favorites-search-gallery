@@ -50,7 +50,7 @@ class ImageController extends GalleryAbstractController {
 
   public zoomToPoint = (x: number, y: number): void => GalleryImageCanvas.zoomToPoint(x, y);
   public upscaleCachedThumbs = (): Promise<void> => GalleryUpscaler.upscaleBatch(GalleryImageLoader.completedRequests());
-  public handleFavoritesAddedToCurrentPage = (thumbs: HTMLElement[]): void => GalleryUpscaler.presetCanvasDimensions(thumbs);
+  public presetCanvasDimensions = (thumbs: HTMLElement[]): void => GalleryUpscaler.presetCanvasDimensions(thumbs);
   public downscaleAll = (): void => GalleryUpscaler.handlePageChange();
 
   protected display(thumb: HTMLElement): void {

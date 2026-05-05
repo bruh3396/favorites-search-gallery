@@ -4,11 +4,10 @@ import * as GalleryView from "../view/gallery_view";
 import * as GalleryZoomFlow from "./gallery_zoom_flow";
 import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
 import { executeByGalleryState } from "./gallery_state_executor";
-import { overGalleryMenu } from "../view/gallery_view_utils";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 
 function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
-  if (mouseEvent.ctrlKey || overGalleryMenu(mouseEvent.originalEvent)) {
+  if (mouseEvent.ctrlKey || GalleryView.overGalleryMenu(mouseEvent.originalEvent)) {
     return;
   }
 

@@ -14,7 +14,7 @@ export const Events = {
     relativePageSelected: new Emitter<PageRelation>(),
     findFavoriteStarted: new Emitter<string>(),
     findFavoriteInAllStarted: new Emitter<string>(),
-    favoritesLoadedFromDatabase: new StickyEmitter<void>(),
+    favoritesFoundInDatabase: new StickyEmitter<boolean>(),
     favoritesLoaded: new StickyEmitter<void>(),
 
     startedFetchingFavorites: new Emitter<void>(),

@@ -17,7 +17,7 @@ function setStyleSheet(url: string): void {
 }
 
 function toggleDarkStyleSheet(useDark: boolean): void {
-  setStyleSheet(buildStyleSheetURL(useDark));
+  setStyleSheet(buildStyleSheetURL(ON_MOBILE_DEVICE ? "mobile" : "desktop", useDark));
 }
 
 function toggleGreenGradientClasses(useDark: boolean): void {

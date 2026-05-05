@@ -1,10 +1,12 @@
 import { ConcurrencyLimiter } from "../../core/concurrency/concurrency_limiter";
+import { ServerSettings } from "../../../config/server_settings";
 import { ThrottledQueue } from "../../core/concurrency/throttled_queue";
 
-export const postLimiter = new ConcurrencyLimiter(4);
-export const tagLimiter = new ConcurrencyLimiter(4);
-export const extensionProbeLimiter = new ConcurrencyLimiter(3);
+export const postLimiter = new ConcurrencyLimiter(ServerSettings.postFetchConcurrency);
+export const tagLimiter = new ConcurrencyLimiter(ServerSettings.tagFetchConcurrency);
+export const extensionProbeLimiter = new ConcurrencyLimiter(ServerSettings.extensionProbeConcurrency);
+export const extensionProbeQueue = new ThrottledQueue(ServerSettings.extensionProbeThrottle);
 
-export const favoriteAddQueue = new ThrottledQueue(200);
-export const favoriteRemoveQueue = new ThrottledQueue(1000);
-export const generalPageRequestQueue = new ThrottledQueue(2000);
+export const favoriteAddQueue = new ThrottledQueue(ServerSettings.favoriteAddThrottle);
+export const favoriteRemoveQueue = new ThrottledQueue(ServerSettings.favoriteRemoveThrottle);
+export const generalPageRequestQueue = new ThrottledQueue(ServerSettings.generalPageRequestThrottle);

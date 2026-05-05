@@ -1,5 +1,4 @@
-import { CoalescingExecutor } from "./coalescing_executor";
-import { ConcurrencyLimiter } from "./concurrency_limiter";
+﻿import { CoalescingExecutor } from "./coalescing_executor";
 
 type PromiseCallback<V> = {
   resolve: (value: V) => void;
@@ -13,7 +12,6 @@ export class CoalescingResolver<V> {
   constructor(
     batchSize: number,
     flushDelay: number,
-    private readonly limiter: ConcurrencyLimiter,
     private readonly resolveBatch: (keys: string[]) => Promise<Record<string, V>>
   ) {
     this.executor = new CoalescingExecutor<string>(batchSize, flushDelay, keys => this.flush(keys));
@@ -30,8 +28,8 @@ export class CoalescingResolver<V> {
   }
 
   private flush(keys: string[]): void {
-    this.limiter.run(async() => {
-      this.resolveAll(await this.resolveBatch(keys));
+    this.resolveBatch(keys).then(data => {
+      this.resolveAll(data);
     }).catch((error: unknown) => {
       this.rejectAll(keys, error);
     });

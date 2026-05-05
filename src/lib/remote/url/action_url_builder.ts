@@ -1,4 +1,3 @@
-import { ON_MOBILE_DEVICE } from "../../environment/environment";
 import { ORIGIN } from "./origin";
 
 const CSS_VERSION = 44;
@@ -20,6 +19,6 @@ export function buildAddFavoriteURL(id: string): string {
   return `${ADD_FAVORITE_URL}${id}`;
 }
 
-export function buildStyleSheetURL(useDark: boolean): string {
-  return `${CSS_URL}${ON_MOBILE_DEVICE ? "mobile" : "desktop"}${useDark ? "-dark" : ""}.css?${CSS_VERSION}`;
+export function buildStyleSheetURL(device: "mobile" | "desktop", useDark: boolean): string {
+  return `${CSS_URL}${device}${useDark ? "-dark" : ""}.css?${CSS_VERSION}`;
 }

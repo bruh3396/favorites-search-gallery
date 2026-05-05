@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 import { Events } from "../../../lib/communication/events";
 import { GallerySettings } from "../../../config/gallery_settings";
@@ -126,10 +126,9 @@ export function getVisibleThumbs(): HTMLElement[] {
 
 export function setupVisibleThumbObserver(): void {
   bypassDebounceAlwaysOnPageChange();
-  Events.favorites.alternateLayoutToggled.on(adjustRootMargin);
 
-  if (ON_SEARCH_PAGE) {
-    observeAllThumbsOnPage();
+  if (ON_FAVORITES_PAGE) {
+    Events.favorites.alternateLayoutToggled.on(adjustRootMargin);
   }
 }
 

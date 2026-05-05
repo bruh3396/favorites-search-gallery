@@ -1,15 +1,21 @@
+import * as FavoritesBottomNavigationButtons from "./control/components/favorites_bottom_navigation_buttons";
+import * as FavoritesDesktopDynamicElements from "./control/components/favorites_desktop_dynamic_elements";
+import * as FavoritesFinder from "./control/components/favorites_finder";
 import * as FavoritesInterFeatureFlow from "./flow/favorites_inter_feature_flow";
 import * as FavoritesLoadFlow from "./flow/favorites_load_flow";
+import * as FavoritesMobileDynamicElements from "./control/components/favorites_mobile_dynamic_elements";
 import * as FavoritesModel from "./model/favorites_model";
 import * as FavoritesOptionsFlow from "./flow/favorites_option_flow";
 import * as FavoritesPaginationFlow from "./flow/favorites_pagination_flow";
 import * as FavoritesPresentationFlow from "./flow/favorites_presentation_flow";
+import * as FavoritesRatingFilter from "./control/components/favorites_rating_filter";
 import * as FavoritesResetFlow from "./flow/favorites_reset_flow";
+import * as FavoritesSearchBox from "./control/search_box/favorites_search_box";
 import * as FavoritesSearchFlow from "./flow/favorites_search_flow";
 import * as FavoritesView from "./view/favorites_view";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
-import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 
 export function setupFavorites(): void {
   if (!ON_FAVORITES_PAGE) {
@@ -18,7 +24,21 @@ export function setupFavorites(): void {
   addEventListeners();
   FavoritesModel.setupFavoritesModel();
   FavoritesView.setupFavoritesView();
+  setupControls();
   FavoritesLoadFlow.loadAllFavorites();
+}
+
+function setupControls(): void {
+  FavoritesBottomNavigationButtons.setupFavoritesBottomNavigationButtons();
+  FavoritesFinder.setupFavoritesFinder();
+  FavoritesRatingFilter.setupFavoritesRatingFilter();
+  FavoritesSearchBox.setupFavoritesSearchBox();
+
+  if (ON_DESKTOP_DEVICE) {
+    FavoritesDesktopDynamicElements.buildFavoritesDesktopMenuElements();
+  } else {
+    FavoritesMobileDynamicElements.buildFavoritesMobileMenuElements();
+  }
 }
 
 function addEventListeners(): void {

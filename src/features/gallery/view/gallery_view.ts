@@ -1,11 +1,13 @@
 import * as GalleryDesktopMenu from "./shell/gallery_desktop_menu";
 import * as GalleryRenderer from "./renderers/gallery_renderer";
 import * as GalleryUI from "./shell/gallery_ui";
-import { mountGallery, toggleGalleryVisibility } from "./shell/gallery_shell";
+import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/gallery_shell";
 import { GALLERY_CSS } from "../../../assets/css";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { RemoveFavoriteStatus } from "../../../types/favorite";
+import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { insertStyle } from "../../../lib/dom/injector";
+export { overGalleryMenu } from "./gallery_view_utils";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
@@ -97,8 +99,12 @@ export function toggleVideoMute(): void {
   GalleryRenderer.toggleVideoMute();
 }
 
-export function handleFavoritesAddedToCurrentPage(thumbs: HTMLElement[]): void {
-  GalleryRenderer.handleFavoritesAddedToCurrentPage(thumbs);
+export function presetAllCanvasDimensions(): void {
+  GalleryRenderer.presetCanvasDimensions(getAllContentThumbs());
+}
+
+export function presetCanvasDimensions(thumbs: HTMLElement[]): void {
+  GalleryRenderer.presetCanvasDimensions(thumbs);
 }
 
 export function toggleZoomCursor(value: boolean): void {
@@ -134,4 +140,8 @@ export function setupGalleryView(): void {
   if (ON_DESKTOP_DEVICE) {
     GalleryDesktopMenu.setupDesktopGalleryMenu();
   }
+}
+
+export function appendToGallery(element: HTMLElement): void {
+  GalleryRoot.appendChild(element);
 }

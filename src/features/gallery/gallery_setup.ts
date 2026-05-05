@@ -3,7 +3,6 @@ import * as GalleryAutoplaySetupFlow from "./flow/gallery_autoplay_setup_flow";
 import * as GalleryClickFlow from "./flow/gallery_click_flow";
 import * as GalleryContentFlow from "./flow/gallery_content_flow";
 import * as GalleryEdgeTapControls from "./control/gallery_edge_tap_controls";
-import * as GalleryFavoritesFlow from "./flow/gallery_favorites_flow";
 import * as GalleryInteractionFlow from "./flow/gallery_interaction_flow";
 import * as GalleryInteractionTracker from "./control/gallery_interaction_tracker";
 import * as GalleryKeyFlow from "./flow/gallery_key_flow";
@@ -18,7 +17,7 @@ import * as GalleryTouchFlow from "./flow/gallery_touch_flow";
 import * as GalleryView from "./view/gallery_view";
 import * as GalleryVisibleThumbObserver from "./control/gallery_visible_thumb_observer";
 import * as GalleryWheelFlow from "./flow/gallery_wheel_flow";
-import { ON_DESKTOP_DEVICE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { GALLERY_DISABLED } from "../../lib/environment/derived_environment";
@@ -28,39 +27,51 @@ export async function setupGallery(): Promise<void> {
     return;
   }
 
-  if (ON_SEARCH_PAGE) {
-    await Events.searchPage.searchPageReady.next();
+  if (ON_FAVORITES_PAGE) {
+    await Events.favorites.favoritesFoundInDatabase.wait();
   }
-  performGallerySetup();
+
+  if (ON_SEARCH_PAGE) {
+    await Events.searchPage.searchPageReady.wait();
+  }
+  finishGallerySetup();
 }
 
-function performGallerySetup(): void {
-  GalleryModel.setupGalleryModel();
-  GalleryVisibleThumbObserver.setupVisibleThumbObserver();
+function finishGallerySetup(): void {
   GalleryEdgeTapControls.setupGalleryMobileTapControls();
   GalleryInteractionTracker.setupGalleryInteractionTracker();
+  GalleryVisibleThumbObserver.setupVisibleThumbObserver();
   GalleryAutoplaySetupFlow.setupAutoplay();
   GalleryView.setupGalleryView();
   addEventListeners();
+
+  GalleryVisibleThumbObserver.observeAllThumbsOnPage();
+  GalleryModel.indexCurrentPageThumbs();
+  GalleryView.presetAllCanvasDimensions();
 }
 
 function addEventListeners(): void {
-  Events.favorites.newFavoritesFound.on(GalleryFavoritesFlow.handleNewFavoritesFound, { once: true });
-  Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
-  Events.favorites.favoritesAddedToCurrentPage.on(GalleryFavoritesFlow.handleFavoritesAddedToCurrentPage);
-  Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowingContentOnHover);
-
   Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadVisibleThumbs);
   Events.gallery.videoEnded.on(GalleryAutoplayController.onVideoEnded);
   Events.gallery.videoDoubleClicked.on(GalleryStateFlow.exitGallery);
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
 
-  Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
-  Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
-  Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
-  Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
-  Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);
   FeatureQueries.inGallery.register(GalleryModel.inGallery);
+
+  if (ON_FAVORITES_PAGE) {
+    Events.favorites.newFavoritesFound.on(GalleryContentFlow.indexThumbs, { once: true });
+    Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
+    Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.handleNewContent);
+    Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowingContentOnHover);
+  }
+
+  if (ON_SEARCH_PAGE) {
+    Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
+    Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
+    Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
+    Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
+    Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);
+  }
 
   if (ON_DESKTOP_DEVICE) {
     Events.document.mouseover.on(GalleryMouseOverFlow.onMouseOver);

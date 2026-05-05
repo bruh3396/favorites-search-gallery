@@ -105,7 +105,3 @@ function setCurrentIndex(nextIndex: number): GalleryBoundary {
 function getLastIndex(): number {
   return GalleryThumbSelector.getThumbsOnCurrentPage().length - 1;
 }
-
-export function setupGalleryModel(): void {
-  indexCurrentPageThumbs();
-}

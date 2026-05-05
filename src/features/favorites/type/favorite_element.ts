@@ -1,5 +1,4 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
-import * as FavoritesAPI from "../../../lib/remote/rule34/favorites_fetcher";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { openOriginal, openPostPage } from "../../../lib/navigator";
 import { ClickCode } from "../../../types/input";

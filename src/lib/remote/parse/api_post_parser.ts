@@ -1,4 +1,4 @@
-import { ApiParseError, DeletedPostError } from "../../../types/errors";
+import { DeletedPostError, RateLimitedError } from "../../../types/errors";
 import { Post, PostResponse } from "../../../types/api";
 
 export function postResponseToPost(response: PostResponse): Post {
@@ -7,10 +7,9 @@ export function postResponseToPost(response: PostResponse): Post {
   }
 
   if (response.status === "rate_limited") {
-    throw new ApiParseError();
+    throw new RateLimitedError();
   }
   return {
-    ...createEmptyPost(),
     id: response.post.id,
     width: response.post.width,
     height: response.post.height,
@@ -20,29 +19,14 @@ export function postResponseToPost(response: PostResponse): Post {
     createdAt: response.post.createdAt,
     tags: response.post.tags,
     fileURL: response.post.fileURL,
-    previewURL: response.post.previewURL
-  };
-}
-
-export function createEmptyPost(): Post {
-  return {
-    id: "",
-    height: 0,
-    score: 0,
-    fileURL: "",
+    previewURL: response.post.previewURL,
     parentId: "",
     sampleURL: "",
     sampleWidth: 0,
     sampleHeight: 0,
-    previewURL: "",
-    rating: "",
-    tags: "",
-    width: 0,
-    change: 0,
     md5: "",
     creatorId: "",
     hasChildren: false,
-    createdAt: "",
     status: "",
     source: "",
     hasNotes: false,
