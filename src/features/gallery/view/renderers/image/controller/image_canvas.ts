@@ -1,6 +1,6 @@
 import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
 import { clearCanvas, drawScaledCanvas } from "../../../../../../utils/dom/canvas";
-import { GallerySettings } from "../../../../../../config/gallery_settings";
+import { GalleryConfig } from "../../../../../../config/gallery_config";
 import { ON_DESKTOP_DEVICE } from "../../../../../../lib/environment/environment";
 import { insertStyle } from "../../../../../../lib/dom/injector";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
@@ -20,7 +20,7 @@ const portraitStyle = `
   }
   `;
 let container: HTMLElement;
-const dimensions = parseDimensions2D(GallerySettings.mainCanvasResolution);
+const dimensions = parseDimensions2D(GalleryConfig.mainCanvasResolution);
 
 mainCanvas.className = "fullscreen-image";
 mainCanvas.width = dimensions.x;

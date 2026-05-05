@@ -4,8 +4,8 @@ import { Events } from "../../../../lib/communication/events";
 import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../types/gallery_types";
 import { GalleryRoot } from "./shell";
-import { GallerySettings } from "../../../../config/gallery_settings";
-import { GeneralSettings } from "../../../../config/general_settings";
+import { GalleryConfig } from "../../../../config/gallery_config";
+import { GeneralConfig } from "../../../../config/general_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Timeout } from "../../../../types/async";
@@ -97,7 +97,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
     Events.gallery.galleryMenuButtonClicked.emit(template.action);
   };
 
-  if (GallerySettings.galleryMenuMonoColor) {
+  if (GalleryConfig.galleryMenuMonoColor) {
     template.color = "#0075FF";
   }
 
@@ -143,7 +143,7 @@ function reveal(): void {
   clearTimeout(menuVisibilityTimeout);
   menuVisibilityTimeout = setTimeout(() => {
     hide();
-  }, GallerySettings.menuVisibilityTime);
+  }, GalleryConfig.menuVisibilityTime);
 }
 
 function hide(): void {
@@ -173,7 +173,7 @@ function toggleDockPosition(): void {
 }
 
 export function setupDesktopGalleryMenu(): void {
-  if (!GeneralSettings.galleryMenuOptionEnabled) {
+  if (!GeneralConfig.galleryMenuOptionEnabled) {
     return;
   }
   GalleryRoot.appendChild(menu);

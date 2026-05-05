@@ -1,5 +1,5 @@
 import * as GalleryImageCache from "./image_cache";
-import { GallerySettings } from "../../../../../../config/gallery_settings";
+import { GalleryConfig } from "../../../../../../config/gallery_config";
 import { ImageRequest } from "../../../../types/image_request";
 import { LowResolutionImageRequest } from "../../../../types/low_resolution_image_request";
 import { ON_FAVORITES_PAGE } from "../../../../../../lib/environment/environment";
@@ -24,7 +24,7 @@ function onBitmapLoaded(request: ImageRequest): void {
  }
 
 function exceededPreloadBudget(megabytes: number, acceptedCount: number): boolean {
-  return megabytes >= GallerySettings.imageMegabyteLimit && acceptedCount >= GallerySettings.minimumPreloadedImageCount;
+  return megabytes >= GalleryConfig.imageMegabyteLimit && acceptedCount >= GalleryConfig.minimumPreloadedImageCount;
 }
 
 function applyMemoryLimit(requests: ImageRequest[]): ImageRequest[] {
@@ -42,7 +42,7 @@ function applyMemoryLimit(requests: ImageRequest[]): ImageRequest[] {
 }
 
 function applySearchPageLimit(requests: ImageRequest[]): ImageRequest[] {
-  return requests.slice(0, GallerySettings.searchPagePreloadedImageCount);
+  return requests.slice(0, GalleryConfig.searchPagePreloadedImageCount);
 }
 
 function applyLimit(requests: ImageRequest[]): ImageRequest[] {

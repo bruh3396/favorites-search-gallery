@@ -1,7 +1,8 @@
 import * as FavoritesAPI from "../../../../lib/remote/rule34/favorites_fetcher";
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
 import { FavoritesPageRequest } from "./favorites_page_request";
-import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { FavoritesConfig } from "../../../../config/favorites_config";
+import { Rule34NetworkConfig } from "../../../../config/rule34_network_config";
 import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
 import { getIdFromThumb } from "../../../../lib/dom/thumb";
 import { sleep } from "../../../../lib/core/scheduling/promise";
@@ -21,13 +22,13 @@ async function fetchNewFavoritesFromPage(storedIds: Set<string>, pageNumber: num
 }
 
 export async function fetchNewFavorites(storedIds: Set<string>): Promise<HTMLElement[]> {
-  await sleep(FavoritesSettings.reloadFetchDelay);
+  await sleep(FavoritesConfig.reloadFetchDelay);
   const allNewElements: HTMLElement[] = [];
   let pageNumber = 0;
 
   while (await fetchNewFavoritesFromPage(storedIds, pageNumber, allNewElements)) {
     pageNumber += 1;
-    await sleep(FavoritesSettings.favoritesPageFetchDelay);
+    await sleep(Rule34NetworkConfig.favoritesPageFetchDelay);
   }
   return allNewElements;
 }

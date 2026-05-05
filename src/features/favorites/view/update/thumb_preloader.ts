@@ -1,5 +1,5 @@
 import { Favorite } from "../../../../types/favorite";
-import { GeneralSettings } from "../../../../config/general_settings";
+import { FavoritesConfig } from "../../../../config/favorites_config";
 import { preloadImage } from "../../../../utils/dom/image";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
@@ -10,7 +10,7 @@ export function preloadThumbnails(favorites: Favorite[]): void {
 }
 
 export const preloadImages = throttle(async(urls: string[]) => {
-  if (!GeneralSettings.preloadThumbnails) {
+  if (!FavoritesConfig.preloadThumbnails) {
     return;
   }
   await waitForAllThumbnailsToLoad();

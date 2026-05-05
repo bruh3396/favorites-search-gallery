@@ -1,18 +1,19 @@
-import { ON_MOBILE_DEVICE } from "../lib/environment/environment";
-
-export const FavoritesSettings = {
+export const FavoritesConfig = {
   resultsPerPageBounds: {
     min: 1,
     max: 10_000
   },
-  maxPageNumberButtons: ON_MOBILE_DEVICE ? 5 : 5,
-  favoritesPageFetchDelay: 1000,
   resultsPerPageStep: 25,
+  maxPageNumberButtons: 5,
+
   infiniteScrollBatchSize: 25,
   infiniteScrollPreloadCount: 100,
+  infiniteScrollMargin: "75%",
+
   reloadFetchDelay: 100,
-  favoritesPageRetryBackoffBase: 7,
+
   buildIndexAsync: true,
+  preloadThumbnails: true,
   favoriteFinderEnabled: false,
   bottomNavigationButtonsEnabled: false
 };

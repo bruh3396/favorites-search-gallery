@@ -1,4 +1,4 @@
-import { GeneralSettings } from "../../../config/general_settings";
+import { FavoritesConfig } from "../../../config/favorites_config";
 import { ITEM_CLASS_NAME } from "../../dom/thumb";
 
 export class PageBottomObserver {
@@ -22,7 +22,7 @@ export class PageBottomObserver {
   private createIntersectionObserver(): IntersectionObserver {
     return new IntersectionObserver(this.onIntersectionChanged.bind(this), {
       threshold: [0.1],
-      rootMargin: `0% 0% ${GeneralSettings.infiniteScrollMargin} 0%`
+      rootMargin: `0% 0% ${FavoritesConfig.infiniteScrollMargin} 0%`
     });
   }
 

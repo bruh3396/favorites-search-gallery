@@ -1,5 +1,5 @@
 import { Favorite } from "../../../../types/favorite";
-import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { FavoritesConfig } from "../../../../config/favorites_config";
 
 function collectUnrendered<T>(favorites: Favorite[], limit: number, selector: (f: Favorite) => T): T[] {
   const result: T[] = [];
@@ -17,7 +17,7 @@ function collectUnrendered<T>(favorites: Favorite[], limit: number, selector: (f
 }
 
 export function getMoreResults(favorites: Favorite[]): HTMLElement[] {
-  return collectUnrendered(favorites, FavoritesSettings.infiniteScrollBatchSize, f => f.root);
+  return collectUnrendered(favorites, FavoritesConfig.infiniteScrollBatchSize, f => f.root);
 }
 
 export function hasMoreResults(favorites: Favorite[]): boolean {
@@ -25,9 +25,9 @@ export function hasMoreResults(favorites: Favorite[]): boolean {
 }
 
 export function getFirstResults(favorites: Favorite[]): Favorite[] {
-  return favorites.slice(0, FavoritesSettings.infiniteScrollBatchSize);
+  return favorites.slice(0, FavoritesConfig.infiniteScrollBatchSize);
 }
 
 export function getThumbURLsToPreload(favorites: Favorite[]): string[] {
-  return collectUnrendered(favorites, FavoritesSettings.infiniteScrollPreloadCount, f => f.thumbUrl);
+  return collectUnrendered(favorites, FavoritesConfig.infiniteScrollPreloadCount, f => f.thumbUrl);
 }

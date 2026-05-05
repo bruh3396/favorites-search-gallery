@@ -2,7 +2,7 @@ import * as GalleryModel from "../model/model";
 import * as GalleryThumbObserver from "../control/visible_thumb_observer";
 import * as GalleryView from "../view/gallery_view";
 import { POSTS_PER_SEARCH_PAGE, doNothing } from "../../../lib/environment/constants";
-import { GallerySettings } from "../../../config/gallery_settings";
+import { GalleryConfig } from "../../../config/gallery_config";
 import { executeByGalleryState } from "./state_executor";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 
@@ -20,7 +20,7 @@ export function onUpscaleToggled(value: boolean): void {
   }
 }
 
-const preloadOutsideGallery = GallerySettings.preloadOutsideGalleryOnSearchPage ? (): void => {
+const preloadOutsideGallery = GalleryConfig.preloadOutsideGalleryOnSearchPage ? (): void => {
   GalleryView.preloadContentOutOfGallery(getAllContentThumbs());
 } : doNothing;
 

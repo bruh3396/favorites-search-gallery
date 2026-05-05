@@ -1,11 +1,10 @@
 import { ConcurrencyLimiter } from "../../core/concurrency/concurrency_limiter";
 import { Favorite } from "../../../types/favorite";
+import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { resolveBaseImageURL } from "../../media/media_url_resolver";
 
-const CONCURRENCY = 3;
-const METADATA_BYTE_RANGES = [500_000, 1_000_000, 2_000_000, 4_000_000];
-const videoLimiter = new ConcurrencyLimiter(CONCURRENCY);
-const videoPool: HTMLVideoElement[] = Array.from({ length: CONCURRENCY }, () => {
+const videoLimiter = new ConcurrencyLimiter(Rule34NetworkConfig.videoDurationFetchConcurrency);
+const videoPool: HTMLVideoElement[] = Array.from({ length: Rule34NetworkConfig.videoDurationFetchConcurrency }, () => {
   const video = document.createElement("video");
 
   video.preload = "metadata";
@@ -23,7 +22,7 @@ export function fetchVideoDuration(url: string): Promise<number> {
 function fetchVideoDurationWithIncreasingByteRanges(url: string): Promise<number> {
   let chain = Promise.reject<number>(new Error());
 
-  for (const range of METADATA_BYTE_RANGES) {
+  for (const range of Rule34NetworkConfig.videoDurationMetadataByteRanges) {
     chain = chain.catch(() => fetchVideoDurationForRange(url, range));
   }
   return chain.catch(() => Promise.reject(new Error(`Unable to read video duration: ${url}`)));

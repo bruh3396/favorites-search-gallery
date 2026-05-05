@@ -1,6 +1,6 @@
 import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
 import { Events } from "../../../../lib/communication/events";
-import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { PageRelation } from "../../../../types/favorite";
 import { Preferences } from "../../../../lib/preferences/preferences";
@@ -57,7 +57,7 @@ export function create(parameters: FavoritesPaginationParameters): void {
 
 export function update(parameters: FavoritesPaginationParameters): void {
   const pageNumberButtons = Array.from(document.getElementsByClassName("pagination-number"));
-  const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesSettings.maxPageNumberButtons;
+  const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesConfig.maxPageNumberButtons;
 
   if (!atMaxPageNumberButtons) {
     create(parameters);
@@ -89,7 +89,7 @@ function updateRangeIndicator(start: number, end: number, count: number): void {
 }
 
 function createNumberTraversalButtons(currentPageNumber: number, finalPageNumber: number): void {
-  const pageNumbers = numbersAroundInRange(currentPageNumber, FavoritesSettings.maxPageNumberButtons, 1, finalPageNumber);
+  const pageNumbers = numbersAroundInRange(currentPageNumber, FavoritesConfig.maxPageNumberButtons, 1, finalPageNumber);
 
   for (const pageNumber of pageNumbers) {
     createNumberTraversalButton(currentPageNumber, pageNumber);

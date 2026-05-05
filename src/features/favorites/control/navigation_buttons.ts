@@ -1,12 +1,12 @@
 import { Content } from "../../../lib/shell";
 import { Events } from "../../../lib/communication/events";
-import { FavoritesSettings } from "../../../config/favorites_settings";
+import { FavoritesConfig } from "../../../config/favorites_config";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { insertStyle } from "../../../lib/dom/injector";
 import { yieldControl } from "../../../lib/core/scheduling/promise";
 
 export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
-  if (ON_MOBILE_DEVICE || !FavoritesSettings.bottomNavigationButtonsEnabled) {
+  if (ON_MOBILE_DEVICE || !FavoritesConfig.bottomNavigationButtonsEnabled) {
     return;
   }
   const container = document.createElement("div");

@@ -1,6 +1,6 @@
 import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/remote/rule34/bitmap_fetcher";
 import { GalleryAbstractUpscaler } from "./abstract_upscaler";
-import { GalleryUpscaleSettings } from "../../../../../../config/gallery_upscale_settings";
+import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";
 import { UpscaledImageRequest } from "../../../../types/upscaled_image_request";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
@@ -17,7 +17,7 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   }
 
   protected finishUpscale(request: ImageRequest): void {
-    if (GalleryUpscaleSettings.upscaleUsingSamples) {
+    if (GalleryUpscaleConfig.upscaleUsingSamples) {
       this.upscaleSampleImageRequest(request);
     } else {
       this.upscaleFullImageRequest(request);

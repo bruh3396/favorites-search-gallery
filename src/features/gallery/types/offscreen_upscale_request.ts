@@ -1,4 +1,4 @@
-import { GallerySettings } from "../../../config/gallery_settings";
+import { GalleryConfig } from "../../../config/gallery_config";
 import { ImageRequest } from "./image_request";
 import { convertImageURLToSampleURL } from "../../../lib/media/media_url_transformer";
 import { isImage } from "../../../lib/media/media_type_guards";
@@ -7,7 +7,7 @@ import { resolveImageURL } from "../../../lib/media/media_url_resolver";
 export const transferredCanvasIds = new Set<string>();
 
 function getImageBitmapClone(imageRequest: ImageRequest): Promise<ImageBitmap | null> {
-  if (GallerySettings.fetchImageBitmapsInWorker) {
+  if (GalleryConfig.fetchImageBitmapsInWorker) {
     return Promise.resolve(null);
   }
 

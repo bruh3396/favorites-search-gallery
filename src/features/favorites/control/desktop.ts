@@ -6,8 +6,9 @@ import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons,
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../lib/ui/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../view/update/menu_event_handlers";
 import { Events } from "../../../lib/communication/events";
-import { FavoritesSettings } from "../../../config/favorites_settings";
-import { GeneralSettings } from "../../../config/general_settings";
+import { FavoritesConfig } from "../../../config/favorites_config";
+import { GeneralConfig } from "../../../config/general_config";
+import { ThumbnailConfig } from "../../../config/thumbnail_config";
 import { MetadataMetric } from "../../../types/search";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/favorites_metadata";
@@ -305,7 +306,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-right",
     textContent: "Gallery Menu",
     title: "Show menu in gallery",
-    enabled: GALLERY_ENABLED && GeneralSettings.galleryMenuOptionEnabled,
+    enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
     function: toggleGalleryMenuEnabled,
     preference: Preferences.galleryMenuEnabled,
     event: Events.favorites.galleryMenuToggled
@@ -383,8 +384,8 @@ const numbers: Partial<NumberElement>[] = [
     parentId: "column-count-container",
     position: "beforeend",
     preference: Preferences.columnCount,
-    min: GeneralSettings.columnCountBounds.min,
-    max: GeneralSettings.columnCountBounds.max,
+    min: ThumbnailConfig.columnCountBounds.min,
+    max: ThumbnailConfig.columnCountBounds.max,
     step: 1,
     pollingTime: 50,
     event: Events.favorites.columnCountChanged
@@ -395,8 +396,8 @@ const numbers: Partial<NumberElement>[] = [
     parentId: "row-size-container",
     position: "beforeend",
     preference: Preferences.rowSize,
-    min: GeneralSettings.rowSizeBounds.min,
-    max: GeneralSettings.rowSizeBounds.max,
+    min: ThumbnailConfig.rowSizeBounds.min,
+    max: ThumbnailConfig.rowSizeBounds.max,
     step: 1,
     pollingTime: 50,
     event: Events.favorites.rowSizeChanged
@@ -407,9 +408,9 @@ const numbers: Partial<NumberElement>[] = [
     parentId: "results-per-page-container",
     position: "beforeend",
     preference: Preferences.resultsPerPage,
-    min: FavoritesSettings.resultsPerPageBounds.min,
-    max: FavoritesSettings.resultsPerPageBounds.max,
-    step: FavoritesSettings.resultsPerPageStep,
+    min: FavoritesConfig.resultsPerPageBounds.min,
+    max: FavoritesConfig.resultsPerPageBounds.max,
+    step: FavoritesConfig.resultsPerPageStep,
     pollingTime: 50,
     event: Events.favorites.resultsPerPageChanged
   }

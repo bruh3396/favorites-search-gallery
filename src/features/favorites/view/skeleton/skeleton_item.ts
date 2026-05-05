@@ -1,6 +1,6 @@
 import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./skeleton_animation";
-import { GeneralSettings } from "../../../../config/general_settings";
+import { ThumbnailConfig } from "../../../../config/thumbnail_config";
 import { LayoutMode } from "../../../../types/ui";
 import { getSkeletonStyle } from "./skeleton_style";
 
@@ -31,7 +31,7 @@ export class SkeletonItem {
   }
 
   private setAnimation(): void {
-    if (GeneralSettings.randomSkeletonAnimationTiming) {
+    if (ThumbnailConfig.randomSkeletonAnimationTiming) {
       this.element.style.setProperty("--skeleton-animation-delay", `${getRandomAnimationDelay()}s`);
       this.element.style.setProperty("--skeleton-animation-duration", `${getRandomAnimationDuration()}s`);
     }
@@ -48,6 +48,6 @@ export class SkeletonItem {
   }
 
   private setClassName(): void {
-    this.element.className = `skeleton-item favorite ${GeneralSettings.skeletonAnimationClasses}`;
+    this.element.className = `skeleton-item favorite ${ThumbnailConfig.skeletonAnimationClasses}`;
   }
 }

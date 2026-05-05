@@ -1,6 +1,6 @@
 import { OffscreenUpscaleRequest } from "../../../../types/offscreen_upscale_request";
 
-declare let GalleryUpscaleSettings: {
+declare let GalleryUpscaleConfig: {
   maxUpscaledThumbCanvasHeight: number
   upscaledThumbCanvasWidth: number
   onlyCacheImagesInGallery: boolean
@@ -10,7 +10,7 @@ declare let GalleryUpscaleSettings: {
 const offscreenCanvases: Map<string, OffscreenCanvas> = new Map();
 
 async function createImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
-  const url = GalleryUpscaleSettings.upscaleUsingSamples ? request.sampleUrl : request.imageUrl;
+  const url = GalleryUpscaleConfig.upscaleUsingSamples ? request.sampleUrl : request.imageUrl;
   let response = await fetch(url);
 
   if (!response.ok) {
@@ -59,10 +59,10 @@ function setOffscreenCanvasDimensions(request: OffscreenUpscaleRequest, bitmap: 
   if (request.hasDimensions || request.offscreenCanvas === null) {
     return;
   }
-  const maxHeight = GalleryUpscaleSettings.maxUpscaledThumbCanvasHeight;
+  const maxHeight = GalleryUpscaleConfig.maxUpscaledThumbCanvasHeight;
   const width = bitmap.width;
   const height = bitmap.height;
-  let targetWidth = GalleryUpscaleSettings.upscaledThumbCanvasWidth;
+  let targetWidth = GalleryUpscaleConfig.upscaledThumbCanvasWidth;
   let targetHeight = (targetWidth / width) * height;
 
   if (targetWidth > width) {

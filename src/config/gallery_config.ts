@@ -1,7 +1,7 @@
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
 import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
 
-export const GallerySettings = {
+export const GalleryConfig = {
   mainCanvasResolutions: {
     search: "3840x2160",
     favorites: "7680x4320",
@@ -9,9 +9,9 @@ export const GallerySettings = {
   },
   get mainCanvasResolution(): string {
     if (ON_MOBILE_DEVICE) {
-      return GallerySettings.mainCanvasResolutions.mobile;
+      return GalleryConfig.mainCanvasResolutions.mobile;
     }
-    return ON_SEARCH_PAGE ? GallerySettings.mainCanvasResolutions.search : GallerySettings.mainCanvasResolutions.favorites;
+    return ON_SEARCH_PAGE ? GalleryConfig.mainCanvasResolutions.search : GalleryConfig.mainCanvasResolutions.favorites;
   },
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 850,
   searchPagePreloadedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_SEARCH_PAGE,

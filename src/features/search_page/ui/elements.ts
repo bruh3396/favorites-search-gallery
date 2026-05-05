@@ -2,7 +2,7 @@ import { CheckboxElement, NumberElement, SelectElement } from "../../../lib/ui/e
 import { LayoutMode, PerformanceProfile } from "../../../types/ui";
 import { Events } from "../../../lib/communication/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
-import { GeneralSettings } from "../../../config/general_settings";
+import { GeneralConfig } from "../../../config/general_config";
 import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
@@ -65,7 +65,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Gallery Menu",
     title: "Show menu in gallery",
     position: "beforeend",
-    enabled: GALLERY_ENABLED && GeneralSettings.galleryMenuOptionEnabled,
+    enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
     function: toggleGalleryMenuEnabled,
     preference: Preferences.galleryMenuEnabled,
     event: Events.favorites.galleryMenuToggled

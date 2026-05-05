@@ -1,7 +1,7 @@
 import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 import { Events } from "../../../lib/communication/events";
-import { GallerySettings } from "../../../config/gallery_settings";
+import { GalleryConfig } from "../../../config/gallery_config";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { debounceTrailing } from "../../../lib/core/scheduling/rate_limiting";
 import { getRectDistance } from "../../../utils/geometry";
@@ -13,7 +13,7 @@ let bypassDebounce = true;
 
 const broadcastDebounceAlways = debounceTrailing(() => {
   Events.gallery.visibleThumbsChanged.emit();
-}, GallerySettings.preloadContentDebounceTime);
+}, GalleryConfig.preloadContentDebounceTime);
 
 function broadcastVisibleThumbsChanged(): void {
   if (bypassDebounce) {
@@ -52,7 +52,7 @@ function createIntersectionObserver(): IntersectionObserver | null {
     return null;
   }
 
-  if (ON_SEARCH_PAGE && !GallerySettings.upscaleEverythingOnSearchPage) {
+  if (ON_SEARCH_PAGE && !GalleryConfig.upscaleEverythingOnSearchPage) {
     return null;
   }
   return new IntersectionObserver(onVisibleThumbsChanged, {
@@ -63,7 +63,7 @@ function createIntersectionObserver(): IntersectionObserver | null {
 }
 
 function getFinalRootMargin(): string {
-  return `${getTopMargin()}px 0px ${GallerySettings.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
+  return `${getTopMargin()}px 0px ${GalleryConfig.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
 }
 
 function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {

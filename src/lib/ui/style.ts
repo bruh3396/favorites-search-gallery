@@ -2,7 +2,7 @@ import { COMMON_HTML, CONTENT_HTML, DARK_THEME_HTML } from "../../assets/html";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../environment/environment";
 import { SKELETON_CSS, TILE_CSS } from "../../assets/css";
 import { getCookie, setCookie } from "../../utils/browser/cookie";
-import { GeneralSettings } from "../../config/general_settings";
+import { ThumbnailConfig } from "../../config/thumbnail_config";
 import { Preferences } from "../preferences/preferences";
 import { buildStyleSheetURL } from "../remote/url/action_url_builder";
 import { insertStyle } from "../dom/injector";
@@ -95,11 +95,11 @@ function setupTilerStyles(): void {
 
   const style = `
   .row, .column, .column .tiled-column, .square, .grid {
-    gap: ${GeneralSettings.thumbnailSpacing}px !important;
+    gap: ${ThumbnailConfig.thumbnailSpacing}px !important;
   }
 
   #favorites-search-gallery-content.column {
-    margin-right: ${ON_DESKTOP_DEVICE ? GeneralSettings.rightContentMargin : 0}px;
+    margin-right: ${ON_DESKTOP_DEVICE ? ThumbnailConfig.rightContentMargin : 0}px;
   }`;
 
   insertStyle(style, "tiler-style");

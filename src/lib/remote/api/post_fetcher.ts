@@ -3,7 +3,7 @@ import { generalPageRequestQueue, postLimiter } from "../http/rate_limiter";
 import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
 import { DeletedPostError } from "../../../types/errors";
 import { POST_API_URL } from "../url/api_urls";
-import { ServerSettings } from "../../../config/server_settings";
+import { ApiConfig } from "../../../config/api_config";
 import { buildPostPageURL } from "../url/page_url_builder";
 import { fetchFromServer } from "./server_client";
 import { fetchHtml } from "../http/http_client";
@@ -11,8 +11,8 @@ import { parsePostFromPostPage } from "../parse/post_page_parser";
 import { postResponseToPost } from "../parse/api_post_parser";
 
 const postFetcher = new CoalescingResolver<PostResponse>(
-  ServerSettings.apiBatchSize,
-  ServerSettings.apiBatchFlushDelay,
+  ApiConfig.apiBatchSize,
+  ApiConfig.apiBatchFlushDelay,
   (ids) => postLimiter.run(() => fetchFromServer(POST_API_URL, { ids }))
 );
 

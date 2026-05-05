@@ -1,5 +1,5 @@
 import { Events } from "../../../lib/communication/events";
-import { FavoritesSettings } from "../../../config/favorites_settings";
+import { FavoritesConfig } from "../../../config/favorites_config";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { debounceLeading } from "../../../lib/core/scheduling/rate_limiting";
@@ -9,7 +9,7 @@ let findButton: HTMLButtonElement;
 let input: HTMLInputElement;
 
 export function setupFavoritesFinder(): void {
-  if (ON_MOBILE_DEVICE || !FavoritesSettings.favoriteFinderEnabled) {
+  if (ON_MOBILE_DEVICE || !FavoritesConfig.favoriteFinderEnabled) {
     return;
   }
   const parent = document.querySelector("#left-favorites-panel-top-row");

@@ -1,5 +1,5 @@
 import { Events } from "../../../lib/communication/events";
-import { GallerySettings } from "../../../config/gallery_settings";
+import { GalleryConfig } from "../../../config/gallery_config";
 import { InteractionTracker } from "../../../lib/core/observers/interaction_tracker";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { doNothing } from "../../../lib/environment/constants";
@@ -15,7 +15,7 @@ export function setupGalleryInteractionTracker(): void {
   };
 
   galleryInteractionTracker = new InteractionTracker(
-    GallerySettings.idleInteractionDuration,
+    GalleryConfig.idleInteractionDuration,
     doNothing,
     onInteractionStopped,
     doNothing,

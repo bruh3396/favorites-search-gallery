@@ -16,9 +16,11 @@ const extensionMap: Map<string, ImageExtension> = new Map();
 const database = new Database<MediaExtensionMapping>(DATABASE_NAME, OBJECT_STORE_NAME);
 const writeScheduler = new CoalescingExecutor<MediaExtensionMapping>(100, 2000, database.update.bind(database));
 
-async function probeExtension(url: string, extension: string): Promise<boolean> {
-  const response = await fetch(url.replace(".jpg", `.${extension}`), { method: "HEAD" }).catch();
-  return response.ok;
+function probeExtension(url: string, extension: string): Promise<boolean> {
+  return extensionProbeLimiter.run(async() => {
+    const response = await fetch(url.replace(".jpg", `.${extension}`), { method: "HEAD" }).catch();
+    return response.ok;
+  });
 }
 
 async function probeExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
@@ -34,7 +36,7 @@ async function probeExtensions(item: HTMLElement | Favorite): Promise<ImageExten
 
 async function findMediaExtension(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
   await extensionProbeQueue.wait();
-  return extensionProbeLimiter.run(() => probeExtensions(item));
+  return probeExtensions(item);
 }
 
 function loadExtensionsIntoCache(): Promise<void> {

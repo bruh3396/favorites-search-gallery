@@ -3,7 +3,7 @@ import { isImage, isVideo } from "../../../lib/media/media_type_guards";
 import { Favorite } from "../../../types/favorite";
 import { FeatureQueries } from "../../../lib/communication/feature_queries";
 import { GalleryBoundary } from "../types/gallery_types";
-import { GallerySettings } from "../../../config/gallery_settings";
+import { GalleryConfig } from "../../../config/gallery_config";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { removeNonNumericCharacters } from "../../../utils/string/format";
 
@@ -32,7 +32,7 @@ export function getIndexFromThumb(thumb: HTMLElement): number {
 export function getImageThumbsAroundOnCurrentPage(initialThumb: HTMLElement): HTMLElement[] {
   return getThumbsAroundWrappedOnCurrentPage(
     initialThumb,
-    GallerySettings.maxImagesToRenderAroundInGallery,
+    GalleryConfig.maxImagesToRenderAroundInGallery,
     (thumb: HTMLElement): boolean => {
       return isImage(thumb);
     }
@@ -42,7 +42,7 @@ export function getImageThumbsAroundOnCurrentPage(initialThumb: HTMLElement): HT
 export function getImageThumbsAroundThroughoutAllPages(initialThumb: HTMLElement): HTMLElement[] {
   return getThumbsAroundThroughoutAllPages(
     initialThumb,
-    GallerySettings.maxImagesToRenderAroundInGallery,
+    GalleryConfig.maxImagesToRenderAroundInGallery,
     (object: HTMLElement | Favorite) => {
       return isImage(object);
     }
@@ -52,7 +52,7 @@ export function getImageThumbsAroundThroughoutAllPages(initialThumb: HTMLElement
 export function getThumbsAroundOnCurrentPage(initialThumb: HTMLElement): HTMLElement[] {
   return getThumbsAroundWrappedOnCurrentPage(
     initialThumb,
-    GallerySettings.maxImagesToRenderAroundInGallery,
+    GalleryConfig.maxImagesToRenderAroundInGallery,
     () => {
       return true;
     }

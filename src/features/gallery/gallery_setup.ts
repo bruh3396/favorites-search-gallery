@@ -1,5 +1,4 @@
-import * as GalleryAutoplayController from "./control/autoplay_controller";
-import * as GalleryAutoplaySetupFlow from "./flow/autoplay_setup_flow";
+﻿import * as GalleryAutoplayController from "./features/autoplay/autoplay_controller";
 import * as GalleryClickFlow from "./flow/click_flow";
 import * as GalleryContentFlow from "./flow/content_flow";
 import * as GalleryEdgeTapControls from "./control/edge_tap_controls";
@@ -9,6 +8,7 @@ import * as GalleryKeyFlow from "./flow/key_flow";
 import * as GalleryMenuFlow from "./flow/menu_flow";
 import * as GalleryModel from "./model/model";
 import * as GalleryMouseOverFlow from "./flow/mouseover_flow";
+import * as GalleryNavigationFlow from "./flow/navigation_flow";
 import * as GalleryPreloadFlow from "./flow/preload_flow";
 import * as GallerySearchPageFlow from "./flow/search_page_flow";
 import * as GalleryStateFlow from "./flow/state_flow";
@@ -21,6 +21,8 @@ import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { GALLERY_DISABLED } from "../../lib/environment/derived_environment";
+import { NavigationKey } from "../../types/input";
+import { executeByGalleryState } from "./flow/state_executor";
 
 export async function setupGallery(): Promise<void> {
   if (GALLERY_DISABLED) {
@@ -41,13 +43,24 @@ function finishGallerySetup(): void {
   GalleryEdgeTapControls.setupGalleryMobileTapControls();
   GalleryInteractionTracker.setupGalleryInteractionTracker();
   GalleryVisibleThumbObserver.setupVisibleThumbObserver();
-  GalleryAutoplaySetupFlow.setupAutoplay();
+  setupAutoplay();
   GalleryView.setupGalleryView();
   addEventListeners();
-
   GalleryVisibleThumbObserver.observeAllThumbsOnPage();
   GalleryModel.indexCurrentPageThumbs();
   GalleryView.presetAllCanvasDimensions();
+}
+
+function setupAutoplay(): void {
+  GalleryAutoplayController.setupAutoplay({
+    onEnable: () => GalleryView.toggleVideoLooping(false),
+    onDisable: () => GalleryView.toggleVideoLooping(true),
+    onPause: () => GalleryView.toggleVideoLooping(true),
+    onResume: () => GalleryView.toggleVideoLooping(false),
+    onComplete: (direction?: NavigationKey) => executeByGalleryState({ gallery: GalleryNavigationFlow.navigate }, direction),
+    onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo()
+  });
+  GalleryView.toggleVideoLooping(GalleryAutoplayController.isPaused() || !GalleryAutoplayController.isActive());
 }
 
 function addEventListeners(): void {

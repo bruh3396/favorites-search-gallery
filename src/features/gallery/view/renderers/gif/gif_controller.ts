@@ -1,5 +1,5 @@
 import { GalleryAbstractController } from "../abstract_controller";
-import { GallerySettings } from "../../../../../config/gallery_settings";
+import { GalleryConfig } from "../../../../../config/gallery_config";
 import { doNothing } from "../../../../../lib/environment/constants";
 import { isGif } from "../../../../../lib/media/media_type_guards";
 import { resolveGifUrl } from "../../../../../lib/media/media_url_resolver";
@@ -16,7 +16,7 @@ class GifController extends GalleryAbstractController {
     this.gif.className = "fullscreen-image";
     this.preloadedGifs = [];
     this.container.appendChild(this.gif);
-    this.preload = GallerySettings.gifPreloadingEnabled ? this.preload : doNothing;
+    this.preload = GalleryConfig.gifPreloadingEnabled ? this.preload : doNothing;
   }
 
   public hide(): void {
@@ -26,7 +26,7 @@ class GifController extends GalleryAbstractController {
   public preload(elements: HTMLElement[]): void {
     const gifSources = elements
       .filter((element) => isGif(element))
-      .slice(0, GallerySettings.preloadedGifCount)
+      .slice(0, GalleryConfig.preloadedGifCount)
       .map((element) => resolveGifUrl(element));
 
     for (const source of gifSources) {

@@ -1,5 +1,6 @@
 import { buildAddFavoriteURL, buildPostVoteURL, buildRemoveFavoriteURL } from "../url/action_url_builder";
 import { favoriteAddQueue, favoriteRemoveQueue } from "../http/rate_limiter";
+import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { AddFavoriteStatus } from "../../../types/favorite";
 import { ON_SEARCH_PAGE } from "../../environment/environment";
 import { fetchHtml } from "../http/http_client";
@@ -23,6 +24,6 @@ export async function removeFavorite(id: string): Promise<void> {
   favoriteAddQueue.cancel(id);
 
   if (await favoriteRemoveQueue.wait(id)) {
-    await withExponentialBackoff(() => fetch(buildRemoveFavoriteURL(id), { method: "GET", redirect: "manual" }), 3, 250);
+    await withExponentialBackoff(() => fetch(buildRemoveFavoriteURL(id), { method: "GET", redirect: "manual" }), Rule34NetworkConfig.favoriteRemoveRetries, Rule34NetworkConfig.favoriteRemoveRetryDelay);
   }
 }

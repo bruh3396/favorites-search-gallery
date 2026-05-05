@@ -1,6 +1,6 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { Events } from "../../../../../lib/communication/events";
-import { GallerySettings } from "../../../../../config/gallery_settings";
+import { GalleryConfig } from "../../../../../config/gallery_config";
 import { Preferences } from "../../../../../lib/preferences/preferences";
 import { Storage } from "../../../../../lib/core/storage/storage_instance";
 import { VideoClip } from "../../../types/gallery_types";
@@ -36,7 +36,7 @@ function createVideoPlayers(): void {
 
   createVideoPlayer(volume, muted);
 
-  for (let i = 0; i < GallerySettings.preloadedVideoCount; i += 1) {
+  for (let i = 0; i < GalleryConfig.preloadedVideoCount; i += 1) {
     createVideoPlayer(volume, muted);
   }
 }

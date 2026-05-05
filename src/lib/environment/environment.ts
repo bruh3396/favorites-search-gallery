@@ -1,3 +1,6 @@
+declare const SCRIPT_VERSION: string;
+
+export const VERSION = SCRIPT_VERSION;
 export const ON_SEARCH_PAGE = location.href.includes("page=post&s=list");
 export const ON_FAVORITES_PAGE = location.href.includes("page=favorites");
 export const ON_POST_PAGE = location.href.includes("page=post&s=view");

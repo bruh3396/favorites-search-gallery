@@ -1,6 +1,6 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
 import { FeatureQueries } from "../../../../../../lib/communication/feature_queries";
-import { GalleryUpscaleSettings } from "../../../../../../config/gallery_upscale_settings";
+import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";
 import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
 import { PerformanceProfile } from "../../../../../../types/ui";
@@ -15,7 +15,7 @@ import { transferredCanvasIds } from "../../../../types/offscreen_upscale_reques
 const batchUpscaleQueue = new ThrottledQueue(20);
 
 export abstract class GalleryAbstractUpscaler {
-  protected readonly upscaleQueue: ThrottledQueue = new ThrottledQueue(GalleryUpscaleSettings.upscaleDelay);
+  protected readonly upscaleQueue: ThrottledQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
   private upscaledIds: Set<string> = new Set();
 
   public upscale(request: ImageRequest): void {
@@ -64,8 +64,8 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   protected setThumbCanvasDimensions(canvas: HTMLCanvasElement, width: number, height: number): void {
-    const maxHeight = GalleryUpscaleSettings.maxUpscaledThumbCanvasHeight;
-    let targetWidth = GalleryUpscaleSettings.upscaledThumbCanvasWidth;
+    const maxHeight = GalleryUpscaleConfig.maxUpscaledThumbCanvasHeight;
+    let targetWidth = GalleryUpscaleConfig.upscaledThumbCanvasWidth;
     let targetHeight = (targetWidth / width) * height;
 
     if (targetWidth > width) {

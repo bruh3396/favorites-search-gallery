@@ -1,5 +1,5 @@
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
-import { FavoritesSettings } from "../../../../config/favorites_settings";
+import { Rule34NetworkConfig } from "../../../../config/rule34_network_config";
 import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
 
 export class FavoritesPageRequest {
@@ -12,7 +12,7 @@ export class FavoritesPageRequest {
   }
 
   public get fetchDelay(): number {
-    return (FavoritesSettings.favoritesPageRetryBackoffBase ** (this.retryCount)) + FavoritesSettings.favoritesPageFetchDelay;
+    return (Rule34NetworkConfig.favoritesPageRetryBackoffBase ** (this.retryCount)) + Rule34NetworkConfig.favoritesPageFetchDelay;
   }
 
   public get realPageNumber(): number {

@@ -5,7 +5,7 @@ import * as GalleryStateFlow from "./state_flow";
 import * as GalleryView from "../view/gallery_view";
 import { isExitKey, isNavigationKey } from "../../../types/guards";
 import { EnhancedKeyboardEvent } from "../../../lib/dom/input_types";
-import { GallerySettings } from "../../../config/gallery_settings";
+import { GalleryConfig } from "../../../config/gallery_config";
 import { executeByGalleryState } from "./state_executor";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../utils/browser/window";
@@ -76,7 +76,7 @@ const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
   }, new EnhancedKeyboardEvent(event));
 };
 
-const onKeyDownThrottled = throttle(onKeyDownNoThrottle, GallerySettings.galleryNavigationDelay);
+const onKeyDownThrottled = throttle(onKeyDownNoThrottle, GalleryConfig.galleryNavigationDelay);
 
 function onKeyUpInGallery(event: EnhancedKeyboardEvent): void {
   if (event.key === "shift") {

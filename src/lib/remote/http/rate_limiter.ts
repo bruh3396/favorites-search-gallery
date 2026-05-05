@@ -1,12 +1,12 @@
+import { ApiConfig } from "../../../config/api_config";
 import { ConcurrencyLimiter } from "../../core/concurrency/concurrency_limiter";
-import { ServerSettings } from "../../../config/server_settings";
+import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { ThrottledQueue } from "../../core/concurrency/throttled_queue";
 
-export const postLimiter = new ConcurrencyLimiter(ServerSettings.postFetchConcurrency);
-export const tagLimiter = new ConcurrencyLimiter(ServerSettings.tagFetchConcurrency);
-export const extensionProbeLimiter = new ConcurrencyLimiter(ServerSettings.extensionProbeConcurrency);
-export const extensionProbeQueue = new ThrottledQueue(ServerSettings.extensionProbeThrottle);
-
-export const favoriteAddQueue = new ThrottledQueue(ServerSettings.favoriteAddThrottle);
-export const favoriteRemoveQueue = new ThrottledQueue(ServerSettings.favoriteRemoveThrottle);
-export const generalPageRequestQueue = new ThrottledQueue(ServerSettings.generalPageRequestThrottle);
+export const postLimiter = new ConcurrencyLimiter(ApiConfig.postFetchConcurrency);
+export const tagLimiter = new ConcurrencyLimiter(ApiConfig.tagFetchConcurrency);
+export const extensionProbeLimiter = new ConcurrencyLimiter(Rule34NetworkConfig.extensionProbeConcurrency);
+export const extensionProbeQueue = new ThrottledQueue(Rule34NetworkConfig.extensionProbeThrottle);
+export const favoriteAddQueue = new ThrottledQueue(Rule34NetworkConfig.favoriteAddThrottle);
+export const favoriteRemoveQueue = new ThrottledQueue(Rule34NetworkConfig.favoriteRemoveThrottle);
+export const generalPageRequestQueue = new ThrottledQueue(Rule34NetworkConfig.generalPageRequestThrottle);

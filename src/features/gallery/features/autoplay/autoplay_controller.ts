@@ -1,17 +1,17 @@
-import * as Icons from "../../../assets/icons";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
-import { clamp, millisecondsToSeconds } from "../../../utils/number";
-import { isImage, isVideo } from "../../../lib/media/media_type_guards";
-import { AUTOPLAY_HTML } from "../../../assets/html";
-import { Events } from "../../../lib/communication/events";
-import { NavigationKey } from "../../../types/input";
-import { NumberComponent } from "../../../lib/ui/element/number_component";
-import { Overlays } from "../../../lib/shell";
-import { Preferences } from "../../../lib/preferences/preferences";
-import { Timer } from "../../../lib/core/scheduling/timer";
-import { createObjectURLFromSvg } from "../../../lib/navigator";
-import { insertStyle } from "../../../lib/dom/injector";
-import { throttle } from "../../../lib/core/scheduling/rate_limiting";
+﻿import * as Icons from "../../../../assets/icons";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { clamp, millisecondsToSeconds } from "../../../../utils/number";
+import { isImage, isVideo } from "../../../../lib/media/media_type_guards";
+import { AUTOPLAY_HTML } from "../../../../assets/html";
+import { Events } from "../../../../lib/communication/events";
+import { NavigationKey } from "../../../../types/input";
+import { NumberComponent } from "../../../../lib/ui/element/number_component";
+import { Overlays } from "../../../../lib/shell";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { Timer } from "../../../../lib/core/scheduling/timer";
+import { createObjectURLFromSvg } from "../../../../lib/navigator";
+import { insertStyle } from "../../../../lib/dom/injector";
+import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
 
 export type AutoplayEvents = {
   onEnable: () => void
@@ -500,11 +500,8 @@ function addAutoplayEventListeners(): void {
   imageViewTimer.onTimerEnd = (): void => {
     events.onComplete();
   };
-  // Events.document.mousemove.on(throttle((event) => {
   Events.document.mousemove.on(throttle<MouseEvent>(() => {
-    // if (!overGalleryMenu(event)) {
     showMenu();
-    // }
   }, 250), {
     signal: eventListenersAbortController.signal
   });
@@ -559,7 +556,6 @@ function startImageProgressBar(): void {
   stopImageProgressBar();
   setTimeout(() => {
     ui.imageProgressBar.classList.add("animated");
-    // document.body.classList.add("autoplay");
   }, 20);
 }
 
