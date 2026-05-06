@@ -1,4 +1,3 @@
-import * as FavoritesDownloadController from "../features/downloader/downloader_menu";
 import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesPresentationFlow from "./presentation_flow";
 import * as FavoritesSearchFlow from "./search_flow";
@@ -9,7 +8,9 @@ import { Favorite } from "../../../types/favorite";
 import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
+  console.log(3);
   await loadDatabaseFavorites();
+  console.log(4);
   Events.favorites.favoritesFoundInDatabase.emit(FavoritesModel.hasFavorites());
 
   if (FavoritesModel.hasFavorites()) {
@@ -87,6 +88,5 @@ async function saveAllFavorites(): Promise<void> {
 
 function finishLoading(): void {
   FavoritesView.collectAspectRatios();
-  FavoritesDownloadController.enableDownloadMenu();
   Events.favorites.favoritesLoaded.emit();
 }

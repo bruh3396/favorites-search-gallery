@@ -1,16 +1,18 @@
-import { addTagsToFavorite, removeTagsFromFavorite, resetAllFavoriteTags, resetTagModifications, setAdditionalTags, storeTagModifications } from "../../../../lib/tags/tag_modifier";
-import { insertHtmlWithStyles, insertStyle } from "../../../../lib/dom/injector";
+import * as TagModifierEditMode from "./edit_mode";
+import * as TagModifierOperations from "./operations";
+import * as TagModifierSelection from "./selection";
+import * as TagModifierStore from "./store";
 import { Favorite } from "../../../../types/favorite";
-import { ITEM_CLASS_NAME } from "../../../../lib/dom/thumb";
 import { TAG_MODIFIER_DISABLED } from "../../../../lib/environment/derived_environment";
 import { TAG_MODIFIER_HTML } from "../../../../assets/html";
 import { doNothing } from "../../../../lib/environment/constants";
-import { removeExtraWhiteSpace } from "../../../../utils/string/format";
-import { setCustomTags } from "../../../../lib/tags/custom_tags";
+import { insertHtmlWithStyles } from "../../../../lib/dom/injector";
 
 export type FavoritesTagModifierInterface = {
   getSearchResults: () => Favorite[]
   getAllFavorites: () => Favorite[]
+  deIndex: (favorite: Favorite) => void
+  reIndex: (favorite: Favorite) => void
 }
 
 type TagModifierUI = {
@@ -26,49 +28,31 @@ type TagModifierUI = {
   export: HTMLButtonElement
 }
 
-const selected: Set<Favorite> = new Set();
 const ui: TagModifierUI = {} as TagModifierUI;
 const favoritesOption = {} as { container: HTMLElement, checkbox: HTMLInputElement };
 let tagModifierInterface: FavoritesTagModifierInterface;
-let tagEditModeAbortController = new AbortController();
-let tagEditModeEnabled = false;
-let atLeastOneFavoriteIsSelected = false;
 
-export function setupFavoritesTagModifier(tmInterface: FavoritesTagModifierInterface): void {
+export async function setupFavoritesTagModifier(tmInterface: FavoritesTagModifierInterface): Promise<void> {
   if (TAG_MODIFIER_DISABLED) {
     return;
   }
   tagModifierInterface = tmInterface;
   insertHTML();
+  TagModifierSelection.initializeSelection(tmInterface.getSearchResults);
+  TagModifierEditMode.initializeTagEditMode(
+    (id) => tmInterface.getSearchResults().find(f => f.id === id),
+    (value) => {
+      ui.container.style.display = value ? "block" : "none";
+    }
+  );
+  TagModifierOperations.initializeTagOperations(tmInterface.deIndex, tmInterface.reIndex, () => ui.statusLabel);
+  await TagModifierStore.loadTagModifications();
   addEventListeners();
 }
 
-export function unselectAll(): void {
-  unSelectAll();
-}
-
-export function highlightSelectedThumbsOnPageChange(): void {
-  if (atLeastOneFavoriteIsSelected) {
-    for (const favorite of getSelectedFavoritesOnPage()) {
-      toggleOutline(favorite, true);
-    }
-  }
-}
-
-export function handleDocumentClick(event: MouseEvent): void {
-  if (!tagEditModeEnabled) {
-    return;
-  }
-
-  if (!(event.target instanceof HTMLElement) || !event.target.classList.contains(ITEM_CLASS_NAME)) {
-    return;
-  }
-  const favorite = getFavorite(event.target.id);
-
-  if (favorite !== undefined) {
-    select(favorite);
-  }
-}
+export { handleDocumentClick } from "./edit_mode";
+export { highlightSelectedThumbsOnPageChange, unselectAll } from "./selection";
+export { getTagModification as getAdditionalTags } from "./store";
 
 function insertHTML(): void {
   insertHtmlWithStyles(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
@@ -89,174 +73,20 @@ function insertHTML(): void {
 function addEventListeners(): void {
   favoritesOption.checkbox.onchange = (event): void => {
     if (event.target instanceof HTMLInputElement) {
-      toggleTagEditMode(event.target.checked);
+      TagModifierEditMode.toggleTagEditMode(event.target.checked);
     }
   };
-  ui.selectAll.onclick = selectAll;
-  ui.unSelectAll.onclick = unSelectAll;
-  ui.add.onclick = addTagsToSelected;
-  ui.remove.onclick = removeTagsFromSelected;
+  ui.selectAll.onclick = TagModifierSelection.selectAll;
+  ui.unSelectAll.onclick = TagModifierSelection.unselectAll;
+  ui.add.onclick = (): void => TagModifierOperations.addTagsToSelected(TagModifierSelection.getSelected(), ui.textarea.value);
+  ui.remove.onclick = (): void => TagModifierOperations.removeTagsFromSelected(TagModifierSelection.getSelected(), ui.textarea.value);
   ui.reset.onclick = (): void => {
     if (!confirm("Are you sure you want to delete all tag modifications?")) {
       return;
     }
-    resetTagModifications();
-    resetAllFavoriteTags(tagModifierInterface.getAllFavorites());
+    TagModifierStore.resetTagModifications();
+    TagModifierOperations.resetAllFavoriteTags(tagModifierInterface.getAllFavorites());
   };
   ui.import.onclick = doNothing;
   ui.export.onclick = doNothing;
-}
-
-function getSelectedFavoritesOnPage(): Favorite[] {
-  return tagModifierInterface.getSearchResults().filter(favorite => document.getElementById(favorite.id) !== null && isSelected(favorite));
-}
-
-function toggleTagEditMode(value: boolean): void {
-  tagEditModeEnabled = value;
-  toggleThumbInteraction(value);
-  toggleUI(value);
-  toggleTagEditModeAbortController(value);
-  ui.unSelectAll.click();
-}
-
-function toggleThumbInteraction(value: boolean): void {
-  let html = "";
-
-  if (value) {
-    html =
-      `
-      .favorite  {
-        cursor: pointer;
-        outline: 1px solid black;
-
-        > div,
-        >a
-        {
-          outline: none !important;
-
-          > img {
-            outline: none !important;
-          }
-
-          pointer-events:none;
-          opacity: 0.6;
-          filter: grayscale(40%);
-          transition: none !important;
-        }
-      }
-    `;
-  }
-  insertStyle(html, "tag-edit-mode");
-}
-
-function toggleUI(value: boolean): void {
-  ui.container.style.display = value ? "block" : "none";
-}
-
-function getFavorite(id: string): Favorite | undefined {
-  return tagModifierInterface.getSearchResults().find(favorite => favorite.id === id);
-}
-
-function toggleTagEditModeAbortController(value: boolean): void {
-  if (!value) {
-    tagEditModeAbortController.abort();
-    tagEditModeAbortController = new AbortController();
-  }
-}
-
-function showStatus(text: string): void {
-  ui.statusLabel.style.visibility = "visible";
-  ui.statusLabel.textContent = text;
-  setTimeout(() => {
-    const statusHasNotChanged = ui.statusLabel.textContent === text;
-
-    if (statusHasNotChanged) {
-      ui.statusLabel.style.visibility = "hidden";
-    }
-  }, 1000);
-}
-
-function unSelectAll(): void {
-  if (!atLeastOneFavoriteIsSelected) {
-    return;
-  }
-
-  for (const favorite of selected) {
-    select(favorite, false);
-  }
-  atLeastOneFavoriteIsSelected = false;
-}
-
-function selectAll(): void {
-  for (const favorite of tagModifierInterface.getSearchResults()) {
-    select(favorite, true);
-  }
-}
-
-function select(favorite: Favorite, value?: boolean): void {
-  atLeastOneFavoriteIsSelected = true;
-
-  if (value === undefined) {
-    value = !selected.has(favorite);
-  }
-
-  if (value) {
-    selected.add(favorite);
-  } else {
-    selected.delete(favorite);
-  }
-  toggleOutline(favorite, value);
-}
-
-function toggleOutline(favorite: Favorite, value: boolean): void {
-  if (document.getElementById(favorite.id) !== null || !value) {
-    favorite.root.classList.toggle("tag-modifier-selected", value);
-  }
-}
-
-function isSelected(favorite: Favorite): boolean {
-  return selected.has(favorite);
-}
-
-function removeMediaTypeTags(tags: string): string {
-  return tags.replace(/(?:^|\s*)(?:video|animated|mp4)(?:$|\s*)/g, "");
-}
-
-function addTagsToSelected(): void {
-  modifyTagsOfSelected(false);
-}
-
-function removeTagsFromSelected(): void {
-  modifyTagsOfSelected(true);
-}
-
-function modifyTagsOfSelected(remove: boolean): void {
-  const tags = ui.textarea.value.toLowerCase();
-  const tagsWithoutMediaTypes = removeMediaTypeTags(tags);
-  const tagsToModify = removeExtraWhiteSpace(tagsWithoutMediaTypes);
-  const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
-  let modifiedTagsCount = 0;
-
-  if (tagsToModify === "") {
-    return;
-  }
-
-  for (const favorite of selected) {
-    const additionalTags = remove ? removeTagsFromFavorite(favorite, tagsToModify) : addTagsToFavorite(favorite, tagsToModify);
-
-    setAdditionalTags(favorite.id, additionalTags);
-    modifiedTagsCount += 1;
-  }
-
-  if (modifiedTagsCount === 0) {
-    return;
-  }
-
-  if (tags !== tagsWithoutMediaTypes) {
-    alert("Warning: video, animated, and mp4 tags are unchanged.\nThey cannot be modified.");
-  }
-  showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);
-  dispatchEvent(new Event("modifiedTags"));
-  setCustomTags(tagsToModify);
-  storeTagModifications();
 }

@@ -1,23 +1,23 @@
-import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../lib/ui/element_types";
-import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../lib/environment/derived_environment";
-import { LayoutMode, PerformanceProfile } from "../../../types/ui";
-import { buildCheckboxElement, buildCheckboxOption } from "../../../lib/ui/element/checkbox";
-import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../lib/ui/toggles";
-import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../lib/ui/style";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../view/update/menu_event_handlers";
-import { Events } from "../../../lib/communication/events";
-import { FavoritesConfig } from "../../../config/favorites_config";
-import { GeneralConfig } from "../../../config/general_config";
-import { ThumbnailConfig } from "../../../config/thumbnail_config";
-import { MetadataMetric } from "../../../types/search";
-import { Preferences } from "../../../lib/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/favorites_metadata";
-import { buildButtonElement } from "../../../lib/ui/element/button";
-import { buildNumberComponent } from "../../../lib/ui/element/number_input";
-import { buildSelectElement } from "../../../lib/ui/element/select";
-import { hideUnusedLayoutSizer } from "../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../lib/ui/element/element_utils";
-import { reloadWindow } from "../../../utils/browser/window";
+import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../lib/ui/element_types";
+import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../lib/environment/derived_environment";
+import { LayoutMode, PerformanceProfile } from "../../../../types/ui";
+import { buildCheckboxElement, buildCheckboxOption } from "../../../../lib/ui/element/checkbox";
+import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
+import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
+import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../../view/update/menu_event_handlers";
+import { Events } from "../../../../lib/communication/events";
+import { FavoritesConfig } from "../../../../config/favorites_config";
+import { GeneralConfig } from "../../../../config/general_config";
+import { MetadataMetric } from "../../../../types/search";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { ThumbnailConfig } from "../../../../config/thumbnail_config";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
+import { buildButtonElement } from "../../../../lib/ui/element/button";
+import { buildNumberComponent } from "../../../../lib/ui/element/number_input";
+import { buildSelectElement } from "../../../../lib/ui/element/select";
+import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
+import { prepareDynamicElements } from "../../../../lib/ui/element/element_utils";
+import { reloadWindow } from "../../../../utils/browser/window";
 
 const buttons: Partial<ButtonElement>[] = [
   {
@@ -416,7 +416,7 @@ const numbers: Partial<NumberElement>[] = [
   }
 ];
 
-export function buildFavoritesDesktopMenuElements(): void {
+export function buildDesktopElements(): void {
   prepareDynamicElements(buttons).forEach(buildButtonElement);
   prepareDynamicElements(checkboxes).forEach(buildCheckboxOption);
   prepareDynamicElements(simpleCheckboxes).forEach(buildCheckboxElement);

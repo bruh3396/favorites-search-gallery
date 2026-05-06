@@ -53,7 +53,7 @@ async function downloadFavorites(favorites: Favorite[], progressCallback: (reque
   currentlyDownloading = false;
 }
 
- async function createTotalFavoriteBlob(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void): Promise<Blob> {
+async function createTotalFavoriteBlob(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void): Promise<Blob> {
   const blobWriter = new zip.BlobWriter("application/zip");
   const zipWriter = new zip.ZipWriter(blobWriter);
 

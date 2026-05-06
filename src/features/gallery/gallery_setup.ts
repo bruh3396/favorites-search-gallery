@@ -1,9 +1,8 @@
 ﻿import * as GalleryAutoplayController from "./features/autoplay/autoplay_controller";
 import * as GalleryClickFlow from "./flow/click_flow";
 import * as GalleryContentFlow from "./flow/content_flow";
-import * as GalleryEdgeTapControls from "./control/edge_tap_controls";
+import * as GalleryControl from "./control/gallery_control";
 import * as GalleryInteractionFlow from "./flow/interaction_flow";
-import * as GalleryInteractionTracker from "./control/interaction_tracker";
 import * as GalleryKeyFlow from "./flow/key_flow";
 import * as GalleryMenuFlow from "./flow/menu_flow";
 import * as GalleryModel from "./model/gallery_model";
@@ -40,18 +39,16 @@ export async function setupGallery(): Promise<void> {
 }
 
 function finishGallerySetup(): void {
-  GalleryEdgeTapControls.setupGalleryMobileTapControls();
-  GalleryInteractionTracker.setupGalleryInteractionTracker();
-  GalleryVisibleThumbObserver.setupVisibleThumbObserver();
-  setupAutoplay();
   GalleryView.setupGalleryView();
+  GalleryControl.setupGalleryControl();
+  setupSubFeatures();
   addEventListeners();
   GalleryVisibleThumbObserver.observeAllThumbsOnPage();
   GalleryModel.indexCurrentPageThumbs();
   GalleryView.presetAllCanvasDimensions();
 }
 
-function setupAutoplay(): void {
+function setupSubFeatures(): void {
   GalleryAutoplayController.setupAutoplay({
     onEnable: () => GalleryView.toggleVideoLooping(false),
     onDisable: () => GalleryView.toggleVideoLooping(true),

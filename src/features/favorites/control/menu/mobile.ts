@@ -1,17 +1,17 @@
-import { ButtonElement, CheckboxElement, SelectElement } from "../../../lib/ui/element_types";
-import { LayoutMode, PerformanceProfile } from "../../../types/ui";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../lib/ui/toggles";
-import { toggleDarkTheme, usingDarkTheme } from "../../../lib/ui/style";
-import { Events } from "../../../lib/communication/events";
-import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
-import { MetadataMetric } from "../../../types/search";
-import { Preferences } from "../../../lib/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/favorites_metadata";
-import { buildButtonElement } from "../../../lib/ui/element/button";
-import { buildSelectElement } from "../../../lib/ui/element/select";
-import { buildToggleSwitch } from "../../../lib/ui/element/checkbox";
-import { hideUnusedLayoutSizer } from "../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../lib/ui/element/element_utils";
+import { ButtonElement, CheckboxElement, SelectElement } from "../../../../lib/ui/element_types";
+import { LayoutMode, PerformanceProfile } from "../../../../types/ui";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../lib/ui/toggles";
+import { toggleDarkTheme, usingDarkTheme } from "../../../../lib/ui/style";
+import { Events } from "../../../../lib/communication/events";
+import { GALLERY_ENABLED } from "../../../../lib/environment/derived_environment";
+import { MetadataMetric } from "../../../../types/search";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
+import { buildButtonElement } from "../../../../lib/ui/element/button";
+import { buildSelectElement } from "../../../../lib/ui/element/select";
+import { buildToggleSwitch } from "../../../../lib/ui/element/checkbox";
+import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
+import { prepareDynamicElements } from "../../../../lib/ui/element/element_utils";
 
 const buttons: Partial<ButtonElement>[] = [
   {
@@ -230,7 +230,7 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<numbe
   }
 ];
 
-export function buildFavoritesMobileMenuElements(): void {
+export function buildMobileElements(): void {
   prepareDynamicElements(buttons).forEach(buildButtonElement);
   prepareDynamicElements(toggleSwitches).forEach(buildToggleSwitch);
   // @ts-expect-error don't care

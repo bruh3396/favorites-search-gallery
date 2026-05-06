@@ -3,19 +3,20 @@ import * as FavoritesMetadataFetcher from "./load/metadata_fetcher";
 import * as FavoritesSearchCoordinator from "./search/search_coordinator";
 import { Favorite } from "../../../types/favorite";
 import { NewFavorites } from "../types/favorite_types";
-import { loadTagModifications } from "../../../lib/tags/tag_modifier";
 
-export function setupFavoritesModel(): void {
+let getAdditionalTags: (id: string) => string | undefined = () => undefined;
+
+export function setupFavoritesModel(getAdditionalTagsFn: (id: string) => string | undefined): void {
+  getAdditionalTags = getAdditionalTagsFn;
   FavoritesMetadataFetcher.initialize(
     FavoritesLoader.updateFavorite,
     (favorite) => FavoritesSearchCoordinator.removeFromIndex([favorite]),
     (favorite) => FavoritesSearchCoordinator.addToIndex([favorite])
   );
-  loadTagModifications();
 }
 
 export function loadDatabaseFavorites(): Promise<void> {
-  return FavoritesLoader.loadDatabaseFavorites((allFavorites) => {
+  return FavoritesLoader.loadDatabaseFavorites(getAdditionalTags, (allFavorites) => {
     FavoritesSearchCoordinator.deferIndexing();
     FavoritesSearchCoordinator.addToIndex(allFavorites);
     FavoritesMetadataFetcher.fetchMissingMetadata(allFavorites);

@@ -93,10 +93,6 @@ export const Events = {
     swipedRight: new Emitter<void>(),
     touchHold: new Emitter<TouchEvent>()
   },
-  tagModifier: {
-    needsReIndex: new Emitter<Favorite>(),
-    needsDeIndex: new Emitter<Favorite>()
-  },
   document: {
     domLoaded: new StickyEmitter<void>(),
     mouseover: new Emitter<EnhancedMouseEvent>(),

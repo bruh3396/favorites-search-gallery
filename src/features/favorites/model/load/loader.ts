@@ -3,14 +3,12 @@ import * as FavoritesSequentialPageFetcher from "./sequential_page_fetcher";
 import { Favorite } from "../../../../types/favorite";
 import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesConcurrentPageFetcher } from "./concurrent_page_fetcher";
-import { getAdditionalTags } from "../../../../lib/tags/tag_modifier";
-
 let allFavorites: Favorite[] = [];
 let activeFavorites: Favorite[] | null = null;
 const favoritesById: Map<string, Favorite> = new Map<string, Favorite>();
 const registerFavorites = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));
 
-export function loadDatabaseFavorites(onFavoritesLoaded: (favorites: FavoriteItem[]) => void): Promise<void> {
+export function loadDatabaseFavorites(getAdditionalTags: (id: string) => string | undefined, onFavoritesLoaded: (favorites: FavoriteItem[]) => void): Promise<void> {
   return FavoritesDatabase.loadFavorites().then((records) => {
     const favorites = records.map(r => new FavoriteItem(r, getAdditionalTags(r.id)));
 

@@ -5,7 +5,7 @@ import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { insertStyle } from "../../../lib/dom/injector";
 import { yieldControl } from "../../../lib/core/scheduling/promise";
 
-export async function setupFavoritesBottomNavigationButtons(): Promise<void> {
+export async function setupFavoritesNavigationButtons(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesConfig.bottomNavigationButtonsEnabled) {
     return;
   }
