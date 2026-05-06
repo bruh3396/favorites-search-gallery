@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
+﻿import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
 import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
 
 export const GalleryConfig = {
@@ -13,29 +13,32 @@ export const GalleryConfig = {
     }
     return ON_SEARCH_PAGE ? GalleryConfig.mainCanvasResolutions.search : GalleryConfig.mainCanvasResolutions.favorites;
   },
+
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 850,
   searchPagePreloadedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_SEARCH_PAGE,
   minimumPreloadedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 0 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 0 : 2,
+  maxVisibleThumbsBeforeStoppingPreload: 175,
+  preloadingEnabled: true,
+  gifPreloadingEnabled: false,
+  preloadOutsideGalleryOnSearchPage: true,
+  upscaleEverythingOnSearchPage: false,
+
   preloadContentDebounceTime: 150,
-  visibleThumbsDownwardScrollPixelGenerosity: 50,
-  visibleThumbsDownwardScrollPercentageGenerosity: 100,
   navigationThrottleTime: 250,
-  maxImagesToRenderAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
+  galleryNavigationDelay: 100,
   idleInteractionDuration: 750,
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2000 : 1000,
-  maxVisibleThumbsBeforeStoppingPreload: 175,
-  galleryNavigationDelay: 100,
+
+  maxImagesToRenderAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
+  visibleThumbsDownwardScrollPixelGenerosity: 50,
+  visibleThumbsDownwardScrollPercentageGenerosity: 100,
   fetchImageBitmapsInWorker: false,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },
   useOffscreenThumbUpscaler: false,
-  preloadingEnabled: true,
   createImageAccentColors: false,
-  galleryMenuMonoColor: true,
-  preloadOutsideGalleryOnSearchPage: true,
-  gifPreloadingEnabled: false,
-  upscaleEverythingOnSearchPage: false
+  galleryMenuMonoColor: true
 };

@@ -1,4 +1,4 @@
-import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeFirstAndLastLines, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "../../utils/string/format";
+﻿import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "../../utils/string/format";
 import { convertToTagSet, convertToTagString } from "../../utils/string/tags";
 import { describe, expect, test } from "vitest";
 import { isEmptyString, isOnlyDigits } from "../../utils/string/query";
@@ -342,33 +342,6 @@ describe("capitalize", () => {
   });
 });
 
-describe("removeFirstAndLastLines", () => {
-  test("empty", () => {
-    expect(removeFirstAndLastLines("")).toBe("");
-  });
-
-  test("less than three lines", () => {
-    const singleLine = "foo";
-    const twoLines = "foo\nbar";
-
-    expect(removeFirstAndLastLines(singleLine)).toBe("");
-    expect(removeFirstAndLastLines(twoLines)).toBe("");
-  });
-
-  test("iife", () => {
-    const code = `() => {
-print("Hello, World!");
-print("Hello, World!");
-print("Hello, Friend!");
-}`;
-
-    const expected = `print("Hello, World!");
-print("Hello, World!");
-print("Hello, Friend!");`;
-
-    expect(removeFirstAndLastLines(code)).toBe(expected);
-  });
-});
 
 describe("removeLeadingHyphen", () => {
   test("empty", () => {

@@ -1,6 +1,6 @@
 ﻿import * as GalleryAutoplayController from "../features/autoplay/autoplay_controller";
 import * as GalleryInteractionTracker from "../control/interaction_tracker";
-import * as GalleryModel from "../model/model";
+import * as GalleryModel from "../model/gallery_model";
 import * as GalleryPreloadFlow from "./preload_flow";
 import * as GalleryView from "../view/gallery_view";
 import * as GalleryZoomFlow from "./zoom_flow";

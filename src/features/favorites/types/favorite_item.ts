@@ -49,7 +49,7 @@ export class FavoriteItem implements Favorite {
   }
 
   public swapFavoriteButton = (): void => this.element?.swapFavoriteButton();
-  public validateTags = (post: Post): void => this.favoriteTags.validate(post);
+  public updateTags = (post: Post): void => this.favoriteTags.set(post.tags);
   public withinRating = (rating: Rating): boolean => (this.metadata.rating & rating) > 0;
   public populateMetadata = (post: Post): void => this.metadata.populateFromPost(post);
   public addAdditionalTags = (newTags: string): string => this.favoriteTags.addAdditionalTags(newTags);

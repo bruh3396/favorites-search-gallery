@@ -1,4 +1,4 @@
-export function toCamelCase(variable: string): string {
+﻿export function toCamelCase(variable: string): string {
   return variable.replace(/_([a-z])/g, (_, character) => character.toUpperCase());
 }
 
@@ -16,15 +16,6 @@ export function removeLeadingHyphens(tag: string): string {
 
 export function replaceSpacesWithUnderscores(tagName: string): string {
   return tagName.replaceAll(/\s/gm, "_");
-}
-
-export function removeFirstAndLastLines(text: string): string {
-  const lines = text.split("\n").filter(line => line.trim() !== "");
-
-  if (lines.length <= 2) {
-    return "";
-  }
-  return lines.slice(1, -1).join("\n").trim();
 }
 
 export function escapeParenthesis(text: string): string {

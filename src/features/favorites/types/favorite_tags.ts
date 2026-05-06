@@ -1,7 +1,6 @@
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/api";
-import { correctTags } from "../../../lib/media/media_tag_validator";
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();
@@ -20,20 +19,10 @@ export class FavoriteTags {
   public set(tags: string | Set<string>, additionalTags?: string): void {
     this.baseTags = tags instanceof Set ? tags : convertToTagSet(tags);
 
-    if (!(tags instanceof Set)) {
-      this.correctVideoTag();
-    }
-
     if (additionalTags !== undefined) {
       this.additionalTags = convertToTagSet(additionalTags);
     }
     this.mergeTags();
-  }
-
-  public validate(post: Post): void {
-    if (post.tags !== "" && !this.tagsAreEqual(post)) {
-      this.set(post.tags);
-    }
   }
 
   public addAdditionalTags(newTagString: string): string {
@@ -64,26 +53,8 @@ export class FavoriteTags {
     this.mergeTags();
   }
 
-  private tagsAreEqual(post: Post): boolean {
-    const validTags = correctTags(post);
-    const difference = this.tags.symmetricDifference(validTags);
-    const equal = difference.size === 0 || (difference.size === 1 && difference.has(post.id));
-
-    if (equal) {
-      return true;
-    }
-    post.tags = convertToTagString(validTags);
-    return false;
-  }
-
   private mergeTags(): void {
     this.tags = new Set(Array.from(this.baseTags.union(this.additionalTags)).sort());
   }
 
-  private correctVideoTag(): void {
-    if (this.baseTags.has("vide") && this.baseTags.has("animated")) {
-      this.baseTags.delete("vide");
-      this.baseTags.add("video");
-    }
-  }
 }

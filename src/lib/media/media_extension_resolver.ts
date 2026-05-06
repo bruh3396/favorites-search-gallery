@@ -9,7 +9,7 @@ import { ON_FAVORITES_PAGE } from "../environment/environment";
 import { Post } from "../../types/api";
 import { resolveBaseImageURL } from "./media_url_resolver";
 
-const IMAGE_EXTENSIONS: ImageExtension[] = ["jpg", "png", "jpeg"];
+const IMAGE_EXTENSIONS: ImageExtension[] = ["jpeg", "png", "jpg"];
 const DATABASE_NAME = "ImageExtensions";
 const OBJECT_STORE_NAME = "extensionMappings";
 const extensionMap: Map<string, ImageExtension> = new Map();

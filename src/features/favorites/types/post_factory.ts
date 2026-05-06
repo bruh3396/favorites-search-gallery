@@ -34,7 +34,7 @@ function createEmptyPost(): Post {
 
 function normalizeTags(image: HTMLElement, id: string): string {
   const tags = image.title || image.getAttribute("tags") || "";
-  return removeExtraWhiteSpace(`${tags} ${id}`).split(" ").sort().join(" ");
+  return removeExtraWhiteSpace(`${tags} ${id}`).replace(/\bvide\b/g, "video").split(" ").sort().join(" ");
 }
 
 function createPostFromDatabaseRecord(record: FavoritesDatabaseRecord): Post {

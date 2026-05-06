@@ -6,7 +6,7 @@ import * as GalleryInteractionFlow from "./flow/interaction_flow";
 import * as GalleryInteractionTracker from "./control/interaction_tracker";
 import * as GalleryKeyFlow from "./flow/key_flow";
 import * as GalleryMenuFlow from "./flow/menu_flow";
-import * as GalleryModel from "./model/model";
+import * as GalleryModel from "./model/gallery_model";
 import * as GalleryMouseOverFlow from "./flow/mouseover_flow";
 import * as GalleryNavigationFlow from "./flow/navigation_flow";
 import * as GalleryPreloadFlow from "./flow/preload_flow";

@@ -1,3 +1,4 @@
+﻿import * as Eta from "./eta";
 import { NewFavorites } from "../../types/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Root } from "../../../../lib/shell";
@@ -36,6 +37,11 @@ export function updateStatusWhileFetching(searchResultsCount: number, favoritesF
 
   if (expectedTotalFavoritesCount !== null) {
     statusText = `${statusText} / ${expectedTotalFavoritesCount}`;
+    const eta = Eta.getEta(favoritesFoundCount, expectedTotalFavoritesCount);
+
+    if (eta !== null) {
+      statusText = `${statusText} ${eta}`;
+    }
   }
   setStatus(statusText);
   setMatchCount(searchResultsCount);

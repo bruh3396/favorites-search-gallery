@@ -6,7 +6,11 @@ import { NewFavorites } from "../types/favorite_types";
 import { loadTagModifications } from "../../../lib/tags/tag_modifier";
 
 export function setupFavoritesModel(): void {
-  FavoritesMetadataFetcher.initialize(FavoritesLoader.updateFavorite);
+  FavoritesMetadataFetcher.initialize(
+    FavoritesLoader.updateFavorite,
+    (favorite) => FavoritesSearchCoordinator.removeFromIndex([favorite]),
+    (favorite) => FavoritesSearchCoordinator.addToIndex([favorite])
+  );
   loadTagModifications();
 }
 

@@ -1,4 +1,3 @@
-import * as ExtensionResolver from "../../../lib/media/media_extension_resolver";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { domParser } from "../../../lib/dom/dom_parser";
 import { prepareSearchPageThumbs } from "../model/thumb_preparer";
@@ -23,7 +22,6 @@ export class SearchPage {
     this.pageNumber = pageNumber;
     this.ids = new Set(this.thumbs.map(thumb => thumb.id));
     this.isFinalPage = this.thumbs.length < POSTS_PER_SEARCH_PAGE;
-    this.cacheExtensions();
   }
 
   public get isEmpty(): boolean {
@@ -36,11 +34,5 @@ export class SearchPage {
 
   public get isFirst(): boolean {
     return this.pageNumber === 0;
-  }
-
-  private async cacheExtensions(): Promise<void> {
-    for (const thumb of this.thumbs) {
-      await ExtensionResolver.resolveExtension(thumb);
-    }
   }
 }

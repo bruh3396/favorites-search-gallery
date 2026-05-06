@@ -1,8 +1,8 @@
-import { BuildOptions, build } from "esbuild";
+﻿import { BuildOptions, build } from "esbuild";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { rawTsPlugin } from "./raw_ts_plugin";
 
-const SCRIPT_VERSION = "1.21";
+const SCRIPT_VERSION = "1.21.1";
 
 function loadEnv(): Record<string, string> {
   const file = existsSync(".env") ? ".env" : ".env.example";
@@ -45,7 +45,9 @@ const BUILD_OPTIONS: BuildOptions = {
   define: buildDefine(),
   plugins: [rawTsPlugin],
   loader: {
-    ".svg": "text"
+    ".svg": "text",
+    ".css": "text",
+    ".html": "text"
   }
 };
 

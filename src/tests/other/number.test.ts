@@ -1,4 +1,4 @@
-import { clamp, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat } from "../../utils/number";
+import { average, clamp, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat, sum } from "../../utils/number";
 import { describe, expect, test } from "vitest";
 
 describe("getRandomPositiveInteger", () => {
@@ -134,6 +134,49 @@ describe("randomBetween", () => {
       expect(value).toBeLessThanOrEqual(20);
       expect(value).toBeGreaterThanOrEqual(0);
     }
+  });
+});
+
+describe("sum", () => {
+  test("empty", () => {
+    expect(sum([])).toBe(0);
+  });
+
+  test("single", () => {
+    expect(sum([5])).toBe(5);
+    expect(sum([-5])).toBe(-5);
+  });
+
+  test("multiple", () => {
+    expect(sum([1, 2, 3])).toBe(6);
+    expect(sum([1, -2, 3])).toBe(2);
+    expect(sum([-1, -2, -3])).toBe(-6);
+  });
+
+  test("decimals", () => {
+    expect(sum([0.1, 0.2])).toBeCloseTo(0.3);
+  });
+});
+
+describe("average", () => {
+  test("empty", () => {
+    expect(average([])).toBe(0);
+  });
+
+  test("single", () => {
+    expect(average([4])).toBe(4);
+    expect(average([-4])).toBe(-4);
+  });
+
+  test("multiple", () => {
+    expect(average([1, 2, 3])).toBe(2);
+    expect(average([0, 10])).toBe(5);
+    expect(average([-10, 10])).toBe(0);
+  });
+
+  test("decimals", () => {
+    expect(average([1, 2])).toBe(1.5);
+    expect(average([1, 1, 2])).toBeCloseTo(1.333);
   });
 });
 

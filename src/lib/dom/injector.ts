@@ -1,9 +1,9 @@
 import { domParser } from "./dom_parser";
 
-export function insertStyle(html: string, id: string | undefined = undefined): void {
+export function insertStyle(css: string, id: string | undefined = undefined): void {
   const style = document.createElement("style");
 
-  style.textContent = html.replace("<style>", "").replace("</style>", "");
+  style.textContent = css.replace("<style>", "").replace("</style>", "");
 
   if (id !== undefined) {
     id += "-fsg-style";

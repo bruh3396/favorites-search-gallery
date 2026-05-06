@@ -1,4 +1,4 @@
-import * as GalleryModel from "../model/model";
+import * as GalleryModel from "../model/gallery_model";
 import { GalleryState } from "../types/gallery_types";
 
 type GalleryStateExecutors<V> = {

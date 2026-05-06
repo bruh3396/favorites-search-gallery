@@ -2,8 +2,8 @@
   videoDurationFetchConcurrency: 3,
   videoDurationMetadataByteRanges: [500_000, 1_000_000, 2_000_000, 4_000_000],
 
-  extensionProbeConcurrency: 6,
-  extensionProbeThrottle: 0,
+  extensionProbeConcurrency: 3,
+  extensionProbeThrottle: 20,
 
   generalPageRequestThrottle: 2000,
 
@@ -14,5 +14,7 @@
   favoriteRemoveRetries: 3,
   favoriteRemoveRetryDelay: 250,
   favoriteAddThrottle: 200,
-  favoriteRemoveThrottle: 1000
+  favoriteRemoveThrottle: 1000,
+
+  searchPagePrefetchLength: 2
 };

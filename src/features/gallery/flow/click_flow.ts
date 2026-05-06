@@ -1,4 +1,4 @@
-import * as GalleryModel from "../model/model";
+import * as GalleryModel from "../model/gallery_model";
 import * as GalleryStateFlow from "./state_flow";
 import * as GalleryView from "../view/gallery_view";
 import * as GalleryZoomFlow from "./zoom_flow";

@@ -1,16 +1,16 @@
-import { OffscreenUpscaleRequest } from "../../../../types/offscreen_upscale_request";
+﻿import { OffscreenUpscaleRequest } from "../../../../types/offscreen_upscale_request";
 
-declare let GalleryUpscaleConfig: {
-  maxUpscaledThumbCanvasHeight: number
-  upscaledThumbCanvasWidth: number
-  onlyCacheImagesInGallery: boolean
-  upscaleUsingSamples: boolean
+type UpscaleConfig = {
+  maxUpscaledThumbCanvasHeight: number;
+  upscaledThumbCanvasWidth: number;
+  upscaleUsingSamples: boolean;
 };
 
+let config: UpscaleConfig;
 const offscreenCanvases: Map<string, OffscreenCanvas> = new Map();
 
 async function createImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
-  const url = GalleryUpscaleConfig.upscaleUsingSamples ? request.sampleUrl : request.imageUrl;
+  const url = config.upscaleUsingSamples ? request.sampleUrl : request.imageUrl;
   let response = await fetch(url);
 
   if (!response.ok) {
@@ -59,10 +59,10 @@ function setOffscreenCanvasDimensions(request: OffscreenUpscaleRequest, bitmap: 
   if (request.hasDimensions || request.offscreenCanvas === null) {
     return;
   }
-  const maxHeight = GalleryUpscaleConfig.maxUpscaledThumbCanvasHeight;
+  const maxHeight = config.maxUpscaledThumbCanvasHeight;
   const width = bitmap.width;
   const height = bitmap.height;
-  let targetWidth = GalleryUpscaleConfig.upscaledThumbCanvasWidth;
+  let targetWidth = config.upscaledThumbCanvasWidth;
   let targetHeight = (targetWidth / width) * height;
 
   if (targetWidth > width) {
@@ -76,6 +76,11 @@ function setOffscreenCanvasDimensions(request: OffscreenUpscaleRequest, bitmap: 
   }
   request.offscreenCanvas.width = targetWidth;
   request.offscreenCanvas.height = targetHeight;
+}
+
+function handleInit(message: MessageEvent<{ action: string, config: UpscaleConfig }>): void {
+  config = message.data.config;
+  onmessage = handleMessage;
 }
 
 function handleMessage(message: MessageEvent<{ action: string, request: OffscreenUpscaleRequest }>): void {
@@ -124,4 +129,4 @@ function clear(): void {
   }
 }
 
-onmessage = handleMessage;
+onmessage = handleInit;

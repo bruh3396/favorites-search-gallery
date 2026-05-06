@@ -1,4 +1,4 @@
-import * as GalleryModel from "../model/model";
+import * as GalleryModel from "../model/gallery_model";
 import * as GalleryView from "../view/gallery_view";
 
 export async function addFavoriteInGallery(): Promise<void> {

@@ -85,3 +85,11 @@ export function numberRange(start: number, end: number): number[] {
   }
   return result;
 }
+
+export function sum(numbers: number[]): number {
+  return numbers.reduce((acc: number, n: number) => acc + n, 0);
+}
+
+export function average(numbers: number[]): number {
+  return numbers.length === 0 ? 0 : sum(numbers) / numbers.length;
+}

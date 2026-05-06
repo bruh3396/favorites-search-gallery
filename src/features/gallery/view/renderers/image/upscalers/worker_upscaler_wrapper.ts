@@ -1,15 +1,18 @@
-import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../types/offscreen_upscale_request";
+﻿import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../types/offscreen_upscale_request";
 import { GalleryAbstractUpscaler } from "./abstract_upscaler";
+import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";
-// @ts-expect-error string import
 import OFFSCREEN_UPSCALER_CODE from "./worker_upscaler?raw";
-// @ts-expect-error string import
-import SHARED_GALLERY_SETTINGS_CODE from "../../../../../../config/gallery_upscale_config?raw";
 import { createWorker } from "../../../../../../utils/browser/worker";
-import { removeFirstAndLastLines } from "../../../../../../utils/string/format";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
-  private readonly worker: Worker = createWorker(`${removeFirstAndLastLines(SHARED_GALLERY_SETTINGS_CODE)}\n${OFFSCREEN_UPSCALER_CODE}`);
+  private readonly worker: Worker;
+
+  constructor() {
+    super();
+    this.worker = createWorker(OFFSCREEN_UPSCALER_CODE);
+    this.worker.postMessage({ action: "init", config: GalleryUpscaleConfig });
+  }
 
   protected reset(): void {
     this.upscaleQueue.reset();

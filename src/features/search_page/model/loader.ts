@@ -1,12 +1,12 @@
 import { NavigationKey } from "../../../types/input";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
+import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { SearchPage } from "../types/search_page";
 import { fetchSearchPage } from "../../../lib/remote/rule34/search_page_fetcher";
 import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
 import { isForwardNavigationKey } from "../../../types/guards";
 import { sleep } from "../../../lib/core/scheduling/promise";
 
-const searchPagePrefetchLength = 6;
 let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;
 let initialPageNumber: number;
@@ -55,7 +55,7 @@ function getAdjacentSearchPageNumber(direction: NavigationKey): number {
 export function preloadSearchPages(): void {
   loadSearchPage(currentPageNumber);
 
-  for (let i = 1; i < searchPagePrefetchLength; i += 1) {
+  for (let i = 0; i < Rule34NetworkConfig.searchPagePrefetchLength; i += 1) {
     loadSearchPage(currentPageNumber - i);
     loadSearchPage(currentPageNumber + i);
   }
