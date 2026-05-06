@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+﻿/* eslint-disable max-classes-per-file */
 import { yieldControl } from "../scheduling/promise";
 
 class LockedDatabaseError extends Error { }
@@ -76,6 +76,24 @@ export class Database<V extends { id: string }> {
     this.lock();
     await yieldControl();
     indexedDB.deleteDatabase(this.name);
+  }
+
+  public async count(objectStoreName: string | undefined = undefined): Promise<number> {
+    const database = await this.open(objectStoreName ?? this.defaultObjectStoreName);
+    const transaction = database.transaction(objectStoreName ?? this.defaultObjectStoreName, "readonly");
+    const objectStore = transaction.objectStore(objectStoreName ?? this.defaultObjectStoreName);
+    return new Promise((resolve, reject) => {
+      const request = objectStore.count();
+
+      request.onsuccess = (): void => {
+        database.close();
+        resolve(request.result);
+      };
+      request.onerror = (): void => {
+        database.close();
+        reject(request.error);
+      };
+    });
   }
 
   private updateRecord(index: IDBIndex, record: V, objectStore: IDBObjectStore): void {

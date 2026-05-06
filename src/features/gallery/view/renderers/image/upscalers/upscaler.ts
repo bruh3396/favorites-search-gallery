@@ -1,5 +1,5 @@
-import { GalleryMainThreadUpscaler } from "./main_thread_upscaler";
 import { GalleryConfig } from "../../../../../../config/gallery_config";
+import { GalleryMainThreadUpscaler } from "./main_thread_upscaler";
 import { GalleryWorkerUpscalerWrapper } from "./worker_upscaler_wrapper";
 import { ImageRequest } from "../../../../types/image_request";
 

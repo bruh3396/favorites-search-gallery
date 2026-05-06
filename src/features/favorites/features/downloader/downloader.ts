@@ -1,8 +1,8 @@
 import { DownloadRequest, toDownloadRequest } from "./download_request";
-import { ConcurrencyLimiter } from "../../lib/core/concurrency/concurrency_limiter";
-import { DownloadAbortedError } from "../../types/errors";
-import { Favorite } from "../../types/favorite";
-import { downloadBlob } from "../../utils/browser/download";
+import { ConcurrencyLimiter } from "../../../../lib/core/concurrency/concurrency_limiter";
+import { DownloadAbortedError } from "../../../../types/errors";
+import { Favorite } from "../../../../types/favorite";
+import { downloadBlob } from "../../../../utils/browser/download";
 
 const fetchLimiter = new ConcurrencyLimiter(3);
 

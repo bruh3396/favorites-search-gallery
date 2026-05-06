@@ -1,14 +1,15 @@
 ﻿import { Post, PostResponse } from "../../../types/api";
 import { generalPageRequestQueue, postLimiter } from "../http/rate_limiter";
+import { ApiConfig } from "../../../config/api_config";
 import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
 import { DeletedPostError } from "../../../types/errors";
 import { POST_API_URL } from "../url/api_urls";
-import { ApiConfig } from "../../../config/api_config";
 import { buildPostPageURL } from "../url/page_url_builder";
 import { fetchFromServer } from "./server_client";
 import { fetchHtml } from "../http/http_client";
 import { parsePostFromPostPage } from "../parse/post_page_parser";
 import { postResponseToPost } from "../parse/api_post_parser";
+import { withExponentialBackoff } from "../../core/scheduling/promise";
 
 const postFetcher = new CoalescingResolver<PostResponse>(
   ApiConfig.apiBatchSize,
@@ -42,5 +43,5 @@ export function fetchPostFromPostPage(id: string): Promise<Post> {
 export async function fetchPostPageHtml(id: string): Promise<string> {
   await postPageGate;
   await generalPageRequestQueue.wait();
-  return fetchHtml(buildPostPageURL(id));
+  return withExponentialBackoff(() => fetchHtml(buildPostPageURL(id)), 3, 1000);
 }

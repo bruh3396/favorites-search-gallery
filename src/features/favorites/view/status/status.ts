@@ -6,7 +6,7 @@ import { Timeout } from "../../../../types/async";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
-let expectedTotalFavoritesCount: number | null = null;
+let totalFavoritesCount: number | null = null;
 let statusTimeout: Timeout;
 const TEMPORARY_STATUS_TIMEOUT = 1000;
 const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "all favorites ";
@@ -35,12 +35,12 @@ export function setMatchCount(value: number): void {
 export function updateStatusWhileFetching(searchResultsCount: number, favoritesFoundCount: number): void {
   let statusText = `Fetching ${FETCHING_STATUS_PREFIX}${favoritesFoundCount}`;
 
-  if (expectedTotalFavoritesCount !== null) {
-    statusText = `${statusText} / ${expectedTotalFavoritesCount}`;
-    const eta = Eta.getEta(favoritesFoundCount, expectedTotalFavoritesCount);
+  if (totalFavoritesCount !== null) {
+    statusText = `${statusText} / ${totalFavoritesCount}`;
+    const eta = Eta.getEta(favoritesFoundCount, totalFavoritesCount);
 
     if (eta !== null) {
-      statusText = `${statusText} ${eta}`;
+      statusText = `${statusText}${eta}`;
     }
   }
   setStatus(statusText);
@@ -56,7 +56,7 @@ export function notifyNewFavoritesFound(newFavorites: NewFavorites): void {
 }
 
 export function setExpectedTotalFavoritesCount(count: number | null): void {
-  expectedTotalFavoritesCount = count;
+  totalFavoritesCount = count;
 }
 
 export function setupFavoritesStatus(): void {

@@ -1,5 +1,6 @@
 import * as FavoritesBottomNavigationButtons from "./control/navigation_buttons";
 import * as FavoritesDesktopDynamicElements from "./control/desktop";
+import * as FavoritesDownloadController from "./features/downloader/downloader_menu";
 import * as FavoritesFinder from "./control/finder";
 import * as FavoritesInterFeatureFlow from "./flows/inter_feature_flow";
 import * as FavoritesLoadFlow from "./flows/load_flow";
@@ -12,6 +13,7 @@ import * as FavoritesRatingFilter from "./control/rating_filter";
 import * as FavoritesResetFlow from "./flows/reset_flow";
 import * as FavoritesSearchBox from "./control/search_box/search_box";
 import * as FavoritesSearchFlow from "./flows/search_flow";
+import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { Events } from "../../lib/communication/events";
@@ -21,10 +23,10 @@ export function setupFavorites(): void {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
-  addEventListeners();
   FavoritesModel.setupFavoritesModel();
   FavoritesView.setupFavoritesView();
   setupControls();
+  addEventListeners();
   FavoritesLoadFlow.loadAllFavorites();
 }
 
@@ -33,6 +35,11 @@ function setupControls(): void {
   FavoritesFinder.setupFavoritesFinder();
   FavoritesRatingFilter.setupFavoritesRatingFilter();
   FavoritesSearchBox.setupFavoritesSearchBox();
+  FavoritesDownloadController.setupDownloadMenu({ getSearchResults: () => FavoritesModel.getLatestSearchResults() });
+  FavoritesTagModifier.setupFavoritesTagModifier({
+    getSearchResults: () => FavoritesModel.getLatestSearchResults(),
+    getAllFavorites: () => FavoritesModel.getAllFavorites()
+  });
 
   if (ON_DESKTOP_DEVICE) {
     FavoritesDesktopDynamicElements.buildFavoritesDesktopMenuElements();
@@ -61,6 +68,10 @@ function addEventListeners(): void {
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
 
+  Events.favorites.downloadButtonClicked.on(FavoritesDownloadController.openDownloadMenu);
+  Events.favorites.searchResultsUpdated.on(FavoritesTagModifier.unselectAll);
+  Events.favorites.pageChanged.on(FavoritesTagModifier.highlightSelectedThumbsOnPageChange);
+  Events.document.click.on(FavoritesTagModifier.handleDocumentClick);
   Events.favorites.resetButtonClicked.on(FavoritesView.tryResetting);
   Events.favorites.resetConfirmed.on(FavoritesResetFlow.resetFavorites);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);

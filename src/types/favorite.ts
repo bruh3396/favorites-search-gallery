@@ -12,7 +12,6 @@ export type FavoritesMetadataDatabaseRecord = {
   create: number
   change: number
   duration: number | undefined
-  deleted: boolean
 };
 export type FavoritesDatabaseRecord = {
   id: string;

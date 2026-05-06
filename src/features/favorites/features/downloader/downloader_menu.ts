@@ -1,16 +1,18 @@
 import * as FavoritesDownloader from "./downloader";
-import { sleep, yieldControl } from "../../lib/core/scheduling/promise";
-import { DOWNLOADER_DISABLED } from "../../lib/environment/derived_environment";
-import { DOWNLOADER_HTML } from "../../assets/html";
+import { sleep, yieldControl } from "../../../../lib/core/scheduling/promise";
+import { DOWNLOADER_DISABLED } from "../../../../lib/environment/derived_environment";
+import { DOWNLOADER_HTML } from "../../../../assets/html";
 import { DownloadRequest } from "./download_request";
-import { Events } from "../../lib/communication/events";
-import { Favorite } from "../../types/favorite";
-import { FeatureQueries } from "../../lib/communication/feature_queries";
-import { Overlays } from "../../lib/shell";
-import { Preferences } from "../../lib/preferences/preferences";
-import { insertHtmlWithStyles } from "../../lib/dom/injector";
-import { splitIntoChunks } from "../../utils/collection/array";
-import { toggleGlobalInputEvents } from "../../lib/communication/dom_event_bridge";
+import { Favorite } from "../../../../types/favorite";
+import { Overlays } from "../../../../lib/shell";
+import { Preferences } from "../../../../lib/preferences/preferences";
+import { insertHtmlWithStyles } from "../../../../lib/dom/injector";
+import { splitIntoChunks } from "../../../../utils/collection/array";
+import { toggleGlobalInputEvents } from "../../../../lib/communication/dom_event_bridge";
+
+type FavoritesDownloaderInterface = {
+  getSearchResults: () => Favorite[]
+}
 
 let dialog: HTMLDialogElement;
 let warningDialog: HTMLDialogElement;
@@ -18,12 +20,14 @@ let downloadButton: HTMLButtonElement;
 let cancelButton: HTMLButtonElement;
 let statusContainer: HTMLElement;
 let statusHeader: HTMLElement;
-let favoritesLoaded: boolean;
+let enabled: boolean = false;
+let favoritesDownloaderInterface: FavoritesDownloaderInterface;
 
-export function setupDownloadMenu(): void {
+export function setupDownloadMenu(fdInterface: FavoritesDownloaderInterface): void {
   if (DOWNLOADER_DISABLED) {
     return;
   }
+  favoritesDownloaderInterface = fdInterface;
   FavoritesDownloader.setupFavoritesDownloader();
   insertHtmlWithStyles(Overlays, "beforeend", DOWNLOADER_HTML);
   dialog = getDialog("download-menu");
@@ -32,8 +36,23 @@ export function setupDownloadMenu(): void {
   cancelButton = getCancelButton();
   statusContainer = getStatusContainer();
   statusHeader = getStatusHeader();
-  favoritesLoaded = false;
   addEventListeners();
+}
+
+export function openDownloadMenu(): void {
+  if (enabled) {
+    downloadButton.disabled = false;
+    dialog.showModal();
+    statusHeader.textContent = `Download ${favoritesDownloaderInterface.getSearchResults().length} Results`;
+  } else {
+    warningDialog.showModal();
+  }
+  toggleGlobalInputEvents(false);
+  document.body.classList.add("dialog-opened");
+}
+
+export function enableDownloadMenu(): void {
+  enabled = true;
 }
 
 function getDialog(id: string): HTMLDialogElement {
@@ -49,7 +68,7 @@ function getDownloadButton(): HTMLButtonElement {
   }
   button.addEventListener("click", () => {
     button.disabled = true;
-    downloadFavorites(FeatureQueries.favoritesSearchResults.query());
+    downloadFavorites(favoritesDownloaderInterface.getSearchResults());
   });
   return button;
 }
@@ -93,35 +112,9 @@ function createStatusTextRow(): HTMLElement {
 }
 
 function addEventListeners(): void {
-  enableAfterFavoritesLoad();
-  openWhenDownloadButtonClicked();
   setupMenuCancelHandler();
   setupMenuCloseHandler();
   setupMenuOptions();
-}
-
-function enableAfterFavoritesLoad(): void {
-  Events.favorites.favoritesLoaded.on(() => {
-    favoritesLoaded = true;
-  }, {
-    once: true
-  });
-}
-
-function openWhenDownloadButtonClicked(): void {
-  Events.favorites.downloadButtonClicked.on(() => {
-
-    if (favoritesLoaded) {
-      downloadButton.disabled = false;
-      dialog.showModal();
-      statusHeader.textContent = `Download ${FeatureQueries.favoritesSearchResults.query().length} Results`;
-    } else {
-      warningDialog.showModal();
-    }
-    toggleGlobalInputEvents(false);
-    document.body.classList.add("dialog-opened");
-
-  });
 }
 
 function setupMenuCancelHandler(): void {

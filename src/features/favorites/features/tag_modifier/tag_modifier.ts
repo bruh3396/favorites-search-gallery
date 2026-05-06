@@ -1,15 +1,17 @@
-import { addTagsToFavorite, removeTagsFromFavorite, resetAllFavoriteTags, resetTagModifications, setAdditionalTags, storeTagModifications } from "../../lib/tags/tag_modifier";
-import { insertHtmlWithStyles, insertStyle } from "../../lib/dom/injector";
-import { Events } from "../../lib/communication/events";
-import { Favorite } from "../../types/favorite";
-import { FeatureQueries } from "../../lib/communication/feature_queries";
-import { ITEM_CLASS_NAME } from "../../lib/dom/thumb";
-import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
-import { TAG_MODIFIER_DISABLED } from "../../lib/environment/derived_environment";
-import { TAG_MODIFIER_HTML } from "../../assets/html";
-import { doNothing } from "../../lib/environment/constants";
-import { removeExtraWhiteSpace } from "../../utils/string/format";
-import { setCustomTags } from "../../lib/tags/custom_tags";
+import { addTagsToFavorite, removeTagsFromFavorite, resetAllFavoriteTags, resetTagModifications, setAdditionalTags, storeTagModifications } from "../../../../lib/tags/tag_modifier";
+import { insertHtmlWithStyles, insertStyle } from "../../../../lib/dom/injector";
+import { Favorite } from "../../../../types/favorite";
+import { ITEM_CLASS_NAME } from "../../../../lib/dom/thumb";
+import { TAG_MODIFIER_DISABLED } from "../../../../lib/environment/derived_environment";
+import { TAG_MODIFIER_HTML } from "../../../../assets/html";
+import { doNothing } from "../../../../lib/environment/constants";
+import { removeExtraWhiteSpace } from "../../../../utils/string/format";
+import { setCustomTags } from "../../../../lib/tags/custom_tags";
+
+export type FavoritesTagModifierInterface = {
+  getSearchResults: () => Favorite[]
+  getAllFavorites: () => Favorite[]
+}
 
 type TagModifierUI = {
   container: HTMLElement
@@ -27,21 +29,48 @@ type TagModifierUI = {
 const selected: Set<Favorite> = new Set();
 const ui: TagModifierUI = {} as TagModifierUI;
 const favoritesOption = {} as { container: HTMLElement, checkbox: HTMLInputElement };
+let tagModifierInterface: FavoritesTagModifierInterface;
 let tagEditModeAbortController = new AbortController();
+let tagEditModeEnabled = false;
 let atLeastOneFavoriteIsSelected = false;
 
-export function setupTagModifier(): void {
+export function setupFavoritesTagModifier(tmInterface: FavoritesTagModifierInterface): void {
   if (TAG_MODIFIER_DISABLED) {
     return;
   }
+  tagModifierInterface = tmInterface;
   insertHTML();
   addEventListeners();
 }
 
-function insertHTML(): void {
-  if (!ON_FAVORITES_PAGE) {
+export function unselectAll(): void {
+  unSelectAll();
+}
+
+export function highlightSelectedThumbsOnPageChange(): void {
+  if (atLeastOneFavoriteIsSelected) {
+    for (const favorite of getSelectedFavoritesOnPage()) {
+      toggleOutline(favorite, true);
+    }
+  }
+}
+
+export function handleDocumentClick(event: MouseEvent): void {
+  if (!tagEditModeEnabled) {
     return;
   }
+
+  if (!(event.target instanceof HTMLElement) || !event.target.classList.contains(ITEM_CLASS_NAME)) {
+    return;
+  }
+  const favorite = getFavorite(event.target.id);
+
+  if (favorite !== undefined) {
+    select(favorite);
+  }
+}
+
+function insertHTML(): void {
   insertHtmlWithStyles(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
   favoritesOption.container = document.getElementById("tag-modifier-container") as HTMLElement;
   favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox") as HTMLInputElement;
@@ -58,9 +87,6 @@ function insertHTML(): void {
 }
 
 function addEventListeners(): void {
-  if (!ON_FAVORITES_PAGE) {
-    return;
-  }
   favoritesOption.checkbox.onchange = (event): void => {
     if (event.target instanceof HTMLInputElement) {
       toggleTagEditMode(event.target.checked);
@@ -75,35 +101,21 @@ function addEventListeners(): void {
       return;
     }
     resetTagModifications();
-    resetAllFavoriteTags(FeatureQueries.allFavorites.query());
+    resetAllFavoriteTags(tagModifierInterface.getAllFavorites());
   };
   ui.import.onclick = doNothing;
   ui.export.onclick = doNothing;
-  Events.favorites.searchResultsUpdated.on(() => {
-    unSelectAll();
-  });
-  Events.favorites.pageChanged.on(() => {
-    highlightSelectedThumbsOnPageChange();
-  });
 }
 
 function getSelectedFavoritesOnPage(): Favorite[] {
-  const results = FeatureQueries.favoritesSearchResults.query();
-  return results.filter(favorite => document.getElementById(favorite.id) !== null && isSelected(favorite));
-}
-
-function highlightSelectedThumbsOnPageChange(): void {
-  if (atLeastOneFavoriteIsSelected) {
-    for (const favorite of getSelectedFavoritesOnPage()) {
-      toggleOutline(favorite, true);
-    }
-  }
+  return tagModifierInterface.getSearchResults().filter(favorite => document.getElementById(favorite.id) !== null && isSelected(favorite));
 }
 
 function toggleTagEditMode(value: boolean): void {
+  tagEditModeEnabled = value;
   toggleThumbInteraction(value);
   toggleUI(value);
-  toggleTagEditModeEventListeners(value);
+  toggleTagEditModeAbortController(value);
   ui.unSelectAll.click();
 }
 
@@ -142,28 +154,14 @@ function toggleUI(value: boolean): void {
 }
 
 function getFavorite(id: string): Favorite | undefined {
-  return FeatureQueries.favoritesSearchResults.query().find(favorite => favorite.id === id);
+  return tagModifierInterface.getSearchResults().find(favorite => favorite.id === id);
 }
 
-function toggleTagEditModeEventListeners(value: boolean): void {
+function toggleTagEditModeAbortController(value: boolean): void {
   if (!value) {
     tagEditModeAbortController.abort();
     tagEditModeAbortController = new AbortController();
-    return;
   }
-
-  Events.document.click.on((event) => {
-    if (!(event.target instanceof HTMLElement) || !event.target.classList.contains(ITEM_CLASS_NAME)) {
-      return;
-    }
-    const favorite = getFavorite(event.target.id);
-
-    if (favorite !== undefined) {
-      select(favorite);
-    }
-  }, {
-    signal: tagEditModeAbortController.signal
-  });
 }
 
 function showStatus(text: string): void {
@@ -190,7 +188,7 @@ function unSelectAll(): void {
 }
 
 function selectAll(): void {
-  for (const favorite of FeatureQueries.favoritesSearchResults.query()) {
+  for (const favorite of tagModifierInterface.getSearchResults()) {
     select(favorite, true);
   }
 }

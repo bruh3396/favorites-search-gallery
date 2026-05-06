@@ -15,6 +15,7 @@ export function storeFavorites(favorites: Favorite[]): Promise<void> {
 }
 
 export const loadFavorites = (): Promise<FavoritesDatabaseRecord[]> => database.load();
+export const hasDatabaseFavorites = (): Promise<boolean> => database.count().then(count => count > 0);
 export const updateFavorite = (favorite: Favorite): void => updateScheduler.add(favorite);
 export const deleteFavorite = (id: string): Promise<void> => database.deleteRecords([id]);
 export const deleteDatabase = (): Promise<void> => database.delete();
