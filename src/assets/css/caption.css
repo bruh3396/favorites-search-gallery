@@ -6,12 +6,10 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    top: -100%;
     left: 0px;
     top: 0px;
     text-align: left;
     transform: translateX(-100%);
-    /* transition: transform .3s cubic-bezier(.26,.28,.2,.82); */
     transition: transform .35s ease;
     padding-top: 0.5ch;
     padding-left: 7px;

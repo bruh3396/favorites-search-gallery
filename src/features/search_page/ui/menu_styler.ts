@@ -1,4 +1,4 @@
-import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../lib/environment/derived_environment";
+﻿import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../lib/environment/derived_environment";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { PerformanceProfile } from "../../../types/ui";
 import { insertStyle } from "../../../lib/dom/injector";
@@ -15,7 +15,7 @@ export function styleSearchPageMenu(): void {
     hiddenSelectors.add("#search-page-upscale-thumbs");
     hiddenSelectors.add("#search-page-performance-profile");
     hiddenSelectors.add("#search-page-autoplay");
-    hiddenSelectors.add(".utility-button");
+    hiddenSelectors.add(".thumbnail-button");
     hiddenSelectors.add("#search-page-add-favorite-buttons");
     hiddenSelectors.add("#search-page-gallery-menu");
   }

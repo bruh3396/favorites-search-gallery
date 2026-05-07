@@ -13,6 +13,11 @@
   }
 
   #favorites-pagination-container>button {
+    text-align: center;
+    font-size: 16px;
+    height: 30px;
+    min-width: 30px;
+    width: unset;
 
     &:active,
     &:focus {
@@ -21,6 +26,11 @@
 
     &:hover {
       background-color: transparent;
+    }
+
+    &[disabled] {
+      opacity: 0.25;
+      pointer-events: none;
     }
   }
 
@@ -52,15 +62,15 @@
   }
 
   #favorites-search-gallery-menu-panels {
-    display: block !important;
+    display: block;
   }
 
   #right-favorites-panel {
-    margin-left: 0px !important;
+    margin-left: 0px;
   }
 
   #left-favorites-panel-bottom-row {
-    margin: 4px 0px 0px 0px !important;
+    margin: 4px 0px 0px 0px;
   }
 
   #additional-favorite-options-container {
@@ -69,8 +79,8 @@
 
   #favorites-search-gallery-content {
     grid-gap: 1.2cqw;
-    padding: 0px 5px 20px 5px !important;
-    margin-right: 0px !important;
+    padding: 0px 5px 20px 5px;
+    margin-right: 0px;
   }
 
   #favorites-search-gallery-menu {
@@ -78,7 +88,6 @@
     top: 0;
     left: 0;
     width: 100vw;
-
 
     &.fixed {
       position: fixed;
@@ -93,7 +102,7 @@
   textarea {
     border-radius: 0px;
     height: 50px;
-    padding: 8px 0px 8px 10px !important;
+    padding: 8px 0px 8px 10px;
   }
 
   select {
@@ -104,12 +113,6 @@
 
   body {
     width: 100% !important;
-  }
-
-  #favorites-pagination-container>button {
-    text-align: center;
-    font-size: 16px;
-    height: 30px;
   }
 
   #goto-page-input {
@@ -132,6 +135,10 @@
     .number {
       display: none;
     }
+
+    select {
+      width: 120px;
+    }
   }
 
   #results-per-page-container {
@@ -140,7 +147,7 @@
 
   #bottom-panel-3,
   #bottom-panel-4 {
-    flex: none !important;
+    flex: none;
   }
 
   #bottom-panel-2 {
@@ -154,45 +161,23 @@
     display: none;
   }
 
-  #favorites-pagination-container>button {
-    &[disabled] {
-      opacity: 0.25;
-      pointer-events: none;
-    }
-  }
-
   html {
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
   }
 
-  #additional-favorite-options {
-    select {
-      width: 120px;
-    }
-  }
-
-  .utility-button {
+  .thumbnail-button {
     filter: none;
     width: 60%;
   }
 
   #left-favorites-panel-bottom-row {
     overflow: hidden;
-    /* -webkit-transition: height 0.2s ease;
-    -moz-transition: height 0.2s ease;
-    -ms-transition: height 0.2s ease;
-    -o-transition: height 0.2s ease;
-    transition: height 0.2s ease; */
     height: 270px;
 
     &.hidden {
       height: 0px;
     }
-  }
-
-  #favorites-search-gallery-content.sticky-menu-shadow {
-    /* transition: margin 0.2s ease; */
   }
 
   #favorites-search-gallery-content.sticky-menu {
@@ -201,7 +186,7 @@
 
   #autoplay-settings-menu {
     >div {
-      font-size: 14px !important;
+      font-size: 14px;
     }
   }
 
@@ -216,17 +201,16 @@
 
     svg {
       fill: black;
-      -webkit-transition: none;
       transition: none;
       transform: scale(0.85);
     }
 
     input[type="checkbox"]:checked+label {
       svg {
-        fill: #0075FF;
+        fill: var(--color-accent);
       }
 
-      color: #0075FF;
+      color: var(--color-accent);
     }
 
     .dark-green-gradient {
@@ -246,7 +230,7 @@
     flex: 1;
 
     &.light-green-gradient {
-      background: white !important;
+      background: white;
     }
 
     &.dark-green-gradient {
@@ -276,7 +260,7 @@
   }
 
   .search-bar-input-container {
-    flex: 1 !important;
+    flex: 1;
     display: flex;
     width: 100%;
     height: 100%;
@@ -289,16 +273,15 @@
     height: 100%;
     padding: 0;
     margin: 0;
-    outline: none !important;
-    border: none !important;
-    font-size: 14px !important;
+    outline: none;
+    font-size: 14px;
     width: 100%;
 
     &:focus,
     &:focus-visible {
-      background: none !important;
-      border: none !important;
-      outline: none !important;
+      background: none;
+      border: none;
+      outline: none;
     }
   }
 
@@ -306,8 +289,8 @@
     visibility: hidden;
 
     svg {
-      transition: none !important;
-      transform: scale(0.6) !important;
+      transition: none;
+      transform: scale(0.6);
     }
   }
 
@@ -318,7 +301,7 @@
     border-radius: 50%;
 
     &:active {
-      background-color: #0075FF;
+      background-color: var(--color-accent);
     }
   }
 
@@ -333,17 +316,17 @@
   }
 
   #reset-button {
-    transition: none !important;
+    transition: none;
     height: 100%;
 
     >svg {
-      transition: none !important;
+      transition: none;
       transform: scale(0.65);
     }
 
     &:active {
       svg {
-        fill: #0075FF;
+        fill: var(--color-accent);
       }
     }
   }
@@ -357,7 +340,7 @@
   }
 
   #sort-ascending-toggle-switch {
-    transform: scale(0.6) !important;
+    transform: scale(0.6);
   }
 
   #sort-inputs>.toggle-switch {
@@ -369,7 +352,7 @@
   }
 
   #layout-sort-container {
-    margin-bottom: 4px !important;
+    margin-bottom: 4px;
   }
 
   #mobile-footer {
@@ -380,7 +363,6 @@
     width: 100%;
     bottom: -1px;
     left: 0;
-    /* padding: 4px 0px; */
 
     >div {
       text-align: center;
@@ -405,7 +387,7 @@
   }
 
   #favorites-load-status {
-    font-size: 12px !important;
+    font-size: 12px;
 
     >span {
       margin-right: 10px;
@@ -416,30 +398,24 @@
     }
 
     >label {
-      /* width: 300px; */
-      min-width: unset !important;
+      min-width: unset;
     }
   }
 
   #favorites-load-status-label {
-    padding-left: 0 !important;
+    padding-left: 0;
   }
 
   #pagination-number:active {
     opacity: 0.5;
   }
 
-  #favorites-pagination-container>button {
-    min-width: 30px !important;
-    width: unset !important;
-  }
-
   #results-per-page-container {
-    margin-bottom: unset !important;
+    margin-bottom: unset;
   }
 
   #gallery-menu {
-    justify-content: center !important;
+    justify-content: center;
   }
 
   #download-button {
@@ -449,11 +425,11 @@
   }
 
   #download-menu-container-wrapper {
-    width: unset !important;
+    width: unset;
   }
 
   #download-menu-options select {
-    font-size: 30px !important;
+    font-size: 30px;
   }
 
   input[type="text"] {

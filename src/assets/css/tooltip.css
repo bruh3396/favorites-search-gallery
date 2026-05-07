@@ -18,7 +18,6 @@
 }
 
 .favorite::after {
-  /* opacity: 0; */
   transition: visibility 0s, opacity 0.25s linear;
   content: attr(data-tooltip);
   position: absolute;

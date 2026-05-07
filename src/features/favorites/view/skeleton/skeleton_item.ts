@@ -1,4 +1,4 @@
-import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
+﻿import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./skeleton_animation";
 import { ThumbnailConfig } from "../../../../config/thumbnail_config";
 import { LayoutMode } from "../../../../types/ui";
@@ -32,8 +32,8 @@ export class SkeletonItem {
 
   private setAnimation(): void {
     if (ThumbnailConfig.randomSkeletonAnimationTiming) {
-      this.element.style.setProperty("--skeleton-animation-delay", `${getRandomAnimationDelay()}s`);
-      this.element.style.setProperty("--skeleton-animation-duration", `${getRandomAnimationDuration()}s`);
+      this.element.style.setProperty("--delay-skeleton", `${getRandomAnimationDelay()}s`);
+      this.element.style.setProperty("--duration-skeleton", `${getRandomAnimationDuration()}s`);
     }
   }
 

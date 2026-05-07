@@ -1,4 +1,4 @@
-  #tag-modifier-option-container,
+﻿  #tag-modifier-option-container,
   #tag-modifier-ui-container,
   #show-ui-label,
   #show-saved-searches-container,
@@ -47,6 +47,7 @@
 
   #favorites-search-gallery-content {
     margin-top: 20px;
+    width: 100%;
   }
 
   #favorites-pagination-container {
@@ -58,8 +59,4 @@
       margin: 0px 1px;
       padding: 0;
     }
-  }
-
-  #favorites-search-gallery-content {
-    width: 100%;
   }

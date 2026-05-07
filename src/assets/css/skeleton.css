@@ -18,8 +18,8 @@
   }
 
   .skeleton-item.pulse {
-    animation: pulse var(--skeleton-animation-duration, 1s) infinite ease-in-out;
-    animation-delay: var(--skeleton-animation-delay, 0s);
+    animation: pulse var(--duration-skeleton) infinite ease-in-out;
+    animation-delay: var(--delay-skeleton);
   }
 
   .skeleton-item.shine::after {
@@ -31,8 +31,8 @@
     left: 0;
     right: 0;
     top: 0;
-    animation: shine var(--skeleton-animation-duration, 1s) linear infinite;
-    animation-delay: var(--skeleton-animation-delay, 0s);
+    animation: shine var(--duration-skeleton) linear infinite;
+    animation-delay: var(--delay-skeleton);
   }
 
   @keyframes pulse {

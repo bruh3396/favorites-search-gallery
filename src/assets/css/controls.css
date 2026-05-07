@@ -1,9 +1,6 @@
 ﻿#controls-guide {
   display: none;
   z-index: 99999;
-  --tap-control: blue;
-  --swipe-down: red;
-  --swipe-up: green;
   top: 0;
   left: 0;
   background: lightblue;
@@ -60,7 +57,7 @@
   top: 50%;
   height: 65%;
   width: 15%;
-  background: var(--tap-control);
+  background: var(--color-tap-control);
   z-index: 9999;
   transform: translateY(-50%);
   writing-mode: vertical-lr;
@@ -93,12 +90,12 @@
 
 #controls-guide-swipe-down {
   top: 0;
-  color: var(--swipe-down);
-  fill: var(--swipe-down);
+  color: var(--color-swipe-down);
+  fill: var(--color-swipe-down);
 }
 
 #controls-guide-swipe-up {
   bottom: 0;
-  color: var(--swipe-up);
-  fill: var(--swipe-up);
+  color: var(--color-swipe-up);
+  fill: var(--color-swipe-up);
 }

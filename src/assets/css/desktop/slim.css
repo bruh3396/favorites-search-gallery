@@ -1,4 +1,4 @@
-  #search-header,
+﻿  #search-header,
   #help-links-container,
   #site-title {
     display: none !important;
@@ -8,6 +8,6 @@
   #goto-page-input,
   #goto-page-button,
   #favorites-main-buttons-container>button {
-    height: 25px !important;
-    border-radius: 0 !important;
+    height: 25px;
+    border-radius: 0;
   }

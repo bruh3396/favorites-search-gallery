@@ -65,7 +65,7 @@
 }
 
 #download-menu-options select {
-  width: 150px !important;
+  width: 150px;
   font-size: 40px;
   height: 60px;
   cursor: pointer;
@@ -88,16 +88,12 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* transition: flex 0.15s linear; */
 }
 
 #download-menu-status-header {
   text-align: center;
   margin: 0;
   background: transparent;
-}
-
-#download-menu-status-header {
   color: white;
 }
 

@@ -1,7 +1,6 @@
 ﻿#favorites-search-gallery-menu {
   position: sticky;
   top: -1px;
-  /* padding: 10px; */
   padding: 5px;
   z-index: 30;
   margin-bottom: 10px;
@@ -28,7 +27,7 @@
 }
 
 #left-favorites-panel {
-  flex: 10 !important;
+  flex: 10;
 }
 
 #left-favorites-panel-top-row {
@@ -54,16 +53,16 @@
     &:not(:last-of-type) {
       margin-right: 5px;
     }
-  }
 
-  >button[disabled] {
-    filter: none !important;
-    cursor: wait !important;
+    &[disabled] {
+      filter: none;
+      cursor: wait;
+    }
   }
 }
 
 #right-favorites-panel {
-  flex: 9 !important;
+  flex: 9;
   margin-left: 30px;
   display: none;
 }
@@ -105,8 +104,6 @@ input[type="checkbox"] {
 
   >button {
     white-space: nowrap;
-    /* border-radius: 4px; */
-    /* height: 30px; */
   }
 
   >button:last-of-type {
@@ -116,15 +113,10 @@ input[type="checkbox"] {
 
   >input {
     width: 75px;
-    /* border-radius: 6px;
-    height: 35px;
-    border: 1px solid; */
   }
 }
 
 #favorites-pagination-container {
-  /* padding: 0px 10px 0px 10px; */
-
   >button {
     background: transparent;
     margin: 0px 2px;
@@ -140,13 +132,13 @@ input[type="checkbox"] {
     }
 
     &.selected {
-      border: none !important;
+      border: none;
       font-weight: bold;
       pointer-events: none;
     }
 
     &[disabled] {
-      background-color: transparent !important;
+      background-color: transparent;
     }
   }
 }
@@ -157,15 +149,6 @@ input[type="checkbox"] {
   >a:not(:last-child)::after {
     content: " |";
   }
-
-  /* display: flex;
-  flex-direction: column;
-
-  >a {
-    font-size: x-large;
-  }
-
-  margin-top: 17px; */
 }
 
 #whats-new-link {
@@ -296,7 +279,7 @@ input[type="checkbox"] {
     display: none;
 
     &:checked+label {
-      background-color: #0075FF;
+      background-color: var(--color-accent);
       color: white;
       opacity: 1;
     }
@@ -336,10 +319,6 @@ input[type="checkbox"] {
 
 div#header {
   margin-bottom: 0 !important;
-}
-
-body {
-  overflow-x: hidden;
 }
 
 #goto-page-input {
@@ -391,11 +370,11 @@ body {
 }
 
 input:checked+.slider {
-  background-color: #0075FF;
+  background-color: var(--color-accent);
 }
 
 input:focus+.slider {
-  box-shadow: 0 0 1px #0075FF;
+  box-shadow: 0 0 1px var(--color-accent);
 }
 
 input:checked+.slider:before {
@@ -431,7 +410,6 @@ input:checked+.slider:before {
 textarea#favorites-search-box {
   margin-top: 5px;
   min-height: 14px;
-  width: 98% !important;
 }
 
 #favorites-load-status-label.hidden {
@@ -450,7 +428,7 @@ textarea#favorites-search-box {
 }
 
 #performance-profile {
-  width: 160px !important;
+  width: 160px;
 }
 
 #show-ui-label {

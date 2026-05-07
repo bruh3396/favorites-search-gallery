@@ -1,9 +1,26 @@
-﻿body {
+﻿:root {
+  --color-bg: black;
+  --color-accent: var(--color-accent);
+  --color-gallery-menu-bg: rgba(0, 0, 0, 1);
+  --size-gallery-menu: 80px;
+  --gradient-rainbow: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+  --size-sidebar: 50px;
+  --size-sidebar-drawer: 200px;
+  --size-sidebar-full: calc(var(--size-sidebar) + var(--size-sidebar-drawer));
+  --duration-sidebar-drawer: 0.15s ease;
+  --duration-skeleton: 1s;
+  --delay-skeleton: 0s;
+  --color-tap-control: blue;
+  --color-swipe-down: red;
+  --color-swipe-up: green;
+}
+
+body {
   overflow-x: hidden;
 
   &:fullscreen,
   &::backdrop {
-    background-color: var(--c-bg);
+    background-color: var(--color-bg);
   }
 }
 
@@ -76,13 +93,11 @@ input[type=number] {
       transform: translate(-50%, -50%);
       width: 200%;
       height: 100%;
-      /* outline: 1px solid greenyellow; */
-      /* background-color: hotpink; */
     }
 
     &:hover {
       >span {
-        color: #0075FF;
+        color: var(--color-accent);
       }
     }
 
@@ -95,7 +110,7 @@ input[type=number] {
       outline: none;
       top: 0;
       z-index: 5;
-      font-size: 1.2em !important;
+      font-size: 1.2em;
     }
 
     &.number-arrow-up {
@@ -161,7 +176,7 @@ input[type=number] {
 }
 
 input[type="checkbox"] {
-  accent-color: #0075FF;
+  accent-color: var(--color-accent);
 }
 
 .thumb {
@@ -192,20 +207,6 @@ input[type="checkbox"] {
   }
 }
 
-/* html::before {
-  content: "";
-  position: fixed;
-  z-index: 10000;
-  opacity: 0;
-  background: black;
-  transition: opacity 0.2s linear;
-  pointer-events: none;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-} */
-
 html.fullscreen-effect::before {
   opacity: 1;
 }
@@ -233,9 +234,7 @@ dialog::backdrop {
   top: 50% !important;
   height: 80vh;
   width: 30vw;
-  background: red;
   z-index: 9999;
-  color: red;
   transform: translateY(-50%);
   pointer-events: all !important;
   opacity: 0;
@@ -258,7 +257,6 @@ dialog::backdrop {
   height: 0;
   overflow: hidden;
   width: 100%;
-  /* transition: height .2s ease; */
   margin-bottom: 5px;
 
   >button {
@@ -268,7 +266,7 @@ dialog::backdrop {
     font-weight: bold;
     text-align: center;
     flex: 1;
-    height: 100% !important;
+    height: 100%;
     border: none;
     border-radius: 4px;
   }

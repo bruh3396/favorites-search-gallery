@@ -1,4 +1,4 @@
-  .checkbox {
+﻿  .checkbox {
     cursor: pointer;
 
     &:hover {
@@ -52,5 +52,5 @@
   }
 
   #bottom-panel-4 {
-    flex: 0 0 15% !important;
+    flex: 0 0 15%;
   }

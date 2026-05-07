@@ -14,15 +14,6 @@
   margin-right: 10px;
 }
 
-#savedSearches {
-  max-width: 100%;
-
-  button {
-    flex: 1 1 auto;
-    cursor: pointer;
-  }
-}
-
 #saved-searches-buttons button {
   margin-right: 1px;
   margin-bottom: 5px;
@@ -47,6 +38,13 @@
 
 #saved-search-list {
   direction: ltr;
+  max-width: 100%;
+
+  button {
+    flex: 1 1 auto;
+    cursor: pointer;
+  }
+
   >li {
     display: flex;
     flex-direction: row;
@@ -75,7 +73,7 @@
 
   &:hover {
     color: white;
-    background: #0075FF;
+    background: var(--color-accent);
   }
 }
 
@@ -108,7 +106,3 @@
   }
 }
 
-/* .tag-type-saved>a,
-.tag-type-saved {
-  color: lightblue;
-} */
