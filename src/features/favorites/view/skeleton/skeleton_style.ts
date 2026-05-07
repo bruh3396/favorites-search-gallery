@@ -1,11 +1,11 @@
 import { LayoutMode } from "../../../../types/ui";
 
 const skeletonStyles: Record<LayoutMode, Record<string, string>> = {
-  column: { "width": "100%" },
-  grid: { "width": "100%" },
-  row: {},
-  square: { "width": "100%", "height": "100%", "aspect-ratio": "1/1" },
-  native: { "native": "" }
+  "tiler--column": { "width": "100%" },
+  "tiler--grid": { "width": "100%" },
+  "tiler--row": {},
+  "tiler--square": { "width": "100%", "height": "100%", "aspect-ratio": "1/1" },
+  "tiler--native": { "native": "" }
 };
 
 export function getSkeletonStyle(layoutMode: LayoutMode): Record<string, string> {

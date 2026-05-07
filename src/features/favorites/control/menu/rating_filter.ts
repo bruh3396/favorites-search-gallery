@@ -1,4 +1,4 @@
-import { Events } from "../../../../lib/communication/events";
+﻿import { Events } from "../../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Rating } from "../../../../types/search";
@@ -32,7 +32,7 @@ function createContainer(): HTMLElement {
   const container = document.createElement("div");
 
   container.id = "allowed-ratings";
-  container.className = "not-highlightable";
+  container.className = "u-no-select";
   return container;
 }
 

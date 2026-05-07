@@ -105,7 +105,7 @@ function getStatusHeader(): HTMLElement {
 function createStatusTextRow(): HTMLElement {
   const row = document.createElement("span");
 
-  row.classList.add("download-menu-status-row");
+  row.classList.add("downloader__status-row");
   statusContainer.appendChild(row);
   return row;
 }
@@ -128,7 +128,7 @@ function setupMenuCloseHandler(): void {
     toggleGlobalInputEvents(true);
     await yieldControl();
     document.body.classList.remove("dialog-opened");
-    dialog.classList.remove("downloading");
+    dialog.classList.remove("downloader--active");
     FavoritesDownloader.abort();
     clearStatusTextRows();
     downloadButton.disabled = true;
@@ -160,7 +160,7 @@ function setupMenuBatchSizeSelect(): void {
 }
 
 function clearStatusTextRows(): void {
-  const rows = Array.from(statusContainer.querySelectorAll(".download-menu-status-row"));
+  const rows = Array.from(statusContainer.querySelectorAll(".downloader__status-row"));
 
   for (const row of rows) {
     row.remove();
@@ -174,7 +174,7 @@ async function downloadFavorites(favorites: Favorite[]): Promise<void> {
     finishDownload();
     return;
   }
-  dialog.classList.add("downloading");
+  dialog.classList.add("downloader--active");
   statusHeader.textContent = `Downloading ${favoriteCount} Results`;
   const batches = splitIntoChunks(favorites, Preferences.downloadBatchSize.value);
   const totalProgressRow = createStatusTextRow();

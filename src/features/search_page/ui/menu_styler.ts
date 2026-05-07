@@ -15,7 +15,7 @@ export function styleSearchPageMenu(): void {
     hiddenSelectors.add("#search-page-upscale-thumbs");
     hiddenSelectors.add("#search-page-performance-profile");
     hiddenSelectors.add("#search-page-autoplay");
-    hiddenSelectors.add(".thumbnail-button");
+    hiddenSelectors.add(".post__action-btn");
     hiddenSelectors.add("#search-page-add-favorite-buttons");
     hiddenSelectors.add("#search-page-gallery-menu");
   }

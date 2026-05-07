@@ -16,12 +16,12 @@ export async function buildControlsGuide(): Promise<void> {
   anchor.onmousedown = (event): void => {
     event.preventDefault();
     event.stopPropagation();
-    controlGuide.classList.toggle("active", true);
+    controlGuide.classList.toggle("controls-guide--active", true);
   };
   controlGuide.ontouchstart = (event): void => {
     event.preventDefault();
     event.stopPropagation();
-    controlGuide.classList.toggle("active", false);
+    controlGuide.classList.toggle("controls-guide--active", false);
   };
   await sleep(0);
   const helpLinksContainer = document.getElementById("help-links-container");
@@ -31,6 +31,6 @@ export async function buildControlsGuide(): Promise<void> {
   }
   helpLinksContainer.insertAdjacentElement("afterbegin", anchor);
   controlGuide.onmousedown = (): void => {
-    controlGuide.classList.toggle("active", false);
+    controlGuide.classList.toggle("controls-guide--active", false);
   };
 }

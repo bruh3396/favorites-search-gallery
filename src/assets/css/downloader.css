@@ -1,20 +1,41 @@
-﻿#download-menu {
-  background: transparent;
+﻿/* ─── Menu shell ────────────────────────────────────────────────────────────── */
 
+#download-menu {
+  background: transparent;
   border: none;
   gap: 10px;
   padding: 0;
   overflow: hidden;
-
-  * {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
 }
+
+#download-menu * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#download-menu p {
+  color: black;
+}
+
+/* ─── Active state overrides ────────────────────────────────────────────────── */
+
+#download-menu.downloader--active #download-menu-buttons-start-download {
+  display: none;
+}
+
+#download-menu.downloader--active #download-menu-options {
+  display: none;
+}
+
+#download-menu.downloader--active #download-menu-status {
+  flex: 1 1 100%;
+}
+
+/* ─── Layout containers ─────────────────────────────────────────────────────── */
 
 #download-menu-container {
   display: flex;
@@ -40,24 +61,7 @@
   height: 100%;
 }
 
-#download-menus button {
-  width: 100%;
-  height: 4rem;
-  border-radius: 8px;
-  font-size: large;
-}
-
-#download-menu.downloading #download-menu-buttons-start-download {
-  display: none;
-}
-
-#download-menu.downloading #download-menu-options {
-  display: none;
-}
-
-#download-menu.downloading #download-menu-status {
-  flex: 1 1 100%;
-}
+/* ─── Options panel ─────────────────────────────────────────────────────────── */
 
 #download-menu-options {
   flex: 1 0 25%;
@@ -71,6 +75,18 @@
   cursor: pointer;
 }
 
+#download-menu-options-batch-size-container>span {
+  font-size: x-large;
+}
+
+/* ─── Buttons panel ─────────────────────────────────────────────────────────── */
+
+#download-menus button {
+  width: 100%;
+  height: 4rem;
+  border-radius: 8px;
+  font-size: large;
+}
 
 #download-menu-buttons {
   display: flex;
@@ -82,6 +98,8 @@
 #download-menu-buttons button {
   flex: 1 1 100%;
 }
+
+/* ─── Status panel ──────────────────────────────────────────────────────────── */
 
 #download-menu-status {
   flex: 0 0 0%;
@@ -101,19 +119,22 @@
   font-size: medium;
 }
 
-#download-menu p {
-  color: black;
+.downloader__status-row {
+  font-size: medium;
 }
 
+/* ─── Warning ───────────────────────────────────────────────────────────────── */
+
+#download-menu-warning-container {
+  text-align: center;
+}
 
 #download-menu-warning-container button {
   margin: auto;
   border-radius: 8px;
 }
 
-#download-menu-warning-container {
-  text-align: center;
-}
+/* ─── Help ──────────────────────────────────────────────────────────────────── */
 
 #download-menu-help {
   display: flex;
@@ -144,7 +165,7 @@
   transform: translate(-50%, -50%);
 }
 
-#download-menu-help svg.dark-green-gradient {
+#download-menu-help svg.theme--dark {
   fill: white;
 }
 
@@ -156,8 +177,4 @@
   transform: translateY(100%);
   background: gray;
   color: black;
-}
-
-#download-menu-options-batch-size-container>span {
-  font-size: x-large;
 }

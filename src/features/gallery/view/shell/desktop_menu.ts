@@ -1,4 +1,4 @@
-import * as Icons from "../../../../assets/icons";
+﻿import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
 import { Events } from "../../../../lib/communication/events";
 import { GalleryConfig } from "../../../../config/gallery_config";
@@ -31,7 +31,7 @@ const menu: HTMLElement = document.createElement("div");
 let menuVisibilityTimeout: Timeout;
 
 menu.id = "gallery-menu";
-menu.className = "gallery-sub-menu";
+menu.className = "gallery__sub-menu";
 
 function loadPreferences(): void {
   if (Preferences.galleryMenuDockedLeft.value) {
@@ -88,7 +88,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
 
   button.innerHTML = template.icon;
   button.id = template.id;
-  button.className = "gallery-menu-button";
+  button.className = "gallery-menu__btn";
   button.dataset.hint = template.hint;
   button.onclick = (): void => {
     handleGalleryMenuAction(template.action);
@@ -113,6 +113,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
           }
         }
       `, template.id);
+
   }
   return button;
 }
@@ -137,7 +138,7 @@ function createColorPicker(): void {
 }
 
 function reveal(): void {
-  menu.classList.add("active");
+  menu.classList.add("gallery-menu--visible");
   clearTimeout(menuVisibilityTimeout);
   menuVisibilityTimeout = setTimeout(() => {
     hide();
@@ -145,29 +146,29 @@ function reveal(): void {
 }
 
 function hide(): void {
-  menu.classList.remove("active");
+  menu.classList.remove("gallery-menu--visible");
 }
 
 function togglePersistence(event: MouseEvent): void {
-  menu.classList.toggle("persistent", event.target instanceof HTMLElement && menu.contains(event.target));
+  menu.classList.toggle("gallery-menu--persistent", event.target instanceof HTMLElement && menu.contains(event.target));
 }
 
 function togglePin(): void {
   if (ON_MOBILE_DEVICE) {
-    menu.classList.add("pinned");
+    menu.classList.add("gallery-menu--pinned");
     Preferences.galleryMenuPinned.set(true);
     return;
   }
-  Preferences.galleryMenuPinned.set(menu.classList.toggle("pinned"));
+  Preferences.galleryMenuPinned.set(menu.classList.toggle("gallery-menu--pinned"));
 }
 
 function toggleDockPosition(): void {
   if (ON_MOBILE_DEVICE) {
-    menu.classList.remove("dock-left");
+    menu.classList.remove("gallery-menu--docked");
     Preferences.galleryMenuDockedLeft.set(false);
     return;
   }
-  Preferences.galleryMenuDockedLeft.set(menu.classList.toggle("dock-left"));
+  Preferences.galleryMenuDockedLeft.set(menu.classList.toggle("gallery-menu--docked"));
 }
 
 export function setupDesktopGalleryMenu(): void {

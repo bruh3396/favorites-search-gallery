@@ -1,4 +1,4 @@
-import { Favorite } from "../../../../types/favorite";
+﻿import { Favorite } from "../../../../types/favorite";
 
 const selected: Set<Favorite> = new Set();
 let getSearchResults: () => Favorite[] = () => [];
@@ -60,7 +60,7 @@ function getSelectedFavoritesOnPage(): Favorite[] {
 
 function toggleOutline(favorite: Favorite, value: boolean): void {
   if (document.getElementById(favorite.id) !== null || !value) {
-    favorite.root.classList.toggle("tag-modifier-selected", value);
+    favorite.root.classList.toggle("post--tag-selected", value);
   }
 }
 

@@ -1,0 +1,13 @@
+  #search-header,
+  #help-links-container,
+  #site-title {
+    display: none !important;
+  }
+
+  #favorites-pagination-container>button,
+  #goto-page-input,
+  #goto-page-button,
+  #favorites-main-buttons-container>button {
+    height: 25px;
+    border-radius: 0;
+  }

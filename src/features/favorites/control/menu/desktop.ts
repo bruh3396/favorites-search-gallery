@@ -353,11 +353,11 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
     function: hideUnusedLayoutSizer,
     triggerOnCreation: true,
     options: new Map<LayoutMode, string>([
-      ["column", "Waterfall"],
-      ["row", "River"],
-      ["square", "Square"],
-      ["grid", "Legacy"],
-      ["native", "Native"]
+      ["tiler--column", "Waterfall"],
+      ["tiler--row", "River"],
+      ["tiler--square", "Square"],
+      ["tiler--grid", "Legacy"],
+      ["tiler--native", "Native"]
     ])
   },
   {

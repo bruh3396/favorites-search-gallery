@@ -1,4 +1,4 @@
-import { Events } from "../../../../lib/communication/events";
+﻿import { Events } from "../../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Storage } from "../../../../lib/core/storage/storage_instance";
@@ -14,7 +14,7 @@ export function syncShowOnHoverFromGallery(value: boolean): void {
 }
 
 export function toggleOptionHotkeyHints(value: boolean): void {
-  insertStyle(value ? "" : ".option-hint {display:none;}", "option-hint-visibility");
+  insertStyle(value ? "" : ".u-opt-hint {display:none;}", "opt-hint-visibility");
 }
 
 export function toggleUI(value: boolean): void {
@@ -44,12 +44,12 @@ export function toggleUI(value: boolean): void {
     panels.style.display = "none";
     menu.style.background = getComputedStyle(document.body).background;
   }
-  container.classList.toggle("ui-hidden", !value);
+  container.classList.toggle("favorites-menu__show-ui--collapsed", !value);
 }
 
 export function toggleFavoritesOptions(value: boolean): void {
   if (ON_MOBILE_DEVICE) {
-    document.getElementById("left-favorites-panel-bottom-row")?.classList.toggle("hidden", !value);
+    document.getElementById("left-favorites-panel-bottom-row")?.classList.toggle("u-hidden", !value);
     insertStyle(`
             #mobile-button-row {
               display: ${value ? "block" : "none"};

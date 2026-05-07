@@ -1,112 +1,127 @@
-  .row,
-  .column,
-  .column .tiled-column,
-  .square,
-  .grid {
-    gap: 6px;
-  }
+﻿.tiler--row,
+.tiler--column,
+.tiler--column .tiler__column,
+.tiler--square,
+.tiler--grid {
+  gap: 6px;
+}
 
-  .grid,
-  .square {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    grid-gap: 0.5cqw;
+.tiler--grid,
+.tiler--square {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-gap: 0.5cqw;
+}
 
-    .thumbnail-button {
-      width: 30%;
-    }
-  }
+.tiler--grid .post__action-btn,
+.tiler--square .post__action-btn {
+  width: 30%;
+}
 
-  .square {
+.tiler--square .post,
+.tiler--square .post--thumb {
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 1;
+}
 
-    .favorite,
-    .thumb {
-      border-radius: var(--radius);
-      overflow: hidden;
-      aspect-ratio: 1;
+.tiler--square .post>a,
+.tiler--square .post>div,
+.tiler--square .post--thumb>a,
+.tiler--square .post--thumb>div {
+  width: 100%;
+  height: 100%;
+}
 
-      >a,
-      >div {
-        width: 100%;
-        height: 100%;
+.tiler--square .post>a>img:first-child,
+.tiler--square .post>a>canvas,
+.tiler--square .post>div>img:first-child,
+.tiler--square .post>div>canvas,
+.tiler--square .post--thumb>a>img:first-child,
+.tiler--square .post--thumb>a>canvas,
+.tiler--square .post--thumb>div>img:first-child,
+.tiler--square .post--thumb>div>canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-        >img:first-child,
-        >canvas {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-      }
-    }
-  }
+.tiler--row {
+  display: flex;
+  flex-wrap: wrap;
+}
 
-  .row {
-    display: flex;
-    flex-wrap: wrap;
+.tiler--row .post,
+.tiler--row .post--thumb {
+  height: 300px;
+  flex: 1 1 auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
 
-    .favorite,
-    .thumb {
-      height: 300px;
-      flex: 1 1 auto;
-      border-radius: var(--radius);
-      overflow: hidden;
+.tiler--row .post.u-last-row,
+.tiler--row .post--thumb.u-last-row {
+  flex: 0 1 auto;
+}
 
-      &.last-row {
-        flex: 0 1 auto;
-      }
+.tiler--row .post>a,
+.tiler--row .post>div,
+.tiler--row .post--thumb>a,
+.tiler--row .post--thumb>div {
+  width: 100%;
+  height: 100%;
+}
 
-      >a,
-      >div {
-        width: 100%;
-        height: 100%;
+.tiler--row .post>a>img:first-child,
+.tiler--row .post>div>img:first-child,
+.tiler--row .post--thumb>a>img:first-child,
+.tiler--row .post--thumb>div>img:first-child {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  vertical-align: middle;
+}
 
-        >img:first-child {
-          object-fit: cover;
-          width: 100%;
-          height: 100%;
-          vertical-align: middle;
-        }
+.tiler--row .post>a>canvas,
+.tiler--row .post>div>canvas,
+.tiler--row .post--thumb>a>canvas,
+.tiler--row .post--thumb>div>canvas {
+  height: 100%;
+  object-fit: cover;
+}
 
-        >canvas {
-          height: 100%;
-          object-fit: cover;
-        }
-      }
-    }
+.tiler--row .post__action-btn {
+  height: 30%;
+}
 
-    .thumbnail-button {
-      height: 30%;
-    }
-  }
+.tiler--column {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+}
 
-  .column {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
+.tiler--column .tiler__column {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 25%;
+}
 
-    .tiled-column {
-      display: flex;
-      flex-direction: column;
-      flex: 0 0 25%;
+.tiler--column .tiler__column .post,
+.tiler--column .tiler__column .post--thumb {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
 
-      .favorite,
-      .thumb {
-        border-radius: var(--radius);
-        overflow: hidden;
-      }
-    }
+.tiler--column .post__action-btn {
+  width: 30%;
+}
 
-    .thumbnail-button {
-      width: 30%;
-    }
-  }
+.tiler--native {
+  display: flex;
+  flex-flow: wrap;
+  gap: 25px 10px;
+}
 
-  .native {
-    display: flex;
-    flex-flow: wrap;
-    gap: 25px 10px;
-
-    .thumbnail-button {
-      width: 70px;
-      aspect-ratio: 1;
-    }
-  }
+.tiler--native .post__action-btn {
+  width: 70px;
+  aspect-ratio: 1;
+}

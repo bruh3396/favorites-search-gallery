@@ -1,4 +1,4 @@
-import { Events } from "../communication/events";
+﻿import { Events } from "../communication/events";
 import { Favorite } from "../../types/favorite";
 import { ON_MOBILE_DEVICE } from "../environment/environment";
 import { getImageFromThumb } from "../dom/thumb";
@@ -26,11 +26,11 @@ export async function revealItem(id: string): Promise<void> {
   await waitForAllThumbnailsToLoad();
   const thumb = document.getElementById(id);
 
-  if (thumb === null || thumb.classList.contains("blink")) {
+  if (thumb === null || thumb.classList.contains("u-blink")) {
     return;
   }
   thumb.scrollIntoView({ behavior: "smooth", block: "center" });
-  thumb.classList.add("blink");
+  thumb.classList.add("u-blink");
   await sleep(1500);
-  thumb.classList.remove("blink");
+  thumb.classList.remove("u-blink");
 }

@@ -5,18 +5,18 @@ import { yieldControl } from "../core/scheduling/promise";
 
 export function toggleAddOrRemoveButtons(value: boolean): void {
   insertStyle(`
-        .remove-favorite-button, .add-favorite-button {
+        .post__action-btn--remove, .post__action-btn--add {
           visibility: ${value ? "visible" : "hidden"} !important;
         }
-    `, "add-or-remove-button-visibility");
+    `, "post-action-btn-visibility");
 }
 
 export function toggleDownloadButtons(value: boolean): void {
   insertStyle(`
-        .download-button {
+        .post__action-btn--download {
           visibility: ${value ? "visible" : "hidden"} !important;
         }
-    `, "download-button-visibility");
+    `, "post-download-btn-visibility");
 }
 
 export function toggleHeader(value: boolean): void {
@@ -25,21 +25,21 @@ export function toggleHeader(value: boolean): void {
 
 export function toggleMaximizeToggleFavoriteButtons(value: boolean): void {
   const html = `
-  .thumbnail-button {
+  .post__action-btn {
     width: 100% !important;
     height: 100% !important;
   }`;
 
-  insertStyle(value ? html : "", "maximize-toggle-favorite-buttons");
+  insertStyle(value ? html : "", "post-action-btn-maximize");
 }
 
 export function toggleAlternateLayout(value: boolean): void {
-  insertStyle(value ? DESKTOP_SIDEBAR_CSS : "", "alternate-layout");
+  insertStyle(value ? DESKTOP_SIDEBAR_CSS : "", "fav-layout-alternate");
 }
 
 export async function toggleSlimLayout(value: boolean): Promise<void> {
   await yieldControl();
-  insertStyle(value ? DESKTOP_SLIM_CSS : "", "slim-layout");
+  insertStyle(value ? DESKTOP_SLIM_CSS : "", "fav-layout-slim");
   const status = document.getElementById("favorites-load-status");
   const pagination = document.getElementById("favorites-pagination-container");
   const header = document.getElementById("search-header");

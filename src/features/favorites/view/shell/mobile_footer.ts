@@ -1,4 +1,4 @@
-import { Overlays } from "../../../../lib/shell";
+﻿import { Overlays } from "../../../../lib/shell";
 
 export function buildMobileFooter(): void {
   const status = document.getElementById("favorites-load-status");
@@ -15,7 +15,7 @@ export function buildMobileFooter(): void {
   footerHeader.id = "mobile-footer-header";
   footerTop.id = "mobile-footer-top";
   footerBottom.id = "mobile-footer-bottom";
-  footer.className = "dark-green-gradient";
+  footer.className = "theme--dark";
   footer.appendChild(footerHeader);
   footer.appendChild(footerTop);
   footer.appendChild(footerBottom);

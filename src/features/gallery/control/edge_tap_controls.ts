@@ -1,4 +1,4 @@
-import * as GalleryView from "../view/gallery_view";
+﻿import * as GalleryView from "../view/gallery_view";
 import { Events } from "../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { yieldControl } from "../../../lib/core/scheduling/promise";
@@ -12,8 +12,8 @@ export function setupGalleryMobileTapControls(): void {
   const rightTap = document.createElement("div");
 
   tapControlContainer.id = "tap-control-container";
-  leftTap.className = "mobile-tap-control";
-  rightTap.className = "mobile-tap-control";
+  leftTap.className = "gallery__tap-zone";
+  rightTap.className = "gallery__tap-zone";
   leftTap.id = "left-mobile-tap-control";
   rightTap.id = "right-mobile-tap-control";
   tapControlContainer.appendChild(leftTap);

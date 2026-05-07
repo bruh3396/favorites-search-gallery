@@ -1,4 +1,4 @@
-import * as GalleryImageCanvas from "./image_canvas";
+﻿import * as GalleryImageCanvas from "./image_canvas";
 import * as GalleryImageLoader from "./image_loader";
 import * as GalleryUpscaler from "../upscalers/upscaler";
 import { GalleryAbstractController } from "../../abstract_controller";
@@ -41,11 +41,11 @@ class ImageController extends GalleryAbstractController {
   }
 
   public toggleZoomCursor(value: boolean): void {
-    this.container.classList.toggle("zooming", value);
+    this.container.classList.toggle("gallery__image-frame--zooming", value);
   }
 
   public toggleZoom(value: boolean | undefined): boolean {
-    return this.container.classList.toggle("zoomed-in", value);
+    return this.container.classList.toggle("gallery__image-frame--zoomed", value);
   }
 
   public zoomToPoint = (x: number, y: number): void => GalleryImageCanvas.zoomToPoint(x, y);

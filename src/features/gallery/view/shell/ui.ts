@@ -16,7 +16,7 @@ background.style.opacity = Preferences.backgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
 
 function usingColumnLayout(): boolean {
-  return document.querySelector("#favorites-search-gallery-content.column") !== null;
+  return document.querySelector("#favorites-search-gallery-content.tiler--column") !== null;
 }
 
 export function setupGalleryUI(): void {
@@ -58,11 +58,11 @@ function toggleVideoPointerEvents(value: boolean): void {
       video {
         pointer-events: ${value ? "auto" : "none"}
       }
-      `, "video-pointer-events");
+      `, "gallery-video-pointer-events");
 }
 
 function toggleBackgroundInteractability(value: boolean): void {
-    background.classList.toggle("in-gallery", value);
+    background.classList.toggle("gallery__background--active", value);
 }
 
 export function toggleBackgroundOpacity(): void {
@@ -164,5 +164,5 @@ export function toggleGalleryMenuVisibility(value: boolean): void {
 }
 
 export function toggleZoomCursor(value: boolean): void {
-  background.classList.toggle("zooming", value);
+  background.classList.toggle("gallery__background--zooming", value);
 }

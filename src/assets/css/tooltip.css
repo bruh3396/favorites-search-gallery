@@ -1,4 +1,4 @@
-﻿#tooltip {
+﻿.tooltip {
   max-width: 750px;
   border: 1px solid black;
   padding: 0.25em;
@@ -12,12 +12,12 @@
   font-size: 1.05em;
 }
 
-#tooltip.visible {
+.tooltip--visible {
   visibility: visible;
   opacity: 1;
 }
 
-.favorite::after {
+.post::after {
   transition: visibility 0s, opacity 0.25s linear;
   content: attr(data-tooltip);
   position: absolute;
@@ -30,9 +30,8 @@
   top: 100%;
   min-width: 500px;
   pointer-events: none;
-
 }
 
-.favorite.tooltip::after {
+.post--tooltip::after {
   opacity: 1;
 }

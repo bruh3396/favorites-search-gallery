@@ -1,4 +1,4 @@
-import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
+﻿import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
 import { clearCanvas, drawScaledCanvas } from "../../../../../../utils/dom/canvas";
 import { GalleryConfig } from "../../../../../../config/gallery_config";
 import { ON_DESKTOP_DEVICE } from "../../../../../../lib/environment/environment";
@@ -8,13 +8,13 @@ import { parseDimensions2D } from "../../../../../../utils/string/parse";
 const mainCanvas = document.createElement("canvas");
 const mainContext = mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
 const landscapeStyle = `
-  .fullscreen-image {
+  .gallery__image {
       height: 100vh !important;
       width: auto !important;
   }
   `;
 const portraitStyle = `
-  .fullscreen-image {
+  .gallery__image {
       width: 100vw !important;
       height: auto !important;
   }
@@ -22,13 +22,13 @@ const portraitStyle = `
 let container: HTMLElement;
 const dimensions = parseDimensions2D(GalleryConfig.mainCanvasResolution);
 
-mainCanvas.className = "fullscreen-image";
+mainCanvas.className = "gallery__image";
 mainCanvas.width = dimensions.x;
 mainCanvas.height = dimensions.y;
 
 function insertGalleryCanvas(newContainer: HTMLElement): void {
   newContainer.id = "canvas-container";
-  newContainer.className = "fullscreen-image-container";
+  newContainer.className = "gallery__image-frame";
   newContainer.appendChild(mainCanvas);
   container = newContainer;
 }

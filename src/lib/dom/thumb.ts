@@ -2,10 +2,10 @@
 import { removeNonNumericCharacters } from "../../utils/string/format";
 import { sum } from "../../utils/number";
 
-export const ITEM_CLASS_NAME = "favorite";
-export const ITEM_SELECTOR = ".favorite, .thumb";
-export const IMAGE_SELECTOR = ".favorite img";
-export const COLUMN_CLASS_NAME = "tiled-column";
+export const ITEM_CLASS_NAME = "post";
+export const ITEM_SELECTOR = ".post, .post--thumb";
+export const IMAGE_SELECTOR = ".post img";
+export const COLUMN_CLASS_NAME = "tiler__column";
 
 function getClosestThumb(element: HTMLElement): HTMLElement | null {
   return element.closest(ITEM_SELECTOR);
@@ -70,7 +70,7 @@ export function getIdFromThumb(thumb: HTMLElement): string {
 }
 
 export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement | null {
-  if (!(event.target instanceof HTMLElement) || event.target.matches(".caption-tag")) {
+  if (!(event.target instanceof HTMLElement) || event.target.matches(".caption__tag")) {
     return null;
   }
   const image = event.target.matches(IMAGE_SELECTOR) ? event.target : null;

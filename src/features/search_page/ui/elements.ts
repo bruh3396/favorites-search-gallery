@@ -80,11 +80,11 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
     preference: Preferences.searchPageLayout,
     event: Events.searchPage.layoutChanged,
     options: new Map<LayoutMode, string>([
-      ["native", "Native"],
-      ["column", "Waterfall"],
-      ["row", "River"],
-      ["square", "Square"],
-      ["grid", "Legacy"]
+      ["tiler--native", "Native"],
+      ["tiler--column", "Waterfall"],
+      ["tiler--row", "River"],
+      ["tiler--square", "Square"],
+      ["tiler--grid", "Legacy"]
     ])
   },
   {

@@ -8,10 +8,7 @@ import { Favorite } from "../../../types/favorite";
 import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
-  await loadDatabaseFavorites();
-  Events.favorites.favoritesFoundInDatabase.emit(FavoritesModel.hasFavorites());
-
-  if (FavoritesModel.hasFavorites()) {
+  if (await loadDatabaseFavorites()) {
     await handleExistingFavorites();
   } else {
     await fetchFavorites();
@@ -19,9 +16,13 @@ export async function loadAllFavorites(): Promise<void> {
   finishLoading();
 }
 
-function loadDatabaseFavorites(): Promise<void> {
+async function loadDatabaseFavorites(): Promise<boolean> {
   FavoritesView.setStatus("Loading favorites");
-  return FavoritesModel.loadDatabaseFavorites();
+  await FavoritesModel.loadDatabaseFavorites();
+  const foundDatabaseFavorites = FavoritesModel.hasFavorites();
+
+  Events.favorites.favoritesFoundInDatabase.emit(foundDatabaseFavorites);
+  return foundDatabaseFavorites;
 }
 
 function handleExistingFavorites(): Promise<void> {

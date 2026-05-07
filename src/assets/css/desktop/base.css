@@ -1,4 +1,4 @@
-﻿  .checkbox {
+﻿  .opt-checkbox {
     cursor: pointer;
 
     &:hover {
@@ -22,14 +22,14 @@
     height: 35px;
   }
 
-  .gallery-menu-button {
+  .gallery-menu__btn {
     &:hover {
       opacity: 1;
       transform: scale(1.25);
     }
   }
 
-  .gallery-menu-button::after {
+  .gallery-menu__btn::after {
     content: attr(data-hint);
     position: absolute;
     top: 50%;
@@ -46,7 +46,7 @@
     pointer-events: none;
   }
 
-  .gallery-menu-button:hover::after {
+  .gallery-menu__btn:hover::after {
     opacity: 1;
     visibility: visible;
   }

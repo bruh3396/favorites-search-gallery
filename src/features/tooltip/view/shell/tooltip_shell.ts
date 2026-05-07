@@ -1,8 +1,8 @@
-export const Tooltip: HTMLElement = document.createElement("span");
+﻿export const Tooltip: HTMLElement = document.createElement("span");
 export const TooltipContainer: HTMLElement = document.createElement("div");
 
 Tooltip.id = "tooltip";
-Tooltip.className = "light-green-gradient";
+Tooltip.className = "theme--light";
 TooltipContainer.id = "tooltip-container";
 
 export function mountTooltip(): void {

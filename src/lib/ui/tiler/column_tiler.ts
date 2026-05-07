@@ -3,7 +3,7 @@ import { AbstractTiler } from "./abstract_tiler";
 import { LayoutMode } from "../../../types/ui";
 
 export class ColumnTiler extends AbstractTiler {
-  public layoutMode: LayoutMode = "column";
+  public layoutMode: LayoutMode = "tiler--column";
   private columns: HTMLElement[];
   private columnCount: number;
 

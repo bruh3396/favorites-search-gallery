@@ -1,4 +1,6 @@
-﻿#saved-searches-container {
+﻿/* ─── Container ─────────────────────────────────────────────────────────────── */
+
+#saved-searches-container {
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -14,6 +16,8 @@
   margin-right: 10px;
 }
 
+/* ─── Input buttons ─────────────────────────────────────────────────────────── */
+
 #saved-searches-buttons button {
   margin-right: 1px;
   margin-bottom: 5px;
@@ -21,11 +25,13 @@
   border-radius: 4px;
   cursor: pointer;
   height: 35px;
-
-  &:hover {
-    filter: brightness(140%);
-  }
 }
+
+#saved-searches-buttons button:hover {
+  filter: brightness(140%);
+}
+
+/* ─── Search list ───────────────────────────────────────────────────────────── */
 
 #saved-search-list-container {
   direction: rtl;
@@ -39,70 +45,71 @@
 #saved-search-list {
   direction: ltr;
   max-width: 100%;
-
-  button {
-    flex: 1 1 auto;
-    cursor: pointer;
-  }
-
-  >li {
-    display: flex;
-    flex-direction: row;
-    cursor: pointer;
-    background: rgba(0, 0, 0, .1);
-
-    &:nth-child(odd) {
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    >div {
-      padding: 4px;
-      align-content: center;
-
-      svg {
-        height: 20px;
-        width: 20px;
-      }
-    }
-  }
 }
 
-.save-search-label {
+#saved-search-list button {
+  flex: 1 1 auto;
+  cursor: pointer;
+}
+
+#saved-search-list>li {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  background: rgba(0, 0, 0, .1);
+}
+
+#saved-search-list>li:nth-child(odd) {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+#saved-search-list>li>div {
+  padding: 4px;
+  align-content: center;
+}
+
+#saved-search-list>li>div svg {
+  height: 20px;
+  width: 20px;
+}
+
+/* ─── List item buttons ─────────────────────────────────────────────────────── */
+
+.saved-searches__item-label {
   flex: 1000 30px;
   text-align: left;
-
-  &:hover {
-    color: white;
-    background: var(--color-accent);
-  }
 }
 
-.edit-saved-search-button {
+.saved-searches__item-label:hover {
+  color: white;
+  background: var(--color-accent);
+}
+
+.saved-searches__item-btn--edit {
   text-align: center;
   flex: 1 20px;
-
-  &:hover {
-    color: white;
-    background: slategray;
-  }
 }
 
-.remove-saved-search-button {
+.saved-searches__item-btn--edit:hover {
+  color: white;
+  background: slategray;
+}
+
+.saved-searches__item-btn--remove {
   text-align: center;
   flex: 1 20px;
-
-  &:hover {
-    color: white;
-    background: #f44336;
-  }
 }
 
-.move-saved-search-to-top-button {
+.saved-searches__item-btn--remove:hover {
+  color: white;
+  background: #f44336;
+}
+
+.saved-searches__item-btn--top {
   text-align: center;
-
-  &:hover {
-    color: white;
-    background: steelblue;
-  }
 }
 
+.saved-searches__item-btn--top:hover {
+  color: white;
+  background: steelblue;
+}

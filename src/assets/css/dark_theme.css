@@ -3,18 +3,16 @@
   color: white;
 }
 
-.number {
+.num-input {
   background-color: #303030;
-
-  >hold-button,
-  button {
-    color: white;
-  }
 }
 
-#favorites-pagination-container {
-  >button {
-    border: 1px solid white;
-    color: white;
-  }
+.num-input>hold-button,
+.num-input button {
+  color: white;
+}
+
+#favorites-pagination-container>button {
+  border: 1px solid white;
+  color: white;
 }

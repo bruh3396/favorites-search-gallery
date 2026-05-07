@@ -13,12 +13,12 @@ const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "all favorites ";
 
 function clearStatus(): void {
   statusIndicator.textContent = "";
-  statusIndicator.classList.add("hidden");
+  statusIndicator.classList.add("u-hidden");
 }
 
 export function setStatus(text: string): void {
   clearTimeout(statusTimeout);
-  statusIndicator.classList.remove("hidden");
+  statusIndicator.classList.remove("u-hidden");
   statusIndicator.textContent = text;
 }
 

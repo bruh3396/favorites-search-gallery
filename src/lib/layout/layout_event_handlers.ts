@@ -6,10 +6,10 @@ import { clamp } from "../../utils/number";
 import { sleep } from "../core/scheduling/promise";
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || LayoutManager.getLayout() === "native") {
+  if (!wheelEvent.originalEvent.shiftKey || LayoutManager.getLayout() === "tiler--native") {
     return;
   }
-  const usingRowLayout = LayoutManager.getLayout() === "row";
+  const usingRowLayout = LayoutManager.getLayout() === "tiler--row";
   const id = usingRowLayout ? "row-size" : "column-count";
   const input = document.getElementById(id);
 
@@ -54,12 +54,12 @@ export async function hideUnusedLayoutSizer(layout: LayoutMode): Promise<void> {
     return;
   }
 
-  if (layout === "native") {
+  if (layout === "tiler--native") {
     columnCountContainer.style.display = "none";
     rowSizeContainer.style.display = "none";
     return;
   }
-  const usingRowLayout = layout === "row";
+  const usingRowLayout = layout === "tiler--row";
 
   columnCountContainer.style.display = usingRowLayout ? "none" : "";
   rowSizeContainer.style.display = usingRowLayout ? "" : "none";

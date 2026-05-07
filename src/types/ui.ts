@@ -1,4 +1,4 @@
-export type GalleryMenuAction = "exit" |
+﻿export type GalleryMenuAction = "exit" |
   "fullscreen" | "openPost" | "openOriginal" |
   "download" | "addFavorite" | "removeFavorite" |
   "toggleDockPosition" | "toggleBackground" | "search" |
@@ -24,7 +24,7 @@ export interface AwesompleteConstructor {
   new(input: HTMLTextAreaElement | HTMLInputElement, options: Record<string, unknown>): AwesompleteInstance
   FILTER_STARTSWITH(value: string, input: string): boolean
 }
-export type LayoutMode = "row" | "square" | "grid" | "column" | "native"
+export type LayoutMode = "tiler--row" | "tiler--square" | "tiler--grid" | "tiler--column" | "tiler--native"
 export type ImageCursor = "zoom-in" | "zoom-out" | "auto"
 export type SkeletonAnimation = "pulse" | "shine"
 export enum PerformanceProfile {

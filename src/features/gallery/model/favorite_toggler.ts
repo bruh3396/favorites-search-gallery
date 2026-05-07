@@ -1,4 +1,4 @@
-import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
+﻿import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";
 
@@ -18,7 +18,7 @@ export function removeFavorite(thumb: HTMLElement | undefined): Promise<RemoveFa
   if (thumb === undefined) {
     return Promise.resolve(RemoveFavoriteStatus.ERROR);
   }
-  const removeFavoriteButton = thumb.querySelector(".remove-favorite-button");
+  const removeFavoriteButton = thumb.querySelector(".post__action-btn--remove");
   const showRemoveFavoriteCheckbox = document.getElementById("show-remove-favorite-buttons");
 
   if (removeFavoriteButton === null || showRemoveFavoriteCheckbox === null) {

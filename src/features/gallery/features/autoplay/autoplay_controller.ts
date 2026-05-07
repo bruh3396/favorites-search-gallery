@@ -162,7 +162,7 @@ function insertImageProgressHTML(): void {
       body.autoplay::before {
         animation: progress ${config.imageViewDurationInSeconds}s linear forwards
       }
-      `, "autoplay-image-progress-bar-animation");
+      `, "autoplay-image-progress");
 }
 
 function insertVideoProgressHTML(): void {
@@ -171,7 +171,7 @@ function insertVideoProgressHTML(): void {
           transition: width ${config.minimumVideoDurationInSeconds}s linear;
           width: 100%;
       }
-      `, "autoplay-video-progress-bar-animation");
+      `, "autoplay-video-progress");
 }
 
 function extractUiElements(): void {
@@ -249,7 +249,7 @@ function setMenuIconImageSources(): void {
   ui.settingsButton.src = menuIcons.tune;
   ui.changeDirectionButton.src = menuIcons.changeDirection;
   ui.changeDirectionMask.image.src = menuIcons.changeDirectionAlt;
-  ui.changeDirectionMask.container.classList.toggle("upper-right", Preferences.autoplayForward.value);
+  ui.changeDirectionMask.container.classList.toggle("autoplay__direction-mask--upper-right", Preferences.autoplayForward.value);
 }
 
 function loadAutoplaySettingsIntoUI(): void {
@@ -259,7 +259,7 @@ function loadAutoplaySettingsIntoUI(): void {
 
 function setupNumberComponents(): void {
   for (const input of [ui.settingsMenu.imageDurationInput, ui.settingsMenu.minimumVideoDurationInput]) {
-    const element = input.closest(".number");
+    const element = input.closest(".num-input");
 
     if (element instanceof HTMLElement) {
       new NumberComponent(element);
@@ -305,7 +305,7 @@ function addMobileMenuEventListeners(): void {
   }
   ui.settingsButton.ontouchstart = (): void => {
     toggleSettingMenu();
-    const settingsMenuIsVisible = ui.settingsMenu.container.classList.contains("visible");
+    const settingsMenuIsVisible = ui.settingsMenu.container.classList.contains("autoplay__settings--visible");
 
     toggleMenuPersistence(settingsMenuIsVisible);
     menuVisibilityTimer.restart();
@@ -345,26 +345,26 @@ function addFavoritesPageEventListeners(): void {
 
 function toggleDirection(): void {
   Preferences.autoplayForward.set(!Preferences.autoplayForward.value);
-  ui.changeDirectionMask.container.classList.toggle("upper-right", Preferences.autoplayForward.value);
+  ui.changeDirectionMask.container.classList.toggle("autoplay__direction-mask--upper-right", Preferences.autoplayForward.value);
 }
 
 function toggleMenuPersistence(value: boolean): void {
   menuIsPersistent = value;
-  ui.menu.classList.toggle("persistent", value);
+  ui.menu.classList.toggle("gallery-menu--persistent", value);
 }
 
 function toggleMenuVisibility(value: boolean): void {
   menuIsVisible = value;
-  ui.menu.classList.toggle("visible", value);
+  ui.menu.classList.toggle("autoplay__menu--visible", value);
 }
 
 function toggleSettingMenu(value?: boolean | undefined): void {
   if (value === undefined) {
-    ui.settingsMenu.container.classList.toggle("visible");
-    ui.settingsButton.classList.toggle("settings-menu-opened");
+    ui.settingsMenu.container.classList.toggle("autoplay__settings--visible");
+    ui.settingsButton.classList.toggle("autoplay__settings-btn--open");
   } else {
-    ui.settingsMenu.container.classList.toggle("visible", value);
-    ui.settingsButton.classList.toggle("settings-menu-opened", value);
+    ui.settingsMenu.container.classList.toggle("autoplay__settings--visible", value);
+    ui.settingsButton.classList.toggle("autoplay__settings-btn--open", value);
   }
 }
 

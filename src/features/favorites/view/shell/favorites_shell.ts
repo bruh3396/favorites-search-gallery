@@ -12,7 +12,7 @@ import { setupFavoritesHelpBar } from "./help_bar";
 
 export function setupFavoritesShell(): void {
   cleanNativeFavoritesPage();
-  insertStyle((ON_MOBILE_DEVICE ? MOBILE_CSS : DESKTOP_CSS) + FAVORITES_CSS, "favorites-menu");
+  insertStyle((ON_MOBILE_DEVICE ? MOBILE_CSS : DESKTOP_CSS) + FAVORITES_CSS, "fav-menu-layout");
   insertHTML(Root, "afterbegin", FAVORITES_HTML);
   setupFavoritesHelpBar();
 

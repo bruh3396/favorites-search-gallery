@@ -1,4 +1,4 @@
-import { CheckboxElement, defaultMenuElement } from "../element_types";
+﻿import { CheckboxElement, defaultMenuElement } from "../element_types";
 import { Events } from "../../communication/events";
 import { FeatureQueries } from "../../communication/feature_queries";
 import { doNothing } from "../../environment/constants";
@@ -78,9 +78,9 @@ export function buildToggleSwitch(partial: Partial<CheckboxElement>): void {
   }
   const toggleSwitchId = `${template.id}-toggle-switch`;
   const switchHtml = `
-    <label id="${toggleSwitchId}" class="toggle-switch" title="${template.title}">
-        <span class="slider round"></span>
-        <span class="toggle-switch-label">${template.textContent}</span>
+    <label id="${toggleSwitchId}" class="opt-toggle" title="${template.title}">
+        <span class="opt-toggle__track opt-toggle__track--round"></span>
+        <span class="opt-toggle__label">${template.textContent}</span>
     </label>`;
 
   parent.insertAdjacentHTML(template.position, switchHtml);
@@ -110,10 +110,10 @@ export function buildCheckboxOption(partial: Partial<CheckboxElement>): void {
 
   container.id = `${partial.id}-container`;
   label.id = labelId;
-  label.className = "checkbox";
+  label.className = "opt-checkbox";
   label.title = partial.title ?? "";
   span.textContent = `${partial.textContent ?? "Missing text"}`;
-  hint.className = "option-hint";
+  hint.className = "u-opt-hint";
   hint.textContent = ` (${partial.hotkey ?? "Missing hotkey"})`;
 
   container.appendChild(label);

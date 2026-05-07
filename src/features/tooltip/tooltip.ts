@@ -41,7 +41,7 @@ function createTooltip(): HTMLElement {
   const t = document.createElement("span");
   const container = document.getElementById("tooltip-container");
 
-  t.className = "light-green-gradient";
+  t.className = "theme--light";
   t.id = "tooltip";
 
   if (container !== null) {
@@ -111,7 +111,7 @@ function setPosition(image: HTMLImageElement): void {
   const imageContainer = image.parentElement as HTMLElement;
   const sizeCalculationDiv = document.createElement("div");
 
-  sizeCalculationDiv.className = "size-calculation-div";
+  sizeCalculationDiv.className = "u-measure";
   imageContainer.appendChild(sizeCalculationDiv);
   const rect = sizeCalculationDiv.getBoundingClientRect();
 

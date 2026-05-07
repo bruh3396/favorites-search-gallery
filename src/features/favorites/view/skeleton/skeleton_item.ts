@@ -1,7 +1,7 @@
 ﻿import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./skeleton_animation";
-import { ThumbnailConfig } from "../../../../config/thumbnail_config";
 import { LayoutMode } from "../../../../types/ui";
+import { ThumbnailConfig } from "../../../../config/thumbnail_config";
 import { getSkeletonStyle } from "./skeleton_style";
 
 export class SkeletonItem {
@@ -48,6 +48,6 @@ export class SkeletonItem {
   }
 
   private setClassName(): void {
-    this.element.className = `skeleton-item favorite ${ThumbnailConfig.skeletonAnimationClasses}`;
+    this.element.className = `skeleton__item post ${ThumbnailConfig.skeletonAnimationClasses}`;
   }
 }

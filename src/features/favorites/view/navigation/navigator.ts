@@ -1,4 +1,4 @@
-import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
+﻿import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
@@ -56,7 +56,7 @@ export function create(parameters: FavoritesPaginationParameters): void {
 }
 
 export function update(parameters: FavoritesPaginationParameters): void {
-  const pageNumberButtons = Array.from(document.getElementsByClassName("pagination-number"));
+  const pageNumberButtons = Array.from(document.getElementsByClassName("fav-menu__pagination-btn"));
   const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesConfig.maxPageNumberButtons;
 
   if (!atMaxPageNumberButtons) {
@@ -102,7 +102,7 @@ function createNumberTraversalButton(currentPageNumber: number, pageNumber: numb
 
   button.id = `favorites-page-${pageNumber}`;
   button.title = `Goto page ${pageNumber}`;
-  button.className = "pagination-number";
+  button.className = "fav-menu__pagination-btn";
   button.classList.toggle("selected", selected);
   button.onclick = (): void => {
     Events.favorites.pageSelected.emit(pageNumber);
@@ -187,7 +187,7 @@ export function toggle(value: boolean): void {
       }
     `;
 
-  insertStyle(value ? "" : html, "pagination-menu-enable");
+  insertStyle(value ? "" : html, "fav-pagination-enable");
 }
 
 export function getContainer(): HTMLElement {

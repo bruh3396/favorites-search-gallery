@@ -10,10 +10,10 @@
   margin: 0;
   flex-direction: column;
   position: fixed;
+}
 
-  &.active {
-    display: flex;
-  }
+#controls-guide.controls-guide--active {
+  display: flex;
 }
 
 #controls-guide-image-container {
@@ -50,14 +50,14 @@
   position: absolute;
 }
 
-.controls-guide-tap {
+.controls-guide__tap-btn {
   color: white;
   font-size: 50px;
   position: absolute;
   top: 50%;
   height: 65%;
   width: 15%;
-  background: var(--color-tap-control);
+  background: var(--color-controls-guide-tap);
   z-index: 9999;
   transform: translateY(-50%);
   writing-mode: vertical-lr;
@@ -79,23 +79,23 @@
   left: 0;
   width: 100%;
   height: 100%;
+}
 
-  svg {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 25%;
-  }
+#controls-guide-swipe-container svg {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25%;
 }
 
 #controls-guide-swipe-down {
   top: 0;
-  color: var(--color-swipe-down);
-  fill: var(--color-swipe-down);
+  color: var(--color-controls-guide-swipe-down);
+  fill: var(--color-controls-guide-swipe-down);
 }
 
 #controls-guide-swipe-up {
   bottom: 0;
-  color: var(--color-swipe-up);
-  fill: var(--color-swipe-up);
+  color: var(--color-controls-guide-swipe-up);
+  fill: var(--color-controls-guide-swipe-up);
 }

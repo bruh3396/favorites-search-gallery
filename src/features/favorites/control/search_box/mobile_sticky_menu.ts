@@ -1,4 +1,4 @@
-import { Content } from "../../../../lib/shell";
+﻿import { Content } from "../../../../lib/shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";
@@ -15,23 +15,23 @@ const stickyMenuCSS = `
   }`;
 
 async function onHeaderVisibilityChanged(headerVisible: boolean): Promise<void> {
-  insertStyle(headerVisible ? "" : stickyMenuCSS, "sticky-menu");
+  insertStyle(headerVisible ? "" : stickyMenuCSS, "fav-menu-sticky");
   const optionsMenu = document.getElementById("left-favorites-panel-bottom-row");
 
-  Content.classList.remove("sticky-menu");
-  Content.classList.remove("sticky-menu-shadow");
+  Content.classList.remove("fav-menu--sticky");
+  Content.classList.remove("fav-menu--sticky-shadow");
 
   if (optionsMenu === null || headerVisible) {
     return;
   }
-  const menuIsOpen = !optionsMenu.classList.contains("hidden");
+  const menuIsOpen = !optionsMenu.classList.contains("u-hidden");
 
   if (menuIsOpen) {
-    Content.classList.add("sticky-menu");
+    Content.classList.add("fav-menu--sticky");
   }
   // Let the DOM settle before adding the shadow so the transition plays correctly.
   await sleep(30);
-  Content.classList.add("sticky-menu-shadow");
+  Content.classList.add("fav-menu--sticky-shadow");
 }
 
 export function setupMobileStickyMenu(optionsCheckbox: HTMLInputElement): void {
@@ -45,7 +45,7 @@ export function setupMobileStickyMenu(optionsCheckbox: HTMLInputElement): void {
     toggleFavoritesOptions(optionsCheckbox.checked);
 
     if (!headerIsVisible) {
-      Content.classList.toggle("sticky-menu", optionsCheckbox.checked);
+      Content.classList.toggle("fav-menu--sticky", optionsCheckbox.checked);
     }
   });
 

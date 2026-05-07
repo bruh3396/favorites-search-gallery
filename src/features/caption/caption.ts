@@ -98,9 +98,9 @@ function initializeFields(): void {
 
 function createHtmlElement(): void {
   captionWrapper = document.createElement("div");
-  captionWrapper.className = "caption-wrapper";
+  captionWrapper.className = "caption__wrapper";
   caption = document.createElement("div");
-  caption.className = "caption inactive not-highlightable";
+  caption.className = "caption caption--inactive u-no-select";
   captionWrapper.appendChild(caption);
   document.head.appendChild(captionWrapper);
   caption.innerHTML = template;
@@ -126,13 +126,13 @@ function addEventListeners(): void {
 
 function addCommonEventListeners(): void {
   caption.addEventListener("transitionend", () => {
-    if (caption.classList.contains("active")) {
-      caption.classList.add("transition-completed");
+    if (caption.classList.contains("caption--active")) {
+      caption.classList.add("caption--settled");
     }
-    caption.classList.remove("transitioning");
+    caption.classList.remove("caption--transitioning");
   });
   caption.addEventListener("transitionstart", () => {
-    caption.classList.add("transitioning");
+    caption.classList.add("caption--transitioning");
   });
   Events.favorites.captionsToggled.on((value) => {
     toggleVisibility(value);
@@ -194,14 +194,14 @@ function attachToThumb(thumb: HTMLElement | null): void {
 }
 
 function attachToThumbHelper(thumb: HTMLElement): void {
-  thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
-  caption.classList.remove("inactive");
+  thumb.querySelectorAll(".caption__wrapper--clone").forEach(element => element.remove());
+  caption.classList.remove("caption--inactive");
   caption.innerHTML = template;
   captionWrapper.removeAttribute("style");
   const captionIdHeader = caption.querySelector("#caption-id");
   const captionIdTag = document.createElement("li");
 
-  captionIdTag.className = "caption-tag";
+  captionIdTag.className = "caption__tag";
   captionIdTag.textContent = thumb.id;
   captionIdTag.onclick = (event): void => {
     event.preventDefault();
@@ -232,9 +232,9 @@ function removeFromThumb(thumb: HTMLElement | null): void {
 
 function removeFromThumbHelper(thumb: HTMLElement): void {
   animateRemoval(thumb);
-  caption.classList.add("inactive");
+  caption.classList.add("caption--inactive");
   animate(false);
-  caption.classList.remove("transition-completed");
+  caption.classList.remove("caption--settled");
 }
 
 function animateRemoval(thumb: HTMLElement): void {
@@ -245,8 +245,8 @@ function animateRemoval(thumb: HTMLElement): void {
   }
   const captionClone = captionWrapperClone.children[0];
 
-  thumb.querySelectorAll(".caption-wrapper-clone").forEach(element => element.remove());
-  captionWrapperClone.classList.add("caption-wrapper-clone");
+  thumb.querySelectorAll(".caption__wrapper--clone").forEach(element => element.remove());
+  captionWrapperClone.classList.add("caption__wrapper--clone");
   captionWrapperClone.querySelectorAll("*").forEach(element => element.removeAttribute("id"));
 
   if (!(captionClone instanceof HTMLElement)) {
@@ -257,7 +257,7 @@ function animateRemoval(thumb: HTMLElement): void {
   };
   thumb.children[0].appendChild(captionWrapperClone);
   setTimeout(() => {
-    captionClone.classList.remove("active");
+    captionClone.classList.remove("caption--active");
   }, 4);
 }
 
@@ -322,7 +322,7 @@ function addTag(tagCategory: TagCategory, tagName: string): void {
     return;
   }
 
-  tag.className = `${tagCategory}-tag caption-tag`;
+  tag.className = `caption__tag--${tagCategory} caption__tag`;
   tag.textContent = replaceUnderscoresWithSpaces(tagName);
   header.insertAdjacentElement("afterend", tag);
   header.style.display = "block";
@@ -398,7 +398,7 @@ function replaceSpacesWithUnderscores(tagName: string): string {
 }
 
 function animate(value: boolean): void {
-  caption.classList.toggle("active", value);
+  caption.classList.toggle("caption--active", value);
 }
 
 function getCategoryHeaderId(tagCategory: TagCategory): string {
@@ -445,7 +445,7 @@ function addTags(tags: Set<string>, thumb: HTMLElement): void {
     return;
   }
 
-  if (thumb.getElementsByClassName("caption-tag").length > 1) {
+  if (thumb.getElementsByClassName("caption__tag").length > 1) {
     return;
   }
 
@@ -621,7 +621,7 @@ export function setupCaptions(): void {
   }
   initializeFields();
   createHtmlElement();
-  insertStyle(CAPTION_CSS, "caption");
+  insertStyle(CAPTION_CSS, "caption-style");
   toggleVisibility(Preferences.captionsVisible.value);
   addEventListeners();
 }

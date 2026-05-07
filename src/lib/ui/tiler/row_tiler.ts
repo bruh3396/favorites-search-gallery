@@ -1,4 +1,4 @@
-import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
+﻿import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { ThumbnailConfig } from "../../../config/thumbnail_config";
 import { LayoutMode } from "../../../types/ui";
@@ -6,7 +6,7 @@ import { insertStyle } from "../../dom/injector";
 import { mapRange } from "../../../utils/number";
 
 export class RowTiler extends AbstractTiler {
-  public layoutMode: LayoutMode = "row";
+  public layoutMode: LayoutMode = "tiler--row";
   private currentlyMarkingLastRow = false;
 
   public tile(items: HTMLElement[]): void {
@@ -28,8 +28,8 @@ export class RowTiler extends AbstractTiler {
     const pixelSize = Math.round(mapRange(rowSize, ThumbnailConfig.rowSizeBounds.min, ThumbnailConfig.rowSizeBounds.max, minWidth, maxWidth));
 
     insertStyle(`
-      #${this.container.id}.row {
-        .favorite {
+      #${this.container.id}.tiler--row {
+        .post {
           height: ${pixelSize}px;
         }
       }
@@ -43,13 +43,13 @@ export class RowTiler extends AbstractTiler {
 
   public unMarkAllItemsAsLastRow(items: HTMLElement[]): void {
     for (const item of items) {
-      item.classList.remove("last-row");
+      item.classList.remove("u-last-row");
     }
   }
 
   public markItemsAsLastRow(items: HTMLElement[]): void {
     for (const item of items) {
-      item.classList.add("last-row");
+      item.classList.add("u-last-row");
     }
   }
 

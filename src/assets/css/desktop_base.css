@@ -1,0 +1,54 @@
+﻿.opt-checkbox {
+  cursor: pointer;
+}
+
+.opt-checkbox:hover {
+  color: #000;
+  background: #93b393;
+  text-shadow: none;
+}
+
+.opt-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+#sort-ascending-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+#favorites-pagination-container>button {
+  height: 35px;
+}
+
+.gallery-menu__btn:hover {
+  opacity: 1;
+  transform: scale(1.25);
+}
+
+.gallery-menu__btn::after {
+  content: attr(data-hint);
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  background: black;
+  padding: 2px 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  font-size: larger;
+  transition: opacity 0.35s ease-in-out;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.gallery-menu__btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+#bottom-panel-4 {
+  flex: 0 0 15%;
+}

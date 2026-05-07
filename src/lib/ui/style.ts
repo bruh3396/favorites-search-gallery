@@ -24,8 +24,8 @@ function toggleDarkStyleSheet(useDark: boolean): void {
 }
 
 function toggleGreenGradientClasses(useDark: boolean): void {
-  const currentTheme = useDark ? "light-green-gradient" : "dark-green-gradient";
-  const targetTheme = useDark ? "dark-green-gradient" : "light-green-gradient";
+  const currentTheme = useDark ? "theme--light" : "theme--dark";
+  const targetTheme = useDark ? "theme--dark" : "theme--light";
 
   for (const element of Array.from(document.querySelectorAll(`.${currentTheme}`))) {
     element.classList.remove(currentTheme);
@@ -42,20 +42,20 @@ function setupVideoAndGifOutlines(): void {
 
   insertStyle(`
     #favorites-search-gallery-content {
-      &.row,
-      &.square,
-      &.column
+      &.tiler--row,
+      &.tiler--square,
+      &.tiler--column
       {
-        .favorite {
+        .post {
           ${videoRule}
           ${gifRule}
         }
       }
 
-      &.grid,
-      &.native
+      &.tiler--grid,
+      &.tiler--native
       {
-        .favorite {
+        .post {
           >a,
           >div {
             ${videoRule}
@@ -65,14 +65,14 @@ function setupVideoAndGifOutlines(): void {
       }
     }
 
-    .thumb {
+    .post--thumb {
       >a,
       >div {
         ${videoRule}
         ${gifRule}
       }
     }
-    `, "video-gif-borders");
+    `, "gallery-media-borders");
 }
 
 function setGalleryBackgroundColor(color: string): void {
@@ -85,27 +85,27 @@ function setGalleryBackgroundColor(color: string): void {
           background: ${color} !important;
         }
 
-        .gallery-menu-button:not(:hover) {
+        .gallery-menu__btn:not(:hover) {
           >svg {
               fill: ${color} !important;
               filter: invert(100%);
             }
         }
-      `, "gallery-background-color");
+      `, "gallery-bg-color");
 }
 
 function setupTilerStyles(): void {
 
   const style = `
-  .row, .column, .column .tiled-column, .square, .grid {
+  .tiler--row, .tiler--column, .tiler--column .tiler__column, .tiler--square, .tiler--grid {
     gap: ${ThumbnailConfig.thumbnailSpacing}px !important;
   }
 
-  #favorites-search-gallery-content.column {
+  #favorites-search-gallery-content.tiler--column {
     margin-right: ${ON_DESKTOP_DEVICE ? ThumbnailConfig.rightContentMargin : 0}px;
   }`;
 
-  insertStyle(style, "tiler-style");
+  insertStyle(style, "fav-tiler");
 }
 
 export function usingDarkTheme(): boolean {
@@ -114,14 +114,14 @@ export function usingDarkTheme(): boolean {
 
 export async function toggleDarkTheme(useDark: boolean): Promise<void> {
   await yieldControl();
-  insertStyle(useDark ? DARK_THEME_CSS : "", "dark-theme");
+  insertStyle(useDark ? DARK_THEME_CSS : "", "theme-dark");
   toggleDarkStyleSheet(useDark);
   toggleGreenGradientClasses(useDark);
   setCookie("theme", useDark ? "dark" : "light");
 }
 
 export function getCurrentThemeClass(): string {
-  return usingDarkTheme() ? "dark-green-gradient" : "light-green-gradient";
+  return usingDarkTheme() ? "theme--dark" : "theme--light";
 }
 
 export function setColorScheme(color: string): void {
@@ -133,7 +133,7 @@ export function toggleGalleryMenuEnabled(value: boolean): void {
   insertStyle(`
         #gallery-menu {
           visibility: ${value ? "visible" : "hidden"} !important;
-        }`, "enable-gallery-menu");
+        }`, "gallery-menu-enable");
 }
 
 export function toggleSavedSearchesVisibility(value: boolean): void {

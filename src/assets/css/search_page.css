@@ -12,14 +12,14 @@
   flex: 1;
 }
 
-.search-page-option {
+.search-menu__option {
   display: flex;
   justify-content: space-between;
+}
 
-  input[type="checkbox"] {
-    transform: scale(1.3);
-    cursor: pointer;
-  }
+.search-menu__option input[type="checkbox"] {
+  transform: scale(1.3);
+  cursor: pointer;
 }
 
 #search-page-menu {

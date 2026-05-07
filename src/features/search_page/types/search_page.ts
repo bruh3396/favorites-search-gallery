@@ -1,4 +1,4 @@
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
+﻿import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { domParser } from "../../../lib/dom/dom_parser";
 import { prepareSearchPageThumbs } from "../model/thumb_preparer";
 
@@ -13,7 +13,7 @@ export class SearchPage {
     if (typeof nativeContent === "string") {
       const dom = domParser.parseFromString(nativeContent, "text/html");
 
-      this.thumbs = prepareSearchPageThumbs(Array.from(dom.querySelectorAll(".thumb")));
+      this.thumbs = prepareSearchPageThumbs(Array.from(dom.querySelectorAll(".post--thumb")));
       this.paginator = dom.getElementById("paginator");
     } else {
       this.thumbs = nativeContent;

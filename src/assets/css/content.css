@@ -8,8 +8,8 @@
   padding: 0px 20px 30px 20px;
 }
 
-.favorite,
-.thumb {
+.post,
+.post--thumb {
   position: relative;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -17,39 +17,51 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-
-  >a,
-  >div {
-    display: block;
-    overflow: hidden;
-    position: relative;
-    cursor: default;
-
-    >img:first-child {
-      width: 100%;
-      z-index: 1;
-    }
-
-    >a>div {
-      height: 100%;
-    }
-
-    >canvas {
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-  }
-
-  &.hidden {
-    display: none;
-  }
 }
 
-.thumbnail-button {
+.post>a,
+.post>div,
+.post--thumb>a,
+.post--thumb>div {
+  display: block;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+}
+
+.post>a>img:first-child,
+.post>div>img:first-child,
+.post--thumb>a>img:first-child,
+.post--thumb>div>img:first-child {
+  width: 100%;
+  z-index: 1;
+}
+
+.post>a>a>div,
+.post>div>a>div,
+.post--thumb>a>a>div,
+.post--thumb>div>a>div {
+  height: 100%;
+}
+
+.post>a>canvas,
+.post>div>canvas,
+.post--thumb>a>canvas,
+.post--thumb>div>canvas {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.post.u-hidden,
+.post--thumb.u-hidden {
+  display: none;
+}
+
+.post__action-btn {
   cursor: pointer;
   position: absolute;
   left: 0;
@@ -59,14 +71,14 @@
   border: none;
   z-index: 2;
   filter: grayscale(70%);
-
-  &:active,
-  &:hover {
-    filter: none;
-  }
 }
 
-.thumbnail-button.download-button {
+.post__action-btn:active,
+.post__action-btn:hover {
+  filter: none;
+}
+
+.post__action-btn--download {
   top: unset;
   right: 0;
   left: unset;

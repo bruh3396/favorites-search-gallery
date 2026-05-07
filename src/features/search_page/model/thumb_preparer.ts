@@ -1,4 +1,4 @@
-import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
+﻿import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
@@ -25,8 +25,8 @@ function prepareThumb(thumb: HTMLElement): void {
   addAddFavoriteButton(thumb);
   addCanvas(thumb);
   thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
-  thumb.classList.remove("thumb");
-  thumb.classList.add("favorite");
+  thumb.classList.remove("post--thumb");
+  thumb.classList.add("post");
 
   if (ON_MOBILE_DEVICE) {
     prepareMobileThumb(thumb);
@@ -40,7 +40,7 @@ function addAddFavoriteButton(thumb: HTMLElement): void {
     return;
   }
   anchor.insertAdjacentHTML("beforeend", ADD_FAVORITE_IMAGE_HTML);
-  const button = anchor.querySelector(".add-favorite-button");
+  const button = anchor.querySelector(".post__action-btn--add");
 
   if (!(button instanceof HTMLElement)) {
     return;

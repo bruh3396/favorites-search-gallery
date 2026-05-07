@@ -1,4 +1,4 @@
-import { select, unselectAll } from "./selection";
+﻿import { select, unselectAll } from "./selection";
 import { Favorite } from "../../../../types/favorite";
 import { ITEM_CLASS_NAME } from "../../../../lib/dom/thumb";
 import { insertStyle } from "../../../../lib/dom/injector";
@@ -42,7 +42,7 @@ function toggleThumbInteraction(value: boolean): void {
   if (value) {
     html =
       `
-      .favorite  {
+      .post  {
         cursor: pointer;
         outline: 1px solid black;
 
@@ -63,7 +63,7 @@ function toggleThumbInteraction(value: boolean): void {
       }
     `;
   }
-  insertStyle(html, "tag-edit-mode");
+  insertStyle(html, "tag-modifier-edit-mode");
 }
 
 function toggleTagEditModeAbortController(value: boolean): void {
