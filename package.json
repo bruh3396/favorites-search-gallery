@@ -24,11 +24,10 @@
     "test": "npx vitest --run",
     "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
     "continuous-integration": "npm run build && npm run test && npm run typecheck",
-    "embed": "(node scripts/bin/static_ts_embedder.js || (npm run compile-scripts && node scripts/bin/static_ts_embedder.js)) && npm run continuous-integration",
     "fix-lf": "tsx .scripts/normalize_line_endings.ts",
     "lint": "npx eslint src/",
     "audit": "tsx .scripts/project_auditor.ts",
-    "release": "npm run compile-scripts && npm run embed && npm run lint && npm run audit",
+    "release": "npm run compile-scripts && npm run continuous-integration && npm run lint && npm run audit",
     "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open",
     "performance": "tsx src/tests/performance.ts"
   },

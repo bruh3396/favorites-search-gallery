@@ -1,0 +1,118 @@
+  .row,
+  .column,
+  .column .tiled-column,
+  .square,
+  .grid {
+    gap: 6px;
+  }
+
+  .grid,
+  .square {
+    display: grid !important;
+    grid-template-columns: repeat(10, 1fr);
+    grid-gap: 0.5cqw;
+
+    .utility-button {
+      width: 30%;
+    }
+  }
+
+  .square {
+
+    .favorite,
+    thumb {
+      border-radius: var(--radius) !important;
+      overflow: hidden;
+      aspect-ratio: 1;
+
+      >a,
+      >div {
+        width: 100%;
+        height: 100%;
+
+        >img:first-child,
+        >canvas {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+
+    .favorite,
+    .thumb {
+
+      &.last-row {
+        flex: 0 1 auto;
+      }
+
+      height: 300px;
+      flex: 1 1 auto;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .favorite,
+    .thumb {
+
+      >a,
+      >div {
+
+        width: 100%;
+        height: 100%;
+
+        >img:first-child {
+          object-fit: cover;
+          width: 100%;
+          height: 100%;
+          vertical-align: middle;
+        }
+
+        >canvas {
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+
+    .utility-button {
+      height: 30%;
+    }
+  }
+
+  .column {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+
+    .tiled-column {
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 25%;
+
+      .favorite,
+      .thumb {
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+    }
+
+    .utility-button {
+      width: 30%;
+    }
+  }
+
+  .native {
+    display: flex;
+    flex-flow: wrap;
+    gap: 25px 10px;
+
+    .utility-button {
+      width: 70px;
+      aspect-ratio: 1;
+    }
+  }

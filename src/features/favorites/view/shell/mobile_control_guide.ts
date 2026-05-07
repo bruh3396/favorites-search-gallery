@@ -1,10 +1,9 @@
-import { CONTROLS_HTML } from "../../../../assets/html";
-import { Overlays } from "../../../../lib/shell";
-import { insertHtmlWithStyles } from "../../../../lib/dom/injector";
+﻿import CONTROLS_CSS from "../../../../assets/css/controls.css";
+import { insertStyle } from "../../../../lib/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
 export async function buildControlsGuide(): Promise<void> {
-  insertHtmlWithStyles(Overlays, "beforeend", CONTROLS_HTML);
+  insertStyle(CONTROLS_CSS);
   const controlGuide = document.getElementById("controls-guide");
 
   if (controlGuide === null) {

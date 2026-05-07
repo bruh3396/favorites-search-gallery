@@ -1,12 +1,11 @@
-import * as FavoritesDownloader from "./downloader";
+﻿import * as FavoritesDownloader from "./downloader";
 import { sleep, yieldControl } from "../../../../lib/core/scheduling/promise";
+import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
 import { DOWNLOADER_DISABLED } from "../../../../lib/environment/derived_environment";
-import { DOWNLOADER_HTML } from "../../../../assets/html";
 import { DownloadRequest } from "./download_request";
 import { Favorite } from "../../../../types/favorite";
-import { Overlays } from "../../../../lib/shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { insertHtmlWithStyles } from "../../../../lib/dom/injector";
+import { insertStyle } from "../../../../lib/dom/injector";
 import { splitIntoChunks } from "../../../../utils/collection/array";
 import { toggleGlobalInputEvents } from "../../../../lib/communication/dom_event_bridge";
 
@@ -29,7 +28,7 @@ export function setupDownloadMenu(fdInterface: FavoritesDownloaderInterface): vo
   }
   favoritesDownloaderInterface = fdInterface;
   FavoritesDownloader.setupFavoritesDownloader();
-  insertHtmlWithStyles(Overlays, "beforeend", DOWNLOADER_HTML);
+  insertStyle(DOWNLOADER_CSS);
   dialog = getDialog("download-menu");
   warningDialog = getDialog("download-menu-warning");
   downloadButton = getDownloadButton();

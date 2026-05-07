@@ -1,8 +1,8 @@
-import * as GalleryDesktopMenu from "./shell/desktop_menu";
+﻿import * as GalleryDesktopMenu from "./shell/desktop_menu";
 import * as GalleryRenderer from "./renderers/renderer";
 import * as GalleryUI from "./shell/ui";
 import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";
-import { GALLERY_CSS } from "../../../assets/css";
+import GALLERY_CSS from "../../../assets/css/gallery.css";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { RemoveFavoriteStatus } from "../../../types/favorite";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";

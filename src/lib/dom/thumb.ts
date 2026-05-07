@@ -1,5 +1,6 @@
-import { imageIsLoading } from "../../utils/dom/image";
+﻿import { imageIsLoading } from "../../utils/dom/image";
 import { removeNonNumericCharacters } from "../../utils/string/format";
+import { sum } from "../../utils/number";
 
 export const ITEM_CLASS_NAME = "favorite";
 export const ITEM_SELECTOR = ".favorite, .thumb";
@@ -15,21 +16,21 @@ export function getThumbsInContainer(container: HTMLElement | Document): HTMLEle
 }
 
 export function getThumbsInMatrix(container: HTMLElement): HTMLElement[] {
-    const itemCount = Array.from(container.querySelectorAll(ITEM_SELECTOR)).length;
-    const columns = Array.from(container.children);
-    const result: HTMLElement[] = [];
-    const matrix = columns.map(column => Array.from(column.querySelectorAll(ITEM_SELECTOR)));
+  const columns = Array.from(container.children);
+  const matrix = columns.map(column => Array.from(column.querySelectorAll(ITEM_SELECTOR)));
+  const itemCount = sum(matrix.map(column => column.length));
+  const result: HTMLElement[] = [];
 
-    for (let i = 0; i < itemCount; i += 1) {
-      const column = i % columns.length;
-      const row = Math.floor(i / columns.length);
-      const item = matrix[column][row];
+  for (let i = 0; i < itemCount; i += 1) {
+    const column = i % columns.length;
+    const row = Math.floor(i / columns.length);
+    const item = matrix[column][row];
 
-      if (item instanceof HTMLElement) {
-        result.push(item);
-      }
+    if (item instanceof HTMLElement) {
+      result.push(item);
     }
-    return result;
+  }
+  return result;
 }
 
 export function getImageFromThumb(thumb: HTMLElement): HTMLImageElement | null {

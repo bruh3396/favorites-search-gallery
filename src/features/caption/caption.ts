@@ -1,8 +1,8 @@
-import * as PostAPI from "../../lib/remote/api/post_fetcher";
+﻿import * as PostAPI from "../../lib/remote/api/post_fetcher";
 import * as TagAPI from "../../lib/remote/api/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
-import { CAPTION_CSS } from "../../assets/css";
+import CAPTION_CSS from "../../assets/css/caption.css";
 import { ClickCode } from "../../types/input";
 import { CoalescingExecutor } from "../../lib/core/concurrency/coalescing_executor";
 import { Database } from "../../lib/core/storage/database";

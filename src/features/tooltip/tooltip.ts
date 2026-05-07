@@ -1,12 +1,14 @@
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
+﻿import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { getImageFromThumb, getThumbFromImage } from "../../lib/dom/thumb";
 import { Events } from "../../lib/communication/events";
 import { Overlays } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
+import TOOLTIP_CSS from "../../assets/css/tooltip.css";
 import { TOOLTIP_DISABLED } from "../../lib/environment/derived_environment";
-import { TOOLTIP_HTML } from "../../assets/html";
+
 import { convertToTagString } from "../../utils/string/tags";
 import { getTagSetFromItem } from "../../lib/dom/tags";
+import { insertStyle } from "../../lib/dom/injector";
 import { parseTagGroups } from "../../lib/search/parse/tag_group_parser";
 import { randomPurpleColor } from "../../utils/string/color";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
@@ -24,7 +26,9 @@ export function setupTooltip(): void {
     return;
   }
   visible = Preferences.tooltipsVisible.value;
-  Overlays.insertAdjacentHTML("afterbegin", TOOLTIP_HTML);
+  insertStyle(TOOLTIP_CSS);
+  Overlays.insertAdjacentHTML("afterbegin", `<div id="tooltip-container">
+</div>`);
   tooltip = createTooltip();
   defaultTransition = tooltip.style.transition;
   tagColorCodes = {};

@@ -1,8 +1,9 @@
-import { insertHtmlWithStyles, insertStyle } from "../../../lib/dom/injector";
+﻿import SEARCH_PAGE_CSS from "../../../assets/css/search_page.css";
+import SEARCH_PAGE_HTML from "../../../assets/html/search_page.html";
+import { insertHTML, insertStyle } from "../../../lib/dom/injector";
 import { Content } from "../../../lib/shell";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { SEARCH_PAGE_HTML } from "../../../assets/html";
 import { createDynamicSearchPageMenuElements } from "./elements";
 import { prepareAllThumbsOnSearchPage as prepareNativeSearchPageThumbs } from "./preparer";
 import { styleSearchPageMenu } from "./menu_styler";
@@ -33,7 +34,8 @@ function insertSearchPageHTML(): void {
   const listItem = document.createElement("li");
 
   displayOptions.appendChild(listItem);
-  insertHtmlWithStyles(listItem, "beforeend", SEARCH_PAGE_HTML);
+  insertStyle(SEARCH_PAGE_CSS);
+  insertHTML(listItem, "beforeend", SEARCH_PAGE_HTML);
 
   if (ON_MOBILE_DEVICE) {
     insertStyle(`#search-page-upscale-thumbs {

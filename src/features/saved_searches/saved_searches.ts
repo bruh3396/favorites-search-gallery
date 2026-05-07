@@ -1,14 +1,15 @@
-import * as ICONS from "../../assets/icons";
+﻿import * as ICONS from "../../assets/icons";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { Preferences } from "../../lib/preferences/preferences";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
-import { SAVED_SEARCHES_HTML } from "../../assets/html";
+import SAVED_SEARCHES_CSS from "../../assets/css/saved_searches.css";
+import SAVED_SEARCHES_HTML from "../../assets/html/saved_searches.html";
 import { Storage } from "../../lib/core/storage/storage_instance";
 import { awesompleteIsUnselected } from "../../lib/ui/awesomplete";
 import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getSavedSearches } from "../../lib/saved_searches";
-import { insertHtmlWithStyles } from "../../lib/dom/injector";
+import { insertHTML, insertStyle } from "../../lib/dom/injector";
 import { shuffleArray } from "../../utils/collection/array";
 import { sleep } from "../../lib/core/scheduling/promise";
 
@@ -31,7 +32,8 @@ export function setupSavedSearches(): void {
 }
 
 function insertHtml(): void {
-  insertHtmlWithStyles(document.getElementById("right-favorites-panel") || document.createElement("div"), "beforeend", SAVED_SEARCHES_HTML);
+  insertStyle(SAVED_SEARCHES_CSS);
+  insertHTML(document.getElementById("right-favorites-panel") || document.createElement("div"), "beforeend", SAVED_SEARCHES_HTML);
 }
 
 function extractHtmlElements(): void {

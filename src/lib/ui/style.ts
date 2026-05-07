@@ -1,9 +1,12 @@
-import { COMMON_HTML, CONTENT_HTML, DARK_THEME_HTML } from "../../assets/html";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../environment/environment";
-import { SKELETON_CSS, TILE_CSS } from "../../assets/css";
+﻿import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../environment/environment";
 import { getCookie, setCookie } from "../../utils/browser/cookie";
-import { ThumbnailConfig } from "../../config/thumbnail_config";
+import COMMON_CSS from "../../assets/css/common.css";
+import CONTENT_CSS from "../../assets/css/content.css";
+import DARK_THEME_CSS from "../../assets/css/dark_theme.css";
 import { Preferences } from "../preferences/preferences";
+import SKELETON_CSS from "../../assets/css/skeleton.css";
+import TILE_CSS from "../../assets/css/tile.css";
+import { ThumbnailConfig } from "../../config/thumbnail_config";
 import { buildStyleSheetURL } from "../remote/url/action_url_builder";
 import { insertStyle } from "../dom/injector";
 import { yieldControl } from "../core/scheduling/promise";
@@ -111,7 +114,7 @@ export function usingDarkTheme(): boolean {
 
 export async function toggleDarkTheme(useDark: boolean): Promise<void> {
   await yieldControl();
-  insertStyle(useDark ? DARK_THEME_HTML : "", "dark-theme");
+  insertStyle(useDark ? DARK_THEME_CSS : "", "dark-theme");
   toggleDarkStyleSheet(useDark);
   toggleGreenGradientClasses(useDark);
   setCookie("theme", useDark ? "dark" : "light");
@@ -142,10 +145,7 @@ export function toggleSavedSearchesVisibility(value: boolean): void {
 }
 
 export function setupStyles(): void {
-  insertStyle(SKELETON_CSS, "skeleton-style");
-  insertStyle(COMMON_HTML, "common-style");
-  insertStyle(CONTENT_HTML, "content-style");
-  insertStyle(TILE_CSS, "tile-style");
+  insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS);
 
   toggleDarkTheme(usingDarkTheme());
   setupVideoAndGifOutlines();

@@ -8,9 +8,7 @@ import { Favorite } from "../../../types/favorite";
 import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
-  console.log(3);
   await loadDatabaseFavorites();
-  console.log(4);
   Events.favorites.favoritesFoundInDatabase.emit(FavoritesModel.hasFavorites());
 
   if (FavoritesModel.hasFavorites()) {

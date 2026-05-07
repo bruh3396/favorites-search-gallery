@@ -1,6 +1,6 @@
-import { AbstractFavoritesSearchBox } from "./abstract_search_box";
+﻿import { AbstractFavoritesSearchBox } from "./abstract_search_box";
 import { Events } from "../../../../lib/communication/events";
-import { TOOLBAR_HTML } from "../../../../assets/html";
+import TOOLBAR_HTML from "../../../../assets/html/toolbar.html";
 import { setupMobileStickyMenu } from "./mobile_sticky_menu";
 import { setupMobileSymbolRow } from "./mobile_symbol_row";
 

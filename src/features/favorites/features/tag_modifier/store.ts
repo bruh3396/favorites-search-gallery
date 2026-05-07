@@ -3,15 +3,13 @@ import { TagModificationDatabaseRecord } from "../../../../types/search";
 import { clearCustomTags } from "../../../../lib/tags/custom_tags";
 
 const DATABASE_NAME = "AdditionalTags";
-const OBJECT_STORE_NAME = DATABASE_NAME;
+const OBJECT_STORE_NAME = "additionalTags";
 
 const tagModificationMap: Map<string, string> = new Map();
 const database = new Database<TagModificationDatabaseRecord>(DATABASE_NAME, OBJECT_STORE_NAME, 12);
 
 export async function loadTagModifications(): Promise<void> {
-  console.log(1);
   (await database.load()).forEach(record => tagModificationMap.set(record.id, record.tags));
-  console.log(tagModificationMap);
 }
 
 export const storeTagModifications = (): Promise<void> => database.update(getDatabaseRecords());

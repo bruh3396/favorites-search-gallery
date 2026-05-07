@@ -2,7 +2,8 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { clamp, millisecondsToSeconds } from "../../../../utils/number";
 import { isImage, isVideo } from "../../../../lib/media/media_type_guards";
-import { AUTOPLAY_HTML } from "../../../../assets/html";
+import AUTOPLAY_CSS from "../../../../assets/css/autoplay.css";
+import AUTOPLAY_HTML from "../../../../assets/html/autoplay.html";
 import { Events } from "../../../../lib/communication/events";
 import { NavigationKey } from "../../../../types/input";
 import { NumberComponent } from "../../../../lib/ui/element/number_component";
@@ -147,6 +148,7 @@ function insertHtml(): void {
 }
 
 function insertMenuHtml(): void {
+  insertStyle(AUTOPLAY_CSS);
   Overlays.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
 }
 

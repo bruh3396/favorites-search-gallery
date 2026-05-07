@@ -1,0 +1,29 @@
+﻿#tag-modifier-ui-container {
+  display: none;
+
+  >* {
+    margin-top: 10px;
+  }
+}
+
+#tag-modifier-ui-textarea {
+  width: 80%;
+}
+
+.favorite.tag-modifier-selected {
+  outline: 2px dashed white !important;
+
+  >div, >a {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
+}
+
+#tag-modifier-ui-status-label {
+  visibility: hidden;
+}
+
+.tag-type-custom>a,
+.tag-type-custom {
+  color: hotpink;
+}

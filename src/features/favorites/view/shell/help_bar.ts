@@ -1,4 +1,4 @@
-import { HELP_HTML } from "../../../../assets/html";
+﻿import HELP_HTML from "../../../../assets/html/help.html";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Overlays } from "../../../../lib/shell";
 import { getCurrentThemeClass } from "../../../../lib/ui/style";

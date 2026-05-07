@@ -1,6 +1,6 @@
-import * as Layout from "../../../lib/layout/layout";
+﻿import * as Layout from "../../../lib/layout/layout";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
-import { SEARCH_PAGE_INFINITE_SCROLL_HTML } from "../../../assets/html";
+import SEARCH_PAGE_INFINITE_SCROLL_CSS from "../../../assets/css/search_page_infinite_scroll.css";
 import { SearchPage } from "../types/search_page";
 import { insertStyle } from "../../../lib/dom/injector";
 
@@ -35,5 +35,5 @@ export function createSearchPage(searchPage: SearchPage): void {
 }
 
 export function toggleInfiniteScroll(value: boolean): void {
-  insertStyle(value ? SEARCH_PAGE_INFINITE_SCROLL_HTML : "", "search-page-infinite-scroll");
+  insertStyle(value ? SEARCH_PAGE_INFINITE_SCROLL_CSS : "", "search-page-infinite-scroll");
 }

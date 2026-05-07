@@ -1,8 +1,6 @@
 experimental
 src/tests/playground/
 .env
-html
-css
 scripts/bin/
 .vscode
 node_modules

@@ -1,12 +1,13 @@
-import * as TagModifierEditMode from "./edit_mode";
+﻿import * as TagModifierEditMode from "./edit_mode";
 import * as TagModifierOperations from "./operations";
 import * as TagModifierSelection from "./selection";
 import * as TagModifierStore from "./store";
 import { Favorite } from "../../../../types/favorite";
 import { TAG_MODIFIER_DISABLED } from "../../../../lib/environment/derived_environment";
-import { TAG_MODIFIER_HTML } from "../../../../assets/html";
+import TAG_MODIFIER_CSS from "../../../../assets/css/tag_modifier.css";
+import TAG_MODIFIER_HTML from "../../../../assets/html/tag_modifier.html";
 import { doNothing } from "../../../../lib/environment/constants";
-import { insertHtmlWithStyles } from "../../../../lib/dom/injector";
+import { insertHTML, insertStyle } from "../../../../lib/dom/injector";
 
 export type FavoritesTagModifierInterface = {
   getSearchResults: () => Favorite[]
@@ -37,7 +38,7 @@ export async function setupFavoritesTagModifier(tmInterface: FavoritesTagModifie
     return;
   }
   tagModifierInterface = tmInterface;
-  insertHTML();
+  insertTagModifierShell();
   TagModifierSelection.initializeSelection(tmInterface.getSearchResults);
   TagModifierEditMode.initializeTagEditMode(
     (id) => tmInterface.getSearchResults().find(f => f.id === id),
@@ -54,8 +55,9 @@ export { handleDocumentClick } from "./edit_mode";
 export { highlightSelectedThumbsOnPageChange, unselectAll } from "./selection";
 export { getTagModification as getAdditionalTags } from "./store";
 
-function insertHTML(): void {
-  insertHtmlWithStyles(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
+function insertTagModifierShell(): void {
+  insertStyle(TAG_MODIFIER_CSS);
+  insertHTML(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
   favoritesOption.container = document.getElementById("tag-modifier-container") as HTMLElement;
   favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox") as HTMLInputElement;
   ui.container = document.getElementById("tag-modifier-ui-container") as HTMLElement;

@@ -1,15 +1,14 @@
 import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
 import { Events } from "../../../../lib/communication/events";
+import { GalleryConfig } from "../../../../config/gallery_config";
 import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../types/gallery_types";
 import { GalleryRoot } from "./shell";
-import { GalleryConfig } from "../../../../config/gallery_config";
 import { GeneralConfig } from "../../../../config/general_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Timeout } from "../../../../types/async";
-import { debounceTrailing } from "../../../../lib/core/scheduling/rate_limiting";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { toggleFullscreen } from "../../../../utils/browser/window";
 
@@ -29,7 +28,6 @@ const buttons: GalleryMenuButton[] = [
 ];
 
 const menu: HTMLElement = document.createElement("div");
-const debouncedReveal = debounceTrailing<MouseEvent>(reveal, 1000);
 let menuVisibilityTimeout: Timeout;
 
 menu.id = "gallery-menu";
@@ -47,7 +45,7 @@ function loadPreferences(): void {
 }
 
 function addEventListeners(): void {
-  Events.document.mousemove.on(debouncedReveal);
+  Events.document.mousemove.on(reveal);
   Events.document.mouseover.on((mouseOverEvent) => {
     togglePersistence(mouseOverEvent.originalEvent);
   });

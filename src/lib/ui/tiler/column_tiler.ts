@@ -1,4 +1,4 @@
-import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix } from "../../dom/thumb";
+﻿import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { LayoutMode } from "../../../types/ui";
 
@@ -22,10 +22,6 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   public addItemsToTop(items: HTMLElement[]): void {
-    if (this.enabled) {
-      // this.deactivate();
-      // this.activate();
-    }
     this.tile(items.concat(getThumbsInContainer(this.container)));
   }
 
@@ -96,9 +92,12 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   private addColumnsToContainer(): void {
+    const fragment = document.createDocumentFragment();
+
     for (const column of this.columns) {
-      this.container.appendChild(column);
+      fragment.appendChild(column);
     }
+    this.container.appendChild(fragment);
   }
 
   private getAllItems(): HTMLElement[] {
@@ -114,9 +113,17 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   private getIndexOfNextAvailableColumn(): number {
-    const columnLengths = this.columns.map(column => column.children.length);
-    const minColumnLength = Math.min(...columnLengths);
-    const firstIndexWithMinimumLength = columnLengths.findIndex(length => length === minColumnLength);
-    return firstIndexWithMinimumLength === -1 ? 0 : firstIndexWithMinimumLength;
+    let minLength = Infinity;
+    let minIndex = 0;
+
+    for (let i = 0; i < this.columns.length; i += 1) {
+      const len = this.columns[i].children.length;
+
+      if (len < minLength) {
+        minLength = len;
+        minIndex = i;
+      }
+    }
+    return minIndex;
   }
 }

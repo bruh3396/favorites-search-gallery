@@ -1,9 +1,7 @@
-import { domParser } from "./dom_parser";
-
-export function insertStyle(css: string, id: string | undefined = undefined): void {
+﻿export function insertStyle(css: string, id: string | undefined = undefined): void {
   const style = document.createElement("style");
 
-  style.textContent = css.replace("<style>", "").replace("</style>", "");
+  style.textContent = css;
 
   if (id !== undefined) {
     id += "-fsg-style";
@@ -17,13 +15,6 @@ export function insertStyle(css: string, id: string | undefined = undefined): vo
   document.head.appendChild(style);
 }
 
-export function insertHtmlWithStyles(element: HTMLElement, position: InsertPosition, html: string): void {
-  const dom = domParser.parseFromString(html, "text/html");
-  const styles = Array.from(dom.querySelectorAll("style"));
-
-  for (const style of styles) {
-    insertStyle(style.innerHTML);
-    style.remove();
-  }
-  element.insertAdjacentHTML(position, dom.body.innerHTML);
+export function insertHTML(element: HTMLElement, position: InsertPosition, html: string): void {
+  element.insertAdjacentHTML(position, html);
 }

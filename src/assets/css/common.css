@@ -1,0 +1,279 @@
+﻿body {
+  overflow-x: hidden;
+
+  &:fullscreen,
+  &::backdrop {
+    background-color: var(--c-bg);
+  }
+}
+
+.light-green-gradient {
+  background: linear-gradient(to bottom, #aae5a4, #89e180);
+  color: black;
+}
+
+.dark-green-gradient {
+  background: linear-gradient(to bottom, #5e715e, #293129);
+  color: white;
+}
+
+img {
+  border: none !important;
+}
+
+.not-highlightable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input[type=number] {
+  border: 1px solid #767676;
+  border-radius: 2px;
+}
+
+.size-calculation-div {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  transition: none !important;
+  transform: scale(1.05, 1.05);
+}
+
+.number {
+  white-space: nowrap;
+  position: relative;
+  margin-top: 5px;
+  border: 1px solid;
+  padding: 0;
+  border-radius: 20px;
+  background-color: white;
+
+  >hold-button,
+  button {
+    position: relative;
+    top: 0;
+    left: 0;
+    font-size: inherit;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    border: none;
+    margin: 0px 8px;
+    padding: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200%;
+      height: 100%;
+      /* outline: 1px solid greenyellow; */
+      /* background-color: hotpink; */
+    }
+
+    &:hover {
+      >span {
+        color: #0075FF;
+      }
+    }
+
+    >span {
+      font-weight: bold;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      position: relative;
+      pointer-events: none;
+      border: none;
+      outline: none;
+      top: 0;
+      z-index: 5;
+      font-size: 1.2em !important;
+    }
+
+    &.number-arrow-up {
+      >span {
+        transition: left .1s ease;
+        left: 0;
+      }
+
+      &:hover>span {
+        left: 3px;
+      }
+    }
+
+    &.number-arrow-down {
+      >span {
+        transition: right .1s ease;
+        right: 0;
+      }
+
+      &:hover>span {
+        right: 3px;
+      }
+    }
+  }
+
+  >input[type="number"] {
+    font-size: inherit;
+    text-align: center;
+    width: 2ch;
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+    padding: 3px;
+    background: none;
+    border: none;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  >input[type="number"]::-webkit-outer-spin-button,
+  >input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+}
+
+.fullscreen-icon {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10010;
+  pointer-events: none;
+  width: 30vw;
+}
+
+input[type="checkbox"] {
+  accent-color: #0075FF;
+}
+
+.thumb {
+  >a {
+    pointer-events: none;
+
+    >img {
+      pointer-events: all;
+    }
+  }
+}
+
+.blink {
+  animation: blink 0.35s step-start infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* html::before {
+  content: "";
+  position: fixed;
+  z-index: 10000;
+  opacity: 0;
+  background: black;
+  transition: opacity 0.2s linear;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+} */
+
+html.fullscreen-effect::before {
+  opacity: 1;
+}
+
+html.transition-disabled::before {
+  transition: none;
+}
+
+body.dialog-opened {
+  overflow: hidden;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.indented {
+  ul {
+    padding-left: 20px;
+  }
+}
+
+.mobile-tap-control {
+  position: fixed;
+  top: 50% !important;
+  height: 80vh;
+  width: 30vw;
+  background: red;
+  z-index: 9999;
+  color: red;
+  transform: translateY(-50%);
+  pointer-events: all !important;
+  opacity: 0;
+}
+
+#left-mobile-tap-control {
+  left: 0 !important;
+  right: unset !important;
+}
+
+#right-mobile-tap-control {
+  right: 0 !important;
+  left: unset !important;
+}
+
+#mobile-symbol-container {
+  display: flex;
+  gap: 10px;
+  text-align: center;
+  height: 0;
+  overflow: hidden;
+  width: 100%;
+  /* transition: height .2s ease; */
+  margin-bottom: 5px;
+
+  >button {
+    font-size: 20px;
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+    text-align: center;
+    flex: 1;
+    height: 100% !important;
+    border: none;
+    border-radius: 4px;
+  }
+
+  &.active {
+    height: 30px;
+  }
+}

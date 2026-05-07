@@ -1,0 +1,32 @@
+﻿<div id="autoplay-container">
+  <div id="autoplay-menu" class="not-highlightable gallery-sub-menu">
+    <div id="autoplay-buttons">
+      <img id="autoplay-settings-button" title="Autoplay settings">
+      <img id="autoplay-play-button" title="Pause autoplay">
+      <img id="autoplay-change-direction-button" title="Change autoplay direction">
+      <div id="autoplay-change-direction-mask-container">
+        <img id="autoplay-change-direction-mask" title="Change autoplay direction">
+      </div>
+    </div>
+    <div id="autoplay-image-progress-bar" class="autoplay-progress-bar"></div>
+    <div id="autoplay-video-progress-bar" class="autoplay-progress-bar"></div>
+    <div id="autoplay-settings-menu">
+      <div>
+        <label for="autoplay-image-duration-input">Image/GIF Duration</label>
+        <span class="number">
+          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+          <input type="number" id="autoplay-image-duration-input" min="1" max="60" step="1">
+          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+        </span>
+      </div>
+      <div>
+        <label for="autoplay-minimum-video-duration-input">Minimum Video Duration</label>
+        <span class="number">
+          <hold-button class="number-arrow-down" pollingtime="50"><span>&lt;</span></hold-button>
+          <input type="number" id="autoplay-minimum-animated-duration-input" min="0" max="60" step="1">
+          <hold-button class="number-arrow-up" pollingtime="50"><span>&gt;</span></hold-button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

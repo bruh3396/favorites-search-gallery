@@ -1,0 +1,167 @@
+﻿#download-menu {
+  background: transparent;
+
+  border: none;
+  gap: 10px;
+  padding: 0;
+  overflow: hidden;
+
+  * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+#download-menu-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+#download-menu-container-wrapper {
+  display: flex;
+  width: 450px;
+  height: 150px;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#download-menu-container-wrapper-inner {
+  display: flex;
+  padding: 10px;
+  border-radius: 8px;
+  height: 100%;
+}
+
+#download-menus button {
+  width: 100%;
+  height: 4rem;
+  border-radius: 8px;
+  font-size: large;
+}
+
+#download-menu.downloading #download-menu-buttons-start-download {
+  display: none;
+}
+
+#download-menu.downloading #download-menu-options {
+  display: none;
+}
+
+#download-menu.downloading #download-menu-status {
+  flex: 1 1 100%;
+}
+
+#download-menu-options {
+  flex: 1 0 25%;
+  text-align: center;
+}
+
+#download-menu-options select {
+  width: 150px !important;
+  font-size: 40px;
+  height: 60px;
+  cursor: pointer;
+}
+
+
+#download-menu-buttons {
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  flex: 1 0 15%;
+}
+
+#download-menu-buttons button {
+  flex: 1 1 100%;
+}
+
+#download-menu-status {
+  flex: 0 0 0%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* transition: flex 0.15s linear; */
+}
+
+#download-menu-status-header {
+  text-align: center;
+  margin: 0;
+  background: transparent;
+}
+
+#download-menu-status-header {
+  color: white;
+}
+
+#download-menu-status span {
+  font-size: medium;
+}
+
+#download-menu p {
+  color: black;
+}
+
+
+#download-menu-warning-container button {
+  margin: auto;
+  border-radius: 8px;
+}
+
+#download-menu-warning-container {
+  text-align: center;
+}
+
+#download-menu-help {
+  display: flex;
+  flex: 0 0 5%;
+  align-items: center;
+  justify-content: center;
+}
+
+#download-menu-help button {
+  background: transparent;
+  width: 100%;
+  aspect-ratio: 1;
+  border: none;
+  position: relative;
+}
+
+#download-menu-help button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#download-menu-help svg {
+  background: transparent !important;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+}
+
+#download-menu-help svg.dark-green-gradient {
+  fill: white;
+}
+
+#download-menu-help-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 500px;
+  transform: translateY(100%);
+  background: gray;
+  color: black;
+}
+
+#download-menu-options-batch-size-container>span {
+  font-size: x-large;
+}
