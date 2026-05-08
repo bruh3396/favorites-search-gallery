@@ -1,4 +1,4 @@
-﻿import * as GalleryView from "../view/gallery_view";
+import * as GalleryView from "../view/gallery_view";
 import { Events } from "../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { yieldControl } from "../../../lib/core/scheduling/promise";

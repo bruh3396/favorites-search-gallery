@@ -1,4 +1,4 @@
-﻿import { Overlays } from "../../../../lib/shell";
+import { Overlays } from "../../../../lib/shell";
 
 export function buildMobileFooter(): void {
   const status = document.getElementById("favorites-load-status");

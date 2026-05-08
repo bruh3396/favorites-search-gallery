@@ -1,4 +1,4 @@
-﻿import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix } from "../../dom/thumb";
+import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
 import { LayoutMode } from "../../../types/ui";
 

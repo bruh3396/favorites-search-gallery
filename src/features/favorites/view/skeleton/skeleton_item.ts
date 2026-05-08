@@ -1,4 +1,4 @@
-﻿import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
+import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./skeleton_animation";
 import { LayoutMode } from "../../../../types/ui";
 import { ThumbnailConfig } from "../../../../config/thumbnail_config";

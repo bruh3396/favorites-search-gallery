@@ -1,4 +1,4 @@
-﻿import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
+import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
 import { ApiConfig } from "../../../config/api_config";
 import { TAG_API_URL } from "../url/api_urls";
 import { Tag } from "../../../types/api";

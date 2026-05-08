@@ -1,4 +1,4 @@
-﻿import * as GalleryAutoplayController from "./features/autoplay/autoplay_controller";
+import * as GalleryAutoplayController from "./features/autoplay/autoplay_controller";
 import * as GalleryClickFlow from "./flow/click_flow";
 import * as GalleryContentFlow from "./flow/content_flow";
 import * as GalleryControl from "./control/gallery_control";

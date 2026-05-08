@@ -1,4 +1,4 @@
-﻿import { HoldButton } from "./hold_button";
+import { HoldButton } from "./hold_button";
 import { clamp } from "../../../utils/number";
 
 export class NumberComponent {

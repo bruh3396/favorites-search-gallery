@@ -1,4 +1,4 @@
-﻿import CONTROLS_CSS from "../../../../assets/css/controls.css";
+import CONTROLS_CSS from "../../../../assets/css/controls.css";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 

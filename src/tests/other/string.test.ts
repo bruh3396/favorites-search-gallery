@@ -1,4 +1,4 @@
-﻿import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "../../utils/string/format";
+import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "../../utils/string/format";
 import { convertToTagSet, convertToTagString } from "../../utils/string/tags";
 import { describe, expect, test } from "vitest";
 import { isEmptyString, isOnlyDigits } from "../../utils/string/query";

@@ -1,4 +1,4 @@
-﻿export const Rule34NetworkConfig = {
+export const Rule34NetworkConfig = {
   videoDurationFetchConcurrency: 3,
   videoDurationMetadataByteRanges: [500_000, 1_000_000, 2_000_000, 4_000_000],
 

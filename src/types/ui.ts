@@ -1,4 +1,4 @@
-﻿export type GalleryMenuAction = "exit" |
+export type GalleryMenuAction = "exit" |
   "fullscreen" | "openPost" | "openOriginal" |
   "download" | "addFavorite" | "removeFavorite" |
   "toggleDockPosition" | "toggleBackground" | "search" |

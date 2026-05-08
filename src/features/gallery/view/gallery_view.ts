@@ -1,4 +1,4 @@
-﻿import * as GalleryDesktopMenu from "./shell/desktop_menu";
+import * as GalleryDesktopMenu from "./shell/desktop_menu";
 import * as GalleryRenderer from "./renderers/renderer";
 import * as GalleryUI from "./shell/ui";
 import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";

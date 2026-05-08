@@ -1,4 +1,4 @@
-﻿import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
+import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
 import { average } from "../../../../utils/number";
 
 let last: number | null = null;

@@ -1,4 +1,4 @@
-﻿import SEARCH_PAGE_CSS from "../../../assets/css/search_page.css";
+import SEARCH_PAGE_CSS from "../../../assets/css/search_page.css";
 import SEARCH_PAGE_HTML from "../../../assets/html/search_page.html";
 import { insertHTML, insertStyle } from "../../../lib/dom/injector";
 import { Content } from "../../../lib/shell";

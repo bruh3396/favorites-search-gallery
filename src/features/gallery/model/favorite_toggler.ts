@@ -1,4 +1,4 @@
-﻿import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
+import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { Events } from "../../../lib/communication/events";
 

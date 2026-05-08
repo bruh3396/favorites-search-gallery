@@ -1,4 +1,4 @@
-﻿import { select, unselectAll } from "./selection";
+import { select, unselectAll } from "./selection";
 import { Favorite } from "../../../../types/favorite";
 import { ITEM_CLASS_NAME } from "../../../../lib/dom/thumb";
 import { insertStyle } from "../../../../lib/dom/injector";

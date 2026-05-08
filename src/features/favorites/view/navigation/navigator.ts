@@ -1,4 +1,4 @@
-﻿import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
+import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";

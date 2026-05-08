@@ -1,4 +1,4 @@
-﻿import * as Icons from "./icons";
+import * as Icons from "./icons";
 import { createObjectURLFromSvg } from "../lib/navigator";
 
 export const REMOVE_FAVORITE_IMAGE_HTML = `<img class="post-action-btn--remove post-action-btn" src=${createObjectURLFromSvg(Icons.HEART_MINUS)}>`;

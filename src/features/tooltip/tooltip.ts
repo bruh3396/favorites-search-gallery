@@ -1,4 +1,4 @@
-﻿import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { getImageFromThumb, getThumbFromImage } from "../../lib/dom/thumb";
 import { Events } from "../../lib/communication/events";
 import { Overlays } from "../../lib/shell";

@@ -1,4 +1,4 @@
-﻿import * as TagModifierEditMode from "./edit_mode";
+import * as TagModifierEditMode from "./edit_mode";
 import * as TagModifierOperations from "./operations";
 import * as TagModifierSelection from "./selection";
 import * as TagModifierStore from "./store";

@@ -1,4 +1,4 @@
-﻿import * as PostAPI from "../../lib/remote/api/post_fetcher";
+import * as PostAPI from "../../lib/remote/api/post_fetcher";
 import * as TagAPI from "../../lib/remote/api/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";

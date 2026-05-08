@@ -1,4 +1,4 @@
-﻿/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file */
 import { yieldControl } from "../scheduling/promise";
 
 class LockedDatabaseError extends Error { }

@@ -1,4 +1,4 @@
-﻿import * as GalleryImageCanvas from "./image_canvas";
+import * as GalleryImageCanvas from "./image_canvas";
 import * as GalleryImageLoader from "./image_loader";
 import * as GalleryUpscaler from "../upscalers/upscaler";
 import { GalleryAbstractController } from "../../abstract_controller";

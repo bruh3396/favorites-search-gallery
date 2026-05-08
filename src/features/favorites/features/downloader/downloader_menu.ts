@@ -1,4 +1,4 @@
-﻿import * as FavoritesDownloader from "./downloader";
+import * as FavoritesDownloader from "./downloader";
 import { sleep, yieldControl } from "../../../../lib/core/scheduling/promise";
 import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
 import { DOWNLOADER_DISABLED } from "../../../../lib/environment/derived_environment";

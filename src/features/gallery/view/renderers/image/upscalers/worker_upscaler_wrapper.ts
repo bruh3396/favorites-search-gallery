@@ -1,4 +1,4 @@
-﻿import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../types/offscreen_upscale_request";
+import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../types/offscreen_upscale_request";
 import { GalleryAbstractUpscaler } from "./abstract_upscaler";
 import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";

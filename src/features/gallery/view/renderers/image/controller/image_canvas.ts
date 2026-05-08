@@ -1,4 +1,4 @@
-﻿import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
+import { clamp, roundToTwoDecimalPlaces } from "../../../../../../utils/number";
 import { clearCanvas, drawScaledCanvas } from "../../../../../../utils/dom/canvas";
 import { GalleryConfig } from "../../../../../../config/gallery_config";
 import { ON_DESKTOP_DEVICE } from "../../../../../../lib/environment/environment";

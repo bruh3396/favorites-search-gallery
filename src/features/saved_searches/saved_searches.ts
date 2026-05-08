@@ -1,4 +1,4 @@
-﻿import * as ICONS from "../../assets/icons";
+import * as ICONS from "../../assets/icons";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { Preferences } from "../../lib/preferences/preferences";

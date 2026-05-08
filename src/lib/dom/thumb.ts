@@ -1,4 +1,4 @@
-﻿import { imageIsLoading } from "../../utils/dom/image";
+import { imageIsLoading } from "../../utils/dom/image";
 import { removeNonNumericCharacters } from "../../utils/string/format";
 import { sum } from "../../utils/number";
 

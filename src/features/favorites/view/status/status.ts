@@ -1,4 +1,4 @@
-﻿import * as Eta from "./eta";
+import * as Eta from "./eta";
 import { NewFavorites } from "../../types/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Root } from "../../../../lib/shell";

@@ -1,4 +1,4 @@
-﻿import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { domParser } from "../../../lib/dom/dom_parser";
 import { prepareSearchPageThumbs } from "../model/thumb_preparer";
 

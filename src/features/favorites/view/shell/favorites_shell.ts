@@ -1,4 +1,4 @@
-﻿import DESKTOP_CSS from "../../../../assets/css/desktop/base.css";
+import DESKTOP_CSS from "../../../../assets/css/desktop/base.css";
 import FAVORITES_CSS from "../../../../assets/css/favorites.css";
 import FAVORITES_HTML from "../../../../assets/html/favorites.html";
 import MOBILE_CSS from "../../../../assets/css/mobile.css";

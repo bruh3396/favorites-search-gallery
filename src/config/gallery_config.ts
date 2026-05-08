@@ -1,4 +1,4 @@
-﻿import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
 import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
 import { Resolution } from "../types/media";
 

@@ -1,4 +1,4 @@
-﻿import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../environment/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../environment/environment";
 import { getCookie, setCookie } from "../../utils/browser/cookie";
 import COMMON_CSS from "../../assets/css/common.css";
 import CONTENT_CSS from "../../assets/css/content.css";

@@ -1,4 +1,4 @@
-﻿import { Post, PostResponse } from "../../../types/api";
+import { Post, PostResponse } from "../../../types/api";
 import { generalPageRequestQueue, postLimiter } from "../http/rate_limiter";
 import { ApiConfig } from "../../../config/api_config";
 import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";

@@ -1,4 +1,4 @@
-﻿export function overGalleryMenu(event: MouseEvent): boolean {
+export function overGalleryMenu(event: MouseEvent): boolean {
   if (!(event.target instanceof HTMLElement)) {
     return false;
   }

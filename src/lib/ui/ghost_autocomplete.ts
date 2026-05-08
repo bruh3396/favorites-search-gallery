@@ -1,4 +1,4 @@
-﻿const MIRROR_STYLES: (keyof CSSStyleDeclaration)[] = [
+const MIRROR_STYLES: (keyof CSSStyleDeclaration)[] = [
   "paddingTop",
   "paddingRight",
   "paddingBottom",

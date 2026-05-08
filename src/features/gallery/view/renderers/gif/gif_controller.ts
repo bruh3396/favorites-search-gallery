@@ -1,4 +1,4 @@
-﻿import { GalleryAbstractController } from "../abstract_controller";
+import { GalleryAbstractController } from "../abstract_controller";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { doNothing } from "../../../../../lib/environment/constants";
 import { isGif } from "../../../../../lib/media/media_type_guards";

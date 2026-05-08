@@ -1,4 +1,4 @@
-﻿import * as Icons from "../../../../assets/icons";
+import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
 import { Events } from "../../../../lib/communication/events";
 import { GalleryConfig } from "../../../../config/gallery_config";

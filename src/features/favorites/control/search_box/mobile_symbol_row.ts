@@ -1,4 +1,4 @@
-﻿import { sleep } from "../../../../lib/core/scheduling/promise";
+import { sleep } from "../../../../lib/core/scheduling/promise";
 
 const SYMBOLS = ["-", "*", "_", "(", ")", "~"];
 const CONTAINER_ID = "mobile-symbol-container";

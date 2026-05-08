@@ -1,4 +1,4 @@
-﻿import { Favorite } from "../../../../types/favorite";
+import { Favorite } from "../../../../types/favorite";
 
 const selected: Set<Favorite> = new Set();
 let getSearchResults: () => Favorite[] = () => [];

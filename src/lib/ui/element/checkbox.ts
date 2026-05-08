@@ -1,4 +1,4 @@
-﻿import { CheckboxElement, defaultMenuElement } from "../element_types";
+import { CheckboxElement, defaultMenuElement } from "../element_types";
 import { Events } from "../../communication/events";
 import { FeatureQueries } from "../../communication/feature_queries";
 import { doNothing } from "../../environment/constants";

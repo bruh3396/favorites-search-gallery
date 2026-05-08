@@ -1,4 +1,4 @@
-﻿import { Events } from "../communication/events";
+import { Events } from "../communication/events";
 import { Favorite } from "../../types/favorite";
 import { ON_MOBILE_DEVICE } from "../environment/environment";
 import { getImageFromThumb } from "../dom/thumb";

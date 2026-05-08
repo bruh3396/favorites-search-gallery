@@ -1,4 +1,4 @@
-﻿export function insertStyle(css: string, id: string | undefined = undefined): void {
+export function insertStyle(css: string, id: string | undefined = undefined): void {
   const style = document.createElement("style");
 
   style.textContent = css;

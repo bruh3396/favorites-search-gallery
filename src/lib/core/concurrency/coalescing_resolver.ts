@@ -1,4 +1,4 @@
-﻿import { CoalescingExecutor } from "./coalescing_executor";
+import { CoalescingExecutor } from "./coalescing_executor";
 
 type PromiseCallback<V> = {
   resolve: (value: V) => void;
