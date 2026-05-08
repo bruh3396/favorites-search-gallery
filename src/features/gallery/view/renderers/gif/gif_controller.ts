@@ -12,8 +12,8 @@ class GifController extends GalleryAbstractController {
     super();
     this.container.id = "gif-container";
     this.gif = document.createElement("img");
-    this.container.className = "gallery__image-frame";
-    this.gif.className = "gallery__image";
+    this.container.className = "gallery-image-frame";
+    this.gif.className = "gallery-image";
     this.preloadedGifs = [];
     this.container.appendChild(this.gif);
     this.preload = GalleryConfig.gifPreloadingEnabled ? this.preload : doNothing;

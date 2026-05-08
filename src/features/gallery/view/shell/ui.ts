@@ -62,7 +62,7 @@ function toggleVideoPointerEvents(value: boolean): void {
 }
 
 function toggleBackgroundInteractability(value: boolean): void {
-    background.classList.toggle("gallery__background--active", value);
+    background.classList.toggle("gallery-background--active", value);
 }
 
 export function toggleBackgroundOpacity(): void {
@@ -164,5 +164,5 @@ export function toggleGalleryMenuVisibility(value: boolean): void {
 }
 
 export function toggleZoomCursor(value: boolean): void {
-  background.classList.toggle("gallery__background--zooming", value);
+  background.classList.toggle("gallery-background--zooming", value);
 }

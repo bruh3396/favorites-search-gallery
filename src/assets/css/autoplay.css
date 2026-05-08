@@ -21,11 +21,11 @@
   transition: opacity .25s ease-in-out;
 }
 
-#autoplay-menu.autoplay__menu--visible {
+#autoplay-menu.autoplay-menu--visible {
   opacity: 1;
 }
 
-#autoplay-menu.autoplay__menu--persistent {
+#autoplay-menu.autoplay-menu--persistent {
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -59,7 +59,7 @@
   background: var(--color-gallery-menu-bg);
 }
 
-#autoplay-settings-menu.autoplay__settings--visible {
+#autoplay-settings-menu.autoplay-settings--visible {
   visibility: visible;
 }
 
@@ -97,11 +97,11 @@
   width: 10ch;
 }
 
-#autoplay-settings-button.autoplay__settings-btn--open {
+#autoplay-settings-button.autoplay-settings-btn--open {
   filter: drop-shadow(6px 6px 3px var(--color-accent));
 }
 
-.autoplay__settings-label {
+.autoplay-settings-label {
   pointer-events: none;
 }
 
@@ -131,13 +131,13 @@
   clip-path: polygon(0% 0%, 0% 100%, 100% 100%);
 }
 
-#autoplay-change-direction-mask-container.autoplay__direction-mask--upper-right {
+#autoplay-change-direction-mask-container.autoplay-direction-mask--upper-right {
   clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
 }
 
 /* ─── Progress bars ─────────────────────────────────────────────────────────── */
 
-.autoplay__progress-bar {
+.autoplay-progress-bar {
   position: absolute;
   top: 0;
   left: 0;

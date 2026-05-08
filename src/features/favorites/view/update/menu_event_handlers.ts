@@ -44,7 +44,7 @@ export function toggleUI(value: boolean): void {
     panels.style.display = "none";
     menu.style.background = getComputedStyle(document.body).background;
   }
-  container.classList.toggle("favorites-menu__show-ui--collapsed", !value);
+  container.classList.toggle("favorites-menu-show-ui--collapsed", !value);
 }
 
 export function toggleFavoritesOptions(value: boolean): void {

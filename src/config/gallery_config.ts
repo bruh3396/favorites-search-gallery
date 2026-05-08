@@ -1,11 +1,16 @@
 ﻿import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
 import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
+import { Resolution } from "../types/media";
+
+const FAVORITES_PAGE_RESOLUTION: Resolution = "7680x4320";
+const SEARCH_PAGE_RESOLUTION: Resolution = "3840x2160";
+const MOBILE_RESOLUTION: Resolution = "1920x1080";
 
 export const GalleryConfig = {
   mainCanvasResolutions: {
-    search: "3840x2160",
-    favorites: "7680x4320",
-    mobile: "1920x1080"
+    favorites: FAVORITES_PAGE_RESOLUTION,
+    search: SEARCH_PAGE_RESOLUTION,
+    mobile: MOBILE_RESOLUTION
   },
   get mainCanvasResolution(): string {
     if (ON_MOBILE_DEVICE) {

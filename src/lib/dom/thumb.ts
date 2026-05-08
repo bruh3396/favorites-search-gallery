@@ -5,7 +5,7 @@ import { sum } from "../../utils/number";
 export const ITEM_CLASS_NAME = "post";
 export const ITEM_SELECTOR = ".post, .post--thumb";
 export const IMAGE_SELECTOR = ".post img";
-export const COLUMN_CLASS_NAME = "tiler__column";
+export const COLUMN_CLASS_NAME = "tiler--column--a";
 
 function getClosestThumb(element: HTMLElement): HTMLElement | null {
   return element.closest(ITEM_SELECTOR);
@@ -70,7 +70,7 @@ export function getIdFromThumb(thumb: HTMLElement): string {
 }
 
 export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement | null {
-  if (!(event.target instanceof HTMLElement) || event.target.matches(".caption__tag")) {
+  if (!(event.target instanceof HTMLElement) || event.target.matches(".caption-tag")) {
     return null;
   }
   const image = event.target.matches(IMAGE_SELECTOR) ? event.target : null;

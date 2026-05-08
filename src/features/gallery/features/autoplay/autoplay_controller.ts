@@ -249,7 +249,7 @@ function setMenuIconImageSources(): void {
   ui.settingsButton.src = menuIcons.tune;
   ui.changeDirectionButton.src = menuIcons.changeDirection;
   ui.changeDirectionMask.image.src = menuIcons.changeDirectionAlt;
-  ui.changeDirectionMask.container.classList.toggle("autoplay__direction-mask--upper-right", Preferences.autoplayForward.value);
+  ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.autoplayForward.value);
 }
 
 function loadAutoplaySettingsIntoUI(): void {
@@ -305,7 +305,7 @@ function addMobileMenuEventListeners(): void {
   }
   ui.settingsButton.ontouchstart = (): void => {
     toggleSettingMenu();
-    const settingsMenuIsVisible = ui.settingsMenu.container.classList.contains("autoplay__settings--visible");
+    const settingsMenuIsVisible = ui.settingsMenu.container.classList.contains("autoplay-settings--visible");
 
     toggleMenuPersistence(settingsMenuIsVisible);
     menuVisibilityTimer.restart();
@@ -345,7 +345,7 @@ function addFavoritesPageEventListeners(): void {
 
 function toggleDirection(): void {
   Preferences.autoplayForward.set(!Preferences.autoplayForward.value);
-  ui.changeDirectionMask.container.classList.toggle("autoplay__direction-mask--upper-right", Preferences.autoplayForward.value);
+  ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.autoplayForward.value);
 }
 
 function toggleMenuPersistence(value: boolean): void {
@@ -355,16 +355,16 @@ function toggleMenuPersistence(value: boolean): void {
 
 function toggleMenuVisibility(value: boolean): void {
   menuIsVisible = value;
-  ui.menu.classList.toggle("autoplay__menu--visible", value);
+  ui.menu.classList.toggle("autoplay-menu--visible", value);
 }
 
 function toggleSettingMenu(value?: boolean | undefined): void {
   if (value === undefined) {
-    ui.settingsMenu.container.classList.toggle("autoplay__settings--visible");
-    ui.settingsButton.classList.toggle("autoplay__settings-btn--open");
+    ui.settingsMenu.container.classList.toggle("autoplay-settings--visible");
+    ui.settingsButton.classList.toggle("autoplay-settings-btn--open");
   } else {
-    ui.settingsMenu.container.classList.toggle("autoplay__settings--visible", value);
-    ui.settingsButton.classList.toggle("autoplay__settings-btn--open", value);
+    ui.settingsMenu.container.classList.toggle("autoplay-settings--visible", value);
+    ui.settingsButton.classList.toggle("autoplay-settings-btn--open", value);
   }
 }
 

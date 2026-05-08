@@ -30,7 +30,7 @@ export function buildNumberComponent(partial: Partial<NumberElement>): void {
   const defaultValue = template.preference === null ? 1 : template.preference.value;
 
   const html = `
-    <span class="number" id="${numberComponentId}">
+    <span class="num-input" id="${numberComponentId}">
       <hold-button class="number-arrow-down" pollingtime="${template.pollingTime}">
         <span>&lt;</span>
       </hold-button>

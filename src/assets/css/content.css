@@ -61,7 +61,7 @@
   display: none;
 }
 
-.post__action-btn {
+.post-action-btn {
   cursor: pointer;
   position: absolute;
   left: 0;
@@ -73,12 +73,12 @@
   filter: grayscale(70%);
 }
 
-.post__action-btn:active,
-.post__action-btn:hover {
+.post-action-btn:active,
+.post-action-btn:hover {
   filter: none;
 }
 
-.post__action-btn--download {
+.post-action-btn--download {
   top: unset;
   right: 0;
   left: unset;

@@ -75,41 +75,41 @@
 
 /* ─── List item buttons ─────────────────────────────────────────────────────── */
 
-.saved-searches__item-label {
+.saved-searches-item-label {
   flex: 1000 30px;
   text-align: left;
 }
 
-.saved-searches__item-label:hover {
+.saved-searches-item-label:hover {
   color: white;
   background: var(--color-accent);
 }
 
-.saved-searches__item-btn--edit {
+.saved-searches-item-btn--edit {
   text-align: center;
   flex: 1 20px;
 }
 
-.saved-searches__item-btn--edit:hover {
+.saved-searches-item-btn--edit:hover {
   color: white;
   background: slategray;
 }
 
-.saved-searches__item-btn--remove {
+.saved-searches-item-btn--remove {
   text-align: center;
   flex: 1 20px;
 }
 
-.saved-searches__item-btn--remove:hover {
+.saved-searches-item-btn--remove:hover {
   color: white;
   background: #f44336;
 }
 
-.saved-searches__item-btn--top {
+.saved-searches-item-btn--top {
   text-align: center;
 }
 
-.saved-searches__item-btn--top:hover {
+.saved-searches-item-btn--top:hover {
   color: white;
   background: steelblue;
 }

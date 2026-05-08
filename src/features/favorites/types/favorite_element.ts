@@ -36,7 +36,7 @@ export class FavoriteElement {
   }
 
   private get hasRemoveButton(): boolean {
-    return this.favoriteButton.classList.contains("post__action-btn--remove");
+    return this.favoriteButton.classList.contains("post-action-btn--remove");
   }
 
   public swapFavoriteButton(): void {
@@ -66,6 +66,7 @@ export class FavoriteElement {
 
   private handleFavoriteButtonClick(event: MouseEvent): void {
     event.stopPropagation();
+    console.log(event.button, ClickCode.LEFT, ClickCode.RIGHT);
 
     if (event.button !== ClickCode.LEFT) {
       return;
@@ -109,7 +110,9 @@ export class FavoriteElement {
   }
 
   private download(event: MouseEvent): void {
-    event.stopPropagation();
-    downloadFromThumb(this.root);
+    if (event.button === ClickCode.LEFT) {
+      event.stopPropagation();
+      downloadFromThumb(this.root);
+    }
   }
 }

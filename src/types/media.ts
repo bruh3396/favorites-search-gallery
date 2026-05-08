@@ -6,3 +6,4 @@ export type MediaExtensionMapping = {
   id: string
   extension: ImageExtension
 }
+export type Resolution = "3840x2160" | "7680x4320" | "1920x1080"

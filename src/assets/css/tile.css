@@ -1,6 +1,6 @@
 ﻿.tiler--row,
 .tiler--column,
-.tiler--column .tiler__column,
+.tiler--column .tiler--column--a,
 .tiler--square,
 .tiler--grid {
   gap: 6px;
@@ -13,8 +13,8 @@
   grid-gap: 0.5cqw;
 }
 
-.tiler--grid .post__action-btn,
-.tiler--square .post__action-btn {
+.tiler--grid .post-action-btn,
+.tiler--square .post-action-btn {
   width: 30%;
 }
 
@@ -90,7 +90,7 @@
   object-fit: cover;
 }
 
-.tiler--row .post__action-btn {
+.tiler--row .post-action-btn {
   height: 30%;
 }
 
@@ -99,19 +99,19 @@
   grid-template-columns: repeat(10, 1fr);
 }
 
-.tiler--column .tiler__column {
+.tiler--column .tiler--column--a {
   display: flex;
   flex-direction: column;
   flex: 0 0 25%;
 }
 
-.tiler--column .tiler__column .post,
-.tiler--column .tiler__column .post--thumb {
+.tiler--column .tiler--column--a .post,
+.tiler--column .tiler--column--a .post--thumb {
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-.tiler--column .post__action-btn {
+.tiler--column .post-action-btn {
   width: 30%;
 }
 
@@ -121,7 +121,7 @@
   gap: 25px 10px;
 }
 
-.tiler--native .post__action-btn {
+.tiler--native .post-action-btn {
   width: 70px;
   aspect-ratio: 1;
 }

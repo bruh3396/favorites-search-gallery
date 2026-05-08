@@ -48,6 +48,6 @@ export class SkeletonItem {
   }
 
   private setClassName(): void {
-    this.element.className = `skeleton__item post ${ThumbnailConfig.skeletonAnimationClasses}`;
+    this.element.className = `skeleton-item post skeleton-item--${ThumbnailConfig.skeletonAnimationClasses}`;
   }
 }

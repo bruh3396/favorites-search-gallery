@@ -12,8 +12,8 @@ export function setupGalleryMobileTapControls(): void {
   const rightTap = document.createElement("div");
 
   tapControlContainer.id = "tap-control-container";
-  leftTap.className = "gallery__tap-zone";
-  rightTap.className = "gallery__tap-zone";
+  leftTap.className = "gallery-tap-zone";
+  rightTap.className = "gallery-tap-zone";
   leftTap.id = "left-mobile-tap-control";
   rightTap.id = "right-mobile-tap-control";
   tapControlContainer.appendChild(leftTap);

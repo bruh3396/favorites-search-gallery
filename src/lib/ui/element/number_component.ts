@@ -11,8 +11,8 @@ export class NumberComponent {
 
   constructor(element: HTMLElement) {
     this.input = element.querySelector("input") ?? document.createElement("input");
-    this.upArrow = element.querySelector(".num-input__btn--up") ?? new HoldButton();
-    this.downArrow = element.querySelector(".num-input__btn--down") ?? new HoldButton();
+    this.upArrow = element.querySelector(".num-input-btn--up") ?? new HoldButton();
+    this.downArrow = element.querySelector(".num-input-btn--down") ?? new HoldButton();
     this.stepSize = 1;
     this.range = {min: 0, max: 100};
     this.defaultValue = 1;

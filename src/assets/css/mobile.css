@@ -219,7 +219,7 @@ input[type="text"] {
 
 /* ─── Post action button ────────────────────────────────────────────────────── */
 
-.post__action-btn {
+.post-action-btn {
   filter: none;
   width: 60%;
 }
@@ -255,7 +255,7 @@ input[type="text"] {
   fill: white;
 }
 
-.mobile-toolbar__checkbox-label {
+.mobile-toolbar-checkbox-label {
   width: 100%;
   height: 100%;
   display: block;
@@ -281,14 +281,14 @@ input[type="text"] {
   background: #303030;
 }
 
-.search-bar__items {
+.search-bar-items {
   display: flex;
   align-items: center;
   height: 100%;
   width: 100%;
 }
 
-.search-bar__items>div {
+.search-bar-items>div {
   flex: 0;
   min-width: 40px;
   width: 100%;
@@ -297,19 +297,19 @@ input[type="text"] {
   align-content: center;
 }
 
-.search-bar__icon-wrap {
+.search-bar-icon-wrap {
   flex: 0;
   min-width: 40px;
 }
 
-.search-bar__input-wrap {
+.search-bar-input-wrap {
   flex: 1;
   display: flex;
   width: 100%;
   height: 100%;
 }
 
-.search-bar__input {
+.search-bar-input {
   flex: 1;
   border: none;
   box-sizing: content-box;
@@ -321,30 +321,30 @@ input[type="text"] {
   width: 100%;
 }
 
-.search-bar__input:focus,
-.search-bar__input:focus-visible {
+.search-bar-input:focus,
+.search-bar-input:focus-visible {
   background: none;
   border: none;
   outline: none;
 }
 
-.search-bar__clear {
+.search-bar-clear {
   visibility: hidden;
 }
 
-.search-bar__clear svg {
+.search-bar-clear svg {
   transition: none;
   transform: scale(0.6);
 }
 
-.search-bar__icon-btn {
+.search-bar-icon-btn {
   padding: 0;
   margin: 0;
   align-content: center;
   border-radius: 50%;
 }
 
-.search-bar__icon-btn:active {
+.search-bar-icon-btn:active {
   background-color: var(--color-accent);
 }
 

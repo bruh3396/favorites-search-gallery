@@ -4,14 +4,15 @@ import * as FavoritesSearchFlow from "./search_flow";
 import * as FavoritesView from "../view/favorites_view";
 import * as PostAPI from "../../../lib/remote/api/post_fetcher";
 import { Events } from "../../../lib/communication/events";
-import { Favorite } from "../../../types/favorite";
+import { NewFavorites } from "../types/favorite_types";
 import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
   if (await loadDatabaseFavorites()) {
-    await handleExistingFavorites();
+    showLoadedFavorites();
+    showNewFavorites(await loadNewFavorites());
   } else {
-    await fetchFavorites();
+    await fetchAllFavorites();
   }
   finishLoading();
 }
@@ -19,54 +20,51 @@ export async function loadAllFavorites(): Promise<void> {
 async function loadDatabaseFavorites(): Promise<boolean> {
   FavoritesView.setStatus("Loading favorites");
   await FavoritesModel.loadDatabaseFavorites();
-  const foundDatabaseFavorites = FavoritesModel.hasFavorites();
-
-  Events.favorites.favoritesFoundInDatabase.emit(foundDatabaseFavorites);
-  return foundDatabaseFavorites;
-}
-
-function handleExistingFavorites(): Promise<void> {
-  FavoritesModel.onDatabaseWritten();
-  showLoadedFavorites();
-  return loadNewFavorites();
+  return FavoritesModel.hasFavorites();
 }
 
 function showLoadedFavorites(): void {
+  FavoritesModel.onDatabaseWritten();
   FavoritesView.setTemporaryStatus("Favorites loaded");
   FavoritesSearchFlow.searchFavorites();
+  Events.favorites.favoritesFoundInDatabase.emit(true);
 }
 
-async function loadNewFavorites(): Promise<void> {
+async function loadNewFavorites(): Promise<NewFavorites | null> {
   FavoritesView.setStatus("Finding new favorites");
   const results = await FavoritesModel.fetchNewFavorites();
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");
-    return;
+    return null;
   }
   FavoritesView.insertNewSearchResultsOnReload(results);
   FavoritesView.notifyNewFavoritesFound(results);
-  saveNewFavorites(results.newFavorites);
+  await FavoritesModel.storeNewFavorites(results.newFavorites);
+  return results;
+}
+
+function showNewFavorites(results: NewFavorites | null): void {
+  if (results === null) {
+    return;
+  }
+  FavoritesView.setTemporaryStatus(`Saved ${results.newFavorites.length} new favorites`);
   FavoritesView.setFavorites(FavoritesModel.getLatestSearchResults());
   Events.favorites.newFavoritesFound.emit(results.newSearchResults);
   Events.favorites.searchResultsUpdated.emit();
 }
 
-async function saveNewFavorites(newFavorites: Favorite[]): Promise<void> {
-  await FavoritesModel.storeNewFavorites(newFavorites);
-  FavoritesView.setTemporaryStatus(`Saved ${newFavorites.length} new favorites`);
-}
-
-function fetchFavorites(): Promise<void> {
+async function fetchAllFavorites(): Promise<void> {
+  Events.favorites.favoritesFoundInDatabase.emit(false);
   PostAPI.setPostPageGate(Events.favorites.favoritesLoaded.wait());
   fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
-  return fetchAllFavorites().then(saveAllFavorites);
-}
-
-async function fetchAllFavorites(): Promise<void> {
   FavoritesPresentationFlow.presentNothing();
   Events.favorites.startedFetchingFavorites.emit();
   await FavoritesModel.fetchAllFavorites(handleFetchedFavoritesPage);
+  FavoritesView.setStatus("Saving favorites");
+  await FavoritesModel.storeAllFavorites();
+  FavoritesView.setTemporaryStatus("All favorites saved");
+  FavoritesModel.onDatabaseWritten();
 }
 
 function handleFetchedFavoritesPage(): void {
@@ -76,13 +74,6 @@ function handleFetchedFavoritesPage(): void {
   );
   Events.favorites.searchResultsUpdated.emit();
   FavoritesPresentationFlow.handleNewSearchResults();
-}
-
-async function saveAllFavorites(): Promise<void> {
-  FavoritesView.setStatus("Saving favorites");
-  await FavoritesModel.storeAllFavorites();
-  FavoritesView.setTemporaryStatus("All favorites saved");
-  FavoritesModel.onDatabaseWritten();
 }
 
 function finishLoading(): void {

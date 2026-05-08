@@ -1,7 +1,7 @@
 ﻿import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
-import { ThumbnailConfig } from "../../../config/thumbnail_config";
 import { LayoutMode } from "../../../types/ui";
+import { ThumbnailConfig } from "../../../config/thumbnail_config";
 import { insertStyle } from "../../dom/injector";
 import { mapRange } from "../../../utils/number";
 

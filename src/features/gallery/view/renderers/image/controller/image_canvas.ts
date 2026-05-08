@@ -8,13 +8,13 @@ import { parseDimensions2D } from "../../../../../../utils/string/parse";
 const mainCanvas = document.createElement("canvas");
 const mainContext = mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
 const landscapeStyle = `
-  .gallery__image {
+  .gallery-image {
       height: 100vh !important;
       width: auto !important;
   }
   `;
 const portraitStyle = `
-  .gallery__image {
+  .gallery-image {
       width: 100vw !important;
       height: auto !important;
   }
@@ -22,13 +22,13 @@ const portraitStyle = `
 let container: HTMLElement;
 const dimensions = parseDimensions2D(GalleryConfig.mainCanvasResolution);
 
-mainCanvas.className = "gallery__image";
+mainCanvas.className = "gallery-image";
 mainCanvas.width = dimensions.x;
 mainCanvas.height = dimensions.y;
 
 function insertGalleryCanvas(newContainer: HTMLElement): void {
   newContainer.id = "canvas-container";
-  newContainer.className = "gallery__image-frame";
+  newContainer.className = "gallery-image-frame";
   newContainer.appendChild(mainCanvas);
   container = newContainer;
 }

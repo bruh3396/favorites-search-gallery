@@ -105,7 +105,7 @@ function getStatusHeader(): HTMLElement {
 function createStatusTextRow(): HTMLElement {
   const row = document.createElement("span");
 
-  row.classList.add("downloader__status-row");
+  row.classList.add("downloader-status-row");
   statusContainer.appendChild(row);
   return row;
 }
@@ -160,7 +160,7 @@ function setupMenuBatchSizeSelect(): void {
 }
 
 function clearStatusTextRows(): void {
-  const rows = Array.from(statusContainer.querySelectorAll(".downloader__status-row"));
+  const rows = Array.from(statusContainer.querySelectorAll(".downloader-status-row"));
 
   for (const row of rows) {
     row.remove();

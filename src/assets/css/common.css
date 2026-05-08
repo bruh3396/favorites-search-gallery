@@ -189,25 +189,25 @@ option {
   color: var(--color-accent);
 }
 
-.num-input>hold-button.num-input__btn--up>span,
-.num-input button.num-input__btn--up>span {
+.num-input>hold-button.num-input-btn--up>span,
+.num-input button.num-input-btn--up>span {
   transition: left .1s ease;
   left: 0;
 }
 
-.num-input>hold-button.num-input__btn--up:hover>span,
-.num-input button.num-input__btn--up:hover>span {
+.num-input>hold-button.num-input-btn--up:hover>span,
+.num-input button.num-input-btn--up:hover>span {
   left: 3px;
 }
 
-.num-input>hold-button.num-input__btn--down>span,
-.num-input button.num-input__btn--down>span {
+.num-input>hold-button.num-input-btn--down>span,
+.num-input button.num-input-btn--down>span {
   transition: right .1s ease;
   right: 0;
 }
 
-.num-input>hold-button.num-input__btn--down:hover>span,
-.num-input button.num-input__btn--down:hover>span {
+.num-input>hold-button.num-input-btn--down:hover>span,
+.num-input button.num-input-btn--down:hover>span {
   right: 3px;
 }
 
@@ -251,7 +251,7 @@ option {
 
 /* ─── Gallery tap zones ─────────────────────────────────────────────────────── */
 
-.gallery__tap-zone {
+.gallery-tap-zone {
   position: fixed;
   top: 50% !important;
   height: 80vh;
@@ -296,7 +296,7 @@ option {
   border-radius: 4px;
 }
 
-#mobile-symbol-container.mobile-toolbar__symbols--active {
+#mobile-symbol-container.mobile-toolbar-symbols--active {
   height: 30px;
 }
 

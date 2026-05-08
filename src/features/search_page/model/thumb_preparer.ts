@@ -40,7 +40,7 @@ function addAddFavoriteButton(thumb: HTMLElement): void {
     return;
   }
   anchor.insertAdjacentHTML("beforeend", ADD_FAVORITE_IMAGE_HTML);
-  const button = anchor.querySelector(".post__action-btn--add");
+  const button = anchor.querySelector(".post-action-btn--add");
 
   if (!(button instanceof HTMLElement)) {
     return;

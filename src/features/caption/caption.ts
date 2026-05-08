@@ -98,7 +98,7 @@ function initializeFields(): void {
 
 function createHtmlElement(): void {
   captionWrapper = document.createElement("div");
-  captionWrapper.className = "caption__wrapper";
+  captionWrapper.className = "caption-wrapper";
   caption = document.createElement("div");
   caption.className = "caption caption--inactive u-no-select";
   captionWrapper.appendChild(caption);
@@ -194,14 +194,14 @@ function attachToThumb(thumb: HTMLElement | null): void {
 }
 
 function attachToThumbHelper(thumb: HTMLElement): void {
-  thumb.querySelectorAll(".caption__wrapper--clone").forEach(element => element.remove());
+  thumb.querySelectorAll(".caption-wrapper--clone").forEach(element => element.remove());
   caption.classList.remove("caption--inactive");
   caption.innerHTML = template;
   captionWrapper.removeAttribute("style");
   const captionIdHeader = caption.querySelector("#caption-id");
   const captionIdTag = document.createElement("li");
 
-  captionIdTag.className = "caption__tag";
+  captionIdTag.className = "caption-tag";
   captionIdTag.textContent = thumb.id;
   captionIdTag.onclick = (event): void => {
     event.preventDefault();
@@ -245,8 +245,8 @@ function animateRemoval(thumb: HTMLElement): void {
   }
   const captionClone = captionWrapperClone.children[0];
 
-  thumb.querySelectorAll(".caption__wrapper--clone").forEach(element => element.remove());
-  captionWrapperClone.classList.add("caption__wrapper--clone");
+  thumb.querySelectorAll(".caption-wrapper--clone").forEach(element => element.remove());
+  captionWrapperClone.classList.add("caption-wrapper--clone");
   captionWrapperClone.querySelectorAll("*").forEach(element => element.removeAttribute("id"));
 
   if (!(captionClone instanceof HTMLElement)) {
@@ -322,7 +322,7 @@ function addTag(tagCategory: TagCategory, tagName: string): void {
     return;
   }
 
-  tag.className = `caption__tag--${tagCategory} caption__tag`;
+  tag.className = `caption-tag--${tagCategory} caption-tag`;
   tag.textContent = replaceUnderscoresWithSpaces(tagName);
   header.insertAdjacentElement("afterend", tag);
   header.style.display = "block";
@@ -445,7 +445,7 @@ function addTags(tags: Set<string>, thumb: HTMLElement): void {
     return;
   }
 
-  if (thumb.getElementsByClassName("caption__tag").length > 1) {
+  if (thumb.getElementsByClassName("caption-tag").length > 1) {
     return;
   }
 

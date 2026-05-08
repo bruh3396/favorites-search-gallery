@@ -22,12 +22,12 @@
   height: 35px;
 }
 
-.gallery-menu__btn:hover {
+.gallery-menu-btn:hover {
   opacity: 1;
   transform: scale(1.25);
 }
 
-.gallery-menu__btn::after {
+.gallery-menu-btn::after {
   content: attr(data-hint);
   position: absolute;
   top: 50%;
@@ -44,7 +44,7 @@
   pointer-events: none;
 }
 
-.gallery-menu__btn:hover::after {
+.gallery-menu-btn:hover::after {
   opacity: 1;
   visibility: visible;
 }

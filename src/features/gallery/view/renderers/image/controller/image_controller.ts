@@ -41,11 +41,11 @@ class ImageController extends GalleryAbstractController {
   }
 
   public toggleZoomCursor(value: boolean): void {
-    this.container.classList.toggle("gallery__image-frame--zooming", value);
+    this.container.classList.toggle("gallery-image-frame--zooming", value);
   }
 
   public toggleZoom(value: boolean | undefined): boolean {
-    return this.container.classList.toggle("gallery__image-frame--zoomed", value);
+    return this.container.classList.toggle("gallery-image-frame--zoomed", value);
   }
 
   public zoomToPoint = (x: number, y: number): void => GalleryImageCanvas.zoomToPoint(x, y);

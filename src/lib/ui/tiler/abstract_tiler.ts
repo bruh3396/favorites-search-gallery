@@ -58,6 +58,7 @@ export abstract class AbstractTiler {
     this.container.classList.remove(this.layoutMode);
     this.onDeactivate();
   }
+
   protected onActivate(): void {}
   protected onDeactivate(): void {}
 }

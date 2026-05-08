@@ -31,7 +31,7 @@
   transform: translateX(0%);
 }
 
-.caption.caption--settled .caption__tag {
+.caption.caption--settled .caption-tag {
   pointer-events: all;
 }
 
@@ -43,34 +43,34 @@
   display: none;
 }
 
-.caption__tag {
+.caption-tag {
   pointer-events: none;
   color: #6cb0ff;
   word-wrap: break-word;
 }
 
-.caption__tag:hover {
+.caption-tag:hover {
   text-decoration-line: underline;
   cursor: pointer;
 }
 
-.caption__tag--artist {
+.caption-tag--artist {
   color: #f0a0a0;
 }
 
-.caption__tag--character {
+.caption-tag--character {
   color: #f0f0a0;
 }
 
-.caption__tag--copyright {
+.caption-tag--copyright {
   color: #EFA1CF;
 }
 
-.caption__tag--meta {
+.caption-tag--meta {
   color: #8FD9ED;
 }
 
-.caption__wrapper {
+.caption-wrapper {
   pointer-events: none;
   position: absolute !important;
   overflow: hidden;

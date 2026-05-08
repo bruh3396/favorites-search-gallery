@@ -3,7 +3,7 @@
 const SYMBOLS = ["-", "*", "_", "(", ")", "~"];
 const CONTAINER_ID = "mobile-symbol-container";
 const PARENT_ID = "left-favorites-panel";
-const ACTIVE_CLASS = "mobile-toolbar__symbols--active";
+const ACTIVE_CLASS = "mobile-toolbar-symbols--active";
 const BUTTON_BLUR_DELAY_MS = 0;
 const SEARCH_BLUR_DELAY_MS = 10;
 

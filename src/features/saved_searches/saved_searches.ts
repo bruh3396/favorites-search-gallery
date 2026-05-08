@@ -104,10 +104,10 @@ function saveSearch(newSavedSearch: string): void {
   editButton.title = "Edit";
   removeButton.title = "Delete";
   moveToTopButton.title = "Move to top";
-  savedSearchLabel.className = "saved-searches__item-label";
-  editButton.className = "saved-searches__item-btn--edit";
-  removeButton.className = "saved-searches__item-btn--remove";
-  moveToTopButton.className = "saved-searches__item-btn--top";
+  savedSearchLabel.className = "saved-searches-item-label";
+  editButton.className = "saved-searches-item-btn--edit";
+  removeButton.className = "saved-searches-item-btn--remove";
+  moveToTopButton.className = "saved-searches-item-btn--top";
   newListItem.appendChild(removeButton);
   newListItem.appendChild(editButton);
   newListItem.appendChild(moveToTopButton);
@@ -223,7 +223,7 @@ function inEditMode(): boolean {
 }
 
 function exportSavedSearches(): void {
-  const savedSearchString = Array.from(document.getElementsByClassName("saved-searches__item-label")).map(search => (search as HTMLElement).innerText).join("\n");
+  const savedSearchString = Array.from(document.getElementsByClassName("saved-searches-item-label")).map(search => (search as HTMLElement).innerText).join("\n");
 
   navigator.clipboard.writeText(savedSearchString);
   alert("Copied saved searches to clipboard");

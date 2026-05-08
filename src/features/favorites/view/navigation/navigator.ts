@@ -56,7 +56,7 @@ export function create(parameters: FavoritesPaginationParameters): void {
 }
 
 export function update(parameters: FavoritesPaginationParameters): void {
-  const pageNumberButtons = Array.from(document.getElementsByClassName("fav-menu__pagination-btn"));
+  const pageNumberButtons = Array.from(document.getElementsByClassName("fav-menu-pagination-btn"));
   const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesConfig.maxPageNumberButtons;
 
   if (!atMaxPageNumberButtons) {
@@ -102,7 +102,7 @@ function createNumberTraversalButton(currentPageNumber: number, pageNumber: numb
 
   button.id = `favorites-page-${pageNumber}`;
   button.title = `Goto page ${pageNumber}`;
-  button.className = "fav-menu__pagination-btn";
+  button.className = "fav-menu-pagination-btn";
   button.classList.toggle("selected", selected);
   button.onclick = (): void => {
     Events.favorites.pageSelected.emit(pageNumber);

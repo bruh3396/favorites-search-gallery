@@ -24,7 +24,7 @@
   visibility: hidden;
 }
 
-.post__tag--custom>a,
-.post__tag--custom {
+.post-tag--custom>a,
+.post-tag--custom {
   color: hotpink;
 }

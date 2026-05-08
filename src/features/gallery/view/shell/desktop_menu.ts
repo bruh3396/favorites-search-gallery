@@ -31,7 +31,7 @@ const menu: HTMLElement = document.createElement("div");
 let menuVisibilityTimeout: Timeout;
 
 menu.id = "gallery-menu";
-menu.className = "gallery__sub-menu";
+menu.className = "gallery-sub-menu";
 
 function loadPreferences(): void {
   if (Preferences.galleryMenuDockedLeft.value) {
@@ -88,7 +88,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
 
   button.innerHTML = template.icon;
   button.id = template.id;
-  button.className = "gallery-menu__btn";
+  button.className = "gallery-menu-btn";
   button.dataset.hint = template.hint;
   button.onclick = (): void => {
     handleGalleryMenuAction(template.action);

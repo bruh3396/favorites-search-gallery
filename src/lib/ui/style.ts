@@ -85,7 +85,7 @@ function setGalleryBackgroundColor(color: string): void {
           background: ${color} !important;
         }
 
-        .gallery-menu__btn:not(:hover) {
+        .gallery-menu-btn:not(:hover) {
           >svg {
               fill: ${color} !important;
               filter: invert(100%);
@@ -97,7 +97,7 @@ function setGalleryBackgroundColor(color: string): void {
 function setupTilerStyles(): void {
 
   const style = `
-  .tiler--row, .tiler--column, .tiler--column .tiler__column, .tiler--square, .tiler--grid {
+  .tiler--row, .tiler--column, .tiler--column .tiler--column--a, .tiler--square, .tiler--grid {
     gap: ${ThumbnailConfig.thumbnailSpacing}px !important;
   }
 

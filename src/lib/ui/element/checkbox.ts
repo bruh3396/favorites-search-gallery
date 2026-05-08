@@ -79,8 +79,8 @@ export function buildToggleSwitch(partial: Partial<CheckboxElement>): void {
   const toggleSwitchId = `${template.id}-toggle-switch`;
   const switchHtml = `
     <label id="${toggleSwitchId}" class="opt-toggle" title="${template.title}">
-        <span class="opt-toggle__track opt-toggle__track--round"></span>
-        <span class="opt-toggle__label">${template.textContent}</span>
+        <span class="opt-toggle-track opt-toggle-track--round"></span>
+        <span class="opt-toggle-label">${template.textContent}</span>
     </label>`;
 
   parent.insertAdjacentHTML(template.position, switchHtml);
