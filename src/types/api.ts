@@ -42,4 +42,8 @@ export type PostResponse =
   | { status: "deleted", id: string }
   | { status: "rate_limited", id: string }
 
-export type Tag = { type: number; } | null;
+export type EncodedTagCategory = number | null
+
+export type TagResponse =
+  | { status: "ok"; category: EncodedTagCategory }
+  | { status: "rate_limited"; }

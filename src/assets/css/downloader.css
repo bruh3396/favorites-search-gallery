@@ -23,15 +23,15 @@
 
 /* ─── Active state overrides ────────────────────────────────────────────────── */
 
-#download-menu.downloader--active #download-menu-buttons-start-download {
+#download-menu[data-active] #download-menu-buttons-start-download {
   display: none;
 }
 
-#download-menu.downloader--active #download-menu-options {
+#download-menu[data-active] #download-menu-options {
   display: none;
 }
 
-#download-menu.downloader--active #download-menu-status {
+#download-menu[data-active] #download-menu-status {
   flex: 1 1 100%;
 }
 

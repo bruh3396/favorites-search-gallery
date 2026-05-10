@@ -1,15 +1,15 @@
-import * as LayoutManager from "./layout";
+import * as ContentTiler from "./layout";
 import { EnhancedWheelEvent } from "../dom/input_types";
 import { FeatureQueries } from "../communication/feature_queries";
-import { LayoutMode } from "../../types/ui";
+import { Layout } from "../../types/ui";
 import { clamp } from "../../utils/number";
 import { sleep } from "../core/scheduling/promise";
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || LayoutManager.getLayout() === "tiler--native") {
+  if (!wheelEvent.originalEvent.shiftKey || ContentTiler.getLayout() === "tiler--native") {
     return;
   }
-  const usingRowLayout = LayoutManager.getLayout() === "tiler--row";
+  const usingRowLayout = ContentTiler.getLayout() === "tiler--row";
   const id = usingRowLayout ? "row-size" : "column-count";
   const input = document.getElementById(id);
 
@@ -45,7 +45,7 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
   }));
 }
 
-export async function hideUnusedLayoutSizer(layout: LayoutMode): Promise<void> {
+export async function hideUnusedLayoutSizer(layout: Layout): Promise<void> {
   await sleep(10);
   const rowSizeContainer = document.querySelector("#row-size-container, #search-page-row-size");
   const columnCountContainer = document.querySelector("#column-count-container, #search-page-column-count");

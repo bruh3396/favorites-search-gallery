@@ -1,8 +1,8 @@
 import { buildTagGroup, sortTagGroup } from "../../lib/search/parse/tag_group_parser";
 import { describe, expect, test } from "vitest";
 import { isMetadataTag, isWildcardTag, parseTag } from "../../lib/search/parse/tag_parser";
-import { ExactTag } from "../../lib/search/tag/exact_tag";
-import { WildcardTag } from "../../lib/search/tag/wildcard_tag";
+import { ExactTag } from "../../lib/search/tags/exact_tag";
+import { WildcardTag } from "../../lib/search/tags/wildcard_tag";
 
 const normalSearchTags = [
   "",

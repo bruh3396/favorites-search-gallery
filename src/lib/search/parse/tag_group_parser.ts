@@ -1,7 +1,7 @@
-import { AbstractTag } from "../tag/abstract_tag";
-import { CategorizedTags } from "../type/search_types";
-import { MetadataTag } from "../tag/metadata_tag";
-import { WildcardTag } from "../tag/wildcard_tag";
+import { AbstractTag } from "../tags/abstract_tag";
+import { CategorizedTags } from "../types/search_types";
+import { MetadataTag } from "../tags/metadata_tag";
+import { WildcardTag } from "../tags/wildcard_tag";
 import { parseTag } from "./tag_parser";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 

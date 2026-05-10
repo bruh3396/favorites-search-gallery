@@ -9,7 +9,7 @@ export class CoalescingExecutor<V> {
   constructor(
     private readonly batchSize: number,
     private readonly flushDelay: number,
-    private readonly onFlush: (batch: V[]) => void
+    private readonly executeBatch: (batch: V[]) => void
   ) {
     this.checkInterval = Math.round(Math.max(10, flushDelay / 5));
   }
@@ -36,7 +36,7 @@ export class CoalescingExecutor<V> {
 
   private flush(): void {
     try {
-      this.onFlush(this.batch);
+      this.executeBatch(this.batch);
     } finally {
       clearInterval(this.intervalHandle);
       this.intervalHandle = undefined;

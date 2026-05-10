@@ -7,7 +7,7 @@ import { Database } from "../core/storage/database";
 import { Favorite } from "../../types/favorite";
 import { ON_FAVORITES_PAGE } from "../environment/environment";
 import { Post } from "../../types/api";
-import { resolveBaseImageURL } from "./media_url_resolver";
+import { resolveBaseImageUrl } from "./media_url_resolver";
 
 const IMAGE_EXTENSIONS: ImageExtension[] = ["jpeg", "png", "jpg"];
 const DATABASE_NAME = "ImageExtensions";
@@ -24,7 +24,7 @@ function probeExtension(url: string, extension: string): Promise<boolean> {
 }
 
 async function probeExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
-  const baseUrl = resolveBaseImageURL(item);
+  const baseUrl = resolveBaseImageUrl(item);
 
   for (const extension of IMAGE_EXTENSIONS) {
     if (await probeExtension(baseUrl, extension)) {
@@ -76,7 +76,7 @@ export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExt
 }
 
 export function setExtensionFromPost(post: Post): void {
-  const extension = extractExtensionFromURL(post.fileURL);
+  const extension = extractExtensionFromUrl(post.fileURL);
 
   if (extension !== null && IMAGE_EXTENSIONS.includes(extension as ImageExtension)) {
     cache(post.id, extension as ImageExtension);
@@ -84,5 +84,5 @@ export function setExtensionFromPost(post: Post): void {
 }
 
 export const deleteExtensionsDatabase: () => void = () => database.delete();
-export const extractExtensionFromURL = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
+export const extractExtensionFromUrl = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
 export const setupExtensions = loadExtensionsIntoCache;

@@ -1,27 +1,27 @@
 import * as GalleryAutoplayController from "./features/autoplay/autoplay_controller";
-import * as GalleryClickFlow from "./flow/click_flow";
-import * as GalleryContentFlow from "./flow/content_flow";
+import * as GalleryClickFlow from "./flows/click_flow";
+import * as GalleryContentFlow from "./flows/content_flow";
 import * as GalleryControl from "./control/gallery_control";
-import * as GalleryInteractionFlow from "./flow/interaction_flow";
-import * as GalleryKeyFlow from "./flow/key_flow";
-import * as GalleryMenuFlow from "./flow/menu_flow";
+import * as GalleryInteractionFlow from "./flows/interaction_flow";
+import * as GalleryKeyFlow from "./flows/key_flow";
+import * as GalleryMenuFlow from "./flows/menu_flow";
 import * as GalleryModel from "./model/gallery_model";
-import * as GalleryMouseOverFlow from "./flow/mouseover_flow";
-import * as GalleryNavigationFlow from "./flow/navigation_flow";
-import * as GalleryPreloadFlow from "./flow/preload_flow";
-import * as GallerySearchPageFlow from "./flow/search_page_flow";
-import * as GalleryStateFlow from "./flow/state_flow";
-import * as GallerySwipeFlow from "./flow/swipe_flow";
-import * as GalleryTouchFlow from "./flow/touch_flow";
+import * as GalleryMouseOverFlow from "./flows/mouseover_flow";
+import * as GalleryNavigationFlow from "./flows/navigation_flow";
+import * as GalleryPreloadFlow from "./flows/preload_flow";
+import * as GallerySearchPageFlow from "./flows/search_page_flow";
+import * as GalleryStateFlow from "./flows/state_flow";
+import * as GallerySwipeFlow from "./flows/swipe_flow";
+import * as GalleryTouchFlow from "./flows/touch_flow";
 import * as GalleryView from "./view/gallery_view";
 import * as GalleryVisibleThumbObserver from "./control/visible_thumb_observer";
-import * as GalleryWheelFlow from "./flow/wheel_flow";
+import * as GalleryWheelFlow from "./flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { GALLERY_DISABLED } from "../../lib/environment/derived_environment";
 import { NavigationKey } from "../../types/input";
-import { executeByGalleryState } from "./flow/state_executor";
+import { executeByGalleryState } from "./flows/state_executor";
 
 export async function setupGallery(): Promise<void> {
   if (GALLERY_DISABLED) {
@@ -58,6 +58,8 @@ function setupSubFeatures(): void {
     onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo()
   });
   GalleryView.toggleVideoLooping(GalleryAutoplayController.isPaused() || !GalleryAutoplayController.isActive());
+  Events.gallery.enteredGallery.on(GalleryAutoplayController.startAutoplay);
+  Events.gallery.exitedGallery.on(GalleryAutoplayController.stopAutoplay);
 }
 
 function addEventListeners(): void {

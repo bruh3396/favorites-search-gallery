@@ -16,5 +16,5 @@ export const Rule34NetworkConfig = {
   favoriteAddThrottle: 200,
   favoriteRemoveThrottle: 1000,
 
-  searchPagePrefetchLength: 2
+  searchPagePrefetchLength: 4
 };

@@ -1,4 +1,10 @@
-import { Store } from "../../../types/store";
+export interface Store {
+  get<V>(key: string): V | null
+  set<V>(key: string, value: V): void
+  remove(key: string): void
+  keys(): string[]
+  clear(): void
+}
 
 export class LocalStorage implements Store {
   public get<V>(key: string): V | null {
@@ -30,3 +36,5 @@ export class LocalStorage implements Store {
     localStorage.clear();
   }
 }
+
+export const Storage: Store = new LocalStorage();

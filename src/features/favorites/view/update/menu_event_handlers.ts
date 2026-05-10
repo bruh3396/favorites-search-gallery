@@ -1,7 +1,7 @@
 import { Events } from "../../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { Storage } from "../../../../lib/core/storage/storage_instance";
+import { Storage } from "../../../../lib/core/storage/local_storage";
 import { insertStyle } from "../../../../lib/dom/injector";
 
 export function syncShowOnHoverFromGallery(value: boolean): void {
@@ -17,7 +17,7 @@ export function toggleOptionHotkeyHints(value: boolean): void {
   insertStyle(value ? "" : ".u-opt-hint {display:none;}", "opt-hint-visibility");
 }
 
-export function toggleUI(value: boolean): void {
+export function toggleUi(value: boolean): void {
   const menu = document.getElementById("favorites-search-gallery-menu");
   const panels = document.getElementById("favorites-search-gallery-menu-panels");
   const header = document.getElementById("header");

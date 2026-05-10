@@ -1,7 +1,7 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
+import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
 import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
-import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
 import { ADD_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { ClickCode } from "../../../types/input";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
@@ -25,8 +25,9 @@ function prepareThumb(thumb: HTMLElement): void {
   addAddFavoriteButton(thumb);
   addCanvas(thumb);
   thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
-  thumb.classList.remove("post--thumb");
-  thumb.classList.add("post");
+  thumb.classList.remove(RAW_THUMB_CLASS_NAME);
+  thumb.classList.add(ITEM_CLASS_NAME);
+  // thumb.classList.add(THUMB_CLASS_NAME);
 
   if (ON_MOBILE_DEVICE) {
     prepareMobileThumb(thumb);

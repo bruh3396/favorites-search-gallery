@@ -1,6 +1,6 @@
 import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../dom/input_types";
 import { Favorite, PageRelation } from "../../types/favorite";
-import { GalleryMenuAction, LayoutMode, PerformanceProfile } from "../../types/ui";
+import { GalleryMenuAction, Layout, PerformanceProfile } from "../../types/ui";
 import { MetadataMetric, Rating } from "../../types/search";
 import { Emitter } from "../core/scheduling/emitter";
 import { SearchPage } from "../../features/search_page/types/search_page";
@@ -17,36 +17,12 @@ export const Events = {
     favoritesFoundInDatabase: new StickyEmitter<boolean>(),
     favoritesLoaded: new StickyEmitter<void>(),
 
-    startedFetchingFavorites: new Emitter<void>(),
     searchResultsUpdated: new Emitter<void>(),
     favoriteRemoved: new Emitter<string>(),
     newFavoritesFound: new Emitter<Favorite[]>(),
     favoritesAddedToCurrentPage: new Emitter<HTMLElement[]>(),
+    resetConfirmed: new Emitter<void>(),
 
-    resultsPerPageChanged: new Emitter<number>(),
-    allowedRatingsChanged: new Emitter<Rating>(),
-    columnCountChanged: new Emitter<number>(),
-    rowSizeChanged: new Emitter<number>(),
-    layoutChanged: new Emitter<LayoutMode>(),
-    sortingMethodChanged: new Emitter<MetadataMetric>(),
-    performanceProfileChanged: new Emitter<PerformanceProfile>(),
-    showOnHoverToggled: new Emitter<boolean>(),
-    tooltipsToggled: new Emitter<boolean>(),
-    autoplayToggled: new Emitter<boolean>(),
-    hintsToggled: new Emitter<boolean>(),
-    optionsToggled: new Emitter<boolean>(),
-    removeButtonsToggled: new Emitter<boolean>(),
-    addButtonsToggled: new Emitter<boolean>(),
-    alternateLayoutToggled: new Emitter<boolean>(),
-    downloadButtonsToggled: new Emitter<boolean>(),
-    uiToggled: new Emitter<boolean>(),
-    darkThemeToggled: new Emitter<boolean>(),
-    headerToggled: new Emitter<boolean>(),
-    captionsToggled: new Emitter<boolean>(),
-    sortAscendingToggled: new Emitter<boolean>(),
-    galleryMenuToggled: new Emitter<boolean>(),
-    blacklistToggled: new Emitter<boolean>(),
-    infiniteScrollToggled: new Emitter<boolean>(),
     downloadButtonClicked: new Emitter<MouseEvent>(),
     setActiveFavoritesClicked: new Emitter<MouseEvent>(),
     resetActiveFavoritesClicked: new Emitter<MouseEvent>(),
@@ -55,12 +31,32 @@ export const Events = {
     searchButtonClicked: new Emitter<MouseEvent>(),
     clearButtonClicked: new Emitter<MouseEvent>(),
     resetButtonClicked: new Emitter<MouseEvent>(),
-    resetConfirmed: new Emitter<void>()
+
+    resultsPerPageChanged: new Emitter<number>(),
+    allowedRatingsChanged: new Emitter<Rating>(),
+    columnCountChanged: new Emitter<number>(),
+    rowSizeChanged: new Emitter<number>(),
+    layoutChanged: new Emitter<Layout>(),
+    sortingMethodChanged: new Emitter<MetadataMetric>(),
+    performanceProfileChanged: new Emitter<PerformanceProfile>(),
+
+    showOnHoverToggled: new Emitter<boolean>(),
+    tooltipsToggled: new Emitter<boolean>(),
+    autoplayToggled: new Emitter<boolean>(),
+    removeButtonsToggled: new Emitter<boolean>(),
+    addButtonsToggled: new Emitter<boolean>(),
+    alternateLayoutToggled: new Emitter<boolean>(),
+    downloadButtonsToggled: new Emitter<boolean>(),
+    captionsToggled: new Emitter<boolean>(),
+    sortAscendingToggled: new Emitter<boolean>(),
+    galleryMenuToggled: new Emitter<boolean>(),
+    blacklistToggled: new Emitter<boolean>(),
+    infiniteScrollToggled: new Emitter<boolean>()
   },
   gallery: {
     favoriteToggled: new Emitter<string>(),
     showOnHoverOverridden: new Emitter<boolean>(),
-    enteredGallery: new Emitter<void>(),
+    enteredGallery: new Emitter<HTMLElement>(),
     exitedGallery: new Emitter<void>(),
     visibleThumbsChanged: new Emitter<void>(),
     galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
@@ -79,7 +75,7 @@ export const Events = {
   },
   searchPage: {
     searchPageReady: new StickyEmitter<void>(),
-    layoutChanged: new Emitter<LayoutMode>(),
+    layoutChanged: new Emitter<Layout>(),
     searchPageCreated: new StickyEmitter<SearchPage>(),
     upscaleToggled: new Emitter<boolean>(),
     infiniteScrollToggled: new Emitter<boolean>(),

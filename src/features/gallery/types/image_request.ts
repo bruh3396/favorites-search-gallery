@@ -1,11 +1,8 @@
 import { FeatureQueries } from "../../../lib/communication/feature_queries";
 import { MediaType } from "../../../types/media";
-import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
-import { getPreviewURL } from "../../../lib/ui/dom";
+import { getPreviewUrl } from "../../../lib/ui/dom";
 import { getTagSetFromItem } from "../../../lib/dom/tags";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
-
-const imageBitmapCloseQueue = new ThrottledQueue(50);
 
 export function getFavoritePixelCount(id: string): number {
   const favorite = FeatureQueries.getFavorite.query(id);
@@ -24,7 +21,7 @@ export class ImageRequest {
 
   constructor(thumb: HTMLElement) {
     this.id = thumb.id;
-    this.thumbUrl = getPreviewURL(thumb) ?? "";
+    this.thumbUrl = getPreviewUrl(thumb) ?? "";
     this.thumb = thumb;
     this.bitmap = null;
     this.abortController = new AbortController();
@@ -70,9 +67,8 @@ export class ImageRequest {
     this.abortController.abort();
   }
 
-  public async close(): Promise<void> {
+  public close(): void {
     if (this.bitmap instanceof ImageBitmap) {
-      await imageBitmapCloseQueue.wait();
       this.bitmap.close();
     }
   }

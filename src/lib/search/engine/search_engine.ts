@@ -1,4 +1,4 @@
-import { AbstractTag } from "../tag/abstract_tag";
+import { AbstractTag } from "../tags/abstract_tag";
 import { InvertedIndex } from "../../core/data_structures/inverted_index";
 import { ResolvedSearchQuery } from "../query/resolved_search_query";
 import { SearchQuery } from "../query/search_query";

@@ -1,5 +1,5 @@
 import { sleep } from "../../../../lib/core/scheduling/promise";
-import { waitForDOMToLoad } from "../../../../lib/ui/dom";
+import { waitForDomToLoad } from "../../../../lib/ui/dom";
 
 function getOriginalFavoritesContent(): HTMLElement | null {
   return document.querySelector("#content, div:has(.thumb)");
@@ -18,7 +18,7 @@ function removeUnusedScripts(): void {
 }
 
 export async function cleanNativeFavoritesPage(): Promise<void> {
-  await waitForDOMToLoad();
+  await waitForDomToLoad();
   await sleep(20);
   removeNativeFavorites();
   removeUnusedScripts();

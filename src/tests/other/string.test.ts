@@ -342,7 +342,6 @@ describe("capitalize", () => {
   });
 });
 
-
 describe("removeLeadingHyphen", () => {
   test("empty", () => {
     expect(removeLeadingHyphens("")).toBe("");

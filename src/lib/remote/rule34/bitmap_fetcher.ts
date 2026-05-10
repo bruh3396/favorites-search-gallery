@@ -1,5 +1,5 @@
-import { convertImageURLToSampleURL, toWimgURL } from "../../media/media_url_transformer";
-import { resolveImageURL } from "../../media/media_url_resolver";
+import { convertImageUrlToSampleUrl, toWimgUrl } from "../../media/media_url_transformer";
+import { resolveImageUrl } from "../../media/media_url_resolver";
 
 export function fetchImageBitmap(url: string, abortController?: AbortController): Promise<ImageBitmap> {
   return fetch(url, { signal: abortController?.signal })
@@ -16,7 +16,7 @@ export function fetchImageBitmap(url: string, abortController?: AbortController)
 async function fetchWimgImageBitmap(url: string): Promise<ImageBitmap> {
   const image = new Image();
 
-  image.src = toWimgURL(url);
+  image.src = toWimgUrl(url);
   await new Promise<void>((resolve, reject) => {
     image.onload = (): void => resolve();
     image.onerror = (): void => reject(new Error(`Failed to load image: ${image.src}`));
@@ -25,10 +25,10 @@ async function fetchWimgImageBitmap(url: string): Promise<ImageBitmap> {
 }
 
 export async function fetchImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
-  return fetchImageBitmap(await resolveImageURL(thumb), abortController);
+  return fetchImageBitmap(await resolveImageUrl(thumb), abortController);
 }
 
 export async function fetchSampleImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
-  return fetchImageBitmap(convertImageURLToSampleURL(await resolveImageURL(thumb)), abortController)
+  return fetchImageBitmap(convertImageUrlToSampleUrl(await resolveImageUrl(thumb)), abortController)
     .catch(() => fetchImageBitmapFromThumb(thumb, abortController));
 }

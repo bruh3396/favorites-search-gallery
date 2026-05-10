@@ -1,9 +1,9 @@
 import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
-import { LayoutMode } from "../../../types/ui";
+import { Layout } from "../../../types/ui";
 
 export class ColumnTiler extends AbstractTiler {
-  public layoutMode: LayoutMode = "tiler--column";
+  public layout: Layout = "tiler--column";
   private columns: HTMLElement[];
   private columnCount: number;
 

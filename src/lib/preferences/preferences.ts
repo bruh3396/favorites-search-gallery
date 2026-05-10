@@ -1,4 +1,4 @@
-import { LayoutMode, PerformanceProfile } from "../../types/ui";
+import { Layout, PerformanceProfile } from "../../types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../environment/environment";
 import { Rating, SortingMethod } from "../../types/search";
 import { Preference } from "../core/storage/preference";
@@ -21,7 +21,7 @@ export const Preferences = {
   downloadButtonsVisible: new Preference("showDownloadButtons", false),
   excludeBlacklist: new Preference("excludeBlacklist", false),
   favoriteFinderId: new Preference("findFavorite", ""),
-  favoritesLayout: new Preference<LayoutMode>("layout", "tiler--column"),
+  favoritesLayout: new Preference<Layout>("layout", "tiler--column"),
   galleryMenuDockedLeft: new Preference("dockGalleryMenuLeft", ON_DESKTOP_DEVICE),
   galleryMenuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),
   galleryMenuPinned: new Preference("galleryMenuPinned", ON_MOBILE_DEVICE),
@@ -41,7 +41,7 @@ export const Preferences = {
   searchPageAddButtonsVisible: new Preference("showSearchPageAddFavoriteButtons", false),
   searchPageColumnCount: new Preference("searchPageColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
   searchPageInfiniteScroll: new Preference("searchPageInfiniteScroll", false),
-  searchPageLayout: new Preference<LayoutMode>("searchPageLayout", "tiler--column"),
+  searchPageLayout: new Preference<Layout>("searchPageLayout", "tiler--column"),
   searchPageRowSize: new Preference("searchPageRowSize", 7),
   searchPageUpscaleThumbs: new Preference("upscaleSearchPageThumbs", ON_DESKTOP_DEVICE),
   searchPages: new Preference("enableOnSearchPages", false),
@@ -51,7 +51,7 @@ export const Preferences = {
   sortingMethod: new Preference<SortingMethod>("sortingMethod", "default"),
   tagAliasing: new Preference("tagAliasing", false),
   tooltipsVisible: new Preference("showTooltip", false),
-  uiVisible: new Preference("showUI", true),
+  uiVisible: new Preference("showUi", true),
   videoMuted: new Preference("videoMuted", false),
   videoVolume: new Preference("videoVolume", 1)
 };

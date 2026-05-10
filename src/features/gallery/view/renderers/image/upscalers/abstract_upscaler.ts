@@ -12,16 +12,16 @@ import { isImage } from "../../../../../../lib/media/media_type_guards";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 import { transferredCanvasIds } from "../../../../types/offscreen_upscale_request";
 
-const batchUpscaleQueue = new ThrottledQueue(20);
+const batchUpscaleQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
 
 export abstract class GalleryAbstractUpscaler {
-  protected readonly upscaleQueue: ThrottledQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
+  private readonly upscaleQueue: ThrottledQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
   private upscaledIds: Set<string> = new Set();
 
   public upscale(request: ImageRequest): void {
     if (this.enabled() && this.requestIsValid(request)) {
-      this.finishUpscale(request);
       this.upscaledIds.add(request.id);
+      this.finishUpscale(request);
     }
   }
 
@@ -83,6 +83,7 @@ export abstract class GalleryAbstractUpscaler {
 
   private async directlyUpscale(request: ImageRequest): Promise<void> {
     if (await fetchBitmap(request)) {
+      await batchUpscaleQueue.wait();
       this.upscale(request);
     }
   }

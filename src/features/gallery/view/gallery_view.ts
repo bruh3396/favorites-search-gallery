@@ -1,147 +1,64 @@
 import * as GalleryDesktopMenu from "./shell/desktop_menu";
 import * as GalleryRenderer from "./renderers/renderer";
-import * as GalleryUI from "./shell/ui";
+import * as GalleryUi from "./shell/ui";
 import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { RemoveFavoriteStatus } from "../../../types/favorite";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { insertStyle } from "../../../lib/dom/injector";
 export { overGalleryMenu } from "./view_utils";
 
 export function showContentInGallery(thumb: HTMLElement): void {
   display(thumb);
-  GalleryUI.updateUiInGallery(thumb);
+  GalleryUi.updateUiInGallery(thumb);
 }
 
 export function display(thumb: HTMLElement): void {
   toggleGalleryVisibility(true);
   GalleryRenderer.render(thumb);
-  GalleryUI.show();
+  GalleryUi.show();
   GalleryRenderer.toggleZoom(false);
 }
 
 export function hide(): void {
   toggleGalleryVisibility(false);
   GalleryRenderer.hideAll();
-  GalleryUI.hide();
+  GalleryUi.hide();
 }
 
 export function enterGallery(thumb: HTMLElement): void {
   GalleryRenderer.render(thumb);
-  GalleryUI.enterGallery(thumb);
+  GalleryUi.enterGallery(thumb);
   toggleGalleryVisibility(true);
 }
 
 export function exitGallery(): void {
   GalleryRenderer.exitGallery();
-  GalleryUI.exitGallery();
+  GalleryUi.exitGallery();
   toggleGalleryVisibility(false);
   toggleZoomCursor(false);
   setTimeout(() => {
     GalleryRenderer.upscaleCachedThumbs();
-  }, 10);
-}
-
-export function preloadContentOutOfGallery(thumbs: HTMLElement[]): void {
-  GalleryRenderer.preloadContentOutOfGallery(thumbs);
-}
-
-export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  GalleryRenderer.preloadContentInGallery(thumbs);
-}
-
-export function handlePageChange(): void {
-  GalleryRenderer.handlePageChange();
-}
-
-export function handlePageChangeInGallery(): void {
-  GalleryRenderer.handlePageChangeInGallery();
-}
-
-export function handleMouseMoveInGallery(): void {
-  toggleCursor(true);
-}
-
-export function toggleBackgroundOpacity(): void {
-  GalleryUI.toggleBackgroundOpacity();
-}
-
-export function updateBackgroundOpacity(event: WheelEvent): void {
-  GalleryUI.updateBackgroundOpacityFromEvent(event);
-}
-
-export function showAddedFavoriteStatus(status: number): void {
-  GalleryUI.showAddedFavoriteStatus(status);
-}
-
-export function showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
-  GalleryUI.showRemovedFavoriteStatus(status);
-}
-
-export function toggleCursor(value: boolean): void {
-  GalleryUI.toggleCursor(value);
-}
-
-export function toggleVideoLooping(value: boolean): void {
-  GalleryRenderer.toggleVideoLooping(value);
-}
-
-export function restartVideo(): void {
-  GalleryRenderer.restartVideo();
-}
-
-export function toggleVideoPause(): void {
-  GalleryRenderer.toggleVideoPause();
-}
-
-export function toggleVideoMute(): void {
-  GalleryRenderer.toggleVideoMute();
-}
-
-export function presetAllCanvasDimensions(): void {
-  GalleryRenderer.presetCanvasDimensions(getAllContentThumbs());
-}
-
-export function presetCanvasDimensions(thumbs: HTMLElement[]): void {
-  GalleryRenderer.presetCanvasDimensions(thumbs);
-}
-
-export function toggleZoomCursor(value: boolean): void {
-  GalleryUI.toggleZoomCursor(value);
-  GalleryRenderer.toggleZoomCursor(value);
-}
-
-export function toggleZoom(value: boolean | undefined = undefined): boolean {
-  return GalleryRenderer.toggleZoom(value);
-}
-
-export function zoomToPoint(x: number, y: number): void {
-  GalleryRenderer.zoomToPoint(x, y);
-}
-
-export function correctOrientation(): void {
-  GalleryRenderer.correctOrientation();
-}
-
-export function downscaleAll(): void {
-  GalleryRenderer.downscaleAll();
-}
-
-export function upscaleCachedThumbs(): void {
-  GalleryRenderer.upscaleCachedThumbs();
+  }, 250);
 }
 
 export function setupGalleryView(): void {
   insertStyle(GALLERY_CSS);
   mountGallery();
-  GalleryUI.setupGalleryUI();
+  GalleryUi.setupGalleryUi();
 
   if (ON_DESKTOP_DEVICE) {
     GalleryDesktopMenu.setupDesktopGalleryMenu();
   }
 }
 
-export function appendToGallery(element: HTMLElement): void {
-  GalleryRoot.appendChild(element);
+export function toggleZoomCursor(value: boolean): void {
+  GalleryUi.toggleZoomCursor(value);
+  GalleryRenderer.toggleZoomCursor(value);
 }
+
+export * from "./renderers/renderer";
+export * from "./shell/ui";
+export const handleMouseMoveInGallery = (): void => GalleryUi.toggleCursor(true);
+export const presetAllCanvasDimensions = (): void => GalleryRenderer.presetCanvasDimensions(getAllContentThumbs());
+export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryRoot.appendChild(element);

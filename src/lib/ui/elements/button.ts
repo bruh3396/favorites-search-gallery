@@ -5,9 +5,9 @@ function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {
   return {
     ...defaultMenuElement,
     event: null,
-    hotkey: "",
     function: doNothing,
     triggerOnCreation: false,
+    hotkey: "",
     rightClickEnabled: false,
     ...partial
   };
@@ -27,19 +27,14 @@ export function buildButtonElement(partial: Partial<ButtonElement>): void {
   button.title = template.title;
   button.textContent = template.textContent;
 
-  if (template.event === null) {
-    return;
-  }
-  const eventEmitter = template.event;
-
   button.onclick = (event): void => {
     template.function(event);
-    eventEmitter.emit(event);
+    template.event?.emit(event);
   };
 
   if (template.rightClickEnabled) {
     button.oncontextmenu = (event): void => {
-      eventEmitter.emit(event);
+      template.event?.emit(event);
     };
   }
 }

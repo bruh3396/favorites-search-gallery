@@ -1,7 +1,7 @@
-import * as FavoritesAPI from "../../../../lib/remote/rule34/favorites_fetcher";
+import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
 import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
-import { FavoritesPageRequest } from "./favorites_page_request";
 import { FavoritesConfig } from "../../../../config/favorites_config";
+import { FavoritesPageRequest } from "./favorites_page_request";
 import { Rule34NetworkConfig } from "../../../../config/rule34_network_config";
 import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
 import { getIdFromThumb } from "../../../../lib/dom/thumb";
@@ -11,7 +11,7 @@ const isEmptyPage = (elements: HTMLElement[]): boolean => elements.length === 0;
 const isLastPage = (elements: HTMLElement[]): boolean => elements.length < FAVORITES_PER_PAGE;
 
 async function fetchNewFavoritesFromPage(storedIds: Set<string>, pageNumber: number, allNewElements: HTMLElement[]): Promise<boolean> {
-  const html = await FavoritesAPI.fetchFavoritesPage(new FavoritesPageRequest(pageNumber).realPageNumber);
+  const html = await FavoritesApi.fetchFavoritesPage(new FavoritesPageRequest(pageNumber).realPageNumber);
   const newElements = extractFavoriteElements(html).filter(element => !storedIds.has(getIdFromThumb(element)));
 
   if (isEmptyPage(newElements)) {

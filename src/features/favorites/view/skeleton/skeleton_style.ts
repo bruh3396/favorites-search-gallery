@@ -1,6 +1,6 @@
-import { LayoutMode } from "../../../../types/ui";
+import { Layout } from "../../../../types/ui";
 
-const skeletonStyles: Record<LayoutMode, Record<string, string>> = {
+const skeletonStyles: Record<Layout, Record<string, string>> = {
   "tiler--column": { "width": "100%" },
   "tiler--grid": { "width": "100%" },
   "tiler--row": {},
@@ -8,6 +8,6 @@ const skeletonStyles: Record<LayoutMode, Record<string, string>> = {
   "tiler--native": { "native": "" }
 };
 
-export function getSkeletonStyle(layoutMode: LayoutMode): Record<string, string> {
-  return skeletonStyles[layoutMode];
+export function getSkeletonStyle(layout: Layout): Record<string, string> {
+  return skeletonStyles[layout];
 }

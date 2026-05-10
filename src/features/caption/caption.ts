@@ -1,5 +1,5 @@
-import * as PostAPI from "../../lib/remote/api/post_fetcher";
-import * as TagAPI from "../../lib/remote/api/tag_fetcher";
+import * as PostApi from "../../lib/remote/api/post_fetcher";
+import * as TagApi from "../../lib/remote/api/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
 import { CAPTIONS_DISABLED } from "../../lib/environment/derived_environment";
 import CAPTION_CSS from "../../assets/css/caption.css";
@@ -12,8 +12,6 @@ import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { capitalize } from "../../utils/string/format";
 import { debounceLeading } from "../../lib/core/scheduling/rate_limiting";
-import { doNothing } from "../../lib/environment/constants";
-import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getImageFromThumb } from "../../lib/dom/thumb";
 import { getTagSetFromItem } from "../../lib/dom/tags";
 import { insertStyle } from "../../lib/dom/injector";
@@ -21,7 +19,6 @@ import { isOnlyDigits } from "../../utils/string/query";
 import { isTagCategory } from "../../types/guards";
 import { openSearchPage } from "../../lib/navigator";
 import { roundToTwoDecimalPlaces } from "../../utils/number";
-import { sleep } from "../../lib/core/scheduling/promise";
 
 const importantTagCategories: Set<TagCategory> = new Set([
   "copyright",
@@ -32,19 +29,10 @@ const importantTagCategories: Set<TagCategory> = new Set([
 const template = `
     <ul id="caption-list">
         <li id="caption-id" style="display: block;"><h6>ID</h6></li>
-        ${getCategoryHeaderHTML()}
+        ${getCategoryHeaderHtml()}
     </ul>
   `;
 const tagCategoryMappings: Record<string, TagCategory> = {};
-const pendingRequests: Set<string> = new Set();
-const settings = {
-  tagFetchDelayAfterFinishedLoading: 35,
-  tagFetchDelayBeforeFinishedLoading: 100,
-  maxPendingRequestsAllowed: 100
-};
-const flags = {
-  finishedLoading: false
-};
 const tagCategoryDecodings: Record<number, TagCategory> = {
   0: "general",
   1: "artist",
@@ -63,7 +51,7 @@ let problematicTags: Set<string>;
 let currentThumbId: string | null = null;
 let abortController: AbortController;
 
-function getCategoryHeaderHTML(): string {
+function getCategoryHeaderHtml(): string {
   let html = "";
 
   for (const category of importantTagCategories) {
@@ -81,13 +69,6 @@ function saveTagCategories(mappings: TagCategoryMapping[]): void {
 
 function isHidden(): boolean {
   return caption.classList.contains("hide") || caption.classList.contains("disabled") || caption.classList.contains("remove");
-}
-
-function getTagFetchDelay(): number {
-  if (flags.finishedLoading) {
-    return settings.tagFetchDelayAfterFinishedLoading;
-  }
-  return settings.tagFetchDelayBeforeFinishedLoading;
 }
 
 function initializeFields(): void {
@@ -164,16 +145,6 @@ function addCommonEventListeners(): void {
 }
 
 function addFavoritesPageEventListeners(): void {
-  Events.favorites.favoritesLoaded.on(() => {
-    flags.finishedLoading = true;
-  }, {
-    once: true
-  });
-  Events.favorites.favoritesFoundInDatabase.on(() => {
-    flags.finishedLoading = true;
-  }, {
-    once: true
-  });
   Events.favorites.pageChanged.on(debounceLeading<void>(() => {
     abortAllRequests("Changed Page");
     abortController = new AbortController();
@@ -422,9 +393,10 @@ function populateTags(thumb: HTMLElement): void {
   }
 
   if (unknownThumbTags.length > 0) {
-    findTagCategories(unknownThumbTags, () => {
+    findTagCategories(unknownThumbTags)
+    .then(() => {
       addTags(tagNames, thumb);
-    }, 3);
+    });
     return;
   }
   addTags(tagNames, thumb);
@@ -475,7 +447,7 @@ function allTagsAreProblematic(tags: string[]): boolean {
 
 async function correctAllProblematicTagsFromThumb(thumb: HTMLElement, onProblematicTagsCorrected: () => void): Promise<void> {
   await Events.favorites.favoritesLoaded.wait();
-  PostAPI.fetchPostPageHtml(thumb.id)
+  PostApi.fetchPostPageHtml(thumb.id)
     .then((html: string) => {
       const tagCategoryMap = getTagCategoryMapFromPostPage(html);
 
@@ -502,93 +474,28 @@ function getTagCategoryMapFromPostPage(html: string): Map<string, string> {
     }, new Map());
 }
 
-function setAsProblematic(tag: string): void {
-  // if (tagCategoryMappings[tag] === undefined && !Utils.customTags.has(tag)) {
-  if (tagCategoryMappings[tag] === undefined) {
-    problematicTags.add(tag);
-  }
-}
-
-export function findTagCategoriesOnPageChange(): void {
-  if (!flags.finishedLoading) {
-    return;
-  }
-  const tagNames = getTagNamesWithUnknownCategories(getAllContentThumbs().slice(0, 200));
-
-  findTagCategories(tagNames, doNothing, getTagFetchDelay());
-}
-
 function abortAllRequests(reason: string): void {
   abortController.abort(reason);
   abortController = new AbortController();
-  pendingRequests.clear();
 }
 
-async function findTagCategories(tagNames: string[], onAllCategoriesFound: () => void, fetchDelay: number): Promise<void> {
-  const lastTagName = tagNames[tagNames.length - 1];
-  const uniqueTagNames = new Set(tagNames);
+async function findTagCategories(tagNames: string[]): Promise<void> {
+  const uniqueTagNames = Array.from(new Set(tagNames));
+  const idTags = uniqueTagNames.filter(tag => isIdTag(tag));
+  const nonIdTags = uniqueTagNames.filter(tag => !isIdTag(tag));
 
-  for (const tagName of uniqueTagNames) {
-    if (isOnlyDigits(tagName) && tagName.length > 5) {
-      addTagCategoryMapping(tagName, "general");
-      continue;
-    }
-
-    if (pendingRequests.size > settings.maxPendingRequestsAllowed) {
-      abortAllRequests(`Too many pending requests: ${pendingRequests.size}`);
-      return;
-    }
-
-    if (tagName.includes("'")) {
-      setAsProblematic(tagName);
-    }
-
-    if (problematicTags.has(tagName)) {
-      if (tagName === lastTagName) {
-        onAllCategoriesFound();
-      }
-      continue;
-    }
-
-    try {
-      pendingRequests.add(tagName);
-      TagAPI.fetchTagFromAPI(tagName)
-        .then((tag) => {
-          pendingRequests.delete(tagName);
-
-          if (tag === null) {
-            setAsProblematic(tagName);
-            return;
-          }
-          addTagCategoryMapping(tagName, decodeTagCategory(tag.type));
-
-          if (tagName === lastTagName) {
-            onAllCategoriesFound();
-          }
-        }).catch(() => {
-          onAllCategoriesFound();
-        });
-    } catch (error) {
-      pendingRequests.delete(tagName);
-      console.error(error);
-    }
-    await sleep(fetchDelay ?? getTagFetchDelay());
+  for (const id of idTags) {
+    addTagCategoryMapping(id, "general");
   }
+  await Promise.all(nonIdTags.map(tag => async(): Promise<void> => {
+    const category = await TagApi.fetchTagCategoryFromApi(tag);
+
+    addTagCategoryMapping(tag, decodeTagCategory(category ?? 0));
+  }));
 }
 
-function getTagNamesWithUnknownCategories(thumbs: HTMLElement[]): string[] {
-  const tagNamesWithUnknownCategories: Set<string> = new Set();
-
-  for (const thumb of thumbs) {
-    const tagNames = Array.from(getTagSetFromItem(thumb));
-
-    for (const tagName of tagNames) {
-      if (tagCategoryIsUnknown(thumb, tagName)) {
-        tagNamesWithUnknownCategories.add(tagName);
-      }
-    }
-  }
-  return Array.from(tagNamesWithUnknownCategories);
+function isIdTag(tagName: string): boolean {
+  return FeatureQueries.getFavorite.query(tagName) !== undefined;
 }
 
 function tagCategoryIsUnknown(thumb: HTMLElement, tagName: string): boolean {

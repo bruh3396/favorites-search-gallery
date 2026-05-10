@@ -30,11 +30,11 @@ export function setupSearchPageLoader(): void {
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
   const nextPageNumber = getAdjacentSearchPageNumber(direction);
-  const searchPage = searchPages.get(nextPageNumber);
 
   if (nextPageNumber < 0) {
     return null;
   }
+  const searchPage = searchPages.get(nextPageNumber);
 
   if (searchPage === undefined || searchPage.isEmpty) {
     fetchedPageNumbers.delete(nextPageNumber);

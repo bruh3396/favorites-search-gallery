@@ -1,5 +1,5 @@
 import { Favorite } from "../../../types/favorite";
-import { LayoutMode } from "../../../types/ui";
+import { Layout } from "../../../types/ui";
 import { NavigationKey } from "../../../types/input";
 
 export interface NewFavorites {
@@ -24,10 +24,10 @@ export const emptyFavoritesPageParameters = {
 };
 
 export interface FavoritesPresentationFlow {
-  present: (results: Favorite[]) => void;
-  onLayoutChanged: (layout: LayoutMode) => void;
-  reveal: (id: string) => void;
-  reset: () => void;
-  handleNewSearchResults: () => void;
-  presentWhileNavigatingGallery: (direction: NavigationKey) => boolean;
+  present: (results: Favorite[]) => void
+  onLayoutChanged: (layout: Layout) => void
+  reveal: (id: string) => void
+  reset: () => void
+  handleNewSearchResults: () => void
+  presentWhileNavigatingGallery: (direction: NavigationKey) => boolean
 }

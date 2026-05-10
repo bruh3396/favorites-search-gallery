@@ -28,6 +28,6 @@ export function getFirstResults(favorites: Favorite[]): Favorite[] {
   return favorites.slice(0, FavoritesConfig.infiniteScrollBatchSize);
 }
 
-export function getThumbURLsToPreload(favorites: Favorite[]): string[] {
+export function getThumbUrlsToPreload(favorites: Favorite[]): string[] {
   return collectUnrendered(favorites, FavoritesConfig.infiniteScrollPreloadCount, f => f.thumbUrl);
 }

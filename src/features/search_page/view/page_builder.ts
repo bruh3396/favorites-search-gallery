@@ -1,4 +1,4 @@
-import * as Layout from "../../../lib/layout/layout";
+import * as ContentTiler from "../../../lib/layout/layout";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import SEARCH_PAGE_INFINITE_SCROLL_CSS from "../../../assets/css/search_page_infinite_scroll.css";
 import { SearchPage } from "../types/search_page";
@@ -29,7 +29,7 @@ function updateAddressBar(searchPage: SearchPage): void {
 }
 
 export function createSearchPage(searchPage: SearchPage): void {
-  Layout.tile(searchPage.thumbs);
+  ContentTiler.tile(searchPage.thumbs);
   updatePaginator(searchPage);
   updateAddressBar(searchPage);
 }

@@ -1,6 +1,6 @@
 import { Fruit, index } from "./fruit_search_fixtures";
 import { describe, expect, test } from "vitest";
-import { AbstractTag } from "../../lib/search/tag/abstract_tag";
+import { AbstractTag } from "../../lib/search/tags/abstract_tag";
 import { ResolvedSearchQuery } from "../../lib/search/query/resolved_search_query";
 
 function getRawTagValue(searchTag: AbstractTag): string {

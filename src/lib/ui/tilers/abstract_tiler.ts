@@ -1,16 +1,16 @@
-import { LayoutMode } from "../../../types/ui";
+import { Layout } from "../../../types/ui";
 import { insertStyle } from "../../dom/injector";
 
 export abstract class AbstractTiler {
   protected readonly container: HTMLElement;
-  public readonly abstract layoutMode: LayoutMode;
+  public readonly abstract layout: Layout;
 
   constructor(container: HTMLElement) {
     this.container = container;
   }
 
   public get enabled(): boolean {
-    return this.container.classList.contains(this.layoutMode);
+    return this.container.classList.contains(this.layout);
   }
 
   public get disabled(): boolean {
@@ -29,10 +29,10 @@ export abstract class AbstractTiler {
 
   public setColumnCount(columnCount: number): void {
     insertStyle(`
-        #${this.container.id}.${this.layoutMode} {
+        #${this.container.id}.${this.layout} {
           grid-template-columns: repeat(${columnCount}, 1fr) !important;
         }
-        `, `${this.container.id}-${this.layoutMode}-column-count`);
+        `, `${this.container.id}-${this.layout}-column-count`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -51,11 +51,11 @@ export abstract class AbstractTiler {
   }
 
   public activate(): void {
-    this.container.classList.add(this.layoutMode);
+    this.container.classList.add(this.layout);
     this.onActivate();
   }
   public deactivate(): void {
-    this.container.classList.remove(this.layoutMode);
+    this.container.classList.remove(this.layout);
     this.onDeactivate();
   }
 

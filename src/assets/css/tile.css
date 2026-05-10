@@ -13,9 +13,34 @@
   grid-gap: 0.5cqw;
 }
 
+.tiler--row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tiler--native {
+  display: flex;
+  flex-flow: wrap;
+  gap: 25px 10px;
+}
+
+
 .tiler--grid .post-action-btn,
 .tiler--square .post-action-btn {
   width: 30%;
+}
+
+.tiler--row .post-action-btn {
+  height: 30%;
+}
+
+.tiler--column .post-action-btn {
+  width: 30%;
+}
+
+.tiler--native .post-action-btn {
+  width: 70px;
+  aspect-ratio: 1;
 }
 
 .tiler--square .post,
@@ -46,10 +71,6 @@
   object-fit: cover;
 }
 
-.tiler--row {
-  display: flex;
-  flex-wrap: wrap;
-}
 
 .tiler--row .post,
 .tiler--row .post--thumb {
@@ -90,10 +111,6 @@
   object-fit: cover;
 }
 
-.tiler--row .post-action-btn {
-  height: 30%;
-}
-
 .tiler--column {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
@@ -109,19 +126,4 @@
 .tiler--column .tiler--column--a .post--thumb {
   border-radius: var(--radius);
   overflow: hidden;
-}
-
-.tiler--column .post-action-btn {
-  width: 30%;
-}
-
-.tiler--native {
-  display: flex;
-  flex-flow: wrap;
-  gap: 25px 10px;
-}
-
-.tiler--native .post-action-btn {
-  width: 70px;
-  aspect-ratio: 1;
 }

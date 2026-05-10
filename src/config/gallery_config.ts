@@ -19,12 +19,13 @@ export const GalleryConfig = {
     return ON_SEARCH_PAGE ? GalleryConfig.mainCanvasResolutions.search : GalleryConfig.mainCanvasResolutions.favorites;
   },
 
-  imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 850,
+  imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 900,
   searchPagePreloadedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_SEARCH_PAGE,
   minimumPreloadedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 0 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 0 : 2,
   maxVisibleThumbsBeforeStoppingPreload: 175,
+  preloadWaitingTimeout: 1000,
   preloadingEnabled: true,
   gifPreloadingEnabled: false,
   preloadOutsideGalleryOnSearchPage: true,

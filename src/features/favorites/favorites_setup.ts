@@ -1,5 +1,5 @@
 import * as FavoritesControl from "./control/favorites_control";
-import * as FavoritesDownloadController from "./features/downloader/downloader_menu";
+import * as FavoritesDownloadController from "./features/downloader/menu";
 import * as FavoritesInterFeatureFlow from "./flows/inter_feature_flow";
 import * as FavoritesLoadFlow from "./flows/load_flow";
 import * as FavoritesModel from "./model/favorites_model";

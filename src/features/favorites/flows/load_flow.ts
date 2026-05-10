@@ -2,7 +2,7 @@ import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesPresentationFlow from "./presentation_flow";
 import * as FavoritesSearchFlow from "./search_flow";
 import * as FavoritesView from "../view/favorites_view";
-import * as PostAPI from "../../../lib/remote/api/post_fetcher";
+import * as PostApi from "../../../lib/remote/api/post_fetcher";
 import { Events } from "../../../lib/communication/events";
 import { NewFavorites } from "../types/favorite_types";
 import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
@@ -38,7 +38,7 @@ async function loadNewFavorites(): Promise<NewFavorites | null> {
     FavoritesView.setTemporaryStatus("No new favorites found");
     return null;
   }
-  FavoritesView.insertNewSearchResultsOnReload(results);
+  FavoritesView.addToTop(results);
   FavoritesView.notifyNewFavoritesFound(results);
   await FavoritesModel.storeNewFavorites(results.newFavorites);
   return results;
@@ -56,10 +56,9 @@ function showNewFavorites(results: NewFavorites | null): void {
 
 async function fetchAllFavorites(): Promise<void> {
   Events.favorites.favoritesFoundInDatabase.emit(false);
-  PostAPI.setPostPageGate(Events.favorites.favoritesLoaded.wait());
+  PostApi.setPostPageGate(Events.favorites.favoritesLoaded.wait());
   fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
   FavoritesPresentationFlow.presentNothing();
-  Events.favorites.startedFetchingFavorites.emit();
   await FavoritesModel.fetchAllFavorites(handleFetchedFavoritesPage);
   FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeAllFavorites();

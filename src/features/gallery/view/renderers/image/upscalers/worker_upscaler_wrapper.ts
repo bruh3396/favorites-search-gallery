@@ -15,14 +15,10 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   }
 
   protected reset(): void {
-    this.upscaleQueue.reset();
     this.worker.postMessage({ action: "clear" });
   }
 
   protected async finishUpscale(request: ImageRequest): Promise<void> {
-    if (!(this.upscaleQueue.wait(request.id))) {
-      return;
-    }
     this.sendRequestToWorker(await getUpscaleRequest(request));
   }
 

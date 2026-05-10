@@ -4,7 +4,7 @@ import { insertStyle } from "../../../../lib/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 import { toggleFavoritesOptions } from "../../view/update/menu_event_handlers";
 
-const stickyMenuCSS = `
+const stickyMenuStyle = `
   #favorites-search-gallery-content {
     margin-top: 65px;
     margin-bottom: 65px;
@@ -15,7 +15,7 @@ const stickyMenuCSS = `
   }`;
 
 async function onHeaderVisibilityChanged(headerVisible: boolean): Promise<void> {
-  insertStyle(headerVisible ? "" : stickyMenuCSS, "fav-menu-sticky");
+  insertStyle(headerVisible ? "" : stickyMenuStyle, "fav-menu-sticky");
   const optionsMenu = document.getElementById("left-favorites-panel-bottom-row");
 
   Content.classList.remove("fav-menu--sticky");

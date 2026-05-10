@@ -6,11 +6,11 @@ import AUTOPLAY_CSS from "../../../../assets/css/autoplay.css";
 import AUTOPLAY_HTML from "../../../../assets/html/autoplay.html";
 import { Events } from "../../../../lib/communication/events";
 import { NavigationKey } from "../../../../types/input";
-import { NumberComponent } from "../../../../lib/ui/element/number_component";
+import { NumberComponent } from "../../../../lib/ui/elements/number_component";
 import { Overlays } from "../../../../lib/shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { Timer } from "../../../../lib/core/scheduling/timer";
-import { createObjectURLFromSvg } from "../../../../lib/navigator";
+import { createObjectUrlFromSvg } from "../../../../lib/navigator";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
 
@@ -43,11 +43,11 @@ type AutoplayMenuElements = {
 }
 
 const menuIcons = {
-  play: createObjectURLFromSvg(Icons.PLAY),
-  pause: createObjectURLFromSvg(Icons.PAUSE),
-  changeDirection: createObjectURLFromSvg(Icons.CHANGE_DIRECTION),
-  changeDirectionAlt: createObjectURLFromSvg(Icons.CHANGE_DIRECTION_2),
-  tune: createObjectURLFromSvg(Icons.TUNE)
+  play: createObjectUrlFromSvg(Icons.PLAY),
+  pause: createObjectUrlFromSvg(Icons.PAUSE),
+  changeDirection: createObjectUrlFromSvg(Icons.CHANGE_DIRECTION),
+  changeDirectionAlt: createObjectUrlFromSvg(Icons.CHANGE_DIRECTION_2),
+  tune: createObjectUrlFromSvg(Icons.TUNE)
 };
 
 const config = {
@@ -86,7 +86,7 @@ export function setupAutoplay(inEvents: AutoplayEvents): void {
   setMenuIconImageSources();
   setupNumberComponents();
   addEventListeners();
-  loadAutoplaySettingsIntoUI();
+  loadAutoplaySettingsIntoUi();
 }
 
 export function isPaused(): boolean {
@@ -143,8 +143,8 @@ function initializeTimers(): void {
 
 function insertHtml(): void {
   insertMenuHtml();
-  insertImageProgressHTML();
-  insertVideoProgressHTML();
+  insertImageProgressHtml();
+  insertVideoProgressHtml();
 }
 
 function insertMenuHtml(): void {
@@ -152,7 +152,7 @@ function insertMenuHtml(): void {
   Overlays.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
 }
 
-function insertImageProgressHTML(): void {
+function insertImageProgressHtml(): void {
   insertStyle(`
       #autoplay-image-progress-bar.animated {
           transition: width ${config.imageViewDurationInSeconds}s linear;
@@ -165,7 +165,7 @@ function insertImageProgressHTML(): void {
       `, "autoplay-image-progress");
 }
 
-function insertVideoProgressHTML(): void {
+function insertVideoProgressHtml(): void {
   insertStyle(`
       #autoplay-video-progress-bar.animated {
           transition: width ${config.minimumVideoDurationInSeconds}s linear;
@@ -252,7 +252,7 @@ function setMenuIconImageSources(): void {
   ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.autoplayForward.value);
 }
 
-function loadAutoplaySettingsIntoUI(): void {
+function loadAutoplaySettingsIntoUi(): void {
   ui.settingsMenu.imageDurationInput.value = String(config.imageViewDurationInSeconds);
   ui.settingsMenu.minimumVideoDurationInput.value = String(config.minimumVideoDurationInSeconds);
 }
@@ -391,7 +391,7 @@ function setImageViewDuration(): void {
   config.imageViewDuration = duration;
   imageViewTimer.waitTime = duration;
   ui.settingsMenu.imageDurationInput.value = String(config.imageViewDurationInSeconds);
-  insertImageProgressHTML();
+  insertImageProgressHtml();
 }
 
 function setMinimumVideoViewDuration(): void {
@@ -406,7 +406,7 @@ function setMinimumVideoViewDuration(): void {
   config.minimumVideoDuration = duration;
   videoViewTimer.waitTime = duration;
   ui.settingsMenu.minimumVideoDurationInput.value = String(config.minimumVideoDurationInSeconds);
-  insertVideoProgressHTML();
+  insertVideoProgressHtml();
 }
 
 export function startViewTimer(thumb: HTMLElement | null): void {

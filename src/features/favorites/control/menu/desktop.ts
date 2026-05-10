@@ -1,10 +1,10 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../lib/ui/element_types";
 import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../lib/environment/derived_environment";
-import { LayoutMode, PerformanceProfile } from "../../../../types/ui";
-import { buildCheckboxElement, buildCheckboxOption } from "../../../../lib/ui/element/checkbox";
+import { Layout, PerformanceProfile } from "../../../../types/ui";
+import { buildCheckboxElement, buildCheckboxOption } from "../../../../lib/ui/elements/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUI } from "../../view/update/menu_event_handlers";
+import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../view/update/menu_event_handlers";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { GeneralConfig } from "../../../../config/general_config";
@@ -12,11 +12,11 @@ import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { ThumbnailConfig } from "../../../../config/thumbnail_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
-import { buildButtonElement } from "../../../../lib/ui/element/button";
-import { buildNumberComponent } from "../../../../lib/ui/element/number_input";
-import { buildSelectElement } from "../../../../lib/ui/element/select";
+import { buildButtonElement } from "../../../../lib/ui/elements/button";
+import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
+import { buildSelectElement } from "../../../../lib/ui/elements/select";
 import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../../lib/ui/element/element_utils";
+import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 import { reloadWindow } from "../../../../utils/browser/window";
 
 const buttons: Partial<ButtonElement>[] = [
@@ -92,8 +92,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     preference: Preferences.optionsVisible,
     hotkey: "O",
     function: toggleFavoritesOptions,
-    triggerOnCreation: true,
-    event: Events.favorites.optionsToggled
+    triggerOnCreation: true
   },
   {
     id: "show-ui",
@@ -102,9 +101,8 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Toggle UI",
     preference: Preferences.uiVisible,
     hotkey: "U",
-    function: toggleUI,
-    triggerOnCreation: true,
-    event: Events.favorites.uiToggled
+    function: toggleUi,
+    triggerOnCreation: true
   },
   {
     id: "enhance-search-pages",
@@ -207,7 +205,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Show hotkeys",
     preference: Preferences.hintsEnabled,
     hotkey: "H",
-    event: Events.favorites.hintsToggled,
     triggerOnCreation: true,
     function: toggleOptionHotkeyHints
   },
@@ -258,7 +255,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Toggle site header",
     preference: Preferences.headerEnabled,
     hotkey: "",
-    event: Events.favorites.headerToggled,
     triggerOnCreation: true,
     function: toggleHeader
   },
@@ -269,7 +265,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Toggle dark theme",
     defaultValue: usingDarkTheme(),
     hotkey: "",
-    event: Events.favorites.darkThemeToggled,
     function: toggleDarkTheme
   },
   {
@@ -323,7 +318,7 @@ const simpleCheckboxes: Partial<CheckboxElement>[] = [
   }
 ];
 
-const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -352,7 +347,7 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
     event: Events.favorites.layoutChanged,
     function: hideUnusedLayoutSizer,
     triggerOnCreation: true,
-    options: new Map<LayoutMode, string>([
+    options: new Map<Layout, string>([
       ["tiler--column", "Waterfall"],
       ["tiler--row", "River"],
       ["tiler--square", "Square"],

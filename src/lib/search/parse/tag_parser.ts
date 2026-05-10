@@ -1,9 +1,9 @@
-import { AbstractTag } from "../tag/abstract_tag";
-import { ExactTag } from "../tag/exact_tag";
-import { MetadataSearchExpression } from "../type/metadata_search_expression";
-import { MetadataTag } from "../tag/metadata_tag";
-import { WildcardMatchType } from "../type/search_types";
-import { WildcardTag } from "../tag/wildcard_tag";
+import { AbstractTag } from "../tags/abstract_tag";
+import { ExactTag } from "../tags/exact_tag";
+import { MetadataSearchExpression } from "../types/metadata_search_expression";
+import { MetadataTag } from "../tags/metadata_tag";
+import { WildcardMatchType } from "../types/search_types";
+import { WildcardTag } from "../tags/wildcard_tag";
 import { escapeParenthesis } from "../../../utils/string/format";
 
 const unmatchableRegex = /^\b$/;

@@ -1,13 +1,13 @@
 import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./skeleton_animation";
-import { LayoutMode } from "../../../../types/ui";
+import { Layout } from "../../../../types/ui";
 import { ThumbnailConfig } from "../../../../config/thumbnail_config";
 import { getSkeletonStyle } from "./skeleton_style";
 
 export class SkeletonItem {
   public readonly element: HTMLElement;
 
-  constructor(layout: LayoutMode) {
+  constructor(layout: Layout) {
     this.element = document.createElement("div");
     this.setStyle(getSkeletonStyle(layout));
   }

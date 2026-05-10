@@ -6,7 +6,7 @@ import { Events } from "../../../lib/communication/events";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { Post } from "../../../types/api";
-import { buildPostPageURL } from "../../../lib/remote/url/page_url_builder";
+import { buildPostPageUrl } from "../../../lib/remote/url/page_url_builder";
 import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
 import { favoriteElementTemplate } from "./favorite_element_template";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
@@ -50,7 +50,7 @@ export class FavoriteElement {
   }
 
   private setupNavigationClick(): void {
-    this.container.href = buildPostPageURL(this.root.id);
+    this.container.href = buildPostPageUrl(this.root.id);
 
     if (ON_DESKTOP_DEVICE) {
       this.container.onclick = (event: MouseEvent): void => this.handleClick(event);
@@ -66,7 +66,6 @@ export class FavoriteElement {
 
   private handleFavoriteButtonClick(event: MouseEvent): void {
     event.stopPropagation();
-    console.log(event.button, ClickCode.LEFT, ClickCode.RIGHT);
 
     if (event.button !== ClickCode.LEFT) {
       return;

@@ -7,7 +7,7 @@ import { Preferences } from "../preferences/preferences";
 import SKELETON_CSS from "../../assets/css/skeleton.css";
 import TILE_CSS from "../../assets/css/tile.css";
 import { ThumbnailConfig } from "../../config/thumbnail_config";
-import { buildStyleSheetURL } from "../remote/url/action_url_builder";
+import { buildStyleSheetUrl } from "../remote/url/action_url_builder";
 import { insertStyle } from "../dom/injector";
 import { yieldControl } from "../core/scheduling/promise";
 
@@ -20,7 +20,7 @@ function setStyleSheet(url: string): void {
 }
 
 function toggleDarkStyleSheet(useDark: boolean): void {
-  setStyleSheet(buildStyleSheetURL(ON_MOBILE_DEVICE ? "mobile" : "desktop", useDark));
+  setStyleSheet(buildStyleSheetUrl(ON_MOBILE_DEVICE ? "mobile" : "desktop", useDark));
 }
 
 function toggleGreenGradientClasses(useDark: boolean): void {

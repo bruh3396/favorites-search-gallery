@@ -1,4 +1,4 @@
-import { LayoutMode } from "../../../../types/ui";
+import { Layout } from "../../../../types/ui";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SkeletonItem } from "./skeleton_item";
 import { getLayout } from "../../../../lib/layout/layout";
@@ -9,7 +9,7 @@ export class Skeleton {
   private readonly items: SkeletonItem[];
   private readonly itemCount;
 
-  constructor(layout: LayoutMode, itemCount = DEFAULT_ITEM_COUNT) {
+  constructor(layout: Layout, itemCount = DEFAULT_ITEM_COUNT) {
     this.itemCount = itemCount;
     this.items = this.createItems(layout);
   }
@@ -18,7 +18,7 @@ export class Skeleton {
     return this.items.map((item) => item.element);
   }
 
-  private createItems(layout: LayoutMode): SkeletonItem[] {
+  private createItems(layout: Layout): SkeletonItem[] {
     return Array.from({length: this.itemCount}, () => new SkeletonItem(layout));
   }
 }

@@ -19,10 +19,14 @@ export class CoalescingResolver<V> {
 
   public resolve(key: string): Promise<V> {
     return new Promise<V>((resolve, reject) => {
-      if (this.pending.has(key)) {
-        this.join(key, { resolve, reject });
+      const promises = this.pending.get(key);
+      const promise = { resolve, reject };
+
+      if (promises === undefined) {
+        this.pending.set(key, [promise]);
+        this.executor.add(key);
       } else {
-        this.register(key, { resolve, reject });
+        promises.push(promise);
       }
     });
   }
@@ -33,15 +37,6 @@ export class CoalescingResolver<V> {
     }).catch((error: unknown) => {
       this.rejectAll(keys, error);
     });
-  }
-
-  private register(key: string, resolver: PromiseCallback<V>): void {
-    this.pending.set(key, [resolver]);
-    this.executor.add(key);
-  }
-
-  private join(key: string, resolver: PromiseCallback<V>): void {
-    this.pending.get(key)!.push(resolver);
   }
 
   private resolveAll(data: Record<string, V>): void {

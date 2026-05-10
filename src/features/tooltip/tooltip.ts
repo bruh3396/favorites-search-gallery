@@ -13,6 +13,7 @@ import { parseTagGroups } from "../../lib/search/parse/tag_group_parser";
 import { randomPurpleColor } from "../../utils/string/color";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
+const overlayId = "overlay-tooltip";
 let tooltip: HTMLElement;
 let defaultTransition: string;
 let visible: boolean;
@@ -27,8 +28,7 @@ export function setupTooltip(): void {
   }
   visible = Preferences.tooltipsVisible.value;
   insertStyle(TOOLTIP_CSS);
-  Overlays.insertAdjacentHTML("afterbegin", `<div id="tooltip-container">
-</div>`);
+  Overlays.insertAdjacentHTML("afterbegin", `<div id=${overlayId}></div>`);
   tooltip = createTooltip();
   defaultTransition = tooltip.style.transition;
   tagColorCodes = {};
@@ -39,9 +39,9 @@ export function setupTooltip(): void {
 
 function createTooltip(): HTMLElement {
   const t = document.createElement("span");
-  const container = document.getElementById("tooltip-container");
+  const container = document.getElementById(overlayId);
 
-  t.className = "theme--light";
+  t.className = "tooltip theme--light";
   t.id = "tooltip";
 
   if (container !== null) {
@@ -121,7 +121,7 @@ function setPosition(image: HTMLImageElement): void {
 
   tooltip.style.top = `${rect.bottom + offset + window.scrollY}px`;
   tooltip.style.left = `${rect.x - 3}px`;
-  tooltip.classList.toggle("visible", true);
+  tooltip.dataset.visible = "true";
   tooltipRect = tooltip.getBoundingClientRect();
   const toolTipIsClippedAtBottom = tooltipRect.bottom > window.innerHeight;
 
@@ -160,7 +160,7 @@ function show(image: HTMLImageElement): void {
 
 function hide(): void {
   tooltip.style.transition = "none";
-  tooltip.classList.toggle("visible", false);
+  tooltip.dataset.visible = "false";
   setTimeout(() => {
     tooltip.style.transition = defaultTransition;
   }, 5);
@@ -181,8 +181,8 @@ function getTags(image: HTMLImageElement): string {
 }
 
 function formatHtml(tags: string): string {
-  let unmatchedTagsHTML = "";
-  let matchedTagsHTML = "";
+  let unmatchedTagsHtml = "";
+  let matchedTagsHtml = "";
 
   const tagList = removeExtraWhiteSpace(tags).split(" ");
 
@@ -192,12 +192,12 @@ function formatHtml(tags: string): string {
     const tagWithSpace = `${tag} `;
 
     if (tagColor === null) {
-      unmatchedTagsHTML += tagWithSpace;
+      unmatchedTagsHtml += tagWithSpace;
     } else {
-      matchedTagsHTML += `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>`;
+      matchedTagsHtml += `<span style="color:${tagColor}"><b>${tagWithSpace}</b></span>`;
     }
   }
-  const html = matchedTagsHTML + unmatchedTagsHTML;
+  const html = matchedTagsHtml + unmatchedTagsHtml;
 
   if (html === "") {
     return tags;

@@ -18,7 +18,7 @@ function getStatistics(dom: Document): Record<string, string> {
   return Object.fromEntries(entries);
 }
 
-function getFileURL(dom: Document): string {
+function getFileUrl(dom: Document): string {
   const image = dom.querySelector("#image");
   return image instanceof HTMLImageElement ? normalizeImageSource(image.src) : "";
 }
@@ -44,7 +44,7 @@ function hasComments(dom: Document): boolean {
 export function parsePostFromPostPage(html: string): Post {
   const dom = domParser.parseFromString(html, "text/html");
   const statistics = getStatistics(dom);
-  const fileUrl = getFileURL(dom);
+  const fileUrl = getFileUrl(dom);
   const tags = getTags(dom);
   const rating = getRating(statistics);
   const dimensions = parseDimensions2D(statistics.size);

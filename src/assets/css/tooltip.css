@@ -8,13 +8,13 @@
   pointer-events: none;
   visibility: hidden;
   opacity: 0;
-  transition: visibility 0s, opacity 0.25s linear;
   font-size: 1.05em;
 }
 
-.tooltip--visible {
+.tooltip[data-visible="true"] {
   visibility: visible;
   opacity: 1;
+  transition: opacity 0.1s linear;
 }
 
 .post::after {

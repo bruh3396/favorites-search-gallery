@@ -69,7 +69,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
     }
     const thumbs = favorites.map(favorite => favorite.root);
 
-    FavoritesView.insertNewSearchResults(thumbs);
+    FavoritesView.addToBottom(thumbs);
     Events.favorites.favoritesAddedToCurrentPage.emit(thumbs);
   }
 

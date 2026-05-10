@@ -1,5 +1,5 @@
 import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
-import { Storage } from "../../../../lib/core/storage/storage_instance";
+import { Storage } from "../../../../lib/core/storage/local_storage";
 import { getImageFromThumb } from "../../../../lib/dom/thumb";
 
 const LOCAL_STORAGE_KEY = "aspectRatios";

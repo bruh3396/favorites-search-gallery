@@ -15,28 +15,16 @@ export function render(thumb: HTMLElement): void {
   getController(thumb).render(thumb);
 }
 
-export function hideAll(): void {
-  controllers.forEach(controller => controller.hide());
-}
-
 export function exitGallery(): void {
   hideAll();
   GalleryImageController.exitGallery();
 }
 
-export function preloadContentInGallery(thumbs: HTMLElement[]): void {
-  controllers.forEach(controller => controller.preload(thumbs));
-}
-
-export function handlePageChange(): void {
-  controllers.forEach(controller => controller.handlePageChange());
-}
-
-export function handlePageChangeInGallery(): void {
-  controllers.forEach(controller => controller.handlePageChangeInGallery());
-}
-
-export const preloadContentOutOfGallery = (thumbs: HTMLElement[]): void => GalleryImageController.preload(thumbs);
+export const hideAll = (): void => controllers.forEach(controller => controller.hide());
+export const preloadContentInGallery = (thumbs: HTMLElement[]): void => controllers.forEach(controller => controller.preload(thumbs));
+export const handlePageChange = (): void => controllers.forEach(controller => controller.handlePageChange());
+export const handlePageChangeInGallery = (): void => controllers.forEach(controller => controller.handlePageChangeInGallery());
+export const preloadContentOutOfGallery = (thumbs: HTMLElement[]): Promise<void> => GalleryImageController.preload(thumbs);
 export const presetCanvasDimensions = (thumbs: HTMLElement[]): void => GalleryImageController.presetCanvasDimensions(thumbs);
 export const toggleVideoLooping = (value: boolean): void => GalleryVideoController.toggleVideoLooping(value);
 export const restartVideo = (): void => GalleryVideoController.restartVideo();

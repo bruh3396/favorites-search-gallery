@@ -2,10 +2,10 @@ import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environm
 import { Events } from "../../../../../lib/communication/events";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { Preferences } from "../../../../../lib/preferences/preferences";
-import { Storage } from "../../../../../lib/core/storage/storage_instance";
+import { Storage } from "../../../../../lib/core/storage/local_storage";
 import { VideoClip } from "../../../types/gallery_types";
-import { convertPreviewURLToImageURL } from "../../../../../lib/media/media_url_transformer";
-import { getPreviewURL } from "../../../../../lib/ui/dom";
+import { convertPreviewUrlToImageUrl } from "../../../../../lib/media/media_url_transformer";
+import { getPreviewUrl } from "../../../../../lib/ui/dom";
 import { isVideo } from "../../../../../lib/media/media_type_guards";
 
 const videoPlayers: HTMLVideoElement[] = [];
@@ -52,10 +52,10 @@ function preventVideoPlayersFromFlashingWhenLoaded(): void {
     if (blob === null) {
       return;
     }
-    const videoBackgroundURL = URL.createObjectURL(blob);
+    const videoBackgroundUrl = URL.createObjectURL(blob);
 
     for (const video of videoPlayers) {
-      video.setAttribute("poster", videoBackgroundURL);
+      video.setAttribute("poster", videoBackgroundUrl);
     }
   });
 }
@@ -268,7 +268,7 @@ function videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): bool
 }
 
 function getVideoSource(thumb: HTMLElement): string {
-  return convertPreviewURLToImageURL(getPreviewURL(thumb) ?? "").replace("jpg", "mp4");
+  return convertPreviewUrlToImageUrl(getPreviewUrl(thumb) ?? "").replace("jpg", "mp4");
 }
 
 function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {

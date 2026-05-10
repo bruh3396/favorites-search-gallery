@@ -1,6 +1,6 @@
 import { AwesompleteSuggestion } from "../../types/ui";
-import { Storage } from "../core/storage/storage_instance";
-import { fetchTagFromAPI } from "../remote/api/tag_fetcher";
+import { Storage } from "../core/storage/local_storage";
+import { isOfficialTag } from "./tag_validator";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 const STORAGE_KEY = "customTags";
@@ -23,16 +23,6 @@ export async function setCustomTags(tags: string): Promise<void> {
 export function clearCustomTags(): void {
   allCustomTags.clear();
   Storage.remove(STORAGE_KEY);
-}
-
-async function isOfficialTag(tagName: string): Promise<boolean> {
-  try {
-    const tag = await fetchTagFromAPI(tagName);
-    return tag !== null;
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
 }
 
 export function addCustomTagsToAutocomplete(officialTags: AwesompleteSuggestion[], searchQuery: string): AwesompleteSuggestion[] {

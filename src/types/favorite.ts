@@ -4,6 +4,7 @@ import { Post } from "./api";
 export type FavoriteMetricMap = {
   [key in MetadataMetric]: number
 }
+
 export type FavoritesMetadataDatabaseRecord = {
   width: number
   height: number
@@ -12,13 +13,15 @@ export type FavoritesMetadataDatabaseRecord = {
   create: number
   change: number
   duration: number | undefined
-};
+}
+
 export type FavoritesDatabaseRecord = {
-  id: string;
-  tags: Set<string>;
-  src: string;
+  id: string
+  tags: Set<string>
+  src: string
   metadata: FavoritesMetadataDatabaseRecord;
-};
+}
+
 export interface Favorite extends Searchable {
   id: string
   root: HTMLElement
@@ -33,6 +36,7 @@ export interface Favorite extends Searchable {
   populateMetadata: (post: Post) => void
   metrics: FavoriteMetricMap
 }
+
 export enum AddFavoriteStatus {
   ERROR = 0,
   ALREADY_ADDED = 1,
@@ -45,4 +49,5 @@ export enum RemoveFavoriteStatus {
   FORBIDDEN = 1,
   SUCCESSFULLY_REMOVED = 2
 }
-export type PageRelation = "first" | "previous" | "next" | "final";
+
+export type PageRelation = "first" | "previous" | "next" | "final"

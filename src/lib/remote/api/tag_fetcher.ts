@@ -1,16 +1,17 @@
-import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
+import { EncodedTagCategory, TagResponse } from "../../../types/api";
 import { ApiConfig } from "../../../config/api_config";
+import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
 import { TAG_API_URL } from "../url/api_urls";
-import { Tag } from "../../../types/api";
-import { fetchFromServer } from "./server_client";
+import { fetchJsonFromApi } from "./api_client";
 import { tagLimiter } from "../http/rate_limiter";
+import { tagResponseToTagCategory } from "../parse/api_tag_parser";
 
-const fetchCoalescer = new CoalescingResolver<Tag>(ApiConfig.apiBatchSize, ApiConfig.apiBatchFlushDelay, fetchTagBatch);
+const fetchCoalescer = new CoalescingResolver<TagResponse>(ApiConfig.apiBatchSize, ApiConfig.apiBatchFlushDelay, fetchTagBatch);
 
-function fetchTagBatch(tagNames: string[]): Promise<Record<string, Tag>> {
-  return tagLimiter.run(() => fetchFromServer(TAG_API_URL, { tagNames }));
+function fetchTagBatch(tagNames: string[]): Promise<Record<string, TagResponse>> {
+  return tagLimiter.run(() => fetchJsonFromApi(TAG_API_URL, { tagNames }));
 }
 
-export function fetchTagFromAPI(tagName: string): Promise<Tag> {
-  return fetchCoalescer.resolve(tagName);
+export function fetchTagCategoryFromApi(tagName: string): Promise<EncodedTagCategory> {
+  return fetchCoalescer.resolve(tagName).then(tagResponseToTagCategory);
 }

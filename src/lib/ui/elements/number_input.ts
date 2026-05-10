@@ -31,11 +31,11 @@ export function buildNumberComponent(partial: Partial<NumberElement>): void {
 
   const html = `
     <span class="num-input" id="${numberComponentId}">
-      <hold-button class="number-arrow-down" pollingtime="${template.pollingTime}">
+      <hold-button class="num-input-btn--down" pollingtime="${template.pollingTime}">
         <span>&lt;</span>
       </hold-button>
       <input id="${template.id}" type="number" min="${template.min}" max="${template.max}" step="${template.step}" defaultValue="${defaultValue}">
-      <hold-button class="number-arrow-up" pollingtime="${template.pollingTime}">
+      <hold-button class="num-input-btn--up" pollingtime="${template.pollingTime}">
         <span>&gt;</span>
       </hold-button>
     </span>

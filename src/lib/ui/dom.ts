@@ -5,7 +5,7 @@ import { getImageFromThumb } from "../dom/thumb";
 import { sleep } from "../core/scheduling/promise";
 import { waitForAllThumbnailsToLoad } from "../dom/content_thumb";
 
-export function getPreviewURL(item: HTMLElement | Favorite): string | null {
+export function getPreviewUrl(item: HTMLElement | Favorite): string | null {
   if (item instanceof HTMLElement) {
     const image = getImageFromThumb(item);
     return image ? image.src : null;
@@ -17,7 +17,7 @@ export function scrollToTop(): void {
   window.scrollTo(0, ON_MOBILE_DEVICE ? 10 : 0);
 }
 
-export function waitForDOMToLoad(): Promise<void> {
+export function waitForDomToLoad(): Promise<void> {
   return new Promise((resolve) => {
     Events.document.domLoaded.on(() => resolve(), { once: true });
   });

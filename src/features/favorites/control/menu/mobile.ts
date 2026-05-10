@@ -1,5 +1,5 @@
 import { ButtonElement, CheckboxElement, SelectElement } from "../../../../lib/ui/element_types";
-import { LayoutMode, PerformanceProfile } from "../../../../types/ui";
+import { Layout, PerformanceProfile } from "../../../../types/ui";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../lib/ui/style";
 import { Events } from "../../../../lib/communication/events";
@@ -7,11 +7,11 @@ import { GALLERY_ENABLED } from "../../../../lib/environment/derived_environment
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
-import { buildButtonElement } from "../../../../lib/ui/element/button";
-import { buildSelectElement } from "../../../../lib/ui/element/select";
-import { buildToggleSwitch } from "../../../../lib/ui/element/checkbox";
+import { buildButtonElement } from "../../../../lib/ui/elements/button";
+import { buildSelectElement } from "../../../../lib/ui/elements/select";
+import { buildToggleSwitch } from "../../../../lib/ui/elements/checkbox";
 import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
-import { prepareDynamicElements } from "../../../../lib/ui/element/element_utils";
+import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 
 const buttons: Partial<ButtonElement>[] = [
   {
@@ -98,7 +98,6 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     preference: Preferences.headerEnabled,
     hotkey: "",
     enabled: false,
-    event: Events.favorites.headerToggled,
     triggerOnCreation: true,
     function: toggleHeader
   },
@@ -109,7 +108,6 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     title: "Toggle dark theme",
     defaultValue: usingDarkTheme(),
     hotkey: "",
-    event: Events.favorites.darkThemeToggled,
     function: toggleDarkTheme
   },
   {
@@ -140,7 +138,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
   }
 ];
 
-const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -169,7 +167,7 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<numbe
     event: Events.favorites.layoutChanged,
     triggerOnCreation: true,
     function: hideUnusedLayoutSizer,
-    options: new Map<LayoutMode, string>([
+    options: new Map<Layout, string>([
       ["tiler--column", "Waterfall"],
       ["tiler--row", "River"],
       ["tiler--square", "Square"],

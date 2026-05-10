@@ -1,15 +1,15 @@
 import * as ICONS from "../../assets/icons";
+import { insertHtml, insertStyle } from "../../lib/dom/injector";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { Preferences } from "../../lib/preferences/preferences";
-import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import SAVED_SEARCHES_CSS from "../../assets/css/saved_searches.css";
+import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
 import SAVED_SEARCHES_HTML from "../../assets/html/saved_searches.html";
-import { Storage } from "../../lib/core/storage/storage_instance";
+import { Storage } from "../../lib/core/storage/local_storage";
 import { awesompleteIsUnselected } from "../../lib/ui/awesomplete";
 import { getAllContentThumbs } from "../../lib/dom/content_thumb";
 import { getSavedSearches } from "../../lib/saved_searches";
-import { insertHTML, insertStyle } from "../../lib/dom/injector";
 import { shuffleArray } from "../../utils/collection/array";
 import { sleep } from "../../lib/core/scheduling/promise";
 
@@ -25,15 +25,15 @@ export function setupSavedSearches(): void {
   if (SAVED_SEARCHES_DISABLED) {
     return;
   }
-  insertHtml();
+  insertAllHtml();
   extractHtmlElements();
   addEventListeners();
   loadSavedSearches();
 }
 
-function insertHtml(): void {
+function insertAllHtml(): void {
   insertStyle(SAVED_SEARCHES_CSS);
-  insertHTML(document.getElementById("right-favorites-panel") || document.createElement("div"), "beforeend", SAVED_SEARCHES_HTML);
+  insertHtml(document.getElementById("right-favorites-panel") || document.createElement("div"), "beforeend", SAVED_SEARCHES_HTML);
 }
 
 function extractHtmlElements(): void {
@@ -199,12 +199,14 @@ function loadSavedSearches(): void {
 function createTutorialSearches(): void {
   const searches: string[] = [];
 
-  Events.favorites.startedFetchingFavorites.on(async(): Promise<void> => {
+  Events.favorites.favoritesFoundInDatabase.on(async(favoritesFound): Promise<void> => {
+    if (favoritesFound) {
+      return;
+    }
     await sleep(1000);
     const postIds = getAllContentThumbs().map(thumb => thumb.id);
 
     shuffleArray(postIds);
-
     const exampleSearch = `( EXAMPLE: ~ ${postIds.slice(0, 9).join(" ~ ")} ) ( male* ~ female* ~ 1boy ~ 1girls )`;
 
     searches.push(exampleSearch);

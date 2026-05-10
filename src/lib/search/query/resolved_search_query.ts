@@ -1,8 +1,8 @@
-import { AbstractTag } from "../tag/abstract_tag";
-import { ExactTag } from "../tag/exact_tag";
+import { AbstractTag } from "../tags/abstract_tag";
+import { ExactTag } from "../tags/exact_tag";
 import { SearchQuery } from "./search_query";
 import { Searchable } from "../../../types/search";
-import { WildcardTag } from "../tag/wildcard_tag";
+import { WildcardTag } from "../tags/wildcard_tag";
 
 export class ResolvedSearchQuery<T extends Searchable> extends SearchQuery<T> {
   private unmatchable: boolean = false;

@@ -1,4 +1,4 @@
-import * as FavoritesAPI from "../../../../lib/remote/rule34/favorites_fetcher";
+import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
 import { FavoritesPageRequest } from "./favorites_page_request";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
@@ -43,7 +43,7 @@ export class FavoritesConcurrentPageFetcher {
 
   private async fetchPage(request: FavoritesPageRequest): Promise<void> {
     try {
-      request.complete(await FavoritesAPI.fetchFavoritesPage(request.realPageNumber));
+      request.complete(await FavoritesApi.fetchFavoritesPage(request.realPageNumber));
       this.inFlight.delete(request.pageNumber);
 
       if (request.elements.length === 0) {

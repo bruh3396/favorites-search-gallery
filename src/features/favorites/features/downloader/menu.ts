@@ -1,11 +1,13 @@
 import * as FavoritesDownloader from "./downloader";
+import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
 import { sleep, yieldControl } from "../../../../lib/core/scheduling/promise";
 import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
 import { DOWNLOADER_DISABLED } from "../../../../lib/environment/derived_environment";
-import { DownloadRequest } from "./download_request";
+import DOWNLOAD_HTML from "../../../../assets/html/downloader.html";
+import { DownloadRequest } from "./request";
 import { Favorite } from "../../../../types/favorite";
+import { Overlays } from "../../../../lib/shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { insertStyle } from "../../../../lib/dom/injector";
 import { splitIntoChunks } from "../../../../utils/collection/array";
 import { toggleGlobalInputEvents } from "../../../../lib/communication/dom_event_bridge";
 
@@ -28,6 +30,7 @@ export function setupDownloadMenu(fdInterface: FavoritesDownloaderInterface): vo
   }
   favoritesDownloaderInterface = fdInterface;
   FavoritesDownloader.setupFavoritesDownloader();
+  insertHtml(Overlays, "beforeend", DOWNLOAD_HTML);
   insertStyle(DOWNLOADER_CSS);
   dialog = getDialog("download-menu");
   warningDialog = getDialog("download-menu-warning");
@@ -128,7 +131,7 @@ function setupMenuCloseHandler(): void {
     toggleGlobalInputEvents(true);
     await yieldControl();
     document.body.classList.remove("dialog-opened");
-    dialog.classList.remove("downloader--active");
+    dialog.toggleAttribute("data-active", false);
     FavoritesDownloader.abort();
     clearStatusTextRows();
     downloadButton.disabled = true;
@@ -174,7 +177,7 @@ async function downloadFavorites(favorites: Favorite[]): Promise<void> {
     finishDownload();
     return;
   }
-  dialog.classList.add("downloader--active");
+  dialog.toggleAttribute("data-active", true);
   statusHeader.textContent = `Downloading ${favoriteCount} Results`;
   const batches = splitIntoChunks(favorites, Preferences.downloadBatchSize.value);
   const totalProgressRow = createStatusTextRow();

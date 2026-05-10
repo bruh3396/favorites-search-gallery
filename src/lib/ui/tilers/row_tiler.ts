@@ -1,12 +1,12 @@
 import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
 import { AbstractTiler } from "./abstract_tiler";
-import { LayoutMode } from "../../../types/ui";
+import { Layout } from "../../../types/ui";
 import { ThumbnailConfig } from "../../../config/thumbnail_config";
 import { insertStyle } from "../../dom/injector";
 import { mapRange } from "../../../utils/number";
 
 export class RowTiler extends AbstractTiler {
-  public layoutMode: LayoutMode = "tiler--row";
+  public layout: Layout = "tiler--row";
   private currentlyMarkingLastRow = false;
 
   public tile(items: HTMLElement[]): void {

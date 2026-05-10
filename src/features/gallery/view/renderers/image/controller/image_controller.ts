@@ -2,8 +2,11 @@ import * as GalleryImageCanvas from "./image_canvas";
 import * as GalleryImageLoader from "./image_loader";
 import * as GalleryUpscaler from "../upscalers/upscaler";
 import { GalleryAbstractController } from "../../abstract_controller";
+import { GalleryConfig } from "../../../../../../config/gallery_config";
 import { ImageRequest } from "../../../../types/image_request";
 import { USING_FIREFOX } from "../../../../../../lib/environment/environment";
+import { waitForAllThumbnailsToLoad } from "../../../../../../lib/dom/content_thumb";
+import { withTimeout } from "../../../../../../lib/core/scheduling/promise";
 
 class ImageController extends GalleryAbstractController {
   private activeId: string;
@@ -15,7 +18,8 @@ class ImageController extends GalleryAbstractController {
     GalleryImageCanvas.mount(this.container);
   }
 
-  public preload(thumbs: HTMLElement[]): void {
+  public async preload(thumbs: HTMLElement[]): Promise<void> {
+    await withTimeout(waitForAllThumbnailsToLoad(), GalleryConfig.preloadWaitingTimeout);
     GalleryImageLoader.preload(thumbs);
     GalleryUpscaler.upscaleAnimated(thumbs);
   }

@@ -2,12 +2,12 @@ import * as TagModifierEditMode from "./edit_mode";
 import * as TagModifierOperations from "./operations";
 import * as TagModifierSelection from "./selection";
 import * as TagModifierStore from "./store";
+import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
 import { Favorite } from "../../../../types/favorite";
-import { TAG_MODIFIER_DISABLED } from "../../../../lib/environment/derived_environment";
 import TAG_MODIFIER_CSS from "../../../../assets/css/tag_modifier.css";
+import { TAG_MODIFIER_DISABLED } from "../../../../lib/environment/derived_environment";
 import TAG_MODIFIER_HTML from "../../../../assets/html/tag_modifier.html";
 import { doNothing } from "../../../../lib/environment/constants";
-import { insertHTML, insertStyle } from "../../../../lib/dom/injector";
 
 export type FavoritesTagModifierInterface = {
   getSearchResults: () => Favorite[]
@@ -16,7 +16,7 @@ export type FavoritesTagModifierInterface = {
   reIndex: (favorite: Favorite) => void
 }
 
-type TagModifierUI = {
+type TagModifierUi = {
   container: HTMLElement
   textarea: HTMLTextAreaElement
   statusLabel: HTMLLabelElement
@@ -29,7 +29,7 @@ type TagModifierUI = {
   export: HTMLButtonElement
 }
 
-const ui: TagModifierUI = {} as TagModifierUI;
+const ui: TagModifierUi = {} as TagModifierUi;
 const favoritesOption = {} as { container: HTMLElement, checkbox: HTMLInputElement };
 let tagModifierInterface: FavoritesTagModifierInterface;
 
@@ -57,7 +57,7 @@ export { getTagModification as getAdditionalTags } from "./store";
 
 function insertTagModifierShell(): void {
   insertStyle(TAG_MODIFIER_CSS);
-  insertHTML(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
+  insertHtml(document.getElementById("bottom-panel-3") as HTMLElement, "beforeend", TAG_MODIFIER_HTML);
   favoritesOption.container = document.getElementById("tag-modifier-container") as HTMLElement;
   favoritesOption.checkbox = document.getElementById("tag-modifier-option-checkbox") as HTMLInputElement;
   ui.container = document.getElementById("tag-modifier-ui-container") as HTMLElement;

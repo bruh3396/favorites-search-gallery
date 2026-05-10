@@ -1,6 +1,6 @@
 import { buildTagGroup, categorizeTags, parseTagGroups, sortTagGroup } from "../parse/tag_group_parser";
-import { AbstractTag } from "../tag/abstract_tag";
-import { SearchQueryMetadata } from "../type/search_types";
+import { AbstractTag } from "../tags/abstract_tag";
+import { SearchQueryMetadata } from "../types/search_types";
 import { Searchable } from "../../../types/search";
 import { isEmptyString } from "../../../utils/string/query";
 

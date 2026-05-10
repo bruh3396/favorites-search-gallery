@@ -1,4 +1,4 @@
-import { compressPreviewSource, convertImageURLToSampleURL, convertPreviewURLToImageURL, decompressPreviewSource, normalizeImageSource, removeIdFromImageURL, toWimgURL } from "../../lib/media/media_url_transformer";
+import { compressPreviewSource, convertImageUrlToSampleUrl, convertPreviewUrlToImageUrl, decompressPreviewSource, normalizeImageSource, removeIdFromImageUrl, toWimgUrl } from "../../lib/media/media_url_transformer";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -43,69 +43,69 @@ describe("compressImageSource", () => {
   });
 });
 
-describe("convertPreviewURLToImageURL", () => {
+describe("convertPreviewUrlToImageUrl", () => {
   test("empty", () => {
-    expect(convertPreviewURLToImageURL("")).toBe("");
+    expect(convertPreviewUrlToImageUrl("")).toBe("");
   });
 
   test("normal", () => {
     const source = "https://us.rule34.xxx/thumbnails/0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
 
-    expect(convertPreviewURLToImageURL(source)).toBe(expected);
+    expect(convertPreviewUrlToImageUrl(source)).toBe(expected);
   });
 });
 
-describe("convertImageURLToSampleURL", () => {
+describe("convertImageUrlToSampleUrl", () => {
   test("empty", () => {
-    expect(convertImageURLToSampleURL("")).toBe("");
+    expect(convertImageUrlToSampleUrl("")).toBe("");
   });
 
   test("normal", () => {
     const source = "https://us.rule34.xxx/images/0123/123456abcde09.jpeg";
     const expected = "https://us.rule34.xxx/samples/0123/sample_123456abcde09.jpg";
 
-    expect(convertImageURLToSampleURL(source)).toBe(expected);
+    expect(convertImageUrlToSampleUrl(source)).toBe(expected);
   });
 });
 
-describe("toWimgURL", () => {
+describe("toWimgUrl", () => {
   test("no subdomain", () => {
-    expect(toWimgURL("https://rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+    expect(toWimgUrl("https://rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
   });
 
   test("with subdomain", () => {
-    expect(toWimgURL("https://us.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+    expect(toWimgUrl("https://us.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
   });
 
   test("already wimg", () => {
-    expect(toWimgURL("https://wimg.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+    expect(toWimgUrl("https://wimg.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
   });
 
   test("rule34 in path does not get replaced", () => {
-    expect(toWimgURL("https://rule34.xxx/rule34/images/abc.jpg")).toBe("https://wimg.rule34.xxx/rule34/images/abc.jpg");
+    expect(toWimgUrl("https://rule34.xxx/rule34/images/abc.jpg")).toBe("https://wimg.rule34.xxx/rule34/images/abc.jpg");
   });
 
   test("rule34 in query string does not get replaced", () => {
-    expect(toWimgURL("https://rule34.xxx/images/abc.jpg?tag=rule34")).toBe("https://wimg.rule34.xxx/images/abc.jpg?tag=rule34");
+    expect(toWimgUrl("https://rule34.xxx/images/abc.jpg?tag=rule34")).toBe("https://wimg.rule34.xxx/images/abc.jpg?tag=rule34");
   });
 
   test("invalid url returns original", () => {
-    expect(toWimgURL("not-a-url")).toBe("not-a-url");
+    expect(toWimgUrl("not-a-url")).toBe("not-a-url");
   });
 });
 
-describe("removeIdFromImageURL", () => {
+describe("removeIdFromImageUrl", () => {
   test("empty", () => {
-    expect(removeIdFromImageURL("")).toBe("");
+    expect(removeIdFromImageUrl("")).toBe("");
   });
 
   test("normal", () => {
-    expect(removeIdFromImageURL("example.jpg")).toBe("example.jpg");
-    expect(removeIdFromImageURL("example.jpg?1")).toBe("example.jpg");
-    expect(removeIdFromImageURL("example.jpg?2")).toBe("example.jpg");
-    expect(removeIdFromImageURL("example.jpg?3")).toBe("example.jpg");
-    expect(removeIdFromImageURL("example.jpg?123456")).toBe("example.jpg");
-    expect(removeIdFromImageURL("example.jpg?123456")).toBe("example.jpg");
+    expect(removeIdFromImageUrl("example.jpg")).toBe("example.jpg");
+    expect(removeIdFromImageUrl("example.jpg?1")).toBe("example.jpg");
+    expect(removeIdFromImageUrl("example.jpg?2")).toBe("example.jpg");
+    expect(removeIdFromImageUrl("example.jpg?3")).toBe("example.jpg");
+    expect(removeIdFromImageUrl("example.jpg?123456")).toBe("example.jpg");
+    expect(removeIdFromImageUrl("example.jpg?123456")).toBe("example.jpg");
   });
 });

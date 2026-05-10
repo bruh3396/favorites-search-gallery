@@ -4,19 +4,19 @@ import { ITEM_CLASS_NAME } from "../../../../lib/dom/thumb";
 import { insertStyle } from "../../../../lib/dom/injector";
 
 let getFavorite: (id: string) => Favorite | undefined = () => undefined;
-let toggleUI: (value: boolean) => void = () => {};
+let toggleUi: (value: boolean) => void = () => {};
 let tagEditModeEnabled = false;
 let tagEditModeAbortController = new AbortController();
 
-export function initializeTagEditMode(getFav: (id: string) => Favorite | undefined, onToggleUI: (value: boolean) => void): void {
+export function initializeTagEditMode(getFav: (id: string) => Favorite | undefined, onToggleUi: (value: boolean) => void): void {
   getFavorite = getFav;
-  toggleUI = onToggleUI;
+  toggleUi = onToggleUi;
 }
 
 export function toggleTagEditMode(value: boolean): void {
   tagEditModeEnabled = value;
   toggleThumbInteraction(value);
-  toggleUI(value);
+  toggleUi(value);
   toggleTagEditModeAbortController(value);
   unselectAll();
 }

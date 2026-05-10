@@ -1,4 +1,4 @@
-import { DownloadRequest, toDownloadRequest } from "./download_request";
+import { DownloadRequest, toDownloadRequest } from "./request";
 import { ConcurrencyLimiter } from "../../../../lib/core/concurrency/concurrency_limiter";
 import { DownloadAbortedError } from "../../../../types/errors";
 import { Favorite } from "../../../../types/favorite";
@@ -7,8 +7,8 @@ import { downloadBlob } from "../../../../utils/browser/download";
 const fetchLimiter = new ConcurrencyLimiter(3);
 
 interface ZipWriter {
-  add: (name: string, reader: unknown, options: { compression: string }) => Promise<void>;
-  close: () => Promise<Blob>;
+  add: (name: string, reader: unknown, options: { compression: string }) => Promise<void>
+  close: () => Promise<Blob>
 }
 
 declare const zip: {

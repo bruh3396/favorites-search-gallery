@@ -19,7 +19,7 @@ function usingColumnLayout(): boolean {
   return document.querySelector("#favorites-search-gallery-content.tiler--column") !== null;
 }
 
-export function setupGalleryUI(): void {
+export function setupGalleryUi(): void {
   GalleryRoot.appendChild(background);
   toggleVideoPointerEvents(false);
   toggleGalleryMenuVisibility(false);

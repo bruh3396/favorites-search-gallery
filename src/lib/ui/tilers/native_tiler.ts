@@ -1,6 +1,6 @@
 import { AbstractTiler } from "./abstract_tiler";
-import { LayoutMode } from "../../../types/ui";
+import { Layout } from "../../../types/ui";
 
 export class NativeTiler extends AbstractTiler {
-  public layoutMode: LayoutMode = "tiler--native";
+  public layout: Layout = "tiler--native";
 }

@@ -1,8 +1,8 @@
 import { GalleryConfig } from "../../../config/gallery_config";
 import { ImageRequest } from "./image_request";
-import { convertImageURLToSampleURL } from "../../../lib/media/media_url_transformer";
+import { convertImageUrlToSampleUrl } from "../../../lib/media/media_url_transformer";
 import { isImage } from "../../../lib/media/media_type_guards";
-import { resolveImageURL } from "../../../lib/media/media_url_resolver";
+import { resolveImageUrl } from "../../../lib/media/media_url_resolver";
 
 export const transferredCanvasIds = new Set<string>();
 
@@ -19,7 +19,7 @@ function getImageBitmapClone(imageRequest: ImageRequest): Promise<ImageBitmap | 
 
 export async function getUpscaleRequest(imageRequest: ImageRequest): Promise<OffscreenUpscaleRequest> {
   const bitmapClone = await getImageBitmapClone(imageRequest);
-  const imageUrl = await resolveImageURL(imageRequest.thumb);
+  const imageUrl = await resolveImageUrl(imageRequest.thumb);
   return new OffscreenUpscaleRequest(imageRequest.thumb, bitmapClone, imageUrl);
 }
 
@@ -39,7 +39,7 @@ export class OffscreenUpscaleRequest {
     this.offscreenCanvas = this.getOffscreenCanvas(thumb);
     this.bitmap = bitmap;
     this.imageUrl = imageUrl;
-    this.sampleUrl = isImage(thumb) ? convertImageURLToSampleURL(imageUrl) : imageUrl;
+    this.sampleUrl = isImage(thumb) ? convertImageUrlToSampleUrl(imageUrl) : imageUrl;
   }
 
   public get transferable(): OffscreenCanvas[] {

@@ -45,10 +45,10 @@ class InfiniteScrollFlow implements FavoritesPresentationFlow {
     const moreResults = FavoritesView.getMoreResults(FavoritesModel.getLatestSearchResults());
 
     if (moreResults.length > 0) {
-      FavoritesView.insertNewSearchResults(moreResults);
+      FavoritesView.addToBottom(moreResults);
       Events.favorites.favoritesAddedToCurrentPage.emit(moreResults);
       await waitForAllThumbnailsToLoad();
-      FavoritesView.preloadImages(FavoritesView.getThumbURLsToPreload(FavoritesModel.getLatestSearchResults()));
+      FavoritesView.preloadImages(FavoritesView.getThumbUrlsToPreload(FavoritesModel.getLatestSearchResults()));
       this.pageBottomObserver.refresh();
     }
   }

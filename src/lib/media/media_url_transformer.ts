@@ -19,22 +19,22 @@ export function compressPreviewSource(source: string): string {
   return match === null ? "" : match.splice(1).join("_");
 }
 
-export function convertPreviewURLToImageURL(thumbUrl: string): string {
+export function convertPreviewUrlToImageUrl(thumbUrl: string): string {
   return normalizeImageSource(thumbUrl)
     .replace("thumbnails", "images")
     .replace("thumbnail_", "")
     .replace("us.rule34", "rule34");
 }
 
-export function convertImageURLToSampleURL(imageUrl: string): string {
+export function convertImageUrlToSampleUrl(imageUrl: string): string {
   return imageUrl.replace("images", "samples").replace(sampleRegex, "/sample_$1").replace(extensionRegex, ".jpg");
 }
 
-export function removeIdFromImageURL(imageUrl: string): string {
+export function removeIdFromImageUrl(imageUrl: string): string {
   return imageUrl.replace(/\?\d+/, "");
 }
 
-export function toWimgURL(url: string): string {
+export function toWimgUrl(url: string): string {
   try {
     const parsed = new URL(url);
 

@@ -15,6 +15,6 @@ export function insertStyle(css: string, id: string | undefined = undefined): vo
   document.head.appendChild(style);
 }
 
-export function insertHTML(element: HTMLElement, position: InsertPosition, html: string): void {
+export function insertHtml(element: HTMLElement, position: InsertPosition, html: string): void {
   element.insertAdjacentHTML(position, html);
 }

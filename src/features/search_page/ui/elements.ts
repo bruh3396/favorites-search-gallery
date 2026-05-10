@@ -1,16 +1,16 @@
 import { CheckboxElement, NumberElement, SelectElement } from "../../../lib/ui/element_types";
-import { LayoutMode, PerformanceProfile } from "../../../types/ui";
+import { Layout, PerformanceProfile } from "../../../types/ui";
 import { Events } from "../../../lib/communication/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralConfig } from "../../../config/general_config";
 import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
-import { buildCheckboxElement } from "../../../lib/ui/element/checkbox";
-import { buildNumberComponent } from "../../../lib/ui/element/number_input";
-import { buildSelectElement } from "../../../lib/ui/element/select";
+import { buildCheckboxElement } from "../../../lib/ui/elements/checkbox";
+import { buildNumberComponent } from "../../../lib/ui/elements/number_input";
+import { buildSelectElement } from "../../../lib/ui/elements/select";
 import { numberRange } from "../../../utils/number";
-import { prepareDynamicElements } from "../../../lib/ui/element/element_utils";
+import { prepareDynamicElements } from "../../../lib/ui/elements/element_utils";
 import { reloadWindow } from "../../../utils/browser/window";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
 import { toggleGalleryMenuEnabled } from "../../../lib/ui/style";
@@ -71,7 +71,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     event: Events.favorites.galleryMenuToggled
   }
 ];
-const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
   {
     id: "layout-select",
     parentId: "search-page-layout",
@@ -79,7 +79,7 @@ const selects: (Partial<SelectElement<LayoutMode>> | Partial<SelectElement<Metad
     position: "beforeend",
     preference: Preferences.searchPageLayout,
     event: Events.searchPage.layoutChanged,
-    options: new Map<LayoutMode, string>([
+    options: new Map<Layout, string>([
       ["tiler--native", "Native"],
       ["tiler--column", "Waterfall"],
       ["tiler--row", "River"],

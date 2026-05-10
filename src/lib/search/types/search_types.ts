@@ -1,6 +1,6 @@
-import { AbstractTag } from "../tag/abstract_tag";
-import { MetadataTag } from "../tag/metadata_tag";
-import { WildcardTag } from "../tag/wildcard_tag";
+import { AbstractTag } from "../tags/abstract_tag";
+import { MetadataTag } from "../tags/metadata_tag";
+import { WildcardTag } from "../tags/wildcard_tag";
 
 export type SearchQueryMetadata = {
   hasPositiveAndTag: boolean
