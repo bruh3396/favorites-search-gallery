@@ -1,7 +1,7 @@
 import { BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
 import { ALL_RATINGS_VALUE } from "../../../../lib/environment/constants";
 import { Favorite } from "../../../../types/favorite";
-import { FavoritesSearchEngine } from "./search_engine";
+import * as FavoritesSearchEngine from "./search_engine";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
 import { negateTags } from "../../../../utils/string/format";

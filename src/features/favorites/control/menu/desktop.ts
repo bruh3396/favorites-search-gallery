@@ -4,7 +4,7 @@ import { Layout, PerformanceProfile } from "../../../../types/ui";
 import { buildCheckboxElement, buildCheckboxOption } from "../../../../lib/ui/elements/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../view/update/menu_event_handlers";
+import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../view/update/ui_toggles";
 import { Events } from "../../../../lib/communication/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { GeneralConfig } from "../../../../config/general_config";

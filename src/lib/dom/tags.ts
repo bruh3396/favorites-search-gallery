@@ -1,5 +1,5 @@
 import { Favorite } from "../../types/favorite";
-import { FeatureQueries } from "../communication/feature_queries";
+import { FeatureBridge } from "../communication/feature_bridge";
 import { ON_FAVORITES_PAGE } from "../environment/environment";
 import { convertToTagSet } from "../../utils/string/tags";
 import { getImageFromThumb } from "./thumb";
@@ -7,7 +7,7 @@ import { getImageFromThumb } from "./thumb";
 export const getTagSetFromItem: (item: HTMLElement | Favorite) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromFavoritesPageItem : getTagSetFromSearchPageItem;
 
 function getTagSetFromFavoritesPageItem(item: HTMLElement | Favorite): Set<string> {
-  const favorite = FeatureQueries.getFavorite.query(item.id);
+  const favorite = FeatureBridge.getFavorite.call(item.id);
   return favorite === undefined ? new Set() : new Set(favorite.tags);
 }
 

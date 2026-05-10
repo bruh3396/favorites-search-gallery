@@ -1,4 +1,4 @@
-export class FeatureQuery<I, O> {
+export class FeatureChannel<I, O> {
   private handler: (value: I) => O;
   private registered = false;
 
@@ -6,7 +6,7 @@ export class FeatureQuery<I, O> {
     this.handler = (): O => defaultValue;
   }
 
-  public query(value: I): O {
+  public call(value: I): O {
     return this.handler(value);
   }
 

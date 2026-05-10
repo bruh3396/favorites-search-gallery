@@ -2,7 +2,7 @@ import { Content } from "../../../../lib/shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { sleep } from "../../../../lib/core/scheduling/promise";
-import { toggleFavoritesOptions } from "../../view/update/menu_event_handlers";
+import { toggleFavoritesOptions } from "../../view/update/ui_toggles";
 
 const stickyMenuStyle = `
   #favorites-search-gallery-content {

@@ -1,5 +1,5 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
-import { FeatureQueries } from "../../../../../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../../../../../lib/communication/feature_bridge";
 import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";
 import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
@@ -108,7 +108,7 @@ export abstract class GalleryAbstractUpscaler {
 
   private requestIsValid(request: ImageRequest | HTMLElement): boolean {
     const thumbIsOffPage = document.getElementById(request.id) === null;
-    const inGallery = FeatureQueries.inGallery.query();
+    const inGallery = FeatureBridge.inGallery.call();
     const seen = this.upscaledIds.has(request.id);
 
     if (seen || inGallery || thumbIsOffPage) {

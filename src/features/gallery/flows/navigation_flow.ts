@@ -2,7 +2,7 @@ import * as GalleryAutoplayController from "../features/autoplay/autoplay";
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryPreloadFlow from "./preload_flow";
 import * as GalleryView from "../view/gallery_view";
-import { FeatureQueries } from "../../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../../lib/communication/feature_bridge";
 import { GalleryBoundary } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/input";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
@@ -14,7 +14,10 @@ export function navigate(direction: NavigationKey): void {
       break;
     case GalleryBoundary.AT_RIGHT_BOUNDARY: navigateAtRightBoundary();
       break;
-    default: finishNavigation();
+    case GalleryBoundary.IN_BOUNDS:
+      finishNavigation();
+      break;
+    default:
       break;
   }
 }
@@ -41,9 +44,9 @@ function navigateAtRightBoundary(): void {
 
 function loadMoreResults(direction: NavigationKey): boolean {
   if (ON_FAVORITES_PAGE) {
-    return FeatureQueries.moreFavoritesPagesExist.query(direction);
+    return FeatureBridge.navigateToAdjacentFavoritesPage.call(direction);
   }
-  return (FeatureQueries.moreSearchPagesExist.query(direction)) !== null;
+  return (FeatureBridge.navigateToAdjacentSearchPage.call(direction)) !== null;
 }
 
 function finishNavigation(): void {

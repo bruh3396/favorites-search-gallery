@@ -1,7 +1,7 @@
 import * as ICONS from "../../assets/icons";
 import { insertHtml, insertStyle } from "../../lib/dom/injector";
 import { Events } from "../../lib/communication/events";
-import { FeatureQueries } from "../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { Preferences } from "../../lib/preferences/preferences";
 import SAVED_SEARCHES_CSS from "../../assets/css/saved_searches.css";
 import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
@@ -247,7 +247,7 @@ function importSavedSearches(): void {
 }
 
 function saveSearchResultsAsCustomSearch(): void {
-  const latestSearchResults = FeatureQueries.favoritesSearchResults.query();
+  const latestSearchResults = FeatureBridge.favoritesSearchResults.call();
   const searchResultIds = latestSearchResults.map(favorite => favorite.id);
 
   if (searchResultIds.length === 0) {

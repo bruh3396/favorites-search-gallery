@@ -7,10 +7,10 @@ import * as FavoritesSearchBox from "./search_box/search_box";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 
 export function setupFavoritesControl(): void {
-  FavoritesNavigationButtons.setupFavoritesNavigationButtons();
-  FavoritesFinder.setupFavoritesFinder();
-  FavoritesRatingFilter.setupFavoritesRatingFilter();
-  FavoritesSearchBox.setupFavoritesSearchBox();
+  FavoritesNavigationButtons.setupNavigationButtons();
+  FavoritesFinder.setupFinder();
+  FavoritesRatingFilter.setupRatingFilter();
+  FavoritesSearchBox.setupSearchBox();
 
   if (ON_DESKTOP_DEVICE) {
     FavoritesDesktop.buildDesktopElements();

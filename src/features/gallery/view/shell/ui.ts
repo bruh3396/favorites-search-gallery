@@ -70,9 +70,9 @@ export function toggleBackgroundOpacity(): void {
   const opacity = parseFloat(background.style.opacity);
 
   if (opacity < 1) {
-    updateBackgroundOpacity(1);
+    setBackgroundOpacity(1);
   } else {
-    updateBackgroundOpacity(0);
+    setBackgroundOpacity(0);
   }
 }
 
@@ -93,12 +93,12 @@ export function updateUiInGallery(thumb: HTMLElement): void {
   scrollToThumb(thumb);
 }
 
-export function updateBackgroundOpacityFromEvent(event: WheelEvent): void {
+export function updateBackgroundOpacity(event: WheelEvent): void {
   let opacity = parseFloat(Preferences.backgroundOpacity.value);
 
   opacity -= event.deltaY * 0.0005;
   opacity = clamp(opacity, 0, 1);
-  updateBackgroundOpacity(roundToTwoDecimalPlaces(opacity));
+  setBackgroundOpacity(roundToTwoDecimalPlaces(opacity));
 }
 
 export function showAddedFavoriteStatus(status: AddFavoriteStatus): void {
@@ -138,7 +138,7 @@ function usingColumnLayout(): boolean {
   return getLayout() === "tiler--column";
 }
 
-function updateBackgroundOpacity(opacity: number): void {
+function setBackgroundOpacity(opacity: number): void {
   const opacityString = String(opacity);
 
   background.style.opacity = opacityString;

@@ -32,7 +32,7 @@ export function fetchMissingMetadata(favorites: FavoriteItem[]): void {
   fetchDurations(favorites.filter(f => isVideo(f) && f.metadata.metrics.duration === 0));
 }
 
-function isEmpty(post: Post): boolean {
+function isUnpopulated(post: Post): boolean {
   return post.width === 0 || post.tags === "";
 }
 
@@ -57,7 +57,7 @@ function fetchDurations(favorites: FavoriteItem[]): void {
 }
 
 function processPost(favorite: FavoriteItem, post: Post): void {
-  if (isEmpty(post)) {
+  if (isUnpopulated(post)) {
     return;
   }
 

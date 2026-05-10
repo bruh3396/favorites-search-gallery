@@ -6,7 +6,6 @@ import { Searchable } from "../../../types/search";
 import { intersection } from "../../../utils/collection/set";
 
 export class SearchEngine<T extends Searchable> {
-
   constructor(private readonly index: InvertedIndex<T>) { }
 
   public search(searchQuery: SearchQuery<T>, candidates: T[]): T[] {

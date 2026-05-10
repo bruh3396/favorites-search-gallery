@@ -1,6 +1,6 @@
 import * as ContentTiler from "./layout";
 import { EnhancedWheelEvent } from "../dom/input_types";
-import { FeatureQueries } from "../communication/feature_queries";
+import { FeatureBridge } from "../communication/feature_bridge";
 import { Layout } from "../../types/ui";
 import { clamp } from "../../utils/number";
 import { sleep } from "../core/scheduling/promise";
@@ -16,7 +16,7 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
   if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLSelectElement)) {
     return;
   }
-  const inGallery = FeatureQueries.inGallery.query();
+  const inGallery = FeatureBridge.inGallery.call();
 
   if (inGallery) {
     return;

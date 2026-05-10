@@ -12,7 +12,7 @@ import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
 import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
-import { FeatureQueries } from "../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 
 export async function setupFavorites(): Promise<void> {
@@ -71,8 +71,8 @@ function addEventListeners(): void {
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   Events.gallery.favoriteToggled.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 
-  FeatureQueries.moreFavoritesPagesExist.register(FavoritesPresentationFlow.presentWhileNavigatingGallery);
-  FeatureQueries.favoritesSearchResults.register(FavoritesModel.getLatestSearchResults);
-  FeatureQueries.getFavorite.register(FavoritesModel.getFavorite);
-  FeatureQueries.allFavorites.register(FavoritesModel.getAllFavorites);
+  FeatureBridge.navigateToAdjacentFavoritesPage.register(FavoritesPresentationFlow.presentWhileNavigatingGallery);
+  FeatureBridge.favoritesSearchResults.register(FavoritesModel.getLatestSearchResults);
+  FeatureBridge.getFavorite.register(FavoritesModel.getFavorite);
+  FeatureBridge.allFavorites.register(FavoritesModel.getAllFavorites);
 }

@@ -11,7 +11,6 @@ import * as GalleryNavigationFlow from "./flows/navigation_flow";
 import * as GalleryPreloadFlow from "./flows/preload_flow";
 import * as GallerySearchPageFlow from "./flows/search_page_flow";
 import * as GalleryStateFlow from "./flows/state_flow";
-import * as GallerySwipeFlow from "./flows/swipe_flow";
 import * as GalleryTouchFlow from "./flows/touch_flow";
 import * as GalleryView from "./view/gallery_view";
 import * as GalleryVisibleThumbObserver from "./control/visible_thumb_observer";
@@ -19,7 +18,7 @@ import * as GalleryWheelFlow from "./flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
-import { FeatureQueries } from "../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { GALLERY_DISABLED } from "../../lib/environment/derived_environment";
 import { NavigationKey } from "../../types/input";
 import { executeByGalleryState } from "./flows/state_executor";
@@ -69,7 +68,7 @@ function addEventListeners(): void {
   Events.gallery.videoDoubleClicked.on(GalleryStateFlow.exitGallery);
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
 
-  FeatureQueries.inGallery.register(GalleryModel.inGallery);
+  FeatureBridge.inGallery.register(GalleryModel.inGallery);
 
   if (ON_FAVORITES_PAGE) {
     Events.favorites.newFavoritesFound.on(GalleryContentFlow.indexThumbs, { once: true });
@@ -101,7 +100,7 @@ function addEventListeners(): void {
     Events.gallery.rightTap.on(GalleryTouchFlow.onRightTap);
     DomEvents.document.mousedown.on(GalleryTouchFlow.onMouseDown);
     DomEvents.document.touchStart.on(GalleryTouchFlow.onTouchStart);
-    Events.mobile.swipedDown.on(GallerySwipeFlow.onSwipeDown);
+    Events.mobile.swipedDown.on(GalleryTouchFlow.onSwipeDown);
     Events.mobile.swipedUp.on(GalleryAutoplay.showMenu);
     DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
   }

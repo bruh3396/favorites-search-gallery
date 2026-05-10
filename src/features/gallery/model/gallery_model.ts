@@ -1,7 +1,7 @@
 import * as GalleryStateMachine from "./state_machine";
 import * as GalleryThumbSelector from "./thumb_selector";
-import { GalleryBoundary, GalleryState } from "../types/gallery_types";
 import { openOriginal, openPostPage } from "../../../lib/navigator";
+import { GalleryBoundary } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/input";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { clamp } from "../../../utils/number";
@@ -9,54 +9,22 @@ import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
 import { isForwardNavigationKey } from "../../../types/guards";
 import { isVideo } from "../../../lib/media/media_type_guards";
 
+export * from "./state_machine";
+export { addFavorite, removeFavorite } from "./favorite_toggler";
+
 let currentIndex = 0;
-let recentlyExitedGallery = false;
-
-export {addFavorite, removeFavorite} from "./favorite_toggler";
-
-export function hasRecentlyExitedGallery(): boolean {
-  return recentlyExitedGallery;
-}
 
 export function getCurrentThumb(): HTMLElement {
   return GalleryThumbSelector.getThumbsOnCurrentPage()[currentIndex];
 }
 
-export function getCurrentState(): GalleryState {
-  return GalleryStateMachine.getCurrentState();
-}
-
-export function inGallery(): boolean {
-  return GalleryStateMachine.getCurrentState() === GalleryState.IN_GALLERY;
-}
-
-export function enlargingOnHover(): boolean {
-  return GalleryStateMachine.getCurrentState() === GalleryState.ENLARGE_ON_HOVER;
-}
-
 export function isViewingVideo(): boolean {
-  return inGallery() && isVideo(getCurrentThumb());
+  return GalleryStateMachine.inGallery() && isVideo(getCurrentThumb());
 }
 
 export function enterGallery(thumb: HTMLElement): void {
   currentIndex = GalleryThumbSelector.getIndexFromThumb(thumb);
-  GalleryStateMachine.changeState(GalleryState.IN_GALLERY);
-}
-
-export function exitGallery(): void {
-  GalleryStateMachine.changeState(GalleryState.IDLE);
-  setRecentlyExitedGallery();
-}
-
-function setRecentlyExitedGallery(): void {
-  recentlyExitedGallery = true;
-  setTimeout(() => {
-    recentlyExitedGallery = false;
-  }, 500);
-}
-
-export function toggleShowingMediaOnHover(): void {
-  GalleryStateMachine.changeState(GalleryStateMachine.getCurrentState() === GalleryState.ENLARGE_ON_HOVER ? GalleryState.IDLE : GalleryState.ENLARGE_ON_HOVER);
+  GalleryStateMachine.enterGallery();
 }
 
 export function navigate(direction: NavigationKey): GalleryBoundary {

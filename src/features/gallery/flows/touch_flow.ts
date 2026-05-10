@@ -41,6 +41,10 @@ export function onRightTap(): void {
   });
 }
 
+export function onSwipeDown(): void {
+  executeByGalleryState({ gallery: GalleryStateFlow.exitGallery });
+}
+
 function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.thumb !== null && galleryEnabled()) {
     mouseEvent.originalEvent.preventDefault();

@@ -1,6 +1,6 @@
 import { CheckboxElement, defaultMenuElement } from "../element_types";
 import { DomEvents } from "../../communication/dom_events";
-import { FeatureQueries } from "../../communication/feature_queries";
+import { FeatureBridge } from "../../communication/feature_bridge";
 import { doNothing } from "../../environment/constants";
 
 export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
@@ -45,7 +45,7 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
     if (!event.isHotkey || event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
       return;
     }
-    const inGallery = FeatureQueries.inGallery.query();
+    const inGallery = FeatureBridge.inGallery.call();
 
     if (inGallery) {
       return;

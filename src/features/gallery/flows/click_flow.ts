@@ -1,7 +1,8 @@
+import * as GalleryClickFlow from "./click_flow";
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryStateFlow from "./state_flow";
 import * as GalleryView from "../view/gallery_view";
-import * as GalleryZoomFlow from "./zoom_flow";
+import { DomEvents } from "../../../lib/communication/dom_events";
 import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
 import { executeByGalleryState } from "./state_executor";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
@@ -32,6 +33,13 @@ export function onContextMenu(mouseEvent: MouseEvent): void {
   }, mouseEvent);
 }
 
+export function toggleGalleryImageZoom(value: undefined | boolean = undefined): boolean {
+  const zoomedIn = GalleryView.toggleZoom(value);
+
+  DomEvents.document.wheel.toggle(!zoomedIn);
+  return zoomedIn;
+}
+
 function onClickInGallery(mouseEvent: MouseEvent): void {
   if (mouseEvent.ctrlKey) {
     GalleryModel.openOriginalInNewTab();
@@ -57,7 +65,7 @@ function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   }
 
   if (mouseEvent.shiftKey) {
-    if (GalleryZoomFlow.toggleGalleryImageZoom()) {
+    if (GalleryClickFlow.toggleGalleryImageZoom()) {
       GalleryView.zoomToPoint(mouseEvent.originalEvent.x, mouseEvent.originalEvent.y);
     }
     return;

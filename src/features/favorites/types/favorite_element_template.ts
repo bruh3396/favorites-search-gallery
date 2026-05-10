@@ -6,7 +6,7 @@ import { domParser } from "../../../lib/dom/dom_parser";
 
 export const favoriteElementTemplate: HTMLElement = domParser.parseFromString("", "text/html").createElement("div");
 
-export function buildFavoriteElementTemplate(): void {
+export function buildElementTemplate(): void {
 favoriteElementTemplate.className = ITEM_CLASS_NAME;
 const canvas = GALLERY_DISABLED ? "" : "<canvas></canvas>";
 const favoriteButton = USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? REMOVE_FAVORITE_IMAGE_HTML : ADD_FAVORITE_IMAGE_HTML;

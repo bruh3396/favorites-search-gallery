@@ -1,11 +1,11 @@
-import { FeatureQueries } from "../../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../../lib/communication/feature_bridge";
 import { MediaType } from "../../../types/media";
 import { getPreviewUrl } from "../../../lib/ui/dom";
 import { getTagSetFromItem } from "../../../lib/dom/tags";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
 
 export function getFavoritePixelCount(id: string): number {
-  const favorite = FeatureQueries.getFavorite.query(id);
+  const favorite = FeatureBridge.getFavorite.call(id);
   return favorite ? favorite.metrics.width * favorite.metrics.height : 0;
 }
 

@@ -5,7 +5,7 @@ import * as SearchPageNavigationFlow from "./flows/navigation_flow";
 import * as SearchPageOptionFlow from "./flows/option_flow";
 import * as SearchPageView from "./view/search_page_view";
 import { Events } from "../../lib/communication/events";
-import { FeatureQueries } from "../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { buildSearchPage } from "./ui/shell";
@@ -22,8 +22,8 @@ export function setupSearchPage(): void {
 }
 
 function addEventListeners(): void {
-  FeatureQueries.moreSearchPagesExist.register(SearchPageNavigationFlow.navigateSearchPages);
-  FeatureQueries.searchPageItems.register(SearchPageModel.getAllSearchPageThumbs);
+  FeatureBridge.navigateToAdjacentSearchPage.register(SearchPageNavigationFlow.navigateSearchPages);
+  FeatureBridge.searchPageItems.register(SearchPageModel.getAllSearchPageThumbs);
   Events.searchPage.layoutChanged.on(ContentTiler.changeLayout);
   Events.searchPage.infiniteScrollToggled.on(SearchPageOptionFlow.toggleInfiniteScroll);
   Events.searchPage.searchPageCreated.emit(SearchPageModel.getInitialSearchPage());

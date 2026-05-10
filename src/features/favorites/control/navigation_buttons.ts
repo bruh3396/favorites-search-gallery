@@ -5,7 +5,7 @@ import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { insertStyle } from "../../../lib/dom/injector";
 import { yieldControl } from "../../../lib/core/scheduling/promise";
 
-export async function setupFavoritesNavigationButtons(): Promise<void> {
+export async function setupNavigationButtons(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesConfig.bottomNavigationButtonsEnabled) {
     return;
   }
@@ -20,8 +20,8 @@ export async function setupFavoritesNavigationButtons(): Promise<void> {
   nextButton.disabled = true;
   previousButton.textContent = "Previous";
   nextButton.textContent = "Next";
-  previousButton.title = "Next page";
-  nextButton.title = "Previous page";
+  previousButton.title = "Previous page";
+  nextButton.title = "Next page";
 
   previousButton.onclick = (): void => {
     Events.favorites.relativePageSelected.emit("previous");

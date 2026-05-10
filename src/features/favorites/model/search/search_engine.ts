@@ -1,59 +1,51 @@
-import { Favorite } from "../../../../types/favorite";
+﻿import { Favorite } from "../../../../types/favorite";
 import { InvertedIndex } from "../../../../lib/core/data_structures/inverted_index";
 import { SearchEngine } from "../../../../lib/search/engine/search_engine";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
 import { yieldControl } from "../../../../lib/core/scheduling/promise";
 
-export class FavoriteIndex {
-  private static readonly INDEX_BATCH_SIZE = 500;
-  private state: "indexing" | "ready" = "ready";
-  private readonly index: InvertedIndex<Favorite>;
-  private readonly engine: SearchEngine<Favorite>;
-  private deferred: Favorite[] = [];
+const INDEX_BATCH_SIZE = 500;
 
-  constructor() {
-    this.index = new InvertedIndex<Favorite>(favorite => favorite.tags, false);
-    this.engine = new SearchEngine(this.index);
-  }
+const index = new InvertedIndex<Favorite>(favorite => favorite.tags, false);
+const engine = new SearchEngine<Favorite>(index);
+let state: "indexing" | "ready" = "ready";
+let deferred: Favorite[] = [];
 
-  public search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
-    const isEngineEligible = this.state === "ready" && !searchQuery.metadata.hasMetadataTag;
-    return isEngineEligible ? this.engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
-  }
-
-  public add(doc: Favorite): void {
-    if (this.state === "ready") {
-      this.index.addDoc(doc);
-      return;
-    }
-
-    if (this.deferred.length === 0) {
-      Promise.resolve().then(() => this.finishIndexing());
-    }
-    this.deferred.push(doc);
-  }
-
-  public remove(doc: Favorite): void {
-    this.index.removeDoc(doc);
-  }
-
-  public deferIndexing(): void {
-    this.state = "indexing";
-    this.index.maintainSortOrder(false);
-  }
-
-  private async finishIndexing(): Promise<void> {
-    for (let i = 0; i < this.deferred.length; i += FavoriteIndex.INDEX_BATCH_SIZE) {
-      const batch = this.deferred.slice(i, i + FavoriteIndex.INDEX_BATCH_SIZE);
-
-      batch.forEach(doc => this.index.addDoc(doc));
-      await yieldControl();
-    }
-    this.deferred = [];
-    this.index.maintainSortOrder(true);
-    this.index.sortTerms();
-    this.state = "ready";
-  }
+export function search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
+  const isEngineEligible = state === "ready" && !searchQuery.metadata.hasMetadataTag;
+  return isEngineEligible ? engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
 }
 
-export const FavoritesSearchEngine = new FavoriteIndex();
+export function add(doc: Favorite): void {
+  if (state === "ready") {
+    index.addDoc(doc);
+    return;
+  }
+
+  if (deferred.length === 0) {
+    Promise.resolve().then(() => finishIndexing());
+  }
+  deferred.push(doc);
+}
+
+export function remove(doc: Favorite): void {
+  index.removeDoc(doc);
+}
+
+export function deferIndexing(): void {
+  state = "indexing";
+  index.maintainSortOrder(false);
+}
+
+async function finishIndexing(): Promise<void> {
+  for (let i = 0; i < deferred.length; i += INDEX_BATCH_SIZE) {
+    const batch = deferred.slice(i, i + INDEX_BATCH_SIZE);
+
+    batch.forEach(doc => index.addDoc(doc));
+    await yieldControl();
+  }
+  deferred = [];
+  index.maintainSortOrder(true);
+  index.sortTerms();
+  state = "ready";
+}

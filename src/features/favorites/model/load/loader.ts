@@ -13,7 +13,7 @@ export function loadDatabaseFavorites(getAdditionalTags: (id: string) => string 
     const favorites = records.map(r => new FavoriteItem(r, getAdditionalTags(r.id)));
 
     allFavorites = favorites;
-    registerFavorites(favorites);
+    indexFavoritesById(favorites);
     onFavoritesLoaded(favorites);
   });
 }
@@ -22,7 +22,7 @@ export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) 
   return new FavoritesConcurrentPageFetcher((elements: HTMLElement[]): void => {
     const favorites = elements.map(element => new FavoriteItem(element));
 
-    registerFavorites(favorites);
+    indexFavoritesById(favorites);
     allFavorites.push(...favorites);
     onFavoritesFound(favorites);
   }).fetchAllFavorites();
@@ -33,7 +33,7 @@ export function fetchNewFavorites(): Promise<FavoriteItem[]> {
   return FavoritesSequentialPageFetcher.fetchNewFavorites(ids).then((elements) => {
     const newFavorites = elements.map(e => new FavoriteItem(e));
 
-    registerFavorites(newFavorites);
+    indexFavoritesById(newFavorites);
     allFavorites.unshift(...newFavorites);
     return newFavorites;
   });
@@ -58,4 +58,4 @@ export const updateFavorite = (favorite: Favorite): void => FavoritesDatabase.up
 export const deleteFavorite = (id: string): Promise<void> => FavoritesDatabase.deleteFavorite(id);
 export const deleteDatabase = (): Promise<void> => FavoritesDatabase.deleteDatabase();
 
-const registerFavorites = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));
+const indexFavoritesById = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));

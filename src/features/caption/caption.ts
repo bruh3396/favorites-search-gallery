@@ -8,7 +8,7 @@ import { CoalescingExecutor } from "../../lib/core/concurrency/coalescing_execut
 import { Database } from "../../lib/core/storage/database";
 import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
-import { FeatureQueries } from "../../lib/communication/feature_queries";
+import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { Preferences } from "../../lib/preferences/preferences";
 import { capitalize } from "../../utils/string/format";
@@ -269,7 +269,7 @@ function thumbMetadataExists(thumb: HTMLElement): boolean {
   if (ON_SEARCH_PAGE) {
     return false;
   }
-  const favorite = FeatureQueries.getFavorite.query(thumb.id);
+  const favorite = FeatureBridge.getFavorite.call(thumb.id);
 
   if (favorite === undefined) {
     return false;
@@ -282,7 +282,7 @@ function thumbMetadataExists(thumb: HTMLElement): boolean {
 }
 
 function estimateThumbHeightFromMetadata(thumb: HTMLElement, columnInput: HTMLInputElement): number {
-  const favorite = FeatureQueries.getFavorite.query(thumb.id);
+  const favorite = FeatureBridge.getFavorite.call(thumb.id);
 
   if (favorite === undefined) {
     return 200;
@@ -497,7 +497,7 @@ async function findTagCategories(tagNames: string[]): Promise<void> {
 }
 
 function isIdTag(tagName: string): boolean {
-  return FeatureQueries.getFavorite.query(tagName) !== undefined;
+  return FeatureBridge.getFavorite.call(tagName) !== undefined;
 }
 
 function tagCategoryIsUnknown(thumb: HTMLElement, tagName: string): boolean {
