@@ -9,50 +9,16 @@ import { ON_FAVORITES_PAGE } from "../environment/environment";
 import { Post } from "../../types/api";
 import { resolveBaseImageUrl } from "./media_url_resolver";
 
-const IMAGE_EXTENSIONS: ImageExtension[] = ["jpeg", "png", "jpg"];
+const ALL_IMAGE_EXTENSIONS: ImageExtension[] = ["jpeg", "png", "jpg"];
 const DATABASE_NAME = "ImageExtensions";
 const OBJECT_STORE_NAME = "extensionMappings";
 const extensionMap: Map<string, ImageExtension> = new Map();
 const database = new Database<MediaExtensionMapping>(DATABASE_NAME, OBJECT_STORE_NAME);
 const writeScheduler = new CoalescingExecutor<MediaExtensionMapping>(100, 2000, database.update.bind(database));
 
-function probeExtension(url: string, extension: string): Promise<boolean> {
-  return extensionProbeLimiter.run(async() => {
-    const response = await fetch(url.replace(".jpg", `.${extension}`), { method: "HEAD" }).catch();
-    return response.ok;
-  });
-}
-
-async function probeExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
-  const baseUrl = resolveBaseImageUrl(item);
-
-  for (const extension of IMAGE_EXTENSIONS) {
-    if (await probeExtension(baseUrl, extension)) {
-      return extension;
-    }
-  }
-  return null;
-}
-
-async function findMediaExtension(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
-  await extensionProbeQueue.wait();
-  return probeExtensions(item);
-}
-
-function loadExtensionsIntoCache(): Promise<void> {
-  return database.load().then(mappings => mappings.forEach(mapping => extensionMap.set(mapping.id, mapping.extension)));
-}
-
-function cache(id: string, extension: ImageExtension): void {
-  if (extensionMap.has(id)) {
-    return;
-  }
-  extensionMap.set(id, extension);
-
-  if (ON_FAVORITES_PAGE) {
-    writeScheduler.add({ id, extension });
-  }
-}
+export const deleteExtensionsDatabase: () => void = () => database.delete();
+export const extractExtensionFromUrl = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
+export const setupExtensions = loadExtensionsIntoCache;
 
 export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExtension> {
   if (isVideo(item)) {
@@ -67,9 +33,9 @@ export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExt
   if (cached !== undefined) {
     return Promise.resolve(cached);
   }
-  return findMediaExtension(item).then(extension => {
+  return findExtension(item).then(extension => {
     if (extension !== null) {
-      cache(item.id, extension);
+      saveExtension(item.id, extension);
     }
     return extension ?? DEFAULT_EXTENSION;
   });
@@ -78,11 +44,47 @@ export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExt
 export function setExtensionFromPost(post: Post): void {
   const extension = extractExtensionFromUrl(post.fileURL);
 
-  if (extension !== null && IMAGE_EXTENSIONS.includes(extension as ImageExtension)) {
-    cache(post.id, extension as ImageExtension);
+  if (extension !== null && ALL_IMAGE_EXTENSIONS.includes(extension as ImageExtension)) {
+    saveExtension(post.id, extension as ImageExtension);
   }
 }
 
-export const deleteExtensionsDatabase: () => void = () => database.delete();
-export const extractExtensionFromUrl = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
-export const setupExtensions = loadExtensionsIntoCache;
+async function findExtension(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
+  await extensionProbeQueue.wait();
+  return probeAllExtensions(item);
+}
+
+async function probeAllExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
+  const baseUrl = resolveBaseImageUrl(item);
+
+  for (const extension of ALL_IMAGE_EXTENSIONS) {
+    if (await probeExtension(baseUrl, extension)) {
+      return extension;
+    }
+  }
+  return null;
+}
+
+function probeExtension(url: string, extension: string): Promise<boolean> {
+  return extensionProbeLimiter.run(async() => {
+    const response = await fetch(url.replace(".jpg", `.${extension}`), { method: "HEAD" }).catch();
+    return response.ok;
+  });
+}
+
+function saveExtension(id: string, extension: ImageExtension): void {
+  if (!extensionMap.has(id)) {
+    extensionMap.set(id, extension);
+    persistExtension(id, extension);
+  }
+}
+
+function persistExtension(id: string, extension: ImageExtension): void {
+  if (ON_FAVORITES_PAGE) {
+    writeScheduler.add({ id, extension });
+  }
+}
+
+function loadExtensionsIntoCache(): Promise<void> {
+  return database.load().then(mappings => mappings.forEach(mapping => extensionMap.set(mapping.id, mapping.extension)));
+}

@@ -6,41 +6,6 @@ import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 
-function getStatistics(dom: Document): Record<string, string> {
-  const stats = dom.querySelector("#stats");
-
-  if (stats === null) {
-    return {};
-  }
-  const textContent = removeExtraWhiteSpace(stats.textContent || "");
-  const matches = Array.from(textContent.matchAll(statisticRegex));
-  const entries = matches.map(match => [match[1].toLowerCase(), match[2]]);
-  return Object.fromEntries(entries);
-}
-
-function getFileUrl(dom: Document): string {
-  const image = dom.querySelector("#image");
-  return image instanceof HTMLImageElement ? normalizeImageSource(image.src) : "";
-}
-
-function getTags(dom: Document): string {
-  return removeExtraWhiteSpace(Array.from(dom.querySelectorAll(".tag>a"))
-    .filter(anchor => anchor instanceof HTMLAnchorElement && anchor.textContent !== "?")
-    .map(anchor => (anchor.textContent || "").replaceAll(" ", "_"))
-    .join(" ") || "");
-}
-
-function getRating(statistics: Record<string, string>): string {
-  if (statistics.rating === undefined || statistics.rating === "") {
-    return "e";
-  }
-  return statistics.rating.charAt(0).toLowerCase();
-}
-
-function hasComments(dom: Document): boolean {
-  return Array.from(dom.querySelectorAll("#comments>div")).length > 0;
-}
-
 export function parsePostFromPostPage(html: string): Post {
   const dom = domParser.parseFromString(html, "text/html");
   const statistics = getStatistics(dom);
@@ -74,4 +39,39 @@ export function parsePostFromPostPage(html: string): Post {
     previewWidth: 0,
     previewHeight: 0
   };
+}
+
+function getStatistics(dom: Document): Record<string, string> {
+  const stats = dom.querySelector("#stats");
+
+  if (stats === null) {
+    return {};
+  }
+  const textContent = removeExtraWhiteSpace(stats.textContent || "");
+  const matches = Array.from(textContent.matchAll(statisticRegex));
+  const entries = matches.map(match => [match[1].toLowerCase(), match[2]]);
+  return Object.fromEntries(entries);
+}
+
+function getFileUrl(dom: Document): string {
+  const image = dom.querySelector("#image");
+  return image instanceof HTMLImageElement ? normalizeImageSource(image.src) : "";
+}
+
+function getTags(dom: Document): string {
+  return removeExtraWhiteSpace(Array.from(dom.querySelectorAll(".tag>a"))
+    .filter(anchor => anchor instanceof HTMLAnchorElement && anchor.textContent !== "?")
+    .map(anchor => (anchor.textContent || "").replaceAll(" ", "_"))
+    .join(" ") || "");
+}
+
+function getRating(statistics: Record<string, string>): string {
+  if (statistics.rating === undefined || statistics.rating === "") {
+    return "e";
+  }
+  return statistics.rating.charAt(0).toLowerCase();
+}
+
+function hasComments(dom: Document): boolean {
+  return Array.from(dom.querySelectorAll("#comments>div")).length > 0;
 }

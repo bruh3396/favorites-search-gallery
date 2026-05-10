@@ -1,5 +1,5 @@
 import * as GalleryDesktopMenu from "./shell/desktop_menu";
-import * as GalleryRenderer from "./renderers/renderer";
+import * as GalleryPresenter from "./presentation/presenter";
 import * as GalleryUi from "./shell/ui";
 import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
@@ -8,37 +8,37 @@ import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { insertStyle } from "../../../lib/dom/injector";
 export { overGalleryMenu } from "./view_utils";
 
-export function showContentInGallery(thumb: HTMLElement): void {
+export function present(thumb: HTMLElement): void {
   display(thumb);
   GalleryUi.updateUiInGallery(thumb);
 }
 
 export function display(thumb: HTMLElement): void {
   toggleGalleryVisibility(true);
-  GalleryRenderer.render(thumb);
+  GalleryPresenter.present(thumb);
   GalleryUi.show();
-  GalleryRenderer.toggleZoom(false);
+  GalleryPresenter.toggleZoom(false);
 }
 
 export function hide(): void {
   toggleGalleryVisibility(false);
-  GalleryRenderer.hideAll();
+  GalleryPresenter.hide();
   GalleryUi.hide();
 }
 
 export function enterGallery(thumb: HTMLElement): void {
-  GalleryRenderer.render(thumb);
+  GalleryPresenter.present(thumb);
   GalleryUi.enterGallery(thumb);
   toggleGalleryVisibility(true);
 }
 
 export function exitGallery(): void {
-  GalleryRenderer.exitGallery();
+  GalleryPresenter.hide();
   GalleryUi.exitGallery();
   toggleGalleryVisibility(false);
   toggleZoomCursor(false);
   setTimeout(() => {
-    GalleryRenderer.upscaleCachedThumbs();
+    GalleryPresenter.upscaleCachedThumbs();
   }, 250);
 }
 
@@ -54,11 +54,11 @@ export function setupGalleryView(): void {
 
 export function toggleZoomCursor(value: boolean): void {
   GalleryUi.toggleZoomCursor(value);
-  GalleryRenderer.toggleZoomCursor(value);
+  GalleryPresenter.toggleZoomCursor(value);
 }
 
-export * from "./renderers/renderer";
+export * from "./presentation/presenter";
 export * from "./shell/ui";
 export const handleMouseMoveInGallery = (): void => GalleryUi.toggleCursor(true);
-export const presetAllCanvasDimensions = (): void => GalleryRenderer.presetCanvasDimensions(getAllContentThumbs());
+export const presetAllCanvasDimensions = (): void => GalleryPresenter.presetCanvasDimensions(getAllContentThumbs());
 export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryRoot.appendChild(element);

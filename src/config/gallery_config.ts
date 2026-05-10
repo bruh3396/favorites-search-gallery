@@ -31,13 +31,13 @@ export const GalleryConfig = {
   preloadOutsideGalleryOnSearchPage: true,
   upscaleEverythingOnSearchPage: false,
 
-  preloadContentDebounceTime: 150,
+  preloadMediaDebounceTime: 150,
   navigationThrottleTime: 250,
   galleryNavigationDelay: 100,
   idleInteractionDuration: 750,
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2000 : 1000,
 
-  maxImagesToRenderAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
+  maxImagesToPreloadAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
   visibleThumbsDownwardScrollPixelGenerosity: 50,
   visibleThumbsDownwardScrollPercentageGenerosity: 100,
   fetchImageBitmapsInWorker: false,

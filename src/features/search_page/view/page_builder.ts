@@ -4,6 +4,16 @@ import SEARCH_PAGE_INFINITE_SCROLL_CSS from "../../../assets/css/search_page_inf
 import { SearchPage } from "../types/search_page";
 import { insertStyle } from "../../../lib/dom/injector";
 
+export function createSearchPage(searchPage: SearchPage): void {
+  ContentTiler.tile(searchPage.thumbs);
+  updatePaginator(searchPage);
+  updateAddressBar(searchPage);
+}
+
+export function toggleInfiniteScroll(value: boolean): void {
+  insertStyle(value ? SEARCH_PAGE_INFINITE_SCROLL_CSS : "", "search-page-infinite-scroll");
+}
+
 function updatePaginator(searchPage: SearchPage): void {
   if (searchPage.paginator === null) {
     return;
@@ -26,14 +36,4 @@ function updateAddressBar(searchPage: SearchPage): void {
   const searchFragment = `${location.search.replace(/&pid=\d+/g, "")}&pid=${searchPage.pageNumber * POSTS_PER_SEARCH_PAGE}`;
 
   window.history.replaceState(null, "", baseUrl + searchFragment);
-}
-
-export function createSearchPage(searchPage: SearchPage): void {
-  ContentTiler.tile(searchPage.thumbs);
-  updatePaginator(searchPage);
-  updateAddressBar(searchPage);
-}
-
-export function toggleInfiniteScroll(value: boolean): void {
-  insertStyle(value ? SEARCH_PAGE_INFINITE_SCROLL_CSS : "", "search-page-infinite-scroll");
 }

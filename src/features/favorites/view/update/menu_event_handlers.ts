@@ -1,7 +1,5 @@
-import { Events } from "../../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
-import { Storage } from "../../../../lib/core/storage/local_storage";
 import { insertStyle } from "../../../../lib/dom/injector";
 
 export function syncShowOnHoverFromGallery(value: boolean): void {
@@ -62,21 +60,4 @@ export function toggleFavoritesOptions(value: boolean): void {
           display: ${value ? "block" : "none"};
         }
         `, "options");
-}
-
-const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag modifications and saved searches will be preserved.";
-const RESET_PROMPT = `Are you sure you want to reset? This will delete all cached favorites, and preferences.${ON_MOBILE_DEVICE ? "" : DESKTOP_RESET_PROMPT_SUFFIX}`;
-const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
-
-function clearLocalStorage(): void {
-  Storage.keys()
-    .filter(key => !persistentLocalStorageKeys.has(key))
-    .forEach(key => Storage.remove(key));
-}
-
-export function tryResetting(): void {
-  if (confirm(RESET_PROMPT)) {
-    clearLocalStorage();
-    Events.favorites.resetConfirmed.emit();
-  }
 }

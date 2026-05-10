@@ -6,10 +6,6 @@ import { FAVORITES_PAGE_ID } from "../../../../lib/environment/favorites_metadat
 const database = new Database<FavoritesDatabaseRecord>("Favorites", `user${FAVORITES_PAGE_ID}`);
 const updateScheduler = new CoalescingExecutor(100, 1000, updateFavorites);
 
-function updateFavorites(favorites: Favorite[]): void {
-  database.update(favorites.map(favorite => favorite.databaseRecord));
-}
-
 export function storeFavorites(favorites: Favorite[]): Promise<void> {
   return database.store([...favorites].reverse().map(favorite => favorite.databaseRecord));
 }
@@ -19,3 +15,7 @@ export const hasDatabaseFavorites = (): Promise<boolean> => database.count().the
 export const updateFavorite = (favorite: Favorite): void => updateScheduler.add(favorite);
 export const deleteFavorite = (id: string): Promise<void> => database.deleteRecords([id]);
 export const deleteDatabase = (): Promise<void> => database.delete();
+
+function updateFavorites(favorites: Favorite[]): void {
+  database.update(favorites.map(favorite => favorite.databaseRecord));
+}

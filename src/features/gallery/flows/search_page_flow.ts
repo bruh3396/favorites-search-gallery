@@ -12,7 +12,7 @@ export function onUpscaleToggled(value: boolean): void {
     const notUsingInfiniteScroll = thumbs.length <= POSTS_PER_SEARCH_PAGE;
 
     if (notUsingInfiniteScroll) {
-      GalleryView.preloadContentOutOfGallery(thumbs);
+      GalleryView.preloadMediaOutsideGallery(thumbs);
     }
     GalleryView.upscaleCachedThumbs();
   } else {
@@ -21,7 +21,7 @@ export function onUpscaleToggled(value: boolean): void {
 }
 
 const preloadOutsideGallery = GalleryConfig.preloadOutsideGalleryOnSearchPage ? (): void => {
-  GalleryView.preloadContentOutOfGallery(getAllContentThumbs());
+  GalleryView.preloadMediaOutsideGallery(getAllContentThumbs());
 } : doNothing;
 
 export function onSearchPageCreated(): void {

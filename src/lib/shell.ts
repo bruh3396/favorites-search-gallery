@@ -1,4 +1,4 @@
-import { Events } from "./communication/events";
+import { DomEvents } from "./communication/dom_events";
 
 export const Root = document.createElement("div");
 Root.id = "favorites-search-gallery";
@@ -11,7 +11,7 @@ Overlays.id = "favorites-search-gallery-overlays";
 
 export function setupShell(): void {
   Root.append(Content, Overlays);
-  Events.document.domLoaded.on(() => {
+  DomEvents.document.domLoaded.on(() => {
     document.body.appendChild(Root);
   }, { once: true });
 }

@@ -14,37 +14,29 @@ const PAGE_NUMBER_REGEX = /favorites-page-(\d+)/;
 
 RANGE_INDICATOR.id = "pagination-range-label";
 
-function createContainer(): HTMLSpanElement {
-  const menu = document.createElement("span");
-
-  menu.id = "favorites-pagination-container";
-  return menu;
+export function setupFavoritesPaginationMenu(): void {
+  insert();
+  create(emptyFavoritesPageParameters);
+  toggle(!Preferences.infiniteScroll.value);
 }
 
-function insertMenu(): void {
-  if (ON_DESKTOP_DEVICE) {
-    const placeToInsert = document.getElementById("favorites-pagination-placeholder");
+export function toggle(value: boolean): void {
+  const html = `
+      #favorites-pagination-container,
+      #results-per-page-container,
+      #favorite-finder,
+      #pagination-range-label,
+      #favorites-bottom-navigation-buttons
+      {
+        display: none !important;
+      }
+    `;
 
-    if (placeToInsert !== null) {
-      placeToInsert.insertAdjacentElement("afterend", CONTAINER);
-      placeToInsert.remove();
-    }
-    return;
-  }
-  const footerBottom = document.getElementById("mobile-footer-bottom");
-
-  if (footerBottom !== null) {
-    footerBottom.insertAdjacentElement("afterbegin", CONTAINER);
-  }
+  insertStyle(value ? "" : html, "fav-pagination-enable");
 }
 
-function insert(): void {
-  const matchCountLabel = document.getElementById("match-count-label");
-
-  if (matchCountLabel !== null) {
-    matchCountLabel.insertAdjacentElement("afterend", RANGE_INDICATOR);
-  }
-  insertMenu();
+export function getContainer(): HTMLElement {
+  return CONTAINER;
 }
 
 export function create(parameters: FavoritesPaginationParameters): void {
@@ -81,6 +73,39 @@ export function update(parameters: FavoritesPaginationParameters): void {
     return;
   }
   create(parameters);
+}
+
+function createContainer(): HTMLSpanElement {
+  const menu = document.createElement("span");
+
+  menu.id = "favorites-pagination-container";
+  return menu;
+}
+
+function insertMenu(): void {
+  if (ON_DESKTOP_DEVICE) {
+    const placeToInsert = document.getElementById("favorites-pagination-placeholder");
+
+    if (placeToInsert !== null) {
+      placeToInsert.insertAdjacentElement("afterend", CONTAINER);
+      placeToInsert.remove();
+    }
+    return;
+  }
+  const footerBottom = document.getElementById("mobile-footer-bottom");
+
+  if (footerBottom !== null) {
+    footerBottom.insertAdjacentElement("afterbegin", CONTAINER);
+  }
+}
+
+function insert(): void {
+  const matchCountLabel = document.getElementById("match-count-label");
+
+  if (matchCountLabel !== null) {
+    matchCountLabel.insertAdjacentElement("afterend", RANGE_INDICATOR);
+  }
+  insertMenu();
 }
 
 function updateRangeIndicator(start: number, end: number, count: number): void {
@@ -173,29 +198,4 @@ function updateArrowTraversalButtonInteractability(previousPage: HTMLButtonEleme
     nextPage.disabled = true;
     finalPage.disabled = true;
   }
-}
-
-export function toggle(value: boolean): void {
-  const html = `
-      #favorites-pagination-container,
-      #results-per-page-container,
-      #favorite-finder,
-      #pagination-range-label,
-      #favorites-bottom-navigation-buttons
-      {
-        display: none !important;
-      }
-    `;
-
-  insertStyle(value ? "" : html, "fav-pagination-enable");
-}
-
-export function getContainer(): HTMLElement {
-  return CONTAINER;
-}
-
-export function setupFavoritesPaginationMenu(): void {
-  insert();
-  create(emptyFavoritesPageParameters);
-  toggle(!Preferences.infiniteScroll.value);
 }

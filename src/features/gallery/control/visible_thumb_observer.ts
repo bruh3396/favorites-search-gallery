@@ -11,9 +11,53 @@ let centerThumb: HTMLElement | null = null;
 let intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let bypassDebounce = true;
 
+export function setupVisibleThumbObserver(): void {
+  bypassDebounceAlwaysOnPageChange();
+
+  if (ON_FAVORITES_PAGE) {
+    Events.favorites.alternateLayoutToggled.on(adjustRootMargin);
+  }
+}
+
+export function observe(thumbs: HTMLElement[]): void {
+  if (intersectionObserver === null) {
+    return;
+  }
+
+  for (const thumb of thumbs) {
+    intersectionObserver.observe(thumb);
+  }
+}
+
+export async function observeAllThumbsOnPage(): Promise<void> {
+  if (intersectionObserver === null) {
+    return;
+  }
+  intersectionObserver.disconnect();
+  visibleThumbs.clear();
+
+  await waitForAllThumbnailsToLoad();
+  observe(getAllContentThumbs());
+}
+
+export function setCenterThumb(thumb: HTMLElement | null): void {
+  centerThumb = thumb;
+}
+
+export function resetCenterThumb(): void {
+  centerThumb = null;
+}
+
+export function getVisibleThumbs(): HTMLElement[] {
+  const entries = Array.from(visibleThumbs.values());
+  return sortByDistanceFromCenterThumb(entries)
+    .map(entry => entry.target)
+    .filter(target => target instanceof HTMLElement);
+}
+
 const broadcastDebounceAlways = debounceTrailing(() => {
   Events.gallery.visibleThumbsChanged.emit();
-}, GalleryConfig.preloadContentDebounceTime);
+}, GalleryConfig.preloadMediaDebounceTime);
 
 function broadcastVisibleThumbsChanged(): void {
   if (bypassDebounce) {
@@ -88,51 +132,7 @@ function bypassDebounceAlwaysOnPageChange(): void {
   });
 }
 
-export function observe(thumbs: HTMLElement[]): void {
-  if (intersectionObserver === null) {
-    return;
-  }
-
-  for (const thumb of thumbs) {
-    intersectionObserver.observe(thumb);
-  }
-}
-
-export async function observeAllThumbsOnPage(): Promise<void> {
-  if (intersectionObserver === null) {
-    return;
-  }
-  intersectionObserver.disconnect();
-  visibleThumbs.clear();
-
-  await waitForAllThumbnailsToLoad();
-  observe(getAllContentThumbs());
-}
-
-export function setCenterThumb(thumb: HTMLElement | null): void {
-  centerThumb = thumb;
-}
-
-export function resetCenterThumb(): void {
-  centerThumb = null;
-}
-
-export function getVisibleThumbs(): HTMLElement[] {
-  const entries = Array.from(visibleThumbs.values());
-  return sortByDistanceFromCenterThumb(entries)
-    .map(entry => entry.target)
-    .filter(target => target instanceof HTMLElement);
-}
-
-export function setupVisibleThumbObserver(): void {
-  bypassDebounceAlwaysOnPageChange();
-
-  if (ON_FAVORITES_PAGE) {
-    Events.favorites.alternateLayoutToggled.on(adjustRootMargin);
-  }
-}
-
-export function adjustRootMargin(): void {
+function adjustRootMargin(): void {
   if (intersectionObserver !== null) {
     intersectionObserver.disconnect();
     intersectionObserver = createIntersectionObserver();

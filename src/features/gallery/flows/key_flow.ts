@@ -28,11 +28,27 @@ const outsideGalleryHotkeyHandlers: Record<string, () => void> = {
   f: toggleFullscreen
 };
 
-function pauseVideo(): void {
-  if (GalleryModel.isViewingVideo()) {
-    GalleryView.toggleVideoPause();
+export function onKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
+  if (keyboardEvent.originalEvent.repeat) {
+    onKeyDownThrottled(keyboardEvent.originalEvent);
+  } else {
+    onKeyDownNoThrottle(keyboardEvent.originalEvent);
   }
 }
+
+export function onKeyUp(event: EnhancedKeyboardEvent): void {
+  executeByGalleryState({ gallery: onKeyUpInGallery }, event);
+}
+
+const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
+  executeByGalleryState({
+    idle: onKeyDownOutsideGallery,
+    hover: onKeyDownOutsideGallery,
+    gallery: onKeyDownInGallery
+  }, new EnhancedKeyboardEvent(event));
+};
+
+const onKeyDownThrottled = throttle(onKeyDownNoThrottle, GalleryConfig.galleryNavigationDelay);
 
 function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;
@@ -68,30 +84,14 @@ function onKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
   }
 }
 
-const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
-  executeByGalleryState({
-    idle: onKeyDownOutsideGallery,
-    hover: onKeyDownOutsideGallery,
-    gallery: onKeyDownInGallery
-  }, new EnhancedKeyboardEvent(event));
-};
-
-const onKeyDownThrottled = throttle(onKeyDownNoThrottle, GalleryConfig.galleryNavigationDelay);
-
 function onKeyUpInGallery(event: EnhancedKeyboardEvent): void {
   if (event.key === "shift") {
     GalleryView.toggleZoomCursor(false);
   }
 }
 
-export function onKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
-  if (keyboardEvent.originalEvent.repeat) {
-    onKeyDownThrottled(keyboardEvent.originalEvent);
-  } else {
-    onKeyDownNoThrottle(keyboardEvent.originalEvent);
+function pauseVideo(): void {
+  if (GalleryModel.isViewingVideo()) {
+    GalleryView.toggleVideoPause();
   }
-}
-
-export function onKeyUp(event: EnhancedKeyboardEvent): void {
-  executeByGalleryState({ gallery: onKeyUpInGallery }, event);
 }

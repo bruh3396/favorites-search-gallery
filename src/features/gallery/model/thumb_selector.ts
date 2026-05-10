@@ -32,7 +32,7 @@ export function getIndexFromThumb(thumb: HTMLElement): number {
 export function getImageThumbsAroundOnCurrentPage(initialThumb: HTMLElement): HTMLElement[] {
   return getThumbsAroundWrappedOnCurrentPage(
     initialThumb,
-    GalleryConfig.maxImagesToRenderAroundInGallery,
+    GalleryConfig.maxImagesToPreloadAroundInGallery,
     (thumb: HTMLElement): boolean => {
       return isImage(thumb);
     }
@@ -42,7 +42,7 @@ export function getImageThumbsAroundOnCurrentPage(initialThumb: HTMLElement): HT
 export function getImageThumbsAroundThroughoutAllPages(initialThumb: HTMLElement): HTMLElement[] {
   return getThumbsAroundThroughoutAllPages(
     initialThumb,
-    GalleryConfig.maxImagesToRenderAroundInGallery,
+    GalleryConfig.maxImagesToPreloadAroundInGallery,
     (object: HTMLElement | Favorite) => {
       return isImage(object);
     }
@@ -52,7 +52,7 @@ export function getImageThumbsAroundThroughoutAllPages(initialThumb: HTMLElement
 export function getThumbsAroundOnCurrentPage(initialThumb: HTMLElement): HTMLElement[] {
   return getThumbsAroundWrappedOnCurrentPage(
     initialThumb,
-    GalleryConfig.maxImagesToRenderAroundInGallery,
+    GalleryConfig.maxImagesToPreloadAroundInGallery,
     () => {
       return true;
     }

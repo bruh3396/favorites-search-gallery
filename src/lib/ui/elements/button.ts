@@ -1,18 +1,6 @@
 import { ButtonElement, defaultMenuElement } from "../element_types";
 import { doNothing } from "../../environment/constants";
 
-function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {
-  return {
-    ...defaultMenuElement,
-    event: null,
-    function: doNothing,
-    triggerOnCreation: false,
-    hotkey: "",
-    rightClickEnabled: false,
-    ...partial
-  };
-}
-
 export function buildButtonElement(partial: Partial<ButtonElement>): void {
   const template = createButtonTemplate(partial);
   const parent = document.getElementById(template.parentId);
@@ -37,4 +25,16 @@ export function buildButtonElement(partial: Partial<ButtonElement>): void {
       template.event?.emit(event);
     };
   }
+}
+
+function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {
+  return {
+    ...defaultMenuElement,
+    event: null,
+    function: doNothing,
+    triggerOnCreation: false,
+    hotkey: "",
+    rightClickEnabled: false,
+    ...partial
+  };
 }

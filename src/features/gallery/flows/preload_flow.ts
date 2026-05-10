@@ -10,7 +10,7 @@ export function preloadVisibleThumbs(): void {
   const thumbs = GalleryThumbObserver.getVisibleThumbs();
 
   if (thumbs.length > 0 && thumbs.length < GalleryConfig.maxVisibleThumbsBeforeStoppingPreload) {
-    GalleryView.preloadContentOutOfGallery(thumbs);
+    GalleryView.preloadMediaOutsideGallery(thumbs);
   }
 }
 
@@ -21,6 +21,6 @@ export function preloadAround(thumb: HTMLElement): void {
 
 export function preloadInGalleryAround(thumb: HTMLElement): void {
   if (GalleryConfig.preloadingEnabled) {
-    GalleryView.preloadContentInGallery(GalleryModel.getThumbsAround(thumb));
+    GalleryView.preloadMediaInGallery(GalleryModel.getThumbsAround(thumb));
   }
 }

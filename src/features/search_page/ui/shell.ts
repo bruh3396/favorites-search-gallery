@@ -9,19 +9,21 @@ import { prepareAllThumbsOnSearchPage as prepareNativeSearchPageThumbs } from ".
 import { styleSearchPageMenu } from "./menu_styler";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
 
+export function buildSearchPage(): void {
+  removeNativeSearchPageThumbs();
+  prepareNativeSearchPageThumbs();
+  insertSearchPageHtml();
+  insertContentContainer();
+  createDynamicSearchPageMenuElements();
+  styleSearchPageMenu();
+  toggleAddOrRemoveButtons(Preferences.searchPageAddButtonsVisible.value);
+}
+
 function removeNativeSearchPageThumbs(): void {
   const thumbContainer = document.querySelector(".image-list");
 
   if (thumbContainer !== null) {
     thumbContainer.innerHTML = "";
-  }
-}
-
-function insertContentContainer(): void {
-  const nativeContent = document.querySelector(".content");
-
-  if (nativeContent !== null) {
-    nativeContent.insertAdjacentElement("afterbegin", Content);
   }
 }
 
@@ -44,12 +46,10 @@ function insertSearchPageHtml(): void {
   }
 }
 
-export function buildSearchPage(): void {
-  removeNativeSearchPageThumbs();
-  prepareNativeSearchPageThumbs();
-  insertSearchPageHtml();
-  insertContentContainer();
-  createDynamicSearchPageMenuElements();
-  styleSearchPageMenu();
-  toggleAddOrRemoveButtons(Preferences.searchPageAddButtonsVisible.value);
+function insertContentContainer(): void {
+  const nativeContent = document.querySelector(".content");
+
+  if (nativeContent !== null) {
+    nativeContent.insertAdjacentElement("afterbegin", Content);
+  }
 }

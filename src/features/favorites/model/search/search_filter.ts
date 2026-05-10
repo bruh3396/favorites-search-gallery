@@ -9,21 +9,7 @@ import { negateTags } from "../../../../utils/string/format";
 const NEGATED_BLACKLISTED_TAGS = negateTags(BLACKLISTED_TAGS);
 const blacklistSearchQuery = new SearchQuery<Favorite>(NEGATED_BLACKLISTED_TAGS);
 let currentSearchQuery = "";
-
-const shouldUseBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.excludeBlacklist.value;
-const areAllRatingsAllowed = (): boolean => Preferences.allowedRatings.value === ALL_RATINGS_VALUE;
-const finalSearchQuery = (): string => (shouldUseBlacklist() ? `${currentSearchQuery} ${NEGATED_BLACKLISTED_TAGS}` : currentSearchQuery);
-const createSearchQuery = (): SearchQuery<Favorite> => new SearchQuery(finalSearchQuery());
-
 let searchQuery: SearchQuery<Favorite> = createSearchQuery();
-
-function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {
-  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : blacklistSearchQuery.apply(favorites);
-}
-
-function filterByRating(favorites: Favorite[]): Favorite[] {
-  return areAllRatingsAllowed() ? favorites : favorites.filter(result => result.withinRating(Preferences.allowedRatings.value));
-}
 
 export function filter(favorites: Favorite[]): Favorite[] {
   return filterByRating(FavoritesSearchEngine.search(searchQuery, favorites));
@@ -47,3 +33,27 @@ export function setSearchQuery(newSearchQuery?: string): void {
 export const addToIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.add(f));
 export const removeFromIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.remove(f));
 export const deferIndexing = (): void => FavoritesSearchEngine.deferIndexing();
+
+function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {
+  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : blacklistSearchQuery.apply(favorites);
+}
+
+function filterByRating(favorites: Favorite[]): Favorite[] {
+  return areAllRatingsAllowed() ? favorites : favorites.filter(result => result.withinRating(Preferences.allowedRatings.value));
+}
+
+function createSearchQuery(): SearchQuery<Favorite> {
+  return new SearchQuery(finalSearchQuery());
+}
+
+function finalSearchQuery(): string {
+  return shouldUseBlacklist() ? `${currentSearchQuery} ${NEGATED_BLACKLISTED_TAGS}` : currentSearchQuery;
+}
+
+function shouldUseBlacklist(): boolean {
+  return !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.excludeBlacklist.value;
+}
+
+function areAllRatingsAllowed(): boolean {
+  return Preferences.allowedRatings.value === ALL_RATINGS_VALUE;
+}

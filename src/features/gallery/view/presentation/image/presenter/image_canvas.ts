@@ -26,30 +26,6 @@ mainCanvas.className = "gallery-image";
 mainCanvas.width = dimensions.x;
 mainCanvas.height = dimensions.y;
 
-function insertGalleryCanvas(newContainer: HTMLElement): void {
-  newContainer.id = "canvas-container";
-  newContainer.className = "gallery-image-frame";
-  newContainer.appendChild(mainCanvas);
-  container = newContainer;
-}
-
-export function correctOrientation(): void {
-  if (ON_DESKTOP_DEVICE) {
-    return;
-  }
-  const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;
-  const usingCorrectOrientation = (usingLandscape && mainCanvas.width > mainCanvas.height) || (!usingLandscape && mainCanvas.width < mainCanvas.height);
-
-  if (usingCorrectOrientation) {
-    return;
-  }
-  insertStyle(usingLandscape ? landscapeStyle : portraitStyle, "gallery-canvas-orientation");
-  const tempWidth = mainCanvas.width;
-
-  mainCanvas.width = mainCanvas.height;
-  mainCanvas.height = tempWidth;
-}
-
 export function mount(newContainer: HTMLElement): void {
   correctOrientation();
   insertGalleryCanvas(newContainer);
@@ -72,4 +48,28 @@ export function zoomToPoint(x: number, y: number): void {
 
   container.scrollLeft = (container.scrollWidth - container.clientWidth) * xPercentage;
   container.scrollTop = (container.scrollHeight - container.clientHeight) * yPercentage;
+}
+
+function insertGalleryCanvas(newContainer: HTMLElement): void {
+  newContainer.id = "canvas-container";
+  newContainer.className = "gallery-image-frame";
+  newContainer.appendChild(mainCanvas);
+  container = newContainer;
+}
+
+export function correctOrientation(): void {
+  if (ON_DESKTOP_DEVICE) {
+    return;
+  }
+  const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;
+  const usingCorrectOrientation = (usingLandscape && mainCanvas.width > mainCanvas.height) || (!usingLandscape && mainCanvas.width < mainCanvas.height);
+
+  if (usingCorrectOrientation) {
+    return;
+  }
+  insertStyle(usingLandscape ? landscapeStyle : portraitStyle, "gallery-canvas-orientation");
+  const tempWidth = mainCanvas.width;
+
+  mainCanvas.width = mainCanvas.height;
+  mainCanvas.height = tempWidth;
 }

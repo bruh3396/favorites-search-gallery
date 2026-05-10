@@ -6,6 +6,51 @@ import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
 import { executeByGalleryState } from "./state_executor";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 
+export const onMouseMove = throttle<MouseEvent>(() => {
+  executeByGalleryState({
+    gallery: GalleryView.handleMouseMoveInGallery
+  });
+}, 250);
+
+export function onClick(mouseEvent: MouseEvent): void {
+  executeByGalleryState({
+    gallery: onClickInGallery
+  }, mouseEvent);
+}
+
+export function onMouseDown(event: MouseEvent | TouchEvent): void {
+  executeByGalleryState({
+    hover: onMouseDownOutsideGallery,
+    idle: onMouseDownOutsideGallery,
+    gallery: onMouseDownInGallery
+  }, new EnhancedMouseEvent(event));
+}
+
+export function onContextMenu(mouseEvent: MouseEvent): void {
+  executeByGalleryState({
+    gallery: onContextMenuInGallery
+  }, mouseEvent);
+}
+
+function onClickInGallery(mouseEvent: MouseEvent): void {
+  if (mouseEvent.ctrlKey) {
+    GalleryModel.openOriginalInNewTab();
+  }
+}
+
+function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
+  if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey) {
+    mouseEvent.originalEvent.preventDefault();
+    GalleryStateFlow.enterGallery(mouseEvent.thumb);
+    return;
+  }
+
+  if (mouseEvent.middleClick && mouseEvent.thumb === null) {
+    mouseEvent.originalEvent.preventDefault();
+    GalleryStateFlow.toggleEnlargeOnHover();
+  }
+}
+
 function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.ctrlKey || GalleryView.overGalleryMenu(mouseEvent.originalEvent)) {
     return;
@@ -33,52 +78,7 @@ function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   }
 }
 
-function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
-  if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey) {
-    mouseEvent.originalEvent.preventDefault();
-    GalleryStateFlow.enterGallery(mouseEvent.thumb);
-    return;
-  }
-
-  if (mouseEvent.middleClick && mouseEvent.thumb === null) {
-    mouseEvent.originalEvent.preventDefault();
-    GalleryStateFlow.toggleShowingContentOnHover();
-  }
-}
-
-function onClickInGallery(mouseEvent: MouseEvent): void {
-  if (mouseEvent.ctrlKey) {
-    GalleryModel.openOriginalInNewTab();
-  }
-}
-
 function onContextMenuInGallery(mouseEvent: MouseEvent): void {
   mouseEvent.preventDefault();
   GalleryStateFlow.exitGallery();
-}
-
-export const onMouseMove = throttle<MouseEvent>(() => {
-  executeByGalleryState({
-    gallery: GalleryView.handleMouseMoveInGallery
-  });
-}, 250);
-
-export function onClick(mouseEvent: MouseEvent): void {
-  executeByGalleryState({
-    gallery: onClickInGallery
-  }, mouseEvent);
-}
-
-export function onMouseDown(event: MouseEvent | TouchEvent): void {
-  executeByGalleryState({
-    hover: onMouseDownOutsideGallery,
-    idle: onMouseDownOutsideGallery,
-    gallery: onMouseDownInGallery
-  }, new EnhancedMouseEvent(event));
-}
-
-export function onContextMenu(mouseEvent: MouseEvent): void {
-  executeByGalleryState({
-    gallery: onContextMenuInGallery
-  }, mouseEvent);
 }

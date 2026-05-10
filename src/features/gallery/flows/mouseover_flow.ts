@@ -5,13 +5,11 @@ import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { debounceTrailing } from "../../../lib/core/scheduling/rate_limiting";
 import { executeByGalleryState } from "./state_executor";
 
-const preloadContentDebounced = debounceTrailing((thumb: HTMLElement | null) => preloadContent(thumb), 1000);
-
-function preloadContent(thumb: HTMLElement | null): void {
-  if (thumb === null || !ON_FAVORITES_PAGE) {
-    return;
-  }
-  GalleryPreloadFlow.preloadAround(thumb);
+export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
+  executeByGalleryState({
+    hover: handleHover,
+    idle: preloadMediaAroundDebounced
+  }, mouseEvent.thumb);
 }
 
 function handleHover(thumb: HTMLElement | null): void {
@@ -22,13 +20,15 @@ function handleHover(thumb: HTMLElement | null): void {
   GalleryView.display(thumb);
 
   if (ON_FAVORITES_PAGE) {
-    preloadContentDebounced(thumb);
+    preloadMediaAroundDebounced(thumb);
   }
 }
 
-export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
-  executeByGalleryState({
-    hover: handleHover,
-    idle: preloadContentDebounced
-  }, mouseEvent.thumb);
+const preloadMediaAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => preloadMediaAround(thumb), 1000);
+
+function preloadMediaAround(thumb: HTMLElement | null): void {
+  if (thumb === null || !ON_FAVORITES_PAGE) {
+    return;
+  }
+  GalleryPreloadFlow.preloadAround(thumb);
 }

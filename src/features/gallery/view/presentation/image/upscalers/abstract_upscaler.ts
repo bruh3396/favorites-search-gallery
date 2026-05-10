@@ -6,7 +6,7 @@ import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_e
 import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../lib/preferences/preferences";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
-import { fetchBitmap } from "../controller/image_fetcher";
+import { fetchBitmap } from "../presenter/image_fetcher";
 import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
 import { isImage } from "../../../../../../lib/media/media_type_guards";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";

@@ -10,26 +10,8 @@ const unmatchableRegex = /^\b$/;
 const startsWithRegex = /^[^*]*\*$/;
 const containsRegex = /^\*[^*]*\*$/;
 
-function removeDuplicateAsterisks(value: string): string {
-  return value.replace(/\*+/g, "*");
-}
-
-function buildWildcardRegex(value: string): RegExp {
-  try {
-    const regex = escapeParenthesis(value.replace(/\*/g, ".*"));
-    return new RegExp(`^${regex}$`);
-  } catch {
-    return unmatchableRegex;
-  }
-}
-
-function getMatchType(value: string): WildcardMatchType {
-  return startsWithRegex.test(value) ? WildcardMatchType.PREFIX : containsRegex.test(value) ? WildcardMatchType.INCLUDES : WildcardMatchType.REGEX;
-}
-
-function parseNegation(tag: string): { negated: boolean; value: string; } {
-  const negated = tag.startsWith("-") && tag.length > 1;
-  return { negated, value: negated ? tag.substring(1) : tag };
+export function parseTag(tag: string): AbstractTag {
+  return isWildcardTag(tag) ? parseWildcardTag(tag) : isMetadataTag(tag) ? parseMetadataTag(tag) : parseExactTag(tag);
 }
 
 export function parseExactTag(tag: string): ExactTag {
@@ -56,6 +38,24 @@ export function isMetadataTag(tag: string): boolean {
   return MetadataSearchExpression.regex.test(tag);
 }
 
-export function parseTag(tag: string): AbstractTag {
-  return isWildcardTag(tag) ? parseWildcardTag(tag) : isMetadataTag(tag) ? parseMetadataTag(tag) : parseExactTag(tag);
+function parseNegation(tag: string): { negated: boolean; value: string; } {
+  const negated = tag.startsWith("-") && tag.length > 1;
+  return { negated, value: negated ? tag.substring(1) : tag };
+}
+
+function getMatchType(value: string): WildcardMatchType {
+  return startsWithRegex.test(value) ? WildcardMatchType.PREFIX : containsRegex.test(value) ? WildcardMatchType.INCLUDES : WildcardMatchType.REGEX;
+}
+
+function buildWildcardRegex(value: string): RegExp {
+  try {
+    const regex = escapeParenthesis(value.replace(/\*/g, ".*"));
+    return new RegExp(`^${regex}$`);
+  } catch {
+    return unmatchableRegex;
+  }
+}
+
+function removeDuplicateAsterisks(value: string): string {
+  return value.replace(/\*+/g, "*");
 }

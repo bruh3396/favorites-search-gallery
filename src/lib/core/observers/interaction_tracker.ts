@@ -1,4 +1,4 @@
-import { Events } from "../../communication/events";
+import { DomEvents } from "../../communication/dom_events";
 import { Timeout } from "../../../types/async";
 
 export class InteractionTracker {
@@ -49,7 +49,7 @@ export class InteractionTracker {
   }
 
   private trackMouseMove(): void {
-    Events.document.mousemove.on(this.onMouseMove.bind(this), {
+    DomEvents.document.mousemove.on(this.onMouseMove.bind(this), {
       passive: true,
       signal: this.abortController.signal
     });

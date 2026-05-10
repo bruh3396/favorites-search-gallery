@@ -29,7 +29,6 @@ async function onHeaderVisibilityChanged(headerVisible: boolean): Promise<void> 
   if (menuIsOpen) {
     Content.classList.add("fav-menu--sticky");
   }
-  // Let the DOM settle before adding the shadow so the transition plays correctly.
   await sleep(30);
   Content.classList.add("fav-menu--sticky-shadow");
 }

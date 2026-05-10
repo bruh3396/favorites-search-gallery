@@ -2,23 +2,6 @@ import { NumberElement, defaultMenuElement } from "../element_types";
 import { NumberComponent } from "./number_component";
 import { doNothing } from "../../environment/constants";
 
-function createNumberTemplate(partial: Partial<NumberElement>): NumberElement {
-  return {
-    ...defaultMenuElement,
-    savePreference: false,
-    event: null,
-    function: doNothing,
-    triggerOnCreation: false,
-    preference: null,
-    min: 0,
-    max: 100,
-    step: 1,
-    defaultValue: 10,
-    pollingTime: 50,
-    ...partial
-  };
-}
-
 export function buildNumberComponent(partial: Partial<NumberElement>): void {
   const template = createNumberTemplate(partial);
   const parent = document.getElementById(template.parentId);
@@ -74,5 +57,22 @@ export function buildNumberComponent(partial: Partial<NumberElement>): void {
   numberInput.onchange = (): void => {
     emitEvent();
     template.preference?.set(parseFloat(numberInput.value));
+  };
+}
+
+function createNumberTemplate(partial: Partial<NumberElement>): NumberElement {
+  return {
+    ...defaultMenuElement,
+    savePreference: false,
+    event: null,
+    function: doNothing,
+    triggerOnCreation: false,
+    preference: null,
+    min: 0,
+    max: 100,
+    step: 1,
+    defaultValue: 10,
+    pollingTime: 50,
+    ...partial
   };
 }

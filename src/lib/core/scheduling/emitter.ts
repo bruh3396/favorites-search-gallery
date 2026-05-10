@@ -1,5 +1,3 @@
-import { withTimeout } from "./promise";
-
 export class Emitter<V> {
   protected listeners: Set<(value: V) => void>;
   protected onceListeners: Set<(value: V) => void>;
@@ -51,10 +49,6 @@ export class Emitter<V> {
     return new Promise((resolve) => {
       this.on(resolve, { once: true });
     });
-  }
-
-  public nextWithTimeout(milliseconds: number): Promise<V> {
-    return withTimeout(this.next(), milliseconds);
   }
 
   public toggle(value: boolean | undefined = undefined): void {

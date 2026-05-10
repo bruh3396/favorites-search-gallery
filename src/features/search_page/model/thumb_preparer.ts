@@ -1,13 +1,27 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
-import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
 import { ADD_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { ClickCode } from "../../../types/input";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
-import { Post } from "../../../types/api";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { removeNonNumericCharacters } from "../../../utils/string/format";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
+
+export function prepareSearchPageThumbs(thumbs: HTMLElement[]): HTMLElement[] {
+  thumbs.forEach(thumb => prepareThumb(thumb));
+  return thumbs;
+}
+
+function prepareThumb(thumb: HTMLElement): void {
+  moveTagsFromTitleToTagsAttribute(thumb);
+  assignMediaType(thumb);
+  addAddFavoriteButton(thumb);
+  addCanvas(thumb);
+  thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
+  thumb.classList.remove(RAW_THUMB_CLASS_NAME);
+  thumb.classList.add(ITEM_CLASS_NAME);
+  prepareMobileThumb(thumb);
+}
 
 function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
   const image = getImageFromThumb(thumb);
@@ -19,19 +33,19 @@ function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
   image.removeAttribute("title");
 }
 
-function prepareThumb(thumb: HTMLElement): void {
-  moveTagsFromTitleToTagsAttribute(thumb);
-  assignMediaType(thumb);
-  addAddFavoriteButton(thumb);
-  addCanvas(thumb);
-  thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
-  thumb.classList.remove(RAW_THUMB_CLASS_NAME);
-  thumb.classList.add(ITEM_CLASS_NAME);
-  // thumb.classList.add(THUMB_CLASS_NAME);
+function assignMediaType(thumb: HTMLElement): void {
+  thumb.classList.remove("image");
+  thumb.classList.remove("video");
+  thumb.classList.remove("gif");
 
-  if (ON_MOBILE_DEVICE) {
-    prepareMobileThumb(thumb);
+  const image = getImageFromThumb(thumb);
+
+  if (image === null) {
+    return;
   }
+  const tags = image.getAttribute("tags") ?? "";
+
+  image.classList.add(resolveMediaType(tags));
 }
 
 function addAddFavoriteButton(thumb: HTMLElement): void {
@@ -68,22 +82,11 @@ function addCanvas(thumb: HTMLElement): void {
   }
 }
 
-function assignMediaType(thumb: HTMLElement): void {
-  thumb.classList.remove("image");
-  thumb.classList.remove("video");
-  thumb.classList.remove("gif");
-
-  const image = getImageFromThumb(thumb);
-
-  if (image === null) {
+function prepareMobileThumb(thumb: HTMLElement): void {
+  if (!ON_MOBILE_DEVICE) {
     return;
   }
-  const tags = image.getAttribute("tags") ?? "";
 
-  image.classList.add(resolveMediaType(tags));
-}
-
-function prepareMobileThumb(thumb: HTMLElement): void {
   for (const script of thumb.querySelectorAll("script")) {
     script.remove();
   }
@@ -99,74 +102,4 @@ function prepareMobileThumb(thumb: HTMLElement): void {
     image.setAttribute("src", altSource);
     image.removeAttribute("data-cfsrc");
   }
-}
-
-export function correctMediaTags(post: Post): void {
-  if (!ON_SEARCH_PAGE) {
-    return;
-  }
-  const thumb = document.getElementById(post.id);
-
-  if (thumb === null) {
-    return;
-  }
-  const tagSet = convertToTagSet(post.tags);
-  const isVideo = post.fileURL.endsWith("mp4");
-  const isGif = post.fileURL.endsWith("gif");
-  const isImage = !isVideo && !isGif;
-  const documentThumb = document.getElementById(thumb.id);
-
-  if (isImage) {
-    removeAnimatedTags(tagSet);
-    removeAnimatedAttributes(thumb);
-    removeAnimatedAttributes(documentThumb);
-  } else if (isVideo) {
-    tagSet.add("video");
-  } else if (isGif) {
-    tagSet.add("gif");
-  }
-  const tagString = convertToTagString(tagSet);
-
-  setThumbTagsOnSearchPage(thumb, tagString);
-  setThumbTagsOnSearchPage(documentThumb, tagString);
-}
-
-function setThumbTagsOnSearchPage(thumb: HTMLElement | null, tags: string): void {
-  if (thumb === null) {
-    return;
-  }
-  const image = getImageFromThumb(thumb);
-
-  if (image === null) {
-    return;
-  }
-  image.setAttribute("tags", tags);
-}
-
-function removeAnimatedTags(tagSet: Set<string>): void {
-  tagSet.delete("animated");
-  tagSet.delete("video");
-  tagSet.delete("mp4");
-  tagSet.delete("gif");
-}
-
-function removeAnimatedAttributes(thumb: HTMLElement | null): void {
-  if (thumb === null) {
-    return;
-  }
-  thumb.classList.remove("video");
-  thumb.classList.remove("gif");
-
-  const image = getImageFromThumb(thumb);
-
-  if (image === null) {
-    return;
-  }
-  image.classList.remove("video");
-  image.classList.remove("gif");
-}
-
-export function prepareSearchPageThumbs(thumbs: HTMLElement[]): HTMLElement[] {
-  thumbs.forEach(thumb => prepareThumb(thumb));
-  return thumbs;
 }

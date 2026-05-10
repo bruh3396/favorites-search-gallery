@@ -11,6 +11,49 @@ import { buildStyleSheetUrl } from "../remote/url/action_url_builder";
 import { insertStyle } from "../dom/injector";
 import { yieldControl } from "../core/scheduling/promise";
 
+export function setupStyles(): void {
+  insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS);
+  toggleDarkTheme(usingDarkTheme());
+  setupVideoAndGifOutlines();
+  setupTilerStyles();
+}
+
+export async function toggleDarkTheme(useDark: boolean): Promise<void> {
+  await yieldControl();
+  insertStyle(useDark ? DARK_THEME_CSS : "", "theme-dark");
+  toggleDarkStyleSheet(useDark);
+  toggleAllThemeClasses(useDark);
+  setCookie("theme", useDark ? "dark" : "light");
+}
+
+export function usingDarkTheme(): boolean {
+  return getCookie("theme", "") === "dark";
+}
+
+export function getCurrentThemeClass(): string {
+  return usingDarkTheme() ? "theme--dark" : "theme--light";
+}
+
+export function setColorScheme(color: string): void {
+  setGalleryBackgroundColor(color);
+  Preferences.colorScheme.set(color);
+}
+
+export function toggleGalleryMenuEnabled(value: boolean): void {
+  insertStyle(`
+        #gallery-menu {
+          visibility: ${value ? "visible" : "hidden"} !important;
+        }`, "gallery-menu-enable");
+}
+
+export function toggleSavedSearchesVisibility(value: boolean): void {
+  insertStyle(`
+      #right-favorites-panel {
+        display: ${value ? "block" : "none"};
+      }
+    `, "saved-searches-visibility");
+}
+
 function getMainStyleSheetElement(): HTMLLinkElement | undefined {
   return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
 }
@@ -23,7 +66,7 @@ function toggleDarkStyleSheet(useDark: boolean): void {
   setStyleSheet(buildStyleSheetUrl(ON_MOBILE_DEVICE ? "mobile" : "desktop", useDark));
 }
 
-function toggleGreenGradientClasses(useDark: boolean): void {
+function toggleAllThemeClasses(useDark: boolean): void {
   const currentTheme = useDark ? "theme--light" : "theme--dark";
   const targetTheme = useDark ? "theme--dark" : "theme--light";
 
@@ -106,48 +149,4 @@ function setupTilerStyles(): void {
   }`;
 
   insertStyle(style, "fav-tiler");
-}
-
-export function usingDarkTheme(): boolean {
-  return getCookie("theme", "") === "dark";
-}
-
-export async function toggleDarkTheme(useDark: boolean): Promise<void> {
-  await yieldControl();
-  insertStyle(useDark ? DARK_THEME_CSS : "", "theme-dark");
-  toggleDarkStyleSheet(useDark);
-  toggleGreenGradientClasses(useDark);
-  setCookie("theme", useDark ? "dark" : "light");
-}
-
-export function getCurrentThemeClass(): string {
-  return usingDarkTheme() ? "theme--dark" : "theme--light";
-}
-
-export function setColorScheme(color: string): void {
-  setGalleryBackgroundColor(color);
-  Preferences.colorScheme.set(color);
-}
-
-export function toggleGalleryMenuEnabled(value: boolean): void {
-  insertStyle(`
-        #gallery-menu {
-          visibility: ${value ? "visible" : "hidden"} !important;
-        }`, "gallery-menu-enable");
-}
-
-export function toggleSavedSearchesVisibility(value: boolean): void {
-  insertStyle(`
-      #right-favorites-panel {
-        display: ${value ? "block" : "none"};
-      }
-    `, "saved-searches-visibility");
-}
-
-export function setupStyles(): void {
-  insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS);
-
-  toggleDarkTheme(usingDarkTheme());
-  setupVideoAndGifOutlines();
-  setupTilerStyles();
 }

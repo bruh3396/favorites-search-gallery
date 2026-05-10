@@ -1,8 +1,8 @@
 import * as VideoController2 from "./video_controller2";
-import { GalleryAbstractController } from "../abstract_controller";
+import { GalleryAbstractPresenter } from "../abstract_presenter";
 import { setupVideoController } from "./video_controller2";
 
-class VideoController extends GalleryAbstractController {
+class VideoPresenter extends GalleryAbstractPresenter {
   constructor() {
     super();
     this.container.id = "video-container";
@@ -45,4 +45,4 @@ class VideoController extends GalleryAbstractController {
   }
 }
 
-export const GalleryVideoController = new VideoController();
+export const GalleryVideoPresenter = new VideoPresenter();

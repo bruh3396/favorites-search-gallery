@@ -6,26 +6,6 @@ import { Preferences } from "../../../lib/preferences/preferences";
 import { didSwipe } from "../../../lib/communication/swipe_events";
 import { executeByGalleryState } from "./state_executor";
 
-function galleryEnabled(): boolean {
-  return (ON_FAVORITES_PAGE && Preferences.mobileGalleryEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPages.value);
-}
-
-function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
-  if (mouseEvent.thumb !== null && galleryEnabled()) {
-    mouseEvent.originalEvent.preventDefault();
-    mouseEvent.originalEvent.stopPropagation();
-    mouseEvent.originalEvent.stopImmediatePropagation();
-    GalleryStateFlow.enterGallery(mouseEvent.thumb);
-  }
-}
-
-function onTouchStartInGallery(event: TouchEvent): void {
-  if (event.target instanceof HTMLElement && event.target.closest("#gallery-menu") !== null) {
-    return;
-  }
-  event.preventDefault();
-}
-
 export function onMouseDown(event: MouseEvent): void {
   executeByGalleryState({
     hover: onMouseDownOutsideGallery,
@@ -59,4 +39,24 @@ export function onRightTap(): void {
       GalleryNavigationFlow.navigate("ArrowRight");
     }
   });
+}
+
+function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
+  if (mouseEvent.thumb !== null && galleryEnabled()) {
+    mouseEvent.originalEvent.preventDefault();
+    mouseEvent.originalEvent.stopPropagation();
+    mouseEvent.originalEvent.stopImmediatePropagation();
+    GalleryStateFlow.enterGallery(mouseEvent.thumb);
+  }
+}
+
+function onTouchStartInGallery(event: TouchEvent): void {
+  if (event.target instanceof HTMLElement && event.target.closest("#gallery-menu") !== null) {
+    return;
+  }
+  event.preventDefault();
+}
+
+function galleryEnabled(): boolean {
+  return (ON_FAVORITES_PAGE && Preferences.mobileGalleryEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPages.value);
 }

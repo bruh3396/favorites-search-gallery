@@ -1,14 +1,14 @@
 import * as GalleryImageCanvas from "./image_canvas";
 import * as GalleryImageLoader from "./image_loader";
 import * as GalleryUpscaler from "../upscalers/upscaler";
-import { GalleryAbstractController } from "../../abstract_controller";
+import { GalleryAbstractPresenter } from "../../abstract_presenter";
 import { GalleryConfig } from "../../../../../../config/gallery_config";
 import { ImageRequest } from "../../../../types/image_request";
 import { USING_FIREFOX } from "../../../../../../lib/environment/environment";
 import { waitForAllThumbnailsToLoad } from "../../../../../../lib/dom/content_thumb";
 import { withTimeout } from "../../../../../../lib/core/scheduling/promise";
 
-class ImageController extends GalleryAbstractController {
+class ImagePresenter extends GalleryAbstractPresenter {
   private activeId: string;
 
   constructor() {
@@ -34,7 +34,9 @@ class ImageController extends GalleryAbstractController {
     setTimeout(() => this.upscaleCachedThumbs(), 10);
   }
 
-  public exitGallery(): void {
+  public hide(): void {
+    super.hide();
+
     if (USING_FIREFOX) {
       GalleryImageCanvas.clear();
     }
@@ -90,4 +92,4 @@ class ImageController extends GalleryAbstractController {
   }
 }
 
-export const GalleryImageController = new ImageController();
+export const GalleryImagePresenter = new ImagePresenter();

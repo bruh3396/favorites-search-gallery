@@ -20,13 +20,6 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     document.getElementById(this.parentId)?.insertAdjacentElement("beforeend", searchBox);
     this.observeHeight();
     this.subscribePlatformEvents();
-    // new GhostAutocomplete(searchBox, (value, cursor) => {
-    //   const textBeforeCursor = value.slice(0, cursor);
-    //   if (textBeforeCursor.endsWith("/foo")) {
-    //     return " Hello World";
-    //   }
-    //   return "";
-    // });
     return searchBox;
   }
 

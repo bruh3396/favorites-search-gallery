@@ -4,9 +4,9 @@ import { download } from "../../../utils/browser/download";
 import { resolveMediaUrl } from "../../media/media_url_resolver";
 
 export async function downloadFromThumb(thumb: HTMLElement): Promise<void> {
-  const originalContentUrl = await resolveMediaUrl(thumb);
-  const extension = ExtensionResolver.extractExtensionFromUrl(originalContentUrl) ?? DEFAULT_EXTENSION;
+  const url = await resolveMediaUrl(thumb);
+  const extension = ExtensionResolver.extractExtensionFromUrl(url) ?? DEFAULT_EXTENSION;
   const filename = `${thumb.id}.${extension}`;
 
-  download(originalContentUrl, filename);
+  download(url, filename);
 }

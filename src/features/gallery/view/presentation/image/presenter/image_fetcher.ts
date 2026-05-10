@@ -6,8 +6,8 @@ import { imageIsLoaded } from "../../../../../../utils/dom/image";
 
 const fetchQueue = new ThrottledQueue(10);
 
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
+export function fetchBitmap(request: ImageRequest): Promise<boolean> {
+  return request.isHighRes ? fetchHighResBitmap(request) : fetchLowResBitmap(request);
 }
 
 async function fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
@@ -24,6 +24,10 @@ async function fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
   }
 }
 
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
 async function fetchLowResBitmap(request: ImageRequest): Promise<boolean> {
   const image = getImageFromThumb(request.thumb);
 
@@ -36,8 +40,4 @@ async function fetchLowResBitmap(request: ImageRequest): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-export function fetchBitmap(request: ImageRequest): Promise<boolean> {
-  return request.isHighRes ? fetchHighResBitmap(request) : fetchLowResBitmap(request);
 }

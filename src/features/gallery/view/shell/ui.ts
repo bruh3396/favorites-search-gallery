@@ -5,6 +5,7 @@ import { GalleryRoot } from "./shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { USING_FIREFOX } from "../../../../lib/environment/environment";
 import { blurActiveElement } from "../../../../utils/dom/interaction";
+import { getLayout } from "../../../../lib/layout/layout";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { showFullscreenIcon } from "../view_utils";
 import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
@@ -14,10 +15,6 @@ const background: HTMLElement = document.createElement("div");
 background.id = "gallery-background";
 background.style.opacity = Preferences.backgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
-
-function usingColumnLayout(): boolean {
-  return document.querySelector("#favorites-search-gallery-content.tiler--column") !== null;
-}
 
 export function setupGalleryUi(): void {
   GalleryRoot.appendChild(background);
@@ -53,16 +50,20 @@ export function scrollToLastVisitedThumb(): void {
     });
 }
 
-function toggleVideoPointerEvents(value: boolean): void {
-  insertStyle(`
-      video {
-        pointer-events: ${value ? "auto" : "none"}
-      }
-      `, "gallery-video-pointer-events");
+export function toggleCursor(value: boolean): void {
+  background.style.cursor = value ? "default" : "none";
 }
 
-function toggleBackgroundInteractability(value: boolean): void {
-    background.classList.toggle("gallery-background--active", value);
+export function toggleGalleryMenuVisibility(value: boolean): void {
+  insertStyle(`
+      #gallery-menu {
+        display: ${value ? "flex" : "none"} !important;
+      }
+      `, "gallery-menu-visibility");
+}
+
+export function toggleZoomCursor(value: boolean): void {
+  background.classList.toggle("gallery-background--zooming", value);
 }
 
 export function toggleBackgroundOpacity(): void {
@@ -83,10 +84,6 @@ export function hide(): void {
   toggleScrollbar(true);
 }
 
-function toggleScrollbar(value: boolean): void {
-  document.body.style.overflowY = value ? "auto" : "hidden";
-}
-
 export function updateUiInGallery(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
 
@@ -102,13 +99,6 @@ export function updateBackgroundOpacityFromEvent(event: WheelEvent): void {
   opacity -= event.deltaY * 0.0005;
   opacity = clamp(opacity, 0, 1);
   updateBackgroundOpacity(roundToTwoDecimalPlaces(opacity));
-}
-
-function updateBackgroundOpacity(opacity: number): void {
-  const opacityString = String(opacity);
-
-  background.style.opacity = opacityString;
-  Preferences.backgroundOpacity.set(opacityString);
 }
 
 export function showAddedFavoriteStatus(status: AddFavoriteStatus): void {
@@ -144,25 +134,36 @@ export function setLastVisitedThumb(thumb: HTMLElement): void {
   lastVisitedThumb = thumb;
 }
 
+function usingColumnLayout(): boolean {
+  return getLayout() === "tiler--column";
+}
+
+function updateBackgroundOpacity(opacity: number): void {
+  const opacityString = String(opacity);
+
+  background.style.opacity = opacityString;
+  Preferences.backgroundOpacity.set(opacityString);
+}
+
+function toggleVideoPointerEvents(value: boolean): void {
+  insertStyle(`
+      video {
+        pointer-events: ${value ? "auto" : "none"}
+      }
+      `, "gallery-video-pointer-events");
+}
+
+function toggleBackgroundInteractability(value: boolean): void {
+  background.classList.toggle("gallery-background--active", value);
+}
+
+function toggleScrollbar(value: boolean): void {
+  document.body.style.overflowY = value ? "auto" : "hidden";
+}
+
 function scrollToThumb(thumb: HTMLElement): void {
   thumb.scrollIntoView({
     behavior: "smooth",
     block: "center"
   });
-}
-
-export function toggleCursor(value: boolean): void {
-  background.style.cursor = value ? "default" : "none";
-}
-
-export function toggleGalleryMenuVisibility(value: boolean): void {
-  insertStyle(`
-      #gallery-menu {
-        display: ${value ? "flex" : "none"} !important;
-      }
-      `, "gallery-menu-visibility");
-}
-
-export function toggleZoomCursor(value: boolean): void {
-  background.classList.toggle("gallery-background--zooming", value);
 }

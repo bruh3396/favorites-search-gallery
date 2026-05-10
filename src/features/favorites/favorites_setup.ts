@@ -10,6 +10,7 @@ import * as FavoritesResetFlow from "./flows/reset_flow";
 import * as FavoritesSearchFlow from "./flows/search_flow";
 import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
+import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
@@ -41,7 +42,7 @@ async function setupSubFeatures(): Promise<void> {
   });
   Events.favorites.searchResultsUpdated.on(FavoritesTagModifier.unselectAll);
   Events.favorites.pageChanged.on(FavoritesTagModifier.highlightSelectedThumbsOnPageChange);
-  Events.document.click.on(FavoritesTagModifier.handleDocumentClick);
+  DomEvents.document.click.on(FavoritesTagModifier.handleDocumentClick);
 }
 
 function addEventListeners(): void {
@@ -64,8 +65,7 @@ function addEventListeners(): void {
 
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
-  Events.favorites.resetButtonClicked.on(FavoritesView.tryResetting);
-  Events.favorites.resetConfirmed.on(FavoritesResetFlow.resetFavorites);
+  Events.favorites.resetButtonClicked.on(FavoritesResetFlow.tryResetting);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
 
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);

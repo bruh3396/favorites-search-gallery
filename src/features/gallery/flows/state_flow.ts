@@ -30,7 +30,7 @@ export function reEnterGallery(): void {
   }
 }
 
-export function toggleShowingContentOnHover(): void {
-  GalleryModel.toggleShowingContentOnHover();
-  Events.gallery.showOnHoverOverridden.emit(GalleryModel.showingContentOnHover());
+export function toggleEnlargeOnHover(): void {
+  GalleryModel.toggleShowingMediaOnHover();
+  Events.gallery.showOnHoverOverridden.emit(GalleryModel.enlargingOnHover());
 }

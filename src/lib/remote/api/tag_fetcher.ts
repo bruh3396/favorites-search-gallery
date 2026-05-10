@@ -8,10 +8,10 @@ import { tagResponseToTagCategory } from "../parse/api_tag_parser";
 
 const fetchCoalescer = new CoalescingResolver<TagResponse>(ApiConfig.apiBatchSize, ApiConfig.apiBatchFlushDelay, fetchTagBatch);
 
-function fetchTagBatch(tagNames: string[]): Promise<Record<string, TagResponse>> {
-  return tagLimiter.run(() => fetchJsonFromApi(TAG_API_URL, { tagNames }));
-}
-
 export function fetchTagCategoryFromApi(tagName: string): Promise<EncodedTagCategory> {
   return fetchCoalescer.resolve(tagName).then(tagResponseToTagCategory);
+}
+
+function fetchTagBatch(tagNames: string[]): Promise<Record<string, TagResponse>> {
+  return tagLimiter.run(() => fetchJsonFromApi(TAG_API_URL, { tagNames }));
 }

@@ -1,5 +1,6 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { getImageFromThumb, getThumbFromImage } from "../../lib/dom/thumb";
+import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
 import { Overlays } from "../../lib/shell";
 import { Preferences } from "../../lib/preferences/preferences";
@@ -51,7 +52,7 @@ function createTooltip(): HTMLElement {
 }
 
 function addEventListeners(): void {
-  Events.document.mouseover.on((mouseOverEvent) => {
+  DomEvents.document.mouseover.on((mouseOverEvent) => {
     if (mouseOverEvent.thumb === null) {
       hide();
       currentImage = null;

@@ -3,10 +3,10 @@ import * as FavoritesSequentialPageFetcher from "./sequential_page_fetcher";
 import { Favorite } from "../../../../types/favorite";
 import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesConcurrentPageFetcher } from "./concurrent_page_fetcher";
+
 let allFavorites: Favorite[] = [];
 let activeFavorites: Favorite[] | null = null;
 const favoritesById: Map<string, Favorite> = new Map<string, Favorite>();
-const registerFavorites = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));
 
 export function loadDatabaseFavorites(getAdditionalTags: (id: string) => string | undefined, onFavoritesLoaded: (favorites: FavoriteItem[]) => void): Promise<void> {
   return FavoritesDatabase.loadFavorites().then((records) => {
@@ -57,3 +57,5 @@ export const storeNewFavorites = (newFavorites: Favorite[]): Promise<void> => Fa
 export const updateFavorite = (favorite: Favorite): void => FavoritesDatabase.updateFavorite(favorite);
 export const deleteFavorite = (id: string): Promise<void> => FavoritesDatabase.deleteFavorite(id);
 export const deleteDatabase = (): Promise<void> => FavoritesDatabase.deleteDatabase();
+
+const registerFavorites = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));

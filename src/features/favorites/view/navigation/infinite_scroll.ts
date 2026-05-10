@@ -1,21 +1,6 @@
 import { Favorite } from "../../../../types/favorite";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 
-function collectUnrendered<T>(favorites: Favorite[], limit: number, selector: (f: Favorite) => T): T[] {
-  const result: T[] = [];
-
-  for (const favorite of favorites) {
-    if (document.getElementById(favorite.id) === null) {
-      result.push(selector(favorite));
-    }
-
-    if (result.length >= limit) {
-      break;
-    }
-  }
-  return result;
-}
-
 export function getMoreResults(favorites: Favorite[]): HTMLElement[] {
   return collectUnrendered(favorites, FavoritesConfig.infiniteScrollBatchSize, f => f.root);
 }
@@ -30,4 +15,19 @@ export function getFirstResults(favorites: Favorite[]): Favorite[] {
 
 export function getThumbUrlsToPreload(favorites: Favorite[]): string[] {
   return collectUnrendered(favorites, FavoritesConfig.infiniteScrollPreloadCount, f => f.thumbUrl);
+}
+
+function collectUnrendered<T>(favorites: Favorite[], limit: number, selector: (f: Favorite) => T): T[] {
+  const result: T[] = [];
+
+  for (const favorite of favorites) {
+    if (document.getElementById(favorite.id) === null) {
+      result.push(selector(favorite));
+    }
+
+    if (result.length >= limit) {
+      break;
+    }
+  }
+  return result;
 }

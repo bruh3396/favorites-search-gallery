@@ -15,6 +15,14 @@ declare const Awesomplete_: AwesompleteConstructor;
 const AUTOCOMPLETE_API_URL = "https://ac.rule34.xxx/autocomplete.php?q=";
 const dummyElement = document.createElement("div");
 
+export function setupAutocomplete(): void {
+  if (AUTOCOMPLETE_DISABLED) {
+    return;
+  }
+  addAwesompleteToGlobalScope();
+  addAwesompleteToAllInputs();
+}
+
 function decodeEntities(encodedString: string): string {
   encodedString = encodedString.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, "");
   encodedString = encodedString.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, "");
@@ -131,12 +139,4 @@ function addAwesompleteToAllInputs(): void {
   for (const input of document.querySelectorAll("textarea, input[needs-autocomplete]")) {
     addAwesompleteToInput(input as HTMLTextAreaElement | HTMLInputElement);
   }
-}
-
-export function setupAutocomplete(): void {
-  if (AUTOCOMPLETE_DISABLED) {
-    return;
-  }
-  addAwesompleteToGlobalScope();
-  addAwesompleteToAllInputs();
 }

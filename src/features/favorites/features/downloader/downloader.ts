@@ -1,4 +1,4 @@
-import { DownloadRequest, toDownloadRequest } from "./request";
+import { DownloadRequest, toDownloadRequest } from "./download_request";
 import { ConcurrencyLimiter } from "../../../../lib/core/concurrency/concurrency_limiter";
 import { DownloadAbortedError } from "../../../../types/errors";
 import { Favorite } from "../../../../types/favorite";

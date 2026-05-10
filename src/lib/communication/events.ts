@@ -1,4 +1,3 @@
-import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../dom/input_types";
 import { Favorite, PageRelation } from "../../types/favorite";
 import { GalleryMenuAction, Layout, PerformanceProfile } from "../../types/ui";
 import { MetadataMetric, Rating } from "../../types/search";
@@ -88,23 +87,5 @@ export const Events = {
     swipedLeft: new Emitter<void>(),
     swipedRight: new Emitter<void>(),
     touchHold: new Emitter<TouchEvent>()
-  },
-  document: {
-    domLoaded: new StickyEmitter<void>(),
-    mouseover: new Emitter<EnhancedMouseEvent>(),
-    click: new Emitter<MouseEvent>(),
-    mousedown: new Emitter<MouseEvent>(),
-    touchStart: new Emitter<TouchEvent>(),
-    touchEnd: new Emitter<TouchEvent>(),
-    keydown: new Emitter<EnhancedKeyboardEvent>(),
-    keyup: new Emitter<EnhancedKeyboardEvent>(),
-    wheel: new Emitter<EnhancedWheelEvent>(),
-    contextmenu: new Emitter<MouseEvent>(),
-    mousemove: new Emitter<MouseEvent>()
-  },
-  window: {
-    focus: new Emitter<FocusEvent>(),
-    blur: new Emitter<FocusEvent>(),
-    orientationChange: new Emitter<Event>()
   }
 };

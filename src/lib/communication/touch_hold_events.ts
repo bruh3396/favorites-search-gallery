@@ -1,14 +1,13 @@
+import { DomEvents } from "./dom_events";
 import { Events } from "./events";
 import { Timeout } from "../../types/async";
 
 let timer: Timeout;
 const THRESHOLD = 300;
 
-function stopHoldTimer(): void {
-  if (timer !== undefined) {
-    clearTimeout(timer);
-    timer = undefined;
-  }
+export function setupTouchHoldEvents(): void {
+  DomEvents.document.touchStart.on(startHoldTimer);
+  DomEvents.document.touchEnd.on(stopHoldTimer);
 }
 
 function startHoldTimer(event: TouchEvent): void {
@@ -19,7 +18,9 @@ function startHoldTimer(event: TouchEvent): void {
   }, THRESHOLD);
 }
 
-export function setupTouchHoldEvents(): void {
-  Events.document.touchStart.on(startHoldTimer);
-  Events.document.touchEnd.on(stopHoldTimer);
+function stopHoldTimer(): void {
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    timer = undefined;
+  }
 }

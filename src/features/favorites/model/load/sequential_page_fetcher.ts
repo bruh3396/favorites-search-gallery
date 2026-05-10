@@ -7,6 +7,18 @@ import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_
 import { getIdFromThumb } from "../../../../lib/dom/thumb";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
+export async function fetchNewFavorites(storedIds: Set<string>): Promise<HTMLElement[]> {
+  await sleep(FavoritesConfig.reloadFetchDelay);
+  const allNewElements: HTMLElement[] = [];
+  let pageNumber = 0;
+
+  while (await fetchNewFavoritesFromPage(storedIds, pageNumber, allNewElements)) {
+    pageNumber += 1;
+    await sleep(Rule34NetworkConfig.favoritesPageFetchDelay);
+  }
+  return allNewElements;
+}
+
 const isEmptyPage = (elements: HTMLElement[]): boolean => elements.length === 0;
 const isLastPage = (elements: HTMLElement[]): boolean => elements.length < FAVORITES_PER_PAGE;
 
@@ -19,16 +31,4 @@ async function fetchNewFavoritesFromPage(storedIds: Set<string>, pageNumber: num
   }
   allNewElements.push(...newElements);
   return !isLastPage(newElements);
-}
-
-export async function fetchNewFavorites(storedIds: Set<string>): Promise<HTMLElement[]> {
-  await sleep(FavoritesConfig.reloadFetchDelay);
-  const allNewElements: HTMLElement[] = [];
-  let pageNumber = 0;
-
-  while (await fetchNewFavoritesFromPage(storedIds, pageNumber, allNewElements)) {
-    pageNumber += 1;
-    await sleep(Rule34NetworkConfig.favoritesPageFetchDelay);
-  }
-  return allNewElements;
 }

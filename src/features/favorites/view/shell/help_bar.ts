@@ -5,6 +5,11 @@ import { getCurrentThemeClass } from "../../../../lib/ui/style";
 
 let dialog: HTMLDialogElement;
 
+export function setupFavoritesHelpBar(): void {
+  insertHelpHtml();
+  buildWhatsNewMenu();
+}
+
 function insertHelpHtml(): void {
   const parent = document.getElementById(ON_MOBILE_DEVICE ? "mobile-footer-header" : "left-favorites-panel-top-row");
 
@@ -57,9 +62,4 @@ function buildDialogWhatsNewMenu(menu: HTMLElement): void {
   dialog.onclick = (): void => {
     dialog.close();
   };
-}
-
-export function setupFavoritesHelpBar(): void {
-  insertHelpHtml();
-  buildWhatsNewMenu();
 }

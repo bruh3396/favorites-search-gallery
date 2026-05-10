@@ -1,21 +1,6 @@
 import { SelectElement, defaultMenuElement } from "../element_types";
 import { doNothing } from "../../environment/constants";
 
-function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T>>): SelectElement<T> {
-  return {
-    ...defaultMenuElement,
-    options: new Map(),
-    savePreference: false,
-    defaultValue: "" as T,
-    event: null,
-    function: doNothing,
-    triggerOnCreation: false,
-    preference: null,
-    isNumeric: false,
-    ...partial
-  };
-}
-
 export function buildSelectElement<T extends string>(partial: Partial<SelectElement<T>>): void {
   const template = createSelectTemplate(partial);
   const parent = document.getElementById(template.parentId);
@@ -62,5 +47,20 @@ export function buildSelectElement<T extends string>(partial: Partial<SelectElem
   }
   select.onchange = (): void => {
     onChange();
+  };
+}
+
+function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T>>): SelectElement<T> {
+  return {
+    ...defaultMenuElement,
+    options: new Map(),
+    savePreference: false,
+    defaultValue: "" as T,
+    event: null,
+    function: doNothing,
+    triggerOnCreation: false,
+    preference: null,
+    isNumeric: false,
+    ...partial
   };
 }

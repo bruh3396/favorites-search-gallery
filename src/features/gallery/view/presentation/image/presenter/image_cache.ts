@@ -8,22 +8,6 @@ export type CachedRequest = {
 
 const cache: Map<string, CachedRequest> = new Map();
 
-function release(cached: CachedRequest | undefined): void {
-  cached?.request.close();
-  cached?.request.stop();
-}
-
-function evictStale(candidates: ImageRequest[]): void {
-  const candidateIds = new Set(candidates.map(request => request.id));
-
-  for (const [id, cached] of cache.entries()) {
-    if (!candidateIds.has(id)) {
-      release(cached);
-      cache.delete(id);
-    }
-  }
-}
-
 export function sync(candidates: ImageRequest[]): ImageRequest[] {
   evictStale(candidates);
   const unseen = candidates.filter(request => !cache.has(request.id));
@@ -51,4 +35,20 @@ export function completedRequests(): ImageRequest[] {
 export function clear(): void {
   [...cache.values()].forEach(cached => release(cached));
   cache.clear();
+}
+
+function evictStale(candidates: ImageRequest[]): void {
+  const candidateIds = new Set(candidates.map(request => request.id));
+
+  for (const [id, cached] of cache.entries()) {
+    if (!candidateIds.has(id)) {
+      release(cached);
+      cache.delete(id);
+    }
+  }
+}
+
+function release(cached: CachedRequest | undefined): void {
+  cached?.request.close();
+  cached?.request.stop();
 }

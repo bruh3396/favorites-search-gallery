@@ -1,5 +1,6 @@
 import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
+import { DomEvents } from "../../../../lib/communication/dom_events";
 import { Events } from "../../../../lib/communication/events";
 import { GalleryConfig } from "../../../../config/gallery_config";
 import { GalleryMenuAction } from "../../../../types/ui";
@@ -33,6 +34,17 @@ let menuVisibilityTimeout: Timeout;
 menu.id = "gallery-menu";
 menu.className = "gallery-sub-menu";
 
+export function setupDesktopGalleryMenu(): void {
+  if (!GeneralConfig.galleryMenuOptionEnabled) {
+    return;
+  }
+  GalleryRoot.appendChild(menu);
+  loadPreferences();
+  createButtons();
+  createColorPicker();
+  addEventListeners();
+}
+
 function loadPreferences(): void {
   if (Preferences.galleryMenuDockedLeft.value) {
     toggleDockPosition();
@@ -45,8 +57,8 @@ function loadPreferences(): void {
 }
 
 function addEventListeners(): void {
-  Events.document.mousemove.on(reveal);
-  Events.document.mouseover.on((mouseOverEvent) => {
+  DomEvents.document.mousemove.on(reveal);
+  DomEvents.document.mouseover.on((mouseOverEvent) => {
     togglePersistence(mouseOverEvent.originalEvent);
   });
 }
@@ -169,15 +181,4 @@ function toggleDockPosition(): void {
     return;
   }
   Preferences.galleryMenuDockedLeft.set(menu.classList.toggle("gallery-menu--docked"));
-}
-
-export function setupDesktopGalleryMenu(): void {
-  if (!GeneralConfig.galleryMenuOptionEnabled) {
-    return;
-  }
-  GalleryRoot.appendChild(menu);
-  loadPreferences();
-  createButtons();
-  createColorPicker();
-  addEventListeners();
 }

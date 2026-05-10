@@ -1,4 +1,4 @@
-import * as GalleryAutoplayController from "../features/autoplay/autoplay_controller";
+import * as GalleryAutoplayController from "../features/autoplay/autoplay";
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryPreloadFlow from "./preload_flow";
 import * as GalleryView from "../view/gallery_view";
@@ -49,7 +49,7 @@ function loadMoreResults(direction: NavigationKey): boolean {
 function finishNavigation(): void {
   const thumb = GalleryModel.getCurrentThumb();
 
-  GalleryView.showContentInGallery(thumb);
+  GalleryView.present(thumb);
   GalleryAutoplayController.startViewTimer(thumb);
   GalleryPreloadFlow.preloadInGalleryAround(thumb);
 }

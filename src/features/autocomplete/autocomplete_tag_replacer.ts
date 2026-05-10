@@ -1,5 +1,33 @@
 const defaultBoundaries = { start: 0, end: 0 };
 
+export function replaceTagInText(text: string, selectionStart: number, replacement: string): { result: string, selectionStart: number } {
+  if (selectionStart < 0 || selectionStart > text.length) {
+    return { result: text, selectionStart };
+  }
+  const { start, end } = getTagBoundary(text, selectionStart);
+  const firstHalf = text.slice(0, start);
+  const secondHalf = text.slice(end, text.length);
+  const result = `${firstHalf}${replacement}${secondHalf}`;
+  return {result, selectionStart: firstHalf.length + replacement.length};
+}
+
+export function getTagBoundary(text: string, selectionStart: number): { start: number, end: number } {
+  if (selectionStart < 0 || selectionStart > text.length || text.length === 0) {
+    return defaultBoundaries;
+  }
+  return {start: getLeftTagBoundary(selectionStart, text), end: getRightTagBoundary(selectionStart, text)};
+}
+
+export function replaceTag(text: string, selectionStart: number, replacement: string): string {
+  if (selectionStart < 0 || selectionStart > text.length) {
+    return text;
+  }
+  const { start, end } = getTagBoundary(text, selectionStart);
+  const firstHalf = text.slice(0, start);
+  const secondHalf = text.slice(end, text.length);
+  return `${firstHalf}${replacement}${secondHalf}`;
+}
+
 function isNegatedLeftTagBoundary(text: string, index: number): boolean {
   return text[index] === "-" && (text[index - 1] === " " || text[index - 1] === undefined);
 }
@@ -28,32 +56,4 @@ function getRightTagBoundary(selectionStart: number, text: string): number {
     boundary += 1;
   }
   return boundary;
-}
-
-export function getTagBoundary(text: string, selectionStart: number): { start: number, end: number } {
-  if (selectionStart < 0 || selectionStart > text.length || text.length === 0) {
-    return defaultBoundaries;
-  }
-  return {start: getLeftTagBoundary(selectionStart, text), end: getRightTagBoundary(selectionStart, text)};
-}
-
-export function replaceTag(text: string, selectionStart: number, replacement: string): string {
-  if (selectionStart < 0 || selectionStart > text.length) {
-    return text;
-  }
-  const { start, end } = getTagBoundary(text, selectionStart);
-  const firstHalf = text.slice(0, start);
-  const secondHalf = text.slice(end, text.length);
-  return `${firstHalf}${replacement}${secondHalf}`;
-}
-
-export function replaceTagInText(text: string, selectionStart: number, replacement: string): { result: string, selectionStart: number } {
-  if (selectionStart < 0 || selectionStart > text.length) {
-    return { result: text, selectionStart };
-  }
-  const { start, end } = getTagBoundary(text, selectionStart);
-  const firstHalf = text.slice(0, start);
-  const secondHalf = text.slice(end, text.length);
-  const result = `${firstHalf}${replacement}${secondHalf}`;
-  return {result, selectionStart: firstHalf.length + replacement.length};
 }

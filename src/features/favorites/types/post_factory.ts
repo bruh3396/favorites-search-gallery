@@ -4,6 +4,17 @@ import { Post } from "../../../types/api";
 import { decompressPreviewSource } from "../../../lib/media/media_url_transformer";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
+export function createPost(object: HTMLElement | FavoritesDatabaseRecord): Post {
+  if (object instanceof HTMLElement) {
+    return createPostFromFavoritesPageThumb(object);
+  }
+  return createPostFromDatabaseRecord(object);
+}
+
+export function clearPost(post: Post): void {
+  Object.assign(post, createEmptyPost());
+}
+
 function createEmptyPost(): Post {
   return {
     id: "",
@@ -61,15 +72,4 @@ function createPostFromFavoritesPageThumb(element: HTMLElement): Post {
   post.previewURL = source;
   post.tags = normalizeTags(image, post.id);
   return post;
-}
-
-export function createPost(object: HTMLElement | FavoritesDatabaseRecord): Post {
-  if (object instanceof HTMLElement) {
-    return createPostFromFavoritesPageThumb(object);
-  }
-  return createPostFromDatabaseRecord(object);
-}
-
-export function clearPost(post: Post): void {
-  Object.assign(post, createEmptyPost());
 }

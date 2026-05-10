@@ -6,6 +6,7 @@ import CAPTION_CSS from "../../assets/css/caption.css";
 import { ClickCode } from "../../types/input";
 import { CoalescingExecutor } from "../../lib/core/concurrency/coalescing_executor";
 import { Database } from "../../lib/core/storage/database";
+import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
 import { FeatureQueries } from "../../lib/communication/feature_queries";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
@@ -50,6 +51,17 @@ let currentThumb: HTMLElement | null = null;
 let problematicTags: Set<string>;
 let currentThumbId: string | null = null;
 let abortController: AbortController;
+
+export function setupCaptions(): void {
+  if (CAPTIONS_DISABLED) {
+    return;
+  }
+  initializeFields();
+  createHtmlElement();
+  insertStyle(CAPTION_CSS, "caption-style");
+  toggleVisibility(Preferences.captionsVisible.value);
+  addEventListeners();
+}
 
 function getCategoryHeaderHtml(): string {
   let html = "";
@@ -126,7 +138,7 @@ function addCommonEventListeners(): void {
       }
     }
   });
-  Events.document.mouseover.on((mouseOverEvent) => {
+  DomEvents.document.mouseover.on((mouseOverEvent) => {
     if (mouseOverEvent.insideOfThumb) {
       const insideOfDifferentThumb = currentThumb !== null && mouseOverEvent.thumb !== null && currentThumb.id !== mouseOverEvent.thumb.id;
 
@@ -402,16 +414,6 @@ function populateTags(thumb: HTMLElement): void {
   addTags(tagNames, thumb);
 }
 
-// export function provideTags(thumb: HTMLElement): void {
-//   const tagNames = getTagSetFromThumb(thumb);
-//   const unknownThumbTags = Array.from(tagNames).filter(tagName => tagCategoryIsUnknown(thumb, tagName));
-
-//   if (unknownThumbTags.length > 0) {
-
-//   }
-
-// }
-
 function addTags(tags: Set<string>, thumb: HTMLElement): void {
   if (currentThumbId !== thumb.id) {
     return;
@@ -503,10 +505,6 @@ function tagCategoryIsUnknown(thumb: HTMLElement, tagName: string): boolean {
   return tagName !== thumb.id && tagCategoryMappings[tagName] === undefined;
 }
 
-// function convertToTagCategory(tagCategory: string): TagCategory {
-//   return isTagCategory(tagCategory) ? tagCategory : "general";
-// }
-
 function decodeTagCategory(encoding: number): TagCategory {
   return tagCategoryDecodings[encoding] ?? "general";
 }
@@ -520,15 +518,4 @@ function addTagCategoryMapping(id: string, category: TagCategory): void {
     id,
     category
   });
-}
-
-export function setupCaptions(): void {
-  if (CAPTIONS_DISABLED) {
-    return;
-  }
-  initializeFields();
-  createHtmlElement();
-  insertStyle(CAPTION_CSS, "caption-style");
-  toggleVisibility(Preferences.captionsVisible.value);
-  addEventListeners();
 }

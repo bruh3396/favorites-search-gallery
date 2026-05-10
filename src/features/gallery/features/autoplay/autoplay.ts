@@ -4,6 +4,7 @@ import { clamp, millisecondsToSeconds } from "../../../../utils/number";
 import { isImage, isVideo } from "../../../../lib/media/media_type_guards";
 import AUTOPLAY_CSS from "../../../../assets/css/autoplay.css";
 import AUTOPLAY_HTML from "../../../../assets/html/autoplay.html";
+import { DomEvents } from "../../../../lib/communication/dom_events";
 import { Events } from "../../../../lib/communication/events";
 import { NavigationKey } from "../../../../types/input";
 import { NumberComponent } from "../../../../lib/ui/elements/number_component";
@@ -502,12 +503,12 @@ function addAutoplayEventListeners(): void {
   imageViewTimer.onTimerEnd = (): void => {
     events.onComplete();
   };
-  Events.document.mousemove.on(throttle<MouseEvent>(() => {
+  DomEvents.document.mousemove.on(throttle<MouseEvent>(() => {
     showMenu();
   }, 250), {
     signal: eventListenersAbortController.signal
   });
-  Events.document.keydown.on((event) => {
+  DomEvents.document.keydown.on((event) => {
     if (!event.isHotkey) {
       return;
     }

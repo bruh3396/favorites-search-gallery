@@ -1,22 +1,8 @@
 import { COLUMN_CLASS_NAME, ITEM_SELECTOR, getThumbsInContainer, getThumbsInMatrix, waitForThumbnailsToLoadInContainer } from "./thumb";
 import { Content } from "../shell";
 
-function usingColumnLayout(): boolean {
-  return Content.querySelector(`.${COLUMN_CLASS_NAME}`) !== null;
-}
-
-export function waitForAllThumbnailsToLoad(): Promise<unknown[]> {
-  return waitForThumbnailsToLoadInContainer(document);
-}
-
-export function getAllContentThumbs(): HTMLElement[] {
-  return usingColumnLayout() ? getThumbsInMatrix(Content) : getThumbsInContainer(Content);
-}
-
-export function getAllPageThumbs(): HTMLElement[] {
-  return getThumbsInContainer(document);
-}
-
-export function noItemsAreVisible(): boolean {
-  return Content.querySelector(ITEM_SELECTOR) === null;
-}
+export const waitForAllThumbnailsToLoad = (): Promise<unknown[]> => waitForThumbnailsToLoadInContainer(document);
+export const getAllContentThumbs = (): HTMLElement[] => (usingColumnLayout() ? getThumbsInMatrix(Content) : getThumbsInContainer(Content));
+export const getAllPageThumbs = (): HTMLElement[] => getThumbsInContainer(document);
+export const noItemsAreVisible = (): boolean => Content.querySelector(ITEM_SELECTOR) === null;
+const usingColumnLayout = (): boolean => Content.querySelector(`.${COLUMN_CLASS_NAME}`) !== null;

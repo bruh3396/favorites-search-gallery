@@ -1,12 +1,3 @@
-function getAwesompleteFromInput(input: HTMLInputElement | HTMLTextAreaElement): HTMLElement | null {
-  const awesomplete = input.parentElement;
-
-  if (awesomplete === null || awesomplete.className !== "awesomplete") {
-    return null;
-  }
-  return awesomplete;
-}
-
 export function hideAwesomplete(input: HTMLInputElement | HTMLTextAreaElement): void {
   const awesomplete = getAwesompleteFromInput(input);
 
@@ -47,4 +38,13 @@ export function awesompleteIsUnselected(input: HTMLInputElement | HTMLTextAreaEl
   const somethingIsSelected = searchSuggestions.map(li => li.getAttribute("aria-selected"))
     .some(element => element === "true");
   return !somethingIsSelected;
+}
+
+function getAwesompleteFromInput(input: HTMLInputElement | HTMLTextAreaElement): HTMLElement | null {
+  const awesomplete = input.parentElement;
+
+  if (awesomplete === null || awesomplete.className !== "awesomplete") {
+    return null;
+  }
+  return awesomplete;
 }

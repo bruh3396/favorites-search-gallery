@@ -11,15 +11,6 @@ let currentPageNumber = 1;
 let resultsPerPage = Preferences.resultsPerPage.value;
 let favorites: Favorite[] = [];
 
-function pageRange(pageNumber: number): PageRange {
-  return { start: resultsPerPage * (pageNumber - 1), end: resultsPerPage * pageNumber };
-}
-
-function favoritesOnPage(pageNumber: number): Favorite[] {
-  const { start, end } = pageRange(pageNumber);
-  return favorites.slice(start, end);
-}
-
 export const pageCount = (): number => Math.ceil(favorites.length / resultsPerPage) || 1;
 export const onFinalPage = (): boolean => currentPageNumber === pageCount();
 export const onFirstPage = (): boolean => currentPageNumber === 1;
@@ -95,4 +86,13 @@ export function goToPageWithFavorite(id: string): boolean {
     return true;
   }
   return false;
+}
+
+function pageRange(pageNumber: number): PageRange {
+  return { start: resultsPerPage * (pageNumber - 1), end: resultsPerPage * pageNumber };
+}
+
+function favoritesOnPage(pageNumber: number): Favorite[] {
+  const { start, end } = pageRange(pageNumber);
+  return favorites.slice(start, end);
 }

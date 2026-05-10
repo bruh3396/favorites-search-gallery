@@ -11,11 +11,6 @@ let statusTimeout: Timeout;
 const TEMPORARY_STATUS_TIMEOUT = 1000;
 const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "all favorites ";
 
-function clearStatus(): void {
-  statusIndicator.textContent = "";
-  statusIndicator.classList.add("u-hidden");
-}
-
 export function setStatus(text: string): void {
   clearTimeout(statusTimeout);
   statusIndicator.classList.remove("u-hidden");
@@ -62,4 +57,9 @@ export function setExpectedTotalFavoritesCount(count: number | null): void {
 export function setupFavoritesStatus(): void {
   matchCountIndicator = Root.querySelector("#match-count-label") ?? document.createElement("label");
   statusIndicator = Root.querySelector("#favorites-load-status-label") ?? document.createElement("label");
+}
+
+function clearStatus(): void {
+  statusIndicator.textContent = "";
+  statusIndicator.classList.add("u-hidden");
 }

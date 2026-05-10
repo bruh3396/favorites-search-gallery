@@ -1,21 +1,7 @@
 import { CheckboxElement, defaultMenuElement } from "../element_types";
-import { Events } from "../../communication/events";
+import { DomEvents } from "../../communication/dom_events";
 import { FeatureQueries } from "../../communication/feature_queries";
 import { doNothing } from "../../environment/constants";
-
-function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
-  return {
-    ...defaultMenuElement,
-    savePreference: true,
-    event: null,
-    defaultValue: false,
-    hotkey: "",
-    function: doNothing,
-    preference: null,
-    triggerOnCreation: false,
-    ...partial
-  };
-}
 
 export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
   const template = createCheckboxTemplate(partial);
@@ -55,7 +41,7 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
     return;
   }
 
-  Events.document.keydown.on((event) => {
+  DomEvents.document.keydown.on((event) => {
     if (!event.isHotkey || event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
       return;
     }
@@ -126,4 +112,18 @@ export function buildCheckboxOption(partial: Partial<CheckboxElement>): void {
 
   partial.parentId = labelId;
   buildCheckboxElement(partial);
+}
+
+function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElement {
+  return {
+    ...defaultMenuElement,
+    savePreference: true,
+    event: null,
+    defaultValue: false,
+    hotkey: "",
+    function: doNothing,
+    preference: null,
+    triggerOnCreation: false,
+    ...partial
+  };
 }

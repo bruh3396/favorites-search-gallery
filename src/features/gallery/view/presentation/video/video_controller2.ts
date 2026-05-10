@@ -14,6 +14,88 @@ const videoContainer: HTMLElement = document.createElement("div");
 
 videoContainer.id = "video-container-inner";
 
+export function setupVideoController(container: HTMLElement): void {
+  insertVideoContainer(container);
+  createVideoPlayers();
+  preventVideoPlayersFromFlashingWhenLoaded();
+  addEventListenersToVideoContainer();
+  addEventListenersToVideoPlayers();
+  loadVideoClips();
+}
+
+export function clearVideoSources(): void {
+  for (const video of videoPlayers) {
+    video.src = "";
+  }
+}
+
+export function preloadVideoPlayers(thumbs: HTMLElement[]): void {
+  if (videoPlayers.length === 1) {
+    return;
+  }
+  const activeVideoPlayer = getActiveVideoPlayer();
+  const inactiveVideoPlayers = getInactiveVideoPlayers();
+  const videoThumbsAroundInitialThumb = thumbs
+    .filter(thumb => isVideo(thumb) && !videoPlayerHasSource(activeVideoPlayer, thumb))
+    .slice(0, inactiveVideoPlayers.length);
+  const loadedVideoSources = new Set(inactiveVideoPlayers
+    .map(video => video.src)
+    .filter(src => src !== ""));
+  const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => getVideoSource(thumb)));
+  const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(getVideoSource(thumb)));
+  const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
+
+  for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
+    setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
+    pauseVideo(freeInactiveVideoPlayers[i]);
+  }
+}
+
+export function toggleVideoLooping(value: boolean): void {
+  for (const video of videoPlayers) {
+    video.toggleAttribute("loop", value);
+  }
+}
+
+export function toggleActiveVideoPause(): void {
+  if (document.activeElement !== getActiveVideoPlayer()) {
+    toggleVideoPause(getActiveVideoPlayer());
+  }
+}
+
+export function restartActiveVideo(): void {
+  getActiveVideoPlayer().play().catch();
+}
+
+export function playVideo(thumb: HTMLElement): Promise<void> {
+  setActiveVideoPlayer(thumb);
+  toggleVideoContainer(true);
+  stopAllVideos();
+  const video = getActiveVideoPlayer();
+  return new Promise((resolve, reject) => {
+    video.onloadedmetadata = (): void => resolve();
+    video.onerror = (): void => {
+      video.src = "";
+      reject(new Error("Video failed to load"));
+    };
+    setVideoSource(video, thumb);
+    video.style.display = "block";
+    video.play().catch(() => { });
+    toggleVideoControls(true);
+  });
+}
+
+export function stopAllVideos(): void {
+  for (const video of videoPlayers) {
+    stopVideo(video);
+  }
+}
+
+export function toggleVideoMute(): void {
+  getActiveVideoPlayer().muted = !getActiveVideoPlayer().muted;
+  Preferences.videoMuted.set(getActiveVideoPlayer().muted);
+}
+
 function createVideoPlayer(volume: number, muted: boolean): void {
   const video = document.createElement("video");
 
@@ -76,15 +158,6 @@ function insertVideoContainer(container: HTMLElement): void {
   container.appendChild(videoContainer);
 }
 
-export function setupVideoController(container: HTMLElement): void {
-  insertVideoContainer(container);
-  createVideoPlayers();
-  preventVideoPlayersFromFlashingWhenLoaded();
-  addEventListenersToVideoContainer();
-  addEventListenersToVideoPlayers();
-  loadVideoClips();
-}
-
 function addEventListenersToVideoPlayers(): void {
   for (const video of videoPlayers) {
     addEventListenerToVideoPlayer(video);
@@ -130,11 +203,6 @@ function toggleVideoPause(video: HTMLVideoElement): void {
   } else {
     video.pause();
   }
-}
-
-export function toggleVideoMute(): void {
-  getActiveVideoPlayer().muted = !getActiveVideoPlayer().muted;
-  Preferences.videoMuted.set(getActiveVideoPlayer().muted);
 }
 
 function updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElement): void {
@@ -207,30 +275,6 @@ function getInactiveVideoPlayers(): HTMLVideoElement[] {
   return videoPlayers.filter(video => !video.hasAttribute("active"));
 }
 
-export function playVideo(thumb: HTMLElement): Promise<void> {
-  setActiveVideoPlayer(thumb);
-  toggleVideoContainer(true);
-  stopAllVideos();
-  const video = getActiveVideoPlayer();
-  return new Promise((resolve, reject) => {
-    video.onloadedmetadata = (): void => resolve();
-    video.onerror = (): void => {
-      video.src = "";
-      reject(new Error("Video failed to load"));
-    };
-    setVideoSource(video, thumb);
-    video.style.display = "block";
-    video.play().catch(() => { });
-    toggleVideoControls(true);
-  });
-}
-
-export function stopAllVideos(): void {
-  for (const video of videoPlayers) {
-    stopVideo(video);
-  }
-}
-
 function stopVideo(video: HTMLVideoElement): void {
   video.style.display = "none";
   pauseVideo(video);
@@ -239,28 +283,6 @@ function stopVideo(video: HTMLVideoElement): void {
 function pauseVideo(video: HTMLVideoElement): void {
   video.pause();
   video.removeAttribute("controls");
-}
-
-export function preloadVideoPlayers(thumbs: HTMLElement[]): void {
-  if (videoPlayers.length === 1) {
-    return;
-  }
-  const activeVideoPlayer = getActiveVideoPlayer();
-  const inactiveVideoPlayers = getInactiveVideoPlayers();
-  const videoThumbsAroundInitialThumb = thumbs
-    .filter(thumb => isVideo(thumb) && !videoPlayerHasSource(activeVideoPlayer, thumb))
-    .slice(0, inactiveVideoPlayers.length);
-  const loadedVideoSources = new Set(inactiveVideoPlayers
-    .map(video => video.src)
-    .filter(src => src !== ""));
-  const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => getVideoSource(thumb)));
-  const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(getVideoSource(thumb)));
-  const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
-
-  for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
-    setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
-    pauseVideo(freeInactiveVideoPlayers[i]);
-  }
 }
 
 function videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): boolean {
@@ -324,28 +346,6 @@ function toggleVideoControls(value: boolean): void {
   }
 }
 
-export function clearVideoSources(): void {
-  for (const video of videoPlayers) {
-    video.src = "";
-  }
-}
-
-export function toggleVideoLooping(value: boolean): void {
-  for (const video of videoPlayers) {
-    video.toggleAttribute("loop", value);
-  }
-}
-
 function toggleVideoContainer(value: boolean): void {
   videoContainer.style.display = value ? "block" : "none";
-}
-
-export function toggleActiveVideoPause(): void {
-  if (document.activeElement !== getActiveVideoPlayer()) {
-    toggleVideoPause(getActiveVideoPlayer());
-  }
-}
-
-export function restartActiveVideo(): void {
-  getActiveVideoPlayer().play().catch();
 }

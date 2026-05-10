@@ -1,3 +1,4 @@
+import { DomEvents } from "./dom_events";
 import { Events } from "./events";
 
 type Point = { x: number; y: number };
@@ -5,6 +6,14 @@ type Point = { x: number; y: number };
 const THRESHOLD = 90;
 const start: Point = { x: 0, y: 0 };
 const end: Point = { x: 0, y: 0 };
+
+export function setupSwipeEvents(): void {
+  DomEvents.document.touchStart.on(setTouchStart);
+  DomEvents.document.touchEnd.on(onTouchEnd);
+}
+
+export const didSwipe = (): boolean => getSwipeDirection() !== null;
+export const didNotSwipe = (): boolean => !didSwipe();
 
 function setTouchStart(event: TouchEvent): void {
   start.x = event.changedTouches[0].screenX;
@@ -44,12 +53,4 @@ function onTouchEnd(event: TouchEvent): void {
       break;
     default: break;
   }
-}
-
-export const didSwipe = (): boolean => getSwipeDirection() !== null;
-export const didNotSwipe = (): boolean => !didSwipe();
-
-export function setupSwipeEvents(): void {
-  Events.document.touchStart.on(setTouchStart);
-  Events.document.touchEnd.on(onTouchEnd);
 }

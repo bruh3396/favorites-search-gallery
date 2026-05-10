@@ -30,8 +30,8 @@ export function inGallery(): boolean {
   return GalleryStateMachine.getCurrentState() === GalleryState.IN_GALLERY;
 }
 
-export function showingContentOnHover(): boolean {
-  return GalleryStateMachine.getCurrentState() === GalleryState.SHOWING_CONTENT_ON_HOVER;
+export function enlargingOnHover(): boolean {
+  return GalleryStateMachine.getCurrentState() === GalleryState.ENLARGE_ON_HOVER;
 }
 
 export function isViewingVideo(): boolean {
@@ -55,8 +55,8 @@ function setRecentlyExitedGallery(): void {
   }, 500);
 }
 
-export function toggleShowingContentOnHover(): void {
-  GalleryStateMachine.changeState(GalleryStateMachine.getCurrentState() === GalleryState.SHOWING_CONTENT_ON_HOVER ? GalleryState.IDLE : GalleryState.SHOWING_CONTENT_ON_HOVER);
+export function toggleShowingMediaOnHover(): void {
+  GalleryStateMachine.changeState(GalleryStateMachine.getCurrentState() === GalleryState.ENLARGE_ON_HOVER ? GalleryState.IDLE : GalleryState.ENLARGE_ON_HOVER);
 }
 
 export function navigate(direction: NavigationKey): GalleryBoundary {

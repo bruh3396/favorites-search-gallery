@@ -1,12 +1,19 @@
 import { sleep } from "../../../../lib/core/scheduling/promise";
 import { waitForDomToLoad } from "../../../../lib/ui/dom";
 
-function getOriginalFavoritesContent(): HTMLElement | null {
-  return document.querySelector("#content, div:has(.thumb)");
+export async function cleanNativeFavoritesPage(): Promise<void> {
+  await waitForDomToLoad();
+  await sleep(20);
+  removeNativeFavorites();
+  removeUnusedScripts();
 }
 
 function removeNativeFavorites(): void {
-  getOriginalFavoritesContent()?.remove();
+  extractNativeFavorites()?.remove();
+}
+
+function extractNativeFavorites(): HTMLElement | null {
+  return document.querySelector("#content, div:has(.thumb)");
 }
 
 function removeUnusedScripts(): void {
@@ -15,11 +22,4 @@ function removeUnusedScripts(): void {
       script.remove();
     }
   }
-}
-
-export async function cleanNativeFavoritesPage(): Promise<void> {
-  await waitForDomToLoad();
-  await sleep(20);
-  removeNativeFavorites();
-  removeUnusedScripts();
 }

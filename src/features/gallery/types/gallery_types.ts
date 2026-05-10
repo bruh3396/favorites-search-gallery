@@ -2,7 +2,7 @@ import { GalleryMenuAction } from "../../../types/ui";
 
 export enum GalleryState {
   IDLE = 0,
-  SHOWING_CONTENT_ON_HOVER = 1,
+  ENLARGE_ON_HOVER = 1,
   IN_GALLERY = 2
 }
 

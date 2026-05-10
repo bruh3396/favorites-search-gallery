@@ -5,10 +5,6 @@ import { getImageFromThumb } from "../../../../lib/dom/thumb";
 const LOCAL_STORAGE_KEY = "aspectRatios";
 const aspectRatios: string[] = Storage.get<string[]>(LOCAL_STORAGE_KEY) ?? [];
 
-function getAspectRatio(width: number, height: number): string {
-  return `${width}/${height}`;
-}
-
 export async function collectAspectRatios(): Promise<void> {
   await waitForAllThumbnailsToLoad();
   const thumbs = getAllContentThumbs();
@@ -20,4 +16,8 @@ export async function collectAspectRatios(): Promise<void> {
 
 export function getNextAspectRatio(): string | undefined {
   return aspectRatios.pop();
+}
+
+function getAspectRatio(width: number, height: number): string {
+  return `${width}/${height}`;
 }

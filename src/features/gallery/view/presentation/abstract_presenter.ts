@@ -1,6 +1,6 @@
 import { GalleryRoot } from "../shell/shell";
 
-export abstract class GalleryAbstractController {
+export abstract class GalleryAbstractPresenter {
   public readonly container: HTMLElement;
 
   constructor() {
@@ -8,7 +8,7 @@ export abstract class GalleryAbstractController {
     GalleryRoot.appendChild(this.container);
   }
 
-  public render(element: HTMLElement): void {
+  public present(element: HTMLElement): void {
     this.container.style.visibility = "visible";
     this.display(element);
   }

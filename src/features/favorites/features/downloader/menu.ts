@@ -4,12 +4,12 @@ import { sleep, yieldControl } from "../../../../lib/core/scheduling/promise";
 import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
 import { DOWNLOADER_DISABLED } from "../../../../lib/environment/derived_environment";
 import DOWNLOAD_HTML from "../../../../assets/html/downloader.html";
-import { DownloadRequest } from "./request";
+import { DownloadRequest } from "./download_request";
 import { Favorite } from "../../../../types/favorite";
 import { Overlays } from "../../../../lib/shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { splitIntoChunks } from "../../../../utils/collection/array";
-import { toggleGlobalInputEvents } from "../../../../lib/communication/dom_event_bridge";
+import { toggleGlobalInputEvents } from "../../../../lib/communication/dom_events";
 
 type FavoritesDownloaderInterface = {
   getSearchResults: () => Favorite[]

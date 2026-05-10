@@ -1,4 +1,4 @@
-import { CheckboxElement, NumberElement, SelectElement } from "../../../lib/ui/element_types";
+import { CheckboxElement, SelectElement } from "../../../lib/ui/element_types";
 import { Layout, PerformanceProfile } from "../../../types/ui";
 import { Events } from "../../../lib/communication/events";
 import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
@@ -7,7 +7,6 @@ import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { buildCheckboxElement } from "../../../lib/ui/elements/checkbox";
-import { buildNumberComponent } from "../../../lib/ui/elements/number_input";
 import { buildSelectElement } from "../../../lib/ui/elements/select";
 import { numberRange } from "../../../utils/number";
 import { prepareDynamicElements } from "../../../lib/ui/elements/element_utils";
@@ -121,17 +120,15 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     ])
   }
 ];
-const numbers: Partial<NumberElement>[] = [];
+
+export function createDynamicSearchPageMenuElements(): void {
+  createCheckboxes();
+  createSelects();
+}
 
 function createCheckboxes(): void {
   for (const checkbox of prepareDynamicElements(checkboxes)) {
     buildCheckboxElement(checkbox);
-  }
-}
-
-function createNumbers(): void {
-  for (const number of prepareDynamicElements(numbers)) {
-    buildNumberComponent(number);
   }
 }
 
@@ -140,10 +137,4 @@ function createSelects(): void {
   for (const select of prepareDynamicElements(selects)) {
     buildSelectElement(select);
   }
-}
-
-export function createDynamicSearchPageMenuElements(): void {
-  createCheckboxes();
-  createSelects();
-  createNumbers();
 }
