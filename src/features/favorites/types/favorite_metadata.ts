@@ -10,7 +10,7 @@ export class FavoriteMetadata {
   constructor(id: string, record: FavoritesDatabaseRecord | HTMLElement) {
     this.metrics = {id: parseInt(id, 10), width: 0, height: 0, score: 0, creationTimestamp: 0, lastChangedTimestamp: 0, default: 0, random: 0, duration: 0};
     this.id = id;
-    this.rating = DiscreteRating.EXPLICIT;
+    this.rating = DiscreteRating.Explicit;
 
     if (!(record instanceof HTMLElement)) {
       this.populateFromDatabase(record);

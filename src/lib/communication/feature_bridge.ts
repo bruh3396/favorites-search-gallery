@@ -10,5 +10,5 @@ export const FeatureBridge = {
   favoritesSearchResults: new FeatureChannel<void, Favorite[]>([]),
   navigateToAdjacentFavoritesPage: new FeatureChannel<NavigationKey, boolean>(false),
   navigateToAdjacentSearchPage: new FeatureChannel<NavigationKey, SearchPage | null>(null),
-  searchPageItems: new FeatureChannel<void, HTMLElement[]>([])
+  searchPageThumbs: new FeatureChannel<void, HTMLElement[]>([])
 };

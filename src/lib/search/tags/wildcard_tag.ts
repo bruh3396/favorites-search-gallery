@@ -21,16 +21,16 @@ export class WildcardTag extends AbstractTag {
 
   public getMatchingTags(tags: string[]): string[] {
     switch (this.matchType) {
-      case WildcardMatchType.PREFIX: return this.getMatchingTagsPrefix(tags);
-      case WildcardMatchType.INCLUDES: return this.getMatchingTagsIncludes(tags);
+      case WildcardMatchType.Prefix: return this.getMatchingTagsPrefix(tags);
+      case WildcardMatchType.Includes: return this.getMatchingTagsIncludes(tags);
       default: return this.getMatchingTagsRegex(tags);
     }
   }
 
   protected override matchesPositive(item: Searchable): boolean {
     switch (this.matchType) {
-      case WildcardMatchType.PREFIX: return this.matchesPrefix(item);
-      case WildcardMatchType.INCLUDES: return this.matchesIncludes(item);
+      case WildcardMatchType.Prefix: return this.matchesPrefix(item);
+      case WildcardMatchType.Includes: return this.matchesIncludes(item);
       default: return this.matchesRegex(item);
     }
   }
@@ -40,7 +40,7 @@ export class WildcardTag extends AbstractTag {
   }
 
   private optimize(): void {
-    this.matchesPositive = this.matchType === WildcardMatchType.PREFIX ? this.matchesPrefix : this.matchType === WildcardMatchType.INCLUDES ? this.matchesIncludes : this.matchesRegex;
+    this.matchesPositive = this.matchType === WildcardMatchType.Prefix ? this.matchesPrefix : this.matchType === WildcardMatchType.Includes ? this.matchesIncludes : this.matchesRegex;
     this.matches = this.negated ? this.matchesNegated : this.matchesPositive;
   }
 

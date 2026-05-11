@@ -365,10 +365,10 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     function: reloadWindow,
     isNumeric: true,
     options: new Map<PerformanceProfile, string>([
-      [PerformanceProfile.NORMAL, "Normal"],
-      [PerformanceProfile.MEDIUM, "Medium (no upscaling)"],
-      [PerformanceProfile.LOW, "Low (no gallery)"],
-      [PerformanceProfile.POTATO, "Potato (only search)"]
+      [PerformanceProfile.Normal, "Normal"],
+      [PerformanceProfile.Medium, "Medium (no upscaling)"],
+      [PerformanceProfile.Low, "Low (no gallery)"],
+      [PerformanceProfile.Potato, "Potato (only search)"]
     ])
   }
 ];

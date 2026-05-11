@@ -16,23 +16,23 @@ export type TagCategoryMapping = {
 }
 
 export enum DiscreteRating {
-  EXPLICIT = 4,
-  QUESTIONABLE = 2,
-  SAFE = 1
+  Explicit = 4,
+  Questionable = 2,
+  Safe = 1
 }
 
 export function decodeRating(rating: string): Rating {
   return {
-    "Explicit": DiscreteRating.EXPLICIT,
-    "E": DiscreteRating.EXPLICIT,
-    "e": DiscreteRating.EXPLICIT,
-    "Questionable": DiscreteRating.QUESTIONABLE,
-    "Q": DiscreteRating.QUESTIONABLE,
-    "q": DiscreteRating.QUESTIONABLE,
-    "Safe": DiscreteRating.SAFE,
-    "S": DiscreteRating.SAFE,
-    "s": DiscreteRating.SAFE
-  }[rating] ?? DiscreteRating.EXPLICIT;
+    "Explicit": DiscreteRating.Explicit,
+    "E": DiscreteRating.Explicit,
+    "e": DiscreteRating.Explicit,
+    "Questionable": DiscreteRating.Questionable,
+    "Q": DiscreteRating.Questionable,
+    "q": DiscreteRating.Questionable,
+    "Safe": DiscreteRating.Safe,
+    "S": DiscreteRating.Safe,
+    "s": DiscreteRating.Safe
+  }[rating] ?? DiscreteRating.Explicit;
 }
 
 export interface Searchable {

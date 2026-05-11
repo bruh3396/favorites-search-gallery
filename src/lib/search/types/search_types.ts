@@ -16,7 +16,7 @@ export type CategorizedTags = {
 };
 
 export enum WildcardMatchType {
-  PREFIX = 10,
-  INCLUDES = 15,
-  REGEX = 20
+  Prefix = 10,
+  Includes = 15,
+  Regex = 20
 }

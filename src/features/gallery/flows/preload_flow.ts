@@ -4,7 +4,7 @@ import * as GalleryView from "../view/gallery_view";
 import { GalleryConfig } from "../../../config/gallery_config";
 
 export function preloadVisibleThumbs(): void {
-  if (!GalleryConfig.preloadingEnabled || GalleryModel.hasRecentlyExitedGallery() || GalleryModel.inGallery()) {
+  if (!GalleryConfig.preloadingEnabled || GalleryModel.hasRecentlyExitedGallery() || GalleryModel.isInGallery()) {
     return;
   }
   const thumbs = GalleryThumbObserver.getVisibleThumbs();

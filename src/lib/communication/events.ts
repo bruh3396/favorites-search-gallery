@@ -57,10 +57,9 @@ export const Events = {
     showOnHoverOverridden: new Emitter<boolean>(),
     enteredGallery: new Emitter<HTMLElement>(),
     exitedGallery: new Emitter<void>(),
+    presentedThumb: new Emitter<HTMLElement>(),
     visibleThumbsChanged: new Emitter<void>(),
     galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
-    videoEnded: new Emitter<void>(),
-    videoDoubleClicked: new Emitter<MouseEvent>(),
     rightTap: new Emitter<void>(),
     leftTap: new Emitter<void>(),
     interactionStopped: new Emitter<void>()

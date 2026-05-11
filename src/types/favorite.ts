@@ -38,16 +38,16 @@ export interface Favorite extends Searchable {
 }
 
 export enum AddFavoriteStatus {
-  ERROR = 0,
-  ALREADY_ADDED = 1,
-  NOT_LOGGED_IN = 2,
-  SUCCESSFULLY_ADDED = 3
+  Error = 0,
+  AlreadyAdded = 1,
+  LoggedOut = 2,
+  Success = 3
 }
 
 export enum RemoveFavoriteStatus {
-  ERROR = 0,
-  FORBIDDEN = 1,
-  SUCCESSFULLY_REMOVED = 2
+  Error = 0,
+  Forbidden = 1,
+  Success = 2
 }
 
 export type PageRelation = "first" | "previous" | "next" | "final"

@@ -31,7 +31,7 @@ export const Preferences = {
   maximizeToggleFavoriteButtons: new Preference("maximizeToggleFavoriteButtons", false),
   mobileGalleryEnabled: new Preference("mobileGalleryEnabled", true),
   optionsVisible: new Preference("showOptions", false),
-  performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.NORMAL),
+  performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.Normal),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   resultsPerPage: new Preference("resultsPerPage", 200),
   rowSize: new Preference("rowSize", 7),

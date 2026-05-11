@@ -1,4 +1,4 @@
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
+﻿import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 import { Events } from "../../../lib/communication/events";
 import { GalleryConfig } from "../../../config/gallery_config";
@@ -12,10 +12,12 @@ let intersectionObserver: IntersectionObserver | null = createIntersectionObserv
 let bypassDebounce = true;
 
 export function setupVisibleThumbObserver(): void {
-  bypassDebounceAlwaysOnPageChange();
+  Events.favorites.pageChanged.on(() => {
+    bypassDebounce = true;
+  });
 
   if (ON_FAVORITES_PAGE) {
-    Events.favorites.alternateLayoutToggled.on(adjustRootMargin);
+    Events.favorites.alternateLayoutToggled.on(recreateObserver);
   }
 }
 
@@ -55,7 +57,7 @@ export function getVisibleThumbs(): HTMLElement[] {
     .filter(target => target instanceof HTMLElement);
 }
 
-const broadcastDebounceAlways = debounceTrailing(() => {
+const broadcastDebounced = debounceTrailing(() => {
   Events.gallery.visibleThumbsChanged.emit();
 }, GalleryConfig.preloadMediaDebounceTime);
 
@@ -64,7 +66,7 @@ function broadcastVisibleThumbsChanged(): void {
     bypassDebounce = false;
     Events.gallery.visibleThumbsChanged.emit();
   } else {
-    broadcastDebounceAlways();
+    broadcastDebounced();
   }
 }
 
@@ -83,14 +85,6 @@ function updateVisibleThumbs(entries: IntersectionObserverEntry[]): void {
   }
 }
 
-function getInitialFavoritesMenuHeight(): number {
-  return -200;
-}
-
-function getTopMargin(): number {
-  return Preferences.alternateLayout ? 0 : getInitialFavoritesMenuHeight();
-}
-
 function createIntersectionObserver(): IntersectionObserver | null {
   if (ON_MOBILE_DEVICE) {
     return null;
@@ -99,15 +93,12 @@ function createIntersectionObserver(): IntersectionObserver | null {
   if (ON_SEARCH_PAGE && !GalleryConfig.upscaleEverythingOnSearchPage) {
     return null;
   }
+  const topMargin = Preferences.alternateLayout ? 0 : -GalleryConfig.favoritesMenuHeight;
   return new IntersectionObserver(onVisibleThumbsChanged, {
     root: null,
-    rootMargin: getFinalRootMargin(),
+    rootMargin: `${topMargin}px 0px ${GalleryConfig.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`,
     threshold: [0.1]
   });
-}
-
-function getFinalRootMargin(): string {
-  return `${getTopMargin()}px 0px ${GalleryConfig.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`;
 }
 
 function sortByDistanceFromCenterThumb(entries: IntersectionObserverEntry[]): IntersectionObserverEntry[] {
@@ -126,13 +117,7 @@ function sortByDistance(centerEntry: IntersectionObserverEntry, entries: Interse
   });
 }
 
-function bypassDebounceAlwaysOnPageChange(): void {
-  Events.favorites.pageChanged.on(() => {
-    bypassDebounce = true;
-  });
-}
-
-function adjustRootMargin(): void {
+function recreateObserver(): void {
   if (intersectionObserver !== null) {
     intersectionObserver.disconnect();
     intersectionObserver = createIntersectionObserver();

@@ -3,7 +3,7 @@ import * as GalleryThumbObserver from "../control/visible_thumb_observer";
 import * as GalleryView from "../view/gallery_view";
 import { POSTS_PER_SEARCH_PAGE, doNothing } from "../../../lib/environment/constants";
 import { GalleryConfig } from "../../../config/gallery_config";
-import { executeByGalleryState } from "./state_executor";
+import { dispatchByState } from "./state_dispatch";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 
 export function onUpscaleToggled(value: boolean): void {
@@ -25,12 +25,12 @@ const preloadOutsideGallery = GalleryConfig.preloadOutsideGalleryOnSearchPage ? 
 } : doNothing;
 
 export function onSearchPageCreated(): void {
-  executeByGalleryState({
+  dispatchByState({
     idle: preloadOutsideGallery
   });
 }
 
 export function handleResultsAddedToSearchPage(thumbs: HTMLElement[]): void {
-  GalleryModel.indexCurrentPageThumbs();
+  GalleryModel.refreshThumbs();
   GalleryThumbObserver.observe(thumbs);
 }

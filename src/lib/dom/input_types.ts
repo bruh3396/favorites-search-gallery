@@ -23,7 +23,7 @@ function convertTouchEventToMouseEvent(touchEvent: TouchEvent, type: string): Mo
     clientY: touch.clientY,
     screenX: touch.screenX,
     screenY: touch.screenY,
-    button: ClickCode.LEFT
+    button: ClickCode.Left
   });
 }
 
@@ -42,9 +42,9 @@ export class EnhancedMouseEvent {
       event = convertTouchEventToMouseEvent(event, "mousedown");
     }
     this.originalEvent = event;
-    this.leftClick = event.button === ClickCode.LEFT;
-    this.rightClick = event.button === ClickCode.RIGHT;
-    this.middleClick = event.button === ClickCode.MIDDLE;
+    this.leftClick = event.button === ClickCode.Left;
+    this.rightClick = event.button === ClickCode.Right;
+    this.middleClick = event.button === ClickCode.Middle;
     this.ctrlKey = event.ctrlKey;
     this.shiftKey = event.shiftKey;
     this.thumb = getThumbUnderCursor(event);

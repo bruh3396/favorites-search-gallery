@@ -1,6 +1,6 @@
-import * as FavoritesLoader from "./load/loader";
-import * as FavoritesMetadataFetcher from "./load/metadata_fetcher";
-import * as FavoritesSearchCoordinator from "./search/search_coordinator";
+﻿import * as FavoritesLoader from "./load/loader";
+import * as FavoritesMetadataFetcher from "./metadata_fetcher";
+import * as FavoritesSearchCoordinator from "./search/coordinator";
 import { Favorite } from "../../../types/favorite";
 import { NewFavorites } from "../types/favorite_types";
 
@@ -47,5 +47,5 @@ export const invertSearchResults = (): Favorite[] => FavoritesSearchCoordinator.
 export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getLatestSearchResults());
 
 export * from "./load/loader";
-export * from "./load/metadata_fetcher";
-export * from "./search/search_coordinator";
+export * from "./metadata_fetcher";
+export * from "./search/coordinator";

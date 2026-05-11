@@ -14,18 +14,18 @@ import { insertStyle } from "../../../../lib/dom/injector";
 import { toggleFullscreen } from "../../../../utils/browser/window";
 
 const buttons: GalleryMenuButton[] = [
-  { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, hint: "Exit (Escape, Right-Click)", color: "red" },
-  { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: true, hint: "Toggle Fullscreen (F)", color: "#0075FF" },
-  { id: "open-in-new-gallery", icon: Icons.OPEN_IN_NEW, action: "openPost", enabled: true, hint: "Open Post (Middle-Click, G)", color: "lightgreen" },
-  { id: "open-image-gallery", icon: Icons.IMAGE, action: "openOriginal", enabled: true, hint: "Open Original (Ctrl + Left-Click, Q)", color: "magenta" },
-  { id: "download-gallery", icon: Icons.DOWNLOAD, action: "download", enabled: true, hint: "Download (S)", color: "lightskyblue" },
-  { id: "add-favorite-gallery", icon: Icons.HEART_PLUS, action: "addFavorite", enabled: true, hint: "Add Favorite (E)", color: "hotpink" },
-  { id: "remove-favorite-gallery", icon: Icons.HEART_MINUS, action: "removeFavorite", enabled: false, hint: "Remove Favorite (X)", color: "red" },
-  { id: "dock-gallery", icon: Icons.DOCK, action: "toggleDockPosition", enabled: false, hint: "Change Position", color: "" },
-  { id: "toggle-background-gallery", icon: Icons.BULB, action: "toggleBackground", enabled: true, hint: "Toggle Background (B)", color: "gold" },
-  { id: "search-gallery", icon: Icons.SEARCH, action: "search", enabled: false, hint: "Search", color: "cyan" },
-  { id: "background-color-gallery", icon: Icons.PALETTE, action: "changeBackgroundColor", enabled: true, hint: "Background Color", color: "orange" },
-  { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: true, hint: "Pin Menu", color: "#0075FF" }
+  { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, tooltip: "Exit (Escape, Right-Click)", color: "red" },
+  { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: true, tooltip: "Toggle Fullscreen (F)", color: "#0075FF" },
+  { id: "open-in-new-gallery", icon: Icons.OPEN_IN_NEW, action: "openPost", enabled: true, tooltip: "Open Post (Middle-Click, G)", color: "lightgreen" },
+  { id: "open-image-gallery", icon: Icons.IMAGE, action: "openOriginal", enabled: true, tooltip: "Open Original (Ctrl + Left-Click, Q)", color: "magenta" },
+  { id: "download-gallery", icon: Icons.DOWNLOAD, action: "download", enabled: true, tooltip: "Download (S)", color: "lightskyblue" },
+  { id: "add-favorite-gallery", icon: Icons.HEART_PLUS, action: "addFavorite", enabled: true, tooltip: "Add Favorite (E)", color: "hotpink" },
+  { id: "remove-favorite-gallery", icon: Icons.HEART_MINUS, action: "removeFavorite", enabled: false, tooltip: "Remove Favorite (X)", color: "red" },
+  { id: "dock-gallery", icon: Icons.DOCK, action: "toggleDockPosition", enabled: false, tooltip: "Change Position", color: "" },
+  { id: "toggle-background-gallery", icon: Icons.BULB, action: "toggleBackground", enabled: true, tooltip: "Toggle Background (B)", color: "gold" },
+  { id: "search-gallery", icon: Icons.SEARCH, action: "search", enabled: false, tooltip: "Search", color: "cyan" },
+  { id: "background-color-gallery", icon: Icons.PALETTE, action: "changeBackgroundColor", enabled: true, tooltip: "Background Color", color: "orange" },
+  { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: true, tooltip: "Pin Menu", color: "#0075FF" }
 ];
 
 const menu: HTMLElement = document.createElement("div");
@@ -101,7 +101,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   button.innerHTML = template.icon;
   button.id = template.id;
   button.className = "gallery-menu-btn";
-  button.dataset.hint = template.hint;
+  button.dataset.hint = template.tooltip;
   button.onclick = (): void => {
     handleGalleryMenuAction(template.action);
     Events.gallery.galleryMenuButtonClicked.emit(template.action);

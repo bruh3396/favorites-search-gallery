@@ -1,5 +1,5 @@
 import * as GalleryDesktopMenu from "./shell/desktop_menu";
-import * as GalleryPresenter from "./presentation/presenter";
+import * as GalleryPresenter from "./presentation/gallery_presenter";
 import * as GalleryUi from "./shell/ui";
 import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
@@ -57,7 +57,7 @@ export function toggleZoomCursor(value: boolean): void {
   GalleryPresenter.toggleZoomCursor(value);
 }
 
-export * from "./presentation/presenter";
+export * from "./presentation/gallery_presenter";
 export * from "./shell/ui";
 export const handleMouseMoveInGallery = (): void => GalleryUi.toggleCursor(true);
 export const presetAllCanvasDimensions = (): void => GalleryPresenter.presetCanvasDimensions(getAllContentThumbs());

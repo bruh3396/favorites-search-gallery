@@ -2,7 +2,7 @@
 
 :root {
   --color-bg: black;
-  --color-accent: var(--color-accent);
+  --color-accent: #0075FF;
   --color-gallery-menu-bg: rgba(0, 0, 0, 1);
   --size-gallery-menu: 80px;
   --gradient-rainbow: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);

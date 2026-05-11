@@ -1,14 +1,14 @@
-import * as GalleryImageCanvas from "./image_canvas";
-import * as GalleryImageLoader from "./image_loader";
-import * as GalleryUpscaler from "../upscalers/upscaler";
-import { GalleryAbstractPresenter } from "../../abstract_presenter";
-import { GalleryConfig } from "../../../../../../config/gallery_config";
-import { ImageRequest } from "../../../../types/image_request";
-import { USING_FIREFOX } from "../../../../../../lib/environment/environment";
-import { waitForAllThumbnailsToLoad } from "../../../../../../lib/dom/content_thumb";
-import { withTimeout } from "../../../../../../lib/core/scheduling/promise";
+import * as GalleryImageCanvas from "./canvas";
+import * as GalleryImageLoader from "./loader";
+import * as GalleryUpscaler from "./upscalers/upscaler";
+import { GalleryAbstractRenderer } from "../abstract_renderer";
+import { GalleryConfig } from "../../../../../config/gallery_config";
+import { ImageRequest } from "../../../types/image_request";
+import { USING_FIREFOX } from "../../../../../lib/environment/environment";
+import { waitForAllThumbnailsToLoad } from "../../../../../lib/dom/content_thumb";
+import { withTimeout } from "../../../../../lib/core/scheduling/promise";
 
-class ImagePresenter extends GalleryAbstractPresenter {
+class ImageRenderer extends GalleryAbstractRenderer {
   private activeId: string;
 
   constructor() {
@@ -92,4 +92,4 @@ class ImagePresenter extends GalleryAbstractPresenter {
   }
 }
 
-export const GalleryImagePresenter = new ImagePresenter();
+export const GalleryImageRenderer = new ImageRenderer();

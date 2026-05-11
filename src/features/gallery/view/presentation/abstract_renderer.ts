@@ -1,6 +1,6 @@
 import { GalleryRoot } from "../shell/shell";
 
-export abstract class GalleryAbstractPresenter {
+export abstract class GalleryAbstractRenderer {
   public readonly container: HTMLElement;
 
   constructor() {
@@ -8,7 +8,7 @@ export abstract class GalleryAbstractPresenter {
     GalleryRoot.appendChild(this.container);
   }
 
-  public present(element: HTMLElement): void {
+  public render(element: HTMLElement): void {
     this.container.style.visibility = "visible";
     this.display(element);
   }
@@ -19,6 +19,6 @@ export abstract class GalleryAbstractPresenter {
 
   public abstract handlePageChangeInGallery(): void;
   public abstract handlePageChange(): void;
-  public abstract preload(elements: HTMLElement[]): void;
+  public abstract preload(elements: HTMLElement[]): Promise<void> | void;
   protected abstract display(element: HTMLElement): void;
 }

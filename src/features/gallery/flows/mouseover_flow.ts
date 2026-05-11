@@ -3,10 +3,10 @@ import * as GalleryView from "../view/gallery_view";
 import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { debounceTrailing } from "../../../lib/core/scheduling/rate_limiting";
-import { executeByGalleryState } from "./state_executor";
+import { dispatchByState } from "./state_dispatch";
 
 export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
-  executeByGalleryState({
+  dispatchByState({
     hover: handleHover,
     idle: preloadMediaAroundDebounced
   }, mouseEvent.thumb);

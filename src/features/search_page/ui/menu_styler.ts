@@ -20,7 +20,7 @@ export function styleSearchPageMenu(): void {
     hiddenSelectors.add("#search-page-gallery-menu");
   }
 
-  if (PERFORMANCE_PROFILE !== PerformanceProfile.NORMAL) {
+  if (PERFORMANCE_PROFILE !== PerformanceProfile.Normal) {
     hiddenSelectors.add("#search-page-upscale-thumbs");
   }
 

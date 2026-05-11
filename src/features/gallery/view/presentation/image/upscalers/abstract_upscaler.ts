@@ -6,7 +6,7 @@ import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_e
 import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../lib/preferences/preferences";
 import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
-import { fetchBitmap } from "../presenter/image_fetcher";
+import { fetchBitmap } from "../fetcher";
 import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
 import { isImage } from "../../../../../../lib/media/media_type_guards";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
@@ -121,7 +121,7 @@ export abstract class GalleryAbstractUpscaler {
     if (ON_SEARCH_PAGE && !Preferences.searchPageUpscaleThumbs.value) {
       return false;
     }
-    return PERFORMANCE_PROFILE === PerformanceProfile.NORMAL;
+    return PERFORMANCE_PROFILE === PerformanceProfile.Normal;
   }
 
   protected abstract reset(): void;

@@ -1,9 +1,8 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
-import { Events } from "../../../../../lib/communication/events";
+import { VideoClip, VideoControllerCallbacks } from "../../../types/gallery_types";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { Preferences } from "../../../../../lib/preferences/preferences";
 import { Storage } from "../../../../../lib/core/storage/local_storage";
-import { VideoClip } from "../../../types/gallery_types";
 import { convertPreviewUrlToImageUrl } from "../../../../../lib/media/media_url_transformer";
 import { getPreviewUrl } from "../../../../../lib/ui/dom";
 import { isVideo } from "../../../../../lib/media/media_type_guards";
@@ -11,10 +10,12 @@ import { isVideo } from "../../../../../lib/media/media_type_guards";
 const videoPlayers: HTMLVideoElement[] = [];
 const videoClips = new Map();
 const videoContainer: HTMLElement = document.createElement("div");
+let callbacks: VideoControllerCallbacks;
 
 videoContainer.id = "video-container-inner";
 
-export function setupVideoController(container: HTMLElement): void {
+export function setupVideoController(container: HTMLElement, videoCallbacks: VideoControllerCallbacks): void {
+  callbacks = videoCallbacks;
   insertVideoContainer(container);
   createVideoPlayers();
   preventVideoPlayersFromFlashingWhenLoaded();
@@ -228,7 +229,7 @@ function updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElemen
 
 function broadcastEnding(video: HTMLVideoElement): void {
   video.addEventListener("ended", () => {
-    Events.gallery.videoEnded.emit();
+    callbacks.onVideoEnded();
   }, {
     passive: true
   });
@@ -236,7 +237,7 @@ function broadcastEnding(video: HTMLVideoElement): void {
 
 function broadcastDoubleClick(video: HTMLVideoElement): void {
   video.addEventListener("dblclick", (event) => {
-    Events.gallery.videoDoubleClicked.emit(event);
+    callbacks.onVideoDoubleClicked(event);
   });
 }
 
@@ -337,8 +338,6 @@ function toggleVideoControls(value: boolean): void {
     if (value) {
       video.setAttribute("controls", "");
     }
-  } else {
-    // video.style.pointerEvents = value ? "auto" : "none";
   }
 
   if (!value) {

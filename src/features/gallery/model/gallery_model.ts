@@ -1,75 +1,23 @@
-import * as GalleryStateMachine from "./state_machine";
-import * as GalleryThumbSelector from "./thumb_selector";
-import { openOriginal, openPostPage } from "../../../lib/navigator";
-import { GalleryBoundary } from "../types/gallery_types";
-import { NavigationKey } from "../../../types/input";
-import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
-import { clamp } from "../../../utils/number";
+﻿import * as GalleryCursor from "./cursor";
+import * as GalleryFavoriter from "./favoriter";
+import * as GalleryState from "./gallery_state";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
+import { openMedia, openPost } from "../../../lib/navigator";
 import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
-import { isForwardNavigationKey } from "../../../types/guards";
 import { isVideo } from "../../../lib/media/media_type_guards";
 
-export * from "./state_machine";
-export { addFavorite, removeFavorite } from "./favorite_toggler";
+export * from "./gallery_state";
+export * from "./cursor";
+export * from "./neighbors";
 
-let currentIndex = 0;
-
-export function getCurrentThumb(): HTMLElement {
-  return GalleryThumbSelector.getThumbsOnCurrentPage()[currentIndex];
-}
-
-export function isViewingVideo(): boolean {
-  return GalleryStateMachine.inGallery() && isVideo(getCurrentThumb());
-}
+export const isVideoSelected = (): boolean => GalleryState.isInGallery() && isVideo(GalleryCursor.getSelectedThumb());
+export const openSelectedPost = (): void => openPost(GalleryCursor.getSelectedThumb().id);
+export const openSelectedMedia = (): Promise<void> => openMedia(GalleryCursor.getSelectedThumb());
+export const downloadSelected = (): Promise<void> => downloadFromThumb(GalleryCursor.getSelectedThumb());
+export const favoriteSelected = (): Promise<AddFavoriteStatus> => GalleryFavoriter.addFavorite(GalleryCursor.getSelectedThumb());
+export const unFavoriteSelected = (): Promise<RemoveFavoriteStatus> => GalleryFavoriter.removeFavorite(GalleryCursor.getSelectedThumb());
 
 export function enterGallery(thumb: HTMLElement): void {
-  currentIndex = GalleryThumbSelector.getIndexFromThumb(thumb);
-  GalleryStateMachine.enterGallery();
-}
-
-export function navigate(direction: NavigationKey): GalleryBoundary {
-  return setCurrentIndex(isForwardNavigationKey(direction) ? currentIndex + 1 : currentIndex - 1);
-}
-
-export function navigateAfterPageChange(direction: NavigationKey): void {
-  setCurrentIndex(isForwardNavigationKey(direction) ? 0 : getLastIndex());
-}
-
-export function navigateToPreviousPage(): void {
-  setCurrentIndex(getLastIndex());
-}
-
-export function navigateToNextPage(): void {
-  setCurrentIndex(0);
-}
-
-export const getThumbsAround = ON_FAVORITES_PAGE ? GalleryThumbSelector.getFavoritesPageSearchResultsAround : GalleryThumbSelector.getSearchPageThumbsAround;
-
-export function indexCurrentPageThumbs(): void {
-  GalleryThumbSelector.indexCurrentPageThumbs();
-}
-
-export function clampCurrentIndex(): void {
-  currentIndex = clamp(currentIndex, 0, getLastIndex());
-}
-
-export function openPostInNewTab(): void {
-  openPostPage(getCurrentThumb().id);
-}
-
-export function openOriginalInNewTab(): void {
-  openOriginal(getCurrentThumb());
-}
-
-export function downloadInGallery(): void {
-  downloadFromThumb(getCurrentThumb());
-}
-
-function setCurrentIndex(nextIndex: number): GalleryBoundary {
-  currentIndex = clamp(nextIndex, 0, getLastIndex());
-  return GalleryThumbSelector.getBoundary(nextIndex);
-}
-
-function getLastIndex(): number {
-  return GalleryThumbSelector.getThumbsOnCurrentPage().length - 1;
+  GalleryCursor.setCurrentThumb(thumb);
+  GalleryState.enterGallery();
 }

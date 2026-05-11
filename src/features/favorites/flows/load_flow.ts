@@ -1,4 +1,4 @@
-import * as FavoritesModel from "../model/favorites_model";
+﻿import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesPresentationFlow from "./presentation_flow";
 import * as FavoritesSearchFlow from "./search_flow";
 import * as FavoritesView from "../view/favorites_view";
@@ -24,7 +24,6 @@ async function loadDatabaseFavorites(): Promise<boolean> {
 }
 
 function showLoadedFavorites(): void {
-  FavoritesModel.onDatabaseWritten();
   FavoritesView.setTemporaryStatus("Favorites loaded");
   FavoritesSearchFlow.searchFavorites();
   Events.favorites.favoritesFoundInDatabase.emit(true);
@@ -63,7 +62,6 @@ async function fetchAllFavorites(): Promise<void> {
   FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeAllFavorites();
   FavoritesView.setTemporaryStatus("All favorites saved");
-  FavoritesModel.onDatabaseWritten();
 }
 
 function handleFetchedFavoritesPage(): void {

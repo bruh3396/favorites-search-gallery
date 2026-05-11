@@ -113,10 +113,10 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     enabled: ON_DESKTOP_DEVICE,
     isNumeric: true,
     options: new Map<PerformanceProfile, string>([
-      [PerformanceProfile.NORMAL, "Normal"],
-      [PerformanceProfile.MEDIUM, "Medium"],
-      [PerformanceProfile.LOW, "Low"],
-      [PerformanceProfile.POTATO, "Potato"]
+      [PerformanceProfile.Normal, "Normal"],
+      [PerformanceProfile.Medium, "Medium"],
+      [PerformanceProfile.Low, "Low"],
+      [PerformanceProfile.Potato, "Potato"]
     ])
   }
 ];

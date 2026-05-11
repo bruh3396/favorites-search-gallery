@@ -64,7 +64,7 @@ function addAddFavoriteButton(thumb: HTMLElement): void {
   button.onmousedown = (event): void => {
     event.stopPropagation();
 
-    if (event.button === ClickCode.LEFT) {
+    if (event.button === ClickCode.Left) {
       FavoritesActions.addFavorite(thumb.id);
       button.remove();
     }

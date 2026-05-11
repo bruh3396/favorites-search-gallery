@@ -44,7 +44,7 @@ function parseNegation(tag: string): { negated: boolean; value: string; } {
 }
 
 function getMatchType(value: string): WildcardMatchType {
-  return startsWithRegex.test(value) ? WildcardMatchType.PREFIX : containsRegex.test(value) ? WildcardMatchType.INCLUDES : WildcardMatchType.REGEX;
+  return startsWithRegex.test(value) ? WildcardMatchType.Prefix : containsRegex.test(value) ? WildcardMatchType.Includes : WildcardMatchType.Regex;
 }
 
 function buildWildcardRegex(value: string): RegExp {

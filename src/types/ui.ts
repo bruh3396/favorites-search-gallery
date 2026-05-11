@@ -33,8 +33,8 @@ export interface AwesompleteConstructor {
 }
 
 export enum PerformanceProfile {
-  NORMAL = 0,
-  MEDIUM = 3,
-  LOW = 1,
-  POTATO = 2
+  Normal = 0,
+  Medium = 3,
+  Low = 1,
+  Potato = 2
 }

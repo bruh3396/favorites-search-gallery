@@ -4,32 +4,32 @@ import * as GalleryStateFlow from "./state_flow";
 import * as GalleryView from "../view/gallery_view";
 import { DomEvents } from "../../../lib/communication/dom_events";
 import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
-import { executeByGalleryState } from "./state_executor";
+import { dispatchByState } from "./state_dispatch";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 
 export const onMouseMove = throttle<MouseEvent>(() => {
-  executeByGalleryState({
-    gallery: GalleryView.handleMouseMoveInGallery
+  dispatchByState({
+    open: GalleryView.handleMouseMoveInGallery
   });
 }, 250);
 
 export function onClick(mouseEvent: MouseEvent): void {
-  executeByGalleryState({
-    gallery: onClickInGallery
+  dispatchByState({
+    open: onClickInGallery
   }, mouseEvent);
 }
 
 export function onMouseDown(event: MouseEvent | TouchEvent): void {
-  executeByGalleryState({
+  dispatchByState({
     hover: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery,
-    gallery: onMouseDownInGallery
+    open: onMouseDownInGallery
   }, new EnhancedMouseEvent(event));
 }
 
 export function onContextMenu(mouseEvent: MouseEvent): void {
-  executeByGalleryState({
-    gallery: onContextMenuInGallery
+  dispatchByState({
+    open: onContextMenuInGallery
   }, mouseEvent);
 }
 
@@ -42,7 +42,7 @@ export function toggleGalleryImageZoom(value: undefined | boolean = undefined): 
 
 function onClickInGallery(mouseEvent: MouseEvent): void {
   if (mouseEvent.ctrlKey) {
-    GalleryModel.openOriginalInNewTab();
+    GalleryModel.openSelectedMedia();
   }
 }
 
@@ -72,7 +72,7 @@ function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   }
   const zoomedIn = mouseEvent.originalEvent.target instanceof HTMLElement && mouseEvent.originalEvent.target.closest(".zoomed-in") !== null;
 
-  if (mouseEvent.leftClick && !zoomedIn && !GalleryModel.isViewingVideo()) {
+  if (mouseEvent.leftClick && !zoomedIn && !GalleryModel.isVideoSelected()) {
     GalleryStateFlow.exitGallery();
     return;
   }
@@ -82,7 +82,7 @@ function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   }
 
   if (mouseEvent.middleClick) {
-    GalleryModel.openPostInNewTab();
+    GalleryModel.openSelectedPost();
   }
 }
 

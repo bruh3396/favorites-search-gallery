@@ -1,4 +1,4 @@
-import * as GalleryFavoriteToggleFlow from "./favorite_toggle_flow";
+import * as GalleryFavoriterFlow from "./favoriter_flow";
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryNavigationFlow from "./navigation_flow";
 import * as GalleryStateFlow from "./state_flow";
@@ -6,20 +6,20 @@ import * as GalleryView from "../view/gallery_view";
 import { isExitKey, isNavigationKey } from "../../../types/guards";
 import { EnhancedKeyboardEvent } from "../../../lib/dom/input_types";
 import { GalleryConfig } from "../../../config/gallery_config";
-import { executeByGalleryState } from "./state_executor";
+import { dispatchByState } from "./state_dispatch";
 import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 import { toggleFullscreen } from "../../../utils/browser/window";
 
 const insideGalleryHotkeyHandlers: Record<string, () => void> = {
   b: GalleryView.toggleBackgroundOpacity,
-  e: GalleryFavoriteToggleFlow.addFavoriteInGallery,
+  e: GalleryFavoriterFlow.addFavoriteInGallery,
   f: toggleFullscreen,
   g: GalleryStateFlow.exitGallery,
   m: GalleryView.toggleVideoMute,
-  q: GalleryModel.openOriginalInNewTab,
-  s: GalleryModel.downloadInGallery,
-  w: GalleryModel.openPostInNewTab,
-  x: GalleryFavoriteToggleFlow.removeFavoriteInGallery,
+  q: GalleryModel.openSelectedMedia,
+  s: GalleryModel.downloadSelected,
+  w: GalleryModel.openSelectedPost,
+  x: GalleryFavoriterFlow.removeFavoriteInGallery,
   " ": pauseVideo
 };
 
@@ -37,14 +37,14 @@ export function onKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
 }
 
 export function onKeyUp(event: EnhancedKeyboardEvent): void {
-  executeByGalleryState({ gallery: onKeyUpInGallery }, event);
+  dispatchByState({ open: onKeyUpInGallery }, event);
 }
 
 const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
-  executeByGalleryState({
+  dispatchByState({
     idle: onKeyDownOutsideGallery,
     hover: onKeyDownOutsideGallery,
-    gallery: onKeyDownInGallery
+    open: onKeyDownInGallery
   }, new EnhancedKeyboardEvent(event));
 };
 
@@ -91,7 +91,7 @@ function onKeyUpInGallery(event: EnhancedKeyboardEvent): void {
 }
 
 function pauseVideo(): void {
-  if (GalleryModel.isViewingVideo()) {
+  if (GalleryModel.isVideoSelected()) {
     GalleryView.toggleVideoPause();
   }
 }

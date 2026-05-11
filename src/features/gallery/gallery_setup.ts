@@ -21,7 +21,7 @@ import { Events } from "../../lib/communication/events";
 import { FeatureBridge } from "../../lib/communication/feature_bridge";
 import { GALLERY_DISABLED } from "../../lib/environment/derived_environment";
 import { NavigationKey } from "../../types/input";
-import { executeByGalleryState } from "./flows/state_executor";
+import { dispatchByState } from "./flows/state_dispatch";
 
 export async function setupGallery(): Promise<void> {
   if (GALLERY_DISABLED) {
@@ -40,11 +40,15 @@ export async function setupGallery(): Promise<void> {
 
 function finishGallerySetup(): void {
   GalleryView.setupGalleryView();
+  GalleryView.setupVideoRenderer({
+    onVideoEnded: GalleryAutoplay.onVideoEnded,
+    onVideoDoubleClicked: GalleryStateFlow.exitGallery
+  });
   GalleryControl.setupGalleryControl();
   setupSubFeatures();
   addEventListeners();
   GalleryVisibleThumbObserver.observeAllThumbsOnPage();
-  GalleryModel.indexCurrentPageThumbs();
+  GalleryModel.refreshThumbs();
   GalleryView.presetAllCanvasDimensions();
 }
 
@@ -54,27 +58,26 @@ function setupSubFeatures(): void {
     onDisable: () => GalleryView.toggleVideoLooping(true),
     onPause: () => GalleryView.toggleVideoLooping(true),
     onResume: () => GalleryView.toggleVideoLooping(false),
-    onComplete: (direction?: NavigationKey) => executeByGalleryState({ gallery: GalleryNavigationFlow.navigate }, direction),
+    onComplete: (direction?: NavigationKey) => dispatchByState({ open: GalleryNavigationFlow.navigate }, direction),
     onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo()
   });
   GalleryView.toggleVideoLooping(GalleryAutoplay.isPaused() || !GalleryAutoplay.isActive());
   Events.gallery.enteredGallery.on(GalleryAutoplay.startAutoplay);
   Events.gallery.exitedGallery.on(GalleryAutoplay.stopAutoplay);
+  Events.gallery.presentedThumb.on(GalleryAutoplay.startViewTimer);
 }
 
 function addEventListeners(): void {
   Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadVisibleThumbs);
-  Events.gallery.videoEnded.on(GalleryAutoplay.onVideoEnded);
-  Events.gallery.videoDoubleClicked.on(GalleryStateFlow.exitGallery);
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
 
-  FeatureBridge.inGallery.register(GalleryModel.inGallery);
+  FeatureBridge.inGallery.register(GalleryModel.isInGallery);
 
   if (ON_FAVORITES_PAGE) {
     Events.favorites.newFavoritesFound.on(GalleryContentFlow.indexThumbs, { once: true });
     Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
     Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.handleNewContent);
-    Events.favorites.showOnHoverToggled.on(GalleryModel.toggleShowingMediaOnHover);
+    Events.favorites.showOnHoverToggled.on(GalleryModel.toggleEnlargeOnHover);
   }
 
   if (ON_SEARCH_PAGE) {

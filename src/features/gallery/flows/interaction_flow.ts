@@ -1,6 +1,6 @@
 import * as GalleryView from "../view/gallery_view";
-import { executeByGalleryState } from "./state_executor";
+import { dispatchByState } from "./state_dispatch";
 
 export function onInteractionStopped(): void {
-  executeByGalleryState({ gallery: () => GalleryView.toggleCursor(false) });
+  dispatchByState({ open: () => GalleryView.toggleCursor(false) });
 }

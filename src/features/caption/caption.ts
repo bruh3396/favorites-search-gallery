@@ -339,7 +339,7 @@ async function loadTagCategoryMappings(): Promise<void> {
 
 function tagOnClick(tagName: string, event: MouseEvent): void {
   switch (event.button) {
-    case ClickCode.LEFT:
+    case ClickCode.Left:
       if (event.shiftKey && isOnlyDigits(tagName)) {
         Events.favorites.findFavoriteInAllStarted.emit(tagName);
       } else {
@@ -347,11 +347,11 @@ function tagOnClick(tagName: string, event: MouseEvent): void {
       }
       break;
 
-    case ClickCode.MIDDLE:
+    case ClickCode.Middle:
       Events.caption.searchForTag.emit(tagName);
       break;
 
-    case ClickCode.RIGHT:
+    case ClickCode.Right:
       tagOnClickHelper(`-${tagName}`, event);
       break;
 

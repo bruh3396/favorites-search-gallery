@@ -1,10 +1,10 @@
-import { GalleryAbstractPresenter } from "../abstract_presenter";
+import { GalleryAbstractRenderer } from "../abstract_renderer";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { doNothing } from "../../../../../lib/environment/constants";
 import { isGif } from "../../../../../lib/media/media_type_guards";
 import { resolveGifUrl } from "../../../../../lib/media/media_url_resolver";
 
-class GifPresenter extends GalleryAbstractPresenter {
+class GifRenderer extends GalleryAbstractRenderer {
   private readonly gif: HTMLImageElement;
   private preloadedGifs: HTMLImageElement[];
 
@@ -45,4 +45,4 @@ class GifPresenter extends GalleryAbstractPresenter {
   }
 }
 
-export const GalleryGifPresenter = new GifPresenter();
+export const GalleryGifRenderer = new GifRenderer();

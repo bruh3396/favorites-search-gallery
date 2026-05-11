@@ -4,7 +4,7 @@ export type NavigationKey = BackwardNavigationKey | ForwardNavigationKey
 export type ExitKey = "Escape" | "Delete" | "Backspace"
 
 export enum ClickCode {
-  LEFT = 0,
-  MIDDLE = 1,
-  RIGHT = 2
+  Left = 0,
+  Middle = 1,
+  Right = 2
 }

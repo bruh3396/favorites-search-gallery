@@ -451,14 +451,13 @@ function stopVideoViewTimer(): void {
   stopVideoProgressBar();
 }
 
-export function startAutoplay(thumb: HTMLElement): void {
+export function startAutoplay(): void {
   if (!active) {
     return;
   }
   addAutoplayEventListeners();
   ui.container.style.visibility = "visible";
   showMenu();
-  startViewTimer(thumb);
 }
 
 export function stopAutoplay(): void {

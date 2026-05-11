@@ -1,12 +1,12 @@
-import * as GalleryImageCache from "./image_cache";
-import { GalleryConfig } from "../../../../../../config/gallery_config";
-import { ImageRequest } from "../../../../types/image_request";
-import { LowResolutionImageRequest } from "../../../../types/low_resolution_image_request";
-import { ON_FAVORITES_PAGE } from "../../../../../../lib/environment/environment";
-import { doNothing } from "../../../../../../lib/environment/constants";
-import { fetchBitmap } from "./image_fetcher";
-import { isImage } from "../../../../../../lib/media/media_type_guards";
-export { get, completedRequests, clear } from "./image_cache";
+import * as GalleryImageCache from "./cache";
+import { GalleryConfig } from "../../../../../config/gallery_config";
+import { ImageRequest } from "../../../types/image_request";
+import { LowResolutionImageRequest } from "../../../types/low_resolution_image_request";
+import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
+import { doNothing } from "../../../../../lib/environment/constants";
+import { fetchBitmap } from "./fetcher";
+import { isImage } from "../../../../../lib/media/media_type_guards";
+export { get, completedRequests, clear } from "./cache";
 
 let onComplete: (request: ImageRequest) => void = doNothing;
 

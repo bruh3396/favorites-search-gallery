@@ -56,16 +56,16 @@ function addEventListeners(): void {
   Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.goToRelativePage);
 
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
-  Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.onBlacklistChanged);
+  Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
-  Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.researchFavorites);
-  Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.researchFavorites);
-  Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.researchFavorites);
+  Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.reSearchFavorites);
+  Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.reSearchFavorites);
+  Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.setResultsPerPage);
 
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
-  Events.favorites.resetButtonClicked.on(FavoritesResetFlow.tryResetting);
+  Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
 
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);

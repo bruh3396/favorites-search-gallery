@@ -1,15 +1,15 @@
 import { GalleryMenuAction } from "../../../types/ui";
 
 export enum GalleryState {
-  IDLE = 0,
-  ENLARGE_ON_HOVER = 1,
-  IN_GALLERY = 2
+  Idle = 0,
+  Hover = 1,
+  Open = 2
 }
 
-export enum GalleryBoundary {
-  IN_BOUNDS = 0,
-  AT_LEFT_BOUNDARY = 1,
-  AT_RIGHT_BOUNDARY = 2
+export enum NavigationBoundary {
+  None = 0,
+  Left = 1,
+  Right = 2
 }
 
 export type VideoClip = {
@@ -17,12 +17,17 @@ export type VideoClip = {
   end: number
 }
 
+export type VideoControllerCallbacks = {
+  onVideoEnded: () => void;
+  onVideoDoubleClicked: (event: MouseEvent) => void;
+}
+
 export type GalleryMenuButton = {
   id: string;
   icon: string;
   action: GalleryMenuAction;
   enabled: boolean;
-  hint: string;
+  tooltip: string;
   color: string;
   href?: string;
 };

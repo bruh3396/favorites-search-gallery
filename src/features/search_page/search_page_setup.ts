@@ -23,7 +23,7 @@ export function setupSearchPage(): void {
 
 function addEventListeners(): void {
   FeatureBridge.navigateToAdjacentSearchPage.register(SearchPageNavigationFlow.navigateSearchPages);
-  FeatureBridge.searchPageItems.register(SearchPageModel.getAllSearchPageThumbs);
+  FeatureBridge.searchPageThumbs.register(SearchPageModel.getAllSearchPageThumbs);
   Events.searchPage.layoutChanged.on(ContentTiler.changeLayout);
   Events.searchPage.infiniteScrollToggled.on(SearchPageOptionFlow.toggleInfiniteScroll);
   Events.searchPage.searchPageCreated.emit(SearchPageModel.getInitialSearchPage());

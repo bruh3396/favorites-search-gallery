@@ -8,7 +8,7 @@ const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag modifications and saved searches will
 const RESET_PROMPT = `Are you sure you want to reset? This will delete all cached favorites, and preferences.${ON_MOBILE_DEVICE ? "" : DESKTOP_RESET_PROMPT_SUFFIX}`;
 const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
 
-export function tryResetting(): void {
+export function attemptReset(): void {
   if (confirm(RESET_PROMPT)) {
     clearLocalStorage();
     Events.favorites.resetConfirmed.emit();

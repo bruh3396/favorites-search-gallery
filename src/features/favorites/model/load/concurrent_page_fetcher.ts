@@ -1,5 +1,6 @@
-import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
-import { FavoritesPageRequest } from "./favorites_page_request";
+﻿import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
+import { FavoritesPageRequest } from "../../types/favorites_page_request";
+import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
 import { sleep } from "../../../../lib/core/scheduling/promise";
 
 export class FavoritesConcurrentPageFetcher {
@@ -43,7 +44,9 @@ export class FavoritesConcurrentPageFetcher {
 
   private async fetchPage(request: FavoritesPageRequest): Promise<void> {
     try {
-      request.complete(await FavoritesApi.fetchFavoritesPage(request.realPageNumber));
+      const elements = await FavoritesApi.fetchFavoritesPage(request.realPageNumber);
+
+      request.complete(extractFavoriteElements(elements));
       this.inFlight.delete(request.pageNumber);
 
       if (request.elements.length === 0) {

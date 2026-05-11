@@ -1,6 +1,6 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
-import { openOriginal, openPostPage } from "../../../lib/navigator";
+import { openMedia, openPost } from "../../../lib/navigator";
 import { ClickCode } from "../../../types/input";
 import { Events } from "../../../lib/communication/events";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
@@ -67,7 +67,7 @@ export class FavoriteElement {
   private handleFavoriteButtonClick(event: MouseEvent): void {
     event.stopPropagation();
 
-    if (event.button !== ClickCode.LEFT) {
+    if (event.button !== ClickCode.Left) {
       return;
     }
 
@@ -82,7 +82,7 @@ export class FavoriteElement {
 
   private handleClick(event: MouseEvent): void {
     if (event.ctrlKey) {
-      openOriginal(this.root);
+      openMedia(this.root);
     }
     event.preventDefault();
   }
@@ -91,11 +91,11 @@ export class FavoriteElement {
     if (event.ctrlKey) {
       return;
     }
-    const shouldOpen = event.button === ClickCode.MIDDLE ||
-      (event.button === ClickCode.LEFT && (event.shiftKey || GALLERY_DISABLED));
+    const shouldOpen = event.button === ClickCode.Middle ||
+      (event.button === ClickCode.Left && (event.shiftKey || GALLERY_DISABLED));
 
     if (shouldOpen) {
-      openPostPage(this.root.id);
+      openPost(this.root.id);
     }
     event.preventDefault();
   }
@@ -109,7 +109,7 @@ export class FavoriteElement {
   }
 
   private download(event: MouseEvent): void {
-    if (event.button === ClickCode.LEFT) {
+    if (event.button === ClickCode.Left) {
       event.stopPropagation();
       downloadFromThumb(this.root);
     }

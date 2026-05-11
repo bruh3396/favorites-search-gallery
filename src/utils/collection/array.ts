@@ -11,13 +11,7 @@ export function shuffleArray<V>(array: V[]): V[] {
   while (maxIndex > 0) {
     randomIndex = randomInt(maxIndex);
     maxIndex -= 1;
-    [
-      array[maxIndex],
-      array[randomIndex]
-    ] = [
-        array[randomIndex],
-        array[maxIndex]
-      ];
+    [array[maxIndex], array[randomIndex]] = [array[randomIndex], array[maxIndex]];
   }
   return array;
 }

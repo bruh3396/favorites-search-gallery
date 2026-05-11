@@ -1,8 +1,8 @@
-import { ImageRequest } from "../../../../types/image_request";
-import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
-import { fetchImageBitmapFromThumb } from "../../../../../../lib/remote/rule34/bitmap_fetcher";
-import { getImageFromThumb } from "../../../../../../lib/dom/thumb";
-import { imageIsLoaded } from "../../../../../../utils/dom/image";
+import { ImageRequest } from "../../../types/image_request";
+import { ThrottledQueue } from "../../../../../lib/core/concurrency/throttled_queue";
+import { fetchImageBitmapFromThumb } from "../../../../../lib/remote/rule34/bitmap_fetcher";
+import { getImageFromThumb } from "../../../../../lib/dom/thumb";
+import { imageIsLoaded } from "../../../../../utils/dom/image";
 
 const fetchQueue = new ThrottledQueue(10);
 
