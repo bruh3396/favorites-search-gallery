@@ -9,7 +9,7 @@ class VideoRenderer extends GalleryAbstractRenderer {
   }
 
   public setup(callbacks: VideoControllerCallbacks): void {
-    VideoController.setupVideoController(this.container, callbacks);
+    VideoController.setup(this.container, callbacks);
   }
 
   public hide(): void {

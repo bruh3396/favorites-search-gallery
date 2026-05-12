@@ -28,7 +28,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
 
   public showCurrentPage(): void {
     FavoritesView.showSearchResults(FavoritesView.currentPageFavorites());
-    FavoritesView.createPageSelectionMenu(FavoritesView.getPaginationParameters());
+    FavoritesView.createNavigationMenu(FavoritesView.getPaginationParameters());
     FavoritesView.preloadThumbnails(FavoritesView.nextPageFavorites());
     FavoritesView.preloadThumbnails(FavoritesView.previousPageFavorites());
     Events.favorites.pageChanged.emit();
@@ -53,7 +53,7 @@ class PaginationFlow implements FavoritesPresentationFlow {
 
   public handleNewSearchResults(): void {
     FavoritesView.setFavorites(FavoritesModel.getLatestSearchResults());
-    FavoritesView.createPageSelectionMenuWhileFetching(FavoritesView.getPaginationParameters());
+    FavoritesView.updateNavigationMenu(FavoritesView.getPaginationParameters());
     this.addNewlyFetchedSearchResultsToCurrentPage();
     Events.favorites.searchResultsUpdated.emit();
   }

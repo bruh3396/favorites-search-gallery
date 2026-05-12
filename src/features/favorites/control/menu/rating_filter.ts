@@ -16,7 +16,7 @@ const explicit = createRatingElement("explicit");
 const questionable = createRatingElement("questionable");
 const safe = createRatingElement("safe");
 
-export function setupRatingFilter(): void {
+export function setup(): void {
   if (ON_MOBILE_DEVICE) {
     return;
   }

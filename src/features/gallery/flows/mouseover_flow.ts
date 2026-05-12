@@ -14,7 +14,7 @@ export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
 
 function handleHover(thumb: HTMLElement | null): void {
   if (thumb === null) {
-    GalleryView.hide();
+    GalleryView.hide2();
     return;
   }
   GalleryView.display(thumb);

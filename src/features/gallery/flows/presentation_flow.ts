@@ -10,5 +10,5 @@ export function present(thumb: HTMLElement): void {
 }
 
 export function presentSelected(): void {
-  present(GalleryModel.getSelectedThumb());
+  present(GalleryModel.currentThumb());
 }

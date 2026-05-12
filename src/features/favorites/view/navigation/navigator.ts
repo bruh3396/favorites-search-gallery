@@ -1,5 +1,4 @@
-import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
-import { Events } from "../../../../lib/communication/events";
+﻿import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { PageRelation } from "../../../../types/favorite";
@@ -8,13 +7,24 @@ import { insertStyle } from "../../../../lib/dom/injector";
 import { isOnlyDigits } from "../../../../utils/string/query";
 import { numbersAroundInRange } from "../../../../utils/number";
 
+interface NavigatorCallbacks {
+  onPageSelected: (pageNumber: number) => void;
+  onRelativePageSelected: (relation: PageRelation) => void;
+}
+
 const CONTAINER = createContainer();
 const RANGE_INDICATOR = document.createElement("label");
 const PAGE_NUMBER_REGEX = /favorites-page-(\d+)/;
 
 RANGE_INDICATOR.id = "pagination-range-label";
 
-export function setupFavoritesPaginationMenu(): void {
+let callbacks: NavigatorCallbacks = {
+  onPageSelected: () => { },
+  onRelativePageSelected: () => { }
+};
+
+export function setup(navigatorCallbacks: NavigatorCallbacks): void {
+  callbacks = navigatorCallbacks;
   insert();
   create(emptyFavoritesPageParameters);
   toggle(!Preferences.infiniteScroll.value);
@@ -130,7 +140,7 @@ function createNumberTraversalButton(currentPageNumber: number, pageNumber: numb
   button.className = "fav-menu-pagination-btn";
   button.classList.toggle("selected", selected);
   button.onclick = (): void => {
-    Events.favorites.pageSelected.emit(pageNumber);
+    callbacks.onPageSelected(pageNumber);
   };
   CONTAINER.appendChild(button);
   button.textContent = String(pageNumber);
@@ -152,7 +162,7 @@ function createArrowTraversalButton(name: PageRelation, textContent: string, pos
   button.title = `Goto ${name} page`;
   button.textContent = textContent;
   button.onclick = (): void => {
-    Events.favorites.relativePageSelected.emit(name);
+    callbacks.onRelativePageSelected(name);
   };
   CONTAINER.insertAdjacentElement(position, button);
   return button;
@@ -175,7 +185,7 @@ function createGotoSpecificPageInputs(finalPageNumber: number): void {
   button.id = "goto-page-button";
   button.onclick = (): void => {
     if (isOnlyDigits(input.value)) {
-      Events.favorites.pageSelected.emit(Number(input.value));
+      callbacks.onPageSelected(Number(input.value));
     }
   };
   input.onkeydown = (event): void => {

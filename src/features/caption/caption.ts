@@ -1,3 +1,4 @@
+import * as Navigator from "../../lib/navigator";
 import * as PostApi from "../../lib/remote/api/post_fetcher";
 import * as TagApi from "../../lib/remote/api/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
@@ -18,7 +19,6 @@ import { getTagSetFromItem } from "../../lib/dom/tags";
 import { insertStyle } from "../../lib/dom/injector";
 import { isOnlyDigits } from "../../utils/string/query";
 import { isTagCategory } from "../../types/guards";
-import { openSearchPage } from "../../lib/navigator";
 import { roundToTwoDecimalPlaces } from "../../utils/number";
 
 const importantTagCategories: Set<TagCategory> = new Set([
@@ -366,7 +366,7 @@ function tagOnClickHelper(value: string, mouseEvent: MouseEvent): void {
   }
 
   if (mouseEvent.ctrlKey) {
-    openSearchPage(value);
+    Navigator.openSearchPage(value);
     return;
   }
   Events.searchBox.append.emit(value);

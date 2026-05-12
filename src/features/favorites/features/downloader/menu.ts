@@ -24,12 +24,12 @@ let statusHeader: HTMLElement;
 let enabled: boolean = false;
 let favoritesDownloaderInterface: FavoritesDownloaderInterface;
 
-export function setupDownloadMenu(fdInterface: FavoritesDownloaderInterface): void {
+export function setup(fdInterface: FavoritesDownloaderInterface): void {
   if (DOWNLOADER_DISABLED) {
     return;
   }
   favoritesDownloaderInterface = fdInterface;
-  FavoritesDownloader.setupFavoritesDownloader();
+  FavoritesDownloader.setup();
   insertHtml(Overlays, "beforeend", DOWNLOAD_HTML);
   insertStyle(DOWNLOADER_CSS);
   dialog = getDialog("download-menu");

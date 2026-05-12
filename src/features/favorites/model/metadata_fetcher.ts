@@ -12,7 +12,7 @@ let onMetadataPopulated: (favorite: Favorite) => void = () => undefined;
 let deIndex: (favorite: Favorite) => void = () => undefined;
 let reIndex: (favorite: Favorite) => void = () => undefined;
 
-export function initialize(
+export function setup(
   onUpdated: (favorite: Favorite) => void,
   deIndexFn: (favorite: Favorite) => void,
   reIndexFn: (favorite: Favorite) => void

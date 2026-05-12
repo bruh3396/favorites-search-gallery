@@ -1,7 +1,5 @@
-import * as Icons from "../../../../assets/icons";
+﻿import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
-import { DomEvents } from "../../../../lib/communication/dom_events";
-import { Events } from "../../../../lib/communication/events";
 import { GalleryConfig } from "../../../../config/gallery_config";
 import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../types/gallery_types";
@@ -30,19 +28,28 @@ const buttons: GalleryMenuButton[] = [
 
 const menu: HTMLElement = document.createElement("div");
 let menuVisibilityTimeout: Timeout;
+let menuActionCallback: (action: GalleryMenuAction) => void = () => { };
 
 menu.id = "gallery-menu";
 menu.className = "gallery-sub-menu";
 
-export function setupDesktopGalleryMenu(): void {
+export function setup(onMenuAction: (action: GalleryMenuAction) => void): void {
   if (!GeneralConfig.galleryMenuOptionEnabled) {
     return;
   }
+  menuActionCallback = onMenuAction;
   GalleryRoot.appendChild(menu);
   loadPreferences();
   createButtons();
   createColorPicker();
-  addEventListeners();
+}
+
+export function onMouseMove(): void {
+  reveal();
+}
+
+export function onMouseOver(event: MouseEvent): void {
+  togglePersistence(event);
 }
 
 function loadPreferences(): void {
@@ -54,13 +61,6 @@ function loadPreferences(): void {
     togglePin();
   }
   toggleGalleryMenuEnabled(Preferences.galleryMenuEnabled.value);
-}
-
-function addEventListeners(): void {
-  DomEvents.document.mousemove.on(reveal);
-  DomEvents.document.mouseover.on((mouseOverEvent) => {
-    togglePersistence(mouseOverEvent.originalEvent);
-  });
 }
 
 function handleGalleryMenuAction(action: GalleryMenuAction): void {
@@ -104,7 +104,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   button.dataset.hint = template.tooltip;
   button.onclick = (): void => {
     handleGalleryMenuAction(template.action);
-    Events.gallery.galleryMenuButtonClicked.emit(template.action);
+    menuActionCallback(template.action);
   };
 
   if (GalleryConfig.galleryMenuMonoColor) {

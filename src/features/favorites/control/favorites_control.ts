@@ -6,15 +6,15 @@ import * as FavoritesRatingFilter from "./menu/rating_filter";
 import * as FavoritesSearchBox from "./search_box/search_box";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 
-export function setupFavoritesControl(): void {
-  FavoritesNavigationButtons.setupNavigationButtons();
-  FavoritesFinder.setupFinder();
-  FavoritesRatingFilter.setupRatingFilter();
-  FavoritesSearchBox.setupSearchBox();
+export function setup(): void {
+  FavoritesNavigationButtons.setup();
+  FavoritesFinder.setup();
+  FavoritesRatingFilter.setup();
+  FavoritesSearchBox.setup();
 
   if (ON_DESKTOP_DEVICE) {
-    FavoritesDesktop.buildDesktopElements();
+    FavoritesDesktop.buildElements();
   } else {
-    FavoritesMobile.buildMobileElements();
+    FavoritesMobile.buildElements();
   }
 }

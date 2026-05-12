@@ -10,7 +10,7 @@ import { buildMobileFooter } from "./mobile_footer";
 import { cleanNativeFavoritesPage } from "./native_page_cleaner";
 import { setupFavoritesHelpBar } from "./help_bar";
 
-export function setupFavoritesShell(): void {
+export function setup(): void {
   cleanNativeFavoritesPage();
   insertStyle((ON_MOBILE_DEVICE ? MOBILE_CSS : DESKTOP_CSS) + FAVORITES_CSS, "fav-menu-layout");
   insertHtml(Root, "afterbegin", FAVORITES_HTML);

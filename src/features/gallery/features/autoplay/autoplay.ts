@@ -77,7 +77,7 @@ let paused: boolean;
 let menuIsPersistent: boolean;
 let menuIsVisible: boolean;
 
-export function setupAutoplay(inEvents: AutoplayEvents): void {
+export function setup(inEvents: AutoplayEvents): void {
   initializeFields();
   initializeEvents(inEvents);
   initializeTimers();

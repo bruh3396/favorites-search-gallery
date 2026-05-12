@@ -1,7 +1,7 @@
 import { Layout } from "../../../../types/ui";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { SkeletonItem } from "./skeleton_item";
-import { getLayout } from "../../../../lib/layout/layout";
+import { getLayout } from "../../../../lib/layout/content_tiler";
 
 const DEFAULT_ITEM_COUNT = 50;
 
@@ -23,6 +23,6 @@ export class Skeleton {
   }
 }
 
-export function getFavoritesSkeleton(): HTMLElement[] {
+export function favoritesSkeleton(): HTMLElement[] {
   return new Skeleton(getLayout(), Preferences.resultsPerPage.value).elements;
 }

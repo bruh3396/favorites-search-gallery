@@ -4,7 +4,7 @@ import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 
 const PARENT_ID = "left-favorites-panel-top-row";
 
-export function setupSearchBox(): void {
+export function setup(): void {
   if (ON_DESKTOP_DEVICE) {
     new FavoritesDesktopSearchBox(PARENT_ID);
   } else {

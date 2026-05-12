@@ -54,7 +54,7 @@ export function setExpectedTotalFavoritesCount(count: number | null): void {
   totalFavoritesCount = count;
 }
 
-export function setupFavoritesStatus(): void {
+export function setup(): void {
   matchCountIndicator = Root.querySelector("#match-count-label") ?? document.createElement("label");
   statusIndicator = Root.querySelector("#favorites-load-status-label") ?? document.createElement("label");
 }

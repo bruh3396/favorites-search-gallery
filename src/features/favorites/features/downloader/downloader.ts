@@ -20,7 +20,7 @@ declare const zip: {
 let aborted = false;
 let currentlyDownloading = false;
 
-export function setupFavoritesDownloader(): void {
+export function setup(): void {
   loadZipJS();
 }
 

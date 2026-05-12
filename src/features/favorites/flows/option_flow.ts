@@ -4,7 +4,7 @@ import { FavoritesInfiniteScrollFlow } from "./infinite_scroll_flow";
 
 export function toggleInfiniteScroll(value: boolean): void {
   FavoritesInfiniteScrollFlow.reset();
-  FavoritesView.togglePaginationMenu(!value);
+  FavoritesView.toggleNavigator(!value);
   FavoritesSearchFlow.showLatestSearchResults();
 }
 

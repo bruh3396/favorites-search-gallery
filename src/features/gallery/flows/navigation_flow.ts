@@ -1,18 +1,18 @@
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryPresentationFlow from "./presentation_flow";
+import { Boundary } from "../types/gallery_types";
 import { FeatureBridge } from "../../../lib/communication/feature_bridge";
-import { NavigationBoundary } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/input";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { usingInfiniteScroll } from "../../../lib/preferences/infinite_scroll";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.move(direction)) {
-    case NavigationBoundary.Left: handleLeftBoundary();
+    case Boundary.Start: handleStartBoundary();
       break;
-    case NavigationBoundary.Right: handleRightBoundary();
+    case Boundary.End: handleEndBoundary();
       break;
-    case NavigationBoundary.None:
+    case Boundary.None:
       GalleryPresentationFlow.presentSelected();
       break;
     default:
@@ -20,14 +20,14 @@ export function navigate(direction: NavigationKey): void {
   }
 }
 
-function handleLeftBoundary(): void {
+function handleStartBoundary(): void {
   if (!usingInfiniteScroll() && requestAdjacentPage("ArrowLeft")) {
     GalleryModel.jumpToLast();
     GalleryPresentationFlow.presentSelected();
   }
 }
 
-function handleRightBoundary(): void {
+function handleEndBoundary(): void {
   if (!requestAdjacentPage("ArrowRight")) {
     return;
   }

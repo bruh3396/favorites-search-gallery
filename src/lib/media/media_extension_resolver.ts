@@ -7,7 +7,7 @@ import { Database } from "../core/storage/database";
 import { Favorite } from "../../types/favorite";
 import { ON_FAVORITES_PAGE } from "../environment/environment";
 import { Post } from "../../types/api";
-import { resolveBaseImageUrl } from "./media_url_resolver";
+import { baseImageUrl } from "./base_image_url";
 
 const ALL_IMAGE_EXTENSIONS: ImageExtension[] = ["jpeg", "png", "jpg"];
 const DATABASE_NAME = "ImageExtensions";
@@ -55,7 +55,7 @@ async function findExtension(item: HTMLElement | Favorite): Promise<ImageExtensi
 }
 
 async function probeAllExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
-  const baseUrl = resolveBaseImageUrl(item);
+  const baseUrl = baseImageUrl(item);
 
   for (const extension of ALL_IMAGE_EXTENSIONS) {
     if (await probeExtension(baseUrl, extension)) {

@@ -1,12 +1,6 @@
 import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../dom/input_types";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../environment/environment";
 import { Emitter } from "../core/scheduling/emitter";
-import { Root } from "../shell";
 import { StickyEmitter } from "../core/scheduling/sticky_emitter";
-import { setupSwipeEvents } from "./swipe_events";
-import { setupTouchHoldEvents } from "./touch_hold_events";
-
-const container = ON_FAVORITES_PAGE ? Root : document.documentElement;
 
 export function toggleGlobalInputEvents(value: boolean): void {
   for (const event of Object.values(DomEvents.document)) {
@@ -14,11 +8,10 @@ export function toggleGlobalInputEvents(value: boolean): void {
   }
 }
 
-export function setupEvents(): void {
+export function setupDomEvents(root: HTMLElement): void {
   broadcastDomLoad();
-  setupDocumentEvents();
+  setupDocumentEvents(root);
   setupWindowEvents();
-  setupMobileEvents();
 }
 
 export const DomEvents = {
@@ -42,11 +35,11 @@ export const DomEvents = {
   }
 };
 
-function setupDocumentEvents(): void {
-  container.addEventListener("click", (event) => {
+function setupDocumentEvents(root: HTMLElement): void {
+  root.addEventListener("click", (event) => {
     DomEvents.document.click.emit(event);
   });
-  container.addEventListener("mousedown", (event) => {
+  root.addEventListener("mousedown", (event) => {
     DomEvents.document.mousedown.emit(event);
   });
   document.addEventListener("keydown", (event) => {
@@ -55,22 +48,22 @@ function setupDocumentEvents(): void {
   document.addEventListener("keyup", (event) => {
     DomEvents.document.keyup.emit(new EnhancedKeyboardEvent(event));
   });
-  container.addEventListener("mouseover", (event) => {
+  root.addEventListener("mouseover", (event) => {
     DomEvents.document.mouseover.emit(new EnhancedMouseEvent(event));
   }, { passive: true });
-  container.addEventListener("mousemove", (event) => {
+  root.addEventListener("mousemove", (event) => {
     DomEvents.document.mousemove.emit(event);
   }, { passive: true });
   document.addEventListener("wheel", (event) => {
     DomEvents.document.wheel.emit(new EnhancedWheelEvent(event));
   }, { passive: true });
-  container.addEventListener("contextmenu", (event) => {
+  root.addEventListener("contextmenu", (event) => {
     DomEvents.document.contextmenu.emit(event);
   });
-  container.addEventListener("touchstart", (event) => {
+  root.addEventListener("touchstart", (event) => {
     DomEvents.document.touchStart.emit(event);
   }, { passive: false });
-  container.addEventListener("touchend", (event) => {
+  root.addEventListener("touchend", (event) => {
     DomEvents.document.touchEnd.emit(event);
   });
 }
@@ -85,14 +78,6 @@ function setupWindowEvents(): void {
   window.addEventListener("orientationchange", (event) => {
     DomEvents.window.orientationChange.emit(event);
   });
-}
-
-function setupMobileEvents(): void {
-  if (ON_DESKTOP_DEVICE) {
-    return;
-  }
-  setupTouchHoldEvents();
-  setupSwipeEvents();
 }
 
 function broadcastDomLoad(): void {

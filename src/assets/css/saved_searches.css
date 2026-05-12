@@ -1,4 +1,4 @@
-/* ─── Container ─────────────────────────────────────────────────────────────── */
+/* Container */
 
 #saved-searches-container {
   margin: 0;
@@ -16,7 +16,7 @@
   margin-right: 10px;
 }
 
-/* ─── Input buttons ─────────────────────────────────────────────────────────── */
+/* Input buttons */
 
 #saved-searches-buttons button {
   margin-right: 1px;
@@ -31,7 +31,7 @@
   filter: brightness(140%);
 }
 
-/* ─── Search list ───────────────────────────────────────────────────────────── */
+/* Search list */
 
 #saved-search-list-container {
   direction: rtl;
@@ -73,7 +73,7 @@
   width: 20px;
 }
 
-/* ─── List item buttons ─────────────────────────────────────────────────────── */
+/* List item buttons */
 
 .saved-searches-item-label {
   flex: 1000 30px;

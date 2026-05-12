@@ -1,6 +1,6 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
+import * as Navigator from "../../../lib/navigator";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
-import { openMedia, openPost } from "../../../lib/navigator";
 import { ClickCode } from "../../../types/input";
 import { Events } from "../../../lib/communication/events";
 import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
@@ -82,7 +82,7 @@ export class FavoriteElement {
 
   private handleClick(event: MouseEvent): void {
     if (event.ctrlKey) {
-      openMedia(this.root);
+      Navigator.openMedia(this.root);
     }
     event.preventDefault();
   }
@@ -95,7 +95,7 @@ export class FavoriteElement {
       (event.button === ClickCode.Left && (event.shiftKey || GALLERY_DISABLED));
 
     if (shouldOpen) {
-      openPost(this.root.id);
+      Navigator.openPost(this.root.id);
     }
     event.preventDefault();
   }

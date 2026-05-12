@@ -1,4 +1,4 @@
-/* ─── Variables ────────────────────────────────────────────────────────────── */
+/* Variables */
 
 :root {
   --color-bg: black;
@@ -17,7 +17,7 @@
   --color-controls-guide-swipe-up: green;
 }
 
-/* ─── Base elements ─────────────────────────────────────────────────────────── */
+/* Base elements */
 
 html.fullscreen-effect::before {
   opacity: 1;
@@ -77,7 +77,7 @@ option {
   font-size: 15px;
 }
 
-/* ─── Themes ────────────────────────────────────────────────────────────────── */
+/* Themes */
 
 .theme--light {
   background: linear-gradient(to bottom, #aae5a4, #89e180);
@@ -89,7 +89,7 @@ option {
   color: white;
 }
 
-/* ─── Utilities ─────────────────────────────────────────────────────────────── */
+/* Utilities */
 
 .u-no-select {
   -webkit-touch-callout: none;
@@ -134,7 +134,7 @@ option {
   color: orange;
 }
 
-/* ─── num-input component ───────────────────────────────────────────────────── */
+/* num-input component */
 
 .num-input {
   white-space: nowrap;
@@ -239,7 +239,7 @@ option {
   -moz-appearance: textfield;
 }
 
-/* ─── post--thumb ───────────────────────────────────────────────────────────── */
+/* post--thumb */
 
 .post--thumb>a {
   pointer-events: none;
@@ -249,7 +249,7 @@ option {
   pointer-events: all;
 }
 
-/* ─── Gallery tap zones ─────────────────────────────────────────────────────── */
+/* Gallery tap zones */
 
 .gallery-tap-zone {
   position: fixed;
@@ -272,7 +272,7 @@ option {
   left: unset !important;
 }
 
-/* ─── Mobile symbol row ─────────────────────────────────────────────────────── */
+/* Mobile symbol row */
 
 #mobile-symbol-container {
   display: flex;
@@ -300,7 +300,7 @@ option {
   height: 30px;
 }
 
-/* ─── Animations ────────────────────────────────────────────────────────────── */
+/* Animations */
 
 @keyframes blink {
   0%   { opacity: 1; }

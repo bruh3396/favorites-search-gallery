@@ -7,16 +7,17 @@ import { VideoControllerCallbacks } from "../../types/gallery_types";
 
 const renderers = [GalleryImageRenderer, GalleryVideoRenderer, GalleryGifRenderer];
 
-export function present(thumb: HTMLElement): void {
+export function show(thumb: HTMLElement): void {
   hide();
   getRenderer(thumb).render(thumb);
 }
 
 export const hide = (): void => renderers.forEach(p => p.hide());
-export const preloadMediaInGallery = (thumbs: HTMLElement[]): void => renderers.forEach(p => p.preload(thumbs));
+export const preload = (thumbs: HTMLElement[]): void => renderers.forEach(p => p.preload(thumbs));
+export const preloadImages = (thumbs: HTMLElement[]): Promise<void> => GalleryImageRenderer.preload(thumbs);
+
 export const handlePageChange = (): void => renderers.forEach(p => p.handlePageChange());
 export const handlePageChangeInGallery = (): void => renderers.forEach(p => p.handlePageChangeInGallery());
-export const preloadMediaOutsideGallery = (thumbs: HTMLElement[]): Promise<void> => GalleryImageRenderer.preload(thumbs);
 export const presetCanvasDimensions = (thumbs: HTMLElement[]): void => GalleryImageRenderer.presetCanvasDimensions(thumbs);
 export const toggleVideoLooping = (value: boolean): void => GalleryVideoRenderer.toggleVideoLooping(value);
 export const restartVideo = (): void => GalleryVideoRenderer.restartVideo();
@@ -28,10 +29,7 @@ export const zoomToPoint = (x: number, y: number): void => GalleryImageRenderer.
 export const correctOrientation = (): void => GalleryImageRenderer.correctOrientation();
 export const downscaleAll = (): void => GalleryImageRenderer.downscaleAll();
 export const upscaleCachedThumbs = (): Promise<void> => GalleryImageRenderer.upscaleCachedThumbs();
-
-export function setupVideoRenderer(callbacks: VideoControllerCallbacks): void {
-  GalleryVideoRenderer.setup(callbacks);
-}
+export const setupVideoRenderer = (callbacks: VideoControllerCallbacks): void => GalleryVideoRenderer.setup(callbacks);
 
 function getRenderer(thumb: HTMLElement): GalleryAbstractRenderer {
   return isVideo(thumb) ? GalleryVideoRenderer : isGif(thumb) ? GalleryGifRenderer : GalleryImageRenderer;

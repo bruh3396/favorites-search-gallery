@@ -1,14 +1,14 @@
 import * as GalleryFavoriterFlow from "./favoriter_flow";
 import * as GalleryModel from "../model/gallery_model";
-import * as GalleryStateFlow from "./state_flow";
+import * as GalleryOpenCloseFlow from "./open_close_flow";
 import * as GalleryView from "../view/gallery_view";
 import { GalleryMenuAction } from "../../../types/ui";
 
 const menuHandlers: Partial<Record<GalleryMenuAction, () => void>> = {
-  exit: GalleryStateFlow.exitGallery,
-  openPost: GalleryModel.openSelectedPost,
-  openOriginal: GalleryModel.openSelectedMedia,
-  download: GalleryModel.downloadSelected,
+  exit: GalleryOpenCloseFlow.close,
+  openPost: GalleryModel.openPost,
+  openOriginal: GalleryModel.openMedia,
+  download: GalleryModel.download,
   addFavorite: GalleryFavoriterFlow.addFavoriteInGallery,
   removeFavorite: GalleryFavoriterFlow.removeFavoriteInGallery,
   toggleBackground: GalleryView.toggleBackgroundOpacity

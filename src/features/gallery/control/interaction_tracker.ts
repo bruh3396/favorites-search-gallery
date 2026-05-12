@@ -6,7 +6,7 @@ import { doNothing } from "../../../lib/environment/constants";
 
 let galleryInteractionTracker: InteractionTracker | null = null;
 
-export function setupGalleryInteractionTracker(): void {
+export function setup(): void {
   if (ON_MOBILE_DEVICE) {
     return;
   }

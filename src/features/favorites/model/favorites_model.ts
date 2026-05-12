@@ -6,9 +6,9 @@ import { NewFavorites } from "../types/favorite_types";
 
 let getAdditionalTags: (id: string) => string | undefined = () => undefined;
 
-export function setupFavoritesModel(getAdditionalTagsFn: (id: string) => string | undefined): void {
+export function setup(getAdditionalTagsFn: (id: string) => string | undefined): void {
   getAdditionalTags = getAdditionalTagsFn;
-  FavoritesMetadataFetcher.initialize(
+  FavoritesMetadataFetcher.setup(
     FavoritesLoader.updateFavorite,
     (favorite) => FavoritesSearchCoordinator.removeFromIndex([favorite]),
     (favorite) => FavoritesSearchCoordinator.addToIndex([favorite])

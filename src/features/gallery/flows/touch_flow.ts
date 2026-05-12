@@ -1,5 +1,5 @@
 import * as GalleryNavigationFlow from "./navigation_flow";
-import * as GalleryStateFlow from "./state_flow";
+import * as GalleryOpenCloseFlow from "./open_close_flow";
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
 import { Preferences } from "../../../lib/preferences/preferences";
@@ -42,7 +42,7 @@ export function onRightTap(): void {
 }
 
 export function onSwipeDown(): void {
-  dispatchByState({ open: GalleryStateFlow.exitGallery });
+  dispatchByState({ open: GalleryOpenCloseFlow.close });
 }
 
 function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
@@ -50,7 +50,7 @@ function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
     mouseEvent.originalEvent.preventDefault();
     mouseEvent.originalEvent.stopPropagation();
     mouseEvent.originalEvent.stopImmediatePropagation();
-    GalleryStateFlow.enterGallery(mouseEvent.thumb);
+    GalleryOpenCloseFlow.open(mouseEvent.thumb);
   }
 }
 

@@ -1,12 +1,17 @@
-import * as ContentTiler from "../../../lib/layout/layout";
-import * as FavoritesPaginationMenu from "./navigation/navigator";
+﻿import * as ContentTiler from "../../../lib/layout/content_tiler";
+import * as FavoritesNavigator from "./navigation/navigator";
 import * as FavoritesShell from "./shell/favorites_shell";
 import * as FavoritesStatus from "./status/status";
-import { Favorite } from "../../../types/favorite";
+import { Favorite, PageRelation } from "../../../types/favorite";
 import { NewFavorites } from "../types/favorite_types";
 import { buildElementTemplate } from "../types/favorite_element_template";
-import { getFavoritesSkeleton } from "./skeleton/skeleton";
+import { favoritesSkeleton } from "./skeleton/skeleton";
 import { scrollToTop } from "../../../lib/ui/dom";
+
+export interface FavoritesViewCallbacks {
+  onPageSelected: (pageNumber: number) => void;
+  onRelativePageSelected: (relation: PageRelation) => void;
+}
 
 export function addToTop(results: NewFavorites): void {
   ContentTiler.addToTop(results.newSearchResults.map((favorite) => favorite.root));
@@ -17,17 +22,17 @@ export function showSearchResults(searchResults: Favorite[]): void {
   scrollToTop();
 }
 
-export function setupFavoritesView(): void {
+export function setup(viewCallbacks: FavoritesViewCallbacks): void {
   buildElementTemplate();
-  FavoritesShell.setupFavoritesShell();
-  FavoritesStatus.setupFavoritesStatus();
-  ContentTiler.setupLayout();
-  ContentTiler.tile(getFavoritesSkeleton());
-  FavoritesPaginationMenu.setupFavoritesPaginationMenu();
+  FavoritesShell.setup();
+  FavoritesStatus.setup();
+  ContentTiler.setup();
+  ContentTiler.tile(favoritesSkeleton());
+  FavoritesNavigator.setup(viewCallbacks);
 }
 
-export { toggle as togglePaginationMenu, getContainer as getPaginationMenu, create as createPageSelectionMenu, update as createPageSelectionMenuWhileFetching } from "./navigation/navigator";
-export { addToBottom, changeLayout } from "../../../lib/layout/layout";
+export { toggle as toggleNavigator, getContainer as getNavigationContainer, create as createNavigationMenu, update as updateNavigationMenu } from "./navigation/navigator";
+export { addToBottom, changeLayout } from "../../../lib/layout/content_tiler";
 
 export * from "./update/thumb_preloader";
 export * from "./status/status";

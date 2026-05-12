@@ -1,4 +1,4 @@
-/* ─── Menu shell ────────────────────────────────────────────────────────────── */
+/* Menu shell */
 
 #download-menu {
   background: transparent;
@@ -21,7 +21,7 @@
   color: black;
 }
 
-/* ─── Active state overrides ────────────────────────────────────────────────── */
+/* Active state overrides */
 
 #download-menu[data-active] #download-menu-buttons-start-download {
   display: none;
@@ -35,7 +35,7 @@
   flex: 1 1 100%;
 }
 
-/* ─── Layout containers ─────────────────────────────────────────────────────── */
+/* Layout containers */
 
 #download-menu-container {
   display: flex;
@@ -61,7 +61,7 @@
   height: 100%;
 }
 
-/* ─── Options panel ─────────────────────────────────────────────────────────── */
+/* Options panel */
 
 #download-menu-options {
   flex: 1 0 25%;
@@ -79,7 +79,7 @@
   font-size: x-large;
 }
 
-/* ─── Buttons panel ─────────────────────────────────────────────────────────── */
+/* Buttons panel */
 
 #download-menus button {
   width: 100%;
@@ -99,7 +99,7 @@
   flex: 1 1 100%;
 }
 
-/* ─── Status panel ──────────────────────────────────────────────────────────── */
+/* Status panel */
 
 #download-menu-status {
   flex: 0 0 0%;
@@ -123,7 +123,7 @@
   font-size: medium;
 }
 
-/* ─── Warning ───────────────────────────────────────────────────────────────── */
+/* Warning */
 
 #download-menu-warning-container {
   text-align: center;
@@ -134,7 +134,7 @@
   border-radius: 8px;
 }
 
-/* ─── Help ──────────────────────────────────────────────────────────────────── */
+/* Help */
 
 #download-menu-help {
   display: flex;

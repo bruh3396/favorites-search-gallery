@@ -8,7 +8,7 @@ let container: HTMLElement;
 let findButton: HTMLButtonElement;
 let input: HTMLInputElement;
 
-export function setupFinder(): void {
+export function setup(): void {
   if (ON_MOBILE_DEVICE || !FavoritesConfig.favoriteFinderEnabled) {
     return;
   }

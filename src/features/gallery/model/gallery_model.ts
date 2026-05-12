@@ -1,8 +1,8 @@
 ﻿import * as GalleryCursor from "./cursor";
 import * as GalleryFavoriter from "./favoriter";
 import * as GalleryState from "./gallery_state";
+import * as Navigator from "../../../lib/navigator";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
-import { openMedia, openPost } from "../../../lib/navigator";
 import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
 import { isVideo } from "../../../lib/media/media_type_guards";
 
@@ -10,14 +10,14 @@ export * from "./gallery_state";
 export * from "./cursor";
 export * from "./neighbors";
 
-export const isVideoSelected = (): boolean => GalleryState.isInGallery() && isVideo(GalleryCursor.getSelectedThumb());
-export const openSelectedPost = (): void => openPost(GalleryCursor.getSelectedThumb().id);
-export const openSelectedMedia = (): Promise<void> => openMedia(GalleryCursor.getSelectedThumb());
-export const downloadSelected = (): Promise<void> => downloadFromThumb(GalleryCursor.getSelectedThumb());
-export const favoriteSelected = (): Promise<AddFavoriteStatus> => GalleryFavoriter.addFavorite(GalleryCursor.getSelectedThumb());
-export const unFavoriteSelected = (): Promise<RemoveFavoriteStatus> => GalleryFavoriter.removeFavorite(GalleryCursor.getSelectedThumb());
+export const isViewingVideo = (): boolean => GalleryState.isInGallery() && isVideo(GalleryCursor.currentThumb());
+export const openPost = (): void => Navigator.openPost(GalleryCursor.currentThumb().id);
+export const openMedia = (): Promise<void> => Navigator.openMedia(GalleryCursor.currentThumb());
+export const download = (): Promise<void> => downloadFromThumb(GalleryCursor.currentThumb());
+export const addFavorite = (): Promise<AddFavoriteStatus> => GalleryFavoriter.addFavorite(GalleryCursor.currentThumb());
+export const removeFavorite = (): Promise<RemoveFavoriteStatus> => GalleryFavoriter.removeFavorite(GalleryCursor.currentThumb());
 
-export function enterGallery(thumb: HTMLElement): void {
-  GalleryCursor.setCurrentThumb(thumb);
-  GalleryState.enterGallery();
+export function enter(thumb: HTMLElement): void {
+  GalleryCursor.pointTo(thumb);
+  GalleryState.enter();
 }

@@ -11,7 +11,7 @@ let centerThumb: HTMLElement | null = null;
 let intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let bypassDebounce = true;
 
-export function setupVisibleThumbObserver(): void {
+export function setup(): void {
   Events.favorites.pageChanged.on(() => {
     bypassDebounce = true;
   });

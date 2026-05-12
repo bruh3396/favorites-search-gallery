@@ -14,7 +14,7 @@ let callbacks: VideoControllerCallbacks;
 
 videoContainer.id = "video-container-inner";
 
-export function setupVideoController(container: HTMLElement, videoCallbacks: VideoControllerCallbacks): void {
+export function setup(container: HTMLElement, videoCallbacks: VideoControllerCallbacks): void {
   callbacks = videoCallbacks;
   insertVideoContainer(container);
   createVideoPlayers();

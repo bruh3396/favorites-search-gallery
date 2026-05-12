@@ -1,7 +1,7 @@
 import * as GalleryFavoriterFlow from "./favoriter_flow";
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryNavigationFlow from "./navigation_flow";
-import * as GalleryStateFlow from "./state_flow";
+import * as GalleryOpenCloseFlow from "./open_close_flow";
 import * as GalleryView from "../view/gallery_view";
 import { isExitKey, isNavigationKey } from "../../../types/guards";
 import { EnhancedKeyboardEvent } from "../../../lib/dom/input_types";
@@ -14,17 +14,17 @@ const insideGalleryHotkeyHandlers: Record<string, () => void> = {
   b: GalleryView.toggleBackgroundOpacity,
   e: GalleryFavoriterFlow.addFavoriteInGallery,
   f: toggleFullscreen,
-  g: GalleryStateFlow.exitGallery,
+  g: GalleryOpenCloseFlow.close,
   m: GalleryView.toggleVideoMute,
-  q: GalleryModel.openSelectedMedia,
-  s: GalleryModel.downloadSelected,
-  w: GalleryModel.openSelectedPost,
+  q: GalleryModel.openMedia,
+  s: GalleryModel.download,
+  w: GalleryModel.openPost,
   x: GalleryFavoriterFlow.removeFavoriteInGallery,
   " ": pauseVideo
 };
 
 const outsideGalleryHotkeyHandlers: Record<string, () => void> = {
-  g: GalleryStateFlow.reEnterGallery,
+  g: GalleryOpenCloseFlow.reOpen,
   f: toggleFullscreen
 };
 
@@ -64,7 +64,7 @@ function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   }
 
   if (isExitKey(event.key)) {
-    GalleryStateFlow.exitGallery();
+    GalleryOpenCloseFlow.close();
     return;
   }
 
@@ -91,7 +91,7 @@ function onKeyUpInGallery(event: EnhancedKeyboardEvent): void {
 }
 
 function pauseVideo(): void {
-  if (GalleryModel.isVideoSelected()) {
+  if (GalleryModel.isViewingVideo()) {
     GalleryView.toggleVideoPause();
   }
 }

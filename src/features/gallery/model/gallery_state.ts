@@ -10,11 +10,11 @@ export const isInGallery = (): boolean => currentState === GalleryState.Open;
 export const isEnlargingOnHover = (): boolean => currentState === GalleryState.Hover;
 export const hasRecentlyExitedGallery = (): boolean => recentlyExitedGallery;
 
-export function enterGallery(): void {
+export function enter(): void {
   currentState = GalleryState.Open;
 }
 
-export function exitGallery(): void {
+export function exit(): void {
   currentState = GalleryState.Idle;
   recentlyExitedGallery = true;
   setTimeout(() => {

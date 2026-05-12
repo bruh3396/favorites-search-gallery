@@ -15,7 +15,7 @@ let baseUrl = getBaseUrl();
 let allThumbs: HTMLElement[] = [];
 let initialSearchPage: SearchPage;
 
-export function setupSearchPageLoader(): void {
+export function setup(): void {
   searchPages = new Map();
   fetchedPageNumbers = new Set();
   initialPageNumber = getInitialPageNumber();

@@ -6,7 +6,7 @@ import { Preferences } from "../../../lib/preferences/preferences";
 
 let pageBottomObserver: PageBottomObserver;
 
-export function setupInfiniteScroll(): void {
+export function setup(): void {
   pageBottomObserver = new PageBottomObserver(showMoreResults);
   Events.searchPage.searchPageReady.on(() => {
     if (Preferences.searchPageInfiniteScroll.value) {

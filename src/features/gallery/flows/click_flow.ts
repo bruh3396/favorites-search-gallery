@@ -1,6 +1,5 @@
-import * as GalleryClickFlow from "./click_flow";
 import * as GalleryModel from "../model/gallery_model";
-import * as GalleryStateFlow from "./state_flow";
+import * as GalleryOpenCloseFlow from "./open_close_flow";
 import * as GalleryView from "../view/gallery_view";
 import { DomEvents } from "../../../lib/communication/dom_events";
 import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
@@ -42,20 +41,20 @@ export function toggleGalleryImageZoom(value: undefined | boolean = undefined): 
 
 function onClickInGallery(mouseEvent: MouseEvent): void {
   if (mouseEvent.ctrlKey) {
-    GalleryModel.openSelectedMedia();
+    GalleryModel.openMedia();
   }
 }
 
 function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey) {
     mouseEvent.originalEvent.preventDefault();
-    GalleryStateFlow.enterGallery(mouseEvent.thumb);
+    GalleryOpenCloseFlow.open(mouseEvent.thumb);
     return;
   }
 
   if (mouseEvent.middleClick && mouseEvent.thumb === null) {
     mouseEvent.originalEvent.preventDefault();
-    GalleryStateFlow.toggleEnlargeOnHover();
+    GalleryOpenCloseFlow.toggleEnlargeOnHover();
   }
 }
 
@@ -65,15 +64,15 @@ function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   }
 
   if (mouseEvent.shiftKey) {
-    if (GalleryClickFlow.toggleGalleryImageZoom()) {
+    if (toggleGalleryImageZoom()) {
       GalleryView.zoomToPoint(mouseEvent.originalEvent.x, mouseEvent.originalEvent.y);
     }
     return;
   }
   const zoomedIn = mouseEvent.originalEvent.target instanceof HTMLElement && mouseEvent.originalEvent.target.closest(".zoomed-in") !== null;
 
-  if (mouseEvent.leftClick && !zoomedIn && !GalleryModel.isVideoSelected()) {
-    GalleryStateFlow.exitGallery();
+  if (mouseEvent.leftClick && !zoomedIn && !GalleryModel.isViewingVideo()) {
+    GalleryOpenCloseFlow.close();
     return;
   }
 
@@ -82,11 +81,11 @@ function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   }
 
   if (mouseEvent.middleClick) {
-    GalleryModel.openSelectedPost();
+    GalleryModel.openPost();
   }
 }
 
 function onContextMenuInGallery(mouseEvent: MouseEvent): void {
   mouseEvent.preventDefault();
-  GalleryStateFlow.exitGallery();
+  GalleryOpenCloseFlow.close();
 }

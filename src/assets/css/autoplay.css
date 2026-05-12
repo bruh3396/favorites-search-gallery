@@ -1,10 +1,10 @@
-/* ─── Container ─────────────────────────────────────────────────────────────── */
+/* Container */
 
 #autoplay-container {
   visibility: hidden;
 }
 
-/* ─── Main menu ─────────────────────────────────────────────────────────────── */
+/* Main menu */
 
 #autoplay-menu {
   position: fixed;
@@ -46,7 +46,7 @@
   background-color: rgba(200, 200, 200, .5);
 }
 
-/* ─── Settings menu ─────────────────────────────────────────────────────────── */
+/* Settings menu */
 
 #autoplay-settings-menu {
   visibility: hidden;
@@ -105,13 +105,13 @@
   pointer-events: none;
 }
 
-/* ─── Buttons ───────────────────────────────────────────────────────────────── */
+/* Buttons */
 
 #autoplay-play-button:active {
   filter: drop-shadow(2px 2px 10px var(--color-accent));
 }
 
-/* ─── Direction mask ────────────────────────────────────────────────────────── */
+/* Direction mask */
 
 #autoplay-change-direction-mask {
   filter: drop-shadow(2px 2px 3px var(--color-accent));
@@ -135,7 +135,7 @@
   clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
 }
 
-/* ─── Progress bars ─────────────────────────────────────────────────────────── */
+/* Progress bars */
 
 .autoplay-progress-bar {
   position: absolute;
@@ -151,7 +151,7 @@
   background-color: royalblue;
 }
 
-/* ─── Animations ────────────────────────────────────────────────────────────── */
+/* Animations */
 
 @keyframes progress {
   from { width: 0; }

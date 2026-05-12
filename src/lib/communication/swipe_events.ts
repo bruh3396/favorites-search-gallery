@@ -1,5 +1,6 @@
 import { DomEvents } from "./dom_events";
 import { Events } from "./events";
+import { ON_MOBILE_DEVICE } from "../environment/environment";
 
 type Point = { x: number; y: number };
 
@@ -8,8 +9,10 @@ const start: Point = { x: 0, y: 0 };
 const end: Point = { x: 0, y: 0 };
 
 export function setupSwipeEvents(): void {
-  DomEvents.document.touchStart.on(setTouchStart);
-  DomEvents.document.touchEnd.on(onTouchEnd);
+  if (ON_MOBILE_DEVICE) {
+    DomEvents.document.touchStart.on(setTouchStart);
+    DomEvents.document.touchEnd.on(onTouchEnd);
+  }
 }
 
 export const didSwipe = (): boolean => getSwipeDirection() !== null;

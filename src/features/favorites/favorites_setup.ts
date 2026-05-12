@@ -1,5 +1,5 @@
-import * as FavoritesControl from "./control/favorites_control";
-import * as FavoritesDownloadController from "./features/downloader/menu";
+﻿import * as FavoritesControl from "./control/favorites_control";
+import * as FavoritesDownloadMenu from "./features/downloader/menu";
 import * as FavoritesInterFeatureFlow from "./flows/inter_feature_flow";
 import * as FavoritesLoadFlow from "./flows/load_flow";
 import * as FavoritesModel from "./model/favorites_model";
@@ -19,20 +19,23 @@ export async function setupFavorites(): Promise<void> {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
-  FavoritesModel.setupFavoritesModel(FavoritesTagModifier.getAdditionalTags);
-  FavoritesView.setupFavoritesView();
-  FavoritesControl.setupFavoritesControl();
+  FavoritesModel.setup(FavoritesTagModifier.getAdditionalTags);
+  FavoritesView.setup({
+    onPageSelected: (pageNumber) => Events.favorites.pageSelected.emit(pageNumber),
+    onRelativePageSelected: (relation) => Events.favorites.relativePageSelected.emit(relation)
+  });
+  FavoritesControl.setup();
   await setupSubFeatures();
   addEventListeners();
   FavoritesLoadFlow.loadAllFavorites();
 }
 
 async function setupSubFeatures(): Promise<void> {
-  FavoritesDownloadController.setupDownloadMenu({
+  FavoritesDownloadMenu.setup({
     getSearchResults: () => FavoritesModel.getLatestSearchResults()
   });
-  Events.favorites.downloadButtonClicked.on(FavoritesDownloadController.openDownloadMenu);
-  Events.favorites.favoritesLoaded.on(FavoritesDownloadController.enableDownloadMenu);
+  Events.favorites.downloadButtonClicked.on(FavoritesDownloadMenu.openDownloadMenu);
+  Events.favorites.favoritesLoaded.on(FavoritesDownloadMenu.enableDownloadMenu);
 
   await FavoritesTagModifier.setupFavoritesTagModifier({
     getSearchResults: () => FavoritesModel.getLatestSearchResults(),

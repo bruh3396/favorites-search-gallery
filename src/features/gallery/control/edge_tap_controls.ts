@@ -3,7 +3,7 @@ import { Events } from "../../../lib/communication/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { yieldControl } from "../../../lib/core/scheduling/promise";
 
-export function setupGalleryMobileTapControls(): void {
+export function setup(): void {
   if (!ON_MOBILE_DEVICE) {
     return;
   }

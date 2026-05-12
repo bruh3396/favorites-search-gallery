@@ -1,5 +1,5 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../environment/environment";
-import { changeItemSizeOnShiftScroll, hideUnusedLayoutSizer } from "./layout_event_handlers";
+import { changeItemSizeOnShiftScroll, hideUnusedLayoutSizer } from "./content_tiler_handlers";
 import { AbstractTiler } from "../ui/tilers/abstract_tiler";
 import { ColumnTiler } from "../ui/tilers/column_tiler";
 import { Content } from "../shell";
@@ -18,7 +18,7 @@ const tilerMap = new Map(tilers.map(tiler => [tiler.layout, tiler]));
 let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.searchPageLayout.value;
 let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
 
-export function setupLayout(): void {
+export function setup(): void {
   currentTiler.activate();
   setColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value);
   setRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowSize.value : Preferences.rowSize.value);
@@ -43,7 +43,7 @@ export const addToBottom = (items: HTMLElement[]): void => currentTiler.addItems
 export const addToTop = (items: HTMLElement[]): void => currentTiler.addItemsToTop(items);
 
 function addEventListeners(): void {
-  DomEvents.document.wheel.on(changeItemSizeOnShiftScroll);
+  DomEvents.document.wheel.on(e => changeItemSizeOnShiftScroll(e, currentLayout));
   Events.favorites.columnCountChanged.on(setColumnCount);
   Events.favorites.rowSizeChanged.on(setRowSize);
   Events.favorites.layoutChanged.on(hideUnusedLayoutSizer);

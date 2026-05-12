@@ -1,12 +1,17 @@
-import * as GalleryDesktopMenu from "./shell/desktop_menu";
+﻿import * as GalleryDesktopMenu from "./shell/desktop_menu";
 import * as GalleryPresenter from "./presentation/gallery_presenter";
 import * as GalleryUi from "./shell/ui";
 import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
+import { GalleryMenuAction } from "../../../types/ui";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { insertStyle } from "../../../lib/dom/injector";
 export { overGalleryMenu } from "./view_utils";
+
+export interface GalleryViewCallbacks {
+  onMenuAction: (action: GalleryMenuAction) => void;
+}
 
 export function present(thumb: HTMLElement): void {
   display(thumb);
@@ -15,24 +20,24 @@ export function present(thumb: HTMLElement): void {
 
 export function display(thumb: HTMLElement): void {
   toggleGalleryVisibility(true);
-  GalleryPresenter.present(thumb);
+  GalleryPresenter.show(thumb);
   GalleryUi.show();
   GalleryPresenter.toggleZoom(false);
 }
 
-export function hide(): void {
+export function hide2(): void {
   toggleGalleryVisibility(false);
   GalleryPresenter.hide();
-  GalleryUi.hide();
+  GalleryUi.showScrollbar();
 }
 
-export function enterGallery(thumb: HTMLElement): void {
-  GalleryPresenter.present(thumb);
+export function show(thumb: HTMLElement): void {
+  GalleryPresenter.show(thumb);
   GalleryUi.enterGallery(thumb);
   toggleGalleryVisibility(true);
 }
 
-export function exitGallery(): void {
+export function hide(): void {
   GalleryPresenter.hide();
   GalleryUi.exitGallery();
   toggleGalleryVisibility(false);
@@ -42,15 +47,17 @@ export function exitGallery(): void {
   }, 250);
 }
 
-export function setupGalleryView(): void {
+export function setup(viewCallbacks: GalleryViewCallbacks): void {
   insertStyle(GALLERY_CSS);
   mountGallery();
-  GalleryUi.setupGalleryUi();
+  GalleryUi.setup();
 
   if (ON_DESKTOP_DEVICE) {
-    GalleryDesktopMenu.setupDesktopGalleryMenu();
+    GalleryDesktopMenu.setup(viewCallbacks.onMenuAction);
   }
 }
+
+export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "./shell/desktop_menu";
 
 export function toggleZoomCursor(value: boolean): void {
   GalleryUi.toggleZoomCursor(value);

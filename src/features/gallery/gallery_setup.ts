@@ -1,4 +1,4 @@
-import * as GalleryAutoplay from "./features/autoplay/autoplay";
+﻿import * as GalleryAutoplay from "./features/autoplay/autoplay";
 import * as GalleryClickFlow from "./flows/click_flow";
 import * as GalleryContentFlow from "./flows/content_flow";
 import * as GalleryControl from "./control/gallery_control";
@@ -8,9 +8,9 @@ import * as GalleryMenuFlow from "./flows/menu_flow";
 import * as GalleryModel from "./model/gallery_model";
 import * as GalleryMouseOverFlow from "./flows/mouseover_flow";
 import * as GalleryNavigationFlow from "./flows/navigation_flow";
+import * as GalleryOpenCloseFlow from "./flows/open_close_flow";
 import * as GalleryPreloadFlow from "./flows/preload_flow";
 import * as GallerySearchPageFlow from "./flows/search_page_flow";
-import * as GalleryStateFlow from "./flows/state_flow";
 import * as GalleryTouchFlow from "./flows/touch_flow";
 import * as GalleryView from "./view/gallery_view";
 import * as GalleryVisibleThumbObserver from "./control/visible_thumb_observer";
@@ -39,12 +39,14 @@ export async function setupGallery(): Promise<void> {
 }
 
 function finishGallerySetup(): void {
-  GalleryView.setupGalleryView();
+  GalleryView.setup({
+    onMenuAction: (action) => Events.gallery.galleryMenuButtonClicked.emit(action)
+  });
   GalleryView.setupVideoRenderer({
     onVideoEnded: GalleryAutoplay.onVideoEnded,
-    onVideoDoubleClicked: GalleryStateFlow.exitGallery
+    onVideoDoubleClicked: GalleryOpenCloseFlow.close
   });
-  GalleryControl.setupGalleryControl();
+  GalleryControl.setup();
   setupSubFeatures();
   addEventListeners();
   GalleryVisibleThumbObserver.observeAllThumbsOnPage();
@@ -53,17 +55,19 @@ function finishGallerySetup(): void {
 }
 
 function setupSubFeatures(): void {
-  GalleryAutoplay.setupAutoplay({
+  GalleryAutoplay.setup({
     onEnable: () => GalleryView.toggleVideoLooping(false),
     onDisable: () => GalleryView.toggleVideoLooping(true),
     onPause: () => GalleryView.toggleVideoLooping(true),
     onResume: () => GalleryView.toggleVideoLooping(false),
-    onComplete: (direction?: NavigationKey) => dispatchByState({ open: GalleryNavigationFlow.navigate }, direction),
+    onComplete: (direction?: NavigationKey) => dispatchByState({
+        open: GalleryNavigationFlow.navigate
+      }, direction),
     onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo()
   });
   GalleryView.toggleVideoLooping(GalleryAutoplay.isPaused() || !GalleryAutoplay.isActive());
-  Events.gallery.enteredGallery.on(GalleryAutoplay.startAutoplay);
-  Events.gallery.exitedGallery.on(GalleryAutoplay.stopAutoplay);
+  Events.gallery.openedGallery.on(GalleryAutoplay.startAutoplay);
+  Events.gallery.closedGallery.on(GalleryAutoplay.stopAutoplay);
   Events.gallery.presentedThumb.on(GalleryAutoplay.startViewTimer);
 }
 
@@ -90,10 +94,12 @@ function addEventListeners(): void {
 
   if (ON_DESKTOP_DEVICE) {
     DomEvents.document.mouseover.on(GalleryMouseOverFlow.onMouseOver);
+    DomEvents.document.mouseover.on((e) => GalleryView.onDesktopMenuMouseOver(e.originalEvent));
     DomEvents.document.click.on(GalleryClickFlow.onClick);
     DomEvents.document.mousedown.on(GalleryClickFlow.onMouseDown);
     DomEvents.document.contextmenu.on(GalleryClickFlow.onContextMenu);
     DomEvents.document.mousemove.on(GalleryClickFlow.onMouseMove);
+    DomEvents.document.mousemove.on(GalleryView.onDesktopMenuMouseMove);
     DomEvents.document.wheel.on(GalleryWheelFlow.onWheel);
     DomEvents.document.keydown.on(GalleryKeyFlow.onKeyDown);
     DomEvents.document.keyup.on(GalleryKeyFlow.onKeyUp);

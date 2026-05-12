@@ -55,8 +55,8 @@ export const Events = {
   gallery: {
     favoriteToggled: new Emitter<string>(),
     showOnHoverOverridden: new Emitter<boolean>(),
-    enteredGallery: new Emitter<HTMLElement>(),
-    exitedGallery: new Emitter<void>(),
+    openedGallery: new Emitter<HTMLElement>(),
+    closedGallery: new Emitter<void>(),
     presentedThumb: new Emitter<HTMLElement>(),
     visibleThumbsChanged: new Emitter<void>(),
     galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),

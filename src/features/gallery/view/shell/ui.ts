@@ -5,7 +5,7 @@ import { GalleryRoot } from "./shell";
 import { Preferences } from "../../../../lib/preferences/preferences";
 import { USING_FIREFOX } from "../../../../lib/environment/environment";
 import { blurActiveElement } from "../../../../utils/dom/interaction";
-import { getLayout } from "../../../../lib/layout/layout";
+import { getLayout } from "../../../../lib/layout/content_tiler";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { showFullscreenIcon } from "../view_utils";
 import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
@@ -16,7 +16,7 @@ background.id = "gallery-background";
 background.style.opacity = Preferences.backgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
 
-export function setupGalleryUi(): void {
+export function setup(): void {
   GalleryRoot.appendChild(background);
   toggleVideoPointerEvents(false);
   toggleGalleryMenuVisibility(false);
@@ -80,7 +80,7 @@ export function show(): void {
   toggleScrollbar(false);
 }
 
-export function hide(): void {
+export function showScrollbar(): void {
   toggleScrollbar(true);
 }
 

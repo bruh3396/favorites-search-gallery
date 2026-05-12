@@ -1,4 +1,4 @@
-/* ─── Base elements ─────────────────────────────────────────────────────────── */
+/* Base elements */
 
 textarea {
   max-width: 100%;
@@ -14,7 +14,7 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
-/* ─── Menu shell ────────────────────────────────────────────────────────────── */
+/* Menu shell */
 
 #favorites-search-gallery-menu {
   position: sticky;
@@ -42,7 +42,7 @@ input[type="checkbox"] {
   flex: 1;
 }
 
-/* ─── Left panel ────────────────────────────────────────────────────────────── */
+/* Left panel */
 
 #left-favorites-panel {
   flex: 10;
@@ -75,7 +75,7 @@ input[type="checkbox"] {
   width: 5ch;
 }
 
-/* ─── Right panel ───────────────────────────────────────────────────────────── */
+/* Right panel */
 
 #right-favorites-panel {
   flex: 9;
@@ -83,7 +83,7 @@ input[type="checkbox"] {
   display: none;
 }
 
-/* ─── Main options ──────────────────────────────────────────────────────────── */
+/* Main options */
 
 #main-favorite-options-container {
   display: flex;
@@ -113,7 +113,7 @@ input[type="checkbox"] {
   margin-right: 15px;
 }
 
-/* ─── Main buttons ──────────────────────────────────────────────────────────── */
+/* Main buttons */
 
 #favorites-main-buttons-container>button {
   height: 35px;
@@ -134,7 +134,7 @@ input[type="checkbox"] {
   cursor: wait;
 }
 
-/* ─── Bottom navigation ─────────────────────────────────────────────────────── */
+/* Bottom navigation */
 
 #favorites-bottom-navigation-buttons {
   display: flex;
@@ -147,7 +147,7 @@ input[type="checkbox"] {
   flex: 1;
 }
 
-/* ─── Pagination ────────────────────────────────────────────────────────────── */
+/* Pagination */
 
 #favorites-pagination-container>button {
   background: transparent;
@@ -174,7 +174,7 @@ input[type="checkbox"] {
   background-color: transparent;
 }
 
-/* ─── Search and sort ───────────────────────────────────────────────────────── */
+/* Search and sort */
 
 textarea#favorites-search-box {
   margin-top: 5px;
@@ -197,7 +197,7 @@ textarea#favorites-search-box {
   display: none;
 }
 
-/* ─── Rating filter ─────────────────────────────────────────────────────────── */
+/* Rating filter */
 
 #rating-container {
   white-space: nowrap;
@@ -239,7 +239,7 @@ textarea#favorites-search-box {
   opacity: 1;
 }
 
-/* ─── Favorite finder ───────────────────────────────────────────────────────── */
+/* Favorite finder */
 
 #favorite-finder {
   margin-top: 7px;
@@ -262,13 +262,13 @@ textarea#favorites-search-box {
   border: none !important;
 }
 
-/* ─── Column count ──────────────────────────────────────────────────────────── */
+/* Column count */
 
 #column-count-container>div {
   align-content: center;
 }
 
-/* ─── Load status ───────────────────────────────────────────────────────────── */
+/* Load status */
 
 #favorites-load-status>label {
   display: inline-block;
@@ -280,13 +280,13 @@ textarea#favorites-search-box {
   display: none;
 }
 
-/* ─── Help links ────────────────────────────────────────────────────────────── */
+/* Help links */
 
 #help-links-container>a:not(:last-child)::after {
   content: " |";
 }
 
-/* ─── What's new ────────────────────────────────────────────────────────────── */
+/* What's new */
 
 #whats-new-link {
   cursor: pointer;
@@ -336,7 +336,7 @@ textarea#favorites-search-box {
   outline: 1.5px solid white;
 }
 
-/* ─── opt-checkbox ──────────────────────────────────────────────────────────── */
+/* opt-checkbox */
 
 .opt-checkbox {
   display: block;
@@ -350,7 +350,7 @@ textarea#favorites-search-box {
   vertical-align: -5px;
 }
 
-/* ─── opt-toggle ────────────────────────────────────────────────────────────── */
+/* opt-toggle */
 
 .opt-toggle {
   position: relative;
@@ -419,7 +419,7 @@ textarea#favorites-search-box {
   font-size: 16px;
 }
 
-/* ─── Misc layout ───────────────────────────────────────────────────────────── */
+/* Misc layout */
 
 .number-label-container {
   display: inline-block;

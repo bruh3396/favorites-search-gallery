@@ -1,4 +1,4 @@
-import * as ContentTiler from "../../lib/layout/layout";
+import * as ContentTiler from "../../lib/layout/content_tiler";
 import * as SearchPageInfiniteScrollFlow from "./flows/infinite_scroll_flow";
 import * as SearchPageModel from "./model/search_page_model";
 import * as SearchPageNavigationFlow from "./flows/navigation_flow";
@@ -14,10 +14,10 @@ export function setupSearchPage(): void {
   if (!ON_SEARCH_PAGE || !Preferences.searchPages.value) {
     return;
   }
-  SearchPageModel.setupSearchPageModel();
-  SearchPageView.setupSearchPageView();
+  SearchPageModel.setup();
+  SearchPageView.setup();
   buildSearchPage();
-  SearchPageInfiniteScrollFlow.setupInfiniteScroll();
+  SearchPageInfiniteScrollFlow.setup();
   addEventListeners();
 }
 

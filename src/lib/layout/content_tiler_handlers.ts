@@ -1,15 +1,14 @@
-import * as ContentTiler from "./layout";
 import { EnhancedWheelEvent } from "../dom/input_types";
 import { FeatureBridge } from "../communication/feature_bridge";
 import { Layout } from "../../types/ui";
 import { clamp } from "../../utils/number";
 import { sleep } from "../core/scheduling/promise";
 
-export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || ContentTiler.getLayout() === "tiler--native") {
+export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent, currentLayout: Layout): void {
+  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "tiler--native") {
     return;
   }
-  const usingRowLayout = ContentTiler.getLayout() === "tiler--row";
+  const usingRowLayout = currentLayout === "tiler--row";
   const id = usingRowLayout ? "row-size" : "column-count";
   const input = document.getElementById(id);
 

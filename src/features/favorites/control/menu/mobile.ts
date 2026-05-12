@@ -10,7 +10,7 @@ import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
 import { buildToggleSwitch } from "../../../../lib/ui/elements/checkbox";
-import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
+import { hideUnusedLayoutSizer } from "../../../../lib/layout/content_tiler_handlers";
 import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 
 const buttons: Partial<ButtonElement>[] = [
@@ -228,7 +228,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
   }
 ];
 
-export function buildMobileElements(): void {
+export function buildElements(): void {
   prepareDynamicElements(buttons).forEach(buildButtonElement);
   prepareDynamicElements(toggleSwitches).forEach(buildToggleSwitch);
   // @ts-expect-error don't care

@@ -1,4 +1,4 @@
-/* ─── Video controls ────────────────────────────────────────────────────────── */
+/* Video controls */
 
 video::-webkit-media-controls-panel {
   background: transparent !important;
@@ -7,8 +7,6 @@ video::-webkit-media-controls-panel {
 video::-webkit-media-controls-enclosure {
   background: transparent !important;
 }
-
-/* ─── Gallery container ─────────────────────────────────────────────────────── */
 
 #gallery-container {
   pointer-events: none;
@@ -31,7 +29,7 @@ video::-webkit-media-controls-enclosure {
   -o-user-drag: none;
 }
 
-/* ─── Gallery background ────────────────────────────────────────────────────── */
+/* Gallery background */
 
 #gallery-background {
   background: black;
@@ -59,7 +57,7 @@ video::-webkit-media-controls-enclosure {
   pointer-events: none;
 }
 
-/* ─── Image frame ───────────────────────────────────────────────────────────── */
+/* Image frame */
 
 .gallery-image-frame {
   width: 100%;
@@ -94,7 +92,7 @@ video::-webkit-media-controls-enclosure {
   transform: translate(-50%, -50%);
 }
 
-/* ─── Gallery menu ──────────────────────────────────────────────────────────── */
+/* Gallery menu */
 
 #gallery-menu {
   pointer-events: none;
@@ -166,7 +164,7 @@ video::-webkit-media-controls-enclosure {
   user-select: none;
 }
 
-/* ─── dock-gallery button ───────────────────────────────────────────────────── */
+/* dock-gallery button */
 
 #gallery-menu #dock-gallery>img,
 #gallery-menu #dock-gallery>svg {
@@ -178,14 +176,14 @@ video::-webkit-media-controls-enclosure {
   transform: none !important;
 }
 
-/* ─── pin-gallery button ────────────────────────────────────────────────────── */
+/* pin-gallery button */
 
 #gallery-menu.gallery-menu--pinned #pin-gallery>img,
 #gallery-menu.gallery-menu--pinned #pin-gallery>svg {
   transform: rotateZ(90deg) !important;
 }
 
-/* ─── Menu button container ─────────────────────────────────────────────────── */
+/* Menu button container */
 
 #gallery-menu-button-container {
   display: flex;
@@ -195,7 +193,7 @@ video::-webkit-media-controls-enclosure {
   background: var(--color-gallery-menu-bg);
 }
 
-/* ─── Menu buttons ──────────────────────────────────────────────────────────── */
+/* Menu buttons */
 
 .gallery-menu-btn {
   pointer-events: all;
@@ -221,7 +219,7 @@ video::-webkit-media-controls-enclosure {
   fill: white;
 }
 
-/* ─── Background color picker ───────────────────────────────────────────────── */
+/* Background color picker */
 
 #gallery-menu-background-color-picker {
   position: absolute;
@@ -231,7 +229,7 @@ video::-webkit-media-controls-enclosure {
   transform: translateY(-50%);
 }
 
-/* ─── Mobile menu overlay ───────────────────────────────────────────────────── */
+/* Mobile menu overlay */
 
 #gallery-mobile-menu {
   position: fixed;
@@ -244,13 +242,13 @@ video::-webkit-media-controls-enclosure {
   background: rgba(0, 0, 0, 0.75);
 }
 
-/* ─── Misc ──────────────────────────────────────────────────────────────────── */
+/* Misc */
 
 a.u-hidden {
   cursor: default;
 }
 
-/* ─── Animations ────────────────────────────────────────────────────────────── */
+/* Animations */
 
 @keyframes glowSwipe {
   0%   { left: -100%; }

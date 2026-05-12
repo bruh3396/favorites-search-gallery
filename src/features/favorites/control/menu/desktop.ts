@@ -15,7 +15,7 @@ import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
-import { hideUnusedLayoutSizer } from "../../../../lib/layout/layout_event_handlers";
+import { hideUnusedLayoutSizer } from "../../../../lib/layout/content_tiler_handlers";
 import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 import { reloadWindow } from "../../../../utils/browser/window";
 
@@ -411,7 +411,7 @@ const numbers: Partial<NumberElement>[] = [
   }
 ];
 
-export function buildDesktopElements(): void {
+export function buildElements(): void {
   prepareDynamicElements(buttons).forEach(buildButtonElement);
   prepareDynamicElements(checkboxes).forEach(buildCheckboxOption);
   prepareDynamicElements(simpleCheckboxes).forEach(buildCheckboxElement);

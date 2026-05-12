@@ -6,10 +6,10 @@ export enum GalleryState {
   Open = 2
 }
 
-export enum NavigationBoundary {
+export enum Boundary {
   None = 0,
-  Left = 1,
-  Right = 2
+  Start = 1,
+  End = 2
 }
 
 export type VideoClip = {

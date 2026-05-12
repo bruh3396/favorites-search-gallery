@@ -3,8 +3,8 @@ import { NavigationKey } from "../../../types/input";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { SearchPage } from "../types/search_page";
 
-export function setupSearchPageModel(): void {
-  SearchPageLoader.setupSearchPageLoader();
+export function setup(): void {
+  SearchPageLoader.setup();
 }
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
