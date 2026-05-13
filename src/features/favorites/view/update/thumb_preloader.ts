@@ -5,7 +5,7 @@ import { sleep } from "../../../../lib/core/scheduling/promise";
 import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
 import { waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
 
-export function preloadThumbnails(favorites: Favorite[]): void {
+export function preloadThumbs(favorites: Favorite[]): void {
   preloadImages(favorites.map(favorite => favorite.thumbUrl));
 }
 

@@ -1,4 +1,4 @@
-﻿import * as GalleryAutoplay from "./features/autoplay/autoplay";
+import * as GalleryAutoplay from "./features/autoplay/autoplay";
 import * as GalleryClickFlow from "./flows/click_flow";
 import * as GalleryContentFlow from "./flows/content_flow";
 import * as GalleryControl from "./control/gallery_control";
@@ -68,7 +68,7 @@ function setupSubFeatures(): void {
   GalleryView.toggleVideoLooping(GalleryAutoplay.isPaused() || !GalleryAutoplay.isActive());
   Events.gallery.openedGallery.on(GalleryAutoplay.startAutoplay);
   Events.gallery.closedGallery.on(GalleryAutoplay.stopAutoplay);
-  Events.gallery.presentedThumb.on(GalleryAutoplay.startViewTimer);
+  Events.gallery.displayedThumb.on(GalleryAutoplay.startViewTimer);
 }
 
 function addEventListeners(): void {

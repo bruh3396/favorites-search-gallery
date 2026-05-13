@@ -1,4 +1,4 @@
-﻿import { FAVORITES_PER_PAGE } from "../../../lib/environment/constants";
+import { FAVORITES_PER_PAGE } from "../../../lib/environment/constants";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 
 export class FavoritesPageRequest {

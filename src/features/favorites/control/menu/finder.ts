@@ -37,7 +37,7 @@ function createElements(): void {
 }
 
 function triggerFind(): void {
-  Events.favorites.findFavoriteStarted.emit(input.value);
+  Events.favorites.findFavorite.emit(input.value);
 }
 
 function setFinderValue(value: string): void {

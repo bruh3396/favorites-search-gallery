@@ -341,7 +341,7 @@ function tagOnClick(tagName: string, event: MouseEvent): void {
   switch (event.button) {
     case ClickCode.Left:
       if (event.shiftKey && isOnlyDigits(tagName)) {
-        Events.favorites.findFavoriteInAllStarted.emit(tagName);
+        Events.favorites.findFavoriteInAll.emit(tagName);
       } else {
         tagOnClickHelper(tagName, event);
       }

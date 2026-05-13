@@ -1,4 +1,4 @@
-﻿import { getCookie } from "../../utils/browser/cookie";
+import { getCookie } from "../../utils/browser/cookie";
 import { negateTags } from "../../utils/string/format";
 
 export const USER_ID = getCookie("user_id", "");

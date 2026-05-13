@@ -1,4 +1,4 @@
-﻿import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
+import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { PageRelation } from "../../../../types/favorite";
@@ -26,7 +26,7 @@ let callbacks: NavigatorCallbacks = {
 export function setup(navigatorCallbacks: NavigatorCallbacks): void {
   callbacks = navigatorCallbacks;
   insert();
-  create(emptyFavoritesPageParameters);
+  build(emptyFavoritesPageParameters);
   toggle(!Preferences.infiniteScroll.value);
 }
 
@@ -49,7 +49,7 @@ export function getContainer(): HTMLElement {
   return CONTAINER;
 }
 
-export function create(parameters: FavoritesPaginationParameters): void {
+export function build(parameters: FavoritesPaginationParameters): void {
   CONTAINER.innerHTML = "";
   updateRangeIndicator(parameters.startIndex, parameters.endIndex, parameters.favoritesCount);
   createNumberTraversalButtons(parameters.currentPageNumber, parameters.finalPageNumber);
@@ -62,19 +62,19 @@ export function update(parameters: FavoritesPaginationParameters): void {
   const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesConfig.maxPageNumberButtons;
 
   if (!atMaxPageNumberButtons) {
-    create(parameters);
+    build(parameters);
     return;
   }
   const middlePageNumberButton = pageNumberButtons[Math.floor(pageNumberButtons.length / 2)];
 
   if (!(middlePageNumberButton instanceof HTMLElement)) {
-    create(parameters);
+    build(parameters);
     return;
   }
   const middlePageNumberMatch = PAGE_NUMBER_REGEX.exec(middlePageNumberButton.id);
 
   if (middlePageNumberMatch === null) {
-    create(parameters);
+    build(parameters);
     return;
   }
   const middlePageNumber = parseInt(middlePageNumberMatch[1], 10);
@@ -82,7 +82,7 @@ export function update(parameters: FavoritesPaginationParameters): void {
   if (parameters.currentPageNumber <= middlePageNumber) {
     return;
   }
-  create(parameters);
+  build(parameters);
 }
 
 function createContainer(): HTMLSpanElement {

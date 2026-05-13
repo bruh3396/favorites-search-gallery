@@ -22,7 +22,7 @@ export function setup(): void {
   toggleGalleryMenuVisibility(false);
 }
 
-export function enterGallery(thumb: HTMLElement): void {
+export function open(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
   blurActiveElement();
   toggleCursor(true);
@@ -32,13 +32,14 @@ export function enterGallery(thumb: HTMLElement): void {
   toggleGalleryMenuVisibility(true);
 }
 
-export function exitGallery(): void {
+export function close(): void {
   toggleBackgroundInteractability(false);
   toggleScrollbar(true);
   scrollToLastVisitedThumb();
   toggleVideoPointerEvents(false);
   toggleCursor(true);
   toggleGalleryMenuVisibility(false);
+  toggleZoomCursor(false);
 }
 
 export function scrollToLastVisitedThumb(): void {
@@ -76,15 +77,11 @@ export function toggleBackgroundOpacity(): void {
   }
 }
 
-export function show(): void {
-  toggleScrollbar(false);
+export function toggleScrollbar(value: boolean): void {
+  document.body.style.overflowY = value ? "auto" : "hidden";
 }
 
-export function showScrollbar(): void {
-  toggleScrollbar(true);
-}
-
-export function updateUiInGallery(thumb: HTMLElement): void {
+export function update(thumb: HTMLElement): void {
   setLastVisitedThumb(thumb);
 
   if (usingColumnLayout() || USING_FIREFOX) {
@@ -155,10 +152,6 @@ function toggleVideoPointerEvents(value: boolean): void {
 
 function toggleBackgroundInteractability(value: boolean): void {
   background.classList.toggle("gallery-background--active", value);
-}
-
-function toggleScrollbar(value: boolean): void {
-  document.body.style.overflowY = value ? "auto" : "hidden";
 }
 
 function scrollToThumb(thumb: HTMLElement): void {

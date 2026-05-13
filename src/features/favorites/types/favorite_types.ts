@@ -1,10 +1,14 @@
 import { Favorite } from "../../../types/favorite";
-import { Layout } from "../../../types/ui";
 import { NavigationKey } from "../../../types/input";
 
 export interface NewFavorites {
   newFavorites: Favorite[]
   newSearchResults: Favorite[]
+}
+
+export interface FavoritesFetchProgress {
+  resultsCount: number
+  allFavoritesCount: number
 }
 
 export type FavoritesPaginationParameters = {
@@ -23,11 +27,16 @@ export const emptyFavoritesPageParameters = {
   endIndex: 0
 };
 
-export interface FavoritesPresentationFlow {
-  present: (results: Favorite[]) => void
-  onLayoutChanged: (layout: Layout) => void
+export interface FavoritesResultsView {
+  initialize: (results: Favorite[]) => void
   reveal: (id: string) => void
-  reset: () => void
-  handleNewSearchResults: () => void
-  presentWhileNavigatingGallery: (direction: NavigationKey) => boolean
+  sync: () => void
+  hasMore: () => boolean
+  loadMore: (direction: NavigationKey) => void
+}
+
+export interface FavoritesPageContext {
+  results: Favorite[]
+  pagination: FavoritesPaginationParameters
+  adjacent: Favorite[]
 }

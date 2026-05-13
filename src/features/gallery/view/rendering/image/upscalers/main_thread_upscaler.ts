@@ -9,7 +9,7 @@ import { isImage } from "../../../../../../lib/media/media_type_guards";
 export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   private readonly canvases: Map<string, HTMLCanvasElement> = new Map();
 
-  protected reset(): void {
+  protected clearCanvases(): void {
     for (const canvas of this.canvases.values()) {
       this.clearCanvas(canvas);
     }

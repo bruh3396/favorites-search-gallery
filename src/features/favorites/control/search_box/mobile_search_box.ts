@@ -16,7 +16,7 @@ export class FavoritesMobileSearchBox extends AbstractFavoritesSearchBox {
     if (!(searchBox instanceof HTMLInputElement) || searchButton === null || !(clearButton instanceof HTMLElement) || !(resetButton instanceof HTMLElement)) {
       return document.createElement("textarea");
     }
-    searchButton.onclick = this.startSearch;
+    searchButton.onclick = (): void => this.startSearch();
     resetButton.onclick = (event): void => Events.favorites.resetButtonClicked.emit(event);
     this.searchBox = searchBox;
     this.wireClearButton(clearButton);
@@ -25,6 +25,11 @@ export class FavoritesMobileSearchBox extends AbstractFavoritesSearchBox {
       setupMobileStickyMenu(optionsCheckbox);
     }
     setupMobileSymbolRow(searchBox);
+    searchBox.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        this.startSearch();
+      }
+    });
     return searchBox;
   }
 

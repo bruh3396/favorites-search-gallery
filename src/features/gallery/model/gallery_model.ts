@@ -1,4 +1,4 @@
-﻿import * as GalleryCursor from "./cursor";
+import * as GalleryCursor from "./cursor";
 import * as GalleryFavoriter from "./favoriter";
 import * as GalleryState from "./gallery_state";
 import * as Navigator from "../../../lib/navigator";
@@ -17,7 +17,7 @@ export const download = (): Promise<void> => downloadFromThumb(GalleryCursor.cur
 export const addFavorite = (): Promise<AddFavoriteStatus> => GalleryFavoriter.addFavorite(GalleryCursor.currentThumb());
 export const removeFavorite = (): Promise<RemoveFavoriteStatus> => GalleryFavoriter.removeFavorite(GalleryCursor.currentThumb());
 
-export function enter(thumb: HTMLElement): void {
+export function open(thumb: HTMLElement): void {
   GalleryCursor.pointTo(thumb);
-  GalleryState.enter();
+  GalleryState.open();
 }

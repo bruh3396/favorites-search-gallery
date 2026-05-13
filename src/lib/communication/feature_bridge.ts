@@ -8,7 +8,8 @@ export const FeatureBridge = {
   allFavorites: new FeatureChannel<void, Favorite[]>([]),
   getFavorite: new FeatureChannel<string, Favorite | undefined>(undefined),
   favoritesSearchResults: new FeatureChannel<void, Favorite[]>([]),
-  navigateToAdjacentFavoritesPage: new FeatureChannel<NavigationKey, boolean>(false),
+  loadMoreFavorites: new FeatureChannel<NavigationKey, void>(undefined),
+  favoritesCanExtend: new FeatureChannel<void, boolean>(false),
   navigateToAdjacentSearchPage: new FeatureChannel<NavigationKey, SearchPage | null>(null),
   searchPageThumbs: new FeatureChannel<void, HTMLElement[]>([])
 };

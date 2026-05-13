@@ -8,7 +8,7 @@ import { throttle } from "../../../lib/core/scheduling/rate_limiting";
 
 export const onMouseMove = throttle<MouseEvent>(() => {
   dispatchByState({
-    open: GalleryView.handleMouseMoveInGallery
+    open: GalleryView.showCursor
   });
 }, 250);
 

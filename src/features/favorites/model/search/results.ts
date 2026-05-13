@@ -1,27 +1,27 @@
-﻿import * as FavoritesResultFilter from "./filter";
+import * as FavoritesResultFilter from "./filter";
 import { Favorite } from "../../../../types/favorite";
 import { shuffleArray } from "../../../../utils/collection/array";
 
-let latestSearchResults: Favorite[] = [];
+let currentSearchResults: Favorite[] = [];
 
-export const get = (): Favorite[] => latestSearchResults;
-export const set = (results: Favorite[]): Favorite[] => (latestSearchResults = results);
+export const get = (): Favorite[] => currentSearchResults;
+export const set = (results: Favorite[]): Favorite[] => (currentSearchResults = results);
 
 export function invert(allFavorites: Favorite[]): Favorite[] {
-  const ids = new Set(latestSearchResults.map(favorite => favorite.id));
+  const ids = new Set(currentSearchResults.map(favorite => favorite.id));
   const inverted = allFavorites.filter(favorite => !ids.has(favorite.id));
-  return (latestSearchResults = FavoritesResultFilter.apply(inverted));
+  return (currentSearchResults = FavoritesResultFilter.apply(inverted));
 }
 
 export function shuffle(): Favorite[] {
-  return (latestSearchResults = shuffleArray(latestSearchResults));
+  return (currentSearchResults = shuffleArray(currentSearchResults));
 }
 
 export function append(favorites: Favorite[]): void {
-  latestSearchResults = [...latestSearchResults, ...favorites];
+  currentSearchResults = [...currentSearchResults, ...favorites];
 }
 
 export function prepend(newFavorites: Favorite[]): Favorite[] {
-  latestSearchResults = [...newFavorites, ...latestSearchResults];
+  currentSearchResults = [...newFavorites, ...currentSearchResults];
   return newFavorites;
 }

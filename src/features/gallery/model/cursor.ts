@@ -1,4 +1,4 @@
-﻿import { Boundary } from "../types/gallery_types";
+import { Boundary } from "../types/gallery_types";
 import { NavigationKey } from "../../../types/input";
 import { clamp } from "../../../utils/number";
 import { getAllContentThumbs } from "../../../lib/dom/content_thumb";

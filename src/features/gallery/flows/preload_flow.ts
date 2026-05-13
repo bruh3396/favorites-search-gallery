@@ -14,7 +14,7 @@ export function preloadVisibleThumbs(): void {
   }
 }
 
-export function preloadAround(thumb: HTMLElement): void {
+export function preloadVisibleThumbsAround(thumb: HTMLElement): void {
   GalleryThumbObserver.setCenterThumb(thumb);
   preloadVisibleThumbs();
 }

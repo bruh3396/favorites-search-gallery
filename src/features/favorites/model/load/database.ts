@@ -1,4 +1,4 @@
-﻿import { Favorite, FavoritesDatabaseRecord } from "../../../../types/favorite";
+import { Favorite, FavoritesDatabaseRecord } from "../../../../types/favorite";
 import { CoalescingExecutor } from "../../../../lib/core/concurrency/coalescing_executor";
 import { Database } from "../../../../lib/core/storage/database";
 import { FAVORITES_PAGE_ID } from "../../../../lib/environment/favorites_metadata";

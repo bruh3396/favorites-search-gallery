@@ -3,23 +3,23 @@ import { GalleryState } from "../types/gallery_types";
 import { Preferences } from "../../../lib/preferences/preferences";
 
 let currentState = initialState();
-let recentlyExitedGallery = false;
+let recentlyClosed = false;
 
 export const getCurrentState = (): GalleryState => currentState;
 export const isInGallery = (): boolean => currentState === GalleryState.Open;
 export const isEnlargingOnHover = (): boolean => currentState === GalleryState.Hover;
-export const hasRecentlyExitedGallery = (): boolean => recentlyExitedGallery;
+export const hasRecentlyExitedGallery = (): boolean => recentlyClosed;
 
-export function enter(): void {
+export function open(): void {
   currentState = GalleryState.Open;
 }
 
-export function exit(): void {
+export function close(): void {
   currentState = GalleryState.Idle;
-  recentlyExitedGallery = true;
+  recentlyClosed = true;
   setTimeout(() => {
-    recentlyExitedGallery = false;
-  }, GalleryConfig.recentExitDuration);
+    recentlyClosed = false;
+  }, GalleryConfig.recentCloseDuration);
 }
 
 export function toggleEnlargeOnHover(): void {

@@ -1,4 +1,4 @@
-﻿import * as FavoritesResults from "./results";
+import * as FavoritesResults from "./results";
 import * as FavoritesSearchEngine from "./engine";
 import * as FavoritesSorter from "./sorter";
 import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
@@ -15,7 +15,7 @@ export function searchFavorites(allFavorites: Favorite[], searchQuery?: string):
 
 export const invertSearchResults = FavoritesResults.invert;
 export const shuffleSearchResults = FavoritesResults.shuffle;
-export const getLatestSearchResults = FavoritesResults.get;
+export const getCurrentSearchResults = FavoritesResults.get;
 export const deferIndexing = FavoritesSearchEngine.deferIndexing;
 export const appendSearchResults = (favorites: Favorite[]): void => FavoritesResults.append(search(favorites));
 export const prependSearchResults = (newFavorites: Favorite[]): Favorite[] => FavoritesResults.prepend(search(newFavorites));

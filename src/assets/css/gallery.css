@@ -17,6 +17,11 @@ video::-webkit-media-controls-enclosure {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  visibility: hidden;
+}
+
+#gallery-container[data-visible] {
+  visibility: visible;
 }
 
 #gallery-container * {

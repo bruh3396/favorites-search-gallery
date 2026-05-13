@@ -1,15 +1,24 @@
 import { GalleryMenuAction } from "../../../types/ui";
 
+export interface GalleryRenderer {
+  root: HTMLElement
+  render: (thumb: HTMLElement) => void
+  clear: () => void
+  softReset: () => void
+  reset: () => void
+  preload: (thumbs: HTMLElement[]) => Promise<void> | void
+}
+
 export enum GalleryState {
-  Idle = 0,
-  Hover = 1,
-  Open = 2
+  Idle,
+  Hover,
+  Open
 }
 
 export enum Boundary {
-  None = 0,
-  Start = 1,
-  End = 2
+  None,
+  Start,
+  End
 }
 
 export type VideoClip = {
@@ -18,16 +27,16 @@ export type VideoClip = {
 }
 
 export type VideoControllerCallbacks = {
-  onVideoEnded: () => void;
-  onVideoDoubleClicked: (event: MouseEvent) => void;
+  onVideoEnded: () => void
+  onVideoDoubleClicked: (event: MouseEvent) => void
 }
 
 export type GalleryMenuButton = {
-  id: string;
-  icon: string;
-  action: GalleryMenuAction;
-  enabled: boolean;
-  tooltip: string;
-  color: string;
-  href?: string;
+  id: string
+  icon: string
+  action: GalleryMenuAction
+  enabled: boolean
+  tooltip: string
+  color: string
+  href?: string
 };

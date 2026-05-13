@@ -1,4 +1,4 @@
-﻿import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
+import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
 import { ALL_RATINGS_VALUE } from "../../../../lib/environment/constants";
 import { Favorite } from "../../../../types/favorite";
 import { Preferences } from "../../../../lib/preferences/preferences";

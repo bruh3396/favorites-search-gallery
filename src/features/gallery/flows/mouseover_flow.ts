@@ -14,10 +14,10 @@ export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
 
 function handleHover(thumb: HTMLElement | null): void {
   if (thumb === null) {
-    GalleryView.hide2();
+    GalleryView.hidePreview();
     return;
   }
-  GalleryView.display(thumb);
+  GalleryView.displayPreview(thumb);
 
   if (ON_FAVORITES_PAGE) {
     preloadMediaAroundDebounced(thumb);
@@ -30,5 +30,5 @@ function preloadMediaAround(thumb: HTMLElement | null): void {
   if (thumb === null || !ON_FAVORITES_PAGE) {
     return;
   }
-  GalleryPreloadFlow.preloadAround(thumb);
+  GalleryPreloadFlow.preloadVisibleThumbsAround(thumb);
 }

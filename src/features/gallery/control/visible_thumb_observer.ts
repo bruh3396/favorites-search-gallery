@@ -1,4 +1,4 @@
-﻿import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
 import { Events } from "../../../lib/communication/events";
 import { GalleryConfig } from "../../../config/gallery_config";

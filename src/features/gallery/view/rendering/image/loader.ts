@@ -1,10 +1,10 @@
 import * as GalleryImageCache from "./cache";
+import * as GalleryImageFetcher from "./fetcher";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { ImageRequest } from "../../../types/image_request";
 import { LowResolutionImageRequest } from "../../../types/low_resolution_image_request";
 import { ON_FAVORITES_PAGE } from "../../../../../lib/environment/environment";
 import { doNothing } from "../../../../../lib/environment/constants";
-import { fetchBitmap } from "./fetcher";
 import { isImage } from "../../../../../lib/media/media_type_guards";
 export { get, completedRequests, clear } from "./cache";
 
@@ -53,20 +53,20 @@ function buildPreloadRequests(thumbs: HTMLElement[]): ImageRequest[] {
   return applyLimit(thumbs.filter(isImage).map(thumb => new ImageRequest(thumb)));
 }
 
-async function fetchRequest(request: ImageRequest): Promise<void> {
-  if (!request.cancelled && await fetchBitmap(request)) {
+async function fetchBitmap(request: ImageRequest): Promise<void> {
+  if (!request.cancelled && await GalleryImageFetcher.fetchBitmap(request)) {
     onBitmapLoaded(request);
   }
 }
 
 export function preload(thumbs: HTMLElement[]): void {
-  GalleryImageCache.sync(buildPreloadRequests(thumbs)).forEach(request => fetchRequest(request));
+  GalleryImageCache.sync(buildPreloadRequests(thumbs)).forEach(request => fetchBitmap(request));
 }
 
 export function loadImmediate(thumb: HTMLElement): void {
   const request = new ImageRequest(thumb);
 
   GalleryImageCache.register(request);
-  fetchRequest(new LowResolutionImageRequest(request));
-  fetchRequest(request);
+  fetchBitmap(new LowResolutionImageRequest(request));
+  fetchBitmap(request);
 }

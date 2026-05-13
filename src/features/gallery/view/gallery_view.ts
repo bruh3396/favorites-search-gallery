@@ -1,7 +1,7 @@
-﻿import * as GalleryDesktopMenu from "./shell/desktop_menu";
-import * as GalleryPresenter from "./presentation/gallery_presenter";
+import * as GalleryDesktopMenu from "./shell/desktop_menu";
+import * as GalleryRenderer from "./rendering/gallery_renderer";
 import * as GalleryUi from "./shell/ui";
-import { GalleryRoot, mountGallery, toggleGalleryVisibility } from "./shell/shell";
+import { GalleryRoot, mountGallery } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
 import { GalleryMenuAction } from "../../../types/ui";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
@@ -13,38 +13,34 @@ export interface GalleryViewCallbacks {
   onMenuAction: (action: GalleryMenuAction) => void;
 }
 
-export function present(thumb: HTMLElement): void {
-  display(thumb);
-  GalleryUi.updateUiInGallery(thumb);
+export function open(thumb: HTMLElement): void {
+  GalleryRoot.toggleAttribute("data-visible", true);
+  GalleryUi.open(thumb);
+}
+
+export function close(): void {
+  GalleryRoot.toggleAttribute("data-visible", false);
+  GalleryRenderer.clear();
+  GalleryUi.close();
+  GalleryRenderer.upscaleCachedThumbs();
 }
 
 export function display(thumb: HTMLElement): void {
-  toggleGalleryVisibility(true);
-  GalleryPresenter.show(thumb);
-  GalleryUi.show();
-  GalleryPresenter.toggleZoom(false);
+  GalleryRenderer.render(thumb);
+  GalleryUi.update(thumb);
 }
 
-export function hide2(): void {
-  toggleGalleryVisibility(false);
-  GalleryPresenter.hide();
-  GalleryUi.showScrollbar();
+export function displayPreview(thumb: HTMLElement): void {
+  GalleryRoot.toggleAttribute("data-visible", true);
+  GalleryRenderer.render(thumb);
+  GalleryUi.toggleScrollbar(false);
+  GalleryRenderer.toggleZoom(false);
 }
 
-export function show(thumb: HTMLElement): void {
-  GalleryPresenter.show(thumb);
-  GalleryUi.enterGallery(thumb);
-  toggleGalleryVisibility(true);
-}
-
-export function hide(): void {
-  GalleryPresenter.hide();
-  GalleryUi.exitGallery();
-  toggleGalleryVisibility(false);
-  toggleZoomCursor(false);
-  setTimeout(() => {
-    GalleryPresenter.upscaleCachedThumbs();
-  }, 250);
+export function hidePreview(): void {
+  GalleryRoot.toggleAttribute("data-visible", false);
+  GalleryRenderer.clear();
+  GalleryUi.toggleScrollbar(true);
 }
 
 export function setup(viewCallbacks: GalleryViewCallbacks): void {
@@ -57,15 +53,14 @@ export function setup(viewCallbacks: GalleryViewCallbacks): void {
   }
 }
 
-export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "./shell/desktop_menu";
-
 export function toggleZoomCursor(value: boolean): void {
   GalleryUi.toggleZoomCursor(value);
-  GalleryPresenter.toggleZoomCursor(value);
+  GalleryRenderer.toggleZoomCursor(value);
 }
 
-export * from "./presentation/gallery_presenter";
-export * from "./shell/ui";
-export const handleMouseMoveInGallery = (): void => GalleryUi.toggleCursor(true);
-export const presetAllCanvasDimensions = (): void => GalleryPresenter.presetCanvasDimensions(getAllContentThumbs());
+export * from "./rendering/gallery_renderer";
+export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "./shell/desktop_menu";
+export { showAddedFavoriteStatus, showRemovedFavoriteStatus, toggleBackgroundOpacity, updateBackgroundOpacity, toggleCursor} from "./shell/ui";
+export const showCursor = (): void => GalleryUi.toggleCursor(true);
+export const presetAllCanvasDimensions = (): void => GalleryRenderer.setCanvasDimensions(getAllContentThumbs());
 export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryRoot.appendChild(element);

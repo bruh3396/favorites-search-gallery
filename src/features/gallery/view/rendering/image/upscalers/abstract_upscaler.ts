@@ -10,6 +10,7 @@ import { fetchBitmap } from "../fetcher";
 import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
 import { isImage } from "../../../../../../lib/media/media_type_guards";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
+import { sleep } from "../../../../../../lib/core/scheduling/promise";
 import { transferredCanvasIds } from "../../../../types/offscreen_upscale_request";
 
 const batchUpscaleQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
@@ -33,24 +34,22 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   public async upscaleBatch(requests: ImageRequest[]): Promise<void> {
+    await sleep(250);
+
     for (const request of requests) {
       await batchUpscaleQueue.wait();
       this.upscale(request);
     }
   }
 
-  public handlePageChange(): void {
-    this.clear();
-    this.presetCanvasDimensions(getAllContentThumbs());
-  }
-
-  public clear(): void {
+  public reset(): void {
     this.upscaleQueue.reset();
     this.upscaledIds.clear();
-    this.reset();
+    this.clearCanvases();
+    this.setCanvasDimensions(getAllContentThumbs());
   }
 
-  public presetCanvasDimensions(thumbs: HTMLElement[]): void {
+  public setCanvasDimensions(thumbs: HTMLElement[]): void {
     if (!ON_FAVORITES_PAGE) {
       return;
     }
@@ -124,6 +123,6 @@ export abstract class GalleryAbstractUpscaler {
     return PERFORMANCE_PROFILE === PerformanceProfile.Normal;
   }
 
-  protected abstract reset(): void;
+  protected abstract clearCanvases(): void;
   protected abstract finishUpscale(request: ImageRequest): void;
 }

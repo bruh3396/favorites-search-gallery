@@ -14,7 +14,7 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
     this.worker.postMessage({ action: "init", config: GalleryUpscaleConfig });
   }
 
-  protected reset(): void {
+  protected clearCanvases(): void {
     this.worker.postMessage({ action: "clear" });
   }
 

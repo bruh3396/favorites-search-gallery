@@ -1,5 +1,5 @@
 import * as Eta from "./eta";
-import { NewFavorites } from "../../types/favorite_types";
+import { FavoritesFetchProgress, NewFavorites } from "../../types/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Root } from "../../../../lib/shell";
 import { Timeout } from "../../../../types/async";
@@ -27,19 +27,19 @@ export function setMatchCount(value: number): void {
   matchCountIndicator.textContent = `${value} ${value === 1 ? "Result" : "Results"}`;
 }
 
-export function updateStatusWhileFetching(searchResultsCount: number, favoritesFoundCount: number): void {
-  let statusText = `Fetching ${FETCHING_STATUS_PREFIX}${favoritesFoundCount}`;
+export function updateStatusWhileFetching(progress: FavoritesFetchProgress): void {
+  let statusText = `Fetching ${FETCHING_STATUS_PREFIX}${progress.allFavoritesCount}`;
 
   if (totalFavoritesCount !== null) {
     statusText = `${statusText} / ${totalFavoritesCount}`;
-    const eta = Eta.getEta(favoritesFoundCount, totalFavoritesCount);
+    const eta = Eta.getEta(progress.allFavoritesCount, totalFavoritesCount);
 
     if (eta !== null) {
       statusText = `${statusText}${eta}`;
     }
   }
   setStatus(statusText);
-  setMatchCount(searchResultsCount);
+  setMatchCount(progress.resultsCount);
 }
 
 export function notifyNewFavoritesFound(newFavorites: NewFavorites): void {

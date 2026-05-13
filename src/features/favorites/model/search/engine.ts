@@ -1,4 +1,4 @@
-﻿import { Favorite } from "../../../../types/favorite";
+import { Favorite } from "../../../../types/favorite";
 import { InvertedIndex } from "../../../../lib/core/data_structures/inverted_index";
 import { SearchEngine } from "../../../../lib/search/engine/search_engine";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
@@ -12,8 +12,8 @@ let state: "indexing" | "ready" = "ready";
 let deferred: Favorite[] = [];
 
 export function search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
-  const isEngineEligible = state === "ready" && !searchQuery.metadata.hasMetadataTag;
-  return isEngineEligible ? engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
+  const eligible = state === "ready" && !searchQuery.metadata.hasMetadataTag;
+  return eligible ? engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
 }
 
 export function add(doc: Favorite): void {

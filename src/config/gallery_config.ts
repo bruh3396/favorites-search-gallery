@@ -1,4 +1,4 @@
-﻿import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
 import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/constants";
 import { Resolution } from "../types/media";
 
@@ -35,7 +35,7 @@ export const GalleryConfig = {
   navigationThrottleTime: 250,
   galleryNavigationDelay: 100,
   idleInteractionDuration: 750,
-  recentExitDuration: 500,
+  recentCloseDuration: 500,
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2000 : 1000,
 
   maxImagesToPreloadAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,

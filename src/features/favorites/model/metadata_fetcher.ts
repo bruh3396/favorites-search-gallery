@@ -1,4 +1,4 @@
-﻿import * as ExtensionResolver from "../../../lib/media/media_extension_resolver";
+import * as ExtensionResolver from "../../../lib/media/media_extension_resolver";
 import * as PostApi from "../../../lib/remote/api/post_fetcher";
 import { Favorite } from "../../../types/favorite";
 import { FavoriteItem } from "../types/favorite_item";

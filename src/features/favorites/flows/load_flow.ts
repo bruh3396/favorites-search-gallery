@@ -1,79 +1,56 @@
-﻿import * as FavoritesModel from "../model/favorites_model";
-import * as FavoritesPresentationFlow from "./presentation_flow";
+import * as FavoritesModel from "../model/favorites_model";
+import * as FavoritesResultsFlow from "./results_flow";
 import * as FavoritesSearchFlow from "./search_flow";
 import * as FavoritesView from "../view/favorites_view";
-import * as PostApi from "../../../lib/remote/api/post_fetcher";
 import { Events } from "../../../lib/communication/events";
-import { NewFavorites } from "../types/favorite_types";
 import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
-  if (await loadDatabaseFavorites()) {
-    showLoadedFavorites();
-    showNewFavorites(await loadNewFavorites());
+  if (await hasDatabaseFavorites()) {
+    await loadDatabaseFavorites();
+    await fetchNewFavorites();
   } else {
     await fetchAllFavorites();
   }
-  finishLoading();
+  Events.favorites.favoritesLoaded.emit();
 }
 
-async function loadDatabaseFavorites(): Promise<boolean> {
+function hasDatabaseFavorites(): Promise<boolean> {
+  return FavoritesModel.hasDatabaseFavorites().then((hasDbFavorites) => {
+    Events.favorites.favoritesFoundInDatabase.emit(hasDbFavorites);
+    return hasDbFavorites;
+  });
+}
+
+async function loadDatabaseFavorites(): Promise<void> {
   FavoritesView.setStatus("Loading favorites");
   await FavoritesModel.loadDatabaseFavorites();
-  return FavoritesModel.hasFavorites();
-}
-
-function showLoadedFavorites(): void {
   FavoritesView.setTemporaryStatus("Favorites loaded");
   FavoritesSearchFlow.searchFavorites();
-  Events.favorites.favoritesFoundInDatabase.emit(true);
 }
 
-async function loadNewFavorites(): Promise<NewFavorites | null> {
+async function fetchNewFavorites(): Promise<void> {
   FavoritesView.setStatus("Finding new favorites");
   const results = await FavoritesModel.fetchNewFavorites();
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");
-    return null;
-  }
-  FavoritesView.addToTop(results);
-  FavoritesView.notifyNewFavoritesFound(results);
-  await FavoritesModel.storeNewFavorites(results.newFavorites);
-  return results;
-}
-
-function showNewFavorites(results: NewFavorites | null): void {
-  if (results === null) {
     return;
   }
+  await FavoritesModel.storeFavorites(results.newFavorites);
+  FavoritesView.addToTop(results);
+  FavoritesView.notifyNewFavoritesFound(results);
   FavoritesView.setTemporaryStatus(`Saved ${results.newFavorites.length} new favorites`);
-  FavoritesView.setFavorites(FavoritesModel.getLatestSearchResults());
+  FavoritesModel.repaginateCurrentResults();
   Events.favorites.newFavoritesFound.emit(results.newSearchResults);
   Events.favorites.searchResultsUpdated.emit();
 }
 
 async function fetchAllFavorites(): Promise<void> {
-  Events.favorites.favoritesFoundInDatabase.emit(false);
-  PostApi.setPostPageGate(Events.favorites.favoritesLoaded.wait());
   fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
-  FavoritesPresentationFlow.presentNothing();
-  await FavoritesModel.fetchAllFavorites(handleFetchedFavoritesPage);
+  FavoritesResultsFlow.clearResults();
+  await FavoritesModel.fetchAllFavorites(FavoritesResultsFlow.syncResults);
   FavoritesView.setStatus("Saving favorites");
-  await FavoritesModel.storeAllFavorites();
+  await FavoritesModel.storeFavorites(FavoritesModel.getAllFavorites());
   FavoritesView.setTemporaryStatus("All favorites saved");
-}
-
-function handleFetchedFavoritesPage(): void {
-  FavoritesView.updateStatusWhileFetching(
-    FavoritesModel.getLatestSearchResults().length,
-    FavoritesModel.getAllFavorites().length
-  );
-  Events.favorites.searchResultsUpdated.emit();
-  FavoritesPresentationFlow.handleNewSearchResults();
-}
-
-function finishLoading(): void {
-  FavoritesView.collectAspectRatios();
-  Events.favorites.favoritesLoaded.emit();
 }

@@ -1,24 +1,25 @@
+import * as GalleryDisplayFlow from "./display_flow";
 import * as GalleryInteractionTracker from "../control/interaction_tracker";
 import * as GalleryModel from "../model/gallery_model";
-import * as GalleryPresentationFlow from "./presentation_flow";
 import * as GalleryView from "../view/gallery_view";
 import { DomEvents } from "../../../lib/communication/dom_events";
 import { Events } from "../../../lib/communication/events";
 
 export function open(thumb: HTMLElement): void {
-  GalleryModel.enter(thumb);
-  GalleryView.show(thumb);
+  GalleryModel.open(thumb);
+  GalleryView.open(thumb);
+  GalleryDisplayFlow.display(thumb);
+
   GalleryInteractionTracker.enableInteractionTracking();
-  GalleryPresentationFlow.present(thumb);
   Events.gallery.showOnHoverOverridden.emit(false);
   Events.gallery.openedGallery.emit(thumb);
 }
 
 export function close(): void {
-  GalleryModel.exit();
-  GalleryView.hide();
+  GalleryModel.close();
+  GalleryView.close();
+
   GalleryInteractionTracker.disableInteractionTracking();
-  GalleryView.toggleZoom(false);
   DomEvents.document.wheel.toggle(true);
   Events.gallery.closedGallery.emit();
 }

@@ -1,15 +1,16 @@
-﻿import * as FavoritesControl from "./control/favorites_control";
+import * as FavoritesControl from "./control/favorites_control";
 import * as FavoritesDownloadMenu from "./features/downloader/menu";
 import * as FavoritesInterFeatureFlow from "./flows/inter_feature_flow";
 import * as FavoritesLoadFlow from "./flows/load_flow";
 import * as FavoritesModel from "./model/favorites_model";
 import * as FavoritesOptionsFlow from "./flows/option_flow";
-import * as FavoritesPaginationFlow from "./flows/pagination_flow";
-import * as FavoritesPresentationFlow from "./flows/presentation_flow";
+import * as FavoritesPaginationFlow from "./flows/paginated_results_flow";
 import * as FavoritesResetFlow from "./flows/reset_flow";
+import * as FavoritesResultsFlow from "./flows/results_flow";
 import * as FavoritesSearchFlow from "./flows/search_flow";
 import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
+import * as PostApi from "../../lib/remote/api/post_fetcher";
 import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
 import { FeatureBridge } from "../../lib/communication/feature_bridge";
@@ -19,6 +20,7 @@ export async function setupFavorites(): Promise<void> {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
+  PostApi.setPostPageGate(Events.favorites.favoritesLoaded.wait());
   FavoritesModel.setup(FavoritesTagModifier.getAdditionalTags);
   FavoritesView.setup({
     onPageSelected: (pageNumber) => Events.favorites.pageSelected.emit(pageNumber),
@@ -32,13 +34,13 @@ export async function setupFavorites(): Promise<void> {
 
 async function setupSubFeatures(): Promise<void> {
   FavoritesDownloadMenu.setup({
-    getSearchResults: () => FavoritesModel.getLatestSearchResults()
+    getSearchResults: () => FavoritesModel.getCurrentSearchResults()
   });
   Events.favorites.downloadButtonClicked.on(FavoritesDownloadMenu.openDownloadMenu);
   Events.favorites.favoritesLoaded.on(FavoritesDownloadMenu.enableDownloadMenu);
 
   await FavoritesTagModifier.setupFavoritesTagModifier({
-    getSearchResults: () => FavoritesModel.getLatestSearchResults(),
+    getSearchResults: () => FavoritesModel.getCurrentSearchResults(),
     getAllFavorites: () => FavoritesModel.getAllFavorites(),
     deIndex: (favorite) => FavoritesModel.removeFromIndex([favorite]),
     reIndex: (favorite) => FavoritesModel.addToIndex([favorite])
@@ -49,11 +51,13 @@ async function setupSubFeatures(): Promise<void> {
 }
 
 function addEventListeners(): void {
+
   Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
   Events.favorites.shuffleButtonClicked.on(FavoritesSearchFlow.shuffleSearchResults);
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
-  Events.favorites.findFavoriteStarted.on(FavoritesPresentationFlow.reveal);
-  Events.favorites.findFavoriteInAllStarted.on(FavoritesSearchFlow.revealFavoriteInAll);
+  Events.favorites.findFavorite.on(FavoritesResultsFlow.reveal);
+  Events.favorites.findFavoriteInAll.on(FavoritesSearchFlow.revealFavoriteInAll);
+  Events.favorites.favoritesLoaded.on(FavoritesView.collectAspectRatios, { once: true });
 
   Events.favorites.pageSelected.on(FavoritesPaginationFlow.goToPage);
   Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.goToRelativePage);
@@ -74,8 +78,9 @@ function addEventListeners(): void {
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   Events.gallery.favoriteToggled.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 
-  FeatureBridge.navigateToAdjacentFavoritesPage.register(FavoritesPresentationFlow.presentWhileNavigatingGallery);
-  FeatureBridge.favoritesSearchResults.register(FavoritesModel.getLatestSearchResults);
+  FeatureBridge.loadMoreFavorites.register(FavoritesResultsFlow.loadMoreResults);
+  FeatureBridge.favoritesCanExtend.register(FavoritesResultsFlow.hasMoreResults);
+  FeatureBridge.favoritesSearchResults.register(FavoritesModel.getCurrentSearchResults);
   FeatureBridge.getFavorite.register(FavoritesModel.getFavorite);
   FeatureBridge.allFavorites.register(FavoritesModel.getAllFavorites);
 }

@@ -298,11 +298,11 @@ function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {
   if (videoPlayerHasSource(video, thumb)) {
     return;
   }
-  createVideoClip(video, thumb);
+  applyVideoClip(video, thumb);
   video.src = getVideoSource(thumb);
 }
 
-function createVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {
+function applyVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {
   const videoClip = videoClips.get(thumb.id);
 
   if (videoClip === undefined) {

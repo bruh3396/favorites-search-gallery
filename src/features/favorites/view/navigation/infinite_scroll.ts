@@ -1,15 +1,15 @@
 import { Favorite } from "../../../../types/favorite";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 
-export function getMoreResults(favorites: Favorite[]): HTMLElement[] {
+export function getNextSlice(favorites: Favorite[]): HTMLElement[] {
   return collectUnrendered(favorites, FavoritesConfig.infiniteScrollBatchSize, f => f.root);
 }
 
-export function hasMoreResults(favorites: Favorite[]): boolean {
-  return getMoreResults(favorites).length > 0;
+export function hasMoreSlices(favorites: Favorite[]): boolean {
+  return getNextSlice(favorites).length > 0;
 }
 
-export function getFirstResults(favorites: Favorite[]): Favorite[] {
+export function getInitialSlice(favorites: Favorite[]): Favorite[] {
   return favorites.slice(0, FavoritesConfig.infiniteScrollBatchSize);
 }
 

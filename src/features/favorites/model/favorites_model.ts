@@ -1,5 +1,6 @@
-﻿import * as FavoritesLoader from "./load/loader";
+import * as FavoritesLoader from "./load/loader";
 import * as FavoritesMetadataFetcher from "./metadata_fetcher";
+import * as FavoritesPaginator from "./paginator";
 import * as FavoritesSearchCoordinator from "./search/coordinator";
 import { Favorite } from "../../../types/favorite";
 import { NewFavorites } from "../types/favorite_types";
@@ -44,8 +45,10 @@ export function fetchNewFavorites(): Promise<NewFavorites> {
 
 export const searchFavorites = (searchQuery?: string): Favorite[] => FavoritesSearchCoordinator.searchFavorites(FavoritesLoader.getActiveFavorites(), searchQuery);
 export const invertSearchResults = (): Favorite[] => FavoritesSearchCoordinator.invertSearchResults(FavoritesLoader.getActiveFavorites());
-export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getLatestSearchResults());
+export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getCurrentSearchResults());
+export const repaginateCurrentResults = (): void => FavoritesPaginator.paginate(FavoritesSearchCoordinator.getCurrentSearchResults());
 
 export * from "./load/loader";
 export * from "./metadata_fetcher";
 export * from "./search/coordinator";
+export * from "./paginator";

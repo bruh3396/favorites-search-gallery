@@ -6,9 +6,9 @@ import { dispatchByState } from "./state_dispatch";
 export function handlePageChange(): void {
   indexThumbs();
   dispatchByState({
-    idle: GalleryView.handlePageChange,
-    hover: GalleryView.handlePageChange,
-    open: GalleryView.handlePageChangeInGallery
+    idle: GalleryView.reset,
+    hover: GalleryView.reset,
+    open: GalleryView.softReset
   });
 }
 
@@ -21,5 +21,5 @@ export function indexThumbs(): void {
 export function handleNewContent(elements: HTMLElement[]): void {
   GalleryThumbObserver.observe(elements);
   GalleryModel.refreshThumbs();
-  GalleryView.presetCanvasDimensions(elements);
+  GalleryView.setCanvasDimensions(elements);
 }

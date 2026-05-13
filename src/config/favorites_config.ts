@@ -14,6 +14,6 @@ export const FavoritesConfig = {
 
   buildIndexAsync: true,
   preloadThumbnails: true,
-  favoriteFinderEnabled: false,
+  favoriteFinderEnabled: true,
   bottomNavigationButtonsEnabled: false
 };
