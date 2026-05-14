@@ -40,7 +40,7 @@ export const Events = {
     performanceProfileChanged: new Emitter<PerformanceProfile>(),
 
     showOnHoverToggled: new Emitter<boolean>(),
-    tooltipsToggled: new Emitter<boolean>(),
+    tooltipToggled: new Emitter<boolean>(),
     autoplayToggled: new Emitter<boolean>(),
     removeButtonsToggled: new Emitter<boolean>(),
     addButtonsToggled: new Emitter<boolean>(),

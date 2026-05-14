@@ -62,5 +62,5 @@ export * from "./rendering/gallery_renderer";
 export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "./shell/desktop_menu";
 export { showAddedFavoriteStatus, showRemovedFavoriteStatus, toggleBackgroundOpacity, updateBackgroundOpacity, toggleCursor} from "./shell/ui";
 export const showCursor = (): void => GalleryUi.toggleCursor(true);
-export const presetAllCanvasDimensions = (): void => GalleryRenderer.setCanvasDimensions(getAllContentThumbs());
+export const setThumbCanvasDimensions = (): void => GalleryRenderer.setThumbCanvasDimensions(getAllContentThumbs());
 export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryRoot.appendChild(element);

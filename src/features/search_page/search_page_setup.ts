@@ -22,6 +22,7 @@ export function setupSearchPage(): void {
 }
 
 function addEventListeners(): void {
+  FeatureBridge.currentSearchQuery.register(SearchPageView.currentSearch);
   FeatureBridge.navigateToAdjacentSearchPage.register(SearchPageNavigationFlow.navigateSearchPages);
   FeatureBridge.searchPageThumbs.register(SearchPageModel.getAllSearchPageThumbs);
   Events.searchPage.layoutChanged.on(ContentTiler.changeLayout);

@@ -234,9 +234,9 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Tooltips",
     title: "Show tags when hovering over a thumbnail and see which ones were matched by a search",
     enabled: TOOLTIP_ENABLED,
-    preference: Preferences.tooltipsVisible,
+    preference: Preferences.tooltipEnabled,
     hotkey: "T",
-    event: Events.favorites.tooltipsToggled
+    event: Events.favorites.tooltipToggled
   },
   {
     id: "show-captions",

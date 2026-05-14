@@ -50,7 +50,8 @@ export const Preferences = {
   sortAscending: new Preference("sortAscending", false),
   sortingMethod: new Preference<SortingMethod>("sortingMethod", "default"),
   tagAliasing: new Preference("tagAliasing", false),
-  tooltipsVisible: new Preference("showTooltip", false),
+  tooltipEnabled: new Preference("showTooltip", false),
+  searchPageTooltipEnabled: new Preference("searchPageShowTooltip", false),
   uiVisible: new Preference("showUi", true),
   videoMuted: new Preference("videoMuted", false),
   videoVolume: new Preference("videoVolume", 1)

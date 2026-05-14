@@ -1,8 +1,12 @@
 import { FeatureBridge } from "../../../lib/communication/feature_bridge";
+import { GalleryConfig } from "../../../config/gallery_config";
 import { MediaType } from "../../../types/media";
+import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
 import { getPreviewUrl } from "../../../lib/ui/dom";
 import { getTagSetFromItem } from "../../../lib/dom/tags";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
+
+const bitmapCloseQueue = new ThrottledQueue(GalleryConfig.bitmapCloseDelay);
 
 export function getFavoritePixelCount(id: string): number {
   const favorite = FeatureBridge.getFavorite.call(id);
@@ -67,7 +71,9 @@ export class ImageRequest {
     this.abortController.abort();
   }
 
-  public close(): void {
+  public async close(): Promise<void> {
+    await bitmapCloseQueue.wait();
+
     if (this.bitmap instanceof ImageBitmap) {
       this.bitmap.close();
     }

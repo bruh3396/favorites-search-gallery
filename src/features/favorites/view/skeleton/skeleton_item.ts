@@ -20,7 +20,8 @@ export class SkeletonItem {
       this.setCustomStyle(style);
     }
     this.setAnimation();
-    this.setClassName();
+    this.element.className = "skeleton-item post";
+    this.element.toggleAttribute(`data-${ThumbnailConfig.skeletonAnimation}`, true);
   }
 
   private setDiscreteDimensions(): void {
@@ -45,9 +46,5 @@ export class SkeletonItem {
     for (const [key, value] of Object.entries(style)) {
       this.element.style.setProperty(key, value);
     }
-  }
-
-  private setClassName(): void {
-    this.element.className = `skeleton-item post skeleton-item--${ThumbnailConfig.skeletonAnimationClasses}`;
   }
 }

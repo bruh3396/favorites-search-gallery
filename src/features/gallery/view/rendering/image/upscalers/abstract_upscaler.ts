@@ -53,6 +53,7 @@ export abstract class GalleryAbstractUpscaler {
     if (!ON_FAVORITES_PAGE) {
       return;
     }
+    thumbs = thumbs.filter(t => !t.classList.contains("skeleton-item"));
 
     for (const item of this.getCanvasDimensions(thumbs)) {
       if (transferredCanvasIds.has(item.id)) {

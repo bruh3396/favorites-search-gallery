@@ -1,8 +1,9 @@
 import * as GalleryAutoplay from "./features/autoplay/autoplay";
 import * as GalleryClickFlow from "./flows/click_flow";
 import * as GalleryContentFlow from "./flows/content_flow";
-import * as GalleryControl from "./control/gallery_control";
+import * as GalleryEdgeTapControls from "./control/edge_tap_controls";
 import * as GalleryInteractionFlow from "./flows/interaction_flow";
+import * as GalleryInteractionTracker from "./control/interaction_tracker";
 import * as GalleryKeyFlow from "./flows/key_flow";
 import * as GalleryMenuFlow from "./flows/menu_flow";
 import * as GalleryModel from "./model/gallery_model";
@@ -46,12 +47,14 @@ function finishGallerySetup(): void {
     onVideoEnded: GalleryAutoplay.onVideoEnded,
     onVideoDoubleClicked: GalleryOpenCloseFlow.close
   });
-  GalleryControl.setup();
+  GalleryEdgeTapControls.setup();
+  GalleryInteractionTracker.setup();
+  GalleryVisibleThumbObserver.setup();
   setupSubFeatures();
   addEventListeners();
   GalleryVisibleThumbObserver.observeAllThumbsOnPage();
   GalleryModel.refreshThumbs();
-  GalleryView.presetAllCanvasDimensions();
+  GalleryView.setThumbCanvasDimensions();
 }
 
 function setupSubFeatures(): void {
@@ -61,8 +64,8 @@ function setupSubFeatures(): void {
     onPause: () => GalleryView.toggleVideoLooping(true),
     onResume: () => GalleryView.toggleVideoLooping(false),
     onComplete: (direction?: NavigationKey) => dispatchByState({
-        open: GalleryNavigationFlow.navigate
-      }, direction),
+      open: GalleryNavigationFlow.navigate
+    }, direction),
     onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo()
   });
   GalleryView.toggleVideoLooping(GalleryAutoplay.isPaused() || !GalleryAutoplay.isActive());

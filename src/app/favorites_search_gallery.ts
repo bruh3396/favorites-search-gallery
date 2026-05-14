@@ -6,7 +6,7 @@ import { setupGallery } from "../features/gallery/gallery_setup";
 import { setupLibrary } from "../lib/lib_setup";
 import { setupSavedSearches } from "../features/saved_searches/saved_searches";
 import { setupSearchPage } from "../features/search_page/search_page_setup";
-import { setupTooltip } from "../features/tooltip/tooltip";
+import { setupTooltip } from "../features/tooltip/tooltip_setup";
 
 function runFavoritesSearchGallery(): void {
   if (FAVORITES_SEARCH_GALLERY_DISABLED) {

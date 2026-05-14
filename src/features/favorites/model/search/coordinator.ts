@@ -13,14 +13,14 @@ export function searchFavorites(allFavorites: Favorite[], searchQuery?: string):
   return FavoritesResults.set(FavoritesSorter.sortFavorites(search(allFavorites)));
 }
 
-export const invertSearchResults = FavoritesResults.invert;
-export const shuffleSearchResults = FavoritesResults.shuffle;
-export const getCurrentSearchResults = FavoritesResults.get;
-export const deferIndexing = FavoritesSearchEngine.deferIndexing;
 export const appendSearchResults = (favorites: Favorite[]): void => FavoritesResults.append(search(favorites));
 export const prependSearchResults = (newFavorites: Favorite[]): Favorite[] => FavoritesResults.prepend(search(newFavorites));
 export const addToIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.add(f));
 export const removeFromIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.remove(f));
+export const getCurrentSearchQuery = (): string => currentSearchQuery;
+
+export { invert as invertSearchResults, shuffle as shuffleSearchResults, get as getCurrentSearchResults } from "./results";
+export { deferIndexing } from "./engine";
 
 function buildQuery(): SearchQuery<Favorite> {
   const shouldUseBlacklist = !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.excludeBlacklist.value;

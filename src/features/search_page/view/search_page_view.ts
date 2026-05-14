@@ -23,3 +23,7 @@ export function insertNewSearchResults(thumbs: HTMLElement[]): void {
 export function toggleInfiniteScroll(value: boolean): void {
   SearchPageCreator.toggleInfiniteScroll(value);
 }
+
+export function currentSearch(): string {
+  return (document.querySelector("input[name=\"tags\"]") as HTMLInputElement)?.value ?? "";
+}

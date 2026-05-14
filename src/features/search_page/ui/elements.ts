@@ -1,7 +1,7 @@
 import { CheckboxElement, SelectElement } from "../../../lib/ui/element_types";
 import { Layout, PerformanceProfile } from "../../../types/ui";
 import { Events } from "../../../lib/communication/events";
-import { GALLERY_ENABLED } from "../../../lib/environment/derived_environment";
+import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../lib/environment/derived_environment";
 import { GeneralConfig } from "../../../config/general_config";
 import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
@@ -46,6 +46,17 @@ const checkboxes: Partial<CheckboxElement>[] = [
     preference: Preferences.autoplayActive,
     hotkey: "",
     event: Events.favorites.autoplayToggled
+  },
+  {
+    id: "enable-tooltip",
+    parentId: "search-page-tooltip",
+    position: "beforeend",
+    textContent: "Tooltip",
+    title: "Enable tooltip",
+    enabled: TOOLTIP_ENABLED,
+    preference: Preferences.searchPageTooltipEnabled,
+    hotkey: "",
+    event: Events.favorites.tooltipToggled
   },
   {
     id: "show-add-favorite-buttons",

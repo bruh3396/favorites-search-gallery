@@ -1,37 +1,11 @@
-.tooltip {
-  max-width: 750px;
-  border: 1px solid black;
-  padding: 0.25em;
+#tooltip {
   position: absolute;
-  box-sizing: border-box;
-  z-index: 25;
+  z-index: 20;
+  padding: 6px 8px;
+  max-width: 700px;
   pointer-events: none;
-  visibility: hidden;
+  overflow-wrap: break-word;
   opacity: 0;
-  font-size: 1.05em;
-}
-
-.tooltip[data-visible="true"] {
-  visibility: visible;
-  opacity: 1;
-  transition: opacity 0.1s linear;
-}
-
-.post::after {
-  transition: visibility 0s, opacity 0.25s linear;
-  content: attr(data-tooltip);
-  position: absolute;
-  font-size: 12px;
-  z-index: 1000;
-  background: gray;
-  padding: 5px;
-  color: white;
-  left: 0;
-  top: 100%;
-  min-width: 500px;
-  pointer-events: none;
-}
-
-.post--tooltip::after {
-  opacity: 1;
+  transition: opacity 150ms ease;
+  border: 1px solid black;
 }

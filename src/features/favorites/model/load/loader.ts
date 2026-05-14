@@ -8,7 +8,10 @@ let allFavorites: Favorite[] = [];
 let activeFavorites: Favorite[] | null = null;
 const favoritesById: Map<string, Favorite> = new Map<string, Favorite>();
 
-export function loadDatabaseFavorites(getAdditionalTags: (id: string) => string | undefined, onFavoritesLoaded: (favorites: FavoriteItem[]) => void): Promise<void> {
+export function loadDatabaseFavorites(
+  getAdditionalTags: (id: string) => string | undefined,
+  onFavoritesLoaded: (favorites: FavoriteItem[]) => void
+): Promise<void> {
   return FavoritesDatabase.loadFavorites().then((records) => {
     const favorites = records.map(r => new FavoriteItem(r, getAdditionalTags(r.id)));
 

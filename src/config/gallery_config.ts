@@ -42,6 +42,7 @@ export const GalleryConfig = {
   favoritesMenuHeight: 200,
   visibleThumbsDownwardScrollPixelGenerosity: 50,
   visibleThumbsDownwardScrollPercentageGenerosity: 100,
+  bitmapCloseDelay: 50,
   fetchImageBitmapsInWorker: false,
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;

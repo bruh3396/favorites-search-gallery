@@ -83,4 +83,5 @@ function addEventListeners(): void {
   FeatureBridge.favoritesSearchResults.register(FavoritesModel.getCurrentSearchResults);
   FeatureBridge.getFavorite.register(FavoritesModel.getFavorite);
   FeatureBridge.allFavorites.register(FavoritesModel.getAllFavorites);
+  FeatureBridge.currentSearchQuery.register(FavoritesModel.getCurrentSearchQuery);
 }

@@ -3,6 +3,6 @@ export const ThumbnailConfig = {
   columnCountBounds: { min: 2, max: 25 },
   thumbnailSpacing: 6,
   rightContentMargin: 15,
-  skeletonAnimationClasses: "pulse",
+  skeletonAnimation: "pulse",
   randomSkeletonAnimationTiming: true
 };

@@ -50,12 +50,20 @@ export function pointTo(thumb: HTMLElement): void {
 export function refreshThumbs(): void {
   thumbIndex.clear();
   thumbs = getAllContentThumbs();
-  thumbs.forEach((t, i) => {
-    if (thumbIndex.has(t.id)) {
-      throw new Error(`Duplicate thumb id: ${t.id}`);
+
+  for (let i = 0; i < thumbs.length; i += 1) {
+    const thumb = thumbs[i];
+
+    if (thumb.id === "") {
+      continue;
     }
-    thumbIndex.set(t.id, i);
-  });
+
+    if (thumbIndex.has(thumb.id)) {
+      console.log(thumb);
+      throw new Error(`Duplicate thumb id: ${thumb.id}`);
+    }
+    thumbIndex.set(thumb.id, i);
+  }
 
   if (thumbs.length === 0 || currentIndex >= thumbs.length) {
     currentIndex = 0;
