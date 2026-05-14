@@ -1,4 +1,4 @@
-import * as FavoritesLoader from "./load/loader";
+﻿import * as FavoritesLoader from "./load/loader";
 import * as FavoritesMetadataFetcher from "./metadata_fetcher";
 import * as FavoritesPaginator from "./paginator";
 import * as FavoritesSearchCoordinator from "./search/coordinator";
@@ -52,3 +52,4 @@ export * from "./load/loader";
 export * from "./metadata_fetcher";
 export * from "./search/coordinator";
 export * from "./paginator";
+export * from "./infinite_scroller";

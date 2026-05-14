@@ -41,6 +41,7 @@ export const getLayout = (): Layout => currentLayout;
 export const tile = (items: HTMLElement[]): void => currentTiler.tile(items);
 export const addToBottom = (items: HTMLElement[]): void => currentTiler.addItemsToBottom(items);
 export const addToTop = (items: HTMLElement[]): void => currentTiler.addItemsToTop(items);
+export const getBottomEdgeElements = (): HTMLElement[] => currentTiler.getBottomEdgeElements();
 
 function addEventListeners(): void {
   DomEvents.document.wheel.on(e => changeItemSizeOnShiftScroll(e, currentLayout));

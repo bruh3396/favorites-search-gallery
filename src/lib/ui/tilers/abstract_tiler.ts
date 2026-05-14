@@ -38,6 +38,10 @@ export abstract class AbstractTiler {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public setRowSize(rowSize: number): void { }
 
+  public getBottomEdgeElements(): HTMLElement[] {
+    return [];
+  }
+
   public addItemsToTop(items: HTMLElement[]): void {
     for (const item of items.reverse()) {
       this.container.insertAdjacentElement("afterbegin", item);

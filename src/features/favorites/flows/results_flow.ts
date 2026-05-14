@@ -1,8 +1,8 @@
-import * as FavoritesModel from "../model/favorites_model";
+﻿import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
 import { Events } from "../../../lib/communication/events";
 import { Favorite } from "../../../types/favorite";
-import { FavoritesInfiniteView } from "./infinite_scroll_results_flow";
+import { FavoritesInfiniteScrollView } from "./infinite_scroll_results_flow";
 import { FavoritesPaginatedView } from "./paginated_results_flow";
 import { FavoritesResultsView } from "../types/favorite_types";
 import { NavigationKey } from "../../../types/input";
@@ -23,4 +23,4 @@ export function syncResults(): void {
   activeView().sync();
 }
 
-const activeView = (): FavoritesResultsView => (Preferences.infiniteScroll.value ? FavoritesInfiniteView : FavoritesPaginatedView);
+const activeView = (): FavoritesResultsView => (Preferences.infiniteScroll.value ? FavoritesInfiniteScrollView : FavoritesPaginatedView);

@@ -1,4 +1,4 @@
-import { Favorite } from "../../../types/favorite";
+﻿import { Favorite } from "../../../types/favorite";
 import { NavigationKey } from "../../../types/input";
 
 export interface NewFavorites {
@@ -33,6 +33,11 @@ export interface FavoritesResultsView {
   sync: () => void
   hasMore: () => boolean
   loadMore: (direction: NavigationKey) => void
+}
+
+export interface ScrollExpansionResult {
+  slice: Favorite[]
+  trimmed: Favorite[]
 }
 
 export interface FavoritesPageContext {

@@ -38,7 +38,7 @@ async function fetchNewFavorites(): Promise<void> {
     return;
   }
   await FavoritesModel.storeFavorites(results.newFavorites);
-  FavoritesView.addToTop(results);
+  FavoritesView.addToTop(results.newSearchResults);
   FavoritesView.notifyNewFavoritesFound(results);
   FavoritesView.setTemporaryStatus(`Saved ${results.newFavorites.length} new favorites`);
   FavoritesModel.repaginateCurrentResults();

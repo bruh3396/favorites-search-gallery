@@ -28,7 +28,8 @@ html.transition-disabled::before {
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-anchor: auto;
 }
 
 body:fullscreen,

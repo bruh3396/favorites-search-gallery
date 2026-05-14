@@ -36,11 +36,9 @@ function goToRelativePage(relativePage: PageRelation): void {
 }
 
 function renderCurrentPage(): void {
-  FavoritesView.renderPage({
-    results: FavoritesModel.currentPageFavorites(),
-    pagination: FavoritesModel.getPaginationParameters(),
-    adjacent: FavoritesModel.adjacentPageFavorites()
-  });
+  FavoritesView.showSearchResults(FavoritesModel.currentPageFavorites());
+  FavoritesView.buildNavigationMenu(FavoritesModel.getPaginationParameters());
+  FavoritesView.preloadThumbs(FavoritesModel.adjacentPageFavorites());
   Events.favorites.pageChanged.emit();
 }
 
@@ -69,7 +67,7 @@ function appendMissingThumbsOnCurrentPage(): void {
   }
   const thumbs = favorites.map(favorite => favorite.root);
 
-  FavoritesView.addToBottom(thumbs);
+  FavoritesView.addToBottom(favorites);
   Events.favorites.favoritesAddedToCurrentPage.emit(thumbs);
 }
 

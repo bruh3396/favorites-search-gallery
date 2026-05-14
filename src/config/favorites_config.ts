@@ -7,8 +7,10 @@ export const FavoritesConfig = {
   maxPageNumberButtons: 5,
 
   infiniteScrollBatchSize: 25,
+  infiniteScrollMaxVisible: 200,
   infiniteScrollPreloadCount: 100,
-  infiniteScrollMargin: "75%",
+  infiniteScrollMargin: "150%",
+  infiniteScrollWindowed: false,
 
   reloadFetchDelay: 100,
 
