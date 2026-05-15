@@ -7,6 +7,7 @@ import { GalleryRoot } from "./shell";
 import { GeneralConfig } from "../../../../config/general_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../lib/preferences/preferences";
+import { EnhancedMouseEvent } from "../../../../lib/dom/input_types";
 import { Timeout } from "../../../../types/async";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { toggleFullscreen } from "../../../../utils/browser/window";
@@ -48,8 +49,8 @@ export function onMouseMove(): void {
   reveal();
 }
 
-export function onMouseOver(event: MouseEvent): void {
-  togglePersistence(event);
+export function onMouseOver(event: EnhancedMouseEvent): void {
+  togglePersistence(event.originalEvent);
 }
 
 function loadPreferences(): void {

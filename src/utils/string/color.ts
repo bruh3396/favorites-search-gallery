@@ -1,8 +1,17 @@
-import { randomElement } from "../collection/array";
+export function brightWarmCoolHslColor(index: number, total: number): string {
+  return warmCoolHslColor(index, total, 90, 85);
+}
 
-const HEX_ALPHABET = "0123456789ABCDEF";
+export function darkWarmCoolHslColor(index: number, total: number): string {
+  return warmCoolHslColor(index, total, 75, 35);
+}
 
-export function randomPurpleColor(): string {
-  const c = (): string => randomElement(HEX_ALPHABET);
-  return `#${c()}${c()}00${c()}${c()}`;
+export function warmCoolHslColor(index: number, total: number, saturation = 90, lightness = 70): string {
+  const half = Math.max(total, 1) / 2;
+  const fractionOfHalf = index / half;
+  const inFirstHalf = index < half;
+  const warmHue = Math.round(fractionOfHalf * 80);
+  const coolHue = Math.round(200 + ((fractionOfHalf - 1) * 140));
+  const hue = inFirstHalf ? warmHue : coolHue;
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }

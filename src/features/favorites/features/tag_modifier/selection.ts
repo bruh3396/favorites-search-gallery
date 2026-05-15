@@ -40,7 +40,7 @@ export function select(favorite: Favorite, value?: boolean): void {
   toggleOutline(favorite, value);
 }
 
-export function highlightSelectedThumbsOnPageChange(): void {
+export function highlightSelectedThumbs(): void {
   if (!atLeastOneFavoriteIsSelected) {
     return;
   }

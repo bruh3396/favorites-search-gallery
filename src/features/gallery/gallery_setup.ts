@@ -28,7 +28,16 @@ export async function setupGallery(): Promise<void> {
   if (GALLERY_DISABLED) {
     return;
   }
+  await waitUntilPageIsReady();
+  setupView();
+  setupControl();
+  setupSubFeatures();
+  subscribeToEvents();
+  registerBridgeHandlers();
+  primeInitialState();
+}
 
+async function waitUntilPageIsReady(): Promise<void> {
   if (ON_FAVORITES_PAGE) {
     await Events.favorites.favoritesFoundInDatabase.wait();
   }
@@ -36,84 +45,103 @@ export async function setupGallery(): Promise<void> {
   if (ON_SEARCH_PAGE) {
     await Events.searchPage.searchPageReady.wait();
   }
-  finishGallerySetup();
 }
 
-function finishGallerySetup(): void {
-  GalleryView.setup({
-    onMenuAction: (action) => Events.gallery.galleryMenuButtonClicked.emit(action)
-  });
-  GalleryView.setupVideoRenderer({
-    onVideoEnded: GalleryAutoplay.onVideoEnded,
-    onVideoDoubleClicked: GalleryOpenCloseFlow.close
-  });
+function setupView(): void {
+  GalleryView.setup(
+    Events.gallery.galleryMenuButtonClicked.emit,
+    GalleryAutoplay.onVideoEnded,
+    GalleryOpenCloseFlow.close
+  );
+}
+
+function setupControl(): void {
   GalleryEdgeTapControls.setup();
   GalleryInteractionTracker.setup();
   GalleryVisibleThumbObserver.setup();
-  setupSubFeatures();
-  addEventListeners();
-  GalleryVisibleThumbObserver.observeAllThumbsOnPage();
-  GalleryModel.refreshThumbs();
-  GalleryView.setThumbCanvasDimensions();
 }
 
 function setupSubFeatures(): void {
+  setupAutoplay();
+}
+
+function setupAutoplay(): void {
   GalleryAutoplay.setup({
-    onEnable: () => GalleryView.toggleVideoLooping(false),
-    onDisable: () => GalleryView.toggleVideoLooping(true),
-    onPause: () => GalleryView.toggleVideoLooping(true),
-    onResume: () => GalleryView.toggleVideoLooping(false),
+    setVideoLooping: GalleryView.toggleVideoLooping,
     onComplete: (direction?: NavigationKey) => dispatchByState({
       open: GalleryNavigationFlow.navigate
     }, direction),
     onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo()
   });
-  GalleryView.toggleVideoLooping(GalleryAutoplay.isPaused() || !GalleryAutoplay.isActive());
   Events.gallery.openedGallery.on(GalleryAutoplay.startAutoplay);
   Events.gallery.closedGallery.on(GalleryAutoplay.stopAutoplay);
   Events.gallery.displayedThumb.on(GalleryAutoplay.startViewTimer);
 }
 
-function addEventListeners(): void {
+function subscribeToEvents(): void {
   Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadVisibleThumbs);
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
 
-  FeatureBridge.inGallery.register(GalleryModel.isInGallery);
-
   if (ON_FAVORITES_PAGE) {
-    Events.favorites.newFavoritesFound.on(GalleryContentFlow.indexThumbs, { once: true });
-    Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
-    Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.handleNewContent);
-    Events.favorites.showOnHoverToggled.on(GalleryModel.toggleEnlargeOnHover);
+    subscribeToFavoritesEvents();
   }
 
   if (ON_SEARCH_PAGE) {
-    Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
-    Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
-    Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
-    Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
-    Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);
+    subscribeToSearchPageEvents();
   }
 
   if (ON_DESKTOP_DEVICE) {
-    DomEvents.document.mouseover.on(GalleryMouseOverFlow.onMouseOver);
-    DomEvents.document.mouseover.on((e) => GalleryView.onDesktopMenuMouseOver(e.originalEvent));
-    DomEvents.document.click.on(GalleryClickFlow.onClick);
-    DomEvents.document.mousedown.on(GalleryClickFlow.onMouseDown);
-    DomEvents.document.contextmenu.on(GalleryClickFlow.onContextMenu);
-    DomEvents.document.mousemove.on(GalleryClickFlow.onMouseMove);
-    DomEvents.document.mousemove.on(GalleryView.onDesktopMenuMouseMove);
-    DomEvents.document.wheel.on(GalleryWheelFlow.onWheel);
-    DomEvents.document.keydown.on(GalleryKeyFlow.onKeyDown);
-    DomEvents.document.keyup.on(GalleryKeyFlow.onKeyUp);
-    Events.gallery.interactionStopped.on(GalleryInteractionFlow.onInteractionStopped);
+    subscribeToDesktopInput();
   } else {
-    Events.gallery.leftTap.on(GalleryTouchFlow.onLeftTap);
-    Events.gallery.rightTap.on(GalleryTouchFlow.onRightTap);
-    DomEvents.document.mousedown.on(GalleryTouchFlow.onMouseDown);
-    DomEvents.document.touchStart.on(GalleryTouchFlow.onTouchStart);
-    Events.mobile.swipedDown.on(GalleryTouchFlow.onSwipeDown);
-    Events.mobile.swipedUp.on(GalleryAutoplay.showMenu);
-    DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
+    subscribeToMobileInput();
   }
+}
+
+function subscribeToFavoritesEvents(): void {
+  Events.favorites.newFavoritesFound.on(GalleryContentFlow.indexThumbs, { once: true });
+  Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
+  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.handleNewContent);
+  Events.favorites.showOnHoverToggled.on(GalleryModel.toggleEnlargeOnHover);
+}
+
+function subscribeToSearchPageEvents(): void {
+  Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
+  Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
+  Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
+  Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
+  Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);
+}
+
+function subscribeToDesktopInput(): void {
+  DomEvents.document.mouseover.on(GalleryMouseOverFlow.onMouseOver);
+  DomEvents.document.mouseover.on(GalleryView.onDesktopMenuMouseOver);
+  DomEvents.document.click.on(GalleryClickFlow.onClick);
+  DomEvents.document.mousedown.on(GalleryClickFlow.onMouseDown);
+  DomEvents.document.contextmenu.on(GalleryClickFlow.onContextMenu);
+  DomEvents.document.mousemove.on(GalleryClickFlow.onMouseMove);
+  DomEvents.document.mousemove.on(GalleryView.onDesktopMenuMouseMove);
+  DomEvents.document.wheel.on(GalleryWheelFlow.onWheel);
+  DomEvents.document.keydown.on(GalleryKeyFlow.onKeyDown);
+  DomEvents.document.keyup.on(GalleryKeyFlow.onKeyUp);
+  Events.gallery.interactionStopped.on(GalleryInteractionFlow.onInteractionStopped);
+}
+
+function subscribeToMobileInput(): void {
+  Events.gallery.leftTap.on(GalleryTouchFlow.onLeftTap);
+  Events.gallery.rightTap.on(GalleryTouchFlow.onRightTap);
+  DomEvents.document.mousedown.on(GalleryTouchFlow.onMouseDown);
+  DomEvents.document.touchStart.on(GalleryTouchFlow.onTouchStart);
+  Events.mobile.swipedDown.on(GalleryTouchFlow.onSwipeDown);
+  Events.mobile.swipedUp.on(GalleryAutoplay.showMenu);
+  DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
+}
+
+function registerBridgeHandlers(): void {
+  FeatureBridge.inGallery.register(GalleryModel.isInGallery);
+}
+
+function primeInitialState(): void {
+  GalleryVisibleThumbObserver.observeAllThumbsOnPage();
+  GalleryModel.reIndexThumbs();
+  GalleryView.setThumbCanvasDimensions();
 }

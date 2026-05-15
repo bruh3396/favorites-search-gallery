@@ -47,7 +47,7 @@ export function pointTo(thumb: HTMLElement): void {
   setCurrentIndex(index);
 }
 
-export function refreshThumbs(): void {
+export function reIndexThumbs(): void {
   thumbIndex.clear();
   thumbs = getAllContentThumbs();
 
@@ -59,7 +59,6 @@ export function refreshThumbs(): void {
     }
 
     if (thumbIndex.has(thumb.id)) {
-      console.log(thumb);
       throw new Error(`Duplicate thumb id: ${thumb.id}`);
     }
     thumbIndex.set(thumb.id, i);

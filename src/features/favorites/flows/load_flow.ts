@@ -15,11 +15,11 @@ export async function loadAllFavorites(): Promise<void> {
   Events.favorites.favoritesLoaded.emit();
 }
 
-function hasDatabaseFavorites(): Promise<boolean> {
-  return FavoritesModel.hasDatabaseFavorites().then((hasDbFavorites) => {
-    Events.favorites.favoritesFoundInDatabase.emit(hasDbFavorites);
-    return hasDbFavorites;
-  });
+async function hasDatabaseFavorites(): Promise<boolean> {
+  const hasDbFavorites = await FavoritesModel.hasDatabaseFavorites();
+
+  Events.favorites.favoritesFoundInDatabase.emit(hasDbFavorites);
+  return hasDbFavorites;
 }
 
 async function loadDatabaseFavorites(): Promise<void> {

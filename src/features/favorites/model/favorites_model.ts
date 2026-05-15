@@ -6,9 +6,14 @@ import { Favorite } from "../../../types/favorite";
 import { NewFavorites } from "../types/favorite_types";
 
 let getAdditionalTags: (id: string) => string | undefined = () => undefined;
+let waitForAdditionalTags: () => Promise<void> = () => Promise.resolve();
 
-export function setup(getAdditionalTagsFn: (id: string) => string | undefined): void {
+export function setup(
+  getAdditionalTagsFn: (id: string) => string | undefined,
+  waitForAdditionalTagsFn: () => Promise<void>
+): void {
   getAdditionalTags = getAdditionalTagsFn;
+  waitForAdditionalTags = waitForAdditionalTagsFn;
   FavoritesMetadataFetcher.setup(
     FavoritesLoader.updateFavorite,
     (favorite) => FavoritesSearchCoordinator.removeFromIndex([favorite]),
@@ -16,7 +21,8 @@ export function setup(getAdditionalTagsFn: (id: string) => string | undefined): 
   );
 }
 
-export function loadDatabaseFavorites(): Promise<void> {
+export async function loadDatabaseFavorites(): Promise<void> {
+  await waitForAdditionalTags();
   return FavoritesLoader.loadDatabaseFavorites(getAdditionalTags, (allFavorites) => {
     FavoritesSearchCoordinator.deferIndexing();
     FavoritesSearchCoordinator.addToIndex(allFavorites);

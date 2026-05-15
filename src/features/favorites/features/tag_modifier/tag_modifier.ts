@@ -1,4 +1,4 @@
-import * as TagModifierEditMode from "./edit_mode";
+﻿import * as TagModifierEditMode from "./edit_mode";
 import * as TagModifierOperations from "./operations";
 import * as TagModifierSelection from "./selection";
 import * as TagModifierStore from "./store";
@@ -9,7 +9,7 @@ import { TAG_MODIFIER_DISABLED } from "../../../../lib/environment/derived_envir
 import TAG_MODIFIER_HTML from "../../../../assets/html/tag_modifier.html";
 import { doNothing } from "../../../../lib/environment/constants";
 
-export type FavoritesTagModifierInterface = {
+type FavoritesTagModifierInterface = {
   getSearchResults: () => Favorite[]
   getAllFavorites: () => Favorite[]
   deIndex: (favorite: Favorite) => void
@@ -33,7 +33,7 @@ const ui: TagModifierUi = {} as TagModifierUi;
 const favoritesOption = {} as { container: HTMLElement, checkbox: HTMLInputElement };
 let tagModifierInterface: FavoritesTagModifierInterface;
 
-export async function setupFavoritesTagModifier(tmInterface: FavoritesTagModifierInterface): Promise<void> {
+export function setup(tmInterface: FavoritesTagModifierInterface): void {
   if (TAG_MODIFIER_DISABLED) {
     return;
   }
@@ -47,13 +47,12 @@ export async function setupFavoritesTagModifier(tmInterface: FavoritesTagModifie
     }
   );
   TagModifierOperations.initializeTagOperations(tmInterface.deIndex, tmInterface.reIndex, () => ui.statusLabel);
-  await TagModifierStore.loadTagModifications();
   addEventListeners();
 }
 
-export { handleDocumentClick } from "./edit_mode";
-export { highlightSelectedThumbsOnPageChange, unselectAll } from "./selection";
-export { getTagModification as getAdditionalTags } from "./store";
+export { handleDocumentClick as onDocumentClick } from "./edit_mode";
+export { highlightSelectedThumbs as onPageChanged, unselectAll as onResultsUpdated } from "./selection";
+export { getTagModification as getAdditionalTags, ensureTagModificationsLoaded } from "./store";
 
 function insertTagModifierShell(): void {
   insertStyle(TAG_MODIFIER_CSS);

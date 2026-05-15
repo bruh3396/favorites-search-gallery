@@ -60,7 +60,7 @@ export function setupCaptions(): void {
   createHtmlElement();
   insertStyle(CAPTION_CSS, "caption-style");
   toggleVisibility(Preferences.captionsVisible.value);
-  addEventListeners();
+  subscribeToEvents();
 }
 
 function getCategoryHeaderHtml(): string {
@@ -112,7 +112,7 @@ function toggleVisibility(value?: boolean): void {
   Preferences.captionsVisible.set(value);
 }
 
-function addEventListeners(): void {
+function subscribeToEvents(): void {
   addCommonEventListeners();
   addFavoritesPageEventListeners();
 }

@@ -9,10 +9,6 @@ import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { insertStyle } from "../../../lib/dom/injector";
 export { overGalleryMenu } from "./view_utils";
 
-export interface GalleryViewCallbacks {
-  onMenuAction: (action: GalleryMenuAction) => void;
-}
-
 export function open(thumb: HTMLElement): void {
   GalleryRoot.toggleAttribute("data-visible", true);
   GalleryUi.open(thumb);
@@ -43,13 +39,18 @@ export function hidePreview(): void {
   GalleryUi.toggleScrollbar(true);
 }
 
-export function setup(viewCallbacks: GalleryViewCallbacks): void {
+export function setup(
+  onMenuAction: (action: GalleryMenuAction) => void,
+  onVideoEnded: () => void,
+  onVideoDoubleClicked: (event: MouseEvent) => void
+): void {
   insertStyle(GALLERY_CSS);
   mountGallery();
   GalleryUi.setup();
+  GalleryRenderer.setupVideoRenderer({ onVideoEnded, onVideoDoubleClicked });
 
   if (ON_DESKTOP_DEVICE) {
-    GalleryDesktopMenu.setup(viewCallbacks.onMenuAction);
+    GalleryDesktopMenu.setup(onMenuAction);
   }
 }
 

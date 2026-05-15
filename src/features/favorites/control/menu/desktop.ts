@@ -411,7 +411,7 @@ const numbers: Partial<NumberElement>[] = [
   }
 ];
 
-export function buildElements(): void {
+export function setup(): void {
   prepareDynamicElements(buttons).forEach(buildButtonElement);
   prepareDynamicElements(checkboxes).forEach(buildCheckboxOption);
   prepareDynamicElements(simpleCheckboxes).forEach(buildCheckboxElement);

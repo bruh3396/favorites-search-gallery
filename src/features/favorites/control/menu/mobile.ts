@@ -228,7 +228,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
   }
 ];
 
-export function buildElements(): void {
+export function setup(): void {
   prepareDynamicElements(buttons).forEach(buildButtonElement);
   prepareDynamicElements(toggleSwitches).forEach(buildToggleSwitch);
   // @ts-expect-error don't care

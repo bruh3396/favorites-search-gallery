@@ -4,7 +4,8 @@ import { parseTagGroups } from "../../../lib/search/parse/tag_group_parser";
 export function parseSearchQueryIntoHighlights(rawSearchQuery: string): SearchTermHighlight[] {
   const { andTags, orGroups } = parseTagGroups(rawSearchQuery);
   const termGroups: string[][] = [...andTags.map(tag => [tag]), ...orGroups];
-  return termGroups.map(g => createHighlightFromTagStrings(g))
+  return termGroups
+    .map(g => createHighlightFromTagStrings(g))
     .filter(h => h !== null);
 }
 
@@ -27,7 +28,7 @@ function createHighlightFromTagStrings(tagStrings: string[]): SearchTermHighligh
   if (exactTags.size === 0 && wildcardPatterns.length === 0) {
     return null;
   }
-  return { exactTags, wildcardPatterns, color: "" };
+  return { exactTags, wildcardPatterns, lightColor: "", darkColor: "" };
 }
 
 function isUnHighlightableTagString(tagString: string): boolean {

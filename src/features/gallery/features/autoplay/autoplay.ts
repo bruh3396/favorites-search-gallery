@@ -16,10 +16,7 @@ import { insertStyle } from "../../../../lib/dom/injector";
 import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
 
 export type AutoplayEvents = {
-  onEnable: () => void
-  onDisable: () => void
-  onPause: () => void
-  onResume: () => void
+  setVideoLooping: (value: boolean) => void
   onComplete: (direction?: NavigationKey) => void
   onVideoEndedBeforeMinimumViewTime: () => void
 }
@@ -88,6 +85,7 @@ export function setup(inEvents: AutoplayEvents): void {
   setupNumberComponents();
   addEventListeners();
   loadAutoplaySettingsIntoUi();
+  inEvents.setVideoLooping(!active || paused);
 }
 
 export function isPaused(): boolean {
@@ -373,11 +371,7 @@ function toggle(value: boolean): void {
   Preferences.autoplayActive.set(value);
   active = value;
 
-  if (value) {
-    events.onEnable();
-  } else {
-    events.onDisable();
-  }
+  events.setVideoLooping(!value);
 }
 
 function setImageViewDuration(): void {
@@ -477,13 +471,12 @@ function pause(): void {
     ui.playButton.title = "Resume Autoplay";
     stopImageViewTimer();
     stopVideoViewTimer();
-    events.onPause();
   } else {
     ui.playButton.src = menuIcons.pause;
     ui.playButton.title = "Pause Autoplay";
     startViewTimer(currentThumb);
-    events.onResume();
   }
+  events.setVideoLooping(paused);
 }
 
 export function onVideoEnded(): void {

@@ -1,4 +1,4 @@
-import { Database } from "../../../../lib/core/storage/database";
+﻿import { Database } from "../../../../lib/core/storage/database";
 import { TagModificationDatabaseRecord } from "../../../../types/search";
 import { clearCustomTags } from "../../../../lib/tags/custom_tags";
 
@@ -8,8 +8,13 @@ const OBJECT_STORE_NAME = "additionalTags";
 const tagModificationMap: Map<string, string> = new Map();
 const database = new Database<TagModificationDatabaseRecord>(DATABASE_NAME, OBJECT_STORE_NAME, 12);
 
-export async function loadTagModifications(): Promise<void> {
-  (await database.load()).forEach(record => tagModificationMap.set(record.id, record.tags));
+let loadPromise: Promise<void> | null = null;
+
+export function ensureTagModificationsLoaded(): Promise<void> {
+  loadPromise ??= database.load().then(records => {
+    records.forEach(record => tagModificationMap.set(record.id, record.tags));
+  });
+  return loadPromise;
 }
 
 export const storeTagModifications = (): Promise<void> => database.update(getDatabaseRecords());

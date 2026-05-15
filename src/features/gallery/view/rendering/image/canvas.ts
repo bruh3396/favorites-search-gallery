@@ -1,5 +1,5 @@
 import { clamp, roundToTwoDecimalPlaces } from "../../../../../utils/number";
-import { drawScaledCanvas } from "../../../../../utils/dom/canvas";
+import { clearCanvas, drawScaledCanvas } from "../../../../../utils/dom/canvas";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { ON_DESKTOP_DEVICE } from "../../../../../lib/environment/environment";
 import { insertStyle } from "../../../../../lib/dom/injector";
@@ -33,7 +33,7 @@ export function mount(newContainer: HTMLElement): void {
 
 export function draw(bitmap: ImageBitmap | null): void {
   if (bitmap !== null) {
-    // clearCanvas(mainContext);
+    clearCanvas(mainContext);
     drawScaledCanvas(mainContext, bitmap);
   }
 }

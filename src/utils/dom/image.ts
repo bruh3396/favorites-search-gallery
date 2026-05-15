@@ -7,7 +7,5 @@ export function imageIsLoading(image: HTMLImageElement): boolean {
 }
 
 export function preloadImage(url: string): void {
-  const img = new Image();
-
-  img.src = url;
+  new Image().src = url;
 }

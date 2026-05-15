@@ -4,6 +4,7 @@ import * as TooltipTagMatcher from "./tag_matcher";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 import { Preferences } from "../../../lib/preferences/preferences";
 import { SearchTermHighlight } from "../types/highlight";
+import { usingDarkTheme } from "../../../lib/ui/style";
 
 let currentHighlights: SearchTermHighlight[] = [];
 
@@ -13,7 +14,10 @@ export function rebuildHighlights(query: string): void {
 }
 
 export function getColorForTag(tag: string): string | null {
-  return TooltipTagMatcher.findMatchingTermColor(tag, currentHighlights);
+  if (usingDarkTheme()) {
+    return TooltipTagMatcher.findMatchingLightColor(tag, currentHighlights);
+  }
+  return TooltipTagMatcher.findMatchingDarkColor(tag, currentHighlights);
 }
 
 export function tooltipEnabled(): boolean {

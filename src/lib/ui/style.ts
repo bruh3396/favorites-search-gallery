@@ -107,14 +107,6 @@ function setupVideoAndGifOutlines(): void {
         }
       }
     }
-
-    .post--thumb {
-      >a,
-      >div {
-        ${videoRule}
-        ${gifRule}
-      }
-    }
     `, "gallery-media-borders");
 }
 

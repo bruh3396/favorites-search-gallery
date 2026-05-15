@@ -43,17 +43,14 @@
   aspect-ratio: 1;
 }
 
-.tiler--square .post,
-.tiler--square .post--thumb {
+.tiler--square .post {
   border-radius: var(--radius);
   overflow: hidden;
   aspect-ratio: 1;
 }
 
 .tiler--square .post>a,
-.tiler--square .post>div,
-.tiler--square .post--thumb>a,
-.tiler--square .post--thumb>div {
+.tiler--square .post>div {
   width: 100%;
   height: 100%;
 }
@@ -61,42 +58,32 @@
 .tiler--square .post>a>img:first-child,
 .tiler--square .post>a>canvas,
 .tiler--square .post>div>img:first-child,
-.tiler--square .post>div>canvas,
-.tiler--square .post--thumb>a>img:first-child,
-.tiler--square .post--thumb>a>canvas,
-.tiler--square .post--thumb>div>img:first-child,
-.tiler--square .post--thumb>div>canvas {
+.tiler--square .post>div>canvas {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 
-.tiler--row .post,
-.tiler--row .post--thumb {
+.tiler--row .post {
   height: 300px;
   flex: 1 1 auto;
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-.tiler--row .post.u-last-row,
-.tiler--row .post--thumb.u-last-row {
+.tiler--row .post.u-last-row {
   flex: 0 1 auto;
 }
 
 .tiler--row .post>a,
-.tiler--row .post>div,
-.tiler--row .post--thumb>a,
-.tiler--row .post--thumb>div {
+.tiler--row .post>div {
   width: 100%;
   height: 100%;
 }
 
 .tiler--row .post>a>img:first-child,
-.tiler--row .post>div>img:first-child,
-.tiler--row .post--thumb>a>img:first-child,
-.tiler--row .post--thumb>div>img:first-child {
+.tiler--row .post>div>img:first-child {
   object-fit: cover;
   width: 100%;
   height: 100%;
@@ -104,9 +91,7 @@
 }
 
 .tiler--row .post>a>canvas,
-.tiler--row .post>div>canvas,
-.tiler--row .post--thumb>a>canvas,
-.tiler--row .post--thumb>div>canvas {
+.tiler--row .post>div>canvas {
   height: 100%;
   object-fit: cover;
 }
@@ -122,8 +107,7 @@
   flex: 0 0 25%;
 }
 
-.tiler--column .tiler--column--a .post,
-.tiler--column .tiler--column--a .post--thumb {
+.tiler--column .tiler--column--a .post {
   border-radius: var(--radius);
   overflow: hidden;
 }

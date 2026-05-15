@@ -9,8 +9,7 @@ html {
   overflow-anchor: none;
 }
 
-.post,
-.post--thumb {
+.post {
   position: relative;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -21,9 +20,7 @@ html {
 }
 
 .post>a,
-.post>div,
-.post--thumb>a,
-.post--thumb>div {
+.post>div {
   display: block;
   overflow: hidden;
   position: relative;
@@ -31,24 +28,18 @@ html {
 }
 
 .post>a>img:first-child,
-.post>div>img:first-child,
-.post--thumb>a>img:first-child,
-.post--thumb>div>img:first-child {
+.post>div>img:first-child {
   width: 100%;
   z-index: 1;
 }
 
 .post>a>a>div,
-.post>div>a>div,
-.post--thumb>a>a>div,
-.post--thumb>div>a>div {
+.post>div>a>div {
   height: 100%;
 }
 
 .post>a>canvas,
-.post>div>canvas,
-.post--thumb>a>canvas,
-.post--thumb>div>canvas {
+.post>div>canvas {
   width: 100%;
   position: absolute;
   top: 0;
@@ -57,8 +48,7 @@ html {
   z-index: 1;
 }
 
-.post.u-hidden,
-.post--thumb.u-hidden {
+.post.u-hidden {
   display: none;
 }
 

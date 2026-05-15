@@ -31,7 +31,7 @@ export function fetchPostFromPostPage(id: string): Promise<Post> {
 }
 
 export async function fetchPostPageHtml(id: string): Promise<string> {
-  await postPageGate;
+  await postPageFetchBarrier;
   await generalPageRequestQueue.wait();
   return withExponentialBackoff(() => fetchHtml(buildPostPageUrl(id)), 3, 1000);
 }
@@ -40,10 +40,10 @@ function fetchPostBatch(ids: string[]) : Promise<Record<string, PostResponse>> {
   return postLimiter.run(() => fetchJsonFromApi(POST_API_URL, { ids }));
 }
 
-let postPageGate: Promise<void> = Promise.resolve();
+let postPageFetchBarrier: Promise<void> = Promise.resolve();
 
-export function setPostPageGate(gate: Promise<void>): void {
-  postPageGate = gate;
+export function deferPostPageFetchesUntil(barrier: Promise<void>): void {
+  postPageFetchBarrier = barrier;
 }
 
 function fetchPostFromApi(id: string): Promise<Post> {

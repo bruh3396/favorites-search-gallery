@@ -15,11 +15,11 @@ export function handlePageChange(): void {
 export function indexThumbs(): void {
   GalleryThumbObserver.resetCenterThumb();
   GalleryThumbObserver.observeAllThumbsOnPage();
-  GalleryModel.refreshThumbs();
+  GalleryModel.reIndexThumbs();
 }
 
 export function handleNewContent(elements: HTMLElement[]): void {
   GalleryThumbObserver.observe(elements);
-  GalleryModel.refreshThumbs();
+  GalleryModel.reIndexThumbs();
   GalleryView.setThumbCanvasDimensions();
 }

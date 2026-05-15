@@ -31,6 +31,6 @@ export function onSearchPageCreated(): void {
 }
 
 export function handleResultsAddedToSearchPage(thumbs: HTMLElement[]): void {
-  GalleryModel.refreshThumbs();
+  GalleryModel.reIndexThumbs();
   GalleryThumbObserver.observe(thumbs);
 }

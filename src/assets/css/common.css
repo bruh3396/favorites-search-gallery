@@ -240,16 +240,6 @@ option {
   -moz-appearance: textfield;
 }
 
-/* post--thumb */
-
-.post--thumb>a {
-  pointer-events: none;
-}
-
-.post--thumb>a>img {
-  pointer-events: all;
-}
-
 /* Gallery tap zones */
 
 .gallery-tap-zone {

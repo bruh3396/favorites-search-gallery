@@ -1,57 +1,88 @@
-import * as FavoritesControl from "./control/favorites_control";
+﻿import * as FavoritesDesktop from "./control/menu/desktop";
 import * as FavoritesDownloadMenu from "./features/downloader/menu";
+import * as FavoritesFinder from "./control/menu/finder";
 import * as FavoritesInterFeatureFlow from "./flows/inter_feature_flow";
 import * as FavoritesLoadFlow from "./flows/load_flow";
+import * as FavoritesMobile from "./control/menu/mobile";
 import * as FavoritesModel from "./model/favorites_model";
+import * as FavoritesNavigationButtons from "./control/navigation_buttons";
 import * as FavoritesOptionsFlow from "./flows/option_flow";
 import * as FavoritesPaginationFlow from "./flows/paginated_results_flow";
+import * as FavoritesRatingFilter from "./control/menu/rating_filter";
 import * as FavoritesResetFlow from "./flows/reset_flow";
 import * as FavoritesResultsFlow from "./flows/results_flow";
+import * as FavoritesSearchBox from "./control/search_box/search_box";
 import * as FavoritesSearchFlow from "./flows/search_flow";
 import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
-import * as PostApi from "../../lib/remote/api/post_fetcher";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { DomEvents } from "../../lib/communication/dom_events";
 import { Events } from "../../lib/communication/events";
 import { FeatureBridge } from "../../lib/communication/feature_bridge";
-import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 
-export async function setupFavorites(): Promise<void> {
+export function setupFavorites(): void {
   if (!ON_FAVORITES_PAGE) {
     return;
   }
-  PostApi.setPostPageGate(Events.favorites.favoritesLoaded.wait());
-  FavoritesModel.setup(FavoritesTagModifier.getAdditionalTags);
-  FavoritesView.setup({
-    onPageSelected: (pageNumber) => Events.favorites.pageSelected.emit(pageNumber),
-    onRelativePageSelected: (relation) => Events.favorites.relativePageSelected.emit(relation)
-  });
-  FavoritesControl.setup();
-  await setupSubFeatures();
-  addEventListeners();
+  setupModel();
+  setupView();
+  setupControl();
+  setupSubFeatures();
+  subscribeToEvents();
+  registerBridgeHandlers();
   FavoritesLoadFlow.loadAllFavorites();
 }
 
-async function setupSubFeatures(): Promise<void> {
+function setupModel(): void {
+  FavoritesModel.setup(FavoritesTagModifier.getAdditionalTags, FavoritesTagModifier.ensureTagModificationsLoaded);
+}
+
+function setupView(): void {
+  FavoritesView.setup({
+    onPageSelected: Events.favorites.pageSelected.emit,
+    onRelativePageSelected: Events.favorites.relativePageSelected.emit
+  });
+}
+
+function setupControl(): void {
+  FavoritesNavigationButtons.setup();
+  FavoritesFinder.setup();
+  FavoritesRatingFilter.setup();
+  FavoritesSearchBox.setup();
+
+  if (ON_DESKTOP_DEVICE) {
+    FavoritesDesktop.setup();
+  } else {
+    FavoritesMobile.setup();
+  }
+}
+
+function setupSubFeatures(): void {
+  setupDownloader();
+  setupTagModifier();
+}
+
+function setupDownloader(): void {
   FavoritesDownloadMenu.setup({
     getSearchResults: () => FavoritesModel.getCurrentSearchResults()
   });
   Events.favorites.downloadButtonClicked.on(FavoritesDownloadMenu.openDownloadMenu);
   Events.favorites.favoritesLoaded.on(FavoritesDownloadMenu.enableDownloadMenu);
+}
 
-  await FavoritesTagModifier.setupFavoritesTagModifier({
+function setupTagModifier(): void {
+  FavoritesTagModifier.setup({
     getSearchResults: () => FavoritesModel.getCurrentSearchResults(),
     getAllFavorites: () => FavoritesModel.getAllFavorites(),
     deIndex: (favorite) => FavoritesModel.removeFromIndex([favorite]),
     reIndex: (favorite) => FavoritesModel.addToIndex([favorite])
   });
-  Events.favorites.searchResultsUpdated.on(FavoritesTagModifier.unselectAll);
-  Events.favorites.pageChanged.on(FavoritesTagModifier.highlightSelectedThumbsOnPageChange);
-  DomEvents.document.click.on(FavoritesTagModifier.handleDocumentClick);
+  Events.favorites.searchResultsUpdated.on(FavoritesTagModifier.onResultsUpdated);
+  Events.favorites.pageChanged.on(FavoritesTagModifier.onPageChanged);
+  DomEvents.document.click.on(FavoritesTagModifier.onDocumentClick);
 }
 
-function addEventListeners(): void {
-
+function subscribeToEvents(): void {
   Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
   Events.favorites.shuffleButtonClicked.on(FavoritesSearchFlow.shuffleSearchResults);
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
@@ -77,7 +108,9 @@ function addEventListeners(): void {
 
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   Events.gallery.favoriteToggled.on(FavoritesInterFeatureFlow.swapFavoriteButton);
+}
 
+function registerBridgeHandlers(): void {
   FeatureBridge.loadMoreFavorites.register(FavoritesResultsFlow.loadMoreResults);
   FeatureBridge.favoritesCanExtend.register(FavoritesResultsFlow.hasMoreResults);
   FeatureBridge.favoritesSearchResults.register(FavoritesModel.getCurrentSearchResults);
