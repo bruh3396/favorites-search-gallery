@@ -44,8 +44,7 @@ export function fetchNewFavorites(): Promise<NewFavorites> {
     .then((newFavorites) => {
       FavoritesSearchCoordinator.addToIndex(newFavorites);
       FavoritesMetadataFetcher.fetchMissingMetadata(newFavorites);
-      const newSearchResults = FavoritesSearchCoordinator.prependSearchResults(newFavorites);
-      return { newFavorites, newSearchResults };
+      return { newFavorites, newSearchResults: FavoritesSearchCoordinator.prependSearchResults(newFavorites) };
     });
 }
 

@@ -8,6 +8,7 @@ export const Rule34NetworkConfig = {
   generalPageRequestThrottle: 2000,
 
   favoritesPageFetchDelay: 1000,
+  favoritesPageFetchRetries: 5,
   favoritesPageRetryBackoffBase: 7,
   favoritesCountFetchRetries: 5,
 

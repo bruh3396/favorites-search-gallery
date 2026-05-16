@@ -1,11 +1,10 @@
 import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
-import { FAVORITES_PER_PAGE } from "../../../../lib/environment/constants";
+import { sleep, withExponentialBackoff } from "../../../../lib/core/scheduling/promise";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { FavoritesPageRequest } from "../../types/favorites_page_request";
 import { Rule34NetworkConfig } from "../../../../config/rule34_network_config";
 import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
 import { getIdFromThumb } from "../../../../lib/dom/thumb";
-import { sleep } from "../../../../lib/core/scheduling/promise";
 
 export async function fetchNewFavorites(storedIds: Set<string>): Promise<HTMLElement[]> {
   await sleep(FavoritesConfig.reloadFetchDelay);
@@ -19,16 +18,17 @@ export async function fetchNewFavorites(storedIds: Set<string>): Promise<HTMLEle
   return allNewElements;
 }
 
-const isEmptyPage = (elements: HTMLElement[]): boolean => elements.length === 0;
-const isLastPage = (elements: HTMLElement[]): boolean => elements.length < FAVORITES_PER_PAGE;
-
 async function fetchNewFavoritesFromPage(storedIds: Set<string>, pageNumber: number, allNewElements: HTMLElement[]): Promise<boolean> {
-  const html = await FavoritesApi.fetchFavoritesPage(new FavoritesPageRequest(pageNumber).realPageNumber);
+  const html = await withExponentialBackoff(() => fetchFavoritesPageHtml(pageNumber), Rule34NetworkConfig.favoritesPageFetchRetries);
   const newElements = extractFavoriteElements(html).filter(element => !storedIds.has(getIdFromThumb(element)));
 
-  if (isEmptyPage(newElements)) {
+  if (newElements.length === 0) {
     return false;
   }
   allNewElements.push(...newElements);
-  return !isLastPage(newElements);
+  return true;
+}
+
+function fetchFavoritesPageHtml(pageNumber: number): Promise<string> {
+  return FavoritesApi.fetchFavoritesPage(new FavoritesPageRequest(pageNumber).realPageNumber);
 }

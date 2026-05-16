@@ -1,19 +1,19 @@
 import { Favorite } from "../../../../types/favorite";
 import { InvertedIndex } from "../../../../lib/core/data_structures/inverted_index";
-import { SearchEngine } from "../../../../lib/search/engine/search_engine";
+import { InvertedIndexSearcher } from "../../../../lib/search/index/inverted_index_searcher";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
 import { yieldControl } from "../../../../lib/core/scheduling/promise";
 
 const INDEX_BATCH_SIZE = 500;
 
 const index = new InvertedIndex<Favorite>(favorite => favorite.tags, false);
-const engine = new SearchEngine<Favorite>(index);
+const searcher = new InvertedIndexSearcher<Favorite>(index);
 let state: "indexing" | "ready" = "ready";
 let deferred: Favorite[] = [];
 
 export function search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
   const eligible = state === "ready" && !searchQuery.metadata.hasMetadataTag;
-  return eligible ? engine.search(searchQuery, candidates) : searchQuery.apply(candidates);
+  return eligible ? searcher.search(searchQuery, candidates) : searchQuery.apply(candidates);
 }
 
 export function add(doc: Favorite): void {

@@ -15,11 +15,11 @@ export const loadMoreResults = (direction: NavigationKey): void => activeView().
 export const hasMoreResults = (): boolean => activeView().hasMore();
 
 export function syncResults(): void {
-  FavoritesView.updateStatusWhileFetching({
+  Events.favorites.searchResultsUpdated.emit();
+  FavoritesView.updateStatus({
     resultsCount: FavoritesModel.getCurrentSearchResults().length,
     allFavoritesCount: FavoritesModel.getAllFavorites().length
   });
-  Events.favorites.searchResultsUpdated.emit();
   activeView().sync();
 }
 

@@ -1,7 +1,7 @@
-import { AbstractTag } from "./abstract_tag";
+import { AbstractSearchTerm } from "./abstract_term";
 import { Searchable } from "../../../types/search";
 
-export class ExactTag extends AbstractTag {
+export class ExactSearchTerm extends AbstractSearchTerm {
   protected override readonly baseCost: number = 0;
 
   protected matchesPositive(item: Searchable): boolean {

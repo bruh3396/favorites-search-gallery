@@ -1,13 +1,13 @@
 import { Fruit, index } from "./fruit_search_fixtures";
 import { describe, expect, test } from "vitest";
-import { AbstractTag } from "../../lib/search/tags/abstract_tag";
+import { AbstractSearchTerm } from "../../lib/search/terms/abstract_term";
 import { ResolvedSearchQuery } from "../../lib/search/query/resolved_search_query";
 
-function getRawTagValue(searchTag: AbstractTag): string {
+function getRawTagValue(searchTag: AbstractSearchTerm): string {
   return searchTag.negated ? `-${searchTag.value}` : searchTag.value;
 }
 
-function getRawTagGroup(searchTags: AbstractTag[]): string[] {
+function getRawTagGroup(searchTags: AbstractSearchTerm[]): string[] {
   return searchTags.map(tag => getRawTagValue(tag)).sort();
 }
 

@@ -1,5 +1,5 @@
 import { buildTagGroup, categorizeTags, parseTagGroups, sortTagGroup } from "../parse/tag_group_parser";
-import { AbstractTag } from "../tags/abstract_tag";
+import { AbstractSearchTerm } from "../terms/abstract_term";
 import { SearchQueryMetadata } from "../types/search_types";
 import { Searchable } from "../../../types/search";
 import { isEmptyString } from "../../../utils/string/query";
@@ -7,8 +7,8 @@ import { isEmptyString } from "../../../utils/string/query";
 export class SearchQuery<T extends Searchable> {
   public readonly rawQuery: string;
   public readonly isEmpty: boolean;
-  public orGroups: AbstractTag[][] = [];
-  public andTags: AbstractTag[] = [];
+  public orGroups: AbstractSearchTerm[][] = [];
+  public andTags: AbstractSearchTerm[] = [];
 
   constructor(searchQuery: string) {
     this.rawQuery = searchQuery;
@@ -36,12 +36,16 @@ export class SearchQuery<T extends Searchable> {
     };
   }
 
-  public get negatedTags(): Set<string> {
+  public get negatedTerms(): Set<string> {
     return new Set(this.andTags.filter(tag => tag.negated).map(tag => tag.value));
   }
 
-  public get positiveAndTags(): string[] {
+  public get requiredTerms(): string[] {
     return this.andTags.filter(tag => !tag.negated).map(tag => tag.value);
+  }
+
+  public get orGroupTerms(): string[][] {
+    return this.orGroups.map(orGroup => orGroup.map(tag => tag.value));
   }
 
   public apply(items: T[]): T[] {
@@ -53,7 +57,7 @@ export class SearchQuery<T extends Searchable> {
   }
 
   private flattenSingleTagOrGroups(): void {
-    const multiTagOrGroups: AbstractTag[][] = [];
+    const multiTagOrGroups: AbstractSearchTerm[][] = [];
 
     for (const orGroup of this.orGroups) {
       if (orGroup.length === 1) {

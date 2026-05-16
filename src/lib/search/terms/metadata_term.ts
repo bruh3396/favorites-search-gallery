@@ -1,4 +1,4 @@
-import { AbstractTag } from "./abstract_tag";
+import { AbstractSearchTerm } from "./abstract_term";
 import { Favorite } from "../../../types/favorite";
 import { MetadataComparator } from "../../../types/search";
 import { MetadataSearchExpression } from "../types/metadata_search_expression";
@@ -11,7 +11,7 @@ const comparators: Record<MetadataComparator, Comparator> = {
   ":>": (a, b) => a > b
 };
 
-export class MetadataTag extends AbstractTag {
+export class MetadataSearchTerm extends AbstractSearchTerm {
   protected override readonly baseCost: number = 0;
   private compare: Comparator;
   private getRightValue: (item: Favorite) => number;

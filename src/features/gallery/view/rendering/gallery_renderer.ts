@@ -22,7 +22,7 @@ export const preload = (thumbs: HTMLElement[]): void => renderers.forEach(r => r
 export const reset = (): void => renderers.forEach(r => r.reset());
 export const softReset = (): void => renderers.forEach(r => r.softReset());
 
-export { preload as preloadImages, correctOrientation, downscaleAll, setCanvasDimensions as setThumbCanvasDimensions, toggleZoom, toggleZoomCursor, upscaleCachedThumbs, zoomToPoint } from "./image/renderer";
+export { preload as preloadImages, correctOrientation, downscaleAll, toggleZoom, toggleZoomCursor, upscaleCachedThumbs, zoomToPoint } from "./image/renderer";
 export { setupVideoRenderer, toggleVideoLooping, restartVideo, toggleVideoPause, toggleVideoMute } from "./video/renderer";
 
 const resolve = (thumb: HTMLElement): GalleryRenderer => (isVideo(thumb) ? GalleryVideoRenderer : isGif(thumb) ? GalleryGifRenderer : GalleryImageRenderer);

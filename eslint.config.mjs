@@ -561,7 +561,7 @@ export default defineConfig([
       "src/lib/core/data_structures/sorted_array.ts",
       "src/features/favorites/types/favorite_item.ts",
       "src/features/favorites/control/menu/rating_filter.ts",
-      "src/lib/search/tags/wildcard_tag.ts"
+      "src/lib/search/terms/wildcard_term.ts"
     ],
     rules: {
       "no-bitwise": "off"

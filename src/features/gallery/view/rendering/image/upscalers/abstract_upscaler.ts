@@ -22,6 +22,7 @@ export abstract class GalleryAbstractUpscaler {
   public upscale(request: ImageRequest): void {
     if (this.enabled() && this.requestIsValid(request)) {
       this.upscaledIds.add(request.id);
+      this.ensureCanvasSized(request.thumb);
       this.finishUpscale(request);
     }
   }
@@ -79,6 +80,25 @@ export abstract class GalleryAbstractUpscaler {
     }
     canvas.width = targetWidth;
     canvas.height = targetHeight;
+  }
+
+  private ensureCanvasSized(thumb: HTMLElement): void {
+    if (!ON_FAVORITES_PAGE) {
+      return;
+    }
+    const canvas = thumb.querySelector("canvas");
+
+    if (canvas === null || canvas.dataset.size === undefined || canvas.dataset.sized === "1") {
+      return;
+    }
+
+    if (transferredCanvasIds.has(thumb.id)) {
+      return;
+    }
+    const dimensions = parseDimensions2D(canvas.dataset.size);
+
+    this.setThumbCanvasDimensions(canvas, dimensions.x, dimensions.y);
+    canvas.dataset.sized = "1";
   }
 
   private async directlyUpscale(request: ImageRequest): Promise<void> {

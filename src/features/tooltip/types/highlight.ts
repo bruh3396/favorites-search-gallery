@@ -1,6 +1,7 @@
+import { AbstractSearchTerm } from "../../../lib/search/terms/abstract_term";
+
 export interface SearchTermHighlight {
-  exactTags: Set<string>
-  wildcardPatterns: RegExp[]
+  tags: AbstractSearchTerm[]
   lightColor: string
   darkColor: string
 }

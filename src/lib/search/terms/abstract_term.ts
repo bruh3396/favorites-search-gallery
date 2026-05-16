@@ -1,6 +1,6 @@
 import { Searchable } from "../../../types/search";
 
-export abstract class AbstractTag {
+export abstract class AbstractSearchTerm {
   public matches: (item: Searchable) => boolean;
   protected abstract readonly baseCost: number;
 

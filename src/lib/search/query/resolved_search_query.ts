@@ -1,8 +1,8 @@
-import { AbstractTag } from "../tags/abstract_tag";
-import { ExactTag } from "../tags/exact_tag";
+import { AbstractSearchTerm } from "../terms/abstract_term";
+import { ExactSearchTerm } from "../terms/exact_term";
 import { SearchQuery } from "./search_query";
 import { Searchable } from "../../../types/search";
-import { WildcardTag } from "../tags/wildcard_tag";
+import { WildcardSearchTerm } from "../terms/wildcard_term";
 
 export class ResolvedSearchQuery<T extends Searchable> extends SearchQuery<T> {
   private unmatchable: boolean = false;
@@ -24,10 +24,10 @@ export class ResolvedSearchQuery<T extends Searchable> extends SearchQuery<T> {
   }
 
   private resolveAndWildcardTags(): void {
-    const andTags: AbstractTag[] = [];
+    const andTags: AbstractSearchTerm[] = [];
 
     for (const tagToResolve of this.andTags) {
-      if (!(tagToResolve instanceof WildcardTag)) {
+      if (!(tagToResolve instanceof WildcardSearchTerm)) {
         andTags.push(tagToResolve);
         continue;
       }
@@ -53,13 +53,13 @@ export class ResolvedSearchQuery<T extends Searchable> extends SearchQuery<T> {
   }
 
   private resolveAllOrGroupWildcardTags(): void {
-    const newOrGroups: AbstractTag[][] = [];
+    const newOrGroups: AbstractSearchTerm[][] = [];
 
     for (const orGroup of this.orGroups) {
-      const newOrGroup: AbstractTag[] = [];
+      const newOrGroup: AbstractSearchTerm[] = [];
 
       for (const tag of orGroup) {
-        if (!(tag instanceof WildcardTag)) {
+        if (!(tag instanceof WildcardSearchTerm)) {
           newOrGroup.push(tag);
           continue;
         }
@@ -86,7 +86,7 @@ export class ResolvedSearchQuery<T extends Searchable> extends SearchQuery<T> {
     this.orGroups = [];
   }
 
-  private resolveWildcardTag(wildcardTag: WildcardTag): AbstractTag[] {
-    return wildcardTag.getMatchingTags(this.indexedTags).map(matchingTag => new ExactTag(matchingTag, wildcardTag.negated));
+  private resolveWildcardTag(wildcardTag: WildcardSearchTerm): AbstractSearchTerm[] {
+    return wildcardTag.getMatchingTags(this.indexedTags).map(matchingTag => new ExactSearchTerm(matchingTag, wildcardTag.negated));
   }
 }

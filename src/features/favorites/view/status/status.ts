@@ -27,7 +27,7 @@ export function setMatchCount(value: number): void {
   matchCountIndicator.textContent = `${value} ${value === 1 ? "Result" : "Results"}`;
 }
 
-export function updateStatusWhileFetching(progress: FavoritesFetchProgress): void {
+export function updateStatus(progress: FavoritesFetchProgress): void {
   let statusText = `Fetching ${FETCHING_STATUS_PREFIX}${progress.allFavoritesCount}`;
 
   if (totalFavoritesCount !== null) {

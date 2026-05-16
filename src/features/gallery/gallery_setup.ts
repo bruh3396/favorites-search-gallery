@@ -143,5 +143,4 @@ function registerBridgeHandlers(): void {
 function primeInitialState(): void {
   GalleryVisibleThumbObserver.observeAllThumbsOnPage();
   GalleryModel.reIndexThumbs();
-  GalleryView.setThumbCanvasDimensions();
 }

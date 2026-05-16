@@ -9,9 +9,10 @@ export function findMatchingDarkColor(tag: string, highlights: SearchTermHighlig
 }
 
 function findMatch(tag: string, highlights: SearchTermHighlight[]): SearchTermHighlight | undefined {
-  return highlights.find(h => matchesTag(h, tag));
+  return highlights.find(highlight => matchesTag(highlight, tag));
 }
 
 function matchesTag(highlight: SearchTermHighlight, tag: string): boolean {
-  return highlight.exactTags.has(tag) || highlight.wildcardPatterns.some(p => p.test(tag));
+  const item = { tags: new Set([tag]) };
+  return highlight.tags.some(t => t.matches(item));
 }

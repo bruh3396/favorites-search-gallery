@@ -1,9 +1,9 @@
+import * as FavoritesApi from "../../../lib/remote/rule34/favorites_fetcher";
 import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesResultsFlow from "./results_flow";
 import * as FavoritesSearchFlow from "./search_flow";
 import * as FavoritesView from "../view/favorites_view";
 import { Events } from "../../../lib/communication/events";
-import { fetchFavoritesCount } from "../../../lib/remote/rule34/favorites_fetcher";
 
 export async function loadAllFavorites(): Promise<void> {
   if (await hasDatabaseFavorites()) {
@@ -47,7 +47,7 @@ async function fetchNewFavorites(): Promise<void> {
 }
 
 async function fetchAllFavorites(): Promise<void> {
-  fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
+  FavoritesApi.fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
   FavoritesResultsFlow.clearResults();
   await FavoritesModel.fetchAllFavorites(FavoritesResultsFlow.syncResults);
   FavoritesView.setStatus("Saving favorites");

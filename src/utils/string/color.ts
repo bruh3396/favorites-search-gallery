@@ -1,9 +1,9 @@
 export function brightWarmCoolHslColor(index: number, total: number): string {
-  return warmCoolHslColor(index, total, 90, 85);
+  return warmCoolHslColor(index, total, 75, 70);
 }
 
 export function darkWarmCoolHslColor(index: number, total: number): string {
-  return warmCoolHslColor(index, total, 75, 35);
+  return warmCoolHslColor(index, total, 75, 45);
 }
 
 export function warmCoolHslColor(index: number, total: number, saturation = 90, lightness = 70): string {

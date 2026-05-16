@@ -11,10 +11,10 @@ import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 export function setupTooltip(): void {
   TooltipView.setup();
   TooltipModel.rebuildHighlights(FeatureBridge.currentSearchQuery.call());
-  addEventListeners();
+  subscribeToEvents();
 }
 
-function addEventListeners(): void {
+function subscribeToEvents(): void {
   DomEvents.document.mouseover.on(TooltipHoverFlow.onMouseover);
   DomEvents.window.scrollend.on(TooltipScrollFlow.onScroll);
   Events.favorites.tooltipToggled.on(TooltipToggleFlow.onTooltipToggled);

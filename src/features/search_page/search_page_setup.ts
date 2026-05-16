@@ -18,14 +18,19 @@ export function setupSearchPage(): void {
   SearchPageView.setup();
   buildSearchPage();
   SearchPageInfiniteScrollFlow.setup();
-  addEventListeners();
+  subscribeToEvents();
+  registerBridgeHandlers();
 }
 
-function addEventListeners(): void {
-  FeatureBridge.currentSearchQuery.register(SearchPageView.currentSearch);
-  FeatureBridge.navigateToAdjacentSearchPage.register(SearchPageNavigationFlow.navigateSearchPages);
-  FeatureBridge.searchPageThumbs.register(SearchPageModel.getAllSearchPageThumbs);
+function subscribeToEvents(): void {
+
   Events.searchPage.layoutChanged.on(ContentTiler.changeLayout);
   Events.searchPage.infiniteScrollToggled.on(SearchPageOptionFlow.toggleInfiniteScroll);
   Events.searchPage.searchPageCreated.emit(SearchPageModel.getInitialSearchPage());
+}
+
+function registerBridgeHandlers(): void {
+  FeatureBridge.currentSearchQuery.register(SearchPageView.currentSearch);
+  FeatureBridge.navigateToAdjacentSearchPage.register(SearchPageNavigationFlow.navigateSearchPages);
+  FeatureBridge.searchPageThumbs.register(SearchPageModel.getAllSearchPageThumbs);
 }

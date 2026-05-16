@@ -17,7 +17,7 @@ export class FavoritesMobileSearchBox extends AbstractFavoritesSearchBox {
       return document.createElement("textarea");
     }
     searchButton.onclick = (): void => this.startSearch();
-    resetButton.onclick = (event): void => Events.favorites.resetButtonClicked.emit(event);
+    resetButton.onclick = Events.favorites.resetButtonClicked.emit;
     this.searchBox = searchBox;
     this.wireClearButton(clearButton);
 

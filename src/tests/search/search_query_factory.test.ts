@@ -1,8 +1,8 @@
 import { buildTagGroup, sortTagGroup } from "../../lib/search/parse/tag_group_parser";
 import { describe, expect, test } from "vitest";
-import { isMetadataTag, isWildcardTag, parseTag } from "../../lib/search/parse/tag_parser";
-import { ExactTag } from "../../lib/search/tags/exact_tag";
-import { WildcardTag } from "../../lib/search/tags/wildcard_tag";
+import { isMetadataTag, isWildcardTerm, parseTag } from "../../lib/search/parse/term_parser";
+import { ExactSearchTerm } from "../../lib/search/terms/exact_term";
+import { WildcardSearchTerm } from "../../lib/search/terms/wildcard_term";
 
 const normalSearchTags = [
   "",
@@ -26,8 +26,8 @@ const wildcardSearchTags = [
 
 describe("utils", () => {
   test("isWildcardSearchTag", () => {
-    expect(normalSearchTags.every(tag => !isWildcardTag(tag))).toBe(true);
-    expect(wildcardSearchTags.every(tag => isWildcardTag(tag))).toBe(true);
+    expect(normalSearchTags.every(tag => !isWildcardTerm(tag))).toBe(true);
+    expect(wildcardSearchTags.every(tag => isWildcardTerm(tag))).toBe(true);
   });
 
   test("isMetadataSearchTag", () => {
@@ -45,8 +45,8 @@ describe("utils", () => {
   });
 
   test("createSearchTag", () => {
-    expect(wildcardSearchTags.every(tag => parseTag(tag) instanceof WildcardTag)).toBe(true);
-    expect(normalSearchTags.every(tag => parseTag(tag) instanceof ExactTag)).toBe(true);
+    expect(wildcardSearchTags.every(tag => parseTag(tag) instanceof WildcardSearchTerm)).toBe(true);
+    expect(normalSearchTags.every(tag => parseTag(tag) instanceof ExactSearchTerm)).toBe(true);
   });
 
   test("createSearchTagGroup", () => {

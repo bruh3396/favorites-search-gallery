@@ -21,5 +21,4 @@ export function indexThumbs(): void {
 export function handleNewContent(elements: HTMLElement[]): void {
   GalleryThumbObserver.observe(elements);
   GalleryModel.reIndexThumbs();
-  GalleryView.setThumbCanvasDimensions();
 }

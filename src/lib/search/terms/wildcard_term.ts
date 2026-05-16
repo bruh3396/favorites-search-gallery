@@ -1,8 +1,8 @@
-import { AbstractTag } from "./abstract_tag";
+import { AbstractSearchTerm } from "./abstract_term";
 import { Searchable } from "../../../types/search";
 import { WildcardMatchType } from "../types/search_types";
 
-export class WildcardTag extends AbstractTag {
+export class WildcardSearchTerm extends AbstractSearchTerm {
   protected override readonly baseCost: number;
   private readonly matchType: WildcardMatchType;
   private readonly regex: RegExp;

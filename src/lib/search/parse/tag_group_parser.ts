@@ -1,46 +1,46 @@
-import { AbstractTag } from "../tags/abstract_tag";
+import { AbstractSearchTerm } from "../terms/abstract_term";
 import { CategorizedTags } from "../types/search_types";
-import { MetadataTag } from "../tags/metadata_tag";
-import { WildcardTag } from "../tags/wildcard_tag";
-import { parseTag } from "./tag_parser";
+import { MetadataSearchTerm } from "../terms/metadata_term";
+import { WildcardSearchTerm } from "../terms/wildcard_term";
+import { parseTag } from "./term_parser";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 
-export function normalizeSearchQuery(searchQuery: string): string {
-  return removeExtraWhiteSpace(searchQuery).toLowerCase();
+export function normalizeSearchQuery(query: string): string {
+  return removeExtraWhiteSpace(query).toLowerCase();
 }
 
-function parseAndTags(searchQuery: string): string[] {
-  return removeExtraWhiteSpace(searchQuery.replace(orGroupRegex, "")).split(" ").filter((tag) => tag !== "");
+function parseAndTags(query: string): string[] {
+  return removeExtraWhiteSpace(query.replace(orGroupRegex, "")).split(" ").filter((tag) => tag !== "");
 }
 
-function parseOrGroups(searchQuery: string): string[][] {
-  return Array.from(searchQuery.matchAll(orGroupRegex)).map((orGroup) => orGroup[1].split(" ~ "));
+function parseOrGroups(query: string): string[][] {
+  return Array.from(query.matchAll(orGroupRegex)).map((orGroup) => orGroup[1].split(" ~ "));
 }
 
-export function parseTagGroups(searchQuery: string): { orGroups: string[][]; andTags: string[]; } {
-  searchQuery = normalizeSearchQuery(searchQuery);
-  return { andTags: parseAndTags(searchQuery), orGroups: parseOrGroups(searchQuery) };
+export function parseTagGroups(query: string): { orGroups: string[][]; andTags: string[]; } {
+  query = normalizeSearchQuery(query);
+  return { andTags: parseAndTags(query), orGroups: parseOrGroups(query) };
 }
 
-export function buildTagGroup(tags: string[]): AbstractTag[] {
+export function buildTagGroup(tags: string[]): AbstractSearchTerm[] {
   return sortTagGroup(Array.from(new Set(tags)).map(tag => parseTag(tag)));
 }
 
-export function sortTagGroup(tags: AbstractTag[]): AbstractTag[] {
+export function sortTagGroup(tags: AbstractSearchTerm[]): AbstractSearchTerm[] {
   return [...tags].sort((a, b) => a.cost - b.cost);
 }
 
-export function categorizeTags(tags: AbstractTag[]): CategorizedTags {
-  const positiveTags: AbstractTag[] = [];
-  const wildcardTags: WildcardTag[] = [];
-  const metadataTags: MetadataTag[] = [];
+export function categorizeTags(tags: AbstractSearchTerm[]): CategorizedTags {
+  const positiveTags: AbstractSearchTerm[] = [];
+  const wildcardTags: WildcardSearchTerm[] = [];
+  const metadataTags: MetadataSearchTerm[] = [];
 
   for (const tag of tags) {
-    if (tag instanceof WildcardTag) {
+    if (tag instanceof WildcardSearchTerm) {
       wildcardTags.push(tag);
-    } else if (tag instanceof MetadataTag) {
+    } else if (tag instanceof MetadataSearchTerm) {
       metadataTags.push(tag);
     } else if (!tag.negated) {
       positiveTags.push(tag);

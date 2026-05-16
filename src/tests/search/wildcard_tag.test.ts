@@ -1,6 +1,6 @@
 import { createSearchable, fruits, getAllSubstrings, getPrefixes, searchableEmptyDoc, searchableFruitDoc } from "./fruit_search_fixtures";
 import { describe, expect, test } from "vitest";
-import { parseWildcardTag } from "../../lib/search/parse/tag_parser";
+import { parseWildcardTag } from "../../lib/search/parse/term_parser";
 
 describe("wildcardSearchTag", () => {
   test("empty", () => {

@@ -1,36 +1,36 @@
-import { AbstractTag } from "../tags/abstract_tag";
-import { ExactTag } from "../tags/exact_tag";
+import { AbstractSearchTerm } from "../terms/abstract_term";
+import { ExactSearchTerm } from "../terms/exact_term";
 import { MetadataSearchExpression } from "../types/metadata_search_expression";
-import { MetadataTag } from "../tags/metadata_tag";
+import { MetadataSearchTerm } from "../terms/metadata_term";
 import { WildcardMatchType } from "../types/search_types";
-import { WildcardTag } from "../tags/wildcard_tag";
+import { WildcardSearchTerm } from "../terms/wildcard_term";
 import { escapeParenthesis } from "../../../utils/string/format";
 
 const unmatchableRegex = /^\b$/;
 const startsWithRegex = /^[^*]*\*$/;
 const containsRegex = /^\*[^*]*\*$/;
 
-export function parseTag(tag: string): AbstractTag {
-  return isWildcardTag(tag) ? parseWildcardTag(tag) : isMetadataTag(tag) ? parseMetadataTag(tag) : parseExactTag(tag);
+export function parseTag(tag: string): AbstractSearchTerm {
+  return isWildcardTerm(tag) ? parseWildcardTag(tag) : isMetadataTag(tag) ? parseMetadataTag(tag) : parseExactTag(tag);
 }
 
-export function parseExactTag(tag: string): ExactTag {
+export function parseExactTag(tag: string): ExactSearchTerm {
   const { negated, value } = parseNegation(tag);
-  return new ExactTag(value, negated);
+  return new ExactSearchTerm(value, negated);
 }
 
-export function parseWildcardTag(tag: string): WildcardTag {
+export function parseWildcardTag(tag: string): WildcardSearchTerm {
   const { negated, value } = parseNegation(removeDuplicateAsterisks(tag));
-  return new WildcardTag(value, negated, getMatchType(value), buildWildcardRegex(value));
+  return new WildcardSearchTerm(value, negated, getMatchType(value), buildWildcardRegex(value));
 }
 
-export function parseMetadataTag(tag: string): MetadataTag {
+export function parseMetadataTag(tag: string): MetadataSearchTerm {
   const { negated, value } = parseNegation(tag);
   const expression = new MetadataSearchExpression(value);
-  return new MetadataTag(value, negated, expression);
+  return new MetadataSearchTerm(value, negated, expression);
 }
 
-export function isWildcardTag(tag: string): boolean {
+export function isWildcardTerm(tag: string): boolean {
   return tag.includes("*");
 }
 

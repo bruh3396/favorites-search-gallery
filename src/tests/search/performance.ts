@@ -1,5 +1,5 @@
 import { InvertedIndex } from "../../lib/core/data_structures/inverted_index";
-import { SearchEngine } from "../../lib/search/engine/search_engine";
+import { InvertedIndexSearcher } from "../../lib/search/index/inverted_index_searcher";
 import { SearchQuery } from "../../lib/search/query/search_query";
 import { Searchable } from "../../types/search";
 
@@ -93,7 +93,7 @@ export function compareSearchPerformance(): void {
   const terms = generateTerms(TERM_COUNT);
   const docs = generateDocs(DOC_COUNT, terms);
   const index = new InvertedIndex<Searchable>(doc => doc.tags, true);
-  const engine = new SearchEngine<Searchable>(index);
+  const engine = new InvertedIndexSearcher<Searchable>(index);
 
   docs.forEach(doc => index.addDoc(doc));
 
