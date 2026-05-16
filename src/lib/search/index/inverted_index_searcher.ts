@@ -1,5 +1,5 @@
+import { ExpandedSearchQuery } from "../query/expanded_search_query";
 import { InvertedIndex } from "../../core/data_structures/inverted_index";
-import { ResolvedSearchQuery } from "../query/resolved_search_query";
 import { SearchQuery } from "../query/search_query";
 import { Searchable } from "../../../types/search";
 import { intersection } from "../../../utils/collection/set";
@@ -8,14 +8,14 @@ export class InvertedIndexSearcher<T extends Searchable> {
   constructor(private readonly index: InvertedIndex<T>) { }
 
   public search(query: SearchQuery<T>, docs: T[]): T[] {
-    const resolvedQuery = new ResolvedSearchQuery<T>(query.rawQuery, this.index.getIndexedTerms());
-    return resolvedQuery.isEmpty ? docs : resolvedQuery.isUnmatchable ? [] : this.findMatches(resolvedQuery, docs);
+    const expandedQuery = new ExpandedSearchQuery<T>(query.rawQuery, this.index.indexedTerms());
+    return expandedQuery.isEmpty ? docs : expandedQuery.isUnmatchable ? [] : this.findMatches(expandedQuery, docs);
   }
 
-  private findMatches(resolvedQuery: ResolvedSearchQuery<T>, docs: T[]): T[] {
-    const excluded = this.docsWithAnyTerm(resolvedQuery.negatedTerms);
-    const required = this.docsWithAllTerms(resolvedQuery.requiredTerms);
-    const candidates = this.narrowByOrGroups(required, resolvedQuery.orGroupTerms);
+  private findMatches(expandedQuery: ExpandedSearchQuery<T>, docs: T[]): T[] {
+    const excluded = this.docsWithAnyTerm(expandedQuery.negatedTerms);
+    const required = this.docsWithAllTerms(expandedQuery.requiredTerms);
+    const candidates = this.narrowByOrGroups(required, expandedQuery.orGroupTerms);
     return candidates.size === 0 ? [] : docs.filter(doc => candidates.has(doc) && !excluded.has(doc));
   }
 
@@ -23,16 +23,16 @@ export class InvertedIndexSearcher<T extends Searchable> {
     const union = new Set<T>();
 
     for (const term of terms) {
-      this.index.getDocsForTerm(term)?.forEach(doc => union.add(doc));
+      this.index.docsForTerm(term)?.forEach(doc => union.add(doc));
     }
     return union;
   }
 
   private docsWithAllTerms(terms: string[]): Set<T> {
     if (terms.length === 0) {
-      return this.index.getAllDocs();
+      return this.index.allDocs();
     }
-    const docSets = terms.map(term => this.index.getDocsForTerm(term));
+    const docSets = terms.map(term => this.index.docsForTerm(term));
 
     if (docSets.some(set => set === undefined)) {
       return new Set<T>();

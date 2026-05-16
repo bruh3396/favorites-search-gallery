@@ -3,7 +3,7 @@ import { convertToTagSet, convertToTagString } from "../../utils/string/tags";
 import { describe, expect, test } from "vitest";
 import { isEmptyString, isOnlyDigits } from "../../utils/string/query";
 import { parseDimensions2D } from "../../utils/string/parse";
-import { parseTagGroups } from "../../lib/search/parse/tag_group_parser";
+import { parseTermGroups } from "../../lib/search/parse/search_term_group_parser";
 import { resolveMediaType } from "../../lib/media/media_type_resolver";
 
 describe("removeExtraWhiteSpace", () => {
@@ -134,10 +134,10 @@ describe("escapeParenthesis", () => {
 
 describe("extractTagGroups", () => {
   function testTagGroups(input: string, expectedOrGroups: string[][], expectedAndTags: string[]): void {
-    const result = parseTagGroups(input);
+    const result = parseTermGroups(input);
 
     expect(result.orGroups).toStrictEqual(expectedOrGroups);
-    expect(result.andTags).toStrictEqual(expectedAndTags);
+    expect(result.andTerms).toStrictEqual(expectedAndTags);
   }
 
   test("empty", () => {

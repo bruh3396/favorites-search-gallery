@@ -1,22 +1,22 @@
-import { AbstractSearchTerm } from "../terms/abstract_term";
-import { MetadataSearchTerm } from "../terms/metadata_term";
-import { WildcardSearchTerm } from "../terms/wildcard_term";
+import { AbstractSearchTerm } from "../terms/abstract_search_term";
+import { MetadataSearchTerm } from "../terms/metadata_search_term";
+import { WildcardSearchTerm } from "../terms/wildcard_search_term";
 
 export type SearchQueryMetadata = {
-  hasPositiveAndTag: boolean
-  hasWildcardTag: boolean
-  hasMetadataTag: boolean
+  hasRequiredTerm: boolean
+  hasWildcardTerm: boolean
+  hasMetadataTerm: boolean
   hasOrGroup: boolean
 };
 
-export type CategorizedTags = {
-  positiveTags: AbstractSearchTerm[]
-  wildcardTags: WildcardSearchTerm[]
-  metadataTags: MetadataSearchTerm[]
+export type CategorizedSearchTerms = {
+  required: AbstractSearchTerm[]
+  wildcard: WildcardSearchTerm[]
+  metadata: MetadataSearchTerm[]
 };
 
 export enum WildcardMatchType {
   Prefix = 10,
-  Includes = 15,
+  Substring = 15,
   Regex = 20
 }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { searchableEmptyDoc, searchableFruitDoc } from "./fruit_search_fixtures";
-import { parseExactTag } from "../../lib/search/parse/term_parser";
+import { parseExactSearchTerm } from "../../lib/search/parse/search_term_parser";
 
 const positiveCases = [
   ["banana", true],
@@ -40,26 +40,26 @@ const invalidCases = [
 
 describe("exactTag", () => {
   test("empty", () => {
-    expect(parseExactTag("").matches(searchableFruitDoc)).toBe(false);
+    expect(parseExactSearchTerm("").matches(searchableFruitDoc)).toBe(false);
   });
 
   test("cost", () => {
-    expect(parseExactTag("foo").cost).toBeLessThan(parseExactTag("-foo").cost);
+    expect(parseExactSearchTerm("foo").cost).toBeLessThan(parseExactSearchTerm("-foo").cost);
   });
 
   test.each(positiveCases)("matches %s", (tag, expected) => {
-    expect(parseExactTag(tag).matches(searchableFruitDoc)).toBe(expected);
+    expect(parseExactSearchTerm(tag).matches(searchableFruitDoc)).toBe(expected);
   });
 
   test.each(negatedCases)("negated %s", (tag, expected) => {
-    expect(parseExactTag(tag).matches(searchableFruitDoc)).toBe(expected);
+    expect(parseExactSearchTerm(tag).matches(searchableFruitDoc)).toBe(expected);
   });
 
   test.each(invalidCases)("invalid '%s'", (tag, expected) => {
-    expect(parseExactTag(tag).matches(searchableEmptyDoc)).toBe(expected);
+    expect(parseExactSearchTerm(tag).matches(searchableEmptyDoc)).toBe(expected);
   });
 
   test("negated matches with empty set", () => {
-    expect(parseExactTag("-banana").matches(searchableEmptyDoc)).toBe(true);
+    expect(parseExactSearchTerm("-banana").matches(searchableEmptyDoc)).toBe(true);
   });
 });

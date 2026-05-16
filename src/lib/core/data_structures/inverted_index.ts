@@ -1,26 +1,26 @@
 import { SortedArray } from "./sorted_array";
 
 export class InvertedIndex<Doc> {
-  private readonly indexedTerms: SortedArray<string> = new SortedArray<string>();
-  private readonly indexedDocs: Set<Doc> = new Set<Doc>();
+  private readonly terms: SortedArray<string> = new SortedArray<string>();
+  private readonly docs: Set<Doc> = new Set<Doc>();
   private readonly docsByTerm: Map<string, Set<Doc>> = new Map<string, Set<Doc>>();
 
   constructor(private readonly extractTerms: (doc: Doc) => Iterable<string>, private maintainingSortOrder: boolean = false) { }
 
-  public getIndexedTerms(): string[] {
-    return this.indexedTerms.toArray();
+  public indexedTerms(): string[] {
+    return this.terms.toArray();
   }
 
-  public getDocsForTerm(term: string): Set<Doc> | undefined {
+  public docsForTerm(term: string): Set<Doc> | undefined {
     return this.docsByTerm.get(term);
   }
 
-  public getAllDocs(): Set<Doc> {
-    return this.indexedDocs;
+  public allDocs(): Set<Doc> {
+    return this.docs;
   }
 
   public addDoc(doc: Doc): void {
-    this.indexedDocs.add(doc);
+    this.docs.add(doc);
 
     for (const term of this.extractTerms(doc)) {
       let docs = this.docsByTerm.get(term);
@@ -35,7 +35,7 @@ export class InvertedIndex<Doc> {
   }
 
   public removeDoc(doc: Doc): void {
-    this.indexedDocs.delete(doc);
+    this.docs.delete(doc);
 
     for (const term of this.extractTerms(doc)) {
       this.docsByTerm.get(term)?.delete(doc);
@@ -47,14 +47,14 @@ export class InvertedIndex<Doc> {
   }
 
   public sortTerms(): void {
-    this.indexedTerms.sort();
+    this.terms.sort();
   }
 
   private addTerm(term: string): void {
     if (this.maintainingSortOrder) {
-      this.indexedTerms.insert(term);
+      this.terms.insert(term);
     } else {
-      this.indexedTerms.push(term);
+      this.terms.push(term);
     }
   }
 }

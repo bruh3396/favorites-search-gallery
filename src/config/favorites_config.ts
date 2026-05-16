@@ -14,6 +14,7 @@ export const FavoritesConfig = {
 
   reloadFetchDelay: 100,
 
+  searchIndexBuildBatchSize: 500,
   buildIndexAsync: true,
   preloadThumbnails: true,
   favoriteFinderEnabled: true,

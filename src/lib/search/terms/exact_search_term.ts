@@ -1,4 +1,4 @@
-import { AbstractSearchTerm } from "./abstract_term";
+import { AbstractSearchTerm } from "./abstract_search_term";
 import { Searchable } from "../../../types/search";
 
 export class ExactSearchTerm extends AbstractSearchTerm {

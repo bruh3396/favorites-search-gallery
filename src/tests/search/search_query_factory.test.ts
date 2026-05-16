@@ -1,8 +1,8 @@
-import { buildTagGroup, sortTagGroup } from "../../lib/search/parse/tag_group_parser";
+import { buildSearchTerms, sortSearchTerms } from "../../lib/search/parse/search_term_group_parser";
 import { describe, expect, test } from "vitest";
-import { isMetadataTag, isWildcardTerm, parseTag } from "../../lib/search/parse/term_parser";
-import { ExactSearchTerm } from "../../lib/search/terms/exact_term";
-import { WildcardSearchTerm } from "../../lib/search/terms/wildcard_term";
+import { isMetadataTerm, isWildcardTerm, parseSearchTerm } from "../../lib/search/parse/search_term_parser";
+import { ExactSearchTerm } from "../../lib/search/terms/exact_search_term";
+import { WildcardSearchTerm } from "../../lib/search/terms/wildcard_search_term";
 
 const normalSearchTags = [
   "",
@@ -31,40 +31,40 @@ describe("utils", () => {
   });
 
   test("isMetadataSearchTag", () => {
-    expect(normalSearchTags.every(tag => !isMetadataTag(tag))).toBe(true);
-    expect(wildcardSearchTags.every(tag => !isMetadataTag(tag))).toBe(true);
+    expect(normalSearchTags.every(tag => !isMetadataTerm(tag))).toBe(true);
+    expect(wildcardSearchTags.every(tag => !isMetadataTerm(tag))).toBe(true);
 
     for (const metric of ["width", "height", "id", "score", "duration"]) {
       for (const comparator of [":", ":<", ":>"]) {
-        expect(isMetadataTag(`${metric}${comparator}0`)).toBe(true);
-        expect(isMetadataTag(`${metric}${comparator}${metric}`)).toBe(true);
-        expect(isMetadataTag(`apple${comparator}${metric}`)).toBe(false);
-        expect(isMetadataTag(`${metric}${comparator}banana`)).toBe(false);
+        expect(isMetadataTerm(`${metric}${comparator}0`)).toBe(true);
+        expect(isMetadataTerm(`${metric}${comparator}${metric}`)).toBe(true);
+        expect(isMetadataTerm(`apple${comparator}${metric}`)).toBe(false);
+        expect(isMetadataTerm(`${metric}${comparator}banana`)).toBe(false);
       }
     }
   });
 
   test("createSearchTag", () => {
-    expect(wildcardSearchTags.every(tag => parseTag(tag) instanceof WildcardSearchTerm)).toBe(true);
-    expect(normalSearchTags.every(tag => parseTag(tag) instanceof ExactSearchTerm)).toBe(true);
+    expect(wildcardSearchTags.every(tag => parseSearchTerm(tag) instanceof WildcardSearchTerm)).toBe(true);
+    expect(normalSearchTags.every(tag => parseSearchTerm(tag) instanceof ExactSearchTerm)).toBe(true);
   });
 
   test("createSearchTagGroup", () => {
-    expect(buildTagGroup(["mango", "mango", "mango", "mango"]).length).toBe(1);
-    expect(buildTagGroup(["mango", "mango", "mango", "-mango"]).length).toBe(2);
-    expect(buildTagGroup(["mango", "mango", "*mango", "-mango"]).length).toBe(3);
-    expect(buildTagGroup(["mangoes", "mango", "*mango", "-mango"]).length).toBe(4);
-    expect(buildTagGroup(["mango", "mango", "mango", "mango"])).toStrictEqual([parseTag("mango")]);
+    expect(buildSearchTerms(["mango", "mango", "mango", "mango"]).length).toBe(1);
+    expect(buildSearchTerms(["mango", "mango", "mango", "-mango"]).length).toBe(2);
+    expect(buildSearchTerms(["mango", "mango", "*mango", "-mango"]).length).toBe(3);
+    expect(buildSearchTerms(["mangoes", "mango", "*mango", "-mango"]).length).toBe(4);
+    expect(buildSearchTerms(["mango", "mango", "mango", "mango"])).toStrictEqual([parseSearchTerm("mango")]);
   });
 
   test("and tags", () => {
-    const searchTag = parseTag("mango");
-    const negatedSearchTag = parseTag("-mango");
-    const wildcardSearchTag = parseTag("*mango");
-    const wildcardNegatedSearchTag = parseTag("-*mango");
+    const searchTag = parseSearchTerm("mango");
+    const negatedSearchTag = parseSearchTerm("-mango");
+    const wildcardSearchTag = parseSearchTerm("*mango");
+    const wildcardNegatedSearchTag = parseSearchTerm("-*mango");
     const searchTagGroup = [wildcardSearchTag, negatedSearchTag, searchTag, wildcardNegatedSearchTag];
 
     expect(searchTag.cost).toBeLessThan(wildcardSearchTag.cost);
-    expect(sortTagGroup(searchTagGroup)).toStrictEqual([searchTag, negatedSearchTag, wildcardSearchTag, wildcardNegatedSearchTag]);
+    expect(sortSearchTerms(searchTagGroup)).toStrictEqual([searchTag, negatedSearchTag, wildcardSearchTag, wildcardNegatedSearchTag]);
   });
 });

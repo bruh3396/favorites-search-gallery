@@ -11,7 +11,7 @@ export function apply(favorites: Favorite[]): Favorite[] {
 }
 
 function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {
-  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : blacklistSearchQuery.apply(favorites);
+  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : blacklistSearchQuery.filter(favorites);
 }
 
 function filterByRating(favorites: Favorite[]): Favorite[] {

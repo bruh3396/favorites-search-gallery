@@ -1,7 +1,7 @@
 import { Fruit, index } from "./fruit_search_fixtures";
 import { describe, expect, test } from "vitest";
-import { AbstractSearchTerm } from "../../lib/search/terms/abstract_term";
-import { ResolvedSearchQuery } from "../../lib/search/query/resolved_search_query";
+import { AbstractSearchTerm } from "../../lib/search/terms/abstract_search_term";
+import { ExpandedSearchQuery } from "../../lib/search/query/expanded_search_query";
 
 function getRawTagValue(searchTag: AbstractSearchTerm): string {
   return searchTag.negated ? `-${searchTag.value}` : searchTag.value;
@@ -11,15 +11,15 @@ function getRawTagGroup(searchTags: AbstractSearchTerm[]): string[] {
   return searchTags.map(tag => getRawTagValue(tag)).sort();
 }
 
-function getFinalSearchQuery(resolvedQuery: ResolvedSearchQuery<Fruit>): string {
-  const andTags = getRawTagGroup(resolvedQuery.andTags).sort().join(" ");
+function getFinalSearchQuery(resolvedQuery: ExpandedSearchQuery<Fruit>): string {
+  const andTags = getRawTagGroup(resolvedQuery.andTerms).sort().join(" ");
   const orGroups = resolvedQuery.orGroups.map(orGroup => `( ${getRawTagGroup(orGroup).join(" ~ ")} )`).sort().join(" ");
   return `${andTags} ${orGroups}`.trim();
 }
 
-function testResolveSearchQuery(rawQuery: string, expectedRawQuery: string): ResolvedSearchQuery<Fruit> {
-  const resolvedQuery = new ResolvedSearchQuery<Fruit>(rawQuery, index.getIndexedTerms());
-  const expectedQuery = new ResolvedSearchQuery<Fruit>(expectedRawQuery, index.getIndexedTerms());
+function testResolveSearchQuery(rawQuery: string, expectedRawQuery: string): ExpandedSearchQuery<Fruit> {
+  const resolvedQuery = new ExpandedSearchQuery<Fruit>(rawQuery, index.indexedTerms());
+  const expectedQuery = new ExpandedSearchQuery<Fruit>(expectedRawQuery, index.indexedTerms());
 
   expect(getFinalSearchQuery(resolvedQuery)).toStrictEqual(getFinalSearchQuery(expectedQuery));
   return resolvedQuery;

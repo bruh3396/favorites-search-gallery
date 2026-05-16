@@ -1,4 +1,4 @@
-import { AbstractSearchTerm } from "./abstract_term";
+import { AbstractSearchTerm } from "./abstract_search_term";
 import { Searchable } from "../../../types/search";
 import { WildcardMatchType } from "../types/search_types";
 
@@ -19,18 +19,18 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
     this.optimize();
   }
 
-  public getMatchingTags(tags: string[]): string[] {
+  public findMatchingTerms(indexedTerms: string[]): string[] {
     switch (this.matchType) {
-      case WildcardMatchType.Prefix: return this.getMatchingTagsPrefix(tags);
-      case WildcardMatchType.Includes: return this.getMatchingTagsIncludes(tags);
-      default: return this.getMatchingTagsRegex(tags);
+      case WildcardMatchType.Prefix: return this.findPrefixMatches(indexedTerms);
+      case WildcardMatchType.Substring: return this.findSubstringMatches(indexedTerms);
+      default: return this.findRegexMatches(indexedTerms);
     }
   }
 
   protected override matchesPositive(item: Searchable): boolean {
     switch (this.matchType) {
       case WildcardMatchType.Prefix: return this.matchesPrefix(item);
-      case WildcardMatchType.Includes: return this.matchesIncludes(item);
+      case WildcardMatchType.Substring: return this.matchesIncludes(item);
       default: return this.matchesRegex(item);
     }
   }
@@ -40,24 +40,8 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
   }
 
   private optimize(): void {
-    this.matchesPositive = this.matchType === WildcardMatchType.Prefix ? this.matchesPrefix : this.matchType === WildcardMatchType.Includes ? this.matchesIncludes : this.matchesRegex;
+    this.matchesPositive = this.matchType === WildcardMatchType.Prefix ? this.matchesPrefix : this.matchType === WildcardMatchType.Substring ? this.matchesIncludes : this.matchesRegex;
     this.matches = this.negated ? this.matchesNegated : this.matchesPositive;
-  }
-
-  private findFirstPrefixMatchIndex(tags: string[]): number {
-    let lo = 0;
-    let hi = tags.length - 1;
-
-    while (lo <= hi) {
-      const mid = (lo + hi) >>> 1;
-
-      if (tags[mid] < this.prefix) {
-        lo = mid + 1;
-      } else {
-        hi = mid - 1;
-      }
-    }
-    return lo;
   }
 
   private matchesPrefix(item: Searchable): boolean {
@@ -91,25 +75,41 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
     return false;
   }
 
-  private getMatchingTagsPrefix(tags: string[]): string[] {
+  private findPrefixMatches(indexedTerms: string[]): string[] {
     const result: string[] = [];
-    const lo = this.findFirstPrefixMatchIndex(tags);
+    const lo = this.findFirstPrefixMatchIndex(indexedTerms);
 
-    for (let i = lo; i < tags.length; i += 1) {
-      if (tags[i].startsWith(this.prefix)) {
-        result.push(tags[i]);
-      } else if (tags[i] > this.prefix) {
+    for (let i = lo; i < indexedTerms.length; i += 1) {
+      if (indexedTerms[i].startsWith(this.prefix)) {
+        result.push(indexedTerms[i]);
+      } else if (indexedTerms[i] > this.prefix) {
         break;
       }
     }
     return result;
   }
 
-  private getMatchingTagsIncludes(tags: string[]): string[] {
-    return tags.filter(tag => tag.includes(this.substring));
+  private findSubstringMatches(indexedTerms: string[]): string[] {
+    return indexedTerms.filter(term => term.includes(this.substring));
   }
 
-  private getMatchingTagsRegex(tags: string[]): string[] {
-    return tags.filter(tag => this.regex.test(tag));
+  private findRegexMatches(indexedTerms: string[]): string[] {
+    return indexedTerms.filter(term => this.regex.test(term));
+  }
+
+    private findFirstPrefixMatchIndex(terms: string[]): number {
+    let lo = 0;
+    let hi = terms.length - 1;
+
+    while (lo <= hi) {
+      const mid = (lo + hi) >>> 1;
+
+      if (terms[mid] < this.prefix) {
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return lo;
   }
 }

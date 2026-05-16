@@ -11,7 +11,7 @@ function testSearch(rawQuery: string, expectedNames: string[]): void {
   const expected = expectedNames.slice().sort();
 
   expect(engine.search(searchQuery, fruitDocs).map(item => item.name).sort()).toEqual(expected);
-  expect(searchQuery.apply(fruitDocs).map(item => item.name).sort()).toEqual(expected);
+  expect(searchQuery.filter(fruitDocs).map(item => item.name).sort()).toEqual(expected);
 }
 
 function testSearchQueriesAreEqual(searchQuery1: string, searchQuery2: string): void {
@@ -19,7 +19,7 @@ function testSearchQueriesAreEqual(searchQuery1: string, searchQuery2: string): 
   const query2 = new SearchQuery<Fruit>(searchQuery2);
 
   expect(query1.orGroups).toStrictEqual(query2.orGroups);
-  expect(query1.andTags).toStrictEqual(query2.andTags);
+  expect(query1.andTerms).toStrictEqual(query2.andTerms);
   expect(query1.metadata).toStrictEqual(query2.metadata);
 }
 
@@ -27,8 +27,8 @@ function testSearchQueriesAreNotEqual(searchQuery1: string, searchQuery2: string
   const query1 = new SearchQuery<Fruit>(searchQuery1);
   const query2 = new SearchQuery<Fruit>(searchQuery2);
 
-  const equal = JSON.stringify({ orGroups: query1.orGroups, andTags: query1.andTags, details: query1.metadata }) ===
-    JSON.stringify({ orGroups: query2.orGroups, andTags: query2.andTags, details: query2.metadata });
+  const equal = JSON.stringify({ orGroups: query1.orGroups, andTags: query1.andTerms, details: query1.metadata }) ===
+    JSON.stringify({ orGroups: query2.orGroups, andTags: query2.andTerms, details: query2.metadata });
 
   expect(equal).toBe(false);
 }
@@ -178,9 +178,9 @@ describe("updateIndex", () => {
 
 describe("details", () => {
   test("hasMetadataTag", () => {
-    expect(new SearchQuery("( apple ~ banana ) sweet").metadata.hasMetadataTag).toBe(false);
-    expect(new SearchQuery("score:>50 sweet").metadata.hasMetadataTag).toBe(true);
-    expect(new SearchQuery("( score:>50 ~ apple ) sweet").metadata.hasMetadataTag).toBe(true);
+    expect(new SearchQuery("( apple ~ banana ) sweet").metadata.hasMetadataTerm).toBe(false);
+    expect(new SearchQuery("score:>50 sweet").metadata.hasMetadataTerm).toBe(true);
+    expect(new SearchQuery("( score:>50 ~ apple ) sweet").metadata.hasMetadataTerm).toBe(true);
   });
 
   test("hasOrGroup", () => {
@@ -190,21 +190,21 @@ describe("details", () => {
   });
 
   test("hasWildcardTag", () => {
-    expect(new SearchQuery("apple sweet").metadata.hasWildcardTag).toBe(false);
-    expect(new SearchQuery("app* sweet").metadata.hasWildcardTag).toBe(true);
-    expect(new SearchQuery("( app* ~ banana ) sweet").metadata.hasWildcardTag).toBe(true);
-    expect(new SearchQuery("-app* sweet").metadata.hasWildcardTag).toBe(true);
+    expect(new SearchQuery("apple sweet").metadata.hasWildcardTerm).toBe(false);
+    expect(new SearchQuery("app* sweet").metadata.hasWildcardTerm).toBe(true);
+    expect(new SearchQuery("( app* ~ banana ) sweet").metadata.hasWildcardTerm).toBe(true);
+    expect(new SearchQuery("-app* sweet").metadata.hasWildcardTerm).toBe(true);
   });
 
   test("hasNormalTag", () => {
-    expect(new SearchQuery("").metadata.hasPositiveAndTag).toBe(false);
-    expect(new SearchQuery("app*").metadata.hasPositiveAndTag).toBe(false);
-    expect(new SearchQuery("score:>50").metadata.hasPositiveAndTag).toBe(false);
-    expect(new SearchQuery("-apple").metadata.hasPositiveAndTag).toBe(false);
-    expect(new SearchQuery("( apple ~ banana )").metadata.hasPositiveAndTag).toBe(false);
-    expect(new SearchQuery("( app* ~ banana )").metadata.hasPositiveAndTag).toBe(false);
-    expect(new SearchQuery("apple").metadata.hasPositiveAndTag).toBe(true);
-    expect(new SearchQuery("apple sweet").metadata.hasPositiveAndTag).toBe(true);
-    expect(new SearchQuery("( apple ) sweet").metadata.hasPositiveAndTag).toBe(true);
+    expect(new SearchQuery("").metadata.hasRequiredTerm).toBe(false);
+    expect(new SearchQuery("app*").metadata.hasRequiredTerm).toBe(false);
+    expect(new SearchQuery("score:>50").metadata.hasRequiredTerm).toBe(false);
+    expect(new SearchQuery("-apple").metadata.hasRequiredTerm).toBe(false);
+    expect(new SearchQuery("( apple ~ banana )").metadata.hasRequiredTerm).toBe(false);
+    expect(new SearchQuery("( app* ~ banana )").metadata.hasRequiredTerm).toBe(false);
+    expect(new SearchQuery("apple").metadata.hasRequiredTerm).toBe(true);
+    expect(new SearchQuery("apple sweet").metadata.hasRequiredTerm).toBe(true);
+    expect(new SearchQuery("( apple ) sweet").metadata.hasRequiredTerm).toBe(true);
   });
 });

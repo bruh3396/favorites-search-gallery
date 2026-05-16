@@ -1,5 +1,5 @@
-import { buildTagGroup, categorizeTags, parseTagGroups, sortTagGroup } from "../parse/tag_group_parser";
-import { AbstractSearchTerm } from "../terms/abstract_term";
+import { buildSearchTerms, categorizeSearchTerms, parseTermGroups, sortSearchTerms } from "../parse/search_term_group_parser";
+import { AbstractSearchTerm } from "../terms/abstract_search_term";
 import { SearchQueryMetadata } from "../types/search_types";
 import { Searchable } from "../../../types/search";
 import { isEmptyString } from "../../../utils/string/query";
@@ -8,7 +8,7 @@ export class SearchQuery<T extends Searchable> {
   public readonly rawQuery: string;
   public readonly isEmpty: boolean;
   public orGroups: AbstractSearchTerm[][] = [];
-  public andTags: AbstractSearchTerm[] = [];
+  public andTerms: AbstractSearchTerm[] = [];
 
   constructor(searchQuery: string) {
     this.rawQuery = searchQuery;
@@ -17,64 +17,64 @@ export class SearchQuery<T extends Searchable> {
     if (this.isEmpty) {
       return;
     }
-    const { orGroups, andTags } = parseTagGroups(searchQuery);
+    const { orGroups, andTerms } = parseTermGroups(searchQuery);
 
-    this.orGroups = orGroups.map(orGroup => buildTagGroup(orGroup));
-    this.andTags = buildTagGroup(andTags);
-    this.flattenSingleTagOrGroups();
+    this.orGroups = orGroups.map(orGroup => buildSearchTerms(orGroup));
+    this.andTerms = buildSearchTerms(andTerms);
+    this.flattenSingletonOrGroups();
     this.orGroups.sort((a, b) => a.length - b.length);
   }
 
   public get metadata(): SearchQueryMetadata {
-    const andTags = categorizeTags(this.andTags);
-    const orTags = categorizeTags(this.orGroups.flat());
+    const andTerms = categorizeSearchTerms(this.andTerms);
+    const orTerms = categorizeSearchTerms(this.orGroups.flat());
     return {
-      hasPositiveAndTag: andTags.positiveTags.length > 0,
-      hasWildcardTag: andTags.wildcardTags.length + orTags.wildcardTags.length > 0,
-      hasMetadataTag: andTags.metadataTags.length + orTags.metadataTags.length > 0,
+      hasRequiredTerm: andTerms.required.length > 0,
+      hasWildcardTerm: andTerms.wildcard.length + orTerms.wildcard.length > 0,
+      hasMetadataTerm: andTerms.metadata.length + orTerms.metadata.length > 0,
       hasOrGroup: this.orGroups.length > 0
     };
   }
 
   public get negatedTerms(): Set<string> {
-    return new Set(this.andTags.filter(tag => tag.negated).map(tag => tag.value));
+    return new Set(this.andTerms.filter(searchTerm => searchTerm.negated).map(searchTerm => searchTerm.value));
   }
 
   public get requiredTerms(): string[] {
-    return this.andTags.filter(tag => !tag.negated).map(tag => tag.value);
+    return this.andTerms.filter(searchTerm => !searchTerm.negated).map(searchTerm => searchTerm.value);
   }
 
   public get orGroupTerms(): string[][] {
-    return this.orGroups.map(orGroup => orGroup.map(tag => tag.value));
+    return this.orGroups.map(orGroup => orGroup.map(searchTerm => searchTerm.value));
   }
 
-  public apply(items: T[]): T[] {
-    return this.isEmpty ? items : items.filter(item => this.matchesAndTags(item) && this.matchesOrGroups(item));
+  public filter(items: T[]): T[] {
+    return this.isEmpty ? items : items.filter(item => this.matchesAndTerms(item) && this.matchesOrGroups(item));
   }
 
   public equals(other: SearchQuery<T>): boolean {
     return this.rawQuery === other.rawQuery;
   }
 
-  private flattenSingleTagOrGroups(): void {
-    const multiTagOrGroups: AbstractSearchTerm[][] = [];
+  private flattenSingletonOrGroups(): void {
+    const multiTermOrGroups: AbstractSearchTerm[][] = [];
 
     for (const orGroup of this.orGroups) {
       if (orGroup.length === 1) {
-        this.andTags.push(orGroup[0]);
+        this.andTerms.push(orGroup[0]);
       } else {
-        multiTagOrGroups.push(orGroup);
+        multiTermOrGroups.push(orGroup);
       }
     }
-    this.orGroups = multiTagOrGroups;
-    this.andTags = sortTagGroup(this.andTags);
+    this.orGroups = multiTermOrGroups;
+    this.andTerms = sortSearchTerms(this.andTerms);
   }
 
-  private matchesAndTags(item: Searchable): boolean {
-    return this.andTags.every(tag => tag.matches(item));
+  private matchesAndTerms(item: Searchable): boolean {
+    return this.andTerms.every(searchTerm => searchTerm.matches(item));
   }
 
   private matchesOrGroups(item: Searchable): boolean {
-    return this.orGroups.every(orGroup => orGroup.some(tag => tag.matches(item)));
+    return this.orGroups.every(orGroup => orGroup.some(searchTerm => searchTerm.matches(item)));
   }
 }

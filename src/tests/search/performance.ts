@@ -108,7 +108,7 @@ export function compareSearchPerformance(): void {
     const searchQuery = new SearchQuery<Searchable>(query);
 
     header(`${name} x${ITERATIONS}`);
-    benchmark(`SearchQuery ${name}`, () => searchQuery.apply(docs), ITERATIONS);
+    benchmark(`SearchQuery ${name}`, () => searchQuery.filter(docs), ITERATIONS);
     benchmark(`SearchEngine ${name}`, () => engine.search(searchQuery, docs), ITERATIONS);
   }
 }
