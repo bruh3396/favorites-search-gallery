@@ -1,17 +1,17 @@
 import * as ICONS from "../../assets/icons";
 import { insertHtml, insertStyle } from "../../lib/dom/injector";
-import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
-import { Preferences } from "../../lib/preferences/preferences";
+import { Events } from "../../app/messaging/events";
+import { FeatureBridge } from "../../app/messaging/feature_bridge";
+import { Preferences } from "../../app/state/preferences";
 import SAVED_SEARCHES_CSS from "../../assets/css/saved_searches.css";
-import { SAVED_SEARCHES_DISABLED } from "../../lib/environment/derived_environment";
+import { SAVED_SEARCHES_DISABLED } from "../../app/state/feature_flags";
 import SAVED_SEARCHES_HTML from "../../assets/html/saved_searches.html";
-import { Storage } from "../../lib/core/storage/local_storage";
-import { awesompleteIsUnselected } from "../../lib/ui/awesomplete";
-import { getAllContentThumbs } from "../../lib/dom/content_thumb";
+import { Storage } from "../../lib/storage/local_storage";
+import { awesompleteIsUnselected } from "../../lib/ui/autocomplete/awesomplete";
+import { getAllContentThumbs } from "../../app/shell/content_thumbs";
 import { getSavedSearches } from "../../lib/saved_searches";
 import { shuffleArray } from "../../utils/collection/array";
-import { sleep } from "../../lib/core/scheduling/promise";
+import { sleep } from "../../lib/async/sleep";
 
 let textarea: HTMLTextAreaElement;
 let savedSearchesList: HTMLElement;

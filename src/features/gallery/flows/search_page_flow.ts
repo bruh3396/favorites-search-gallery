@@ -4,7 +4,7 @@ import * as GalleryView from "../view/gallery_view";
 import { POSTS_PER_SEARCH_PAGE, doNothing } from "../../../lib/environment/constants";
 import { GalleryConfig } from "../../../config/gallery_config";
 import { dispatchByState } from "./state_dispatch";
-import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
+import { getAllContentThumbs } from "../../../app/shell/content_thumbs";
 
 export function onUpscaleToggled(value: boolean): void {
   if (value) {

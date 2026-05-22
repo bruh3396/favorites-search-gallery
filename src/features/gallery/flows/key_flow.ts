@@ -4,10 +4,10 @@ import * as GalleryNavigationFlow from "./navigation_flow";
 import * as GalleryOpenCloseFlow from "./open_close_flow";
 import * as GalleryView from "../view/gallery_view";
 import { isExitKey, isNavigationKey } from "../../../types/guards";
-import { EnhancedKeyboardEvent } from "../../../lib/dom/input_types";
+import { EnhancedKeyboardEvent } from "../../../lib/ui/input_types";
 import { GalleryConfig } from "../../../config/gallery_config";
 import { dispatchByState } from "./state_dispatch";
-import { throttle } from "../../../lib/core/scheduling/rate_limiting";
+import { throttle } from "../../../lib/async/throttle";
 import { toggleFullscreen } from "../../../utils/browser/window";
 
 const insideGalleryHotkeyHandlers: Record<string, () => void> = {

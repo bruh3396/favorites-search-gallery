@@ -1,10 +1,10 @@
-import * as ContentTiler from "../../../lib/layout/content_tiler";
+import * as ContentTiler from "../../../app/shell/content_tiler";
 import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
-import { PageBottomObserver, PageTopObserver } from "../../../lib/core/observers/edge_observer";
-import { noItemsAreVisible, waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
-import { Content } from "../../../lib/shell";
-import { Events } from "../../../lib/communication/events";
+import { Content, ScrollSentinelBottom, ScrollSentinelTop } from "../../../app/shell/shell";
+import { PageBottomObserver, PageTopObserver } from "../../../lib/observer/edge_observer";
+import { noItemsAreVisible, waitForAllThumbnailsToLoad } from "../../../app/shell/content_thumbs";
+import { Events } from "../../../app/messaging/events";
 import { Favorite } from "../../../types/favorite";
 import { FavoritesConfig } from "../../../config/favorites_config";
 import { FavoritesResultsView } from "../types/favorite_types";
@@ -12,8 +12,8 @@ import { NavigationKey } from "../../../types/input";
 import { doNothing } from "../../../lib/environment/constants";
 import { isForwardNavigationKey } from "../../../types/guards";
 
-const bottomObserver = new PageBottomObserver(extendBelow, ContentTiler.getBottomEdgeElements);
-const topObserver = new PageTopObserver(extendAbove);
+const bottomObserver = new PageBottomObserver(extendBelow, getBottomSentinels);
+const topObserver = new PageTopObserver(extendAbove, () => [ScrollSentinelTop]);
 
 export const FavoritesInfiniteScrollView = {
   initialize,
@@ -26,6 +26,11 @@ export const FavoritesInfiniteScrollView = {
 export function disconnect(): void {
   bottomObserver.disconnect();
   topObserver.disconnect();
+}
+
+function getBottomSentinels(): HTMLElement[] {
+  const extras = ContentTiler.getBottomEdgeElements();
+  return extras.length > 0 ? extras : [ScrollSentinelBottom];
 }
 
 async function initialize(favorites: Favorite[]): Promise<void> {

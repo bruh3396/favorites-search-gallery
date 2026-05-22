@@ -1,13 +1,13 @@
 import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
+import { EnhancedMouseEvent } from "../../../../lib/ui/input_types";
 import { GalleryConfig } from "../../../../config/gallery_config";
 import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../types/gallery_types";
 import { GalleryRoot } from "./shell";
 import { GeneralConfig } from "../../../../config/general_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { Preferences } from "../../../../lib/preferences/preferences";
-import { EnhancedMouseEvent } from "../../../../lib/dom/input_types";
+import { Preferences } from "../../../../app/state/preferences";
 import { Timeout } from "../../../../types/async";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { toggleFullscreen } from "../../../../utils/browser/window";
@@ -146,6 +146,7 @@ function createColorPicker(): void {
   };
   colorPicker.oninput = (): void => {
     setColorScheme(colorPicker.value);
+    Preferences.colorScheme.set(colorPicker.value);
   };
   button.insertAdjacentElement("afterbegin", colorPicker);
 }

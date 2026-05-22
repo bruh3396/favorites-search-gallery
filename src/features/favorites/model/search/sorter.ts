@@ -1,5 +1,5 @@
 import { Favorite } from "../../../../types/favorite";
-import { Preferences } from "../../../../lib/preferences/preferences";
+import { Preferences } from "../../../../app/state/preferences";
 import { shuffleArray } from "../../../../utils/collection/array";
 
 export function sortFavorites(favorites: Favorite[]): Favorite[] {

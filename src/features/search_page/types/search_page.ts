@@ -1,5 +1,5 @@
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
-import { RAW_THUMB_CLASS_NAME } from "../../../lib/dom/thumb";
+import { RAW_THUMB_CLASS_NAME } from "../../../lib/thumb/thumbs";
 import { domParser } from "../../../lib/dom/dom_parser";
 import { prepareSearchPageThumbs } from "../model/thumb_preparer";
 

@@ -1,8 +1,8 @@
 import * as SearchPageModel from "../model/search_page_model";
 import * as SearchPageView from "../view/search_page_view";
-import { Events } from "../../../lib/communication/events";
-import { PageBottomObserver } from "../../../lib/core/observers/page_bottom_observer";
-import { Preferences } from "../../../lib/preferences/preferences";
+import { Events } from "../../../app/messaging/events";
+import { PageBottomObserver } from "../../../lib/observer/page_bottom_observer";
+import { Preferences } from "../../../app/state/preferences";
 
 let pageBottomObserver: PageBottomObserver;
 

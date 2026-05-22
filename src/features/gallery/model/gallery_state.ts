@@ -1,6 +1,6 @@
 import { GalleryConfig } from "../../../config/gallery_config";
 import { GalleryState } from "../types/gallery_types";
-import { Preferences } from "../../../lib/preferences/preferences";
+import { Preferences } from "../../../app/state/preferences";
 
 let currentState = initialState();
 let recentlyClosed = false;

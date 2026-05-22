@@ -1,6 +1,6 @@
 import HELP_HTML from "../../../../assets/html/help.html";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { Overlays } from "../../../../lib/shell";
+import { Overlays } from "../../../../app/shell/shell";
 import { getCurrentThemeClass } from "../../../../lib/ui/style";
 
 let dialog: HTMLDialogElement;

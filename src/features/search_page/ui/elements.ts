@@ -1,12 +1,12 @@
 import { CheckboxElement, SelectElement } from "../../../lib/ui/element_types";
+import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../app/state/feature_flags";
 import { Layout, PerformanceProfile } from "../../../types/ui";
-import { Events } from "../../../lib/communication/events";
-import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../lib/environment/derived_environment";
+import { Events } from "../../../app/messaging/events";
 import { GeneralConfig } from "../../../config/general_config";
 import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { Preferences } from "../../../lib/preferences/preferences";
-import { buildCheckboxElement } from "../../../lib/ui/elements/checkbox";
+import { Preferences } from "../../../app/state/preferences";
+import { buildCheckboxElement } from "../../../app/input/checkbox";
 import { buildSelectElement } from "../../../lib/ui/elements/select";
 import { numberRange } from "../../../utils/number";
 import { prepareDynamicElements } from "../../../lib/ui/elements/element_utils";

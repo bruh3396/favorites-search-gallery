@@ -32,6 +32,7 @@
     "audit": "tsx .scripts/project_auditor.ts",
     "release": "npm run compile-scripts && npm run continuous-integration && npm run lint && npm run audit",
     "fix-lf": "tsx .scripts/normalize_line_endings.ts",
+    "fix-bom": "python .scripts/correct_bom.py",
     "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open",
     "performance": "tsx src/tests/performance.ts"
   },

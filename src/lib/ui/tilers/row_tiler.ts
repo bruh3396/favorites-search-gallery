@@ -1,4 +1,4 @@
-import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../dom/thumb";
+import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../thumb/thumbs";
 import { AbstractTiler } from "./abstract_tiler";
 import { Layout } from "../../../types/ui";
 import { ThumbnailConfig } from "../../../config/thumbnail_config";

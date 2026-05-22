@@ -1,4 +1,4 @@
-import { ConcurrencyLimiter } from "../../core/concurrency/concurrency_limiter";
+import { ConcurrencyLimiter } from "../../async/concurrency_limiter";
 import { Favorite } from "../../../types/favorite";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { baseImageUrl } from "../../media/base_image_url";

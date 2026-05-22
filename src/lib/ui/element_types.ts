@@ -1,5 +1,5 @@
-import { Emitter } from "../core/scheduling/emitter";
-import { Preference } from "../core/storage/preference";
+import { Emitter } from "../communication/emitter";
+import { Preference } from "../storage/preference";
 import { doNothing } from "../environment/constants";
 
 export interface MenuElement<T> {

@@ -1,6 +1,6 @@
 import { EncodedTagCategory, TagResponse } from "../../../types/api";
 import { ApiConfig } from "../../../config/api_config";
-import { CoalescingResolver } from "../../core/concurrency/coalescing_resolver";
+import { CoalescingResolver } from "../../async/coalescing_resolver";
 import { TAG_API_URL } from "../url/api_urls";
 import { fetchJsonFromApi } from "./api_client";
 import { tagLimiter } from "../http/rate_limiter";

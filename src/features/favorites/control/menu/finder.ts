@@ -1,8 +1,8 @@
-import { Events } from "../../../../lib/communication/events";
+import { Events } from "../../../../app/messaging/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { Preferences } from "../../../../lib/preferences/preferences";
-import { debounceLeading } from "../../../../lib/core/scheduling/rate_limiting";
+import { Preferences } from "../../../../app/state/preferences";
+import { debounceLeading } from "../../../../lib/async/debounce";
 
 let container: HTMLElement;
 let findButton: HTMLButtonElement;

@@ -1,9 +1,9 @@
 import * as FavoritesResults from "./results";
 import * as FavoritesSearchEngine from "./engine";
 import * as FavoritesSorter from "./sorter";
-import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
+import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/session";
 import { Favorite } from "../../../../types/favorite";
-import { Preferences } from "../../../../lib/preferences/preferences";
+import { Preferences } from "../../../../app/state/preferences";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
 
 let currentSearchQuery = "";

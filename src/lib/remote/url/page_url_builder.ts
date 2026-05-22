@@ -1,4 +1,4 @@
-import { FAVORITES_PAGE_ID } from "../../environment/favorites_metadata";
+import { FAVORITES_PAGE_ID } from "../../environment/session";
 import { ORIGIN } from "./origin";
 import { POSTS_PER_SEARCH_PAGE } from "../../environment/constants";
 

@@ -1,6 +1,6 @@
 import CONTROLS_CSS from "../../../../assets/css/controls.css";
 import { insertStyle } from "../../../../lib/dom/injector";
-import { sleep } from "../../../../lib/core/scheduling/promise";
+import { sleep } from "../../../../lib/async/sleep";
 
 export async function buildControlsGuide(): Promise<void> {
   insertStyle(CONTROLS_CSS);

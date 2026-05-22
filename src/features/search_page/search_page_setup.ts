@@ -1,13 +1,13 @@
-import * as ContentTiler from "../../lib/layout/content_tiler";
+import * as ContentTiler from "../../app/shell/content_tiler";
 import * as SearchPageInfiniteScrollFlow from "./flows/infinite_scroll_flow";
 import * as SearchPageModel from "./model/search_page_model";
 import * as SearchPageNavigationFlow from "./flows/navigation_flow";
 import * as SearchPageOptionFlow from "./flows/option_flow";
 import * as SearchPageView from "./view/search_page_view";
-import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { Events } from "../../app/messaging/events";
+import { FeatureBridge } from "../../app/messaging/feature_bridge";
 import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
-import { Preferences } from "../../lib/preferences/preferences";
+import { Preferences } from "../../app/state/preferences";
 import { buildSearchPage } from "./ui/shell";
 
 export function setupSearchPage(): void {
@@ -33,4 +33,5 @@ function registerBridgeHandlers(): void {
   FeatureBridge.currentSearchQuery.register(SearchPageView.currentSearch);
   FeatureBridge.navigateToAdjacentSearchPage.register(SearchPageNavigationFlow.navigateSearchPages);
   FeatureBridge.searchPageThumbs.register(SearchPageModel.getAllSearchPageThumbs);
+  FeatureBridge.usingInfiniteScroll.register(() => Preferences.searchPageInfiniteScroll.value);
 }

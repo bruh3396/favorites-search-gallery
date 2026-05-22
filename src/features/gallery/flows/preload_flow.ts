@@ -2,7 +2,7 @@ import * as GalleryModel from "../model/gallery_model";
 import * as GalleryThumbObserver from "../control/visible_thumb_observer";
 import * as GalleryView from "../view/gallery_view";
 import { GalleryConfig } from "../../../config/gallery_config";
-import { yieldControl } from "../../../lib/core/scheduling/promise";
+import { yieldControl } from "../../../lib/async/sleep";
 
 export async function preloadVisibleThumbs(): Promise<void> {
   if (!GalleryConfig.preloadingEnabled || GalleryModel.hasRecentlyExitedGallery() || GalleryModel.isInGallery()) {

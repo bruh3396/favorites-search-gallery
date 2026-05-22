@@ -1,9 +1,9 @@
-import { FeatureBridge } from "../../../lib/communication/feature_bridge";
+import { FeatureBridge } from "../../../app/messaging/feature_bridge";
 import { GalleryConfig } from "../../../config/gallery_config";
 import { MediaType } from "../../../types/media";
-import { ThrottledQueue } from "../../../lib/core/concurrency/throttled_queue";
-import { getPreviewUrl } from "../../../lib/ui/dom";
-import { getTagSetFromItem } from "../../../lib/dom/tags";
+import { ThrottledQueue } from "../../../lib/async/throttled_queue";
+import { getPreviewUrl } from "../../../lib/thumb/thumbs";
+import { getTagSetFromItem } from "../../../lib/thumb/thumb_tags";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";
 
 const bitmapCloseQueue = new ThrottledQueue(GalleryConfig.bitmapCloseDelay);

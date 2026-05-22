@@ -1,11 +1,11 @@
-﻿import * as ContentTiler from "../../../lib/layout/content_tiler";
+import * as ContentTiler from "../../../app/shell/content_tiler";
 import * as FavoritesNavigator from "./navigation/navigator";
 import * as FavoritesShell from "./shell/favorites_shell";
 import * as FavoritesStatus from "./status/status";
 import { Favorite, PageRelation } from "../../../types/favorite";
 import { buildElementTemplate } from "../types/favorite_element_template";
 import { favoritesSkeleton } from "./skeleton/skeleton";
-import { scrollToTop } from "../../../lib/ui/dom";
+import { scrollToTop } from "../../../lib/thumb/thumbs";
 
 export interface FavoritesViewCallbacks {
   onPageSelected: (pageNumber: number) => void;
@@ -35,7 +35,7 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
 }
 
 export { toggle as toggleNavigator, getContainer as getNavigationContainer, build as buildNavigationMenu, update as updateNavigationMenu } from "./navigation/navigator";
-export { changeLayout } from "../../../lib/layout/content_tiler";
+export { changeLayout } from "../../../app/shell/content_tiler";
 
 export * from "./update/thumb_preloader";
 export * from "./status/status";

@@ -5,7 +5,6 @@ import { GalleryRoot, mountGallery } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
 import { GalleryMenuAction } from "../../../types/ui";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { getAllContentThumbs } from "../../../lib/dom/content_thumb";
 import { insertStyle } from "../../../lib/dom/injector";
 export { overGalleryMenu } from "./view_utils";
 

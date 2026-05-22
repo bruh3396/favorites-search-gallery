@@ -1,0 +1,59 @@
+import { DomEvents } from "./dom_events";
+import { Events } from "../messaging/events";
+import { ON_MOBILE_DEVICE } from "../../lib/environment/environment";
+
+type Point = { x: number; y: number };
+
+const THRESHOLD = 90;
+const start: Point = { x: 0, y: 0 };
+const end: Point = { x: 0, y: 0 };
+
+export function setupSwipeEvents(): void {
+  if (ON_MOBILE_DEVICE) {
+    DomEvents.document.touchStart.on(setTouchStart);
+    DomEvents.document.touchEnd.on(onTouchEnd);
+  }
+}
+
+export const didSwipe = (): boolean => getSwipeDirection() !== null;
+export const didNotSwipe = (): boolean => !didSwipe();
+
+function setTouchStart(event: TouchEvent): void {
+  start.x = event.changedTouches[0].screenX;
+  start.y = event.changedTouches[0].screenY;
+}
+
+function getSwipeDirection(): "up" | "down" | "left" | "right" | null {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+
+  if (Math.abs(dx) < THRESHOLD && Math.abs(dy) < THRESHOLD) {
+    return null;
+  }
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return dx > 0 ? "right" : "left";
+  }
+  return dy > 0 ? "down" : "up";
+}
+
+function onTouchEnd(event: TouchEvent): void {
+  end.x = event.changedTouches[0].screenX;
+  end.y = event.changedTouches[0].screenY;
+
+  switch (getSwipeDirection()) {
+    case "up":
+      Events.mobile.swipedUp.emit();
+      break;
+    case "down":
+      Events.mobile.swipedDown.emit();
+      break;
+    case "left":
+      Events.mobile.swipedLeft.emit();
+      break;
+    case "right":
+      Events.mobile.swipedRight.emit();
+      break;
+    default: break;
+  }
+}

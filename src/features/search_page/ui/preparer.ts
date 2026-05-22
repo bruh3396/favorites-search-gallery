@@ -1,8 +1,8 @@
-import { Events } from "../../../lib/communication/events";
-import { ITEM_SELECTOR } from "../../../lib/dom/thumb";
+import { Events } from "../../../app/messaging/events";
+import { ITEM_SELECTOR } from "../../../lib/thumb/thumbs";
 import { prepareSearchPageThumbs } from "../model/thumb_preparer";
-import { waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
-import { waitForDomToLoad } from "../../../lib/ui/dom";
+import { waitForAllThumbnailsToLoad } from "../../../app/shell/content_thumbs";
+import { waitForDomToLoad } from "../../../app/input/dom_events";
 
 export async function prepareAllThumbsOnSearchPage(): Promise<void> {
   await waitForDomToLoad();

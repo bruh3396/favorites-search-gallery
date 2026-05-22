@@ -1,7 +1,7 @@
 import { insertHtml, insertStyle } from "../../../lib/dom/injector";
-import { Content } from "../../../lib/shell";
+import { Content } from "../../../app/shell/shell";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
-import { Preferences } from "../../../lib/preferences/preferences";
+import { Preferences } from "../../../app/state/preferences";
 import SEARCH_PAGE_CSS from "../../../assets/css/search_page.css";
 import SEARCH_PAGE_HTML from "../../../assets/html/search_page.html";
 import { createDynamicSearchPageMenuElements } from "./elements";

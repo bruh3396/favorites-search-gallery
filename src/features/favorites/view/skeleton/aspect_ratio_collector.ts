@@ -1,6 +1,6 @@
-import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../../lib/dom/content_thumb";
-import { Storage } from "../../../../lib/core/storage/local_storage";
-import { getImageFromThumb } from "../../../../lib/dom/thumb";
+import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../../app/shell/content_thumbs";
+import { Storage } from "../../../../lib/storage/local_storage";
+import { getImageFromThumb } from "../../../../lib/thumb/thumbs";
 
 const LOCAL_STORAGE_KEY = "aspectRatios";
 const aspectRatios: string[] = Storage.get<string[]>(LOCAL_STORAGE_KEY) ?? [];

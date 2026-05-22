@@ -1,4 +1,4 @@
-import { compressPreviewSource, convertImageUrlToSampleUrl, convertPreviewUrlToImageUrl, decompressPreviewSource, normalizeImageSource, removeIdFromImageUrl, toWimgUrl } from "../../lib/media/media_url_transformer";
+import { compressPreviewSource, convertImageUrlToSampleUrl, convertPreviewUrlToImageUrl, convertToWimgUrl, decompressPreviewSource, normalizeImageSource, removeIdFromImageUrl } from "../../lib/media/media_url_transformer";
 import { describe, expect, test } from "vitest";
 
 describe("cleanImageSource", () => {
@@ -71,27 +71,27 @@ describe("convertImageUrlToSampleUrl", () => {
 
 describe("toWimgUrl", () => {
   test("no subdomain", () => {
-    expect(toWimgUrl("https://rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+    expect(convertToWimgUrl("https://rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
   });
 
   test("with subdomain", () => {
-    expect(toWimgUrl("https://us.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+    expect(convertToWimgUrl("https://us.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
   });
 
   test("already wimg", () => {
-    expect(toWimgUrl("https://wimg.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
+    expect(convertToWimgUrl("https://wimg.rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
   });
 
   test("rule34 in path does not get replaced", () => {
-    expect(toWimgUrl("https://rule34.xxx/rule34/images/abc.jpg")).toBe("https://wimg.rule34.xxx/rule34/images/abc.jpg");
+    expect(convertToWimgUrl("https://rule34.xxx/rule34/images/abc.jpg")).toBe("https://wimg.rule34.xxx/rule34/images/abc.jpg");
   });
 
   test("rule34 in query string does not get replaced", () => {
-    expect(toWimgUrl("https://rule34.xxx/images/abc.jpg?tag=rule34")).toBe("https://wimg.rule34.xxx/images/abc.jpg?tag=rule34");
+    expect(convertToWimgUrl("https://rule34.xxx/images/abc.jpg?tag=rule34")).toBe("https://wimg.rule34.xxx/images/abc.jpg?tag=rule34");
   });
 
   test("invalid url returns original", () => {
-    expect(toWimgUrl("not-a-url")).toBe("not-a-url");
+    expect(convertToWimgUrl("not-a-url")).toBe("not-a-url");
   });
 });
 

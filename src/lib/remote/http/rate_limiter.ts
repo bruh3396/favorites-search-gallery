@@ -1,7 +1,7 @@
 import { ApiConfig } from "../../../config/api_config";
-import { ConcurrencyLimiter } from "../../core/concurrency/concurrency_limiter";
+import { ConcurrencyLimiter } from "../../async/concurrency_limiter";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
-import { ThrottledQueue } from "../../core/concurrency/throttled_queue";
+import { ThrottledQueue } from "../../async/throttled_queue";
 
 export const postLimiter = new ConcurrencyLimiter(ApiConfig.postFetchConcurrency);
 export const tagLimiter = new ConcurrencyLimiter(ApiConfig.tagFetchConcurrency);

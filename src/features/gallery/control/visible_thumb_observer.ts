@@ -1,9 +1,9 @@
 import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
-import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../lib/dom/content_thumb";
-import { Events } from "../../../lib/communication/events";
+import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../app/shell/content_thumbs";
+import { Events } from "../../../app/messaging/events";
 import { GalleryConfig } from "../../../config/gallery_config";
-import { Preferences } from "../../../lib/preferences/preferences";
-import { debounceTrailing } from "../../../lib/core/scheduling/rate_limiting";
+import { Preferences } from "../../../app/state/preferences";
+import { debounceTrailing } from "../../../lib/async/debounce";
 import { getRectDistance } from "../../../utils/geometry";
 
 const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();

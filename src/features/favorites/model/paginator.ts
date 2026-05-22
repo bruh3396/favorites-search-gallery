@@ -1,7 +1,7 @@
 import { Favorite, PageRelation } from "../../../types/favorite";
 import { FavoritesPaginationParameters } from "../types/favorite_types";
 import { NavigationKey } from "../../../types/input";
-import { Preferences } from "../../../lib/preferences/preferences";
+import { Preferences } from "../../../app/state/preferences";
 import { clamp } from "../../../utils/number";
 import { isForwardNavigationKey } from "../../../types/guards";
 

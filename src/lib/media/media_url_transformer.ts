@@ -34,7 +34,7 @@ export function removeIdFromImageUrl(imageUrl: string): string {
   return imageUrl.replace(/\?\d+/, "");
 }
 
-export function toWimgUrl(url: string): string {
+export function convertToWimgUrl(url: string): string {
   try {
     const parsed = new URL(url);
 

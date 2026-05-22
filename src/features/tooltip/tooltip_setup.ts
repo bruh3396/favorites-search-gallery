@@ -3,9 +3,9 @@ import * as TooltipModel from "./model/tooltip_model";
 import * as TooltipScrollFlow from "./flows/scroll_flow";
 import * as TooltipToggleFlow from "./flows/toggle_flow";
 import * as TooltipView from "./view/tooltip_view";
-import { DomEvents } from "../../lib/communication/dom_events";
-import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { DomEvents } from "../../app/input/dom_events";
+import { Events } from "../../app/messaging/events";
+import { FeatureBridge } from "../../app/messaging/feature_bridge";
 import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 
 export function setupTooltip(): void {

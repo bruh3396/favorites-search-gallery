@@ -1,6 +1,6 @@
 import { Favorite } from "../../types/favorite";
 import { baseImageUrl } from "./base_image_url";
-import { getTagSetFromItem } from "../dom/tags";
+import { getTagSetFromItem } from "../thumb/thumb_tags";
 import { resolveExtension } from "./media_extension_resolver";
 
 export async function resolveImageUrl(item: HTMLElement | Favorite): Promise<string> {

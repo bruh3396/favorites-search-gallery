@@ -1,9 +1,9 @@
-import * as ContentTiler from "../../../lib/layout/content_tiler";
+import * as ContentTiler from "../../../app/shell/content_tiler";
 import * as SearchPageCreator from "./page_builder";
-import { Preferences } from "../../../lib/preferences/preferences";
+import { Preferences } from "../../../app/state/preferences";
 import { SearchPage } from "../types/search_page";
-import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
-import { hideUnusedLayoutSizer } from "../../../lib/layout/content_tiler_handlers";
+import { getAllPageThumbs } from "../../../app/shell/content_thumbs";
+import { hideUnusedLayoutSizer } from "../../../app/shell/content_tiler";
 
 export function setup(): void {
   ContentTiler.setup();

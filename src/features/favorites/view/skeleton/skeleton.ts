@@ -1,7 +1,7 @@
 import { Layout } from "../../../../types/ui";
-import { Preferences } from "../../../../lib/preferences/preferences";
+import { Preferences } from "../../../../app/state/preferences";
 import { SkeletonItem } from "./skeleton_item";
-import { getLayout } from "../../../../lib/layout/content_tiler";
+import { getLayout } from "../../../../app/shell/content_tiler";
 
 const DEFAULT_ITEM_COUNT = 50;
 

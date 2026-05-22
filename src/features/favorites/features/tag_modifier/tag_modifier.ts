@@ -1,11 +1,11 @@
-﻿import * as TagModifierEditMode from "./edit_mode";
+import * as TagModifierEditMode from "./edit_mode";
 import * as TagModifierOperations from "./operations";
 import * as TagModifierSelection from "./selection";
 import * as TagModifierStore from "./store";
 import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
 import { Favorite } from "../../../../types/favorite";
 import TAG_MODIFIER_CSS from "../../../../assets/css/tag_modifier.css";
-import { TAG_MODIFIER_DISABLED } from "../../../../lib/environment/derived_environment";
+import { TAG_MODIFIER_DISABLED } from "../../../../app/state/feature_flags";
 import TAG_MODIFIER_HTML from "../../../../assets/html/tag_modifier.html";
 import { doNothing } from "../../../../lib/environment/constants";
 

@@ -1,6 +1,6 @@
 import { select, unselectAll } from "./selection";
 import { Favorite } from "../../../../types/favorite";
-import { ITEM_CLASS_NAME } from "../../../../lib/dom/thumb";
+import { ITEM_CLASS_NAME } from "../../../../lib/thumb/thumbs";
 import { insertStyle } from "../../../../lib/dom/injector";
 
 let getFavorite: (id: string) => Favorite | undefined = () => undefined;

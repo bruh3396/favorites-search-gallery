@@ -1,21 +1,21 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../lib/ui/element_types";
-import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../lib/environment/derived_environment";
+import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/state/feature_flags";
 import { Layout, PerformanceProfile } from "../../../../types/ui";
-import { buildCheckboxElement, buildCheckboxOption } from "../../../../lib/ui/elements/checkbox";
+import { buildCheckboxElement, buildCheckboxOption } from "../../../../app/input/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../view/update/ui_toggles";
-import { Events } from "../../../../lib/communication/events";
+import { Events } from "../../../../app/messaging/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { GeneralConfig } from "../../../../config/general_config";
 import { MetadataMetric } from "../../../../types/search";
-import { Preferences } from "../../../../lib/preferences/preferences";
+import { Preferences } from "../../../../app/state/preferences";
 import { ThumbnailConfig } from "../../../../config/thumbnail_config";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/session";
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
-import { hideUnusedLayoutSizer } from "../../../../lib/layout/content_tiler_handlers";
+import { hideUnusedLayoutSizer } from "../../../../app/shell/content_tiler";
 import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 import { reloadWindow } from "../../../../utils/browser/window";
 

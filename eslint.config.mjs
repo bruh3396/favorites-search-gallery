@@ -558,10 +558,10 @@ export default defineConfig([
   },
   {
     files: [
-      "src/lib/core/data_structures/sorted_array.ts",
+      "src/**/sorted_array.ts",
       "src/features/favorites/types/favorite_item.ts",
       "src/features/favorites/control/menu/rating_filter.ts",
-      "src/lib/search/terms/wildcard_search_term.ts"
+      "src/**/wildcard_search_term.ts"
     ],
     rules: {
       "no-bitwise": "off"

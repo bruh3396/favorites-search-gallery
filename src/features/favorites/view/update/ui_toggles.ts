@@ -1,5 +1,5 @@
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { Preferences } from "../../../../lib/preferences/preferences";
+import { Preferences } from "../../../../app/state/preferences";
 import { insertStyle } from "../../../../lib/dom/injector";
 
 export function syncShowOnHoverFromGallery(value: boolean): void {

@@ -1,11 +1,11 @@
 import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "../../types/ui";
-import { AUTOCOMPLETE_DISABLED } from "../../lib/environment/derived_environment";
-import { Preferences } from "../../lib/preferences/preferences";
+import { AUTOCOMPLETE_DISABLED } from "../../app/state/feature_flags";
+import { Preferences } from "../../app/state/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
-import { addCustomTagsToAutocomplete } from "../../lib/tags/custom_tags";
+import { addCustomTagsToAutocomplete } from "../../lib/search/tags/custom_tags";
 import { fetchHtml } from "../../lib/remote/http/http_client";
 import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
-import { hideAwesomplete } from "../../lib/ui/awesomplete";
+import { hideAwesomplete } from "../../lib/ui/autocomplete/awesomplete";
 import { isEmptyString } from "../../utils/string/query";
 import { removeLeadingHyphens } from "../../utils/string/format";
 import { replaceTagInText } from "./autocomplete_tag_replacer";

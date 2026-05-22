@@ -1,6 +1,6 @@
 import { Favorite } from "../../../types/favorite";
 import { FavoritesConfig } from "../../../config/favorites_config";
-import { Preferences } from "../../../lib/preferences/preferences";
+import { Preferences } from "../../../app/state/preferences";
 import { ScrollExpansionResult } from "../types/favorite_types";
 
 let favorites: Favorite[] = [];

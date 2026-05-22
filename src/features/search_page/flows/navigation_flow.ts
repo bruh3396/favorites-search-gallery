@@ -1,9 +1,9 @@
 import * as SearchPageInfiniteScrollFlow from "./infinite_scroll_flow";
 import * as SearchPageModel from "../model/search_page_model";
 import * as SearchPageView from "../view/search_page_view";
-import { Events } from "../../../lib/communication/events";
+import { Events } from "../../../app/messaging/events";
 import { NavigationKey } from "../../../types/input";
-import { Preferences } from "../../../lib/preferences/preferences";
+import { Preferences } from "../../../app/state/preferences";
 import { SearchPage } from "../types/search_page";
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {

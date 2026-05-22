@@ -1,7 +1,7 @@
-import { Events } from "../../../../lib/communication/events";
-import { SearchHistory } from "../../../../lib/core/storage/search_history";
-import { debounceLeading } from "../../../../lib/core/scheduling/rate_limiting";
-import { hideAwesomplete } from "../../../../lib/ui/awesomplete";
+import { Events } from "../../../../app/messaging/events";
+import { SearchHistory } from "../../../../lib/storage/search_history";
+import { debounceLeading } from "../../../../lib/async/debounce";
+import { hideAwesomplete } from "../../../../lib/ui/autocomplete/awesomplete";
 
 const HISTORY_DEPTH = 30;
 const INPUT_PERSIST_DELAY = 500;

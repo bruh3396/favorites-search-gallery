@@ -1,4 +1,4 @@
-﻿import * as FavoritesDesktop from "./control/menu/desktop";
+import * as FavoritesDesktop from "./control/menu/desktop";
 import * as FavoritesDownloadMenu from "./features/downloader/menu";
 import * as FavoritesFinder from "./control/menu/finder";
 import * as FavoritesInterFeatureFlow from "./flows/inter_feature_flow";
@@ -16,9 +16,12 @@ import * as FavoritesSearchFlow from "./flows/search_flow";
 import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../lib/environment/environment";
-import { DomEvents } from "../../lib/communication/dom_events";
-import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
+import { DomEvents } from "../../app/input/dom_events";
+import { Events } from "../../app/messaging/events";
+import { FeatureBridge } from "../../app/messaging/feature_bridge";
+import { Preferences } from "../../app/state/preferences";
+import { deferPostPageFetchesUntil } from "../../lib/remote/api/post_fetcher";
+import { setFavoriteTagsLookup } from "../../lib/thumb/thumb_tags";
 
 export function setupFavorites(): void {
   if (!ON_FAVORITES_PAGE) {
@@ -30,6 +33,7 @@ export function setupFavorites(): void {
   setupSubFeatures();
   subscribeToEvents();
   registerBridgeHandlers();
+  deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
   FavoritesLoadFlow.loadAllFavorites();
 }
 
@@ -115,6 +119,8 @@ function registerBridgeHandlers(): void {
   FeatureBridge.favoritesCanExtend.register(FavoritesResultsFlow.hasMoreResults);
   FeatureBridge.favoritesSearchResults.register(FavoritesModel.getCurrentSearchResults);
   FeatureBridge.getFavorite.register(FavoritesModel.getFavorite);
+  setFavoriteTagsLookup(id => FavoritesModel.getFavorite(id)?.tags);
   FeatureBridge.allFavorites.register(FavoritesModel.getAllFavorites);
   FeatureBridge.currentSearchQuery.register(FavoritesModel.getCurrentSearchQuery);
+  FeatureBridge.usingInfiniteScroll.register(() => Preferences.infiniteScroll.value);
 }

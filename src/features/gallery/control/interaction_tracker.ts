@@ -1,6 +1,7 @@
-import { Events } from "../../../lib/communication/events";
+import { DomEvents } from "../../../app/input/dom_events";
+import { Events } from "../../../app/messaging/events";
 import { GalleryConfig } from "../../../config/gallery_config";
-import { InteractionTracker } from "../../../lib/core/observers/interaction_tracker";
+import { InteractionTracker } from "../../../lib/observer/interaction_tracker";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { doNothing } from "../../../lib/environment/constants";
 
@@ -19,7 +20,8 @@ export function setup(): void {
     doNothing,
     onInteractionStopped,
     doNothing,
-    onInteractionStopped
+    onInteractionStopped,
+    DomEvents.document.mousemove.on
   );
 }
 

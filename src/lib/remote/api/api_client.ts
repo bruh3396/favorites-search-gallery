@@ -1,5 +1,5 @@
 import { PING_URL } from "../url/api_urls";
-import { USER_ID } from "../../environment/favorites_metadata";
+import { USER_ID } from "../../environment/session";
 import { VERSION } from "../../environment/environment";
 
 export function setupServer(): void {

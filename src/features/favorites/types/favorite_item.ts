@@ -6,7 +6,7 @@ import { FavoriteTags } from "./favorite_tags";
 import { Post } from "../../../types/api";
 import { Rating } from "../../../types/search";
 import { compressPreviewSource } from "../../../lib/media/media_url_transformer";
-import { getIdFromThumb } from "../../../lib/dom/thumb";
+import { getIdFromThumb } from "../../../lib/thumb/thumbs";
 
 export class FavoriteItem implements Favorite {
   public readonly id: string;

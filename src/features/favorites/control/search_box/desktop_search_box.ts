@@ -1,9 +1,9 @@
-import { awesompleteIsUnselected, awesompleteIsVisible } from "../../../../lib/ui/awesomplete";
+import { awesompleteIsUnselected, awesompleteIsVisible } from "../../../../lib/ui/autocomplete/awesomplete";
 import { AbstractFavoritesSearchBox } from "./abstract_search_box";
-import { EnhancedMouseEvent } from "../../../../lib/dom/input_types";
-import { Events } from "../../../../lib/communication/events";
-import { Preferences } from "../../../../lib/preferences/preferences";
-import { openSearchPage } from "../../../../lib/navigator";
+import { EnhancedMouseEvent } from "../../../../lib/ui/input_types";
+import { Events } from "../../../../app/messaging/events";
+import { Preferences } from "../../../../app/state/preferences";
+import { openSearchPage } from "../../../../lib/dom/navigation";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
   protected override createSearchBox(): HTMLTextAreaElement | HTMLInputElement {

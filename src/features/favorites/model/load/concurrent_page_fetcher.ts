@@ -1,7 +1,7 @@
 import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
 import { FavoritesPageRequest } from "../../types/favorites_page_request";
 import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
-import { sleep } from "../../../../lib/core/scheduling/promise";
+import { sleep } from "../../../../lib/async/sleep";
 
 export class FavoritesConcurrentPageFetcher {
   private static readonly PENDING_POLL_INTERVAL = 200;

@@ -1,8 +1,8 @@
 import * as GalleryPreloadFlow from "./preload_flow";
 import * as GalleryView from "../view/gallery_view";
-import { EnhancedMouseEvent } from "../../../lib/dom/input_types";
+import { EnhancedMouseEvent } from "../../../lib/ui/input_types";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
-import { debounceTrailing } from "../../../lib/core/scheduling/rate_limiting";
+import { debounceTrailing } from "../../../lib/async/debounce";
 import { dispatchByState } from "./state_dispatch";
 
 export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {

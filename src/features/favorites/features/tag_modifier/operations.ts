@@ -1,7 +1,7 @@
 import { cacheTagModification, storeTagModifications } from "./store";
 import { Favorite } from "../../../../types/favorite";
 import { removeExtraWhiteSpace } from "../../../../utils/string/format";
-import { setCustomTags } from "../../../../lib/tags/custom_tags";
+import { setCustomTags } from "../../../../lib/search/tags/custom_tags";
 
 let onDeIndex: (favorite: Favorite) => void = () => { };
 let onReIndex: (favorite: Favorite) => void = () => { };

@@ -1,4 +1,4 @@
-﻿import { Favorite } from "../../../types/favorite";
+import { Favorite } from "../../../types/favorite";
 import { NavigationKey } from "../../../types/input";
 
 export interface NewFavorites {

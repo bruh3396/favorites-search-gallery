@@ -3,13 +3,12 @@ import { getCookie, setCookie } from "../../utils/browser/cookie";
 import COMMON_CSS from "../../assets/css/common.css";
 import CONTENT_CSS from "../../assets/css/content.css";
 import DARK_THEME_CSS from "../../assets/css/dark_theme.css";
-import { Preferences } from "../preferences/preferences";
 import SKELETON_CSS from "../../assets/css/skeleton.css";
 import TILE_CSS from "../../assets/css/tile.css";
 import { ThumbnailConfig } from "../../config/thumbnail_config";
 import { buildStyleSheetUrl } from "../remote/url/action_url_builder";
 import { insertStyle } from "../dom/injector";
-import { yieldControl } from "../core/scheduling/promise";
+import { yieldControl } from "../async/sleep";
 
 export function setupStyles(): void {
   insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS);
@@ -36,7 +35,6 @@ export function getCurrentThemeClass(): string {
 
 export function setColorScheme(color: string): void {
   setGalleryBackgroundColor(color);
-  Preferences.colorScheme.set(color);
 }
 
 export function toggleGalleryMenuEnabled(value: boolean): void {

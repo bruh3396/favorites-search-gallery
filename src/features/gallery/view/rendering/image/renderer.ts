@@ -5,8 +5,8 @@ import { GalleryConfig } from "../../../../../config/gallery_config";
 import { GalleryRenderer } from "../../../types/gallery_types";
 import { ImageRequest } from "../../../types/image_request";
 import { USING_FIREFOX } from "../../../../../lib/environment/environment";
-import { waitForAllThumbnailsToLoad } from "../../../../../lib/dom/content_thumb";
-import { withTimeout } from "../../../../../lib/core/scheduling/promise";
+import { waitForAllThumbnailsToLoad } from "../../../../../app/shell/content_thumbs";
+import { withTimeout } from "../../../../../lib/async/sleep";
 
 const root = document.createElement("div");
 let activeId = "";

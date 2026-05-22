@@ -1,4 +1,4 @@
-import { Overlays } from "../../../../lib/shell";
+import { Overlays } from "../../../../app/shell/shell";
 import TOOLTIP_CSS from "../../../../assets/css/tooltip.css";
 import { insertStyle } from "../../../../lib/dom/injector";
 

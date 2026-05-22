@@ -5,21 +5,21 @@ import { FavoriteItem } from "../types/favorite_item";
 import { Post } from "../../../types/api";
 import { fetchVideoDurationFromFavorite } from "../../../lib/remote/rule34/video_duration_fetcher";
 import { isVideo } from "../../../lib/media/media_type_guards";
-import { tagsAreValid } from "../../../lib/tags/tag_validator";
-import { withExponentialBackoff } from "../../../lib/core/scheduling/promise";
+import { tagsAreValid } from "../../../lib/search/tags/tag_validator";
+import { withExponentialBackoff } from "../../../lib/async/sleep";
 
 let onMetadataPopulated: (favorite: Favorite) => void = () => undefined;
-let deIndex: (favorite: Favorite) => void = () => undefined;
-let reIndex: (favorite: Favorite) => void = () => undefined;
+let beforeUpdateTags: (favorite: Favorite) => void = () => undefined;
+let afterUpdateTags: (favorite: Favorite) => void = () => undefined;
 
 export function setup(
   onUpdated: (favorite: Favorite) => void,
-  deIndexFn: (favorite: Favorite) => void,
-  reIndexFn: (favorite: Favorite) => void
+  beforeUpdateTagsFn: (favorite: Favorite) => void,
+  afterUpdateTagsFn: (favorite: Favorite) => void
 ): void {
   onMetadataPopulated = onUpdated;
-  deIndex = deIndexFn;
-  reIndex = reIndexFn;
+  beforeUpdateTags = beforeUpdateTagsFn;
+  afterUpdateTags = afterUpdateTagsFn;
 }
 
 export function fetchMissingMetadata(favorites: FavoriteItem[]): void {
@@ -54,9 +54,9 @@ function processPost(favorite: FavoriteItem, post: Post): void {
   }
 
   if (!tagsAreValid(favorite, post)) {
-    deIndex(favorite);
+    beforeUpdateTags(favorite);
     favorite.updateTags(post);
-    reIndex(favorite);
+    afterUpdateTags(favorite);
   }
   favorite.populateMetadata(post);
   ExtensionResolver.setExtensionFromPost(post);

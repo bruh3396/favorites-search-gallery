@@ -1,5 +1,5 @@
 import { ExpandedSearchQuery } from "../query/expanded_search_query";
-import { InvertedIndex } from "../../core/data_structures/inverted_index";
+import { InvertedIndex } from "../../collection/inverted_index";
 import { SearchQuery } from "../query/search_query";
 import { Searchable } from "../../../types/search";
 import { intersection } from "../../../utils/collection/set";

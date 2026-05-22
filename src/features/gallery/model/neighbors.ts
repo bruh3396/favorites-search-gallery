@@ -1,5 +1,5 @@
 import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "../../../utils/collection/array";
-import { FeatureBridge } from "../../../lib/communication/feature_bridge";
+import { FeatureBridge } from "../../../app/messaging/feature_bridge";
 import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
 
 export const getThumbsAround = ON_FAVORITES_PAGE ? getFavoritesThumbsAround : getSearchPageThumbsAround;

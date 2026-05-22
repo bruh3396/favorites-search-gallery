@@ -1,10 +1,9 @@
 import * as GalleryDisplayFlow from "./display_flow";
 import * as GalleryModel from "../model/gallery_model";
 import { Boundary } from "../types/gallery_types";
-import { FeatureBridge } from "../../../lib/communication/feature_bridge";
+import { FeatureBridge } from "../../../app/messaging/feature_bridge";
 import { NavigationKey } from "../../../types/input";
 import { ON_SEARCH_PAGE } from "../../../lib/environment/environment";
-import { usingInfiniteScroll } from "../../../lib/preferences/infinite_scroll";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.move(direction)) {
@@ -21,7 +20,7 @@ export function navigate(direction: NavigationKey): void {
 }
 
 function handleStartBoundary(): void {
-  if (usingInfiniteScroll() || !loadMoreResults("ArrowLeft")) {
+  if (FeatureBridge.usingInfiniteScroll.call() || !loadMoreResults("ArrowLeft")) {
     return;
   }
   GalleryModel.jumpToLast();
@@ -33,7 +32,7 @@ function handleEndBoundary(): void {
     return;
   }
 
-  if (usingInfiniteScroll()) {
+  if (FeatureBridge.usingInfiniteScroll.call()) {
     GalleryModel.move("ArrowRight");
   } else {
     GalleryModel.jumpToFirst();

@@ -1,9 +1,9 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
-import * as Navigator from "../../../lib/navigator";
+import * as Navigator from "../../../lib/dom/navigation";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { ClickCode } from "../../../types/input";
-import { Events } from "../../../lib/communication/events";
-import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
+import { Events } from "../../../app/messaging/events";
+import { GALLERY_DISABLED } from "../../../app/state/feature_flags";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
 import { Post } from "../../../types/api";
 import { buildPostPageUrl } from "../../../lib/remote/url/page_url_builder";

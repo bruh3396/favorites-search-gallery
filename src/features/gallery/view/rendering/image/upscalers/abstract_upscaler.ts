@@ -1,16 +1,16 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
-import { FeatureBridge } from "../../../../../../lib/communication/feature_bridge";
+import { FeatureBridge } from "../../../../../../app/messaging/feature_bridge";
 import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";
-import { PERFORMANCE_PROFILE } from "../../../../../../lib/environment/derived_environment";
+import { PERFORMANCE_PROFILE } from "../../../../../../app/state/feature_flags";
 import { PerformanceProfile } from "../../../../../../types/ui";
-import { Preferences } from "../../../../../../lib/preferences/preferences";
-import { ThrottledQueue } from "../../../../../../lib/core/concurrency/throttled_queue";
+import { Preferences } from "../../../../../../app/state/preferences";
+import { ThrottledQueue } from "../../../../../../lib/async/throttled_queue";
 import { fetchBitmap } from "../fetcher";
-import { getAllContentThumbs } from "../../../../../../lib/dom/content_thumb";
+import { getAllContentThumbs } from "../../../../../../app/shell/content_thumbs";
 import { isImage } from "../../../../../../lib/media/media_type_guards";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
-import { sleep } from "../../../../../../lib/core/scheduling/promise";
+import { sleep } from "../../../../../../lib/async/sleep";
 import { transferredCanvasIds } from "../../../../types/offscreen_upscale_request";
 
 const batchUpscaleQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);

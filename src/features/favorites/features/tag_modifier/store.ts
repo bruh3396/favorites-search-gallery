@@ -1,6 +1,6 @@
-﻿import { Database } from "../../../../lib/core/storage/database";
+import { Database } from "../../../../lib/storage/database";
 import { TagModificationDatabaseRecord } from "../../../../types/search";
-import { clearCustomTags } from "../../../../lib/tags/custom_tags";
+import { clearCustomTags } from "../../../../lib/search/tags/custom_tags";
 
 const DATABASE_NAME = "AdditionalTags";
 const OBJECT_STORE_NAME = "additionalTags";

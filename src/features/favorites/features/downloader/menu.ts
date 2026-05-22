@@ -1,15 +1,15 @@
 import * as FavoritesDownloader from "./downloader";
 import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
-import { sleep, yieldControl } from "../../../../lib/core/scheduling/promise";
+import { sleep, yieldControl } from "../../../../lib/async/sleep";
 import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
-import { DOWNLOADER_DISABLED } from "../../../../lib/environment/derived_environment";
+import { DOWNLOADER_DISABLED } from "../../../../app/state/feature_flags";
 import DOWNLOAD_HTML from "../../../../assets/html/downloader.html";
 import { DownloadRequest } from "./download_request";
 import { Favorite } from "../../../../types/favorite";
-import { Overlays } from "../../../../lib/shell";
-import { Preferences } from "../../../../lib/preferences/preferences";
+import { Overlays } from "../../../../app/shell/shell";
+import { Preferences } from "../../../../app/state/preferences";
 import { splitIntoChunks } from "../../../../utils/collection/array";
-import { toggleGlobalInputEvents } from "../../../../lib/communication/dom_events";
+import { toggleGlobalInputEvents } from "../../../../app/input/dom_events";
 
 type FavoritesDownloaderInterface = {
   getSearchResults: () => Favorite[]

@@ -3,9 +3,9 @@ import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { SearchPage } from "../types/search_page";
 import { fetchSearchPage } from "../../../lib/remote/rule34/search_page_fetcher";
-import { getAllPageThumbs } from "../../../lib/dom/content_thumb";
+import { getAllPageThumbs } from "../../../app/shell/content_thumbs";
 import { isForwardNavigationKey } from "../../../types/guards";
-import { sleep } from "../../../lib/core/scheduling/promise";
+import { sleep } from "../../../lib/async/sleep";
 
 let searchPages: Map<number, SearchPage>;
 let fetchedPageNumbers: Set<number>;

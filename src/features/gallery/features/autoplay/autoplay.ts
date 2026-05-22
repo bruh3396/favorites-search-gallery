@@ -4,16 +4,16 @@ import { clamp, millisecondsToSeconds } from "../../../../utils/number";
 import { isImage, isVideo } from "../../../../lib/media/media_type_guards";
 import AUTOPLAY_CSS from "../../../../assets/css/autoplay.css";
 import AUTOPLAY_HTML from "../../../../assets/html/autoplay.html";
-import { DomEvents } from "../../../../lib/communication/dom_events";
-import { Events } from "../../../../lib/communication/events";
+import { DomEvents } from "../../../../app/input/dom_events";
+import { Events } from "../../../../app/messaging/events";
 import { NavigationKey } from "../../../../types/input";
 import { NumberComponent } from "../../../../lib/ui/elements/number_component";
-import { Overlays } from "../../../../lib/shell";
-import { Preferences } from "../../../../lib/preferences/preferences";
-import { Timer } from "../../../../lib/core/scheduling/timer";
-import { createObjectUrlFromSvg } from "../../../../lib/navigator";
+import { Overlays } from "../../../../app/shell/shell";
+import { Preferences } from "../../../../app/state/preferences";
+import { Timer } from "../../../../lib/async/timer";
+import { createObjectUrlFromSvg } from "../../../../lib/dom/navigation";
 import { insertStyle } from "../../../../lib/dom/injector";
-import { throttle } from "../../../../lib/core/scheduling/rate_limiting";
+import { throttle } from "../../../../lib/async/throttle";
 
 export type AutoplayEvents = {
   setVideoLooping: (value: boolean) => void

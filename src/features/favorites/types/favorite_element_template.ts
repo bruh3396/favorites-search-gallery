@@ -1,7 +1,7 @@
 import { ADD_FAVORITE_IMAGE_HTML, DOWNLOAD_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
-import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
-import { ITEM_CLASS_NAME } from "../../../lib/dom/thumb";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/favorites_metadata";
+import { GALLERY_DISABLED } from "../../../app/state/feature_flags";
+import { ITEM_CLASS_NAME } from "../../../lib/thumb/thumbs";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../lib/environment/session";
 import { domParser } from "../../../lib/dom/dom_parser";
 
 export const favoriteElementTemplate: HTMLElement = domParser.parseFromString("", "text/html").createElement("div");

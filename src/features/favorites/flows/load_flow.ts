@@ -3,7 +3,7 @@ import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesResultsFlow from "./results_flow";
 import * as FavoritesSearchFlow from "./search_flow";
 import * as FavoritesView from "../view/favorites_view";
-import { Events } from "../../../lib/communication/events";
+import { Events } from "../../../app/messaging/events";
 
 export async function loadAllFavorites(): Promise<void> {
   if (await hasDatabaseFavorites()) {

@@ -17,10 +17,10 @@ import * as GalleryView from "./view/gallery_view";
 import * as GalleryVisibleThumbObserver from "./control/visible_thumb_observer";
 import * as GalleryWheelFlow from "./flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
-import { DomEvents } from "../../lib/communication/dom_events";
-import { Events } from "../../lib/communication/events";
-import { FeatureBridge } from "../../lib/communication/feature_bridge";
-import { GALLERY_DISABLED } from "../../lib/environment/derived_environment";
+import { DomEvents } from "../../app/input/dom_events";
+import { Events } from "../../app/messaging/events";
+import { FeatureBridge } from "../../app/messaging/feature_bridge";
+import { GALLERY_DISABLED } from "../../app/state/feature_flags";
 import { NavigationKey } from "../../types/input";
 import { dispatchByState } from "./flows/state_dispatch";
 

@@ -1,7 +1,7 @@
 import * as GalleryView from "../view/gallery_view";
-import { Events } from "../../../lib/communication/events";
+import { Events } from "../../../app/messaging/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
-import { yieldControl } from "../../../lib/core/scheduling/promise";
+import { yieldControl } from "../../../lib/async/sleep";
 
 export function setup(): void {
   if (!ON_MOBILE_DEVICE) {

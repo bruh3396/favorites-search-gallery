@@ -1,8 +1,8 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
-import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
+import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "../../../lib/thumb/thumbs";
 import { ADD_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { ClickCode } from "../../../types/input";
-import { GALLERY_DISABLED } from "../../../lib/environment/derived_environment";
+import { GALLERY_DISABLED } from "../../../app/state/feature_flags";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { removeNonNumericCharacters } from "../../../utils/string/format";
 import { resolveMediaType } from "../../../lib/media/media_type_resolver";

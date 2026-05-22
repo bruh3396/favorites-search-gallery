@@ -4,7 +4,7 @@ import { favoriteAddQueue, favoriteRemoveQueue } from "../http/rate_limiter";
 import { ON_SEARCH_PAGE } from "../../environment/environment";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { fetchHtml } from "../http/http_client";
-import { withExponentialBackoff } from "../../core/scheduling/promise";
+import { withExponentialBackoff } from "../../async/sleep";
 
 export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
   favoriteRemoveQueue.cancel(id);

@@ -1,4 +1,4 @@
-import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../lib/environment/derived_environment";
+import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../app/state/feature_flags";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { PerformanceProfile } from "../../../types/ui";
 import { insertStyle } from "../../../lib/dom/injector";

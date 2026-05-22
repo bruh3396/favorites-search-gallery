@@ -1,4 +1,4 @@
-import { getIdFromThumb, getImageFromThumb } from "../../../lib/dom/thumb";
+import { getIdFromThumb, getImageFromThumb } from "../../../lib/thumb/thumbs";
 import { FavoritesDatabaseRecord } from "../../../types/favorite";
 import { Post } from "../../../types/api";
 import { decompressPreviewSource } from "../../../lib/media/media_url_transformer";

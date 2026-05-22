@@ -2,15 +2,15 @@ import { ButtonElement, CheckboxElement, SelectElement } from "../../../../lib/u
 import { Layout, PerformanceProfile } from "../../../../types/ui";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, usingDarkTheme } from "../../../../lib/ui/style";
-import { Events } from "../../../../lib/communication/events";
-import { GALLERY_ENABLED } from "../../../../lib/environment/derived_environment";
+import { Events } from "../../../../app/messaging/events";
+import { GALLERY_ENABLED } from "../../../../app/state/feature_flags";
 import { MetadataMetric } from "../../../../types/search";
-import { Preferences } from "../../../../lib/preferences/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/favorites_metadata";
+import { Preferences } from "../../../../app/state/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/session";
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
-import { buildToggleSwitch } from "../../../../lib/ui/elements/checkbox";
-import { hideUnusedLayoutSizer } from "../../../../lib/layout/content_tiler_handlers";
+import { buildToggleSwitch } from "../../../../app/input/checkbox";
+import { hideUnusedLayoutSizer } from "../../../../app/shell/content_tiler";
 import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 
 const buttons: Partial<ButtonElement>[] = [
