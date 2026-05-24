@@ -1,4 +1,4 @@
-import { ButtonElement, defaultMenuElement } from "../element_types";
+import { ButtonElement, defaultMenuElement } from "../../../types/element";
 import { doNothing } from "../../environment/constants";
 
 export function buildButtonElement(partial: Partial<ButtonElement>): void {

@@ -1,8 +1,8 @@
 import { awesompleteIsUnselected, awesompleteIsVisible } from "../../../../lib/ui/autocomplete/awesomplete";
 import { AbstractFavoritesSearchBox } from "./abstract_search_box";
-import { EnhancedMouseEvent } from "../../../../lib/ui/input_types";
-import { Events } from "../../../../app/messaging/events";
-import { Preferences } from "../../../../app/state/preferences";
+import { EnhancedMouseEvent } from "../../../../types/input";
+import { Events } from "../../../../app/channels/events";
+import { Preferences } from "../../../../app/context/preferences";
 import { openSearchPage } from "../../../../lib/dom/navigation";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {

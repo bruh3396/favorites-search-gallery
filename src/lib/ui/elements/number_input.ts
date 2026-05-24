@@ -1,4 +1,4 @@
-import { NumberElement, defaultMenuElement } from "../element_types";
+import { NumberElement, defaultMenuElement } from "../../../types/element";
 import { NumberComponent } from "./number_component";
 import { doNothing } from "../../environment/constants";
 

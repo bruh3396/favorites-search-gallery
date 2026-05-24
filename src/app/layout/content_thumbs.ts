@@ -1,6 +1,6 @@
 import { COLUMN_CLASS_NAME, ITEM_SELECTOR, getThumbsInContainer, getThumbsInMatrix, waitForThumbnailsToLoadInContainer } from "../../lib/thumb/thumbs";
 import { Content } from "./shell";
-import { sleep } from "../../lib/async/sleep";
+import { sleep } from "../../lib/async/timing";
 
 export const waitForAllThumbnailsToLoad = (): Promise<unknown[]> => waitForThumbnailsToLoadInContainer(document);
 export const getAllContentThumbs = (): HTMLElement[] => (usingColumnLayout() ? getThumbsInMatrix(Content) : getThumbsInContainer(Content));

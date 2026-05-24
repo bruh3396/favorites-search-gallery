@@ -1,11 +1,11 @@
-import { CheckboxElement, SelectElement } from "../../../lib/ui/element_types";
-import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../app/state/feature_flags";
+import { CheckboxElement, SelectElement } from "../../../types/element";
+import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../app/context/flags";
 import { Layout, PerformanceProfile } from "../../../types/ui";
-import { Events } from "../../../app/messaging/events";
+import { Events } from "../../../app/channels/events";
 import { GeneralConfig } from "../../../config/general_config";
 import { MetadataMetric } from "../../../types/search";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { Preferences } from "../../../app/state/preferences";
+import { Preferences } from "../../../app/context/preferences";
 import { buildCheckboxElement } from "../../../app/input/checkbox";
 import { buildSelectElement } from "../../../lib/ui/elements/select";
 import { numberRange } from "../../../utils/number";
@@ -33,6 +33,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Enable infinite scroll",
     preference: Preferences.searchPageInfiniteScroll,
     event: Events.searchPage.infiniteScrollToggled,
+    triggerOnCreation: true,
     textContent: "",
     defaultValue: false
   },
@@ -65,6 +66,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Toggle add favorite buttons",
     position: "beforeend",
     preference: Preferences.searchPageAddButtonsVisible,
+    triggerOnCreation: true,
     function: toggleAddOrRemoveButtons,
     hotkey: "R",
     event: Events.favorites.addButtonsToggled
@@ -132,7 +134,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
   }
 ];
 
-export function createDynamicSearchPageMenuElements(): void {
+export function setup(): void {
   createCheckboxes();
   createSelects();
 }

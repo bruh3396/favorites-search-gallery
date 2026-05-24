@@ -1,6 +1,6 @@
 import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "../../types/ui";
-import { AUTOCOMPLETE_DISABLED } from "../../app/state/feature_flags";
-import { Preferences } from "../../app/state/preferences";
+import { AUTOCOMPLETE_DISABLED } from "../../app/context/flags";
+import { Preferences } from "../../app/context/preferences";
 import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "../../lib/search/tags/custom_tags";
 import { fetchHtml } from "../../lib/remote/http/http_client";

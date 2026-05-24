@@ -1,10 +1,10 @@
 import * as GalleryModel from "../model/gallery_model";
 import * as GalleryThumbObserver from "../control/visible_thumb_observer";
 import * as GalleryView from "../view/gallery_view";
-import { POSTS_PER_SEARCH_PAGE, doNothing } from "../../../lib/environment/constants";
 import { GalleryConfig } from "../../../config/gallery_config";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
 import { dispatchByState } from "./state_dispatch";
-import { getAllContentThumbs } from "../../../app/shell/content_thumbs";
+import { getAllContentThumbs } from "../../../app/layout/content_thumbs";
 
 export function onUpscaleToggled(value: boolean): void {
   if (value) {
@@ -20,10 +20,6 @@ export function onUpscaleToggled(value: boolean): void {
   }
 }
 
-const preloadOutsideGallery = GalleryConfig.preloadOutsideGalleryOnSearchPage ? (): void => {
-  GalleryView.preloadImages(getAllContentThumbs());
-} : doNothing;
-
 export function onSearchPageCreated(): void {
   dispatchByState({
     idle: preloadOutsideGallery
@@ -33,4 +29,10 @@ export function onSearchPageCreated(): void {
 export function handleResultsAddedToSearchPage(thumbs: HTMLElement[]): void {
   GalleryModel.reIndexThumbs();
   GalleryThumbObserver.observe(thumbs);
+}
+
+function preloadOutsideGallery(): void {
+  if (GalleryConfig.preloadOutsideGalleryOnSearchPage) {
+    GalleryView.preloadImages(getAllContentThumbs());
+  }
 }

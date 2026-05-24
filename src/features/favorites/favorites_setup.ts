@@ -15,12 +15,12 @@ import * as FavoritesSearchBox from "./control/search_box/search_box";
 import * as FavoritesSearchFlow from "./flows/search_flow";
 import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
+import * as PostApi from "../../lib/remote/api/post_fetcher";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../lib/environment/environment";
 import { DomEvents } from "../../app/input/dom_events";
-import { Events } from "../../app/messaging/events";
-import { FeatureBridge } from "../../app/messaging/feature_bridge";
-import { Preferences } from "../../app/state/preferences";
-import { deferPostPageFetchesUntil } from "../../lib/remote/api/post_fetcher";
+import { Events } from "../../app/channels/events";
+import { FeatureBridge } from "../../app/channels/feature_bridge";
+import { Preferences } from "../../app/context/preferences";
 import { setFavoriteTagsLookup } from "../../lib/thumb/thumb_tags";
 
 export function setupFavorites(): void {
@@ -33,7 +33,7 @@ export function setupFavorites(): void {
   setupSubFeatures();
   subscribeToEvents();
   registerBridgeHandlers();
-  deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
+  PostApi.deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
   FavoritesLoadFlow.loadAllFavorites();
 }
 
@@ -78,8 +78,8 @@ function setupTagModifier(): void {
   FavoritesTagModifier.setup({
     getSearchResults: () => FavoritesModel.getCurrentSearchResults(),
     getAllFavorites: () => FavoritesModel.getAllFavorites(),
-    deIndex: (favorite) => FavoritesModel.removeFromIndex([favorite]),
-    reIndex: (favorite) => FavoritesModel.addToIndex([favorite])
+    deIndex: (favorite) => FavoritesModel.deIndex([favorite]),
+    reIndex: (favorite) => FavoritesModel.reIndex([favorite])
   });
   Events.favorites.searchResultsUpdated.on(FavoritesTagModifier.onResultsUpdated);
   Events.favorites.pageChanged.on(FavoritesTagModifier.onPageChanged);

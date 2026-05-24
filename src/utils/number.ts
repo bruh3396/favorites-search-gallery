@@ -42,7 +42,7 @@ export function randomBetween(min: number, max: number): number {
   return min + (Math.random() * (max - min));
 }
 
-export function numbersAroundInRange(number: number, count: number, min: number, max: number): number[] {
+export function numbersAroundInRange(initial: number, count: number, min: number = 0, max: number = Number.MAX_SAFE_INTEGER): number[] {
   if (count <= 0) {
     return [];
   }
@@ -51,12 +51,12 @@ export function numbersAroundInRange(number: number, count: number, min: number,
     return [];
   }
 
-  const numbers = [number];
+  const numbers = [initial];
   let i = 1;
 
   while (numbers.length < count) {
-    const left = number - i;
-    const right = number + i;
+    const left = initial - i;
+    const right = initial + i;
     const leftInBounds = left >= min && left <= max;
     const rightInBounds = right >= min && right <= max;
     const bothOutOfBounds = !leftInBounds && !rightInBounds;

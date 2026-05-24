@@ -1,13 +1,13 @@
 import * as FavoritesDownloader from "./downloader";
 import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
-import { sleep, yieldControl } from "../../../../lib/async/sleep";
+import { sleep, yieldControl } from "../../../../lib/async/timing";
 import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
-import { DOWNLOADER_DISABLED } from "../../../../app/state/feature_flags";
+import { DOWNLOADER_DISABLED } from "../../../../app/context/flags";
 import DOWNLOAD_HTML from "../../../../assets/html/downloader.html";
 import { DownloadRequest } from "./download_request";
 import { Favorite } from "../../../../types/favorite";
-import { Overlays } from "../../../../app/shell/shell";
-import { Preferences } from "../../../../app/state/preferences";
+import { Overlays } from "../../../../app/layout/shell";
+import { Preferences } from "../../../../app/context/preferences";
 import { splitIntoChunks } from "../../../../utils/collection/array";
 import { toggleGlobalInputEvents } from "../../../../app/input/dom_events";
 

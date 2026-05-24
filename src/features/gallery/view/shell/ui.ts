@@ -2,13 +2,13 @@ import * as Icons from "../../../../assets/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite";
 import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/number";
 import { GalleryRoot } from "./shell";
-import { Preferences } from "../../../../app/state/preferences";
+import { Preferences } from "../../../../app/context/preferences";
 import { USING_FIREFOX } from "../../../../lib/environment/environment";
 import { blurActiveElement } from "../../../../utils/dom/interaction";
-import { getLayout } from "../../../../app/shell/content_tiler";
+import { getLayout } from "../../../../app/layout/content_tiler";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { showFullscreenIcon } from "../view_utils";
-import { waitForAllThumbnailsToLoad } from "../../../../app/shell/content_thumbs";
+import { waitForAllThumbnailsToLoad } from "../../../../app/layout/content_thumbs";
 
 const background: HTMLElement = document.createElement("div");
 

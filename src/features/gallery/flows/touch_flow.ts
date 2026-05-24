@@ -1,8 +1,8 @@
 import * as GalleryNavigationFlow from "./navigation_flow";
 import * as GalleryOpenCloseFlow from "./open_close_flow";
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
-import { EnhancedMouseEvent } from "../../../lib/ui/input_types";
-import { Preferences } from "../../../app/state/preferences";
+import { EnhancedMouseEvent } from "../../../types/input";
+import { Preferences } from "../../../app/context/preferences";
 import { didSwipe } from "../../../app/input/swipe_events";
 import { dispatchByState } from "./state_dispatch";
 

@@ -1,4 +1,4 @@
-import { Events } from "../../../../app/messaging/events";
+import { Events } from "../../../../app/channels/events";
 import { SearchHistory } from "../../../../lib/storage/search_history";
 import { debounceLeading } from "../../../../lib/async/debounce";
 import { hideAwesomplete } from "../../../../lib/ui/autocomplete/awesomplete";

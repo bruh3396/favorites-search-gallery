@@ -1,19 +1,10 @@
 import * as SearchPageModel from "../model/search_page_model";
 import * as SearchPageView from "../view/search_page_view";
-import { Events } from "../../../app/messaging/events";
+import { Events } from "../../../app/channels/events";
 import { PageBottomObserver } from "../../../lib/observer/page_bottom_observer";
-import { Preferences } from "../../../app/state/preferences";
+import { Preferences } from "../../../app/context/preferences";
 
-let pageBottomObserver: PageBottomObserver;
-
-export function setup(): void {
-  pageBottomObserver = new PageBottomObserver(showMoreResults);
-  Events.searchPage.searchPageReady.on(() => {
-    if (Preferences.searchPageInfiniteScroll.value) {
-      pageBottomObserver.refresh();
-    }
-  }, { once: true });
-}
+const pageBottomObserver: PageBottomObserver = new PageBottomObserver(showMoreResults);
 
 export function disableInfiniteScroll(): void {
   pageBottomObserver.disconnect();

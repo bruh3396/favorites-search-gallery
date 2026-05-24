@@ -1,4 +1,4 @@
-import { sleep } from "../../../../lib/async/sleep";
+import { sleep } from "../../../../lib/async/timing";
 import { waitForDomToLoad } from "../../../../app/input/dom_events";
 
 export async function cleanNativeFavoritesPage(): Promise<void> {

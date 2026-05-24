@@ -1,10 +1,10 @@
-import * as ContentTiler from "../../../app/shell/content_tiler";
+import * as ContentTiler from "../../../app/layout/content_tiler";
 import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
-import { Content, ScrollSentinelBottom, ScrollSentinelTop } from "../../../app/shell/shell";
+import { Content, ScrollSentinelBottom, ScrollSentinelTop } from "../../../app/layout/shell";
 import { PageBottomObserver, PageTopObserver } from "../../../lib/observer/edge_observer";
-import { noItemsAreVisible, waitForAllThumbnailsToLoad } from "../../../app/shell/content_thumbs";
-import { Events } from "../../../app/messaging/events";
+import { noItemsAreVisible, waitForAllThumbnailsToLoad } from "../../../app/layout/content_thumbs";
+import { Events } from "../../../app/channels/events";
 import { Favorite } from "../../../types/favorite";
 import { FavoritesConfig } from "../../../config/favorites_config";
 import { FavoritesResultsView } from "../types/favorite_types";

@@ -16,8 +16,8 @@ export function setup(
   waitForAdditionalTags = waitForAdditionalTagsFn;
   FavoritesMetadataFetcher.setup(
     FavoritesLoader.updateFavorite,
-    (favorite) => FavoritesSearchCoordinator.removeFromIndex([favorite]),
-    (favorite) => FavoritesSearchCoordinator.addToIndex([favorite])
+    (favorite) => FavoritesSearchCoordinator.deIndex([favorite]),
+    (favorite) => FavoritesSearchCoordinator.reIndex([favorite])
   );
 }
 
@@ -25,14 +25,14 @@ export async function loadDatabaseFavorites(): Promise<void> {
   await waitForAdditionalTags();
   return FavoritesLoader.loadDatabaseFavorites(getAdditionalTags, (allFavorites) => {
     FavoritesSearchCoordinator.deferIndexing();
-    FavoritesSearchCoordinator.addToIndex(allFavorites);
+    FavoritesSearchCoordinator.reIndex(allFavorites);
     FavoritesMetadataFetcher.fetchMissingMetadata(allFavorites);
   });
 }
 
 export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<void> {
   return FavoritesLoader.fetchAllFavorites((favorites) => {
-    FavoritesSearchCoordinator.addToIndex(favorites);
+    FavoritesSearchCoordinator.reIndex(favorites);
     FavoritesMetadataFetcher.fetchMissingMetadata(favorites);
     FavoritesSearchCoordinator.appendSearchResults(favorites);
     onSearchResultsFound();
@@ -42,7 +42,7 @@ export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<voi
 export function fetchNewFavorites(): Promise<NewFavorites> {
   return FavoritesLoader.fetchNewFavorites()
     .then((newFavorites) => {
-      FavoritesSearchCoordinator.addToIndex(newFavorites);
+      FavoritesSearchCoordinator.reIndex(newFavorites);
       FavoritesMetadataFetcher.fetchMissingMetadata(newFavorites);
       return { newFavorites, newSearchResults: FavoritesSearchCoordinator.prependSearchResults(newFavorites) };
     });

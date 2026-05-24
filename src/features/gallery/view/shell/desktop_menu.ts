@@ -1,13 +1,13 @@
 import * as Icons from "../../../../assets/icons";
 import { setColorScheme, toggleGalleryMenuEnabled } from "../../../../lib/ui/style";
-import { EnhancedMouseEvent } from "../../../../lib/ui/input_types";
+import { EnhancedMouseEvent } from "../../../../types/input";
 import { GalleryConfig } from "../../../../config/gallery_config";
 import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../types/gallery_types";
 import { GalleryRoot } from "./shell";
 import { GeneralConfig } from "../../../../config/general_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { Preferences } from "../../../../app/state/preferences";
+import { Preferences } from "../../../../app/context/preferences";
 import { Timeout } from "../../../../types/async";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { toggleFullscreen } from "../../../../utils/browser/window";

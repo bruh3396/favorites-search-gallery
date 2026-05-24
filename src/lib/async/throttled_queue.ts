@@ -1,4 +1,4 @@
-import { sleep } from "./sleep";
+import { sleep } from "./timing";
 
 type Waiter = {
   id: string | null;

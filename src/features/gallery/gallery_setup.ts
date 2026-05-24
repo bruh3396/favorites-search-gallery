@@ -18,9 +18,9 @@ import * as GalleryVisibleThumbObserver from "./control/visible_thumb_observer";
 import * as GalleryWheelFlow from "./flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
 import { DomEvents } from "../../app/input/dom_events";
-import { Events } from "../../app/messaging/events";
-import { FeatureBridge } from "../../app/messaging/feature_bridge";
-import { GALLERY_DISABLED } from "../../app/state/feature_flags";
+import { Events } from "../../app/channels/events";
+import { FeatureBridge } from "../../app/channels/feature_bridge";
+import { GALLERY_DISABLED } from "../../app/context/flags";
 import { NavigationKey } from "../../types/input";
 import { dispatchByState } from "./flows/state_dispatch";
 

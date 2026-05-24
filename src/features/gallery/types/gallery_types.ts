@@ -15,12 +15,6 @@ export enum GalleryState {
   Open
 }
 
-export enum Boundary {
-  None,
-  Start,
-  End
-}
-
 export type VideoClip = {
   start: number
   end: number

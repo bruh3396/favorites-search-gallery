@@ -1,4 +1,4 @@
-import { sleep } from "../../../../lib/async/sleep";
+import { sleep } from "../../../../lib/async/timing";
 
 const SYMBOLS = ["-", "*", "_", "(", ")", "~"];
 const CONTAINER_ID = "mobile-symbol-container";

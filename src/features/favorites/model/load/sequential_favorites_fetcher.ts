@@ -1,5 +1,5 @@
 import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
-import { sleep, withExponentialBackoff } from "../../../../lib/async/sleep";
+import { sleep, withExponentialBackoff } from "../../../../lib/async/timing";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { FavoritesPageRequest } from "../../types/favorites_page_request";
 import { Rule34NetworkConfig } from "../../../../config/rule34_network_config";

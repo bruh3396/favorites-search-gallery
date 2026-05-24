@@ -1,13 +1,14 @@
 import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
 import { FavoritesPageRequest } from "../../types/favorites_page_request";
+import { SortedArray } from "../../../../lib/collection/sorted_array";
 import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
-import { sleep } from "../../../../lib/async/sleep";
+import { sleep } from "../../../../lib/async/timing";
 
 export class FavoritesConcurrentPageFetcher {
   private static readonly PENDING_POLL_INTERVAL = 200;
   private readonly inFlight = new Set<number>();
   private readonly failed: FavoritesPageRequest[] = [];
-  private readonly pendingDelivery: FavoritesPageRequest[] = [];
+  private readonly pendingDelivery = new SortedArray<FavoritesPageRequest>((a, b) => a.pageNumber - b.pageNumber);
   private nextPage = 0;
   private lastDeliveredPage = -1;
   private allPagesFetched = false;
@@ -47,24 +48,23 @@ export class FavoritesConcurrentPageFetcher {
       const elements = await FavoritesApi.fetchFavoritesPage(request.realPageNumber);
 
       request.complete(extractFavoriteElements(elements));
-      this.inFlight.delete(request.pageNumber);
 
       if (request.elements.length === 0) {
         this.allPagesFetched = true;
       } else {
-        this.pendingDelivery.push(request);
-        this.pendingDelivery.sort((a, b) => a.pageNumber - b.pageNumber);
+        this.pendingDelivery.insert(request);
         this.deliverInOrder();
       }
     } catch {
       request.retry();
-      this.inFlight.delete(request.pageNumber);
       this.failed.push(request);
+    } finally {
+      this.inFlight.delete(request.pageNumber);
     }
   }
 
   private deliverInOrder(): void {
-    while (this.pendingDelivery.length > 0 && this.pendingDelivery[0].pageNumber === this.lastDeliveredPage + 1) {
+    while (this.pendingDelivery.first()?.pageNumber === this.lastDeliveredPage + 1) {
       const request = this.pendingDelivery.shift()!;
 
       this.lastDeliveredPage = request.pageNumber;

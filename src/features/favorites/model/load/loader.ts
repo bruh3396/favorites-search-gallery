@@ -1,8 +1,8 @@
 import * as FavoritesDatabase from "./database";
-import * as FavoritesSequentialPageFetcher from "./sequential_page_fetcher";
+import * as FavoritesSequentialPageFetcher from "./sequential_favorites_fetcher";
 import { Favorite } from "../../../../types/favorite";
 import { FavoriteItem } from "../../types/favorite_item";
-import { FavoritesConcurrentPageFetcher } from "./concurrent_page_fetcher";
+import { FavoritesConcurrentPageFetcher } from "./concurrent_favorites_fetcher";
 
 let allFavorites: Favorite[] = [];
 let activeFavorites: Favorite[] | null = null;

@@ -1,9 +1,9 @@
 import { Favorite } from "../../../../types/favorite";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { preloadImage } from "../../../../utils/dom/image";
-import { sleep } from "../../../../lib/async/sleep";
+import { sleep } from "../../../../lib/async/timing";
 import { throttle } from "../../../../lib/async/throttle";
-import { waitForAllThumbnailsToLoad } from "../../../../app/shell/content_thumbs";
+import { waitForAllThumbnailsToLoad } from "../../../../app/layout/content_thumbs";
 
 export function preloadThumbs(favorites: Favorite[]): void {
   preloadImages(favorites.map(favorite => favorite.thumbUrl));

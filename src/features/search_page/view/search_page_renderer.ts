@@ -1,17 +1,11 @@
-import * as ContentTiler from "../../../app/shell/content_tiler";
+import * as ContentTiler from "../../../app/layout/content_tiler";
 import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
-import SEARCH_PAGE_INFINITE_SCROLL_CSS from "../../../assets/css/search_page_infinite_scroll.css";
 import { SearchPage } from "../types/search_page";
-import { insertStyle } from "../../../lib/dom/injector";
 
-export function createSearchPage(searchPage: SearchPage): void {
+export function render(searchPage: SearchPage): void {
   ContentTiler.tile(searchPage.thumbs);
   updatePaginator(searchPage);
   updateAddressBar(searchPage);
-}
-
-export function toggleInfiniteScroll(value: boolean): void {
-  insertStyle(value ? SEARCH_PAGE_INFINITE_SCROLL_CSS : "", "search-page-infinite-scroll");
 }
 
 function updatePaginator(searchPage: SearchPage): void {

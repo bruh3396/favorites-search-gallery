@@ -1,21 +1,21 @@
-import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../lib/ui/element_types";
-import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/state/feature_flags";
+import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../types/element";
+import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/context/flags";
 import { Layout, PerformanceProfile } from "../../../../types/ui";
 import { buildCheckboxElement, buildCheckboxOption } from "../../../../app/input/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../view/update/ui_toggles";
-import { Events } from "../../../../app/messaging/events";
+import { Events } from "../../../../app/channels/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { GeneralConfig } from "../../../../config/general_config";
 import { MetadataMetric } from "../../../../types/search";
-import { Preferences } from "../../../../app/state/preferences";
+import { Preferences } from "../../../../app/context/preferences";
 import { ThumbnailConfig } from "../../../../config/thumbnail_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/session";
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
-import { hideUnusedLayoutSizer } from "../../../../app/shell/content_tiler";
+import { hideUnusedLayoutSizer } from "../../../../app/layout/content_tiler";
 import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
 import { reloadWindow } from "../../../../utils/browser/window";
 

@@ -1,6 +1,6 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
-import { Preferences } from "../../../app/state/preferences";
+import { Preferences } from "../../../app/context/preferences";
 
 export function addFavorite(thumb: HTMLElement | undefined): Promise<AddFavoriteStatus> {
   return thumb === undefined ? Promise.resolve(AddFavoriteStatus.Error) : FavoritesActions.addFavorite(thumb.id);

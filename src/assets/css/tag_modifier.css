@@ -16,7 +16,7 @@
 
 .post--tag-selected>div,
 .post--tag-selected>a {
-  opacity: 1;
+  opacity: 1 !important;
   filter: grayscale(0%);
 }
 

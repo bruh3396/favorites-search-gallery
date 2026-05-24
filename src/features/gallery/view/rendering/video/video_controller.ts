@@ -1,7 +1,7 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
 import { VideoClip, VideoControllerCallbacks } from "../../../types/gallery_types";
 import { GalleryConfig } from "../../../../../config/gallery_config";
-import { Preferences } from "../../../../../app/state/preferences";
+import { Preferences } from "../../../../../app/context/preferences";
 import { Storage } from "../../../../../lib/storage/local_storage";
 import { convertPreviewUrlToImageUrl } from "../../../../../lib/media/media_url_transformer";
 import { getPreviewUrl } from "../../../../../lib/thumb/thumbs";

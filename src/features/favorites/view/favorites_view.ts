@@ -1,4 +1,4 @@
-import * as ContentTiler from "../../../app/shell/content_tiler";
+import * as ContentTiler from "../../../app/layout/content_tiler";
 import * as FavoritesNavigator from "./navigation/navigator";
 import * as FavoritesShell from "./shell/favorites_shell";
 import * as FavoritesStatus from "./status/status";
@@ -35,7 +35,7 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
 }
 
 export { toggle as toggleNavigator, getContainer as getNavigationContainer, build as buildNavigationMenu, update as updateNavigationMenu } from "./navigation/navigator";
-export { changeLayout } from "../../../app/shell/content_tiler";
+export { changeLayout } from "../../../app/layout/content_tiler";
 
 export * from "./update/thumb_preloader";
 export * from "./status/status";

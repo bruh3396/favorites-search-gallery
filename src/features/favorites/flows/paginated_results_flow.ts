@@ -1,10 +1,10 @@
 import * as FavoritesModel from "../model/favorites_model";
 import * as FavoritesView from "../view/favorites_view";
 import { Favorite, PageRelation } from "../../../types/favorite";
-import { Events } from "../../../app/messaging/events";
+import { Events } from "../../../app/channels/events";
 import { FavoritesResultsView } from "../types/favorite_types";
 import { NavigationKey } from "../../../types/input";
-import { revealItem } from "../../../app/shell/content_thumbs";
+import { revealItem } from "../../../app/layout/content_thumbs";
 
 let hasAppendedFirstResults = false;
 

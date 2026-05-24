@@ -9,7 +9,7 @@ import { fetchHtml } from "../http/http_client";
 import { fetchJsonFromApi } from "./api_client";
 import { parsePostFromPostPage } from "../parse/post_page_parser";
 import { postResponseToPost } from "../parse/api_post_parser";
-import { withExponentialBackoff } from "../../async/sleep";
+import { withExponentialBackoff } from "../../async/timing";
 
 const postFetcher = new CoalescingResolver<PostResponse>(
   ApiConfig.apiBatchSize,

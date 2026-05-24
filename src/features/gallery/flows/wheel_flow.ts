@@ -1,6 +1,6 @@
 import * as GalleryNavigationFlow from "./navigation_flow";
 import * as GalleryView from "../view/gallery_view";
-import { EnhancedWheelEvent } from "../../../lib/ui/input_types";
+import { EnhancedWheelEvent } from "../../../types/input";
 import { dispatchByState } from "./state_dispatch";
 
 export function onWheel(wheelEvent: EnhancedWheelEvent): void {

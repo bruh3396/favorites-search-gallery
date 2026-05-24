@@ -1,17 +1,16 @@
 import * as ICONS from "../../assets/icons";
 import { insertHtml, insertStyle } from "../../lib/dom/injector";
-import { Events } from "../../app/messaging/events";
-import { FeatureBridge } from "../../app/messaging/feature_bridge";
-import { Preferences } from "../../app/state/preferences";
+import { Events } from "../../app/channels/events";
+import { FeatureBridge } from "../../app/channels/feature_bridge";
+import { Preferences } from "../../app/context/preferences";
 import SAVED_SEARCHES_CSS from "../../assets/css/saved_searches.css";
-import { SAVED_SEARCHES_DISABLED } from "../../app/state/feature_flags";
+import { SAVED_SEARCHES_DISABLED } from "../../app/context/flags";
 import SAVED_SEARCHES_HTML from "../../assets/html/saved_searches.html";
 import { Storage } from "../../lib/storage/local_storage";
 import { awesompleteIsUnselected } from "../../lib/ui/autocomplete/awesomplete";
-import { getAllContentThumbs } from "../../app/shell/content_thumbs";
-import { getSavedSearches } from "../../lib/saved_searches";
+import { getAllContentThumbs } from "../../app/layout/content_thumbs";
 import { shuffleArray } from "../../utils/collection/array";
-import { sleep } from "../../lib/async/sleep";
+import { sleep } from "../../lib/async/timing";
 
 let textarea: HTMLTextAreaElement;
 let savedSearchesList: HTMLElement;
@@ -29,6 +28,13 @@ export function setupSavedSearches(): void {
   extractHtmlElements();
   addEventListeners();
   loadSavedSearches();
+  FeatureBridge.savedSearches.register(getSavedSearches);
+}
+
+function getSavedSearches(): string[] {
+  return Array.from(document.getElementsByClassName("saved-searches-item-label"))
+    .filter(element => element instanceof HTMLElement)
+    .map(element => element.innerText);
 }
 
 function insertAllHtml(): void {

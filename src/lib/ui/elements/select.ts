@@ -1,4 +1,4 @@
-import { SelectElement, defaultMenuElement } from "../element_types";
+import { SelectElement, defaultMenuElement } from "../../../types/element";
 import { doNothing } from "../../environment/constants";
 
 export function buildSelectElement<T extends string>(partial: Partial<SelectElement<T>>): void {

@@ -1,7 +1,7 @@
-import { Events } from "../../../../app/messaging/events";
+import { Events } from "../../../../app/channels/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { Preferences } from "../../../../app/state/preferences";
+import { Preferences } from "../../../../app/context/preferences";
 import { debounceLeading } from "../../../../lib/async/debounce";
 
 let container: HTMLElement;

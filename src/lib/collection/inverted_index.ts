@@ -5,7 +5,10 @@ export class InvertedIndex<Doc> {
   private readonly docs: Set<Doc> = new Set<Doc>();
   private readonly docsByTerm: Map<string, Set<Doc>> = new Map<string, Set<Doc>>();
 
-  constructor(private readonly extractTerms: (doc: Doc) => Iterable<string>, private maintainingSortOrder: boolean = false) { }
+  constructor(
+    private readonly extractTerms: (doc: Doc) => Iterable<string>,
+    private maintainingSortOrder: boolean = false
+  ) { }
 
   public indexedTerms(): string[] {
     return this.terms.toArray();
@@ -15,7 +18,7 @@ export class InvertedIndex<Doc> {
     return this.docsByTerm.get(term);
   }
 
-  public allDocs(): Set<Doc> {
+  public allDocs(): ReadonlySet<Doc> {
     return this.docs;
   }
 
@@ -38,7 +41,17 @@ export class InvertedIndex<Doc> {
     this.docs.delete(doc);
 
     for (const term of this.extractTerms(doc)) {
-      this.docsByTerm.get(term)?.delete(doc);
+      const docs = this.docsByTerm.get(term);
+
+      if (docs === undefined) {
+        continue;
+      }
+      docs.delete(doc);
+
+      if (docs.size === 0) {
+        this.docsByTerm.delete(term);
+        this.terms.remove(term);
+      }
     }
   }
 

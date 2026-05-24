@@ -1,4 +1,4 @@
-import { FeatureBridge } from "../../../app/messaging/feature_bridge";
+import { FeatureBridge } from "../../../app/channels/feature_bridge";
 import { GalleryConfig } from "../../../config/gallery_config";
 import { MediaType } from "../../../types/media";
 import { ThrottledQueue } from "../../../lib/async/throttled_queue";

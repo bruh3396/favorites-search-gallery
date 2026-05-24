@@ -1,16 +1,16 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
-import { FeatureBridge } from "../../../../../../app/messaging/feature_bridge";
+import { FeatureBridge } from "../../../../../../app/channels/feature_bridge";
 import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";
-import { PERFORMANCE_PROFILE } from "../../../../../../app/state/feature_flags";
+import { PERFORMANCE_PROFILE } from "../../../../../../app/context/flags";
 import { PerformanceProfile } from "../../../../../../types/ui";
-import { Preferences } from "../../../../../../app/state/preferences";
+import { Preferences } from "../../../../../../app/context/preferences";
 import { ThrottledQueue } from "../../../../../../lib/async/throttled_queue";
 import { fetchBitmap } from "../fetcher";
-import { getAllContentThumbs } from "../../../../../../app/shell/content_thumbs";
+import { getAllContentThumbs } from "../../../../../../app/layout/content_thumbs";
 import { isImage } from "../../../../../../lib/media/media_type_guards";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
-import { sleep } from "../../../../../../lib/async/sleep";
+import { sleep } from "../../../../../../lib/async/timing";
 import { transferredCanvasIds } from "../../../../types/offscreen_upscale_request";
 
 const batchUpscaleQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);

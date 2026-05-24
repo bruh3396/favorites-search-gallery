@@ -1,4 +1,4 @@
-import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../../lib/ui/input_types";
+import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../../types/input";
 import { Emitter } from "../../lib/communication/emitter";
 import { StickyEmitter } from "../../lib/communication/sticky_emitter";
 

@@ -1,8 +1,8 @@
-import { Boundary } from "../types/gallery_types";
+import { Boundary } from "../../../types/boundary";
 import { NavigationKey } from "../../../types/input";
 import { clamp } from "../../../utils/number";
-import { getAllContentThumbs } from "../../../app/shell/content_thumbs";
-import { isForwardNavigationKey } from "../../../types/guards";
+import { getAllContentThumbs } from "../../../app/layout/content_thumbs";
+import { navigationDelta } from "../../../utils/navigation";
 
 let currentIndex = 0;
 let thumbs: HTMLElement[] = [];
@@ -18,10 +18,9 @@ export function jumpToFirst(): void {
   setCurrentIndex(0);
 }
 
-export function move(key: NavigationKey): Boundary {
+export function move(direction: NavigationKey): Boundary {
   requireThumbs();
-  const delta = isForwardNavigationKey(key) ? 1 : -1;
-  const nextIndex = currentIndex + delta;
+  const nextIndex = currentIndex + navigationDelta(direction);
 
   setCurrentIndex(nextIndex);
   return nextIndex < 0 ? Boundary.Start : nextIndex >= thumbs.length ? Boundary.End : Boundary.None;

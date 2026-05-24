@@ -1,27 +1,17 @@
-import * as ContentTiler from "../../../app/shell/content_tiler";
-import * as SearchPageCreator from "./page_builder";
-import { Preferences } from "../../../app/state/preferences";
-import { SearchPage } from "../types/search_page";
-import { getAllPageThumbs } from "../../../app/shell/content_thumbs";
-import { hideUnusedLayoutSizer } from "../../../app/shell/content_tiler";
+import * as ContentTiler from "../../../app/layout/content_tiler";
+import * as SearchPageShell from "./shell/shell";
+import { Preferences } from "../../../app/context/preferences";
+import { getAllPageThumbs } from "../../../app/layout/content_thumbs";
 
-export function setup(): void {
+export { render as renderSearchPage } from "./search_page_renderer";
+export { addToBottom as insertNewSearchResults } from "../../../app/layout/content_tiler";
+export { setInfiniteScrollStyle } from "./update/infinite_scroll_style";
+
+export function setup(): Promise<void> {
   ContentTiler.setup();
   ContentTiler.tile(getAllPageThumbs());
-  hideUnusedLayoutSizer(Preferences.searchPageLayout.value);
-  toggleInfiniteScroll(Preferences.searchPageInfiniteScroll.value);
-}
-
-export function createSearchPage(searchPage: SearchPage): void {
-  SearchPageCreator.createSearchPage(searchPage);
-}
-
-export function insertNewSearchResults(thumbs: HTMLElement[]): void {
-  ContentTiler.addToBottom(thumbs);
-}
-
-export function toggleInfiniteScroll(value: boolean): void {
-  SearchPageCreator.toggleInfiniteScroll(value);
+  ContentTiler.hideUnusedLayoutSizer(Preferences.searchPageLayout.value);
+  return SearchPageShell.setup();
 }
 
 export function currentSearch(): string {

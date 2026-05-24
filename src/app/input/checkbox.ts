@@ -1,6 +1,6 @@
-import { CheckboxElement, defaultMenuElement } from "../../lib/ui/element_types";
+import { CheckboxElement, defaultMenuElement } from "../../types/element";
 import { DomEvents } from "./dom_events";
-import { FeatureBridge } from "../messaging/feature_bridge";
+import { FeatureBridge } from "../channels/feature_bridge";
 import { doNothing } from "../../lib/environment/constants";
 
 export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {

@@ -1,9 +1,9 @@
 import * as SearchPageInfiniteScrollFlow from "./infinite_scroll_flow";
 import * as SearchPageModel from "../model/search_page_model";
 import * as SearchPageView from "../view/search_page_view";
-import { Events } from "../../../app/messaging/events";
+import { Events } from "../../../app/channels/events";
 import { NavigationKey } from "../../../types/input";
-import { Preferences } from "../../../app/state/preferences";
+import { Preferences } from "../../../app/context/preferences";
 import { SearchPage } from "../types/search_page";
 
 export function navigateSearchPages(direction: NavigationKey): SearchPage | null {
@@ -11,11 +11,11 @@ export function navigateSearchPages(direction: NavigationKey): SearchPage | null
     SearchPageInfiniteScrollFlow.showMoreResults();
     return null;
   }
-  const searchPage = SearchPageModel.navigateSearchPages(direction);
+  const result = SearchPageModel.navigate(direction);
 
-  if (searchPage !== null) {
-    SearchPageView.createSearchPage(searchPage);
-    Events.searchPage.pageChanged.emit(searchPage);
+  if (result.searchPage !== null) {
+    SearchPageView.renderSearchPage(result.searchPage);
+    Events.searchPage.pageChanged.emit(result.searchPage);
   }
-  return searchPage;
+  return result.searchPage;
 }

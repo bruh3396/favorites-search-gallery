@@ -1,5 +1,5 @@
 import { AwesompleteSuggestion } from "../../types/ui";
-import { getSavedSearches } from "../../lib/saved_searches";
+import { FeatureBridge } from "../../app/channels/feature_bridge";
 import { removeExtraWhiteSpace } from "../../utils/string/format";
 
 const SUGGESTION_LIMIT = 5;
@@ -13,7 +13,7 @@ export function getSavedSearchesSuggestions(tag: string): AwesompleteSuggestion[
   if (tag.length < MIN_TAG_LENGTH) {
     return [];
   }
-  return getSavedSearches()
+  return FeatureBridge.savedSearches.call()
     .filter(savedSearch => savedSearchMatchesTag(tag, savedSearch))
     .slice(0, SUGGESTION_LIMIT)
     .map(savedSearch => createAwesompleteSuggestion(tag, savedSearch));

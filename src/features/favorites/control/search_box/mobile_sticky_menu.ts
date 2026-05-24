@@ -1,7 +1,7 @@
-import { Content } from "../../../../app/shell/shell";
-import { Preferences } from "../../../../app/state/preferences";
+import { Content } from "../../../../app/layout/shell";
+import { Preferences } from "../../../../app/context/preferences";
 import { insertStyle } from "../../../../lib/dom/injector";
-import { sleep } from "../../../../lib/async/sleep";
+import { sleep } from "../../../../lib/async/timing";
 import { toggleFavoritesOptions } from "../../view/update/ui_toggles";
 
 const stickyMenuStyle = `

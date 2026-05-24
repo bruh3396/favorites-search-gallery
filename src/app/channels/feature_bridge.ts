@@ -13,5 +13,6 @@ export const FeatureBridge = {
   navigateToAdjacentSearchPage: new FeatureChannel<NavigationKey, SearchPage | null>(null),
   searchPageThumbs: new FeatureChannel<void, HTMLElement[]>([]),
   currentSearchQuery: new FeatureChannel<void, string>(""),
-  usingInfiniteScroll: new FeatureChannel<void, boolean>(false)
+  usingInfiniteScroll: new FeatureChannel<void, boolean>(false),
+  savedSearches: new FeatureChannel<void, string[]>([])
 };

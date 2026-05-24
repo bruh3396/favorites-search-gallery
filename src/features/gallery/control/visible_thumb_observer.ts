@@ -1,8 +1,8 @@
 import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment/environment";
-import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../app/shell/content_thumbs";
-import { Events } from "../../../app/messaging/events";
+import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../app/layout/content_thumbs";
+import { Events } from "../../../app/channels/events";
 import { GalleryConfig } from "../../../config/gallery_config";
-import { Preferences } from "../../../app/state/preferences";
+import { Preferences } from "../../../app/context/preferences";
 import { debounceTrailing } from "../../../lib/async/debounce";
 import { getRectDistance } from "../../../utils/geometry";
 

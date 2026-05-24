@@ -3,7 +3,7 @@ import { FavoritesConfig } from "../../../../config/favorites_config";
 import { InvertedIndex } from "../../../../lib/collection/inverted_index";
 import { InvertedIndexSearcher } from "../../../../lib/search/index/inverted_index_searcher";
 import { SearchQuery } from "../../../../lib/search/query/search_query";
-import { yieldControl } from "../../../../lib/async/sleep";
+import { yieldControl } from "../../../../lib/async/timing";
 
 const index = new InvertedIndex<Favorite>(favorite => favorite.tags, false);
 const searcher = new InvertedIndexSearcher<Favorite>(index);

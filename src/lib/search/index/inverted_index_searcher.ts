@@ -28,7 +28,7 @@ export class InvertedIndexSearcher<T extends Searchable> {
     return union;
   }
 
-  private docsWithAllTerms(terms: string[]): Set<T> {
+  private docsWithAllTerms(terms: string[]): ReadonlySet<T> {
     if (terms.length === 0) {
       return this.index.allDocs();
     }
@@ -50,14 +50,16 @@ export class InvertedIndexSearcher<T extends Searchable> {
     return candidates;
   }
 
-  private narrowByOrGroups(candidates: Set<T>, orGroups: string[][]): Set<T> {
-    for (const orGroup of orGroups) {
-      candidates = intersection(this.docsWithAnyTerm(orGroup), candidates);
+  private narrowByOrGroups(candidates: ReadonlySet<T>, orGroups: string[][]): Set<T> {
+    let narrowed = new Set(candidates);
 
-      if (candidates.size === 0) {
+    for (const orGroup of orGroups) {
+      narrowed = intersection(this.docsWithAnyTerm(orGroup), narrowed);
+
+      if (narrowed.size === 0) {
         return new Set<T>();
       }
     }
-    return candidates;
+    return narrowed;
   }
 }

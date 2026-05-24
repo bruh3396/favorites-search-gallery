@@ -1,4 +1,4 @@
-import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../../app/shell/content_thumbs";
+import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../../app/layout/content_thumbs";
 import { Storage } from "../../../../lib/storage/local_storage";
 import { getImageFromThumb } from "../../../../lib/thumb/thumbs";
 

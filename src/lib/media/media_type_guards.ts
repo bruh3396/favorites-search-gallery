@@ -1,6 +1,5 @@
 import { Favorite } from "../../types/favorite";
 import { MediaType } from "../../types/media";
-import { getImageFromThumb } from "../thumb/thumbs";
 import { getTagSetFromItem } from "../thumb/thumb_tags";
 import { resolveMediaType } from "./media_type_resolver";
 
@@ -8,14 +7,6 @@ export const isVideo = (item: HTMLElement | Favorite): boolean => isMediaType(it
 export const isGif = (item: HTMLElement | Favorite): boolean => isMediaType(item, "gif");
 export const isImage = (item: HTMLElement | Favorite): boolean => isMediaType(item, "image");
 
-function isFavoriteMediaType(favorite: Favorite, mediaType: MediaType): boolean {
-  return resolveMediaType(favorite.tags) === mediaType;
-}
-
-function isThumbMediaType(thumb: HTMLElement, mediaType: MediaType): boolean {
-  return getImageFromThumb(thumb) !== null && resolveMediaType(getTagSetFromItem(thumb)) === mediaType;
-}
-
-function isMediaType(item: HTMLElement | Favorite, mediaType: MediaType): boolean {
-  return (item instanceof HTMLElement) ? isThumbMediaType(item, mediaType) : isFavoriteMediaType(item, mediaType);
-}
+const isFavoriteMediaType = (favorite: Favorite, mediaType: MediaType): boolean => resolveMediaType(favorite.tags) === mediaType;
+const isThumbMediaType = (thumb: HTMLElement, mediaType: MediaType): boolean => resolveMediaType(getTagSetFromItem(thumb)) === mediaType;
+const isMediaType = (item: HTMLElement | Favorite, mediaType: MediaType): boolean => ((item instanceof HTMLElement) ? isThumbMediaType(item, mediaType) : isFavoriteMediaType(item, mediaType));

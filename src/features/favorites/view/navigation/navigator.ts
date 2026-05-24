@@ -2,7 +2,7 @@ import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
 import { PageRelation } from "../../../../types/favorite";
-import { Preferences } from "../../../../app/state/preferences";
+import { Preferences } from "../../../../app/context/preferences";
 import { insertStyle } from "../../../../lib/dom/injector";
 import { isOnlyDigits } from "../../../../utils/string/query";
 import { numbersAroundInRange } from "../../../../utils/number";

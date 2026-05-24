@@ -1,7 +1,7 @@
 import * as Eta from "./eta";
 import { FavoritesFetchProgress, NewFavorites } from "../../types/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { Root } from "../../../../app/shell/shell";
+import { Root } from "../../../../app/layout/shell";
 import { Timeout } from "../../../../types/async";
 
 let matchCountIndicator: HTMLElement;

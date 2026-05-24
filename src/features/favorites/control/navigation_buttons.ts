@@ -1,9 +1,9 @@
-import { Content } from "../../../app/shell/shell";
-import { Events } from "../../../app/messaging/events";
+import { Content } from "../../../app/layout/shell";
+import { Events } from "../../../app/channels/events";
 import { FavoritesConfig } from "../../../config/favorites_config";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { insertStyle } from "../../../lib/dom/injector";
-import { yieldControl } from "../../../lib/async/sleep";
+import { yieldControl } from "../../../lib/async/timing";
 
 export async function setup(): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesConfig.bottomNavigationButtonsEnabled) {

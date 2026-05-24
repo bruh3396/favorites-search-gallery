@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { yieldControl } from "../async/sleep";
+import { yieldControl } from "../async/timing";
 
 class LockedDatabaseError extends Error { }
 

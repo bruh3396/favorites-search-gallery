@@ -8,7 +8,7 @@ import TILE_CSS from "../../assets/css/tile.css";
 import { ThumbnailConfig } from "../../config/thumbnail_config";
 import { buildStyleSheetUrl } from "../remote/url/action_url_builder";
 import { insertStyle } from "../dom/injector";
-import { yieldControl } from "../async/sleep";
+import { yieldControl } from "../async/timing";
 
 export function setupStyles(): void {
   insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS);

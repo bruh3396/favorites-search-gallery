@@ -1,9 +1,9 @@
 import { Favorite, PageRelation } from "../../../types/favorite";
 import { FavoritesPaginationParameters } from "../types/favorite_types";
 import { NavigationKey } from "../../../types/input";
-import { Preferences } from "../../../app/state/preferences";
+import { Preferences } from "../../../app/context/preferences";
 import { clamp } from "../../../utils/number";
-import { isForwardNavigationKey } from "../../../types/guards";
+import { navigationDelta } from "../../../utils/navigation";
 
 type PageRange = { start: number; end: number };
 
@@ -42,8 +42,7 @@ export function selectAdjacentPage(direction: NavigationKey): boolean {
   if (onlyOnePage()) {
     return false;
   }
-  const delta = isForwardNavigationKey(direction) ? 1 : -1;
-  const nextPage = ((currentPageNumber - 1 + delta + pageCount()) % pageCount()) + 1;
+  const nextPage = ((currentPageNumber - 1 + navigationDelta(direction) + pageCount()) % pageCount()) + 1;
 
   selectPage(nextPage);
   return true;

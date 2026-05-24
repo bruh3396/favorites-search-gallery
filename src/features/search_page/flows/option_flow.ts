@@ -9,7 +9,7 @@ export function toggleInfiniteScroll(value: boolean): void {
   } else {
     SearchPageInfiniteScrollFlow.disableInfiniteScroll();
     SearchPageModel.resetCurrentPageNumber();
-    SearchPageView.createSearchPage(SearchPageModel.getInitialSearchPage());
+    SearchPageView.renderSearchPage(SearchPageModel.getInitialSearchPage());
   }
-  SearchPageView.toggleInfiniteScroll(value);
+  SearchPageView.setInfiniteScrollStyle(value);
 }

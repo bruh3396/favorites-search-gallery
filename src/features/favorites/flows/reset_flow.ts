@@ -1,6 +1,6 @@
 import * as ExtensionResolver from "../../../lib/media/media_extension_resolver";
 import * as FavoritesModel from "../model/favorites_model";
-import { Events } from "../../../app/messaging/events";
+import { Events } from "../../../app/channels/events";
 import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
 import { Storage } from "../../../lib/storage/local_storage";
 

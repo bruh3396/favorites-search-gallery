@@ -1,7 +1,7 @@
 import * as GalleryDisplayFlow from "./display_flow";
 import * as GalleryModel from "../model/gallery_model";
-import { Boundary } from "../types/gallery_types";
-import { FeatureBridge } from "../../../app/messaging/feature_bridge";
+import { Boundary } from "../../../types/boundary";
+import { FeatureBridge } from "../../../app/channels/feature_bridge";
 import { NavigationKey } from "../../../types/input";
 import { ON_SEARCH_PAGE } from "../../../lib/environment/environment";
 
