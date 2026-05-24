@@ -35,3 +35,15 @@
   flex-direction: column;
   gap: 3px;
 }
+
+.is-favorite {
+  outline: 3px solid gold !important;
+}
+
+.is-favorite .post-action-btn--add {
+  visibility: hidden !important;
+}
+
+body.is-loading-favorite-indicator .post-action-btn--add {
+  visibility: hidden !important;
+}

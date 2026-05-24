@@ -109,7 +109,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Enhance Search Pages",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.searchPages,
+    preference: Preferences.searchPagesEnabled,
     hotkey: "",
     savePreference: true
   },

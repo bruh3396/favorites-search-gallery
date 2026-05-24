@@ -76,7 +76,7 @@ function getCategoryHeaderHtml(): string {
 }
 
 function saveTagCategories(mappings: TagCategoryMapping[]): void {
-  database.store(mappings);
+  database.write(mappings);
 }
 
 function isHidden(): boolean {
@@ -165,7 +165,7 @@ function addFavoritesPageEventListeners(): void {
     }, 600);
   }, 2000));
   Events.favorites.resetConfirmed.on(() => {
-    database.delete();
+    database.destroy();
   });
 }
 
@@ -328,7 +328,7 @@ function addTag(tagCategory: TagCategory, tagName: string): void {
 }
 
 async function loadTagCategoryMappings(): Promise<void> {
-  const mappings = await database.load();
+  const mappings = await database.readAll();
 
   for (const mapping of mappings) {
     tagCategoryMappings[mapping.id] = mapping.category;

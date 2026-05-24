@@ -115,7 +115,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Search Page Gallery",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.searchPages,
+    preference: Preferences.searchPagesEnabled,
     hotkey: "",
     savePreference: true
   },

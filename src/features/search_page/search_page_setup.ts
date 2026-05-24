@@ -1,32 +1,45 @@
 import * as ContentTiler from "../../app/layout/content_tiler";
+import * as MarkFavoriteThumbsFlow from "./flows/mark_favorite_thumbs_flow";
 import * as SearchPageModel from "./model/search_page_model";
 import * as SearchPageNavigationFlow from "./flows/navigation_flow";
 import * as SearchPageOptionFlow from "./flows/option_flow";
 import * as SearchPageView from "./view/search_page_view";
 import { Events } from "../../app/channels/events";
 import { FeatureBridge } from "../../app/channels/feature_bridge";
-import { ON_SEARCH_PAGE } from "../../lib/environment";
 import { Preferences } from "../../app/context/preferences";
+import { SEARCH_PAGE_DISABLED } from "../../app/context/flags";
 
-export function setupSearchPage(): void {
-  if (!ON_SEARCH_PAGE || !Preferences.searchPages.value) {
+export async function setupSearchPage(): Promise<void> {
+  if (SEARCH_PAGE_DISABLED) {
     return;
   }
   setupModel();
-  setupView();
+  await setupView();
+  await setupFavoriteIndicator();
   subscribeToEvents();
   registerBridgeHandlers();
   Events.searchPage.initialSearchPageCreated.emit(SearchPageModel.getInitialSearchPage());
+  Events.searchPage.searchPageInitialized.emit();
 }
 
 function setupModel(): void {
   SearchPageModel.setup();
-
 }
 
-async function setupView(): Promise<void> {
-  await SearchPageView.setup();
-  Events.searchPage.searchPageReady.emit();
+function setupView(): Promise<void> {
+  return SearchPageView.setup();
+}
+
+async function setupFavoriteIndicator(): Promise<void> {
+  if (!Preferences.searchPageFavoriteIndicator.value) {
+    return;
+  }
+  SearchPageView.setFavoriteIndicatorLoading(true);
+  SearchPageModel.populateFavoriteIds(await FeatureBridge.favoriteIds.call());
+  MarkFavoriteThumbsFlow.markFavoriteThumbs(SearchPageModel.allThumbs());
+  SearchPageView.setFavoriteIndicatorLoading(false);
+  Events.searchPage.pageChanged.on(MarkFavoriteThumbsFlow.markFavoriteThumbs);
+  Events.searchPage.moreResultsAdded.on(MarkFavoriteThumbsFlow.markFavoriteThumbs);
 }
 
 function subscribeToEvents(): void {

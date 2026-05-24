@@ -72,13 +72,13 @@ export const Events = {
     append: new Emitter<string>()
   },
   searchPage: {
-    searchPageReady: new StickyEmitter<void>(),
+    searchPageInitialized: new StickyEmitter<void>(),
     layoutChanged: new Emitter<Layout>(),
     initialSearchPageCreated: new StickyEmitter<SearchPage>(),
     upscaleToggled: new Emitter<boolean>(),
     infiniteScrollToggled: new Emitter<boolean>(),
     moreResultsAdded: new Emitter<HTMLElement[]>(),
-    pageChanged: new Emitter<SearchPage>()
+    pageChanged: new Emitter<HTMLElement[]>()
   },
   mobile: {
     swipedUp: new Emitter<void>(),

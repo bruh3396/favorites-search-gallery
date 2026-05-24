@@ -76,6 +76,10 @@ export function hideUnusedOptions(): void {
     hiddenSelectors.add("#search-page-upscale-thumbs");
   }
 
+  if (PERFORMANCE_PROFILE === PerformanceProfile.Potato) {
+    hiddenSelectors.add("#search-page-tooltip");
+  }
+
   if (hiddenSelectors.size > 0) {
     insertStyle(`
       ${[...hiddenSelectors].join(",\n")} {

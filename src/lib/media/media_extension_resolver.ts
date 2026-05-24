@@ -16,7 +16,7 @@ const extensionMap: Map<string, ImageExtension> = new Map();
 const database = new Database<MediaExtensionMapping>(DATABASE_NAME, OBJECT_STORE_NAME);
 const writeScheduler = new CoalescingExecutor<MediaExtensionMapping>(100, 2000, database.update.bind(database));
 
-export const deleteExtensionsDatabase: () => void = () => database.delete();
+export const deleteExtensionsDatabase: () => void = () => database.destroy();
 export const extractExtensionFromUrl = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
 export const setupExtensions = loadExtensionsIntoCache;
 
@@ -86,5 +86,5 @@ function persistExtension(id: string, extension: ImageExtension): void {
 }
 
 function loadExtensionsIntoCache(): Promise<void> {
-  return database.load().then(mappings => mappings.forEach(mapping => extensionMap.set(mapping.id, mapping.extension)));
+  return database.readAll().then(mappings => mappings.forEach(mapping => extensionMap.set(mapping.id, mapping.extension)));
 }

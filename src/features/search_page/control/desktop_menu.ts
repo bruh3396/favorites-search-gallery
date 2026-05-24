@@ -60,6 +60,16 @@ const checkboxes: Partial<CheckboxElement>[] = [
     event: Events.favorites.tooltipToggled
   },
   {
+    id: "favorite-indicator",
+    parentId: "search-page-favorite-indicator",
+    position: "beforeend",
+    textContent: "",
+    title: "Mark thumbs you've already favorited",
+    preference: Preferences.searchPageFavoriteIndicator,
+    function: reloadWindow,
+    defaultValue: false
+  },
+  {
     id: "show-add-favorite-buttons",
     parentId: "search-page-add-favorite-buttons",
     textContent: "Add Favorite Buttons",

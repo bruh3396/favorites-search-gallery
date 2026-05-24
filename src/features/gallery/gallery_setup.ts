@@ -43,7 +43,7 @@ async function waitUntilPageIsReady(): Promise<void> {
   }
 
   if (ON_SEARCH_PAGE) {
-    await Events.searchPage.searchPageReady.wait();
+    await Events.searchPage.searchPageInitialized.wait();
   }
 }
 

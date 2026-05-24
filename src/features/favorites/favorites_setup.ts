@@ -21,9 +21,15 @@ import { DomEvents } from "../../app/input/dom_events";
 import { Events } from "../../app/channels/events";
 import { FeatureBridge } from "../../app/channels/feature_bridge";
 import { Preferences } from "../../app/context/preferences";
+import { SEARCH_PAGE_ENABLED } from "../../app/context/flags";
 import { setFavoriteTagsLookup } from "../../lib/thumb/thumb_tags";
 
 export function setupFavorites(): void {
+  if (SEARCH_PAGE_ENABLED) {
+    registerSearchPageBridgeHandlers();
+    return;
+  }
+
   if (!ON_FAVORITES_PAGE) {
     return;
   }
@@ -112,6 +118,12 @@ function subscribeToEvents(): void {
 
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   Events.gallery.favoriteToggled.on(FavoritesInterFeatureFlow.swapFavoriteButton);
+}
+
+function registerSearchPageBridgeHandlers(): void {
+  if (Preferences.searchPageFavoriteIndicator.value) {
+    FeatureBridge.favoriteIds.register(FavoritesModel.loadFavoriteIds);
+  }
 }
 
 function registerBridgeHandlers(): void {

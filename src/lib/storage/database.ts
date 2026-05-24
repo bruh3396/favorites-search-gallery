@@ -16,12 +16,40 @@ export class Database<V extends { id: string }> {
     this.locked = false;
   }
 
-  public async load(objectStoreName: string | undefined = undefined): Promise<V[]> {
+  public async readAll(objectStoreName: string | undefined = undefined): Promise<V[]> {
     const database = await this.open(objectStoreName ?? this.defaultObjectStoreName);
     return this.getAllRecords(database, objectStoreName ?? this.defaultObjectStoreName);
   }
 
-  public async store(records: V[], objectStoreName: string | undefined = undefined): Promise<void> {
+  public async readAllIds(objectStoreName: string | undefined = undefined): Promise<string[]> {
+    objectStoreName = objectStoreName ?? this.defaultObjectStoreName;
+    const database = await this.open(objectStoreName);
+    const transaction = database.transaction(objectStoreName, "readonly");
+    const objectStore = transaction.objectStore(objectStoreName);
+    const index = objectStore.index("id");
+    return new Promise((resolve, reject) => {
+      const ids: string[] = [];
+      const request = index.openKeyCursor();
+
+      request.onsuccess = (): void => {
+        const cursor = request.result;
+
+        if (cursor) {
+          ids.push(cursor.key as string);
+          cursor.continue();
+          return;
+        }
+        database.close();
+        resolve(ids);
+      };
+      request.onerror = (): void => {
+        database.close();
+        reject(request.error);
+      };
+    });
+  }
+
+  public async write(records: V[], objectStoreName: string | undefined = undefined): Promise<void> {
     if (this.locked) {
       return Promise.reject(new LockedDatabaseError());
     }
@@ -60,7 +88,7 @@ export class Database<V extends { id: string }> {
     });
   }
 
-  public async deleteRecords(ids: string[], objectStoreName: string | undefined = undefined): Promise<void> {
+  public async delete(ids: string[], objectStoreName: string | undefined = undefined): Promise<void> {
     objectStoreName = objectStoreName || this.defaultObjectStoreName;
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");
@@ -72,7 +100,7 @@ export class Database<V extends { id: string }> {
     }
   }
 
-  public async delete(): Promise<void> {
+  public async destroy(): Promise<void> {
     this.lock();
     await yieldControl();
     indexedDB.deleteDatabase(this.name);

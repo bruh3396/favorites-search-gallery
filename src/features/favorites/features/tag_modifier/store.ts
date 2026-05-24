@@ -11,7 +11,7 @@ const database = new Database<TagModificationDatabaseRecord>(DATABASE_NAME, OBJE
 let loadPromise: Promise<void> | null = null;
 
 export function ensureTagModificationsLoaded(): Promise<void> {
-  loadPromise ??= database.load().then(records => {
+  loadPromise ??= database.readAll().then(records => {
     records.forEach(record => tagModificationMap.set(record.id, record.tags));
   });
   return loadPromise;

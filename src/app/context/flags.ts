@@ -2,7 +2,7 @@ import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/
 import { PerformanceProfile } from "../../types/ui";
 import { Preferences } from "./preferences";
 
-export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.searchPages.value);
+export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value);
 export const FAVORITES_SEARCH_GALLERY_DISABLED = !FAVORITES_SEARCH_GALLERY_ENABLED;
 
 export const PERFORMANCE_PROFILE = Preferences.performanceProfile.value;
@@ -27,3 +27,6 @@ export const AUTOCOMPLETE_DISABLED = !AUTOCOMPLETE_ENABLED;
 
 export const DOWNLOADER_ENABLED = ON_FAVORITES_PAGE;
 export const DOWNLOADER_DISABLED = !DOWNLOADER_ENABLED;
+
+export const SEARCH_PAGE_ENABLED = ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value;
+export const SEARCH_PAGE_DISABLED = !SEARCH_PAGE_ENABLED;

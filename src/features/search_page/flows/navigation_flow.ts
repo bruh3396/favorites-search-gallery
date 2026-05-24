@@ -15,7 +15,7 @@ export function navigateSearchPages(direction: NavigationKey): SearchPage | null
 
   if (result.searchPage !== null) {
     SearchPageView.renderSearchPage(result.searchPage);
-    Events.searchPage.pageChanged.emit(result.searchPage);
+    Events.searchPage.pageChanged.emit(result.searchPage.thumbs);
   }
   return result.searchPage;
 }

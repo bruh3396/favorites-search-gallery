@@ -62,5 +62,5 @@ function onTouchStartInGallery(event: TouchEvent): void {
 }
 
 function galleryEnabled(): boolean {
-  return (ON_FAVORITES_PAGE && Preferences.mobileGalleryEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPages.value);
+  return (ON_FAVORITES_PAGE && Preferences.mobileGalleryEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPagesEnabled.value);
 }
