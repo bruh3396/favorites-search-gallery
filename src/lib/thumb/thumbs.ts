@@ -1,5 +1,5 @@
 import { Favorite } from "../../types/favorite";
-import { ON_MOBILE_DEVICE } from "../environment/environment";
+import { ON_MOBILE_DEVICE } from "../environment";
 import { imageIsLoading } from "../../utils/dom/image";
 import { removeNonNumericCharacters } from "../../utils/string/format";
 import { sum } from "../../utils/number";

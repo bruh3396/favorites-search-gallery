@@ -16,7 +16,7 @@ import * as GalleryTouchFlow from "./flows/touch_flow";
 import * as GalleryView from "./view/gallery_view";
 import * as GalleryVisibleThumbObserver from "./control/visible_thumb_observer";
 import * as GalleryWheelFlow from "./flows/wheel_flow";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment";
 import { DomEvents } from "../../app/input/dom_events";
 import { Events } from "../../app/channels/events";
 import { FeatureBridge } from "../../app/channels/feature_bridge";
@@ -106,7 +106,7 @@ function subscribeToFavoritesEvents(): void {
 
 function subscribeToSearchPageEvents(): void {
   Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
-  Events.searchPage.searchPageCreated.on(GallerySearchPageFlow.onSearchPageCreated);
+  Events.searchPage.initialSearchPageCreated.on(GallerySearchPageFlow.onInitialSearchPageCreated, { once: true });
   Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
   Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
   Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);

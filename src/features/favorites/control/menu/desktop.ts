@@ -11,7 +11,7 @@ import { GeneralConfig } from "../../../../config/general_config";
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../app/context/preferences";
 import { ThumbnailConfig } from "../../../../config/thumbnail_config";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/session";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";

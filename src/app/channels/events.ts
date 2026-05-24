@@ -74,7 +74,7 @@ export const Events = {
   searchPage: {
     searchPageReady: new StickyEmitter<void>(),
     layoutChanged: new Emitter<Layout>(),
-    searchPageCreated: new StickyEmitter<SearchPage>(),
+    initialSearchPageCreated: new StickyEmitter<SearchPage>(),
     upscaleToggled: new Emitter<boolean>(),
     infiniteScrollToggled: new Emitter<boolean>(),
     moreResultsAdded: new Emitter<HTMLElement[]>(),

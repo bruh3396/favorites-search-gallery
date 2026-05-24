@@ -1,5 +1,5 @@
 import { Layout, PerformanceProfile } from "../../types/ui";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/environment";
 import { Rating, SortingMethod } from "../../types/search";
 import { Preference } from "../../lib/storage/preference";
 

@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { Preferences } from "../../../../app/context/preferences";
 import { insertStyle } from "../../../../utils/dom/injector";
 

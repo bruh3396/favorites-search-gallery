@@ -1,6 +1,6 @@
 import * as TooltipHighlightBuilder from "./highlight_builder";
 import * as TooltipTagMatcher from "./tag_matcher";
-import { ON_FAVORITES_PAGE } from "../../../lib/environment/environment";
+import { ON_FAVORITES_PAGE } from "../../../lib/environment";
 import { Preferences } from "../../../app/context/preferences";
 import { SearchTermHighlight } from "../types/highlight";
 import { usingDarkTheme } from "../../../lib/ui/style";

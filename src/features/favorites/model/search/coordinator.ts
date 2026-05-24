@@ -1,7 +1,7 @@
 import * as FavoritesResults from "./results";
 import * as FavoritesSearchEngine from "./engine";
 import * as FavoritesSorter from "./sorter";
-import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/session";
+import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
 import { Favorite } from "../../../../types/favorite";
 import { Preferences } from "../../../../app/context/preferences";
 import { SearchQuery } from "../../../../lib/search/query/search_query";

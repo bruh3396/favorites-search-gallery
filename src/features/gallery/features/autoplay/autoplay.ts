@@ -1,5 +1,5 @@
 import * as Icons from "../../../../assets/icons";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { clamp, millisecondsToSeconds } from "../../../../utils/number";
 import { isImage, isVideo } from "../../../../lib/media/media_type_guards";
 import AUTOPLAY_CSS from "../../../../assets/css/autoplay.css";

@@ -1,7 +1,7 @@
 import { Content } from "../../../app/layout/shell";
 import { Events } from "../../../app/channels/events";
 import { FavoritesConfig } from "../../../config/favorites_config";
-import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment";
 import { insertStyle } from "../../../utils/dom/injector";
 import { yieldControl } from "../../../lib/async/timing";
 

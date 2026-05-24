@@ -6,7 +6,7 @@ import { GalleryMenuAction } from "../../../../types/ui";
 import { GalleryMenuButton } from "../../types/gallery_types";
 import { GalleryRoot } from "./shell";
 import { GeneralConfig } from "../../../../config/general_config";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { Preferences } from "../../../../app/context/preferences";
 import { Timeout } from "../../../../types/async";
 import { insertStyle } from "../../../../utils/dom/injector";

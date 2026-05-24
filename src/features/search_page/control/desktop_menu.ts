@@ -4,7 +4,7 @@ import { Layout, PerformanceProfile } from "../../../types/ui";
 import { Events } from "../../../app/channels/events";
 import { GeneralConfig } from "../../../config/general_config";
 import { MetadataMetric } from "../../../types/search";
-import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE } from "../../../lib/environment";
 import { Preferences } from "../../../app/context/preferences";
 import { buildCheckboxElement } from "../../../app/input/checkbox";
 import { buildSelectElement } from "../../../lib/ui/elements/select";

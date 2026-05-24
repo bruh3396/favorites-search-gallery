@@ -1,4 +1,4 @@
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment";
 import { PerformanceProfile } from "../../types/ui";
 import { Preferences } from "./preferences";
 

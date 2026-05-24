@@ -1,5 +1,5 @@
 import { Events } from "../../../../app/channels/events";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { Preferences } from "../../../../app/context/preferences";
 import { Rating } from "../../../../types/search";
 import { capitalize } from "../../../../utils/string/format";

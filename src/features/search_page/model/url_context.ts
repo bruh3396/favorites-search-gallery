@@ -1,4 +1,4 @@
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/rule34_constants";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/rule34_constants";
 
 export function initialPageNumber(): number {
   const match = (/&pid=(\d+)/).exec(location.href);

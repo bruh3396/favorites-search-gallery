@@ -10,7 +10,7 @@ import { Database } from "../../lib/storage/database";
 import { DomEvents } from "../../app/input/dom_events";
 import { Events } from "../../app/channels/events";
 import { FeatureBridge } from "../../app/channels/feature_bridge";
-import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { ON_SEARCH_PAGE } from "../../lib/environment";
 import { Preferences } from "../../app/context/preferences";
 import { capitalize } from "../../utils/string/format";
 import { debounceLeading } from "../../lib/async/debounce";

@@ -1,4 +1,4 @@
-import { FAVORITES_PER_PAGE } from "../../../../lib/environment/rule34_constants";
+import { FAVORITES_PER_PAGE } from "../../../../lib/rule34_constants";
 import { average } from "../../../../utils/number";
 
 let last: number | null = null;

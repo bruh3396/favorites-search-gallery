@@ -1,6 +1,6 @@
 import * as GalleryView from "../view/gallery_view";
 import { Events } from "../../../app/channels/events";
-import { ON_MOBILE_DEVICE } from "../../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment";
 import { yieldControl } from "../../../lib/async/timing";
 
 export function setup(): void {

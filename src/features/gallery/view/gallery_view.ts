@@ -4,7 +4,7 @@ import * as GalleryUi from "./shell/ui";
 import { GalleryRoot, mountGallery } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
 import { GalleryMenuAction } from "../../../types/ui";
-import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE } from "../../../lib/environment";
 import { insertStyle } from "../../../utils/dom/injector";
 export { overGalleryMenu } from "./view_utils";
 

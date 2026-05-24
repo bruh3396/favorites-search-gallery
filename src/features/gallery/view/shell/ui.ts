@@ -3,7 +3,7 @@ import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favor
 import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/number";
 import { GalleryRoot } from "./shell";
 import { Preferences } from "../../../../app/context/preferences";
-import { USING_FIREFOX } from "../../../../lib/environment/environment";
+import { USING_FIREFOX } from "../../../../lib/environment";
 import { blurActiveElement } from "../../../../utils/dom/interaction";
 import { getLayout } from "../../../../app/layout/content_tiler";
 import { insertStyle } from "../../../../utils/dom/injector";

@@ -1,4 +1,4 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../../lib/environment";
 import { VideoClip, VideoControllerCallbacks } from "../../../types/gallery_types";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { Preferences } from "../../../../../app/context/preferences";

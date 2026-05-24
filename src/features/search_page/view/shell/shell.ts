@@ -3,7 +3,7 @@ import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../../app/context/f
 import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
 import { Content } from "../../../../app/layout/shell";
 import { ITEM_SELECTOR } from "../../../../lib/thumb/thumbs";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { PerformanceProfile } from "../../../../types/ui";
 import SEARCH_PAGE_CSS from "../../../../assets/css/search_page.css";
 import SEARCH_PAGE_HTML from "../../../../assets/html/search_page.html";

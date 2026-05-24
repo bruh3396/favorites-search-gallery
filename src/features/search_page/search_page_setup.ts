@@ -5,7 +5,7 @@ import * as SearchPageOptionFlow from "./flows/option_flow";
 import * as SearchPageView from "./view/search_page_view";
 import { Events } from "../../app/channels/events";
 import { FeatureBridge } from "../../app/channels/feature_bridge";
-import { ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { ON_SEARCH_PAGE } from "../../lib/environment";
 import { Preferences } from "../../app/context/preferences";
 
 export function setupSearchPage(): void {
@@ -16,7 +16,7 @@ export function setupSearchPage(): void {
   setupView();
   subscribeToEvents();
   registerBridgeHandlers();
-  Events.searchPage.searchPageCreated.emit(SearchPageModel.getInitialSearchPage());
+  Events.searchPage.initialSearchPageCreated.emit(SearchPageModel.getInitialSearchPage());
 }
 
 function setupModel(): void {

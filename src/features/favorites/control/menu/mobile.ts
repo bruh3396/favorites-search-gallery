@@ -6,7 +6,7 @@ import { Events } from "../../../../app/channels/events";
 import { GALLERY_ENABLED } from "../../../../app/context/flags";
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../app/context/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment/session";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
 import { buildToggleSwitch } from "../../../../app/input/checkbox";

@@ -1,6 +1,6 @@
 import { DomEvents } from "./dom_events";
 import { Events } from "../channels/events";
-import { ON_MOBILE_DEVICE } from "../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../lib/environment";
 import { Timeout } from "../../types/async";
 
 let timer: Timeout;

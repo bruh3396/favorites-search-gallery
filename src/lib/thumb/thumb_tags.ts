@@ -1,5 +1,5 @@
 import { Favorite } from "../../types/favorite";
-import { ON_FAVORITES_PAGE } from "../environment/environment";
+import { ON_FAVORITES_PAGE } from "../environment";
 import { convertToTagSet } from "../../utils/string/tags";
 import { getImageFromThumb } from "./thumbs";
 

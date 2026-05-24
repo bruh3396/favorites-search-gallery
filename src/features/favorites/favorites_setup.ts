@@ -16,7 +16,7 @@ import * as FavoritesSearchFlow from "./flows/search_flow";
 import * as FavoritesTagModifier from "./features/tag_modifier/tag_modifier";
 import * as FavoritesView from "./view/favorites_view";
 import * as PostApi from "../../lib/remote/api/post_fetcher";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "../../lib/environment";
 import { DomEvents } from "../../app/input/dom_events";
 import { Events } from "../../app/channels/events";
 import { FeatureBridge } from "../../app/channels/feature_bridge";

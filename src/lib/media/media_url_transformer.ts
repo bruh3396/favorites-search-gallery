@@ -1,4 +1,4 @@
-import { THUMBNAIL_ORIGIN } from "../environment/rule34_constants";
+import { THUMBNAIL_ORIGIN } from "../rule34_constants";
 import { extensionRegex } from "./media_constants";
 
 const imageSourceNormalizationRegex = /^([^.]*\/\/)?(?:[^.]+\.)*rule34/;

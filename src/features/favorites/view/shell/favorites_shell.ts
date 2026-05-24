@@ -1,4 +1,4 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
 import DESKTOP_CSS from "../../../../assets/css/desktop_base.css";
 import FAVORITES_CSS from "../../../../assets/css/favorites.css";

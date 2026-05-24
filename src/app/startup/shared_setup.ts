@@ -1,5 +1,5 @@
 import { Root, setupShell } from "../layout/shell";
-import { ON_FAVORITES_PAGE } from "../../lib/environment/environment";
+import { ON_FAVORITES_PAGE } from "../../lib/environment";
 import { setupDomEvents } from "../input/dom_events";
 import { setupExtensions } from "../../lib/media/media_extension_resolver";
 import { setupServer } from "../../lib/remote/api/api_client";

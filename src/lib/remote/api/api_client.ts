@@ -1,6 +1,6 @@
 import { PING_URL } from "../url/api_urls";
-import { USER_ID } from "../../environment/session";
-import { VERSION } from "../../environment/environment";
+import { USER_ID } from "../../environment";
+import { VERSION } from "../../environment";
 
 export function setupServer(): void {
   fetchFromApi(PING_URL, {});

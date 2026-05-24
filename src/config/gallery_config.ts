@@ -1,5 +1,5 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment/environment";
-import { POSTS_PER_SEARCH_PAGE } from "../lib/environment/rule34_constants";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment";
+import { POSTS_PER_SEARCH_PAGE } from "../lib/rule34_constants";
 import { Resolution } from "../types/media";
 
 const FAVORITES_PAGE_RESOLUTION: Resolution = "7680x4320";

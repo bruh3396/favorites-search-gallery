@@ -1,7 +1,7 @@
 import { Favorite, FavoritesDatabaseRecord } from "../../../../types/favorite";
 import { CoalescingExecutor } from "../../../../lib/async/coalescing_executor";
 import { Database } from "../../../../lib/storage/database";
-import { FAVORITES_PAGE_ID } from "../../../../lib/environment/session";
+import { FAVORITES_PAGE_ID } from "../../../../lib/environment";
 
 const database = new Database<FavoritesDatabaseRecord>("Favorites", `user${FAVORITES_PAGE_ID}`);
 const updateCoalescer = new CoalescingExecutor<Favorite>(100, 1000, (favorites) => database.update(favorites.map(f => f.databaseRecord)));

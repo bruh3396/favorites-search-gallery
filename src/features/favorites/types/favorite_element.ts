@@ -4,7 +4,7 @@ import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../as
 import { ClickCode } from "../../../types/input";
 import { Events } from "../../../app/channels/events";
 import { GALLERY_DISABLED } from "../../../app/context/flags";
-import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE } from "../../../lib/environment";
 import { Post } from "../../../types/api";
 import { buildPostPageUrl } from "../../../lib/remote/url/page_url_builder";
 import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";

@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE } from "../../environment/environment";
+import { ON_MOBILE_DEVICE } from "../../environment";
 import { Timeout } from "../../../types/async";
 import { clamp } from "../../../utils/number";
 

@@ -3,7 +3,7 @@ import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, getIdFromThumb, getImageFromThum
 import { ADD_FAVORITE_IMAGE_HTML } from "../../../../assets/images";
 import { ClickCode } from "../../../../types/input";
 import { GALLERY_DISABLED } from "../../../../app/context/flags";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
+import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { removeNonNumericCharacters } from "../../../../utils/string/format";
 import { resolveMediaType } from "../../../../lib/media/media_type_resolver";
 

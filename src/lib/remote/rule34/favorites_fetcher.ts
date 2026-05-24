@@ -1,6 +1,6 @@
 import { buildFavoritesPageUrl, buildProfilePageUrl } from "../url/page_url_builder";
 import { withExponentialBackoff, yieldControl } from "../../async/timing";
-import { FAVORITES_PAGE_ID } from "../../environment/session";
+import { FAVORITES_PAGE_ID } from "../../environment";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { extractFavoritesCount } from "../parsers/profile_page_parser";
 import { extractFavoritesPageCount } from "../parsers/favorites_page_parser";

@@ -1,6 +1,6 @@
 import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
 import { FavoritesConfig } from "../../../../config/favorites_config";
-import { ON_DESKTOP_DEVICE } from "../../../../lib/environment/environment";
+import { ON_DESKTOP_DEVICE } from "../../../../lib/environment";
 import { PageRelation } from "../../../../types/favorite";
 import { Preferences } from "../../../../app/context/preferences";
 import { insertStyle } from "../../../../utils/dom/injector";

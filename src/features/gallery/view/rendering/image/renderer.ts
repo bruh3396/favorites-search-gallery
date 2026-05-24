@@ -4,7 +4,7 @@ import * as GalleryUpscaler from "./upscalers/upscaler";
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { GalleryRenderer } from "../../../types/gallery_types";
 import { ImageRequest } from "../../../types/image_request";
-import { USING_FIREFOX } from "../../../../../lib/environment/environment";
+import { USING_FIREFOX } from "../../../../../lib/environment";
 import { waitForAllThumbnailsToLoad } from "../../../../../app/layout/content_thumbs";
 import { withTimeout } from "../../../../../lib/async/timing";
 

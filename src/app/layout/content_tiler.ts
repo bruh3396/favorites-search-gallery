@@ -1,4 +1,4 @@
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment/environment";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment";
 import { AbstractTiler } from "../../lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "../../lib/ui/tilers/column_tiler";
 import { Content } from "./shell";

@@ -5,7 +5,7 @@ import { isGif, isVideo } from "./media_type_guards";
 import { CoalescingExecutor } from "../async/coalescing_executor";
 import { Database } from "../storage/database";
 import { Favorite } from "../../types/favorite";
-import { ON_FAVORITES_PAGE } from "../environment/environment";
+import { ON_FAVORITES_PAGE } from "../environment";
 import { Post } from "../../types/api";
 import { baseImageUrl } from "./base_image_url";
 

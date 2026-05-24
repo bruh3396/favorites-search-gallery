@@ -1,4 +1,4 @@
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment/environment";
+import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment";
 import { FeatureBridge } from "../../../../../../app/channels/feature_bridge";
 import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
 import { ImageRequest } from "../../../../types/image_request";
