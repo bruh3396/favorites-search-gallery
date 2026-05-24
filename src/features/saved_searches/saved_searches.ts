@@ -1,5 +1,5 @@
 import * as ICONS from "../../assets/icons";
-import { insertHtml, insertStyle } from "../../lib/dom/injector";
+import { insertHtml, insertStyle } from "../../utils/dom/injector";
 import { Events } from "../../app/channels/events";
 import { FeatureBridge } from "../../app/channels/feature_bridge";
 import { Preferences } from "../../app/context/preferences";

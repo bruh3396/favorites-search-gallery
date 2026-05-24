@@ -11,7 +11,7 @@ import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
 import { buildToggleSwitch } from "../../../../app/input/checkbox";
 import { hideUnusedLayoutSizer } from "../../../../app/layout/content_tiler";
-import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
+import { prepareDynamicElements } from "../../../../lib/ui/elements/dynamic_element_preparer";
 
 const buttons: Partial<ButtonElement>[] = [
   {

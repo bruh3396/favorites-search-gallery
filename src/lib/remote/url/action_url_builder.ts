@@ -1,4 +1,4 @@
-import { ORIGIN } from "./origin";
+import { ORIGIN } from "../../environment/rule34_constants";
 
 const CSS_VERSION = 44;
 

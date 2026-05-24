@@ -1,6 +1,6 @@
-import { DEFAULT_EXTENSION, extensionRegex } from "../environment/constants";
+import { DEFAULT_EXTENSION, extensionRegex } from "./media_constants";
 import { ImageExtension, MediaExtension, MediaExtensionMapping } from "../../types/media";
-import { extensionProbeLimiter, extensionProbeQueue } from "../remote/http/rate_limiter";
+import { extensionProbeLimiter, extensionProbeQueue } from "../remote/http/rate_limiters";
 import { isGif, isVideo } from "./media_type_guards";
 import { CoalescingExecutor } from "../async/coalescing_executor";
 import { Database } from "../storage/database";

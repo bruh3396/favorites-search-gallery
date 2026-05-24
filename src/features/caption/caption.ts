@@ -1,4 +1,4 @@
-import * as Navigator from "../../lib/dom/navigation";
+import * as Navigator from "../../lib/remote/rule34/navigator";
 import * as PostApi from "../../lib/remote/api/post_fetcher";
 import * as TagApi from "../../lib/remote/api/tag_fetcher";
 import { TagCategory, TagCategoryMapping } from "../../types/search";
@@ -16,7 +16,7 @@ import { capitalize } from "../../utils/string/format";
 import { debounceLeading } from "../../lib/async/debounce";
 import { getImageFromThumb } from "../../lib/thumb/thumbs";
 import { getTagSetFromItem } from "../../lib/thumb/thumb_tags";
-import { insertStyle } from "../../lib/dom/injector";
+import { insertStyle } from "../../utils/dom/injector";
 import { isOnlyDigits } from "../../utils/string/query";
 import { isTagCategory } from "../../types/guards";
 import { roundToTwoDecimalPlaces } from "../../utils/number";

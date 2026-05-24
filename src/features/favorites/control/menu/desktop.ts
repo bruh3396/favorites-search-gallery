@@ -16,7 +16,7 @@ import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
 import { buildSelectElement } from "../../../../lib/ui/elements/select";
 import { hideUnusedLayoutSizer } from "../../../../app/layout/content_tiler";
-import { prepareDynamicElements } from "../../../../lib/ui/elements/element_utils";
+import { prepareDynamicElements } from "../../../../lib/ui/elements/dynamic_element_preparer";
 import { reloadWindow } from "../../../../utils/browser/window";
 
 const buttons: Partial<ButtonElement>[] = [

@@ -1,6 +1,6 @@
 import { AbstractSearchTerm } from "../terms/abstract_search_term";
 import { ExactSearchTerm } from "../terms/exact_search_term";
-import { MetadataSearchExpression } from "../types/metadata_search_expression";
+import { MetadataSearchExpression } from "./metadata_search_expression";
 import { MetadataSearchTerm } from "../terms/metadata_search_term";
 import { WildcardMatchType } from "../types/search_types";
 import { WildcardSearchTerm } from "../terms/wildcard_search_term";

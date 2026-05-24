@@ -1,5 +1,5 @@
 import { Layout } from "../../../types/ui";
-import { insertStyle } from "../../dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 
 export abstract class AbstractTiler {
   protected readonly container: HTMLElement;

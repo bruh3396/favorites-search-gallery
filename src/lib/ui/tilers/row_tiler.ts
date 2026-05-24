@@ -2,7 +2,7 @@ import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../
 import { AbstractTiler } from "./abstract_tiler";
 import { Layout } from "../../../types/ui";
 import { ThumbnailConfig } from "../../../config/thumbnail_config";
-import { insertStyle } from "../../dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 import { mapRange } from "../../../utils/number";
 
 export class RowTiler extends AbstractTiler {

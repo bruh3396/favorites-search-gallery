@@ -9,7 +9,7 @@ import { GeneralConfig } from "../../../../config/general_config";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
 import { Preferences } from "../../../../app/context/preferences";
 import { Timeout } from "../../../../types/async";
-import { insertStyle } from "../../../../lib/dom/injector";
+import { insertStyle } from "../../../../utils/dom/injector";
 import { toggleFullscreen } from "../../../../utils/browser/window";
 
 const buttons: GalleryMenuButton[] = [

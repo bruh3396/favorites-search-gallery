@@ -1,13 +1,13 @@
 import { Post } from "../../../types/api";
-import { domParser } from "../../dom/dom_parser";
 import { normalizeImageSource } from "../../media/media_url_transformer";
 import { parseDimensions2D } from "../../../utils/string/parse";
+import { parseHtml } from "../../../utils/dom/html_parser";
 import { removeExtraWhiteSpace } from "../../../utils/string/format";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 
 export function parsePostFromPostPage(html: string): Post {
-  const dom = domParser.parseFromString(html, "text/html");
+  const dom = parseHtml(html);
   const statistics = getStatistics(dom);
   const fileUrl = getFileUrl(dom);
   const tags = getTags(dom);

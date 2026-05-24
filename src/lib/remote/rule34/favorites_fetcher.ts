@@ -2,10 +2,10 @@ import { buildFavoritesPageUrl, buildProfilePageUrl } from "../url/page_url_buil
 import { withExponentialBackoff, yieldControl } from "../../async/timing";
 import { FAVORITES_PAGE_ID } from "../../environment/session";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
-import { extractFavoritesCount } from "../parse/profile_page_parser";
-import { extractFavoritesPageCount } from "../parse/favorites_page_parser";
+import { extractFavoritesCount } from "../parsers/profile_page_parser";
+import { extractFavoritesPageCount } from "../parsers/favorites_page_parser";
 import { fetchHtml } from "../http/http_client";
-import { generalPageRequestQueue } from "../http/rate_limiter";
+import { generalPageRequestQueue } from "../http/rate_limiters";
 
 export function fetchFavoritesPage(pageNumber: number): Promise<string> {
   return fetchHtml(buildFavoritesPageUrl(pageNumber));

@@ -1,6 +1,6 @@
 import { Searchable, SearchableMetadataMetric } from "../../types/search";
 import { describe, expect, test } from "vitest";
-import { parseMetadataSearchTerm } from "../../lib/search/parse/search_term_parser";
+import { parseMetadataSearchTerm } from "../../lib/search/parsers/search_term_parser";
 
 type MetadataSearchable = Searchable & { metrics: Record<SearchableMetadataMetric, number> };
 

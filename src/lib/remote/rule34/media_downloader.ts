@@ -1,5 +1,5 @@
 import * as ExtensionResolver from "../../media/media_extension_resolver";
-import { DEFAULT_EXTENSION } from "../../environment/constants";
+import { DEFAULT_EXTENSION } from "../../media/media_constants";
 import { download } from "../../../utils/browser/download";
 import { resolveMediaUrl } from "../../media/media_url_resolver";
 

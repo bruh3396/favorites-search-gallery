@@ -1,5 +1,5 @@
 import { Post, PostResponse } from "../../../types/api";
-import { generalPageRequestQueue, postLimiter } from "../http/rate_limiter";
+import { generalPageRequestQueue, postLimiter } from "../http/rate_limiters";
 import { ApiConfig } from "../../../config/api_config";
 import { CoalescingResolver } from "../../async/coalescing_resolver";
 import { DeletedPostError } from "../../../types/errors";
@@ -7,8 +7,8 @@ import { POST_API_URL } from "../url/api_urls";
 import { buildPostPageUrl } from "../url/page_url_builder";
 import { fetchHtml } from "../http/http_client";
 import { fetchJsonFromApi } from "./api_client";
-import { parsePostFromPostPage } from "../parse/post_page_parser";
-import { postResponseToPost } from "../parse/api_post_parser";
+import { parsePostFromPostPage } from "../parsers/post_page_parser";
+import { postResponseToPost } from "../parsers/api_post_parser";
 import { withExponentialBackoff } from "../../async/timing";
 
 const postFetcher = new CoalescingResolver<PostResponse>(

@@ -1,7 +1,7 @@
 import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
 import { FavoritesPageRequest } from "../../types/favorites_page_request";
 import { SortedArray } from "../../../../lib/collection/sorted_array";
-import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
+import { extractFavoriteElements } from "../../../../lib/remote/parsers/favorites_page_parser";
 import { sleep } from "../../../../lib/async/timing";
 
 export class FavoritesConcurrentPageFetcher {

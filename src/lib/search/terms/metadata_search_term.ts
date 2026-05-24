@@ -1,7 +1,7 @@
 import { AbstractSearchTerm } from "./abstract_search_term";
 import { Favorite } from "../../../types/favorite";
 import { MetadataComparator } from "../../../types/search";
-import { MetadataSearchExpression } from "../types/metadata_search_expression";
+import { MetadataSearchExpression } from "../parsers/metadata_search_expression";
 
 type Comparator = (a: number, b: number) => boolean;
 

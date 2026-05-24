@@ -1,4 +1,4 @@
-import { buildSearchTerms, categorizeSearchTerms, parseTermGroups, sortSearchTerms } from "../parse/search_term_group_parser";
+import { buildSearchTerms, categorizeSearchTerms, parseTermGroups, sortSearchTerms } from "../parsers/search_term_group_parser";
 import { AbstractSearchTerm } from "../terms/abstract_search_term";
 import { SearchQueryMetadata } from "../types/search_types";
 import { Searchable } from "../../../types/search";

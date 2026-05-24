@@ -1,5 +1,5 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";
-import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
+import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
 import DESKTOP_CSS from "../../../../assets/css/desktop_base.css";
 import FAVORITES_CSS from "../../../../assets/css/favorites.css";
 import FAVORITES_HTML from "../../../../assets/html/favorites.html";

@@ -1,5 +1,5 @@
 import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
-import * as Navigator from "../../../lib/dom/navigation";
+import * as Navigator from "../../../lib/remote/rule34/navigator";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
 import { ClickCode } from "../../../types/input";
 import { Events } from "../../../app/channels/events";

@@ -1,6 +1,6 @@
 import { Emitter } from "../lib/communication/emitter";
 import { Preference } from "../lib/storage/preference";
-import { doNothing } from "../lib/environment/constants";
+import { doNothing } from "../utils/function";
 
 export interface MenuElement<T> {
   parentId: string

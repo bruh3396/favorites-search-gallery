@@ -2,12 +2,12 @@ import * as TagModifierEditMode from "./edit_mode";
 import * as TagModifierOperations from "./operations";
 import * as TagModifierSelection from "./selection";
 import * as TagModifierStore from "./store";
-import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
+import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
 import { Favorite } from "../../../../types/favorite";
 import TAG_MODIFIER_CSS from "../../../../assets/css/tag_modifier.css";
 import { TAG_MODIFIER_DISABLED } from "../../../../app/context/flags";
 import TAG_MODIFIER_HTML from "../../../../assets/html/tag_modifier.html";
-import { doNothing } from "../../../../lib/environment/constants";
+import { doNothing } from "../../../../utils/function";
 
 type FavoritesTagModifierInterface = {
   getSearchResults: () => Favorite[]

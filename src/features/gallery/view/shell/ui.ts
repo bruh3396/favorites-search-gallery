@@ -6,7 +6,7 @@ import { Preferences } from "../../../../app/context/preferences";
 import { USING_FIREFOX } from "../../../../lib/environment/environment";
 import { blurActiveElement } from "../../../../utils/dom/interaction";
 import { getLayout } from "../../../../app/layout/content_tiler";
-import { insertStyle } from "../../../../lib/dom/injector";
+import { insertStyle } from "../../../../utils/dom/injector";
 import { showFullscreenIcon } from "../view_utils";
 import { waitForAllThumbnailsToLoad } from "../../../../app/layout/content_thumbs";
 

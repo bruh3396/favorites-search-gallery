@@ -2,9 +2,9 @@ import * as SearchPageCache from "./page_cache";
 import { RAW_THUMB_CLASS_NAME } from "../../../lib/thumb/thumbs";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { SearchPage } from "../types/search_page";
-import { domParser } from "../../../lib/dom/dom_parser";
 import { fetchSearchPage } from "../../../lib/remote/rule34/search_page_fetcher";
 import { numbersAroundInRange } from "../../../utils/number";
+import { parseHtml } from "../../../utils/dom/html_parser";
 import { prepareSearchPageThumbs } from "../view/update/thumb_preparer";
 
 export function load(baseUrl: string, pageNumber: number): Promise<void> {
@@ -25,7 +25,7 @@ export function preloadAround(baseUrl: string, currentPageNumber: number): void 
 }
 
 export function createSearchPageFromHtml(pageNumber: number, html: string): SearchPage {
-  const dom = domParser.parseFromString(html, "text/html");
+  const dom = parseHtml(html);
   const thumbs = prepareSearchPageThumbs(Array.from(dom.querySelectorAll(`.${RAW_THUMB_CLASS_NAME}`)));
   const paginator = dom.getElementById("paginator");
   return new SearchPage(pageNumber, thumbs, paginator);

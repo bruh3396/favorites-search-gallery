@@ -1,6 +1,6 @@
 import { NumberElement, defaultMenuElement } from "../../../types/element";
 import { NumberComponent } from "./number_component";
-import { doNothing } from "../../environment/constants";
+import { doNothing } from "../../../utils/function";
 
 export function buildNumberComponent(partial: Partial<NumberElement>): void {
   const template = createNumberTemplate(partial);

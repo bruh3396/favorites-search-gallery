@@ -1,6 +1,6 @@
 import * as GalleryVideoController from "./video_controller";
 import { GalleryRenderer, VideoControllerCallbacks } from "../../../types/gallery_types";
-import { doNothing } from "../../../../../lib/environment/constants";
+import { doNothing } from "../../../../../utils/function";
 
 const root = document.createElement("div");
 

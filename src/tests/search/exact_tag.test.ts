@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { searchableEmptyDoc, searchableFruitDoc } from "./fruit_search_fixtures";
-import { parseExactSearchTerm } from "../../lib/search/parse/search_term_parser";
+import { parseExactSearchTerm } from "../../lib/search/parsers/search_term_parser";
 
 const positiveCases = [
   ["banana", true],

@@ -3,7 +3,7 @@ import { sleep, withExponentialBackoff } from "../../../../lib/async/timing";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { FavoritesPageRequest } from "../../types/favorites_page_request";
 import { Rule34NetworkConfig } from "../../../../config/rule34_network_config";
-import { extractFavoriteElements } from "../../../../lib/remote/parse/favorites_page_parser";
+import { extractFavoriteElements } from "../../../../lib/remote/parsers/favorites_page_parser";
 import { getIdFromThumb } from "../../../../lib/thumb/thumbs";
 
 export async function fetchNewFavorites(storedIds: Set<string>): Promise<HTMLElement[]> {

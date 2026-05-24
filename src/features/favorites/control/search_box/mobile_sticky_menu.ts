@@ -1,6 +1,6 @@
 import { Content } from "../../../../app/layout/shell";
 import { Preferences } from "../../../../app/context/preferences";
-import { insertStyle } from "../../../../lib/dom/injector";
+import { insertStyle } from "../../../../utils/dom/injector";
 import { sleep } from "../../../../lib/async/timing";
 import { toggleFavoritesOptions } from "../../view/update/ui_toggles";
 

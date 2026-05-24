@@ -3,7 +3,7 @@ import { AbstractFavoritesSearchBox } from "./abstract_search_box";
 import { EnhancedMouseEvent } from "../../../../types/input";
 import { Events } from "../../../../app/channels/events";
 import { Preferences } from "../../../../app/context/preferences";
-import { openSearchPage } from "../../../../lib/dom/navigation";
+import { openSearchPage } from "../../../../lib/remote/rule34/navigator";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
   protected override createSearchBox(): HTMLTextAreaElement | HTMLInputElement {

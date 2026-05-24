@@ -1,6 +1,6 @@
 import * as SearchPageDesktopMenu from "../../control/desktop_menu";
 import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../../app/context/flags";
-import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
+import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
 import { Content } from "../../../../app/layout/shell";
 import { ITEM_SELECTOR } from "../../../../lib/thumb/thumbs";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment/environment";

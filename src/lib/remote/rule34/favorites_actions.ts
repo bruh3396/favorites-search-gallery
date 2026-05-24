@@ -1,6 +1,6 @@
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "../url/action_url_builder";
-import { favoriteAddQueue, favoriteRemoveQueue } from "../http/rate_limiter";
+import { favoriteAddQueue, favoriteRemoveQueue } from "../http/rate_limiters";
 import { ON_SEARCH_PAGE } from "../../environment/environment";
 import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
 import { fetchHtml } from "../http/http_client";

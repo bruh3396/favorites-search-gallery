@@ -1,5 +1,5 @@
 import * as ContentTiler from "../../../app/layout/content_tiler";
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/rule34_constants";
 import { SearchPage } from "../types/search_page";
 
 export function render(searchPage: SearchPage): void {

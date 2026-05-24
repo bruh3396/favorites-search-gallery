@@ -9,7 +9,7 @@ import { Favorite } from "../../../types/favorite";
 import { FavoritesConfig } from "../../../config/favorites_config";
 import { FavoritesResultsView } from "../types/favorite_types";
 import { NavigationKey } from "../../../types/input";
-import { doNothing } from "../../../lib/environment/constants";
+import { doNothing } from "../../../utils/function";
 import { isForwardNavigationKey } from "../../../types/guards";
 
 const bottomObserver = new PageBottomObserver(extendBelow, getBottomSentinels);

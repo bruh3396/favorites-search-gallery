@@ -1,5 +1,5 @@
 import * as FavoritesDownloader from "./downloader";
-import { insertHtml, insertStyle } from "../../../../lib/dom/injector";
+import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
 import { sleep, yieldControl } from "../../../../lib/async/timing";
 import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
 import { DOWNLOADER_DISABLED } from "../../../../app/context/flags";

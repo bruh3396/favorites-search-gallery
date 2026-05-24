@@ -1,6 +1,6 @@
-import { buildSearchTerms, sortSearchTerms } from "../../lib/search/parse/search_term_group_parser";
+import { buildSearchTerms, sortSearchTerms } from "../../lib/search/parsers/search_term_group_parser";
 import { describe, expect, test } from "vitest";
-import { isMetadataTerm, isWildcardTerm, parseSearchTerm } from "../../lib/search/parse/search_term_parser";
+import { isMetadataTerm, isWildcardTerm, parseSearchTerm } from "../../lib/search/parsers/search_term_parser";
 import { ExactSearchTerm } from "../../lib/search/terms/exact_search_term";
 import { WildcardSearchTerm } from "../../lib/search/terms/wildcard_search_term";
 

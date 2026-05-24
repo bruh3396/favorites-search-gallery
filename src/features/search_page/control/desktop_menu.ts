@@ -9,7 +9,7 @@ import { Preferences } from "../../../app/context/preferences";
 import { buildCheckboxElement } from "../../../app/input/checkbox";
 import { buildSelectElement } from "../../../lib/ui/elements/select";
 import { numberRange } from "../../../utils/number";
-import { prepareDynamicElements } from "../../../lib/ui/elements/element_utils";
+import { prepareDynamicElements } from "../../../lib/ui/elements/dynamic_element_preparer";
 import { reloadWindow } from "../../../utils/browser/window";
 import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
 import { toggleGalleryMenuEnabled } from "../../../lib/ui/style";

@@ -5,7 +5,7 @@ import { GalleryRoot, mountGallery } from "./shell/shell";
 import GALLERY_CSS from "../../../assets/css/gallery.css";
 import { GalleryMenuAction } from "../../../types/ui";
 import { ON_DESKTOP_DEVICE } from "../../../lib/environment/environment";
-import { insertStyle } from "../../../lib/dom/injector";
+import { insertStyle } from "../../../utils/dom/injector";
 export { overGalleryMenu } from "./view_utils";
 
 export function open(thumb: HTMLElement): void {

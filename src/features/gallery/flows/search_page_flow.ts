@@ -2,7 +2,7 @@ import * as GalleryModel from "../model/gallery_model";
 import * as GalleryThumbObserver from "../control/visible_thumb_observer";
 import * as GalleryView from "../view/gallery_view";
 import { GalleryConfig } from "../../../config/gallery_config";
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/constants";
+import { POSTS_PER_SEARCH_PAGE } from "../../../lib/environment/rule34_constants";
 import { dispatchByState } from "./state_dispatch";
 import { getAllContentThumbs } from "../../../app/layout/content_thumbs";
 

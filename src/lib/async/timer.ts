@@ -1,5 +1,5 @@
 import { Timeout } from "../../types/async";
-import { doNothing } from "../environment/constants";
+import { doNothing } from "../../utils/function";
 
 export class Timer {
   public waitTime: number;

@@ -1,6 +1,6 @@
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { GalleryRenderer } from "../../../types/gallery_types";
-import { doNothing } from "../../../../../lib/environment/constants";
+import { doNothing } from "../../../../../utils/function";
 import { isGif } from "../../../../../lib/media/media_type_guards";
 import { resolveGifUrl } from "../../../../../lib/media/media_url_resolver";
 

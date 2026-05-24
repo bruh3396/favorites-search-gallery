@@ -3,7 +3,7 @@ import { convertToTagSet, convertToTagString } from "../../utils/string/tags";
 import { describe, expect, test } from "vitest";
 import { isEmptyString, isOnlyDigits } from "../../utils/string/query";
 import { parseDimensions2D } from "../../utils/string/parse";
-import { parseTermGroups } from "../../lib/search/parse/search_term_group_parser";
+import { parseTermGroups } from "../../lib/search/parsers/search_term_group_parser";
 import { resolveMediaType } from "../../lib/media/media_type_resolver";
 
 describe("removeExtraWhiteSpace", () => {

@@ -11,8 +11,8 @@ import { NumberComponent } from "../../../../lib/ui/elements/number_component";
 import { Overlays } from "../../../../app/layout/shell";
 import { Preferences } from "../../../../app/context/preferences";
 import { Timer } from "../../../../lib/async/timer";
-import { createObjectUrlFromSvg } from "../../../../lib/dom/navigation";
-import { insertStyle } from "../../../../lib/dom/injector";
+import { createObjectUrlFromSvg } from "../../../../utils/dom/svg";
+import { insertStyle } from "../../../../utils/dom/injector";
 import { throttle } from "../../../../lib/async/throttle";
 
 export type AutoplayEvents = {

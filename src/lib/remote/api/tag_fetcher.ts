@@ -3,8 +3,8 @@ import { ApiConfig } from "../../../config/api_config";
 import { CoalescingResolver } from "../../async/coalescing_resolver";
 import { TAG_API_URL } from "../url/api_urls";
 import { fetchJsonFromApi } from "./api_client";
-import { tagLimiter } from "../http/rate_limiter";
-import { tagResponseToTagCategory } from "../parse/api_tag_parser";
+import { tagLimiter } from "../http/rate_limiters";
+import { tagResponseToTagCategory } from "../parsers/api_tag_parser";
 
 const fetchCoalescer = new CoalescingResolver<TagResponse>(ApiConfig.apiBatchSize, ApiConfig.apiBatchFlushDelay, fetchTagBatch);
 
