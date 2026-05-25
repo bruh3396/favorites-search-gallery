@@ -1,7 +1,5 @@
-import * as FavoritesActions from "../../../../lib/remote/rule34/favorites_actions";
 import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "../../../../lib/thumb/thumbs";
 import { ADD_FAVORITE_IMAGE_HTML } from "../../../../assets/images";
-import { ClickCode } from "../../../../types/input";
 import { GALLERY_DISABLED } from "../../../../app/context/flags";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { removeNonNumericCharacters } from "../../../../utils/string/format";
@@ -55,20 +53,6 @@ function addAddFavoriteButton(thumb: HTMLElement): void {
     return;
   }
   anchor.insertAdjacentHTML("beforeend", ADD_FAVORITE_IMAGE_HTML);
-  const button = anchor.querySelector(".post-action-btn--add");
-
-  if (!(button instanceof HTMLElement)) {
-    return;
-  }
-
-  button.onmousedown = (event): void => {
-    event.stopPropagation();
-
-    if (event.button === ClickCode.Left) {
-      FavoritesActions.addFavorite(thumb.id);
-      button.remove();
-    }
-  };
 }
 
 function addCanvas(thumb: HTMLElement): void {

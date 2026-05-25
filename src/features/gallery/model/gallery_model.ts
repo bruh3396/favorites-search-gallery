@@ -16,6 +16,7 @@ export const openMedia = (): Promise<void> => Navigator.openMedia(GalleryCursor.
 export const download = (): Promise<void> => downloadFromThumb(GalleryCursor.currentThumb());
 export const addFavorite = (): Promise<AddFavoriteStatus> => GalleryFavoriter.addFavorite(GalleryCursor.currentThumb());
 export const removeFavorite = (): Promise<RemoveFavoriteStatus> => GalleryFavoriter.removeFavorite(GalleryCursor.currentThumb());
+export const currentThumbIfOpen = (): HTMLElement | null => (GalleryState.isInGallery() ? GalleryCursor.currentThumb() : null);
 
 export function open(thumb: HTMLElement): void {
   GalleryCursor.pointTo(thumb);

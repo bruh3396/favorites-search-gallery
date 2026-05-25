@@ -1,6 +1,12 @@
 const ids: Set<string> = new Set();
+let loadPromise: Promise<void> | null = null;
 
-export function populate(loaded: string[]): void {
+export function ensureLoaded(fetchIds: () => Promise<string[]>): Promise<void> {
+  loadPromise ??= fetchIds().then(addAll);
+  return loadPromise;
+}
+
+function addAll(loaded: string[]): void {
   loaded.forEach(id => ids.add(String(id)));
 }
 

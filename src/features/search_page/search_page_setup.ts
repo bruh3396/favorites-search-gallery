@@ -1,5 +1,6 @@
 import * as ContentTiler from "../../app/layout/content_tiler";
-import * as MarkFavoriteThumbsFlow from "./flows/mark_favorite_thumbs_flow";
+import * as SearchPageFavoriteButton from "./control/favorite_button";
+import * as SearchPageFavoritesMarkerFlow from "./flows/favorites_marker_flow";
 import * as SearchPageModel from "./model/search_page_model";
 import * as SearchPageNavigationFlow from "./flows/navigation_flow";
 import * as SearchPageOptionFlow from "./flows/option_flow";
@@ -15,6 +16,7 @@ export async function setupSearchPage(): Promise<void> {
   }
   setupModel();
   await setupView();
+  setupControl();
   await setupFavoriteIndicator();
   subscribeToEvents();
   registerBridgeHandlers();
@@ -30,16 +32,23 @@ function setupView(): Promise<void> {
   return SearchPageView.setup();
 }
 
+function setupControl(): void {
+  SearchPageFavoriteButton.setupAddFavoriteButtons(SearchPageModel.allThumbs());
+  Events.searchPage.pageChanged.on(SearchPageFavoriteButton.setupAddFavoriteButtons);
+  Events.searchPage.moreResultsAdded.on(SearchPageFavoriteButton.setupAddFavoriteButtons);
+}
+
 async function setupFavoriteIndicator(): Promise<void> {
-  if (!Preferences.searchPageFavoriteIndicator.value) {
-    return;
+  Events.searchPage.pageChanged.on(SearchPageFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
+  Events.searchPage.moreResultsAdded.on(SearchPageFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
+  Events.favorites.favoriteAdded.on(SearchPageFavoritesMarkerFlow.onFavoriteAdded);
+  Events.searchPage.favoriteIndicatorToggled.on(SearchPageFavoritesMarkerFlow.toggleIndicator);
+  Events.searchPage.favoriteIndicatorStyleChanged.on(SearchPageView.applyCurrentFavoriteStyle);
+  Events.gallery.displayedThumb.on(SearchPageView.applyGalleryFavoriteStyle);
+
+  if (Preferences.searchPageFavoriteIndicator.value) {
+    await SearchPageFavoritesMarkerFlow.toggleIndicator(true);
   }
-  SearchPageView.setFavoriteIndicatorLoading(true);
-  SearchPageModel.populateFavoriteIds(await FeatureBridge.favoriteIds.call());
-  MarkFavoriteThumbsFlow.markFavoriteThumbs(SearchPageModel.allThumbs());
-  SearchPageView.setFavoriteIndicatorLoading(false);
-  Events.searchPage.pageChanged.on(MarkFavoriteThumbsFlow.markFavoriteThumbs);
-  Events.searchPage.moreResultsAdded.on(MarkFavoriteThumbsFlow.markFavoriteThumbs);
 }
 
 function subscribeToEvents(): void {

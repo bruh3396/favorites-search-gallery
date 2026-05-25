@@ -1,6 +1,8 @@
 export type Layout = "tiler--row" | "tiler--square" | "tiler--grid" | "tiler--column" | "tiler--native"
 export type ImageCursor = "zoom-in" | "zoom-out" | "auto"
 export type SkeletonAnimation = "pulse" | "shine"
+export type FavoriteIndicatorStyle = "border" | "dim" | "hidden" | "none";
+export type GalleryFavoriteStyle = "border" | "glow" | "none";
 
 export type GalleryMenuAction = "exit" |
   "fullscreen" | "openPost" | "openOriginal" |

@@ -1,6 +1,6 @@
 import { CheckboxElement, SelectElement } from "../../../types/element";
+import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "../../../types/ui";
 import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../app/context/flags";
-import { Layout, PerformanceProfile } from "../../../types/ui";
 import { Events } from "../../../app/channels/events";
 import { GeneralConfig } from "../../../config/general_config";
 import { MetadataMetric } from "../../../types/search";
@@ -60,16 +60,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     event: Events.favorites.tooltipToggled
   },
   {
-    id: "favorite-indicator",
-    parentId: "search-page-favorite-indicator",
-    position: "beforeend",
-    textContent: "",
-    title: "Mark thumbs you've already favorited",
-    preference: Preferences.searchPageFavoriteIndicator,
-    function: reloadWindow,
-    defaultValue: false
-  },
-  {
     id: "show-add-favorite-buttons",
     parentId: "search-page-add-favorite-buttons",
     textContent: "Add Favorite Buttons",
@@ -91,9 +81,19 @@ const checkboxes: Partial<CheckboxElement>[] = [
     function: toggleGalleryMenuEnabled,
     preference: Preferences.galleryMenuEnabled,
     event: Events.favorites.galleryMenuToggled
+  },
+  {
+    id: "favorite-indicator",
+    parentId: "search-page-favorite-indicator",
+    position: "beforeend",
+    textContent: "",
+    title: "Mark thumbs you've already favorited",
+    preference: Preferences.searchPageFavoriteIndicator,
+    event: Events.searchPage.favoriteIndicatorToggled,
+    defaultValue: false
   }
 ];
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<FavoriteIndicatorStyle>> | Partial<SelectElement<GalleryFavoriteStyle>>)[] = [
   {
     id: "layout-select",
     parentId: "search-page-layout",
@@ -124,6 +124,30 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     preference: Preferences.searchPageRowSize,
     event: Events.favorites.rowSizeChanged,
     options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
+  },
+  {
+    id: "favorite-indicator-style",
+    parentId: "search-page-favorite-indicator-style",
+    position: "beforeend",
+    preference: Preferences.searchPageFavoriteIndicatorStyle,
+    event: Events.searchPage.favoriteIndicatorStyleChanged,
+    options: new Map<FavoriteIndicatorStyle, string>([
+      ["border", "Border"],
+      ["dim", "Dim"],
+      ["none", "None"]
+      // ["hidden", "Hidden"]
+    ])
+  },
+  {
+    id: "gallery-favorite-style",
+    parentId: "search-page-gallery-favorite-style",
+    position: "beforeend",
+    preference: Preferences.searchPageGalleryFavoriteStyle,
+    options: new Map<GalleryFavoriteStyle, string>([
+      ["none", "None"],
+      ["border", "Border"],
+      ["glow", "Glow"]
+    ])
   },
   {
     id: "performance-profile",

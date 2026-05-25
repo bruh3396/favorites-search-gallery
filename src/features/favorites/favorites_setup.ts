@@ -115,15 +115,14 @@ function subscribeToEvents(): void {
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
+  Events.favorites.favoriteAdded.on(FavoritesInterFeatureFlow.swapFavoriteButton);
+  Events.favorites.favoriteRemoved.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 
   Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
-  Events.gallery.favoriteToggled.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 }
 
 function registerSearchPageBridgeHandlers(): void {
-  if (Preferences.searchPageFavoriteIndicator.value) {
-    FeatureBridge.favoriteIds.register(FavoritesModel.loadFavoriteIds);
-  }
+  FeatureBridge.favoriteIds.register(FavoritesModel.loadFavoriteIds);
 }
 
 function registerBridgeHandlers(): void {

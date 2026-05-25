@@ -1,5 +1,5 @@
 import { Favorite, PageRelation } from "../../types/favorite";
-import { GalleryMenuAction, Layout, PerformanceProfile } from "../../types/ui";
+import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile } from "../../types/ui";
 import { MetadataMetric, Rating } from "../../types/search";
 import { Emitter } from "../../lib/communication/emitter";
 import { SearchPage } from "../../features/search_page/types/search_page";
@@ -17,6 +17,7 @@ export const Events = {
     favoritesLoaded: new StickyEmitter<void>(),
 
     searchResultsUpdated: new Emitter<void>(),
+    favoriteAdded: new Emitter<string>(),
     favoriteRemoved: new Emitter<string>(),
     newFavoritesFound: new Emitter<Favorite[]>(),
     favoritesAddedToCurrentPage: new Emitter<HTMLElement[]>(),
@@ -53,7 +54,6 @@ export const Events = {
     infiniteScrollToggled: new Emitter<boolean>()
   },
   gallery: {
-    favoriteToggled: new Emitter<string>(),
     showOnHoverOverridden: new Emitter<boolean>(),
     openedGallery: new Emitter<HTMLElement>(),
     closedGallery: new Emitter<void>(),
@@ -78,7 +78,9 @@ export const Events = {
     upscaleToggled: new Emitter<boolean>(),
     infiniteScrollToggled: new Emitter<boolean>(),
     moreResultsAdded: new Emitter<HTMLElement[]>(),
-    pageChanged: new Emitter<HTMLElement[]>()
+    pageChanged: new Emitter<HTMLElement[]>(),
+    favoriteIndicatorToggled: new Emitter<boolean>(),
+    favoriteIndicatorStyleChanged: new Emitter<FavoriteIndicatorStyle>()
   },
   mobile: {
     swipedUp: new Emitter<void>(),

@@ -15,5 +15,6 @@ export const FeatureBridge = {
   currentSearchQuery: new FeatureChannel<void, string>(""),
   usingInfiniteScroll: new FeatureChannel<void, boolean>(false),
   savedSearches: new FeatureChannel<void, string[]>([]),
-  favoriteIds: new FeatureChannel<void, Promise<string[]>>(Promise.resolve([]))
+  favoriteIds: new FeatureChannel<void, Promise<string[]>>(Promise.resolve([])),
+  currentGalleryThumb: new FeatureChannel<void, HTMLElement | null>(null)
 };

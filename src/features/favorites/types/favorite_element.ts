@@ -75,9 +75,9 @@ export class FavoriteElement {
       Events.favorites.favoriteRemoved.emit(this.root.id);
       FavoritesActions.removeFavorite(this.root.id);
     } else {
+      Events.favorites.favoriteAdded.emit(this.root.id);
       FavoritesActions.addFavorite(this.root.id);
     }
-    this.swapFavoriteButton();
   }
 
   private handleClick(event: MouseEvent): void {

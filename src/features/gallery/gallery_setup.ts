@@ -138,6 +138,7 @@ function subscribeToMobileInput(): void {
 
 function registerBridgeHandlers(): void {
   FeatureBridge.inGallery.register(GalleryModel.isInGallery);
+  FeatureBridge.currentGalleryThumb.register(GalleryModel.currentThumbIfOpen);
 }
 
 function primeInitialState(): void {

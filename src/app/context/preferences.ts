@@ -1,4 +1,4 @@
-import { Layout, PerformanceProfile } from "../../types/ui";
+import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "../../types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/environment";
 import { Rating, SortingMethod } from "../../types/search";
 import { Preference } from "../../lib/storage/preference";
@@ -41,6 +41,8 @@ export const Preferences = {
   searchPageAddButtonsVisible: new Preference("showSearchPageAddFavoriteButtons", false),
   searchPageColumnCount: new Preference("searchPageColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
   searchPageFavoriteIndicator: new Preference("searchPageFavoriteIndicator", false),
+  searchPageFavoriteIndicatorStyle: new Preference<FavoriteIndicatorStyle>("searchPageFavoriteIndicatorStyle", "border"),
+  searchPageGalleryFavoriteStyle: new Preference<GalleryFavoriteStyle>("searchPageGalleryFavoriteStyle", "none"),
   searchPageInfiniteScroll: new Preference("searchPageInfiniteScroll", false),
   searchPageLayout: new Preference<Layout>("searchPageLayout", "tiler--column"),
   searchPageRowSize: new Preference("searchPageRowSize", 7),
