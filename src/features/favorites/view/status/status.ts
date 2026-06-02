@@ -1,4 +1,4 @@
-import * as Eta from "./eta";
+import * as FavoritesEta from "./eta";
 import { FavoritesFetchProgress, NewFavorites } from "../../types/favorite_types";
 import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { Root } from "../../../../app/layout/shell";
@@ -8,7 +8,7 @@ let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
 let totalFavoritesCount: number | null = null;
 let statusTimeout: Timeout;
-const TEMPORARY_STATUS_TIMEOUT = 1000;
+const TEMPORARY_STATUS_TIMEOUT = 1_000;
 const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "all favorites ";
 
 export function setStatus(text: string): void {
@@ -32,7 +32,7 @@ export function updateStatus(progress: FavoritesFetchProgress): void {
 
   if (totalFavoritesCount !== null) {
     statusText = `${statusText} / ${totalFavoritesCount}`;
-    const eta = Eta.getEta(progress.allFavoritesCount, totalFavoritesCount);
+    const eta = FavoritesEta.getEta(progress.allFavoritesCount, totalFavoritesCount);
 
     if (eta !== null) {
       statusText = `${statusText}${eta}`;

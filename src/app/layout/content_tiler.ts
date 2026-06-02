@@ -13,7 +13,8 @@ import { Preferences } from "../context/preferences";
 import { RowTiler } from "../../lib/ui/tilers/row_tiler";
 import { SquareTiler } from "../../lib/ui/tilers/square_tiler";
 import { clamp } from "../../utils/number";
-import { sleep } from "../../lib/async/timing";
+import { navigationDelta } from "../../utils/navigation";
+import { yieldControl } from "../../lib/async/timing";
 
 const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.columnCount.value : Preferences.searchPageColumnCount.value);
 const tilers: AbstractTiler[] = [columnTiler, new GridTiler(Content), new RowTiler(Content), new SquareTiler(Content), new NativeTiler(Content)];
@@ -51,26 +52,17 @@ export const addToTop = (items: HTMLElement[]): void => currentTiler.addItemsToT
 export const getBottomEdgeElements = (): HTMLElement[] => currentTiler.getBottomEdgeElements();
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "tiler--native") {
+  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "tiler--native" || FeatureBridge.inGallery.call()) {
     return;
   }
   const usingRowLayout = currentLayout === "tiler--row";
-  const id = usingRowLayout ? "row-size" : "column-count";
-  const input = document.getElementById(id);
+  const input = document.getElementById(usingRowLayout ? "row-size" : "column-count");
 
   if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLSelectElement)) {
     return;
   }
-  const inGallery = FeatureBridge.inGallery.call();
-
-  if (inGallery) {
-    return;
-  }
-  let delta = (wheelEvent.isForward ? 1 : -1);
-
-  if (usingRowLayout) {
-    delta = -delta;
-  }
+  const direction = navigationDelta(wheelEvent.direction);
+  const delta = usingRowLayout ? -direction : direction;
   let value = parseInt(input.value, 10) + delta;
 
   if (input instanceof HTMLSelectElement) {
@@ -79,33 +71,18 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
 
     value = clamp(value, smallestOption, largestOption);
   }
-
   input.value = String(value);
-  input.dispatchEvent(new KeyboardEvent("keydown", {
-    key: "Enter",
-    bubbles: true
-  }));
-  input.dispatchEvent(new Event("change", {
-    bubbles: true
-  }));
+  input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 export async function hideUnusedLayoutSizer(layout: Layout): Promise<void> {
-  await sleep(10);
+  await yieldControl();
   const rowSizeContainer = document.querySelector("#row-size-container, #search-page-row-size");
   const columnCountContainer = document.querySelector("#column-count-container, #search-page-column-count");
 
-  if (!(columnCountContainer instanceof HTMLElement) || !(rowSizeContainer instanceof HTMLElement)) {
-    return;
+  if ((columnCountContainer instanceof HTMLElement) && (rowSizeContainer instanceof HTMLElement)) {
+    rowSizeContainer.style.display = layout === "tiler--row" ? "" : "none";
+    columnCountContainer.style.display = layout === "tiler--row" || layout === "tiler--native" ? "none" : "";
   }
-
-  if (layout === "tiler--native") {
-    columnCountContainer.style.display = "none";
-    rowSizeContainer.style.display = "none";
-    return;
-  }
-  const usingRowLayout = layout === "tiler--row";
-
-  columnCountContainer.style.display = usingRowLayout ? "none" : "";
-  rowSizeContainer.style.display = usingRowLayout ? "" : "none";
 }

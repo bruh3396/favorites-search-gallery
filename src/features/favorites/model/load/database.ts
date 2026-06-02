@@ -4,7 +4,7 @@ import { CoalescingExecutor } from "../../../../lib/async/coalescing_executor";
 import { Database } from "../../../../lib/storage/database";
 
 const database = new Database<FavoritesDatabaseRecord>("Favorites", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
-const updateCoalescer = new CoalescingExecutor<Favorite>(100, 1000, (favorites) => database.update(favorites.map(f => f.databaseRecord)));
+const updateCoalescer = new CoalescingExecutor<Favorite>(100, 1_000, (favorites) => database.update(favorites.map(f => f.databaseRecord)));
 let isDatabasePopulated = false;
 
 export async function storeFavorites(favorites: Favorite[]): Promise<void> {
@@ -25,7 +25,19 @@ export function updateFavorite(favorite: Favorite): void {
   }
 }
 
-export const loadFavoriteIds = (): Promise<string[]> => database.readAllIds();
-export const hasDatabaseFavorites = (): Promise<boolean> => database.count().then(count => count > 0);
+export async function loadFavoriteIds(): Promise<string[]> {
+  if (!(await database.exists())) {
+    return [];
+  }
+  return database.readAllIds();
+}
+
+export async function hasDatabaseFavorites(): Promise<boolean> {
+  if (!(await database.exists())) {
+    return false;
+  }
+  return (await database.count()) > 0;
+}
+
 export const deleteFavorite = (id: string): Promise<void> => database.delete([id]);
 export const deleteDatabase = (): Promise<void> => database.destroy();

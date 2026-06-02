@@ -1,15 +1,17 @@
 import { Layout } from "../../../../types/ui";
 import { Preferences } from "../../../../app/context/preferences";
+import { SkeletonConfig } from "../../../../config/skeleton_config";
 import { SkeletonItem } from "./skeleton_item";
 import { getLayout } from "../../../../app/layout/content_tiler";
+import { getNextAspectRatio } from "../thumb_aspect_ratios";
 
-const DEFAULT_ITEM_COUNT = 50;
+export { collectAspectRatios } from "../thumb_aspect_ratios";
 
-export class Skeleton {
+class Skeleton {
   private readonly items: SkeletonItem[];
   private readonly itemCount;
 
-  constructor(layout: Layout, itemCount = DEFAULT_ITEM_COUNT) {
+  constructor(layout: Layout, itemCount = SkeletonConfig.defaultItemCount) {
     this.itemCount = itemCount;
     this.items = this.createItems(layout);
   }
@@ -19,7 +21,7 @@ export class Skeleton {
   }
 
   private createItems(layout: Layout): SkeletonItem[] {
-    return Array.from({length: this.itemCount}, () => new SkeletonItem(layout));
+    return Array.from({ length: this.itemCount }, () => new SkeletonItem(layout, getNextAspectRatio()));
   }
 }
 

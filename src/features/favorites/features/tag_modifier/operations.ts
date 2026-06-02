@@ -91,5 +91,5 @@ function showStatus(text: string): void {
     if (statusHasNotChanged) {
       label.style.visibility = "hidden";
     }
-  }, 1000);
+  }, 1_000);
 }

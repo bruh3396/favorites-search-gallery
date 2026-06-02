@@ -135,7 +135,7 @@ function setupMenuCloseHandler(): void {
     FavoritesDownloader.abort();
     clearStatusTextRows();
     downloadButton.disabled = true;
-    await sleep(2000);
+    await sleep(2_000);
     downloadButton.disabled = false;
     FavoritesDownloader.reset();
   });

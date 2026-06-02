@@ -5,7 +5,7 @@ import CONTENT_CSS from "../../assets/css/content.css";
 import DARK_THEME_CSS from "../../assets/css/dark_theme.css";
 import SKELETON_CSS from "../../assets/css/skeleton.css";
 import TILE_CSS from "../../assets/css/tile.css";
-import { ThumbnailConfig } from "../../config/thumbnail_config";
+import { ThumbConfig } from "../../config/thumb_config";
 import { buildStyleSheetUrl } from "../remote/url/action_url_builder";
 import { insertStyle } from "../../utils/dom/injector";
 import { yieldControl } from "../async/timing";
@@ -131,11 +131,11 @@ function setupTilerStyles(): void {
 
   const style = `
   .tiler--row, .tiler--column, .tiler--column .tiler--column--a, .tiler--square, .tiler--grid {
-    gap: ${ThumbnailConfig.thumbnailSpacing}px !important;
+    gap: ${ThumbConfig.thumbSpacing}px !important;
   }
 
   #favorites-search-gallery-content.tiler--column {
-    margin-right: ${ON_DESKTOP_DEVICE ? ThumbnailConfig.rightContentMargin : 0}px;
+    margin-right: ${ON_DESKTOP_DEVICE ? ThumbConfig.rightContentMargin : 0}px;
   }`;
 
   insertStyle(style, "fav-tiler");

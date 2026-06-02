@@ -209,7 +209,7 @@ function createTutorialSearches(): void {
     if (favoritesFound) {
       return;
     }
-    await sleep(1000);
+    await sleep(1_000);
     const postIds = getAllContentThumbs().map(thumb => thumb.id);
 
     shuffleArray(postIds);

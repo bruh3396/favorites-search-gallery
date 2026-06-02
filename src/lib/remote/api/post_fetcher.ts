@@ -33,7 +33,7 @@ export function fetchPostFromPostPage(id: string): Promise<Post> {
 export async function fetchPostPageHtml(id: string): Promise<string> {
   await postPageFetchBarrier;
   await generalPageRequestQueue.wait();
-  return withExponentialBackoff(() => fetchHtml(buildPostPageUrl(id)), 3, 1000);
+  return withExponentialBackoff(() => fetchHtml(buildPostPageUrl(id)), 3, 1_000);
 }
 
 function fetchPostBatch(ids: string[]) : Promise<Record<string, PostResponse>> {

@@ -1,50 +1,62 @@
-import { getPredictedAspectRatio, getPredictedDiscreteDimensions } from "./skeleton_dimensions";
+import { coinFlip, randomIntInRange, seededRandomIntInRange } from "../../../../utils/number";
 import { getRandomAnimationDelay, getRandomAnimationDuration } from "./skeleton_animation";
+import { Dimensions2D } from "../../../../types/geometry";
 import { Layout } from "../../../../types/ui";
-import { ThumbnailConfig } from "../../../../config/thumbnail_config";
+import { SkeletonConfig } from "../../../../config/skeleton_config";
 import { getSkeletonStyle } from "./skeleton_style";
+import { parseDimensions2D } from "../../../../utils/string/parse";
 
 export class SkeletonItem {
   public readonly element: HTMLElement;
 
-  constructor(layout: Layout) {
+  constructor(layout: Layout, aspectRatio: string | undefined) {
     this.element = document.createElement("div");
-    this.setStyle(getSkeletonStyle(layout));
-  }
-
-  private setStyle(style: Record<string, string>): void {
-    if (Object.keys(style).includes("native")) {
-      this.setDiscreteDimensions();
-    } else {
-      this.setAspectRatio();
-      this.setCustomStyle(style);
-    }
-    this.setAnimation();
     this.element.className = "skeleton-item post";
-    this.element.toggleAttribute(`data-${ThumbnailConfig.skeletonAnimation}`, true);
+    this.setSize(getSkeletonStyle(layout), aspectRatio);
+    this.configureAnimation();
+
   }
 
-  private setDiscreteDimensions(): void {
-    const dimensions = getPredictedDiscreteDimensions();
+  private setSize(style: Record<string, string> | null, aspectRatio: string | undefined): void {
+    if (style === null) {
+      const dimensions: Dimensions2D = aspectRatio ? parseDimensions2D(aspectRatio) : randomDimensions();
 
-    this.element.style.setProperty("width", `${dimensions.x}px`);
-    this.element.style.setProperty("height", `${dimensions.y}px`);
+      this.element.style.setProperty("width", `${dimensions.x}px`);
+      this.element.style.setProperty("height", `${dimensions.y}px`);
+    } else {
+      this.element.style.setProperty("aspect-ratio", aspectRatio ?? randomAspectRatio());
+      Object.entries(style).forEach(([key, value]) => this.element.style.setProperty(key, value));
+    }
   }
 
-  private setAnimation(): void {
-    if (ThumbnailConfig.randomSkeletonAnimationTiming) {
+    private configureAnimation(): void {
+    if (SkeletonConfig.randomAnimationTiming) {
       this.element.style.setProperty("--delay-skeleton", `${getRandomAnimationDelay()}s`);
       this.element.style.setProperty("--duration-skeleton", `${getRandomAnimationDuration()}s`);
     }
+    this.element.dataset.animation = SkeletonConfig.animation;
   }
+}
 
-  private setAspectRatio(): void {
-    this.element.style.setProperty("aspect-ratio", getPredictedAspectRatio());
-  }
+function randomAspectRatio(): string {
+  const {
+    fallbackAspectRatioWidth: w,
+    fallbackAspectRatioHeightMin: hMin,
+    fallbackAspectRatioHeightMax: hMax
+  } = SkeletonConfig;
+  return `${w}/${seededRandomIntInRange(hMin, hMax)}`;
+}
 
-  private setCustomStyle(style: Record<string, string>): void {
-    for (const [key, value] of Object.entries(style)) {
-      this.element.style.setProperty(key, value);
-    }
-  }
+function randomDimensions(): Dimensions2D {
+  const {
+    discreteDimensionMin: min,
+    discreteDimensionMax: max
+  } = SkeletonConfig;
+
+  const maximizeWidth = coinFlip();
+  const randomDimension = randomIntInRange(min, max);
+  return {
+    x: maximizeWidth ? max : randomDimension,
+    y: maximizeWidth ? randomDimension : max
+  };
 }

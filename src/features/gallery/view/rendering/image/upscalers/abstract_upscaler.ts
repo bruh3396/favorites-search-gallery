@@ -1,3 +1,4 @@
+import * as GalleryFetcher from "../fetcher";
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../../../../../lib/environment";
 import { FeatureBridge } from "../../../../../../app/channels/feature_bridge";
 import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
@@ -6,7 +7,6 @@ import { PERFORMANCE_PROFILE } from "../../../../../../app/context/flags";
 import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../app/context/preferences";
 import { ThrottledQueue } from "../../../../../../lib/async/throttled_queue";
-import { fetchBitmap } from "../fetcher";
 import { getAllContentThumbs } from "../../../../../../app/layout/content_thumbs";
 import { isImage } from "../../../../../../lib/media/media_type_guards";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
@@ -102,7 +102,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private async directlyUpscale(request: ImageRequest): Promise<void> {
-    if (await fetchBitmap(request)) {
+    if (await GalleryFetcher.fetchBitmap(request)) {
       await batchUpscaleQueue.wait();
       this.upscale(request);
     }

@@ -1,7 +1,6 @@
 import * as Icons from "../../../../assets/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite";
 import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/number";
-import { GalleryRoot } from "./shell";
 import { Preferences } from "../../../../app/context/preferences";
 import { USING_FIREFOX } from "../../../../lib/environment";
 import { blurActiveElement } from "../../../../utils/dom/interaction";
@@ -16,8 +15,8 @@ background.id = "gallery-background";
 background.style.opacity = Preferences.backgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
 
-export function setup(): void {
-  GalleryRoot.appendChild(background);
+export function setup(root: HTMLElement): void {
+  root.appendChild(background);
   toggleVideoPointerEvents(false);
   toggleGalleryMenuVisibility(false);
 }
@@ -116,7 +115,7 @@ export function showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
       break;
 
     case RemoveFavoriteStatus.Forbidden:
-      showFullscreenIcon(Icons.WARNING, 1000);
+      showFullscreenIcon(Icons.WARNING, 1_000);
       setTimeout(() => {
         alert("The \"Remove Buttons\" option must be checked to use this hotkey");
       }, 20);

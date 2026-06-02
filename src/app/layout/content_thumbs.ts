@@ -17,6 +17,6 @@ export async function revealItem(id: string): Promise<void> {
   }
   thumb.scrollIntoView({ behavior: "smooth", block: "center" });
   thumb.classList.add("u-blink");
-  await sleep(1500);
+  await sleep(1_500);
   thumb.classList.remove("u-blink");
 }

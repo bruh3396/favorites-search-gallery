@@ -1,4 +1,4 @@
-import { Preferences } from "../../../../app/context/preferences";
+import { Preferences } from "../../../app/context/preferences";
 
 const FAVORITE_CLASS = "is-favorite";
 const LOADING_CLASS = "is-loading-favorite-indicator";
@@ -30,6 +30,18 @@ export function applyCurrentFavoriteStyle(): void {
 
   for (const thumb of document.querySelectorAll<HTMLElement>(`.${FAVORITE_CLASS}`)) {
     thumb.dataset.favoriteStyle = style;
+  }
+}
+
+export function setFavoriteIndicatorSubOptionsVisible(visible: boolean): void {
+  const ids = ["search-page-favorite-indicator-style", "search-page-gallery-favorite-style"];
+
+  for (const id of ids) {
+    const row = document.getElementById(id);
+
+    if (row !== null) {
+      row.style.display = visible ? "" : "none";
+    }
   }
 }
 

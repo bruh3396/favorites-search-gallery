@@ -188,7 +188,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
       [100, "100"],
       [200, "200"],
       [500, "500"],
-      [1000, "1000"]
+      [1_000, "1000"]
     ])
   },
   {

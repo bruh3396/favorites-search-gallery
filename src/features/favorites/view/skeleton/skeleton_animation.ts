@@ -1,9 +1,12 @@
 import { randomBetween, roundToTwoDecimalPlaces } from "../../../../utils/number";
+import { SkeletonConfig } from "../../../../config/skeleton_config";
 
 export function getRandomAnimationDelay(): number {
-  return roundToTwoDecimalPlaces(randomBetween(0, 0.15));
+  const { min, max } = SkeletonConfig.animationDelayRange;
+  return roundToTwoDecimalPlaces(randomBetween(min, max));
 }
 
 export function getRandomAnimationDuration(): number {
-  return roundToTwoDecimalPlaces(randomBetween(0.55, 0.85));
+  const { min, max } = SkeletonConfig.animationDurationRange;
+  return roundToTwoDecimalPlaces(randomBetween(min, max));
 }

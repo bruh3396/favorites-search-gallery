@@ -46,7 +46,7 @@ function setFinderValue(value: string): void {
 }
 
 function addEventListeners(): void {
-  const setValue = debounceLeading(setFinderValue, 1000);
+  const setValue = debounceLeading(setFinderValue, 1_000);
 
   findButton.onclick = triggerFind;
   input.onkeydown = (event): void => {

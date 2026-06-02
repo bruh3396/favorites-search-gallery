@@ -18,7 +18,7 @@ export function getEta(current: number, total: number): string | null {
     recentElapsed.shift();
   }
   const remaining = total - current;
-  const seconds = Math.ceil((remaining / FAVORITES_PER_PAGE) * (average(recentElapsed) / 1000));
+  const seconds = Math.ceil((remaining / FAVORITES_PER_PAGE) * (average(recentElapsed) / 1_000));
 
   last = now;
   return format(seconds);

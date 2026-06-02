@@ -1,4 +1,4 @@
-import { average, clamp, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat, sum } from "../../utils/number";
+import { average, clamp, coinFlip, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat, sum } from "../../utils/number";
 import { describe, expect, test } from "vitest";
 
 describe("getRandomPositiveInteger", () => {
@@ -207,5 +207,22 @@ describe("clamp", () => {
   test("clamp max", () => {
     expect(clamp(100, 16, 20)).toBe(20);
     expect(clamp(1000, 16, 20)).toBe(20);
+  });
+});
+
+describe("coinFlip", () => {
+  test("produces both outcomes frequently", () => {
+    let heads = 0;
+    let tails = 0;
+
+    for (let i = 0; i < 1000; i += 1) {
+      if (coinFlip()) {
+        heads += 1;
+      } else {
+        tails += 1;
+      }
+    }
+    expect(heads).toBeGreaterThan(100);
+    expect(tails).toBeGreaterThan(100);
   });
 });

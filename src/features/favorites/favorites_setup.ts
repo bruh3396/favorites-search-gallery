@@ -93,12 +93,11 @@ function setupTagModifier(): void {
 }
 
 function subscribeToEvents(): void {
-  Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
+  Events.favorites.searchStarted.on(FavoritesSearchFlow.searchActiveFavorites);
   Events.favorites.shuffleButtonClicked.on(FavoritesSearchFlow.shuffleSearchResults);
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
   Events.favorites.findFavorite.on(FavoritesResultsFlow.reveal);
   Events.favorites.findFavoriteInAll.on(FavoritesSearchFlow.revealFavoriteInAll);
-  Events.favorites.favoritesLoaded.on(FavoritesView.collectAspectRatios, { once: true });
 
   Events.favorites.pageSelected.on(FavoritesPaginationFlow.goToPage);
   Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.goToRelativePage);

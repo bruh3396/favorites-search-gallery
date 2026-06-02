@@ -5,17 +5,17 @@ export const Rule34NetworkConfig = {
   extensionProbeConcurrency: 3,
   extensionProbeThrottle: 20,
 
-  generalPageRequestThrottle: 2000,
+  generalPageRequestThrottle: 2_000,
 
-  favoritesPageFetchDelay: 1000,
+  favoritesPageFetchDelay: 1_000,
   favoritesPageFetchRetries: 5,
   favoritesPageRetryBackoffBase: 7,
   favoritesCountFetchRetries: 5,
 
   favoriteRemoveRetries: 3,
-  favoriteRemoveRetryDelay: 250,
+  favoriteRemoveRetryDelay: 500,
   favoriteAddThrottle: 200,
-  favoriteRemoveThrottle: 1000,
+  favoriteRemoveThrottle: 1_000,
 
   searchPagePrefetchLength: 3,
   searchPageFetchRetries: 4,

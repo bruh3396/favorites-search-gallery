@@ -35,7 +35,7 @@ export class ImageRequest {
   }
 
   public get megabytes(): number {
-    return getFavoritePixelCount(this.id) / 220000;
+    return getFavoritePixelCount(this.id) / 220_000;
   }
 
   public get isImage(): boolean {

@@ -5,7 +5,7 @@ import { SearchPage } from "../types/search_page";
 import { fetchSearchPage } from "../../../lib/remote/rule34/search_page_fetcher";
 import { numbersAroundInRange } from "../../../utils/number";
 import { parseHtml } from "../../../utils/dom/html_parser";
-import { prepareSearchPageThumbs } from "../view/update/thumb_preparer";
+import { prepareSearchPageThumbs } from "../dom_tweaks/thumb_preparer";
 
 export function load(baseUrl: string, pageNumber: number): Promise<void> {
   if (SearchPageCache.has(pageNumber) || pageNumber < 0) {

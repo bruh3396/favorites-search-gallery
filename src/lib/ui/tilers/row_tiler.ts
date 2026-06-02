@@ -1,7 +1,7 @@
 import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../thumb/thumbs";
 import { AbstractTiler } from "./abstract_tiler";
 import { Layout } from "../../../types/ui";
-import { ThumbnailConfig } from "../../../config/thumbnail_config";
+import { ThumbConfig } from "../../../config/thumb_config";
 import { insertStyle } from "../../../utils/dom/injector";
 import { mapRange } from "../../../utils/number";
 
@@ -25,7 +25,7 @@ export class RowTiler extends AbstractTiler {
   public setRowSize(rowSize: number): void {
     const minWidth = Math.floor(window.innerWidth / 20);
     const maxWidth = Math.floor(window.innerWidth / 4);
-    const pixelSize = Math.round(mapRange(rowSize, ThumbnailConfig.rowSizeBounds.min, ThumbnailConfig.rowSizeBounds.max, minWidth, maxWidth));
+    const pixelSize = Math.round(mapRange(rowSize, ThumbConfig.rowSizeBounds.min, ThumbConfig.rowSizeBounds.max, minWidth, maxWidth));
 
     insertStyle(`
       #${this.container.id}.tiler--row {

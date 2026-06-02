@@ -101,6 +101,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     position: "beforeend",
     preference: Preferences.searchPageLayout,
     event: Events.searchPage.layoutChanged,
+    triggerOnCreation: true,
     options: new Map<Layout, string>([
       ["tiler--native", "Native"],
       ["tiler--column", "Waterfall"],
@@ -134,8 +135,8 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     options: new Map<FavoriteIndicatorStyle, string>([
       ["border", "Border"],
       ["dim", "Dim"],
-      ["none", "None"]
-      // ["hidden", "Hidden"]
+      ["none", "None"],
+      ["hidden", "Hidden"]
     ])
   },
   {
@@ -145,8 +146,8 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     preference: Preferences.searchPageGalleryFavoriteStyle,
     options: new Map<GalleryFavoriteStyle, string>([
       ["none", "None"],
-      ["border", "Border"],
-      ["glow", "Glow"]
+      ["glow", "Glow"],
+      ["border", "Border"]
     ])
   },
   {
@@ -168,7 +169,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
   }
 ];
 
-export function setup(): void {
+export function create(): void {
   createCheckboxes();
   createSelects();
 }

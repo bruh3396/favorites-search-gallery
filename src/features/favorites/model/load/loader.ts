@@ -33,11 +33,14 @@ export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) 
 
 export function fetchNewFavorites(): Promise<FavoriteItem[]> {
   const ids = new Set(allFavorites.map(favorite => favorite.id));
+
+  console.log("loader");
   return FavoritesSequentialPageFetcher.fetchNewFavorites(ids).then((elements) => {
     const newFavorites = elements.map(e => new FavoriteItem(e));
 
     indexFavoritesById(newFavorites);
     allFavorites.unshift(...newFavorites);
+    console.log("loader end");
     return newFavorites;
   });
 }

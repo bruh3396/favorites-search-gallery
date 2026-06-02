@@ -26,12 +26,15 @@ async function loadDatabaseFavorites(): Promise<void> {
   FavoritesView.setStatus("Loading favorites");
   await FavoritesModel.loadDatabaseFavorites();
   FavoritesView.setTemporaryStatus("Favorites loaded");
-  FavoritesSearchFlow.searchFavorites();
+  FavoritesSearchFlow.searchActiveFavorites();
 }
 
 async function fetchNewFavorites(): Promise<void> {
+  console.log("flow");
   FavoritesView.setStatus("Finding new favorites");
   const results = await FavoritesModel.fetchNewFavorites();
+
+  console.log("flow end");
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");

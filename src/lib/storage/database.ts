@@ -100,6 +100,27 @@ export class Database<V extends { id: string }> {
     }
   }
 
+  public async exists(objectStoreName: string | undefined = undefined): Promise<boolean> {
+    objectStoreName = objectStoreName ?? this.defaultObjectStoreName;
+    const databases = await indexedDB.databases();
+
+    if (!databases.some(database => database.name === this.name)) {
+      return false;
+    }
+    return new Promise((resolve) => {
+      const request = indexedDB.open(this.name);
+
+      request.onsuccess = (): void => {
+        const database = request.result;
+        const hasObjectStore = database.objectStoreNames.contains(objectStoreName);
+
+        database.close();
+        resolve(hasObjectStore);
+      };
+      request.onerror = (): void => resolve(false);
+    });
+  }
+
   public async destroy(): Promise<void> {
     this.lock();
     await yieldControl();

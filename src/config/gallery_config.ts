@@ -2,17 +2,13 @@ import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../lib/environment";
 import { POSTS_PER_SEARCH_PAGE } from "../lib/rule34_constants";
 import { Resolution } from "../types/media";
 
-const FAVORITES_PAGE_RESOLUTION: Resolution = "7680x4320";
-const SEARCH_PAGE_RESOLUTION: Resolution = "3840x2160";
-const MOBILE_RESOLUTION: Resolution = "1920x1080";
-
 export const GalleryConfig = {
   mainCanvasResolutions: {
-    favorites: FAVORITES_PAGE_RESOLUTION,
-    search: SEARCH_PAGE_RESOLUTION,
-    mobile: MOBILE_RESOLUTION
-  },
-  get mainCanvasResolution(): string {
+    favorites: "7680x4320",
+    search: "3840x2160",
+    mobile: "1920x1080"
+  } satisfies Record<"favorites" | "search" | "mobile", Resolution>,
+  get mainCanvasResolution(): Resolution {
     if (ON_MOBILE_DEVICE) {
       return GalleryConfig.mainCanvasResolutions.mobile;
     }
@@ -25,7 +21,7 @@ export const GalleryConfig = {
   preloadedVideoCount: ON_MOBILE_DEVICE ? 0 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 0 : 2,
   maxVisibleThumbsBeforeStoppingPreload: 175,
-  preloadWaitingTimeout: 1000,
+  preloadWaitingTimeout: 1_000,
   preloadingEnabled: true,
   gifPreloadingEnabled: false,
   preloadOutsideGalleryOnSearchPage: true,
@@ -36,7 +32,7 @@ export const GalleryConfig = {
   galleryNavigationDelay: 100,
   idleInteractionDuration: 750,
   recentCloseDuration: 500,
-  menuVisibilityTime: ON_MOBILE_DEVICE ? 2000 : 1000,
+  menuVisibilityTime: ON_MOBILE_DEVICE ? 2_000 : 1_000,
 
   maxImagesToPreloadAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
   favoritesMenuHeight: 200,

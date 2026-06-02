@@ -1,6 +1,6 @@
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
-import { Preferences } from "../../../../app/context/preferences";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { ON_MOBILE_DEVICE } from "../../../lib/environment";
+import { Preferences } from "../../../app/context/preferences";
+import { insertStyle } from "../../../utils/dom/injector";
 
 export function syncShowOnHoverFromGallery(value: boolean): void {
   const showOnHoverCheckbox = document.getElementById("show-on-hover");

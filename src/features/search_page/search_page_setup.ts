@@ -42,7 +42,7 @@ async function setupFavoriteIndicator(): Promise<void> {
   Events.searchPage.pageChanged.on(SearchPageFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.searchPage.moreResultsAdded.on(SearchPageFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.favorites.favoriteAdded.on(SearchPageFavoritesMarkerFlow.onFavoriteAdded);
-  Events.searchPage.favoriteIndicatorToggled.on(SearchPageFavoritesMarkerFlow.toggleIndicator);
+  Events.searchPage.favoriteIndicatorToggled.on(SearchPageOptionFlow.toggleFavoriteIndicator);
   Events.searchPage.favoriteIndicatorStyleChanged.on(SearchPageView.applyCurrentFavoriteStyle);
   Events.gallery.displayedThumb.on(SearchPageView.applyGalleryFavoriteStyle);
 

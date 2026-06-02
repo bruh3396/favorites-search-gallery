@@ -4,13 +4,13 @@ import { Layout, PerformanceProfile } from "../../../../types/ui";
 import { buildCheckboxElement, buildCheckboxOption } from "../../../../app/input/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../view/update/ui_toggles";
+import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../dom_tweaks/ui_toggles";
 import { Events } from "../../../../app/channels/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { GeneralConfig } from "../../../../config/general_config";
 import { MetadataMetric } from "../../../../types/search";
 import { Preferences } from "../../../../app/context/preferences";
-import { ThumbnailConfig } from "../../../../config/thumbnail_config";
+import { ThumbConfig } from "../../../../config/thumb_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
 import { buildButtonElement } from "../../../../lib/ui/elements/button";
 import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
@@ -379,8 +379,8 @@ const numbers: Partial<NumberElement>[] = [
     parentId: "column-count-container",
     position: "beforeend",
     preference: Preferences.columnCount,
-    min: ThumbnailConfig.columnCountBounds.min,
-    max: ThumbnailConfig.columnCountBounds.max,
+    min: ThumbConfig.columnCountBounds.min,
+    max: ThumbConfig.columnCountBounds.max,
     step: 1,
     pollingTime: 50,
     event: Events.favorites.columnCountChanged
@@ -391,8 +391,8 @@ const numbers: Partial<NumberElement>[] = [
     parentId: "row-size-container",
     position: "beforeend",
     preference: Preferences.rowSize,
-    min: ThumbnailConfig.rowSizeBounds.min,
-    max: ThumbnailConfig.rowSizeBounds.max,
+    min: ThumbConfig.rowSizeBounds.min,
+    max: ThumbConfig.rowSizeBounds.max,
     step: 1,
     pollingTime: 50,
     event: Events.favorites.rowSizeChanged

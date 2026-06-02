@@ -51,7 +51,7 @@ const menuIcons = {
 const config = {
   imageViewDuration: Preferences.autoplayImageDuration.value,
   minimumVideoDuration: Preferences.autoplayMinimumVideoDuration.value,
-  menuVisibilityDuration: ON_MOBILE_DEVICE ? 1500 : 1000,
+  menuVisibilityDuration: ON_MOBILE_DEVICE ? 1_500 : 1_000,
 
   get imageViewDurationInSeconds(): number {
     return millisecondsToSeconds(this.imageViewDuration);
@@ -380,7 +380,7 @@ function setImageViewDuration(): void {
   if (isNaN(durationInSeconds)) {
     durationInSeconds = config.imageViewDurationInSeconds;
   }
-  const duration = Math.round(clamp(durationInSeconds * 1000, 1000, 60000));
+  const duration = Math.round(clamp(durationInSeconds * 1_000, 1_000, 6_0000));
 
   Preferences.autoplayImageDuration.set(duration);
   config.imageViewDuration = duration;
@@ -395,7 +395,7 @@ function setMinimumVideoViewDuration(): void {
   if (isNaN(durationInSeconds)) {
     durationInSeconds = config.minimumVideoDurationInSeconds;
   }
-  const duration = Math.round(clamp(durationInSeconds * 1000, 0, 60000));
+  const duration = Math.round(clamp(durationInSeconds * 1_000, 0, 60_000));
 
   Preferences.autoplayMinimumVideoDuration.set(duration);
   config.minimumVideoDuration = duration;

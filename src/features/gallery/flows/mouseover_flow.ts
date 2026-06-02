@@ -24,7 +24,7 @@ function handleHover(thumb: HTMLElement | null): void {
   }
 }
 
-const preloadMediaAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => preloadMediaAround(thumb), 1000);
+const preloadMediaAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => preloadMediaAround(thumb), 1_000);
 
 function preloadMediaAround(thumb: HTMLElement | null): void {
   if (thumb === null || !ON_FAVORITES_PAGE) {

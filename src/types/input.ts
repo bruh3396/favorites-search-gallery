@@ -1,6 +1,5 @@
 /* eslint-disable max-classes-per-file */
 import { getThumbUnderCursor, insideOfThumb } from "../lib/thumb/thumbs";
-import { isForwardNavigationKey } from "./guards";
 import { isHotkeyEvent } from "../utils/dom/interaction";
 
 export type BackwardNavigationKey = "a" | "A" | "ArrowLeft"
@@ -58,10 +57,6 @@ export class EnhancedWheelEvent {
   constructor(event: WheelEvent) {
     this.originalEvent = event;
     this.direction = event.deltaY > 0 ? "ArrowRight" : "ArrowLeft";
-  }
-
-  public get isForward(): boolean {
-    return isForwardNavigationKey(this.direction);
   }
 }
 

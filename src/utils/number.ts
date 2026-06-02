@@ -13,7 +13,7 @@ export function randomIntInRange(min: number, max: number): number {
 }
 
 export function seededRandomFloat(seed: number): number {
-  const x = Math.sin(seed) * 4051.2948;
+  const x = Math.sin(seed) * 4_051.2948;
   return x - Math.floor(x);
 }
 
@@ -35,7 +35,7 @@ export function roundToTwoDecimalPlaces(value: number): number {
 }
 
 export function millisecondsToSeconds(milliseconds: number): number {
-  return roundToTwoDecimalPlaces(milliseconds / 1000);
+  return roundToTwoDecimalPlaces(milliseconds / 1_000);
 }
 
 export function randomBetween(min: number, max: number): number {
@@ -92,4 +92,8 @@ export function sum(numbers: number[]): number {
 
 export function average(numbers: number[]): number {
   return numbers.length === 0 ? 0 : sum(numbers) / numbers.length;
+}
+
+export function coinFlip(): boolean {
+  return Math.random() < 0.5;
 }

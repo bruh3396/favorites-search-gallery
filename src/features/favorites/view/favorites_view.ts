@@ -36,12 +36,10 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
 
 export { toggle as toggleNavigator, getContainer as getNavigationContainer, build as buildNavigationMenu, update as updateNavigationMenu } from "./navigation/navigator";
 export { changeLayout } from "../../../app/layout/content_tiler";
-
-export * from "./update/thumb_preloader";
+export { collectAspectRatios } from "./skeleton/skeleton";
+export * from "./thumb_preloader";
 export * from "./status/status";
-export * from "./update/favorites_item_update";
-export * from "./skeleton/aspect_ratio_collector";
-export * from "./update/ui_toggles";
+export * from "../dom_tweaks/ui_toggles";
 
 function toElements(items: Favorite[] | HTMLElement[]): HTMLElement[] {
   if (items.length === 0) {

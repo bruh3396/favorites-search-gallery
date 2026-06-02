@@ -43,7 +43,7 @@ const tagCategoryDecodings: Record<number, TagCategory> = {
   5: "metadata"
 };
 const database = new Database<TagCategoryMapping>("TagCategories", "tagMappings");
-const databaseWriteScheduler = new CoalescingExecutor<TagCategoryMapping>(500, 2000, saveTagCategories);
+const databaseWriteScheduler = new CoalescingExecutor<TagCategoryMapping>(500, 2_000, saveTagCategories);
 
 let captionWrapper: HTMLElement;
 let caption: HTMLElement;
@@ -163,7 +163,7 @@ function addFavoritesPageEventListeners(): void {
     setTimeout(() => {
       // findTagCategoriesOnPageChange();
     }, 600);
-  }, 2000));
+  }, 2_000));
   Events.favorites.resetConfirmed.on(() => {
     database.destroy();
   });

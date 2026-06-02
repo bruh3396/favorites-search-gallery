@@ -15,5 +15,5 @@ export function setResultsPerPage(resultsPerPage: number): void {
 }
 
 export function reSearchFavorites(): void {
-  FavoritesSearchFlow.searchFavorites();
+  FavoritesSearchFlow.searchActiveFavorites();
 }
