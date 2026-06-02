@@ -122,7 +122,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     id: "row-size",
     parentId: "search-page-row-size",
     position: "beforeend",
-    preference: Preferences.searchPageRowSize,
+    preference: Preferences.searchPageRowHeight,
     event: Events.favorites.rowSizeChanged,
     options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
   },
@@ -145,9 +145,9 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     position: "beforeend",
     preference: Preferences.searchPageGalleryFavoriteStyle,
     options: new Map<GalleryFavoriteStyle, string>([
-      ["none", "None"],
+      ["border", "Border"],
       ["glow", "Glow"],
-      ["border", "Border"]
+      ["none", "None"]
     ])
   },
   {

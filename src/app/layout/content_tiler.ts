@@ -25,7 +25,7 @@ let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
 export function setup(): void {
   currentTiler.activate();
   setColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value);
-  setRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowSize.value : Preferences.rowSize.value);
+  setRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowHeight.value : Preferences.rowHeight.value);
   DomEvents.document.wheel.on(changeItemSizeOnShiftScroll);
   Events.favorites.columnCountChanged.on(setColumnCount);
   Events.favorites.rowSizeChanged.on(setRowSize);

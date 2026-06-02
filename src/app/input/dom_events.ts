@@ -32,7 +32,8 @@ export const DomEvents = {
     focus: new Emitter<FocusEvent>(),
     blur: new Emitter<FocusEvent>(),
     orientationChange: new Emitter<Event>(),
-    scrollend: new Emitter<Event>()
+    scrollend: new Emitter<Event>(),
+    scroll: new Emitter<Event>()
   }
 };
 
@@ -81,6 +82,9 @@ function setupWindowEvents(): void {
   });
   window.addEventListener("scrollend", (event) => {
     DomEvents.window.scrollend.emit(event);
+  }, { passive: true });
+  window.addEventListener("scroll", (event) => {
+    DomEvents.window.scroll.emit(event);
   }, { passive: true });
 }
 

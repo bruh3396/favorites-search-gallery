@@ -4,7 +4,7 @@ import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_c
 import { ImageRequest } from "../../../../types/image_request";
 import { UpscaledImageRequest } from "../../../../types/upscaled_image_request";
 import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
-import { isImage } from "../../../../../../lib/media/media_type_guards";
+import { isImage } from "../../../../../../lib/media/media_type_predicates";
 
 export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   private readonly canvases: Map<string, HTMLCanvasElement> = new Map();

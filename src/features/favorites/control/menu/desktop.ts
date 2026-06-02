@@ -109,7 +109,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Enhance Search Pages",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.searchPagesEnabled,
+    preference: Preferences.searchPageEnabled,
     hotkey: "",
     savePreference: true
   },
@@ -390,7 +390,7 @@ const numbers: Partial<NumberElement>[] = [
     id: "row-size",
     parentId: "row-size-container",
     position: "beforeend",
-    preference: Preferences.rowSize,
+    preference: Preferences.rowHeight,
     min: ThumbConfig.rowSizeBounds.min,
     max: ThumbConfig.rowSizeBounds.max,
     step: 1,

@@ -31,16 +31,13 @@ export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) 
   }).fetchAllFavorites();
 }
 
-export function fetchNewFavorites(): Promise<FavoriteItem[]> {
+export function fetchNewFavorites(page0Elements?: HTMLElement[]): Promise<FavoriteItem[]> {
   const ids = new Set(allFavorites.map(favorite => favorite.id));
-
-  console.log("loader");
-  return FavoritesSequentialPageFetcher.fetchNewFavorites(ids).then((elements) => {
+  return FavoritesSequentialPageFetcher.fetchNewFavorites(ids, page0Elements).then((elements) => {
     const newFavorites = elements.map(e => new FavoriteItem(e));
 
     indexFavoritesById(newFavorites);
     allFavorites.unshift(...newFavorites);
-    console.log("loader end");
     return newFavorites;
   });
 }

@@ -1,19 +1,18 @@
-import { sleep } from "../../../../lib/async/timing";
-import { waitForDomToLoad } from "../../../../app/input/dom_events";
-
-export async function cleanNativeFavoritesPage(): Promise<void> {
-  await waitForDomToLoad();
-  await sleep(20);
-  removeNativeFavorites();
+export function extractFavorites(): HTMLElement[] | undefined {
   removeUnusedScripts();
+  return stripNativeFavoritesPage();
 }
 
-function removeNativeFavorites(): void {
-  extractNativeFavorites()?.remove();
-}
+function stripNativeFavoritesPage(): HTMLElement[] | undefined {
+  const container = document.querySelector<HTMLElement>("#content, div:has(.thumb)");
 
-function extractNativeFavorites(): HTMLElement | null {
-  return document.querySelector("#content, div:has(.thumb)");
+  if (container === null) {
+    return undefined;
+  }
+  const thumbs = Array.from(container.querySelectorAll(".thumb")) as HTMLElement[];
+
+  container.remove();
+  return thumbs;
 }
 
 function removeUnusedScripts(): void {

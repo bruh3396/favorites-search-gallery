@@ -4,7 +4,7 @@ import { Favorite } from "../../../types/favorite";
 import { FavoriteItem } from "../types/favorite_item";
 import { Post } from "../../../types/api";
 import { fetchVideoDurationFromFavorite } from "../../../lib/remote/rule34/video_duration_fetcher";
-import { isVideo } from "../../../lib/media/media_type_guards";
+import { isVideo } from "../../../lib/media/media_type_predicates";
 import { tagsAreValid } from "../../../lib/search/tags/tag_validator";
 import { withExponentialBackoff } from "../../../lib/async/timing";
 

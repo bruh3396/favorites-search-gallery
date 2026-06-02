@@ -50,7 +50,8 @@ function setupModel(): void {
 function setupView(): void {
   FavoritesView.setup({
     onPageSelected: Events.favorites.pageSelected.emit,
-    onRelativePageSelected: Events.favorites.relativePageSelected.emit
+    onRelativePageSelected: Events.favorites.relativePageSelected.emit,
+    onFirstPageFavoritesExtracted: Events.favorites.firstPageFavorites.emit
   });
 }
 

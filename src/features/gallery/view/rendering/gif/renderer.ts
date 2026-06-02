@@ -1,7 +1,7 @@
 import { GalleryConfig } from "../../../../../config/gallery_config";
 import { GalleryRenderer } from "../../../types/gallery_types";
 import { doNothing } from "../../../../../utils/function";
-import { isGif } from "../../../../../lib/media/media_type_guards";
+import { isGif } from "../../../../../lib/media/media_type_predicates";
 import { resolveGifUrl } from "../../../../../lib/media/media_url_resolver";
 
 const root = document.createElement("div");

@@ -1,7 +1,7 @@
 import { GalleryConfig } from "../../../config/gallery_config";
 import { ImageRequest } from "./image_request";
 import { convertImageUrlToSampleUrl } from "../../../lib/media/media_url_transformer";
-import { isImage } from "../../../lib/media/media_type_guards";
+import { isImage } from "../../../lib/media/media_type_predicates";
 import { resolveImageUrl } from "../../../lib/media/media_url_resolver";
 
 export const transferredCanvasIds = new Set<string>();

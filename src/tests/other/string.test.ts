@@ -4,7 +4,6 @@ import { describe, expect, test } from "vitest";
 import { isEmptyString, isOnlyDigits } from "../../utils/string/query";
 import { parseDimensions2D } from "../../utils/string/parse";
 import { parseTermGroups } from "../../lib/search/parsers/search_term_group_parser";
-import { resolveMediaType } from "../../lib/media/media_type_resolver";
 
 describe("removeExtraWhiteSpace", () => {
   test("empty", () => {
@@ -192,30 +191,6 @@ describe("extractTagGroups", () => {
     testTagGroups("  apple ( banana ) grape ( orange )  ", [["banana"], ["orange"]], ["apple", "grape"]);
     testTagGroups("  apple ( banana ~ cherry ~ lime ) grape ( orange ) kiwi  ", [["banana", "cherry", "lime"], ["orange"]], ["apple", "grape", "kiwi"]);
     testTagGroups(" apple                  banana    ( cherry )", [["cherry"]], ["apple", "banana"]);
-  });
-});
-
-describe("resolveMediaType", () => {
-  test("empty", () => {
-    expect(resolveMediaType("")).toBe("image");
-  });
-
-  test("image", () => {
-    expect(resolveMediaType("tag1 tag2")).toBe("image");
-    expect(resolveMediaType("tag1 ")).toBe("image");
-    expect(resolveMediaType("tag1")).toBe("image");
-    expect(resolveMediaType("tag1 tag2 tag3")).toBe("image");
-  });
-
-  test("video", () => {
-    expect(resolveMediaType("tag1 video more_tags tag20")).toBe("video");
-    expect(resolveMediaType("video")).toBe("video");
-    expect(resolveMediaType("tag1 video")).toBe("video");
-    expect(resolveMediaType("video tag2")).toBe("video");
-  });
-
-  test("animated", () => {
-    expect(resolveMediaType("tag1 tag2 animated")).toBe("gif");
   });
 });
 

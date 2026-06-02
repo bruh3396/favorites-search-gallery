@@ -27,8 +27,8 @@ function extractThumbImageElements(dom: Document): HTMLElement[] {
     .filter(thumb => thumb !== null);
 }
 
-export function extractFavoriteElements(html: string): HTMLElement[] {
-  const dom = parseHtml(html);
+export function extractFavoriteElements(source: string | Document): HTMLElement[] {
+  const dom = typeof source === "string" ? parseHtml(source) : source;
   const thumbs = extractThumbElements(dom);
   return thumbs.length > 0 ? thumbs : extractThumbImageElements(dom);
 }

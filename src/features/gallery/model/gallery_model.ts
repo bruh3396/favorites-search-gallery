@@ -4,7 +4,7 @@ import * as GalleryState from "./gallery_state";
 import * as Navigator from "../../../lib/remote/rule34/navigator";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
 import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
-import { isVideo } from "../../../lib/media/media_type_guards";
+import { isVideo } from "../../../lib/media/media_type_predicates";
 
 export * from "./gallery_state";
 export * from "./cursor";

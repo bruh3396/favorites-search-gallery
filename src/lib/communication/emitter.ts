@@ -8,6 +8,7 @@ export class Emitter<V> {
     this.onceListeners = new Set();
     this.enabled = enabled;
     this.emit = this.emit.bind(this);
+    this.on = this.on.bind(this);
   }
 
   public on(callback: (value: V) => void, options?: AddEventListenerOptions): void {

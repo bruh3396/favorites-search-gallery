@@ -39,11 +39,9 @@ export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<voi
   });
 }
 
-export function fetchNewFavorites(): Promise<NewFavorites> {
-  console.log("model");
-  return FavoritesLoader.fetchNewFavorites()
+export function fetchNewFavorites(page0Elements?: HTMLElement[]): Promise<NewFavorites> {
+  return FavoritesLoader.fetchNewFavorites(page0Elements)
     .then((newFavorites) => {
-      console.log("model end");
       FavoritesSearchCoordinator.reIndex(newFavorites);
       FavoritesMetadataFetcher.fetchMissingMetadata(newFavorites);
       return { newFavorites, newSearchResults: FavoritesSearchCoordinator.prependResults(newFavorites) };

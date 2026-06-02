@@ -1,6 +1,6 @@
 import { Timeout } from "../../types/async";
 
-  type Subscribe<T> = (handler: (value: T) => void, opts?: { signal?: AbortSignal }) => void;
+type Subscribe<T> = (handler: (value: T) => void, opts?: { signal?: AbortSignal }) => void;
 
 export class InteractionTracker {
   private onInteractionStopped: () => void;
@@ -14,7 +14,8 @@ export class InteractionTracker {
   private isMouseMoving: boolean;
   private isScrolling: boolean;
   private abortController: AbortController;
-  private onMouseMoveEvent: Subscribe<MouseEvent>;
+  private mouseMoveEvent: Subscribe<MouseEvent>;
+  private scrollEvent: Subscribe<Event>;
 
   constructor(
     idleDuration: number,
@@ -22,7 +23,8 @@ export class InteractionTracker {
     onMouseMoveStopped: () => void,
     onScrollingStopped: () => void,
     onNoInteractionOnEnable: () => void,
-    onMouseMoveEvent: Subscribe<MouseEvent>
+    mouseMoveEvent: Subscribe<MouseEvent>,
+    scrollEvent: Subscribe<Event>
   ) {
     this.idleDuration = idleDuration;
     this.onInteractionStopped = onInteractionStopped;
@@ -32,13 +34,14 @@ export class InteractionTracker {
     this.isMouseMoving = false;
     this.isScrolling = false;
     this.abortController = new AbortController();
-    this.onMouseMoveEvent = onMouseMoveEvent;
+    this.mouseMoveEvent = mouseMoveEvent;
+    this.scrollEvent = scrollEvent;
   }
 
   public enable(): void {
     this.abortController = new AbortController();
-    this.trackMouseMove();
-    this.trackScroll();
+    this.mouseMoveEvent(this.onMouseMove.bind(this), { signal: this.abortController.signal });
+    this.scrollEvent(this.onScroll.bind(this), {signal: this.abortController.signal});
     this.startNoInteractionOnEnableTimer();
   }
 
@@ -50,19 +53,6 @@ export class InteractionTracker {
     this.noInteractionOnEnableTimeout = setTimeout(() => {
       this.onNoInteractionOnEnable();
     }, this.idleDuration);
-  }
-
-  private trackMouseMove(): void {
-    this.onMouseMoveEvent(this.onMouseMove.bind(this), {
-      signal: this.abortController.signal
-    });
-  }
-
-  private trackScroll(): void {
-    window.addEventListener("scroll", this.onScroll.bind(this), {
-      passive: true,
-      signal: this.abortController.signal
-    });
   }
 
   private onMouseMove(): void {

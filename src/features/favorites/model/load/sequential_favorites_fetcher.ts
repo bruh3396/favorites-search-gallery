@@ -1,27 +1,40 @@
 import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
 import { sleep, withExponentialBackoff } from "../../../../lib/async/timing";
+import { FAVORITES_PER_PAGE } from "../../../../lib/rule34_constants";
+import { FavoritesConfig } from "../../../../config/favorites_config";
 import { FavoritesPageRequest } from "../../types/favorites_page_request";
 import { Rule34NetworkConfig } from "../../../../config/rule34_network_config";
 import { extractFavoriteElements } from "../../../../lib/remote/parsers/favorites_page_parser";
 import { getIdFromThumb } from "../../../../lib/thumb/thumbs";
 
-export async function fetchNewFavorites(storedIds: Set<string>): Promise<HTMLElement[]> {
-  const allNewElements: HTMLElement[] = [];
+export async function fetchNewFavorites(storedIds: Set<string>, page0Elements?: HTMLElement[]): Promise<HTMLElement[]> {
+  const allNewFavorites: HTMLElement[] = [];
   let pageNumber = 0;
 
-  while (await fetchNewFavoritesFromPage(storedIds, pageNumber, allNewElements)) {
+  if (FavoritesConfig.skipFirstPageFetch && page0Elements !== undefined) {
+    const newFavorites = page0Elements.filter(element => !storedIds.has(getIdFromThumb(element)));
+
+    allNewFavorites.push(...newFavorites);
+
+    if (newFavorites.length < FAVORITES_PER_PAGE) {
+      return allNewFavorites;
+    }
+    pageNumber = 1;
+  }
+
+  while (await fetchNewFavoritesFromPage(storedIds, pageNumber, allNewFavorites)) {
     pageNumber += 1;
     await sleep(Rule34NetworkConfig.favoritesPageFetchDelay);
   }
-  return allNewElements;
+  return allNewFavorites;
 }
 
-async function fetchNewFavoritesFromPage(storedIds: Set<string>, pageNumber: number, allNewElements: HTMLElement[]): Promise<boolean> {
+async function fetchNewFavoritesFromPage(storedIds: Set<string>, pageNumber: number, allNewFavorites: HTMLElement[]): Promise<boolean> {
   const html = await withExponentialBackoff(() => fetchFavoritesPageHtml(pageNumber), Rule34NetworkConfig.favoritesPageFetchRetries);
-  const newElements = extractFavoriteElements(html).filter(element => !storedIds.has(getIdFromThumb(element)));
+  const newFavorites = extractFavoriteElements(html).filter(element => !storedIds.has(getIdFromThumb(element)));
 
-  allNewElements.push(...newElements);
-  return newElements.length === 50;
+  allNewFavorites.push(...newFavorites);
+  return newFavorites.length === FAVORITES_PER_PAGE;
 }
 
 function fetchFavoritesPageHtml(pageNumber: number): Promise<string> {

@@ -30,11 +30,8 @@ async function loadDatabaseFavorites(): Promise<void> {
 }
 
 async function fetchNewFavorites(): Promise<void> {
-  console.log("flow");
   FavoritesView.setStatus("Finding new favorites");
-  const results = await FavoritesModel.fetchNewFavorites();
-
-  console.log("flow end");
+  const results = await FavoritesModel.fetchNewFavorites(await Events.favorites.firstPageFavorites.waitWithTimeout());
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");

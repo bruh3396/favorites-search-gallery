@@ -14,6 +14,7 @@ export const ON_DESKTOP_DEVICE = !ON_MOBILE_DEVICE;
 export const USER_ID = getCookie("user_id", "");
 export const FAVORITES_PAGE_ID = getQueryParam("id");
 export const USER_IS_ON_THEIR_OWN_FAVORITES_PAGE = USER_ID === FAVORITES_PAGE_ID;
+export const ON_FIRST_FAVORITES_PAGE = ON_FAVORITES_PAGE && (getQueryParam("pid") === null || getQueryParam("pid") === "0");
 export const BLACKLISTED_TAGS = getTagBlacklist();
 export const NEGATED_BLACKLISTED_TAGS = negateTags(BLACKLISTED_TAGS);
 

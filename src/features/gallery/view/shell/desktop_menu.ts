@@ -109,7 +109,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   };
 
   if (GalleryConfig.galleryMenuMonoColor) {
-    template.color = "#0075FF";
+    template.color = "var(--color-accent)";
   }
 
   if (template.color !== "") {

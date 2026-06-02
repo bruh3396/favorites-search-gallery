@@ -1,7 +1,7 @@
 import * as Icons from "../../../../assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment";
 import { clamp, millisecondsToSeconds } from "../../../../utils/number";
-import { isImage, isVideo } from "../../../../lib/media/media_type_guards";
+import { isImage, isVideo } from "../../../../lib/media/media_type_predicates";
 import AUTOPLAY_CSS from "../../../../assets/css/autoplay.css";
 import AUTOPLAY_HTML from "../../../../assets/html/autoplay.html";
 import { DomEvents } from "../../../../app/input/dom_events";

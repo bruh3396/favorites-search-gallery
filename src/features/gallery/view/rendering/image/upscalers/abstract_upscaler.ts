@@ -8,7 +8,7 @@ import { PerformanceProfile } from "../../../../../../types/ui";
 import { Preferences } from "../../../../../../app/context/preferences";
 import { ThrottledQueue } from "../../../../../../lib/async/throttled_queue";
 import { getAllContentThumbs } from "../../../../../../app/layout/content_thumbs";
-import { isImage } from "../../../../../../lib/media/media_type_guards";
+import { isImage } from "../../../../../../lib/media/media_type_predicates";
 import { parseDimensions2D } from "../../../../../../utils/string/parse";
 import { sleep } from "../../../../../../lib/async/timing";
 import { transferredCanvasIds } from "../../../../types/offscreen_upscale_request";

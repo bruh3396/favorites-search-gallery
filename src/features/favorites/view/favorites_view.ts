@@ -10,6 +10,7 @@ import { scrollToTop } from "../../../lib/thumb/thumbs";
 export interface FavoritesViewCallbacks {
   onPageSelected: (pageNumber: number) => void;
   onRelativePageSelected: (relation: PageRelation) => void;
+  onFirstPageFavoritesExtracted: (elements: HTMLElement[] | undefined) => void;
 }
 
 export function addToTop(items: Favorite[] | HTMLElement[]): void {
@@ -27,7 +28,7 @@ export function showSearchResults(searchResults: Favorite[]): void {
 
 export function setup(viewCallbacks: FavoritesViewCallbacks): void {
   buildElementTemplate();
-  FavoritesShell.setup();
+  FavoritesShell.setup(viewCallbacks.onFirstPageFavoritesExtracted);
   FavoritesStatus.setup();
   ContentTiler.setup();
   ContentTiler.tile(favoritesSkeleton());

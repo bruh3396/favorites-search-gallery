@@ -21,7 +21,8 @@ export function setup(): void {
     onInteractionStopped,
     doNothing,
     onInteractionStopped,
-    DomEvents.document.mousemove.on
+    DomEvents.document.mousemove.on,
+    DomEvents.window.scroll.on
   );
 }
 

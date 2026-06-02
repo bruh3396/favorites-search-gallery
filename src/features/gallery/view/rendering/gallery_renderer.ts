@@ -1,6 +1,6 @@
 import { GalleryRenderer, VideoControllerCallbacks } from "../../types/gallery_types";
 import { GalleryVideoRenderer, setupVideoRenderer } from "./video/renderer";
-import { isGif, isVideo } from "../../../../lib/media/media_type_guards";
+import { isGif, isVideo } from "../../../../lib/media/media_type_predicates";
 import { GalleryGifRenderer } from "./gif/renderer";
 import { GalleryImageRenderer } from "./image/renderer";
 

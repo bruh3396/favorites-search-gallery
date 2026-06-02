@@ -30,7 +30,7 @@ export const GalleryConfig = {
   preloadMediaDebounceTime: 150,
   navigationThrottleTime: 250,
   galleryNavigationDelay: 100,
-  idleInteractionDuration: 750,
+  idleInteractionDuration: 300,
   recentCloseDuration: 500,
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2_000 : 1_000,
 

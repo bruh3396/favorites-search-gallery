@@ -1,4 +1,5 @@
 import { Emitter } from "./emitter";
+import { withTimeout } from "../async/timing";
 
 export class StickyEmitter<V> extends Emitter<V> {
   private lastValue: V | undefined;
@@ -12,6 +13,10 @@ export class StickyEmitter<V> extends Emitter<V> {
 
   public wait(): Promise<V> {
     return super.next();
+  }
+
+  public waitWithTimeout(milliseconds: number = 1_000): Promise<V | undefined> {
+    return withTimeout(this.wait(), milliseconds).catch(() => undefined);
   }
 
   public override next(): Promise<V> {

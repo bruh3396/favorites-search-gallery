@@ -13,6 +13,7 @@ export const Events = {
     relativePageSelected: new Emitter<PageRelation>(),
     findFavorite: new Emitter<string>(),
     findFavoriteInAll: new Emitter<string>(),
+    firstPageFavorites: new StickyEmitter<HTMLElement[] | undefined>(),
     favoritesFoundInDatabase: new StickyEmitter<boolean>(),
     favoritesLoaded: new StickyEmitter<void>(),
 

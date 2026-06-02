@@ -1,6 +1,6 @@
 import { DEFAULT_EXTENSION, allImageExtensions, extensionRegex } from "./media_constants";
 import { ImageExtension, MediaExtension, MediaExtensionMapping } from "../../types/media";
-import { isGif, isVideo } from "./media_type_guards";
+import { isGif, isVideo } from "./media_type_predicates";
 import { CoalescingExecutor } from "../async/coalescing_executor";
 import { Database } from "../storage/database";
 import { Favorite } from "../../types/favorite";

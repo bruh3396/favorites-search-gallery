@@ -115,7 +115,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Search Page Gallery",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.searchPagesEnabled,
+    preference: Preferences.searchPageEnabled,
     hotkey: "",
     savePreference: true
   },
@@ -214,7 +214,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     id: "row-size",
     parentId: "row-size-container",
     position: "beforeend",
-    preference: Preferences.rowSize,
+    preference: Preferences.rowHeight,
     event: Events.favorites.rowSizeChanged,
     options: new Map<number, string>([
       [1, "1"],

@@ -5,7 +5,7 @@ import { Preferences } from "../../../../../app/context/preferences";
 import { Storage } from "../../../../../lib/storage/local_storage";
 import { convertPreviewUrlToImageUrl } from "../../../../../lib/media/media_url_transformer";
 import { getPreviewUrl } from "../../../../../lib/thumb/thumbs";
-import { isVideo } from "../../../../../lib/media/media_type_guards";
+import { isVideo } from "../../../../../lib/media/media_type_predicates";
 
 const videoPlayers: HTMLVideoElement[] = [];
 const videoClips = new Map();
