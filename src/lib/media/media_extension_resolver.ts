@@ -10,7 +10,6 @@ import { probeAllExtensions } from "./media_extension_prober";
 
 const DATABASE_NAME = "ImageExtensions";
 const OBJECT_STORE_NAME = "extensionMappings";
-
 const extensionCache: Map<string, ImageExtension> = new Map();
 const database = new Database<MediaExtensionMapping>(DATABASE_NAME, OBJECT_STORE_NAME);
 const databaseWriter = new CoalescingExecutor<MediaExtensionMapping>(100, 2_000, database.update.bind(database));

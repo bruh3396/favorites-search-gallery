@@ -17,17 +17,19 @@ const postFetcher = new CoalescingResolver<PostResponse>(
   fetchPostBatch
 );
 
-export function fetchPostWithFallback(id: string): Promise<Post> {
-  return fetchPostFromApi(id).catch((error: unknown) => {
-    if (!(error instanceof DeletedPostError)) {
-      throw error;
-    }
-    return fetchPostFromPostPage(id);
-  });
+let postPageFetchBarrier: Promise<void> = Promise.resolve();
+
+export function fetchPost(id: string): Promise<Post> {
+  return postFetcher.resolve(id)
+  .then(postResponseToPost)
+  .catch((error: unknown) => recoverFromFetchError(id, error));
 }
 
-export function fetchPostFromPostPage(id: string): Promise<Post> {
-  return fetchPostPageHtml(id).then(parsePostFromPostPage);
+function recoverFromFetchError(id: string, error: unknown): Promise<Post> {
+  if (error instanceof DeletedPostError) {
+    return fetchPostFromPostPage(id);
+  }
+  throw error;
 }
 
 export async function fetchPostPageHtml(id: string): Promise<string> {
@@ -36,16 +38,14 @@ export async function fetchPostPageHtml(id: string): Promise<string> {
   return withExponentialBackoff(() => fetchHtml(buildPostPageUrl(id)), 3, 1_000);
 }
 
-function fetchPostBatch(ids: string[]) : Promise<Record<string, PostResponse>> {
-  return postLimiter.run(() => fetchJsonFromApi(POST_API_URL, { ids }));
-}
-
-let postPageFetchBarrier: Promise<void> = Promise.resolve();
-
 export function deferPostPageFetchesUntil(barrier: Promise<void>): void {
   postPageFetchBarrier = barrier;
 }
 
-function fetchPostFromApi(id: string): Promise<Post> {
-  return postFetcher.resolve(id).then(postResponseToPost);
+function fetchPostFromPostPage(id: string): Promise<Post> {
+  return fetchPostPageHtml(id).then(parsePostFromPostPage);
+}
+
+function fetchPostBatch(ids: string[]): Promise<Record<string, PostResponse>> {
+  return postLimiter.run(() => fetchJsonFromApi(POST_API_URL, { ids }));
 }

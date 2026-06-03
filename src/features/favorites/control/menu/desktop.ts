@@ -1,5 +1,5 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../types/element";
-import { CAPTIONS_ENABLED, GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/context/flags";
+import { CAPTIONS_ENABLED, GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/context/flags";
 import { Layout, PerformanceProfile } from "../../../../types/ui";
 import { buildCheckboxElement, buildCheckboxOption } from "../../../../app/input/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
@@ -247,6 +247,16 @@ const checkboxes: Partial<CheckboxElement>[] = [
     preference: Preferences.captionsVisible,
     hotkey: "D",
     event: Events.favorites.captionsToggled
+  },
+  {
+    id: "show-post-overlay",
+    parentId: "favorite-options-right",
+    textContent: "Overlay",
+    title: "Show post info when hovering over a thumbnail",
+    enabled: POST_OVERLAY_ENABLED,
+    preference: Preferences.postOverlayEnabled,
+    hotkey: "",
+    event: Events.favorites.postOverlayToggled
   },
   {
     id: "toggle-header",

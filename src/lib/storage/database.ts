@@ -53,6 +53,10 @@ export class Database<V extends { id: string }> {
     if (this.locked) {
       return Promise.reject(new LockedDatabaseError());
     }
+
+    if (records.length === 0) {
+      return Promise.resolve();
+    }
     objectStoreName = objectStoreName ?? this.defaultObjectStoreName;
     const database = await this.open(objectStoreName);
     const transaction = database.transaction(objectStoreName, "readwrite");

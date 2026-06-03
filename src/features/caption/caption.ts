@@ -490,7 +490,7 @@ async function findTagCategories(tagNames: string[]): Promise<void> {
     addTagCategoryMapping(id, "general");
   }
   await Promise.all(nonIdTags.map(tag => async(): Promise<void> => {
-    const category = await TagApi.fetchTagCategoryFromApi(tag);
+    const category = await TagApi.fetchTagCategory(tag);
 
     addTagCategoryMapping(tag, decodeTagCategory(category ?? 0));
   }));

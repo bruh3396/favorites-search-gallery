@@ -1,0 +1,64 @@
+.post-overlay {
+  position: absolute;
+  z-index: 9999;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  padding: 0.5em;
+  overflow: hidden;
+  font-size: 0.85em;
+  line-height: 1.3;
+  color: #fff;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.82);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.post-overlay[data-visible="true"] {
+  opacity: 1;
+}
+
+.post-overlay-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25em;
+  align-items: baseline;
+}
+
+.post-overlay-group-label {
+  margin-right: 0.25em;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.post-overlay-tag {
+  padding: 0.05em 0.35em;
+  white-space: nowrap;
+  border-radius: 0.25em;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.post-overlay-tag[data-category="id"] {
+  color: #c0c0c0;
+}
+
+.post-overlay-tag[data-category="artist"] {
+  color: #f0a0c0;
+}
+
+.post-overlay-tag[data-category="copyright"] {
+  color: #d0a0f0;
+}
+
+.post-overlay-tag[data-category="character"] {
+  color: #a0f0a0;
+}
+
+.post-overlay-tag[data-category="metadata"] {
+  color: #f0d080;
+}

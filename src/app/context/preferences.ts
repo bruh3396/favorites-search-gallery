@@ -32,6 +32,7 @@ export const Preferences = {
   mobileGalleryEnabled: new Preference("mobileGalleryEnabled", true),
   optionsVisible: new Preference("showOptions", false),
   performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.Normal),
+  postOverlayEnabled: new Preference("postOverlayEnabled", false),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   resultsPerPage: new Preference("resultsPerPage", 200),
   rowHeight: new Preference("rowSize", 7),

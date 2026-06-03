@@ -17,7 +17,7 @@ export function tagsAreValid(favorite: Favorite, post: Post): boolean {
 
 export async function isOfficialTag(tagName: string): Promise<boolean> {
   try {
-    const category = await TagApi.fetchTagCategoryFromApi(tagName);
+    const category = await TagApi.fetchTagCategory(tagName);
     return category !== null;
   } catch (error) {
     console.error(error);

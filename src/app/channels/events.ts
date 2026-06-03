@@ -49,6 +49,7 @@ export const Events = {
     alternateLayoutToggled: new Emitter<boolean>(),
     downloadButtonsToggled: new Emitter<boolean>(),
     captionsToggled: new Emitter<boolean>(),
+    postOverlayToggled: new Emitter<boolean>(),
     sortAscendingToggled: new Emitter<boolean>(),
     galleryMenuToggled: new Emitter<boolean>(),
     blacklistToggled: new Emitter<boolean>(),

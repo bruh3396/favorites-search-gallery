@@ -33,7 +33,7 @@ function isUnpopulated(post: Post): boolean {
 
 function fetchMetadata(favorites: FavoriteItem[]): void {
   for (const favorite of favorites) {
-    withExponentialBackoff(() => PostApi.fetchPostWithFallback(favorite.id), 5)
+    withExponentialBackoff(() => PostApi.fetchPost(favorite.id), 5)
       .then(post => processPost(favorite, post))
       .catch(console.error);
   }
