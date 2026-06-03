@@ -52,10 +52,15 @@ function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
     return;
   }
 
-  if (mouseEvent.middleClick && mouseEvent.thumb === null) {
+  if (mouseEvent.middleClick && mouseEvent.thumb === null && !clickedInteractiveOverlay(mouseEvent)) {
     mouseEvent.originalEvent.preventDefault();
     GalleryOpenCloseFlow.toggleEnlargeOnHover();
   }
+}
+
+function clickedInteractiveOverlay(mouseEvent: EnhancedMouseEvent): boolean {
+  const target = mouseEvent.originalEvent.target;
+  return target instanceof HTMLElement && target.closest(".post-overlay") !== null;
 }
 
 function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {

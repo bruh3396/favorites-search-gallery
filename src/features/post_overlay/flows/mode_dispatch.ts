@@ -1,13 +1,13 @@
-import * as PostOverlayModel from "../model/post_overlay_model";
+import { Preferences } from "../../../app/context/preferences";
 
 type OverlayModeHandlers<V> = {
-  tags?: (arg: V) => void
+  tag?: (arg: V) => void
 };
 
 export function dispatchByMode<V>(handlers: OverlayModeHandlers<V>, args?: V): void {
   const handler = {
-    tags: handlers.tags
-  }[PostOverlayModel.getMode()];
+    tag: handlers.tag
+  }[Preferences.overlayMode.value];
 
   handler?.(args as V);
 }

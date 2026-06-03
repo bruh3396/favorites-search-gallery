@@ -16,6 +16,11 @@
   --color-controls-guide-swipe-down: red;
   --color-controls-guide-swipe-up: green;
   --color-favorite-indicator: gold;
+  --color-tag-general: #b0e0b0;
+  --color-tag-artist: #f0a0a0;
+  --color-tag-character: #f0f0a0;
+  --color-tag-copyright: #f0a0f0;
+  --color-tag-metadata: #90d9ed;
 }
 
 /* Base elements */
@@ -92,6 +97,13 @@ option {
 }
 
 /* Utilities */
+
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
+}
 
 .u-no-select {
   -webkit-touch-callout: none;

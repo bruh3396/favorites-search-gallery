@@ -1,5 +1,4 @@
 import { setupAutocomplete } from "../../features/autocomplete/autocomplete";
-import { setupCaptions } from "../../features/caption/caption";
 import { setupFavorites } from "../../features/favorites/favorites_setup";
 import { setupGallery } from "../../features/gallery/gallery_setup";
 import { setupPostOverlay } from "../../features/post_overlay/post_overlay_setup";
@@ -14,6 +13,5 @@ export function setupFeatures(): void {
   setupSavedSearches();
   setupAutocomplete();
   setupTooltip();
-  setupCaptions();
   setupPostOverlay();
 }

@@ -10,17 +10,4 @@ export function renderTags(postId: string, categories: Map<string, TagCategory>)
   PostOverlayTagRenderer.renderTags(PostOverlayShell.getOverlay(), postId, categories);
 }
 
-export function showForThumb(thumb: HTMLElement): void {
-  const overlay = PostOverlayShell.getOverlay();
-  const rect = thumb.getBoundingClientRect();
-
-  overlay.style.left = `${rect.left + window.scrollX}px`;
-  overlay.style.top = `${rect.top + window.scrollY}px`;
-  overlay.style.width = `${rect.width}px`;
-  overlay.style.height = `${rect.height}px`;
-  overlay.dataset.visible = "true";
-}
-
-export function hide(): void {
-  PostOverlayShell.getOverlay().dataset.visible = "false";
-}
+export { reveal, hide } from "./shell/post_overlay_shell";

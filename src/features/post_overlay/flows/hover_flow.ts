@@ -3,40 +3,61 @@ import * as PostOverlayModel from "../model/post_overlay_model";
 import * as PostOverlayView from "../view/post_overlay_view";
 import { EnhancedMouseEvent } from "../../../types/input";
 import { Preferences } from "../../../app/context/preferences";
-import { getTagSetFromItem } from "../../../lib/thumb/thumb_tags";
-
-let currentThumbId: string | null = null;
+import { isInsideOverlay } from "../dom_tweaks/overlay_hit_test";
 
 export function onMouseover(event: EnhancedMouseEvent): void {
   if (!Preferences.postOverlayEnabled.value) {
     return;
   }
+  PostOverlayModel.recordCursorPosition(event);
+
+  if (PostOverlayModel.isCoolingDown() || isInsideOverlay(event.originalEvent.target)) {
+    return;
+  }
 
   if (!event.insideOfThumb || event.thumb === null) {
-    currentThumbId = null;
-    PostOverlayView.hide();
+    hideOverlay();
     return;
   }
-  const thumb = event.thumb;
+  showOverlay(event.thumb);
+}
 
-  if (thumb.id === currentThumbId) {
+export function hideOverlay(): void {
+  PostOverlayModel.clearOverlayTarget();
+  PostOverlayView.hide();
+}
+
+export function onThumbsMoved(): void {
+  hideOverlay();
+  PostOverlayModel.startReopenCooldown(showThumbUnderCursor);
+}
+
+function showThumbUnderCursor(): void {
+  if (!Preferences.postOverlayEnabled.value) {
     return;
   }
-  currentThumbId = thumb.id;
+  const thumb = PostOverlayModel.thumbUnderCursor();
+
+  if (thumb !== null) {
+    showOverlay(thumb);
+  }
+}
+
+function showOverlay(thumb: HTMLElement): void {
+  if (PostOverlayModel.isCurrentTarget(thumb.id)) {
+    return;
+  }
+  PostOverlayModel.setCurrentTarget(thumb.id);
   PostOverlayModeDispatch.dispatchByMode<HTMLElement>({
-    tags: renderTagOverlay
+    tag: showTags
   }, thumb);
 }
 
-async function renderTagOverlay(thumb: HTMLElement): Promise<void> {
-  const tagNames = getTagSetFromItem(thumb);
+async function showTags(thumb: HTMLElement): Promise<void> {
+  const categories = await PostOverlayModel.resolveTagCategories(thumb);
 
-  tagNames.delete(thumb.id);
-  const categories = await PostOverlayModel.resolveTagCategories(Array.from(tagNames));
-
-  if (thumb.id !== currentThumbId) {
-    return;
+  if (PostOverlayModel.isCurrentTarget(thumb.id)) {
+    PostOverlayView.renderTags(thumb.id, categories);
+    PostOverlayView.reveal(thumb);
   }
-  PostOverlayView.renderTags(thumb.id, categories);
-  PostOverlayView.showForThumb(thumb);
 }

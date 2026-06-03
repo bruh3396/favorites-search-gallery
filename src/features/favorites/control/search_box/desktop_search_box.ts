@@ -30,6 +30,12 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
       this.searchBox.value = tag;
       this.startSearch();
     });
+    Events.postOverlay.addTagToSearch.on((tag) => this.appendText(tag));
+    Events.postOverlay.excludeTagFromSearch.on((tag) => this.appendText(`-${tag}`));
+    Events.postOverlay.searchForTag.on((tag) => {
+      this.searchBox.value = tag;
+      this.startSearch();
+    });
     this.searchBox.addEventListener("keydown", ((event: KeyboardEvent) => {
       if (event.key === "Enter") {
         this.handleEnter(event);

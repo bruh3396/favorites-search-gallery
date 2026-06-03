@@ -1,5 +1,5 @@
-import * as FavoritesDatabase from "./database";
 import * as FavoritesSequentialPageFetcher from "./sequential_favorites_fetcher";
+import * as FavoritesStore from "./store";
 import { Favorite } from "../../../../types/favorite";
 import { FavoriteItem } from "../../types/favorite_item";
 import { FavoritesConcurrentPageFetcher } from "./concurrent_favorites_fetcher";
@@ -12,7 +12,7 @@ export function loadDatabaseFavorites(
   getAdditionalTags: (id: string) => string | undefined,
   onFavoritesLoaded: (favorites: FavoriteItem[]) => void
 ): Promise<void> {
-  return FavoritesDatabase.loadFavorites().then((records) => {
+  return FavoritesStore.readAll().then((records) => {
     const favorites = records.map(r => new FavoriteItem(r, getAdditionalTags(r.id)));
 
     allFavorites = favorites;
@@ -53,6 +53,6 @@ export function resetActiveFavorites(): void {
 export const getAllFavorites = (): Favorite[] => [...allFavorites];
 export const getFavorite = (id: string): Favorite | undefined => favoritesById.get(id);
 export const getActiveFavorites = (): Favorite[] => [...(activeFavorites ?? allFavorites)];
-export { deleteDatabase, deleteFavorite, updateFavorite, storeFavorites, hasDatabaseFavorites, loadFavoriteIds } from "./database";
+export { destroy as deleteDatabase, deleteId, update as updateFavorite, write as storeFavorites, favoritesExist as hasDatabaseFavorites, loadIds as loadFavoriteIds } from "./store";
 
 const indexFavoritesById = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));

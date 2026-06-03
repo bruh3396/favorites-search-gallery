@@ -1,5 +1,5 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../types/element";
-import { CAPTIONS_ENABLED, GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/context/flags";
+import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/context/flags";
 import { Layout, PerformanceProfile } from "../../../../types/ui";
 import { buildCheckboxElement, buildCheckboxOption } from "../../../../app/input/checkbox";
 import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
@@ -9,6 +9,7 @@ import { Events } from "../../../../app/channels/events";
 import { FavoritesConfig } from "../../../../config/favorites_config";
 import { GeneralConfig } from "../../../../config/general_config";
 import { MetadataMetric } from "../../../../types/search";
+import { PostOverlayId } from "../../../post_overlay/types/css_names";
 import { Preferences } from "../../../../app/context/preferences";
 import { ThumbConfig } from "../../../../config/thumb_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
@@ -231,28 +232,18 @@ const checkboxes: Partial<CheckboxElement>[] = [
   {
     id: "show-tooltips",
     parentId: "favorite-options-right",
-    textContent: "Tooltips",
-    title: "Show tags when hovering over a thumbnail and see which ones were matched by a search",
+    textContent: "Tooltip",
+    title: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
     enabled: TOOLTIP_ENABLED,
     preference: Preferences.tooltipEnabled,
     hotkey: "T",
     event: Events.favorites.tooltipToggled
   },
   {
-    id: "show-captions",
-    parentId: "favorite-options-right",
-    textContent: "Details",
-    title: "Show details when hovering over thumbnail",
-    enabled: CAPTIONS_ENABLED,
-    preference: Preferences.captionsVisible,
-    hotkey: "D",
-    event: Events.favorites.captionsToggled
-  },
-  {
-    id: "show-post-overlay",
+    id: PostOverlayId.menuCheckbox,
     parentId: "favorite-options-right",
     textContent: "Overlay",
-    title: "Show post info when hovering over a thumbnail",
+    title: "Categorize important tags when hovering over a thumbnail and click on them to add to search.",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlayEnabled,
     hotkey: "",

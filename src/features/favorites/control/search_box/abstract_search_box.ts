@@ -36,7 +36,7 @@ export abstract class AbstractFavoritesSearchBox {
     Events.searchBox.append.on((text) => this.appendText(text));
   }
 
-  private appendText(text: string): void {
+  protected appendText(text: string): void {
     const current = this.searchBox.value;
     const separator = current === "" ? "" : " ";
     const updated = `${current}${separator}${text}`;

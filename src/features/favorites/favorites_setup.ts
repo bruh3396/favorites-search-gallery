@@ -114,7 +114,7 @@ function subscribeToEvents(): void {
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
-  Events.favorites.favoriteRemoved.on(FavoritesModel.deleteFavorite);
+  Events.favorites.favoriteRemoved.on(FavoritesModel.deleteId);
   Events.favorites.favoriteAdded.on(FavoritesInterFeatureFlow.swapFavoriteButton);
   Events.favorites.favoriteRemoved.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 

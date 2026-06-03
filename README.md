@@ -64,7 +64,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 * Exclude results with blacklisted tags
 * Search by post ID
 * See tooltip showing which tags were matched by the last search
-* Click overlay of tags related to favorite to add them to the search box
+* Hover a thumbnail to overlay its tags by category, then click a tag to add it to the search (right click to negate, middle click to search only that tag)
 * Look at other user's favorites with the above features (blacklisted tags are automatically hidden)
 * Sort by score, width, height, rating, id, date uploaded, or date changed
 * Filter by rating: safe, questionable, explicit, or any combination of the three
@@ -86,13 +86,12 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | Middle Click | Open post page of thumbnail in new tab | Clicked on a thumbnail |
 | Ctrl Left Click | Open original content in new tab and stay on current tab | Clicked on a thumbnail |
 | Ctrl Shift Left Click | Open original content in new tab and move to new tab | Clicked on a thumbnail |
-| Middle Click | Toggle "Enlarge on Hover" option | Did **NOT** click on a thumbnail or tag in details |
+| Middle Click | Toggle "Enlarge on Hover" option | Did **NOT** click on a thumbnail or a tag in the thumbnail overlay |
 | Scroll Wheel | Change background opacity | Cursor hovering over thumbnail with "Enlarge on Hover" enabled |
 | Shift Scroll Wheel | Change column count | NOT in gallery |
-| Left Click | Add tag to search | Clicked on a tag in details |
-| Right Click | Add negated tag to search | Clicked on a tag in details |
-| Middle Click | Quick search tag | Clicked on a tag in details |
-| Ctrl Left Click | Search site for tag in new tab | Clicked on a tag in details |
+| Left Click | Add tag to search | Clicked on a tag in the thumbnail overlay |
+| Right Click | Add negated tag to search | Clicked on a tag in the thumbnail overlay |
+| Middle Click | Search only for that tag | Clicked on a tag in the thumbnail overlay |
 | Right Click | Search site for current query in new tab | Clicked on "Search" button |
 | Ctrl Click | Search site for current query in new tab, stay on current tab | Clicked on "Search" button |
 

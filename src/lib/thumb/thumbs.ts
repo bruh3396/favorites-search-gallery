@@ -73,7 +73,7 @@ export function getIdFromThumb(thumb: HTMLElement): string {
 }
 
 export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement | null {
-  if (!(event.target instanceof HTMLElement) || event.target.matches(".caption-tag")) {
+  if (!(event.target instanceof HTMLElement) || event.target.matches(".post-overlay-tag")) {
     return null;
   }
   const image = event.target.matches(IMAGE_SELECTOR) ? event.target : null;
@@ -82,6 +82,11 @@ export function getThumbUnderCursor(event: MouseEvent | TouchEvent): HTMLElement
 
 export function insideOfThumb(element: unknown): boolean {
   return element instanceof HTMLElement && getClosestThumb(element) !== null;
+}
+
+export function getThumbAtPoint(x: number, y: number): HTMLElement | null {
+  const element = document.elementFromPoint(x, y);
+  return element instanceof HTMLElement ? getClosestThumb(element) : null;
 }
 
 export function waitForThumbnailsToLoadInContainer(container: HTMLElement | Document): Promise<unknown[]> {

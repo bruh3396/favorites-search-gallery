@@ -1,6 +1,7 @@
 import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "../../types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/environment";
 import { Rating, SortingMethod } from "../../types/search";
+import { OverlayMode } from "../../features/post_overlay/types/overlay_mode";
 import { Preference } from "../../lib/storage/preference";
 
 export const Preferences = {
@@ -33,6 +34,7 @@ export const Preferences = {
   optionsVisible: new Preference("showOptions", false),
   performanceProfile: new Preference<PerformanceProfile>("performanceProfile", PerformanceProfile.Normal),
   postOverlayEnabled: new Preference("postOverlayEnabled", false),
+  overlayMode: new Preference<OverlayMode>("overlayMode", "tag"),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
   resultsPerPage: new Preference("resultsPerPage", 200),
   rowHeight: new Preference("rowSize", 7),

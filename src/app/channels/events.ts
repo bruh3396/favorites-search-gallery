@@ -73,6 +73,11 @@ export const Events = {
   searchBox: {
     append: new Emitter<string>()
   },
+  postOverlay: {
+    addTagToSearch: new Emitter<string>(),
+    excludeTagFromSearch: new Emitter<string>(),
+    searchForTag: new Emitter<string>()
+  },
   searchPage: {
     searchPageInitialized: new StickyEmitter<void>(),
     layoutChanged: new Emitter<Layout>(),

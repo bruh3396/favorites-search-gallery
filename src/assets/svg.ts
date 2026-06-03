@@ -1,0 +1,5 @@
+export const Svg = {
+  leftClick: "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"6\"/><path d=\"M12 2v8\"/><path d=\"M6 8h6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M6.5 3.5A6 6 0 0 0 6 8h6V2.2A6 6 0 0 0 6.5 3.5Z\" fill=\"currentColor\" stroke=\"none\"/></svg>",
+  rightClick: "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"6\"/><path d=\"M12 2v8\"/><path d=\"M17.5 3.5A6 6 0 0 1 18 8h-6V2.2A6 6 0 0 1 17.5 3.5Z\" fill=\"currentColor\" stroke=\"none\"/></svg>",
+  middleClick: "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"6\"/><rect x=\"11\" y=\"6\" width=\"2\" height=\"4\" rx=\"1\" fill=\"currentColor\" stroke=\"none\"/></svg>"
+} as const;

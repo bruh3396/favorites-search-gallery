@@ -1,1 +1,1 @@
-export type OverlayMode = "tags"
+export type OverlayMode = "tag";

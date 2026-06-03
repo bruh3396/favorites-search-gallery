@@ -1,6 +1,6 @@
 .post-overlay {
   position: absolute;
-  z-index: 9999;
+  z-index: 20;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -11,9 +11,10 @@
   line-height: 1.3;
   color: #fff;
   pointer-events: none;
+  user-select: none;
   background: rgba(0, 0, 0, 0.82);
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity 0.15s ease;
 }
 
 .post-overlay[data-visible="true"] {
@@ -43,22 +44,61 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.post-overlay[data-visible="true"] .post-overlay-tag[data-tag] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.post-overlay[data-visible="true"] .post-overlay-tag[data-tag]:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 .post-overlay-tag[data-category="id"] {
-  color: #c0c0c0;
+  color: var(--color-tag-general);
 }
 
 .post-overlay-tag[data-category="artist"] {
-  color: #f0a0c0;
+  color: var(--color-tag-artist);
 }
 
 .post-overlay-tag[data-category="copyright"] {
-  color: #d0a0f0;
+  color: var(--color-tag-copyright);
 }
 
 .post-overlay-tag[data-category="character"] {
-  color: #a0f0a0;
+  color: var(--color-tag-character);
 }
 
 .post-overlay-tag[data-category="metadata"] {
-  color: #f0d080;
+  color: var(--color-tag-metadata);
+}
+
+.post-overlay-hint {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6em;
+  padding-top: 0.4em;
+  font-size: 1.2em;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.post-overlay-hint-item {
+  display: inline-flex;
+  gap: 0.25em;
+  align-items: center;
+}
+
+.post-overlay-hint-item .icon {
+  width: 1.6em;
+  height: 1.6em;
+}
+
+.post-overlay[data-visible="true"]:hover .post-overlay-hint {
+  opacity: 0.85;
+  transition: opacity 0.15s ease 1s;
 }
