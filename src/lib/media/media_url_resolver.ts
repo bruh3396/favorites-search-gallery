@@ -1,7 +1,7 @@
-import { Favorite } from "../../types/favorite";
-import { baseImageUrl } from "./base_image_url";
-import { getTagSetFromItem } from "../thumb/thumb_tags";
-import { resolveExtension } from "./media_extension_resolver";
+import { Favorite } from "@/types/favorite";
+import { baseImageUrl } from "@/lib/media/base_image_url";
+import { getTagSetFromItem } from "@/lib/thumb/thumb_tags";
+import { resolveExtension } from "@/lib/media/media_extension_resolver";
 
 export async function resolveImageUrl(item: HTMLElement | Favorite): Promise<string> {
   return (await resolveMediaUrl(item)).replace(".mp4", ".jpg");

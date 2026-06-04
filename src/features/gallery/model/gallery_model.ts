@@ -1,14 +1,14 @@
-import * as GalleryCursor from "./cursor";
-import * as GalleryFavoriter from "./favoriter";
-import * as GalleryState from "./gallery_state";
-import * as Navigator from "../../../lib/remote/rule34/navigator";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
-import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
-import { isVideo } from "../../../lib/media/media_type_predicates";
+import * as GalleryCursor from "@/features/gallery/model/cursor";
+import * as GalleryFavoriter from "@/features/gallery/model/favoriter";
+import * as GalleryState from "@/features/gallery/model/gallery_state";
+import * as Navigator from "@/lib/remote/rule34/navigator";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { downloadFromThumb } from "@/lib/remote/rule34/media_downloader";
+import { isVideo } from "@/lib/media/media_type_predicates";
 
-export * from "./gallery_state";
-export * from "./cursor";
-export * from "./neighbors";
+export * from "@/features/gallery/model/gallery_state";
+export * from "@/features/gallery/model/cursor";
+export * from "@/features/gallery/model/neighbors";
 
 export const isViewingVideo = (): boolean => GalleryState.isInGallery() && isVideo(GalleryCursor.currentThumb());
 export const openPost = (): void => Navigator.openPost(GalleryCursor.currentThumb().id);

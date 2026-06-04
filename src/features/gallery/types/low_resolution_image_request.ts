@@ -1,4 +1,4 @@
-import { ImageRequest } from "./image_request";
+import { ImageRequest } from "@/features/gallery/types/image_request";
 
 export class LowResolutionImageRequest extends ImageRequest {
 

@@ -17,7 +17,14 @@ function resolveRawImport(args: esbuild.OnResolveArgs): esbuild.OnResolveResult 
 function resolveRawPath(args: esbuild.OnResolveArgs): string {
   const rawPath = args.path.replace(/\?raw$/, "");
   const withExtension = rawPath.endsWith(".ts") ? rawPath : `${rawPath}.ts`;
-  return path.resolve(args.resolveDir, withExtension);
+  return resolveSpecifier(withExtension, args.resolveDir);
+}
+
+function resolveSpecifier(specifier: string, resolveDir: string): string {
+  if (specifier.startsWith("@/")) {
+    return path.resolve("src", specifier.slice("@/".length));
+  }
+  return path.resolve(resolveDir, specifier);
 }
 
 function loadTsIifeString(args: esbuild.OnLoadArgs): Promise<esbuild.OnLoadResult> {

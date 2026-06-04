@@ -1,6 +1,6 @@
-import { EnhancedMouseEvent } from "../../../types/input";
-import { Events } from "../../../app/channels/events";
-import { PostOverlayClass } from "../types/css_names";
+import { EnhancedMouseEvent } from "@/types/input";
+import { Events } from "@/app/channels/events";
+import { PostOverlayClass } from "@/features/post_overlay/types/css_names";
 
 export function onMouseDown(event: MouseEvent): void {
   const mouseEvent = new EnhancedMouseEvent(event);

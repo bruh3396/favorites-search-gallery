@@ -1,18 +1,18 @@
-import { CheckboxElement, SelectElement } from "../../../types/element";
-import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "../../../types/ui";
-import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "../../../app/context/flags";
-import { Events } from "../../../app/channels/events";
-import { GeneralConfig } from "../../../config/general_config";
-import { MetadataMetric } from "../../../types/search";
-import { ON_DESKTOP_DEVICE } from "../../../lib/environment";
-import { Preferences } from "../../../app/context/preferences";
-import { buildCheckboxElement } from "../../../app/input/checkbox";
-import { buildSelectElement } from "../../../lib/ui/elements/select";
-import { numberRange } from "../../../utils/number";
-import { prepareDynamicElements } from "../../../lib/ui/elements/dynamic_element_preparer";
-import { reloadWindow } from "../../../utils/browser/window";
-import { toggleAddOrRemoveButtons } from "../../../lib/ui/toggles";
-import { toggleGalleryMenuEnabled } from "../../../lib/ui/style";
+import { CheckboxElement, SelectElement } from "@/types/element";
+import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "@/types/ui";
+import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
+import { Events } from "@/app/channels/events";
+import { GeneralConfig } from "@/config/general_config";
+import { MetadataMetric } from "@/types/search";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { Preferences } from "@/app/context/preferences";
+import { buildCheckboxElement } from "@/app/input/checkbox";
+import { buildSelectElement } from "@/lib/ui/elements/select";
+import { numberRange } from "@/utils/number";
+import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
+import { reloadWindow } from "@/utils/browser/window";
+import { toggleAddOrRemoveButtons } from "@/lib/ui/toggles";
+import { toggleGalleryMenuEnabled } from "@/lib/ui/style";
 
 const checkboxes: Partial<CheckboxElement>[] = [
   {

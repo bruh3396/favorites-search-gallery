@@ -1,5 +1,5 @@
-import { ExitKey, ForwardNavigationKey, NavigationKey } from "./input";
-import { MetadataComparator, SearchableMetadataMetric, TagCategory } from "./search";
+import { ExitKey, ForwardNavigationKey, NavigationKey } from "@/types/input";
+import { MetadataComparator, SearchableMetadataMetric, TagCategory } from "@/types/search";
 
 export const exitKeys: Set<ExitKey> = new Set(["Escape", "Delete", "Backspace"]);
 export const navigationKeys: Set<NavigationKey> = new Set(["a", "A", "ArrowLeft", "d", "D", "ArrowRight"]);

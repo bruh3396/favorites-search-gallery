@@ -1,6 +1,6 @@
-import * as GalleryVideoController from "./video_controller";
-import { GalleryRenderer, VideoControllerCallbacks } from "../../../types/gallery_types";
-import { doNothing } from "../../../../../utils/function";
+import * as GalleryVideoController from "@/features/gallery/view/rendering/video/video_controller";
+import { GalleryRenderer, VideoControllerCallbacks } from "@/features/gallery/types/gallery_types";
+import { doNothing } from "@/utils/function";
 
 const root = document.createElement("div");
 
@@ -16,7 +16,7 @@ export const GalleryVideoRenderer = {
 } satisfies GalleryRenderer;
 
 export const setupVideoRenderer = (callbacks: VideoControllerCallbacks): void => GalleryVideoController.setup(root, callbacks);
-export { toggleVideoLooping, restartActiveVideo as restartVideo, toggleActiveVideoPause as toggleVideoPause, toggleVideoMute } from "./video_controller";
+export { toggleVideoLooping, restartActiveVideo as restartVideo, toggleActiveVideoPause as toggleVideoPause, toggleVideoMute } from "@/features/gallery/view/rendering/video/video_controller";
 
 function render(thumb: HTMLElement): void {
   root.style.visibility = "visible";

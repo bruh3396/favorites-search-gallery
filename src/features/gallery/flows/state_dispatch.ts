@@ -1,5 +1,5 @@
-import * as GalleryModel from "../model/gallery_model";
-import { GalleryState } from "../types/gallery_types";
+import * as GalleryModel from "@/features/gallery/model/gallery_model";
+import { GalleryState } from "@/features/gallery/types/gallery_types";
 
 type GalleryStateHandlers<V> = {
   idle?: (arg: V) => void

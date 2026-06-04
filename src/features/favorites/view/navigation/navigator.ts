@@ -1,11 +1,11 @@
-import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "../../types/favorite_types";
-import { FavoritesConfig } from "../../../../config/favorites_config";
-import { ON_DESKTOP_DEVICE } from "../../../../lib/environment";
-import { PageRelation } from "../../../../types/favorite";
-import { Preferences } from "../../../../app/context/preferences";
-import { insertStyle } from "../../../../utils/dom/injector";
-import { isOnlyDigits } from "../../../../utils/string/query";
-import { numbersAroundInRange } from "../../../../utils/number";
+import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "@/features/favorites/types/favorite_types";
+import { FavoritesConfig } from "@/config/favorites_config";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { PageRelation } from "@/types/favorite";
+import { Preferences } from "@/app/context/preferences";
+import { insertStyle } from "@/utils/dom/injector";
+import { isOnlyDigits } from "@/utils/string/query";
+import { numbersAroundInRange } from "@/utils/number";
 
 interface NavigatorCallbacks {
   onPageSelected: (pageNumber: number) => void;

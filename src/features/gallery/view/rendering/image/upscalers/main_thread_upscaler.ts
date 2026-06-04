@@ -1,10 +1,10 @@
-import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "../../../../../../lib/remote/rule34/bitmap_fetcher";
-import { GalleryAbstractUpscaler } from "./abstract_upscaler";
-import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
-import { ImageRequest } from "../../../../types/image_request";
-import { UpscaledImageRequest } from "../../../../types/upscaled_image_request";
-import { drawScaledCanvas } from "../../../../../../utils/dom/canvas";
-import { isImage } from "../../../../../../lib/media/media_type_predicates";
+import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "@/lib/remote/rule34/bitmap_fetcher";
+import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
+import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
+import { ImageRequest } from "@/features/gallery/types/image_request";
+import { UpscaledImageRequest } from "@/features/gallery/types/upscaled_image_request";
+import { drawScaledCanvas } from "@/utils/dom/canvas";
+import { isImage } from "@/lib/media/media_type_predicates";
 
 export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   private readonly canvases: Map<string, HTMLCanvasElement> = new Map();

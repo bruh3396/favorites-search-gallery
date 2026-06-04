@@ -1,5 +1,5 @@
-import { DeletedPostError, RateLimitedError } from "../../../types/errors";
-import { Post, PostResponse } from "../../../types/api";
+import { DeletedPostError, RateLimitedError } from "@/types/errors";
+import { Post, PostResponse } from "@/types/api";
 
 export function postResponseToPost(response: PostResponse): Post {
   if (response.status === "deleted") {

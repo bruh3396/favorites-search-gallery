@@ -1,10 +1,10 @@
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "../../../lib/environment";
-import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "../../../app/layout/content_thumbs";
-import { Events } from "../../../app/channels/events";
-import { GalleryConfig } from "../../../config/gallery_config";
-import { Preferences } from "../../../app/context/preferences";
-import { debounceTrailing } from "../../../lib/async/debounce";
-import { getRectDistance } from "../../../utils/geometry";
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "@/lib/environment";
+import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
+import { Events } from "@/app/channels/events";
+import { GalleryConfig } from "@/config/gallery_config";
+import { Preferences } from "@/app/context/preferences";
+import { debounceTrailing } from "@/lib/async/debounce";
+import { getRectDistance } from "@/utils/geometry";
 
 const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
 let centerThumb: HTMLElement | null = null;

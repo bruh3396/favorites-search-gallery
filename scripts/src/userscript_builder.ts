@@ -1,5 +1,6 @@
-﻿import { BuildOptions, build } from "esbuild";
+import { BuildOptions, build } from "esbuild";
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import { resolve } from "path";
 import { rawTsPlugin } from "./raw_ts_plugin";
 
 const SCRIPT_VERSION = "1.22";
@@ -39,6 +40,9 @@ const BUILD_OPTIONS: BuildOptions = {
   format: "iife",
   target: ["esnext"],
   legalComments: "none",
+  alias: {
+    "@": resolve("src")
+  },
   banner: {
     js: USERSCRIPT_HEADER
   },

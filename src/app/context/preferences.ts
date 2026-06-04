@@ -1,8 +1,8 @@
-import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "../../types/ui";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../lib/environment";
-import { Rating, SortingMethod } from "../../types/search";
-import { OverlayMode } from "../../features/post_overlay/types/overlay_mode";
-import { Preference } from "../../lib/storage/preference";
+import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "@/types/ui";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { Rating, SortingMethod } from "@/types/search";
+import { OverlayMode } from "@/features/post_overlay/types/overlay_mode";
+import { Preference } from "@/lib/storage/preference";
 
 export const Preferences = {
   addButtonsVisible: new Preference("showAddFavoriteButtons", false),

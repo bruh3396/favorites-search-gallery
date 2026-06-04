@@ -1,24 +1,24 @@
-import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "../../../../types/element";
-import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "../../../../app/context/flags";
-import { Layout, PerformanceProfile } from "../../../../types/ui";
-import { buildCheckboxElement, buildCheckboxOption } from "../../../../app/input/checkbox";
-import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "../../../../lib/ui/toggles";
-import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "../../../../lib/ui/style";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "../../dom_tweaks/ui_toggles";
-import { Events } from "../../../../app/channels/events";
-import { FavoritesConfig } from "../../../../config/favorites_config";
-import { GeneralConfig } from "../../../../config/general_config";
-import { MetadataMetric } from "../../../../types/search";
-import { PostOverlayId } from "../../../post_overlay/types/css_names";
-import { Preferences } from "../../../../app/context/preferences";
-import { ThumbConfig } from "../../../../config/thumb_config";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
-import { buildButtonElement } from "../../../../lib/ui/elements/button";
-import { buildNumberComponent } from "../../../../lib/ui/elements/number_input";
-import { buildSelectElement } from "../../../../lib/ui/elements/select";
-import { hideUnusedLayoutSizer } from "../../../../app/layout/content_tiler";
-import { prepareDynamicElements } from "../../../../lib/ui/elements/dynamic_element_preparer";
-import { reloadWindow } from "../../../../utils/browser/window";
+import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/types/element";
+import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
+import { Layout, PerformanceProfile } from "@/types/ui";
+import { buildCheckboxElement, buildCheckboxOption } from "@/app/input/checkbox";
+import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "@/lib/ui/toggles";
+import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "@/lib/ui/style";
+import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "@/features/favorites/dom_tweaks/ui_toggles";
+import { Events } from "@/app/channels/events";
+import { FavoritesConfig } from "@/config/favorites_config";
+import { GeneralConfig } from "@/config/general_config";
+import { MetadataMetric } from "@/types/search";
+import { PostOverlayId } from "@/features/post_overlay/types/css_names";
+import { Preferences } from "@/app/context/preferences";
+import { ThumbConfig } from "@/config/thumb_config";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
+import { buildButtonElement } from "@/lib/ui/elements/button";
+import { buildNumberComponent } from "@/lib/ui/elements/number_input";
+import { buildSelectElement } from "@/lib/ui/elements/select";
+import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
+import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
+import { reloadWindow } from "@/utils/browser/window";
 
 const buttons: Partial<ButtonElement>[] = [
   {

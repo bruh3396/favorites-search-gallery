@@ -1,8 +1,8 @@
-import * as SearchPageModel from "../model/search_page_model";
-import * as SearchPageView from "../view/search_page_view";
-import { Events } from "../../../app/channels/events";
-import { PageBottomObserver } from "../../../lib/observer/page_bottom_observer";
-import { Preferences } from "../../../app/context/preferences";
+import * as SearchPageModel from "@/features/search_page/model/search_page_model";
+import * as SearchPageView from "@/features/search_page/view/search_page_view";
+import { Events } from "@/app/channels/events";
+import { PageBottomObserver } from "@/lib/observer/page_bottom_observer";
+import { Preferences } from "@/app/context/preferences";
 
 const pageBottomObserver: PageBottomObserver = new PageBottomObserver(showMoreResults);
 

@@ -1,4 +1,4 @@
-import { Layout } from "../../../../types/ui";
+import { Layout } from "@/types/ui";
 
 const skeletonStyles: Record<Layout, Record<string, string> | null> = {
   "tiler--column": { "width": "100%" },

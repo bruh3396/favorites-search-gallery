@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getTagBoundary, replaceTag } from "../../../features/autocomplete/autocomplete_tag_replacer";
+import { getTagBoundary, replaceTag } from "@/features/autocomplete/autocomplete_tag_replacer";
 
 describe("getWordBoundaries", () => {
   test("empty", () => {

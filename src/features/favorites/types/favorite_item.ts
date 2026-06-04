@@ -1,12 +1,12 @@
-import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "../../../types/favorite";
-import { clearPost, createPost } from "./post_factory";
-import { FavoriteElement } from "./favorite_element";
-import { FavoriteMetadata } from "./favorite_metadata";
-import { FavoriteTags } from "./favorite_tags";
-import { Post } from "../../../types/api";
-import { Rating } from "../../../types/search";
-import { compressPreviewSource } from "../../../lib/media/media_url_transformer";
-import { getIdFromThumb } from "../../../lib/thumb/thumbs";
+import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "@/types/favorite";
+import { clearPost, createPost } from "@/features/favorites/types/post_factory";
+import { FavoriteElement } from "@/features/favorites/types/favorite_element";
+import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
+import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
+import { Post } from "@/types/api";
+import { Rating } from "@/types/search";
+import { compressPreviewSource } from "@/lib/media/media_url_transformer";
+import { getIdFromThumb } from "@/lib/thumb/thumbs";
 
 export class FavoriteItem implements Favorite {
   public readonly id: string;

@@ -1,13 +1,13 @@
-import * as PostApi from "../../../../../lib/remote/api/post_fetcher";
-import * as PostOverlayCategoryCache from "./category_cache";
-import * as PostOverlayCategoryStore from "./category_store";
-import * as TagApi from "../../../../../lib/remote/api/tag_fetcher";
-import { PostOverlayConfig } from "../../../../../config/post_overlay_config";
-import { TagCategory } from "../../../../../types/search";
-import { decodeTagCategory } from "../../../../../lib/remote/parsers/api_tag_parser";
-import { getTagSetFromItem } from "../../../../../lib/thumb/thumb_tags";
-import { parseTagCategoriesFromPostPage } from "../../../../../lib/remote/parsers/post_page_parser";
-import { withTimeout } from "../../../../../lib/async/timing";
+import * as PostApi from "@/lib/remote/api/post_fetcher";
+import * as PostOverlayCategoryCache from "@/features/post_overlay/model/providers/tags/category_cache";
+import * as PostOverlayCategoryStore from "@/features/post_overlay/model/providers/tags/category_store";
+import * as TagApi from "@/lib/remote/api/tag_fetcher";
+import { PostOverlayConfig } from "@/config/post_overlay_config";
+import { TagCategory } from "@/types/search";
+import { decodeTagCategory } from "@/lib/remote/parsers/api_tag_parser";
+import { getTagSetFromItem } from "@/lib/thumb/thumb_tags";
+import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page_parser";
+import { withTimeout } from "@/lib/async/timing";
 
 export async function preloadCache(): Promise<void> {
   for (const mapping of await PostOverlayCategoryStore.readAll()) {

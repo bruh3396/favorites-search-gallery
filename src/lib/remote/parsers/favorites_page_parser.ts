@@ -1,4 +1,4 @@
-import { parseHtml } from "../../../utils/dom/html_parser";
+import { parseHtml } from "@/utils/dom/html_parser";
 
 export function extractFavoritesPageCount(html: string): number | null {
   const dom = parseHtml(html);

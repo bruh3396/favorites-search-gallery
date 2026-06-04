@@ -1,9 +1,9 @@
-import * as GalleryDisplayFlow from "./display_flow";
-import * as GalleryModel from "../model/gallery_model";
-import { Boundary } from "../../../types/boundary";
-import { FeatureBridge } from "../../../app/channels/feature_bridge";
-import { NavigationKey } from "../../../types/input";
-import { ON_SEARCH_PAGE } from "../../../lib/environment";
+import * as GalleryDisplayFlow from "@/features/gallery/flows/display_flow";
+import * as GalleryModel from "@/features/gallery/model/gallery_model";
+import { Boundary } from "@/types/boundary";
+import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { NavigationKey } from "@/types/input";
+import { ON_SEARCH_PAGE } from "@/lib/environment";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.move(direction)) {

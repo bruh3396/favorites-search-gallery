@@ -1,9 +1,9 @@
-import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "../../thumb/thumbs";
-import { AbstractTiler } from "./abstract_tiler";
-import { Layout } from "../../../types/ui";
-import { ThumbConfig } from "../../../config/thumb_config";
-import { insertStyle } from "../../../utils/dom/injector";
-import { mapRange } from "../../../utils/number";
+import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "@/lib/thumb/thumbs";
+import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
+import { Layout } from "@/types/ui";
+import { ThumbConfig } from "@/config/thumb_config";
+import { insertStyle } from "@/utils/dom/injector";
+import { mapRange } from "@/utils/number";
 
 export class RowTiler extends AbstractTiler {
   public layout: Layout = "tiler--row";

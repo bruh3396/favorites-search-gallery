@@ -1,4 +1,4 @@
-import { Timeout } from "../../types/async";
+import { Timeout } from "@/types/async";
 
 type Subscribe<T> = (handler: (value: T) => void, opts?: { signal?: AbortSignal }) => void;
 

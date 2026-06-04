@@ -1,4 +1,4 @@
-import { DomEvents } from "../input/dom_events";
+import { DomEvents } from "@/app/input/dom_events";
 
 export const Root = document.createElement("div");
 Root.id = "favorites-search-gallery";

@@ -1,6 +1,6 @@
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "../../lib/environment";
-import { PerformanceProfile } from "../../types/ui";
-import { Preferences } from "./preferences";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
+import { PerformanceProfile } from "@/types/ui";
+import { Preferences } from "@/app/context/preferences";
 
 export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.searchPageEnabled.value);
 export const FAVORITES_SEARCH_GALLERY_DISABLED = !FAVORITES_SEARCH_GALLERY_ENABLED;

@@ -1,7 +1,7 @@
-import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
-import { AddFavoriteStatus } from "../../../types/favorite";
-import { ClickCode } from "../../../types/input";
-import { Events } from "../../../app/channels/events";
+import * as FavoritesActions from "@/lib/remote/rule34/favorites_actions";
+import { AddFavoriteStatus } from "@/types/favorite";
+import { ClickCode } from "@/types/input";
+import { Events } from "@/app/channels/events";
 
 export function setupAddFavoriteButtons(thumbs: HTMLElement[]): void {
   for (const thumb of thumbs) {

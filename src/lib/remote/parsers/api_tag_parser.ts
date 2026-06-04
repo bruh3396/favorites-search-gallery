@@ -1,6 +1,6 @@
-import { EncodedTagCategory, TagResponse } from "../../../types/api";
-import { RateLimitedError } from "../../../types/errors";
-import { TagCategory } from "../../../types/search";
+import { EncodedTagCategory, TagResponse } from "@/types/api";
+import { RateLimitedError } from "@/types/errors";
+import { TagCategory } from "@/types/search";
 
 const tagCategoryDecodings: Record<number, TagCategory> = {
   0: "general",

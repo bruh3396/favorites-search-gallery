@@ -1,4 +1,4 @@
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/rule34_constants";
+import { POSTS_PER_SEARCH_PAGE } from "@/lib/rule34_constants";
 
 export class SearchPage {
   public thumbs: HTMLElement[];

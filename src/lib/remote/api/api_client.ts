@@ -1,5 +1,5 @@
-import { USER_ID, VERSION } from "../../environment";
-import { PING_URL } from "../url/api_urls";
+import { USER_ID, VERSION } from "@/lib/environment";
+import { PING_URL } from "@/lib/remote/url/api_urls";
 
 export function setupServer(): void {
   fetchFromApi(PING_URL, {});

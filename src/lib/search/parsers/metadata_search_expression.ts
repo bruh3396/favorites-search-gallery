@@ -1,5 +1,5 @@
-import { MetadataComparator, SearchableMetadataMetric } from "../../../types/search";
-import { isMetadataComparator, isSearchableMetadataMetric, searchableMetadataMetrics } from "../../../types/guards";
+import { MetadataComparator, SearchableMetadataMetric } from "@/types/search";
+import { isMetadataComparator, isSearchableMetadataMetric, searchableMetadataMetrics } from "@/types/guards";
 
 const metricPattern = Array.from(searchableMetadataMetrics).join("|");
 

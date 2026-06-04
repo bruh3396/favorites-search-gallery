@@ -1,6 +1,6 @@
-import { ON_MOBILE_DEVICE } from "../../environment";
-import { Timeout } from "../../../types/async";
-import { clamp } from "../../../utils/number";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { Timeout } from "@/types/async";
+import { clamp } from "@/utils/number";
 
 export class HoldButton extends HTMLElement {
   private static defaultPollingTime: number = 100;

@@ -1,8 +1,8 @@
-import { AbstractFavoritesSearchBox } from "./abstract_search_box";
-import { Events } from "../../../../app/channels/events";
-import TOOLBAR_HTML from "../../../../assets/html/toolbar.html";
-import { setupMobileStickyMenu } from "./mobile_sticky_menu";
-import { setupMobileSymbolRow } from "./mobile_symbol_row";
+import { AbstractFavoritesSearchBox } from "@/features/favorites/control/search_box/abstract_search_box";
+import { Events } from "@/app/channels/events";
+import TOOLBAR_HTML from "@/assets/html/toolbar.html";
+import { setupMobileStickyMenu } from "@/features/favorites/control/search_box/mobile_sticky_menu";
+import { setupMobileSymbolRow } from "@/features/favorites/control/search_box/mobile_symbol_row";
 
 export class FavoritesMobileSearchBox extends AbstractFavoritesSearchBox {
   protected override createSearchBox(): HTMLTextAreaElement | HTMLInputElement {

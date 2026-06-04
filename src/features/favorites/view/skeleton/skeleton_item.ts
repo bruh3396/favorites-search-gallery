@@ -1,10 +1,10 @@
-import { coinFlip, randomIntInRange, seededRandomIntInRange } from "../../../../utils/number";
-import { getRandomAnimationDelay, getRandomAnimationDuration } from "./skeleton_animation";
-import { Dimensions2D } from "../../../../types/geometry";
-import { Layout } from "../../../../types/ui";
-import { SkeletonConfig } from "../../../../config/skeleton_config";
-import { getSkeletonStyle } from "./skeleton_style";
-import { parseDimensions2D } from "../../../../utils/string/parse";
+import { coinFlip, randomIntInRange, seededRandomIntInRange } from "@/utils/number";
+import { getRandomAnimationDelay, getRandomAnimationDuration } from "@/features/favorites/view/skeleton/skeleton_animation";
+import { Dimensions2D } from "@/types/geometry";
+import { Layout } from "@/types/ui";
+import { SkeletonConfig } from "@/config/skeleton_config";
+import { getSkeletonStyle } from "@/features/favorites/view/skeleton/skeleton_style";
+import { parseDimensions2D } from "@/utils/string/parse";
 
 export class SkeletonItem {
   public readonly element: HTMLElement;

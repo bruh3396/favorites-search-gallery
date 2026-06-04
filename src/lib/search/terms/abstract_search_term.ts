@@ -1,4 +1,4 @@
-import { Searchable } from "../../../types/search";
+import { Searchable } from "@/types/search";
 
 export abstract class AbstractSearchTerm {
   public matches: (item: Searchable) => boolean;

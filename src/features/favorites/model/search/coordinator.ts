@@ -1,10 +1,10 @@
-import * as FavoritesResults from "./results";
-import * as FavoritesSearchEngine from "./engine";
-import * as FavoritesSorter from "./sorter";
-import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
-import { Favorite } from "../../../../types/favorite";
-import { Preferences } from "../../../../app/context/preferences";
-import { SearchQuery } from "../../../../lib/search/query/search_query";
+import * as FavoritesResults from "@/features/favorites/model/search/results";
+import * as FavoritesSearchEngine from "@/features/favorites/model/search/engine";
+import * as FavoritesSorter from "@/features/favorites/model/search/sorter";
+import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
+import { Favorite } from "@/types/favorite";
+import { Preferences } from "@/app/context/preferences";
+import { SearchQuery } from "@/lib/search/query/search_query";
 
 let currentSearchQuery = "";
 
@@ -19,8 +19,8 @@ export const prependResults = (newFavorites: Favorite[]): Favorite[] => Favorite
 export const reIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.add(f));
 export const deIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.remove(f));
 export const getCurrentSearchQuery = (): string => currentSearchQuery;
-export { shuffle as shuffleSearchResults, get as getCurrentSearchResults } from "./results";
-export { deferIndexing } from "./engine";
+export { shuffle as shuffleSearchResults, get as getCurrentSearchResults } from "@/features/favorites/model/search/results";
+export { deferIndexing } from "@/features/favorites/model/search/engine";
 
 const useBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.excludeBlacklist.value;
 const blacklistSearchQuery = (): string => `${currentSearchQuery} ${NEGATED_BLACKLISTED_TAGS}`;

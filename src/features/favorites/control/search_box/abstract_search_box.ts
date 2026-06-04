@@ -1,7 +1,7 @@
-import { Events } from "../../../../app/channels/events";
-import { SearchHistory } from "../../../../lib/storage/search_history";
-import { debounceLeading } from "../../../../lib/async/debounce";
-import { hideAwesomplete } from "../../../../lib/ui/autocomplete/awesomplete";
+import { Events } from "@/app/channels/events";
+import { SearchHistory } from "@/lib/storage/search_history";
+import { debounceLeading } from "@/lib/async/debounce";
+import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 
 const HISTORY_DEPTH = 30;
 const INPUT_PERSIST_DELAY = 500;

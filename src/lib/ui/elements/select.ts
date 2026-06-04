@@ -1,5 +1,5 @@
-import { SelectElement, defaultMenuElement } from "../../../types/element";
-import { doNothing } from "../../../utils/function";
+import { SelectElement, defaultMenuElement } from "@/types/element";
+import { doNothing } from "@/utils/function";
 
 export function buildSelectElement<T extends string>(partial: Partial<SelectElement<T>>): void {
   const template = createSelectTemplate(partial);

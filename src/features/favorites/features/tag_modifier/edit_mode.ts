@@ -1,7 +1,7 @@
-import { select, unselectAll } from "./selection";
-import { Favorite } from "../../../../types/favorite";
-import { ITEM_CLASS_NAME } from "../../../../lib/thumb/thumbs";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { select, unselectAll } from "@/features/favorites/features/tag_modifier/selection";
+import { Favorite } from "@/types/favorite";
+import { ITEM_CLASS_NAME } from "@/lib/thumb/thumbs";
+import { insertStyle } from "@/utils/dom/injector";
 
 let getFavorite: (id: string) => Favorite | undefined = () => undefined;
 let toggleUi: (value: boolean) => void = () => {};

@@ -1,4 +1,4 @@
-import { OffscreenUpscaleRequest } from "../../../../types/offscreen_upscale_request";
+import { OffscreenUpscaleRequest } from "@/features/gallery/types/offscreen_upscale_request";
 
 type UpscaleConfig = {
   maxUpscaledThumbCanvasHeight: number;

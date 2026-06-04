@@ -1,7 +1,7 @@
-import { Favorite } from "../../../types/favorite";
-import { FavoritesConfig } from "../../../config/favorites_config";
-import { Preferences } from "../../../app/context/preferences";
-import { ScrollExpansionResult } from "../types/favorite_types";
+import { Favorite } from "@/types/favorite";
+import { FavoritesConfig } from "@/config/favorites_config";
+import { Preferences } from "@/app/context/preferences";
+import { ScrollExpansionResult } from "@/features/favorites/types/favorite_types";
 
 let favorites: Favorite[] = [];
 let renderedStart = 0;

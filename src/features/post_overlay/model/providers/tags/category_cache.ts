@@ -1,4 +1,4 @@
-import { TagCategory } from "../../../../../types/search";
+import { TagCategory } from "@/types/search";
 
 const cache = new Map<string, TagCategory>();
 

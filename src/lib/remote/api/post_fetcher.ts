@@ -1,15 +1,15 @@
-import { Post, PostResponse } from "../../../types/api";
-import { generalPageRequestQueue, postLimiter } from "../http/rate_limiters";
-import { ApiConfig } from "../../../config/api_config";
-import { CoalescingResolver } from "../../async/coalescing_resolver";
-import { DeletedPostError } from "../../../types/errors";
-import { POST_API_URL } from "../url/api_urls";
-import { buildPostPageUrl } from "../url/page_url_builder";
-import { fetchHtml } from "../http/http_client";
-import { fetchJsonFromApi } from "./api_client";
-import { parsePostFromPostPage } from "../parsers/post_page_parser";
-import { postResponseToPost } from "../parsers/api_post_parser";
-import { withExponentialBackoff } from "../../async/timing";
+import { Post, PostResponse } from "@/types/api";
+import { generalPageRequestQueue, postLimiter } from "@/lib/remote/http/rate_limiters";
+import { ApiConfig } from "@/config/api_config";
+import { CoalescingResolver } from "@/lib/async/coalescing_resolver";
+import { DeletedPostError } from "@/types/errors";
+import { POST_API_URL } from "@/lib/remote/url/api_urls";
+import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+import { fetchHtml } from "@/lib/remote/http/http_client";
+import { fetchJsonFromApi } from "@/lib/remote/api/api_client";
+import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page_parser";
+import { postResponseToPost } from "@/lib/remote/parsers/api_post_parser";
+import { withExponentialBackoff } from "@/lib/async/timing";
 
 const postFetcher = new CoalescingResolver<PostResponse>(
   ApiConfig.apiBatchSize,

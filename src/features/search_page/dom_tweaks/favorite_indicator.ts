@@ -1,4 +1,4 @@
-import { Preferences } from "../../../app/context/preferences";
+import { Preferences } from "@/app/context/preferences";
 
 const FAVORITE_CLASS = "is-favorite";
 const LOADING_CLASS = "is-loading-favorite-indicator";

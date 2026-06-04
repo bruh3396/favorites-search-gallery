@@ -1,14 +1,14 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../environment";
-import { getCookie, setCookie } from "../../utils/browser/cookie";
-import COMMON_CSS from "../../assets/css/common.css";
-import CONTENT_CSS from "../../assets/css/content.css";
-import DARK_THEME_CSS from "../../assets/css/dark_theme.css";
-import SKELETON_CSS from "../../assets/css/skeleton.css";
-import TILE_CSS from "../../assets/css/tile.css";
-import { ThumbConfig } from "../../config/thumb_config";
-import { buildStyleSheetUrl } from "../remote/url/action_url_builder";
-import { insertStyle } from "../../utils/dom/injector";
-import { yieldControl } from "../async/timing";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { getCookie, setCookie } from "@/utils/browser/cookie";
+import COMMON_CSS from "@/assets/css/common.css";
+import CONTENT_CSS from "@/assets/css/content.css";
+import DARK_THEME_CSS from "@/assets/css/dark_theme.css";
+import SKELETON_CSS from "@/assets/css/skeleton.css";
+import TILE_CSS from "@/assets/css/tile.css";
+import { ThumbConfig } from "@/config/thumb_config";
+import { buildStyleSheetUrl } from "@/lib/remote/url/action_url_builder";
+import { insertStyle } from "@/utils/dom/injector";
+import { yieldControl } from "@/lib/async/timing";
 
 export function setupStyles(): void {
   insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS);

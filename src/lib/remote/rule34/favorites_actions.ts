@@ -1,10 +1,10 @@
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
-import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "../url/action_url_builder";
-import { favoriteAddQueue, favoriteRemoveQueue } from "../http/rate_limiters";
-import { ON_SEARCH_PAGE } from "../../environment";
-import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
-import { fetchHtml } from "../http/http_client";
-import { withExponentialBackoff } from "../../async/timing";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "@/lib/remote/url/action_url_builder";
+import { favoriteAddQueue, favoriteRemoveQueue } from "@/lib/remote/http/rate_limiters";
+import { ON_SEARCH_PAGE } from "@/lib/environment";
+import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { fetchHtml } from "@/lib/remote/http/http_client";
+import { withExponentialBackoff } from "@/lib/async/timing";
 
 export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
   favoriteRemoveQueue.cancel(id);

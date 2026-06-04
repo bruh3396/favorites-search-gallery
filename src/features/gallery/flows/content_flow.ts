@@ -1,7 +1,7 @@
-import * as GalleryModel from "../model/gallery_model";
-import * as GalleryThumbObserver from "../control/visible_thumb_observer";
-import * as GalleryView from "../view/gallery_view";
-import { dispatchByState } from "./state_dispatch";
+import * as GalleryModel from "@/features/gallery/model/gallery_model";
+import * as GalleryThumbObserver from "@/features/gallery/control/visible_thumb_observer";
+import * as GalleryView from "@/features/gallery/view/gallery_view";
+import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 
 export function handlePageChange(): void {
   indexThumbs();

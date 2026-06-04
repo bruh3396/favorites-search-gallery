@@ -1,11 +1,11 @@
-import * as ContentTiler from "../../../app/layout/content_tiler";
-import * as FavoritesNavigator from "./navigation/navigator";
-import * as FavoritesShell from "./shell/favorites_shell";
-import * as FavoritesStatus from "./status/status";
-import { Favorite, PageRelation } from "../../../types/favorite";
-import { buildElementTemplate } from "../types/favorite_element_template";
-import { favoritesSkeleton } from "./skeleton/skeleton";
-import { scrollToTop } from "../../../lib/thumb/thumbs";
+import * as ContentTiler from "@/app/layout/content_tiler";
+import * as FavoritesNavigator from "@/features/favorites/view/navigation/navigator";
+import * as FavoritesShell from "@/features/favorites/view/shell/favorites_shell";
+import * as FavoritesStatus from "@/features/favorites/view/status/status";
+import { Favorite, PageRelation } from "@/types/favorite";
+import { buildElementTemplate } from "@/features/favorites/types/favorite_element_template";
+import { favoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
+import { scrollToTop } from "@/lib/thumb/thumbs";
 
 export interface FavoritesViewCallbacks {
   onPageSelected: (pageNumber: number) => void;
@@ -35,12 +35,12 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
   FavoritesNavigator.setup(viewCallbacks);
 }
 
-export { toggle as toggleNavigator, getContainer as getNavigationContainer, build as buildNavigationMenu, update as updateNavigationMenu } from "./navigation/navigator";
-export { changeLayout } from "../../../app/layout/content_tiler";
-export { collectAspectRatios } from "./skeleton/skeleton";
-export * from "./thumb_preloader";
-export * from "./status/status";
-export * from "../dom_tweaks/ui_toggles";
+export { toggle as toggleNavigator, getContainer as getNavigationContainer, build as buildNavigationMenu, update as updateNavigationMenu } from "@/features/favorites/view/navigation/navigator";
+export { changeLayout } from "@/app/layout/content_tiler";
+export { collectAspectRatios } from "@/features/favorites/view/skeleton/skeleton";
+export * from "@/features/favorites/view/thumb_preloader";
+export * from "@/features/favorites/view/status/status";
+export * from "@/features/favorites/dom_tweaks/ui_toggles";
 
 function toElements(items: Favorite[] | HTMLElement[]): HTMLElement[] {
   if (items.length === 0) {

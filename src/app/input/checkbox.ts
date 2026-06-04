@@ -1,7 +1,7 @@
-import { CheckboxElement, defaultMenuElement } from "../../types/element";
-import { DomEvents } from "./dom_events";
-import { FeatureBridge } from "../channels/feature_bridge";
-import { doNothing } from "../../utils/function";
+import { CheckboxElement, defaultMenuElement } from "@/types/element";
+import { DomEvents } from "@/app/input/dom_events";
+import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { doNothing } from "@/utils/function";
 
 export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
   const template = createCheckboxTemplate(partial);

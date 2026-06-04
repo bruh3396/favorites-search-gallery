@@ -1,8 +1,8 @@
-import { Content } from "../../../../app/layout/shell";
-import { Preferences } from "../../../../app/context/preferences";
-import { insertStyle } from "../../../../utils/dom/injector";
-import { sleep } from "../../../../lib/async/timing";
-import { toggleFavoritesOptions } from "../../dom_tweaks/ui_toggles";
+import { Content } from "@/app/layout/shell";
+import { Preferences } from "@/app/context/preferences";
+import { insertStyle } from "@/utils/dom/injector";
+import { sleep } from "@/lib/async/timing";
+import { toggleFavoritesOptions } from "@/features/favorites/dom_tweaks/ui_toggles";
 
 const stickyMenuStyle = `
   #favorites-search-gallery-content {

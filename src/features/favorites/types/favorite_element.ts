@@ -1,15 +1,15 @@
-import * as FavoritesActions from "../../../lib/remote/rule34/favorites_actions";
-import * as Navigator from "../../../lib/remote/rule34/navigator";
-import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "../../../assets/images";
-import { ClickCode } from "../../../types/input";
-import { Events } from "../../../app/channels/events";
-import { GALLERY_DISABLED } from "../../../app/context/flags";
-import { ON_DESKTOP_DEVICE } from "../../../lib/environment";
-import { Post } from "../../../types/api";
-import { buildPostPageUrl } from "../../../lib/remote/url/page_url_builder";
-import { downloadFromThumb } from "../../../lib/remote/rule34/media_downloader";
-import { favoriteElementTemplate } from "./favorite_element_template";
-import { resolveMediaType } from "../../../lib/media/media_type_resolver";
+import * as FavoritesActions from "@/lib/remote/rule34/favorites_actions";
+import * as Navigator from "@/lib/remote/rule34/navigator";
+import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "@/assets/images";
+import { ClickCode } from "@/types/input";
+import { Events } from "@/app/channels/events";
+import { GALLERY_DISABLED } from "@/app/context/flags";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { Post } from "@/types/api";
+import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+import { downloadFromThumb } from "@/lib/remote/rule34/media_downloader";
+import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
+import { resolveMediaType } from "@/lib/media/media_type_resolver";
 
 export class FavoriteElement {
   public readonly root: HTMLElement;

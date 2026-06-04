@@ -1,6 +1,6 @@
-import * as ContentTiler from "../../../app/layout/content_tiler";
-import { POSTS_PER_SEARCH_PAGE } from "../../../lib/rule34_constants";
-import { SearchPage } from "../types/search_page";
+import * as ContentTiler from "@/app/layout/content_tiler";
+import { POSTS_PER_SEARCH_PAGE } from "@/lib/rule34_constants";
+import { SearchPage } from "@/features/search_page/types/search_page";
 
 export function render(searchPage: SearchPage): void {
   ContentTiler.tile(searchPage.thumbs);

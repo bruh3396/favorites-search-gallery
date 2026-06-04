@@ -1,7 +1,7 @@
-import * as SearchPageModel from "../model/search_page_model";
-import * as SearchPageView from "../view/search_page_view";
-import { FeatureBridge } from "../../../app/channels/feature_bridge";
-import { Preferences } from "../../../app/context/preferences";
+import * as SearchPageModel from "@/features/search_page/model/search_page_model";
+import * as SearchPageView from "@/features/search_page/view/search_page_view";
+import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { Preferences } from "@/app/context/preferences";
 
 export async function toggleIndicator(enabled: boolean): Promise<void> {
   if (enabled) {

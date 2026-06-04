@@ -1,6 +1,6 @@
-import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "../../types/input";
-import { Emitter } from "../../lib/communication/emitter";
-import { StickyEmitter } from "../../lib/communication/sticky_emitter";
+import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@/types/input";
+import { Emitter } from "@/lib/communication/emitter";
+import { StickyEmitter } from "@/lib/communication/sticky_emitter";
 
 export function toggleGlobalInputEvents(value: boolean): void {
   for (const event of Object.values(DomEvents.document)) {

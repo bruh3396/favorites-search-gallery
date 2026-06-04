@@ -1,8 +1,8 @@
-import { Events } from "../../../../app/channels/events";
-import { FavoritesConfig } from "../../../../config/favorites_config";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
-import { Preferences } from "../../../../app/context/preferences";
-import { debounceLeading } from "../../../../lib/async/debounce";
+import { Events } from "@/app/channels/events";
+import { FavoritesConfig } from "@/config/favorites_config";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { Preferences } from "@/app/context/preferences";
+import { debounceLeading } from "@/lib/async/debounce";
 
 let container: HTMLElement;
 let findButton: HTMLButtonElement;

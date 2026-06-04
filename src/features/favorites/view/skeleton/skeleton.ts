@@ -1,11 +1,11 @@
-import { Layout } from "../../../../types/ui";
-import { Preferences } from "../../../../app/context/preferences";
-import { SkeletonConfig } from "../../../../config/skeleton_config";
-import { SkeletonItem } from "./skeleton_item";
-import { getLayout } from "../../../../app/layout/content_tiler";
-import { getNextAspectRatio } from "../thumb_aspect_ratios";
+import { Layout } from "@/types/ui";
+import { Preferences } from "@/app/context/preferences";
+import { SkeletonConfig } from "@/config/skeleton_config";
+import { SkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
+import { getLayout } from "@/app/layout/content_tiler";
+import { getNextAspectRatio } from "@/features/favorites/view/thumb_aspect_ratios";
 
-export { collectAspectRatios } from "../thumb_aspect_ratios";
+export { collectAspectRatios } from "@/features/favorites/view/thumb_aspect_ratios";
 
 class Skeleton {
   private readonly items: SkeletonItem[];

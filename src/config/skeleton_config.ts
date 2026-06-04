@@ -1,4 +1,4 @@
-import { SkeletonAnimation } from "../types/ui";
+import { SkeletonAnimation } from "@/types/ui";
 
 export const SkeletonConfig = {
   defaultItemCount: 50,

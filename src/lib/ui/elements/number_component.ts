@@ -1,5 +1,5 @@
-import { HoldButton } from "./hold_button";
-import { clamp } from "../../../utils/number";
+import { HoldButton } from "@/lib/ui/elements/hold_button";
+import { clamp } from "@/utils/number";
 
 export class NumberComponent {
   public input: HTMLInputElement;

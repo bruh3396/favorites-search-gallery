@@ -1,7 +1,7 @@
-import { Favorite } from "../../types/favorite";
-import { ON_FAVORITES_PAGE } from "../environment";
-import { convertToTagSet } from "../../utils/string/tags";
-import { getImageFromThumb } from "./thumbs";
+import { Favorite } from "@/types/favorite";
+import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { convertToTagSet } from "@/utils/string/tags";
+import { getImageFromThumb } from "@/lib/thumb/thumbs";
 
 let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
 

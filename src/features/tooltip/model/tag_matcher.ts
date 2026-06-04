@@ -1,4 +1,4 @@
-import { SearchTermHighlight } from "../types/highlight";
+import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
 
 export function findMatchingLightColor(tag: string, highlights: SearchTermHighlight[]): string | null {
   return findMatch(tag, highlights)?.lightColor ?? null;

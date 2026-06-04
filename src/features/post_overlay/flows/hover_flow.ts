@@ -1,9 +1,9 @@
-import * as PostOverlayModeDispatch from "./mode_dispatch";
-import * as PostOverlayModel from "../model/post_overlay_model";
-import * as PostOverlayView from "../view/post_overlay_view";
-import { EnhancedMouseEvent } from "../../../types/input";
-import { Preferences } from "../../../app/context/preferences";
-import { isInsideOverlay } from "../dom_tweaks/overlay_hit_test";
+import * as PostOverlayModeDispatch from "@/features/post_overlay/flows/mode_dispatch";
+import * as PostOverlayModel from "@/features/post_overlay/model/post_overlay_model";
+import * as PostOverlayView from "@/features/post_overlay/view/post_overlay_view";
+import { EnhancedMouseEvent } from "@/types/input";
+import { Preferences } from "@/app/context/preferences";
+import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
 export function onMouseover(event: EnhancedMouseEvent): void {
   if (!Preferences.postOverlayEnabled.value) {

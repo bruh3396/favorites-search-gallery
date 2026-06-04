@@ -1,4 +1,4 @@
-import { Timeout } from "../../types/async";
+import { Timeout } from "@/types/async";
 
 export function debounceLeading<V>(this: unknown, fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
   let timeoutId: Timeout;

@@ -1,13 +1,13 @@
-import * as SearchPageLoader from "./page_loader";
-import * as SearchPageUrlContext from "./url_context";
-import { Boundary } from "../../../types/boundary";
-import { NavigationKey } from "../../../types/input";
-import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
-import { SearchPage } from "../types/search_page";
-import { SearchPageNavigationResult } from "../types/search_page_types";
-import { getAllPageThumbs } from "../../../app/layout/content_thumbs";
-import { navigationDelta } from "../../../utils/navigation";
-import { sleep } from "../../../lib/async/timing";
+import * as SearchPageLoader from "@/features/search_page/model/page_loader";
+import * as SearchPageUrlContext from "@/features/search_page/model/url_context";
+import { Boundary } from "@/types/boundary";
+import { NavigationKey } from "@/types/input";
+import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { SearchPage } from "@/features/search_page/types/search_page";
+import { SearchPageNavigationResult } from "@/features/search_page/types/search_page_types";
+import { getAllPageThumbs } from "@/app/layout/content_thumbs";
+import { navigationDelta } from "@/utils/navigation";
+import { sleep } from "@/lib/async/timing";
 
 let initialPageNumber: number;
 let currentPageNumber: number;
@@ -75,4 +75,4 @@ export function resetCurrentPageNumber(): void {
   currentPageNumber = initialPageNumber;
 }
 
-export { allThumbs } from "./page_loader";
+export { allThumbs } from "@/features/search_page/model/page_loader";

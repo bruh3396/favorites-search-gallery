@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { FavoritesConfig } from "../../config/favorites_config";
+import { FavoritesConfig } from "@/config/favorites_config";
 
 abstract class EdgeObserver {
   protected readonly getSentinels: () => HTMLElement[];

@@ -1,5 +1,5 @@
-import * as TooltipElement from "./shell/tooltip_element";
-import { clamp } from "../../../utils/number";
+import * as TooltipElement from "@/features/tooltip/view/shell/tooltip_element";
+import { clamp } from "@/utils/number";
 
 const TOP_MARGIN = 100;
 

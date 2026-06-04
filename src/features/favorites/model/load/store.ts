@@ -1,7 +1,7 @@
-import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "../../../../lib/environment";
-import { Favorite, FavoritesDatabaseRecord } from "../../../../types/favorite";
-import { CoalescingExecutor } from "../../../../lib/async/coalescing_executor";
-import { Database } from "../../../../lib/storage/database";
+import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "@/lib/environment";
+import { Favorite, FavoritesDatabaseRecord } from "@/types/favorite";
+import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
+import { Database } from "@/lib/storage/database";
 
 const database = new Database<FavoritesDatabaseRecord>("Favorites", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
 const updateScheduler = new CoalescingExecutor<Favorite>(100, 1_000, (favorites) => database.update(favorites.map(f => f.databaseRecord)));

@@ -1,19 +1,19 @@
-import * as Icons from "../../../../assets/icons";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "../../../../lib/environment";
-import { clamp, millisecondsToSeconds } from "../../../../utils/number";
-import { isImage, isVideo } from "../../../../lib/media/media_type_predicates";
-import AUTOPLAY_CSS from "../../../../assets/css/autoplay.css";
-import AUTOPLAY_HTML from "../../../../assets/html/autoplay.html";
-import { DomEvents } from "../../../../app/input/dom_events";
-import { Events } from "../../../../app/channels/events";
-import { NavigationKey } from "../../../../types/input";
-import { NumberComponent } from "../../../../lib/ui/elements/number_component";
-import { Overlays } from "../../../../app/layout/shell";
-import { Preferences } from "../../../../app/context/preferences";
-import { Timer } from "../../../../lib/async/timer";
-import { createObjectUrlFromSvg } from "../../../../utils/dom/svg";
-import { insertStyle } from "../../../../utils/dom/injector";
-import { throttle } from "../../../../lib/async/throttle";
+import * as Icons from "@/assets/icons";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { clamp, millisecondsToSeconds } from "@/utils/number";
+import { isImage, isVideo } from "@/lib/media/media_type_predicates";
+import AUTOPLAY_CSS from "@/assets/css/autoplay.css";
+import AUTOPLAY_HTML from "@/assets/html/autoplay.html";
+import { DomEvents } from "@/app/input/dom_events";
+import { Events } from "@/app/channels/events";
+import { NavigationKey } from "@/types/input";
+import { NumberComponent } from "@/lib/ui/elements/number_component";
+import { Overlays } from "@/app/layout/shell";
+import { Preferences } from "@/app/context/preferences";
+import { Timer } from "@/lib/async/timer";
+import { createObjectUrlFromSvg } from "@/utils/dom/svg";
+import { insertStyle } from "@/utils/dom/injector";
+import { throttle } from "@/lib/async/throttle";
 
 export type AutoplayEvents = {
   setVideoLooping: (value: boolean) => void

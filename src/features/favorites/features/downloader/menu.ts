@@ -1,15 +1,15 @@
-import * as FavoritesDownloader from "./downloader";
-import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
-import { sleep, yieldControl } from "../../../../lib/async/timing";
-import DOWNLOADER_CSS from "../../../../assets/css/downloader.css";
-import { DOWNLOADER_DISABLED } from "../../../../app/context/flags";
-import DOWNLOAD_HTML from "../../../../assets/html/downloader.html";
-import { DownloadRequest } from "./download_request";
-import { Favorite } from "../../../../types/favorite";
-import { Overlays } from "../../../../app/layout/shell";
-import { Preferences } from "../../../../app/context/preferences";
-import { splitIntoChunks } from "../../../../utils/collection/array";
-import { toggleGlobalInputEvents } from "../../../../app/input/dom_events";
+import * as FavoritesDownloader from "@/features/favorites/features/downloader/downloader";
+import { insertHtml, insertStyle } from "@/utils/dom/injector";
+import { sleep, yieldControl } from "@/lib/async/timing";
+import DOWNLOADER_CSS from "@/assets/css/downloader.css";
+import { DOWNLOADER_DISABLED } from "@/app/context/flags";
+import DOWNLOAD_HTML from "@/assets/html/downloader.html";
+import { DownloadRequest } from "@/features/favorites/features/downloader/download_request";
+import { Favorite } from "@/types/favorite";
+import { Overlays } from "@/app/layout/shell";
+import { Preferences } from "@/app/context/preferences";
+import { splitIntoChunks } from "@/utils/collection/array";
+import { toggleGlobalInputEvents } from "@/app/input/dom_events";
 
 type FavoritesDownloaderInterface = {
   getSearchResults: () => Favorite[]

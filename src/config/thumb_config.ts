@@ -1,4 +1,4 @@
-import { ON_SEARCH_PAGE } from "../lib/environment";
+import { ON_SEARCH_PAGE } from "@/lib/environment";
 
 export const ThumbConfig = {
   rowSizeBounds: { min: 1, max: 10 },

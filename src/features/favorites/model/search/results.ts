@@ -1,6 +1,6 @@
-import * as FavoritesResultFilter from "./filter";
-import { Favorite } from "../../../../types/favorite";
-import { shuffleArray } from "../../../../utils/collection/array";
+import * as FavoritesResultFilter from "@/features/favorites/model/search/filter";
+import { Favorite } from "@/types/favorite";
+import { shuffleArray } from "@/utils/collection/array";
 
 let currentSearchResults: Favorite[] = [];
 

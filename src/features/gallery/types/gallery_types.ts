@@ -1,4 +1,4 @@
-import { GalleryMenuAction } from "../../../types/ui";
+import { GalleryMenuAction } from "@/types/ui";
 
 export interface GalleryRenderer {
   root: HTMLElement

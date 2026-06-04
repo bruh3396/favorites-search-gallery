@@ -1,17 +1,17 @@
-import { ButtonElement, CheckboxElement, SelectElement } from "../../../../types/element";
-import { Layout, PerformanceProfile } from "../../../../types/ui";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "../../../../lib/ui/toggles";
-import { toggleDarkTheme, usingDarkTheme } from "../../../../lib/ui/style";
-import { Events } from "../../../../app/channels/events";
-import { GALLERY_ENABLED } from "../../../../app/context/flags";
-import { MetadataMetric } from "../../../../types/search";
-import { Preferences } from "../../../../app/context/preferences";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "../../../../lib/environment";
-import { buildButtonElement } from "../../../../lib/ui/elements/button";
-import { buildSelectElement } from "../../../../lib/ui/elements/select";
-import { buildToggleSwitch } from "../../../../app/input/checkbox";
-import { hideUnusedLayoutSizer } from "../../../../app/layout/content_tiler";
-import { prepareDynamicElements } from "../../../../lib/ui/elements/dynamic_element_preparer";
+import { ButtonElement, CheckboxElement, SelectElement } from "@/types/element";
+import { Layout, PerformanceProfile } from "@/types/ui";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "@/lib/ui/toggles";
+import { toggleDarkTheme, usingDarkTheme } from "@/lib/ui/style";
+import { Events } from "@/app/channels/events";
+import { GALLERY_ENABLED } from "@/app/context/flags";
+import { MetadataMetric } from "@/types/search";
+import { Preferences } from "@/app/context/preferences";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
+import { buildButtonElement } from "@/lib/ui/elements/button";
+import { buildSelectElement } from "@/lib/ui/elements/select";
+import { buildToggleSwitch } from "@/app/input/checkbox";
+import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
+import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
 
 const buttons: Partial<ButtonElement>[] = [
   {

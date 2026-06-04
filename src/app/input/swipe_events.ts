@@ -1,6 +1,6 @@
-import { DomEvents } from "./dom_events";
-import { Events } from "../channels/events";
-import { ON_MOBILE_DEVICE } from "../../lib/environment";
+import { DomEvents } from "@/app/input/dom_events";
+import { Events } from "@/app/channels/events";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
 
 type Point = { x: number; y: number };
 

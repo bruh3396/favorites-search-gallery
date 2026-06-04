@@ -1,9 +1,9 @@
-import * as GalleryDisplayFlow from "./display_flow";
-import * as GalleryInteractionTracker from "../control/interaction_tracker";
-import * as GalleryModel from "../model/gallery_model";
-import * as GalleryView from "../view/gallery_view";
-import { DomEvents } from "../../../app/input/dom_events";
-import { Events } from "../../../app/channels/events";
+import * as GalleryDisplayFlow from "@/features/gallery/flows/display_flow";
+import * as GalleryInteractionTracker from "@/features/gallery/control/interaction_tracker";
+import * as GalleryModel from "@/features/gallery/model/gallery_model";
+import * as GalleryView from "@/features/gallery/view/gallery_view";
+import { DomEvents } from "@/app/input/dom_events";
+import { Events } from "@/app/channels/events";
 
 export function open(thumb: HTMLElement): void {
   GalleryModel.open(thumb);

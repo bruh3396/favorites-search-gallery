@@ -1,8 +1,8 @@
-import * as FavoritesEta from "./eta";
-import { FavoritesFetchProgress, NewFavorites } from "../../types/favorite_types";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
-import { Root } from "../../../../app/layout/shell";
-import { Timeout } from "../../../../types/async";
+import * as FavoritesEta from "@/features/favorites/view/status/eta";
+import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/favorite_types";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { Root } from "@/app/layout/shell";
+import { Timeout } from "@/types/async";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;

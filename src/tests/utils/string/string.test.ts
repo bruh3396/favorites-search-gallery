@@ -1,8 +1,8 @@
-import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "../../../utils/string/format";
-import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
+import { capitalize, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "@/utils/string/format";
+import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
 import { describe, expect, test } from "vitest";
-import { isEmptyString, isOnlyDigits } from "../../../utils/string/query";
-import { parseDimensions2D } from "../../../utils/string/parse";
+import { isEmptyString, isOnlyDigits } from "@/utils/string/query";
+import { parseDimensions2D } from "@/utils/string/parse";
 
 describe("removeExtraWhiteSpace", () => {
   test("empty", () => {

@@ -1,8 +1,8 @@
-import { getIdFromThumb, getImageFromThumb } from "../../../lib/thumb/thumbs";
-import { FavoritesDatabaseRecord } from "../../../types/favorite";
-import { Post } from "../../../types/api";
-import { decompressPreviewSource } from "../../../lib/media/media_url_transformer";
-import { removeExtraWhiteSpace } from "../../../utils/string/format";
+import { getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
+import { FavoritesDatabaseRecord } from "@/types/favorite";
+import { Post } from "@/types/api";
+import { decompressPreviewSource } from "@/lib/media/media_url_transformer";
+import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 export function createPost(object: HTMLElement | FavoritesDatabaseRecord): Post {
   if (object instanceof HTMLElement) {

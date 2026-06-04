@@ -1,13 +1,13 @@
-import * as TagModifierEditMode from "./edit_mode";
-import * as TagModifierOperations from "./operations";
-import * as TagModifierSelection from "./selection";
-import * as TagModifierStore from "./store";
-import { insertHtml, insertStyle } from "../../../../utils/dom/injector";
-import { Favorite } from "../../../../types/favorite";
-import TAG_MODIFIER_CSS from "../../../../assets/css/tag_modifier.css";
-import { TAG_MODIFIER_DISABLED } from "../../../../app/context/flags";
-import TAG_MODIFIER_HTML from "../../../../assets/html/tag_modifier.html";
-import { doNothing } from "../../../../utils/function";
+import * as TagModifierEditMode from "@/features/favorites/features/tag_modifier/edit_mode";
+import * as TagModifierOperations from "@/features/favorites/features/tag_modifier/operations";
+import * as TagModifierSelection from "@/features/favorites/features/tag_modifier/selection";
+import * as TagModifierStore from "@/features/favorites/features/tag_modifier/store";
+import { insertHtml, insertStyle } from "@/utils/dom/injector";
+import { Favorite } from "@/types/favorite";
+import TAG_MODIFIER_CSS from "@/assets/css/tag_modifier.css";
+import { TAG_MODIFIER_DISABLED } from "@/app/context/flags";
+import TAG_MODIFIER_HTML from "@/assets/html/tag_modifier.html";
+import { doNothing } from "@/utils/function";
 
 type FavoritesTagModifierInterface = {
   getSearchResults: () => Favorite[]
@@ -50,9 +50,9 @@ export function setup(tmInterface: FavoritesTagModifierInterface): void {
   addEventListeners();
 }
 
-export { handleDocumentClick as onDocumentClick } from "./edit_mode";
-export { highlightSelectedThumbs as onPageChanged, unselectAll as onResultsUpdated } from "./selection";
-export { getTagModification as getAdditionalTags, ensureTagModificationsLoaded } from "./store";
+export { handleDocumentClick as onDocumentClick } from "@/features/favorites/features/tag_modifier/edit_mode";
+export { highlightSelectedThumbs as onPageChanged, unselectAll as onResultsUpdated } from "@/features/favorites/features/tag_modifier/selection";
+export { getTagModification as getAdditionalTags, ensureTagModificationsLoaded } from "@/features/favorites/features/tag_modifier/store";
 
 function insertTagModifierShell(): void {
   insertStyle(TAG_MODIFIER_CSS);

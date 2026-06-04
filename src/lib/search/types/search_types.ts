@@ -1,6 +1,6 @@
-import { AbstractSearchTerm } from "../terms/abstract_search_term";
-import { MetadataSearchTerm } from "../terms/metadata_search_term";
-import { WildcardSearchTerm } from "../terms/wildcard_search_term";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { MetadataSearchTerm } from "@/lib/search/terms/metadata_search_term";
+import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 
 export type SearchQueryMetadata = {
   hasRequiredTerm: boolean

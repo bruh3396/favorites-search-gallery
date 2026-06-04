@@ -1,8 +1,8 @@
-import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "../../../../app/context/flags";
-import { ON_MOBILE_DEVICE } from "../../../../lib/environment";
-import { PerformanceProfile } from "../../../../types/ui";
-import { Preferences } from "../../../../app/context/preferences";
-import { insertStyle } from "../../../../utils/dom/injector";
+import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "@/app/context/flags";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { PerformanceProfile } from "@/types/ui";
+import { Preferences } from "@/app/context/preferences";
+import { insertStyle } from "@/utils/dom/injector";
 
 export function hideUnusedOptions(): void {
   const hiddenSelectors = new Set<string>();

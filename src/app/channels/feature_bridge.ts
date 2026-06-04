@@ -1,7 +1,7 @@
-import { Favorite } from "../../types/favorite";
-import { FeatureChannel } from "../../lib/communication/feature_channel";
-import { NavigationKey } from "../../types/input";
-import { SearchPage } from "../../features/search_page/types/search_page";
+import { Favorite } from "@/types/favorite";
+import { FeatureChannel } from "@/lib/communication/feature_channel";
+import { NavigationKey } from "@/types/input";
+import { SearchPage } from "@/features/search_page/types/search_page";
 
 export const FeatureBridge = {
   inGallery: new FeatureChannel<void, boolean>(false),

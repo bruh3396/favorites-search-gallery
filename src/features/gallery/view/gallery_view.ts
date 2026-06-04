@@ -1,12 +1,12 @@
-import * as GalleryDesktopMenu from "./shell/desktop_menu";
-import * as GalleryRenderer from "./rendering/gallery_renderer";
-import * as GalleryShell from "./shell/shell";
-import * as GalleryUi from "./shell/ui";
-import GALLERY_CSS from "../../../assets/css/gallery.css";
-import { GalleryMenuAction } from "../../../types/ui";
-import { ON_DESKTOP_DEVICE } from "../../../lib/environment";
-import { insertStyle } from "../../../utils/dom/injector";
-export { overGalleryMenu } from "./view_utils";
+import * as GalleryDesktopMenu from "@/features/gallery/view/shell/desktop_menu";
+import * as GalleryRenderer from "@/features/gallery/view/rendering/gallery_renderer";
+import * as GalleryShell from "@/features/gallery/view/shell/shell";
+import * as GalleryUi from "@/features/gallery/view/shell/ui";
+import GALLERY_CSS from "@/assets/css/gallery.css";
+import { GalleryMenuAction } from "@/types/ui";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { insertStyle } from "@/utils/dom/injector";
+export { overGalleryMenu } from "@/features/gallery/view/view_utils";
 
 export function setup(
   onMenuAction: (action: GalleryMenuAction) => void,
@@ -58,8 +58,8 @@ export function toggleZoomCursor(value: boolean): void {
   GalleryRenderer.toggleZoomCursor(value);
 }
 
-export * from "./rendering/gallery_renderer";
-export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "./shell/desktop_menu";
-export { showAddedFavoriteStatus, showRemovedFavoriteStatus, toggleBackgroundOpacity, updateBackgroundOpacity, toggleCursor} from "./shell/ui";
+export * from "@/features/gallery/view/rendering/gallery_renderer";
+export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "@/features/gallery/view/shell/desktop_menu";
+export { showAddedFavoriteStatus, showRemovedFavoriteStatus, toggleBackgroundOpacity, updateBackgroundOpacity, toggleCursor} from "@/features/gallery/view/shell/ui";
 export const showCursor = (): void => GalleryUi.toggleCursor(true);
 export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryShell.GalleryRoot.appendChild(element);

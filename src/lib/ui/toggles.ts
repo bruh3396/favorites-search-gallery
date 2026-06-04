@@ -1,7 +1,7 @@
-import DESKTOP_SIDEBAR_CSS from "../../assets/css/desktop_sidebar.css";
-import DESKTOP_SLIM_CSS from "../../assets/css/desktop_slim.css";
-import { insertStyle } from "../../utils/dom/injector";
-import { yieldControl } from "../async/timing";
+import DESKTOP_SIDEBAR_CSS from "@/assets/css/desktop_sidebar.css";
+import DESKTOP_SLIM_CSS from "@/assets/css/desktop_slim.css";
+import { insertStyle } from "@/utils/dom/injector";
+import { yieldControl } from "@/lib/async/timing";
 
 export function toggleAddOrRemoveButtons(value: boolean): void {
   insertStyle(`

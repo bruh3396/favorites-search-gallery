@@ -1,9 +1,9 @@
-import { Favorite, PageRelation } from "../../../types/favorite";
-import { FavoritesPaginationParameters } from "../types/favorite_types";
-import { NavigationKey } from "../../../types/input";
-import { Preferences } from "../../../app/context/preferences";
-import { clamp } from "../../../utils/number";
-import { navigationDelta } from "../../../utils/navigation";
+import { Favorite, PageRelation } from "@/types/favorite";
+import { FavoritesPaginationParameters } from "@/features/favorites/types/favorite_types";
+import { NavigationKey } from "@/types/input";
+import { Preferences } from "@/app/context/preferences";
+import { clamp } from "@/utils/number";
+import { navigationDelta } from "@/utils/navigation";
 
 type PageRange = { start: number; end: number };
 

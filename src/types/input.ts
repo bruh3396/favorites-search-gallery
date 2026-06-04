@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import { getThumbUnderCursor, insideOfThumb } from "../lib/thumb/thumbs";
-import { isHotkeyEvent } from "../utils/dom/interaction";
+import { getThumbUnderCursor, insideOfThumb } from "@/lib/thumb/thumbs";
+import { isHotkeyEvent } from "@/utils/dom/interaction";
 
 export type BackwardNavigationKey = "a" | "A" | "ArrowLeft"
 export type ForwardNavigationKey = "d" | "D" | "ArrowRight"

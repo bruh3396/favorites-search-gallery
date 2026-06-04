@@ -1,4 +1,4 @@
-import { LocalOverrides } from "../../../config/local_overrides";
+import { LocalOverrides } from "@/config/local_overrides";
 
 const PRODUCTION_SERVER_ORIGIN = "https://favorites-search-gallery-api.bruh3396.workers.dev";
 // const PRODUCTION_SERVER_ORIGIN = "http://localhost:8787";

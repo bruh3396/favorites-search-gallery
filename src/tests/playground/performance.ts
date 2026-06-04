@@ -1,7 +1,7 @@
-import { InvertedIndex } from "../../lib/collection/inverted_index";
-import { InvertedIndexSearcher } from "../../lib/search/index/inverted_index_searcher";
-import { SearchQuery } from "../../lib/search/query/search_query";
-import { Searchable } from "../../types/search";
+import { InvertedIndex } from "@/lib/collection/inverted_index";
+import { InvertedIndexSearcher } from "@/lib/search/index/inverted_index_searcher";
+import { SearchQuery } from "@/lib/search/query/search_query";
+import { Searchable } from "@/types/search";
 
 function randomElement<T>(array: T[] | string): T | string {
   return array[Math.floor(Math.random() * array.length)];

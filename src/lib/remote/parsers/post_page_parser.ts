@@ -1,10 +1,10 @@
-import { Post } from "../../../types/api";
-import { TagCategory } from "../../../types/search";
-import { isTagCategory } from "../../../types/guards";
-import { normalizeImageSource } from "../../media/media_url_transformer";
-import { parseDimensions2D } from "../../../utils/string/parse";
-import { parseHtml } from "../../../utils/dom/html_parser";
-import { removeExtraWhiteSpace } from "../../../utils/string/format";
+import { Post } from "@/types/api";
+import { TagCategory } from "@/types/search";
+import { isTagCategory } from "@/types/guards";
+import { normalizeImageSource } from "@/lib/media/media_url_transformer";
+import { parseDimensions2D } from "@/utils/string/parse";
+import { parseHtml } from "@/utils/dom/html_parser";
+import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 

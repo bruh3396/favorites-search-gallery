@@ -1,8 +1,8 @@
-import { extensionProbeLimiter, extensionProbeQueue } from "../remote/http/rate_limiters";
-import { Favorite } from "../../types/favorite";
-import { ImageExtension } from "../../types/media";
-import { allImageExtensions } from "./media_constants";
-import { baseImageUrl } from "./base_image_url";
+import { extensionProbeLimiter, extensionProbeQueue } from "@/lib/remote/http/rate_limiters";
+import { Favorite } from "@/types/favorite";
+import { ImageExtension } from "@/types/media";
+import { allImageExtensions } from "@/lib/media/media_constants";
+import { baseImageUrl } from "@/lib/media/base_image_url";
 
 export async function probeAllExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
   await extensionProbeQueue.wait();

@@ -1,8 +1,8 @@
-import * as FavoritesSequentialPageFetcher from "./sequential_favorites_fetcher";
-import * as FavoritesStore from "./store";
-import { Favorite } from "../../../../types/favorite";
-import { FavoriteItem } from "../../types/favorite_item";
-import { FavoritesConcurrentPageFetcher } from "./concurrent_favorites_fetcher";
+import * as FavoritesSequentialPageFetcher from "@/features/favorites/model/load/sequential_favorites_fetcher";
+import * as FavoritesStore from "@/features/favorites/model/load/store";
+import { Favorite } from "@/types/favorite";
+import { FavoriteItem } from "@/features/favorites/types/favorite_item";
+import { FavoritesConcurrentPageFetcher } from "@/features/favorites/model/load/concurrent_favorites_fetcher";
 
 let allFavorites: Favorite[] = [];
 let activeFavorites: Favorite[] | null = null;
@@ -53,6 +53,6 @@ export function resetActiveFavorites(): void {
 export const getAllFavorites = (): Favorite[] => [...allFavorites];
 export const getFavorite = (id: string): Favorite | undefined => favoritesById.get(id);
 export const getActiveFavorites = (): Favorite[] => [...(activeFavorites ?? allFavorites)];
-export { destroy as deleteDatabase, deleteId, update as updateFavorite, write as storeFavorites, favoritesExist as hasDatabaseFavorites, loadIds as loadFavoriteIds } from "./store";
+export { destroy as deleteDatabase, deleteId, update as updateFavorite, write as storeFavorites, favoritesExist as hasDatabaseFavorites, loadIds as loadFavoriteIds } from "@/features/favorites/model/load/store";
 
 const indexFavoritesById = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { getElementsAroundIndex, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "../../../utils/collection/array";
-import { numberRange, numbersAroundInRange, randomInt } from "../../../utils/number";
+import { getElementsAroundIndex, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "@/utils/collection/array";
+import { numberRange, numbersAroundInRange, randomInt } from "@/utils/number";
 
 describe("indexInBounds", () => {
   test("empty", () => {

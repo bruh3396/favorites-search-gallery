@@ -1,14 +1,14 @@
-import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "../../types/ui";
-import { AUTOCOMPLETE_DISABLED } from "../../app/context/flags";
-import { Preferences } from "../../app/context/preferences";
-import { addAwesompleteToGlobalScope } from "./autocomplete_awesomplete_implementation";
-import { addCustomTagsToAutocomplete } from "../../lib/search/tags/custom_tags";
-import { fetchHtml } from "../../lib/remote/http/http_client";
-import { getSavedSearchesSuggestions } from "./autocomplete_saved_search";
-import { hideAwesomplete } from "../../lib/ui/autocomplete/awesomplete";
-import { isEmptyString } from "../../utils/string/query";
-import { removeLeadingHyphens } from "../../utils/string/format";
-import { replaceTagInText } from "./autocomplete_tag_replacer";
+import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "@/types/ui";
+import { AUTOCOMPLETE_DISABLED } from "@/app/context/flags";
+import { Preferences } from "@/app/context/preferences";
+import { addAwesompleteToGlobalScope } from "@/features/autocomplete/autocomplete_awesomplete_implementation";
+import { addCustomTagsToAutocomplete } from "@/lib/search/tags/custom_tags";
+import { fetchHtml } from "@/lib/remote/http/http_client";
+import { getSavedSearchesSuggestions } from "@/features/autocomplete/autocomplete_saved_search";
+import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
+import { isEmptyString } from "@/utils/string/query";
+import { removeLeadingHyphens } from "@/utils/string/format";
+import { replaceTagInText } from "@/features/autocomplete/autocomplete_tag_replacer";
 
 declare const Awesomplete_: AwesompleteConstructor;
 

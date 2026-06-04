@@ -1,4 +1,4 @@
-import { SearchPage } from "../types/search_page";
+import { SearchPage } from "@/features/search_page/types/search_page";
 
 type SearchPageEntry =
   | { status: "loading" }

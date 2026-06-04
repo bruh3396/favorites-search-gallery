@@ -1,6 +1,6 @@
-import { AwesompleteSuggestion } from "../../types/ui";
-import { FeatureBridge } from "../../app/channels/feature_bridge";
-import { removeExtraWhiteSpace } from "../../utils/string/format";
+import { AwesompleteSuggestion } from "@/types/ui";
+import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 const SUGGESTION_LIMIT = 5;
 const MIN_TAG_LENGTH = 3;

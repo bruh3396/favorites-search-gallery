@@ -1,9 +1,9 @@
-import { OffscreenUpscaleRequest, getUpscaleRequest } from "../../../../types/offscreen_upscale_request";
-import { GalleryAbstractUpscaler } from "./abstract_upscaler";
-import { GalleryUpscaleConfig } from "../../../../../../config/gallery_upscale_config";
-import { ImageRequest } from "../../../../types/image_request";
-import OFFSCREEN_UPSCALER_CODE from "./worker_upscaler?raw";
-import { createWorker } from "../../../../../../utils/browser/worker";
+import { OffscreenUpscaleRequest, getUpscaleRequest } from "@/features/gallery/types/offscreen_upscale_request";
+import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
+import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
+import { ImageRequest } from "@/features/gallery/types/image_request";
+import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler?raw";
+import { createWorker } from "@/utils/browser/worker";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   private readonly worker: Worker;

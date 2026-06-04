@@ -1,9 +1,9 @@
-import * as FavoritesApi from "../../../lib/remote/rule34/favorites_fetcher";
-import * as FavoritesModel from "../model/favorites_model";
-import * as FavoritesResultsFlow from "./results_flow";
-import * as FavoritesSearchFlow from "./search_flow";
-import * as FavoritesView from "../view/favorites_view";
-import { Events } from "../../../app/channels/events";
+import * as FavoritesApi from "@/lib/remote/rule34/favorites_fetcher";
+import * as FavoritesModel from "@/features/favorites/model/favorites_model";
+import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
+import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
+import * as FavoritesView from "@/features/favorites/view/favorites_view";
+import { Events } from "@/app/channels/events";
 
 export async function loadAllFavorites(): Promise<void> {
   if (await hasDatabaseFavorites()) {

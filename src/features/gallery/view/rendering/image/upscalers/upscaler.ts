@@ -1,7 +1,7 @@
-import { GalleryConfig } from "../../../../../../config/gallery_config";
-import { GalleryMainThreadUpscaler } from "./main_thread_upscaler";
-import { GalleryWorkerUpscalerWrapper } from "./worker_upscaler_wrapper";
-import { ImageRequest } from "../../../../types/image_request";
+import { GalleryConfig } from "@/config/gallery_config";
+import { GalleryMainThreadUpscaler } from "@/features/gallery/view/rendering/image/upscalers/main_thread_upscaler";
+import { GalleryWorkerUpscalerWrapper } from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler_wrapper";
+import { ImageRequest } from "@/features/gallery/types/image_request";
 
 const upscaler = GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper() : new GalleryMainThreadUpscaler();
 

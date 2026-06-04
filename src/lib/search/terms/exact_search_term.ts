@@ -1,5 +1,5 @@
-import { AbstractSearchTerm } from "./abstract_search_term";
-import { Searchable } from "../../../types/search";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { Searchable } from "@/types/search";
 
 export class ExactSearchTerm extends AbstractSearchTerm {
   protected override readonly baseCost: number = 0;

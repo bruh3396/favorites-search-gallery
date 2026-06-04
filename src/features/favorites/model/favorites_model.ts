@@ -1,9 +1,9 @@
-import * as FavoritesLoader from "./load/loader";
-import * as FavoritesMetadataFetcher from "./metadata_fetcher";
-import * as FavoritesPaginator from "./paginator";
-import * as FavoritesSearchCoordinator from "./search/coordinator";
-import { Favorite } from "../../../types/favorite";
-import { NewFavorites } from "../types/favorite_types";
+import * as FavoritesLoader from "@/features/favorites/model/load/loader";
+import * as FavoritesMetadataFetcher from "@/features/favorites/model/metadata_fetcher";
+import * as FavoritesPaginator from "@/features/favorites/model/paginator";
+import * as FavoritesSearchCoordinator from "@/features/favorites/model/search/coordinator";
+import { Favorite } from "@/types/favorite";
+import { NewFavorites } from "@/features/favorites/types/favorite_types";
 
 let getAdditionalTags: (id: string) => string | undefined = () => undefined;
 let waitForAdditionalTags: () => Promise<void> = () => Promise.resolve();
@@ -53,8 +53,8 @@ export const invertSearchResults = (): Favorite[] => FavoritesSearchCoordinator.
 export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getCurrentSearchResults());
 export const repaginateCurrentResults = (): void => FavoritesPaginator.paginate(FavoritesSearchCoordinator.getCurrentSearchResults());
 
-export * from "./load/loader";
-export * from "./metadata_fetcher";
-export * from "./search/coordinator";
-export * from "./paginator";
-export * from "./infinite_scroller";
+export * from "@/features/favorites/model/load/loader";
+export * from "@/features/favorites/model/metadata_fetcher";
+export * from "@/features/favorites/model/search/coordinator";
+export * from "@/features/favorites/model/paginator";
+export * from "@/features/favorites/model/infinite_scroller";

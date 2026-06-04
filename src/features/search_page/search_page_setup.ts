@@ -1,14 +1,14 @@
-import * as ContentTiler from "../../app/layout/content_tiler";
-import * as SearchPageFavoriteButton from "./control/favorite_button";
-import * as SearchPageFavoritesMarkerFlow from "./flows/favorites_marker_flow";
-import * as SearchPageModel from "./model/search_page_model";
-import * as SearchPageNavigationFlow from "./flows/navigation_flow";
-import * as SearchPageOptionFlow from "./flows/option_flow";
-import * as SearchPageView from "./view/search_page_view";
-import { Events } from "../../app/channels/events";
-import { FeatureBridge } from "../../app/channels/feature_bridge";
-import { Preferences } from "../../app/context/preferences";
-import { SEARCH_PAGE_DISABLED } from "../../app/context/flags";
+import * as ContentTiler from "@/app/layout/content_tiler";
+import * as SearchPageFavoriteButton from "@/features/search_page/control/favorite_button";
+import * as SearchPageFavoritesMarkerFlow from "@/features/search_page/flows/favorites_marker_flow";
+import * as SearchPageModel from "@/features/search_page/model/search_page_model";
+import * as SearchPageNavigationFlow from "@/features/search_page/flows/navigation_flow";
+import * as SearchPageOptionFlow from "@/features/search_page/flows/option_flow";
+import * as SearchPageView from "@/features/search_page/view/search_page_view";
+import { Events } from "@/app/channels/events";
+import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { Preferences } from "@/app/context/preferences";
+import { SEARCH_PAGE_DISABLED } from "@/app/context/flags";
 
 export async function setupSearchPage(): Promise<void> {
   if (SEARCH_PAGE_DISABLED) {

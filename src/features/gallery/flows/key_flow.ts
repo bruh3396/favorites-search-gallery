@@ -1,14 +1,14 @@
-import * as GalleryFavoriterFlow from "./favoriter_flow";
-import * as GalleryModel from "../model/gallery_model";
-import * as GalleryNavigationFlow from "./navigation_flow";
-import * as GalleryOpenCloseFlow from "./open_close_flow";
-import * as GalleryView from "../view/gallery_view";
-import { isExitKey, isNavigationKey } from "../../../types/guards";
-import { EnhancedKeyboardEvent } from "../../../types/input";
-import { GalleryConfig } from "../../../config/gallery_config";
-import { dispatchByState } from "./state_dispatch";
-import { throttle } from "../../../lib/async/throttle";
-import { toggleFullscreen } from "../../../utils/browser/window";
+import * as GalleryFavoriterFlow from "@/features/gallery/flows/favoriter_flow";
+import * as GalleryModel from "@/features/gallery/model/gallery_model";
+import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
+import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
+import * as GalleryView from "@/features/gallery/view/gallery_view";
+import { isExitKey, isNavigationKey } from "@/types/guards";
+import { EnhancedKeyboardEvent } from "@/types/input";
+import { GalleryConfig } from "@/config/gallery_config";
+import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
+import { throttle } from "@/lib/async/throttle";
+import { toggleFullscreen } from "@/utils/browser/window";
 
 const insideGalleryHotkeyHandlers: Record<string, () => void> = {
   b: GalleryView.toggleBackgroundOpacity,

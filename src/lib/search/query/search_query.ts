@@ -1,8 +1,8 @@
-import { buildSearchTerms, categorizeSearchTerms, parseTermGroups, sortSearchTerms } from "../parsers/search_term_group_parser";
-import { AbstractSearchTerm } from "../terms/abstract_search_term";
-import { SearchQueryMetadata } from "../types/search_types";
-import { Searchable } from "../../../types/search";
-import { isEmptyString } from "../../../utils/string/query";
+import { buildSearchTerms, categorizeSearchTerms, parseTermGroups, sortSearchTerms } from "@/lib/search/parsers/search_term_group_parser";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { SearchQueryMetadata } from "@/lib/search/types/search_types";
+import { Searchable } from "@/types/search";
+import { isEmptyString } from "@/utils/string/query";
 
 export class SearchQuery<T extends Searchable> {
   public readonly rawQuery: string;

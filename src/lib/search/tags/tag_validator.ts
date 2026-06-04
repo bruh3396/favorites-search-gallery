@@ -1,7 +1,7 @@
-import * as TagApi from "../../remote/api/tag_fetcher";
-import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
-import { Favorite } from "../../../types/favorite";
-import { Post } from "../../../types/api";
+import * as TagApi from "@/lib/remote/api/tag_fetcher";
+import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
+import { Favorite } from "@/types/favorite";
+import { Post } from "@/types/api";
 
 export function tagsAreValid(favorite: Favorite, post: Post): boolean {
   const validTags = correctTags(post);

@@ -1,5 +1,5 @@
-import { Svg } from "../../assets/svg";
-import { parseHtml } from "../../utils/dom/html_parser";
+import { Svg } from "@/assets/svg";
+import { parseHtml } from "@/utils/dom/html_parser";
 
 export type IconName = keyof typeof Svg;
 

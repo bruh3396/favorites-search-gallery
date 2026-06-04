@@ -1,4 +1,4 @@
-import { Timeout } from "../../types/async";
+import { Timeout } from "@/types/async";
 
 export class CoalescingExecutor<V> {
   private readonly checkInterval: number;

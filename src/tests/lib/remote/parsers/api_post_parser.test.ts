@@ -1,7 +1,7 @@
-import { CompactPost, PostResponse } from "../../../../types/api";
-import { DeletedPostError, RateLimitedError } from "../../../../types/errors";
+import { CompactPost, PostResponse } from "@/types/api";
+import { DeletedPostError, RateLimitedError } from "@/types/errors";
 import { describe, expect, test } from "vitest";
-import { postResponseToPost } from "../../../../lib/remote/parsers/api_post_parser";
+import { postResponseToPost } from "@/lib/remote/parsers/api_post_parser";
 
 const compactPost: CompactPost = {
   id: "123",

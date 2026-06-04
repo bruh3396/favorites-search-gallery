@@ -1,12 +1,12 @@
-import * as FavoritesModel from "../model/favorites_model";
-import * as FavoritesView from "../view/favorites_view";
-import { Events } from "../../../app/channels/events";
-import { Favorite } from "../../../types/favorite";
-import { FavoritesInfiniteScrollView } from "./infinite_scroll_results_flow";
-import { FavoritesPaginatedView } from "./paginated_results_flow";
-import { FavoritesResultsView } from "../types/favorite_types";
-import { NavigationKey } from "../../../types/input";
-import { Preferences } from "../../../app/context/preferences";
+import * as FavoritesModel from "@/features/favorites/model/favorites_model";
+import * as FavoritesView from "@/features/favorites/view/favorites_view";
+import { Events } from "@/app/channels/events";
+import { Favorite } from "@/types/favorite";
+import { FavoritesInfiniteScrollView } from "@/features/favorites/flows/infinite_scroll_results_flow";
+import { FavoritesPaginatedView } from "@/features/favorites/flows/paginated_results_flow";
+import { FavoritesResultsView } from "@/features/favorites/types/favorite_types";
+import { NavigationKey } from "@/types/input";
+import { Preferences } from "@/app/context/preferences";
 
 export const showResults = (favorites: Favorite[]): void => activeView().initialize(favorites);
 export const clearResults = (): void => activeView().initialize([]);

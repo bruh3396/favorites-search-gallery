@@ -1,8 +1,8 @@
-import { Boundary } from "../../../types/boundary";
-import { NavigationKey } from "../../../types/input";
-import { clamp } from "../../../utils/number";
-import { getAllContentThumbs } from "../../../app/layout/content_thumbs";
-import { navigationDelta } from "../../../utils/navigation";
+import { Boundary } from "@/types/boundary";
+import { NavigationKey } from "@/types/input";
+import { clamp } from "@/utils/number";
+import { getAllContentThumbs } from "@/app/layout/content_thumbs";
+import { navigationDelta } from "@/utils/navigation";
 
 let currentIndex = 0;
 let thumbs: HTMLElement[] = [];

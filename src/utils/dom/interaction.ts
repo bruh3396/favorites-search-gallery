@@ -1,4 +1,4 @@
-import { typeableInputs } from "../../types/guards";
+import { typeableInputs } from "@/types/guards";
 
 export function isHotkeyEvent(event: KeyboardEvent): boolean {
   return !event.repeat && event.target instanceof HTMLElement && !isTypeableInput(event.target) && !event.ctrlKey;

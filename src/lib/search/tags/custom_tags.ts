@@ -1,7 +1,7 @@
-import { AwesompleteSuggestion } from "../../../types/ui";
-import { Storage } from "../../storage/local_storage";
-import { isOfficialTag } from "./tag_validator";
-import { removeExtraWhiteSpace } from "../../../utils/string/format";
+import { AwesompleteSuggestion } from "@/types/ui";
+import { Storage } from "@/lib/storage/local_storage";
+import { isOfficialTag } from "@/lib/search/tags/tag_validator";
+import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 const STORAGE_KEY = "customTags";
 const allCustomTags: Set<string> = new Set(Storage.get<string[]>(STORAGE_KEY) ?? []);

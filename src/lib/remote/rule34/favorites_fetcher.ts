@@ -1,11 +1,11 @@
-import { buildFavoritesPageUrl, buildProfilePageUrl } from "../url/page_url_builder";
-import { withExponentialBackoff, yieldControl } from "../../async/timing";
-import { FAVORITES_PAGE_ID } from "../../environment";
-import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
-import { extractFavoritesCount } from "../parsers/profile_page_parser";
-import { extractFavoritesPageCount } from "../parsers/favorites_page_parser";
-import { fetchHtml } from "../http/http_client";
-import { generalPageRequestQueue } from "../http/rate_limiters";
+import { buildFavoritesPageUrl, buildProfilePageUrl } from "@/lib/remote/url/page_url_builder";
+import { withExponentialBackoff, yieldControl } from "@/lib/async/timing";
+import { FAVORITES_PAGE_ID } from "@/lib/environment";
+import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { extractFavoritesCount } from "@/lib/remote/parsers/profile_page_parser";
+import { extractFavoritesPageCount } from "@/lib/remote/parsers/favorites_page_parser";
+import { fetchHtml } from "@/lib/remote/http/http_client";
+import { generalPageRequestQueue } from "@/lib/remote/http/rate_limiters";
 
 export function fetchFavoritesPage(pageNumber: number): Promise<string> {
   return fetchHtml(buildFavoritesPageUrl(pageNumber));

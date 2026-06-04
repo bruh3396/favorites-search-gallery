@@ -1,5 +1,5 @@
-import { ButtonElement, defaultMenuElement } from "../../../types/element";
-import { doNothing } from "../../../utils/function";
+import { ButtonElement, defaultMenuElement } from "@/types/element";
+import { doNothing } from "@/utils/function";
 
 export function buildButtonElement(partial: Partial<ButtonElement>): void {
   const template = createButtonTemplate(partial);

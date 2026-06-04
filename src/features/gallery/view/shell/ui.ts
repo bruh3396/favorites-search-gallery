@@ -1,13 +1,13 @@
-import * as Icons from "../../../../assets/icons";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../../types/favorite";
-import { clamp, roundToTwoDecimalPlaces } from "../../../../utils/number";
-import { Preferences } from "../../../../app/context/preferences";
-import { USING_FIREFOX } from "../../../../lib/environment";
-import { blurActiveElement } from "../../../../utils/dom/interaction";
-import { getLayout } from "../../../../app/layout/content_tiler";
-import { insertStyle } from "../../../../utils/dom/injector";
-import { showFullscreenIcon } from "../view_utils";
-import { waitForAllThumbnailsToLoad } from "../../../../app/layout/content_thumbs";
+import * as Icons from "@/assets/icons";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { clamp, roundToTwoDecimalPlaces } from "@/utils/number";
+import { Preferences } from "@/app/context/preferences";
+import { USING_FIREFOX } from "@/lib/environment";
+import { blurActiveElement } from "@/utils/dom/interaction";
+import { getLayout } from "@/app/layout/content_tiler";
+import { insertStyle } from "@/utils/dom/injector";
+import { showFullscreenIcon } from "@/features/gallery/view/view_utils";
+import { waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
 
 const background: HTMLElement = document.createElement("div");
 

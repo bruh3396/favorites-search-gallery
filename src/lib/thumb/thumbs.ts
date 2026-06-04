@@ -1,8 +1,8 @@
-import { Favorite } from "../../types/favorite";
-import { ON_MOBILE_DEVICE } from "../environment";
-import { imageIsLoading } from "../../utils/dom/image";
-import { removeNonNumericCharacters } from "../../utils/string/format";
-import { sum } from "../../utils/number";
+import { Favorite } from "@/types/favorite";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { imageIsLoading } from "@/utils/dom/image";
+import { removeNonNumericCharacters } from "@/utils/string/format";
+import { sum } from "@/utils/number";
 
 export const ITEM_CLASS_NAME = "post";
 export const RAW_THUMB_CLASS_NAME = "thumb";

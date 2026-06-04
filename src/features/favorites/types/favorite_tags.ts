@@ -1,6 +1,6 @@
-import { convertToTagSet, convertToTagString } from "../../../utils/string/tags";
-import { FavoritesDatabaseRecord } from "../../../types/favorite";
-import { Post } from "../../../types/api";
+import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
+import { FavoritesDatabaseRecord } from "@/types/favorite";
+import { Post } from "@/types/api";
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();

@@ -1,4 +1,4 @@
-import { removeExtraWhiteSpace } from "./format";
+import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 export function convertToTagSet(tagString: string): Set<string> {
   tagString = removeExtraWhiteSpace(tagString);

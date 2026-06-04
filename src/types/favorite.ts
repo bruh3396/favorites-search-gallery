@@ -1,5 +1,5 @@
-import { MetadataMetric, Rating, Searchable } from "./search";
-import { Post } from "./api";
+import { MetadataMetric, Rating, Searchable } from "@/types/search";
+import { Post } from "@/types/api";
 
 export type FavoriteMetricMap = {
   [key in MetadataMetric]: number

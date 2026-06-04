@@ -1,8 +1,8 @@
-import * as FavoritesApi from "../../../../lib/remote/rule34/favorites_fetcher";
-import { FavoritesPageRequest } from "../../types/favorites_page_request";
-import { SortedArray } from "../../../../lib/collection/sorted_array";
-import { extractFavoriteElements } from "../../../../lib/remote/parsers/favorites_page_parser";
-import { sleep } from "../../../../lib/async/timing";
+import * as FavoritesApi from "@/lib/remote/rule34/favorites_fetcher";
+import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_request";
+import { SortedArray } from "@/lib/collection/sorted_array";
+import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_parser";
+import { sleep } from "@/lib/async/timing";
 
 export class FavoritesConcurrentPageFetcher {
   private static readonly PENDING_POLL_INTERVAL = 200;

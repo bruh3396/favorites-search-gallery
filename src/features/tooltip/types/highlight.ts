@@ -1,4 +1,4 @@
-import { AbstractSearchTerm } from "../../../lib/search/terms/abstract_search_term";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 
 export interface SearchTermHighlight {
   tags: AbstractSearchTerm[]

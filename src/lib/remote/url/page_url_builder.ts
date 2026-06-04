@@ -1,5 +1,5 @@
-import { ORIGIN, POSTS_PER_SEARCH_PAGE } from "../../rule34_constants";
-import { FAVORITES_PAGE_ID } from "../../environment";
+import { ORIGIN, POSTS_PER_SEARCH_PAGE } from "@/lib/rule34_constants";
+import { FAVORITES_PAGE_ID } from "@/lib/environment";
 
 const POST_PAGE_URL = `${ORIGIN}/index.php?page=post&s=view&id=`;
 const SEARCH_PAGE_URL = `${ORIGIN}/index.php?page=post&s=list&tags=`;

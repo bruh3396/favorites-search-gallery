@@ -1,4 +1,4 @@
-import { Dimensions2D } from "../../types/geometry";
+import { Dimensions2D } from "@/types/geometry";
 
 const defaultDimensions2D: Dimensions2D = { x: 100, y: 100 };
 const dimensions2DRegex = /^(\d+)(?:x|\/)(\d+)$/;

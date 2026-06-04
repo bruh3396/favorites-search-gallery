@@ -1,5 +1,5 @@
-import { randomBetween, roundToTwoDecimalPlaces } from "../../../../utils/number";
-import { SkeletonConfig } from "../../../../config/skeleton_config";
+import { randomBetween, roundToTwoDecimalPlaces } from "@/utils/number";
+import { SkeletonConfig } from "@/config/skeleton_config";
 
 export function getRandomAnimationDelay(): number {
   const { min, max } = SkeletonConfig.animationDelayRange;

@@ -1,4 +1,4 @@
-import { average, clamp, coinFlip, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat, sum } from "../../utils/number";
+import { average, clamp, coinFlip, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat, sum } from "@/utils/number";
 import { describe, expect, test } from "vitest";
 
 describe("getRandomPositiveInteger", () => {

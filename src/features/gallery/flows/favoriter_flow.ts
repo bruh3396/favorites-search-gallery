@@ -1,7 +1,7 @@
-import * as GalleryModel from "../model/gallery_model";
-import * as GalleryView from "../view/gallery_view";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "../../../types/favorite";
-import { Events } from "../../../app/channels/events";
+import * as GalleryModel from "@/features/gallery/model/gallery_model";
+import * as GalleryView from "@/features/gallery/view/gallery_view";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { Events } from "@/app/channels/events";
 
 export async function addFavoriteInGallery(): Promise<void> {
   const status = await GalleryModel.addFavorite();

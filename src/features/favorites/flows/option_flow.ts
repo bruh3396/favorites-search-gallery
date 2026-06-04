@@ -1,7 +1,7 @@
-import * as FavoritesInfiniteScrollFlow from "./infinite_scroll_results_flow";
-import * as FavoritesModel from "../model/favorites_model";
-import * as FavoritesSearchFlow from "./search_flow";
-import * as FavoritesView from "../view/favorites_view";
+import * as FavoritesInfiniteScrollFlow from "@/features/favorites/flows/infinite_scroll_results_flow";
+import * as FavoritesModel from "@/features/favorites/model/favorites_model";
+import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
+import * as FavoritesView from "@/features/favorites/view/favorites_view";
 
 export function toggleInfiniteScroll(value: boolean): void {
   FavoritesInfiniteScrollFlow.disconnect();

@@ -1,9 +1,9 @@
-import { Favorite, PageRelation } from "../../types/favorite";
-import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile } from "../../types/ui";
-import { MetadataMetric, Rating } from "../../types/search";
-import { Emitter } from "../../lib/communication/emitter";
-import { SearchPage } from "../../features/search_page/types/search_page";
-import { StickyEmitter } from "../../lib/communication/sticky_emitter";
+import { Favorite, PageRelation } from "@/types/favorite";
+import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile } from "@/types/ui";
+import { MetadataMetric, Rating } from "@/types/search";
+import { Emitter } from "@/lib/communication/emitter";
+import { SearchPage } from "@/features/search_page/types/search_page";
+import { StickyEmitter } from "@/lib/communication/sticky_emitter";
 
 export const Events = {
   favorites: {

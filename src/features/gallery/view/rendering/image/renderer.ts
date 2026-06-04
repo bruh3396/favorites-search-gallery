@@ -1,12 +1,12 @@
-import * as GalleryImageCanvas from "./canvas";
-import * as GalleryImageLoader from "./loader";
-import * as GalleryUpscaler from "./upscalers/upscaler";
-import { GalleryConfig } from "../../../../../config/gallery_config";
-import { GalleryRenderer } from "../../../types/gallery_types";
-import { ImageRequest } from "../../../types/image_request";
-import { USING_FIREFOX } from "../../../../../lib/environment";
-import { waitForAllThumbnailsToLoad } from "../../../../../app/layout/content_thumbs";
-import { withTimeout } from "../../../../../lib/async/timing";
+import * as GalleryImageCanvas from "@/features/gallery/view/rendering/image/canvas";
+import * as GalleryImageLoader from "@/features/gallery/view/rendering/image/loader";
+import * as GalleryUpscaler from "@/features/gallery/view/rendering/image/upscalers/upscaler";
+import { GalleryConfig } from "@/config/gallery_config";
+import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
+import { ImageRequest } from "@/features/gallery/types/image_request";
+import { USING_FIREFOX } from "@/lib/environment";
+import { waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
+import { withTimeout } from "@/lib/async/timing";
 
 const root = document.createElement("div");
 let activeId = "";

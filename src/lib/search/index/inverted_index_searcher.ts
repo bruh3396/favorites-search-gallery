@@ -1,8 +1,8 @@
-import { ExpandedSearchQuery } from "../query/expanded_search_query";
-import { InvertedIndex } from "../../collection/inverted_index";
-import { SearchQuery } from "../query/search_query";
-import { Searchable } from "../../../types/search";
-import { intersection } from "../../../utils/collection/set";
+import { ExpandedSearchQuery } from "@/lib/search/query/expanded_search_query";
+import { InvertedIndex } from "@/lib/collection/inverted_index";
+import { SearchQuery } from "@/lib/search/query/search_query";
+import { Searchable } from "@/types/search";
+import { intersection } from "@/utils/collection/set";
 
 export class InvertedIndexSearcher<T extends Searchable> {
   constructor(private readonly index: InvertedIndex<T>) { }

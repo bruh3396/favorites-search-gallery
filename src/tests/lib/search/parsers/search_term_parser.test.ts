@@ -1,7 +1,7 @@
-import { Searchable, SearchableMetadataMetric } from "../../../../types/search";
-import { createSearchable, fruits, getAllSubstrings, getPrefixes, searchableEmptyDoc, searchableFruitDoc } from "../fixtures/fruit_search";
+import { Searchable, SearchableMetadataMetric } from "@/types/search";
+import { createSearchable, fruits, getAllSubstrings, getPrefixes, searchableEmptyDoc, searchableFruitDoc } from "@/tests/lib/search/fixtures/fruit_search";
 import { describe, expect, test } from "vitest";
-import { parseExactSearchTerm, parseMetadataSearchTerm, parseWildcardSearchTerm } from "../../../../lib/search/parsers/search_term_parser";
+import { parseExactSearchTerm, parseMetadataSearchTerm, parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 const positiveCases = [
   ["banana", true],

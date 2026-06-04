@@ -1,11 +1,11 @@
-import * as SearchPageCache from "./page_cache";
-import { RAW_THUMB_CLASS_NAME } from "../../../lib/thumb/thumbs";
-import { Rule34NetworkConfig } from "../../../config/rule34_network_config";
-import { SearchPage } from "../types/search_page";
-import { fetchSearchPage } from "../../../lib/remote/rule34/search_page_fetcher";
-import { numbersAroundInRange } from "../../../utils/number";
-import { parseHtml } from "../../../utils/dom/html_parser";
-import { prepareSearchPageThumbs } from "../dom_tweaks/thumb_preparer";
+import * as SearchPageCache from "@/features/search_page/model/page_cache";
+import { RAW_THUMB_CLASS_NAME } from "@/lib/thumb/thumbs";
+import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { SearchPage } from "@/features/search_page/types/search_page";
+import { fetchSearchPage } from "@/lib/remote/rule34/search_page_fetcher";
+import { numbersAroundInRange } from "@/utils/number";
+import { parseHtml } from "@/utils/dom/html_parser";
+import { prepareSearchPageThumbs } from "@/features/search_page/dom_tweaks/thumb_preparer";
 
 export function load(baseUrl: string, pageNumber: number): Promise<void> {
   if (SearchPageCache.has(pageNumber) || pageNumber < 0) {
@@ -36,4 +36,4 @@ export function reload(baseUrl: string, pageNumber: number): Promise<void> {
   return load(baseUrl, pageNumber);
 }
 
-export { get, allThumbs, markLoaded } from "./page_cache";
+export { get, allThumbs, markLoaded } from "@/features/search_page/model/page_cache";

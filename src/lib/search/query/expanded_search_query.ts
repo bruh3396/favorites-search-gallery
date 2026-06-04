@@ -1,8 +1,8 @@
-import { AbstractSearchTerm } from "../terms/abstract_search_term";
-import { ExactSearchTerm } from "../terms/exact_search_term";
-import { SearchQuery } from "./search_query";
-import { Searchable } from "../../../types/search";
-import { WildcardSearchTerm } from "../terms/wildcard_search_term";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
+import { SearchQuery } from "@/lib/search/query/search_query";
+import { Searchable } from "@/types/search";
+import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 
 export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
   private unmatchable: boolean = false;

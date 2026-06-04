@@ -1,9 +1,9 @@
-import { AbstractSearchTerm } from "../terms/abstract_search_term";
-import { CategorizedSearchTerms } from "../types/search_types";
-import { MetadataSearchTerm } from "../terms/metadata_search_term";
-import { WildcardSearchTerm } from "../terms/wildcard_search_term";
-import { parseSearchTerm } from "./search_term_parser";
-import { removeExtraWhiteSpace } from "../../../utils/string/format";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { CategorizedSearchTerms } from "@/lib/search/types/search_types";
+import { MetadataSearchTerm } from "@/lib/search/terms/metadata_search_term";
+import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
+import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
+import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 

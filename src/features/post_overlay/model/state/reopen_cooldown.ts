@@ -1,4 +1,4 @@
-import { Timeout } from "../../../../types/async";
+import { Timeout } from "@/types/async";
 
 const REOPEN_COOLDOWN = 300;
 

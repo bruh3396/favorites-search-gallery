@@ -1,6 +1,6 @@
-import { brightWarmCoolHslColor, darkWarmCoolHslColor } from "../../../utils/string/color";
-import { SearchQuery } from "../../../lib/search/query/search_query";
-import { SearchTermHighlight } from "../types/highlight";
+import { brightWarmCoolHslColor, darkWarmCoolHslColor } from "@/utils/string/color";
+import { SearchQuery } from "@/lib/search/query/search_query";
+import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
 
 export function buildHighlights(query: string): SearchTermHighlight[] {
   const searchQuery = new SearchQuery(query);

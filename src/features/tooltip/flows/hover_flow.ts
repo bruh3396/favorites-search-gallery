@@ -1,6 +1,6 @@
-import * as TooltipModel from "../model/tooltip_model";
-import * as TooltipView from "../view/tooltip_view";
-import { EnhancedMouseEvent } from "../../../types/input";
+import * as TooltipModel from "@/features/tooltip/model/tooltip_model";
+import * as TooltipView from "@/features/tooltip/view/tooltip_view";
+import { EnhancedMouseEvent } from "@/types/input";
 
 export function onMouseover(event: EnhancedMouseEvent): void {
   if (!TooltipModel.tooltipEnabled()) {

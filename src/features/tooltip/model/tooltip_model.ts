@@ -1,9 +1,9 @@
-import * as TooltipHighlightBuilder from "./highlight_builder";
-import * as TooltipTagMatcher from "./tag_matcher";
-import { ON_FAVORITES_PAGE } from "../../../lib/environment";
-import { Preferences } from "../../../app/context/preferences";
-import { SearchTermHighlight } from "../types/highlight";
-import { usingDarkTheme } from "../../../lib/ui/style";
+import * as TooltipHighlightBuilder from "@/features/tooltip/model/highlight_builder";
+import * as TooltipTagMatcher from "@/features/tooltip/model/tag_matcher";
+import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { Preferences } from "@/app/context/preferences";
+import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
+import { usingDarkTheme } from "@/lib/ui/style";
 
 let currentHighlights: SearchTermHighlight[] = [];
 

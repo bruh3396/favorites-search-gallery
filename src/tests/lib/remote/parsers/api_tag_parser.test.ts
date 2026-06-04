@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { decodeTagCategory } from "../../../../lib/remote/parsers/api_tag_parser";
+import { decodeTagCategory } from "@/lib/remote/parsers/api_tag_parser";
 
 describe("decodeTagCategory", () => {
   test("decodes known encodings", () => {
