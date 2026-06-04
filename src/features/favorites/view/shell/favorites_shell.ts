@@ -1,10 +1,12 @@
 import * as FavoritesMobileFooter from "@/features/favorites/view/shell/mobile_footer";
 import * as FavoritesNativePageCleaner from "@/features/favorites/view/shell/native_page_cleaner";
-import { ON_DESKTOP_DEVICE, ON_FIRST_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_FIRST_FAVORITES_PAGE } from "@/lib/environment";
 import { insertHtml, insertStyle } from "@/utils/dom/injector";
 import DESKTOP_CSS from "@/assets/css/desktop_base.css";
 import FAVORITES_CSS from "@/assets/css/favorites.css";
-import FAVORITES_HTML from "@/assets/html/favorites.html";
+import FAVORITES_DESKTOP_MENU_HTML from "@/assets/html/favorites_desktop_menu.html";
+import FAVORITES_MENU_CSS from "@/assets/css/favorites_menu.css";
+import FAVORITES_MOBILE_HTML from "@/assets/html/favorites.html";
 import MOBILE_CSS from "@/assets/css/mobile.css";
 import { Root } from "@/app/layout/shell";
 import { buildControlsGuide } from "@/features/favorites/view/shell/mobile_control_guide";
@@ -14,8 +16,14 @@ export function setup(onFirstPageFavoritesExtracted: (elements: HTMLElement[] | 
   const favorites = FavoritesNativePageCleaner.extractFavorites();
 
   onFirstPageFavoritesExtracted(ON_FIRST_FAVORITES_PAGE ? favorites : undefined);
-  insertStyle((ON_MOBILE_DEVICE ? MOBILE_CSS : DESKTOP_CSS) + FAVORITES_CSS, "fav-menu-layout");
-  insertHtml(Root, "afterbegin", FAVORITES_HTML);
+
+  if (ON_DESKTOP_DEVICE) {
+    insertStyle(DESKTOP_CSS + FAVORITES_MENU_CSS, "favorites-menu");
+    insertHtml(Root, "afterbegin", FAVORITES_DESKTOP_MENU_HTML);
+  } else {
+    insertStyle(MOBILE_CSS + FAVORITES_CSS, "favorites-menu");
+    insertHtml(Root, "afterbegin", FAVORITES_MOBILE_HTML);
+  }
   setupFavoritesHelpBar();
 
   if (!ON_DESKTOP_DEVICE) {

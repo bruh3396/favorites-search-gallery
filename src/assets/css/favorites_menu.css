@@ -1,0 +1,328 @@
+/*
+ * Desktop favorites menu — command bar + search pill.
+ * Fully token-driven (see themes.css). No hard-coded colors.
+ *
+ * Reset strategy: the host (Rule34) page styles bare button/input/textarea
+ * elements (unlayered), which bleed into the injected menu. We neutralize it
+ * once with an id-scoped reset — `#favorites-search-gallery-menu :is(...)` has
+ * specificity (1,0,1), which beats the host's bare-element rules (0,0,1).
+ *
+ * NOTE: cascade layers (@layer) do NOT help here. Unlayered styles always beat
+ * layered ones regardless of specificity, so a layered reset would lose to the
+ * host. Component overrides therefore win by raising specificity one notch:
+ * include the menu/container id alongside the class so the selector beats the
+ * (1,0,1) reset.
+ */
+
+#favorites-search-gallery-menu :is(button, input, textarea) {
+  all: unset;
+  box-sizing: border-box;
+}
+
+#favorites-search-gallery-menu {
+  position: sticky;
+  top: -1px;
+  z-index: 30;
+  padding: 6px 16px;
+  margin-bottom: 10px;
+  background: var(--surface);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+/* #region Command bar */
+
+#favorites-menu-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px 270px;
+  align-items: center;
+  gap: 8px;
+}
+
+#favorites-menu-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: flex-start;
+  height: 34px;
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+#favorites-menu-status>label {
+  display: block;
+  font-weight: normal;
+  line-height: 17px;
+}
+
+#favorites-menu-status>#favorites-load-status-label {
+  order: -1;
+  flex: 0 0 100%;
+}
+
+#favorites-menu-status>#match-count-label {
+  flex: 0 0 110px;
+}
+
+#favorites-menu-status>#pagination-range-label {
+  flex: 0 0 90px;
+}
+
+#favorites-load-status-label.u-hidden {
+  visibility: hidden;
+}
+
+/* #endregion */
+
+/* #region Search pill */
+
+#favorites-menu-pill {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+#favorites-menu-search-button,
+#favorites-menu-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+#favorites-menu-pill #favorites-search-box {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: 28px;
+  padding: 9px 6px 0;
+  box-sizing: border-box;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: text;
+}
+
+#favorites-menu-pill #favorites-search-box,
+#favorites-menu-pill #favorites-search-box:focus {
+  background-color: transparent !important;
+}
+
+#favorites-menu-pill #favorites-search-box::placeholder {
+  color: var(--text-muted);
+}
+
+/* #endregion */
+
+/* #region Icon buttons */
+
+#favorites-search-gallery-menu .menu-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text);
+  transition: background-color 0.12s ease;
+}
+
+#favorites-search-gallery-menu .menu-icon-btn:hover {
+  background: var(--surface-hover);
+}
+
+.menu-icon-btn>.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-icon-btn::after {
+  content: attr(data-hint);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 12px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.1s ease 0s, visibility 0s linear 0.6s;
+  z-index: 40;
+}
+
+.menu-icon-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.1s ease 0.6s, visibility 0s linear 0.6s;
+}
+
+/* #endregion */
+
+/* #region Pagination */
+
+#favorites-pagination-placeholder {
+  flex: 0 0 auto;
+}
+
+#favorites-pagination-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 42px;
+  box-sizing: border-box;
+}
+
+#favorites-pagination-container button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 100%;
+  padding: 0;
+  color: var(--text-muted);
+  transition: color 0.12s ease;
+}
+
+#favorites-pagination-container .favorites-menu-pagination-btn,
+#favorites-pagination-container .favorites-menu-pagination-ellipsis {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#favorites-pagination-container button:hover {
+  color: var(--text);
+}
+
+#favorites-pagination-container .favorites-menu-pagination-arrow {
+  font-size: 18px;
+}
+
+#favorites-pagination-container .favorites-menu-pagination-arrow#previous-page {
+  position: absolute;
+  left: 0;
+}
+
+#favorites-pagination-container .favorites-menu-pagination-arrow#next-page {
+  position: absolute;
+  right: 0;
+}
+
+#favorites-pagination-container button[disabled] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+#favorites-pagination-container .favorites-menu-pagination-btn.selected {
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: bold;
+  pointer-events: none;
+}
+
+/* #endregion */
+
+/* #region Go to page popover */
+
+#goto-page-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  min-width: 160px;
+  border-radius: 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s linear 0.15s;
+}
+
+#goto-page-popover.goto-page-popover--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.goto-page-heading {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+#goto-page-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#goto-page-popover #goto-page-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--surface-pill);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+#goto-page-popover #goto-page-button {
+  flex: 0 0 auto;
+  cursor: pointer;
+  text-align: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: bold;
+}
+
+#goto-page-popover #goto-page-button:hover {
+  filter: brightness(1.1);
+}
+
+/* #endregion */
+
+/* #region Drawer (shell only for now) */
+
+#favorites-menu-drawer:empty {
+  display: none;
+}
+
+/* #endregion */

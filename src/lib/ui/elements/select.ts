@@ -5,6 +5,26 @@ export function buildSelectElement<T extends string>(partial: Partial<SelectElem
   const template = createSelectTemplate(partial);
   const parent = document.getElementById(template.parentId);
 
+  const emit = (value: T, save: boolean): void => {
+    if (save && template.preference !== null) {
+      template.preference.set(value);
+    }
+
+    if (template.event !== null) {
+      template.event.emit(value);
+    }
+    template.function(value);
+  };
+
+  const currentValue = (): T => {
+    const raw = template.preference === null ? [...template.options.keys()][0] : template.preference.value;
+    return (template.isNumeric ? Number(raw) : raw) as T;
+  };
+
+  if (template.triggerOnCreation) {
+    emit(currentValue(), false);
+  }
+
   if (parent === null) {
     return;
   }
@@ -22,31 +42,11 @@ export function buildSelectElement<T extends string>(partial: Partial<SelectElem
     select.appendChild(option);
   }
   parent.insertAdjacentElement(template.position, select);
-
-  const onChange = (save: boolean = true): void => {
+  select.value = template.preference === null ? Object.keys(template.options)[0] : String(template.preference.value);
+  select.onchange = (): void => {
     const value = template.isNumeric ? Number(select.value) : select.value;
 
-    if (save && template.preference !== null) {
-      template.preference.set(value as T);
-    }
-
-    if (template.event !== null) {
-      template.event.emit(value as T);
-    }
-    template.function(value as T);
-  };
-
-  if (template.preference === null) {
-    select.value = Object.keys(template.options)[0];
-  } else {
-    select.value = String(template.preference.value);
-  }
-
-  if (template.triggerOnCreation) {
-    onChange(false);
-  }
-  select.onchange = (): void => {
-    onChange();
+    emit(value as T, true);
   };
 }
 

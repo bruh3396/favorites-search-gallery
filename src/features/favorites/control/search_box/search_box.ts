@@ -1,13 +1,15 @@
 import { FavoritesDesktopSearchBox } from "@/features/favorites/control/search_box/desktop_search_box";
+import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
 import { FavoritesMobileSearchBox } from "@/features/favorites/control/search_box/mobile_search_box";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 
-const PARENT_ID = "left-favorites-panel-top-row";
+const DESKTOP_PARENT_ID = FavoritesMenuId.pill;
+const MOBILE_PARENT_ID = "left-favorites-panel-top-row";
 
 export function setup(): void {
   if (ON_DESKTOP_DEVICE) {
-    new FavoritesDesktopSearchBox(PARENT_ID);
+    new FavoritesDesktopSearchBox(DESKTOP_PARENT_ID);
   } else {
-    new FavoritesMobileSearchBox(PARENT_ID);
+    new FavoritesMobileSearchBox(MOBILE_PARENT_ID);
   }
 }

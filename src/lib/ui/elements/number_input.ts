@@ -5,12 +5,15 @@ import { doNothing } from "@/utils/function";
 export function buildNumberComponent(partial: Partial<NumberElement>): void {
   const template = createNumberTemplate(partial);
   const parent = document.getElementById(template.parentId);
+  const defaultValue = template.preference === null ? 1 : template.preference.value;
 
   if (parent === null) {
+    if (template.event !== null) {
+      template.event.emit(defaultValue);
+    }
     return;
   }
   const numberComponentId = `${template.id}-number`;
-  const defaultValue = template.preference === null ? 1 : template.preference.value;
 
   const html = `
     <span class="num-input" id="${numberComponentId}">

@@ -11,8 +11,3 @@ input[type=number] {
 .num-input button {
   color: white;
 }
-
-#favorites-pagination-container>button {
-  border: 1px solid white;
-  color: white;
-}

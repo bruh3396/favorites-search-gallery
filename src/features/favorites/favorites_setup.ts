@@ -82,12 +82,12 @@ function setupDownloader(): void {
 }
 
 function setupTagModifier(): void {
-  FavoritesTagModifier.setup({
-    getSearchResults: () => FavoritesModel.getCurrentSearchResults(),
-    getAllFavorites: () => FavoritesModel.getAllFavorites(),
-    deIndex: (favorite) => FavoritesModel.deIndex([favorite]),
-    reIndex: (favorite) => FavoritesModel.reIndex([favorite])
-  });
+  // FavoritesTagModifier.setup({
+  //   getSearchResults: () => FavoritesModel.getCurrentSearchResults(),
+  //   getAllFavorites: () => FavoritesModel.getAllFavorites(),
+  //   deIndex: (favorite) => FavoritesModel.deIndex([favorite]),
+  //   reIndex: (favorite) => FavoritesModel.reIndex([favorite])
+  // });
   Events.favorites.searchResultsUpdated.on(FavoritesTagModifier.onResultsUpdated);
   Events.favorites.pageChanged.on(FavoritesTagModifier.onPageChanged);
   DomEvents.document.click.on(FavoritesTagModifier.onDocumentClick);

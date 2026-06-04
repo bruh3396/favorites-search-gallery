@@ -2,11 +2,12 @@ import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/ui";
 import { buildCheckboxElement, buildCheckboxOption } from "@/app/input/checkbox";
-import { toggleAddOrRemoveButtons, toggleAlternateLayout, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons, toggleSlimLayout } from "@/lib/ui/toggles";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons } from "@/lib/ui/toggles";
 import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "@/lib/ui/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "@/features/favorites/dom_tweaks/ui_toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
+import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
 import { GeneralConfig } from "@/config/general_config";
 import { MetadataMetric } from "@/types/search";
 import { PostOverlayId } from "@/features/post_overlay/types/css_names";
@@ -23,44 +24,44 @@ import { reloadWindow } from "@/utils/browser/window";
 const buttons: Partial<ButtonElement>[] = [
   {
     id: "search-button",
-    parentId: "favorites-main-buttons-container",
+    parentId: FavoritesMenuId.searchButton,
     title: "Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab",
-    position: "afterbegin",
-    textContent: "Search",
+    icon: "search",
     rightClickEnabled: true,
     event: Events.favorites.searchButtonClicked
   },
   {
     id: "shuffle-button",
-    parentId: "favorites-main-buttons-container",
-    textContent: "Shuffle",
-    title: "Randomize order of search results",
+    parentId: FavoritesMenuId.actions,
+    icon: "shuffle",
+    title: "Shuffle results",
     event: Events.favorites.shuffleButtonClicked
   },
   {
     id: "invert-button",
-    parentId: "favorites-main-buttons-container",
-    textContent: "Invert",
-    title: "Show results not matched by latest search",
+    parentId: FavoritesMenuId.actions,
+    icon: "invert",
+    title: "Invert results",
     event: Events.favorites.invertButtonClicked
   },
   {
     id: "clear-button",
-    parentId: "favorites-main-buttons-container",
-    textContent: "Clear",
-    title: "Empty the search box",
+    parentId: FavoritesMenuId.actions,
+    icon: "clear",
+    title: "Clear",
     event: Events.favorites.clearButtonClicked
   },
   {
     id: "download-button",
-    parentId: "favorites-main-buttons-container",
-    textContent: "Download",
-    title: "Download search results (experimental)",
+    parentId: FavoritesMenuId.actions,
+    icon: "download",
+    title: "Download search results",
+    enabled: false,
     event: Events.favorites.downloadButtonClicked
   },
   {
     id: "set-active_favorites_button",
-    parentId: "favorites-main-buttons-container",
+    parentId: FavoritesMenuId.actions,
     textContent: "Set Subset",
     title: "Make the current search results the entire set of results to search from",
     enabled: false,
@@ -68,7 +69,7 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "reset-active_favorites_button",
-    parentId: "favorites-main-buttons-container",
+    parentId: FavoritesMenuId.actions,
     textContent: "Stop Subset",
     title: "Reset active favorites to all",
     enabled: false,
@@ -76,10 +77,16 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "reset-button",
-    parentId: "favorites-main-buttons-container",
-    textContent: "Reset",
+    parentId: FavoritesMenuId.actions,
+    icon: "reset",
     title: "Delete cached favorites and reset preferences",
     event: Events.favorites.resetButtonClicked
+  },
+  {
+    id: "settings-button",
+    parentId: FavoritesMenuId.actions,
+    icon: "settings",
+    title: "Settings"
   }
 
 ];
@@ -155,26 +162,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     preference: Preferences.maximizeToggleFavoriteButtons,
     function: toggleMaximizeToggleFavoriteButtons,
     enabled: false,
-    triggerOnCreation: true
-  },
-  {
-    id: "alternate-layout",
-    parentId: "favorite-options-left",
-    textContent: "Alternate Layout",
-    title: "Toggle alternate layout",
-    preference: Preferences.alternateLayout,
-    function: toggleAlternateLayout,
-    event: Events.favorites.alternateLayoutToggled,
-    enabled: false,
-    triggerOnCreation: true
-  },
-  {
-    id: "slim-layout",
-    parentId: "favorite-options-left",
-    textContent: "Slim Layout",
-    title: "Toggle slim layout",
-    preference: Preferences.slimLayout,
-    function: toggleSlimLayout,
     triggerOnCreation: true
   },
   {

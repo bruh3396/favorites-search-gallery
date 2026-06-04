@@ -1,4 +1,5 @@
 import { Emitter } from "@/lib/communication/emitter";
+import { IconName } from "@/lib/ui/icon";
 import { Preference } from "@/lib/storage/preference";
 import { doNothing } from "@/utils/function";
 
@@ -26,6 +27,7 @@ export interface StateMenuElement<T> extends MenuElement<T> {
 
 export interface ButtonElement extends MenuElement<MouseEvent>, HotkeyElement {
   rightClickEnabled: boolean
+  icon: IconName | null
 }
 
 export interface CheckboxElement extends StateMenuElement<boolean>, HotkeyElement {}

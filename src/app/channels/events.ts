@@ -47,7 +47,6 @@ export const Events = {
     autoplayToggled: new Emitter<boolean>(),
     removeButtonsToggled: new Emitter<boolean>(),
     addButtonsToggled: new Emitter<boolean>(),
-    alternateLayoutToggled: new Emitter<boolean>(),
     downloadButtonsToggled: new Emitter<boolean>(),
     captionsToggled: new Emitter<boolean>(),
     postOverlayToggled: new Emitter<boolean>(),

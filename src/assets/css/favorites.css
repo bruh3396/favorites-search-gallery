@@ -50,12 +50,83 @@ input[type="checkbox"] {
 
 #left-favorites-panel-top-row {
   margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #left-favorites-panel-top-row>label {
   align-content: center;
   margin-right: 5px;
   margin-top: 4px;
+}
+
+/* Search pill */
+
+#search-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  min-width: 0;
+}
+
+#search-pill #favorites-main-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+#search-pill #search-button-slot {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+textarea#favorites-search-box {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  padding: 6px 4px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  resize: none;
+  height: auto;
+  min-height: 24px;
+}
+
+textarea#favorites-search-box:focus {
+  outline: none;
+}
+
+/* Flat icon buttons inside the pill */
+
+#search-pill .menu-icon-btn {
+  background: transparent;
+  height: 30px;
+  width: 30px;
+}
+
+#search-pill .menu-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+
+#drawer-toggle .menu-icon-btn {
+  background: transparent;
+  height: 35px;
+  width: 35px;
+}
+
+#drawer-toggle .menu-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
 }
 
 #left-favorites-panel-bottom-row {
@@ -121,6 +192,47 @@ input[type="checkbox"] {
   border-radius: 4px;
 }
 
+/* Icon buttons */
+
+.menu-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  padding: 0;
+}
+
+.menu-icon-btn>.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-icon-btn::after {
+  content: attr(data-hint);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  background: black;
+  color: white;
+  border-radius: 3px;
+  font-size: 12px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 40;
+}
+
+.menu-icon-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
 #favorites-main-buttons-container>button:hover {
   filter: brightness(140%);
 }
@@ -175,11 +287,6 @@ input[type="checkbox"] {
 }
 
 /* Search and sort */
-
-textarea#favorites-search-box {
-  margin-top: 5px;
-  min-height: 14px;
-}
 
 #sort-container {
   position: relative;

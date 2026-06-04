@@ -7,6 +7,23 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
   const template = createCheckboxTemplate(partial);
   const parent = document.getElementById(template.parentId);
 
+  let checked = template.preference === null ? template.defaultValue : template.preference.value;
+
+  const onChange = (save: boolean = true): void => {
+    if (save && template.savePreference && template.preference !== null) {
+      template.preference.set(checked);
+    }
+
+    if (template.event !== null) {
+      template.event.emit(checked);
+    }
+    template.function(checked);
+  };
+
+  if (template.triggerOnCreation) {
+    onChange(false);
+  }
+
   if (parent === null) {
     return;
   }
@@ -15,24 +32,9 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
 
   checkbox.id = template.id;
   checkbox.type = "checkbox";
-  checkbox.checked = template.preference === null ? template.defaultValue : template.preference.value;
-
-  const onChange = (save: boolean = true): void => {
-    if (save && template.savePreference && template.preference !== null) {
-      template.preference.set(checkbox.checked);
-    }
-
-    if (template.event !== null) {
-      template.event.emit(checkbox.checked);
-    }
-    template.function(checkbox.checked);
-  };
-
-  if (template.triggerOnCreation) {
-    onChange(false);
-  }
-
+  checkbox.checked = checked;
   checkbox.addEventListener("change", (): void => {
+    checked = checkbox.checked;
     onChange();
   });
   parent.insertAdjacentElement(template.position, checkbox);
@@ -50,7 +52,8 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
     if (inGallery) {
       return;
     }
-    checkbox.checked = !checkbox.checked;
+    checked = !checked;
+    checkbox.checked = checked;
     onChange();
   });
 }
@@ -60,6 +63,7 @@ export function buildToggleSwitch(partial: Partial<CheckboxElement>): void {
   const parent = document.getElementById(template.parentId);
 
   if (parent === null) {
+    buildCheckboxElement(template);
     return;
   }
   const toggleSwitchId = `${template.id}-toggle-switch`;
@@ -86,6 +90,7 @@ export function buildCheckboxOption(partial: Partial<CheckboxElement>): void {
   const parent = document.getElementById(partial.parentId || "not-an-id");
 
   if (parent === null) {
+    buildCheckboxElement(partial);
     return;
   }
   const container = document.createElement("div");

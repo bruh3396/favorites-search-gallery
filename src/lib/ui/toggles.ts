@@ -1,7 +1,4 @@
-import DESKTOP_SIDEBAR_CSS from "@/assets/css/desktop_sidebar.css";
-import DESKTOP_SLIM_CSS from "@/assets/css/desktop_slim.css";
 import { insertStyle } from "@/utils/dom/injector";
-import { yieldControl } from "@/lib/async/timing";
 
 export function toggleAddOrRemoveButtons(value: boolean): void {
   insertStyle(`
@@ -31,29 +28,4 @@ export function toggleMaximizeToggleFavoriteButtons(value: boolean): void {
   }`;
 
   insertStyle(value ? html : "", "post-action-btn-maximize");
-}
-
-export function toggleAlternateLayout(value: boolean): void {
-  insertStyle(value ? DESKTOP_SIDEBAR_CSS : "", "fav-layout-alternate");
-}
-
-export async function toggleSlimLayout(value: boolean): Promise<void> {
-  await yieldControl();
-  insertStyle(value ? DESKTOP_SLIM_CSS : "", "favorites-layout-slim");
-  const status = document.getElementById("favorites-load-status");
-  const pagination = document.getElementById("favorites-pagination-container");
-  const header = document.getElementById("search-header");
-  const layoutSort = document.getElementById("layout-sort-container");
-  const additionalOptions = document.getElementById("additional-favorite-options");
-
-  if (status === null || pagination === null || header === null || layoutSort === null || additionalOptions === null) {
-    return;
-  }
-  (value ? pagination : header).insertAdjacentElement("afterend", status);
-
-  // if (value) {
-  //   status.insertAdjacentElement("afterend", layoutSort);
-  // } else {
-  //   additionalOptions.insertAdjacentElement("afterbegin", layoutSort);
-  // }
 }

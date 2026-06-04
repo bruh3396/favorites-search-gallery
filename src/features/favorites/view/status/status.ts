@@ -1,5 +1,6 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
 import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/favorite_types";
+import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
@@ -55,8 +56,8 @@ export function setExpectedTotalFavoritesCount(count: number | null): void {
 }
 
 export function setup(): void {
-  matchCountIndicator = Root.querySelector("#match-count-label") ?? document.createElement("label");
-  statusIndicator = Root.querySelector("#favorites-load-status-label") ?? document.createElement("label");
+  matchCountIndicator = Root.querySelector(`#${FavoritesMenuId.matchCount}`) ?? document.createElement("label");
+  statusIndicator = Root.querySelector(`#${FavoritesMenuId.loadStatus}`) ?? document.createElement("label");
 }
 
 function clearStatus(): void {

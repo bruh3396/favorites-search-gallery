@@ -1,0 +1,43 @@
+/*
+ * App-wide theme system.
+ *
+ * A theme is one block of custom properties selected by the `data-theme`
+ * attribute on the app root. Every component reads these variables and
+ * hard-codes no colors, so adding a theme means copying one block and changing
+ * values — nothing else. Switch themes by setting `root.dataset.theme`.
+ *
+ * Required variables (the contract every theme must define):
+ *   --surface          app / bar background
+ *   --surface-pill     search pill background
+ *   --surface-raised   raised controls (buttons, cards)
+ *   --surface-hover    hover state for controls
+ *   --border           pill / control borders
+ *   --text             primary text
+ *   --text-muted       placeholders, secondary text
+ *   --accent           selected / active / focus
+ *   --accent-text      text / icon on an accent fill
+ */
+
+[data-theme="native-dark"] {
+  --surface: #2a322a;
+  --surface-pill: #1c211c;
+  --surface-raised: #364036;
+  --surface-hover: #44503f;
+  --border: #4a564a;
+  --text: #e8efe8;
+  --text-muted: #9fb09f;
+  --accent: #0075ff;
+  --accent-text: #ffffff;
+}
+
+[data-theme="native-light"] {
+  --surface: #9bdc92;
+  --surface-pill: #f2faf0;
+  --surface-raised: #cdebc7;
+  --surface-hover: #b6e0ad;
+  --border: #7cc472;
+  --text: #14210f;
+  --text-muted: #4d6446;
+  --accent: #0075ff;
+  --accent-text: #ffffff;
+}

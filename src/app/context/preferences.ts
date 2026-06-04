@@ -7,7 +7,6 @@ import { Preference } from "@/lib/storage/preference";
 export const Preferences = {
   addButtonsVisible: new Preference("showAddFavoriteButtons", false),
   allowedRatings: new Preference<Rating>("allowedRatings", 7),
-  alternateLayout: new Preference("alternateLayout", false),
   autoplayActive: new Preference("autoplayActive", false),
   autoplayForward: new Preference("autoplayForward", true),
   autoplayImageDuration: new Preference("autoplayImageDuration", 3_000),
@@ -52,7 +51,6 @@ export const Preferences = {
   searchPageUpscaleThumbs: new Preference("upscaleSearchPageThumbs", ON_DESKTOP_DEVICE),
   searchPageEnabled: new Preference("enableOnSearchPages", false),
   showOnHover: new Preference("showOnHover", false),
-  slimLayout: new Preference("slimLayout", false),
   sortAscending: new Preference("sortAscending", false),
   sortingMethod: new Preference<SortingMethod>("sortingMethod", "default"),
   tagAliasing: new Preference("tagAliasing", false),

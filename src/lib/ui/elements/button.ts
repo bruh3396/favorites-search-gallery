@@ -1,5 +1,6 @@
 import { ButtonElement, defaultMenuElement } from "@/types/element";
 import { doNothing } from "@/utils/function";
+import { icon } from "@/lib/ui/icon";
 
 export function buildButtonElement(partial: Partial<ButtonElement>): void {
   const template = createButtonTemplate(partial);
@@ -12,8 +13,15 @@ export function buildButtonElement(partial: Partial<ButtonElement>): void {
 
   parent.insertAdjacentElement(template.position, button);
   button.id = template.id;
-  button.title = template.title;
-  button.textContent = template.textContent;
+
+  if (template.icon === null) {
+    button.title = template.title;
+    button.textContent = template.textContent;
+  } else {
+    button.classList.add("menu-icon-btn");
+    button.dataset.hint = template.title;
+    button.appendChild(icon(template.icon));
+  }
 
   button.onclick = (event): void => {
     template.function(event);
@@ -35,6 +43,7 @@ function createButtonTemplate(partial: Partial<ButtonElement>): ButtonElement {
     triggerOnCreation: false,
     hotkey: "",
     rightClickEnabled: false,
+    icon: null,
     ...partial
   };
 }

@@ -1,24 +1,19 @@
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "@/lib/environment";
 import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
-import { Preferences } from "@/app/context/preferences";
 import { debounceTrailing } from "@/lib/async/debounce";
 import { getRectDistance } from "@/utils/geometry";
 
 const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
+const intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let centerThumb: HTMLElement | null = null;
-let intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let bypassDebounce = true;
 
 export function setup(): void {
   Events.favorites.pageChanged.on(() => {
     bypassDebounce = true;
   });
-
-  if (ON_FAVORITES_PAGE) {
-    Events.favorites.alternateLayoutToggled.on(recreateObserver);
-  }
 }
 
 export function observe(thumbs: HTMLElement[]): void {
@@ -93,7 +88,7 @@ function createIntersectionObserver(): IntersectionObserver | null {
   if (ON_SEARCH_PAGE && !GalleryConfig.upscaleEverythingOnSearchPage) {
     return null;
   }
-  const topMargin = Preferences.alternateLayout ? 0 : -GalleryConfig.favoritesMenuHeight;
+  const topMargin = -GalleryConfig.favoritesMenuHeight;
   return new IntersectionObserver(onVisibleThumbsChanged, {
     root: null,
     rootMargin: `${topMargin}px 0px ${GalleryConfig.visibleThumbsDownwardScrollPercentageGenerosity}% 0px`,
@@ -115,12 +110,4 @@ function sortByDistance(centerEntry: IntersectionObserverEntry, entries: Interse
     const distanceB = getRectDistance(centerEntry.boundingClientRect, b.boundingClientRect);
     return distanceA - distanceB;
   });
-}
-
-function recreateObserver(): void {
-  if (intersectionObserver !== null) {
-    intersectionObserver.disconnect();
-    intersectionObserver = createIntersectionObserver();
-    observeAllThumbsOnPage();
-  }
 }

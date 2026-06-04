@@ -22,13 +22,13 @@ let saveSearchResultsButton: HTMLElement;
 
 export function setupSavedSearches(): void {
   if (SAVED_SEARCHES_DISABLED) {
-    return;
+
   }
-  insertAllHtml();
-  extractHtmlElements();
-  addEventListeners();
-  loadSavedSearches();
-  FeatureBridge.savedSearches.register(getSavedSearches);
+  // insertAllHtml();
+  // extractHtmlElements();
+  // addEventListeners();
+  // loadSavedSearches();
+  // FeatureBridge.savedSearches.register(getSavedSearches);
 }
 
 function getSavedSearches(): string[] {
