@@ -1,7 +1,7 @@
-import { Fruit, index } from "./fruit_search_fixtures";
+import { Fruit, index } from "../fixtures/fruit_search";
 import { describe, expect, test } from "vitest";
-import { AbstractSearchTerm } from "../../lib/search/terms/abstract_search_term";
-import { ExpandedSearchQuery } from "../../lib/search/query/expanded_search_query";
+import { AbstractSearchTerm } from "../../../../lib/search/terms/abstract_search_term";
+import { ExpandedSearchQuery } from "../../../../lib/search/query/expanded_search_query";
 
 function getRawTagValue(searchTag: AbstractSearchTerm): string {
   return searchTag.negated ? `-${searchTag.value}` : searchTag.value;

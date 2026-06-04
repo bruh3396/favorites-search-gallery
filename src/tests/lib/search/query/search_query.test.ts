@@ -1,6 +1,6 @@
-import { Fruit, allDocNames, allTerms, engine, fruitDocs, index } from "./fruit_search_fixtures";
+import { Fruit, allDocNames, allTerms, engine, fruitDocs, index } from "../fixtures/fruit_search";
 import { describe, expect, test } from "vitest";
-import { SearchQuery } from "../../lib/search/query/search_query";
+import { SearchQuery } from "../../../../lib/search/query/search_query";
 
 function testSearchEngine(searchQuery: string, expectedNames: string[]): void {
   expect(engine.search(new SearchQuery<Fruit>(searchQuery), fruitDocs).map(item => item.name).sort()).toEqual(expectedNames.slice().sort());

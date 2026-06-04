@@ -1,6 +1,134 @@
-import { Searchable, SearchableMetadataMetric } from "../../types/search";
+import { Searchable, SearchableMetadataMetric } from "../../../../types/search";
+import { createSearchable, fruits, getAllSubstrings, getPrefixes, searchableEmptyDoc, searchableFruitDoc } from "../fixtures/fruit_search";
 import { describe, expect, test } from "vitest";
-import { parseMetadataSearchTerm } from "../../lib/search/parsers/search_term_parser";
+import { parseExactSearchTerm, parseMetadataSearchTerm, parseWildcardSearchTerm } from "../../../../lib/search/parsers/search_term_parser";
+
+const positiveCases = [
+  ["banana", true],
+  ["kiwi", true],
+  ["grape", true],
+  ["apple", true],
+  ["orange", true],
+  ["mango", true],
+  ["rose", false],
+  ["tulip", false],
+  ["daisy", false],
+  ["lily", false],
+  ["orchid", false],
+  ["sunflower", false]
+] as const;
+
+const negatedCases = [
+  ["-banana", false],
+  ["-kiwi", false],
+  ["-grape", false],
+  ["-apple", false],
+  ["-orange", false],
+  ["-mango", false],
+  ["-rose", true],
+  ["-tulip", true],
+  ["-daisy", true],
+  ["-lily", true],
+  ["-orchid", true],
+  ["-sunflower", true]
+] as const;
+
+const invalidCases = [
+  [" ", false],
+  ["   ", false],
+  ["a", false]
+] as const;
+
+describe("exactTag", () => {
+  test("empty", () => {
+    expect(parseExactSearchTerm("").matches(searchableFruitDoc)).toBe(false);
+  });
+
+  test("cost", () => {
+    expect(parseExactSearchTerm("foo").cost).toBeLessThan(parseExactSearchTerm("-foo").cost);
+  });
+
+  test.each(positiveCases)("matches %s", (tag, expected) => {
+    expect(parseExactSearchTerm(tag).matches(searchableFruitDoc)).toBe(expected);
+  });
+
+  test.each(negatedCases)("negated %s", (tag, expected) => {
+    expect(parseExactSearchTerm(tag).matches(searchableFruitDoc)).toBe(expected);
+  });
+
+  test.each(invalidCases)("invalid '%s'", (tag, expected) => {
+    expect(parseExactSearchTerm(tag).matches(searchableEmptyDoc)).toBe(expected);
+  });
+
+  test("negated matches with empty set", () => {
+    expect(parseExactSearchTerm("-banana").matches(searchableEmptyDoc)).toBe(true);
+  });
+});
+
+describe("wildcardSearchTag", () => {
+  test("empty", () => {
+    expect(parseWildcardSearchTerm("*").matches(searchableEmptyDoc)).toBe(false);
+  });
+
+  test("empty negated", () => {
+    expect(parseWildcardSearchTerm("-*").matches(searchableEmptyDoc)).toBe(true);
+  });
+
+  test("one tag", () => {
+    expect(parseWildcardSearchTerm("*").matches(createSearchable(["apple"]))).toBe(true);
+  });
+
+  test("match all", () => {
+    expect(parseWildcardSearchTerm("*").matches(searchableFruitDoc)).toBe(true);
+  });
+
+  test("match none", () => {
+    expect(parseWildcardSearchTerm("-*").matches(searchableFruitDoc)).toBe(false);
+  });
+
+  test("matches prefix", () => {
+    for (const fruit of fruits) {
+      for (const prefix of getPrefixes(fruit)) {
+        expect(parseWildcardSearchTerm(`${prefix}*`).matches(searchableFruitDoc)).toBe(true);
+      }
+    }
+  });
+
+  test("matches double asterisk", () => {
+    for (const fruit of fruits) {
+      for (const substring of getAllSubstrings(fruit)) {
+        expect(parseWildcardSearchTerm(`*${substring}*`).matches(searchableFruitDoc)).toBe(true);
+        expect(parseWildcardSearchTerm(`**${substring}*`).matches(searchableFruitDoc)).toBe(true);
+        expect(parseWildcardSearchTerm(`**${substring}***`).matches(searchableFruitDoc)).toBe(true);
+        expect(parseWildcardSearchTerm(`*${substring}_NO_MATCH_*`).matches(searchableFruitDoc)).toBe(false);
+      }
+    }
+  });
+
+  test("matches inside", () => {
+    expect(parseWildcardSearchTerm("*b*na*").matches(searchableFruitDoc)).toBe(true);
+    expect(parseWildcardSearchTerm("*b*a*").matches(searchableFruitDoc)).toBe(true);
+    expect(parseWildcardSearchTerm("*bna*").matches(searchableFruitDoc)).toBe(false);
+  });
+
+  test("compare cost", () => {
+    const startsWithTag = parseWildcardSearchTerm("banana*");
+    const containsTag = parseWildcardSearchTerm("*bana*");
+    const containsTag2 = parseWildcardSearchTerm("*bana*****");
+    const endsWithTag = parseWildcardSearchTerm("*banana");
+    const regexTag = parseWildcardSearchTerm("*b*a*");
+
+    expect(startsWithTag.cost).toBeLessThan(containsTag.cost);
+    expect(startsWithTag.cost).toBeLessThan(endsWithTag.cost);
+    expect(startsWithTag.cost).toBeLessThan(regexTag.cost);
+
+    expect(containsTag.cost).toBeLessThan(endsWithTag.cost);
+    expect(containsTag.cost).toBeLessThan(regexTag.cost);
+    expect(containsTag.cost).toBe(containsTag2.cost);
+
+    expect(endsWithTag.cost).toBe(regexTag.cost);
+  });
+});
 
 type MetadataSearchable = Searchable & { metrics: Record<SearchableMetadataMetric, number> };
 
