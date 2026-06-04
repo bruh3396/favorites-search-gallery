@@ -1,5 +1,5 @@
 import { Post } from "@/types/api";
-import { TagCategory } from "@/types/search";
+import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
 import { normalizeImageSource } from "@/lib/media/media_url_transformer";
 import { parseDimensions2D } from "@/utils/string/parse";
@@ -43,9 +43,9 @@ export function parsePostFromPostPage(html: string): Post {
   };
 }
 
-export function parseTagCategoriesFromPostPage(html: string): Map<string, TagCategory> {
+export function parseTagCategoriesFromPostPage(html: string): TagCategoryMap {
   const dom = parseHtml(html);
-  const categories = new Map<string, TagCategory>();
+  const categoryMap: TagCategoryMap = new Map();
 
   for (const tag of Array.from(dom.querySelectorAll(".tag"))) {
     const category = tag.classList[0]?.replace("tag-type-", "") ?? "";
@@ -54,9 +54,9 @@ export function parseTagCategoriesFromPostPage(html: string): Map<string, TagCat
     if (name === "") {
       continue;
     }
-    categories.set(name, isTagCategory(category) ? category : "general");
+    categoryMap.set(name, isTagCategory(category) ? category : "general");
   }
-  return categories;
+  return categoryMap;
 }
 
 function getStatistics(dom: Document): Record<string, string> {

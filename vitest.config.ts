@@ -6,15 +6,5 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "src")
     }
-  },
-  test: {
-    exclude: [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/cypress/**",
-      "**/.{idea,git,cache,output,temp}/**",
-      "**/{karma,rollup,webpack,vite,vitest,jest,babel,nyc,cypress,tsup,build}.config.*",
-      "src/tests/playground/**"
-    ]
   }
 });

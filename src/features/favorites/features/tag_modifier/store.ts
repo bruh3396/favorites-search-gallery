@@ -23,8 +23,8 @@ function getDatabaseRecords(): TagModificationDatabaseRecord[] {
   return Array.from(tagModificationMap.entries()).map((entry) => ({ id: entry[0], tags: entry[1] }));
 }
 
-export function resetTagModifications(): void {
-  indexedDB.deleteDatabase(DATABASE_NAME);
+export function destroy(): void {
+  database.destroy();
   clearCustomTags();
 }
 

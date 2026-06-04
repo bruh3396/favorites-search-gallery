@@ -243,7 +243,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     id: PostOverlayId.menuCheckbox,
     parentId: "favorite-options-right",
     textContent: "Overlay",
-    title: "Categorize important tags when hovering over a thumbnail and click on them to add to search.",
+    title: "Categorize important tags when hovering over a thumbnail and click on them to add to search",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlayEnabled,
     hotkey: "",
@@ -332,10 +332,9 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
       ["score", "Score"],
       ["width", "Width"],
       ["height", "Height"],
-      ["creationTimestamp", "Date Uploaded"],
+      ["id", "Date Uploaded"],
       ["lastChangedTimestamp", "Date Changed"],
       ["duration", "Duration"],
-      ["id", "ID"],
       ["random", "Random"]
     ])
   },

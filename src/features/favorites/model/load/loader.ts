@@ -53,6 +53,6 @@ export function resetActiveFavorites(): void {
 export const getAllFavorites = (): Favorite[] => [...allFavorites];
 export const getFavorite = (id: string): Favorite | undefined => favoritesById.get(id);
 export const getActiveFavorites = (): Favorite[] => [...(activeFavorites ?? allFavorites)];
-export { destroy as deleteDatabase, deleteId, update as updateFavorite, write as storeFavorites, favoritesExist as hasDatabaseFavorites, loadIds as loadFavoriteIds } from "@/features/favorites/model/load/store";
+export { destroy as destroyStore, deleteId, update as updateFavorite, write as storeFavorites, favoritesExist as hasDatabaseFavorites, loadIds as loadFavoriteIds } from "@/features/favorites/model/load/store";
 
 const indexFavoritesById = (favorites: Favorite[]): void => favorites.forEach(f => favoritesById.set(f.id, f));

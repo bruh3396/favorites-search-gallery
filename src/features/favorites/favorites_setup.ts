@@ -44,7 +44,7 @@ export function setupFavorites(): void {
 }
 
 function setupModel(): void {
-  FavoritesModel.setup(FavoritesTagModifier.getAdditionalTags, FavoritesTagModifier.ensureTagModificationsLoaded);
+  FavoritesModel.setup(FavoritesTagModifier.getAdditionalTags, FavoritesTagModifier.ensureTagModificationsLoaded, Events.favorites.tagCategoriesResolved.emit);
 }
 
 function setupView(): void {

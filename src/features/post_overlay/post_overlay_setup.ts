@@ -20,7 +20,9 @@ function subscribeToEvents(): void {
   DomEvents.document.mouseover.on(PostOverlayHoverFlow.onMouseover);
   DomEvents.document.mousedown.on(PostOverlayTagClickFlow.onMouseDown);
   DomEvents.document.contextmenu.on(PostOverlayTagClickFlow.onContextMenu);
-  Events.favorites.postOverlayToggled.on(PostOverlayToggleFlow.onPostOverlayToggled);
+  Events.favorites.postOverlayToggled.on(PostOverlayToggleFlow.hideIfDisabled);
+  Events.favorites.tagCategoriesResolved.on(PostOverlayModel.warmTagCategoryCache);
+  Events.favorites.resetConfirmed.on(PostOverlayModel.destroyStore);
   DomEvents.window.scroll.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.pageChanged.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.columnCountChanged.on(PostOverlayHoverFlow.onThumbsMoved);

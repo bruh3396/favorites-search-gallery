@@ -85,7 +85,7 @@ function addEventListeners(): void {
     if (!confirm("Are you sure you want to delete all tag modifications?")) {
       return;
     }
-    TagModifierStore.resetTagModifications();
+    TagModifierStore.destroy();
     TagModifierOperations.resetAllFavoriteTags(tagModifierInterface.getAllFavorites());
   };
   ui.import.onclick = doNothing;

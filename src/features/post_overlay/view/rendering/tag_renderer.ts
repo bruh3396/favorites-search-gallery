@@ -1,16 +1,16 @@
 import { IconName, icon } from "@/lib/ui/icon";
+import { TagCategory, TagCategoryMap } from "@/types/search";
 import { PostOverlayClass } from "@/features/post_overlay/types/css_names";
 import { PostOverlayConfig } from "@/config/post_overlay_config";
-import { TagCategory } from "@/types/search";
 
 const DISPLAYED_CATEGORIES: readonly TagCategory[] = ["artist", "copyright", "character", "metadata"];
 
-export function renderTags(target: HTMLElement, postId: string, categories: Map<string, TagCategory>): void {
+export function renderTags(target: HTMLElement, postId: string, categoryMap: TagCategoryMap): void {
   target.replaceChildren();
   target.appendChild(buildGroup("id", "ID", [postId]));
 
   for (const category of DISPLAYED_CATEGORIES) {
-    const tagNames = tagNamesInCategory(categories, category);
+    const tagNames = tagNamesInCategory(categoryMap, category);
 
     if (tagNames.length > 0) {
       target.appendChild(buildGroup(category, category, tagNames));
@@ -22,8 +22,8 @@ export function renderTags(target: HTMLElement, postId: string, categories: Map<
   }
 }
 
-function tagNamesInCategory(categories: Map<string, TagCategory>, category: TagCategory): string[] {
-  return Array.from(categories.keys()).filter(tagName => categories.get(tagName) === category);
+function tagNamesInCategory(categoryMap: TagCategoryMap, category: TagCategory): string[] {
+  return Array.from(categoryMap.keys()).filter(tagName => categoryMap.get(tagName) === category);
 }
 
 function buildGroup(category: string, label: string, items: string[]): HTMLElement {

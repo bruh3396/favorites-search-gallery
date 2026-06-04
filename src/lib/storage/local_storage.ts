@@ -3,7 +3,7 @@ export interface Store {
   set<V>(key: string, value: V): void
   remove(key: string): void
   keys(): string[]
-  clear(): void
+  clear(persistent?: Set<string>): void
 }
 
 export class LocalStorage implements Store {
@@ -32,8 +32,12 @@ export class LocalStorage implements Store {
     return Object.keys(localStorage);
   }
 
-  public clear(): void {
-    localStorage.clear();
+  public clear(persistent?: Set<string>): void {
+    if (persistent === undefined) {
+      localStorage.clear();
+      return;
+    }
+    this.keys().filter(key => !persistent.has(key)).forEach(key => this.remove(key));
   }
 }
 

@@ -1,4 +1,4 @@
-import { Post, PostResponse } from "@/types/api";
+import { CategorizedPost, Post, PostResponse } from "@/types/api";
 import { generalPageRequestQueue, postLimiter } from "@/lib/remote/http/rate_limiters";
 import { ApiConfig } from "@/config/api_config";
 import { CoalescingResolver } from "@/lib/async/coalescing_resolver";
@@ -8,7 +8,7 @@ import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
 import { fetchHtml } from "@/lib/remote/http/http_client";
 import { fetchJsonFromApi } from "@/lib/remote/api/api_client";
 import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page_parser";
-import { postResponseToPost } from "@/lib/remote/parsers/api_post_parser";
+import { parsePostResponse } from "@/lib/remote/parsers/api_post_parser";
 import { withExponentialBackoff } from "@/lib/async/timing";
 
 const postFetcher = new CoalescingResolver<PostResponse>(
@@ -19,17 +19,21 @@ const postFetcher = new CoalescingResolver<PostResponse>(
 
 let postPageFetchBarrier: Promise<void> = Promise.resolve();
 
-export function fetchPost(id: string): Promise<Post> {
+export function fetchPost(id: string): Promise<CategorizedPost> {
   return postFetcher.resolve(id)
-  .then(postResponseToPost)
+  .then(parsePostResponse)
   .catch((error: unknown) => recoverFromFetchError(id, error));
 }
 
-function recoverFromFetchError(id: string, error: unknown): Promise<Post> {
+function recoverFromFetchError(id: string, error: unknown): Promise<CategorizedPost> {
   if (error instanceof DeletedPostError) {
-    return fetchPostFromPostPage(id);
+    return fetchPostFromPostPage(id).then(toCategorizedPost);
   }
   throw error;
+}
+
+function toCategorizedPost(post: Post): CategorizedPost {
+  return { ...post, tagCategories: new Map() };
 }
 
 export async function fetchPostPageHtml(id: string): Promise<string> {

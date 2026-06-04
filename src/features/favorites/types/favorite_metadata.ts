@@ -37,7 +37,7 @@ export class FavoriteMetadata {
     this.metrics.width = post.width;
     this.metrics.height = post.height;
     this.metrics.score = post.score;
-    this.metrics.creationTimestamp = Date.parse(post.createdAt);
+    this.metrics.creationTimestamp = 0;
     this.metrics.lastChangedTimestamp = post.change;
     this.rating = decodeRating(post.rating);
   }

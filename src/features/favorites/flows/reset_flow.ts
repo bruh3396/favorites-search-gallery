@@ -10,13 +10,9 @@ const persistentLocalStorageKeys = new Set(["customTags", "savedSearches"]);
 
 export function attemptReset(): void {
   if (confirm(RESET_PROMPT)) {
-    clearLocalStorage();
+    Storage.clear(persistentLocalStorageKeys);
     Events.favorites.resetConfirmed.emit();
-    FavoritesModel.deleteDatabase();
-    ExtensionResolver.deleteExtensionsDatabase();
+    FavoritesModel.destroyStore();
+    ExtensionResolver.destroyStore();
   }
-}
-
-function clearLocalStorage(): void {
-  Storage.keys().filter(key => !persistentLocalStorageKeys.has(key)).forEach(key => Storage.remove(key));
 }

@@ -13,6 +13,10 @@ export function write(mapping: TagCategoryMapping): void {
   writeScheduler.add(mapping);
 }
 
+export function destroy(): Promise<void> {
+  return database.destroy();
+}
+
 function writeBatch(mappings: TagCategoryMapping[]): void {
   database.write(mappings);
 }

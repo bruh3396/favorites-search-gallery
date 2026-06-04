@@ -1,6 +1,6 @@
 import { Favorite, PageRelation } from "@/types/favorite";
 import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile } from "@/types/ui";
-import { MetadataMetric, Rating } from "@/types/search";
+import { MetadataMetric, Rating, TagCategoryMap } from "@/types/search";
 import { Emitter } from "@/lib/communication/emitter";
 import { SearchPage } from "@/features/search_page/types/search_page";
 import { StickyEmitter } from "@/lib/communication/sticky_emitter";
@@ -18,6 +18,7 @@ export const Events = {
     favoritesLoaded: new StickyEmitter<void>(),
 
     searchResultsUpdated: new Emitter<void>(),
+    tagCategoriesResolved: new Emitter<TagCategoryMap>(),
     favoriteAdded: new Emitter<string>(),
     favoriteRemoved: new Emitter<string>(),
     newFavoritesFound: new Emitter<Favorite[]>(),

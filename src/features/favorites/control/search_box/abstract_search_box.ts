@@ -16,6 +16,16 @@ export abstract class AbstractFavoritesSearchBox {
     this.subscribeToEvents();
   }
 
+  protected appendText(text: string): void {
+    const current = this.searchBox.value;
+    const separator = current === "" ? "" : " ";
+    const updated = `${current}${separator}${text}`;
+
+    this.searchBox.value = updated;
+    this.history.add(updated);
+    this.history.setLastQuery(updated);
+  }
+
   protected startSearch(): void {
     const query = this.searchBox.value;
 
@@ -34,16 +44,6 @@ export abstract class AbstractFavoritesSearchBox {
 
     this.searchBox.addEventListener("input", persistInput);
     Events.searchBox.append.on((text) => this.appendText(text));
-  }
-
-  protected appendText(text: string): void {
-    const current = this.searchBox.value;
-    const separator = current === "" ? "" : " ";
-    const updated = `${current}${separator}${text}`;
-
-    this.searchBox.value = updated;
-    this.history.add(updated);
-    this.history.setLastQuery(updated);
   }
 
   protected abstract createSearchBox(): HTMLTextAreaElement | HTMLInputElement;

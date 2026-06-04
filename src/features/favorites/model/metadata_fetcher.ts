@@ -1,8 +1,9 @@
 import * as ExtensionResolver from "@/lib/media/media_extension_resolver";
 import * as PostApi from "@/lib/remote/api/post_fetcher";
+import { CategorizedPost, Post } from "@/types/api";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
-import { Post } from "@/types/api";
+import { TagCategoryMap } from "@/types/search";
 import { fetchVideoDurationFromFavorite } from "@/lib/remote/rule34/video_duration_fetcher";
 import { isVideo } from "@/lib/media/media_type_predicates";
 import { tagsAreValid } from "@/lib/search/tags/tag_validator";
@@ -11,15 +12,18 @@ import { withExponentialBackoff } from "@/lib/async/timing";
 let onMetadataPopulated: (favorite: Favorite) => void = () => undefined;
 let beforeUpdateTags: (favorite: Favorite) => void = () => undefined;
 let afterUpdateTags: (favorite: Favorite) => void = () => undefined;
+let onCategoriesResolved: (categoryMap: TagCategoryMap) => void = () => undefined;
 
 export function setup(
   onUpdated: (favorite: Favorite) => void,
   beforeUpdateTagsFn: (favorite: Favorite) => void,
-  afterUpdateTagsFn: (favorite: Favorite) => void
+  afterUpdateTagsFn: (favorite: Favorite) => void,
+  onCategoriesResolvedFn: (categoryMap: TagCategoryMap) => void
 ): void {
   onMetadataPopulated = onUpdated;
   beforeUpdateTags = beforeUpdateTagsFn;
   afterUpdateTags = afterUpdateTagsFn;
+  onCategoriesResolved = onCategoriesResolvedFn;
 }
 
 export function fetchMissingMetadata(favorites: FavoriteItem[]): void {
@@ -48,10 +52,11 @@ function fetchDurations(favorites: FavoriteItem[]): void {
   });
 }
 
-function processPost(favorite: FavoriteItem, post: Post): void {
+function processPost(favorite: FavoriteItem, post: CategorizedPost): void {
   if (isUnpopulated(post)) {
     return;
   }
+  onCategoriesResolved(post.tagCategories);
 
   if (!tagsAreValid(favorite, post)) {
     beforeUpdateTags(favorite);

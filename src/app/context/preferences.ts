@@ -36,7 +36,7 @@ export const Preferences = {
   postOverlayEnabled: new Preference("postOverlayEnabled", false),
   overlayMode: new Preference<OverlayMode>("overlayMode", "tag"),
   removeButtonsVisible: new Preference("showRemoveFavoriteButtons", false),
-  resultsPerPage: new Preference("resultsPerPage", 200),
+  resultsPerPage: new Preference("resultsPerPage", 150),
   rowHeight: new Preference("rowSize", 7),
   savedSearchesVisible: new Preference("savedSearchVisibility", false),
   savedSearchSuggestions: new Preference("savedSearchSuggestions", false),

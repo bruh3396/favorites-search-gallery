@@ -1,6 +1,6 @@
-import { TagCategory } from "@/types/search";
+import { TagCategory, TagCategoryMap } from "@/types/search";
 
-const cache = new Map<string, TagCategory>();
+const cache: TagCategoryMap = new Map();
 
 export function get(tagName: string): TagCategory | undefined {
   return cache.get(tagName);

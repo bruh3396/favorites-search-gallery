@@ -151,9 +151,8 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
       ["score", "Score"],
       ["width", "Width"],
       ["height", "Height"],
-      ["creationTimestamp", "Date Uploaded"],
+      ["id", "Date Uploaded"],
       ["lastChangedTimestamp", "Date Changed"],
-      ["id", "ID"],
       ["random", "Random"],
       ["duration", "Duration"]
     ])

@@ -1,3 +1,7 @@
+import { TagCategoryMap } from "@/types/search";
+
+export type EncodedTagCategory = number | null
+
 export type Post = {
   id: string
   height: number
@@ -25,24 +29,26 @@ export type Post = {
 }
 
 export type CompactPost = {
-  id: string
+  id: number
   width: number
   height: number
   score: number
   rating: string
   change: number
   createdAt: string
-  tags: string
+  tags: Record<string, EncodedTagCategory>
   fileURL: string
   previewURL: string
+}
+
+export type CategorizedPost = Post & {
+  tagCategories: TagCategoryMap
 }
 
 export type PostResponse =
   | { status: "ok"; post: CompactPost }
   | { status: "deleted", id: string }
   | { status: "rate_limited", id: string }
-
-export type EncodedTagCategory = number | null
 
 export type TagResponse =
   | { status: "ok"; category: EncodedTagCategory }

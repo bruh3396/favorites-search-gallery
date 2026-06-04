@@ -14,8 +14,8 @@ const extensionCache: Map<string, ImageExtension> = new Map();
 const database = new Database<MediaExtensionMapping>(DATABASE_NAME, OBJECT_STORE_NAME);
 const databaseWriter = new CoalescingExecutor<MediaExtensionMapping>(100, 2_000, database.update.bind(database));
 
-export const deleteExtensionsDatabase: () => void = () => database.destroy();
-export const extractExtensionFromUrl = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
+export const destroyStore: () => void = () => database.destroy();
+export const extractExtension = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
 export const setupExtensions = loadExtensionsIntoCache;
 
 export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExtension> {
@@ -40,7 +40,7 @@ export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExt
 }
 
 export function setExtensionFromPost(post: Post): void {
-  const extension = extractExtensionFromUrl(post.fileURL);
+  const extension = extractExtension(post.fileURL);
 
   if (extension !== null && allImageExtensions.includes(extension as ImageExtension)) {
     saveExtension(post.id, extension as ImageExtension);

@@ -32,10 +32,6 @@
   display: none;
 }
 
-#sorting-method-id {
-  display: none;
-}
-
 /* Base element overrides */
 
 html {
@@ -161,23 +157,7 @@ input[type="text"] {
 
 #favorites-load-status {
   font-size: 12px;
-}
-
-#favorites-load-status>span {
-  margin-right: 10px;
-}
-
-#favorites-load-status>span:nth-child(odd) {
-  font-weight: bold;
-}
-
-#favorites-load-status>label {
-  min-width: unset;
-}
-
-#favorites-load-status-label {
-  display: inline;
-  padding-left: 0;
+  gap: 6px;
 }
 
 /* Sort and layout controls */
