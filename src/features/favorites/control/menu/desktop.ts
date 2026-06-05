@@ -3,14 +3,12 @@ import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/co
 import { Layout, PerformanceProfile, Theme } from "@/types/ui";
 import { applyTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility } from "@/lib/ui/style";
 import { buildCheckboxElement, buildCheckboxOption } from "@/app/input/checkbox";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons } from "@/lib/ui/toggles";
-import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "@/features/favorites/dom_tweaks/ui_toggles";
+import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "@/lib/ui/toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
+import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
 import { GeneralConfig } from "@/config/general_config";
 import { MetadataMetric } from "@/types/search";
-import { PostOverlayId } from "@/features/post_overlay/types/css_names";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
@@ -20,6 +18,7 @@ import { buildSelectElement } from "@/lib/ui/elements/select";
 import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
 import { reloadWindow } from "@/utils/browser/window";
+import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/ui_toggles";
 
 const buttons: Partial<ButtonElement>[] = [
   {
@@ -86,33 +85,13 @@ const buttons: Partial<ButtonElement>[] = [
     id: "reset-button",
     parentId: FavoritesMenuId.settingsSlot,
     icon: "reset",
-    title: "Delete cached favorites and reset preferences",
+    title: "Reset",
     event: Events.favorites.resetButtonClicked
   }
 
 ];
 
 const checkboxes: Partial<CheckboxElement>[] = [
-  {
-    id: "options",
-    parentId: "bottom-panel-1",
-    textContent: "More Options",
-    title: "Show more options",
-    preference: Preferences.optionsVisible,
-    hotkey: "O",
-    function: toggleFavoritesOptions,
-    triggerOnCreation: true
-  },
-  {
-    id: "show-ui",
-    parentId: "show-ui-wrapper",
-    textContent: "UI",
-    title: "Toggle UI",
-    preference: Preferences.uiVisible,
-    hotkey: "U",
-    function: toggleUi,
-    triggerOnCreation: true
-  },
   {
     id: "enhance-search-pages",
     parentId: "favorite-options-left",
@@ -127,7 +106,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Infinite Scroll",
     title: "Use infinite scroll (waterfall) instead of pages",
-    preference: Preferences.infiniteScroll,
+    preference: Preferences.favoritesInfiniteScroll,
     hotkey: "",
     event: Events.favorites.infiniteScrollToggled
   },
@@ -137,7 +116,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Remove Buttons",
     title: "Toggle remove favorite buttons",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.removeButtonsVisible,
+    preference: Preferences.favoritesRemoveButtonsVisible,
     hotkey: "R",
     function: toggleAddOrRemoveButtons,
     event: Events.favorites.removeButtonsToggled,
@@ -149,20 +128,10 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Add Favorite Buttons",
     title: "Toggle add favorite buttons",
     enabled: !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.addButtonsVisible,
+    preference: Preferences.favoritesAddButtonsVisible,
     function: toggleAddOrRemoveButtons,
     hotkey: "R",
     event: Events.favorites.addButtonsToggled,
-    triggerOnCreation: true
-  },
-  {
-    id: "maximize-toggle-favorite-buttons",
-    parentId: "favorite-options-left",
-    textContent: `Maximize ${USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? "Remove" : "Add"} Buttons`,
-    title: "Maximize toggle favorite buttons",
-    preference: Preferences.maximizeToggleFavoriteButtons,
-    function: toggleMaximizeToggleFavoriteButtons,
-    enabled: false,
     triggerOnCreation: true
   },
   {
@@ -171,7 +140,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Download Buttons",
     title: "Toggle download buttons",
     enabled: true,
-    preference: Preferences.downloadButtonsVisible,
+    preference: Preferences.favoritesDownloadButtonsVisible,
     hotkey: "",
     function: toggleDownloadButtons,
     triggerOnCreation: true,
@@ -183,7 +152,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Exclude Blacklist",
     title: "Exclude favorites with blacklisted tags from search",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.excludeBlacklist,
+    preference: Preferences.favoritesExcludeBlacklist,
     hotkey: "",
     event: Events.favorites.blacklistToggled
   },
@@ -192,7 +161,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Hotkey Hints",
     title: "Show hotkeys",
-    preference: Preferences.hintsEnabled,
+    preference: Preferences.favoritesHintsEnabled,
     hotkey: "H",
     triggerOnCreation: true,
     function: toggleOptionHotkeyHints
@@ -203,7 +172,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Autoplay",
     title: "Enable autoplay in gallery",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.autoplayActive,
+    preference: Preferences.galleryAutoplayActive,
     hotkey: "",
     event: Events.favorites.autoplayToggled
   },
@@ -213,9 +182,9 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Fullscreen on Hover",
     title: "View full resolution images or play videos and GIFs when hovering over a thumbnail",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.showOnHover,
+    preference: Preferences.galleryPreviewEnabled,
     hotkey: "",
-    event: Events.favorites.showOnHoverToggled
+    event: Events.favorites.galleryPreviewToggled
   },
   {
     id: "show-tooltips",
@@ -223,12 +192,12 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Tooltip",
     title: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
     enabled: TOOLTIP_ENABLED,
-    preference: Preferences.tooltipEnabled,
+    preference: Preferences.favoritesTooltipEnabled,
     hotkey: "T",
     event: Events.favorites.tooltipToggled
   },
   {
-    id: PostOverlayId.menuCheckbox,
+    id: "show-post-overlay",
     parentId: "favorite-options-right",
     textContent: "Overlay",
     title: "Categorize important tags when hovering over a thumbnail and click on them to add to search",
@@ -242,19 +211,10 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-right",
     textContent: "Header",
     title: "Toggle site header",
-    preference: Preferences.headerEnabled,
+    preference: Preferences.favoritesHeaderEnabled,
     hotkey: "",
     triggerOnCreation: true,
     function: toggleHeader
-  },
-  {
-    id: "use-aliases",
-    parentId: "favorite-options-right",
-    textContent: "Aliases",
-    title: "Alias similar tags",
-    enabled: false,
-    preference: Preferences.tagAliases,
-    hotkey: "A"
   },
   {
     id: "show-saved-search-suggestions",
@@ -262,7 +222,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Saved Suggestions",
     title: "Show saved search suggestions in autocomplete dropdown",
     enabled: false,
-    preference: Preferences.savedSearchSuggestions,
+    preference: Preferences.savedSearchesSuggestions,
     hotkey: "",
     savePreference: true
   },
@@ -293,7 +253,7 @@ const simpleCheckboxes: Partial<CheckboxElement>[] = [
     id: "sort-ascending",
     parentId: "sort-inputs",
     position: "beforeend",
-    preference: Preferences.sortAscending,
+    preference: Preferences.favoritesSortAscending,
     event: Events.favorites.sortAscendingToggled
   }
 ];
@@ -303,7 +263,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     id: "theme",
     parentId: "favorite-options-right",
     title: "Change theme",
-    preference: Preferences.theme,
+    preference: Preferences.appTheme,
     function: applyTheme,
     options: new Map<Theme, string>([
       ["native-light", "Light"],
@@ -316,7 +276,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     parentId: "sort-inputs",
     title: "Change sorting order of search results",
     position: "beforeend",
-    preference: Preferences.sortingMethod,
+    preference: Preferences.favoritesSortKey,
     event: Events.favorites.sortingMethodChanged,
     options: new Map<MetadataMetric, string>([
       ["default", "Default"],
@@ -351,7 +311,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     parentId: "performance-profile-container",
     title: "Improve performance by disabling features",
     position: "beforeend",
-    preference: Preferences.performanceProfile,
+    preference: Preferences.appPerformanceProfile,
     event: Events.favorites.performanceProfileChanged,
     function: reloadWindow,
     isNumeric: true,
@@ -369,7 +329,7 @@ const numbers: Partial<NumberElement>[] = [
     id: "column-count",
     parentId: "column-count-container",
     position: "beforeend",
-    preference: Preferences.columnCount,
+    preference: Preferences.favoritesColumnCount,
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
     step: 1,
@@ -381,7 +341,7 @@ const numbers: Partial<NumberElement>[] = [
     id: "row-size",
     parentId: "row-size-container",
     position: "beforeend",
-    preference: Preferences.rowHeight,
+    preference: Preferences.favoritesRowHeight,
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
@@ -393,7 +353,7 @@ const numbers: Partial<NumberElement>[] = [
     id: "results-per-page",
     parentId: "results-per-page-container",
     position: "beforeend",
-    preference: Preferences.resultsPerPage,
+    preference: Preferences.favoritesResultsPerPage,
     min: FavoritesConfig.resultsPerPageBounds.min,
     max: FavoritesConfig.resultsPerPageBounds.max,
     step: FavoritesConfig.resultsPerPageStep,

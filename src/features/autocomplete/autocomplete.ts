@@ -39,7 +39,7 @@ function getAutocompleteSuggestions(prefix: string): Promise<string> {
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {
   const suggestions = addCustomTagsToAutocomplete(JSON.parse(html), prefix);
-  return Preferences.savedSearchSuggestions.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
+  return Preferences.savedSearchesSuggestions.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
 }
 
 async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: AwesompleteInstance): Promise<void> {

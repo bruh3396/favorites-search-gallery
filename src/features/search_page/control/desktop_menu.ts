@@ -44,7 +44,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Autoplay",
     title: "Enable autoplay in gallery",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.autoplayActive,
+    preference: Preferences.galleryAutoplayActive,
     hotkey: "",
     event: Events.favorites.autoplayToggled
   },
@@ -155,7 +155,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     parentId: "search-page-performance-profile",
     title: "Improve performance by disabling features",
     position: "beforeend",
-    preference: Preferences.performanceProfile,
+    preference: Preferences.appPerformanceProfile,
     event: Events.favorites.performanceProfileChanged,
     function: reloadWindow,
     enabled: ON_DESKTOP_DEVICE,

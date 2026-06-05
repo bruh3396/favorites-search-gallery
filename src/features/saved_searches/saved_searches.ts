@@ -187,9 +187,9 @@ function storeSavedSearches(): void {
 
 function loadSavedSearches(): void {
   const savedSearches = Storage.get<string[]>("savedSearches") ?? [];
-  const firstUse = Boolean(Preferences.savedSearchTutorial.value);
+  const firstUse = Boolean(Preferences.savedSearchesTutorial.value);
 
-  Preferences.savedSearchTutorial.set(false);
+  Preferences.savedSearchesTutorial.set(false);
 
   if (firstUse && savedSearches.length === 0) {
     createTutorialSearches();

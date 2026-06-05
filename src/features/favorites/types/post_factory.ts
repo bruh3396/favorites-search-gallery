@@ -4,11 +4,11 @@ import { Post } from "@/types/api";
 import { decompressPreviewSource } from "@/lib/media/media_url_transformer";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 
-export function createPost(object: HTMLElement | FavoritesDatabaseRecord): Post {
-  if (object instanceof HTMLElement) {
-    return createPostFromFavoritesPageThumb(object);
+export function createPost(source: HTMLElement | FavoritesDatabaseRecord): Post {
+  if (source instanceof HTMLElement) {
+    return createPostFromFavoritesPageThumb(source);
   }
-  return createPostFromDatabaseRecord(object);
+  return createPostFromDatabaseRecord(source);
 }
 
 export function clearPost(post: Post): void {

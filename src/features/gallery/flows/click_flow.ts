@@ -20,7 +20,7 @@ export function onClick(mouseEvent: MouseEvent): void {
 
 export function onMouseDown(event: MouseEvent | TouchEvent): void {
   dispatchByState({
-    hover: onMouseDownOutsideGallery,
+    preview: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery,
     open: onMouseDownInGallery
   }, new EnhancedMouseEvent(event));
@@ -54,7 +54,7 @@ function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
 
   if (mouseEvent.middleClick && mouseEvent.thumb === null && !clickedInteractiveOverlay(mouseEvent)) {
     mouseEvent.originalEvent.preventDefault();
-    GalleryOpenCloseFlow.toggleEnlargeOnHover();
+    GalleryOpenCloseFlow.togglePreviews();
   }
 }
 

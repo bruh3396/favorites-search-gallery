@@ -12,7 +12,7 @@ import { waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
 const background: HTMLElement = document.createElement("div");
 
 background.id = "gallery-background";
-background.style.opacity = Preferences.backgroundOpacity.value;
+background.style.opacity = Preferences.galleryBackgroundOpacity.value;
 let lastVisitedThumb: HTMLElement | null = null;
 
 export function setup(root: HTMLElement): void {
@@ -90,7 +90,7 @@ export function update(thumb: HTMLElement): void {
 }
 
 export function updateBackgroundOpacity(event: WheelEvent): void {
-  let opacity = parseFloat(Preferences.backgroundOpacity.value);
+  let opacity = parseFloat(Preferences.galleryBackgroundOpacity.value);
 
   opacity -= event.deltaY * 0.0005;
   opacity = clamp(opacity, 0, 1);
@@ -138,7 +138,7 @@ function setBackgroundOpacity(opacity: number): void {
   const opacityString = String(opacity);
 
   background.style.opacity = opacityString;
-  Preferences.backgroundOpacity.set(opacityString);
+  Preferences.galleryBackgroundOpacity.set(opacityString);
 }
 
 function toggleVideoPointerEvents(value: boolean): void {

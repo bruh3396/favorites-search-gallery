@@ -146,7 +146,7 @@ function createColorPicker(): void {
   };
   colorPicker.oninput = (): void => {
     setColorScheme(colorPicker.value);
-    Preferences.colorScheme.set(colorPicker.value);
+    Preferences.galleryColorScheme.set(colorPicker.value);
   };
   button.insertAdjacentElement("afterbegin", colorPicker);
 }

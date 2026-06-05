@@ -11,7 +11,7 @@ let visibleIndex = 0;
 
 export function setup(): void {
   insertStyle(POST_OVERLAY_CSS, PostOverlayClass.overlay);
-  setMenuLabel(Preferences.overlayMode.value);
+  setMenuLabel(Preferences.postOverlayMode.value);
 
   for (let i = 0; i < OVERLAY_POOL_SIZE; i += 1) {
     const overlay = document.createElement("div");

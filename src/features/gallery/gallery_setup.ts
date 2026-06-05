@@ -101,7 +101,7 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.newFavoritesFound.on(GalleryContentFlow.indexThumbs, { once: true });
   Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
   Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.handleNewContent);
-  Events.favorites.showOnHoverToggled.on(GalleryModel.toggleEnlargeOnHover);
+  Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreviews);
 }
 
 function subscribeToSearchPageEvents(): void {

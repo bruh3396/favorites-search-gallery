@@ -1,7 +1,7 @@
 import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "@/features/favorites/types/favorite_types";
 import { IconName, icon } from "@/lib/ui/icon";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
+import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { PageRelation } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
@@ -29,7 +29,7 @@ export function setup(navigatorCallbacks: NavigatorCallbacks): void {
   callbacks = navigatorCallbacks;
   insert();
   build(emptyFavoritesPageParameters);
-  toggle(!Preferences.infiniteScroll.value);
+  toggle(!Preferences.favoritesInfiniteScroll.value);
 }
 
 export function toggle(value: boolean): void {

@@ -12,6 +12,9 @@ ContentColumn.id = "favorites-search-gallery-content-column";
 export const Content = document.createElement("div");
 Content.id = "favorites-search-gallery-content";
 
+export const ContentRow = document.createElement("div");
+ContentRow.id = "favorites-search-gallery-content-row";
+
 export const DrawerTrack = document.createElement("div");
 DrawerTrack.id = "favorites-search-gallery-drawer-track";
 
@@ -26,7 +29,8 @@ ScrollSentinelBottom.id = "scroll-sentinel-bottom";
 
 export function setupShell(): void {
   ContentColumn.append(ScrollSentinelTop, Content, ScrollSentinelBottom);
-  Body.append(DrawerTrack, ContentColumn);
+  ContentRow.append(DrawerTrack, ContentColumn);
+  Body.append(ContentRow);
   Root.append(Body, Overlays);
   DomEvents.document.domLoaded.on(() => {
     document.body.appendChild(Root);

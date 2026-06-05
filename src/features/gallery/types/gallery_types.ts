@@ -11,7 +11,7 @@ export interface GalleryRenderer {
 
 export enum GalleryState {
   Idle,
-  Hover,
+  Preview,
   Open
 }
 

@@ -119,7 +119,7 @@ function subscribeToEvents(): void {
   Events.favorites.favoriteAdded.on(FavoritesInterFeatureFlow.swapFavoriteButton);
   Events.favorites.favoriteRemoved.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 
-  Events.gallery.showOnHoverOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
+  Events.gallery.previewOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
 }
 
 function registerSearchPageBridgeHandlers(): void {
@@ -134,5 +134,5 @@ function registerBridgeHandlers(): void {
   setFavoriteTagsLookup(id => FavoritesModel.getFavorite(id)?.tags);
   FeatureBridge.allFavorites.register(FavoritesModel.getAllFavorites);
   FeatureBridge.currentSearchQuery.register(FavoritesModel.getCurrentSearchQuery);
-  FeatureBridge.usingInfiniteScroll.register(() => Preferences.infiniteScroll.value);
+  FeatureBridge.usingInfiniteScroll.register(() => Preferences.favoritesInfiniteScroll.value);
 }

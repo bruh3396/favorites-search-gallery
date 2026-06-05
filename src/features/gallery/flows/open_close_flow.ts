@@ -11,7 +11,7 @@ export function open(thumb: HTMLElement): void {
   GalleryDisplayFlow.display(thumb);
 
   GalleryInteractionTracker.enableInteractionTracking();
-  Events.gallery.showOnHoverOverridden.emit(false);
+  Events.gallery.previewOverridden.emit(false);
   Events.gallery.openedGallery.emit(thumb);
 }
 
@@ -28,7 +28,7 @@ export function reOpen(): void {
   open(GalleryModel.currentThumb());
 }
 
-export function toggleEnlargeOnHover(): void {
-  GalleryModel.toggleEnlargeOnHover();
-  Events.gallery.showOnHoverOverridden.emit(GalleryModel.isEnlargingOnHover());
+export function togglePreviews(): void {
+  GalleryModel.togglePreviews();
+  Events.gallery.previewOverridden.emit(GalleryModel.isShowingPreviews());
 }

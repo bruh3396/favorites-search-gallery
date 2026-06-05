@@ -1,6 +1,6 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
 import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/favorite_types";
-import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
+import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";

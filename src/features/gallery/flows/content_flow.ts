@@ -7,7 +7,7 @@ export function handlePageChange(): void {
   indexThumbs();
   dispatchByState({
     idle: GalleryView.reset,
-    hover: GalleryView.reset,
+    preview: GalleryView.reset,
     open: GalleryView.softReset
   });
 }

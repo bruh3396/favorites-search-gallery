@@ -30,7 +30,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Infinite Scroll",
     title: "Use infinite scroll (waterfall) instead of pages",
-    preference: Preferences.infiniteScroll,
+    preference: Preferences.favoritesInfiniteScroll,
     hotkey: "",
     event: Events.favorites.infiniteScrollToggled
   },
@@ -40,7 +40,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     textContent: "Remove Buttons",
     title: "Toggle remove favorite buttons",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.removeButtonsVisible,
+    preference: Preferences.favoritesRemoveButtonsVisible,
     hotkey: "R",
     function: toggleAddOrRemoveButtons,
     event: Events.favorites.removeButtonsToggled,
@@ -52,7 +52,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     textContent: "Add Favorite Buttons",
     title: "Toggle add favorite buttons",
     enabled: !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.addButtonsVisible,
+    preference: Preferences.favoritesAddButtonsVisible,
     function: toggleAddOrRemoveButtons,
     hotkey: "R",
     event: Events.favorites.addButtonsToggled,
@@ -64,7 +64,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     textContent: "Download Buttons",
     title: "Toggle download buttons",
     enabled: true,
-    preference: Preferences.downloadButtonsVisible,
+    preference: Preferences.favoritesDownloadButtonsVisible,
     hotkey: "",
     function: toggleDownloadButtons,
     event: Events.favorites.downloadButtonsToggled,
@@ -76,7 +76,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     textContent: "Exclude Blacklist",
     title: "Exclude favorites with blacklisted tags from search",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.excludeBlacklist,
+    preference: Preferences.favoritesExcludeBlacklist,
     hotkey: "",
     event: Events.favorites.blacklistToggled
   },
@@ -86,7 +86,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     textContent: "Autoplay",
     title: "Enable autoplay in gallery",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.autoplayActive,
+    preference: Preferences.galleryAutoplayActive,
     hotkey: "",
     event: Events.favorites.autoplayToggled
   },
@@ -95,7 +95,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Header",
     title: "Toggle site header",
-    preference: Preferences.headerEnabled,
+    preference: Preferences.favoritesHeaderEnabled,
     hotkey: "",
     enabled: false,
     triggerOnCreation: true,
@@ -115,7 +115,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     parentId: "sort-inputs",
     position: "beforeend",
     enabled: true,
-    preference: Preferences.sortAscending,
+    preference: Preferences.favoritesSortAscending,
     event: Events.favorites.sortAscendingToggled
   },
   {
@@ -125,7 +125,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     title: "Enable gallery",
     position: "beforeend",
     enabled: true,
-    preference: Preferences.mobileGalleryEnabled
+    preference: Preferences.galleryMobileEnabled
   }
 ];
 
@@ -134,7 +134,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     id: "theme",
     parentId: "favorite-options-left",
     title: "Change theme",
-    preference: Preferences.theme,
+    preference: Preferences.appTheme,
     function: applyTheme,
     options: new Map<Theme, string>([
       ["native-light", "Light"],
@@ -147,7 +147,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     parentId: "sort-inputs",
     title: "Change sorting order of search results",
     position: "beforeend",
-    preference: Preferences.sortingMethod,
+    preference: Preferences.favoritesSortKey,
     event: Events.favorites.sortingMethodChanged,
     options: new Map<MetadataMetric, string>([
       ["default", "Default"],
@@ -180,7 +180,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     id: "results-per-page", parentId: "results-per-page-container",
     title: "Change results per page",
     position: "beforeend",
-    preference: Preferences.resultsPerPage,
+    preference: Preferences.favoritesResultsPerPage,
     event: Events.favorites.resultsPerPageChanged,
     options: new Map<number, string>([
       [5, "5"],
@@ -197,7 +197,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     id: "column-count",
     parentId: "column-count-container",
     position: "beforeend",
-    preference: Preferences.columnCount,
+    preference: Preferences.favoritesColumnCount,
     event: Events.favorites.columnCountChanged,
     options: new Map<number, string>([
       [1, "1"],
@@ -216,7 +216,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     id: "row-size",
     parentId: "row-size-container",
     position: "beforeend",
-    preference: Preferences.rowHeight,
+    preference: Preferences.favoritesRowHeight,
     event: Events.favorites.rowSizeChanged,
     options: new Map<number, string>([
       [1, "1"],

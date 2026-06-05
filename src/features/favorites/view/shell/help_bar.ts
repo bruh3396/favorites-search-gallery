@@ -1,64 +1,33 @@
-import HELP_HTML from "@/assets/html/help.html";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { Overlays } from "@/app/layout/shell";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { favoritesHelpLinks } from "@/features/favorites/types/scaffold";
 
-let dialog: HTMLDialogElement;
+const HELP_LINKS_CONTAINER_ID = "help-links-container";
 
 export function setupFavoritesHelpBar(): void {
-  insertHelpHtml();
-  buildWhatsNewMenu();
-}
-
-function insertHelpHtml(): void {
-  const parent = document.getElementById(ON_MOBILE_DEVICE ? "mobile-footer-header" : "left-favorites-panel-top-row");
-
-  if (parent !== null) {
-    parent.insertAdjacentHTML("beforeend", HELP_HTML);
-  }
-}
-
-function buildWhatsNewMenu(): void {
-  const whatsNew = document.getElementById("whats-new-link");
-
-  if (whatsNew === null) {
+  if (ON_DESKTOP_DEVICE) {
     return;
   }
+  const parent = document.getElementById("mobile-footer-header");
 
-  if (ON_MOBILE_DEVICE) {
-    whatsNew.remove();
+  if (parent === null) {
     return;
   }
-  buildDialogWhatsNewMenu(whatsNew);
+  parent.appendChild(buildHelpLinks());
 }
 
-function buildDialogWhatsNewMenu(menu: HTMLElement): void {
-  dialog = document.createElement("dialog");
-  dialog.id = "whats-new-dialog";
-  dialog.style.padding = "5px 10px";
-  dialog.style.fontSize = "large";
-  dialog.classList.add("surface-panel");
-  Overlays.appendChild(dialog);
-  const whatsNewContainer = menu.querySelector("#whats-new-container");
+function buildHelpLinks(): HTMLElement {
+  const container = document.createElement("span");
 
-  if (whatsNewContainer === null) {
-    return;
+  container.id = HELP_LINKS_CONTAINER_ID;
+
+  for (const link of favoritesHelpLinks) {
+    const anchor = document.createElement("a");
+
+    anchor.href = link.href;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.textContent = link.label;
+    container.appendChild(anchor);
   }
-  whatsNewContainer.removeAttribute("id");
-
-  dialog.appendChild(whatsNewContainer);
-  const closeButton = document.createElement("button");
-
-  closeButton.textContent = "X";
-  closeButton.style.position = "absolute";
-  closeButton.style.top = "1em";
-  closeButton.style.right = "1em";
-  closeButton.addEventListener("click", () => dialog.close());
-  dialog.appendChild(closeButton);
-  menu.onmousedown = (): boolean => {
-    dialog.showModal();
-    return false;
-  };
-  dialog.onclick = (): void => {
-    dialog.close();
-  };
+  return container;
 }

@@ -2,8 +2,7 @@ import { awesompleteIsUnselected, awesompleteIsVisible } from "@/lib/ui/autocomp
 import { AbstractFavoritesSearchBox } from "@/features/favorites/control/search_box/abstract_search_box";
 import { EnhancedMouseEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
-import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
-import { Preferences } from "@/app/context/preferences";
+import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
 import { openSearchPage } from "@/lib/remote/rule34/navigator";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
@@ -24,7 +23,6 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     } else {
       searchButtonSlot.insertAdjacentElement("afterend", searchBox);
     }
-    this.observeHeight();
     this.subscribePlatformEvents();
     return searchBox;
   }
@@ -52,18 +50,6 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
         this.handleHistoryNavigation(event);
       }
     }) as EventListener);
-  }
-
-  private observeHeight(): void {
-    const observer = new ResizeObserver((entries) => {
-      const newHeight = entries[0].contentRect.height;
-
-      if (Preferences.desktopSearchBoxHeight.value !== newHeight) {
-        Preferences.desktopSearchBoxHeight.set(newHeight);
-      }
-    });
-
-    observer.observe(this.searchBox);
   }
 
   private handleEnter(event: KeyboardEvent): void {

@@ -1,12 +1,12 @@
+import * as FavoritesChangelogPanel from "@/features/favorites/view/shell/changelog_panel";
+import * as FavoritesHelpPanel from "@/features/favorites/view/shell/help_panel";
 import { Body, DrawerTrack } from "@/app/layout/shell";
-import { FavoritesDrawerTab, FavoritesMenuId, favoritesDrawerTabs } from "@/features/favorites/types/menu_ids";
+import { FavoritesDrawerTab, FavoritesMenuClass, FavoritesMenuId, favoritesDrawerTabs } from "@/features/favorites/types/scaffold";
+import { IconName, icon } from "@/lib/ui/icon";
 import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { yieldControl } from "@/lib/async/timing";
-
-const PANEL_PREFIX = "favorites-menu-drawer-panel-";
-const TAB_PREFIX = "favorites-menu-drawer-tab-";
 
 let activeTab: FavoritesDrawerTab = "settings";
 
@@ -17,13 +17,12 @@ export async function setup(): Promise<void> {
   const drawer = document.createElement("div");
 
   drawer.id = FavoritesMenuId.drawer;
-  drawer.appendChild(buildTabStrip());
+  drawer.appendChild(buildTabRail());
   drawer.appendChild(buildPanels());
   DrawerTrack.appendChild(drawer);
   selectTab(activeTab);
-  anchorBelowBar();
 
-  if (Preferences.drawerOpen.value) {
+  if (Preferences.favoritesDrawerOpen.value) {
     await yieldControl();
     openInstant();
   }
@@ -40,17 +39,25 @@ export function toggle(): void {
     removeDataset(Body, "drawerOpen");
     removeDataset(button, "active");
   }
-  Preferences.drawerOpen.set(open);
+  Preferences.favoritesDrawerOpen.set(open);
 }
 
-export function selectTab(tab: FavoritesDrawerTab): void {
+function tabId(tab: FavoritesDrawerTab): string {
+  return `${FavoritesMenuClass.drawerTab}-${tab}`;
+}
+
+function panelId(tab: FavoritesDrawerTab): string {
+  return `${FavoritesMenuClass.drawerPanel}-${tab}`;
+}
+
+function selectTab(tab: FavoritesDrawerTab): void {
   activeTab = tab;
 
   for (const { tab: candidate } of favoritesDrawerTabs) {
     const isActive = candidate === tab;
 
-    const tabElement = document.getElementById(TAB_PREFIX + candidate);
-    const panelElement = document.getElementById(PANEL_PREFIX + candidate);
+    const tabElement = document.getElementById(tabId(candidate));
+    const panelElement = document.getElementById(panelId(candidate));
 
     if (isActive) {
       setDataset(tabElement, "selected", "");
@@ -75,31 +82,31 @@ function openInstant(): void {
   drawerElement.style.transition = "";
 }
 
-function anchorBelowBar(): void {
-  const menu = document.getElementById(FavoritesMenuId.menu);
+function buildTabRail(): HTMLElement {
+  const rail = document.createElement("div");
 
-  if (menu !== null) {
-    Body.style.setProperty("--favorites-bar-height", `${menu.offsetHeight}px`);
+  rail.id = FavoritesMenuId.drawerTabStrip;
+
+  for (const { tab, label, icon: iconName } of favoritesDrawerTabs) {
+    rail.appendChild(buildTab(tab, label, iconName));
   }
+  return rail;
 }
 
-function buildTabStrip(): HTMLElement {
-  const tabStrip = document.createElement("div");
-
-  tabStrip.id = FavoritesMenuId.drawerTabStrip;
-
-  for (const { tab, label } of favoritesDrawerTabs) {
-    tabStrip.appendChild(buildTab(tab, label));
-  }
-  return tabStrip;
-}
-
-function buildTab(tab: FavoritesDrawerTab, label: string): HTMLElement {
+function buildTab(tab: FavoritesDrawerTab, label: string, iconName: IconName): HTMLElement {
   const button = document.createElement("button");
 
-  button.id = TAB_PREFIX + tab;
-  button.className = "favorites-menu-drawer-tab";
-  button.textContent = label;
+  button.id = tabId(tab);
+  button.className = FavoritesMenuClass.drawerTab;
+  // button.title = label;
+
+  const labelSpan = document.createElement("span");
+
+  labelSpan.className = FavoritesMenuClass.drawerTabLabel;
+  labelSpan.textContent = label;
+
+  button.appendChild(icon(iconName));
+  button.appendChild(labelSpan);
   button.onclick = (): void => {
     selectTab(tab);
   };
@@ -114,9 +121,23 @@ function buildPanels(): HTMLElement {
   for (const { tab } of favoritesDrawerTabs) {
     const panel = document.createElement("div");
 
-    panel.id = PANEL_PREFIX + tab;
-    panel.className = "favorites-menu-drawer-panel";
+    panel.id = panelId(tab);
+    panel.className = FavoritesMenuClass.drawerPanel;
+    renderPanelContent(tab, panel);
     panels.appendChild(panel);
   }
   return panels;
+}
+
+function renderPanelContent(tab: FavoritesDrawerTab, panel: HTMLElement): void {
+  switch (tab) {
+    case "new":
+      FavoritesChangelogPanel.buildChangelogPanel(panel);
+      break;
+    case "help":
+      FavoritesHelpPanel.buildHelpPanel(panel);
+      break;
+    default:
+      break;
+  }
 }

@@ -6,7 +6,7 @@ import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 export function onWheel(wheelEvent: EnhancedWheelEvent): void {
   dispatchByState(
     {
-      hover: (event) => GalleryView.updateBackgroundOpacity(event.originalEvent),
+      preview: (event) => GalleryView.updateBackgroundOpacity(event.originalEvent),
       open: (event) => {
         if (!event.originalEvent.shiftKey && !event.originalEvent.ctrlKey) {
           GalleryNavigationFlow.navigate(event.direction);

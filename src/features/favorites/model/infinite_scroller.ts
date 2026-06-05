@@ -84,5 +84,5 @@ function alignDown(n: number): number {
 }
 
 function itemsPerRow(): number {
-  return Math.max(1, Preferences.columnCount.value);
+  return Math.max(1, Preferences.favoritesColumnCount.value);
 }

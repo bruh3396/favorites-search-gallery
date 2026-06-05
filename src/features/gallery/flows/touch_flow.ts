@@ -8,7 +8,7 @@ import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 
 export function onMouseDown(event: MouseEvent): void {
   dispatchByState({
-    hover: onMouseDownOutsideGallery,
+    preview: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery
   }, new EnhancedMouseEvent(event));
 }
@@ -62,5 +62,5 @@ function onTouchStartInGallery(event: TouchEvent): void {
 }
 
 function galleryEnabled(): boolean {
-  return (ON_FAVORITES_PAGE && Preferences.mobileGalleryEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPageEnabled.value);
+  return (ON_FAVORITES_PAGE && Preferences.galleryMobileEnabled.value) || (ON_SEARCH_PAGE && Preferences.searchPageEnabled.value);
 }

@@ -7,12 +7,12 @@ import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 
 export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
   dispatchByState({
-    hover: handleHover,
+    preview: handlePreview,
     idle: preloadMediaAroundDebounced
   }, mouseEvent.thumb);
 }
 
-function handleHover(thumb: HTMLElement | null): void {
+function handlePreview(thumb: HTMLElement | null): void {
   if (thumb === null) {
     GalleryView.hidePreview();
     return;

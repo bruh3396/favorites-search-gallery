@@ -94,7 +94,7 @@ export function stopAllVideos(): void {
 
 export function toggleVideoMute(): void {
   getActiveVideoPlayer().muted = !getActiveVideoPlayer().muted;
-  Preferences.videoMuted.set(getActiveVideoPlayer().muted);
+  Preferences.galleryVideoMuted.set(getActiveVideoPlayer().muted);
 }
 
 function createVideoPlayer(volume: number, muted: boolean): void {
@@ -114,8 +114,8 @@ function createVideoPlayer(volume: number, muted: boolean): void {
 }
 
 function createVideoPlayers(): void {
-  const volume = Preferences.videoVolume.value;
-  const muted = Preferences.videoMuted.value;
+  const volume = Preferences.galleryVideoVolume.value;
+  const muted = Preferences.galleryVideoMuted.value;
 
   createVideoPlayer(volume, muted);
 
@@ -215,8 +215,8 @@ function updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElemen
     if (event.target === null || !event.target.hasAttribute("active")) {
       return;
     }
-    Preferences.videoVolume.set(video.volume);
-    Preferences.videoMuted.set(video.muted);
+    Preferences.galleryVideoVolume.set(video.volume);
+    Preferences.galleryVideoMuted.set(video.muted);
 
     for (const v of getInactiveVideoPlayers()) {
       v.volume = video.volume;

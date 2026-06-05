@@ -43,7 +43,7 @@ export function onKeyUp(event: EnhancedKeyboardEvent): void {
 const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
   dispatchByState({
     idle: onKeyDownOutsideGallery,
-    hover: onKeyDownOutsideGallery,
+    preview: onKeyDownOutsideGallery,
     open: onKeyDownInGallery
   }, new EnhancedKeyboardEvent(event));
 };

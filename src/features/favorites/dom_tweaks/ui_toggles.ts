@@ -7,42 +7,12 @@ export function syncShowOnHoverFromGallery(value: boolean): void {
 
   if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
     showOnHoverCheckbox.checked = value;
-    Preferences.showOnHover.set(value);
+    Preferences.galleryPreviewEnabled.set(value);
   }
 }
 
 export function toggleOptionHotkeyHints(value: boolean): void {
   insertStyle(value ? "" : ".u-opt-hint {display:none;}", "opt-hint-visibility");
-}
-
-export function toggleUi(value: boolean): void {
-  const menu = document.getElementById("favorites-search-gallery-menu");
-  const panels = document.getElementById("favorites-search-gallery-menu-panels");
-  const header = document.getElementById("header");
-  const container = document.getElementById("show-ui-container");
-  const bottomPanel4 = document.getElementById("bottom-panel-4");
-
-  if (menu === null || panels === null || container === null || bottomPanel4 === null) {
-    return;
-  }
-
-  if (value) {
-    if (header !== null) {
-      header.style.display = "";
-    }
-    bottomPanel4.insertAdjacentElement("afterbegin", container);
-    panels.style.display = "flex";
-    menu.removeAttribute("style");
-  } else {
-    menu.appendChild(container);
-
-    if (header !== null) {
-      header.style.display = "none";
-    }
-    panels.style.display = "none";
-    menu.style.background = getComputedStyle(document.body).background;
-  }
-  container.classList.toggle("favorites-menu-show-ui--collapsed", !value);
 }
 
 export function toggleFavoritesOptions(value: boolean): void {

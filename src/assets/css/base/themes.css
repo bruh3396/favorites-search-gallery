@@ -66,3 +66,21 @@
   --c-text: #e6edf3;
   --c-link: blueviolet !important;
 }
+
+[data-theme="ember"] {
+  --surface: #1f1512;
+  --surface-pill: #160d0a;
+  --surface-raised: #2c1d18;
+  --surface-hover: #3a2620;
+  --border: #4d3128;
+  --text: #f5e6df;
+  --text-muted: #b08a7c;
+  --accent: #ff6a3d;
+  --accent-text: #1f1512;
+}
+
+[data-theme="ember"] body {
+  --c-bg: #1f1512;
+  --c-text: #f5e6df;
+  --c-link: #ff6a3d !important;
+}

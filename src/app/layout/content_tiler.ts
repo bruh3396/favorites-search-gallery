@@ -16,7 +16,7 @@ import { clamp } from "@/utils/number";
 import { navigationDelta } from "@/utils/navigation";
 import { yieldControl } from "@/lib/async/timing";
 
-const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.columnCount.value : Preferences.searchPageColumnCount.value);
+const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.favoritesColumnCount.value : Preferences.searchPageColumnCount.value);
 const tilers: AbstractTiler[] = [columnTiler, new GridTiler(Content), new RowTiler(Content), new SquareTiler(Content), new NativeTiler(Content)];
 const tilerMap = new Map(tilers.map(tiler => [tiler.layout, tiler]));
 let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.searchPageLayout.value;
@@ -24,8 +24,8 @@ let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
 
 export function setup(): void {
   currentTiler.activate();
-  setColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.columnCount.value);
-  setRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowHeight.value : Preferences.rowHeight.value);
+  setColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.favoritesColumnCount.value);
+  setRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowHeight.value : Preferences.favoritesRowHeight.value);
   DomEvents.document.wheel.on(changeItemSizeOnShiftScroll);
   Events.favorites.columnCountChanged.on(setColumnCount);
   Events.favorites.rowSizeChanged.on(setRowSize);

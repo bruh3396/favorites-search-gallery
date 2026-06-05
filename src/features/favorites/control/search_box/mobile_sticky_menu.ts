@@ -34,13 +34,13 @@ async function onHeaderVisibilityChanged(headerVisible: boolean): Promise<void> 
 }
 
 export function setupMobileStickyMenu(optionsCheckbox: HTMLInputElement): void {
-  toggleFavoritesOptions(Preferences.optionsVisible.value);
-  optionsCheckbox.checked = Preferences.optionsVisible.value;
+  toggleFavoritesOptions(Preferences.favoritesOptionsVisible.value);
+  optionsCheckbox.checked = Preferences.favoritesOptionsVisible.value;
 
   let headerIsVisible = true;
 
   optionsCheckbox.addEventListener("change", () => {
-    Preferences.optionsVisible.set(optionsCheckbox.checked);
+    Preferences.favoritesOptionsVisible.set(optionsCheckbox.checked);
     toggleFavoritesOptions(optionsCheckbox.checked);
 
     if (!headerIsVisible) {

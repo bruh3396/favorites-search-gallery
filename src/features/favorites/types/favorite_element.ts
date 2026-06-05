@@ -39,6 +39,12 @@ export class FavoriteElement {
     return this.favoriteButton.classList.contains("post-action-btn--remove");
   }
 
+  public setAspectRatio(width: number, height: number): void {
+    if (width > 0 && height > 0) {
+      this.image.style.aspectRatio = `${width} / ${height}`;
+    }
+  }
+
   public swapFavoriteButton(): void {
     this.favoriteButton.outerHTML = this.hasRemoveButton ? ADD_FAVORITE_IMAGE_HTML : REMOVE_FAVORITE_IMAGE_HTML;
     this.favoriteButton = this.container.children[1] as HTMLImageElement;
@@ -70,6 +76,7 @@ export class FavoriteElement {
     this.image.src = post.previewURL;
     this.image.classList.add(resolveMediaType(post.tags));
     this.root.id = post.id;
+    this.setAspectRatio(post.width, post.height);
   }
 
   private handleFavoriteButtonClick(event: MouseEvent): void {

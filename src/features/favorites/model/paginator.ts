@@ -8,7 +8,7 @@ import { navigationDelta } from "@/utils/navigation";
 type PageRange = { start: number; end: number };
 
 let currentPageNumber = 1;
-let resultsPerPage = Preferences.resultsPerPage.value;
+let resultsPerPage = Preferences.favoritesResultsPerPage.value;
 let favorites: Favorite[] = [];
 
 export const pageCount = (): number => Math.ceil(favorites.length / resultsPerPage) || 1;

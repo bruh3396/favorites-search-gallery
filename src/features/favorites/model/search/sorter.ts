@@ -3,11 +3,11 @@ import { Preferences } from "@/app/context/preferences";
 import { shuffleArray } from "@/utils/collection/array";
 
 export function sortFavorites(favorites: Favorite[]): Favorite[] {
-  const sortingMethod = Preferences.sortingMethod.value;
+  const sortKey = Preferences.favoritesSortKey.value;
 
-  if (sortingMethod === "random") {
+  if (sortKey === "random") {
     return shuffleArray([...favorites]);
   }
-  const sorted = [...favorites].sort((a, b) => b.metrics[sortingMethod] - a.metrics[sortingMethod]);
-  return Preferences.sortAscending.value ? sorted.reverse() : sorted;
+  const sorted = [...favorites].sort((a, b) => b.metrics[sortKey] - a.metrics[sortKey]);
+  return Preferences.favoritesSortAscending.value ? sorted.reverse() : sorted;
 }

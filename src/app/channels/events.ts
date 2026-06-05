@@ -43,7 +43,7 @@ export const Events = {
     sortingMethodChanged: new Emitter<MetadataMetric>(),
     performanceProfileChanged: new Emitter<PerformanceProfile>(),
 
-    showOnHoverToggled: new Emitter<boolean>(),
+    galleryPreviewToggled: new Emitter<boolean>(),
     tooltipToggled: new Emitter<boolean>(),
     autoplayToggled: new Emitter<boolean>(),
     removeButtonsToggled: new Emitter<boolean>(),
@@ -57,7 +57,7 @@ export const Events = {
     infiniteScrollToggled: new Emitter<boolean>()
   },
   gallery: {
-    showOnHoverOverridden: new Emitter<boolean>(),
+    previewOverridden: new Emitter<boolean>(),
     openedGallery: new Emitter<HTMLElement>(),
     closedGallery: new Emitter<void>(),
     displayedThumb: new Emitter<HTMLElement>(),

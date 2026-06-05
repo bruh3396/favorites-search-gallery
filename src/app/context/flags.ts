@@ -5,7 +5,7 @@ import { Preferences } from "@/app/context/preferences";
 export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_SEARCH_PAGE && Preferences.searchPageEnabled.value);
 export const FAVORITES_SEARCH_GALLERY_DISABLED = !FAVORITES_SEARCH_GALLERY_ENABLED;
 
-export const PERFORMANCE_PROFILE = Preferences.performanceProfile.value;
+export const PERFORMANCE_PROFILE = Preferences.appPerformanceProfile.value;
 
 export const GALLERY_ENABLED = (ON_FAVORITES_PAGE || ON_SEARCH_PAGE) && (PERFORMANCE_PROFILE === PerformanceProfile.Normal || PERFORMANCE_PROFILE === PerformanceProfile.Medium);
 export const GALLERY_DISABLED = !GALLERY_ENABLED;

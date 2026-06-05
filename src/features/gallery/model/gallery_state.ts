@@ -7,7 +7,7 @@ let recentlyClosed = false;
 
 export const getCurrentState = (): GalleryState => currentState;
 export const isInGallery = (): boolean => currentState === GalleryState.Open;
-export const isEnlargingOnHover = (): boolean => currentState === GalleryState.Hover;
+export const isShowingPreviews = (): boolean => currentState === GalleryState.Preview;
 export const hasRecentlyExitedGallery = (): boolean => recentlyClosed;
 
 export function open(): void {
@@ -22,10 +22,10 @@ export function close(): void {
   }, GalleryConfig.recentCloseDuration);
 }
 
-export function toggleEnlargeOnHover(): void {
-  currentState = currentState === GalleryState.Hover ? GalleryState.Idle : GalleryState.Hover;
+export function togglePreviews(): void {
+  currentState = currentState === GalleryState.Preview ? GalleryState.Idle : GalleryState.Preview;
 }
 
 function initialState(): GalleryState {
-  return Preferences.showOnHover.value ? GalleryState.Hover : GalleryState.Idle;
+  return Preferences.galleryPreviewEnabled.value ? GalleryState.Preview : GalleryState.Idle;
 }

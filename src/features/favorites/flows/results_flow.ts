@@ -23,4 +23,4 @@ export function syncResults(): void {
   activeView().sync();
 }
 
-const activeView = (): FavoritesResultsView => (Preferences.infiniteScroll.value ? FavoritesInfiniteScrollView : FavoritesPaginatedView);
+const activeView = (): FavoritesResultsView => (Preferences.favoritesInfiniteScroll.value ? FavoritesInfiniteScrollView : FavoritesPaginatedView);

@@ -155,10 +155,10 @@ function setupMenuBatchSizeSelect(): void {
   if (!(batchSizeSelect instanceof HTMLSelectElement)) {
     return;
   }
-  batchSizeSelect.value = String(Preferences.downloadBatchSize.value);
+  batchSizeSelect.value = String(Preferences.favoritesDownloadBatchSize.value);
 
   batchSizeSelect.addEventListener("change", () => {
-    Preferences.downloadBatchSize.set(parseInt(batchSizeSelect.value, 10));
+    Preferences.favoritesDownloadBatchSize.set(parseInt(batchSizeSelect.value, 10));
   });
 }
 
@@ -179,7 +179,7 @@ async function downloadFavorites(favorites: Favorite[]): Promise<void> {
   }
   dialog.toggleAttribute("data-active", true);
   statusHeader.textContent = `Downloading ${favoriteCount} Results`;
-  const batches = splitIntoChunks(favorites, Preferences.downloadBatchSize.value);
+  const batches = splitIntoChunks(favorites, Preferences.favoritesDownloadBatchSize.value);
   const totalProgressRow = createStatusTextRow();
   const batchProgressRow = createStatusTextRow();
   const fileNameRow = createStatusTextRow();
