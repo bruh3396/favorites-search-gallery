@@ -18,7 +18,7 @@ export class SkeletonItem {
   }
 
   private setSize(style: Record<string, string> | null, aspectRatio: string | undefined): void {
-    if (style === null) {
+    if (style === null || style === undefined) {
       const dimensions: Dimensions2D = aspectRatio ? parseDimensions2D(aspectRatio) : randomDimensions();
 
       this.element.style.setProperty("width", `${dimensions.x}px`);

@@ -165,8 +165,8 @@
   transform: translate(-50%, -50%);
 }
 
-#download-menu-help svg.theme--dark {
-  fill: white;
+#download-menu-help svg {
+  fill: var(--text);
 }
 
 #download-menu-help-text {

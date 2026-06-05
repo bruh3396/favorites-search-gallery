@@ -1,4 +1,4 @@
-import SEARCH_PAGE_INFINITE_SCROLL_CSS from "@/assets/css/search_page_infinite_scroll.css";
+import SEARCH_PAGE_INFINITE_SCROLL_CSS from "@/assets/css/search_page/infinite_scroll.css";
 import { insertStyle } from "@/utils/dom/injector";
 
 export function setInfiniteScrollStyle(value: boolean): void {

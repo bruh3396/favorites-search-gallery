@@ -1,7 +1,7 @@
 import { insertHtml, insertStyle } from "@/utils/dom/injector";
 import { Content } from "@/app/layout/shell";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import SEARCH_PAGE_CSS from "@/assets/css/search_page.css";
+import SEARCH_PAGE_CSS from "@/assets/css/search_page/search_page.css";
 import SEARCH_PAGE_HTML from "@/assets/html/search_page.html";
 
 export function setup(): void {

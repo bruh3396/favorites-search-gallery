@@ -66,8 +66,10 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 * See tooltip showing which tags were matched by the last search
 * Hover a thumbnail to overlay its tags by category, then click a tag to add it to the search (right click to negate, middle click to search only that tag)
 * Look at other user's favorites with the above features (blacklisted tags are automatically hidden)
+* Highlight posts already in your favorites while browsing search pages
 * Sort by score, width, height, rating, id, date uploaded, or date changed
 * Filter by rating: safe, questionable, explicit, or any combination of the three
+* Choose between multiple themes
 * Add/Remove favorites while in gallery
 * Redirect to original images in new tabs
 
@@ -140,7 +142,6 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | Key | Function        |
 | :---| :---------------|
 | T   | Toggle tooltips |
-| D   | Toggle details  |
 | U   | Toggle UI |
 | O   | Toggle more options  |
 | R   | Toggle add/remove favorite buttons |

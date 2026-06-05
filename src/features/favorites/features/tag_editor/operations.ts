@@ -1,4 +1,4 @@
-import { cacheTagModification, storeTagModifications } from "@/features/favorites/features/tag_modifier/store";
+import { cacheTagModification, storeTagModifications } from "@/features/favorites/features/tag_editor/store";
 import { Favorite } from "@/types/favorite";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 import { setCustomTags } from "@/lib/search/tags/custom_tags";
@@ -18,30 +18,30 @@ export function initializeTagOperations(
 }
 
 export function addTagsToSelected(selected: Set<Favorite>, tags: string): void {
-  modifyTagsOfSelected(selected, tags, false);
+  editSelectedTags(selected, tags, false);
 }
 
 export function removeTagsFromSelected(selected: Set<Favorite>, tags: string): void {
-  modifyTagsOfSelected(selected, tags, true);
+  editSelectedTags(selected, tags, true);
 }
 
 export function resetAllFavoriteTags(favorites: Favorite[]): void {
   favorites.forEach(f => withReIndex(f, () => f.resetAdditionalTags()));
 }
 
-function modifyTagsOfSelected(selected: Set<Favorite>, rawTags: string, remove: boolean): void {
+function editSelectedTags(selected: Set<Favorite>, rawTags: string, remove: boolean): void {
   const tags = rawTags.toLowerCase();
   const tagsWithoutMediaTypes = removeMediaTypeTags(tags);
-  const tagsToModify = removeExtraWhiteSpace(tagsWithoutMediaTypes);
+  const tagsToEdit = removeExtraWhiteSpace(tagsWithoutMediaTypes);
   const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
   let modifiedTagsCount = 0;
 
-  if (tagsToModify === "") {
+  if (tagsToEdit === "") {
     return;
   }
 
   for (const favorite of selected) {
-    const additionalTags = remove ? removeTagsFromFavorite(favorite, tagsToModify) : addTagsToFavorite(favorite, tagsToModify);
+    const additionalTags = remove ? removeTagsFromFavorite(favorite, tagsToEdit) : addTagsToFavorite(favorite, tagsToEdit);
 
     cacheTagModification(favorite.id, additionalTags);
     modifiedTagsCount += 1;
@@ -56,7 +56,7 @@ function modifyTagsOfSelected(selected: Set<Favorite>, rawTags: string, remove: 
   }
   showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);
   dispatchEvent(new Event("modifiedTags"));
-  setCustomTags(tagsToModify);
+  setCustomTags(tagsToEdit);
   storeTagModifications();
 }
 

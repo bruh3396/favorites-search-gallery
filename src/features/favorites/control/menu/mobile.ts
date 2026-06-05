@@ -1,12 +1,12 @@
 import { ButtonElement, CheckboxElement, SelectElement } from "@/types/element";
-import { Layout, PerformanceProfile } from "@/types/ui";
+import { Layout, PerformanceProfile, Theme } from "@/types/ui";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "@/lib/ui/toggles";
-import { toggleDarkTheme, usingDarkTheme } from "@/lib/ui/style";
 import { Events } from "@/app/channels/events";
 import { GALLERY_ENABLED } from "@/app/context/flags";
 import { MetadataMetric } from "@/types/search";
 import { Preferences } from "@/app/context/preferences";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
+import { applyTheme } from "@/lib/ui/style";
 import { buildButtonElement } from "@/lib/ui/elements/button";
 import { buildSelectElement } from "@/lib/ui/elements/select";
 import { buildToggleSwitch } from "@/app/input/checkbox";
@@ -102,15 +102,6 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
     function: toggleHeader
   },
   {
-    id: "dark-theme",
-    parentId: "favorite-options-left",
-    textContent: "Dark Theme",
-    title: "Toggle dark theme",
-    defaultValue: usingDarkTheme(),
-    hotkey: "",
-    function: toggleDarkTheme
-  },
-  {
     id: "enhance-search-pages",
     parentId: "favorite-options-left",
     textContent: "Search Page Gallery",
@@ -138,7 +129,19 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
   }
 ];
 
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<Theme>>)[] = [
+  {
+    id: "theme",
+    parentId: "favorite-options-left",
+    title: "Change theme",
+    preference: Preferences.theme,
+    function: applyTheme,
+    options: new Map<Theme, string>([
+      ["native-light", "Light"],
+      ["native-dark", "Dark"],
+      ["midnight", "Midnight"]
+    ])
+  },
   {
     id: "sorting-method",
     parentId: "sort-inputs",

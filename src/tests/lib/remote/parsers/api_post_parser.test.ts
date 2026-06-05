@@ -1,5 +1,5 @@
 import { CompactPost, PostResponse } from "@/types/api";
-import { DeletedPostError, RateLimitedError } from "@/types/errors";
+import { DeletedPostError, PostFetchError } from "@/types/errors";
 import { describe, expect, test } from "vitest";
 import { parsePostResponse } from "@/lib/remote/parsers/api_post_parser";
 
@@ -43,7 +43,11 @@ describe("parsePostResponse", () => {
     expect(() => parsePostResponse({ status: "deleted", id: "foo" })).toThrow(DeletedPostError);
   });
 
-  test("rate_limited throws RateLimitedError", () => {
-    expect(() => parsePostResponse({ status: "rate_limited", id: "bar" })).toThrow(RateLimitedError);
+  test("rate_limited throws PostFetchError", () => {
+    expect(() => parsePostResponse({ status: "rate_limited", id: "bar" })).toThrow(PostFetchError);
+  });
+
+  test("error throws PostFetchError", () => {
+    expect(() => parsePostResponse({ status: "error", id: "bar" })).toThrow(PostFetchError);
   });
 });

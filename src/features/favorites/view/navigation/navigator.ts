@@ -1,4 +1,5 @@
 import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "@/features/favorites/types/favorite_types";
+import { IconName, icon } from "@/lib/ui/icon";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesMenuId } from "@/features/favorites/types/menu_ids";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
@@ -94,7 +95,7 @@ function createContainer(): HTMLSpanElement {
 
 function insertMenu(): void {
   if (ON_DESKTOP_DEVICE) {
-    const placeToInsert = document.getElementById(FavoritesMenuId.paginationPlaceholder);
+    const placeToInsert = document.getElementById(FavoritesMenuId.paginationSlot);
 
     if (placeToInsert !== null) {
       placeToInsert.insertAdjacentElement("afterend", CONTAINER);
@@ -179,19 +180,19 @@ function createNumberTraversalButton(currentPageNumber: number, pageNumber: numb
 }
 
 function createArrowTraversalButtons(parameters: FavoritesPaginationParameters): void {
-  const previous = createArrowTraversalButton("previous", "‹", "afterbegin");
-  const next = createArrowTraversalButton("next", "›", "beforeend");
+  const previous = createArrowTraversalButton("previous", "chevronLeft", "afterbegin");
+  const next = createArrowTraversalButton("next", "chevronRight", "beforeend");
 
   updateArrowTraversalButtonInteractability(previous, next, parameters);
 }
 
-function createArrowTraversalButton(name: PageRelation, textContent: string, position: InsertPosition): HTMLButtonElement {
+function createArrowTraversalButton(name: PageRelation, iconName: IconName, position: InsertPosition): HTMLButtonElement {
   const button = document.createElement("button");
 
   button.id = `${name}-page`;
   button.title = `Goto ${name} page`;
   button.className = "favorites-menu-pagination-arrow";
-  button.textContent = textContent;
+  button.appendChild(icon(iconName));
   button.onclick = (): void => {
     callbacks.onRelativePageSelected(name);
   };

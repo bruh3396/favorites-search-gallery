@@ -1,4 +1,4 @@
-import CONTROLS_CSS from "@/assets/css/controls.css";
+import CONTROLS_CSS from "@/assets/css/thumbs/controls.css";
 import { insertStyle } from "@/utils/dom/injector";
 import { sleep } from "@/lib/async/timing";
 

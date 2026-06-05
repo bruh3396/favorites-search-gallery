@@ -3,6 +3,8 @@
 :root {
   --color-bg: black;
   --color-accent: #0075FF;
+  --danger: #e5484d;
+  --danger-surface: rgba(229, 72, 77, 0.15);
   --color-gallery-menu-bg: rgba(0, 0, 0, 1);
   --size-gallery-menu: 80px;
   --gradient-rainbow: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
@@ -74,6 +76,8 @@ dialog::backdrop {
 input[type=number] {
   border: 1px solid #767676;
   border-radius: 2px;
+  background-color: var(--surface-raised);
+  color: var(--text);
 }
 
 input[type="checkbox"] {
@@ -84,16 +88,12 @@ option {
   font-size: 15px;
 }
 
+
 /* Themes */
 
-.theme--light {
-  background: linear-gradient(to bottom, #aae5a4, #89e180);
-  color: black;
-}
-
-.theme--dark {
-  background: linear-gradient(to bottom, #5e715e, #293129);
-  color: white;
+.surface-panel {
+  background: var(--surface-gradient);
+  color: var(--text);
 }
 
 /* Utilities */
@@ -157,7 +157,7 @@ option {
   border: 1px solid;
   padding: 0;
   border-radius: 20px;
-  background-color: white;
+  background-color: var(--surface-raised);
 }
 
 .num-input>hold-button,
@@ -172,6 +172,7 @@ option {
   border: none;
   margin: 0px 8px;
   padding: 0;
+  color: var(--text);
 }
 
 .num-input>hold-button::after,

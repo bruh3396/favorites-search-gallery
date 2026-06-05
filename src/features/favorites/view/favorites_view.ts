@@ -1,4 +1,5 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
+import * as FavoritesDrawer from "@/features/favorites/view/shell/drawer";
 import * as FavoritesNavigator from "@/features/favorites/view/navigation/navigator";
 import * as FavoritesShell from "@/features/favorites/view/shell/favorites_shell";
 import * as FavoritesStatus from "@/features/favorites/view/status/status";
@@ -33,9 +34,11 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
   ContentTiler.setup();
   ContentTiler.tile(favoritesSkeleton());
   FavoritesNavigator.setup(viewCallbacks);
+  FavoritesDrawer.setup();
 }
 
 export { toggle as toggleNavigator, getContainer as getNavigationContainer, build as buildNavigationMenu, update as updateNavigationMenu } from "@/features/favorites/view/navigation/navigator";
+export { toggle as toggleDrawer } from "@/features/favorites/view/shell/drawer";
 export { changeLayout } from "@/app/layout/content_tiler";
 export { collectAspectRatios } from "@/features/favorites/view/skeleton/skeleton";
 export * from "@/features/favorites/view/thumb_preloader";

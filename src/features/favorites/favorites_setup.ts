@@ -13,7 +13,7 @@ import * as FavoritesResetFlow from "@/features/favorites/flows/reset_flow";
 import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
 import * as FavoritesSearchBox from "@/features/favorites/control/search_box/search_box";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
-import * as FavoritesTagModifier from "@/features/favorites/features/tag_modifier/tag_modifier";
+import * as FavoritesTagEditor from "@/features/favorites/features/tag_editor/tag_editor";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import * as PostApi from "@/lib/remote/api/post_fetcher";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "@/lib/environment";
@@ -44,7 +44,7 @@ export function setupFavorites(): void {
 }
 
 function setupModel(): void {
-  FavoritesModel.setup(FavoritesTagModifier.getAdditionalTags, FavoritesTagModifier.ensureTagModificationsLoaded, Events.favorites.tagCategoriesResolved.emit);
+  FavoritesModel.setup(FavoritesTagEditor.getAdditionalTags, FavoritesTagEditor.ensureTagModificationsLoaded, Events.favorites.tagCategoriesResolved.emit);
 }
 
 function setupView(): void {
@@ -70,7 +70,7 @@ function setupControl(): void {
 
 function setupSubFeatures(): void {
   setupDownloader();
-  setupTagModifier();
+  setupTagEditor();
 }
 
 function setupDownloader(): void {
@@ -81,16 +81,16 @@ function setupDownloader(): void {
   Events.favorites.favoritesLoaded.on(FavoritesDownloadMenu.enableDownloadMenu);
 }
 
-function setupTagModifier(): void {
-  // FavoritesTagModifier.setup({
+function setupTagEditor(): void {
+  // FavoritesTagEditor.setup({
   //   getSearchResults: () => FavoritesModel.getCurrentSearchResults(),
   //   getAllFavorites: () => FavoritesModel.getAllFavorites(),
   //   deIndex: (favorite) => FavoritesModel.deIndex([favorite]),
   //   reIndex: (favorite) => FavoritesModel.reIndex([favorite])
   // });
-  Events.favorites.searchResultsUpdated.on(FavoritesTagModifier.onResultsUpdated);
-  Events.favorites.pageChanged.on(FavoritesTagModifier.onPageChanged);
-  DomEvents.document.click.on(FavoritesTagModifier.onDocumentClick);
+  Events.favorites.searchResultsUpdated.on(FavoritesTagEditor.onResultsUpdated);
+  Events.favorites.pageChanged.on(FavoritesTagEditor.onPageChanged);
+  DomEvents.document.click.on(FavoritesTagEditor.onDocumentClick);
 }
 
 function subscribeToEvents(): void {
@@ -114,6 +114,7 @@ function subscribeToEvents(): void {
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
+  Events.favorites.panelButtonClicked.on(FavoritesView.toggleDrawer);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteId);
   Events.favorites.favoriteAdded.on(FavoritesInterFeatureFlow.swapFavoriteButton);
   Events.favorites.favoriteRemoved.on(FavoritesInterFeatureFlow.swapFavoriteButton);

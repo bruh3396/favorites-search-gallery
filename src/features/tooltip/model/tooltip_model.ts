@@ -3,8 +3,6 @@ import * as TooltipTagMatcher from "@/features/tooltip/model/tag_matcher";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
-import { usingDarkTheme } from "@/lib/ui/style";
-
 let currentHighlights: SearchTermHighlight[] = [];
 
 export function rebuildHighlights(query: string): void {
@@ -12,10 +10,10 @@ export function rebuildHighlights(query: string): void {
 }
 
 export function getColorForTag(tag: string): string | null {
-  if (usingDarkTheme()) {
-    return TooltipTagMatcher.findMatchingLightColor(tag, currentHighlights);
+  if (Preferences.theme.value === "native-light") {
+    return TooltipTagMatcher.findMatchingDarkColor(tag, currentHighlights);
   }
-  return TooltipTagMatcher.findMatchingDarkColor(tag, currentHighlights);
+  return TooltipTagMatcher.findMatchingLightColor(tag, currentHighlights);
 }
 
 export function tooltipEnabled(): boolean {

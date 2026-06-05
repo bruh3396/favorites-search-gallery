@@ -1,5 +1,5 @@
 import { CategorizedPost, PostResponse } from "@/types/api";
-import { DeletedPostError, RateLimitedError } from "@/types/errors";
+import { DeletedPostError, PostFetchError } from "@/types/errors";
 import { TagCategoryMap } from "@/types/search";
 import { decodeTagCategory } from "@/lib/remote/parsers/api_tag_parser";
 
@@ -8,8 +8,8 @@ export function parsePostResponse(response: PostResponse): CategorizedPost {
     throw new DeletedPostError();
   }
 
-  if (response.status === "rate_limited") {
-    throw new RateLimitedError();
+  if (response.status === "rate_limited" || response.status === "error") {
+    throw new PostFetchError();
   }
   const compact = response.post;
   const tagNames = Object.keys(compact.tags).sort();

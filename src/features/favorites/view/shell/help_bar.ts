@@ -1,7 +1,6 @@
 import HELP_HTML from "@/assets/html/help.html";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Overlays } from "@/app/layout/shell";
-import { getCurrentThemeClass } from "@/lib/ui/style";
 
 let dialog: HTMLDialogElement;
 
@@ -37,7 +36,7 @@ function buildDialogWhatsNewMenu(menu: HTMLElement): void {
   dialog.id = "whats-new-dialog";
   dialog.style.padding = "5px 10px";
   dialog.style.fontSize = "large";
-  dialog.classList.add(getCurrentThemeClass());
+  dialog.classList.add("surface-panel");
   Overlays.appendChild(dialog);
   const whatsNewContainer = menu.querySelector("#whats-new-container");
 

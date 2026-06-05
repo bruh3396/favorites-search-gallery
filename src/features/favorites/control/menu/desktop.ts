@@ -1,9 +1,9 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/types/element";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
-import { Layout, PerformanceProfile } from "@/types/ui";
+import { Layout, PerformanceProfile, Theme } from "@/types/ui";
+import { applyTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility } from "@/lib/ui/style";
 import { buildCheckboxElement, buildCheckboxOption } from "@/app/input/checkbox";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader, toggleMaximizeToggleFavoriteButtons } from "@/lib/ui/toggles";
-import { toggleDarkTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility, usingDarkTheme } from "@/lib/ui/style";
 import { toggleFavoritesOptions, toggleOptionHotkeyHints, toggleUi } from "@/features/favorites/dom_tweaks/ui_toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -25,7 +25,7 @@ const buttons: Partial<ButtonElement>[] = [
   {
     id: "search-button",
     parentId: FavoritesMenuId.searchButton,
-    title: "Search favorites\nctrl+click/right-click: Search all of rule34 in a new tab",
+    title: "Search",
     icon: "search",
     rightClickEnabled: true,
     event: Events.favorites.searchButtonClicked
@@ -48,7 +48,7 @@ const buttons: Partial<ButtonElement>[] = [
     id: "clear-button",
     parentId: FavoritesMenuId.actions,
     icon: "clear",
-    title: "Clear",
+    title: "Clear search",
     event: Events.favorites.clearButtonClicked
   },
   {
@@ -76,17 +76,18 @@ const buttons: Partial<ButtonElement>[] = [
     event: Events.favorites.resetActiveFavoritesClicked
   },
   {
+    id: FavoritesMenuId.panelButton,
+    parentId: FavoritesMenuId.settingsSlot,
+    icon: "hamburger",
+    title: "Menu",
+    event: Events.favorites.panelButtonClicked
+  },
+  {
     id: "reset-button",
-    parentId: FavoritesMenuId.actions,
+    parentId: FavoritesMenuId.settingsSlot,
     icon: "reset",
     title: "Delete cached favorites and reset preferences",
     event: Events.favorites.resetButtonClicked
-  },
-  {
-    id: "settings-button",
-    parentId: FavoritesMenuId.actions,
-    icon: "settings",
-    title: "Settings"
   }
 
 ];
@@ -247,21 +248,12 @@ const checkboxes: Partial<CheckboxElement>[] = [
     function: toggleHeader
   },
   {
-    id: "dark-theme",
-    parentId: "favorite-options-right",
-    textContent: "Dark Theme",
-    title: "Toggle dark theme",
-    defaultValue: usingDarkTheme(),
-    hotkey: "",
-    function: toggleDarkTheme
-  },
-  {
     id: "use-aliases",
     parentId: "favorite-options-right",
     textContent: "Aliases",
     title: "Alias similar tags",
     enabled: false,
-    preference: Preferences.tagAliasing,
+    preference: Preferences.tagAliases,
     hotkey: "A"
   },
   {
@@ -306,7 +298,19 @@ const simpleCheckboxes: Partial<CheckboxElement>[] = [
   }
 ];
 
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<Theme>>)[] = [
+  {
+    id: "theme",
+    parentId: "favorite-options-right",
+    title: "Change theme",
+    preference: Preferences.theme,
+    function: applyTheme,
+    options: new Map<Theme, string>([
+      ["native-light", "Light"],
+      ["native-dark", "Dark"],
+      ["midnight", "Midnight"]
+    ])
+  },
   {
     id: "sorting-method",
     parentId: "sort-inputs",
@@ -378,8 +382,8 @@ const numbers: Partial<NumberElement>[] = [
     parentId: "row-size-container",
     position: "beforeend",
     preference: Preferences.rowHeight,
-    min: ThumbConfig.rowSizeBounds.min,
-    max: ThumbConfig.rowSizeBounds.max,
+    min: ThumbConfig.rowHeightBounds.min,
+    max: ThumbConfig.rowHeightBounds.max,
     step: 1,
     pollingTime: 50,
     event: Events.favorites.rowSizeChanged

@@ -1,4 +1,4 @@
-import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "@/types/ui";
+import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile, Theme } from "@/types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortingMethod } from "@/types/search";
 import { OverlayMode } from "@/features/post_overlay/types/overlay_mode";
@@ -13,12 +13,12 @@ export const Preferences = {
   autoplayMinimumVideoDuration: new Preference("autoplayMinimumVideoDuration", 5_000),
   autoplayPaused: new Preference("autoplayPaused", false),
   backgroundOpacity: new Preference("backgroundOpacity", "1"),
-  captionsVisible: new Preference("showCaptions", false),
   colorScheme: new Preference("colorScheme", "black"),
   columnCount: new Preference("columnCount", ON_MOBILE_DEVICE ? 3 : 6),
   desktopSearchBoxHeight: new Preference("desktopSearchBoxHeight", 50),
   downloadBatchSize: new Preference("downloadBatchSize", 250),
   downloadButtonsVisible: new Preference("showDownloadButtons", false),
+  drawerOpen: new Preference("drawerOpen", false),
   excludeBlacklist: new Preference("excludeBlacklist", false),
   favoriteFinderId: new Preference("findFavorite", ""),
   favoritesLayout: new Preference<Layout>("layout", "tiler--column"),
@@ -53,7 +53,9 @@ export const Preferences = {
   showOnHover: new Preference("showOnHover", false),
   sortAscending: new Preference("sortAscending", false),
   sortingMethod: new Preference<SortingMethod>("sortingMethod", "default"),
-  tagAliasing: new Preference("tagAliasing", false),
+  tagAliases: new Preference("tagAliasing", false),
+  // theme: new Preference<Theme>("theme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
+  theme: new Preference<Theme>("theme", "midnight"),
   tooltipEnabled: new Preference("showTooltip", false),
   searchPageTooltipEnabled: new Preference("searchPageShowTooltip", false),
   uiVisible: new Preference("showUi", true),

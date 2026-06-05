@@ -408,14 +408,9 @@ textarea#favorites-search-box:focus {
   display: none;
 }
 
-#whats-new-link.persistent.theme--light,
-#whats-new-link:hover.theme--light {
-  color: black;
-}
-
-#whats-new-link.persistent:not(.theme--light),
-#whats-new-link:hover:not(.theme--light) {
-  color: white;
+#whats-new-link.persistent,
+#whats-new-link:hover {
+  color: var(--text);
 }
 
 #whats-new-container {
@@ -434,12 +429,8 @@ textarea#favorites-search-box:focus {
   border-radius: 2px;
 }
 
-#whats-new-container.theme--light {
-  outline: 2px solid black;
-}
-
-#whats-new-container:not(.theme--light) {
-  outline: 1.5px solid white;
+#whats-new-container {
+  outline: 1.5px solid var(--text);
 }
 
 /* opt-checkbox */

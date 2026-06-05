@@ -16,7 +16,14 @@
  *   --text-muted       placeholders, secondary text
  *   --accent           selected / active / focus
  *   --accent-text      text / icon on an accent fill
+ *
+ * Computed tokens (derived automatically from the above — do not set per-theme):
+ *   --surface-gradient  standard panel gradient (surface-raised → surface, top to bottom)
  */
+
+:root {
+  --surface-gradient: linear-gradient(to bottom, var(--surface-raised), var(--surface));
+}
 
 [data-theme="native-dark"] {
   --surface: #2a322a;
@@ -40,4 +47,22 @@
   --text-muted: #4d6446;
   --accent: #0075ff;
   --accent-text: #ffffff;
+}
+
+[data-theme="midnight"] {
+  --surface: #0d1117;
+  --surface-pill: #161b22;
+  --surface-raised: #21262d;
+  --surface-hover: #30363d;
+  --border: #3d444d;
+  --text: #e6edf3;
+  --text-muted: #7d8590;
+  --accent: blueviolet;
+  --accent-text: #ffffff;
+}
+
+[data-theme="midnight"] body {
+  --c-bg: #0d1117;
+  --c-text: #e6edf3;
+  --c-link: blueviolet !important;
 }

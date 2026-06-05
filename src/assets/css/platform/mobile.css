@@ -230,8 +230,8 @@ input[type="text"] {
   fill: var(--color-accent);
 }
 
-#mobile-toolbar-row .theme--dark svg {
-  fill: white;
+[data-theme="native-dark"] #mobile-toolbar-row svg {
+  fill: var(--text);
 }
 
 .mobile-toolbar-checkbox-label {
@@ -252,12 +252,8 @@ input[type="text"] {
   flex: 1;
 }
 
-.search-bar.theme--light {
-  background: white;
-}
-
-.search-bar.theme--dark {
-  background: #303030;
+.search-bar {
+  background: var(--surface-pill);
 }
 
 .search-bar-items {
@@ -391,12 +387,8 @@ input[type="text"] {
   text-align: center;
 }
 
-#mobile-footer.theme--light {
-  background: linear-gradient(to top, #aae5a4, #89e180);
-}
-
-#mobile-footer.theme--dark {
-  background: linear-gradient(to top, #5e715e, #293129);
+#mobile-footer {
+  background: var(--surface-gradient);
 }
 
 #mobile-footer-top {

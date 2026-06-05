@@ -50,7 +50,15 @@ export class FavoriteElement {
   }
 
   private setupNavigationClick(): void {
-    this.container.href = buildPostPageUrl(this.root.id);
+    const url = buildPostPageUrl(this.root.id);
+
+    this.container.href = url;
+    this.container.addEventListener("mouseenter", (): void => {
+      this.container.removeAttribute("href");
+    });
+    this.container.addEventListener("mouseleave", (): void => {
+      this.container.href = url;
+    });
 
     if (ON_DESKTOP_DEVICE) {
       this.container.onclick = (event: MouseEvent): void => this.handleClick(event);

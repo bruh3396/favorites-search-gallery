@@ -4,7 +4,6 @@ import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { Preferences } from "@/app/context/preferences";
 import SAVED_SEARCHES_CSS from "@/assets/css/saved_searches.css";
-import { SAVED_SEARCHES_DISABLED } from "@/app/context/flags";
 import SAVED_SEARCHES_HTML from "@/assets/html/saved_searches.html";
 import { Storage } from "@/lib/storage/local_storage";
 import { awesompleteIsUnselected } from "@/lib/ui/autocomplete/awesomplete";
@@ -21,9 +20,9 @@ let exportButton: HTMLElement;
 let saveSearchResultsButton: HTMLElement;
 
 export function setupSavedSearches(): void {
-  if (SAVED_SEARCHES_DISABLED) {
-
-  }
+  // if (SAVED_SEARCHES_DISABLED) {
+  //   return;
+  // }
   // insertAllHtml();
   // extractHtmlElements();
   // addEventListeners();

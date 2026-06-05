@@ -1,5 +1,5 @@
 import { EncodedTagCategory, TagResponse } from "@/types/api";
-import { RateLimitedError } from "@/types/errors";
+import { PostFetchError } from "@/types/errors";
 import { TagCategory } from "@/types/search";
 
 const tagCategoryDecodings: Record<number, TagCategory> = {
@@ -13,7 +13,7 @@ const tagCategoryDecodings: Record<number, TagCategory> = {
 
 export function tagResponseToTagCategory(response: TagResponse): EncodedTagCategory {
   if (response.status === "rate_limited") {
-    throw new RateLimitedError();
+    throw new PostFetchError();
   }
   return response.category;
 }

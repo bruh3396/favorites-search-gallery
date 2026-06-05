@@ -33,6 +33,7 @@ export const Events = {
     searchButtonClicked: new Emitter<MouseEvent>(),
     clearButtonClicked: new Emitter<MouseEvent>(),
     resetButtonClicked: new Emitter<MouseEvent>(),
+    panelButtonClicked: new Emitter<MouseEvent>(),
 
     resultsPerPageChanged: new Emitter<number>(),
     allowedRatingsChanged: new Emitter<Rating>(),

@@ -49,6 +49,7 @@ export type PostResponse =
   | { status: "ok"; post: CompactPost }
   | { status: "deleted", id: string }
   | { status: "rate_limited", id: string }
+  | { status: "error", id: string }
 
 export type TagResponse =
   | { status: "ok"; category: EncodedTagCategory }

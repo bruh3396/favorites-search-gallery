@@ -2,7 +2,7 @@ import * as GalleryDesktopMenu from "@/features/gallery/view/shell/desktop_menu"
 import * as GalleryRenderer from "@/features/gallery/view/rendering/gallery_renderer";
 import * as GalleryShell from "@/features/gallery/view/shell/shell";
 import * as GalleryUi from "@/features/gallery/view/shell/ui";
-import GALLERY_CSS from "@/assets/css/gallery.css";
+import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
 import { GalleryMenuAction } from "@/types/ui";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { insertStyle } from "@/utils/dom/injector";

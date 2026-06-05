@@ -1,12 +1,12 @@
-#tag-modifier-ui-container {
+#tag-editor-ui-container {
   display: none;
 }
 
-#tag-modifier-ui-container>* {
+#tag-editor-ui-container>* {
   margin-top: 10px;
 }
 
-#tag-modifier-ui-textarea {
+#tag-editor-ui-textarea {
   width: 80%;
 }
 
@@ -20,7 +20,7 @@
   filter: grayscale(0%);
 }
 
-#tag-modifier-ui-status-label {
+#tag-editor-ui-status-label {
   visibility: hidden;
 }
 

@@ -1,3 +1,4 @@
+export type Theme = "native-dark" | "native-light" | "midnight";
 export type Layout = "tiler--row" | "tiler--square" | "tiler--grid" | "tiler--column" | "tiler--native"
 export type ImageCursor = "zoom-in" | "zoom-out" | "auto"
 export type SkeletonAnimation = "pulse" | "shine"

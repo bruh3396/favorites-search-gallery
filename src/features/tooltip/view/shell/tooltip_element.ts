@@ -13,6 +13,6 @@ function createTooltipElement(): HTMLDivElement {
   const el = document.createElement("div");
 
   el.id = "tooltip";
-  el.className = "theme--light";
+  el.className = "surface-panel";
   return el;
 }

@@ -15,7 +15,7 @@ export function buildMobileFooter(): void {
   footerHeader.id = "mobile-footer-header";
   footerTop.id = "mobile-footer-top";
   footerBottom.id = "mobile-footer-bottom";
-  footer.className = "theme--dark";
+  footer.className = "surface-panel";
   footer.appendChild(footerHeader);
   footer.appendChild(footerTop);
   footer.appendChild(footerBottom);

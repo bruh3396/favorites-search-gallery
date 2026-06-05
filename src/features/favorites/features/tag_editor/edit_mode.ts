@@ -1,4 +1,4 @@
-import { select, unselectAll } from "@/features/favorites/features/tag_modifier/selection";
+import { select, unselectAll } from "@/features/favorites/features/tag_editor/selection";
 import { Favorite } from "@/types/favorite";
 import { ITEM_CLASS_NAME } from "@/lib/thumb/thumbs";
 import { insertStyle } from "@/utils/dom/injector";
@@ -63,7 +63,7 @@ function toggleThumbInteraction(value: boolean): void {
       }
     `;
   }
-  insertStyle(html, "tag-modifier-edit-mode");
+  insertStyle(html, "tag-editor-edit-mode");
 }
 
 function toggleTagEditModeAbortController(value: boolean): void {

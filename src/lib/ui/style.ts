@@ -1,42 +1,43 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { getCookie, setCookie } from "@/utils/browser/cookie";
-import COMMON_CSS from "@/assets/css/common.css";
-import CONTENT_CSS from "@/assets/css/content.css";
-import DARK_THEME_CSS from "@/assets/css/dark_theme.css";
-import SKELETON_CSS from "@/assets/css/skeleton.css";
-import THEMES_CSS from "@/assets/css/themes.css";
-import TILE_CSS from "@/assets/css/tile.css";
+import COMMON_CSS from "@/assets/css/base/common.css";
+import CONTENT_CSS from "@/assets/css/base/content.css";
+import { Preferences } from "@/app/context/preferences";
+import SKELETON_CSS from "@/assets/css/base/skeleton.css";
+import THEMES_CSS from "@/assets/css/base/themes.css";
+import THUMB_FADE_IN_CSS from "@/assets/css/thumbs/thumb_fade_in.css";
+import TILE_CSS from "@/assets/css/thumbs/tile.css";
+import { Theme } from "@/types/ui";
 import { ThumbConfig } from "@/config/thumb_config";
-import { buildStyleSheetUrl } from "@/lib/remote/url/action_url_builder";
 import { insertStyle } from "@/utils/dom/injector";
+import { setCookie } from "@/utils/browser/cookie";
 import { yieldControl } from "@/lib/async/timing";
 
 export function setupStyles(): void {
-  insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS + THEMES_CSS);
-  toggleDarkTheme(usingDarkTheme());
+  const fadeInCss = ThumbConfig.fadeIn ? THUMB_FADE_IN_CSS : "";
+
+  insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS + THEMES_CSS + fadeInCss);
+  applyTheme(Preferences.theme.value);
   setupVideoAndGifOutlines();
   setupTilerStyles();
 }
 
-export async function toggleDarkTheme(useDark: boolean): Promise<void> {
+export async function applyTheme(theme: Theme): Promise<void> {
   await yieldControl();
-  insertStyle(useDark ? DARK_THEME_CSS : "", "theme-dark");
-  toggleDarkStyleSheet(useDark);
-  toggleAllThemeClasses(useDark);
-  setTheme(useDark ? "native-dark" : "native-light");
-  setCookie("theme", useDark ? "dark" : "light");
-}
-
-function setTheme(theme: string): void {
+  Preferences.theme.set(theme);
   document.documentElement.dataset.theme = theme;
+  syncNativeCookie(theme);
 }
 
-export function usingDarkTheme(): boolean {
-  return getCookie("theme", "") === "dark";
-}
+function syncNativeCookie(theme: Theme): void {
+  const nativeCookies: Partial<Record<Theme, string>> = {
+    "native-dark": "dark",
+    "native-light": "light"
+  };
+  const cookieValue = nativeCookies[theme];
 
-export function getCurrentThemeClass(): string {
-  return usingDarkTheme() ? "theme--dark" : "theme--light";
+  if (cookieValue !== undefined) {
+    setCookie("theme", cookieValue);
+  }
 }
 
 export function setColorScheme(color: string): void {
@@ -56,28 +57,6 @@ export function toggleSavedSearchesVisibility(value: boolean): void {
         display: ${value ? "block" : "none"};
       }
     `, "saved-searches-visibility");
-}
-
-function getMainStyleSheetElement(): HTMLLinkElement | undefined {
-  return Array.from(document.querySelectorAll("link")).filter(link => link.rel === "stylesheet")[0];
-}
-
-function setStyleSheet(url: string): void {
-  getMainStyleSheetElement()?.setAttribute("href", url);
-}
-
-function toggleDarkStyleSheet(useDark: boolean): void {
-  setStyleSheet(buildStyleSheetUrl(ON_MOBILE_DEVICE ? "mobile" : "desktop", useDark));
-}
-
-function toggleAllThemeClasses(useDark: boolean): void {
-  const currentTheme = useDark ? "theme--light" : "theme--dark";
-  const targetTheme = useDark ? "theme--dark" : "theme--light";
-
-  for (const element of Array.from(document.querySelectorAll(`.${currentTheme}`))) {
-    element.classList.remove(currentTheme);
-    element.classList.add(targetTheme);
-  }
 }
 
 function setupVideoAndGifOutlines(): void {
@@ -137,7 +116,7 @@ function setupTilerStyles(): void {
 
   const style = `
   .tiler--row, .tiler--column, .tiler--column .tiler--column--a, .tiler--square, .tiler--grid {
-    gap: ${ThumbConfig.thumbSpacing}px !important;
+    gap: ${ThumbConfig.spacing}px !important;
   }
 
   #favorites-search-gallery-content.tiler--column {

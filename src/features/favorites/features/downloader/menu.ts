@@ -1,7 +1,7 @@
 import * as FavoritesDownloader from "@/features/favorites/features/downloader/downloader";
 import { insertHtml, insertStyle } from "@/utils/dom/injector";
 import { sleep, yieldControl } from "@/lib/async/timing";
-import DOWNLOADER_CSS from "@/assets/css/downloader.css";
+import DOWNLOADER_CSS from "@/assets/css/favorites/downloader.css";
 import { DOWNLOADER_DISABLED } from "@/app/context/flags";
 import DOWNLOAD_HTML from "@/assets/html/downloader.html";
 import { DownloadRequest } from "@/features/favorites/features/downloader/download_request";
