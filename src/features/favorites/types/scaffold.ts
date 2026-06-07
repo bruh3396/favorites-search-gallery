@@ -1,9 +1,15 @@
 import { FavoritesDrawerTab } from "@/types/ui";
 import { IconName } from "@/lib/ui/icon";
 
-export const FavoritesMenuId = {
+export const FavoritesId = {
+  body: "favorites-body",
+  drawerTrack: "favorites-drawer-track",
+  contentRow: "favorites-content-row",
+  contentColumn: "favorites-content-column",
   commandBar: "favorites-command-bar",
   grid: "favorites-command-bar-grid",
+  brandSlot: "favorites-brand-slot",
+  brandVersion: "favorites-brand-version",
   searchBox: "favorites-search-box",
   status: "favorites-search-status",
   matchCount: "match-count-label",
@@ -20,7 +26,7 @@ export const FavoritesMenuId = {
   drawerTabPanels: "favorites-drawer-panels"
 } as const;
 
-export const FavoritesMenuClass = {
+export const FavoritesClass = {
   drawerTab: "favorites-drawer-tab",
   drawerTabLabel: "favorites-drawer-tab-label",
   drawerPanel: "favorites-drawer-panel",
@@ -30,7 +36,7 @@ export const FavoritesMenuClass = {
   drawerHelpLink: "favorites-drawer-help-link"
 } as const;
 
-export const favoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; icon: IconName }[] = [
+export const FavoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; icon: IconName }[] = [
   { tab: "settings", label: "Settings", icon: "settings" },
   { tab: "saved", label: "Saved", icon: "bookmark" },
   { tab: "tags", label: "Tags", icon: "tag" },
@@ -39,7 +45,7 @@ export const favoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; icon
   { tab: "help", label: "Help", icon: "help" }
 ];
 
-export const favoritesHelpLinks: { label: string; href: string }[] = [
+export const FavoritesHelpLinks: { label: string; href: string }[] = [
   { label: "Controls & Help", href: "https://github.com/bruh3396/favorites-search-gallery/#controls" },
   { label: "Report an Issue", href: "https://github.com/bruh3396/favorites-search-gallery/issues" }
 ];

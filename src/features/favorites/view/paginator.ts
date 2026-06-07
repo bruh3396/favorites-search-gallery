@@ -1,8 +1,8 @@
 import { IconName, icon } from "@/lib/ui/icon";
 import { label, span } from "@/utils/dom/element";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
-import { FavoritesPaginationParameters } from "@/features/favorites/types/favorite_types";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesPaginationParameters } from "@/features/favorites/types/interfaces";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { PageRelation } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
@@ -12,7 +12,7 @@ import { isOnlyDigits } from "@/utils/string/query";
 import { numbersAroundInRange } from "@/utils/number";
 import { toggleDataset } from "@/utils/dom/attribute";
 
-const mainContainer = span("favorites-pagination-container");
+const container = span("favorites-pagination");
 const rangeIndicator = label("pagination-range-label");
 const pageNumberRegex = /favorites-page-(\d+)/;
 
@@ -29,7 +29,7 @@ export function setup(pageSelected: (pageNumber: number) => void, relativePageSe
 
 export function toggle(value: boolean): void {
   const html = `
-      #favorites-pagination-container,
+      #favorites-pagination,
       #results-per-page-container,
       #favorite-finder,
       #pagination-range-label,
@@ -43,11 +43,11 @@ export function toggle(value: boolean): void {
 }
 
 export function getContainer(): HTMLElement {
-  return mainContainer;
+  return container;
 }
 
 export function build(parameters: FavoritesPaginationParameters): void {
-  mainContainer.innerHTML = "";
+  container.innerHTML = "";
   updateRangeIndicator(parameters.startIndex, parameters.endIndex, parameters.favoritesCount);
   createNumberTraversalButtons(parameters.currentPageNumber, parameters.finalPageNumber);
   createArrowTraversalButtons(parameters);
@@ -83,10 +83,10 @@ export function update(parameters: FavoritesPaginationParameters): void {
 
 function insertMenu(): void {
   if (ON_DESKTOP_DEVICE) {
-    const placeToInsert = document.getElementById(FavoritesMenuId.paginationSlot);
+    const placeToInsert = document.getElementById(FavoritesId.paginationSlot);
 
     if (placeToInsert !== null) {
-      placeToInsert.insertAdjacentElement("afterend", mainContainer);
+      placeToInsert.insertAdjacentElement("afterend", container);
       placeToInsert.remove();
     }
     return;
@@ -94,12 +94,12 @@ function insertMenu(): void {
   const footerBottom = document.getElementById("mobile-footer-bottom");
 
   if (footerBottom !== null) {
-    footerBottom.insertAdjacentElement("afterbegin", mainContainer);
+    footerBottom.insertAdjacentElement("afterbegin", container);
   }
 }
 
 function insert(): void {
-  const matchCountLabel = document.getElementById(FavoritesMenuId.matchCount);
+  const matchCountLabel = document.getElementById(FavoritesId.matchCount);
 
   if (matchCountLabel !== null) {
     matchCountLabel.insertAdjacentElement("afterend", rangeIndicator);
@@ -137,7 +137,7 @@ function createNumberTraversalButtons(currentPageNumber: number, finalPageNumber
   if (windowEnd < finalPageNumber) {
     createNumberTraversalButton(currentPageNumber, finalPageNumber);
   }
-  mainContainer.appendChild(popover);
+  container.appendChild(popover);
 }
 
 function createEllipsis(popover: HTMLElement): void {
@@ -151,7 +151,7 @@ function createEllipsis(popover: HTMLElement): void {
       popover.querySelector("input")?.select();
     }
   };
-  mainContainer.appendChild(ellipsis);
+  container.appendChild(ellipsis);
 }
 
 function createNumberTraversalButton(currentPageNumber: number, pageNumber: number): void {
@@ -164,7 +164,7 @@ function createNumberTraversalButton(currentPageNumber: number, pageNumber: numb
   button.onclick = (): void => {
     onPageSelected(pageNumber);
   };
-  mainContainer.appendChild(button);
+  container.appendChild(button);
   button.textContent = String(pageNumber);
 }
 
@@ -185,7 +185,7 @@ function createArrowTraversalButton(name: PageRelation, iconName: IconName, posi
   button.onclick = (): void => {
     onRelativePageSelected(name);
   };
-  mainContainer.insertAdjacentElement(position, button);
+  container.insertAdjacentElement(position, button);
   return button;
 }
 

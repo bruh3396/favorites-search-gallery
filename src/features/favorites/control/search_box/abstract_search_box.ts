@@ -1,5 +1,5 @@
 import { Events } from "@/app/channels/events";
-import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { SearchHistory } from "@/lib/storage/search_history";
 import { debounceLeading } from "@/lib/async/debounce";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
@@ -8,7 +8,7 @@ const HISTORY_DEPTH = 30;
 const INPUT_PERSIST_DELAY = 500;
 
 export abstract class AbstractFavoritesSearchBox {
-  protected readonly id: string = FavoritesMenuId.searchBox;
+  protected readonly id: string = FavoritesId.searchBox;
   protected readonly history = new SearchHistory(HISTORY_DEPTH);
   protected searchBox: HTMLTextAreaElement | HTMLInputElement;
 

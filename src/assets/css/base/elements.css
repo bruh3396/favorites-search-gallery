@@ -1,0 +1,81 @@
+html {
+  width: 100vw;
+}
+
+body {
+  overflow-x: clip;
+  overflow-anchor: auto;
+}
+
+body:fullscreen,
+body::backdrop {
+  background-color: var(--color-bg);
+}
+
+body.dialog-opened {
+  overflow: hidden;
+}
+
+body.autoplay::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 4px;
+  background: #ff5733;
+  animation: progress 5s linear forwards;
+  z-index: 9999;
+}
+
+img {
+  border: none !important;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+input[type=number] {
+  border: 1px solid #767676;
+  border-radius: 2px;
+  background-color: var(--surface-raised);
+  color: var(--text);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+option {
+  font-size: 15px;
+}
+
+.surface-panel {
+  background: var(--surface-gradient);
+  color: var(--text);
+}
+
+#favorites-search-gallery-content {
+  margin-right: 15px;
+  padding: 8px 8px 30px 8px;
+  overflow-anchor: none;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

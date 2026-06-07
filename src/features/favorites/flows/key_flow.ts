@@ -1,5 +1,5 @@
 import { EnhancedKeyboardEvent } from "@/types/input";
-import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 
 const hotkeyHandlers: Record<string, () => void> = {
@@ -20,5 +20,5 @@ export function onKeyDown(event: EnhancedKeyboardEvent): void {
 }
 
 function focusSearchBar(): void {
-  document.getElementById(FavoritesMenuId.searchBox)?.focus();
+  document.getElementById(FavoritesId.searchBox)?.focus();
 }

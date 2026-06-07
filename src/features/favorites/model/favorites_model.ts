@@ -2,7 +2,7 @@ import * as FavoritesLoader from "@/features/favorites/model/load/loader";
 import * as FavoritesMetadataFetcher from "@/features/favorites/model/metadata_fetcher";
 import * as FavoritesPaginator from "@/features/favorites/model/paginator";
 import * as FavoritesSearchCoordinator from "@/features/favorites/model/search/coordinator";
-import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/favorite_types";
+import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/interfaces";
 import { Favorite } from "@/types/favorite";
 
 let getAdditionalTags: (id: string) => string | undefined = () => undefined;

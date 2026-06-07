@@ -103,11 +103,11 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     event: Events.searchPage.layoutChanged,
     triggerOnCreation: true,
     options: new Map<Layout, string>([
-      ["tiler--native", "Native"],
-      ["tiler--column", "Waterfall"],
-      ["tiler--row", "River"],
-      ["tiler--square", "Square"],
-      ["tiler--grid", "Legacy"]
+      ["native", "Native"],
+      ["column", "Waterfall"],
+      ["row", "River"],
+      ["square", "Square"],
+      ["grid", "Legacy"]
     ])
   },
   {

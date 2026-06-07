@@ -1,9 +1,9 @@
-import { COLUMN_CLASS_NAME, getThumbsInContainer, getThumbsInMatrix } from "@/lib/thumb/thumbs";
+import { getThumbsInContainer, getThumbsInMatrix } from "@/lib/thumb/thumbs";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/ui";
 
 export class ColumnTiler extends AbstractTiler {
-  public layout: Layout = "tiler--column";
+  public layout: Layout = "column";
   private columns: HTMLElement[];
   private columnCount: number;
 
@@ -78,7 +78,7 @@ export class ColumnTiler extends AbstractTiler {
     for (let i = 0; i < this.columnCount; i += 1) {
       const column = document.createElement("div");
 
-      column.classList.add(COLUMN_CLASS_NAME);
+      column.dataset.tilerColumn = "";
       this.columns.push(column);
     }
   }

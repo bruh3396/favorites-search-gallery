@@ -265,7 +265,7 @@ textarea#favorites-search-box:focus {
 
 /* Pagination */
 
-#favorites-pagination-container>button {
+#favorites-pagination>button {
   background: transparent;
   margin: 0px 2px;
   padding: 2px 6px;
@@ -276,17 +276,17 @@ textarea#favorites-search-box:focus {
   width: 6ch;
 }
 
-#favorites-pagination-container>button:hover {
+#favorites-pagination>button:hover {
   background-color: #93b393;
 }
 
-#favorites-pagination-container>button.selected {
+#favorites-pagination>button.selected {
   border: none;
   font-weight: bold;
   pointer-events: none;
 }
 
-#favorites-pagination-container>button[disabled] {
+#favorites-pagination>button[disabled] {
   background-color: transparent;
 }
 
@@ -341,7 +341,7 @@ textarea#favorites-search-box:focus {
 }
 
 #allowed-ratings>input[type="checkbox"]:checked+label {
-  background-color: var(--color-accent);
+  background-color: var(--accent);
   color: white;
   opacity: 1;
 }
@@ -460,11 +460,11 @@ textarea#favorites-search-box:focus {
 }
 
 .opt-toggle-input:checked+.opt-toggle-track {
-  background-color: var(--color-accent);
+  background-color: var(--accent);
 }
 
 .opt-toggle-input:focus+.opt-toggle-track {
-  box-shadow: 0 0 1px var(--color-accent);
+  box-shadow: 0 0 1px var(--accent);
 }
 
 .opt-toggle-input:checked+.opt-toggle-track:before {

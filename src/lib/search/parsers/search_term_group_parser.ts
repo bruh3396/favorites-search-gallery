@@ -11,14 +11,6 @@ export function normalizeSearchQuery(query: string): string {
   return removeExtraWhiteSpace(query).toLowerCase();
 }
 
-function parseAndTerms(query: string): string[] {
-  return removeExtraWhiteSpace(query.replace(orGroupRegex, "")).split(" ").filter((term) => term !== "");
-}
-
-function parseOrGroups(query: string): string[][] {
-  return Array.from(query.matchAll(orGroupRegex)).map((orGroup) => orGroup[1].split(" ~ "));
-}
-
 export function parseTermGroups(query: string): { orGroups: string[][]; andTerms: string[]; } {
   query = normalizeSearchQuery(query);
   return { andTerms: parseAndTerms(query), orGroups: parseOrGroups(query) };
@@ -47,4 +39,12 @@ export function categorizeSearchTerms(searchTerms: AbstractSearchTerm[]): Catego
     }
   }
   return { required, wildcard, metadata };
+}
+
+function parseAndTerms(query: string): string[] {
+  return removeExtraWhiteSpace(query.replace(orGroupRegex, "")).split(" ").filter((term) => term !== "");
+}
+
+function parseOrGroups(query: string): string[][] {
+  return Array.from(query.matchAll(orGroupRegex)).map((orGroup) => orGroup[1].split(" ~ "));
 }

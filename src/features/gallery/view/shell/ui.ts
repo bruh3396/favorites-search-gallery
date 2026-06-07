@@ -131,7 +131,7 @@ export function setLastVisitedThumb(thumb: HTMLElement): void {
 }
 
 function usingColumnLayout(): boolean {
-  return getLayout() === "tiler--column";
+  return getLayout() === "column";
 }
 
 function setBackgroundOpacity(opacity: number): void {

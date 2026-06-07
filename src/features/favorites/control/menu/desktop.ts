@@ -6,7 +6,7 @@ import { buildCheckboxElement, buildCheckboxOption } from "@/app/dom/checkbox";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "@/lib/ui/toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { GeneralConfig } from "@/config/general_config";
 import { MetadataMetric } from "@/types/search";
 import { Preferences } from "@/app/context/preferences";
@@ -23,7 +23,7 @@ import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/ui_togg
 const buttons: Partial<ButtonElement>[] = [
   {
     id: "search-button",
-    parentId: FavoritesMenuId.searchButton,
+    parentId: FavoritesId.searchButton,
     title: "Search",
     icon: "search",
     rightClickEnabled: true,
@@ -31,28 +31,28 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "shuffle-button",
-    parentId: FavoritesMenuId.actions,
+    parentId: FavoritesId.actions,
     icon: "shuffle",
     title: "Shuffle results",
     event: Events.favorites.shuffleButtonClicked
   },
   {
     id: "invert-button",
-    parentId: FavoritesMenuId.actions,
+    parentId: FavoritesId.actions,
     icon: "invert",
     title: "Invert results",
     event: Events.favorites.invertButtonClicked
   },
   {
     id: "clear-button",
-    parentId: FavoritesMenuId.actions,
+    parentId: FavoritesId.actions,
     icon: "clear",
     title: "Clear search",
     event: Events.favorites.clearButtonClicked
   },
   {
     id: "download-button",
-    parentId: FavoritesMenuId.actions,
+    parentId: FavoritesId.actions,
     icon: "download",
     title: "Download search results",
     enabled: false,
@@ -60,7 +60,7 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "set-active_favorites_button",
-    parentId: FavoritesMenuId.actions,
+    parentId: FavoritesId.actions,
     textContent: "Set Subset",
     title: "Make the current search results the entire set of results to search from",
     enabled: false,
@@ -68,24 +68,23 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "reset-active_favorites_button",
-    parentId: FavoritesMenuId.actions,
+    parentId: FavoritesId.actions,
     textContent: "Stop Subset",
     title: "Reset active favorites to all",
     enabled: false,
     event: Events.favorites.resetActiveFavoritesClicked
   },
   {
-    id: FavoritesMenuId.panelButton,
-    parentId: FavoritesMenuId.drawerToggleSlot,
+    id: FavoritesId.panelButton,
+    parentId: FavoritesId.drawerToggleSlot,
     icon: "hamburger",
     title: "Menu",
     event: Events.favorites.panelButtonClicked
   },
   {
     id: "reset-button",
-    parentId: FavoritesMenuId.resetSlot,
-    icon: "reset",
-    title: "Reset",
+    parentId: FavoritesId.resetSlot,
+    textContent: "RESET",
     event: Events.favorites.resetButtonClicked
   }
 
@@ -299,11 +298,11 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     function: hideUnusedLayoutSizer,
     triggerOnCreation: true,
     options: new Map<Layout, string>([
-      ["tiler--column", "Waterfall"],
-      ["tiler--row", "River"],
-      ["tiler--square", "Square"],
-      ["tiler--grid", "Legacy"],
-      ["tiler--native", "Native"]
+      ["column", "Waterfall"],
+      ["row", "River"],
+      ["square", "Square"],
+      ["grid", "Legacy"],
+      ["native", "Native"]
     ])
   },
   {

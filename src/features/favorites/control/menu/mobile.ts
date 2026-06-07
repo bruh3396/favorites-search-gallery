@@ -170,10 +170,10 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     triggerOnCreation: true,
     function: hideUnusedLayoutSizer,
     options: new Map<Layout, string>([
-      ["tiler--column", "Waterfall"],
-      ["tiler--row", "River"],
-      ["tiler--square", "Square"],
-      ["tiler--grid", "Legacy"]
+      ["column", "Waterfall"],
+      ["row", "River"],
+      ["square", "Square"],
+      ["grid", "Legacy"]
     ])
   },
   {

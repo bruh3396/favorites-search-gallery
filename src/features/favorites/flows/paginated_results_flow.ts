@@ -1,10 +1,11 @@
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { Favorite, PageRelation } from "@/types/favorite";
+import { preloadImages, revealItem } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
-import { FavoritesResultsView } from "@/features/favorites/types/favorite_types";
+import { FavoritesConfig } from "@/config/favorites_config";
+import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
 import { NavigationKey } from "@/types/input";
-import { revealItem } from "@/app/layout/content_thumbs";
 
 let hasAppendedFirstResults = false;
 
@@ -37,8 +38,11 @@ function goToRelativePage(relativePage: PageRelation): void {
 
 function renderCurrentPage(): void {
   FavoritesView.showSearchResults(FavoritesModel.currentPageFavorites());
-  FavoritesView.buildNavigationMenu(FavoritesModel.getPaginationParameters());
-  FavoritesView.preloadThumbs(FavoritesModel.adjacentPageFavorites());
+  FavoritesView.buildPaginator(FavoritesModel.getPaginationParameters());
+
+  if (FavoritesConfig.preloadThumbnails) {
+    preloadImages(FavoritesModel.adjacentPageFavorites().map(favorite => favorite.thumbUrl));
+  }
   Events.favorites.pageChanged.emit();
 }
 
@@ -51,7 +55,7 @@ function reveal(id: string): void {
 
 function reconcilePagination(): void {
   FavoritesModel.paginate(FavoritesModel.getCurrentSearchResults());
-  FavoritesView.updateNavigationMenu(FavoritesModel.getPaginationParameters());
+  FavoritesView.updatePaginator(FavoritesModel.getPaginationParameters());
   appendMissingThumbsOnCurrentPage();
   Events.favorites.searchResultsUpdated.emit();
 }

@@ -1,5 +1,5 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
-import { FavoritesMenuClass } from "@/features/favorites/types/scaffold";
+import { FavoritesClass } from "@/features/favorites/types/scaffold";
 
 interface Release {
   version: string;
@@ -7,8 +7,8 @@ interface Release {
 }
 
 const PANEL_CLASSES = {
-  section: FavoritesMenuClass.drawerSection,
-  sectionTitle: FavoritesMenuClass.drawerSectionTitle
+  section: FavoritesClass.drawerSection,
+  sectionTitle: FavoritesClass.drawerSectionTitle
 };
 
 const releases: Release[] = [

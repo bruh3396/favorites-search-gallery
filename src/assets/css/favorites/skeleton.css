@@ -1,0 +1,69 @@
+.skeleton-item {
+  background: #555;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.skeleton-item[data-layout="column"],
+.skeleton-item[data-layout="grid"] {
+  width: 100%;
+}
+
+.skeleton-item[data-layout="square"] {
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-item[data-animation="pulse"] {
+  position: relative;
+  background-color: #595959;
+}
+
+.skeleton-item[data-animation="pulse"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: #717171;
+  opacity: 0;
+  will-change: opacity;
+  animation: pulse var(--duration-skeleton) infinite ease-in-out;
+  animation-delay: var(--delay-skeleton);
+}
+
+.skeleton-item[data-animation="shine"]::after {
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0));
+  content: "";
+  position: absolute;
+  transform: translateX(-100%);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  animation: shine var(--duration-skeleton) linear infinite;
+  animation-delay: var(--delay-skeleton);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}

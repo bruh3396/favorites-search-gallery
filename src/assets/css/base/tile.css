@@ -1,0 +1,119 @@
+[data-layout="row"],
+[data-layout="column"],
+[data-layout="column"] [data-tiler-column],
+[data-layout="square"],
+[data-layout="grid"] {
+  gap: 6px;
+}
+
+[data-layout="grid"],
+[data-layout="square"] {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-gap: 0.5cqw;
+}
+
+[data-layout="row"] {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+[data-layout="native"] {
+  display: flex;
+  flex-flow: wrap;
+  gap: 25px 10px;
+}
+
+
+[data-layout="grid"] .post-action-btn,
+[data-layout="square"] .post-action-btn {
+  width: 30%;
+}
+
+[data-layout="row"] .post-action-btn {
+  height: 30%;
+}
+
+[data-layout="column"] .post-action-btn {
+  width: 30%;
+}
+
+[data-layout="native"] .post-action-btn {
+  width: 70px;
+  aspect-ratio: 1;
+}
+
+[data-layout="square"] .post {
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+
+[data-layout="square"] .post>a,
+[data-layout="square"] .post>div {
+  width: 100%;
+  height: 100%;
+}
+
+[data-layout="square"] .post>a>img:first-child,
+[data-layout="square"] .post>a>canvas,
+[data-layout="square"] .post>div>img:first-child,
+[data-layout="square"] .post>div>canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+[data-layout="row"] .post {
+  height: 300px;
+  flex: 1 1 auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+[data-layout="row"] .post.u-last-row {
+  flex: 0 1 auto;
+}
+
+[data-layout="row"] .post>a,
+[data-layout="row"] .post>div {
+  width: 100%;
+  height: 100%;
+}
+
+[data-layout="row"] .post>a>img:first-child,
+[data-layout="row"] .post>div>img:first-child {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  vertical-align: middle;
+}
+
+[data-layout="row"] .post>a>canvas,
+[data-layout="row"] .post>div>canvas {
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-layout="column"] {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+}
+
+[data-layout="column"] [data-tiler-column] {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 25%;
+}
+
+[data-layout="column"] [data-tiler-column] .post {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+[data-layout="square"] .post:not(.skeleton-item),
+[data-layout="row"] .post:not(.skeleton-item),
+[data-layout="column"] [data-tiler-column] .post:not(.skeleton-item) {
+  animation: thumb-fade-in 0.2s ease both;
+}

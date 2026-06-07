@@ -6,7 +6,7 @@ import { insertStyle } from "@/utils/dom/injector";
 import { mapRange } from "@/utils/number";
 
 export class RowTiler extends AbstractTiler {
-  public layout: Layout = "tiler--row";
+  public layout: Layout = "row";
   private currentlyMarkingLastRow = false;
 
   public tile(items: HTMLElement[]): void {
@@ -28,7 +28,7 @@ export class RowTiler extends AbstractTiler {
     const pixelSize = Math.round(mapRange(rowSize, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
 
     insertStyle(`
-      #${this.container.id}.tiler--row {
+      #${this.container.id}[data-layout="row"] {
         .post {
           height: ${pixelSize}px;
         }

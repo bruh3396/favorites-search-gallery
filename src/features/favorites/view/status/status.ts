@@ -1,6 +1,6 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
-import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/favorite_types";
-import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
+import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/interfaces";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
@@ -56,8 +56,8 @@ export function setExpectedTotalFavoritesCount(count: number | null): void {
 }
 
 export function setup(): void {
-  matchCountIndicator = Root.querySelector(`#${FavoritesMenuId.matchCount}`) ?? document.createElement("label");
-  statusIndicator = Root.querySelector(`#${FavoritesMenuId.loadStatus}`) ?? document.createElement("label");
+  matchCountIndicator = Root.querySelector(`#${FavoritesId.matchCount}`) ?? document.createElement("label");
+  statusIndicator = Root.querySelector(`#${FavoritesId.loadStatus}`) ?? document.createElement("label");
 }
 
 function clearStatus(): void {

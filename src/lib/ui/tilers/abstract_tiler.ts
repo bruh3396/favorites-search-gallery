@@ -10,7 +10,7 @@ export abstract class AbstractTiler {
   }
 
   public get enabled(): boolean {
-    return this.container.classList.contains(this.layout);
+    return this.container.dataset.layout === this.layout;
   }
 
   public get disabled(): boolean {
@@ -29,7 +29,7 @@ export abstract class AbstractTiler {
 
   public setColumnCount(columnCount: number): void {
     insertStyle(`
-        #${this.container.id}.${this.layout} {
+        #${this.container.id}[data-layout="${this.layout}"] {
           grid-template-columns: repeat(${columnCount}, 1fr) !important;
         }
         `, `${this.container.id}-${this.layout}-column-count`);
@@ -55,11 +55,13 @@ export abstract class AbstractTiler {
   }
 
   public activate(): void {
-    this.container.classList.add(this.layout);
+    this.container.dataset.layout = this.layout;
     this.onActivate();
   }
   public deactivate(): void {
-    this.container.classList.remove(this.layout);
+    if (this.container.dataset.layout === this.layout) {
+      delete this.container.dataset.layout;
+    }
     this.onDeactivate();
   }
 

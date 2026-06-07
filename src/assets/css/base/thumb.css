@@ -1,14 +1,3 @@
-html {
-  width: 100vw;
-}
-
-#favorites-search-gallery-content {
-  --radius: 7px;
-  margin-right: 15px;
-  padding: 8px 8px 30px 8px;
-  overflow-anchor: none;
-}
-
 .post {
   position: relative;
   -webkit-touch-callout: none;
@@ -31,6 +20,7 @@ html {
 .post>div>img:first-child {
   width: 100%;
   z-index: 1;
+  background-color: #595959;
 }
 
 .post>a>a>div,
@@ -75,7 +65,7 @@ html {
   left: unset;
 }
 
-img {
+.post img {
   -webkit-user-drag: none;
   -khtml-user-drag: none;
   -moz-user-drag: none;

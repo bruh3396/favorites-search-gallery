@@ -126,7 +126,7 @@ input[type="text"] {
 
 /* Pagination */
 
-#favorites-pagination-container>button {
+#favorites-pagination>button {
   text-align: center;
   font-size: 16px;
   height: 30px;
@@ -134,16 +134,16 @@ input[type="text"] {
   width: unset;
 }
 
-#favorites-pagination-container>button:active,
-#favorites-pagination-container>button:focus {
+#favorites-pagination>button:active,
+#favorites-pagination>button:focus {
   background-color: slategray;
 }
 
-#favorites-pagination-container>button:hover {
+#favorites-pagination>button:hover {
   background-color: transparent;
 }
 
-#favorites-pagination-container>button[disabled] {
+#favorites-pagination>button[disabled] {
   opacity: 0.25;
   pointer-events: none;
 }
@@ -222,11 +222,11 @@ input[type="text"] {
 }
 
 #mobile-toolbar-row input[type="checkbox"]:checked+label {
-  color: var(--color-accent);
+  color: var(--accent);
 }
 
 #mobile-toolbar-row input[type="checkbox"]:checked+label svg {
-  fill: var(--color-accent);
+  fill: var(--accent);
 }
 
 [data-theme="native-dark"] #mobile-toolbar-row svg {
@@ -319,7 +319,7 @@ input[type="text"] {
 }
 
 .search-bar-icon-btn:active {
-  background-color: var(--color-accent);
+  background-color: var(--accent);
 }
 
 /* Toolbar buttons */
@@ -335,7 +335,7 @@ input[type="text"] {
 }
 
 #reset-button:active svg {
-  fill: var(--color-accent);
+  fill: var(--accent);
 }
 
 #help-button {

@@ -16,6 +16,12 @@ export function extractFavoritesPageCount(html: string): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
+export function extractFavoriteElements(source: string | Document): HTMLElement[] {
+  const dom = typeof source === "string" ? parseHtml(source) : source;
+  const thumbs = extractThumbElements(dom);
+  return thumbs.length > 0 ? thumbs : extractThumbImageElements(dom);
+}
+
 function extractThumbElements(dom: Document): HTMLElement[] {
   return Array.from(dom.querySelectorAll(".thumb")) as HTMLElement[];
 }
@@ -25,10 +31,4 @@ function extractThumbImageElements(dom: Document): HTMLElement[] {
     .filter(image => image.src.includes("thumbnail_"))
     .map(image => image.parentElement)
     .filter(thumb => thumb !== null);
-}
-
-export function extractFavoriteElements(source: string | Document): HTMLElement[] {
-  const dom = typeof source === "string" ? parseHtml(source) : source;
-  const thumbs = extractThumbElements(dom);
-  return thumbs.length > 0 ? thumbs : extractThumbImageElements(dom);
 }

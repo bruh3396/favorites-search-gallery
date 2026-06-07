@@ -52,10 +52,10 @@ export const addToTop = (items: HTMLElement[]): void => currentTiler.addItemsToT
 export const getBottomEdgeElements = (): HTMLElement[] => currentTiler.getBottomEdgeElements();
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "tiler--native" || FeatureBridge.inGallery.call()) {
+  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || FeatureBridge.inGallery.call()) {
     return;
   }
-  const usingRowLayout = currentLayout === "tiler--row";
+  const usingRowLayout = currentLayout === "row";
   const input = document.getElementById(usingRowLayout ? "row-size" : "column-count");
 
   if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLSelectElement)) {
@@ -82,7 +82,7 @@ export async function hideUnusedLayoutSizer(layout: Layout): Promise<void> {
   const columnCountContainer = document.querySelector("#column-count-container, #search-page-column-count");
 
   if ((columnCountContainer instanceof HTMLElement) && (rowSizeContainer instanceof HTMLElement)) {
-    rowSizeContainer.style.display = layout === "tiler--row" ? "" : "none";
-    columnCountContainer.style.display = layout === "tiler--row" || layout === "tiler--native" ? "none" : "";
+    rowSizeContainer.style.display = layout === "row" ? "" : "none";
+    columnCountContainer.style.display = layout === "row" || layout === "native" ? "none" : "";
   }
 }

@@ -14,25 +14,6 @@ const stickyMenuStyle = `
     margin-top: 0;
   }`;
 
-async function onHeaderVisibilityChanged(headerVisible: boolean): Promise<void> {
-  insertStyle(headerVisible ? "" : stickyMenuStyle, "fav-menu-sticky");
-  const optionsMenu = document.getElementById("left-favorites-panel-bottom-row");
-
-  Content.classList.remove("fav-menu--sticky");
-  Content.classList.remove("fav-menu--sticky-shadow");
-
-  if (optionsMenu === null || headerVisible) {
-    return;
-  }
-  const menuIsOpen = !optionsMenu.classList.contains("u-hidden");
-
-  if (menuIsOpen) {
-    Content.classList.add("fav-menu--sticky");
-  }
-  await sleep(30);
-  Content.classList.add("fav-menu--sticky-shadow");
-}
-
 export function setupMobileStickyMenu(optionsCheckbox: HTMLInputElement): void {
   toggleFavoritesOptions(Preferences.favoritesOptionsVisible.value);
   optionsCheckbox.checked = Preferences.favoritesOptionsVisible.value;
@@ -59,4 +40,23 @@ export function setupMobileStickyMenu(optionsCheckbox: HTMLInputElement): void {
   }, { threshold: 0 });
 
   observer.observe(header);
+}
+
+async function onHeaderVisibilityChanged(headerVisible: boolean): Promise<void> {
+  insertStyle(headerVisible ? "" : stickyMenuStyle, "fav-menu-sticky");
+  const optionsMenu = document.getElementById("left-favorites-panel-bottom-row");
+
+  Content.classList.remove("fav-menu--sticky");
+  Content.classList.remove("fav-menu--sticky-shadow");
+
+  if (optionsMenu === null || headerVisible) {
+    return;
+  }
+  const menuIsOpen = !optionsMenu.classList.contains("u-hidden");
+
+  if (menuIsOpen) {
+    Content.classList.add("fav-menu--sticky");
+  }
+  await sleep(30);
+  Content.classList.add("fav-menu--sticky-shadow");
 }

@@ -2,7 +2,7 @@
   flex: 0 0 auto;
 }
 
-#favorites-pagination-container {
+#favorites-pagination {
   position: relative;
   display: flex;
   align-items: center;
@@ -13,7 +13,7 @@
   box-sizing: border-box;
 }
 
-#favorites-pagination-container button {
+#favorites-pagination button {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -26,38 +26,38 @@
   transition: color 0.12s ease;
 }
 
-#favorites-pagination-container .favorites-pagination-btn,
-#favorites-pagination-container .favorites-pagination-ellipsis {
+#favorites-pagination .favorites-pagination-btn,
+#favorites-pagination .favorites-pagination-ellipsis {
   border: 1px solid var(--border);
   border-radius: 4px;
   box-sizing: border-box;
 }
 
-#favorites-pagination-container button:hover {
+#favorites-pagination button:hover {
   color: var(--text);
 }
 
-#favorites-pagination-container .favorites-pagination-arrow .icon {
+#favorites-pagination .favorites-pagination-arrow .icon {
   width: 18px;
   height: 18px;
 }
 
-#favorites-pagination-container .favorites-pagination-arrow#previous-page {
+#favorites-pagination .favorites-pagination-arrow#previous-page {
   position: absolute;
   left: 0;
 }
 
-#favorites-pagination-container .favorites-pagination-arrow#next-page {
+#favorites-pagination .favorites-pagination-arrow#next-page {
   position: absolute;
   right: 0;
 }
 
-#favorites-pagination-container button[disabled] {
+#favorites-pagination button[disabled] {
   opacity: 0.35;
   pointer-events: none;
 }
 
-#favorites-pagination-container .favorites-pagination-btn.selected {
+#favorites-pagination .favorites-pagination-btn.selected {
   color: var(--accent);
   border-color: var(--accent);
   font-weight: bold;

@@ -98,7 +98,7 @@
 }
 
 #autoplay-settings-button.autoplay-settings-btn--open {
-  filter: drop-shadow(6px 6px 3px var(--color-accent));
+  filter: drop-shadow(6px 6px 3px var(--accent));
 }
 
 .autoplay-settings-label {
@@ -108,13 +108,13 @@
 /* Buttons */
 
 #autoplay-play-button:active {
-  filter: drop-shadow(2px 2px 10px var(--color-accent));
+  filter: drop-shadow(2px 2px 10px var(--accent));
 }
 
 /* Direction mask */
 
 #autoplay-change-direction-mask {
-  filter: drop-shadow(2px 2px 3px var(--color-accent));
+  filter: drop-shadow(2px 2px 3px var(--accent));
 }
 
 #autoplay-change-direction-mask-container {

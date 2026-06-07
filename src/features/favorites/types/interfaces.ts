@@ -26,13 +26,13 @@ export interface FavoritesFetchProgress {
   allFavoritesCount: number
 }
 
-export type FavoritesPaginationParameters = {
+export interface FavoritesPaginationParameters {
   currentPageNumber: number
   finalPageNumber: number
   favoritesCount: number
   startIndex: number
   endIndex: number
-};
+}
 
 export interface FavoritesResultsView {
   initialize: (results: Favorite[]) => void

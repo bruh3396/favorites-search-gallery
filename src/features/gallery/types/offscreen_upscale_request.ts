@@ -6,19 +6,8 @@ import { resolveImageUrl } from "@/lib/media/media_url_resolver";
 
 export const transferredCanvasIds = new Set<string>();
 
-function getImageBitmapClone(imageRequest: ImageRequest): Promise<ImageBitmap | null> {
-  if (GalleryConfig.fetchImageBitmapsInWorker) {
-    return Promise.resolve(null);
-  }
-
-  if (!(imageRequest.bitmap instanceof ImageBitmap)) {
-    throw new Error("Tried to create upscale request without image bitmap");
-  }
-  return createImageBitmap(imageRequest.bitmap);
-}
-
 export async function getUpscaleRequest(imageRequest: ImageRequest): Promise<OffscreenUpscaleRequest> {
-  const bitmapClone = await getImageBitmapClone(imageRequest);
+  const bitmapClone = await cloneImageBitmap(imageRequest);
   const imageUrl = await resolveImageUrl(imageRequest.thumb);
   return new OffscreenUpscaleRequest(imageRequest.thumb, bitmapClone, imageUrl);
 }
@@ -59,4 +48,15 @@ export class OffscreenUpscaleRequest {
     this.hasDimensions = canvas.dataset.size !== undefined;
     return canvas.transferControlToOffscreen();
   }
+}
+
+function cloneImageBitmap(imageRequest: ImageRequest): Promise<ImageBitmap | null> {
+  if (GalleryConfig.fetchImageBitmapsInWorker) {
+    return Promise.resolve(null);
+  }
+
+  if (!(imageRequest.bitmap instanceof ImageBitmap)) {
+    throw new Error("Tried to create upscale request without image bitmap");
+  }
+  return createImageBitmap(imageRequest.bitmap);
 }

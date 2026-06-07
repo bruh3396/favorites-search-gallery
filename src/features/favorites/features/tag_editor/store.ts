@@ -19,10 +19,6 @@ export function ensureTagModificationsLoaded(): Promise<void> {
 
 export const storeTagModifications = (): Promise<void> => database.update(getDatabaseRecords());
 
-function getDatabaseRecords(): TagModificationDatabaseRecord[] {
-  return Array.from(tagModificationMap.entries()).map((entry) => ({ id: entry[0], tags: entry[1] }));
-}
-
 export function destroy(): void {
   database.destroy();
   clearCustomTags();
@@ -30,3 +26,7 @@ export function destroy(): void {
 
 export const cacheTagModification = (id: string, tags: string): Map<string, string> => tagModificationMap.set(id, tags);
 export const getTagModification = (id: string): string | undefined => tagModificationMap.get(id);
+
+function getDatabaseRecords(): TagModificationDatabaseRecord[] {
+  return Array.from(tagModificationMap.entries()).map((entry) => ({ id: entry[0], tags: entry[1] }));
+}

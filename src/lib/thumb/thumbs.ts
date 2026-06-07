@@ -8,11 +8,7 @@ export const ITEM_CLASS_NAME = "post";
 export const RAW_THUMB_CLASS_NAME = "thumb";
 export const ITEM_SELECTOR = `.${ITEM_CLASS_NAME}, .${RAW_THUMB_CLASS_NAME}`;
 export const IMAGE_SELECTOR = `.${ITEM_CLASS_NAME} img`;
-export const COLUMN_CLASS_NAME = "tiler--column--a";
-
-function getClosestThumb(element: HTMLElement): HTMLElement | null {
-  return element.closest(ITEM_SELECTOR);
-}
+export const COLUMN_SELECTOR = "[data-tiler-column]";
 
 export function getThumbsInContainer(container: HTMLElement | Document): HTMLElement[] {
   return Array.from(container.querySelectorAll(ITEM_SELECTOR)).filter(thumb => thumb instanceof HTMLElement);
@@ -115,4 +111,8 @@ export function getPreviewUrl(item: HTMLElement | Favorite): string | null {
 
 export function scrollToTop(): void {
   window.scrollTo(0, ON_MOBILE_DEVICE ? 10 : 0);
+}
+
+function getClosestThumb(element: HTMLElement): HTMLElement | null {
+  return element.closest(ITEM_SELECTOR);
 }

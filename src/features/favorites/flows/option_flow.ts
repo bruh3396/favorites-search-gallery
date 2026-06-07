@@ -5,7 +5,7 @@ import * as FavoritesView from "@/features/favorites/view/favorites_view";
 
 export function toggleInfiniteScroll(value: boolean): void {
   FavoritesInfiniteScrollFlow.disconnect();
-  FavoritesView.toggleNavigator(!value);
+  FavoritesView.togglePaginator(!value);
   FavoritesSearchFlow.showLatestSearchResults();
 }
 

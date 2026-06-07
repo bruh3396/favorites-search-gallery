@@ -14,6 +14,18 @@ export function setCompletionCallback(completionCallback: (request: ImageRequest
   onComplete = completionCallback;
 }
 
+export function preload(thumbs: HTMLElement[]): void {
+  GalleryImageCache.sync(buildPreloadRequests(thumbs)).forEach(request => fetchBitmap(request));
+}
+
+export function loadImmediate(thumb: HTMLElement): void {
+  const request = new ImageRequest(thumb);
+
+  GalleryImageCache.register(request);
+  fetchBitmap(new LowResolutionImageRequest(request));
+  fetchBitmap(request);
+}
+
 function onBitmapLoaded(request: ImageRequest): void {
   const cached = GalleryImageCache.get(request.id);
 
@@ -57,16 +69,4 @@ async function fetchBitmap(request: ImageRequest): Promise<void> {
   if (!request.cancelled && await GalleryImageFetcher.fetchBitmap(request)) {
     onBitmapLoaded(request);
   }
-}
-
-export function preload(thumbs: HTMLElement[]): void {
-  GalleryImageCache.sync(buildPreloadRequests(thumbs)).forEach(request => fetchBitmap(request));
-}
-
-export function loadImmediate(thumb: HTMLElement): void {
-  const request = new ImageRequest(thumb);
-
-  GalleryImageCache.register(request);
-  fetchBitmap(new LowResolutionImageRequest(request));
-  fetchBitmap(request);
 }

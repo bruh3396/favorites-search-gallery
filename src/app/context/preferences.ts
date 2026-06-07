@@ -20,7 +20,7 @@ export const Preferences = {
   favoritesHeaderEnabled: new Preference("favoritesHeaderEnabled", true),
   favoritesHintsEnabled: new Preference("favoritesHintsEnabled", false),
   favoritesInfiniteScroll: new Preference("favoritesInfiniteScroll", false),
-  favoritesLayout: new Preference<Layout>("favoritesLayout", "tiler--column"),
+  favoritesLayout: new Preference<Layout>("favoritesLayout", "column"),
   favoritesOptionsVisible: new Preference("favoritesOptionsVisible", false),
   favoritesRemoveButtonsVisible: new Preference("favoritesRemoveButtonsVisible", false),
   favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 125),
@@ -58,7 +58,7 @@ export const Preferences = {
   searchPageFavoriteIndicatorStyle: new Preference<FavoriteIndicatorStyle>("searchPageFavoriteIndicatorStyle", "border"),
   searchPageGalleryFavoriteStyle: new Preference<GalleryFavoriteStyle>("searchPageGalleryFavoriteStyle", "border"),
   searchPageInfiniteScroll: new Preference("searchPageInfiniteScroll", false),
-  searchPageLayout: new Preference<Layout>("searchPageLayout", "tiler--column"),
+  searchPageLayout: new Preference<Layout>("searchPageLayout", "column"),
   searchPageRowHeight: new Preference("searchPageRowHeight", 7),
   searchPageTooltipEnabled: new Preference("searchPageTooltipEnabled", false),
   searchPageUpscaleThumbs: new Preference("searchPageUpscaleThumbs", ON_DESKTOP_DEVICE)

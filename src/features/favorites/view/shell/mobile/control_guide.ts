@@ -1,8 +1,8 @@
-import CONTROLS_CSS from "@/assets/css/thumbs/controls.css";
+import CONTROLS_CSS from "@/assets/css/base/controls.css";
 import { insertStyle } from "@/utils/dom/injector";
 import { sleep } from "@/lib/async/timing";
 
-export async function buildControlsGuide(): Promise<void> {
+export async function setup(): Promise<void> {
   insertStyle(CONTROLS_CSS);
   const controlGuide = document.getElementById("controls-guide");
 

@@ -7,7 +7,7 @@ import { noItemsAreVisible, waitForAllThumbnailsToLoad } from "@/app/layout/cont
 import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesResultsView } from "@/features/favorites/types/favorite_types";
+import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
 import { NavigationKey } from "@/types/input";
 import { doNothing } from "@/utils/function";
 import { isForwardNavigationKey } from "@/types/guards";

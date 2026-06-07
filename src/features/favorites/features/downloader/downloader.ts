@@ -24,21 +24,6 @@ export function setup(): void {
   loadZipJS();
 }
 
-async function loadZipJS(): Promise<void> {
-  await new Promise((resolve, reject) => {
-    if (typeof zip !== "undefined") {
-      resolve(zip);
-      return;
-    }
-    const script = document.createElement("script");
-
-    script.src = "https://cdn.jsdelivr.net/gh/gildas-lormeau/zip.js/dist/zip-full.min.js";
-    script.onload = (): void => resolve(zip);
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
-
 export async function startDownloading(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
   if (currentlyDownloading) {
     return;
@@ -46,6 +31,14 @@ export async function startDownloading(favorites: Favorite[], progressCallback: 
   currentlyDownloading = true;
   aborted = false;
   await downloadFavorites(favorites, progressCallback);
+}
+
+export function abort(): void {
+  aborted = true;
+}
+
+export function reset(): void {
+  currentlyDownloading = false;
 }
 
 async function downloadFavorites(favorites: Favorite[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
@@ -100,10 +93,17 @@ function stopIfAborted(): void {
   }
 }
 
-export function abort(): void {
-  aborted = true;
-}
+async function loadZipJS(): Promise<void> {
+  await new Promise((resolve, reject) => {
+    if (typeof zip !== "undefined") {
+      resolve(zip);
+      return;
+    }
+    const script = document.createElement("script");
 
-export function reset(): void {
-  currentlyDownloading = false;
+    script.src = "https://cdn.jsdelivr.net/gh/gildas-lormeau/zip.js/dist/zip-full.min.js";
+    script.onload = (): void => resolve(zip);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
 }

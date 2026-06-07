@@ -4,7 +4,7 @@ import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesInfiniteScrollView } from "@/features/favorites/flows/infinite_scroll_results_flow";
 import { FavoritesPaginatedView } from "@/features/favorites/flows/paginated_results_flow";
-import { FavoritesResultsView } from "@/features/favorites/types/favorite_types";
+import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 

@@ -1,5 +1,5 @@
 import { Favorite, PageRelation } from "@/types/favorite";
-import { FavoritesPaginationParameters } from "@/features/favorites/types/favorite_types";
+import { FavoritesPaginationParameters } from "@/features/favorites/types/interfaces";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 import { clamp } from "@/utils/number";

@@ -4,8 +4,11 @@ import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { Events } from "@/app/channels/events";
+import { ON_FIRST_FAVORITES_PAGE } from "@/lib/environment";
 
 export async function loadAllFavorites(): Promise<void> {
+  // await sleep(30000);
+
   if (await hasDatabaseFavorites()) {
     await loadDatabaseFavorites();
     await fetchNewFavorites();
@@ -13,6 +16,7 @@ export async function loadAllFavorites(): Promise<void> {
     await fetchAllFavorites();
   }
   Events.favorites.favoritesLoaded.emit();
+  FavoritesView.collectAspectRatios();
 }
 
 async function hasDatabaseFavorites(): Promise<boolean> {
@@ -32,7 +36,8 @@ async function loadDatabaseFavorites(): Promise<void> {
 
 async function fetchNewFavorites(): Promise<void> {
   FavoritesView.setStatus("Finding new favorites");
-  const results = await FavoritesModel.fetchNewFavorites(await Events.favorites.firstPageFavorites.timeout());
+  const firstPageFavorites = ON_FIRST_FAVORITES_PAGE ? await Events.favorites.firstPageFavorites.timeout() : undefined;
+  const results = await FavoritesModel.fetchNewFavorites(firstPageFavorites);
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");

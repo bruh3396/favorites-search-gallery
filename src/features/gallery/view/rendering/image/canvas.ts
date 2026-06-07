@@ -50,13 +50,6 @@ export function zoomToPoint(x: number, y: number): void {
   container.scrollTop = (container.scrollHeight - container.clientHeight) * yPercentage;
 }
 
-function insertGalleryCanvas(newContainer: HTMLElement): void {
-  newContainer.id = "canvas-container";
-  newContainer.className = "gallery-image-frame";
-  newContainer.appendChild(mainCanvas);
-  container = newContainer;
-}
-
 export function correctOrientation(): void {
   if (ON_DESKTOP_DEVICE) {
     return;
@@ -72,4 +65,11 @@ export function correctOrientation(): void {
 
   mainCanvas.width = mainCanvas.height;
   mainCanvas.height = tempWidth;
+}
+
+function insertGalleryCanvas(newContainer: HTMLElement): void {
+  newContainer.id = "canvas-container";
+  newContainer.className = "gallery-image-frame";
+  newContainer.appendChild(mainCanvas);
+  container = newContainer;
 }

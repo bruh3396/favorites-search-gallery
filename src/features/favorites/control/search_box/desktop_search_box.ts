@@ -2,7 +2,7 @@ import { awesompleteIsUnselected, awesompleteIsVisible } from "@/lib/ui/autocomp
 import { AbstractFavoritesSearchBox } from "@/features/favorites/control/search_box/abstract_search_box";
 import { EnhancedMouseEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
-import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { openSearchPage } from "@/lib/remote/rule34/navigator";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
@@ -16,7 +16,7 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     searchBox.spellcheck = false;
     searchBox.value = this.history.lastEditedQuery;
 
-    const searchButtonSlot = document.getElementById(FavoritesMenuId.searchButton);
+    const searchButtonSlot = document.getElementById(FavoritesId.searchButton);
 
     if (searchButtonSlot === null) {
       document.getElementById(this.parentId)?.insertAdjacentElement("beforeend", searchBox);
