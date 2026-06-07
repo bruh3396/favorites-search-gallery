@@ -2,7 +2,7 @@ import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { EnhancedWheelEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";

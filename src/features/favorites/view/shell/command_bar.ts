@@ -1,41 +1,23 @@
+import { div, label, span } from "@/utils/dom/element";
 import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
 
 export function build(): HTMLElement {
-  const menu = div(FavoritesMenuId.menu);
-
-  menu.className = "u-no-select";
-
-  const bar = div(FavoritesMenuId.bar);
+  const commandBar = div(FavoritesMenuId.commandBar);
+  const grid = div(FavoritesMenuId.grid);
   const pill = div(FavoritesMenuId.pill);
-
-  pill.append(span(FavoritesMenuId.searchButton), span(FavoritesMenuId.actions));
-
+  const searchButton = span(FavoritesMenuId.searchButton);
+  const actions = span(FavoritesMenuId.actions);
   const status = span(FavoritesMenuId.status);
+  const drawerToggleSlot = span(FavoritesMenuId.drawerToggleSlot);
+  const paginationSlot = span(FavoritesMenuId.paginationSlot);
+  const resetSlot = span(FavoritesMenuId.resetSlot);
+  const matchCount = label(FavoritesMenuId.matchCount);
+  const loadStatus = label(FavoritesMenuId.loadStatus);
 
-  status.append(label(FavoritesMenuId.matchCount), label(FavoritesMenuId.loadStatus));
-
-  bar.append(span(FavoritesMenuId.settingsSlot), pill, span(FavoritesMenuId.paginationSlot), status);
-  menu.append(bar);
-  return menu;
-}
-
-function div(id: string): HTMLDivElement {
-  const element = document.createElement("div");
-
-  element.id = id;
-  return element;
-}
-
-function span(id: string): HTMLSpanElement {
-  const element = document.createElement("span");
-
-  element.id = id;
-  return element;
-}
-
-function label(id: string): HTMLLabelElement {
-  const element = document.createElement("label");
-
-  element.id = id;
-  return element;
+  commandBar.className = "u-no-select";
+  pill.append(searchButton, actions);
+  status.append(matchCount, loadStatus);
+  grid.append(drawerToggleSlot, pill, paginationSlot, status, resetSlot);
+  commandBar.append(grid);
+  return commandBar;
 }

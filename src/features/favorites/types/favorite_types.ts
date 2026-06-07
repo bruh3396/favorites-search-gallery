@@ -1,5 +1,20 @@
-import { Favorite } from "@/types/favorite";
+import { Favorite, PageRelation } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
+import { TagCategoryMap } from "@/types/search";
+
+export interface FavoritesViewCallbacks {
+  onPageSelected: (pageNumber: number) => void;
+  onRelativePageSelected: (relation: PageRelation) => void;
+  onFirstPageFavoritesExtracted: (elements: HTMLElement[] | undefined) => void;
+  onFavoriteAdded: (id: string) => void;
+  onFavoriteRemoved: (id: string) => void;
+}
+
+export interface FavoritesModelCallbacks {
+  getAdditionalTags: (id: string) => string | undefined;
+  waitForAdditionalTags: () => Promise<void>;
+  onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void;
+}
 
 export interface NewFavorites {
   newFavorites: Favorite[]
@@ -19,14 +34,6 @@ export type FavoritesPaginationParameters = {
   endIndex: number
 };
 
-export const emptyFavoritesPageParameters = {
-  currentPageNumber: 1,
-  finalPageNumber: 1,
-  favoritesCount: 0,
-  startIndex: 0,
-  endIndex: 0
-};
-
 export interface FavoritesResultsView {
   initialize: (results: Favorite[]) => void
   reveal: (id: string) => void
@@ -38,10 +45,4 @@ export interface FavoritesResultsView {
 export interface ScrollExpansionResult {
   slice: Favorite[]
   trimmed: Favorite[]
-}
-
-export interface FavoritesPageContext {
-  results: Favorite[]
-  pagination: FavoritesPaginationParameters
-  adjacent: Favorite[]
 }

@@ -1,15 +1,24 @@
 import * as FavoritesActions from "@/lib/remote/rule34/favorites_actions";
 import * as Navigator from "@/lib/remote/rule34/navigator";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "@/assets/images";
+import { buildElementTemplate, favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { ClickCode } from "@/types/input";
-import { Events } from "@/app/channels/events";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Post } from "@/types/api";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+import { doNothing } from "@/utils/function";
 import { downloadFromThumb } from "@/lib/remote/rule34/media_downloader";
-import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { resolveMediaType } from "@/lib/media/media_type_resolver";
+
+let onFavoriteAdded: (id: string) => void = doNothing;
+let onFavoriteRemoved: (id: string) => void = doNothing;
+
+export function setupFavoriteElement(favoriteAdded: (id: string) => void, favoriteRemoved: (id: string) => void): void {
+  buildElementTemplate();
+  onFavoriteAdded = favoriteAdded;
+  onFavoriteRemoved = favoriteRemoved;
+}
 
 export class FavoriteElement {
   public readonly root: HTMLElement;
@@ -87,10 +96,10 @@ export class FavoriteElement {
     }
 
     if (this.hasRemoveButton) {
-      Events.favorites.favoriteRemoved.emit(this.root.id);
+      onFavoriteRemoved(this.root.id);
       FavoritesActions.removeFavorite(this.root.id);
     } else {
-      Events.favorites.favoriteAdded.emit(this.root.id);
+      onFavoriteAdded(this.root.id);
       FavoritesActions.addFavorite(this.root.id);
     }
   }

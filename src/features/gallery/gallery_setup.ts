@@ -17,7 +17,7 @@ import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibleThumbObserver from "@/features/gallery/control/visible_thumb_observer";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GALLERY_DISABLED } from "@/app/context/flags";
@@ -48,11 +48,11 @@ async function waitUntilPageIsReady(): Promise<void> {
 }
 
 function setupView(): void {
-  GalleryView.setup(
-    Events.gallery.galleryMenuButtonClicked.emit,
-    GalleryAutoplay.onVideoEnded,
-    GalleryOpenCloseFlow.close
-  );
+  GalleryView.setup({
+    onMenuAction: Events.gallery.galleryMenuButtonClicked.emit,
+    onVideoEnded: GalleryAutoplay.onVideoEnded,
+    onVideoDoubleClicked: GalleryOpenCloseFlow.close
+  });
 }
 
 function setupControl(): void {
@@ -71,8 +71,11 @@ function setupAutoplay(): void {
     onComplete: (direction?: NavigationKey) => dispatchByState({
       open: GalleryNavigationFlow.navigate
     }, direction),
-    onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo()
+    onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo(),
+    subscribeToMouseMove: DomEvents.document.mousemove.on,
+    subscribeToKeyDown: DomEvents.document.keydown.on
   });
+  Events.favorites.autoplayToggled.on(GalleryAutoplay.toggle);
   Events.gallery.openedGallery.on(GalleryAutoplay.startAutoplay);
   Events.gallery.closedGallery.on(GalleryAutoplay.stopAutoplay);
   Events.gallery.displayedThumb.on(GalleryAutoplay.startViewTimer);

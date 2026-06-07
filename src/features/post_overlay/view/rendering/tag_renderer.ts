@@ -1,6 +1,6 @@
 import { IconName, icon } from "@/lib/ui/icon";
 import { TagCategory, TagCategoryMap } from "@/types/search";
-import { PostOverlayClass } from "@/features/post_overlay/types/css_names";
+import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
 import { PostOverlayConfig } from "@/config/post_overlay_config";
 
 const DISPLAYED_CATEGORIES: readonly TagCategory[] = ["artist", "copyright", "character", "metadata"];

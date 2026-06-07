@@ -26,7 +26,7 @@ export function getEta(current: number, total: number): string | null {
 
 function format(seconds: number): string {
   if (seconds >= 60) {
-    return `   ~ ${Math.ceil(seconds / 60)}m`;
+    return ` ~ ${Math.ceil(seconds / 60)}m`;
   }
-  return `~${String(seconds).padStart(3, " ")}s`;
+  return ` ~${String(seconds).padStart(3, " ")}s`;
 }

@@ -20,7 +20,8 @@ export type VideoClip = {
   end: number
 }
 
-export type VideoControllerCallbacks = {
+export interface GalleryViewCallbacks {
+  onMenuAction: (action: GalleryMenuAction) => void
   onVideoEnded: () => void
   onVideoDoubleClicked: (event: MouseEvent) => void
 }

@@ -9,7 +9,7 @@ import { Favorite } from "@/types/favorite";
 import { Overlays } from "@/app/layout/shell";
 import { Preferences } from "@/app/context/preferences";
 import { splitIntoChunks } from "@/utils/collection/array";
-import { toggleGlobalInputEvents } from "@/app/input/dom_events";
+import { toggleGlobalInputEvents } from "@/app/dom/input_gate";
 
 type FavoritesDownloaderInterface = {
   getSearchResults: () => Favorite[]

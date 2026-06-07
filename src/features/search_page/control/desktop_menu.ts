@@ -6,7 +6,7 @@ import { GeneralConfig } from "@/config/general_config";
 import { MetadataMetric } from "@/types/search";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
-import { buildCheckboxElement } from "@/app/input/checkbox";
+import { buildCheckboxElement } from "@/app/dom/checkbox";
 import { buildSelectElement } from "@/lib/ui/elements/select";
 import { numberRange } from "@/utils/number";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
@@ -93,7 +93,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     defaultValue: false
   }
 ];
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<FavoriteIndicatorStyle>> | Partial<SelectElement<GalleryFavoriteStyle>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<FavoriteIndicatorStyle>> | Partial<SelectElement<GalleryFavoriteStyle>>)[] = [
   {
     id: "layout-select",
     parentId: "search-page-layout",
@@ -159,12 +159,11 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     event: Events.favorites.performanceProfileChanged,
     function: reloadWindow,
     enabled: ON_DESKTOP_DEVICE,
-    isNumeric: true,
     options: new Map<PerformanceProfile, string>([
-      [PerformanceProfile.Normal, "Normal"],
-      [PerformanceProfile.Medium, "Medium"],
-      [PerformanceProfile.Low, "Low"],
-      [PerformanceProfile.Potato, "Potato"]
+      ["normal", "Normal"],
+      ["medium", "Medium"],
+      ["low", "Low"],
+      ["potato", "Potato"]
     ])
   }
 ];

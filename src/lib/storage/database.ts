@@ -3,6 +3,8 @@ import { yieldControl } from "@/lib/async/timing";
 
 class LockedDatabaseError extends Error { }
 
+let readAllSequence = 0;
+
 export class Database<V extends { id: string }> {
   private readonly name: string;
   private readonly defaultObjectStoreName: string;
@@ -17,8 +19,12 @@ export class Database<V extends { id: string }> {
   }
 
   public async readAll(objectStoreName: string | undefined = undefined): Promise<V[]> {
-    const database = await this.open(objectStoreName ?? this.defaultObjectStoreName);
-    return this.getAllRecords(database, objectStoreName ?? this.defaultObjectStoreName);
+    const store = objectStoreName ?? this.defaultObjectStoreName;
+
+    readAllSequence += 1;
+    console.log(`[readAll #${readAllSequence}] ${this.name} / ${store}`);
+    const database = await this.open(store);
+    return this.getAllRecords(database, store);
   }
 
   public async readAllIds(objectStoreName: string | undefined = undefined): Promise<string[]> {

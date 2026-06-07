@@ -5,7 +5,7 @@ html {
 #favorites-search-gallery-content {
   --radius: 7px;
   margin-right: 15px;
-  padding: 0px 20px 30px 20px;
+  padding: 8px 8px 30px 8px;
   overflow-anchor: none;
 }
 

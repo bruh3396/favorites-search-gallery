@@ -48,7 +48,7 @@ export const defaultMenuElement: MenuElement<void> = {
   parentId: "",
   id: "",
   enabled: true,
-  title: "bruh",
+  title: "",
   position: "afterbegin",
   textContent: "",
   event: null,

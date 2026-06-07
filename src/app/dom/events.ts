@@ -2,12 +2,6 @@ import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@
 import { Emitter } from "@/lib/communication/emitter";
 import { StickyEmitter } from "@/lib/communication/sticky_emitter";
 
-export function toggleGlobalInputEvents(value: boolean): void {
-  for (const event of Object.values(DomEvents.document)) {
-    event.toggle(value);
-  }
-}
-
 export function setupDomEvents(root: HTMLElement): void {
   broadcastDomLoad();
   setupDocumentEvents(root);
@@ -96,10 +90,4 @@ function broadcastDomLoad(): void {
   document.addEventListener("DOMContentLoaded", () => {
     DomEvents.document.domLoaded.emit();
   }, { once: true });
-}
-
-export function waitForDomToLoad(): Promise<void> {
-  return new Promise((resolve) => {
-    DomEvents.document.domLoaded.on(() => resolve(), { once: true });
-  });
 }

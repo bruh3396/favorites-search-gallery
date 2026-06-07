@@ -15,6 +15,7 @@ export const Events = {
     findFavoriteInAll: new Emitter<string>(),
     firstPageFavorites: new StickyEmitter<HTMLElement[] | undefined>(),
     favoritesFoundInDatabase: new StickyEmitter<boolean>(),
+    favoritesDatabaseLoaded: new StickyEmitter<void>(),
     favoritesLoaded: new StickyEmitter<void>(),
 
     searchResultsUpdated: new Emitter<void>(),

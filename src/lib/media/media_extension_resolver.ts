@@ -16,7 +16,7 @@ const databaseWriter = new CoalescingExecutor<MediaExtensionMapping>(100, 2_000,
 
 export const destroyStore: () => void = () => database.destroy();
 export const extractExtension = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
-export const setupExtensions = loadExtensionsIntoCache;
+export const setupExtensions = (gate?: Promise<unknown>): Promise<void> => loadExtensionsIntoCache(gate);
 
 export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExtension> {
   if (isVideo(item)) {
@@ -58,6 +58,10 @@ function saveExtension(id: string, extension: ImageExtension): void {
   }
 }
 
-function loadExtensionsIntoCache(): Promise<void> {
-  return database.readAll().then(mappings => mappings.forEach(mapping => extensionCache.set(mapping.id, mapping.extension)));
+async function loadExtensionsIntoCache(gate?: Promise<unknown>): Promise<void> {
+  if (!ON_FAVORITES_PAGE) {
+    return;
+  }
+  await gate;
+  (await database.readAll()).forEach(mapping => extensionCache.set(mapping.id, mapping.extension));
 }

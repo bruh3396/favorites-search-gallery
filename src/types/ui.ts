@@ -1,5 +1,3 @@
-export type Theme = "native-dark" | "native-light" | "midnight" | "ember";
-
 export interface DrawerPanelClasses {
   section: string;
   sectionTitle: string;
@@ -40,9 +38,8 @@ export interface AwesompleteConstructor {
   FILTER_STARTSWITH(value: string, input: string): boolean
 }
 
-export enum PerformanceProfile {
-  Normal = 0,
-  Medium = 3,
-  Low = 1,
-  Potato = 2
-}
+export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
+export type Theme = "native-dark" | "native-light" | "midnight" | "ember";
+
+export type FavoritesDrawerTab = "settings" | "saved" | "tags" | "download" | "new" | "help";
+export type PostOverlayMode = "tag";

@@ -4,7 +4,7 @@ export function insertStyle(css: string, id: string | undefined = undefined): vo
   style.textContent = css;
 
   if (id !== undefined) {
-    id += "-fsg-style";
+    id = `fsg-style-${id}`;
     const oldStyle = document.getElementById(id);
 
     if (oldStyle !== null) {

@@ -2,25 +2,20 @@ import * as FavoritesLoader from "@/features/favorites/model/load/loader";
 import * as FavoritesMetadataFetcher from "@/features/favorites/model/metadata_fetcher";
 import * as FavoritesPaginator from "@/features/favorites/model/paginator";
 import * as FavoritesSearchCoordinator from "@/features/favorites/model/search/coordinator";
+import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/favorite_types";
 import { Favorite } from "@/types/favorite";
-import { NewFavorites } from "@/features/favorites/types/favorite_types";
-import { TagCategoryMap } from "@/types/search";
 
 let getAdditionalTags: (id: string) => string | undefined = () => undefined;
 let waitForAdditionalTags: () => Promise<void> = () => Promise.resolve();
 
-export function setup(
-  getAdditionalTagsFn: (id: string) => string | undefined,
-  waitForAdditionalTagsFn: () => Promise<void>,
-  onCategoriesResolved: (categoryMap: TagCategoryMap) => void
-): void {
-  getAdditionalTags = getAdditionalTagsFn;
-  waitForAdditionalTags = waitForAdditionalTagsFn;
+export function setup(callbacks: FavoritesModelCallbacks): void {
+  getAdditionalTags = callbacks.getAdditionalTags;
+  waitForAdditionalTags = callbacks.waitForAdditionalTags;
   FavoritesMetadataFetcher.setup(
     FavoritesLoader.updateFavorite,
     (favorite) => FavoritesSearchCoordinator.deIndex([favorite]),
     (favorite) => FavoritesSearchCoordinator.reIndex([favorite]),
-    onCategoriesResolved
+    callbacks.onTagCategoriesResolved
   );
 }
 

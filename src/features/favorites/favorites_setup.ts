@@ -2,6 +2,7 @@ import * as FavoritesDesktop from "@/features/favorites/control/menu/desktop";
 import * as FavoritesDownloadMenu from "@/features/favorites/features/downloader/menu";
 import * as FavoritesFinder from "@/features/favorites/control/menu/finder";
 import * as FavoritesInterFeatureFlow from "@/features/favorites/flows/inter_feature_flow";
+import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
 import * as FavoritesMobile from "@/features/favorites/control/menu/mobile";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
@@ -17,7 +18,7 @@ import * as FavoritesTagEditor from "@/features/favorites/features/tag_editor/ta
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import * as PostApi from "@/lib/remote/api/post_fetcher";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "@/lib/environment";
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { Preferences } from "@/app/context/preferences";
@@ -40,18 +41,25 @@ export function setupFavorites(): void {
   subscribeToEvents();
   registerBridgeHandlers();
   PostApi.deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
+  FavoritesView.showSkeleton();
   FavoritesLoadFlow.loadAllFavorites();
 }
 
 function setupModel(): void {
-  FavoritesModel.setup(FavoritesTagEditor.getAdditionalTags, FavoritesTagEditor.ensureTagModificationsLoaded, Events.favorites.tagCategoriesResolved.emit);
+  FavoritesModel.setup({
+    getAdditionalTags: FavoritesTagEditor.getAdditionalTags,
+    waitForAdditionalTags: FavoritesTagEditor.ensureTagModificationsLoaded,
+    onTagCategoriesResolved: Events.favorites.tagCategoriesResolved.emit
+  });
 }
 
 function setupView(): void {
   FavoritesView.setup({
     onPageSelected: Events.favorites.pageSelected.emit,
     onRelativePageSelected: Events.favorites.relativePageSelected.emit,
-    onFirstPageFavoritesExtracted: Events.favorites.firstPageFavorites.emit
+    onFirstPageFavoritesExtracted: Events.favorites.firstPageFavorites.emit,
+    onFavoriteAdded: Events.favorites.favoriteAdded.emit,
+    onFavoriteRemoved: Events.favorites.favoriteRemoved.emit
   });
 }
 
@@ -120,6 +128,7 @@ function subscribeToEvents(): void {
   Events.favorites.favoriteRemoved.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 
   Events.gallery.previewOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
+  DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);
 }
 
 function registerSearchPageBridgeHandlers(): void {

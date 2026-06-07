@@ -1,5 +1,5 @@
 import { ButtonElement, CheckboxElement, SelectElement } from "@/types/element";
-import { Layout, PerformanceProfile, Theme } from "@/types/ui";
+import { Layout, Theme } from "@/types/ui";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "@/lib/ui/toggles";
 import { Events } from "@/app/channels/events";
 import { GALLERY_ENABLED } from "@/app/context/flags";
@@ -9,7 +9,7 @@ import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { applyTheme } from "@/lib/ui/style";
 import { buildButtonElement } from "@/lib/ui/elements/button";
 import { buildSelectElement } from "@/lib/ui/elements/select";
-import { buildToggleSwitch } from "@/app/input/checkbox";
+import { buildToggleSwitch } from "@/app/dom/checkbox";
 import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
 
@@ -129,7 +129,7 @@ const toggleSwitches: Partial<CheckboxElement>[] = [
   }
 ];
 
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<Theme>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<Theme>>)[] = [
   {
     id: "theme",
     parentId: "favorite-options-left",

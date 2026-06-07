@@ -15,9 +15,9 @@ const releases: Release[] = [
   {
     version: "v1.22",
     changes: [
-      "Redesigned favorites UI",
-      "Custom themes",
-      "Search page favorite indicator: highlights posts already in your favorites",
+      "Redesigned favorites ui",
+      "Added new themes",
+      "Added favorite indicator",
       "Improved post overlay"
     ]
   }

@@ -3,27 +3,26 @@ import COMMON_CSS from "@/assets/css/base/common.css";
 import CONTENT_CSS from "@/assets/css/base/content.css";
 import SKELETON_CSS from "@/assets/css/base/skeleton.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
-import THUMB_FADE_IN_CSS from "@/assets/css/thumbs/thumb_loading.css";
+import THUMB_FADE_IN_CSS from "@/assets/css/thumbs/fade_in.css";
+import THUMB_LOADING_CSS from "@/assets/css/thumbs/loading.css";
 import TILE_CSS from "@/assets/css/thumbs/tile.css";
 import { Theme } from "@/types/ui";
 import { ThumbConfig } from "@/config/thumb_config";
 import { insertStyle } from "@/utils/dom/injector";
 import { setCookie } from "@/utils/browser/cookie";
 import { yieldControl } from "@/lib/async/timing";
-import { Preferences } from "@/app/context/preferences";
 
-export function setupStyles(): void {
+export function setupStyles(theme: Theme): void {
   const fadeInCss = ThumbConfig.fadeIn ? THUMB_FADE_IN_CSS : "";
 
-  insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS + THEMES_CSS + fadeInCss);
-  applyTheme(Preferences.appTheme.value);
+  insertStyle(SKELETON_CSS + COMMON_CSS + CONTENT_CSS + TILE_CSS + THEMES_CSS + THUMB_LOADING_CSS + fadeInCss);
+  applyTheme(theme);
   setupVideoAndGifOutlines();
   setupTilerStyles();
 }
 
 export async function applyTheme(theme: Theme): Promise<void> {
   await yieldControl();
-  Preferences.appTheme.set(theme);
   document.documentElement.dataset.theme = theme;
   syncNativeCookie(theme);
 }

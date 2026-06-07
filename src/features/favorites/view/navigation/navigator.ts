@@ -1,34 +1,29 @@
-import { FavoritesPaginationParameters, emptyFavoritesPageParameters } from "@/features/favorites/types/favorite_types";
 import { IconName, icon } from "@/lib/ui/icon";
+import { label, span } from "@/utils/dom/element";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
+import { FavoritesPaginationParameters } from "@/features/favorites/types/favorite_types";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { PageRelation } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
+import { doNothing } from "@/utils/function";
 import { insertStyle } from "@/utils/dom/injector";
 import { isOnlyDigits } from "@/utils/string/query";
 import { numbersAroundInRange } from "@/utils/number";
+import { toggleDataset } from "@/utils/dom/attribute";
 
-interface NavigatorCallbacks {
-  onPageSelected: (pageNumber: number) => void;
-  onRelativePageSelected: (relation: PageRelation) => void;
-}
+const mainContainer = span("favorites-pagination-container");
+const rangeIndicator = label("pagination-range-label");
+const pageNumberRegex = /favorites-page-(\d+)/;
 
-const CONTAINER = createContainer();
-const RANGE_INDICATOR = document.createElement("label");
-const PAGE_NUMBER_REGEX = /favorites-page-(\d+)/;
+let onPageSelected: (pageNumber: number) => void = doNothing;
+let onRelativePageSelected: (relation: PageRelation) => void = doNothing;
 
-RANGE_INDICATOR.id = "pagination-range-label";
-
-let callbacks: NavigatorCallbacks = {
-  onPageSelected: () => { },
-  onRelativePageSelected: () => { }
-};
-
-export function setup(navigatorCallbacks: NavigatorCallbacks): void {
-  callbacks = navigatorCallbacks;
+export function setup(pageSelected: (pageNumber: number) => void, relativePageSelected: (relation: PageRelation) => void): void {
+  onPageSelected = pageSelected;
+  onRelativePageSelected = relativePageSelected;
   insert();
-  build(emptyFavoritesPageParameters);
+  build({currentPageNumber: 1, finalPageNumber: 1, favoritesCount: 0, startIndex: 0, endIndex: 0});
   toggle(!Preferences.favoritesInfiniteScroll.value);
 }
 
@@ -48,18 +43,18 @@ export function toggle(value: boolean): void {
 }
 
 export function getContainer(): HTMLElement {
-  return CONTAINER;
+  return mainContainer;
 }
 
 export function build(parameters: FavoritesPaginationParameters): void {
-  CONTAINER.innerHTML = "";
+  mainContainer.innerHTML = "";
   updateRangeIndicator(parameters.startIndex, parameters.endIndex, parameters.favoritesCount);
   createNumberTraversalButtons(parameters.currentPageNumber, parameters.finalPageNumber);
   createArrowTraversalButtons(parameters);
 }
 
 export function update(parameters: FavoritesPaginationParameters): void {
-  const pageNumberButtons = Array.from(document.getElementsByClassName("favorites-menu-pagination-btn"));
+  const pageNumberButtons = Array.from(document.getElementsByClassName("favorites-pagination-btn"));
   const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesConfig.maxPageNumberButtons;
 
   if (!atMaxPageNumberButtons) {
@@ -72,7 +67,7 @@ export function update(parameters: FavoritesPaginationParameters): void {
     build(parameters);
     return;
   }
-  const middlePageNumberMatch = PAGE_NUMBER_REGEX.exec(middlePageNumberButton.id);
+  const middlePageNumberMatch = pageNumberRegex.exec(middlePageNumberButton.id);
 
   if (middlePageNumberMatch === null) {
     build(parameters);
@@ -86,19 +81,12 @@ export function update(parameters: FavoritesPaginationParameters): void {
   build(parameters);
 }
 
-function createContainer(): HTMLSpanElement {
-  const menu = document.createElement("span");
-
-  menu.id = "favorites-pagination-container";
-  return menu;
-}
-
 function insertMenu(): void {
   if (ON_DESKTOP_DEVICE) {
     const placeToInsert = document.getElementById(FavoritesMenuId.paginationSlot);
 
     if (placeToInsert !== null) {
-      placeToInsert.insertAdjacentElement("afterend", CONTAINER);
+      placeToInsert.insertAdjacentElement("afterend", mainContainer);
       placeToInsert.remove();
     }
     return;
@@ -106,7 +94,7 @@ function insertMenu(): void {
   const footerBottom = document.getElementById("mobile-footer-bottom");
 
   if (footerBottom !== null) {
-    footerBottom.insertAdjacentElement("afterbegin", CONTAINER);
+    footerBottom.insertAdjacentElement("afterbegin", mainContainer);
   }
 }
 
@@ -114,14 +102,14 @@ function insert(): void {
   const matchCountLabel = document.getElementById(FavoritesMenuId.matchCount);
 
   if (matchCountLabel !== null) {
-    matchCountLabel.insertAdjacentElement("afterend", RANGE_INDICATOR);
+    matchCountLabel.insertAdjacentElement("afterend", rangeIndicator);
   }
   insertMenu();
 }
 
 function updateRangeIndicator(start: number, end: number, count: number): void {
   end = Math.min(count, end);
-  RANGE_INDICATOR.textContent = end === 0 ? "" : `${start + 1} - ${end}`;
+  rangeIndicator.textContent = end === 0 ? "" : `${start + 1} - ${end}`;
 }
 
 function createNumberTraversalButtons(currentPageNumber: number, finalPageNumber: number): void {
@@ -149,20 +137,21 @@ function createNumberTraversalButtons(currentPageNumber: number, finalPageNumber
   if (windowEnd < finalPageNumber) {
     createNumberTraversalButton(currentPageNumber, finalPageNumber);
   }
-  CONTAINER.appendChild(popover);
+  mainContainer.appendChild(popover);
 }
 
 function createEllipsis(popover: HTMLElement): void {
   const ellipsis = document.createElement("button");
 
-  ellipsis.className = "favorites-menu-pagination-ellipsis";
+  ellipsis.className = "favorites-pagination-ellipsis";
   ellipsis.title = "Goto specific page";
   ellipsis.textContent = "…";
   ellipsis.onclick = (): void => {
-    popover.classList.toggle("goto-page-popover--open");
-    popover.querySelector("input")?.focus();
+    if (toggleDataset(popover, "open")) {
+      popover.querySelector("input")?.select();
+    }
   };
-  CONTAINER.appendChild(ellipsis);
+  mainContainer.appendChild(ellipsis);
 }
 
 function createNumberTraversalButton(currentPageNumber: number, pageNumber: number): void {
@@ -170,12 +159,12 @@ function createNumberTraversalButton(currentPageNumber: number, pageNumber: numb
   const selected = currentPageNumber === pageNumber;
 
   button.id = `favorites-page-${pageNumber}`;
-  button.className = "favorites-menu-pagination-btn";
+  button.className = "favorites-pagination-btn";
   button.classList.toggle("selected", selected);
   button.onclick = (): void => {
-    callbacks.onPageSelected(pageNumber);
+    onPageSelected(pageNumber);
   };
-  CONTAINER.appendChild(button);
+  mainContainer.appendChild(button);
   button.textContent = String(pageNumber);
 }
 
@@ -191,12 +180,12 @@ function createArrowTraversalButton(name: PageRelation, iconName: IconName, posi
 
   button.id = `${name}-page`;
   button.title = `Goto ${name} page`;
-  button.className = "favorites-menu-pagination-arrow";
+  button.className = "favorites-pagination-arrow";
   button.appendChild(icon(iconName));
   button.onclick = (): void => {
-    callbacks.onRelativePageSelected(name);
+    onRelativePageSelected(name);
   };
-  CONTAINER.insertAdjacentElement(position, button);
+  mainContainer.insertAdjacentElement(position, button);
   return button;
 }
 
@@ -221,7 +210,7 @@ function createGotoPagePopover(currentPageNumber: number, finalPageNumber: numbe
 
   const submit = (): void => {
     if (isOnlyDigits(input.value)) {
-      callbacks.onPageSelected(Number(input.value));
+      onPageSelected(Number(input.value));
       popover.classList.remove("goto-page-popover--open");
     }
   };

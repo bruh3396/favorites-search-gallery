@@ -1,5 +1,5 @@
 import { CheckboxElement, defaultMenuElement } from "@/types/element";
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { doNothing } from "@/utils/function";
 

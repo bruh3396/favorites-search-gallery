@@ -1,4 +1,4 @@
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Timeout } from "@/types/async";

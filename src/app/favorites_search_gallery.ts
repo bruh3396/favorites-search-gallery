@@ -1,12 +1,12 @@
 import { FAVORITES_SEARCH_GALLERY_ENABLED } from "@/app/context/flags";
-import { setupFeatures } from "@/app/startup/features_setup";
-import { setupShared } from "@/app/startup/shared_setup";
+import { startFeatures } from "@/app/startup/features";
+import { startRuntime } from "@/app/startup/runtime";
 
-function runFavoritesSearchGallery(): void {
+function startFavoritesSearchGallery(): void {
   if (FAVORITES_SEARCH_GALLERY_ENABLED) {
-    setupShared();
-    setupFeatures();
+    startRuntime();
+    startFeatures();
   }
 }
 
-runFavoritesSearchGallery();
+startFavoritesSearchGallery();

@@ -1,6 +1,5 @@
 import { GALLERY_DISABLED, PERFORMANCE_PROFILE } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { PerformanceProfile } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
 import { insertStyle } from "@/utils/dom/injector";
 
@@ -21,11 +20,11 @@ export function hideUnusedOptions(): void {
     hiddenSelectors.add("#search-page-gallery-menu");
   }
 
-  if (PERFORMANCE_PROFILE !== PerformanceProfile.Normal) {
+  if (PERFORMANCE_PROFILE !== "normal") {
     hiddenSelectors.add("#search-page-upscale-thumbs");
   }
 
-  if (PERFORMANCE_PROFILE === PerformanceProfile.Potato) {
+  if (PERFORMANCE_PROFILE === "potato") {
     hiddenSelectors.add("#search-page-tooltip");
   }
 

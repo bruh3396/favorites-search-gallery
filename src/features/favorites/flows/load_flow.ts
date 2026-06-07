@@ -25,13 +25,14 @@ async function hasDatabaseFavorites(): Promise<boolean> {
 async function loadDatabaseFavorites(): Promise<void> {
   FavoritesView.setStatus("Loading favorites");
   await FavoritesModel.loadDatabaseFavorites();
+  Events.favorites.favoritesDatabaseLoaded.emit();
   FavoritesView.setTemporaryStatus("Favorites loaded");
   FavoritesSearchFlow.searchActiveFavorites();
 }
 
 async function fetchNewFavorites(): Promise<void> {
   FavoritesView.setStatus("Finding new favorites");
-  const results = await FavoritesModel.fetchNewFavorites(await Events.favorites.firstPageFavorites.waitWithTimeout());
+  const results = await FavoritesModel.fetchNewFavorites(await Events.favorites.firstPageFavorites.timeout());
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");

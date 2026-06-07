@@ -1,14 +1,15 @@
 import * as FavoritesChangelogPanel from "@/features/favorites/view/shell/changelog_panel";
 import * as FavoritesHelpPanel from "@/features/favorites/view/shell/help_panel";
 import { Body, DrawerTrack } from "@/app/layout/shell";
-import { FavoritesDrawerTab, FavoritesMenuClass, FavoritesMenuId, favoritesDrawerTabs } from "@/features/favorites/types/scaffold";
+import { FavoritesMenuClass, FavoritesMenuId, favoritesDrawerTabs } from "@/features/favorites/types/scaffold";
 import { IconName, icon } from "@/lib/ui/icon";
 import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { FavoritesDrawerTab } from "@/types/ui";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { yieldControl } from "@/lib/async/timing";
 
-let activeTab: FavoritesDrawerTab = "settings";
+let activeTab: FavoritesDrawerTab = Preferences.favoritesDrawerActiveTab.value;
 
 export async function setup(): Promise<void> {
   if (!ON_DESKTOP_DEVICE) {
@@ -24,7 +25,7 @@ export async function setup(): Promise<void> {
 
   if (Preferences.favoritesDrawerOpen.value) {
     await yieldControl();
-    openInstant();
+    openInstantly();
   }
 }
 
@@ -52,6 +53,7 @@ function panelId(tab: FavoritesDrawerTab): string {
 
 function selectTab(tab: FavoritesDrawerTab): void {
   activeTab = tab;
+  Preferences.favoritesDrawerActiveTab.set(tab);
 
   for (const { tab: candidate } of favoritesDrawerTabs) {
     const isActive = candidate === tab;
@@ -69,7 +71,7 @@ function selectTab(tab: FavoritesDrawerTab): void {
   }
 }
 
-function openInstant(): void {
+function openInstantly(): void {
   const drawerElement = document.getElementById(FavoritesMenuId.drawer);
 
   if (drawerElement === null) {
@@ -98,7 +100,6 @@ function buildTab(tab: FavoritesDrawerTab, label: string, iconName: IconName): H
 
   button.id = tabId(tab);
   button.className = FavoritesMenuClass.drawerTab;
-  // button.title = label;
 
   const labelSpan = document.createElement("span");
 

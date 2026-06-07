@@ -3,17 +3,19 @@ import * as PostOverlayModel from "@/features/post_overlay/model/post_overlay_mo
 import * as PostOverlayTagClickFlow from "@/features/post_overlay/flows/tag_click_flow";
 import * as PostOverlayToggleFlow from "@/features/post_overlay/flows/toggle_flow";
 import * as PostOverlayView from "@/features/post_overlay/view/post_overlay_view";
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
+import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { POST_OVERLAY_DISABLED } from "@/app/context/flags";
 
-export function setupPostOverlay(): void {
+export async function setupPostOverlay(): Promise<void> {
   if (POST_OVERLAY_DISABLED) {
     return;
   }
-  PostOverlayModel.setup();
   PostOverlayView.setup();
   subscribeToEvents();
+  await waitUntilFavoritesAreReady();
+  PostOverlayModel.setup();
 }
 
 function subscribeToEvents(): void {
@@ -28,4 +30,8 @@ function subscribeToEvents(): void {
   Events.favorites.columnCountChanged.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.layoutChanged.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.rowSizeChanged.on(PostOverlayHoverFlow.onThumbsMoved);
+}
+
+function waitUntilFavoritesAreReady(): Promise<unknown> {
+  return ON_FAVORITES_PAGE ? Events.favorites.favoritesDatabaseLoaded.timeout(2_000) : Promise.resolve();
 }

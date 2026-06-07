@@ -2,17 +2,12 @@ import * as ContentTiler from "@/app/layout/content_tiler";
 import * as FavoritesDrawer from "@/features/favorites/view/shell/drawer";
 import * as FavoritesNavigator from "@/features/favorites/view/navigation/navigator";
 import * as FavoritesShell from "@/features/favorites/view/shell/favorites_shell";
+import * as FavoritesSkeleton from "@/features/favorites/view/skeleton/skeleton";
 import * as FavoritesStatus from "@/features/favorites/view/status/status";
-import { Favorite, PageRelation } from "@/types/favorite";
-import { buildElementTemplate } from "@/features/favorites/types/favorite_element_template";
-import { favoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
+import { Favorite } from "@/types/favorite";
+import { FavoritesViewCallbacks } from "@/features/favorites/types/favorite_types";
 import { scrollToTop } from "@/lib/thumb/thumbs";
-
-export interface FavoritesViewCallbacks {
-  onPageSelected: (pageNumber: number) => void;
-  onRelativePageSelected: (relation: PageRelation) => void;
-  onFirstPageFavoritesExtracted: (elements: HTMLElement[] | undefined) => void;
-}
+import { setupFavoriteElement } from "@/features/favorites/types/favorite_element";
 
 export function addToTop(items: Favorite[] | HTMLElement[]): void {
   ContentTiler.addToTop(toElements(items));
@@ -28,13 +23,16 @@ export function showSearchResults(searchResults: Favorite[]): void {
 }
 
 export function setup(viewCallbacks: FavoritesViewCallbacks): void {
-  buildElementTemplate();
+  setupFavoriteElement(viewCallbacks.onFavoriteAdded, viewCallbacks.onFavoriteRemoved);
   FavoritesShell.setup(viewCallbacks.onFirstPageFavoritesExtracted);
   FavoritesStatus.setup();
   ContentTiler.setup();
-  ContentTiler.tile(favoritesSkeleton());
-  FavoritesNavigator.setup(viewCallbacks);
+  FavoritesNavigator.setup(viewCallbacks.onPageSelected, viewCallbacks.onRelativePageSelected);
   FavoritesDrawer.setup();
+}
+
+export function showSkeleton(): void {
+  ContentTiler.tile(FavoritesSkeleton.build());
 }
 
 export { toggle as toggleNavigator, getContainer as getNavigationContainer, build as buildNavigationMenu, update as updateNavigationMenu } from "@/features/favorites/view/navigation/navigator";

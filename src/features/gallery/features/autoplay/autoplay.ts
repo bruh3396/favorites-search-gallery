@@ -4,9 +4,7 @@ import { clamp, millisecondsToSeconds } from "@/utils/number";
 import { isImage, isVideo } from "@/lib/media/media_type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import AUTOPLAY_HTML from "@/assets/html/autoplay.html";
-import { DomEvents } from "@/app/input/dom_events";
-import { Events } from "@/app/channels/events";
-import { NavigationKey } from "@/types/input";
+import { EnhancedKeyboardEvent, NavigationKey } from "@/types/input";
 import { NumberComponent } from "@/lib/ui/elements/number_component";
 import { Overlays } from "@/app/layout/shell";
 import { Preferences } from "@/app/context/preferences";
@@ -15,10 +13,14 @@ import { createObjectUrlFromSvg } from "@/utils/dom/svg";
 import { insertStyle } from "@/utils/dom/injector";
 import { throttle } from "@/lib/async/throttle";
 
+type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
+
 export type AutoplayEvents = {
   setVideoLooping: (value: boolean) => void
   onComplete: (direction?: NavigationKey) => void
   onVideoEndedBeforeMinimumViewTime: () => void
+  subscribeToMouseMove: Subscribe<MouseEvent>
+  subscribeToKeyDown: Subscribe<EnhancedKeyboardEvent>
 }
 
 type AutoplayMenuElements = {
@@ -269,7 +271,6 @@ function setupNumberComponents(): void {
 function addEventListeners(): void {
   addMenuEventListeners();
   addSettingsMenuEventListeners();
-  addFavoritesPageEventListeners();
 }
 
 function addMenuEventListeners(): void {
@@ -336,12 +337,6 @@ function addSettingsMenuEventListeners(): void {
   };
 }
 
-function addFavoritesPageEventListeners(): void {
-  Events.favorites.autoplayToggled.on((value) => {
-    toggle(value);
-  });
-}
-
 function toggleDirection(): void {
   Preferences.galleryAutoplayForward.set(!Preferences.galleryAutoplayForward.value);
   ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.galleryAutoplayForward.value);
@@ -367,7 +362,7 @@ function toggleSettingMenu(value?: boolean | undefined): void {
   }
 }
 
-function toggle(value: boolean): void {
+export function toggle(value: boolean): void {
   Preferences.galleryAutoplayActive.set(value);
   active = value;
 
@@ -495,12 +490,12 @@ function addAutoplayEventListeners(): void {
   imageViewTimer.onTimerEnd = (): void => {
     events.onComplete();
   };
-  DomEvents.document.mousemove.on(throttle<MouseEvent>(() => {
+  events.subscribeToMouseMove(throttle<MouseEvent>(() => {
     showMenu();
   }, 250), {
     signal: eventListenersAbortController.signal
   });
-  DomEvents.document.keydown.on((event) => {
+  events.subscribeToKeyDown((event) => {
     if (!event.isHotkey) {
       return;
     }

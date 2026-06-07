@@ -1,5 +1,5 @@
 import * as GalleryVideoController from "@/features/gallery/view/rendering/video/video_controller";
-import { GalleryRenderer, VideoControllerCallbacks } from "@/features/gallery/types/gallery_types";
+import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/function";
 
 const root = document.createElement("div");
@@ -15,7 +15,7 @@ export const GalleryVideoRenderer = {
   preload: GalleryVideoController.preloadVideoPlayers
 } satisfies GalleryRenderer;
 
-export const setupVideoRenderer = (callbacks: VideoControllerCallbacks): void => GalleryVideoController.setup(root, callbacks);
+export const setupVideoRenderer = (onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void): void => GalleryVideoController.setup(root, onVideoEnded, onVideoDoubleClicked);
 export { toggleVideoLooping, restartActiveVideo as restartVideo, toggleActiveVideoPause as toggleVideoPause, toggleVideoMute } from "@/features/gallery/view/rendering/video/video_controller";
 
 function render(thumb: HTMLElement): void {

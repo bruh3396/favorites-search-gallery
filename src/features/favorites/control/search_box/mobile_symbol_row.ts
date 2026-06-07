@@ -1,4 +1,5 @@
 import { sleep } from "@/lib/async/timing";
+import { FavoritesMenuId } from "@/features/favorites/types/scaffold";
 
 const SYMBOLS = ["-", "*", "_", "(", ")", "~"];
 const CONTAINER_ID = "mobile-symbol-container";
@@ -63,5 +64,5 @@ function isFocusInsideRow(container: HTMLElement): boolean {
   if (active === null) {
     return false;
   }
-  return active.id === "favorites-search-box" || container.contains(active);
+  return active.id === FavoritesMenuId.searchBox || container.contains(active);
 }

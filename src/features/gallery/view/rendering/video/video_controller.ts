@@ -1,21 +1,24 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { VideoClip, VideoControllerCallbacks } from "@/features/gallery/types/gallery_types";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";
+import { VideoClip } from "@/features/gallery/types/gallery_types";
 import { convertPreviewUrlToImageUrl } from "@/lib/media/media_url_transformer";
+import { doNothing } from "@/utils/function";
 import { getPreviewUrl } from "@/lib/thumb/thumbs";
 import { isVideo } from "@/lib/media/media_type_predicates";
 
 const videoPlayers: HTMLVideoElement[] = [];
 const videoClips = new Map();
 const videoContainer: HTMLElement = document.createElement("div");
-let callbacks: VideoControllerCallbacks;
+let onVideoEnded: () => void = doNothing;
+let onVideoDoubleClicked: (event: MouseEvent) => void = doNothing;
 
 videoContainer.id = "video-container-inner";
 
-export function setup(container: HTMLElement, videoCallbacks: VideoControllerCallbacks): void {
-  callbacks = videoCallbacks;
+export function setup(container: HTMLElement, videoEnded: () => void, videoDoubleClicked: (event: MouseEvent) => void): void {
+  onVideoEnded = videoEnded;
+  onVideoDoubleClicked = videoDoubleClicked;
   insertVideoContainer(container);
   createVideoPlayers();
   preventVideoPlayersFromFlashingWhenLoaded();
@@ -229,7 +232,7 @@ function updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElemen
 
 function broadcastEnding(video: HTMLVideoElement): void {
   video.addEventListener("ended", () => {
-    callbacks.onVideoEnded();
+    onVideoEnded();
   }, {
     passive: true
   });
@@ -237,7 +240,7 @@ function broadcastEnding(video: HTMLVideoElement): void {
 
 function broadcastDoubleClick(video: HTMLVideoElement): void {
   video.addEventListener("dblclick", (event) => {
-    callbacks.onVideoDoubleClicked(event);
+    onVideoDoubleClicked(event);
   });
 }
 

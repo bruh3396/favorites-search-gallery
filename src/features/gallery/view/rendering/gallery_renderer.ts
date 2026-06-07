@@ -1,14 +1,14 @@
-import { GalleryRenderer, VideoControllerCallbacks } from "@/features/gallery/types/gallery_types";
 import { GalleryVideoRenderer, setupVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
 import { isGif, isVideo } from "@/lib/media/media_type_predicates";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
+import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 
 const renderers = [GalleryImageRenderer, GalleryVideoRenderer, GalleryGifRenderer];
 
-export function setup(root: HTMLElement, callbacks: VideoControllerCallbacks): void {
+export function setup(root: HTMLElement, onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void): void {
   renderers.forEach(r => root.appendChild(r.root));
-  setupVideoRenderer(callbacks);
+  setupVideoRenderer(onVideoEnded, onVideoDoubleClicked);
 }
 
 export function render(thumb: HTMLElement): void {

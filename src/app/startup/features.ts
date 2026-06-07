@@ -6,7 +6,7 @@ import { setupSavedSearches } from "@/features/saved_searches/saved_searches";
 import { setupSearchPage } from "@/features/search_page/search_page_setup";
 import { setupTooltip } from "@/features/tooltip/tooltip_setup";
 
-export function setupFeatures(): void {
+export function startFeatures(): void {
   setupFavorites();
   setupSearchPage();
   setupGallery();

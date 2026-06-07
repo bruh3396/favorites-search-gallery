@@ -1,0 +1,133 @@
+#favorites-pagination-slot {
+  flex: 0 0 auto;
+}
+
+#favorites-pagination-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 42px;
+  box-sizing: border-box;
+}
+
+#favorites-pagination-container button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 100%;
+  padding: 0;
+  color: var(--text-muted);
+  transition: color 0.12s ease;
+}
+
+#favorites-pagination-container .favorites-pagination-btn,
+#favorites-pagination-container .favorites-pagination-ellipsis {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#favorites-pagination-container button:hover {
+  color: var(--text);
+}
+
+#favorites-pagination-container .favorites-pagination-arrow .icon {
+  width: 18px;
+  height: 18px;
+}
+
+#favorites-pagination-container .favorites-pagination-arrow#previous-page {
+  position: absolute;
+  left: 0;
+}
+
+#favorites-pagination-container .favorites-pagination-arrow#next-page {
+  position: absolute;
+  right: 0;
+}
+
+#favorites-pagination-container button[disabled] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+#favorites-pagination-container .favorites-pagination-btn.selected {
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: bold;
+  pointer-events: none;
+}
+
+/* Go to page popover */
+
+#goto-page-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  min-width: 160px;
+  border-radius: 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s linear 0.15s;
+}
+
+#goto-page-popover[data-open] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.goto-page-heading {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+#goto-page-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#goto-page-popover #goto-page-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--surface-pill);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+#goto-page-popover #goto-page-button {
+  flex: 0 0 auto;
+  cursor: pointer;
+  text-align: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: bold;
+}
+
+#goto-page-popover #goto-page-button:hover {
+  filter: brightness(1.1);
+}

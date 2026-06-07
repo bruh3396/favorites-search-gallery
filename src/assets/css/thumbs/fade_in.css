@@ -1,14 +1,15 @@
-.post img {
-  background-color: #6a6a6a;
-}
-
 @keyframes thumb-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .tiler--square .post:not(.skeleton-item),
 .tiler--row .post:not(.skeleton-item),
 .tiler--column .tiler--column--a .post:not(.skeleton-item) {
-  animation: thumb-fade-in 0.3s ease both;
+  animation: thumb-fade-in 0.15s ease both;
 }

@@ -15,7 +15,7 @@ export class StickyEmitter<V> extends Emitter<V> {
     return super.next();
   }
 
-  public waitWithTimeout(milliseconds: number = 1_000): Promise<V | undefined> {
+  public timeout(milliseconds: number = 1_000): Promise<V | undefined> {
     return withTimeout(this.wait(), milliseconds).catch(() => undefined);
   }
 

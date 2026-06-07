@@ -4,7 +4,6 @@ import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { PERFORMANCE_PROFILE } from "@/app/context/flags";
-import { PerformanceProfile } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
 import { ThrottledQueue } from "@/lib/async/throttled_queue";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
@@ -141,7 +140,7 @@ export abstract class GalleryAbstractUpscaler {
     if (ON_SEARCH_PAGE && !Preferences.searchPageUpscaleThumbs.value) {
       return false;
     }
-    return PERFORMANCE_PROFILE === PerformanceProfile.Normal;
+    return PERFORMANCE_PROFILE === "normal";
   }
 
   protected abstract clearCanvases(): void;

@@ -2,7 +2,7 @@ import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile, Theme } from "@/types/ui";
 import { applyTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility } from "@/lib/ui/style";
-import { buildCheckboxElement, buildCheckboxOption } from "@/app/input/checkbox";
+import { buildCheckboxElement, buildCheckboxOption } from "@/app/dom/checkbox";
 import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "@/lib/ui/toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -76,14 +76,14 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: FavoritesMenuId.panelButton,
-    parentId: FavoritesMenuId.settingsSlot,
+    parentId: FavoritesMenuId.drawerToggleSlot,
     icon: "hamburger",
     title: "Menu",
     event: Events.favorites.panelButtonClicked
   },
   {
     id: "reset-button",
-    parentId: FavoritesMenuId.settingsSlot,
+    parentId: FavoritesMenuId.resetSlot,
     icon: "reset",
     title: "Reset",
     event: Events.favorites.resetButtonClicked
@@ -314,12 +314,11 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     preference: Preferences.appPerformanceProfile,
     event: Events.favorites.performanceProfileChanged,
     function: reloadWindow,
-    isNumeric: true,
     options: new Map<PerformanceProfile, string>([
-      [PerformanceProfile.Normal, "Normal"],
-      [PerformanceProfile.Medium, "Medium (no upscaling)"],
-      [PerformanceProfile.Low, "Low (no gallery)"],
-      [PerformanceProfile.Potato, "Potato (only search)"]
+      ["normal", "Normal"],
+      ["medium", "Medium (no upscaling)"],
+      ["low", "Low (no gallery)"],
+      ["potato", "Potato (only search)"]
     ])
   }
 ];

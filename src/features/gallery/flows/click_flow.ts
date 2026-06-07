@@ -1,7 +1,7 @@
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { EnhancedMouseEvent } from "@/types/input";
 import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 import { throttle } from "@/lib/async/throttle";

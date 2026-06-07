@@ -141,6 +141,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 
 | Key | Function        |
 | :---| :---------------|
+| /   | Focus the search bar |
 | T   | Toggle tooltips |
 | U   | Toggle UI |
 | O   | Toggle more options  |

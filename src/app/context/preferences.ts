@@ -1,12 +1,11 @@
-import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile, Theme } from "@/types/ui";
+import { FavoriteIndicatorStyle, FavoritesDrawerTab, GalleryFavoriteStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortingMethod } from "@/types/search";
-import { OverlayMode } from "@/features/post_overlay/types/overlay_mode";
 import { Preference } from "@/lib/storage/preference";
 import { getCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
-  appPerformanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", PerformanceProfile.Normal),
+  appPerformanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
   appTheme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
 
   favoritesAddButtonsVisible: new Preference("favoritesAddButtonsVisible", false),
@@ -14,6 +13,7 @@ export const Preferences = {
   favoritesColumnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
   favoritesDownloadBatchSize: new Preference("favoritesDownloadBatchSize", 250),
   favoritesDownloadButtonsVisible: new Preference("favoritesDownloadButtonsVisible", false),
+  favoritesDrawerActiveTab: new Preference<FavoritesDrawerTab>("favoritesDrawerActiveTab", "settings"),
   favoritesDrawerOpen: new Preference("favoritesDrawerOpen", false),
   favoritesExcludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
   favoritesFinderId: new Preference("favoritesFinderId", ""),
@@ -23,7 +23,7 @@ export const Preferences = {
   favoritesLayout: new Preference<Layout>("favoritesLayout", "tiler--column"),
   favoritesOptionsVisible: new Preference("favoritesOptionsVisible", false),
   favoritesRemoveButtonsVisible: new Preference("favoritesRemoveButtonsVisible", false),
-  favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 150),
+  favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 125),
   favoritesRowHeight: new Preference("favoritesRowHeight", 7),
   favoritesSortAscending: new Preference("favoritesSortAscending", false),
   favoritesSortKey: new Preference<SortingMethod>("favoritesSortKey", "default"),
@@ -45,7 +45,7 @@ export const Preferences = {
   galleryVideoVolume: new Preference("galleryVideoVolume", 1),
 
   postOverlayEnabled: new Preference("postOverlayEnabled", false),
-  postOverlayMode: new Preference<OverlayMode>("postOverlayMode", "tag"),
+  postOverlayMode: new Preference<PostOverlayMode>("postOverlayMode", "tag"),
 
   savedSearchesSuggestions: new Preference("savedSearchesSuggestions", false),
   savedSearchesTutorial: new Preference("savedSearchesTutorial", false),
@@ -53,7 +53,7 @@ export const Preferences = {
 
   searchPageAddButtonsVisible: new Preference("searchPageAddButtonsVisible", false),
   searchPageColumnCount: new Preference("searchPageColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
-  searchPageEnabled: new Preference("searchPageEnabled", false),
+  searchPageEnabled: new Preference("searchPageEnabled", true),
   searchPageFavoriteIndicator: new Preference("searchPageFavoriteIndicator", false),
   searchPageFavoriteIndicatorStyle: new Preference<FavoriteIndicatorStyle>("searchPageFavoriteIndicatorStyle", "border"),
   searchPageGalleryFavoriteStyle: new Preference<GalleryFavoriteStyle>("searchPageGalleryFavoriteStyle", "border"),

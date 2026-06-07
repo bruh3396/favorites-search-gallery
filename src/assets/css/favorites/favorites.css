@@ -228,6 +228,10 @@ textarea#favorites-search-box:focus {
   z-index: 40;
 }
 
+.menu-icon-btn::after {
+  color: purple !important;
+}
+
 .menu-icon-btn:hover::after {
   opacity: 1;
   visibility: visible;

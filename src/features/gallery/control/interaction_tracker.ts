@@ -1,4 +1,4 @@
-import { DomEvents } from "@/app/input/dom_events";
+import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
 import { InteractionTracker } from "@/lib/observer/interaction_tracker";

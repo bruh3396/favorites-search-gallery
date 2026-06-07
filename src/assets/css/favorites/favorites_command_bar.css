@@ -1,0 +1,149 @@
+:root {
+  --favorites-bar-height: 46px;
+
+  --cmd-bar-icon-slot: 40px;
+  --cmd-bar-drawer-toggle: var(--cmd-bar-icon-slot);
+  --cmd-bar-pill: minmax(400px, 1fr);
+  --cmd-bar-pagination: 380px;
+  --cmd-bar-status: 400px;
+  --cmd-bar-reset: var(--cmd-bar-icon-slot);
+}
+
+#favorites-command-bar :is(button, input, textarea),
+#favorites-drawer :is(button, input, textarea) {
+  all: unset;
+  box-sizing: border-box;
+}
+
+#favorites-command-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--favorites-bar-height);
+  padding: 4px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+#favorites-command-bar-grid {
+  display: grid;
+  grid-template-columns:
+    var(--cmd-bar-drawer-toggle)
+    var(--cmd-bar-pill)
+    var(--cmd-bar-pagination)
+    var(--cmd-bar-status)
+    var(--cmd-bar-reset);
+  align-items: center;
+  gap: 10px;
+}
+
+#favorites-reset-slot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 5px;
+}
+
+#favorites-drawer-toggle-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 4px;
+}
+
+#favorites-command-bar #reset-button:hover {
+  color: var(--danger);
+  background: var(--danger-surface);
+}
+
+#favorites-search-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: flex-start;
+  height: 34px;
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+#favorites-search-status>label {
+  display: block;
+  line-height: 17px;
+}
+
+#favorites-search-status>#favorites-load-status-label {
+  order: -1;
+  flex: 0 0 100%;
+}
+
+#favorites-search-status>#match-count-label {
+  flex: 0 0 110px;
+}
+
+#favorites-search-status>#pagination-range-label {
+  flex: 0 0 90px;
+}
+
+#favorites-load-status-label.u-hidden {
+  visibility: hidden;
+}
+
+/* Icon buttons */
+
+#favorites-command-bar .menu-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text);
+  transition: background-color 0.12s ease;
+}
+
+#favorites-command-bar .menu-icon-btn:hover {
+  background: var(--surface-hover);
+}
+
+#favorites-command-bar .menu-icon-btn[data-active] {
+  color: var(--accent);
+}
+
+.menu-icon-btn>.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-icon-btn::after {
+  content: attr(data-hint);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 12px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.1s ease 0s, visibility 0s linear 0.6s;
+  z-index: 40;
+}
+
+.menu-icon-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.1s ease 0.6s, visibility 0s linear 0.6s;
+}

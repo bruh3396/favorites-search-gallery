@@ -27,14 +27,6 @@
 
 /* Base elements */
 
-html.fullscreen-effect::before {
-  opacity: 1;
-}
-
-html.transition-disabled::before {
-  transition: none;
-}
-
 body {
   overflow-x: clip;
   overflow-anchor: auto;

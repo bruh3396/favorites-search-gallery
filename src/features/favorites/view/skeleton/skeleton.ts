@@ -25,6 +25,6 @@ class Skeleton {
   }
 }
 
-export function favoritesSkeleton(): HTMLElement[] {
+export function build(): HTMLElement[] {
   return new Skeleton(getLayout(), Preferences.favoritesResultsPerPage.value).elements;
 }

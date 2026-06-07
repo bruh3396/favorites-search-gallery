@@ -1,33 +1,34 @@
+import { FavoritesDrawerTab } from "@/types/ui";
 import { IconName } from "@/lib/ui/icon";
 
 export const FavoritesMenuId = {
-  menu: "favorites-search-gallery-menu",
-  bar: "favorites-menu-bar",
-  status: "favorites-menu-status",
+  commandBar: "favorites-command-bar",
+  grid: "favorites-command-bar-grid",
+  searchBox: "favorites-search-box",
+  status: "favorites-search-status",
   matchCount: "match-count-label",
   loadStatus: "favorites-load-status-label",
-  pill: "favorites-menu-pill",
-  searchButton: "favorites-menu-search-button",
+  pill: "favorites-pill",
+  searchButton: "favorites-search-button",
   panelButton: "panel-button",
-  settingsSlot: "favorites-menu-panel-button-slot",
-  actions: "favorites-menu-actions",
+  drawerToggleSlot: "favorites-drawer-toggle-slot",
+  actions: "favorites-search-actions",
   paginationSlot: "favorites-pagination-slot",
-  drawer: "favorites-menu-drawer",
-  drawerTabStrip: "favorites-menu-drawer-tabs",
-  drawerTabPanels: "favorites-menu-drawer-panels"
+  resetSlot: "favorites-reset-slot",
+  drawer: "favorites-drawer",
+  drawerTabStrip: "favorites-drawer-tabs",
+  drawerTabPanels: "favorites-drawer-panels"
 } as const;
 
 export const FavoritesMenuClass = {
-  drawerTab: "favorites-menu-drawer-tab",
-  drawerTabLabel: "favorites-menu-drawer-tab-label",
-  drawerPanel: "favorites-menu-drawer-panel",
-  drawerSection: "favorites-menu-drawer-section",
-  drawerSectionTitle: "favorites-menu-drawer-section-title",
-  drawerHelpLinks: "favorites-menu-drawer-help-links",
-  drawerHelpLink: "favorites-menu-drawer-help-link"
+  drawerTab: "favorites-drawer-tab",
+  drawerTabLabel: "favorites-drawer-tab-label",
+  drawerPanel: "favorites-drawer-panel",
+  drawerSection: "favorites-drawer-section",
+  drawerSectionTitle: "favorites-drawer-section-title",
+  drawerHelpLinks: "favorites-drawer-help-links",
+  drawerHelpLink: "favorites-drawer-help-link"
 } as const;
-
-export type FavoritesDrawerTab = "settings" | "saved" | "tags" | "download" | "new" | "help";
 
 export const favoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; icon: IconName }[] = [
   { tab: "settings", label: "Settings", icon: "settings" },
