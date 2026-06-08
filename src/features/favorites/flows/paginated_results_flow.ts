@@ -1,8 +1,8 @@
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import { Favorite, PageRelation } from "@/types/favorite";
 import { preloadImages, revealItem } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
+import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
 import { NavigationKey } from "@/types/input";
@@ -13,11 +13,11 @@ export const FavoritesPaginatedView = {
   initialize,
   sync: reconcilePagination,
   reveal,
-  loadMore: (direction: NavigationKey): void => navigateToAdjacentPage(direction),
+  loadMore: (direction: NavigationKey): void => stepPage(direction),
   hasMore: (): boolean => true
 } satisfies FavoritesResultsView;
 
-export { goToPage, goToRelativePage };
+export { goToPage, stepPage };
 
 function initialize(results: Favorite[]): void {
   FavoritesModel.paginate(results);
@@ -30,15 +30,9 @@ function goToPage(pageNumber: number): void {
   renderCurrentPage();
 }
 
-function goToRelativePage(relativePage: PageRelation): void {
-  if (FavoritesModel.selectRelativePage(relativePage)) {
-    renderCurrentPage();
-  }
-}
-
 function renderCurrentPage(): void {
   FavoritesView.showSearchResults(FavoritesModel.currentPageFavorites());
-  FavoritesView.buildPaginator(FavoritesModel.getPaginationParameters());
+  FavoritesView.buildPaginator(FavoritesModel.paginationContext());
 
   if (FavoritesConfig.preloadThumbnails) {
     preloadImages(FavoritesModel.adjacentPageFavorites().map(favorite => favorite.thumbUrl));
@@ -55,7 +49,7 @@ function reveal(id: string): void {
 
 function reconcilePagination(): void {
   FavoritesModel.paginate(FavoritesModel.getCurrentSearchResults());
-  FavoritesView.updatePaginator(FavoritesModel.getPaginationParameters());
+  FavoritesView.updatePaginator(FavoritesModel.paginationContext());
   appendMissingThumbsOnCurrentPage();
   Events.favorites.searchResultsUpdated.emit();
 }
@@ -75,7 +69,7 @@ function appendMissingThumbsOnCurrentPage(): void {
   Events.favorites.favoritesAddedToCurrentPage.emit(thumbs);
 }
 
-function navigateToAdjacentPage(direction: NavigationKey): void {
+function stepPage(direction: NavigationKey): void {
   if (FavoritesModel.selectAdjacentPage(direction)) {
     renderCurrentPage();
   }

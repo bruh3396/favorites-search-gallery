@@ -12,14 +12,14 @@ export function build(): HTMLElement {
   const status = span(FavoritesId.status);
   const drawerToggleSlot = span(FavoritesId.drawerToggleSlot);
   const paginationSlot = span(FavoritesId.paginationSlot);
-  const resetSlot = span(FavoritesId.resetSlot);
+  const buttonsSlot = span(FavoritesId.buttonsSlot);
   const matchCount = label(FavoritesId.matchCount);
   const loadStatus = label(FavoritesId.loadStatus);
 
   commandBar.className = "u-no-select";
   pill.append(searchButton, actions);
   status.append(matchCount, loadStatus);
-  grid.append(drawerToggleSlot, pill, paginationSlot, status, resetSlot, brandSlot);
+  grid.append(drawerToggleSlot, pill, buttonsSlot, paginationSlot, status, brandSlot);
   commandBar.append(grid);
   return commandBar;
 }

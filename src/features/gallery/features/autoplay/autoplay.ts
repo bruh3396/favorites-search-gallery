@@ -1,11 +1,11 @@
+import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/icons";
 import { EnhancedKeyboardEvent, NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { clamp, millisecondsToSeconds } from "@/utils/number";
 import { isImage, isVideo } from "@/lib/media/media_type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
-import AUTOPLAY_HTML from "@/assets/html/autoplay.html";
-import { NumberComponent } from "@/lib/ui/elements/number_component";
+import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
 import { Overlays } from "@/app/layout/shell";
 import { Preferences } from "@/app/context/preferences";
 import { Timer } from "@/lib/async/timer";
@@ -21,25 +21,6 @@ export type AutoplayEvents = {
   onVideoEndedBeforeMinimumViewTime: () => void
   subscribeToMouseMove: Subscribe<MouseEvent>
   subscribeToKeyDown: Subscribe<EnhancedKeyboardEvent>
-}
-
-type AutoplayMenuElements = {
-  container: HTMLElement
-  menu: HTMLElement
-  settingsButton: HTMLImageElement
-  settingsMenu: {
-    container: HTMLElement
-    imageDurationInput: HTMLInputElement
-    minimumVideoDurationInput: HTMLInputElement
-  }
-  playButton: HTMLImageElement
-  changeDirectionButton: HTMLImageElement
-  changeDirectionMask: {
-    container: HTMLElement
-    image: HTMLImageElement
-  }
-  imageProgressBar: HTMLElement
-  videoProgressBar: HTMLElement
 }
 
 const menuIcons = {
@@ -82,9 +63,7 @@ export function setup(inEvents: AutoplayEvents): void {
   initializeTimers();
   insertHtml();
   configureMobileUi();
-  extractUiElements();
   setMenuIconImageSources();
-  setupNumberComponents();
   addEventListeners();
   loadAutoplaySettingsIntoUi();
   inEvents.setVideoLooping(!active || paused);
@@ -99,10 +78,6 @@ export function isActive(): boolean {
 }
 
 function initializeFields(): void {
-  ui = {
-    settingsMenu: {},
-    changeDirectionMask: {}
-  } as AutoplayMenuElements;
   eventListenersAbortController = new AbortController();
   currentThumb = null;
   active = Preferences.galleryAutoplayActive.value;
@@ -150,7 +125,8 @@ function insertHtml(): void {
 
 function insertMenuHtml(): void {
   insertStyle(AUTOPLAY_CSS);
-  Overlays.insertAdjacentHTML("afterbegin", AUTOPLAY_HTML);
+  ui = AutoplayMenu.build();
+  Overlays.insertAdjacentElement("afterbegin", ui.container);
 }
 
 function insertImageProgressHtml(): void {
@@ -175,21 +151,6 @@ function insertVideoProgressHtml(): void {
       `, "autoplay-video-progress");
 }
 
-function extractUiElements(): void {
-  ui.container = document.getElementById("autoplay-container") as HTMLElement;
-  ui.menu = document.getElementById("autoplay-menu") as HTMLElement;
-  ui.settingsButton = document.getElementById("autoplay-settings-button") as HTMLImageElement;
-  ui.settingsMenu.container = document.getElementById("autoplay-settings-menu") as HTMLElement;
-  ui.settingsMenu.imageDurationInput = document.getElementById("autoplay-image-duration-input") as HTMLInputElement;
-  ui.settingsMenu.minimumVideoDurationInput = document.getElementById("autoplay-minimum-animated-duration-input") as HTMLInputElement;
-  ui.playButton = document.getElementById("autoplay-play-button") as HTMLImageElement;
-  ui.changeDirectionButton = document.getElementById("autoplay-change-direction-button") as HTMLImageElement;
-  ui.changeDirectionMask.container = document.getElementById("autoplay-change-direction-mask-container") as HTMLElement;
-  ui.changeDirectionMask.image = document.getElementById("autoplay-change-direction-mask") as HTMLImageElement;
-  ui.imageProgressBar = document.getElementById("autoplay-image-progress-bar") as HTMLElement;
-  ui.videoProgressBar = document.getElementById("autoplay-video-progress-bar") as HTMLElement;
-}
-
 function configureMobileUi(): void {
   if (ON_DESKTOP_DEVICE) {
     return;
@@ -198,19 +159,16 @@ function configureMobileUi(): void {
 }
 
 function createViewDurationSelects(): void {
-  const imageViewDurationSelect = createDurationSelect(1, 60);
-  const videoViewDurationSelect = createDurationSelect(0, 60);
-  const imageViewDurationInput = (document.getElementById("autoplay-image-duration-input") as HTMLElement).parentElement as HTMLElement;
-  const videoViewDurationInput = (document.getElementById("autoplay-minimum-animated-duration-input") as HTMLElement).parentElement as HTMLElement;
+  ui.settingsMenu.imageDurationInput = swapInputForSelect(ui.settingsMenu.imageDurationInput, createDurationSelect(1, 60), config.imageViewDurationInSeconds);
+  ui.settingsMenu.minimumVideoDurationInput = swapInputForSelect(ui.settingsMenu.minimumVideoDurationInput, createDurationSelect(0, 60), config.minimumVideoDurationInSeconds);
+}
 
-  imageViewDurationSelect.value = String(config.imageViewDurationInSeconds);
-  videoViewDurationSelect.value = String(config.minimumVideoDurationInSeconds);
-  imageViewDurationInput.insertAdjacentElement("afterend", imageViewDurationSelect);
-  videoViewDurationInput.insertAdjacentElement("afterend", videoViewDurationSelect);
-  imageViewDurationInput.remove();
-  videoViewDurationInput.remove();
-  imageViewDurationSelect.id = "autoplay-image-duration-input";
-  videoViewDurationSelect.id = "autoplay-minimum-animated-duration-input";
+function swapInputForSelect(input: HTMLElement, select: HTMLSelectElement, value: number): HTMLSelectElement {
+  select.value = String(value);
+  select.id = input.id;
+  input.insertAdjacentElement("afterend", select);
+  input.remove();
+  return select;
 }
 
 function createDurationSelect(minimum: number, maximum: number): HTMLSelectElement {
@@ -256,16 +214,6 @@ function setMenuIconImageSources(): void {
 function loadAutoplaySettingsIntoUi(): void {
   ui.settingsMenu.imageDurationInput.value = String(config.imageViewDurationInSeconds);
   ui.settingsMenu.minimumVideoDurationInput.value = String(config.minimumVideoDurationInSeconds);
-}
-
-function setupNumberComponents(): void {
-  for (const input of [ui.settingsMenu.imageDurationInput, ui.settingsMenu.minimumVideoDurationInput]) {
-    const element = input.closest(".num-input");
-
-    if (element instanceof HTMLElement) {
-      new NumberComponent(element);
-    }
-  }
 }
 
 function addEventListeners(): void {

@@ -9,17 +9,15 @@
   --color-tag-character: #f0f0a0;
   --color-tag-copyright: #f0a0f0;
   --color-tag-metadata: #90d9ed;
-  --danger: #e5484d;
-  --danger-surface: rgba(229, 72, 77, 0.15);
-  --radius: 7px;
+  --color-danger: #e5484d;
   --color-gallery-menu-bg: rgba(0, 0, 0, 1);
+
+  --size-radius: 7px;
   --size-gallery-menu: 80px;
   --gradient-rainbow: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-  --size-sidebar: 50px;
-  --size-sidebar-drawer: 200px;
-  --size-sidebar-full: calc(var(--size-sidebar) + var(--size-sidebar-drawer));
-  --duration-sidebar-transition: 0.15s ease;
-  --duration-skeleton: 1s;
-  --delay-skeleton: 0s;
 
+  --duration-sidebar-transition: 0.15s ease;
+  --duration-skeleton: 1.5s;
+
+  --delay-skeleton: 0s;
 }

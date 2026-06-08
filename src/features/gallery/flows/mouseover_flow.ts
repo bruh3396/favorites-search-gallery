@@ -8,7 +8,7 @@ import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
   dispatchByState({
     preview: handlePreview,
-    idle: preloadMediaAroundDebounced
+    idle: preloadMediaAround
   }, mouseEvent.thumb);
 }
 
@@ -17,18 +17,12 @@ function handlePreview(thumb: HTMLElement | null): void {
     GalleryView.hidePreview();
     return;
   }
-  GalleryView.displayPreview(thumb);
-
-  if (ON_FAVORITES_PAGE) {
-    preloadMediaAroundDebounced(thumb);
-  }
+  GalleryView.showPreview(thumb);
+  preloadMediaAround(thumb);
 }
 
-const preloadMediaAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => preloadMediaAround(thumb), 1_000);
-
-function preloadMediaAround(thumb: HTMLElement | null): void {
-  if (thumb === null || !ON_FAVORITES_PAGE) {
-    return;
+const preloadMediaAround = debounceTrailing((thumb: HTMLElement | null) => {
+  if (thumb !== null && ON_FAVORITES_PAGE) {
+    GalleryPreloadFlow.preloadVisibleThumbsAround(thumb);
   }
-  GalleryPreloadFlow.preloadVisibleThumbsAround(thumb);
-}
+}, 1_000);

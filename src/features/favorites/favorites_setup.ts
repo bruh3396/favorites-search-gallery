@@ -1,10 +1,8 @@
 import * as FavoritesDesktop from "@/features/favorites/control/menu/desktop";
-import * as FavoritesDownloadMenu from "@/features/favorites/features/downloader/menu";
 import * as FavoritesFinder from "@/features/favorites/control/menu/finder";
 import * as FavoritesInterFeatureFlow from "@/features/favorites/flows/inter_feature_flow";
 import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
-import * as FavoritesMobile from "@/features/favorites/control/menu/mobile";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesNavigationButtons from "@/features/favorites/control/navigation_buttons";
 import * as FavoritesOptionsFlow from "@/features/favorites/flows/option_flow";
@@ -56,7 +54,7 @@ function setupModel(): void {
 function setupView(): void {
   FavoritesView.setup({
     onPageSelected: Events.favorites.pageSelected.emit,
-    onRelativePageSelected: Events.favorites.relativePageSelected.emit,
+    onPageStepped: Events.favorites.pageStepped.emit,
     onFirstPageFavoritesExtracted: Events.favorites.firstPageFavorites.emit,
     onFavoriteAdded: Events.favorites.favoriteAdded.emit,
     onFavoriteRemoved: Events.favorites.favoriteRemoved.emit
@@ -71,22 +69,11 @@ function setupControl(): void {
 
   if (ON_DESKTOP_DEVICE) {
     FavoritesDesktop.setup();
-  } else {
-    FavoritesMobile.setup();
   }
 }
 
 function setupSubFeatures(): void {
-  setupDownloader();
   setupTagEditor();
-}
-
-function setupDownloader(): void {
-  FavoritesDownloadMenu.setup({
-    getSearchResults: () => FavoritesModel.getCurrentSearchResults()
-  });
-  Events.favorites.downloadButtonClicked.on(FavoritesDownloadMenu.openDownloadMenu);
-  Events.favorites.favoritesLoaded.on(FavoritesDownloadMenu.enableDownloadMenu);
 }
 
 function setupTagEditor(): void {
@@ -109,7 +96,7 @@ function subscribeToEvents(): void {
   Events.favorites.findFavoriteInAll.on(FavoritesSearchFlow.revealFavoriteInAll);
 
   Events.favorites.pageSelected.on(FavoritesPaginationFlow.goToPage);
-  Events.favorites.relativePageSelected.on(FavoritesPaginationFlow.goToRelativePage);
+  Events.favorites.pageStepped.on(FavoritesPaginationFlow.stepPage);
 
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.reSearchFavorites);
@@ -117,7 +104,7 @@ function subscribeToEvents(): void {
   Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.reSearchFavorites);
-  Events.favorites.resultsPerPageChanged.on(FavoritesOptionsFlow.setResultsPerPage);
+  Events.favorites.resultsPerPageChanged.on(FavoritesSearchFlow.showLatestSearchResults);
 
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);

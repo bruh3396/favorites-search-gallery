@@ -24,11 +24,11 @@ export async function setup(): Promise<void> {
   nextButton.title = "Next page";
 
   previousButton.onclick = (): void => {
-    Events.favorites.relativePageSelected.emit("previous");
+    Events.favorites.pageStepped.emit("ArrowLeft");
   };
 
   nextButton.onclick = (): void => {
-    Events.favorites.relativePageSelected.emit("next");
+    Events.favorites.pageStepped.emit("ArrowRight");
   };
 
   Events.favorites.pageChanged.on(() => {

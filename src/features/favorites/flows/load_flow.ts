@@ -7,8 +7,6 @@ import { Events } from "@/app/channels/events";
 import { ON_FIRST_FAVORITES_PAGE } from "@/lib/environment";
 
 export async function loadAllFavorites(): Promise<void> {
-  // await sleep(30000);
-
   if (await hasDatabaseFavorites()) {
     await loadDatabaseFavorites();
     await fetchNewFavorites();

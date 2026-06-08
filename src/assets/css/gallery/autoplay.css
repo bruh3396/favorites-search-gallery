@@ -76,18 +76,7 @@
   padding-right: 20px;
 }
 
-#autoplay-settings-menu>div>.num-input {
-  background: none;
-  outline: 2px solid white;
-}
-
-#autoplay-settings-menu>div>.num-input>hold-button::after,
-#autoplay-settings-menu>div>.num-input>button::after {
-  width: 200%;
-  height: 130%;
-}
-
-#autoplay-settings-menu>div>.num-input>input[type="number"] {
+#autoplay-settings-menu>div>input[type="number"] {
   color: white;
   width: 7ch;
 }

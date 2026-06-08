@@ -1,29 +1,27 @@
 import { IconName, icon } from "@/lib/ui/icon";
+import { PaginationContext, PaginationSequence } from "@/features/favorites/types/interfaces";
 import { label, span } from "@/utils/dom/element";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { FavoritesPaginationParameters } from "@/features/favorites/types/interfaces";
+import { NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
-import { PageRelation } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { doNothing } from "@/utils/function";
 import { insertStyle } from "@/utils/dom/injector";
 import { isOnlyDigits } from "@/utils/string/query";
-import { numbersAroundInRange } from "@/utils/number";
 import { toggleDataset } from "@/utils/dom/attribute";
 
 const container = span("favorites-pagination");
 const rangeIndicator = label("pagination-range-label");
-const pageNumberRegex = /favorites-page-(\d+)/;
 
 let onPageSelected: (pageNumber: number) => void = doNothing;
-let onRelativePageSelected: (relation: PageRelation) => void = doNothing;
+let onPageStepped: (direction: NavigationKey) => void = doNothing;
+let renderedSequence: PaginationSequence = [];
 
-export function setup(pageSelected: (pageNumber: number) => void, relativePageSelected: (relation: PageRelation) => void): void {
+export function setup(pageSelected: (pageNumber: number) => void, pageStepped: (direction: NavigationKey) => void): void {
   onPageSelected = pageSelected;
-  onRelativePageSelected = relativePageSelected;
+  onPageStepped = pageStepped;
   insert();
-  build({currentPageNumber: 1, finalPageNumber: 1, favoritesCount: 0, startIndex: 0, endIndex: 0});
+  build({currentPage: 1, finalPage: 1, totalCount: 0, sliceStart: 0, sliceEnd: 0, sequence: [1]});
   toggle(!Preferences.favoritesInfiniteScroll.value);
 }
 
@@ -46,39 +44,17 @@ export function getContainer(): HTMLElement {
   return container;
 }
 
-export function build(parameters: FavoritesPaginationParameters): void {
+export function build(context: PaginationContext): void {
   container.innerHTML = "";
-  updateRangeIndicator(parameters.startIndex, parameters.endIndex, parameters.favoritesCount);
-  createNumberTraversalButtons(parameters.currentPageNumber, parameters.finalPageNumber);
-  createArrowTraversalButtons(parameters);
+  updateRangeIndicator(context.sliceStart, context.sliceEnd, context.totalCount);
+  createNumberTraversalButtons(context);
+  createArrowTraversalButtons(context);
 }
 
-export function update(parameters: FavoritesPaginationParameters): void {
-  const pageNumberButtons = Array.from(document.getElementsByClassName("favorites-pagination-btn"));
-  const atMaxPageNumberButtons = pageNumberButtons.length >= FavoritesConfig.maxPageNumberButtons;
-
-  if (!atMaxPageNumberButtons) {
-    build(parameters);
-    return;
-  }
-  const middlePageNumberButton = pageNumberButtons[Math.floor(pageNumberButtons.length / 2)];
-
-  if (!(middlePageNumberButton instanceof HTMLElement)) {
-    build(parameters);
-    return;
-  }
-  const middlePageNumberMatch = pageNumberRegex.exec(middlePageNumberButton.id);
-
-  if (middlePageNumberMatch === null) {
-    build(parameters);
-    return;
-  }
-  const middlePageNumber = parseInt(middlePageNumberMatch[1], 10);
-
-  if (parameters.currentPageNumber <= middlePageNumber) {
-    return;
-  }
-  build(parameters);
+export function update(context: PaginationContext): void {
+  updateRangeIndicator(context.sliceStart, context.sliceEnd, context.totalCount);
+  rebuildNumberTraversalButtons(context);
+  updateExistingArrowTraversalButtons(context);
 }
 
 function insertMenu(): void {
@@ -112,30 +88,17 @@ function updateRangeIndicator(start: number, end: number, count: number): void {
   rangeIndicator.textContent = end === 0 ? "" : `${start + 1} - ${end}`;
 }
 
-function createNumberTraversalButtons(currentPageNumber: number, finalPageNumber: number): void {
-  const popover = createGotoPagePopover(currentPageNumber, finalPageNumber);
-  const windowPages = numbersAroundInRange(currentPageNumber, FavoritesConfig.maxPageNumberButtons, 1, finalPageNumber);
-  const windowStart = windowPages[0] ?? 1;
-  const windowEnd = windowPages[windowPages.length - 1] ?? 1;
+function createNumberTraversalButtons(context: PaginationContext): void {
+  const popover = createGotoPagePopover(context.currentPage, context.finalPage);
 
-  if (windowStart > 1) {
-    createNumberTraversalButton(currentPageNumber, 1);
-  }
+  renderedSequence = context.sequence;
 
-  if (windowStart > 2) {
-    createEllipsis(popover);
-  }
-
-  for (const pageNumber of windowPages) {
-    createNumberTraversalButton(currentPageNumber, pageNumber);
-  }
-
-  if (windowEnd < finalPageNumber - 1) {
-    createEllipsis(popover);
-  }
-
-  if (windowEnd < finalPageNumber) {
-    createNumberTraversalButton(currentPageNumber, finalPageNumber);
+  for (const term of renderedSequence) {
+    if (term === "ellipsis") {
+      createEllipsis(popover);
+    } else {
+      createNumberTraversalButton(context.currentPage, term);
+    }
   }
   container.appendChild(popover);
 }
@@ -168,14 +131,29 @@ function createNumberTraversalButton(currentPageNumber: number, pageNumber: numb
   button.textContent = String(pageNumber);
 }
 
-function createArrowTraversalButtons(parameters: FavoritesPaginationParameters): void {
-  const previous = createArrowTraversalButton("previous", "chevronLeft", "afterbegin");
-  const next = createArrowTraversalButton("next", "chevronRight", "beforeend");
+function rebuildNumberTraversalButtons(context: PaginationContext): void {
+  if (sequencesEqual(renderedSequence, context.sequence)) {
+    return;
+  }
 
-  updateArrowTraversalButtonInteractability(previous, next, parameters);
+  for (const element of [...container.querySelectorAll(".favorites-pagination-btn, .favorites-pagination-ellipsis, #goto-page-popover")]) {
+    element.remove();
+  }
+  createNumberTraversalButtons(context);
 }
 
-function createArrowTraversalButton(name: PageRelation, iconName: IconName, position: InsertPosition): HTMLButtonElement {
+function sequencesEqual(a: PaginationSequence, b: PaginationSequence): boolean {
+  return a.length === b.length && a.every((term, index) => term === b[index]);
+}
+
+function createArrowTraversalButtons(context: PaginationContext): void {
+  const previous = createArrowTraversalButton("previous", "ArrowLeft", "chevronLeft", "afterbegin");
+  const next = createArrowTraversalButton("next", "ArrowRight", "chevronRight", "beforeend");
+
+  updateArrowTraversalButtonInteractability(previous, next, context);
+}
+
+function createArrowTraversalButton(name: string, direction: NavigationKey, iconName: IconName, position: InsertPosition): HTMLButtonElement {
   const button = document.createElement("button");
 
   button.id = `${name}-page`;
@@ -183,7 +161,7 @@ function createArrowTraversalButton(name: PageRelation, iconName: IconName, posi
   button.className = "favorites-pagination-arrow";
   button.appendChild(icon(iconName));
   button.onclick = (): void => {
-    onRelativePageSelected(name);
+    onPageStepped(direction);
   };
   container.insertAdjacentElement(position, button);
   return button;
@@ -229,7 +207,16 @@ function createGotoPagePopover(currentPageNumber: number, finalPageNumber: numbe
   return popover;
 }
 
-function updateArrowTraversalButtonInteractability(previousPage: HTMLButtonElement, nextPage: HTMLButtonElement, parameters: FavoritesPaginationParameters): void {
-  previousPage.disabled = parameters.currentPageNumber === 1;
-  nextPage.disabled = parameters.currentPageNumber === parameters.finalPageNumber;
+function updateExistingArrowTraversalButtons(context: PaginationContext): void {
+  const previous = container.querySelector<HTMLButtonElement>("#previous-page");
+  const next = container.querySelector<HTMLButtonElement>("#next-page");
+
+  if (previous !== null && next !== null) {
+    updateArrowTraversalButtonInteractability(previous, next, context);
+  }
+}
+
+function updateArrowTraversalButtonInteractability(previousPage: HTMLButtonElement, nextPage: HTMLButtonElement, context: PaginationContext): void {
+  previousPage.disabled = context.currentPage === 1;
+  nextPage.disabled = context.currentPage === context.finalPage;
 }

@@ -1,5 +1,5 @@
 import { GalleryConfig } from "@/config/gallery_config";
-import { GalleryState } from "@/features/gallery/types/gallery_types";
+import { GalleryState } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
 
 let currentState = initialState();

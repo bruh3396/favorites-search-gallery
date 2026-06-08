@@ -1,6 +1,6 @@
 import { CheckboxElement, defaultMenuElement } from "@/types/element";
 import { DomEvents } from "@/app/dom/events";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { inGallery } from "@/app/channels/feature_bridge";
 import { doNothing } from "@/utils/function";
 
 export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
@@ -47,9 +47,7 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
     if (!event.isHotkey || event.key.toLowerCase() !== template.hotkey.toLowerCase()) {
       return;
     }
-    const inGallery = FeatureBridge.inGallery.call();
-
-    if (inGallery) {
+    if (inGallery()) {
       return;
     }
     checked = !checked;

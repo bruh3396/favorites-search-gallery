@@ -3,6 +3,11 @@ import { baseImageUrl } from "@/lib/media/base_image_url";
 import { getTagSetFromItem } from "@/lib/thumb/thumb_tags";
 import { resolveExtension } from "@/lib/media/media_extension_resolver";
 
+// FIXME: temp alias so the downloader depends on a media-resolvable thing, not the
+// favorites domain type. Still the legacy HTMLElement|Favorite union. Collapse into a
+// real MediaItem capability type in the lib/media remodel — see docs/media-item-remodel.md.
+export type MediaResolvable = HTMLElement | Favorite;
+
 export async function resolveImageUrl(item: HTMLElement | Favorite): Promise<string> {
   return (await resolveMediaUrl(item)).replace(".mp4", ".jpg");
 }

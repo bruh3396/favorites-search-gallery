@@ -1,6 +1,5 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
-import NUM_INPUT_CSS from "@/assets/css/base/num_input.css";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
 import THUMB_CSS from "@/assets/css/base/thumb.css";
@@ -22,7 +21,6 @@ export function setupStyles(theme: Theme): void {
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
     UTILITIES_CSS +
-    NUM_INPUT_CSS +
     WIDGETS_CSS +
     SKELETON_CSS +
     THUMB_CSS +

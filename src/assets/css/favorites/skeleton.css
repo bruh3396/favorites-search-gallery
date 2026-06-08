@@ -16,17 +16,17 @@
 
 .skeleton-item[data-animation="pulse"] {
   position: relative;
-  background-color: #595959;
+  background-color: #636363;
 }
 
 .skeleton-item[data-animation="pulse"]::after {
   content: "";
   position: absolute;
   inset: 0;
-  background-color: #717171;
+  background-color: #424242;
   opacity: 0;
   will-change: opacity;
-  animation: pulse var(--duration-skeleton) infinite ease-in-out;
+  animation: pulse var(--duration-skeleton) infinite cubic-bezier(0.42, 0, 0.58, 1);
   animation-delay: var(--delay-skeleton);
 }
 

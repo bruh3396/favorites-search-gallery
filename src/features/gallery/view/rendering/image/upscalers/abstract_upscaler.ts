@@ -1,6 +1,6 @@
 import * as GalleryFetcher from "@/features/gallery/view/rendering/image/fetcher";
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { inGallery } from "@/app/channels/feature_bridge";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { PERFORMANCE_PROFILE } from "@/app/context/flags";
@@ -127,10 +127,9 @@ export abstract class GalleryAbstractUpscaler {
 
   private requestIsValid(request: ImageRequest | HTMLElement): boolean {
     const thumbIsOffPage = document.getElementById(request.id) === null;
-    const inGallery = FeatureBridge.inGallery.call();
     const seen = this.upscaledIds.has(request.id);
 
-    if (seen || inGallery || thumbIsOffPage) {
+    if (seen || inGallery() || thumbIsOffPage) {
       return false;
     }
     return (request instanceof HTMLElement) ? true : request.isHighRes && request.hasCompleted;

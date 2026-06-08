@@ -9,12 +9,6 @@ export interface GalleryRenderer {
   preload: (thumbs: HTMLElement[]) => Promise<void> | void
 }
 
-export enum GalleryState {
-  Idle,
-  Preview,
-  Open
-}
-
 export type VideoClip = {
   start: number
   end: number

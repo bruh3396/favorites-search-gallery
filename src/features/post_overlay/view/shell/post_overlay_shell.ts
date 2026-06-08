@@ -4,6 +4,7 @@ import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
 import { Preferences } from "@/app/context/preferences";
 import { insertStyle } from "@/utils/dom/injector";
 import { setMenuLabel } from "@/features/post_overlay/dom_tweaks/menu_label";
+import { setDataset, removeDataset } from "@/utils/dom/attribute";
 
 const OVERLAY_POOL_SIZE = 3;
 const overlays: HTMLElement[] = [];
@@ -31,14 +32,18 @@ export function reveal(thumb: HTMLElement): void {
   const nextToShow = overlays[nextIndex()];
 
   position(nextToShow, thumb);
-  currentlyShown.dataset.visible = "false";
-  nextToShow.dataset.visible = "true";
+  removeDataset(currentlyShown, "visible");
+  setDataset(nextToShow, "visible");
   visibleIndex = nextIndex();
+}
+
+export function isVisible(): boolean {
+  return overlays[visibleIndex]?.dataset.visible !== undefined;
 }
 
 export function hide(): void {
   for (const overlay of overlays) {
-    overlay.dataset.visible = "false";
+    removeDataset(overlay, "visible");
   }
 }
 

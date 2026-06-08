@@ -36,7 +36,7 @@ export abstract class AbstractTiler {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public setRowSize(rowSize: number): void { }
+  public setRowHeight(rowHeight: number): void { }
 
   public getBottomEdgeElements(): HTMLElement[] {
     return [];

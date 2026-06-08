@@ -1,18 +1,21 @@
 import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
+import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
 import { DomEvents } from "@/app/dom/events";
 import { EnhancedWheelEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GridTiler } from "@/lib/ui/tilers/grid_tiler";
 import { Layout } from "@/types/ui";
 import { NativeTiler } from "@/lib/ui/tilers/native_tiler";
+import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { RowTiler } from "@/lib/ui/tilers/row_tiler";
 import { SquareTiler } from "@/lib/ui/tilers/square_tiler";
+import { ThumbConfig } from "@/config/thumb_config";
 import { clamp } from "@/utils/number";
+import { galleryIsIdle } from "@/app/channels/feature_bridge";
 import { navigationDelta } from "@/utils/navigation";
 import { yieldControl } from "@/lib/async/timing";
 
@@ -25,10 +28,10 @@ let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
 export function setup(): void {
   currentTiler.activate();
   setColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.favoritesColumnCount.value);
-  setRowSize(ON_SEARCH_PAGE ? Preferences.searchPageRowHeight.value : Preferences.favoritesRowHeight.value);
+  setRowHeight(ON_SEARCH_PAGE ? Preferences.searchPageRowHeight.value : Preferences.favoritesRowHeight.value);
   DomEvents.document.wheel.on(changeItemSizeOnShiftScroll);
   Events.favorites.columnCountChanged.on(setColumnCount);
-  Events.favorites.rowSizeChanged.on(setRowSize);
+  Events.favorites.rowHeightChanged.on(setRowHeight);
   Events.favorites.layoutChanged.on(hideUnusedLayoutSizer);
   Events.searchPage.layoutChanged.on(hideUnusedLayoutSizer);
 }
@@ -43,8 +46,13 @@ export function changeLayout(layout: Layout): void {
   currentTiler.activate();
 }
 
-export const setRowSize = (rowSize: number): void => tilers.forEach(tiler => tiler.setRowSize(rowSize));
-export const setColumnCount = (columnCount: number): void => tilers.forEach(tiler => tiler.setColumnCount(columnCount));
+export const setRowHeight = (rowHeight: number): void => tilers.forEach(tiler => tiler.setRowHeight(rowHeight));
+
+export function setColumnCount(columnCount: number): void {
+  setDataset(Content, "suppressFade");
+  tilers.forEach(tiler => tiler.setColumnCount(columnCount));
+  requestAnimationFrame(() => requestAnimationFrame(() => removeDataset(Content, "suppressFade")));
+}
 export const getLayout = (): Layout => currentLayout;
 export const tile = (items: HTMLElement[]): void => currentTiler.tile(items);
 export const addToBottom = (items: HTMLElement[]): void => currentTiler.addItemsToBottom(items);
@@ -52,37 +60,37 @@ export const addToTop = (items: HTMLElement[]): void => currentTiler.addItemsToT
 export const getBottomEdgeElements = (): HTMLElement[] => currentTiler.getBottomEdgeElements();
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || FeatureBridge.inGallery.call()) {
+  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || !galleryIsIdle()) {
     return;
   }
   const usingRowLayout = currentLayout === "row";
-  const input = document.getElementById(usingRowLayout ? "row-size" : "column-count");
-
-  if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLSelectElement)) {
-    return;
-  }
   const direction = navigationDelta(wheelEvent.direction);
   const delta = usingRowLayout ? -direction : direction;
-  let value = parseInt(input.value, 10) + delta;
+  let preference: Preference<number>;
 
-  if (input instanceof HTMLSelectElement) {
-    const smallestOption = parseInt(input.querySelector("option")?.value ?? "1");
-    const largestOption = parseInt((input.querySelector("option:last-child") as HTMLOptionElement)?.value ?? "1");
-
-    value = clamp(value, smallestOption, largestOption);
+  if (ON_FAVORITES_PAGE) {
+    preference = usingRowLayout ? Preferences.favoritesRowHeight : Preferences.favoritesColumnCount;
+  } else {
+    preference = usingRowLayout ? Preferences.searchPageRowHeight : Preferences.searchPageColumnCount;
   }
-  input.value = String(value);
-  input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
+  const bounds = usingRowLayout ? ThumbConfig.rowHeightBounds : ThumbConfig.columnCountBounds;
+
+  preference.set(clamp(preference.value + delta, bounds.min, bounds.max));
+
+  if (usingRowLayout) {
+    setRowHeight(preference.value);
+  } else {
+    setColumnCount(preference.value);
+  }
 }
 
 export async function hideUnusedLayoutSizer(layout: Layout): Promise<void> {
   await yieldControl();
-  const rowSizeContainer = document.querySelector("#row-size-container, #search-page-row-size");
+  const rowHeightContainer = document.querySelector("#row-size-container, #search-page-row-size");
   const columnCountContainer = document.querySelector("#column-count-container, #search-page-column-count");
 
-  if ((columnCountContainer instanceof HTMLElement) && (rowSizeContainer instanceof HTMLElement)) {
-    rowSizeContainer.style.display = layout === "row" ? "" : "none";
+  if ((columnCountContainer instanceof HTMLElement) && (rowHeightContainer instanceof HTMLElement)) {
+    rowHeightContainer.style.display = layout === "row" ? "" : "none";
     columnCountContainer.style.display = layout === "row" || layout === "native" ? "none" : "";
   }
 }

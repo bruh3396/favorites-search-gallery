@@ -2,6 +2,21 @@
   --surface-gradient: linear-gradient(to bottom, var(--surface-raised), var(--surface));
 }
 
+head, body {
+  --c-bg: var(--surface);
+  --c-text: var(--text);
+  --c-link: var(--accent) !important;
+}
+
+#header, #header * {
+  background-color: var(--surface-gradient) !important;
+  color: var(--text-muted);
+}
+
+#header a:hover {
+    color: var(--text)
+}
+
 [data-theme="native-dark"] {
   --surface: #2a322a;
   --surface-pill: #1c211c;
@@ -26,6 +41,7 @@
   --accent-text: #ffffff;
 }
 
+
 [data-theme="midnight"] {
   --surface: #0d1117;
   --surface-pill: #161b22;
@@ -38,12 +54,6 @@
   --accent-text: #ffffff;
 }
 
-[data-theme="midnight"] body {
-  --c-bg: var(--surface);
-  --c-text: #e6edf3;
-  --c-link: blueviolet !important;
-}
-
 [data-theme="ember"] {
   --surface: #1f1512;
   --surface-pill: #160d0a;
@@ -54,10 +64,4 @@
   --text-muted: #b08a7c;
   --accent: #ff6a3d;
   --accent-text: #1f1512;
-}
-
-[data-theme="ember"] body {
-  --c-bg: #1f1512;
-  --c-text: #f5e6df;
-  --c-link: #ff6a3d !important;
 }

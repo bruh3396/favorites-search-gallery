@@ -7,9 +7,9 @@
   gap: 0.25em;
   padding: 0.5em;
   overflow: hidden;
-  font-size: 1.2em;
+  font-size: 1em;
   line-height: 1.3;
-  color: #fff;
+  color: white;
   pointer-events: none;
   user-select: none;
   background: rgba(0, 0, 0, 0.82);
@@ -17,7 +17,7 @@
   transition: opacity 0.15s ease;
 }
 
-.post-overlay[data-visible="true"] {
+.post-overlay[data-visible] {
   opacity: 1;
 }
 
@@ -34,7 +34,6 @@
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  opacity: 0.6;
 }
 
 .post-overlay-tag {
@@ -44,12 +43,12 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-.post-overlay[data-visible="true"] .post-overlay-tag[data-tag] {
+.post-overlay[data-visible] .post-overlay-tag[data-tag] {
   pointer-events: auto;
   cursor: pointer;
 }
 
-.post-overlay[data-visible="true"] .post-overlay-tag[data-tag]:hover {
+.post-overlay[data-visible] .post-overlay-tag[data-tag]:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
@@ -98,7 +97,7 @@
   height: 1.6em;
 }
 
-.post-overlay[data-visible="true"]:hover .post-overlay-hint {
+.post-overlay[data-visible]:hover .post-overlay-hint {
   opacity: 0.85;
   transition: opacity 0.15s ease 1s;
 }

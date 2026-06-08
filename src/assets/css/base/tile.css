@@ -44,7 +44,7 @@
 }
 
 [data-layout="square"] .post {
-  border-radius: var(--radius);
+  border-radius: var(--size-radius);
   overflow: hidden;
   aspect-ratio: 1;
 }
@@ -68,7 +68,7 @@
 [data-layout="row"] .post {
   height: 300px;
   flex: 1 1 auto;
-  border-radius: var(--radius);
+  border-radius: var(--size-radius);
   overflow: hidden;
 }
 
@@ -108,7 +108,7 @@
 }
 
 [data-layout="column"] [data-tiler-column] .post {
-  border-radius: var(--radius);
+  border-radius: var(--size-radius);
   overflow: hidden;
 }
 
@@ -116,4 +116,8 @@
 [data-layout="row"] .post:not(.skeleton-item),
 [data-layout="column"] [data-tiler-column] .post:not(.skeleton-item) {
   animation: thumb-fade-in 0.2s ease both;
+}
+
+[data-suppress-fade] .post:not(.skeleton-item) {
+  animation: none !important;
 }

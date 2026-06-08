@@ -20,7 +20,7 @@ export const FavoritesId = {
   drawerToggleSlot: "favorites-drawer-toggle-slot",
   actions: "favorites-search-actions",
   paginationSlot: "favorites-pagination-slot",
-  resetSlot: "favorites-reset-slot",
+  buttonsSlot: "favorites-button-slot",
   drawer: "favorites-drawer",
   drawerTabStrip: "favorites-drawer-tabs",
   drawerTabPanels: "favorites-drawer-panels"

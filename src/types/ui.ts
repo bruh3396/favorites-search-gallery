@@ -38,6 +38,12 @@ export interface AwesompleteConstructor {
   FILTER_STARTSWITH(value: string, input: string): boolean
 }
 
+export enum GalleryState {
+  Idle,
+  Preview,
+  Open
+}
+
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
 export type Theme = "native-dark" | "native-light" | "midnight" | "ember";
 

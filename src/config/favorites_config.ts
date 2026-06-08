@@ -4,7 +4,7 @@ export const FavoritesConfig = {
     max: 10_000
   },
   resultsPerPageStep: 25,
-  maxPageNumberButtons: 3,
+  nearbyPageCount: 3,
 
   infiniteScrollBatchSize: 25,
   infiniteScrollMaxVisible: 200,

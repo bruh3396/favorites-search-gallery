@@ -1,10 +1,10 @@
-import { Favorite, PageRelation } from "@/types/favorite";
+import { Favorite } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
 import { TagCategoryMap } from "@/types/search";
 
 export interface FavoritesViewCallbacks {
   onPageSelected: (pageNumber: number) => void;
-  onRelativePageSelected: (relation: PageRelation) => void;
+  onPageStepped: (direction: NavigationKey) => void;
   onFirstPageFavoritesExtracted: (elements: HTMLElement[] | undefined) => void;
   onFavoriteAdded: (id: string) => void;
   onFavoriteRemoved: (id: string) => void;
@@ -26,12 +26,16 @@ export interface FavoritesFetchProgress {
   allFavoritesCount: number
 }
 
-export interface FavoritesPaginationParameters {
-  currentPageNumber: number
-  finalPageNumber: number
-  favoritesCount: number
-  startIndex: number
-  endIndex: number
+export type PaginationTerm = number | "ellipsis";
+export type PaginationSequence = PaginationTerm[];
+
+export interface PaginationContext {
+  totalCount: number
+  sliceStart: number
+  sliceEnd: number
+  currentPage: number
+  finalPage: number
+  sequence: PaginationSequence
 }
 
 export interface FavoritesResultsView {

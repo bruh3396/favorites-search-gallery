@@ -36,17 +36,15 @@ export function display(thumb: HTMLElement): void {
   GalleryUi.update(thumb);
 }
 
-export function displayPreview(thumb: HTMLElement): void {
+export function showPreview(thumb: HTMLElement): void {
   GalleryShell.GalleryRoot.toggleAttribute("data-visible", true);
   GalleryRenderer.render(thumb);
-  GalleryUi.toggleScrollbar(false);
   GalleryRenderer.toggleZoom(false);
 }
 
 export function hidePreview(): void {
   GalleryShell.GalleryRoot.toggleAttribute("data-visible", false);
   GalleryRenderer.clear();
-  GalleryUi.toggleScrollbar(true);
 }
 
 export function toggleZoomCursor(value: boolean): void {

@@ -1,13 +1,13 @@
 import { EnhancedKeyboardEvent } from "@/types/input";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { inGallery } from "@/app/channels/feature_bridge";
 
 const hotkeyHandlers: Record<string, () => void> = {
   "/": focusSearchBar
 };
 
 export function onKeyDown(event: EnhancedKeyboardEvent): void {
-  if (!event.isHotkey || FeatureBridge.inGallery.call()) {
+  if (!event.isHotkey || inGallery()) {
     return;
   }
   const handler = hotkeyHandlers[event.key.toLowerCase()];

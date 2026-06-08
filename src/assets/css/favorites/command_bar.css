@@ -1,13 +1,13 @@
 :root {
   --favorites-bar-height: 46px;
 
-  --cmd-bar-icon-slot: 40px;
-  --cmd-bar-drawer-toggle: var(--cmd-bar-icon-slot);
-  --cmd-bar-pill: minmax(400px, 1fr);
-  --cmd-bar-pagination: 380px;
-  --cmd-bar-status: 300px;
-  --cmd-bar-reset: max-content;
-  --cmd-bar-brand: max-content;
+  --command-bar-icon-slot: 40px;
+  --command-bar-drawer-toggle: var(--command-bar-icon-slot);
+  --command-bar-pill: minmax(400px, 1fr);
+  --command-bar-buttons: max-content;
+  --command-bar-pagination: 380px;
+  --command-bar-status: 300px;
+  --command-bar-brand: max-content;
 }
 
 #favorites-command-bar :is(button, input, textarea),
@@ -23,6 +23,7 @@
   height: var(--favorites-bar-height);
   padding: 4px 16px;
   background: var(--surface);
+  border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   color: var(--text);
   box-sizing: border-box;
@@ -31,14 +32,14 @@
 #favorites-command-bar-grid {
   display: grid;
   grid-template-columns:
-    var(--cmd-bar-drawer-toggle)
-    var(--cmd-bar-pill)
-    var(--cmd-bar-pagination)
-    var(--cmd-bar-status)
-    var(--cmd-bar-reset)
-    var(--cmd-bar-brand);
+    var(--command-bar-drawer-toggle)
+    var(--command-bar-pill)
+    var(--command-bar-buttons)
+    var(--command-bar-pagination)
+    var(--command-bar-status)
+    var(--command-bar-brand);
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 #favorites-brand-slot {
@@ -57,11 +58,34 @@
   font-variant-numeric: tabular-nums;
 }
 
-#favorites-reset-slot {
+#favorites-button-slot {
   display: flex;
   align-items: center;
+  gap: 4px;
   justify-content: flex-end;
-  padding-right: 6px;
+}
+
+#favorites-button-slot button {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  min-width: 70px;
+  border: 1px solid var(--border);
+  border-radius: var(--size-radius);
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+#favorites-button-slot button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 #favorites-drawer-toggle-slot {
@@ -71,25 +95,10 @@
   padding-left: 4px;
 }
 
-#favorites-command-bar #reset-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 16px;
-  border: 1px solid var(--text);
-  border-radius: var(--radius);
-  color: var(--text);
-  background: transparent;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-}
 
 #favorites-command-bar #reset-button:hover {
-  color: var(--danger);
-  border-color: var(--danger);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 #favorites-search-status {

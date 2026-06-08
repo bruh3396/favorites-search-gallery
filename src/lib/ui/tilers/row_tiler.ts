@@ -22,10 +22,10 @@ export class RowTiler extends AbstractTiler {
   public setColumnCount(): void {
   }
 
-  public setRowSize(rowSize: number): void {
+  public setRowHeight(rowHeight: number): void {
     const minWidth = Math.floor(window.innerWidth / 20);
     const maxWidth = Math.floor(window.innerWidth / 4);
-    const pixelSize = Math.round(mapRange(rowSize, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
+    const pixelSize = Math.round(mapRange(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
 
     insertStyle(`
       #${this.container.id}[data-layout="row"] {

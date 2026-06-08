@@ -1,4 +1,5 @@
 import * as PostOverlayHoverFlow from "@/features/post_overlay/flows/hover_flow";
+import * as PostOverlayKeyFlow from "@/features/post_overlay/flows/key_flow";
 import * as PostOverlayModel from "@/features/post_overlay/model/post_overlay_model";
 import * as PostOverlayTagClickFlow from "@/features/post_overlay/flows/tag_click_flow";
 import * as PostOverlayToggleFlow from "@/features/post_overlay/flows/toggle_flow";
@@ -22,6 +23,8 @@ function subscribeToEvents(): void {
   DomEvents.document.mouseover.on(PostOverlayHoverFlow.onMouseover);
   DomEvents.document.mousedown.on(PostOverlayTagClickFlow.onMouseDown);
   DomEvents.document.contextmenu.on(PostOverlayTagClickFlow.onContextMenu);
+  DomEvents.document.keydown.on(PostOverlayKeyFlow.onKeyDown);
+  DomEvents.document.keyup.on(PostOverlayKeyFlow.onKeyUp);
   Events.favorites.postOverlayToggled.on(PostOverlayToggleFlow.hideIfDisabled);
   Events.favorites.tagCategoriesResolved.on(PostOverlayModel.warmTagCategoryCache);
   Events.favorites.resetConfirmed.on(PostOverlayModel.destroyStore);
@@ -29,7 +32,7 @@ function subscribeToEvents(): void {
   Events.favorites.pageChanged.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.columnCountChanged.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.layoutChanged.on(PostOverlayHoverFlow.onThumbsMoved);
-  Events.favorites.rowSizeChanged.on(PostOverlayHoverFlow.onThumbsMoved);
+  Events.favorites.rowHeightChanged.on(PostOverlayHoverFlow.onThumbsMoved);
 }
 
 function waitUntilFavoritesAreReady(): Promise<unknown> {

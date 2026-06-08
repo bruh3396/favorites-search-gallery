@@ -1,5 +1,4 @@
 import { NumberElement, defaultMenuElement } from "@/types/element";
-import { NumberComponent } from "@/lib/ui/elements/number_component";
 import { doNothing } from "@/utils/function";
 
 export function buildNumberComponent(partial: Partial<NumberElement>): void {
@@ -33,7 +32,7 @@ export function buildNumberComponent(partial: Partial<NumberElement>): void {
   if (element === null) {
     return;
   }
-  const numberComponent = new NumberComponent(element);
+  // const numberComponent = new NumberComponent(element);
   const numberInput = numberComponent.input;
   const emitEvent = (): void => {
     const value = parseFloat(numberInput.value);

@@ -13,7 +13,6 @@ import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { buildButtonElement } from "@/lib/ui/elements/button";
-import { buildNumberComponent } from "@/lib/ui/elements/number_input";
 import { buildSelectElement } from "@/lib/ui/elements/select";
 import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
@@ -31,15 +30,17 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "shuffle-button",
-    parentId: FavoritesId.actions,
-    icon: "shuffle",
+    parentId: FavoritesId.buttonsSlot,
+    // icon: "shuffle",
+    textContent: "SHUFFLE",
     title: "Shuffle results",
     event: Events.favorites.shuffleButtonClicked
   },
   {
     id: "invert-button",
-    parentId: FavoritesId.actions,
-    icon: "invert",
+    parentId: FavoritesId.buttonsSlot,
+    // icon: "invert",
+    textContent: "INVERT",
     title: "Invert results",
     event: Events.favorites.invertButtonClicked
   },
@@ -49,14 +50,6 @@ const buttons: Partial<ButtonElement>[] = [
     icon: "clear",
     title: "Clear search",
     event: Events.favorites.clearButtonClicked
-  },
-  {
-    id: "download-button",
-    parentId: FavoritesId.actions,
-    icon: "download",
-    title: "Download search results",
-    enabled: false,
-    event: Events.favorites.downloadButtonClicked
   },
   {
     id: "set-active_favorites_button",
@@ -83,7 +76,7 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "reset-button",
-    parentId: FavoritesId.resetSlot,
+    parentId: FavoritesId.buttonsSlot,
     textContent: "RESET",
     event: Events.favorites.resetButtonClicked
   }
@@ -344,7 +337,7 @@ const numbers: Partial<NumberElement>[] = [
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
     pollingTime: 50,
-    event: Events.favorites.rowSizeChanged
+    event: Events.favorites.rowHeightChanged
   },
 
   {
@@ -366,5 +359,5 @@ export function setup(): void {
   prepareDynamicElements(simpleCheckboxes).forEach(buildCheckboxElement);
   // @ts-expect-error don't care
   prepareDynamicElements(selects).forEach(buildSelectElement);
-  prepareDynamicElements(numbers).forEach(buildNumberComponent);
+  // prepareDynamicElements(numbers).forEach(buildNumberComponent);
 }

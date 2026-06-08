@@ -10,4 +10,4 @@ export function renderTags(postId: string, categoryMap: TagCategoryMap): void {
   PostOverlayTagRenderer.renderTags(PostOverlayShell.getOverlay(), postId, categoryMap);
 }
 
-export { reveal, hide } from "@/features/post_overlay/view/shell/post_overlay_shell";
+export { reveal, hide, isVisible } from "@/features/post_overlay/view/shell/post_overlay_shell";

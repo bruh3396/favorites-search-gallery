@@ -23,7 +23,7 @@ export const Preferences = {
   favoritesLayout: new Preference<Layout>("favoritesLayout", "column"),
   favoritesOptionsVisible: new Preference("favoritesOptionsVisible", false),
   favoritesRemoveButtonsVisible: new Preference("favoritesRemoveButtonsVisible", false),
-  favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 125),
+  favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 50),
   favoritesRowHeight: new Preference("favoritesRowHeight", 7),
   favoritesSortAscending: new Preference("favoritesSortAscending", false),
   favoritesSortKey: new Preference<SortingMethod>("favoritesSortKey", "default"),

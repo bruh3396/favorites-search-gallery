@@ -140,7 +140,7 @@ function subscribeToMobileInput(): void {
 }
 
 function registerBridgeHandlers(): void {
-  FeatureBridge.inGallery.register(GalleryModel.isInGallery);
+  FeatureBridge.galleryState.register(GalleryModel.getCurrentState);
   FeatureBridge.currentGalleryThumb.register(GalleryModel.currentThumbIfOpen);
 }
 

@@ -19,7 +19,7 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
   FavoritesShell.setup(viewCallbacks.onFirstPageFavoritesExtracted);
   FavoritesStatus.setup();
   ContentTiler.setup();
-  FavoritesPaginator.setup(viewCallbacks.onPageSelected, viewCallbacks.onRelativePageSelected);
+  FavoritesPaginator.setup(viewCallbacks.onPageSelected, viewCallbacks.onPageStepped);
   FavoritesDrawer.setup();
 }
 

@@ -1,7 +1,8 @@
-import { Favorite, PageRelation } from "@/types/favorite";
+import { Favorite } from "@/types/favorite";
 import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile } from "@/types/ui";
 import { MetadataMetric, Rating, TagCategoryMap } from "@/types/search";
 import { Emitter } from "@/lib/communication/emitter";
+import { NavigationKey } from "@/types/input";
 import { SearchPage } from "@/features/search_page/types/search_page";
 import { StickyEmitter } from "@/lib/communication/sticky_emitter";
 
@@ -10,7 +11,7 @@ export const Events = {
     searchStarted: new Emitter<string>(),
     pageChanged: new Emitter<void>(),
     pageSelected: new Emitter<number>(),
-    relativePageSelected: new Emitter<PageRelation>(),
+    pageStepped: new Emitter<NavigationKey>(),
     findFavorite: new Emitter<string>(),
     findFavoriteInAll: new Emitter<string>(),
     firstPageFavorites: new StickyEmitter<HTMLElement[] | undefined>(),
@@ -26,7 +27,6 @@ export const Events = {
     favoritesAddedToCurrentPage: new Emitter<HTMLElement[]>(),
     resetConfirmed: new Emitter<void>(),
 
-    downloadButtonClicked: new Emitter<MouseEvent>(),
     setActiveFavoritesClicked: new Emitter<MouseEvent>(),
     resetActiveFavoritesClicked: new Emitter<MouseEvent>(),
     invertButtonClicked: new Emitter<MouseEvent>(),
@@ -39,7 +39,7 @@ export const Events = {
     resultsPerPageChanged: new Emitter<number>(),
     allowedRatingsChanged: new Emitter<Rating>(),
     columnCountChanged: new Emitter<number>(),
-    rowSizeChanged: new Emitter<number>(),
+    rowHeightChanged: new Emitter<number>(),
     layoutChanged: new Emitter<Layout>(),
     sortingMethodChanged: new Emitter<MetadataMetric>(),
     performanceProfileChanged: new Emitter<PerformanceProfile>(),

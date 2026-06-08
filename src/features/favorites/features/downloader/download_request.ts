@@ -1,6 +1,5 @@
 import * as ExtensionResolver from "@/lib/media/media_extension_resolver";
-import { Favorite } from "@/types/favorite";
-import { resolveMediaUrl } from "@/lib/media/media_url_resolver";
+import { MediaResolvable, resolveMediaUrl } from "@/lib/media/media_url_resolver";
 
 export class DownloadRequest {
   constructor(private readonly id: string, public url: string, public extension: string) {}
@@ -10,8 +9,8 @@ export class DownloadRequest {
   }
 }
 
-export async function toDownloadRequest(favorite: Favorite): Promise<DownloadRequest> {
-  const extension = await ExtensionResolver.resolveExtension(favorite);
-  const url = await resolveMediaUrl(favorite);
-  return new DownloadRequest(favorite.id, url, extension);
+export async function toDownloadRequest(item: MediaResolvable): Promise<DownloadRequest> {
+  const extension = await ExtensionResolver.resolveExtension(item);
+  const url = await resolveMediaUrl(item);
+  return new DownloadRequest(item.id, url, extension);
 }

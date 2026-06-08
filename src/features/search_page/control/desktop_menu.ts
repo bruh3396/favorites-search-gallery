@@ -123,7 +123,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     parentId: "search-page-row-size",
     position: "beforeend",
     preference: Preferences.searchPageRowHeight,
-    event: Events.favorites.rowSizeChanged,
+    event: Events.favorites.rowHeightChanged,
     options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
   },
   {

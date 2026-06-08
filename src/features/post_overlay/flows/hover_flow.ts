@@ -3,13 +3,18 @@ import * as PostOverlayModel from "@/features/post_overlay/model/post_overlay_mo
 import * as PostOverlayView from "@/features/post_overlay/view/post_overlay_view";
 import { EnhancedMouseEvent } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
+import { galleryIsIdle } from "@/app/channels/feature_bridge";
 import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
 export function onMouseover(event: EnhancedMouseEvent): void {
-  if (!Preferences.postOverlayEnabled.value) {
+  if (!Preferences.postOverlayEnabled.value || !galleryIsIdle()) {
     return;
   }
   PostOverlayModel.recordCursorPosition(event);
+
+  if (PostOverlayModel.isResizing()) {
+    return;
+  }
 
   if (PostOverlayModel.isCoolingDown() || isInsideOverlay(event.originalEvent.target)) {
     return;
@@ -32,7 +37,7 @@ export function onThumbsMoved(): void {
   PostOverlayModel.startReopenCooldown(showThumbUnderCursor);
 }
 
-function showThumbUnderCursor(): void {
+export function showThumbUnderCursor(): void {
   if (!Preferences.postOverlayEnabled.value) {
     return;
   }
