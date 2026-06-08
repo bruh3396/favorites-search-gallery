@@ -2,7 +2,7 @@ import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/communication/feature_channel";
 import { GalleryState } from "@/types/ui";
 import { NavigationKey } from "@/types/input";
-import { SearchPage } from "@/features/search_page/types/search_page";
+import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 export const FeatureBridge = {
   galleryState: new FeatureChannel<void, GalleryState>(GalleryState.Idle),
@@ -11,8 +11,8 @@ export const FeatureBridge = {
   favoritesSearchResults: new FeatureChannel<void, Favorite[]>([]),
   loadMoreFavorites: new FeatureChannel<NavigationKey, void>(undefined),
   favoritesCanExtend: new FeatureChannel<void, boolean>(false),
-  navigateToAdjacentSearchPage: new FeatureChannel<NavigationKey, SearchPage | null>(null),
-  searchPageThumbs: new FeatureChannel<void, HTMLElement[]>([]),
+  navigateToAdjacentPostList: new FeatureChannel<NavigationKey, PostList | null>(null),
+  postListThumbs: new FeatureChannel<void, HTMLElement[]>([]),
   currentSearchQuery: new FeatureChannel<void, string>(""),
   usingInfiniteScroll: new FeatureChannel<void, boolean>(false),
   savedSearches: new FeatureChannel<void, string[]>([]),

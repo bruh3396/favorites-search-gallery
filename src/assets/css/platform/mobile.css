@@ -222,15 +222,15 @@ input[type="text"] {
 }
 
 #mobile-toolbar-row input[type="checkbox"]:checked+label {
-  color: var(--accent);
+  color: var(--theme-accent);
 }
 
 #mobile-toolbar-row input[type="checkbox"]:checked+label svg {
-  fill: var(--accent);
+  fill: var(--theme-accent);
 }
 
 [data-theme="native-dark"] #mobile-toolbar-row svg {
-  fill: var(--text);
+  fill: var(--theme-text);
 }
 
 .mobile-toolbar-checkbox-label {
@@ -252,7 +252,7 @@ input[type="text"] {
 }
 
 .search-bar {
-  background: var(--surface-pill);
+  background: var(--theme-surface-sunken);
 }
 
 .search-bar-items {
@@ -319,7 +319,7 @@ input[type="text"] {
 }
 
 .search-bar-icon-btn:active {
-  background-color: var(--accent);
+  background-color: var(--theme-accent);
 }
 
 /* Toolbar buttons */
@@ -335,7 +335,7 @@ input[type="text"] {
 }
 
 #reset-button:active svg {
-  fill: var(--accent);
+  fill: var(--theme-accent);
 }
 
 #help-button {
@@ -387,7 +387,7 @@ input[type="text"] {
 }
 
 #mobile-footer {
-  background: var(--surface-gradient);
+  background: var(--theme-surface-gradient);
 }
 
 #mobile-footer-top {

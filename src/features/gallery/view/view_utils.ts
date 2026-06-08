@@ -1,8 +1,8 @@
 export function overGalleryMenu(event: MouseEvent): boolean {
-  if (!(event.target instanceof HTMLElement)) {
+  if (!(event.target instanceof Element)) {
     return false;
   }
-  return event.target.classList.contains(".gallery-sub-menu") || event.target.closest(".gallery-sub-menu") !== null;
+  return event.target.closest(".gallery-sub-menu") !== null;
 }
 
 export function showFullscreenIcon(svg: string, duration: number = 500): void {

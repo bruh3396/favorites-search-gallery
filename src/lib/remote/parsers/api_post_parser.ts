@@ -1,7 +1,7 @@
 import { DeletedPostError, PostFetchError } from "@/types/errors";
 import { EncodedTagCategory, Post, PostResponse, RawPost, TagInfo } from "@/types/api";
-import { TagCategoryMap } from "@/types/search";
 import { decodeTagCategory, encodeTagCategory } from "@/lib/remote/parsers/api_tag_parser";
+import { TagCategoryMap } from "@/types/search";
 import { decodeHtmlEntities } from "@/utils/string/format";
 
 export function parsePostResponse(response: PostResponse): Post {

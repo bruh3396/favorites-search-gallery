@@ -1,4 +1,5 @@
 import { div, img, numberInput } from "@/utils/dom/element";
+import { icon } from "@/lib/ui/icon";
 
 export type AutoplayMenuElements = {
   container: HTMLElement
@@ -10,10 +11,10 @@ export type AutoplayMenuElements = {
     minimumVideoDurationInput: HTMLInputElement | HTMLSelectElement
   }
   playButton: HTMLImageElement
-  changeDirectionButton: HTMLImageElement
+  changeDirectionButton: HTMLElement
   changeDirectionMask: {
     container: HTMLElement
-    image: HTMLImageElement
+    image: SVGElement
   }
   imageProgressBar: HTMLElement
   videoProgressBar: HTMLElement
@@ -25,9 +26,13 @@ export function build(): AutoplayMenuElements {
   const buttons = div("autoplay-buttons");
   const settingsButton = img("autoplay-settings-button");
   const playButton = img("autoplay-play-button");
-  const changeDirectionButton = img("autoplay-change-direction-button");
+  const directionSlot = div("autoplay-change-direction-slot");
+  const changeDirectionButton = icon("changeDirection");
   const maskContainer = div("autoplay-change-direction-mask-container");
-  const maskImage = img("autoplay-change-direction-mask");
+  const maskImage = icon("changeDirectionMask");
+
+  changeDirectionButton.id = "autoplay-change-direction-button";
+  maskImage.id = "autoplay-change-direction-mask";
   const imageProgressBar = div("autoplay-image-progress-bar");
   const videoProgressBar = div("autoplay-video-progress-bar");
 
@@ -38,13 +43,13 @@ export function build(): AutoplayMenuElements {
   menu.className = "u-no-select gallery-sub-menu";
   settingsButton.title = "Autoplay settings";
   playButton.title = "Pause autoplay";
-  changeDirectionButton.title = "Change autoplay direction";
-  maskImage.title = "Change autoplay direction";
+  directionSlot.title = "Change autoplay direction";
   imageProgressBar.className = "autoplay-progress-bar";
   videoProgressBar.className = "autoplay-progress-bar";
 
   maskContainer.append(maskImage);
-  buttons.append(settingsButton, playButton, changeDirectionButton, maskContainer);
+  directionSlot.append(changeDirectionButton, maskContainer);
+  buttons.append(settingsButton, playButton, directionSlot);
   settingsMenu.append(imageDuration.row, minimumVideoDuration.row);
   menu.append(buttons, imageProgressBar, videoProgressBar, settingsMenu);
   container.append(menu);
@@ -58,7 +63,7 @@ export function build(): AutoplayMenuElements {
       minimumVideoDurationInput: minimumVideoDuration.input
     },
     playButton,
-    changeDirectionButton,
+    changeDirectionButton: directionSlot,
     changeDirectionMask: {
       container: maskContainer,
       image: maskImage

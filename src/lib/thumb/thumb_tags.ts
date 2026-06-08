@@ -9,18 +9,18 @@ export function setFavoriteTagsLookup(fn: (id: string) => Set<string> | undefine
   getFavoriteTags = fn;
 }
 
-export const getTagSetFromItem: (item: HTMLElement | Favorite) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromFavoritesPageItem : getTagSetFromSearchPageItem;
+export const getTagSetFromItem: (item: HTMLElement | Favorite) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromFavoritesPageItem : getTagSetFromPostListItem;
 
 function getTagSetFromFavoritesPageItem(item: HTMLElement | Favorite): Set<string> {
   const tags = getFavoriteTags(item.id);
   return tags === undefined ? new Set() : new Set(tags);
 }
 
-function getTagSetFromSearchPageItem(thumb: HTMLElement | Favorite): Set<string> {
-  return convertToTagSet(getRawTagsFromSearchPageItem(thumb));
+function getTagSetFromPostListItem(thumb: HTMLElement | Favorite): Set<string> {
+  return convertToTagSet(getRawTagsFromPostListItem(thumb));
 }
 
-function getRawTagsFromSearchPageItem(thumb: HTMLElement | Favorite): string {
+function getRawTagsFromPostListItem(thumb: HTMLElement | Favorite): string {
   if (!(thumb instanceof HTMLElement)) {
     return "";
   }

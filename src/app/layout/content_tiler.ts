@@ -1,5 +1,4 @@
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
@@ -19,21 +18,21 @@ import { galleryIsIdle } from "@/app/channels/feature_bridge";
 import { navigationDelta } from "@/utils/navigation";
 import { yieldControl } from "@/lib/async/timing";
 
-const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.favoritesColumnCount.value : Preferences.searchPageColumnCount.value);
+const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.favoritesColumnCount.value : Preferences.postListColumnCount.value);
 const tilers: AbstractTiler[] = [columnTiler, new GridTiler(Content), new RowTiler(Content), new SquareTiler(Content), new NativeTiler(Content)];
 const tilerMap = new Map(tilers.map(tiler => [tiler.layout, tiler]));
-let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.searchPageLayout.value;
+let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.postListLayout.value;
 let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
 
 export function setup(): void {
   currentTiler.activate();
-  setColumnCount(ON_SEARCH_PAGE ? Preferences.searchPageColumnCount.value : Preferences.favoritesColumnCount.value);
-  setRowHeight(ON_SEARCH_PAGE ? Preferences.searchPageRowHeight.value : Preferences.favoritesRowHeight.value);
+  setColumnCount(ON_POST_LIST_PAGE ? Preferences.postListColumnCount.value : Preferences.favoritesColumnCount.value);
+  setRowHeight(ON_POST_LIST_PAGE ? Preferences.postListRowHeight.value : Preferences.favoritesRowHeight.value);
   DomEvents.document.wheel.on(changeItemSizeOnShiftScroll);
   Events.favorites.columnCountChanged.on(setColumnCount);
   Events.favorites.rowHeightChanged.on(setRowHeight);
   Events.favorites.layoutChanged.on(hideUnusedLayoutSizer);
-  Events.searchPage.layoutChanged.on(hideUnusedLayoutSizer);
+  Events.postList.layoutChanged.on(hideUnusedLayoutSizer);
 }
 
 export function changeLayout(layout: Layout): void {
@@ -47,12 +46,7 @@ export function changeLayout(layout: Layout): void {
 }
 
 export const setRowHeight = (rowHeight: number): void => tilers.forEach(tiler => tiler.setRowHeight(rowHeight));
-
-export function setColumnCount(columnCount: number): void {
-  setDataset(Content, "suppressFade");
-  tilers.forEach(tiler => tiler.setColumnCount(columnCount));
-  requestAnimationFrame(() => requestAnimationFrame(() => removeDataset(Content, "suppressFade")));
-}
+export const setColumnCount = (columnCount: number): void => tilers.forEach(tiler => tiler.setColumnCount(columnCount));
 export const getLayout = (): Layout => currentLayout;
 export const tile = (items: HTMLElement[]): void => currentTiler.tile(items);
 export const addToBottom = (items: HTMLElement[]): void => currentTiler.addItemsToBottom(items);
@@ -71,7 +65,7 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
   if (ON_FAVORITES_PAGE) {
     preference = usingRowLayout ? Preferences.favoritesRowHeight : Preferences.favoritesColumnCount;
   } else {
-    preference = usingRowLayout ? Preferences.searchPageRowHeight : Preferences.searchPageColumnCount;
+    preference = usingRowLayout ? Preferences.postListRowHeight : Preferences.postListColumnCount;
   }
   const bounds = usingRowLayout ? ThumbConfig.rowHeightBounds : ThumbConfig.columnCountBounds;
 
@@ -86,8 +80,8 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
 
 export async function hideUnusedLayoutSizer(layout: Layout): Promise<void> {
   await yieldControl();
-  const rowHeightContainer = document.querySelector("#row-size-container, #search-page-row-size");
-  const columnCountContainer = document.querySelector("#column-count-container, #search-page-column-count");
+  const rowHeightContainer = document.querySelector("#row-size-container, #post-list-row-size");
+  const columnCountContainer = document.querySelector("#column-count-container, #post-list-column-count");
 
   if ((columnCountContainer instanceof HTMLElement) && (rowHeightContainer instanceof HTMLElement)) {
     rowHeightContainer.style.display = layout === "row" ? "" : "none";

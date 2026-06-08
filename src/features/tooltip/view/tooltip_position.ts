@@ -22,7 +22,7 @@ export function positionTooltip(thumb: HTMLElement): void {
 }
 
 function getMenuBottom(): number {
-  const menu = document.getElementById("favorites-command-bar");
+  const menu = document.getElementById("favorites-toolbar");
 
   if (menu === null || menu.offsetParent === null) {
     return 0;

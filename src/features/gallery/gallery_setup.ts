@@ -10,13 +10,13 @@ import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryMouseOverFlow from "@/features/gallery/flows/mouseover_flow";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
+import * as GalleryPostListFlow from "@/features/gallery/flows/post_list_flow";
 import * as GalleryPreloadFlow from "@/features/gallery/flows/preload_flow";
-import * as GallerySearchPageFlow from "@/features/gallery/flows/search_page_flow";
 import * as GalleryTouchFlow from "@/features/gallery/flows/touch_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibleThumbObserver from "@/features/gallery/control/visible_thumb_observer";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
@@ -42,8 +42,8 @@ async function waitUntilPageIsReady(): Promise<void> {
     await Events.favorites.favoritesFoundInDatabase.wait();
   }
 
-  if (ON_SEARCH_PAGE) {
-    await Events.searchPage.searchPageInitialized.wait();
+  if (ON_POST_LIST_PAGE) {
+    await Events.postList.postListInitialized.wait();
   }
 }
 
@@ -89,8 +89,8 @@ function subscribeToEvents(): void {
     subscribeToFavoritesEvents();
   }
 
-  if (ON_SEARCH_PAGE) {
-    subscribeToSearchPageEvents();
+  if (ON_POST_LIST_PAGE) {
+    subscribeToPostListEvents();
   }
 
   if (ON_DESKTOP_DEVICE) {
@@ -107,12 +107,12 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreviews);
 }
 
-function subscribeToSearchPageEvents(): void {
-  Events.searchPage.upscaleToggled.on(GallerySearchPageFlow.onUpscaleToggled);
-  Events.searchPage.initialSearchPageCreated.on(GallerySearchPageFlow.onInitialSearchPageCreated, { once: true });
-  Events.searchPage.moreResultsAdded.on(GallerySearchPageFlow.handleResultsAddedToSearchPage);
-  Events.searchPage.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
-  Events.searchPage.pageChanged.on(GalleryContentFlow.handlePageChange);
+function subscribeToPostListEvents(): void {
+  Events.postList.upscaleToggled.on(GalleryPostListFlow.onUpscaleToggled);
+  Events.postList.initialPostListCreated.on(GalleryPostListFlow.onInitialPostListCreated, { once: true });
+  Events.postList.moreResultsAdded.on(GalleryPostListFlow.handleResultsAddedToPostList);
+  Events.postList.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
+  Events.postList.pageChanged.on(GalleryContentFlow.handlePageChange);
 }
 
 function subscribeToDesktopInput(): void {

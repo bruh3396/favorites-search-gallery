@@ -19,13 +19,13 @@ import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { POST_LIST_PAGE_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
-import { SEARCH_PAGE_ENABLED } from "@/app/context/flags";
 import { setFavoriteTagsLookup } from "@/lib/thumb/thumb_tags";
 
 export function setupFavorites(): void {
-  if (SEARCH_PAGE_ENABLED) {
-    registerSearchPageBridgeHandlers();
+  if (POST_LIST_PAGE_ENABLED) {
+    registerPostListBridgeHandlers();
     return;
   }
 
@@ -118,7 +118,7 @@ function subscribeToEvents(): void {
   DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);
 }
 
-function registerSearchPageBridgeHandlers(): void {
+function registerPostListBridgeHandlers(): void {
   FeatureBridge.favoriteIds.register(FavoritesModel.loadFavoriteIds);
 }
 

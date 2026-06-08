@@ -1,5 +1,5 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "@/lib/environment";
-import { POSTS_PER_SEARCH_PAGE } from "@/lib/rule34_constants";
+import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { POSTS_PER_POST_LIST_PAGE } from "@/lib/rule34_constants";
 import { Resolution } from "@/types/media";
 
 export const GalleryConfig = {
@@ -12,11 +12,11 @@ export const GalleryConfig = {
     if (ON_MOBILE_DEVICE) {
       return GalleryConfig.mainCanvasResolutions.mobile;
     }
-    return ON_SEARCH_PAGE ? GalleryConfig.mainCanvasResolutions.search : GalleryConfig.mainCanvasResolutions.favorites;
+    return ON_POST_LIST_PAGE ? GalleryConfig.mainCanvasResolutions.search : GalleryConfig.mainCanvasResolutions.favorites;
   },
 
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 700,
-  searchPagePreloadedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_SEARCH_PAGE,
+  postListPreloadedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_POST_LIST_PAGE,
   minimumPreloadedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 0 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 0 : 2,
@@ -24,8 +24,8 @@ export const GalleryConfig = {
   preloadWaitingTimeout: 1_000,
   preloadingEnabled: true,
   gifPreloadingEnabled: false,
-  preloadOutsideGalleryOnSearchPage: true,
-  upscaleEverythingOnSearchPage: false,
+  preloadOutsideGalleryOnPostList: true,
+  upscaleEverythingOnPostList: false,
 
   preloadMediaDebounceTime: 150,
   navigationThrottleTime: 250,

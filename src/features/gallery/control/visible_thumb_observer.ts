@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE, ON_SEARCH_PAGE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
@@ -85,7 +85,7 @@ function createIntersectionObserver(): IntersectionObserver | null {
     return null;
   }
 
-  if (ON_SEARCH_PAGE && !GalleryConfig.upscaleEverythingOnSearchPage) {
+  if (ON_POST_LIST_PAGE && !GalleryConfig.upscaleEverythingOnPostList) {
     return null;
   }
   const topMargin = -GalleryConfig.favoritesMenuHeight;

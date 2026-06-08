@@ -1,10 +1,10 @@
+import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { Overlays } from "@/app/layout/shell";
 import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
 import { Preferences } from "@/app/context/preferences";
 import { insertStyle } from "@/utils/dom/injector";
 import { setMenuLabel } from "@/features/post_overlay/dom_tweaks/menu_label";
-import { setDataset, removeDataset } from "@/utils/dom/attribute";
 
 const OVERLAY_POOL_SIZE = 3;
 const overlays: HTMLElement[] = [];

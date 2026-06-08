@@ -2,7 +2,7 @@ import { FavoritesDesktopSearchBox } from "@/features/favorites/control/search_b
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 
-const DESKTOP_PARENT_ID = FavoritesId.pill;
+const DESKTOP_PARENT_ID = FavoritesId.searchField;
 
 export function setup(): void {
   if (ON_DESKTOP_DEVICE) {

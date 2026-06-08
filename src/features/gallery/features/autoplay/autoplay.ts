@@ -26,8 +26,6 @@ export type AutoplayEvents = {
 const menuIcons = {
   play: createObjectUrlFromSvg(Icons.PLAY),
   pause: createObjectUrlFromSvg(Icons.PAUSE),
-  changeDirection: createObjectUrlFromSvg(Icons.CHANGE_DIRECTION),
-  changeDirectionAlt: createObjectUrlFromSvg(Icons.CHANGE_DIRECTION_2),
   tune: createObjectUrlFromSvg(Icons.TUNE)
 };
 
@@ -206,8 +204,6 @@ function createDurationSelect(minimum: number, maximum: number): HTMLSelectEleme
 function setMenuIconImageSources(): void {
   ui.playButton.src = paused ? menuIcons.play : menuIcons.pause;
   ui.settingsButton.src = menuIcons.tune;
-  ui.changeDirectionButton.src = menuIcons.changeDirection;
-  ui.changeDirectionMask.image.src = menuIcons.changeDirectionAlt;
   ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.galleryAutoplayForward.value);
 }
 

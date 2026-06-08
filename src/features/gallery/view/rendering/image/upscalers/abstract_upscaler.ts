@@ -1,12 +1,12 @@
 import * as GalleryFetcher from "@/features/gallery/view/rendering/image/fetcher";
-import { ON_FAVORITES_PAGE, ON_SEARCH_PAGE } from "@/lib/environment";
-import { inGallery } from "@/app/channels/feature_bridge";
+import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { PERFORMANCE_PROFILE } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { ThrottledQueue } from "@/lib/async/throttled_queue";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
+import { inGallery } from "@/app/channels/feature_bridge";
 import { isImage } from "@/lib/media/media_type_predicates";
 import { parseDimensions2D } from "@/utils/string/parse";
 import { sleep } from "@/lib/async/timing";
@@ -136,7 +136,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private enabled(): boolean {
-    if (ON_SEARCH_PAGE && !Preferences.searchPageUpscaleThumbs.value) {
+    if (ON_POST_LIST_PAGE && !Preferences.postListUpscaleThumbs.value) {
       return false;
     }
     return PERFORMANCE_PROFILE === "normal";

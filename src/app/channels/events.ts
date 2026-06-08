@@ -1,9 +1,9 @@
-import { Favorite } from "@/types/favorite";
 import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile } from "@/types/ui";
 import { MetadataMetric, Rating, TagCategoryMap } from "@/types/search";
 import { Emitter } from "@/lib/communication/emitter";
+import { Favorite } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
-import { SearchPage } from "@/features/search_page/types/search_page";
+import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { StickyEmitter } from "@/lib/communication/sticky_emitter";
 
 export const Events = {
@@ -80,10 +80,10 @@ export const Events = {
     excludeTagFromSearch: new Emitter<string>(),
     searchForTag: new Emitter<string>()
   },
-  searchPage: {
-    searchPageInitialized: new StickyEmitter<void>(),
+  postList: {
+    postListInitialized: new StickyEmitter<void>(),
     layoutChanged: new Emitter<Layout>(),
-    initialSearchPageCreated: new StickyEmitter<SearchPage>(),
+    initialPostListCreated: new StickyEmitter<PostList>(),
     upscaleToggled: new Emitter<boolean>(),
     infiniteScrollToggled: new Emitter<boolean>(),
     moreResultsAdded: new Emitter<HTMLElement[]>(),

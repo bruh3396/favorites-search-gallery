@@ -43,12 +43,12 @@ dialog::backdrop {
 input[type=number] {
   border: 1px solid #767676;
   border-radius: 2px;
-  background-color: var(--surface-raised);
-  color: var(--text);
+  background-color: var(--theme-surface-raised);
+  color: var(--theme-text);
 }
 
 input[type="checkbox"] {
-  accent-color: var(--accent);
+  accent-color: var(--theme-accent);
 }
 
 option {
@@ -56,8 +56,8 @@ option {
 }
 
 .surface-panel {
-  background: var(--surface-gradient);
-  color: var(--text);
+  background: var(--theme-surface-gradient);
+  color: var(--theme-text);
 }
 
 #favorites-search-gallery-content {

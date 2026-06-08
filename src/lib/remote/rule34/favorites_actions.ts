@@ -1,7 +1,7 @@
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "@/lib/remote/url/action_url_builder";
 import { favoriteAddQueue, favoriteRemoveQueue } from "@/lib/remote/http/rate_limiters";
-import { ON_SEARCH_PAGE } from "@/lib/environment";
+import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { fetchHtml } from "@/lib/remote/http/http_client";
 import { withExponentialBackoff } from "@/lib/async/timing";
@@ -13,7 +13,7 @@ export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
     return AddFavoriteStatus.Error;
   }
 
-  if (ON_SEARCH_PAGE) {
+  if (ON_POST_LIST_PAGE) {
     fetch(buildPostVoteUrl(id));
   }
   const status = await fetchHtml(buildAddFavoriteUrl(id));

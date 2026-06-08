@@ -1,6 +1,6 @@
 :root {
   --favorites-drawer-width: 400px;
-  --favorites-bar-height: 46px;
+  --favorites-toolbar-height: 46px;
 
   --favorites-tab-width: 64px;
   --favorites-tab-padding: 8px 4px;
@@ -39,14 +39,14 @@
 
 #favorites-drawer {
   position: sticky;
-  top: var(--favorites-bar-height);
-  height: calc(100vh - var(--favorites-bar-height));
+  top: var(--favorites-toolbar-height);
+  height: calc(100vh - var(--favorites-toolbar-height));
   width: var(--favorites-drawer-width);
   display: flex;
   flex-direction: row;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  color: var(--text);
+  background: var(--theme-surface);
+  border-right: 1px solid var(--theme-border);
+  color: var(--theme-text);
   box-sizing: border-box;
   transform: translateX(-100%);
   transition: transform var(--favorites-drawer-close-speed) ease;
@@ -64,8 +64,8 @@
   flex: 0 0 auto;
   gap: 4px;
   padding: 4px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
+  background: var(--theme-surface);
+  border-right: 1px solid var(--theme-border);
   overflow-y: auto;
 }
 
@@ -78,7 +78,7 @@
   cursor: pointer;
   padding: var(--favorites-tab-padding);
   border-radius: 6px;
-  color: var(--text-muted);
+  color: var(--theme-text-muted);
   font-size: var(--favorites-tab-font-size);
   border-left: 2px solid transparent;
   transition: background-color 0.12s ease, color 0.12s ease;
@@ -95,11 +95,11 @@
 }
 
 #favorites-drawer .favorites-drawer-tab:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+  color: var(--theme-text);
+  background: var(--theme-surface-hover);
 }
 
 #favorites-drawer .favorites-drawer-tab[data-selected] {
-  color: var(--accent);
-  background: var(--surface-raised);
+  color: var(--theme-accent);
+  background: var(--theme-surface-raised);
 }

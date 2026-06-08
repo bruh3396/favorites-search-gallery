@@ -53,12 +53,12 @@ function applyMemoryLimit(requests: ImageRequest[]): ImageRequest[] {
   return accepted;
 }
 
-function applySearchPageLimit(requests: ImageRequest[]): ImageRequest[] {
-  return requests.slice(0, GalleryConfig.searchPagePreloadedImageCount);
+function applyPostListLimit(requests: ImageRequest[]): ImageRequest[] {
+  return requests.slice(0, GalleryConfig.postListPreloadedImageCount);
 }
 
 function applyLimit(requests: ImageRequest[]): ImageRequest[] {
-  return ON_FAVORITES_PAGE ? applyMemoryLimit(requests) : applySearchPageLimit(requests);
+  return ON_FAVORITES_PAGE ? applyMemoryLimit(requests) : applyPostListLimit(requests);
 }
 
 function buildPreloadRequests(thumbs: HTMLElement[]): ImageRequest[] {

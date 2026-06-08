@@ -3,7 +3,7 @@ import { AbstractFavoritesSearchBox } from "@/features/favorites/control/search_
 import { EnhancedMouseEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { openSearchPage } from "@/lib/remote/rule34/navigator";
+import { openPostList } from "@/lib/remote/rule34/navigator";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
   protected override createSearchBox(): HTMLTextAreaElement | HTMLInputElement {
@@ -73,7 +73,7 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     const mouseEvent = new EnhancedMouseEvent(event);
 
     if (mouseEvent.rightClick || mouseEvent.ctrlKey) {
-      openSearchPage(this.searchBox.value);
+      openPostList(this.searchBox.value);
       return;
     }
     this.startSearch();

@@ -1,8 +1,8 @@
 import * as ExtensionResolver from "@/lib/media/media_extension_resolver";
 import * as PostApi from "@/lib/remote/api/post_fetcher";
-import { Post } from "@/types/api";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
+import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { fetchVideoDurationFromFavorite } from "@/lib/remote/rule34/video_duration_fetcher";
 import { isVideo } from "@/lib/media/media_type_predicates";

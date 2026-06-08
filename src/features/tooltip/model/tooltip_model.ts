@@ -17,5 +17,5 @@ export function getColorForTag(tag: string): string | null {
 }
 
 export function tooltipEnabled(): boolean {
-  return ON_FAVORITES_PAGE ? Preferences.favoritesTooltipEnabled.value : Preferences.searchPageTooltipEnabled.value;
+  return ON_FAVORITES_PAGE ? Preferences.favoritesTooltipEnabled.value : Preferences.postListTooltipEnabled.value;
 }

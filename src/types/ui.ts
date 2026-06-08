@@ -45,7 +45,7 @@ export enum GalleryState {
 }
 
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
-export type Theme = "native-dark" | "native-light" | "midnight" | "ember";
+export type Theme = "native-dark" | "native-light" | "midnight" | "ember" | "venom" | "zeal";
 
 export type FavoritesDrawerTab = "settings" | "saved" | "tags" | "download" | "new" | "help";
 export type PostOverlayMode = "tag";

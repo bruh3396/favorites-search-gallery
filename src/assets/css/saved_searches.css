@@ -82,7 +82,7 @@
 
 .saved-searches-item-label:hover {
   color: white;
-  background: var(--accent);
+  background: var(--theme-accent);
 }
 
 .saved-searches-item-btn--edit {

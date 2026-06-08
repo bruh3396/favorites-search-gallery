@@ -29,7 +29,7 @@ export const Preferences = {
   favoritesSortKey: new Preference<SortingMethod>("favoritesSortKey", "default"),
   favoritesTooltipEnabled: new Preference("tooltipEnabled", false),
 
-  galleryAutoplayActive: new Preference("galleryAutoplayActive", false),
+  galleryAutoplayActive: new Preference("galleryAutoplayActive", true),
   galleryAutoplayForward: new Preference("galleryAutoplayForward", true),
   galleryAutoplayImageDuration: new Preference("galleryAutoplayImageDuration", 3_000),
   galleryAutoplayMinimumVideoDuration: new Preference("galleryAutoplayMinimumVideoDuration", 5_000),
@@ -51,15 +51,15 @@ export const Preferences = {
   savedSearchesTutorial: new Preference("savedSearchesTutorial", false),
   savedSearchesVisible: new Preference("savedSearchesVisible", false),
 
-  searchPageAddButtonsVisible: new Preference("searchPageAddButtonsVisible", false),
-  searchPageColumnCount: new Preference("searchPageColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
-  searchPageEnabled: new Preference("searchPageEnabled", true),
-  searchPageFavoriteIndicator: new Preference("searchPageFavoriteIndicator", false),
-  searchPageFavoriteIndicatorStyle: new Preference<FavoriteIndicatorStyle>("searchPageFavoriteIndicatorStyle", "border"),
-  searchPageGalleryFavoriteStyle: new Preference<GalleryFavoriteStyle>("searchPageGalleryFavoriteStyle", "border"),
-  searchPageInfiniteScroll: new Preference("searchPageInfiniteScroll", false),
-  searchPageLayout: new Preference<Layout>("searchPageLayout", "column"),
-  searchPageRowHeight: new Preference("searchPageRowHeight", 7),
-  searchPageTooltipEnabled: new Preference("searchPageTooltipEnabled", false),
-  searchPageUpscaleThumbs: new Preference("searchPageUpscaleThumbs", ON_DESKTOP_DEVICE)
+  postListAddButtonsVisible: new Preference("postListAddButtonsVisible", false),
+  postListColumnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
+  postListEnabled: new Preference("postListEnabled", true),
+  postListFavoriteIndicator: new Preference("postListFavoriteIndicator", false),
+  postListFavoriteIndicatorStyle: new Preference<FavoriteIndicatorStyle>("postListFavoriteIndicatorStyle", "border"),
+  postListGalleryFavoriteStyle: new Preference<GalleryFavoriteStyle>("postListGalleryFavoriteStyle", "border"),
+  postListInfiniteScroll: new Preference("postListInfiniteScroll", false),
+  postListLayout: new Preference<Layout>("postListLayout", "column"),
+  postListRowHeight: new Preference("postListRowHeight", 7),
+  postListTooltipEnabled: new Preference("postListTooltipEnabled", false),
+  postListUpscaleThumbs: new Preference("postListUpscaleThumbs", ON_DESKTOP_DEVICE)
 };

@@ -22,19 +22,19 @@
   width: 38px;
   height: 100%;
   padding: 0;
-  color: var(--text-muted);
+  color: var(--theme-text-muted);
   transition: color 0.12s ease;
 }
 
 #favorites-pagination .favorites-pagination-btn,
 #favorites-pagination .favorites-pagination-ellipsis {
-  border: 1px solid var(--border);
+  border: 1px solid var(--theme-border);
   border-radius: 4px;
   box-sizing: border-box;
 }
 
 #favorites-pagination button:hover {
-  color: var(--text);
+  color: var(--theme-text);
 }
 
 #favorites-pagination .favorites-pagination-arrow .icon {
@@ -58,8 +58,8 @@
 }
 
 #favorites-pagination .favorites-pagination-btn.selected {
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--theme-accent);
+  border-color: var(--theme-accent);
   font-weight: bold;
   pointer-events: none;
 }
@@ -77,8 +77,8 @@
   padding: 12px;
   min-width: 160px;
   border-radius: 8px;
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   z-index: 50;
   opacity: 0;
@@ -98,7 +98,7 @@
 .goto-page-heading {
   font-size: 13px;
   font-weight: bold;
-  color: var(--text);
+  color: var(--theme-text);
 }
 
 #goto-page-row {
@@ -112,9 +112,9 @@
   min-width: 0;
   padding: 6px 8px;
   border-radius: 6px;
-  background: var(--surface-pill);
-  border: 1px solid var(--border);
-  color: var(--text);
+  background: var(--theme-surface-sunken);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
 }
 
 #goto-page-popover #goto-page-button {
@@ -123,8 +123,8 @@
   text-align: center;
   padding: 6px 12px;
   border-radius: 6px;
-  background: var(--accent);
-  color: var(--accent-text);
+  background: var(--theme-accent);
+  color: var(--theme-accent-text);
   font-weight: bold;
 }
 

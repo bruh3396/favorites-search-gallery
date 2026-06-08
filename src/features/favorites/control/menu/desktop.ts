@@ -76,6 +76,7 @@ const buttons: Partial<ButtonElement>[] = [
   },
   {
     id: "reset-button",
+    title: "Reset",
     parentId: FavoritesId.buttonsSlot,
     textContent: "RESET",
     event: Events.favorites.resetButtonClicked
@@ -85,11 +86,11 @@ const buttons: Partial<ButtonElement>[] = [
 
 const checkboxes: Partial<CheckboxElement>[] = [
   {
-    id: "enhance-search-pages",
+    id: "enhance-post-lists",
     parentId: "favorite-options-left",
     textContent: "Enhance Search Pages",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.searchPageEnabled,
+    preference: Preferences.postListEnabled,
     hotkey: "",
     savePreference: true
   },

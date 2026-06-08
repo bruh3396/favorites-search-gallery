@@ -3,7 +3,7 @@ import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import { Boundary } from "@/types/boundary";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { NavigationKey } from "@/types/input";
-import { ON_SEARCH_PAGE } from "@/lib/environment";
+import { ON_POST_LIST_PAGE } from "@/lib/environment";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.move(direction)) {
@@ -41,8 +41,8 @@ function handleEndBoundary(): void {
 }
 
 function loadMoreResults(direction: NavigationKey): boolean {
-  if (ON_SEARCH_PAGE) {
-    return FeatureBridge.navigateToAdjacentSearchPage.call(direction) !== null;
+  if (ON_POST_LIST_PAGE) {
+    return FeatureBridge.navigateToAdjacentPostList.call(direction) !== null;
   }
 
   if (!FeatureBridge.favoritesCanExtend.call()) {
