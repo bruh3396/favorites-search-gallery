@@ -1,4 +1,4 @@
-import { CategorizedPost, Post, PostResponse } from "@/types/api";
+import { Post, PostResponse } from "@/types/api";
 import { generalPageRequestQueue, postLimiter } from "@/lib/remote/http/rate_limiters";
 import { ApiConfig } from "@/config/api_config";
 import { CoalescingResolver } from "@/lib/async/coalescing_resolver";
@@ -19,7 +19,7 @@ const postFetcher = new CoalescingResolver<PostResponse>(
 
 let postPageFetchBarrier: Promise<void> = Promise.resolve();
 
-export function fetchPost(id: string): Promise<CategorizedPost> {
+export function fetchPost(id: string): Promise<Post> {
   return postFetcher.resolve(id)
   .then(parsePostResponse)
   .catch((error: unknown) => recoverFromFetchError(id, error));
@@ -35,15 +35,11 @@ export function deferPostPageFetchesUntil(barrier: Promise<void>): void {
   postPageFetchBarrier = barrier;
 }
 
-function recoverFromFetchError(id: string, error: unknown): Promise<CategorizedPost> {
+function recoverFromFetchError(id: string, error: unknown): Promise<Post> {
   if (error instanceof DeletedPostError) {
-    return fetchPostFromPostPage(id).then(toCategorizedPost);
+    return fetchPostFromPostPage(id);
   }
   throw error;
-}
-
-function toCategorizedPost(post: Post): CategorizedPost {
-  return { ...post, tagCategories: new Map() };
 }
 
 function fetchPostFromPostPage(id: string): Promise<Post> {

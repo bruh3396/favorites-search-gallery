@@ -11,6 +11,14 @@ const tagCategoryDecodings: Record<number, TagCategory> = {
   5: "metadata"
 };
 
+const tagCategoryEncodings: Record<string, EncodedTagCategory> = {
+  tag: 0,
+  artist: 1,
+  copyright: 3,
+  character: 4,
+  metadata: 5
+};
+
 export function tagResponseToTagCategory(response: TagResponse): EncodedTagCategory {
   if (response.status === "rate_limited") {
     throw new PostFetchError();
@@ -23,4 +31,8 @@ export function decodeTagCategory(encoded: EncodedTagCategory): TagCategory {
     return "general";
   }
   return tagCategoryDecodings[encoded] ?? "general";
+}
+
+export function encodeTagCategory(type: string): EncodedTagCategory {
+  return tagCategoryEncodings[type] ?? null;
 }

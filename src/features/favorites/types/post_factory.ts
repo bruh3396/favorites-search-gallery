@@ -18,28 +18,15 @@ export function clearPost(post: Post): void {
 function createEmptyPost(): Post {
   return {
     id: "",
+    width: 0,
     height: 0,
     score: 0,
-    fileURL: "",
-    parentId: "",
-    sampleURL: "",
-    sampleWidth: 0,
-    sampleHeight: 0,
-    previewURL: "",
     rating: "",
-    tags: "",
-    width: 0,
     change: 0,
-    md5: "",
-    creatorId: "",
-    hasChildren: false,
-    createdAt: "",
-    status: "",
-    source: "",
-    hasNotes: false,
-    hasComments: false,
-    previewWidth: 0,
-    previewHeight: 0
+    tags: "",
+    fileURL: "",
+    previewURL: "",
+    tagCategories: new Map()
   };
 }
 

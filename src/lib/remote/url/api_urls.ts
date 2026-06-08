@@ -1,8 +1,8 @@
 import { LocalOverrides } from "@/config/local_overrides";
 
 const PRODUCTION_SERVER_ORIGIN = "https://frozencobalt.stream";
-const PRIVATE_SERVER_ORIGIN = LocalOverrides.serverOrigin ?? PRODUCTION_SERVER_ORIGIN;
+const SERVER_ORIGIN = LocalOverrides.serverOrigin ?? PRODUCTION_SERVER_ORIGIN;
 
-export const PING_URL = `${PRIVATE_SERVER_ORIGIN}/ping`;
-export const TAG_API_URL = `${PRIVATE_SERVER_ORIGIN}/tag`;
-export const POST_API_URL = `${PRIVATE_SERVER_ORIGIN}/post`;
+export const PING_URL = `${SERVER_ORIGIN}/ping`;
+export const TAG_API_URL = `${SERVER_ORIGIN}/tag`;
+export const POST_API_URL = `${SERVER_ORIGIN}/post`;

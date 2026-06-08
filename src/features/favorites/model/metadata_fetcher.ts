@@ -1,6 +1,6 @@
 import * as ExtensionResolver from "@/lib/media/media_extension_resolver";
 import * as PostApi from "@/lib/remote/api/post_fetcher";
-import { CategorizedPost, Post } from "@/types/api";
+import { Post } from "@/types/api";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { TagCategoryMap } from "@/types/search";
@@ -52,7 +52,7 @@ function fetchDurations(favorites: FavoriteItem[]): void {
   });
 }
 
-function processPost(favorite: FavoriteItem, post: CategorizedPost): void {
+function processPost(favorite: FavoriteItem, post: Post): void {
   if (isUnpopulated(post)) {
     return;
   }

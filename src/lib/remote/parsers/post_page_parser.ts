@@ -15,31 +15,17 @@ export function parsePostFromPostPage(html: string): Post {
   const tags = getTags(dom);
   const rating = getRating(statistics);
   const dimensions = parseDimensions2D(statistics.size);
-  const hasNotes = statistics.notes !== undefined && statistics.notes !== "0";
   return {
     id: statistics.id,
+    width: dimensions.x,
     height: dimensions.y,
     score: Number(statistics.score),
-    fileURL: fileUrl,
-    parentId: "",
-    sampleURL: "",
-    sampleWidth: 0,
-    sampleHeight: 0,
-    previewURL: "",
     rating,
-    tags,
-    width: dimensions.x,
     change: 0,
-    md5: "",
-    creatorId: "",
-    hasChildren: false,
-    createdAt: statistics.posted,
-    status: "active",
-    source: statistics.source,
-    hasNotes,
-    hasComments: hasComments(dom),
-    previewWidth: 0,
-    previewHeight: 0
+    tags,
+    fileURL: fileUrl,
+    previewURL: "",
+    tagCategories: new Map()
   };
 }
 
@@ -88,8 +74,4 @@ function getRating(statistics: Record<string, string>): string {
     return "e";
   }
   return statistics.rating.charAt(0).toLowerCase();
-}
-
-function hasComments(dom: Document): boolean {
-  return Array.from(dom.querySelectorAll("#comments>div")).length > 0;
 }

@@ -4,52 +4,53 @@ export type EncodedTagCategory = number | null
 
 export type Post = {
   id: string
+  width: number
   height: number
   score: number
-  fileURL: string
-  parentId: string
-  sampleURL: string
-  sampleWidth: number
-  sampleHeight: number
-  previewURL: string
   rating: string
+  change: number
   tags: string
-  width: number
-  change: number
-  md5: string
-  creatorId: string
-  hasChildren: boolean
-  createdAt: string
-  status: string
-  source: string
-  hasNotes: boolean
-  hasComments: boolean
-  previewWidth: number
-  previewHeight: number
-}
-
-export type CompactPost = {
-  id: number
-  width: number
-  height: number
-  score: number
-  rating: string
-  change: number
-  createdAt: string
-  tags: Record<string, EncodedTagCategory>
   fileURL: string
   previewURL: string
-}
-
-export type CategorizedPost = Post & {
   tagCategories: TagCategoryMap
 }
 
 export type PostResponse =
-  | { status: "ok"; post: CompactPost }
-  | { status: "deleted", id: string }
+  | { status: "ok"; raw: string }
   | { status: "rate_limited", id: string }
   | { status: "error", id: string }
+
+export type TagInfo = {
+  tag: string
+  type: string
+  count: number
+}
+
+export type RawPost = {
+  preview_url: string
+  sample_url: string
+  file_url: string
+  directory: number
+  hash: string
+  width: number
+  height: number
+  id: number
+  image: string
+  change: number
+  owner: string
+  parent_id: number
+  rating: string
+  sample: boolean
+  sample_height: number
+  sample_width: number
+  score: number
+  tags: string
+  source: string
+  status: string
+  has_notes: boolean
+  comment_count: number
+  tag_info?: TagInfo[]
+}
 
 export type TagResponse =
   | { status: "ok"; category: EncodedTagCategory }

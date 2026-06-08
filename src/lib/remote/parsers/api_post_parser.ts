@@ -1,47 +1,72 @@
-import { CategorizedPost, PostResponse } from "@/types/api";
 import { DeletedPostError, PostFetchError } from "@/types/errors";
+import { EncodedTagCategory, Post, PostResponse, RawPost, TagInfo } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
-import { decodeTagCategory } from "@/lib/remote/parsers/api_tag_parser";
+import { decodeTagCategory, encodeTagCategory } from "@/lib/remote/parsers/api_tag_parser";
+import { decodeHtmlEntities } from "@/utils/string/format";
 
-export function parsePostResponse(response: PostResponse): CategorizedPost {
-  if (response.status === "deleted") {
-    throw new DeletedPostError();
-  }
-
+export function parsePostResponse(response: PostResponse): Post {
   if (response.status === "rate_limited" || response.status === "error") {
     throw new PostFetchError();
   }
-  const compact = response.post;
-  const tagNames = Object.keys(compact.tags).sort();
+  const post = parseRawPost(response.raw);
+
+  if (post === null) {
+    throw new DeletedPostError();
+  }
+  return toPost(post);
+}
+
+function parseRawPost(raw: string): RawPost | null {
+  let posts: RawPost[];
+
+  try {
+    posts = JSON.parse(raw) as RawPost[];
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(posts) || posts.length === 0) {
+    return null;
+  }
+  return posts[0];
+}
+
+function toTagCategories(tags: string, tagInfo: TagInfo[] | undefined): Record<string, EncodedTagCategory> {
+  const categories: Record<string, EncodedTagCategory> = {};
+
+  if (Array.isArray(tagInfo) && tagInfo.length > 0) {
+    for (const info of tagInfo) {
+      categories[decodeHtmlEntities(info.tag)] = encodeTagCategory(info.type);
+    }
+    return categories;
+  }
+
+  for (const tag of tags.split(" ")) {
+    if (tag !== "") {
+      categories[tag] = null;
+    }
+  }
+  return categories;
+}
+
+function toPost(post: RawPost): Post {
+  const tags = toTagCategories(post.tags, post.tag_info);
+  const tagNames = Object.keys(tags).sort();
   const tagCategories: TagCategoryMap = new Map();
 
   for (const tagName of tagNames) {
-    tagCategories.set(tagName, decodeTagCategory(compact.tags[tagName]));
+    tagCategories.set(tagName, decodeTagCategory(tags[tagName]));
   }
   return {
-    id: String(compact.id),
-    width: compact.width,
-    height: compact.height,
-    score: compact.score,
-    rating: compact.rating,
-    change: compact.change,
-    createdAt: compact.createdAt,
+    id: String(post.id),
+    width: post.width,
+    height: post.height,
+    score: post.score,
+    rating: post.rating,
+    change: post.change,
     tags: tagNames.join(" "),
-    tagCategories,
-    fileURL: compact.fileURL,
-    previewURL: compact.previewURL,
-    parentId: "",
-    sampleURL: "",
-    sampleWidth: 0,
-    sampleHeight: 0,
-    md5: "",
-    creatorId: "",
-    hasChildren: false,
-    status: "",
-    source: "",
-    hasNotes: false,
-    hasComments: false,
-    previewWidth: 0,
-    previewHeight: 0
+    fileURL: post.file_url,
+    previewURL: post.preview_url,
+    tagCategories
   };
 }
