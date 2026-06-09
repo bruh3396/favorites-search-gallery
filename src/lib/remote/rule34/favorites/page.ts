@@ -2,9 +2,9 @@ import { buildFavoritesPageUrl, buildProfilePageUrl } from "@/lib/remote/url/pag
 import { withExponentialBackoff, yieldControl } from "@/lib/async/timing";
 import { FAVORITES_PAGE_ID } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { extractFavoritesCount } from "@/lib/remote/parsers/profile_page_parser";
-import { extractFavoritesPageCount } from "@/lib/remote/parsers/favorites_page_parser";
-import { fetchHtml } from "@/lib/remote/http/http_client";
+import { extractFavoritesCount } from "@/lib/remote/parsers/profile_page";
+import { extractFavoritesPageCount } from "@/lib/remote/parsers/favorites_page";
+import { fetchHtml } from "@/lib/remote/http/client";
 import { generalPageRequestQueue } from "@/lib/remote/http/rate_limiters";
 
 export function fetchFavoritesPage(pageNumber: number): Promise<string> {

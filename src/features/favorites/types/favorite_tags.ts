@@ -1,6 +1,7 @@
 import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
 import { FavoritesDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
+import { union } from "@/utils/collection/set";
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();
@@ -54,7 +55,7 @@ export class FavoriteTags {
   }
 
   private mergeTags(): void {
-    this.tags = new Set(Array.from(this.baseTags.union(this.additionalTags)).sort());
+    this.tags = new Set(Array.from(union(this.baseTags, this.additionalTags)).sort());
   }
 
 }

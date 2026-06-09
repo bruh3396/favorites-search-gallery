@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { paginationSequence } from "@/features/favorites/model/paginator/context";
+import { PaginationTerm } from "@/types/ui";
+import { paginationSequence } from "@/lib/ui/pagination";
 
-describe("computePaginationSequence", () => {
+describe("paginationSequence", () => {
   describe("width 3", () => {
     test("single page collapses to just that page", () => {
       expect(paginationSequence(1, 1, 3)).toEqual([1]);
@@ -103,7 +104,7 @@ describe("computePaginationSequence", () => {
         for (let currentPage = 1; currentPage <= finalPage; currentPage += 1) {
           const sequence = paginationSequence(currentPage, finalPage, width);
 
-          sequence.forEach((term, index) => {
+          sequence.forEach((term: PaginationTerm, index: number) => {
             if (term === "ellipsis") {
               const before = sequence[index - 1];
               const after = sequence[index + 1];
@@ -120,5 +121,5 @@ describe("computePaginationSequence", () => {
 });
 
 function pageNumbers(currentPage: number, finalPage: number, width: number): number[] {
-  return paginationSequence(currentPage, finalPage, width).filter((term): term is number => term !== "ellipsis");
+  return paginationSequence(currentPage, finalPage, width).filter((term: PaginationTerm): term is number => term !== "ellipsis");
 }

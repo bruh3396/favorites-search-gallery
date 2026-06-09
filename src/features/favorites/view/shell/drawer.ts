@@ -22,6 +22,7 @@ export async function setup(): Promise<void> {
   drawer.appendChild(buildPanels());
   DrawerTrack.appendChild(drawer);
   selectTab(activeTab);
+  wireVersionLabel();
 
   if (Preferences.favoritesDrawerOpen.value) {
     await yieldControl();
@@ -41,6 +42,31 @@ export function toggle(): void {
     removeDataset(button, "active");
   }
   Preferences.favoritesDrawerOpen.set(open);
+}
+
+function toggleTo(tab: FavoritesDrawerTab): void {
+  const open = Body.dataset.drawerOpen !== undefined;
+
+  if (open && activeTab === tab) {
+    toggle();
+    return;
+  }
+  selectTab(tab);
+
+  if (!open) {
+    toggle();
+  }
+}
+
+function wireVersionLabel(): void {
+  const version = document.getElementById(FavoritesId.brandVersion);
+
+  if (version === null) {
+    return;
+  }
+  version.onclick = (): void => {
+    toggleTo("change");
+  };
 }
 
 function tabId(tab: FavoritesDrawerTab): string {
@@ -132,7 +158,7 @@ function buildPanels(): HTMLElement {
 
 function renderPanelContent(tab: FavoritesDrawerTab, panel: HTMLElement): void {
   switch (tab) {
-    case "new":
+    case "change":
       FavoritesChangelogPanel.buildChangelogPanel(panel);
       break;
     case "help":

@@ -1,5 +1,5 @@
 import { CheckboxElement, SelectElement } from "@/types/element";
-import { FavoriteIndicatorStyle, GalleryFavoriteStyle, Layout, PerformanceProfile } from "@/types/ui";
+import { FavoriteIndicatorStyle, GalleryFavoriteIndicatorStyle, Layout, PerformanceProfile } from "@/types/ui";
 import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Events } from "@/app/channels/events";
 import { GeneralConfig } from "@/config/general_config";
@@ -93,7 +93,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     defaultValue: false
   }
 ];
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<FavoriteIndicatorStyle>> | Partial<SelectElement<GalleryFavoriteStyle>>)[] = [
+const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<FavoriteIndicatorStyle>> | Partial<SelectElement<GalleryFavoriteIndicatorStyle>>)[] = [
   {
     id: "layout-select",
     parentId: "post-list-layout",
@@ -144,7 +144,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     parentId: "post-list-gallery-favorite-style",
     position: "beforeend",
     preference: Preferences.postListGalleryFavoriteStyle,
-    options: new Map<GalleryFavoriteStyle, string>([
+    options: new Map<GalleryFavoriteIndicatorStyle, string>([
       ["border", "Border"],
       ["glow", "Glow"],
       ["none", "None"]

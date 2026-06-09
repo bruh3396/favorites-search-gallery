@@ -41,7 +41,7 @@ export const FavoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; icon
   { tab: "saved", label: "Saved", icon: "bookmark" },
   { tab: "tags", label: "Tags", icon: "tag" },
   { tab: "download", label: "Download", icon: "download" },
-  { tab: "new", label: "New", icon: "sparkles" },
+  { tab: "change", label: "Changelog", icon: "changelog" },
   { tab: "help", label: "Help", icon: "help" }
 ];
 

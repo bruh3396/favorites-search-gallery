@@ -1,9 +1,9 @@
 import * as GalleryCursor from "@/features/gallery/model/cursor";
 import * as GalleryFavoriter from "@/features/gallery/model/favoriter";
 import * as GalleryState from "@/features/gallery/model/gallery_state";
-import * as Navigator from "@/lib/remote/rule34/navigator";
+import * as Navigator from "@/lib/remote/rule34/posts/navigaton";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { downloadFromThumb } from "@/lib/remote/rule34/media_downloader";
+import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
 import { isVideo } from "@/lib/media/media_type_predicates";
 
 export * from "@/features/gallery/model/gallery_state";

@@ -5,6 +5,7 @@ import { removeNonNumericCharacters } from "@/utils/string/format";
 import { sum } from "@/utils/number";
 
 export const ITEM_CLASS_NAME = "post";
+export const TILE_ITEM_CLASS_NAME = "tile-item";
 export const RAW_THUMB_CLASS_NAME = "thumb";
 export const ITEM_SELECTOR = `.${ITEM_CLASS_NAME}, .${RAW_THUMB_CLASS_NAME}`;
 export const IMAGE_SELECTOR = `.${ITEM_CLASS_NAME} img`;

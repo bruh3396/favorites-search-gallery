@@ -1,0 +1,13 @@
+.post[data-new] {
+  --glow-color: var(--theme-accent);
+
+  border-radius: var(--size-radius);
+  box-shadow:
+    0 0 0 2px var(--glow-color),
+    0 0 8px 2px var(--glow-color);
+}
+
+.post[data-new] > a,
+.post[data-new] > div {
+  border-radius: inherit;
+}

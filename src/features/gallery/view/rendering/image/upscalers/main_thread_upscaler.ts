@@ -1,4 +1,4 @@
-import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "@/lib/remote/rule34/bitmap_fetcher";
+import { fetchImageBitmapFromThumb, fetchSampleImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";

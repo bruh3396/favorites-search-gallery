@@ -559,6 +559,7 @@ export default defineConfig([
   {
     files: [
       "src/**/sorted_array.ts",
+      "src/**/array.ts",
       "src/features/favorites/types/favorite_item.ts",
       "src/features/favorites/control/menu/rating_filter.ts",
       "src/**/wildcard_search_term.ts"

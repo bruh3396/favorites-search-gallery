@@ -1,12 +1,12 @@
-import { FavoriteIndicatorStyle, FavoritesDrawerTab, GalleryFavoriteStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/ui";
+import { FavoriteIndicatorStyle, FavoritesDrawerTab, GalleryFavoriteIndicatorStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortingMethod } from "@/types/search";
 import { Preference } from "@/lib/storage/preference";
-import { getCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
   appPerformanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
-  appTheme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
+  // appTheme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
+  appTheme: new Preference<Theme>("appTheme", "zeal"),
 
   favoritesAddButtonsVisible: new Preference("favoritesAddButtonsVisible", false),
   favoritesAllowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
@@ -29,7 +29,7 @@ export const Preferences = {
   favoritesSortKey: new Preference<SortingMethod>("favoritesSortKey", "default"),
   favoritesTooltipEnabled: new Preference("tooltipEnabled", false),
 
-  galleryAutoplayActive: new Preference("galleryAutoplayActive", true),
+  galleryAutoplayActive: new Preference("galleryAutoplayActive", false),
   galleryAutoplayForward: new Preference("galleryAutoplayForward", true),
   galleryAutoplayImageDuration: new Preference("galleryAutoplayImageDuration", 3_000),
   galleryAutoplayMinimumVideoDuration: new Preference("galleryAutoplayMinimumVideoDuration", 5_000),
@@ -56,7 +56,7 @@ export const Preferences = {
   postListEnabled: new Preference("postListEnabled", true),
   postListFavoriteIndicator: new Preference("postListFavoriteIndicator", false),
   postListFavoriteIndicatorStyle: new Preference<FavoriteIndicatorStyle>("postListFavoriteIndicatorStyle", "border"),
-  postListGalleryFavoriteStyle: new Preference<GalleryFavoriteStyle>("postListGalleryFavoriteStyle", "border"),
+  postListGalleryFavoriteStyle: new Preference<GalleryFavoriteIndicatorStyle>("postListGalleryFavoriteStyle", "border"),
   postListInfiniteScroll: new Preference("postListInfiniteScroll", false),
   postListLayout: new Preference<Layout>("postListLayout", "column"),
   postListRowHeight: new Preference("postListRowHeight", 7),

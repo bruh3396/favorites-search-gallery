@@ -30,6 +30,7 @@ const USERSCRIPT_HEADER = `// ==UserScript==
 // @compatible   Opera
 // @match        https://rule34.xxx/index.php?page=favorites&s=view&id=*
 // @match        https://rule34.xxx/index.php?page=post&s=list*
+// @grant        none
 
 // ==/UserScript==`;
 const BUILD_OPTIONS: BuildOptions = {

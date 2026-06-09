@@ -13,3 +13,9 @@ export function reloadWindow(): void {
 export function setSiteTitle(title: string): void {
   document.title = title;
 }
+
+export function nextAnimationFrame(): Promise<number> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(resolve);
+  });
+}

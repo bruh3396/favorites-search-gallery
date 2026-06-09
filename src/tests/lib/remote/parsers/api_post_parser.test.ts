@@ -2,7 +2,7 @@
 import { DeletedPostError, PostFetchError } from "@/types/errors";
 import { describe, expect, test } from "vitest";
 import { PostResponse } from "@/types/api";
-import { parsePostResponse } from "@/lib/remote/parsers/api_post_parser";
+import { parsePostResponse } from "@/lib/remote/parsers/post";
 
 function ok(raw: string): PostResponse {
   return { status: "ok", raw };

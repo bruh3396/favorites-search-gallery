@@ -1,5 +1,5 @@
-import * as FavoritesActions from "@/lib/remote/rule34/favorites_actions";
-import * as Navigator from "@/lib/remote/rule34/navigator";
+import * as FavoritesActions from "@/lib/remote/rule34/favorites/actions";
+import * as Navigator from "@/lib/remote/rule34/posts/navigaton";
 import { ADD_FAVORITE_IMAGE_HTML, REMOVE_FAVORITE_IMAGE_HTML } from "@/assets/images";
 import { buildElementTemplate, favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { ClickCode } from "@/types/input";
@@ -8,7 +8,7 @@ import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Post } from "@/types/api";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
 import { doNothing } from "@/utils/function";
-import { downloadFromThumb } from "@/lib/remote/rule34/media_downloader";
+import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
 import { resolveMediaType } from "@/lib/media/media_type_resolver";
 
 let onFavoriteAdded: (id: string) => void = doNothing;

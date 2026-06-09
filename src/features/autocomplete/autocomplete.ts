@@ -3,7 +3,7 @@ import { AUTOCOMPLETE_DISABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { addAwesompleteToGlobalScope } from "@/features/autocomplete/autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "@/lib/search/tags/custom_tags";
-import { fetchHtml } from "@/lib/remote/http/http_client";
+import { fetchHtml } from "@/lib/remote/http/client";
 import { getSavedSearchesSuggestions } from "@/features/autocomplete/autocomplete_saved_search";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { isEmptyString } from "@/utils/string/query";
@@ -118,6 +118,7 @@ function addEventListenersToInput(input: HTMLTextAreaElement | HTMLInputElement,
         }
         awesomplete.next();
         awesomplete.select();
+
         keyEvent.preventDefault();
         break;
 

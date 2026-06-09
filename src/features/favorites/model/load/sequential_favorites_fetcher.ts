@@ -1,10 +1,10 @@
-import * as FavoritesApi from "@/lib/remote/rule34/favorites_fetcher";
 import { sleep, withExponentialBackoff } from "@/lib/async/timing";
 import { FAVORITES_PER_PAGE } from "@/lib/rule34_constants";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_request";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_parser";
+import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page";
+import { fetchFavoritesPage } from "@/lib/remote/rule34/favorites/page";
 import { getIdFromThumb } from "@/lib/thumb/thumbs";
 
 export async function fetchNewFavorites(storedIds: Set<string>, page0Elements?: HTMLElement[]): Promise<HTMLElement[]> {
@@ -38,5 +38,5 @@ async function fetchNewFavoritesFromPage(storedIds: Set<string>, pageNumber: num
 }
 
 function fetchFavoritesPageHtml(pageNumber: number): Promise<string> {
-  return FavoritesApi.fetchFavoritesPage(new FavoritesPageRequest(pageNumber).realPageNumber);
+  return fetchFavoritesPage(new FavoritesPageRequest(pageNumber).realPageNumber);
 }

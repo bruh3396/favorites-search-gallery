@@ -1,5 +1,4 @@
-import * as FavoritesActions from "@/lib/remote/rule34/favorites_actions";
-import { AddFavoriteStatus } from "@/types/favorite";
+import * as FavoritesActions from "@/lib/remote/rule34/favorites/actions";
 import { ClickCode } from "@/types/input";
 import { Events } from "@/app/channels/events";
 
@@ -21,7 +20,7 @@ function setupButton(thumb: HTMLElement, button: HTMLElement): void {
       return;
     }
     FavoritesActions.addFavorite(thumb.id).then(status => {
-      if (status === AddFavoriteStatus.Success) {
+      if (status === "success") {
         Events.favorites.favoriteAdded.emit(thumb.id);
       }
     });

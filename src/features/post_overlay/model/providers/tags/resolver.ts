@@ -1,12 +1,12 @@
-import * as PostApi from "@/lib/remote/api/post_fetcher";
 import * as PostOverlayCategoryCache from "@/features/post_overlay/model/providers/tags/cache";
 import * as PostOverlayCategoryStore from "@/features/post_overlay/model/providers/tags/store";
-import * as TagApi from "@/lib/remote/api/tag_fetcher";
 import { TagCategory, TagCategoryMap } from "@/types/search";
 import { PostOverlayConfig } from "@/config/post_overlay_config";
-import { decodeTagCategory } from "@/lib/remote/parsers/api_tag_parser";
+import { decodeTagCategory } from "@/lib/remote/parsers/tag";
+import { fetchPostPageHtml } from "@/lib/remote/rule34/posts/page";
+import { fetchTagCategory } from "@/lib/remote/api/tag";
 import { getTagSetFromItem } from "@/lib/thumb/thumb_tags";
-import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page_parser";
+import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page";
 import { withTimeout } from "@/lib/async/timing";
 
 export { destroy as destroyStore } from "@/features/post_overlay/model/providers/tags/store";
@@ -46,7 +46,7 @@ async function resolve(tagName: string): Promise<TagCategory> {
   if (cached !== undefined) {
     return cached;
   }
-  const category = decodeTagCategory(await TagApi.fetchTagCategory(tagName));
+  const category = decodeTagCategory(await fetchTagCategory(tagName));
 
   persist(tagName, category);
   return category;
@@ -56,7 +56,7 @@ async function resolveFromPostPage(postId: string, tagsToResolve: string[]): Pro
   const categoryMap: TagCategoryMap = new Map();
 
   try {
-    const pageCategories = parseTagCategoriesFromPostPage(await PostApi.fetchPostPageHtml(postId));
+    const pageCategories = parseTagCategoriesFromPostPage(await fetchPostPageHtml(postId));
 
     for (const tagName of tagsToResolve) {
       const category = pageCategories.get(tagName) ?? "general";

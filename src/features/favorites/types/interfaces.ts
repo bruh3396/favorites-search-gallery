@@ -1,5 +1,6 @@
 import { Favorite } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
+import { PaginationSequence } from "@/types/ui";
 import { TagCategoryMap } from "@/types/search";
 
 export interface FavoritesViewCallbacks {
@@ -25,9 +26,6 @@ export interface FavoritesFetchProgress {
   resultsCount: number
   allFavoritesCount: number
 }
-
-export type PaginationTerm = number | "ellipsis";
-export type PaginationSequence = PaginationTerm[];
 
 export interface PaginationContext {
   totalCount: number

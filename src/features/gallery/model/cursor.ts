@@ -23,7 +23,7 @@ export function move(direction: NavigationKey): Boundary {
   const nextIndex = currentIndex + navigationDelta(direction);
 
   setCurrentIndex(nextIndex);
-  return nextIndex < 0 ? Boundary.Start : nextIndex >= thumbs.length ? Boundary.End : Boundary.None;
+  return nextIndex < 0 ? "start" : nextIndex >= thumbs.length ? "end" : "none";
 }
 
 export function currentThumb(): HTMLElement {

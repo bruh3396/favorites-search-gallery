@@ -6,7 +6,7 @@
   gap: 2px;
   padding: 2px 6px;
   border-radius: 22px;
-  background: var(--theme-surface);
+  background: var(--theme-surface-sunken);
   border: 1px solid var(--theme-border);
 }
 

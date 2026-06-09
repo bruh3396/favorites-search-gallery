@@ -1,13 +1,15 @@
 import { IconName, icon } from "@/lib/ui/icon";
-import { PaginationContext, PaginationSequence } from "@/features/favorites/types/interfaces";
 import { label, span } from "@/utils/dom/element";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { PaginationContext } from "@/features/favorites/types/interfaces";
+import { PaginationSequence } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
 import { doNothing } from "@/utils/function";
 import { insertStyle } from "@/utils/dom/injector";
 import { isOnlyDigits } from "@/utils/string/query";
+import { paginationUpdateStrategy } from "@/lib/ui/pagination";
 import { toggleDataset } from "@/utils/dom/attribute";
 
 const container = span("favorites-pagination");
@@ -119,20 +121,30 @@ function createEllipsis(popover: HTMLElement): void {
 
 function createNumberTraversalButton(currentPageNumber: number, pageNumber: number): void {
   const button = document.createElement("button");
-  const selected = currentPageNumber === pageNumber;
 
-  button.id = `favorites-page-${pageNumber}`;
   button.className = "favorites-pagination-btn";
-  button.classList.toggle("selected", selected);
+  container.appendChild(button);
+  assignNumberTraversalButton(button, currentPageNumber, pageNumber);
+}
+
+function assignNumberTraversalButton(button: HTMLButtonElement, currentPageNumber: number, pageNumber: number): void {
+  button.id = `favorites-page-${pageNumber}`;
+  button.classList.toggle("selected", currentPageNumber === pageNumber);
+  button.textContent = String(pageNumber);
   button.onclick = (): void => {
     onPageSelected(pageNumber);
   };
-  container.appendChild(button);
-  button.textContent = String(pageNumber);
 }
 
 function rebuildNumberTraversalButtons(context: PaginationContext): void {
-  if (sequencesEqual(renderedSequence, context.sequence)) {
+  const strategy = paginationUpdateStrategy(renderedSequence, context.sequence);
+
+  if (strategy === "skip") {
+    return;
+  }
+
+  if (strategy === "patch") {
+    patchNumberTraversalButtons(context);
     return;
   }
 
@@ -142,8 +154,30 @@ function rebuildNumberTraversalButtons(context: PaginationContext): void {
   createNumberTraversalButtons(context);
 }
 
-function sequencesEqual(a: PaginationSequence, b: PaginationSequence): boolean {
-  return a.length === b.length && a.every((term, index) => term === b[index]);
+function patchNumberTraversalButtons(context: PaginationContext): void {
+  const buttons = container.querySelectorAll<HTMLButtonElement>(".favorites-pagination-btn");
+  let buttonIndex = 0;
+
+  for (const term of context.sequence) {
+    if (term !== "ellipsis") {
+      const button = buttons[buttonIndex];
+
+      if (button !== undefined) {
+        assignNumberTraversalButton(button, context.currentPage, term);
+      }
+      buttonIndex += 1;
+    }
+  }
+  patchGotoPagePopover(context);
+  renderedSequence = context.sequence;
+}
+
+function patchGotoPagePopover(context: PaginationContext): void {
+  const input = container.querySelector<HTMLInputElement>("#goto-page-input");
+
+  if (input !== null) {
+    input.max = String(context.finalPage);
+  }
 }
 
 function createArrowTraversalButtons(context: PaginationContext): void {

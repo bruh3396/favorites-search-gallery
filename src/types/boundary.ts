@@ -1,5 +1,1 @@
-export enum Boundary {
-  None,
-  Start,
-  End
-}
+export type Boundary = "none" | "start" | "end"

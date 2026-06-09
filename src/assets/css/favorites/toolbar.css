@@ -3,7 +3,7 @@
 
   --toolbar-icon-slot: 40px;
   --toolbar-drawer-toggle: var(--toolbar-icon-slot);
-  --toolbar-search-field: minmax(400px, 1fr);
+  --toolbar-search-field: minmax(300px, 1fr);
   --toolbar-buttons: max-content;
   --toolbar-pagination: 380px;
   --toolbar-status: 300px;
@@ -22,7 +22,8 @@
   z-index: 30;
   height: var(--favorites-toolbar-height);
   padding: 4px 16px;
-  background: var(--theme-surface);
+  /* background: var(--theme-surface); */
+  background: var(--theme-surface-gradient);
   border-top: 1px solid var(--theme-border);
   border-bottom: 1px solid var(--theme-border);
   color: var(--theme-text);
@@ -32,12 +33,7 @@
 #favorites-toolbar-grid {
   display: grid;
   grid-template-columns:
-    var(--toolbar-drawer-toggle)
-    var(--toolbar-search-field)
-    var(--toolbar-buttons)
-    var(--toolbar-pagination)
-    var(--toolbar-status)
-    var(--toolbar-brand);
+    var(--toolbar-drawer-toggle) var(--toolbar-search-field) var(--toolbar-buttons) var(--toolbar-pagination) var(--toolbar-status) var(--toolbar-brand);
   align-items: center;
   gap: 6px;
 }
@@ -52,10 +48,24 @@
 }
 
 #favorites-brand-version {
-  font-size: 11px;
+  font-size: 15px;
+  font-style: oblique;
   font-weight: 500;
   color: var(--theme-text-muted);
   font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: color 0.12s ease, background-color 0.12s ease;
+}
+
+#favorites-brand-version:hover {
+  color: var(--theme-text);
+  background-color: var(--theme-surface-hover);
+}
+
+#favorites-brand-version:active {
+  transform: translateY(1px);
 }
 
 #favorites-button-slot {
@@ -63,6 +73,7 @@
   align-items: center;
   gap: 4px;
   justify-content: flex-end;
+  margin-left: 15px;
 }
 
 #favorites-button-slot button {
@@ -70,13 +81,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 8px;
+  padding: 4px;
   min-width: 70px;
   border: 1px solid var(--theme-border);
   border-radius: var(--size-radius);
   color: var(--theme-text-muted);
   background: transparent;
-  font-size: 1em;
+  font-size: .85em;
   font-weight: 600;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -92,7 +103,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-left: 4px;
+  padding-left: 6px;
 }
 
 

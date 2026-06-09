@@ -14,13 +14,13 @@ import * as FavoritesSearchBox from "@/features/favorites/control/search_box/sea
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesTagEditor from "@/features/favorites/features/tag_editor/tag_editor";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import * as PostApi from "@/lib/remote/api/post_fetcher";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { POST_LIST_PAGE_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
+import { deferPostPageFetchesUntil } from "@/lib/remote/rule34/posts/page";
 import { setFavoriteTagsLookup } from "@/lib/thumb/thumb_tags";
 
 export function setupFavorites(): void {
@@ -38,7 +38,7 @@ export function setupFavorites(): void {
   setupSubFeatures();
   subscribeToEvents();
   registerBridgeHandlers();
-  PostApi.deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
+  deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
   FavoritesView.showSkeleton();
   FavoritesLoadFlow.loadAllFavorites();
 }

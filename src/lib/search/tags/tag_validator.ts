@@ -1,7 +1,7 @@
-import * as TagApi from "@/lib/remote/api/tag_fetcher";
 import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
+import { fetchTagCategory } from "@/lib/remote/api/tag";
 
 export function tagsAreValid(favorite: Favorite, post: Post): boolean {
   const validTags = correctTags(post);
@@ -17,7 +17,7 @@ export function tagsAreValid(favorite: Favorite, post: Post): boolean {
 
 export async function isOfficialTag(tagName: string): Promise<boolean> {
   try {
-    const category = await TagApi.fetchTagCategory(tagName);
+    const category = await fetchTagCategory(tagName);
     return category !== null;
   } catch (error) {
     console.error(error);

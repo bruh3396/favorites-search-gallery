@@ -1,17 +1,16 @@
 import * as GalleryDisplayFlow from "@/features/gallery/flows/display_flow";
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
-import { Boundary } from "@/types/boundary";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { NavigationKey } from "@/types/input";
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.move(direction)) {
-    case Boundary.Start: handleStartBoundary();
+    case "start": handleStartBoundary();
       break;
-    case Boundary.End: handleEndBoundary();
+    case "end": handleEndBoundary();
       break;
-    case Boundary.None:
+    case "none":
       GalleryDisplayFlow.displaySelected();
       break;
     default:

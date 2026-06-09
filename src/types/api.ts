@@ -55,3 +55,5 @@ export type RawPost = {
 export type TagResponse =
   | { status: "ok"; category: EncodedTagCategory }
   | { status: "rate_limited"; }
+
+export type Route = "ping" | "post" | "tag"

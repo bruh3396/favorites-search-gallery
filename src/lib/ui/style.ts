@@ -1,5 +1,6 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
+import INDICATOR_CSS from "@/assets/css/base/indicator.css";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
 import THUMB_CSS from "@/assets/css/base/thumb.css";
@@ -25,6 +26,7 @@ export function setupStyles(theme: Theme): void {
     SKELETON_CSS +
     THUMB_CSS +
     TILE_CSS +
+    INDICATOR_CSS +
     THEMES_CSS +
     THUMB_LOADING_CSS +
     fadeInCss);

@@ -1,6 +1,5 @@
 import * as PostListNavigatorLoader from "@/features/post_list_navigator/model/page_loader";
 import * as PostListNavigatorUrlContext from "@/features/post_list_navigator/model/url_context";
-import { Boundary } from "@/types/boundary";
 import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigationResult } from "@/features/post_list_navigator/types/navigation";
@@ -27,17 +26,17 @@ export function navigate(direction: NavigationKey): PostListNavigationResult {
   const nextPageNumber = currentPageNumber + navigationDelta(direction);
 
   if (nextPageNumber < 0) {
-    return { postList: null, boundary: Boundary.Start };
+    return { postList: null, boundary: "start" };
   }
   const postList = PostListNavigatorLoader.get(nextPageNumber);
 
   if (postList === undefined || postList.isEmpty) {
     PostListNavigatorLoader.reload(baseUrl, nextPageNumber);
-    return { postList: null, boundary: Boundary.End };
+    return { postList: null, boundary: "end" };
   }
   currentPageNumber = nextPageNumber;
   PostListNavigatorLoader.preloadAround(baseUrl, currentPageNumber);
-  return { postList, boundary: Boundary.None };
+  return { postList, boundary: "none" };
 }
 
 export async function getMoreResults(): Promise<HTMLElement[]> {

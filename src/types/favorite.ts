@@ -37,15 +37,6 @@ export interface Favorite extends Searchable {
   metrics: FavoriteMetricMap
 }
 
-export enum AddFavoriteStatus {
-  Error = 0,
-  AlreadyAdded = 1,
-  LoggedOut = 2,
-  Success = 3
-}
+export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success"
 
-export enum RemoveFavoriteStatus {
-  Error = 0,
-  Forbidden = 1,
-  Success = 2
-}
+export type RemoveFavoriteStatus = "error" | "forbidden" | "success"

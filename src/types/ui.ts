@@ -2,11 +2,6 @@ export interface DrawerPanelClasses {
   section: string;
   sectionTitle: string;
 }
-export type Layout = "row" | "square" | "grid" | "column" | "native"
-export type ImageCursor = "zoom-in" | "zoom-out" | "auto"
-export type SkeletonAnimation = "pulse" | "shine"
-export type FavoriteIndicatorStyle = "border" | "dim" | "hidden" | "none";
-export type GalleryFavoriteStyle = "border" | "glow" | "none";
 
 export type GalleryMenuAction = "exit" |
   "fullscreen" | "openPost" | "openOriginal" |
@@ -38,14 +33,19 @@ export interface AwesompleteConstructor {
   FILTER_STARTSWITH(value: string, input: string): boolean
 }
 
-export enum GalleryState {
-  Idle,
-  Preview,
-  Open
-}
-
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
-export type Theme = "native-dark" | "native-light" | "midnight" | "ember" | "venom" | "zeal";
+export type Theme = "native-dark" | "native-light" | "midnight" | "ember" | "venom" | "zeal" | "frozen-cobalt";
+export type Layout = "row" | "square" | "grid" | "column" | "native"
 
-export type FavoritesDrawerTab = "settings" | "saved" | "tags" | "download" | "new" | "help";
+export type SkeletonAnimation = "pulse" | "shine"
+export type FavoritesDrawerTab = "settings" | "saved" | "tags" | "download" | "change" | "help";
+export type PaginationTerm = number | "ellipsis";
+export type PaginationSequence = PaginationTerm[];
+
+export type GalleryState = "idle" | "preview" | "open"
+export type ImageCursor = "zoom-in" | "zoom-out" | "auto"
+
+export type FavoriteIndicatorStyle = "border" | "dim" | "hidden" | "none";
+export type GalleryFavoriteIndicatorStyle = "border" | "glow" | "none";
+
 export type PostOverlayMode = "tag";

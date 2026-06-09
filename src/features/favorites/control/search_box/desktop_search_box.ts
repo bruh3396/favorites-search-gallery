@@ -3,7 +3,7 @@ import { AbstractFavoritesSearchBox } from "@/features/favorites/control/search_
 import { EnhancedMouseEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { openPostList } from "@/lib/remote/rule34/navigator";
+import { openPostList } from "@/lib/remote/rule34/posts/navigaton";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
   protected override createSearchBox(): HTMLTextAreaElement | HTMLInputElement {

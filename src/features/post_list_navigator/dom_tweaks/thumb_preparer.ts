@@ -1,4 +1,4 @@
-import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
+import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_ITEM_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
 import { ADD_FAVORITE_IMAGE_HTML } from "@/assets/images";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
@@ -17,7 +17,7 @@ function prepareThumb(thumb: HTMLElement): void {
   addCanvas(thumb);
   thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
   thumb.classList.remove(RAW_THUMB_CLASS_NAME);
-  thumb.classList.add(ITEM_CLASS_NAME);
+  thumb.classList.add(ITEM_CLASS_NAME, TILE_ITEM_CLASS_NAME);
   prepareMobileThumb(thumb);
 }
 

@@ -6,16 +6,16 @@ let currentState = initialState();
 let recentlyClosed = false;
 
 export const getCurrentState = (): GalleryState => currentState;
-export const isInGallery = (): boolean => currentState === GalleryState.Open;
-export const isShowingPreviews = (): boolean => currentState === GalleryState.Preview;
+export const isInGallery = (): boolean => currentState === "open";
+export const isShowingPreviews = (): boolean => currentState === "preview";
 export const hasRecentlyExitedGallery = (): boolean => recentlyClosed;
 
 export function open(): void {
-  currentState = GalleryState.Open;
+  currentState = "open";
 }
 
 export function close(): void {
-  currentState = GalleryState.Idle;
+  currentState = "idle";
   recentlyClosed = true;
   setTimeout(() => {
     recentlyClosed = false;
@@ -23,9 +23,9 @@ export function close(): void {
 }
 
 export function togglePreviews(): void {
-  currentState = currentState === GalleryState.Preview ? GalleryState.Idle : GalleryState.Preview;
+  currentState = currentState === "preview" ? "idle" : "preview";
 }
 
 function initialState(): GalleryState {
-  return Preferences.galleryPreviewEnabled.value ? GalleryState.Preview : GalleryState.Idle;
+  return Preferences.galleryPreviewEnabled.value ? "preview" : "idle";
 }

@@ -99,10 +99,10 @@ export function updateBackgroundOpacity(event: WheelEvent): void {
 
 export function showAddedFavoriteStatus(status: AddFavoriteStatus): void {
   const icon = {
-    [AddFavoriteStatus.AlreadyAdded]: Icons.HEART_CHECK,
-    [AddFavoriteStatus.Success]: Icons.HEART_PLUS,
-    [AddFavoriteStatus.Error]: Icons.ERROR,
-    [AddFavoriteStatus.LoggedOut]: Icons.ERROR
+    alreadyAdded: Icons.HEART_CHECK,
+    success: Icons.HEART_PLUS,
+    error: Icons.ERROR,
+    loggedOut: Icons.ERROR
   }[status] ?? Icons.ERROR;
 
   showFullscreenIcon(icon);
@@ -110,11 +110,11 @@ export function showAddedFavoriteStatus(status: AddFavoriteStatus): void {
 
 export function showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
   switch (status) {
-    case RemoveFavoriteStatus.Success:
+    case "success":
       showFullscreenIcon(Icons.HEART_MINUS);
       break;
 
-    case RemoveFavoriteStatus.Forbidden:
+    case "forbidden":
       showFullscreenIcon(Icons.WARNING, 1_000);
       setTimeout(() => {
         alert("The \"Remove Buttons\" option must be checked to use this hotkey");

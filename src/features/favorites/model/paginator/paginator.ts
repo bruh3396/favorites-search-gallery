@@ -5,7 +5,7 @@ import { PaginationContext } from "@/features/favorites/types/interfaces";
 import { Preferences } from "@/app/context/preferences";
 import { clamp } from "@/utils/number";
 import { navigationDelta } from "@/utils/navigation";
-import { paginationContext } from "@/features/favorites/model/paginator/context";
+import { paginationSequence } from "@/lib/ui/pagination";
 
 let current = 1;
 let favorites: Favorite[] = [];
@@ -13,7 +13,16 @@ let favorites: Favorite[] = [];
 export const onFinal = (): boolean => current === pageCount();
 export const currentFavorites = (): Favorite[] => favoritesOnPage(current);
 export const adjacentFavorites = (): Favorite[] => [...favoritesOnPage(current - 1), ...favoritesOnPage(current + 1)];
-export const context = (): PaginationContext => paginationContext(current, pageCount(), favorites.length, resultsPerPage(), FavoritesConfig.nearbyPageCount);
+export function context(): PaginationContext {
+  return {
+    currentPage: current,
+    finalPage: pageCount(),
+    totalCount: favorites.length,
+    sliceStart: resultsPerPage() * (current - 1),
+    sliceEnd: resultsPerPage() * current,
+    sequence: paginationSequence(current, pageCount(), FavoritesConfig.nearbyPageCount)
+  };
+}
 export const selectAdjacent = (direction: NavigationKey): boolean => select(wrappedPage(current, navigationDelta(direction), pageCount()));
 
 export function select(pageNumber: number): boolean {

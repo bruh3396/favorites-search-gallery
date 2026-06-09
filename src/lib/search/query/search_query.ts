@@ -5,13 +5,13 @@ import { Searchable } from "@/types/search";
 import { isEmptyString } from "@/utils/string/query";
 
 export class SearchQuery<T extends Searchable> {
-  public readonly rawQuery: string;
+  public readonly raw: string;
   public readonly isEmpty: boolean;
   public orGroups: AbstractSearchTerm[][] = [];
   public andTerms: AbstractSearchTerm[] = [];
 
   constructor(searchQuery: string) {
-    this.rawQuery = searchQuery;
+    this.raw = searchQuery;
     this.isEmpty = isEmptyString(searchQuery);
 
     if (this.isEmpty) {
@@ -53,7 +53,7 @@ export class SearchQuery<T extends Searchable> {
   }
 
   public equals(other: SearchQuery<T>): boolean {
-    return this.rawQuery === other.rawQuery;
+    return this.raw === other.raw;
   }
 
   private flattenSingletonOrGroups(): void {

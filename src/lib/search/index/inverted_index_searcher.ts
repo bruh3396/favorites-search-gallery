@@ -8,15 +8,15 @@ export class InvertedIndexSearcher<T extends Searchable> {
   constructor(private readonly index: InvertedIndex<T>) { }
 
   public search(query: SearchQuery<T>, docs: T[]): T[] {
-    const expandedQuery = new ExpandedSearchQuery<T>(query.rawQuery, this.index.indexedTerms());
+    const expandedQuery = new ExpandedSearchQuery<T>(query.raw, this.index.indexedTerms());
     return expandedQuery.isEmpty ? docs : expandedQuery.isUnmatchable ? [] : this.findMatches(expandedQuery, docs);
   }
 
   private findMatches(expandedQuery: ExpandedSearchQuery<T>, docs: T[]): T[] {
-    const excluded = this.docsWithAnyTerm(expandedQuery.negatedTerms);
     const required = this.docsWithAllTerms(expandedQuery.requiredTerms);
     const candidates = this.narrowByOrGroups(required, expandedQuery.orGroupTerms);
-    return candidates.size === 0 ? [] : docs.filter(doc => candidates.has(doc) && !excluded.has(doc));
+    const exclusions = this.docsWithAnyTerm(expandedQuery.negatedTerms);
+    return candidates.size === 0 ? [] : docs.filter(doc => candidates.has(doc) && !exclusions.has(doc));
   }
 
   private docsWithAnyTerm(terms: Iterable<string>): Set<T> {
