@@ -3,7 +3,7 @@ import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { Content, ScrollSentinelBottom, ScrollSentinelTop } from "@/app/layout/shell";
 import { PageBottomObserver, PageTopObserver } from "@/lib/observer/edge_observer";
-import { noItemsAreVisible, waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
+import { noItemsAreVisible, waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -36,7 +36,7 @@ function getBottomSentinels(): HTMLElement[] {
 async function initialize(favorites: Favorite[]): Promise<void> {
   FavoritesModel.setFavorites(favorites);
   FavoritesView.showSearchResults(FavoritesModel.initialSlice());
-  await waitForAllThumbnailsToLoad();
+  await waitForAllThumbsToLoad();
   refreshObservers();
   Events.favorites.pageChanged.emit();
 }
@@ -64,7 +64,7 @@ async function extendBelow(): Promise<void> {
   trimAboveAnchoredToBottom(trimmed);
   FavoritesView.addToBottom(slice);
   Events.favorites.favoritesAddedToCurrentPage.emit(slice.map(f => f.root));
-  await waitForAllThumbnailsToLoad();
+  await waitForAllThumbsToLoad();
   refreshObservers();
 }
 
@@ -97,7 +97,7 @@ async function extendAbove(): Promise<void> {
   window.scrollBy(0, shift);
   trimmed.forEach(f => f.root.remove());
   Events.favorites.favoritesAddedToCurrentPage.emit(slice.map(f => f.root));
-  await waitForAllThumbnailsToLoad();
+  await waitForAllThumbsToLoad();
   refreshObservers();
 }
 

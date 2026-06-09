@@ -11,9 +11,9 @@ import * as GalleryMouseOverFlow from "@/features/gallery/flows/mouseover_flow";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import * as GalleryPostListFlow from "@/features/gallery/flows/post_list_flow";
-import * as GalleryPreloadFlow from "@/features/gallery/flows/preload_flow";
 import * as GalleryTouchFlow from "@/features/gallery/flows/touch_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
+import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow";
 import * as GalleryVisibleThumbObserver from "@/features/gallery/control/visible_thumb_observer";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
@@ -82,7 +82,7 @@ function setupAutoplay(): void {
 }
 
 function subscribeToEvents(): void {
-  Events.gallery.visibleThumbsChanged.on(GalleryPreloadFlow.preloadVisibleThumbs);
+  Events.gallery.visibleThumbsChanged.on(GalleryVisibilityFlow.onVisibleThumbsChanged);
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
 
   if (ON_FAVORITES_PAGE) {

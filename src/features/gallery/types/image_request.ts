@@ -22,6 +22,7 @@ export class ImageRequest {
   public cancelled: boolean;
   public mediaType: MediaType;
   public accentColor: string | null;
+  public disposable: boolean;
 
   constructor(thumb: HTMLElement) {
     this.id = thumb.id;
@@ -32,6 +33,7 @@ export class ImageRequest {
     this.cancelled = false;
     this.mediaType = resolveMediaType(getTagSetFromItem(thumb));
     this.accentColor = null;
+    this.disposable = false;
   }
 
   public get megabytes(): number {

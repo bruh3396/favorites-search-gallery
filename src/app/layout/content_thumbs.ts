@@ -4,13 +4,13 @@ import { preloadImage } from "@/utils/dom/image";
 import { sleep } from "@/lib/async/timing";
 import { throttle } from "@/lib/async/throttle";
 
-export const waitForAllThumbnailsToLoad = (): Promise<unknown[]> => waitForThumbnailsToLoadInContainer(document);
+export const waitForAllThumbsToLoad = (): Promise<unknown[]> => waitForThumbnailsToLoadInContainer(document);
 export const getAllContentThumbs = (): HTMLElement[] => (usingColumnLayout() ? getThumbsInMatrix(Content) : getThumbsInContainer(Content));
 export const getAllPageThumbs = (): HTMLElement[] => getThumbsInContainer(document);
 export const noItemsAreVisible = (): boolean => Content.querySelector(ITEM_SELECTOR) === null;
 
 export async function revealItem(id: string): Promise<void> {
-  await waitForAllThumbnailsToLoad();
+  await waitForAllThumbsToLoad();
   const thumb = document.getElementById(id);
 
   if (thumb === null || thumb.classList.contains("u-blink")) {
@@ -23,7 +23,7 @@ export async function revealItem(id: string): Promise<void> {
 }
 
 export const preloadImages = throttle(async(urls: string[]) => {
-  await waitForAllThumbnailsToLoad();
+  await waitForAllThumbsToLoad();
 
   for (const url of urls) {
     await sleep(3);

@@ -23,6 +23,8 @@ export const GalleryConfig = {
   maxVisibleThumbsBeforeStoppingPreload: 175,
   preloadWaitingTimeout: 1_000,
   preloadingEnabled: true,
+  cacheImagesOnIdle: true,
+  cacheFirstImages: true,
   gifPreloadingEnabled: false,
   preloadOutsideGalleryOnPostList: true,
   upscaleEverythingOnPostList: false,

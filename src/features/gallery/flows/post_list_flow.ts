@@ -12,7 +12,7 @@ export function onUpscaleToggled(value: boolean): void {
     const notUsingInfiniteScroll = thumbs.length <= POSTS_PER_POST_LIST_PAGE;
 
     if (notUsingInfiniteScroll) {
-      GalleryView.preloadImages(thumbs);
+      GalleryView.cacheImages(thumbs);
     }
     GalleryView.upscaleCachedThumbs();
   } else {
@@ -33,6 +33,6 @@ export function handleResultsAddedToPostList(thumbs: HTMLElement[]): void {
 
 function preloadOutsideGallery(): void {
   if (GalleryConfig.preloadOutsideGalleryOnPostList) {
-    GalleryView.preloadImages(getAllContentThumbs());
+    GalleryView.cacheImages(getAllContentThumbs());
   }
 }

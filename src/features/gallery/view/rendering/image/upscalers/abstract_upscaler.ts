@@ -7,39 +7,19 @@ import { Preferences } from "@/app/context/preferences";
 import { ThrottledQueue } from "@/lib/async/throttled_queue";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 import { inGallery } from "@/app/channels/feature_bridge";
-import { isImage } from "@/lib/media/media_type_predicates";
 import { parseDimensions2D } from "@/utils/string/parse";
-import { sleep } from "@/lib/async/timing";
 import { transferredCanvasIds } from "@/features/gallery/types/offscreen_upscale_request";
-
-const batchUpscaleQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
 
 export abstract class GalleryAbstractUpscaler {
   private readonly upscaleQueue: ThrottledQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
   private upscaledIds: Set<string> = new Set();
 
   public upscale(request: ImageRequest): void {
-    if (this.enabled() && this.requestIsValid(request)) {
-      this.upscaledIds.add(request.id);
-      this.ensureCanvasSized(request.thumb);
-      this.finishUpscale(request);
-    }
+    this.draw(request);
   }
 
-  public upscaleAnimated(thumbs: HTMLElement[]): void {
-    thumbs
-      .filter(thumb => !isImage(thumb) && this.requestIsValid(thumb))
-      .map(thumb => new ImageRequest(thumb))
-      .forEach(request => this.directlyUpscale(request));
-  }
-
-  public async upscaleBatch(requests: ImageRequest[]): Promise<void> {
-    await sleep(250);
-
-    for (const request of requests) {
-      await batchUpscaleQueue.wait();
-      this.upscale(request);
-    }
+  public upscaleAll(requests: ImageRequest[]): void {
+    requests.forEach(request => this.process(request));
   }
 
   public reset(): void {
@@ -100,10 +80,23 @@ export abstract class GalleryAbstractUpscaler {
     canvas.dataset.sized = "1";
   }
 
-  private async directlyUpscale(request: ImageRequest): Promise<void> {
-    if (await GalleryFetcher.fetchBitmap(request)) {
-      await batchUpscaleQueue.wait();
-      this.upscale(request);
+  private async process(request: ImageRequest): Promise<void> {
+    if (!this.enabled() || !this.isEligible(request)) {
+      return;
+    }
+    await this.upscaleQueue.wait();
+
+    if (request.isIncomplete && !await GalleryFetcher.fetchBitmap(request)) {
+      return;
+    }
+    this.draw(request);
+  }
+
+  private draw(request: ImageRequest): void {
+    if (this.enabled() && this.canDraw(request)) {
+      this.upscaledIds.add(request.id);
+      this.ensureCanvasSized(request.thumb);
+      this.finishUpscale(request);
     }
   }
 
@@ -125,14 +118,15 @@ export abstract class GalleryAbstractUpscaler {
       });
   }
 
-  private requestIsValid(request: ImageRequest | HTMLElement): boolean {
-    const thumbIsOffPage = document.getElementById(request.id) === null;
-    const seen = this.upscaledIds.has(request.id);
-
-    if (seen || inGallery() || thumbIsOffPage) {
+  private isEligible(request: ImageRequest): boolean {
+    if (this.upscaledIds.has(request.id) || inGallery()) {
       return false;
     }
-    return (request instanceof HTMLElement) ? true : request.isHighRes && request.hasCompleted;
+    return document.getElementById(request.id) !== null;
+  }
+
+  private canDraw(request: ImageRequest): boolean {
+    return this.isEligible(request) && request.isHighRes && request.hasCompleted;
   }
 
   private enabled(): boolean {

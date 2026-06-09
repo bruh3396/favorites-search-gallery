@@ -7,7 +7,7 @@ import { blurActiveElement } from "@/utils/dom/interaction";
 import { getLayout } from "@/app/layout/content_tiler";
 import { insertStyle } from "@/utils/dom/injector";
 import { showFullscreenIcon } from "@/features/gallery/view/view_utils";
-import { waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
+import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 
 const background: HTMLElement = document.createElement("div");
 
@@ -42,7 +42,7 @@ export function close(): void {
 }
 
 export function scrollToLastVisitedThumb(): void {
-  waitForAllThumbnailsToLoad()
+  waitForAllThumbsToLoad()
     .then(() => {
       if (lastVisitedThumb !== null && usingColumnLayout()) {
         scrollToThumb(lastVisitedThumb);

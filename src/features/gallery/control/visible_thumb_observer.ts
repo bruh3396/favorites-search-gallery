@@ -1,5 +1,5 @@
 import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
-import { getAllContentThumbs, waitForAllThumbnailsToLoad } from "@/app/layout/content_thumbs";
+import { getAllContentThumbs, waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
 import { debounceTrailing } from "@/lib/async/debounce";
@@ -33,7 +33,7 @@ export async function observeAllThumbsOnPage(): Promise<void> {
   intersectionObserver.disconnect();
   visibleThumbs.clear();
 
-  await waitForAllThumbnailsToLoad();
+  await waitForAllThumbsToLoad();
   observe(getAllContentThumbs());
 }
 

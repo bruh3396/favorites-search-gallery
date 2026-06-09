@@ -14,7 +14,7 @@ export function setCompletionCallback(completionCallback: (request: ImageRequest
   onComplete = completionCallback;
 }
 
-export function preload(thumbs: HTMLElement[]): void {
+export function load(thumbs: HTMLElement[]): void {
   GalleryImageCache.sync(buildPreloadRequests(thumbs)).forEach(request => fetchBitmap(request));
 }
 
