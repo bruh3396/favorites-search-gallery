@@ -117,7 +117,7 @@ export function showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
     case "forbidden":
       showFullscreenIcon(Icons.WARNING, 1_000);
       setTimeout(() => {
-        alert("The \"Remove Buttons\" option must be checked to use this hotkey");
+        alert("Removing favorites from the gallery is currently disabled.");
       }, 20);
       break;
 

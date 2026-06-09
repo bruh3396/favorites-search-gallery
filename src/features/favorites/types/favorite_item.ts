@@ -49,7 +49,6 @@ export class FavoriteItem implements Favorite {
     return { id: this.id, tags: this.tags, src: compressPreviewSource(this.thumbUrl), metadata: this.metadata.databaseRecord };
   }
 
-  public swapFavoriteButton = (): void => this.element?.swapFavoriteButton();
   public updateTags = (post: Post): void => this.favoriteTags.set(post.tags);
   public withinRating = (rating: Rating): boolean => (this.metadata.rating & rating) > 0;
   public populateMetadata = (post: Post): void => {

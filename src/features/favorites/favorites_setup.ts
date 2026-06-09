@@ -1,6 +1,5 @@
 import * as FavoritesDesktop from "@/features/favorites/control/menu/desktop";
 import * as FavoritesFinder from "@/features/favorites/control/menu/finder";
-import * as FavoritesInterFeatureFlow from "@/features/favorites/flows/inter_feature_flow";
 import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
@@ -102,7 +101,7 @@ function subscribeToEvents(): void {
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
   Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.reSearchFavorites);
-  Events.favorites.sortingMethodChanged.on(FavoritesOptionsFlow.reSearchFavorites);
+  Events.favorites.sortMethodChanged.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.resultsPerPageChanged.on(FavoritesSearchFlow.showLatestSearchResults);
 
@@ -111,8 +110,6 @@ function subscribeToEvents(): void {
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
   Events.favorites.panelButtonClicked.on(FavoritesView.toggleDrawer);
   Events.favorites.favoriteRemoved.on(FavoritesModel.deleteId);
-  Events.favorites.favoriteAdded.on(FavoritesInterFeatureFlow.swapFavoriteButton);
-  Events.favorites.favoriteRemoved.on(FavoritesInterFeatureFlow.swapFavoriteButton);
 
   Events.gallery.previewOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);

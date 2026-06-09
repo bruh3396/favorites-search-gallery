@@ -13,7 +13,7 @@
   bottom: 5%;
   padding: 0;
   margin: 0;
-  background: var(--color-gallery-menu-bg);
+  background: var(--color-gallery-background);
   border-radius: 4px;
   white-space: nowrap;
   z-index: 10000;
@@ -69,7 +69,7 @@
   transform: translate(-50%, -105%);
   border-radius: 4px;
   font-size: 10px;
-  background: var(--color-gallery-menu-bg);
+  background: var(--color-gallery-background);
 }
 
 #autoplay-settings-menu.autoplay-settings--visible {

@@ -11,7 +11,6 @@ import { buildSelectElement } from "@/lib/ui/elements/select";
 import { numberRange } from "@/utils/number";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
 import { reloadWindow } from "@/utils/browser/window";
-import { toggleAddOrRemoveButtons } from "@/lib/ui/toggles";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/style";
 
 const checkboxes: Partial<CheckboxElement>[] = [
@@ -58,18 +57,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     preference: Preferences.postListTooltipEnabled,
     hotkey: "",
     event: Events.favorites.tooltipToggled
-  },
-  {
-    id: "show-add-favorite-buttons",
-    parentId: "post-list-add-favorite-buttons",
-    textContent: "Add Favorite Buttons",
-    title: "Toggle add favorite buttons",
-    position: "beforeend",
-    preference: Preferences.postListAddButtonsVisible,
-    triggerOnCreation: true,
-    function: toggleAddOrRemoveButtons,
-    hotkey: "R",
-    event: Events.favorites.addButtonsToggled
   },
   {
     id: "enable-gallery-menu",

@@ -22,12 +22,15 @@
   z-index: 30;
   height: var(--favorites-toolbar-height);
   padding: 4px 16px;
-  /* background: var(--theme-surface); */
-  background: var(--theme-surface-gradient);
+  background: var(--theme-surface);
   border-top: 1px solid var(--theme-border);
   border-bottom: 1px solid var(--theme-border);
   color: var(--theme-text);
   box-sizing: border-box;
+}
+
+:root[data-surface-gradient] #favorites-toolbar {
+  background: var(--theme-surface-gradient);
 }
 
 #favorites-toolbar-grid {

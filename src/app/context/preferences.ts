@@ -1,18 +1,17 @@
 import { FavoriteIndicatorStyle, FavoritesDrawerTab, GalleryFavoriteIndicatorStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { Rating, SortingMethod } from "@/types/search";
+import { Rating, SortMethod } from "@/types/search";
 import { Preference } from "@/lib/storage/preference";
 
 export const Preferences = {
   appPerformanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
+  appSurfaceGradient: new Preference("appSurfaceGradient", true),
   // appTheme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
   appTheme: new Preference<Theme>("appTheme", "zeal"),
 
-  favoritesAddButtonsVisible: new Preference("favoritesAddButtonsVisible", false),
   favoritesAllowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
   favoritesColumnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
   favoritesDownloadBatchSize: new Preference("favoritesDownloadBatchSize", 250),
-  favoritesDownloadButtonsVisible: new Preference("favoritesDownloadButtonsVisible", false),
   favoritesDrawerActiveTab: new Preference<FavoritesDrawerTab>("favoritesDrawerActiveTab", "settings"),
   favoritesDrawerOpen: new Preference("favoritesDrawerOpen", false),
   favoritesExcludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
@@ -26,7 +25,7 @@ export const Preferences = {
   favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 50),
   favoritesRowHeight: new Preference("favoritesRowHeight", 7),
   favoritesSortAscending: new Preference("favoritesSortAscending", false),
-  favoritesSortKey: new Preference<SortingMethod>("favoritesSortKey", "default"),
+  favoritesSortKey: new Preference<SortMethod>("favoritesSortKey", "default"),
   favoritesTooltipEnabled: new Preference("tooltipEnabled", false),
 
   galleryAutoplayActive: new Preference("galleryAutoplayActive", false),
@@ -49,9 +48,7 @@ export const Preferences = {
 
   savedSearchesSuggestions: new Preference("savedSearchesSuggestions", false),
   savedSearchesTutorial: new Preference("savedSearchesTutorial", false),
-  savedSearchesVisible: new Preference("savedSearchesVisible", false),
 
-  postListAddButtonsVisible: new Preference("postListAddButtonsVisible", false),
   postListColumnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
   postListEnabled: new Preference("postListEnabled", true),
   postListFavoriteIndicator: new Preference("postListFavoriteIndicator", false),

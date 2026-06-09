@@ -1,5 +1,4 @@
 import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_ITEM_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
-import { ADD_FAVORITE_IMAGE_HTML } from "@/assets/images";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { removeNonNumericCharacters } from "@/utils/string/format";
@@ -13,7 +12,6 @@ export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {
 function prepareThumb(thumb: HTMLElement): void {
   moveTagsFromTitleToTagsAttribute(thumb);
   assignMediaType(thumb);
-  addAddFavoriteButton(thumb);
   addCanvas(thumb);
   thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
   thumb.classList.remove(RAW_THUMB_CLASS_NAME);
@@ -44,15 +42,6 @@ function assignMediaType(thumb: HTMLElement): void {
   const tags = image.getAttribute("tags") ?? "";
 
   image.classList.add(resolveMediaType(tags));
-}
-
-function addAddFavoriteButton(thumb: HTMLElement): void {
-  const anchor = thumb.querySelector("a");
-
-  if (anchor === null) {
-    return;
-  }
-  anchor.insertAdjacentHTML("beforeend", ADD_FAVORITE_IMAGE_HTML);
 }
 
 function addCanvas(thumb: HTMLElement): void {

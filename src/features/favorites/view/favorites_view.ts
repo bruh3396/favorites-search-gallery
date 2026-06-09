@@ -15,7 +15,7 @@ export function showSearchResults(searchResults: Favorite[]): void {
 }
 
 export function setup(viewCallbacks: FavoritesViewCallbacks): void {
-  setupFavoriteElement(viewCallbacks.onFavoriteAdded, viewCallbacks.onFavoriteRemoved);
+  setupFavoriteElement();
   FavoritesShell.setup(viewCallbacks.onFirstPageFavoritesExtracted);
   FavoritesStatus.setup();
   ContentTiler.setup();

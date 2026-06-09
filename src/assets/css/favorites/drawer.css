@@ -45,7 +45,6 @@
   display: flex;
   flex-direction: row;
   background: var(--theme-surface);
-  /* background: var(--theme-surface-gradient); */
   border-right: 1px solid var(--theme-border);
   color: var(--theme-text);
   box-sizing: border-box;
@@ -65,11 +64,13 @@
   flex: 0 0 auto;
   gap: 4px;
   padding: 4px;
-  /* background: var(--theme-surface); */
-  background: var(--theme-surface-gradient);
-  /* background: var(--theme-surface-raised); */
+  background: var(--theme-surface);
   border-right: 1px solid var(--theme-border);
   overflow-y: auto;
+}
+
+:root[data-surface-gradient] #favorites-drawer-tabs {
+  background: var(--theme-surface-gradient);
 }
 
 #favorites-drawer .favorites-drawer-tab {

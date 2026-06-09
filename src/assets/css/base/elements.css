@@ -7,27 +7,6 @@ body {
   overflow-anchor: auto;
 }
 
-body:fullscreen,
-body::backdrop {
-  background-color: var(--color-bg);
-}
-
-body.dialog-opened {
-  overflow: hidden;
-}
-
-body.autoplay::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 4px;
-  background: #ff5733;
-  animation: progress 5s linear forwards;
-  z-index: 9999;
-}
-
 img {
   border: none !important;
   -webkit-user-drag: none;

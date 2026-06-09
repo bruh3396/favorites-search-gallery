@@ -1,5 +1,4 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
-import * as PostListNavigatorFavoriteButton from "@/features/post_list_navigator/control/favorite_button";
 import * as PostListNavigatorFavoritesMarkerFlow from "@/features/post_list_navigator/flows/favorites_marker_flow";
 import * as PostListNavigatorModel from "@/features/post_list_navigator/model/post_list_navigator_model";
 import * as PostListNavigatorNavigationFlow from "@/features/post_list_navigator/flows/navigation_flow";
@@ -16,7 +15,6 @@ export async function setupPostList(): Promise<void> {
   }
   setupModel();
   await setupView();
-  setupControl();
   await setupFavoriteIndicator();
   subscribeToEvents();
   registerBridgeHandlers();
@@ -30,12 +28,6 @@ function setupModel(): void {
 
 function setupView(): Promise<void> {
   return PostListNavigatorView.setup();
-}
-
-function setupControl(): void {
-  PostListNavigatorFavoriteButton.setupAddFavoriteButtons(PostListNavigatorModel.allThumbs());
-  Events.postList.pageChanged.on(PostListNavigatorFavoriteButton.setupAddFavoriteButtons);
-  Events.postList.moreResultsAdded.on(PostListNavigatorFavoriteButton.setupAddFavoriteButtons);
 }
 
 async function setupFavoriteIndicator(): Promise<void> {

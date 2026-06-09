@@ -28,7 +28,6 @@ export interface Favorite extends Searchable {
   thumbUrl: string
   databaseRecord: FavoritesDatabaseRecord
   withinRating: (rating: Rating) => boolean
-  swapFavoriteButton: () => void
   updateTags: (post: Post) => void
   addAdditionalTags: (newTags: string) => string
   removeAdditionalTags: (tagsToRemove: string) => string

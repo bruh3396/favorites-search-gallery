@@ -37,7 +37,7 @@ video::-webkit-media-controls-enclosure {
 /* Gallery background */
 
 #gallery-background {
-  background: black;
+  background: var(--color-gallery-background);
   z-index: -1;
   pointer-events: none;
   cursor: none;
@@ -113,6 +113,10 @@ video::-webkit-media-controls-enclosure {
   transform: translateY(-100%);
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0, 0, 0.25, 1), opacity 0.25s cubic-bezier(0, 0, 0.25, 1);
+}
+
+:root[data-gallery-menu-hidden] #gallery-menu {
+  visibility: hidden !important;
 }
 
 #gallery-menu.gallery-menu--visible,
@@ -195,7 +199,7 @@ video::-webkit-media-controls-enclosure {
   justify-content: center;
   height: 100%;
   width: fit-content;
-  background: var(--color-gallery-menu-bg);
+  background: var(--color-gallery-background);
 }
 
 /* Menu buttons */
@@ -217,6 +221,11 @@ video::-webkit-media-controls-enclosure {
   height: 75% !important;
   transform: none !important;
   transition: transform 0.25s ease;
+}
+
+.gallery-menu-btn:not(:hover)>svg {
+  fill: var(--color-gallery-background);
+  filter: invert(100%);
 }
 
 #add-favorite-gallery>svg {

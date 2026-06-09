@@ -1,9 +1,9 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/types/element";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile, Theme } from "@/types/ui";
-import { applyTheme, toggleGalleryMenuEnabled, toggleSavedSearchesVisibility } from "@/lib/ui/style";
+import { applySurfaceGradient, applyTheme, toggleGalleryMenuEnabled } from "@/lib/ui/style";
 import { buildCheckboxElement, buildCheckboxOption } from "@/app/dom/checkbox";
-import { toggleAddOrRemoveButtons, toggleDownloadButtons, toggleHeader } from "@/lib/ui/toggles";
+import { toggleHeader } from "@/lib/ui/toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
@@ -104,42 +104,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     event: Events.favorites.infiniteScrollToggled
   },
   {
-    id: "show-remove-favorite-buttons",
-    parentId: "favorite-options-left",
-    textContent: "Remove Buttons",
-    title: "Toggle remove favorite buttons",
-    enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.favoritesRemoveButtonsVisible,
-    hotkey: "R",
-    function: toggleAddOrRemoveButtons,
-    event: Events.favorites.removeButtonsToggled,
-    triggerOnCreation: true
-  },
-  {
-    id: "show-add-favorite-buttons",
-    parentId: "favorite-options-left",
-    textContent: "Add Favorite Buttons",
-    title: "Toggle add favorite buttons",
-    enabled: !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.favoritesAddButtonsVisible,
-    function: toggleAddOrRemoveButtons,
-    hotkey: "R",
-    event: Events.favorites.addButtonsToggled,
-    triggerOnCreation: true
-  },
-  {
-    id: "show-download-buttons",
-    parentId: "favorite-options-left",
-    textContent: "Download Buttons",
-    title: "Toggle download buttons",
-    enabled: true,
-    preference: Preferences.favoritesDownloadButtonsVisible,
-    hotkey: "",
-    function: toggleDownloadButtons,
-    triggerOnCreation: true,
-    event: Events.favorites.downloadButtonsToggled
-  },
-  {
     id: "exclude-blacklist",
     parentId: "favorite-options-left",
     textContent: "Exclude Blacklist",
@@ -210,6 +174,16 @@ const checkboxes: Partial<CheckboxElement>[] = [
     function: toggleHeader
   },
   {
+    id: "toggle-surface-gradient",
+    parentId: "favorite-options-right",
+    textContent: "Gradient",
+    title: "Use a gradient background on the toolbar and drawer tabs",
+    preference: Preferences.appSurfaceGradient,
+    hotkey: "",
+    triggerOnCreation: true,
+    function: applySurfaceGradient
+  },
+  {
     id: "show-saved-search-suggestions",
     parentId: "favorite-options-right",
     textContent: "Saved Suggestions",
@@ -218,16 +192,6 @@ const checkboxes: Partial<CheckboxElement>[] = [
     preference: Preferences.savedSearchesSuggestions,
     hotkey: "",
     savePreference: true
-  },
-  {
-    id: "show-saved-searches",
-    parentId: "bottom-panel-2",
-    textContent: "Saved Searches",
-    title: "Show saved searches",
-    enabled: true,
-    preference: Preferences.savedSearchesVisible,
-    function: toggleSavedSearchesVisibility,
-    triggerOnCreation: true
   },
   {
     id: "enable-gallery-menu",
@@ -265,12 +229,12 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     ])
   },
   {
-    id: "sorting-method",
+    id: "sort-method",
     parentId: "sort-inputs",
-    title: "Change sorting order of search results",
+    title: "Change sort order of search results",
     position: "beforeend",
     preference: Preferences.favoritesSortKey,
-    event: Events.favorites.sortingMethodChanged,
+    event: Events.favorites.sortMethodChanged,
     options: new Map<MetadataMetric, string>([
       ["default", "Default"],
       ["score", "Score"],

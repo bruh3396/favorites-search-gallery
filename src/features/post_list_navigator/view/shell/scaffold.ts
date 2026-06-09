@@ -1,8 +1,8 @@
-import { insertHtml, insertStyle } from "@/utils/dom/injector";
+import * as PostListMenu from "@/features/post_list_navigator/view/shell/menu";
 import { Content } from "@/app/layout/shell";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
-import POST_LIST_HTML from "@/assets/html/post_list.html";
+import { insertStyle } from "@/utils/dom/injector";
 
 export function setup(): void {
   removeNativePostListThumbs();
@@ -28,7 +28,7 @@ function insertPostListMenu(): void {
 
   displayOptions.appendChild(listItem);
   insertStyle(POST_LIST_CSS);
-  insertHtml(listItem, "beforeend", POST_LIST_HTML);
+  listItem.append(PostListMenu.build());
 
   if (ON_MOBILE_DEVICE) {
     insertStyle(`#post-list-upscale-thumbs {

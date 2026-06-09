@@ -8,28 +8,24 @@
   user-select: none;
 }
 
-.post>a,
-.post>div {
+.post>a {
   display: block;
   overflow: hidden;
   position: relative;
   cursor: default;
 }
 
-.post>a>img:first-child,
-.post>div>img:first-child {
+.post>a>img:first-child {
   width: 100%;
   z-index: 1;
   background-color: #595959;
 }
 
-.post>a>a>div,
-.post>div>a>div {
+.post>a>a>div {
   height: 100%;
 }
 
-.post>a>canvas,
-.post>div>canvas {
+.post>a>canvas {
   width: 100%;
   position: absolute;
   top: 0;
@@ -40,29 +36,6 @@
 
 .post.u-hidden {
   display: none;
-}
-
-.post-action-btn {
-  cursor: pointer;
-  position: absolute;
-  left: 0;
-  top: 0;
-  font-weight: bold;
-  background: none;
-  border: none;
-  z-index: 2;
-  filter: grayscale(70%);
-}
-
-.post-action-btn:active,
-.post-action-btn:hover {
-  filter: none;
-}
-
-.post-action-btn--download {
-  top: unset;
-  right: 0;
-  left: unset;
 }
 
 .post img {

@@ -15,8 +15,6 @@ export function hideUnusedOptions(): void {
     hiddenSelectors.add("#post-list-upscale-thumbs");
     hiddenSelectors.add("#post-list-performance-profile");
     hiddenSelectors.add("#post-list-autoplay");
-    hiddenSelectors.add(".post-action-btn");
-    hiddenSelectors.add("#post-list-add-favorite-buttons");
     hiddenSelectors.add("#post-list-gallery-menu");
   }
 

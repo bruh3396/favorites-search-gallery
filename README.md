@@ -129,7 +129,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | Key | Function                       | Condition                          |
 |-----|--------------------------------|------------------------------------|
 | E   | Add favorite                   |                                    |
-| X   | Remove favorite                | "Remove Buttons" option checked    |
+| X   | Remove favorite                | Gallery favorite removal enabled   |
 | M   | Toggle video mute              |                                    |
 | B   | Toggle background              |                                    |
 | P   | Stop/start autoplay            | Autoplay option checked            |
