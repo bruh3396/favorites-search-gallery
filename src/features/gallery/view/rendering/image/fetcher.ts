@@ -10,8 +10,14 @@ export function fetchBitmap(request: ImageRequest): Promise<boolean> {
   return request.isHighRes ? fetchHighResBitmap(request) : fetchLowResBitmap(request);
 }
 
+export function cancelFetch(id: string): void {
+  fetchQueue.cancel(id);
+}
+
 async function fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
-  await fetchQueue.wait();
+  if (!await fetchQueue.wait(request.id) || request.cancelled) {
+    return false;
+  }
 
   try {
     request.complete(await fetchImageBitmapFromThumb(request.thumb, request.abortController));

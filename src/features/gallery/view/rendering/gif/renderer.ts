@@ -1,8 +1,8 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/function";
-import { isGif } from "@/lib/media/media_type_predicates";
-import { resolveGifUrl } from "@/lib/media/media_url_resolver";
+import { isGif } from "@/lib/media/type_predicates";
+import { resolveGifUrl } from "@/lib/media/url_resolver";
 
 const root = document.createElement("div");
 const gif = document.createElement("img");

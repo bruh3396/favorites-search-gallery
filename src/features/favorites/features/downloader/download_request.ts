@@ -1,5 +1,5 @@
-import * as ExtensionResolver from "@/lib/media/media_extension_resolver";
-import { MediaResolvable, resolveMediaUrl } from "@/lib/media/media_url_resolver";
+import * as ExtensionResolver from "@/lib/media/extension_resolver";
+import { MediaResolvable, resolveMediaUrl } from "@/lib/media/url_resolver";
 
 export class DownloadRequest {
   constructor(private readonly id: string, public url: string, public extension: string) {}

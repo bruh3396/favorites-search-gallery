@@ -1,4 +1,4 @@
-import { gifTags, videoTags } from "@/lib/media/media_constants";
+import { gifTags, videoTags } from "@/lib/media/constants";
 import { MediaType } from "@/types/media";
 import { convertToTagSet } from "@/utils/string/tags";
 import { intersects } from "@/utils/collection/set";

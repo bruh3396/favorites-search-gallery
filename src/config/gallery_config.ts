@@ -29,7 +29,7 @@ export const GalleryConfig = {
   preloadOutsideGalleryOnPostList: true,
   upscaleEverythingOnPostList: false,
 
-  preloadMediaDebounceTime: 150,
+  preloadMediaDebounceTime: 500,
   navigationThrottleTime: 250,
   galleryNavigationDelay: 100,
   idleInteractionDuration: 300,

@@ -2,7 +2,7 @@ import { coinFlip, randomBetween, randomIntInRange, roundToTwoDecimalPlaces, see
 import { Dimensions2D } from "@/types/geometry";
 import { Layout } from "@/types/ui";
 import { SkeletonConfig } from "@/config/skeleton_config";
-import { TILE_ITEM_CLASS_NAME } from "@/lib/thumb/thumbs";
+import { TILE_CLASS_NAME } from "@/lib/thumb/thumbs";
 import { parseDimensions2D } from "@/utils/string/parse";
 
 export class FavoritesSkeletonItem {
@@ -10,7 +10,7 @@ export class FavoritesSkeletonItem {
 
   constructor(layout: Layout, aspectRatio: string | undefined) {
     this.element = document.createElement("div");
-    this.element.className = `skeleton-item ${TILE_ITEM_CLASS_NAME}`;
+    this.element.className = `skeleton-item ${TILE_CLASS_NAME}`;
     this.setSize(layout, aspectRatio);
     this.configureAnimation();
 

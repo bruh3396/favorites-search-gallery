@@ -3,7 +3,7 @@ import * as Icons from "@/assets/icons";
 import { EnhancedKeyboardEvent, NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { clamp, millisecondsToSeconds } from "@/utils/number";
-import { isImage, isVideo } from "@/lib/media/media_type_predicates";
+import { isImage, isVideo } from "@/lib/media/type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
 import { Overlays } from "@/app/layout/shell";

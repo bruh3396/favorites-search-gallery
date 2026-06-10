@@ -1,7 +1,7 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
 import * as FavoritesDrawer from "@/features/favorites/view/shell/drawer";
-import * as FavoritesPaginator from "@/features/favorites/view/paginator";
-import * as FavoritesShell from "@/features/favorites/view/shell/favorites_shell";
+import * as FavoritesPaginator from "@/features/favorites/view/pagination_renderer";
+import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import * as FavoritesSkeleton from "@/features/favorites/view/skeleton/skeleton";
 import * as FavoritesStatus from "@/features/favorites/view/status/status";
 import { Favorite } from "@/types/favorite";
@@ -27,7 +27,7 @@ export const addToTop = (favorites: Favorite[]): void => ContentTiler.addToTop(f
 export const addToBottom = (favorites: Favorite[]): void => ContentTiler.addToBottom(favorites.map((favorite) => favorite.root));
 export const showSkeleton = (): void => ContentTiler.tile(FavoritesSkeleton.build());
 
-export { toggle as togglePaginator, getContainer as getPaginationContainer, build as buildPaginator, update as updatePaginator } from "@/features/favorites/view/paginator";
+export { toggle as togglePaginator, getContainer as getPaginationContainer, build as buildPaginator, update as updatePaginator } from "@/features/favorites/view/pagination_renderer";
 export { toggle as toggleDrawer } from "@/features/favorites/view/shell/drawer";
 export { changeLayout } from "@/app/layout/content_tiler";
 export { collectAspectRatios } from "@/features/favorites/view/skeleton/skeleton";

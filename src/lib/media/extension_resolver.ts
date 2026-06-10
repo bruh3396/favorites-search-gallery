@@ -1,12 +1,12 @@
-import { DEFAULT_EXTENSION, allImageExtensions, extensionRegex } from "@/lib/media/media_constants";
+import { DEFAULT_EXTENSION, allImageExtensions, extensionRegex } from "@/lib/media/constants";
 import { ImageExtension, MediaExtension, MediaExtensionMapping } from "@/types/media";
-import { isGif, isVideo } from "@/lib/media/media_type_predicates";
+import { isGif, isVideo } from "@/lib/media/type_predicates";
 import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Post } from "@/types/api";
-import { probeAllExtensions } from "@/lib/media/media_extension_prober";
+import { probeAllExtensions } from "@/lib/media/extension_prober";
 
 const DATABASE_NAME = "ImageExtensions";
 const OBJECT_STORE_NAME = "extensionMappings";

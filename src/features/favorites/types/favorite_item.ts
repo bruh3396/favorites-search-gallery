@@ -5,7 +5,7 @@ import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
 import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
 import { Post } from "@/types/api";
 import { Rating } from "@/types/search";
-import { compressPreviewSource } from "@/lib/media/media_url_transformer";
+import { compressPreviewSource } from "@/lib/media/url_transformer";
 import { getIdFromThumb } from "@/lib/thumb/thumbs";
 
 export class FavoriteItem implements Favorite {

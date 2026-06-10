@@ -1,7 +1,7 @@
 import { Favorite } from "@/types/favorite";
 import { baseImageUrl } from "@/lib/media/base_image_url";
-import { getTagSetFromItem } from "@/lib/thumb/thumb_tags";
-import { resolveExtension } from "@/lib/media/media_extension_resolver";
+import { getTagSetFromItem } from "@/lib/thumb/tags";
+import { resolveExtension } from "@/lib/media/extension_resolver";
 
 // FIXME: temp alias so the downloader depends on a media-resolvable thing, not the
 // favorites domain type. Still the legacy HTMLElement|Favorite union. Collapse into a

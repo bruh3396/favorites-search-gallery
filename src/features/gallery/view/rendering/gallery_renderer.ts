@@ -1,5 +1,5 @@
 import { GalleryVideoRenderer, setupVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
-import { isGif, isVideo } from "@/lib/media/media_type_predicates";
+import { isGif, isVideo } from "@/lib/media/type_predicates";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";

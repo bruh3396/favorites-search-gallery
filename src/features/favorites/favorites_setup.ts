@@ -20,7 +20,7 @@ import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { POST_LIST_PAGE_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { deferPostPageFetchesUntil } from "@/lib/remote/rule34/posts/page";
-import { setFavoriteTagsLookup } from "@/lib/thumb/thumb_tags";
+import { setFavoriteTagsLookup } from "@/lib/thumb/tags";
 
 export function setupFavorites(): void {
   if (POST_LIST_PAGE_ENABLED) {

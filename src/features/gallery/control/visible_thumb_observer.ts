@@ -8,13 +8,6 @@ import { getRectDistance } from "@/utils/geometry";
 const visibleThumbs: Map<string, IntersectionObserverEntry> = new Map();
 const intersectionObserver: IntersectionObserver | null = createIntersectionObserver();
 let centerThumb: HTMLElement | null = null;
-let bypassDebounce = true;
-
-export function setup(): void {
-  Events.favorites.pageChanged.on(() => {
-    bypassDebounce = true;
-  });
-}
 
 export function observe(thumbs: HTMLElement[]): void {
   if (intersectionObserver === null) {
@@ -52,18 +45,9 @@ export function getVisibleThumbs(): HTMLElement[] {
     .filter(target => target instanceof HTMLElement);
 }
 
-const broadcastDebounced = debounceTrailing(() => {
+const broadcastVisibleThumbsChanged = debounceTrailing(() => {
   Events.gallery.visibleThumbsChanged.emit();
 }, GalleryConfig.preloadMediaDebounceTime);
-
-function broadcastVisibleThumbsChanged(): void {
-  if (bypassDebounce) {
-    bypassDebounce = false;
-    Events.gallery.visibleThumbsChanged.emit();
-  } else {
-    broadcastDebounced();
-  }
-}
 
 function onVisibleThumbsChanged(entries: IntersectionObserverEntry[]): void {
   updateVisibleThumbs(entries);

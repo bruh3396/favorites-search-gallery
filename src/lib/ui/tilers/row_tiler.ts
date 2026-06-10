@@ -1,8 +1,8 @@
-import { getThumbsInContainer, waitForThumbnailsToLoadInContainer } from "@/lib/thumb/thumbs";
+import { getItemsInContainer, waitForThumbnailsToLoadInContainer } from "@/lib/thumb/thumbs";
+import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/ui";
 import { ThumbConfig } from "@/config/thumb_config";
-import { insertStyle } from "@/utils/dom/injector";
 import { mapRange } from "@/utils/number";
 
 export class RowTiler extends AbstractTiler {
@@ -23,34 +23,12 @@ export class RowTiler extends AbstractTiler {
   }
 
   public setRowHeight(rowHeight: number): void {
-    const minWidth = Math.floor(window.innerWidth / 20);
-    const maxWidth = Math.floor(window.innerWidth / 4);
-    const pixelSize = Math.round(mapRange(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
-
-    insertStyle(`
-      #${this.container.id}[data-layout="row"] {
-        .post {
-          height: ${pixelSize}px;
-        }
-      }
-    `, `${this.container.id}-row-size`);
+    this.container.style.setProperty("--tile-row-height", `${rowHeightToPixels(rowHeight)}px`);
     this.markItemsOnLastRow();
   }
 
   public onActivate(): void {
     this.markItemsOnLastRow();
-  }
-
-  public unMarkAllItemsAsLastRow(items: HTMLElement[]): void {
-    for (const item of items) {
-      item.classList.remove("u-last-row");
-    }
-  }
-
-  public markItemsAsLastRow(items: HTMLElement[]): void {
-    for (const item of items) {
-      item.classList.add("u-last-row");
-    }
   }
 
   private async markItemsOnLastRow(): Promise<void> {
@@ -59,27 +37,33 @@ export class RowTiler extends AbstractTiler {
     }
     this.currentlyMarkingLastRow = true;
     await waitForThumbnailsToLoadInContainer(this.container);
-    const items = getThumbsInContainer(this.container);
+    this.currentlyMarkingLastRow = false;
+    const items = getItemsInContainer(this.container);
 
     if (items.length === 0) {
       return;
     }
-    this.unMarkAllItemsAsLastRow(items);
-    this.markItemsAsLastRow(this.getItemsOnLastRow(items));
-    this.currentlyMarkingLastRow = false;
+    items.forEach(item => removeDataset(item, "lastRow"));
+    getItemsOnLastRow(items).forEach(item => setDataset(item, "lastRow"));
   }
+}
 
-  private getItemsOnLastRow(items: HTMLElement[]): HTMLElement[] {
-    items = items.slice().reverse();
-    const itemsOnLastRow = [];
-    const lastRowY = items[0].offsetTop;
+function rowHeightToPixels(rowHeight: number): number {
+  const minWidth = Math.floor(window.innerWidth / 20);
+  const maxWidth = Math.floor(window.innerWidth / 4);
+  return Math.round(mapRange(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
+}
 
-    for (const item of items) {
-      if (item.offsetTop !== lastRowY) {
-        break;
-      }
-      itemsOnLastRow.push(item);
+function getItemsOnLastRow(items: HTMLElement[]): HTMLElement[] {
+  items = items.slice().reverse();
+  const itemsOnLastRow = [];
+  const lastRowY = items[0].offsetTop;
+
+  for (const item of items) {
+    if (item.offsetTop !== lastRowY) {
+      break;
     }
-    return itemsOnLastRow;
+    itemsOnLastRow.push(item);
   }
+  return itemsOnLastRow;
 }

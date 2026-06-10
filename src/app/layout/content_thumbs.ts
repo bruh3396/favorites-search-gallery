@@ -1,12 +1,12 @@
-import { COLUMN_SELECTOR, ITEM_SELECTOR, getThumbsInContainer, getThumbsInMatrix, waitForThumbnailsToLoadInContainer } from "@/lib/thumb/thumbs";
+import { COLUMN_SELECTOR, ITEM_SELECTOR, getItemsInContainer, getThumbsInMatrix, waitForThumbnailsToLoadInContainer } from "@/lib/thumb/thumbs";
 import { Content } from "@/app/layout/shell";
 import { preloadImage } from "@/utils/dom/image";
 import { sleep } from "@/lib/async/timing";
 import { throttle } from "@/lib/async/throttle";
 
 export const waitForAllThumbsToLoad = (): Promise<unknown[]> => waitForThumbnailsToLoadInContainer(document);
-export const getAllContentThumbs = (): HTMLElement[] => (usingColumnLayout() ? getThumbsInMatrix(Content) : getThumbsInContainer(Content));
-export const getAllPageThumbs = (): HTMLElement[] => getThumbsInContainer(document);
+export const getAllContentThumbs = (): HTMLElement[] => (usingColumnLayout() ? getThumbsInMatrix(Content) : getItemsInContainer(Content));
+export const getAllPageThumbs = (): HTMLElement[] => getItemsInContainer(document);
 export const noItemsAreVisible = (): boolean => Content.querySelector(ITEM_SELECTOR) === null;
 
 export async function revealItem(id: string): Promise<void> {

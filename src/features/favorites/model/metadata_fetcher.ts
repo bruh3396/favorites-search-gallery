@@ -1,11 +1,11 @@
-import * as ExtensionResolver from "@/lib/media/media_extension_resolver";
+import * as ExtensionResolver from "@/lib/media/extension_resolver";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { fetchPost } from "@/lib/remote/api/post";
 import { fetchVideoDurationFromFavorite } from "@/lib/remote/rule34/media/duration";
-import { isVideo } from "@/lib/media/media_type_predicates";
+import { isVideo } from "@/lib/media/type_predicates";
 import { tagsAreValid } from "@/lib/search/tags/tag_validator";
 import { withExponentialBackoff } from "@/lib/async/timing";
 

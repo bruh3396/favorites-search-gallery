@@ -5,14 +5,14 @@ import { removeNonNumericCharacters } from "@/utils/string/format";
 import { sum } from "@/utils/number";
 
 export const ITEM_CLASS_NAME = "post";
-export const TILE_ITEM_CLASS_NAME = "tile-item";
+export const TILE_CLASS_NAME = "tile";
 export const RAW_THUMB_CLASS_NAME = "thumb";
 export const ITEM_SELECTOR = `.${ITEM_CLASS_NAME}, .${RAW_THUMB_CLASS_NAME}`;
 export const IMAGE_SELECTOR = `.${ITEM_CLASS_NAME} img`;
 export const COLUMN_SELECTOR = "[data-tiler-column]";
 
-export function getThumbsInContainer(container: HTMLElement | Document): HTMLElement[] {
-  return Array.from(container.querySelectorAll(ITEM_SELECTOR)).filter(thumb => thumb instanceof HTMLElement);
+export function getItemsInContainer(container: HTMLElement | Document): HTMLElement[] {
+  return Array.from(container.querySelectorAll(ITEM_SELECTOR)).filter(item => item instanceof HTMLElement);
 }
 
 export function getThumbsInMatrix(container: HTMLElement): HTMLElement[] {
@@ -87,7 +87,7 @@ export function getThumbAtPoint(x: number, y: number): HTMLElement | null {
 }
 
 export function waitForThumbnailsToLoadInContainer(container: HTMLElement | Document): Promise<unknown[]> {
-  const unloadedImages = getThumbsInContainer(container)
+  const unloadedImages = getItemsInContainer(container)
     .map(thumb => getImageFromThumb(thumb))
     .filter(image => image instanceof HTMLImageElement)
     .filter(image => image.dataset.preload !== "true" && imageIsLoading(image));

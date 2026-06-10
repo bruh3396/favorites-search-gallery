@@ -1,6 +1,6 @@
 import * as FavoritesLoader from "@/features/favorites/model/load/loader";
 import * as FavoritesMetadataFetcher from "@/features/favorites/model/metadata_fetcher";
-import * as FavoritesPaginator from "@/features/favorites/model/paginator/paginator";
+import * as FavoritesPaginator from "@/features/favorites/model/paginator";
 import * as FavoritesSearchCoordinator from "@/features/favorites/model/search/coordinator";
 import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/interfaces";
 import { Favorite } from "@/types/favorite";
@@ -63,5 +63,5 @@ export {
   selectAdjacent as selectAdjacentPage,
   selectContaining as selectPageContaining,
   context as paginationContext
-} from "@/features/favorites/model/paginator/paginator";
+} from "@/features/favorites/model/paginator";
 export * from "@/features/favorites/model/infinite_scroller";

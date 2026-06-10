@@ -1,7 +1,7 @@
-import * as TooltipContent from "@/features/tooltip/view/tooltip_content";
-import * as TooltipElement from "@/features/tooltip/view/shell/tooltip_element";
-import * as TooltipPosition from "@/features/tooltip/view/tooltip_position";
-import * as TooltipVisibility from "@/features/tooltip/view/tooltip_visibility";
+import * as TooltipContent from "@/features/tooltip/view/content";
+import * as TooltipElement from "@/features/tooltip/view/shell/element";
+import * as TooltipPosition from "@/features/tooltip/view/position";
+import * as TooltipVisibility from "@/features/tooltip/view/visibility";
 
 let lastThumb: HTMLElement | null = null;
 

@@ -1,11 +1,12 @@
-import * as Navigator from "@/lib/remote/rule34/posts/navigaton";
+import * as Navigator from "@/lib/remote/rule34/posts/navigation";
 import { buildElementTemplate, favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { ClickCode } from "@/types/input";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Post } from "@/types/api";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
-import { resolveMediaType } from "@/lib/media/media_type_resolver";
+import { resolveMediaType } from "@/lib/media/type_resolver";
+import { setDataset } from "@/utils/dom/attribute";
 
 export function setupFavoriteElement(): void {
   buildElementTemplate();
@@ -54,7 +55,7 @@ export class FavoriteElement {
 
   private populateAttributes(post: Post): void {
     this.image.src = post.previewURL;
-    this.image.classList.add(resolveMediaType(post.tags));
+    setDataset(this.root, "mediaType", resolveMediaType(post.tags));
     this.root.id = post.id;
     this.setAspectRatio(post.width, post.height);
   }

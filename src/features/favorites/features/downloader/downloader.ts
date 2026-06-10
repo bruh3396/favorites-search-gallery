@@ -1,7 +1,7 @@
 import { DownloadRequest, toDownloadRequest } from "@/features/favorites/features/downloader/download_request";
 import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
 import { DownloadAbortedError } from "@/types/errors";
-import { MediaResolvable } from "@/lib/media/media_url_resolver";
+import { MediaResolvable } from "@/lib/media/url_resolver";
 import { downloadBlob } from "@/utils/browser/download";
 
 const fetchLimiter = new ConcurrencyLimiter(3);

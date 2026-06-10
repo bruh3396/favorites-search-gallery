@@ -1,5 +1,4 @@
 import { Layout } from "@/types/ui";
-import { insertStyle } from "@/utils/dom/injector";
 
 export abstract class AbstractTiler {
   protected readonly container: HTMLElement;
@@ -28,11 +27,7 @@ export abstract class AbstractTiler {
   }
 
   public setColumnCount(columnCount: number): void {
-    insertStyle(`
-        #${this.container.id}[data-layout="${this.layout}"] {
-          grid-template-columns: repeat(${columnCount}, 1fr) !important;
-        }
-        `, `${this.container.id}-${this.layout}-column-count`);
+    this.container.style.setProperty("--tile-columns", String(columnCount));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

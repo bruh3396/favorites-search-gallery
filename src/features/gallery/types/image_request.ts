@@ -3,8 +3,8 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { MediaType } from "@/types/media";
 import { ThrottledQueue } from "@/lib/async/throttled_queue";
 import { getPreviewUrl } from "@/lib/thumb/thumbs";
-import { getTagSetFromItem } from "@/lib/thumb/thumb_tags";
-import { resolveMediaType } from "@/lib/media/media_type_resolver";
+import { getTagSetFromItem } from "@/lib/thumb/tags";
+import { resolveMediaType } from "@/lib/media/type_resolver";
 
 const bitmapCloseQueue = new ThrottledQueue(GalleryConfig.bitmapCloseDelay);
 

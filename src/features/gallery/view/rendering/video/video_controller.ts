@@ -3,10 +3,10 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";
 import { VideoClip } from "@/features/gallery/types/gallery_types";
-import { convertPreviewUrlToImageUrl } from "@/lib/media/media_url_transformer";
+import { convertPreviewUrlToImageUrl } from "@/lib/media/url_transformer";
 import { doNothing } from "@/utils/function";
 import { getPreviewUrl } from "@/lib/thumb/thumbs";
-import { isVideo } from "@/lib/media/media_type_predicates";
+import { isVideo } from "@/lib/media/type_predicates";
 
 const videoPlayers: HTMLVideoElement[] = [];
 const videoClips = new Map();

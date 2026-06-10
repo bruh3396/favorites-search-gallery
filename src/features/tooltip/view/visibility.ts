@@ -1,4 +1,4 @@
-import * as TooltipElement from "@/features/tooltip/view/shell/tooltip_element";
+import * as TooltipElement from "@/features/tooltip/view/shell/element";
 
 export function showTooltip(): void {
   TooltipElement.element.style.opacity = "1";

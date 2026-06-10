@@ -1,8 +1,9 @@
-import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_ITEM_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
+import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { removeNonNumericCharacters } from "@/utils/string/format";
-import { resolveMediaType } from "@/lib/media/media_type_resolver";
+import { resolveMediaType } from "@/lib/media/type_resolver";
+import { setDataset } from "@/utils/dom/attribute";
 
 export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {
   thumbs.forEach(thumb => prepareThumb(thumb));
@@ -15,7 +16,7 @@ function prepareThumb(thumb: HTMLElement): void {
   addCanvas(thumb);
   thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
   thumb.classList.remove(RAW_THUMB_CLASS_NAME);
-  thumb.classList.add(ITEM_CLASS_NAME, TILE_ITEM_CLASS_NAME);
+  thumb.classList.add(ITEM_CLASS_NAME, TILE_CLASS_NAME);
   prepareMobileThumb(thumb);
 }
 
@@ -30,10 +31,6 @@ function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
 }
 
 function assignMediaType(thumb: HTMLElement): void {
-  thumb.classList.remove("image");
-  thumb.classList.remove("video");
-  thumb.classList.remove("gif");
-
   const image = getImageFromThumb(thumb);
 
   if (image === null) {
@@ -41,7 +38,7 @@ function assignMediaType(thumb: HTMLElement): void {
   }
   const tags = image.getAttribute("tags") ?? "";
 
-  image.classList.add(resolveMediaType(tags));
+  setDataset(thumb, "mediaType", resolveMediaType(tags));
 }
 
 function addCanvas(thumb: HTMLElement): void {

@@ -1,7 +1,7 @@
 import { getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
 import { FavoritesDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
-import { decompressPreviewSource } from "@/lib/media/media_url_transformer";
+import { decompressPreviewSource } from "@/lib/media/url_transformer";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 export function createPost(source: HTMLElement | FavoritesDatabaseRecord): Post {

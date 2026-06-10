@@ -1,6 +1,7 @@
-import * as FavoritesChangelogPanel from "@/features/favorites/view/shell/panels/changelog";
-import * as FavoritesHelpPanel from "@/features/favorites/view/shell/panels/help";
-import { Body, DrawerTrack } from "@/features/favorites/view/shell/favorites_shell";
+import * as FavoritesChangelogPanel from "@/features/favorites/view/shell/changelog";
+import * as FavoritesHelpPanel from "@/features/favorites/view/shell/help";
+import * as FavoritesSettingsPanel from "@/features/favorites/view/shell/settings";
+import { Body, DrawerTrack } from "@/features/favorites/view/shell/shell";
 import { FavoritesClass, FavoritesDrawerTabs, FavoritesId } from "@/features/favorites/types/scaffold";
 import { IconName, icon } from "@/lib/ui/icon";
 import { removeDataset, setDataset } from "@/utils/dom/attribute";
@@ -21,6 +22,7 @@ export async function setup(): Promise<void> {
   drawer.appendChild(buildTabRail());
   drawer.appendChild(buildPanels());
   DrawerTrack.appendChild(drawer);
+  FavoritesSettingsPanel.wireSettingsPanel();
   selectTab(activeTab);
   wireVersionLabel();
 
@@ -158,6 +160,9 @@ function buildPanels(): HTMLElement {
 
 function renderPanelContent(tab: FavoritesDrawerTab, panel: HTMLElement): void {
   switch (tab) {
+    case "settings":
+      FavoritesSettingsPanel.buildSettingsPanel(panel);
+      break;
     case "change":
       FavoritesChangelogPanel.buildChangelogPanel(panel);
       break;

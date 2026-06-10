@@ -1,4 +1,4 @@
-import { convertPreviewUrlToImageUrl, removeIdFromImageUrl } from "@/lib/media/media_url_transformer";
+import { convertPreviewUrlToImageUrl, removeIdFromImageUrl } from "@/lib/media/url_transformer";
 import { Favorite } from "@/types/favorite";
 import { getPreviewUrl } from "@/lib/thumb/thumbs";
 

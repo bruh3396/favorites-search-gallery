@@ -58,7 +58,6 @@ function setupView(): void {
 function setupControl(): void {
   GalleryEdgeTapControls.setup();
   GalleryInteractionTracker.setup();
-  GalleryVisibleThumbObserver.setup();
 }
 
 function setupSubFeatures(): void {

@@ -5,7 +5,7 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import { LowResolutionImageRequest } from "@/features/gallery/types/low_resolution_image_request";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { doNothing } from "@/utils/function";
-import { isImage } from "@/lib/media/media_type_predicates";
+import { isImage } from "@/lib/media/type_predicates";
 export { get, completedRequests, clear } from "@/features/gallery/view/rendering/image/cache";
 
 let onComplete: (request: ImageRequest) => void = doNothing;
@@ -29,11 +29,16 @@ export function loadImmediate(thumb: HTMLElement): void {
 function onBitmapLoaded(request: ImageRequest): void {
   const cached = GalleryImageCache.get(request.id);
 
-  if (cached?.status !== "complete") {
+  if (cached === undefined || request.cancelled) {
+    request.close();
+    return;
+  }
+
+  if (cached.status !== "complete") {
     GalleryImageCache.set(request, request.isHighRes ? "complete" : "low-res");
     onComplete(request);
   }
- }
+}
 
 function exceededPreloadBudget(megabytes: number, acceptedCount: number): boolean {
   return megabytes >= GalleryConfig.imageMegabyteLimit && acceptedCount >= GalleryConfig.minimumPreloadedImageCount;

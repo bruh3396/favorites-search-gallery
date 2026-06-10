@@ -44,7 +44,7 @@ body {
 
 [data-theme="native-dark"] {
   --theme-surface: #2a322a;
-  --theme-surface-sunken: #1c211c;
+  --theme-surface-sunken: #303030;
   --theme-surface-raised: #364036;
   --theme-surface-hover: #44503f;
   --theme-border: #4a564a;

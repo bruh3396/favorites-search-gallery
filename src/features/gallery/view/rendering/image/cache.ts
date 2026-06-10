@@ -1,3 +1,4 @@
+import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fetcher";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 
 export type RequestStatus = "low-res" | "complete";
@@ -49,6 +50,10 @@ function evictStale(candidates: ImageRequest[]): void {
 }
 
 function release(cached: CachedRequest | undefined): void {
-  cached?.request.close();
-  cached?.request.stop();
+  if (cached === undefined) {
+    return;
+  }
+  GalleryImageFetcher.cancelFetch(cached.request.id);
+  cached.request.close();
+  cached.request.stop();
 }

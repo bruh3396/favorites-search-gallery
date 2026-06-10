@@ -1,5 +1,5 @@
 import { THUMBNAIL_ORIGIN } from "@/lib/rule34_constants";
-import { extensionRegex } from "@/lib/media/media_constants";
+import { extensionRegex } from "@/lib/media/constants";
 
 const imageSourceNormalizationRegex = /^([^.]*\/\/)?(?:[^.]+\.)*rule34/;
 const thumbSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;

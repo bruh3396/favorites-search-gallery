@@ -16,7 +16,7 @@ import { SquareTiler } from "@/lib/ui/tilers/square_tiler";
 import { ThumbConfig } from "@/config/thumb_config";
 import { Timeout } from "@/types/async";
 import { clamp } from "@/utils/number";
-import { galleryIsIdle } from "@/app/channels/feature_bridge";
+import { inGallery } from "@/app/channels/feature_bridge";
 import { navigationDelta } from "@/utils/navigation";
 import { yieldControl } from "@/lib/async/timing";
 
@@ -58,7 +58,7 @@ export const addToTop = (items: HTMLElement[]): void => fadeInWhile(() => curren
 export const getBottomEdgeElements = (): HTMLElement[] => currentTiler.getBottomEdgeElements();
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || !galleryIsIdle()) {
+  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || inGallery()) {
     return;
   }
   const usingRowLayout = currentLayout === "row";

@@ -1,8 +1,8 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { convertImageUrlToSampleUrl } from "@/lib/media/media_url_transformer";
-import { isImage } from "@/lib/media/media_type_predicates";
-import { resolveImageUrl } from "@/lib/media/media_url_resolver";
+import { convertImageUrlToSampleUrl } from "@/lib/media/url_transformer";
+import { isImage } from "@/lib/media/type_predicates";
+import { resolveImageUrl } from "@/lib/media/url_resolver";
 
 export const transferredCanvasIds = new Set<string>();
 

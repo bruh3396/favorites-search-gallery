@@ -1,15 +1,15 @@
-import * as PostOverlayCategoryCache from "@/features/post_overlay/model/providers/tags/cache";
-import * as PostOverlayCategoryStore from "@/features/post_overlay/model/providers/tags/store";
+import * as PostOverlayCategoryCache from "@/features/post_overlay/model/tags/cache";
+import * as PostOverlayCategoryStore from "@/features/post_overlay/model/tags/store";
 import { TagCategory, TagCategoryMap } from "@/types/search";
 import { PostOverlayConfig } from "@/config/post_overlay_config";
 import { decodeTagCategory } from "@/lib/remote/parsers/tag";
 import { fetchPostPageHtml } from "@/lib/remote/rule34/posts/page";
 import { fetchTagCategory } from "@/lib/remote/api/tag";
-import { getTagSetFromItem } from "@/lib/thumb/thumb_tags";
+import { getTagSetFromItem } from "@/lib/thumb/tags";
 import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page";
 import { withTimeout } from "@/lib/async/timing";
 
-export { destroy as destroyStore } from "@/features/post_overlay/model/providers/tags/store";
+export { destroy as destroyStore } from "@/features/post_overlay/model/tags/store";
 
 export async function preloadCache(): Promise<void> {
   for (const mapping of await PostOverlayCategoryStore.readAll()) {

@@ -1,4 +1,4 @@
-import { getThumbsInContainer, getThumbsInMatrix } from "@/lib/thumb/thumbs";
+import { getItemsInContainer, getThumbsInMatrix } from "@/lib/thumb/thumbs";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/ui";
 
@@ -64,7 +64,7 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   protected onActivate(): void {
-    this.tile(getThumbsInContainer(this.container));
+    this.tile(getItemsInContainer(this.container));
   }
 
   protected onDeactivate(): void {

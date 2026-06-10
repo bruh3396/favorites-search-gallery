@@ -1,4 +1,4 @@
-import * as ExtensionResolver from "@/lib/media/media_extension_resolver";
+import * as ExtensionResolver from "@/lib/media/extension_resolver";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import { Events } from "@/app/channels/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";

@@ -1,5 +1,5 @@
-import { convertImageUrlToSampleUrl, convertToWimgUrl } from "@/lib/media/media_url_transformer";
-import { resolveImageUrl } from "@/lib/media/media_url_resolver";
+import { convertImageUrlToSampleUrl, convertToWimgUrl } from "@/lib/media/url_transformer";
+import { resolveImageUrl } from "@/lib/media/url_resolver";
 
 export async function fetchImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
   return fetchImageBitmap(await resolveImageUrl(thumb), abortController);

@@ -21,11 +21,7 @@ export function setup(onFirstPageFavoritesExtracted: (elements: HTMLElement[] | 
 
   buildScaffold();
   FavoritesNativePageCleaner.removeUnusedScripts();
-  style();
-}
-
-function style(): void {
-  insertStyle(DESKTOP_CSS + TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS, "favorites-menu");
+  insertStyle(DESKTOP_CSS + TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS, "favorites-ui");
   Body.insertAdjacentElement("afterbegin", FavoritesToolbar.build());
 }
 
