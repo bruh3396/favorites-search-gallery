@@ -37,9 +37,7 @@ export const GalleryConfig = {
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2_000 : 1_000,
 
   maxImagesToPreloadAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
-  favoritesMenuHeight: 200,
-  visibleThumbsDownwardScrollPixelGenerosity: 50,
-  visibleThumbsDownwardScrollPercentageGenerosity: 100,
+  bottomOverscanPercent: 100,
   bitmapCloseDelay: 50,
   fetchImageBitmapsInWorker: false,
   get sendImageBitmapsToWorker(): boolean {

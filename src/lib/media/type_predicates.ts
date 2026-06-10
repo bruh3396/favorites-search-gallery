@@ -1,6 +1,6 @@
 import { Favorite } from "@/types/favorite";
 import { MediaType } from "@/types/media";
-import { getTagSetFromItem } from "@/lib/thumb/tags";
+import { getTagSetFromItem } from "@/lib/thumb/tag";
 import { resolveMediaType } from "@/lib/media/type_resolver";
 
 export const isVideo = (item: HTMLElement | Favorite): boolean => isMediaType(item, "video");

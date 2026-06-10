@@ -1,6 +1,6 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { convertImageUrlToSampleUrl } from "@/lib/media/url_transformer";
+import { imageUrlToSampleUrl } from "@/lib/media/url_transformer";
 import { isImage } from "@/lib/media/type_predicates";
 import { resolveImageUrl } from "@/lib/media/url_resolver";
 
@@ -28,7 +28,7 @@ export class OffscreenUpscaleRequest {
     this.offscreenCanvas = this.getOffscreenCanvas(thumb);
     this.bitmap = bitmap;
     this.imageUrl = imageUrl;
-    this.sampleUrl = isImage(thumb) ? convertImageUrlToSampleUrl(imageUrl) : imageUrl;
+    this.sampleUrl = isImage(thumb) ? imageUrlToSampleUrl(imageUrl) : imageUrl;
   }
 
   public get transferable(): OffscreenCanvas[] {

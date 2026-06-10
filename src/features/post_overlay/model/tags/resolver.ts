@@ -5,7 +5,7 @@ import { PostOverlayConfig } from "@/config/post_overlay_config";
 import { decodeTagCategory } from "@/lib/remote/parsers/tag";
 import { fetchPostPageHtml } from "@/lib/remote/rule34/posts/page";
 import { fetchTagCategory } from "@/lib/remote/api/tag";
-import { getTagSetFromItem } from "@/lib/thumb/tags";
+import { getTagSetFromItem } from "@/lib/thumb/tag";
 import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page";
 import { withTimeout } from "@/lib/async/timing";
 

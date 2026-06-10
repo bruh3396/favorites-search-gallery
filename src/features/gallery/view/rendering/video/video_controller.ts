@@ -3,9 +3,9 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";
 import { VideoClip } from "@/features/gallery/types/gallery_types";
-import { convertPreviewUrlToImageUrl } from "@/lib/media/url_transformer";
+import { thumbnailUrlToImageUrl } from "@/lib/media/url_transformer";
 import { doNothing } from "@/utils/function";
-import { getPreviewUrl } from "@/lib/thumb/thumbs";
+import { thumbnailUrl } from "@/lib/thumb/url";
 import { isVideo } from "@/lib/media/type_predicates";
 
 const videoPlayers: HTMLVideoElement[] = [];
@@ -294,7 +294,7 @@ function videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): bool
 }
 
 function getVideoSource(thumb: HTMLElement): string {
-  return convertPreviewUrlToImageUrl(getPreviewUrl(thumb) ?? "").replace("jpg", "mp4");
+  return thumbnailUrlToImageUrl(thumbnailUrl(thumb) ?? "").replace("jpg", "mp4");
 }
 
 function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {

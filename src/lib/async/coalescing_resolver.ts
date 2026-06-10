@@ -1,55 +1,44 @@
 import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
+import { DeferredPromise } from "@/types/async";
 
-type PromiseCallback<V> = {
-  resolve: (value: V) => void;
-  reject: (reason: unknown) => void
-};
-
-export class CoalescingResolver<V> {
-  private readonly pending = new Map<string, PromiseCallback<V>[]>();
-  private readonly executor: CoalescingExecutor<string>;
+export class CoalescingResolver<K, V> {
+  private readonly deferred = new Map<K, DeferredPromise<V>[]>();
+  private readonly executor: CoalescingExecutor<K>;
 
   constructor(
-    batchSize: number,
-    flushDelay: number,
-    private readonly resolveBatch: (keys: string[]) => Promise<Record<string, V>>
+    maxSize: number,
+    flushTimeout: number,
+    private readonly resolve: (coalesced: K[]) => Promise<Map<K, V>>
   ) {
-    this.executor = new CoalescingExecutor<string>(batchSize, flushDelay, keys => this.flush(keys));
+    this.executor = new CoalescingExecutor<K>(maxSize, flushTimeout, coalesced => this.flush(coalesced));
   }
 
-  public resolve(key: string): Promise<V> {
+  public schedule(key: K): Promise<V> {
     return new Promise<V>((resolve, reject) => {
-      const promises = this.pending.get(key);
       const promise = { resolve, reject };
+      const existing = this.deferred.get(key);
 
-      if (promises === undefined) {
-        this.pending.set(key, [promise]);
-        this.executor.add(key);
+      if (existing === undefined) {
+        this.deferred.set(key, [promise]);
+        this.executor.schedule(key);
       } else {
-        promises.push(promise);
+        existing.push(promise);
       }
     });
   }
 
-  private flush(keys: string[]): void {
-    this.resolveBatch(keys).then(data => {
-      this.resolveAll(data);
-    }).catch((error: unknown) => {
-      this.rejectAll(keys, error);
-    });
-  }
-
-  private resolveAll(data: Record<string, V>): void {
-    for (const [key, value] of Object.entries(data)) {
-      this.pending.get(key)?.forEach(r => r.resolve(value));
-      this.pending.delete(key);
-    }
-  }
-
-  private rejectAll(keys: string[], error: unknown): void {
-    for (const key of keys) {
-      this.pending.get(key)?.forEach(r => r.reject(error));
-      this.pending.delete(key);
-    }
+  private flush(coalesced: K[]): void {
+    this.resolve(coalesced)
+      .then(resolution => {
+        for (const [key, value] of resolution) {
+          this.deferred.get(key)?.forEach(promise => promise.resolve(value));
+          this.deferred.delete(key);
+        }
+      }).catch((error: unknown) => {
+        for (const key of coalesced) {
+          this.deferred.get(key)?.forEach(promise => promise.reject(error));
+          this.deferred.delete(key);
+        }
+      });
   }
 }

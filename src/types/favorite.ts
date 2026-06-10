@@ -25,7 +25,7 @@ export type FavoritesDatabaseRecord = {
 export interface Favorite extends Searchable {
   id: string
   root: HTMLElement
-  thumbUrl: string
+  thumbnailUrl: string
   databaseRecord: FavoritesDatabaseRecord
   withinRating: (rating: Rating) => boolean
   updateTags: (post: Post) => void

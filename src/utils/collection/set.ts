@@ -1,4 +1,4 @@
-export function intersection<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+export function intersection<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): Set<T> {
   const smaller = setA.size < setB.size ? setA : setB;
   const larger = smaller === setA ? setB : setA;
   const result = new Set<T>();
@@ -11,7 +11,7 @@ export function intersection<T>(setA: Set<T>, setB: Set<T>): Set<T> {
   return result;
 }
 
-export function intersects<T>(setA: Set<T>, setB: Set<T>): boolean {
+export function intersects<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): boolean {
   const smaller = setA.size < setB.size ? setA : setB;
   const larger = smaller === setA ? setB : setA;
 
@@ -23,7 +23,7 @@ export function intersects<T>(setA: Set<T>, setB: Set<T>): boolean {
   return false;
 }
 
-export function union<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+export function union<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): Set<T> {
   const result = new Set(setB);
 
   for (const a of setA) {

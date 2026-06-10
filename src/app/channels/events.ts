@@ -2,16 +2,23 @@ import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile }
 import { MetadataMetric, Rating, TagCategoryMap } from "@/types/search";
 import { Emitter } from "@/lib/communication/emitter";
 import { Favorite } from "@/types/favorite";
-import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { StickyEmitter } from "@/lib/communication/sticky_emitter";
 
 export const Events = {
+  app: {
+    favoriteAdded: new Emitter<string>(),
+    favoriteRemoved: new Emitter<string>(),
+    autoplayToggled: new Emitter<boolean>(),
+    tooltipToggled: new Emitter<boolean>(),
+    galleryMenuToggled: new Emitter<boolean>(),
+    columnCountChanged: new Emitter<number>(),
+    rowHeightChanged: new Emitter<number>(),
+    performanceProfileChanged: new Emitter<PerformanceProfile>()
+  },
   favorites: {
     searchStarted: new Emitter<string>(),
     pageChanged: new Emitter<void>(),
-    pageSelected: new Emitter<number>(),
-    pageStepped: new Emitter<NavigationKey>(),
     findFavorite: new Emitter<string>(),
     findFavoriteInAll: new Emitter<string>(),
     firstPageFavorites: new StickyEmitter<HTMLElement[] | undefined>(),
@@ -21,8 +28,6 @@ export const Events = {
 
     searchResultsUpdated: new Emitter<void>(),
     tagCategoriesResolved: new Emitter<TagCategoryMap>(),
-    favoriteAdded: new Emitter<string>(),
-    favoriteRemoved: new Emitter<string>(),
     newFavoritesFound: new Emitter<Favorite[]>(),
     favoritesAddedToCurrentPage: new Emitter<HTMLElement[]>(),
     resetConfirmed: new Emitter<void>(),
@@ -38,19 +43,13 @@ export const Events = {
 
     resultsPerPageChanged: new Emitter<number>(),
     allowedRatingsChanged: new Emitter<Rating>(),
-    columnCountChanged: new Emitter<number>(),
-    rowHeightChanged: new Emitter<number>(),
     layoutChanged: new Emitter<Layout>(),
     sortMethodChanged: new Emitter<MetadataMetric>(),
-    performanceProfileChanged: new Emitter<PerformanceProfile>(),
 
     galleryPreviewToggled: new Emitter<boolean>(),
-    tooltipToggled: new Emitter<boolean>(),
-    autoplayToggled: new Emitter<boolean>(),
     captionsToggled: new Emitter<boolean>(),
     postOverlayToggled: new Emitter<boolean>(),
     sortAscendingToggled: new Emitter<boolean>(),
-    galleryMenuToggled: new Emitter<boolean>(),
     blacklistToggled: new Emitter<boolean>(),
     infiniteScrollToggled: new Emitter<boolean>()
   },
@@ -59,7 +58,6 @@ export const Events = {
     openedGallery: new Emitter<HTMLElement>(),
     closedGallery: new Emitter<void>(),
     displayedThumb: new Emitter<HTMLElement>(),
-    visibleThumbsChanged: new Emitter<void>(),
     galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
     rightTap: new Emitter<void>(),
     leftTap: new Emitter<void>(),

@@ -3,7 +3,7 @@ export interface Store {
   set<V>(key: string, value: V): void
   remove(key: string): void
   keys(): string[]
-  clear(persistent?: Set<string>): void
+  clear(persistent?: ReadonlySet<string>): void
 }
 
 export class LocalStorage implements Store {

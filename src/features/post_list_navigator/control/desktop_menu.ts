@@ -45,7 +45,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     enabled: GALLERY_ENABLED,
     preference: Preferences.galleryAutoplayActive,
     hotkey: "",
-    event: Events.favorites.autoplayToggled
+    event: Events.app.autoplayToggled
   },
   {
     id: "enable-tooltip",
@@ -56,7 +56,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     enabled: TOOLTIP_ENABLED,
     preference: Preferences.postListTooltipEnabled,
     hotkey: "",
-    event: Events.favorites.tooltipToggled
+    event: Events.app.tooltipToggled
   },
   {
     id: "enable-gallery-menu",
@@ -67,7 +67,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
     function: toggleGalleryMenuEnabled,
     preference: Preferences.galleryMenuEnabled,
-    event: Events.favorites.galleryMenuToggled
+    event: Events.app.galleryMenuToggled
   },
   {
     id: "favorite-indicator",
@@ -102,7 +102,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     parentId: "post-list-column-count",
     position: "beforeend",
     preference: Preferences.postListColumnCount,
-    event: Events.favorites.columnCountChanged,
+    event: Events.app.columnCountChanged,
     options: new Map<number, string>(numberRange(2, ON_DESKTOP_DEVICE ? 25 : 10).map(n => [n, String(n)]))
   },
   {
@@ -110,7 +110,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     parentId: "post-list-row-size",
     position: "beforeend",
     preference: Preferences.postListRowHeight,
-    event: Events.favorites.rowHeightChanged,
+    event: Events.app.rowHeightChanged,
     options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
   },
   {
@@ -143,7 +143,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> 
     title: "Improve performance by disabling features",
     position: "beforeend",
     preference: Preferences.appPerformanceProfile,
-    event: Events.favorites.performanceProfileChanged,
+    event: Events.app.performanceProfileChanged,
     function: reloadWindow,
     enabled: ON_DESKTOP_DEVICE,
     options: new Map<PerformanceProfile, string>([

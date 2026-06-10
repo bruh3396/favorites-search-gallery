@@ -30,7 +30,7 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
   protected override matchesPositive(item: Searchable): boolean {
     switch (this.matchType) {
       case WildcardMatchType.Prefix: return this.matchesPrefix(item);
-      case WildcardMatchType.Substring: return this.matchesIncludes(item);
+      case WildcardMatchType.Substring: return this.matchesSubstring(item);
       default: return this.matchesRegex(item);
     }
   }
@@ -40,7 +40,7 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
   }
 
   private optimize(): void {
-    this.matchesPositive = this.matchType === WildcardMatchType.Prefix ? this.matchesPrefix : this.matchType === WildcardMatchType.Substring ? this.matchesIncludes : this.matchesRegex;
+    this.matchesPositive = this.matchType === WildcardMatchType.Prefix ? this.matchesPrefix : this.matchType === WildcardMatchType.Substring ? this.matchesSubstring : this.matchesRegex;
     this.matches = this.negated ? this.matchesNegated : this.matchesPositive;
   }
 
@@ -57,7 +57,7 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
     return false;
   }
 
-  private matchesIncludes(item: Searchable): boolean {
+  private matchesSubstring(item: Searchable): boolean {
     for (const tag of item.tags.values()) {
       if (tag.includes(this.substring)) {
         return true;

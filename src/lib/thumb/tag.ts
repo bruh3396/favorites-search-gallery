@@ -9,6 +9,11 @@ export function setFavoriteTagsLookup(fn: (id: string) => Set<string> | undefine
   getFavoriteTags = fn;
 }
 
+export function getTagsFromThumb(thumb: HTMLElement): string {
+    const image = getImageFromThumb(thumb);
+    return image?.title ?? image?.getAttribute("tags") ?? "";
+}
+
 export const getTagSetFromItem: (item: HTMLElement | Favorite) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromFavoritesPageItem : getTagSetFromPostListItem;
 
 function getTagSetFromFavoritesPageItem(item: HTMLElement | Favorite): Set<string> {
@@ -30,7 +35,7 @@ function getRawTagsFromPostListItem(thumb: HTMLElement | Favorite): string {
     return "";
   }
   const tagAttribute = resolveTagAttribute(image);
-  return image.getAttribute(tagAttribute) || "";
+  return image.getAttribute(tagAttribute) ?? "";
 }
 
 function resolveTagAttribute(image: HTMLImageElement): string {

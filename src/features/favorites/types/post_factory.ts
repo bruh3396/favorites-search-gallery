@@ -1,23 +1,43 @@
-import { getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
 import { FavoritesDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
-import { decompressPreviewSource } from "@/lib/media/url_transformer";
+import { chain } from "@/utils/function";
+import { decompressPreviewSource } from "@/lib/media/url_compressor";
+import { getImageFromThumb } from "@/lib/thumb/thumbs";
+import { getTagsFromThumb } from "@/lib/thumb/tag";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 export function createPost(source: HTMLElement | FavoritesDatabaseRecord): Post {
-  if (source instanceof HTMLElement) {
-    return createPostFromFavoritesPageThumb(source);
-  }
-  return createPostFromDatabaseRecord(source);
+  return source instanceof HTMLElement ? createPostFromThumb(source) : createPostFromRecord(source);
 }
 
 export function clearPost(post: Post): void {
   Object.assign(post, createEmptyPost());
 }
 
-function createEmptyPost(): Post {
+function createPostFromThumb(thumb: HTMLElement): Post {
+  const post = createEmptyPost(thumb.id);
+  const image = getImageFromThumb(thumb);
+
+  if (image === null) {
+    return post;
+  }
+  post.previewURL = image.src ?? image.getAttribute("data-cfsrc") ?? "";
+  post.tags = normalizeTags(thumb, post.id);
+  return post;
+}
+
+function createPostFromRecord(record: FavoritesDatabaseRecord): Post {
+  const post = createEmptyPost(record.id);
+
+  post.height = record.metadata.height;
+  post.width = record.metadata.width;
+  post.previewURL = decompressPreviewSource(record.src);
+  return post;
+}
+
+function createEmptyPost(id: string = ""): Post {
   return {
-    id: "",
+    id,
     width: 0,
     height: 0,
     score: 0,
@@ -30,33 +50,16 @@ function createEmptyPost(): Post {
   };
 }
 
-function normalizeTags(image: HTMLElement, id: string): string {
-  const tags = image.title || image.getAttribute("tags") || "";
-  return removeExtraWhiteSpace(`${tags} ${id}`).replace(/\bvide\b/g, "video").split(" ").sort().join(" ");
+function normalizeTags(thumb: HTMLElement, id: string): string {
+  return chain(
+    getTagsFromThumb(thumb),
+    fixTruncatedVideoTag,
+    tags => appendId(tags, id),
+    sortTags,
+    removeExtraWhiteSpace
+  );
 }
 
-function createPostFromDatabaseRecord(record: FavoritesDatabaseRecord): Post {
-  const post = createEmptyPost();
-
-  post.id = record.id;
-  post.height = record.metadata.height;
-  post.width = record.metadata.width;
-  post.previewURL = decompressPreviewSource(record.src);
-  return post;
-}
-
-function createPostFromFavoritesPageThumb(element: HTMLElement): Post {
-  const post = createEmptyPost();
-
-  post.id = getIdFromThumb(element);
-  const image = getImageFromThumb(element);
-
-  if (image === null) {
-    return post;
-  }
-  const source = image.src || image.getAttribute("data-cfsrc") || "";
-
-  post.previewURL = source;
-  post.tags = normalizeTags(image, post.id);
-  return post;
-}
+const appendId = (tags: string, id: string): string => `${tags} ${id}`;
+const fixTruncatedVideoTag = (tags: string): string => tags.replace(/\bvide\b/g, "video");
+const sortTags = (tags: string): string => tags.split(" ").sort().join(" ");

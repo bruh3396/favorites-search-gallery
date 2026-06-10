@@ -1,5 +1,5 @@
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
-import * as GalleryThumbObserver from "@/features/gallery/control/visible_thumb_observer";
+import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { GalleryConfig } from "@/config/gallery_config";
 import { debounceLeading } from "@/lib/async/debounce";
@@ -37,7 +37,7 @@ function cacheAroundFirstThumb(): void {
 
 export function indexThumbs(): void {
   GalleryThumbObserver.resetCenterThumb();
-  GalleryThumbObserver.observeAllThumbsOnPage();
+  GalleryThumbObserver.refresh();
   GalleryModel.reIndexThumbs();
 }
 

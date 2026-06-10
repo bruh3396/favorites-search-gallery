@@ -1,6 +1,6 @@
+import { imageUrlToSampleUrl, replaceExtension, withExtension } from "@/lib/media/url_transformer";
 import { Favorite } from "@/types/favorite";
-import { baseImageUrl } from "@/lib/media/base_image_url";
-import { getTagSetFromItem } from "@/lib/thumb/tags";
+import { imageUrl } from "@/lib/thumb/url";
 import { resolveExtension } from "@/lib/media/extension_resolver";
 
 // FIXME: temp alias so the downloader depends on a media-resolvable thing, not the
@@ -8,15 +8,14 @@ import { resolveExtension } from "@/lib/media/extension_resolver";
 // real MediaItem capability type in the lib/media remodel — see docs/media-item-remodel.md.
 export type MediaResolvable = HTMLElement | Favorite;
 
+export async function resolveSampleUrl(item: HTMLElement | Favorite): Promise<string> {
+  return imageUrlToSampleUrl(await resolveImageUrl(item));
+}
+
 export async function resolveImageUrl(item: HTMLElement | Favorite): Promise<string> {
-  return (await resolveMediaUrl(item)).replace(".mp4", ".jpg");
+  return replaceExtension(await resolveMediaUrl(item), "mp4", "jpg");
 }
 
 export async function resolveMediaUrl(item: HTMLElement | Favorite): Promise<string> {
-  return baseImageUrl(item).replace(".jpg", `.${await resolveExtension(item)}`);
-}
-
-export function resolveGifUrl(thumb: HTMLElement | Favorite): string {
-  const extension = getTagSetFromItem(thumb).has("animated_png") ? "png" : "gif";
-  return baseImageUrl(thumb).replace("jpg", extension);
+  return withExtension(imageUrl(item), await resolveExtension(item));
 }

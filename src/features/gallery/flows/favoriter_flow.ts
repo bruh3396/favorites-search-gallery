@@ -6,7 +6,7 @@ export async function addFavoriteInGallery(): Promise<void> {
   const status = await GalleryModel.addFavorite();
 
   if (status === "success") {
-    Events.favorites.favoriteAdded.emit(GalleryModel.currentThumb().id);
+    Events.app.favoriteAdded.emit(GalleryModel.currentThumb().id);
   }
   GalleryView.showAddedFavoriteStatus(status);
 }
@@ -15,7 +15,7 @@ export async function removeFavoriteInGallery(): Promise<void> {
   const status = await GalleryModel.removeFavorite();
 
   if (status === "success") {
-    Events.favorites.favoriteRemoved.emit(GalleryModel.currentThumb().id);
+    Events.app.favoriteRemoved.emit(GalleryModel.currentThumb().id);
   }
   GalleryView.showRemovedFavoriteStatus(status);
 }

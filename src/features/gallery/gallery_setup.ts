@@ -14,7 +14,7 @@ import * as GalleryPostListFlow from "@/features/gallery/flows/post_list_flow";
 import * as GalleryTouchFlow from "@/features/gallery/flows/touch_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow";
-import * as GalleryVisibleThumbObserver from "@/features/gallery/control/visible_thumb_observer";
+import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
@@ -34,7 +34,8 @@ export async function setupGallery(): Promise<void> {
   setupSubFeatures();
   subscribeToEvents();
   registerBridgeHandlers();
-  primeInitialState();
+  GalleryThumbObserver.refresh();
+  GalleryModel.reIndexThumbs();
 }
 
 async function waitUntilPageIsReady(): Promise<void> {
@@ -58,6 +59,7 @@ function setupView(): void {
 function setupControl(): void {
   GalleryEdgeTapControls.setup();
   GalleryInteractionTracker.setup();
+  GalleryThumbObserver.setup(GalleryVisibilityFlow.onVisibleThumbsChanged);
 }
 
 function setupSubFeatures(): void {
@@ -74,14 +76,13 @@ function setupAutoplay(): void {
     subscribeToMouseMove: DomEvents.document.mousemove.on,
     subscribeToKeyDown: DomEvents.document.keydown.on
   });
-  Events.favorites.autoplayToggled.on(GalleryAutoplay.toggle);
+  Events.app.autoplayToggled.on(GalleryAutoplay.toggle);
   Events.gallery.openedGallery.on(GalleryAutoplay.startAutoplay);
   Events.gallery.closedGallery.on(GalleryAutoplay.stopAutoplay);
   Events.gallery.displayedThumb.on(GalleryAutoplay.startViewTimer);
 }
 
 function subscribeToEvents(): void {
-  Events.gallery.visibleThumbsChanged.on(GalleryVisibilityFlow.onVisibleThumbsChanged);
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
 
   if (ON_FAVORITES_PAGE) {
@@ -141,9 +142,4 @@ function subscribeToMobileInput(): void {
 function registerBridgeHandlers(): void {
   FeatureBridge.galleryState.register(GalleryModel.getCurrentState);
   FeatureBridge.currentGalleryThumb.register(GalleryModel.currentThumbIfOpen);
-}
-
-function primeInitialState(): void {
-  GalleryVisibleThumbObserver.observeAllThumbsOnPage();
-  GalleryModel.reIndexThumbs();
 }

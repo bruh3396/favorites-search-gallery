@@ -1,12 +1,17 @@
 import { ApiConfig } from "@/config/api_config";
-import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
+import { RateLimiter } from "@/lib/async/rate_limiter";
+import { RateLimiterConfig } from "@/types/async";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { ThrottledQueue } from "@/lib/async/throttled_queue";
+import { ThrottleQueue } from "@/lib/async/throttled_queue";
 
-export const postLimiter = new ConcurrencyLimiter(ApiConfig.postFetchConcurrency);
-export const tagLimiter = new ConcurrencyLimiter(ApiConfig.tagFetchConcurrency);
-export const extensionProbeLimiter = new ConcurrencyLimiter(Rule34NetworkConfig.extensionProbeConcurrency);
-export const extensionProbeQueue = new ThrottledQueue(Rule34NetworkConfig.extensionProbeThrottle);
-export const favoriteAddQueue = new ThrottledQueue(Rule34NetworkConfig.favoriteAddThrottle);
-export const favoriteRemoveQueue = new ThrottledQueue(Rule34NetworkConfig.favoriteRemoveThrottle);
-export const generalPageRequestQueue = new ThrottledQueue(Rule34NetworkConfig.generalPageRequestThrottle);
+function createRateLimiter({ concurrency, ratePerSecond }: RateLimiterConfig): RateLimiter {
+  return new RateLimiter(concurrency, ratePerSecond);
+}
+
+export const postLimiter = createRateLimiter(ApiConfig.postRateLimit);
+export const tagLimiter = createRateLimiter(ApiConfig.tagRateLimit);
+export const extensionProbeLimiter = createRateLimiter(Rule34NetworkConfig.extensionProbeRateLimit);
+export const generalPageRequestLimiter = createRateLimiter(Rule34NetworkConfig.generalPageRequestRateLimit);
+
+export const favoriteAddThrottle = new ThrottleQueue(Rule34NetworkConfig.favoriteAddThrottle);
+export const favoriteRemoveThrottle = new ThrottleQueue(Rule34NetworkConfig.favoriteRemoveThrottle);

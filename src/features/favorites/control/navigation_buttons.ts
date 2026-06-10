@@ -1,11 +1,12 @@
 import { Content } from "@/app/layout/shell";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
+import { NavigationKey } from "@/types/input";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { insertStyle } from "@/utils/dom/injector";
 import { yieldControl } from "@/lib/async/timing";
 
-export async function setup(): Promise<void> {
+export async function setup(onPageStepped: (direction: NavigationKey) => void): Promise<void> {
   if (ON_MOBILE_DEVICE || !FavoritesConfig.bottomNavigationButtonsEnabled) {
     return;
   }
@@ -24,11 +25,11 @@ export async function setup(): Promise<void> {
   nextButton.title = "Next page";
 
   previousButton.onclick = (): void => {
-    Events.favorites.pageStepped.emit("ArrowLeft");
+    onPageStepped("ArrowLeft");
   };
 
   nextButton.onclick = (): void => {
-    Events.favorites.pageStepped.emit("ArrowRight");
+    onPageStepped("ArrowRight");
   };
 
   Events.favorites.pageChanged.on(() => {

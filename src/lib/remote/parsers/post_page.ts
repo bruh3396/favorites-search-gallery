@@ -1,7 +1,7 @@
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
-import { normalizeImageSource } from "@/lib/media/url_transformer";
+import { withRule34Hostname } from "@/lib/media/url_transformer";
 import { parseDimensions2D } from "@/utils/string/parse";
 import { parseHtml } from "@/utils/dom/html_parser";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
@@ -59,7 +59,7 @@ function getStatistics(dom: Document): Record<string, string> {
 
 function getFileUrl(dom: Document): string {
   const image = dom.querySelector("#image");
-  return image instanceof HTMLImageElement ? normalizeImageSource(image.src) : "";
+  return image instanceof HTMLImageElement ? withRule34Hostname(image.src) : "";
 }
 
 function getTags(dom: Document): string {

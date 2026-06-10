@@ -8,29 +8,21 @@ import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page";
 import { parsePostResponse } from "@/lib/remote/parsers/post";
 import { postLimiter } from "@/lib/remote/http/rate_limiters";
 
-const postFetcher = new CoalescingResolver<PostResponse>(
-  ApiConfig.apiBatchSize,
-  ApiConfig.apiBatchFlushDelay,
-  fetchPosts
-);
+const postResolver = new CoalescingResolver<string, PostResponse>(ApiConfig.maxRequests, ApiConfig.requestFlushTimeout, fetchPosts);
 
 export function fetchPost(id: string): Promise<Post> {
-  return postFetcher.resolve(id)
-  .then(parsePostResponse)
-  .catch((error: unknown) => recoverFromFetchError(id, error));
+  return postResolver.schedule(id)
+    .then(parsePostResponse)
+    .catch((error: unknown) => {
+      if (error instanceof DeletedPostError) {
+        return fetchPostPageHtml(id).then(parsePostFromPostPage);
+      }
+      throw error;
+    });
 }
 
-function fetchPosts(ids: string[]): Promise<Record<string, PostResponse>> {
-  return postLimiter.run(() => fetchApi("post", { ids }).then(r => r.json() as Promise<Record<string, PostResponse>>));
-}
-
-function recoverFromFetchError(id: string, error: unknown): Promise<Post> {
-  if (error instanceof DeletedPostError) {
-    return fetchPostFromPostPage(id);
-  }
-  throw error;
-}
-
-function fetchPostFromPostPage(id: string): Promise<Post> {
-  return fetchPostPageHtml(id).then(parsePostFromPostPage);
+function fetchPosts(ids: string[]): Promise<Map<string, PostResponse>> {
+  return postLimiter.run(() => fetchApi("post", { ids })
+    .then(response => response.json() as Promise<Record<string, PostResponse>>)
+    .then(record => new Map(Object.entries(record))));
 }

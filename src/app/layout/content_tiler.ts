@@ -33,8 +33,8 @@ export function setup(): void {
   setColumnCount(ON_POST_LIST_PAGE ? Preferences.postListColumnCount.value : Preferences.favoritesColumnCount.value);
   setRowHeight(ON_POST_LIST_PAGE ? Preferences.postListRowHeight.value : Preferences.favoritesRowHeight.value);
   DomEvents.document.wheel.on(changeItemSizeOnShiftScroll);
-  Events.favorites.columnCountChanged.on(setColumnCount);
-  Events.favorites.rowHeightChanged.on(setRowHeight);
+  Events.app.columnCountChanged.on(setColumnCount);
+  Events.app.rowHeightChanged.on(setRowHeight);
   Events.favorites.layoutChanged.on(hideUnusedLayoutSizer);
   Events.postList.layoutChanged.on(hideUnusedLayoutSizer);
 }

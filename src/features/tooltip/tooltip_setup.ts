@@ -17,7 +17,7 @@ export function setupTooltip(): void {
 function subscribeToEvents(): void {
   DomEvents.document.mouseover.on(TooltipHoverFlow.onMouseover);
   DomEvents.window.scrollend.on(TooltipScrollFlow.onScroll);
-  Events.favorites.tooltipToggled.on(TooltipToggleFlow.onTooltipToggled);
+  Events.app.tooltipToggled.on(TooltipToggleFlow.onTooltipToggled);
 
   if (ON_FAVORITES_PAGE) {
     Events.favorites.searchStarted.on(TooltipModel.rebuildHighlights);

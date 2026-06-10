@@ -63,7 +63,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Autoplay",
     preference: Preferences.galleryAutoplayActive,
     hotkey: "",
-    event: Events.favorites.autoplayToggled
+    event: Events.app.autoplayToggled
   },
   {
     id: "debug-show-on-hover",
@@ -79,7 +79,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Tooltip",
     preference: Preferences.favoritesTooltipEnabled,
     hotkey: "",
-    event: Events.favorites.tooltipToggled
+    event: Events.app.tooltipToggled
   },
   {
     id: "debug-show-post-overlay",
@@ -120,7 +120,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     function: toggleGalleryMenuEnabled,
     preference: Preferences.galleryMenuEnabled,
     hotkey: "",
-    event: Events.favorites.galleryMenuToggled
+    event: Events.app.galleryMenuToggled
   },
   {
     id: "debug-sort-ascending",
@@ -186,7 +186,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     parentId: SELECT_PARENT,
     title: "Improve performance by disabling features",
     preference: Preferences.appPerformanceProfile,
-    event: Events.favorites.performanceProfileChanged,
+    event: Events.app.performanceProfileChanged,
     function: reloadWindow,
     options: new Map<PerformanceProfile, string>([
       ["normal", "Normal"],

@@ -1,12 +1,12 @@
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GalleryConfig } from "@/config/gallery_config";
 import { MediaType } from "@/types/media";
-import { ThrottledQueue } from "@/lib/async/throttled_queue";
-import { getPreviewUrl } from "@/lib/thumb/thumbs";
-import { getTagSetFromItem } from "@/lib/thumb/tags";
+import { ThrottleQueue } from "@/lib/async/throttled_queue";
+import { thumbnailUrl } from "@/lib/thumb/url";
+import { getTagSetFromItem } from "@/lib/thumb/tag";
 import { resolveMediaType } from "@/lib/media/type_resolver";
 
-const bitmapCloseQueue = new ThrottledQueue(GalleryConfig.bitmapCloseDelay);
+const bitmapCloseQueue = new ThrottleQueue(GalleryConfig.bitmapCloseDelay);
 
 export function getFavoritePixelCount(id: string): number {
   const favorite = FeatureBridge.getFavorite.call(id);
@@ -26,7 +26,7 @@ export class ImageRequest {
 
   constructor(thumb: HTMLElement) {
     this.id = thumb.id;
-    this.thumbUrl = getPreviewUrl(thumb) ?? "";
+    this.thumbUrl = thumbnailUrl(thumb) ?? "";
     this.thumb = thumb;
     this.bitmap = null;
     this.abortController = new AbortController();

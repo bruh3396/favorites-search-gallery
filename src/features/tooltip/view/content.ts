@@ -1,5 +1,5 @@
 import * as TooltipElement from "@/features/tooltip/view/shell/element";
-import { getTagSetFromItem } from "@/lib/thumb/tags";
+import { getTagSetFromItem } from "@/lib/thumb/tag";
 
 export function renderTooltipContent(thumb: HTMLElement, getColor: (tag: string) => string | null): void {
   TooltipElement.element.replaceChildren();

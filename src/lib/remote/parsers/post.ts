@@ -6,7 +6,7 @@ import { decodeHtmlEntities } from "@/utils/string/format";
 
 export function parsePostResponse(response: PostResponse): Post {
   if (response.status === "rate_limited" || response.status === "error") {
-    throw new PostFetchError();
+    throw new PostFetchError(response.status);
   }
   const post = parseRawPost(response.raw);
 

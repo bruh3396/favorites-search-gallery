@@ -131,7 +131,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     enabled: GALLERY_ENABLED,
     preference: Preferences.galleryAutoplayActive,
     hotkey: "",
-    event: Events.favorites.autoplayToggled
+    event: Events.app.autoplayToggled
   },
   {
     id: "show-on-hover",
@@ -151,7 +151,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     enabled: TOOLTIP_ENABLED,
     preference: Preferences.favoritesTooltipEnabled,
     hotkey: "T",
-    event: Events.favorites.tooltipToggled
+    event: Events.app.tooltipToggled
   },
   {
     id: "show-post-overlay",
@@ -201,7 +201,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
     function: toggleGalleryMenuEnabled,
     preference: Preferences.galleryMenuEnabled,
-    event: Events.favorites.galleryMenuToggled
+    event: Events.app.galleryMenuToggled
   }
 ];
 
@@ -269,7 +269,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     title: "Improve performance by disabling features",
     position: "beforeend",
     preference: Preferences.appPerformanceProfile,
-    event: Events.favorites.performanceProfileChanged,
+    event: Events.app.performanceProfileChanged,
     function: reloadWindow,
     options: new Map<PerformanceProfile, string>([
       ["normal", "Normal"],
@@ -290,7 +290,7 @@ const numbers: Partial<NumberElement>[] = [
     max: ThumbConfig.columnCountBounds.max,
     step: 1,
     pollingTime: 50,
-    event: Events.favorites.columnCountChanged
+    event: Events.app.columnCountChanged
   },
 
   {
@@ -302,7 +302,7 @@ const numbers: Partial<NumberElement>[] = [
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
     pollingTime: 50,
-    event: Events.favorites.rowHeightChanged
+    event: Events.app.rowHeightChanged
   },
 
   {

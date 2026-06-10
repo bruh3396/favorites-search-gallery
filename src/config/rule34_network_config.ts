@@ -1,11 +1,12 @@
+import { RateLimiterConfig } from "@/types/async";
+
 export const Rule34NetworkConfig = {
   videoDurationFetchConcurrency: 3,
   videoDurationMetadataByteRanges: [500_000, 1_000_000, 2_000_000, 4_000_000],
 
-  extensionProbeConcurrency: 3,
-  extensionProbeThrottle: 20,
+  extensionProbeRateLimit: { concurrency: 3, ratePerSecond: 50 } satisfies RateLimiterConfig,
 
-  generalPageRequestThrottle: 2_000,
+  generalPageRequestRateLimit: { concurrency: 1, ratePerSecond: 0.25 } satisfies RateLimiterConfig,
 
   favoritesPageFetchDelay: 1_000,
   favoritesPageFetchRetries: 5,

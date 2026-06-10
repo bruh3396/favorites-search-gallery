@@ -30,9 +30,9 @@ function subscribeToEvents(): void {
   Events.favorites.resetConfirmed.on(PostOverlayModel.destroyStore);
   DomEvents.window.scroll.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.pageChanged.on(PostOverlayHoverFlow.onThumbsMoved);
-  Events.favorites.columnCountChanged.on(PostOverlayHoverFlow.onThumbsMoved);
+  Events.app.columnCountChanged.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.layoutChanged.on(PostOverlayHoverFlow.onThumbsMoved);
-  Events.favorites.rowHeightChanged.on(PostOverlayHoverFlow.onThumbsMoved);
+  Events.app.rowHeightChanged.on(PostOverlayHoverFlow.onThumbsMoved);
 }
 
 function waitUntilFavoritesAreReady(): Promise<unknown> {

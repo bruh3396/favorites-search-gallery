@@ -10,7 +10,7 @@ export function readAll(): Promise<TagCategoryMapping[]> {
 }
 
 export function write(mapping: TagCategoryMapping): void {
-  writeScheduler.add(mapping);
+  writeScheduler.schedule(mapping);
 }
 
 export function destroy(): Promise<void> {

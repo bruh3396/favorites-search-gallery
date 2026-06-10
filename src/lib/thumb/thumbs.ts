@@ -1,4 +1,3 @@
-import { Favorite } from "@/types/favorite";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { imageIsLoading } from "@/utils/dom/image";
 import { removeNonNumericCharacters } from "@/utils/string/format";
@@ -100,14 +99,6 @@ export function waitForThumbnailsToLoadInContainer(container: HTMLElement | Docu
         once: true
       });
     })));
-}
-
-export function getPreviewUrl(item: HTMLElement | Favorite): string | null {
-  if (item instanceof HTMLElement) {
-    const image = getImageFromThumb(item);
-    return image ? image.src : null;
-  }
-  return item.thumbUrl;
 }
 
 export function scrollToTop(): void {

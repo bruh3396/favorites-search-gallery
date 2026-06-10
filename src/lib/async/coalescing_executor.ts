@@ -1,46 +1,46 @@
 import { Timeout } from "@/types/async";
 
 export class CoalescingExecutor<V> {
-  private readonly checkInterval: number;
-  private lastAddTime: number = 0;
-  private intervalHandle: Timeout;
-  private batch: V[] = [];
+  private readonly pollInterval: number;
+  private pollHandle: Timeout;
+  private lastScheduleTime: number = 0;
+  private pending: V[] = [];
 
   constructor(
-    private readonly batchSize: number,
-    private readonly flushDelay: number,
-    private readonly executeBatch: (batch: V[]) => void
+    private readonly maxSize: number,
+    private readonly flushTimeout: number,
+    private readonly execute: (batch: V[]) => void
   ) {
-    this.checkInterval = Math.round(Math.max(10, flushDelay / 5));
+    this.pollInterval = Math.round(Math.max(10, flushTimeout / 5));
   }
 
-  public add(item: V): void {
-    this.batch.push(item);
-    this.lastAddTime = performance.now();
+  public schedule(item: V): void {
+    this.pending.push(item);
+    this.lastScheduleTime = performance.now();
 
-    if (this.batch.length >= this.batchSize) {
+    if (this.pending.length >= this.maxSize) {
       this.flush();
       return;
     }
 
-    if (this.intervalHandle !== undefined) {
+    if (this.pollHandle !== undefined) {
       return;
     }
 
-    this.intervalHandle = setInterval(() => {
-      if (performance.now() - this.lastAddTime >= this.flushDelay) {
+    this.pollHandle = setInterval(() => {
+      if (performance.now() - this.lastScheduleTime >= this.flushTimeout) {
         this.flush();
       }
-    }, this.checkInterval);
+    }, this.pollInterval);
   }
 
   private flush(): void {
     try {
-      this.executeBatch(this.batch);
+      this.execute(this.pending);
     } finally {
-      clearInterval(this.intervalHandle);
-      this.intervalHandle = undefined;
-      this.batch = [];
+      clearInterval(this.pollHandle);
+      this.pollHandle = undefined;
+      this.pending = [];
     }
   }
 }

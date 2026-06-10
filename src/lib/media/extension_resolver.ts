@@ -54,7 +54,7 @@ function saveExtension(id: string, extension: ImageExtension): void {
   extensionCache.set(id, extension);
 
   if (ON_FAVORITES_PAGE) {
-    databaseWriter.add({ id, extension });
+    databaseWriter.schedule({ id, extension });
   }
 }
 

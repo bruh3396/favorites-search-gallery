@@ -5,7 +5,7 @@ import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
 import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
 import { Post } from "@/types/api";
 import { Rating } from "@/types/search";
-import { compressPreviewSource } from "@/lib/media/url_transformer";
+import { compressPreviewSource } from "@/lib/media/url_compressor";
 import { getIdFromThumb } from "@/lib/thumb/thumbs";
 
 export class FavoriteItem implements Favorite {
@@ -37,7 +37,7 @@ export class FavoriteItem implements Favorite {
     return this.element.root;
   }
 
-  public get thumbUrl(): string {
+  public get thumbnailUrl(): string {
     return this.element === null ? this.post.previewURL : this.element.thumbUrl;
   }
 
@@ -46,7 +46,7 @@ export class FavoriteItem implements Favorite {
   }
 
   public get databaseRecord(): FavoritesDatabaseRecord {
-    return { id: this.id, tags: this.tags, src: compressPreviewSource(this.thumbUrl), metadata: this.metadata.databaseRecord };
+    return { id: this.id, tags: this.tags, src: compressPreviewSource(this.thumbnailUrl), metadata: this.metadata.databaseRecord };
   }
 
   public updateTags = (post: Post): void => this.favoriteTags.set(post.tags);

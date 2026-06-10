@@ -5,7 +5,7 @@ type Waiter = {
   resolve: (waited: boolean) => void;
 };
 
-export class ThrottledQueue {
+export class ThrottleQueue {
   private queue: Waiter[];
   private delay: number;
   private drainPromise: Promise<void> | null;

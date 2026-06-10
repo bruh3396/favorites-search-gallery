@@ -5,7 +5,7 @@ import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { extractFavoritesCount } from "@/lib/remote/parsers/profile_page";
 import { extractFavoritesPageCount } from "@/lib/remote/parsers/favorites_page";
 import { fetchHtml } from "@/lib/remote/http/client";
-import { generalPageRequestQueue } from "@/lib/remote/http/rate_limiters";
+import { generalPageRequestLimiter } from "@/lib/remote/http/rate_limiters";
 
 export function fetchFavoritesPage(pageNumber: number): Promise<string> {
   return fetchHtml(buildFavoritesPageUrl(pageNumber));
@@ -18,8 +18,8 @@ export async function fetchFavoritesCount(): Promise<number | null> {
     return null;
   }
   await yieldControl();
-  await generalPageRequestQueue.wait();
-  return withExponentialBackoff(() => fetchHtml(buildProfilePageUrl(pageId)), Rule34NetworkConfig.favoritesCountFetchRetries)
+  return generalPageRequestLimiter.run(() =>
+    withExponentialBackoff(() => fetchHtml(buildProfilePageUrl(pageId)), Rule34NetworkConfig.favoritesCountFetchRetries))
     .then(extractFavoritesCount)
     .catch(() => null);
 }

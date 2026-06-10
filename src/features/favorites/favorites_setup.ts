@@ -20,7 +20,7 @@ import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { POST_LIST_PAGE_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { deferPostPageFetchesUntil } from "@/lib/remote/rule34/posts/page";
-import { setFavoriteTagsLookup } from "@/lib/thumb/tags";
+import { setFavoriteTagsLookup } from "@/lib/thumb/tag";
 
 export function setupFavorites(): void {
   if (POST_LIST_PAGE_ENABLED) {
@@ -52,16 +52,16 @@ function setupModel(): void {
 
 function setupView(): void {
   FavoritesView.setup({
-    onPageSelected: Events.favorites.pageSelected.emit,
-    onPageStepped: Events.favorites.pageStepped.emit,
+    onPageSelected: FavoritesPaginationFlow.goToPage,
+    onPageStepped: FavoritesPaginationFlow.stepPage,
     onFirstPageFavoritesExtracted: Events.favorites.firstPageFavorites.emit,
-    onFavoriteAdded: Events.favorites.favoriteAdded.emit,
-    onFavoriteRemoved: Events.favorites.favoriteRemoved.emit
+    onFavoriteAdded: Events.app.favoriteAdded.emit,
+    onFavoriteRemoved: Events.app.favoriteRemoved.emit
   });
 }
 
 function setupControl(): void {
-  FavoritesNavigationButtons.setup();
+  FavoritesNavigationButtons.setup(FavoritesPaginationFlow.stepPage);
   FavoritesFinder.setup();
   FavoritesRatingFilter.setup();
   FavoritesSearchBox.setup();
@@ -94,9 +94,6 @@ function subscribeToEvents(): void {
   Events.favorites.findFavorite.on(FavoritesResultsFlow.reveal);
   Events.favorites.findFavoriteInAll.on(FavoritesSearchFlow.revealFavoriteInAll);
 
-  Events.favorites.pageSelected.on(FavoritesPaginationFlow.goToPage);
-  Events.favorites.pageStepped.on(FavoritesPaginationFlow.stepPage);
-
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
@@ -109,7 +106,7 @@ function subscribeToEvents(): void {
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
   Events.favorites.panelButtonClicked.on(FavoritesView.toggleDrawer);
-  Events.favorites.favoriteRemoved.on(FavoritesModel.deleteId);
+  Events.app.favoriteRemoved.on(FavoritesModel.deleteId);
 
   Events.gallery.previewOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);

@@ -36,6 +36,7 @@ export interface AwesompleteConstructor {
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
 export type Theme = "native-dark" | "native-light" | "midnight" | "ember" | "venom" | "zeal" | "frozen-cobalt";
 export type Layout = "row" | "square" | "grid" | "column" | "native"
+export type TypeableInput = "color" | "email" | "number" | "password" | "search" | "tel" | "text" | "url" | "datetime";
 
 export type SkeletonAnimation = "pulse" | "shine"
 export type FavoritesDrawerTab = "settings" | "saved" | "tags" | "download" | "change" | "help";

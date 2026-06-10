@@ -1,10 +1,10 @@
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { ThrottledQueue } from "@/lib/async/throttled_queue";
+import { ThrottleQueue } from "@/lib/async/throttled_queue";
 import { fetchImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
 import { getImageFromThumb } from "@/lib/thumb/thumbs";
 import { imageIsLoaded } from "@/utils/dom/image";
 
-const fetchQueue = new ThrottledQueue(10);
+const fetchQueue = new ThrottleQueue(10);
 
 export function fetchBitmap(request: ImageRequest): Promise<boolean> {
   return request.isHighRes ? fetchHighResBitmap(request) : fetchLowResBitmap(request);

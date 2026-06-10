@@ -4,14 +4,14 @@ import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { PERFORMANCE_PROFILE } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
-import { ThrottledQueue } from "@/lib/async/throttled_queue";
+import { ThrottleQueue } from "@/lib/async/throttled_queue";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 import { inGallery } from "@/app/channels/feature_bridge";
 import { parseDimensions2D } from "@/utils/string/parse";
 import { transferredCanvasIds } from "@/features/gallery/types/offscreen_upscale_request";
 
 export abstract class GalleryAbstractUpscaler {
-  private readonly upscaleQueue: ThrottledQueue = new ThrottledQueue(GalleryUpscaleConfig.upscaleDelay);
+  private readonly upscaleQueue: ThrottleQueue = new ThrottleQueue(GalleryUpscaleConfig.upscaleDelay);
   private upscaledIds: Set<string> = new Set();
 
   public upscale(request: ImageRequest): void {

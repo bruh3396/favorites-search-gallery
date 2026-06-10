@@ -33,7 +33,7 @@ function setupView(): Promise<void> {
 async function setupFavoriteIndicator(): Promise<void> {
   Events.postList.pageChanged.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.postList.moreResultsAdded.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
-  Events.favorites.favoriteAdded.on(PostListNavigatorFavoritesMarkerFlow.onFavoriteAdded);
+  Events.app.favoriteAdded.on(PostListNavigatorFavoritesMarkerFlow.onFavoriteAdded);
   Events.postList.favoriteIndicatorToggled.on(PostListNavigatorOptionFlow.toggleFavoriteIndicator);
   Events.postList.favoriteIndicatorStyleChanged.on(PostListNavigatorView.applyCurrentFavoriteStyle);
   Events.gallery.displayedThumb.on(PostListNavigatorView.applyGalleryFavoriteStyle);

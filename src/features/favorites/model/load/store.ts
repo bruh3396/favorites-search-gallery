@@ -21,7 +21,7 @@ export async function readAll(): Promise<FavoritesDatabaseRecord[]> {
 
 export function update(favorite: Favorite): void {
   if (isDatabasePopulated) {
-    updateScheduler.add(favorite);
+    updateScheduler.schedule(favorite);
   }
 }
 

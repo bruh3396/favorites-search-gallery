@@ -1,6 +1,8 @@
+import { RateLimiterConfig } from "@/types/async";
+
 export const ApiConfig = {
-  apiBatchSize: 50,
-  apiBatchFlushDelay: 40,
-  postFetchConcurrency: 4,
-  tagFetchConcurrency: 4
+  maxRequests: 50,
+  requestFlushTimeout: 40,
+  postRateLimit: { concurrency: 4, ratePerSecond: 10 } satisfies RateLimiterConfig,
+  tagRateLimit: { concurrency: 4, ratePerSecond: 10 } satisfies RateLimiterConfig
 };

@@ -1,7 +1,7 @@
 import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
 import { Favorite } from "@/types/favorite";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { baseImageUrl } from "@/lib/media/base_image_url";
+import { videoUrl } from "@/lib/thumb/url";
 
 const videoLimiter = new ConcurrencyLimiter(Rule34NetworkConfig.videoDurationFetchConcurrency);
 const videoPool: HTMLVideoElement[] = Array.from({ length: Rule34NetworkConfig.videoDurationFetchConcurrency }, () => {
@@ -12,7 +12,7 @@ const videoPool: HTMLVideoElement[] = Array.from({ length: Rule34NetworkConfig.v
 });
 
 export function fetchVideoDurationFromFavorite(favorite: Favorite): Promise<number> {
-  return fetchVideoDuration(baseImageUrl(favorite).replace(".jpg", ".mp4"));
+  return fetchVideoDuration(videoUrl(favorite));
 }
 
 export function fetchVideoDuration(url: string): Promise<number> {

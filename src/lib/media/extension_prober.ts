@@ -1,12 +1,12 @@
-import { extensionProbeLimiter, extensionProbeQueue } from "@/lib/remote/http/rate_limiters";
 import { Favorite } from "@/types/favorite";
 import { ImageExtension } from "@/types/media";
 import { allImageExtensions } from "@/lib/media/constants";
-import { baseImageUrl } from "@/lib/media/base_image_url";
+import { extensionProbeLimiter } from "@/lib/remote/http/rate_limiters";
+import { imageUrl } from "@/lib/thumb/url";
+import { withExtension } from "@/lib/media/url_transformer";
 
 export async function probeAllExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
-  await extensionProbeQueue.wait();
-  const baseUrl = baseImageUrl(item);
+  const baseUrl = imageUrl(item);
 
   for (const extension of allImageExtensions) {
     if (await probeExtension(baseUrl, extension)) {
@@ -17,8 +17,9 @@ export async function probeAllExtensions(item: HTMLElement | Favorite): Promise<
 }
 
 function probeExtension(url: string, extension: ImageExtension): Promise<boolean> {
-  return extensionProbeLimiter.run(async() => {
-    const response = await fetch(url.replace(".jpg", `.${extension}`), { method: "HEAD" }).catch();
-    return response.ok;
+  return extensionProbeLimiter.run(() => {
+    return fetch(withExtension(url, extension), { method: "HEAD" })
+    .then(response => response.ok)
+    .catch(() => false);
   });
 }
