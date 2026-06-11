@@ -17,7 +17,7 @@ export type FavoriteMetadataDatabaseRecord = {
 
 export type FavoriteDatabaseRecord = {
   id: string
-  tags: Set<string>
+  tags: string | Set<string>
   src: string
   metadata: FavoriteMetadataDatabaseRecord
 }

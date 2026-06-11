@@ -1,42 +1,56 @@
-import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
+import { convertToSortedTagString, toTagSet, toTagString } from "@/utils/string/tags";
 import { describe, expect, test } from "vitest";
 
-describe("convertToTagSet", () => {
+describe("toTagSet", () => {
   test("empty", () => {
-    expect(convertToTagSet("")).toStrictEqual(new Set());
+    expect(toTagSet("")).toStrictEqual(new Set());
   });
 
   test("single tag", () => {
-    expect(convertToTagSet("apple")).toStrictEqual(new Set(["apple"]));
+    expect(toTagSet("apple")).toStrictEqual(new Set(["apple"]));
   });
 
   test("multiple tags", () => {
-    expect(convertToTagSet("apple banana cherry")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
+    expect(toTagSet("apple banana cherry")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
   });
 
   test("extra spaces", () => {
-    expect(convertToTagSet("  apple   banana   cherry  ")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
+    expect(toTagSet("  apple   banana   cherry  ")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
   });
 
   test("special characters", () => {
-    expect(convertToTagSet("apple!@#banana$%^cherry&*()")).toStrictEqual(new Set(["apple!@#banana$%^cherry&*()"]));
+    expect(toTagSet("apple!@#banana$%^cherry&*()")).toStrictEqual(new Set(["apple!@#banana$%^cherry&*()"]));
   });
 });
 
-describe("convertToTagString", () => {
+describe("toTagString", () => {
   test("empty", () => {
-    expect(convertToTagString(new Set())).toBe("");
+    expect(toTagString(new Set())).toBe("");
   });
 
   test("single tag", () => {
-    expect(convertToTagString(new Set(["apple"]))).toBe("apple");
+    expect(toTagString(new Set(["apple"]))).toBe("apple");
   });
 
   test("multiple tags", () => {
-    expect(convertToTagString(new Set(["apple", "banana", "cherry"]))).toBe("apple banana cherry");
+    expect(toTagString(new Set(["apple", "banana", "cherry"]))).toBe("apple banana cherry");
   });
 
   test("special characters", () => {
-    expect(convertToTagString(new Set(["apple!@#banana$%^cherry&*()"]))).toBe("apple!@#banana$%^cherry&*()");
+    expect(toTagString(new Set(["apple!@#banana$%^cherry&*()"]))).toBe("apple!@#banana$%^cherry&*()");
+  });
+
+  test("preserves insertion order without sorting", () => {
+    expect(toTagString(new Set(["cherry", "apple", "banana"]))).toBe("cherry apple banana");
+  });
+});
+
+describe("toSortedTagString", () => {
+  test("empty", () => {
+    expect(convertToSortedTagString(new Set())).toBe("");
+  });
+
+  test("sorts unordered tags", () => {
+    expect(convertToSortedTagString(new Set(["cherry", "apple", "banana"]))).toBe("apple banana cherry");
   });
 });

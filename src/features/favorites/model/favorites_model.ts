@@ -4,6 +4,7 @@ import * as FavoritesPaginator from "@/features/favorites/model/paginator";
 import * as FavoritesSearchCoordinator from "@/features/favorites/model/search/coordinator";
 import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/interfaces";
 import { Favorite } from "@/types/favorite";
+import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 
 let getAdditionalTags: (id: string) => string | undefined = () => undefined;
 let waitForAdditionalTags: () => Promise<void> = () => Promise.resolve();
@@ -23,25 +24,22 @@ export async function loadDatabaseFavorites(): Promise<void> {
   await waitForAdditionalTags();
   return FavoritesLoader.loadDatabaseFavorites(getAdditionalTags, (allFavorites) => {
     FavoritesSearchCoordinator.deferIndexing();
-    FavoritesSearchCoordinator.reIndex(allFavorites);
-    FavoritesMetadataFetcher.fetchMissingMetadata(allFavorites);
+    ingest(allFavorites);
   });
 }
 
 export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<void> {
   return FavoritesLoader.fetchAllFavorites((favorites) => {
-    FavoritesSearchCoordinator.reIndex(favorites);
-    FavoritesMetadataFetcher.fetchMissingMetadata(favorites);
+    ingest(favorites);
     FavoritesSearchCoordinator.appendResults(favorites);
     onSearchResultsFound();
   });
 }
 
-export function fetchNewFavorites(page0Elements?: HTMLElement[]): Promise<NewFavorites> {
-  return FavoritesLoader.fetchNewFavorites(page0Elements)
+export function fetchNewFavorites(firstPageFavorites?: HTMLElement[]): Promise<NewFavorites> {
+  return FavoritesLoader.fetchNewFavorites(firstPageFavorites)
     .then((newFavorites) => {
-      FavoritesSearchCoordinator.reIndex(newFavorites);
-      FavoritesMetadataFetcher.fetchMissingMetadata(newFavorites);
+      ingest(newFavorites);
       return { newFavorites, newSearchResults: FavoritesSearchCoordinator.prependResults(newFavorites) };
     });
 }
@@ -54,14 +52,10 @@ export const repaginateCurrentResults = (): Favorite[] => FavoritesPaginator.pag
 export * from "@/features/favorites/model/load/loader";
 export * from "@/features/favorites/model/metadata_fetcher";
 export * from "@/features/favorites/model/search/coordinator";
-export {
-  paginate,
-  onFinal as onFinalPage,
-  currentFavorites as currentPageFavorites,
-  adjacentFavorites as adjacentPageFavorites,
-  select as selectPage,
-  selectAdjacent as selectAdjacentPage,
-  selectContaining as selectPageContaining,
-  context as paginationContext
-} from "@/features/favorites/model/paginator";
+export * from "@/features/favorites/model/paginator";
 export * from "@/features/favorites/model/infinite_scroller";
+
+function ingest(favorites: FavoriteItem[]): void {
+  FavoritesSearchCoordinator.reIndex(favorites);
+  FavoritesMetadataFetcher.fetchMissingMetadata(favorites);
+}

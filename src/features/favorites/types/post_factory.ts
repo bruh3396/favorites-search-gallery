@@ -35,6 +35,8 @@ function createPostFromRecord(record: FavoriteDatabaseRecord): Post {
   return post;
 }
 
+const EMPTY_TAG_CATEGORIES: Post["tagCategories"] = new Map();
+
 function createEmptyPost(id: string = ""): Post {
   return {
     id,
@@ -46,7 +48,7 @@ function createEmptyPost(id: string = ""): Post {
     tags: "",
     fileURL: "",
     previewURL: "",
-    tagCategories: new Map()
+    tagCategories: EMPTY_TAG_CATEGORIES
   };
 }
 

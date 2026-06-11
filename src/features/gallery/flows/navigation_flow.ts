@@ -1,5 +1,6 @@
 import * as GalleryDisplayFlow from "@/features/gallery/flows/display_flow";
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
+import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { NavigationKey } from "@/types/input";
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
@@ -20,6 +21,7 @@ export function navigate(direction: NavigationKey): void {
 
 function handleStartBoundary(): void {
   if (FeatureBridge.usingInfiniteScroll.call() || !loadMoreResults("ArrowLeft")) {
+    GalleryView.nudge(GalleryModel.currentThumb(), "start");
     return;
   }
   GalleryModel.jumpToLast();
@@ -28,6 +30,7 @@ function handleStartBoundary(): void {
 
 function handleEndBoundary(): void {
   if (!loadMoreResults("ArrowRight")) {
+    GalleryView.nudge(GalleryModel.currentThumb(), "end");
     return;
   }
 
@@ -43,10 +46,5 @@ function loadMoreResults(direction: NavigationKey): boolean {
   if (ON_POST_LIST_PAGE) {
     return FeatureBridge.navigateToAdjacentPostList.call(direction) !== null;
   }
-
-  if (!FeatureBridge.favoritesCanExtend.call()) {
-    return false;
-  }
-  FeatureBridge.loadMoreFavorites.call(direction);
-  return true;
+  return FeatureBridge.loadMoreFavorites.call(direction);
 }

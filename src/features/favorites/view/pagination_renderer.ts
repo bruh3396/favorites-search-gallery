@@ -23,11 +23,11 @@ export function setup(pageSelected: (pageNumber: number) => void, pageStepped: (
   onPageSelected = pageSelected;
   onPageStepped = pageStepped;
   insert();
-  build({currentPage: 1, finalPage: 1, totalCount: 0, sliceStart: 0, sliceEnd: 0, sequence: [1]});
-  toggle(!Preferences.favoritesInfiniteScroll.value);
+  buildPaginator({currentPage: 1, finalPage: 1, totalCount: 0, sliceStart: 0, sliceEnd: 0, sequence: [1]});
+  togglePaginator(!Preferences.favoritesInfiniteScroll.value);
 }
 
-export function toggle(value: boolean): void {
+export function togglePaginator(value: boolean): void {
   const html = `
       #favorites-pagination,
       #results-per-page-container,
@@ -42,18 +42,18 @@ export function toggle(value: boolean): void {
   insertStyle(value ? "" : html, "fav-pagination-enable");
 }
 
-export function getContainer(): HTMLElement {
+export function getPaginationContainer(): HTMLElement {
   return container;
 }
 
-export function build(context: PaginationContext): void {
+export function buildPaginator(context: PaginationContext): void {
   container.innerHTML = "";
   updateRangeIndicator(context.sliceStart, context.sliceEnd, context.totalCount);
   createNumberTraversalButtons(context);
   createArrowTraversalButtons(context);
 }
 
-export function update(context: PaginationContext): void {
+export function updatePaginator(context: PaginationContext): void {
   updateRangeIndicator(context.sliceStart, context.sliceEnd, context.totalCount);
   rebuildNumberTraversalButtons(context);
   updateExistingArrowTraversalButtons(context);

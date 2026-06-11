@@ -1,4 +1,4 @@
-import { Favorite, FavoriteMetricMap, FavoriteDatabaseRecord } from "@/types/favorite";
+import { Favorite, FavoriteDatabaseRecord, FavoriteMetricMap } from "@/types/favorite";
 import { clearPost, createPost } from "@/features/favorites/types/post_factory";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
@@ -46,7 +46,7 @@ export class FavoriteItem implements Favorite {
   }
 
   public get databaseRecord(): FavoriteDatabaseRecord {
-    return { id: this.id, tags: this.tags, src: compressPreviewSource(this.thumbnailUrl), metadata: this.metadata.databaseRecord };
+    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbnailUrl), metadata: this.metadata.databaseRecord };
   }
 
   public updateTags = (post: Post): void => this.favoriteTags.set(post.tags);

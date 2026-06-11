@@ -33,8 +33,8 @@ export async function setupGallery(): Promise<void> {
   setupControl();
   setupSubFeatures();
   subscribeToEvents();
-  registerBridgeHandlers();
-  GalleryContentFlow.refreshContent();
+  serveExternalRequests();
+  start();
 }
 
 async function waitUntilPageIsReady(): Promise<void> {
@@ -100,18 +100,18 @@ function subscribeToEvents(): void {
 }
 
 function subscribeToFavoritesEvents(): void {
-  Events.favorites.newFavoritesFound.on(GalleryContentFlow.refreshContent, { once: true });
-  Events.favorites.pageChanged.on(GalleryContentFlow.refreshContent);
-  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.refreshContent);
+  Events.favorites.newFavoritesFound.on(GalleryContentFlow.refresh, { once: true });
+  Events.favorites.pageChanged.on(GalleryContentFlow.refresh);
+  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.refresh);
   Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreviews);
 }
 
 function subscribeToPostListEvents(): void {
   Events.postList.upscaleToggled.on(GalleryPostListFlow.onUpscaleToggled);
   Events.postList.initialPostListCreated.on(GalleryPostListFlow.onInitialPostListCreated, { once: true });
-  Events.postList.moreResultsAdded.on(GalleryContentFlow.refreshContent);
-  Events.postList.infiniteScrollToggled.on(GalleryContentFlow.refreshContent);
-  Events.postList.pageChanged.on(GalleryContentFlow.refreshContent);
+  Events.postList.moreResultsAdded.on(GalleryContentFlow.refresh);
+  Events.postList.infiniteScrollToggled.on(GalleryContentFlow.refresh);
+  Events.postList.pageChanged.on(GalleryContentFlow.refresh);
 }
 
 function subscribeToDesktopInput(): void {
@@ -138,7 +138,11 @@ function subscribeToMobileInput(): void {
   DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
 }
 
-function registerBridgeHandlers(): void {
+function serveExternalRequests(): void {
   FeatureBridge.galleryState.register(GalleryModel.getCurrentState);
   FeatureBridge.currentGalleryThumb.register(GalleryModel.currentThumbIfOpen);
+}
+
+function start(): void {
+  GalleryContentFlow.refresh();
 }

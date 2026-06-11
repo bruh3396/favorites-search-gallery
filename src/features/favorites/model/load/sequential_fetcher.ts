@@ -7,12 +7,12 @@ import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page";
 import { fetchFavoritesPage } from "@/lib/remote/rule34/favorites/page";
 import { getIdFromThumb } from "@/lib/thumb/thumbs";
 
-export async function fetchNewFavorites(storedIds: Set<string>, page0Elements?: HTMLElement[]): Promise<HTMLElement[]> {
+export async function fetchNewFavorites(storedIds: Set<string>, firstPageFavorites?: HTMLElement[]): Promise<HTMLElement[]> {
   const allNewFavorites: HTMLElement[] = [];
   let pageNumber = 0;
 
-  if (FavoritesConfig.skipFirstPageFetch && page0Elements !== undefined) {
-    const newFavorites = page0Elements.filter(element => !storedIds.has(getIdFromThumb(element)));
+  if (FavoritesConfig.skipFirstPageFetch && firstPageFavorites !== undefined) {
+    const newFavorites = firstPageFavorites.filter(element => !storedIds.has(getIdFromThumb(element)));
 
     allNewFavorites.push(...newFavorites);
 

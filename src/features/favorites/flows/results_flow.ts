@@ -11,8 +11,7 @@ import { Preferences } from "@/app/context/preferences";
 export const showResults = (favorites: Favorite[]): void => activeView().initialize(favorites);
 export const clearResults = (): void => activeView().initialize([]);
 export const reveal = (id: string): void => activeView().reveal(id);
-export const loadMoreResults = (direction: NavigationKey): void => activeView().loadMore(direction);
-export const hasMoreResults = (): boolean => activeView().hasMore();
+export const loadMoreResults = (direction: NavigationKey): boolean => activeView().loadMore(direction);
 
 export function syncResults(): void {
   Events.favorites.searchResultsUpdated.emit();

@@ -1,7 +1,6 @@
-import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
+import { convertToSortedTagString, toTagSet, toTagString } from "@/utils/string/tags";
 import { FavoriteDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
-import { union } from "@/utils/collection/set";
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();
@@ -14,36 +13,36 @@ export class FavoriteTags {
   }
 
   public get tagString(): string {
-    return convertToTagString(this.tags);
+    return toTagString(this.tags);
   }
 
   public set(tags: string | Set<string>, additionalTags?: string): void {
-    this.baseTags = tags instanceof Set ? tags : convertToTagSet(tags);
+    this.baseTags = tags instanceof Set ? tags : toTagSet(tags);
 
     if (additionalTags !== undefined) {
-      this.additionalTags = convertToTagSet(additionalTags);
+      this.additionalTags = toTagSet(additionalTags);
     }
     this.mergeTags();
   }
 
   public addAdditionalTags(newTagString: string): string {
-    const newTags = convertToTagSet(newTagString).difference(this.tags);
+    const newTags = toTagSet(newTagString).difference(this.tags);
 
     if (newTags.size > 0) {
       this.additionalTags = this.additionalTags.union(newTags);
       this.mergeTags();
     }
-    return convertToTagString(this.additionalTags);
+    return convertToSortedTagString(this.additionalTags);
   }
 
   public removeAdditionalTags(tagsToRemove: string): string {
-    const tagsToRemoveSet = convertToTagSet(tagsToRemove).intersection(this.additionalTags);
+    const tagsToRemoveSet = toTagSet(tagsToRemove).intersection(this.additionalTags);
 
     if (tagsToRemoveSet.size > 0) {
       this.additionalTags = this.additionalTags.difference(tagsToRemoveSet);
       this.mergeTags();
     }
-    return convertToTagString(this.additionalTags);
+    return convertToSortedTagString(this.additionalTags);
   }
 
   public resetAdditionalTags(): void {
@@ -55,7 +54,10 @@ export class FavoriteTags {
   }
 
   private mergeTags(): void {
-    this.tags = new Set(Array.from(union(this.baseTags, this.additionalTags)).sort());
+    if (this.additionalTags.size === 0) {
+      this.tags = this.baseTags;
+      return;
+    }
+    this.tags = new Set(Array.from(this.baseTags.union(this.additionalTags)).sort());
   }
-
 }

@@ -5,13 +5,13 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { debounceLeading } from "@/lib/async/debounce";
 import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 
-export function refreshContent(): void {
+export function refresh(): void {
   GalleryThumbObserver.refresh();
   GalleryModel.indexThumbs();
-  refreshCache();
+  recache();
 }
 
-const refreshCache = debounceLeading(() => {
+const recache = debounceLeading(() => {
   dispatchByState({
     idle: recacheFirstThumbs,
     preview: recacheFirstThumbs,

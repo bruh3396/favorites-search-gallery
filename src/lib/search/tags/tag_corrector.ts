@@ -1,32 +1,21 @@
-import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
+import { convertToSortedTagString as toSortedTagString, toTagSet } from "@/utils/string/tags";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
-import { fetchTagCategory } from "@/lib/remote/api/tag";
 
-export function tagsAreValid(favorite: Favorite, post: Post): boolean {
+export function tagsNeedCorrection(favorite: Favorite, post: Post): boolean {
   const validTags = correctTags(post);
   const difference = favorite.tags.symmetricDifference(validTags);
   const equal = difference.size === 0 || (difference.size === 1 && difference.has(post.id));
 
   if (equal) {
-    return true;
-  }
-  post.tags = convertToTagString(validTags);
-  return false;
-}
-
-export async function isOfficialTag(tagName: string): Promise<boolean> {
-  try {
-    const category = await fetchTagCategory(tagName);
-    return category !== null;
-  } catch (error) {
-    console.error(error);
     return false;
   }
+  post.tags = toSortedTagString(validTags);
+  return true;
 }
 
 function correctTags(post: Post): Set<string> {
-  const validTags = convertToTagSet(post.tags);
+  const validTags = toTagSet(post.tags);
 
   validTags.add(post.id);
 

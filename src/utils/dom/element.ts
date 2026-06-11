@@ -21,6 +21,10 @@ export function img(id: string): HTMLImageElement {
   return elementWithId("img", id);
 }
 
+export function forceReflow(element: HTMLElement): void {
+  element.getBoundingClientRect();
+}
+
 export function numberInput(id: string, min: number, max: number, step: number): HTMLInputElement {
   const input = elementWithId("input", id);
 

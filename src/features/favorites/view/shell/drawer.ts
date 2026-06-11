@@ -32,7 +32,7 @@ export async function setup(): Promise<void> {
   }
 }
 
-export function toggle(): void {
+export function toggleDrawer(): void {
   const open = Body.dataset.drawerOpen === undefined;
   const button = document.getElementById(FavoritesId.panelButton);
 
@@ -50,13 +50,13 @@ function toggleTo(tab: FavoritesDrawerTab): void {
   const open = Body.dataset.drawerOpen !== undefined;
 
   if (open && activeTab === tab) {
-    toggle();
+    toggleDrawer();
     return;
   }
   selectTab(tab);
 
   if (!open) {
-    toggle();
+    toggleDrawer();
   }
 }
 
@@ -106,7 +106,7 @@ function openInstantly(): void {
     return;
   }
   drawerElement.style.transition = "none";
-  toggle();
+  toggleDrawer();
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   drawerElement.offsetHeight;
   drawerElement.style.transition = "";

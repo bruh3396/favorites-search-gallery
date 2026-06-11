@@ -1,13 +1,12 @@
 import * as FavoritesToolbar from "@/features/favorites/view/shell/toolbar";
-import * as FavoritesNativePageCleaner from "@/features/favorites/view/shell/native_page_cleaner";
 import { Content, Root, ScrollSentinelBottom, ScrollSentinelTop } from "@/app/layout/shell";
-import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
 import DESKTOP_CSS from "@/assets/css/platform/desktop_base.css";
 import DRAWER_CSS from "@/assets/css/favorites/drawer.css";
 import DRAWER_PANELS_CSS from "@/assets/css/favorites/drawer_panels.css";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import PAGINATION_CSS from "@/assets/css/favorites/pagination.css";
 import SEARCH_FIELD_CSS from "@/assets/css/favorites/search_field.css";
+import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
 import { div } from "@/utils/dom/element";
 import { insertStyle } from "@/utils/dom/injector";
 
@@ -16,11 +15,8 @@ export const DrawerTrack = div(FavoritesId.drawerTrack);
 const ContentRow = div(FavoritesId.contentRow);
 const ContentColumn = div(FavoritesId.contentColumn);
 
-export function setup(onFirstPageFavoritesExtracted: (elements: HTMLElement[] | undefined) => void): void {
-  onFirstPageFavoritesExtracted(FavoritesNativePageCleaner.extractNativeFavorites());
-
+export function setup(): void {
   buildScaffold();
-  FavoritesNativePageCleaner.removeUnusedScripts();
   insertStyle(DESKTOP_CSS + TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS, "favorites-ui");
   Body.insertAdjacentElement("afterbegin", FavoritesToolbar.build());
 }

@@ -1,26 +1,24 @@
 import * as Navigator from "@/lib/remote/rule34/posts/navigation";
-import { buildElementTemplate, favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { ClickCode } from "@/types/input";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Post } from "@/types/api";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { resolveMediaType } from "@/lib/media/type_resolver";
 import { setDataset } from "@/utils/dom/attribute";
-
-export function setupFavoriteElement(): void {
-  buildElementTemplate();
-}
 
 export class FavoriteElement {
   public readonly root: HTMLElement;
   private readonly container: HTMLAnchorElement;
   private readonly image: HTMLImageElement;
+  private readonly canvas: HTMLCanvasElement | null;
 
   constructor(post: Post) {
     this.root = favoriteElementTemplate.cloneNode(true) as HTMLElement;
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.container.children[0] as HTMLImageElement;
+    this.canvas = (this.container.children[1] as HTMLCanvasElement | undefined) ?? null;
     this.populateAttributes(post);
     this.presetCanvasDimensions(post);
     this.setupNavigationClick();
@@ -82,10 +80,8 @@ export class FavoriteElement {
   }
 
   private presetCanvasDimensions(post: Post): void {
-    const canvas = this.root.querySelector("canvas");
-
-    if (canvas !== null && post.height > 0 && post.width > 0) {
-      canvas.dataset.size = `${post.width}x${post.height}`;
+    if (this.canvas !== null && post.height > 0 && post.width > 0) {
+      this.canvas.dataset.size = `${post.width}x${post.height}`;
     }
   }
 }

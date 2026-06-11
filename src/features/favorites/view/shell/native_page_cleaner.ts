@@ -1,18 +1,18 @@
 export function extractNativeFavorites(): HTMLElement[] | undefined {
-  const container = document.querySelector<HTMLElement>("#content, div:has(.thumb)");
+  const content = document.querySelector<HTMLElement>("#content, div:has(.thumb)");
 
-  if (container === null) {
+  if (content === null) {
     return undefined;
   }
-  const thumbs = Array.from(container.querySelectorAll(".thumb")) as HTMLElement[];
+  const thumbs = Array.from(content.querySelectorAll<HTMLElement>(".thumb"));
 
-  container.remove();
+  content.remove();
   return thumbs;
 }
 
 export function removeUnusedScripts(): void {
   for (const script of document.querySelectorAll("script")) {
-    if ((/(?:fluidplayer|awesomplete)/).test(script.src ?? "")) {
+    if ((/(?:fluidplayer|awesomplete)/).test(script.src)) {
       script.remove();
     }
   }

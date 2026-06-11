@@ -7,10 +7,10 @@ import { ON_FIRST_FAVORITES_PAGE } from "@/lib/environment";
 import { fetchFavoritesCount } from "@/lib/remote/rule34/favorites/page";
 import { markAsNew } from "@/features/favorites/dom_tweaks/indicator";
 
-export async function loadAllFavorites(): Promise<void> {
+export async function loadAllFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
   if (await hasDatabaseFavorites()) {
     await loadDatabaseFavorites();
-    await fetchNewFavorites();
+    await fetchNewFavorites(nativeFavorites);
   } else {
     await fetchAllFavorites();
   }
@@ -33,9 +33,9 @@ async function loadDatabaseFavorites(): Promise<void> {
   FavoritesSearchFlow.searchActiveFavorites();
 }
 
-async function fetchNewFavorites(): Promise<void> {
+async function fetchNewFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
   FavoritesView.setStatus("Finding new favorites");
-  const firstPageFavorites = ON_FIRST_FAVORITES_PAGE ? await Events.favorites.firstPageFavorites.timeout() : undefined;
+  const firstPageFavorites = ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined;
   const results = await FavoritesModel.fetchNewFavorites(firstPageFavorites);
 
   if (results.newSearchResults.length === 0) {

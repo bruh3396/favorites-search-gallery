@@ -1,5 +1,5 @@
 import { DiscreteRating, Rating, decodeRating } from "@/types/search";
-import { FavoriteMetricMap, FavoriteDatabaseRecord, FavoriteMetadataDatabaseRecord } from "@/types/favorite";
+import { FavoriteDatabaseRecord, FavoriteMetadataDatabaseRecord, FavoriteMetricMap } from "@/types/favorite";
 import { Post } from "@/types/api";
 
 export class FavoriteMetadata {
@@ -8,7 +8,17 @@ export class FavoriteMetadata {
   public rating: Rating;
 
   constructor(id: string, record: FavoriteDatabaseRecord | HTMLElement) {
-    this.metrics = {id: parseInt(id, 10), width: 0, height: 0, score: 0, creationTimestamp: 0, lastChangedTimestamp: 0, default: 0, random: 0, duration: 0};
+    this.metrics = {
+      id: parseInt(id, 10),
+      width: 0,
+      height: 0,
+      score: 0,
+      creationTimestamp: 0,
+      lastChangedTimestamp: 0,
+      default: 0,
+      random: 0,
+      duration: 0
+    };
     this.id = id;
     this.rating = DiscreteRating.Explicit;
 

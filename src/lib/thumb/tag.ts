@@ -1,6 +1,6 @@
 import { Favorite } from "@/types/favorite";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
-import { convertToTagSet } from "@/utils/string/tags";
+import { toTagSet } from "@/utils/string/tags";
 import { getImageFromThumb } from "@/lib/thumb/thumbs";
 
 let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
@@ -22,7 +22,7 @@ function getTagSetFromFavoritesPageItem(item: HTMLElement | Favorite): Set<strin
 }
 
 function getTagSetFromPostListItem(thumb: HTMLElement | Favorite): Set<string> {
-  return convertToTagSet(getRawTagsFromPostListItem(thumb));
+  return toTagSet(getRawTagsFromPostListItem(thumb));
 }
 
 function getRawTagsFromPostListItem(thumb: HTMLElement | Favorite): string {

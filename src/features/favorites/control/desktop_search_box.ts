@@ -1,5 +1,5 @@
 import { awesompleteIsUnselected, awesompleteIsVisible } from "@/lib/ui/autocomplete/awesomplete";
-import { AbstractFavoritesSearchBox } from "@/features/favorites/control/search_box/abstract_search_box";
+import { AbstractFavoritesSearchBox } from "@/features/favorites/control/abstract_search_box";
 import { EnhancedMouseEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";

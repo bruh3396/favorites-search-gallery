@@ -5,6 +5,10 @@ export class StickyEmitter<V> extends Emitter<V> {
   private lastValue: V | undefined;
   private hasFired: boolean = false;
 
+  public get fired(): boolean {
+    return this.hasFired;
+  }
+
   public override emit(value: V): void {
     this.lastValue = value;
     this.hasFired = true;

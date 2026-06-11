@@ -1,7 +1,7 @@
+import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { CheckboxElement, SelectElement } from "@/types/element";
 import { Layout, PerformanceProfile, Theme } from "@/types/ui";
 import { applySurfaceGradient, applyTheme, toggleGalleryMenuEnabled } from "@/lib/ui/style";
-import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { Events } from "@/app/channels/events";
 import { FavoritesClass } from "@/features/favorites/types/scaffold";
 import { MetadataMetric } from "@/types/search";

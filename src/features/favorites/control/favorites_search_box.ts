@@ -1,4 +1,4 @@
-import { FavoritesDesktopSearchBox } from "@/features/favorites/control/search_box/desktop_search_box";
+import { FavoritesDesktopSearchBox } from "@/features/favorites/control/desktop_search_box";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 

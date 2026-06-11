@@ -19,8 +19,7 @@ export const FavoritesInfiniteScrollView = {
   initialize,
   sync: fillIfEmpty,
   reveal: doNothing,
-  loadMore: extendInDirection,
-  hasMore: FavoritesModel.hasMore
+  loadMore: extendInDirection
 } satisfies FavoritesResultsView;
 
 export function disconnect(): void {
@@ -47,12 +46,17 @@ function fillIfEmpty(): void {
   }
 }
 
-function extendInDirection(direction: NavigationKey): void {
+function extendInDirection(direction: NavigationKey): boolean {
+  if (!FavoritesModel.hasMore()) {
+    return false;
+  }
+
   if (isForwardNavigationKey(direction)) {
     extendBelow();
   } else {
     extendAbove();
   }
+  return true;
 }
 
 async function extendBelow(): Promise<void> {

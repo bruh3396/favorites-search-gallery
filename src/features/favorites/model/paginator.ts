@@ -10,13 +10,14 @@ import { paginationSequence } from "@/lib/ui/pagination";
 let current = 1;
 let favorites: Favorite[] = [];
 
-export const onFinal = (): boolean => current === pageCount();
-export const currentFavorites = (): Favorite[] => favoritesOnPage(current);
-export const adjacentFavorites = (): Favorite[] => [...favoritesOnPage(current - 1), ...favoritesOnPage(current + 1)];
-export const selectAdjacent = (direction: NavigationKey): boolean => select(wrappedPage(current, navigationDelta(direction), pageCount()));
+export const onFinalPage = (): boolean => current === pageCount();
+export const currentPageFavorites = (): Favorite[] => favoritesOnPage(current);
+export const adjacentPageFavorites = (): Favorite[] => [...favoritesOnPage(current - 1), ...favoritesOnPage(current + 1)];
+export const selectAdjacentPage = (direction: NavigationKey): boolean => selectPage(current + navigationDelta(direction));
+export const selectWrappedAdjacentPage = (direction: NavigationKey): boolean => selectPage(wrappedPage(current, navigationDelta(direction), pageCount()));
 export const paginate = (newFavorites: Favorite[]): Favorite[] => (favorites = newFavorites);
 
-export function select(pageNumber: number): boolean {
+export function selectPage(pageNumber: number): boolean {
   const target = clamp(pageNumber, 1, pageCount());
   const changed = target !== current;
 
@@ -24,12 +25,12 @@ export function select(pageNumber: number): boolean {
   return changed;
 }
 
-export function selectContaining(id: string): boolean {
+export function selectPageContaining(id: string): boolean {
   const index = favorites.findIndex(f => f.id === id);
-  return index !== -1 && select(Math.floor(index / resultsPerPage()) + 1);
+  return index !== -1 && selectPage(Math.floor(index / resultsPerPage()) + 1);
 }
 
-export function context(): PaginationContext {
+export function paginationContext(): PaginationContext {
   return {
     currentPage: current,
     finalPage: pageCount(),

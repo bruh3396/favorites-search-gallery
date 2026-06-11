@@ -6,7 +6,7 @@ import { TagCategoryMap } from "@/types/search";
 import { fetchPost } from "@/lib/remote/api/post";
 import { fetchVideoDurationFromFavorite } from "@/lib/remote/rule34/media/duration";
 import { isVideo } from "@/lib/media/type_predicates";
-import { tagsAreValid } from "@/lib/search/tags/tag_validator";
+import { tagsNeedCorrection } from "@/lib/search/tags/tag_corrector";
 import { withExponentialBackoff } from "@/lib/async/timing";
 
 let onMetadataPopulated: (favorite: Favorite) => void = () => undefined;
@@ -27,8 +27,8 @@ export function setup(
 }
 
 export function fetchMissingMetadata(favorites: FavoriteItem[]): void {
-  fetchMetadata(favorites.filter(f => f.metadata.isUnpopulated));
-  fetchDurations(favorites.filter(f => isVideo(f) && f.metadata.metrics.duration === 0));
+  fetchMetadata(favorites.filter(favorite => favorite.metadata.isUnpopulated));
+  fetchDurations(favorites.filter(favorite => isVideo(favorite) && favorite.metadata.metrics.duration === 0));
 }
 
 function isUnpopulated(post: Post): boolean {
@@ -45,10 +45,11 @@ function fetchMetadata(favorites: FavoriteItem[]): void {
 
 function fetchDurations(favorites: FavoriteItem[]): void {
   favorites.forEach(favorite => {
-    fetchVideoDurationFromFavorite(favorite).then(duration => {
-      favorite.metadata.metrics.duration = duration;
-      onMetadataPopulated(favorite);
-    }).catch(console.error);
+    fetchVideoDurationFromFavorite(favorite)
+      .then(duration => {
+        favorite.metadata.metrics.duration = duration;
+        onMetadataPopulated(favorite);
+      }).catch(console.error);
   });
 }
 
@@ -58,7 +59,7 @@ function processPost(favorite: FavoriteItem, post: Post): void {
   }
   onCategoriesResolved(post.tagCategories);
 
-  if (!tagsAreValid(favorite, post)) {
+  if (tagsNeedCorrection(favorite, post)) {
     beforeUpdateTags(favorite);
     favorite.updateTags(post);
     afterUpdateTags(favorite);

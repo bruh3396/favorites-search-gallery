@@ -13,8 +13,7 @@ export const FavoritesPaginatedView = {
   initialize,
   sync: reconcilePagination,
   reveal,
-  loadMore: (direction: NavigationKey): void => stepPage(direction),
-  hasMore: (): boolean => true
+  loadMore: (direction: NavigationKey): boolean => stepPage(direction)
 } satisfies FavoritesResultsView;
 
 export { goToPage, stepPage };
@@ -69,8 +68,15 @@ function appendMissingThumbsOnCurrentPage(): void {
   Events.favorites.favoritesAddedToCurrentPage.emit(thumbs);
 }
 
-function stepPage(direction: NavigationKey): void {
-  if (FavoritesModel.selectAdjacentPage(direction)) {
+function stepPage(direction: NavigationKey): boolean {
+  if (Events.favorites.favoritesLoaded.fired) {
+    if (FavoritesModel.selectWrappedAdjacentPage(direction)) {
+      renderCurrentPage();
+      return true;
+    }
+  } else if (FavoritesModel.selectAdjacentPage(direction)) {
     renderCurrentPage();
+    return true;
   }
+  return false;
 }

@@ -1,15 +1,15 @@
-import * as FavoritesDesktop from "@/features/favorites/control/menu/desktop";
-import * as FavoritesFinder from "@/features/favorites/control/menu/finder";
+import * as FavoritesDesktop from "@/features/favorites/control/desktop";
+import * as FavoritesFinder from "@/features/favorites/control/finder";
 import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesNavigationButtons from "@/features/favorites/control/navigation_buttons";
 import * as FavoritesOptionsFlow from "@/features/favorites/flows/option_flow";
 import * as FavoritesPaginationFlow from "@/features/favorites/flows/paginated_results_flow";
-import * as FavoritesRatingFilter from "@/features/favorites/control/menu/rating_filter";
+import * as FavoritesRatingFilter from "@/features/favorites/control/rating_filter";
 import * as FavoritesResetFlow from "@/features/favorites/flows/reset_flow";
 import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
-import * as FavoritesSearchBox from "@/features/favorites/control/search_box/search_box";
+import * as FavoritesSearchBox from "@/features/favorites/control/favorites_search_box";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesTagEditor from "@/features/favorites/features/tag_editor/tag_editor";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
@@ -24,7 +24,7 @@ import { setFavoriteTagsLookup } from "@/lib/thumb/tag";
 
 export function setupFavorites(): void {
   if (POST_LIST_PAGE_ENABLED) {
-    registerPostListBridgeHandlers();
+    servePosListRequests();
     return;
   }
 
@@ -36,10 +36,8 @@ export function setupFavorites(): void {
   setupControl();
   setupSubFeatures();
   subscribeToEvents();
-  registerBridgeHandlers();
-  deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
-  FavoritesView.showSkeleton();
-  FavoritesLoadFlow.loadAllFavorites();
+  serveExternalRequests();
+  start();
 }
 
 function setupModel(): void {
@@ -53,10 +51,7 @@ function setupModel(): void {
 function setupView(): void {
   FavoritesView.setup({
     onPageSelected: FavoritesPaginationFlow.goToPage,
-    onPageStepped: FavoritesPaginationFlow.stepPage,
-    onFirstPageFavoritesExtracted: Events.favorites.firstPageFavorites.emit,
-    onFavoriteAdded: Events.app.favoriteAdded.emit,
-    onFavoriteRemoved: Events.app.favoriteRemoved.emit
+    onPageStepped: FavoritesPaginationFlow.stepPage
   });
 }
 
@@ -93,7 +88,6 @@ function subscribeToEvents(): void {
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
   Events.favorites.findFavorite.on(FavoritesResultsFlow.reveal);
   Events.favorites.findFavoriteInAll.on(FavoritesSearchFlow.revealFavoriteInAll);
-
   Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
@@ -106,23 +100,29 @@ function subscribeToEvents(): void {
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
   Events.favorites.panelButtonClicked.on(FavoritesView.toggleDrawer);
-  Events.app.favoriteRemoved.on(FavoritesModel.deleteId);
 
+  Events.app.favoriteRemoved.on(FavoritesModel.deleteId);
   Events.gallery.previewOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);
 }
 
-function registerPostListBridgeHandlers(): void {
+function servePosListRequests(): void {
   FeatureBridge.favoriteIds.register(FavoritesModel.loadFavoriteIds);
 }
 
-function registerBridgeHandlers(): void {
+function serveExternalRequests(): void {
   FeatureBridge.loadMoreFavorites.register(FavoritesResultsFlow.loadMoreResults);
-  FeatureBridge.favoritesCanExtend.register(FavoritesResultsFlow.hasMoreResults);
   FeatureBridge.favoritesSearchResults.register(FavoritesModel.getCurrentSearchResults);
   FeatureBridge.getFavorite.register(FavoritesModel.getFavorite);
   setFavoriteTagsLookup(id => FavoritesModel.getFavorite(id)?.tags);
   FeatureBridge.allFavorites.register(FavoritesModel.getAllFavorites);
   FeatureBridge.currentSearchQuery.register(FavoritesModel.getCurrentSearchQuery);
   FeatureBridge.usingInfiniteScroll.register(() => Preferences.favoritesInfiniteScroll.value);
+}
+
+function start(): void {
+  FavoritesView.removeUnusedScripts();
+  deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
+  FavoritesView.showSkeleton();
+  FavoritesLoadFlow.loadAllFavorites(FavoritesView.extractNativeFavorites());
 }
