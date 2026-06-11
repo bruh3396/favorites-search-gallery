@@ -25,9 +25,9 @@
     "compile-scripts": "tsc --project scripts/tsconfig.json",
     "delete-compiled-scripts": "if exist scripts\\bin del /q scripts\\bin\\*.js",
     "build": "node scripts/bin/userscript_builder || (npm run compile-scripts && node scripts/bin/userscript_builder)",
-    "test": "npx vitest --run --exclude \"src/tests/playground/**\"",
-    "test-local-server": "npx vitest --run src/tests/playground/local_server.test.ts",
-    "test-post-contract": "npx vitest --run src/tests/playground/post_contract.test.ts",
+    "test": "npx vitest --run --exclude \"src/playground/**\"",
+    "test-local-server": "npx vitest --run src/playground/local_server.test.ts",
+    "test-post-contract": "npx vitest --run src/playground/post_contract.test.ts",
     "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
     "continuous-integration": "npm run build && npm run test && npm run typecheck",
     "lint": "npx eslint src/",
@@ -36,8 +36,8 @@
     "fix-lf": "tsx .scripts/normalize_line_endings.ts",
     "fix-bom": "python .scripts/correct_bom.py",
     "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open",
-    "performance": "tsx src/tests/search/performance.ts",
-    "build-playground": "esbuild src/tests/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js"
+    "performance": "tsx src/playground/performance.ts",
+    "build-playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js"
   },
   "dependencies": {
     "strip-ansi": "^7.1.0"

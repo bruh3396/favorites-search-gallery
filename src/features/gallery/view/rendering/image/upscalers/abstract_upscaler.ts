@@ -4,7 +4,7 @@ import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { PERFORMANCE_PROFILE } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
-import { ThrottleQueue } from "@/lib/async/throttled_queue";
+import { ThrottleQueue } from "@/lib/async/throttle_queue";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 import { inGallery } from "@/app/channels/feature_bridge";
 import { parseDimensions2D } from "@/utils/string/parse";
@@ -22,7 +22,7 @@ export abstract class GalleryAbstractUpscaler {
     requests.forEach(request => this.process(request));
   }
 
-  public reset(): void {
+  public downscaleAll(): void {
     this.upscaleQueue.reset();
     this.upscaledIds.clear();
     this.clearCanvases();
@@ -33,7 +33,6 @@ export abstract class GalleryAbstractUpscaler {
     if (!ON_FAVORITES_PAGE) {
       return;
     }
-    thumbs = thumbs.filter(t => !t.classList.contains("skeleton-item"));
 
     for (const item of this.getCanvasDimensions(thumbs)) {
       if (transferredCanvasIds.has(item.id)) {

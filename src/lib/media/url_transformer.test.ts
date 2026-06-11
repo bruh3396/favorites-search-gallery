@@ -1,8 +1,7 @@
-import { compressPreviewSource, decompressPreviewSource } from "@/lib/media/url_compressor";
 import { describe, expect, test } from "vitest";
 import { imageUrlToSampleUrl, thumbnailUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url_transformer";
 
-describe("cleanImageSource", () => {
+describe("withRule34Hostname", () => {
   test("one subdomain", () => {
     const source = "https://wimg.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
     const source1 = "https://wimg1.rule34.xxx/thumbnails//1234/thumbnail_123456789abcdef.jpg?123456";
@@ -23,23 +22,7 @@ describe("cleanImageSource", () => {
   });
 });
 
-describe("compressImageSource", () => {
-  test("normal", () => {
-    const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
-
-    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
-  });
-
-  test("no subdomain", () => {
-    const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
-
-    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
-  });
-});
-
-describe("convertPreviewUrlToImageUrl", () => {
+describe("thumbnailUrlToImageUrl", () => {
   test("normal", () => {
     const source = "https://us.rule34.xxx/thumbnails/0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
@@ -48,7 +31,7 @@ describe("convertPreviewUrlToImageUrl", () => {
   });
 });
 
-describe("convertImageUrlToSampleUrl", () => {
+describe("imageUrlToSampleUrl", () => {
   test("empty", () => {
     expect(imageUrlToSampleUrl("")).toBe("");
   });
@@ -61,7 +44,7 @@ describe("convertImageUrlToSampleUrl", () => {
   });
 });
 
-describe("toWimgUrl", () => {
+describe("withRule34WimgHostname", () => {
   test("no subdomain", () => {
     expect(withRule34WimgHostname("https://rule34.xxx/images/0123/abc.jpg")).toBe("https://wimg.rule34.xxx/images/0123/abc.jpg");
   });

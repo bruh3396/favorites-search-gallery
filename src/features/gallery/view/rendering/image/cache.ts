@@ -33,7 +33,7 @@ export function completedRequests(): ImageRequest[] {
   return [...cache.values()].filter(cached => cached.status === "complete").map(cached => cached.request);
 }
 
-export function clear(): void {
+export function clearCache(): void {
   [...cache.values()].forEach(cached => release(cached));
   cache.clear();
 }
@@ -55,5 +55,5 @@ function release(cached: CachedRequest | undefined): void {
   }
   GalleryImageFetcher.cancelFetch(cached.request.id);
   cached.request.close();
-  cached.request.stop();
+  cached.request.cancel();
 }

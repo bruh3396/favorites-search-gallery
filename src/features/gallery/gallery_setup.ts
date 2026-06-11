@@ -11,10 +11,10 @@ import * as GalleryMouseOverFlow from "@/features/gallery/flows/mouseover_flow";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import * as GalleryPostListFlow from "@/features/gallery/flows/post_list_flow";
+import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer";
 import * as GalleryTouchFlow from "@/features/gallery/flows/touch_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow";
-import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
@@ -34,8 +34,7 @@ export async function setupGallery(): Promise<void> {
   setupSubFeatures();
   subscribeToEvents();
   registerBridgeHandlers();
-  GalleryThumbObserver.refresh();
-  GalleryModel.reIndexThumbs();
+  GalleryContentFlow.refreshContent();
 }
 
 async function waitUntilPageIsReady(): Promise<void> {
@@ -101,18 +100,18 @@ function subscribeToEvents(): void {
 }
 
 function subscribeToFavoritesEvents(): void {
-  Events.favorites.newFavoritesFound.on(GalleryContentFlow.indexThumbs, { once: true });
-  Events.favorites.pageChanged.on(GalleryContentFlow.handlePageChange);
-  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.handleNewContent);
+  Events.favorites.newFavoritesFound.on(GalleryContentFlow.refreshContent, { once: true });
+  Events.favorites.pageChanged.on(GalleryContentFlow.refreshContent);
+  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.refreshContent);
   Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreviews);
 }
 
 function subscribeToPostListEvents(): void {
   Events.postList.upscaleToggled.on(GalleryPostListFlow.onUpscaleToggled);
   Events.postList.initialPostListCreated.on(GalleryPostListFlow.onInitialPostListCreated, { once: true });
-  Events.postList.moreResultsAdded.on(GalleryPostListFlow.handleResultsAddedToPostList);
-  Events.postList.infiniteScrollToggled.on(GalleryContentFlow.indexThumbs);
-  Events.postList.pageChanged.on(GalleryContentFlow.handlePageChange);
+  Events.postList.moreResultsAdded.on(GalleryContentFlow.refreshContent);
+  Events.postList.infiniteScrollToggled.on(GalleryContentFlow.refreshContent);
+  Events.postList.pageChanged.on(GalleryContentFlow.refreshContent);
 }
 
 function subscribeToDesktopInput(): void {

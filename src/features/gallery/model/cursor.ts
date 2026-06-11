@@ -46,7 +46,7 @@ export function pointTo(thumb: HTMLElement): void {
   setCurrentIndex(index);
 }
 
-export function reIndexThumbs(): void {
+export function indexThumbs(): void {
   thumbIndex.clear();
   thumbs = getAllContentThumbs();
 

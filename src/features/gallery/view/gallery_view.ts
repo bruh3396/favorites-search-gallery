@@ -26,7 +26,7 @@ export function open(thumb: HTMLElement): void {
 
 export function close(): void {
   GalleryShell.GalleryRoot.toggleAttribute("data-visible", false);
-  GalleryRenderer.clear();
+  GalleryRenderer.hide();
   GalleryUi.close();
   GalleryRenderer.upscaleCachedThumbs();
 }
@@ -40,13 +40,13 @@ export function showPreview(thumb: HTMLElement): void {
   GalleryShell.GalleryRoot.toggleAttribute("data-visible", true);
   GalleryRenderer.render(thumb);
   GalleryRenderer.toggleZoom(false);
-  // GalleryUi.toggleScrollbar(false);
+  GalleryUi.toggleScrollbar(false);
 }
 
 export function hidePreview(): void {
   GalleryShell.GalleryRoot.toggleAttribute("data-visible", false);
-  GalleryRenderer.clear();
-  // GalleryUi.toggleScrollbar(true);
+  GalleryRenderer.hide();
+  GalleryUi.toggleScrollbar(true);
 }
 
 export function toggleZoomCursor(value: boolean): void {

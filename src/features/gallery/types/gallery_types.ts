@@ -3,10 +3,9 @@ import { GalleryMenuAction } from "@/types/ui";
 export interface GalleryRenderer {
   root: HTMLElement
   render: (thumb: HTMLElement) => void
-  clear: () => void
-  softReset: () => void
-  reset: () => void
-  preload: (thumbs: HTMLElement[]) => Promise<void> | void
+  hide: () => void
+  clearCache: () => void
+  cache: (thumbs: HTMLElement[]) => Promise<void> | void
 }
 
 export type VideoClip = {

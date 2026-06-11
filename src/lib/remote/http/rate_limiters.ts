@@ -2,7 +2,7 @@ import { ApiConfig } from "@/config/api_config";
 import { RateLimiter } from "@/lib/async/rate_limiter";
 import { RateLimiterConfig } from "@/types/async";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { ThrottleQueue } from "@/lib/async/throttled_queue";
+import { ThrottleQueue } from "@/lib/async/throttle_queue";
 
 function createRateLimiter({ concurrency, ratePerSecond }: RateLimiterConfig): RateLimiter {
   return new RateLimiter(concurrency, ratePerSecond);

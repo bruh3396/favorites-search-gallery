@@ -16,10 +16,9 @@ root.appendChild(gif);
 export const GalleryGifRenderer = {
   root,
   render,
-  clear,
-  preload: GalleryConfig.gifPreloadingEnabled ? preloadGifs : doNothing,
-  reset: doNothing,
-  softReset: doNothing
+  hide,
+  cache: GalleryConfig.gifPreloadingEnabled ? cacheGifs : doNothing,
+  clearCache: doNothing
 } satisfies GalleryRenderer;
 
 function render(thumb: HTMLElement): void {
@@ -28,12 +27,12 @@ function render(thumb: HTMLElement): void {
   gif.src = gifUrl(thumb);
 }
 
-function clear(): void {
+function hide(): void {
   root.style.visibility = "hidden";
   gif.src = "";
 }
 
-function preloadGifs(thumbs: HTMLElement[]): void {
+function cacheGifs(thumbs: HTMLElement[]): void {
   const gifSources = thumbs
     .filter((thumb) => isGif(thumb))
     .slice(0, GalleryConfig.preloadedGifCount)

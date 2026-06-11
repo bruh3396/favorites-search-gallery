@@ -1,5 +1,5 @@
 import { convertToTagSet, convertToTagString } from "@/utils/string/tags";
-import { FavoritesDatabaseRecord } from "@/types/favorite";
+import { FavoriteDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
 import { union } from "@/utils/collection/set";
 
@@ -8,7 +8,7 @@ export class FavoriteTags {
   private baseTags: Set<string> = new Set();
   private additionalTags: Set<string> = new Set();
 
-  constructor(post: Post, record: HTMLElement | FavoritesDatabaseRecord, additionalTags?: string) {
+  constructor(post: Post, record: HTMLElement | FavoriteDatabaseRecord, additionalTags?: string) {
     this.set(record instanceof HTMLElement ? post.tags : record.tags, additionalTags);
     post.tags = "";
   }

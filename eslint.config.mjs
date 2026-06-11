@@ -1,4 +1,4 @@
-﻿import { defineConfig } from "eslint/config";
+import { defineConfig } from "eslint/config";
 import globals from "globals";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -545,7 +545,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["scripts/**/*.ts", "src/tests/**/*.ts", ".scripts/**/*.ts"],
+    files: ["scripts/**/*.ts", "src/playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.ts"],
     rules: {
       "no-console": "off"
     }

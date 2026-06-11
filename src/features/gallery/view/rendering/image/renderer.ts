@@ -18,10 +18,9 @@ GalleryImageCanvas.mount(root);
 export const GalleryImageRenderer = {
   root,
   render,
-  clear,
-  preload,
-  reset,
-  softReset
+  hide,
+  cache,
+  clearCache
 } satisfies GalleryRenderer;
 
 export const toggleZoomCursor = (value: boolean): boolean => root.classList.toggle("gallery-image-frame--zooming", value);
@@ -29,19 +28,17 @@ export const toggleZoom = (value: boolean | undefined): boolean => root.classLis
 export const zoomToPoint = GalleryImageCanvas.zoomToPoint;
 export const upscaleCachedThumbs = (): void => GalleryUpscaler.upscaleAll(GalleryImageLoader.completedRequests());
 export const setCanvasDimensions = GalleryUpscaler.setCanvasDimensions;
-export const downscaleAll = GalleryUpscaler.reset;
+export const downscaleAll = GalleryUpscaler.downscaleAll;
 
 export function correctOrientation(): void {
   GalleryImageCanvas.correctOrientation();
   renderActiveThumb();
 }
 
-export async function preload(thumbs: HTMLElement[]): Promise<void> {
-  const animated = thumbs.filter(thumb => !isImage(thumb));
-
+export async function cache(thumbs: HTMLElement[]): Promise<void> {
   await waitForAllThumbsToLoadWithTimeout();
   GalleryImageLoader.load(thumbs);
-  GalleryUpscaler.upscaleAll(disposableRequests(animated));
+  GalleryUpscaler.upscaleAll(disposableRequests(thumbs.filter(thumb => !isImage(thumb))));
 }
 
 export async function upscale(thumbs: HTMLElement[]): Promise<void> {
@@ -49,12 +46,17 @@ export async function upscale(thumbs: HTMLElement[]): Promise<void> {
   GalleryUpscaler.upscaleAll(disposableRequests(thumbs));
 }
 
+export function reupscaleCachedThumbs(): void {
+  GalleryUpscaler.downscaleAll();
+  setTimeout(upscaleCachedThumbs, 10);
+}
+
 function render(thumb: HTMLElement): void {
   root.style.visibility = "visible";
   draw(thumb);
 }
 
-function clear(): void {
+function hide(): void {
   root.style.visibility = "hidden";
   toggleZoomCursor(false);
   toggleZoom(false);
@@ -64,23 +66,9 @@ function clear(): void {
   }
 }
 
-function disposableRequests(thumbs: HTMLElement[]): ImageRequest[] {
-  return thumbs.map(thumb => {
-    const request = new ImageRequest(thumb);
-
-    request.disposable = true;
-    return request;
-  });
-}
-
-function reset(): void {
-  GalleryUpscaler.reset();
-  GalleryImageLoader.clear();
-}
-
-function softReset(): void {
-  GalleryUpscaler.reset();
-  setTimeout(() => GalleryUpscaler.upscaleAll(GalleryImageLoader.completedRequests()), 10);
+function clearCache(): void {
+  GalleryUpscaler.downscaleAll();
+  GalleryImageLoader.clearCache();
 }
 
 function draw(thumb: HTMLElement): void {
@@ -113,6 +101,10 @@ function renderActiveThumb(): void {
   if (cached && cached.status === "complete") {
     draw(thumb);
   }
+}
+
+function disposableRequests(thumbs: HTMLElement[]): ImageRequest[] {
+  return thumbs.map(thumb => new ImageRequest(thumb, true));
 }
 
 function waitForAllThumbsToLoadWithTimeout(): Promise<unknown[]> {

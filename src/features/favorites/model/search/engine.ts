@@ -3,6 +3,7 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { InvertedIndex } from "@/lib/collection/inverted_index";
 import { InvertedIndexSearcher } from "@/lib/search/index/inverted_index_searcher";
 import { SearchQuery } from "@/lib/search/query/search_query";
+import { hasMetadataTerm } from "@/lib/search/parsers/search_term_parser";
 import { yieldControl } from "@/lib/async/timing";
 
 const index = new InvertedIndex<Favorite>(favorite => favorite.tags, false);
@@ -10,9 +11,9 @@ const searcher = new InvertedIndexSearcher<Favorite>(index);
 let state: "indexing" | "ready" = "ready";
 let deferred: Favorite[] = [];
 
-export function search(searchQuery: SearchQuery<Favorite>, candidates: Favorite[]): Favorite[] {
-  const eligible = state === "ready" && !searchQuery.metadata.hasMetadataTerm;
-  return eligible ? searcher.search(searchQuery, candidates) : searchQuery.filter(candidates);
+export function search(query: string, candidates: Favorite[]): Favorite[] {
+  const eligible = state === "ready" && !hasMetadataTerm(query);
+  return eligible ? searcher.search(query, candidates) : new SearchQuery<Favorite>(query).filter(candidates);
 }
 
 export function add(doc: Favorite): void {

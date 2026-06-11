@@ -17,6 +17,6 @@ export function displaySelected(): void {
 async function cacheAdjacent(thumb: HTMLElement): Promise<void> {
   if (GalleryConfig.preloadingEnabled) {
     await yieldControl();
-    GalleryView.preload(GalleryModel.getThumbsAround(thumb));
+    GalleryView.cache(GalleryModel.getThumbsAround(thumb));
   }
 }

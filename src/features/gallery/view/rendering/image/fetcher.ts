@@ -1,5 +1,5 @@
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { ThrottleQueue } from "@/lib/async/throttled_queue";
+import { ThrottleQueue } from "@/lib/async/throttle_queue";
 import { fetchImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
 import { getImageFromThumb } from "@/lib/thumb/thumbs";
 import { imageIsLoaded } from "@/utils/dom/image";

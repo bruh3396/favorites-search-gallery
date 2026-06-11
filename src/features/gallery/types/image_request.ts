@@ -1,10 +1,6 @@
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GalleryConfig } from "@/config/gallery_config";
-import { MediaType } from "@/types/media";
-import { ThrottleQueue } from "@/lib/async/throttled_queue";
-import { thumbnailUrl } from "@/lib/thumb/url";
-import { getTagSetFromItem } from "@/lib/thumb/tag";
-import { resolveMediaType } from "@/lib/media/type_resolver";
+import { ThrottleQueue } from "@/lib/async/throttle_queue";
 
 const bitmapCloseQueue = new ThrottleQueue(GalleryConfig.bitmapCloseDelay);
 
@@ -14,38 +10,24 @@ export function getFavoritePixelCount(id: string): number {
 }
 
 export class ImageRequest {
-  public id: string;
-  public thumbUrl: string;
-  public thumb: HTMLElement;
+  public readonly id: string;
+  public readonly thumb: HTMLElement;
+  public readonly abortController: AbortController;
+  public readonly disposable: boolean;
   public bitmap: ImageBitmap | null;
-  public abortController: AbortController;
   public cancelled: boolean;
-  public mediaType: MediaType;
-  public accentColor: string | null;
-  public disposable: boolean;
 
-  constructor(thumb: HTMLElement) {
+  constructor(thumb: HTMLElement, disposable: boolean = false) {
     this.id = thumb.id;
-    this.thumbUrl = thumbnailUrl(thumb) ?? "";
     this.thumb = thumb;
     this.bitmap = null;
     this.abortController = new AbortController();
     this.cancelled = false;
-    this.mediaType = resolveMediaType(getTagSetFromItem(thumb));
-    this.accentColor = null;
-    this.disposable = false;
+    this.disposable = disposable;
   }
 
   public get megabytes(): number {
     return getFavoritePixelCount(this.id) / 220_000;
-  }
-
-  public get isImage(): boolean {
-    return this.mediaType === "image";
-  }
-
-  public get isAnimated(): boolean {
-    return !this.isImage;
   }
 
   public get isIncomplete(): boolean {
@@ -60,15 +42,11 @@ export class ImageRequest {
     return true;
   }
 
-  public get isLowRes(): boolean {
-    return !this.isHighRes;
-  }
-
   public complete(bitmap: ImageBitmap): void {
     this.bitmap = bitmap;
   }
 
-  public stop(): void {
+  public cancel(): void {
     this.cancelled = true;
     this.abortController.abort();
   }

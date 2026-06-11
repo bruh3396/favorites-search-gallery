@@ -1,10 +1,10 @@
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
-import { withRule34Hostname } from "@/lib/media/url_transformer";
 import { parseDimensions2D } from "@/utils/string/parse";
 import { parseHtml } from "@/utils/dom/html_parser";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
+import { withRule34Hostname } from "@/lib/media/url_transformer";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 

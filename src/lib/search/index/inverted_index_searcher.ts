@@ -1,14 +1,13 @@
 import { ExpandedSearchQuery } from "@/lib/search/query/expanded_search_query";
 import { InvertedIndex } from "@/lib/collection/inverted_index";
-import { SearchQuery } from "@/lib/search/query/search_query";
 import { Searchable } from "@/types/search";
 import { intersection } from "@/utils/collection/set";
 
 export class InvertedIndexSearcher<T extends Searchable> {
   constructor(private readonly index: InvertedIndex<T>) { }
 
-  public search(query: SearchQuery<T>, docs: T[]): T[] {
-    const expandedQuery = new ExpandedSearchQuery<T>(query.raw, this.index.indexedTerms());
+  public search(query: string, docs: T[]): T[] {
+    const expandedQuery = new ExpandedSearchQuery<T>(query, this.index.indexedTerms());
     return expandedQuery.isEmpty ? docs : expandedQuery.isUnmatchable ? [] : this.findMatches(expandedQuery, docs);
   }
 

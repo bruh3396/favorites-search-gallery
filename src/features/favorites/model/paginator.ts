@@ -13,17 +13,8 @@ let favorites: Favorite[] = [];
 export const onFinal = (): boolean => current === pageCount();
 export const currentFavorites = (): Favorite[] => favoritesOnPage(current);
 export const adjacentFavorites = (): Favorite[] => [...favoritesOnPage(current - 1), ...favoritesOnPage(current + 1)];
-export function context(): PaginationContext {
-  return {
-    currentPage: current,
-    finalPage: pageCount(),
-    totalCount: favorites.length,
-    sliceStart: resultsPerPage() * (current - 1),
-    sliceEnd: resultsPerPage() * current,
-    sequence: paginationSequence(current, pageCount(), FavoritesConfig.nearbyPageCount)
-  };
-}
 export const selectAdjacent = (direction: NavigationKey): boolean => select(wrappedPage(current, navigationDelta(direction), pageCount()));
+export const paginate = (newFavorites: Favorite[]): Favorite[] => (favorites = newFavorites);
 
 export function select(pageNumber: number): boolean {
   const target = clamp(pageNumber, 1, pageCount());
@@ -33,17 +24,20 @@ export function select(pageNumber: number): boolean {
   return changed;
 }
 
-export function paginate(newFavorites: Favorite[]): void {
-  favorites = newFavorites;
-}
-
 export function selectContaining(id: string): boolean {
   const index = favorites.findIndex(f => f.id === id);
+  return index !== -1 && select(Math.floor(index / resultsPerPage()) + 1);
+}
 
-  if (index === -1) {
-    return false;
-  }
-  return select(Math.floor(index / resultsPerPage()) + 1);
+export function context(): PaginationContext {
+  return {
+    currentPage: current,
+    finalPage: pageCount(),
+    totalCount: favorites.length,
+    sliceStart: resultsPerPage() * (current - 1),
+    sliceEnd: resultsPerPage() * current,
+    sequence: paginationSequence(current, pageCount(), FavoritesConfig.nearbyPageCount)
+  };
 }
 
 const pageCount = (): number => Math.ceil(favorites.length / resultsPerPage()) || 1;

@@ -4,7 +4,6 @@ import * as FavoritesSorter from "@/features/favorites/model/search/sorter";
 import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { Favorite } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
-import { SearchQuery } from "@/lib/search/query/search_query";
 
 let currentSearchQuery = "";
 
@@ -24,5 +23,5 @@ export { deferIndexing } from "@/features/favorites/model/search/engine";
 
 const useBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.favoritesExcludeBlacklist.value;
 const blacklistSearchQuery = (): string => `${currentSearchQuery} ${NEGATED_BLACKLISTED_TAGS}`;
-const buildQuery = (): SearchQuery<Favorite> => new SearchQuery<Favorite>(useBlacklist() ? blacklistSearchQuery() : currentSearchQuery);
-const search = (favorites: Favorite[]): Favorite[] => FavoritesSearchEngine.search(buildQuery(), favorites);
+const finalQuery = (): string => (useBlacklist() ? blacklistSearchQuery() : currentSearchQuery);
+const search = (favorites: Favorite[]): Favorite[] => FavoritesSearchEngine.search(finalQuery(), favorites);

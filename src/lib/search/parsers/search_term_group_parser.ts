@@ -1,7 +1,4 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
-import { CategorizedSearchTerms } from "@/lib/search/types/search_types";
-import { MetadataSearchTerm } from "@/lib/search/terms/metadata_search_term";
-import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 
@@ -22,23 +19,6 @@ export function buildSearchTerms(terms: string[]): AbstractSearchTerm[] {
 
 export function sortSearchTerms(searchTerms: AbstractSearchTerm[]): AbstractSearchTerm[] {
   return [...searchTerms].sort((a, b) => a.cost - b.cost);
-}
-
-export function categorizeSearchTerms(searchTerms: AbstractSearchTerm[]): CategorizedSearchTerms {
-  const required: AbstractSearchTerm[] = [];
-  const wildcard: WildcardSearchTerm[] = [];
-  const metadata: MetadataSearchTerm[] = [];
-
-  for (const searchTerm of searchTerms) {
-    if (searchTerm instanceof WildcardSearchTerm) {
-      wildcard.push(searchTerm);
-    } else if (searchTerm instanceof MetadataSearchTerm) {
-      metadata.push(searchTerm);
-    } else if (!searchTerm.negated) {
-      required.push(searchTerm);
-    }
-  }
-  return { required, wildcard, metadata };
 }
 
 function parseAndTerms(query: string): string[] {

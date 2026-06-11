@@ -5,7 +5,7 @@ export type FavoriteMetricMap = {
   [key in MetadataMetric]: number
 }
 
-export type FavoritesMetadataDatabaseRecord = {
+export type FavoriteMetadataDatabaseRecord = {
   width: number
   height: number
   score: number
@@ -15,18 +15,18 @@ export type FavoritesMetadataDatabaseRecord = {
   duration: number | undefined
 }
 
-export type FavoritesDatabaseRecord = {
+export type FavoriteDatabaseRecord = {
   id: string
   tags: Set<string>
   src: string
-  metadata: FavoritesMetadataDatabaseRecord;
+  metadata: FavoriteMetadataDatabaseRecord
 }
 
 export interface Favorite extends Searchable {
   id: string
   root: HTMLElement
   thumbnailUrl: string
-  databaseRecord: FavoritesDatabaseRecord
+  databaseRecord: FavoriteDatabaseRecord
   withinRating: (rating: Rating) => boolean
   updateTags: (post: Post) => void
   addAdditionalTags: (newTags: string) => string
@@ -37,5 +37,4 @@ export interface Favorite extends Searchable {
 }
 
 export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success"
-
 export type RemoveFavoriteStatus = "error" | "forbidden" | "success"

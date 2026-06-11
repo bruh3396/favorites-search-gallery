@@ -49,7 +49,7 @@ export function fetchNewFavorites(page0Elements?: HTMLElement[]): Promise<NewFav
 export const searchActiveFavorites = (searchQuery?: string): Favorite[] => FavoritesSearchCoordinator.searchFavorites(FavoritesLoader.getActiveFavorites(), searchQuery);
 export const invertSearchResults = (): Favorite[] => FavoritesSearchCoordinator.invertResults(FavoritesLoader.getActiveFavorites());
 export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getCurrentSearchResults());
-export const repaginateCurrentResults = (): void => FavoritesPaginator.paginate(FavoritesSearchCoordinator.getCurrentSearchResults());
+export const repaginateCurrentResults = (): Favorite[] => FavoritesPaginator.paginate(FavoritesSearchCoordinator.getCurrentSearchResults());
 
 export * from "@/features/favorites/model/load/loader";
 export * from "@/features/favorites/model/metadata_fetcher";

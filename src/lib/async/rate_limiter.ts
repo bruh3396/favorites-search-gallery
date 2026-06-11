@@ -1,5 +1,5 @@
 import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
-import { ThrottleQueue } from "@/lib/async/throttled_queue";
+import { ThrottleQueue } from "@/lib/async/throttle_queue";
 
 export class RateLimiter {
   private readonly limiter: ConcurrencyLimiter;

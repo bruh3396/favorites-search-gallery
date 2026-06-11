@@ -1,5 +1,3 @@
-import * as GalleryModel from "@/features/gallery/model/gallery_model";
-import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { GalleryConfig } from "@/config/gallery_config";
 import { POSTS_PER_POST_LIST_PAGE } from "@/lib/rule34_constants";
@@ -24,11 +22,6 @@ export function onInitialPostListCreated(): void {
   dispatchByState({
     idle: preloadOutsideGallery
   });
-}
-
-export function handleResultsAddedToPostList(thumbs: HTMLElement[]): void {
-  GalleryModel.reIndexThumbs();
-  GalleryThumbObserver.observe(thumbs);
 }
 
 function preloadOutsideGallery(): void {

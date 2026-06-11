@@ -3,16 +3,8 @@ import { POSTS_PER_POST_LIST_PAGE } from "@/lib/rule34_constants";
 import { Resolution } from "@/types/media";
 
 export const GalleryConfig = {
-  mainCanvasResolutions: {
-    favorites: "7680x4320",
-    search: "3840x2160",
-    mobile: "1920x1080"
-  } satisfies Record<"favorites" | "search" | "mobile", Resolution>,
   get mainCanvasResolution(): Resolution {
-    if (ON_MOBILE_DEVICE) {
-      return GalleryConfig.mainCanvasResolutions.mobile;
-    }
-    return ON_POST_LIST_PAGE ? GalleryConfig.mainCanvasResolutions.search : GalleryConfig.mainCanvasResolutions.favorites;
+    return ON_MOBILE_DEVICE ? "1920x1080" : ON_POST_LIST_PAGE ? "3840x2160" : "7680x4320";
   },
 
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 700,
@@ -29,7 +21,7 @@ export const GalleryConfig = {
   preloadOutsideGalleryOnPostList: true,
   upscaleEverythingOnPostList: false,
 
-  preloadMediaDebounceTime: 500,
+  contentRefreshTime: 500,
   navigationThrottleTime: 250,
   galleryNavigationDelay: 100,
   idleInteractionDuration: 300,
@@ -43,7 +35,6 @@ export const GalleryConfig = {
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },
-  useOffscreenThumbUpscaler: false,
-  createImageAccentColors: false,
+  useOffscreenThumbUpscaler: true,
   galleryMenuMonoColor: true
 };

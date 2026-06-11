@@ -38,6 +38,10 @@ export function isMetadataTerm(term: string): boolean {
   return MetadataSearchExpression.regex.test(term);
 }
 
+export function hasMetadataTerm(query: string): boolean {
+  return query.trim().split(/\s+/).some(isMetadataTerm);
+}
+
 function parseNegation(term: string): { negated: boolean; value: string; } {
   const negated = term.startsWith("-") && term.length > 1;
   return { negated, value: negated ? term.substring(1) : term };

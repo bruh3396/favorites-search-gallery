@@ -12,16 +12,15 @@ export function setup(root: HTMLElement, onVideoEnded: () => void, onVideoDouble
 }
 
 export function render(thumb: HTMLElement): void {
-  clear();
+  hide();
   resolve(thumb).render(thumb);
 }
 
-export const clear = (): void => renderers.forEach(r => r.clear());
-export const preload = (thumbs: HTMLElement[]): void => renderers.forEach(r => r.preload(thumbs));
-export const reset = (): void => renderers.forEach(r => r.reset());
-export const softReset = (): void => renderers.forEach(r => r.softReset());
+export const hide = (): void => renderers.forEach(r => r.hide());
+export const cache = (thumbs: HTMLElement[]): void => renderers.forEach(r => r.cache(thumbs));
+export const clearCache = (): void => renderers.forEach(r => r.clearCache());
 
-export { preload as cacheImages, upscale, correctOrientation, downscaleAll, toggleZoom, toggleZoomCursor, upscaleCachedThumbs, zoomToPoint } from "@/features/gallery/view/rendering/image/renderer";
+export { cache as cacheImages, reupscaleCachedThumbs, upscale, correctOrientation, downscaleAll, toggleZoom, toggleZoomCursor, upscaleCachedThumbs, zoomToPoint } from "@/features/gallery/view/rendering/image/renderer";
 export { toggleVideoLooping, restartVideo, toggleVideoPause, toggleVideoMute } from "@/features/gallery/view/rendering/video/renderer";
 
 const resolve = (thumb: HTMLElement): GalleryRenderer => (isVideo(thumb) ? GalleryVideoRenderer : isGif(thumb) ? GalleryGifRenderer : GalleryImageRenderer);

@@ -1,12 +1,12 @@
-import { FavoritesDatabaseRecord } from "@/types/favorite";
+import { getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
+import { FavoriteDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
 import { chain } from "@/utils/function";
 import { decompressPreviewSource } from "@/lib/media/url_compressor";
-import { getImageFromThumb } from "@/lib/thumb/thumbs";
 import { getTagsFromThumb } from "@/lib/thumb/tag";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 
-export function createPost(source: HTMLElement | FavoritesDatabaseRecord): Post {
+export function createPost(source: HTMLElement | FavoriteDatabaseRecord): Post {
   return source instanceof HTMLElement ? createPostFromThumb(source) : createPostFromRecord(source);
 }
 
@@ -15,7 +15,7 @@ export function clearPost(post: Post): void {
 }
 
 function createPostFromThumb(thumb: HTMLElement): Post {
-  const post = createEmptyPost(thumb.id);
+  const post = createEmptyPost(getIdFromThumb(thumb));
   const image = getImageFromThumb(thumb);
 
   if (image === null) {
@@ -26,7 +26,7 @@ function createPostFromThumb(thumb: HTMLElement): Post {
   return post;
 }
 
-function createPostFromRecord(record: FavoritesDatabaseRecord): Post {
+function createPostFromRecord(record: FavoriteDatabaseRecord): Post {
   const post = createEmptyPost(record.id);
 
   post.height = record.metadata.height;

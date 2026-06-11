@@ -1,5 +1,5 @@
 experimental
-src/tests/playground/
+src/playground/
 .env
 scripts/bin/
 .vscode

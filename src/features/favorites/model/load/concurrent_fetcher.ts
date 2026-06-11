@@ -4,7 +4,7 @@ import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page";
 import { fetchFavoritesPage } from "@/lib/remote/rule34/favorites/page";
 import { sleep } from "@/lib/async/timing";
 
-export class FavoritesConcurrentPageFetcher {
+export class FavoritesConcurrentFetcher {
   private static readonly PENDING_POLL_INTERVAL = 200;
   private readonly inFlight = new Set<number>();
   private readonly failed: FavoritesPageRequest[] = [];
@@ -20,7 +20,7 @@ export class FavoritesConcurrentPageFetcher {
       const request = this.takeNextRequest();
 
       if (request === undefined) {
-        await sleep(FavoritesConcurrentPageFetcher.PENDING_POLL_INTERVAL);
+        await sleep(FavoritesConcurrentFetcher.PENDING_POLL_INTERVAL);
         continue;
       }
       this.fetchPage(request);

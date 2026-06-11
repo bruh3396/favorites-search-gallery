@@ -6,7 +6,7 @@ import { LowResolutionImageRequest } from "@/features/gallery/types/low_resoluti
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { doNothing } from "@/utils/function";
 import { isImage } from "@/lib/media/type_predicates";
-export { get, completedRequests, clear } from "@/features/gallery/view/rendering/image/cache";
+export { get, completedRequests, clearCache } from "@/features/gallery/view/rendering/image/cache";
 
 let onComplete: (request: ImageRequest) => void = doNothing;
 

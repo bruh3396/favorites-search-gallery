@@ -1,7 +1,7 @@
 import { PaginationSequence, PaginationTerm } from "@/types/ui";
 import { numbersAroundInRange } from "@/utils/number";
 
-export type PaginationUpdateStrategy = "skip" | "patch" | "rebuild";
+type PaginationUpdateStrategy = "skip" | "patch" | "rebuild";
 
 export function paginationSequence(currentPage: number, finalPage: number, nearbyCount: number): PaginationSequence {
   const nearbyPages = numbersAroundInRange(currentPage, nearbyCount, 1, finalPage);
@@ -21,21 +21,14 @@ export function paginationSequence(currentPage: number, finalPage: number, nearb
 }
 
 export function paginationUpdateStrategy(previous: PaginationSequence, next: PaginationSequence): PaginationUpdateStrategy {
-  if (sequencesEqual(previous, next)) {
-    return "skip";
-  }
-
-  if (sequenceShapesEqual(previous, next)) {
-    return "patch";
-  }
-  return "rebuild";
+  return sequencesEqual(previous, next) ? "skip" : sequenceShapesEqual(previous, next) ? "patch" : "rebuild";
 }
 
-export function sequencesEqual(a: PaginationSequence, b: PaginationSequence): boolean {
+function sequencesEqual(a: PaginationSequence, b: PaginationSequence): boolean {
   return a.length === b.length && a.every((term, index) => term === b[index]);
 }
 
-export function sequenceShapesEqual(a: PaginationSequence, b: PaginationSequence): boolean {
+function sequenceShapesEqual(a: PaginationSequence, b: PaginationSequence): boolean {
   return a.length === b.length && a.every((term, index) => isEllipsis(term) === isEllipsis(b[index]));
 }
 

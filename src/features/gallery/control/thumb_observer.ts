@@ -11,8 +11,8 @@ class VisibleThumbObserver {
   private suppressNextBroadcast: boolean = false;
   private readonly scheduleBroadcast: () => void;
 
-  public constructor(onVisibleThumbsChanged: () => void) {
-    this.scheduleBroadcast = debounceTrailing(onVisibleThumbsChanged, GalleryConfig.preloadMediaDebounceTime);
+  constructor(onVisibleThumbsChanged: () => void) {
+    this.scheduleBroadcast = debounceTrailing(onVisibleThumbsChanged, GalleryConfig.contentRefreshTime);
     this.observer = new IntersectionObserver(entries => this.onIntersection(entries), {
       root: null,
       rootMargin: `0px 0px ${GalleryConfig.bottomOverscanPercent}% 0px`,
@@ -20,16 +20,13 @@ class VisibleThumbObserver {
     });
   }
 
-  public observe(thumbs: HTMLElement[]): void {
-    thumbs.forEach(thumb => this.observer.observe(thumb));
-  }
-
   public async refresh(): Promise<void> {
+    this.setCenterThumb(null);
     this.observer.disconnect();
     this.visibleThumbs.clear();
     await waitForAllThumbsToLoad();
     this.suppressNextBroadcast = true;
-    this.observe(getAllContentThumbs());
+    getAllContentThumbs().forEach(thumb => this.observer.observe(thumb));
   }
 
   public setCenterThumb(thumb: HTMLElement | null): void {
@@ -87,20 +84,12 @@ export function setup(onVisibleThumbsChanged: () => void): void {
   instance = new VisibleThumbObserver(onVisibleThumbsChanged);
 }
 
-export function observe(thumbs: HTMLElement[]): void {
-  instance?.observe(thumbs);
-}
-
 export async function refresh(): Promise<void> {
   await instance?.refresh();
 }
 
 export function setCenterThumb(thumb: HTMLElement | null): void {
   instance?.setCenterThumb(thumb);
-}
-
-export function resetCenterThumb(): void {
-  instance?.setCenterThumb(null);
 }
 
 export function getVisibleThumbs(): HTMLElement[] {

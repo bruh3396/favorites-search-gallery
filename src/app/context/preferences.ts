@@ -2,12 +2,12 @@ import { FavoriteIndicatorStyle, FavoritesDrawerTab, GalleryFavoriteIndicatorSty
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortMethod } from "@/types/search";
 import { Preference } from "@/lib/storage/preference";
+import { getCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
   appPerformanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
   appSurfaceGradient: new Preference("appSurfaceGradient", true),
-  // appTheme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
-  appTheme: new Preference<Theme>("appTheme", "zeal"),
+  appTheme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
 
   favoritesAllowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
   favoritesColumnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 6),

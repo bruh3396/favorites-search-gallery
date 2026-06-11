@@ -4,44 +4,22 @@ import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { GalleryConfig } from "@/config/gallery_config";
 import { debounceLeading } from "@/lib/async/debounce";
 import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
-import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
-export function handlePageChange(): void {
-  indexThumbs();
-  refreshContentDebounced();
-}
-
-const refreshContentDebounced = debounceLeading(() => {
-  dispatchByState({
-    idle: outOfGalleryPageChange,
-    preview: outOfGalleryPageChange,
-    open: GalleryView.softReset
-  });
-}, GalleryConfig.preloadMediaDebounceTime);
-
-function outOfGalleryPageChange(): void {
-  GalleryView.reset();
-  cacheAroundFirstThumb();
-}
-
-function cacheAroundFirstThumb(): void {
-  if (!GalleryConfig.cacheFirstImages) {
-    return;
-  }
-  const [firstThumb] = getAllContentThumbs();
-
-  if (firstThumb !== undefined) {
-    GalleryView.cacheImages(GalleryModel.getThumbsAround(firstThumb));
-  }
-}
-
-export function indexThumbs(): void {
-  GalleryThumbObserver.resetCenterThumb();
+export function refreshContent(): void {
   GalleryThumbObserver.refresh();
-  GalleryModel.reIndexThumbs();
+  GalleryModel.indexThumbs();
+  refreshCache();
 }
 
-export function handleNewContent(elements: HTMLElement[]): void {
-  GalleryThumbObserver.observe(elements);
-  GalleryModel.reIndexThumbs();
+const refreshCache = debounceLeading(() => {
+  dispatchByState({
+    idle: recacheFirstThumbs,
+    preview: recacheFirstThumbs,
+    open: GalleryView.reupscaleCachedThumbs
+  });
+}, GalleryConfig.contentRefreshTime);
+
+function recacheFirstThumbs(): void {
+  GalleryView.clearCache();
+  GalleryView.cacheImages(GalleryModel.getFirstThumbs());
 }

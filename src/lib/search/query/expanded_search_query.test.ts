@@ -1,67 +1,67 @@
-import { Fruit, index } from "@/tests/lib/search/fixtures/fruit_search";
+import { Fruit, index } from "@/lib/search/fixtures/fruit_search_fixture";
 import { describe, expect, test } from "vitest";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExpandedSearchQuery } from "@/lib/search/query/expanded_search_query";
 
-function getRawTagValue(searchTag: AbstractSearchTerm): string {
-  return searchTag.negated ? `-${searchTag.value}` : searchTag.value;
+function getRawTermValue(searchTerm: AbstractSearchTerm): string {
+  return searchTerm.negated ? `-${searchTerm.value}` : searchTerm.value;
 }
 
-function getRawTagGroup(searchTags: AbstractSearchTerm[]): string[] {
-  return searchTags.map(tag => getRawTagValue(tag)).sort();
+function getRawTermGroup(searchTerms: AbstractSearchTerm[]): string[] {
+  return searchTerms.map(term => getRawTermValue(term)).sort();
 }
 
 function getFinalSearchQuery(expandedQuery: ExpandedSearchQuery<Fruit>): string {
-  const andTags = getRawTagGroup(expandedQuery.andTerms).sort().join(" ");
-  const orGroups = expandedQuery.orGroups.map(orGroup => `( ${getRawTagGroup(orGroup).join(" ~ ")} )`).sort().join(" ");
-  return `${andTags} ${orGroups}`.trim();
+  const andTerms = getRawTermGroup(expandedQuery.andTerms).sort().join(" ");
+  const orGroups = expandedQuery.orGroups.map(orGroup => `( ${getRawTermGroup(orGroup).join(" ~ ")} )`).sort().join(" ");
+  return `${andTerms} ${orGroups}`.trim();
 }
 
-function testExpandSearchQuery(rawQuery: string, expectedRawQuery: string): ExpandedSearchQuery<Fruit> {
-  const expandedQuery = new ExpandedSearchQuery<Fruit>(rawQuery, index.indexedTerms());
-  const expectedQuery = new ExpandedSearchQuery<Fruit>(expectedRawQuery, index.indexedTerms());
+function testExpandSearchQuery(query: string, expectedQuery: string): ExpandedSearchQuery<Fruit> {
+  const expandedQuery = new ExpandedSearchQuery<Fruit>(query, index.indexedTerms());
+  const expected = new ExpandedSearchQuery<Fruit>(expectedQuery, index.indexedTerms());
 
-  expect(getFinalSearchQuery(expandedQuery)).toStrictEqual(getFinalSearchQuery(expectedQuery));
+  expect(getFinalSearchQuery(expandedQuery)).toStrictEqual(getFinalSearchQuery(expected));
   return expandedQuery;
 }
 
-describe("expandWildcardTags", () => {
+describe("expandWildcardTerms", () => {
   test("empty", () => {
     testExpandSearchQuery("", "");
     testExpandSearchQuery(" ", "");
     testExpandSearchQuery(" \n\t", "");
   });
 
-  test("no wildcard tags", () => {
+  test("no wildcard terms", () => {
     testExpandSearchQuery("apple", "apple");
   });
 
-  test("no matches from resolving and wildcard tags", () => {
+  test("no matches from resolving and wildcard terms", () => {
     expect(testExpandSearchQuery("foobar", "foobar").isUnmatchable).toBe(false);
     expect(testExpandSearchQuery("foobar*", "").isUnmatchable).toBe(true);
     expect(testExpandSearchQuery("foobar* ap*", "").isUnmatchable).toBe(true);
   });
 
-  test("one wildcard tag expands to multiple", () => {
+  test("one wildcard term expands to multiple", () => {
     testExpandSearchQuery("sm*", "( small ~  smooth ~ smoothie )");
     testExpandSearchQuery("smo*", "( smooth ~ smoothie )");
     testExpandSearchQuery("*moo*", "( smooth ~ smoothie )");
     testExpandSearchQuery("*ee*", "( green ~ sweet ~ peelable ~ seedless )");
   });
 
-  test("one wildcard tag expands to one", () => {
+  test("one wildcard term expands to one", () => {
     testExpandSearchQuery("or*", "orange");
   });
 
-  test("two wildcard tags", () => {
+  test("two wildcard terms", () => {
     testExpandSearchQuery("sm* smo*", "( small ~ smooth ~ smoothie ) ( smooth ~ smoothie )");
   });
 
-  test("three wildcard tags", () => {
+  test("three wildcard terms", () => {
     testExpandSearchQuery("sm* bl* *ee*", "( small ~ smooth ~ smoothie ) ( blue ~ blueberry )  ( green ~ sweet ~ peelable ~ seedless )");
   });
 
-  test("mixed tags", () => {
+  test("mixed terms", () => {
     testExpandSearchQuery("kiwi orange", "kiwi orange");
     testExpandSearchQuery("kiwi orange* banana", "kiwi orange banana");
   });
@@ -84,7 +84,7 @@ describe("expandWildcardTags", () => {
     expect(testExpandSearchQuery("( *foobar* ~ a* ) ( smo* )", "( apple ~ antioxidants ~ antioxidant ) ( smooth ~ smoothie )").isUnmatchable).toBe(false);
   });
 
-  test("expand and tags and or groups", () => {
+  test("expand and terms and or groups", () => {
     testExpandSearchQuery("*ee* *ed *pple *ple ( tag ~ on* ~ smo* )", "( green ~ sweet ~ peelable ~ seedless ) red apple ( apple ~ purple ) ( tag ~ smooth ~ smoothie )");
     testExpandSearchQuery("*ee* *ed *pple *ple ( tag ~ on* ~ smo* ) ( red ~ blue )", "( green ~ sweet ~ peelable ~ seedless ) red apple ( apple ~ purple ) ( tag ~ smooth ~ smoothie ) ( red ~ blue )");
     testExpandSearchQuery("*ee* *ed *pple *ple ( tag ~ on* ~ smo* ) ( red ~ blue ) ( apple ~ *ch* )", "( green ~ sweet ~ peelable ~ seedless ) red apple ( apple ~ purple ) ( tag ~ smooth ~ smoothie ) ( red ~ blue ) ( apple ~ cherry ~ lunch ~ crunchy  )");

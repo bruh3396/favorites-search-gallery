@@ -1,4 +1,4 @@
-import { Favorite, FavoriteMetricMap, FavoritesDatabaseRecord } from "@/types/favorite";
+import { Favorite, FavoriteMetricMap, FavoriteDatabaseRecord } from "@/types/favorite";
 import { clearPost, createPost } from "@/features/favorites/types/post_factory";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
@@ -15,7 +15,7 @@ export class FavoriteItem implements Favorite {
   private readonly favoriteTags: FavoriteTags;
   private element: FavoriteElement | null;
 
-  constructor(source: HTMLElement | FavoritesDatabaseRecord, additionalTags?: string) {
+  constructor(source: HTMLElement | FavoriteDatabaseRecord, additionalTags?: string) {
     this.id = source instanceof HTMLElement ? getIdFromThumb(source) : source.id;
     this.post = createPost(source);
     this.favoriteTags = new FavoriteTags(this.post, source, additionalTags);
@@ -45,7 +45,7 @@ export class FavoriteItem implements Favorite {
     return this.metadata.metrics;
   }
 
-  public get databaseRecord(): FavoritesDatabaseRecord {
+  public get databaseRecord(): FavoriteDatabaseRecord {
     return { id: this.id, tags: this.tags, src: compressPreviewSource(this.thumbnailUrl), metadata: this.metadata.databaseRecord };
   }
 

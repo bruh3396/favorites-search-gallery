@@ -1,6 +1,5 @@
-import { buildSearchTerms, categorizeSearchTerms, parseTermGroups, sortSearchTerms } from "@/lib/search/parsers/search_term_group_parser";
+import { buildSearchTerms, parseTermGroups, sortSearchTerms } from "@/lib/search/parsers/search_term_group_parser";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
-import { SearchQueryMetadata } from "@/lib/search/types/search_types";
 import { Searchable } from "@/types/search";
 import { isEmptyString } from "@/utils/string/query";
 
@@ -10,30 +9,19 @@ export class SearchQuery<T extends Searchable> {
   public orGroups: AbstractSearchTerm[][] = [];
   public andTerms: AbstractSearchTerm[] = [];
 
-  constructor(searchQuery: string) {
-    this.raw = searchQuery;
-    this.isEmpty = isEmptyString(searchQuery);
+  constructor(query: string) {
+    this.raw = query;
+    this.isEmpty = isEmptyString(query);
 
     if (this.isEmpty) {
       return;
     }
-    const { orGroups, andTerms } = parseTermGroups(searchQuery);
+    const { orGroups, andTerms } = parseTermGroups(query);
 
     this.orGroups = orGroups.map(orGroup => buildSearchTerms(orGroup));
     this.andTerms = buildSearchTerms(andTerms);
     this.flattenSingletonOrGroups();
     this.orGroups.sort((a, b) => a.length - b.length);
-  }
-
-  public get metadata(): SearchQueryMetadata {
-    const andTerms = categorizeSearchTerms(this.andTerms);
-    const orTerms = categorizeSearchTerms(this.orGroups.flat());
-    return {
-      hasRequiredTerm: andTerms.required.length > 0,
-      hasWildcardTerm: andTerms.wildcard.length + orTerms.wildcard.length > 0,
-      hasMetadataTerm: andTerms.metadata.length + orTerms.metadata.length > 0,
-      hasOrGroup: this.orGroups.length > 0
-    };
   }
 
   public get negatedTerms(): Set<string> {

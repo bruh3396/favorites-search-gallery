@@ -8,4 +8,4 @@ const upscaler = GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpsc
 export const upscaleOne = (request: ImageRequest): void => upscaler.upscale(request);
 export const upscaleAll = (requests: ImageRequest[]): void => upscaler.upscaleAll(requests);
 export const setCanvasDimensions = (thumbs: HTMLElement[]): void => upscaler.setCanvasDimensions(thumbs);
-export const reset = (): void => upscaler.reset();
+export const downscaleAll = (): void => upscaler.downscaleAll();

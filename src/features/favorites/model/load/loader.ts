@@ -1,8 +1,8 @@
-import * as FavoritesSequentialPageFetcher from "@/features/favorites/model/load/sequential_favorites_fetcher";
+import * as FavoritesSequentialFetcher from "@/features/favorites/model/load/sequential_fetcher";
 import * as FavoritesStore from "@/features/favorites/model/load/store";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
-import { FavoritesConcurrentPageFetcher } from "@/features/favorites/model/load/concurrent_favorites_fetcher";
+import { FavoritesConcurrentFetcher } from "@/features/favorites/model/load/concurrent_fetcher";
 
 let allFavorites: Favorite[] = [];
 let activeFavorites: Favorite[] | null = null;
@@ -22,7 +22,7 @@ export function loadDatabaseFavorites(
 }
 
 export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
-  return new FavoritesConcurrentPageFetcher((elements: HTMLElement[]): void => {
+  return new FavoritesConcurrentFetcher((elements: HTMLElement[]): void => {
     const favorites = elements.map(element => new FavoriteItem(element));
 
     indexFavoritesById(favorites);
@@ -33,8 +33,8 @@ export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) 
 
 export function fetchNewFavorites(page0Elements?: HTMLElement[]): Promise<FavoriteItem[]> {
   const ids = new Set(allFavorites.map(favorite => favorite.id));
-  return FavoritesSequentialPageFetcher.fetchNewFavorites(ids, page0Elements).then((elements) => {
-    const newFavorites = elements.map(e => new FavoriteItem(e));
+  return FavoritesSequentialFetcher.fetchNewFavorites(ids, page0Elements).then((elements) => {
+    const newFavorites = elements.map(element => new FavoriteItem(element));
 
     indexFavoritesById(newFavorites);
     allFavorites.unshift(...newFavorites);
