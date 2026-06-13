@@ -4,13 +4,11 @@ export const FavoritesConfig = {
     max: 10_000
   },
   resultsPerPageStep: 25,
-  nearbyPageCount: 3,
+  nearbyPageCount: 5,
 
-  infiniteScrollBatchSize: 25,
-  infiniteScrollMaxVisible: 200,
+  infiniteScrollSliceSize: 25,
   infiniteScrollPreloadCount: 100,
   infiniteScrollMargin: "150%",
-  infiniteScrollWindowed: false,
 
   reloadFetchDelay: 100,
   skipFirstPageFetch: true,
@@ -19,5 +17,5 @@ export const FavoritesConfig = {
   buildIndexAsync: true,
   preloadThumbnails: true,
   favoriteFinderEnabled: false,
-  bottomNavigationButtonsEnabled: false
+  bottomNavigationButtonsEnabled: true
 };

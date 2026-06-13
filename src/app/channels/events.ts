@@ -1,4 +1,4 @@
-import { FavoriteIndicatorStyle, GalleryMenuAction, Layout, PerformanceProfile } from "@/types/ui";
+import { GalleryMenuAction, HighlightStyle, Layout, PerformanceProfile } from "@/types/ui";
 import { MetadataMetric, Rating, TagCategoryMap } from "@/types/search";
 import { Emitter } from "@/lib/communication/emitter";
 import { Favorite } from "@/types/favorite";
@@ -28,7 +28,7 @@ export const Events = {
     searchResultsUpdated: new Emitter<void>(),
     tagCategoriesResolved: new Emitter<TagCategoryMap>(),
     newFavoritesFound: new Emitter<Favorite[]>(),
-    favoritesAddedToCurrentPage: new Emitter<HTMLElement[]>(),
+    favoritesAddedToCurrentPage: new Emitter<Favorite[]>(),
     resetConfirmed: new Emitter<void>(),
 
     setActiveFavoritesClicked: new Emitter<MouseEvent>(),
@@ -83,7 +83,7 @@ export const Events = {
     moreResultsAdded: new Emitter<HTMLElement[]>(),
     pageChanged: new Emitter<HTMLElement[]>(),
     favoriteIndicatorToggled: new Emitter<boolean>(),
-    favoriteIndicatorStyleChanged: new Emitter<FavoriteIndicatorStyle>()
+    favoriteIndicatorStyleChanged: new Emitter<HighlightStyle>()
   },
   mobile: {
     swipedUp: new Emitter<void>(),

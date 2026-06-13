@@ -9,7 +9,7 @@ export function setFavoriteIndicatorLoading(loading: boolean): void {
 
 export function markAsFavorite(thumb: HTMLElement): void {
   thumb.classList.add(FAVORITE_CLASS);
-  thumb.dataset.favoriteStyle = Preferences.postListFavoriteIndicatorStyle.value;
+  thumb.dataset.highlight = Preferences.postListFavoriteIndicatorStyle.value;
 }
 
 export function markAsFavoriteById(id: string): void {
@@ -22,14 +22,14 @@ export function markAsFavoriteById(id: string): void {
 
 export function unmarkAsFavorite(thumb: HTMLElement): void {
   thumb.classList.remove(FAVORITE_CLASS);
-  delete thumb.dataset.favoriteStyle;
+  delete thumb.dataset.highlight;
 }
 
 export function applyCurrentFavoriteStyle(): void {
   const style = Preferences.postListFavoriteIndicatorStyle.value;
 
   for (const thumb of document.querySelectorAll<HTMLElement>(`.${FAVORITE_CLASS}`)) {
-    thumb.dataset.favoriteStyle = style;
+    thumb.dataset.highlight = style;
   }
 }
 
@@ -58,8 +58,8 @@ export function applyGalleryFavoriteStyle(thumb: HTMLElement | null): void {
   const isFavorite = thumb.classList.contains(FAVORITE_CLASS);
 
   if (style === "none" || !isFavorite) {
-    delete container.dataset.favoriteStyle;
+    delete container.dataset.highlight;
   } else {
-    container.dataset.favoriteStyle = style;
+    container.dataset.highlight = style;
   }
 }

@@ -3,6 +3,7 @@ import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/function";
 import { gifUrl } from "@/lib/thumb/url";
 import { isGif } from "@/lib/media/type_predicates";
+import { toMediaItem } from "@/lib/thumb/item";
 
 const root = document.createElement("div");
 const gif = document.createElement("img");
@@ -17,14 +18,13 @@ export const GalleryGifRenderer = {
   root,
   render,
   hide,
-  cache: GalleryConfig.gifPreloadingEnabled ? cacheGifs : doNothing,
-  clearCache: doNothing
+  cache: GalleryConfig.gifPreloadingEnabled ? cacheGifs : doNothing
 } satisfies GalleryRenderer;
 
 function render(thumb: HTMLElement): void {
   root.style.visibility = "visible";
   gif.src = "";
-  gif.src = gifUrl(thumb);
+  gif.src = gifUrl(toMediaItem(thumb));
 }
 
 function hide(): void {
@@ -34,9 +34,10 @@ function hide(): void {
 
 function cacheGifs(thumbs: HTMLElement[]): void {
   const gifSources = thumbs
-    .filter((thumb) => isGif(thumb))
+    .map((thumb) => toMediaItem(thumb))
+    .filter((item) => isGif(item))
     .slice(0, GalleryConfig.preloadedGifCount)
-    .map((thumb) => gifUrl(thumb));
+    .map((item) => gifUrl(item));
 
   for (const source of gifSources) {
     const preloadedGif = new Image();

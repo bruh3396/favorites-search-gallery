@@ -1,5 +1,4 @@
 import * as Icons from "@/assets/icons";
-import { setColorScheme, toggleGalleryMenuEnabled } from "@/lib/ui/style";
 import { EnhancedMouseEvent } from "@/types/input";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryMenuAction } from "@/types/ui";
@@ -10,7 +9,9 @@ import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
 import { insertStyle } from "@/utils/dom/injector";
+import { setColorScheme } from "@/lib/ui/theme";
 import { toggleFullscreen } from "@/utils/browser/window";
+import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 const buttons: GalleryMenuButton[] = [
   { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, tooltip: "Exit (Escape, Right-Click)", color: "red" },

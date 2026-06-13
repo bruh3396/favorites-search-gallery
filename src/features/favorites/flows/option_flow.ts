@@ -1,9 +1,9 @@
-import * as FavoritesInfiniteScrollFlow from "@/features/favorites/flows/infinite_scroll_results_flow";
+import * as FavoritesInfiniteScrollResultsFlow from "@/features/favorites/flows/infinite_scroll_results_flow";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 
 export function toggleInfiniteScroll(value: boolean): void {
-  FavoritesInfiniteScrollFlow.disconnect();
+  FavoritesInfiniteScrollResultsFlow.disconnect();
   FavoritesView.togglePaginator(!value);
   FavoritesSearchFlow.showLatestSearchResults();
 }

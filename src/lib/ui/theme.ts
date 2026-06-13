@@ -23,10 +23,6 @@ export function setColorScheme(color: string): void {
   root.style.setProperty("--color-gallery-background", color);
 }
 
-export function toggleGalleryMenuEnabled(value: boolean): void {
-  toggleDataset(root, "galleryMenuHidden", !value);
-}
-
 function syncNativeThemeCookie(theme: Theme): void {
   const cookieValue = nativeCookies[theme];
 

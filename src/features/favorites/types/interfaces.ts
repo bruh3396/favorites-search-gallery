@@ -36,11 +36,6 @@ export interface PaginationContext {
 export interface FavoritesResultsView {
   initialize: (results: Favorite[]) => void
   reveal: (id: string) => void
-  sync: () => void
+  sync: (newFavorites: Favorite[]) => void
   loadMore: (direction: NavigationKey) => boolean
-}
-
-export interface ScrollExpansionResult {
-  slice: Favorite[]
-  trimmed: Favorite[]
 }

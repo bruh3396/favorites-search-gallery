@@ -4,7 +4,6 @@ export interface GalleryRenderer {
   root: HTMLElement
   render: (thumb: HTMLElement) => void
   hide: () => void
-  clearCache: () => void
   cache: (thumbs: HTMLElement[]) => Promise<void> | void
 }
 
@@ -27,4 +26,4 @@ export type GalleryMenuButton = {
   tooltip: string
   color: string
   href?: string
-};
+}

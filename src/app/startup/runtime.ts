@@ -8,7 +8,7 @@ import { setupStyles } from "@/app/startup/style";
 import { setupSwipeEvents } from "@/app/dom/swipe_events";
 import { setupTouchHoldEvents } from "@/app/dom/touch_hold_events";
 
-export function startRuntime(): void {
+export function setupRuntime(): void {
   setupServer();
   setupDomEvents(ON_FAVORITES_PAGE ? Root : document.documentElement);
   setupTouchHoldEvents();

@@ -1,4 +1,4 @@
-import { FavoriteIndicatorStyle, FavoritesDrawerTab, GalleryFavoriteIndicatorStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/ui";
+import { FavoritesDrawerTab, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/ui";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortMethod } from "@/types/search";
 import { Preference } from "@/lib/storage/preference";
@@ -20,9 +20,10 @@ export const Preferences = {
   favoritesHintsEnabled: new Preference("favoritesHintsEnabled", false),
   favoritesInfiniteScroll: new Preference("favoritesInfiniteScroll", false),
   favoritesLayout: new Preference<Layout>("favoritesLayout", "column"),
+  favoritesNewFavoriteHighlight: new Preference<HighlightStyle>("favoritesNewFavoriteHighlight", "border"),
   favoritesOptionsVisible: new Preference("favoritesOptionsVisible", false),
   favoritesRemoveButtonsVisible: new Preference("favoritesRemoveButtonsVisible", false),
-  favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 50),
+  favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 200),
   favoritesRowHeight: new Preference("favoritesRowHeight", 7),
   favoritesSortAscending: new Preference("favoritesSortAscending", false),
   favoritesSortKey: new Preference<SortMethod>("favoritesSortKey", "default"),
@@ -50,10 +51,10 @@ export const Preferences = {
   savedSearchesTutorial: new Preference("savedSearchesTutorial", false),
 
   postListColumnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
-  postListEnabled: new Preference("postListEnabled", true),
+  postListEnabled: new Preference("postListEnabled", false),
   postListFavoriteIndicator: new Preference("postListFavoriteIndicator", false),
-  postListFavoriteIndicatorStyle: new Preference<FavoriteIndicatorStyle>("postListFavoriteIndicatorStyle", "border"),
-  postListGalleryFavoriteStyle: new Preference<GalleryFavoriteIndicatorStyle>("postListGalleryFavoriteStyle", "border"),
+  postListFavoriteIndicatorStyle: new Preference<HighlightStyle>("postListFavoriteIndicatorStyle", "border"),
+  postListGalleryFavoriteStyle: new Preference<HighlightStyle>("postListGalleryFavoriteStyle", "border"),
   postListInfiniteScroll: new Preference("postListInfiniteScroll", false),
   postListLayout: new Preference<Layout>("postListLayout", "column"),
   postListRowHeight: new Preference("postListRowHeight", 7),

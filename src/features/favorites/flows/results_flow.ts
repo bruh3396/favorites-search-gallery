@@ -13,13 +13,13 @@ export const clearResults = (): void => activeView().initialize([]);
 export const reveal = (id: string): void => activeView().reveal(id);
 export const loadMoreResults = (direction: NavigationKey): boolean => activeView().loadMore(direction);
 
-export function syncResults(): void {
+export function syncResults(newFavorites: Favorite[]): void {
   Events.favorites.searchResultsUpdated.emit();
   FavoritesView.updateStatus({
     resultsCount: FavoritesModel.getCurrentSearchResults().length,
     allFavoritesCount: FavoritesModel.getAllFavorites().length
   });
-  activeView().sync();
+  activeView().sync(newFavorites);
 }
 
 const activeView = (): FavoritesResultsView => (Preferences.favoritesInfiniteScroll.value ? FavoritesInfiniteScrollView : FavoritesPaginatedView);

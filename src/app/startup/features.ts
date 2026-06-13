@@ -1,17 +1,17 @@
-import { setupAutocomplete } from "@/features/autocomplete/autocomplete";
-import { setupFavorites } from "@/features/favorites/favorites_setup";
-import { setupGallery } from "@/features/gallery/gallery_setup";
-import { setupPostList } from "@/features/post_list_navigator/post_list_navigator_setup";
-import { setupPostOverlay } from "@/features/post_overlay/post_overlay_setup";
-import { setupSavedSearches } from "@/features/saved_searches/saved_searches";
-import { setupTooltip } from "@/features/tooltip/tooltip_setup";
+import { startAutocomplete } from "@/features/autocomplete/autocomplete";
+import { startFavorites } from "@/features/favorites/favorites_startup";
+import { startGallery } from "@/features/gallery/gallery_startup";
+import { startPostListNavigator } from "@/features/post_list_navigator/post_list_navigator_startup";
+import { startPostOverlay } from "@/features/post_overlay/post_overlay_startup";
+import { startSavedSearches } from "@/features/saved_searches/saved_searches";
+import { startTooltip } from "@/features/tooltip/tooltip_startup";
 
-export function startFeatures(): void {
-  setupFavorites();
-  setupPostList();
-  setupGallery();
-  setupSavedSearches();
-  setupAutocomplete();
-  setupTooltip();
-  setupPostOverlay();
+export function launchFeatures(): void {
+  startFavorites();
+  startPostListNavigator();
+  startGallery();
+  startSavedSearches();
+  startAutocomplete();
+  startTooltip();
+  startPostOverlay();
 }

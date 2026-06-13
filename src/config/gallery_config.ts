@@ -8,8 +8,8 @@ export const GalleryConfig = {
   },
 
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 700,
-  postListPreloadedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_POST_LIST_PAGE,
-  minimumPreloadedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
+  postListCachedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_POST_LIST_PAGE,
+  minimumCachedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 0 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 0 : 2,
   maxVisibleThumbsBeforeStoppingPreload: 175,
@@ -23,7 +23,7 @@ export const GalleryConfig = {
 
   contentRefreshTime: 500,
   navigationThrottleTime: 250,
-  galleryNavigationDelay: 100,
+  galleryNavigationDelay: 50,
   idleInteractionDuration: 300,
   recentCloseDuration: 500,
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2_000 : 1_000,
@@ -35,6 +35,6 @@ export const GalleryConfig = {
   get sendImageBitmapsToWorker(): boolean {
     return !this.fetchImageBitmapsInWorker;
   },
-  useOffscreenThumbUpscaler: true,
+  useOffscreenThumbUpscaler: false,
   galleryMenuMonoColor: true
 };

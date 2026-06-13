@@ -6,7 +6,6 @@ import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
 import { GalleryViewCallbacks } from "@/features/gallery/types/gallery_types";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { insertStyle } from "@/utils/dom/injector";
-export { overGalleryMenu } from "@/features/gallery/view/view_utils";
 
 export function setup(callbacks: GalleryViewCallbacks): void {
   insertStyle(GALLERY_CSS);

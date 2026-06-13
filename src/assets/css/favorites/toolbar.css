@@ -1,11 +1,10 @@
 :root {
   --favorites-toolbar-height: 46px;
-
   --toolbar-icon-slot: 40px;
   --toolbar-drawer-toggle: var(--toolbar-icon-slot);
-  --toolbar-search-field: minmax(300px, 1fr);
+  --toolbar-search: minmax(300px, 1fr);
   --toolbar-buttons: max-content;
-  --toolbar-pagination: 380px;
+  --toolbar-pagination: 440px;
   --toolbar-status: 300px;
   --toolbar-brand: max-content;
 }
@@ -36,7 +35,7 @@
 #favorites-toolbar-grid {
   display: grid;
   grid-template-columns:
-    var(--toolbar-drawer-toggle) var(--toolbar-search-field) var(--toolbar-buttons) var(--toolbar-pagination) var(--toolbar-status) var(--toolbar-brand);
+    var(--toolbar-drawer-toggle) var(--toolbar-search) var(--toolbar-buttons) var(--toolbar-pagination) var(--toolbar-status) var(--toolbar-brand);
   align-items: center;
   gap: 6px;
 }

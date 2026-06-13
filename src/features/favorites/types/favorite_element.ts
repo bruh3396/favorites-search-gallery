@@ -52,7 +52,6 @@ export class FavoriteElement {
   }
 
   private populateAttributes(post: Post): void {
-
     this.image.src = post.previewURL;
     setDataset(this.root, "mediaType", resolveMediaType(post.tags));
     this.root.id = post.id;

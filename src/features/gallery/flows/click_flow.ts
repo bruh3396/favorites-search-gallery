@@ -3,23 +3,24 @@ import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow"
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { DomEvents } from "@/app/dom/events";
 import { EnhancedMouseEvent } from "@/types/input";
-import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
+import { overGalleryMenu } from "@/features/gallery/dom_tweaks/menu";
 import { throttle } from "@/lib/async/throttle";
 
 export const onMouseMove = throttle<MouseEvent>(() => {
-  dispatchByState({
+  GalleryDispatch.run({
     open: GalleryView.showCursor
   });
 }, 250);
 
 export function onClick(mouseEvent: MouseEvent): void {
-  dispatchByState({
+  GalleryDispatch.run({
     open: onClickInGallery
   }, mouseEvent);
 }
 
 export function onMouseDown(event: MouseEvent | TouchEvent): void {
-  dispatchByState({
+  GalleryDispatch.run({
     preview: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery,
     open: onMouseDownInGallery
@@ -27,7 +28,7 @@ export function onMouseDown(event: MouseEvent | TouchEvent): void {
 }
 
 export function onContextMenu(mouseEvent: MouseEvent): void {
-  dispatchByState({
+  GalleryDispatch.run({
     open: onContextMenuInGallery
   }, mouseEvent);
 }
@@ -64,7 +65,7 @@ function clickedInteractiveOverlay(mouseEvent: EnhancedMouseEvent): boolean {
 }
 
 function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
-  if (mouseEvent.ctrlKey || GalleryView.overGalleryMenu(mouseEvent.originalEvent)) {
+  if (mouseEvent.ctrlKey || overGalleryMenu(mouseEvent.originalEvent)) {
     return;
   }
 

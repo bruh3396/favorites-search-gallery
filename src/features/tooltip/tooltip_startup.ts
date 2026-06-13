@@ -8,10 +8,18 @@ import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 
-export function setupTooltip(): void {
-  TooltipView.setup();
-  TooltipModel.rebuildHighlights(FeatureBridge.currentSearchQuery.call());
+export function startTooltip(): void {
+  setup();
+  start();
+}
+
+function setup(): void {
+  setupView();
   subscribeToEvents();
+}
+
+function setupView(): void {
+  TooltipView.setup();
 }
 
 function subscribeToEvents(): void {
@@ -22,4 +30,8 @@ function subscribeToEvents(): void {
   if (ON_FAVORITES_PAGE) {
     Events.favorites.searchStarted.on(TooltipModel.rebuildHighlights);
   }
+}
+
+function start(): void {
+  TooltipModel.rebuildHighlights(FeatureBridge.currentSearchQuery.call());
 }

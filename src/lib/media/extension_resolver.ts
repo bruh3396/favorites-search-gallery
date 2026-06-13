@@ -1,9 +1,8 @@
 import { DEFAULT_EXTENSION, allImageExtensions, extensionRegex } from "@/lib/media/constants";
-import { ImageExtension, MediaExtension, MediaExtensionMapping } from "@/types/media";
+import { ImageExtension, MediaExtension, MediaExtensionMapping, MediaItem } from "@/types/media";
 import { isGif, isVideo } from "@/lib/media/type_predicates";
 import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
 import { Database } from "@/lib/storage/database";
-import { Favorite } from "@/types/favorite";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Post } from "@/types/api";
 import { probeAllExtensions } from "@/lib/media/extension_prober";
@@ -18,7 +17,7 @@ export const destroyStore: () => void = () => database.destroy();
 export const extractExtension = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
 export const setupExtensions = (gate?: Promise<unknown>): Promise<void> => loadExtensionsIntoCache(gate);
 
-export function resolveExtension(item: HTMLElement | Favorite): Promise<MediaExtension> {
+export function resolveExtension(item: MediaItem): Promise<MediaExtension> {
   if (isVideo(item)) {
     return Promise.resolve("mp4");
   }

@@ -1,4 +1,4 @@
-import { cacheTagModification, storeTagModifications } from "@/features/favorites/features/tag_editor/store";
+import { cacheTagEdit, storeTagEdits } from "@/features/favorites/features/tag_editor/store";
 import { Favorite } from "@/types/favorite";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 import { setCustomTags } from "@/lib/search/tags/custom_tags";
@@ -34,7 +34,7 @@ function editSelectedTags(selected: Set<Favorite>, rawTags: string, remove: bool
   const tagsWithoutMediaTypes = removeMediaTypeTags(tags);
   const tagsToEdit = removeExtraWhiteSpace(tagsWithoutMediaTypes);
   const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
-  let modifiedTagsCount = 0;
+  let editedTagsCount = 0;
 
   if (tagsToEdit === "") {
     return;
@@ -43,21 +43,20 @@ function editSelectedTags(selected: Set<Favorite>, rawTags: string, remove: bool
   for (const favorite of selected) {
     const additionalTags = remove ? removeTagsFromFavorite(favorite, tagsToEdit) : addTagsToFavorite(favorite, tagsToEdit);
 
-    cacheTagModification(favorite.id, additionalTags);
-    modifiedTagsCount += 1;
+    cacheTagEdit(favorite.id, additionalTags);
+    editedTagsCount += 1;
   }
 
-  if (modifiedTagsCount === 0) {
+  if (editedTagsCount === 0) {
     return;
   }
 
   if (tags !== tagsWithoutMediaTypes) {
-    alert("Warning: video, animated, and mp4 tags are unchanged.\nThey cannot be modified.");
+    alert("Warning: video, animated, and mp4 tags are unchanged.\nThey cannot be edited.");
   }
-  showStatus(`${statusPrefix} ${modifiedTagsCount} favorite(s)`);
-  dispatchEvent(new Event("modifiedTags"));
+  showStatus(`${statusPrefix} ${editedTagsCount} favorite(s)`);
   setCustomTags(tagsToEdit);
-  storeTagModifications();
+  storeTagEdits();
 }
 
 function addTagsToFavorite(favorite: Favorite, tags: string): string {

@@ -1,7 +1,7 @@
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { Storage } from "@/lib/storage/local_storage";
 
-export function setupSavedSearches(): void {
+export function startSavedSearches(): void {
   FeatureBridge.savedSearches.register(getSavedSearches);
 }
 

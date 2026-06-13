@@ -1,114 +1,69 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
-import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import { Content, ScrollSentinelBottom, ScrollSentinelTop } from "@/app/layout/shell";
-import { PageBottomObserver, PageTopObserver } from "@/lib/observer/edge_observer";
-import { noItemsAreVisible, waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
-import { NavigationKey } from "@/types/input";
+import { BottomEdgeObserver } from "@/lib/observer/edge_observer";
+import { ScrollSentinelBottom } from "@/app/layout/shell";
+import { SlidingWindow } from "@/lib/collection/sliding_window";
 import { doNothing } from "@/utils/function";
-import { isForwardNavigationKey } from "@/types/guards";
+import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 
-const bottomObserver = new PageBottomObserver(extendBelow, getBottomSentinels);
-const topObserver = new PageTopObserver(extendAbove, () => [ScrollSentinelTop]);
+const bottomObserver = new BottomEdgeObserver(extendBelow, () => [...ContentTiler.bottomEdgeElements(), ScrollSentinelBottom]);
+const slidingWindow = new SlidingWindow<Favorite>(FavoritesConfig.infiniteScrollSliceSize);
 
 export const FavoritesInfiniteScrollView = {
   initialize,
-  sync: fillIfEmpty,
+  sync,
   reveal: doNothing,
-  loadMore: extendInDirection
+  loadMore
 } satisfies FavoritesResultsView;
 
 export function disconnect(): void {
   bottomObserver.disconnect();
-  topObserver.disconnect();
-}
-
-function getBottomSentinels(): HTMLElement[] {
-  const extras = ContentTiler.getBottomEdgeElements();
-  return extras.length > 0 ? extras : [ScrollSentinelBottom];
 }
 
 async function initialize(favorites: Favorite[]): Promise<void> {
-  FavoritesModel.setFavorites(favorites);
-  FavoritesView.showSearchResults(FavoritesModel.initialSlice());
+  slidingWindow.reset(favorites);
+  FavoritesView.showSearchResults(slidingWindow.nextSlice());
   await waitForAllThumbsToLoad();
-  refreshObservers();
+  bottomObserver.refresh();
   Events.favorites.pageChanged.emit();
 }
 
-function fillIfEmpty(): void {
-  if (noItemsAreVisible()) {
-    extendBelow();
-  }
-}
+ function sync(newFavorites: Favorite[]): void {
+    const wasExhausted = !slidingWindow.hasMore();
 
-function extendInDirection(direction: NavigationKey): boolean {
-  if (!FavoritesModel.hasMore()) {
+    slidingWindow.append(newFavorites);
+
+    if (wasExhausted && slidingWindow.hasMore()) {
+      bottomObserver.refresh();
+    }
+  }
+
+function loadMore(): boolean {
+  const slice = slidingWindow.nextSlice();
+
+  if (slice.length === 0) {
     return false;
   }
-
-  if (isForwardNavigationKey(direction)) {
-    extendBelow();
-  } else {
-    extendAbove();
-  }
+  appendSlice(slice);
   return true;
 }
 
-async function extendBelow(): Promise<void> {
-  const { slice, trimmed } = FavoritesModel.expandBelow();
+async function extendBelow(): Promise<boolean> {
+  const slice = slidingWindow.nextSlice();
 
   if (slice.length === 0) {
-    return;
+    return false;
   }
-  trimAboveAnchoredToBottom(trimmed);
+  appendSlice(slice);
+  await waitForAllThumbsToLoad();
+  return slidingWindow.hasMore();
+}
+
+function appendSlice(slice: Favorite[]): void {
   FavoritesView.addToBottom(slice);
-  Events.favorites.favoritesAddedToCurrentPage.emit(slice.map(f => f.root));
-  await waitForAllThumbsToLoad();
-  refreshObservers();
-}
-
-function trimAboveAnchoredToBottom(trimmed: Favorite[]): void {
-  if (!FavoritesConfig.infiniteScrollWindowed) {
-    return;
-  }
-  const anchor = trimmed[trimmed.length - 1]?.root.nextElementSibling;
-  const anchorTopBefore = anchor?.getBoundingClientRect().top ?? 0;
-
-  trimmed.forEach(f => f.root.remove());
-  const shift = anchorTopBefore - (anchor?.getBoundingClientRect().top ?? 0);
-
-  window.scrollBy(0, -shift);
-}
-
-async function extendAbove(): Promise<void> {
-  const { slice, trimmed } = FavoritesModel.expandAbove();
-
-  if (slice.length === 0) {
-    return;
-  }
-  const anchor = Content.firstElementChild;
-  const anchorTopBefore = anchor?.getBoundingClientRect().top ?? 0;
-
-  FavoritesView.addToTop(slice);
-  const anchorTopAfter = anchor?.getBoundingClientRect().top ?? 0;
-  const shift = anchorTopAfter - anchorTopBefore;
-
-  window.scrollBy(0, shift);
-  trimmed.forEach(f => f.root.remove());
-  Events.favorites.favoritesAddedToCurrentPage.emit(slice.map(f => f.root));
-  await waitForAllThumbsToLoad();
-  refreshObservers();
-}
-
-function refreshObservers(): void {
-  bottomObserver.refresh();
-
-  if (FavoritesConfig.infiniteScrollWindowed) {
-    topObserver.refresh();
-  }
+  Events.favorites.favoritesAddedToCurrentPage.emit(slice);
 }

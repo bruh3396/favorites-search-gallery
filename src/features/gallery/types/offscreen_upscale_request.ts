@@ -1,14 +1,15 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { imageUrlToSampleUrl } from "@/lib/media/url_transformer";
-import { isImage } from "@/lib/media/type_predicates";
+import { isImageThumb } from "@/lib/media/type_predicates";
 import { resolveImageUrl } from "@/lib/media/url_resolver";
+import { toMediaItem } from "@/lib/thumb/item";
 
 export const transferredCanvasIds = new Set<string>();
 
 export async function getUpscaleRequest(imageRequest: ImageRequest): Promise<OffscreenUpscaleRequest> {
   const bitmapClone = await cloneImageBitmap(imageRequest);
-  const imageUrl = await resolveImageUrl(imageRequest.thumb);
+  const imageUrl = await resolveImageUrl(toMediaItem(imageRequest.thumb));
   return new OffscreenUpscaleRequest(imageRequest.thumb, bitmapClone, imageUrl);
 }
 
@@ -28,7 +29,7 @@ export class OffscreenUpscaleRequest {
     this.offscreenCanvas = this.getOffscreenCanvas(thumb);
     this.bitmap = bitmap;
     this.imageUrl = imageUrl;
-    this.sampleUrl = isImage(thumb) ? imageUrlToSampleUrl(imageUrl) : imageUrl;
+    this.sampleUrl = isImageThumb(thumb) ? imageUrlToSampleUrl(imageUrl) : imageUrl;
   }
 
   public get transferable(): OffscreenCanvas[] {

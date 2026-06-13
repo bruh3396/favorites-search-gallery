@@ -1,7 +1,7 @@
-import * as FavoritesChangelogPanel from "@/features/favorites/view/shell/changelog";
-import * as FavoritesHelpPanel from "@/features/favorites/view/shell/help";
-import * as FavoritesSettingsPanel from "@/features/favorites/view/shell/settings";
-import { Body, DrawerTrack } from "@/features/favorites/view/shell/shell";
+import * as FavoritesChangelog from "@/features/favorites/view/shell/changelog";
+import * as FavoritesHelp from "@/features/favorites/view/shell/help";
+import * as FavoritesSettings from "@/features/favorites/view/shell/settings";
+import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import { FavoritesClass, FavoritesDrawerTabs, FavoritesId } from "@/features/favorites/types/scaffold";
 import { IconName, icon } from "@/lib/ui/icon";
 import { removeDataset, setDataset } from "@/utils/dom/attribute";
@@ -21,8 +21,8 @@ export async function setup(): Promise<void> {
   drawer.id = FavoritesId.drawer;
   drawer.appendChild(buildTabRail());
   drawer.appendChild(buildPanels());
-  DrawerTrack.appendChild(drawer);
-  FavoritesSettingsPanel.wireSettingsPanel();
+  FavoritesShell.DrawerTrack.appendChild(drawer);
+  FavoritesSettings.wireSettingsPanel();
   selectTab(activeTab);
   wireVersionLabel();
 
@@ -33,21 +33,21 @@ export async function setup(): Promise<void> {
 }
 
 export function toggleDrawer(): void {
-  const open = Body.dataset.drawerOpen === undefined;
+  const open = FavoritesShell.Body.dataset.drawerOpen === undefined;
   const button = document.getElementById(FavoritesId.panelButton);
 
   if (open) {
-    setDataset(Body, "drawerOpen", "");
+    setDataset(FavoritesShell.Body, "drawerOpen", "");
     setDataset(button, "active", "");
   } else {
-    removeDataset(Body, "drawerOpen");
+    removeDataset(FavoritesShell.Body, "drawerOpen");
     removeDataset(button, "active");
   }
   Preferences.favoritesDrawerOpen.set(open);
 }
 
 function toggleTo(tab: FavoritesDrawerTab): void {
-  const open = Body.dataset.drawerOpen !== undefined;
+  const open = FavoritesShell.Body.dataset.drawerOpen !== undefined;
 
   if (open && activeTab === tab) {
     toggleDrawer();
@@ -161,13 +161,13 @@ function buildPanels(): HTMLElement {
 function renderPanelContent(tab: FavoritesDrawerTab, panel: HTMLElement): void {
   switch (tab) {
     case "settings":
-      FavoritesSettingsPanel.buildSettingsPanel(panel);
+      FavoritesSettings.buildSettingsPanel(panel);
       break;
     case "change":
-      FavoritesChangelogPanel.buildChangelogPanel(panel);
+      FavoritesChangelog.buildChangelogPanel(panel);
       break;
     case "help":
-      FavoritesHelpPanel.buildHelpPanel(panel);
+      FavoritesHelp.buildHelpPanel(panel);
       break;
     default:
       break;

@@ -6,7 +6,7 @@ export type SortMethod = MetadataMetric
 export type SearchableMetadataMetric = "id" | "score" | "width" | "height" | "duration"
 export type MetadataComparator = ":" | ":<" | ":>"
 
-export type TagModificationDatabaseRecord = {
+export type TagEditDatabaseRecord = {
   id: string
   tags: string
 }

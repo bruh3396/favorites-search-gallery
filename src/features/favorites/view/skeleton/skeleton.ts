@@ -1,9 +1,10 @@
-import * as FavoritesThumbAspectRatios from "@/features/favorites/view/aspect_ratios";
+import * as FavoritesAspectRatios from "@/features/favorites/view/skeleton/aspect_ratios";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
 import { Layout } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
 import { SkeletonConfig } from "@/config/skeleton_config";
 import { getLayout } from "@/app/layout/content_tiler";
+export { collectAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
 
 class FavoritesSkeleton {
   private readonly items: FavoritesSkeletonItem[];
@@ -23,7 +24,7 @@ class FavoritesSkeleton {
       { length: this.itemCount },
       () => new FavoritesSkeletonItem(
         layout,
-        FavoritesThumbAspectRatios.getNextAspectRatio()
+        FavoritesAspectRatios.getNextAspectRatio()
       )
     );
   }

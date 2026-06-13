@@ -28,6 +28,6 @@ export function reOpen(): void {
 }
 
 export function togglePreviews(): void {
-  GalleryModel.togglePreviews();
+  GalleryModel.togglePreview();
   Events.gallery.previewOverridden.emit(GalleryModel.isShowingPreviews());
 }

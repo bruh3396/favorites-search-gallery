@@ -13,8 +13,8 @@ export function searchFavorites(allFavorites: Favorite[], searchQuery?: string):
 }
 
 export const invertResults = (allFavorites: Favorite[]): Favorite[] => FavoritesResults.set(FavoritesSorter.sortFavorites(FavoritesResults.invert(allFavorites)));
-export const appendResults = (favorites: Favorite[]): void => FavoritesResults.append(search(favorites));
-export const prependResults = (newFavorites: Favorite[]): Favorite[] => FavoritesResults.prepend(search(newFavorites));
+export const appendResults = (favorites: Favorite[]): Favorite[] => FavoritesResults.append(search(favorites));
+export const prependResults = (favorites: Favorite[]): Favorite[] => FavoritesResults.prepend(search(favorites));
 export const reIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.add(f));
 export const deIndex = (favorites: Favorite[]): void => favorites.forEach(f => FavoritesSearchEngine.remove(f));
 export const getCurrentSearchQuery = (): string => currentSearchQuery;

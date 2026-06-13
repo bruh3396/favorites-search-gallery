@@ -12,7 +12,7 @@ export async function loadAllFavorites(nativeFavorites: HTMLElement[] | undefine
     await loadDatabaseFavorites();
     await fetchNewFavorites(nativeFavorites);
   } else {
-    await fetchAllFavorites();
+    await fetchAllFavorites(nativeFavorites);
   }
   Events.favorites.favoritesLoaded.emit();
   FavoritesView.collectAspectRatios();
@@ -35,8 +35,7 @@ async function loadDatabaseFavorites(): Promise<void> {
 
 async function fetchNewFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
   FavoritesView.setStatus("Finding new favorites");
-  const firstPageFavorites = ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined;
-  const results = await FavoritesModel.fetchNewFavorites(firstPageFavorites);
+  const results = await FavoritesModel.fetchNewFavorites(firstPageFavorites(nativeFavorites));
 
   if (results.newSearchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");
@@ -52,11 +51,15 @@ async function fetchNewFavorites(nativeFavorites: HTMLElement[] | undefined): Pr
   Events.favorites.searchResultsUpdated.emit();
 }
 
-async function fetchAllFavorites(): Promise<void> {
+async function fetchAllFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
   fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
   FavoritesResultsFlow.clearResults();
-  await FavoritesModel.fetchAllFavorites(FavoritesResultsFlow.syncResults);
+  await FavoritesModel.fetchAllFavorites(FavoritesResultsFlow.syncResults, firstPageFavorites(nativeFavorites));
   FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeFavorites(FavoritesModel.getAllFavorites());
   FavoritesView.setTemporaryStatus("All favorites saved");
+}
+
+function firstPageFavorites(nativeFavorites: HTMLElement[] | undefined): HTMLElement[] | undefined {
+  return ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined;
 }

@@ -46,7 +46,6 @@ export type PaginationSequence = PaginationTerm[];
 export type GalleryState = "idle" | "preview" | "open"
 export type ImageCursor = "zoom-in" | "zoom-out" | "auto"
 
-export type FavoriteIndicatorStyle = "border" | "dim" | "hidden" | "none";
-export type GalleryFavoriteIndicatorStyle = "border" | "glow" | "none";
+export type HighlightStyle = "glow" | "trace" | "border" | "hidden" | "none";
 
 export type PostOverlayMode = "tag";

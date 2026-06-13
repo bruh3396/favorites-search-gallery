@@ -1,12 +1,12 @@
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow";
 import { EnhancedMouseEvent } from "@/types/input";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { debounceTrailing } from "@/lib/async/debounce";
-import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
 
 export function onMouseOver(mouseEvent: EnhancedMouseEvent): void {
-  dispatchByState({
+  GalleryDispatch.run({
     preview: handlePreview,
     idle: upscaleAround
   }, mouseEvent.thumb);

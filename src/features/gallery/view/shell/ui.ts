@@ -7,7 +7,7 @@ import { blurActiveElement } from "@/utils/dom/interaction";
 import { div } from "@/utils/dom/element";
 import { getLayout } from "@/app/layout/content_tiler";
 import { insertStyle } from "@/utils/dom/injector";
-import { showFullscreenIcon } from "@/features/gallery/view/view_utils";
+import { showFullscreenIcon } from "@/features/gallery/dom_tweaks/fullscreen_icon";
 import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 
 const background: HTMLDivElement = div("gallery-background");

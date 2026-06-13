@@ -1,7 +1,8 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { CheckboxElement, SelectElement } from "@/types/element";
 import { Layout, PerformanceProfile, Theme } from "@/types/ui";
-import { applySurfaceGradient, applyTheme, toggleGalleryMenuEnabled } from "@/lib/ui/style";
+import { applySurfaceGradient, applyTheme } from "@/lib/ui/theme";
+import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesClass } from "@/features/favorites/types/scaffold";
 import { MetadataMetric } from "@/types/search";
@@ -10,8 +11,7 @@ import { buildCheckboxOption } from "@/app/dom/checkbox";
 import { buildSelectElement } from "@/lib/ui/elements/select";
 import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
 import { reloadWindow } from "@/utils/browser/window";
-import { toggleHeader } from "@/lib/ui/toggles";
-import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/ui_toggles";
+import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/toggles";
 
 const PANEL_CLASSES = {
   section: FavoritesClass.drawerSection,

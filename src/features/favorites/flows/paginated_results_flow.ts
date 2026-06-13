@@ -7,7 +7,7 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
 import { NavigationKey } from "@/types/input";
 
-let hasAppendedFirstResults = false;
+let appendedFirstResults = false;
 
 export const FavoritesPaginatedView = {
   initialize,
@@ -50,22 +50,20 @@ function reconcilePagination(): void {
   FavoritesModel.paginate(FavoritesModel.getCurrentSearchResults());
   FavoritesView.updatePaginator(FavoritesModel.paginationContext());
   appendMissingThumbsOnCurrentPage();
-  Events.favorites.searchResultsUpdated.emit();
 }
 
 function appendMissingThumbsOnCurrentPage(): void {
-  if (!FavoritesModel.onFinalPage() && hasAppendedFirstResults) {
+  if (appendedFirstResults && !FavoritesModel.onFinalPage()) {
     return;
   }
-  const favorites = FavoritesModel.currentPageFavorites().filter(favorite => document.getElementById(favorite.id) === null);
+  const missing = FavoritesModel.currentPageFavorites().filter(favorite => document.getElementById(favorite.id) === null);
 
-  if (favorites.length > 0) {
-    hasAppendedFirstResults = true;
+  if (missing.length === 0) {
+    return;
   }
-  const thumbs = favorites.map(favorite => favorite.root);
-
-  FavoritesView.addToBottom(favorites);
-  Events.favorites.favoritesAddedToCurrentPage.emit(thumbs);
+  appendedFirstResults = true;
+  FavoritesView.addToBottom(missing);
+  Events.favorites.favoritesAddedToCurrentPage.emit(missing);
 }
 
 function stepPage(direction: NavigationKey): boolean {
@@ -74,7 +72,10 @@ function stepPage(direction: NavigationKey): boolean {
       renderCurrentPage();
       return true;
     }
-  } else if (FavoritesModel.selectAdjacentPage(direction)) {
+    return FavoritesModel.onlyOnePage();
+  }
+
+  if (FavoritesModel.selectAdjacentPage(direction)) {
     renderCurrentPage();
     return true;
   }

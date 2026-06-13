@@ -1,7 +1,7 @@
 import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
-import { getAllContentThumbs, waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 import { GalleryConfig } from "@/config/gallery_config";
 import { debounceTrailing } from "@/lib/async/debounce";
+import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 import { getRectDistance } from "@/utils/geometry";
 
 class VisibleThumbObserver {
@@ -20,11 +20,10 @@ class VisibleThumbObserver {
     });
   }
 
-  public async refresh(): Promise<void> {
+  public refresh(): void {
     this.setCenterThumb(null);
     this.observer.disconnect();
     this.visibleThumbs.clear();
-    await waitForAllThumbsToLoad();
     this.suppressNextBroadcast = true;
     getAllContentThumbs().forEach(thumb => this.observer.observe(thumb));
   }
@@ -84,8 +83,8 @@ export function setup(onVisibleThumbsChanged: () => void): void {
   instance = new VisibleThumbObserver(onVisibleThumbsChanged);
 }
 
-export async function refresh(): Promise<void> {
-  await instance?.refresh();
+export function refresh(): void {
+  instance?.refresh();
 }
 
 export function setCenterThumb(thumb: HTMLElement | null): void {

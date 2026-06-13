@@ -9,14 +9,26 @@ import { Events } from "@/app/channels/events";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { POST_OVERLAY_DISABLED } from "@/app/context/flags";
 
-export async function setupPostOverlay(): Promise<void> {
+export async function startPostOverlay(): Promise<void> {
   if (POST_OVERLAY_DISABLED) {
     return;
   }
-  PostOverlayView.setup();
-  subscribeToEvents();
+  setup();
   await waitUntilFavoritesAreReady();
-  PostOverlayModel.setup();
+  start();
+}
+
+function setup(): void {
+  setupView();
+  subscribeToEvents();
+}
+
+function start(): void {
+  PostOverlayModel.preloadTagCategoryCache();
+}
+
+function setupView(): void {
+  PostOverlayView.setup();
 }
 
 function subscribeToEvents(): void {
@@ -27,7 +39,7 @@ function subscribeToEvents(): void {
   DomEvents.document.keyup.on(PostOverlayKeyFlow.onKeyUp);
   Events.favorites.postOverlayToggled.on(PostOverlayToggleFlow.hideIfDisabled);
   Events.favorites.tagCategoriesResolved.on(PostOverlayModel.warmTagCategoryCache);
-  Events.favorites.resetConfirmed.on(PostOverlayModel.destroyStore);
+  Events.favorites.resetConfirmed.on(PostOverlayModel.destroyTagCategoryStore);
   DomEvents.window.scroll.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.favorites.pageChanged.on(PostOverlayHoverFlow.onThumbsMoved);
   Events.app.columnCountChanged.on(PostOverlayHoverFlow.onThumbsMoved);

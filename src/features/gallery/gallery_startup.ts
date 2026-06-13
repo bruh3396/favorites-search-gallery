@@ -22,18 +22,14 @@ import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { NavigationKey } from "@/types/input";
-import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
+import { run } from "@/features/gallery/flows/dispatch";
 
-export async function setupGallery(): Promise<void> {
+export async function startGallery(): Promise<void> {
   if (GALLERY_DISABLED) {
     return;
   }
   await waitUntilPageIsReady();
-  setupView();
-  setupControl();
-  setupSubFeatures();
-  subscribeToEvents();
-  serveExternalRequests();
+  setup();
   start();
 }
 
@@ -45,6 +41,29 @@ async function waitUntilPageIsReady(): Promise<void> {
   if (ON_POST_LIST_PAGE) {
     await Events.postList.postListInitialized.wait();
   }
+}
+
+function setup(): void {
+  setupView();
+  setupControl();
+  setupSubFeatures();
+  subscribeToEvents();
+  serveExternalRequests();
+}
+
+async function start(): Promise<void> {
+  if (ON_POST_LIST_PAGE) {
+    GalleryContentFlow.refresh();
+    return;
+  }
+
+  if (ON_FAVORITES_PAGE && !(await hasStoredFavorites())) {
+    GalleryContentFlow.refresh();
+  }
+}
+
+function hasStoredFavorites(): Promise<boolean> {
+  return Events.favorites.favoritesFoundInDatabase.wait();
 }
 
 function setupView(): void {
@@ -68,7 +87,7 @@ function setupSubFeatures(): void {
 function setupAutoplay(): void {
   GalleryAutoplay.setup({
     setVideoLooping: GalleryView.toggleVideoLooping,
-    onComplete: (direction?: NavigationKey) => dispatchByState({
+    onComplete: (direction?: NavigationKey) => run({
       open: GalleryNavigationFlow.navigate
     }, direction),
     onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo(),
@@ -101,9 +120,9 @@ function subscribeToEvents(): void {
 
 function subscribeToFavoritesEvents(): void {
   Events.favorites.newFavoritesFound.on(GalleryContentFlow.refresh, { once: true });
-  Events.favorites.pageChanged.on(GalleryContentFlow.refresh);
-  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.refresh);
-  Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreviews);
+  Events.favorites.pageChanged.on(GalleryContentFlow.hardRefresh);
+  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.reIndex);
+  Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreview);
 }
 
 function subscribeToPostListEvents(): void {
@@ -111,7 +130,7 @@ function subscribeToPostListEvents(): void {
   Events.postList.initialPostListCreated.on(GalleryPostListFlow.onInitialPostListCreated, { once: true });
   Events.postList.moreResultsAdded.on(GalleryContentFlow.refresh);
   Events.postList.infiniteScrollToggled.on(GalleryContentFlow.refresh);
-  Events.postList.pageChanged.on(GalleryContentFlow.refresh);
+  Events.postList.pageChanged.on(GalleryContentFlow.hardRefresh);
 }
 
 function subscribeToDesktopInput(): void {
@@ -141,8 +160,4 @@ function subscribeToMobileInput(): void {
 function serveExternalRequests(): void {
   FeatureBridge.galleryState.register(GalleryModel.getCurrentState);
   FeatureBridge.currentGalleryThumb.register(GalleryModel.currentThumbIfOpen);
-}
-
-function start(): void {
-  GalleryContentFlow.refresh();
 }

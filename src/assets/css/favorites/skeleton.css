@@ -2,6 +2,9 @@
   background: #555;
   overflow: hidden;
   z-index: 0;
+  animation: none !important;
+  animation-delay: 0s !important;
+  opacity: 1 !important;
 }
 
 .skeleton-item[data-layout="column"],

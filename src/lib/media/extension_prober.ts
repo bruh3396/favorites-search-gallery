@@ -1,11 +1,10 @@
-import { Favorite } from "@/types/favorite";
-import { ImageExtension } from "@/types/media";
+import { ImageExtension, MediaItem } from "@/types/media";
 import { allImageExtensions } from "@/lib/media/constants";
 import { extensionProbeLimiter } from "@/lib/remote/http/rate_limiters";
 import { imageUrl } from "@/lib/thumb/url";
 import { withExtension } from "@/lib/media/url_transformer";
 
-export async function probeAllExtensions(item: HTMLElement | Favorite): Promise<ImageExtension | null> {
+export async function probeAllExtensions(item: MediaItem): Promise<ImageExtension | null> {
   const baseUrl = imageUrl(item);
 
   for (const extension of allImageExtensions) {

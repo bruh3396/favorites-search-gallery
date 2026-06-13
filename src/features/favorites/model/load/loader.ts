@@ -21,14 +21,14 @@ export function loadDatabaseFavorites(
   });
 }
 
-export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void): Promise<void> {
+export function fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
   return new FavoritesConcurrentFetcher((elements: HTMLElement[]): void => {
     const favorites = elements.map(element => new FavoriteItem(element));
 
     indexFavoritesById(favorites);
     allFavorites.push(...favorites);
     onFavoritesFound(favorites);
-  }).fetchAllFavorites();
+  }, firstPageFavorites).fetchAllFavorites();
 }
 
 export function fetchNewFavorites(firstPageFavorites?: HTMLElement[]): Promise<FavoriteItem[]> {

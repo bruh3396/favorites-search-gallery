@@ -1,7 +1,7 @@
 import { DownloadRequest, toDownloadRequest } from "@/features/favorites/features/downloader/download_request";
 import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
 import { DownloadAbortedError } from "@/types/errors";
-import { MediaResolvable } from "@/lib/media/url_resolver";
+import { MediaItem } from "@/types/media";
 import { downloadBlob } from "@/utils/browser/download";
 
 const fetchLimiter = new ConcurrencyLimiter(3);
@@ -24,7 +24,7 @@ export function setup(): void {
   loadZipJS();
 }
 
-export async function startDownloading(favorites: MediaResolvable[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
+export async function startDownloading(favorites: MediaItem[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
   if (currentlyDownloading) {
     return;
   }
@@ -41,12 +41,12 @@ export function reset(): void {
   currentlyDownloading = false;
 }
 
-async function downloadFavorites(favorites: MediaResolvable[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
+async function downloadFavorites(favorites: MediaItem[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
   downloadBlob(await createTotalFavoriteBlob(favorites, progressCallback), "download.zip");
   currentlyDownloading = false;
 }
 
-async function createTotalFavoriteBlob(favorites: MediaResolvable[], progressCallback: (request: DownloadRequest) => void): Promise<Blob> {
+async function createTotalFavoriteBlob(favorites: MediaItem[], progressCallback: (request: DownloadRequest) => void): Promise<Blob> {
   const blobWriter = new zip.BlobWriter("application/zip");
   const zipWriter = new zip.ZipWriter(blobWriter);
 
@@ -55,7 +55,7 @@ async function createTotalFavoriteBlob(favorites: MediaResolvable[], progressCal
   return zipWriter.close();
 }
 
-async function createFavoriteBlob(favorite: MediaResolvable, zipWriter: ZipWriter, progressCallback: (request: DownloadRequest) => void): Promise<void> {
+async function createFavoriteBlob(favorite: MediaItem, zipWriter: ZipWriter, progressCallback: (request: DownloadRequest) => void): Promise<void> {
   try {
     stopIfAborted();
     const request = await toDownloadRequest(favorite);

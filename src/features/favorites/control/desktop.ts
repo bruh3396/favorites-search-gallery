@@ -1,8 +1,9 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/types/element";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile, Theme } from "@/types/ui";
-import { applySurfaceGradient, applyTheme, toggleGalleryMenuEnabled } from "@/lib/ui/style";
+import { applySurfaceGradient, applyTheme } from "@/lib/ui/theme";
 import { buildCheckboxElement, buildCheckboxOption } from "@/app/dom/checkbox";
+import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
@@ -16,8 +17,7 @@ import { buildSelectElement } from "@/lib/ui/elements/select";
 import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
 import { reloadWindow } from "@/utils/browser/window";
-import { toggleHeader } from "@/lib/ui/toggles";
-import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/ui_toggles";
+import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/toggles";
 
 const buttons: Partial<ButtonElement>[] = [
   {

@@ -3,7 +3,7 @@ import * as Icons from "@/assets/icons";
 import { EnhancedKeyboardEvent, NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { clamp, millisecondsToSeconds } from "@/utils/number";
-import { isImage, isVideo } from "@/lib/media/type_predicates";
+import { isImageThumb, isVideoThumb } from "@/lib/media/type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
 import { Overlays } from "@/app/layout/shell";
@@ -268,14 +268,14 @@ function addSettingsMenuEventListeners(): void {
   ui.settingsMenu.imageDurationInput.onchange = (): void => {
     setImageViewDuration();
 
-    if (currentThumb !== null && isImage(currentThumb)) {
+    if (currentThumb !== null && isImageThumb(currentThumb)) {
       startViewTimer(currentThumb);
     }
   };
   ui.settingsMenu.minimumVideoDurationInput.onchange = (): void => {
     setMinimumVideoViewDuration();
 
-    if (currentThumb !== null && !isImage(currentThumb)) {
+    if (currentThumb !== null && !isImageThumb(currentThumb)) {
       startViewTimer(currentThumb);
     }
   };
@@ -353,7 +353,7 @@ export function startViewTimer(thumb: HTMLElement | null): void {
     return;
   }
 
-  if (isVideo(thumb)) {
+  if (isVideoThumb(thumb)) {
     startVideoViewTimer();
   } else {
     startImageViewTimer();
@@ -451,7 +451,7 @@ function addAutoplayEventListeners(): void {
         break;
 
       case " ":
-        if (currentThumb !== null && !isVideo(currentThumb)) {
+        if (currentThumb !== null && !isVideoThumb(currentThumb)) {
           showMenu();
           pause();
         }

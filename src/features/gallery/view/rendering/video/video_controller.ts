@@ -4,7 +4,8 @@ import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";
 import { VideoClip } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/function";
-import { isVideo } from "@/lib/media/type_predicates";
+import { isVideoThumb } from "@/lib/media/type_predicates";
+import { toMediaItem } from "@/lib/thumb/item";
 import { videoUrl } from "@/lib/thumb/url";
 
 const videoPlayers: HTMLVideoElement[] = [];
@@ -39,13 +40,13 @@ export function preloadVideoPlayers(thumbs: HTMLElement[]): void {
   const activeVideoPlayer = getActiveVideoPlayer();
   const inactiveVideoPlayers = getInactiveVideoPlayers();
   const videoThumbsAroundInitialThumb = thumbs
-    .filter(thumb => isVideo(thumb) && !videoPlayerHasSource(activeVideoPlayer, thumb))
+    .filter(thumb => isVideoThumb(thumb) && !videoPlayerHasSource(activeVideoPlayer, thumb))
     .slice(0, inactiveVideoPlayers.length);
   const loadedVideoSources = new Set(inactiveVideoPlayers
     .map(video => video.src)
     .filter(src => src !== ""));
-  const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => videoUrl(thumb)));
-  const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(videoUrl(thumb)));
+  const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => videoUrl(toMediaItem(thumb))));
+  const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(videoUrl(toMediaItem(thumb))));
   const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
 
   for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
@@ -289,7 +290,7 @@ function pauseVideo(video: HTMLVideoElement): void {
 }
 
 function videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): boolean {
-  return video.src === videoUrl(thumb);
+  return video.src === videoUrl(toMediaItem(thumb));
 }
 
 function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {
@@ -297,7 +298,7 @@ function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {
     return;
   }
   applyVideoClip(video, thumb);
-  video.src = videoUrl(thumb);
+  video.src = videoUrl(toMediaItem(thumb));
 }
 
 function applyVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {

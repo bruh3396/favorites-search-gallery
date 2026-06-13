@@ -9,7 +9,7 @@ export class CoalescingExecutor<T> {
   constructor(
     private readonly maxSize: number,
     private readonly flushTimeout: number,
-    private readonly execute: (batch: T[]) => void
+    private readonly execute: (coalesced: T[]) => void
   ) {
     this.pollInterval = Math.round(Math.max(10, flushTimeout / 5));
   }

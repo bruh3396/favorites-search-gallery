@@ -11,7 +11,7 @@ import { parseDimensions2D } from "@/utils/string/parse";
 import { transferredCanvasIds } from "@/features/gallery/types/offscreen_upscale_request";
 
 export abstract class GalleryAbstractUpscaler {
-  private readonly upscaleQueue: ThrottleQueue = new ThrottleQueue(GalleryUpscaleConfig.upscaleDelay);
+  private readonly directUpscaleQueue: ThrottleQueue = new ThrottleQueue(GalleryUpscaleConfig.upscaleDelay);
   private upscaledIds: Set<string> = new Set();
 
   public upscale(request: ImageRequest): void {
@@ -19,11 +19,13 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   public upscaleAll(requests: ImageRequest[]): void {
-    requests.forEach(request => this.process(request));
+    if (this.enabled()) {
+      requests.forEach(request => this.process(request));
+    }
   }
 
   public downscaleAll(): void {
-    this.upscaleQueue.reset();
+    this.directUpscaleQueue.reset();
     this.upscaledIds.clear();
     this.clearCanvases();
     this.setCanvasDimensions(getAllContentThumbs());
@@ -80,10 +82,10 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private async process(request: ImageRequest): Promise<void> {
-    if (!this.enabled() || !this.isEligible(request)) {
+    if (!this.isEligible(request)) {
       return;
     }
-    await this.upscaleQueue.wait();
+    await this.directUpscaleQueue.wait();
 
     if (request.isIncomplete && !await GalleryFetcher.fetchBitmap(request)) {
       return;

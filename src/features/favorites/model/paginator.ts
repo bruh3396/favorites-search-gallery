@@ -11,6 +11,7 @@ let current = 1;
 let favorites: Favorite[] = [];
 
 export const onFinalPage = (): boolean => current === pageCount();
+export const onlyOnePage = (): boolean => pageCount() === 1;
 export const currentPageFavorites = (): Favorite[] => favoritesOnPage(current);
 export const adjacentPageFavorites = (): Favorite[] => [...favoritesOnPage(current - 1), ...favoritesOnPage(current + 1)];
 export const selectAdjacentPage = (direction: NavigationKey): boolean => selectPage(current + navigationDelta(direction));

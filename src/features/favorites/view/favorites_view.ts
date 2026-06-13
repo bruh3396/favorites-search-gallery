@@ -1,6 +1,6 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
 import * as FavoritesDrawer from "@/features/favorites/view/shell/drawer";
-import * as FavoritesPaginator from "@/features/favorites/view/pagination_renderer";
+import * as FavoritesPaginationRenderer from "@/features/favorites/view/pagination_renderer";
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import * as FavoritesSkeleton from "@/features/favorites/view/skeleton/skeleton";
 import * as FavoritesStatus from "@/features/favorites/view/status/status";
@@ -19,7 +19,10 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
   FavoritesShell.setup();
   FavoritesStatus.setup();
   ContentTiler.setup();
-  FavoritesPaginator.setup(viewCallbacks.onPageSelected, viewCallbacks.onPageStepped);
+  FavoritesPaginationRenderer.setup(
+    viewCallbacks.onPageSelected,
+    viewCallbacks.onPageStepped
+);
   FavoritesDrawer.setup();
 }
 
@@ -28,10 +31,10 @@ export const addToBottom = (favorites: Favorite[]): void => ContentTiler.addToBo
 export const showSkeleton = (): void => ContentTiler.tile(FavoritesSkeleton.build());
 
 export { changeLayout } from "@/app/layout/content_tiler";
-export { collectAspectRatios } from "@/features/favorites/view/aspect_ratios";
+export { collectAspectRatios } from "@/features/favorites/view/skeleton/skeleton";
 
 export * from "@/features/favorites/view/shell/native_page_cleaner";
 export * from "@/features/favorites/view/pagination_renderer";
 export * from "@/features/favorites/view/shell/drawer";
 export * from "@/features/favorites/view/status/status";
-export * from "@/features/favorites/dom_tweaks/ui_toggles";
+export * from "@/features/favorites/dom_tweaks/toggles";

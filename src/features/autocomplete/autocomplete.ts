@@ -15,7 +15,7 @@ declare const Awesomplete_: AwesompleteConstructor;
 const AUTOCOMPLETE_API_URL = "https://ac.rule34.xxx/autocomplete.php?q=";
 const dummyElement = document.createElement("div");
 
-export function setupAutocomplete(): void {
+export function startAutocomplete(): void {
   if (AUTOCOMPLETE_DISABLED) {
     return;
   }

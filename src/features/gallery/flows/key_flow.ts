@@ -6,7 +6,7 @@ import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { isExitKey, isNavigationKey } from "@/types/guards";
 import { EnhancedKeyboardEvent } from "@/types/input";
 import { GalleryConfig } from "@/config/gallery_config";
-import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import { throttle } from "@/lib/async/throttle";
 import { toggleFullscreen } from "@/utils/browser/window";
 
@@ -37,11 +37,11 @@ export function onKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
 }
 
 export function onKeyUp(event: EnhancedKeyboardEvent): void {
-  dispatchByState({ open: onKeyUpInGallery }, event);
+  GalleryDispatch.run({ open: onKeyUpInGallery }, event);
 }
 
 const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
-  dispatchByState({
+  GalleryDispatch.run({
     idle: onKeyDownOutsideGallery,
     preview: onKeyDownOutsideGallery,
     open: onKeyDownInGallery

@@ -1,11 +1,11 @@
 import * as TooltipElement from "@/features/tooltip/view/shell/element";
-import { getTagSetFromItem } from "@/lib/thumb/tag";
+import { getTagSetFromThumb } from "@/lib/thumb/tag";
 
 export function renderTooltipContent(thumb: HTMLElement, getColor: (tag: string) => string | null): void {
   TooltipElement.element.replaceChildren();
   let isFirst = true;
 
-  for (const tag of getTagSetFromItem(thumb)) {
+  for (const tag of getTagSetFromThumb(thumb)) {
     if (!isFirst) {
       TooltipElement.element.appendChild(document.createTextNode(" "));
     }

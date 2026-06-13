@@ -6,7 +6,7 @@ type GalleryStateHandlers<V> = {
   open?: (arg: V) => void
 };
 
-export function dispatchByState<V>(handlers: GalleryStateHandlers<V>, args?: V): void {
+export function run<V>(handlers: GalleryStateHandlers<V>, args?: V): void {
   const handler = {
     idle: handlers.idle,
     preview: handlers.preview,

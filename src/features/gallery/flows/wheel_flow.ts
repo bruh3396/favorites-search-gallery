@@ -1,10 +1,10 @@
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 // import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { EnhancedWheelEvent } from "@/types/input";
-import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 
 export function onWheel(wheelEvent: EnhancedWheelEvent): void {
-  dispatchByState(
+  GalleryDispatch.run(
     {
       // preview: (event) => GalleryView.updateBackgroundOpacity(event.originalEvent),
       open: (event) => {

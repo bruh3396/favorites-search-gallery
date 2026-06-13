@@ -4,21 +4,12 @@ import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
 import { insertStyle } from "@/utils/dom/injector";
 
-export function setup(): void {
-  removeNativePostListThumbs();
-  insertPostListMenu();
-  insertContentContainer();
+export function insert(): void {
+  insertOptionsMenu();
+  insertContent();
 }
 
-function removeNativePostListThumbs(): void {
-  const thumbContainer = document.querySelector(".image-list");
-
-  if (thumbContainer !== null) {
-    thumbContainer.innerHTML = "";
-  }
-}
-
-function insertPostListMenu(): void {
+function insertOptionsMenu(): void {
   const displayOptions = document.getElementById("displayOptions");
 
   if (displayOptions === null) {
@@ -37,10 +28,6 @@ function insertPostListMenu(): void {
   }
 }
 
-function insertContentContainer(): void {
-  const nativeContent = document.querySelector(".content");
-
-  if (nativeContent !== null) {
-    nativeContent.insertAdjacentElement("afterbegin", Content);
-  }
+function insertContent(): void {
+  document.querySelector(".content")?.insertAdjacentElement("afterbegin", Content);
 }

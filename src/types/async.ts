@@ -1,4 +1,4 @@
-export type Timeout = undefined | ReturnType<typeof setTimeout>
+export type Timeout = ReturnType<typeof setTimeout> | undefined
 
 export type DeferredPromise<V> = {
   resolve: (value: V) => void

@@ -28,12 +28,11 @@ export async function loadDatabaseFavorites(): Promise<void> {
   });
 }
 
-export function fetchAllFavorites(onSearchResultsFound: () => void): Promise<void> {
+export function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
   return FavoritesLoader.fetchAllFavorites((favorites) => {
     ingest(favorites);
-    FavoritesSearchCoordinator.appendResults(favorites);
-    onSearchResultsFound();
-  });
+    onSearchResultsFound(FavoritesSearchCoordinator.appendResults(favorites));
+  }, firstPageFavorites);
 }
 
 export function fetchNewFavorites(firstPageFavorites?: HTMLElement[]): Promise<NewFavorites> {
@@ -44,7 +43,7 @@ export function fetchNewFavorites(firstPageFavorites?: HTMLElement[]): Promise<N
     });
 }
 
-export const searchActiveFavorites = (searchQuery?: string): Favorite[] => FavoritesSearchCoordinator.searchFavorites(FavoritesLoader.getActiveFavorites(), searchQuery);
+export const searchActiveFavorites = (query?: string): Favorite[] => FavoritesSearchCoordinator.searchFavorites(FavoritesLoader.getActiveFavorites(), query);
 export const invertSearchResults = (): Favorite[] => FavoritesSearchCoordinator.invertResults(FavoritesLoader.getActiveFavorites());
 export const setActiveFavorites = (): void => FavoritesLoader.setActiveFavorites(FavoritesSearchCoordinator.getCurrentSearchResults());
 export const repaginateCurrentResults = (): Favorite[] => FavoritesPaginator.paginate(FavoritesSearchCoordinator.getCurrentSearchResults());
@@ -53,7 +52,6 @@ export * from "@/features/favorites/model/load/loader";
 export * from "@/features/favorites/model/metadata_fetcher";
 export * from "@/features/favorites/model/search/coordinator";
 export * from "@/features/favorites/model/paginator";
-export * from "@/features/favorites/model/infinite_scroller";
 
 function ingest(favorites: FavoriteItem[]): void {
   FavoritesSearchCoordinator.reIndex(favorites);

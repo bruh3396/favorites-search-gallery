@@ -1,7 +1,6 @@
-import { Favorite } from "@/types/favorite";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
-import { toTagSet } from "@/utils/string/tags";
 import { getImageFromThumb } from "@/lib/thumb/thumbs";
+import { toTagSet } from "@/utils/string/tags";
 
 let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
 
@@ -14,21 +13,18 @@ export function getTagsFromThumb(thumb: HTMLElement): string {
     return image?.title ?? image?.getAttribute("tags") ?? "";
 }
 
-export const getTagSetFromItem: (item: HTMLElement | Favorite) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromFavoritesPageItem : getTagSetFromPostListItem;
+export const getTagSetFromThumb: (thumb: HTMLElement) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromFavoritesPageThumb : getTagSetFromPostListThumb;
 
-function getTagSetFromFavoritesPageItem(item: HTMLElement | Favorite): Set<string> {
-  const tags = getFavoriteTags(item.id);
+function getTagSetFromFavoritesPageThumb(thumb: HTMLElement): Set<string> {
+  const tags = getFavoriteTags(thumb.id);
   return tags === undefined ? new Set() : new Set(tags);
 }
 
-function getTagSetFromPostListItem(thumb: HTMLElement | Favorite): Set<string> {
-  return toTagSet(getRawTagsFromPostListItem(thumb));
+function getTagSetFromPostListThumb(thumb: HTMLElement): Set<string> {
+  return toTagSet(getRawTagsFromPostListThumb(thumb));
 }
 
-function getRawTagsFromPostListItem(thumb: HTMLElement | Favorite): string {
-  if (!(thumb instanceof HTMLElement)) {
-    return "";
-  }
+function getRawTagsFromPostListThumb(thumb: HTMLElement): string {
   const image = getImageFromThumb(thumb);
 
   if (image === null) {

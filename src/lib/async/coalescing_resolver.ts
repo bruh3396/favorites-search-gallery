@@ -10,7 +10,7 @@ export class CoalescingResolver<K, V> {
     flushTimeout: number,
     private readonly resolve: (coalesced: K[]) => Promise<Map<K, V>>
   ) {
-    this.executor = new CoalescingExecutor<K>(maxSize, flushTimeout, coalesced => this.flush(coalesced));
+    this.executor = new CoalescingExecutor<K>(maxSize, flushTimeout, coalesced => this.resolveCoalesced(coalesced));
   }
 
   public schedule(key: K): Promise<V> {
@@ -27,7 +27,7 @@ export class CoalescingResolver<K, V> {
     });
   }
 
-  private flush(coalesced: K[]): void {
+  private resolveCoalesced(coalesced: K[]): void {
     this.resolve(coalesced)
       .then(resolution => {
         for (const [key, value] of resolution) {

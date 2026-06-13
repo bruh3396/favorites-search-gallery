@@ -1,28 +1,41 @@
 import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fetcher";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 
-export type RequestStatus = "low-res" | "complete";
-export type CachedRequest = {
+type RequestStatus = "low-res" | "complete";
+type CachedRequest = {
   request: ImageRequest;
   status: RequestStatus;
 };
 
 const cache: Map<string, CachedRequest> = new Map();
 
+// setInterval(() => {
+//   const cached = [...cache.values()];
+
+//   console.log("[image cache]", {
+//     size: cache.size,
+//     lowRes: cached.filter(c => c.status === "low-res").length,
+//     complete: cached.filter(c => c.status === "complete").length,
+//     bitmaps: cached.filter(c => c.request.bitmap !== null).length,
+//     thumbs: cached.map(c => c.request.thumb),
+//     megabytes: Number(cached.reduce((sum, c) => sum + c.request.megabytes, 0).toFixed(1))
+//   });
+// }, 500);
+
 export function sync(candidates: ImageRequest[]): ImageRequest[] {
   evictStale(candidates);
   const unseen = candidates.filter(request => !cache.has(request.id));
 
-  unseen.forEach(request => register(request));
+  unseen.forEach(request => markLowRes(request));
   return unseen;
 }
 
-export function register(request: ImageRequest): void {
-  cache.set(request.id, { request, status: "low-res" });
+export function markLowRes(request: ImageRequest): void {
+  mark(request, "low-res");
 }
 
-export function set(request: ImageRequest, status: RequestStatus): void {
-  cache.set(request.id, { request, status });
+export function markComplete(request: ImageRequest): void {
+  mark(request, "complete");
 }
 
 export function get(id: string): CachedRequest | undefined {
@@ -31,11 +44,6 @@ export function get(id: string): CachedRequest | undefined {
 
 export function completedRequests(): ImageRequest[] {
   return [...cache.values()].filter(cached => cached.status === "complete").map(cached => cached.request);
-}
-
-export function clearCache(): void {
-  [...cache.values()].forEach(cached => release(cached));
-  cache.clear();
 }
 
 function evictStale(candidates: ImageRequest[]): void {
@@ -47,6 +55,10 @@ function evictStale(candidates: ImageRequest[]): void {
       cache.delete(id);
     }
   }
+}
+
+function mark(request: ImageRequest, status: RequestStatus): void {
+  cache.set(request.id, { request, status });
 }
 
 function release(cached: CachedRequest | undefined): void {

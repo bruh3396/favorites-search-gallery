@@ -4,17 +4,17 @@ import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { EnhancedMouseEvent } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 import { didSwipe } from "@/app/dom/swipe_events";
-import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 
 export function onMouseDown(event: MouseEvent): void {
-  dispatchByState({
+  GalleryDispatch.run({
     preview: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery
   }, new EnhancedMouseEvent(event));
 }
 
 export function onTouchStart(event: TouchEvent): void {
-  dispatchByState({
+  GalleryDispatch.run({
     open: onTouchStartInGallery
   }, event);
 }
@@ -23,7 +23,7 @@ export function onLeftTap(): void {
   if (didSwipe()) {
     return;
   }
-  dispatchByState({
+  GalleryDispatch.run({
     open: () => {
       GalleryNavigationFlow.navigate("ArrowLeft");
     }
@@ -34,7 +34,7 @@ export function onRightTap(): void {
   if (didSwipe()) {
     return;
   }
-  dispatchByState({
+  GalleryDispatch.run({
     open: () => {
       GalleryNavigationFlow.navigate("ArrowRight");
     }
@@ -42,7 +42,7 @@ export function onRightTap(): void {
 }
 
 export function onSwipeDown(): void {
-  dispatchByState({ open: GalleryOpenCloseFlow.close });
+  GalleryDispatch.run({ open: GalleryOpenCloseFlow.close });
 }
 
 function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {

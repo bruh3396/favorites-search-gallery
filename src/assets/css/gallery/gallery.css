@@ -1,5 +1,3 @@
-/* Video controls */
-
 video::-webkit-media-controls-panel {
   background: transparent !important;
 }
@@ -34,8 +32,6 @@ video::-webkit-media-controls-enclosure {
   -o-user-drag: none;
 }
 
-/* Gallery background */
-
 #gallery-background {
   background: var(--color-gallery-background);
   z-index: -1;
@@ -61,30 +57,6 @@ video::-webkit-media-controls-enclosure {
 #gallery-background.gallery-background--zooming.gallery-background--zoomed {
   pointer-events: none;
 }
-
-/* Boundary nudge effect */
-
-#gallery-container [data-nudge="end"] {
-  animation: gallery-nudge-end 260ms ease-out;
-}
-
-#gallery-container [data-nudge="start"] {
-  animation: gallery-nudge-start 260ms ease-out;
-}
-
-@keyframes gallery-nudge-end {
-  0%   { transform: translateX(0); }
-  40%  { transform: translateX(-22px); }
-  100% { transform: translateX(0); }
-}
-
-@keyframes gallery-nudge-start {
-  0%   { transform: translateX(0); }
-  40%  { transform: translateX(22px); }
-  100% { transform: translateX(0); }
-}
-
-/* Image frame */
 
 .gallery-image-frame {
   width: 100%;
@@ -118,8 +90,6 @@ video::-webkit-media-controls-enclosure {
   top: 50% !important;
   transform: translate(-50%, -50%);
 }
-
-/* Gallery menu */
 
 #gallery-menu {
   pointer-events: none;
@@ -195,8 +165,6 @@ video::-webkit-media-controls-enclosure {
   user-select: none;
 }
 
-/* dock-gallery button */
-
 #gallery-menu #dock-gallery>img,
 #gallery-menu #dock-gallery>svg {
   transform: rotateZ(-90deg) !important;
@@ -207,14 +175,10 @@ video::-webkit-media-controls-enclosure {
   transform: none !important;
 }
 
-/* pin-gallery button */
-
 #gallery-menu.gallery-menu--pinned #pin-gallery>img,
 #gallery-menu.gallery-menu--pinned #pin-gallery>svg {
   transform: rotateZ(90deg) !important;
 }
-
-/* Menu button container */
 
 #gallery-menu-button-container {
   display: flex;
@@ -223,8 +187,6 @@ video::-webkit-media-controls-enclosure {
   width: fit-content;
   background: var(--color-gallery-background);
 }
-
-/* Menu buttons */
 
 .gallery-menu-btn {
   pointer-events: all;
@@ -254,8 +216,6 @@ video::-webkit-media-controls-enclosure {
   fill: white;
 }
 
-/* Background color picker */
-
 #gallery-menu-background-color-picker {
   position: absolute;
   visibility: hidden;
@@ -263,8 +223,6 @@ video::-webkit-media-controls-enclosure {
   top: 50%;
   transform: translateY(-50%);
 }
-
-/* Mobile menu overlay */
 
 #gallery-mobile-menu {
   position: fixed;
@@ -277,15 +235,16 @@ video::-webkit-media-controls-enclosure {
   background: rgba(0, 0, 0, 0.75);
 }
 
-/* Misc */
-
 a.u-hidden {
   cursor: default;
 }
 
-/* Animations */
-
 @keyframes glowSwipe {
-  0%   { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }

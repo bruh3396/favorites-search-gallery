@@ -33,7 +33,7 @@ export class ColumnTiler extends AbstractTiler {
     this.addNewItemsToColumns(items);
   }
 
-  public getBottomEdgeElements(): HTMLElement[] {
+  public bottomEdgeElements(): HTMLElement[] {
     const lasts: HTMLElement[] = [];
 
     for (const column of this.columns) {

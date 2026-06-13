@@ -1,6 +1,6 @@
 import { CheckboxElement, SelectElement } from "@/types/element";
-import { FavoriteIndicatorStyle, GalleryFavoriteIndicatorStyle, Layout, PerformanceProfile } from "@/types/ui";
 import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
+import { HighlightStyle, Layout, PerformanceProfile } from "@/types/ui";
 import { Events } from "@/app/channels/events";
 import { GeneralConfig } from "@/config/general_config";
 import { MetadataMetric } from "@/types/search";
@@ -11,7 +11,7 @@ import { buildSelectElement } from "@/lib/ui/elements/select";
 import { numberRange } from "@/utils/number";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
 import { reloadWindow } from "@/utils/browser/window";
-import { toggleGalleryMenuEnabled } from "@/lib/ui/style";
+import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 const checkboxes: Partial<CheckboxElement>[] = [
   {
@@ -80,93 +80,102 @@ const checkboxes: Partial<CheckboxElement>[] = [
     defaultValue: false
   }
 ];
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<number>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<FavoriteIndicatorStyle>> | Partial<SelectElement<GalleryFavoriteIndicatorStyle>>)[] = [
-  {
-    id: "layout-select",
-    parentId: "post-list-layout",
-    title: "Change layout",
-    position: "beforeend",
-    preference: Preferences.postListLayout,
-    event: Events.postList.layoutChanged,
-    triggerOnCreation: true,
-    options: new Map<Layout, string>([
-      ["native", "Native"],
-      ["column", "Waterfall"],
-      ["row", "River"],
-      ["square", "Square"],
-      ["grid", "Legacy"]
-    ])
-  },
-  {
-    id: "column-count",
-    parentId: "post-list-column-count",
-    position: "beforeend",
-    preference: Preferences.postListColumnCount,
-    event: Events.app.columnCountChanged,
-    options: new Map<number, string>(numberRange(2, ON_DESKTOP_DEVICE ? 25 : 10).map(n => [n, String(n)]))
-  },
-  {
-    id: "row-size",
-    parentId: "post-list-row-size",
-    position: "beforeend",
-    preference: Preferences.postListRowHeight,
-    event: Events.app.rowHeightChanged,
-    options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
-  },
-  {
-    id: "favorite-indicator-style",
-    parentId: "post-list-favorite-indicator-style",
-    position: "beforeend",
-    preference: Preferences.postListFavoriteIndicatorStyle,
-    event: Events.postList.favoriteIndicatorStyleChanged,
-    options: new Map<FavoriteIndicatorStyle, string>([
-      ["border", "Border"],
-      ["dim", "Dim"],
-      ["none", "None"],
-      ["hidden", "Hidden"]
-    ])
-  },
-  {
-    id: "gallery-favorite-style",
-    parentId: "post-list-gallery-favorite-style",
-    position: "beforeend",
-    preference: Preferences.postListGalleryFavoriteStyle,
-    options: new Map<GalleryFavoriteIndicatorStyle, string>([
-      ["border", "Border"],
-      ["glow", "Glow"],
-      ["none", "None"]
-    ])
-  },
-  {
-    id: "performance-profile",
-    parentId: "post-list-performance-profile",
-    title: "Improve performance by disabling features",
-    position: "beforeend",
-    preference: Preferences.appPerformanceProfile,
-    event: Events.app.performanceProfileChanged,
-    function: reloadWindow,
-    enabled: ON_DESKTOP_DEVICE,
-    options: new Map<PerformanceProfile, string>([
-      ["normal", "Normal"],
-      ["medium", "Medium"],
-      ["low", "Low"],
-      ["potato", "Potato"]
-    ])
-  }
-];
 
-export function create(): void {
-  createCheckboxes();
-  createSelects();
+const selects: (
+  Partial<SelectElement<Layout>> |
+  Partial<SelectElement<number>> |
+  Partial<SelectElement<MetadataMetric>> |
+  Partial<SelectElement<PerformanceProfile>> |
+  Partial<SelectElement<HighlightStyle>>
+)[] = [
+    {
+      id: "layout-select",
+      parentId: "post-list-layout",
+      title: "Change layout",
+      position: "beforeend",
+      preference: Preferences.postListLayout,
+      event: Events.postList.layoutChanged,
+      triggerOnCreation: true,
+      options: new Map<Layout, string>([
+        ["native", "Native"],
+        ["column", "Waterfall"],
+        ["row", "River"],
+        ["square", "Square"],
+        ["grid", "Legacy"]
+      ])
+    },
+    {
+      id: "column-count",
+      parentId: "post-list-column-count",
+      position: "beforeend",
+      preference: Preferences.postListColumnCount,
+      event: Events.app.columnCountChanged,
+      options: new Map<number, string>(numberRange(2, ON_DESKTOP_DEVICE ? 25 : 10).map(n => [n, String(n)]))
+    },
+    {
+      id: "row-size",
+      parentId: "post-list-row-size",
+      position: "beforeend",
+      preference: Preferences.postListRowHeight,
+      event: Events.app.rowHeightChanged,
+      options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
+    },
+    {
+      id: "favorite-indicator-style",
+      parentId: "post-list-favorite-indicator-style",
+      position: "beforeend",
+      preference: Preferences.postListFavoriteIndicatorStyle,
+      event: Events.postList.favoriteIndicatorStyleChanged,
+      options: new Map<HighlightStyle, string>([
+        ["border", "Border"],
+        ["glow", "Glow"],
+        ["trace", "Trace"],
+        ["hidden", "Hidden"],
+        ["none", "None"]
+      ])
+    },
+    {
+      id: "gallery-favorite-style",
+      parentId: "post-list-gallery-favorite-style",
+      position: "beforeend",
+      preference: Preferences.postListGalleryFavoriteStyle,
+      options: new Map<HighlightStyle, string>([
+        ["border", "Border"],
+        ["glow", "Glow"],
+        ["trace", "Trace"],
+        ["none", "None"]
+      ])
+    },
+    {
+      id: "performance-profile",
+      parentId: "post-list-performance-profile",
+      title: "Improve performance by disabling features",
+      position: "beforeend",
+      preference: Preferences.appPerformanceProfile,
+      event: Events.app.performanceProfileChanged,
+      function: reloadWindow,
+      enabled: ON_DESKTOP_DEVICE,
+      options: new Map<PerformanceProfile, string>([
+        ["normal", "Normal"],
+        ["medium", "Medium"],
+        ["low", "Low"],
+        ["potato", "Potato"]
+      ])
+    }
+  ];
+
+export function build(): void {
+  buildCheckboxes();
+  buildSelects();
 }
 
-function createCheckboxes(): void {
+function buildCheckboxes(): void {
   for (const checkbox of prepareDynamicElements(checkboxes)) {
     buildCheckboxElement(checkbox);
   }
 }
 
-function createSelects(): void {
+function buildSelects(): void {
   //  @ts-expect-error don't care
   for (const select of prepareDynamicElements(selects)) {
     buildSelectElement(select);

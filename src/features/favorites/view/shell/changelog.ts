@@ -16,9 +16,10 @@ const releases: Release[] = [
     version: "v1.22",
     changes: [
       "Redesigned favorites ui",
+      "Added search page favorite indicator",
       "Added new themes",
-      "Added favorite indicator",
-      "Improved post overlay"
+      "Improved post overlay",
+      "Improved performance"
     ]
   }
 ];

@@ -6,18 +6,33 @@ import * as PostListNavigatorOptionFlow from "@/features/post_list_navigator/flo
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/post_list_navigator_view";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { POST_LIST_PAGE_DISABLED } from "@/app/context/flags";
+import { POST_LIST_PAGE_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 
-export async function setupPostList(): Promise<void> {
-  if (POST_LIST_PAGE_DISABLED) {
-    return;
+export function startPostListNavigator(): void {
+  if (POST_LIST_PAGE_ENABLED) {
+    setup();
+    start();
   }
+}
+
+function setup(): void {
   setupModel();
-  await setupView();
-  await setupFavoriteIndicator();
+  setupView();
+  setupFavoriteIndicator();
   subscribeToEvents();
-  registerBridgeHandlers();
+  serveExternalRequests();
+}
+
+async function start(): Promise<void> {
+  PostListNavigatorModel.preloadAroundInitialPage();
+  PostListNavigatorView.tileNativePostListThumbs();
+  PostListNavigatorView.removeNativeImageList();
+  PostListNavigatorView.prepareNativePostListThumbs();
+
+  if (Preferences.postListFavoriteIndicator.value) {
+    await PostListNavigatorFavoritesMarkerFlow.toggleIndicator(true);
+  }
   Events.postList.initialPostListCreated.emit(PostListNavigatorModel.getInitialPostList());
   Events.postList.postListInitialized.emit();
 }
@@ -26,21 +41,17 @@ function setupModel(): void {
   PostListNavigatorModel.setup();
 }
 
-function setupView(): Promise<void> {
-  return PostListNavigatorView.setup();
+function setupView(): void {
+  PostListNavigatorView.setup();
 }
 
-async function setupFavoriteIndicator(): Promise<void> {
+function setupFavoriteIndicator(): void {
   Events.postList.pageChanged.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.postList.moreResultsAdded.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.app.favoriteAdded.on(PostListNavigatorFavoritesMarkerFlow.onFavoriteAdded);
   Events.postList.favoriteIndicatorToggled.on(PostListNavigatorOptionFlow.toggleFavoriteIndicator);
   Events.postList.favoriteIndicatorStyleChanged.on(PostListNavigatorView.applyCurrentFavoriteStyle);
   Events.gallery.displayedThumb.on(PostListNavigatorView.applyGalleryFavoriteStyle);
-
-  if (Preferences.postListFavoriteIndicator.value) {
-    await PostListNavigatorFavoritesMarkerFlow.toggleIndicator(true);
-  }
 }
 
 function subscribeToEvents(): void {
@@ -48,7 +59,7 @@ function subscribeToEvents(): void {
   Events.postList.infiniteScrollToggled.on(PostListNavigatorOptionFlow.toggleInfiniteScroll);
 }
 
-function registerBridgeHandlers(): void {
+function serveExternalRequests(): void {
   FeatureBridge.currentSearchQuery.register(PostListNavigatorView.currentSearch);
   FeatureBridge.navigateToAdjacentPostList.register(PostListNavigatorNavigationFlow.navigatePostLists);
   FeatureBridge.postListThumbs.register(PostListNavigatorModel.allThumbs);

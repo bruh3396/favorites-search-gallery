@@ -1,5 +1,5 @@
 import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { fadeIn, fadeInFresh, setupFadeIn } from "@/app/layout/fade_in";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
@@ -14,21 +14,19 @@ import { Preferences } from "@/app/context/preferences";
 import { RowTiler } from "@/lib/ui/tilers/row_tiler";
 import { SquareTiler } from "@/lib/ui/tilers/square_tiler";
 import { ThumbConfig } from "@/config/thumb_config";
-import { Timeout } from "@/types/async";
 import { clamp } from "@/utils/number";
 import { inGallery } from "@/app/channels/feature_bridge";
 import { navigationDelta } from "@/utils/navigation";
 import { yieldControl } from "@/lib/async/timing";
 
-const FADE_IN_DURATION_MS = 500;
 const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.favoritesColumnCount.value : Preferences.postListColumnCount.value);
 const tilers: AbstractTiler[] = [columnTiler, new GridTiler(Content), new RowTiler(Content), new SquareTiler(Content), new NativeTiler(Content)];
 const tilerMap = new Map(tilers.map(tiler => [tiler.layout, tiler]));
 let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.postListLayout.value;
 let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
-let fadeInEndTimeout: Timeout;
 
 export function setup(): void {
+  setupFadeIn();
   currentTiler.activate();
   setColumnCount(ON_POST_LIST_PAGE ? Preferences.postListColumnCount.value : Preferences.favoritesColumnCount.value);
   setRowHeight(ON_POST_LIST_PAGE ? Preferences.postListRowHeight.value : Preferences.favoritesRowHeight.value);
@@ -52,10 +50,10 @@ export function changeLayout(layout: Layout): void {
 export const setRowHeight = (rowHeight: number): void => tilers.forEach(tiler => tiler.setRowHeight(rowHeight));
 export const setColumnCount = (columnCount: number): void => tilers.forEach(tiler => tiler.setColumnCount(columnCount));
 export const getLayout = (): Layout => currentLayout;
-export const tile = (items: HTMLElement[]): void => fadeInWhile(() => currentTiler.tile(items));
-export const addToBottom = (items: HTMLElement[]): void => fadeInWhile(() => currentTiler.addItemsToBottom(items));
-export const addToTop = (items: HTMLElement[]): void => fadeInWhile(() => currentTiler.addItemsToTop(items));
-export const getBottomEdgeElements = (): HTMLElement[] => currentTiler.getBottomEdgeElements();
+export const tile = (items: HTMLElement[]): void => fadeInFresh(items, () => currentTiler.tile(items));
+export const addToBottom = (items: HTMLElement[]): void => fadeIn(items, () => currentTiler.addItemsToBottom(items));
+export const addToTop = (items: HTMLElement[]): void => fadeIn(items, () => currentTiler.addItemsToTop(items));
+export const bottomEdgeElements = (): HTMLElement[] => currentTiler.bottomEdgeElements();
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
   if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || inGallery()) {
@@ -91,11 +89,4 @@ export async function hideUnusedLayoutSizer(layout: Layout): Promise<void> {
     rowHeightContainer.style.display = layout === "row" ? "" : "none";
     columnCountContainer.style.display = layout === "row" || layout === "native" ? "none" : "";
   }
-}
-
-function fadeInWhile(action: () => void): void {
-  setDataset(Content, "fading");
-  action();
-  clearTimeout(fadeInEndTimeout);
-  fadeInEndTimeout = setTimeout(() => removeDataset(Content, "fading"), FADE_IN_DURATION_MS);
 }

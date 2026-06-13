@@ -5,7 +5,7 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { USING_FIREFOX } from "@/lib/environment";
-import { isImage } from "@/lib/media/type_predicates";
+import { isImageThumb } from "@/lib/media/type_predicates";
 import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 import { withTimeout } from "@/lib/async/timing";
 
@@ -19,8 +19,7 @@ export const GalleryImageRenderer = {
   root,
   render,
   hide,
-  cache,
-  clearCache
+  cache
 } satisfies GalleryRenderer;
 
 export const toggleZoomCursor = (value: boolean): boolean => root.classList.toggle("gallery-image-frame--zooming", value);
@@ -37,8 +36,10 @@ export function correctOrientation(): void {
 
 export async function cache(thumbs: HTMLElement[]): Promise<void> {
   await waitForAllThumbsToLoadWithTimeout();
-  GalleryImageLoader.load(thumbs);
-  GalleryUpscaler.upscaleAll(disposableRequests(thumbs.filter(thumb => !isImage(thumb))));
+  const rejected = GalleryImageLoader.load(thumbs).map(request => request.thumb);
+  const animated = thumbs.filter(thumb => !isImageThumb(thumb));
+
+  GalleryUpscaler.upscaleAll(disposableRequests([...animated, ...rejected]));
 }
 
 export async function upscale(thumbs: HTMLElement[]): Promise<void> {
@@ -64,11 +65,6 @@ function hide(): void {
   if (USING_FIREFOX) {
     GalleryImageCanvas.clear();
   }
-}
-
-function clearCache(): void {
-  GalleryUpscaler.downscaleAll();
-  GalleryImageLoader.clearCache();
 }
 
 function draw(thumb: HTMLElement): void {

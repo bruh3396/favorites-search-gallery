@@ -1,18 +1,28 @@
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { GalleryConfig } from "@/config/gallery_config";
 import { debounceLeading } from "@/lib/async/debounce";
-import { dispatchByState } from "@/features/gallery/flows/state_dispatch";
+import { getAllContentThumbs } from "@/app/layout/content_thumbs";
+
+export function hardRefresh(): void {
+  GalleryView.downscaleAll();
+  refresh();
+}
 
 export function refresh(): void {
-  GalleryThumbObserver.refresh();
-  GalleryModel.indexThumbs();
+  reIndex();
   recache();
 }
 
+export function reIndex(): void {
+  GalleryThumbObserver.refresh();
+  GalleryModel.indexThumbs();
+}
+
 const recache = debounceLeading(() => {
-  dispatchByState({
+  GalleryDispatch.run({
     idle: recacheFirstThumbs,
     preview: recacheFirstThumbs,
     open: GalleryView.reupscaleCachedThumbs
@@ -20,6 +30,5 @@ const recache = debounceLeading(() => {
 }, GalleryConfig.contentRefreshTime);
 
 function recacheFirstThumbs(): void {
-  GalleryView.clearCache();
-  GalleryView.cacheImages(GalleryModel.getFirstThumbs());
+  GalleryView.cacheImages(getAllContentThumbs().slice(0, 25));
 }

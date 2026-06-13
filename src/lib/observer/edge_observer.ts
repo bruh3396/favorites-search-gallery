@@ -1,22 +1,24 @@
 /* eslint-disable max-classes-per-file */
 import { FavoritesConfig } from "@/config/favorites_config";
 
-abstract class EdgeObserver {
-  protected readonly getSentinels: () => HTMLElement[];
-  private intersectionObserver: IntersectionObserver;
-  private readonly onEdgeReached: () => void;
+class EdgeObserver {
+  private readonly onEdgeReached: () => Promise<boolean>;
+  private readonly getSentinels: () => HTMLElement[];
+  private readonly intersectionObserver: IntersectionObserver;
+  private loading = false;
 
-  constructor(onEdgeReached: () => void, getSentinels: () => HTMLElement[]) {
+  constructor(rootMargin: string, onEdgeReached: () => Promise<boolean>, getSentinels: () => HTMLElement[]) {
     this.onEdgeReached = onEdgeReached;
     this.getSentinels = getSentinels;
-    this.intersectionObserver = this.createIntersectionObserver();
+    this.intersectionObserver = new IntersectionObserver(this.onIntersection.bind(this), {
+      threshold: [0.1],
+      rootMargin
+    });
   }
-
-  protected abstract get rootMargin(): string;
-  protected abstract get label(): string;
 
   public disconnect(): void {
     this.intersectionObserver.disconnect();
+    this.loading = false;
   }
 
   public refresh(): void {
@@ -27,40 +29,23 @@ abstract class EdgeObserver {
     }
   }
 
-  private createIntersectionObserver(): IntersectionObserver {
-    return new IntersectionObserver(this.onIntersectionChanged.bind(this), {
-      threshold: [0.1],
-      rootMargin: this.rootMargin
-    });
-  }
-
-  private onIntersectionChanged(entries: IntersectionObserverEntry[]): void {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        this.onEdgeReached();
-        this.disconnect();
-        return;
-      }
+  private onIntersection(entries: IntersectionObserverEntry[]): void {
+    if (this.loading || !entries.some((entry) => entry.isIntersecting)) {
+      return;
     }
+    this.loading = true;
+    this.onEdgeReached().then((hasMore) => (hasMore ? this.refresh() : this.disconnect()));
   }
 }
 
-export class PageBottomObserver extends EdgeObserver {
-  protected get rootMargin(): string {
-    return `0% 0% ${FavoritesConfig.infiniteScrollMargin} 0%`;
-  }
-
-  protected get label(): string {
-    return "bottom";
+export class BottomEdgeObserver extends EdgeObserver {
+  constructor(onEdgeReached: () => Promise<boolean>, getSentinels: () => HTMLElement[]) {
+    super(`0% 0% ${FavoritesConfig.infiniteScrollMargin} 0%`, onEdgeReached, getSentinels);
   }
 }
 
-export class PageTopObserver extends EdgeObserver {
-  protected get rootMargin(): string {
-    return `${FavoritesConfig.infiniteScrollMargin} 0% 0% 0%`;
-  }
-
-  protected get label(): string {
-    return "top";
+export class TopEdgeObserver extends EdgeObserver {
+  constructor(onEdgeReached: () => Promise<boolean>, getSentinels: () => HTMLElement[]) {
+    super(`${FavoritesConfig.infiniteScrollMargin} 0% 0% 0%`, onEdgeReached, getSentinels);
   }
 }

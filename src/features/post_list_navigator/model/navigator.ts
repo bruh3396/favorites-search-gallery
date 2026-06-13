@@ -19,7 +19,10 @@ export function setup(): void {
   currentPageNumber = initialPageNumber;
   initialPostList = new PostList(initialPageNumber, Array.from(getAllPageThumbs()), document.getElementById("paginator"));
   PostListNavigatorLoader.markLoaded(initialPageNumber, initialPostList);
-  PostListNavigatorLoader.preloadAround(baseUrl, currentPageNumber);
+}
+
+export function preloadAroundInitialPage(): void {
+  PostListNavigatorLoader.preloadAround(baseUrl, initialPageNumber);
 }
 
 export function navigate(direction: NavigationKey): PostListNavigationResult {
