@@ -2,7 +2,7 @@ import { Favorite } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { shuffleArray } from "@/utils/collection/array";
 
-export function sortFavorites(favorites: Favorite[]): Favorite[] {
+export function sort(favorites: Favorite[]): Favorite[] {
   const sortKey = Preferences.favorites.sortKey.value;
 
   if (sortKey === "random") {

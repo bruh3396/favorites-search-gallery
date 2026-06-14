@@ -43,7 +43,7 @@ export const Events = {
     resultsPerPageChanged: new Emitter<number>(),
     allowedRatingsChanged: new Emitter<Rating>(),
     layoutChanged: new Emitter<Layout>(),
-    sortMethodChanged: new Emitter<MetadataMetric>(),
+    sortKeyChanged: new Emitter<MetadataMetric>(),
 
     galleryPreviewToggled: new Emitter<boolean>(),
     captionsToggled: new Emitter<boolean>(),

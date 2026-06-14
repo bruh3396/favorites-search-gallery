@@ -1,4 +1,4 @@
-import * as Navigator from "@/lib/remote/rule34/posts/navigation";
+import { openMedia, openPost } from "@/lib/remote/rule34/posts/navigation";
 import { EnhancedMouseEvent } from "@/types/input";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
@@ -11,7 +11,7 @@ export function onClick(event: EnhancedMouseEvent): void {
   }
 
   if (event.ctrlKey) {
-    Navigator.openMedia(event.thumb);
+    openMedia(event.thumb);
   }
   event.originalEvent.preventDefault();
 }
@@ -24,7 +24,7 @@ export function onMouseDown(event: EnhancedMouseEvent): void {
     (event.leftClick && (event.shiftKey || GALLERY_DISABLED));
 
   if (shouldOpen) {
-    Navigator.openPost(event.thumb.id);
+    openPost(event.thumb.id);
   }
   event.originalEvent.preventDefault();
 }

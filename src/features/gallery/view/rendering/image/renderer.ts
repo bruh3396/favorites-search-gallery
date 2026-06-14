@@ -29,7 +29,6 @@ export const zoomToPoint = GalleryImageCanvas.zoomToPoint;
 export const upscaleCachedThumbs = (): void => GalleryUpscaler.upscaleAll(GalleryImageLoader.completedRequests());
 export const downscaleAll = GalleryUpscaler.downscaleAll;
 export const toggleUpscaler = GalleryUpscaler.toggleUpscaler;
-export const setupUpscaler = GalleryUpscaler.setup;
 
 export function correctOrientation(): void {
   GalleryImageCanvas.correctOrientation();

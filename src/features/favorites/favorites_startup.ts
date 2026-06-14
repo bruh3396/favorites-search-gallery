@@ -101,7 +101,7 @@ function subscribeToEvents(): void {
   Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
   Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.reSearchFavorites);
-  Events.favorites.sortMethodChanged.on(FavoritesOptionsFlow.reSearchFavorites);
+  Events.favorites.sortKeyChanged.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.reSearchFavorites);
   Events.favorites.resultsPerPageChanged.on(FavoritesSearchFlow.showLatestSearchResults);
 

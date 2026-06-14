@@ -9,19 +9,6 @@ type CachedRequest = {
 
 const cache: Map<string, CachedRequest> = new Map();
 
-// setInterval(() => {
-//   const cached = [...cache.values()];
-
-//   console.log("[image cache]", {
-//     size: cache.size,
-//     lowRes: cached.filter(c => c.status === "low-res").length,
-//     complete: cached.filter(c => c.status === "complete").length,
-//     bitmaps: cached.filter(c => c.request.bitmap !== null).length,
-//     thumbs: cached.map(c => c.request.thumb),
-//     megabytes: Number(cached.reduce((sum, c) => sum + c.request.megabytes, 0).toFixed(1))
-//   });
-// }, 500);
-
 export function sync(candidates: ImageRequest[]): ImageRequest[] {
   evictStale(candidates);
   const unseen = candidates.filter(request => !cache.has(request.id));

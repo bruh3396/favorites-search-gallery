@@ -11,7 +11,7 @@ export function removeFavorite(thumb: HTMLElement | undefined): Promise<RemoveFa
     return Promise.resolve("error");
   }
 
-  if (!Preferences.favorites.removeButtonsVisible.value) {
+  if (!Preferences.favorites.deletingAllowed.value) {
     return Promise.resolve("forbidden");
   }
   FavoritesActions.removeFavorite(thumb.id);

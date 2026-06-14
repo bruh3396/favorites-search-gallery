@@ -7,6 +7,7 @@ import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { FavoritesDrawerTab } from "@/types/app";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
+import { div } from "@/utils/dom/element";
 import { macroTask } from "@/lib/async/async";
 
 let activeTab: FavoritesDrawerTab = Preferences.favorites.drawerActiveTab.value;
@@ -15,9 +16,9 @@ export async function setup(): Promise<void> {
   if (!ON_DESKTOP_DEVICE) {
     return;
   }
-  const drawer = document.createElement("div");
+  const drawer = div(FavoritesId.drawer);
 
-  drawer.id = FavoritesId.drawer;
+  drawer.classList.add("u-no-select");
   drawer.appendChild(buildTabRail());
   drawer.appendChild(buildPanels());
   FavoritesShell.DrawerTrack.appendChild(drawer);
@@ -111,9 +112,7 @@ function openInstantly(): void {
 }
 
 function buildTabRail(): HTMLElement {
-  const rail = document.createElement("div");
-
-  rail.id = FavoritesId.drawerTabStrip;
+  const rail = div(FavoritesId.drawerTabStrip);
 
   for (const { tab, label, icon: iconName } of FavoritesDrawerTabs) {
     rail.appendChild(buildTab(tab, label, iconName));
@@ -141,14 +140,11 @@ function buildTab(tab: FavoritesDrawerTab, label: string, iconName: IconName): H
 }
 
 function buildPanels(): HTMLElement {
-  const panels = document.createElement("div");
-
-  panels.id = FavoritesId.drawerTabPanels;
+  const panels = div(FavoritesId.drawerTabPanels);
 
   for (const { tab } of FavoritesDrawerTabs) {
-    const panel = document.createElement("div");
+    const panel = div(panelId(tab));
 
-    panel.id = panelId(tab);
     panel.className = FavoritesClass.drawerPanel;
     renderPanelContent(tab, panel);
     panels.appendChild(panel);

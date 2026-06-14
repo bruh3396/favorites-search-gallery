@@ -19,5 +19,5 @@ export const FeatureBridge = {
   currentGalleryThumb: new FeatureChannel<void, HTMLElement | null>(null)
 };
 
-export const inGallery = (): boolean => FeatureBridge.galleryState.call() === "open";
-export const galleryIsIdle = (): boolean => FeatureBridge.galleryState.call() === "idle";
+export const galleryOpened = (): boolean => FeatureBridge.galleryState.call() === "open";
+export const galleryIdle = (): boolean => FeatureBridge.galleryState.call() === "idle";

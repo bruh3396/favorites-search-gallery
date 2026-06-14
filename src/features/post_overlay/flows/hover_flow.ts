@@ -3,11 +3,11 @@ import * as PostOverlayModel from "@/features/post_overlay/model/post_overlay_mo
 import * as PostOverlayView from "@/features/post_overlay/view/post_overlay_view";
 import { EnhancedMouseEvent } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
-import { galleryIsIdle } from "@/app/channels/feature_bridge";
+import { galleryIdle } from "@/app/channels/feature_bridge";
 import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
 export function onMouseover(event: EnhancedMouseEvent): void {
-  if (!Preferences.postOverlay.enabled.value || !galleryIsIdle()) {
+  if (!Preferences.postOverlay.enabled.value || !galleryIdle()) {
     return;
   }
   PostOverlayModel.recordCursorPosition(event);

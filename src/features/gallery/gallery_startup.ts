@@ -78,8 +78,7 @@ function setupView(): void {
   GalleryView.setup({
     onMenuAction: Events.gallery.galleryMenuButtonClicked.emit,
     onVideoEnded: GalleryAutoplay.onVideoEnded,
-    onVideoDoubleClicked: GalleryOpenCloseFlow.close,
-    getVisibleThumbIds: GalleryThumbObserver.getVisibleThumbIds
+    onVideoDoubleClicked: GalleryOpenCloseFlow.close
   });
 }
 

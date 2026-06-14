@@ -1,5 +1,5 @@
 import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
-import { fadeIn, fadeInFresh, setupFadeIn } from "@/app/layout/fade_in";
+import { fadeIn, fadeInReplacement, setupFadeIn } from "@/app/layout/fade_in";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
@@ -15,7 +15,7 @@ import { RowTiler } from "@/lib/ui/tilers/row_tiler";
 import { SquareTiler } from "@/lib/ui/tilers/square_tiler";
 import { ThumbConfig } from "@/config/thumb_config";
 import { clamp } from "@/utils/number";
-import { inGallery } from "@/app/channels/feature_bridge";
+import { galleryOpened } from "@/app/channels/feature_bridge";
 import { navigationDelta } from "@/utils/navigation";
 import { macroTask } from "@/lib/async/async";
 
@@ -50,13 +50,13 @@ export function changeLayout(layout: Layout): void {
 export const setRowHeight = (rowHeight: number): void => tilers.forEach(tiler => tiler.setRowHeight(rowHeight));
 export const setColumnCount = (columnCount: number): void => tilers.forEach(tiler => tiler.setColumnCount(columnCount));
 export const getLayout = (): Layout => currentLayout;
-export const tile = (items: HTMLElement[]): void => fadeInFresh(items, () => currentTiler.tile(items));
+export const tile = (items: HTMLElement[]): void => fadeInReplacement(items, () => currentTiler.tile(items));
 export const addToBottom = (items: HTMLElement[]): void => fadeIn(items, () => currentTiler.addItemsToBottom(items));
 export const addToTop = (items: HTMLElement[]): void => fadeIn(items, () => currentTiler.addItemsToTop(items));
 export const bottomEdgeElements = (): HTMLElement[] => currentTiler.bottomEdgeElements();
 
 export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): void {
-  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || inGallery()) {
+  if (!wheelEvent.originalEvent.shiftKey || currentLayout === "native" || galleryOpened()) {
     return;
   }
   const usingRowLayout = currentLayout === "row";

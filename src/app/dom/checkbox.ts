@@ -1,7 +1,7 @@
 import { CheckboxElement, defaultMenuElement } from "@/types/element";
 import { DomEvents } from "@/app/dom/events";
 import { doNothing } from "@/utils/function";
-import { inGallery } from "@/app/channels/feature_bridge";
+import { galleryOpened } from "@/app/channels/feature_bridge";
 
 export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
   const template = createCheckboxTemplate(partial);
@@ -48,7 +48,7 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
       return;
     }
 
-    if (inGallery()) {
+    if (galleryOpened()) {
       return;
     }
     checked = !checked;

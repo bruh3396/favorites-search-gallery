@@ -229,12 +229,12 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     ])
   },
   {
-    id: "sort-method",
+    id: "sort-key",
     parentId: "sort-inputs",
     title: "Change sort order of search results",
     position: "beforeend",
     preference: Preferences.favorites.sortKey,
-    event: Events.favorites.sortMethodChanged,
+    event: Events.favorites.sortKeyChanged,
     options: new Map<MetadataMetric, string>([
       ["default", "Default"],
       ["score", "Score"],

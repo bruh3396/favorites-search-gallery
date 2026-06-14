@@ -8,10 +8,6 @@ import { fetchSampleImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitma
 export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   private readonly canvases: Map<string, HTMLCanvasElement> = new Map();
 
-  constructor(getVisibleIds: () => Set<string>) {
-    super(getVisibleIds);
-  }
-
   protected evict(id: string): void {
     const canvas = this.canvases.get(id);
 

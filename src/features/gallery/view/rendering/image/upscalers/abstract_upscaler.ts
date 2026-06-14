@@ -5,6 +5,7 @@ import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { PERFORMANCE_PROFILE } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { ThrottleQueue } from "@/lib/async/throttle_queue";
+import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
 function upscalingEnabled(): boolean {
   if (ON_POST_LIST_PAGE && !Preferences.postList.upscaleThumbs.value) {
@@ -18,8 +19,6 @@ export abstract class GalleryAbstractUpscaler {
   private readonly directUpscaleQueue: ThrottleQueue = new ThrottleQueue(GalleryUpscaleConfig.upscaleDelay);
   private readonly upscaledIds: Set<string> = new Set();
   private paused: boolean = false;
-
-  constructor(private readonly getVisibleIds: () => Set<string>) {}
 
   public toggle(value: boolean): void {
     this.paused = value;
@@ -65,10 +64,10 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private evictOldestBeyondCap(): void {
-    const visibleIds = this.getVisibleIds();
+    const idsOnPage = new Set(getAllContentThumbs().map(thumb => thumb.id));
 
     while (this.upscaledIds.size > GalleryUpscaleConfig.maxUpscaledThumbs) {
-      const oldest = [...this.upscaledIds].find(id => !visibleIds.has(id));
+      const oldest = [...this.upscaledIds].find(id => !idsOnPage.has(id));
 
       if (oldest === undefined) {
         return;

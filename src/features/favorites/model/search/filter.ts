@@ -6,16 +6,12 @@ import { SearchQuery } from "@/lib/search/query/search_query";
 
 const blacklistSearchQuery = new SearchQuery<Favorite>(NEGATED_BLACKLISTED_TAGS);
 
-export function apply(favorites: Favorite[]): Favorite[] {
-  return filterOutBlacklisted(filterByRating(favorites));
-}
-
-function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {
-  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : blacklistSearchQuery.filter(favorites);
-}
-
-function filterByRating(favorites: Favorite[]): Favorite[] {
+export function filterByRating(favorites: Favorite[]): Favorite[] {
   return areAllRatingsAllowed() ? favorites : favorites.filter(result => result.withinRating(Preferences.favorites.allowedRatings.value));
+}
+
+export function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {
+  return USER_IS_ON_THEIR_OWN_FAVORITES_PAGE ? favorites : blacklistSearchQuery.filter(favorites);
 }
 
 function areAllRatingsAllowed(): boolean {

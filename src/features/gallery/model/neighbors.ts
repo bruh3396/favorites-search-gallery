@@ -1,4 +1,5 @@
 import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "@/utils/collection/array";
+import { ON_FAVORITES_PAGE } from "@/lib/environment";
 
 let getCandidates: () => HTMLElement[];
 
@@ -6,11 +7,19 @@ export function setup(getNeighborCandidates: () => HTMLElement[]): void {
   getCandidates = getNeighborCandidates;
 }
 
-export function getWrappedItemsAround(id: string, limit: number = 50): HTMLElement[] {
+export const getItemsAround = (
+  id: string,
+  limit: number = 50
+): HTMLElement[] => (ON_FAVORITES_PAGE ? getWrappedItemsAround : getUnwrappedItemsAround)(
+    id,
+    limit
+  );
+
+function getWrappedItemsAround(id: string, limit: number): HTMLElement[] {
   return getItems(id, limit, getWrappedElementsAroundIndex);
 }
 
-export function getItemsAround(id: string, limit: number = 50): HTMLElement[] {
+function getUnwrappedItemsAround(id: string, limit: number): HTMLElement[] {
   return getItems(id, limit, getElementsAroundIndex);
 }
 

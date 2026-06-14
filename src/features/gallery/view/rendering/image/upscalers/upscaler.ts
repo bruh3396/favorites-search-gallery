@@ -4,11 +4,7 @@ import { GalleryMainThreadUpscaler } from "@/features/gallery/view/rendering/ima
 import { GalleryWorkerUpscalerWrapper } from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler_wrapper";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 
-let upscaler: GalleryAbstractUpscaler = new GalleryMainThreadUpscaler(() => new Set());
-
-export function setup(getVisibleIds: () => Set<string>): void {
-  upscaler = GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper(getVisibleIds) : new GalleryMainThreadUpscaler(getVisibleIds);
-}
+const upscaler: GalleryAbstractUpscaler = GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper() : new GalleryMainThreadUpscaler();
 
 export const toggleUpscaler = (value: boolean): void => upscaler.toggle(value);
 export const upscaleOne = (request: ImageRequest): void => upscaler.upscale(request);
