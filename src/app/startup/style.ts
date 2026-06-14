@@ -24,7 +24,7 @@ export function setupStyles(): void {
 }
 
 function insertBaseStyles(): void {
-  const fadeInCss = ThumbConfig.fadeIn ? ANIMATIONS_CSS : "";
+  const fadeInCss = Preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +

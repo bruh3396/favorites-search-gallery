@@ -1,8 +1,11 @@
-import { insertStyle } from "@/utils/dom/injector";
 import { toggleDataset } from "@/utils/dom/attribute";
 
+export function toggleDisplay(element: HTMLElement | null, visible: boolean): void {
+  toggleDataset(element, "hidden", !visible);
+}
+
 export function toggleHeader(value: boolean): void {
-  insertStyle(`#header {display: ${value ? "block" : "none"}}`, "header");
+  toggleDisplay(document.getElementById("header"), value);
 }
 
 export function toggleGalleryMenuEnabled(value: boolean): void {

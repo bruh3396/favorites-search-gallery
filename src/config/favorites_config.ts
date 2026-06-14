@@ -1,4 +1,5 @@
 export const FavoritesConfig = {
+  settingsTooltipHintEnabled: false,
   resultsPerPageBounds: {
     min: 1,
     max: 10_000

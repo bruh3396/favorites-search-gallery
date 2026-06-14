@@ -13,8 +13,8 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   private readonly currentlyTransferred: Set<string> = new Set();
   private readonly previouslyTransferred: Set<string> = new Set();
 
-  constructor(getVisibleIds: () => Set<string>) {
-    super(getVisibleIds);
+  constructor() {
+    super();
     this.worker = createWorker(OFFSCREEN_UPSCALER_CODE);
     this.worker.postMessage({ action: "init", config: GalleryUpscaleConfig });
   }

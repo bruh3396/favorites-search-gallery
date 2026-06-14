@@ -6,6 +6,7 @@ import { TagCategoryMap } from "@/types/search";
 export interface FavoritesViewCallbacks {
   onPageSelected: (pageNumber: number) => void
   onPageStepped: (direction: NavigationKey) => void
+  renderSettingsPanel: (panel: HTMLElement) => void
 }
 
 export interface FavoritesModelCallbacks {

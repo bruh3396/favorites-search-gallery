@@ -37,7 +37,7 @@ function subscribeToEvents(): void {
   DomEvents.document.contextmenu.on(PostOverlayTagClickFlow.onContextMenu);
   DomEvents.document.keydown.on(PostOverlayKeyFlow.onKeyDown);
   DomEvents.document.keyup.on(PostOverlayKeyFlow.onKeyUp);
-  Events.favorites.postOverlayToggled.on(PostOverlayToggleFlow.hideIfDisabled);
+  Events.favorites.postOverlayToggled.on(PostOverlayToggleFlow.onToggled);
   Events.favorites.tagCategoriesResolved.on(PostOverlayModel.warmTagCategoryCache);
   Events.favorites.resetConfirmed.on(PostOverlayModel.destroyTagCategoryStore);
   DomEvents.window.scroll.on(PostOverlayHoverFlow.onThumbsMoved);

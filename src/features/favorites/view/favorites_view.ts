@@ -23,7 +23,7 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
     viewCallbacks.onPageSelected,
     viewCallbacks.onPageStepped
 );
-  FavoritesDrawer.setup();
+  FavoritesDrawer.setup(viewCallbacks.renderSettingsPanel);
 }
 
 export const addToTop = (favorites: Favorite[]): void => ContentTiler.addToTop(favorites.map((favorite) => favorite.root));

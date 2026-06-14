@@ -561,7 +561,7 @@ export default defineConfig([
       "src/**/sorted_array.ts",
       "src/**/array.ts",
       "src/features/favorites/types/favorite_item.ts",
-      "src/**/rating_filter.ts",
+      "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts"
     ],
     rules: {

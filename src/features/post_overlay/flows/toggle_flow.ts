@@ -1,7 +1,9 @@
-import * as PostOverlayView from "@/features/post_overlay/view/post_overlay_view";
+import * as PostOverlayHoverFlow from "@/features/post_overlay/flows/hover_flow";
 
-export function hideIfDisabled(enabled: boolean): void {
-  if (!enabled) {
-    PostOverlayView.hide();
+export function onToggled(enabled: boolean): void {
+  if (enabled) {
+    PostOverlayHoverFlow.showThumbUnderCursor();
+  } else {
+    PostOverlayHoverFlow.hideOverlay();
   }
 }

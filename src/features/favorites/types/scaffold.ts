@@ -36,6 +36,28 @@ export const FavoritesClass = {
   drawerHelpLink: "favorites-drawer-help-link"
 } as const;
 
+export const SettingsClass = {
+  section: "favorites-settings-section",
+  sectionHeader: "favorites-settings-section-header",
+  sectionTitle: "favorites-settings-section-title",
+  groupWrap: "favorites-settings-group-wrap",
+  group: "favorites-settings-group",
+  row: "favorites-settings-row",
+  rowLabel: "favorites-settings-row-label",
+  control: "favorites-settings-control",
+  toggleTrack: "favorites-settings-toggle-track",
+  toggleKnob: "favorites-settings-toggle-knob",
+  segmented: "favorites-settings-segmented",
+  segmentedOption: "favorites-settings-segmented-option",
+  dropdown: "favorites-settings-dropdown",
+  dropdownButton: "favorites-settings-dropdown-button",
+  dropdownMenu: "favorites-settings-dropdown-menu",
+  dropdownOption: "favorites-settings-dropdown-option",
+  stepper: "favorites-settings-stepper",
+  stepperButton: "favorites-settings-stepper-button",
+  stepperValue: "favorites-settings-stepper-value"
+} as const;
+
 export const FavoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; icon: IconName }[] = [
   { tab: "settings", label: "Settings", icon: "settings" },
   { tab: "saved", label: "Saved", icon: "bookmark" },

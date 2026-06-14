@@ -74,9 +74,9 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
   preference.set(clamp(preference.value + delta, bounds.min, bounds.max));
 
   if (usingRowLayout) {
-    setRowHeight(preference.value);
+    Events.app.rowHeightChanged.emit(preference.value);
   } else {
-    setColumnCount(preference.value);
+    Events.app.columnCountChanged.emit(preference.value);
   }
 }
 

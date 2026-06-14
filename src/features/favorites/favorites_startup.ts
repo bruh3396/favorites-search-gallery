@@ -6,7 +6,6 @@ import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesMouseFlow from "@/features/favorites/flows/mouse_flow";
 import * as FavoritesOptionsFlow from "@/features/favorites/flows/option_flow";
 import * as FavoritesPaginationFlow from "@/features/favorites/flows/paginated_results_flow";
-import * as FavoritesRatingFilter from "@/features/favorites/control/rating_filter";
 import * as FavoritesResetFlow from "@/features/favorites/flows/reset_flow";
 import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
 import * as FavoritesSearchBox from "@/features/favorites/control/favorites_search_box";
@@ -61,13 +60,13 @@ function setupModel(): void {
 function setupView(): void {
   FavoritesView.setup({
     onPageSelected: FavoritesPaginationFlow.goToPage,
-    onPageStepped: FavoritesPaginationFlow.stepPage
+    onPageStepped: FavoritesPaginationFlow.stepPage,
+    renderSettingsPanel: FavoritesDesktop.buildSettingsPanel
   });
 }
 
 function setupControl(): void {
   FavoritesFinder.setup();
-  FavoritesRatingFilter.setup();
   FavoritesSearchBox.setup();
 
   if (ON_DESKTOP_DEVICE) {

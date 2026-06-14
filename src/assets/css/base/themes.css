@@ -120,3 +120,29 @@ body {
   --theme-accent-text: #0a1320;
   --theme-link: #7dd3fc;
 }
+
+[data-theme="cherry-blossom"] {
+  --theme-surface: #fff1f5;
+  --theme-surface-sunken: #ffe4ec;
+  --theme-surface-raised: #ffe0ea;
+  --theme-surface-hover: #ffd0de;
+  --theme-border: #f6b8cc;
+  --theme-text: #4a2330;
+  --theme-text-muted: #a06b7d;
+  --theme-accent: #f06292;
+  --theme-accent-text: #ffffff;
+  --theme-link: #c2185b;
+}
+
+[data-theme="forest"] {
+  --theme-surface: #14241a;
+  --theme-surface-sunken: #0e1a12;
+  --theme-surface-raised: #1c3024;
+  --theme-surface-hover: #264030;
+  --theme-border: #355040;
+  --theme-text: #e4f0e6;
+  --theme-text-muted: #9bb6a3;
+  --theme-accent: #6dbf73;
+  --theme-accent-text: #0e1a12;
+  --theme-link: #a7e0ac;
+}

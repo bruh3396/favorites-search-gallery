@@ -2,11 +2,35 @@
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-border) transparent;
+}
+
+#favorites-drawer-panels::-webkit-scrollbar {
+  width: 8px;
+}
+
+#favorites-drawer-panels::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#favorites-drawer-panels::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background-color: var(--theme-border);
+}
+
+#favorites-drawer-panels::-webkit-scrollbar-thumb:hover {
+  background-color: var(--theme-text-muted);
 }
 
 .favorites-drawer-panel {
-  padding: 12px;
+  padding: 12px 0px 0px 6px;
 }
 
 .favorites-drawer-panel[data-hidden] {

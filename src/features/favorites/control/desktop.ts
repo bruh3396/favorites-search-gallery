@@ -1,23 +1,26 @@
-import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/types/element";
-import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
-import { Layout, PerformanceProfile, Theme } from "@/types/app";
-import { applySurfaceGradient, applyTheme } from "@/lib/ui/theme";
-import { buildCheckboxElement, buildCheckboxOption } from "@/app/dom/checkbox";
-import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
+import { FavoritesId, SettingsClass } from "@/features/favorites/types/scaffold";
+import { Settings, SettingsControl } from "@/features/favorites/control/settings";
+import { ButtonElement } from "@/types/element";
 import { Events } from "@/app/channels/events";
-import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { GeneralConfig } from "@/config/general_config";
-import { MetadataMetric } from "@/types/search";
 import { Preferences } from "@/app/context/preferences";
-import { ThumbConfig } from "@/config/thumb_config";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { buildButtonElement } from "@/lib/ui/elements/button";
-import { buildSelectElement } from "@/lib/ui/elements/select";
-import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
+import { icon } from "@/lib/ui/icon";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
-import { reloadWindow } from "@/utils/browser/window";
-import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/toggles";
+
+interface SettingsSection {
+  title: string;
+  controls: SettingsControl[];
+}
+
+export function setup(): void {
+  prepareDynamicElements(buttons).forEach(buildButtonElement);
+}
+
+export function buildSettingsPanel(panel: HTMLElement): void {
+  for (const section of sections) {
+    panel.appendChild(buildSection(section));
+  }
+}
 
 const buttons: Partial<ButtonElement>[] = [
   {
@@ -31,7 +34,6 @@ const buttons: Partial<ButtonElement>[] = [
   {
     id: "shuffle-button",
     parentId: FavoritesId.buttonsSlot,
-    // icon: "shuffle",
     textContent: "SHUFFLE",
     title: "Shuffle results",
     event: Events.favorites.shuffleButtonClicked
@@ -39,7 +41,6 @@ const buttons: Partial<ButtonElement>[] = [
   {
     id: "invert-button",
     parentId: FavoritesId.buttonsSlot,
-    // icon: "invert",
     textContent: "INVERT",
     title: "Invert results",
     event: Events.favorites.invertButtonClicked
@@ -81,248 +82,104 @@ const buttons: Partial<ButtonElement>[] = [
     textContent: "RESET",
     event: Events.favorites.resetButtonClicked
   }
-
 ];
 
-const checkboxes: Partial<CheckboxElement>[] = [
+const sections: SettingsSection[] = [
   {
-    id: "enhance-post-lists",
-    parentId: "favorite-options-left",
-    textContent: "Enhance Search Pages",
-    title: "Enable gallery and other features on search pages",
-    preference: Preferences.postList.enabled,
-    hotkey: "",
-    savePreference: true
+    title: "General",
+    controls: [
+      Settings.performanceProfile,
+      Settings.enhanceSearchPages,
+      Settings.postOverlay,
+      Settings.tooltip
+
+    ]
   },
   {
-    id: "infinite-scroll",
-    parentId: "favorite-options-left",
-    textContent: "Infinite Scroll",
-    title: "Use infinite scroll (waterfall) instead of pages",
-    preference: Preferences.favorites.infiniteScroll,
-    hotkey: "",
-    event: Events.favorites.infiniteScrollToggled
+    title: "Appearance",
+    controls: [
+      Settings.layout,
+      Settings.theme,
+      Settings.gradient,
+      // Settings.fadeThumbs,
+      Settings.header,
+      Settings.infiniteScroll,
+      Settings.columnCount,
+      Settings.rowHeight,
+      Settings.resultsPerPage
+    ]
   },
   {
-    id: "exclude-blacklist",
-    parentId: "favorite-options-left",
-    textContent: "Exclude Blacklist",
-    title: "Exclude favorites with blacklisted tags from search",
-    enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.favorites.excludeBlacklist,
-    hotkey: "",
-    event: Events.favorites.blacklistToggled
+    title: "Search",
+    controls: [
+      Settings.sortKey,
+      Settings.sortAscending,
+      Settings.excludeBlacklist,
+      Settings.ratings
+    ]
   },
   {
-    id: "show-hints",
-    parentId: "favorite-options-left",
-    textContent: "Hotkey Hints",
-    title: "Show hotkeys",
-    preference: Preferences.favorites.hintsEnabled,
-    hotkey: "H",
-    triggerOnCreation: true,
-    function: toggleOptionHotkeyHints
-  },
-  {
-    id: "enable-autoplay",
-    parentId: "favorite-options-right",
-    textContent: "Autoplay",
-    title: "Enable autoplay in gallery",
-    enabled: GALLERY_ENABLED,
-    preference: Preferences.gallery.autoplayActive,
-    hotkey: "",
-    event: Events.app.autoplayToggled
-  },
-  {
-    id: "show-on-hover",
-    parentId: "favorite-options-right",
-    textContent: "Fullscreen on Hover",
-    title: "View full resolution images or play videos and GIFs when hovering over a thumbnail",
-    enabled: GALLERY_ENABLED,
-    preference: Preferences.gallery.previewEnabled,
-    hotkey: "",
-    event: Events.favorites.galleryPreviewToggled
-  },
-  {
-    id: "show-tooltips",
-    parentId: "favorite-options-right",
-    textContent: "Tooltip",
-    title: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
-    enabled: TOOLTIP_ENABLED,
-    preference: Preferences.favorites.tooltipEnabled,
-    hotkey: "T",
-    event: Events.app.tooltipToggled
-  },
-  {
-    id: "show-post-overlay",
-    parentId: "favorite-options-right",
-    textContent: "Overlay",
-    title: "Categorize important tags when hovering over a thumbnail and click on them to add to search",
-    enabled: POST_OVERLAY_ENABLED,
-    preference: Preferences.postOverlay.enabled,
-    hotkey: "",
-    event: Events.favorites.postOverlayToggled
-  },
-  {
-    id: "toggle-header",
-    parentId: "favorite-options-right",
-    textContent: "Header",
-    title: "Toggle site header",
-    preference: Preferences.favorites.headerEnabled,
-    hotkey: "",
-    triggerOnCreation: true,
-    function: toggleHeader
-  },
-  {
-    id: "toggle-surface-gradient",
-    parentId: "favorite-options-right",
-    textContent: "Gradient",
-    title: "Use a gradient background on the toolbar and drawer tabs",
-    preference: Preferences.app.surfaceGradient,
-    hotkey: "",
-    triggerOnCreation: true,
-    function: applySurfaceGradient
-  },
-  {
-    id: "show-saved-search-suggestions",
-    parentId: "favorite-options-right",
-    textContent: "Saved Suggestions",
-    title: "Show saved search suggestions in autocomplete dropdown",
-    enabled: false,
-    preference: Preferences.savedSearches.suggestions,
-    hotkey: "",
-    savePreference: true
-  },
-  {
-    id: "enable-gallery-menu",
-    parentId: "favorite-options-right",
-    textContent: "Gallery Menu",
-    title: "Show menu in gallery",
-    enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
-    function: toggleGalleryMenuEnabled,
-    preference: Preferences.gallery.menuEnabled,
-    event: Events.app.galleryMenuToggled
+    title: "Gallery",
+    controls: [
+      Settings.autoplay,
+      Settings.fullscreenOnHover,
+      Settings.galleryMenu
+    ]
   }
 ];
 
-const simpleCheckboxes: Partial<CheckboxElement>[] = [
-  {
-    id: "sort-ascending",
-    parentId: "sort-inputs",
-    position: "beforeend",
-    preference: Preferences.favorites.sortAscending,
-    event: Events.favorites.sortAscendingToggled
+function buildSection(section: SettingsSection): HTMLElement {
+  const collapsed = Preferences.favorites.settingsCollapsedSections.value[section.title] === true;
+
+  const element = document.createElement("section");
+
+  element.className = SettingsClass.section;
+
+  if (collapsed) {
+    element.dataset.collapsed = "";
   }
-];
 
-const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataMetric>> | Partial<SelectElement<PerformanceProfile>> | Partial<SelectElement<Theme>>)[] = [
-  {
-    id: "theme",
-    parentId: "favorite-options-right",
-    title: "Change theme",
-    preference: Preferences.app.theme,
-    function: applyTheme,
-    options: new Map<Theme, string>([
-      ["native-light", "Light"],
-      ["native-dark", "Dark"],
-      ["midnight", "Midnight"]
-    ])
-  },
-  {
-    id: "sort-key",
-    parentId: "sort-inputs",
-    title: "Change sort order of search results",
-    position: "beforeend",
-    preference: Preferences.favorites.sortKey,
-    event: Events.favorites.sortKeyChanged,
-    options: new Map<MetadataMetric, string>([
-      ["default", "Default"],
-      ["score", "Score"],
-      ["width", "Width"],
-      ["height", "Height"],
-      ["id", "Date Uploaded"],
-      ["lastChangedTimestamp", "Date Changed"],
-      ["duration", "Duration"],
-      ["random", "Random"]
-    ])
-  },
-  {
-    id: "layout-select",
-    parentId: "layout-container",
-    title: "Change layout",
-    position: "beforeend",
-    preference: Preferences.favorites.layout,
-    event: Events.favorites.layoutChanged,
-    function: hideUnusedLayoutSizer,
-    triggerOnCreation: true,
-    options: new Map<Layout, string>([
-      ["column", "Waterfall"],
-      ["row", "River"],
-      ["square", "Square"],
-      ["grid", "Legacy"],
-      ["native", "Native"]
-    ])
-  },
-  {
-    id: "performance-profile",
-    parentId: "performance-profile-container",
-    title: "Improve performance by disabling features",
-    position: "beforeend",
-    preference: Preferences.app.performanceProfile,
-    event: Events.app.performanceProfileChanged,
-    function: reloadWindow,
-    options: new Map<PerformanceProfile, string>([
-      ["normal", "Normal"],
-      ["medium", "Medium (no upscaling)"],
-      ["low", "Low (no gallery)"],
-      ["potato", "Potato (only search)"]
-    ])
+  const header = document.createElement("button");
+
+  header.type = "button";
+  header.className = SettingsClass.sectionHeader;
+
+  const title = document.createElement("span");
+
+  title.className = SettingsClass.sectionTitle;
+  title.textContent = section.title;
+  header.append(title, icon("chevronDown"));
+
+  const wrap = document.createElement("div");
+
+  wrap.className = SettingsClass.groupWrap;
+
+  const body = document.createElement("div");
+
+  body.className = SettingsClass.group;
+
+  for (const control of section.controls) {
+    body.appendChild(control());
   }
-];
+  wrap.appendChild(body);
 
-const numbers: Partial<NumberElement>[] = [
-  {
-    id: "column-count",
-    parentId: "column-count-container",
-    position: "beforeend",
-    preference: Preferences.favorites.columnCount,
-    min: ThumbConfig.columnCountBounds.min,
-    max: ThumbConfig.columnCountBounds.max,
-    step: 1,
-    pollingTime: 50,
-    event: Events.app.columnCountChanged
-  },
+  header.addEventListener("click", () => {
+    toggleSection(section.title, element);
+  });
 
-  {
-    id: "row-size",
-    parentId: "row-size-container",
-    position: "beforeend",
-    preference: Preferences.favorites.rowHeight,
-    min: ThumbConfig.rowHeightBounds.min,
-    max: ThumbConfig.rowHeightBounds.max,
-    step: 1,
-    pollingTime: 50,
-    event: Events.app.rowHeightChanged
-  },
+  element.append(header, wrap);
+  return element;
+}
 
-  {
-    id: "results-per-page",
-    parentId: "results-per-page-container",
-    position: "beforeend",
-    preference: Preferences.favorites.resultsPerPage,
-    min: FavoritesConfig.resultsPerPageBounds.min,
-    max: FavoritesConfig.resultsPerPageBounds.max,
-    step: FavoritesConfig.resultsPerPageStep,
-    pollingTime: 50,
-    event: Events.favorites.resultsPerPageChanged
+function toggleSection(title: string, element: HTMLElement): void {
+  const collapsed = element.dataset.collapsed === undefined;
+
+  if (collapsed) {
+    element.dataset.collapsed = "";
+  } else {
+    delete element.dataset.collapsed;
   }
-];
+  const state = { ...Preferences.favorites.settingsCollapsedSections.value, [title]: collapsed };
 
-export function setup(): void {
-  prepareDynamicElements(buttons).forEach(buildButtonElement);
-  prepareDynamicElements(checkboxes).forEach(buildCheckboxOption);
-  prepareDynamicElements(simpleCheckboxes).forEach(buildCheckboxElement);
-  // @ts-expect-error don't care
-  prepareDynamicElements(selects).forEach(buildSelectElement);
-  // prepareDynamicElements(numbers).forEach(buildNumberComponent);
+  Preferences.favorites.settingsCollapsedSections.set(state);
 }

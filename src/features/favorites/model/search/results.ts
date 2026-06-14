@@ -1,4 +1,3 @@
-import * as FavoritesFilter from "@/features/favorites/model/search/filter";
 import { Favorite } from "@/types/favorite";
 import { shuffleArray } from "@/utils/collection/array";
 
@@ -9,8 +8,7 @@ export const set = (results: Favorite[]): Favorite[] => (currentSearchResults = 
 
 export function invert(allFavorites: Favorite[]): Favorite[] {
   const ids = new Set(currentSearchResults.map(favorite => favorite.id));
-  const inverted = allFavorites.filter(favorite => !ids.has(favorite.id));
-  return (currentSearchResults = FavoritesFilter.apply(inverted));
+  return allFavorites.filter(favorite => !ids.has(favorite.id));
 }
 
 export function shuffle(): Favorite[] {

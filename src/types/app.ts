@@ -2,7 +2,7 @@ export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postLis
 export type FeatureNamespaced = Partial<Record<Feature, object>>;
 
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
-export type Theme = "native-dark" | "native-light" | "midnight" | "ember" | "venom" | "zeal" | "frozen-cobalt";
+export type Theme = "native-dark" | "native-light" | "midnight" | "ember" | "venom" | "zeal" | "frozen-cobalt" | "cherry-blossom" | "forest";
 export type Layout = "row" | "square" | "grid" | "column" | "native";
 export type HighlightStyle = "glow" | "trace" | "border" | "hidden" | "none";
 

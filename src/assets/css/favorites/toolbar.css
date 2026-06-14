@@ -109,10 +109,10 @@
 }
 
 
-#favorites-toolbar #reset-button:hover {
+/* #favorites-toolbar #reset-button:hover {
   color: var(--color-danger);
   border-color: var(--color-danger);
-}
+} */
 
 #favorites-search-status {
   display: flex;

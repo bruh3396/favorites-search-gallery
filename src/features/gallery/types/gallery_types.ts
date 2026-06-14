@@ -16,7 +16,6 @@ export interface GalleryViewCallbacks {
   onMenuAction: (action: GalleryMenuAction) => void
   onVideoEnded: () => void
   onVideoDoubleClicked: (event: MouseEvent) => void
-  getVisibleThumbIds: () => Set<string>
 }
 
 export type GalleryMenuButton = {

@@ -28,6 +28,7 @@ export const Preferences = {
     deletingAllowed: new Preference("favoritesDeletingAllowed", false),
     resultsPerPage: new Preference("favoritesResultsPerPage", 200),
     rowHeight: new Preference("favoritesRowHeight", 7),
+    settingsCollapsedSections: new Preference<Record<string, boolean>>("favoritesSettingsCollapsedSections", {}),
     sortAscending: new Preference("favoritesSortAscending", false),
     sortKey: new Preference<SortKey>("favoritesSortKey", "default"),
     tooltipEnabled: new Preference("favoritesTooltipEnabled", false)
@@ -57,8 +58,8 @@ export const Preferences = {
     tutorial: new Preference("savedSearchesTutorial", false)
   },
   postList: {
-    columnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
     enabled: new Preference("postListEnabled", false),
+    columnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
     favoriteIndicator: new Preference("postListFavoriteIndicator", false),
     favoriteIndicatorStyle: new Preference<HighlightStyle>("postListFavoriteIndicatorStyle", "border"),
     galleryFavoriteStyle: new Preference<HighlightStyle>("postListGalleryFavoriteStyle", "border"),

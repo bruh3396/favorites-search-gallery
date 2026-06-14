@@ -11,11 +11,13 @@ import { div } from "@/utils/dom/element";
 import { macroTask } from "@/lib/async/async";
 
 let activeTab: FavoritesDrawerTab = Preferences.favorites.drawerActiveTab.value;
+let renderSettings: (panel: HTMLElement) => void = (): void => undefined;
 
-export async function setup(): Promise<void> {
+export async function setup(renderSettingsPanel: (panel: HTMLElement) => void): Promise<void> {
   if (!ON_DESKTOP_DEVICE) {
     return;
   }
+  renderSettings = renderSettingsPanel;
   const drawer = div(FavoritesId.drawer);
 
   drawer.classList.add("u-no-select");
@@ -149,11 +151,26 @@ function buildPanels(): HTMLElement {
     renderPanelContent(tab, panel);
     panels.appendChild(panel);
   }
+  containScroll(panels);
   return panels;
+}
+
+function containScroll(panels: HTMLElement): void {
+  panels.addEventListener("wheel", (event) => {
+    const atTop = panels.scrollTop <= 0 && event.deltaY < 0;
+    const atBottom = panels.scrollTop + panels.clientHeight >= panels.scrollHeight && event.deltaY > 0;
+
+    if (atTop || atBottom) {
+      event.preventDefault();
+    }
+  }, { passive: false });
 }
 
 function renderPanelContent(tab: FavoritesDrawerTab, panel: HTMLElement): void {
   switch (tab) {
+    case "settings":
+      renderSettings(panel);
+      break;
     case "change":
       FavoritesChangelog.buildChangelogPanel(panel);
       break;

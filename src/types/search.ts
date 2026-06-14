@@ -22,20 +22,6 @@ export enum DiscreteRating {
   Safe = 1
 }
 
-export function decodeRating(rating: string): Rating {
-  return {
-    "Explicit": DiscreteRating.Explicit,
-    "E": DiscreteRating.Explicit,
-    "e": DiscreteRating.Explicit,
-    "Questionable": DiscreteRating.Questionable,
-    "Q": DiscreteRating.Questionable,
-    "q": DiscreteRating.Questionable,
-    "Safe": DiscreteRating.Safe,
-    "S": DiscreteRating.Safe,
-    "s": DiscreteRating.Safe
-  }[rating] ?? DiscreteRating.Explicit;
-}
-
 export interface Searchable {
   tags: Set<string>
 }

@@ -16,7 +16,7 @@ export function fadeInReplacement(thumbs: HTMLElement[], insert: () => void): vo
 }
 
 export function fadeIn(thumbs: HTMLElement[], insert: () => void): void {
-  if (ThumbConfig.fadeIn) {
+  if (Preferences.app.fadeThumbs.value) {
     thumbs.forEach(thumb => setDataset(thumb, "fading"));
     insert();
     thumbs.forEach(thumb => fadeObserver.observe(thumb));

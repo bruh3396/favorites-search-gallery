@@ -12,7 +12,6 @@ export function setup(callbacks: GalleryViewCallbacks): void {
   GalleryShell.mountGallery();
   GalleryUi.setup(GalleryShell.GalleryRoot);
   GalleryRenderer.setup(GalleryShell.GalleryRoot, callbacks.onVideoEnded, callbacks.onVideoDoubleClicked);
-  GalleryRenderer.setupUpscaler(callbacks.getVisibleThumbIds);
 
   if (ON_DESKTOP_DEVICE) {
     GalleryDesktopMenu.setup(callbacks.onMenuAction);

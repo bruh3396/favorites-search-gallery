@@ -7,12 +7,9 @@ import { galleryIdle } from "@/app/channels/feature_bridge";
 import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
 export function onMouseover(event: EnhancedMouseEvent): void {
-  if (!Preferences.postOverlay.enabled.value || !galleryIdle()) {
-    return;
-  }
   PostOverlayModel.recordCursorPosition(event);
 
-  if (PostOverlayModel.isResizing()) {
+  if (!Preferences.postOverlay.enabled.value || !galleryIdle() || PostOverlayModel.isResizing()) {
     return;
   }
 

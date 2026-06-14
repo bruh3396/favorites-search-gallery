@@ -6,6 +6,7 @@ import DRAWER_PANELS_CSS from "@/assets/css/favorites/drawer_panels.css";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import PAGINATION_CSS from "@/assets/css/favorites/pagination.css";
 import SEARCH_FIELD_CSS from "@/assets/css/favorites/search_field.css";
+import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
 import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
 import { div } from "@/utils/dom/element";
 import { insertStyle } from "@/utils/dom/injector";
@@ -17,7 +18,7 @@ const ContentColumn = div(FavoritesId.contentColumn);
 
 export function setup(): void {
   buildScaffold();
-  insertStyle(DESKTOP_CSS + TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS, "favorites-ui");
+  insertStyle(DESKTOP_CSS + TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS + SETTINGS_PANEL_CSS, "favorites-ui");
   Body.insertAdjacentElement("afterbegin", FavoritesToolbar.build());
 }
 
