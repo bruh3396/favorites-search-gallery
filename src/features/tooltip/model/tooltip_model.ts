@@ -10,12 +10,12 @@ export function rebuildHighlights(query: string): void {
 }
 
 export function getColorForTag(tag: string): string | null {
-  if (Preferences.appTheme.value === "native-light") {
+  if (Preferences.app.theme.value === "native-light") {
     return TooltipTagMatcher.findMatchingDarkColor(tag, currentHighlights);
   }
   return TooltipTagMatcher.findMatchingLightColor(tag, currentHighlights);
 }
 
 export function tooltipEnabled(): boolean {
-  return ON_FAVORITES_PAGE ? Preferences.favoritesTooltipEnabled.value : Preferences.postListTooltipEnabled.value;
+  return ON_FAVORITES_PAGE ? Preferences.favorites.tooltipEnabled.value : Preferences.postList.tooltipEnabled.value;
 }

@@ -3,6 +3,7 @@ import * as FavoritesFinder from "@/features/favorites/control/finder";
 import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
+import * as FavoritesMouseFlow from "@/features/favorites/flows/mouse_flow";
 import * as FavoritesOptionsFlow from "@/features/favorites/flows/option_flow";
 import * as FavoritesPaginationFlow from "@/features/favorites/flows/paginated_results_flow";
 import * as FavoritesRatingFilter from "@/features/favorites/control/rating_filter";
@@ -112,6 +113,12 @@ function subscribeToEvents(): void {
   Events.app.favoriteRemoved.on(FavoritesModel.deleteId);
   Events.gallery.previewOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);
+
+  if (ON_DESKTOP_DEVICE) {
+    DomEvents.document.mouseover.on(FavoritesMouseFlow.onMouseOver);
+    DomEvents.document.click.on(FavoritesMouseFlow.onClick);
+    DomEvents.document.mousedown.on(FavoritesMouseFlow.onMouseDown);
+  }
 }
 
 function servePostListRequests(): void {
@@ -125,5 +132,5 @@ function serveExternalRequests(): void {
   setFavoriteTagsLookup(id => FavoritesModel.getFavorite(id)?.tags);
   FeatureBridge.allFavorites.register(FavoritesModel.getAllFavorites);
   FeatureBridge.currentSearchQuery.register(FavoritesModel.getCurrentSearchQuery);
-  FeatureBridge.usingInfiniteScroll.register(() => Preferences.favoritesInfiniteScroll.value);
+  FeatureBridge.usingInfiniteScroll.register(() => Preferences.favorites.infiniteScroll.value);
 }

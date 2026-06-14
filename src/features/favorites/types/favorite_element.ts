@@ -1,7 +1,3 @@
-import * as Navigator from "@/lib/remote/rule34/posts/navigation";
-import { ClickCode } from "@/types/input";
-import { GALLERY_DISABLED } from "@/app/context/flags";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Post } from "@/types/api";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
 import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
@@ -12,16 +8,13 @@ export class FavoriteElement {
   public readonly root: HTMLElement;
   private readonly container: HTMLAnchorElement;
   private readonly image: HTMLImageElement;
-  private readonly canvas: HTMLCanvasElement | null;
 
   constructor(post: Post) {
     this.root = favoriteElementTemplate.cloneNode(true) as HTMLElement;
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.container.children[0] as HTMLImageElement;
-    this.canvas = (this.container.children[1] as HTMLCanvasElement | undefined) ?? null;
     this.populateAttributes(post);
-    this.presetCanvasDimensions(post);
-    this.setupNavigationClick();
+    this.container.href = buildPostPageUrl(this.root.id);
   }
 
   public get thumbUrl(): string {
@@ -34,53 +27,10 @@ export class FavoriteElement {
     }
   }
 
-  private setupNavigationClick(): void {
-    const url = buildPostPageUrl(this.root.id);
-
-    this.container.href = url;
-    this.container.addEventListener("mouseenter", (): void => {
-      this.container.removeAttribute("href");
-    });
-    this.container.addEventListener("mouseleave", (): void => {
-      this.container.href = url;
-    });
-
-    if (ON_DESKTOP_DEVICE) {
-      this.container.onclick = (event: MouseEvent): void => this.handleClick(event);
-      this.container.addEventListener("mousedown", (event): void => this.handleMouseDown(event));
-    }
-  }
-
   private populateAttributes(post: Post): void {
     this.image.src = post.previewURL;
     setDataset(this.root, "mediaType", resolveMediaType(post.tags));
     this.root.id = post.id;
     this.setAspectRatio(post.width, post.height);
-  }
-
-  private handleClick(event: MouseEvent): void {
-    if (event.ctrlKey) {
-      Navigator.openMedia(this.root);
-    }
-    event.preventDefault();
-  }
-
-  private handleMouseDown(event: MouseEvent): void {
-    if (event.ctrlKey) {
-      return;
-    }
-    const shouldOpen = event.button === ClickCode.Middle ||
-      (event.button === ClickCode.Left && (event.shiftKey || GALLERY_DISABLED));
-
-    if (shouldOpen) {
-      Navigator.openPost(this.root.id);
-    }
-    event.preventDefault();
-  }
-
-  private presetCanvasDimensions(post: Post): void {
-    if (this.canvas !== null && post.height > 0 && post.width > 0) {
-      this.canvas.dataset.size = `${post.width}x${post.height}`;
-    }
   }
 }

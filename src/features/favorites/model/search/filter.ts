@@ -15,9 +15,9 @@ function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {
 }
 
 function filterByRating(favorites: Favorite[]): Favorite[] {
-  return areAllRatingsAllowed() ? favorites : favorites.filter(result => result.withinRating(Preferences.favoritesAllowedRatings.value));
+  return areAllRatingsAllowed() ? favorites : favorites.filter(result => result.withinRating(Preferences.favorites.allowedRatings.value));
 }
 
 function areAllRatingsAllowed(): boolean {
-  return Preferences.favoritesAllowedRatings.value === ALL_RATINGS_VALUE;
+  return Preferences.favorites.allowedRatings.value === ALL_RATINGS_VALUE;
 }

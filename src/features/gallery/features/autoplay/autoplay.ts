@@ -30,8 +30,8 @@ const menuIcons = {
 };
 
 const config = {
-  imageViewDuration: Preferences.galleryAutoplayImageDuration.value,
-  minimumVideoDuration: Preferences.galleryAutoplayMinimumVideoDuration.value,
+  imageViewDuration: Preferences.gallery.autoplayImageDuration.value,
+  minimumVideoDuration: Preferences.gallery.autoplayMinimumVideoDuration.value,
   menuVisibilityDuration: ON_MOBILE_DEVICE ? 1_500 : 1_000,
 
   get imageViewDurationInSeconds(): number {
@@ -78,14 +78,14 @@ export function isActive(): boolean {
 function initializeFields(): void {
   eventListenersAbortController = new AbortController();
   currentThumb = null;
-  active = Preferences.galleryAutoplayActive.value;
-  paused = Preferences.galleryAutoplayPaused.value;
+  active = Preferences.gallery.autoplayActive.value;
+  paused = Preferences.gallery.autoplayPaused.value;
   menuIsPersistent = false;
   menuIsVisible = false;
 }
 
 function getDirection(): NavigationKey {
-  return Preferences.galleryAutoplayForward.value ? "ArrowRight" : "ArrowLeft";
+  return Preferences.gallery.autoplayForward.value ? "ArrowRight" : "ArrowLeft";
 }
 
 function initializeEvents(inEvents: AutoplayEvents): void {
@@ -204,7 +204,7 @@ function createDurationSelect(minimum: number, maximum: number): HTMLSelectEleme
 function setMenuIconImageSources(): void {
   ui.playButton.src = paused ? menuIcons.play : menuIcons.pause;
   ui.settingsButton.src = menuIcons.tune;
-  ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.galleryAutoplayForward.value);
+  ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.gallery.autoplayForward.value);
 }
 
 function loadAutoplaySettingsIntoUi(): void {
@@ -282,8 +282,8 @@ function addSettingsMenuEventListeners(): void {
 }
 
 function toggleDirection(): void {
-  Preferences.galleryAutoplayForward.set(!Preferences.galleryAutoplayForward.value);
-  ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.galleryAutoplayForward.value);
+  Preferences.gallery.autoplayForward.set(!Preferences.gallery.autoplayForward.value);
+  ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.gallery.autoplayForward.value);
 }
 
 function toggleMenuPersistence(value: boolean): void {
@@ -307,7 +307,7 @@ function toggleSettingMenu(value?: boolean | undefined): void {
 }
 
 export function toggle(value: boolean): void {
-  Preferences.galleryAutoplayActive.set(value);
+  Preferences.gallery.autoplayActive.set(value);
   active = value;
 
   events.setVideoLooping(!value);
@@ -321,7 +321,7 @@ function setImageViewDuration(): void {
   }
   const duration = Math.round(clamp(durationInSeconds * 1_000, 1_000, 6_0000));
 
-  Preferences.galleryAutoplayImageDuration.set(duration);
+  Preferences.gallery.autoplayImageDuration.set(duration);
   config.imageViewDuration = duration;
   imageViewTimer.waitTime = duration;
   ui.settingsMenu.imageDurationInput.value = String(config.imageViewDurationInSeconds);
@@ -336,7 +336,7 @@ function setMinimumVideoViewDuration(): void {
   }
   const duration = Math.round(clamp(durationInSeconds * 1_000, 0, 60_000));
 
-  Preferences.galleryAutoplayMinimumVideoDuration.set(duration);
+  Preferences.gallery.autoplayMinimumVideoDuration.set(duration);
   config.minimumVideoDuration = duration;
   videoViewTimer.waitTime = duration;
   ui.settingsMenu.minimumVideoDurationInput.value = String(config.minimumVideoDurationInSeconds);
@@ -403,7 +403,7 @@ export function stopAutoplay(): void {
 
 function pause(): void {
   paused = !paused;
-  Preferences.galleryAutoplayPaused.set(paused);
+  Preferences.gallery.autoplayPaused.set(paused);
 
   if (paused) {
     ui.playButton.src = menuIcons.play;

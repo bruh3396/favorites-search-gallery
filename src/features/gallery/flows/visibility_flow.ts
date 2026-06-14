@@ -4,6 +4,23 @@ import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { GalleryConfig } from "@/config/gallery_config";
 
+export function onVisibleThumbsChanged(): void {
+  GalleryDispatch.run({
+    idle: () => withVisibleThumbs(cacheOrUpscale),
+    preview: () => withVisibleThumbs(GalleryView.cacheImages)
+  });
+}
+
+export function upscaleVisibleThumbsAround(thumb: HTMLElement): void {
+  GalleryThumbObserver.setCenterThumb(thumb);
+  withVisibleThumbs(cacheOrUpscale);
+}
+
+export function cacheVisibleThumbsAround(thumb: HTMLElement): void {
+  GalleryThumbObserver.setCenterThumb(thumb);
+  withVisibleThumbs(GalleryView.cacheImages);
+}
+
 function cacheOrUpscale(thumbs: HTMLElement[]): void {
   if (GalleryConfig.cacheImagesOnIdle) {
     GalleryView.cacheImages(thumbs);
@@ -21,21 +38,4 @@ function withVisibleThumbs(use: (thumbs: HTMLElement[]) => void): void {
   if (thumbs.length > 0 && thumbs.length < GalleryConfig.maxVisibleThumbsBeforeStoppingPreload) {
     Promise.resolve().then(() => use(thumbs));
   }
-}
-
-export function onVisibleThumbsChanged(): void {
-  GalleryDispatch.run({
-    idle: () => withVisibleThumbs(cacheOrUpscale),
-    preview: () => withVisibleThumbs(GalleryView.cacheImages)
-  });
-}
-
-export function upscaleVisibleThumbsAround(thumb: HTMLElement): void {
-  GalleryThumbObserver.setCenterThumb(thumb);
-  withVisibleThumbs(cacheOrUpscale);
-}
-
-export function cacheVisibleThumbsAround(thumb: HTMLElement): void {
-  GalleryThumbObserver.setCenterThumb(thumb);
-  withVisibleThumbs(GalleryView.cacheImages);
 }

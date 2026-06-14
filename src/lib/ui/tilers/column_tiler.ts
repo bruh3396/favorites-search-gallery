@@ -1,6 +1,6 @@
 import { getItemsInContainer, getThumbsInMatrix } from "@/lib/thumb/thumbs";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
-import { Layout } from "@/types/ui";
+import { Layout } from "@/types/app";
 
 export class ColumnTiler extends AbstractTiler {
   public layout: Layout = "column";

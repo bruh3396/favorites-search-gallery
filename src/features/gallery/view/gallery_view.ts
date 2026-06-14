@@ -12,6 +12,7 @@ export function setup(callbacks: GalleryViewCallbacks): void {
   GalleryShell.mountGallery();
   GalleryUi.setup(GalleryShell.GalleryRoot);
   GalleryRenderer.setup(GalleryShell.GalleryRoot, callbacks.onVideoEnded, callbacks.onVideoDoubleClicked);
+  GalleryRenderer.setupUpscaler(callbacks.getVisibleThumbIds);
 
   if (ON_DESKTOP_DEVICE) {
     GalleryDesktopMenu.setup(callbacks.onMenuAction);
@@ -20,10 +21,12 @@ export function setup(callbacks: GalleryViewCallbacks): void {
 
 export function open(thumb: HTMLElement): void {
   GalleryShell.GalleryRoot.toggleAttribute("data-visible", true);
+  GalleryRenderer.toggleUpscaler(true);
   GalleryUi.open(thumb);
 }
 
 export function close(): void {
+  GalleryRenderer.toggleUpscaler(false);
   GalleryShell.GalleryRoot.toggleAttribute("data-visible", false);
   GalleryRenderer.hide();
   GalleryUi.close();
@@ -55,6 +58,6 @@ export function toggleZoomCursor(value: boolean): void {
 
 export * from "@/features/gallery/view/rendering/gallery_renderer";
 export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "@/features/gallery/view/shell/desktop_menu";
-export { showAddedFavoriteStatus, showRemovedFavoriteStatus, toggleBackgroundOpacity, updateBackgroundOpacity, toggleCursor} from "@/features/gallery/view/shell/ui";
+export * from "@/features/gallery/view/shell/ui";
 export const showCursor = (): void => GalleryUi.toggleCursor(true);
 export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryShell.GalleryRoot.appendChild(element);

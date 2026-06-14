@@ -5,11 +5,12 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { USING_FIREFOX } from "@/lib/environment";
+import { div } from "@/utils/dom/element";
 import { isImageThumb } from "@/lib/media/type_predicates";
 import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
-import { withTimeout } from "@/lib/async/timing";
+import { withTimeout } from "@/lib/async/async";
 
-const root = document.createElement("div");
+const root = div();
 let activeId = "";
 
 GalleryImageLoader.setCompletionCallback(onBitmapLoaded);
@@ -19,22 +20,23 @@ export const GalleryImageRenderer = {
   root,
   render,
   hide,
-  cache
+  cache: cacheImages
 } satisfies GalleryRenderer;
 
 export const toggleZoomCursor = (value: boolean): boolean => root.classList.toggle("gallery-image-frame--zooming", value);
 export const toggleZoom = (value: boolean | undefined): boolean => root.classList.toggle("gallery-image-frame--zoomed", value);
 export const zoomToPoint = GalleryImageCanvas.zoomToPoint;
 export const upscaleCachedThumbs = (): void => GalleryUpscaler.upscaleAll(GalleryImageLoader.completedRequests());
-export const setCanvasDimensions = GalleryUpscaler.setCanvasDimensions;
 export const downscaleAll = GalleryUpscaler.downscaleAll;
+export const toggleUpscaler = GalleryUpscaler.toggleUpscaler;
+export const setupUpscaler = GalleryUpscaler.setup;
 
 export function correctOrientation(): void {
   GalleryImageCanvas.correctOrientation();
   renderActiveThumb();
 }
 
-export async function cache(thumbs: HTMLElement[]): Promise<void> {
+export async function cacheImages(thumbs: HTMLElement[]): Promise<void> {
   await waitForAllThumbsToLoadWithTimeout();
   const rejected = GalleryImageLoader.load(thumbs).map(request => request.thumb);
   const animated = thumbs.filter(thumb => !isImageThumb(thumb));

@@ -1,5 +1,5 @@
-import * as PostOverlayCategoryCache from "@/features/post_overlay/model/tags/cache";
-import * as PostOverlayCategoryStore from "@/features/post_overlay/model/tags/store";
+import * as PostOverlayTagsCache from "@/features/post_overlay/model/tags/cache";
+import * as PostOverlayTagsStore from "@/features/post_overlay/model/tags/store";
 import { TagCategory, TagCategoryMap } from "@/types/search";
 import { PostOverlayConfig } from "@/config/post_overlay_config";
 import { decodeTagCategory } from "@/lib/remote/parsers/tag";
@@ -7,13 +7,13 @@ import { fetchPostPageHtml } from "@/lib/remote/rule34/posts/page";
 import { fetchTagCategory } from "@/lib/remote/api/tag";
 import { getTagSetFromThumb } from "@/lib/thumb/tag";
 import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page";
-import { withTimeout } from "@/lib/async/timing";
+import { withTimeout } from "@/lib/async/async";
 
 export { destroy as destroyStore } from "@/features/post_overlay/model/tags/store";
 
 export async function preloadCache(): Promise<void> {
-  for (const mapping of await PostOverlayCategoryStore.readAll()) {
-    PostOverlayCategoryCache.set(mapping.id, mapping.category);
+  for (const mapping of await PostOverlayTagsStore.readAll()) {
+    PostOverlayTagsCache.set(mapping.id, mapping.category);
   }
 }
 
@@ -41,7 +41,7 @@ export function warmCache(categoryMap: TagCategoryMap): void {
 }
 
 async function resolve(tagName: string): Promise<TagCategory> {
-  const cached = PostOverlayCategoryCache.get(tagName);
+  const cached = PostOverlayTagsCache.get(tagName);
 
   if (cached !== undefined) {
     return cached;
@@ -75,8 +75,8 @@ async function resolveFromPostPage(postId: string, tagsToResolve: string[]): Pro
 }
 
 function persist(tagName: string, category: TagCategory): void {
-  if (!PostOverlayCategoryCache.has(tagName)) {
-    PostOverlayCategoryCache.set(tagName, category);
-    PostOverlayCategoryStore.write({id: tagName, category});
+  if (!PostOverlayTagsCache.has(tagName)) {
+    PostOverlayTagsCache.set(tagName, category);
+    PostOverlayTagsStore.write({id: tagName, category});
   }
 }

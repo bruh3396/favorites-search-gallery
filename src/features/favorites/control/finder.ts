@@ -32,7 +32,7 @@ function createElements(): void {
   input = document.createElement("input");
   input.id = "favorite-finder-input";
   input.type = "number";
-  input.value = Preferences.favoritesFinderId.value;
+  input.value = Preferences.favorites.finderId.value;
   input.placeholder = "ID";
 }
 
@@ -42,7 +42,7 @@ function triggerFind(): void {
 
 function setFinderValue(value: string): void {
   input.value = value;
-  Preferences.favoritesFinderId.set(input.value);
+  Preferences.favorites.finderId.set(input.value);
 }
 
 function addEventListeners(): void {
@@ -57,7 +57,7 @@ function addEventListeners(): void {
   input.oninput = ((): void => {
     setValue(input.value);
   });
-  Events.caption.idClicked.on(setValue);
+  Events.postOverlay.addTagToSearch.on(setValue);
 }
 
 function appendElements(parent: HTMLElement): void {

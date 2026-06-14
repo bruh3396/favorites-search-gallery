@@ -6,7 +6,7 @@ export function toMediaItem(thumb: HTMLElement): MediaItem {
   let tags: Set<string> | null = null;
   return {
     id: thumb.id,
-    thumbnailUrl: getImageFromThumb(thumb)?.src ?? null,
+    thumbUrl: getImageFromThumb(thumb)?.src ?? null,
     get tags(): Set<string> {
       if (tags === null) {
         tags = getTagSetFromThumb(thumb);

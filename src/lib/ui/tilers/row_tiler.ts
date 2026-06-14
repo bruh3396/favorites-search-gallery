@@ -1,7 +1,7 @@
-import { getItemsInContainer, waitForThumbnailsToLoadInContainer } from "@/lib/thumb/thumbs";
+import { getItemsInContainer, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
 import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
-import { Layout } from "@/types/ui";
+import { Layout } from "@/types/app";
 import { ThumbConfig } from "@/config/thumb_config";
 import { mapRange } from "@/utils/number";
 
@@ -36,7 +36,7 @@ export class RowTiler extends AbstractTiler {
       return;
     }
     this.currentlyMarkingLastRow = true;
-    await waitForThumbnailsToLoadInContainer(this.container);
+    await waitForThumbsToLoadInContainer(this.container);
     this.currentlyMarkingLastRow = false;
     const items = getItemsInContainer(this.container);
 

@@ -1,12 +1,12 @@
-import * as PostOverlayCategoryResolver from "@/features/post_overlay/model/tags/resolver";
+import * as PostOverlayTagsResolver from "@/features/post_overlay/model/tags/resolver";
 import { TagCategoryMap } from "@/types/search";
 
 export function resolveTagCategories(thumb: HTMLElement): Promise<TagCategoryMap> {
-  return PostOverlayCategoryResolver.resolveAll(thumb);
+  return PostOverlayTagsResolver.resolveAll(thumb);
 }
 
 export function warmTagCategoryCache(categoryMap: TagCategoryMap): void {
-  PostOverlayCategoryResolver.warmCache(categoryMap);
+  PostOverlayTagsResolver.warmCache(categoryMap);
 }
 
 export { preloadCache as preloadTagCategoryCache, destroyStore as destroyTagCategoryStore } from "@/features/post_overlay/model/tags/resolver";

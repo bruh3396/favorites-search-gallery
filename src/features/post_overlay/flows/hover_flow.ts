@@ -7,7 +7,7 @@ import { galleryIsIdle } from "@/app/channels/feature_bridge";
 import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
 export function onMouseover(event: EnhancedMouseEvent): void {
-  if (!Preferences.postOverlayEnabled.value || !galleryIsIdle()) {
+  if (!Preferences.postOverlay.enabled.value || !galleryIsIdle()) {
     return;
   }
   PostOverlayModel.recordCursorPosition(event);
@@ -38,7 +38,7 @@ export function onThumbsMoved(): void {
 }
 
 export function showThumbUnderCursor(): void {
-  if (!Preferences.postOverlayEnabled.value) {
+  if (!Preferences.postOverlay.enabled.value) {
     return;
   }
   const thumb = PostOverlayModel.thumbUnderCursor();

@@ -33,8 +33,8 @@ function renderCurrentPage(): void {
   FavoritesView.showSearchResults(FavoritesModel.currentPageFavorites());
   FavoritesView.buildPaginator(FavoritesModel.paginationContext());
 
-  if (FavoritesConfig.preloadThumbnails) {
-    preloadImages(FavoritesModel.adjacentPageFavorites().map(favorite => favorite.thumbnailUrl));
+  if (FavoritesConfig.preloadThumbs) {
+    preloadImages(FavoritesModel.adjacentPageFavorites().map(favorite => favorite.thumbUrl));
   }
   Events.favorites.pageChanged.emit();
 }

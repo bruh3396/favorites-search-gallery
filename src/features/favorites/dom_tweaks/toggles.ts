@@ -7,7 +7,7 @@ export function syncShowOnHoverFromGallery(value: boolean): void {
 
   if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
     showOnHoverCheckbox.checked = value;
-    Preferences.galleryPreviewEnabled.set(value);
+    Preferences.gallery.previewEnabled.set(value);
   }
 }
 

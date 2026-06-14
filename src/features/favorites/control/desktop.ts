@@ -1,6 +1,6 @@
 import { ButtonElement, CheckboxElement, NumberElement, SelectElement } from "@/types/element";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
-import { Layout, PerformanceProfile, Theme } from "@/types/ui";
+import { Layout, PerformanceProfile, Theme } from "@/types/app";
 import { applySurfaceGradient, applyTheme } from "@/lib/ui/theme";
 import { buildCheckboxElement, buildCheckboxOption } from "@/app/dom/checkbox";
 import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
@@ -90,7 +90,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Enhance Search Pages",
     title: "Enable gallery and other features on search pages",
-    preference: Preferences.postListEnabled,
+    preference: Preferences.postList.enabled,
     hotkey: "",
     savePreference: true
   },
@@ -99,7 +99,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Infinite Scroll",
     title: "Use infinite scroll (waterfall) instead of pages",
-    preference: Preferences.favoritesInfiniteScroll,
+    preference: Preferences.favorites.infiniteScroll,
     hotkey: "",
     event: Events.favorites.infiniteScrollToggled
   },
@@ -109,7 +109,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Exclude Blacklist",
     title: "Exclude favorites with blacklisted tags from search",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.favoritesExcludeBlacklist,
+    preference: Preferences.favorites.excludeBlacklist,
     hotkey: "",
     event: Events.favorites.blacklistToggled
   },
@@ -118,7 +118,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-left",
     textContent: "Hotkey Hints",
     title: "Show hotkeys",
-    preference: Preferences.favoritesHintsEnabled,
+    preference: Preferences.favorites.hintsEnabled,
     hotkey: "H",
     triggerOnCreation: true,
     function: toggleOptionHotkeyHints
@@ -129,7 +129,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Autoplay",
     title: "Enable autoplay in gallery",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.galleryAutoplayActive,
+    preference: Preferences.gallery.autoplayActive,
     hotkey: "",
     event: Events.app.autoplayToggled
   },
@@ -139,7 +139,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Fullscreen on Hover",
     title: "View full resolution images or play videos and GIFs when hovering over a thumbnail",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.galleryPreviewEnabled,
+    preference: Preferences.gallery.previewEnabled,
     hotkey: "",
     event: Events.favorites.galleryPreviewToggled
   },
@@ -149,7 +149,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Tooltip",
     title: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
     enabled: TOOLTIP_ENABLED,
-    preference: Preferences.favoritesTooltipEnabled,
+    preference: Preferences.favorites.tooltipEnabled,
     hotkey: "T",
     event: Events.app.tooltipToggled
   },
@@ -159,7 +159,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Overlay",
     title: "Categorize important tags when hovering over a thumbnail and click on them to add to search",
     enabled: POST_OVERLAY_ENABLED,
-    preference: Preferences.postOverlayEnabled,
+    preference: Preferences.postOverlay.enabled,
     hotkey: "",
     event: Events.favorites.postOverlayToggled
   },
@@ -168,7 +168,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-right",
     textContent: "Header",
     title: "Toggle site header",
-    preference: Preferences.favoritesHeaderEnabled,
+    preference: Preferences.favorites.headerEnabled,
     hotkey: "",
     triggerOnCreation: true,
     function: toggleHeader
@@ -178,7 +178,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "favorite-options-right",
     textContent: "Gradient",
     title: "Use a gradient background on the toolbar and drawer tabs",
-    preference: Preferences.appSurfaceGradient,
+    preference: Preferences.app.surfaceGradient,
     hotkey: "",
     triggerOnCreation: true,
     function: applySurfaceGradient
@@ -189,7 +189,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Saved Suggestions",
     title: "Show saved search suggestions in autocomplete dropdown",
     enabled: false,
-    preference: Preferences.savedSearchesSuggestions,
+    preference: Preferences.savedSearches.suggestions,
     hotkey: "",
     savePreference: true
   },
@@ -200,7 +200,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     title: "Show menu in gallery",
     enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
     function: toggleGalleryMenuEnabled,
-    preference: Preferences.galleryMenuEnabled,
+    preference: Preferences.gallery.menuEnabled,
     event: Events.app.galleryMenuToggled
   }
 ];
@@ -210,7 +210,7 @@ const simpleCheckboxes: Partial<CheckboxElement>[] = [
     id: "sort-ascending",
     parentId: "sort-inputs",
     position: "beforeend",
-    preference: Preferences.favoritesSortAscending,
+    preference: Preferences.favorites.sortAscending,
     event: Events.favorites.sortAscendingToggled
   }
 ];
@@ -220,7 +220,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     id: "theme",
     parentId: "favorite-options-right",
     title: "Change theme",
-    preference: Preferences.appTheme,
+    preference: Preferences.app.theme,
     function: applyTheme,
     options: new Map<Theme, string>([
       ["native-light", "Light"],
@@ -233,7 +233,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     parentId: "sort-inputs",
     title: "Change sort order of search results",
     position: "beforeend",
-    preference: Preferences.favoritesSortKey,
+    preference: Preferences.favorites.sortKey,
     event: Events.favorites.sortMethodChanged,
     options: new Map<MetadataMetric, string>([
       ["default", "Default"],
@@ -251,7 +251,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     parentId: "layout-container",
     title: "Change layout",
     position: "beforeend",
-    preference: Preferences.favoritesLayout,
+    preference: Preferences.favorites.layout,
     event: Events.favorites.layoutChanged,
     function: hideUnusedLayoutSizer,
     triggerOnCreation: true,
@@ -268,7 +268,7 @@ const selects: (Partial<SelectElement<Layout>> | Partial<SelectElement<MetadataM
     parentId: "performance-profile-container",
     title: "Improve performance by disabling features",
     position: "beforeend",
-    preference: Preferences.appPerformanceProfile,
+    preference: Preferences.app.performanceProfile,
     event: Events.app.performanceProfileChanged,
     function: reloadWindow,
     options: new Map<PerformanceProfile, string>([
@@ -285,7 +285,7 @@ const numbers: Partial<NumberElement>[] = [
     id: "column-count",
     parentId: "column-count-container",
     position: "beforeend",
-    preference: Preferences.favoritesColumnCount,
+    preference: Preferences.favorites.columnCount,
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
     step: 1,
@@ -297,7 +297,7 @@ const numbers: Partial<NumberElement>[] = [
     id: "row-size",
     parentId: "row-size-container",
     position: "beforeend",
-    preference: Preferences.favoritesRowHeight,
+    preference: Preferences.favorites.rowHeight,
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
@@ -309,7 +309,7 @@ const numbers: Partial<NumberElement>[] = [
     id: "results-per-page",
     parentId: "results-per-page-container",
     position: "beforeend",
-    preference: Preferences.favoritesResultsPerPage,
+    preference: Preferences.favorites.resultsPerPage,
     min: FavoritesConfig.resultsPerPageBounds.min,
     max: FavoritesConfig.resultsPerPageBounds.max,
     step: FavoritesConfig.resultsPerPageStep,

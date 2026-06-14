@@ -1,6 +1,6 @@
 import { ExitKey, ForwardNavigationKey, NavigationKey } from "@/types/input";
 import { MetadataComparator, SearchableMetadataMetric, TagCategory } from "@/types/search";
-import { TypeableInput } from "@/types/ui";
+import { TypeableInput } from "@/types/input";
 
 export const exitKeys: ReadonlySet<ExitKey> = new Set(["Escape", "Delete", "Backspace"]);
 export const navigationKeys: ReadonlySet<NavigationKey> = new Set(["a", "A", "ArrowLeft", "d", "D", "ArrowRight"]);

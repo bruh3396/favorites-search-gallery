@@ -1,4 +1,4 @@
-import { SkeletonAnimation } from "@/types/ui";
+type SkeletonAnimation = "shimmer" | "pulse"
 
 export const SkeletonConfig = {
   defaultItemCount: 50,

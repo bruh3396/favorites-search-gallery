@@ -1,31 +1,35 @@
+import { queueMacroTask } from "@/lib/async/async";
+
+interface EmitterOptions extends AddEventListenerOptions {
+  async?: boolean
+}
+
+interface ListenerFlags {
+  once: boolean
+  async: boolean
+}
+
 export class Emitter<V> {
-  protected listeners: Set<(value: V) => void>;
-  protected onceListeners: Set<(value: V) => void>;
+  protected listeners: Map<(value: V) => void, ListenerFlags>;
   protected enabled: boolean;
 
   constructor(enabled: boolean = true) {
-    this.listeners = new Set();
-    this.onceListeners = new Set();
+    this.listeners = new Map();
     this.enabled = enabled;
     this.emit = this.emit.bind(this);
     this.on = this.on.bind(this);
   }
 
-  public on(callback: (value: V) => void, options?: AddEventListenerOptions): void {
+  public on(callback: (value: V) => void, options?: EmitterOptions): void {
     if (!this.enabled) {
       return;
     }
-    this.listeners.add(callback);
+    this.listeners.set(callback, {
+      once: options?.once ?? false,
+      async: options?.async ?? false
+    });
 
-    if (options === undefined) {
-      return;
-    }
-
-    if (options.once) {
-      this.onceListeners.add(callback);
-    }
-
-    if (options.signal) {
+    if (options?.signal) {
       options.signal.addEventListener("abort", () => {
         this.off(callback);
       });
@@ -41,10 +45,17 @@ export class Emitter<V> {
       return;
     }
 
-    for (const callback of this.listeners) {
-      callback(value);
+    for (const [callback, flags] of this.listeners) {
+      if (flags.async) {
+        queueMacroTask(() => callback(value));
+      } else {
+        callback(value);
+      }
+
+      if (flags.once) {
+        this.listeners.delete(callback);
+      }
     }
-    this.removeOneTimeListeners();
   }
 
   public next(): Promise<V> {
@@ -55,10 +66,5 @@ export class Emitter<V> {
 
   public toggle(value: boolean | undefined = undefined): void {
     this.enabled = value ?? !this.enabled;
-  }
-
-  private removeOneTimeListeners(): void {
-    this.listeners = this.listeners.difference(this.onceListeners);
-    this.onceListeners.clear();
   }
 }

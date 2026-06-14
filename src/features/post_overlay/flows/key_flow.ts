@@ -5,7 +5,7 @@ import { EnhancedKeyboardEvent } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 
 export function onKeyDown(event: EnhancedKeyboardEvent): void {
-  if (!Preferences.postOverlayEnabled.value) {
+  if (!Preferences.postOverlay.enabled.value) {
     return;
   }
 
@@ -19,7 +19,7 @@ export function onKeyDown(event: EnhancedKeyboardEvent): void {
 }
 
 export function onKeyUp(event: EnhancedKeyboardEvent): void {
-  if (!Preferences.postOverlayEnabled.value) {
+  if (!Preferences.postOverlay.enabled.value) {
     return;
   }
 

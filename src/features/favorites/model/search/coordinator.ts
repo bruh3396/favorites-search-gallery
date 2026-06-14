@@ -21,7 +21,7 @@ export const getCurrentSearchQuery = (): string => currentSearchQuery;
 export { shuffle as shuffleSearchResults, get as getCurrentSearchResults } from "@/features/favorites/model/search/results";
 export { deferIndexing } from "@/features/favorites/model/search/engine";
 
-const useBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.favoritesExcludeBlacklist.value;
+const useBlacklist = (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.favorites.excludeBlacklist.value;
 const blacklistSearchQuery = (): string => `${currentSearchQuery} ${NEGATED_BLACKLISTED_TAGS}`;
 const finalQuery = (): string => (useBlacklist() ? blacklistSearchQuery() : currentSearchQuery);
 const search = (favorites: Favorite[]): Favorite[] => FavoritesSearchEngine.search(finalQuery(), favorites);

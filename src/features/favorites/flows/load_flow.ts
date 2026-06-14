@@ -48,7 +48,7 @@ async function fetchNewFavorites(nativeFavorites: HTMLElement[] | undefined): Pr
   FavoritesView.setTemporaryStatus(`Saved ${results.newFavorites.length} new favorites`);
   FavoritesModel.repaginateCurrentResults();
   Events.favorites.newFavoritesFound.emit(results.newSearchResults);
-  Events.favorites.searchResultsUpdated.emit();
+  Events.favorites.searchResultsUpdated.emit(FavoritesModel.getCurrentSearchResults());
 }
 
 async function fetchAllFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {

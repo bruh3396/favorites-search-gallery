@@ -1,6 +1,6 @@
 import { coinFlip, randomBetween, randomIntInRange, roundToTwoDecimalPlaces, seededRandomIntInRange } from "@/utils/number";
 import { Dimensions2D } from "@/types/geometry";
-import { Layout } from "@/types/ui";
+import { Layout } from "@/types/app";
 import { SkeletonConfig } from "@/config/skeleton_config";
 import { TILE_CLASS_NAME } from "@/lib/thumb/thumbs";
 import { parseDimensions2D } from "@/utils/string/parse";

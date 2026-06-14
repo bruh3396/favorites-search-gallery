@@ -1,7 +1,7 @@
 import { setDataset, toggleDataset } from "@/utils/dom/attribute";
-import { Theme } from "@/types/ui";
+import { Theme } from "@/types/app";
 import { setCookie } from "@/utils/browser/cookie";
-import { yieldControl } from "@/lib/async/timing";
+import { macroTask } from "@/lib/async/async";
 
 const root = document.documentElement;
 const nativeCookies: Partial<Record<Theme, string>> = {
@@ -10,7 +10,7 @@ const nativeCookies: Partial<Record<Theme, string>> = {
 };
 
 export async function applyTheme(theme: Theme): Promise<void> {
-  await yieldControl();
+  await macroTask();
   setDataset(root, "theme", theme);
   syncNativeThemeCookie(theme);
 }

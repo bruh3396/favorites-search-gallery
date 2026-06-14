@@ -1,7 +1,7 @@
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { Events } from "@/app/channels/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { yieldControl } from "@/lib/async/timing";
+import { macroTask } from "@/lib/async/async";
 
 export function setup(): void {
   if (!ON_MOBILE_DEVICE) {
@@ -20,11 +20,11 @@ export function setup(): void {
   tapControlContainer.appendChild(rightTap);
   GalleryView.appendToGallery(tapControlContainer);
   leftTap.ontouchend = async(): Promise<void> => {
-    await yieldControl();
+    await macroTask();
     Events.gallery.leftTap.emit();
   };
   rightTap.ontouchend = async(): Promise<void> => {
-    await yieldControl();
+    await macroTask();
     Events.gallery.rightTap.emit();
   };
 }

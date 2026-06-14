@@ -31,10 +31,7 @@ export const GalleryConfig = {
   maxImagesToPreloadAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
   bottomOverscanPercent: 100,
   bitmapCloseDelay: 50,
-  fetchImageBitmapsInWorker: false,
-  get sendImageBitmapsToWorker(): boolean {
-    return !this.fetchImageBitmapsInWorker;
-  },
-  useOffscreenThumbUpscaler: false,
+
+  useOffscreenThumbUpscaler: true,
   galleryMenuMonoColor: true
 };

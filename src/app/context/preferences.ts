@@ -1,63 +1,71 @@
-import { FavoritesDrawerTab, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/ui";
+import { FavoritesDrawerTab, FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { Rating, SortMethod } from "@/types/search";
+import { Rating, SortKey } from "@/types/search";
 import { Preference } from "@/lib/storage/preference";
 import { getCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
-  appPerformanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
-  appSurfaceGradient: new Preference("appSurfaceGradient", true),
-  appTheme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
-
-  favoritesAllowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
-  favoritesColumnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
-  favoritesDownloadBatchSize: new Preference("favoritesDownloadBatchSize", 250),
-  favoritesDrawerActiveTab: new Preference<FavoritesDrawerTab>("favoritesDrawerActiveTab", "settings"),
-  favoritesDrawerOpen: new Preference("favoritesDrawerOpen", false),
-  favoritesExcludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
-  favoritesFinderId: new Preference("favoritesFinderId", ""),
-  favoritesHeaderEnabled: new Preference("favoritesHeaderEnabled", true),
-  favoritesHintsEnabled: new Preference("favoritesHintsEnabled", false),
-  favoritesInfiniteScroll: new Preference("favoritesInfiniteScroll", false),
-  favoritesLayout: new Preference<Layout>("favoritesLayout", "column"),
-  favoritesNewFavoriteHighlight: new Preference<HighlightStyle>("favoritesNewFavoriteHighlight", "border"),
-  favoritesOptionsVisible: new Preference("favoritesOptionsVisible", false),
-  favoritesRemoveButtonsVisible: new Preference("favoritesRemoveButtonsVisible", false),
-  favoritesResultsPerPage: new Preference("favoritesResultsPerPage", 200),
-  favoritesRowHeight: new Preference("favoritesRowHeight", 7),
-  favoritesSortAscending: new Preference("favoritesSortAscending", false),
-  favoritesSortKey: new Preference<SortMethod>("favoritesSortKey", "default"),
-  favoritesTooltipEnabled: new Preference("tooltipEnabled", false),
-
-  galleryAutoplayActive: new Preference("galleryAutoplayActive", false),
-  galleryAutoplayForward: new Preference("galleryAutoplayForward", true),
-  galleryAutoplayImageDuration: new Preference("galleryAutoplayImageDuration", 3_000),
-  galleryAutoplayMinimumVideoDuration: new Preference("galleryAutoplayMinimumVideoDuration", 5_000),
-  galleryAutoplayPaused: new Preference("galleryAutoplayPaused", false),
-  galleryBackgroundOpacity: new Preference("galleryBackgroundOpacity", "1"),
-  galleryColorScheme: new Preference("galleryColorScheme", "black"),
-  galleryMenuDockedLeft: new Preference("galleryMenuDockedLeft", ON_DESKTOP_DEVICE),
-  galleryMenuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),
-  galleryMenuPinned: new Preference("galleryMenuPinned", ON_MOBILE_DEVICE),
-  galleryMobileEnabled: new Preference("galleryMobileEnabled", true),
-  galleryPreviewEnabled: new Preference("galleryPreviewEnabled", false),
-  galleryVideoMuted: new Preference("galleryVideoMuted", false),
-  galleryVideoVolume: new Preference("galleryVideoVolume", 1),
-
-  postOverlayEnabled: new Preference("postOverlayEnabled", false),
-  postOverlayMode: new Preference<PostOverlayMode>("postOverlayMode", "tag"),
-
-  savedSearchesSuggestions: new Preference("savedSearchesSuggestions", false),
-  savedSearchesTutorial: new Preference("savedSearchesTutorial", false),
-
-  postListColumnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
-  postListEnabled: new Preference("postListEnabled", false),
-  postListFavoriteIndicator: new Preference("postListFavoriteIndicator", false),
-  postListFavoriteIndicatorStyle: new Preference<HighlightStyle>("postListFavoriteIndicatorStyle", "border"),
-  postListGalleryFavoriteStyle: new Preference<HighlightStyle>("postListGalleryFavoriteStyle", "border"),
-  postListInfiniteScroll: new Preference("postListInfiniteScroll", false),
-  postListLayout: new Preference<Layout>("postListLayout", "column"),
-  postListRowHeight: new Preference("postListRowHeight", 7),
-  postListTooltipEnabled: new Preference("postListTooltipEnabled", false),
-  postListUpscaleThumbs: new Preference("postListUpscaleThumbs", ON_DESKTOP_DEVICE)
-};
+  app: {
+    performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
+    surfaceGradient: new Preference("appSurfaceGradient", true),
+    theme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
+    fadeThumbs: new Preference<boolean>("appFadeThumbs", true)
+  },
+  favorites: {
+    allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
+    columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 5),
+    downloadBatchSize: new Preference("favoritesDownloadBatchSize", 250),
+    drawerActiveTab: new Preference<FavoritesDrawerTab>("favoritesDrawerActiveTab", "settings"),
+    drawerOpen: new Preference("favoritesDrawerOpen", false),
+    excludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
+    finderId: new Preference("favoritesFinderId", ""),
+    headerEnabled: new Preference("favoritesHeaderEnabled", true),
+    hintsEnabled: new Preference("favoritesHintsEnabled", false),
+    infiniteScroll: new Preference("favoritesInfiniteScroll", false),
+    layout: new Preference<Layout>("favoritesLayout", "column"),
+    newFavoriteHighlight: new Preference<HighlightStyle>("favoritesNewFavoriteHighlight", "border"),
+    optionsVisible: new Preference("favoritesOptionsVisible", false),
+    removeButtonsVisible: new Preference("favoritesRemoveButtonsVisible", false),
+    resultsPerPage: new Preference("favoritesResultsPerPage", 50),
+    rowHeight: new Preference("favoritesRowHeight", 7),
+    sortAscending: new Preference("favoritesSortAscending", false),
+    sortKey: new Preference<SortKey>("favoritesSortKey", "default"),
+    tooltipEnabled: new Preference("favoritesTooltipEnabled", false)
+  },
+  gallery: {
+    autoplayActive: new Preference("galleryAutoplayActive", false),
+    autoplayForward: new Preference("galleryAutoplayForward", true),
+    autoplayImageDuration: new Preference("galleryAutoplayImageDuration", 3_000),
+    autoplayMinimumVideoDuration: new Preference("galleryAutoplayMinimumVideoDuration", 5_000),
+    autoplayPaused: new Preference("galleryAutoplayPaused", false),
+    backgroundOpacity: new Preference("galleryBackgroundOpacity", "1"),
+    colorScheme: new Preference("galleryColorScheme", "black"),
+    menuDockedLeft: new Preference("galleryMenuDockedLeft", ON_DESKTOP_DEVICE),
+    menuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),
+    menuPinned: new Preference("galleryMenuPinned", ON_MOBILE_DEVICE),
+    mobileEnabled: new Preference("galleryMobileEnabled", true),
+    previewEnabled: new Preference("galleryPreviewEnabled", false),
+    videoMuted: new Preference("galleryVideoMuted", false),
+    videoVolume: new Preference("galleryVideoVolume", 1)
+  },
+  postOverlay: {
+    enabled: new Preference("postOverlayEnabled", false),
+    mode: new Preference<PostOverlayMode>("postOverlayMode", "tag")
+  },
+  savedSearches: {
+    suggestions: new Preference("savedSearchesSuggestions", false),
+    tutorial: new Preference("savedSearchesTutorial", false)
+  },
+  postList: {
+    columnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
+    enabled: new Preference("postListEnabled", false),
+    favoriteIndicator: new Preference("postListFavoriteIndicator", false),
+    favoriteIndicatorStyle: new Preference<HighlightStyle>("postListFavoriteIndicatorStyle", "border"),
+    galleryFavoriteStyle: new Preference<HighlightStyle>("postListGalleryFavoriteStyle", "border"),
+    infiniteScroll: new Preference("postListInfiniteScroll", false),
+    layout: new Preference<Layout>("postListLayout", "column"),
+    rowHeight: new Preference("postListRowHeight", 7),
+    tooltipEnabled: new Preference("postListTooltipEnabled", false),
+    upscaleThumbs: new Preference("postListUpscaleThumbs", ON_DESKTOP_DEVICE)
+  }
+} satisfies FeatureNamespaced;

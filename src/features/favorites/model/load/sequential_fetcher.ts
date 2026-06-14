@@ -1,4 +1,4 @@
-import { sleep, withExponentialBackoff } from "@/lib/async/timing";
+import { sleep, withExponentialBackoff } from "@/lib/async/async";
 import { FAVORITES_PER_PAGE } from "@/lib/rule34_constants";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_request";

@@ -1,5 +1,4 @@
 import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 
 type Point = { x: number; y: number };
@@ -43,16 +42,16 @@ function onTouchEnd(event: TouchEvent): void {
 
   switch (getSwipeDirection()) {
     case "up":
-      Events.mobile.swipedUp.emit();
+      DomEvents.mobile.swipedUp.emit();
       break;
     case "down":
-      Events.mobile.swipedDown.emit();
+      DomEvents.mobile.swipedDown.emit();
       break;
     case "left":
-      Events.mobile.swipedLeft.emit();
+      DomEvents.mobile.swipedLeft.emit();
       break;
     case "right":
-      Events.mobile.swipedRight.emit();
+      DomEvents.mobile.swipedRight.emit();
       break;
     default: break;
   }

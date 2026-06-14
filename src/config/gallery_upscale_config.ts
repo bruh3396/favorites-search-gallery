@@ -1,6 +1,7 @@
 export const GalleryUpscaleConfig = {
-  upscaledThumbCanvasWidth: 700,
-  maxUpscaledThumbCanvasHeight: 16_000,
+  upscaledCanvasWidth: 600,
+  maxUpscaledCanvasHeight: 16_000,
+  maxUpscaledThumbs: 75,
   upscaleUsingSamples: false,
   upscaleDelay: 25
 };

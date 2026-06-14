@@ -30,7 +30,7 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
   private subscribePlatformEvents(): void {
     Events.favorites.searchButtonClicked.on((event) => this.handleSearchButtonClicked(event));
     Events.favorites.clearButtonClicked.on(this.clear.bind(this));
-    Events.caption.searchForTag.on((tag) => {
+    Events.postOverlay.searchForTag.on((tag) => {
       this.searchBox.value = tag;
       this.startSearch();
     });

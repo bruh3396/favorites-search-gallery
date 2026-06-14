@@ -7,8 +7,18 @@ type BudgetedRequests = {
   rejected: ImageRequest[]
 }
 
+let getPixelCount: (id: string) => number = () => 0;
+
+export function setup(getPixelCountForId: (id: string) => number): void {
+  getPixelCount = getPixelCountForId;
+}
+
 export function partition(thumbs: HTMLElement[]): BudgetedRequests {
   return partitionByLimit(thumbs.map(t => new ImageRequest(t)));
+}
+
+function megabytes(request: ImageRequest): number {
+  return getPixelCount(request.id) / 220_000;
 }
 
 function partitionByLimit(requests: ImageRequest[]): BudgetedRequests {
@@ -26,7 +36,7 @@ function partitionByMemory(requests: ImageRequest[]): BudgetedRequests {
       cutoff = i;
       break;
     }
-    totalMegabytes += requests[i].megabytes;
+    totalMegabytes += megabytes(requests[i]);
     accepted.push(requests[i]);
   }
   return { accepted, rejected: requests.slice(cutoff) };

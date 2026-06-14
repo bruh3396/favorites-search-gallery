@@ -1,7 +1,7 @@
 import * as Icons from "@/assets/icons";
 import { EnhancedMouseEvent } from "@/types/input";
 import { GalleryConfig } from "@/config/gallery_config";
-import { GalleryMenuAction } from "@/types/ui";
+import { GalleryMenuAction } from "@/types/app";
 import { GalleryMenuButton } from "@/features/gallery/types/gallery_types";
 import { GalleryRoot } from "@/features/gallery/view/shell/shell";
 import { GeneralConfig } from "@/config/general_config";
@@ -55,14 +55,14 @@ export function onMouseOver(event: EnhancedMouseEvent): void {
 }
 
 function loadPreferences(): void {
-  if (Preferences.galleryMenuDockedLeft.value) {
+  if (Preferences.gallery.menuDockedLeft.value) {
     toggleDockPosition();
   }
 
-  if (Preferences.galleryMenuPinned.value) {
+  if (Preferences.gallery.menuPinned.value) {
     togglePin();
   }
-  toggleGalleryMenuEnabled(Preferences.galleryMenuEnabled.value);
+  toggleGalleryMenuEnabled(Preferences.gallery.menuEnabled.value);
 }
 
 function handleGalleryMenuAction(action: GalleryMenuAction): void {
@@ -147,7 +147,7 @@ function createColorPicker(): void {
   };
   colorPicker.oninput = (): void => {
     setColorScheme(colorPicker.value);
-    Preferences.galleryColorScheme.set(colorPicker.value);
+    Preferences.gallery.colorScheme.set(colorPicker.value);
   };
   button.insertAdjacentElement("afterbegin", colorPicker);
 }
@@ -171,17 +171,17 @@ function togglePersistence(event: MouseEvent): void {
 function togglePin(): void {
   if (ON_MOBILE_DEVICE) {
     menu.classList.add("gallery-menu--pinned");
-    Preferences.galleryMenuPinned.set(true);
+    Preferences.gallery.menuPinned.set(true);
     return;
   }
-  Preferences.galleryMenuPinned.set(menu.classList.toggle("gallery-menu--pinned"));
+  Preferences.gallery.menuPinned.set(menu.classList.toggle("gallery-menu--pinned"));
 }
 
 function toggleDockPosition(): void {
   if (ON_MOBILE_DEVICE) {
     menu.classList.remove("gallery-menu--docked");
-    Preferences.galleryMenuDockedLeft.set(false);
+    Preferences.gallery.menuDockedLeft.set(false);
     return;
   }
-  Preferences.galleryMenuDockedLeft.set(menu.classList.toggle("gallery-menu--docked"));
+  Preferences.gallery.menuDockedLeft.set(menu.classList.toggle("gallery-menu--docked"));
 }

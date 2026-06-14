@@ -1,4 +1,4 @@
-import * as PostListMenu from "@/features/post_list_navigator/view/shell/menu";
+import * as PostListNavigatorMenu from "@/features/post_list_navigator/view/shell/menu";
 import { Content } from "@/app/layout/shell";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
@@ -19,7 +19,7 @@ function insertOptionsMenu(): void {
 
   displayOptions.appendChild(listItem);
   insertStyle(POST_LIST_CSS);
-  listItem.append(PostListMenu.build());
+  listItem.append(PostListNavigatorMenu.build());
 
   if (ON_MOBILE_DEVICE) {
     insertStyle(`#post-list-upscale-thumbs {

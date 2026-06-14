@@ -45,5 +45,5 @@ export function paginationContext(): PaginationContext {
 const pageCount = (): number => Math.ceil(favorites.length / resultsPerPage()) || 1;
 const pageRange = (c: number): {start: number, end: number} => ({ start: resultsPerPage() * (c - 1), end: resultsPerPage() * c });
 const favoritesOnPage = (c: number): Favorite[] => favorites.slice(pageRange(c).start, pageRange(c).end);
-const resultsPerPage = (): number => Preferences.favoritesResultsPerPage.value;
+const resultsPerPage = (): number => Preferences.favorites.resultsPerPage.value;
 const wrappedPage = (page: number, delta: number, total: number): number => ((page - 1 + delta + total) % total) + 1;

@@ -7,7 +7,7 @@ import { DomEvents } from "@/app/dom/events";
 import { EnhancedWheelEvent } from "@/types/input";
 import { Events } from "@/app/channels/events";
 import { GridTiler } from "@/lib/ui/tilers/grid_tiler";
-import { Layout } from "@/types/ui";
+import { Layout } from "@/types/app";
 import { NativeTiler } from "@/lib/ui/tilers/native_tiler";
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
@@ -17,19 +17,19 @@ import { ThumbConfig } from "@/config/thumb_config";
 import { clamp } from "@/utils/number";
 import { inGallery } from "@/app/channels/feature_bridge";
 import { navigationDelta } from "@/utils/navigation";
-import { yieldControl } from "@/lib/async/timing";
+import { macroTask } from "@/lib/async/async";
 
-const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.favoritesColumnCount.value : Preferences.postListColumnCount.value);
+const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.favorites.columnCount.value : Preferences.postList.columnCount.value);
 const tilers: AbstractTiler[] = [columnTiler, new GridTiler(Content), new RowTiler(Content), new SquareTiler(Content), new NativeTiler(Content)];
 const tilerMap = new Map(tilers.map(tiler => [tiler.layout, tiler]));
-let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favoritesLayout.value : Preferences.postListLayout.value;
+let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favorites.layout.value : Preferences.postList.layout.value;
 let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
 
 export function setup(): void {
   setupFadeIn();
   currentTiler.activate();
-  setColumnCount(ON_POST_LIST_PAGE ? Preferences.postListColumnCount.value : Preferences.favoritesColumnCount.value);
-  setRowHeight(ON_POST_LIST_PAGE ? Preferences.postListRowHeight.value : Preferences.favoritesRowHeight.value);
+  setColumnCount(ON_POST_LIST_PAGE ? Preferences.postList.columnCount.value : Preferences.favorites.columnCount.value);
+  setRowHeight(ON_POST_LIST_PAGE ? Preferences.postList.rowHeight.value : Preferences.favorites.rowHeight.value);
   DomEvents.document.wheel.on(changeItemSizeOnShiftScroll);
   Events.app.columnCountChanged.on(setColumnCount);
   Events.app.rowHeightChanged.on(setRowHeight);
@@ -65,9 +65,9 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
   let preference: Preference<number>;
 
   if (ON_FAVORITES_PAGE) {
-    preference = usingRowLayout ? Preferences.favoritesRowHeight : Preferences.favoritesColumnCount;
+    preference = usingRowLayout ? Preferences.favorites.rowHeight : Preferences.favorites.columnCount;
   } else {
-    preference = usingRowLayout ? Preferences.postListRowHeight : Preferences.postListColumnCount;
+    preference = usingRowLayout ? Preferences.postList.rowHeight : Preferences.postList.columnCount;
   }
   const bounds = usingRowLayout ? ThumbConfig.rowHeightBounds : ThumbConfig.columnCountBounds;
 
@@ -81,7 +81,7 @@ export function changeItemSizeOnShiftScroll(wheelEvent: EnhancedWheelEvent): voi
 }
 
 export async function hideUnusedLayoutSizer(layout: Layout): Promise<void> {
-  await yieldControl();
+  await macroTask();
   const rowHeightContainer = document.querySelector("#row-size-container, #post-list-row-size");
   const columnCountContainer = document.querySelector("#column-count-container, #post-list-column-count");
 

@@ -1,5 +1,5 @@
 import { PostOverlayId } from "@/features/post_overlay/types/scaffold";
-import { PostOverlayMode } from "@/types/ui";
+import { PostOverlayMode } from "@/types/app";
 import { capitalize } from "@/utils/string/format";
 
 export function setMenuLabel(mode: PostOverlayMode): void {

@@ -1,6 +1,6 @@
 import { CheckboxElement, SelectElement } from "@/types/element";
 import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
-import { HighlightStyle, Layout, PerformanceProfile } from "@/types/ui";
+import { HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
 import { Events } from "@/app/channels/events";
 import { GeneralConfig } from "@/config/general_config";
 import { MetadataMetric } from "@/types/search";
@@ -19,7 +19,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "post-list-upscale-thumbs",
     position: "beforeend",
     title: "Upscale thumbnails on search pages",
-    preference: Preferences.postListUpscaleThumbs,
+    preference: Preferences.postList.upscaleThumbs,
     event: Events.postList.upscaleToggled,
     textContent: "",
     enabled: ON_DESKTOP_DEVICE,
@@ -30,7 +30,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     parentId: "post-list-infinite-scroll",
     position: "beforeend",
     title: "Enable infinite scroll",
-    preference: Preferences.postListInfiniteScroll,
+    preference: Preferences.postList.infiniteScroll,
     event: Events.postList.infiniteScrollToggled,
     triggerOnCreation: true,
     textContent: "",
@@ -43,7 +43,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Autoplay",
     title: "Enable autoplay in gallery",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.galleryAutoplayActive,
+    preference: Preferences.gallery.autoplayActive,
     hotkey: "",
     event: Events.app.autoplayToggled
   },
@@ -54,7 +54,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     textContent: "Tooltip",
     title: "Enable tooltip",
     enabled: TOOLTIP_ENABLED,
-    preference: Preferences.postListTooltipEnabled,
+    preference: Preferences.postList.tooltipEnabled,
     hotkey: "",
     event: Events.app.tooltipToggled
   },
@@ -66,7 +66,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     position: "beforeend",
     enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
     function: toggleGalleryMenuEnabled,
-    preference: Preferences.galleryMenuEnabled,
+    preference: Preferences.gallery.menuEnabled,
     event: Events.app.galleryMenuToggled
   },
   {
@@ -75,7 +75,7 @@ const checkboxes: Partial<CheckboxElement>[] = [
     position: "beforeend",
     textContent: "",
     title: "Mark thumbs you've already favorited",
-    preference: Preferences.postListFavoriteIndicator,
+    preference: Preferences.postList.favoriteIndicator,
     event: Events.postList.favoriteIndicatorToggled,
     defaultValue: false
   }
@@ -93,7 +93,7 @@ const selects: (
       parentId: "post-list-layout",
       title: "Change layout",
       position: "beforeend",
-      preference: Preferences.postListLayout,
+      preference: Preferences.postList.layout,
       event: Events.postList.layoutChanged,
       triggerOnCreation: true,
       options: new Map<Layout, string>([
@@ -108,7 +108,7 @@ const selects: (
       id: "column-count",
       parentId: "post-list-column-count",
       position: "beforeend",
-      preference: Preferences.postListColumnCount,
+      preference: Preferences.postList.columnCount,
       event: Events.app.columnCountChanged,
       options: new Map<number, string>(numberRange(2, ON_DESKTOP_DEVICE ? 25 : 10).map(n => [n, String(n)]))
     },
@@ -116,7 +116,7 @@ const selects: (
       id: "row-size",
       parentId: "post-list-row-size",
       position: "beforeend",
-      preference: Preferences.postListRowHeight,
+      preference: Preferences.postList.rowHeight,
       event: Events.app.rowHeightChanged,
       options: new Map<number, string>(numberRange(1, 10).map(n => [n, String(n)]))
     },
@@ -124,7 +124,7 @@ const selects: (
       id: "favorite-indicator-style",
       parentId: "post-list-favorite-indicator-style",
       position: "beforeend",
-      preference: Preferences.postListFavoriteIndicatorStyle,
+      preference: Preferences.postList.favoriteIndicatorStyle,
       event: Events.postList.favoriteIndicatorStyleChanged,
       options: new Map<HighlightStyle, string>([
         ["border", "Border"],
@@ -138,7 +138,7 @@ const selects: (
       id: "gallery-favorite-style",
       parentId: "post-list-gallery-favorite-style",
       position: "beforeend",
-      preference: Preferences.postListGalleryFavoriteStyle,
+      preference: Preferences.postList.galleryFavoriteStyle,
       options: new Map<HighlightStyle, string>([
         ["border", "Border"],
         ["glow", "Glow"],
@@ -151,7 +151,7 @@ const selects: (
       parentId: "post-list-performance-profile",
       title: "Improve performance by disabling features",
       position: "beforeend",
-      preference: Preferences.appPerformanceProfile,
+      preference: Preferences.app.performanceProfile,
       event: Events.app.performanceProfileChanged,
       function: reloadWindow,
       enabled: ON_DESKTOP_DEVICE,

@@ -24,7 +24,7 @@ export function setup(): void {
   parentContainer.appendChild(createLabel());
   parentContainer.appendChild(document.createElement("br"));
   parentContainer.appendChild(mainContainer);
-  changeWhichRatingsAreSelected(Preferences.favoritesAllowedRatings.value);
+  changeWhichRatingsAreSelected(Preferences.favorites.allowedRatings.value);
   addEventListeners();
 }
 
@@ -67,7 +67,7 @@ function addEventListeners(): void {
     }
     const rating = getCurrentRating();
 
-    Preferences.favoritesAllowedRatings.set(rating);
+    Preferences.favorites.allowedRatings.set(rating);
     Events.favorites.allowedRatingsChanged.emit(rating);
     preventAllRatingsFromBeingUnselected();
   };

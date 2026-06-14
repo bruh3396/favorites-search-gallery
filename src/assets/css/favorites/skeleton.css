@@ -33,16 +33,24 @@
   animation-delay: var(--delay-skeleton);
 }
 
-.skeleton-item[data-animation="shine"]::after {
-  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0));
+.skeleton-item[data-animation="shimmer"] {
+  position: relative;
+  background-color: #636363;
+}
+
+.skeleton-item[data-animation="shimmer"]::after {
   content: "";
   position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
   transform: translateX(-100%);
-  bottom: 0;
-  left: 0;
-  right: 0;
-  top: 0;
-  animation: shine var(--duration-skeleton) linear infinite;
+  will-change: transform;
+  animation: shimmer var(--duration-skeleton) infinite linear;
   animation-delay: var(--delay-skeleton);
 }
 
@@ -57,16 +65,9 @@
   }
 }
 
-@keyframes shine {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  50% {
+@keyframes shimmer {
+  100% {
     transform: translateX(100%);
   }
-
-  100% {
-    transform: translateX(-100%);
-  }
 }
+

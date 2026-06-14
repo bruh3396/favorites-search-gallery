@@ -9,7 +9,7 @@ export function setFavoriteIndicatorLoading(loading: boolean): void {
 
 export function markAsFavorite(thumb: HTMLElement): void {
   thumb.classList.add(FAVORITE_CLASS);
-  thumb.dataset.highlight = Preferences.postListFavoriteIndicatorStyle.value;
+  thumb.dataset.highlight = Preferences.postList.favoriteIndicatorStyle.value;
 }
 
 export function markAsFavoriteById(id: string): void {
@@ -26,7 +26,7 @@ export function unmarkAsFavorite(thumb: HTMLElement): void {
 }
 
 export function applyCurrentFavoriteStyle(): void {
-  const style = Preferences.postListFavoriteIndicatorStyle.value;
+  const style = Preferences.postList.favoriteIndicatorStyle.value;
 
   for (const thumb of document.querySelectorAll<HTMLElement>(`.${FAVORITE_CLASS}`)) {
     thumb.dataset.highlight = style;
@@ -54,7 +54,7 @@ export function applyGalleryFavoriteStyle(thumb: HTMLElement | null): void {
   if (container === null) {
     return;
   }
-  const style = Preferences.postListGalleryFavoriteStyle.value;
+  const style = Preferences.postList.galleryFavoriteStyle.value;
   const isFavorite = thumb.classList.contains(FAVORITE_CLASS);
 
   if (style === "none" || !isFavorite) {

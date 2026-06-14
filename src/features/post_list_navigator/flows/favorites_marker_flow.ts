@@ -15,7 +15,7 @@ export async function toggleIndicator(enabled: boolean): Promise<void> {
 }
 
 export function markExistingFavoritesIfEnabled(thumbs: HTMLElement[]): void {
-  if (Preferences.postListFavoriteIndicator.value) {
+  if (Preferences.postList.favoriteIndicator.value) {
     PostListNavigatorView.markAsFavorites(PostListNavigatorModel.filterFavorites(thumbs));
   }
 }
@@ -23,7 +23,7 @@ export function markExistingFavoritesIfEnabled(thumbs: HTMLElement[]): void {
 export function onFavoriteAdded(id: string): void {
   PostListNavigatorModel.addFavoriteId(id);
 
-  if (Preferences.postListFavoriteIndicator.value) {
+  if (Preferences.postList.favoriteIndicator.value) {
     PostListNavigatorView.markAsFavoriteById(id);
   }
 

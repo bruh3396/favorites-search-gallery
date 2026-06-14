@@ -3,5 +3,5 @@ import { Preferences } from "@/app/context/preferences";
 import { setDataset } from "@/utils/dom/attribute";
 
 export function markAsNew(favorite: Favorite): void {
-  setDataset(favorite.root, "highlight", Preferences.favoritesNewFavoriteHighlight.value);
+  setDataset(favorite.root, "highlight", Preferences.favorites.newFavoriteHighlight.value);
 }

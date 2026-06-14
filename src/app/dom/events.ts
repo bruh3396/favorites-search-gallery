@@ -12,8 +12,8 @@ export const DomEvents = {
   document: {
     domLoaded: new StickyEmitter<void>(),
     mouseover: new Emitter<EnhancedMouseEvent>(),
-    click: new Emitter<MouseEvent>(),
-    mousedown: new Emitter<MouseEvent>(),
+    click: new Emitter<EnhancedMouseEvent>(),
+    mousedown: new Emitter<EnhancedMouseEvent>(),
     touchStart: new Emitter<TouchEvent>(),
     touchEnd: new Emitter<TouchEvent>(),
     keydown: new Emitter<EnhancedKeyboardEvent>(),
@@ -28,15 +28,22 @@ export const DomEvents = {
     orientationChange: new Emitter<Event>(),
     scrollend: new Emitter<Event>(),
     scroll: new Emitter<Event>()
+  },
+  mobile: {
+    swipedUp: new Emitter<void>(),
+    swipedDown: new Emitter<void>(),
+    swipedLeft: new Emitter<void>(),
+    swipedRight: new Emitter<void>(),
+    touchHold: new Emitter<TouchEvent>()
   }
 };
 
 function setupDocumentEvents(root: HTMLElement): void {
   root.addEventListener("click", (event) => {
-    DomEvents.document.click.emit(event);
+    DomEvents.document.click.emit(new EnhancedMouseEvent(event));
   });
   root.addEventListener("mousedown", (event) => {
-    DomEvents.document.mousedown.emit(event);
+    DomEvents.document.mousedown.emit(new EnhancedMouseEvent(event));
   });
   document.addEventListener("keydown", (event) => {
     DomEvents.document.keydown.emit(new EnhancedKeyboardEvent(event));

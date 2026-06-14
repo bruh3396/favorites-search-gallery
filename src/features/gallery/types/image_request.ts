@@ -1,13 +1,7 @@
-import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GalleryConfig } from "@/config/gallery_config";
 import { ThrottleQueue } from "@/lib/async/throttle_queue";
 
 const bitmapCloseQueue = new ThrottleQueue(GalleryConfig.bitmapCloseDelay);
-
-export function getFavoritePixelCount(id: string): number {
-  const favorite = FeatureBridge.getFavorite.call(id);
-  return favorite ? favorite.metrics.width * favorite.metrics.height : 0;
-}
 
 export class ImageRequest {
   public readonly id: string;
@@ -24,10 +18,6 @@ export class ImageRequest {
     this.abortController = new AbortController();
     this.cancelled = false;
     this.disposable = disposable;
-  }
-
-  public get megabytes(): number {
-    return getFavoritePixelCount(this.id) / 220_000;
   }
 
   public get isIncomplete(): boolean {

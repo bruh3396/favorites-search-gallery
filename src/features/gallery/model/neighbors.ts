@@ -1,24 +1,25 @@
 import { getElementsAroundIndex, getWrappedElementsAroundIndex } from "@/utils/collection/array";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
 
-export const getThumbsAround = ON_FAVORITES_PAGE ? getFavoritesThumbsAround : getPostListThumbsAround;
+let getCandidates: () => HTMLElement[];
 
-function getFavoritesThumbsAround(thumb: HTMLElement | undefined, limit: number = 50): HTMLElement[] {
-  if (thumb === undefined) {
-    return [];
-  }
-  const searchResults = FeatureBridge.favoritesSearchResults.call();
-  const startIndex = searchResults.findIndex(favorite => favorite.id === thumb.id);
-  const adjacentResults = getWrappedElementsAroundIndex(searchResults, startIndex, limit);
-  return adjacentResults.map(favorite => favorite.root);
+export function setup(getNeighborCandidates: () => HTMLElement[]): void {
+  getCandidates = getNeighborCandidates;
 }
 
-function getPostListThumbsAround(thumb: HTMLElement | undefined, limit: number = 50): HTMLElement[] {
-  if (thumb === undefined) {
-    return [];
-  }
-  const thumbs = FeatureBridge.postListThumbs.call();
-  const index = thumbs.findIndex(postListThumb => postListThumb.id === thumb.id);
-  return index === -1 ? [] : getElementsAroundIndex(thumbs, index, limit);
+export function getWrappedItemsAround(id: string, limit: number = 50): HTMLElement[] {
+  return getItems(id, limit, getWrappedElementsAroundIndex);
+}
+
+export function getItemsAround(id: string, limit: number = 50): HTMLElement[] {
+  return getItems(id, limit, getElementsAroundIndex);
+}
+
+function getItems(
+  id: string,
+  limit: number,
+  getAroundIndex: (candidates: HTMLElement[], index: number, maxItems: number) => HTMLElement[]
+): HTMLElement[] {
+  const candidates = getCandidates();
+  const index = candidates.findIndex(candidate => candidate.id === id);
+  return getAroundIndex(candidates, index, limit);
 }

@@ -1,4 +1,4 @@
-import { GalleryMenuAction } from "@/types/ui";
+import { GalleryMenuAction } from "@/types/app";
 
 export interface GalleryRenderer {
   root: HTMLElement
@@ -16,6 +16,7 @@ export interface GalleryViewCallbacks {
   onMenuAction: (action: GalleryMenuAction) => void
   onVideoEnded: () => void
   onVideoDoubleClicked: (event: MouseEvent) => void
+  getVisibleThumbIds: () => Set<string>
 }
 
 export type GalleryMenuButton = {

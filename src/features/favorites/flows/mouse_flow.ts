@@ -1,0 +1,42 @@
+import * as Navigator from "@/lib/remote/rule34/posts/navigation";
+import { EnhancedMouseEvent } from "@/types/input";
+import { GALLERY_DISABLED } from "@/app/context/flags";
+import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+
+let previousThumb: HTMLElement | null = null;
+
+export function onClick(event: EnhancedMouseEvent): void {
+  if (event.thumb === null) {
+    return;
+  }
+
+  if (event.ctrlKey) {
+    Navigator.openMedia(event.thumb);
+  }
+  event.originalEvent.preventDefault();
+}
+
+export function onMouseDown(event: EnhancedMouseEvent): void {
+  if (event.thumb === null || event.ctrlKey) {
+    return;
+  }
+  const shouldOpen = event.middleClick ||
+    (event.leftClick && (event.shiftKey || GALLERY_DISABLED));
+
+  if (shouldOpen) {
+    Navigator.openPost(event.thumb.id);
+  }
+  event.originalEvent.preventDefault();
+}
+
+export function onMouseOver(event: EnhancedMouseEvent): void {
+  if (event.thumb === previousThumb || event.thumb === null) {
+    return;
+  }
+
+  if (previousThumb !== null) {
+    previousThumb.querySelector("a")?.setAttribute("href", buildPostPageUrl(previousThumb.id));
+  }
+  event.thumb.querySelector("a")?.removeAttribute("href");
+  previousThumb = event.thumb;
+}

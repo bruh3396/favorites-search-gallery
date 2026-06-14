@@ -1,5 +1,5 @@
 import { buildFavoritesPageUrl, buildProfilePageUrl } from "@/lib/remote/url/page_url_builder";
-import { withExponentialBackoff, yieldControl } from "@/lib/async/timing";
+import { withExponentialBackoff, macroTask } from "@/lib/async/async";
 import { FAVORITES_PAGE_ID } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { extractFavoritesCount } from "@/lib/remote/parsers/profile_page";
@@ -23,7 +23,7 @@ export function fetchFavoritesCount(): Promise<number | null> {
 }
 
 async function fetchProfilePage(pageId: string): Promise<string> {
-  await yieldControl();
+  await macroTask();
   return withExponentialBackoff(
     () => fetchHtml(buildProfilePageUrl(pageId)),
     Rule34NetworkConfig.favoritesCountFetchRetries

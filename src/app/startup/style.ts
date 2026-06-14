@@ -18,8 +18,8 @@ import { insertStyle } from "@/utils/dom/injector";
 
 export function setupStyles(): void {
   insertBaseStyles();
-  applyTheme(Preferences.appTheme.value);
-  applySurfaceGradient(Preferences.appSurfaceGradient.value);
+  applyTheme(Preferences.app.theme.value);
+  applySurfaceGradient(Preferences.app.surfaceGradient.value);
   applyTileVariables();
 }
 

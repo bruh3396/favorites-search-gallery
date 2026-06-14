@@ -1,4 +1,4 @@
-import { Layout } from "@/types/ui";
+import { Layout } from "@/types/app";
 
 export abstract class AbstractTiler {
   protected readonly container: HTMLElement;

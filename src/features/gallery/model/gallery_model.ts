@@ -8,7 +8,7 @@ import { isVideoThumb } from "@/lib/media/type_predicates";
 
 export * from "@/features/gallery/model/gallery_state";
 export * from "@/features/gallery/model/cursor";
-export * from "@/features/gallery/model/neighbors";
+export { setup as setupNeighbors, getItemsAround, getWrappedItemsAround } from "@/features/gallery/model/neighbors";
 
 export const isViewingVideo = (): boolean => GalleryState.isInGallery() && isVideoThumb(GalleryCursor.currentThumb());
 export const openPost = (): void => Navigator.openPost(GalleryCursor.currentThumb().id);

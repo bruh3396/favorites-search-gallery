@@ -29,7 +29,7 @@ function resetFadeObserver(): void {
 }
 
 function revealVisible(entries: IntersectionObserverEntry[]): void {
-  const columnCount = Math.max(1, ON_FAVORITES_PAGE ? Preferences.favoritesColumnCount.value : Preferences.postListColumnCount.value);
+  const columnCount = Math.max(1, ON_FAVORITES_PAGE ? Preferences.favorites.columnCount.value : Preferences.postList.columnCount.value);
   let revealed = 0;
 
   for (const entry of entries) {

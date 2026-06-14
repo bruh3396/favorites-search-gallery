@@ -15,12 +15,12 @@ export function enableInfiniteScroll(): void {
 }
 
 export async function showMoreResults(): Promise<boolean> {
-  if (!Preferences.postListInfiniteScroll.value) {
+  if (!Preferences.postList.infiniteScroll.value) {
     return false;
   }
   const moreResults = await PostListNavigatorModel.getMoreResults();
 
-  if (moreResults.length > 0 && Preferences.postListInfiniteScroll.value) {
+  if (moreResults.length > 0 && Preferences.postList.infiniteScroll.value) {
     PostListNavigatorView.insertNewSearchResults(moreResults);
     Events.postList.moreResultsAdded.emit(moreResults);
     pageBottomObserver.refresh();

@@ -1,4 +1,4 @@
-import { AwesompleteSuggestion } from "@/types/ui";
+import { AwesompleteSuggestion } from "@/types/awesomplete";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 

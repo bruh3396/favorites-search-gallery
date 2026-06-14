@@ -1,4 +1,4 @@
-import { GalleryState } from "@/types/ui";
+import { GalleryState } from "@/types/app";
 import { Preferences } from "@/app/context/preferences";
 
 let currentState = initialState();
@@ -20,5 +20,5 @@ export function togglePreview(): void {
 }
 
 function initialState(): GalleryState {
-  return Preferences.galleryPreviewEnabled.value ? "preview" : "idle";
+  return Preferences.gallery.previewEnabled.value ? "preview" : "idle";
 }

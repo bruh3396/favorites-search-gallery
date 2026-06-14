@@ -1,4 +1,4 @@
-import { FavoritesDrawerTab } from "@/types/ui";
+import { FavoritesDrawerTab } from "@/types/app";
 import { IconName } from "@/lib/ui/icon";
 
 export const FavoritesId = {

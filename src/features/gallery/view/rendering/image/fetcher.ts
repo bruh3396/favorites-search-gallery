@@ -1,6 +1,6 @@
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { ThrottleQueue } from "@/lib/async/throttle_queue";
-import { fetchImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
+import { fetchFullImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
 import { getImageFromThumb } from "@/lib/thumb/thumbs";
 import { imageIsLoaded } from "@/utils/dom/image";
 
@@ -20,7 +20,7 @@ async function fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
   }
 
   try {
-    request.complete(await fetchImageBitmapFromThumb(request.thumb, request.abortController));
+    request.complete(await fetchFullImageBitmapFromThumb(request.thumb, request.abortController));
     return true;
   } catch (error) {
     if (isAbortError(error)) {

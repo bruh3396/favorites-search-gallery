@@ -44,7 +44,6 @@ export abstract class AbstractFavoritesSearchBox {
     const persistInput = debounceLeading<Event>(() => this.history.setLastQuery(this.searchBox.value), INPUT_PERSIST_DELAY);
 
     this.searchBox.addEventListener("input", persistInput);
-    Events.searchBox.append.on((text) => this.appendText(text));
   }
 
   protected abstract createSearchBox(): HTMLTextAreaElement | HTMLInputElement;

@@ -14,12 +14,14 @@ export const reveal = (id: string): void => activeView().reveal(id);
 export const loadMoreResults = (direction: NavigationKey): boolean => activeView().loadMore(direction);
 
 export function syncResults(newFavorites: Favorite[]): void {
-  Events.favorites.searchResultsUpdated.emit();
+  const currentSearchResults = FavoritesModel.getCurrentSearchResults();
+
+  Events.favorites.searchResultsUpdated.emit(currentSearchResults);
   FavoritesView.updateStatus({
-    resultsCount: FavoritesModel.getCurrentSearchResults().length,
+    resultsCount: currentSearchResults.length,
     allFavoritesCount: FavoritesModel.getAllFavorites().length
   });
   activeView().sync(newFavorites);
 }
 
-const activeView = (): FavoritesResultsView => (Preferences.favoritesInfiniteScroll.value ? FavoritesInfiniteScrollView : FavoritesPaginatedView);
+const activeView = (): FavoritesResultsView => (Preferences.favorites.infiniteScroll.value ? FavoritesInfiniteScrollView : FavoritesPaginatedView);

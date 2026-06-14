@@ -1,4 +1,4 @@
-import { TypeableInput } from "@/types/ui";
+import { TypeableInput } from "@/types/input";
 import { typeableInputs } from "@/types/guards";
 
 export function isHotkeyEvent(event: KeyboardEvent): boolean {

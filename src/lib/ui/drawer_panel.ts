@@ -1,4 +1,7 @@
-import { DrawerPanelClasses } from "@/types/ui";
+interface DrawerPanelClasses {
+  section: string;
+  sectionTitle: string;
+}
 
 export function section(classes: DrawerPanelClasses, title: string, ...children: (HTMLElement | SVGElement)[]): HTMLElement {
   const element = document.createElement("section");

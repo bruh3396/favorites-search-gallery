@@ -1,4 +1,4 @@
-import { sleep } from "@/lib/async/timing";
+import { sleep } from "@/lib/async/async";
 
 type Waiter = {
   id: string | null;

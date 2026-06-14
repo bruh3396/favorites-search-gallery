@@ -85,7 +85,7 @@ export function getThumbAtPoint(x: number, y: number): HTMLElement | null {
   return element instanceof HTMLElement ? getClosestThumb(element) : null;
 }
 
-export function waitForThumbnailsToLoadInContainer(container: HTMLElement | Document): Promise<unknown[]> {
+export function waitForThumbsToLoadInContainer(container: HTMLElement | Document): Promise<unknown[]> {
   const unloadedImages = getItemsInContainer(container)
     .map(thumb => getImageFromThumb(thumb))
     .filter(image => image instanceof HTMLImageElement)

@@ -94,3 +94,7 @@ export function setCenterThumb(thumb: HTMLElement | null): void {
 export function getVisibleThumbs(): HTMLElement[] {
   return instance?.getVisible() ?? [];
 }
+
+export function getVisibleThumbIds(): Set<string> {
+  return new Set(getVisibleThumbs().map(thumb => thumb.id));
+}

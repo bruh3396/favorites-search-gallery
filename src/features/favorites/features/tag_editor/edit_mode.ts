@@ -1,4 +1,5 @@
 import { select, unselectAll } from "@/features/favorites/features/tag_editor/selection";
+import { EnhancedMouseEvent } from "@/types/input";
 import { Favorite } from "@/types/favorite";
 import { ITEM_CLASS_NAME } from "@/lib/thumb/thumbs";
 import { insertStyle } from "@/utils/dom/injector";
@@ -21,15 +22,16 @@ export function toggleTagEditMode(value: boolean): void {
   unselectAll();
 }
 
-export function handleDocumentClick(event: MouseEvent): void {
+export function handleDocumentClick(event: EnhancedMouseEvent): void {
   if (!tagEditModeEnabled) {
     return;
   }
+  const target = event.originalEvent.target;
 
-  if (!(event.target instanceof HTMLElement) || !event.target.classList.contains(ITEM_CLASS_NAME)) {
+  if (!(target instanceof HTMLElement) || !target.classList.contains(ITEM_CLASS_NAME)) {
     return;
   }
-  const favorite = getFavorite(event.target.id);
+  const favorite = getFavorite(target.id);
 
   if (favorite !== undefined) {
     select(favorite);

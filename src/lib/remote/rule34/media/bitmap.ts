@@ -1,14 +1,18 @@
 import { imageUrlToSampleUrl, withRule34WimgHostname } from "@/lib/media/url_transformer";
+import { isImageThumb } from "@/lib/media/type_predicates";
 import { resolveImageUrl } from "@/lib/media/url_resolver";
 import { toMediaItem } from "@/lib/thumb/item";
 
-export async function fetchImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
+export async function fetchFullImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
   return fetchImageBitmap(await resolveImageUrl(toMediaItem(thumb)), abortController);
 }
 
 export async function fetchSampleImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
+  if (!isImageThumb(thumb)) {
+    return fetchFullImageBitmapFromThumb(thumb, abortController);
+  }
   return fetchImageBitmap(imageUrlToSampleUrl(await resolveImageUrl(toMediaItem(thumb))), abortController)
-    .catch(() => fetchImageBitmapFromThumb(thumb, abortController));
+    .catch(() => fetchFullImageBitmapFromThumb(thumb, abortController));
 }
 
 function fetchImageBitmap(url: string, abortController?: AbortController): Promise<ImageBitmap> {

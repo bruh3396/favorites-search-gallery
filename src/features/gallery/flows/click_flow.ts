@@ -1,9 +1,9 @@
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { DomEvents } from "@/app/dom/events";
 import { EnhancedMouseEvent } from "@/types/input";
-import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import { overGalleryMenu } from "@/features/gallery/dom_tweaks/menu";
 import { throttle } from "@/lib/async/throttle";
 
@@ -13,18 +13,18 @@ export const onMouseMove = throttle<MouseEvent>(() => {
   });
 }, 250);
 
-export function onClick(mouseEvent: MouseEvent): void {
+export function onClick(mouseEvent: EnhancedMouseEvent): void {
   GalleryDispatch.run({
     open: onClickInGallery
-  }, mouseEvent);
+  }, mouseEvent.originalEvent);
 }
 
-export function onMouseDown(event: MouseEvent | TouchEvent): void {
+export function onMouseDown(event: EnhancedMouseEvent): void {
   GalleryDispatch.run({
     preview: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery,
     open: onMouseDownInGallery
-  }, new EnhancedMouseEvent(event));
+  }, event);
 }
 
 export function onContextMenu(mouseEvent: MouseEvent): void {
@@ -47,7 +47,7 @@ function onClickInGallery(mouseEvent: MouseEvent): void {
 }
 
 function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
-  if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey) {
+  if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey && !mouseEvent.shiftKey) {
     mouseEvent.originalEvent.preventDefault();
     GalleryOpenCloseFlow.open(mouseEvent.thumb);
     return;

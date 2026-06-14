@@ -1,4 +1,4 @@
-import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "@/types/ui";
+import { AwesompleteConstructor, AwesompleteInstance, AwesompleteSuggestion } from "@/types/awesomplete";
 import { AUTOCOMPLETE_DISABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { addAwesompleteToGlobalScope } from "@/features/autocomplete/autocomplete_awesomplete_implementation";
@@ -39,7 +39,7 @@ function getAutocompleteSuggestions(prefix: string): Promise<string> {
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {
   const suggestions = addCustomTagsToAutocomplete(JSON.parse(html), prefix);
-  return Preferences.savedSearchesSuggestions.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
+  return Preferences.savedSearches.suggestions.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
 }
 
 async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: AwesompleteInstance): Promise<void> {

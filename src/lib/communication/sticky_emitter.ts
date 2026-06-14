@@ -1,5 +1,5 @@
 import { Emitter } from "@/lib/communication/emitter";
-import { withTimeout } from "@/lib/async/timing";
+import { withTimeout } from "@/lib/async/async";
 
 export class StickyEmitter<V> extends Emitter<V> {
   private lastValue: V | undefined;

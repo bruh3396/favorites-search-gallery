@@ -1,16 +1,15 @@
 import * as FavoritesChangelog from "@/features/favorites/view/shell/changelog";
 import * as FavoritesHelp from "@/features/favorites/view/shell/help";
-import * as FavoritesSettings from "@/features/favorites/view/shell/settings";
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import { FavoritesClass, FavoritesDrawerTabs, FavoritesId } from "@/features/favorites/types/scaffold";
 import { IconName, icon } from "@/lib/ui/icon";
 import { removeDataset, setDataset } from "@/utils/dom/attribute";
-import { FavoritesDrawerTab } from "@/types/ui";
+import { FavoritesDrawerTab } from "@/types/app";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
-import { yieldControl } from "@/lib/async/timing";
+import { macroTask } from "@/lib/async/async";
 
-let activeTab: FavoritesDrawerTab = Preferences.favoritesDrawerActiveTab.value;
+let activeTab: FavoritesDrawerTab = Preferences.favorites.drawerActiveTab.value;
 
 export async function setup(): Promise<void> {
   if (!ON_DESKTOP_DEVICE) {
@@ -22,12 +21,11 @@ export async function setup(): Promise<void> {
   drawer.appendChild(buildTabRail());
   drawer.appendChild(buildPanels());
   FavoritesShell.DrawerTrack.appendChild(drawer);
-  FavoritesSettings.wireSettingsPanel();
   selectTab(activeTab);
   wireVersionLabel();
 
-  if (Preferences.favoritesDrawerOpen.value) {
-    await yieldControl();
+  if (Preferences.favorites.drawerOpen.value) {
+    await macroTask();
     openInstantly();
   }
 }
@@ -43,7 +41,7 @@ export function toggleDrawer(): void {
     removeDataset(FavoritesShell.Body, "drawerOpen");
     removeDataset(button, "active");
   }
-  Preferences.favoritesDrawerOpen.set(open);
+  Preferences.favorites.drawerOpen.set(open);
 }
 
 function toggleTo(tab: FavoritesDrawerTab): void {
@@ -81,7 +79,7 @@ function panelId(tab: FavoritesDrawerTab): string {
 
 function selectTab(tab: FavoritesDrawerTab): void {
   activeTab = tab;
-  Preferences.favoritesDrawerActiveTab.set(tab);
+  Preferences.favorites.drawerActiveTab.set(tab);
 
   for (const { tab: candidate } of FavoritesDrawerTabs) {
     const isActive = candidate === tab;
@@ -160,9 +158,6 @@ function buildPanels(): HTMLElement {
 
 function renderPanelContent(tab: FavoritesDrawerTab, panel: HTMLElement): void {
   switch (tab) {
-    case "settings":
-      FavoritesSettings.buildSettingsPanel(panel);
-      break;
     case "change":
       FavoritesChangelog.buildChangelogPanel(panel);
       break;

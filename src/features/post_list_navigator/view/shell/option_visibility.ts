@@ -26,7 +26,7 @@ export function hideUnusedOptions(): void {
     hiddenSelectors.add("#post-list-tooltip");
   }
 
-  if (!Preferences.postListFavoriteIndicator.value) {
+  if (!Preferences.postList.favoriteIndicator.value) {
     for (const id of ["post-list-favorite-indicator-style", "post-list-gallery-favorite-style"]) {
       document.getElementById(id)?.style.setProperty("display", "none");
     }

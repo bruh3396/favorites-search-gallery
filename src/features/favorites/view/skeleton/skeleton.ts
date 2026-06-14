@@ -1,6 +1,6 @@
 import * as FavoritesAspectRatios from "@/features/favorites/view/skeleton/aspect_ratios";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
-import { Layout } from "@/types/ui";
+import { Layout } from "@/types/app";
 import { Preferences } from "@/app/context/preferences";
 import { SkeletonConfig } from "@/config/skeleton_config";
 import { getLayout } from "@/app/layout/content_tiler";
@@ -31,5 +31,5 @@ class FavoritesSkeleton {
 }
 
 export function build(): HTMLElement[] {
-  return new FavoritesSkeleton(getLayout(), Preferences.favoritesResultsPerPage.value).elements;
+  return new FavoritesSkeleton(getLayout(), Preferences.favorites.resultsPerPage.value).elements;
 }

@@ -30,8 +30,8 @@ export function nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
 
 export const hide = (): void => renderers.forEach(r => r.hide());
 export const cache = (thumbs: HTMLElement[]): void => renderers.forEach(r => r.cache(thumbs));
-export { cache as cacheImages, reupscaleCachedThumbs, upscale, correctOrientation, downscaleAll, toggleZoom, toggleZoomCursor, upscaleCachedThumbs, zoomToPoint } from "@/features/gallery/view/rendering/image/renderer";
-export { toggleVideoLooping, restartVideo, toggleVideoPause, toggleVideoMute } from "@/features/gallery/view/rendering/video/renderer";
+export * from "@/features/gallery/view/rendering/image/renderer";
+export * from "@/features/gallery/view/rendering/video/renderer";
 
 function resolve(thumb: HTMLElement): GalleryRenderer {
   const item = toMediaItem(thumb);

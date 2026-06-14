@@ -1,6 +1,6 @@
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/communication/feature_channel";
-import { GalleryState } from "@/types/ui";
+import { GalleryState } from "@/types/app";
 import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 

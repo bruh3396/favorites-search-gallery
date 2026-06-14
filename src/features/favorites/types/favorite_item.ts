@@ -7,6 +7,7 @@ import { Post } from "@/types/api";
 import { Rating } from "@/types/search";
 import { compressPreviewSource } from "@/lib/media/url_compressor";
 import { getIdFromThumb } from "@/lib/thumb/thumbs";
+import { toSortedTagSet } from "@/utils/string/tags";
 
 export class FavoriteItem implements Favorite {
   public readonly id: string;
@@ -37,7 +38,7 @@ export class FavoriteItem implements Favorite {
     return this.element.root;
   }
 
-  public get thumbnailUrl(): string {
+  public get thumbUrl(): string {
     return this.element === null ? this.post.previewURL : this.element.thumbUrl;
   }
 
@@ -46,10 +47,10 @@ export class FavoriteItem implements Favorite {
   }
 
   public get databaseRecord(): FavoriteDatabaseRecord {
-    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbnailUrl), metadata: this.metadata.databaseRecord };
+    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbUrl), metadata: this.metadata.databaseRecord };
   }
 
-  public updateTags = (post: Post): void => this.favoriteTags.set(post.tags);
+  public updateTags = (post: Post): void => this.favoriteTags.set(toSortedTagSet(post.tags));
   public withinRating = (rating: Rating): boolean => (this.metadata.rating & rating) > 0;
   public populateMetadata = (post: Post): void => {
     this.metadata.populateFromPost(post);

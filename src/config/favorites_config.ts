@@ -15,7 +15,7 @@ export const FavoritesConfig = {
 
   searchIndexBuildBatchSize: 500,
   buildIndexAsync: true,
-  preloadThumbnails: true,
+  preloadThumbs: true,
   favoriteFinderEnabled: false,
   bottomNavigationButtonsEnabled: true
 };

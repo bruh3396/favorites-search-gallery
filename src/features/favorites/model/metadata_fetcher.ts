@@ -7,7 +7,7 @@ import { fetchPost } from "@/lib/remote/api/post";
 import { fetchVideoDurationFromFavorite } from "@/lib/remote/rule34/media/duration";
 import { isVideo } from "@/lib/media/type_predicates";
 import { tagsNeedCorrection } from "@/lib/search/tags/tag_corrector";
-import { withExponentialBackoff } from "@/lib/async/timing";
+import { withExponentialBackoff } from "@/lib/async/async";
 
 let onMetadataPopulated: (favorite: Favorite) => void = () => undefined;
 let beforeUpdateTags: (favorite: Favorite) => void = () => undefined;

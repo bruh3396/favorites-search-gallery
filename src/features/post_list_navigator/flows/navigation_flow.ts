@@ -7,7 +7,7 @@ import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { Preferences } from "@/app/context/preferences";
 
 export function navigatePostLists(direction: NavigationKey): PostList | null {
-  if (Preferences.postListInfiniteScroll.value) {
+  if (Preferences.postList.infiniteScroll.value) {
     PostListNavigatorInfiniteScrollFlow.showMoreResults();
     return null;
   }

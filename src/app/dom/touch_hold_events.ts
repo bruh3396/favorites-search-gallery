@@ -1,5 +1,4 @@
 import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Timeout } from "@/types/async";
 
@@ -17,7 +16,7 @@ function startHoldTimer(event: TouchEvent): void {
   stopHoldTimer();
 
   timer = setTimeout(() => {
-    Events.mobile.touchHold.emit(event);
+    DomEvents.mobile.touchHold.emit(event);
   }, THRESHOLD);
 }
 

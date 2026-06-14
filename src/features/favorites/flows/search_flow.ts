@@ -5,7 +5,7 @@ import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 
 export function showSearchResults(searchResults: Favorite[]): void {
-  Events.favorites.searchResultsUpdated.emit();
+  Events.favorites.searchResultsUpdated.emit(searchResults);
   FavoritesView.setMatchCount(searchResults.length);
   FavoritesResultsFlow.showResults(searchResults);
 }

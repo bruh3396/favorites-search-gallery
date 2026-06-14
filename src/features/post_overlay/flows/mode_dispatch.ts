@@ -7,7 +7,7 @@ type OverlayModeHandlers<V> = {
 export function dispatchByMode<V>(handlers: OverlayModeHandlers<V>, args?: V): void {
   const handler = {
     tag: handlers.tag
-  }[Preferences.postOverlayMode.value];
+  }[Preferences.postOverlay.mode.value];
 
   handler?.(args as V);
 }

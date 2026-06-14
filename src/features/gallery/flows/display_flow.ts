@@ -2,7 +2,7 @@ import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
-import { yieldControl } from "@/lib/async/timing";
+import { macroTask } from "@/lib/async/async";
 
 export function display(thumb: HTMLElement): void {
   GalleryView.display(thumb);
@@ -16,7 +16,7 @@ export function displaySelected(): void {
 
 async function cacheAdjacent(thumb: HTMLElement): Promise<void> {
   if (GalleryConfig.preloadingEnabled) {
-    await yieldControl();
-    GalleryView.cache(GalleryModel.getThumbsAround(thumb));
+    await macroTask();
+    GalleryView.cache(GalleryModel.getItemsAround(thumb.id));
   }
 }

@@ -1,4 +1,4 @@
-import { convertToSortedTagString as toSortedTagString, toTagSet } from "@/utils/string/tags";
+import { toSortedTagSet, toSortedTagString } from "@/utils/string/tags";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
 
@@ -15,7 +15,7 @@ export function tagsNeedCorrection(favorite: Favorite, post: Post): boolean {
 }
 
 function correctTags(post: Post): Set<string> {
-  const validTags = toTagSet(post.tags);
+  const validTags = toSortedTagSet(post.tags);
 
   validTags.add(post.id);
 

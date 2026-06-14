@@ -24,7 +24,7 @@ export function setup(pageSelected: (pageNumber: number) => void, pageStepped: (
   onPageStepped = pageStepped;
   insert();
   buildPaginator({currentPage: 1, finalPage: 1, totalCount: 0, sliceStart: 0, sliceEnd: 0, sequence: [1]});
-  togglePaginator(!Preferences.favoritesInfiniteScroll.value);
+  togglePaginator(!Preferences.favorites.infiniteScroll.value);
 }
 
 export function togglePaginator(value: boolean): void {

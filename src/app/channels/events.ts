@@ -1,4 +1,4 @@
-import { GalleryMenuAction, HighlightStyle, Layout, PerformanceProfile } from "@/types/ui";
+import { FeatureNamespaced, GalleryMenuAction, HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
 import { MetadataMetric, Rating, TagCategoryMap } from "@/types/search";
 import { Emitter } from "@/lib/communication/emitter";
 import { Favorite } from "@/types/favorite";
@@ -25,7 +25,7 @@ export const Events = {
     favoritesDatabaseLoaded: new StickyEmitter<void>(),
     favoritesLoaded: new StickyEmitter<void>(),
 
-    searchResultsUpdated: new Emitter<void>(),
+    searchResultsUpdated: new Emitter<Favorite[]>(),
     tagCategoriesResolved: new Emitter<TagCategoryMap>(),
     newFavoritesFound: new Emitter<Favorite[]>(),
     favoritesAddedToCurrentPage: new Emitter<Favorite[]>(),
@@ -62,13 +62,6 @@ export const Events = {
     leftTap: new Emitter<void>(),
     interactionStopped: new Emitter<void>()
   },
-  caption: {
-    idClicked: new Emitter<string>(),
-    searchForTag: new Emitter<string>()
-  },
-  searchBox: {
-    append: new Emitter<string>()
-  },
   postOverlay: {
     addTagToSearch: new Emitter<string>(),
     excludeTagFromSearch: new Emitter<string>(),
@@ -84,12 +77,5 @@ export const Events = {
     pageChanged: new Emitter<HTMLElement[]>(),
     favoriteIndicatorToggled: new Emitter<boolean>(),
     favoriteIndicatorStyleChanged: new Emitter<HighlightStyle>()
-  },
-  mobile: {
-    swipedUp: new Emitter<void>(),
-    swipedDown: new Emitter<void>(),
-    swipedLeft: new Emitter<void>(),
-    swipedRight: new Emitter<void>(),
-    touchHold: new Emitter<TouchEvent>()
   }
-};
+} satisfies FeatureNamespaced;

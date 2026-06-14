@@ -1,10 +1,10 @@
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 
-export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_POST_LIST_PAGE && Preferences.postListEnabled.value);
+export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_POST_LIST_PAGE && Preferences.postList.enabled.value);
 export const FAVORITES_SEARCH_GALLERY_DISABLED = !FAVORITES_SEARCH_GALLERY_ENABLED;
 
-export const PERFORMANCE_PROFILE = Preferences.appPerformanceProfile.value;
+export const PERFORMANCE_PROFILE = Preferences.app.performanceProfile.value;
 
 export const GALLERY_ENABLED = (ON_FAVORITES_PAGE || ON_POST_LIST_PAGE) && (PERFORMANCE_PROFILE === "normal" || PERFORMANCE_PROFILE === "medium");
 export const GALLERY_DISABLED = !GALLERY_ENABLED;
@@ -30,5 +30,5 @@ export const AUTOCOMPLETE_DISABLED = !AUTOCOMPLETE_ENABLED;
 export const DOWNLOADER_ENABLED = ON_FAVORITES_PAGE;
 export const DOWNLOADER_DISABLED = !DOWNLOADER_ENABLED;
 
-export const POST_LIST_PAGE_ENABLED = ON_POST_LIST_PAGE && Preferences.postListEnabled.value;
+export const POST_LIST_PAGE_ENABLED = ON_POST_LIST_PAGE && Preferences.postList.enabled.value;
 export const POST_LIST_PAGE_DISABLED = !POST_LIST_PAGE_ENABLED;

@@ -6,11 +6,11 @@ import { Preferences } from "@/app/context/preferences";
 import { didSwipe } from "@/app/dom/swipe_events";
 import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 
-export function onMouseDown(event: MouseEvent): void {
+export function onMouseDown(event: EnhancedMouseEvent): void {
   GalleryDispatch.run({
     preview: onMouseDownOutsideGallery,
     idle: onMouseDownOutsideGallery
-  }, new EnhancedMouseEvent(event));
+  }, event);
 }
 
 export function onTouchStart(event: TouchEvent): void {
@@ -62,5 +62,5 @@ function onTouchStartInGallery(event: TouchEvent): void {
 }
 
 function galleryEnabled(): boolean {
-  return (ON_FAVORITES_PAGE && Preferences.galleryMobileEnabled.value) || (ON_POST_LIST_PAGE && Preferences.postListEnabled.value);
+  return (ON_FAVORITES_PAGE && Preferences.gallery.mobileEnabled.value) || (ON_POST_LIST_PAGE && Preferences.postList.enabled.value);
 }

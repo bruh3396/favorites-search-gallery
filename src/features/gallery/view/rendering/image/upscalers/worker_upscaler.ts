@@ -1,68 +1,97 @@
-import { OffscreenUpscaleRequest } from "@/features/gallery/types/offscreen_upscale_request";
+// This file is compiled to a standalone string (via `?raw`) and run inside a Web Worker.
+// It is transformed, not bundled, so it must be fully self-contained — no imports.
 
 type UpscaleConfig = {
-  maxUpscaledThumbCanvasHeight: number;
-  upscaledThumbCanvasWidth: number;
-  upscaleUsingSamples: boolean;
+  upscaledCanvasWidth: number
+  maxUpscaledCanvasHeight: number
+}
+
+type UpscaleCommand =
+  | { action: "init", config: UpscaleConfig }
+  | { action: "upscale", id: string, url: string, canvas?: OffscreenCanvas }
+  | { action: "evict", id: string }
+
+const canvases: Map<string, OffscreenCanvas> = new Map();
+let config: UpscaleConfig = { upscaledCanvasWidth: 600, maxUpscaledCanvasHeight: 16_000 };
+
+self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
+  const message = event.data;
+
+  switch (message.action) {
+    case "init":
+      config = message.config;
+      break;
+
+    case "upscale":
+      upscale(message.id, message.url, message.canvas);
+      break;
+
+    case "evict":
+      evict(message.id);
+      break;
+    default:
+      break;
+  }
 };
 
-let config: UpscaleConfig;
-const offscreenCanvases: Map<string, OffscreenCanvas> = new Map();
-
-async function createImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
-  const url = config.upscaleUsingSamples ? request.sampleUrl : request.imageUrl;
-  let response = await fetch(url);
-
-  if (!response.ok) {
-    response = await fetch(request.imageUrl);
+async function upscale(id: string, url: string, canvas?: OffscreenCanvas): Promise<void> {
+  if (canvas !== undefined) {
+    canvases.set(id, canvas);
   }
-  return createImageBitmap(await response.blob());
+  const target = canvases.get(id);
+
+  if (target === undefined) {
+    return;
+  }
+  const bitmap = await fetchBitmap(url);
+
+  if (bitmap === null) {
+    return;
+  }
+  draw(target, bitmap);
+  bitmap.close();
 }
 
-function getImageBitmapFromRequest(request: OffscreenUpscaleRequest): Promise<ImageBitmap> {
-  return request.bitmap instanceof ImageBitmap ? Promise.resolve(request.bitmap) : createImageBitmapFromRequest(request);
+function evict(id: string): void {
+  const canvas = canvases.get(id);
+
+  if (canvas === undefined) {
+    return;
+  }
+  canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.width = 0;
+  canvas.height = 0;
+  canvases.delete(id);
 }
 
-function drawOffscreenCanvas(context: OffscreenCanvasRenderingContext2D | null, bitmap: ImageBitmap): void {
+async function fetchBitmap(url: string): Promise<ImageBitmap | null> {
+  try {
+    const response = await fetch(url);
+    return await createImageBitmap(await response.blob());
+  } catch {
+    return null;
+  }
+}
+
+function draw(canvas: OffscreenCanvas, bitmap: ImageBitmap): void {
+  setCanvasDimensions(canvas, bitmap.width, bitmap.height);
+  const context = canvas.getContext("2d");
+
   if (context === null) {
     return;
   }
-  const offscreenCanvas = context.canvas;
-  const ratio = Math.min(offscreenCanvas.width / bitmap.width, offscreenCanvas.height / bitmap.height);
-  const centerShiftX = (offscreenCanvas.width - (bitmap.width * ratio)) / 2;
-  const centerShiftY = (offscreenCanvas.height - (bitmap.height * ratio)) / 2;
+  const ratio = Math.min(canvas.width / bitmap.width, canvas.height / bitmap.height);
+  const centerShiftX = (canvas.width - (bitmap.width * ratio)) / 2;
+  const centerShiftY = (canvas.height - (bitmap.height * ratio)) / 2;
 
   context.drawImage(
     bitmap, 0, 0, bitmap.width, bitmap.height,
     centerShiftX, centerShiftY, bitmap.width * ratio, bitmap.height * ratio
   );
-  bitmap.close();
 }
 
-function clearOffscreenCanvas(offscreenCanvas: OffscreenCanvas): void {
-  const width = offscreenCanvas.width;
-  const height = offscreenCanvas.height;
-  const context = offscreenCanvas.getContext("2d");
-
-  if (context instanceof OffscreenCanvasRenderingContext2D) {
-    context.clearRect(0, 0, width, height);
-  }
-  offscreenCanvas.width = 0;
-  offscreenCanvas.height = 0;
-  setTimeout(() => {
-    offscreenCanvas.width = width;
-    offscreenCanvas.height = height;
-  }, 20);
-}
-
-function setOffscreenCanvasDimensions(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
-  if (request.hasDimensions || request.offscreenCanvas === null) {
-    return;
-  }
-  const maxHeight = config.maxUpscaledThumbCanvasHeight;
-  const width = bitmap.width;
-  const height = bitmap.height;
-  let targetWidth = config.upscaledThumbCanvasWidth;
+function setCanvasDimensions(canvas: OffscreenCanvas, width: number, height: number): void {
+  let targetWidth = config.upscaledCanvasWidth;
   let targetHeight = (targetWidth / width) * height;
 
   if (targetWidth > width) {
@@ -70,63 +99,10 @@ function setOffscreenCanvasDimensions(request: OffscreenUpscaleRequest, bitmap: 
     targetHeight = height;
   }
 
-  if (height > maxHeight) {
-    targetWidth *= (maxHeight / height);
-    targetHeight = maxHeight;
+  if (height > config.maxUpscaledCanvasHeight) {
+    targetWidth *= (config.maxUpscaledCanvasHeight / height);
+    targetHeight = config.maxUpscaledCanvasHeight;
   }
-  request.offscreenCanvas.width = targetWidth;
-  request.offscreenCanvas.height = targetHeight;
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
 }
-
-function handleInit(message: MessageEvent<{ action: string, config: UpscaleConfig }>): void {
-  config = message.data.config;
-  onmessage = handleMessage;
-}
-
-function handleMessage(message: MessageEvent<{ action: string, request: OffscreenUpscaleRequest }>): void {
-  const request = message.data;
-
-  switch (request.action) {
-    case "upscale":
-      upscale(request.request);
-      break;
-
-    case "clear":
-      clear();
-      break;
-
-    default:
-      break;
-  }
-}
-
-async function upscale(request: OffscreenUpscaleRequest): Promise<void> {
-  const bitmap = await getImageBitmapFromRequest(request);
-
-  collectOffscreenCanvas(request, bitmap);
-  drawOffscreenCanvasFromRequest(request, bitmap);
-}
-
-function collectOffscreenCanvas(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
-  if (!offscreenCanvases.has(request.id) && request.offscreenCanvas !== null) {
-    offscreenCanvases.set(request.id, request.offscreenCanvas);
-    setOffscreenCanvasDimensions(request, bitmap);
-  }
-}
-
-function drawOffscreenCanvasFromRequest(request: OffscreenUpscaleRequest, bitmap: ImageBitmap): void {
-  const offscreenCanvas = offscreenCanvases.get(request.id);
-
-  if (offscreenCanvas === undefined) {
-    return;
-  }
-  drawOffscreenCanvas(offscreenCanvas.getContext("2d"), bitmap);
-}
-
-function clear(): void {
-  for (const offscreenCanvas of offscreenCanvases.values()) {
-    clearOffscreenCanvas(offscreenCanvas);
-  }
-}
-
-onmessage = handleInit;

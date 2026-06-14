@@ -44,11 +44,19 @@ async function waitUntilPageIsReady(): Promise<void> {
 }
 
 function setup(): void {
+  setupModel();
   setupView();
   setupControl();
   setupSubFeatures();
   subscribeToEvents();
   serveExternalRequests();
+}
+
+function setupModel(): void {
+  const getFavoriteThumbs = (): HTMLElement[] => FeatureBridge.favoritesSearchResults.call().map(favorite => favorite.root);
+  const getPostListThumbs = (): HTMLElement[] => FeatureBridge.postListThumbs.call();
+
+  GalleryModel.setupNeighbors(ON_FAVORITES_PAGE ? getFavoriteThumbs : getPostListThumbs);
 }
 
 async function start(): Promise<void> {
@@ -70,7 +78,8 @@ function setupView(): void {
   GalleryView.setup({
     onMenuAction: Events.gallery.galleryMenuButtonClicked.emit,
     onVideoEnded: GalleryAutoplay.onVideoEnded,
-    onVideoDoubleClicked: GalleryOpenCloseFlow.close
+    onVideoDoubleClicked: GalleryOpenCloseFlow.close,
+    getVisibleThumbIds: GalleryThumbObserver.getVisibleThumbIds
   });
 }
 
@@ -120,9 +129,10 @@ function subscribeToEvents(): void {
 
 function subscribeToFavoritesEvents(): void {
   Events.favorites.newFavoritesFound.on(GalleryContentFlow.refresh, { once: true });
-  Events.favorites.pageChanged.on(GalleryContentFlow.hardRefresh);
+  Events.favorites.pageChanged.on(GalleryContentFlow.refresh);
   Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.reIndex);
   Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreview);
+  Events.favorites.searchResultsUpdated.on(GalleryContentFlow.downscaleThumbsOutsideResults);
 }
 
 function subscribeToPostListEvents(): void {
@@ -130,7 +140,7 @@ function subscribeToPostListEvents(): void {
   Events.postList.initialPostListCreated.on(GalleryPostListFlow.onInitialPostListCreated, { once: true });
   Events.postList.moreResultsAdded.on(GalleryContentFlow.refresh);
   Events.postList.infiniteScrollToggled.on(GalleryContentFlow.refresh);
-  Events.postList.pageChanged.on(GalleryContentFlow.hardRefresh);
+  Events.postList.pageChanged.on(GalleryContentFlow.refresh);
 }
 
 function subscribeToDesktopInput(): void {
@@ -152,8 +162,8 @@ function subscribeToMobileInput(): void {
   Events.gallery.rightTap.on(GalleryTouchFlow.onRightTap);
   DomEvents.document.mousedown.on(GalleryTouchFlow.onMouseDown);
   DomEvents.document.touchStart.on(GalleryTouchFlow.onTouchStart);
-  Events.mobile.swipedDown.on(GalleryTouchFlow.onSwipeDown);
-  Events.mobile.swipedUp.on(GalleryAutoplay.showMenu);
+  DomEvents.mobile.swipedDown.on(GalleryTouchFlow.onSwipeDown);
+  DomEvents.mobile.swipedUp.on(GalleryAutoplay.showMenu);
   DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
 }
 

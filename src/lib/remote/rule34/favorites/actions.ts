@@ -4,7 +4,7 @@ import { favoriteAddThrottle, favoriteRemoveThrottle } from "@/lib/remote/http/r
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { fetchHtml } from "@/lib/remote/http/client";
-import { withExponentialBackoff } from "@/lib/async/timing";
+import { withExponentialBackoff } from "@/lib/async/async";
 
 const SERVER_ADD_STATUS: Record<number, AddFavoriteStatus> = {
   0: "error",

@@ -1,6 +1,13 @@
-import { convertToSortedTagString, toTagSet, toTagString } from "@/utils/string/tags";
+import { toSortedTagSet, toSortedTagString, toTagSet, toTagString } from "@/utils/string/tags";
 import { FavoriteDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
+
+function toBaseTagSet(post: Post, record: HTMLElement | FavoriteDatabaseRecord): Set<string> {
+  if (record instanceof HTMLElement) {
+    return toSortedTagSet(post.tags);
+  }
+  return record.tags instanceof Set ? record.tags : toTagSet(record.tags);
+}
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();
@@ -8,7 +15,7 @@ export class FavoriteTags {
   private additionalTags: Set<string> = new Set();
 
   constructor(post: Post, record: HTMLElement | FavoriteDatabaseRecord, additionalTags?: string) {
-    this.set(record instanceof HTMLElement ? post.tags : record.tags, additionalTags);
+    this.set(toBaseTagSet(post, record), additionalTags === undefined ? undefined : toSortedTagSet(additionalTags));
     post.tags = "";
   }
 
@@ -16,33 +23,33 @@ export class FavoriteTags {
     return toTagString(this.tags);
   }
 
-  public set(tags: string | Set<string>, additionalTags?: string): void {
-    this.baseTags = tags instanceof Set ? tags : toTagSet(tags);
+  public set(tags: Set<string>, additionalTags?: Set<string>): void {
+    this.baseTags = tags;
 
     if (additionalTags !== undefined) {
-      this.additionalTags = toTagSet(additionalTags);
+      this.additionalTags = additionalTags;
     }
     this.mergeTags();
   }
 
   public addAdditionalTags(newTagString: string): string {
-    const newTags = toTagSet(newTagString).difference(this.tags);
+    const newTags = toSortedTagSet(newTagString).difference(this.tags);
 
     if (newTags.size > 0) {
       this.additionalTags = this.additionalTags.union(newTags);
       this.mergeTags();
     }
-    return convertToSortedTagString(this.additionalTags);
+    return toSortedTagString(this.additionalTags);
   }
 
   public removeAdditionalTags(tagsToRemove: string): string {
-    const tagsToRemoveSet = toTagSet(tagsToRemove).intersection(this.additionalTags);
+    const tagsToRemoveSet = toSortedTagSet(tagsToRemove).intersection(this.additionalTags);
 
     if (tagsToRemoveSet.size > 0) {
       this.additionalTags = this.additionalTags.difference(tagsToRemoveSet);
       this.mergeTags();
     }
-    return convertToSortedTagString(this.additionalTags);
+    return toSortedTagString(this.additionalTags);
   }
 
   public resetAdditionalTags(): void {
@@ -50,6 +57,15 @@ export class FavoriteTags {
       return;
     }
     this.additionalTags = new Set();
+    this.mergeTags();
+  }
+
+  private setPresorted(tags: string | Set<string>, additionalTags?: string): void {
+    this.baseTags = tags instanceof Set ? tags : toTagSet(tags);
+
+    if (additionalTags !== undefined) {
+      this.additionalTags = toSortedTagSet(additionalTags);
+    }
     this.mergeTags();
   }
 

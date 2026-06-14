@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { imageUrlToSampleUrl, thumbnailUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url_transformer";
+import { imageUrlToSampleUrl, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url_transformer";
 
 describe("withRule34Hostname", () => {
   test("one subdomain", () => {
@@ -27,7 +27,7 @@ describe("thumbnailUrlToImageUrl", () => {
     const source = "https://us.rule34.xxx/thumbnails/0123/thumbnail_123456abcde09.jpg?11187914";
     const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
 
-    expect(thumbnailUrlToImageUrl(source)).toBe(expected);
+    expect(thumbUrlToImageUrl(source)).toBe(expected);
   });
 });
 
