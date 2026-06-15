@@ -1,4 +1,4 @@
-import { average, clamp, coinFlip, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat, sum } from "@/utils/number";
+import { average, clamp, coinFlip, mapRange, millisecondsToSeconds, randomBetween, randomInt, randomIntInRange, roundToTwoDecimalPlaces, seededRandomFloat, stepDown, stepUp, sum } from "@/utils/number";
 import { describe, expect, test } from "vitest";
 
 describe("getRandomPositiveInteger", () => {
@@ -207,6 +207,67 @@ describe("clamp", () => {
   test("clamp max", () => {
     expect(clamp(100, 16, 20)).toBe(20);
     expect(clamp(1000, 16, 20)).toBe(20);
+  });
+});
+
+describe("stepUp", () => {
+  test("from an off-grid value goes up to the next multiple", () => {
+    expect(stepUp(1, 25)).toBe(25);
+    expect(stepUp(24, 25)).toBe(25);
+    expect(stepUp(30, 25)).toBe(50);
+    expect(stepUp(7, 5)).toBe(10);
+  });
+
+  test("from a multiple advances one full step", () => {
+    expect(stepUp(0, 25)).toBe(25);
+    expect(stepUp(25, 25)).toBe(50);
+    expect(stepUp(50, 25)).toBe(75);
+  });
+
+  test("step of 1 increments integers", () => {
+    expect(stepUp(7, 1)).toBe(8);
+    expect(stepUp(0, 1)).toBe(1);
+  });
+
+  test("negative values", () => {
+    expect(stepUp(-30, 25)).toBe(-25);
+    expect(stepUp(-25, 25)).toBe(0);
+    expect(stepUp(-1, 25)).toBe(0);
+  });
+
+  test("non-positive step returns value unchanged", () => {
+    expect(stepUp(7, 0)).toBe(7);
+    expect(stepUp(7, -5)).toBe(7);
+  });
+});
+
+describe("stepDown", () => {
+  test("from an off-grid value goes down to the previous multiple", () => {
+    expect(stepDown(30, 25)).toBe(25);
+    expect(stepDown(49, 25)).toBe(25);
+    expect(stepDown(24, 25)).toBe(0);
+    expect(stepDown(7, 5)).toBe(5);
+  });
+
+  test("from a multiple retreats one full step", () => {
+    expect(stepDown(50, 25)).toBe(25);
+    expect(stepDown(25, 25)).toBe(0);
+    expect(stepDown(0, 25)).toBe(-25);
+  });
+
+  test("step of 1 decrements integers", () => {
+    expect(stepDown(7, 1)).toBe(6);
+    expect(stepDown(1, 1)).toBe(0);
+  });
+
+  test("negative values", () => {
+    expect(stepDown(-1, 25)).toBe(-25);
+    expect(stepDown(-25, 25)).toBe(-50);
+  });
+
+  test("non-positive step returns value unchanged", () => {
+    expect(stepDown(7, 0)).toBe(7);
+    expect(stepDown(7, -5)).toBe(7);
   });
 });
 

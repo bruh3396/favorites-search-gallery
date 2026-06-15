@@ -22,6 +22,7 @@ import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { NavigationKey } from "@/types/input";
+import { Preferences } from "@/app/context/preferences";
 import { run } from "@/features/gallery/flows/dispatch";
 
 export async function startGallery(): Promise<void> {
@@ -102,7 +103,7 @@ function setupAutoplay(): void {
     subscribeToMouseMove: DomEvents.document.mousemove.on,
     subscribeToKeyDown: DomEvents.document.keydown.on
   });
-  Events.app.autoplayToggled.on(GalleryAutoplay.toggle);
+  Preferences.gallery.autoplayActive.on(GalleryAutoplay.toggle);
   Events.gallery.openedGallery.on(GalleryAutoplay.startAutoplay);
   Events.gallery.closedGallery.on(GalleryAutoplay.stopAutoplay);
   Events.gallery.displayedThumb.on(GalleryAutoplay.startViewTimer);
@@ -130,15 +131,15 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.newFavoritesFound.on(GalleryContentFlow.refresh, { once: true });
   Events.favorites.pageChanged.on(GalleryContentFlow.refresh);
   Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.reIndex);
-  Events.favorites.galleryPreviewToggled.on(GalleryModel.togglePreview);
+  Preferences.gallery.previewEnabled.on(GalleryModel.togglePreview);
   Events.favorites.searchResultsUpdated.on(GalleryContentFlow.downscaleThumbsOutsideResults);
 }
 
 function subscribeToPostListEvents(): void {
-  Events.postList.upscaleToggled.on(GalleryPostListFlow.onUpscaleToggled);
+  Preferences.postList.upscaleThumbs.on(GalleryPostListFlow.onUpscaleToggled);
   Events.postList.initialPostListCreated.on(GalleryPostListFlow.onInitialPostListCreated, { once: true });
   Events.postList.moreResultsAdded.on(GalleryContentFlow.refresh);
-  Events.postList.infiniteScrollToggled.on(GalleryContentFlow.refresh);
+  Preferences.postList.infiniteScroll.on(GalleryContentFlow.refresh);
   Events.postList.pageChanged.on(GalleryContentFlow.refresh);
 }
 

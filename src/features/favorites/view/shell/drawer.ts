@@ -7,7 +7,7 @@ import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { FavoritesDrawerTab } from "@/types/app";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
-import { div } from "@/utils/dom/element";
+import { div } from "@/utils/dom/element_factory";
 import { macroTask } from "@/lib/async/async";
 
 let activeTab: FavoritesDrawerTab = Preferences.favorites.drawerActiveTab.value;
@@ -151,19 +151,7 @@ function buildPanels(): HTMLElement {
     renderPanelContent(tab, panel);
     panels.appendChild(panel);
   }
-  containScroll(panels);
   return panels;
-}
-
-function containScroll(panels: HTMLElement): void {
-  panels.addEventListener("wheel", (event) => {
-    const atTop = panels.scrollTop <= 0 && event.deltaY < 0;
-    const atBottom = panels.scrollTop + panels.clientHeight >= panels.scrollHeight && event.deltaY > 0;
-
-    if (atTop || atBottom) {
-      event.preventDefault();
-    }
-  }, { passive: false });
 }
 
 function renderPanelContent(tab: FavoritesDrawerTab, panel: HTMLElement): void {

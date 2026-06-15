@@ -1,4 +1,4 @@
-import { div } from "@/utils/dom/element";
+import { div } from "@/utils/dom/element_factory";
 
 const OPTIONS: { id: string; label: string }[] = [
   { id: "post-list-upscale-thumbs", label: "Upscale" },

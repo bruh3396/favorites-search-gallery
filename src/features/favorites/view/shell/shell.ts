@@ -8,7 +8,7 @@ import PAGINATION_CSS from "@/assets/css/favorites/pagination.css";
 import SEARCH_FIELD_CSS from "@/assets/css/favorites/search_field.css";
 import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
 import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
-import { div } from "@/utils/dom/element";
+import { div } from "@/utils/dom/element_factory";
 import { insertStyle } from "@/utils/dom/injector";
 
 export const Body = div(FavoritesId.body);

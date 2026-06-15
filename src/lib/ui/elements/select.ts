@@ -9,10 +9,6 @@ export function buildSelectElement<T extends string>(partial: Partial<SelectElem
     if (save && template.preference !== null) {
       template.preference.set(value);
     }
-
-    if (template.event !== null) {
-      template.event.emit(value);
-    }
     template.function(value);
   };
 
@@ -56,7 +52,6 @@ function createSelectTemplate<T extends string>(partial: Partial<SelectElement<T
     options: new Map(),
     savePreference: false,
     defaultValue: "" as T,
-    event: null,
     function: doNothing,
     triggerOnCreation: false,
     preference: null,

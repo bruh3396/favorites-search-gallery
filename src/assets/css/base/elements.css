@@ -1,6 +1,6 @@
 html {
   width: 100vw;
-  scrollbar-width: thin;
+  scrollbar-width: auto;
   scrollbar-color: var(--theme-border) transparent;
 }
 
@@ -10,8 +10,8 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 18px;
+  height: 18px;
 }
 
 ::-webkit-scrollbar-track {
@@ -52,6 +52,11 @@ input[type="checkbox"] {
   accent-color: var(--theme-accent);
 }
 
+input[type="text"] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 option {
   font-size: 15px;
 }
@@ -62,8 +67,7 @@ option {
 }
 
 #favorites-search-gallery-content {
-  margin-right: 15px;
-  padding: 8px 8px 30px 8px;
+  padding: 10px 10px 10px 10px;
   overflow-anchor: none;
 }
 

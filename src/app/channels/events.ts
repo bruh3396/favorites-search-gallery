@@ -1,20 +1,14 @@
-import { FeatureNamespaced, GalleryMenuAction, HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
-import { MetadataMetric, Rating, TagCategoryMap } from "@/types/search";
+import { FeatureNamespaced, GalleryMenuAction } from "@/types/app";
 import { Emitter } from "@/lib/communication/emitter";
 import { Favorite } from "@/types/favorite";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { StickyEmitter } from "@/lib/communication/sticky_emitter";
+import { TagCategoryMap } from "@/types/search";
 
 export const Events = {
   app: {
     favoriteAdded: new Emitter<string>(),
-    favoriteRemoved: new Emitter<string>(),
-    autoplayToggled: new Emitter<boolean>(),
-    tooltipToggled: new Emitter<boolean>(),
-    galleryMenuToggled: new Emitter<boolean>(),
-    columnCountChanged: new Emitter<number>(),
-    rowHeightChanged: new Emitter<number>(),
-    performanceProfileChanged: new Emitter<PerformanceProfile>()
+    favoriteRemoved: new Emitter<string>()
   },
   favorites: {
     searchStarted: new Emitter<string>(),
@@ -38,22 +32,9 @@ export const Events = {
     searchButtonClicked: new Emitter<MouseEvent>(),
     clearButtonClicked: new Emitter<MouseEvent>(),
     resetButtonClicked: new Emitter<MouseEvent>(),
-    panelButtonClicked: new Emitter<MouseEvent>(),
-
-    resultsPerPageChanged: new Emitter<number>(),
-    allowedRatingsChanged: new Emitter<Rating>(),
-    layoutChanged: new Emitter<Layout>(),
-    sortKeyChanged: new Emitter<MetadataMetric>(),
-
-    galleryPreviewToggled: new Emitter<boolean>(),
-    captionsToggled: new Emitter<boolean>(),
-    postOverlayToggled: new Emitter<boolean>(),
-    sortAscendingToggled: new Emitter<boolean>(),
-    blacklistToggled: new Emitter<boolean>(),
-    infiniteScrollToggled: new Emitter<boolean>()
+    panelButtonClicked: new Emitter<MouseEvent>()
   },
   gallery: {
-    previewOverridden: new Emitter<boolean>(),
     openedGallery: new Emitter<HTMLElement>(),
     closedGallery: new Emitter<void>(),
     displayedThumb: new Emitter<HTMLElement>(),
@@ -69,13 +50,8 @@ export const Events = {
   },
   postList: {
     postListInitialized: new StickyEmitter<void>(),
-    layoutChanged: new Emitter<Layout>(),
     initialPostListCreated: new StickyEmitter<PostList>(),
-    upscaleToggled: new Emitter<boolean>(),
-    infiniteScrollToggled: new Emitter<boolean>(),
     moreResultsAdded: new Emitter<HTMLElement[]>(),
-    pageChanged: new Emitter<HTMLElement[]>(),
-    favoriteIndicatorToggled: new Emitter<boolean>(),
-    favoriteIndicatorStyleChanged: new Emitter<HighlightStyle>()
+    pageChanged: new Emitter<HTMLElement[]>()
   }
 } satisfies FeatureNamespaced;

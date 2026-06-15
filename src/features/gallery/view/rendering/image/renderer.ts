@@ -5,7 +5,7 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { USING_FIREFOX } from "@/lib/environment";
-import { div } from "@/utils/dom/element";
+import { div } from "@/utils/dom/element_factory";
 import { isImageThumb } from "@/lib/media/type_predicates";
 import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 import { withTimeout } from "@/lib/async/async";

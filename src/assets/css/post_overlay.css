@@ -1,5 +1,7 @@
 .post-overlay {
   position: absolute;
+  top: 0;
+  left: 0;
   z-index: 20;
   box-sizing: border-box;
   display: flex;

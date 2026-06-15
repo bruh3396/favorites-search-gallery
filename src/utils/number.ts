@@ -4,6 +4,20 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+export function stepUp(value: number, step: number): number {
+  if (step <= 0) {
+    return value;
+  }
+  return (Math.floor(value / step) + 1) * step;
+}
+
+export function stepDown(value: number, step: number): number {
+  if (step <= 0) {
+    return value;
+  }
+  return (Math.ceil(value / step) - 1) * step;
+}
+
 export function randomInt(maximum: number): number {
   return Math.floor(Math.random() * maximum);
 }

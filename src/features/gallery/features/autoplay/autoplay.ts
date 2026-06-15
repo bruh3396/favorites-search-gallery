@@ -15,7 +15,7 @@ import { throttle } from "@/lib/async/throttle";
 
 type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
 
-export type AutoplayEvents = {
+type AutoplayEvents = {
   setVideoLooping: (value: boolean) => void
   onComplete: (direction?: NavigationKey) => void
   onVideoEndedBeforeMinimumViewTime: () => void
@@ -307,7 +307,6 @@ function toggleSettingMenu(value?: boolean | undefined): void {
 }
 
 export function toggle(value: boolean): void {
-  Preferences.gallery.autoplayActive.set(value);
   active = value;
 
   events.setVideoLooping(!value);

@@ -1,5 +1,5 @@
 import { IconName, icon } from "@/lib/ui/icon";
-import { label, span } from "@/utils/dom/element";
+import { label, span } from "@/utils/dom/element_factory";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";

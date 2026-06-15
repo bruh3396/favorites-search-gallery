@@ -1,4 +1,4 @@
-import { div, label, span } from "@/utils/dom/element";
+import { div, label, span } from "@/utils/dom/element_factory";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { VERSION } from "@/lib/environment";
 

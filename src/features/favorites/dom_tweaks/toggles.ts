@@ -1,15 +1,5 @@
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { Preferences } from "@/app/context/preferences";
 import { insertStyle } from "@/utils/dom/injector";
-
-export function syncShowOnHoverFromGallery(value: boolean): void {
-  const showOnHoverCheckbox = document.getElementById("show-on-hover");
-
-  if (showOnHoverCheckbox !== null && showOnHoverCheckbox instanceof HTMLInputElement) {
-    showOnHoverCheckbox.checked = value;
-    Preferences.gallery.previewEnabled.set(value);
-  }
-}
 
 export function toggleOptionHotkeyHints(value: boolean): void {
   insertStyle(value ? "" : ".u-opt-hint {display:none;}", "opt-hint-visibility");

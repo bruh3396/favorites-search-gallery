@@ -4,7 +4,7 @@ import { clamp, roundToTwoDecimalPlaces } from "@/utils/number";
 import { Preferences } from "@/app/context/preferences";
 import { USING_FIREFOX } from "@/lib/environment";
 import { blurActiveElement } from "@/utils/dom/interaction";
-import { div } from "@/utils/dom/element";
+import { div } from "@/utils/dom/element_factory";
 import { getLayout } from "@/app/layout/content_tiler";
 import { insertStyle } from "@/utils/dom/injector";
 import { showFullscreenIcon } from "@/features/gallery/dom_tweaks/fullscreen_icon";

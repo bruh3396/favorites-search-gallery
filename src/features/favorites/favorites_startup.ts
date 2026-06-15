@@ -96,13 +96,13 @@ function subscribeToEvents(): void {
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
   Events.favorites.findFavorite.on(FavoritesResultsFlow.reveal);
   Events.favorites.findFavoriteInAll.on(FavoritesSearchFlow.revealFavoriteInAll);
-  Events.favorites.infiniteScrollToggled.on(FavoritesOptionsFlow.toggleInfiniteScroll);
-  Events.favorites.blacklistToggled.on(FavoritesOptionsFlow.reSearchFavorites);
-  Events.favorites.layoutChanged.on(FavoritesView.changeLayout);
-  Events.favorites.sortAscendingToggled.on(FavoritesOptionsFlow.reSearchFavorites);
-  Events.favorites.sortKeyChanged.on(FavoritesOptionsFlow.reSearchFavorites);
-  Events.favorites.allowedRatingsChanged.on(FavoritesOptionsFlow.reSearchFavorites);
-  Events.favorites.resultsPerPageChanged.on(FavoritesSearchFlow.showLatestSearchResults);
+  Preferences.favorites.infiniteScroll.on(FavoritesOptionsFlow.toggleInfiniteScroll);
+  Preferences.favorites.excludeBlacklist.on(FavoritesOptionsFlow.reSearchFavorites);
+  Preferences.favorites.layout.on(FavoritesView.changeLayout);
+  Preferences.favorites.sortAscending.on(FavoritesOptionsFlow.reSearchFavorites);
+  Preferences.favorites.sortKey.on(FavoritesOptionsFlow.reSearchFavorites);
+  Preferences.favorites.allowedRatings.on(FavoritesOptionsFlow.reSearchFavorites);
+  Preferences.favorites.resultsPerPage.on(FavoritesOptionsFlow.setResultsPerPage);
 
   Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
   Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
@@ -110,7 +110,6 @@ function subscribeToEvents(): void {
   Events.favorites.panelButtonClicked.on(FavoritesView.toggleDrawer);
 
   Events.app.favoriteRemoved.on(FavoritesModel.deleteId);
-  Events.gallery.previewOverridden.on(FavoritesView.syncShowOnHoverFromGallery);
   DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);
 
   if (ON_DESKTOP_DEVICE) {

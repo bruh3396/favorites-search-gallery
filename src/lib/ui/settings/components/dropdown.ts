@@ -1,7 +1,9 @@
-import { bindEnableRule, commit, currentValue, syncOnEvent, toBinding } from "@/features/favorites/control/components/state_binding";
-import { SelectSetting } from "@/features/favorites/types/setting";
-import { SettingsClass } from "@/features/favorites/types/scaffold";
-import { controlRow } from "@/features/favorites/control/components/row";
+import { bindEnableRule, commit, currentValue, onPreferenceChange, toBinding } from "@/lib/ui/settings/state_binding";
+import { removeDataset, setDataset, toggleDataset } from "@/utils/dom/attribute";
+import { SelectSetting } from "@/lib/ui/settings/setting";
+import { SettingsClass } from "@/lib/ui/settings/classes";
+import { controlRow } from "@/lib/ui/settings/components/row";
+import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 
 const closers = new Set<() => void>();
@@ -19,36 +21,25 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
   const binding = toBinding(config, [...options.keys()][0]);
   let value = currentValue(binding);
 
-  if (config.triggerOnCreation === true) {
+  if (config.applyOnBuild === true) {
     commit(binding, value, false);
   }
-  const dropdown = document.createElement("div");
-
-  dropdown.className = SettingsClass.dropdown;
-
-  if (config.id !== undefined) {
-    dropdown.id = config.id;
-  }
-  const button = document.createElement("button");
+  const buttonLabel = createElement("span");
+  const button = createElement("button", { className: SettingsClass.dropdownButton, children: [buttonLabel, icon("chevronDown")] });
 
   button.type = "button";
-  button.className = SettingsClass.dropdownButton;
-  const buttonLabel = document.createElement("span");
-
-  button.append(buttonLabel, icon("chevronDown"));
-  const menu = document.createElement("div");
-
-  menu.className = SettingsClass.dropdownMenu;
+  const menu = createElement("div", { className: SettingsClass.dropdownMenu });
+  const dropdown = createElement("div", { id: config.id, className: SettingsClass.dropdown, children: [button, menu] });
   const optionButtons = new Map<T, HTMLButtonElement>();
   const close = (): void => {
-    delete dropdown.dataset.open;
+    removeDataset(dropdown, "open");
   };
 
   closers.add(close);
   const toggleOpen = (): void => {
     if (dropdown.dataset.open === undefined) {
       closeAllExcept(close);
-      dropdown.dataset.open = "";
+      setDataset(dropdown, "open");
     } else {
       close();
     }
@@ -57,29 +48,27 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
     buttonLabel.textContent = options.get(value) ?? "";
 
     for (const [optionValue, optionButton] of optionButtons) {
-      if (optionValue === value) {
-        optionButton.dataset.selected = "";
-      } else {
-        delete optionButton.dataset.selected;
-      }
+      toggleDataset(optionButton, "selected", optionValue === value);
     }
   };
 
+  const select = (optionValue: T): void => {
+    if (optionValue === value) {
+      close();
+      return;
+    }
+    value = optionValue;
+    render();
+    close();
+    commit(binding, value);
+  };
+
   for (const [optionValue, optionLabel] of options) {
-    const optionButton = document.createElement("button");
+    const optionButton = createElement("button", { className: SettingsClass.dropdownOption, textContent: optionLabel });
 
     optionButton.type = "button";
-    optionButton.className = SettingsClass.dropdownOption;
-    optionButton.textContent = optionLabel;
     optionButton.addEventListener("click", () => {
-      if (optionValue === value) {
-        close();
-        return;
-      }
-      value = optionValue;
-      render();
-      close();
-      commit(binding, value);
+      select(optionValue);
     });
     optionButtons.set(optionValue, optionButton);
     menu.appendChild(optionButton);
@@ -89,11 +78,9 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
     event.stopPropagation();
     toggleOpen();
   });
-
-  dropdown.append(button, menu);
   render();
 
-  const row = controlRow(config.label ?? "", config.tooltip ?? "", dropdown, config.enabled !== false);
+  const row = controlRow(config, dropdown);
 
   row.addEventListener("click", (event) => {
     if (config.enabled === false || dropdown.contains(event.target as Node)) {
@@ -108,10 +95,10 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
     }
   });
 
-  syncOnEvent(binding, (next) => {
+  onPreferenceChange(binding, (next) => {
     value = next;
     render();
   });
-  bindEnableRule(row, config.disableOn);
+  bindEnableRule(row, config.enabledWhen);
   return row;
 }

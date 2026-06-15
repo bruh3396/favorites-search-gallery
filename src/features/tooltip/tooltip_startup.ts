@@ -7,6 +7,7 @@ import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { Preferences } from "@/app/context/preferences";
 
 export function startTooltip(): void {
   setup();
@@ -25,7 +26,8 @@ function setupView(): void {
 function subscribeToEvents(): void {
   DomEvents.document.mouseover.on(TooltipHoverFlow.onMouseover);
   DomEvents.window.scrollend.on(TooltipScrollFlow.onScroll);
-  Events.app.tooltipToggled.on(TooltipToggleFlow.onTooltipToggled);
+  Preferences.favorites.tooltipEnabled.on(TooltipToggleFlow.onTooltipToggled);
+  Preferences.postList.tooltipEnabled.on(TooltipToggleFlow.onTooltipToggled);
 
   if (ON_FAVORITES_PAGE) {
     Events.favorites.searchStarted.on(TooltipModel.rebuildHighlights);

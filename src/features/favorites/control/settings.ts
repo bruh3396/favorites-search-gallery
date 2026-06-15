@@ -1,33 +1,32 @@
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
-import { EnableRule, SelectSetting, StepperSetting, ToggleSetting, enableWhen } from "@/features/favorites/types/setting";
+import { EnableRule, ToggleSetting, enableWhen } from "@/lib/ui/settings/setting";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile, Theme } from "@/types/app";
+import { SettingsControl, dropdown, multiSegmented, stepper, toggle as toggleControl } from "@/lib/ui/settings/controls";
 import { applySurfaceGradient, applyTheme } from "@/lib/ui/theme";
 import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
-import { Events } from "@/app/channels/events";
+import { DomEvents } from "@/app/dom/events";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { GeneralConfig } from "@/config/general_config";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
-import { buildDropdownRow } from "@/features/favorites/control/components/dropdown";
-import { buildMultiSegmentedRow } from "@/features/favorites/control/components/multi_segmented";
-import { buildSegmentedRow } from "@/features/favorites/control/components/segmented";
-import { buildStepperRow } from "@/features/favorites/control/components/stepper";
-import { buildToggleRow } from "@/features/favorites/control/components/toggle";
-import { hideUnusedLayoutSizer } from "@/app/layout/content_tiler";
+import { galleryOpened } from "@/app/channels/feature_bridge";
 import { reloadWindow } from "@/utils/browser/window";
 import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/toggles";
 
-export type SettingsControl = () => HTMLElement;
-export const toggle = (config: Partial<ToggleSetting>): SettingsControl => (): HTMLElement => buildToggleRow(config);
-export const segmented = <T extends string>(config: Partial<SelectSetting<T>>): SettingsControl => (): HTMLElement => buildSegmentedRow(config);
-export const multiSegmented = <T extends number>(config: Partial<SelectSetting<T>>): SettingsControl => (): HTMLElement => buildMultiSegmentedRow(config);
-export const dropdown = <T extends string>(config: Partial<SelectSetting<T>>): SettingsControl => (): HTMLElement => buildDropdownRow(config);
-export const stepper = (config: Partial<StepperSetting>): SettingsControl => (): HTMLElement => buildStepperRow(config);
+function registerHotkey(key: string, fire: () => void): void {
+  DomEvents.document.keydown.on((event) => {
+    if (event.isHotkey && event.key === key && !galleryOpened()) {
+      fire();
+    }
+  });
+}
 
-const onLayout = (predicate: (layout: Layout) => boolean): EnableRule => enableWhen(Events.favorites.layoutChanged, () => Preferences.favorites.layout.value, predicate);
-const whenNotInfiniteScroll = (): EnableRule => enableWhen(Events.favorites.infiniteScrollToggled, () => Preferences.favorites.infiniteScroll.value, (on) => !on);
+const toggle = (config: Partial<ToggleSetting>): SettingsControl => toggleControl({ registerHotkey, ...config });
+
+const onLayout = (predicate: (layout: Layout) => boolean): EnableRule => enableWhen(Preferences.favorites.layout, predicate);
+const whenNotInfiniteScroll = (): EnableRule => enableWhen(Preferences.favorites.infiniteScroll, (on) => !on);
 
 export const Settings = {
   theme: dropdown<Theme>({
@@ -35,7 +34,7 @@ export const Settings = {
     tooltip: "Theme",
     label: "Theme",
     preference: Preferences.app.theme,
-    function: applyTheme,
+    apply: applyTheme,
     options: new Map<Theme, string>([
       ["native-light", "Native Light"],
       ["native-dark", "Native Dark"],
@@ -43,26 +42,25 @@ export const Settings = {
       ["ember", "Ember"],
       ["venom", "Venom"],
       ["zeal", "Zeal"],
-      ["frozen-cobalt", "Cobalt"],
+      ["frozen-cobalt", "Frost"],
       ["cherry-blossom", "Cherry Blossom"],
-      ["forest", "Forest"]
+      ["forest", "Forest"],
+      ["parchment", "Parchment"]
     ])
   }),
   fadeThumbs: toggle({
     id: "fade-thumbs",
-    label: "Fade Thumbnails",
+    label: "Fade In Thumbnails",
     tooltip: "Fade thumbnails in as they load (applies on reload)",
     preference: Preferences.app.fadeThumbs,
-    function: reloadWindow
+    apply: reloadWindow
   }),
   layout: dropdown<Layout>({
     id: "layout-select",
     tooltip: "Favorites Layout",
     label: "Layout",
     preference: Preferences.favorites.layout,
-    event: Events.favorites.layoutChanged,
-    function: hideUnusedLayoutSizer,
-    triggerOnCreation: true,
+    applyOnBuild: true,
     options: new Map<Layout, string>([
       ["column", "Waterfall"],
       ["row", "River"],
@@ -79,8 +77,7 @@ export const Settings = {
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
     step: 1,
-    event: Events.app.columnCountChanged,
-    disableOn: onLayout((layout) => layout !== "row" && layout !== "native")
+    enabledWhen: onLayout((layout) => layout !== "row" && layout !== "native")
   }),
   rowHeight: stepper({
     id: "row-size",
@@ -90,49 +87,45 @@ export const Settings = {
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
-    event: Events.app.rowHeightChanged,
-    disableOn: onLayout((layout) => layout === "row")
+    enabledWhen: onLayout((layout) => layout === "row")
   }),
   header: toggle({
     id: "toggle-header",
     label: "Header",
     tooltip: "Site header",
     preference: Preferences.favorites.headerEnabled,
-    triggerOnCreation: true,
-    function: toggleHeader
+    applyOnBuild: true,
+    apply: toggleHeader
   }),
   gradient: toggle({
     id: "toggle-surface-gradient",
     label: "Gradient",
     tooltip: "Gradient menu backgrounds",
     preference: Preferences.app.surfaceGradient,
-    triggerOnCreation: true,
-    function: applySurfaceGradient
+    applyOnBuild: true,
+    apply: applySurfaceGradient
   }),
   autoplay: toggle({
     id: "enable-autoplay",
     label: "Autoplay",
     tooltip: "Autoplay in gallery",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.gallery.autoplayActive,
-    event: Events.app.autoplayToggled
+    preference: Preferences.gallery.autoplayActive
   }),
   fullscreenOnHover: toggle({
     id: "show-on-hover",
     label: "Fullscreen on Hover",
     tooltip: "Show fullscreen content on hover",
     enabled: GALLERY_ENABLED,
-    preference: Preferences.gallery.previewEnabled,
-    event: Events.favorites.galleryPreviewToggled
+    preference: Preferences.gallery.previewEnabled
   }),
   galleryMenu: toggle({
     id: "enable-gallery-menu",
     label: "Menu",
     tooltip: "Show menu in gallery",
     enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
-    function: toggleGalleryMenuEnabled,
-    preference: Preferences.gallery.menuEnabled,
-    event: Events.app.galleryMenuToggled
+    apply: toggleGalleryMenuEnabled,
+    preference: Preferences.gallery.menuEnabled
   }),
   enhanceSearchPages: toggle({
     id: "enhance-post-lists",
@@ -144,23 +137,20 @@ export const Settings = {
     id: "infinite-scroll",
     label: "Infinite Scroll",
     tooltip: "Use infinite scroll (waterfall) instead of pages",
-    preference: Preferences.favorites.infiniteScroll,
-    event: Events.favorites.infiniteScrollToggled
+    preference: Preferences.favorites.infiniteScroll
   }),
   excludeBlacklist: toggle({
     id: "exclude-blacklist",
     label: "Exclude Blacklist",
     tooltip: "Exclude favorites with blacklisted tags from search",
     enabled: USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    preference: Preferences.favorites.excludeBlacklist,
-    event: Events.favorites.blacklistToggled
+    preference: Preferences.favorites.excludeBlacklist
   }),
-  ratings: multiSegmented<Rating>({
+  rating: multiSegmented<Rating>({
     id: "allowed-ratings",
-    label: "Ratings",
+    label: "Rating",
     tooltip: "Which content ratings to include in search results",
     preference: Preferences.favorites.allowedRatings,
-    event: Events.favorites.allowedRatingsChanged,
     options: new Map<Rating, string>([
       [DiscreteRating.Safe, "Safe"],
       [DiscreteRating.Questionable, "Questionable"],
@@ -172,7 +162,6 @@ export const Settings = {
     tooltip: "Change sort order of search results",
     label: "Sort By",
     preference: Preferences.favorites.sortKey,
-    event: Events.favorites.sortKeyChanged,
     options: new Map<SortKey, string>([
       ["default", "Default"],
       ["score", "Score"],
@@ -188,8 +177,7 @@ export const Settings = {
     id: "sort-ascending",
     label: "Sort Ascending",
     tooltip: "Sort search results in ascending order",
-    preference: Preferences.favorites.sortAscending,
-    event: Events.favorites.sortAscendingToggled
+    preference: Preferences.favorites.sortAscending
   }),
   resultsPerPage: stepper({
     id: "results-per-page",
@@ -199,8 +187,7 @@ export const Settings = {
     min: FavoritesConfig.resultsPerPageBounds.min,
     max: FavoritesConfig.resultsPerPageBounds.max,
     step: FavoritesConfig.resultsPerPageStep,
-    event: Events.favorites.resultsPerPageChanged,
-    disableOn: whenNotInfiniteScroll()
+    enabledWhen: whenNotInfiniteScroll()
   }),
   tooltip: toggle({
     id: "show-tooltips",
@@ -208,8 +195,7 @@ export const Settings = {
     tooltip: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
     enabled: TOOLTIP_ENABLED,
     preference: Preferences.favorites.tooltipEnabled,
-    hotkey: "T",
-    event: Events.app.tooltipToggled
+    hotkey: "T"
   }),
   postOverlay: toggle({
     id: "show-post-overlay",
@@ -217,8 +203,7 @@ export const Settings = {
     tooltip: "Categorize important tags when hovering over a thumbnail and click on them to add to search",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlay.enabled,
-    hotkey: "O",
-    event: Events.favorites.postOverlayToggled
+    hotkey: "O"
   }),
   hotkeyHints: toggle({
     id: "show-hints",
@@ -226,16 +211,15 @@ export const Settings = {
     tooltip: "Show hotkeys",
     preference: Preferences.favorites.hintsEnabled,
     hotkey: "H",
-    triggerOnCreation: true,
-    function: toggleOptionHotkeyHints
+    applyOnBuild: true,
+    apply: toggleOptionHotkeyHints
   }),
   performanceProfile: dropdown<PerformanceProfile>({
     id: "performance-profile",
     tooltip: "Improve performance by disabling features",
     label: "Performance Profile",
     preference: Preferences.app.performanceProfile,
-    event: Events.app.performanceProfileChanged,
-    function: reloadWindow,
+    apply: reloadWindow,
     options: new Map<PerformanceProfile, string>([
       ["normal", "Normal"],
       ["medium", "No upscaling"],

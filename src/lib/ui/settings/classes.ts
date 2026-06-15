@@ -1,0 +1,22 @@
+export const SettingsClass = {
+  panel: "settings-panel",
+  section: "setting-section",
+  sectionHeader: "setting-section-header",
+  sectionTitle: "setting-section-title",
+  groupWrap: "setting-group-wrap",
+  group: "setting-group",
+  row: "setting-row",
+  rowLabel: "setting-row-label",
+  control: "setting-control",
+  toggleTrack: "setting-toggle-track",
+  toggleKnob: "setting-toggle-knob",
+  segmented: "setting-segmented",
+  segmentedOption: "setting-segmented-option",
+  dropdown: "setting-dropdown",
+  dropdownButton: "setting-dropdown-button",
+  dropdownMenu: "setting-dropdown-menu",
+  dropdownOption: "setting-dropdown-option",
+  stepper: "setting-stepper",
+  stepperButton: "setting-stepper-button",
+  stepperValue: "setting-stepper-value"
+} as const;

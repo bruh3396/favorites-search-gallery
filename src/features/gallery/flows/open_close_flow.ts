@@ -10,14 +10,12 @@ export function open(thumb: HTMLElement): void {
   GalleryView.open(thumb);
   GalleryDisplayFlow.display(thumb);
   GalleryInteractionTracker.enableInteractionTracking();
-  Events.gallery.previewOverridden.emit(false);
   Events.gallery.openedGallery.emit(thumb);
 }
 
 export function close(): void {
   GalleryModel.close();
   GalleryView.close();
-
   GalleryInteractionTracker.disableInteractionTracking();
   DomEvents.document.wheel.toggle(true);
   Events.gallery.closedGallery.emit();
@@ -25,9 +23,4 @@ export function close(): void {
 
 export function reOpen(): void {
   open(GalleryModel.currentThumb());
-}
-
-export function togglePreviews(): void {
-  GalleryModel.togglePreview();
-  Events.gallery.previewOverridden.emit(GalleryModel.isShowingPreviews());
 }

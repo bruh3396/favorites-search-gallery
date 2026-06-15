@@ -13,10 +13,6 @@ export function buildCheckboxElement(partial: Partial<CheckboxElement>): void {
     if (save && template.savePreference && template.preference !== null) {
       template.preference.set(checked);
     }
-
-    if (template.event !== null) {
-      template.event.emit(checked);
-    }
     template.function(checked);
   };
 
@@ -122,7 +118,6 @@ function createCheckboxTemplate(partial: Partial<CheckboxElement>): CheckboxElem
   return {
     ...defaultMenuElement,
     savePreference: true,
-    event: null,
     defaultValue: false,
     hotkey: "",
     function: doNothing,

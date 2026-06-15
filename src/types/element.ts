@@ -10,7 +10,6 @@ export interface MenuElement<T> {
   title: string
   position: InsertPosition
   textContent: string
-  event: Emitter<T> | null
   function: (event: T) => void
   triggerOnCreation: boolean
 }
@@ -26,6 +25,7 @@ export interface StateMenuElement<T> extends MenuElement<T> {
 }
 
 export interface ButtonElement extends MenuElement<MouseEvent>, HotkeyElement {
+  event: Emitter<MouseEvent> | null
   rightClickEnabled: boolean
   icon: IconName | null
 }
@@ -37,13 +37,6 @@ export interface SelectElement<T extends (string | number)> extends StateMenuEle
   isNumeric: boolean
 }
 
-export interface NumberElement extends StateMenuElement<number> {
-  min: number
-  max: number
-  step: number
-  pollingTime: number
-}
-
 export const defaultMenuElement: MenuElement<void> = {
   parentId: "",
   id: "",
@@ -51,7 +44,6 @@ export const defaultMenuElement: MenuElement<void> = {
   title: "",
   position: "afterbegin",
   textContent: "",
-  event: null,
   function: doNothing,
   triggerOnCreation: false
 };

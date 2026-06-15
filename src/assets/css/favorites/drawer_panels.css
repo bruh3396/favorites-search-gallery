@@ -30,7 +30,7 @@
 }
 
 .favorites-drawer-panel {
-  padding: 12px 0px 0px 6px;
+  padding: 0px 0px 0px 6px;
 }
 
 .favorites-drawer-panel[data-hidden] {

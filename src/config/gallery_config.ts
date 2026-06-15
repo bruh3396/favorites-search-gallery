@@ -29,7 +29,7 @@ export const GalleryConfig = {
   menuVisibilityTime: ON_MOBILE_DEVICE ? 2_000 : 1_000,
 
   maxImagesToPreloadAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
-  bottomOverscanPercent: 100,
+  bottomOverscanPercent: 175,
   bitmapCloseDelay: 50,
 
   useOffscreenThumbUpscaler: false,

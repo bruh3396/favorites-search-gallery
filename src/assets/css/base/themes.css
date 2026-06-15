@@ -146,3 +146,16 @@ body {
   --theme-accent-text: #0e1a12;
   --theme-link: #a7e0ac;
 }
+
+[data-theme="parchment"] {
+  --theme-surface: #f4ecd8;
+  --theme-surface-sunken: #e8dcc0;
+  --theme-surface-raised: #fbf5e6;
+  --theme-surface-hover: #ecdfc3;
+  --theme-border: #cbb792;
+  --theme-text: #463720;
+  --theme-text-muted: #8a7550;
+  --theme-accent: #a8541f;
+  --theme-accent-text: #fbf5e6;
+  --theme-link: #8a3a12;
+}

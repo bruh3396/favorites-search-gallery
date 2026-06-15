@@ -1,5 +1,5 @@
 import { DomEvents } from "@/app/dom/events";
-import { div } from "@/utils/dom/element";
+import { div } from "@/utils/dom/element_factory";
 
 export const Root = div("favorites-search-gallery");
 export const Content = div("favorites-search-gallery-content");

@@ -6,6 +6,7 @@ let currentState = initialState();
 export const getCurrentState = (): GalleryState => currentState;
 export const isInGallery = (): boolean => currentState === "open";
 export const isShowingPreviews = (): boolean => currentState === "preview";
+export const isIdle = (): boolean => currentState === "idle";
 
 export function open(): void {
   currentState = "open";

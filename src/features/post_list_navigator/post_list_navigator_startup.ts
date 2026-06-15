@@ -49,14 +49,14 @@ function setupFavoriteIndicator(): void {
   Events.postList.pageChanged.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.postList.moreResultsAdded.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.app.favoriteAdded.on(PostListNavigatorFavoritesMarkerFlow.onFavoriteAdded);
-  Events.postList.favoriteIndicatorToggled.on(PostListNavigatorOptionFlow.toggleFavoriteIndicator);
-  Events.postList.favoriteIndicatorStyleChanged.on(PostListNavigatorView.applyCurrentFavoriteStyle);
+  Preferences.postList.favoriteIndicator.on(PostListNavigatorOptionFlow.toggleFavoriteIndicator);
+  Preferences.postList.favoriteIndicatorStyle.on(PostListNavigatorView.applyCurrentFavoriteStyle);
   Events.gallery.displayedThumb.on(PostListNavigatorView.applyGalleryFavoriteStyle);
 }
 
 function subscribeToEvents(): void {
-  Events.postList.layoutChanged.on(ContentTiler.changeLayout);
-  Events.postList.infiniteScrollToggled.on(PostListNavigatorOptionFlow.toggleInfiniteScroll);
+  Preferences.postList.layout.on(ContentTiler.changeLayout);
+  Preferences.postList.infiniteScroll.on(PostListNavigatorOptionFlow.toggleInfiniteScroll);
 }
 
 function serveExternalRequests(): void {

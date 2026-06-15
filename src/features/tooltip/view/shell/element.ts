@@ -1,5 +1,6 @@
 import { Overlays } from "@/app/layout/shell";
 import TOOLTIP_CSS from "@/assets/css/tooltip.css";
+import { div } from "@/utils/dom/element_factory";
 import { insertStyle } from "@/utils/dom/injector";
 
 export const element = createTooltipElement();
@@ -10,9 +11,8 @@ export function setupTooltipShell(): void {
 }
 
 function createTooltipElement(): HTMLDivElement {
-  const el = document.createElement("div");
+  const el = div("tooltip");
 
-  el.id = "tooltip";
   el.className = "surface-panel";
   return el;
 }

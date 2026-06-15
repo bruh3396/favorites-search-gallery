@@ -1,9 +1,14 @@
-import { FavoritesId, SettingsClass } from "@/features/favorites/types/scaffold";
-import { Settings, SettingsControl } from "@/features/favorites/control/settings";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { SettingsClass } from "@/lib/ui/settings/classes";
+import { SettingsControl } from "@/lib/ui/settings/controls";
+import { Settings } from "@/features/favorites/control/settings";
+import { removeDataset, setDataset } from "@/utils/dom/attribute";
 import { ButtonElement } from "@/types/element";
 import { Events } from "@/app/channels/events";
+import { FavoritesConfig } from "@/config/favorites_config";
 import { Preferences } from "@/app/context/preferences";
 import { buildButtonElement } from "@/lib/ui/elements/button";
+import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 import { prepareDynamicElements } from "@/lib/ui/elements/dynamic_element_preparer";
 
@@ -17,6 +22,12 @@ export function setup(): void {
 }
 
 export function buildSettingsPanel(panel: HTMLElement): void {
+  panel.classList.add(SettingsClass.panel);
+
+  if (FavoritesConfig.settingsTooltipHintEnabled) {
+    setDataset(panel, "tooltips");
+  }
+
   for (const section of sections) {
     panel.appendChild(buildSection(section));
   }
@@ -98,15 +109,15 @@ const sections: SettingsSection[] = [
   {
     title: "Appearance",
     controls: [
-      Settings.layout,
       Settings.theme,
-      Settings.gradient,
-      // Settings.fadeThumbs,
-      Settings.header,
-      Settings.infiniteScroll,
+      Settings.layout,
+      Settings.resultsPerPage,
       Settings.columnCount,
       Settings.rowHeight,
-      Settings.resultsPerPage
+      Settings.infiniteScroll,
+      // Settings.gradient,
+      // Settings.fadeThumbs,
+      Settings.header
     ]
   },
   {
@@ -115,7 +126,7 @@ const sections: SettingsSection[] = [
       Settings.sortKey,
       Settings.sortAscending,
       Settings.excludeBlacklist,
-      Settings.ratings
+      Settings.rating
     ]
   },
   {
@@ -128,47 +139,22 @@ const sections: SettingsSection[] = [
   }
 ];
 
-function buildSection(section: SettingsSection): HTMLElement {
-  const collapsed = Preferences.favorites.settingsCollapsedSections.value[section.title] === true;
-
-  const element = document.createElement("section");
-
-  element.className = SettingsClass.section;
-
-  if (collapsed) {
-    element.dataset.collapsed = "";
-  }
-
-  const header = document.createElement("button");
+function buildSection(settingsSection: SettingsSection): HTMLElement {
+  const collapsed = Preferences.favorites.settingsCollapsedSections.value[settingsSection.title] === true;
+  const section = createElement("section", { className: SettingsClass.section, dataset: collapsed ? { collapsed: "" } : undefined });
+  const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
+  const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
 
   header.type = "button";
-  header.className = SettingsClass.sectionHeader;
-
-  const title = document.createElement("span");
-
-  title.className = SettingsClass.sectionTitle;
-  title.textContent = section.title;
-  header.append(title, icon("chevronDown"));
-
-  const wrap = document.createElement("div");
-
-  wrap.className = SettingsClass.groupWrap;
-
-  const body = document.createElement("div");
-
-  body.className = SettingsClass.group;
-
-  for (const control of section.controls) {
-    body.appendChild(control());
-  }
-  wrap.appendChild(body);
+  const body = createElement("div", { className: SettingsClass.group, children: settingsSection.controls.map((control) => control()) });
+  const wrap = createElement("div", { className: SettingsClass.groupWrap, children: [body] });
 
   header.addEventListener("click", () => {
-    toggleSection(section.title, element);
+    toggleSection(settingsSection.title, section);
   });
 
-  element.append(header, wrap);
-  return element;
+  section.append(header, wrap);
+  return section;
 }
 
 function toggleSection(title: string, element: HTMLElement): void {
@@ -176,8 +162,9 @@ function toggleSection(title: string, element: HTMLElement): void {
 
   if (collapsed) {
     element.dataset.collapsed = "";
+    setDataset(element, "collapsed");
   } else {
-    delete element.dataset.collapsed;
+    removeDataset(element, "collapsed");
   }
   const state = { ...Preferences.favorites.settingsCollapsedSections.value, [title]: collapsed };
 

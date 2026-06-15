@@ -1,7 +1,9 @@
-import { bindEnableRule, commit, currentValue, syncOnEvent, toBinding } from "@/features/favorites/control/components/state_binding";
-import { SettingsClass } from "@/features/favorites/types/scaffold";
-import { StepperSetting } from "@/features/favorites/types/setting";
-import { controlRow } from "@/features/favorites/control/components/row";
+import { bindEnableRule, commit, currentValue, onPreferenceChange, toBinding } from "@/lib/ui/settings/state_binding";
+import { clamp, stepDown, stepUp } from "@/utils/number";
+import { SettingsClass } from "@/lib/ui/settings/classes";
+import { StepperSetting } from "@/lib/ui/settings/setting";
+import { controlRow } from "@/lib/ui/settings/components/row";
+import { createElement } from "@/utils/dom/element_factory";
 import { debounceTrailing } from "@/lib/async/debounce";
 import { icon } from "@/lib/ui/icon";
 
@@ -14,21 +16,13 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   const binding = toBinding(config, min);
   let value = clamp(currentValue(binding), min, max);
 
-  const stepper = document.createElement("div");
-
-  stepper.className = SettingsClass.stepper;
-
-  if (config.id !== undefined) {
-    stepper.id = config.id;
-  }
-
+  const stepper = createElement("div", { id: config.id, className: SettingsClass.stepper });
   const decrement = stepperButton("minus");
   const increment = stepperButton("plus");
-  const display = document.createElement("input");
+  const display = createElement("input", { className: SettingsClass.stepperValue });
 
   display.type = "text";
   display.inputMode = "numeric";
-  display.className = SettingsClass.stepperValue;
 
   const pushValue = debounceTrailing((next: number): void => {
     commit(binding, next);
@@ -49,10 +43,6 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
     value = clamped;
     render();
     pushValue(value);
-  };
-
-  const change = (delta: number): void => {
-    setValue(value + delta);
   };
 
   const commitInput = (): void => {
@@ -77,13 +67,13 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   display.addEventListener("blur", commitInput);
 
   bindHold(decrement, () => {
-    change(-step);
+    setValue(stepDown(value, step));
   });
   bindHold(increment, () => {
-    change(step);
+    setValue(stepUp(value, step));
   });
 
-  syncOnEvent(binding, (next) => {
+  onPreferenceChange(binding, (next) => {
     if (next === value) {
       return;
     }
@@ -94,12 +84,12 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   stepper.append(decrement, display, increment);
   render();
 
-  const row = controlRow(config.label ?? "", config.tooltip ?? "", stepper, config.enabled !== false);
+  const row = controlRow(config, stepper);
 
   if (config.id !== undefined) {
     row.id = `${config.id}-row`;
   }
-  bindEnableRule(row, config.disableOn);
+  bindEnableRule(row, config.enabledWhen);
   return row;
 }
 
@@ -139,14 +129,8 @@ function bindHold(button: HTMLButtonElement, step: () => void): void {
 }
 
 function stepperButton(iconName: "plus" | "minus"): HTMLButtonElement {
-  const button = document.createElement("button");
+  const button = createElement("button", { className: SettingsClass.stepperButton, children: [icon(iconName)] });
 
   button.type = "button";
-  button.className = SettingsClass.stepperButton;
-  button.appendChild(icon(iconName));
   return button;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }
