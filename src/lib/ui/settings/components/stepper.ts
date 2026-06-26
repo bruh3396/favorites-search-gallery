@@ -1,10 +1,10 @@
-import { bindEnableRule, commit, currentValue, onPreferenceChange, toBinding } from "@/lib/ui/settings/state_binding";
 import { clamp, stepDown, stepUp } from "@/utils/number";
+import { DebouncedStateBinding } from "@/lib/ui/settings/debounced_state_binding";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { StepperSetting } from "@/lib/ui/settings/setting";
+import { bindEnableRule } from "../enable_rule";
 import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/dom/element_factory";
-import { debounceTrailing } from "@/lib/async/debounce";
 import { icon } from "@/lib/ui/icon";
 
 const COMMIT_DEBOUNCE_MS = 50;
@@ -13,9 +13,6 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   const min = config.min ?? 0;
   const max = config.max ?? 100;
   const step = config.step ?? 1;
-  const binding = toBinding(config, min);
-  let value = clamp(currentValue(binding), min, max);
-
   const stepper = createElement("div", { id: config.id, className: SettingsClass.stepper });
   const decrement = stepperButton("minus");
   const increment = stepperButton("plus");
@@ -24,36 +21,29 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   display.type = "text";
   display.inputMode = "numeric";
 
-  const pushValue = debounceTrailing((next: number): void => {
-    commit(binding, next);
-  }, COMMIT_DEBOUNCE_MS);
+  const render = (value: number): void => {
+    const clamped = clamp(value, min, max);
 
-  const render = (): void => {
-    display.value = String(value);
-    decrement.disabled = value <= min;
-    increment.disabled = value >= max;
+    display.value = String(clamped);
+    decrement.disabled = clamped <= min;
+    increment.disabled = clamped >= max;
   };
 
-  const setValue = (next: number): void => {
-    const clamped = clamp(next, min, max);
+  const binding = new DebouncedStateBinding(config, min, render, COMMIT_DEBOUNCE_MS);
 
-    if (clamped === value) {
-      return;
-    }
-    value = clamped;
-    render();
-    pushValue(value);
+  const setValue = (next: number): void => {
+    binding.set(clamp(next, min, max));
   };
 
   const commitInput = (): void => {
     const parsed = parseInt(display.value, 10);
 
     if (Number.isNaN(parsed)) {
-      render();
+      render(binding.value);
       return;
     }
     setValue(parsed);
-    render();
+    render(binding.value);
   };
 
   display.addEventListener("click", (event) => {
@@ -67,22 +57,13 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   display.addEventListener("blur", commitInput);
 
   bindHold(decrement, () => {
-    setValue(stepDown(value, step));
+    setValue(stepDown(binding.value, step));
   });
   bindHold(increment, () => {
-    setValue(stepUp(value, step));
-  });
-
-  onPreferenceChange(binding, (next) => {
-    if (next === value) {
-      return;
-    }
-    value = clamp(next, min, max);
-    render();
+    setValue(stepUp(binding.value, step));
   });
 
   stepper.append(decrement, display, increment);
-  render();
 
   const row = controlRow(config, stepper);
 

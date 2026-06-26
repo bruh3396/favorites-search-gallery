@@ -9,7 +9,7 @@
   border-bottom: none;
 }
 
-#favorites-drawer .settings-panel button.setting-section-header {
+.settings-panel button.setting-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,7 +23,7 @@
   transition: background 0.15s ease;
 }
 
-#favorites-drawer .settings-panel button.setting-section-header:hover {
+.settings-panel button.setting-section-header:hover {
   background: var(--theme-surface-hover);
 }
 
@@ -132,7 +132,7 @@
 }
 
 .setting-row[data-on] .setting-toggle-knob {
-  transform: translate(16px, -50%);
+  transform: translate(18px, -50%);
   background: var(--theme-accent-text);
 }
 
@@ -146,7 +146,7 @@
   border: 1px solid var(--theme-border);
 }
 
-#favorites-drawer .settings-panel button.setting-segmented-option {
+.settings-panel button.setting-segmented-option {
   padding: 3px 9px;
   border: none;
   border-radius: 6px;
@@ -159,31 +159,31 @@
   transition: background 0.12s ease, color 0.12s ease;
 }
 
-#favorites-drawer .settings-panel button.setting-segmented-option:hover {
+.settings-panel button.setting-segmented-option:hover {
   color: var(--theme-text);
 }
 
-#favorites-drawer .settings-panel button.setting-segmented-option[data-selected] {
+.settings-panel button.setting-segmented-option[data-selected] {
   background: var(--theme-accent);
   color: var(--theme-accent-text);
 }
 
-#favorites-drawer .settings-panel #allowed-ratings.setting-segmented {
+.settings-panel #allowed-ratings.setting-segmented {
   flex-wrap: nowrap;
   padding: 0;
   overflow: hidden;
 }
 
-#favorites-drawer .settings-panel #allowed-ratings button.setting-segmented-option {
+.settings-panel #allowed-ratings button.setting-segmented-option {
   border-radius: 0;
   border-left: 1px solid var(--theme-border);
 }
 
-#favorites-drawer .settings-panel #allowed-ratings button.setting-segmented-option:first-child {
+.settings-panel #allowed-ratings button.setting-segmented-option:first-child {
   border-left: none;
 }
 
-#favorites-drawer .settings-panel #allowed-ratings button.setting-segmented-option:disabled {
+.settings-panel #allowed-ratings button.setting-segmented-option:disabled {
   cursor: default;
   opacity: 1;
 }
@@ -193,7 +193,7 @@
   display: inline-block;
 }
 
-#favorites-drawer .settings-panel button.setting-dropdown-button {
+.settings-panel button.setting-dropdown-button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -208,7 +208,7 @@
   cursor: pointer;
 }
 
-#favorites-drawer .settings-panel button.setting-dropdown-button > span {
+.settings-panel button.setting-dropdown-button > span {
   flex: 1 1 auto;
   text-align: left;
 }
@@ -238,7 +238,7 @@
   display: flex;
 }
 
-#favorites-drawer .settings-panel button.setting-dropdown-option {
+.settings-panel button.setting-dropdown-option {
   padding: 5px 10px;
   border: none;
   border-radius: 6px;
@@ -251,16 +251,16 @@
   cursor: pointer;
 }
 
-#favorites-drawer .settings-panel button.setting-dropdown-option:hover {
+.settings-panel button.setting-dropdown-option:hover {
   background: var(--theme-surface-hover);
 }
 
-#favorites-drawer .settings-panel button.setting-dropdown-option[data-selected] {
+.settings-panel button.setting-dropdown-option[data-selected] {
   color: var(--theme-accent);
   cursor: default;
 }
 
-#favorites-drawer .settings-panel button.setting-dropdown-option[data-selected]:hover {
+.settings-panel button.setting-dropdown-option[data-selected]:hover {
   background: none;
 }
 
@@ -274,7 +274,7 @@
   border: 1px solid var(--theme-border);
 }
 
-#favorites-drawer .settings-panel button.setting-stepper-button {
+.settings-panel button.setting-stepper-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -288,11 +288,11 @@
   cursor: pointer;
 }
 
-#favorites-drawer .settings-panel button.setting-stepper-button:hover {
+.settings-panel button.setting-stepper-button:hover {
   background: var(--theme-surface-hover);
 }
 
-#favorites-drawer .settings-panel button.setting-stepper-button:disabled {
+.settings-panel button.setting-stepper-button:disabled {
   opacity: 0.35;
   pointer-events: none;
 }
@@ -302,7 +302,7 @@
   height: 14px;
 }
 
-#favorites-drawer .settings-panel input.setting-stepper-value {
+.settings-panel input.setting-stepper-value {
   width: 38px;
   min-width: 38px;
   padding: 0;
@@ -317,7 +317,7 @@
   appearance: textfield;
 }
 
-#favorites-drawer .settings-panel input.setting-stepper-value:focus {
+.settings-panel input.setting-stepper-value:focus {
   outline: none;
 }
 

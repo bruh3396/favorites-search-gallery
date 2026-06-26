@@ -1,12 +1,13 @@
 import * as GalleryCursor from "@/features/gallery/model/cursor";
 import * as GalleryFavoriter from "@/features/gallery/model/favoriter";
-import * as GalleryState from "@/features/gallery/model/gallery_state";
+import * as GalleryState from "@/features/gallery/model/state";
 import * as Navigator from "@/lib/remote/rule34/posts/navigation";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { Preferences } from "@/app/context/preferences";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
 import { isVideoThumb } from "@/lib/media/type_predicates";
 
-export * from "@/features/gallery/model/gallery_state";
+export * from "@/features/gallery/model/state";
 export * from "@/features/gallery/model/cursor";
 export { setup as setupNeighbors, getItemsAround } from "@/features/gallery/model/neighbors";
 
@@ -21,4 +22,8 @@ export const currentThumbIfOpen = (): HTMLElement | null => (GalleryState.isInGa
 export function open(thumb: HTMLElement): void {
   GalleryCursor.pointTo(thumb);
   GalleryState.open();
+
+  if (Preferences.gallery.previewEnabled.value) {
+    Preferences.gallery.previewEnabled.set(false);
+  }
 }

@@ -39,3 +39,7 @@ div.sidebar {
   flex-direction: column;
   gap: 3px;
 }
+
+[data-infinite-scroll] #paginator {
+  display: none !important;
+}

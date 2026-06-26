@@ -1,5 +1,5 @@
 import { getItemsInContainer, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 import { ThumbConfig } from "@/config/thumb_config";

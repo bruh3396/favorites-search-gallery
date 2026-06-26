@@ -1,5 +1,5 @@
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
-import { EnableRule, ToggleSetting, enableWhen } from "@/lib/ui/settings/setting";
+import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile, Theme } from "@/types/app";
 import { SettingsControl, dropdown, multiSegmented, stepper, toggle as toggleControl } from "@/lib/ui/settings/controls";
@@ -10,6 +10,7 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { GeneralConfig } from "@/config/general_config";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
+import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { galleryOpened } from "@/app/channels/feature_bridge";
 import { reloadWindow } from "@/utils/browser/window";
@@ -17,18 +18,17 @@ import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/toggles
 
 function registerHotkey(key: string, fire: () => void): void {
   DomEvents.document.keydown.on((event) => {
-    if (event.isHotkey && event.key === key && !galleryOpened()) {
+    if (event.isHotkey && event.key.toLowerCase() === key.toLowerCase() && !galleryOpened()) {
       fire();
     }
   });
 }
 
 const toggle = (config: Partial<ToggleSetting>): SettingsControl => toggleControl({ registerHotkey, ...config });
-
 const onLayout = (predicate: (layout: Layout) => boolean): EnableRule => enableWhen(Preferences.favorites.layout, predicate);
 const whenNotInfiniteScroll = (): EnableRule => enableWhen(Preferences.favorites.infiniteScroll, (on) => !on);
 
-export const Settings = {
+export const FavoritesSettings = {
   theme: dropdown<Theme>({
     id: "theme",
     tooltip: "Theme",
@@ -152,9 +152,9 @@ export const Settings = {
     tooltip: "Which content ratings to include in search results",
     preference: Preferences.favorites.allowedRatings,
     options: new Map<Rating, string>([
-      [DiscreteRating.Safe, "Safe"],
+      [DiscreteRating.Explicit, "Explicit"],
       [DiscreteRating.Questionable, "Questionable"],
-      [DiscreteRating.Explicit, "Explicit"]
+      [DiscreteRating.Safe, "Safe"]
     ])
   }),
   sortKey: dropdown<SortKey>({
@@ -191,7 +191,7 @@ export const Settings = {
   }),
   tooltip: toggle({
     id: "show-tooltips",
-    label: "Tooltip",
+    label: "Tag Tooltip",
     tooltip: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
     enabled: TOOLTIP_ENABLED,
     preference: Preferences.favorites.tooltipEnabled,

@@ -1,16 +1,5 @@
+import { EnableRule } from "@/lib/ui/settings/enable_rule";
 import { Preference } from "@/lib/storage/preference";
-
-export interface EnableRule {
-  subscribe: (recompute: () => void) => void;
-  isEnabled: () => boolean;
-}
-
-export function enableWhen<E>(preference: Preference<E>, predicate: (value: E) => boolean): EnableRule {
-  return {
-    subscribe: (recompute) => preference.on(recompute),
-    isEnabled: () => predicate(preference.value)
-  };
-}
 
 export interface Setting<T> {
   id: string;

@@ -1,7 +1,8 @@
-import { bindEnableRule, commit, currentValue, onPreferenceChange, toBinding } from "@/lib/ui/settings/state_binding";
-import { removeDataset, setDataset, toggleDataset } from "@/utils/dom/attribute";
+import { removeDataset, setDataset, toggleDataset } from "@/utils/dom/dataset";
 import { SelectSetting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
+import { StateBinding } from "@/lib/ui/settings/state_binding";
+import { bindEnableRule } from "../enable_rule";
 import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
@@ -18,12 +19,6 @@ function closeAllExcept(keep: () => void): void {
 
 export function buildDropdownRow<T extends string>(config: Partial<SelectSetting<T>>): HTMLElement {
   const options = config.options ?? new Map<T, string>();
-  const binding = toBinding(config, [...options.keys()][0]);
-  let value = currentValue(binding);
-
-  if (config.applyOnBuild === true) {
-    commit(binding, value, false);
-  }
   const buttonLabel = createElement("span");
   const button = createElement("button", { className: SettingsClass.dropdownButton, children: [buttonLabel, icon("chevronDown")] });
 
@@ -44,7 +39,7 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
       close();
     }
   };
-  const render = (): void => {
+  const render = (value: T): void => {
     buttonLabel.textContent = options.get(value) ?? "";
 
     for (const [optionValue, optionButton] of optionButtons) {
@@ -53,14 +48,8 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
   };
 
   const select = (optionValue: T): void => {
-    if (optionValue === value) {
-      close();
-      return;
-    }
-    value = optionValue;
-    render();
     close();
-    commit(binding, value);
+    binding.set(optionValue);
   };
 
   for (const [optionValue, optionLabel] of options) {
@@ -78,7 +67,8 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
     event.stopPropagation();
     toggleOpen();
   });
-  render();
+
+  const binding = new StateBinding(config, [...options.keys()][0], render);
 
   const row = controlRow(config, dropdown);
 
@@ -95,10 +85,6 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
     }
   });
 
-  onPreferenceChange(binding, (next) => {
-    value = next;
-    render();
-  });
   bindEnableRule(row, config.enabledWhen);
   return row;
 }

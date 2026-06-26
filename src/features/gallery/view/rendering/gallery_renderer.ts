@@ -1,5 +1,5 @@
 import { isGif, isVideo } from "@/lib/media/type_predicates";
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { BoundaryEdge } from "@/types/boundary";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";

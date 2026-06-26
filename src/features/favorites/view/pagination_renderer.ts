@@ -10,7 +10,7 @@ import { doNothing } from "@/utils/function";
 import { insertStyle } from "@/utils/dom/injector";
 import { isOnlyDigits } from "@/utils/string/query";
 import { paginationUpdateStrategy } from "@/lib/ui/pagination";
-import { toggleDataset } from "@/utils/dom/attribute";
+import { toggleDataset } from "@/utils/dom/dataset";
 
 const container = span("favorites-pagination");
 const rangeIndicator = label("pagination-range-label");

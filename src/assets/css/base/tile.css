@@ -39,7 +39,7 @@
 }
 
 .tile[data-fading="play"] {
-  animation: thumb-fade-in 0.25s ease both;
+  animation: thumb-fade-in 0.2s ease both;
   animation-delay: calc(var(--fade-cascade-step) * var(--fade-cascade-index, 0));
 }
 

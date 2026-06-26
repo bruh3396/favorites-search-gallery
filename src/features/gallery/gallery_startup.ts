@@ -131,7 +131,7 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.newFavoritesFound.on(GalleryContentFlow.refresh, { once: true });
   Events.favorites.pageChanged.on(GalleryContentFlow.refresh);
   Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.reIndex);
-  Preferences.gallery.previewEnabled.on(GalleryModel.togglePreview);
+  Preferences.gallery.previewEnabled.on(GalleryModel.preview);
   Events.favorites.searchResultsUpdated.on(GalleryContentFlow.downscaleThumbsOutsideResults);
 }
 

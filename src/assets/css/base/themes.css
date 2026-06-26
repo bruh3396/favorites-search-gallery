@@ -9,13 +9,15 @@ body {
 }
 
 .sidebar {
-  background-color: var(--theme-surface);
+  background-color: var(--theme-surface-sunken);
 }
 
-#header,
-#header * {
+#navbar, #header, #site-title {
   background-color: var(--theme-surface-gradient) !important;
-  color: var(--theme-link);
+}
+
+#header * {
+  color: var(--theme-link) !important;
 }
 
 .awesomplete>ul {
@@ -43,8 +45,8 @@ body {
 }
 
 [data-theme="native-dark"] {
-  --theme-surface: #2a322a;
-  --theme-surface-sunken: #303030;
+  --theme-surface: #303a30;
+  --theme-surface-sunken: #293129;
   --theme-surface-raised: #364036;
   --theme-surface-hover: #44503f;
   --theme-border: #4a564a;

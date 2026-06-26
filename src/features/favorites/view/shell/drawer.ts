@@ -3,33 +3,34 @@ import * as FavoritesHelp from "@/features/favorites/view/shell/help";
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import { FavoritesClass, FavoritesDrawerTabs, FavoritesId } from "@/features/favorites/types/scaffold";
 import { IconName, icon } from "@/lib/ui/icon";
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { createElement, div } from "@/utils/dom/element_factory";
+import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { FavoritesDrawerTab } from "@/types/app";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
-import { div } from "@/utils/dom/element_factory";
-import { macroTask } from "@/lib/async/async";
+import { queueMacroTask } from "@/lib/async/async";
 
 let activeTab: FavoritesDrawerTab = Preferences.favorites.drawerActiveTab.value;
 let renderSettings: (panel: HTMLElement) => void = (): void => undefined;
 
-export async function setup(renderSettingsPanel: (panel: HTMLElement) => void): Promise<void> {
+export function setup(renderSettingsPanel: (panel: HTMLElement) => void): void {
   if (!ON_DESKTOP_DEVICE) {
     return;
   }
   renderSettings = renderSettingsPanel;
-  const drawer = div(FavoritesId.drawer);
-
-  drawer.classList.add("u-no-select");
-  drawer.appendChild(buildTabRail());
-  drawer.appendChild(buildPanels());
-  FavoritesShell.DrawerTrack.appendChild(drawer);
+  FavoritesShell.DrawerTrack.appendChild(createElement(
+    "div",
+    {
+      id: FavoritesId.drawer,
+      className: "u-no-select",
+      children: [buildTabRail(), buildPanels()]
+    }
+  ));
   selectTab(activeTab);
   wireVersionLabel();
 
   if (Preferences.favorites.drawerOpen.value) {
-    await macroTask();
-    openInstantly();
+    queueMacroTask(openInstantly);
   }
 }
 

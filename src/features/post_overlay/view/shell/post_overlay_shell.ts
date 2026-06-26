@@ -1,4 +1,4 @@
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { Overlays } from "@/app/layout/shell";
 import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";

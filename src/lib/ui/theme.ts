@@ -1,4 +1,4 @@
-import { setDataset, toggleDataset } from "@/utils/dom/attribute";
+import { setDataset, toggleDataset } from "@/utils/dom/dataset";
 import { Theme } from "@/types/app";
 import { setCookie } from "@/utils/browser/cookie";
 import { macroTask } from "@/lib/async/async";

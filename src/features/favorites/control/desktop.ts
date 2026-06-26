@@ -1,12 +1,12 @@
-import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { SettingsClass } from "@/lib/ui/settings/classes";
-import { SettingsControl } from "@/lib/ui/settings/controls";
-import { Settings } from "@/features/favorites/control/settings";
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { ButtonElement } from "@/types/element";
 import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
+import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesSettings } from "@/features/favorites/control/settings";
 import { Preferences } from "@/app/context/preferences";
+import { SettingsClass } from "@/lib/ui/settings/classes";
+import { SettingsControl } from "@/lib/ui/settings/controls";
 import { buildButtonElement } from "@/lib/ui/elements/button";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
@@ -99,42 +99,42 @@ const sections: SettingsSection[] = [
   {
     title: "General",
     controls: [
-      Settings.performanceProfile,
-      Settings.enhanceSearchPages,
-      Settings.postOverlay,
-      Settings.tooltip
+      FavoritesSettings.performanceProfile,
+      FavoritesSettings.enhanceSearchPages,
+      FavoritesSettings.postOverlay,
+      FavoritesSettings.tooltip
 
     ]
   },
   {
     title: "Appearance",
     controls: [
-      Settings.theme,
-      Settings.layout,
-      Settings.resultsPerPage,
-      Settings.columnCount,
-      Settings.rowHeight,
-      Settings.infiniteScroll,
-      // Settings.gradient,
-      // Settings.fadeThumbs,
-      Settings.header
+      FavoritesSettings.theme,
+      FavoritesSettings.layout,
+      FavoritesSettings.resultsPerPage,
+      FavoritesSettings.columnCount,
+      FavoritesSettings.rowHeight,
+      FavoritesSettings.infiniteScroll,
+      // FavoritesSettings.gradient,
+      FavoritesSettings.fadeThumbs,
+      FavoritesSettings.header
     ]
   },
   {
     title: "Search",
     controls: [
-      Settings.sortKey,
-      Settings.sortAscending,
-      Settings.excludeBlacklist,
-      Settings.rating
+      FavoritesSettings.sortKey,
+      FavoritesSettings.sortAscending,
+      FavoritesSettings.excludeBlacklist,
+      FavoritesSettings.rating
     ]
   },
   {
     title: "Gallery",
     controls: [
-      Settings.autoplay,
-      Settings.fullscreenOnHover,
-      Settings.galleryMenu
+      FavoritesSettings.autoplay,
+      FavoritesSettings.fullscreenOnHover,
+      FavoritesSettings.galleryMenu
     ]
   }
 ];

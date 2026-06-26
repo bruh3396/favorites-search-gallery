@@ -66,6 +66,7 @@ export const Preferences = {
     infiniteScroll: new Preference("postListInfiniteScroll", false),
     layout: new Preference<Layout>("postListLayout", "column"),
     rowHeight: new Preference("postListRowHeight", 7),
+    settingsCollapsed: new Preference("postListSettingsCollapsed", false),
     tooltipEnabled: new Preference("postListTooltipEnabled", false),
     upscaleThumbs: new Preference("postListUpscaleThumbs", ON_DESKTOP_DEVICE)
   }

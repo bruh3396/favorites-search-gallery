@@ -2,7 +2,7 @@ import { Post } from "@/types/api";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
 import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { resolveMediaType } from "@/lib/media/type_resolver";
-import { setDataset } from "@/utils/dom/attribute";
+import { setDataset } from "@/utils/dom/dataset";
 
 export class FavoriteElement {
   public readonly root: HTMLElement;

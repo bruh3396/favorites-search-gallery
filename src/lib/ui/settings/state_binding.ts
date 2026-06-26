@@ -1,47 +1,54 @@
-import { EnableRule, Setting } from "@/lib/ui/settings/setting";
 import { Preference } from "@/lib/storage/preference";
+import { Setting } from "@/lib/ui/settings/setting";
 import { doNothing } from "@/utils/function";
-import { toggleDataset } from "@/utils/dom/attribute";
 
-export interface StateBinding<T> {
-  preference: Preference<T> | null;
-  defaultValue: T;
-  apply: (value: T) => void;
-}
+export class StateBinding<T> {
+  private currentValue: T;
+  private readonly preference: Preference<T> | null;
+  private readonly apply: (value: T) => void;
+  private readonly render: (value: T) => void;
 
-export function toBinding<T>(setting: Partial<Setting<T>>, defaultValue: T): StateBinding<T> {
-  return {
-    preference: setting.preference ?? null,
-    defaultValue,
-    apply: setting.apply ?? doNothing
-  };
-}
-
-export function currentValue<T>(binding: StateBinding<T>): T {
-  return binding.preference === null ? binding.defaultValue : binding.preference.value;
-}
-
-export function onPreferenceChange<T>(binding: StateBinding<T>, apply: (value: T) => void): void {
-  if (binding.preference !== null) {
-    binding.preference.on(apply);
+  constructor(setting: Partial<Setting<T>>, defaultValue: T, render: (value: T) => void) {
+    this.preference = setting.preference ?? null;
+    this.apply = setting.apply ?? doNothing;
+    this.render = render;
+    this.currentValue = this.preference === null ? defaultValue : this.preference.value;
+    this.initialize(setting);
   }
-}
 
-export function bindEnableRule(settingElement: HTMLElement, rule: EnableRule | null | undefined): void {
-  if (rule === null || rule === undefined) {
-    return;
+  public get value(): T {
+    return this.currentValue;
   }
-  const update = (): void => {
-    toggleDataset(settingElement, "disabled", !rule.isEnabled());
-  };
 
-  update();
-  rule.subscribe(update);
-}
-
-export function commit<T>(binding: StateBinding<T>, value: T, save: boolean = true): void {
-  if (save && binding.preference !== null) {
-    binding.preference.set(value);
+  public set(next: T): void {
+    if (next === this.currentValue) {
+      return;
+    }
+    this.currentValue = next;
+    this.rerender();
+    this.commit(next);
   }
-  binding.apply(value);
+
+  protected commit(value: T): void {
+    this.preference?.set(value);
+    this.apply(value);
+  }
+
+  private rerender(): void {
+    this.render(this.currentValue);
+  }
+
+  private initialize(setting: Partial<Setting<T>>): void {
+    this.preference?.on((next) => {
+      if (next !== this.currentValue) {
+        this.currentValue = next;
+        this.rerender();
+      }
+    });
+    this.rerender();
+
+    if (setting.applyOnBuild === true) {
+      this.apply(this.currentValue);
+    }
+  }
 }

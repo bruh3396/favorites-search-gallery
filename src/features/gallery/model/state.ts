@@ -16,8 +16,8 @@ export function close(): void {
   currentState = "idle";
 }
 
-export function togglePreview(): void {
-  currentState = currentState === "preview" ? "idle" : "preview";
+export function preview(value: boolean): void {
+  currentState = currentState === "open" ? "open" : value ? "preview" : "idle";
 }
 
 function initialState(): GalleryState {

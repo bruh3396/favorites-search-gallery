@@ -1,31 +1,27 @@
-import * as PostListNavigatorMenu from "@/features/post_list_navigator/view/shell/menu";
 import { Content } from "@/app/layout/shell";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
+import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
+import { div } from "@/utils/dom/element_factory";
 import { insertStyle } from "@/utils/dom/injector";
 
-export function insert(): void {
-  insertOptionsMenu();
+export function insert(): HTMLElement | null {
   insertContent();
+  return insertOptionsMenu();
 }
 
-function insertOptionsMenu(): void {
+function insertOptionsMenu(): HTMLElement | null {
   const displayOptions = document.getElementById("displayOptions");
 
   if (displayOptions === null) {
-    return;
+    return null;
   }
   const listItem = document.createElement("li");
+  const panel = div("post-list-menu");
 
+  insertStyle(POST_LIST_CSS + SETTINGS_PANEL_CSS, "post-list-ui");
+  listItem.appendChild(panel);
   displayOptions.appendChild(listItem);
-  insertStyle(POST_LIST_CSS);
-  listItem.append(PostListNavigatorMenu.build());
-
-  if (ON_MOBILE_DEVICE) {
-    insertStyle(`#post-list-upscale-thumbs {
-      display: none;
-    }`);
-  }
+  return panel;
 }
 
 function insertContent(): void {

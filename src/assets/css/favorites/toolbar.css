@@ -10,7 +10,7 @@
 }
 
 #favorites-toolbar :is(button, input, textarea),
-#favorites-drawer :is(button, input, textarea) {
+#favorites-drawer-tabs :is(button, input, textarea) {
   all: unset;
   box-sizing: border-box;
 }

@@ -1,4 +1,4 @@
-import { removeDataset, setDataset } from "@/utils/dom/attribute";
+import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";

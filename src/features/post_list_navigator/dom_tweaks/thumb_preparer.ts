@@ -3,7 +3,7 @@ import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { removeNonNumericCharacters } from "@/utils/string/format";
 import { resolveMediaType } from "@/lib/media/type_resolver";
-import { setDataset } from "@/utils/dom/attribute";
+import { setDataset } from "@/utils/dom/dataset";
 
 export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {
   thumbs.forEach(thumb => prepareThumb(thumb));

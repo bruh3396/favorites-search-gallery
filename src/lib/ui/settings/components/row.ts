@@ -1,6 +1,6 @@
 import { Setting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { buildDataset } from "@/utils/dom/attribute";
+import { buildDataset } from "@/utils/dom/dataset";
 import { createElement } from "@/utils/dom/element_factory";
 
 export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement): HTMLElement {
