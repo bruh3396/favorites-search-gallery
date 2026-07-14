@@ -1,16 +1,17 @@
 import { IconName, icon } from "@/lib/ui/icon";
+import { Stepper, buildStepper } from "@/lib/ui/settings/components/stepper_control";
 import { label, span } from "@/utils/dom/element_factory";
+import { removeDataset, toggleDataset } from "@/utils/dom/dataset";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { PaginationContext } from "@/features/favorites/types/interfaces";
 import { PaginationSequence } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
+import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { doNothing } from "@/utils/function";
 import { insertStyle } from "@/utils/dom/injector";
-import { isOnlyDigits } from "@/utils/string/query";
 import { paginationUpdateStrategy } from "@/lib/ui/pagination";
-import { toggleDataset } from "@/utils/dom/dataset";
 
 const container = span("favorites-pagination");
 const rangeIndicator = label("pagination-range-label");
@@ -18,6 +19,7 @@ const rangeIndicator = label("pagination-range-label");
 let onPageSelected: (pageNumber: number) => void = doNothing;
 let onPageStepped: (direction: NavigationKey) => void = doNothing;
 let renderedSequence: PaginationSequence = [];
+let gotoPageStepper: Stepper | null = null;
 
 export function setup(pageSelected: (pageNumber: number) => void, pageStepped: (direction: NavigationKey) => void): void {
   onPageSelected = pageSelected;
@@ -44,6 +46,16 @@ export function togglePaginator(value: boolean): void {
 
 export function getPaginationContainer(): HTMLElement {
   return container;
+}
+
+export function isGotoPagePopoverTarget(target: Node): boolean {
+  const popover = container.querySelector("#goto-page-popover");
+  const ellipsis = container.querySelector(".favorites-pagination-ellipsis");
+  return popover?.contains(target) === true || ellipsis?.contains(target) === true;
+}
+
+export function closeGotoPagePopover(): void {
+  removeDataset(container.querySelector<HTMLElement>("#goto-page-popover"), "open");
 }
 
 export function buildPaginator(context: PaginationContext): void {
@@ -109,7 +121,7 @@ function createEllipsis(popover: HTMLElement): void {
   const ellipsis = document.createElement("button");
 
   ellipsis.className = "favorites-pagination-ellipsis";
-  ellipsis.title = "Goto specific page";
+  addTooltip(ellipsis, "Goto specific page", "below");
   ellipsis.textContent = "…";
   ellipsis.onclick = (): void => {
     if (toggleDataset(popover, "open")) {
@@ -173,11 +185,7 @@ function patchNumberTraversalButtons(context: PaginationContext): void {
 }
 
 function patchGotoPagePopover(context: PaginationContext): void {
-  const input = container.querySelector<HTMLInputElement>("#goto-page-input");
-
-  if (input !== null) {
-    input.max = String(context.finalPage);
-  }
+  gotoPageStepper?.setMax(context.finalPage);
 }
 
 function createArrowTraversalButtons(context: PaginationContext): void {
@@ -191,7 +199,7 @@ function createArrowTraversalButton(name: string, direction: NavigationKey, icon
   const button = document.createElement("button");
 
   button.id = `${name}-page`;
-  button.title = `Goto ${name} page`;
+  addTooltip(button, `Goto ${name} page`, "below");
   button.className = "favorites-pagination-arrow";
   button.appendChild(icon(iconName));
   button.onclick = (): void => {
@@ -205,39 +213,38 @@ function createGotoPagePopover(currentPageNumber: number, finalPageNumber: numbe
   const popover = document.createElement("div");
   const heading = document.createElement("label");
   const row = document.createElement("div");
-  const input = document.createElement("input");
   const button = document.createElement("button");
+  const stepper = buildStepper({
+    id: "goto-page-input",
+    min: 1,
+    max: finalPageNumber,
+    step: 1,
+    value: currentPageNumber,
+    onChange: doNothing
+  });
 
   popover.id = "goto-page-popover";
   heading.className = "goto-page-heading";
   heading.textContent = "Go to page";
   row.id = "goto-page-row";
-  input.type = "number";
-  input.min = "1";
-  input.max = String(finalPageNumber);
-  input.value = String(currentPageNumber);
-  input.id = "goto-page-input";
   button.textContent = "Go";
   button.id = "goto-page-button";
+  gotoPageStepper = stepper;
 
   const submit = (): void => {
-    if (isOnlyDigits(input.value)) {
-      onPageSelected(Number(input.value));
-      popover.classList.remove("goto-page-popover--open");
-    }
+    onPageSelected(stepper.value);
+    removeDataset(popover, "open");
   };
 
   button.onclick = submit;
-  input.onkeydown = (event): void => {
+  stepper.element.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       submit();
     }
-  };
+  });
 
-  row.appendChild(input);
-  row.appendChild(button);
-  popover.appendChild(heading);
-  popover.appendChild(row);
+  row.append(stepper.element, button);
+  popover.append(heading, row);
   return popover;
 }
 

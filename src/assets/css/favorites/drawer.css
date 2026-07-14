@@ -69,8 +69,8 @@
   overflow-y: auto;
 }
 
-:root[data-surface-gradient] #favorites-drawer-tabs {
-  background: var(--theme-surface-gradient);
+:root[data-gradient] #favorites-drawer-tabs {
+  background: var(--theme-gradient);
 }
 
 #favorites-drawer .favorites-drawer-tab {
@@ -100,10 +100,10 @@
 
 #favorites-drawer .favorites-drawer-tab:hover {
   color: var(--theme-text);
-  background: var(--theme-surface-hover);
+  background: var(--theme-hover);
 }
 
 #favorites-drawer .favorites-drawer-tab[data-selected] {
   color: var(--theme-accent);
-  background: var(--theme-surface-raised);
+  background: var(--theme-raised);
 }

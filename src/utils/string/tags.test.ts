@@ -1,5 +1,5 @@
-import { toSortedTagString, toSortedTagSet, toTagString } from "@/utils/string/tags";
 import { describe, expect, test } from "vitest";
+import { toSortedTagSet, toSortedTagString, toTagString } from "@/utils/string/tags";
 
 describe("toTagSet", () => {
   test("empty", () => {

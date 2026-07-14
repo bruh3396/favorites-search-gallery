@@ -18,5 +18,8 @@ export const SettingsClass = {
   dropdownOption: "setting-dropdown-option",
   stepper: "setting-stepper",
   stepperButton: "setting-stepper-button",
-  stepperValue: "setting-stepper-value"
+  stepperValue: "setting-stepper-value",
+  slider: "setting-slider",
+  sliderInput: "setting-slider-input",
+  sliderValue: "setting-slider-value"
 } as const;

@@ -1,3 +1,4 @@
+import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { openMedia, openPost } from "@/lib/remote/rule34/posts/navigation";
 import { EnhancedMouseEvent } from "@/types/input";
 import { GALLERY_DISABLED } from "@/app/context/flags";
@@ -17,6 +18,8 @@ export function onClick(event: EnhancedMouseEvent): void {
 }
 
 export function onMouseDown(event: EnhancedMouseEvent): void {
+  closePopoversOutside(event);
+
   if (event.thumb === null || event.ctrlKey) {
     return;
   }
@@ -27,6 +30,14 @@ export function onMouseDown(event: EnhancedMouseEvent): void {
     openPost(event.thumb.id);
   }
   event.originalEvent.preventDefault();
+}
+
+function closePopoversOutside(event: EnhancedMouseEvent): void {
+  const target = event.originalEvent.target;
+
+  if (target instanceof Node && !FavoritesView.isGotoPagePopoverTarget(target)) {
+    FavoritesView.closeGotoPagePopover();
+  }
 }
 
 export function onMouseOver(event: EnhancedMouseEvent): void {

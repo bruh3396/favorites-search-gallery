@@ -1,15 +1,17 @@
-import { FavoritesDrawerTab, FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode, Theme } from "@/types/app";
+import { FavoritesDrawerTab, FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortKey } from "@/types/search";
 import { Preference } from "@/lib/storage/preference";
+import { Theme } from "@/lib/ui/theme/themes";
 import { getCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
   app: {
     performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
-    surfaceGradient: new Preference("appSurfaceGradient", true),
-    theme: new Preference<Theme>("appTheme", getCookie("theme", "") === "dark" ? "native-dark" : "native-light"),
-    fadeThumbs: new Preference<boolean>("appFadeThumbs", true)
+    gradient: new Preference("appGradient", true),
+    theme: new Preference<Theme>("appTheme", "native"),
+    darkMode: new Preference<boolean>("appDarkMode", getCookie("theme", "") === "dark"),
+    fadeThumbs: new Preference<boolean>("appFadeThumbs", false)
   },
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
@@ -26,7 +28,7 @@ export const Preferences = {
     newFavoriteHighlight: new Preference<HighlightStyle>("favoritesNewFavoriteHighlight", "border"),
     optionsVisible: new Preference("favoritesOptionsVisible", false),
     deletingAllowed: new Preference("favoritesDeletingAllowed", false),
-    resultsPerPage: new Preference("favoritesResultsPerPage", 200),
+    resultsPerPage: new Preference("favoritesResultsPerPage", 100),
     rowHeight: new Preference("favoritesRowHeight", 7),
     settingsCollapsedSections: new Preference<Record<string, boolean>>("favoritesSettingsCollapsedSections", {}),
     sortAscending: new Preference("favoritesSortAscending", false),
@@ -39,7 +41,7 @@ export const Preferences = {
     autoplayImageDuration: new Preference("galleryAutoplayImageDuration", 3_000),
     autoplayMinimumVideoDuration: new Preference("galleryAutoplayMinimumVideoDuration", 5_000),
     autoplayPaused: new Preference("galleryAutoplayPaused", false),
-    backgroundOpacity: new Preference("galleryBackgroundOpacity", "1"),
+    backgroundOpacity: new Preference("galleryBackgroundOpacity", 1),
     colorScheme: new Preference("galleryColorScheme", "black"),
     menuDockedLeft: new Preference("galleryMenuDockedLeft", ON_DESKTOP_DEVICE),
     menuEnabled: new Preference("galleryMenuEnabled", ON_MOBILE_DEVICE),

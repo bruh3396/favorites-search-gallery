@@ -2,6 +2,10 @@ export function toCamelCase(variable: string): string {
   return variable.replace(/_([a-z])/g, (_, character) => character.toUpperCase());
 }
 
+export function toKebabCase(variable: string): string {
+  return variable.replace(/([A-Z])/g, (_, character) => `-${character.toLowerCase()}`);
+}
+
 export function removeExtraWhiteSpace(text: string): string {
   return text.trim().replace(/\s\s+/g, " ");
 }

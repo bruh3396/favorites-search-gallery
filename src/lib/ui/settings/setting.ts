@@ -26,3 +26,9 @@ export interface StepperSetting extends Setting<number> {
   max: number;
   step: number;
 }
+
+export interface SliderSetting extends Setting<number> {
+  min: number;
+  max: number;
+  step: number;
+}

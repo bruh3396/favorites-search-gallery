@@ -5,8 +5,10 @@ import { createElement } from "@/utils/dom/element_factory";
 
 export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement): HTMLElement {
   control.classList.add(SettingsClass.control);
+  const hasTooltip = config.tooltip !== undefined && config.tooltip !== "";
   const dataset = buildDataset({
-    tooltip: config.tooltip === undefined || config.tooltip === "" ? undefined : config.tooltip,
+    tooltip: hasTooltip ? config.tooltip : undefined,
+    tooltipPos: hasTooltip ? "above" : undefined,
     disabled: config.enabled === false ? "" : undefined
   });
   const text = createElement("span", { className: SettingsClass.rowLabel, textContent: config.label ?? "" });

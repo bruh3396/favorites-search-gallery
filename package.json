@@ -27,7 +27,7 @@
     "build": "node scripts/bin/userscript_builder || (npm run compile-scripts && node scripts/bin/userscript_builder)",
     "test": "npx vitest --run --exclude \"src/playground/**\"",
     "test-local-server": "npx vitest --run src/playground/local_server.test.ts",
-    "test-post-contract": "npx vitest --run src/playground/post_contract.test.ts",
+    "test-worker": "npx vitest --run src/playground/worker.test.ts",
     "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
     "continuous-integration": "npm run build && npm run test && npm run typecheck",
     "lint": "npx eslint src/",

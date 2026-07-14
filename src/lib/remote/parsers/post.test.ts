@@ -35,6 +35,7 @@ describe("parsePostResponse", () => {
     expect(post.height).toBe(1080);
     expect(post.score).toBe(100);
     expect(post.rating).toBe("e");
+    expect(post.change).toBe(1234567890);
     expect(post.tags).toBe("tag1 tag2");
     expect(post.fileURL).toBe("https://example.com/image.jpg");
     expect(post.previewURL).toBe("https://example.com/preview.jpg");

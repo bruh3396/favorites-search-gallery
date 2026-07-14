@@ -37,4 +37,3 @@ export * from "@/features/favorites/view/shell/native_page_cleaner";
 export * from "@/features/favorites/view/pagination_renderer";
 export * from "@/features/favorites/view/shell/drawer";
 export * from "@/features/favorites/view/status/status";
-export * from "@/features/favorites/dom_tweaks/toggles";

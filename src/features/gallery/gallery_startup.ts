@@ -111,6 +111,7 @@ function setupAutoplay(): void {
 
 function subscribeToEvents(): void {
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
+  Preferences.gallery.backgroundOpacity.on(GalleryView.setBackgroundOpacity);
 
   if (ON_FAVORITES_PAGE) {
     subscribeToFavoritesEvents();

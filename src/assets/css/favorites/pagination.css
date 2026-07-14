@@ -75,9 +75,8 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  min-width: 160px;
   border-radius: 8px;
-  background: var(--theme-surface-raised);
+  background: var(--theme-raised);
   border: 1px solid var(--theme-border);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   z-index: 50;
@@ -104,17 +103,18 @@
 #goto-page-row {
   display: flex;
   align-items: stretch;
+  justify-content: space-between;
   gap: 6px;
 }
 
 #goto-page-popover #goto-page-input {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+}
+
+#goto-page-popover #goto-page-input input.setting-stepper-value {
+  flex: 0 1 auto;
+  width: 48px;
   min-width: 0;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: var(--theme-surface-sunken);
-  border: 1px solid var(--theme-border);
-  color: var(--theme-text);
 }
 
 #goto-page-popover #goto-page-button {

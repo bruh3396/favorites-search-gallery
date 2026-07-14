@@ -9,7 +9,7 @@ import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
 import { insertStyle } from "@/utils/dom/injector";
-import { setColorScheme } from "@/lib/ui/theme";
+import { setColorScheme } from "@/lib/ui/theme/apply";
 import { toggleFullscreen } from "@/utils/browser/window";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 

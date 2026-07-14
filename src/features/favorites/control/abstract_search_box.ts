@@ -38,6 +38,7 @@ export abstract class AbstractFavoritesSearchBox {
 
   protected clear(): void {
     this.searchBox.value = "";
+    this.history.setLastQuery("");
   }
 
   private subscribeToEvents(): void {

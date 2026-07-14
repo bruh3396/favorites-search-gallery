@@ -145,11 +145,10 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | :---| :---------------|
 | /   | Focus the search bar |
 | T   | Toggle tooltips |
-| U   | Toggle UI |
-| O   | Toggle more options  |
-| R   | Toggle add/remove favorite buttons |
+| O   | Toggle tag overlay  |
 | H   | Toggle hints |
 | F   | Toggle fullscreen |
+| D   | Toggle dark mode |
 | G   | Enter gallery |
 
 

@@ -44,7 +44,7 @@ dialog::backdrop {
 input[type=number] {
   border: 1px solid #767676;
   border-radius: 2px;
-  background-color: var(--theme-surface-raised);
+  background-color: var(--theme-raised);
   color: var(--theme-text);
 }
 
@@ -62,7 +62,7 @@ option {
 }
 
 .surface-panel {
-  background: var(--theme-surface-gradient);
+  background: var(--theme-gradient);
   color: var(--theme-text);
 }
 

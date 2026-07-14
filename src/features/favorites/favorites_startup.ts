@@ -1,5 +1,4 @@
-import * as FavoritesDesktop from "@/features/favorites/control/desktop";
-import * as FavoritesFinder from "@/features/favorites/control/finder";
+import * as FavoritesFinder from "@/features/favorites/control/desktop/finder";
 import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
@@ -10,7 +9,9 @@ import * as FavoritesResetFlow from "@/features/favorites/flows/reset_flow";
 import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
 import * as FavoritesSearchBox from "@/features/favorites/control/favorites_search_box";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
+import * as FavoritesSettingsPanel from "@/features/favorites/control/desktop/settings_panel";
 import * as FavoritesTagEditor from "@/features/favorites/features/tag_editor/tag_editor";
+import * as FavoritesToolbar from "@/features/favorites/control/desktop/toolbar";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
@@ -61,7 +62,7 @@ function setupView(): void {
   FavoritesView.setup({
     onPageSelected: FavoritesPaginationFlow.goToPage,
     onPageStepped: FavoritesPaginationFlow.stepPage,
-    renderSettingsPanel: FavoritesDesktop.buildSettingsPanel
+    renderSettingsPanel: FavoritesSettingsPanel.buildSettingsPanel
   });
 }
 
@@ -70,7 +71,7 @@ function setupControl(): void {
   FavoritesSearchBox.setup();
 
   if (ON_DESKTOP_DEVICE) {
-    FavoritesDesktop.setup();
+    FavoritesToolbar.setup();
   }
 }
 

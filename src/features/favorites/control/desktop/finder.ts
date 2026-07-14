@@ -2,6 +2,7 @@ import { Events } from "@/app/channels/events";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
+import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { debounceLeading } from "@/lib/async/debounce";
 
 let container: HTMLElement;
@@ -27,7 +28,7 @@ function createElements(): void {
   container.id = "favorite-finder";
   findButton = document.createElement("button");
   findButton.id = "favorite-finder-button";
-  findButton.title = "Find favorite using its ID";
+  addTooltip(findButton, "Find favorite using its ID", "below");
   findButton.textContent = "Find";
   input = document.createElement("input");
   input.id = "favorite-finder-input";

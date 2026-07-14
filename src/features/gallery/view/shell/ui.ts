@@ -12,7 +12,7 @@ import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 
 const background: HTMLDivElement = div("gallery-background");
 
-background.style.opacity = Preferences.gallery.backgroundOpacity.value;
+background.style.opacity = String(Preferences.gallery.backgroundOpacity.value);
 let lastVisitedThumb: HTMLElement | null = null;
 
 export function setup(root: HTMLElement): void {
@@ -66,14 +66,14 @@ export function toggleZoomCursor(value: boolean): void {
   background.classList.toggle("gallery-background--zooming", value);
 }
 
-export function toggleBackgroundOpacity(): void {
-  const opacity = parseFloat(background.style.opacity);
+export function setBackgroundOpacity(opacity: number): void {
+  background.style.opacity = String(opacity);
+}
 
-  if (opacity < 1) {
-    setBackgroundOpacity(1);
-  } else {
-    setBackgroundOpacity(0);
-  }
+export function toggleBackgroundOpacity(): void {
+  const opacity = Preferences.gallery.backgroundOpacity.value < 1 ? 1 : 0;
+
+  Preferences.gallery.backgroundOpacity.set(opacity);
 }
 
 export function toggleScrollbar(value: boolean): void {
@@ -90,11 +90,11 @@ export function update(thumb: HTMLElement): void {
 }
 
 export function updateBackgroundOpacity(event: WheelEvent): void {
-  let opacity = parseFloat(Preferences.gallery.backgroundOpacity.value);
+  let opacity = Preferences.gallery.backgroundOpacity.value;
 
   opacity -= event.deltaY * 0.0005;
   opacity = clamp(opacity, 0, 1);
-  setBackgroundOpacity(roundToTwoDecimalPlaces(opacity));
+  Preferences.gallery.backgroundOpacity.set(roundToTwoDecimalPlaces(opacity));
 }
 
 export function showAddedFavoriteStatus(status: AddFavoriteStatus): void {
@@ -132,13 +132,6 @@ export function setLastVisitedThumb(thumb: HTMLElement): void {
 
 function usingColumnLayout(): boolean {
   return getLayout() === "column";
-}
-
-function setBackgroundOpacity(opacity: number): void {
-  const opacityString = String(opacity);
-
-  background.style.opacity = opacityString;
-  Preferences.gallery.backgroundOpacity.set(opacityString);
 }
 
 function toggleVideoPointerEvents(value: boolean): void {

@@ -1,4 +1,4 @@
-import { capitalize, decodeHtmlEntities, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores } from "@/utils/string/format";
+import { capitalize, decodeHtmlEntities, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores, toKebabCase } from "@/utils/string/format";
 import { describe, expect, test } from "vitest";
 
 describe("removeExtraWhiteSpace", () => {
@@ -142,6 +142,32 @@ test("replaceSpacesWithUnderscores", () => {
   expect(replaceSpacesWithUnderscores("apple")).toBe("apple");
   expect(replaceSpacesWithUnderscores("apple banana")).toBe("apple_banana");
   expect(replaceSpacesWithUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
+});
+
+describe("toKebabCase", () => {
+  test("empty", () => {
+    expect(toKebabCase("")).toBe("");
+  });
+
+  test("single word", () => {
+    expect(toKebabCase("surface")).toBe("surface");
+  });
+
+  test("two words", () => {
+    expect(toKebabCase("surfaceSunken")).toBe("surface-sunken");
+  });
+
+  test("three words", () => {
+    expect(toKebabCase("themeSurfaceRaised")).toBe("theme-surface-raised");
+  });
+
+  test("leading uppercase", () => {
+    expect(toKebabCase("ThemeSurface")).toBe("-theme-surface");
+  });
+
+  test("consecutive uppercase", () => {
+    expect(toKebabCase("ariaHTML")).toBe("aria-h-t-m-l");
+  });
 });
 
 describe("decodeHtmlEntities", () => {

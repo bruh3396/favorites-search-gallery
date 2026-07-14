@@ -1,7 +1,7 @@
 .setting-section {
   margin: 0 -12px;
   border-bottom: 1px solid var(--theme-border);
-  background: var(--theme-surface-raised);
+  background: var(--theme-raised);
 }
 
 .setting-section:last-child {
@@ -16,7 +16,7 @@
   width: 100%;
   padding: 12px 12px 12px 14px;
   border: none;
-  background: var(--theme-surface-sunken);
+  background: var(--theme-sunken);
   color: var(--theme-text);
   font: inherit;
   cursor: pointer;
@@ -24,7 +24,7 @@
 }
 
 .settings-panel button.setting-section-header:hover {
-  background: var(--theme-surface-hover);
+  background: var(--theme-hover);
 }
 
 .setting-section-title {
@@ -82,7 +82,7 @@
 }
 
 .settings-panel .setting-row:hover {
-  background: var(--theme-surface-hover);
+  background: var(--theme-hover);
 }
 
 .setting-row[data-disabled] {
@@ -109,7 +109,7 @@
   width: 38px;
   height: 22px;
   border-radius: 999px;
-  background: var(--theme-surface-sunken);
+  background: var(--theme-sunken);
   border: 1px solid var(--theme-border);
   transition: background 0.15s ease, border-color 0.15s ease;
 }
@@ -142,7 +142,7 @@
   justify-content: flex-end;
   padding: 2px;
   border-radius: 8px;
-  background: var(--theme-surface-sunken);
+  background: var(--theme-sunken);
   border: 1px solid var(--theme-border);
 }
 
@@ -201,7 +201,7 @@
   padding: 4px 8px;
   border: 1px solid var(--theme-border);
   border-radius: 8px;
-  background: var(--theme-surface-sunken);
+  background: var(--theme-sunken);
   color: var(--theme-text);
   font: inherit;
   font-size: 12px;
@@ -230,7 +230,7 @@
   padding: 4px;
   border: 1px solid var(--theme-border);
   border-radius: 8px;
-  background: var(--theme-surface-raised);
+  background: var(--theme-raised);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
@@ -252,7 +252,7 @@
 }
 
 .settings-panel button.setting-dropdown-option:hover {
-  background: var(--theme-surface-hover);
+  background: var(--theme-hover);
 }
 
 .settings-panel button.setting-dropdown-option[data-selected] {
@@ -270,11 +270,11 @@
   gap: 2px;
   padding: 2px;
   border-radius: 8px;
-  background: var(--theme-surface-sunken);
+  background: var(--theme-sunken);
   border: 1px solid var(--theme-border);
 }
 
-.settings-panel button.setting-stepper-button {
+button.setting-stepper-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -288,11 +288,11 @@
   cursor: pointer;
 }
 
-.settings-panel button.setting-stepper-button:hover {
-  background: var(--theme-surface-hover);
+button.setting-stepper-button:hover {
+  background: var(--theme-hover);
 }
 
-.settings-panel button.setting-stepper-button:disabled {
+button.setting-stepper-button:disabled {
   opacity: 0.35;
   pointer-events: none;
 }
@@ -302,7 +302,7 @@
   height: 14px;
 }
 
-.settings-panel input.setting-stepper-value {
+input.setting-stepper-value {
   width: 38px;
   min-width: 38px;
   padding: 0;
@@ -317,41 +317,56 @@
   appearance: textfield;
 }
 
-.settings-panel input.setting-stepper-value:focus {
+input.setting-stepper-value:focus {
   outline: none;
 }
 
-.setting-row[data-tooltip] {
-  position: relative;
+.setting-slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.setting-row[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  z-index: 20;
-  left: 50%;
-  bottom: calc(100% + 4px);
-  width: max-content;
-  max-width: 90%;
-  padding: 6px 10px;
-  border: 1px solid var(--theme-border);
-  border-radius: 8px;
-  background: var(--theme-surface-raised);
-  color: var(--theme-text-muted);
-  font-size: 12px;
-  line-height: 1.35;
-  text-align: center;
-  white-space: normal;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+.settings-panel input.setting-slider-input {
+  width: 110px;
+  height: 4px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--theme-sunken);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.settings-panel input.setting-slider-input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--theme-accent);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.settings-panel input.setting-slider-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--theme-accent);
+  cursor: pointer;
+}
+
+.setting-slider-value {
+  min-width: 30px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--theme-text);
+}
+
+.settings-panel:not([data-tooltips]) .setting-row[data-tooltip]:hover::after {
   opacity: 0;
-  transform: translate(-50%, 4px);
-  pointer-events: none;
-  transition: opacity 0.12s ease, transform 0.12s ease;
-  transition-delay: 0s;
-}
-
-.settings-panel[data-tooltips] .setting-row[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translate(-50%, 0);
-  transition-delay: 0.4s;
 }

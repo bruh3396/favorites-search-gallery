@@ -28,8 +28,8 @@
   box-sizing: border-box;
 }
 
-:root[data-surface-gradient] #favorites-toolbar {
-  background: var(--theme-surface-gradient);
+:root[data-gradient] #favorites-toolbar {
+  background: var(--theme-gradient);
 }
 
 #favorites-toolbar-grid {
@@ -63,7 +63,7 @@
 
 #favorites-brand-version:hover {
   color: var(--theme-text);
-  background-color: var(--theme-surface-hover);
+  background-color: var(--theme-hover);
 }
 
 #favorites-brand-version:active {
@@ -174,7 +174,7 @@
 }
 
 #favorites-toolbar .menu-icon-btn:hover {
-  background: var(--theme-surface-hover);
+  background: var(--theme-hover);
 }
 
 #favorites-toolbar .menu-icon-btn[data-active] {
@@ -184,30 +184,4 @@
 .menu-icon-btn>.icon {
   width: 20px;
   height: 20px;
-}
-
-.menu-icon-btn::after {
-  content: attr(data-hint);
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 4px;
-  padding: 2px 6px;
-  white-space: nowrap;
-  background: var(--theme-surface-raised);
-  color: var(--theme-text);
-  border: 1px solid var(--theme-border);
-  border-radius: 3px;
-  font-size: 12px;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.1s ease 0s, visibility 0s linear 0.6s;
-  z-index: 40;
-}
-
-.menu-icon-btn:hover::after {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.1s ease 0.6s, visibility 0s linear 0.6s;
 }

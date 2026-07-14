@@ -10,7 +10,7 @@ export function rebuildHighlights(query: string): void {
 }
 
 export function getColorForTag(tag: string): string | null {
-  if (Preferences.app.theme.value === "native-light") {
+  if (!Preferences.app.darkMode.value) {
     return TooltipTagMatcher.findMatchingDarkColor(tag, currentHighlights);
   }
   return TooltipTagMatcher.findMatchingLightColor(tag, currentHighlights);

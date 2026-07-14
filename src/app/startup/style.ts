@@ -1,5 +1,5 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { applySurfaceGradient, applyTheme } from "@/lib/ui/theme";
+import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
 import { Content } from "@/app/layout/shell";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
@@ -10,16 +10,18 @@ import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
 import THUMB_LOADING_CSS from "@/assets/css/base/loading.css";
 import TILE_CSS from "@/assets/css/base/tile.css";
+import TOOLTIP_CSS from "@/assets/css/base/tooltip.css";
 import { ThumbConfig } from "@/config/thumb_config";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
 import { insertStyle } from "@/utils/dom/injector";
+import { themeStyles } from "@/lib/ui/theme/builder";
 
 export function setupStyles(): void {
   insertBaseStyles();
-  applyTheme(Preferences.app.theme.value);
-  applySurfaceGradient(Preferences.app.surfaceGradient.value);
+  applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
+  toggleGradient(Preferences.app.gradient.value);
   applyTileVariables();
 }
 
@@ -34,7 +36,9 @@ function insertBaseStyles(): void {
     POST_CSS +
     TILE_CSS +
     HIGHLIGHT_CSS +
+    TOOLTIP_CSS +
     THEMES_CSS +
+    themeStyles() +
     THUMB_LOADING_CSS +
     fadeInCss);
 }

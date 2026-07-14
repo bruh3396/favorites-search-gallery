@@ -2,7 +2,6 @@ export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postLis
 export type FeatureNamespaced = Partial<Record<Feature, object>>;
 
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
-export type Theme = "native-dark" | "native-light" | "midnight" | "ember" | "venom" | "zeal" | "frozen-cobalt" | "cherry-blossom" | "forest" | "parchment";
 export type Layout = "row" | "square" | "grid" | "column" | "native";
 export type HighlightStyle = "glow" | "trace" | "border" | "hidden" | "none";
 
@@ -15,3 +14,4 @@ export type GalleryMenuAction = "exit" |
 export type GalleryState = "idle" | "preview" | "open";
 export type FavoritesDrawerTab = "settings" | "saved" | "tags" | "download" | "change" | "help";
 export type PostOverlayMode = "tag";
+export type MapToString<T extends readonly unknown[]> = { readonly [K in keyof T]: string };

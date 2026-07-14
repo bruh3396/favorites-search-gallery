@@ -1,20 +1,21 @@
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
-import { Layout, PerformanceProfile, Theme } from "@/types/app";
-import { SettingsControl, dropdown, multiSegmented, stepper, toggle as toggleControl } from "@/lib/ui/settings/controls";
-import { applySurfaceGradient, applyTheme } from "@/lib/ui/theme";
+import { Layout, PerformanceProfile } from "@/types/app";
+import { SettingsControl, dropdown, multiSegmented, slider, stepper, toggle as toggleControl } from "@/lib/ui/settings/controls";
+import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
 import { DomEvents } from "@/app/dom/events";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { GeneralConfig } from "@/config/general_config";
 import { Preferences } from "@/app/context/preferences";
+import { Theme } from "@/lib/ui/theme/themes";
 import { ThumbConfig } from "@/config/thumb_config";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { galleryOpened } from "@/app/channels/feature_bridge";
 import { reloadWindow } from "@/utils/browser/window";
-import { toggleOptionHotkeyHints } from "@/features/favorites/dom_tweaks/toggles";
+import { themeOptions } from "@/lib/ui/theme/builder";
 
 function registerHotkey(key: string, fire: () => void): void {
   DomEvents.document.keydown.on((event) => {
@@ -27,26 +28,28 @@ function registerHotkey(key: string, fire: () => void): void {
 const toggle = (config: Partial<ToggleSetting>): SettingsControl => toggleControl({ registerHotkey, ...config });
 const onLayout = (predicate: (layout: Layout) => boolean): EnableRule => enableWhen(Preferences.favorites.layout, predicate);
 const whenNotInfiniteScroll = (): EnableRule => enableWhen(Preferences.favorites.infiniteScroll, (on) => !on);
+const whenNotFullscreenOnHover = (): EnableRule => enableWhen(Preferences.gallery.previewEnabled, (on) => !on);
+
+function applyCurrentTheme(): void {
+  applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
+}
 
 export const FavoritesSettings = {
   theme: dropdown<Theme>({
     id: "theme",
-    tooltip: "Theme",
+    tooltip: "Choose the color theme",
     label: "Theme",
     preference: Preferences.app.theme,
-    apply: applyTheme,
-    options: new Map<Theme, string>([
-      ["native-light", "Native Light"],
-      ["native-dark", "Native Dark"],
-      ["midnight", "Midnight"],
-      ["ember", "Ember"],
-      ["venom", "Venom"],
-      ["zeal", "Zeal"],
-      ["frozen-cobalt", "Frost"],
-      ["cherry-blossom", "Cherry Blossom"],
-      ["forest", "Forest"],
-      ["parchment", "Parchment"]
-    ])
+    apply: applyCurrentTheme,
+    options: themeOptions()
+  }),
+  darkMode: toggle({
+    id: "dark-mode",
+    label: "Dark Mode",
+    tooltip: "Use the dark variant of the selected theme",
+    preference: Preferences.app.darkMode,
+    hotkey: "D",
+    apply: applyCurrentTheme
   }),
   fadeThumbs: toggle({
     id: "fade-thumbs",
@@ -57,7 +60,7 @@ export const FavoritesSettings = {
   }),
   layout: dropdown<Layout>({
     id: "layout-select",
-    tooltip: "Favorites Layout",
+    tooltip: "Choose how favorites are laid out",
     label: "Layout",
     preference: Preferences.favorites.layout,
     applyOnBuild: true,
@@ -65,14 +68,14 @@ export const FavoritesSettings = {
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],
-      ["grid", "Legacy"],
+      ["grid", "Classic"],
       ["native", "Native"]
     ])
   }),
   columnCount: stepper({
     id: "column-count",
     label: "Columns",
-    tooltip: "Number of columns in the waterfall/square/legacy layouts",
+    tooltip: "Set the number of columns in the waterfall/square/classic layouts",
     preference: Preferences.favorites.columnCount,
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
@@ -82,7 +85,7 @@ export const FavoritesSettings = {
   rowHeight: stepper({
     id: "row-size",
     label: "Row Height",
-    tooltip: "Row height in the river layout",
+    tooltip: "Set the row height in the river layout",
     preference: Preferences.favorites.rowHeight,
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
@@ -92,23 +95,23 @@ export const FavoritesSettings = {
   header: toggle({
     id: "toggle-header",
     label: "Header",
-    tooltip: "Site header",
+    tooltip: "Show the site header",
     preference: Preferences.favorites.headerEnabled,
     applyOnBuild: true,
     apply: toggleHeader
   }),
   gradient: toggle({
-    id: "toggle-surface-gradient",
+    id: "toggle-gradient",
     label: "Gradient",
-    tooltip: "Gradient menu backgrounds",
-    preference: Preferences.app.surfaceGradient,
+    tooltip: "Apply gradient menu backgrounds",
+    preference: Preferences.app.gradient,
     applyOnBuild: true,
-    apply: applySurfaceGradient
+    apply: toggleGradient
   }),
   autoplay: toggle({
     id: "enable-autoplay",
     label: "Autoplay",
-    tooltip: "Autoplay in gallery",
+    tooltip: "Autoplay videos in the gallery",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.autoplayActive
   }),
@@ -118,6 +121,16 @@ export const FavoritesSettings = {
     tooltip: "Show fullscreen content on hover",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.previewEnabled
+  }),
+  backgroundOpacity: slider({
+    id: "background-opacity",
+    label: "Background Opacity",
+    tooltip: "Set the opacity of the gallery background",
+    enabled: GALLERY_ENABLED,
+    preference: Preferences.gallery.backgroundOpacity,
+    min: 0,
+    max: 1,
+    step: 0.05
   }),
   galleryMenu: toggle({
     id: "enable-gallery-menu",
@@ -149,7 +162,7 @@ export const FavoritesSettings = {
   rating: multiSegmented<Rating>({
     id: "allowed-ratings",
     label: "Rating",
-    tooltip: "Which content ratings to include in search results",
+    tooltip: "Choose which content ratings to include in search results",
     preference: Preferences.favorites.allowedRatings,
     options: new Map<Rating, string>([
       [DiscreteRating.Explicit, "Explicit"],
@@ -182,7 +195,7 @@ export const FavoritesSettings = {
   resultsPerPage: stepper({
     id: "results-per-page",
     label: "Results Per Page",
-    tooltip: "Number of search results shown per page",
+    tooltip: "Set the number of search results shown per page",
     preference: Preferences.favorites.resultsPerPage,
     min: FavoritesConfig.resultsPerPageBounds.min,
     max: FavoritesConfig.resultsPerPageBounds.max,
@@ -195,6 +208,7 @@ export const FavoritesSettings = {
     tooltip: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
     enabled: TOOLTIP_ENABLED,
     preference: Preferences.favorites.tooltipEnabled,
+    enabledWhen: whenNotFullscreenOnHover(),
     hotkey: "T"
   }),
   postOverlay: toggle({
@@ -203,16 +217,15 @@ export const FavoritesSettings = {
     tooltip: "Categorize important tags when hovering over a thumbnail and click on them to add to search",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlay.enabled,
+    enabledWhen: whenNotFullscreenOnHover(),
     hotkey: "O"
   }),
-  hotkeyHints: toggle({
+  hints: toggle({
     id: "show-hints",
-    label: "Hotkey Hints",
-    tooltip: "Show hotkeys",
+    label: "Hints",
+    tooltip: "Show hints",
     preference: Preferences.favorites.hintsEnabled,
-    hotkey: "H",
-    applyOnBuild: true,
-    apply: toggleOptionHotkeyHints
+    hotkey: "H"
   }),
   performanceProfile: dropdown<PerformanceProfile>({
     id: "performance-profile",

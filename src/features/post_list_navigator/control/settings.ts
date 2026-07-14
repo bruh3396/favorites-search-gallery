@@ -64,7 +64,7 @@ export const Settings = {
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],
-      ["grid", "Legacy"]
+      ["grid", "Classic"]
     ])
   }),
   columnCount: stepper({
