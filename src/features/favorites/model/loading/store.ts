@@ -5,27 +5,27 @@ import { Database } from "@/lib/storage/database";
 
 const database = new Database<FavoriteDatabaseRecord>("Favorites", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
 const databaseUpdater = new CoalescingExecutor<Favorite>(100, 1_000, (favorites) => database.update(favorites.map(favorite => favorite.databaseRecord)));
-let isDatabasePopulated = false;
+let isDatabaseEmpty = true;
 
 export async function write(favorites: Favorite[]): Promise<void> {
   await database.write([...favorites].reverse().map(favorite => favorite.databaseRecord));
-  isDatabasePopulated = true;
+  isDatabaseEmpty = false;
 }
 
 export async function readAll(): Promise<FavoriteDatabaseRecord[]> {
   const records = await database.readAll();
 
-  isDatabasePopulated = records.length > 0;
+  isDatabaseEmpty = records.length === 0;
   return records;
 }
 
 export function update(favorite: Favorite): void {
-  if (isDatabasePopulated) {
+  if (!isDatabaseEmpty) {
     databaseUpdater.schedule(favorite);
   }
 }
 
-export const favoritesExist = async(): Promise<boolean> => (await database.exists()) && (await database.count()) > 0;
-export const loadIds = async(): Promise<string[]> => ((await database.exists()) ? database.readAllIds() : []);
+export const isEmpty = async(): Promise<boolean> => !(await database.exists()) || (await database.count()) === 0;
+export const readIds = async(): Promise<string[]> => ((await database.exists()) ? database.readAllIds() : []);
 export const deleteId = (id: string): Promise<void> => database.delete([id]);
 export const destroy = (): Promise<void> => database.destroy();

@@ -1,23 +1,36 @@
+import { FeatureNamespaced, GalleryState } from "@/types/app";
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/communication/feature_channel";
-import { GalleryState } from "@/types/app";
 import { NavigationKey } from "@/types/input";
+import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 export const FeatureBridge = {
-  galleryState: new FeatureChannel<void, GalleryState>("idle"),
-  allFavorites: new FeatureChannel<void, Favorite[]>([]),
-  getFavorite: new FeatureChannel<string, Favorite | undefined>(undefined),
-  favoritesSearchResults: new FeatureChannel<void, Favorite[]>([]),
-  loadMoreFavorites: new FeatureChannel<NavigationKey, boolean>(false),
-  navigateToAdjacentPostList: new FeatureChannel<NavigationKey, PostList | null>(null),
-  postListThumbs: new FeatureChannel<void, HTMLElement[]>([]),
-  currentSearchQuery: new FeatureChannel<void, string>(""),
-  usingInfiniteScroll: new FeatureChannel<void, boolean>(false),
-  savedSearches: new FeatureChannel<void, string[]>([]),
-  favoriteIds: new FeatureChannel<void, Promise<string[]>>(Promise.resolve([])),
-  currentGalleryThumb: new FeatureChannel<void, HTMLElement | null>(null)
-};
+  favorites: {
+    allFavorites: new FeatureChannel<void, Favorite[]>([]),
+    favoriteIds: new FeatureChannel<void, Promise<string[]>>(Promise.resolve([])),
+    getFavorite: new FeatureChannel<string, Favorite | undefined>(undefined),
+    loadMore: new FeatureChannel<NavigationKey, boolean>(false),
+    searchQuery: new FeatureChannel<void, string>(""),
+    searchResults: new FeatureChannel<void, Favorite[]>([]),
+    usingInfiniteScroll: new FeatureChannel<void, boolean>(false)
+  },
+  gallery: {
+    currentThumb: new FeatureChannel<void, HTMLElement | null>(null),
+    state: new FeatureChannel<void, GalleryState>("idle")
+  },
+  postList: {
+    navigateToAdjacent: new FeatureChannel<NavigationKey, PostList | null>(null),
+    searchQuery: new FeatureChannel<void, string>(""),
+    thumbs: new FeatureChannel<void, HTMLElement[]>([]),
+    usingInfiniteScroll: new FeatureChannel<void, boolean>(false)
+  },
+  savedSearches: {
+    savedSearches: new FeatureChannel<void, string[]>([])
+  }
+} satisfies FeatureNamespaced;
 
-export const galleryOpened = (): boolean => FeatureBridge.galleryState.call() === "open";
-export const galleryIdle = (): boolean => FeatureBridge.galleryState.call() === "idle";
+export const galleryOpened = (): boolean => FeatureBridge.gallery.state.call() === "open";
+export const galleryIdle = (): boolean => FeatureBridge.gallery.state.call() === "idle";
+export const getCurrentSearchQuery = ON_POST_LIST_PAGE ? (): string => FeatureBridge.postList.searchQuery.call() : (): string => FeatureBridge.favorites.searchQuery.call();
+export const usingInfiniteScroll = ON_POST_LIST_PAGE ? (): boolean => FeatureBridge.postList.usingInfiniteScroll.call() : (): boolean => FeatureBridge.favorites.usingInfiniteScroll.call();

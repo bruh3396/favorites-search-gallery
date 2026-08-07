@@ -2,6 +2,13 @@ import * as PostListNavigatorFavoritesMarkerFlow from "@/features/post_list_navi
 import * as PostListNavigatorInfiniteScrollFlow from "@/features/post_list_navigator/flows/infinite_scroll_flow";
 import * as PostListNavigatorModel from "@/features/post_list_navigator/model/post_list_navigator_model";
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/post_list_navigator_view";
+import { Preferences } from "@/app/context/preferences";
+
+export function startInfiniteScroll(): void {
+  if (Preferences.postList.infiniteScroll.value) {
+    toggleInfiniteScroll(true);
+  }
+}
 
 export function toggleInfiniteScroll(value: boolean): void {
   if (value) {

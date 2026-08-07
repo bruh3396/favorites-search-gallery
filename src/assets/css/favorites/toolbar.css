@@ -108,6 +108,11 @@
   padding-left: 6px;
 }
 
+#favorites-body[data-drawer-icon-only] #favorites-drawer-toggle-slot {
+  padding-left: 0;
+  padding-right: 20px;
+}
+
 
 /* #favorites-toolbar #reset-button:hover {
   color: var(--color-danger);

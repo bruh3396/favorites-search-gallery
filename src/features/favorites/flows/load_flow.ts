@@ -8,21 +8,21 @@ import { fetchFavoritesCount } from "@/lib/remote/rule34/favorites/page";
 import { markAsNew } from "@/features/favorites/dom_tweaks/indicator";
 
 export async function loadAllFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
-  if (await hasDatabaseFavorites()) {
+  if (await databaseIsEmpty()) {
+    await fetchAllFavorites(nativeFavorites);
+  } else {
     await loadDatabaseFavorites();
     await fetchNewFavorites(nativeFavorites);
-  } else {
-    await fetchAllFavorites(nativeFavorites);
   }
   Events.favorites.favoritesLoaded.emit();
   FavoritesView.collectAspectRatios();
 }
 
-async function hasDatabaseFavorites(): Promise<boolean> {
-  const hasDbFavorites = await FavoritesModel.hasDatabaseFavorites();
+async function databaseIsEmpty(): Promise<boolean> {
+  const isEmpty = await FavoritesModel.databaseIsEmpty();
 
-  Events.favorites.favoritesFoundInDatabase.emit(hasDbFavorites);
-  return hasDbFavorites;
+  Events.favorites.favoritesFoundInDatabase.emit(!isEmpty);
+  return isEmpty;
 }
 
 async function loadDatabaseFavorites(): Promise<void> {

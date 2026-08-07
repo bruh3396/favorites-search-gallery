@@ -5,9 +5,9 @@ import * as TooltipToggleFlow from "@/features/tooltip/flows/toggle_flow";
 import * as TooltipView from "@/features/tooltip/view/tooltip_view";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
+import { getCurrentSearchQuery } from "@/app/channels/feature_bridge";
 
 export function startTooltip(): void {
   setup();
@@ -35,5 +35,5 @@ function subscribeToEvents(): void {
 }
 
 function start(): void {
-  TooltipModel.rebuildHighlights(FeatureBridge.currentSearchQuery.call());
+  TooltipModel.rebuildHighlights(getCurrentSearchQuery());
 }

@@ -1,8 +1,9 @@
-import { removeDataset, setDataset, toggleDataset } from "@/utils/dom/dataset";
+import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { FavoritesSettings } from "@/features/favorites/control/settings";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
+import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 
@@ -74,13 +75,17 @@ const sections: SettingsSection[] = [
 export function buildSettingsPanel(panel: HTMLElement): void {
   panel.classList.add(SettingsClass.panel);
 
-  toggleDataset(panel, "tooltips", Preferences.favorites.hintsEnabled.value);
-  Preferences.favorites.hintsEnabled.on((enabled) => {
-    toggleDataset(panel, "tooltips", enabled);
-  });
-
   for (const section of sections) {
     panel.appendChild(buildSection(section));
+  }
+  dropFirstRowTooltip(panel);
+}
+
+function dropFirstRowTooltip(panel: HTMLElement): void {
+  const firstRow = panel.querySelector<HTMLElement>(`.${SettingsClass.row}[data-tooltip]`);
+
+  if (firstRow !== null) {
+    addTooltip(firstRow, firstRow.dataset.tooltip ?? "", "below");
   }
 }
 

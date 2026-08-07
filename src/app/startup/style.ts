@@ -16,12 +16,14 @@ import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
 import { insertStyle } from "@/utils/dom/injector";
+import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
 
 export function setupStyles(): void {
   insertBaseStyles();
   applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
   toggleGradient(Preferences.app.gradient.value);
+  setTooltipsEnabled(Preferences.favorites.hintsEnabled.value);
   applyTileVariables();
 }
 

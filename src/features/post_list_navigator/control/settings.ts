@@ -1,11 +1,10 @@
+import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, PERFORMANCE_PROFILE, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
 import { dropdown, stepper, toggle } from "@/lib/ui/settings/controls";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
-import { enableWhen } from "@/lib/ui/settings/enable_rule";
-import { EnableRule } from "@/lib/ui/settings/enable_rule";
 import { reloadWindow } from "@/utils/browser/window";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 

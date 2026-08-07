@@ -1,4 +1,10 @@
+import { toggleDataset } from "@/utils/dom/dataset";
+
 export type TooltipPosition = "above" | "below" | "right";
+
+export function setTooltipsEnabled(enabled: boolean): void {
+  toggleDataset(document.documentElement, "tooltips", enabled);
+}
 
 export function addTooltip(element: HTMLElement, text: string, position: TooltipPosition = "above"): void {
   if (text === "") {

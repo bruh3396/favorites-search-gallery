@@ -15,7 +15,7 @@ export function buildHelpPanel(panel: HTMLElement): void {
   for (const link of FavoritesHelpLinks) {
     list.appendChild(buildLinkRow(link.label, link.href));
   }
-  panel.appendChild(DrawerPanel.section(PANEL_CLASSES, "Help", list));
+  panel.appendChild(DrawerPanel.section(PANEL_CLASSES, "", list));
 }
 
 function buildLinkRow(label: string, href: string): HTMLAnchorElement {

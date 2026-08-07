@@ -367,6 +367,3 @@ input.setting-stepper-value:focus {
   color: var(--theme-text);
 }
 
-.settings-panel:not([data-tooltips]) .setting-row[data-tooltip]:hover::after {
-  opacity: 0;
-}

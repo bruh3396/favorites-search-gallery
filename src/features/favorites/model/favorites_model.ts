@@ -61,5 +61,5 @@ export * from "@/features/favorites/model/search/paginator";
 
 function processIncomingFavorites(favorites: FavoriteItem[]): void {
   FavoritesSearcher.reIndex(favorites);
-  FavoritesEnricher.enrichFavorites(favorites);
+  FavoritesEnricher.enrich(favorites);
 }

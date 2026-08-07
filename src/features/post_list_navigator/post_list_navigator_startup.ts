@@ -29,6 +29,7 @@ async function start(): Promise<void> {
   PostListNavigatorView.tileNativePostListThumbs();
   PostListNavigatorView.removeNativeImageList();
   PostListNavigatorView.prepareNativePostListThumbs();
+  PostListNavigatorOptionFlow.startInfiniteScroll();
 
   if (Preferences.postList.favoriteIndicator.value) {
     await PostListNavigatorFavoritesMarkerFlow.toggleIndicator(true);
@@ -60,8 +61,8 @@ function subscribeToEvents(): void {
 }
 
 function serveExternalRequests(): void {
-  FeatureBridge.currentSearchQuery.register(PostListNavigatorView.currentSearch);
-  FeatureBridge.navigateToAdjacentPostList.register(PostListNavigatorNavigationFlow.navigatePostLists);
-  FeatureBridge.postListThumbs.register(PostListNavigatorModel.allThumbs);
-  FeatureBridge.usingInfiniteScroll.register(() => Preferences.postList.infiniteScroll.value);
+  FeatureBridge.postList.searchQuery.register(PostListNavigatorView.currentSearch);
+  FeatureBridge.postList.navigateToAdjacent.register(PostListNavigatorNavigationFlow.navigatePostLists);
+  FeatureBridge.postList.thumbs.register(PostListNavigatorModel.allThumbs);
+  FeatureBridge.postList.usingInfiniteScroll.register(() => Preferences.postList.infiniteScroll.value);
 }

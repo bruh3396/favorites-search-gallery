@@ -54,8 +54,8 @@ function setup(): void {
 }
 
 function setupModel(): void {
-  const getFavoriteThumbs = (): HTMLElement[] => FeatureBridge.favoritesSearchResults.call().map(favorite => favorite.root);
-  const getPostListThumbs = (): HTMLElement[] => FeatureBridge.postListThumbs.call();
+  const getFavoriteThumbs = (): HTMLElement[] => FeatureBridge.favorites.searchResults.call().map(favorite => favorite.root);
+  const getPostListThumbs = (): HTMLElement[] => FeatureBridge.postList.thumbs.call();
 
   GalleryModel.setupNeighbors(ON_FAVORITES_PAGE ? getFavoriteThumbs : getPostListThumbs);
 }
@@ -169,6 +169,6 @@ function subscribeToMobileInput(): void {
 }
 
 function serveExternalRequests(): void {
-  FeatureBridge.galleryState.register(GalleryModel.getCurrentState);
-  FeatureBridge.currentGalleryThumb.register(GalleryModel.currentThumbIfOpen);
+  FeatureBridge.gallery.state.register(GalleryModel.getCurrentState);
+  FeatureBridge.gallery.currentThumb.register(GalleryModel.currentThumbIfOpen);
 }

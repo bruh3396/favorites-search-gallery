@@ -46,7 +46,7 @@ export const FavoritesSettings = {
   darkMode: toggle({
     id: "dark-mode",
     label: "Dark Mode",
-    tooltip: "Use the dark variant of the selected theme",
+    tooltip: "Use the dark variant of the selected color theme",
     preference: Preferences.app.darkMode,
     hotkey: "D",
     apply: applyCurrentTheme
@@ -117,7 +117,7 @@ export const FavoritesSettings = {
   }),
   fullscreenOnHover: toggle({
     id: "show-on-hover",
-    label: "Fullscreen on Hover",
+    label: "Enlarge Content",
     tooltip: "Enlarge content on hover",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.previewEnabled
@@ -214,7 +214,7 @@ export const FavoritesSettings = {
   postOverlay: toggle({
     id: "show-post-overlay",
     label: "Tag Overlay",
-    tooltip: "Categorize tags when hovering over a thumbnail. Click to add to search. Middle click to quick search",
+    tooltip: "Categorize tags when hovering over a thumbnail - Click to add to search - Middle click to quick search",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlay.enabled,
     enabledWhen: whenNotFullscreenOnHover(),

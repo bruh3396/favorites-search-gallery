@@ -23,6 +23,8 @@ export const FavoritesId = {
   buttonsSlot: "favorites-button-slot",
   drawer: "favorites-drawer",
   drawerTabStrip: "favorites-drawer-tabs",
+  drawerBody: "favorites-drawer-body",
+  drawerTitle: "favorites-drawer-title",
   drawerTabPanels: "favorites-drawer-panels"
 } as const;
 
@@ -36,13 +38,13 @@ export const FavoritesClass = {
   drawerHelpLink: "favorites-drawer-help-link"
 } as const;
 
-export const FavoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; icon: IconName }[] = [
+export const FavoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; title?: string; icon: IconName }[] = [
   { tab: "settings", label: "Settings", icon: "settings" },
-  { tab: "saved", label: "Saved", icon: "bookmark" },
-  { tab: "tags", label: "Tags", icon: "tag" },
-  { tab: "download", label: "Download", icon: "download" },
+  { tab: "saved", label: "Saved", title: "Saved Searches", icon: "bookmark" },
+  { tab: "tags", label: "Tags", title: "Edit Tags", icon: "tag" },
+  { tab: "download", label: "Download", title: "Download Favorites", icon: "download" },
   { tab: "change", label: "Changelog", icon: "changelog" },
-  { tab: "help", label: "Help", icon: "help" }
+  { tab: "help", label: "Help", title: "Help & Support", icon: "help" }
 ];
 
 export const FavoritesHelpLinks: { label: string; href: string }[] = [

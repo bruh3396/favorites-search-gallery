@@ -15,7 +15,7 @@ export function setup(
   FavoritesDurationResolver.setup(onPopulated);
 }
 
-export function enrichFavorites(favorites: FavoriteItem[]): void {
+export function enrich(favorites: FavoriteItem[]): void {
   FavoritesMetadataResolver.fetchMetadata(favorites.filter(hasUnpopulatedMetadata));
   FavoritesDurationResolver.fetchDurations(favorites.filter(isVideoMissingDuration));
 }

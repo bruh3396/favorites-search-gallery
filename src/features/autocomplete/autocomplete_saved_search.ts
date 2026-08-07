@@ -13,7 +13,7 @@ export function getSavedSearchesSuggestions(tag: string): AwesompleteSuggestion[
   if (tag.length < MIN_TAG_LENGTH) {
     return [];
   }
-  return FeatureBridge.savedSearches.call()
+  return FeatureBridge.savedSearches.savedSearches.call()
     .filter(savedSearch => savedSearchMatchesTag(tag, savedSearch))
     .slice(0, SUGGESTION_LIMIT)
     .map(savedSearch => createAwesompleteSuggestion(tag, savedSearch));

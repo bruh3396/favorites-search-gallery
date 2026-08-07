@@ -2,6 +2,8 @@ import * as FavoritesChangelog from "@/features/favorites/view/shell/changelog";
 import * as FavoritesHelp from "@/features/favorites/view/shell/help";
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import { FavoritesClass, FavoritesDrawerTabs, FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesConfig } from "@/config/favorites_config";
+import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { IconName, icon } from "@/lib/ui/icon";
 import { createElement, div } from "@/utils/dom/element_factory";
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
@@ -17,17 +19,21 @@ export function setup(renderSettingsPanel: (panel: HTMLElement) => void): void {
   if (!ON_DESKTOP_DEVICE) {
     return;
   }
+
+  if (!FavoritesConfig.drawerTabLabelsEnabled) {
+    setDataset(FavoritesShell.Body, "drawerIconOnly", "");
+  }
   renderSettings = renderSettingsPanel;
   FavoritesShell.DrawerTrack.appendChild(createElement(
     "div",
     {
       id: FavoritesId.drawer,
       className: "u-no-select",
-      children: [buildTabRail(), buildPanels()]
+      children: [buildTabRail(), buildBody()]
     }
   ));
   selectTab(activeTab);
-  wireVersionLabel();
+  setupVersionLabel();
 
   if (Preferences.favorites.drawerOpen.value) {
     queueMacroTask(openInstantly);
@@ -35,41 +41,36 @@ export function setup(renderSettingsPanel: (panel: HTMLElement) => void): void {
 }
 
 export function toggleDrawer(): void {
-  const open = FavoritesShell.Body.dataset.drawerOpen === undefined;
   const button = document.getElementById(FavoritesId.panelButton);
 
-  if (open) {
-    setDataset(FavoritesShell.Body, "drawerOpen", "");
-    setDataset(button, "active", "");
-  } else {
+  if (isOpen()) {
     removeDataset(FavoritesShell.Body, "drawerOpen");
     removeDataset(button, "active");
+  } else {
+    setDataset(FavoritesShell.Body, "drawerOpen", "");
+    setDataset(button, "active", "");
   }
-  Preferences.favorites.drawerOpen.set(open);
+  Preferences.favorites.drawerOpen.set(isOpen());
 }
 
-function toggleTo(tab: FavoritesDrawerTab): void {
-  const open = FavoritesShell.Body.dataset.drawerOpen !== undefined;
-
-  if (open && activeTab === tab) {
-    toggleDrawer();
-    return;
-  }
-  selectTab(tab);
-
-  if (!open) {
-    toggleDrawer();
-  }
+function isOpen(): boolean {
+  return FavoritesShell.Body.dataset.drawerOpen !== undefined;
 }
 
-function wireVersionLabel(): void {
+function setupVersionLabel(): void {
   const version = document.getElementById(FavoritesId.brandVersion);
 
   if (version === null) {
     return;
   }
   version.onclick = (): void => {
-    toggleTo("change");
+    if (!isOpen()) {
+      toggleDrawer();
+    }
+
+    if (activeTab !== "change") {
+      selectTab("change");
+    }
   };
 }
 
@@ -84,6 +85,7 @@ function panelId(tab: FavoritesDrawerTab): string {
 function selectTab(tab: FavoritesDrawerTab): void {
   activeTab = tab;
   Preferences.favorites.drawerActiveTab.set(tab);
+  updateTitle(tab);
 
   for (const { tab: candidate } of FavoritesDrawerTabs) {
     const isActive = candidate === tab;
@@ -114,6 +116,28 @@ function openInstantly(): void {
   drawerElement.style.transition = "";
 }
 
+function buildBody(): HTMLElement {
+  return createElement("div", {
+    id: FavoritesId.drawerBody,
+    children: [buildTitle(), buildPanels()]
+  });
+}
+
+function buildTitle(): HTMLElement {
+  return createElement("div", { id: FavoritesId.drawerTitle });
+}
+
+function updateTitle(tab: FavoritesDrawerTab): void {
+  const title = document.getElementById(FavoritesId.drawerTitle);
+
+  if (title === null) {
+    return;
+  }
+  const descriptor = FavoritesDrawerTabs.find(({ tab: candidate }) => candidate === tab);
+
+  title.textContent = descriptor?.title ?? descriptor?.label ?? "";
+}
+
 function buildTabRail(): HTMLElement {
   const rail = div(FavoritesId.drawerTabStrip);
 
@@ -129,13 +153,17 @@ function buildTab(tab: FavoritesDrawerTab, label: string, iconName: IconName): H
   button.id = tabId(tab);
   button.className = FavoritesClass.drawerTab;
 
-  const labelSpan = document.createElement("span");
-
-  labelSpan.className = FavoritesClass.drawerTabLabel;
-  labelSpan.textContent = label;
-
   button.appendChild(icon(iconName));
-  button.appendChild(labelSpan);
+
+  if (FavoritesConfig.drawerTabLabelsEnabled) {
+    const labelSpan = document.createElement("span");
+
+    labelSpan.className = FavoritesClass.drawerTabLabel;
+    labelSpan.textContent = label;
+    button.appendChild(labelSpan);
+  } else {
+    addTooltip(button, label, "right");
+  }
   button.onclick = (): void => {
     selectTab(tab);
   };

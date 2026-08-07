@@ -18,4 +18,4 @@ export function fetchNewFavorites(existingIds: Set<string>, firstPageFavorites?:
     .then(elements => elements.map(element => new FavoriteItem(element)));
 }
 
-export { destroy as destroyStore, deleteId, update as updateFavorite, write as storeFavorites, favoritesExist as hasDatabaseFavorites, loadIds as loadFavoriteIds } from "@/features/favorites/model/loading/store";
+export { destroy as destroyStore, deleteId, update as updateFavorite, write as storeFavorites, isEmpty as databaseIsEmpty, readIds as loadFavoriteIds } from "@/features/favorites/model/loading/store";

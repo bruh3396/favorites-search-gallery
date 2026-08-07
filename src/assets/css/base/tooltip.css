@@ -51,3 +51,7 @@
 [data-tooltip-pos="right"]:hover::after {
   transform: translate(0, -50%);
 }
+
+:root:not([data-tooltips]) [data-tooltip]:hover::after {
+  opacity: 0;
+}

@@ -6,7 +6,7 @@ import { Preferences } from "@/app/context/preferences";
 export async function toggleIndicator(enabled: boolean): Promise<void> {
   if (enabled) {
     PostListNavigatorView.setFavoriteIndicatorLoading(true);
-    await PostListNavigatorModel.ensureFavoriteIdsLoaded(() => FeatureBridge.favoriteIds.call());
+    await PostListNavigatorModel.ensureFavoriteIdsLoaded(() => FeatureBridge.favorites.favoriteIds.call());
     PostListNavigatorView.markAsFavorites(PostListNavigatorModel.filterFavorites(PostListNavigatorModel.allThumbs()));
     PostListNavigatorView.setFavoriteIndicatorLoading(false);
   } else {
@@ -28,6 +28,6 @@ export function onFavoriteAdded(id: string): void {
   }
 
   if (galleryOpened()) {
-    PostListNavigatorView.applyGalleryFavoriteStyle(FeatureBridge.currentGalleryThumb.call());
+    PostListNavigatorView.applyGalleryFavoriteStyle(FeatureBridge.gallery.currentThumb.call());
   }
 }
