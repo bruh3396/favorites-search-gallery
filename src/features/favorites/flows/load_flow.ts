@@ -30,7 +30,7 @@ async function loadDatabaseFavorites(): Promise<void> {
   await FavoritesModel.loadDatabaseFavorites();
   Events.favorites.favoritesDatabaseLoaded.emit();
   FavoritesView.setTemporaryStatus("Favorites loaded");
-  FavoritesSearchFlow.searchActiveFavorites();
+  FavoritesSearchFlow.reSearchFavorites();
 }
 
 async function fetchNewFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {

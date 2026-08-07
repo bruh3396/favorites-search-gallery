@@ -11,7 +11,7 @@ const DATABASE_NAME = "ImageExtensions";
 const OBJECT_STORE_NAME = "extensionMappings";
 const extensionCache: Map<string, ImageExtension> = new Map();
 const database = new Database<MediaExtensionMapping>(DATABASE_NAME, OBJECT_STORE_NAME);
-const databaseWriter = new CoalescingExecutor<MediaExtensionMapping>(100, 2_000, database.update.bind(database));
+const databaseUpdater = new CoalescingExecutor<MediaExtensionMapping>(100, 2_000, database.update.bind(database));
 
 export const destroyStore: () => void = () => database.destroy();
 export const extractExtension = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
@@ -53,7 +53,7 @@ function saveExtension(id: string, extension: ImageExtension): void {
   extensionCache.set(id, extension);
 
   if (ON_FAVORITES_PAGE) {
-    databaseWriter.schedule({ id, extension });
+    databaseUpdater.schedule({ id, extension });
   }
 }
 

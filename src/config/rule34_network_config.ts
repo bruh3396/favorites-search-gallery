@@ -1,7 +1,7 @@
 import { RateLimiterConfig } from "@/types/async";
 
 export const Rule34NetworkConfig = {
-  videoDurationFetchConcurrency: 3,
+  videoDurationRateLimit: {concurrency: 3, ratePerSecond: 5} satisfies RateLimiterConfig,
   videoDurationMetadataByteRanges: [500_000, 1_000_000, 2_000_000, 4_000_000],
 
   extensionProbeRateLimit: { concurrency: 3, ratePerSecond: 50 } satisfies RateLimiterConfig,

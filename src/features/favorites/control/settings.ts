@@ -37,7 +37,7 @@ function applyCurrentTheme(): void {
 export const FavoritesSettings = {
   theme: dropdown<Theme>({
     id: "theme",
-    tooltip: "Choose the color theme",
+    tooltip: "Choose color theme",
     label: "Theme",
     preference: Preferences.app.theme,
     apply: applyCurrentTheme,
@@ -60,7 +60,7 @@ export const FavoritesSettings = {
   }),
   layout: dropdown<Layout>({
     id: "layout-select",
-    tooltip: "Choose how favorites are laid out",
+    tooltip: "Choose favorites layout",
     label: "Layout",
     preference: Preferences.favorites.layout,
     applyOnBuild: true,
@@ -75,7 +75,7 @@ export const FavoritesSettings = {
   columnCount: stepper({
     id: "column-count",
     label: "Columns",
-    tooltip: "Set the number of columns in the waterfall/square/classic layouts",
+    tooltip: "Set column count (waterfall/square/classic layouts)",
     preference: Preferences.favorites.columnCount,
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
@@ -85,7 +85,7 @@ export const FavoritesSettings = {
   rowHeight: stepper({
     id: "row-size",
     label: "Row Height",
-    tooltip: "Set the row height in the river layout",
+    tooltip: "Set row height (river layout)",
     preference: Preferences.favorites.rowHeight,
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
@@ -95,7 +95,7 @@ export const FavoritesSettings = {
   header: toggle({
     id: "toggle-header",
     label: "Header",
-    tooltip: "Show the site header",
+    tooltip: "Show site header",
     preference: Preferences.favorites.headerEnabled,
     applyOnBuild: true,
     apply: toggleHeader
@@ -103,7 +103,7 @@ export const FavoritesSettings = {
   gradient: toggle({
     id: "toggle-gradient",
     label: "Gradient",
-    tooltip: "Apply gradient menu backgrounds",
+    tooltip: "Use gradient menu background",
     preference: Preferences.app.gradient,
     applyOnBuild: true,
     apply: toggleGradient
@@ -118,14 +118,14 @@ export const FavoritesSettings = {
   fullscreenOnHover: toggle({
     id: "show-on-hover",
     label: "Fullscreen on Hover",
-    tooltip: "Show fullscreen content on hover",
+    tooltip: "Enlarge content on hover",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.previewEnabled
   }),
   backgroundOpacity: slider({
     id: "background-opacity",
     label: "Background Opacity",
-    tooltip: "Set the opacity of the gallery background",
+    tooltip: "Set gallery background opacity",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.backgroundOpacity,
     min: 0,
@@ -135,7 +135,7 @@ export const FavoritesSettings = {
   galleryMenu: toggle({
     id: "enable-gallery-menu",
     label: "Menu",
-    tooltip: "Show menu in gallery",
+    tooltip: "Show gallery sidebar",
     enabled: GALLERY_ENABLED && GeneralConfig.galleryMenuOptionEnabled,
     apply: toggleGalleryMenuEnabled,
     preference: Preferences.gallery.menuEnabled
@@ -149,7 +149,7 @@ export const FavoritesSettings = {
   infiniteScroll: toggle({
     id: "infinite-scroll",
     label: "Infinite Scroll",
-    tooltip: "Use infinite scroll (waterfall) instead of pages",
+    tooltip: "Use infinite scroll (waterfall) instead of paging",
     preference: Preferences.favorites.infiniteScroll
   }),
   excludeBlacklist: toggle({
@@ -172,7 +172,7 @@ export const FavoritesSettings = {
   }),
   sortKey: dropdown<SortKey>({
     id: "sort-key",
-    tooltip: "Change sort order of search results",
+    tooltip: "Choose sort order of search results",
     label: "Sort By",
     preference: Preferences.favorites.sortKey,
     options: new Map<SortKey, string>([
@@ -195,7 +195,7 @@ export const FavoritesSettings = {
   resultsPerPage: stepper({
     id: "results-per-page",
     label: "Results Per Page",
-    tooltip: "Set the number of search results shown per page",
+    tooltip: "Set search result count per page",
     preference: Preferences.favorites.resultsPerPage,
     min: FavoritesConfig.resultsPerPageBounds.min,
     max: FavoritesConfig.resultsPerPageBounds.max,
@@ -214,7 +214,7 @@ export const FavoritesSettings = {
   postOverlay: toggle({
     id: "show-post-overlay",
     label: "Tag Overlay",
-    tooltip: "Categorize important tags when hovering over a thumbnail and click on them to add to search",
+    tooltip: "Categorize tags when hovering over a thumbnail. Click to add to search. Middle click to quick search",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlay.enabled,
     enabledWhen: whenNotFullscreenOnHover(),

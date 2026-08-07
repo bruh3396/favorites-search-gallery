@@ -11,11 +11,12 @@ export function showSearchResults(searchResults: Favorite[]): void {
 }
 
 export function revealFavoriteInAll(id: string): void {
-  searchActiveFavorites("");
+  searchFavorites("");
   FavoritesResultsFlow.reveal(id);
 }
 
-export const searchActiveFavorites = (searchQuery?: string): void => showSearchResults(FavoritesModel.searchActiveFavorites(searchQuery));
+export const searchFavorites = (searchQuery: string): void => showSearchResults(FavoritesModel.searchScopedFavorites(searchQuery));
+export const reSearchFavorites = (): void => showSearchResults(FavoritesModel.reSearchScopedFavorites());
 export const showLatestSearchResults = (): void => showSearchResults(FavoritesModel.getCurrentSearchResults());
 export const shuffleSearchResults = (): void => showSearchResults(FavoritesModel.shuffleSearchResults());
 export const invertSearchResults = (): void => showSearchResults(FavoritesModel.invertSearchResults());

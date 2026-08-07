@@ -12,4 +12,4 @@ export const imageUrlToSampleUrl = (url: string): string => toSampleUrl(withExte
 const toImageUrl = (url: string) :string => url.replace("thumbnails", "images").replace("thumbnail_", "");
 const toSampleUrl = (url: string) :string => url.replace("images", "samples").replace(/\/([^/]+)$/, "/sample_$1");
 const prependDot = (extension: MediaExtension): string => `.${extension}`;
-const createExtensionRegex = (extension: MediaExtension): RegExp => new RegExp(`\\.${extension}$`);
+const createExtensionRegex = (extension: MediaExtension): RegExp => new RegExp(`\\.${extension}(?=$|\\?)`);

@@ -1,4 +1,4 @@
-import { thumbUrlToImageUrl as thumbUrlToImageUrl, withExtension } from "@/lib/media/url_transformer";
+import { thumbUrlToImageUrl, withExtension } from "@/lib/media/url_transformer";
 import { MediaItem } from "@/types/media";
 
 export const imageUrl = (item: MediaItem): string => thumbUrlToImageUrl(item.thumbUrl ?? "");

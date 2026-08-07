@@ -25,7 +25,8 @@ const sections: SettingsSection[] = [
     controls: [
       FavoritesSettings.theme,
       FavoritesSettings.darkMode,
-      FavoritesSettings.gradient,
+      // FavoritesSettings.gradient,
+      // FavoritesSettings.fadeThumbs,
       FavoritesSettings.header
     ]
   },

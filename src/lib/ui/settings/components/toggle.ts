@@ -25,7 +25,10 @@ export function buildToggleRow(config: Partial<ToggleSetting>): HTMLElement {
     }
     binding.set(!binding.value);
   });
-  bindEnableRule(row, config.enabledWhen);
+
+  if (config.enabled !== false) {
+    bindEnableRule(row, config.enabledWhen);
+  }
 
   if (config.hotkey !== undefined && config.hotkey !== "" && config.registerHotkey !== undefined) {
     config.registerHotkey(config.hotkey, () => {

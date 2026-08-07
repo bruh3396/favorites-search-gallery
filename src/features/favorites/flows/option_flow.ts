@@ -17,5 +17,5 @@ export function setResultsPerPage(): void {
 
 export function reSearchFavorites(): void {
   ContentTiler.skipNextFade();
-  FavoritesSearchFlow.searchActiveFavorites();
+  FavoritesSearchFlow.reSearchFavorites();
 }

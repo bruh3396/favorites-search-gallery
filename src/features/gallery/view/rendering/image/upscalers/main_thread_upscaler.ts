@@ -2,7 +2,6 @@ import { drawScaledCanvas, resetCanvas, setCanvasDimensions } from "@/utils/dom/
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { UpscaledImageRequest } from "@/features/gallery/types/upscaled_image_request";
 import { fetchSampleImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
 
 export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
@@ -26,11 +25,10 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   }
 
   private async upscaleSampleImageRequest(request: ImageRequest): Promise<void> {
-    const upscaleRequest = new UpscaledImageRequest(request.thumb);
+    const sampleRequest = new ImageRequest(request.thumb, true);
 
-    upscaleRequest.complete(await fetchSampleImageBitmapFromThumb(upscaleRequest.thumb));
-    this.upscaleFullImageRequest(upscaleRequest);
-    upscaleRequest.close();
+    sampleRequest.complete(await fetchSampleImageBitmapFromThumb(sampleRequest.thumb));
+    this.upscaleFullImageRequest(sampleRequest);
   }
 
   private upscaleFullImageRequest(request: ImageRequest): void {

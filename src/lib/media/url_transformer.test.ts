@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { imageUrlToSampleUrl, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url_transformer";
+import { imageUrlToSampleUrl, replaceExtension, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url_transformer";
 
 describe("withRule34Hostname", () => {
   test("one subdomain", () => {
@@ -41,6 +41,16 @@ describe("imageUrlToSampleUrl", () => {
     const expected = "https://us.rule34.xxx/samples/0123/sample_123456abcde09.jpg";
 
     expect(imageUrlToSampleUrl(source)).toBe(expected);
+  });
+});
+
+describe("replaceExtension", () => {
+  test("no query string", () => {
+    expect(replaceExtension("https://rule34.xxx/images/0123/abc.mp4", "mp4", "jpg")).toBe("https://rule34.xxx/images/0123/abc.jpg");
+  });
+
+  test("with query string", () => {
+    expect(replaceExtension("https://rule34.xxx/images/0123/abc.mp4?9238048", "mp4", "jpg")).toBe("https://rule34.xxx/images/0123/abc.jpg?9238048");
   });
 });
 

@@ -11,7 +11,7 @@ export const Preferences = {
     gradient: new Preference("appGradient", true),
     theme: new Preference<Theme>("appTheme", "native"),
     darkMode: new Preference<boolean>("appDarkMode", getCookie("theme", "") === "dark"),
-    fadeThumbs: new Preference<boolean>("appFadeThumbs", false)
+    fadeThumbs: new Preference<boolean>("appFadeThumbs", true)
   },
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),

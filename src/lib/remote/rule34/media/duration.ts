@@ -1,10 +1,10 @@
-import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
 import { Favorite } from "@/types/favorite";
+import { RateLimiter } from "@/lib/async/rate_limiter";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { videoUrl } from "@/lib/thumb/url";
 
-const videoLimiter = new ConcurrencyLimiter(Rule34NetworkConfig.videoDurationFetchConcurrency);
-const videoPool: HTMLVideoElement[] = Array.from({ length: Rule34NetworkConfig.videoDurationFetchConcurrency }, () => {
+const videoLimiter = new RateLimiter(Rule34NetworkConfig.videoDurationRateLimit);
+const videoPool: HTMLVideoElement[] = Array.from({ length: Rule34NetworkConfig.videoDurationRateLimit.concurrency }, () => {
   const video = document.createElement("video");
 
   video.preload = "metadata";

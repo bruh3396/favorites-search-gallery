@@ -4,7 +4,7 @@ import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
 import { Database } from "@/lib/storage/database";
 
 const database = new Database<FavoriteDatabaseRecord>("Favorites", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
-const databaseWriter = new CoalescingExecutor<Favorite>(100, 1_000, (favorites) => database.update(favorites.map(favorite => favorite.databaseRecord)));
+const databaseUpdater = new CoalescingExecutor<Favorite>(100, 1_000, (favorites) => database.update(favorites.map(favorite => favorite.databaseRecord)));
 let isDatabasePopulated = false;
 
 export async function write(favorites: Favorite[]): Promise<void> {
@@ -21,7 +21,7 @@ export async function readAll(): Promise<FavoriteDatabaseRecord[]> {
 
 export function update(favorite: Favorite): void {
   if (isDatabasePopulated) {
-    databaseWriter.schedule(favorite);
+    databaseUpdater.schedule(favorite);
   }
 }
 

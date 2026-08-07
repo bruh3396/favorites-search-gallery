@@ -36,7 +36,6 @@
     "fix-lf": "tsx .scripts/normalize_line_endings.ts",
     "fix-bom": "python .scripts/correct_bom.py",
     "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open",
-    "performance": "tsx src/playground/performance.ts",
     "build-playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js"
   },
   "dependencies": {

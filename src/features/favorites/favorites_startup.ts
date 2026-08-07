@@ -92,7 +92,7 @@ function setupTagEditor(): void {
 }
 
 function subscribeToEvents(): void {
-  Events.favorites.searchStarted.on(FavoritesSearchFlow.searchActiveFavorites);
+  Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
   Events.favorites.shuffleButtonClicked.on(FavoritesSearchFlow.shuffleSearchResults);
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
   Events.favorites.findFavorite.on(FavoritesResultsFlow.reveal);
@@ -105,8 +105,8 @@ function subscribeToEvents(): void {
   Preferences.favorites.allowedRatings.on(FavoritesOptionsFlow.reSearchFavorites);
   Preferences.favorites.resultsPerPage.on(FavoritesOptionsFlow.setResultsPerPage);
 
-  Events.favorites.setActiveFavoritesClicked.on(FavoritesModel.setActiveFavorites);
-  Events.favorites.resetActiveFavoritesClicked.on(FavoritesModel.resetActiveFavorites);
+  Events.favorites.setSearchScopeButtonClicked.on(FavoritesModel.setSearchScopeToCurrentResults);
+  Events.favorites.clearSearchScopeButtonClicked.on(FavoritesModel.clearSearchScope);
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
   Events.favorites.panelButtonClicked.on(FavoritesView.toggleDrawer);
 

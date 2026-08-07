@@ -4,8 +4,6 @@ import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { fetchPost } from "@/lib/remote/api/post";
-import { fetchVideoDurationFromFavorite } from "@/lib/remote/rule34/media/duration";
-import { isVideo } from "@/lib/media/type_predicates";
 import { tagsNeedCorrection } from "@/lib/search/tags/tag_corrector";
 import { withExponentialBackoff } from "@/lib/async/async";
 
@@ -15,42 +13,23 @@ let afterUpdateTags: (favorite: Favorite) => void = () => undefined;
 let onCategoriesResolved: (categoryMap: TagCategoryMap) => void = () => undefined;
 
 export function setup(
-  onUpdated: (favorite: Favorite) => void,
+  onPopulated: (favorite: Favorite) => void,
   beforeUpdateTagsFn: (favorite: Favorite) => void,
   afterUpdateTagsFn: (favorite: Favorite) => void,
   onCategoriesResolvedFn: (categoryMap: TagCategoryMap) => void
 ): void {
-  onMetadataPopulated = onUpdated;
+  onMetadataPopulated = onPopulated;
   beforeUpdateTags = beforeUpdateTagsFn;
   afterUpdateTags = afterUpdateTagsFn;
   onCategoriesResolved = onCategoriesResolvedFn;
 }
 
-export function fetchMissingMetadata(favorites: FavoriteItem[]): void {
-  fetchMetadata(favorites.filter(favorite => favorite.metadata.isUnpopulated));
-  fetchDurations(favorites.filter(favorite => isVideo(favorite) && favorite.metadata.metrics.duration === 0));
-}
-
-function isUnpopulated(post: Post): boolean {
-  return post.width === 0 || post.tags === "";
-}
-
-function fetchMetadata(favorites: FavoriteItem[]): void {
+export function fetchMetadata(favorites: FavoriteItem[]): void {
   for (const favorite of favorites) {
     withExponentialBackoff(() => fetchPost(favorite.id), 5)
       .then(post => processPost(favorite, post))
       .catch(console.error);
   }
-}
-
-function fetchDurations(favorites: FavoriteItem[]): void {
-  favorites.forEach(favorite => {
-    fetchVideoDurationFromFavorite(favorite)
-      .then(duration => {
-        favorite.metadata.metrics.duration = duration;
-        onMetadataPopulated(favorite);
-      }).catch(console.error);
-  });
 }
 
 function processPost(favorite: FavoriteItem, post: Post): void {
@@ -68,3 +47,5 @@ function processPost(favorite: FavoriteItem, post: Post): void {
   ExtensionResolver.setExtensionFromPost(post);
   onMetadataPopulated(favorite);
 }
+
+const isUnpopulated = (post: Post): boolean => post.width === 0 || post.tags === "";
