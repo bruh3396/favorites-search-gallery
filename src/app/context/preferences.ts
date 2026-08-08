@@ -1,4 +1,4 @@
-import { FavoritesDrawerTab, FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
+import { FavoritesDrawerView, FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortKey } from "@/types/search";
 import { Preference } from "@/lib/storage/preference";
@@ -17,7 +17,7 @@ export const Preferences = {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
     columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 5),
     downloadBatchSize: new Preference("favoritesDownloadBatchSize", 250),
-    drawerActiveTab: new Preference<FavoritesDrawerTab>("favoritesDrawerActiveTab", "settings"),
+    drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
     drawerOpen: new Preference("favoritesDrawerOpen", false),
     excludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
     finderId: new Preference("favoritesFinderId", ""),

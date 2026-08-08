@@ -52,7 +52,7 @@ const buttons: Partial<ButtonElement>[] = [
     event: Events.favorites.clearSearchScopeButtonClicked
   },
   {
-    id: FavoritesId.panelButton,
+    id: FavoritesId.drawerToggleButton,
     parentId: FavoritesId.drawerToggleSlot,
     icon: "hamburger",
     title: "Menu",

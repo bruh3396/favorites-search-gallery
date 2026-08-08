@@ -18,5 +18,5 @@ export const FavoritesConfig = {
   preloadThumbs: true,
   favoriteFinderEnabled: false,
   bottomNavigationButtonsEnabled: true,
-  drawerTabLabelsEnabled: false
+  drawerSidebarLabelsEnabled: false
 };

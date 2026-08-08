@@ -1,6 +1,13 @@
 import { Emitter } from "@/lib/communication/emitter";
 import { IconName } from "@/lib/ui/icon";
 
+export interface ProgressBar {
+  element: HTMLElement
+  setLabel: (text: string) => void
+  setProgress: (completed: number, total: number) => void
+  setVisible: (visible: boolean) => void
+}
+
 export interface ButtonElement {
   parentId: string
   id: string

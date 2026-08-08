@@ -67,14 +67,6 @@ export function setup(inEvents: AutoplayEvents): void {
   inEvents.setVideoLooping(!active || paused);
 }
 
-export function isPaused(): boolean {
-  return paused;
-}
-
-export function isActive(): boolean {
-  return active;
-}
-
 function initializeFields(): void {
   eventListenersAbortController = new AbortController();
   currentThumb = null;

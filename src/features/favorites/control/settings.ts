@@ -2,7 +2,7 @@ import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { SettingsControl, dropdown, multiSegmented, slider, stepper, toggle as toggleControl } from "@/lib/ui/settings/controls";
+import { SettingsControl, dropdown, multiSegmented, segmented, slider, stepper, toggle as toggleControl } from "@/lib/ui/settings/controls";
 import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
 import { DomEvents } from "@/app/dom/events";
@@ -58,7 +58,7 @@ export const FavoritesSettings = {
     preference: Preferences.app.fadeThumbs,
     apply: reloadWindow
   }),
-  layout: dropdown<Layout>({
+  layout: segmented<Layout>({
     id: "layout-select",
     tooltip: "Choose favorites layout",
     label: "Layout",
@@ -68,14 +68,14 @@ export const FavoritesSettings = {
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],
-      ["grid", "Classic"],
+      ["grid", "Grid"],
       ["native", "Native"]
     ])
   }),
   columnCount: stepper({
     id: "column-count",
     label: "Columns",
-    tooltip: "Set column count (waterfall/square/classic layouts)",
+    tooltip: "Set column count (waterfall/square/grid layouts)",
     preference: Preferences.favorites.columnCount,
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
@@ -227,17 +227,18 @@ export const FavoritesSettings = {
     preference: Preferences.favorites.hintsEnabled,
     hotkey: "H"
   }),
-  performanceProfile: dropdown<PerformanceProfile>({
+  performanceProfile: segmented<PerformanceProfile>({
     id: "performance-profile",
-    tooltip: "Improve performance by disabling features",
-    label: "Performance Profile",
+    tooltip: "Choose performance profile - High: Normal - Med: No upscaling - Low: No gallery, Potato: Search only",
+    label: "Performance",
     preference: Preferences.app.performanceProfile,
     apply: reloadWindow,
+    tooltipPosition: "below",
     options: new Map<PerformanceProfile, string>([
-      ["normal", "Normal"],
-      ["medium", "No upscaling"],
-      ["low", "No gallery"],
-      ["potato", "Only search"]
+      ["normal", "High"],
+      ["medium", "Med"],
+      ["low", "Low"],
+      ["potato", "Potato"]
     ])
   })
 };

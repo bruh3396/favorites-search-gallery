@@ -1,20 +1,20 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
 import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/interfaces";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ProgressBar } from "@/types/element";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
+import { buildProgressBar } from "@/lib/ui/elements/progress_bar";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
+let progressBar: ProgressBar;
 let totalFavoritesCount: number | null = null;
 let statusTimeout: Timeout;
 const TEMPORARY_STATUS_TIMEOUT = 1_000;
-const FETCHING_STATUS_PREFIX = ON_MOBILE_DEVICE ? "" : "all favorites ";
 
 export function setStatus(text: string): void {
   clearTimeout(statusTimeout);
-  statusIndicator.classList.remove("u-hidden");
   statusIndicator.textContent = text;
 }
 
@@ -29,7 +29,7 @@ export function setMatchCount(value: number): void {
 }
 
 export function updateStatus(progress: FavoritesFetchProgress): void {
-  let statusText = `Fetching ${FETCHING_STATUS_PREFIX}${progress.allFavoritesCount}`;
+  let statusText = `Fetching ${progress.allFavoritesCount}`;
 
   if (totalFavoritesCount !== null) {
     statusText = `${statusText} / ${totalFavoritesCount}`;
@@ -38,6 +38,8 @@ export function updateStatus(progress: FavoritesFetchProgress): void {
     if (eta !== null) {
       statusText = `${statusText}${eta}`;
     }
+    progressBar.setProgress(progress.allFavoritesCount, totalFavoritesCount);
+    progressBar.setVisible(true);
   }
   setStatus(statusText);
   setMatchCount(progress.resultsCount);
@@ -58,9 +60,11 @@ export function setExpectedTotalFavoritesCount(count: number | null): void {
 export function setup(): void {
   matchCountIndicator = Root.querySelector(`#${FavoritesId.matchCount}`) ?? document.createElement("label");
   statusIndicator = Root.querySelector(`#${FavoritesId.loadStatus}`) ?? document.createElement("label");
+  progressBar = buildProgressBar(FavoritesId.loadProgressBar);
+  Root.querySelector(`#${FavoritesId.toolbar}`)?.append(progressBar.element);
 }
 
 function clearStatus(): void {
   statusIndicator.textContent = "";
-  statusIndicator.classList.add("u-hidden");
+  progressBar.setVisible(false);
 }

@@ -1,21 +1,19 @@
 import { ButtonElement, defaultButtonElement } from "@/types/element";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
+import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 
 export function buildButton(partial: Partial<ButtonElement>): HTMLButtonElement {
   const template = { ...defaultButtonElement, ...partial };
-  const button = document.createElement("button");
+  const button = createElement("button", {
+    id: template.id,
+    className: template.icon === null ? "action-button" : "menu-icon-btn",
+    textContent: template.icon === null ? template.textContent : undefined,
+    children: template.icon === null ? undefined : [icon(template.icon)]
+  });
 
   button.type = "button";
-  button.id = template.id;
   addTooltip(button, template.title, "below");
-
-  if (template.icon === null) {
-    button.textContent = template.textContent;
-  } else {
-    button.classList.add("menu-icon-btn");
-    button.appendChild(icon(template.icon));
-  }
 
   button.onclick = (event): void => {
     template.event?.emit(event);

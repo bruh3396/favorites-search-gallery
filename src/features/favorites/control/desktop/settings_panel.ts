@@ -1,9 +1,9 @@
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
+import { FavoritesDrawerViewContent } from "@/types/app";
 import { FavoritesSettings } from "@/features/favorites/control/settings";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
-import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 
@@ -26,8 +26,6 @@ const sections: SettingsSection[] = [
     controls: [
       FavoritesSettings.theme,
       FavoritesSettings.darkMode,
-      // FavoritesSettings.gradient,
-      // FavoritesSettings.fadeThumbs,
       FavoritesSettings.header
     ]
   },
@@ -72,21 +70,32 @@ const sections: SettingsSection[] = [
   }
 ];
 
-export function buildSettingsPanel(panel: HTMLElement): void {
-  panel.classList.add(SettingsClass.panel);
+export function buildDrawerView(): FavoritesDrawerViewContent {
+  return { build: buildSettingsPanel, actions: [buildCollapseAllButton()] };
+}
+
+function buildSettingsPanel(panel: HTMLElement): void {
+  panel.classList.add(SettingsClass.view);
 
   for (const section of sections) {
     panel.appendChild(buildSection(section));
   }
-  dropFirstRowTooltip(panel);
 }
 
-function dropFirstRowTooltip(panel: HTMLElement): void {
-  const firstRow = panel.querySelector<HTMLElement>(`.${SettingsClass.row}[data-tooltip]`);
+function buildCollapseAllButton(): HTMLElement {
+  const button = createElement("button");
 
-  if (firstRow !== null) {
-    addTooltip(firstRow, firstRow.dataset.tooltip ?? "", "below");
-  }
+  button.type = "button";
+  renderCollapseAllButton(button);
+  button.addEventListener("click", toggleAllSections);
+  Preferences.favorites.settingsCollapsedSections.on(() => {
+    renderCollapseAllButton(button);
+  });
+  return button;
+}
+
+function renderCollapseAllButton(button: HTMLElement): void {
+  button.replaceChildren(icon(allSectionsCollapsed() ? "expandAll" : "collapseAll"));
 }
 
 function buildSection(settingsSection: SettingsSection): HTMLElement {
@@ -107,12 +116,33 @@ function buildSection(settingsSection: SettingsSection): HTMLElement {
   return section;
 }
 
+function allSectionsCollapsed(): boolean {
+  return sections.every(({ title }) => Preferences.favorites.settingsCollapsedSections.value[title] === true);
+}
+
+function toggleAllSections(): void {
+  const collapsed = !allSectionsCollapsed();
+  const state: Record<string, boolean> = {};
+
+  for (const { title } of sections) {
+    state[title] = collapsed;
+  }
+  Preferences.favorites.settingsCollapsedSections.set(state);
+
+  for (const element of document.querySelectorAll<HTMLElement>(`.${SettingsClass.view} .${SettingsClass.section}`)) {
+    if (collapsed) {
+      setDataset(element, "collapsed", "");
+    } else {
+      removeDataset(element, "collapsed");
+    }
+  }
+}
+
 function toggleSection(title: string, element: HTMLElement): void {
   const collapsed = element.dataset.collapsed === undefined;
 
   if (collapsed) {
-    element.dataset.collapsed = "";
-    setDataset(element, "collapsed");
+    setDataset(element, "collapsed", "");
   } else {
     removeDataset(element, "collapsed");
   }

@@ -1,3 +1,4 @@
+import * as FavoritesDownloadPanel from "@/features/favorites/features/downloader/panel";
 import * as FavoritesFinder from "@/features/favorites/control/desktop/finder";
 import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
@@ -63,7 +64,10 @@ function setupView(): void {
   FavoritesView.setup({
     onPageSelected: FavoritesPaginationFlow.goToPage,
     onPageStepped: FavoritesPaginationFlow.stepPage,
-    renderSettingsPanel: FavoritesSettingsPanel.buildSettingsPanel
+    drawerViews: {
+      settings: FavoritesSettingsPanel.buildDrawerView(),
+      download: FavoritesDownloadPanel.buildDrawerView()
+    }
   });
 }
 
@@ -78,6 +82,15 @@ function setupControl(): void {
 
 function setupSubFeatures(): void {
   setupTagEditor();
+  setupDownloader();
+}
+
+function setupDownloader(): void {
+  FavoritesDownloadPanel.setup({
+    getItems: FavoritesModel.getCurrentSearchResults
+  });
+  Events.favorites.favoritesLoaded.on(FavoritesDownloadPanel.unlock);
+  Events.favorites.searchResultsUpdated.on(FavoritesDownloadPanel.refreshCount);
 }
 
 function setupTagEditor(): void {

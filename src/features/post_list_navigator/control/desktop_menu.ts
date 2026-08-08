@@ -32,7 +32,7 @@ const sections: SettingsSection[] = [
 ];
 
 export function build(panel: HTMLElement): void {
-  panel.classList.add(SettingsClass.panel);
+  panel.classList.add(SettingsClass.view);
 
   for (const section of sections) {
     panel.appendChild(buildSection(section));

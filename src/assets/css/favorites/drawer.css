@@ -11,17 +11,17 @@
   --favorites-drawer-close-speed: calc(var(--favorites-drawer-open-speed) / 2);
 }
 
-#favorites-body {
+#favorites-root {
   display: flex;
   flex-direction: column;
 }
 
-#favorites-content-row {
+#favorites-workspace {
   display: flex;
   align-items: flex-start;
 }
 
-#favorites-content-column {
+#favorites-content-pane {
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -32,7 +32,7 @@
   align-self: stretch;
 }
 
-#favorites-body[data-drawer-open] #favorites-drawer-track {
+#favorites-root[data-drawer-open] #favorites-drawer-track {
   flex: 0 0 var(--favorites-drawer-width);
   width: var(--favorites-drawer-width);
 }
@@ -53,12 +53,12 @@
   z-index: 25;
 }
 
-#favorites-body[data-drawer-open] #favorites-drawer {
+#favorites-root[data-drawer-open] #favorites-drawer {
   transform: translateX(0);
   transition: transform var(--favorites-drawer-open-speed) ease;
 }
 
-#favorites-drawer-tabs {
+#favorites-drawer-sidebar {
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
@@ -68,11 +68,11 @@
   border-right: 1px solid var(--theme-border);
 }
 
-:root[data-gradient] #favorites-drawer-tabs {
+:root[data-gradient] #favorites-drawer-sidebar {
   background: var(--theme-gradient);
 }
 
-#favorites-drawer .favorites-drawer-tab {
+#favorites-drawer .favorites-drawer-sidebar-icon {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -88,32 +88,32 @@
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-#favorites-body[data-drawer-icon-only] #favorites-drawer .favorites-drawer-tab {
+#favorites-root[data-drawer-icon-only] #favorites-drawer .favorites-drawer-sidebar-icon {
   width: auto;
   padding: 10px;
 }
 
-#favorites-body[data-drawer-icon-only] #favorites-drawer .favorites-drawer-tab .icon {
+#favorites-root[data-drawer-icon-only] #favorites-drawer .favorites-drawer-sidebar-icon .icon {
   width: 20px;
   height: 20px;
 }
 
-#favorites-drawer .favorites-drawer-tab .icon {
+#favorites-drawer .favorites-drawer-sidebar-icon .icon {
   width: var(--favorites-tab-icon-size);
   height: var(--favorites-tab-icon-size);
 }
 
-#favorites-drawer .favorites-drawer-tab-label {
+#favorites-drawer .favorites-drawer-sidebar-icon-label {
   text-align: center;
   line-height: 1.2;
 }
 
-#favorites-drawer .favorites-drawer-tab:hover {
+#favorites-drawer .favorites-drawer-sidebar-icon:hover {
   color: var(--theme-text);
   background: var(--theme-hover);
 }
 
-#favorites-drawer .favorites-drawer-tab[data-selected] {
+#favorites-drawer .favorites-drawer-sidebar-icon[data-selected] {
   color: var(--theme-accent);
   background: var(--theme-raised);
 }

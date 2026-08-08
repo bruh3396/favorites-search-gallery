@@ -63,7 +63,7 @@ export const Settings = {
       ["column", "Waterfall"],
       ["row", "River"],
       ["square", "Square"],
-      ["grid", "Classic"]
+      ["grid", "Grid"]
     ])
   }),
   columnCount: stepper({
@@ -116,7 +116,7 @@ export const Settings = {
   performanceProfile: dropdown<PerformanceProfile>({
     id: "performance-profile",
     label: "Performance Profile",
-    tooltip: "Improve performance by disabling features",
+    tooltip: "Choose performance profile",
     preference: Preferences.app.performanceProfile,
     apply: reloadWindow,
     enabled: ON_DESKTOP_DEVICE,

@@ -28,13 +28,17 @@ export const THEMES = {
     light: ["#d4ebf9", "#e6f4fd", "#bce0f5", "#a4d4f1", "#7bbce8", "#0f1b2d", "#3f6585", "#0e8cc4", "#ffffff", "#0a6aa3"],
     dark:  ["#0f1b2d", "#0a1320", "#16273f", "#1f3556", "#2c4569", "#e3edf9", "#8aa4c4", "#38bdf8", "#0a1320", "#7dd3fc"]
   },
-  slate: {
-    light: ["#dce8f7", "#eaf2fc", "#c7dbf2", "#b3cdec", "#8fb2e0", "#0d1117", "#3f5b80", "#1e63c4", "#ffffff", "#0a4ea3"],
-    dark:  ["#0d1117", "#161b22", "#21262d", "#30363d", "#3d444d", "#e6edf3", "#7d8590", "#3b81d1", "#ffffff", "#0e53a1"]
+  ink: {
+    light: ["#ffffff", "#f2f2f2", "#e8e8e8", "#dcdcdc", "#b8b8b8", "#000000", "#5c5c5c", "#000000", "#ffffff", "#000000"],
+    dark:  ["#000000", "#0a0a0a", "#171717", "#262626", "#404040", "#ffffff", "#a3a3a3", "#ffffff", "#000000", "#ffffff"]
   },
   parchment: {
     light: ["#f4ecd8", "#e8dcc0", "#fbf5e6", "#ecdfc3", "#cbb792", "#463720", "#8a7550", "#a8541f", "#fbf5e6", "#8a3a12"],
     dark:  ["#2a2418", "#1f1a10", "#37301f", "#473e29", "#5e5238", "#f4ecd8", "#b0a079", "#c8771f", "#1f1a10", "#d89a4a"]
+  },
+  slate: {
+    light: ["#dce8f7", "#eaf2fc", "#c7dbf2", "#b3cdec", "#8fb2e0", "#0d1117", "#3f5b80", "#1e63c4", "#ffffff", "#0a4ea3"],
+    dark:  ["#0d1117", "#161b22", "#21262d", "#30363d", "#3d444d", "#e6edf3", "#7d8590", "#3b81d1", "#ffffff", "#0e53a1"]
   },
   venom: {
     light: ["#ecdcef", "#f6ecf8", "#e0c8e4", "#d3b4d9", "#bd96c6", "#2f2032", "#6e5872", "#4f9c1d", "#ffffff", "#5f6e0e"],

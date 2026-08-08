@@ -1,109 +1,46 @@
-import { DownloadRequest, toDownloadRequest } from "@/features/favorites/features/downloader/download_request";
-import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
-import { DownloadAbortedError } from "@/types/errors";
+import * as FavoritesArchiver from "@/features/favorites/features/downloader/archiver";
+import { DownloadProgress, DownloadResult } from "@/features/favorites/features/downloader/types";
+import { DownloaderConfig } from "@/config/downloader_config";
 import { MediaItem } from "@/types/media";
 import { downloadBlob } from "@/utils/browser/download";
+import { splitIntoChunks } from "@/utils/collection/array";
 
-const fetchLimiter = new ConcurrencyLimiter(3);
+export async function download(items: MediaItem[], batchSize: number, signal: AbortSignal, onProgress: (progress: DownloadProgress) => void): Promise<DownloadResult> {
+  const batches = splitIntoChunks(items, batchSize);
+  const result: DownloadResult = { successCount: 0, failureCount: 0, aborted: false };
 
-interface ZipWriter {
-  add: (name: string, reader: unknown, options: { compression: string }) => Promise<void>
-  close: () => Promise<Blob>
-}
+  for (const [batchIndex, batch] of batches.entries()) {
+    if (signal.aborted) {
+      break;
+    }
 
-declare const zip: {
-  BlobWriter: new (type: string) => unknown;
-  BlobReader: new (blob: Blob) => unknown;
-  ZipWriter: new (writer: unknown) => ZipWriter;
-};
-
-let aborted = false;
-let currentlyDownloading = false;
-
-export function setup(): void {
-  loadZipJS();
-}
-
-export async function startDownloading(favorites: MediaItem[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
-  if (currentlyDownloading) {
-    return;
-  }
-  currentlyDownloading = true;
-  aborted = false;
-  await downloadFavorites(favorites, progressCallback);
-}
-
-export function abort(): void {
-  aborted = true;
-}
-
-export function reset(): void {
-  currentlyDownloading = false;
-}
-
-async function downloadFavorites(favorites: MediaItem[], progressCallback: (request: DownloadRequest) => void): Promise<void> {
-  downloadBlob(await createTotalFavoriteBlob(favorites, progressCallback), "download.zip");
-  currentlyDownloading = false;
-}
-
-async function createTotalFavoriteBlob(favorites: MediaItem[], progressCallback: (request: DownloadRequest) => void): Promise<Blob> {
-  const blobWriter = new zip.BlobWriter("application/zip");
-  const zipWriter = new zip.ZipWriter(blobWriter);
-
-  await Promise.all(favorites.map(favorite => createFavoriteBlob(favorite, zipWriter, progressCallback)));
-  stopIfAborted();
-  return zipWriter.close();
-}
-
-async function createFavoriteBlob(favorite: MediaItem, zipWriter: ZipWriter, progressCallback: (request: DownloadRequest) => void): Promise<void> {
-  try {
-    stopIfAborted();
-    const request = await toDownloadRequest(favorite);
-
-    stopIfAborted();
-    const response = await fetchLimiter.run(() => {
-      return fetch(request.url);
+    const blob = await FavoritesArchiver.archive(batch, signal, (filename) => {
+      if (filename === null) {
+        result.failureCount += 1;
+      } else {
+        result.successCount += 1;
+      }
+      onProgress({
+        filename: filename ?? "",
+        currentBatch: batchIndex + 1,
+        totalBatches: batches.length,
+        totalItems: items.length,
+        successCount: result.successCount,
+        failureCount: result.failureCount
+      });
     });
 
-    stopIfAborted();
-    const blob = await response.blob();
-
-    stopIfAborted();
-    await zipFile(zipWriter, request, blob);
-    stopIfAborted();
-    progressCallback?.(request);
-    stopIfAborted();
-  } catch (error) {
-    stopIfAborted();
-    console.error(error);
-  }
-}
-
-async function zipFile(zipWriter: ZipWriter, request: DownloadRequest, blob: Blob): Promise<void> {
-  const reader = new zip.BlobReader(blob);
-
-  await zipWriter.add(request.filename, reader, {
-    compression: "STORE"
-  });
-}
-
-function stopIfAborted(): void {
-  if (aborted) {
-    throw new DownloadAbortedError();
-  }
-}
-
-async function loadZipJS(): Promise<void> {
-  await new Promise((resolve, reject) => {
-    if (typeof zip !== "undefined") {
-      resolve(zip);
-      return;
+    if (blob !== null) {
+      downloadBlob(blob, batchFilename(batchIndex + 1, batches.length));
     }
-    const script = document.createElement("script");
+  }
+  result.aborted = signal.aborted;
+  return result;
+}
 
-    script.src = "https://cdn.jsdelivr.net/gh/gildas-lormeau/zip.js/dist/zip-full.min.js";
-    script.onload = (): void => resolve(zip);
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+function batchFilename(batch: number, batchCount: number): string {
+  if (batchCount <= 1) {
+    return `${DownloaderConfig.archiveName}.zip`;
+  }
+  return `${DownloaderConfig.archiveName}_${String(batch).padStart(String(batchCount).length, "0")}of${batchCount}.zip`;
 }

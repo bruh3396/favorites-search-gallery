@@ -6,7 +6,7 @@ import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/dom/element_factory";
 import { toggleDataset } from "@/utils/dom/dataset";
 
-export function buildSegmentedRow<T extends string>(config: Partial<SelectSetting<T>>): HTMLElement {
+export function buildSegmentedRow<T extends string | number>(config: Partial<SelectSetting<T>>): HTMLElement {
   const options = config.options ?? new Map<T, string>();
   const group = createElement("div", { id: config.id, className: SettingsClass.segmented });
   const buttons = new Map<T, HTMLButtonElement>();

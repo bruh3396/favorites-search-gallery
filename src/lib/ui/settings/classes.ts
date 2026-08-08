@@ -1,5 +1,5 @@
 export const SettingsClass = {
-  panel: "settings-panel",
+  view: "settings-view",
   section: "setting-section",
   sectionHeader: "setting-section-header",
   sectionTitle: "setting-section-title",

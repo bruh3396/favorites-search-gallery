@@ -1,5 +1,6 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { FavoritesClass } from "@/features/favorites/types/scaffold";
+import { FavoritesDrawerViewContent } from "@/types/app";
 
 interface Release {
   version: string;
@@ -24,7 +25,11 @@ const releases: Release[] = [
   }
 ];
 
-export function buildChangelogPanel(panel: HTMLElement): void {
+export function buildDrawerView(): FavoritesDrawerViewContent {
+  return { build: buildChangelogPanel };
+}
+
+function buildChangelogPanel(panel: HTMLElement): void {
   for (const release of releases) {
     panel.appendChild(DrawerPanel.section(PANEL_CLASSES, release.version, DrawerPanel.bulletList(release.changes)));
   }

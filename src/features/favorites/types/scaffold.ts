@@ -1,36 +1,38 @@
-import { FavoritesDrawerTab } from "@/types/app";
-import { IconName } from "@/lib/ui/icon";
+import { FavoritesDrawerView, FavoritesDrawerViewDescriptor } from "@/types/app";
 
 export const FavoritesId = {
-  body: "favorites-body",
-  drawerTrack: "favorites-drawer-track",
-  contentRow: "favorites-content-row",
-  contentColumn: "favorites-content-column",
+  root: "favorites-root",
   toolbar: "favorites-toolbar",
-  grid: "favorites-toolbar-grid",
+  workspace: "favorites-workspace",
+  drawerTrack: "favorites-drawer-track",
+  contentPane: "favorites-content-pane",
+  toolbarGrid: "favorites-toolbar-grid",
   brandSlot: "favorites-brand-slot",
   brandVersion: "favorites-brand-version",
   searchBox: "favorites-search-box",
   status: "favorites-search-status",
   matchCount: "match-count-label",
   loadStatus: "favorites-load-status-label",
+  loadProgressBar: "favorites-load-progress-bar",
   searchField: "favorites-search-field",
   searchButton: "favorites-search-button",
-  panelButton: "panel-button",
   drawerToggleSlot: "favorites-drawer-toggle-slot",
+  drawerToggleButton: "favorites-drawer-toggle-button",
   actions: "favorites-search-actions",
   paginationSlot: "favorites-pagination-slot",
   buttonsSlot: "favorites-button-slot",
   drawer: "favorites-drawer",
-  drawerTabStrip: "favorites-drawer-tabs",
-  drawerBody: "favorites-drawer-body",
-  drawerTitle: "favorites-drawer-title",
-  drawerTabPanels: "favorites-drawer-panels"
+  drawerSidebar: "favorites-drawer-sidebar",
+  drawerViews: "favorites-drawer-views"
 } as const;
 
 export const FavoritesClass = {
-  drawerTab: "favorites-drawer-tab",
-  drawerTabLabel: "favorites-drawer-tab-label",
+  drawerSidebarIcon: "favorites-drawer-sidebar-icon",
+  drawerSidebarIconLabel: "favorites-drawer-sidebar-icon-label",
+  drawerView: "favorites-drawer-view",
+  drawerTitle: "favorites-drawer-title",
+  drawerTitleLabel: "favorites-drawer-title-label",
+  drawerTitleAction: "favorites-drawer-title-action",
   drawerPanel: "favorites-drawer-panel",
   drawerSection: "favorites-drawer-section",
   drawerSectionTitle: "favorites-drawer-section-title",
@@ -38,16 +40,24 @@ export const FavoritesClass = {
   drawerHelpLink: "favorites-drawer-help-link"
 } as const;
 
-export const FavoritesDrawerTabs: { tab: FavoritesDrawerTab; label: string; title?: string; icon: IconName }[] = [
-  { tab: "settings", label: "Settings", icon: "settings" },
-  { tab: "saved", label: "Saved", title: "Saved Searches", icon: "bookmark" },
-  { tab: "tags", label: "Tags", title: "Edit Tags", icon: "tag" },
-  { tab: "download", label: "Download", title: "Download Favorites", icon: "download" },
-  { tab: "change", label: "Changelog", icon: "changelog" },
-  { tab: "help", label: "Help", title: "Help & Support", icon: "help" }
+export const FavoritesDrawerViews: FavoritesDrawerViewDescriptor[] = [
+  { name: "settings", label: "Settings", icon: "settings" },
+  { name: "download", label: "Download", title: "Download Favorites", icon: "download" },
+  { name: "saved", label: "Saved", title: "Saved Searches", icon: "bookmark" },
+  { name: "tags", label: "Tags", title: "Edit Tags", icon: "tag" },
+  { name: "change", label: "Changelog", icon: "changelog" },
+  { name: "help", label: "Help", title: "Help & Support", icon: "help" }
 ];
 
 export const FavoritesHelpLinks: { label: string; href: string }[] = [
   { label: "Controls & Help", href: "https://github.com/bruh3396/favorites-search-gallery/#controls" },
   { label: "Report an Issue", href: "https://github.com/bruh3396/favorites-search-gallery/issues" }
 ];
+
+export function favoritesDrawerSidebarIconId(view: FavoritesDrawerView): string {
+  return `${FavoritesClass.drawerSidebarIcon}-${view}`;
+}
+
+export function favoritesDrawerViewId(view: FavoritesDrawerView): string {
+  return `${FavoritesClass.drawerView}-${view}`;
+}

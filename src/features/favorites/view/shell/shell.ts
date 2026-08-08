@@ -11,20 +11,16 @@ import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
 import { div } from "@/utils/dom/element_factory";
 import { insertStyle } from "@/utils/dom/injector";
 
-export const Body = div(FavoritesId.body);
-export const DrawerTrack = div(FavoritesId.drawerTrack);
-const ContentRow = div(FavoritesId.contentRow);
-const ContentColumn = div(FavoritesId.contentColumn);
+export const FavoritesRoot = div(FavoritesId.root);
+export const FavoritesWorkspace = div(FavoritesId.workspace);
+export const FavoritesDrawerTrack = div(FavoritesId.drawerTrack);
+export const FavoritesContentPane = div(FavoritesId.contentPane);
 
 export function setup(): void {
-  buildScaffold();
+  Root.prepend(FavoritesRoot);
+  FavoritesRoot.append(FavoritesToolbar.build());
+  FavoritesRoot.append(FavoritesWorkspace);
+  FavoritesWorkspace.append(FavoritesDrawerTrack, FavoritesContentPane);
+  FavoritesContentPane.append(ScrollSentinelTop, Content, ScrollSentinelBottom);
   insertStyle(DESKTOP_CSS + TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS + SETTINGS_PANEL_CSS, "favorites-ui");
-  Body.insertAdjacentElement("afterbegin", FavoritesToolbar.build());
-}
-
-function buildScaffold(): void {
-  ContentColumn.append(ScrollSentinelTop, Content, ScrollSentinelBottom);
-  ContentRow.append(DrawerTrack, ContentColumn);
-  Body.append(ContentRow);
-  Root.prepend(Body);
 }

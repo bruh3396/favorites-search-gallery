@@ -1,3 +1,27 @@
+button,
+input,
+textarea {
+  all: unset;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:not([disabled]):active,
+input[type="submit"]:not([disabled]):active,
+input[type="button"]:not([disabled]):active {
+  filter: none;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: auto;
+  cursor: pointer;
+}
+
 html {
   width: 100vw;
   scrollbar-width: auto;
@@ -66,6 +90,37 @@ option {
   color: var(--theme-text);
 }
 
+.action-button {
+  box-sizing: border-box;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  min-width: 70px;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--size-radius);
+  color: var(--theme-text-muted);
+  background: transparent;
+  font-family: inherit;
+  font-size: .85em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  text-transform: uppercase;
+}
+
+.action-button:hover:not(:disabled) {
+  color: var(--theme-accent);
+  border-color: var(--theme-accent);
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 #favorites-search-gallery-content {
   padding: 10px 10px 10px 10px;
   overflow-anchor: none;
@@ -87,4 +142,41 @@ option {
 
 #header {
   margin-bottom: unset !important;
+}
+
+.progress-bar {
+  display: none;
+  position: relative;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--theme-text-muted);
+  overflow: hidden;
+}
+
+.progress-bar[data-visible] {
+  display: block;
+}
+
+.progress-bar-fill {
+  width: 0;
+  height: 100%;
+  background: var(--theme-accent);
+  transition: width 120ms linear;
+}
+
+.progress-bar-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-accent-text);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.progress-bar-label:empty {
+  display: none;
 }

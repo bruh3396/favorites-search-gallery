@@ -1,5 +1,7 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
-import * as FavoritesDrawer from "@/features/favorites/view/shell/drawer";
+import * as FavoritesChangelog from "@/features/favorites/view/shell/changelog";
+import * as FavoritesDrawer from "@/features/favorites/view/shell/drawer/drawer";
+import * as FavoritesHelp from "@/features/favorites/view/shell/help";
 import * as FavoritesPaginationRenderer from "@/features/favorites/view/pagination_renderer";
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import * as FavoritesSkeleton from "@/features/favorites/view/skeleton/skeleton";
@@ -23,7 +25,11 @@ export function setup(viewCallbacks: FavoritesViewCallbacks): void {
     viewCallbacks.onPageSelected,
     viewCallbacks.onPageStepped
 );
-  FavoritesDrawer.setup(viewCallbacks.renderSettingsPanel);
+  FavoritesDrawer.setup({
+    change: FavoritesChangelog.buildDrawerView(),
+    help: FavoritesHelp.buildDrawerView(),
+    ...viewCallbacks.drawerViews
+  });
 }
 
 export const addToTop = (favorites: Favorite[]): void => ContentTiler.addToTop(favorites.map((favorite) => favorite.root));
@@ -33,7 +39,7 @@ export const showSkeleton = (): void => ContentTiler.tile(FavoritesSkeleton.buil
 export { changeLayout } from "@/app/layout/content_tiler";
 export { collectAspectRatios } from "@/features/favorites/view/skeleton/skeleton";
 
-export * from "@/features/favorites/view/shell/native_page_cleaner";
+export * from "@/features/favorites/view/native_page_cleaner";
 export * from "@/features/favorites/view/pagination_renderer";
-export * from "@/features/favorites/view/shell/drawer";
+export * from "@/features/favorites/view/shell/drawer/drawer";
 export * from "@/features/favorites/view/status/status";

@@ -1,5 +1,6 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { FavoritesClass, FavoritesHelpLinks } from "@/features/favorites/types/scaffold";
+import { FavoritesDrawerViewContent } from "@/types/app";
 import { icon } from "@/lib/ui/icon";
 
 const PANEL_CLASSES = {
@@ -7,7 +8,11 @@ const PANEL_CLASSES = {
   sectionTitle: FavoritesClass.drawerSectionTitle
 };
 
-export function buildHelpPanel(panel: HTMLElement): void {
+export function buildDrawerView(): FavoritesDrawerViewContent {
+  return { build: buildHelpPanel };
+}
+
+function buildHelpPanel(panel: HTMLElement): void {
   const list = document.createElement("div");
 
   list.className = FavoritesClass.drawerHelpLinks;

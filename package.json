@@ -39,6 +39,7 @@
     "build-playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js"
   },
   "dependencies": {
+    "@zip.js/zip.js": "^2.8.34",
     "strip-ansi": "^7.1.0"
   }
 }
