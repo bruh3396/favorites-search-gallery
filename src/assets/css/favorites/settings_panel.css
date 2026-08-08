@@ -158,10 +158,10 @@
 
 .setting-segmented {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
-  padding: 2px;
   border-radius: 8px;
+  overflow: hidden;
   background: var(--theme-sunken);
   border: 1px solid var(--theme-border);
 }
@@ -169,7 +169,8 @@
 .settings-view button.setting-segmented-option {
   padding: 3px 5px;
   border: none;
-  border-radius: 6px;
+  border-left: 1px solid var(--theme-border);
+  border-radius: 0;
   background: transparent;
   color: var(--theme-text-muted);
   font: inherit;
@@ -177,6 +178,10 @@
   white-space: nowrap;
   cursor: pointer;
   transition: background 0.12s ease, color 0.12s ease;
+}
+
+.settings-view button.setting-segmented-option:first-child {
+  border-left: none;
 }
 
 .settings-view button.setting-segmented-option:hover {
@@ -188,22 +193,7 @@
   color: var(--theme-accent-text);
 }
 
-.settings-view #allowed-ratings.setting-segmented {
-  flex-wrap: nowrap;
-  padding: 0;
-  overflow: hidden;
-}
-
-.settings-view #allowed-ratings button.setting-segmented-option {
-  border-radius: 0;
-  border-left: 1px solid var(--theme-border);
-}
-
-.settings-view #allowed-ratings button.setting-segmented-option:first-child {
-  border-left: none;
-}
-
-.settings-view #allowed-ratings button.setting-segmented-option:disabled {
+.settings-view button.setting-segmented-option:disabled {
   cursor: default;
   opacity: 1;
 }

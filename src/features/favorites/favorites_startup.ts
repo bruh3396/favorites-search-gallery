@@ -1,4 +1,4 @@
-import * as FavoritesDownloadPanel from "@/features/favorites/features/downloader/panel";
+import * as FavoritesDownloader from "@/features/favorites/features/downloader/downloader";
 import * as FavoritesFinder from "@/features/favorites/control/desktop/finder";
 import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
@@ -66,7 +66,7 @@ function setupView(): void {
     onPageStepped: FavoritesPaginationFlow.stepPage,
     drawerViews: {
       settings: FavoritesSettingsPanel.buildDrawerView(),
-      download: FavoritesDownloadPanel.buildDrawerView()
+      download: FavoritesDownloader.buildDrawerView()
     }
   });
 }
@@ -86,11 +86,12 @@ function setupSubFeatures(): void {
 }
 
 function setupDownloader(): void {
-  FavoritesDownloadPanel.setup({
-    getItems: FavoritesModel.getCurrentSearchResults
+  FavoritesDownloader.setup({
+    getItems: FavoritesModel.getCurrentSearchResults,
+    getTagCategory: (tagName: string) => FeatureBridge.postOverlay.tagCategory.call(tagName)
   });
-  Events.favorites.favoritesLoaded.on(FavoritesDownloadPanel.unlock);
-  Events.favorites.searchResultsUpdated.on(FavoritesDownloadPanel.refreshCount);
+  Events.favorites.favoritesLoaded.on(FavoritesDownloader.unlock);
+  Events.favorites.searchResultsUpdated.on(FavoritesDownloader.refreshCount);
 }
 
 function setupTagEditor(): void {

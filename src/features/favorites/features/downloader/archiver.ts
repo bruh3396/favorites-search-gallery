@@ -4,6 +4,7 @@ import { ConcurrencyLimiter } from "@/lib/async/concurrency_limiter";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { MediaItem } from "@/types/media";
 import { doNothing } from "@/utils/function";
+import { filenameFor } from "@/features/favorites/features/downloader/filename_settings";
 import { resolveMediaUrl } from "@/lib/media/url_resolver";
 
 configure({ useWebWorkers: false });
@@ -39,7 +40,7 @@ async function addToArchive(zipWriter: ZipWriter<Blob>, item: MediaItem, signal:
   const extension = await ExtensionResolver.resolveExtension(item);
   const url = await resolveMediaUrl(item);
   const response = await fetch(url, { signal });
-  const filename = `${item.id}.${extension}`;
+  const filename = filenameFor(item, extension);
 
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);

@@ -164,6 +164,7 @@ export const FavoritesSettings = {
     label: "Rating",
     tooltip: "Choose which content ratings to include in search results",
     preference: Preferences.favorites.allowedRatings,
+    requireSelection: true,
     options: new Map<Rating, string>([
       [DiscreteRating.Explicit, "Explicit"],
       [DiscreteRating.Questionable, "Questionable"],

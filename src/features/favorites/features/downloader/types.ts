@@ -1,4 +1,7 @@
 import { MediaItem } from "@/types/media";
+import { TagCategory } from "@/types/search";
+
+export type FilenameCategory = Extract<TagCategory, "artist" | "character" | "copyright">;
 
 export interface DownloadProgress {
   filename: string;
@@ -17,4 +20,5 @@ export interface DownloadResult {
 
 export interface DownloaderCallbacks {
   getItems: () => MediaItem[];
+  getTagCategory: (tagName: string) => TagCategory | undefined;
 }

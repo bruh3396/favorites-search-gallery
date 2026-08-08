@@ -48,6 +48,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 * Search favorites with the the same [syntax](#search-syntax) as the normal search pages (including meta tags):
 * View full resolution images, or play videos and GIFs in a gallery (also works on search pages)
 * Download all search results at once
+  * Optionally include artist, character, and/or copyright tags in each filename
 * Autocompleted tag search
 * Remove favorites without reloading page
 * Add favorites from other users' favorites pages

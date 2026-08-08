@@ -212,10 +212,6 @@ video::-webkit-media-controls-enclosure {
   filter: invert(100%);
 }
 
-#add-favorite-gallery>svg {
-  fill: white;
-}
-
 #gallery-menu-background-color-picker {
   position: absolute;
   visibility: hidden;

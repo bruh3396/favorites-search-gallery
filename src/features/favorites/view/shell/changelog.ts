@@ -19,6 +19,7 @@ const releases: Release[] = [
       "Redesigned favorites ui",
       "Added search page favorite indicator",
       "Added new themes",
+      "Added artist, character, and copyright tags to downloaded filenames",
       "Improved post overlay",
       "Improved performance"
     ]

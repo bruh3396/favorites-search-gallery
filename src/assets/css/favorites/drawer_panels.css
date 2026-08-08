@@ -123,11 +123,12 @@
 .favorites-download-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   padding-top: 5px;
 }
 
 .favorites-download-batch-size[data-hidden],
+.favorites-download-filename-format[data-hidden],
 .favorites-download-button[data-hidden],
 .favorites-download-status:empty {
   display: none;
@@ -148,17 +149,20 @@
   font-size: 13px;
 }
 
-.favorites-download-batch-size .setting-row {
+.favorites-download-batch-size .setting-row,
+.favorites-download-filename-format .setting-row {
   padding-left: 0;
   padding-right: 0;
   cursor: default;
 }
 
-.favorites-download-batch-size .setting-control {
+.favorites-download-batch-size .setting-control,
+.favorites-download-filename-format .setting-control {
   margin-right: 0px;
 }
 
-.settings-view .favorites-download-batch-size .setting-row:hover {
+.settings-view .favorites-download-batch-size .setting-row:hover,
+.settings-view .favorites-download-filename-format .setting-row:hover {
   background: transparent;
 }
 

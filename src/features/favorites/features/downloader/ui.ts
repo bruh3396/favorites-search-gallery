@@ -1,19 +1,20 @@
-import * as FavoritesDownloader from "@/features/favorites/features/downloader/downloader";
-import { DownloadProgress, DownloadResult, DownloaderCallbacks } from "@/features/favorites/features/downloader/types";
+import * as FavoritesDownload from "@/features/favorites/features/downloader/download";
+import { DownloadProgress, DownloadResult } from "@/features/favorites/features/downloader/types";
+import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
 import { DownloaderConfig } from "@/config/downloader_config";
+import { FavoritesDownloaderDeps } from "@/features/favorites/features/downloader/deps";
 import { FavoritesDrawerViewContent } from "@/types/app";
-import { MediaItem } from "@/types/media";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildProgressBar } from "@/lib/ui/elements/progress_bar";
+import { categoryOptions } from "@/features/favorites/features/downloader/filename_settings";
 import { createElement } from "@/utils/dom/element_factory";
-import { segmented } from "@/lib/ui/settings/controls";
 import { toggleDataset } from "@/utils/dom/dataset";
 
-let getItems: () => MediaItem[] = () => [];
 let abortController: AbortController | null = null;
 let ready = false;
 const batchSizeRow = createElement("div", { className: "favorites-download-batch-size" });
+const filenameFormatRow = createElement("div", { className: "favorites-download-filename-format" });
 const downloadButton = createElement("button", { className: "action-button favorites-download-button", textContent: "Download Results" });
 const cancelButton = createElement("button", { className: "action-button favorites-download-button", textContent: "Cancel" });
 const progressBar = buildProgressBar();
@@ -24,22 +25,8 @@ cancelButton.type = "button";
 downloadButton.onclick = startDownload;
 cancelButton.onclick = cancel;
 
-export function setup(callbacks: DownloaderCallbacks): void {
-  getItems = callbacks.getItems;
-  Preferences.favorites.downloadBatchSize.on(refreshCount);
-}
-
 export function buildDrawerView(): FavoritesDrawerViewContent {
   return { build: buildDownloadPanel };
-}
-
-function buildDownloadPanel(panel: HTMLElement): void {
-  const actions = createElement("div", { className: "favorites-download-actions", children: [downloadButton, cancelButton] });
-
-  batchSizeRow.append(buildBatchSizeControl());
-  panel.classList.add(SettingsClass.view, "favorites-download-panel");
-  panel.append(batchSizeRow, progressBar.element, status, actions);
-  render();
 }
 
 export function unlock(): void {
@@ -57,15 +44,26 @@ export function refreshCount(): void {
   }
 }
 
+function buildDownloadPanel(panel: HTMLElement): void {
+  const actions = createElement("div", { className: "favorites-download-actions", children: [downloadButton, cancelButton] });
+
+  batchSizeRow.append(buildBatchSizeControl());
+  filenameFormatRow.append(buildFilenameFormatControl());
+  panel.classList.add(SettingsClass.view, "favorites-download-panel");
+  panel.append(batchSizeRow, filenameFormatRow, progressBar.element, status, actions);
+  render();
+}
+
 function isDownloading(): boolean {
   return abortController !== null;
 }
 
 function render(): void {
   const downloading = isDownloading();
-  const itemCount = ready ? getItems().length : 0;
+  const itemCount = ready ? FavoritesDownloaderDeps.getItems().length : 0;
 
   toggleDataset(batchSizeRow, "hidden", !ready || downloading);
+  toggleDataset(filenameFormatRow, "hidden", !ready || downloading);
   toggleDataset(downloadButton, "hidden", !ready || downloading);
   toggleDataset(cancelButton, "hidden", !ready || !downloading);
   progressBar.setVisible(ready && downloading);
@@ -89,11 +87,22 @@ function countBatches(itemCount: number, batchSize: number): number {
   return batchSize <= 0 ? 1 : Math.ceil(itemCount / batchSize);
 }
 
+function buildFilenameFormatControl(): HTMLElement {
+  return multiSegmented<number>({
+    id: "download-filename-format",
+    label: "Filename Format",
+    tooltip: "Add tags to each filename",
+    tooltipPosition: "below",
+    preference: Preferences.favorites.downloadFilenameFormat,
+    options: categoryOptions()
+  })();
+}
+
 function buildBatchSizeControl(): HTMLElement {
   return segmented<number>({
     id: "download-batch-size",
     label: "Batch Size",
-    tooltip: "Split the download into separate zip files of this many posts",
+    tooltip: "Split download into smaller chunks",
     tooltipPosition: "below",
     preference: Preferences.favorites.downloadBatchSize,
     options: new Map(DownloaderConfig.batchSizeOptions.map(size => [size, size === 0 ? "All" : String(size)]))
@@ -108,7 +117,7 @@ async function startDownload(): Promise<void> {
   if (!ready || isDownloading()) {
     return;
   }
-  const items = getItems();
+  const items = FavoritesDownloaderDeps.getItems();
 
   if (items.length === 0) {
     status.textContent = "No search results to download";
@@ -123,7 +132,7 @@ async function startDownload(): Promise<void> {
   status.textContent = `Downloading ${items.length}...`;
 
   try {
-    const result = await FavoritesDownloader.download(items, Preferences.favorites.downloadBatchSize.value, controller.signal, showProgress);
+    const result = await FavoritesDownload.download(items, Preferences.favorites.downloadBatchSize.value, controller.signal, showProgress);
 
     status.textContent = summarize(result);
   } finally {

@@ -1,4 +1,4 @@
-import { SelectSetting } from "@/lib/ui/settings/setting";
+import { MultiSelectSetting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { StateBinding } from "@/lib/ui/settings/state_binding";
 import { bindEnableRule } from "../enable_rule";
@@ -6,18 +6,19 @@ import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/dom/element_factory";
 import { toggleDataset } from "@/utils/dom/dataset";
 
-export function buildMultiSegmentedRow<T extends number>(config: Partial<SelectSetting<T>>): HTMLElement {
+export function buildMultiSegmentedRow<T extends number>(config: Partial<MultiSelectSetting<T>>): HTMLElement {
   const options = config.options ?? new Map<T, string>();
+  const requireSelection = config.requireSelection ?? false;
   const group = createElement("div", { id: config.id, className: SettingsClass.segmented });
   const buttons = new Map<number, HTMLButtonElement>();
 
-  const isOnlySelectedBit = (value: number, bit: number): boolean => value === bit;
+  const isLocked = (value: number, bit: number): boolean => requireSelection && value === bit;
 
   const toggleBit = (bit: number): void => {
     const value = binding.value;
     const selected = (value & bit) === bit;
 
-    if (selected && isOnlySelectedBit(value, bit)) {
+    if (selected && isLocked(value, bit)) {
       return;
     }
     binding.set((selected ? value & ~bit : value | bit) as T);
@@ -39,7 +40,7 @@ export function buildMultiSegmentedRow<T extends number>(config: Partial<SelectS
       const selected = (value & bit) === bit;
 
       toggleDataset(button, "selected", selected);
-      button.disabled = selected && isOnlySelectedBit(value, bit);
+      button.disabled = selected && isLocked(value, bit);
     }
   });
 
