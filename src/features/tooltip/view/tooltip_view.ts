@@ -1,29 +1,32 @@
 import * as TooltipContent from "@/features/tooltip/view/content";
 import * as TooltipElement from "@/features/tooltip/view/shell/element";
 import * as TooltipPosition from "@/features/tooltip/view/position";
-import * as TooltipVisibility from "@/features/tooltip/view/visibility";
 
 let lastThumb: HTMLElement | null = null;
+let lastTooltip: HTMLElement | null = null;
 
 export function setup(): void {
-  TooltipElement.setupTooltipShell();
+  TooltipElement.setup();
 }
 
 export function showTooltipForThumb(thumb: HTMLElement, getColor: (tag: string) => string | null): void {
+  const tooltip = TooltipElement.reveal();
+
   lastThumb = thumb;
-  TooltipContent.renderTooltipContent(thumb, getColor);
-  TooltipPosition.positionTooltip(thumb);
-  TooltipVisibility.showTooltip();
+  lastTooltip = tooltip;
+  TooltipContent.render(tooltip, thumb, getColor);
+  TooltipPosition.position(tooltip, thumb);
 }
 
-export function hideTooltip(): void {
+export function hide(): void {
   lastThumb = null;
-  TooltipVisibility.hideTooltip();
+  lastTooltip = null;
+  TooltipElement.hide();
 }
 
 export function repositionIfVisible(): void {
-  if (lastThumb === null) {
+  if (lastThumb === null || lastTooltip === null) {
     return;
   }
-  TooltipPosition.positionTooltip(lastThumb);
+  TooltipPosition.position(lastTooltip, lastThumb);
 }

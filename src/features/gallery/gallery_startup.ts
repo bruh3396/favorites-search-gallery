@@ -45,10 +45,10 @@ async function waitUntilPageIsReady(): Promise<void> {
 }
 
 function setup(): void {
+  setupSubFeatures();
   setupModel();
   setupView();
   setupControl();
-  setupSubFeatures();
   subscribeToEvents();
   serveExternalRequests();
 }

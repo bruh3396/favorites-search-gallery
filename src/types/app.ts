@@ -1,6 +1,4 @@
-import { IconName } from "@/lib/ui/icon";
-
-export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postList" | "savedSearches" | "tooltip" | "autocomplete";
+export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postList" | "tooltip" | "autocomplete";
 export type FeatureNamespaced = Partial<Record<Feature, object>>;
 
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
@@ -17,15 +15,10 @@ export type GalleryState = "idle" | "preview" | "open";
 export type PostOverlayMode = "tag";
 export type MapToString<T extends readonly unknown[]> = { readonly [K in keyof T]: string };
 
-export type FavoritesDrawerView = "settings" | "saved" | "tags" | "download" | "change" | "help";
-export type FavoritesDrawerViewDescriptor = {
-  name: FavoritesDrawerView;
-  label: string;
-  title?: string;
-  icon: IconName;
-};
+export const FavoritesDrawerViewNames = ["settings", "snippets", "tags", "download", "change", "help"] as const;
+export type FavoritesDrawerView = typeof FavoritesDrawerViewNames[number];
 export type FavoritesDrawerViewContent = {
-  build?: (panel: HTMLElement) => void;
+  mount?: (panel: HTMLElement) => void;
   actions?: HTMLElement[];
 };
-export type FavoritesDrawerViewBuilders = Partial<Record<FavoritesDrawerView, FavoritesDrawerViewContent>>;
+export type FavoritesDrawerViewMap = Partial<Record<FavoritesDrawerView, FavoritesDrawerViewContent>>;

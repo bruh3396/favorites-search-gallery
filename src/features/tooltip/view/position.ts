@@ -1,12 +1,11 @@
-import * as TooltipElement from "@/features/tooltip/view/shell/element";
 import { clamp } from "@/utils/number";
 
 const TOP_MARGIN = 100;
 
-export function positionTooltip(thumb: HTMLElement): void {
+export function position(tooltip: HTMLElement, thumb: HTMLElement): void {
   const rect = thumb.getBoundingClientRect();
-  const width = TooltipElement.element.offsetWidth;
-  const height = TooltipElement.element.offsetHeight;
+  const width = tooltip.offsetWidth;
+  const height = tooltip.offsetHeight;
   const topBoundary = Math.max(TOP_MARGIN, getMenuBottom());
   const overflowsRight = rect.right + width > window.innerWidth;
   const overflowsTop = rect.top < topBoundary;
@@ -17,8 +16,8 @@ export function positionTooltip(thumb: HTMLElement): void {
   const clampedLeft = clamp(preferredLeft, 0, window.innerWidth - width);
   const clampedTop = clamp(preferredTop, topBoundary, window.innerHeight - height);
 
-  TooltipElement.element.style.left = `${clampedLeft + window.scrollX}px`;
-  TooltipElement.element.style.top = `${clampedTop + window.scrollY}px`;
+  tooltip.style.left = `${clampedLeft + window.scrollX}px`;
+  tooltip.style.top = `${clampedTop + window.scrollY}px`;
 }
 
 function getMenuBottom(): number {

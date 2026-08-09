@@ -9,7 +9,7 @@ const PANEL_CLASSES = {
 };
 
 export function buildDrawerView(): FavoritesDrawerViewContent {
-  return { build: buildHelpPanel };
+  return { mount: buildHelpPanel };
 }
 
 function buildHelpPanel(panel: HTMLElement): void {

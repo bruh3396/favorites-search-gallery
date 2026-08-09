@@ -1,9 +1,5 @@
 .setting-section {
-  margin: 0 -12px;
-}
-
-.setting-section:last-child {
-  margin-bottom: -12px;
+  margin: 0;
 }
 
 .settings-view button.setting-section-header {
@@ -12,7 +8,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 13px 12px;
+  padding: 12px 12px 6px;
   border: none;
   background: none;
   color: var(--theme-text);
@@ -43,7 +39,7 @@
 }
 
 .setting-section-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -78,10 +74,9 @@
 .setting-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-height: 0;
-  padding: 6px 8px 12px;
-  /* background: var(--theme-raised); */
+  padding: 0 0 10px;
 }
 
 .setting-section[data-collapsed] .setting-group {
@@ -94,8 +89,8 @@
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  min-height: 25px;
-  padding: 4px 8px;
+  min-height: 30px;
+  padding: 3px 12px;
   background: transparent;
   color: var(--theme-text);
   cursor: pointer;
@@ -120,7 +115,7 @@
 .setting-control {
   flex: 0 0 auto;
   min-width: 0;
-  margin-right: 14px;
+  margin-right: 20px;
 }
 
 .setting-toggle-track {

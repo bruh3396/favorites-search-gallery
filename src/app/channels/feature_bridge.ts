@@ -28,9 +28,6 @@ export const FeatureBridge = {
     searchQuery: new FeatureChannel<void, string>(""),
     thumbs: new FeatureChannel<void, HTMLElement[]>([]),
     usingInfiniteScroll: new FeatureChannel<void, boolean>(false)
-  },
-  savedSearches: {
-    savedSearches: new FeatureChannel<void, string[]>([])
   }
 } satisfies FeatureNamespaced;
 

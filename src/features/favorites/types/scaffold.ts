@@ -1,4 +1,4 @@
-import { FavoritesDrawerView, FavoritesDrawerViewDescriptor } from "@/types/app";
+import { FavoritesDrawerView } from "@/types/app";
 
 export const FavoritesId = {
   root: "favorites-root",
@@ -39,15 +39,6 @@ export const FavoritesClass = {
   drawerHelpLinks: "favorites-drawer-help-links",
   drawerHelpLink: "favorites-drawer-help-link"
 } as const;
-
-export const FavoritesDrawerViews: FavoritesDrawerViewDescriptor[] = [
-  { name: "settings", label: "Settings", icon: "settings" },
-  { name: "download", label: "Download", title: "Download Favorites", icon: "download" },
-  { name: "saved", label: "Saved", title: "Saved Searches", icon: "bookmark" },
-  { name: "tags", label: "Tags", title: "Edit Tags", icon: "tag" },
-  { name: "change", label: "Changelog", icon: "changelog" },
-  { name: "help", label: "Help", title: "Help & Support", icon: "help" }
-];
 
 export const FavoritesHelpLinks: { label: string; href: string }[] = [
   { label: "Controls & Help", href: "https://github.com/bruh3396/favorites-search-gallery/#controls" },

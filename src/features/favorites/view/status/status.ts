@@ -5,6 +5,7 @@ import { ProgressBar } from "@/types/element";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
 import { buildProgressBar } from "@/lib/ui/elements/progress_bar";
+import { pluralize } from "@/utils/string/format";
 
 let matchCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
@@ -49,7 +50,7 @@ export function notifyNewFavoritesFound(newFavorites: NewFavorites): void {
   const newFavoritesCount = newFavorites.newFavorites.length;
 
   if (newFavoritesCount > 0) {
-    setStatus(`Found ${newFavoritesCount} new favorite${newFavoritesCount > 1 ? "s" : ""}`);
+    setStatus(`Found ${newFavoritesCount} new favorite${pluralize(newFavoritesCount)}`);
   }
 }
 

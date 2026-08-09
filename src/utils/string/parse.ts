@@ -14,3 +14,11 @@ export function parseDimensions2D(dimensionString: string): Dimensions2D {
   }
   return defaultDimensions2D;
 }
+
+export function parseJson(json: string): unknown {
+  try {
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}

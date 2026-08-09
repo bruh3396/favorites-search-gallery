@@ -34,6 +34,10 @@ export function removeNonNumericCharacters(text: string): string {
   return text.replace(/\D/g, "");
 }
 
+export function pluralize(count: number): string {
+  return count === 1 ? "" : "s";
+}
+
 export function decodeHtmlEntities(value: string): string {
   return value.replace(/&amp;/g, "&").replace(/&(?:apos|#0?39);/g, "'");
 }

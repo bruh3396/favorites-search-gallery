@@ -1,14 +1,23 @@
-#tooltip {
+.tooltip {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 20;
-  padding: 6px 8px;
+  padding: 6px 10px;
   max-width: 550px;
-  pointer-events: none;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  background: var(--theme-raised);
+  color: var(--theme-text-muted);
+  font-size: 12px;
+  line-height: 1.35;
   overflow-wrap: break-word;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 150ms ease;
-  border: 2px solid var(--theme-text);
-  background: var(--theme-gradient);
+}
+
+.tooltip[data-visible] {
+  opacity: 1;
 }

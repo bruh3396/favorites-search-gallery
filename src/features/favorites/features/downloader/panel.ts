@@ -9,6 +9,7 @@ import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildProgressBar } from "@/lib/ui/elements/progress_bar";
 import { categoryOptions } from "@/features/favorites/features/downloader/filename_settings";
 import { createElement } from "@/utils/dom/element_factory";
+import { pluralize } from "@/utils/string/format";
 import { toggleDataset } from "@/utils/dom/dataset";
 
 let abortController: AbortController | null = null;
@@ -25,8 +26,8 @@ cancelButton.type = "button";
 downloadButton.onclick = startDownload;
 cancelButton.onclick = cancel;
 
-export function buildDrawerView(): FavoritesDrawerViewContent {
-  return { build: buildDownloadPanel };
+export function mount(): FavoritesDrawerViewContent {
+  return { mount: buildPanel };
 }
 
 export function unlock(): void {
@@ -44,7 +45,7 @@ export function refreshCount(): void {
   }
 }
 
-function buildDownloadPanel(panel: HTMLElement): void {
+function buildPanel(panel: HTMLElement): void {
   const actions = createElement("div", { className: "favorites-download-actions", children: [downloadButton, cancelButton] });
 
   batchSizeRow.append(buildBatchSizeControl());
@@ -78,7 +79,7 @@ function buildDownloadLabel(itemCount: number): string {
   const batchCount = countBatches(itemCount, Preferences.favorites.downloadBatchSize.value);
 
   if (batchCount <= 1) {
-    return `Download ${itemCount} Results`;
+    return `Download ${itemCount} Result${pluralize(itemCount)}`;
   }
   return `Download ${itemCount} Results · ${batchCount} zips`;
 }
@@ -90,8 +91,8 @@ function countBatches(itemCount: number, batchSize: number): number {
 function buildFilenameFormatControl(): HTMLElement {
   return multiSegmented<number>({
     id: "download-filename-format",
-    label: "Filename Format",
-    tooltip: "Add tags to each filename",
+    label: "Filename Tags",
+    tooltip: "Add selected meta tags to each filename",
     tooltipPosition: "below",
     preference: Preferences.favorites.downloadFilenameFormat,
     options: categoryOptions()

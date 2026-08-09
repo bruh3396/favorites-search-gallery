@@ -42,8 +42,8 @@ const sections: SettingsSection[] = [
     controls: [
       FavoritesSettings.sortKey,
       FavoritesSettings.sortAscending,
-      FavoritesSettings.resultsPerPage,
-      FavoritesSettings.infiniteScroll
+      FavoritesSettings.infiniteScroll,
+      FavoritesSettings.resultsPerPage
     ]
   },
   {
@@ -70,8 +70,8 @@ const sections: SettingsSection[] = [
   }
 ];
 
-export function buildDrawerView(): FavoritesDrawerViewContent {
-  return { build: buildSettingsPanel, actions: [buildCollapseAllButton()] };
+export function mount(): FavoritesDrawerViewContent {
+  return { mount: buildSettingsPanel, actions: [buildCollapseAllButton()] };
 }
 
 function buildSettingsPanel(panel: HTMLElement): void {

@@ -1,5 +1,5 @@
 import { Favorite } from "@/types/favorite";
-import { FavoritesDrawerViewBuilders } from "@/types/app";
+import { FavoritesDrawerViewMap } from "@/types/app";
 import { NavigationKey } from "@/types/input";
 import { PaginationSequence } from "@/types/ui";
 import { TagCategoryMap } from "@/types/search";
@@ -7,7 +7,7 @@ import { TagCategoryMap } from "@/types/search";
 export interface FavoritesViewCallbacks {
   onPageSelected: (pageNumber: number) => void
   onPageStepped: (direction: NavigationKey) => void
-  drawerViews: FavoritesDrawerViewBuilders
+  drawerViews: FavoritesDrawerViewMap
 }
 
 export interface FavoritesModelCallbacks {

@@ -56,10 +56,6 @@ export const Preferences = {
     enabled: new Preference("postOverlayEnabled", false),
     mode: new Preference<PostOverlayMode>("postOverlayMode", "tag")
   },
-  savedSearches: {
-    suggestions: new Preference("savedSearchesSuggestions", false),
-    tutorial: new Preference("savedSearchesTutorial", false)
-  },
   postList: {
     enabled: new Preference("postListEnabled", false),
     columnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),

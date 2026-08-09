@@ -1,11 +1,27 @@
-import { FavoritesClass, FavoritesDrawerViews, FavoritesId, favoritesDrawerSidebarIconId, favoritesDrawerViewId } from "@/features/favorites/types/scaffold";
-import { FavoritesDrawerView, FavoritesDrawerViewBuilders, FavoritesDrawerViewContent, FavoritesDrawerViewDescriptor } from "@/types/app";
+import { FavoritesClass, FavoritesId, favoritesDrawerSidebarIconId, favoritesDrawerViewId } from "@/features/favorites/types/scaffold";
+import { FavoritesDrawerView, FavoritesDrawerViewContent, FavoritesDrawerViewMap } from "@/types/app";
+import { IconName, icon } from "@/lib/ui/icon";
 import { createElement, div } from "@/utils/dom/element_factory";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { icon } from "@/lib/ui/icon";
 
-export function buildDrawer(renderers: FavoritesDrawerViewBuilders, onViewSelected: (view: FavoritesDrawerView) => void): HTMLElement {
+type FavoritesDrawerViewDescriptor = {
+  name: FavoritesDrawerView;
+  label: string;
+  title?: string;
+  icon: IconName;
+};
+
+const FavoritesDrawerViews: FavoritesDrawerViewDescriptor[] = [
+  { name: "settings", label: "Settings", icon: "settings" },
+  { name: "download", label: "Download", title: "Download", icon: "download" },
+  { name: "snippets", label: "Snippets", icon: "snippet" },
+  { name: "tags", label: "Tags", title: "Edit Tags", icon: "tag" },
+  { name: "change", label: "Changelog", icon: "changelog" },
+  { name: "help", label: "Help", title: "Help & Support", icon: "help" }
+];
+
+export function buildDrawer(renderers: FavoritesDrawerViewMap, onViewSelected: (view: FavoritesDrawerView) => void): HTMLElement {
   return createElement(
     "div",
     {
@@ -16,7 +32,7 @@ export function buildDrawer(renderers: FavoritesDrawerViewBuilders, onViewSelect
   );
 }
 
-function buildViews(builders: FavoritesDrawerViewBuilders): HTMLElement {
+function buildViews(builders: FavoritesDrawerViewMap): HTMLElement {
   return createElement("div", {
     id: FavoritesId.drawerViews,
     children: FavoritesDrawerViews.map(descriptor => buildView(descriptor, builders[descriptor.name]))
@@ -28,7 +44,7 @@ function buildView(descriptor: FavoritesDrawerViewDescriptor, content: Favorites
   const element = div(favoritesDrawerViewId(view));
 
   element.className = FavoritesClass.drawerView;
-  element.append(buildTitle(title ?? label, content?.actions ?? []), buildPanel(content?.build));
+  element.append(buildTitle(title ?? label, content?.actions ?? []), buildPanel(content?.mount));
   return element;
 }
 
@@ -39,10 +55,10 @@ function buildTitle(label: string, actions: HTMLElement[]): HTMLElement {
   return createElement("div", { className: FavoritesClass.drawerTitle, children: [labelElement, ...actions] });
 }
 
-function buildPanel(build: ((panel: HTMLElement) => void) | undefined): HTMLElement {
+function buildPanel(mount: ((panel: HTMLElement) => void) | undefined): HTMLElement {
   const panel = createElement("div", { className: FavoritesClass.drawerPanel });
 
-  build?.(panel);
+  mount?.(panel);
   return panel;
 }
 

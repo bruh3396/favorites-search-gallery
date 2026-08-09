@@ -11,6 +11,7 @@ import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
 import * as FavoritesSearchBox from "@/features/favorites/control/favorites_search_box";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesSettingsPanel from "@/features/favorites/control/desktop/settings_panel";
+import * as FavoritesSnippets from "@/features/favorites/features/snippets/snippets";
 import * as FavoritesTagEditor from "@/features/favorites/features/tag_editor/tag_editor";
 import * as FavoritesToolbar from "@/features/favorites/control/desktop/toolbar";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
@@ -37,10 +38,10 @@ export function startFavorites(): void {
 }
 
 function setup(): void {
+  setupSubFeatures();
   setupModel();
   setupView();
   setupControl();
-  setupSubFeatures();
   subscribeToEvents();
   serveExternalRequests();
 }
@@ -65,8 +66,9 @@ function setupView(): void {
     onPageSelected: FavoritesPaginationFlow.goToPage,
     onPageStepped: FavoritesPaginationFlow.stepPage,
     drawerViews: {
-      settings: FavoritesSettingsPanel.buildDrawerView(),
-      download: FavoritesDownloader.buildDrawerView()
+      settings: FavoritesSettingsPanel.mount(),
+      download: FavoritesDownloader.mount(),
+      snippets: FavoritesSnippets.mount()
     }
   });
 }
@@ -83,6 +85,14 @@ function setupControl(): void {
 function setupSubFeatures(): void {
   setupTagEditor();
   setupDownloader();
+  setupSnippets();
+}
+
+function setupSnippets(): void {
+  FavoritesSnippets.setup({
+    getSearchQuery: FavoritesModel.getCurrentSearchQuery,
+    appendToSearch: FavoritesSearchBox.append
+  });
 }
 
 function setupDownloader(): void {
@@ -108,6 +118,11 @@ function setupTagEditor(): void {
 
 function subscribeToEvents(): void {
   Events.favorites.searchStarted.on(FavoritesSearchFlow.searchFavorites);
+  Events.favorites.searchButtonClicked.on(FavoritesSearchBox.handleSearchButtonClicked);
+  Events.favorites.clearButtonClicked.on(FavoritesSearchBox.clear);
+  Events.postOverlay.searchForTag.on(FavoritesSearchBox.search);
+  Events.postOverlay.addTagToSearch.on(FavoritesSearchBox.append);
+  Events.postOverlay.excludeTagFromSearch.on(FavoritesSearchBox.exclude);
   Events.favorites.shuffleButtonClicked.on(FavoritesSearchFlow.shuffleSearchResults);
   Events.favorites.invertButtonClicked.on(FavoritesSearchFlow.invertSearchResults);
   Events.favorites.findFavorite.on(FavoritesResultsFlow.reveal);

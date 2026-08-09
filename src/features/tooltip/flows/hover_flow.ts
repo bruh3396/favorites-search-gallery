@@ -9,7 +9,7 @@ export function onMouseover(event: EnhancedMouseEvent): void {
   }
 
   if (event.thumb === null) {
-    TooltipView.hideTooltip();
+    TooltipView.hide();
   } else {
     TooltipView.showTooltipForThumb(event.thumb, TooltipModel.getColorForTag);
   }

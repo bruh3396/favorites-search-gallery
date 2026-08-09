@@ -3,12 +3,12 @@ import * as FavoritesDrawerViewSelector from "@/features/favorites/view/shell/dr
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesDrawerViewBuilders } from "@/types/app";
+import { FavoritesDrawerViewMap } from "@/types/app";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { Preferences } from "@/app/context/preferences";
 import { queueMacroTask } from "@/lib/async/async";
 
-export function setup(renderers: FavoritesDrawerViewBuilders): void {
+export function setup(renderers: FavoritesDrawerViewMap): void {
   if (!FavoritesConfig.drawerSidebarLabelsEnabled) {
     setDataset(FavoritesShell.FavoritesRoot, "drawerIconOnly", "");
   }

@@ -1,10 +1,10 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
+import { BottomEdgeObserver } from "@/lib/observer/edge_observer";
 import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
-import { BottomEdgeObserver } from "@/lib/observer/edge_observer";
 import { ScrollSentinelBottom } from "@/app/layout/shell";
 import { SlidingWindow } from "@/lib/collection/sliding_window";
 import { doNothing } from "@/utils/function";

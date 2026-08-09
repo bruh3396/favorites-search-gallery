@@ -17,7 +17,7 @@ export abstract class AbstractFavoritesSearchBox {
     this.subscribeToEvents();
   }
 
-  protected appendText(text: string): void {
+  public append(text: string): void {
     const current = this.searchBox.value;
     const separator = current === "" ? "" : " ";
     const updated = `${current}${separator}${text}`;
@@ -27,6 +27,16 @@ export abstract class AbstractFavoritesSearchBox {
     this.history.setLastQuery(updated);
   }
 
+  public search(query: string): void {
+    this.searchBox.value = query;
+    this.startSearch();
+  }
+
+  public clear(): void {
+    this.searchBox.value = "";
+    this.history.setLastQuery("");
+  }
+
   protected startSearch(): void {
     const query = this.searchBox.value;
 
@@ -34,11 +44,6 @@ export abstract class AbstractFavoritesSearchBox {
     this.history.setLastQuery(query);
     hideAwesomplete(this.searchBox);
     Events.favorites.searchStarted.emit(query);
-  }
-
-  protected clear(): void {
-    this.searchBox.value = "";
-    this.history.setLastQuery("");
   }
 
   private subscribeToEvents(): void {

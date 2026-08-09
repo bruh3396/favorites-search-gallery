@@ -1,11 +1,20 @@
 import { awesompleteIsUnselected, awesompleteIsVisible } from "@/lib/ui/autocomplete/awesomplete";
 import { AbstractFavoritesSearchBox } from "@/features/favorites/control/abstract_search_box";
 import { EnhancedMouseEvent } from "@/types/input";
-import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { openPostList } from "@/lib/remote/rule34/posts/navigation";
 
 export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
+  public handleSearchButtonClicked(event: MouseEvent): void {
+    const mouseEvent = new EnhancedMouseEvent(event);
+
+    if (mouseEvent.rightClick || mouseEvent.ctrlKey) {
+      openPostList(this.searchBox.value);
+      return;
+    }
+    this.startSearch();
+  }
+
   protected override createSearchBox(): HTMLTextAreaElement | HTMLInputElement {
     const searchBox = document.createElement("textarea");
 
@@ -23,23 +32,11 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     } else {
       searchButtonSlot.insertAdjacentElement("afterend", searchBox);
     }
-    this.subscribePlatformEvents();
+    this.subscribeToKeyboard();
     return searchBox;
   }
 
-  private subscribePlatformEvents(): void {
-    Events.favorites.searchButtonClicked.on((event) => this.handleSearchButtonClicked(event));
-    Events.favorites.clearButtonClicked.on(this.clear.bind(this));
-    Events.postOverlay.searchForTag.on((tag) => {
-      this.searchBox.value = tag;
-      this.startSearch();
-    });
-    Events.postOverlay.addTagToSearch.on((tag) => this.appendText(tag));
-    Events.postOverlay.excludeTagFromSearch.on((tag) => this.appendText(`-${tag}`));
-    Events.postOverlay.searchForTag.on((tag) => {
-      this.searchBox.value = tag;
-      this.startSearch();
-    });
+  private subscribeToKeyboard(): void {
     this.searchBox.addEventListener("keydown", ((event: KeyboardEvent) => {
       if (event.key === "Enter") {
         this.handleEnter(event);
@@ -67,15 +64,5 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     event.preventDefault();
     this.history.navigate(event.key as "ArrowUp" | "ArrowDown");
     this.searchBox.value = this.history.selectedQuery;
-  }
-
-  private handleSearchButtonClicked(event: MouseEvent): void {
-    const mouseEvent = new EnhancedMouseEvent(event);
-
-    if (mouseEvent.rightClick || mouseEvent.ctrlKey) {
-      openPostList(this.searchBox.value);
-      return;
-    }
-    this.startSearch();
   }
 }

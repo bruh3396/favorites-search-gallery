@@ -3,6 +3,8 @@ import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
 import { Content } from "@/app/layout/shell";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
+import FONT_CSS from "@/assets/css/base/font.css";
+import { GeneralConfig } from "@/config/general_config";
 import HIGHLIGHT_CSS from "@/assets/css/base/highlight.css";
 import POST_CSS from "@/assets/css/base/post.css";
 import { Preferences } from "@/app/context/preferences";
@@ -29,9 +31,11 @@ export function setupStyles(): void {
 
 function insertBaseStyles(): void {
   const fadeInCss = Preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
+  const fontCss = GeneralConfig.overrideSiteFont ? FONT_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
+    fontCss +
     UTILITIES_CSS +
     WIDGETS_CSS +
     SKELETON_CSS +

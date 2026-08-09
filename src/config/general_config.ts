@@ -1,3 +1,4 @@
 export const GeneralConfig = {
-  galleryMenuOptionEnabled: true
+  galleryMenuOptionEnabled: true,
+  overrideSiteFont: true
 };

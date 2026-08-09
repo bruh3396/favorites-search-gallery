@@ -4,7 +4,6 @@ import { Preferences } from "@/app/context/preferences";
 import { addAwesompleteToGlobalScope } from "@/features/autocomplete/autocomplete_awesomplete_implementation";
 import { addCustomTagsToAutocomplete } from "@/lib/search/tags/custom_tags";
 import { fetchHtml } from "@/lib/remote/http/client";
-import { getSavedSearchesSuggestions } from "@/features/autocomplete/autocomplete_saved_search";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { isEmptyString } from "@/utils/string/query";
 import { removeLeadingHyphens } from "@/utils/string/format";
@@ -26,7 +25,6 @@ export function startAutocomplete(): void {
 function decodeEntities(encodedString: string): string {
   encodedString = encodedString.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, "");
   encodedString = encodedString.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, "");
-  encodedString = encodedString.replace(/\w+_saved_search\s*/, "");
   dummyElement.innerHTML = encodedString;
   encodedString = dummyElement.textContent ?? "";
   dummyElement.textContent = "";
@@ -38,8 +36,7 @@ function getAutocompleteSuggestions(prefix: string): Promise<string> {
 }
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {
-  const suggestions = addCustomTagsToAutocomplete(JSON.parse(html), prefix);
-  return Preferences.savedSearches.suggestions.value ? suggestions.concat(getSavedSearchesSuggestions(prefix)) : suggestions;
+  return addCustomTagsToAutocomplete(JSON.parse(html), prefix);
 }
 
 async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: AwesompleteInstance): Promise<void> {

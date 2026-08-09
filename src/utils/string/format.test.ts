@@ -1,4 +1,4 @@
-import { capitalize, decodeHtmlEntities, escapeParenthesis, negateTags, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores, toKebabCase } from "@/utils/string/format";
+import { capitalize, decodeHtmlEntities, escapeParenthesis, negateTags, pluralize, removeExtraWhiteSpace, removeLeadingHyphens, removeNonNumericCharacters, replaceSpacesWithUnderscores, toKebabCase } from "@/utils/string/format";
 import { describe, expect, test } from "vitest";
 
 describe("removeExtraWhiteSpace", () => {
@@ -167,6 +167,25 @@ describe("toKebabCase", () => {
 
   test("consecutive uppercase", () => {
     expect(toKebabCase("ariaHTML")).toBe("aria-h-t-m-l");
+  });
+});
+
+describe("pluralize", () => {
+  test("zero", () => {
+    expect(pluralize(0)).toBe("s");
+  });
+
+  test("one", () => {
+    expect(pluralize(1)).toBe("");
+  });
+
+  test("many", () => {
+    expect(pluralize(2)).toBe("s");
+    expect(pluralize(50)).toBe("s");
+  });
+
+  test("negative", () => {
+    expect(pluralize(-1)).toBe("s");
   });
 });
 

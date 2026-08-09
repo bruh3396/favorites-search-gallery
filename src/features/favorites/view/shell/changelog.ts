@@ -27,7 +27,7 @@ const releases: Release[] = [
 ];
 
 export function buildDrawerView(): FavoritesDrawerViewContent {
-  return { build: buildChangelogPanel };
+  return { mount: buildChangelogPanel };
 }
 
 function buildChangelogPanel(panel: HTMLElement): void {

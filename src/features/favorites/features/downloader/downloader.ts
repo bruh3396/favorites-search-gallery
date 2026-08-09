@@ -1,9 +1,9 @@
 import { DownloaderCallbacks } from "@/features/favorites/features/downloader/types";
 import { Preferences } from "@/app/context/preferences";
-import { refreshCount } from "@/features/favorites/features/downloader/ui";
+import { refreshCount } from "@/features/favorites/features/downloader/panel";
 import { setDeps } from "@/features/favorites/features/downloader/deps";
 
-export { buildDrawerView, refreshCount, unlock } from "@/features/favorites/features/downloader/ui";
+export { mount, refreshCount, unlock } from "@/features/favorites/features/downloader/panel";
 
 export function setup(callbacks: DownloaderCallbacks): void {
   setDeps(callbacks);

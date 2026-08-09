@@ -59,7 +59,9 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
     * Allows for complex tags and grouping (essentially folders)
     * Does not actually add tags to the post associated with a favorite (all changes are local)
     * Original tags of favorite cannot be altered
-* Save custom searches
+* Save searches as named snippets
+  * Each snippet pairs a name with a query, and is referenced as **/\<name\>**
+  * Import and export snippets as JSON
 * Shuffle search results
 * Invert search results
 * Exclude results with blacklisted tags
