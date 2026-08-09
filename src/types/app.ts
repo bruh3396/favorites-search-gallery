@@ -14,11 +14,4 @@ export type GalleryMenuAction = "exit" |
 export type GalleryState = "idle" | "preview" | "open";
 export type PostOverlayMode = "tag";
 export type MapToString<T extends readonly unknown[]> = { readonly [K in keyof T]: string };
-
-export const FavoritesDrawerViewNames = ["settings", "snippets", "tags", "download", "change", "help"] as const;
-export type FavoritesDrawerView = typeof FavoritesDrawerViewNames[number];
-export type FavoritesDrawerViewContent = {
-  mount?: (panel: HTMLElement) => void;
-  actions?: HTMLElement[];
-};
-export type FavoritesDrawerViewMap = Partial<Record<FavoritesDrawerView, FavoritesDrawerViewContent>>;
+export type Identifiable = { id: string };

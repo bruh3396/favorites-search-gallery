@@ -3,7 +3,7 @@ import { DownloadProgress, DownloadResult } from "@/features/favorites/features/
 import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { FavoritesDownloaderDeps } from "@/features/favorites/features/downloader/deps";
-import { FavoritesDrawerViewContent } from "@/types/app";
+import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildProgressBar } from "@/lib/ui/elements/progress_bar";

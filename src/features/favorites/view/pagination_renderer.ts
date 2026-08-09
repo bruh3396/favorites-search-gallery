@@ -5,7 +5,7 @@ import { removeDataset, toggleDataset } from "@/utils/dom/dataset";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
-import { PaginationContext } from "@/features/favorites/types/interfaces";
+import { PaginationContext } from "@/features/favorites/types/types";
 import { PaginationSequence } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";

@@ -4,7 +4,7 @@ import { preloadImages, revealItem } from "@/app/layout/content_thumbs";
 import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesResultsView } from "@/features/favorites/types/interfaces";
+import { FavoritesResultsView } from "@/features/favorites/types/types";
 import { NavigationKey } from "@/types/input";
 
 let appendedFirstResults = false;

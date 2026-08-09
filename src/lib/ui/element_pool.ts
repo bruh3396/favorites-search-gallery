@@ -12,6 +12,10 @@ export class ElementPool {
     return this.elements[this.visibleIndex];
   }
 
+  public get next(): HTMLElement {
+    return this.elements[this.nextIndex];
+  }
+
   public get all(): HTMLElement[] {
     return this.elements;
   }
@@ -20,9 +24,13 @@ export class ElementPool {
     return this.current.dataset.visible !== undefined;
   }
 
+  private get nextIndex(): number {
+    return (this.visibleIndex + 1) % this.elements.length;
+  }
+
   public reveal(): HTMLElement {
     removeDataset(this.current, "visible");
-    this.visibleIndex = (this.visibleIndex + 1) % this.elements.length;
+    this.visibleIndex = this.nextIndex;
     setDataset(this.current, "visible");
     return this.current;
   }

@@ -1,5 +1,5 @@
 import * as SnippetsPanel from "@/features/favorites/features/snippets/panel";
-import { FavoritesDrawerViewContent } from "@/types/app";
+import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { SnippetStore } from "@/features/favorites/features/snippets/store";
 import { SnippetsCallbacks } from "@/features/favorites/features/snippets/types";
 import { Storage } from "@/lib/storage/local_storage";

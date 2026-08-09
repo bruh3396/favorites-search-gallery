@@ -1,4 +1,4 @@
-import { Setting } from "@/lib/ui/settings/setting";
+import { SelectSetting, Setting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/dom/element_factory";
@@ -12,6 +12,12 @@ export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement)
   if (config.enabled === false) {
     setDataset(row, "disabled");
   }
-  addTooltip(row, config.tooltip ?? "", config.tooltipPosition ?? "above");
+  addTooltip(row, config.tooltip ?? "", config.tooltipPosition ?? "below");
+  setDataset(row, "keywords", keywordsOf(config));
   return row;
+}
+
+function keywordsOf<T>(config: Partial<Setting<T>>): string {
+  const { options } = config as Partial<SelectSetting<string>>;
+  return [config.label ?? "", config.tooltip ?? "", ...(options?.values() ?? [])].join(" ").toLowerCase();
 }

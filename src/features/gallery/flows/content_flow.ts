@@ -18,7 +18,7 @@ export function downscaleThumbsOutsideResults(searchResults: Favorite[]): void {
 
 export function reIndex(): void {
   GalleryThumbObserver.refresh();
-  GalleryModel.indexThumbs();
+  GalleryModel.indexThumbs(getAllContentThumbs());
 }
 
 const recache = debounceLeading(() => {

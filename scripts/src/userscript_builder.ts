@@ -1,7 +1,7 @@
 import { BuildOptions, build } from "esbuild";
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { resolve } from "path";
 import { rawTsPlugin } from "./raw_ts_plugin";
+import { resolve } from "path";
 
 const SCRIPT_VERSION = "1.22";
 

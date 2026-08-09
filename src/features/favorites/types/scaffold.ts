@@ -1,4 +1,4 @@
-import { FavoritesDrawerView } from "@/types/app";
+import { FavoritesDrawerView } from "@/types/favorite";
 
 export const FavoritesId = {
   root: "favorites-root",

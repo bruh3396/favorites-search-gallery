@@ -18,6 +18,14 @@ export class Preference<T> {
     return (cache[this.key] as T) ?? this.defaultValue;
   }
 
+  public static resetAll(): void {
+    Storage.remove(LOCAL_STORAGE_KEY);
+
+    for (const key of Object.keys(cache)) {
+      delete cache[key];
+    }
+  }
+
   public set(value: T): void {
     cache[this.key] = value;
     Storage.set(LOCAL_STORAGE_KEY, cache);

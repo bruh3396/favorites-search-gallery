@@ -1,5 +1,5 @@
-import * as PostListNavigatorNavigator from "@/features/post_list_navigator/model/navigator";
 import * as PostListNavigatorFavoriteIds from "@/features/post_list_navigator/model/favorite_ids";
+import * as PostListNavigatorNavigator from "@/features/post_list_navigator/model/navigator";
 
 export function setup(): void {
   PostListNavigatorNavigator.setup();

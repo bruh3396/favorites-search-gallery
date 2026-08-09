@@ -1,7 +1,7 @@
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { NavigationKey } from "@/types/input";
-import { PaginationContext } from "@/features/favorites/types/interfaces";
+import { PaginationContext } from "@/features/favorites/types/types";
 import { Preferences } from "@/app/context/preferences";
 import { clamp } from "@/utils/number";
 import { navigationDelta } from "@/utils/navigation";

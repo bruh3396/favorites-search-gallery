@@ -137,5 +137,6 @@ function stepperButton(iconName: "plus" | "minus"): HTMLButtonElement {
   const button = createElement("button", { className: SettingsClass.stepperButton, children: [icon(iconName)] });
 
   button.type = "button";
+  button.dataset.step = iconName;
   return button;
 }

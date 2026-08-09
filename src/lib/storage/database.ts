@@ -1,9 +1,10 @@
 /* eslint-disable max-classes-per-file */
+import { Identifiable } from "@/types/app";
 import { macroTask } from "@/lib/async/async";
 
 class LockedDatabaseError extends Error { }
 
-export class Database<V extends { id: string }> {
+export class Database<V extends Identifiable> {
   private readonly name: string;
   private readonly defaultObjectStoreName: string;
   private version: number;

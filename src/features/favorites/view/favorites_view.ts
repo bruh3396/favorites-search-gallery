@@ -7,7 +7,7 @@ import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import * as FavoritesSkeleton from "@/features/favorites/view/skeleton/skeleton";
 import * as FavoritesStatus from "@/features/favorites/view/status/status";
 import { Favorite } from "@/types/favorite";
-import { FavoritesViewCallbacks } from "@/features/favorites/types/interfaces";
+import { FavoritesViewCallbacks } from "@/features/favorites/types/types";
 import { buildElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { scrollToTop } from "@/lib/thumb/thumbs";
 

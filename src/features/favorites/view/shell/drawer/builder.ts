@@ -1,5 +1,5 @@
 import { FavoritesClass, FavoritesId, favoritesDrawerSidebarIconId, favoritesDrawerViewId } from "@/features/favorites/types/scaffold";
-import { FavoritesDrawerView, FavoritesDrawerViewContent, FavoritesDrawerViewMap } from "@/types/app";
+import { FavoritesDrawerView, FavoritesDrawerViewContent, FavoritesDrawerViewMap } from "@/types/favorite";
 import { IconName, icon } from "@/lib/ui/icon";
 import { createElement, div } from "@/utils/dom/element_factory";
 import { FavoritesConfig } from "@/config/favorites_config";

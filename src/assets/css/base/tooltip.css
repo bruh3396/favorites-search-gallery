@@ -7,7 +7,7 @@
   position: absolute;
   z-index: 40;
   width: max-content;
-  max-width: 240px;
+  max-width: 300px;
   padding: 6px 10px;
   border: 1px solid var(--theme-border);
   border-radius: 8px;
@@ -24,34 +24,83 @@
   transition-delay: 0s;
 }
 
+[data-tooltip-caret]::before {
+  content: "";
+  position: absolute;
+  z-index: 41;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-raised);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition-delay: 0s;
+}
+
 [data-tooltip-pos="above"]::after {
   left: 50%;
-  bottom: calc(100% + 4px);
+  bottom: calc(100% + 10px);
   transform: translate(-50%, 4px);
+}
+
+[data-tooltip-pos="above"][data-tooltip-caret]::before {
+  left: 50%;
+  bottom: calc(100% + 5px);
+  border-width: 0 1px 1px 0;
+  transform: translate(-50%, 4px) rotate(45deg);
 }
 
 [data-tooltip-pos="below"]::after {
   left: 50%;
-  top: calc(100% + 4px);
+  top: calc(100% + 10px);
   transform: translate(-50%, -4px);
+}
+
+[data-tooltip-pos="below"][data-tooltip-caret]::before {
+  left: 50%;
+  top: calc(100% + 5px);
+  border-width: 1px 0 0 1px;
+  transform: translate(-50%, -4px) rotate(45deg);
 }
 
 [data-tooltip-pos="right"]::after {
   top: 50%;
-  left: calc(100% + 4px);
+  left: calc(100% + 10px);
   transform: translate(-4px, -50%);
 }
 
-[data-tooltip]:hover::after {
+[data-tooltip-pos="right"][data-tooltip-caret]::before {
+  top: 50%;
+  left: calc(100% + 5px);
+  border-width: 0 0 1px 1px;
+  transform: translate(-4px, -50%) rotate(45deg);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip-caret]:hover::before {
   opacity: 1;
-  transform: translate(-50%, 0);
   transition-delay: 0.4s;
+}
+
+[data-tooltip]:hover::after {
+  transform: translate(-50%, 0);
+}
+
+[data-tooltip-pos="above"][data-tooltip-caret]:hover::before,
+[data-tooltip-pos="below"][data-tooltip-caret]:hover::before {
+  transform: translate(-50%, 0) rotate(45deg);
 }
 
 [data-tooltip-pos="right"]:hover::after {
   transform: translate(0, -50%);
 }
 
-:root:not([data-tooltips]) [data-tooltip]:hover::after {
+[data-tooltip-pos="right"][data-tooltip-caret]:hover::before {
+  transform: translate(0, -50%) rotate(45deg);
+}
+
+:root:not([data-tooltips]) [data-tooltip]:hover::after,
+:root:not([data-tooltips]) [data-tooltip-caret]:hover::before {
   opacity: 0;
 }

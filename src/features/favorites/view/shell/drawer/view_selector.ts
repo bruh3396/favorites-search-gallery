@@ -1,4 +1,4 @@
-import { FavoritesDrawerView, FavoritesDrawerViewNames } from "@/types/app";
+import { FavoritesDrawerView, FavoritesDrawerViewNames } from "@/types/favorite";
 import { favoritesDrawerSidebarIconId, favoritesDrawerViewId } from "@/features/favorites/types/scaffold";
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { Preferences } from "@/app/context/preferences";
@@ -6,12 +6,16 @@ import { Preferences } from "@/app/context/preferences";
 let activeView: FavoritesDrawerView = Preferences.favorites.drawerActiveView.value;
 
 export function showActiveView(): void {
-  selectView(activeView);
+  renderView(activeView);
 }
 
 export function selectView(view: FavoritesDrawerView): void {
-  activeView = view;
   Preferences.favorites.drawerActiveView.set(view);
+  renderView(view);
+}
+
+function renderView(view: FavoritesDrawerView): void {
+  activeView = view;
 
   for (const candidate of FavoritesDrawerViewNames) {
     const isActive = candidate === view;

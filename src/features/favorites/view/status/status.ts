@@ -1,5 +1,5 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
-import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/interfaces";
+import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/types";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { ProgressBar } from "@/types/element";
 import { Root } from "@/app/layout/shell";

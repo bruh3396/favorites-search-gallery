@@ -41,6 +41,6 @@ function buildStatus(): HTMLElement {
 function buildBrandSlot(): HTMLElement {
   return createElement("div", {
     id: FavoritesId.brandSlot,
-    children: [createElement("span", { id: FavoritesId.brandVersion, textContent: `v${VERSION}` })]
+    children: [createElement("span", { id: FavoritesId.brandVersion, textContent: `FSG v${VERSION}` })]
   });
 }

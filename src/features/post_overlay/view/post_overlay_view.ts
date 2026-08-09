@@ -1,13 +1,13 @@
-import * as PostOverlayShell from "@/features/post_overlay/view/shell/post_overlay_shell";
+import * as PostOverlayElement from "@/features/post_overlay/view/shell/element";
 import * as PostOverlayTagRenderer from "@/features/post_overlay/view/rendering/tag_renderer";
 import { TagCategoryMap } from "@/types/search";
 
 export function setup(): void {
-  PostOverlayShell.setup();
+  PostOverlayElement.setup();
 }
 
 export function renderTags(postId: string, categoryMap: TagCategoryMap): void {
-  PostOverlayTagRenderer.renderTags(PostOverlayShell.getOverlay(), postId, categoryMap);
+  PostOverlayTagRenderer.renderTags(PostOverlayElement.getOverlay(), postId, categoryMap);
 }
 
-export { reveal, hide, isVisible } from "@/features/post_overlay/view/shell/post_overlay_shell";
+export { reveal, hide, isVisible } from "@/features/post_overlay/view/shell/element";

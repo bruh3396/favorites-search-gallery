@@ -10,7 +10,7 @@ import * as FavoritesResetFlow from "@/features/favorites/flows/reset_flow";
 import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
 import * as FavoritesSearchBox from "@/features/favorites/control/favorites_search_box";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
-import * as FavoritesSettingsPanel from "@/features/favorites/control/desktop/settings_panel";
+import * as FavoritesSettings from "@/features/favorites/control/desktop/settings/settings";
 import * as FavoritesSnippets from "@/features/favorites/features/snippets/snippets";
 import * as FavoritesTagEditor from "@/features/favorites/features/tag_editor/tag_editor";
 import * as FavoritesToolbar from "@/features/favorites/control/desktop/toolbar";
@@ -66,7 +66,7 @@ function setupView(): void {
     onPageSelected: FavoritesPaginationFlow.goToPage,
     onPageStepped: FavoritesPaginationFlow.stepPage,
     drawerViews: {
-      settings: FavoritesSettingsPanel.mount(),
+      settings: FavoritesSettings.mount(),
       download: FavoritesDownloader.mount(),
       snippets: FavoritesSnippets.mount()
     }

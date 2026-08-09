@@ -16,7 +16,7 @@ export function shuffleArray<V>(array: V[]): V[] {
   return array;
 }
 
-export function getElementsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
+export function itemsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
   if (!indexInBounds(array, startIndex) || limit === 0) {
     return [];
   }
@@ -46,7 +46,7 @@ export function getElementsAroundIndex<V>(array: V[], startIndex: number, limit:
   return result;
 }
 
-export function getWrappedElementsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
+export function wrappedItemsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
   if (!indexInBounds(array, startIndex) || limit === 0) {
     return [];
   }

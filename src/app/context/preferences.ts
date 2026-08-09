@@ -1,6 +1,7 @@
-import { FavoritesDrawerView, FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
+import { FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortKey } from "@/types/search";
+import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
 import { getCookie } from "@/utils/browser/cookie";

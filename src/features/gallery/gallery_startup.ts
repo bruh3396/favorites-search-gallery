@@ -57,7 +57,7 @@ function setupModel(): void {
   const getFavoriteThumbs = (): HTMLElement[] => FeatureBridge.favorites.searchResults.call().map(favorite => favorite.root);
   const getPostListThumbs = (): HTMLElement[] => FeatureBridge.postList.thumbs.call();
 
-  GalleryModel.setupNeighbors(ON_FAVORITES_PAGE ? getFavoriteThumbs : getPostListThumbs);
+  GalleryModel.setup(ON_FAVORITES_PAGE ? getFavoriteThumbs : getPostListThumbs, ON_FAVORITES_PAGE);
 }
 
 async function start(): Promise<void> {

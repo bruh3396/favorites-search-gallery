@@ -1,5 +1,8 @@
 export const SettingsClass = {
   view: "settings-view",
+  filter: "setting-filter",
+  filterInput: "setting-filter-input",
+  filterEmpty: "setting-filter-empty",
   section: "setting-section",
   sectionHeader: "setting-section-header",
   sectionTitle: "setting-section-title",

@@ -94,7 +94,7 @@
   display: flex;
   flex-wrap: wrap;
   align-content: center;
-  justify-content: flex-start;
+  justify-content: center;
   column-gap: 14px;
   height: 34px;
   font-size: 12px;
@@ -130,6 +130,7 @@
 
 #favorites-search-status>#favorites-load-status-label {
   flex: 0 0 100%;
+  text-align: center;
   color: var(--theme-text-muted);
 }
 

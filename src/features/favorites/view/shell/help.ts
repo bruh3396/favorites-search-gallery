@@ -1,6 +1,6 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { FavoritesClass, FavoritesHelpLinks } from "@/features/favorites/types/scaffold";
-import { FavoritesDrawerViewContent } from "@/types/app";
+import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { icon } from "@/lib/ui/icon";
 
 const PANEL_CLASSES = {

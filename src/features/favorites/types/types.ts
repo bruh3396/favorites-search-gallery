@@ -1,5 +1,5 @@
 import { Favorite } from "@/types/favorite";
-import { FavoritesDrawerViewMap } from "@/types/app";
+import { FavoritesDrawerViewMap } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
 import { PaginationSequence } from "@/types/ui";
 import { TagCategoryMap } from "@/types/search";

@@ -1,6 +1,6 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { FavoritesClass } from "@/features/favorites/types/scaffold";
-import { FavoritesDrawerViewContent } from "@/types/app";
+import { FavoritesDrawerViewContent } from "@/types/favorite";
 
 interface Release {
   version: string;

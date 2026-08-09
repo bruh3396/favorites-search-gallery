@@ -1,50 +1,42 @@
-import { removeDataset, setDataset } from "@/utils/dom/dataset";
+import { ElementPool } from "@/lib/ui/element_pool";
 import { Overlays } from "@/app/layout/shell";
 import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
 import { Preferences } from "@/app/context/preferences";
+import { div } from "@/utils/dom/element_factory";
 import { insertStyle } from "@/utils/dom/injector";
 import { setMenuLabel } from "@/features/post_overlay/dom_tweaks/menu_label";
 
-const OVERLAY_POOL_SIZE = 3;
-const overlays: HTMLElement[] = [];
-let visibleIndex = 0;
+const pool = new ElementPool(3, createOverlayElement);
 
 export function setup(): void {
   insertStyle(POST_OVERLAY_CSS, PostOverlayClass.overlay);
   setMenuLabel(Preferences.postOverlay.mode.value);
-
-  for (let i = 0; i < OVERLAY_POOL_SIZE; i += 1) {
-    const overlay = document.createElement("div");
-
-    overlay.className = PostOverlayClass.overlay;
-    Overlays.appendChild(overlay);
-    overlays.push(overlay);
-  }
+  pool.all.forEach(overlay => Overlays.appendChild(overlay));
 }
 
 export function getOverlay(): HTMLElement {
-  return overlays[nextIndex()];
+  return pool.next;
 }
 
 export function reveal(thumb: HTMLElement): void {
-  const currentlyShown = overlays[visibleIndex];
-  const nextToShow = overlays[nextIndex()];
-
-  position(nextToShow, thumb);
-  removeDataset(currentlyShown, "visible");
-  setDataset(nextToShow, "visible");
-  visibleIndex = nextIndex();
+  position(pool.next, thumb);
+  pool.reveal();
 }
 
 export function isVisible(): boolean {
-  return overlays[visibleIndex]?.dataset.visible !== undefined;
+  return pool.isVisible;
 }
 
 export function hide(): void {
-  for (const overlay of overlays) {
-    removeDataset(overlay, "visible");
-  }
+  pool.hide();
+}
+
+function createOverlayElement(): HTMLDivElement {
+  const overlay = div();
+
+  overlay.className = PostOverlayClass.overlay;
+  return overlay;
 }
 
 function position(overlay: HTMLElement, thumb: HTMLElement): void {
@@ -55,8 +47,4 @@ function position(overlay: HTMLElement, thumb: HTMLElement): void {
   overlay.style.width = `${rect.width}px`;
   overlay.style.height = `${rect.height}px`;
   overlay.style.borderRadius = getComputedStyle(thumb).borderRadius;
-}
-
-function nextIndex(): number {
-  return (visibleIndex + 1) % overlays.length;
 }

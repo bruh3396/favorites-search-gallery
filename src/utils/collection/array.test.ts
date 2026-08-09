@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getElementsAroundIndex, getWrappedElementsAroundIndex, indexInBounds, shuffleArray, splitIntoChunks } from "@/utils/collection/array";
+import { indexInBounds, itemsAroundIndex, shuffleArray, splitIntoChunks, wrappedItemsAroundIndex } from "@/utils/collection/array";
 import { numberRange, numbersAroundInRange, randomInt } from "@/utils/number";
 
 describe("indexInBounds", () => {
@@ -91,9 +91,9 @@ describe("getNumbersAround", () => {
   });
 });
 
-describe("getElementsAroundIndex", () => {
-  function testElementsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
-    const result = getElementsAroundIndex(array, startIndex, limit);
+describe("itemsAroundIndex", () => {
+  function testItemsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
+    const result = itemsAroundIndex(array, startIndex, limit);
 
     expect(result).toStrictEqual(expected);
   }
@@ -103,35 +103,35 @@ describe("getElementsAroundIndex", () => {
       const startIndex = randomInt(100);
       const limit = randomInt(100);
 
-      testElementsAroundIndex([], startIndex, limit, []);
+      testItemsAroundIndex([], startIndex, limit, []);
     }
   });
 
   test("index out of bounds", () => {
-    testElementsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+    testItemsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
   });
 
   test("limit greater than length", () => {
-    testElementsAroundIndex([1, 2], 0, 3, [1, 2]);
+    testItemsAroundIndex([1, 2], 0, 3, [1, 2]);
   });
 
   test("zero limit", () => {
-    testElementsAroundIndex([1, 2], 0, 0, []);
+    testItemsAroundIndex([1, 2], 0, 0, []);
   });
 
   test("normal cases", () => {
-    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 1, [3]);
-    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 3, [3, 2, 4]);
-    testElementsAroundIndex([1, 2, 3, 4, 5], 0, 3, [1, 2, 3]);
-    testElementsAroundIndex([1, 2, 3, 4, 5], 4, 3, [5, 4, 3]);
-    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
-    testElementsAroundIndex([1, 2, 3, 4, 5], 2, 4, [3, 2, 4, 1]);
+    testItemsAroundIndex([1, 2, 3, 4, 5], 2, 1, [3]);
+    testItemsAroundIndex([1, 2, 3, 4, 5], 2, 3, [3, 2, 4]);
+    testItemsAroundIndex([1, 2, 3, 4, 5], 0, 3, [1, 2, 3]);
+    testItemsAroundIndex([1, 2, 3, 4, 5], 4, 3, [5, 4, 3]);
+    testItemsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
+    testItemsAroundIndex([1, 2, 3, 4, 5], 2, 4, [3, 2, 4, 1]);
   });
 });
 
-describe("getWrappedElementsAroundIndex", () => {
-  function testWrappedElementsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
-    const result = getWrappedElementsAroundIndex(array, startIndex, limit);
+describe("wrappedItemsAroundIndex", () => {
+  function testWrappedItemsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
+    const result = wrappedItemsAroundIndex(array, startIndex, limit);
 
     expect(result).toStrictEqual(expected);
   }
@@ -141,38 +141,38 @@ describe("getWrappedElementsAroundIndex", () => {
       const startIndex = randomInt(100);
       const limit = randomInt(100);
 
-      testWrappedElementsAroundIndex([], startIndex, limit, []);
+      testWrappedItemsAroundIndex([], startIndex, limit, []);
     }
   });
 
   test("index out of bounds", () => {
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
   });
 
   test("limit greater than length", () => {
-    testWrappedElementsAroundIndex([1, 2], 0, 3, [1, 2]);
+    testWrappedItemsAroundIndex([1, 2], 0, 3, [1, 2]);
   });
 
   test("zero limit", () => {
-    testWrappedElementsAroundIndex([1, 2], 0, 0, []);
+    testWrappedItemsAroundIndex([1, 2], 0, 0, []);
   });
 
   test("normal cases", () => {
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 0, 5, [1, 5, 2, 4, 3]);
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 4, 5, [5, 4, 1, 3, 2]);
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 0, 1, [1]);
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 9, 10, [10, 9, 1, 8, 2, 7, 3, 6, 4, 5]);
-    testWrappedElementsAroundIndex([42], 0, 3, [42]);
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5], 2, 10, [3, 2, 4, 1, 5]);
-    testWrappedElementsAroundIndex([], 2, 10, []);
-    testWrappedElementsAroundIndex([], 0, 0, []);
-    testWrappedElementsAroundIndex([1], 0, 0, []);
-    testWrappedElementsAroundIndex([1], 0, 1, [1]);
-    testWrappedElementsAroundIndex([50], 0, 2, [50]);
-    testWrappedElementsAroundIndex([1, 2, 4, 5], 1, 3, [2, 1, 4]);
-    testWrappedElementsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2, [5, 4]);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5], 0, 5, [1, 5, 2, 4, 3]);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5], 4, 5, [5, 4, 1, 3, 2]);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5], 0, 1, [1]);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 9, 10, [10, 9, 1, 8, 2, 7, 3, 6, 4, 5]);
+    testWrappedItemsAroundIndex([42], 0, 3, [42]);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5], 2, 10, [3, 2, 4, 1, 5]);
+    testWrappedItemsAroundIndex([], 2, 10, []);
+    testWrappedItemsAroundIndex([], 0, 0, []);
+    testWrappedItemsAroundIndex([1], 0, 0, []);
+    testWrappedItemsAroundIndex([1], 0, 1, [1]);
+    testWrappedItemsAroundIndex([50], 0, 2, [50]);
+    testWrappedItemsAroundIndex([1, 2, 4, 5], 1, 3, [2, 1, 4]);
+    testWrappedItemsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2, [5, 4]);
   });
 });
 

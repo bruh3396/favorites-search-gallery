@@ -1,3 +1,60 @@
+.setting-filter {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: var(--theme-surface);
+}
+
+.settings-view input.setting-filter-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid var(--theme-border);
+  border-radius: 5px;
+  background: var(--theme-sunken) !important;
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.settings-view input.setting-filter-input:focus {
+  outline: none;
+  border-color: var(--theme-text-muted);
+}
+
+.settings-view input.setting-filter-input::placeholder {
+  color: var(--theme-text-muted);
+}
+
+.setting-filter-empty {
+  display: none;
+  padding: 20px 12px;
+  color: var(--theme-text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.settings-view[data-empty] .setting-filter-empty {
+  display: block;
+}
+
+.setting-section[data-filtered],
+.setting-row[data-filtered] {
+  display: none;
+}
+
+.settings-view[data-filtering] .setting-section-header {
+  pointer-events: none;
+  cursor: default;
+}
+
+.settings-view[data-filtering] .setting-section-header .icon {
+  display: none;
+}
+
 .setting-section {
   margin: 0;
 }
@@ -8,7 +65,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 12px 12px 6px;
+  padding: 8px 8px 10px 12px;
   border: none;
   background: none;
   color: var(--theme-text);
@@ -40,11 +97,15 @@
 
 .setting-section-title {
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-weight: 600;
+  font-style: italic;
   color: var(--theme-text-muted);
   transition: color 0.15s ease;
+}
+
+.setting-section:not([data-collapsed]) .setting-section-title,
+.settings-view[data-filtering] .setting-section-title {
+  color: var(--theme-accent);
 }
 
 .setting-section-header .icon {
@@ -69,6 +130,15 @@
 .setting-section[data-collapsed] .setting-group-wrap {
   grid-template-rows: 0fr;
   overflow: hidden;
+}
+
+.settings-view[data-filtering] .setting-section[data-collapsed] .setting-group-wrap {
+  grid-template-rows: 1fr;
+  overflow: visible;
+}
+
+.settings-view[data-filtering] .setting-section[data-collapsed] .setting-group {
+  padding: 0 0 10px;
 }
 
 .setting-group {
@@ -305,6 +375,10 @@ button.setting-stepper-button:disabled {
 .setting-stepper-button .icon {
   width: 14px;
   height: 14px;
+}
+
+button.setting-stepper-button[data-step="minus"] .icon {
+  stroke-width: 2.5;
 }
 
 input.setting-stepper-value {

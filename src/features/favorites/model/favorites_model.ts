@@ -3,7 +3,7 @@ import * as FavoritesEnricher from "@/features/favorites/model/enrichment/enrich
 import * as FavoritesLoader from "@/features/favorites/model/loading/loader";
 import * as FavoritesPaginator from "@/features/favorites/model/search/paginator";
 import * as FavoritesSearcher from "@/features/favorites/model/search/searcher";
-import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/interfaces";
+import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 

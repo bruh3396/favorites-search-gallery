@@ -55,13 +55,8 @@ export function onMouseOver(event: EnhancedMouseEvent): void {
 }
 
 function loadPreferences(): void {
-  if (Preferences.gallery.menuDockedLeft.value) {
-    toggleDockPosition();
-  }
-
-  if (Preferences.gallery.menuPinned.value) {
-    togglePin();
-  }
+  menu.classList.toggle("gallery-menu--docked", !ON_MOBILE_DEVICE && Preferences.gallery.menuDockedLeft.value);
+  menu.classList.toggle("gallery-menu--pinned", ON_MOBILE_DEVICE || Preferences.gallery.menuPinned.value);
   toggleGalleryMenuEnabled(Preferences.gallery.menuEnabled.value);
 }
 
