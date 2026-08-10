@@ -10,7 +10,7 @@ export const Preferences = {
   app: {
     performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
     gradient: new Preference("appGradient", false),
-    theme: new Preference<Theme>("appTheme", "zeal"),
+    theme: new Preference<Theme>("appTheme", "native"),
     darkMode: new Preference<boolean>("appDarkMode", getCookie("theme", "") === "dark"),
     fadeThumbs: new Preference<boolean>("appFadeThumbs", true)
   },
@@ -19,8 +19,8 @@ export const Preferences = {
     columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 5),
     downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 0),
-    drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
-    drawerOpen: new Preference("favoritesDrawerOpen", false),
+    drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "help"),
+    drawerOpen: new Preference("favoritesDrawerOpen", true),
     excludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
     finderId: new Preference("favoritesFinderId", ""),
     headerEnabled: new Preference("favoritesHeaderEnabled", true),

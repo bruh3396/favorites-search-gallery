@@ -3,7 +3,7 @@ import * as FavoritesDrawerViewSelector from "@/features/favorites/view/shell/dr
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesDrawerViewMap } from "@/types/favorite";
+import { FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { Preferences } from "@/app/context/preferences";
 import { queueMacroTask } from "@/lib/async/async";
@@ -14,7 +14,8 @@ export function setup(renderers: FavoritesDrawerViewMap): void {
   }
   FavoritesShell.FavoritesDrawerTrack.appendChild(FavoritesDrawerBuilder.buildDrawer(renderers, FavoritesDrawerViewSelector.selectView));
   FavoritesDrawerViewSelector.showActiveView();
-  setupVersionLabel();
+  setupViewShortcut(FavoritesId.aboutVersion, "change");
+  setupViewShortcut(FavoritesId.aboutHelp, "help");
   openInstantlyOnStart();
 }
 
@@ -35,17 +36,17 @@ function isOpen(): boolean {
   return FavoritesShell.FavoritesRoot.dataset.drawerOpen !== undefined;
 }
 
-function setupVersionLabel(): void {
-  const version = document.getElementById(FavoritesId.brandVersion);
+function setupViewShortcut(elementId: string, view: FavoritesDrawerView): void {
+  const element = document.getElementById(elementId);
 
-  if (version === null) {
+  if (element === null) {
     return;
   }
-  version.onclick = (): void => {
+  element.onclick = (): void => {
     if (!isOpen()) {
       toggleDrawer();
     }
-    FavoritesDrawerViewSelector.selectView("change");
+    FavoritesDrawerViewSelector.selectView(view);
   };
 }
 

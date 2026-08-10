@@ -12,7 +12,7 @@ export function mount(): FavoritesDrawerViewContent {
     mount: (panel): void => {
       build(panel, [collapseExpand]);
     },
-    actions: [resetAllButton(), collapseExpand]
+    actions: [collapseExpand, resetAllButton()]
   };
 }
 

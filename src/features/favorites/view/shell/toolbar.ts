@@ -1,46 +1,59 @@
 import { createElement, label, span } from "@/utils/dom/element_factory";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { VERSION } from "@/lib/environment";
+import { addTooltip } from "@/lib/ui/tooltip/tooltip";
+import { icon } from "@/lib/ui/icon";
 
 export function build(): HTMLElement {
   return createElement("div", {
     id: FavoritesId.toolbar,
     className: "u-no-select",
-    children: [buildToolbarGrid()]
+    children: [grid()]
   });
 }
 
-function buildToolbarGrid(): HTMLElement {
+function grid(): HTMLElement {
   return createElement("div", {
     id: FavoritesId.toolbarGrid,
     children: [
       span(FavoritesId.drawerToggleSlot),
-      buildSearchField(),
+      searchField(),
       span(FavoritesId.buttonsSlot),
       span(FavoritesId.paginationSlot),
-      buildStatus(),
-      buildBrandSlot()
+      status(),
+      about()
     ]
   });
 }
 
-function buildSearchField(): HTMLElement {
+function searchField(): HTMLElement {
   return createElement("div", {
     id: FavoritesId.searchField,
     children: [span(FavoritesId.searchButton), span(FavoritesId.actions)]
   });
 }
 
-function buildStatus(): HTMLElement {
-  return createElement("span", {
-    id: FavoritesId.status,
-    children: [label(FavoritesId.matchCount), label(FavoritesId.loadStatus)]
+function status(): HTMLElement {
+  return createElement("span", { id: FavoritesId.status, children: [label(FavoritesId.matchCount), label(FavoritesId.loadStatus)] });
+}
+
+function about(): HTMLElement {
+  return createElement("div", {
+    id: FavoritesId.aboutSlot,
+    children: [
+      help(),
+      version()
+    ]
   });
 }
 
-function buildBrandSlot(): HTMLElement {
-  return createElement("div", {
-    id: FavoritesId.brandSlot,
-    children: [createElement("span", { id: FavoritesId.brandVersion, textContent: `FSG v${VERSION}` })]
-  });
+function help(): HTMLElement {
+  const button = createElement("button", { id: FavoritesId.aboutHelp, className: "menu-icon-btn", children: [icon("help")] });
+
+  addTooltip(button, "Help", "below");
+  return button;
+}
+
+function version(): HTMLElement {
+  return createElement("span", { id: FavoritesId.aboutVersion, textContent: `v${VERSION}` });
 }

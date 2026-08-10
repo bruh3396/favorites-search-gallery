@@ -6,7 +6,7 @@
   --toolbar-buttons: max-content;
   --toolbar-pagination: 440px;
   --toolbar-status: 300px;
-  --toolbar-brand: max-content;
+  --toolbar-about: max-content;
 }
 
 #favorites-toolbar {
@@ -29,38 +29,38 @@
 #favorites-toolbar-grid {
   display: grid;
   grid-template-columns:
-    var(--toolbar-drawer-toggle) var(--toolbar-search) var(--toolbar-buttons) var(--toolbar-pagination) var(--toolbar-status) var(--toolbar-brand);
+    var(--toolbar-drawer-toggle) var(--toolbar-search) var(--toolbar-buttons) var(--toolbar-pagination) var(--toolbar-status) var(--toolbar-about);
   align-items: center;
   gap: 6px;
 }
 
-#favorites-brand-slot {
+#favorites-about-slot {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  padding-right: 20px;
+  padding-right: 6px;
   white-space: nowrap;
 }
 
-#favorites-brand-version {
-  font-size: 12px;
+#favorites-about-version {
   font-style: oblique;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--theme-text-muted);
-  font-variant-numeric: tabular-nums;
+  color: var(--theme-text);
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 6px;
+  font-variant-numeric: tabular-nums;
   transition: color 0.12s ease, background-color 0.12s ease;
 }
 
-#favorites-brand-version:hover {
-  color: var(--theme-text);
+#favorites-about-version:hover {
   background-color: var(--theme-hover);
 }
 
-#favorites-brand-version:active {
+#favorites-about-version:active,
+#favorites-about-help:active {
   transform: translateY(1px);
 }
 

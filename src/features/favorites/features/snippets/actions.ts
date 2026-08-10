@@ -12,6 +12,15 @@ export function exportButton(onExport: () => void): HTMLElement {
   return button;
 }
 
+export function deleteAllButton(onDeleteAll: () => void): HTMLElement {
+  const button = createElement("button", { children: [icon("reset")] });
+
+  button.type = "button";
+  addTooltip(button, "Delete all snippets", "below");
+  button.addEventListener("click", onDeleteAll);
+  return button;
+}
+
 export function importButton(onImport: (contents: string) => void): HTMLElement {
   const button = createElement("button", { children: [icon("download")] });
 

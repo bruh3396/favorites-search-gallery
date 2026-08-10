@@ -31,7 +31,11 @@ export function setup(appendSnippetToSearch: (text: string) => void): void {
 export function mount(): FavoritesDrawerViewContent {
   return {
     mount: SnippetView.mount,
-    actions: [SnippetActions.importButton(importFromFile), SnippetActions.exportButton(exportToFile)]
+    actions: [
+      SnippetActions.importButton(importFromFile),
+      SnippetActions.exportButton(exportToFile),
+      SnippetActions.deleteAllButton(deleteAllSnippets)
+    ]
   };
 }
 
@@ -97,6 +101,23 @@ function deleteSnippet(name: string): void {
   refresh();
 }
 
+function deleteAllSnippets(): void {
+  const count = store.getAll().length;
+
+  if (count === 0) {
+    alert("No snippets to delete");
+    return;
+  }
+
+  if (!confirm(`Delete all ${count} snippets?`)) {
+    return;
+  }
+  store.replaceAll([]);
+  SnippetState.deleteTarget = null;
+  clearEditor();
+  refresh();
+}
+
 function clearFailure(): void {
   if (SnippetState.saveFailure !== null) {
     SnippetState.saveFailure = null;
@@ -116,7 +137,7 @@ function importFromFile(contents: string): void {
     return;
   }
 
-  if (!confirm(`Replace all snippets with ${imported.length} from this file?`)) {
+  if (store.getAll().length > 0 && !confirm(`Replace all snippets with ${imported.length} from this file?`)) {
     return;
   }
   store.replaceAll(imported);
