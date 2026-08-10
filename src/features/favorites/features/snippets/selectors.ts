@@ -1,0 +1,23 @@
+export const SnippetSelectors = {
+  panel: "favorites-snippets-panel",
+  list: "favorites-snippets-list",
+  row: "favorites-snippets-row",
+  definition: "favorites-snippets-definition",
+  name: "favorites-snippets-name",
+  query: "favorites-snippets-query",
+  actions: "favorites-snippets-actions",
+  action: "favorites-snippets-action",
+  confirmPrompt: "favorites-snippets-confirm-prompt",
+  confirmButton: "favorites-snippets-confirm-button",
+  rule: "favorites-snippets-rule",
+  eyebrow: "favorites-snippets-eyebrow",
+  editor: "favorites-snippets-editor",
+  field: "favorites-snippets-field",
+  queryField: "favorites-snippets-query-field",
+  error: "favorites-snippets-error",
+  editorActions: "favorites-snippets-editor-actions",
+  button: "favorites-snippets-button",
+  primaryButton: "favorites-snippets-primary-button",
+  footer: "favorites-snippets-footer",
+  empty: "favorites-snippets-empty"
+} as const;

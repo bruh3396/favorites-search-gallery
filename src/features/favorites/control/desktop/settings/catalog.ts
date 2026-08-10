@@ -210,7 +210,7 @@ export const SettingsCatalog = {
   }),
   performanceProfile: segmented<PerformanceProfile>({
     id: "performance-profile",
-    tooltip: "Choose performance profile - Normal: All features - Medium: No thumbnail upscaling - Low: No gallery, Potato: Search only",
+    tooltip: "Choose performance profile - Normal: All - Medium: No upscaling - Low: No gallery, Potato: Search only",
     label: "Performance Profile",
     preference: Preferences.app.performanceProfile,
     apply: reloadWindow,

@@ -1,7 +1,8 @@
-import { SnippetStore, normalizeName } from "@/features/favorites/features/snippets/store";
-import { beforeEach, describe, expect, test } from "vitest";
+﻿import { beforeEach, describe, expect, test } from "vitest";
 import { Snippet } from "@/features/favorites/features/snippets/types";
+import { SnippetStore } from "@/features/favorites/features/snippets/store";
 import { Store } from "@/lib/storage/local_storage";
+import { normalizeName } from "@/features/favorites/features/snippets/utils";
 
 const STORAGE_KEY = "searchSnippets";
 const LEGACY_STORAGE_KEY = "savedSearches";
@@ -309,6 +310,124 @@ describe("remove", () => {
     store.add("fruits", "apple");
     store.remove("missing");
     expect(store.getAll()).toHaveLength(1);
+  });
+});
+
+describe("replaceAll", () => {
+  test("discards the existing snippets", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple");
+    store.replaceAll([{ name: "veg", query: "carrot" }]);
+    expect(namesOf(store.getAll())).toEqual(["veg"]);
+  });
+
+  test("stores every entry", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "a", query: "1" }, { name: "b", query: "2" }]);
+    expect(namesOf(store.getAll())).toEqual(["a", "b"]);
+  });
+
+  test("keeps the order of the imported entries", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "c", query: "3" }, { name: "a", query: "1" }, { name: "b", query: "2" }]);
+    expect(namesOf(store.getAll())).toEqual(["c", "a", "b"]);
+  });
+
+  test("orders imported entries by creation time", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "first", query: "1" }, { name: "second", query: "2" }]);
+    expect(store.getAll()[0].createdAt).toBeGreaterThan(store.getAll()[1].createdAt);
+  });
+
+  test("returns the number of entries stored", () => {
+    const store = new SnippetStore(storage);
+
+    expect(store.replaceAll([{ name: "a", query: "1" }, { name: "b", query: "2" }])).toBe(2);
+  });
+
+  test("normalizes imported names", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "My Fruits", query: "apple" }]);
+    expect(namesOf(store.getAll())).toEqual(["my_fruits"]);
+  });
+
+  test("skips an entry with an empty name", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "", query: "apple" }, { name: "veg", query: "carrot" }]);
+    expect(namesOf(store.getAll())).toEqual(["veg"]);
+  });
+
+  test("skips an entry with an empty query", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "fruits", query: "" }, { name: "veg", query: "carrot" }]);
+    expect(namesOf(store.getAll())).toEqual(["veg"]);
+  });
+
+  test("keeps only the first of two entries sharing a name", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "fruits", query: "apple" }, { name: "fruits", query: "banana" }]);
+    expect(queriesOf(store.getAll())).toEqual(["apple"]);
+  });
+
+  test("excludes skipped entries from the count", () => {
+    const store = new SnippetStore(storage);
+
+    expect(store.replaceAll([{ name: "", query: "apple" }, { name: "veg", query: "carrot" }])).toBe(1);
+  });
+
+  test("clears the snippets when given nothing", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple");
+    store.replaceAll([]);
+    expect(store.getAll()).toEqual([]);
+  });
+
+  test("persists the replacement", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple");
+    store.replaceAll([{ name: "veg", query: "carrot" }]);
+    expect(namesOf(persisted())).toEqual(["veg"]);
+  });
+
+  test("persists an empty replacement", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple");
+    store.replaceAll([]);
+    expect(persisted()).toEqual([]);
+  });
+
+  test("resets the time of last use", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple");
+    store.use("fruits");
+    store.replaceAll([{ name: "fruits", query: "apple" }]);
+    expect(store.getAll()[0].lastUsedAt).toBe(0);
+  });
+
+  test("collapses whitespace in imported queries", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "fruits", query: "  apple   banana  " }]);
+    expect(queriesOf(store.getAll())).toEqual(["apple banana"]);
+  });
+
+  test("reloads the replacement from storage", () => {
+    const store = new SnippetStore(storage);
+
+    store.replaceAll([{ name: "veg", query: "carrot" }]);
+    expect(namesOf(new SnippetStore(storage).getAll())).toEqual(["veg"]);
   });
 });
 

@@ -6,7 +6,7 @@ import { FavoritesDownloaderDeps } from "@/features/favorites/features/downloade
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { buildProgressBar } from "@/lib/ui/elements/progress_bar";
+import { buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { categoryOptions } from "@/features/favorites/features/downloader/filename_settings";
 import { createElement } from "@/utils/dom/element_factory";
 import { pluralize } from "@/utils/string/format";

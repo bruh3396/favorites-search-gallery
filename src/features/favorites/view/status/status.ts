@@ -4,7 +4,7 @@ import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { ProgressBar } from "@/types/element";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
-import { buildProgressBar } from "@/lib/ui/elements/progress_bar";
+import { buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { pluralize } from "@/utils/string/format";
 
 let matchCountIndicator: HTMLElement;

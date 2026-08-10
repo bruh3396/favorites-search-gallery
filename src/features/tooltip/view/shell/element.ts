@@ -1,4 +1,4 @@
-import { ElementPool } from "@/lib/ui/element_pool";
+import { ElementPool } from "@/utils/dom/element_pool";
 import { Overlays } from "@/app/layout/shell";
 import TOOLTIP_CSS from "@/assets/css/tooltip.css";
 import { div } from "@/utils/dom/element_factory";

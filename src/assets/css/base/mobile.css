@@ -1,0 +1,20 @@
+.gallery-tap-zone {
+  position: fixed;
+  top: 50% !important;
+  height: 80vh;
+  width: 30vw;
+  z-index: 9999;
+  transform: translateY(-50%);
+  pointer-events: all !important;
+  opacity: 0;
+}
+
+#left-mobile-tap-control {
+  left: 0 !important;
+  right: unset !important;
+}
+
+#right-mobile-tap-control {
+  right: 0 !important;
+  left: unset !important;
+}

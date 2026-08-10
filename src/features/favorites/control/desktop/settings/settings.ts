@@ -18,6 +18,14 @@ export function mount(): FavoritesDrawerViewContent {
 
 function build(panel: HTMLElement, hideWhileFiltering: HTMLElement[]): void {
   panel.classList.add(SettingsClass.view);
-  panel.append(buildFilterInput(panel, hideWhileFiltering), ...buildSections(SettingsSections));
-  panel.appendChild(createElement("div", { className: SettingsClass.filterEmpty, textContent: "No matching settings" }));
+  panel.append(buildFilterInput(panel, hideWhileFiltering), body());
+}
+
+function body(): HTMLElement {
+  return createElement("div", { className: SettingsClass.body, children: [...buildSections(SettingsSections), placeholder()] });
+
+}
+
+function placeholder(): HTMLElement {
+  return createElement("div", { className: SettingsClass.filterEmpty, textContent: "No matching settings" });
 }

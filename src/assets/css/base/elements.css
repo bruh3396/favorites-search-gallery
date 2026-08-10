@@ -90,37 +90,6 @@ option {
   color: var(--theme-text);
 }
 
-.action-button {
-  box-sizing: border-box;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  min-width: 70px;
-  border: 1px solid var(--theme-border);
-  border-radius: var(--size-radius);
-  color: var(--theme-text-muted);
-  background: transparent;
-  font-family: inherit;
-  font-size: .85em;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-  text-transform: uppercase;
-}
-
-.action-button:hover:not(:disabled) {
-  color: var(--theme-accent);
-  border-color: var(--theme-accent);
-}
-
-.action-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
 #favorites-search-gallery-content {
   padding: 10px 10px 10px 10px;
   overflow-anchor: none;

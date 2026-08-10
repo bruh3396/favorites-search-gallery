@@ -9,11 +9,4 @@ export type SerializedSnippet = Omit<Snippet, "lastUsedAt" | "createdAt">;
 
 export type SnippetFailure = "empty-name" | "empty-query" | "duplicate-name" | "not-found";
 
-export type SnippetResult =
-  | { ok: true; snippet: Snippet }
-  | { ok: false; reason: SnippetFailure };
-
-export interface SnippetsCallbacks {
-  getSearchQuery: () => string;
-  appendToSearch: (text: string) => void;
-}
+export type SnippetResult = { ok: true; snippet: Snippet } | { ok: false; reason: SnippetFailure };

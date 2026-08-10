@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
-import { importSnippets } from "@/features/favorites/features/snippets/serialization";
+﻿import { describe, expect, test } from "vitest";
+import { importSnippets } from "@/features/favorites/features/snippets/transfer";
 
 describe("importSnippets", () => {
   test("reads exported entries", () => {

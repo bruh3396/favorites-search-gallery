@@ -1,4 +1,4 @@
-import { ElementPool } from "@/lib/ui/element_pool";
+import { ElementPool } from "@/utils/dom/element_pool";
 import { Overlays } from "@/app/layout/shell";
 import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";

@@ -1,7 +1,7 @@
 import { ButtonElement } from "@/types/element";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { buildButton } from "@/lib/ui/elements/button";
+import { buildButton } from "@/lib/ui/widgets/button";
 
 export function setup(): void {
   buttons.forEach(insertButton);
@@ -11,7 +11,7 @@ const buttons: Partial<ButtonElement>[] = [
   {
     id: "search-button",
     parentId: FavoritesId.searchButton,
-    title: "Search",
+    // title: "Search",
     icon: "search",
     rightClickEnabled: true,
     event: Events.favorites.searchButtonClicked
@@ -32,7 +32,7 @@ const buttons: Partial<ButtonElement>[] = [
     id: "clear-button",
     parentId: FavoritesId.actions,
     icon: "clear",
-    title: "Clear",
+    // title: "Clear",
     event: Events.favorites.clearButtonClicked
   },
   {
@@ -55,7 +55,7 @@ const buttons: Partial<ButtonElement>[] = [
     id: FavoritesId.drawerToggleButton,
     parentId: FavoritesId.drawerToggleSlot,
     icon: "hamburger",
-    title: "Menu",
+    // title: "Menu",
     event: Events.favorites.panelButtonClicked
   },
   {

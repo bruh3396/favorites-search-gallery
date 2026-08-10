@@ -12,7 +12,7 @@ export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement)
   if (config.enabled === false) {
     setDataset(row, "disabled");
   }
-  addTooltip(row, config.tooltip ?? "", config.tooltipPosition ?? "below");
+  addTooltip(row, config.tooltip ?? "", config.tooltipPosition ?? "above");
   setDataset(row, "keywords", keywordsOf(config));
   return row;
 }

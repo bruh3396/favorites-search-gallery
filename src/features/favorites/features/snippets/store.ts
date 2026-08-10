@@ -1,7 +1,8 @@
-import { Snippet, SnippetResult } from "@/features/favorites/features/snippets/types";
+import { SerializedSnippet, Snippet, SnippetResult } from "@/features/favorites/features/snippets/types";
 import { Store } from "@/lib/storage/local_storage";
 import { isEmptyString } from "@/utils/string/query";
 import { isRecord } from "@/utils/object";
+import { normalizeName } from "@/features/favorites/features/snippets/utils";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 const STORAGE_KEY = "searchSnippets";
@@ -83,6 +84,17 @@ export class SnippetStore {
     this.save();
   }
 
+  public replaceAll(entries: SerializedSnippet[]): number {
+    const now = Date.now();
+
+    this.snippets.clear();
+
+    const stored = entries.filter((entry, index) => this.add(entry.name, entry.query, 0, now - index).ok).length;
+
+    this.save();
+    return stored;
+  }
+
   private save(): void {
     this.storage.set(STORAGE_KEY, this.getAll());
   }
@@ -119,10 +131,6 @@ export class SnippetStore {
     }
     return migrated;
   }
-}
-
-export function normalizeName(name: string): string {
-  return removeExtraWhiteSpace(name).toLowerCase().replace(/\s/g, "_");
 }
 
 function generateName(taken: Map<string, Snippet>): string {

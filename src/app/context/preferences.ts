@@ -10,14 +10,14 @@ export const Preferences = {
   app: {
     performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
     gradient: new Preference("appGradient", false),
-    theme: new Preference<Theme>("appTheme", "native"),
+    theme: new Preference<Theme>("appTheme", "zeal"),
     darkMode: new Preference<boolean>("appDarkMode", getCookie("theme", "") === "dark"),
     fadeThumbs: new Preference<boolean>("appFadeThumbs", true)
   },
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
     columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 5),
-    downloadBatchSize: new Preference("favoritesDownloadBatchSize", 250),
+    downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 0),
     drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
     drawerOpen: new Preference("favoritesDrawerOpen", false),

@@ -89,10 +89,7 @@ function setupSubFeatures(): void {
 }
 
 function setupSnippets(): void {
-  FavoritesSnippets.setup({
-    getSearchQuery: FavoritesModel.getCurrentSearchQuery,
-    appendToSearch: FavoritesSearchBox.append
-  });
+  FavoritesSnippets.setup(FavoritesSearchBox.append);
 }
 
 function setupDownloader(): void {

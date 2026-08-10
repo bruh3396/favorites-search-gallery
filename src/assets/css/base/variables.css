@@ -10,6 +10,11 @@
   --color-tag-copyright: #f0a0f0;
   --color-tag-metadata: #90d9ed;
   --color-danger: #e5484d;
+  --color-danger-border: #7a3b34;
+  --color-danger-text: #e08a7d;
+  --color-danger-contrast: #f6ded9;
+  --color-danger-surface: #4a2b26;
+  --color-danger-on-surface: #f0b0a4;
   --color-gallery-background: rgba(0, 0, 0, 1);
 
   --font-mono: ui-monospace, Consolas, monospace;

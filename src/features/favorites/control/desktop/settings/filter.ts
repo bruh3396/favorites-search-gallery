@@ -1,25 +1,13 @@
 import { SettingsClass } from "@/lib/ui/settings/classes";
+import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { createElement } from "@/utils/dom/element_factory";
+import { searchField } from "@/lib/ui/widgets/search_field";
 import { toggleDataset } from "@/utils/dom/dataset";
 
 export function buildFilterInput(panel: HTMLElement, hideWhileFiltering: HTMLElement[] = []): HTMLElement {
-  const input = createElement("input", { className: SettingsClass.filterInput });
+  const field = searchField("Search Settings", (value) => filterSettings(panel, value, hideWhileFiltering));
 
-  input.type = "text";
-  input.placeholder = "Search Settings";
-  input.spellcheck = false;
-
-  input.addEventListener("input", () => {
-    filterSettings(panel, input.value, hideWhileFiltering);
-  });
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && input.value !== "") {
-      event.stopPropagation();
-      input.value = "";
-      filterSettings(panel, "", hideWhileFiltering);
-    }
-  });
-  return createElement("div", { className: SettingsClass.filter, children: [input] });
+  return createElement("div", { className: `${SettingsClass.filter} ${WidgetSelectors.separatorBelow}`, children: [field] });
 }
 
 function filterSettings(panel: HTMLElement, query: string, hideWhileFiltering: HTMLElement[]): void {

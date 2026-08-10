@@ -1,32 +1,44 @@
+.favorites-drawer-panel.settings-view {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.settings-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-border) transparent;
+}
+
+.settings-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-body::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background-color: var(--theme-border);
+}
+
+.settings-body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--theme-text-muted);
+}
+
 .setting-filter {
-  position: sticky;
-  z-index: 5;
-  top: 0;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 6px;
   background: var(--theme-surface);
-}
-
-.settings-view input.setting-filter-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 5px 7px;
-  border: 1px solid var(--theme-border);
-  border-radius: 5px;
-  background: var(--theme-sunken) !important;
-  color: var(--theme-text);
-  font: inherit;
-  font-size: 12.5px;
-}
-
-.settings-view input.setting-filter-input:focus {
-  outline: none;
-  border-color: var(--theme-text-muted);
-}
-
-.settings-view input.setting-filter-input::placeholder {
-  color: var(--theme-text-muted);
 }
 
 .setting-filter-empty {
