@@ -23,12 +23,12 @@ jobs:
 
       - run: npm install
 
-      - run: npm run release:ci
+      - run: npm run release-checks:ci
 
       - name: Verify version matches tag
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          built=$(grep -m1 '^// @version' dist/favorites_search_gallery.js | awk '{print $3}')
+          built=$(grep -m1 '^// @version' dist/favorites_search_gallery.js | tr -d '\r' | awk '{print $3}')
           echo "tag=$tag built=$built"
           test "$tag" = "$built"
 

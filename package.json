@@ -22,21 +22,30 @@
     "node_modules"
   ],
   "scripts": {
-    "compile-scripts": "tsc --project scripts/tsconfig.json",
-    "delete-compiled-scripts": "if exist scripts\\bin del /q scripts\\bin\\*.js",
     "build": "node scripts/bin/build || (npm run compile-scripts && node scripts/bin/build)",
+    "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js",
+
     "test": "npx vitest --run --exclude \"src/playground/**\"",
     "test:worker": "npx vitest --run src/playground/worker.test.ts",
     "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
-    "continuous-integration": "npm run build && npm run test && npm run typecheck",
     "lint": "npx eslint src/",
     "audit": "tsx .scripts/project_auditor.ts",
-    "release:local": "npm run compile-scripts && npm run continuous-integration && npm run test:worker && npm run lint",
-    "release:ci": "npm run compile-scripts && npm run continuous-integration && npm run lint",
-    "fix-bom": "python .scripts/correct_bom.py",
+
+    "continuous-integration": "npm run build && npm run test && npm run typecheck",
+    "release-checks:local": "npm run compile-scripts && npm run continuous-integration && npm run test:worker && npm run lint",
+    "release-checks:ci": "npm run compile-scripts && npm run continuous-integration && npm run lint",
+
     "release": "python .scripts/release.py",
-    "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open",
-    "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js"
+    "release:patch": "npm run release -- patch",
+    "release:minor": "npm run release -- minor",
+    "release:major": "npm run release -- major",
+    "release:test": "npm run release -- test",
+    "release:cleanup": "npm run release -- cleanup",
+
+    "compile-scripts": "tsc --project scripts/tsconfig.json",
+    "delete-compiled-scripts": "if exist scripts\\bin del /q scripts\\bin\\*.js",
+    "fix-bom": "python .scripts/correct_bom.py",
+    "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open"
   },
   "dependencies": {
     "@zip.js/zip.js": "^2.8.34",
