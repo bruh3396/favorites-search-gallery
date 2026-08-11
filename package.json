@@ -24,7 +24,7 @@
   "scripts": {
     "compile-scripts": "tsc --project scripts/tsconfig.json",
     "delete-compiled-scripts": "if exist scripts\\bin del /q scripts\\bin\\*.js",
-    "build": "node scripts/bin/userscript_builder || (npm run compile-scripts && node scripts/bin/userscript_builder)",
+    "build": "node scripts/bin/build || (npm run compile-scripts && node scripts/bin/build)",
     "test": "npx vitest --run --exclude \"src/playground/**\"",
     "test-worker": "npx vitest --run src/playground/worker.test.ts",
     "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@zip.js/zip.js": "^2.8.34",
+    "awesomplete": "^1.1.7",
     "strip-ansi": "^7.1.0"
   }
 }

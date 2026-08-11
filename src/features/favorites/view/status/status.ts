@@ -30,14 +30,14 @@ export function setMatchCount(value: number): void {
 }
 
 export function updateStatus(progress: FavoritesFetchProgress): void {
-  let statusText = `Fetching ${progress.allFavoritesCount}`;
+  let statusText = `Fetching - ${progress.allFavoritesCount}`;
 
   if (totalFavoritesCount !== null) {
     statusText = `${statusText} / ${totalFavoritesCount}`;
     const eta = FavoritesEta.getEta(progress.allFavoritesCount, totalFavoritesCount);
 
     if (eta !== null) {
-      statusText = `${statusText}${eta}`;
+      statusText = `${statusText} - ${eta}`;
     }
     progressBar.setProgress(progress.allFavoritesCount, totalFavoritesCount);
     progressBar.setVisible(true);

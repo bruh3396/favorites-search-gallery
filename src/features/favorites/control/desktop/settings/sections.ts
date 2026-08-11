@@ -1,9 +1,10 @@
-﻿import { SettingsCatalog } from "@/features/favorites/control/desktop/settings/catalog";
+import { SettingsCatalog } from "@/features/favorites/control/desktop/settings/catalog";
 import { SettingsSection } from "@/features/favorites/control/desktop/settings/types";
 
 export const SettingsSections: SettingsSection[] = [
   {
     title: "General",
+    expanded: true,
     controls: [
       SettingsCatalog.performanceProfile,
       SettingsCatalog.enhanceSearchPages,
@@ -12,6 +13,7 @@ export const SettingsSections: SettingsSection[] = [
   },
   {
     title: "Appearance",
+    expanded: true,
     controls: [
       SettingsCatalog.theme,
       SettingsCatalog.darkMode,
@@ -54,7 +56,9 @@ export const SettingsSections: SettingsSection[] = [
     title: "Gallery",
     controls: [
       SettingsCatalog.autoplay,
-      SettingsCatalog.galleryMenu
+      SettingsCatalog.galleryMenu,
+      SettingsCatalog.themedBackground,
+      SettingsCatalog.backgroundOpacity
     ]
   }
 ];

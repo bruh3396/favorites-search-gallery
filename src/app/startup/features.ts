@@ -1,4 +1,3 @@
-import { startAutocomplete } from "@/features/autocomplete/autocomplete";
 import { startFavorites } from "@/features/favorites/favorites_startup";
 import { startGallery } from "@/features/gallery/gallery_startup";
 import { startPostListNavigator } from "@/features/post_list_navigator/post_list_navigator_startup";
@@ -9,7 +8,6 @@ export function launchFeatures(): void {
   startFavorites();
   startPostListNavigator();
   startGallery();
-  startAutocomplete();
   startTooltip();
   startPostOverlay();
 }

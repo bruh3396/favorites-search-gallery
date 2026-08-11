@@ -1,4 +1,4 @@
-export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postList" | "tooltip" | "autocomplete";
+export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postList" | "tooltip";
 export type FeatureNamespaced = Partial<Record<Feature, object>>;
 
 export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
@@ -9,7 +9,7 @@ export type GalleryMenuAction = "exit" |
   "fullscreen" | "openPost" | "openOriginal" |
   "download" | "addFavorite" | "removeFavorite" |
   "toggleDockPosition" | "toggleBackground" | "search" |
-  "changeBackgroundColor" | "pin" | "none";
+  "pin" | "none";
 
 export type GalleryState = "idle" | "preview" | "open";
 export type PostOverlayMode = "tag";

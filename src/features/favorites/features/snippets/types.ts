@@ -1,3 +1,10 @@
+import { Favorite } from "@/types/favorite";
+
+export interface SnippetsContext {
+  appendToSearch: (text: string) => void;
+  getSearchResults: () => Favorite[];
+}
+
 export interface Snippet {
   name: string;
   query: string;

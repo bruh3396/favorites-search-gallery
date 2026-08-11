@@ -7,7 +7,7 @@ import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import * as FavoritesSkeleton from "@/features/favorites/view/skeleton/skeleton";
 import * as FavoritesStatus from "@/features/favorites/view/status/status";
 import { Favorite } from "@/types/favorite";
-import { FavoritesViewCallbacks } from "@/features/favorites/types/types";
+import { FavoritesViewContext } from "@/features/favorites/types/types";
 import { buildElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { scrollToTop } from "@/lib/thumb/thumbs";
 
@@ -16,20 +16,20 @@ export function showSearchResults(searchResults: Favorite[]): void {
   scrollToTop();
 }
 
-export function setup(viewCallbacks: FavoritesViewCallbacks): void {
+export function setup(context: FavoritesViewContext): void {
   buildElementTemplate();
   FavoritesShell.setup();
   FavoritesStatus.setup();
   ContentTiler.setup();
   FavoritesPaginationRenderer.setup(
-    viewCallbacks.onPageSelected,
-    viewCallbacks.onPageStepped
+    context.onPageSelected,
+    context.onPageStepped
 );
   FavoritesDrawer.setup({
     change: FavoritesChangelog.buildDrawerView(),
     help: FavoritesHelp.buildDrawerView(),
-    ...viewCallbacks.drawerViews
-  });
+    ...context.drawerViews
+  }, context.onDrawerToggled, context.onDrawerViewSelected);
 }
 
 export const addToTop = (favorites: Favorite[]): void => ContentTiler.addToTop(favorites.map((favorite) => favorite.root));

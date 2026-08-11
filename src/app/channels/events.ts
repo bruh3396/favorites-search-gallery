@@ -8,15 +8,16 @@ import { TagCategoryMap } from "@/types/search";
 export const Events = {
   app: {
     favoriteAdded: new Emitter<string>(),
-    favoriteRemoved: new Emitter<string>()
+    favoriteRemoved: new Emitter<string>(),
+    hotkeyPressed: new Emitter<string>()
   },
   favorites: {
     searchStarted: new Emitter<string>(),
     pageChanged: new Emitter<void>(),
     findFavorite: new Emitter<string>(),
     findFavoriteInAll: new Emitter<string>(),
-    favoritesFoundInDatabase: new StickyEmitter<boolean>(),
-    favoritesDatabaseLoaded: new StickyEmitter<void>(),
+    storedFavoritesFound: new StickyEmitter<boolean>(),
+    storedFavoritesLoaded: new StickyEmitter<void>(),
     favoritesLoaded: new StickyEmitter<void>(),
 
     searchResultsUpdated: new Emitter<Favorite[]>(),

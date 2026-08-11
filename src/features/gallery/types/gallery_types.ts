@@ -12,7 +12,7 @@ export type VideoClip = {
   end: number
 }
 
-export interface GalleryViewCallbacks {
+export interface GalleryViewContext {
   onMenuAction: (action: GalleryMenuAction) => void
   onVideoEnded: () => void
   onVideoDoubleClicked: (event: MouseEvent) => void

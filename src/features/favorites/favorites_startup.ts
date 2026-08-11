@@ -65,6 +65,8 @@ function setupView(): void {
   FavoritesView.setup({
     onPageSelected: FavoritesPaginationFlow.goToPage,
     onPageStepped: FavoritesPaginationFlow.stepPage,
+    onDrawerToggled: FavoritesOptionsFlow.persistDrawerState,
+    onDrawerViewSelected: FavoritesOptionsFlow.persistDrawerView,
     drawerViews: {
       settings: FavoritesSettings.mount(),
       download: FavoritesDownloader.mount(),
@@ -89,7 +91,10 @@ function setupSubFeatures(): void {
 }
 
 function setupSnippets(): void {
-  FavoritesSnippets.setup(FavoritesSearchBox.append);
+  FavoritesSnippets.setup({
+    appendToSearch: FavoritesSearchBox.append,
+    getSearchResults: FavoritesModel.getCurrentSearchResults
+  });
 }
 
 function setupDownloader(): void {
@@ -132,11 +137,13 @@ function subscribeToEvents(): void {
   Preferences.favorites.allowedRatings.on(FavoritesOptionsFlow.reSearchFavorites);
   Preferences.favorites.resultsPerPage.on(FavoritesOptionsFlow.setResultsPerPage);
   Preferences.favorites.hintsEnabled.on(setTooltipsEnabled);
+  Preferences.favorites.downloadBatchSize.on(FavoritesDownloader.refreshCount);
+  Preferences.favorites.downloadFilenameFormat.on(FavoritesDownloader.refreshCount);
 
   Events.favorites.setSearchScopeButtonClicked.on(FavoritesModel.setSearchScopeToCurrentResults);
   Events.favorites.clearSearchScopeButtonClicked.on(FavoritesModel.clearSearchScope);
   Events.favorites.resetButtonClicked.on(FavoritesResetFlow.attemptReset);
-  Events.favorites.panelButtonClicked.on(FavoritesView.toggleDrawer);
+  Events.favorites.panelButtonClicked.on(FavoritesOptionsFlow.toggleDrawer);
 
   Events.app.favoriteRemoved.on(FavoritesModel.deleteId);
   DomEvents.document.keydown.on(FavoritesKeyFlow.onKeyDown);

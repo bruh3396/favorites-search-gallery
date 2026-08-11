@@ -29,6 +29,8 @@ export class SearchHistory {
   }
 
   public add(searchQuery: string): void {
+    this.setLastQuery(searchQuery);
+
     if (isEmptyString(searchQuery)) {
       return;
     }

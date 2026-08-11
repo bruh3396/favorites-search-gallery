@@ -7,18 +7,18 @@ import { fetchPost } from "@/lib/remote/api/post";
 import { tagsNeedCorrection } from "@/lib/search/tags/tag_corrector";
 import { withExponentialBackoff } from "@/lib/async/async";
 
-let onMetadataPopulated: (favorite: Favorite) => void = () => undefined;
+let onPopulated: (favorite: Favorite) => void = () => undefined;
 let beforeUpdateTags: (favorite: Favorite) => void = () => undefined;
 let afterUpdateTags: (favorite: Favorite) => void = () => undefined;
 let onCategoriesResolved: (categoryMap: TagCategoryMap) => void = () => undefined;
 
 export function setup(
-  onPopulated: (favorite: Favorite) => void,
+  onPopulatedFn: (favorite: Favorite) => void,
   beforeUpdateTagsFn: (favorite: Favorite) => void,
   afterUpdateTagsFn: (favorite: Favorite) => void,
   onCategoriesResolvedFn: (categoryMap: TagCategoryMap) => void
 ): void {
-  onMetadataPopulated = onPopulated;
+  onPopulated = onPopulatedFn;
   beforeUpdateTags = beforeUpdateTagsFn;
   afterUpdateTags = afterUpdateTagsFn;
   onCategoriesResolved = onCategoriesResolvedFn;
@@ -45,7 +45,7 @@ function processPost(favorite: FavoriteItem, post: Post): void {
   }
   favorite.populateMetadata(post);
   ExtensionResolver.setExtensionFromPost(post);
-  onMetadataPopulated(favorite);
+  onPopulated(favorite);
 }
 
 const isUnpopulated = (post: Post): boolean => post.width === 0 || post.tags === "";

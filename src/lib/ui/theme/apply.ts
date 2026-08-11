@@ -15,10 +15,6 @@ export function toggleGradient(enabled: boolean): void {
   toggleDataset(root, "gradient", enabled);
 }
 
-export function setColorScheme(color: string): void {
-  root.style.setProperty("--color-gallery-background", color);
-}
-
 function syncNativeThemeCookie(theme: Theme, dark: boolean): void {
   if (theme === "native") {
     setCookie("theme", dark ? "dark" : "light");

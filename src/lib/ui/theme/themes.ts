@@ -5,12 +5,16 @@ import { ThemeColors } from "@/lib/ui/theme/types";
 //           surface      sunken       raised       hover        border       text         muted        accent       accentText    link
 export const THEMES = {
   native: {
-    light: ["#aae5a4", "#f2faf0", "#89cf81", "#b6e0ad", "#7cc472", "#000000", "#000000", "#0075ff", "#ffffff", "#000099"],
+    light: ["#aae5a4", "#f2faf0", "#89cf81", "#8ed486", "#7cc472", "#000000", "#000000", "#0075ff", "#ffffff", "#000099"],
     dark:  ["#303a30", "#293129", "#364036", "#44503f", "#4a564a", "#e8efe8", "#9fb09f", "#0075ff", "#ffffff", "#93b393"]
   },
   cherry: {
     light: ["#fff1f5", "#ffe4ec", "#ffe0ea", "#ffd0de", "#f6b8cc", "#4a2330", "#a06b7d", "#f06292", "#ffffff", "#c2185b"],
     dark:  ["#2a1620", "#1f0f17", "#371d29", "#472634", "#5e3343", "#fce4ec", "#c99aaa", "#f06292", "#1f0f17", "#f48fb1"]
+  },
+  cirrus: {
+    light: ["#eef1f6", "#f8fafc", "#e2e7ef", "#d6dde8", "#bcc6d6", "#232a36", "#6b7688", "#d1603f", "#ffffff", "#b04a2c"],
+    dark:  ["#232a36", "#1a202a", "#2e3745", "#3a4454", "#4a5566", "#eef1f6", "#98a3b5", "#f3845c", "#1a202a", "#f9ae90"]
   },
   dusk: {
     light: ["#e6e1f2", "#f1eef9", "#d6cee9", "#c5badd", "#a99cc8", "#241a33", "#5f5279", "#6d4fc4", "#ffffff", "#553fa3"],

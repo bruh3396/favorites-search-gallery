@@ -9,14 +9,13 @@ import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
 import { insertStyle } from "@/utils/dom/injector";
-import { setColorScheme } from "@/lib/ui/theme/apply";
 import { toggleFullscreen } from "@/utils/browser/window";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 const buttons: GalleryMenuButton[] = [
-  { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, tooltip: "Exit (Escape, Right-Click)", color: "red" },
+  { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, tooltip: "Exit (Escape, Right-Click, G)", color: "red" },
   { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: true, tooltip: "Toggle Fullscreen (F)", color: "#0075FF" },
-  { id: "open-in-new-gallery", icon: Icons.OPEN_IN_NEW, action: "openPost", enabled: true, tooltip: "Open Post (Middle-Click, G)", color: "lightgreen" },
+  { id: "open-in-new-gallery", icon: Icons.OPEN_IN_NEW, action: "openPost", enabled: true, tooltip: "Open Post (Middle-Click, W)", color: "lightgreen" },
   { id: "open-image-gallery", icon: Icons.IMAGE, action: "openOriginal", enabled: true, tooltip: "Open Original (Ctrl + Left-Click, Q)", color: "magenta" },
   { id: "download-gallery", icon: Icons.DOWNLOAD, action: "download", enabled: true, tooltip: "Download (S)", color: "lightskyblue" },
   { id: "add-favorite-gallery", icon: Icons.HEART_PLUS, action: "addFavorite", enabled: true, tooltip: "Add Favorite (E)", color: "hotpink" },
@@ -24,7 +23,6 @@ const buttons: GalleryMenuButton[] = [
   { id: "dock-gallery", icon: Icons.DOCK, action: "toggleDockPosition", enabled: false, tooltip: "Change Position", color: "" },
   { id: "toggle-background-gallery", icon: Icons.BULB, action: "toggleBackground", enabled: true, tooltip: "Toggle Background (B)", color: "gold" },
   { id: "search-gallery", icon: Icons.SEARCH, action: "search", enabled: false, tooltip: "Search", color: "cyan" },
-  { id: "background-color-gallery", icon: Icons.PALETTE, action: "changeBackgroundColor", enabled: true, tooltip: "Background Color", color: "orange" },
   { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: true, tooltip: "Pin Menu", color: "#0075FF" }
 ];
 
@@ -43,7 +41,6 @@ export function setup(onMenuAction: (action: GalleryMenuAction) => void): void {
   GalleryRoot.appendChild(menu);
   loadPreferences();
   createButtons();
-  createColorPicker();
 }
 
 export function onMouseMove(): void {
@@ -125,26 +122,6 @@ function createButton(template: GalleryMenuButton): HTMLElement {
 
   }
   return button;
-}
-
-function createColorPicker(): void {
-  const button = document.getElementById("background-color-gallery");
-
-  if (!(button instanceof HTMLElement)) {
-    return;
-  }
-  const colorPicker = document.createElement("input");
-
-  colorPicker.type = "color";
-  colorPicker.id = "gallery-menu-background-color-picker";
-  button.onclick = (): void => {
-    colorPicker.click();
-  };
-  colorPicker.oninput = (): void => {
-    setColorScheme(colorPicker.value);
-    Preferences.gallery.colorScheme.set(colorPicker.value);
-  };
-  button.insertAdjacentElement("afterbegin", colorPicker);
 }
 
 function reveal(): void {

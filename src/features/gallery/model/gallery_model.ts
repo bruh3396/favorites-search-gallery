@@ -6,7 +6,6 @@ import { Boundary } from "@/types/boundary";
 import { Cursor } from "@/lib/collection/cursor";
 import { ItemWindow } from "@/lib/collection/item_window";
 import { NavigationKey } from "@/types/input";
-import { Preferences } from "@/app/context/preferences";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
 import { isVideoThumb } from "@/lib/media/type_predicates";
 import { navigationDelta } from "@/utils/navigation";
@@ -40,8 +39,4 @@ export const currentThumbIfOpen = (): HTMLElement | null => (GalleryState.isInGa
 export function open(thumb: HTMLElement): void {
   cursor.pointTo(thumb);
   GalleryState.open();
-
-  if (Preferences.gallery.previewEnabled.value) {
-    Preferences.gallery.previewEnabled.set(false);
-  }
 }

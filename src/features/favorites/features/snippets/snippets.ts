@@ -5,22 +5,30 @@ import { exportSnippets, importSnippets } from "@/features/favorites/features/sn
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { SnippetState } from "@/features/favorites/features/snippets/state";
 import { SnippetStore } from "@/features/favorites/features/snippets/store";
+import { SnippetsContext } from "@/features/favorites/features/snippets/types";
 import { Storage } from "@/lib/storage/local_storage";
+import { buildIdQuery } from "@/features/favorites/features/snippets/utils";
+import { copyText } from "@/utils/browser/clipboard";
 import { setHandlers } from "@/features/favorites/features/snippets/handlers";
 
 const store = new SnippetStore(Storage);
 
-let appendToSearch: (text: string) => void = () => { };
+let context: SnippetsContext = {
+  appendToSearch: () => { },
+  getSearchResults: () => []
+};
 
-export function setup(appendSnippetToSearch: (text: string) => void): void {
-  appendToSearch = appendSnippetToSearch;
+export function setup(snippetsContext: SnippetsContext): void {
+  context = snippetsContext;
   setHandlers({
     onUse: useSnippet,
+    onCopy: copySnippet,
     onEdit: editSnippet,
     onDelete: deleteSnippet,
     onDeleteRequested: requestDelete,
     onDeleteCancelled: cancelDelete,
     onSave: saveSnippet,
+    onResultsQueryRequested: fillQueryFromResults,
     onEditCancelled: cancelEdit,
     onEditorInput: clearFailure,
     onFiltered: SnippetView.render
@@ -45,9 +53,18 @@ function useSnippet(name: string): void {
   if (snippet === undefined) {
     return;
   }
-  appendToSearch(snippet.query);
+  context.appendToSearch(snippet.query);
   store.use(name);
   refresh();
+}
+
+function copySnippet(name: string): void {
+  const snippet = store.get(name);
+
+  if (snippet === undefined) {
+    return;
+  }
+  copyText(snippet.query);
 }
 
 function editSnippet(name: string): void {
@@ -74,6 +91,17 @@ function saveSnippet(): void {
   }
   clearEditor();
   refresh();
+}
+
+function fillQueryFromResults(): void {
+  const results = context.getSearchResults();
+
+  if (results.length === 0) {
+    alert("No search results to build a query from");
+    return;
+  }
+  SnippetEditor.setQuery(buildIdQuery(results.map(favorite => favorite.id)));
+  clearFailure();
 }
 
 function cancelEdit(): void {

@@ -8,27 +8,27 @@ import { fetchFavoritesCount } from "@/lib/remote/rule34/favorites/page";
 import { markAsNew } from "@/features/favorites/dom_tweaks/indicator";
 
 export async function loadAllFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
-  if (await databaseIsEmpty()) {
-    await fetchAllFavorites(nativeFavorites);
-  } else {
-    await loadDatabaseFavorites();
+  if (await hasStoredFavorites()) {
+    await loadStoredFavorites();
     await fetchNewFavorites(nativeFavorites);
+  } else {
+    await fetchAllFavorites(nativeFavorites);
   }
   Events.favorites.favoritesLoaded.emit();
   FavoritesView.collectAspectRatios();
 }
 
-async function databaseIsEmpty(): Promise<boolean> {
-  const isEmpty = await FavoritesModel.databaseIsEmpty();
+async function hasStoredFavorites(): Promise<boolean> {
+  const hasFavorites = await FavoritesModel.hasStoredFavorites();
 
-  Events.favorites.favoritesFoundInDatabase.emit(!isEmpty);
-  return isEmpty;
+  Events.favorites.storedFavoritesFound.emit(hasFavorites);
+  return hasFavorites;
 }
 
-async function loadDatabaseFavorites(): Promise<void> {
+async function loadStoredFavorites(): Promise<void> {
   FavoritesView.setStatus("Loading favorites");
-  await FavoritesModel.loadDatabaseFavorites();
-  Events.favorites.favoritesDatabaseLoaded.emit();
+  await FavoritesModel.loadStoredFavorites();
+  Events.favorites.storedFavoritesLoaded.emit();
   FavoritesView.setTemporaryStatus("Favorites loaded");
   FavoritesSearchFlow.reSearchFavorites();
 }

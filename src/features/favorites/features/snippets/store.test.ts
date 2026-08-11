@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { Snippet } from "@/features/favorites/features/snippets/types";
 import { SnippetStore } from "@/features/favorites/features/snippets/store";
 import { Store } from "@/lib/storage/local_storage";

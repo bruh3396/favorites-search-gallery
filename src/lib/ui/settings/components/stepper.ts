@@ -1,6 +1,6 @@
 import { DebouncedStateBinding } from "@/lib/ui/settings/debounced_state_binding";
 import { StepperSetting } from "@/lib/ui/settings/setting";
-import { bindEnableRule } from "../enable_rule";
+import { bindEnableRule } from "@/lib/ui/settings/enable_rule";
 import { buildStepper } from "@/lib/ui/settings/components/stepper_control";
 import { clamp } from "@/utils/number";
 import { controlRow } from "@/lib/ui/settings/components/row";

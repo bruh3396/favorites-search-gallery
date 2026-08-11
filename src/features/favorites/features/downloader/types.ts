@@ -18,7 +18,7 @@ export interface DownloadResult {
   aborted: boolean;
 }
 
-export interface DownloaderCallbacks {
+export interface DownloaderContext {
   getItems: () => MediaItem[];
   getTagCategory: (tagName: string) => TagCategory | undefined;
 }

@@ -117,6 +117,10 @@
   min-width: 0;
 }
 
+#goto-page-popover #goto-page-input input.setting-stepper-value:focus {
+  background-color: transparent !important;
+}
+
 #goto-page-popover #goto-page-button {
   flex: 0 0 auto;
   cursor: pointer;

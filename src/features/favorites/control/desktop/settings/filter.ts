@@ -6,7 +6,6 @@ import { toggleDataset } from "@/utils/dom/dataset";
 
 export function buildFilterInput(panel: HTMLElement, hideWhileFiltering: HTMLElement[] = []): HTMLElement {
   const field = searchField("Search Settings", (value) => filterSettings(panel, value, hideWhileFiltering));
-
   return createElement("div", { className: `${SettingsClass.filter} ${WidgetSelectors.separatorBelow}`, children: [field] });
 }
 

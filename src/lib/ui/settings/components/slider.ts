@@ -1,7 +1,7 @@
 import { DebouncedStateBinding } from "@/lib/ui/settings/debounced_state_binding";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SliderSetting } from "@/lib/ui/settings/setting";
-import { bindEnableRule } from "../enable_rule";
+import { bindEnableRule } from "@/lib/ui/settings/enable_rule";
 import { clamp } from "@/utils/number";
 import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/dom/element_factory";

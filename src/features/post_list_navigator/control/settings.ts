@@ -8,9 +8,6 @@ import { ThumbConfig } from "@/config/thumb_config";
 import { reloadWindow } from "@/utils/browser/window";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
-const onLayout = (predicate: (layout: Layout) => boolean): EnableRule => enableWhen(Preferences.postList.layout, predicate);
-const whenFavoriteIndicator = (): EnableRule => enableWhen(Preferences.postList.favoriteIndicator, (on) => on);
-
 export const Settings = {
   upscale: toggle({
     id: "post-list-upscale",
@@ -128,3 +125,11 @@ export const Settings = {
     ])
   })
 };
+
+function onLayout(predicate: (layout: Layout) => boolean): EnableRule {
+  return enableWhen(Preferences.postList.layout, predicate);
+}
+
+function whenFavoriteIndicator(): EnableRule {
+  return enableWhen(Preferences.postList.favoriteIndicator, (on) => on);
+}

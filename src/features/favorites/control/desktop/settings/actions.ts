@@ -1,7 +1,7 @@
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { SettingsSection } from "./types";
+import { SettingsSection } from "@/features/favorites/control/desktop/settings/types";
 import { SettingsSections } from "@/features/favorites/control/desktop/settings/sections";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { allSectionsCollapsed } from "@/features/favorites/control/desktop/settings/helpers";
@@ -25,24 +25,17 @@ export function resetAllButton(): HTMLElement {
 }
 
 export function collapseExpandButton(): HTMLElement {
-  const button = createElement("button");
+  const button = createElement("button", { className: SettingsClass.collapseExpand, children: [icon("collapseAll"), icon("expandAll")] });
 
   button.type = "button";
-  renderCollapseExpandButton(button);
+  renderCollapseState(button, allSectionsCollapsed(SettingsSections));
+  Preferences.favorites.settingsExpandedSections.on(() => {
+    renderCollapseState(button, allSectionsCollapsed(SettingsSections));
+  });
   button.addEventListener("click", () => {
     toggleAllSections(SettingsSections);
   });
-  Preferences.favorites.settingsCollapsedSections.on(() => {
-    renderCollapseExpandButton(button);
-  });
   return button;
-}
-
-function renderCollapseExpandButton(button: HTMLElement): void {
-  const collapsed = allSectionsCollapsed(SettingsSections);
-
-  button.replaceChildren(icon(collapsed ? "expandAll" : "collapseAll"));
-  addTooltip(button, `${collapsed ? "Expand" : "Collapse"} settings`, "below");
 }
 
 function toggleAllSections(sections: SettingsSection[]): void {
@@ -50,11 +43,16 @@ function toggleAllSections(sections: SettingsSection[]): void {
   const state: Record<string, boolean> = {};
 
   for (const { title } of sections) {
-    state[title] = collapsed;
+    state[title] = !collapsed;
   }
-  Preferences.favorites.settingsCollapsedSections.set(state);
+  Preferences.favorites.settingsExpandedSections.set(state);
 
   for (const element of document.querySelectorAll<HTMLElement>(`.${SettingsClass.view} .${SettingsClass.section}`)) {
     toggleDataset(element, "collapsed", collapsed);
   }
+}
+
+function renderCollapseState(button: HTMLElement, collapsed: boolean): void {
+  toggleDataset(button, "collapsed", collapsed);
+  addTooltip(button, `${collapsed ? "Expand" : "Collapse"} settings`, "below");
 }

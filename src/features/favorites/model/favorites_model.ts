@@ -3,27 +3,27 @@ import * as FavoritesEnricher from "@/features/favorites/model/enrichment/enrich
 import * as FavoritesLoader from "@/features/favorites/model/loading/loader";
 import * as FavoritesPaginator from "@/features/favorites/model/search/paginator";
 import * as FavoritesSearcher from "@/features/favorites/model/search/searcher";
-import { FavoritesModelCallbacks, NewFavorites } from "@/features/favorites/types/types";
+import { FavoritesModelContext, NewFavorites } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 
 let getAdditionalTags: (id: string) => string | undefined = () => undefined;
 let waitForAdditionalTags: () => Promise<void> = () => Promise.resolve();
 
-export function setup(callbacks: FavoritesModelCallbacks): void {
-  getAdditionalTags = callbacks.getAdditionalTags;
-  waitForAdditionalTags = callbacks.waitForAdditionalTags;
+export function setup(context: FavoritesModelContext): void {
+  getAdditionalTags = context.getAdditionalTags;
+  waitForAdditionalTags = context.waitForAdditionalTags;
   FavoritesEnricher.setup(
     FavoritesLoader.updateFavorite,
     (favorite) => FavoritesSearcher.deIndex([favorite]),
     (favorite) => FavoritesSearcher.reIndex([favorite]),
-    callbacks.onTagCategoriesResolved
+    context.onTagCategoriesResolved
   );
 }
 
-export async function loadDatabaseFavorites(): Promise<void> {
+export async function loadStoredFavorites(): Promise<void> {
   await waitForAdditionalTags();
-  const favorites = await FavoritesLoader.readDatabaseFavorites(getAdditionalTags);
+  const favorites = await FavoritesLoader.readStoredFavorites(getAdditionalTags);
 
   FavoritesSearcher.deferIndexing();
   FavoritesCollection.setAll(favorites);

@@ -1,3 +1,4 @@
+import * as ExtensionResolver from "@/lib/media/extension_resolver";
 import * as GalleryAutoplay from "@/features/gallery/features/autoplay/autoplay";
 import * as GalleryClickFlow from "@/features/gallery/flows/click_flow";
 import * as GalleryContentFlow from "@/features/gallery/flows/content_flow";
@@ -19,6 +20,7 @@ import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
+import { Favorite } from "@/types/favorite";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { NavigationKey } from "@/types/input";
@@ -36,7 +38,7 @@ export async function startGallery(): Promise<void> {
 
 async function waitUntilPageIsReady(): Promise<void> {
   if (ON_FAVORITES_PAGE) {
-    await Events.favorites.favoritesFoundInDatabase.wait();
+    await Events.favorites.storedFavoritesFound.wait();
   }
 
   if (ON_POST_LIST_PAGE) {
@@ -72,7 +74,7 @@ async function start(): Promise<void> {
 }
 
 function hasStoredFavorites(): Promise<boolean> {
-  return Events.favorites.favoritesFoundInDatabase.wait();
+  return Events.favorites.storedFavoritesFound.wait();
 }
 
 function setupView(): void {
@@ -134,6 +136,13 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.reIndex);
   Preferences.gallery.previewEnabled.on(GalleryModel.preview);
   Events.favorites.searchResultsUpdated.on(GalleryContentFlow.downscaleThumbsOutsideResults);
+  Events.favorites.searchResultsUpdated.on(warmExtensionCache, { once: true });
+}
+
+async function warmExtensionCache(searchResults: Favorite[]): Promise<void> {
+  if (await hasStoredFavorites()) {
+    ExtensionResolver.cacheExtensions(searchResults.slice(0, 50).map(favorite => favorite.id));
+  }
 }
 
 function subscribeToPostListEvents(): void {

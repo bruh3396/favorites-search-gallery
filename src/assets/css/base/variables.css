@@ -15,7 +15,7 @@
   --color-danger-contrast: #f6ded9;
   --color-danger-surface: #4a2b26;
   --color-danger-on-surface: #f0b0a4;
-  --color-gallery-background: rgba(0, 0, 0, 1);
+  --color-gallery-background: black;
 
   --font-mono: ui-monospace, Consolas, monospace;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;

@@ -1,9 +1,9 @@
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { SettingsSection } from "./types";
+import { SettingsSection } from "@/features/favorites/control/desktop/settings/types";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
-import { isCollapsed } from "@/features/favorites/control/desktop/settings/helpers";
+import { isExpanded } from "@/features/favorites/control/desktop/settings/helpers";
 import { toggleDataset } from "@/utils/dom/dataset";
 
 export function buildSections(sections: SettingsSection[]): HTMLElement[] {
@@ -11,7 +11,7 @@ export function buildSections(sections: SettingsSection[]): HTMLElement[] {
 }
 
 function buildSection(settingsSection: SettingsSection): HTMLElement {
-  const collapsed = isCollapsed(settingsSection.title);
+  const collapsed = !isExpanded(settingsSection);
   const section = createElement("section", { className: SettingsClass.section, dataset: collapsed ? { collapsed: "" } : undefined });
   const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
   const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
@@ -32,7 +32,7 @@ function toggleSection(title: string, element: HTMLElement): void {
   const collapsed = element.dataset.collapsed === undefined;
 
   toggleDataset(element, "collapsed", collapsed);
-  const state = { ...Preferences.favorites.settingsCollapsedSections.value, [title]: collapsed };
+  const state = { ...Preferences.favorites.settingsExpandedSections.value, [title]: !collapsed };
 
-  Preferences.favorites.settingsCollapsedSections.set(state);
+  Preferences.favorites.settingsExpandedSections.set(state);
 }

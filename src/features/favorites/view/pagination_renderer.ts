@@ -44,10 +44,6 @@ export function togglePaginator(value: boolean): void {
   insertStyle(value ? "" : html, "fav-pagination-enable");
 }
 
-export function getPaginationContainer(): HTMLElement {
-  return container;
-}
-
 export function isGotoPagePopoverTarget(target: Node): boolean {
   const popover = container.querySelector("#goto-page-popover");
   const ellipsis = container.querySelector(".favorites-pagination-ellipsis");

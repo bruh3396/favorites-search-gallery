@@ -4,13 +4,18 @@ import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { Preferences } from "@/app/context/preferences";
 
 let activeView: FavoritesDrawerView = Preferences.favorites.drawerActiveView.value;
+let onViewSelected: (view: FavoritesDrawerView) => void = () => { };
+
+export function setup(onSelected: (view: FavoritesDrawerView) => void): void {
+  onViewSelected = onSelected;
+}
 
 export function showActiveView(): void {
   renderView(activeView);
 }
 
 export function selectView(view: FavoritesDrawerView): void {
-  Preferences.favorites.drawerActiveView.set(view);
+  onViewSelected(view);
   renderView(view);
 }
 

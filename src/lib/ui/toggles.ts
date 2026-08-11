@@ -11,3 +11,11 @@ export function toggleHeader(value: boolean): void {
 export function toggleGalleryMenuEnabled(value: boolean): void {
   toggleDataset(document.documentElement, "galleryMenuHidden", !value);
 }
+
+export function toggleNativeFont(value: boolean): void {
+  toggleDataset(document.documentElement, "nativeFont", value);
+}
+
+export function toggleThemedGalleryBackground(value: boolean): void {
+  toggleDataset(document.documentElement, "themedGalleryBackground", value);
+}

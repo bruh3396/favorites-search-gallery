@@ -3,7 +3,7 @@ import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/co
 import { Layout, PerformanceProfile } from "@/types/app";
 import { applyCurrentTheme, onLayout, toggle, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/desktop/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
-import { toggleGalleryMenuEnabled, toggleHeader } from "@/lib/ui/toggles";
+import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { GeneralConfig } from "@/config/general_config";
 import { Preferences } from "@/app/context/preferences";
@@ -26,10 +26,17 @@ export const SettingsCatalog = {
   darkMode: toggle({
     id: "dark-mode",
     label: "Dark Mode",
-    tooltip: "Use the dark variant of the selected color theme",
+    tooltip: "Use dark variant of selected color theme",
     preference: Preferences.app.darkMode,
     hotkey: "D",
     apply: applyCurrentTheme
+  }),
+  nativeFont: toggle({
+    id: "native-font",
+    label: "Native Font",
+    tooltip: "Use native site font",
+    preference: Preferences.app.nativeFont,
+    apply: toggleNativeFont
   }),
   fadeThumbs: toggle({
     id: "fade-thumbs",
@@ -55,7 +62,7 @@ export const SettingsCatalog = {
   columnCount: stepper({
     id: "column-count",
     label: "Columns",
-    tooltip: "Set column count (waterfall/square/grid layouts)",
+    tooltip: "Set column count for waterfall, square, and grid layouts",
     preference: Preferences.favorites.columnCount,
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
@@ -65,7 +72,7 @@ export const SettingsCatalog = {
   rowHeight: stepper({
     id: "row-size",
     label: "Row Height",
-    tooltip: "Set row height (river layout)",
+    tooltip: "Set row height for river layout",
     preference: Preferences.favorites.rowHeight,
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
@@ -91,7 +98,7 @@ export const SettingsCatalog = {
   autoplay: toggle({
     id: "enable-autoplay",
     label: "Autoplay",
-    tooltip: "Autoplay videos in the gallery",
+    tooltip: "Automatically traverse gallery",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.autoplayActive
   }),
@@ -101,6 +108,14 @@ export const SettingsCatalog = {
     tooltip: "Enlarge content on hover",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.previewEnabled
+  }),
+  themedBackground: toggle({
+    id: "themed-background",
+    label: "Themed Background",
+    tooltip: "Use the current theme's background color for the gallery instead of black",
+    enabled: GALLERY_ENABLED,
+    preference: Preferences.gallery.themedBackground,
+    apply: toggleThemedGalleryBackground
   }),
   backgroundOpacity: slider({
     id: "background-opacity",
@@ -123,7 +138,7 @@ export const SettingsCatalog = {
   enhanceSearchPages: toggle({
     id: "enhance-post-lists",
     label: "Enhance Search Pages",
-    tooltip: "Enable gallery and other features on search pages",
+    tooltip: "Enable gallery and browser on search pages",
     preference: Preferences.postList.enabled
   }),
   infiniteScroll: toggle({
@@ -210,8 +225,8 @@ export const SettingsCatalog = {
   }),
   performanceProfile: segmented<PerformanceProfile>({
     id: "performance-profile",
-    tooltip: "Choose performance profile - Normal: All - Medium: No upscaling - Low: No gallery, Potato: Search only",
-    label: "Performance Profile",
+    tooltip: "Choose performance profile - Normal: all - Medium: no upscaling - Low: no gallery, Potato: search only",
+    label: "Performance",
     preference: Preferences.app.performanceProfile,
     apply: reloadWindow,
     tooltipPosition: "below",

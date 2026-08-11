@@ -14,12 +14,12 @@ const PANEL_CLASSES = {
 
 const releases: Release[] = [
   {
-    version: "v1.22",
+    version: "v1.22.0",
     changes: [
       "Redesigned favorites ui",
       "Added search page favorite indicator",
       "Added new themes",
-      "Added artist, character, and copyright tags to downloaded filenames",
+      "Added download naming",
       "Improved post overlay",
       "Improved performance"
     ]

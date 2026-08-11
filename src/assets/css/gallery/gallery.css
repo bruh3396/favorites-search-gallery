@@ -32,6 +32,10 @@ video::-webkit-media-controls-enclosure {
   -o-user-drag: none;
 }
 
+:root[data-themed-gallery-background] {
+  --color-gallery-background: var(--theme-surface);
+}
+
 #gallery-background {
   background: var(--color-gallery-background);
   z-index: -1;
@@ -210,14 +214,6 @@ video::-webkit-media-controls-enclosure {
 .gallery-menu-btn:not(:hover)>svg {
   fill: var(--color-gallery-background);
   filter: invert(100%);
-}
-
-#gallery-menu-background-color-picker {
-  position: absolute;
-  visibility: hidden;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 #gallery-mobile-menu {

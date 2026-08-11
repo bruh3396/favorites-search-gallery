@@ -2,6 +2,7 @@ export const SettingsClass = {
   view: "settings-view",
   body: "settings-body",
   filter: "setting-filter",
+  collapseExpand: "setting-collapse-expand",
   filterEmpty: "setting-filter-empty",
   section: "setting-section",
   sectionHeader: "setting-section-header",

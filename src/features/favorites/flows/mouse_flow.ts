@@ -32,14 +32,6 @@ export function onMouseDown(event: EnhancedMouseEvent): void {
   event.originalEvent.preventDefault();
 }
 
-function closePopoversOutside(event: EnhancedMouseEvent): void {
-  const target = event.originalEvent.target;
-
-  if (target instanceof Node && !FavoritesView.isGotoPagePopoverTarget(target)) {
-    FavoritesView.closeGotoPagePopover();
-  }
-}
-
 export function onMouseOver(event: EnhancedMouseEvent): void {
   if (event.thumb === previousThumb || event.thumb === null) {
     return;
@@ -50,4 +42,12 @@ export function onMouseOver(event: EnhancedMouseEvent): void {
   }
   event.thumb.querySelector("a")?.removeAttribute("href");
   previousThumb = event.thumb;
+}
+
+function closePopoversOutside(event: EnhancedMouseEvent): void {
+  const target = event.originalEvent.target;
+
+  if (target instanceof Node && !FavoritesView.isGotoPagePopoverTarget(target)) {
+    FavoritesView.closeGotoPagePopover();
+  }
 }

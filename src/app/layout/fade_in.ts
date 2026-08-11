@@ -5,7 +5,7 @@ import { ThumbConfig } from "@/config/thumb_config";
 import { getImageFromThumb } from "@/lib/thumb/thumbs";
 
 const observer = new IntersectionObserver(fadeInOnScreen, { root: null, threshold: 0 });
-const pending = new Map<HTMLElement, () => void>();
+const pending: Map<HTMLElement, () => void> = new Map();
 
 export function setupFadeIn(): void {
   document.documentElement.style.setProperty("--fade-cascade-step", `${ThumbConfig.fadeCascadeStepMs}ms`);

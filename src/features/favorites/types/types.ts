@@ -1,16 +1,17 @@
-import { Favorite } from "@/types/favorite";
-import { FavoritesDrawerViewMap } from "@/types/favorite";
+import { Favorite, FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
 import { PaginationSequence } from "@/types/ui";
 import { TagCategoryMap } from "@/types/search";
 
-export interface FavoritesViewCallbacks {
+export interface FavoritesViewContext {
   onPageSelected: (pageNumber: number) => void
   onPageStepped: (direction: NavigationKey) => void
+  onDrawerToggled: (open: boolean) => void
+  onDrawerViewSelected: (view: FavoritesDrawerView) => void
   drawerViews: FavoritesDrawerViewMap
 }
 
-export interface FavoritesModelCallbacks {
+export interface FavoritesModelContext {
   getAdditionalTags: (id: string) => string | undefined
   waitForAdditionalTags: () => Promise<void>
   onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void

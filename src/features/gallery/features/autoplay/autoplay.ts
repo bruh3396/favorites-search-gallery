@@ -67,6 +67,63 @@ export function setup(inEvents: AutoplayEvents): void {
   inEvents.setVideoLooping(!active || paused);
 }
 
+export function toggle(value: boolean): void {
+  active = value;
+
+  events.setVideoLooping(!value);
+}
+
+export function startViewTimer(thumb: HTMLElement | null): void {
+  if (thumb === null) {
+    return;
+  }
+  currentThumb = thumb;
+
+  if (!active || paused) {
+    return;
+  }
+
+  if (isVideoThumb(thumb)) {
+    startVideoViewTimer();
+  } else {
+    startImageViewTimer();
+  }
+}
+
+export function startAutoplay(): void {
+  if (!active) {
+    return;
+  }
+  addAutoplayEventListeners();
+  ui.container.style.visibility = "visible";
+  showMenu();
+}
+
+export function stopAutoplay(): void {
+  ui.container.style.visibility = "hidden";
+  removeAutoplayEventListeners();
+  stopImageViewTimer();
+  stopVideoViewTimer();
+  forceHideMenu();
+}
+
+export function onVideoEnded(): void {
+  if (!active || paused) {
+    return;
+  }
+
+  if (videoViewTimer.isRunning) {
+    events.onVideoEndedBeforeMinimumViewTime();
+  } else {
+    events.onComplete();
+  }
+}
+
+export function showMenu(): void {
+  toggleMenuVisibility(true);
+  menuVisibilityTimer.restart();
+}
+
 function initializeFields(): void {
   eventListenersAbortController = new AbortController();
   currentThumb = null;
@@ -298,12 +355,6 @@ function toggleSettingMenu(value?: boolean | undefined): void {
   }
 }
 
-export function toggle(value: boolean): void {
-  active = value;
-
-  events.setVideoLooping(!value);
-}
-
 function setImageViewDuration(): void {
   let durationInSeconds = parseFloat(ui.settingsMenu.imageDurationInput.value);
 
@@ -334,23 +385,6 @@ function setMinimumVideoViewDuration(): void {
   insertVideoProgressHtml();
 }
 
-export function startViewTimer(thumb: HTMLElement | null): void {
-  if (thumb === null) {
-    return;
-  }
-  currentThumb = thumb;
-
-  if (!active || paused) {
-    return;
-  }
-
-  if (isVideoThumb(thumb)) {
-    startVideoViewTimer();
-  } else {
-    startImageViewTimer();
-  }
-}
-
 function startImageViewTimer(): void {
   stopVideoProgressBar();
   stopVideoViewTimer();
@@ -375,23 +409,6 @@ function stopVideoViewTimer(): void {
   stopVideoProgressBar();
 }
 
-export function startAutoplay(): void {
-  if (!active) {
-    return;
-  }
-  addAutoplayEventListeners();
-  ui.container.style.visibility = "visible";
-  showMenu();
-}
-
-export function stopAutoplay(): void {
-  ui.container.style.visibility = "hidden";
-  removeAutoplayEventListeners();
-  stopImageViewTimer();
-  stopVideoViewTimer();
-  forceHideMenu();
-}
-
 function pause(): void {
   paused = !paused;
   Preferences.gallery.autoplayPaused.set(paused);
@@ -407,18 +424,6 @@ function pause(): void {
     startViewTimer(currentThumb);
   }
   events.setVideoLooping(paused);
-}
-
-export function onVideoEnded(): void {
-  if (!active || paused) {
-    return;
-  }
-
-  if (videoViewTimer.isRunning) {
-    events.onVideoEndedBeforeMinimumViewTime();
-  } else {
-    events.onComplete();
-  }
 }
 
 function addAutoplayEventListeners(): void {
@@ -460,11 +465,6 @@ function removeAutoplayEventListeners(): void {
   imageViewTimer.onTimerEnd = (): void => { };
   eventListenersAbortController.abort();
   eventListenersAbortController = new AbortController();
-}
-
-export function showMenu(): void {
-  toggleMenuVisibility(true);
-  menuVisibilityTimer.restart();
 }
 
 function hideMenu(): void {

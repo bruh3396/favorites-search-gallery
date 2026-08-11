@@ -1,8 +1,8 @@
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
+import { Preferences } from "@/app/context/preferences";
+import { Settings } from "@/features/post_list_navigator/control/settings";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
-import { Settings } from "@/features/post_list_navigator/control/settings";
-import { Preferences } from "@/app/context/preferences";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 

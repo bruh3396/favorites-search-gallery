@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { getTagBoundary, replaceTag } from "@/features/autocomplete/autocomplete_tag_replacer";
+import { getTagBoundary, replaceTagInText } from "@/lib/ui/autocomplete/tag_replacer";
+
+function replaceTag(text: string, selectionStart: number, replacement: string): string {
+  return replaceTagInText(text, selectionStart, replacement).result;
+}
 
 describe("getWordBoundaries", () => {
   test("empty", () => {

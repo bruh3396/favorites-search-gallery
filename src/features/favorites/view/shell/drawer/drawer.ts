@@ -1,14 +1,23 @@
 import * as FavoritesDrawerBuilder from "@/features/favorites/view/shell/drawer/builder";
 import * as FavoritesDrawerViewSelector from "@/features/favorites/view/shell/drawer/view_selector";
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
+import { FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { Preferences } from "@/app/context/preferences";
 import { queueMacroTask } from "@/lib/async/async";
 
-export function setup(renderers: FavoritesDrawerViewMap): void {
+let onToggled: (open: boolean) => void = () => { };
+
+export function setup(
+  renderers: FavoritesDrawerViewMap,
+  onDrawerToggled: (open: boolean) => void,
+  onDrawerViewSelected: (view: FavoritesDrawerView) => void
+): void {
+  onToggled = onDrawerToggled;
+  FavoritesDrawerViewSelector.setup(onDrawerViewSelected);
+
   if (!FavoritesConfig.drawerSidebarLabelsEnabled) {
     setDataset(FavoritesShell.FavoritesRoot, "drawerIconOnly", "");
   }
@@ -19,7 +28,7 @@ export function setup(renderers: FavoritesDrawerViewMap): void {
   openInstantlyOnStart();
 }
 
-export function toggleDrawer(): void {
+export function toggleDrawer(): boolean {
   const button = document.getElementById(FavoritesId.drawerToggleButton);
 
   if (isOpen()) {
@@ -29,7 +38,7 @@ export function toggleDrawer(): void {
     setDataset(FavoritesShell.FavoritesRoot, "drawerOpen", "");
     setDataset(button, "active", "");
   }
-  Preferences.favorites.drawerOpen.set(isOpen());
+  return isOpen();
 }
 
 function isOpen(): boolean {
@@ -44,7 +53,7 @@ function setupViewShortcut(elementId: string, view: FavoritesDrawerView): void {
   }
   element.onclick = (): void => {
     if (!isOpen()) {
-      toggleDrawer();
+      onToggled(toggleDrawer());
     }
     FavoritesDrawerViewSelector.selectView(view);
   };

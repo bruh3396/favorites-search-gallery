@@ -1,3 +1,4 @@
+import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryFavoriterFlow from "@/features/gallery/flows/favoriter_flow";
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
@@ -6,7 +7,6 @@ import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { isExitKey, isNavigationKey } from "@/types/guards";
 import { EnhancedKeyboardEvent } from "@/types/input";
 import { GalleryConfig } from "@/config/gallery_config";
-import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import { throttle } from "@/lib/async/throttle";
 import { toggleFullscreen } from "@/utils/browser/window";
 

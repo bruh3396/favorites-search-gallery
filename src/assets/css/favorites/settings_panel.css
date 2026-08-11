@@ -165,6 +165,11 @@
   padding: 0;
 }
 
+.setting-collapse-expand[data-collapsed] > .icon:first-child,
+.setting-collapse-expand:not([data-collapsed]) > .icon:last-child {
+  display: none;
+}
+
 .setting-row {
   display: flex;
   align-items: center;

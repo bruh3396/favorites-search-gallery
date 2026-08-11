@@ -2,7 +2,7 @@ import * as FavoritesDownload from "@/features/favorites/features/downloader/dow
 import { DownloadProgress, DownloadResult } from "@/features/favorites/features/downloader/types";
 import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
 import { DownloaderConfig } from "@/config/downloader_config";
-import { FavoritesDownloaderDeps } from "@/features/favorites/features/downloader/deps";
+import { FavoritesDownloaderContext } from "@/features/favorites/features/downloader/deps";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
@@ -61,7 +61,7 @@ function isDownloading(): boolean {
 
 function render(): void {
   const downloading = isDownloading();
-  const itemCount = ready ? FavoritesDownloaderDeps.getItems().length : 0;
+  const itemCount = ready ? FavoritesDownloaderContext.getItems().length : 0;
 
   toggleDataset(batchSizeRow, "hidden", !ready || downloading);
   toggleDataset(filenameFormatRow, "hidden", !ready || downloading);
@@ -118,7 +118,7 @@ async function startDownload(): Promise<void> {
   if (!ready || isDownloading()) {
     return;
   }
-  const items = FavoritesDownloaderDeps.getItems();
+  const items = FavoritesDownloaderContext.getItems();
 
   if (items.length === 0) {
     status.textContent = "No search results to download";

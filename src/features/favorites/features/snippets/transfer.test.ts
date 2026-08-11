@@ -1,4 +1,4 @@
-﻿import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { importSnippets } from "@/features/favorites/features/snippets/transfer";
 
 describe("importSnippets", () => {

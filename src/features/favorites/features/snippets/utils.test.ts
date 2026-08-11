@@ -1,9 +1,23 @@
+import { buildIdQuery, failureText, filterSnippets, normalizeName, sortByRecentlyUsed } from "@/features/favorites/features/snippets/utils";
 import { describe, expect, test } from "vitest";
-import { failureText, filterSnippets, normalizeName, sortByRecentlyUsed } from "@/features/favorites/features/snippets/utils";
 import { Snippet } from "@/features/favorites/features/snippets/types";
 
 const snippet = (name: string, query: string, lastUsedAt: number = 0, createdAt: number = 0): Snippet => ({ name, query, lastUsedAt, createdAt });
 const namesOf = (snippets: Snippet[]): string[] => snippets.map(entry => entry.name);
+
+describe("buildIdQuery", () => {
+  test("joins ids with tildes inside parentheses", () => {
+    expect(buildIdQuery(["1", "2", "3"])).toBe("( 1 ~ 2 ~ 3 )");
+  });
+
+  test("wraps a single id", () => {
+    expect(buildIdQuery(["42"])).toBe("( 42 )");
+  });
+
+  test("returns empty string when there are no ids", () => {
+    expect(buildIdQuery([])).toBe("");
+  });
+});
 
 describe("normalizeName", () => {
   test("lowercases", () => {

@@ -2,20 +2,12 @@ import { removeDataset, setDataset, toggleDataset } from "@/utils/dom/dataset";
 import { SelectSetting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { StateBinding } from "@/lib/ui/settings/state_binding";
-import { bindEnableRule } from "../enable_rule";
+import { bindEnableRule } from "@/lib/ui/settings/enable_rule";
 import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 
 const closers = new Set<() => void>();
-
-function closeAllExcept(keep: () => void): void {
-  for (const closer of closers) {
-    if (closer !== keep) {
-      closer();
-    }
-  }
-}
 
 export function buildDropdownRow<T extends string>(config: Partial<SelectSetting<T>>): HTMLElement {
   const options = config.options ?? new Map<T, string>();
@@ -87,4 +79,12 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
 
   bindEnableRule(row, config.enabledWhen);
   return row;
+}
+
+function closeAllExcept(keep: () => void): void {
+  for (const closer of closers) {
+    if (closer !== keep) {
+      closer();
+    }
+  }
 }

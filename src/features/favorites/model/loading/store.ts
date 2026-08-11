@@ -1,18 +1,18 @@
 import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "@/lib/environment";
-import { Favorite, FavoriteDatabaseRecord } from "@/types/favorite";
+import { Favorite, SerializedFavorite } from "@/types/favorite";
 import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
 import { Database } from "@/lib/storage/database";
 
-const database = new Database<FavoriteDatabaseRecord>("Favorites", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
-const databaseUpdater = new CoalescingExecutor<Favorite>(100, 1_000, (favorites) => database.update(favorites.map(favorite => favorite.databaseRecord)));
+const database = new Database<SerializedFavorite>("Favorites", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
+const databaseUpdater = new CoalescingExecutor<Favorite>(100, 1_000, (favorites) => database.update(favorites.map(favorite => favorite.serialized)));
 let isDatabaseEmpty = true;
 
 export async function write(favorites: Favorite[]): Promise<void> {
-  await database.write([...favorites].reverse().map(favorite => favorite.databaseRecord));
+  await database.write([...favorites].reverse().map(favorite => favorite.serialized));
   isDatabaseEmpty = false;
 }
 
-export async function readAll(): Promise<FavoriteDatabaseRecord[]> {
+export async function readAll(): Promise<SerializedFavorite[]> {
   const records = await database.readAll();
 
   isDatabaseEmpty = records.length === 0;
@@ -25,7 +25,7 @@ export function update(favorite: Favorite): void {
   }
 }
 
-export const isEmpty = async(): Promise<boolean> => !(await database.exists()) || (await database.count()) === 0;
+export const hasAny = async(): Promise<boolean> => (await database.exists()) && (await database.count()) > 0;
 export const readIds = async(): Promise<string[]> => ((await database.exists()) ? database.readAllIds() : []);
 export const deleteId = (id: string): Promise<void> => database.delete([id]);
 export const destroy = (): Promise<void> => database.destroy();

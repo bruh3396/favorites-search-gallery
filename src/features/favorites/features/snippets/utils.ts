@@ -14,6 +14,10 @@ export function filterSnippets(snippets: Snippet[], text: string): Snippet[] {
   return text === "" ? snippets : snippets.filter(snippet => matches(snippet, text));
 }
 
+export function buildIdQuery(ids: string[]): string {
+  return ids.length === 0 ? "" : `( ${ids.join(" ~ ")} )`;
+}
+
 export function failureText(reason: SnippetFailure, name: string): string {
   switch (reason) {
     case "empty-name":

@@ -7,7 +7,7 @@ export function extractNativeFavorites(): HTMLElement[] | undefined {
   const thumbs = Array.from(content.querySelectorAll<HTMLElement>(".thumb"));
 
   content.remove();
-  return thumbs;
+  return thumbs.length === 0 ? undefined : thumbs;
 }
 
 export function removeUnusedScripts(): void {

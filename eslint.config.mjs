@@ -568,14 +568,5 @@ export default defineConfig([
     rules: {
       "no-bitwise": "off"
     }
-  },
-  {
-    files: ["src/features/autocomplete/autocomplete.ts"],
-    rules: {
-      "no-underscore-dangle": "off",
-      "new-cap": "off",
-      "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": "off"
-    }
   }
 ]);

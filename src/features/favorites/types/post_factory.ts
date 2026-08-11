@@ -1,12 +1,12 @@
 import { getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
-import { FavoriteDatabaseRecord } from "@/types/favorite";
 import { Post } from "@/types/api";
+import { SerializedFavorite } from "@/types/favorite";
 import { chain } from "@/utils/function";
 import { decompressPreviewSource } from "@/lib/media/url_compressor";
 import { getTagsFromThumb } from "@/lib/thumb/tag";
 import { removeExtraWhiteSpace } from "@/utils/string/format";
 
-export function createPost(source: HTMLElement | FavoriteDatabaseRecord): Post {
+export function createPost(source: HTMLElement | SerializedFavorite): Post {
   return source instanceof HTMLElement ? createPostFromThumb(source) : createPostFromRecord(source);
 }
 
@@ -26,7 +26,7 @@ function createPostFromThumb(thumb: HTMLElement): Post {
   return post;
 }
 
-function createPostFromRecord(record: FavoriteDatabaseRecord): Post {
+function createPostFromRecord(record: SerializedFavorite): Post {
   const post = createEmptyPost(record.id);
 
   post.height = record.metadata.height;

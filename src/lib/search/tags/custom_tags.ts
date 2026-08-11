@@ -1,4 +1,4 @@
-import { AwesompleteSuggestion } from "@/types/awesomplete";
+import { AwesompleteSuggestion } from "awesomplete";
 import { Storage } from "@/lib/storage/local_storage";
 import { fetchTagCategory } from "@/lib/remote/api/tag";
 import { removeExtraWhiteSpace } from "@/utils/string/format";

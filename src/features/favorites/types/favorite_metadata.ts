@@ -1,5 +1,5 @@
 import { DiscreteRating, Rating } from "@/types/search";
-import { FavoriteDatabaseRecord, FavoriteMetadataDatabaseRecord, FavoriteMetricMap } from "@/types/favorite";
+import { FavoriteMetricMap, SerializedFavorite, SerializedFavoriteMetadata } from "@/types/favorite";
 import { Post } from "@/types/api";
 import { decodeRating } from "@/lib/search/rating";
 
@@ -8,7 +8,7 @@ export class FavoriteMetadata {
   public readonly id: string;
   public rating: Rating;
 
-  constructor(id: string, record: FavoriteDatabaseRecord | HTMLElement) {
+  constructor(id: string, record: SerializedFavorite | HTMLElement) {
     this.metrics = {
       id: parseInt(id, 10),
       width: 0,
@@ -24,11 +24,11 @@ export class FavoriteMetadata {
     this.rating = DiscreteRating.Explicit;
 
     if (!(record instanceof HTMLElement)) {
-      this.populateFromDatabase(record);
+      this.populateFromSerialized(record);
     }
   }
 
-  public get databaseRecord(): FavoriteMetadataDatabaseRecord {
+  public get serialized(): SerializedFavoriteMetadata {
     return {
       width: this.metrics.width,
       height: this.metrics.height,
@@ -53,7 +53,7 @@ export class FavoriteMetadata {
     this.rating = decodeRating(post.rating);
   }
 
-  private populateFromDatabase(record: FavoriteDatabaseRecord): void {
+  private populateFromSerialized(record: SerializedFavorite): void {
     this.metrics.width = record.metadata.width;
     this.metrics.height = record.metadata.height;
     this.metrics.score = record.metadata.score;

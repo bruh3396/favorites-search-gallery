@@ -1,4 +1,4 @@
-import { awesompleteIsUnselected, awesompleteIsVisible } from "@/lib/ui/autocomplete/awesomplete";
+import { awesompleteIsUnselected, awesompleteIsVisible, markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { AbstractFavoritesSearchBox } from "@/features/favorites/control/abstract_search_box";
 import { EnhancedMouseEvent } from "@/types/input";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
@@ -24,6 +24,7 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     searchBox.placeholder = "Search Favorites";
     searchBox.spellcheck = false;
     searchBox.value = this.history.lastEditedQuery;
+    markAsNeedingAutocomplete(searchBox);
 
     const searchButtonSlot = document.getElementById(FavoritesId.searchButton);
 
@@ -64,5 +65,6 @@ export class FavoritesDesktopSearchBox extends AbstractFavoritesSearchBox {
     event.preventDefault();
     this.history.navigate(event.key as "ArrowUp" | "ArrowDown");
     this.searchBox.value = this.history.selectedQuery;
+    this.refreshClearButton();
   }
 }

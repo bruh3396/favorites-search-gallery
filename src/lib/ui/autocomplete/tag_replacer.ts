@@ -18,16 +18,6 @@ export function getTagBoundary(text: string, selectionStart: number): { start: n
   return {start: getLeftTagBoundary(selectionStart, text), end: getRightTagBoundary(selectionStart, text)};
 }
 
-export function replaceTag(text: string, selectionStart: number, replacement: string): string {
-  if (selectionStart < 0 || selectionStart > text.length) {
-    return text;
-  }
-  const { start, end } = getTagBoundary(text, selectionStart);
-  const firstHalf = text.slice(0, start);
-  const secondHalf = text.slice(end, text.length);
-  return `${firstHalf}${replacement}${secondHalf}`;
-}
-
 function isNegatedLeftTagBoundary(text: string, index: number): boolean {
   return text[index] === "-" && (text[index - 1] === " " || text[index - 1] === undefined);
 }

@@ -1,10 +1,10 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
+import { toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
 import { Content } from "@/app/layout/shell";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
-import { GeneralConfig } from "@/config/general_config";
 import HIGHLIGHT_CSS from "@/assets/css/base/highlight.css";
 import MOBILE_CSS from "@/assets/css/base/mobile.css";
 import POST_CSS from "@/assets/css/base/post.css";
@@ -27,16 +27,17 @@ export function setupStyles(): void {
   applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
   toggleGradient(Preferences.app.gradient.value);
   setTooltipsEnabled(Preferences.favorites.hintsEnabled.value);
+  toggleNativeFont(Preferences.app.nativeFont.value);
+  toggleThemedGalleryBackground(Preferences.gallery.themedBackground.value);
   applyTileVariables();
 }
 
 function insertBaseStyles(): void {
   const fadeInCss = Preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
-  const fontCss = GeneralConfig.overrideSiteFont ? FONT_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
-    fontCss +
+    FONT_CSS +
     WIDGETS_CSS +
     UTILITIES_CSS +
     MOBILE_CSS +

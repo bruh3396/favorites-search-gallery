@@ -3,18 +3,18 @@ import * as GalleryRenderer from "@/features/gallery/view/rendering/gallery_rend
 import * as GalleryShell from "@/features/gallery/view/shell/shell";
 import * as GalleryUi from "@/features/gallery/view/shell/ui";
 import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
-import { GalleryViewCallbacks } from "@/features/gallery/types/gallery_types";
+import { GalleryViewContext } from "@/features/gallery/types/gallery_types";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { insertStyle } from "@/utils/dom/injector";
 
-export function setup(callbacks: GalleryViewCallbacks): void {
+export function setup(context: GalleryViewContext): void {
   insertStyle(GALLERY_CSS);
   GalleryShell.mountGallery();
   GalleryUi.setup(GalleryShell.GalleryRoot);
-  GalleryRenderer.setup(GalleryShell.GalleryRoot, callbacks.onVideoEnded, callbacks.onVideoDoubleClicked);
+  GalleryRenderer.setup(GalleryShell.GalleryRoot, context.onVideoEnded, context.onVideoDoubleClicked);
 
   if (ON_DESKTOP_DEVICE) {
-    GalleryDesktopMenu.setup(callbacks.onMenuAction);
+    GalleryDesktopMenu.setup(context.onMenuAction);
   }
 }
 

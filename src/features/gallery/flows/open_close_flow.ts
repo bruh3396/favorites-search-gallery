@@ -4,8 +4,10 @@ import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
+import { Preferences } from "@/app/context/preferences";
 
 export function open(thumb: HTMLElement): void {
+  disablePreview();
   GalleryModel.open(thumb);
   GalleryView.open(thumb);
   GalleryDisplayFlow.display(thumb);
@@ -23,4 +25,10 @@ export function close(): void {
 
 export function reOpen(): void {
   open(GalleryModel.currentThumb());
+}
+
+function disablePreview(): void {
+  if (Preferences.gallery.previewEnabled.value) {
+    Preferences.gallery.previewEnabled.set(false);
+  }
 }

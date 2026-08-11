@@ -5,7 +5,7 @@ export type FavoriteMetricMap = {
   [key in MetadataMetric]: number
 }
 
-export type FavoriteMetadataDatabaseRecord = {
+export type SerializedFavoriteMetadata = {
   width: number
   height: number
   score: number
@@ -15,18 +15,18 @@ export type FavoriteMetadataDatabaseRecord = {
   duration: number | undefined
 }
 
-export type FavoriteDatabaseRecord = {
+export type SerializedFavorite = {
   id: string
   tags: string | Set<string>
   src: string
-  metadata: FavoriteMetadataDatabaseRecord
+  metadata: SerializedFavoriteMetadata
 }
 
 export interface Favorite extends Searchable {
   id: string
   root: HTMLElement
   thumbUrl: string
-  databaseRecord: FavoriteDatabaseRecord
+  serialized: SerializedFavorite
   withinRating: (rating: Rating) => boolean
   updateTags: (post: Post) => void
   addAdditionalTags: (newTags: string) => string

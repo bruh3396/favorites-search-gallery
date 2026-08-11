@@ -1,7 +1,7 @@
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { StateBinding } from "@/lib/ui/settings/state_binding";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
-import { bindEnableRule } from "../enable_rule";
+import { bindEnableRule } from "@/lib/ui/settings/enable_rule";
 import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/dom/element_factory";
 import { toggleDataset } from "@/utils/dom/dataset";

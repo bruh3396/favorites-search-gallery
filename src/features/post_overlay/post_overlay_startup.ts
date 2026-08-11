@@ -55,5 +55,5 @@ function subscribeToEvents(): void {
 }
 
 function waitUntilFavoritesAreReady(): Promise<unknown> {
-  return ON_FAVORITES_PAGE ? Events.favorites.favoritesDatabaseLoaded.timeout(2_000) : Promise.resolve();
+  return ON_FAVORITES_PAGE ? Events.favorites.storedFavoritesLoaded.timeout(2_000) : Promise.resolve();
 }

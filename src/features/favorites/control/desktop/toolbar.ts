@@ -29,7 +29,7 @@ const buttons: Partial<ButtonElement>[] = [
     event: Events.favorites.invertButtonClicked
   },
   {
-    id: "clear-button",
+    id: FavoritesId.clearButton,
     parentId: FavoritesId.actions,
     icon: "clear",
     // title: "Clear",

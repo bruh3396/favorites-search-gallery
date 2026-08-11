@@ -23,6 +23,37 @@ export class Database<V extends Identifiable> {
     return this.getAllRecords(database, store);
   }
 
+  public async readMany(ids: string[], objectStoreName: string | undefined = undefined): Promise<V[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const store = objectStoreName ?? this.defaultObjectStoreName;
+    const database = await this.open(store);
+    const transaction = database.transaction(store, "readonly");
+    const index = transaction.objectStore(store).index("id");
+    return new Promise((resolve, reject) => {
+      const records: V[] = [];
+
+      transaction.onerror = (): void => {
+        database.close();
+        reject(transaction.error);
+      };
+      transaction.oncomplete = (): void => {
+        database.close();
+        resolve(records);
+      };
+      ids.forEach(id => {
+        const request = index.get(id);
+
+        request.onsuccess = (): void => {
+          if (request.result !== undefined) {
+            records.push(request.result as V);
+          }
+        };
+      });
+    });
+  }
+
   public async readAllIds(objectStoreName: string | undefined = undefined): Promise<string[]> {
     objectStoreName = objectStoreName ?? this.defaultObjectStoreName;
     const database = await this.open(objectStoreName);
@@ -215,7 +246,7 @@ export class Database<V extends Identifiable> {
   }
 
   private getAllRecords(database: IDBDatabase, objectStoreName: string): Promise<V[]> {
-    const transaction = database.transaction(objectStoreName, "readwrite");
+    const transaction = database.transaction(objectStoreName, "readonly");
     const objectStore = transaction.objectStore(objectStoreName);
     return new Promise((resolve, reject) => {
       transaction.onerror = (event): void => {

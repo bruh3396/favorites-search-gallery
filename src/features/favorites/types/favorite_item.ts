@@ -1,4 +1,4 @@
-import { Favorite, FavoriteDatabaseRecord, FavoriteMetricMap } from "@/types/favorite";
+import { Favorite, FavoriteMetricMap, SerializedFavorite } from "@/types/favorite";
 import { clearPost, createPost } from "@/features/favorites/types/post_factory";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
@@ -16,7 +16,7 @@ export class FavoriteItem implements Favorite {
   private readonly favoriteTags: FavoriteTags;
   private element: FavoriteElement | null;
 
-  constructor(source: HTMLElement | FavoriteDatabaseRecord, additionalTags?: string) {
+  constructor(source: HTMLElement | SerializedFavorite, additionalTags?: string) {
     this.id = source instanceof HTMLElement ? getIdFromThumb(source) : source.id;
     this.post = createPost(source);
     this.favoriteTags = new FavoriteTags(this.post, source, additionalTags);
@@ -46,8 +46,8 @@ export class FavoriteItem implements Favorite {
     return this.metadata.metrics;
   }
 
-  public get databaseRecord(): FavoriteDatabaseRecord {
-    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbUrl), metadata: this.metadata.databaseRecord };
+  public get serialized(): SerializedFavorite {
+    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbUrl), metadata: this.metadata.serialized };
   }
 
   public updateTags = (post: Post): void => this.favoriteTags.set(toSortedTagSet(post.tags));
