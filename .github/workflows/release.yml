@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+
+      - run: npm run release:ci
+
+      - name: Verify version matches tag
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          built=$(grep -m1 '^// @version' dist/favorites_search_gallery.js | awk '{print $3}')
+          echo "tag=$tag built=$built"
+          test "$tag" = "$built"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/favorites_search_gallery.js
+          generate_release_notes: true
