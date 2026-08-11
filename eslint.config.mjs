@@ -301,7 +301,6 @@ export default defineConfig([
       "wrap-regex": "error",
       "yield-star-spacing": "error",
       "yoda": "error",
-      "linebreak-style": ["error", "windows"],
       "padding-line-between-statements": [
         "error",
         {
