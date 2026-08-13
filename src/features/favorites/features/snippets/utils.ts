@@ -5,8 +5,8 @@ export function normalizeName(name: string): string {
   return removeExtraWhiteSpace(name).toLowerCase().replace(/\s/g, "_");
 }
 
-export function sortByRecentlyUsed(snippets: Snippet[]): Snippet[] {
-  return snippets.slice().sort((a, b) => b.lastUsedAt - a.lastUsedAt || b.createdAt - a.createdAt);
+export function sortByNewest(snippets: Snippet[]): Snippet[] {
+  return snippets.slice().sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export function filterSnippets(snippets: Snippet[], text: string): Snippet[] {
@@ -35,6 +35,5 @@ export function failureText(reason: SnippetFailure, name: string): string {
 }
 
 function matches(snippet: Snippet, text: string): boolean {
-  // remove slash from left of text if someone types in tat prefix?? /portrait -> portrait? claude help here
   return snippet.name.toLowerCase().includes(text) || snippet.query.toLowerCase().includes(text);
 }

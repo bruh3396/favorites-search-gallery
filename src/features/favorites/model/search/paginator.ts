@@ -1,7 +1,7 @@
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { NavigationKey } from "@/types/input";
-import { PaginationContext } from "@/features/favorites/types/types";
+import { PaginationState } from "@/features/favorites/types/types";
 import { Preferences } from "@/app/context/preferences";
 import { clamp } from "@/utils/number";
 import { navigationDelta } from "@/utils/navigation";
@@ -10,8 +10,8 @@ import { paginationSequence } from "@/lib/ui/pagination";
 let current = 1;
 let favorites: Favorite[] = [];
 
-export const onFinalPage = (): boolean => current === pageCount();
-export const onlyOnePage = (): boolean => pageCount() === 1;
+export const atFinalPage = (): boolean => current === pageCount();
+export const hasOnlyOnePage = (): boolean => pageCount() === 1;
 export const currentPageFavorites = (): Favorite[] => favoritesOnPage(current);
 export const adjacentPageFavorites = (): Favorite[] => [...favoritesOnPage(current - 1), ...favoritesOnPage(current + 1)];
 export const selectAdjacentPage = (direction: NavigationKey): boolean => selectPage(current + navigationDelta(direction));
@@ -31,7 +31,7 @@ export function selectPageContaining(id: string): boolean {
   return index !== -1 && selectPage(Math.floor(index / resultsPerPage()) + 1);
 }
 
-export function paginationContext(): PaginationContext {
+export function paginationState(): PaginationState {
   return {
     currentPage: current,
     finalPage: pageCount(),
@@ -43,7 +43,7 @@ export function paginationContext(): PaginationContext {
 }
 
 const pageCount = (): number => Math.ceil(favorites.length / resultsPerPage()) || 1;
-const pageRange = (c: number): {start: number, end: number} => ({ start: resultsPerPage() * (c - 1), end: resultsPerPage() * c });
+const pageRange = (c: number): {start: number; end: number} => ({ start: resultsPerPage() * (c - 1), end: resultsPerPage() * c });
 const favoritesOnPage = (c: number): Favorite[] => favorites.slice(pageRange(c).start, pageRange(c).end);
 const resultsPerPage = (): number => Preferences.favorites.resultsPerPage.value;
 const wrappedPage = (page: number, delta: number, total: number): number => ((page - 1 + delta + total) % total) + 1;

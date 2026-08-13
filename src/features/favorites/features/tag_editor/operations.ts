@@ -26,7 +26,7 @@ export function removeTagsFromSelected(selected: Set<Favorite>, tags: string): v
 }
 
 export function resetAllFavoriteTags(favorites: Favorite[]): void {
-  favorites.forEach(f => withReIndex(f, () => f.resetAdditionalTags()));
+  favorites.forEach(f => withReIndex(f, () => f.resetAddedTags()));
 }
 
 function editSelectedTags(selected: Set<Favorite>, rawTags: string, remove: boolean): void {
@@ -41,9 +41,9 @@ function editSelectedTags(selected: Set<Favorite>, rawTags: string, remove: bool
   }
 
   for (const favorite of selected) {
-    const additionalTags = remove ? removeTagsFromFavorite(favorite, tagsToEdit) : addTagsToFavorite(favorite, tagsToEdit);
+    const addedTags = remove ? removeTagsFromFavorite(favorite, tagsToEdit) : addTagsToFavorite(favorite, tagsToEdit);
 
-    cacheTagEdit(favorite.id, additionalTags);
+    cacheTagEdit(favorite.id, addedTags);
     editedTagsCount += 1;
   }
 
@@ -60,11 +60,11 @@ function editSelectedTags(selected: Set<Favorite>, rawTags: string, remove: bool
 }
 
 function addTagsToFavorite(favorite: Favorite, tags: string): string {
-  return withReIndex(favorite, () => favorite.addAdditionalTags(tags));
+  return withReIndex(favorite, () => favorite.addTags(tags));
 }
 
 function removeTagsFromFavorite(favorite: Favorite, tags: string): string {
-  return withReIndex(favorite, () => favorite.removeAdditionalTags(tags));
+  return withReIndex(favorite, () => favorite.removeAddedTags(tags));
 }
 
 function withReIndex<T>(favorite: Favorite, action: () => T): T {

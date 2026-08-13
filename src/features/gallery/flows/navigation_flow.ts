@@ -20,7 +20,7 @@ export function navigate(direction: NavigationKey): void {
 }
 
 function handleStartBoundary(): void {
-  if (usingInfiniteScroll() || !loadMoreResults("ArrowLeft")) {
+  if (usingInfiniteScroll() || !advanceResults("ArrowLeft")) {
     GalleryView.nudge(GalleryModel.currentThumb(), "start");
     return;
   }
@@ -29,7 +29,7 @@ function handleStartBoundary(): void {
 }
 
 function handleEndBoundary(): void {
-  if (!loadMoreResults("ArrowRight")) {
+  if (!advanceResults("ArrowRight")) {
     GalleryView.nudge(GalleryModel.currentThumb(), "end");
     return;
   }
@@ -42,9 +42,9 @@ function handleEndBoundary(): void {
   GalleryDisplayFlow.displaySelected();
 }
 
-function loadMoreResults(direction: NavigationKey): boolean {
+function advanceResults(direction: NavigationKey): boolean {
   if (ON_POST_LIST_PAGE) {
     return FeatureBridge.postList.navigateToAdjacent.call(direction) !== null;
   }
-  return FeatureBridge.favorites.loadMore.call(direction);
+  return FeatureBridge.favorites.advance.call(direction);
 }

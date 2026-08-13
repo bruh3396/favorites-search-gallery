@@ -3,34 +3,27 @@ import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { DomEvents } from "@/app/dom/events";
-import { EnhancedMouseEvent } from "@/types/input";
+import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
 import { Preferences } from "@/app/context/preferences";
 import { overGalleryMenu } from "@/features/gallery/dom_tweaks/menu";
-import { throttle } from "@/lib/async/throttle";
 
-export const onMouseMove = throttle<MouseEvent>(() => {
+export function handleClick(mouseEvent: EnhancedMouseEvent): void {
   GalleryDispatch.run({
-    open: GalleryView.showCursor
-  });
-}, 250);
-
-export function onClick(mouseEvent: EnhancedMouseEvent): void {
-  GalleryDispatch.run({
-    open: onClickInGallery
+    open: openMediaOnCtrlClick
   }, mouseEvent.originalEvent);
 }
 
-export function onMouseDown(event: EnhancedMouseEvent): void {
+export function handleMouseDown(event: EnhancedMouseEvent): void {
   GalleryDispatch.run({
-    preview: onMouseDownOutsideGallery,
-    idle: onMouseDownOutsideGallery,
-    open: onMouseDownInGallery
+    preview: handleMouseDownOutsideGallery,
+    idle: handleMouseDownOutsideGallery,
+    open: handleMouseDownInGallery
   }, event);
 }
 
-export function onContextMenu(mouseEvent: MouseEvent): void {
+export function handleContextMenu(mouseEvent: MouseEvent): void {
   GalleryDispatch.run({
-    open: onContextMenuInGallery
+    open: closeOnContextMenu
   }, mouseEvent);
 }
 
@@ -41,13 +34,13 @@ export function toggleGalleryImageZoom(value: undefined | boolean = undefined): 
   return zoomedIn;
 }
 
-function onClickInGallery(mouseEvent: MouseEvent): void {
+function openMediaOnCtrlClick(mouseEvent: MouseEvent): void {
   if (mouseEvent.ctrlKey) {
     GalleryModel.openMedia();
   }
 }
 
-function onMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
+function handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey && !mouseEvent.shiftKey) {
     mouseEvent.originalEvent.preventDefault();
     GalleryOpenCloseFlow.open(mouseEvent.thumb);
@@ -65,7 +58,7 @@ function clickedInteractiveOverlay(mouseEvent: EnhancedMouseEvent): boolean {
   return target instanceof HTMLElement && target.closest(".post-overlay") !== null;
 }
 
-function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
+function handleMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   if (mouseEvent.ctrlKey || overGalleryMenu(mouseEvent.originalEvent)) {
     return;
   }
@@ -92,7 +85,7 @@ function onMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
   }
 }
 
-function onContextMenuInGallery(mouseEvent: MouseEvent): void {
+function closeOnContextMenu(mouseEvent: MouseEvent): void {
   mouseEvent.preventDefault();
   GalleryOpenCloseFlow.close();
 }

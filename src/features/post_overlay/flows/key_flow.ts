@@ -1,10 +1,10 @@
 import * as PostOverlayHoverFlow from "@/features/post_overlay/flows/hover_flow";
 import * as PostOverlayModel from "@/features/post_overlay/model/post_overlay_model";
 import * as PostOverlayView from "@/features/post_overlay/view/post_overlay_view";
-import { EnhancedKeyboardEvent } from "@/types/input";
+import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
 import { Preferences } from "@/app/context/preferences";
 
-export function onKeyDown(event: EnhancedKeyboardEvent): void {
+export function handleKeyDown(event: EnhancedKeyboardEvent): void {
   if (!Preferences.postOverlay.enabled.value) {
     return;
   }
@@ -18,7 +18,7 @@ export function onKeyDown(event: EnhancedKeyboardEvent): void {
   }
 }
 
-export function onKeyUp(event: EnhancedKeyboardEvent): void {
+export function handleKeyUp(event: EnhancedKeyboardEvent): void {
   if (!Preferences.postOverlay.enabled.value) {
     return;
   }

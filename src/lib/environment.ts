@@ -10,6 +10,7 @@ export const ON_POST_PAGE = location.href.includes("page=post&s=view");
 export const USING_FIREFOX = navigator.userAgent.toLowerCase().includes("firefox");
 export const ON_MOBILE_DEVICE = (/iPhone|iPad|iPod|Android/i).test(navigator.userAgent);
 export const ON_DESKTOP_DEVICE = !ON_MOBILE_DEVICE;
+export const PLATFORM = ON_MOBILE_DEVICE ? "mobile" : "desktop";
 
 export const USER_ID = getCookie("user_id", "");
 export const FAVORITES_PAGE_ID = getQueryParam("id");

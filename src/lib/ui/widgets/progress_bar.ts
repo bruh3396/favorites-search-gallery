@@ -1,7 +1,13 @@
-import { ProgressBar } from "@/types/element";
 import { clamp } from "@/utils/number";
 import { createElement } from "@/utils/dom/element_factory";
 import { toggleDataset } from "@/utils/dom/dataset";
+
+export interface ProgressBar {
+  element: HTMLElement;
+  setLabel: (text: string) => void;
+  setProgress: (completed: number, total: number) => void;
+  setVisible: (visible: boolean) => void;
+}
 
 export function buildProgressBar(id?: string): ProgressBar {
   const fill = createElement("div", { className: "progress-bar-fill" });

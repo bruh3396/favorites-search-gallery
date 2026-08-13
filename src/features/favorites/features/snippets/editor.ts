@@ -1,6 +1,5 @@
+import { Snippet, SnippetHandlers } from "@/features/favorites/features/snippets/types";
 import { failureText, normalizeName } from "@/features/favorites/features/snippets/utils";
-import { Snippet } from "@/features/favorites/features/snippets/types";
-import { SnippetHandlers } from "@/features/favorites/features/snippets/handlers";
 import { SnippetSelectors } from "@/features/favorites/features/snippets/selectors";
 import { SnippetState } from "@/features/favorites/features/snippets/state";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
@@ -17,6 +16,11 @@ const errorMessage = createElement("div", { className: SnippetSelectors.error })
 const cancelButton = createElement("button", { className: `${WidgetSelectors.actionButton} ${SnippetSelectors.button}`, textContent: "Cancel" });
 const resultsButton = createElement("button", { className: WidgetSelectors.actionButton, textContent: "Results" });
 const saveButton = createElement("button", { className: `${WidgetSelectors.actionButton} ${SnippetSelectors.primaryButton}`, textContent: "Save" });
+let handlers: SnippetHandlers;
+
+export function setup(snippetHandlers: SnippetHandlers): void {
+  handlers = snippetHandlers;
+}
 
 export function build(): HTMLElement {
   nameField.type = "text";
@@ -31,11 +35,11 @@ export function build(): HTMLElement {
   cancelButton.type = "button";
   resultsButton.type = "button";
   addTooltip(resultsButton, "Query from search results");
-  saveButton.addEventListener("click", () => SnippetHandlers.onSave());
-  resultsButton.addEventListener("click", () => SnippetHandlers.onResultsQueryRequested());
-  cancelButton.addEventListener("click", () => SnippetHandlers.onEditCancelled());
+  saveButton.addEventListener("click", () => handlers.onSave());
+  resultsButton.addEventListener("click", () => handlers.onResultsQueryRequested());
+  cancelButton.addEventListener("click", () => handlers.onEditCancelled());
   nameField.addEventListener("input", onNameInput);
-  queryField.addEventListener("input", () => SnippetHandlers.onEditorInput());
+  queryField.addEventListener("input", () => handlers.onEditorInput());
   nameField.addEventListener("keydown", onKeyDown);
   queryField.addEventListener("keydown", onKeyDown);
   return createElement("div", {
@@ -88,7 +92,7 @@ function onNameInput(): void {
   if (normalized !== nameField.value) {
     nameField.value = normalized;
   }
-  SnippetHandlers.onEditorInput();
+  handlers.onEditorInput();
 }
 
 function onKeyDown(event: KeyboardEvent): void {
@@ -97,7 +101,7 @@ function onKeyDown(event: KeyboardEvent): void {
   }
   event.preventDefault();
   event.stopPropagation();
-  SnippetHandlers.onEditCancelled();
+  handlers.onEditCancelled();
 }
 
 function fields(): HTMLElement {

@@ -1,5 +1,5 @@
 import * as Icons from "@/assets/icons";
-import { EnhancedMouseEvent } from "@/types/input";
+import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryMenuAction } from "@/types/app";
 import { GalleryMenuButton } from "@/features/gallery/types/gallery_types";
@@ -41,14 +41,6 @@ export function setup(onMenuAction: (action: GalleryMenuAction) => void): void {
   GalleryRoot.appendChild(menu);
   loadPreferences();
   createButtons();
-}
-
-export function onMouseMove(): void {
-  reveal();
-}
-
-export function onMouseOver(event: EnhancedMouseEvent): void {
-  togglePersistence(event.originalEvent);
 }
 
 function loadPreferences(): void {
@@ -124,7 +116,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   return button;
 }
 
-function reveal(): void {
+export function reveal(): void {
   menu.classList.add("gallery-menu--visible");
   clearTimeout(menuVisibilityTimeout);
   menuVisibilityTimeout = setTimeout(() => {
@@ -136,8 +128,10 @@ function hide(): void {
   menu.classList.remove("gallery-menu--visible");
 }
 
-function togglePersistence(event: MouseEvent): void {
-  menu.classList.toggle("gallery-menu--persistent", event.target instanceof HTMLElement && menu.contains(event.target));
+export function togglePersistence(event: EnhancedMouseEvent): void {
+  const target = event.originalEvent.target;
+
+  menu.classList.toggle("gallery-menu--persistent", target instanceof HTMLElement && menu.contains(target));
 }
 
 function togglePin(): void {

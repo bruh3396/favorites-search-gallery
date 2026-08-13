@@ -12,7 +12,7 @@ export function resolveScriptVersion(): string {
     return describe(["--exact-match"]);
   } catch {
     try {
-      return describe([]);
+      return `${describe([]).split("-")[0]}-dev`;
     } catch {
       return "0.0.0-dev";
     }

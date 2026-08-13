@@ -1,23 +1,33 @@
 import * as SnippetComponents from "@/features/favorites/features/snippets/components";
 import * as SnippetEditor from "@/features/favorites/features/snippets/editor";
-import { filterSnippets, sortByRecentlyUsed } from "@/features/favorites/features/snippets/utils";
-import { Snippet } from "@/features/favorites/features/snippets/types";
-import { SnippetHandlers } from "@/features/favorites/features/snippets/handlers";
+import { Snippet, SnippetHandlers } from "@/features/favorites/features/snippets/types";
+import { filterSnippets, sortByNewest } from "@/features/favorites/features/snippets/utils";
 import { SnippetSelectors } from "@/features/favorites/features/snippets/selectors";
 import { SnippetState } from "@/features/favorites/features/snippets/state";
+import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { createElement } from "@/utils/dom/element_factory";
 import { searchField } from "@/lib/ui/widgets/search_field";
 
 const list = createElement("div", { className: SnippetSelectors.list });
+let handlers: SnippetHandlers;
+
+export function setup(snippetHandlers: SnippetHandlers): void {
+  handlers = snippetHandlers;
+  SnippetEditor.setup(snippetHandlers);
+}
 
 export function mount(panel: HTMLElement): void {
   const filterField = searchField("Search Snippets", (value) => {
     SnippetState.filterText = value;
-    SnippetHandlers.onFiltered();
+    handlers.onFiltered();
+  });
+  const filter = createElement("div", {
+    className: `${SnippetSelectors.filter} ${WidgetSelectors.separatorBelow}`,
+    children: [filterField]
   });
 
   panel.classList.add(SnippetSelectors.panel);
-  panel.append(filterField, list, SnippetEditor.build());
+  panel.append(filter, list, SnippetEditor.build());
   render();
 }
 
@@ -33,11 +43,11 @@ function renderList(): void {
 }
 
 function row(snippet: Snippet): HTMLElement {
-  return SnippetState.deleteTarget === snippet.name ? SnippetComponents.confirmRow(snippet) : SnippetComponents.row(snippet);
+  return SnippetState.deleteTarget === snippet.name ? SnippetComponents.confirmRow(snippet, handlers) : SnippetComponents.row(snippet, handlers);
 }
 
 function visibleSnippets(): Snippet[] {
-  return filterSnippets(sortByRecentlyUsed(SnippetState.snippets), SnippetState.filterText);
+  return filterSnippets(sortByNewest(SnippetState.snippets), SnippetState.filterText);
 }
 
 function placeholderText(): string {

@@ -1,18 +1,17 @@
+import * as FavoritesDisplayFlow from "@/features/favorites/flows/display_flow";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
-import * as FavoritesResultsFlow from "@/features/favorites/flows/results_flow";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { Events } from "@/app/channels/events";
-import { ON_FIRST_FAVORITES_PAGE } from "@/lib/environment";
 import { fetchFavoritesCount } from "@/lib/remote/rule34/favorites/page";
 import { markAsNew } from "@/features/favorites/dom_tweaks/indicator";
 
-export async function loadAllFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
+export async function loadAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
   if (await hasStoredFavorites()) {
     await loadStoredFavorites();
-    await fetchNewFavorites(nativeFavorites);
+    await fetchNewFavorites(firstPageFavorites);
   } else {
-    await fetchAllFavorites(nativeFavorites);
+    await fetchAllFavorites(firstPageFavorites);
   }
   Events.favorites.favoritesLoaded.emit();
   FavoritesView.collectAspectRatios();
@@ -33,33 +32,27 @@ async function loadStoredFavorites(): Promise<void> {
   FavoritesSearchFlow.reSearchFavorites();
 }
 
-async function fetchNewFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
+async function fetchNewFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
   FavoritesView.setStatus("Finding new favorites");
-  const results = await FavoritesModel.fetchNewFavorites(firstPageFavorites(nativeFavorites));
+  const results = await FavoritesModel.fetchNewFavorites(firstPageFavorites);
 
-  if (results.newSearchResults.length === 0) {
+  if (results.searchResults.length === 0) {
     FavoritesView.setTemporaryStatus("No new favorites found");
     return;
   }
-  await FavoritesModel.storeFavorites(results.newFavorites);
-  results.newSearchResults.forEach(markAsNew);
-  FavoritesView.addToTop(results.newSearchResults);
+  await FavoritesModel.storeFavorites(results.favorites);
+  results.searchResults.forEach(markAsNew);
+  FavoritesView.addToTop(results.searchResults);
   FavoritesView.notifyNewFavoritesFound(results);
-  FavoritesView.setTemporaryStatus(`Saved ${results.newFavorites.length} new favorites`);
+  FavoritesView.setTemporaryStatus(`Saved ${results.favorites.length} new favorites`);
   FavoritesModel.repaginateCurrentResults();
-  Events.favorites.newFavoritesFound.emit(results.newSearchResults);
-  Events.favorites.searchResultsUpdated.emit(FavoritesModel.getCurrentSearchResults());
 }
 
-async function fetchAllFavorites(nativeFavorites: HTMLElement[] | undefined): Promise<void> {
+async function fetchAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
   fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
-  FavoritesResultsFlow.clearResults();
-  await FavoritesModel.fetchAllFavorites(FavoritesResultsFlow.syncResults, firstPageFavorites(nativeFavorites));
+  FavoritesDisplayFlow.clear();
+  await FavoritesModel.fetchAllFavorites(FavoritesDisplayFlow.sync, firstPageFavorites);
   FavoritesView.setStatus("Saving favorites");
   await FavoritesModel.storeFavorites(FavoritesModel.getAllFavorites());
   FavoritesView.setTemporaryStatus("All favorites saved");
-}
-
-function firstPageFavorites(nativeFavorites: HTMLElement[] | undefined): HTMLElement[] | undefined {
-  return ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined;
 }

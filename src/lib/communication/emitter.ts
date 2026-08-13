@@ -1,12 +1,12 @@
 import { queueMacroTask } from "@/lib/async/async";
 
 interface EmitterOptions extends AddEventListenerOptions {
-  async?: boolean
+  async?: boolean;
 }
 
 interface ListenerFlags {
-  once: boolean
-  async: boolean
+  once: boolean;
+  async: boolean;
 }
 
 export class Emitter<V> {

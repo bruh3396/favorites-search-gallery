@@ -4,7 +4,7 @@ import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { GalleryConfig } from "@/config/gallery_config";
 
-export function onVisibleThumbsChanged(): void {
+export function handleVisibleThumbsChanged(): void {
   GalleryDispatch.run({
     idle: () => withVisibleThumbs(cacheOrUpscale),
     preview: () => withVisibleThumbs(GalleryView.cacheImages)

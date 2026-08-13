@@ -4,7 +4,7 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { POSTS_PER_POST_LIST_PAGE } from "@/lib/rule34_constants";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
-export function onUpscaleToggled(value: boolean): void {
+export function toggleUpscaling(value: boolean): void {
   if (value) {
     const thumbs = getAllContentThumbs();
     const notUsingInfiniteScroll = thumbs.length <= POSTS_PER_POST_LIST_PAGE;
@@ -18,14 +18,12 @@ export function onUpscaleToggled(value: boolean): void {
   }
 }
 
-export function onInitialPostListCreated(): void {
-  GalleryDispatch.run({
-    idle: preloadOutsideGallery
-  });
+export function preloadOnIdle(): void {
+  if (GalleryConfig.preloadOutsideGalleryOnPostList) {
+    GalleryDispatch.run({ idle: preload });
+  }
 }
 
-function preloadOutsideGallery(): void {
-  if (GalleryConfig.preloadOutsideGalleryOnPostList) {
-    GalleryView.cacheImages(getAllContentThumbs());
-  }
+function preload(): void {
+  GalleryView.cacheImages(getAllContentThumbs());
 }

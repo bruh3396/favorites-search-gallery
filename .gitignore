@@ -1,7 +1,6 @@
 src/playground/
 .env
-scripts/bin/
-.vscode
+build/bin
 node_modules
 dist
 package-lock.json

@@ -1,12 +1,12 @@
 import * as PostOverlayModeDispatch from "@/features/post_overlay/flows/mode_dispatch";
 import * as PostOverlayModel from "@/features/post_overlay/model/post_overlay_model";
 import * as PostOverlayView from "@/features/post_overlay/view/post_overlay_view";
-import { EnhancedMouseEvent } from "@/types/input";
+import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
 import { Preferences } from "@/app/context/preferences";
 import { galleryIdle } from "@/app/channels/feature_bridge";
 import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
-export function onMouseover(event: EnhancedMouseEvent): void {
+export function handleMouseOver(event: EnhancedMouseEvent): void {
   PostOverlayModel.recordCursorPosition(event);
 
   if (!Preferences.postOverlay.enabled.value || !galleryIdle() || PostOverlayModel.isResizing()) {
@@ -29,7 +29,7 @@ export function hideOverlay(): void {
   PostOverlayView.hide();
 }
 
-export function onThumbsMoved(): void {
+export function hideTemporarily(): void {
   hideOverlay();
   PostOverlayModel.startReopenCooldown(showThumbUnderCursor);
 }

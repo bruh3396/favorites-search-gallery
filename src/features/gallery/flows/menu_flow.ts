@@ -14,6 +14,6 @@ const menuHandlers: Partial<Record<GalleryMenuAction, () => void>> = {
   toggleBackground: GalleryView.toggleBackgroundOpacity
 };
 
-export function onGalleryMenuAction(action: GalleryMenuAction): void {
+export function handleAction(action: GalleryMenuAction): void {
   menuHandlers[action]?.();
 }

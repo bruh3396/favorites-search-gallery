@@ -24,13 +24,13 @@ function setupView(): void {
 }
 
 function subscribeToEvents(): void {
-  DomEvents.document.mouseover.on(TooltipHoverFlow.onMouseover);
-  DomEvents.window.scrollend.on(TooltipScrollFlow.onScroll);
-  Preferences.favorites.tooltipEnabled.on(TooltipToggleFlow.onTooltipToggled);
-  Preferences.postList.tooltipEnabled.on(TooltipToggleFlow.onTooltipToggled);
+  DomEvents.document.mouseover.on(TooltipHoverFlow.handleMouseOver);
+  DomEvents.window.scrollend.on(TooltipScrollFlow.reposition);
+  Preferences.favorites.tooltipEnabled.on(TooltipToggleFlow.hideIfDisabled);
+  Preferences.postList.tooltipEnabled.on(TooltipToggleFlow.hideIfDisabled);
 
   if (ON_FAVORITES_PAGE) {
-    Events.favorites.searchStarted.on(TooltipModel.rebuildHighlights);
+    Events.favorites.searchRequested.on(TooltipModel.rebuildHighlights);
   }
 }
 

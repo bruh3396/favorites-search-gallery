@@ -1,20 +1,37 @@
 import { IconName, icon } from "@/lib/ui/icon";
 import { Stepper, buildStepper } from "@/lib/ui/settings/components/stepper_control";
-import { label, span } from "@/utils/dom/element_factory";
+import { createElement, label, span } from "@/utils/dom/element_factory";
 import { removeDataset, toggleDataset } from "@/utils/dom/dataset";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
-import { PaginationContext } from "@/features/favorites/types/types";
 import { PaginationSequence } from "@/types/ui";
+import { PaginationState } from "@/features/favorites/types/types";
 import { Preferences } from "@/app/context/preferences";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { doNothing } from "@/utils/function";
-import { insertStyle } from "@/utils/dom/injector";
 import { paginationUpdateStrategy } from "@/lib/ui/pagination";
 
-const container = span("favorites-pagination");
-const rangeIndicator = label("pagination-range-label");
+const PaginationSelectors = {
+  containerId: "favorites-pagination",
+  rangeIndicatorId: "pagination-range-label",
+  numberTraversalButtonClass: "favorites-pagination-btn",
+  ellipsisClass: "favorites-pagination-ellipsis",
+  arrowClass: "favorites-pagination-arrow",
+  headingClass: "goto-page-heading",
+  selectedClass: "selected",
+  popoverId: "goto-page-popover",
+  popoverRowId: "goto-page-row",
+  popoverInputId: "goto-page-input",
+  popoverButtonId: "goto-page-button"
+};
+
+const ArrowTraversalButtons = {
+  previous: { id: "previous-page", iconName: "chevronLeft", direction: "ArrowLeft", position: "afterbegin" },
+  next: { id: "next-page", iconName: "chevronRight", direction: "ArrowRight", position: "beforeend" }
+} as const satisfies Record<string, { id: string; iconName: IconName; direction: NavigationKey; position: InsertPosition }>;
+
+const container = span(PaginationSelectors.containerId);
+const rangeIndicator = label(PaginationSelectors.rangeIndicatorId);
 
 let onPageSelected: (pageNumber: number) => void = doNothing;
 let onPageStepped: (direction: NavigationKey) => void = doNothing;
@@ -25,71 +42,46 @@ export function setup(pageSelected: (pageNumber: number) => void, pageStepped: (
   onPageSelected = pageSelected;
   onPageStepped = pageStepped;
   insert();
-  buildPaginator({currentPage: 1, finalPage: 1, totalCount: 0, sliceStart: 0, sliceEnd: 0, sequence: [1]});
+  buildPaginator({ currentPage: 1, finalPage: 1, totalCount: 0, sliceStart: 0, sliceEnd: 0, sequence: [1] });
   togglePaginator(!Preferences.favorites.infiniteScroll.value);
 }
 
 export function togglePaginator(value: boolean): void {
-  const html = `
-      #favorites-pagination,
-      #results-per-page-container,
-      #favorite-finder,
-      #pagination-range-label,
-      #favorites-bottom-navigation-buttons
-      {
-        display: none !important;
-      }
-    `;
-
-  insertStyle(value ? "" : html, "fav-pagination-enable");
+  toggleDataset(document.documentElement, "paginationHidden", !value);
 }
 
 export function isGotoPagePopoverTarget(target: Node): boolean {
-  const popover = container.querySelector("#goto-page-popover");
-  const ellipsis = container.querySelector(".favorites-pagination-ellipsis");
+  const popover = container.querySelector(`#${PaginationSelectors.popoverId}`);
+  const ellipsis = container.querySelector(`.${PaginationSelectors.ellipsisClass}`);
   return popover?.contains(target) === true || ellipsis?.contains(target) === true;
 }
 
 export function closeGotoPagePopover(): void {
-  removeDataset(container.querySelector<HTMLElement>("#goto-page-popover"), "open");
+  removeDataset(container.querySelector<HTMLElement>(`#${PaginationSelectors.popoverId}`), "open");
 }
 
-export function buildPaginator(context: PaginationContext): void {
+export function buildPaginator(context: PaginationState): void {
   container.innerHTML = "";
   updateRangeIndicator(context.sliceStart, context.sliceEnd, context.totalCount);
   createNumberTraversalButtons(context);
   createArrowTraversalButtons(context);
 }
 
-export function updatePaginator(context: PaginationContext): void {
+export function updatePaginator(context: PaginationState): void {
   updateRangeIndicator(context.sliceStart, context.sliceEnd, context.totalCount);
   rebuildNumberTraversalButtons(context);
   updateExistingArrowTraversalButtons(context);
 }
 
 function insertMenu(): void {
-  if (ON_DESKTOP_DEVICE) {
-    const placeToInsert = document.getElementById(FavoritesId.paginationSlot);
+  const placeToInsert = document.getElementById(FavoritesId.paginationSlot);
 
-    if (placeToInsert !== null) {
-      placeToInsert.insertAdjacentElement("afterend", container);
-      placeToInsert.remove();
-    }
-    return;
-  }
-  const footerBottom = document.getElementById("mobile-footer-bottom");
-
-  if (footerBottom !== null) {
-    footerBottom.insertAdjacentElement("afterbegin", container);
-  }
+  placeToInsert?.insertAdjacentElement("afterend", container);
+  placeToInsert?.remove();
 }
 
 function insert(): void {
-  const matchCountLabel = document.getElementById(FavoritesId.matchCount);
-
-  if (matchCountLabel !== null) {
-    matchCountLabel.insertAdjacentElement("afterend", rangeIndicator);
-  }
+  document.getElementById(FavoritesId.resultsCount)?.insertAdjacentElement("beforebegin", rangeIndicator);
   insertMenu();
 }
 
@@ -98,7 +90,7 @@ function updateRangeIndicator(start: number, end: number, count: number): void {
   rangeIndicator.textContent = end === 0 ? "" : `${start + 1} - ${end}`;
 }
 
-function createNumberTraversalButtons(context: PaginationContext): void {
+function createNumberTraversalButtons(context: PaginationState): void {
   const popover = createGotoPagePopover(context.currentPage, context.finalPage);
 
   renderedSequence = context.sequence;
@@ -114,11 +106,9 @@ function createNumberTraversalButtons(context: PaginationContext): void {
 }
 
 function createEllipsis(popover: HTMLElement): void {
-  const ellipsis = document.createElement("button");
+  const ellipsis = createElement("button", { className: PaginationSelectors.ellipsisClass, textContent: "…" });
 
-  ellipsis.className = "favorites-pagination-ellipsis";
   addTooltip(ellipsis, "Goto specific page", "below");
-  ellipsis.textContent = "…";
   ellipsis.onclick = (): void => {
     if (toggleDataset(popover, "open")) {
       popover.querySelector("input")?.select();
@@ -128,23 +118,22 @@ function createEllipsis(popover: HTMLElement): void {
 }
 
 function createNumberTraversalButton(currentPageNumber: number, pageNumber: number): void {
-  const button = document.createElement("button");
+  const button = createElement("button", { className: PaginationSelectors.numberTraversalButtonClass });
 
-  button.className = "favorites-pagination-btn";
   container.appendChild(button);
   assignNumberTraversalButton(button, currentPageNumber, pageNumber);
 }
 
 function assignNumberTraversalButton(button: HTMLButtonElement, currentPageNumber: number, pageNumber: number): void {
   button.id = `favorites-page-${pageNumber}`;
-  button.classList.toggle("selected", currentPageNumber === pageNumber);
+  button.classList.toggle(PaginationSelectors.selectedClass, currentPageNumber === pageNumber);
   button.textContent = String(pageNumber);
   button.onclick = (): void => {
     onPageSelected(pageNumber);
   };
 }
 
-function rebuildNumberTraversalButtons(context: PaginationContext): void {
+function rebuildNumberTraversalButtons(context: PaginationState): void {
   const strategy = paginationUpdateStrategy(renderedSequence, context.sequence);
 
   if (strategy === "skip") {
@@ -156,14 +145,14 @@ function rebuildNumberTraversalButtons(context: PaginationContext): void {
     return;
   }
 
-  for (const element of [...container.querySelectorAll(".favorites-pagination-btn, .favorites-pagination-ellipsis, #goto-page-popover")]) {
+  for (const element of [...container.querySelectorAll(`.${PaginationSelectors.numberTraversalButtonClass}, .${PaginationSelectors.ellipsisClass}, #${PaginationSelectors.popoverId}`)]) {
     element.remove();
   }
   createNumberTraversalButtons(context);
 }
 
-function patchNumberTraversalButtons(context: PaginationContext): void {
-  const buttons = container.querySelectorAll<HTMLButtonElement>(".favorites-pagination-btn");
+function patchNumberTraversalButtons(context: PaginationState): void {
+  const buttons = container.querySelectorAll<HTMLButtonElement>(`.${PaginationSelectors.numberTraversalButtonClass}`);
   let buttonIndex = 0;
 
   for (const term of context.sequence) {
@@ -180,53 +169,41 @@ function patchNumberTraversalButtons(context: PaginationContext): void {
   renderedSequence = context.sequence;
 }
 
-function patchGotoPagePopover(context: PaginationContext): void {
+function patchGotoPagePopover(context: PaginationState): void {
   gotoPageStepper?.setMax(context.finalPage);
 }
 
-function createArrowTraversalButtons(context: PaginationContext): void {
-  const previous = createArrowTraversalButton("previous", "ArrowLeft", "chevronLeft", "afterbegin");
-  const next = createArrowTraversalButton("next", "ArrowRight", "chevronRight", "beforeend");
+function createArrowTraversalButtons(context: PaginationState): void {
+  const previous = createArrowTraversalButton("previous");
+  const next = createArrowTraversalButton("next");
 
   updateArrowTraversalButtonInteractability(previous, next, context);
 }
 
-function createArrowTraversalButton(name: string, direction: NavigationKey, iconName: IconName, position: InsertPosition): HTMLButtonElement {
-  const button = document.createElement("button");
+function createArrowTraversalButton(name: keyof typeof ArrowTraversalButtons): HTMLButtonElement {
+  const arrow = ArrowTraversalButtons[name];
+  const button = createElement("button", {
+    id: arrow.id, className: PaginationSelectors.arrowClass, children: [icon(arrow.iconName)]
+  });
 
-  button.id = `${name}-page`;
   addTooltip(button, `Goto ${name} page`, "below");
-  button.className = "favorites-pagination-arrow";
-  button.appendChild(icon(iconName));
   button.onclick = (): void => {
-    onPageStepped(direction);
+    onPageStepped(arrow.direction);
   };
-  container.insertAdjacentElement(position, button);
+  container.insertAdjacentElement(arrow.position, button);
   return button;
 }
 
 function createGotoPagePopover(currentPageNumber: number, finalPageNumber: number): HTMLElement {
-  const popover = document.createElement("div");
-  const heading = document.createElement("label");
-  const row = document.createElement("div");
-  const button = document.createElement("button");
+  const heading = createElement("label", { className: PaginationSelectors.headingClass, textContent: "Go to page" });
+  const button = createElement("button", { id: PaginationSelectors.popoverButtonId, textContent: "Go" });
   const stepper = buildStepper({
-    id: "goto-page-input",
-    min: 1,
-    max: finalPageNumber,
-    step: 1,
-    value: currentPageNumber,
-    onChange: doNothing
+    id: PaginationSelectors.popoverInputId, min: 1, max: finalPageNumber, step: 1, value: currentPageNumber, onChange: doNothing
   });
+  const row = createElement("div", { id: PaginationSelectors.popoverRowId, children: [stepper.element, button] });
+  const popover = createElement("div", { id: PaginationSelectors.popoverId, children: [heading, row] });
 
-  popover.id = "goto-page-popover";
-  heading.className = "goto-page-heading";
-  heading.textContent = "Go to page";
-  row.id = "goto-page-row";
-  button.textContent = "Go";
-  button.id = "goto-page-button";
   gotoPageStepper = stepper;
-
   const submit = (): void => {
     onPageSelected(stepper.value);
     removeDataset(popover, "open");
@@ -238,22 +215,19 @@ function createGotoPagePopover(currentPageNumber: number, finalPageNumber: numbe
       submit();
     }
   });
-
-  row.append(stepper.element, button);
-  popover.append(heading, row);
   return popover;
 }
 
-function updateExistingArrowTraversalButtons(context: PaginationContext): void {
-  const previous = container.querySelector<HTMLButtonElement>("#previous-page");
-  const next = container.querySelector<HTMLButtonElement>("#next-page");
+function updateExistingArrowTraversalButtons(context: PaginationState): void {
+  const previous = container.querySelector<HTMLButtonElement>(`#${ArrowTraversalButtons.previous.id}`);
+  const next = container.querySelector<HTMLButtonElement>(`#${ArrowTraversalButtons.next.id}`);
 
   if (previous !== null && next !== null) {
     updateArrowTraversalButtonInteractability(previous, next, context);
   }
 }
 
-function updateArrowTraversalButtonInteractability(previousPage: HTMLButtonElement, nextPage: HTMLButtonElement, context: PaginationContext): void {
+function updateArrowTraversalButtonInteractability(previousPage: HTMLButtonElement, nextPage: HTMLButtonElement, context: PaginationState): void {
   previousPage.disabled = context.currentPage === 1;
   nextPage.disabled = context.currentPage === context.finalPage;
 }

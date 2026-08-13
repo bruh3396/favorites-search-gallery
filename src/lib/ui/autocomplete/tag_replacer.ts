@@ -1,6 +1,6 @@
 const defaultBoundaries = { start: 0, end: 0 };
 
-export function replaceTagInText(text: string, selectionStart: number, replacement: string): { result: string, selectionStart: number } {
+export function replaceTagInText(text: string, selectionStart: number, replacement: string): { result: string; selectionStart: number } {
   if (selectionStart < 0 || selectionStart > text.length) {
     return { result: text, selectionStart };
   }
@@ -11,7 +11,7 @@ export function replaceTagInText(text: string, selectionStart: number, replaceme
   return {result, selectionStart: firstHalf.length + replacement.length};
 }
 
-export function getTagBoundary(text: string, selectionStart: number): { start: number, end: number } {
+export function getTagBoundary(text: string, selectionStart: number): { start: number; end: number } {
   if (selectionStart < 0 || selectionStart > text.length || text.length === 0) {
     return defaultBoundaries;
   }

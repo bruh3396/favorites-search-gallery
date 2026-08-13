@@ -1,27 +1,28 @@
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import { preloadImages, revealItem } from "@/app/layout/content_thumbs";
+import { ContentDisplayOptions } from "@/types/ui";
 import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesResultsView } from "@/features/favorites/types/types";
+import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { NavigationKey } from "@/types/input";
+import { preloadImages } from "@/app/layout/content_thumbs";
 
 let appendedFirstResults = false;
 
-export const FavoritesPaginatedView = {
+export const FavoritesPaginatedDisplay = {
   initialize,
   sync: reconcilePagination,
-  reveal,
-  loadMore: (direction: NavigationKey): boolean => stepPage(direction)
-} satisfies FavoritesResultsView;
+  advance: stepPage,
+  goToPage,
+  teardown: (): void => FavoritesView.togglePaginator(false)
+} satisfies FavoritesDisplay;
 
-export { goToPage, stepPage };
-
-function initialize(results: Favorite[]): void {
+function initialize(results: Favorite[], options?: ContentDisplayOptions): void {
+  FavoritesView.togglePaginator(true);
   FavoritesModel.paginate(results);
   FavoritesModel.selectPage(1);
-  renderCurrentPage();
+  renderCurrentPage(options);
 }
 
 function goToPage(pageNumber: number): void {
@@ -29,21 +30,13 @@ function goToPage(pageNumber: number): void {
   renderCurrentPage();
 }
 
-function renderCurrentPage(): void {
-  FavoritesView.showSearchResults(FavoritesModel.currentPageFavorites());
+function renderCurrentPage(options?: ContentDisplayOptions): void {
+  FavoritesView.showSearchResults(FavoritesModel.currentPageFavorites(), options);
   FavoritesView.buildPaginator(FavoritesModel.paginationContext());
 
   if (FavoritesConfig.preloadThumbs) {
     preloadImages(FavoritesModel.adjacentPageFavorites().map(favorite => favorite.thumbUrl));
   }
-  Events.favorites.pageChanged.emit();
-}
-
-function reveal(id: string): void {
-  if (FavoritesModel.selectPageContaining(id)) {
-    renderCurrentPage();
-  }
-  revealItem(id);
 }
 
 function reconcilePagination(): void {
@@ -53,7 +46,7 @@ function reconcilePagination(): void {
 }
 
 function appendMissingThumbsOnCurrentPage(): void {
-  if (appendedFirstResults && !FavoritesModel.onFinalPage()) {
+  if (appendedFirstResults && !FavoritesModel.atFinalPage()) {
     return;
   }
   const missing = FavoritesModel.currentPageFavorites().filter(favorite => document.getElementById(favorite.id) === null);
@@ -63,7 +56,6 @@ function appendMissingThumbsOnCurrentPage(): void {
   }
   appendedFirstResults = true;
   FavoritesView.addToBottom(missing);
-  Events.favorites.favoritesAddedToCurrentPage.emit(missing);
 }
 
 function stepPage(direction: NavigationKey): boolean {
@@ -72,7 +64,7 @@ function stepPage(direction: NavigationKey): boolean {
       renderCurrentPage();
       return true;
     }
-    return FavoritesModel.onlyOnePage();
+    return FavoritesModel.hasOnlyOnePage();
   }
 
   if (FavoritesModel.selectAdjacentPage(direction)) {

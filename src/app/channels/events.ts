@@ -12,28 +12,26 @@ export const Events = {
     hotkeyPressed: new Emitter<string>()
   },
   favorites: {
-    searchStarted: new Emitter<string>(),
-    pageChanged: new Emitter<void>(),
-    findFavorite: new Emitter<string>(),
-    findFavoriteInAll: new Emitter<string>(),
+    searchButtonClicked: new Emitter<MouseEvent>(),
+    clearButtonClicked: new Emitter<MouseEvent>(),
+    shuffleButtonClicked: new Emitter<MouseEvent>(),
+    invertButtonClicked: new Emitter<MouseEvent>(),
+    resetButtonClicked: new Emitter<MouseEvent>(),
+    setSearchScopeButtonClicked: new Emitter<MouseEvent>(),
+    clearSearchScopeButtonClicked: new Emitter<MouseEvent>(),
+
+    searchRequested: new Emitter<string>(),
+    searchResultsUpdated: new Emitter<Favorite[]>(),
+
     storedFavoritesFound: new StickyEmitter<boolean>(),
     storedFavoritesLoaded: new StickyEmitter<void>(),
     favoritesLoaded: new StickyEmitter<void>(),
 
-    searchResultsUpdated: new Emitter<Favorite[]>(),
-    tagCategoriesResolved: new Emitter<TagCategoryMap>(),
-    newFavoritesFound: new Emitter<Favorite[]>(),
-    favoritesAddedToCurrentPage: new Emitter<Favorite[]>(),
-    resetConfirmed: new Emitter<void>(),
+    contentReplaced: new Emitter<void>(),
+    contentAdded: new Emitter<Favorite[]>(),
 
-    setSearchScopeButtonClicked: new Emitter<MouseEvent>(),
-    clearSearchScopeButtonClicked: new Emitter<MouseEvent>(),
-    invertButtonClicked: new Emitter<MouseEvent>(),
-    shuffleButtonClicked: new Emitter<MouseEvent>(),
-    searchButtonClicked: new Emitter<MouseEvent>(),
-    clearButtonClicked: new Emitter<MouseEvent>(),
-    resetButtonClicked: new Emitter<MouseEvent>(),
-    panelButtonClicked: new Emitter<MouseEvent>()
+    tagCategoriesResolved: new Emitter<TagCategoryMap>(),
+    resetConfirmed: new Emitter<void>()
   },
   gallery: {
     openedGallery: new Emitter<HTMLElement>(),

@@ -1,44 +1,43 @@
+import { ContentDisplayOptions, PaginationSequence } from "@/types/ui";
 import { Favorite, FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
-import { PaginationSequence } from "@/types/ui";
 import { TagCategoryMap } from "@/types/search";
 
-export interface FavoritesViewContext {
-  onPageSelected: (pageNumber: number) => void
-  onPageStepped: (direction: NavigationKey) => void
-  onDrawerToggled: (open: boolean) => void
-  onDrawerViewSelected: (view: FavoritesDrawerView) => void
-  drawerViews: FavoritesDrawerViewMap
+export interface FavoritesViewDependencies {
+  onPageSelected: (pageNumber: number) => void;
+  onPageStepped: (direction: NavigationKey) => void;
+  onContentReplaced: () => void;
+  onContentAdded: (favorites: Favorite[]) => void;
+  onDrawerOpen: () => void;
+  onDrawerViewSelected: (view: FavoritesDrawerView) => void;
+  drawerViews: FavoritesDrawerViewMap;
 }
 
-export interface FavoritesModelContext {
-  getAdditionalTags: (id: string) => string | undefined
-  waitForAdditionalTags: () => Promise<void>
-  onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void
+export interface FavoritesModelDependencies {
+  getAddedTags: (id: string) => string | undefined;
+  waitForAddedTags: () => Promise<void>;
+  onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void;
+  onSearchResultsChanged: (searchResults: Favorite[]) => void;
 }
 
-export interface NewFavorites {
-  newFavorites: Favorite[]
-  newSearchResults: Favorite[]
+export interface FavoritesDisplay {
+  initialize: (results: Favorite[], options?: ContentDisplayOptions) => void;
+  sync: (newFavorites: Favorite[]) => void;
+  advance: (direction: NavigationKey) => boolean;
+  goToPage: (pageNumber: number) => void;
+  teardown: () => void;
 }
 
-export interface FavoritesFetchProgress {
-  resultsCount: number
-  allFavoritesCount: number
+export interface PaginationState {
+  totalCount: number;
+  sliceStart: number;
+  sliceEnd: number;
+  currentPage: number;
+  finalPage: number;
+  sequence: PaginationSequence;
 }
 
-export interface PaginationContext {
-  totalCount: number
-  sliceStart: number
-  sliceEnd: number
-  currentPage: number
-  finalPage: number
-  sequence: PaginationSequence
-}
-
-export interface FavoritesResultsView {
-  initialize: (results: Favorite[]) => void
-  reveal: (id: string) => void
-  sync: (newFavorites: Favorite[]) => void
-  loadMore: (direction: NavigationKey) => boolean
+export interface NewFavoritesResult {
+  favorites: Favorite[];
+  searchResults: Favorite[];
 }

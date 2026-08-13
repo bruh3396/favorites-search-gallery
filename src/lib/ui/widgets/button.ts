@@ -1,8 +1,32 @@
-import { ButtonElement, defaultButtonElement } from "@/types/element";
+import { IconName, icon } from "@/lib/ui/icon";
+import { Emitter } from "@/lib/communication/emitter";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/dom/element_factory";
-import { icon } from "@/lib/ui/icon";
+
+export interface ButtonElement {
+  parentId: string;
+  id: string;
+  enabled: boolean;
+  title: string;
+  position: InsertPosition;
+  textContent: string;
+  event: Emitter<MouseEvent> | null;
+  rightClickEnabled: boolean;
+  icon: IconName | null;
+}
+
+export const defaultButtonElement: ButtonElement = {
+  parentId: "",
+  id: "",
+  enabled: true,
+  title: "",
+  position: "afterbegin",
+  textContent: "",
+  event: null,
+  rightClickEnabled: false,
+  icon: null
+};
 
 export function buildButton(partial: Partial<ButtonElement>): HTMLButtonElement {
   const template = { ...defaultButtonElement, ...partial };

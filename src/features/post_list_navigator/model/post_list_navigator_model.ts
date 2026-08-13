@@ -5,7 +5,7 @@ export function setup(): void {
   PostListNavigatorNavigator.setup();
 }
 
-export * from "@/features/post_list_navigator/model/navigator";
+export { preloadAroundInitialPage, navigate, getMoreResults, getInitialPostList, resetCurrentPageNumber, allThumbs } from "@/features/post_list_navigator/model/navigator";
 export { ensureLoaded as ensureFavoriteIdsLoaded, has as isFavorite, add as addFavoriteId, remove as removeFavoriteId } from "@/features/post_list_navigator/model/favorite_ids";
 
 export function filterFavorites(thumbs: HTMLElement[]): HTMLElement[] {

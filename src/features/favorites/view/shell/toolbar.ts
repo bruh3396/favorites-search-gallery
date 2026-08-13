@@ -29,12 +29,21 @@ function grid(): HTMLElement {
 function searchField(): HTMLElement {
   return createElement("div", {
     id: FavoritesId.searchField,
-    children: [span(FavoritesId.searchButton), span(FavoritesId.actions)]
+    children: [
+      span(FavoritesId.searchButton),
+      span(FavoritesId.actions)
+    ]
   });
 }
 
 function status(): HTMLElement {
-  return createElement("span", { id: FavoritesId.status, children: [label(FavoritesId.matchCount), label(FavoritesId.loadStatus)] });
+  return createElement("span", {
+    id: FavoritesId.status,
+    children: [
+      label(FavoritesId.resultsCount),
+      label(FavoritesId.loadStatus)
+    ]
+  });
 }
 
 function about(): HTMLElement {
@@ -48,12 +57,19 @@ function about(): HTMLElement {
 }
 
 function help(): HTMLElement {
-  const button = createElement("button", { id: FavoritesId.aboutHelp, className: "menu-icon-btn", children: [icon("help")] });
+  const button = createElement("button", {
+    id: FavoritesId.aboutHelp,
+    className: "menu-icon-btn",
+    children: [icon("help")]
+  });
 
   addTooltip(button, "Help", "below");
   return button;
 }
 
 function version(): HTMLElement {
-  return createElement("span", { id: FavoritesId.aboutVersion, textContent: `v${VERSION}` });
+  return createElement("span", {
+    id: FavoritesId.aboutVersion,
+    textContent: `v${VERSION}`
+  });
 }

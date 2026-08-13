@@ -2,6 +2,13 @@
   flex: 0 0 auto;
 }
 
+[data-pagination-hidden] #favorites-pagination,
+[data-pagination-hidden] #results-per-page-container,
+[data-pagination-hidden] #pagination-range-label,
+[data-pagination-hidden] #favorites-bottom-navigation-buttons {
+  display: none !important;
+}
+
 #favorites-pagination {
   position: relative;
   display: flex;
@@ -115,10 +122,6 @@
   flex: 0 1 auto;
   width: 48px;
   min-width: 0;
-}
-
-#goto-page-popover #goto-page-input input.setting-stepper-value:focus {
-  background-color: transparent !important;
 }
 
 #goto-page-popover #goto-page-button {

@@ -1,7 +1,7 @@
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { applyCurrentTheme, onLayout, toggle, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/desktop/settings/helpers";
+import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/desktop/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
 import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -67,7 +67,7 @@ export const SettingsCatalog = {
     min: ThumbConfig.columnCountBounds.min,
     max: ThumbConfig.columnCountBounds.max,
     step: 1,
-    enabledWhen: onLayout((layout) => layout !== "row" && layout !== "native")
+    enabledWhen: whenLayout((layout) => layout !== "row" && layout !== "native")
   }),
   rowHeight: stepper({
     id: "row-size",
@@ -77,7 +77,7 @@ export const SettingsCatalog = {
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
-    enabledWhen: onLayout((layout) => layout === "row")
+    enabledWhen: whenLayout((layout) => layout === "row")
   }),
   header: toggle({
     id: "toggle-header",

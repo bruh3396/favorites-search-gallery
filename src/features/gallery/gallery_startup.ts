@@ -80,7 +80,7 @@ function hasStoredFavorites(): Promise<boolean> {
 function setupView(): void {
   GalleryView.setup({
     onMenuAction: Events.gallery.galleryMenuButtonClicked.emit,
-    onVideoEnded: GalleryAutoplay.onVideoEnded,
+    onVideoEnded: GalleryAutoplay.handleVideoEnded,
     onVideoDoubleClicked: GalleryOpenCloseFlow.close
   });
 }
@@ -88,7 +88,7 @@ function setupView(): void {
 function setupControl(): void {
   GalleryEdgeTapControls.setup();
   GalleryInteractionTracker.setup();
-  GalleryThumbObserver.setup(GalleryVisibilityFlow.onVisibleThumbsChanged);
+  GalleryThumbObserver.setup(GalleryVisibilityFlow.handleVisibleThumbsChanged);
 }
 
 function setupSubFeatures(): void {
@@ -112,7 +112,7 @@ function setupAutoplay(): void {
 }
 
 function subscribeToEvents(): void {
-  Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.onGalleryMenuAction);
+  Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.handleAction);
   Preferences.gallery.backgroundOpacity.on(GalleryView.setBackgroundOpacity);
 
   if (ON_FAVORITES_PAGE) {
@@ -131,9 +131,8 @@ function subscribeToEvents(): void {
 }
 
 function subscribeToFavoritesEvents(): void {
-  Events.favorites.newFavoritesFound.on(GalleryContentFlow.refresh, { once: true });
-  Events.favorites.pageChanged.on(GalleryContentFlow.refresh);
-  Events.favorites.favoritesAddedToCurrentPage.on(GalleryContentFlow.reIndex);
+  Events.favorites.contentReplaced.on(GalleryContentFlow.refresh);
+  Events.favorites.contentAdded.on(GalleryContentFlow.reIndex);
   Preferences.gallery.previewEnabled.on(GalleryModel.preview);
   Events.favorites.searchResultsUpdated.on(GalleryContentFlow.downscaleThumbsOutsideResults);
   Events.favorites.searchResultsUpdated.on(warmExtensionCache, { once: true });
@@ -146,33 +145,33 @@ async function warmExtensionCache(searchResults: Favorite[]): Promise<void> {
 }
 
 function subscribeToPostListEvents(): void {
-  Preferences.postList.upscaleThumbs.on(GalleryPostListFlow.onUpscaleToggled);
-  Events.postList.initialPostListCreated.on(GalleryPostListFlow.onInitialPostListCreated, { once: true });
+  Preferences.postList.upscaleThumbs.on(GalleryPostListFlow.toggleUpscaling);
+  Events.postList.initialPostListCreated.on(GalleryPostListFlow.preloadOnIdle, { once: true });
   Events.postList.moreResultsAdded.on(GalleryContentFlow.refresh);
   Preferences.postList.infiniteScroll.on(GalleryContentFlow.refresh);
   Events.postList.pageChanged.on(GalleryContentFlow.refresh);
 }
 
 function subscribeToDesktopInput(): void {
-  DomEvents.document.mouseover.on(GalleryMouseOverFlow.onMouseOver);
-  DomEvents.document.mouseover.on(GalleryView.onDesktopMenuMouseOver);
-  DomEvents.document.click.on(GalleryClickFlow.onClick);
-  DomEvents.document.mousedown.on(GalleryClickFlow.onMouseDown);
-  DomEvents.document.contextmenu.on(GalleryClickFlow.onContextMenu);
-  DomEvents.document.mousemove.on(GalleryClickFlow.onMouseMove);
-  DomEvents.document.mousemove.on(GalleryView.onDesktopMenuMouseMove);
-  DomEvents.document.wheel.on(GalleryWheelFlow.onWheel);
-  DomEvents.document.keydown.on(GalleryKeyFlow.onKeyDown);
-  DomEvents.document.keyup.on(GalleryKeyFlow.onKeyUp);
-  Events.gallery.interactionStopped.on(GalleryInteractionFlow.onInteractionStopped);
+  DomEvents.document.mouseover.on(GalleryMouseOverFlow.handleMouseOver);
+  DomEvents.document.mouseover.on(GalleryView.toggleMenuPersistence);
+  DomEvents.document.click.on(GalleryClickFlow.handleClick);
+  DomEvents.document.mousedown.on(GalleryClickFlow.handleMouseDown);
+  DomEvents.document.contextmenu.on(GalleryClickFlow.handleContextMenu);
+  DomEvents.document.mousemove.on(GalleryInteractionFlow.showCursorInGallery);
+  DomEvents.document.mousemove.on(GalleryView.revealMenu);
+  DomEvents.document.wheel.on(GalleryWheelFlow.handleWheel);
+  DomEvents.document.keydown.on(GalleryKeyFlow.handleKeyDown);
+  DomEvents.document.keyup.on(GalleryKeyFlow.handleKeyUp);
+  Events.gallery.interactionStopped.on(GalleryInteractionFlow.hideCursorInGallery);
 }
 
 function subscribeToMobileInput(): void {
-  Events.gallery.leftTap.on(GalleryTouchFlow.onLeftTap);
-  Events.gallery.rightTap.on(GalleryTouchFlow.onRightTap);
-  DomEvents.document.mousedown.on(GalleryTouchFlow.onMouseDown);
-  DomEvents.document.touchStart.on(GalleryTouchFlow.onTouchStart);
-  DomEvents.mobile.swipedDown.on(GalleryTouchFlow.onSwipeDown);
+  Events.gallery.leftTap.on(GalleryTouchFlow.navigateBackInGallery);
+  Events.gallery.rightTap.on(GalleryTouchFlow.navigateForwardInGallery);
+  DomEvents.document.mousedown.on(GalleryTouchFlow.handleMouseDown);
+  DomEvents.document.touchStart.on(GalleryTouchFlow.handleTouchStart);
+  DomEvents.mobile.swipedDown.on(GalleryTouchFlow.closeGallery);
   DomEvents.mobile.swipedUp.on(GalleryAutoplay.showMenu);
   DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
 }

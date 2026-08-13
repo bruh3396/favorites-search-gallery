@@ -9,6 +9,10 @@ import { chain } from "@/utils/function";
 
 let currentSearchQuery = "";
 
+export function setup(onSearchResultsChanged: (results: Favorite[]) => void): void {
+  FavoritesResults.setup(onSearchResultsChanged);
+}
+
 export function search(favorites: Favorite[], searchQuery: string): Favorite[] {
   currentSearchQuery = searchQuery;
   return updateSearchResults(favorites);

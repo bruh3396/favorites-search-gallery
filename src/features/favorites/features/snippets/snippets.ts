@@ -5,23 +5,19 @@ import { exportSnippets, importSnippets } from "@/features/favorites/features/sn
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { SnippetState } from "@/features/favorites/features/snippets/state";
 import { SnippetStore } from "@/features/favorites/features/snippets/store";
-import { SnippetsContext } from "@/features/favorites/features/snippets/types";
+import { SnippetsDependencies } from "@/features/favorites/features/snippets/types";
 import { Storage } from "@/lib/storage/local_storage";
 import { buildIdQuery } from "@/features/favorites/features/snippets/utils";
 import { copyText } from "@/utils/browser/clipboard";
-import { setHandlers } from "@/features/favorites/features/snippets/handlers";
 
 const store = new SnippetStore(Storage);
+let dependencies: SnippetsDependencies;
 
-let context: SnippetsContext = {
-  appendToSearch: () => { },
-  getSearchResults: () => []
-};
-
-export function setup(snippetsContext: SnippetsContext): void {
-  context = snippetsContext;
-  setHandlers({
+export function setup(deps: SnippetsDependencies): void {
+  dependencies = deps;
+  SnippetView.setup({
     onUse: useSnippet,
+    onMoveToTop: moveSnippetToTop,
     onCopy: copySnippet,
     onEdit: editSnippet,
     onDelete: deleteSnippet,
@@ -53,8 +49,13 @@ function useSnippet(name: string): void {
   if (snippet === undefined) {
     return;
   }
-  context.appendToSearch(snippet.query);
+  dependencies.appendToSearch(snippet.query);
   store.use(name);
+  refresh();
+}
+
+function moveSnippetToTop(name: string): void {
+  store.moveToTop(name);
   refresh();
 }
 
@@ -94,7 +95,7 @@ function saveSnippet(): void {
 }
 
 function fillQueryFromResults(): void {
-  const results = context.getSearchResults();
+  const results = dependencies.getSearchResults();
 
   if (results.length === 0) {
     alert("No search results to build a query from");

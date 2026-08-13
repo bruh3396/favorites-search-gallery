@@ -13,7 +13,7 @@ import { navigationDelta } from "@/utils/navigation";
 const cursor = new Cursor<HTMLElement>();
 let preloadWindow: ItemWindow<HTMLElement>;
 
-export * from "@/features/gallery/model/state";
+export { getCurrentState, isInGallery, isShowingPreviews, close, preview } from "@/features/gallery/model/state";
 
 export function setup(getItems: () => HTMLElement[], wrapAround: boolean): void {
   preloadWindow = new ItemWindow(getItems, wrapAround);

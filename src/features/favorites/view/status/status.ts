@@ -1,13 +1,12 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
-import { FavoritesFetchProgress, NewFavorites } from "@/features/favorites/types/types";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { ProgressBar } from "@/types/element";
+import { NewFavoritesResult } from "@/features/favorites/types/types";
+import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
-import { buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { pluralize } from "@/utils/string/format";
 
-let matchCountIndicator: HTMLElement;
+let resultsCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
 let progressBar: ProgressBar;
 let totalFavoritesCount: number | null = null;
@@ -25,29 +24,29 @@ export function setTemporaryStatus(text: string): void {
   statusTimeout = setTimeout(clearStatus, TEMPORARY_STATUS_TIMEOUT);
 }
 
-export function setMatchCount(value: number): void {
-  matchCountIndicator.textContent = `${value} ${value === 1 ? "Result" : "Results"}`;
+export function setResultsCount(value: number): void {
+  resultsCountIndicator.textContent = `${value} ${value === 1 ? "Result" : "Results"}`;
 }
 
-export function updateStatus(progress: FavoritesFetchProgress): void {
-  let statusText = `Fetching - ${progress.allFavoritesCount}`;
+export function updateFetchStatus(completed: number): void {
+  let statusText = `Fetching - ${completed}`;
 
   if (totalFavoritesCount !== null) {
     statusText = `${statusText} / ${totalFavoritesCount}`;
-    const eta = FavoritesEta.getEta(progress.allFavoritesCount, totalFavoritesCount);
+    const eta = FavoritesEta.getEta(completed, totalFavoritesCount);
 
     if (eta !== null) {
       statusText = `${statusText} - ${eta}`;
     }
-    progressBar.setProgress(progress.allFavoritesCount, totalFavoritesCount);
+    progressBar.setProgress(completed, totalFavoritesCount);
     progressBar.setVisible(true);
   }
   setStatus(statusText);
-  setMatchCount(progress.resultsCount);
+  setResultsCount(completed);
 }
 
-export function notifyNewFavoritesFound(newFavorites: NewFavorites): void {
-  const newFavoritesCount = newFavorites.newFavorites.length;
+export function notifyNewFavoritesFound(newFavorites: NewFavoritesResult): void {
+  const newFavoritesCount = newFavorites.favorites.length;
 
   if (newFavoritesCount > 0) {
     setStatus(`Found ${newFavoritesCount} new favorite${pluralize(newFavoritesCount)}`);
@@ -59,7 +58,7 @@ export function setExpectedTotalFavoritesCount(count: number | null): void {
 }
 
 export function setup(): void {
-  matchCountIndicator = Root.querySelector(`#${FavoritesId.matchCount}`) ?? document.createElement("label");
+  resultsCountIndicator = Root.querySelector(`#${FavoritesId.resultsCount}`) ?? document.createElement("label");
   statusIndicator = Root.querySelector(`#${FavoritesId.loadStatus}`) ?? document.createElement("label");
   progressBar = buildProgressBar(FavoritesId.loadProgressBar);
   Root.querySelector(`#${FavoritesId.toolbar}`)?.append(progressBar.element);

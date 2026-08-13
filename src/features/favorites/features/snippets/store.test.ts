@@ -465,6 +465,41 @@ describe("use", () => {
   });
 });
 
+describe("moveToTop", () => {
+  test("makes the snippet the newest", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple", 0, 100);
+    store.add("veg", "carrot", 0, 200);
+    store.moveToTop("fruits");
+    expect(store.get("fruits")?.createdAt).toBeGreaterThan(200);
+  });
+
+  test("persists the new creation time", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple", 0, 100);
+    store.moveToTop("fruits");
+    expect(persisted()[0].createdAt).toBeGreaterThan(100);
+  });
+
+  test("leaves the query alone", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple");
+    store.moveToTop("fruits");
+    expect(queriesOf(store.getAll())).toEqual(["apple"]);
+  });
+
+  test("ignores an unknown name", () => {
+    const store = new SnippetStore(storage);
+
+    store.add("fruits", "apple", 0, 100);
+    store.moveToTop("missing");
+    expect(store.get("fruits")?.createdAt).toBe(100);
+  });
+});
+
 describe("getAll", () => {
   test("does not expose the internal collection", () => {
     const store = new SnippetStore(storage);

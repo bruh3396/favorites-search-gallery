@@ -11,7 +11,7 @@ export const FeatureBridge = {
     allFavorites: new FeatureChannel<void, Favorite[]>([]),
     favoriteIds: new FeatureChannel<void, Promise<string[]>>(Promise.resolve([])),
     getFavorite: new FeatureChannel<string, Favorite | undefined>(undefined),
-    loadMore: new FeatureChannel<NavigationKey, boolean>(false),
+    advance: new FeatureChannel<NavigationKey, boolean>(false),
     searchQuery: new FeatureChannel<void, string>(""),
     searchResults: new FeatureChannel<void, Favorite[]>([]),
     usingInfiniteScroll: new FeatureChannel<void, boolean>(false)

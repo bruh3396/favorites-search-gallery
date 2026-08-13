@@ -1,9 +1,9 @@
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
 
 type GalleryStateHandlers<V> = {
-  idle?: (arg: V) => void
-  preview?: (arg: V) => void
-  open?: (arg: V) => void
+  idle?: (arg: V) => void;
+  preview?: (arg: V) => void;
+  open?: (arg: V) => void;
 };
 
 export function run<V>(handlers: GalleryStateHandlers<V>, args?: V): void {

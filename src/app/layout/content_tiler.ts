@@ -3,8 +3,9 @@ import { clearFade, fadeIn, fadeInReplacement, setupFadeIn } from "@/app/layout/
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
+import { ContentDisplayOptions } from "@/types/ui";
 import { DomEvents } from "@/app/dom/events";
-import { EnhancedWheelEvent } from "@/types/input";
+import { EnhancedWheelEvent } from "@/lib/input/wheel_event";
 import { GridTiler } from "@/lib/ui/tilers/grid_tiler";
 import { Layout } from "@/types/app";
 import { NativeTiler } from "@/lib/ui/tilers/native_tiler";
@@ -22,7 +23,6 @@ const tilers: AbstractTiler[] = [columnTiler, new GridTiler(Content), new RowTil
 const tilerMap = new Map(tilers.map(tiler => [tiler.layout, tiler]));
 let currentLayout: Layout = ON_FAVORITES_PAGE ? Preferences.favorites.layout.value : Preferences.postList.layout.value;
 let currentTiler: AbstractTiler = tilerMap.get(currentLayout) ?? columnTiler;
-let skipFadeOnNextTile = false;
 
 export function setup(): void {
   setupFadeIn();
@@ -49,17 +49,13 @@ export function changeLayout(layout: Layout): void {
 export const setRowHeight = (rowHeight: number): void => tilers.forEach(tiler => tiler.setRowHeight(rowHeight));
 export const setColumnCount = (columnCount: number): void => tilers.forEach(tiler => tiler.setColumnCount(columnCount));
 export const getLayout = (): Layout => currentLayout;
-export const skipNextFade = (): void => {
-  skipFadeOnNextTile = true;
-};
 
-export function tile(items: HTMLElement[]): void {
-  if (skipFadeOnNextTile) {
-    skipFadeOnNextTile = false;
+export function tile(items: HTMLElement[], options: ContentDisplayOptions = { fade: true }): void {
+  if (options.fade) {
+    fadeInReplacement(items, () => currentTiler.tile(items));
+  } else {
     clearFade(items);
     currentTiler.tile(items);
-  } else {
-    fadeInReplacement(items, () => currentTiler.tile(items));
   }
 }
 export const addToBottom = (items: HTMLElement[]): void => fadeIn(items, () => currentTiler.addItemsToBottom(items));

@@ -1,6 +1,7 @@
 import { defineConfig } from "eslint/config";
 import globals from "globals";
 import js from "@eslint/js";
+import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
@@ -22,7 +23,21 @@ export default defineConfig([
   },
   tseslint.configs.recommended,
   {
+    plugins: { "@stylistic": stylistic },
     rules: {
+      "@stylistic/member-delimiter-style": [
+        "error",
+        {
+          multiline: {
+            delimiter: "semi",
+            requireLast: true
+          },
+          singleline: {
+            delimiter: "semi",
+            requireLast: false
+          }
+        }
+      ],
       "accessor-pairs": "error",
       "array-bracket-newline": "error",
       "array-bracket-spacing": "error",
@@ -544,7 +559,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["scripts/**/*.ts", "src/playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.ts"],
+    files: ["build/**/*.ts", "src/playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.ts"],
     rules: {
       "no-console": "off"
     }

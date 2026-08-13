@@ -38,7 +38,7 @@ export const SettingsSections: SettingsSection[] = [
     ]
   },
   {
-    title: "Search",
+    title: "Filter",
     controls: [
       SettingsCatalog.rating,
       SettingsCatalog.excludeBlacklist

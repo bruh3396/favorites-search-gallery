@@ -1,29 +1,29 @@
 import { GalleryMenuAction } from "@/types/app";
 
 export interface GalleryRenderer {
-  root: HTMLElement
-  render: (thumb: HTMLElement) => void
-  hide: () => void
-  cache: (thumbs: HTMLElement[]) => Promise<void> | void
+  root: HTMLElement;
+  render: (thumb: HTMLElement) => void;
+  hide: () => void;
+  cache: (thumbs: HTMLElement[]) => Promise<void> | void;
 }
 
 export type VideoClip = {
-  start: number
-  end: number
+  start: number;
+  end: number;
 }
 
-export interface GalleryViewContext {
-  onMenuAction: (action: GalleryMenuAction) => void
-  onVideoEnded: () => void
-  onVideoDoubleClicked: (event: MouseEvent) => void
+export interface GalleryViewDependencies {
+  onMenuAction: (action: GalleryMenuAction) => void;
+  onVideoEnded: () => void;
+  onVideoDoubleClicked: (event: MouseEvent) => void;
 }
 
 export type GalleryMenuButton = {
-  id: string
-  icon: string
-  action: GalleryMenuAction
-  enabled: boolean
-  tooltip: string
-  color: string
-  href?: string
+  id: string;
+  icon: string;
+  action: GalleryMenuAction;
+  enabled: boolean;
+  tooltip: string;
+  color: string;
+  href?: string;
 }

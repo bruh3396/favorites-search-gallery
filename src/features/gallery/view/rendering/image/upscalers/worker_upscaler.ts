@@ -1,15 +1,12 @@
-// This file is compiled to a standalone string (via `?raw`) and run inside a Web Worker.
-// It is transformed, not bundled, so it must be fully self-contained — no imports.
-
 type UpscaleConfig = {
-  upscaledCanvasWidth: number
-  maxUpscaledCanvasHeight: number
+  upscaledCanvasWidth: number;
+  maxUpscaledCanvasHeight: number;
 }
 
 type UpscaleCommand =
-  | { action: "init", config: UpscaleConfig }
-  | { action: "upscale", id: string, url: string, canvas?: OffscreenCanvas }
-  | { action: "evict", id: string }
+  | { action: "init"; config: UpscaleConfig }
+  | { action: "upscale"; id: string; url: string; canvas?: OffscreenCanvas }
+  | { action: "evict"; id: string }
 
 const canvases: Map<string, OffscreenCanvas> = new Map();
 let config: UpscaleConfig = { upscaledCanvasWidth: 600, maxUpscaledCanvasHeight: 16_000 };

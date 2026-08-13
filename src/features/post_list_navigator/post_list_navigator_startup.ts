@@ -6,11 +6,11 @@ import * as PostListNavigatorOptionFlow from "@/features/post_list_navigator/flo
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/post_list_navigator_view";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { POST_LIST_PAGE_ENABLED } from "@/app/context/flags";
+import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 
 export function startPostListNavigator(): void {
-  if (POST_LIST_PAGE_ENABLED) {
+  if (ON_POST_LIST_PAGE) {
     setup();
     start();
   }
@@ -49,7 +49,7 @@ function setupView(): void {
 function setupFavoriteIndicator(): void {
   Events.postList.pageChanged.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.postList.moreResultsAdded.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
-  Events.app.favoriteAdded.on(PostListNavigatorFavoritesMarkerFlow.onFavoriteAdded);
+  Events.app.favoriteAdded.on(PostListNavigatorFavoritesMarkerFlow.registerFavorite);
   Preferences.postList.favoriteIndicator.on(PostListNavigatorOptionFlow.toggleFavoriteIndicator);
   Preferences.postList.favoriteIndicatorStyle.on(PostListNavigatorView.applyCurrentFavoriteStyle);
   Events.gallery.displayedThumb.on(PostListNavigatorView.applyGalleryFavoriteStyle);

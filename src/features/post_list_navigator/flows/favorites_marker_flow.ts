@@ -20,7 +20,7 @@ export function markExistingFavoritesIfEnabled(thumbs: HTMLElement[]): void {
   }
 }
 
-export function onFavoriteAdded(id: string): void {
+export function registerFavorite(id: string): void {
   PostListNavigatorModel.addFavoriteId(id);
 
   if (Preferences.postList.favoriteIndicator.value) {

@@ -11,7 +11,7 @@ export function toggle(config: Partial<ToggleSetting>): SettingsControl {
   return toggleControl({ registerHotkey, ...config });
 }
 
-export function onLayout(predicate: (layout: Layout) => boolean): EnableRule {
+export function whenLayout(predicate: (layout: Layout) => boolean): EnableRule {
   return enableWhen(Preferences.favorites.layout, predicate);
 }
 

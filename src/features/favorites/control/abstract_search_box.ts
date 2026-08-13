@@ -40,7 +40,7 @@ export abstract class AbstractFavoritesSearchBox {
   protected startSearch(): void {
     this.history.add(this.searchBox.value);
     hideAwesomplete(this.searchBox);
-    Events.favorites.searchStarted.emit(this.searchBox.value);
+    Events.favorites.searchRequested.emit(this.searchBox.value);
   }
 
   protected refreshClearButton(): void {

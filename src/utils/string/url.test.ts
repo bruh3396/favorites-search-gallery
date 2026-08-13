@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getQueryParamFromUrl, withHostname, withoutQueryParam } from "@/utils/string/url";
+import { getQueryParamFromUrl, withHostname, withoutQueryParam, withoutQueryParams } from "@/utils/string/url";
 
 describe("getQueryParamFromUrl", () => {
   const url = "https://rule34.xxx/index.php?page=favorites&s=view&id=12345&pid=42";
@@ -74,5 +74,27 @@ describe("withoutQueryParam", () => {
 
   test("preserves hash", () => {
     expect(withoutQueryParam("https://x.com/p?id=5#top", "id")).toBe("https://x.com/p#top");
+  });
+});
+
+describe("withoutQueryParams", () => {
+  test("removes every param", () => {
+    expect(withoutQueryParams("https://x.com/p?id=5&pid=2&tag=a")).toBe("https://x.com/p");
+  });
+
+  test("url without a query string is unchanged", () => {
+    expect(withoutQueryParams("https://x.com/p")).toBe("https://x.com/p");
+  });
+
+  test("preserves hash", () => {
+    expect(withoutQueryParams("https://x.com/p?id=5#top")).toBe("https://x.com/p#top");
+  });
+
+  test("preserves protocol, port, and path", () => {
+    expect(withoutQueryParams("http://localhost:3000/a/b?id=5")).toBe("http://localhost:3000/a/b");
+  });
+
+  test("drops a trailing question mark with no params", () => {
+    expect(withoutQueryParams("https://x.com/p?")).toBe("https://x.com/p");
   });
 });

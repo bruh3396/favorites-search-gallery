@@ -1,4 +1,4 @@
-import { EnhancedMouseEvent } from "@/types/input";
+import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
 import { getThumbAtPoint } from "@/lib/thumb/thumbs";
 
 let lastCursorX = 0;

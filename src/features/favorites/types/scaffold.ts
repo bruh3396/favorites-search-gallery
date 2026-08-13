@@ -1,4 +1,12 @@
 import { FavoritesDrawerView } from "@/types/favorite";
+import { IconName } from "@/lib/ui/icon";
+
+export type FavoritesDrawerViewDescriptor = {
+  name: FavoritesDrawerView;
+  label: string;
+  title?: string;
+  icon: IconName;
+};
 
 export const FavoritesId = {
   root: "favorites-root",
@@ -12,7 +20,7 @@ export const FavoritesId = {
   aboutHelp: "favorites-about-help",
   searchBox: "favorites-search-box",
   status: "favorites-search-status",
-  matchCount: "match-count-label",
+  resultsCount: "results-count-label",
   loadStatus: "favorites-load-status-label",
   loadProgressBar: "favorites-load-progress-bar",
   searchField: "favorites-search-field",
@@ -41,6 +49,15 @@ export const FavoritesClass = {
   drawerHelpLinks: "favorites-drawer-help-links",
   drawerHelpLink: "favorites-drawer-help-link"
 } as const;
+
+export const FavoritesDrawerViews: FavoritesDrawerViewDescriptor[] = [
+  { name: "settings", label: "Settings", icon: "settings" },
+  { name: "download", label: "Download", title: "Download", icon: "download" },
+  { name: "snippets", label: "Snippets", icon: "snippet" },
+  { name: "tags", label: "Tags", title: "Edit Tags", icon: "tag" },
+  { name: "change", label: "Changelog", icon: "changelog" },
+  { name: "help", label: "Help", title: "Help & Support", icon: "help" }
+];
 
 export const FavoritesHelpLinks: { label: string; href: string }[] = [
   { label: "Controls & Help", href: "https://github.com/bruh3396/favorites-search-gallery/#controls" },

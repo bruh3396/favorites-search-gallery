@@ -8,7 +8,7 @@ export function normalizeSearchQuery(query: string): string {
   return removeExtraWhiteSpace(query).toLowerCase();
 }
 
-export function parseTermGroups(query: string): { orGroups: string[][]; andTerms: string[]; } {
+export function parseTermGroups(query: string): { orGroups: string[][]; andTerms: string[] } {
   query = normalizeSearchQuery(query);
   return { andTerms: parseAndTerms(query), orGroups: parseOrGroups(query) };
 }

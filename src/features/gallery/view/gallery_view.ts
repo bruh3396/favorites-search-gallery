@@ -3,18 +3,18 @@ import * as GalleryRenderer from "@/features/gallery/view/rendering/gallery_rend
 import * as GalleryShell from "@/features/gallery/view/shell/shell";
 import * as GalleryUi from "@/features/gallery/view/shell/ui";
 import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
-import { GalleryViewContext } from "@/features/gallery/types/gallery_types";
+import { GalleryViewDependencies } from "@/features/gallery/types/gallery_types";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { insertStyle } from "@/utils/dom/injector";
 
-export function setup(context: GalleryViewContext): void {
+export function setup(deps: GalleryViewDependencies): void {
   insertStyle(GALLERY_CSS);
   GalleryShell.mountGallery();
   GalleryUi.setup(GalleryShell.GalleryRoot);
-  GalleryRenderer.setup(GalleryShell.GalleryRoot, context.onVideoEnded, context.onVideoDoubleClicked);
+  GalleryRenderer.setup(GalleryShell.GalleryRoot, deps.onVideoEnded, deps.onVideoDoubleClicked);
 
   if (ON_DESKTOP_DEVICE) {
-    GalleryDesktopMenu.setup(context.onMenuAction);
+    GalleryDesktopMenu.setup(deps.onMenuAction);
   }
 }
 
@@ -55,8 +55,8 @@ export function toggleZoomCursor(value: boolean): void {
   GalleryRenderer.toggleZoomCursor(value);
 }
 
-export * from "@/features/gallery/view/rendering/gallery_renderer";
-export { onMouseMove as onDesktopMenuMouseMove, onMouseOver as onDesktopMenuMouseOver } from "@/features/gallery/view/shell/desktop_menu";
-export * from "@/features/gallery/view/shell/ui";
+export { nudge, cache, toggleZoom, zoomToPoint, cacheImages, upscale, upscaleCachedThumbs, downscaleAll, reupscaleCachedThumbs, correctOrientation, toggleVideoLooping, restartVideo, toggleVideoPause, toggleVideoMute } from "@/features/gallery/view/rendering/gallery_renderer";
+export { reveal as revealMenu, togglePersistence as toggleMenuPersistence } from "@/features/gallery/view/shell/desktop_menu";
+export { toggleCursor, setBackgroundOpacity, toggleBackgroundOpacity, updateBackgroundOpacity, showAddedFavoriteStatus, showRemovedFavoriteStatus } from "@/features/gallery/view/shell/ui";
 export const showCursor = (): void => GalleryUi.toggleCursor(true);
 export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryShell.GalleryRoot.appendChild(element);

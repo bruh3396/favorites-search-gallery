@@ -1,10 +1,23 @@
 import { Favorite } from "@/types/favorite";
+import { doNothing } from "@/utils/function";
 import { shuffleArray } from "@/utils/collection/array";
 
 let currentSearchResults: Favorite[] = [];
+let onChanged: (results: Favorite[]) => void = doNothing;
 
-export const get = (): Favorite[] => currentSearchResults;
-export const set = (results: Favorite[]): Favorite[] => (currentSearchResults = results);
+export function setup(onSearchResultsChanged: (results: Favorite[]) => void): void {
+  onChanged = onSearchResultsChanged;
+}
+
+export function get(): Favorite[] {
+  return currentSearchResults;
+}
+
+export function set(results: Favorite[]): Favorite[] {
+  currentSearchResults = results;
+  onChanged(currentSearchResults);
+  return currentSearchResults;
+}
 
 export function invert(allFavorites: Favorite[]): Favorite[] {
   const ids = new Set(currentSearchResults.map(favorite => favorite.id));
@@ -12,15 +25,15 @@ export function invert(allFavorites: Favorite[]): Favorite[] {
 }
 
 export function shuffle(): Favorite[] {
-  return (currentSearchResults = shuffleArray(currentSearchResults));
+  return set(shuffleArray(currentSearchResults));
 }
 
 export function append(favorites: Favorite[]): Favorite[] {
-  currentSearchResults = [...currentSearchResults, ...favorites];
+  set([...currentSearchResults, ...favorites]);
   return favorites;
 }
 
 export function prepend(favorites: Favorite[]): Favorite[] {
-  currentSearchResults = [...favorites, ...currentSearchResults];
+  set([...favorites, ...currentSearchResults]);
   return favorites;
 }

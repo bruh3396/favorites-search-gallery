@@ -165,8 +165,8 @@
   padding: 0;
 }
 
-.setting-collapse-expand[data-collapsed] > .icon:first-child,
-.setting-collapse-expand:not([data-collapsed]) > .icon:last-child {
+.setting-collapse-expand[data-collapsed]>.icon:first-child,
+.setting-collapse-expand:not([data-collapsed])>.icon:last-child {
   display: none;
 }
 
@@ -300,7 +300,7 @@
   cursor: pointer;
 }
 
-.settings-view button.setting-dropdown-button > span {
+.settings-view button.setting-dropdown-button>span {
   flex: 1 1 auto;
   text-align: left;
 }
@@ -414,8 +414,17 @@ input.setting-stepper-value {
 }
 
 input.setting-stepper-value:focus {
+  background-color: transparent !important;
   outline: none;
 }
+
+input.setting-stepper-value:hover {
+  background-color: transparent !important;
+  outline: none;
+  cursor: text;
+}
+
+
 
 .setting-slider {
   display: inline-flex;
@@ -462,4 +471,3 @@ input.setting-stepper-value:focus {
   text-align: right;
   color: var(--theme-text);
 }
-

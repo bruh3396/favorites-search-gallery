@@ -119,7 +119,7 @@
 }
 
 
-#favorites-search-status>#match-count-label {
+#favorites-search-status>#results-count-label {
   flex: 0 0 auto;
 }
 

@@ -1,4 +1,4 @@
-import { EnhancedKeyboardEvent } from "@/types/input";
+import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { galleryOpened } from "@/app/channels/feature_bridge";
 
@@ -6,7 +6,7 @@ const hotkeyHandlers: Record<string, () => void> = {
   "/": focusSearchBar
 };
 
-export function onKeyDown(event: EnhancedKeyboardEvent): void {
+export function handleKeyDown(event: EnhancedKeyboardEvent): void {
   if (!event.isHotkey || galleryOpened()) {
     return;
   }

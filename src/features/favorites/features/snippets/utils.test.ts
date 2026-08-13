@@ -1,4 +1,4 @@
-import { buildIdQuery, failureText, filterSnippets, normalizeName, sortByRecentlyUsed } from "@/features/favorites/features/snippets/utils";
+import { buildIdQuery, failureText, filterSnippets, normalizeName, sortByNewest } from "@/features/favorites/features/snippets/utils";
 import { describe, expect, test } from "vitest";
 import { Snippet } from "@/features/favorites/features/snippets/types";
 
@@ -37,34 +37,28 @@ describe("normalizeName", () => {
   });
 });
 
-describe("sortByRecentlyUsed", () => {
-  test("puts the most recently used first", () => {
-    const snippets = [snippet("a", "1", 100), snippet("b", "2", 300), snippet("c", "3", 200)];
-
-    expect(namesOf(sortByRecentlyUsed(snippets))).toEqual(["b", "c", "a"]);
-  });
-
-  test("falls back to newest created when unused", () => {
+describe("sortByNewest", () => {
+  test("puts the most recently created first", () => {
     const snippets = [snippet("a", "1", 0, 100), snippet("b", "2", 0, 300), snippet("c", "3", 0, 200)];
 
-    expect(namesOf(sortByRecentlyUsed(snippets))).toEqual(["b", "c", "a"]);
+    expect(namesOf(sortByNewest(snippets))).toEqual(["b", "c", "a"]);
   });
 
-  test("ranks any used snippet above an unused one", () => {
-    const snippets = [snippet("unused", "1", 0, 999), snippet("used", "2", 1, 0)];
+  test("ignores when a snippet was last used", () => {
+    const snippets = [snippet("older", "1", 999, 100), snippet("newer", "2", 0, 200)];
 
-    expect(namesOf(sortByRecentlyUsed(snippets))).toEqual(["used", "unused"]);
+    expect(namesOf(sortByNewest(snippets))).toEqual(["newer", "older"]);
   });
 
   test("does not modify the given array", () => {
-    const snippets = [snippet("a", "1", 100), snippet("b", "2", 300)];
+    const snippets = [snippet("a", "1", 0, 100), snippet("b", "2", 0, 300)];
 
-    sortByRecentlyUsed(snippets);
+    sortByNewest(snippets);
     expect(namesOf(snippets)).toEqual(["a", "b"]);
   });
 
   test("handles an empty list", () => {
-    expect(sortByRecentlyUsed([])).toEqual([]);
+    expect(sortByNewest([])).toEqual([]);
   });
 });
 

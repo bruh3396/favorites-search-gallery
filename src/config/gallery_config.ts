@@ -32,6 +32,6 @@ export const GalleryConfig = {
   bottomOverscanPercent: 175,
   bitmapCloseDelay: 50,
 
-  useOffscreenThumbUpscaler: false,
+  useOffscreenThumbUpscaler: true,
   galleryMenuMonoColor: true
 };

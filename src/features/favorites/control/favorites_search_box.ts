@@ -10,22 +10,8 @@ export function setup(): void {
   }
 }
 
-export function append(text: string): void {
-  searchBox?.append(text);
-}
-
-export function exclude(tag: string): void {
-  searchBox?.append(`-${tag}`);
-}
-
-export function search(query: string): void {
-  searchBox?.search(query);
-}
-
-export function clear(): void {
-  searchBox?.clear();
-}
-
-export function handleSearchButtonClicked(event: MouseEvent): void {
-  searchBox?.handleSearchButtonClicked(event);
-}
+export const append = (text: string): void => searchBox?.append(text);
+export const exclude = (tag: string): void => searchBox?.append(`-${tag}`);
+export const search = (query: string): void => searchBox?.search(query);
+export const clear = (): void => searchBox?.clear();
+export const handleSearchButtonClicked = (event: MouseEvent): void => searchBox?.handleSearchButtonClicked(event);

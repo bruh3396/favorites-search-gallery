@@ -1,5 +1,5 @@
 import { select, unselectAll } from "@/features/favorites/features/tag_editor/selection";
-import { EnhancedMouseEvent } from "@/types/input";
+import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
 import { Favorite } from "@/types/favorite";
 import { ITEM_CLASS_NAME } from "@/lib/thumb/thumbs";
 import { insertStyle } from "@/utils/dom/injector";

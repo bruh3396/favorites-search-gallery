@@ -1,7 +1,8 @@
 import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/icons";
-import { EnhancedKeyboardEvent, NavigationKey } from "@/types/input";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
+import { NavigationKey } from "@/types/input";
 import { clamp, millisecondsToSeconds } from "@/utils/number";
 import { isImageThumb, isVideoThumb } from "@/lib/media/type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
@@ -16,11 +17,11 @@ import { throttle } from "@/lib/async/throttle";
 type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
 
 type AutoplayEvents = {
-  setVideoLooping: (value: boolean) => void
-  onComplete: (direction?: NavigationKey) => void
-  onVideoEndedBeforeMinimumViewTime: () => void
-  subscribeToMouseMove: Subscribe<MouseEvent>
-  subscribeToKeyDown: Subscribe<EnhancedKeyboardEvent>
+  setVideoLooping: (value: boolean) => void;
+  onComplete: (direction?: NavigationKey) => void;
+  onVideoEndedBeforeMinimumViewTime: () => void;
+  subscribeToMouseMove: Subscribe<MouseEvent>;
+  subscribeToKeyDown: Subscribe<EnhancedKeyboardEvent>;
 }
 
 const menuIcons = {
@@ -107,7 +108,7 @@ export function stopAutoplay(): void {
   forceHideMenu();
 }
 
-export function onVideoEnded(): void {
+export function handleVideoEnded(): void {
   if (!active || paused) {
     return;
   }

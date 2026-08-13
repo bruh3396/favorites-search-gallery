@@ -16,10 +16,10 @@ export class FavoriteItem implements Favorite {
   private readonly favoriteTags: FavoriteTags;
   private element: FavoriteElement | null;
 
-  constructor(source: HTMLElement | SerializedFavorite, additionalTags?: string) {
+  constructor(source: HTMLElement | SerializedFavorite, addedTags?: string) {
     this.id = source instanceof HTMLElement ? getIdFromThumb(source) : source.id;
     this.post = createPost(source);
-    this.favoriteTags = new FavoriteTags(this.post, source, additionalTags);
+    this.favoriteTags = new FavoriteTags(this.post, source, addedTags);
     this.element = null;
     this.metadata = new FavoriteMetadata(this.id, source);
   }
@@ -56,7 +56,7 @@ export class FavoriteItem implements Favorite {
     this.metadata.populateFromPost(post);
     this.element?.setAspectRatio(post.width, post.height);
   };
-  public addAdditionalTags = (newTags: string): string => this.favoriteTags.addAdditionalTags(newTags);
-  public removeAdditionalTags = (tagsToRemove: string): string => this.favoriteTags.removeAdditionalTags(tagsToRemove);
-  public resetAdditionalTags = (): void => this.favoriteTags.resetAdditionalTags();
+  public addTags = (newTags: string): string => this.favoriteTags.addTags(newTags);
+  public removeAddedTags = (tagsToRemove: string): string => this.favoriteTags.removeAddedTags(tagsToRemove);
+  public resetAddedTags = (): void => this.favoriteTags.resetAddedTags();
 }

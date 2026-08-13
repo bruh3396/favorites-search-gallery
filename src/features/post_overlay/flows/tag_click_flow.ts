@@ -1,8 +1,8 @@
-import { EnhancedMouseEvent } from "@/types/input";
+import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
 import { Events } from "@/app/channels/events";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
 
-export function onMouseDown(mouseEvent: EnhancedMouseEvent): void {
+export function handleMouseDown(mouseEvent: EnhancedMouseEvent): void {
   const event = mouseEvent.originalEvent;
   const tag = tagUnderEvent(event);
 
@@ -27,7 +27,7 @@ export function onMouseDown(mouseEvent: EnhancedMouseEvent): void {
   }
 }
 
-export function onContextMenu(event: MouseEvent): void {
+export function handleContextMenu(event: MouseEvent): void {
   if (tagUnderEvent(event) !== null) {
     event.preventDefault();
   }

@@ -5,7 +5,7 @@ import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { isExitKey, isNavigationKey } from "@/types/guards";
-import { EnhancedKeyboardEvent } from "@/types/input";
+import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
 import { GalleryConfig } from "@/config/gallery_config";
 import { throttle } from "@/lib/async/throttle";
 import { toggleFullscreen } from "@/utils/browser/window";
@@ -28,29 +28,29 @@ const outsideGalleryHotkeyHandlers: Record<string, () => void> = {
   f: toggleFullscreen
 };
 
-export function onKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
+export function handleKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
   if (keyboardEvent.originalEvent.repeat) {
-    onKeyDownThrottled(keyboardEvent.originalEvent);
+    handleKeyDownThrottled(keyboardEvent.originalEvent);
   } else {
-    onKeyDownNoThrottle(keyboardEvent.originalEvent);
+    handleKeyDownNoThrottle(keyboardEvent.originalEvent);
   }
 }
 
-export function onKeyUp(event: EnhancedKeyboardEvent): void {
-  GalleryDispatch.run({ open: onKeyUpInGallery }, event);
+export function handleKeyUp(event: EnhancedKeyboardEvent): void {
+  GalleryDispatch.run({ open: handleKeyUpInGallery }, event);
 }
 
-const onKeyDownNoThrottle = (event: KeyboardEvent): void => {
+const handleKeyDownNoThrottle = (event: KeyboardEvent): void => {
   GalleryDispatch.run({
-    idle: onKeyDownOutsideGallery,
-    preview: onKeyDownOutsideGallery,
-    open: onKeyDownInGallery
+    idle: handleKeyDownOutsideGallery,
+    preview: handleKeyDownOutsideGallery,
+    open: handleKeyDownInGallery
   }, new EnhancedKeyboardEvent(event));
 };
 
-const onKeyDownThrottled = throttle(onKeyDownNoThrottle, GalleryConfig.galleryNavigationDelay);
+const handleKeyDownThrottled = throttle(handleKeyDownNoThrottle, GalleryConfig.galleryNavigationDelay);
 
-function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
+function handleKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   const event = keyboardEvent.originalEvent;
 
   if (event.ctrlKey) {
@@ -78,13 +78,13 @@ function onKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
   }
 }
 
-function onKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
+function handleKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
   if (event.isHotkey) {
     outsideGalleryHotkeyHandlers[event.key.toLowerCase()]?.();
   }
 }
 
-function onKeyUpInGallery(event: EnhancedKeyboardEvent): void {
+function handleKeyUpInGallery(event: EnhancedKeyboardEvent): void {
   if (event.key === "shift") {
     GalleryView.toggleZoomCursor(false);
   }

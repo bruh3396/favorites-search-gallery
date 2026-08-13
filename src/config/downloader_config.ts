@@ -3,8 +3,8 @@ export const DownloaderConfig = {
   concurrency: 5,
   batchSizeOptions: [100, 250, 500, 1_000, 0],
   filename: {
-    tagSeparator: ",",
-    categorySeparator: "--",
+    tagSeparator: " ",
+    categorySeparator: " ",
     maxLength: 200
   }
 };

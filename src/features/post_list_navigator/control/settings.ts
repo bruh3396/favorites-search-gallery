@@ -71,7 +71,7 @@ export const Settings = {
     min: ThumbConfig.columnCountBounds.min,
     max: ON_DESKTOP_DEVICE ? ThumbConfig.columnCountBounds.max : 10,
     step: 1,
-    enabledWhen: onLayout((layout) => layout !== "row" && layout !== "native")
+    enabledWhen: whenLayout((layout) => layout !== "row" && layout !== "native")
   }),
   rowHeight: stepper({
     id: "row-size",
@@ -81,7 +81,7 @@ export const Settings = {
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
-    enabledWhen: onLayout((layout) => layout === "row")
+    enabledWhen: whenLayout((layout) => layout === "row")
   }),
   favoriteIndicatorStyle: dropdown<HighlightStyle>({
     id: "favorite-indicator-style",
@@ -126,7 +126,7 @@ export const Settings = {
   })
 };
 
-function onLayout(predicate: (layout: Layout) => boolean): EnableRule {
+function whenLayout(predicate: (layout: Layout) => boolean): EnableRule {
   return enableWhen(Preferences.postList.layout, predicate);
 }
 

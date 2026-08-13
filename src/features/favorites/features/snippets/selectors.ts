@@ -1,5 +1,6 @@
 export const SnippetSelectors = {
   panel: "favorites-snippets-panel",
+  filter: "favorites-snippets-filter",
   list: "favorites-snippets-list",
   row: "favorites-snippets-row",
   definition: "favorites-snippets-definition",

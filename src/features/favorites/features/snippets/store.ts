@@ -84,6 +84,16 @@ export class SnippetStore {
     this.save();
   }
 
+  public moveToTop(name: string): void {
+    const snippet = this.snippets.get(name);
+
+    if (snippet === undefined) {
+      return;
+    }
+    this.snippets.set(name, { ...snippet, createdAt: Date.now() });
+    this.save();
+  }
+
   public replaceAll(entries: SerializedSnippet[]): number {
     const now = Date.now();
 

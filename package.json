@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@eslint/js": "^9.24.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^25.6.0",
     "@types/sqlite3": "^5.1.0",
     "@typescript-eslint/eslint-plugin": "^8.30.1",
@@ -9,6 +10,8 @@
     "esbuild": "^0.25.2",
     "esbuild-visualizer": "^0.7.0",
     "eslint": "^9.25.1",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-boundaries": "^7.2.0",
     "globals": "^15.15.0",
     "knip": "^6.12.2",
     "sqlite3": "^6.0.1",
@@ -22,28 +25,27 @@
     "node_modules"
   ],
   "scripts": {
-    "build": "node scripts/bin/build || (npm run compile-scripts && node scripts/bin/build)",
+    "build": "node build/bin/build || (npm run compile-build && node build/bin/build)",
     "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js",
-
     "test": "npx vitest --run --exclude \"src/playground/**\"",
-    "test:worker": "npx vitest --run src/playground/worker.test.ts",
+    "test-api": "npx vitest --run src/playground/worker.test.ts",
     "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
     "lint": "npx eslint src/",
-    "audit": "tsx .scripts/project_auditor.ts",
-
+    "audit:old": "tsx .scripts/project_auditor.ts",
+    "audit:dependencies": "npx eslint --no-config-lookup -c .architecture/dependencies/eslint.config.mjs src/",
+    "audit:structure": "tsx .architecture/structure/main.ts",
+    "audit": "npm run audit:dependencies && npm run audit:structure",
     "continuous-integration": "npm run build && npm run test && npm run typecheck",
-    "release-checks:local": "npm run compile-scripts && npm run continuous-integration && npm run test:worker && npm run lint",
-    "release-checks:ci": "npm run compile-scripts && npm run continuous-integration && npm run lint",
-
+    "release-checks:ci": "npm run compile-build && npm run continuous-integration && npm run lint && npm run audit",
+    "release-checks:local": "npm run release-checks:ci && npm run test-api",
     "release": "python .scripts/release.py",
     "release:patch": "npm run release -- patch",
     "release:minor": "npm run release -- minor",
     "release:major": "npm run release -- major",
     "release:test": "npm run release -- test",
     "release:cleanup": "npm run release -- cleanup",
-
-    "compile-scripts": "tsc --project scripts/tsconfig.json",
-    "delete-compiled-scripts": "if exist scripts\\bin del /q scripts\\bin\\*.js",
+    "compile-build": "tsc --project build/tsconfig.json",
+    "delete-compiled-build": "if exist build\\bin del /q build\\bin\\*.js",
     "fix-bom": "python .scripts/correct_bom.py",
     "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open"
   },

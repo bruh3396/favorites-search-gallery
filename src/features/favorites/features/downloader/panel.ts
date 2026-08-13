@@ -2,7 +2,7 @@ import * as FavoritesDownload from "@/features/favorites/features/downloader/dow
 import { DownloadProgress, DownloadResult } from "@/features/favorites/features/downloader/types";
 import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
 import { DownloaderConfig } from "@/config/downloader_config";
-import { FavoritesDownloaderContext } from "@/features/favorites/features/downloader/deps";
+import { FavoritesDownloaderDeps } from "@/features/favorites/features/downloader/deps";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
@@ -30,7 +30,7 @@ export function mount(): FavoritesDrawerViewContent {
   return { mount: buildPanel };
 }
 
-export function unlock(): void {
+export function enable(): void {
   ready = true;
 
   if (!isDownloading()) {
@@ -39,7 +39,7 @@ export function unlock(): void {
   render();
 }
 
-export function refreshCount(): void {
+export function reRender(): void {
   if (!isDownloading()) {
     render();
   }
@@ -61,7 +61,7 @@ function isDownloading(): boolean {
 
 function render(): void {
   const downloading = isDownloading();
-  const itemCount = ready ? FavoritesDownloaderContext.getItems().length : 0;
+  const itemCount = ready ? FavoritesDownloaderDeps.getSearchResults().length : 0;
 
   toggleDataset(batchSizeRow, "hidden", !ready || downloading);
   toggleDataset(filenameFormatRow, "hidden", !ready || downloading);
@@ -91,7 +91,7 @@ function countBatches(itemCount: number, batchSize: number): number {
 function buildFilenameFormatControl(): HTMLElement {
   return multiSegmented<number>({
     id: "download-filename-format",
-    label: "Filename Tags",
+    label: "Filename",
     tooltip: "Add selected meta tags to each filename",
     tooltipPosition: "below",
     preference: Preferences.favorites.downloadFilenameFormat,
@@ -118,7 +118,7 @@ async function startDownload(): Promise<void> {
   if (!ready || isDownloading()) {
     return;
   }
-  const items = FavoritesDownloaderContext.getItems();
+  const items = FavoritesDownloaderDeps.getSearchResults();
 
   if (items.length === 0) {
     status.textContent = "No search results to download";

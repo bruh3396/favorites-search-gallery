@@ -6,34 +6,34 @@ export type FavoriteMetricMap = {
 }
 
 export type SerializedFavoriteMetadata = {
-  width: number
-  height: number
-  score: number
-  rating: number
-  create: number
-  change: number
-  duration: number | undefined
+  width: number;
+  height: number;
+  score: number;
+  rating: number;
+  create: number;
+  change: number;
+  duration: number | undefined;
 }
 
 export type SerializedFavorite = {
-  id: string
-  tags: string | Set<string>
-  src: string
-  metadata: SerializedFavoriteMetadata
+  id: string;
+  tags: string | Set<string>;
+  src: string;
+  metadata: SerializedFavoriteMetadata;
 }
 
 export interface Favorite extends Searchable {
-  id: string
-  root: HTMLElement
-  thumbUrl: string
-  serialized: SerializedFavorite
-  withinRating: (rating: Rating) => boolean
-  updateTags: (post: Post) => void
-  addAdditionalTags: (newTags: string) => string
-  removeAdditionalTags: (tagsToRemove: string) => string
-  resetAdditionalTags: () => void
-  populateMetadata: (post: Post) => void
-  metrics: FavoriteMetricMap
+  id: string;
+  root: HTMLElement;
+  thumbUrl: string;
+  serialized: SerializedFavorite;
+  withinRating: (rating: Rating) => boolean;
+  updateTags: (post: Post) => void;
+  addTags: (newTags: string) => string;
+  removeAddedTags: (tagsToRemove: string) => string;
+  resetAddedTags: () => void;
+  populateMetadata: (post: Post) => void;
+  metrics: FavoriteMetricMap;
 }
 
 export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success"

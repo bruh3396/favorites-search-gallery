@@ -1,12 +1,12 @@
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { openMedia, openPost } from "@/lib/remote/rule34/posts/navigation";
-import { EnhancedMouseEvent } from "@/types/input";
+import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
 
 let previousThumb: HTMLElement | null = null;
 
-export function onClick(event: EnhancedMouseEvent): void {
+export function handleClick(event: EnhancedMouseEvent): void {
   if (event.thumb === null) {
     return;
   }
@@ -17,7 +17,7 @@ export function onClick(event: EnhancedMouseEvent): void {
   event.originalEvent.preventDefault();
 }
 
-export function onMouseDown(event: EnhancedMouseEvent): void {
+export function handleMouseDown(event: EnhancedMouseEvent): void {
   closePopoversOutside(event);
 
   if (event.thumb === null || event.ctrlKey) {
@@ -32,7 +32,7 @@ export function onMouseDown(event: EnhancedMouseEvent): void {
   event.originalEvent.preventDefault();
 }
 
-export function onMouseOver(event: EnhancedMouseEvent): void {
+export function suppressLinkOnHoveredThumb(event: EnhancedMouseEvent): void {
   if (event.thumb === previousThumb || event.thumb === null) {
     return;
   }

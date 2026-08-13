@@ -3,12 +3,13 @@
   flex-direction: column;
   gap: 6px;
   padding: 6px;
+  min-height: 0;
   overflow-y: hidden;
 }
 
 .favorites-snippets-list {
   display: flex;
-  flex: 0 0 40%;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 2px;
   min-height: 0;
@@ -21,13 +22,23 @@
 
 .favorites-snippets-footer {
   flex: 0 0 auto;
+  margin-bottom: 100px;
 }
 
-.favorites-snippets-panel > .search-field {
+.favorites-snippets-filter {
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin: -6px -6px 0;
+  padding: 6px;
+}
+
+.favorites-snippets-filter > .search-field {
+  flex: 1 1 auto;
 }
 
 .favorites-snippets-row {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 6px;
@@ -47,10 +58,16 @@
 }
 
 .favorites-snippets-actions {
+  position: absolute;
+  top: 50%;
+  right: 6px;
   display: flex;
-  flex: 0 0 auto;
   gap: 4px;
+  padding-left: 12px;
+  transform: translateY(-50%);
+  background: linear-gradient(to right, transparent, var(--theme-hover) 12px);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.12s ease;
 }
 
@@ -58,10 +75,12 @@
 .favorites-snippets-actions:has(:focus-visible),
 .favorites-snippets-actions:has([data-copied]) {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .favorites-snippets-action {
   display: grid;
+  flex: 0 0 auto;
   place-items: center;
   width: 28px;
   height: 28px;
@@ -163,7 +182,7 @@
   min-height: 100px;
   font-family: var(--font-mono) !important;
   line-height: 1.5;
-  resize: vertical;
+  resize: none;
 }
 
 .favorites-snippets-error {

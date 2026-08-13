@@ -3,8 +3,8 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 
 type BudgetedRequests = {
-  accepted: ImageRequest[]
-  rejected: ImageRequest[]
+  accepted: ImageRequest[];
+rejected: ImageRequest[];
 }
 
 let getPixelCount: (id: string) => number = () => 0;

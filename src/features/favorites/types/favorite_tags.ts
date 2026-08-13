@@ -5,10 +5,10 @@ import { SerializedFavorite } from "@/types/favorite";
 export class FavoriteTags {
   public tags: Set<string> = new Set();
   private baseTags: Set<string> = new Set();
-  private additionalTags: Set<string> = new Set();
+  private addedTags: Set<string> = new Set();
 
-  constructor(post: Post, record: HTMLElement | SerializedFavorite, additionalTags?: string) {
-    this.set(toBaseTagSet(post, record), additionalTags === undefined ? undefined : toSortedTagSet(additionalTags));
+  constructor(post: Post, record: HTMLElement | SerializedFavorite, addedTags?: string) {
+    this.set(toBaseTagSet(post, record), addedTags === undefined ? undefined : toSortedTagSet(addedTags));
     post.tags = "";
   }
 
@@ -16,49 +16,49 @@ export class FavoriteTags {
     return toTagString(this.tags);
   }
 
-  public set(tags: Set<string>, additionalTags?: Set<string>): void {
+  public set(tags: Set<string>, addedTags?: Set<string>): void {
     this.baseTags = tags;
 
-    if (additionalTags !== undefined) {
-      this.additionalTags = additionalTags;
+    if (addedTags !== undefined) {
+      this.addedTags = addedTags;
     }
     this.mergeTags();
   }
 
-  public addAdditionalTags(newTagString: string): string {
+  public addTags(newTagString: string): string {
     const newTags = toSortedTagSet(newTagString).difference(this.tags);
 
     if (newTags.size > 0) {
-      this.additionalTags = this.additionalTags.union(newTags);
+      this.addedTags = this.addedTags.union(newTags);
       this.mergeTags();
     }
-    return toSortedTagString(this.additionalTags);
+    return toSortedTagString(this.addedTags);
   }
 
-  public removeAdditionalTags(tagsToRemove: string): string {
-    const tagsToRemoveSet = toSortedTagSet(tagsToRemove).intersection(this.additionalTags);
+  public removeAddedTags(tagsToRemove: string): string {
+    const tagsToRemoveSet = toSortedTagSet(tagsToRemove).intersection(this.addedTags);
 
     if (tagsToRemoveSet.size > 0) {
-      this.additionalTags = this.additionalTags.difference(tagsToRemoveSet);
+      this.addedTags = this.addedTags.difference(tagsToRemoveSet);
       this.mergeTags();
     }
-    return toSortedTagString(this.additionalTags);
+    return toSortedTagString(this.addedTags);
   }
 
-  public resetAdditionalTags(): void {
-    if (this.additionalTags.size === 0) {
+  public resetAddedTags(): void {
+    if (this.addedTags.size === 0) {
       return;
     }
-    this.additionalTags = new Set();
+    this.addedTags = new Set();
     this.mergeTags();
   }
 
   private mergeTags(): void {
-    if (this.additionalTags.size === 0) {
+    if (this.addedTags.size === 0) {
       this.tags = this.baseTags;
       return;
     }
-    this.tags = new Set(Array.from(this.baseTags.union(this.additionalTags)).sort());
+    this.tags = new Set(Array.from(this.baseTags.union(this.addedTags)).sort());
   }
 }
 

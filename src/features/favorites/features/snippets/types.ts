@@ -1,8 +1,23 @@
 import { Favorite } from "@/types/favorite";
 
-export interface SnippetsContext {
+export interface SnippetsDependencies {
   appendToSearch: (text: string) => void;
   getSearchResults: () => Favorite[];
+}
+
+export interface SnippetHandlers {
+  onUse: (name: string) => void;
+  onMoveToTop: (name: string) => void;
+  onCopy: (name: string) => void;
+  onEdit: (name: string) => void;
+  onDelete: (name: string) => void;
+  onDeleteRequested: (name: string) => void;
+  onDeleteCancelled: () => void;
+  onSave: () => void;
+  onResultsQueryRequested: () => void;
+  onEditCancelled: () => void;
+  onEditorInput: () => void;
+  onFiltered: () => void;
 }
 
 export interface Snippet {

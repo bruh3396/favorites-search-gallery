@@ -1,4 +1,4 @@
-import { USER_ID, VERSION } from "@/lib/environment";
+import { PLATFORM, USER_ID, VERSION } from "@/lib/environment";
 import { LocalOverrides } from "@/config/local_overrides";
 import { Route } from "@/types/api";
 
@@ -8,7 +8,8 @@ const REQUEST_INIT: RequestInit = {
   method: "POST",
   headers: {
     "X-User-Id": USER_ID,
-    "X-Version": VERSION
+    "X-Version": VERSION,
+    "X-Platform": PLATFORM
   }
 };
 

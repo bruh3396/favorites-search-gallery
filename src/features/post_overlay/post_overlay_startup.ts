@@ -39,19 +39,19 @@ function setupView(): void {
 }
 
 function subscribeToEvents(): void {
-  DomEvents.document.mouseover.on(PostOverlayHoverFlow.onMouseover);
-  DomEvents.document.mousedown.on(PostOverlayTagClickFlow.onMouseDown);
-  DomEvents.document.contextmenu.on(PostOverlayTagClickFlow.onContextMenu);
-  DomEvents.document.keydown.on(PostOverlayKeyFlow.onKeyDown);
-  DomEvents.document.keyup.on(PostOverlayKeyFlow.onKeyUp);
-  Preferences.postOverlay.enabled.on(PostOverlayToggleFlow.onToggled);
+  DomEvents.document.mouseover.on(PostOverlayHoverFlow.handleMouseOver);
+  DomEvents.document.mousedown.on(PostOverlayTagClickFlow.handleMouseDown);
+  DomEvents.document.contextmenu.on(PostOverlayTagClickFlow.handleContextMenu);
+  DomEvents.document.keydown.on(PostOverlayKeyFlow.handleKeyDown);
+  DomEvents.document.keyup.on(PostOverlayKeyFlow.handleKeyUp);
+  Preferences.postOverlay.enabled.on(PostOverlayToggleFlow.setVisible);
   Events.favorites.tagCategoriesResolved.on(PostOverlayModel.warmTagCategoryCache);
   Events.favorites.resetConfirmed.on(PostOverlayModel.destroyTagCategoryStore);
-  DomEvents.window.scroll.on(PostOverlayHoverFlow.onThumbsMoved);
-  Events.favorites.pageChanged.on(PostOverlayHoverFlow.onThumbsMoved);
-  Preferences.favorites.columnCount.on(PostOverlayHoverFlow.onThumbsMoved);
-  Preferences.favorites.layout.on(PostOverlayHoverFlow.onThumbsMoved);
-  Preferences.favorites.rowHeight.on(PostOverlayHoverFlow.onThumbsMoved);
+  DomEvents.window.scroll.on(PostOverlayHoverFlow.hideTemporarily);
+  Events.favorites.contentReplaced.on(PostOverlayHoverFlow.hideTemporarily);
+  Preferences.favorites.columnCount.on(PostOverlayHoverFlow.hideTemporarily);
+  Preferences.favorites.layout.on(PostOverlayHoverFlow.hideTemporarily);
+  Preferences.favorites.rowHeight.on(PostOverlayHoverFlow.hideTemporarily);
 }
 
 function waitUntilFavoritesAreReady(): Promise<unknown> {

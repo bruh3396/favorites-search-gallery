@@ -1,8 +1,8 @@
-import { DownloaderContext } from "@/features/favorites/features/downloader/types";
-import { setContext } from "@/features/favorites/features/downloader/deps";
+import { DownloaderDependencies } from "@/features/favorites/features/downloader/types";
+import { setDependencies } from "@/features/favorites/features/downloader/deps";
 
-export { mount, refreshCount, unlock } from "@/features/favorites/features/downloader/panel";
+export { mount, reRender, enable } from "@/features/favorites/features/downloader/panel";
 
-export function setup(context: DownloaderContext): void {
-  setContext(context);
+export function setup(deps: DownloaderDependencies): void {
+  setDependencies(deps);
 }

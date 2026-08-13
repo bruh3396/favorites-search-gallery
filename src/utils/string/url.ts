@@ -15,3 +15,10 @@ export function withoutQueryParam(url: string, name: string): string {
   parsed.searchParams.delete(name);
   return parsed.toString();
 }
+
+export function withoutQueryParams(url: string): string {
+  const parsed = new URL(url);
+
+  parsed.search = "";
+  return parsed.toString();
+}

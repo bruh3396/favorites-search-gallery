@@ -7,13 +7,13 @@ export type SearchableMetadataMetric = "id" | "score" | "width" | "height" | "du
 export type MetadataComparator = ":" | ":<" | ":>"
 
 export type TagEditDatabaseRecord = {
-  id: string
-  tags: string
+  id: string;
+  tags: string;
 }
 
 export type TagCategoryMapping = {
-  id: string
-  category: TagCategory
+  id: string;
+  category: TagCategory;
 }
 
 export enum DiscreteRating {
@@ -23,5 +23,5 @@ export enum DiscreteRating {
 }
 
 export interface Searchable {
-  tags: Set<string>
+  tags: Set<string>;
 }

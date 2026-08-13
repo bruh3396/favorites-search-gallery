@@ -3,7 +3,7 @@ import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { div } from "@/utils/dom/element_factory";
 
 type VideoRenderer = GalleryRenderer & {
-  setup: (onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void) => void
+  setup: (onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void) => void;
 }
 
 const root = div("video-container");

@@ -14,9 +14,9 @@ export function resetAllButton(): HTMLElement {
   const button = createElement("button", { children: [icon("reset")] });
 
   button.type = "button";
-  addTooltip(button, "Reset settings", "below");
+  addTooltip(button, "Reset", "below");
   button.addEventListener("click", () => {
-    if (window.confirm("Reset settings?")) {
+    if (window.confirm("Reset all settings?")) {
       Preference.resetAll();
       reloadWindow();
     }
@@ -54,5 +54,5 @@ function toggleAllSections(sections: SettingsSection[]): void {
 
 function renderCollapseState(button: HTMLElement, collapsed: boolean): void {
   toggleDataset(button, "collapsed", collapsed);
-  addTooltip(button, `${collapsed ? "Expand" : "Collapse"} settings`, "below");
+  addTooltip(button, `${collapsed ? "Expand" : "Collapse"} all`, "below");
 }

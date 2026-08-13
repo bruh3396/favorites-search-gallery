@@ -1,4 +1,4 @@
-import { FavoritesDownloaderContext } from "@/features/favorites/features/downloader/deps";
+import { FavoritesDownloaderDeps } from "@/features/favorites/features/downloader/deps";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types";
 import { MediaItem } from "@/types/media";
 import { Preferences } from "@/app/context/preferences";
@@ -8,7 +8,7 @@ import { capitalize } from "@/utils/string/format";
 const CATEGORIES: FilenameCategory[] = ["artist", "character", "copyright"];
 
 export function filenameFor(item: MediaItem, extension: string): string {
-  return buildFilename(item, extension, selectedCategories(), FavoritesDownloaderContext.getTagCategory);
+  return buildFilename(item, extension, selectedCategories(), FavoritesDownloaderDeps.getTagCategory);
 }
 
 export function categoryOptions(): Map<number, string> {

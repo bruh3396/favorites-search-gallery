@@ -2,22 +2,22 @@ import { div, img, numberInput } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 
 export type AutoplayMenuElements = {
-  container: HTMLElement
-  menu: HTMLElement
-  settingsButton: HTMLImageElement
+  container: HTMLElement;
+  menu: HTMLElement;
+  settingsButton: HTMLImageElement;
   settingsMenu: {
-    container: HTMLElement
-    imageDurationInput: HTMLInputElement | HTMLSelectElement
-    minimumVideoDurationInput: HTMLInputElement | HTMLSelectElement
-  }
-  playButton: HTMLImageElement
-  changeDirectionButton: HTMLElement
+    container: HTMLElement;
+    imageDurationInput: HTMLInputElement | HTMLSelectElement;
+    minimumVideoDurationInput: HTMLInputElement | HTMLSelectElement;
+  };
+  playButton: HTMLImageElement;
+  changeDirectionButton: HTMLElement;
   changeDirectionMask: {
-    container: HTMLElement
-    image: SVGElement
-  }
-  imageProgressBar: HTMLElement
-  videoProgressBar: HTMLElement
+    container: HTMLElement;
+    image: SVGElement;
+  };
+  imageProgressBar: HTMLElement;
+  videoProgressBar: HTMLElement;
 };
 
 export function build(): AutoplayMenuElements {

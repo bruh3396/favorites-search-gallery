@@ -89,7 +89,7 @@ export function waitForThumbsToLoadInContainer(container: HTMLElement | Document
   const unloadedImages = getItemsInContainer(container)
     .map(thumb => getImageFromThumb(thumb))
     .filter(image => image instanceof HTMLImageElement)
-    .filter(image => image.dataset.preload !== "true" && imageIsLoading(image));
+    .filter(image => image.dataset.preload !== "true" && imageIsLoading(image) && image.loading !== "lazy");
   return Promise.all(unloadedImages
     .map(image => new Promise(resolve => {
       image.addEventListener("load", resolve, {
