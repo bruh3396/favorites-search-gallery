@@ -6,7 +6,7 @@ import { insertStyle } from "@/utils/dom/injector";
 
 let getFavorite: (id: string) => Favorite | undefined = () => undefined;
 let toggleUi: (value: boolean) => void = () => {};
-let tagEditModeEnabled = false;
+let isInEditMode = false;
 let tagEditModeAbortController = new AbortController();
 
 export function initializeTagEditMode(getFav: (id: string) => Favorite | undefined, onToggleUi: (value: boolean) => void): void {
@@ -15,7 +15,7 @@ export function initializeTagEditMode(getFav: (id: string) => Favorite | undefin
 }
 
 export function toggleTagEditMode(value: boolean): void {
-  tagEditModeEnabled = value;
+  isInEditMode = value;
   toggleThumbInteraction(value);
   toggleUi(value);
   toggleTagEditModeAbortController(value);
@@ -23,7 +23,7 @@ export function toggleTagEditMode(value: boolean): void {
 }
 
 export function handleDocumentClick(event: EnhancedMouseEvent): void {
-  if (!tagEditModeEnabled) {
+  if (!isInEditMode) {
     return;
   }
   const target = event.originalEvent.target;

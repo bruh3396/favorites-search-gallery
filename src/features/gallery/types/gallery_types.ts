@@ -16,6 +16,7 @@ export interface GalleryViewDependencies {
   onMenuAction: (action: GalleryMenuAction) => void;
   onVideoEnded: () => void;
   onVideoDoubleClicked: (event: MouseEvent) => void;
+  onVolumeChanged: (volume: number) => void;
 }
 
 export type GalleryMenuButton = {

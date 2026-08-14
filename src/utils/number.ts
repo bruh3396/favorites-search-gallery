@@ -71,19 +71,19 @@ export function numbersAroundInRange(initial: number, count: number, min: number
   while (numbers.length < count) {
     const left = initial - i;
     const right = initial + i;
-    const leftInBounds = left >= min && left <= max;
-    const rightInBounds = right >= min && right <= max;
-    const bothOutOfBounds = !leftInBounds && !rightInBounds;
+    const isLeftInBounds = left >= min && left <= max;
+    const isRightInBounds = right >= min && right <= max;
+    const isOutOfBounds = !isLeftInBounds && !isRightInBounds;
 
-    if (bothOutOfBounds) {
+    if (isOutOfBounds) {
       break;
     }
 
-    if (leftInBounds) {
+    if (isLeftInBounds) {
       numbers.push(left);
     }
 
-    if (rightInBounds && numbers.length < count) {
+    if (isRightInBounds && numbers.length < count) {
       numbers.push(right);
     }
     i += 1;

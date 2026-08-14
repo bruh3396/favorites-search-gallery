@@ -7,16 +7,16 @@ export function paginationSequence(currentPage: number, finalPage: number, nearb
   const nearbyPages = numbersAroundInRange(currentPage, nearbyCount, 1, finalPage);
   const smallestNearby = nearbyPages[0] ?? 1;
   const largestNearby = nearbyPages[nearbyPages.length - 1] ?? 1;
-  const nearbyIncludesFirst = smallestNearby === 1;
-  const nearbyIncludesFinal = largestNearby === finalPage;
-  const gapAfterFirst = smallestNearby > 2;
-  const gapBeforeFinal = largestNearby < finalPage - 1;
+  const isFirstNearby = smallestNearby === 1;
+  const isFinalNearby = largestNearby === finalPage;
+  const hasGapAfterFirst = smallestNearby > 2;
+  const hasGapBeforeFinal = largestNearby < finalPage - 1;
   return [
-    ...(nearbyIncludesFirst ? [] : [1]),
-    ...(gapAfterFirst ? ["ellipsis" as const] : []),
+    ...(isFirstNearby ? [] : [1]),
+    ...(hasGapAfterFirst ? ["ellipsis" as const] : []),
     ...nearbyPages,
-    ...(gapBeforeFinal ? ["ellipsis" as const] : []),
-    ...(nearbyIncludesFinal ? [] : [finalPage])
+    ...(hasGapBeforeFinal ? ["ellipsis" as const] : []),
+    ...(isFinalNearby ? [] : [finalPage])
   ];
 }
 

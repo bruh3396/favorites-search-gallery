@@ -2,21 +2,21 @@ import { Favorite } from "@/types/favorite";
 
 const selected: Set<Favorite> = new Set();
 let getSearchResults: () => Favorite[] = () => [];
-let atLeastOneFavoriteIsSelected = false;
+let hasSelectedAtLeastOne = false;
 
 export function initializeSelection(getResults: () => Favorite[]): void {
   getSearchResults = getResults;
 }
 
 export function unselectAll(): void {
-  if (!atLeastOneFavoriteIsSelected) {
+  if (!hasSelectedAtLeastOne) {
     return;
   }
 
   for (const favorite of selected) {
     select(favorite, false);
   }
-  atLeastOneFavoriteIsSelected = false;
+  hasSelectedAtLeastOne = false;
 }
 
 export function selectAll(): void {
@@ -26,7 +26,7 @@ export function selectAll(): void {
 }
 
 export function select(favorite: Favorite, value?: boolean): void {
-  atLeastOneFavoriteIsSelected = true;
+  hasSelectedAtLeastOne = true;
 
   if (value === undefined) {
     value = !selected.has(favorite);
@@ -41,7 +41,7 @@ export function select(favorite: Favorite, value?: boolean): void {
 }
 
 export function highlightSelectedThumbs(): void {
-  if (!atLeastOneFavoriteIsSelected) {
+  if (!hasSelectedAtLeastOne) {
     return;
   }
 

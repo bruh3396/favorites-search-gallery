@@ -2,25 +2,25 @@ import { Timeout } from "@/types/async";
 
 export function debounceLeading<V>(this: unknown, fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
   let timeoutId: Timeout;
-  let firstCall = true;
-  let calledDuringDebounce = false;
+  let isFirstCall = true;
+  let wasCalledDuringDebounce = false;
   return (...args: V[]): void => {
-    if (firstCall) {
+    if (isFirstCall) {
 
       Reflect.apply(fn, this, args);
-      firstCall = false;
+      isFirstCall = false;
     } else {
-      calledDuringDebounce = true;
+      wasCalledDuringDebounce = true;
     }
 
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
-      if (calledDuringDebounce) {
+      if (wasCalledDuringDebounce) {
 
         Reflect.apply(fn, this, args);
-        calledDuringDebounce = false;
+        wasCalledDuringDebounce = false;
       }
-      firstCall = true;
+      isFirstCall = true;
     }, delay) as Timeout;
   };
 }

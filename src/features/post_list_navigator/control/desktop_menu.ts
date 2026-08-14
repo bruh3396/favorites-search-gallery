@@ -40,8 +40,8 @@ export function build(panel: HTMLElement): void {
 }
 
 function buildSection(settingsSection: SettingsSection): HTMLElement {
-  const collapsed = Preferences.postList.settingsCollapsed.value;
-  const section = createElement("section", { className: SettingsClass.section, dataset: collapsed ? { collapsed: "" } : undefined });
+  const isCollapsed = Preferences.postList.settingsCollapsed.value;
+  const section = createElement("section", { className: SettingsClass.section, dataset: isCollapsed ? { collapsed: "" } : undefined });
   const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
   const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
 
@@ -58,12 +58,12 @@ function buildSection(settingsSection: SettingsSection): HTMLElement {
 }
 
 function toggleSection(element: HTMLElement): void {
-  const collapsed = element.dataset.collapsed === undefined;
+  const isCollapsed = element.dataset.collapsed === undefined;
 
-  if (collapsed) {
+  if (isCollapsed) {
     setDataset(element, "collapsed");
   } else {
     removeDataset(element, "collapsed");
   }
-  Preferences.postList.settingsCollapsed.set(collapsed);
+  Preferences.postList.settingsCollapsed.set(isCollapsed);
 }

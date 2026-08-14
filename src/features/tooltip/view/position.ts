@@ -10,8 +10,8 @@ export function position(tooltip: HTMLElement, thumb: HTMLElement): void {
   const overflowsRight = rect.right + width > window.innerWidth;
   const overflowsTop = rect.top < topBoundary;
   const overflowsBottom = rect.top + height > window.innerHeight;
-  const flippedVertically = overflowsTop || overflowsBottom;
-  const preferredLeft = flippedVertically ? rect.left : (overflowsRight ? rect.left - width : rect.right);
+  const isFlippedVertically = overflowsTop || overflowsBottom;
+  const preferredLeft = isFlippedVertically ? rect.left : (overflowsRight ? rect.left - width : rect.right);
   const preferredTop = overflowsTop ? rect.bottom : (overflowsBottom ? rect.top - height : rect.top);
   const clampedLeft = clamp(preferredLeft, 0, window.innerWidth - width);
   const clampedTop = clamp(preferredTop, topBoundary, window.innerHeight - height);

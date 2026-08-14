@@ -12,8 +12,8 @@ let state: "indexing" | "ready" = "ready";
 let deferred: Favorite[] = [];
 
 export function search(query: string, candidates: Favorite[]): Favorite[] {
-  const eligible = state === "ready" && !hasMetadataTerm(query);
-  return eligible ? searcher.search(query, candidates) : new SearchQuery<Favorite>(query).filter(candidates);
+  const isEligible = state === "ready" && !hasMetadataTerm(query);
+  return isEligible ? searcher.search(query, candidates) : new SearchQuery<Favorite>(query).filter(candidates);
 }
 
 export function add(doc: Favorite): void {

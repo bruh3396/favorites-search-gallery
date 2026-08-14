@@ -26,19 +26,19 @@ export function itemsAroundIndex<V>(array: V[], startIndex: number, limit: numbe
   while (result.length < limit) {
     const leftIndex = startIndex - i;
     const rightIndex = startIndex + i;
-    const leftIndexInBounds = indexInBounds(array, leftIndex);
-    const rightIndexInBounds = indexInBounds(array, rightIndex);
-    const bothIndexesOutOfBounds = !leftIndexInBounds && !rightIndexInBounds;
+    const isLeftIndexInBounds = indexInBounds(array, leftIndex);
+    const isRightIndexInBounds = indexInBounds(array, rightIndex);
+    const areBothIndexesOutOfBounds = !isLeftIndexInBounds && !isRightIndexInBounds;
 
-    if (bothIndexesOutOfBounds) {
+    if (areBothIndexesOutOfBounds) {
       break;
     }
 
-    if (leftIndexInBounds) {
+    if (isLeftIndexInBounds) {
       result.push(array[leftIndex]);
     }
 
-    if (rightIndexInBounds && result.length < limit) {
+    if (isRightIndexInBounds && result.length < limit) {
       result.push(array[rightIndex]);
     }
     i += 1;

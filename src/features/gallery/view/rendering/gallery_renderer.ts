@@ -10,9 +10,9 @@ import { toMediaItem } from "@/lib/thumb/item";
 
 const renderers: GalleryRenderer[] = [GalleryImageRenderer, GalleryVideoRenderer, GalleryGifRenderer];
 
-export function setup(root: HTMLElement, onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void): void {
+export function setup(root: HTMLElement, onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void, onVolumeChanged: (volume: number) => void): void {
   renderers.forEach(r => root.appendChild(r.root));
-  GalleryVideoRenderer.setup(onVideoEnded, onVideoDoubleClicked);
+  GalleryVideoRenderer.setup(onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
 }
 
 export function render(thumb: HTMLElement): void {
@@ -31,7 +31,7 @@ export function nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
 export const hide = (): void => renderers.forEach(r => r.hide());
 export const cache = (thumbs: HTMLElement[]): void => renderers.forEach(r => r.cache(thumbs));
 export { toggleZoom, toggleZoomCursor, toggleUpscaler, zoomToPoint, cacheImages, upscale, upscaleCachedThumbs, downscaleAll, reupscaleCachedThumbs, correctOrientation } from "@/features/gallery/view/rendering/image/renderer";
-export { toggleVideoLooping, restartVideo, toggleVideoPause, toggleVideoMute } from "@/features/gallery/view/rendering/video/renderer";
+export { toggleVideoLooping, restartVideo, toggleVideoPause, setVideoMuted } from "@/features/gallery/view/rendering/video/renderer";
 
 function resolve(thumb: HTMLElement): GalleryRenderer {
   const item = toMediaItem(thumb);

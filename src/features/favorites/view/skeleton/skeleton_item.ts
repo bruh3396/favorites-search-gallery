@@ -63,10 +63,10 @@ function randomDimensions(): Dimensions2D {
     discreteDimensionMax: max
   } = SkeletonConfig;
 
-  const maximizeWidth = coinFlip();
+  const shouldMaximizeWidth = coinFlip();
   const randomDimension = randomIntInRange(min, max);
   return {
-    x: maximizeWidth ? max : randomDimension,
-    y: maximizeWidth ? randomDimension : max
+    x: shouldMaximizeWidth ? max : randomDimension,
+    y: shouldMaximizeWidth ? randomDimension : max
   };
 }

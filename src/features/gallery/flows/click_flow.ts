@@ -28,10 +28,10 @@ export function handleContextMenu(mouseEvent: MouseEvent): void {
 }
 
 export function toggleGalleryImageZoom(value: undefined | boolean = undefined): boolean {
-  const zoomedIn = GalleryView.toggleZoom(value);
+  const isZoomedIn = GalleryView.toggleZoom(value);
 
-  DomEvents.document.wheel.toggle(!zoomedIn);
-  return zoomedIn;
+  DomEvents.document.wheel.toggle(!isZoomedIn);
+  return isZoomedIn;
 }
 
 function openMediaOnCtrlClick(mouseEvent: MouseEvent): void {
@@ -69,9 +69,9 @@ function handleMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
     }
     return;
   }
-  const zoomedIn = mouseEvent.originalEvent.target instanceof HTMLElement && mouseEvent.originalEvent.target.closest(".zoomed-in") !== null;
+  const isZoomedIn = mouseEvent.originalEvent.target instanceof HTMLElement && mouseEvent.originalEvent.target.closest(".zoomed-in") !== null;
 
-  if (mouseEvent.leftClick && !zoomedIn && !GalleryModel.isViewingVideo()) {
+  if (mouseEvent.leftClick && !isZoomedIn && !GalleryModel.isViewingVideo()) {
     GalleryOpenCloseFlow.close();
     return;
   }

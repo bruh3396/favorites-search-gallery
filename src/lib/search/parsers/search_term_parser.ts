@@ -15,19 +15,19 @@ export function parseSearchTerm(term: string): AbstractSearchTerm {
 }
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
-  const { negated, value } = parseNegation(removeDuplicateAsterisks(term));
-  return new WildcardSearchTerm(value, negated, chooseWildcardMatchType(value), buildWildcardRegex(value));
+  const { isNegated, value } = parseNegation(removeDuplicateAsterisks(term));
+  return new WildcardSearchTerm(value, isNegated, chooseWildcardMatchType(value), buildWildcardRegex(value));
 }
 
 export function parseMetadataSearchTerm(term: string): MetadataSearchTerm {
-  const { negated, value } = parseNegation(term);
+  const { isNegated, value } = parseNegation(term);
   const expression = new MetadataSearchExpression(value);
-  return new MetadataSearchTerm(value, negated, expression);
+  return new MetadataSearchTerm(value, isNegated, expression);
 }
 
 export function parseExactSearchTerm(term: string): ExactSearchTerm {
-  const { negated, value } = parseNegation(term);
-  return new ExactSearchTerm(value, negated);
+  const { isNegated, value } = parseNegation(term);
+  return new ExactSearchTerm(value, isNegated);
 }
 
 export function isWildcardTerm(term: string): boolean {
@@ -42,9 +42,9 @@ export function hasMetadataTerm(query: string): boolean {
   return query.trim().split(/\s+/).some(isMetadataTerm);
 }
 
-function parseNegation(term: string): { negated: boolean; value: string } {
-  const negated = term.startsWith("-") && term.length > 1;
-  return { negated, value: negated ? term.substring(1) : term };
+function parseNegation(term: string): { isNegated: boolean; value: string } {
+  const isNegated = term.startsWith("-") && term.length > 1;
+  return { isNegated, value: isNegated ? term.substring(1) : term };
 }
 
 function chooseWildcardMatchType(value: string): WildcardMatchType {

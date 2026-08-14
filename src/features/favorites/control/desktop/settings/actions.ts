@@ -39,16 +39,16 @@ export function collapseExpandButton(): HTMLElement {
 }
 
 function toggleAllSections(sections: SettingsSection[]): void {
-  const collapsed = !allSectionsCollapsed(sections);
+  const isCollapsed = !allSectionsCollapsed(sections);
   const state: Record<string, boolean> = {};
 
   for (const { title } of sections) {
-    state[title] = !collapsed;
+    state[title] = !isCollapsed;
   }
   Preferences.favorites.settingsExpandedSections.set(state);
 
   for (const element of document.querySelectorAll<HTMLElement>(`.${SettingsClass.view} .${SettingsClass.section}`)) {
-    toggleDataset(element, "collapsed", collapsed);
+    toggleDataset(element, "collapsed", isCollapsed);
   }
 }
 

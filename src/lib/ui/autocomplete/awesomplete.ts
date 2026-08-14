@@ -41,9 +41,9 @@ export function awesompleteIsUnselected(input: HTMLInputElement | HTMLTextAreaEl
   if (searchSuggestions.length === 0) {
     return true;
   }
-  const somethingIsSelected = searchSuggestions.map(li => li.getAttribute("aria-selected"))
+  const isSomethingSelected = searchSuggestions.map(li => li.getAttribute("aria-selected"))
     .some(element => element === "true");
-  return !somethingIsSelected;
+  return !isSomethingSelected;
 }
 
 function getAwesompleteFromInput(input: HTMLInputElement | HTMLTextAreaElement): HTMLElement | null {

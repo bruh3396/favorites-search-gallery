@@ -6,19 +6,21 @@ import { VideoClip } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/function";
 import { isVideoThumb } from "@/lib/media/type_predicates";
 import { toMediaItem } from "@/lib/thumb/item";
-import { videoUrl } from "@/lib/thumb/url";
+import { videoUrl } from "@/lib/media/url";
 
 const videoPlayers: HTMLVideoElement[] = [];
 const videoClips = new Map();
 const videoContainer: HTMLElement = document.createElement("div");
 let onVideoEnded: () => void = doNothing;
 let onVideoDoubleClicked: (event: MouseEvent) => void = doNothing;
+let onVolumeChanged: (volume: number) => void = doNothing;
 
 videoContainer.id = "video-container-inner";
 
-export function setup(container: HTMLElement, videoEnded: () => void, videoDoubleClicked: (event: MouseEvent) => void): void {
+export function setup(container: HTMLElement, videoEnded: () => void, videoDoubleClicked: (event: MouseEvent) => void, volumeChanged: (volume: number) => void): void {
   onVideoEnded = videoEnded;
   onVideoDoubleClicked = videoDoubleClicked;
+  onVolumeChanged = volumeChanged;
   insertVideoContainer(container);
   createVideoPlayers();
   preventVideoPlayersFromFlashingWhenLoaded();
@@ -95,9 +97,10 @@ export function stopAllVideos(): void {
   }
 }
 
-export function toggleVideoMute(): void {
-  getActiveVideoPlayer().muted = !getActiveVideoPlayer().muted;
-  Preferences.gallery.videoMuted.set(getActiveVideoPlayer().muted);
+export function setVideoMuted(muted: boolean): void {
+  for (const video of videoPlayers) {
+    video.muted = muted;
+  }
 }
 
 function createVideoPlayer(volume: number, muted: boolean): void {
@@ -118,12 +121,12 @@ function createVideoPlayer(volume: number, muted: boolean): void {
 
 function createVideoPlayers(): void {
   const volume = Preferences.gallery.videoVolume.value;
-  const muted = Preferences.gallery.videoMuted.value;
+  const isMuted = Preferences.gallery.videoMuted.value;
 
-  createVideoPlayer(volume, muted);
+  createVideoPlayer(volume, isMuted);
 
   for (let i = 0; i < GalleryConfig.preloadedVideoCount; i += 1) {
-    createVideoPlayer(volume, muted);
+    createVideoPlayer(volume, isMuted);
   }
 }
 
@@ -218,8 +221,7 @@ function updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElemen
     if (event.target === null || !event.target.hasAttribute("active")) {
       return;
     }
-    Preferences.gallery.videoVolume.set(video.volume);
-    Preferences.gallery.videoMuted.set(video.muted);
+    onVolumeChanged(video.volume);
 
     for (const v of getInactiveVideoPlayers()) {
       v.volume = video.volume;

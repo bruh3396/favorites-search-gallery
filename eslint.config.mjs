@@ -23,6 +23,15 @@ export default defineConfig([
   },
   tseslint.configs.recommended,
   {
+    files: ["src/**/*.ts"],
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname
+      }
+    }
+  },
+  {
     plugins: { "@stylistic": stylistic },
     rules: {
       "@stylistic/member-delimiter-style": [
@@ -47,7 +56,6 @@ export default defineConfig([
       "block-spacing": "error",
       "brace-style": "error",
       // "callback-return": "error",
-      "camelcase": "error",
       "comma-dangle": "error",
       "comma-spacing": "error",
       "comma-style": "error",
@@ -78,7 +86,6 @@ export default defineConfig([
       "handle-callback-err": "error",
       "id-blacklist": "error",
       "id-denylist": "error",
-      "id-match": "error",
       "implicit-arrow-linebreak": "error",
       "jsx-quotes": "error",
       "key-spacing": "error",
@@ -349,6 +356,36 @@ export default defineConfig([
       // "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/explicit-function-return-type": "error",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        { selector: "default", format: ["camelCase"], leadingUnderscore: "allow" },
+        { selector: "variable", format: ["camelCase", "UPPER_CASE", "PascalCase"], leadingUnderscore: "allow" },
+        {
+          selector: "variable",
+          modifiers: ["const", "global"],
+          types: ["boolean"],
+          format: ["UPPER_CASE"]
+        },
+        {
+          selector: "variable",
+          types: ["boolean"],
+          format: ["PascalCase"],
+          prefix: [
+            "is", "has", "should", "can", "was", "did", "will", "must",
+            "using", "requires", "needs", "allows", "in", "are",
+            "overflows", "includes", "contains", "exceeds", "matches"
+          ]
+        },
+        { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },
+        { selector: "function", format: ["camelCase", "PascalCase"] },
+        { selector: "typeLike", format: ["PascalCase"] },
+        { selector: "enumMember", format: ["camelCase", "PascalCase", "UPPER_CASE"] },
+        { selector: ["objectLiteralProperty", "objectLiteralMethod"], format: null },
+        { selector: "typeProperty", format: ["camelCase"], leadingUnderscore: "allow" },
+        { selector: "classProperty", format: ["camelCase", "UPPER_CASE"], leadingUnderscore: "allow" },
+        { selector: "classMethod", format: ["camelCase"] },
+        { selector: "import", format: ["camelCase", "PascalCase", "UPPER_CASE"] }
+      ],
 
       "@typescript-eslint/explicit-member-accessibility": [
         "error", {
@@ -568,6 +605,16 @@ export default defineConfig([
     files: ["src/types/errors.ts"],
     rules: {
       "max-classes-per-file": "off"
+    }
+  },
+  {
+    files: ["src/types/api.ts"],
+    rules: {
+      "@typescript-eslint/naming-convention": [
+        "error",
+        { selector: "typeProperty", format: null },
+        { selector: "typeLike", format: ["PascalCase"] }
+      ]
     }
   },
   {

@@ -1,10 +1,10 @@
 import { IconName, icon } from "@/lib/ui/icon";
 import { Snippet, SnippetHandlers } from "@/features/favorites/features/snippets/types";
-import { removeDataset, setDataset, toggleDataset } from "@/utils/dom/dataset";
 import { SnippetSelectors } from "@/features/favorites/features/snippets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/dom/element_factory";
 import { separator } from "@/lib/ui/widgets/separator";
+import { toggleDataset } from "@/utils/dom/dataset";
 
 export function row(snippet: Snippet, handlers: SnippetHandlers): HTMLElement {
   const element = createElement("div", {
@@ -49,7 +49,6 @@ function actions(snippet: Snippet, handlers: SnippetHandlers): HTMLElement {
   return createElement("div", {
     className: SnippetSelectors.actions,
     children: [
-      // copyButton(snippet, handlers),
       iconButton("moveToTop", () => handlers.onMoveToTop(snippet.name)),
       iconButton("pencil", () => handlers.onEdit(snippet.name)),
       iconButton("trash", () => handlers.onDeleteRequested(snippet.name), true)
@@ -65,21 +64,6 @@ function confirmActions(snippet: Snippet, handlers: SnippetHandlers): HTMLElemen
       textButton("Delete", () => handlers.onDelete(snippet.name), true)
     ]
   });
-}
-
-function copyButton(snippet: Snippet, handlers: SnippetHandlers): HTMLElement {
-  const element = createElement("button", { className: SnippetSelectors.action, children: [icon("clipboard")] });
-  let restore: number | undefined;
-  return button(element, () => {
-    handlers.onCopy(snippet.name);
-    element.replaceChildren(icon("check"));
-    setDataset(element, "copied");
-    clearTimeout(restore);
-    restore = window.setTimeout(() => {
-      element.replaceChildren(icon("clipboard"));
-      removeDataset(element, "copied");
-    }, 1200);
-  }, false);
 }
 
 function iconButton(iconName: IconName, onClick: () => void, danger: boolean = false): HTMLElement {

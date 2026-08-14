@@ -8,7 +8,7 @@ import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { NavigationKey } from "@/types/input";
 import { preloadImages } from "@/app/layout/content_thumbs";
 
-let appendedFirstResults = false;
+let hasAppendedFirstResults = false;
 
 export const FavoritesPaginatedDisplay = {
   initialize,
@@ -46,7 +46,7 @@ function reconcilePagination(): void {
 }
 
 function appendMissingThumbsOnCurrentPage(): void {
-  if (appendedFirstResults && !FavoritesModel.atFinalPage()) {
+  if (hasAppendedFirstResults && !FavoritesModel.atFinalPage()) {
     return;
   }
   const missing = FavoritesModel.currentPageFavorites().filter(favorite => document.getElementById(favorite.id) === null);
@@ -54,7 +54,7 @@ function appendMissingThumbsOnCurrentPage(): void {
   if (missing.length === 0) {
     return;
   }
-  appendedFirstResults = true;
+  hasAppendedFirstResults = true;
   FavoritesView.addToBottom(missing);
 }
 

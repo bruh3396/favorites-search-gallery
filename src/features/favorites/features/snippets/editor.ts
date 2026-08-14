@@ -49,13 +49,13 @@ export function build(): HTMLElement {
 }
 
 export function render(): void {
-  const editing = SnippetState.editTarget !== null;
+  const isEditing = SnippetState.editTarget !== null;
   const failure = SnippetState.saveFailure;
 
-  eyebrow.textContent = editing ? `Editing /${SnippetState.editTarget}` : "New snippet";
-  saveButton.textContent = editing ? "Update" : "Save";
+  eyebrow.textContent = isEditing ? `Editing /${SnippetState.editTarget}` : "New snippet";
+  saveButton.textContent = isEditing ? "Update" : "Save";
   errorMessage.textContent = failure === null ? "" : failureText(failure, normalizeName(nameField.value));
-  toggleDataset(cancelButton, "hidden", !editing);
+  toggleDataset(cancelButton, "hidden", !isEditing);
   toggleDataset(errorMessage, "hidden", failure === null);
   toggleDataset(saveButton, "disabled", failure !== null);
   toggleDataset(nameField, "invalid", failure === "empty-name" || failure === "duplicate-name");

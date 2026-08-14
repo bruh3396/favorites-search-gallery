@@ -1,6 +1,5 @@
 import * as Icons from "@/assets/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { clamp, roundToTwoDecimalPlaces } from "@/utils/number";
 import { Preferences } from "@/app/context/preferences";
 import { USING_FIREFOX } from "@/lib/environment";
 import { blurActiveElement } from "@/utils/dom/interaction";
@@ -70,12 +69,6 @@ export function setBackgroundOpacity(opacity: number): void {
   background.style.opacity = String(opacity);
 }
 
-export function toggleBackgroundOpacity(): void {
-  const opacity = Preferences.gallery.backgroundOpacity.value < 1 ? 1 : 0;
-
-  Preferences.gallery.backgroundOpacity.set(opacity);
-}
-
 export function toggleScrollbar(value: boolean): void {
   document.body.style.overflowY = value ? "auto" : "hidden";
 }
@@ -87,14 +80,6 @@ export function update(thumb: HTMLElement): void {
     return;
   }
   scrollToThumb(thumb);
-}
-
-export function updateBackgroundOpacity(event: WheelEvent): void {
-  let opacity = Preferences.gallery.backgroundOpacity.value;
-
-  opacity -= event.deltaY * 0.0005;
-  opacity = clamp(opacity, 0, 1);
-  Preferences.gallery.backgroundOpacity.set(roundToTwoDecimalPlaces(opacity));
 }
 
 export function showAddedFavoriteStatus(status: AddFavoriteStatus): void {

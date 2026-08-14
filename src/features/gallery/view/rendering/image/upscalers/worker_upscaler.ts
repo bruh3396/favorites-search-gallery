@@ -40,7 +40,7 @@ async function upscale(id: string, url: string, canvas?: OffscreenCanvas): Promi
   if (target === undefined) {
     return;
   }
-  const bitmap = await fetchBitmap(url);
+  const bitmap = await fetchBitmap(url, config.upscaledCanvasWidth);
 
   if (bitmap === null) {
     return;
@@ -61,10 +61,11 @@ function evict(id: string): void {
   canvases.delete(id);
 }
 
-async function fetchBitmap(url: string): Promise<ImageBitmap | null> {
+async function fetchBitmap(url: string, resizeWidth: number): Promise<ImageBitmap | null> {
   try {
     const response = await fetch(url);
-    return await createImageBitmap(await response.blob());
+    const blob = await response.blob();
+    return await createImageBitmap(blob, { resizeWidth, resizeQuality: "high" });
   } catch {
     return null;
   }
@@ -88,13 +89,8 @@ function draw(canvas: OffscreenCanvas, bitmap: ImageBitmap): void {
 }
 
 function setCanvasDimensions(canvas: OffscreenCanvas, width: number, height: number): void {
-  let targetWidth = config.upscaledCanvasWidth;
-  let targetHeight = (targetWidth / width) * height;
-
-  if (targetWidth > width) {
-    targetWidth = width;
-    targetHeight = height;
-  }
+  let targetWidth = width;
+  let targetHeight = height;
 
   if (height > config.maxUpscaledCanvasHeight) {
     targetWidth *= (config.maxUpscaledCanvasHeight / height);

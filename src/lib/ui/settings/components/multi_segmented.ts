@@ -8,20 +8,20 @@ import { toggleDataset } from "@/utils/dom/dataset";
 
 export function buildMultiSegmentedRow<T extends number>(config: Partial<MultiSelectSetting<T>>): HTMLElement {
   const options = config.options ?? new Map<T, string>();
-  const requireSelection = config.requireSelection ?? false;
+  const requiresSelection = config.requireSelection ?? false;
   const group = createElement("div", { id: config.id, className: SettingsClass.segmented });
   const buttons = new Map<number, HTMLButtonElement>();
 
-  const isLocked = (value: number, bit: number): boolean => requireSelection && value === bit;
+  const isLocked = (value: number, bit: number): boolean => requiresSelection && value === bit;
 
   const toggleBit = (bit: number): void => {
     const value = binding.value;
-    const selected = (value & bit) === bit;
+    const isSelected = (value & bit) === bit;
 
-    if (selected && isLocked(value, bit)) {
+    if (isSelected && isLocked(value, bit)) {
       return;
     }
-    binding.set((selected ? value & ~bit : value | bit) as T);
+    binding.set((isSelected ? value & ~bit : value | bit) as T);
   };
 
   for (const [bit, optionLabel] of options) {
@@ -37,10 +37,10 @@ export function buildMultiSegmentedRow<T extends number>(config: Partial<MultiSe
 
   const binding = new StateBinding(config, 0 as T, (value) => {
     for (const [bit, button] of buttons) {
-      const selected = (value & bit) === bit;
+      const isSelected = (value & bit) === bit;
 
-      toggleDataset(button, "selected", selected);
-      button.disabled = selected && isLocked(value, bit);
+      toggleDataset(button, "selected", isSelected);
+      button.disabled = isSelected && isLocked(value, bit);
     }
   });
 

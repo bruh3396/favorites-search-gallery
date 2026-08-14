@@ -85,9 +85,9 @@ function showStatus(text: string): void {
   label.style.visibility = "visible";
   label.textContent = text;
   setTimeout(() => {
-    const statusHasNotChanged = label.textContent === text;
+    const hasNotChangedStatus = label.textContent === text;
 
-    if (statusHasNotChanged) {
+    if (hasNotChangedStatus) {
       label.style.visibility = "hidden";
     }
   }, 1_000);

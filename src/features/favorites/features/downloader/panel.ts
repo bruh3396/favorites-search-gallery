@@ -13,7 +13,7 @@ import { pluralize } from "@/utils/string/format";
 import { toggleDataset } from "@/utils/dom/dataset";
 
 let abortController: AbortController | null = null;
-let ready = false;
+let isReady = false;
 const batchSizeRow = createElement("div", { className: "favorites-download-batch-size" });
 const filenameFormatRow = createElement("div", { className: "favorites-download-filename-format" });
 const downloadButton = createElement("button", { className: "action-button favorites-download-button", textContent: "Download Results" });
@@ -31,7 +31,7 @@ export function mount(): FavoritesDrawerViewContent {
 }
 
 export function enable(): void {
-  ready = true;
+  isReady = true;
 
   if (!isDownloading()) {
     status.textContent = "";
@@ -60,14 +60,14 @@ function isDownloading(): boolean {
 }
 
 function render(): void {
-  const downloading = isDownloading();
-  const itemCount = ready ? FavoritesDownloaderDeps.getSearchResults().length : 0;
+  const wasDownloading = isDownloading();
+  const itemCount = isReady ? FavoritesDownloaderDeps.getSearchResults().length : 0;
 
-  toggleDataset(batchSizeRow, "hidden", !ready || downloading);
-  toggleDataset(filenameFormatRow, "hidden", !ready || downloading);
-  toggleDataset(downloadButton, "hidden", !ready || downloading);
-  toggleDataset(cancelButton, "hidden", !ready || !downloading);
-  progressBar.setVisible(ready && downloading);
+  toggleDataset(batchSizeRow, "hidden", !isReady || wasDownloading);
+  toggleDataset(filenameFormatRow, "hidden", !isReady || wasDownloading);
+  toggleDataset(downloadButton, "hidden", !isReady || wasDownloading);
+  toggleDataset(cancelButton, "hidden", !isReady || !wasDownloading);
+  progressBar.setVisible(isReady && wasDownloading);
   downloadButton.disabled = itemCount === 0;
   downloadButton.textContent = buildDownloadLabel(itemCount);
 }
@@ -115,7 +115,7 @@ function cancel(): void {
 }
 
 async function startDownload(): Promise<void> {
-  if (!ready || isDownloading()) {
+  if (!isReady || isDownloading()) {
     return;
   }
   const items = FavoritesDownloaderDeps.getSearchResults();

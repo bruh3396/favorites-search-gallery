@@ -1,9 +1,9 @@
-let resizing = false;
+let isCurrentlyResizing = false;
 
 export function isResizing(): boolean {
-  return resizing;
+  return isCurrentlyResizing;
 }
 
 export function setResizing(active: boolean): void {
-  resizing = active;
+  isCurrentlyResizing = active;
 }

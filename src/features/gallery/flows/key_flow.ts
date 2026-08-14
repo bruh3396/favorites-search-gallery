@@ -1,8 +1,10 @@
+import * as GalleryBackgroundFlow from "@/features/gallery/flows/background_flow";
 import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryFavoriterFlow from "@/features/gallery/flows/favoriter_flow";
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
+import * as GalleryVideoFlow from "@/features/gallery/flows/video_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { isExitKey, isNavigationKey } from "@/types/guards";
 import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
@@ -11,11 +13,11 @@ import { throttle } from "@/lib/async/throttle";
 import { toggleFullscreen } from "@/utils/browser/window";
 
 const insideGalleryHotkeyHandlers: Record<string, () => void> = {
-  b: GalleryView.toggleBackgroundOpacity,
+  b: GalleryBackgroundFlow.toggleBackgroundOpacity,
   e: GalleryFavoriterFlow.addFavoriteInGallery,
   f: toggleFullscreen,
   g: GalleryOpenCloseFlow.close,
-  m: GalleryView.toggleVideoMute,
+  m: GalleryVideoFlow.toggleVideoMute,
   q: GalleryModel.openMedia,
   s: GalleryModel.download,
   w: GalleryModel.openPost,

@@ -1,7 +1,7 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
+import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NewFavoritesResult } from "@/features/favorites/types/types";
-import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
 import { pluralize } from "@/utils/string/format";
@@ -28,7 +28,7 @@ export function setResultsCount(value: number): void {
   resultsCountIndicator.textContent = `${value} ${value === 1 ? "Result" : "Results"}`;
 }
 
-export function updateFetchStatus(completed: number): void {
+export function updateFetchStatus(completed: number, resultsCount: number): void {
   let statusText = `Fetching - ${completed}`;
 
   if (totalFavoritesCount !== null) {
@@ -42,7 +42,7 @@ export function updateFetchStatus(completed: number): void {
     progressBar.setVisible(true);
   }
   setStatus(statusText);
-  setResultsCount(completed);
+  setResultsCount(resultsCount);
 }
 
 export function notifyNewFavoritesFound(newFavorites: NewFavoritesResult): void {

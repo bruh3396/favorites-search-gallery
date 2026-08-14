@@ -14,7 +14,10 @@ export function display(favorites: Favorite[], options?: ContentDisplayOptions):
 }
 
 export function sync(favorites: Favorite[]): void {
-  FavoritesView.updateFetchStatus(FavoritesModel.getAllFavorites().length);
+  FavoritesView.updateFetchStatus(
+    FavoritesModel.getAllFavorites().length,
+    FavoritesModel.getCurrentSearchResults().length
+  );
   activeDisplay().sync(favorites);
 }
 
@@ -24,7 +27,7 @@ export function toggleInfiniteScroll(): void {
 }
 
 export const redisplayLatestResults = (): void => display(FavoritesModel.getCurrentSearchResults(), { fade: false });
-export const clear = (): void => activeDisplay().initialize([]);
+export const clear = (): void => display([]);
 export const advance = (direction: NavigationKey): boolean => activeDisplay().advance(direction);
 export const goToPage = (pageNumber: number): void => activeDisplay().goToPage(pageNumber);
 

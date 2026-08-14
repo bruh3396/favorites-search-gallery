@@ -7,9 +7,9 @@ import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 export function toggleUpscaling(value: boolean): void {
   if (value) {
     const thumbs = getAllContentThumbs();
-    const notUsingInfiniteScroll = thumbs.length <= POSTS_PER_POST_LIST_PAGE;
+    const isNotUsingInfiniteScroll = thumbs.length <= POSTS_PER_POST_LIST_PAGE;
 
-    if (notUsingInfiniteScroll) {
+    if (isNotUsingInfiniteScroll) {
       GalleryView.cacheImages(thumbs);
     }
     GalleryView.upscaleCachedThumbs();

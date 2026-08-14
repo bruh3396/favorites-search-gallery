@@ -11,7 +11,7 @@ export function buildFilterInput(panel: HTMLElement, hideWhileFiltering: HTMLEle
 
 function filterSettings(panel: HTMLElement, query: string, hideWhileFiltering: HTMLElement[]): void {
   const terms = parseQuery(query);
-  const filtering = terms.length > 0;
+  const isFiltering = terms.length > 0;
   let totalVisibleRows = 0;
 
   for (const section of panel.querySelectorAll<HTMLElement>(`.${SettingsClass.section}`)) {
@@ -21,9 +21,9 @@ function filterSettings(panel: HTMLElement, query: string, hideWhileFiltering: H
     toggleDataset(section, "filtered", visibleRows === 0);
   }
 
-  hideWhileFiltering.forEach(element => toggleDataset(element, "hidden", filtering));
-  toggleDataset(panel, "filtering", filtering);
-  toggleDataset(panel, "empty", filtering && totalVisibleRows === 0);
+  hideWhileFiltering.forEach(element => toggleDataset(element, "hidden", isFiltering));
+  toggleDataset(panel, "filtering", isFiltering);
+  toggleDataset(panel, "empty", isFiltering && totalVisibleRows === 0);
 }
 
 function parseQuery(query: string): string[] {
@@ -36,10 +36,10 @@ function filterSection(section: HTMLElement, terms: string[]): number {
 
   for (const row of section.querySelectorAll<HTMLElement>(`.${SettingsClass.row}`)) {
     const haystack = `${title} ${row.dataset.keywords ?? ""}`.toLowerCase();
-    const matched = terms.every(term => haystack.includes(term));
+    const matches = terms.every(term => haystack.includes(term));
 
-    toggleDataset(row, "filtered", !matched);
-    visibleRows += matched ? 1 : 0;
+    toggleDataset(row, "filtered", !matches);
+    visibleRows += matches ? 1 : 0;
   }
   return visibleRows;
 }

@@ -44,8 +44,8 @@ export function setup(onMenuAction: (action: GalleryMenuAction) => void): void {
 }
 
 function loadPreferences(): void {
-  menu.classList.toggle("gallery-menu--docked", !ON_MOBILE_DEVICE && Preferences.gallery.menuDockedLeft.value);
-  menu.classList.toggle("gallery-menu--pinned", ON_MOBILE_DEVICE || Preferences.gallery.menuPinned.value);
+  setDockedLeft(!ON_MOBILE_DEVICE && Preferences.gallery.menuDockedLeft.value);
+  setPinned(ON_MOBILE_DEVICE || Preferences.gallery.menuPinned.value);
   toggleGalleryMenuEnabled(Preferences.gallery.menuEnabled.value);
 }
 
@@ -53,14 +53,6 @@ function handleGalleryMenuAction(action: GalleryMenuAction): void {
   switch (action) {
     case "fullscreen":
       toggleFullscreen();
-      break;
-
-    case "pin":
-      togglePin();
-      break;
-
-    case "toggleDockPosition":
-      toggleDockPosition();
       break;
 
     default:
@@ -134,20 +126,10 @@ export function togglePersistence(event: EnhancedMouseEvent): void {
   menu.classList.toggle("gallery-menu--persistent", target instanceof HTMLElement && menu.contains(target));
 }
 
-function togglePin(): void {
-  if (ON_MOBILE_DEVICE) {
-    menu.classList.add("gallery-menu--pinned");
-    Preferences.gallery.menuPinned.set(true);
-    return;
-  }
-  Preferences.gallery.menuPinned.set(menu.classList.toggle("gallery-menu--pinned"));
+export function setPinned(pinned: boolean): void {
+  menu.classList.toggle("gallery-menu--pinned", pinned);
 }
 
-function toggleDockPosition(): void {
-  if (ON_MOBILE_DEVICE) {
-    menu.classList.remove("gallery-menu--docked");
-    Preferences.gallery.menuDockedLeft.set(false);
-    return;
-  }
-  Preferences.gallery.menuDockedLeft.set(menu.classList.toggle("gallery-menu--docked"));
+export function setDockedLeft(dockedLeft: boolean): void {
+  menu.classList.toggle("gallery-menu--docked", dockedLeft);
 }

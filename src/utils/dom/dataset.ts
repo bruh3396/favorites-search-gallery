@@ -25,12 +25,12 @@ export function toggleDataset(element: HTMLElement | null, name: string, force?:
   if (element === null) {
     return false;
   }
-  const present = force ?? element.dataset[name] === undefined;
+  const isPresent = force ?? element.dataset[name] === undefined;
 
-  if (present) {
+  if (isPresent) {
     element.dataset[name] = "";
   } else {
     delete element.dataset[name];
   }
-  return present;
+  return isPresent;
 }

@@ -117,6 +117,7 @@ function subscribeToEvents(): void {
   Events.postOverlay.addTagToSearch.on(FavoritesSearchBox.append);
   Events.postOverlay.excludeTagFromSearch.on(FavoritesSearchBox.exclude);
   Events.app.favoriteRemoved.on(FavoritesModel.deleteStoredFavorite);
+  Events.app.hotkeyPressed.on(FavoritesKeyFlow.handleHotkey);
 }
 
 function subscribeToPreferences(): void {
@@ -133,7 +134,6 @@ function subscribeToPreferences(): void {
 
 function subscribeToDomEvents(): void {
   if (ON_DESKTOP_DEVICE) {
-    DomEvents.document.keydown.on(FavoritesKeyFlow.handleKeyDown);
     DomEvents.document.mouseover.on(FavoritesMouseFlow.suppressLinkOnHoveredThumb);
     DomEvents.document.click.on(FavoritesMouseFlow.handleClick);
     DomEvents.document.mousedown.on(FavoritesMouseFlow.handleMouseDown);

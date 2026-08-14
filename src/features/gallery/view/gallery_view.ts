@@ -11,7 +11,7 @@ export function setup(deps: GalleryViewDependencies): void {
   insertStyle(GALLERY_CSS);
   GalleryShell.mountGallery();
   GalleryUi.setup(GalleryShell.GalleryRoot);
-  GalleryRenderer.setup(GalleryShell.GalleryRoot, deps.onVideoEnded, deps.onVideoDoubleClicked);
+  GalleryRenderer.setup(GalleryShell.GalleryRoot, deps.onVideoEnded, deps.onVideoDoubleClicked, deps.onVolumeChanged);
 
   if (ON_DESKTOP_DEVICE) {
     GalleryDesktopMenu.setup(deps.onMenuAction);
@@ -55,8 +55,8 @@ export function toggleZoomCursor(value: boolean): void {
   GalleryRenderer.toggleZoomCursor(value);
 }
 
-export { nudge, cache, toggleZoom, zoomToPoint, cacheImages, upscale, upscaleCachedThumbs, downscaleAll, reupscaleCachedThumbs, correctOrientation, toggleVideoLooping, restartVideo, toggleVideoPause, toggleVideoMute } from "@/features/gallery/view/rendering/gallery_renderer";
-export { reveal as revealMenu, togglePersistence as toggleMenuPersistence } from "@/features/gallery/view/shell/desktop_menu";
-export { toggleCursor, setBackgroundOpacity, toggleBackgroundOpacity, updateBackgroundOpacity, showAddedFavoriteStatus, showRemovedFavoriteStatus } from "@/features/gallery/view/shell/ui";
+export { nudge, cache, toggleZoom, zoomToPoint, cacheImages, upscale, upscaleCachedThumbs, downscaleAll, reupscaleCachedThumbs, correctOrientation, toggleVideoLooping, restartVideo, toggleVideoPause, setVideoMuted } from "@/features/gallery/view/rendering/gallery_renderer";
+export { reveal as revealMenu, togglePersistence as toggleMenuPersistence, setPinned as setMenuPinned, setDockedLeft as setMenuDockedLeft } from "@/features/gallery/view/shell/desktop_menu";
+export { toggleCursor, setBackgroundOpacity, showAddedFavoriteStatus, showRemovedFavoriteStatus } from "@/features/gallery/view/shell/ui";
 export const showCursor = (): void => GalleryUi.toggleCursor(true);
 export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryShell.GalleryRoot.appendChild(element);

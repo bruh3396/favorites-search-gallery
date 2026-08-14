@@ -1,7 +1,7 @@
-import * as GalleryFavoriter from "@/features/gallery/model/favoriter";
 import * as GalleryState from "@/features/gallery/model/state";
 import * as Navigator from "@/lib/remote/rule34/posts/navigation";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/remote/rule34/favorites/thumb_actions";
 import { Boundary } from "@/types/boundary";
 import { Cursor } from "@/lib/collection/cursor";
 import { ItemWindow } from "@/lib/collection/item_window";
@@ -32,8 +32,8 @@ export const isViewingVideo = (): boolean => GalleryState.isInGallery() && isVid
 export const openPost = (): void => Navigator.openPost(cursor.currentItem().id);
 export const openMedia = (): Promise<void> => Navigator.openMedia(cursor.currentItem());
 export const download = (): Promise<void> => downloadFromThumb(cursor.currentItem());
-export const addFavorite = (): Promise<AddFavoriteStatus> => GalleryFavoriter.addFavorite(cursor.currentItem());
-export const removeFavorite = (): Promise<RemoveFavoriteStatus> => GalleryFavoriter.removeFavorite(cursor.currentItem());
+export const addFavorite = (): Promise<AddFavoriteStatus> => addFavoriteFromThumb(cursor.currentItem());
+export const removeFavorite = (): Promise<RemoveFavoriteStatus> => removeFavoriteFromThumb(cursor.currentItem());
 export const currentThumbIfOpen = (): HTMLElement | null => (GalleryState.isInGallery() ? cursor.currentItem() : null);
 
 export function open(thumb: HTMLElement): void {

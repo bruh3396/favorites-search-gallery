@@ -14,6 +14,7 @@ import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow"
 import * as GalleryPostListFlow from "@/features/gallery/flows/post_list_flow";
 import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer";
 import * as GalleryTouchFlow from "@/features/gallery/flows/touch_flow";
+import * as GalleryVideoFlow from "@/features/gallery/flows/video_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
@@ -81,7 +82,8 @@ function setupView(): void {
   GalleryView.setup({
     onMenuAction: Events.gallery.galleryMenuButtonClicked.emit,
     onVideoEnded: GalleryAutoplay.handleVideoEnded,
-    onVideoDoubleClicked: GalleryOpenCloseFlow.close
+    onVideoDoubleClicked: GalleryOpenCloseFlow.close,
+    onVolumeChanged: GalleryVideoFlow.setVolume
   });
 }
 
@@ -114,6 +116,9 @@ function setupAutoplay(): void {
 function subscribeToEvents(): void {
   Events.gallery.galleryMenuButtonClicked.on(GalleryMenuFlow.handleAction);
   Preferences.gallery.backgroundOpacity.on(GalleryView.setBackgroundOpacity);
+  Preferences.gallery.menuPinned.on(GalleryView.setMenuPinned);
+  Preferences.gallery.menuDockedLeft.on(GalleryView.setMenuDockedLeft);
+  Preferences.gallery.videoMuted.on(GalleryView.setVideoMuted);
 
   if (ON_FAVORITES_PAGE) {
     subscribeToFavoritesEvents();

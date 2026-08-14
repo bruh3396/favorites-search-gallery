@@ -1,24 +1,19 @@
-import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { galleryOpened } from "@/app/channels/feature_bridge";
+import { queueMacroTask } from "@/lib/async/async";
 
 const hotkeyHandlers: Record<string, () => void> = {
   "/": focusSearchBar
 };
 
-export function handleKeyDown(event: EnhancedKeyboardEvent): void {
-  if (!event.isHotkey || galleryOpened()) {
-    return;
-  }
-  const handler = hotkeyHandlers[event.key.toLowerCase()];
+export function handleHotkey(key: string): void {
+  const handler = hotkeyHandlers[key];
 
   if (handler === undefined) {
     return;
   }
-  event.originalEvent.preventDefault();
   handler();
 }
 
 function focusSearchBar(): void {
-  document.getElementById(FavoritesId.searchBox)?.focus();
+  queueMacroTask(() => document.getElementById(FavoritesId.searchBox)?.focus());
 }

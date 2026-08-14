@@ -20,10 +20,10 @@ export const paginate = (newFavorites: Favorite[]): Favorite[] => (favorites = n
 
 export function selectPage(pageNumber: number): boolean {
   const target = clamp(pageNumber, 1, pageCount());
-  const changed = target !== current;
+  const wasChanged = target !== current;
 
   current = target;
-  return changed;
+  return wasChanged;
 }
 
 export function selectPageContaining(id: string): boolean {

@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE, USING_FIREFOX } from "@/lib/environment";
 import { POSTS_PER_POST_LIST_PAGE } from "@/lib/rule34_constants";
 import { Resolution } from "@/types/media";
 
@@ -15,7 +15,7 @@ export const GalleryConfig = {
   maxVisibleThumbsBeforeStoppingPreload: 175,
   preloadWaitingTimeout: 1_000,
   preloadingEnabled: true,
-  cacheImagesOnIdle: true,
+  cacheImagesOnIdle: !USING_FIREFOX,
   cacheFirstImages: true,
   gifPreloadingEnabled: false,
   preloadOutsideGalleryOnPostList: true,

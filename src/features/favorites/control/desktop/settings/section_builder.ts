@@ -11,8 +11,8 @@ export function buildSections(sections: SettingsSection[]): HTMLElement[] {
 }
 
 function buildSection(settingsSection: SettingsSection): HTMLElement {
-  const collapsed = !isExpanded(settingsSection);
-  const section = createElement("section", { className: SettingsClass.section, dataset: collapsed ? { collapsed: "" } : undefined });
+  const isCollapsed = !isExpanded(settingsSection);
+  const section = createElement("section", { className: SettingsClass.section, dataset: isCollapsed ? { collapsed: "" } : undefined });
   const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
   const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
 
@@ -29,10 +29,10 @@ function buildSection(settingsSection: SettingsSection): HTMLElement {
 }
 
 function toggleSection(title: string, element: HTMLElement): void {
-  const collapsed = element.dataset.collapsed === undefined;
+  const isCollapsed = element.dataset.collapsed === undefined;
 
-  toggleDataset(element, "collapsed", collapsed);
-  const state = { ...Preferences.favorites.settingsExpandedSections.value, [title]: !collapsed };
+  toggleDataset(element, "collapsed", isCollapsed);
+  const state = { ...Preferences.favorites.settingsExpandedSections.value, [title]: !isCollapsed };
 
   Preferences.favorites.settingsExpandedSections.set(state);
 }

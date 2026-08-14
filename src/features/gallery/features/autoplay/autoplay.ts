@@ -1,12 +1,12 @@
 import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
-import { NavigationKey } from "@/types/input";
 import { clamp, millisecondsToSeconds } from "@/utils/number";
 import { isImageThumb, isVideoThumb } from "@/lib/media/type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
+import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
+import { NavigationKey } from "@/types/input";
 import { Overlays } from "@/app/layout/shell";
 import { Preferences } from "@/app/context/preferences";
 import { Timer } from "@/lib/async/timer";
@@ -51,10 +51,10 @@ let currentThumb: HTMLElement | null;
 let imageViewTimer: Timer;
 let menuVisibilityTimer: Timer;
 let videoViewTimer: Timer;
-let active: boolean;
-let paused: boolean;
-let menuIsPersistent: boolean;
-let menuIsVisible: boolean;
+let isActive: boolean;
+let isPaused: boolean;
+let isMenuPersistent: boolean;
+let isMenuVisible: boolean;
 
 export function setup(inEvents: AutoplayEvents): void {
   initializeFields();
@@ -65,11 +65,11 @@ export function setup(inEvents: AutoplayEvents): void {
   setMenuIconImageSources();
   addEventListeners();
   loadAutoplaySettingsIntoUi();
-  inEvents.setVideoLooping(!active || paused);
+  inEvents.setVideoLooping(!isActive || isPaused);
 }
 
 export function toggle(value: boolean): void {
-  active = value;
+  isActive = value;
 
   events.setVideoLooping(!value);
 }
@@ -80,7 +80,7 @@ export function startViewTimer(thumb: HTMLElement | null): void {
   }
   currentThumb = thumb;
 
-  if (!active || paused) {
+  if (!isActive || isPaused) {
     return;
   }
 
@@ -92,7 +92,7 @@ export function startViewTimer(thumb: HTMLElement | null): void {
 }
 
 export function startAutoplay(): void {
-  if (!active) {
+  if (!isActive) {
     return;
   }
   addAutoplayEventListeners();
@@ -109,7 +109,7 @@ export function stopAutoplay(): void {
 }
 
 export function handleVideoEnded(): void {
-  if (!active || paused) {
+  if (!isActive || isPaused) {
     return;
   }
 
@@ -128,10 +128,10 @@ export function showMenu(): void {
 function initializeFields(): void {
   eventListenersAbortController = new AbortController();
   currentThumb = null;
-  active = Preferences.gallery.autoplayActive.value;
-  paused = Preferences.gallery.autoplayPaused.value;
-  menuIsPersistent = false;
-  menuIsVisible = false;
+  isActive = Preferences.gallery.autoplayActive.value;
+  isPaused = Preferences.gallery.autoplayPaused.value;
+  isMenuPersistent = false;
+  isMenuVisible = false;
 }
 
 function getDirection(): NavigationKey {
@@ -143,7 +143,7 @@ function initializeEvents(inEvents: AutoplayEvents): void {
   const onComplete = events.onComplete;
 
   events.onComplete = (): void => {
-    if (active && !paused) {
+    if (isActive && !isPaused) {
       onComplete(getDirection());
     }
   };
@@ -158,7 +158,7 @@ function initializeTimers(): void {
   menuVisibilityTimer.onTimerEnd = (): void => {
     hideMenu();
     setTimeout(() => {
-      if (!menuIsPersistent && !menuIsVisible) {
+      if (!isMenuPersistent && !isMenuVisible) {
         toggleSettingMenu(false);
       }
     }, 100);
@@ -252,7 +252,7 @@ function createDurationSelect(minimum: number, maximum: number): HTMLSelectEleme
 }
 
 function setMenuIconImageSources(): void {
-  ui.playButton.src = paused ? menuIcons.play : menuIcons.pause;
+  ui.playButton.src = isPaused ? menuIcons.play : menuIcons.pause;
   ui.settingsButton.src = menuIcons.tune;
   ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", Preferences.gallery.autoplayForward.value);
 }
@@ -299,9 +299,9 @@ function addMobileMenuEventListeners(): void {
   }
   ui.settingsButton.ontouchstart = (): void => {
     toggleSettingMenu();
-    const settingsMenuIsVisible = ui.settingsMenu.container.classList.contains("autoplay-settings--visible");
+    const isSettingsMenuVisible = ui.settingsMenu.container.classList.contains("autoplay-settings--visible");
 
-    toggleMenuPersistence(settingsMenuIsVisible);
+    toggleMenuPersistence(isSettingsMenuVisible);
     menuVisibilityTimer.restart();
   };
   ui.playButton.ontouchstart = (): void => {
@@ -337,12 +337,12 @@ function toggleDirection(): void {
 }
 
 function toggleMenuPersistence(value: boolean): void {
-  menuIsPersistent = value;
+  isMenuPersistent = value;
   ui.menu.classList.toggle("gallery-menu--persistent", value);
 }
 
 function toggleMenuVisibility(value: boolean): void {
-  menuIsVisible = value;
+  isMenuVisible = value;
   ui.menu.classList.toggle("autoplay-menu--visible", value);
 }
 
@@ -411,10 +411,10 @@ function stopVideoViewTimer(): void {
 }
 
 function pause(): void {
-  paused = !paused;
-  Preferences.gallery.autoplayPaused.set(paused);
+  isPaused = !isPaused;
+  Preferences.gallery.autoplayPaused.set(isPaused);
 
-  if (paused) {
+  if (isPaused) {
     ui.playButton.src = menuIcons.play;
     ui.playButton.title = "Resume Autoplay";
     stopImageViewTimer();
@@ -424,7 +424,7 @@ function pause(): void {
     ui.playButton.title = "Pause Autoplay";
     startViewTimer(currentThumb);
   }
-  events.setVideoLooping(paused);
+  events.setVideoLooping(isPaused);
 }
 
 function addAutoplayEventListeners(): void {

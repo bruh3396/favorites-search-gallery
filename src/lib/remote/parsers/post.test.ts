@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { DeletedPostError, PostFetchError } from "@/types/errors";
 import { describe, expect, test } from "vitest";
 import { PostResponse } from "@/types/api";

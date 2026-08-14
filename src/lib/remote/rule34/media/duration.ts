@@ -1,7 +1,7 @@
 import { Favorite } from "@/types/favorite";
 import { RateLimiter } from "@/lib/async/rate_limiter";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { videoUrl } from "@/lib/thumb/url";
+import { videoUrl } from "@/lib/media/url";
 
 const videoLimiter = new RateLimiter(Rule34NetworkConfig.videoDurationRateLimit);
 const videoPool: HTMLVideoElement[] = Array.from({ length: Rule34NetworkConfig.videoDurationRateLimit.concurrency }, () => {

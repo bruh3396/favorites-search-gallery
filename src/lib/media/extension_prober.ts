@@ -1,7 +1,7 @@
 import { ImageExtension, MediaItem } from "@/types/media";
 import { allImageExtensions } from "@/lib/media/constants";
 import { extensionProbeLimiter } from "@/lib/remote/http/rate_limiters";
-import { imageUrl } from "@/lib/thumb/url";
+import { imageUrl } from "@/lib/media/url";
 import { withExtension } from "@/lib/media/url_transformer";
 
 export async function probeAllExtensions(item: MediaItem): Promise<ImageExtension | null> {

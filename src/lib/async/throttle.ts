@@ -1,11 +1,11 @@
 export function throttle<V>(fn: (...args: V[]) => void, delay: number): (...args: V[]) => void {
-  let throttling = false;
+  let isThrottling = false;
   return (...args) => {
-    if (!throttling) {
+    if (!isThrottling) {
       fn(...args);
-      throttling = true;
+      isThrottling = true;
       setTimeout(() => {
-        throttling = false;
+        isThrottling = false;
       }, delay);
     }
   };

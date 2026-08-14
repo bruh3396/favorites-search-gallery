@@ -5,9 +5,9 @@ import { Post } from "@/types/api";
 export function tagsNeedCorrection(favorite: Favorite, post: Post): boolean {
   const validTags = correctTags(post);
   const difference = favorite.tags.symmetricDifference(validTags);
-  const equal = difference.size === 0 || (difference.size === 1 && difference.has(post.id));
+  const isEqual = difference.size === 0 || (difference.size === 1 && difference.has(post.id));
 
-  if (equal) {
+  if (isEqual) {
     return false;
   }
   post.tags = toSortedTagString(validTags);
