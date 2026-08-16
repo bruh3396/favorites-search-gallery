@@ -15,6 +15,7 @@ export class FavoriteItem implements Favorite {
   private readonly post: Post;
   private readonly favoriteTags: FavoriteTags;
   private element: FavoriteElement | null;
+  private isDeleted: boolean;
 
   constructor(source: HTMLElement | SerializedFavorite, addedTags?: string) {
     this.id = source instanceof HTMLElement ? getIdFromThumb(source) : source.id;
@@ -22,6 +23,11 @@ export class FavoriteItem implements Favorite {
     this.favoriteTags = new FavoriteTags(this.post, source, addedTags);
     this.element = null;
     this.metadata = new FavoriteMetadata(this.id, source);
+    this.isDeleted = source instanceof HTMLElement ? false : source.deleted ?? false;
+  }
+
+  public get deleted(): boolean {
+    return this.isDeleted;
   }
 
   public get tags(): Set<string> {
@@ -47,15 +53,17 @@ export class FavoriteItem implements Favorite {
   }
 
   public get serialized(): SerializedFavorite {
-    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbUrl), metadata: this.metadata.serialized };
+    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbUrl), deleted: this.isDeleted, metadata: this.metadata.serialized };
   }
 
-  public updateTags = (post: Post): void => this.favoriteTags.set(toSortedTagSet(post.tags));
-  public withinRating = (rating: Rating): boolean => (this.metadata.rating & rating) > 0;
-  public populateMetadata = (post: Post): void => {
+  public populateMetadata(post: Post): void {
     this.metadata.populateFromPost(post);
     this.element?.setAspectRatio(post.width, post.height);
-  };
+  }
+
+  public markDeleted = (): boolean => (this.isDeleted = true);
+  public updateTags = (post: Post): void => this.favoriteTags.set(toSortedTagSet(post.tags));
+  public withinRating = (rating: Rating): boolean => (this.metadata.rating & rating) > 0;
   public addTags = (newTags: string): string => this.favoriteTags.addTags(newTags);
   public removeAddedTags = (tagsToRemove: string): string => this.favoriteTags.removeAddedTags(tagsToRemove);
   public resetAddedTags = (): void => this.favoriteTags.resetAddedTags();

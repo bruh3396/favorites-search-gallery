@@ -15,7 +15,7 @@ const menuHandlers: Partial<Record<GalleryMenuAction, () => void>> = {
   removeFavorite: GalleryFavoriterFlow.removeFavoriteInGallery,
   toggleBackground: GalleryBackgroundFlow.toggleBackgroundOpacity,
   pin: togglePin,
-  toggleDockPosition: toggleDockPosition
+  toggleDockPosition
 };
 
 export function handleAction(action: GalleryMenuAction): void {

@@ -4,7 +4,7 @@ import { Resolution } from "@/types/media";
 
 export const GalleryConfig = {
   get mainCanvasResolution(): Resolution {
-    return ON_MOBILE_DEVICE ? "1920x1080" : ON_POST_LIST_PAGE ? "3840x2160" : "7680x4320";
+    return ON_MOBILE_DEVICE || USING_FIREFOX ? "1920x1080" : ON_POST_LIST_PAGE ? "3840x2160" : "7680x4320";
   },
 
   imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 700,
@@ -32,6 +32,6 @@ export const GalleryConfig = {
   bottomOverscanPercent: 175,
   bitmapCloseDelay: 50,
 
-  useOffscreenThumbUpscaler: true,
+  useOffscreenThumbUpscaler: USING_FIREFOX,
   galleryMenuMonoColor: true
 };

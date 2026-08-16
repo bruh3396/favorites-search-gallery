@@ -1,9 +1,10 @@
 import * as ExtensionResolver from "@/lib/media/extension_resolver";
+import { fetchDeletedPost, fetchPost } from "@/lib/remote/api/post";
+import { ApiConfig } from "@/config/api_config";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
-import { fetchPost } from "@/lib/remote/api/post";
 import { tagsNeedCorrection } from "@/lib/search/tags/tag_corrector";
 import { withExponentialBackoff } from "@/lib/async/async";
 
@@ -26,10 +27,22 @@ export function setup(
 
 export function fetchMetadata(favorites: FavoriteItem[]): void {
   for (const favorite of favorites) {
-    withExponentialBackoff(() => fetchPost(favorite.id), 5)
-      .then(post => processPost(favorite, post))
-      .catch(console.error);
+    withExponentialBackoff(() => resolvePost(favorite), ApiConfig.metadataRetries)
+    .then(post => processPost(favorite, post))
+    .catch(console.error);
   }
+}
+
+function resolvePost(favorite: FavoriteItem): Promise<Post> {
+  if (favorite.deleted) {
+    return fetchDeletedPost(favorite.id);
+  }
+  return fetchPost(favorite.id, () => markDeleted(favorite));
+}
+
+function markDeleted(favorite: FavoriteItem): void {
+  favorite.markDeleted();
+  onPopulated(favorite);
 }
 
 function processPost(favorite: FavoriteItem, post: Post): void {

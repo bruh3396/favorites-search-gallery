@@ -1,4 +1,4 @@
-import { FeatureNamespaced, GalleryState } from "@/types/app";
+import { FeatureNamespace, GalleryState } from "@/types/app";
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/communication/feature_channel";
 import { NavigationKey } from "@/types/input";
@@ -29,7 +29,7 @@ export const FeatureBridge = {
     thumbs: new FeatureChannel<void, HTMLElement[]>([]),
     usingInfiniteScroll: new FeatureChannel<void, boolean>(false)
   }
-} satisfies FeatureNamespaced;
+} satisfies FeatureNamespace;
 
 export const galleryOpened = (): boolean => FeatureBridge.gallery.state.call() === "open";
 export const galleryIdle = (): boolean => FeatureBridge.gallery.state.call() === "idle";

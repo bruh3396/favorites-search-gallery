@@ -51,7 +51,7 @@ export const showSkeleton = (): void => ContentTiler.tile(FavoritesSkeleton.buil
 
 export { changeLayout } from "@/app/layout/content_tiler";
 export { collectAspectRatios } from "@/features/favorites/view/skeleton/skeleton";
-export { firstPageFavorites, removeOriginalUnusedScripts } from "@/features/favorites/view/native_page_cleaner";
+export { takeNativeFavorites, removeOriginalUnusedScripts } from "@/features/favorites/view/native_page_cleaner";
 export { togglePaginator, isGotoPagePopoverTarget, closeGotoPagePopover, buildPaginator, updatePaginator } from "@/features/favorites/view/pagination_renderer";
 export { toggle as toggleDrawer } from "@/features/favorites/view/shell/drawer";
 export { setStatus, setTemporaryStatus, setResultsCount as setMatchCount, updateFetchStatus, notifyNewFavoritesFound, setExpectedTotalFavoritesCount } from "@/features/favorites/view/status/status";

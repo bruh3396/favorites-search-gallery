@@ -3,7 +3,6 @@ src/playground/
 build/bin
 node_modules
 dist
-package-lock.json
 .*/
 *.md
 !README.md

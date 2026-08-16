@@ -1,14 +1,20 @@
-import { EncodedTagCategory, TagResponse } from "@/types/api";
 import { ApiConfig } from "@/config/api_config";
 import { CoalescingResolver } from "@/lib/async/coalescing_resolver";
+import { EncodedTagCategory } from "@/types/search";
+import { PostFetchError } from "@/types/errors";
+import { TagResponse } from "@/types/api";
 import { fetchApi } from "@/lib/remote/api/gateway";
 import { tagLimiter } from "@/lib/remote/http/rate_limiters";
-import { tagResponseToTagCategory } from "@/lib/remote/parsers/tag";
 
-const tagResolver = new CoalescingResolver<string, TagResponse>(ApiConfig.maxRequests, ApiConfig.requestFlushTimeout, fetchTagCategories);
+const tagResolver = new CoalescingResolver<string, TagResponse>(ApiConfig.coalesceSize, ApiConfig.flushTimeout, fetchTagCategories);
 
 export function fetchTagCategory(tagName: string): Promise<EncodedTagCategory> {
-  return tagResolver.schedule(tagName).then(tagResponseToTagCategory);
+  return tagResolver.schedule(tagName).then((response) => {
+    if (response.status === "rate_limited") {
+      throw new PostFetchError();
+    }
+    return response.category;
+  });
 }
 
 function fetchTagCategories(tagNames: string[]): Promise<Map<string, TagResponse>> {

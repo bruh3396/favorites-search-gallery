@@ -1,3 +1,30 @@
+[data-mobile] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[data-mobile] #favorites-toolbar .menu-icon-btn:hover,
+[data-mobile] #favorites-drawer .favorites-drawer-sidebar-icon:hover,
+[data-mobile] #favorites-about-version:hover,
+[data-mobile] #favorites-drawer .favorites-drawer-title-action:hover {
+  background: transparent;
+}
+
+[data-mobile] button:focus,
+[data-mobile] .setting-row:focus {
+  outline: none;
+}
+
+[data-mobile] #favorites-search-gallery-content {
+  padding: 10px;
+}
+
+[data-mobile] #favorites-drawer-track,
+[data-mobile] #favorites-root[data-drawer-open] #favorites-drawer-track {
+  flex: 0 0 0;
+  width: 0;
+}
+
 .gallery-tap-zone {
   position: fixed;
   top: 50% !important;

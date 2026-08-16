@@ -1,7 +1,7 @@
 export const FavoritesConfig = {
   resultsPerPageBounds: {
     min: 1,
-    max: 10_000
+    max: 5_000
   },
   resultsPerPageStep: 25,
   nearbyPageCount: 5,

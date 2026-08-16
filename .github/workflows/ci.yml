@@ -16,6 +16,6 @@ jobs:
         with:
           node-version: 22
 
-      - run: npm install
+      - run: npm ci
 
       - run: npm run continuous-integration

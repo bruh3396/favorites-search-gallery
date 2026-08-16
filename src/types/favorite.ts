@@ -19,6 +19,7 @@ export type SerializedFavorite = {
   id: string;
   tags: string | Set<string>;
   src: string;
+  deleted?: boolean;
   metadata: SerializedFavoriteMetadata;
 }
 
@@ -33,6 +34,7 @@ export interface Favorite extends Searchable {
   removeAddedTags: (tagsToRemove: string) => string;
   resetAddedTags: () => void;
   populateMetadata: (post: Post) => void;
+  markDeleted: () => void;
   metrics: FavoriteMetricMap;
 }
 

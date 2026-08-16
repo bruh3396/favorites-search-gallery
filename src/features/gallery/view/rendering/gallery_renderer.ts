@@ -21,7 +21,12 @@ export function render(thumb: HTMLElement): void {
 }
 
 export function nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
-  const { root } = resolve(thumb);
+  const renderer = resolve(thumb);
+
+  if (renderer === GalleryVideoRenderer) {
+    return;
+  }
+  const root = renderer.root;
 
   removeDataset(root, "nudge");
   forceReflow(root);

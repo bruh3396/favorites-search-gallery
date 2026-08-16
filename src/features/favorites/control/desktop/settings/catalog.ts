@@ -209,8 +209,8 @@ export const SettingsCatalog = {
   }),
   postOverlay: toggle({
     id: "show-post-overlay",
-    label: "Tag Overlay",
-    tooltip: "Categorize tags when hovering over a thumbnail - Click to add to search - Middle click to quick search",
+    label: "Post Overlay",
+    tooltip: "Show overlay on posts",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlay.enabled,
     enabledWhen: whenNotFullscreenOnHover(),

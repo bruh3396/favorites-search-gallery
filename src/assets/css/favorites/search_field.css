@@ -16,6 +16,7 @@
   align-items: center;
   gap: 2px;
   flex: 0 0 auto;
+  margin-bottom: 1px;
 }
 
 #favorites-search-field #favorites-search-box {

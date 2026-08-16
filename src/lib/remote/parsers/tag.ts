@@ -1,6 +1,6 @@
-import { EncodedTagCategory, TagResponse } from "@/types/api";
+import { EncodedTagCategory, TagCategory } from "@/types/search";
 import { PostFetchError } from "@/types/errors";
-import { TagCategory } from "@/types/search";
+import { TagResponse } from "@/types/api";
 
 const tagCategoryDecodings: Record<number, TagCategory> = {
   0: "general",

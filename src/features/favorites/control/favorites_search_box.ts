@@ -1,13 +1,10 @@
 import { FavoritesDesktopSearchBox } from "@/features/favorites/control/desktop/search_box";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 
 let searchBox: FavoritesDesktopSearchBox | null = null;
 
 export function setup(): void {
-  if (ON_DESKTOP_DEVICE) {
-    searchBox = new FavoritesDesktopSearchBox(FavoritesId.searchField);
-  }
+  searchBox = new FavoritesDesktopSearchBox(FavoritesId.searchField);
 }
 
 export const append = (text: string): void => searchBox?.append(text);

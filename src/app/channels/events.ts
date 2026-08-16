@@ -1,4 +1,4 @@
-import { FeatureNamespaced, GalleryMenuAction } from "@/types/app";
+import { FeatureNamespace, GalleryMenuAction } from "@/types/app";
 import { Emitter } from "@/lib/communication/emitter";
 import { Favorite } from "@/types/favorite";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
@@ -53,4 +53,4 @@ export const Events = {
     moreResultsAdded: new Emitter<HTMLElement[]>(),
     pageChanged: new Emitter<HTMLElement[]>()
   }
-} satisfies FeatureNamespaced;
+} satisfies FeatureNamespace;

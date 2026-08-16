@@ -1,4 +1,4 @@
-import { FeatureNamespaced, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
+import { FeatureNamespace, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortKey } from "@/types/search";
 import { FavoritesDrawerView } from "@/types/favorite";
@@ -8,7 +8,7 @@ import { getCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
   app: {
-    performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
+    performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", ON_MOBILE_DEVICE ? "medium" : "normal"),
     gradient: new Preference("appGradient", false),
     theme: new Preference<Theme>("appTheme", "native"),
     darkMode: new Preference<boolean>("appDarkMode", getCookie("theme", "") === "dark"),
@@ -17,15 +17,15 @@ export const Preferences = {
   },
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
-    columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 3 : 5),
+    columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 2 : 5),
     downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
     drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
     drawerOpen: new Preference("favoritesDrawerOpen", false),
     excludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
     headerEnabled: new Preference("favoritesHeaderEnabled", true),
-    hintsEnabled: new Preference("favoritesHintsEnabled", true),
-    infiniteScroll: new Preference("favoritesInfiniteScroll", false),
+    hintsEnabled: new Preference("favoritesHintsEnabled", ON_DESKTOP_DEVICE),
+    infiniteScroll: new Preference("favoritesInfiniteScroll", ON_MOBILE_DEVICE),
     layout: new Preference<Layout>("favoritesLayout", "column"),
     newFavoriteHighlight: new Preference<HighlightStyle>("favoritesNewFavoriteHighlight", "border"),
     deletingAllowed: new Preference("favoritesDeletingAllowed", false),
@@ -69,4 +69,4 @@ export const Preferences = {
     tooltipEnabled: new Preference("postListTooltipEnabled", false),
     upscaleThumbs: new Preference("postListUpscaleThumbs", ON_DESKTOP_DEVICE)
   }
-} satisfies FeatureNamespaced;
+} satisfies FeatureNamespace;

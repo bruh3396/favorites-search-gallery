@@ -11,7 +11,7 @@ import * as FavoritesSettings from "@/features/favorites/control/desktop/setting
 import * as FavoritesSnippets from "@/features/favorites/features/snippets/snippets";
 import * as FavoritesToolbar from "@/features/favorites/control/desktop/toolbar";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_FIRST_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
@@ -45,7 +45,9 @@ function start(): void {
   FavoritesView.removeOriginalUnusedScripts();
   deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
   FavoritesView.showSkeleton();
-  FavoritesLoadFlow.loadAllFavorites(FavoritesView.firstPageFavorites());
+  const nativeFavorites = FavoritesView.takeNativeFavorites();
+
+  FavoritesLoadFlow.loadAllFavorites(ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined);
 }
 
 function setupModel(): void {
@@ -75,10 +77,7 @@ function setupView(): void {
 
 function setupControl(): void {
   FavoritesSearchBox.setup();
-
-  if (ON_DESKTOP_DEVICE) {
-    FavoritesToolbar.setup();
-  }
+  FavoritesToolbar.setup();
 }
 
 function setupSubFeatures(): void {
