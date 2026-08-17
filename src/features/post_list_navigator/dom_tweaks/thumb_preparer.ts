@@ -1,6 +1,7 @@
-import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME, getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
+import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME, getImageFromThumb, parseIdFromThumb } from "@/lib/thumb/thumbs";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { actionBarHtml } from "@/lib/thumb/action_bar/bar";
 import { removeNonNumericCharacters } from "@/utils/string/format";
 import { resolveMediaType } from "@/lib/media/type_resolver";
 import { setDataset } from "@/utils/dom/dataset";
@@ -14,7 +15,8 @@ function prepareThumb(thumb: HTMLElement): void {
   moveTagsFromTitleToTagsAttribute(thumb);
   assignMediaType(thumb);
   addCanvas(thumb);
-  thumb.id = removeNonNumericCharacters(getIdFromThumb(thumb));
+  addActionBar(thumb);
+  thumb.id = removeNonNumericCharacters(parseIdFromThumb(thumb));
   thumb.classList.remove(RAW_THUMB_CLASS_NAME);
   thumb.classList.add(ITEM_CLASS_NAME, TILE_CLASS_NAME);
   prepareMobileThumb(thumb);
@@ -49,6 +51,14 @@ function addCanvas(thumb: HTMLElement): void {
 
   if (anchor !== null) {
     anchor.appendChild(document.createElement("canvas"));
+  }
+}
+
+function addActionBar(thumb: HTMLElement): void {
+  const anchor = thumb.querySelector("a");
+
+  if (anchor !== null) {
+    anchor.insertAdjacentHTML("beforeend", actionBarHtml(false));
   }
 }
 

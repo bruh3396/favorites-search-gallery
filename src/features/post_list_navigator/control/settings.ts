@@ -2,6 +2,7 @@ import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, PERFORMANCE_PROFILE, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
 import { dropdown, stepper, toggle } from "@/lib/ui/settings/controls";
+import { setActionBarEnabled, setActionBarStatic } from "@/lib/thumb/action_bar/bar";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
@@ -50,6 +51,23 @@ export const Settings = {
     tooltip: "Mark thumbs you've already favorited",
     preference: Preferences.postList.favoriteIndicator
   }),
+  postActionBar: toggle({
+    id: "post-action-bar",
+    label: "Actions",
+    tooltip: "Show a quick action bar on thumbnails",
+    preference: Preferences.postList.postActionBar,
+    applyOnBuild: true,
+    apply: setActionBarEnabled
+  }),
+  postActionBarStatic: toggle({
+    id: "post-action-bar-static",
+    label: "Always Show Actions",
+    tooltip: "Keep the thumbnail action bar visible instead of only on hover",
+    preference: Preferences.postList.postActionBarStatic,
+    applyOnBuild: true,
+    apply: setActionBarStatic,
+    enabledWhen: whenPostActionBarEnabled()
+  }),
   layout: dropdown<Layout>({
     id: "layout-select",
     label: "Layout",
@@ -71,7 +89,7 @@ export const Settings = {
     min: ThumbConfig.columnCountBounds.min,
     max: ON_DESKTOP_DEVICE ? ThumbConfig.columnCountBounds.max : 10,
     step: 1,
-    enabledWhen: whenLayout((layout) => layout !== "row" && layout !== "native")
+    enabledWhen: whenLayoutIs((layout) => layout !== "row" && layout !== "native")
   }),
   rowHeight: stepper({
     id: "row-size",
@@ -81,14 +99,14 @@ export const Settings = {
     min: ThumbConfig.rowHeightBounds.min,
     max: ThumbConfig.rowHeightBounds.max,
     step: 1,
-    enabledWhen: whenLayout((layout) => layout === "row")
+    enabledWhen: whenLayoutIs((layout) => layout === "row")
   }),
   favoriteIndicatorStyle: dropdown<HighlightStyle>({
     id: "favorite-indicator-style",
     label: "Favorites",
     tooltip: "Highlight style for favorited thumbs",
     preference: Preferences.postList.favoriteIndicatorStyle,
-    enabledWhen: whenFavoriteIndicator(),
+    enabledWhen: whenFavoriteIndicatorEnabled(),
     options: new Map<HighlightStyle, string>([
       ["border", "Border"],
       ["glow", "Glow"],
@@ -102,7 +120,7 @@ export const Settings = {
     label: "Gallery Favorites",
     tooltip: "Highlight style for favorited thumbs in the gallery",
     preference: Preferences.postList.galleryFavoriteStyle,
-    enabledWhen: whenFavoriteIndicator(),
+    enabledWhen: whenFavoriteIndicatorEnabled(),
     options: new Map<HighlightStyle, string>([
       ["border", "Border"],
       ["glow", "Glow"],
@@ -112,7 +130,7 @@ export const Settings = {
   }),
   performanceProfile: dropdown<PerformanceProfile>({
     id: "performance-profile",
-    label: "Performance Profile",
+    label: "Performance",
     tooltip: "Choose performance profile",
     preference: Preferences.app.performanceProfile,
     apply: reloadWindow,
@@ -126,10 +144,14 @@ export const Settings = {
   })
 };
 
-function whenLayout(predicate: (layout: Layout) => boolean): EnableRule {
+function whenLayoutIs(predicate: (layout: Layout) => boolean): EnableRule {
   return enableWhen(Preferences.postList.layout, predicate);
 }
 
-function whenFavoriteIndicator(): EnableRule {
+function whenFavoriteIndicatorEnabled(): EnableRule {
   return enableWhen(Preferences.postList.favoriteIndicator, (on) => on);
+}
+
+function whenPostActionBarEnabled(): EnableRule {
+  return enableWhen(Preferences.postList.postActionBar, (on) => on);
 }

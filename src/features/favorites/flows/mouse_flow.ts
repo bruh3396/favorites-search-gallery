@@ -1,3 +1,4 @@
+import * as FavoritesPostActionFlow from "@/features/favorites/flows/post_action_flow";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { openMedia, openPost } from "@/lib/remote/rule34/posts/navigation";
 import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
@@ -7,6 +8,8 @@ import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
 let previousThumb: HTMLElement | null = null;
 
 export function handleClick(event: EnhancedMouseEvent): void {
+  FavoritesPostActionFlow.triggerPostAction(event);
+
   if (event.thumb === null) {
     return;
   }

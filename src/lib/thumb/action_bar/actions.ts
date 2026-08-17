@@ -1,0 +1,60 @@
+import { ActionBarAction, ActionBarCallbacks } from "@/lib/thumb/action_bar/types";
+import { ActionBarDataset, ActionBarSelectors } from "@/lib/thumb/action_bar/selectors";
+import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/remote/rule34/favorites/thumb_actions";
+import { ClickCode } from "@/types/input";
+import { ITEM_SELECTOR } from "@/lib/thumb/thumbs";
+import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
+import { setFavorite } from "@/lib/thumb/action_bar/bar";
+
+export function handleActionBarClick(event: MouseEvent, callbacks: ActionBarCallbacks): void {
+  if (event.button !== ClickCode.Left) {
+    return;
+  }
+  console.log(event.target);
+  const button = closestActionButton(event.target);
+
+  if (button === null) {
+    return;
+  }
+  event.stopPropagation();
+  event.preventDefault();
+  dispatch(button, callbacks);
+}
+
+function dispatch(button: HTMLElement, callbacks: ActionBarCallbacks): void {
+  const bar = button.closest(`.${ActionBarSelectors.bar}`);
+  const thumb = button.closest(ITEM_SELECTOR);
+  const action = button.dataset.action as ActionBarAction;
+
+  if (!(bar instanceof HTMLElement) || !(thumb instanceof HTMLElement)) {
+    return;
+  }
+
+  if (action === "download") {
+    downloadFromThumb(thumb);
+  } else if (action === "favorite") {
+    toggleFavorite(bar, thumb, callbacks);
+  }
+}
+
+function toggleFavorite(bar: HTMLElement, thumb: HTMLElement, callbacks: ActionBarCallbacks): void {
+  const wasFavorite = bar.dataset[ActionBarDataset.isFavorite] !== undefined;
+
+  setFavorite(bar, !wasFavorite);
+
+  if (wasFavorite) {
+    removeFavoriteFromThumb(thumb);
+    callbacks.onFavoriteRemoved(thumb.id);
+  } else {
+    addFavoriteFromThumb(thumb);
+    callbacks.onFavoriteAdded(thumb.id);
+  }
+}
+
+function closestActionButton(target: EventTarget | null): HTMLElement | null {
+  if (!(target instanceof Element)) {
+    return null;
+  }
+  const button = target.closest(`.${ActionBarSelectors.button}`);
+  return button instanceof HTMLElement ? button : null;
+}

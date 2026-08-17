@@ -6,7 +6,7 @@ import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
 import { Post } from "@/types/api";
 import { Rating } from "@/types/search";
 import { compressPreviewSource } from "@/lib/media/url_compressor";
-import { getIdFromThumb } from "@/lib/thumb/thumbs";
+import { parseIdFromThumb } from "@/lib/thumb/thumbs";
 import { toSortedTagSet } from "@/utils/string/tags";
 
 export class FavoriteItem implements Favorite {
@@ -18,7 +18,7 @@ export class FavoriteItem implements Favorite {
   private isDeleted: boolean;
 
   constructor(source: HTMLElement | SerializedFavorite, addedTags?: string) {
-    this.id = source instanceof HTMLElement ? getIdFromThumb(source) : source.id;
+    this.id = source instanceof HTMLElement ? parseIdFromThumb(source) : source.id;
     this.post = createPost(source);
     this.favoriteTags = new FavoriteTags(this.post, source, addedTags);
     this.element = null;

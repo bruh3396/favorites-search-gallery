@@ -1,3 +1,11 @@
+button,
+input,
+textarea {
+  all: unset;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
 #favorites-drawer-views {
   display: flex;
   flex-direction: column;

@@ -1,11 +1,3 @@
-button,
-input,
-textarea {
-  all: unset;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
 button {
   cursor: pointer;
 }

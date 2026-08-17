@@ -1,0 +1,59 @@
+.post-action-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: none;
+  gap: 2px;
+  padding: 4px;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.tile > a {
+  position: relative;
+}
+
+[data-post-action-bar-enabled] .post-action-bar {
+  display: flex;
+}
+
+[data-post-action-bar-enabled] .tile:hover .post-action-bar,
+[data-post-action-bar-enabled][data-post-action-bar-static] .post-action-bar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.post-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--size-radius);
+  cursor: pointer;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.post-action-button:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.post-action-button svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.post-action-button[data-action="favorite"] {
+  color: #ff5b6e;
+}
+
+.post-action-bar:not([data-is-favorite]) .post-action-button[data-action="favorite"] .post-action-heart-filled,
+.post-action-bar[data-is-favorite] .post-action-button[data-action="favorite"] .post-action-heart-empty {
+  display: none;
+}

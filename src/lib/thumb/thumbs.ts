@@ -40,7 +40,7 @@ export function getThumbFromImage(image: HTMLElement): HTMLElement | null {
   return getClosestThumb(image);
 }
 
-export function getIdFromThumb(thumb: HTMLElement): string {
+export function parseIdFromThumb(thumb: HTMLElement): string {
   const id = thumb.getAttribute("id");
 
   if (id !== null) {

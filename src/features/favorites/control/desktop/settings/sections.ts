@@ -49,7 +49,9 @@ export const SettingsSections: SettingsSection[] = [
     controls: [
       SettingsCatalog.postOverlay,
       SettingsCatalog.tooltip,
-      SettingsCatalog.fullscreenOnHover
+      SettingsCatalog.fullscreenOnHover,
+      SettingsCatalog.postActionBar,
+      SettingsCatalog.postActionBarStatic
     ]
   },
   {

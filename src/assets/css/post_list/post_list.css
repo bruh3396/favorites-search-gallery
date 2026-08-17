@@ -34,6 +34,48 @@ div.sidebar {
   min-width: 80px;
 }
 
+#post-list-menu .setting-row {
+  gap: 6px;
+  width: unset;
+  min-height: 24px;
+  padding: 1px 10px 1px 8px;
+}
+
+#post-list-menu .setting-row-label {
+  font-size: 12px;
+}
+
+#post-list-menu .setting-control {
+  margin-right: 0;
+}
+
+#post-list-menu .setting-toggle-track {
+  width: 32px;
+  height: 18px;
+}
+
+#post-list-menu .setting-toggle-knob {
+  width: 13px;
+  height: 13px;
+}
+
+#post-list-menu .setting-row[data-on] .setting-toggle-knob {
+  transform: translate(15px, -50%);
+}
+
+#post-list-menu .setting-dropdown-button {
+  min-width: 84px;
+  font-size: 11px;
+}
+
+#post-list-menu .setting-stepper-value {
+  font-size: 12px;
+}
+
+#post-list-menu .setting-section-header {
+  padding: 6px 10px 8px 8px;
+}
+
 #post-list-options {
   display: flex;
   flex-direction: column;

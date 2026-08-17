@@ -7,6 +7,7 @@ import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
 import HIGHLIGHT_CSS from "@/assets/css/base/highlight.css";
 import MOBILE_CSS from "@/assets/css/base/mobile.css";
+import POST_ACTION_BAR_CSS from "@/assets/css/base/post_action_bar.css";
 import POST_CSS from "@/assets/css/base/post.css";
 import { Preferences } from "@/app/context/preferences";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
@@ -43,6 +44,7 @@ function insertBaseStyles(): void {
     MOBILE_CSS +
     SKELETON_CSS +
     POST_CSS +
+    POST_ACTION_BAR_CSS +
     TILE_CSS +
     HIGHLIGHT_CSS +
     TOOLTIP_CSS +

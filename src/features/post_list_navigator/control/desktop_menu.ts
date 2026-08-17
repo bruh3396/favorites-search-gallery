@@ -21,6 +21,8 @@ const sections: SettingsSection[] = [
       Settings.tooltip,
       Settings.galleryMenu,
       Settings.favoriteIndicator,
+      Settings.postActionBar,
+      Settings.postActionBarStatic,
       Settings.layout,
       Settings.columnCount,
       Settings.rowHeight,

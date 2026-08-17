@@ -1,8 +1,9 @@
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/desktop/settings/helpers";
+import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll, whenPostActionBarEnabled } from "@/features/favorites/control/desktop/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
+import { setActionBarEnabled, setActionBarStatic } from "@/lib/thumb/action_bar/bar";
 import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { GeneralConfig } from "@/config/general_config";
@@ -146,6 +147,23 @@ export const SettingsCatalog = {
     label: "Infinite Scroll",
     tooltip: "Use infinite scroll (waterfall) instead of paging",
     preference: Preferences.favorites.infiniteScroll
+  }),
+  postActionBar: toggle({
+    id: "post-action-bar",
+    label: "Actions",
+    tooltip: "Show a quick action bar on thumbnails",
+    preference: Preferences.favorites.postActionBar,
+    applyOnBuild: true,
+    apply: setActionBarEnabled
+  }),
+  postActionBarStatic: toggle({
+    id: "post-action-bar-static",
+    label: "Always Show Actions",
+    tooltip: "Keep the thumbnail action bar visible instead of only on hover",
+    preference: Preferences.favorites.postActionBarStatic,
+    applyOnBuild: true,
+    apply: setActionBarStatic,
+    enabledWhen: whenPostActionBarEnabled()
   }),
   excludeBlacklist: toggle({
     id: "exclude-blacklist",

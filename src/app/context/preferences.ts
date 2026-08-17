@@ -18,6 +18,8 @@ export const Preferences = {
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
     columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 2 : 5),
+    postActionBar: new Preference("favoritesPostActionBar", false),
+    postActionBarStatic: new Preference("favoritesPostActionBarStatic", ON_MOBILE_DEVICE),
     downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
     drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
@@ -64,6 +66,8 @@ export const Preferences = {
     galleryFavoriteStyle: new Preference<HighlightStyle>("postListGalleryFavoriteStyle", "border"),
     layout: new Preference<Layout>("postListLayout", "column"),
     infiniteScroll: new Preference("postListInfiniteScroll", false),
+    postActionBar: new Preference("postListPostActionBar", false),
+    postActionBarStatic: new Preference("postListPostActionBarStatic", true),
     rowHeight: new Preference("postListRowHeight", 7),
     settingsCollapsed: new Preference("postListSettingsCollapsed", false),
     tooltipEnabled: new Preference("postListTooltipEnabled", false),

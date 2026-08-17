@@ -1,4 +1,4 @@
-import { getIdFromThumb, getImageFromThumb } from "@/lib/thumb/thumbs";
+import { getImageFromThumb, parseIdFromThumb } from "@/lib/thumb/thumbs";
 import { Post } from "@/types/api";
 import { SerializedFavorite } from "@/types/favorite";
 import { chain } from "@/utils/function";
@@ -15,7 +15,7 @@ export function clearPost(post: Post): void {
 }
 
 function createPostFromThumb(thumb: HTMLElement): Post {
-  const post = createEmptyPost(getIdFromThumb(thumb));
+  const post = createEmptyPost(parseIdFromThumb(thumb));
   const image = getImageFromThumb(thumb);
 
   if (image === null) {

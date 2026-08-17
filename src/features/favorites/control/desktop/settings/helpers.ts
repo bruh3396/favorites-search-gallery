@@ -23,6 +23,10 @@ export function whenNotFullscreenOnHover(): EnableRule {
   return enableWhen(Preferences.gallery.previewEnabled, (on) => !on);
 }
 
+export function whenPostActionBarEnabled(): EnableRule {
+  return enableWhen(Preferences.favorites.postActionBar, (on) => on);
+}
+
 export function applyCurrentTheme(): void {
   applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
 }
