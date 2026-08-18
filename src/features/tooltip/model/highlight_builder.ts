@@ -4,7 +4,7 @@ import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
 
 export function buildHighlights(query: string): SearchTermHighlight[] {
   const searchQuery = new SearchQuery(query);
-  const andGroups = searchQuery.andTerms.filter(t => !t.negated).map(t => [t]);
+  const andGroups = searchQuery.andTerms.filter(term => !term.isNegated).map(t => [t]);
   const allTagGroups = [...andGroups, ...searchQuery.orGroups];
   const highlights: SearchTermHighlight[] = [];
 

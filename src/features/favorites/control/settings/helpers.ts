@@ -3,7 +3,7 @@ import { SettingsControl, toggle as toggleControl } from "@/lib/ui/settings/cont
 import { Events } from "@/app/channels/events";
 import { Layout } from "@/types/app";
 import { Preferences } from "@/app/context/preferences";
-import { SettingsSection } from "@/features/favorites/control/desktop/settings/types";
+import { SettingsSection } from "@/features/favorites/control/settings/types";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { applyTheme } from "@/lib/ui/theme/apply";
 
@@ -21,10 +21,6 @@ export function whenNotInfiniteScroll(): EnableRule {
 
 export function whenNotFullscreenOnHover(): EnableRule {
   return enableWhen(Preferences.gallery.previewEnabled, (on) => !on);
-}
-
-export function whenPostActionBarEnabled(): EnableRule {
-  return enableWhen(Preferences.favorites.postActionBar, (on) => on);
 }
 
 export function applyCurrentTheme(): void {

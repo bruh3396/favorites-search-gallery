@@ -17,7 +17,6 @@
   outline: var(--media-outline-size, 2px) solid blue;
 }
 
-
 .tile[data-media-type="gif"]>a {
   outline: var(--media-outline-size, 2px) solid hotpink;
 }

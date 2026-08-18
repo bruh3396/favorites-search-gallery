@@ -17,8 +17,8 @@ export class MetadataSearchTerm extends AbstractSearchTerm {
   private rightValue: (item: Favorite) => number;
   private leftValue: (item: Favorite) => number;
 
-  constructor(value: string, negated: boolean, expression: MetadataSearchExpression) {
-    super(value, negated);
+  constructor(value: string, isNegated: boolean, expression: MetadataSearchExpression) {
+    super(value, isNegated);
     this.compare = comparators[expression.operator];
     this.leftValue = (item): number => item.metrics[expression.metric];
     this.rightValue = expression.hasRightHandMetric ? (item): number => item.metrics[expression.rightHandMetric] : (): number => expression.rightHandValue;

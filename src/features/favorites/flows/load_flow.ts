@@ -41,7 +41,7 @@ async function fetchNewFavorites(firstPageFavorites: HTMLElement[] | undefined):
     return;
   }
   await FavoritesModel.storeFavorites(results.favorites);
-  results.searchResults.forEach(markAsNew);
+  markAsNew(results.favorites);
   FavoritesView.addToTop(results.searchResults);
   FavoritesView.notifyNewFavoritesFound(results);
   FavoritesView.setTemporaryStatus(`Saved ${results.favorites.length} new favorites`);

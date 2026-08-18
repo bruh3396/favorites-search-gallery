@@ -1,6 +1,6 @@
 import { removeDataset, setDataset } from "@/utils/dom/dataset";
+import { PostListSettingsCatalog } from "@/features/post_list_navigator/control/catalog";
 import { Preferences } from "@/app/context/preferences";
-import { Settings } from "@/features/post_list_navigator/control/settings";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
 import { createElement } from "@/utils/dom/element_factory";
@@ -15,20 +15,20 @@ const sections: SettingsSection[] = [
   {
     title: "Favorites Search Gallery",
     controls: [
-      Settings.upscale,
-      Settings.infiniteScroll,
-      Settings.autoplay,
-      Settings.tooltip,
-      Settings.galleryMenu,
-      Settings.favoriteIndicator,
-      Settings.postActionBar,
-      Settings.postActionBarStatic,
-      Settings.layout,
-      Settings.columnCount,
-      Settings.rowHeight,
-      Settings.favoriteIndicatorStyle,
-      Settings.galleryFavoriteStyle,
-      Settings.performanceProfile
+      PostListSettingsCatalog.upscale,
+      PostListSettingsCatalog.infiniteScroll,
+      PostListSettingsCatalog.autoplay,
+      PostListSettingsCatalog.tooltip,
+      PostListSettingsCatalog.galleryMenu,
+      PostListSettingsCatalog.favoriteIndicator,
+      PostListSettingsCatalog.postActionBar,
+      PostListSettingsCatalog.postActionBarButtons,
+      PostListSettingsCatalog.layout,
+      PostListSettingsCatalog.columnCount,
+      PostListSettingsCatalog.rowHeight,
+      PostListSettingsCatalog.favoriteIndicatorStyle,
+      PostListSettingsCatalog.galleryFavoriteStyle,
+      PostListSettingsCatalog.performanceProfile
     ]
   }
 ];
@@ -46,10 +46,10 @@ function buildSection(settingsSection: SettingsSection): HTMLElement {
   const section = createElement("section", { className: SettingsClass.section, dataset: isCollapsed ? { collapsed: "" } : undefined });
   const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
   const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
-
-  header.type = "button";
   const body = createElement("div", { className: SettingsClass.group, children: settingsSection.controls.map((control) => control()) });
   const wrap = createElement("div", { className: SettingsClass.groupWrap, children: [body] });
+
+  header.type = "button";
 
   header.addEventListener("click", () => {
     toggleSection(section);

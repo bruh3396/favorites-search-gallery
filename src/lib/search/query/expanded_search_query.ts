@@ -33,7 +33,7 @@ export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
       }
       const expandedTerms = this.expandWildcardTerm(searchTerm);
 
-      if (searchTerm.negated) {
+      if (searchTerm.isNegated) {
         newAndTerms.push(...expandedTerms);
         continue;
       }
@@ -88,6 +88,6 @@ export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
 
   private expandWildcardTerm(wildcardTerm: WildcardSearchTerm): AbstractSearchTerm[] {
     return wildcardTerm.findMatchingTerms(this.indexedTerms)
-    .map(term => new ExactSearchTerm(term, wildcardTerm.negated));
+    .map(term => new ExactSearchTerm(term, wildcardTerm.isNegated));
   }
 }

@@ -1,6 +1,7 @@
 import { FeatureNamespace, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortKey } from "@/types/search";
+import { ActionBarMode } from "@/lib/thumb/action_bar/types";
 import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
@@ -18,8 +19,8 @@ export const Preferences = {
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
     columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 2 : 5),
-    postActionBar: new Preference("favoritesPostActionBar", false),
-    postActionBarStatic: new Preference("favoritesPostActionBarStatic", ON_MOBILE_DEVICE),
+    postActionBar: new Preference<ActionBarMode>("favoritesPostActionBar", ON_MOBILE_DEVICE ? "off" : "hover"),
+    postActionBarButtons: new Preference("favoritesPostActionBarButtons", 1),
     downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
     drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
@@ -66,8 +67,8 @@ export const Preferences = {
     galleryFavoriteStyle: new Preference<HighlightStyle>("postListGalleryFavoriteStyle", "border"),
     layout: new Preference<Layout>("postListLayout", "column"),
     infiniteScroll: new Preference("postListInfiniteScroll", false),
-    postActionBar: new Preference("postListPostActionBar", false),
-    postActionBarStatic: new Preference("postListPostActionBarStatic", true),
+    postActionBar: new Preference<ActionBarMode>("postListPostActionBar", ON_MOBILE_DEVICE ? "off" : "hover"),
+    postActionBarButtons: new Preference("postListPostActionBarButtons", 3),
     rowHeight: new Preference("postListRowHeight", 7),
     settingsCollapsed: new Preference("postListSettingsCollapsed", false),
     tooltipEnabled: new Preference("postListTooltipEnabled", false),

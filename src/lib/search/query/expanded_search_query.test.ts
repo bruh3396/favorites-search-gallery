@@ -4,7 +4,7 @@ import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExpandedSearchQuery } from "@/lib/search/query/expanded_search_query";
 
 function getRawTermValue(searchTerm: AbstractSearchTerm): string {
-  return searchTerm.negated ? `-${searchTerm.value}` : searchTerm.value;
+  return searchTerm.isNegated ? `-${searchTerm.value}` : searchTerm.value;
 }
 
 function getRawTermGroup(searchTerms: AbstractSearchTerm[]): string[] {

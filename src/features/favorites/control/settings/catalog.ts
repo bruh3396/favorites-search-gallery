@@ -1,9 +1,10 @@
+import { ActionBarButton, ActionBarMode } from "@/lib/thumb/action_bar/types";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll, whenPostActionBarEnabled } from "@/features/favorites/control/desktop/settings/helpers";
+import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
-import { setActionBarEnabled, setActionBarStatic } from "@/lib/thumb/action_bar/bar";
+import { setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar/toggles";
 import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { GeneralConfig } from "@/config/general_config";
@@ -15,7 +16,7 @@ import { reloadWindow } from "@/utils/browser/window";
 import { themeOptions } from "@/lib/ui/theme/builder";
 import { toggleGradient } from "@/lib/ui/theme/apply";
 
-export const SettingsCatalog = {
+export const FavoritesSettingsCatalog = {
   theme: dropdown<Theme>({
     id: "theme",
     tooltip: "Choose color theme",
@@ -82,7 +83,7 @@ export const SettingsCatalog = {
   }),
   header: toggle({
     id: "toggle-header",
-    label: "Header",
+    label: "Site Header",
     tooltip: "Show site header",
     preference: Preferences.favorites.headerEnabled,
     applyOnBuild: true,
@@ -105,7 +106,7 @@ export const SettingsCatalog = {
   }),
   fullscreenOnHover: toggle({
     id: "show-on-hover",
-    label: "Enlarge Content",
+    label: "Enlarge on hover",
     tooltip: "Enlarge content on hover",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.previewEnabled
@@ -148,22 +149,31 @@ export const SettingsCatalog = {
     tooltip: "Use infinite scroll (waterfall) instead of paging",
     preference: Preferences.favorites.infiniteScroll
   }),
-  postActionBar: toggle({
+  postActionBar: segmented<ActionBarMode>({
     id: "post-action-bar",
-    label: "Actions",
-    tooltip: "Show a quick action bar on thumbnails",
+    label: "Action Visibility",
+    tooltip: "Show actions on thumbnails",
     preference: Preferences.favorites.postActionBar,
     applyOnBuild: true,
-    apply: setActionBarEnabled
+    apply: setActionBarMode,
+    options: new Map<ActionBarMode, string>([
+      ["always", "Always"],
+      ["hover", "Hover"],
+      ["off", "Off"]
+    ])
   }),
-  postActionBarStatic: toggle({
-    id: "post-action-bar-static",
-    label: "Always Show Actions",
-    tooltip: "Keep the thumbnail action bar visible instead of only on hover",
-    preference: Preferences.favorites.postActionBarStatic,
+  postActionBarButtons: multiSegmented<ActionBarButton>({
+    id: "post-action-bar-buttons",
+    label: "Action Buttons",
+    tooltip: "Choose which actions appear on thumbnails",
+    preference: Preferences.favorites.postActionBarButtons,
     applyOnBuild: true,
-    apply: setActionBarStatic,
-    enabledWhen: whenPostActionBarEnabled()
+    apply: setActionBarButtons,
+    requireSelection: true,
+    options: new Map<ActionBarButton, string>([
+      [ActionBarButton.Favorite, "Favorite"],
+      [ActionBarButton.Download, "Download"]
+    ])
   }),
   excludeBlacklist: toggle({
     id: "exclude-blacklist",

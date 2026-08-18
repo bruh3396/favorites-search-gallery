@@ -5,6 +5,7 @@ import { actionBarHtml } from "@/lib/thumb/action_bar/bar";
 import { removeNonNumericCharacters } from "@/utils/string/format";
 import { resolveMediaType } from "@/lib/media/type_resolver";
 import { setDataset } from "@/utils/dom/dataset";
+import { stampActionBarId } from "@/lib/thumb/action_bar/toggles";
 
 export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {
   thumbs.forEach(thumb => prepareThumb(thumb));
@@ -17,6 +18,7 @@ function prepareThumb(thumb: HTMLElement): void {
   addCanvas(thumb);
   addActionBar(thumb);
   thumb.id = removeNonNumericCharacters(parseIdFromThumb(thumb));
+  stampActionBarId(thumb);
   thumb.classList.remove(RAW_THUMB_CLASS_NAME);
   thumb.classList.add(ITEM_CLASS_NAME, TILE_CLASS_NAME);
   prepareMobileThumb(thumb);

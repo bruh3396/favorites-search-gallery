@@ -1,4 +1,4 @@
-import { FavoritesDesktopSearchBox } from "@/features/favorites/control/desktop/search_box";
+import { FavoritesDesktopSearchBox } from "@/features/favorites/control/toolbar/search_box";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 
 let searchBox: FavoritesDesktopSearchBox | null = null;

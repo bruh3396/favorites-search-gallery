@@ -1,10 +1,10 @@
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { SettingsSection } from "@/features/favorites/control/desktop/settings/types";
-import { SettingsSections } from "@/features/favorites/control/desktop/settings/sections";
+import { SettingsSection } from "@/features/favorites/control/settings/types";
+import { SettingsSections } from "@/features/favorites/control/settings/sections";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { allSectionsCollapsed } from "@/features/favorites/control/desktop/settings/helpers";
+import { allSectionsCollapsed } from "@/features/favorites/control/settings/helpers";
 import { createElement } from "@/utils/dom/element_factory";
 import { icon } from "@/lib/ui/icon";
 import { reloadWindow } from "@/utils/browser/window";

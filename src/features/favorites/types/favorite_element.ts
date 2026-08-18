@@ -3,6 +3,7 @@ import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
 import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { resolveMediaType } from "@/lib/media/type_resolver";
 import { setDataset } from "@/utils/dom/dataset";
+import { stampActionBarId } from "@/lib/thumb/action_bar/toggles";
 
 export class FavoriteElement {
   public readonly root: HTMLElement;
@@ -31,6 +32,7 @@ export class FavoriteElement {
     this.image.src = post.previewURL;
     setDataset(this.root, "mediaType", resolveMediaType(post.tags));
     this.root.id = post.id;
+    stampActionBarId(this.root);
     this.setAspectRatio(post.width, post.height);
   }
 }

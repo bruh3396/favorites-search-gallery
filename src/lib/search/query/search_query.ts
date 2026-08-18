@@ -25,11 +25,11 @@ export class SearchQuery<T extends Searchable> {
   }
 
   public get negatedTerms(): Set<string> {
-    return new Set(this.andTerms.filter(searchTerm => searchTerm.negated).map(searchTerm => searchTerm.value));
+    return new Set(this.andTerms.filter(searchTerm => searchTerm.isNegated).map(searchTerm => searchTerm.value));
   }
 
   public get requiredTerms(): string[] {
-    return this.andTerms.filter(searchTerm => !searchTerm.negated).map(searchTerm => searchTerm.value);
+    return this.andTerms.filter(searchTerm => !searchTerm.isNegated).map(searchTerm => searchTerm.value);
   }
 
   public get orGroupTerms(): string[][] {

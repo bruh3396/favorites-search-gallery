@@ -1,15 +1,16 @@
+import { ActionBarButton, ActionBarMode } from "@/lib/thumb/action_bar/types";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, PERFORMANCE_PROFILE, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
-import { dropdown, stepper, toggle } from "@/lib/ui/settings/controls";
-import { setActionBarEnabled, setActionBarStatic } from "@/lib/thumb/action_bar/bar";
+import { dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
+import { setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar/toggles";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
 import { reloadWindow } from "@/utils/browser/window";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
-export const Settings = {
+export const PostListSettingsCatalog = {
   upscale: toggle({
     id: "post-list-upscale",
     label: "Upscale",
@@ -51,22 +52,31 @@ export const Settings = {
     tooltip: "Mark thumbs you've already favorited",
     preference: Preferences.postList.favoriteIndicator
   }),
-  postActionBar: toggle({
+  postActionBar: segmented<ActionBarMode>({
     id: "post-action-bar",
     label: "Actions",
-    tooltip: "Show a quick action bar on thumbnails",
+    tooltip: "Show actions thumbnails",
     preference: Preferences.postList.postActionBar,
     applyOnBuild: true,
-    apply: setActionBarEnabled
+    apply: setActionBarMode,
+    options: new Map<ActionBarMode, string>([
+      ["always", "Always"],
+      ["hover", "Hover"],
+      ["off", "Off"]
+    ])
   }),
-  postActionBarStatic: toggle({
-    id: "post-action-bar-static",
-    label: "Always Show Actions",
-    tooltip: "Keep the thumbnail action bar visible instead of only on hover",
-    preference: Preferences.postList.postActionBarStatic,
+  postActionBarButtons: multiSegmented<ActionBarButton>({
+    id: "post-action-bar-buttons",
+    label: "Buttons",
+    tooltip: "Choose which actions appear on thumbnails",
+    preference: Preferences.postList.postActionBarButtons,
     applyOnBuild: true,
-    apply: setActionBarStatic,
-    enabledWhen: whenPostActionBarEnabled()
+    apply: setActionBarButtons,
+    requireSelection: true,
+    options: new Map<ActionBarButton, string>([
+      [ActionBarButton.Favorite, "Favorite"],
+      [ActionBarButton.Download, "Download"]
+    ])
   }),
   layout: dropdown<Layout>({
     id: "layout-select",
@@ -150,8 +160,4 @@ function whenLayoutIs(predicate: (layout: Layout) => boolean): EnableRule {
 
 function whenFavoriteIndicatorEnabled(): EnableRule {
   return enableWhen(Preferences.postList.favoriteIndicator, (on) => on);
-}
-
-function whenPostActionBarEnabled(): EnableRule {
-  return enableWhen(Preferences.postList.postActionBar, (on) => on);
 }

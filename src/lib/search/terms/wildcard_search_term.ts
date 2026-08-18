@@ -9,8 +9,8 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
   private readonly prefix: string;
   private readonly substring: string;
 
-  constructor(value: string, negated: boolean, matchType: WildcardMatchType, regex: RegExp) {
-    super(value, negated);
+  constructor(value: string, isNegated: boolean, matchType: WildcardMatchType, regex: RegExp) {
+    super(value, isNegated);
     this.baseCost = matchType;
     this.matchType = matchType;
     this.regex = regex;
@@ -41,7 +41,7 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
 
   private optimize(): void {
     this.matchesPositive = this.matchType === WildcardMatchType.Prefix ? this.matchesPrefix : this.matchType === WildcardMatchType.Substring ? this.matchesSubstring : this.matchesRegex;
-    this.matches = this.negated ? this.matchesNegated : this.matchesPositive;
+    this.matches = this.isNegated ? this.matchesNegated : this.matchesPositive;
   }
 
   private matchesPrefix(item: Searchable): boolean {

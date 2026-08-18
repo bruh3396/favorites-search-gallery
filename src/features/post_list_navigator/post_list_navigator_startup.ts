@@ -5,6 +5,7 @@ import * as PostListNavigatorNavigationFlow from "@/features/post_list_navigator
 import * as PostListNavigatorOptionFlow from "@/features/post_list_navigator/flows/option_flow";
 import * as PostListNavigatorPostActionFlow from "@/features/post_list_navigator/flows/post_action_flow";
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/post_list_navigator_view";
+import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/action_bar/toggles";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
@@ -61,6 +62,8 @@ function subscribeToEvents(): void {
   Preferences.postList.layout.on(ContentTiler.changeLayout);
   Preferences.postList.infiniteScroll.on(PostListNavigatorOptionFlow.toggleInfiniteScroll);
   DomEvents.document.click.on(PostListNavigatorPostActionFlow.triggerPostAction);
+  Events.app.favoriteAdded.on(markActionBarFavorited);
+  Events.app.favoriteRemoved.on(markActionBarUnfavorited);
 }
 
 function serveExternalRequests(): void {

@@ -4,13 +4,11 @@ import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/remote/rule
 import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/thumb/thumbs";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
-import { setFavorite } from "@/lib/thumb/action_bar/bar";
 
 export function handleActionBarClick(event: MouseEvent, callbacks: ActionBarCallbacks): void {
   if (event.button !== ClickCode.Left) {
     return;
   }
-  console.log(event.target);
   const button = closestActionButton(event.target);
 
   if (button === null) {
@@ -39,8 +37,6 @@ function dispatch(button: HTMLElement, callbacks: ActionBarCallbacks): void {
 
 function toggleFavorite(bar: HTMLElement, thumb: HTMLElement, callbacks: ActionBarCallbacks): void {
   const wasFavorite = bar.dataset[ActionBarDataset.isFavorite] !== undefined;
-
-  setFavorite(bar, !wasFavorite);
 
   if (wasFavorite) {
     removeFavoriteFromThumb(thumb);
