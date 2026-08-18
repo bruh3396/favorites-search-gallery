@@ -1,6 +1,6 @@
 import { Setting } from "@/lib/ui/settings/setting";
 import { StateBinding } from "@/lib/ui/settings/state_binding";
-import { debounceTrailing } from "@/lib/async/debounce";
+import { debounceTrailing } from "@/lib/async/rate_limiting";
 
 export class DebouncedStateBinding<T> extends StateBinding<T> {
   private readonly commitLater: (value: T) => void;

@@ -1,6 +1,6 @@
 import { thumbUrlToImageUrl, withExtension } from "@/lib/media/url_transformer";
 import { MediaItem } from "@/types/media";
-import { withoutQueryParams } from "@/utils/string/url";
+import { withoutQueryParams } from "@/utils/pure/url";
 
 export const imageUrl = (item: MediaItem): string => withoutQueryParams(thumbUrlToImageUrl(item.thumbUrl ?? ""));
 export const videoUrl = (item: MediaItem): string => withExtension(imageUrl(item), "mp4");

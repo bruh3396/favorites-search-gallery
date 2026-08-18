@@ -3,7 +3,7 @@ import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { DomEvents } from "@/app/dom/events";
-import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
+import { EnhancedMouseEvent } from "@/lib/input";
 import { Preferences } from "@/app/context/preferences";
 import { overGalleryMenu } from "@/features/gallery/dom_tweaks/menu";
 

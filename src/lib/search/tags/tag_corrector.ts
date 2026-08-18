@@ -1,4 +1,4 @@
-import { toSortedTagSet, toSortedTagString } from "@/utils/string/tags";
+import { toSortedTagSet, toSortedTagString } from "@/utils/pure/tag";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
 

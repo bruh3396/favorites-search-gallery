@@ -10,7 +10,7 @@ import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { FavoritesViewDependencies } from "@/features/favorites/types/types";
 import { buildFavoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
-import { doNothing } from "@/utils/function";
+import { doNothing } from "@/utils/pure/function";
 import { scrollToTop } from "@/lib/thumb/thumbs";
 
 let onContentReplaced: () => void = doNothing;

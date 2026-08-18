@@ -4,7 +4,7 @@ import { MetadataSearchExpression } from "@/lib/search/parsers/metadata_search_e
 import { MetadataSearchTerm } from "@/lib/search/terms/metadata_search_term";
 import { WildcardMatchType } from "@/lib/search/types/search_types";
 import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
-import { escapeParenthesis } from "@/utils/string/format";
+import { escapeParenthesis } from "@/utils/pure/string";
 
 const unmatchableRegex = /^\b$/;
 const startsWithRegex = /^[^*]*\*$/;

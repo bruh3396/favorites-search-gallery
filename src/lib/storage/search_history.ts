@@ -1,8 +1,7 @@
+import { isEmptyString, removeExtraWhiteSpace } from "@/utils/pure/string";
 import { Storage } from "@/lib/storage/local_storage";
-import { clamp } from "@/utils/number";
-import { indexInBounds } from "@/utils/collection/array";
-import { isEmptyString } from "@/utils/string/query";
-import { removeExtraWhiteSpace } from "@/utils/string/format";
+import { clamp } from "@/utils/pure/number";
+import { indexInBounds } from "@/utils/pure/collection";
 
 export class SearchHistory {
   private lastQuery: string;

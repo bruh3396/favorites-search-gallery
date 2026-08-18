@@ -1,10 +1,10 @@
-import { removeDataset, setDataset, toggleDataset } from "@/utils/dom/dataset";
+import { removeDataset, setDataset, toggleDataset } from "@/utils/platform/dataset";
 import { SelectSetting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { StateBinding } from "@/lib/ui/settings/state_binding";
 import { bindEnableRule } from "@/lib/ui/settings/enable_rule";
 import { controlRow } from "@/lib/ui/settings/components/row";
-import { createElement } from "@/utils/dom/element_factory";
+import { createElement } from "@/utils/platform/factory";
 import { icon } from "@/lib/ui/icon";
 
 const closers = new Set<() => void>();

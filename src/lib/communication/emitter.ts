@@ -1,4 +1,4 @@
-import { queueMacroTask } from "@/lib/async/async";
+import { queueMacroTask, withTimeout } from "@/lib/async/scheduling";
 
 interface EmitterOptions extends AddEventListenerOptions {
   async?: boolean;
@@ -66,5 +66,45 @@ export class Emitter<V> {
 
   public toggle(value: boolean | undefined = undefined): void {
     this.enabled = value ?? !this.enabled;
+  }
+}
+
+export class StickyEmitter<V> extends Emitter<V> {
+  private lastValue: V | undefined;
+  private hasFired: boolean = false;
+
+  public get fired(): boolean {
+    return this.hasFired;
+  }
+
+  public override emit(value: V): void {
+    this.lastValue = value;
+    this.hasFired = true;
+    super.emit(value);
+  }
+
+  public wait(): Promise<V> {
+    return super.next();
+  }
+
+  public timeout(milliseconds: number = 1000): Promise<V | undefined> {
+    return withTimeout(this.wait(), milliseconds).catch(() => undefined);
+  }
+
+  public override next(): Promise<V> {
+    throw new Error("Use wait() on StickyEmitter instead of next()");
+  }
+
+  public override on(callback: (value: V) => void, options: AddEventListenerOptions | undefined = undefined): void {
+    super.on(callback, options);
+
+    if (!this.enabled || !this.hasFired) {
+      return;
+    }
+    callback(this.lastValue as V);
+
+    if (options?.once) {
+      this.off(callback);
+    }
   }
 }

@@ -7,7 +7,7 @@ import { fetchPostPageHtml } from "@/lib/remote/rule34/posts/page";
 import { fetchTagCategory } from "@/lib/remote/api/tag";
 import { getTagSetFromThumb } from "@/lib/thumb/tag";
 import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page";
-import { withTimeout } from "@/lib/async/async";
+import { withTimeout } from "@/lib/async/scheduling";
 
 export { destroy as destroyStore } from "@/features/post_overlay/model/tags/store";
 export { get as getCachedCategory } from "@/features/post_overlay/model/tags/cache";

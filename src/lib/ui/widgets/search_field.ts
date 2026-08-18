@@ -1,7 +1,7 @@
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/dom/element_factory";
-import { toggleDataset } from "@/utils/dom/dataset";
+import { createElement } from "@/utils/platform/factory";
+import { toggleDataset } from "@/utils/platform/dataset";
 
 export function searchField(placeholder: string, onChange: (value: string) => void): HTMLElement {
   const input = createElement("input", { className: `${WidgetSelectors.textField} ${WidgetSelectors.searchFieldInput}` });

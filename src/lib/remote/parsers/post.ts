@@ -1,6 +1,6 @@
 import { Post, ServerPost } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
-import { decodeHtmlEntities } from "@/utils/string/format";
+import { decodeHtmlEntities } from "@/utils/pure/string";
 import { decodeTagCategory } from "@/lib/remote/parsers/tag";
 
 export function parsePost(post: ServerPost): Post {

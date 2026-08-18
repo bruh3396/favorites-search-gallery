@@ -1,5 +1,5 @@
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { queueMacroTask } from "@/lib/async/async";
+import { queueMacroTask } from "@/lib/async/scheduling";
 
 const hotkeyHandlers: Record<string, () => void> = {
   "/": focusSearchBar

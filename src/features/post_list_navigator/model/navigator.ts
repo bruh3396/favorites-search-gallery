@@ -5,8 +5,8 @@ import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigationResult } from "@/features/post_list_navigator/types/navigation";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { getAllPageThumbs } from "@/app/layout/content_thumbs";
-import { navigationDelta } from "@/utils/navigation";
-import { sleep } from "@/lib/async/async";
+import { navigationDelta } from "@/utils/pure/number";
+import { sleep } from "@/lib/async/scheduling";
 
 let initialPageNumber: number;
 let currentPageNumber: number;

@@ -91,7 +91,7 @@ export default defineConfig([
       "key-spacing": "error",
       "keyword-spacing": "error",
       "lines-around-directive": "error",
-      "max-classes-per-file": ["error"],
+      // "max-classes-per-file": ["error"],
       "max-depth": "error",
       "max-nested-callbacks": "error",
       "max-statements-per-line": "error",

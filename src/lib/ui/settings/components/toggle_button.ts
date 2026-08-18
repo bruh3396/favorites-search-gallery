@@ -1,9 +1,9 @@
 import { StateBinding } from "@/lib/ui/settings/state_binding";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/dom/element_factory";
+import { createElement } from "@/utils/platform/factory";
 import { icon } from "@/lib/ui/icon";
-import { toggleDataset } from "@/utils/dom/dataset";
+import { toggleDataset } from "@/utils/platform/dataset";
 
 export function buildToggleButton(config: Partial<ToggleSetting>, iconName: Parameters<typeof icon>[0]): HTMLButtonElement {
   const button = createElement("button", {

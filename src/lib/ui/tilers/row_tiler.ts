@@ -1,9 +1,9 @@
 import { getItemsInContainer, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
-import { removeDataset, setDataset } from "@/utils/dom/dataset";
+import { removeDataset, setDataset } from "@/utils/platform/dataset";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 import { ThumbConfig } from "@/config/thumb_config";
-import { mapRange } from "@/utils/number";
+import { mapRange } from "@/utils/pure/number";
 
 export class RowTiler extends AbstractTiler {
   public layout: Layout = "row";

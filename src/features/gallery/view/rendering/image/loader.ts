@@ -3,7 +3,7 @@ import * as GalleryImageCache from "@/features/gallery/view/rendering/image/cach
 import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fetcher";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { LowResolutionImageRequest } from "@/features/gallery/types/low_resolution_image_request";
-import { doNothing } from "@/utils/function";
+import { doNothing } from "@/utils/pure/function";
 import { isImageThumb } from "@/lib/media/type_predicates";
 export { get, completedRequests } from "@/features/gallery/view/rendering/image/cache";
 

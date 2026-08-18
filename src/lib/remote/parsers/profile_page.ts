@@ -1,7 +1,5 @@
-import { parseHtml } from "@/utils/dom/html_parser";
-
 export function extractFavoritesCount(html: string): number {
-  const favoritesUrl = Array.from(parseHtml(html).querySelectorAll("a"))
+  const favoritesUrl = Array.from(new DOMParser().parseFromString(html, "text/html").querySelectorAll("a"))
     .find(a => a.href.includes("page=favorites&s=view"));
 
   if (favoritesUrl === undefined || favoritesUrl.textContent === null) {

@@ -1,5 +1,5 @@
 import { GalleryConfig } from "@/config/gallery_config";
-import { ThrottleQueue } from "@/lib/async/throttle_queue";
+import { ThrottleQueue } from "@/lib/async/rate_limiting";
 
 const bitmapCloseQueue = new ThrottleQueue(GalleryConfig.bitmapCloseDelay);
 

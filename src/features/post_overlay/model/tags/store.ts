@@ -1,4 +1,4 @@
-import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
+import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";
 import { TagCategoryMapping } from "@/types/search";
 

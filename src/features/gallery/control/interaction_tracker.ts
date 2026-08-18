@@ -3,7 +3,7 @@ import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
 import { InteractionTracker } from "@/lib/observer/interaction_tracker";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { doNothing } from "@/utils/function";
+import { doNothing } from "@/utils/pure/function";
 
 let galleryInteractionTracker: InteractionTracker | null = null;
 

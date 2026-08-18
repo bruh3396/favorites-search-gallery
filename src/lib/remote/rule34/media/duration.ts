@@ -1,5 +1,5 @@
 import { Favorite } from "@/types/favorite";
-import { RateLimiter } from "@/lib/async/rate_limiter";
+import { RateLimiter } from "@/lib/async/rate_limiting";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { videoUrl } from "@/lib/media/url";
 

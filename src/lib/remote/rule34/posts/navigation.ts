@@ -1,4 +1,4 @@
-import { buildPostListUrlFromQuery, buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+import { buildPostListUrlFromQuery, buildPostPageUrl } from "../../url";
 import { resolveMediaUrl } from "@/lib/media/url_resolver";
 import { toMediaItem } from "@/lib/thumb/item";
 

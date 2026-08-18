@@ -1,6 +1,6 @@
-import { clamp, stepDown, stepUp } from "@/utils/number";
+import { clamp, stepDown, stepUp } from "@/utils/pure/number";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { createElement } from "@/utils/dom/element_factory";
+import { createElement } from "@/utils/platform/factory";
 import { icon } from "@/lib/ui/icon";
 
 const HOLD_INITIAL_DELAY_MS = 120;

@@ -1,10 +1,10 @@
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "@/lib/remote/url/action_url_builder";
+import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "../../url";
 import { favoriteAddThrottle, favoriteRemoveThrottle } from "@/lib/remote/http/rate_limiters";
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { fetchHtml } from "@/lib/remote/http/client";
-import { withExponentialBackoff } from "@/lib/async/async";
+import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 const SERVER_ADD_STATUS: Record<number, AddFavoriteStatus> = {
   0: "error",

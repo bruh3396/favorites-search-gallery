@@ -1,8 +1,8 @@
 import { COLUMN_SELECTOR, ITEM_SELECTOR, getItemsInContainer, getThumbsInMatrix, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
 import { Content } from "@/app/layout/shell";
-import { preloadImage } from "@/utils/dom/image";
-import { sleep } from "@/lib/async/async";
-import { throttle } from "@/lib/async/throttle";
+import { preloadImage } from "@/utils/platform/image";
+import { sleep } from "@/lib/async/scheduling";
+import { throttle } from "@/lib/async/rate_limiting";
 
 export const waitForAllThumbsToLoad = (): Promise<unknown[]> => waitForThumbsToLoadInContainer(document);
 export const getAllContentThumbs = (): HTMLElement[] => (usingColumnLayout() ? getThumbsInMatrix(Content) : getItemsInContainer(Content));

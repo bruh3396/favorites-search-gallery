@@ -1,6 +1,6 @@
 import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "@/lib/environment";
 import { Favorite, SerializedFavorite } from "@/types/favorite";
-import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
+import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";
 
 const database = new Database<SerializedFavorite>("Favorites", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);

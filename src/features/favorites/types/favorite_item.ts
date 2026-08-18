@@ -7,7 +7,7 @@ import { Post } from "@/types/api";
 import { Rating } from "@/types/search";
 import { compressPreviewSource } from "@/lib/media/url_compressor";
 import { parseIdFromThumb } from "@/lib/thumb/thumbs";
-import { toSortedTagSet } from "@/utils/string/tags";
+import { toSortedTagSet } from "@/utils/pure/tag";
 
 export class FavoriteItem implements Favorite {
   public readonly id: string;

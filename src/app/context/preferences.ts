@@ -5,7 +5,7 @@ import { ActionBarMode } from "@/lib/thumb/action_bar/types";
 import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
-import { getCookie } from "@/utils/browser/cookie";
+import { getCookie } from "@/utils/platform/browser";
 
 export const Preferences = {
   app: {

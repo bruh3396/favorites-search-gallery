@@ -1,9 +1,9 @@
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { SearchHistory } from "@/lib/storage/search_history";
-import { debounceLeading } from "@/lib/async/debounce";
+import { debounceLeading } from "@/lib/async/rate_limiting";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
-import { toggleDataset } from "@/utils/dom/dataset";
+import { toggleDataset } from "@/utils/platform/dataset";
 
 const HISTORY_DEPTH = 30;
 const INPUT_PERSIST_DELAY = 500;

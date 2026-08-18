@@ -1,4 +1,4 @@
-import { clamp, roundToTwoDecimalPlaces } from "@/utils/number";
+import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { Preferences } from "@/app/context/preferences";
 
 export function toggleBackgroundOpacity(): void {

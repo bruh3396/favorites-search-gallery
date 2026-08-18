@@ -8,7 +8,7 @@ import { SnippetStore } from "@/features/favorites/features/snippets/store";
 import { SnippetsDependencies } from "@/features/favorites/features/snippets/types";
 import { Storage } from "@/lib/storage/local_storage";
 import { buildIdQuery } from "@/features/favorites/features/snippets/utils";
-import { copyText } from "@/utils/browser/clipboard";
+import { copyText } from "@/utils/platform/browser";
 
 const store = new SnippetStore(Storage);
 let dependencies: SnippetsDependencies;

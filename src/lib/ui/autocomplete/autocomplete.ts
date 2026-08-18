@@ -1,11 +1,10 @@
 import { AUTOCOMPLETE_SELECTOR, hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
+import { isEmptyString, removeLeadingHyphens } from "@/utils/pure/string";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { addCustomTagsToAutocomplete } from "@/lib/search/tags/custom_tags";
 import { fetchHtml } from "@/lib/remote/http/client";
-import { isEmptyString } from "@/utils/string/query";
-import { queueMacroTask } from "@/lib/async/async";
-import { removeLeadingHyphens } from "@/utils/string/format";
+import { queueMacroTask } from "@/lib/async/scheduling";
 import { replaceTagInText } from "@/lib/ui/autocomplete/tag_replacer";
 
 export function setupAutocomplete(): void {

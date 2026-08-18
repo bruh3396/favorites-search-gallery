@@ -2,7 +2,7 @@ import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
-import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
+import { EnhancedMouseEvent } from "@/lib/input";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 import { didSwipe } from "@/app/dom/swipe_events";

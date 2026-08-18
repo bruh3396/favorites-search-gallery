@@ -1,5 +1,5 @@
 import { ApiConfig } from "@/config/api_config";
-import { CoalescingResolver } from "@/lib/async/coalescing_resolver";
+import { CoalescingResolver } from "@/lib/async/coalescing";
 import { EncodedTagCategory } from "@/types/search";
 import { PostFetchError } from "@/types/errors";
 import { TagResponse } from "@/types/api";

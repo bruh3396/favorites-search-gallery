@@ -1,7 +1,7 @@
 import { DEFAULT_EXTENSION, allImageExtensions, extensionRegex } from "@/lib/media/constants";
 import { ImageExtension, MediaExtension, MediaExtensionMapping, MediaItem } from "@/types/media";
 import { isGif, isVideo } from "@/lib/media/type_predicates";
-import { CoalescingExecutor } from "@/lib/async/coalescing_executor";
+import { CoalescingExecutor } from "../async/coalescing";
 import { Database } from "@/lib/storage/database";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Post } from "@/types/api";

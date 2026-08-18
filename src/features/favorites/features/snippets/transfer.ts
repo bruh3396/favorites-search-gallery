@@ -1,15 +1,20 @@
 import { SerializedSnippet, Snippet } from "@/features/favorites/features/snippets/types";
-import { downloadBlob } from "@/utils/browser/download";
-import { isEmptyString } from "@/utils/string/query";
-import { parseJson } from "@/utils/string/parse";
-import { readString } from "@/utils/object";
+import { downloadBlob } from "@/utils/platform/browser";
+import { isEmptyString } from "@/utils/pure/string";
+import { isRecord } from "@/utils/pure/collection";
 
 export function exportSnippets(snippets: Snippet[]): void {
   downloadBlob(new Blob([JSON.stringify(snippets.map(toExported), null, 2)], { type: "application/json" }), "snippets.json");
 }
 
 export function importSnippets(contents: string): SerializedSnippet[] {
-  const parsed = parseJson(contents);
+  let parsed;
+
+  try {
+    parsed = JSON.parse(contents);
+  } catch {
+    parsed = null;
+  }
   return Array.isArray(parsed) ? parsed.map(toImported).filter(snippet => snippet !== null) : [];
 }
 
@@ -21,4 +26,9 @@ function toImported(value: unknown): SerializedSnippet | null {
   const name = readString(value, "name");
   const query = readString(value, "query");
   return isEmptyString(name) || isEmptyString(query) ? null : { name, query };
+}
+
+function readString(value: unknown, key: string, fallback: string = ""): string {
+  const field = isRecord(value) ? value[key] : undefined;
+  return typeof field === "string" ? field : fallback;
 }

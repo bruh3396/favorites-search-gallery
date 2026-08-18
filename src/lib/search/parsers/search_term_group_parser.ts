@@ -1,6 +1,6 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
-import { removeExtraWhiteSpace } from "@/utils/string/format";
+import { removeExtraWhiteSpace } from "@/utils/pure/string";
 
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 

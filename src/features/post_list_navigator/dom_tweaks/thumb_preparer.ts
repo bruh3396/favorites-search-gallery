@@ -2,9 +2,9 @@ import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME, getImageFromThu
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { actionBarHtml } from "@/lib/thumb/action_bar/bar";
-import { removeNonNumericCharacters } from "@/utils/string/format";
+import { removeNonNumericCharacters } from "@/utils/pure/string";
 import { resolveMediaType } from "@/lib/media/type_resolver";
-import { setDataset } from "@/utils/dom/dataset";
+import { setDataset } from "@/utils/platform/dataset";
 import { stampActionBarId } from "@/lib/thumb/action_bar/toggles";
 
 export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {

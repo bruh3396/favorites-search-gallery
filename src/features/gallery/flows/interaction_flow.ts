@@ -1,6 +1,6 @@
 import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
-import { throttle } from "@/lib/async/throttle";
+import { throttle } from "@/lib/async/rate_limiting";
 
 export const showCursorInGallery = throttle<MouseEvent>(() => {
   GalleryDispatch.run({ open: GalleryView.showCursor });

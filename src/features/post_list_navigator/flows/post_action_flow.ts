@@ -1,4 +1,4 @@
-import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
+import { EnhancedMouseEvent } from "@/lib/input";
 import { Events } from "@/app/channels/events";
 import { handleActionBarClick } from "@/lib/thumb/action_bar/actions";
 

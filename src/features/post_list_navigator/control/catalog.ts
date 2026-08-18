@@ -7,7 +7,7 @@ import { setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar/to
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
-import { reloadWindow } from "@/utils/browser/window";
+import { reloadWindow } from "@/utils/platform/browser";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 export const PostListSettingsCatalog = {

@@ -1,10 +1,9 @@
+import { clamp, navigationDelta } from "@/utils/pure/number";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/features/favorites/types/types";
 import { Preferences } from "@/app/context/preferences";
-import { clamp } from "@/utils/number";
-import { navigationDelta } from "@/utils/navigation";
 import { paginationSequence } from "@/lib/ui/pagination";
 
 let current = 1;

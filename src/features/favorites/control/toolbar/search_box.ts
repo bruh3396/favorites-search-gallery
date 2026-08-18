@@ -1,6 +1,6 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { AbstractFavoritesSearchBox } from "@/features/favorites/control/toolbar/abstract_search_box";
-import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
+import { EnhancedMouseEvent } from "@/lib/input";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { openPostList } from "@/lib/remote/rule34/posts/navigation";
 

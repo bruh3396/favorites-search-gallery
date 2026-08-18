@@ -1,6 +1,5 @@
-import { getCookie } from "@/utils/browser/cookie";
-import { getQueryParam } from "@/utils/browser/url";
-import { negateTags } from "@/utils/string/format";
+import { getCookie, getQueryParam } from "@/utils/platform/browser";
+import { negateTags } from "@/utils/pure/tag";
 
 declare const SCRIPT_VERSION: string;
 export const VERSION = SCRIPT_VERSION;

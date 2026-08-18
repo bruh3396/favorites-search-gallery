@@ -1,9 +1,9 @@
 import * as FavoritesPostActionFlow from "@/features/favorites/flows/post_action_flow";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { openMedia, openPost } from "@/lib/remote/rule34/posts/navigation";
-import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
+import { EnhancedMouseEvent } from "@/lib/input";
 import { GALLERY_DISABLED } from "@/app/context/flags";
-import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+import { buildPostPageUrl } from "@/lib/remote/url";
 
 let previousThumb: HTMLElement | null = null;
 

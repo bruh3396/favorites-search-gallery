@@ -1,5 +1,5 @@
 import * as Icons from "@/assets/icons";
-import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
+import { EnhancedMouseEvent } from "@/lib/input";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryMenuAction } from "@/types/app";
 import { GalleryMenuButton } from "@/features/gallery/types/gallery_types";
@@ -8,8 +8,8 @@ import { GeneralConfig } from "@/config/general_config";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
-import { insertStyle } from "@/utils/dom/injector";
-import { toggleFullscreen } from "@/utils/browser/window";
+import { insertStyle } from "@/utils/platform/injector";
+import { toggleFullscreen } from "@/utils/platform/browser";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 const buttons: GalleryMenuButton[] = [

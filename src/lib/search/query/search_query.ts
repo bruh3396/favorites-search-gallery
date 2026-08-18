@@ -1,7 +1,7 @@
 import { buildSearchTerms, parseTermGroups, sortSearchTerms } from "@/lib/search/parsers/search_term_group_parser";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { Searchable } from "@/types/search";
-import { isEmptyString } from "@/utils/string/query";
+import { isEmptyString } from "@/utils/pure/string";
 
 export class SearchQuery<T extends Searchable> {
   public readonly raw: string;

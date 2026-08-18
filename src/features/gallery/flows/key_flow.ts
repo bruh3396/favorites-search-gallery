@@ -7,10 +7,10 @@ import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow"
 import * as GalleryVideoFlow from "@/features/gallery/flows/video_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { isExitKey, isNavigationKey } from "@/types/guards";
-import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
+import { EnhancedKeyboardEvent } from "@/lib/input";
 import { GalleryConfig } from "@/config/gallery_config";
-import { throttle } from "@/lib/async/throttle";
-import { toggleFullscreen } from "@/utils/browser/window";
+import { throttle } from "@/lib/async/rate_limiting";
+import { toggleFullscreen } from "@/utils/platform/browser";
 
 const insideGalleryHotkeyHandlers: Record<string, () => void> = {
   b: GalleryBackgroundFlow.toggleBackgroundOpacity,

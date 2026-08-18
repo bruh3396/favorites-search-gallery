@@ -1,6 +1,6 @@
 import { Preference } from "@/lib/storage/preference";
 import { Setting } from "@/lib/ui/settings/setting";
-import { doNothing } from "@/utils/function";
+import { doNothing } from "@/utils/pure/function";
 
 export class StateBinding<T> {
   private currentValue: T;

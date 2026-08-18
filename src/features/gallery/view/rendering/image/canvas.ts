@@ -1,9 +1,9 @@
-import { clamp, roundToTwoDecimalPlaces } from "@/utils/number";
-import { clearCanvas, drawScaledCanvas } from "@/utils/dom/canvas";
+import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
+import { clearCanvas, drawScaledCanvas } from "@/utils/platform/canvas";
 import { GalleryConfig } from "@/config/gallery_config";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
-import { insertStyle } from "@/utils/dom/injector";
-import { parseDimensions2D } from "@/utils/string/parse";
+import { insertStyle } from "@/utils/platform/injector";
+import { parseDimensions2D } from "@/utils/pure/string";
 
 const mainCanvas = document.createElement("canvas");
 const mainContext = mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();

@@ -1,6 +1,6 @@
 import { ActionBarButton, ActionBarMode } from "@/lib/thumb/action_bar/types";
 import { ActionBarDataset, ActionBarSelectors } from "@/lib/thumb/action_bar/selectors";
-import { setDataset, toggleDataset } from "@/utils/dom/dataset";
+import { setDataset, toggleDataset } from "@/utils/platform/dataset";
 import { ThumbConfig } from "@/config/thumb_config";
 
 export function setActionBarMode(mode: ActionBarMode): void {

@@ -12,7 +12,7 @@ import { Preferences } from "@/app/context/preferences";
 import { Theme } from "@/lib/ui/theme/themes";
 import { ThumbConfig } from "@/config/thumb_config";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
-import { reloadWindow } from "@/utils/browser/window";
+import { reloadWindow } from "@/utils/platform/browser";
 import { themeOptions } from "@/lib/ui/theme/builder";
 import { toggleGradient } from "@/lib/ui/theme/apply";
 

@@ -3,7 +3,7 @@ import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_
 import { SortedArray } from "@/lib/collection/sorted_array";
 import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page";
 import { fetchFavoritesPage } from "@/lib/remote/rule34/favorites/page";
-import { sleep } from "@/lib/async/async";
+import { sleep } from "@/lib/async/scheduling";
 
 export class FavoritesConcurrentFetcher {
   private static readonly PENDING_POLL_INTERVAL = 200;

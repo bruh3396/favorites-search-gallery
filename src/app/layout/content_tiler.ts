@@ -1,11 +1,12 @@
 import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { clamp, navigationDelta } from "@/utils/pure/number";
 import { clearFade, fadeIn, fadeInReplacement, setupFadeIn } from "@/app/layout/fade_in";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
 import { ContentDisplayOptions } from "@/types/ui";
 import { DomEvents } from "@/app/dom/events";
-import { EnhancedWheelEvent } from "@/lib/input/wheel_event";
+import { EnhancedWheelEvent } from "@/lib/input";
 import { GridTiler } from "@/lib/ui/tilers/grid_tiler";
 import { Layout } from "@/types/app";
 import { NativeTiler } from "@/lib/ui/tilers/native_tiler";
@@ -14,9 +15,7 @@ import { Preferences } from "@/app/context/preferences";
 import { RowTiler } from "@/lib/ui/tilers/row_tiler";
 import { SquareTiler } from "@/lib/ui/tilers/square_tiler";
 import { ThumbConfig } from "@/config/thumb_config";
-import { clamp } from "@/utils/number";
 import { galleryOpened } from "@/app/channels/feature_bridge";
-import { navigationDelta } from "@/utils/navigation";
 
 const columnTiler = new ColumnTiler(Content, ON_FAVORITES_PAGE ? Preferences.favorites.columnCount.value : Preferences.postList.columnCount.value);
 const tilers: AbstractTiler[] = [columnTiler, new GridTiler(Content), new RowTiler(Content), new SquareTiler(Content), new NativeTiler(Content)];

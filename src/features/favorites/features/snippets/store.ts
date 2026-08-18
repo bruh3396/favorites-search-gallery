@@ -1,9 +1,8 @@
 import { SerializedSnippet, Snippet, SnippetResult } from "@/features/favorites/features/snippets/types";
+import { isEmptyString, removeExtraWhiteSpace } from "@/utils/pure/string";
 import { Store } from "@/lib/storage/local_storage";
-import { isEmptyString } from "@/utils/string/query";
-import { isRecord } from "@/utils/object";
+import { isRecord } from "@/utils/pure/collection";
 import { normalizeName } from "@/features/favorites/features/snippets/utils";
-import { removeExtraWhiteSpace } from "@/utils/string/format";
 
 const STORAGE_KEY = "searchSnippets";
 const LEGACY_STORAGE_KEY = "savedSearches";

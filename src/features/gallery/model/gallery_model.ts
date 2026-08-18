@@ -3,14 +3,14 @@ import * as Navigator from "@/lib/remote/rule34/posts/navigation";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/remote/rule34/favorites/thumb_actions";
 import { Boundary } from "@/types/boundary";
-import { Cursor } from "@/lib/collection/cursor";
-import { ItemWindow } from "@/lib/collection/item_window";
+import { Carousel } from "@/lib/collection/carousel";
+import { ItemWindow } from "@/features/gallery/model/item_window";
 import { NavigationKey } from "@/types/input";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
 import { isVideoThumb } from "@/lib/media/type_predicates";
-import { navigationDelta } from "@/utils/navigation";
+import { navigationDelta } from "@/utils/pure/number";
 
-const cursor = new Cursor<HTMLElement>();
+const cursor = new Carousel<HTMLElement>();
 let preloadWindow: ItemWindow<HTMLElement>;
 
 export { getCurrentState, isInGallery, isShowingPreviews, close, preview } from "@/features/gallery/model/state";
@@ -27,7 +27,6 @@ export const move = (direction: NavigationKey): Boundary => cursor.move(navigati
 export const currentThumb = (): HTMLElement => cursor.currentItem();
 export const pointTo = (thumb: HTMLElement): void => cursor.pointTo(thumb);
 export const indexThumbs = (source: HTMLElement[]): void => cursor.indexItems(source);
-
 export const isViewingVideo = (): boolean => GalleryState.isInGallery() && isVideoThumb(cursor.currentItem());
 export const openPost = (): void => Navigator.openPost(cursor.currentItem().id);
 export const openMedia = (): Promise<void> => Navigator.openMedia(cursor.currentItem());

@@ -1,8 +1,8 @@
 import { select, unselectAll } from "@/features/favorites/features/tag_editor/selection";
-import { EnhancedMouseEvent } from "@/lib/input/mouse_event";
+import { EnhancedMouseEvent } from "@/lib/input";
 import { Favorite } from "@/types/favorite";
 import { ITEM_CLASS_NAME } from "@/lib/thumb/thumbs";
-import { insertStyle } from "@/utils/dom/injector";
+import { insertStyle } from "@/utils/platform/injector";
 
 let getFavorite: (id: string) => Favorite | undefined = () => undefined;
 let toggleUi: (value: boolean) => void = () => {};

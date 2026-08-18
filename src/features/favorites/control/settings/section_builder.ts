@@ -1,10 +1,10 @@
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
-import { createElement } from "@/utils/dom/element_factory";
+import { createElement } from "@/utils/platform/factory";
 import { icon } from "@/lib/ui/icon";
 import { isExpanded } from "@/features/favorites/control/settings/helpers";
-import { toggleDataset } from "@/utils/dom/dataset";
+import { toggleDataset } from "@/utils/platform/dataset";
 
 export function buildSections(sections: SettingsSection[]): HTMLElement[] {
   return sections.map(buildSection);

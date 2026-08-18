@@ -1,8 +1,8 @@
-import { ElementPool } from "@/utils/dom/element_pool";
+import { ElementPool } from "@/lib/ui/element_pool";
 import { Overlays } from "@/app/layout/shell";
 import TOOLTIP_CSS from "@/assets/css/tooltip.css";
-import { div } from "@/utils/dom/element_factory";
-import { insertStyle } from "@/utils/dom/injector";
+import { div } from "@/utils/platform/factory";
+import { insertStyle } from "@/utils/platform/injector";
 
 const TOOLTIP_POOL_SIZE = 3;
 const pool = new ElementPool(TOOLTIP_POOL_SIZE, createTooltipElement);

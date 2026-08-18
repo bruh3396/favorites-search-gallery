@@ -4,7 +4,7 @@ import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { Favorite } from "@/types/favorite";
 import { GalleryConfig } from "@/config/gallery_config";
-import { debounceLeading } from "@/lib/async/debounce";
+import { debounceLeading } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
 export function refresh(): void {
@@ -16,7 +16,7 @@ export function downscaleThumbsOutsideResults(searchResults: Favorite[]): void {
   GalleryView.downscaleAll(new Set(searchResults.map(favorite => favorite.id)));
 }
 
-export function reIndex(): void {
+function reIndex(): void {
   GalleryThumbObserver.refresh();
   GalleryModel.indexThumbs(getAllContentThumbs());
 }

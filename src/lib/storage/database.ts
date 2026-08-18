@@ -1,6 +1,5 @@
-/* eslint-disable max-classes-per-file */
 import { Identifiable } from "@/types/app";
-import { macroTask } from "@/lib/async/async";
+import { macroTask } from "@/lib/async/scheduling";
 
 class LockedDatabaseError extends Error { }
 

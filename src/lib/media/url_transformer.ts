@@ -1,6 +1,6 @@
 import { DEFAULT_EXTENSION, extensionRegex } from "@/lib/media/constants";
 import { MediaExtension } from "@/types/media";
-import { withHostname } from "@/utils/string/url";
+import { withHostname } from "@/utils/pure/url";
 
 export const withRule34Hostname = (url: string): string => withHostname(url, "rule34.xxx");
 export const withRule34WimgHostname = (url: string): string => withHostname(url, "wimg.rule34.xxx");

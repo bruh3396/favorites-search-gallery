@@ -1,5 +1,4 @@
 import { Svg } from "@/assets/svg";
-import { parseHtml } from "@/utils/dom/html_parser";
 
 export type IconName = keyof typeof Svg;
 
@@ -16,7 +15,7 @@ function getPrototype(name: IconName): SVGElement {
   if (cached !== undefined) {
     return cached;
   }
-  const element = parseHtml(Svg[name]).body.querySelector("svg");
+  const element = new DOMParser().parseFromString(Svg[name], "text/html").body.querySelector("svg");
 
   if (element === null) {
     throw new Error(`malformed icon svg: ${name}`);

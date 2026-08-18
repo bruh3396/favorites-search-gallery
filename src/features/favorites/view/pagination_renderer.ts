@@ -1,14 +1,14 @@
 import { IconName, icon } from "@/lib/ui/icon";
 import { Stepper, buildStepper } from "@/lib/ui/settings/components/stepper_control";
-import { createElement, label, span } from "@/utils/dom/element_factory";
-import { removeDataset, toggleDataset } from "@/utils/dom/dataset";
+import { createElement, label, span } from "@/utils/platform/factory";
+import { removeDataset, toggleDataset } from "@/utils/platform/dataset";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
 import { PaginationSequence } from "@/types/ui";
 import { PaginationState } from "@/features/favorites/types/types";
 import { Preferences } from "@/app/context/preferences";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { doNothing } from "@/utils/function";
+import { doNothing } from "@/utils/pure/function";
 import { paginationUpdateStrategy } from "@/lib/ui/pagination";
 
 const PaginationSelectors = {

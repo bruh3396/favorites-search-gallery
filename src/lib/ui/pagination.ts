@@ -1,5 +1,5 @@
 import { PaginationSequence, PaginationTerm } from "@/types/ui";
-import { numbersAroundInRange } from "@/utils/number";
+import { numbersAroundInRange } from "@/utils/pure/number";
 
 type PaginationUpdateStrategy = "skip" | "patch" | "rebuild";
 

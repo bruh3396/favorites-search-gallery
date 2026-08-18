@@ -8,9 +8,9 @@ import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { categoryOptions } from "@/features/favorites/features/downloader/filename_settings";
-import { createElement } from "@/utils/dom/element_factory";
-import { pluralize } from "@/utils/string/format";
-import { toggleDataset } from "@/utils/dom/dataset";
+import { createElement } from "@/utils/platform/factory";
+import { pluralize } from "@/utils/pure/string";
+import { toggleDataset } from "@/utils/platform/dataset";
 
 let abortController: AbortController | null = null;
 let isReady = false;

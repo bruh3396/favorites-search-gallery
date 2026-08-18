@@ -1,8 +1,8 @@
 import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { GalleryConfig } from "@/config/gallery_config";
-import { debounceTrailing } from "@/lib/async/debounce";
+import { computeRectDistance } from "@/utils/pure/number";
+import { debounceTrailing } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
-import { getRectDistance } from "@/utils/geometry";
 
 class VisibleThumbObserver {
   private readonly observer: IntersectionObserver;
@@ -67,8 +67,8 @@ class VisibleThumbObserver {
     }
     const centerRect = center.boundingClientRect;
     return entries.sort((a, b) => {
-      const distanceA = getRectDistance(centerRect, a.boundingClientRect);
-      const distanceB = getRectDistance(centerRect, b.boundingClientRect);
+      const distanceA = computeRectDistance(centerRect, a.boundingClientRect);
+      const distanceB = computeRectDistance(centerRect, b.boundingClientRect);
       return distanceA - distanceB;
     });
   }

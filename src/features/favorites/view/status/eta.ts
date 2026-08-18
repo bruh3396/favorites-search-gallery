@@ -1,5 +1,5 @@
 import { FAVORITES_PER_PAGE } from "@/lib/rule34_constants";
-import { average } from "@/utils/number";
+import { average } from "@/utils/pure/number";
 
 let last: number | null = null;
 const recentElapsed: number[] = [];

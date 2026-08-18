@@ -1,7 +1,7 @@
-import { buildPostPageUrl } from "@/lib/remote/url/page_url_builder";
+import { buildPostPageUrl } from "../../url";
 import { fetchHtml } from "@/lib/remote/http/client";
 import { generalPageRequestLimiter } from "@/lib/remote/http/rate_limiters";
-import { withExponentialBackoff } from "@/lib/async/async";
+import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 let postPageFetchGate: Promise<void> = Promise.resolve();
 

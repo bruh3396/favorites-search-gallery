@@ -1,7 +1,5 @@
-import { parseHtml } from "@/utils/dom/html_parser";
-
 export function extractFavoritesPageCount(html: string): number | null {
-  const dom = parseHtml(html);
+  const dom = new DOMParser().parseFromString(html, "text/html");
   const paginator = dom.querySelector("[name=\"lastpage\"]");
 
   if (paginator === null) {
@@ -17,7 +15,7 @@ export function extractFavoritesPageCount(html: string): number | null {
 }
 
 export function extractFavoriteElements(source: string | Document): HTMLElement[] {
-  const dom = typeof source === "string" ? parseHtml(source) : source;
+  const dom = typeof source === "string" ? new DOMParser().parseFromString(source, "text/html") : source;
   const thumbs = extractThumbElements(dom);
   return thumbs.length > 0 ? thumbs : extractThumbImageElements(dom);
 }

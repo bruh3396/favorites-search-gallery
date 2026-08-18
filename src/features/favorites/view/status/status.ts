@@ -4,7 +4,7 @@ import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NewFavoritesResult } from "@/features/favorites/types/types";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
-import { pluralize } from "@/utils/string/format";
+import { pluralize } from "@/utils/pure/string";
 
 let resultsCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;

@@ -3,7 +3,7 @@ import { FilenameCategory } from "@/features/favorites/features/downloader/types
 import { MediaItem } from "@/types/media";
 import { Preferences } from "@/app/context/preferences";
 import { buildFilename } from "@/features/favorites/features/downloader/filename_builder";
-import { capitalize } from "@/utils/string/format";
+import { capitalize } from "@/utils/pure/string";
 
 const CATEGORIES: FilenameCategory[] = ["artist", "character", "copyright"];
 

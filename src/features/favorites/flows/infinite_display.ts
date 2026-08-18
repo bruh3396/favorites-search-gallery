@@ -6,7 +6,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { ScrollSentinelBottom } from "@/app/layout/shell";
-import { doNothing } from "@/utils/function";
+import { doNothing } from "@/utils/pure/function";
 import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 
 const bottomObserver = new BottomEdgeObserver(extendBelow, () => [...ContentTiler.bottomEdgeElements(), ScrollSentinelBottom]);

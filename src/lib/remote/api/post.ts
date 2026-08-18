@@ -1,6 +1,6 @@
 import { Post, PostResponse } from "@/types/api";
 import { ApiConfig } from "@/config/api_config";
-import { CoalescingResolver } from "@/lib/async/coalescing_resolver";
+import { CoalescingResolver } from "@/lib/async/coalescing";
 import { PostFetchError } from "@/types/errors";
 import { fetchApi } from "@/lib/remote/api/gateway";
 import { fetchPostPageHtml } from "@/lib/remote/rule34/posts/page";

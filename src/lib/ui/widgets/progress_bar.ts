@@ -1,6 +1,6 @@
-import { clamp } from "@/utils/number";
-import { createElement } from "@/utils/dom/element_factory";
-import { toggleDataset } from "@/utils/dom/dataset";
+import { clamp } from "@/utils/pure/number";
+import { createElement } from "@/utils/platform/factory";
+import { toggleDataset } from "@/utils/platform/dataset";
 
 export interface ProgressBar {
   element: HTMLElement;

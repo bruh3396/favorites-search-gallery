@@ -1,6 +1,6 @@
 import { Favorite } from "@/types/favorite";
-import { doNothing } from "@/utils/function";
-import { shuffleArray } from "@/utils/collection/array";
+import { doNothing } from "@/utils/pure/function";
+import { shuffle as shuffleArray } from "@/utils/pure/collection";
 
 let currentSearchResults: Favorite[] = [];
 let onChanged: (results: Favorite[]) => void = doNothing;

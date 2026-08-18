@@ -1,5 +1,5 @@
 import { Preference } from "@/lib/storage/preference";
-import { toggleDataset } from "@/utils/dom/dataset";
+import { toggleDataset } from "@/utils/platform/dataset";
 
 export interface EnableRule {
   subscribe: (recompute: () => void) => void;

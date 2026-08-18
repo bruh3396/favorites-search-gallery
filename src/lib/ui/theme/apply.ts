@@ -1,7 +1,7 @@
-import { setDataset, toggleDataset } from "@/utils/dom/dataset";
+import { setDataset, toggleDataset } from "@/utils/platform/dataset";
 import { Theme } from "@/lib/ui/theme/themes";
-import { macroTask } from "@/lib/async/async";
-import { setCookie } from "@/utils/browser/cookie";
+import { macroTask } from "@/lib/async/scheduling";
+import { setCookie } from "@/utils/platform/browser";
 
 const root = document.documentElement;
 

@@ -1,15 +1,13 @@
+import { parseDimensions2D, removeExtraWhiteSpace } from "@/utils/pure/string";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
-import { parseDimensions2D } from "@/utils/string/parse";
-import { parseHtml } from "@/utils/dom/html_parser";
-import { removeExtraWhiteSpace } from "@/utils/string/format";
 import { withRule34Hostname } from "@/lib/media/url_transformer";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 
 export function parsePostFromPostPage(html: string): Post {
-  const dom = parseHtml(html);
+  const dom = new DOMParser().parseFromString(html, "text/html");
   const statistics = getStatistics(dom);
   const fileUrl = getFileUrl(dom);
   const tags = getTags(dom);
@@ -30,7 +28,7 @@ export function parsePostFromPostPage(html: string): Post {
 }
 
 export function parseTagCategoriesFromPostPage(html: string): TagCategoryMap {
-  const dom = parseHtml(html);
+  const dom = new DOMParser().parseFromString(html, "text/html");
   const categoryMap: TagCategoryMap = new Map();
 
   for (const tag of Array.from(dom.querySelectorAll(".tag"))) {

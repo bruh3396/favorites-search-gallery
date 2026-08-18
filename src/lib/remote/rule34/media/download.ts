@@ -1,6 +1,6 @@
 import * as ExtensionResolver from "@/lib/media/extension_resolver";
 import { DEFAULT_EXTENSION } from "@/lib/media/constants";
-import { download } from "@/utils/browser/download";
+import { download } from "@/utils/platform/browser";
 import { resolveMediaUrl } from "@/lib/media/url_resolver";
 import { toMediaItem } from "@/lib/thumb/item";
 

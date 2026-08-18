@@ -4,7 +4,7 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { PERFORMANCE_PROFILE } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
-import { ThrottleQueue } from "@/lib/async/throttle_queue";
+import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
 function upscalingEnabled(): boolean {

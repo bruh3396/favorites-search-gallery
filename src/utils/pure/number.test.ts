@@ -1,0 +1,380 @@
+import {
+    average,
+    clamp,
+    coinFlip,
+    computeRectDistance,
+    mapRange,
+    millisecondsToSeconds,
+    navigationDelta,
+    randomBetween,
+    randomInt,
+    randomIntInRange,
+    roundToTwoDecimalPlaces,
+    seededRandomFloat,
+    stepDown,
+    stepUp,
+    sum
+} from "@/utils/pure/number";
+import { describe, expect, test } from "vitest";
+
+describe("getRandomPositiveInteger", () => {
+  test("zero", () => {
+    expect(randomInt(0)).toBe(0);
+  });
+
+  test("one", () => {
+    expect(randomInt(1)).toBeLessThanOrEqual(1);
+    expect(randomInt(1)).toBeGreaterThanOrEqual(0);
+  });
+
+  test("many", () => {
+    for (let i = 0; i < 100; i += 1) {
+      expect(randomInt(2000)).toBeLessThanOrEqual(2000);
+      expect(randomInt(2000)).toBeGreaterThanOrEqual(0);
+    }
+  });
+});
+
+describe("mapRange", () => {
+  test("positive", () => {
+    expect(mapRange(5, 0, 10, 0, 100)).toBe(50);
+    expect(mapRange(0, 0, 10, 0, 100)).toBe(0);
+    expect(mapRange(10, 0, 10, 0, 100)).toBe(100);
+    expect(mapRange(2.5, 0, 10, 0, 100)).toBe(25);
+  });
+
+  test("negative", () => {
+    expect(mapRange(-5, -10, 0, 0, 100)).toBe(50);
+    expect(mapRange(-10, -10, 0, 0, 100)).toBe(0);
+    expect(mapRange(0, -10, 0, 0, 100)).toBe(100);
+  });
+
+  test("inverted", () => {
+    expect(mapRange(0, 0, 10, 100, 0)).toBe(100);
+    expect(mapRange(10, 0, 10, 100, 0)).toBe(0);
+    expect(mapRange(5, 0, 10, 100, 0)).toBe(50);
+  });
+});
+
+describe("getRandomPositiveIntegerInRange", () => {
+  test("0 min max", () => {
+    expect(randomIntInRange(0, 0)).toBe(0);
+  });
+
+  test("range", () => {
+    for (let i = 0; i < 100; i += 1) {
+      const value = randomIntInRange(0, 20);
+
+      expect(value).toBeLessThanOrEqual(20);
+      expect(value).toBeGreaterThanOrEqual(0);
+    }
+  });
+});
+
+describe("seededRandom", () => {
+  test("all cases", () => {
+    for (let i = 0; i < 100; i += 1) {
+      expect(seededRandomFloat(i)).toBe(seededRandomFloat(i));
+      expect(seededRandomFloat(i)).not.toBe(seededRandomFloat(i + 1));
+    }
+  });
+});
+
+describe("roundToTwoDecimalPlaces", () => {
+  test("zero", () => {
+    expect(roundToTwoDecimalPlaces(0)).toBe(0);
+  });
+
+  test("integer", () => {
+    expect(roundToTwoDecimalPlaces(1)).toBe(1);
+    expect(roundToTwoDecimalPlaces(-1)).toBe(-1);
+  });
+
+  test("positive", () => {
+    expect(roundToTwoDecimalPlaces(0.123456)).toBe(0.12);
+    expect(roundToTwoDecimalPlaces(0.123456789)).toBe(0.12);
+    expect(roundToTwoDecimalPlaces(0.1234)).toBe(0.12);
+    expect(roundToTwoDecimalPlaces(0.123)).toBe(0.12);
+  });
+
+  test("negative", () => {
+    expect(roundToTwoDecimalPlaces(-0.123456)).toBe(-0.12);
+    expect(roundToTwoDecimalPlaces(-0.123456789)).toBe(-0.12);
+    expect(roundToTwoDecimalPlaces(-0.1234)).toBe(-0.12);
+    expect(roundToTwoDecimalPlaces(-0.123)).toBe(-0.12);
+  });
+
+  test("positive large", () => {
+    expect(roundToTwoDecimalPlaces(123456789)).toBe(123456789);
+    expect(roundToTwoDecimalPlaces(123456789.123456)).toBe(123456789.12);
+    expect(roundToTwoDecimalPlaces(123456789.1234)).toBe(123456789.12);
+    expect(roundToTwoDecimalPlaces(123456789.123)).toBe(123456789.12);
+  });
+
+  test("negative large", () => {
+    expect(roundToTwoDecimalPlaces(-123456789)).toBe(-123456789);
+    expect(roundToTwoDecimalPlaces(-123456789.123456)).toBe(-123456789.12);
+    expect(roundToTwoDecimalPlaces(-123456789.1234)).toBe(-123456789.12);
+    expect(roundToTwoDecimalPlaces(-123456789.123)).toBe(-123456789.12);
+  });
+});
+
+describe("millisecondsToSeconds", () => {
+  test("zero", () => {
+    expect(millisecondsToSeconds(0)).toBe(0);
+  });
+
+  test("normal cases", () => {
+    expect(millisecondsToSeconds(1000)).toBe(1);
+    expect(millisecondsToSeconds(2000)).toBe(2);
+    expect(millisecondsToSeconds(5000)).toBe(5);
+    expect(millisecondsToSeconds(500)).toBe(0.5);
+    expect(millisecondsToSeconds(123456)).toBe(123.46);
+  });
+
+  test("rounding", () => {
+    expect(millisecondsToSeconds(123.456)).toBe(0.12);
+    expect(millisecondsToSeconds(1234.567)).toBe(1.23);
+  });
+});
+
+describe("randomBetween", () => {
+  test("zero", () => {
+    expect(randomBetween(0, 0)).toBe(0);
+  });
+
+  test("normal", () => {
+    for (let i = 0; i < 100; i += 1) {
+      const value = randomBetween(0, 20);
+
+      expect(value).toBeLessThanOrEqual(20);
+      expect(value).toBeGreaterThanOrEqual(0);
+    }
+  });
+});
+
+describe("sum", () => {
+  test("empty", () => {
+    expect(sum([])).toBe(0);
+  });
+
+  test("single", () => {
+    expect(sum([5])).toBe(5);
+    expect(sum([-5])).toBe(-5);
+  });
+
+  test("multiple", () => {
+    expect(sum([1, 2, 3])).toBe(6);
+    expect(sum([1, -2, 3])).toBe(2);
+    expect(sum([-1, -2, -3])).toBe(-6);
+  });
+
+  test("decimals", () => {
+    expect(sum([0.1, 0.2])).toBeCloseTo(0.3);
+  });
+});
+
+describe("average", () => {
+  test("empty", () => {
+    expect(average([])).toBe(0);
+  });
+
+  test("single", () => {
+    expect(average([4])).toBe(4);
+    expect(average([-4])).toBe(-4);
+  });
+
+  test("multiple", () => {
+    expect(average([1, 2, 3])).toBe(2);
+    expect(average([0, 10])).toBe(5);
+    expect(average([-10, 10])).toBe(0);
+  });
+
+  test("decimals", () => {
+    expect(average([1, 2])).toBe(1.5);
+    expect(average([1, 1, 2])).toBeCloseTo(1.333);
+  });
+});
+
+describe("clamp", () => {
+  test("zero", () => {
+    expect(clamp(0, 0, 0)).toBe(0);
+    expect(clamp(1, 0, 0)).toBe(0);
+    expect(clamp(10, 0, 0)).toBe(0);
+  });
+
+  test("invalid range", () => {
+    expect(clamp(10, 100, 0)).toBe(100);
+  });
+
+  test("no clamp", () => {
+    expect(clamp(10, 0, 20)).toBe(10);
+    expect(clamp(11, 0, 20)).toBe(11);
+    expect(clamp(12, 0, 20)).toBe(12);
+    expect(clamp(12, 12, 20)).toBe(12);
+    expect(clamp(13, -100, 20)).toBe(13);
+  });
+
+  test("clamp min", () => {
+    expect(clamp(10, 16, 20)).toBe(16);
+    expect(clamp(-1000, 16, 20)).toBe(16);
+  });
+
+  test("clamp max", () => {
+    expect(clamp(100, 16, 20)).toBe(20);
+    expect(clamp(1000, 16, 20)).toBe(20);
+  });
+});
+
+describe("stepUp", () => {
+  test("from an off-grid value goes up to the next multiple", () => {
+    expect(stepUp(1, 25)).toBe(25);
+    expect(stepUp(24, 25)).toBe(25);
+    expect(stepUp(30, 25)).toBe(50);
+    expect(stepUp(7, 5)).toBe(10);
+  });
+
+  test("from a multiple advances one full step", () => {
+    expect(stepUp(0, 25)).toBe(25);
+    expect(stepUp(25, 25)).toBe(50);
+    expect(stepUp(50, 25)).toBe(75);
+  });
+
+  test("step of 1 increments integers", () => {
+    expect(stepUp(7, 1)).toBe(8);
+    expect(stepUp(0, 1)).toBe(1);
+  });
+
+  test("negative values", () => {
+    expect(stepUp(-30, 25)).toBe(-25);
+    expect(stepUp(-25, 25)).toBe(0);
+    expect(stepUp(-1, 25)).toBe(0);
+  });
+
+  test("non-positive step returns value unchanged", () => {
+    expect(stepUp(7, 0)).toBe(7);
+    expect(stepUp(7, -5)).toBe(7);
+  });
+});
+
+describe("stepDown", () => {
+  test("from an off-grid value goes down to the previous multiple", () => {
+    expect(stepDown(30, 25)).toBe(25);
+    expect(stepDown(49, 25)).toBe(25);
+    expect(stepDown(24, 25)).toBe(0);
+    expect(stepDown(7, 5)).toBe(5);
+  });
+
+  test("from a multiple retreats one full step", () => {
+    expect(stepDown(50, 25)).toBe(25);
+    expect(stepDown(25, 25)).toBe(0);
+    expect(stepDown(0, 25)).toBe(-25);
+  });
+
+  test("step of 1 decrements integers", () => {
+    expect(stepDown(7, 1)).toBe(6);
+    expect(stepDown(1, 1)).toBe(0);
+  });
+
+  test("negative values", () => {
+    expect(stepDown(-1, 25)).toBe(-25);
+    expect(stepDown(-25, 25)).toBe(-50);
+  });
+
+  test("non-positive step returns value unchanged", () => {
+    expect(stepDown(7, 0)).toBe(7);
+    expect(stepDown(7, -5)).toBe(7);
+  });
+});
+
+describe("coinFlip", () => {
+  test("produces both outcomes frequently", () => {
+    let heads = 0;
+    let tails = 0;
+
+    for (let i = 0; i < 1000; i += 1) {
+      if (coinFlip()) {
+        heads += 1;
+      } else {
+        tails += 1;
+      }
+    }
+    expect(heads).toBeGreaterThan(100);
+    expect(tails).toBeGreaterThan(100);
+  });
+});
+
+describe("computeRectDistance", () => {
+  test("identical rects have zero distance", () => {
+    const r = rect(0, 0, 10, 10);
+
+    expect(computeRectDistance(r, r)).toBe(0);
+  });
+
+  test("rects with the same center have zero distance regardless of size", () => {
+    const a = rect(0, 0, 10, 10);
+    const b = rect(2.5, 2.5, 5, 5);
+
+    expect(computeRectDistance(a, b)).toBe(0);
+  });
+
+  test("horizontal separation", () => {
+    const a = rect(0, 0, 10, 10);
+    const b = rect(30, 0, 10, 10);
+
+    expect(computeRectDistance(a, b)).toBe(30);
+  });
+
+  test("vertical separation", () => {
+    const a = rect(0, 0, 10, 10);
+    const b = rect(0, 30, 10, 10);
+
+    expect(computeRectDistance(a, b)).toBe(30);
+  });
+
+  test("diagonal separation (3-4-5 triangle)", () => {
+    const a = rect(0, 0, 0, 0);
+    const b = rect(3, 4, 0, 0);
+
+    expect(computeRectDistance(a, b)).toBe(5);
+  });
+
+  test("is symmetric", () => {
+    const a = rect(0, 0, 10, 20);
+    const b = rect(100, 50, 30, 40);
+
+    expect(computeRectDistance(a, b)).toBe(computeRectDistance(b, a));
+  });
+
+  test("accounts for rect size when computing centers", () => {
+    const a = rect(0, 0, 20, 0);
+    const b = rect(20, 0, 20, 0);
+
+    expect(computeRectDistance(a, b)).toBe(20);
+  });
+
+  test("handles negative coordinates", () => {
+    const a = rect(-10, -10, 0, 0);
+    const b = rect(-7, -6, 0, 0);
+
+    expect(computeRectDistance(a, b)).toBe(5);
+  });
+});
+
+describe("navigationDelta", () => {
+  test("forward keys return 1", () => {
+    expect(navigationDelta("d")).toBe(1);
+    expect(navigationDelta("D")).toBe(1);
+    expect(navigationDelta("ArrowRight")).toBe(1);
+  });
+
+  test("backward keys return -1", () => {
+    expect(navigationDelta("a")).toBe(-1);
+    expect(navigationDelta("A")).toBe(-1);
+    expect(navigationDelta("ArrowLeft")).toBe(-1);
+  });
+});
+
+function rect(left: number, top: number, width: number, height: number): DOMRectReadOnly {
+  return { left, top, width, height } as DOMRectReadOnly;
+}

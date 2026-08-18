@@ -1,7 +1,7 @@
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/dom/element_factory";
+import { createElement } from "@/utils/platform/factory";
 import { icon } from "@/lib/ui/icon";
-import { selectFile } from "@/utils/browser/upload";
+import { selectFile } from "@/utils/platform/browser";
 
 export function exportButton(onExport: () => void): HTMLElement {
   const button = createElement("button", { children: [icon("upload")] });

@@ -1,18 +1,18 @@
 import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { clamp, millisecondsToSeconds } from "@/utils/number";
+import { clamp, millisecondsToSeconds } from "@/utils/pure/number";
 import { isImageThumb, isVideoThumb } from "@/lib/media/type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
-import { EnhancedKeyboardEvent } from "@/lib/input/keyboard_event";
+import { EnhancedKeyboardEvent } from "@/lib/input";
 import { NavigationKey } from "@/types/input";
 import { Overlays } from "@/app/layout/shell";
 import { Preferences } from "@/app/context/preferences";
-import { Timer } from "@/lib/async/timer";
-import { createObjectUrlFromSvg } from "@/utils/dom/svg";
-import { insertStyle } from "@/utils/dom/injector";
-import { throttle } from "@/lib/async/throttle";
+import { Timer } from "@/lib/async/scheduling";
+import { createObjectUrlFromSvg } from "@/utils/platform/image";
+import { insertStyle } from "@/utils/platform/injector";
+import { throttle } from "@/lib/async/rate_limiting";
 
 type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
 

@@ -1,0 +1,128 @@
+import { NavigationKey } from "@/types/input";
+import { isForwardNavigationKey } from "@/types/guards";
+
+let internalSeed = 100;
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+export function stepUp(value: number, step: number): number {
+  if (step <= 0) {
+    return value;
+  }
+  return (Math.floor(value / step) + 1) * step;
+}
+
+export function stepDown(value: number, step: number): number {
+  if (step <= 0) {
+    return value;
+  }
+  return (Math.ceil(value / step) - 1) * step;
+}
+
+export function randomInt(maximum: number): number {
+  return Math.floor(Math.random() * maximum);
+}
+
+export function randomIntInRange(min: number, max: number): number {
+  return randomInt(max - min) + min;
+}
+
+export function seededRandomFloat(seed: number): number {
+  const x = Math.sin(seed) * 4_051.2948;
+  return x - Math.floor(x);
+}
+
+export function seededRandomInt(maximum: number): number {
+  internalSeed += 1;
+  return Math.floor(seededRandomFloat(internalSeed) * maximum);
+}
+
+export function seededRandomIntInRange(min: number, max: number): number {
+  return seededRandomInt(max - min) + min;
+}
+
+export function mapRange(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
+  return Math.round(toMin + (((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin)));
+}
+
+export function roundToTwoDecimalPlaces(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+export function millisecondsToSeconds(milliseconds: number): number {
+  return roundToTwoDecimalPlaces(milliseconds / 1_000);
+}
+
+export function randomBetween(min: number, max: number): number {
+  return min + (Math.random() * (max - min));
+}
+
+export function numbersAroundInRange(initial: number, count: number, min: number = 0, max: number = Number.MAX_SAFE_INTEGER): number[] {
+  if (count <= 0) {
+    return [];
+  }
+
+  if (min > max) {
+    return [];
+  }
+
+  const numbers = [initial];
+  let i = 1;
+
+  while (numbers.length < count) {
+    const left = initial - i;
+    const right = initial + i;
+    const isLeftInBounds = left >= min && left <= max;
+    const isRightInBounds = right >= min && right <= max;
+    const isOutOfBounds = !isLeftInBounds && !isRightInBounds;
+
+    if (isOutOfBounds) {
+      break;
+    }
+
+    if (isLeftInBounds) {
+      numbers.push(left);
+    }
+
+    if (isRightInBounds && numbers.length < count) {
+      numbers.push(right);
+    }
+    i += 1;
+  }
+  return numbers.sort((a, b) => a - b);
+}
+
+export function numberRange(start: number, end: number): number[] {
+  const result: number[] = [];
+
+  for (let i = start; i <= end; i += 1) {
+    result.push(i);
+  }
+  return result;
+}
+
+export function sum(numbers: number[]): number {
+  return numbers.reduce((acc: number, n: number) => acc + n, 0);
+}
+
+export function average(numbers: number[]): number {
+  return numbers.length === 0 ? 0 : sum(numbers) / numbers.length;
+}
+
+export function coinFlip(): boolean {
+  return Math.random() < 0.5;
+}
+
+export function computeRectDistance(rect1: DOMRectReadOnly, rect2: DOMRectReadOnly): number {
+  const x1 = rect1.left + (rect1.width / 2);
+  const y1 = rect1.top + (rect1.height / 2);
+  const x2 = rect2.left + (rect2.width / 2);
+  const y2 = rect2.top + (rect2.height / 2);
+  return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2));
+}
+
+export function navigationDelta(direction: NavigationKey): number {
+  return isForwardNavigationKey(direction) ? 1 : -1;
+}

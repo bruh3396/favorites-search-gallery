@@ -137,7 +137,7 @@ function subscribeToEvents(): void {
 
 function subscribeToFavoritesEvents(): void {
   Events.favorites.contentReplaced.on(GalleryContentFlow.refresh);
-  Events.favorites.contentAdded.on(GalleryContentFlow.reIndex);
+  Events.favorites.contentAdded.on(GalleryContentFlow.refresh);
   Preferences.gallery.previewEnabled.on(GalleryModel.preview);
   Events.favorites.searchResultsUpdated.on(GalleryContentFlow.downscaleThumbsOutsideResults);
   Events.favorites.searchResultsUpdated.on(warmExtensionCache, { once: true });

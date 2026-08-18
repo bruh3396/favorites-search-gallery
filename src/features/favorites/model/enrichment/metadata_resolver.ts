@@ -6,7 +6,7 @@ import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { tagsNeedCorrection } from "@/lib/search/tags/tag_corrector";
-import { withExponentialBackoff } from "@/lib/async/async";
+import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 let onPopulated: (favorite: Favorite) => void = () => undefined;
 let beforeUpdateTags: (favorite: Favorite) => void = () => undefined;

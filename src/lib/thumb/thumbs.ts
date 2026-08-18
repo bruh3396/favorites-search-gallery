@@ -1,7 +1,7 @@
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { imageIsLoading } from "@/utils/dom/image";
-import { removeNonNumericCharacters } from "@/utils/string/format";
-import { sum } from "@/utils/number";
+import { imageIsLoading } from "@/utils/platform/image";
+import { removeNonNumericCharacters } from "@/utils/pure/string";
+import { sum } from "@/utils/pure/number";
 
 export const ITEM_CLASS_NAME = "post";
 export const TILE_CLASS_NAME = "tile";

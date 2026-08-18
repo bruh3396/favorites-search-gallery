@@ -1,4 +1,4 @@
-import { idle, macroTask, queueMacroTask } from "@/lib/async/async";
+import { idle, macroTask, queueMacroTask } from "@/lib/async/scheduling";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { InvertedIndex } from "@/lib/collection/inverted_index";

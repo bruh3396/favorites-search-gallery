@@ -5,7 +5,7 @@ import * as FavoritesSorter from "@/features/favorites/model/search/sorter";
 import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { Favorite } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
-import { chain } from "@/utils/function";
+import { chain } from "@/utils/pure/function";
 
 let currentSearchQuery = "";
 
