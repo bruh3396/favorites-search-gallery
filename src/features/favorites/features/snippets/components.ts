@@ -2,9 +2,9 @@ import { IconName, icon } from "@/lib/ui/icon";
 import { Snippet, SnippetHandlers } from "@/features/favorites/features/snippets/types";
 import { SnippetSelectors } from "@/features/favorites/features/snippets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/platform/factory";
+import { createElement } from "@/utils/browser/factory";
 import { separator } from "@/lib/ui/widgets/separator";
-import { toggleDataset } from "@/utils/platform/dataset";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 export function row(snippet: Snippet, handlers: SnippetHandlers): HTMLElement {
   const element = createElement("div", {

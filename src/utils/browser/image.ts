@@ -1,9 +1,9 @@
-export function imageIsLoaded(image: HTMLImageElement): boolean {
+export function isImageLoaded(image: HTMLImageElement): boolean {
   return image.complete || image.naturalWidth !== 0;
 }
 
-export function imageIsLoading(image: HTMLImageElement): boolean {
-  return !imageIsLoaded(image);
+export function isImageLoading(image: HTMLImageElement): boolean {
+  return !isImageLoaded(image);
 }
 
 export function preloadImage(url: string): void {

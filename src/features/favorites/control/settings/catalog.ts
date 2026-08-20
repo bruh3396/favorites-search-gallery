@@ -2,6 +2,7 @@ import { ActionBarButton, ActionBarMode } from "@/lib/thumb/action_bar/types";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
+import { ON_MOBILE_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
 import { setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar/toggles";
@@ -11,8 +12,8 @@ import { GeneralConfig } from "@/config/general_config";
 import { Preferences } from "@/app/context/preferences";
 import { Theme } from "@/lib/ui/theme/themes";
 import { ThumbConfig } from "@/config/thumb_config";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
-import { reloadWindow } from "@/utils/platform/browser";
+import { booleanPreference } from "@/lib/storage/preference";
+import { reloadWindow } from "@/utils/browser/window";
 import { themeOptions } from "@/lib/ui/theme/builder";
 import { toggleGradient } from "@/lib/ui/theme/apply";
 
@@ -55,7 +56,7 @@ export const FavoritesSettingsCatalog = {
     applyOnBuild: true,
     options: new Map<Layout, string>([
       ["column", "Waterfall"],
-      ["row", "River"],
+      ...(ON_MOBILE_DEVICE ? [] : [["row", "River"] as [Layout, string]]),
       ["square", "Square"],
       ["grid", "Grid"],
       ["native", "Native"]
@@ -162,6 +163,14 @@ export const FavoritesSettingsCatalog = {
       ["off", "Off"]
     ])
   }),
+  postActionBarToggle: toggle({
+    id: "post-action-bar-toggle",
+    label: "Show Actions",
+    tooltip: "Show actions on thumbnails",
+    preference: booleanPreference<ActionBarMode>(Preferences.favorites.postActionBar, "always", "off"),
+    applyOnBuild: true,
+    apply: (on) => setActionBarMode(on ? "always" : "off")
+  }),
   postActionBarButtons: multiSegmented<ActionBarButton>({
     id: "post-action-bar-buttons",
     label: "Action Buttons",
@@ -237,8 +246,8 @@ export const FavoritesSettingsCatalog = {
   }),
   postOverlay: toggle({
     id: "show-post-overlay",
-    label: "Post Overlay",
-    tooltip: "Show overlay on posts",
+    label: "Tag Overlay",
+    tooltip: "Show tag overlay on thumbnails",
     enabled: POST_OVERLAY_ENABLED,
     preference: Preferences.postOverlay.enabled,
     enabledWhen: whenNotFullscreenOnHover(),
@@ -261,7 +270,7 @@ export const FavoritesSettingsCatalog = {
     options: new Map<PerformanceProfile, string>([
       ["normal", "Normal"],
       ["medium", "Medium"],
-      ["low", "Low"],
+      ...(ON_MOBILE_DEVICE ? [] : [["low", "Low"] as [PerformanceProfile, string]]),
       ["potato", "Potato"]
     ])
   })

@@ -4,10 +4,10 @@ import { SnippetSelectors } from "@/features/favorites/features/snippets/selecto
 import { SnippetState } from "@/features/favorites/features/snippets/state";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/platform/factory";
+import { createElement } from "@/utils/browser/factory";
 import { markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { rule } from "@/features/favorites/features/snippets/components";
-import { toggleDataset } from "@/utils/platform/dataset";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 const eyebrow = createElement("div", { className: SnippetSelectors.eyebrow });
 const nameField = createElement("input", { className: `${WidgetSelectors.textField} ${SnippetSelectors.field}` });

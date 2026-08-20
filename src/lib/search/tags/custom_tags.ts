@@ -1,13 +1,13 @@
 import { AwesompleteSuggestion } from "awesomplete";
 import { Storage } from "@/lib/storage/local_storage";
 import { fetchTagCategory } from "@/lib/remote/api/tag";
-import { removeExtraWhiteSpace } from "@/utils/pure/string";
+import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const STORAGE_KEY = "customTags";
 const allCustomTags: Set<string> = new Set(Storage.get<string[]>(STORAGE_KEY) ?? []);
 
 export async function setCustomTags(tags: string): Promise<void> {
-  for (const tag of removeExtraWhiteSpace(tags).split(" ")) {
+  for (const tag of removeExtraWhitespace(tags).split(" ")) {
     if (tag === "" || allCustomTags.has(tag)) {
       continue;
     }

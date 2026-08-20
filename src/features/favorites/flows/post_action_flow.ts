@@ -8,3 +8,10 @@ export function triggerPostAction(event: EnhancedMouseEvent): void {
     onFavoriteRemoved: Events.app.favoriteRemoved.emit
   });
 }
+
+export function triggerPostActionFromTouch(event: TouchEvent): void {
+  handleActionBarClick(event, {
+    onFavoriteAdded: Events.app.favoriteAdded.emit,
+    onFavoriteRemoved: Events.app.favoriteRemoved.emit
+  });
+}

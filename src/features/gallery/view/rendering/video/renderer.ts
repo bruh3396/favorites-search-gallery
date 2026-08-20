@@ -1,6 +1,6 @@
 import * as GalleryVideoController from "@/features/gallery/view/rendering/video/video_controller";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
-import { div } from "@/utils/platform/factory";
+import { div } from "@/utils/browser/factory";
 
 type VideoRenderer = GalleryRenderer & {
   setup: (onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void, onVolumeChanged: (volume: number) => void) => void;

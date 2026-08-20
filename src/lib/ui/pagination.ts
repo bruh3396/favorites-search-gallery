@@ -1,10 +1,10 @@
 import { PaginationSequence, PaginationTerm } from "@/types/ui";
-import { numbersAroundInRange } from "@/utils/pure/number";
+import { numbersAround } from "@/utils/pure/number";
 
 type PaginationUpdateStrategy = "skip" | "patch" | "rebuild";
 
 export function paginationSequence(currentPage: number, finalPage: number, nearbyCount: number): PaginationSequence {
-  const nearbyPages = numbersAroundInRange(currentPage, nearbyCount, 1, finalPage);
+  const nearbyPages = numbersAround(currentPage, nearbyCount, 1, finalPage);
   const smallestNearby = nearbyPages[0] ?? 1;
   const largestNearby = nearbyPages[nearbyPages.length - 1] ?? 1;
   const isFirstNearby = smallestNearby === 1;

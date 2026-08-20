@@ -56,11 +56,12 @@ export const FavoritesDrawerViews: FavoritesDrawerViewDescriptor[] = [
   { name: "snippets", label: "Snippets", icon: "snippet" },
   { name: "tags", label: "Tags", title: "Edit Tags", icon: "tag" },
   { name: "change", label: "Changelog", icon: "changelog" },
-  { name: "help", label: "Help", title: "Help & Support", icon: "help" }
+  { name: "help", label: "Help", title: "Help", icon: "help" }
 ];
 
 export const FavoritesHelpLinks: { label: string; href: string }[] = [
-  { label: "Controls & Help", href: "https://github.com/bruh3396/favorites-search-gallery/#controls" },
+  { label: "Controls", href: "https://github.com/bruh3396/favorites-search-gallery/#controls" },
+  { label: "Search Syntax", href: "https://github.com/bruh3396/favorites-search-gallery/#search-syntax" },
   { label: "Report an Issue", href: "https://github.com/bruh3396/favorites-search-gallery/issues" }
 ];
 

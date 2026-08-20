@@ -1,19 +1,18 @@
 import {
-    average,
-    clamp,
-    coinFlip,
-    computeRectDistance,
-    mapRange,
-    millisecondsToSeconds,
-    navigationDelta,
-    randomBetween,
-    randomInt,
-    randomIntInRange,
-    roundToTwoDecimalPlaces,
-    seededRandomFloat,
-    stepDown,
-    stepUp,
-    sum
+  average,
+  clamp,
+  navigationDelta,
+  randomBoolean,
+  randomFloatInRange,
+  randomInt,
+  randomIntInRange,
+  rescale,
+  roundDownToMultiple,
+  roundToTwoDecimalPlaces,
+  roundUpToMultiple,
+  seededFloat,
+  sum,
+  toSeconds
 } from "@/utils/pure/number";
 import { describe, expect, test } from "vitest";
 
@@ -35,24 +34,24 @@ describe("getRandomPositiveInteger", () => {
   });
 });
 
-describe("mapRange", () => {
+describe("rescale", () => {
   test("positive", () => {
-    expect(mapRange(5, 0, 10, 0, 100)).toBe(50);
-    expect(mapRange(0, 0, 10, 0, 100)).toBe(0);
-    expect(mapRange(10, 0, 10, 0, 100)).toBe(100);
-    expect(mapRange(2.5, 0, 10, 0, 100)).toBe(25);
+    expect(rescale(5, 0, 10, 0, 100)).toBe(50);
+    expect(rescale(0, 0, 10, 0, 100)).toBe(0);
+    expect(rescale(10, 0, 10, 0, 100)).toBe(100);
+    expect(rescale(2.5, 0, 10, 0, 100)).toBe(25);
   });
 
   test("negative", () => {
-    expect(mapRange(-5, -10, 0, 0, 100)).toBe(50);
-    expect(mapRange(-10, -10, 0, 0, 100)).toBe(0);
-    expect(mapRange(0, -10, 0, 0, 100)).toBe(100);
+    expect(rescale(-5, -10, 0, 0, 100)).toBe(50);
+    expect(rescale(-10, -10, 0, 0, 100)).toBe(0);
+    expect(rescale(0, -10, 0, 0, 100)).toBe(100);
   });
 
   test("inverted", () => {
-    expect(mapRange(0, 0, 10, 100, 0)).toBe(100);
-    expect(mapRange(10, 0, 10, 100, 0)).toBe(0);
-    expect(mapRange(5, 0, 10, 100, 0)).toBe(50);
+    expect(rescale(0, 0, 10, 100, 0)).toBe(100);
+    expect(rescale(10, 0, 10, 100, 0)).toBe(0);
+    expect(rescale(5, 0, 10, 100, 0)).toBe(50);
   });
 });
 
@@ -74,8 +73,8 @@ describe("getRandomPositiveIntegerInRange", () => {
 describe("seededRandom", () => {
   test("all cases", () => {
     for (let i = 0; i < 100; i += 1) {
-      expect(seededRandomFloat(i)).toBe(seededRandomFloat(i));
-      expect(seededRandomFloat(i)).not.toBe(seededRandomFloat(i + 1));
+      expect(seededFloat(i)).toBe(seededFloat(i));
+      expect(seededFloat(i)).not.toBe(seededFloat(i + 1));
     }
   });
 });
@@ -119,33 +118,33 @@ describe("roundToTwoDecimalPlaces", () => {
   });
 });
 
-describe("millisecondsToSeconds", () => {
+describe("toSeconds", () => {
   test("zero", () => {
-    expect(millisecondsToSeconds(0)).toBe(0);
+    expect(toSeconds(0)).toBe(0);
   });
 
   test("normal cases", () => {
-    expect(millisecondsToSeconds(1000)).toBe(1);
-    expect(millisecondsToSeconds(2000)).toBe(2);
-    expect(millisecondsToSeconds(5000)).toBe(5);
-    expect(millisecondsToSeconds(500)).toBe(0.5);
-    expect(millisecondsToSeconds(123456)).toBe(123.46);
+    expect(toSeconds(1000)).toBe(1);
+    expect(toSeconds(2000)).toBe(2);
+    expect(toSeconds(5000)).toBe(5);
+    expect(toSeconds(500)).toBe(0.5);
+    expect(toSeconds(123456)).toBe(123.46);
   });
 
   test("rounding", () => {
-    expect(millisecondsToSeconds(123.456)).toBe(0.12);
-    expect(millisecondsToSeconds(1234.567)).toBe(1.23);
+    expect(toSeconds(123.456)).toBe(0.12);
+    expect(toSeconds(1234.567)).toBe(1.23);
   });
 });
 
-describe("randomBetween", () => {
+describe("randomFloatInRange", () => {
   test("zero", () => {
-    expect(randomBetween(0, 0)).toBe(0);
+    expect(randomFloatInRange(0, 0)).toBe(0);
   });
 
   test("normal", () => {
     for (let i = 0; i < 100; i += 1) {
-      const value = randomBetween(0, 20);
+      const value = randomFloatInRange(0, 20);
 
       expect(value).toBeLessThanOrEqual(20);
       expect(value).toBeGreaterThanOrEqual(0);
@@ -226,74 +225,74 @@ describe("clamp", () => {
   });
 });
 
-describe("stepUp", () => {
+describe("roundUpToMultiple", () => {
   test("from an off-grid value goes up to the next multiple", () => {
-    expect(stepUp(1, 25)).toBe(25);
-    expect(stepUp(24, 25)).toBe(25);
-    expect(stepUp(30, 25)).toBe(50);
-    expect(stepUp(7, 5)).toBe(10);
+    expect(roundUpToMultiple(1, 25)).toBe(25);
+    expect(roundUpToMultiple(24, 25)).toBe(25);
+    expect(roundUpToMultiple(30, 25)).toBe(50);
+    expect(roundUpToMultiple(7, 5)).toBe(10);
   });
 
   test("from a multiple advances one full step", () => {
-    expect(stepUp(0, 25)).toBe(25);
-    expect(stepUp(25, 25)).toBe(50);
-    expect(stepUp(50, 25)).toBe(75);
+    expect(roundUpToMultiple(0, 25)).toBe(25);
+    expect(roundUpToMultiple(25, 25)).toBe(50);
+    expect(roundUpToMultiple(50, 25)).toBe(75);
   });
 
   test("step of 1 increments integers", () => {
-    expect(stepUp(7, 1)).toBe(8);
-    expect(stepUp(0, 1)).toBe(1);
+    expect(roundUpToMultiple(7, 1)).toBe(8);
+    expect(roundUpToMultiple(0, 1)).toBe(1);
   });
 
   test("negative values", () => {
-    expect(stepUp(-30, 25)).toBe(-25);
-    expect(stepUp(-25, 25)).toBe(0);
-    expect(stepUp(-1, 25)).toBe(0);
+    expect(roundUpToMultiple(-30, 25)).toBe(-25);
+    expect(roundUpToMultiple(-25, 25)).toBe(0);
+    expect(roundUpToMultiple(-1, 25)).toBe(0);
   });
 
   test("non-positive step returns value unchanged", () => {
-    expect(stepUp(7, 0)).toBe(7);
-    expect(stepUp(7, -5)).toBe(7);
+    expect(roundUpToMultiple(7, 0)).toBe(7);
+    expect(roundUpToMultiple(7, -5)).toBe(7);
   });
 });
 
-describe("stepDown", () => {
+describe("roundDownToMultiple", () => {
   test("from an off-grid value goes down to the previous multiple", () => {
-    expect(stepDown(30, 25)).toBe(25);
-    expect(stepDown(49, 25)).toBe(25);
-    expect(stepDown(24, 25)).toBe(0);
-    expect(stepDown(7, 5)).toBe(5);
+    expect(roundDownToMultiple(30, 25)).toBe(25);
+    expect(roundDownToMultiple(49, 25)).toBe(25);
+    expect(roundDownToMultiple(24, 25)).toBe(0);
+    expect(roundDownToMultiple(7, 5)).toBe(5);
   });
 
   test("from a multiple retreats one full step", () => {
-    expect(stepDown(50, 25)).toBe(25);
-    expect(stepDown(25, 25)).toBe(0);
-    expect(stepDown(0, 25)).toBe(-25);
+    expect(roundDownToMultiple(50, 25)).toBe(25);
+    expect(roundDownToMultiple(25, 25)).toBe(0);
+    expect(roundDownToMultiple(0, 25)).toBe(-25);
   });
 
   test("step of 1 decrements integers", () => {
-    expect(stepDown(7, 1)).toBe(6);
-    expect(stepDown(1, 1)).toBe(0);
+    expect(roundDownToMultiple(7, 1)).toBe(6);
+    expect(roundDownToMultiple(1, 1)).toBe(0);
   });
 
   test("negative values", () => {
-    expect(stepDown(-1, 25)).toBe(-25);
-    expect(stepDown(-25, 25)).toBe(-50);
+    expect(roundDownToMultiple(-1, 25)).toBe(-25);
+    expect(roundDownToMultiple(-25, 25)).toBe(-50);
   });
 
   test("non-positive step returns value unchanged", () => {
-    expect(stepDown(7, 0)).toBe(7);
-    expect(stepDown(7, -5)).toBe(7);
+    expect(roundDownToMultiple(7, 0)).toBe(7);
+    expect(roundDownToMultiple(7, -5)).toBe(7);
   });
 });
 
-describe("coinFlip", () => {
+describe("randomBoolean", () => {
   test("produces both outcomes frequently", () => {
     let heads = 0;
     let tails = 0;
 
     for (let i = 0; i < 1000; i += 1) {
-      if (coinFlip()) {
+      if (randomBoolean()) {
         heads += 1;
       } else {
         tails += 1;
@@ -301,63 +300,6 @@ describe("coinFlip", () => {
     }
     expect(heads).toBeGreaterThan(100);
     expect(tails).toBeGreaterThan(100);
-  });
-});
-
-describe("computeRectDistance", () => {
-  test("identical rects have zero distance", () => {
-    const r = rect(0, 0, 10, 10);
-
-    expect(computeRectDistance(r, r)).toBe(0);
-  });
-
-  test("rects with the same center have zero distance regardless of size", () => {
-    const a = rect(0, 0, 10, 10);
-    const b = rect(2.5, 2.5, 5, 5);
-
-    expect(computeRectDistance(a, b)).toBe(0);
-  });
-
-  test("horizontal separation", () => {
-    const a = rect(0, 0, 10, 10);
-    const b = rect(30, 0, 10, 10);
-
-    expect(computeRectDistance(a, b)).toBe(30);
-  });
-
-  test("vertical separation", () => {
-    const a = rect(0, 0, 10, 10);
-    const b = rect(0, 30, 10, 10);
-
-    expect(computeRectDistance(a, b)).toBe(30);
-  });
-
-  test("diagonal separation (3-4-5 triangle)", () => {
-    const a = rect(0, 0, 0, 0);
-    const b = rect(3, 4, 0, 0);
-
-    expect(computeRectDistance(a, b)).toBe(5);
-  });
-
-  test("is symmetric", () => {
-    const a = rect(0, 0, 10, 20);
-    const b = rect(100, 50, 30, 40);
-
-    expect(computeRectDistance(a, b)).toBe(computeRectDistance(b, a));
-  });
-
-  test("accounts for rect size when computing centers", () => {
-    const a = rect(0, 0, 20, 0);
-    const b = rect(20, 0, 20, 0);
-
-    expect(computeRectDistance(a, b)).toBe(20);
-  });
-
-  test("handles negative coordinates", () => {
-    const a = rect(-10, -10, 0, 0);
-    const b = rect(-7, -6, 0, 0);
-
-    expect(computeRectDistance(a, b)).toBe(5);
   });
 });
 
@@ -374,7 +316,3 @@ describe("navigationDelta", () => {
     expect(navigationDelta("ArrowLeft")).toBe(-1);
   });
 });
-
-function rect(left: number, top: number, width: number, height: number): DOMRectReadOnly {
-  return { left, top, width, height } as DOMRectReadOnly;
-}

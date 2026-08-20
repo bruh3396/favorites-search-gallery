@@ -1,4 +1,4 @@
-import { setDataset } from "@/utils/platform/dataset";
+import { setDataset } from "@/utils/browser/dataset";
 
 const AUTOCOMPLETE_DATASET_KEY = "autocomplete";
 

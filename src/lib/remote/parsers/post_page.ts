@@ -1,7 +1,8 @@
-import { parseDimensions2D, removeExtraWhiteSpace } from "@/utils/pure/string";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
+import { toDimensions2D } from "@/utils/pure/geometry";
+import { removeExtraWhitespace } from "@/utils/pure/string";
 import { withRule34Hostname } from "@/lib/media/url_transformer";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
@@ -12,7 +13,7 @@ export function parsePostFromPostPage(html: string): Post {
   const fileUrl = getFileUrl(dom);
   const tags = getTags(dom);
   const rating = getRating(statistics);
-  const dimensions = parseDimensions2D(statistics.size);
+  const dimensions = toDimensions2D(statistics.size);
   return {
     id: statistics.id,
     width: dimensions.x,
@@ -49,7 +50,7 @@ function getStatistics(dom: Document): Record<string, string> {
   if (stats === null) {
     return {};
   }
-  const textContent = removeExtraWhiteSpace(stats.textContent || "");
+  const textContent = removeExtraWhitespace(stats.textContent || "");
   const matches = Array.from(textContent.matchAll(statisticRegex));
   const entries = matches.map(match => [match[1].toLowerCase(), match[2]]);
   return Object.fromEntries(entries);
@@ -61,7 +62,7 @@ function getFileUrl(dom: Document): string {
 }
 
 function getTags(dom: Document): string {
-  return removeExtraWhiteSpace(Array.from(dom.querySelectorAll(".tag>a"))
+  return removeExtraWhitespace(Array.from(dom.querySelectorAll(".tag>a"))
     .filter(anchor => anchor instanceof HTMLAnchorElement && anchor.textContent !== "?")
     .map(anchor => (anchor.textContent || "").replaceAll(" ", "_"))
     .join(" ") || "");

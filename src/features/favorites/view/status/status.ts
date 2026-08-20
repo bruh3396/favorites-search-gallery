@@ -4,7 +4,7 @@ import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NewFavoritesResult } from "@/features/favorites/types/types";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
-import { pluralize } from "@/utils/pure/string";
+import { pluralSuffix } from "@/utils/pure/string";
 
 let resultsCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
@@ -49,7 +49,7 @@ export function notifyNewFavoritesFound(newFavorites: NewFavoritesResult): void 
   const newFavoritesCount = newFavorites.favorites.length;
 
   if (newFavoritesCount > 0) {
-    setStatus(`Found ${newFavoritesCount} new favorite${pluralize(newFavoritesCount)}`);
+    setStatus(`Found ${newFavoritesCount} new favorite${pluralSuffix(newFavoritesCount)}`);
   }
 }
 

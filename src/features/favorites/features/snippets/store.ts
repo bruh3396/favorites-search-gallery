@@ -1,7 +1,6 @@
 import { SerializedSnippet, Snippet, SnippetResult } from "@/features/favorites/features/snippets/types";
-import { isEmptyString, removeExtraWhiteSpace } from "@/utils/pure/string";
+import { isEmptyString, removeExtraWhitespace } from "@/utils/pure/string";
 import { Store } from "@/lib/storage/local_storage";
-import { isRecord } from "@/utils/pure/collection";
 import { normalizeName } from "@/features/favorites/features/snippets/utils";
 
 const STORAGE_KEY = "searchSnippets";
@@ -27,7 +26,7 @@ export class SnippetStore {
 
   public add(name: string, query: string, lastUsedAt: number = 0, createdAt: number = Date.now()): SnippetResult {
     name = normalizeName(name);
-    query = removeExtraWhiteSpace(query);
+    query = removeExtraWhitespace(query);
 
     if (isEmptyString(name)) {
       return { ok: false, reason: "empty-name" };
@@ -129,7 +128,7 @@ export class SnippetStore {
 
         migrated.set(name, {
           name,
-          query: removeExtraWhiteSpace(query),
+          query: removeExtraWhitespace(query),
           lastUsedAt: 0,
           createdAt: now - index
         });
@@ -167,11 +166,14 @@ function parseSnippets(value: unknown): Map<string, Snippet> {
 }
 
 function isSnippet(value: unknown): value is Snippet {
-  return isRecord(value) &&
-    typeof value.name === "string" &&
-    !isEmptyString(value.name) &&
-    typeof value.query === "string" &&
-    !isEmptyString(value.query) &&
-    typeof value.lastUsedAt === "number" &&
-    typeof value.createdAt === "number";
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return typeof record.name === "string" &&
+    !isEmptyString(record.name) &&
+    typeof record.query === "string" &&
+    !isEmptyString(record.query) &&
+    typeof record.lastUsedAt === "number" &&
+    typeof record.createdAt === "number";
 }

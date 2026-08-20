@@ -1,4 +1,4 @@
-import { removeDataset, setDataset } from "@/utils/platform/dataset";
+import { removeDataset, setDataset } from "@/utils/browser/dataset";
 
 export class ElementPool {
   private readonly elements: HTMLElement[];

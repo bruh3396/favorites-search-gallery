@@ -1,10 +1,10 @@
 import { ActionBarDataset, ActionBarSelectors } from "@/lib/thumb/action_bar/selectors";
 import { ActionBarAction } from "@/lib/thumb/action_bar/types";
 import { Svg } from "@/assets/svg";
-import { toKebabCase } from "@/utils/pure/string";
+import { camelToKebabCase } from "@/utils/pure/string";
 
 export function actionBarHtml(isFavorite: boolean): string {
-  const favoriteState = isFavorite ? ` data-${toKebabCase(ActionBarDataset.isFavorite)}` : "";
+  const favoriteState = isFavorite ? ` data-${camelToKebabCase(ActionBarDataset.isFavorite)}` : "";
   return `<div class="${ActionBarSelectors.bar}"${favoriteState}><span class="${ActionBarSelectors.id}"></span>${downloadButton()}${favoriteButton()}</div>`;
 }
 

@@ -3,8 +3,8 @@ import { SettingsClass } from "@/lib/ui/settings/classes";
 import { StateBinding } from "@/lib/ui/settings/state_binding";
 import { bindEnableRule } from "@/lib/ui/settings/enable_rule";
 import { controlRow } from "@/lib/ui/settings/components/row";
-import { createElement } from "@/utils/platform/factory";
-import { toggleDataset } from "@/utils/platform/dataset";
+import { createElement } from "@/utils/browser/factory";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 export function buildSegmentedRow<T extends string | number>(config: Partial<SelectSetting<T>>): HTMLElement {
   const options = config.options ?? new Map<T, string>();

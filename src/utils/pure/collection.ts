@@ -1,41 +1,15 @@
-import { randomInt } from "@/utils/pure/number";
+import { randomInt, valuesAround } from "@/utils/pure/number";
 
-export function indexInBounds<V>(array: V[], index: number): boolean {
+export function isIndexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;
 }
 
-export function itemsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
-  if (!indexInBounds(array, startIndex) || limit === 0) {
-    return [];
-  }
-  const result = [array[startIndex]];
-  let i = 1;
-
-  while (result.length < limit) {
-    const leftIndex = startIndex - i;
-    const rightIndex = startIndex + i;
-    const isLeftIndexInBounds = indexInBounds(array, leftIndex);
-    const isRightIndexInBounds = indexInBounds(array, rightIndex);
-    const areBothIndexesOutOfBounds = !isLeftIndexInBounds && !isRightIndexInBounds;
-
-    if (areBothIndexesOutOfBounds) {
-      break;
-    }
-
-    if (isLeftIndexInBounds) {
-      result.push(array[leftIndex]);
-    }
-
-    if (isRightIndexInBounds && result.length < limit) {
-      result.push(array[rightIndex]);
-    }
-    i += 1;
-  }
-  return result;
+export function itemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
+  return valuesAround(startIndex, limit, index => isIndexInBounds(array, index), index => array[index]);
 }
 
-export function wrappedItemsAroundIndex<V>(array: V[], startIndex: number, limit: number): V[] {
-  if (!indexInBounds(array, startIndex) || limit === 0) {
+export function wrappedItemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
+  if (!isIndexInBounds(array, startIndex) || limit === 0) {
     return [];
   }
   const result = [array[startIndex]];
@@ -56,7 +30,7 @@ export function wrappedItemsAroundIndex<V>(array: V[], startIndex: number, limit
   return result;
 }
 
-export function shuffle<V>(array: V[]): V[] {
+export function shuffleInPlace<V>(array: V[]): V[] {
   let maxIndex = array.length;
   let randomIndex;
 
@@ -68,7 +42,7 @@ export function shuffle<V>(array: V[]): V[] {
   return array;
 }
 
-export function splitIntoChunks<V>(array: V[], chunkSize: number): V[][] {
+export function chunk<V>(array: V[], chunkSize: number): V[][] {
   const result: V[][] = [];
 
   if (chunkSize <= 0) {
@@ -81,8 +55,13 @@ export function splitIntoChunks<V>(array: V[], chunkSize: number): V[][] {
   return result;
 }
 
-export function randomElement<V>(array: V[] | string): V | string {
-  return array[randomInt(array.length)];
+export function union<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): Set<T> {
+  const result = new Set(setB);
+
+  for (const a of setA) {
+    result.add(a);
+  }
+  return result;
 }
 
 export function intersection<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): Set<T> {
@@ -98,7 +77,7 @@ export function intersection<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): Set
   return result;
 }
 
-export function intersects<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): boolean {
+export function hasIntersection<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): boolean {
   const smaller = setA.size < setB.size ? setA : setB;
   const larger = smaller === setA ? setB : setA;
 
@@ -108,17 +87,4 @@ export function intersects<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): boole
     }
   }
   return false;
-}
-
-export function union<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): Set<T> {
-  const result = new Set(setB);
-
-  for (const a of setA) {
-    result.add(a);
-  }
-  return result;
-}
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }

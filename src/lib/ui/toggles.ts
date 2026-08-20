@@ -1,4 +1,4 @@
-import { toggleDataset } from "@/utils/platform/dataset";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 export function toggleDisplay(element: HTMLElement | null, visible: boolean): void {
   toggleDataset(element, "hidden", !visible);

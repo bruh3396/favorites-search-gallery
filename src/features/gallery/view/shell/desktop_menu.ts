@@ -8,8 +8,8 @@ import { GeneralConfig } from "@/config/general_config";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
-import { insertStyle } from "@/utils/platform/injector";
-import { toggleFullscreen } from "@/utils/platform/browser";
+import { insertStyle } from "@/utils/browser/injector";
+import { toggleFullscreen } from "@/utils/browser/window";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 const buttons: GalleryMenuButton[] = [

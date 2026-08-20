@@ -1,9 +1,9 @@
-import { removeDataset, setDataset } from "@/utils/platform/dataset";
+import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { PostListSettingsCatalog } from "@/features/post_list_navigator/control/catalog";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
-import { createElement } from "@/utils/platform/factory";
+import { createElement } from "@/utils/browser/factory";
 import { icon } from "@/lib/ui/icon";
 
 interface SettingsSection {

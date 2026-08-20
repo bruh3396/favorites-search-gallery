@@ -1,6 +1,6 @@
-import { clamp, stepDown, stepUp } from "@/utils/pure/number";
+import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/utils/pure/number";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { createElement } from "@/utils/platform/factory";
+import { createElement } from "@/utils/browser/factory";
 import { icon } from "@/lib/ui/icon";
 
 const HOLD_INITIAL_DELAY_MS = 120;
@@ -75,10 +75,10 @@ export function buildStepper(config: StepperConfig): Stepper {
   display.addEventListener("blur", commitInput);
 
   bindHold(decrement, () => {
-    update(stepDown(current, step));
+    update(roundDownToMultiple(current, step));
   });
   bindHold(increment, () => {
-    update(stepUp(current, step));
+    update(roundUpToMultiple(current, step));
   });
 
   element.append(decrement, display, increment);

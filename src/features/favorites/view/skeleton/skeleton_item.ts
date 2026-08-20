@@ -1,9 +1,9 @@
-import { coinFlip, randomBetween, randomIntInRange, roundToTwoDecimalPlaces, seededRandomIntInRange } from "@/utils/pure/number";
+import { nextSeededIntInRange, randomBoolean, randomFloatInRange, randomIntInRange, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { Dimensions2D } from "@/types/geometry";
 import { Layout } from "@/types/app";
 import { SkeletonConfig } from "@/config/skeleton_config";
 import { TILE_CLASS_NAME } from "@/lib/thumb/thumbs";
-import { parseDimensions2D } from "@/utils/pure/string";
+import { toDimensions2D } from "@/utils/pure/geometry";
 
 export class FavoritesSkeletonItem {
   public readonly element: HTMLElement;
@@ -20,7 +20,7 @@ export class FavoritesSkeletonItem {
     this.element.dataset.layout = layout;
 
     if (layout === "native") {
-      const dimensions: Dimensions2D = aspectRatio ? parseDimensions2D(aspectRatio) : randomDimensions();
+      const dimensions: Dimensions2D = aspectRatio ? toDimensions2D(aspectRatio) : randomDimensions();
 
       this.element.style.setProperty("width", `${dimensions.x}px`);
       this.element.style.setProperty("height", `${dimensions.y}px`);
@@ -40,12 +40,12 @@ export class FavoritesSkeletonItem {
 
 function randomAnimationDelay(): number {
   const { min, max } = SkeletonConfig.animationDelayRange;
-  return roundToTwoDecimalPlaces(randomBetween(min, max));
+  return roundToTwoDecimalPlaces(randomFloatInRange(min, max));
 }
 
 function randomAnimationDuration(): number {
   const { min, max } = SkeletonConfig.animationDurationRange;
-  return roundToTwoDecimalPlaces(randomBetween(min, max));
+  return roundToTwoDecimalPlaces(randomFloatInRange(min, max));
 }
 
 function randomAspectRatio(): string {
@@ -54,7 +54,7 @@ function randomAspectRatio(): string {
     fallbackAspectRatioHeightMin: hMin,
     fallbackAspectRatioHeightMax: hMax
   } = SkeletonConfig;
-  return `${w}/${seededRandomIntInRange(hMin, hMax)}`;
+  return `${w}/${nextSeededIntInRange(hMin, hMax)}`;
 }
 
 function randomDimensions(): Dimensions2D {
@@ -63,7 +63,7 @@ function randomDimensions(): Dimensions2D {
     discreteDimensionMax: max
   } = SkeletonConfig;
 
-  const shouldMaximizeWidth = coinFlip();
+  const shouldMaximizeWidth = randomBoolean();
   const randomDimension = randomIntInRange(min, max);
   return {
     x: shouldMaximizeWidth ? max : randomDimension,

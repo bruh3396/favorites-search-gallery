@@ -19,7 +19,7 @@ import { ThumbConfig } from "@/config/thumb_config";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
-import { insertStyle } from "@/utils/platform/injector";
+import { insertStyle } from "@/utils/browser/injector";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
 
@@ -41,7 +41,6 @@ function insertBaseStyles(): void {
     FONT_CSS +
     WIDGETS_CSS +
     UTILITIES_CSS +
-    MOBILE_CSS +
     SKELETON_CSS +
     POST_CSS +
     POST_ACTION_BAR_CSS +
@@ -51,6 +50,7 @@ function insertBaseStyles(): void {
     THEMES_CSS +
     themeStyles() +
     THUMB_LOADING_CSS +
+    MOBILE_CSS +
     fadeInCss);
 }
 

@@ -5,10 +5,10 @@ import { SettingsSection } from "@/features/favorites/control/settings/types";
 import { SettingsSections } from "@/features/favorites/control/settings/sections";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { allSectionsCollapsed } from "@/features/favorites/control/settings/helpers";
-import { createElement } from "@/utils/platform/factory";
+import { createElement } from "@/utils/browser/factory";
 import { icon } from "@/lib/ui/icon";
-import { reloadWindow } from "@/utils/platform/browser";
-import { toggleDataset } from "@/utils/platform/dataset";
+import { reloadWindow } from "@/utils/browser/window";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 export function resetAllButton(): HTMLElement {
   const button = createElement("button", { children: [icon("reset")] });

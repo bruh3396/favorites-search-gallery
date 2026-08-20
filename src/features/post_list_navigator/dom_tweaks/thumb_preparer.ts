@@ -2,9 +2,9 @@ import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME, getImageFromThu
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { actionBarHtml } from "@/lib/thumb/action_bar/bar";
-import { removeNonNumericCharacters } from "@/utils/pure/string";
+import { removeNonNumeric } from "@/utils/pure/string";
 import { resolveMediaType } from "@/lib/media/type_resolver";
-import { setDataset } from "@/utils/platform/dataset";
+import { setDataset } from "@/utils/browser/dataset";
 import { stampActionBarId } from "@/lib/thumb/action_bar/toggles";
 
 export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {
@@ -17,7 +17,7 @@ function prepareThumb(thumb: HTMLElement): void {
   assignMediaType(thumb);
   addCanvas(thumb);
   addActionBar(thumb);
-  thumb.id = removeNonNumericCharacters(parseIdFromThumb(thumb));
+  thumb.id = removeNonNumeric(parseIdFromThumb(thumb));
   stampActionBarId(thumb);
   thumb.classList.remove(RAW_THUMB_CLASS_NAME);
   thumb.classList.add(ITEM_CLASS_NAME, TILE_CLASS_NAME);

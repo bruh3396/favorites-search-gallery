@@ -1,7 +1,7 @@
-import { setDataset, toggleDataset } from "@/utils/platform/dataset";
+import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { Theme } from "@/lib/ui/theme/themes";
 import { macroTask } from "@/lib/async/scheduling";
-import { setCookie } from "@/utils/platform/browser";
+import { writeCookie } from "@/utils/browser/cookie";
 
 const root = document.documentElement;
 
@@ -17,6 +17,6 @@ export function toggleGradient(enabled: boolean): void {
 
 function syncNativeThemeCookie(theme: Theme, dark: boolean): void {
   if (theme === "native") {
-    setCookie("theme", dark ? "dark" : "light");
+    writeCookie("theme", dark ? "dark" : "light");
   }
 }

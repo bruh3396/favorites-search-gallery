@@ -1,11 +1,11 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
-import { removeExtraWhiteSpace } from "@/utils/pure/string";
+import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 
 export function normalizeSearchQuery(query: string): string {
-  return removeExtraWhiteSpace(query).toLowerCase();
+  return removeExtraWhitespace(query).toLowerCase();
 }
 
 export function parseTermGroups(query: string): { orGroups: string[][]; andTerms: string[] } {
@@ -22,7 +22,7 @@ export function sortSearchTerms(searchTerms: AbstractSearchTerm[]): AbstractSear
 }
 
 function parseAndTerms(query: string): string[] {
-  return removeExtraWhiteSpace(query.replace(orGroupRegex, "")).split(" ").filter((term) => term !== "");
+  return removeExtraWhitespace(query.replace(orGroupRegex, "")).split(" ").filter((term) => term !== "");
 }
 
 function parseOrGroups(query: string): string[][] {

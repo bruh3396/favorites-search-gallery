@@ -1,4 +1,4 @@
-import { drawScaledCanvas, resetCanvas, setCanvasDimensions } from "@/utils/platform/canvas";
+import { drawScaledBitmap, resetCanvas, setCanvasDimensions } from "@/utils/browser/canvas";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
@@ -39,7 +39,7 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
     }
     this.canvases.set(request.id, canvas);
     setCanvasDimensions(canvas, request.bitmap.width, request.bitmap.height, GalleryUpscaleConfig.upscaledCanvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight);
-    drawScaledCanvas(canvas.getContext("2d"), request.bitmap);
+    drawScaledBitmap(canvas.getContext("2d"), request.bitmap);
 
     if (request.disposable) {
       request.close();

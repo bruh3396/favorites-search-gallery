@@ -43,3 +43,17 @@ export class Preference<T> {
     this.emitter.on(listener);
   }
 }
+
+export function booleanPreference<T>(source: Preference<T>, trueValue: T, falseValue: T): Preference<boolean> {
+  return {
+    get value(): boolean {
+      return source.value === trueValue;
+    },
+    set(value: boolean): void {
+      source.set(value ? trueValue : falseValue);
+    },
+    on(listener: (value: boolean) => void): void {
+      source.on((next) => listener(next === trueValue));
+    }
+  } as Preference<boolean>;
+}

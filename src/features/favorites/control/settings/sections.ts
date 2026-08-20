@@ -1,7 +1,8 @@
 import { FavoritesSettingsCatalog } from "@/features/favorites/control/settings/catalog";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 
-export const SettingsSections: SettingsSection[] = [
+const DesktopSettingsSections: SettingsSection[] = [
   {
     title: "General",
     expanded: true,
@@ -12,9 +13,13 @@ export const SettingsSections: SettingsSection[] = [
     ]
   },
   {
-    title: "Thumbs",
-    expanded: true,
-    controls: [FavoritesSettingsCatalog.postActionBar, FavoritesSettingsCatalog.postActionBarButtons]
+    title: "Thumbnails",
+    controls: [
+      FavoritesSettingsCatalog.postActionBar,
+      FavoritesSettingsCatalog.postActionBarButtons,
+      FavoritesSettingsCatalog.postOverlay,
+      FavoritesSettingsCatalog.tooltip
+    ]
   },
   {
     title: "Appearance",
@@ -28,20 +33,19 @@ export const SettingsSections: SettingsSection[] = [
     title: "Layout",
     controls: [
       FavoritesSettingsCatalog.layout,
-      FavoritesSettingsCatalog.infiniteScroll,
-      FavoritesSettingsCatalog.resultsPerPage,
       FavoritesSettingsCatalog.columnCount,
       FavoritesSettingsCatalog.rowHeight
     ]
   },
   {
-    title: "Results",
+    title: "Search Results",
     controls: [
       FavoritesSettingsCatalog.rating,
       FavoritesSettingsCatalog.sortKey,
       FavoritesSettingsCatalog.sortAscending,
-      FavoritesSettingsCatalog.excludeBlacklist
-
+      FavoritesSettingsCatalog.excludeBlacklist,
+      FavoritesSettingsCatalog.infiniteScroll,
+      FavoritesSettingsCatalog.resultsPerPage
     ]
   },
   {
@@ -53,12 +57,56 @@ export const SettingsSections: SettingsSection[] = [
       FavoritesSettingsCatalog.themedBackground,
       FavoritesSettingsCatalog.backgroundOpacity
     ]
+  }
+];
+
+const MobileSettingsSections: SettingsSection[] = [
+  {
+    title: "General",
+    expanded: true,
+    controls: [FavoritesSettingsCatalog.enhanceSearchPages]
   },
   {
-    title: "Extras",
+    title: "Thumbnails",
     controls: [
-      FavoritesSettingsCatalog.postOverlay,
-      FavoritesSettingsCatalog.tooltip
+      FavoritesSettingsCatalog.postActionBarToggle,
+      FavoritesSettingsCatalog.postActionBarButtons
+    ]
+  },
+  {
+    title: "Appearance",
+    controls: [
+      FavoritesSettingsCatalog.theme,
+      FavoritesSettingsCatalog.darkMode,
+      FavoritesSettingsCatalog.header
+    ]
+  },
+  {
+    title: "Layout",
+    controls: [
+      FavoritesSettingsCatalog.layout,
+      FavoritesSettingsCatalog.columnCount
+    ]
+  },
+  {
+    title: "Search Results",
+    controls: [
+      FavoritesSettingsCatalog.rating,
+      FavoritesSettingsCatalog.sortKey,
+      FavoritesSettingsCatalog.sortAscending,
+      FavoritesSettingsCatalog.excludeBlacklist,
+      FavoritesSettingsCatalog.infiniteScroll,
+      FavoritesSettingsCatalog.resultsPerPage
+    ]
+  },
+  {
+    title: "Gallery",
+    controls: [
+      FavoritesSettingsCatalog.autoplay,
+      FavoritesSettingsCatalog.galleryMenu,
+      FavoritesSettingsCatalog.themedBackground
     ]
   }
 ];
+
+export const SettingsSections: SettingsSection[] = ON_MOBILE_DEVICE ? MobileSettingsSections : DesktopSettingsSections;

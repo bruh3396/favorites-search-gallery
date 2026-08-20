@@ -45,3 +45,13 @@
   right: 0 !important;
   left: unset !important;
 }
+
+[data-mobile] .post-action-button {
+  width: 3.4rem;
+  height: 3.4rem;
+}
+
+[data-mobile] .post-action-button svg {
+  width: 2.3rem;
+  height: 2.3rem;
+}

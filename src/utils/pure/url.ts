@@ -1,4 +1,4 @@
-export function getQueryParamFromUrl(url: string, name: string): string | null {
+export function readQueryParam(url: string, name: string): string | null {
   return new URL(url).searchParams.get(name);
 }
 
@@ -16,7 +16,7 @@ export function withoutQueryParam(url: string, name: string): string {
   return parsed.toString();
 }
 
-export function withoutQueryParams(url: string): string {
+export function withoutAllQueryParams(url: string): string {
   const parsed = new URL(url);
 
   parsed.search = "";

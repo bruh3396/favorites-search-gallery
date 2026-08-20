@@ -1,7 +1,7 @@
 import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { clamp, millisecondsToSeconds } from "@/utils/pure/number";
+import { clamp, toSeconds } from "@/utils/pure/number";
 import { isImageThumb, isVideoThumb } from "@/lib/media/type_predicates";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
@@ -10,8 +10,8 @@ import { NavigationKey } from "@/types/input";
 import { Overlays } from "@/app/layout/shell";
 import { Preferences } from "@/app/context/preferences";
 import { Timer } from "@/lib/async/scheduling";
-import { createObjectUrlFromSvg } from "@/utils/platform/image";
-import { insertStyle } from "@/utils/platform/injector";
+import { createObjectUrlFromSvg } from "@/utils/browser/image";
+import { insertStyle } from "@/utils/browser/injector";
 import { throttle } from "@/lib/async/rate_limiting";
 
 type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
@@ -36,11 +36,11 @@ const config = {
   menuVisibilityDuration: ON_MOBILE_DEVICE ? 1_500 : 1_000,
 
   get imageViewDurationInSeconds(): number {
-    return millisecondsToSeconds(this.imageViewDuration);
+    return toSeconds(this.imageViewDuration);
   },
 
   get minimumVideoDurationInSeconds(): number {
-    return millisecondsToSeconds(this.minimumVideoDuration);
+    return toSeconds(this.minimumVideoDuration);
   }
 };
 

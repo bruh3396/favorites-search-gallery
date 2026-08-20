@@ -7,94 +7,60 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function stepUp(value: number, step: number): number {
-  if (step <= 0) {
-    return value;
-  }
-  return (Math.floor(value / step) + 1) * step;
-}
-
-export function stepDown(value: number, step: number): number {
-  if (step <= 0) {
-    return value;
-  }
-  return (Math.ceil(value / step) - 1) * step;
-}
-
-export function randomInt(maximum: number): number {
-  return Math.floor(Math.random() * maximum);
-}
-
-export function randomIntInRange(min: number, max: number): number {
-  return randomInt(max - min) + min;
-}
-
-export function seededRandomFloat(seed: number): number {
-  const x = Math.sin(seed) * 4_051.2948;
-  return x - Math.floor(x);
-}
-
-export function seededRandomInt(maximum: number): number {
-  internalSeed += 1;
-  return Math.floor(seededRandomFloat(internalSeed) * maximum);
-}
-
-export function seededRandomIntInRange(min: number, max: number): number {
-  return seededRandomInt(max - min) + min;
-}
-
-export function mapRange(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
+export function rescale(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
   return Math.round(toMin + (((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin)));
+}
+
+export function roundUpToMultiple(value: number, multiple: number): number {
+  return multiple <= 0 ? value : (Math.floor(value / multiple) + 1) * multiple;
+}
+
+export function roundDownToMultiple(value: number, multiple: number): number {
+  return multiple <= 0 ? value : (Math.ceil(value / multiple) - 1) * multiple;
 }
 
 export function roundToTwoDecimalPlaces(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-export function millisecondsToSeconds(milliseconds: number): number {
+export function toSeconds(milliseconds: number): number {
   return roundToTwoDecimalPlaces(milliseconds / 1_000);
 }
 
-export function randomBetween(min: number, max: number): number {
-  return min + (Math.random() * (max - min));
-}
-
-export function numbersAroundInRange(initial: number, count: number, min: number = 0, max: number = Number.MAX_SAFE_INTEGER): number[] {
-  if (count <= 0) {
+export function valuesAround<V>(center: number, count: number, isInBounds: (position: number) => boolean, at: (position: number) => V): V[] {
+  if (count <= 0 || !isInBounds(center)) {
     return [];
   }
-
-  if (min > max) {
-    return [];
-  }
-
-  const numbers = [initial];
+  const result = [at(center)];
   let i = 1;
 
-  while (numbers.length < count) {
-    const left = initial - i;
-    const right = initial + i;
-    const isLeftInBounds = left >= min && left <= max;
-    const isRightInBounds = right >= min && right <= max;
-    const isOutOfBounds = !isLeftInBounds && !isRightInBounds;
+  while (result.length < count) {
+    const left = center - i;
+    const right = center + i;
+    const isLeftInBounds = isInBounds(left);
+    const isRightInBounds = isInBounds(right);
 
-    if (isOutOfBounds) {
+    if (!isLeftInBounds && !isRightInBounds) {
       break;
     }
 
     if (isLeftInBounds) {
-      numbers.push(left);
+      result.push(at(left));
     }
 
-    if (isRightInBounds && numbers.length < count) {
-      numbers.push(right);
+    if (isRightInBounds && result.length < count) {
+      result.push(at(right));
     }
     i += 1;
   }
-  return numbers.sort((a, b) => a - b);
+  return result;
 }
 
-export function numberRange(start: number, end: number): number[] {
+export function numbersAround(initial: number, count: number, min: number = 0, max: number = Number.MAX_SAFE_INTEGER): number[] {
+  return valuesAround(initial, count, value => value >= min && value <= max, value => value).sort((a, b) => a - b);
+}
+
+export function numbersInRange(start: number, end: number): number[] {
   const result: number[] = [];
 
   for (let i = start; i <= end; i += 1) {
@@ -111,16 +77,34 @@ export function average(numbers: number[]): number {
   return numbers.length === 0 ? 0 : sum(numbers) / numbers.length;
 }
 
-export function coinFlip(): boolean {
+export function randomInt(max: number): number {
+  return Math.floor(Math.random() * max);
+}
+
+export function randomIntInRange(min: number, max: number): number {
+  return randomInt(max - min) + min;
+}
+
+export function randomFloatInRange(min: number, max: number): number {
+  return min + (Math.random() * (max - min));
+}
+
+export function randomBoolean(): boolean {
   return Math.random() < 0.5;
 }
 
-export function computeRectDistance(rect1: DOMRectReadOnly, rect2: DOMRectReadOnly): number {
-  const x1 = rect1.left + (rect1.width / 2);
-  const y1 = rect1.top + (rect1.height / 2);
-  const x2 = rect2.left + (rect2.width / 2);
-  const y2 = rect2.top + (rect2.height / 2);
-  return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2));
+export function seededFloat(seed: number): number {
+  const x = Math.sin(seed) * 4_051.2948;
+  return x - Math.floor(x);
+}
+
+export function nextSeededInt(max: number): number {
+  internalSeed += 1;
+  return Math.floor(seededFloat(internalSeed) * max);
+}
+
+export function nextSeededIntInRange(min: number, max: number): number {
+  return nextSeededInt(max - min) + min;
 }
 
 export function navigationDelta(direction: NavigationKey): number {

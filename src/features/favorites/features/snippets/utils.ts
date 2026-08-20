@@ -1,8 +1,8 @@
 import { Snippet, SnippetFailure } from "@/features/favorites/features/snippets/types";
-import { removeExtraWhiteSpace } from "@/utils/pure/string";
+import { removeExtraWhitespace } from "@/utils/pure/string";
 
 export function normalizeName(name: string): string {
-  return removeExtraWhiteSpace(name).toLowerCase().replace(/\s/g, "_");
+  return removeExtraWhitespace(name).toLowerCase().replace(/\s/g, "_");
 }
 
 export function sortByNewest(snippets: Snippet[]): Snippet[] {

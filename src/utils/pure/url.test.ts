@@ -1,39 +1,39 @@
 import { describe, expect, test } from "vitest";
-import { getQueryParamFromUrl, withHostname, withoutQueryParam, withoutQueryParams } from "@/utils/pure/url";
+import { readQueryParam, withHostname, withoutAllQueryParams, withoutQueryParam } from "@/utils/pure/url";
 
-describe("getQueryParamFromUrl", () => {
+describe("readQueryParam", () => {
   const url = "https://rule34.xxx/index.php?page=favorites&s=view&id=12345&pid=42";
 
   test("first param after ?", () => {
-    expect(getQueryParamFromUrl(url, "page")).toBe("favorites");
+    expect(readQueryParam(url, "page")).toBe("favorites");
   });
 
   test("middle param", () => {
-    expect(getQueryParamFromUrl(url, "id")).toBe("12345");
+    expect(readQueryParam(url, "id")).toBe("12345");
   });
 
   test("last param", () => {
-    expect(getQueryParamFromUrl(url, "pid")).toBe("42");
+    expect(readQueryParam(url, "pid")).toBe("42");
   });
 
   test("missing param", () => {
-    expect(getQueryParamFromUrl(url, "missing")).toBeNull();
+    expect(readQueryParam(url, "missing")).toBeNull();
   });
 
   test("param name is a substring of another param", () => {
-    expect(getQueryParamFromUrl("https://x.com?id=1&pid=2", "id")).toBe("1");
+    expect(readQueryParam("https://x.com?id=1&pid=2", "id")).toBe("1");
   });
 
   test("empty value", () => {
-    expect(getQueryParamFromUrl("https://x.com?id=", "id")).toBe("");
+    expect(readQueryParam("https://x.com?id=", "id")).toBe("");
   });
 
   test("no query string", () => {
-    expect(getQueryParamFromUrl("https://x.com", "id")).toBeNull();
+    expect(readQueryParam("https://x.com", "id")).toBeNull();
   });
 
   test("decodes percent-encoded value", () => {
-    expect(getQueryParamFromUrl("https://x.com?q=a%20b", "q")).toBe("a b");
+    expect(readQueryParam("https://x.com?q=a%20b", "q")).toBe("a b");
   });
 });
 
@@ -77,24 +77,24 @@ describe("withoutQueryParam", () => {
   });
 });
 
-describe("withoutQueryParams", () => {
+describe("withoutAllQueryParams", () => {
   test("removes every param", () => {
-    expect(withoutQueryParams("https://x.com/p?id=5&pid=2&tag=a")).toBe("https://x.com/p");
+    expect(withoutAllQueryParams("https://x.com/p?id=5&pid=2&tag=a")).toBe("https://x.com/p");
   });
 
   test("url without a query string is unchanged", () => {
-    expect(withoutQueryParams("https://x.com/p")).toBe("https://x.com/p");
+    expect(withoutAllQueryParams("https://x.com/p")).toBe("https://x.com/p");
   });
 
   test("preserves hash", () => {
-    expect(withoutQueryParams("https://x.com/p?id=5#top")).toBe("https://x.com/p#top");
+    expect(withoutAllQueryParams("https://x.com/p?id=5#top")).toBe("https://x.com/p#top");
   });
 
   test("preserves protocol, port, and path", () => {
-    expect(withoutQueryParams("http://localhost:3000/a/b?id=5")).toBe("http://localhost:3000/a/b");
+    expect(withoutAllQueryParams("http://localhost:3000/a/b?id=5")).toBe("http://localhost:3000/a/b");
   });
 
   test("drops a trailing question mark with no params", () => {
-    expect(withoutQueryParams("https://x.com/p?")).toBe("https://x.com/p");
+    expect(withoutAllQueryParams("https://x.com/p?")).toBe("https://x.com/p");
   });
 });

@@ -5,14 +5,14 @@ import { ActionBarMode } from "@/lib/thumb/action_bar/types";
 import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
-import { getCookie } from "@/utils/platform/browser";
+import { readCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
   app: {
     performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", ON_MOBILE_DEVICE ? "medium" : "normal"),
     gradient: new Preference("appGradient", false),
     theme: new Preference<Theme>("appTheme", "native"),
-    darkMode: new Preference<boolean>("appDarkMode", getCookie("theme", "") === "dark"),
+    darkMode: new Preference<boolean>("appDarkMode", readCookie("theme", "") === "dark"),
     fadeThumbs: new Preference<boolean>("appFadeThumbs", true),
     nativeFont: new Preference<boolean>("appNativeFont", true)
   },

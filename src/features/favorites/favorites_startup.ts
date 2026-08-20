@@ -4,6 +4,7 @@ import * as FavoritesKeyFlow from "@/features/favorites/flows/key_flow";
 import * as FavoritesLoadFlow from "@/features/favorites/flows/load_flow";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesMouseFlow from "@/features/favorites/flows/mouse_flow";
+import * as FavoritesPostActionFlow from "@/features/favorites/flows/post_action_flow";
 import * as FavoritesResetFlow from "@/features/favorites/flows/reset_flow";
 import * as FavoritesSearchBox from "@/features/favorites/control/toolbar/favorites_search_box";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
@@ -139,6 +140,8 @@ function subscribeToDomEvents(): void {
     DomEvents.document.mouseover.on(FavoritesMouseFlow.suppressLinkOnHoveredThumb);
     DomEvents.document.click.on(FavoritesMouseFlow.handleClick);
     DomEvents.document.mousedown.on(FavoritesMouseFlow.handleMouseDown);
+  } else {
+    DomEvents.document.touchEnd.on(FavoritesPostActionFlow.triggerPostActionFromTouch);
   }
 }
 

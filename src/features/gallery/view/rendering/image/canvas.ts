@@ -1,9 +1,9 @@
 import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
-import { clearCanvas, drawScaledCanvas } from "@/utils/platform/canvas";
+import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
 import { GalleryConfig } from "@/config/gallery_config";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
-import { insertStyle } from "@/utils/platform/injector";
-import { parseDimensions2D } from "@/utils/pure/string";
+import { insertStyle } from "@/utils/browser/injector";
+import { toDimensions2D } from "@/utils/pure/geometry";
 
 const mainCanvas = document.createElement("canvas");
 const mainContext = mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
@@ -20,7 +20,7 @@ const portraitStyle = `
   }
   `;
 let container: HTMLElement;
-const dimensions = parseDimensions2D(GalleryConfig.mainCanvasResolution);
+const dimensions = toDimensions2D(GalleryConfig.mainCanvasResolution);
 
 mainCanvas.className = "gallery-image";
 mainCanvas.width = dimensions.x;
@@ -34,7 +34,7 @@ export function mount(newContainer: HTMLElement): void {
 export function draw(bitmap: ImageBitmap | null): void {
   if (bitmap !== null) {
     clearCanvas(mainContext);
-    drawScaledCanvas(mainContext, bitmap);
+    drawScaledBitmap(mainContext, bitmap);
   }
 }
 

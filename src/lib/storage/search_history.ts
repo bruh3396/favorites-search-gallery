@@ -1,7 +1,7 @@
-import { isEmptyString, removeExtraWhiteSpace } from "@/utils/pure/string";
+import { isEmptyString, removeExtraWhitespace } from "@/utils/pure/string";
 import { Storage } from "@/lib/storage/local_storage";
 import { clamp } from "@/utils/pure/number";
-import { indexInBounds } from "@/utils/pure/collection";
+import { isIndexInBounds } from "@/utils/pure/collection";
 
 export class SearchHistory {
   private lastQuery: string;
@@ -21,7 +21,7 @@ export class SearchHistory {
   }
 
   public get selectedQuery(): string {
-    if (indexInBounds(this.history, this.index)) {
+    if (isIndexInBounds(this.history, this.index)) {
       return this.history[this.index];
     }
     return this.lastQuery;
@@ -33,7 +33,7 @@ export class SearchHistory {
     if (isEmptyString(searchQuery)) {
       return;
     }
-    const cleaned = removeExtraWhiteSpace(searchQuery);
+    const cleaned = removeExtraWhitespace(searchQuery);
     const deduped = this.history.filter(entry => entry !== cleaned);
     const updated = [cleaned].concat(deduped).slice(0, this.depth);
 

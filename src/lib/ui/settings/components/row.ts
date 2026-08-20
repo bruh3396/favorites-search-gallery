@@ -1,8 +1,8 @@
 import { SelectSetting, Setting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/platform/factory";
-import { setDataset } from "@/utils/platform/dataset";
+import { createElement } from "@/utils/browser/factory";
+import { setDataset } from "@/utils/browser/dataset";
 
 export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement): HTMLElement {
   control.classList.add(SettingsClass.control);

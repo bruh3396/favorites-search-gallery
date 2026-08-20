@@ -1,9 +1,9 @@
 import { getItemsInContainer, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
-import { removeDataset, setDataset } from "@/utils/platform/dataset";
+import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 import { ThumbConfig } from "@/config/thumb_config";
-import { mapRange } from "@/utils/pure/number";
+import { rescale } from "@/utils/pure/number";
 
 export class RowTiler extends AbstractTiler {
   public layout: Layout = "row";
@@ -51,7 +51,7 @@ export class RowTiler extends AbstractTiler {
 function rowHeightToPixels(rowHeight: number): number {
   const minWidth = Math.floor(window.innerWidth / 20);
   const maxWidth = Math.floor(window.innerWidth / 4);
-  return Math.round(mapRange(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
+  return Math.round(rescale(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
 }
 
 function getItemsOnLastRow(items: HTMLElement[]): HTMLElement[] {

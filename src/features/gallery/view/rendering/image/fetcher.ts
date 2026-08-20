@@ -2,7 +2,7 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { fetchFullImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
 import { getImageFromThumb } from "@/lib/thumb/thumbs";
-import { imageIsLoaded } from "@/utils/platform/image";
+import { isImageLoaded } from "@/utils/browser/image";
 
 const fetchQueue = new ThrottleQueue(10);
 
@@ -37,7 +37,7 @@ function isAbortError(error: unknown): boolean {
 async function fetchLowResBitmap(request: ImageRequest): Promise<boolean> {
   const image = getImageFromThumb(request.thumb);
 
-  if (image === null || !imageIsLoaded(image)) {
+  if (image === null || !isImageLoaded(image)) {
     return false;
   }
   try {

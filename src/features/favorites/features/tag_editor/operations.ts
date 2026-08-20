@@ -1,6 +1,6 @@
 import { cacheTagEdit, storeTagEdits } from "@/features/favorites/features/tag_editor/store";
 import { Favorite } from "@/types/favorite";
-import { removeExtraWhiteSpace } from "@/utils/pure/string";
+import { removeExtraWhitespace } from "@/utils/pure/string";
 import { setCustomTags } from "@/lib/search/tags/custom_tags";
 
 let onDeIndex: (favorite: Favorite) => void = () => { };
@@ -32,7 +32,7 @@ export function resetAllFavoriteTags(favorites: Favorite[]): void {
 function editSelectedTags(selected: Set<Favorite>, rawTags: string, remove: boolean): void {
   const tags = rawTags.toLowerCase();
   const tagsWithoutMediaTypes = removeMediaTypeTags(tags);
-  const tagsToEdit = removeExtraWhiteSpace(tagsWithoutMediaTypes);
+  const tagsToEdit = removeExtraWhitespace(tagsWithoutMediaTypes);
   const statusPrefix = remove ? "Removed tag(s) from" : "Added tag(s) to";
   let editedTagsCount = 0;
 

@@ -1,94 +1,94 @@
 import {
+  camelToKebabCase,
   capitalize,
   decodeHtmlEntities,
-  escapeParenthesis,
+  escapeParentheses,
   isEmptyString,
   isOnlyDigits,
-  parseDimensions2D, pluralize,
-  removeExtraWhiteSpace,
-  removeLeadingHyphens,
-  removeNonNumericCharacters,
-  replaceSpacesWithUnderscores,
-  toKebabCase
+  pluralSuffix,
+  removeExtraWhitespace,
+  removeLeadingModifiers,
+  removeNonNumeric,
+  spacesToUnderscores
 } from "@/utils/pure/string";
 import { describe, expect, test } from "vitest";
 
-describe("removeExtraWhiteSpace", () => {
+describe("removeExtraWhitespace", () => {
   test("empty", () => {
-    expect(removeExtraWhiteSpace("")).toBe("");
+    expect(removeExtraWhitespace("")).toBe("");
   });
 
   test("spaces only", () => {
-    expect(removeExtraWhiteSpace("                      ")).toBe("");
+    expect(removeExtraWhitespace("                      ")).toBe("");
   });
 
   test("single space", () => {
-    expect(removeExtraWhiteSpace(" ")).toBe("");
+    expect(removeExtraWhitespace(" ")).toBe("");
   });
 
   test("single word", () => {
-    expect(removeExtraWhiteSpace("hello")).toBe("hello");
+    expect(removeExtraWhitespace("hello")).toBe("hello");
   });
 
   test("multiple spaces", () => {
-    expect(removeExtraWhiteSpace("hello     world")).toBe("hello world");
+    expect(removeExtraWhitespace("hello     world")).toBe("hello world");
   });
 
   test("leading and trailing spaces", () => {
-    expect(removeExtraWhiteSpace("   hello world   ")).toBe("hello world");
+    expect(removeExtraWhitespace("   hello world   ")).toBe("hello world");
   });
 
   test("remove newlines", () => {
-    expect(removeExtraWhiteSpace("remove extra\n\n\n\nwhitespace")).toBe("remove extra whitespace");
+    expect(removeExtraWhitespace("remove extra\n\n\n\nwhitespace")).toBe("remove extra whitespace");
   });
 });
 
-describe("escapeParenthesis", () => {
+describe("escapeParentheses", () => {
   test("empty", () => {
-    expect(escapeParenthesis("")).toBe("");
+    expect(escapeParentheses("")).toBe("");
   });
 
   test("one parenthesis", () => {
-    expect(escapeParenthesis("(")).toBe("\\(");
+    expect(escapeParentheses("(")).toBe("\\(");
   });
 
   test("two parenthesis", () => {
-    expect(escapeParenthesis("()")).toBe("\\(\\)");
+    expect(escapeParentheses("()")).toBe("\\(\\)");
   });
 
   test("multiple parenthesis", () => {
-    expect(escapeParenthesis("(a)(b)(c)")).toBe("\\(a\\)\\(b\\)\\(c\\)");
+    expect(escapeParentheses("(a)(b)(c)")).toBe("\\(a\\)\\(b\\)\\(c\\)");
   });
 
   test("parenthesis with text", () => {
-    expect(escapeParenthesis("a(b)c")).toBe("a\\(b\\)c");
+    expect(escapeParentheses("a(b)c")).toBe("a\\(b\\)c");
   });
 
   test("back to back parenthesis", () => {
-    expect(escapeParenthesis("()()")).toBe("\\(\\)\\(\\)");
+    expect(escapeParentheses("()()")).toBe("\\(\\)\\(\\)");
   });
 });
 
-describe("removeNonNumericCharacters", () => {
+describe("removeNonNumeric", () => {
   test("empty", () => {
-    expect(removeNonNumericCharacters("")).toBe("");
+    expect(removeNonNumeric("")).toBe("");
   });
 
   test("only letters", () => {
-    expect(removeNonNumericCharacters("abc")).toBe("");
+    expect(removeNonNumeric("abc")).toBe("");
   });
 
   test("only numbers", () => {
-    expect(removeNonNumericCharacters("123")).toBe("123");
+    expect(removeNonNumeric("123")).toBe("123");
   });
 
   test("letters and numbers", () => {
-    expect(removeNonNumericCharacters("abc123")).toBe("123");
+    expect(removeNonNumeric("abc123")).toBe("123");
   });
 
   test("other", () => {
-    expect(removeNonNumericCharacters("P12304")).toBe("12304");
-    expect(removeNonNumericCharacters("_!@0#$%^1^&*()2(?:<")).toBe("012");
+    expect(removeNonNumeric("P12304")).toBe("12304");
+    expect(removeNonNumeric("_!@0#$%^1^&*()2(?:<")).toBe("012");
   });
 });
 
@@ -115,76 +115,76 @@ describe("capitalize", () => {
   });
 });
 
-describe("removeLeadingHyphens", () => {
+describe("removeLeadingModifiers", () => {
   test("empty", () => {
-    expect(removeLeadingHyphens("")).toBe("");
+    expect(removeLeadingModifiers("")).toBe("");
   });
 
   test("no hyphen", () => {
-    expect(removeLeadingHyphens("apple")).toBe("apple");
-    expect(removeLeadingHyphens("banana")).toBe("banana");
+    expect(removeLeadingModifiers("apple")).toBe("apple");
+    expect(removeLeadingModifiers("banana")).toBe("banana");
   });
 
   test("one hyphen", () => {
-    expect(removeLeadingHyphens("-apple")).toBe("apple");
-    expect(removeLeadingHyphens("-banana")).toBe("banana");
+    expect(removeLeadingModifiers("-apple")).toBe("apple");
+    expect(removeLeadingModifiers("-banana")).toBe("banana");
   });
 
   test("multiple hyphens", () => {
-    expect(removeLeadingHyphens("---apple")).toBe("apple");
-    expect(removeLeadingHyphens("--banana")).toBe("banana");
+    expect(removeLeadingModifiers("---apple")).toBe("apple");
+    expect(removeLeadingModifiers("--banana")).toBe("banana");
   });
 });
 
-test("replaceSpacesWithUnderscores", () => {
-  expect(replaceSpacesWithUnderscores("apple banana cherry")).toBe("apple_banana_cherry");
-  expect(replaceSpacesWithUnderscores("apple")).toBe("apple");
-  expect(replaceSpacesWithUnderscores("apple banana")).toBe("apple_banana");
-  expect(replaceSpacesWithUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
+test("spacesToUnderscores", () => {
+  expect(spacesToUnderscores("apple banana cherry")).toBe("apple_banana_cherry");
+  expect(spacesToUnderscores("apple")).toBe("apple");
+  expect(spacesToUnderscores("apple banana")).toBe("apple_banana");
+  expect(spacesToUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
 });
 
-describe("toKebabCase", () => {
+describe("camelToKebabCase", () => {
   test("empty", () => {
-    expect(toKebabCase("")).toBe("");
+    expect(camelToKebabCase("")).toBe("");
   });
 
   test("single word", () => {
-    expect(toKebabCase("surface")).toBe("surface");
+    expect(camelToKebabCase("surface")).toBe("surface");
   });
 
   test("two words", () => {
-    expect(toKebabCase("surfaceSunken")).toBe("surface-sunken");
+    expect(camelToKebabCase("surfaceSunken")).toBe("surface-sunken");
   });
 
   test("three words", () => {
-    expect(toKebabCase("themeSurfaceRaised")).toBe("theme-surface-raised");
+    expect(camelToKebabCase("themeSurfaceRaised")).toBe("theme-surface-raised");
   });
 
   test("leading uppercase", () => {
-    expect(toKebabCase("ThemeSurface")).toBe("-theme-surface");
+    expect(camelToKebabCase("ThemeSurface")).toBe("-theme-surface");
   });
 
   test("consecutive uppercase", () => {
-    expect(toKebabCase("ariaHTML")).toBe("aria-h-t-m-l");
+    expect(camelToKebabCase("ariaHTML")).toBe("aria-h-t-m-l");
   });
 });
 
-describe("pluralize", () => {
+describe("pluralSuffix", () => {
   test("zero", () => {
-    expect(pluralize(0)).toBe("s");
+    expect(pluralSuffix(0)).toBe("s");
   });
 
   test("one", () => {
-    expect(pluralize(1)).toBe("");
+    expect(pluralSuffix(1)).toBe("");
   });
 
   test("many", () => {
-    expect(pluralize(2)).toBe("s");
-    expect(pluralize(50)).toBe("s");
+    expect(pluralSuffix(2)).toBe("s");
+    expect(pluralSuffix(50)).toBe("s");
   });
 
   test("negative", () => {
-    expect(pluralize(-1)).toBe("s");
+    expect(pluralSuffix(-1)).toBe("s");
   });
 });
 
@@ -223,42 +223,6 @@ describe("decodeHtmlEntities", () => {
 
   test("leaves unrelated entities untouched", () => {
     expect(decodeHtmlEntities("a&lt;b&gt;c")).toBe("a&lt;b&gt;c");
-  });
-});
-
-describe("parseDimensions2D", () => {
-  const defaultDimensions = { x: 100, y: 100 };
-
-  test("empty", () => {
-    expect(parseDimensions2D("")).toStrictEqual(defaultDimensions);
-  });
-
-  test("square", () => {
-    expect(parseDimensions2D("20x20")).toStrictEqual({ x: 20, y: 20 });
-  });
-
-  test("rectangle", () => {
-    expect(parseDimensions2D("1920x1080")).toStrictEqual({ x: 1920, y: 1080 });
-  });
-
-  test("invalid format", () => {
-    expect(parseDimensions2D("20x")).toStrictEqual(defaultDimensions);
-  });
-
-  test("invalid format with letters", () => {
-    expect(parseDimensions2D("20x20a")).toStrictEqual(defaultDimensions);
-  });
-
-  test("invalid format with letters and spaces", () => {
-    expect(parseDimensions2D("20x 20a")).toStrictEqual(defaultDimensions);
-  });
-
-  test("invalid format with spaces", () => {
-    expect(parseDimensions2D("20 x 20")).toStrictEqual(defaultDimensions);
-  });
-
-  test("different separator", () => {
-    expect(parseDimensions2D("20/20")).toStrictEqual({ x: 20, y: 20 });
   });
 });
 

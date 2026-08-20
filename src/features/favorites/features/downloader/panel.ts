@@ -8,9 +8,9 @@ import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { categoryOptions } from "@/features/favorites/features/downloader/filename_settings";
-import { createElement } from "@/utils/platform/factory";
-import { pluralize } from "@/utils/pure/string";
-import { toggleDataset } from "@/utils/platform/dataset";
+import { createElement } from "@/utils/browser/factory";
+import { pluralSuffix } from "@/utils/pure/string";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 let abortController: AbortController | null = null;
 let isReady = false;
@@ -79,7 +79,7 @@ function buildDownloadLabel(itemCount: number): string {
   const batchCount = countBatches(itemCount, Preferences.favorites.downloadBatchSize.value);
 
   if (batchCount <= 1) {
-    return `Download ${itemCount} Result${pluralize(itemCount)}`;
+    return `Download ${itemCount} Result${pluralSuffix(itemCount)}`;
   }
   return `Download ${itemCount} Results · ${batchCount} zips`;
 }

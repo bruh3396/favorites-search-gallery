@@ -5,11 +5,11 @@ import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/thumb/thumbs";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
 
-export function handleActionBarClick(event: MouseEvent, callbacks: ActionBarCallbacks): void {
-  if (event.button !== ClickCode.Left) {
+export function handleActionBarClick(event: MouseEvent | TouchEvent, callbacks: ActionBarCallbacks): void {
+  if (event instanceof MouseEvent && event.button !== ClickCode.Left) {
     return;
   }
-  const button = closestActionButton(event.target);
+  const button = closestActionButton(targetOf(event));
 
   if (button === null) {
     return;
@@ -17,6 +17,14 @@ export function handleActionBarClick(event: MouseEvent, callbacks: ActionBarCall
   event.stopPropagation();
   event.preventDefault();
   dispatch(button, callbacks);
+}
+
+function targetOf(event: MouseEvent | TouchEvent): EventTarget | null {
+  if (event instanceof TouchEvent) {
+    const touch = event.changedTouches[0];
+    return touch === undefined ? null : document.elementFromPoint(touch.clientX, touch.clientY);
+  }
+  return event.target;
 }
 
 function dispatch(button: HTMLElement, callbacks: ActionBarCallbacks): void {

@@ -1,8 +1,8 @@
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
-import { createElement } from "@/utils/platform/factory";
+import { createElement } from "@/utils/browser/factory";
 import { searchField } from "@/lib/ui/widgets/search_field";
-import { toggleDataset } from "@/utils/platform/dataset";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 export function buildFilterInput(panel: HTMLElement, hideWhileFiltering: HTMLElement[] = []): HTMLElement {
   const field = searchField("Search Settings", (value) => filterSettings(panel, value, hideWhileFiltering));

@@ -2,7 +2,7 @@ import { IconName, icon } from "@/lib/ui/icon";
 import { Emitter } from "@/lib/communication/emitter";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/platform/factory";
+import { createElement } from "@/utils/browser/factory";
 
 export interface ButtonElement {
   parentId: string;

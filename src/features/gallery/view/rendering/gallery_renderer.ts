@@ -1,11 +1,11 @@
 import { isGif, isVideo } from "@/lib/media/type_predicates";
-import { removeDataset, setDataset } from "@/utils/platform/dataset";
+import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { BoundaryEdge } from "@/types/boundary";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
-import { forceReflow } from "@/utils/platform/factory";
+import { forceReflow } from "@/utils/browser/factory";
 import { toMediaItem } from "@/lib/thumb/item";
 
 const renderers: GalleryRenderer[] = [GalleryImageRenderer, GalleryVideoRenderer, GalleryGifRenderer];

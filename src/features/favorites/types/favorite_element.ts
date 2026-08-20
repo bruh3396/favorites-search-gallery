@@ -2,7 +2,7 @@ import { Post } from "@/types/api";
 import { buildPostPageUrl } from "@/lib/remote/url";
 import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { resolveMediaType } from "@/lib/media/type_resolver";
-import { setDataset } from "@/utils/platform/dataset";
+import { setDataset } from "@/utils/browser/dataset";
 import { stampActionBarId } from "@/lib/thumb/action_bar/toggles";
 
 export class FavoriteElement {

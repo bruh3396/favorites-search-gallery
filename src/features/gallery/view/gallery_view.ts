@@ -5,7 +5,7 @@ import * as GalleryUi from "@/features/gallery/view/shell/ui";
 import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
 import { GalleryViewDependencies } from "@/features/gallery/types/gallery_types";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
-import { insertStyle } from "@/utils/platform/injector";
+import { insertStyle } from "@/utils/browser/injector";
 
 export function setup(deps: GalleryViewDependencies): void {
   insertStyle(GALLERY_CSS);

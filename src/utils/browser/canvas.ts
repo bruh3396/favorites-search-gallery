@@ -1,4 +1,4 @@
-export function drawScaledCanvas(context: CanvasRenderingContext2D | null, bitmap: ImageBitmap): void {
+export function drawScaledBitmap(context: CanvasRenderingContext2D | null, bitmap: ImageBitmap): void {
   if (context === null) {
     return;
   }

@@ -4,7 +4,7 @@ import { SerializedFavorite } from "@/types/favorite";
 import { chain } from "@/utils/pure/function";
 import { decompressPreviewSource } from "@/lib/media/url_compressor";
 import { getTagsFromThumb } from "@/lib/thumb/tag";
-import { removeExtraWhiteSpace } from "@/utils/pure/string";
+import { removeExtraWhitespace } from "@/utils/pure/string";
 
 export function createPost(source: HTMLElement | SerializedFavorite): Post {
   return source instanceof HTMLElement ? createPostFromThumb(source) : createPostFromRecord(source);
@@ -58,7 +58,7 @@ function normalizeTags(thumb: HTMLElement, id: string): string {
     fixTruncatedVideoTag,
     tags => appendId(tags, id),
     sortTags,
-    removeExtraWhiteSpace
+    removeExtraWhitespace
   );
 }
 

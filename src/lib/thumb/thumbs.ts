@@ -1,6 +1,6 @@
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { imageIsLoading } from "@/utils/platform/image";
-import { removeNonNumericCharacters } from "@/utils/pure/string";
+import { isImageLoading } from "@/utils/browser/image";
+import { removeNonNumeric } from "@/utils/pure/string";
 import { sum } from "@/utils/pure/number";
 
 export const ITEM_CLASS_NAME = "post";
@@ -44,12 +44,12 @@ export function parseIdFromThumb(thumb: HTMLElement): string {
   const id = thumb.getAttribute("id");
 
   if (id !== null) {
-    return removeNonNumericCharacters(id);
+    return removeNonNumeric(id);
   }
   const anchor = thumb.querySelector("a");
 
   if (anchor !== null && anchor.hasAttribute("id")) {
-    return removeNonNumericCharacters(anchor.id);
+    return removeNonNumeric(anchor.id);
   }
 
   if (anchor !== null && anchor.hasAttribute("href")) {
@@ -89,7 +89,7 @@ export function waitForThumbsToLoadInContainer(container: HTMLElement | Document
   const unloadedImages = getItemsInContainer(container)
     .map(thumb => getImageFromThumb(thumb))
     .filter(image => image instanceof HTMLImageElement)
-    .filter(image => image.dataset.preload !== "true" && imageIsLoading(image) && image.loading !== "lazy");
+    .filter(image => image.dataset.preload !== "true" && isImageLoading(image) && image.loading !== "lazy");
   return Promise.all(unloadedImages
     .map(image => new Promise(resolve => {
       image.addEventListener("load", resolve, {

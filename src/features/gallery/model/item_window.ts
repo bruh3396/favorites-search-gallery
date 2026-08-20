@@ -1,4 +1,4 @@
-import { itemsAroundIndex, wrappedItemsAroundIndex } from "@/utils/pure/collection";
+import { itemsAround, wrappedItemsAround } from "@/utils/pure/collection";
 import { Identifiable } from "@/types/app";
 
 export class ItemWindow<T extends Identifiable> {
@@ -9,7 +9,7 @@ export class ItemWindow<T extends Identifiable> {
   constructor(getItems: () => T[], wrapAround: boolean, limit: number = 50) {
     this.getItems = getItems;
     this.limit = limit;
-    this.window = wrapAround ? wrappedItemsAroundIndex : itemsAroundIndex;
+    this.window = wrapAround ? wrappedItemsAround : itemsAround;
   }
 
   public getItemsAround(id: string): T[] {

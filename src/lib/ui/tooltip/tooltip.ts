@@ -1,4 +1,4 @@
-import { toggleDataset } from "@/utils/platform/dataset";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 export type TooltipPosition = "above" | "below" | "right";
 

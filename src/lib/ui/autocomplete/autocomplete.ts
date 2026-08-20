@@ -1,6 +1,6 @@
 import { AUTOCOMPLETE_SELECTOR, hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
-import { isEmptyString, removeLeadingHyphens } from "@/utils/pure/string";
+import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { addCustomTagsToAutocomplete } from "@/lib/search/tags/custom_tags";
 import { fetchHtml } from "@/lib/remote/http/client";
@@ -134,7 +134,7 @@ async function populateAwesompleteList(inputId: string, prefix: string, awesompl
   if (isEmptyString(prefix)) {
     return;
   }
-  prefix = removeLeadingHyphens(prefix);
+  prefix = removeLeadingModifiers(prefix);
   const html = await getAutocompleteSuggestions(prefix);
 
   awesomplete.list = getFinalAutocompleteSuggestions(html, prefix);

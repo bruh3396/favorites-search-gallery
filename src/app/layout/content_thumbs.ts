@@ -1,6 +1,6 @@
 import { COLUMN_SELECTOR, ITEM_SELECTOR, getItemsInContainer, getThumbsInMatrix, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
 import { Content } from "@/app/layout/shell";
-import { preloadImage } from "@/utils/platform/image";
+import { preloadImage } from "@/utils/browser/image";
 import { sleep } from "@/lib/async/scheduling";
 import { throttle } from "@/lib/async/rate_limiting";
 
