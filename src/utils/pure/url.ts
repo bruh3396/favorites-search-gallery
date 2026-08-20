@@ -16,7 +16,7 @@ export function withoutQueryParam(url: string, name: string): string {
   return parsed.toString();
 }
 
-export function withoutAllQueryParams(url: string): string {
+export function withNoQueryParams(url: string): string {
   const parsed = new URL(url);
 
   parsed.search = "";

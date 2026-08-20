@@ -1,7 +1,7 @@
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 import { isExpanded } from "@/features/favorites/control/settings/helpers";
 import { toggleDataset } from "@/utils/browser/dataset";

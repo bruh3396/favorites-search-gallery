@@ -1,4 +1,4 @@
-import { compressPreviewSource, decompressPreviewSource } from "@/lib/media/url_compressor";
+import { compressPreviewSource, decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
 import { describe, expect, test } from "vitest";
 
 describe("compressPreviewSource", () => {

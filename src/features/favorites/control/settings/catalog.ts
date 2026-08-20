@@ -1,11 +1,10 @@
-import { ActionBarButton, ActionBarMode } from "@/lib/thumb/action_bar/types";
+import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
 import { ON_MOBILE_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
-import { setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar/toggles";
 import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { GeneralConfig } from "@/config/general_config";

@@ -26,11 +26,11 @@ export function removeLeadingModifiers(text: string): string {
   return text.replace(/^[-*]*/, "");
 }
 
-export function removeNonNumeric(text: string): string {
+export function removeNonNumericCharacters(text: string): string {
   return text.replace(/\D/g, "");
 }
 
-export function spacesToUnderscores(text: string): string {
+export function replaceSpacesWithUnderscores(text: string): string {
   return text.replaceAll(/\s/gm, "_");
 }
 

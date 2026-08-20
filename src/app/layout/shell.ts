@@ -1,6 +1,6 @@
 import { DomEvents } from "@/app/dom/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
-import { div } from "@/utils/browser/factory";
+import { div } from "@/utils/browser/element";
 
 export const Root = div("favorites-search-gallery");
 export const Content = div("favorites-search-gallery-content");

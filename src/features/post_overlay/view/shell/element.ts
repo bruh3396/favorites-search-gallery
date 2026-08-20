@@ -2,7 +2,7 @@ import { ElementPool } from "@/lib/ui/element_pool";
 import { Overlays } from "@/app/layout/shell";
 import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
-import { div } from "@/utils/browser/factory";
+import { div } from "@/utils/browser/element";
 import { insertStyle } from "@/utils/browser/injector";
 
 const pool = new ElementPool(3, createOverlayElement);

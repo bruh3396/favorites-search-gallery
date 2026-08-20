@@ -10,7 +10,7 @@ export interface GalleryRenderer {
 export type VideoClip = {
   start: number;
   end: number;
-}
+};
 
 export interface GalleryViewDependencies {
   onMenuAction: (action: GalleryMenuAction) => void;
@@ -27,4 +27,4 @@ export type GalleryMenuButton = {
   tooltip: string;
   color: string;
   href?: string;
-}
+};

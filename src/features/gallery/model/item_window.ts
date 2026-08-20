@@ -1,7 +1,7 @@
-import { itemsAround, wrappedItemsAround } from "@/utils/pure/collection";
+import { itemsAround, wrappedItemsAround } from "@/utils/pure/array";
 import { Identifiable } from "@/types/app";
 
-export class ItemWindow<T extends Identifiable> {
+export class GalleryItemWindow<T extends Identifiable> {
   private readonly getItems: () => T[];
   private readonly limit: number;
   private readonly window: (items: T[], index: number, limit: number) => T[];

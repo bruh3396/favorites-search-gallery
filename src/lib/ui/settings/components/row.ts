@@ -1,7 +1,7 @@
 import { SelectSetting, Setting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { setDataset } from "@/utils/browser/dataset";
 
 export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement): HTMLElement {

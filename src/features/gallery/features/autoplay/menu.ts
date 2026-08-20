@@ -1,4 +1,4 @@
-import { div, img, numberInput } from "@/utils/browser/factory";
+import { div, img, numberInput } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
 export type AutoplayMenuElements = {

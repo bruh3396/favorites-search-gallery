@@ -1,9 +1,8 @@
-import { ActionBarButton, ActionBarMode } from "@/lib/thumb/action_bar/types";
+import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, PERFORMANCE_PROFILE, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
 import { dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
-import { setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar/toggles";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";

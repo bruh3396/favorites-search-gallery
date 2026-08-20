@@ -1,9 +1,9 @@
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
-import { toDimensions2D } from "@/utils/pure/geometry";
 import { removeExtraWhitespace } from "@/utils/pure/string";
-import { withRule34Hostname } from "@/lib/media/url_transformer";
+import { toDimensions2D } from "@/utils/pure/geometry";
+import { withRule34Hostname } from "@/lib/media/url";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 

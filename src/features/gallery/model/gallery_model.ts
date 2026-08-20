@@ -4,19 +4,19 @@ import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/remote/rule34/favorites/thumb_actions";
 import { Boundary } from "@/types/boundary";
 import { Carousel } from "@/lib/collection/carousel";
-import { ItemWindow } from "@/features/gallery/model/item_window";
+import { GalleryItemWindow } from "@/features/gallery/model/item_window";
 import { NavigationKey } from "@/types/input";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
-import { isVideoThumb } from "@/lib/media/type_predicates";
+import { isVideoThumb } from "@/lib/thumb/item";
 import { navigationDelta } from "@/utils/pure/number";
 
 const cursor = new Carousel<HTMLElement>();
-let preloadWindow: ItemWindow<HTMLElement>;
+let preloadWindow: GalleryItemWindow<HTMLElement>;
 
 export { getCurrentState, isInGallery, isShowingPreviews, close, preview } from "@/features/gallery/model/state";
 
 export function setup(getItems: () => HTMLElement[], wrapAround: boolean): void {
-  preloadWindow = new ItemWindow(getItems, wrapAround);
+  preloadWindow = new GalleryItemWindow(getItems, wrapAround);
 }
 
 export const getItemsAround = (id: string): HTMLElement[] => preloadWindow.getItemsAround(id);

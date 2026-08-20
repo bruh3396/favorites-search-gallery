@@ -5,7 +5,7 @@ import * as PostListNavigatorNavigationFlow from "@/features/post_list_navigator
 import * as PostListNavigatorOptionFlow from "@/features/post_list_navigator/flows/option_flow";
 import * as PostListNavigatorPostActionFlow from "@/features/post_list_navigator/flows/post_action_flow";
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/post_list_navigator_view";
-import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/action_bar/toggles";
+import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/action_bar";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
@@ -67,8 +67,8 @@ function subscribeToEvents(): void {
 }
 
 function serveExternalRequests(): void {
-  FeatureBridge.postList.searchQuery.register(PostListNavigatorView.currentSearch);
-  FeatureBridge.postList.navigateToAdjacent.register(PostListNavigatorNavigationFlow.navigatePostLists);
-  FeatureBridge.postList.thumbs.register(PostListNavigatorModel.allThumbs);
-  FeatureBridge.postList.usingInfiniteScroll.register(() => Preferences.postList.infiniteScroll.value);
+  FeatureBridge.postList.searchQuery.serve(PostListNavigatorView.currentSearch);
+  FeatureBridge.postList.navigateToAdjacent.serve(PostListNavigatorNavigationFlow.navigatePostLists);
+  FeatureBridge.postList.thumbs.serve(PostListNavigatorModel.allThumbs);
+  FeatureBridge.postList.usingInfiniteScroll.serve(() => Preferences.postList.infiniteScroll.value);
 }

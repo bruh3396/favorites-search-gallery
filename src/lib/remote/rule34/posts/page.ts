@@ -1,4 +1,4 @@
-import { buildPostPageUrl } from "../../url";
+import { buildPostPageUrl } from "@/lib/remote/url";
 import { fetchHtml } from "@/lib/remote/http/client";
 import { generalPageRequestLimiter } from "@/lib/remote/http/rate_limiters";
 import { withExponentialBackoff } from "@/lib/async/scheduling";

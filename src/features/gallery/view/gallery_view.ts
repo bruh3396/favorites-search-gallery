@@ -7,14 +7,14 @@ import { GalleryViewDependencies } from "@/features/gallery/types/gallery_types"
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { insertStyle } from "@/utils/browser/injector";
 
-export function setup(deps: GalleryViewDependencies): void {
+export function setup(dependencies: GalleryViewDependencies): void {
   insertStyle(GALLERY_CSS);
   GalleryShell.mountGallery();
   GalleryUi.setup(GalleryShell.GalleryRoot);
-  GalleryRenderer.setup(GalleryShell.GalleryRoot, deps.onVideoEnded, deps.onVideoDoubleClicked, deps.onVolumeChanged);
+  GalleryRenderer.setup(GalleryShell.GalleryRoot, dependencies.onVideoEnded, dependencies.onVideoDoubleClicked, dependencies.onVolumeChanged);
 
   if (ON_DESKTOP_DEVICE) {
-    GalleryDesktopMenu.setup(deps.onMenuAction);
+    GalleryDesktopMenu.setup(dependencies.onMenuAction);
   }
 }
 

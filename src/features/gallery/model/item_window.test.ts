@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from "vitest";
 import { Identifiable } from "@/types/app";
-import { ItemWindow } from "@/features/gallery/model/item_window";
+import { GalleryItemWindow } from "@/features/gallery/model/item_window";
 
 const items = (...ids: string[]): Identifiable[] => ids.map(id => ({ id }));
 
-const windowOf = (getItems: () => Identifiable[], wrapAround: boolean = false, limit?: number): ItemWindow<Identifiable> => new ItemWindow(getItems, wrapAround, limit);
+const windowOf = (getItems: () => Identifiable[], wrapAround: boolean = false, limit?: number): GalleryItemWindow<Identifiable> => new GalleryItemWindow(getItems, wrapAround, limit);
 
 const idsAround = (
   candidates: Identifiable[],

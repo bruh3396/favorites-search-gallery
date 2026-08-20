@@ -2,9 +2,8 @@ import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler?raw";
-import { createWorker } from "@/utils/browser/worker";
 import { replaceCanvas } from "@/utils/browser/canvas";
-import { resolveImageUrl } from "@/lib/media/url_resolver";
+import { resolveImageUrl } from "@/lib/media/resolver";
 import { toMediaItem } from "@/lib/thumb/item";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
@@ -15,7 +14,7 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
 
   constructor() {
     super();
-    this.worker = createWorker(OFFSCREEN_UPSCALER_CODE);
+    this.worker = new Worker(URL.createObjectURL(new Blob([OFFSCREEN_UPSCALER_CODE], { type: "application/javascript" })));
     this.worker.postMessage({ action: "init", config: GalleryUpscaleConfig });
   }
 

@@ -1,6 +1,6 @@
 import { Favorite } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
-import { shuffleInPlace } from "@/utils/pure/collection";
+import { shuffleInPlace } from "@/utils/pure/array";
 
 export function sort(favorites: Favorite[]): Favorite[] {
   const sortKey = Preferences.favorites.sortKey.value;

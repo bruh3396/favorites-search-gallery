@@ -43,6 +43,28 @@ export function setup(onMenuAction: (action: GalleryMenuAction) => void): void {
   createButtons();
 }
 
+export function togglePersistence(event: EnhancedMouseEvent): void {
+  const target = event.originalEvent.target;
+
+  menu.classList.toggle("gallery-menu--persistent", target instanceof HTMLElement && menu.contains(target));
+}
+
+export function setPinned(pinned: boolean): void {
+  menu.classList.toggle("gallery-menu--pinned", pinned);
+}
+
+export function setDockedLeft(dockedLeft: boolean): void {
+  menu.classList.toggle("gallery-menu--docked", dockedLeft);
+}
+
+export function reveal(): void {
+  menu.classList.add("gallery-menu--visible");
+  clearTimeout(menuVisibilityTimeout);
+  menuVisibilityTimeout = setTimeout(() => {
+    hide();
+  }, GalleryConfig.menuVisibilityTime);
+}
+
 function loadPreferences(): void {
   setDockedLeft(!ON_MOBILE_DEVICE && Preferences.gallery.menuDockedLeft.value);
   setPinned(ON_MOBILE_DEVICE || Preferences.gallery.menuPinned.value);
@@ -108,28 +130,6 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   return button;
 }
 
-export function reveal(): void {
-  menu.classList.add("gallery-menu--visible");
-  clearTimeout(menuVisibilityTimeout);
-  menuVisibilityTimeout = setTimeout(() => {
-    hide();
-  }, GalleryConfig.menuVisibilityTime);
-}
-
 function hide(): void {
   menu.classList.remove("gallery-menu--visible");
-}
-
-export function togglePersistence(event: EnhancedMouseEvent): void {
-  const target = event.originalEvent.target;
-
-  menu.classList.toggle("gallery-menu--persistent", target instanceof HTMLElement && menu.contains(target));
-}
-
-export function setPinned(pinned: boolean): void {
-  menu.classList.toggle("gallery-menu--pinned", pinned);
-}
-
-export function setDockedLeft(dockedLeft: boolean): void {
-  menu.classList.toggle("gallery-menu--docked", dockedLeft);
 }

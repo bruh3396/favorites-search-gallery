@@ -1,7 +1,7 @@
 import { FeatureNamespace, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortKey } from "@/types/search";
-import { ActionBarMode } from "@/lib/thumb/action_bar/types";
+import { ActionBarMode } from "@/lib/thumb/action_bar";
 import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";

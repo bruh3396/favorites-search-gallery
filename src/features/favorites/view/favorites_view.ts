@@ -22,19 +22,19 @@ export function showSearchResults(searchResults: Favorite[], options: ContentDis
   onContentReplaced();
 }
 
-export function setup(deps: FavoritesViewDependencies): void {
-  onContentReplaced = deps.onContentReplaced;
-  onContentAdded = deps.onContentAdded;
+export function setup(dependencies: FavoritesViewDependencies): void {
+  onContentReplaced = dependencies.onContentReplaced;
+  onContentAdded = dependencies.onContentAdded;
   buildFavoriteElementTemplate();
   FavoritesShell.setup();
   FavoritesStatus.setup();
   ContentTiler.setup();
-  FavoritesPaginationRenderer.setup(deps.onPageSelected, deps.onPageStepped);
+  FavoritesPaginationRenderer.setup(dependencies.onPageSelected, dependencies.onPageStepped);
   FavoritesDrawer.setup({
     change: FavoritesChangelog.buildDrawerView(),
     help: FavoritesHelp.buildDrawerView(),
-    ...deps.drawerViews
-  }, deps.onDrawerOpen, deps.onDrawerViewSelected);
+    ...dependencies.drawerViews
+  }, dependencies.onDrawerOpen, dependencies.onDrawerViewSelected);
 }
 
 export function addToTop(favorites: Favorite[]): void {

@@ -1,4 +1,3 @@
-import * as ExtensionResolver from "@/lib/media/extension_resolver";
 import * as GalleryAutoplay from "@/features/gallery/features/autoplay/autoplay";
 import * as GalleryClickFlow from "@/features/gallery/flows/click_flow";
 import * as GalleryContentFlow from "@/features/gallery/flows/content_flow";
@@ -18,6 +17,7 @@ import * as GalleryVideoFlow from "@/features/gallery/flows/video_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
+import * as MediaResolver from "@/lib/media/resolver";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
@@ -143,9 +143,9 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.searchResultsUpdated.on(warmExtensionCache, { once: true });
 }
 
-async function warmExtensionCache(searchResults: Favorite[]): Promise<void> {
+async function warmExtensionCache(favorites: Favorite[]): Promise<void> {
   if (await hasStoredFavorites()) {
-    ExtensionResolver.cacheExtensions(searchResults.slice(0, 50).map(favorite => favorite.id));
+    MediaResolver.cacheExtensions(favorites.slice(0, 50).map(favorite => favorite.id));
   }
 }
 
@@ -182,6 +182,6 @@ function subscribeToMobileInput(): void {
 }
 
 function serveExternalRequests(): void {
-  FeatureBridge.gallery.state.register(GalleryModel.getCurrentState);
-  FeatureBridge.gallery.currentThumb.register(GalleryModel.currentThumbIfOpen);
+  FeatureBridge.gallery.state.serve(GalleryModel.getCurrentState);
+  FeatureBridge.gallery.currentThumb.serve(GalleryModel.currentThumbIfOpen);
 }

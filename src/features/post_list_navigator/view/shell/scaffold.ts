@@ -1,7 +1,7 @@
 import { Content } from "@/app/layout/shell";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
 import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
-import { div } from "@/utils/browser/factory";
+import { div } from "@/utils/browser/element";
 import { insertStyle } from "@/utils/browser/injector";
 
 export function insert(): HTMLElement | null {

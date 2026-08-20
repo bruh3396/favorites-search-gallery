@@ -1,5 +1,5 @@
 import { clamp } from "@/utils/pure/number";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 export interface ProgressBar {

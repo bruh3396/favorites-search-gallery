@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { imageUrlToSampleUrl, replaceExtension, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url_transformer";
+import { imageUrlToSampleUrl, replaceExtension, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url";
 
 describe("withRule34Hostname", () => {
   test("one subdomain", () => {

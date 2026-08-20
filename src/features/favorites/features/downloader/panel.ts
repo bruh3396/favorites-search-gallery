@@ -2,13 +2,13 @@ import * as FavoritesDownload from "@/features/favorites/features/downloader/dow
 import { DownloadProgress, DownloadResult } from "@/features/favorites/features/downloader/types";
 import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
 import { DownloaderConfig } from "@/config/downloader_config";
-import { FavoritesDownloaderDeps } from "@/features/favorites/features/downloader/deps";
+import { FavoritesDownloaderDependencies } from "@/features/favorites/features/downloader/dependencies";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { categoryOptions } from "@/features/favorites/features/downloader/filename_settings";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { pluralSuffix } from "@/utils/pure/string";
 import { toggleDataset } from "@/utils/browser/dataset";
 
@@ -61,7 +61,7 @@ function isDownloading(): boolean {
 
 function render(): void {
   const wasDownloading = isDownloading();
-  const itemCount = isReady ? FavoritesDownloaderDeps.getSearchResults().length : 0;
+  const itemCount = isReady ? FavoritesDownloaderDependencies.getSearchResults().length : 0;
 
   toggleDataset(batchSizeRow, "hidden", !isReady || wasDownloading);
   toggleDataset(filenameFormatRow, "hidden", !isReady || wasDownloading);
@@ -118,7 +118,7 @@ async function startDownload(): Promise<void> {
   if (!isReady || isDownloading()) {
     return;
   }
-  const items = FavoritesDownloaderDeps.getSearchResults();
+  const items = FavoritesDownloaderDependencies.getSearchResults();
 
   if (items.length === 0) {
     status.textContent = "No search results to download";

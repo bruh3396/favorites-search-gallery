@@ -5,7 +5,7 @@ import { SettingsSection } from "@/features/favorites/control/settings/types";
 import { SettingsSections } from "@/features/favorites/control/settings/sections";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { allSectionsCollapsed } from "@/features/favorites/control/settings/helpers";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 import { reloadWindow } from "@/utils/browser/window";
 import { toggleDataset } from "@/utils/browser/dataset";

@@ -1,5 +1,5 @@
 import { DownloaderDependencies } from "@/features/favorites/features/downloader/types";
-import { setDependencies } from "@/features/favorites/features/downloader/deps";
+import { setDependencies } from "@/features/favorites/features/downloader/dependencies";
 
 export { mount, reRender, enable } from "@/features/favorites/features/downloader/panel";
 

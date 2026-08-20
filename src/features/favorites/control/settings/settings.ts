@@ -4,7 +4,7 @@ import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsSections } from "@/features/favorites/control/settings/sections";
 import { buildFilterInput } from "@/features/favorites/control/settings/filter";
 import { buildSections } from "@/features/favorites/control/settings/section_builder";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 
 export function mount(): FavoritesDrawerViewContent {
   const collapseExpand = collapseExpandButton();

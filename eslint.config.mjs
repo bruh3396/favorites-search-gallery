@@ -293,7 +293,8 @@ export default defineConfig([
       "require-await": "error",
       "require-yield": "error",
       "rest-spread-spacing": "error",
-      "semi": "error",
+      "semi": "off",
+      "@stylistic/semi": ["error", "always"],
       "semi-spacing": "error",
       "semi-style": "error",
       "sort-imports": [
@@ -625,7 +626,7 @@ export default defineConfig([
       "src/features/favorites/features/downloader/filename_settings.ts",
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",
-      "src/lib/thumb/action_bar/toggles.ts"
+      "src/lib/thumb/action_bar.ts"
     ],
     rules: {
       "no-bitwise": "off"

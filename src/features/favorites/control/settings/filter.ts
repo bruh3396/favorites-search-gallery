@@ -1,6 +1,6 @@
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { searchField } from "@/lib/ui/widgets/search_field";
 import { toggleDataset } from "@/utils/browser/dataset";
 

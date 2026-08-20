@@ -2,6 +2,8 @@ import {
   average,
   clamp,
   navigationDelta,
+  numbersAround,
+  numbersInRange,
   randomBoolean,
   randomFloatInRange,
   randomInt,
@@ -314,5 +316,61 @@ describe("navigationDelta", () => {
     expect(navigationDelta("a")).toBe(-1);
     expect(navigationDelta("A")).toBe(-1);
     expect(navigationDelta("ArrowLeft")).toBe(-1);
+  });
+});
+
+describe("getNumbersAround", () => {
+  test("empty", () => {
+    expect(numbersAround(0, 0, 0, 0)).toStrictEqual([]);
+  });
+
+  test("one", () => {
+    expect(numbersAround(0, 1, 0, 0)).toStrictEqual([0]);
+    expect(numbersAround(0, 1, -1, 1)).toStrictEqual([0]);
+    expect(numbersAround(1, 1, -1, 1)).toStrictEqual([1]);
+    expect(numbersAround(-1, 1, -1, 1)).toStrictEqual([-1]);
+  });
+
+  test("two", () => {
+    expect(numbersAround(0, 2, -1, 1)).toStrictEqual([-1, 0]);
+    expect(numbersAround(0, 2, -2, 2)).toStrictEqual([-1, 0]);
+    expect(numbersAround(1, 2, -2, 2)).toStrictEqual([0, 1]);
+    expect(numbersAround(-1, 2, -2, 2)).toStrictEqual([-2, -1]);
+    expect(numbersAround(-2, 2, -2, 2)).toStrictEqual([-2, -1]);
+  });
+
+  test("three", () => {
+    expect(numbersAround(0, 3, -1, 1)).toStrictEqual([-1, 0, 1]);
+    expect(numbersAround(0, 3, -2, 2)).toStrictEqual([-1, 0, 1]);
+  });
+
+  test("many", () => {
+    expect(numbersAround(40, 10, 30, 100)).toStrictEqual([40, 39, 41, 38, 42, 37, 43, 36, 44, 35].sort((a, b) => a - b));
+  });
+
+  test("count = 0", () => {
+    expect(numbersAround(40, 0, 0, 100)).toStrictEqual([]);
+    expect(numbersAround(40, 0, 30, 100)).toStrictEqual([]);
+  });
+
+  test("mix > max", () => {
+    expect(numbersAround(40, 10, 100, 20)).toStrictEqual([]);
+  });
+});
+
+describe("getNumberRange", () => {
+  test("zero", () => {
+    expect(numbersInRange(0, 0)).toStrictEqual([0]);
+  });
+
+  test("normal", () => {
+    expect(numbersInRange(0, 1)).toStrictEqual([0, 1]);
+    expect(numbersInRange(0, 0)).toStrictEqual([0]);
+    expect(numbersInRange(0, 1)).toStrictEqual([0, 1]);
+    expect(numbersInRange(1, 3)).toStrictEqual([1, 2, 3]);
+    expect(numbersInRange(5, 7)).toStrictEqual([5, 6, 7]);
+    expect(numbersInRange(-2, 2)).toStrictEqual([-2, -1, 0, 1, 2]);
+    expect(numbersInRange(3, 3)).toStrictEqual([3]);
+    expect(numbersInRange(10, 13)).toStrictEqual([10, 11, 12, 13]);
   });
 });

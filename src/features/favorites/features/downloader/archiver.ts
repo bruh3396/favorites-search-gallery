@@ -1,11 +1,10 @@
-import * as ExtensionResolver from "@/lib/media/extension_resolver";
+import * as MediaResolver from "@/lib/media/resolver";
 import { BlobReader, BlobWriter, ZipWriter, configure } from "@zip.js/zip.js";
 import { ConcurrencyLimiter } from "@/lib/async/rate_limiting";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { MediaItem } from "@/types/media";
 import { doNothing } from "@/utils/pure/function";
 import { filenameFor } from "@/features/favorites/features/downloader/filename_settings";
-import { resolveMediaUrl } from "@/lib/media/url_resolver";
 
 configure({ useWebWorkers: false });
 
@@ -37,8 +36,8 @@ export async function archive(items: MediaItem[], signal: AbortSignal, onItemSet
 }
 
 async function addToArchive(zipWriter: ZipWriter<Blob>, item: MediaItem, signal: AbortSignal): Promise<string> {
-  const extension = await ExtensionResolver.resolveExtension(item);
-  const url = await resolveMediaUrl(item);
+  const extension = await MediaResolver.resolveExtension(item);
+  const url = await MediaResolver.resolveMediaUrl(item);
   const response = await fetch(url, { signal });
   const filename = filenameFor(item, extension);
 

@@ -1,12 +1,8 @@
-import { Emitter } from "@/lib/communication/emitter";
+import { Emitter } from "@/lib/events/emitter";
 import { Storage } from "@/lib/storage/local_storage";
 
 const LOCAL_STORAGE_KEY = "preferences";
 const cache: Record<string, unknown> = readStored();
-
-function readStored(): Record<string, unknown> {
-  return Storage.get<Record<string, unknown>>(LOCAL_STORAGE_KEY) ?? {};
-}
 
 export class Preference<T> {
   private readonly key: string;
@@ -56,4 +52,8 @@ export function booleanPreference<T>(source: Preference<T>, trueValue: T, falseV
       source.on((next) => listener(next === trueValue));
     }
   } as Preference<boolean>;
+}
+
+function readStored(): Record<string, unknown> {
+  return Storage.get<Record<string, unknown>>(LOCAL_STORAGE_KEY) ?? {};
 }

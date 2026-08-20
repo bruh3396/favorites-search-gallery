@@ -1,6 +1,6 @@
 export class FeatureChannel<I, O> {
   private handler: (value: I) => O;
-  private registered = false;
+  private served = false;
 
   constructor(defaultValue: O) {
     this.handler = (): O => defaultValue;
@@ -10,11 +10,11 @@ export class FeatureChannel<I, O> {
     return this.handler(value);
   }
 
-  public register(handler: (value: I) => O): void {
-    if (this.registered) {
+  public serve(handler: (value: I) => O): void {
+    if (this.served) {
       throw new Error("Handler already registered");
     }
     this.handler = handler;
-    this.registered = true;
+    this.served = true;
   }
 }

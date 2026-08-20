@@ -1,7 +1,7 @@
 import * as FavoritesShell from "@/features/favorites/view/shell/shell";
 import { FavoritesClass, FavoritesDrawerViewDescriptor, FavoritesDrawerViews, FavoritesId, favoritesDrawerSidebarIconId, favoritesDrawerViewId } from "@/features/favorites/types/scaffold";
 import { FavoritesDrawerView, FavoritesDrawerViewContent, FavoritesDrawerViewMap, FavoritesDrawerViewNames } from "@/types/favorite";
-import { createElement, div } from "@/utils/browser/factory";
+import { createElement, div } from "@/utils/browser/element";
 import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { Preferences } from "@/app/context/preferences";

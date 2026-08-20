@@ -1,6 +1,6 @@
 import { IconName, icon } from "@/lib/ui/icon";
 import { Stepper, buildStepper } from "@/lib/ui/settings/components/stepper_control";
-import { createElement, label, span } from "@/utils/browser/factory";
+import { createElement, label, span } from "@/utils/browser/element";
 import { removeDataset, toggleDataset } from "@/utils/browser/dataset";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";

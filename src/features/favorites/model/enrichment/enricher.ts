@@ -1,24 +1,21 @@
-import * as FavoritesDurationResolver from "@/features/favorites/model/enrichment/duration_resolver";
-import * as FavoritesMetadataResolver from "@/features/favorites/model/enrichment/metadata_resolver";
+import * as FavoritesDurationEnricher from "@/features/favorites/model/enrichment/duration_enricher";
+import * as FavoritesMetadataEnricher from "@/features/favorites/model/enrichment/metadata_enricher";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { TagCategoryMap } from "@/types/search";
-import { isVideo } from "@/lib/media/type_predicates";
+import { isVideo } from "@/lib/media/type";
 
 export function setup(
-  onPopulated: (favorite: Favorite) => void,
-  beforeUpdateTags: (favorite: Favorite) => void,
-  afterUpdateTags: (favorite: Favorite) => void,
+  onFavoriteEnriched: (favorite: Favorite) => void,
+  beforeTagsChanged: (favorite: Favorite) => void,
+  afterTagsChanged: (favorite: Favorite) => void,
   onCategoriesResolved: (categoryMap: TagCategoryMap) => void
 ): void {
-  FavoritesMetadataResolver.setup(onPopulated, beforeUpdateTags, afterUpdateTags, onCategoriesResolved);
-  FavoritesDurationResolver.setup(onPopulated);
+  FavoritesMetadataEnricher.setup(onFavoriteEnriched, beforeTagsChanged, afterTagsChanged, onCategoriesResolved);
+  FavoritesDurationEnricher.setup(onFavoriteEnriched);
 }
 
 export function enrich(favorites: FavoriteItem[]): void {
-  FavoritesMetadataResolver.fetchMetadata(favorites.filter(hasUnpopulatedMetadata));
-  FavoritesDurationResolver.fetchDurations(favorites.filter(isVideoMissingDuration));
+  FavoritesMetadataEnricher.enrich(favorites.filter(favorite => favorite.metadata.isEmpty));
+  FavoritesDurationEnricher.enrich(favorites.filter(favorite => isVideo(favorite) && favorite.metadata.metrics.duration === 0));
 }
-
-const hasUnpopulatedMetadata = (favorite: FavoriteItem): boolean => favorite.metadata.isUnpopulated;
-const isVideoMissingDuration = (favorite: FavoriteItem): boolean => isVideo(favorite) && favorite.metadata.metrics.duration === 0;

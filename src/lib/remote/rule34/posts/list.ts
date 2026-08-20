@@ -1,4 +1,4 @@
-import { buildPostListUrl } from "../../url";
+import { buildPostListUrl } from "@/lib/remote/url";
 import { fetchHtml } from "@/lib/remote/http/client";
 import { generalPageRequestLimiter } from "@/lib/remote/http/rate_limiters";
 

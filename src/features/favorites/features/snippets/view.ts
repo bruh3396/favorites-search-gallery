@@ -5,7 +5,7 @@ import { filterSnippets, sortByNewest } from "@/features/favorites/features/snip
 import { SnippetSelectors } from "@/features/favorites/features/snippets/selectors";
 import { SnippetState } from "@/features/favorites/features/snippets/state";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { searchField } from "@/lib/ui/widgets/search_field";
 
 const list = createElement("div", { className: SnippetSelectors.list });

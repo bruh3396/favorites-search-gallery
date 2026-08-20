@@ -1,5 +1,5 @@
-import { buildPostListUrlFromQuery, buildPostPageUrl } from "../../url";
-import { resolveMediaUrl } from "@/lib/media/url_resolver";
+import { buildPostListUrlFromQuery, buildPostPageUrl } from "@/lib/remote/url";
+import { resolveMediaUrl } from "@/lib/media/resolver";
 import { toMediaItem } from "@/lib/thumb/item";
 
 export function openPost(id: string): void {

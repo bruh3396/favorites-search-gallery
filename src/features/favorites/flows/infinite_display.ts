@@ -1,6 +1,6 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import { BottomEdgeObserver } from "@/lib/observer/edge_observer";
+import { BottomEdgeObserver } from "@/features/favorites/flows/edge_observer";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";

@@ -10,15 +10,15 @@ import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 let getAddedTags: (id: string) => string | undefined = () => undefined;
 let waitForAddedTags: () => Promise<void> = () => Promise.resolve();
 
-export function setup(deps: FavoritesModelDependencies): void {
-  getAddedTags = deps.getAddedTags;
-  waitForAddedTags = deps.waitForAddedTags;
-  FavoritesSearcher.setup(deps.onSearchResultsChanged);
+export function setup(dependencies: FavoritesModelDependencies): void {
+  getAddedTags = dependencies.getAddedTags;
+  waitForAddedTags = dependencies.waitForAddedTags;
+  FavoritesSearcher.setup(dependencies.onSearchResultsChanged);
   FavoritesEnricher.setup(
-    FavoritesLoader.updateFavorite,
+    FavoritesLoader.updateStoredFavorite,
     (favorite) => FavoritesSearcher.deIndex([favorite]),
     (favorite) => FavoritesSearcher.reIndex([favorite]),
-    deps.onTagCategoriesResolved
+    dependencies.onTagCategoriesResolved
   );
 }
 

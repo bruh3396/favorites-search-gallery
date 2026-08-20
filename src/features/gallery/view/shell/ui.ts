@@ -3,7 +3,7 @@ import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { USING_FIREFOX } from "@/lib/environment";
 import { blurActiveElement } from "@/utils/browser/window";
-import { div } from "@/utils/browser/factory";
+import { div } from "@/utils/browser/element";
 import { getLayout } from "@/app/layout/content_tiler";
 import { insertStyle } from "@/utils/browser/injector";
 import { showFullscreenIcon } from "@/features/gallery/dom_tweaks/fullscreen_icon";

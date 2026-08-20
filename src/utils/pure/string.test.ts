@@ -8,8 +8,8 @@ import {
   pluralSuffix,
   removeExtraWhitespace,
   removeLeadingModifiers,
-  removeNonNumeric,
-  spacesToUnderscores
+  removeNonNumericCharacters,
+  replaceSpacesWithUnderscores
 } from "@/utils/pure/string";
 import { describe, expect, test } from "vitest";
 
@@ -71,24 +71,24 @@ describe("escapeParentheses", () => {
 
 describe("removeNonNumeric", () => {
   test("empty", () => {
-    expect(removeNonNumeric("")).toBe("");
+    expect(removeNonNumericCharacters("")).toBe("");
   });
 
   test("only letters", () => {
-    expect(removeNonNumeric("abc")).toBe("");
+    expect(removeNonNumericCharacters("abc")).toBe("");
   });
 
   test("only numbers", () => {
-    expect(removeNonNumeric("123")).toBe("123");
+    expect(removeNonNumericCharacters("123")).toBe("123");
   });
 
   test("letters and numbers", () => {
-    expect(removeNonNumeric("abc123")).toBe("123");
+    expect(removeNonNumericCharacters("abc123")).toBe("123");
   });
 
   test("other", () => {
-    expect(removeNonNumeric("P12304")).toBe("12304");
-    expect(removeNonNumeric("_!@0#$%^1^&*()2(?:<")).toBe("012");
+    expect(removeNonNumericCharacters("P12304")).toBe("12304");
+    expect(removeNonNumericCharacters("_!@0#$%^1^&*()2(?:<")).toBe("012");
   });
 });
 
@@ -137,10 +137,10 @@ describe("removeLeadingModifiers", () => {
 });
 
 test("spacesToUnderscores", () => {
-  expect(spacesToUnderscores("apple banana cherry")).toBe("apple_banana_cherry");
-  expect(spacesToUnderscores("apple")).toBe("apple");
-  expect(spacesToUnderscores("apple banana")).toBe("apple_banana");
-  expect(spacesToUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
+  expect(replaceSpacesWithUnderscores("apple banana cherry")).toBe("apple_banana_cherry");
+  expect(replaceSpacesWithUnderscores("apple")).toBe("apple");
+  expect(replaceSpacesWithUnderscores("apple banana")).toBe("apple_banana");
+  expect(replaceSpacesWithUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
 });
 
 describe("camelToKebabCase", () => {

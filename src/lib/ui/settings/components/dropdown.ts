@@ -4,7 +4,7 @@ import { SettingsClass } from "@/lib/ui/settings/classes";
 import { StateBinding } from "@/lib/ui/settings/state_binding";
 import { bindEnableRule } from "@/lib/ui/settings/enable_rule";
 import { controlRow } from "@/lib/ui/settings/components/row";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
 const closers = new Set<() => void>();

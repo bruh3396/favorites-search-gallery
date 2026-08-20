@@ -40,7 +40,7 @@ export class FavoriteMetadata {
     };
   }
 
-  public get isUnpopulated(): boolean {
+  public get isEmpty(): boolean {
     return this.metrics.width === 0 && this.metrics.height === 0;
   }
 

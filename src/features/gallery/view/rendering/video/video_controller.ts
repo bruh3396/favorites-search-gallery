@@ -1,11 +1,10 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { isVideoThumb, toMediaItem } from "@/lib/thumb/item";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";
 import { VideoClip } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/pure/function";
-import { isVideoThumb } from "@/lib/media/type_predicates";
-import { toMediaItem } from "@/lib/thumb/item";
 import { videoUrl } from "@/lib/media/url";
 
 const videoPlayers: HTMLVideoElement[] = [];

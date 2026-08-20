@@ -5,7 +5,7 @@ import { ON_FAVORITES_PAGE } from "@/lib/environment";
 type BudgetedRequests = {
   accepted: ImageRequest[];
 rejected: ImageRequest[];
-}
+};
 
 let getPixelCount: (id: string) => number = () => 0;
 

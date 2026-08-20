@@ -3,7 +3,7 @@ import { Events } from "@/app/channels/events";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { setupAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { setupDomEvents } from "@/app/dom/events";
-import { setupExtensions } from "@/lib/media/extension_resolver";
+import { setupExtensions } from "@/lib/media/resolver";
 import { setupHotkeyEvents } from "@/app/dom/hotkey_events";
 import { setupServer } from "@/lib/remote/api/ping";
 import { setupStyles } from "@/app/startup/style";

@@ -13,7 +13,7 @@ import * as FavoritesSnippets from "@/features/favorites/features/snippets/snipp
 import * as FavoritesToolbar from "@/features/favorites/control/toolbar/toolbar";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_FIRST_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
-import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/action_bar/toggles";
+import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/action_bar";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
@@ -146,14 +146,14 @@ function subscribeToDomEvents(): void {
 }
 
 function serveFavoritesPageRequests(): void {
-  FeatureBridge.favorites.advance.register(FavoritesDisplayFlow.advance);
-  FeatureBridge.favorites.searchResults.register(FavoritesModel.getCurrentSearchResults);
-  FeatureBridge.favorites.getFavorite.register(FavoritesModel.getFavorite);
-  FeatureBridge.favorites.allFavorites.register(FavoritesModel.getAllFavorites);
-  FeatureBridge.favorites.searchQuery.register(FavoritesModel.getCurrentSearchQuery);
-  FeatureBridge.favorites.usingInfiniteScroll.register(() => Preferences.favorites.infiniteScroll.value);
+  FeatureBridge.favorites.advance.serve(FavoritesDisplayFlow.advance);
+  FeatureBridge.favorites.searchResults.serve(FavoritesModel.getCurrentSearchResults);
+  FeatureBridge.favorites.getFavorite.serve(FavoritesModel.getFavorite);
+  FeatureBridge.favorites.allFavorites.serve(FavoritesModel.getAllFavorites);
+  FeatureBridge.favorites.searchQuery.serve(FavoritesModel.getCurrentSearchQuery);
+  FeatureBridge.favorites.usingInfiniteScroll.serve(() => Preferences.favorites.infiniteScroll.value);
 }
 
 function servePostListRequests(): void {
-  FeatureBridge.favorites.favoriteIds.register(FavoritesModel.loadFavoriteIds);
+  FeatureBridge.favorites.favoriteIds.serve(FavoritesModel.loadFavoriteIds);
 }

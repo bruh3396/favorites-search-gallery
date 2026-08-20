@@ -2,8 +2,8 @@ import * as FavoritesArchiver from "@/features/favorites/features/downloader/arc
 import { DownloadProgress, DownloadResult } from "@/features/favorites/features/downloader/types";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { MediaItem } from "@/types/media";
+import { chunk } from "@/utils/pure/array";
 import { downloadBlob } from "@/utils/browser/download";
-import { chunk } from "@/utils/pure/collection";
 
 export async function download(items: MediaItem[], batchSize: number, signal: AbortSignal, onProgress: (progress: DownloadProgress) => void): Promise<DownloadResult> {
   const batches = chunk(items, batchSize);

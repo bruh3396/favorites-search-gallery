@@ -3,7 +3,7 @@ declare module "awesomplete" {
     label: string;
     value: string;
     type: string;
-  }
+  };
 
   export interface AwesompleteOptions {
     minChars?: number;

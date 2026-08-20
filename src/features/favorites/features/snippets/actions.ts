@@ -1,5 +1,5 @@
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 import { selectFile } from "@/utils/browser/download";
 

@@ -1,6 +1,6 @@
 import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/utils/pure/number";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
 const HOLD_INITIAL_DELAY_MS = 120;

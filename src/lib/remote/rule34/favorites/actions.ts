@@ -1,5 +1,5 @@
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "../../url";
+import { buildAddFavoriteUrl, buildPostVoteUrl, buildRemoveFavoriteUrl } from "@/lib/remote/url";
 import { favoriteAddThrottle, favoriteRemoveThrottle } from "@/lib/remote/http/rate_limiters";
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";

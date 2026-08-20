@@ -1,6 +1,6 @@
+import { negateTags } from "@/utils/pure/tag";
 import { readCookie } from "@/utils/browser/cookie";
 import { readQueryParam } from "@/utils/browser/window";
-import { negateTags } from "@/utils/pure/tag";
 
 declare const SCRIPT_VERSION: string;
 export const VERSION = SCRIPT_VERSION;

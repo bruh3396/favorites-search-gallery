@@ -1,6 +1,6 @@
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { isImageLoading } from "@/utils/browser/image";
-import { removeNonNumeric } from "@/utils/pure/string";
+import { removeNonNumericCharacters } from "@/utils/pure/string";
 import { sum } from "@/utils/pure/number";
 
 export const ITEM_CLASS_NAME = "post";
@@ -44,12 +44,12 @@ export function parseIdFromThumb(thumb: HTMLElement): string {
   const id = thumb.getAttribute("id");
 
   if (id !== null) {
-    return removeNonNumeric(id);
+    return removeNonNumericCharacters(id);
   }
   const anchor = thumb.querySelector("a");
 
   if (anchor !== null && anchor.hasAttribute("id")) {
-    return removeNonNumeric(anchor.id);
+    return removeNonNumericCharacters(anchor.id);
   }
 
   if (anchor !== null && anchor.hasAttribute("href")) {

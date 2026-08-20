@@ -1,5 +1,5 @@
-import * as ExtensionResolver from "@/lib/media/extension_resolver";
 import * as FavoritesModel from "@/features/favorites/model/favorites_model";
+import * as MediaResolver from "@/lib/media/resolver";
 import { Events } from "@/app/channels/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Storage } from "@/lib/storage/local_storage";
@@ -15,7 +15,7 @@ export async function reset(): Promise<void> {
     Storage.clear(persistentLocalStorageKeys);
     Events.favorites.resetConfirmed.emit();
     await FavoritesModel.destroyStore();
-    await ExtensionResolver.destroyStore();
+    await MediaResolver.destroyStore();
     queueMacroTask(reloadWindow);
   }
 }

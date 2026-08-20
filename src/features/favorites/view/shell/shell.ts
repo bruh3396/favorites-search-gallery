@@ -10,7 +10,7 @@ import SEARCH_FIELD_CSS from "@/assets/css/favorites/search_field.css";
 import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
 import SNIPPETS_CSS from "@/assets/css/favorites/snippets.css";
 import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
-import { div } from "@/utils/browser/factory";
+import { div } from "@/utils/browser/element";
 import { insertStyle } from "@/utils/browser/injector";
 
 export const FavoritesRoot = div(FavoritesId.root);

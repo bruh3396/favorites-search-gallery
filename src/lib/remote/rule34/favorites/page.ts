@@ -1,4 +1,4 @@
-import { buildFavoritesPageUrl, buildProfilePageUrl } from "../../url";
+import { buildFavoritesPageUrl, buildProfilePageUrl } from "@/lib/remote/url";
 import { macroTask, withExponentialBackoff } from "@/lib/async/scheduling";
 import { FAVORITES_PAGE_ID } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";

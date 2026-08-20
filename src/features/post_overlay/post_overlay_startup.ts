@@ -27,7 +27,7 @@ function setup(): void {
 }
 
 function serveExternalRequests(): void {
-  FeatureBridge.postOverlay.tagCategory.register(PostOverlayModel.getTagCategory);
+  FeatureBridge.postOverlay.tagCategory.serve(PostOverlayModel.getTagCategory);
 }
 
 function start(): void {

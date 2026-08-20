@@ -1,6 +1,6 @@
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 export function searchField(placeholder: string, onChange: (value: string) => void): HTMLElement {

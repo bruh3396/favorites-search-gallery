@@ -5,7 +5,7 @@ import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
 import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
 import { Post } from "@/types/api";
 import { Rating } from "@/types/search";
-import { compressPreviewSource } from "@/lib/media/url_compressor";
+import { compressPreviewSource } from "@/features/favorites/types/preview_source_codec";
 import { parseIdFromThumb } from "@/lib/thumb/thumbs";
 import { toSortedTagSet } from "@/utils/pure/tag";
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MediaType } from "@/types/media";
-import { resolveMediaType } from "@/lib/media/type_resolver";
+import { resolveMediaType } from "@/lib/media/type";
 
 describe("resolveMediaType", () => {
   describe("image", () => {

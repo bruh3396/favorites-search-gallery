@@ -3,7 +3,7 @@ import { Post } from "@/types/api";
 
 export type FavoriteMetricMap = {
   [key in MetadataMetric]: number
-}
+};
 
 export type SerializedFavoriteMetadata = {
   width: number;
@@ -13,7 +13,7 @@ export type SerializedFavoriteMetadata = {
   create: number;
   change: number;
   duration: number | undefined;
-}
+};
 
 export type SerializedFavorite = {
   id: string;
@@ -21,7 +21,7 @@ export type SerializedFavorite = {
   src: string;
   deleted?: boolean;
   metadata: SerializedFavoriteMetadata;
-}
+};
 
 export interface Favorite extends Searchable {
   id: string;
@@ -38,12 +38,15 @@ export interface Favorite extends Searchable {
   metrics: FavoriteMetricMap;
 }
 
-export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success"
-export type RemoveFavoriteStatus = "error" | "forbidden" | "success"
+export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success";
+export type RemoveFavoriteStatus = "error" | "forbidden" | "success";
+
 export const FavoritesDrawerViewNames = ["settings", "snippets", "tags", "download", "change", "help"] as const;
 export type FavoritesDrawerView = (typeof FavoritesDrawerViewNames)[number];
+
 export type FavoritesDrawerViewContent = {
   mount?: (panel: HTMLElement) => void;
   actions?: HTMLElement[];
 };
+
 export type FavoritesDrawerViewMap = Partial<Record<FavoritesDrawerView, FavoritesDrawerViewContent>>;

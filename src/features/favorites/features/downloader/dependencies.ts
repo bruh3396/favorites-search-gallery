@@ -2,11 +2,11 @@ import { DownloaderDependencies } from "@/features/favorites/features/downloader
 import { MediaItem } from "@/types/media";
 import { TagCategory } from "@/types/search";
 
-export const FavoritesDownloaderDeps: DownloaderDependencies = {
+export const FavoritesDownloaderDependencies: DownloaderDependencies = {
   getSearchResults: (): MediaItem[] => [],
   getTagCategory: (): TagCategory | undefined => undefined
 };
 
-export function setDependencies(deps: DownloaderDependencies): void {
-  Object.assign(FavoritesDownloaderDeps, deps);
+export function setDependencies(dependencies: DownloaderDependencies): void {
+  Object.assign(FavoritesDownloaderDependencies, dependencies);
 }

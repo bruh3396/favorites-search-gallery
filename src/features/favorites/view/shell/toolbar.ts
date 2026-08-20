@@ -1,4 +1,4 @@
-import { createElement, label, span } from "@/utils/browser/factory";
+import { createElement, label, span } from "@/utils/browser/element";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { VERSION } from "@/lib/environment";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";

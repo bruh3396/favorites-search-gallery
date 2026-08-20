@@ -1,7 +1,7 @@
 import { StateBinding } from "@/lib/ui/settings/state_binding";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 import { toggleDataset } from "@/utils/browser/dataset";
 

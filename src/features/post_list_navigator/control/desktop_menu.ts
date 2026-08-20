@@ -3,7 +3,7 @@ import { PostListSettingsCatalog } from "@/features/post_list_navigator/control/
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
-import { createElement } from "@/utils/browser/factory";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
 interface SettingsSection {

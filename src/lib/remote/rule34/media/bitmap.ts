@@ -1,7 +1,6 @@
-import { imageUrlToSampleUrl, withRule34WimgHostname } from "@/lib/media/url_transformer";
-import { isImageThumb } from "@/lib/media/type_predicates";
-import { resolveImageUrl } from "@/lib/media/url_resolver";
-import { toMediaItem } from "@/lib/thumb/item";
+import { imageUrlToSampleUrl, withRule34WimgHostname } from "@/lib/media/url";
+import { isImageThumb, toMediaItem } from "@/lib/thumb/item";
+import { resolveImageUrl } from "@/lib/media/resolver";
 
 export async function fetchFullImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
   return fetchImageBitmap(await resolveImageUrl(toMediaItem(thumb)), abortController);

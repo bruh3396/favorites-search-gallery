@@ -1,4 +1,4 @@
-export type Timeout = ReturnType<typeof setTimeout> | undefined
+export type Timeout = ReturnType<typeof setTimeout> | undefined;
 
 export type DeferredPromise<V> = {
   resolve: (value: V) => void;
@@ -8,4 +8,4 @@ export type DeferredPromise<V> = {
 export type RateLimiterConfig = {
   concurrency: number;
   ratePerSecond: number;
-}
+};

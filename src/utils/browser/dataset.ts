@@ -14,12 +14,12 @@ export function toggleDataset(element: HTMLElement | null, name: string, force?:
   if (element === null) {
     return false;
   }
-  const isPresent = force ?? element.dataset[name] === undefined;
+  const shouldSet = force ?? element.dataset[name] === undefined;
 
-  if (isPresent) {
+  if (shouldSet) {
     setDataset(element, name, "");
   } else {
     removeDataset(element, name);
   }
-  return isPresent;
+  return shouldSet;
 }

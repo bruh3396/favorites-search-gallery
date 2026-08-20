@@ -39,6 +39,16 @@ export class EnhancedMouseEvent {
   }
 }
 
+export class EnhancedWheelEvent {
+  public readonly originalEvent: WheelEvent;
+  public readonly direction: NavigationKey;
+
+  constructor(event: WheelEvent) {
+    this.originalEvent = event;
+    this.direction = event.deltaY > 0 ? "ArrowRight" : "ArrowLeft";
+  }
+}
+
 function convertTouchEventToMouseEvent(touchEvent: TouchEvent, type: string): MouseEvent {
   const touch = touchEvent.changedTouches[0];
   return new MouseEvent(type, {
@@ -48,14 +58,4 @@ function convertTouchEventToMouseEvent(touchEvent: TouchEvent, type: string): Mo
     screenY: touch.screenY,
     button: ClickCode.Left
   });
-}
-
-export class EnhancedWheelEvent {
-  public readonly originalEvent: WheelEvent;
-  public readonly direction: NavigationKey;
-
-  constructor(event: WheelEvent) {
-    this.originalEvent = event;
-    this.direction = event.deltaY > 0 ? "ArrowRight" : "ArrowLeft";
-  }
 }

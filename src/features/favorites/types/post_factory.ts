@@ -2,7 +2,7 @@ import { getImageFromThumb, parseIdFromThumb } from "@/lib/thumb/thumbs";
 import { Post } from "@/types/api";
 import { SerializedFavorite } from "@/types/favorite";
 import { chain } from "@/utils/pure/function";
-import { decompressPreviewSource } from "@/lib/media/url_compressor";
+import { decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
 import { getTagsFromThumb } from "@/lib/thumb/tag";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
