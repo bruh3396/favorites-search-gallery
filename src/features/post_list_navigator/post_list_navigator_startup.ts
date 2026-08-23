@@ -54,8 +54,6 @@ function setupFavoriteIndicator(): void {
   Events.postList.moreResultsAdded.on(PostListNavigatorFavoritesMarkerFlow.markExistingFavoritesIfEnabled);
   Events.app.favoriteAdded.on(PostListNavigatorFavoritesMarkerFlow.registerFavorite);
   Preferences.postList.favoriteIndicator.on(PostListNavigatorOptionFlow.toggleFavoriteIndicator);
-  Preferences.postList.favoriteIndicatorStyle.on(PostListNavigatorView.applyCurrentFavoriteStyle);
-  Events.gallery.displayedThumb.on(PostListNavigatorView.applyGalleryFavoriteStyle);
 }
 
 function subscribeToEvents(): void {

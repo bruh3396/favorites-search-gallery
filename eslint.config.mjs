@@ -626,7 +626,8 @@ export default defineConfig([
       "src/features/favorites/features/downloader/filename_settings.ts",
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",
-      "src/lib/thumb/action_bar.ts"
+      "src/lib/thumb/action_bar.ts",
+      "src/app/context/preferences.ts"
     ],
     rules: {
       "no-bitwise": "off"

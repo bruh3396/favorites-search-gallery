@@ -1,4 +1,4 @@
-import { Emitter } from "@/lib/events/emitter";
+import { Emitter } from "@/lib/messaging/emitter";
 import { Storage } from "@/lib/storage/local_storage";
 
 const LOCAL_STORAGE_KEY = "preferences";

@@ -1,4 +1,4 @@
-import { Emitter, StickyEmitter } from "@/lib/events/emitter";
+import { Emitter, StickyEmitter } from "@/lib/messaging/emitter";
 import { FeatureNamespace, GalleryMenuAction } from "@/types/app";
 import { Favorite } from "@/types/favorite";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";

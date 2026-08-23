@@ -1,4 +1,4 @@
-import { Fruit, fruitDocs, index, searcher } from "@/lib/search/fixtures/fruit_search_fixture";
+import { Fruit, fruitDocs, index, searcher } from "@/lib/search/fruit_search_fixture";
 import { describe, expect, test } from "vitest";
 
 function testSearcher(searchQuery: string, expectedNames: string[]): void {

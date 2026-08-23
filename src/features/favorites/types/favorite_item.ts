@@ -6,7 +6,7 @@ import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
 import { Post } from "@/types/api";
 import { Rating } from "@/types/search";
 import { compressPreviewSource } from "@/features/favorites/types/preview_source_codec";
-import { parseIdFromThumb } from "@/lib/thumb/thumbs";
+import { parseIdFromThumb } from "@/lib/thumb/post_id";
 import { toSortedTagSet } from "@/utils/pure/tag";
 
 export class FavoriteItem implements Favorite {

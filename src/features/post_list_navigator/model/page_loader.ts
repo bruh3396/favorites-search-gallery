@@ -1,6 +1,6 @@
 import * as PostListNavigatorPageCache from "@/features/post_list_navigator/model/page_cache";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
-import { RAW_THUMB_CLASS_NAME } from "@/lib/thumb/thumbs";
+import { RAW_THUMB_CLASS_NAME } from "@/lib/thumb/selectors";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { fetchPostList } from "@/lib/remote/rule34/posts/list";
 import { numbersAround } from "@/utils/pure/number";

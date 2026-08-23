@@ -1,4 +1,5 @@
-import { getItemsInContainer, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
+import { getItemsInContainer } from "@/lib/thumb/query";
+import { waitForThumbsToLoadInContainer } from "@/lib/thumb/loading";
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";

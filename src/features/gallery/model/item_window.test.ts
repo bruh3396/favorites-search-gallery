@@ -1,6 +1,6 @@
-import { describe, expect, test, vi } from "vitest";
-import { Identifiable } from "@/types/app";
+﻿import { describe, expect, test, vi } from "vitest";
 import { GalleryItemWindow } from "@/features/gallery/model/item_window";
+import { Identifiable } from "@/types/app";
 
 const items = (...ids: string[]): Identifiable[] => ids.map(id => ({ id }));
 
@@ -13,7 +13,7 @@ const idsAround = (
   limit?: number
 ): string[] => windowOf(() => candidates, wrapAround, limit).getItemsAround(id).map(item => item.id);
 
-describe("ItemWindow", () => {
+describe("GalleryItemWindow", () => {
   test("returns the item itself first", () => {
     expect(idsAround(items("a", "b", "c"), false, "b", 1)).toEqual(["b"]);
   });
@@ -39,7 +39,7 @@ describe("ItemWindow", () => {
   });
 });
 
-describe("ItemWindow wrapAround", () => {
+describe("GalleryItemWindow wrapAround", () => {
   test("wraps past the last item when enabled", () => {
     expect(idsAround(items("a", "b", "c", "d", "e"), true, "e", 3)).toEqual(["e", "d", "a"]);
   });
@@ -61,7 +61,7 @@ describe("ItemWindow wrapAround", () => {
   });
 });
 
-describe("ItemWindow candidates", () => {
+describe("GalleryItemWindow candidates", () => {
   test("reads the candidates on every call", () => {
     const getItems = vi.fn(() => items("a", "b", "c"));
     const finder = windowOf(getItems);
@@ -98,7 +98,7 @@ describe("ItemWindow candidates", () => {
   });
 });
 
-describe("ItemWindow limit", () => {
+describe("GalleryItemWindow limit", () => {
   test("falls back to fifty items when no limit is configured", () => {
     const candidates = items(...Array.from({ length: 100 }, (_, i) => `id${i}`));
 

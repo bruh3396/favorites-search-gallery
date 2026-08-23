@@ -1,5 +1,5 @@
 import { InvertedIndex } from "@/lib/collection/inverted_index";
-import { InvertedIndexSearcher } from "@/lib/search/index/inverted_index_searcher";
+import { InvertedIndexSearcher } from "@/lib/search/inverted_index_searcher";
 import { Searchable } from "@/types/search";
 
 export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";

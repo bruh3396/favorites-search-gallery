@@ -3,7 +3,7 @@ import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
 import { ON_MOBILE_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
-import { applyCurrentTheme, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/settings/helpers";
+import { applyCurrentTheme, applyDarkMode, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
 import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -31,7 +31,7 @@ export const FavoritesSettingsCatalog = {
     tooltip: "Use dark variant of selected color theme",
     preference: Preferences.app.darkMode,
     hotkey: "D",
-    apply: applyCurrentTheme
+    apply: applyDarkMode
   }),
   nativeFont: toggle({
     id: "native-font",
@@ -103,6 +103,12 @@ export const FavoritesSettingsCatalog = {
     tooltip: "Automatically traverse gallery",
     enabled: GALLERY_ENABLED,
     preference: Preferences.gallery.autoplayActive
+  }),
+  mobileGallery: toggle({
+    id: "enable-mobile-gallery",
+    label: "Gallery",
+    enabled: GALLERY_ENABLED,
+    preference: Preferences.gallery.mobileEnabled
   }),
   fullscreenOnHover: toggle({
     id: "show-on-hover",
@@ -180,7 +186,8 @@ export const FavoritesSettingsCatalog = {
     requireSelection: true,
     options: new Map<ActionBarButton, string>([
       [ActionBarButton.Favorite, "Favorite"],
-      [ActionBarButton.Download, "Download"]
+      [ActionBarButton.Download, "Download"],
+      [ActionBarButton.Open, "Open"]
     ])
   }),
   excludeBlacklist: toggle({

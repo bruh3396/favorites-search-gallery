@@ -1,7 +1,6 @@
 import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
-import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { EnhancedMouseEvent } from "@/lib/input";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
@@ -44,7 +43,7 @@ function navigateInGallery(direction: NavigationKey): void {
 }
 
 function handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
-  if (mouseEvent.thumb !== null && galleryEnabled()) {
+  if (mouseEvent.thumb !== null && Preferences.gallery.mobileEnabled.value) {
     mouseEvent.originalEvent.preventDefault();
     mouseEvent.originalEvent.stopPropagation();
     mouseEvent.originalEvent.stopImmediatePropagation();
@@ -57,8 +56,4 @@ function handleTouchStartInGallery(event: TouchEvent): void {
     return;
   }
   event.preventDefault();
-}
-
-function galleryEnabled(): boolean {
-  return (ON_FAVORITES_PAGE && Preferences.gallery.mobileEnabled.value) || ON_POST_LIST_PAGE;
 }

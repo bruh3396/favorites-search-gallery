@@ -1,7 +1,7 @@
-import { FeatureNamespace, HighlightStyle, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
+import { ActionBarButton, ActionBarMode } from "@/lib/thumb/action_bar";
+import { FeatureNamespace, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Rating, SortKey } from "@/types/search";
-import { ActionBarMode } from "@/lib/thumb/action_bar";
 import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
@@ -12,7 +12,7 @@ export const Preferences = {
     performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", ON_MOBILE_DEVICE ? "medium" : "normal"),
     gradient: new Preference("appGradient", false),
     theme: new Preference<Theme>("appTheme", "native"),
-    darkMode: new Preference<boolean>("appDarkMode", readCookie("theme", "") === "dark"),
+    darkMode: new Preference<boolean>("appDarkMode", readCookie("theme") === "dark"),
     fadeThumbs: new Preference<boolean>("appFadeThumbs", true),
     nativeFont: new Preference<boolean>("appNativeFont", true)
   },
@@ -20,7 +20,7 @@ export const Preferences = {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
     columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 2 : 5),
     postActionBar: new Preference<ActionBarMode>("favoritesPostActionBar", ON_MOBILE_DEVICE ? "off" : "hover"),
-    postActionBarButtons: new Preference("favoritesPostActionBarButtons", 1),
+    postActionBarButtons: new Preference("favoritesPostActionBarButtons", ON_DESKTOP_DEVICE ? ActionBarButton.Favorite : ActionBarButton.Favorite | ActionBarButton.Open),
     downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
     drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
@@ -30,7 +30,6 @@ export const Preferences = {
     hintsEnabled: new Preference("favoritesHintsEnabled", ON_DESKTOP_DEVICE),
     infiniteScroll: new Preference("favoritesInfiniteScroll", ON_MOBILE_DEVICE),
     layout: new Preference<Layout>("favoritesLayout", "column"),
-    newFavoriteHighlight: new Preference<HighlightStyle>("favoritesNewFavoriteHighlight", "border"),
     deletingAllowed: new Preference("favoritesDeletingAllowed", false),
     resultsPerPage: new Preference("favoritesResultsPerPage", 100),
     rowHeight: new Preference("favoritesRowHeight", 7),
@@ -63,12 +62,10 @@ export const Preferences = {
     enabled: new Preference("postListEnabled", false),
     columnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
     favoriteIndicator: new Preference("postListFavoriteIndicator", false),
-    favoriteIndicatorStyle: new Preference<HighlightStyle>("postListFavoriteIndicatorStyle", "border"),
-    galleryFavoriteStyle: new Preference<HighlightStyle>("postListGalleryFavoriteStyle", "border"),
     layout: new Preference<Layout>("postListLayout", "column"),
     infiniteScroll: new Preference("postListInfiniteScroll", false),
-    postActionBar: new Preference<ActionBarMode>("postListPostActionBar", ON_MOBILE_DEVICE ? "off" : "hover"),
-    postActionBarButtons: new Preference("postListPostActionBarButtons", 3),
+    postActionBar: new Preference<ActionBarMode>("postListPostActionBar", ON_MOBILE_DEVICE ? "always" : "hover"),
+    postActionBarButtons: new Preference("postListPostActionBarButtons", ActionBarButton.Favorite),
     rowHeight: new Preference("postListRowHeight", 7),
     settingsCollapsed: new Preference("postListSettingsCollapsed", false),
     tooltipEnabled: new Preference("postListTooltipEnabled", false),

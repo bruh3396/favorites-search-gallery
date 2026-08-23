@@ -1,6 +1,6 @@
-import { FavoritesConfig } from "@/config/favorites_config";
+﻿import { FavoritesConfig } from "@/config/favorites_config";
 
-class EdgeObserver {
+class FavoritesEdgeObserver {
   private readonly onEdgeReached: () => Promise<boolean>;
   private readonly getSentinels: () => HTMLElement[];
   private readonly intersectionObserver: IntersectionObserver;
@@ -37,13 +37,13 @@ class EdgeObserver {
   }
 }
 
-export class BottomEdgeObserver extends EdgeObserver {
+export class FavoritesBottomEdgeObserver extends FavoritesEdgeObserver {
   constructor(onEdgeReached: () => Promise<boolean>, getSentinels: () => HTMLElement[]) {
     super(`0% 0% ${FavoritesConfig.infiniteScrollMargin} 0%`, onEdgeReached, getSentinels);
   }
 }
 
-export class TopEdgeObserver extends EdgeObserver {
+export class FavoritesTopEdgeObserver extends FavoritesEdgeObserver {
   constructor(onEdgeReached: () => Promise<boolean>, getSentinels: () => HTMLElement[]) {
     super(`${FavoritesConfig.infiniteScrollMargin} 0% 0% 0%`, onEdgeReached, getSentinels);
   }

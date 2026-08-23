@@ -1,17 +1,32 @@
-import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/remote/rule34/favorites/thumb_actions";
+import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/thumb/favorite_actions";
+import { camelToKebabCase, capitalize } from "@/utils/pure/string";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ClickCode } from "@/types/input";
-import { ITEM_SELECTOR } from "@/lib/thumb/thumbs";
+import { ITEM_SELECTOR } from "@/lib/thumb/selectors";
 import { Svg } from "@/assets/svg";
 import { ThumbConfig } from "@/config/thumb_config";
-import { camelToKebabCase } from "@/utils/pure/string";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
+import { openPost } from "@/lib/remote/rule34/posts/navigation";
 
-export type ActionBarAction = "favorite" | "download";
+export type ActionBarAction = "favorite" | "download" | "open";
 
 export enum ActionBarButton {
   Favorite = 1,
-  Download = 2
+  Download = 2,
+  Open = 4
+}
+
+interface ActionBarButtonSpec {
+  bit: ActionBarButton;
+  action: ActionBarAction;
+  icon: string;
+  run: (context: ActionContext) => void;
+}
+
+interface ActionContext {
+  bar: HTMLElement;
+  thumb: HTMLElement;
+  callbacks: ActionBarCallbacks;
 }
 
 export type ActionBarMode = "off" | "hover" | "always";
@@ -34,14 +49,23 @@ export const ActionBarSelectors = {
 export const ActionBarDataset = {
   mode: "postActionBarMode",
   style: "postActionBarStyle",
-  favoriteVisible: "postActionBarFavoriteVisible",
-  downloadVisible: "postActionBarDownloadVisible",
   isFavorite: "isFavorite"
 } as const;
 
+const ACTION_BAR_BUTTONS: ActionBarButtonSpec[] = [
+  { bit: ActionBarButton.Open, action: "open", icon: Svg.externalLink, run: ({ thumb }) => openPost(thumb.id) },
+  { bit: ActionBarButton.Download, action: "download", icon: Svg.download, run: ({ thumb }) => downloadFromThumb(thumb) },
+  { bit: ActionBarButton.Favorite, action: "favorite", icon: `<span class="${ActionBarSelectors.heartEmpty}">${Svg.heart}</span><span class="${ActionBarSelectors.heartFilled}">${Svg.heartFilled}</span>`, run: toggleFavorite }
+];
+
+function visibleDataset(action: ActionBarAction): string {
+  return `postActionBar${capitalize(action)}Visible`;
+}
+
 export function actionBarHtml(isFavorite: boolean): string {
   const favoriteState = isFavorite ? ` data-${camelToKebabCase(ActionBarDataset.isFavorite)}` : "";
-  return `<div class="${ActionBarSelectors.bar}"${favoriteState}><span class="${ActionBarSelectors.id}"></span>${downloadButton()}${favoriteButton()}</div>`;
+  const buttons = ACTION_BAR_BUTTONS.map((spec) => actionButton(spec.action, spec.icon)).join("");
+  return `<div class="${ActionBarSelectors.bar}"${favoriteState}><span class="${ActionBarSelectors.id}"></span>${buttons}</div>`;
 }
 
 export function handleActionBarClick(event: MouseEvent | TouchEvent, callbacks: ActionBarCallbacks): void {
@@ -64,8 +88,9 @@ export function setActionBarMode(mode: ActionBarMode): void {
 }
 
 export function setActionBarButtons(buttons: number): void {
-  toggleDataset(document.documentElement, ActionBarDataset.favoriteVisible, (buttons & ActionBarButton.Favorite) === ActionBarButton.Favorite);
-  toggleDataset(document.documentElement, ActionBarDataset.downloadVisible, (buttons & ActionBarButton.Download) === ActionBarButton.Download);
+  for (const spec of ACTION_BAR_BUTTONS) {
+    toggleDataset(document.documentElement, visibleDataset(spec.action), (buttons & spec.bit) === spec.bit);
+  }
 }
 
 export function stampActionBarId(item: HTMLElement): void {
@@ -82,14 +107,6 @@ export function markActionBarFavorited(id: string): void {
 
 export function markActionBarUnfavorited(id: string): void {
   syncActionBarFavorite(id, false);
-}
-
-function favoriteButton(): string {
-  return actionButton("favorite", `<span class="${ActionBarSelectors.heartEmpty}">${Svg.heart}</span><span class="${ActionBarSelectors.heartFilled}">${Svg.heartFilled}</span>`);
-}
-
-function downloadButton(): string {
-  return actionButton("download", Svg.download);
 }
 
 function actionButton(action: ActionBarAction, innerHTML: string): string {
@@ -115,20 +132,15 @@ function closestActionButton(target: EventTarget | null): HTMLElement | null {
 function dispatch(button: HTMLElement, callbacks: ActionBarCallbacks): void {
   const bar = button.closest(`.${ActionBarSelectors.bar}`);
   const thumb = button.closest(ITEM_SELECTOR);
-  const action = button.dataset.action as ActionBarAction;
+  const spec = ACTION_BAR_BUTTONS.find((candidate) => candidate.action === button.dataset.action);
 
-  if (!(bar instanceof HTMLElement) || !(thumb instanceof HTMLElement)) {
+  if (spec === undefined || !(bar instanceof HTMLElement) || !(thumb instanceof HTMLElement)) {
     return;
   }
-
-  if (action === "download") {
-    downloadFromThumb(thumb);
-  } else if (action === "favorite") {
-    toggleFavorite(bar, thumb, callbacks);
-  }
+  spec.run({ bar, thumb, callbacks });
 }
 
-function toggleFavorite(bar: HTMLElement, thumb: HTMLElement, callbacks: ActionBarCallbacks): void {
+function toggleFavorite({ bar, thumb, callbacks }: ActionContext): void {
   const wasFavorite = bar.dataset[ActionBarDataset.isFavorite] !== undefined;
 
   if (wasFavorite) {

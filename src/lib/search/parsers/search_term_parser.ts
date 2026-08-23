@@ -2,7 +2,7 @@ import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
 import { MetadataSearchExpression } from "@/lib/search/parsers/metadata_search_expression";
 import { MetadataSearchTerm } from "@/lib/search/terms/metadata_search_term";
-import { WildcardMatchType } from "@/lib/search/types/search_types";
+import { WildcardMatchType } from "@/lib/search/wildcard_match_type";
 import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { escapeParentheses } from "@/utils/pure/string";
 

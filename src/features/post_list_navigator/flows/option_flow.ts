@@ -23,6 +23,5 @@ export function toggleInfiniteScroll(value: boolean): void {
 }
 
 export function toggleFavoriteIndicator(enabled: boolean): Promise<void> {
-  PostListNavigatorView.setFavoriteIndicatorSubOptionsVisible(enabled);
   return PostListNavigatorFavoritesMarkerFlow.toggleIndicator(enabled);
 }

@@ -7,9 +7,9 @@ export const GalleryConfig = {
     return ON_MOBILE_DEVICE || USING_FIREFOX ? "1920x1080" : ON_POST_LIST_PAGE ? "3840x2160" : "7680x4320";
   },
 
-  imageMegabyteLimit: ON_MOBILE_DEVICE ? 0 : 700,
-  postListCachedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_POST_LIST_PAGE,
-  minimumCachedImageCount: ON_MOBILE_DEVICE ? 3 : 5,
+  imageMegabyteLimit: 700,
+  cachedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_POST_LIST_PAGE,
+  minimumCachedImageCount: 5,
   preloadedVideoCount: ON_MOBILE_DEVICE ? 0 : 2,
   preloadedGifCount: ON_MOBILE_DEVICE ? 0 : 2,
   maxVisibleThumbsBeforeStoppingPreload: 175,

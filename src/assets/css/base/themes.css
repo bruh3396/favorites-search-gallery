@@ -8,12 +8,8 @@ body {
   color: var(--theme-text);
 }
 
-.sidebar {
-  background-color: var(--theme-sunken);
-}
-
-#navbar, #header, #site-title {
-  background-color: var(--theme-gradient) !important;
+#header, #site-title, #navbar, #subnavbar {
+  background-color: var(--theme-surface) !important;
 }
 
 #header * {

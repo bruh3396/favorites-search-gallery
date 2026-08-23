@@ -1,6 +1,6 @@
 import * as PostListNavigatorModel from "@/features/post_list_navigator/model/post_list_navigator_model";
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/post_list_navigator_view";
-import { FeatureBridge, galleryOpened } from "@/app/channels/feature_bridge";
+import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { Preferences } from "@/app/context/preferences";
 
 export async function toggleIndicator(enabled: boolean): Promise<void> {
@@ -25,9 +25,5 @@ export function registerFavorite(id: string): void {
 
   if (Preferences.postList.favoriteIndicator.value) {
     PostListNavigatorView.markAsFavoriteById(id);
-  }
-
-  if (galleryOpened()) {
-    PostListNavigatorView.applyGalleryFavoriteStyle(FeatureBridge.gallery.currentThumb.call());
   }
 }

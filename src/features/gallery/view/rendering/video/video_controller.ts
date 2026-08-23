@@ -1,5 +1,5 @@
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { isVideoThumb, toMediaItem } from "@/lib/thumb/item";
+import { isVideoThumb, toMediaItem } from "@/lib/thumb/media_item";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";

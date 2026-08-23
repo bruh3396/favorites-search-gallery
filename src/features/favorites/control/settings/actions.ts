@@ -2,7 +2,7 @@ import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
-import { SettingsSections } from "@/features/favorites/control/settings/sections";
+import { SettingsSections } from "@/features/favorites/control/settings/menu";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { allSectionsCollapsed } from "@/features/favorites/control/settings/helpers";
 import { createElement } from "@/utils/browser/element";

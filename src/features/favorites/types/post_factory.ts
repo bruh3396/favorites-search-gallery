@@ -1,4 +1,5 @@
-import { getImageFromThumb, parseIdFromThumb } from "@/lib/thumb/thumbs";
+import { getImageFromThumb } from "@/lib/thumb/query";
+import { parseIdFromThumb } from "@/lib/thumb/post_id";
 import { Post } from "@/types/api";
 import { SerializedFavorite } from "@/types/favorite";
 import { chain } from "@/utils/pure/function";

@@ -3,7 +3,6 @@ import * as GalleryFavoriterFlow from "@/features/gallery/flows/favoriter_flow";
 import * as GalleryModel from "@/features/gallery/model/gallery_model";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import { GalleryMenuAction } from "@/types/app";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 
 const menuHandlers: Partial<Record<GalleryMenuAction, () => void>> = {
@@ -23,9 +22,9 @@ export function handleAction(action: GalleryMenuAction): void {
 }
 
 function togglePin(): void {
-  Preferences.gallery.menuPinned.set(ON_MOBILE_DEVICE || !Preferences.gallery.menuPinned.value);
+  Preferences.gallery.menuPinned.set(!Preferences.gallery.menuPinned.value);
 }
 
 function toggleDockPosition(): void {
-  Preferences.gallery.menuDockedLeft.set(!ON_MOBILE_DEVICE && !Preferences.gallery.menuDockedLeft.value);
+  Preferences.gallery.menuDockedLeft.set(!Preferences.gallery.menuDockedLeft.value);
 }

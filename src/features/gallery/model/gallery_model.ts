@@ -1,13 +1,13 @@
 import * as GalleryState from "@/features/gallery/model/state";
 import * as Navigator from "@/lib/remote/rule34/posts/navigation";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/remote/rule34/favorites/thumb_actions";
+import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/thumb/favorite_actions";
 import { Boundary } from "@/types/boundary";
 import { Carousel } from "@/lib/collection/carousel";
 import { GalleryItemWindow } from "@/features/gallery/model/item_window";
 import { NavigationKey } from "@/types/input";
 import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
-import { isVideoThumb } from "@/lib/thumb/item";
+import { isVideoThumb } from "@/lib/thumb/media_item";
 import { navigationDelta } from "@/utils/pure/number";
 
 const cursor = new Carousel<HTMLElement>();

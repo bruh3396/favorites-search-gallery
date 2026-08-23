@@ -9,16 +9,16 @@ import * as FavoritesStatus from "@/features/favorites/view/status/status";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { FavoritesViewDependencies } from "@/features/favorites/types/types";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { buildFavoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { doNothing } from "@/utils/pure/function";
-import { scrollToTop } from "@/lib/thumb/thumbs";
 
 let onContentReplaced: () => void = doNothing;
 let onContentAdded: (favorites: Favorite[]) => void = doNothing;
 
 export function showSearchResults(searchResults: Favorite[], options: ContentDisplayOptions = { fade: true }): void {
   ContentTiler.tile(searchResults.map((result) => result.root), options);
-  scrollToTop();
+  window.scrollTo(0, ON_MOBILE_DEVICE ? 10 : 0);
   onContentReplaced();
 }
 

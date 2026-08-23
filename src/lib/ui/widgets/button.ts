@@ -1,5 +1,5 @@
 import { IconName, icon } from "@/lib/ui/icon";
-import { Emitter } from "@/lib/events/emitter";
+import { Emitter } from "@/lib/messaging/emitter";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/browser/element";

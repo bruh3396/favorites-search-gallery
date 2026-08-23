@@ -12,8 +12,22 @@
   flex: 1;
 }
 
-div.sidebar {
+.sidebar {
   max-width: 220px !important;
+  background-color: transparent;
+}
+
+input:checked + .slider {
+    background-color: var(--theme-accent) !important;
+}
+
+#paginator a:link, #paginator a:visited, #paginator a:hover, #paginator a:active {
+    color: var(--theme-link);
+    text-decoration: none;
+}
+
+input[type=submit], input[type=button], button {
+  /* background-color: var(--theme-accent); */
 }
 
 .search-menu-option {

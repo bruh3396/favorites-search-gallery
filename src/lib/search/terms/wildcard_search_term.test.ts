@@ -1,4 +1,4 @@
-import { createSearchable, fruits, getAllSubstrings, getPrefixes, searchableEmptyDoc, searchableFruitDoc } from "@/lib/search/fixtures/fruit_search_fixture";
+import { createSearchable, fruits, getAllSubstrings, getPrefixes, searchableEmptyDoc, searchableFruitDoc } from "@/lib/search/fruit_search_fixture";
 import { describe, expect, test } from "vitest";
 import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 

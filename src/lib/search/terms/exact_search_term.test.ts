@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { searchableEmptyDoc, searchableFruitDoc } from "@/lib/search/fixtures/fruit_search_fixture";
+import { searchableEmptyDoc, searchableFruitDoc } from "@/lib/search/fruit_search_fixture";
 import { parseExactSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 const positiveCases = [

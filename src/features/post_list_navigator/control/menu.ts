@@ -1,4 +1,5 @@
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { PostListSettingsCatalog } from "@/features/post_list_navigator/control/catalog";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
@@ -11,7 +12,7 @@ interface SettingsSection {
   controls: SettingsControl[];
 }
 
-const sections: SettingsSection[] = [
+const DesktopSettingsSections: SettingsSection[] = [
   {
     title: "Favorites Search Gallery",
     controls: [
@@ -26,12 +27,26 @@ const sections: SettingsSection[] = [
       PostListSettingsCatalog.layout,
       PostListSettingsCatalog.columnCount,
       PostListSettingsCatalog.rowHeight,
-      PostListSettingsCatalog.favoriteIndicatorStyle,
-      PostListSettingsCatalog.galleryFavoriteStyle,
       PostListSettingsCatalog.performanceProfile
     ]
   }
 ];
+const MobileSettingsSections: SettingsSection[] = [
+  {
+    title: "Favorites Search Gallery",
+    controls: [
+      PostListSettingsCatalog.favoriteIndicator,
+      PostListSettingsCatalog.mobileGallery,
+      PostListSettingsCatalog.infiniteScroll,
+      PostListSettingsCatalog.layout,
+      PostListSettingsCatalog.columnCount,
+      PostListSettingsCatalog.postActionBarToggle,
+      PostListSettingsCatalog.postActionBarButtons,
+      PostListSettingsCatalog.autoplay
+    ]
+  }
+];
+const sections: SettingsSection[] = ON_DESKTOP_DEVICE ? DesktopSettingsSections : MobileSettingsSections;
 
 export function build(panel: HTMLElement): void {
   panel.classList.add(SettingsClass.view);

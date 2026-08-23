@@ -1,5 +1,5 @@
 import { FavoritesConfig } from "@/config/favorites_config";
-import { ITEM_CLASS_NAME } from "@/lib/thumb/thumbs";
+import { ITEM_CLASS_NAME } from "@/lib/thumb/selectors";
 
 export class PageBottomObserver {
   private intersectionObserver: IntersectionObserver;

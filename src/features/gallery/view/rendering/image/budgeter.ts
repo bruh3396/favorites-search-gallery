@@ -1,6 +1,6 @@
+import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
 
 type BudgetedRequests = {
   accepted: ImageRequest[];
@@ -22,7 +22,7 @@ function megabytes(request: ImageRequest): number {
 }
 
 function partitionByLimit(requests: ImageRequest[]): BudgetedRequests {
-  return ON_FAVORITES_PAGE ? partitionByMemory(requests) : partitionByCount(requests);
+  return ON_FAVORITES_PAGE && !ON_MOBILE_DEVICE ? partitionByMemory(requests) : partitionByCount(requests);
 }
 
 function partitionByMemory(requests: ImageRequest[]): BudgetedRequests {
@@ -43,6 +43,6 @@ function partitionByMemory(requests: ImageRequest[]): BudgetedRequests {
 }
 
 function partitionByCount(requests: ImageRequest[]): BudgetedRequests {
-  const cutoff = GalleryConfig.postListCachedImageCount;
+  const cutoff = GalleryConfig.cachedImageCount;
   return { accepted: requests.slice(0, cutoff), rejected: requests.slice(cutoff) };
 }

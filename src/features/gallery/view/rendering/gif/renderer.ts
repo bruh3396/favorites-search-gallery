@@ -3,7 +3,7 @@ import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/pure/function";
 import { gifUrl } from "@/lib/media/url";
 import { isGif } from "@/lib/media/type";
-import { toMediaItem } from "@/lib/thumb/item";
+import { toMediaItem } from "@/lib/thumb/media_item";
 
 const root = document.createElement("div");
 const gif = document.createElement("img");

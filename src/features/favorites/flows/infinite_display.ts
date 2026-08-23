@@ -1,15 +1,15 @@
-import * as ContentTiler from "@/app/layout/content_tiler";
+﻿import * as ContentTiler from "@/app/layout/content_tiler";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import { BottomEdgeObserver } from "@/features/favorites/flows/edge_observer";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
+import { FavoritesBottomEdgeObserver } from "@/features/favorites/flows/edge_observer";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { ScrollSentinelBottom } from "@/app/layout/shell";
 import { doNothing } from "@/utils/pure/function";
 import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 
-const bottomObserver = new BottomEdgeObserver(extendBelow, () => [...ContentTiler.bottomEdgeElements(), ScrollSentinelBottom]);
+const bottomObserver = new FavoritesBottomEdgeObserver(extendBelow, () => [...ContentTiler.bottomEdgeElements(), ScrollSentinelBottom]);
 let favorites: Favorite[] = [];
 let displayedCount = 0;
 

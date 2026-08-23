@@ -1,5 +1,5 @@
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
-import { getImageFromThumb } from "@/lib/thumb/thumbs";
+import { getImageFromThumb } from "@/lib/thumb/query";
 import { toSortedTagSet } from "@/utils/pure/tag";
 
 let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;

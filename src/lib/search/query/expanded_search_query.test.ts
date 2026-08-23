@@ -1,4 +1,4 @@
-import { Fruit, index } from "@/lib/search/fixtures/fruit_search_fixture";
+import { Fruit, index } from "@/lib/search/fruit_search_fixture";
 import { describe, expect, test } from "vitest";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExpandedSearchQuery } from "@/lib/search/query/expanded_search_query";

@@ -1,6 +1,6 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { Searchable } from "@/types/search";
-import { WildcardMatchType } from "@/lib/search/types/search_types";
+import { WildcardMatchType } from "@/lib/search/wildcard_match_type";
 
 export class WildcardSearchTerm extends AbstractSearchTerm {
   protected override readonly baseCost: number;

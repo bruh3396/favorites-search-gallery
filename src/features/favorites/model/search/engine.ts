@@ -2,7 +2,7 @@ import { idle, macroTask, queueMacroTask } from "@/lib/async/scheduling";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { InvertedIndex } from "@/lib/collection/inverted_index";
-import { InvertedIndexSearcher } from "@/lib/search/index/inverted_index_searcher";
+import { InvertedIndexSearcher } from "@/lib/search/inverted_index_searcher";
 import { SearchQuery } from "@/lib/search/query/search_query";
 import { hasMetadataTerm } from "@/lib/search/parsers/search_term_parser";
 

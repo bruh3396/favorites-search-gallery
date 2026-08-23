@@ -2,10 +2,10 @@ import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
+import BADGE_CSS from "@/assets/css/base/badge.css";
 import { Content } from "@/app/layout/shell";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
-import HIGHLIGHT_CSS from "@/assets/css/base/highlight.css";
 import MOBILE_CSS from "@/assets/css/base/mobile.css";
 import POST_ACTION_BAR_CSS from "@/assets/css/base/post_action_bar.css";
 import POST_CSS from "@/assets/css/base/post.css";
@@ -35,6 +35,7 @@ export function setupStyles(): void {
 
 function insertBaseStyles(): void {
   const fadeInCss = Preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
+  const mobileCss = ON_MOBILE_DEVICE ? MOBILE_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
@@ -45,12 +46,12 @@ function insertBaseStyles(): void {
     POST_CSS +
     POST_ACTION_BAR_CSS +
     TILE_CSS +
-    HIGHLIGHT_CSS +
+    BADGE_CSS +
     TOOLTIP_CSS +
     THEMES_CSS +
     themeStyles() +
     THUMB_LOADING_CSS +
-    MOBILE_CSS +
+    mobileCss +
     fadeInCss);
 }
 

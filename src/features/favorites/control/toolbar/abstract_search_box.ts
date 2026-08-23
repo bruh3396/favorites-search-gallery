@@ -1,6 +1,6 @@
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { SearchHistory } from "@/lib/storage/search_history";
+import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { toggleDataset } from "@/utils/browser/dataset";

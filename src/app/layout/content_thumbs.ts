@@ -1,4 +1,6 @@
-import { COLUMN_SELECTOR, ITEM_SELECTOR, getItemsInContainer, getThumbsInMatrix, waitForThumbsToLoadInContainer } from "@/lib/thumb/thumbs";
+import { COLUMN_SELECTOR, ITEM_SELECTOR } from "@/lib/thumb/selectors";
+import { getItemsInContainer, getThumbsInMatrix } from "@/lib/thumb/query";
+import { waitForThumbsToLoadInContainer } from "@/lib/thumb/loading";
 import { Content } from "@/app/layout/shell";
 import { preloadImage } from "@/utils/browser/image";
 import { sleep } from "@/lib/async/scheduling";

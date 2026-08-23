@@ -2,7 +2,7 @@ import { toSortedTagSet, toSortedTagString } from "@/utils/pure/tag";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
 
-export function tagsNeedCorrection(favorite: Favorite, post: Post): boolean {
+export function correctTagsIfInvalid(favorite: Favorite, post: Post): boolean {
   const validTags = correctTags(post);
   const difference = favorite.tags.symmetricDifference(validTags);
   const isEqual = difference.size === 0 || (difference.size === 1 && difference.has(post.id));

@@ -2,7 +2,7 @@ import { nextSeededIntInRange, randomBoolean, randomFloatInRange, randomIntInRan
 import { Dimensions2D } from "@/types/geometry";
 import { Layout } from "@/types/app";
 import { SkeletonConfig } from "@/config/skeleton_config";
-import { TILE_CLASS_NAME } from "@/lib/thumb/thumbs";
+import { TILE_CLASS_NAME } from "@/lib/thumb/selectors";
 import { toDimensions2D } from "@/utils/pure/geometry";
 
 export class FavoritesSkeletonItem {

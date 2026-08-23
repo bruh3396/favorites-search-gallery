@@ -2,7 +2,7 @@ import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { clamp, toSeconds } from "@/utils/pure/number";
-import { isImageThumb, isVideoThumb } from "@/lib/thumb/item";
+import { isImageThumb, isVideoThumb } from "@/lib/thumb/media_item";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
 import { EnhancedKeyboardEvent } from "@/lib/input";

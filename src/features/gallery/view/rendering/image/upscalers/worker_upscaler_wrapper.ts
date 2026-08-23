@@ -4,7 +4,7 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler?raw";
 import { replaceCanvas } from "@/utils/browser/canvas";
 import { resolveImageUrl } from "@/lib/media/resolver";
-import { toMediaItem } from "@/lib/thumb/item";
+import { toMediaItem } from "@/lib/thumb/media_item";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   protected readonly requiresBitmap: boolean = false;

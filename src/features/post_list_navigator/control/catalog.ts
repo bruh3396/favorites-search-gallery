@@ -1,11 +1,12 @@
 import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, PERFORMANCE_PROFILE, TOOLTIP_ENABLED } from "@/app/context/flags";
-import { HighlightStyle, Layout, PerformanceProfile } from "@/types/app";
+import { Layout, PerformanceProfile } from "@/types/app";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
+import { booleanPreference } from "@/lib/storage/preference";
 import { reloadWindow } from "@/utils/browser/window";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
@@ -48,7 +49,7 @@ export const PostListSettingsCatalog = {
   favoriteIndicator: toggle({
     id: "favorite-indicator",
     label: "Favorite Indicator",
-    tooltip: "Mark thumbs you've already favorited",
+    tooltip: "Mark thumbs already favorited",
     preference: Preferences.postList.favoriteIndicator
   }),
   postActionBar: segmented<ActionBarMode>({
@@ -74,8 +75,17 @@ export const PostListSettingsCatalog = {
     requireSelection: true,
     options: new Map<ActionBarButton, string>([
       [ActionBarButton.Favorite, "Favorite"],
-      [ActionBarButton.Download, "Download"]
+      [ActionBarButton.Download, "Download"],
+      [ActionBarButton.Open, "Open"]
     ])
+  }),
+  postActionBarToggle: toggle({
+    id: "post-action-bar-toggle",
+    label: "Show Actions",
+    tooltip: "Show actions on thumbnails",
+    preference: booleanPreference<ActionBarMode>(Preferences.postList.postActionBar, "always", "off"),
+    applyOnBuild: true,
+    apply: (on) => setActionBarMode(on ? "always" : "off")
   }),
   layout: dropdown<Layout>({
     id: "layout-select",
@@ -85,7 +95,7 @@ export const PostListSettingsCatalog = {
     options: new Map<Layout, string>([
       ["native", "Native"],
       ["column", "Waterfall"],
-      ["row", "River"],
+      ...(ON_MOBILE_DEVICE ? [] : [["row", "River"] as [Layout, string]]),
       ["square", "Square"],
       ["grid", "Grid"]
     ])
@@ -110,33 +120,6 @@ export const PostListSettingsCatalog = {
     step: 1,
     enabledWhen: whenLayoutIs((layout) => layout === "row")
   }),
-  favoriteIndicatorStyle: dropdown<HighlightStyle>({
-    id: "favorite-indicator-style",
-    label: "Favorites",
-    tooltip: "Highlight style for favorited thumbs",
-    preference: Preferences.postList.favoriteIndicatorStyle,
-    enabledWhen: whenFavoriteIndicatorEnabled(),
-    options: new Map<HighlightStyle, string>([
-      ["border", "Border"],
-      ["glow", "Glow"],
-      ["trace", "Trace"],
-      ["hidden", "Hidden"],
-      ["none", "None"]
-    ])
-  }),
-  galleryFavoriteStyle: dropdown<HighlightStyle>({
-    id: "gallery-favorite-style",
-    label: "Gallery Favorites",
-    tooltip: "Highlight style for favorited thumbs in the gallery",
-    preference: Preferences.postList.galleryFavoriteStyle,
-    enabledWhen: whenFavoriteIndicatorEnabled(),
-    options: new Map<HighlightStyle, string>([
-      ["border", "Border"],
-      ["glow", "Glow"],
-      ["trace", "Trace"],
-      ["none", "None"]
-    ])
-  }),
   performanceProfile: dropdown<PerformanceProfile>({
     id: "performance-profile",
     label: "Performance",
@@ -150,13 +133,15 @@ export const PostListSettingsCatalog = {
       ["low", "Low"],
       ["potato", "Potato"]
     ])
+  }),
+  mobileGallery: toggle({
+    id: "enable-mobile-gallery",
+    label: "Gallery",
+    enabled: GALLERY_ENABLED,
+    preference: Preferences.gallery.mobileEnabled
   })
 };
 
 function whenLayoutIs(predicate: (layout: Layout) => boolean): EnableRule {
   return enableWhen(Preferences.postList.layout, predicate);
-}
-
-function whenFavoriteIndicatorEnabled(): EnableRule {
-  return enableWhen(Preferences.postList.favoriteIndicator, (on) => on);
 }

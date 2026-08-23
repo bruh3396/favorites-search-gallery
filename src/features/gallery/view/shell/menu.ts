@@ -1,11 +1,11 @@
 import * as Icons from "@/assets/icons";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { EnhancedMouseEvent } from "@/lib/input";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryMenuAction } from "@/types/app";
 import { GalleryMenuButton } from "@/features/gallery/types/gallery_types";
 import { GalleryRoot } from "@/features/gallery/view/shell/shell";
 import { GeneralConfig } from "@/config/general_config";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
 import { insertStyle } from "@/utils/browser/injector";
@@ -14,16 +14,16 @@ import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 const buttons: GalleryMenuButton[] = [
   { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, tooltip: "Exit (Escape, Right-Click, G)", color: "red" },
-  { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: true, tooltip: "Toggle Fullscreen (F)", color: "#0075FF" },
+  { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: ON_DESKTOP_DEVICE, tooltip: "Toggle Fullscreen (F)", color: "#0075FF" },
   { id: "open-in-new-gallery", icon: Icons.OPEN_IN_NEW, action: "openPost", enabled: true, tooltip: "Open Post (Middle-Click, W)", color: "lightgreen" },
   { id: "open-image-gallery", icon: Icons.IMAGE, action: "openOriginal", enabled: true, tooltip: "Open Original (Ctrl + Left-Click, Q)", color: "magenta" },
   { id: "download-gallery", icon: Icons.DOWNLOAD, action: "download", enabled: true, tooltip: "Download (S)", color: "lightskyblue" },
   { id: "add-favorite-gallery", icon: Icons.HEART_PLUS, action: "addFavorite", enabled: true, tooltip: "Add Favorite (E)", color: "hotpink" },
   { id: "remove-favorite-gallery", icon: Icons.HEART_MINUS, action: "removeFavorite", enabled: false, tooltip: "Remove Favorite (X)", color: "red" },
   { id: "dock-gallery", icon: Icons.DOCK, action: "toggleDockPosition", enabled: false, tooltip: "Change Position", color: "" },
-  { id: "toggle-background-gallery", icon: Icons.BULB, action: "toggleBackground", enabled: true, tooltip: "Toggle Background (B)", color: "gold" },
+  { id: "toggle-background-gallery", icon: Icons.BULB, action: "toggleBackground", enabled: ON_DESKTOP_DEVICE, tooltip: "Toggle Background (B)", color: "gold" },
   { id: "search-gallery", icon: Icons.SEARCH, action: "search", enabled: false, tooltip: "Search", color: "cyan" },
-  { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: true, tooltip: "Pin Menu", color: "#0075FF" }
+  { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: ON_DESKTOP_DEVICE, tooltip: "Pin Menu", color: "#0075FF" }
 ];
 
 const menu: HTMLElement = document.createElement("div");
@@ -34,7 +34,7 @@ menu.id = "gallery-menu";
 menu.className = "gallery-sub-menu";
 
 export function setup(onMenuAction: (action: GalleryMenuAction) => void): void {
-  if (!GeneralConfig.galleryMenuOptionEnabled) {
+  if (!GeneralConfig.galleryMenuOptionEnabled || ON_MOBILE_DEVICE) {
     return;
   }
   menuActionCallback = onMenuAction;
@@ -66,8 +66,8 @@ export function reveal(): void {
 }
 
 function loadPreferences(): void {
-  setDockedLeft(!ON_MOBILE_DEVICE && Preferences.gallery.menuDockedLeft.value);
-  setPinned(ON_MOBILE_DEVICE || Preferences.gallery.menuPinned.value);
+  setDockedLeft(Preferences.gallery.menuDockedLeft.value);
+  setPinned(Preferences.gallery.menuPinned.value);
   toggleGalleryMenuEnabled(Preferences.gallery.menuEnabled.value);
 }
 

@@ -14,7 +14,6 @@ export async function loadAllFavorites(firstPageFavorites: HTMLElement[] | undef
     await fetchAllFavorites(firstPageFavorites);
   }
   Events.favorites.favoritesLoaded.emit();
-  FavoritesView.collectAspectRatios();
 }
 
 async function hasStoredFavorites(): Promise<boolean> {

@@ -1,10 +1,10 @@
-export function readCookie(key: string, defaultValue: string): string {
-  const nameEquation = `${key}=`;
+export function readCookie(key: string, defaultValue: string = ""): string {
+  const equation = `${key}=`;
   const cookies = document.cookie.split(";").map(cookie => cookie.trimStart());
 
   for (const cookie of cookies) {
-    if (cookie.startsWith(nameEquation)) {
-      return cookie.substring(nameEquation.length, cookie.length);
+    if (cookie.startsWith(equation)) {
+      return cookie.substring(equation.length, cookie.length);
     }
   }
   return defaultValue;

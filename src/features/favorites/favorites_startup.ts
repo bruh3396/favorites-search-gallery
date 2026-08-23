@@ -99,7 +99,8 @@ function setupDownloader(): void {
     getSearchResults: FavoritesModel.getCurrentSearchResults,
     getTagCategory: tagName => FeatureBridge.postOverlay.tagCategory.call(tagName)
   });
-  Events.favorites.favoritesLoaded.on(FavoritesDownloader.enable);
+  Events.favorites.favoritesLoaded.on(FavoritesDownloader.enable, { once: true });
+  Events.favorites.favoritesLoaded.on(FavoritesView.collectAspectRatios, { once: true });
   Events.favorites.searchResultsUpdated.on(FavoritesDownloader.reRender);
   Preferences.favorites.downloadBatchSize.on(FavoritesDownloader.reRender);
   Preferences.favorites.downloadFilenameFormat.on(FavoritesDownloader.reRender);

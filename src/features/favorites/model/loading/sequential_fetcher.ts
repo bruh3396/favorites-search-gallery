@@ -5,7 +5,7 @@ import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page";
 import { fetchFavoritesPage } from "@/lib/remote/rule34/favorites/page";
-import { parseIdFromThumb } from "@/lib/thumb/thumbs";
+import { parseIdFromThumb } from "@/lib/thumb/post_id";
 
 export async function fetchNewFavorites(storedIds: Set<string>, firstPageFavorites?: HTMLElement[]): Promise<HTMLElement[]> {
   const allNewFavorites: HTMLElement[] = [];

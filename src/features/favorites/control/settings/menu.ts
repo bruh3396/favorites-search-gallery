@@ -64,7 +64,10 @@ const MobileSettingsSections: SettingsSection[] = [
   {
     title: "General",
     expanded: true,
-    controls: [FavoritesSettingsCatalog.enhanceSearchPages]
+    controls: [
+      FavoritesSettingsCatalog.enhanceSearchPages,
+      FavoritesSettingsCatalog.mobileGallery
+    ]
   },
   {
     title: "Thumbnails",
@@ -103,7 +106,6 @@ const MobileSettingsSections: SettingsSection[] = [
     title: "Gallery",
     controls: [
       FavoritesSettingsCatalog.autoplay,
-      FavoritesSettingsCatalog.galleryMenu,
       FavoritesSettingsCatalog.themedBackground
     ]
   }

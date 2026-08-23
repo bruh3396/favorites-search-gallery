@@ -1,4 +1,4 @@
-import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/thumb/thumbs";
+import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/thumb/selectors";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
 import { actionBarHtml } from "@/lib/thumb/action_bar";

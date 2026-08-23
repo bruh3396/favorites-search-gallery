@@ -2,7 +2,7 @@ import { AUTOCOMPLETE_SELECTOR, hideAwesomplete } from "@/lib/ui/autocomplete/aw
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
 import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
-import { addCustomTagsToAutocomplete } from "@/lib/search/tags/custom_tags";
+import { addCustomTagsToAutocomplete } from "@/lib/ui/autocomplete/custom_tags";
 import { fetchHtml } from "@/lib/remote/http/client";
 import { queueMacroTask } from "@/lib/async/scheduling";
 import { replaceTagInText } from "@/lib/ui/autocomplete/tag_replacer";

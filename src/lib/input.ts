@@ -1,5 +1,5 @@
 import { ClickCode, NavigationKey } from "@/types/input";
-import { getThumbUnderCursor, insideOfThumb } from "@/lib/thumb/thumbs";
+import { getThumbUnderCursor, insideOfThumb } from "@/lib/thumb/query";
 import { isHotkeyEvent } from "@/utils/browser/guards";
 
 export class EnhancedKeyboardEvent {

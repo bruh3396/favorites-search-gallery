@@ -1,11 +1,11 @@
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { SettingsControl, toggle as toggleControl } from "@/lib/ui/settings/controls";
+import { applyTheme, swapNativeStylesheet } from "@/lib/ui/theme/apply";
 import { Events } from "@/app/channels/events";
 import { Layout } from "@/types/app";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
-import { applyTheme } from "@/lib/ui/theme/apply";
 
 export function toggle(config: Partial<ToggleSetting>): SettingsControl {
   return toggleControl({ registerHotkey, ...config });
@@ -25,6 +25,11 @@ export function whenNotFullscreenOnHover(): EnableRule {
 
 export function applyCurrentTheme(): void {
   applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
+}
+
+export function applyDarkMode(dark: boolean): void {
+  applyCurrentTheme();
+  swapNativeStylesheet(dark);
 }
 
 export function isExpanded(section: SettingsSection): boolean {

@@ -1,0 +1,31 @@
+.post[data-new-badge],
+.post.is-favorite {
+  position: relative;
+}
+
+.post[data-new-badge]::after,
+.post.is-favorite::after {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 3;
+  pointer-events: none;
+  padding: 2px 5px;
+  border-radius: var(--size-radius, 4px);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.post[data-new-badge]::after {
+  content: "NEW";
+  background: var(--theme-accent);
+}
+
+.post.is-favorite::after {
+  content: "FAV";
+  background: #e0245e;
+}

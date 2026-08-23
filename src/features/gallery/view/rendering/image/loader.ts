@@ -4,7 +4,7 @@ import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fe
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { LowResolutionImageRequest } from "@/features/gallery/types/low_resolution_image_request";
 import { doNothing } from "@/utils/pure/function";
-import { isImageThumb } from "@/lib/thumb/item";
+import { isImageThumb } from "@/lib/thumb/media_item";
 export { get, completedRequests } from "@/features/gallery/view/rendering/image/cache";
 
 let onRequestCompleted: (request: ImageRequest) => void = doNothing;

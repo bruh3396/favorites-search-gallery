@@ -1,6 +1,6 @@
 import { buildPostListUrlFromQuery, buildPostPageUrl } from "@/lib/remote/url";
 import { resolveMediaUrl } from "@/lib/media/resolver";
-import { toMediaItem } from "@/lib/thumb/item";
+import { toMediaItem } from "@/lib/thumb/media_item";
 
 export function openPost(id: string): void {
   window.open(buildPostPageUrl(id), "_blank");

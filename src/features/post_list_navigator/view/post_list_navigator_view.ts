@@ -1,14 +1,14 @@
 import * as ContentTiler from "@/app/layout/content_tiler";
 import * as PostListNavigatorShell from "@/features/post_list_navigator/view/shell/shell";
 import { markAsFavorite, unmarkAsFavorite } from "@/features/post_list_navigator/dom_tweaks/favorite_indicator";
-import { ITEM_SELECTOR } from "@/lib/thumb/thumbs";
+import { ITEM_SELECTOR } from "@/lib/thumb/selectors";
 import { getAllPageThumbs } from "@/app/layout/content_thumbs";
 import { preparePostListThumbs } from "@/features/post_list_navigator/dom_tweaks/thumb_preparer";
 
 export { render as renderPostList } from "@/features/post_list_navigator/view/renderer";
 export { addToBottom as insertNewSearchResults } from "@/app/layout/content_tiler";
 export { setInfiniteScrollStyle } from "@/features/post_list_navigator/dom_tweaks/infinite_scroll_style";
-export { setFavoriteIndicatorLoading, markAsFavorite, markAsFavoriteById, unmarkAsFavorite, applyCurrentFavoriteStyle, applyGalleryFavoriteStyle, setFavoriteIndicatorSubOptionsVisible } from "@/features/post_list_navigator/dom_tweaks/favorite_indicator";
+export { setFavoriteIndicatorLoading, markAsFavorite, markAsFavoriteById, unmarkAsFavorite } from "@/features/post_list_navigator/dom_tweaks/favorite_indicator";
 
 export function setup(): void {
   ContentTiler.setup();

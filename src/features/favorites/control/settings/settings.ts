@@ -1,7 +1,7 @@
 import { collapseExpandButton, resetAllButton } from "@/features/favorites/control/settings/actions";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { SettingsClass } from "@/lib/ui/settings/classes";
-import { SettingsSections } from "@/features/favorites/control/settings/sections";
+import { SettingsSections } from "@/features/favorites/control/settings/menu";
 import { buildFilterInput } from "@/features/favorites/control/settings/filter";
 import { buildSections } from "@/features/favorites/control/settings/section_builder";
 import { createElement } from "@/utils/browser/element";

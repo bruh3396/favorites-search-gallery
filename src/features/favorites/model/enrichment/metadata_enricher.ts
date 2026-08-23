@@ -1,3 +1,4 @@
+import * as FavoritesTagCorrector from "@/features/favorites/model/enrichment/tag_corrector";
 import * as MediaResolver from "@/lib/media/resolver";
 import { fetchDeletedPost, fetchPost } from "@/lib/remote/api/post";
 import { ApiConfig } from "@/config/api_config";
@@ -5,7 +6,6 @@ import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
-import { tagsNeedCorrection } from "@/lib/search/tags/tag_corrector";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 let onFavoriteEnriched: (favorite: Favorite) => void = () => undefined;
@@ -48,7 +48,7 @@ function applyPost(favorite: FavoriteItem, post: Post): void {
   }
   onCategoriesResolved(post.tagCategories);
 
-  if (tagsNeedCorrection(favorite, post)) {
+  if (FavoritesTagCorrector.correctTagsIfInvalid(favorite, post)) {
     beforeTagsChanged(favorite);
     favorite.updateTags(post);
     afterTagsChanged(favorite);

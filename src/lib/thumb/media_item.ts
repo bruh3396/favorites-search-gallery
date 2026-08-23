@@ -1,6 +1,6 @@
 import { isGif, isImage, isVideo } from "@/lib/media/type";
 import { MediaItem } from "@/types/media";
-import { getImageFromThumb } from "@/lib/thumb/thumbs";
+import { getImageFromThumb } from "@/lib/thumb/query";
 import { getTagSetFromThumb } from "@/lib/thumb/tag";
 
 export function toMediaItem(thumb: HTMLElement): MediaItem {

@@ -2,7 +2,7 @@ import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
-import { getImageFromThumb } from "@/lib/thumb/thumbs";
+import { getImageFromThumb } from "@/lib/thumb/query";
 
 const observer = new IntersectionObserver(fadeInOnScreen, { root: null, threshold: 0 });
 const pending: Map<HTMLElement, () => void> = new Map();

@@ -28,7 +28,8 @@
 }
 
 :root:not([data-post-action-bar-favorite-visible]) .post-action-button[data-action="favorite"],
-:root:not([data-post-action-bar-download-visible]) .post-action-button[data-action="download"] {
+:root:not([data-post-action-bar-download-visible]) .post-action-button[data-action="download"],
+:root:not([data-post-action-bar-open-visible]) .post-action-button[data-action="open"] {
   display: none;
 }
 

@@ -1,6 +1,6 @@
 import { FeatureNamespace, GalleryState } from "@/types/app";
 import { Favorite } from "@/types/favorite";
-import { FeatureChannel } from "@/lib/events/feature_channel";
+import { FeatureChannel } from "@/lib/messaging/feature_channel";
 import { NavigationKey } from "@/types/input";
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
