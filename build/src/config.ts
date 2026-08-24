@@ -1,7 +1,6 @@
 import { BuildOptions } from "esbuild";
 import { buildDefine } from "./define";
 import { buildHeader } from "./header";
-import { minifyVendorPlugin } from "./minify_vendor_plugin";
 import { rawTsPlugin } from "./raw_ts_plugin";
 import { resolve } from "path";
 import { resolveScriptVersion } from "./version";
@@ -25,7 +24,7 @@ export const BUILD_OPTIONS: BuildOptions = {
     js: buildHeader(SCRIPT_VERSION)
   },
   define: buildDefine(SCRIPT_VERSION),
-  plugins: [rawTsPlugin, minifyVendorPlugin],
+  plugins: [rawTsPlugin],
   loader: {
     ".svg": "text",
     ".css": "text",
