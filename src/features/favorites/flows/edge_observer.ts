@@ -1,4 +1,4 @@
-﻿import { FavoritesConfig } from "@/config/favorites_config";
+import { FavoritesConfig } from "@/config/favorites_config";
 
 class FavoritesEdgeObserver {
   private readonly onEdgeReached: () => Promise<boolean>;

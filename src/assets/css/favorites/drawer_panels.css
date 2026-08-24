@@ -97,6 +97,13 @@ textarea {
   background-color: var(--theme-text-muted);
 }
 
+.favorites-drawer-placeholder {
+  padding-top: 4px;
+  text-align: center;
+  color: var(--theme-text-muted);
+  font-size: 13px;
+}
+
 .favorites-drawer-section {
   margin-bottom: 20px;
 }

@@ -8,10 +8,10 @@ import { TagCategory } from "@/types/search";
 
 export const FeatureBridge = {
   favorites: {
+    advance: new FeatureChannel<NavigationKey, boolean>(false),
     allFavorites: new FeatureChannel<void, Favorite[]>([]),
     favoriteIds: new FeatureChannel<void, Promise<string[]>>(Promise.resolve([])),
     getFavorite: new FeatureChannel<string, Favorite | undefined>(undefined),
-    advance: new FeatureChannel<NavigationKey, boolean>(false),
     searchQuery: new FeatureChannel<void, string>(""),
     searchResults: new FeatureChannel<void, Favorite[]>([]),
     usingInfiniteScroll: new FeatureChannel<void, boolean>(false)

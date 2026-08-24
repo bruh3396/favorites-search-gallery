@@ -21,7 +21,7 @@ const insideGalleryHotkeyHandlers: Record<string, () => void> = {
   q: GalleryModel.openMedia,
   s: GalleryModel.download,
   w: GalleryModel.openPost,
-  x: GalleryFavoriterFlow.removeFavoriteInGallery,
+  // x: GalleryFavoriterFlow.removeFavoriteInGallery,
   " ": pauseVideo
 };
 

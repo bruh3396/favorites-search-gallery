@@ -1,4 +1,4 @@
-﻿import * as ContentTiler from "@/app/layout/content_tiler";
+import * as ContentTiler from "@/app/layout/content_tiler";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";

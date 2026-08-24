@@ -18,9 +18,9 @@ const releases: Release[] = [
     changes: [
       "Redesigned favorites ui",
       "Added search page favorite indicator",
-      "Added new themes",
+      "Added themes",
       "Added download naming",
-      "Improved post overlay",
+      "Improved thumb overlay",
       "Improved performance"
     ]
   }
@@ -32,6 +32,18 @@ export function buildDrawerView(): FavoritesDrawerViewContent {
 
 function buildChangelogPanel(panel: HTMLElement): void {
   for (const release of releases) {
-    panel.appendChild(DrawerPanel.section(PANEL_CLASSES, release.version, DrawerPanel.bulletList(release.changes)));
+    panel.appendChild(DrawerPanel.section(PANEL_CLASSES, release.version, bulletList(release.changes)));
   }
+}
+
+function bulletList(items: string[]): HTMLUListElement {
+  const list = document.createElement("ul");
+
+  for (const item of items) {
+    const entry = document.createElement("li");
+
+    entry.textContent = item;
+    list.appendChild(entry);
+  }
+  return list;
 }

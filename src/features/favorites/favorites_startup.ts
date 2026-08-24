@@ -6,7 +6,7 @@ import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesMouseFlow from "@/features/favorites/flows/mouse_flow";
 import * as FavoritesPostActionFlow from "@/features/favorites/flows/post_action_flow";
 import * as FavoritesResetFlow from "@/features/favorites/flows/reset_flow";
-import * as FavoritesSearchBox from "@/features/favorites/control/toolbar/favorites_search_box";
+import * as FavoritesSearchBox from "@/features/favorites/control/toolbar/search_box";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesSettings from "@/features/favorites/control/settings/settings";
 import * as FavoritesSnippets from "@/features/favorites/features/snippets/snippets";
@@ -18,6 +18,7 @@ import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { Preferences } from "@/app/context/preferences";
+import { createElement } from "@/utils/browser/element";
 import { deferPostPageFetchesUntil } from "@/lib/remote/rule34/posts/page";
 import { setFavoriteTagsLookup } from "@/lib/thumb/tag";
 import { setSnippetSuggestionSource } from "@/lib/ui/autocomplete/autocomplete";
@@ -74,7 +75,8 @@ function setupView(): void {
     drawerViews: {
       settings: FavoritesSettings.mount(),
       download: FavoritesDownloader.mount(),
-      snippets: FavoritesSnippets.mount()
+      snippets: FavoritesSnippets.mount(),
+      tags: { mount: panel => panel.appendChild(createElement("div", { className: "favorites-drawer-placeholder", textContent: "Work in progress" })) }
     }
   });
 }

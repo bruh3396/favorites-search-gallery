@@ -1,4 +1,4 @@
-﻿import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { GalleryItemWindow } from "@/features/gallery/model/item_window";
 import { Identifiable } from "@/types/app";
 

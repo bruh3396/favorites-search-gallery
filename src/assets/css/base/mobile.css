@@ -145,3 +145,17 @@
     background-color: var(--theme-link) !important;
     outline: .2rem solid var(--theme-link);
 }
+
+[data-mobile] #autoplay-settings-menu>div {
+  font-size: 18px;
+  padding: 5px 12px;
+}
+
+[data-mobile] #autoplay-settings-menu>div>label {
+  padding-right: 14px;
+}
+
+[data-mobile] #autoplay-settings-menu select {
+  font-size: 18px;
+  width: 6ch;
+}

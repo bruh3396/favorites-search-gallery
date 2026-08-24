@@ -24,6 +24,7 @@ export const FavoritesId = {
   loadStatus: "favorites-load-status-label",
   loadProgressBar: "favorites-load-progress-bar",
   searchField: "favorites-search-field",
+  searchFieldInner: "favorites-search-field-inner",
   searchButton: "favorites-search-button",
   drawerToggleSlot: "favorites-drawer-toggle-slot",
   drawerToggleButton: "favorites-drawer-toggle-button",

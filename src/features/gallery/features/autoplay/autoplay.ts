@@ -156,6 +156,10 @@ function initializeTimers(): void {
 
   imageViewTimer.onTimerEnd = (): void => { };
   menuVisibilityTimer.onTimerEnd = (): void => {
+    if (isSettingsMenuOpen()) {
+      menuVisibilityTimer.restart();
+      return;
+    }
     hideMenu();
     setTimeout(() => {
       if (!isMenuPersistent && !isMenuVisible) {
@@ -299,9 +303,6 @@ function addMobileMenuEventListeners(): void {
   }
   ui.settingsButton.ontouchstart = (): void => {
     toggleSettingMenu();
-    const isSettingsMenuVisible = ui.settingsMenu.container.classList.contains("autoplay-settings--visible");
-
-    toggleMenuPersistence(isSettingsMenuVisible);
     menuVisibilityTimer.restart();
   };
   ui.playButton.ontouchstart = (): void => {
@@ -344,6 +345,10 @@ function toggleMenuPersistence(value: boolean): void {
 function toggleMenuVisibility(value: boolean): void {
   isMenuVisible = value;
   ui.menu.classList.toggle("autoplay-menu--visible", value);
+}
+
+function isSettingsMenuOpen(): boolean {
+  return ui.settingsMenu.container.classList.contains("autoplay-settings--visible");
 }
 
 function toggleSettingMenu(value?: boolean | undefined): void {

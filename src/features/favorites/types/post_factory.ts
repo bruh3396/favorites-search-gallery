@@ -1,10 +1,10 @@
-import { getImageFromThumb } from "@/lib/thumb/query";
-import { parseIdFromThumb } from "@/lib/thumb/post_id";
 import { Post } from "@/types/api";
 import { SerializedFavorite } from "@/types/favorite";
 import { chain } from "@/utils/pure/function";
 import { decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
+import { getImageFromThumb } from "@/lib/thumb/query";
 import { getTagsFromThumb } from "@/lib/thumb/tag";
+import { parseIdFromThumb } from "@/lib/thumb/post_id";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
 export function createPost(source: HTMLElement | SerializedFavorite): Post {

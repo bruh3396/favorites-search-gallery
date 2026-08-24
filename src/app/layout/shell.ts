@@ -10,7 +10,7 @@ export const ScrollSentinelBottom = div("scroll-sentinel-bottom");
 
 export function setupShell(): void {
   if (ON_MOBILE_DEVICE) {
-    Root.dataset.mobile = "";
+    document.documentElement.dataset.mobile = "";
     lockViewport();
   }
   Root.append(Overlays);

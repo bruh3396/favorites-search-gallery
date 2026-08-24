@@ -52,7 +52,7 @@ function handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
 }
 
 function handleTouchStartInGallery(event: TouchEvent): void {
-  if (event.target instanceof HTMLElement && event.target.closest("#gallery-menu") !== null) {
+  if (event.target instanceof HTMLElement && event.target.closest("#gallery-menu, #autoplay-menu") !== null) {
     return;
   }
   event.preventDefault();

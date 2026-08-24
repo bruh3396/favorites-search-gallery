@@ -11,35 +11,35 @@ export const Events = {
     hotkeyPressed: new Emitter<string>()
   },
   favorites: {
-    searchButtonClicked: new Emitter<MouseEvent>(),
     clearButtonClicked: new Emitter<MouseEvent>(),
-    shuffleButtonClicked: new Emitter<MouseEvent>(),
+    clearSearchScopeButtonClicked: new Emitter<MouseEvent>(),
     invertButtonClicked: new Emitter<MouseEvent>(),
     resetButtonClicked: new Emitter<MouseEvent>(),
+    searchButtonClicked: new Emitter<MouseEvent>(),
     setSearchScopeButtonClicked: new Emitter<MouseEvent>(),
-    clearSearchScopeButtonClicked: new Emitter<MouseEvent>(),
+    shuffleButtonClicked: new Emitter<MouseEvent>(),
 
     searchRequested: new Emitter<string>(),
     searchResultsUpdated: new Emitter<Favorite[]>(),
 
+    favoritesLoaded: new StickyEmitter<void>(),
     storedFavoritesFound: new StickyEmitter<boolean>(),
     storedFavoritesLoaded: new StickyEmitter<void>(),
-    favoritesLoaded: new StickyEmitter<void>(),
 
-    contentReplaced: new Emitter<void>(),
     contentAdded: new Emitter<Favorite[]>(),
+    contentReplaced: new Emitter<void>(),
 
-    tagCategoriesResolved: new Emitter<TagCategoryMap>(),
-    resetConfirmed: new Emitter<void>()
+    resetConfirmed: new Emitter<void>(),
+    tagCategoriesResolved: new Emitter<TagCategoryMap>()
   },
   gallery: {
-    openedGallery: new Emitter<HTMLElement>(),
     closedGallery: new Emitter<void>(),
     displayedThumb: new Emitter<HTMLElement>(),
     galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
-    rightTap: new Emitter<void>(),
-    leftTap: new Emitter<void>(),
     interactionStopped: new Emitter<void>(),
+    leftTap: new Emitter<void>(),
+    openedGallery: new Emitter<HTMLElement>(),
+    rightTap: new Emitter<void>(),
     showControlsRequested: new Emitter<void>()
   },
   postOverlay: {
@@ -48,9 +48,9 @@ export const Events = {
     searchForTag: new Emitter<string>()
   },
   postList: {
-    postListInitialized: new StickyEmitter<void>(),
     initialPostListCreated: new StickyEmitter<PostList>(),
     moreResultsAdded: new Emitter<HTMLElement[]>(),
-    pageChanged: new Emitter<HTMLElement[]>()
+    pageChanged: new Emitter<HTMLElement[]>(),
+    postListInitialized: new StickyEmitter<void>()
   }
 } satisfies FeatureNamespace;

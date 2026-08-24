@@ -30,8 +30,13 @@ function searchField(): HTMLElement {
   return createElement("div", {
     id: FavoritesId.searchField,
     children: [
-      span(FavoritesId.searchButton),
-      span(FavoritesId.actions)
+      createElement("div", {
+        id: FavoritesId.searchFieldInner,
+        children: [
+          span(FavoritesId.searchButton),
+          span(FavoritesId.actions)
+        ]
+      })
     ]
   });
 }
