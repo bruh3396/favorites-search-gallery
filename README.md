@@ -258,9 +258,5 @@ Q: Why am I experiencing lag?<br>
 
 ## Credits
 
-**Awesomplete**: [Website](https://leaverou.github.io/awesomplete/) | [GitHub Repository](https://github.com/LeaVerou/awesomplete)<br>
+**Awesomplete**: [Website](https://leaverou.github.io/awesomplete/) | [GitHub](https://github.com/LeaVerou/awesomplete)<br>
 Copyright (c) 2013-2025, Lea Verou
-
-
-**Zip.js**: [Website](https://gildas-lormeau.github.io/zip.js/) | [GitHub Repository](https://github.com/gildas-lormeau/zip.js)<br>
-Copyright (c) 2010-2025 Gildas Lormeau

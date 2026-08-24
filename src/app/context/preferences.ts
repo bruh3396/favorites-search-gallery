@@ -19,7 +19,7 @@ export const Preferences = {
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
     columnCount: new Preference("favoritesColumnCount", ON_DESKTOP_DEVICE ? 5 : 2),
-    downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
+    downloadBatchSize: new Preference("favoritesDownloadBatchSize", 500),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
     drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
     drawerOpen: new Preference("favoritesDrawerOpen", false),

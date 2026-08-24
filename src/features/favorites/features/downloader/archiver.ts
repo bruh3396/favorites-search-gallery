@@ -1,16 +1,13 @@
 import * as MediaResolver from "@/lib/media/resolver";
-import { BlobReader, BlobWriter, ZipWriter, configure } from "@zip.js/zip.js";
 import { ConcurrencyLimiter } from "@/lib/async/rate_limiting";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { MediaItem } from "@/types/media";
-import { doNothing } from "@/utils/pure/function";
+import { ZipWriter } from "@/features/favorites/features/downloader/zip_writer";
 import { filenameFor } from "@/features/favorites/features/downloader/filename_settings";
-
-configure({ useWebWorkers: false });
 
 export async function archive(items: MediaItem[], signal: AbortSignal, onItemSettled: (filename: string | null) => void): Promise<Blob | null> {
   const limiter = new ConcurrencyLimiter(DownloaderConfig.concurrency);
-  const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+  const zipWriter = new ZipWriter();
 
   await limiter.runAll(items, async(item) => {
     if (signal.aborted) {
@@ -29,13 +26,12 @@ export async function archive(items: MediaItem[], signal: AbortSignal, onItemSet
   });
 
   if (signal.aborted) {
-    await discard(zipWriter);
     return null;
   }
-  return zipWriter.close();
+  return zipWriter.finish();
 }
 
-async function addToArchive(zipWriter: ZipWriter<Blob>, item: MediaItem, signal: AbortSignal): Promise<string> {
+async function addToArchive(zipWriter: ZipWriter, item: MediaItem, signal: AbortSignal): Promise<string> {
   const extension = await MediaResolver.resolveExtension(item);
   const url = await MediaResolver.resolveMediaUrl(item);
   const response = await fetch(url, { signal });
@@ -44,14 +40,6 @@ async function addToArchive(zipWriter: ZipWriter<Blob>, item: MediaItem, signal:
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
-  await zipWriter.add(filename, new BlobReader(await response.blob()), { level: 0 });
+  zipWriter.add(filename, new Uint8Array(await response.arrayBuffer()));
   return filename;
-}
-
-async function discard(zipWriter: ZipWriter<Blob>): Promise<void> {
-  try {
-    await zipWriter.close();
-  } catch {
-    doNothing();
-  }
 }

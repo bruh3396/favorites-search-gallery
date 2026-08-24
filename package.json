@@ -46,7 +46,6 @@
     "visualize": "esbuild-visualizer --metadata dist/meta.json --template treemap --filename dist/stats.html --open"
   },
   "dependencies": {
-    "@zip.js/zip.js": "^2.8.34",
     "awesomplete": "^1.1.7"
   }
 }

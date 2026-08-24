@@ -627,7 +627,8 @@ export default defineConfig([
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",
       "src/lib/thumb/action_bar.ts",
-      "src/app/context/preferences.ts"
+      "src/app/context/preferences.ts",
+      "src/features/favorites/features/downloader/zip_writer.ts"
     ],
     rules: {
       "no-bitwise": "off"
