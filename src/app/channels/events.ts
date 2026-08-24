@@ -39,7 +39,8 @@ export const Events = {
     galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
     rightTap: new Emitter<void>(),
     leftTap: new Emitter<void>(),
-    interactionStopped: new Emitter<void>()
+    interactionStopped: new Emitter<void>(),
+    showControlsRequested: new Emitter<void>()
   },
   postOverlay: {
     addTagToSearch: new Emitter<string>(),

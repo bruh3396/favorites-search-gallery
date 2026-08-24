@@ -7,10 +7,18 @@ import { fetchHtml } from "@/lib/remote/http/client";
 import { queueMacroTask } from "@/lib/async/scheduling";
 import { replaceTagInText } from "@/lib/ui/autocomplete/tag_replacer";
 
+type SnippetSuggestionSource = (prefix: string) => AwesompleteSuggestion[];
+
+let getSnippetSuggestions: SnippetSuggestionSource = () => [];
+
 export function setupAutocomplete(): void {
   if (ON_FAVORITES_PAGE) {
     queueMacroTask(addAwesompleteToAllInputs);
   }
+}
+
+export function setSnippetSuggestionSource(source: SnippetSuggestionSource): void {
+  getSnippetSuggestions = source;
 }
 
 function addAwesompleteToAllInputs(): void {
@@ -20,21 +28,21 @@ function addAwesompleteToAllInputs(): void {
 }
 
 function createAwesompleteInstance(input: HTMLTextAreaElement | HTMLInputElement): Awesomplete {
-  const types = new Map<string, string>();
+  const details = new Map<string, AwesompleteSuggestion>();
   const awesomplete = new Awesomplete(input, {
     minChars: 1,
     list: [],
     sort: false,
-    data: (suggestion: AwesompleteSuggestion): AwesompleteSuggestion => rememberTagType(types, suggestion),
+    data: (suggestion: AwesompleteSuggestion): AwesompleteSuggestion => rememberDetails(details, suggestion),
     filter: (suggestion: AwesompleteSuggestion): boolean => matchesCurrentTag(suggestion, awesomplete.input),
-    item: (suggestion: AwesompleteSuggestion, tags: string): HTMLElement => renderSuggestion(suggestion, tags, types),
-    replace: (suggestion: AwesompleteSuggestion): void => applySuggestion(suggestion, awesomplete.input)
+    item: (suggestion: AwesompleteSuggestion, tags: string): HTMLElement => renderSuggestion(suggestion, tags, details),
+    replace: (suggestion: AwesompleteSuggestion): void => applySuggestion(suggestion, details, awesomplete.input)
   });
   return awesomplete;
 }
 
-function rememberTagType(types: Map<string, string>, suggestion: AwesompleteSuggestion): AwesompleteSuggestion {
-  types.set(suggestion.value, suggestion.type);
+function rememberDetails(details: Map<string, AwesompleteSuggestion>, suggestion: AwesompleteSuggestion): AwesompleteSuggestion {
+  details.set(suggestion.value, suggestion);
   return suggestion;
 }
 
@@ -43,11 +51,11 @@ function matchesCurrentTag(suggestion: AwesompleteSuggestion, input: HTMLTextAre
   return Awesomplete.FILTER_STARTSWITH(suggestion.value, getCurrentTag(input).replaceAll("*", ""));
 }
 
-function renderSuggestion(suggestion: AwesompleteSuggestion, tags: string, types: Map<string, string>): HTMLElement {
+function renderSuggestion(suggestion: AwesompleteSuggestion, tags: string, details: Map<string, AwesompleteSuggestion>): HTMLElement {
   return Awesomplete.$.create("li", {
     innerHTML: highlightMatch(suggestion.label, tags),
     "aria-selected": "false",
-    className: `tag-type-${types.get(suggestion.value)}`
+    className: `tag-type-${details.get(suggestion.value)?.type}`
   });
 }
 
@@ -58,8 +66,10 @@ function highlightMatch(label: string, tags: string): string {
   return label.replace(RegExp(Awesomplete.$.regExpEscape(tags.trim()), "gi"), "<mark>$&</mark>");
 }
 
-function applySuggestion(suggestion: AwesompleteSuggestion, input: HTMLTextAreaElement | HTMLInputElement): void {
-  insertSuggestion(input, decodeEntities(suggestion.value));
+function applySuggestion(suggestion: AwesompleteSuggestion, details: Map<string, AwesompleteSuggestion>, input: HTMLTextAreaElement | HTMLInputElement): void {
+  const insert = details.get(suggestion.value)?.insert ?? suggestion.value;
+
+  insertSuggestion(input, decodeEntities(insert));
   input.dispatchEvent(new Event("input"));
 }
 
@@ -145,5 +155,5 @@ function getAutocompleteSuggestions(prefix: string): Promise<string> {
 }
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {
-  return addCustomTagsToAutocomplete(JSON.parse(html), prefix);
+  return [...getSnippetSuggestions(prefix), ...addCustomTagsToAutocomplete(JSON.parse(html), prefix)];
 }

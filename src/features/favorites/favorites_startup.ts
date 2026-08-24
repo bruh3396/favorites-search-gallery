@@ -20,6 +20,7 @@ import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { Preferences } from "@/app/context/preferences";
 import { deferPostPageFetchesUntil } from "@/lib/remote/rule34/posts/page";
 import { setFavoriteTagsLookup } from "@/lib/thumb/tag";
+import { setSnippetSuggestionSource } from "@/lib/ui/autocomplete/autocomplete";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 
 export function startFavorites(): void {
@@ -69,6 +70,7 @@ function setupView(): void {
     onContentAdded: Events.favorites.contentAdded.emit,
     onDrawerOpen: () => Preferences.favorites.drawerOpen.set(true),
     onDrawerViewSelected: Preferences.favorites.drawerActiveView.set,
+    onShowControls: Events.gallery.showControlsRequested.emit,
     drawerViews: {
       settings: FavoritesSettings.mount(),
       download: FavoritesDownloader.mount(),
@@ -92,6 +94,7 @@ function setupSnippets(): void {
     appendToSearch: FavoritesSearchBox.append,
     getSearchResults: FavoritesModel.getCurrentSearchResults
   });
+  setSnippetSuggestionSource(FavoritesSnippets.suggestions);
 }
 
 function setupDownloader(): void {

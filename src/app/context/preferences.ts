@@ -9,8 +9,8 @@ import { readCookie } from "@/utils/browser/cookie";
 
 export const Preferences = {
   app: {
-    performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", ON_MOBILE_DEVICE ? "medium" : "normal"),
-    gradient: new Preference("appGradient", false),
+    performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", ON_DESKTOP_DEVICE ? "normal" : "medium"),
+    gradient: new Preference("appGradient", true),
     theme: new Preference<Theme>("appTheme", "native"),
     darkMode: new Preference<boolean>("appDarkMode", readCookie("theme") === "dark"),
     fadeThumbs: new Preference<boolean>("appFadeThumbs", true),
@@ -18,8 +18,8 @@ export const Preferences = {
   },
   favorites: {
     allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
-    columnCount: new Preference("favoritesColumnCount", ON_MOBILE_DEVICE ? 2 : 5),
-    postActionBar: new Preference<ActionBarMode>("favoritesPostActionBar", ON_MOBILE_DEVICE ? "off" : "hover"),
+    columnCount: new Preference("favoritesColumnCount", ON_DESKTOP_DEVICE ? 5 : 2),
+    postActionBar: new Preference<ActionBarMode>("favoritesPostActionBar", ON_DESKTOP_DEVICE ? "hover" : "off"),
     postActionBarButtons: new Preference("favoritesPostActionBarButtons", ON_DESKTOP_DEVICE ? ActionBarButton.Favorite : ActionBarButton.Favorite | ActionBarButton.Open),
     downloadBatchSize: new Preference("favoritesDownloadBatchSize", 100),
     downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
@@ -30,7 +30,6 @@ export const Preferences = {
     hintsEnabled: new Preference("favoritesHintsEnabled", ON_DESKTOP_DEVICE),
     infiniteScroll: new Preference("favoritesInfiniteScroll", ON_MOBILE_DEVICE),
     layout: new Preference<Layout>("favoritesLayout", "column"),
-    deletingAllowed: new Preference("favoritesDeletingAllowed", false),
     resultsPerPage: new Preference("favoritesResultsPerPage", 100),
     rowHeight: new Preference("favoritesRowHeight", 7),
     settingsExpandedSections: new Preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
@@ -51,6 +50,7 @@ export const Preferences = {
     mobileEnabled: new Preference("galleryMobileEnabled", true),
     previewEnabled: new Preference("galleryPreviewEnabled", false),
     themedBackground: new Preference("galleryThemedBackground", false),
+    tutorialSeen: new Preference("galleryTutorialSeen", false),
     videoMuted: new Preference("galleryVideoMuted", false),
     videoVolume: new Preference("galleryVideoVolume", 1)
   },
@@ -60,11 +60,11 @@ export const Preferences = {
   },
   postList: {
     enabled: new Preference("postListEnabled", false),
-    columnCount: new Preference("postListColumnCount", ON_MOBILE_DEVICE ? 3 : 6),
+    columnCount: new Preference("postListColumnCount", ON_DESKTOP_DEVICE ? 6 : 3),
     favoriteIndicator: new Preference("postListFavoriteIndicator", false),
     layout: new Preference<Layout>("postListLayout", "column"),
     infiniteScroll: new Preference("postListInfiniteScroll", false),
-    postActionBar: new Preference<ActionBarMode>("postListPostActionBar", ON_MOBILE_DEVICE ? "always" : "hover"),
+    postActionBar: new Preference<ActionBarMode>("postListPostActionBar", ON_DESKTOP_DEVICE ? "hover" : "always"),
     postActionBarButtons: new Preference("postListPostActionBarButtons", ActionBarButton.Favorite),
     rowHeight: new Preference("postListRowHeight", 7),
     settingsCollapsed: new Preference("postListSettingsCollapsed", false),

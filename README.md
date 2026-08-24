@@ -100,7 +100,6 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | Right Click | Search site for current query in new tab | Clicked on "Search" button |
 | Ctrl Click | Search site for current query in new tab, stay on current tab | Clicked on "Search" button |
 | Tab | Accept the highlighted autocomplete suggestion | Autocomplete suggestions open |
-| Shift Tab | Accept the highlighted suggestion and append " ~ " to start an OR group | Autocomplete suggestions open |
 
 ### General Controls (Mobile)
 | Input | Function | Condition |

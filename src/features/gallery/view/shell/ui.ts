@@ -1,7 +1,7 @@
 import * as Icons from "@/assets/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { ON_MOBILE_DEVICE, USING_FIREFOX } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
-import { USING_FIREFOX } from "@/lib/environment";
 import { blurActiveElement } from "@/utils/browser/window";
 import { div } from "@/utils/browser/element";
 import { getLayout } from "@/app/layout/content_tiler";
@@ -70,7 +70,9 @@ export function setBackgroundOpacity(opacity: number): void {
 }
 
 export function toggleScrollbar(value: boolean): void {
-  document.body.style.overflowY = value ? "auto" : "hidden";
+  const target = ON_MOBILE_DEVICE ? document.documentElement : document.body;
+
+  target.style.overflowY = value ? "auto" : "hidden";
 }
 
 export function update(thumb: HTMLElement): void {

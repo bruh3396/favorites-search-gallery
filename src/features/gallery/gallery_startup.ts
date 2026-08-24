@@ -19,6 +19,7 @@ import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
 import * as MediaResolver from "@/lib/media/resolver";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { hideTutorial, showTutorial } from "@/features/gallery/dom_tweaks/tutorial";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { Favorite } from "@/types/favorite";
@@ -179,6 +180,16 @@ function subscribeToMobileInput(): void {
   DomEvents.mobile.swipedDown.on(GalleryTouchFlow.closeGallery);
   DomEvents.mobile.swipedUp.on(GalleryAutoplay.showMenu);
   DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
+  Events.gallery.openedGallery.on(showTutorialOnFirstOpen, { once: true });
+  Events.gallery.showControlsRequested.on(showTutorial);
+  Events.gallery.closedGallery.on(hideTutorial);
+}
+
+function showTutorialOnFirstOpen(): void {
+  if (!Preferences.gallery.tutorialSeen.value) {
+    Preferences.gallery.tutorialSeen.set(true);
+    showTutorial();
+  }
 }
 
 function serveExternalRequests(): void {

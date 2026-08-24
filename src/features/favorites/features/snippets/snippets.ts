@@ -2,6 +2,7 @@ import * as SnippetActions from "@/features/favorites/features/snippets/actions"
 import * as SnippetEditor from "@/features/favorites/features/snippets/editor";
 import * as SnippetView from "@/features/favorites/features/snippets/view";
 import { exportSnippets, importSnippets } from "@/features/favorites/features/snippets/transfer";
+import { AwesompleteSuggestion } from "awesomplete";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { SnippetState } from "@/features/favorites/features/snippets/state";
 import { SnippetStore } from "@/features/favorites/features/snippets/store";
@@ -10,6 +11,7 @@ import { Storage } from "@/lib/storage/local_storage";
 import { buildIdQuery } from "@/features/favorites/features/snippets/utils";
 import { copyText } from "@/utils/browser/clipboard";
 
+const SNIPPET_TRIGGER = "/";
 const store = new SnippetStore(Storage);
 let dependencies: SnippetsDependencies;
 
@@ -30,6 +32,18 @@ export function setup(deps: SnippetsDependencies): void {
     onFiltered: SnippetView.render
   });
   refresh();
+}
+
+export function suggestions(prefix: string): AwesompleteSuggestion[] {
+  if (!prefix.startsWith(SNIPPET_TRIGGER)) {
+    return [];
+  }
+  return store.getAll().map(snippet => ({
+    label: `${SNIPPET_TRIGGER}${snippet.name} (snippet)`,
+    value: `${SNIPPET_TRIGGER}${snippet.name}`,
+    insert: snippet.query,
+    type: "snippet"
+  }));
 }
 
 export function mount(): FavoritesDrawerViewContent {

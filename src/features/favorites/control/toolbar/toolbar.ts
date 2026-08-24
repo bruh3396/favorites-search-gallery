@@ -1,6 +1,7 @@
 import { ButtonElement, buildButton } from "@/lib/ui/widgets/button";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { Preferences } from "@/app/context/preferences";
 import { buildToggleButton } from "@/lib/ui/settings/components/toggle_button";
 
@@ -31,18 +32,22 @@ const buttons: Partial<ButtonElement>[] = [
     id: "reset-button",
     parentId: FavoritesId.buttonsSlot,
     textContent: "RESET",
+    icon: ON_DESKTOP_DEVICE ? null : "reset",
     event: Events.favorites.resetButtonClicked
   },
   {
     id: "invert-button",
     parentId: FavoritesId.buttonsSlot,
     textContent: "INVERT",
+    icon: ON_DESKTOP_DEVICE ? null : "changeDirection",
+    enabled: ON_DESKTOP_DEVICE,
     event: Events.favorites.invertButtonClicked
   },
   {
     id: "shuffle-button",
     parentId: FavoritesId.buttonsSlot,
     textContent: "SHUFFLE",
+    icon: ON_DESKTOP_DEVICE ? null : "shuffle",
     event: Events.favorites.shuffleButtonClicked
   },
   {

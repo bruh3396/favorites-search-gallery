@@ -10,6 +10,7 @@ export interface FavoritesViewDependencies {
   onContentAdded: (favorites: Favorite[]) => void;
   onDrawerOpen: () => void;
   onDrawerViewSelected: (view: FavoritesDrawerView) => void;
+  onShowControls: () => void;
   drawerViews: FavoritesDrawerViewMap;
 }
 

@@ -1,8 +1,8 @@
 :root {
   --color-bg: black;
-  --color-controls-guide-tap: blue;
-  --color-controls-guide-swipe-down: red;
-  --color-controls-guide-swipe-up: green;
+  --color-controls-guide-tap: #4fd6e8;
+  --color-controls-guide-swipe-down: #4fd6e8;
+  --color-controls-guide-swipe-up: #f5c76e;
   --color-favorite-indicator: gold;
   --color-tag-general: #b0e0b0;
   --color-tag-artist: #f0a0a0;

@@ -32,7 +32,7 @@ export function setup(dependencies: FavoritesViewDependencies): void {
   FavoritesPaginationRenderer.setup(dependencies.onPageSelected, dependencies.onPageStepped);
   FavoritesDrawer.setup({
     change: FavoritesChangelog.buildDrawerView(),
-    help: FavoritesHelp.buildDrawerView(),
+    help: FavoritesHelp.buildDrawerView(dependencies.onShowControls),
     ...dependencies.drawerViews
   }, dependencies.onDrawerOpen, dependencies.onDrawerViewSelected);
 }

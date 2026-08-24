@@ -58,10 +58,6 @@ const ACTION_BAR_BUTTONS: ActionBarButtonSpec[] = [
   { bit: ActionBarButton.Favorite, action: "favorite", icon: `<span class="${ActionBarSelectors.heartEmpty}">${Svg.heart}</span><span class="${ActionBarSelectors.heartFilled}">${Svg.heartFilled}</span>`, run: toggleFavorite }
 ];
 
-function visibleDataset(action: ActionBarAction): string {
-  return `postActionBar${capitalize(action)}Visible`;
-}
-
 export function actionBarHtml(isFavorite: boolean): string {
   const favoriteState = isFavorite ? ` data-${camelToKebabCase(ActionBarDataset.isFavorite)}` : "";
   const buttons = ACTION_BAR_BUTTONS.map((spec) => actionButton(spec.action, spec.icon)).join("");
@@ -158,4 +154,8 @@ function syncActionBarFavorite(id: string, isFavorite: boolean): void {
   if (bar instanceof HTMLElement) {
     toggleDataset(bar, ActionBarDataset.isFavorite, isFavorite);
   }
+}
+
+function visibleDataset(action: ActionBarAction): string {
+  return `postActionBar${capitalize(action)}Visible`;
 }

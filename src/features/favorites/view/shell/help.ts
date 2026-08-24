@@ -1,6 +1,8 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { FavoritesClass, FavoritesHelpLinks } from "@/features/favorites/types/scaffold";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
+import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
 const PANEL_CLASSES = {
@@ -8,29 +10,45 @@ const PANEL_CLASSES = {
   sectionTitle: FavoritesClass.drawerSectionTitle
 };
 
-export function buildDrawerView(): FavoritesDrawerViewContent {
-  return { mount: buildHelpPanel };
+export function buildDrawerView(onShowControls: () => void): FavoritesDrawerViewContent {
+  return { mount: (panel) => buildHelpPanel(panel, onShowControls) };
 }
 
-function buildHelpPanel(panel: HTMLElement): void {
-  const list = document.createElement("div");
+function buildHelpPanel(panel: HTMLElement, onShowControls: () => void): void {
+  const rows: HTMLElement[] = [];
 
-  list.className = FavoritesClass.drawerHelpLinks;
+  if (ON_MOBILE_DEVICE) {
+    rows.push(buildControlsRow(onShowControls));
+  }
 
   for (const link of FavoritesHelpLinks) {
-    list.appendChild(buildLinkRow(link.label, link.href));
+    rows.push(buildLinkRow(link.label, link.href));
   }
+  const list = createElement("div", { className: FavoritesClass.drawerHelpLinks, children: rows });
+
   panel.appendChild(DrawerPanel.section(PANEL_CLASSES, "", list));
 }
 
-function buildLinkRow(label: string, href: string): HTMLAnchorElement {
-  const anchor = document.createElement("a");
+function buildControlsRow(onShowControls: () => void): HTMLButtonElement {
+  const button = createElement("button", {
+    className: FavoritesClass.drawerHelpLink,
+    textContent: "Gallery Controls",
+    children: [icon("help")]
+  });
 
-  anchor.className = FavoritesClass.drawerHelpLink;
+  button.addEventListener("click", onShowControls);
+  return button;
+}
+
+function buildLinkRow(label: string, href: string): HTMLAnchorElement {
+  const anchor = createElement("a", {
+    className: FavoritesClass.drawerHelpLink,
+    textContent: label,
+    children: [icon("externalLink")]
+  });
+
   anchor.href = href;
   anchor.target = "_blank";
   anchor.rel = "noopener noreferrer";
-  anchor.textContent = label;
-  anchor.appendChild(icon("externalLink"));
   return anchor;
 }

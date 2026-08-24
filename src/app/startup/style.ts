@@ -3,6 +3,7 @@ import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
 import BADGE_CSS from "@/assets/css/base/badge.css";
+import CONTROLS_CSS from "@/assets/css/base/controls.css";
 import { Content } from "@/app/layout/shell";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
@@ -35,7 +36,7 @@ export function setupStyles(): void {
 
 function insertBaseStyles(): void {
   const fadeInCss = Preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
-  const mobileCss = ON_MOBILE_DEVICE ? MOBILE_CSS : "";
+  const mobileCss = ON_MOBILE_DEVICE ? MOBILE_CSS + CONTROLS_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +

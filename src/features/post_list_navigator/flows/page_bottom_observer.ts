@@ -1,7 +1,7 @@
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ITEM_CLASS_NAME } from "@/lib/thumb/selectors";
 
-export class PageBottomObserver {
+export class PostListNavigatorPageBottomObserver {
   private intersectionObserver: IntersectionObserver;
   private onBottomReached: () => void;
 

@@ -1,10 +1,10 @@
 import * as PostListNavigatorModel from "@/features/post_list_navigator/model/post_list_navigator_model";
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/post_list_navigator_view";
 import { Events } from "@/app/channels/events";
-import { PageBottomObserver } from "@/features/post_list_navigator/flows/page_bottom_observer";
+import { PostListNavigatorPageBottomObserver } from "@/features/post_list_navigator/flows/page_bottom_observer";
 import { Preferences } from "@/app/context/preferences";
 
-const pageBottomObserver: PageBottomObserver = new PageBottomObserver(showMoreResults);
+const pageBottomObserver: PostListNavigatorPageBottomObserver = new PostListNavigatorPageBottomObserver(showMoreResults);
 
 export function disableInfiniteScroll(): void {
   pageBottomObserver.disconnect();

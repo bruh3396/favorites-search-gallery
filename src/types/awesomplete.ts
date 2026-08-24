@@ -3,6 +3,7 @@ declare module "awesomplete" {
     label: string;
     value: string;
     type: string;
+    insert?: string;
   };
 
   export interface AwesompleteOptions {

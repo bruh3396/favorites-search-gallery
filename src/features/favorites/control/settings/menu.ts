@@ -38,7 +38,7 @@ const DesktopSettingsSections: SettingsSection[] = [
     ]
   },
   {
-    title: "Search Results",
+    title: "Results",
     controls: [
       FavoritesSettingsCatalog.rating,
       FavoritesSettingsCatalog.sortKey,
@@ -92,7 +92,7 @@ const MobileSettingsSections: SettingsSection[] = [
     ]
   },
   {
-    title: "Search Results",
+    title: "Results",
     controls: [
       FavoritesSettingsCatalog.rating,
       FavoritesSettingsCatalog.sortKey,
