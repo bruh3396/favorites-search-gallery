@@ -1,9 +1,11 @@
 import * as GalleryDispatch from "@/features/gallery/flows/dispatch";
+import * as GalleryFavoriterFlow from "@/features/gallery/flows/favoriter_flow";
 import * as GalleryNavigationFlow from "@/features/gallery/flows/navigation_flow";
 import * as GalleryOpenCloseFlow from "@/features/gallery/flows/open_close_flow";
 import { EnhancedMouseEvent } from "@/lib/input";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
+import { didHold } from "@/app/dom/touch_hold_events";
 import { didSwipe } from "@/app/dom/swipe_events";
 
 export function handleMouseDown(event: EnhancedMouseEvent): void {
@@ -31,8 +33,12 @@ export function closeGallery(): void {
   GalleryDispatch.run({ open: GalleryOpenCloseFlow.close });
 }
 
+export function favoriteCurrentPost(): void {
+  GalleryDispatch.run({ open: GalleryFavoriterFlow.addFavoriteInGallery });
+}
+
 function navigateInGallery(direction: NavigationKey): void {
-  if (didSwipe()) {
+  if (didSwipe() || didHold()) {
     return;
   }
   GalleryDispatch.run({

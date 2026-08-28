@@ -179,6 +179,7 @@ function subscribeToMobileInput(): void {
   DomEvents.document.touchStart.on(GalleryTouchFlow.handleTouchStart);
   DomEvents.mobile.swipedDown.on(GalleryTouchFlow.closeGallery);
   DomEvents.mobile.swipedUp.on(GalleryAutoplay.showMenu);
+  DomEvents.mobile.touchHold.on(GalleryTouchFlow.favoriteCurrentPost);
   DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
   Events.gallery.openedGallery.on(showTutorialOnFirstOpen, { once: true });
   Events.gallery.showControlsRequested.on(showTutorial);

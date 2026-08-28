@@ -4,6 +4,7 @@ import * as GalleryThumbObserver from "@/features/gallery/control/thumb_observer
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import { Favorite } from "@/types/favorite";
 import { GalleryConfig } from "@/config/gallery_config";
+import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
@@ -30,5 +31,7 @@ const recache = debounceLeading(() => {
 }, GalleryConfig.contentRefreshTime);
 
 function recacheFirstThumbs(): void {
-  GalleryView.cacheImages(getAllContentThumbs().slice(0, 25));
+  if (ON_DESKTOP_DEVICE) {
+    GalleryView.cacheImages(getAllContentThumbs().slice(0, 25));
+  }
 }

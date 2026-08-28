@@ -1,19 +1,3 @@
-export function extractFavoritesPageCount(html: string): number | null {
-  const dom = new DOMParser().parseFromString(html, "text/html");
-  const paginator = dom.querySelector("[name=\"lastpage\"]");
-
-  if (paginator === null) {
-    return null;
-  }
-  const onclick = paginator.getAttribute("onclick");
-
-  if (onclick === null) {
-    return null;
-  }
-  const match = onclick.match(/pid=(\d+)/);
-  return match ? parseInt(match[1], 10) : null;
-}
-
 export function extractFavoriteElements(source: string | Document): HTMLElement[] {
   const dom = typeof source === "string" ? new DOMParser().parseFromString(source, "text/html") : source;
   const thumbs = extractThumbElements(dom);

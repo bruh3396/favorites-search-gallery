@@ -1,6 +1,6 @@
 import { Post } from "@/types/api";
-import { buildPostPageUrl } from "@/lib/remote/url";
 import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
+import { postPageUrl } from "@/lib/remote/url";
 import { resolveMediaType } from "@/lib/media/type";
 import { setDataset } from "@/utils/browser/dataset";
 import { stampActionBarId } from "@/lib/thumb/action_bar";
@@ -15,7 +15,7 @@ export class FavoriteElement {
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.container.children[0] as HTMLImageElement;
     this.populateAttributes(post);
-    this.container.href = buildPostPageUrl(this.root.id);
+    this.container.href = postPageUrl(this.root.id);
   }
 
   public get thumbUrl(): string {

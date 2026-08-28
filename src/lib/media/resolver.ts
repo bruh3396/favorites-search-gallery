@@ -6,16 +6,18 @@ import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { Post } from "@/types/api";
-import { extensionProbeLimiter } from "@/lib/remote/http/rate_limiters";
+import { RateLimiter } from "@/lib/async/rate_limiting";
+import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { withTimeout } from "@/lib/async/scheduling";
 
+const extensionProbeLimiter = new RateLimiter(Rule34NetworkConfig.extensionProbeRateLimit);
 const cache: Map<string, ImageExtension> = new Map();
 const database = new Database<MediaExtensionMapping>("ImageExtensions", "extensionMappings");
 const databaseUpdater = new CoalescingExecutor<MediaExtensionMapping>(100, 2_000, database.update.bind(database));
 let warm: Promise<void> = Promise.resolve();
 
 export const resolveSampleUrl = async(item: MediaItem): Promise<string> => imageUrlToSampleUrl(await resolveImageUrl(item));
-export const resolveImageUrl = async(item: MediaItem): Promise<string> => replaceExtension(await resolveMediaUrl(item), "mp4", "jpg");
+export const resolveImageUrl = async(item: MediaItem): Promise<string> => replaceExtension(await resolveMediaUrl(item), "mp4", DEFAULT_EXTENSION);
 export const resolveMediaUrl = async(item: MediaItem): Promise<string> => withExtension(imageUrl(item), await resolveExtension(item));
 
 export const destroyStore: () => void = () => database.destroy();

@@ -73,6 +73,30 @@
   color: var(--color-controls-guide-swipe-down);
 }
 
+.controls-guide-hold {
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  right: 30%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.controls-guide-hold svg {
+  width: 34px;
+  height: 34px;
+}
+
+#controls-guide-hold {
+  color: var(--color-controls-guide-hold);
+}
+
 #controls-guide-dismiss {
   position: absolute;
   left: 0;

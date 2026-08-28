@@ -5,8 +5,8 @@ import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/thumb/selectors";
 import { Svg } from "@/assets/svg";
 import { ThumbConfig } from "@/config/thumb_config";
-import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
-import { openPost } from "@/lib/remote/rule34/posts/navigation";
+import { downloadFromThumb } from "@/lib/media/download";
+import { openPost } from "@/lib/remote/actions";
 
 export type ActionBarAction = "favorite" | "download" | "open";
 

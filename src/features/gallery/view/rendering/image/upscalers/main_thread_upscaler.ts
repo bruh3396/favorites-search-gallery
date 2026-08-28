@@ -2,7 +2,7 @@ import { drawScaledBitmap, resetCanvas, setCanvasDimensions } from "@/utils/brow
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { fetchSampleImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
+import { fetchSampleImageBitmapFromThumb } from "@/lib/media/bitmap";
 
 export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
   private readonly canvases: Map<string, HTMLCanvasElement> = new Map();

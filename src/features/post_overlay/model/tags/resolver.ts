@@ -2,9 +2,8 @@ import * as PostOverlayTagsCache from "@/features/post_overlay/model/tags/cache"
 import * as PostOverlayTagsStore from "@/features/post_overlay/model/tags/store";
 import { TagCategory, TagCategoryMap } from "@/types/search";
 import { PostOverlayConfig } from "@/config/post_overlay_config";
-import { decodeTagCategory } from "@/lib/remote/parsers/tag";
-import { fetchPostPageHtml } from "@/lib/remote/rule34/posts/page";
-import { fetchTagCategory } from "@/lib/remote/api/tag";
+import { fetchPostPageHtml } from "@/lib/remote/pages";
+import { fetchTagCategory } from "@/lib/remote/api";
 import { getTagSetFromThumb } from "@/lib/thumb/tag";
 import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page";
 import { withTimeout } from "@/lib/async/scheduling";
@@ -47,7 +46,7 @@ async function resolve(tagName: string): Promise<TagCategory> {
   if (cached !== undefined) {
     return cached;
   }
-  const category = decodeTagCategory(await fetchTagCategory(tagName));
+  const category = await fetchTagCategory(tagName);
 
   persist(tagName, category);
   return category;

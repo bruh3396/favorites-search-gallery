@@ -3,6 +3,7 @@ import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { Timeout } from "@/types/async";
 
 let timer: Timeout;
+let wasHeld = false;
 const THRESHOLD = 300;
 
 export function setupTouchHoldEvents(): void {
@@ -12,10 +13,14 @@ export function setupTouchHoldEvents(): void {
   }
 }
 
+export const didHold = (): boolean => wasHeld;
+
 function startHoldTimer(event: TouchEvent): void {
   stopHoldTimer();
+  wasHeld = false;
 
   timer = setTimeout(() => {
+    wasHeld = true;
     DomEvents.mobile.touchHold.emit(event);
   }, THRESHOLD);
 }

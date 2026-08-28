@@ -1,6 +1,6 @@
 import * as FavoritesTagCorrector from "@/features/favorites/model/enrichment/tag_corrector";
 import * as MediaResolver from "@/lib/media/resolver";
-import { fetchDeletedPost, fetchPost } from "@/lib/remote/api/post";
+import { fetchDeletedPost, fetchPost } from "@/lib/remote/api";
 import { ApiConfig } from "@/config/api_config";
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";

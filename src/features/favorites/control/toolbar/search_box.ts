@@ -4,7 +4,7 @@ import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { debounceLeading } from "@/lib/async/rate_limiting";
-import { openPostList } from "@/lib/remote/rule34/posts/navigation";
+import { openPostList } from "@/lib/remote/actions";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 const HISTORY_DEPTH = 30;

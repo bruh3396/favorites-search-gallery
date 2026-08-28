@@ -3,7 +3,7 @@ import * as FavoritesModel from "@/features/favorites/model/favorites_model";
 import * as FavoritesSearchFlow from "@/features/favorites/flows/search_flow";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
 import { Events } from "@/app/channels/events";
-import { fetchFavoritesCount } from "@/lib/remote/rule34/favorites/page";
+import { fetchFavoritesCount } from "@/lib/remote/pages";
 import { markAsNew } from "@/features/favorites/dom_tweaks/indicator";
 
 export async function loadAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {

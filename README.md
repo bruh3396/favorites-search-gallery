@@ -125,6 +125,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 | Tap Left/Right Edge of Screen    | Navigate gallery                               |                        |
 | Swipe Down                       | Exit gallery                                   |  |
 | Swipe Up                       | Show autoplay menu                                   |  |
+| Tap and Hold                     | Add favorite                                   |  |
 
 ### Gallery Hotkeys (Desktop)
 

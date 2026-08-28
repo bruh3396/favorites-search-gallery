@@ -1,6 +1,6 @@
 import { Favorite } from "@/types/favorite";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
-import { fetchVideoDurationFromFavorite } from "@/lib/remote/rule34/media/duration";
+import { fetchVideoDurationFromFavorite } from "@/lib/media/duration";
 
 let onFavoriteEnriched: (favorite: Favorite) => void = () => undefined;
 

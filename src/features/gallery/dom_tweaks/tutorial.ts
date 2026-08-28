@@ -24,6 +24,7 @@ function buildTutorial(): HTMLElement {
       tapButton("controls-guide-tap-right", "chevronRight", "Tap · next"),
       swipe("controls-guide-swipe-up", "chevronUp", "Swipe up · autoplay (if enabled)"),
       swipe("controls-guide-swipe-down", "chevronDown", "Swipe down · exit"),
+      hold("controls-guide-hold", "heartFilled", "Tap and hold · add favorite"),
       dismissLabel()
     ]
   });
@@ -44,6 +45,14 @@ function swipe(id: string, iconName: IconName, text: string): HTMLElement {
   return createElement("div", {
     id,
     className: "controls-guide-swipe",
+    children: [icon(iconName), label(text)]
+  });
+}
+
+function hold(id: string, iconName: IconName, text: string): HTMLElement {
+  return createElement("div", {
+    id,
+    className: "controls-guide-hold",
     children: [icon(iconName), label(text)]
   });
 }

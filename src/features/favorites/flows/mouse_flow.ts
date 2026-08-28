@@ -1,9 +1,9 @@
 import * as FavoritesPostActionFlow from "@/features/favorites/flows/post_action_flow";
 import * as FavoritesView from "@/features/favorites/view/favorites_view";
-import { openMedia, openPost } from "@/lib/remote/rule34/posts/navigation";
+import { openMedia, openPost } from "@/lib/remote/actions";
 import { EnhancedMouseEvent } from "@/lib/input";
 import { GALLERY_DISABLED } from "@/app/context/flags";
-import { buildPostPageUrl } from "@/lib/remote/url";
+import { postPageUrl } from "@/lib/remote/url";
 
 let previousThumb: HTMLElement | null = null;
 
@@ -41,7 +41,7 @@ export function suppressLinkOnHoveredThumb(event: EnhancedMouseEvent): void {
   }
 
   if (previousThumb !== null) {
-    previousThumb.querySelector("a")?.setAttribute("href", buildPostPageUrl(previousThumb.id));
+    previousThumb.querySelector("a")?.setAttribute("href", postPageUrl(previousThumb.id));
   }
   event.thumb.querySelector("a")?.removeAttribute("href");
   previousThumb = event.thumb;

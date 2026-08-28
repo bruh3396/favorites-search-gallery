@@ -19,7 +19,7 @@ import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { Preferences } from "@/app/context/preferences";
 import { createElement } from "@/utils/browser/element";
-import { deferPostPageFetchesUntil } from "@/lib/remote/rule34/posts/page";
+import { deferPostPageFetchesUntil } from "@/lib/remote/pages";
 import { setFavoriteTagsLookup } from "@/lib/thumb/tag";
 import { setSnippetSuggestionSource } from "@/lib/ui/autocomplete/autocomplete";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
@@ -147,7 +147,7 @@ function subscribeToDomEvents(): void {
     DomEvents.document.click.on(FavoritesMouseFlow.handleClick);
     DomEvents.document.mousedown.on(FavoritesMouseFlow.handleMouseDown);
   } else {
-    DomEvents.document.touchEnd.on(FavoritesPostActionFlow.triggerPostActionFromTouch);
+    DomEvents.document.click.on(FavoritesPostActionFlow.triggerPostAction);
   }
 }
 

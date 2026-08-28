@@ -1,6 +1,6 @@
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
-import { fetchFullImageBitmapFromThumb } from "@/lib/remote/rule34/media/bitmap";
+import { fetchFullImageBitmapFromThumb } from "@/lib/media/bitmap";
 import { getImageFromThumb } from "@/lib/thumb/query";
 import { isImageLoaded } from "@/utils/browser/image";
 

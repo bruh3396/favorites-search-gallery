@@ -1,12 +1,12 @@
+import * as Actions from "@/lib/remote/actions";
 import * as GalleryState from "@/features/gallery/model/state";
-import * as Navigator from "@/lib/remote/rule34/posts/navigation";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/thumb/favorite_actions";
 import { Boundary } from "@/types/boundary";
 import { Carousel } from "@/lib/collection/carousel";
 import { GalleryItemWindow } from "@/features/gallery/model/item_window";
 import { NavigationKey } from "@/types/input";
-import { downloadFromThumb } from "@/lib/remote/rule34/media/download";
+import { downloadFromThumb } from "@/lib/media/download";
 import { isVideoThumb } from "@/lib/thumb/media_item";
 import { navigationDelta } from "@/utils/pure/number";
 
@@ -28,8 +28,8 @@ export const currentThumb = (): HTMLElement => cursor.currentItem();
 export const pointTo = (thumb: HTMLElement): void => cursor.pointTo(thumb);
 export const indexThumbs = (source: HTMLElement[]): void => cursor.indexItems(source);
 export const isViewingVideo = (): boolean => GalleryState.isInGallery() && isVideoThumb(cursor.currentItem());
-export const openPost = (): void => Navigator.openPost(cursor.currentItem().id);
-export const openMedia = (): Promise<void> => Navigator.openMedia(cursor.currentItem());
+export const openPost = (): void => Actions.openPost(cursor.currentItem().id);
+export const openMedia = (): Promise<void> => Actions.openMedia(cursor.currentItem());
 export const download = (): Promise<void> => downloadFromThumb(cursor.currentItem());
 export const addFavorite = (): Promise<AddFavoriteStatus> => addFavoriteFromThumb(cursor.currentItem());
 export const removeFavorite = (): Promise<RemoveFavoriteStatus> => removeFavoriteFromThumb(cursor.currentItem());
