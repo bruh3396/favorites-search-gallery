@@ -59,7 +59,7 @@ export class ExpandedSearchQuery<T extends Searchable> extends SearchQuery<T> {
       const newOrGroup: AbstractSearchTerm[] = [];
 
       for (const searchTerm of orGroup) {
-        if (!(searchTerm instanceof WildcardSearchTerm)) {
+        if (!(searchTerm instanceof WildcardSearchTerm) || searchTerm.isNegated) {
           newOrGroup.push(searchTerm);
           continue;
         }

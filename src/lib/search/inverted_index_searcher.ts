@@ -1,3 +1,4 @@
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExpandedSearchQuery } from "@/lib/search/query/expanded_search_query";
 import { InvertedIndex } from "@/lib/collection/inverted_index";
 import { Searchable } from "@/types/search";
@@ -13,7 +14,7 @@ export class InvertedIndexSearcher<T extends Searchable> {
 
   private findMatches(expandedQuery: ExpandedSearchQuery<T>, docs: T[]): T[] {
     const required = this.docsWithAllTerms(expandedQuery.requiredTerms);
-    const candidates = this.narrowByOrGroups(required, expandedQuery.orGroupTerms);
+    const candidates = this.narrowByOrGroups(required, expandedQuery.orGroups);
     const exclusions = this.docsWithAnyTerm(expandedQuery.negatedTerms);
     return candidates.size === 0 ? [] : docs.filter(doc => candidates.has(doc) && !exclusions.has(doc));
   }
@@ -49,16 +50,28 @@ export class InvertedIndexSearcher<T extends Searchable> {
     return candidates;
   }
 
-  private narrowByOrGroups(candidates: ReadonlySet<T>, orGroups: string[][]): Set<T> {
+  private narrowByOrGroups(candidates: ReadonlySet<T>, orGroups: AbstractSearchTerm[][]): Set<T> {
     let narrowed = new Set(candidates);
 
     for (const orGroup of orGroups) {
-      narrowed = intersection(this.docsWithAnyTerm(orGroup), narrowed);
+      narrowed = this.narrowByOrGroup(narrowed, orGroup);
 
       if (narrowed.size === 0) {
         return new Set<T>();
       }
     }
     return narrowed;
+  }
+
+  private narrowByOrGroup(candidates: Set<T>, orGroup: AbstractSearchTerm[]): Set<T> {
+    return orGroup.some(searchTerm => searchTerm.isNegated) ? this.keepDocsMatchingAnyTerm(candidates, orGroup) : this.keepDocsIndexedByAnyTerm(candidates, orGroup);
+  }
+
+  private keepDocsMatchingAnyTerm(candidates: Set<T>, orGroup: AbstractSearchTerm[]): Set<T> {
+    return new Set([...candidates].filter(doc => orGroup.some(searchTerm => searchTerm.matches(doc))));
+  }
+
+  private keepDocsIndexedByAnyTerm(candidates: Set<T>, orGroup: AbstractSearchTerm[]): Set<T> {
+    return intersection(this.docsWithAnyTerm(orGroup.map(searchTerm => searchTerm.value)), candidates);
   }
 }

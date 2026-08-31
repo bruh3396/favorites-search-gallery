@@ -1,11 +1,12 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { desugarNestedOrGroups } from "@/lib/search/parsers/nested_or_group_desugarer";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 
 export function normalizeSearchQuery(query: string): string {
-  return removeExtraWhitespace(query).toLowerCase();
+  return desugarNestedOrGroups(removeExtraWhitespace(query).toLowerCase());
 }
 
 export function parseTermGroups(query: string): { orGroups: string[][]; andTerms: string[] } {

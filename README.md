@@ -165,6 +165,7 @@ Same as the normal site syntax with addition of lone "ID" without ":"
 |-----------------|-----------------|------------------------------------------------------------------------------------------------------------------------|
 | And             | tag1 tag2       | apple banana grape                                                                                                     |
 | Or              | ( tag1 ~ tag2 ) | ( apple ~ banana ~ grape )                                                                                             |
+| Nested Or       | ( tag1 ~ ( tag2 tag3 ) ) | ( apple ~ ( banana grape ) )                                                                                 |
 | Not             | -tag1           | -pineapple -orange                                                                                                     |
 | Wildcard        | ta*1            | a\*ple\*auce b\*a\*n\*a \*grape\*                 |
 | ID              | \<id\>          | 12345                                                                                                            |
@@ -217,13 +218,28 @@ Notes:
 | -height:>width video                             | landscape video                                                                                        |
 | duration:>30 duration:<31 video                  | 30 second video                                                                                        |
 
+### Nested Or
 
+An alternative inside an **Or** group may itself be a parenthesized **And** group. This expresses "either of these, but require extra tags on one of them" as a single search rather than two separate ones.
+
+`( banana ~ ( apple green ) )` matches every post with **banana**, plus the **apple** posts that also have **green**. It is equivalent to `( banana ~ apple ) ( banana ~ green )`.
+
+
+| Query                                             | Explanation                                                                                     |
+|---------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| ( banana ~ ( apple green ) )                      | has **banana**, or has both **apple** and **green**                                             |
+| ( banana ~ ( apple green strawberry ) )           | has **banana**, or has all of **apple**, **green**, and **strawberry**                          |
+| ( ( apple green ) ~ banana )                      | same as above; the nested group can be on either side                                           |
+| ( apple ~ ( banana -ripe ) )                      | has **apple**, or has **banana** but not **ripe**                                               |
+| ( ( apple red ) ~ ( banana yellow ) )             | has both **apple** and **red**, or has both **banana** and **yellow**                           |
+| ( gif ~ ( animated -video ) ~ ( video duration:<5 ) ) | is a **gif**, or is **animated** but not a **video**, or is a **video** shorter than 5 seconds |
+| ripe ( banana ~ ( apple green ) )                 | has **ripe**, and (has **banana**, or has both **apple** and **green**)                          |
 
 
 ### Realistic Examples
 
 * ( video ~ animated ~ high_res\* ~ absurd_res\* ) -low_res\* ( female\* ~ 1girls ~ 123 ) -ai_generated -red_hair -no_sound looking_at_viewer score:>100
-* ( fortnite\* ~ valorant\* ~ apex\* ~ \*league\* ) -video -\*animated\* -ai_generated \*3d\* -\*2d\*
+* ( fortnite\* ~ valorant\* ~ apex\* ~ \*league\* ) -ai_generated \*3d\* -\*2d\* ( gif ~ ( animated -video ) ~ ( video duration:<5 ) )
 
 
 ## FAQ

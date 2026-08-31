@@ -146,6 +146,27 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
     }
   },
   {
+    name: "negated or",
+    run: (assert: AssertMatches): void => {
+      assert("( red ~ -red )", allDocNames);
+      assert("( red ~ -sweet )", ["apple", "banana", "cherry", "kiwi", "orange", "strawberry"]);
+      assert("( -red ~ -sweet )", ["apple", "banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
+      assert("( red ~ -berry )", ["apple", "banana", "cherry", "grape", "kiwi", "mango", "orange", "pear", "strawberry"]);
+      assert("( -* ~ red )", ["apple", "cherry", "strawberry"]);
+      assert("fiber ( sweet ~ -red )", ["banana", "blueberry", "cherry", "kiwi", "mango", "orange", "pear"]);
+    }
+  },
+  {
+    name: "nested or",
+    run: (assert: AssertMatches): void => {
+      assert("( red ~ ( sweet berry ) )", ["apple", "cherry", "strawberry", "blueberry"]);
+      assert("( ( sweet berry ) ~ red )", ["apple", "cherry", "strawberry", "blueberry"]);
+      assert("( apple ~ ( green tropical ) )", ["apple", "kiwi"]);
+      assert("( ( juicy citrus ) ~ ( grainy soft ) )", ["orange", "pear"]);
+      assert("green ( red ~ ( fiber tart ) )", ["apple", "kiwi"]);
+    }
+  },
+  {
     name: "wildcard",
     run: (assert: AssertMatches): void => {
       assert("ch*", ["cherry"]);

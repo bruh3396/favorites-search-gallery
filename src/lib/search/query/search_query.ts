@@ -32,10 +32,6 @@ export class SearchQuery<T extends Searchable> {
     return this.andTerms.filter(searchTerm => !searchTerm.isNegated).map(searchTerm => searchTerm.value);
   }
 
-  public get orGroupTerms(): string[][] {
-    return this.orGroups.map(orGroup => orGroup.map(searchTerm => searchTerm.value));
-  }
-
   public filter(items: T[]): T[] {
     return this.isEmpty ? items : items.filter(item => this.matchesAndTerms(item) && this.matchesOrGroups(item));
   }
