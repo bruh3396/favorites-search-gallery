@@ -5,18 +5,26 @@ import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { fetchPostList } from "@/lib/remote/pages";
 import { numbersAround } from "@/utils/pure/number";
 import { preparePostListThumbs } from "@/features/post_list_navigator/dom_tweaks/thumb_preparer";
+import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 export function load(baseUrl: string, pageNumber: number): Promise<void> {
-  if (PostListNavigatorPageCache.has(pageNumber) || pageNumber < 0) {
+  if (pageNumber < 0 || PostListNavigatorPageCache.isLoaded(pageNumber)) {
     return Promise.resolve();
   }
-  PostListNavigatorPageCache.markLoading(pageNumber);
-  return fetchPostList(baseUrl, pageNumber)
+  const pending = PostListNavigatorPageCache.pendingLoad(pageNumber);
+
+  if (pending !== undefined) {
+    return pending;
+  }
+  const loaded = withExponentialBackoff(() => fetchPostList(baseUrl, pageNumber), Rule34NetworkConfig.postListFetchRetries, Rule34NetworkConfig.postListFetchRetryDelay)
     .then((html: string) => {
       PostListNavigatorPageCache.markLoaded(pageNumber, createPostListFromHtml(pageNumber, html));
     }).catch(() => {
       PostListNavigatorPageCache.remove(pageNumber);
     });
+
+  PostListNavigatorPageCache.markLoading(pageNumber, loaded);
+  return loaded;
 }
 
 export function preloadAround(baseUrl: string, currentPageNumber: number): void {

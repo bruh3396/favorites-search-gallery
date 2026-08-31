@@ -1,6 +1,6 @@
 import { THUMB_ORIGIN } from "@/lib/rule34_constants";
 
-const thumbSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
+const previewSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
 
 export function decompressPreviewSource(compressedSource: string): string {
   const splitSource = compressedSource.split("_");
@@ -8,6 +8,6 @@ export function decompressPreviewSource(compressedSource: string): string {
 }
 
 export function compressPreviewSource(source: string): string {
-  const match = source.match(thumbSourceCompressionRegex);
+  const match = source.match(previewSourceCompressionRegex);
   return match === null ? "" : match.splice(1).join("_");
 }

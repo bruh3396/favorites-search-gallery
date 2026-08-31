@@ -19,8 +19,12 @@
 [data-post-action-bar-mode="hover"] .tile:hover .post-action-bar,
 [data-post-action-bar-mode="always"] .post-action-bar {
   opacity: 1;
-  pointer-events: auto;
   transform: none;
+}
+
+[data-post-action-bar-mode="hover"] .tile:hover .post-action-button,
+[data-post-action-bar-mode="always"] .post-action-button {
+  pointer-events: auto;
 }
 
 .post-action-id {

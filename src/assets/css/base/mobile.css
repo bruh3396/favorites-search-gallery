@@ -137,6 +137,22 @@
   width: 98vw;
 }
 
+[data-mobile] #thumbnailSize {
+  display: none;
+}
+
+[data-mobile] .sidebar {
+  background-color: transparent !important;
+}
+
+[data-mobile] #postListDisplayOptsForm>h3, .postListSidebarRight {
+    display: block !important;
+}
+
+[data-mobile] #postListDisplayOptsForm>*:nth-child(-n+2) {
+    display: none !important;
+}
+
 [data-mobile] #post-list-menu .setting-row-label {
     text-align: left;
 }

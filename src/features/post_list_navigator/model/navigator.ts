@@ -3,10 +3,8 @@ import * as PostListNavigatorUrlContext from "@/features/post_list_navigator/mod
 import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigationResult } from "@/features/post_list_navigator/types/navigation";
-import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { getAllPageThumbs } from "@/app/layout/content_thumbs";
 import { navigationDelta } from "@/utils/pure/number";
-import { sleep } from "@/lib/async/scheduling";
 
 let initialPageNumber: number;
 let currentPageNumber: number;
@@ -49,17 +47,8 @@ export async function getMoreResults(): Promise<HTMLElement[]> {
     return [];
   }
   currentPageNumber += 1;
-  let nextPostList: PostList | undefined;
-
-  for (let attempts = 0; attempts < Rule34NetworkConfig.postListFetchRetries; attempts += 1) {
-    await PostListNavigatorPageLoader.load(baseUrl, currentPageNumber);
-    nextPostList = PostListNavigatorPageLoader.get(currentPageNumber);
-
-    if (nextPostList !== undefined) {
-      break;
-    }
-    await sleep(Rule34NetworkConfig.postListFetchRetryDelay);
-  }
+  await PostListNavigatorPageLoader.load(baseUrl, currentPageNumber);
+  const nextPostList = PostListNavigatorPageLoader.get(currentPageNumber);
 
   if (nextPostList === undefined) {
     console.error(`Could not load next search page ${currentPageNumber}`);

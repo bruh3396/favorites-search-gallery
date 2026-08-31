@@ -6,7 +6,7 @@ export const Rule34NetworkConfig = {
 
   extensionProbeRateLimit: { concurrency: 3, ratePerSecond: 50 } satisfies RateLimiterConfig,
 
-  generalPageRequestRateLimit: { concurrency: 1, ratePerSecond: 0.25 } satisfies RateLimiterConfig,
+  generalPageRequestRateLimit: { concurrency: 1, ratePerSecond: 0.3 } satisfies RateLimiterConfig,
 
   favoritesPageFetchDelay: 1_000,
   favoritesPageFetchRetries: 5,
@@ -19,6 +19,6 @@ export const Rule34NetworkConfig = {
   favoriteRemoveThrottle: 1_000,
 
   postListPrefetchLength: 3,
-  postListFetchRetries: 4,
+  postListFetchRetries: 10,
   postListFetchRetryDelay: 500
 };

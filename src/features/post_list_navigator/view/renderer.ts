@@ -13,16 +13,12 @@ function updatePaginator(postList: PostList): void {
     return;
   }
   const currentPaginator = document.getElementById("paginator");
-  const placeToInsert = currentPaginator;
 
-  if (placeToInsert === null) {
+  if (currentPaginator === null || currentPaginator === postList.paginator) {
     return;
   }
-  placeToInsert.insertAdjacentElement("afterend", postList.paginator);
-
-  if (currentPaginator !== null) {
-    currentPaginator.remove();
-  }
+  currentPaginator.insertAdjacentElement("afterend", postList.paginator);
+  currentPaginator.remove();
 }
 
 function updateAddressBar(postList: PostList): void {

@@ -67,7 +67,7 @@ export const PostListSettingsCatalog = {
   }),
   postActionBarButtons: multiSegmented<ActionBarButton>({
     id: "post-action-bar-buttons",
-    label: "Buttons",
+    label: "Action Buttons",
     tooltip: "Choose which actions appear on thumbnails",
     preference: Preferences.postList.postActionBarButtons,
     applyOnBuild: true,

@@ -68,14 +68,20 @@ export function handleActionBarClick(event: MouseEvent | TouchEvent, callbacks: 
   if (event instanceof MouseEvent && event.button !== ClickCode.Left) {
     return;
   }
-  const button = closestActionButton(targetOf(event));
+  const target = event instanceof MouseEvent ? event.target : document.elementFromPoint(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+  const bar = target instanceof Element ? target.closest(`.${ActionBarSelectors.bar}`) : null;
 
-  if (button === null) {
+  if (!(bar instanceof HTMLElement)) {
     return;
   }
   event.stopPropagation();
   event.preventDefault();
-  dispatch(button, callbacks);
+
+  const button = closestActionButton(target);
+
+  if (button !== null) {
+    dispatch(button, callbacks);
+  }
 }
 
 export function setActionBarMode(mode: ActionBarMode): void {
@@ -107,14 +113,6 @@ export function markActionBarUnfavorited(id: string): void {
 
 function actionButton(action: ActionBarAction, innerHTML: string): string {
   return `<button type="button" class="${ActionBarSelectors.button}" data-action="${action}">${innerHTML}</button>`;
-}
-
-function targetOf(event: MouseEvent | TouchEvent): EventTarget | null {
-  if (event instanceof TouchEvent) {
-    const touch = event.changedTouches[0];
-    return touch === undefined ? null : document.elementFromPoint(touch.clientX, touch.clientY);
-  }
-  return event.target;
 }
 
 function closestActionButton(target: EventTarget | null): HTMLElement | null {
