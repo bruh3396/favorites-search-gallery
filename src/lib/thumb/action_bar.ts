@@ -110,7 +110,7 @@ function actionButton(action: ActionBarAction, innerHTML: string): string {
 }
 
 function targetOf(event: MouseEvent | TouchEvent): EventTarget | null {
-  if (event instanceof TouchEvent) {
+  if (!(event instanceof MouseEvent)) {
     const touch = event.changedTouches[0];
     return touch === undefined ? null : document.elementFromPoint(touch.clientX, touch.clientY);
   }
