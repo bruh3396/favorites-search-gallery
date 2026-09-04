@@ -1,18 +1,12 @@
-import * as FavoritesCollection from "@/features/favorites/model/loading/collection";
+import * as FavoritesCollection from "@/features/favorites/model/collection";
 import * as FavoritesEnricher from "@/features/favorites/model/enrichment/enricher";
 import * as FavoritesLoader from "@/features/favorites/model/loading/loader";
 import * as FavoritesPaginator from "@/features/favorites/model/search/paginator";
 import * as FavoritesSearcher from "@/features/favorites/model/search/searcher";
 import { FavoritesModelDependencies, NewFavoritesResult } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { FavoriteItem } from "@/features/favorites/types/favorite_item";
-
-let getAddedTags: (id: string) => string | undefined = () => undefined;
-let waitForAddedTags: () => Promise<void> = () => Promise.resolve();
 
 export function setup(dependencies: FavoritesModelDependencies): void {
-  getAddedTags = dependencies.getAddedTags;
-  waitForAddedTags = dependencies.waitForAddedTags;
   FavoritesSearcher.setup(dependencies.onSearchResultsChanged);
   FavoritesEnricher.setup(
     FavoritesLoader.updateStoredFavorite,
@@ -23,8 +17,7 @@ export function setup(dependencies: FavoritesModelDependencies): void {
 }
 
 export async function loadStoredFavorites(): Promise<void> {
-  await waitForAddedTags();
-  const favorites = await FavoritesLoader.readStoredFavorites(getAddedTags);
+  const favorites = await FavoritesLoader.readStoredFavorites();
 
   FavoritesSearcher.deferIndexing();
   FavoritesCollection.setAll(favorites);
@@ -55,12 +48,12 @@ export const invertSearchResults = (): Favorite[] => FavoritesSearcher.invertRes
 export const setSearchScopeToCurrentResults = (): void => FavoritesCollection.setSearchScope(FavoritesSearcher.getCurrentSearchResults());
 export const repaginateCurrentResults = (): Favorite[] => FavoritesPaginator.paginate(FavoritesSearcher.getCurrentSearchResults());
 
-export { getAll as getAllFavorites, get as getFavorite, getScoped as getFavoritesInScope, clearSearchScope } from "@/features/favorites/model/loading/collection";
-export { destroyStore, deleteStoredFavorite, storeFavorites, hasStoredFavorites, loadFavoriteIds } from "@/features/favorites/model/loading/loader";
+export { getAll as getAllFavorites, get as getFavorite, getScoped as getFavoritesInScope, clearSearchScope } from "@/features/favorites/model/collection";
+export { destroyStore, deleteStoredFavorite, storeFavorites, hasStoredFavorites, loadFavoriteIds, destroyLegacyStores, migrateLegacyStores } from "@/features/favorites/model/loading/loader";
 export { getCurrentSearchQuery, getCurrentSearchResults, shuffleSearchResults } from "@/features/favorites/model/search/searcher";
 export { paginate, selectPage, currentPageFavorites, adjacentPageFavorites, selectAdjacentPage, selectWrappedAdjacentPage, atFinalPage, hasOnlyOnePage, paginationState as paginationContext } from "@/features/favorites/model/search/paginator";
 
-function processIncomingFavorites(favorites: FavoriteItem[]): void {
+function processIncomingFavorites(favorites: Favorite[]): void {
   FavoritesSearcher.reIndex(favorites);
   FavoritesEnricher.enrich(favorites);
 }

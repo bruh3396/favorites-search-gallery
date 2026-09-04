@@ -1,6 +1,7 @@
 import { EncodedTagCategory, EncodedTagCategoryMap, TagCategoryMap } from "@/types/search";
+import { MediaExtension } from "@/types/media";
 
-type BasePost<T> = {
+export type ServerPost = {
   id: string;
   width: number;
   height: number;
@@ -9,11 +10,17 @@ type BasePost<T> = {
   change: number;
   fileURL: string;
   previewURL: string;
-  tagCategories: T;
+  tagCategories: EncodedTagCategoryMap;
 };
 
-export type Post = BasePost<TagCategoryMap> & { tags: string };
-export type ServerPost = BasePost<EncodedTagCategoryMap>;
+export type Post = Omit<ServerPost, "tagCategories"> & {
+  tagCategories: TagCategoryMap;
+  tags: string;
+  duration?: number;
+  extension?: MediaExtension;
+  deleted?: boolean;
+  fetchedAt?: number;
+};
 
 export type PostResponse =
   | { status: "ok"; post: ServerPost }

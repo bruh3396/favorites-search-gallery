@@ -27,6 +27,10 @@ export function toSeconds(milliseconds: number): number {
   return roundToTwoDecimalPlaces(milliseconds / 1_000);
 }
 
+export function daysToMilliseconds(days: number): number {
+  return days * 24 * 60 * 60 * 1_000;
+}
+
 export function valuesAround<V>(center: number, count: number, isInBounds: (position: number) => boolean, at: (position: number) => V): V[] {
   if (count <= 0 || !isInBounds(center)) {
     return [];

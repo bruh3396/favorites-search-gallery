@@ -46,7 +46,6 @@ function subscribeToEvents(): void {
   DomEvents.document.keyup.on(PostOverlayKeyFlow.handleKeyUp);
   Preferences.postOverlay.enabled.on(PostOverlayToggleFlow.setVisible);
   Events.favorites.tagCategoriesResolved.on(PostOverlayModel.warmTagCategoryCache);
-  Events.favorites.resetConfirmed.on(PostOverlayModel.destroyTagCategoryStore);
   DomEvents.window.scroll.on(PostOverlayHoverFlow.hideTemporarily);
   Events.favorites.contentReplaced.on(PostOverlayHoverFlow.hideTemporarily);
   Preferences.favorites.columnCount.on(PostOverlayHoverFlow.hideTemporarily);

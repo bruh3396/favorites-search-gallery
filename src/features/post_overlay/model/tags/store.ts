@@ -3,20 +3,12 @@ import { Database } from "@/lib/storage/database";
 import { TagCategoryMapping } from "@/types/search";
 
 const database = new Database<TagCategoryMapping>("TagCategories", "tagCategories");
-const writeScheduler = new CoalescingExecutor<TagCategoryMapping>(500, 2_000, writeBatch);
+const databaseWriter = new CoalescingExecutor<TagCategoryMapping>(500, 2_000, database.write.bind(database));
 
 export function readAll(): Promise<TagCategoryMapping[]> {
   return database.readAll();
 }
 
 export function write(mapping: TagCategoryMapping): void {
-  writeScheduler.schedule(mapping);
-}
-
-export function destroy(): Promise<void> {
-  return database.destroy();
-}
-
-function writeBatch(mappings: TagCategoryMapping[]): void {
-  database.write(mappings);
+  databaseWriter.schedule(mapping);
 }

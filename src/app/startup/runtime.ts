@@ -1,9 +1,7 @@
 import { Root, setupShell } from "@/app/layout/shell";
-import { Events } from "@/app/channels/events";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { setupAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { setupDomEvents } from "@/app/dom/events";
-import { setupExtensions } from "@/lib/media/resolver";
 import { setupHotkeyEvents } from "@/app/dom/hotkey_events";
 import { ping as setupServer } from "@/lib/remote/api";
 import { setupStyles } from "@/app/startup/style";
@@ -17,7 +15,6 @@ export function setupRuntime(): void {
   setupSwipeEvents();
   setupHotkeyEvents();
   setupAutocomplete();
-  setupExtensions(Events.favorites.storedFavoritesLoaded.timeout(2_000));
   setupStyles();
   setupShell();
 }

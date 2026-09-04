@@ -1,40 +1,19 @@
-import { MetadataMetric, Rating, Searchable } from "@/types/search";
-import { Post } from "@/types/api";
+import { MediaItem } from "@/types/media";
+import { MetadataMetric } from "@/types/search";
+import { Post } from "./api";
 
 export type FavoriteMetricMap = {
   [key in MetadataMetric]: number
 };
 
-export type SerializedFavoriteMetadata = {
-  width: number;
-  height: number;
-  score: number;
-  rating: number;
-  create: number;
-  change: number;
-  duration: number | undefined;
-};
-
-export type SerializedFavorite = {
-  id: string;
-  tags: string | Set<string>;
-  src: string;
-  deleted?: boolean;
-  metadata: SerializedFavoriteMetadata;
-};
-
-export interface Favorite extends Searchable {
-  id: string;
+export interface Favorite extends MediaItem {
   root: HTMLElement;
-  thumbUrl: string;
-  serialized: SerializedFavorite;
-  withinRating: (rating: Rating) => boolean;
-  updateTags: (post: Post) => void;
+  post: Post;
+  enrich: (post: Post) => void;
+  setDuration: (duration: number) => void;
   addTags: (newTags: string) => string;
   removeAddedTags: (tagsToRemove: string) => string;
   resetAddedTags: () => void;
-  populateMetadata: (post: Post) => void;
-  markDeleted: () => void;
   metrics: FavoriteMetricMap;
 }
 

@@ -1,61 +1,51 @@
-import * as FavoritesTagCorrector from "@/features/favorites/model/enrichment/tag_corrector";
-import * as MediaResolver from "@/lib/media/resolver";
-import { fetchDeletedPost, fetchPost } from "@/lib/remote/api";
-import { ApiConfig } from "@/config/api_config";
+import * as PostResolver from "@/lib/post/resolver";
 import { Favorite } from "@/types/favorite";
-import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
-import { withExponentialBackoff } from "@/lib/async/scheduling";
+import { toTagSet } from "@/utils/pure/tag";
 
 let onFavoriteEnriched: (favorite: Favorite) => void = () => undefined;
 let beforeTagsChanged: (favorite: Favorite) => void = () => undefined;
 let afterTagsChanged: (favorite: Favorite) => void = () => undefined;
-let onCategoriesResolved: (categoryMap: TagCategoryMap) => void = () => undefined;
+let onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void = () => undefined;
 
 export function setup(
   onFavoriteEnrichedFn: (favorite: Favorite) => void,
   beforeTagsChangedFn: (favorite: Favorite) => void,
   afterTagsChangedFn: (favorite: Favorite) => void,
-  onCategoriesResolvedFn: (categoryMap: TagCategoryMap) => void
+  onTagCategoriesResolvedFn: (categoryMap: TagCategoryMap) => void
 ): void {
   onFavoriteEnriched = onFavoriteEnrichedFn;
   beforeTagsChanged = beforeTagsChangedFn;
   afterTagsChanged = afterTagsChangedFn;
-  onCategoriesResolved = onCategoriesResolvedFn;
+  onTagCategoriesResolved = onTagCategoriesResolvedFn;
 }
 
-export function enrich(favorites: FavoriteItem[]): void {
-  for (const favorite of favorites) {
-    withExponentialBackoff(() => fetchPostForFavorite(favorite), ApiConfig.metadataRetries)
-      .then(post => applyPost(favorite, post))
-      .catch(console.error);
-  }
+export function enrich(favorites: Favorite[]): Promise<void> {
+  const favoritesById = new Map(favorites.map(favorite => [favorite.id, favorite]));
+  return PostResolver.resolvePosts(
+    favorites.map(favorite => favorite.post),
+    post => applyPost(favoritesById.get(post.id), post)
+  );
 }
 
-function fetchPostForFavorite(favorite: FavoriteItem): Promise<Post> {
-  return favorite.deleted ? fetchDeletedPost(favorite.id) : fetchPost(favorite.id, () => markDeleted(favorite));
-}
-
-function markDeleted(favorite: FavoriteItem): void {
-  favorite.markDeleted();
-  onFavoriteEnriched(favorite);
-}
-
-function applyPost(favorite: FavoriteItem, post: Post): void {
-  if (postIsEmpty(post)) {
+function applyPost(favorite: Favorite | undefined, post: Post): void {
+  if (favorite === undefined) {
     return;
   }
-  onCategoriesResolved(post.tagCategories);
+  onTagCategoriesResolved(post.tagCategories);
 
-  if (FavoritesTagCorrector.correctTagsIfInvalid(favorite, post)) {
+  if (tagsAreDifferent(favorite, post)) {
     beforeTagsChanged(favorite);
-    favorite.updateTags(post);
+    favorite.enrich(post);
     afterTagsChanged(favorite);
+  } else {
+    favorite.enrich(post);
   }
-  favorite.populateMetadata(post);
-  MediaResolver.writeExtensionFromPost(post);
   onFavoriteEnriched(favorite);
 }
 
-const postIsEmpty = (post: Post): boolean => post.width === 0 || post.tags === "";
+function tagsAreDifferent(favorite: Favorite, post: Post): boolean {
+  const difference = favorite.tags.symmetricDifference(toTagSet(post.tags));
+  return difference.size > 1 || (difference.size === 1 && !difference.has(favorite.id));
+}

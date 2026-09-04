@@ -3,11 +3,12 @@ import { ALL_RATINGS_VALUE } from "@/lib/rule34_constants";
 import { Favorite } from "@/types/favorite";
 import { Preferences } from "@/app/context/preferences";
 import { SearchQuery } from "@/lib/search/query/search_query";
+import { isRatingAllowed } from "@/lib/search/rating";
 
 const blacklistSearchQuery = new SearchQuery<Favorite>(NEGATED_BLACKLISTED_TAGS);
 
 export function filterByRating(favorites: Favorite[]): Favorite[] {
-  return areAllRatingsAllowed() ? favorites : favorites.filter(result => result.withinRating(Preferences.favorites.allowedRatings.value));
+  return areAllRatingsAllowed() ? favorites : favorites.filter(favorite => isRatingAllowed(favorite.post.rating, Preferences.favorites.allowedRatings.value));
 }
 
 export function filterOutBlacklisted(favorites: Favorite[]): Favorite[] {

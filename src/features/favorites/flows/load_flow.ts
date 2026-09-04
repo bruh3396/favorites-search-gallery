@@ -7,6 +7,8 @@ import { fetchFavoritesCount } from "@/lib/remote/pages";
 import { markAsNew } from "@/features/favorites/dom_tweaks/indicator";
 
 export async function loadAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
+  await FavoritesModel.migrateLegacyStores(() => FavoritesView.setStatus("Migrating favorites"));
+
   if (await hasStoredFavorites()) {
     await loadStoredFavorites();
     await fetchNewFavorites(firstPageFavorites);

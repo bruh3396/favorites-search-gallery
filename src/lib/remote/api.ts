@@ -1,5 +1,6 @@
 import { PLATFORM, USER_ID, VERSION } from "@/lib/environment";
-import { Post, PostResponse, Route, TagResponse } from "@/types/api";
+import { PostResponse, Route, TagResponse } from "@/types/api";
+import { Post } from "@/types/api";
 import { ApiConfig } from "@/config/api_config";
 import { CoalescingResolver } from "@/lib/async/coalescing";
 import { LocalOverrides } from "@/config/local_overrides";

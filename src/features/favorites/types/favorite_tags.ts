@@ -1,19 +1,20 @@
-import { toSortedTagSet, toSortedTagString, toTagSet, toTagString } from "@/utils/pure/tag";
-import { Post } from "@/types/api";
-import { SerializedFavorite } from "@/types/favorite";
+import { toSortedTagSet, toSortedTagString, toTagString } from "@/utils/pure/tag";
 
 export class FavoriteTags {
   public tags: Set<string> = new Set();
   private baseTags: Set<string> = new Set();
   private addedTags: Set<string> = new Set();
 
-  constructor(post: Post, record: HTMLElement | SerializedFavorite, addedTags?: string) {
-    this.set(toBaseTagSet(post, record), addedTags === undefined ? undefined : toSortedTagSet(addedTags));
-    post.tags = "";
+  constructor(baseTags: Set<string>, addedTags?: Set<string>) {
+    this.set(baseTags, addedTags);
   }
 
   public get tagString(): string {
     return toTagString(this.tags);
+  }
+
+  public get addedTagString(): string | undefined {
+    return this.addedTags.size === 0 ? undefined : toSortedTagString(this.addedTags);
   }
 
   public set(tags: Set<string>, addedTags?: Set<string>): void {
@@ -60,11 +61,4 @@ export class FavoriteTags {
     }
     this.tags = new Set(Array.from(this.baseTags.union(this.addedTags)).sort());
   }
-}
-
-function toBaseTagSet(post: Post, record: HTMLElement | SerializedFavorite): Set<string> {
-  if (record instanceof HTMLElement) {
-    return toSortedTagSet(post.tags);
-  }
-  return record.tags instanceof Set ? record.tags : toTagSet(record.tags);
 }

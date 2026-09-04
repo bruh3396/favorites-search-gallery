@@ -2,7 +2,7 @@ import { DEFAULT_EXTENSION, extensionRegex } from "@/lib/media/constants";
 import { MediaExtension, MediaItem } from "@/types/media";
 import { withHostname, withNoQueryParams } from "@/utils/pure/url";
 
-export const imageUrl = (item: MediaItem): string => withNoQueryParams(thumbUrlToImageUrl(item.thumbUrl ?? ""));
+export const imageUrl = (item: MediaItem): string => withNoQueryParams(thumbUrlToImageUrl(item.thumbUrl));
 export const videoUrl = (item: MediaItem): string => withExtension(imageUrl(item), "mp4");
 export const gifUrl = (item: MediaItem): string => withExtension(imageUrl(item), item.tags.has("animated_png") ? "png" : "gif");
 

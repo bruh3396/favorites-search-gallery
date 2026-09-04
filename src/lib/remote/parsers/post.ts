@@ -1,4 +1,5 @@
-import { Post, ServerPost } from "@/types/api";
+import { ServerPost } from "@/types/api";
+import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { decodeHtmlEntities } from "@/utils/pure/string";
 import { decodeTagCategory } from "@/lib/remote/parsers/tag";

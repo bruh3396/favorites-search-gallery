@@ -9,3 +9,7 @@ const RATINGS_BY_INITIAL: Record<string, Rating> = {
 export function decodeRating(rating: string): Rating {
   return RATINGS_BY_INITIAL[rating.charAt(0).toLowerCase()] ?? DiscreteRating.Explicit;
 }
+
+export function isRatingAllowed(rating: string, allowedRatings: Rating): boolean {
+  return (decodeRating(rating) & allowedRatings) > 0;
+}

@@ -357,6 +357,12 @@ export default defineConfig([
       // "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/explicit-function-return-type": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          ignoreRestSiblings: true
+        }
+      ],
       "@typescript-eslint/naming-convention": [
         "error",
         { selector: "default", format: ["camelCase"], leadingUnderscore: "allow" },
@@ -622,7 +628,7 @@ export default defineConfig([
     files: [
       "src/**/sorted_array.ts",
       "src/**/array.ts",
-      "src/features/favorites/types/favorite_item.ts",
+      "src/lib/search/rating.ts",
       "src/features/favorites/features/downloader/filename_settings.ts",
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",

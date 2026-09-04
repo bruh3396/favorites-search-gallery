@@ -1,4 +1,4 @@
-import { Post } from "@/types/api";
+import { MediaExtension } from "@/types/media";
 import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { postPageUrl } from "@/lib/remote/url";
 import { resolveMediaType } from "@/lib/media/type";
@@ -10,11 +10,11 @@ export class FavoriteElement {
   private readonly container: HTMLAnchorElement;
   private readonly image: HTMLImageElement;
 
-  constructor(post: Post) {
+  constructor(id: string, previewUrl: string, tags: string) {
     this.root = favoriteElementTemplate.cloneNode(true) as HTMLElement;
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.container.children[0] as HTMLImageElement;
-    this.populateAttributes(post);
+    this.populateAttributes(id, previewUrl, tags);
     this.container.href = postPageUrl(this.root.id);
   }
 
@@ -28,11 +28,16 @@ export class FavoriteElement {
     }
   }
 
-  private populateAttributes(post: Post): void {
-    this.image.src = post.previewURL;
-    setDataset(this.root, "mediaType", resolveMediaType(post.tags));
-    this.root.id = post.id;
+  public setExtension(extension: MediaExtension | undefined): void {
+    if (extension !== undefined) {
+      setDataset(this.root, "extension", extension);
+    }
+  }
+
+  private populateAttributes(id: string, previewUrl: string, tags: string): void {
+    this.image.src = previewUrl;
+    setDataset(this.root, "mediaType", resolveMediaType(tags));
+    this.root.id = id;
     stampActionBarId(this.root);
-    this.setAspectRatio(post.width, post.height);
   }
 }

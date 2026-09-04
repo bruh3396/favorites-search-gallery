@@ -17,12 +17,10 @@ import * as GalleryVideoFlow from "@/features/gallery/flows/video_flow";
 import * as GalleryView from "@/features/gallery/view/gallery_view";
 import * as GalleryVisibilityFlow from "@/features/gallery/flows/visibility_flow";
 import * as GalleryWheelFlow from "@/features/gallery/flows/wheel_flow";
-import * as MediaResolver from "@/lib/media/resolver";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { hideTutorial, showTutorial } from "@/features/gallery/dom_tweaks/tutorial";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
-import { Favorite } from "@/types/favorite";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { NavigationKey } from "@/types/input";
@@ -141,13 +139,6 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.contentAdded.on(GalleryContentFlow.refresh);
   Preferences.gallery.previewEnabled.on(GalleryModel.preview);
   Events.favorites.searchResultsUpdated.on(GalleryContentFlow.downscaleThumbsOutsideResults);
-  Events.favorites.searchResultsUpdated.on(warmExtensionCache, { once: true });
-}
-
-async function warmExtensionCache(favorites: Favorite[]): Promise<void> {
-  if (await hasStoredFavorites()) {
-    MediaResolver.cacheExtensions(favorites.slice(0, 50).map(favorite => favorite.id));
-  }
 }
 
 function subscribeToPostListEvents(): void {

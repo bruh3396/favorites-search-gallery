@@ -27,5 +27,5 @@ export enum DiscreteRating {
 }
 
 export interface Searchable {
-  tags: Set<string>;
+  readonly tags: Set<string>;
 }

@@ -29,7 +29,6 @@ export const Events = {
     contentAdded: new Emitter<Favorite[]>(),
     contentReplaced: new Emitter<void>(),
 
-    resetConfirmed: new Emitter<void>(),
     tagCategoriesResolved: new Emitter<TagCategoryMap>()
   },
   gallery: {

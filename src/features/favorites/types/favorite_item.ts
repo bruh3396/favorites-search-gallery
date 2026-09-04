@@ -1,70 +1,103 @@
-import { Favorite, FavoriteMetricMap, SerializedFavorite } from "@/types/favorite";
-import { clearPost, createPost } from "@/features/favorites/types/post_factory";
+import { Favorite, FavoriteMetricMap } from "@/types/favorite";
+import { toSortedTagSet, toTagSet } from "@/utils/pure/tag";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
-import { FavoriteMetadata } from "@/features/favorites/types/favorite_metadata";
 import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
+import { MediaExtension } from "@/types/media";
 import { Post } from "@/types/api";
-import { Rating } from "@/types/search";
-import { compressPreviewSource } from "@/features/favorites/types/preview_source_codec";
+import { chain } from "@/utils/pure/function";
+import { getImageFromThumb } from "@/lib/thumb/query";
+import { getTagsFromThumb } from "@/lib/thumb/tag";
 import { parseIdFromThumb } from "@/lib/thumb/post_id";
-import { toSortedTagSet } from "@/utils/pure/tag";
+import { removeExtraWhitespace } from "@/utils/pure/string";
 
 export class FavoriteItem implements Favorite {
   public readonly id: string;
-  public readonly metadata: FavoriteMetadata;
-  private readonly post: Post;
+  public readonly post: Post;
   private readonly favoriteTags: FavoriteTags;
   private element: FavoriteElement | null;
-  private isDeleted: boolean;
 
-  constructor(source: HTMLElement | SerializedFavorite, addedTags?: string) {
-    this.id = source instanceof HTMLElement ? parseIdFromThumb(source) : source.id;
-    this.post = createPost(source);
-    this.favoriteTags = new FavoriteTags(this.post, source, addedTags);
+  constructor(source: HTMLElement | Post) {
+    this.post = source instanceof HTMLElement ? thumbToPost(source) : source;
+    this.id = this.post.id;
+    this.favoriteTags = new FavoriteTags(toTagSet(this.post.tags));
     this.element = null;
-    this.metadata = new FavoriteMetadata(this.id, source);
-    this.isDeleted = source instanceof HTMLElement ? false : source.deleted ?? false;
-  }
-
-  public get deleted(): boolean {
-    return this.isDeleted;
   }
 
   public get tags(): Set<string> {
     return this.favoriteTags.tags;
   }
 
-  public get root(): HTMLElement {
-    if (this.element === null) {
-      this.post.tags = this.favoriteTags.tagString;
-      this.element = new FavoriteElement(this.post);
-      this.element.setAspectRatio(this.metadata.metrics.width, this.metadata.metrics.height);
-      clearPost(this.post);
-    }
-    return this.element.root;
-  }
-
   public get thumbUrl(): string {
     return this.element === null ? this.post.previewURL : this.element.thumbUrl;
   }
 
+  public get extension(): MediaExtension | undefined {
+    return this.post.extension;
+  }
+
   public get metrics(): FavoriteMetricMap {
-    return this.metadata.metrics;
+    return {
+      id: parseInt(this.post.id, 10),
+      width: this.post.width,
+      height: this.post.height,
+      score: this.post.score,
+      creationTimestamp: 0,
+      lastChangedTimestamp: this.post.change,
+      duration: this.post.duration ?? 0,
+      default: 0,
+      random: 0
+    };
   }
 
-  public get serialized(): SerializedFavorite {
-    return { id: this.id, tags: this.favoriteTags.tagString, src: compressPreviewSource(this.thumbUrl), deleted: this.isDeleted, metadata: this.metadata.serialized };
+  public get root(): HTMLElement {
+    if (this.element === null) {
+      this.element = new FavoriteElement(this.id, this.post.previewURL, this.favoriteTags.tagString);
+      this.element.setAspectRatio(this.post.width, this.post.height);
+      this.element.setExtension(this.post.extension);
+    }
+    return this.element.root;
   }
 
-  public populateMetadata(post: Post): void {
-    this.metadata.populateFromPost(post);
+  public enrich(post: Post): void {
+    post.previewURL = this.post.previewURL || post.previewURL;
+    Object.assign(this.post, post);
+    this.favoriteTags.set(toSortedTagSet(post.tags));
     this.element?.setAspectRatio(post.width, post.height);
+    this.element?.setExtension(post.extension);
   }
 
-  public markDeleted = (): boolean => (this.isDeleted = true);
-  public updateTags = (post: Post): void => this.favoriteTags.set(toSortedTagSet(post.tags));
-  public withinRating = (rating: Rating): boolean => (this.metadata.rating & rating) > 0;
+  public setDuration = (duration: number): void => {
+    this.post.duration = duration;
+  };
+
   public addTags = (newTags: string): string => this.favoriteTags.addTags(newTags);
   public removeAddedTags = (tagsToRemove: string): string => this.favoriteTags.removeAddedTags(tagsToRemove);
   public resetAddedTags = (): void => this.favoriteTags.resetAddedTags();
+}
+
+function thumbToPost(thumb: HTMLElement): Post {
+  const id = parseIdFromThumb(thumb);
+  const image = getImageFromThumb(thumb);
+  return {
+    id,
+    tags: image === null ? "" : normalizeTags(thumb, id),
+    width: 0,
+    height: 0,
+    score: 0,
+    rating: "",
+    change: 0,
+    fileURL: "",
+    previewURL: image === null ? "" : image.src ?? image.getAttribute("data-cfsrc") ?? "",
+    tagCategories: new Map()
+  };
+}
+
+function normalizeTags(thumb: HTMLElement, id: string): string {
+  return chain(
+    getTagsFromThumb(thumb),
+    tags => tags.replace(/\bvide\b/g, "video"),
+    tags => `${tags} ${id}`,
+    tags => tags.split(" ").sort().join(" "),
+    removeExtraWhitespace
+  );
 }
