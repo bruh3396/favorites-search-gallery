@@ -13,8 +13,6 @@ export const FavoritesConfig = {
   reloadFetchDelay: 100,
   skipFirstPageFetch: true,
 
-  searchIndexBuildBatchSize: 500,
-  buildIndexAsync: true,
   preloadThumbs: true,
   bottomNavigationButtonsEnabled: true,
   drawerSidebarLabelsEnabled: false

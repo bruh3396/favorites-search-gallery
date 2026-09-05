@@ -1,20 +1,16 @@
 import { itemsAround, wrappedItemsAround } from "@/utils/pure/array";
 import { Identifiable } from "@/types/app";
 
-export class GalleryItemWindow<T extends Identifiable> {
-  private readonly getItems: () => T[];
-  private readonly limit: number;
-  private readonly window: (items: T[], index: number, limit: number) => T[];
+const PRELOAD_WINDOW_SIZE = 50;
 
-  constructor(getItems: () => T[], wrapAround: boolean, limit: number = 50) {
-    this.getItems = getItems;
-    this.limit = limit;
-    this.window = wrapAround ? wrappedItemsAround : itemsAround;
-  }
+export function wrappingThumbsAroundId<T extends Identifiable, R>(items: T[], id: string, toThumb: (item: T) => R): R[] {
+  return wrappedItemsAround(items, indexOfId(items, id), PRELOAD_WINDOW_SIZE).map(toThumb);
+}
 
-  public getItemsAround(id: string): T[] {
-    const items = this.getItems();
-    const index = items.findIndex(item => item.id === id);
-    return this.window(items, index, this.limit);
-  }
+export function clampedThumbsAroundId<T extends Identifiable, R>(items: T[], id: string, toThumb: (item: T) => R): R[] {
+  return itemsAround(items, indexOfId(items, id), PRELOAD_WINDOW_SIZE).map(toThumb);
+}
+
+function indexOfId<T extends Identifiable>(items: T[], id: string): number {
+  return items.findIndex(item => item.id === id);
 }

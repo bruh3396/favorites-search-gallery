@@ -2,19 +2,20 @@ import { Searchable, SearchableMetadataMetric } from "@/types/search";
 import { describe, expect, test } from "vitest";
 import { parseMetadataSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
-type MetadataSearchable = Searchable & { metrics: Record<SearchableMetadataMetric, number> };
+type MetadataSearchable = Searchable & { getMetric: (metric: SearchableMetadataMetric) => number };
 
 function createMetadataSearchable(metrics: Partial<Record<SearchableMetadataMetric, number>>): MetadataSearchable {
+  const values: Record<SearchableMetadataMetric, number> = {
+    score: 0,
+    width: 0,
+    height: 0,
+    id: 0,
+    duration: 0,
+    ...metrics
+  };
   return {
     tags: new Set(),
-    metrics: {
-      score: 0,
-      width: 0,
-      height: 0,
-      id: 0,
-      duration: 0,
-      ...metrics
-    }
+    getMetric: (metric): number => values[metric]
   };
 }
 

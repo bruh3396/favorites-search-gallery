@@ -1,51 +1,50 @@
 import * as PostStore from "@/lib/post/store";
+import { ParsedPost, Post } from "@/types/api";
 import { allMediaExtensions, extensionRegex } from "@/lib/media/constants";
 import { fetchDeletedPost, fetchPost } from "@/lib/remote/api";
 import { ApiConfig } from "@/config/api_config";
 import { MediaExtension } from "@/types/media";
-import { Post } from "@/types/api";
 import { postIsComplete } from "@/lib/post/status";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
 
-export async function resolvePosts(posts: Post[], onResolved: (post: Post) => void): Promise<void> {
-  const cached = await readCache(posts);
+export async function resolveAll(stalePosts: Post[], onResolved: (resolved: ParsedPost) => void): Promise<void> {
+  const cached = await readCached(stalePosts.map(post => post.id));
 
-  await Promise.all(posts.map(async post => {
+  await Promise.all(stalePosts.map(async post => {
     onResolved(await resolve(post, cached.get(post.id)));
   }));
 }
 
-async function resolve(post: Post, cached: Post | undefined): Promise<Post> {
+async function resolve(stale: Post, cached: Post | undefined): Promise<ParsedPost> {
   if (cached !== undefined) {
-    return cached;
+    return { post: cached, tagCategories: new Map() };
   }
-  const resolved = await fetchComplete(post);
+  const latest = await fetchLatest(stale);
 
-  if (!postIsComplete(resolved)) {
-    return post;
+  if (!postIsComplete(latest.post)) {
+    return { post: stale, tagCategories: latest.tagCategories };
   }
-  const complete = { ...post, ...withExtension(resolved), fetchedAt: Date.now() };
+  const complete = { ...stale, ...withExtension(latest.post), fetchedAt: Date.now() };
 
   PostStore.write(complete);
-  return complete;
+  return { post: complete, tagCategories: latest.tagCategories };
 }
 
-async function readCache(posts: Post[]): Promise<Map<string, Post>> {
-  const postIds = posts.map(post => post.id);
+async function readCached(postIds: string[]): Promise<Map<string, Post>> {
   const cached = await PostStore.readMany(postIds);
   return new Map(cached.map(post => [post.id, post]));
 }
 
-function fetchComplete(post: Post): Promise<Post> {
+function fetchLatest(post: Post): Promise<ParsedPost> {
   return withExponentialBackoff(async() => {
     if (post.deleted) {
       return fetchDeletedPost(post.id);
     }
     let isDeleted = false;
-    const fetched = await fetchPost(post.id, () => {
+    const latest = await fetchPost(post.id, () => {
       isDeleted = true;
     });
-    return isDeleted ? { ...fetched, deleted: true } : fetched;
+    return isDeleted ? { ...latest, post: { ...latest.post, deleted: true } } : latest;
   }, ApiConfig.postRetries);
 }
 

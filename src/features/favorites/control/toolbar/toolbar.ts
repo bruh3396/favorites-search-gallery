@@ -55,22 +55,6 @@ const buttons: Partial<ButtonElement>[] = [
     parentId: FavoritesId.actions,
     icon: "clear",
     event: Events.favorites.clearButtonClicked
-  },
-  {
-    id: "set_search_scope_button",
-    parentId: FavoritesId.actions,
-    textContent: "Set Subset",
-    title: "Make the current search results the entire set of results to search from",
-    enabled: false,
-    event: Events.favorites.setSearchScopeButtonClicked
-  },
-  {
-    id: "clear_search_scope_button",
-    parentId: FavoritesId.actions,
-    textContent: "Stop Subset",
-    title: "Reset active favorites to all",
-    enabled: false,
-    event: Events.favorites.clearSearchScopeButtonClicked
   }
 ];
 

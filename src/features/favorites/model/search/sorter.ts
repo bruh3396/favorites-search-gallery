@@ -8,6 +8,6 @@ export function sort(favorites: Favorite[]): Favorite[] {
   if (sortKey === "random") {
     return shuffleInPlace([...favorites]);
   }
-  const sorted = [...favorites].sort((a, b) => b.metrics[sortKey] - a.metrics[sortKey]);
+  const sorted = [...favorites].sort((a, b) => b.getMetric(sortKey) - a.getMetric(sortKey));
   return Preferences.favorites.sortAscending.value ? sorted.reverse() : sorted;
 }

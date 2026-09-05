@@ -126,7 +126,6 @@ function migratePost(favorite: SerializedFavorite, imageExtension: ImageExtensio
     tags,
     fileURL: extension === undefined ? "" : withExtension(thumbUrlToImageUrl(previewURL), extension),
     previewURL,
-    tagCategories: new Map(),
     duration: favorite.metadata.duration,
     deleted: favorite.deleted,
     extension,

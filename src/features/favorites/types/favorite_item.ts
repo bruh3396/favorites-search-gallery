@@ -1,8 +1,9 @@
-import { Favorite, FavoriteMetricMap } from "@/types/favorite";
-import { toSortedTagSet, toTagSet } from "@/utils/pure/tag";
+import { toSortedTagSet, toSortedTagString, toTagSet } from "@/utils/pure/tag";
+import { Favorite } from "@/types/favorite";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
 import { MediaExtension } from "@/types/media";
+import { MetadataMetric } from "@/types/search";
 import { Post } from "@/types/api";
 import { chain } from "@/utils/pure/function";
 import { getImageFromThumb } from "@/lib/thumb/query";
@@ -13,12 +14,14 @@ import { removeExtraWhitespace } from "@/utils/pure/string";
 export class FavoriteItem implements Favorite {
   public readonly id: string;
   public readonly post: Post;
+  private readonly numericId: number;
   private readonly favoriteTags: FavoriteTags;
   private element: FavoriteElement | null;
 
   constructor(source: HTMLElement | Post) {
     this.post = source instanceof HTMLElement ? thumbToPost(source) : source;
     this.id = this.post.id;
+    this.numericId = parseInt(this.post.id, 10);
     this.favoriteTags = new FavoriteTags(toTagSet(this.post.tags));
     this.element = null;
   }
@@ -35,20 +38,6 @@ export class FavoriteItem implements Favorite {
     return this.post.extension;
   }
 
-  public get metrics(): FavoriteMetricMap {
-    return {
-      id: parseInt(this.post.id, 10),
-      width: this.post.width,
-      height: this.post.height,
-      score: this.post.score,
-      creationTimestamp: 0,
-      lastChangedTimestamp: this.post.change,
-      duration: this.post.duration ?? 0,
-      default: 0,
-      random: 0
-    };
-  }
-
   public get root(): HTMLElement {
     if (this.element === null) {
       this.element = new FavoriteElement(this.id, this.post.previewURL, this.favoriteTags.tagString);
@@ -58,10 +47,35 @@ export class FavoriteItem implements Favorite {
     return this.element.root;
   }
 
+  public getMetric(metric: MetadataMetric): number {
+    switch (metric) {
+      case "id":
+        return this.numericId;
+      case "width":
+        return this.post.width;
+      case "height":
+        return this.post.height;
+      case "score":
+        return this.post.score;
+      case "lastChangedTimestamp":
+        return this.post.change;
+      case "duration":
+        return this.post.duration ?? 0;
+      case "creationTimestamp":
+      case "default":
+      case "random":
+      default:
+        return 0;
+    }
+  }
+
   public enrich(post: Post): void {
     post.previewURL = this.post.previewURL || post.previewURL;
+    const tags = toSortedTagSet(post.tags).add(this.id);
+
     Object.assign(this.post, post);
-    this.favoriteTags.set(toSortedTagSet(post.tags));
+    this.post.tags = toSortedTagString(tags);
+    this.favoriteTags.set(tags);
     this.element?.setAspectRatio(post.width, post.height);
     this.element?.setExtension(post.extension);
   }
@@ -87,8 +101,7 @@ function thumbToPost(thumb: HTMLElement): Post {
     rating: "",
     change: 0,
     fileURL: "",
-    previewURL: image === null ? "" : image.src ?? image.getAttribute("data-cfsrc") ?? "",
-    tagCategories: new Map()
+    previewURL: image === null ? "" : image.src ?? image.getAttribute("data-cfsrc") ?? ""
   };
 }
 

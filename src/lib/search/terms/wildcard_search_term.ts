@@ -77,9 +77,9 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
 
   private findPrefixMatches(indexedTerms: string[]): string[] {
     const result: string[] = [];
-    const lo = this.findFirstPrefixMatchIndex(indexedTerms);
+    const low = this.findFirstPrefixMatchIndex(indexedTerms);
 
-    for (let i = lo; i < indexedTerms.length; i += 1) {
+    for (let i = low; i < indexedTerms.length; i += 1) {
       if (indexedTerms[i].startsWith(this.prefix)) {
         result.push(indexedTerms[i]);
       } else if (indexedTerms[i] > this.prefix) {
@@ -98,18 +98,18 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
   }
 
     private findFirstPrefixMatchIndex(terms: string[]): number {
-    let lo = 0;
-    let hi = terms.length - 1;
+    let low = 0;
+    let high = terms.length - 1;
 
-    while (lo <= hi) {
-      const mid = (lo + hi) >>> 1;
+    while (low <= high) {
+      const mid = (low + high) >>> 1;
 
       if (terms[mid] < this.prefix) {
-        lo = mid + 1;
+        low = mid + 1;
       } else {
-        hi = mid - 1;
+        high = mid - 1;
       }
     }
-    return lo;
+    return low;
   }
 }

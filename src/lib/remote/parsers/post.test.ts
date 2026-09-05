@@ -16,7 +16,7 @@ const serverPost: ServerPost = {
 
 describe("parsePost", () => {
   test("maps fields correctly", () => {
-    const post = parsePost(serverPost);
+    const { post } = parsePost(serverPost);
 
     expect(post.id).toBe("123");
     expect(post.width).toBe(1920);
@@ -30,15 +30,15 @@ describe("parsePost", () => {
   });
 
   test("decodes tag categories", () => {
-    const post = parsePost(serverPost);
+    const { tagCategories } = parsePost(serverPost);
 
-    expect(post.tagCategories.get("tag1")).toBe("general");
-    expect(post.tagCategories.get("tag2")).toBe("character");
+    expect(tagCategories.get("tag1")).toBe("general");
+    expect(tagCategories.get("tag2")).toBe("character");
   });
 
   test("decodes null tag category to general", () => {
-    const post = parsePost({ ...serverPost, tagCategories: { alpha: null } });
+    const { tagCategories } = parsePost({ ...serverPost, tagCategories: { alpha: null } });
 
-    expect(post.tagCategories.get("alpha")).toBe("general");
+    expect(tagCategories.get("alpha")).toBe("general");
   });
 });

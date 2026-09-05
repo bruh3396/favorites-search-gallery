@@ -1,6 +1,6 @@
 import * as PostResolver from "@/lib/post/resolver";
+import { ParsedPost, Post } from "@/types/api";
 import { Favorite } from "@/types/favorite";
-import { Post } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { toTagSet } from "@/utils/pure/tag";
 
@@ -23,17 +23,17 @@ export function setup(
 
 export function enrich(favorites: Favorite[]): Promise<void> {
   const favoritesById = new Map(favorites.map(favorite => [favorite.id, favorite]));
-  return PostResolver.resolvePosts(
+  return PostResolver.resolveAll(
     favorites.map(favorite => favorite.post),
-    post => applyPost(favoritesById.get(post.id), post)
+    resolved => applyPost(favoritesById.get(resolved.post.id), resolved)
   );
 }
 
-function applyPost(favorite: Favorite | undefined, post: Post): void {
+function applyPost(favorite: Favorite | undefined, { post, tagCategories }: ParsedPost): void {
   if (favorite === undefined) {
     return;
   }
-  onTagCategoriesResolved(post.tagCategories);
+  onTagCategoriesResolved(tagCategories);
 
   if (tagsAreDifferent(favorite, post)) {
     beforeTagsChanged(favorite);

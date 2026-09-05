@@ -5,6 +5,7 @@ import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { openPostList } from "@/lib/remote/actions";
+import { queueMacroTask } from "@/lib/async/scheduling";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 const HISTORY_DEPTH = 30;
@@ -32,6 +33,10 @@ class SearchBox {
     this.searchBox.value = query;
     this.refreshClearButton();
     this.startSearch();
+  }
+
+  public focus(): void {
+    this.searchBox.focus();
   }
 
   public clear(): void {
@@ -83,6 +88,13 @@ class SearchBox {
     this.searchBox.addEventListener("input", debounceLeading<Event>(() => this.history.setLastQuery(this.searchBox.value), INPUT_PERSIST_DELAY));
     this.subscribeToKeyboard();
     this.subscribeToGrowOnFocus();
+    Events.app.hotkeyPressed.on((key) => this.handleHotkey(key));
+  }
+
+  private handleHotkey(key: string): void {
+    if (key === "/") {
+      queueMacroTask(() => this.focus());
+    }
   }
 
   private subscribeToGrowOnFocus(): void {
@@ -143,8 +155,8 @@ class SearchBox {
     if (awesompleteIsVisible(this.searchBox)) {
       return;
     }
-    event.preventDefault();
     this.history.navigate(event.key as "ArrowUp" | "ArrowDown");
+    event.preventDefault();
     this.searchBox.value = this.history.selectedQuery;
     this.refreshClearButton();
     this.growToFit();
@@ -161,4 +173,5 @@ export const append = (text: string): void => searchBox?.append(text);
 export const exclude = (tag: string): void => searchBox?.append(`-${tag}`);
 export const search = (query: string): void => searchBox?.search(query);
 export const clear = (): void => searchBox?.clear();
+export const focus = (): void => searchBox?.focus();
 export const handleSearchButtonClicked = (event: MouseEvent): void => searchBox?.handleSearchButtonClicked(event);

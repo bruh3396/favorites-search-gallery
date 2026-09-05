@@ -26,7 +26,7 @@
     "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js",
     "test": "npx vitest --run --exclude \"src/playground/**\"",
     "test:api": "npx vitest --run src/playground/api.test.ts",
-    "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
     "lint": "npx eslint src/",
     "audit:old": "tsx .scripts/project_auditor.ts",
     "audit:lint": "npx eslint --no-config-lookup -c .audit/lint/eslint.config.mjs src/",

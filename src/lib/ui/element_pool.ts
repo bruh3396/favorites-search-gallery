@@ -36,8 +36,6 @@ export class ElementPool {
   }
 
   public hide(): void {
-    for (const element of this.elements) {
-      removeDataset(element, "visible");
-    }
+    this.elements.forEach(element => removeDataset(element, "visible"));
   }
 }

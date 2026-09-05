@@ -9,10 +9,7 @@ const pool = new ElementPool(TOOLTIP_POOL_SIZE, createTooltipElement);
 
 export function setup(): void {
   insertStyle(TOOLTIP_CSS, "tooltip-style");
-
-  for (const tooltip of pool.all) {
-    Overlays.appendChild(tooltip);
-  }
+  pool.all.forEach(element => Overlays.appendChild(element));
 }
 
 export function reveal(): HTMLElement {

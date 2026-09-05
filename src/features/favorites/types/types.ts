@@ -15,8 +15,6 @@ export interface FavoritesViewDependencies {
 }
 
 export interface FavoritesModelDependencies {
-  getAddedTags: (id: string) => string | undefined;
-  waitForAddedTags: () => Promise<void>;
   onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void;
   onSearchResultsChanged: (searchResults: Favorite[]) => void;
 }

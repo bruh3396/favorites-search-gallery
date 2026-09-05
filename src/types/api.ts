@@ -14,12 +14,16 @@ export type ServerPost = {
 };
 
 export type Post = Omit<ServerPost, "tagCategories"> & {
-  tagCategories: TagCategoryMap;
   tags: string;
   duration?: number;
   extension?: MediaExtension;
   deleted?: boolean;
   fetchedAt?: number;
+};
+
+export type ParsedPost = {
+  post: Post;
+  tagCategories: TagCategoryMap;
 };
 
 export type PostResponse =

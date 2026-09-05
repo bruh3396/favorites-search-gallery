@@ -1,6 +1,5 @@
 import { PLATFORM, USER_ID, VERSION } from "@/lib/environment";
-import { PostResponse, Route, TagResponse } from "@/types/api";
-import { Post } from "@/types/api";
+import { ParsedPost, PostResponse, Route, TagResponse } from "@/types/api";
 import { ApiConfig } from "@/config/api_config";
 import { CoalescingResolver } from "@/lib/async/coalescing";
 import { LocalOverrides } from "@/config/local_overrides";
@@ -26,7 +25,7 @@ export function ping(): void {
   fetchApi("ping");
 }
 
-export function fetchPost(id: string, onDeleted?: () => void): Promise<Post> {
+export function fetchPost(id: string, onDeleted?: () => void): Promise<ParsedPost> {
   return postResolver.schedule(id).then(response => {
     switch (response.status) {
       case "ok":
@@ -44,7 +43,7 @@ export function fetchPost(id: string, onDeleted?: () => void): Promise<Post> {
   });
 }
 
-export function fetchDeletedPost(id: string): Promise<Post> {
+export function fetchDeletedPost(id: string): Promise<ParsedPost> {
   return fetchPostPageHtml(id).then(parsePostFromPostPage);
 }
 

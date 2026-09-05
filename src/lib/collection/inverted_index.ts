@@ -7,7 +7,7 @@ export class InvertedIndex<Doc> {
 
   constructor(
     private readonly extractTerms: (doc: Doc) => Iterable<string>,
-    private maintainingSortOrder: boolean = false
+    private maintainingSortOrder: boolean = true
   ) { }
 
   public indexedTerms(): string[] {

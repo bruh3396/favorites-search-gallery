@@ -22,9 +22,5 @@ export function position(tooltip: HTMLElement, thumb: HTMLElement): void {
 
 function getMenuBottom(): number {
   const menu = document.getElementById("favorites-toolbar");
-
-  if (menu === null || menu.offsetParent === null) {
-    return 0;
-  }
-  return menu.getBoundingClientRect().bottom;
+  return (menu === null || menu.offsetParent === null) ? 0 : menu.getBoundingClientRect().bottom;
 }

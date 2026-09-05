@@ -12,11 +12,9 @@ export const Events = {
   },
   favorites: {
     clearButtonClicked: new Emitter<MouseEvent>(),
-    clearSearchScopeButtonClicked: new Emitter<MouseEvent>(),
     invertButtonClicked: new Emitter<MouseEvent>(),
     resetButtonClicked: new Emitter<MouseEvent>(),
     searchButtonClicked: new Emitter<MouseEvent>(),
-    setSearchScopeButtonClicked: new Emitter<MouseEvent>(),
     shuffleButtonClicked: new Emitter<MouseEvent>(),
 
     searchRequested: new Emitter<string>(),

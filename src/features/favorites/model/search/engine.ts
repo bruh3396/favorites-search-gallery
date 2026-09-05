@@ -1,29 +1,27 @@
-import { idle, macroTask, queueMacroTask } from "@/lib/async/scheduling";
 import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { InvertedIndex } from "@/lib/collection/inverted_index";
 import { InvertedIndexSearcher } from "@/lib/search/inverted_index_searcher";
 import { SearchQuery } from "@/lib/search/query/search_query";
 import { hasMetadataTerm } from "@/lib/search/parsers/search_term_parser";
+import { queueMacroTask } from "@/lib/async/scheduling";
 
-const index = new InvertedIndex<Favorite>(favorite => favorite.tags, false);
+const index = new InvertedIndex<Favorite>(favorite => favorite.tags);
 const searcher = new InvertedIndexSearcher<Favorite>(index);
 let state: "indexing" | "ready" = "ready";
 let deferred: Favorite[] = [];
 
 export function search(query: string, candidates: Favorite[]): Favorite[] {
-  const isEligible = state === "ready" && !hasMetadataTerm(query);
-  return isEligible ? searcher.search(query, candidates) : new SearchQuery<Favorite>(query).filter(candidates);
+  return canUseIndex(query) ? searcher.search(query, candidates) : new SearchQuery<Favorite>(query).filter(candidates);
+}
+
+function canUseIndex(query: string): boolean {
+  return state === "ready" && !hasMetadataTerm(query);
 }
 
 export function add(doc: Favorite): void {
   if (state === "ready") {
     index.addDoc(doc);
     return;
-  }
-
-  if (deferred.length === 0) {
-    queueMacroTask(() => finishIndexing());
   }
   deferred.push(doc);
 }
@@ -35,17 +33,15 @@ export function remove(doc: Favorite): void {
 export function deferIndexing(): void {
   state = "indexing";
   index.maintainSortOrder(false);
+  queueMacroTask(() => indexSync());
 }
 
-async function finishIndexing(): Promise<void> {
-  await idle();
+function indexSync(): void {
+  deferred.forEach(doc => index.addDoc(doc));
+  finishIndexing();
+}
 
-  for (let i = 0; i < deferred.length; i += FavoritesConfig.searchIndexBuildBatchSize) {
-    await macroTask();
-    const batch = deferred.slice(i, i + FavoritesConfig.searchIndexBuildBatchSize);
-
-    batch.forEach(doc => index.addDoc(doc));
-  }
+function finishIndexing(): void {
   deferred = [];
   index.maintainSortOrder(true);
   index.sortTerms();

@@ -1,4 +1,5 @@
-import { Post } from "@/types/api";
+import { toSortedTagSet, toTagString } from "@/utils/pure/tag";
+import { ParsedPost } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
 import { removeExtraWhitespace } from "@/utils/pure/string";
@@ -7,7 +8,7 @@ import { withRule34Hostname } from "@/lib/media/url";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 
-export function parsePostFromPostPage(html: string): Post {
+export function parsePostFromPostPage(html: string): ParsedPost {
   const dom = new DOMParser().parseFromString(html, "text/html");
   const statistics = getStatistics(dom);
   const fileUrl = getFileUrl(dom);
@@ -15,21 +16,26 @@ export function parsePostFromPostPage(html: string): Post {
   const rating = getRating(statistics);
   const dimensions = toDimensions2D(statistics.size);
   return {
-    id: statistics.id,
-    width: dimensions.x,
-    height: dimensions.y,
-    score: Number(statistics.score),
-    rating,
-    change: 0,
-    tags,
-    fileURL: fileUrl,
-    previewURL: "",
-    tagCategories: new Map()
+    post: {
+      id: statistics.id,
+      width: dimensions.x,
+      height: dimensions.y,
+      score: Number(statistics.score),
+      rating,
+      change: 0,
+      tags,
+      fileURL: fileUrl,
+      previewURL: ""
+    },
+    tagCategories: parseTagCategories(dom)
   };
 }
 
 export function parseTagCategoriesFromPostPage(html: string): TagCategoryMap {
-  const dom = new DOMParser().parseFromString(html, "text/html");
+  return parseTagCategories(new DOMParser().parseFromString(html, "text/html"));
+}
+
+function parseTagCategories(dom: Document): TagCategoryMap {
   const categoryMap: TagCategoryMap = new Map();
 
   for (const tag of Array.from(dom.querySelectorAll(".tag"))) {
@@ -62,10 +68,11 @@ function getFileUrl(dom: Document): string {
 }
 
 function getTags(dom: Document): string {
-  return removeExtraWhitespace(Array.from(dom.querySelectorAll(".tag>a"))
+  const tags = removeExtraWhitespace(Array.from(dom.querySelectorAll(".tag>a"))
     .filter(anchor => anchor instanceof HTMLAnchorElement && anchor.textContent !== "?")
     .map(anchor => (anchor.textContent || "").replaceAll(" ", "_"))
     .join(" ") || "");
+  return toTagString(toSortedTagSet(tags));
 }
 
 function getRating(statistics: Record<string, string>): string {

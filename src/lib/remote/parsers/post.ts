@@ -1,16 +1,16 @@
-import { ServerPost } from "@/types/api";
-import { Post } from "@/types/api";
+import { ParsedPost, ServerPost } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { decodeHtmlEntities } from "@/utils/pure/string";
 import { decodeTagCategory } from "@/lib/remote/parsers/tag";
 
-export function parsePost(post: ServerPost): Post {
+export function parsePost(post: ServerPost): ParsedPost {
+  const { tagCategories: encodedTagCategories, ...rest } = post;
   const tagCategories: TagCategoryMap = new Map();
 
-  for (const [tagName, encoded] of Object.entries(post.tagCategories)) {
+  for (const [tagName, encoded] of Object.entries(encodedTagCategories)) {
     tagCategories.set(decodeHtmlEntities(tagName), decodeTagCategory(encoded));
   }
-  return { ...post, tags: deriveTags(tagCategories), tagCategories };
+  return { post: { ...rest, tags: deriveTags(tagCategories) }, tagCategories };
 }
 
 function deriveTags(tagCategories: TagCategoryMap): string {

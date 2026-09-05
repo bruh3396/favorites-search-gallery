@@ -1,4 +1,4 @@
-import * as GalleryView from "@/features/gallery/view/gallery_view";
+import * as GalleryView from "@/features/gallery/view/view";
 import { Events } from "@/app/channels/events";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { macroTask } from "@/lib/async/scheduling";
