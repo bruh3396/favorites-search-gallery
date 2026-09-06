@@ -6,6 +6,10 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.22.4",
+    ["Fixed searches with multiple wildcards in an or group returning no results"]
+  ],
+  [
     "v1.22.3",
     [
       "Improved search speed for wildcard and partial tag searches",

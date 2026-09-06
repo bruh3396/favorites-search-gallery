@@ -67,6 +67,28 @@ describe("WildcardExpander", () => {
     expect(expand("( cat* ~ dog )", { cat: ["cat", "catgirl"] })).toEqual({ query: "( cat ~ catgirl ~ dog )", isUnmatchable: false });
   });
 
+  test("a substring wildcard inside an or group expands to or alternatives, not a nested group", () => {
+    expect(expand("( *cat* ~ dog )", { cat: ["cat", "catgirl"] })).toEqual({ query: "( cat ~ catgirl ~ dog )", isUnmatchable: false });
+  });
+
+  test("multiple wildcard kinds inside an or group all flatten to or alternatives", () => {
+    expect(expand("( *cat* ~ dog* )", { cat: ["cat", "catgirl"], dog: ["dog", "doghouse"] })).toEqual({ query: "( cat ~ catgirl ~ dog ~ doghouse )", isUnmatchable: false });
+  });
+
+  test("a second wildcard in an or group still flattens when an earlier expansion contains parens", () => {
+    expect(expand("( *word* ~ dog* )", {
+      word: ["morgan_tylle_(word2)", "word"],
+      dog: ["dog", "doghouse"]
+    })).toEqual({ query: "( morgan_tylle_(word2) ~ word ~ dog ~ doghouse )", isUnmatchable: false });
+  });
+
+  test("a trailing paren term before a second wildcard does not break or group flattening", () => {
+    expect(expand("( *word* ~ dog* )", {
+      word: ["word", "dragonslayer_(sword)"],
+      dog: ["dog", "doghouse"]
+    })).toEqual({ query: "( word ~ dragonslayer_(sword) ~ dog ~ doghouse )", isUnmatchable: false });
+  });
+
   test("a zero-match wildcard inside an or group does not mark unmatchable", () => {
     expect(expand("( cat* ~ dog )", {})).toEqual({ query: "( cat* ~ dog )", isUnmatchable: false });
   });

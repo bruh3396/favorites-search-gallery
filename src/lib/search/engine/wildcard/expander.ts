@@ -71,7 +71,7 @@ function escapeRegex(value: string): string {
 }
 
 function insideOrGroup(query: string, offset: number): boolean {
-  return query.lastIndexOf("(", offset) > query.lastIndexOf(")", offset);
+  return query.lastIndexOf("( ", offset) > query.lastIndexOf(" )", offset);
 }
 
 function asNegatedTerms(terms: string[]): string {

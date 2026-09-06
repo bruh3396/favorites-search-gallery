@@ -173,6 +173,8 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
       assert("-*ita*c", ["apple", "banana", "blueberry", "cherry", "grape", "mango"]);
       assert("*vitamin-*", ["kiwi", "mango", "orange", "pear", "strawberry"]);
       assert("( *ita*a ~ *ita*c )", ["kiwi", "mango", "orange", "pear", "strawberry"]);
+      assert("( *fat* ~ vitamin* )", ["apple", "kiwi", "mango", "orange", "pear", "strawberry"]);
+      assert("( *fat* ~ red )", ["apple", "cherry", "strawberry"]);
     }
   }
 ];
