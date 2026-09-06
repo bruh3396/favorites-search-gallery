@@ -8,6 +8,7 @@ import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/ac
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
+import { IMAGUS_SUPPORT_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { createElement } from "@/utils/browser/element";
 import { deferPostPageFetchesUntil } from "@/lib/remote/pages";
@@ -116,7 +117,9 @@ function subscribeToPreferences(): void {
 
 function subscribeToDomEvents(): void {
   if (ON_DESKTOP_DEVICE) {
-    DomEvents.document.mouseover.on(FavoritesView.suppressLinkOnHoveredThumb);
+    if (IMAGUS_SUPPORT_ENABLED) {
+      DomEvents.document.mouseover.on(FavoritesView.suppressLinkOnHoveredThumb);
+    }
     DomEvents.document.click.on(FavoritesFlows.Input.handleClick);
     DomEvents.document.mousedown.on(FavoritesFlows.Input.handleMouseDown);
   } else {

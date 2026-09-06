@@ -6,6 +6,15 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.22.3",
+    [
+      "Improved search speed for wildcard and partial tag searches",
+      "Fixed lag in the gallery",
+      "Fixed link previews showing over the gallery on Firefox",
+      "Fixed autoplay menu appearing blacked out on themed backgrounds"
+    ]
+  ],
+  [
     "v1.22.2",
     [
       "Fixed action buttons on mobile",

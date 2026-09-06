@@ -1,3 +1,4 @@
+import { IMAGUS_SUPPORT_ENABLED } from "@/app/context/flags";
 import { MediaExtension } from "@/types/media";
 import { favoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { postPageUrl } from "@/lib/remote/url";
@@ -15,7 +16,10 @@ export class FavoriteElement {
     this.container = this.root.children[0] as HTMLAnchorElement;
     this.image = this.container.children[0] as HTMLImageElement;
     this.populateAttributes(id, previewUrl, tags);
-    this.container.href = postPageUrl(this.root.id);
+
+    if (IMAGUS_SUPPORT_ENABLED) {
+      this.container.href = postPageUrl(this.root.id);
+    }
   }
 
   public get thumbUrl(): string {

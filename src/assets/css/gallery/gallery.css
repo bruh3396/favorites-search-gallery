@@ -34,6 +34,7 @@ video::-webkit-media-controls-enclosure {
 
 :root[data-themed-gallery-background] {
   --color-gallery-background: var(--theme-surface);
+  --color-gallery-text: var(--theme-text);
 }
 
 #gallery-background {
