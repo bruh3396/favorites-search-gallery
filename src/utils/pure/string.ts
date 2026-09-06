@@ -45,3 +45,12 @@ export function decodeHtmlEntities(text: string): string {
 export function pluralSuffix(count: number): string {
   return count === 1 ? "" : "s";
 }
+
+export function trigramsOf(value: string): string[] {
+  const trigrams: string[] = [];
+
+  for (let i = 0; i + 3 <= value.length; i += 1) {
+    trigrams.push(value.slice(i, i + 3));
+  }
+  return trigrams;
+}

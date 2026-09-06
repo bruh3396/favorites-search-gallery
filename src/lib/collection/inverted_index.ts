@@ -22,8 +22,16 @@ export class InvertedIndex<Doc> {
     return this.docs;
   }
 
-  public addDoc(doc: Doc): void {
+  public addDocs(docs: Doc[]): void {
+    this.maintainingSortOrder = false;
+    docs.forEach(doc => this.addDoc(doc));
+    this.maintainingSortOrder = true;
+    this.terms.sort();
+  }
+
+  public addDoc(doc: Doc): string[] {
     this.docs.add(doc);
+    const newTerms: string[] = [];
 
     for (const term of this.extractTerms(doc)) {
       let docs = this.docsByTerm.get(term);
@@ -32,13 +40,16 @@ export class InvertedIndex<Doc> {
         docs = new Set<Doc>();
         this.docsByTerm.set(term, docs);
         this.addTerm(term);
+        newTerms.push(term);
       }
       docs.add(doc);
     }
+    return newTerms;
   }
 
-  public removeDoc(doc: Doc): void {
+  public removeDoc(doc: Doc): string[] {
     this.docs.delete(doc);
+    const deadTerms: string[] = [];
 
     for (const term of this.extractTerms(doc)) {
       const docs = this.docsByTerm.get(term);
@@ -51,16 +62,10 @@ export class InvertedIndex<Doc> {
       if (docs.size === 0) {
         this.docsByTerm.delete(term);
         this.terms.remove(term);
+        deadTerms.push(term);
       }
     }
-  }
-
-  public maintainSortOrder(value: boolean): void {
-    this.maintainingSortOrder = value;
-  }
-
-  public sortTerms(): void {
-    this.terms.sort();
+    return deadTerms;
   }
 
   private addTerm(term: string): void {

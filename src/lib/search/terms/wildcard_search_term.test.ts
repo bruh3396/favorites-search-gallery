@@ -1,5 +1,7 @@
-import { createSearchable, fruits, getAllSubstrings, getPrefixes, searchableEmptyDoc, searchableFruitDoc } from "@/lib/search/fruit_search_fixture";
+import { createSearchable, searchableEmptyDoc } from "@/lib/search/testing/searchable";
 import { describe, expect, test } from "vitest";
+import { fruits, searchableFruitDoc } from "@/lib/search/testing/fruit_corpus";
+import { prefixesOf, substringsOf } from "@/lib/search/testing/string";
 import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 describe("WildcardSearchTerm", () => {
@@ -25,7 +27,7 @@ describe("WildcardSearchTerm", () => {
 
   test("matches prefix", () => {
     for (const fruit of fruits) {
-      for (const prefix of getPrefixes(fruit)) {
+      for (const prefix of prefixesOf(fruit)) {
         expect(parseWildcardSearchTerm(`${prefix}*`).matches(searchableFruitDoc)).toBe(true);
       }
     }
@@ -33,7 +35,7 @@ describe("WildcardSearchTerm", () => {
 
   test("matches double asterisk", () => {
     for (const fruit of fruits) {
-      for (const substring of getAllSubstrings(fruit)) {
+      for (const substring of substringsOf(fruit)) {
         expect(parseWildcardSearchTerm(`*${substring}*`).matches(searchableFruitDoc)).toBe(true);
         expect(parseWildcardSearchTerm(`**${substring}*`).matches(searchableFruitDoc)).toBe(true);
         expect(parseWildcardSearchTerm(`**${substring}***`).matches(searchableFruitDoc)).toBe(true);

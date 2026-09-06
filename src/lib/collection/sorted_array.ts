@@ -1,3 +1,5 @@
+import { lowerBound } from "@/utils/pure/array";
+
 type Comparator<T> = (a: T, b: T) => number;
 const defaultCompare = <T>(a: T, b: T): number => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -66,18 +68,6 @@ export class SortedArray<T> {
   }
 
   private getSortedIndex(value: T): number {
-    let low = 0;
-    let high = this.array.length;
-
-    while (low < high) {
-      const mid = (low + high) >>> 1;
-
-      if (this.compare(this.array[mid], value) < 0) {
-        low = mid + 1;
-      } else {
-        high = mid;
-      }
-    }
-    return low;
+    return lowerBound(this.array.length, index => this.compare(this.array[index], value) >= 0);
   }
 }

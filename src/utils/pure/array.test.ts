@@ -1,6 +1,35 @@
-import { chunk, isIndexInBounds, itemsAround, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
+import { chunk, isIndexInBounds, itemsAround, lowerBound, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
 import { describe, expect, test } from "vitest";
 import { randomInt } from "@/utils/pure/number";
+
+describe("lowerBound", () => {
+  const sorted = [10, 20, 20, 30];
+  const firstAtOrAbove = (value: number): number => lowerBound(sorted.length, index => sorted[index] >= value);
+
+  test("returns the first index whose value satisfies the predicate", () => {
+    expect(firstAtOrAbove(20)).toBe(1);
+  });
+
+  test("skips past every element sharing the boundary value", () => {
+    expect(lowerBound(sorted.length, index => sorted[index] > 20)).toBe(3);
+  });
+
+  test("returns 0 when every element satisfies the predicate", () => {
+    expect(firstAtOrAbove(0)).toBe(0);
+  });
+
+  test("returns the length when no element satisfies the predicate", () => {
+    expect(firstAtOrAbove(99)).toBe(4);
+  });
+
+  test("returns 0 for an empty range", () => {
+    expect(lowerBound(0, () => true)).toBe(0);
+  });
+
+  test("finds an exact match", () => {
+    expect(firstAtOrAbove(30)).toBe(3);
+  });
+});
 
 describe("isIndexInBounds", () => {
   test("empty", () => {

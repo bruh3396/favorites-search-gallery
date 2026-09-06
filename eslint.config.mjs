@@ -626,12 +626,12 @@ export default defineConfig([
   },
   {
     files: [
-      "src/**/sorted_array.ts",
       "src/**/array.ts",
-      "src/lib/search/rating.ts",
+      "src/features/favorites/model/search/rating.ts",
       "src/features/favorites/features/downloader/filename_settings.ts",
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",
+      "src/playground/search_performance/prefix_index.ts",
       "src/lib/thumb/action_bar.ts",
       "src/app/context/preferences.ts",
       "src/features/favorites/features/downloader/zip_writer.ts"

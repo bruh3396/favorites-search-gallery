@@ -1,93 +1,6 @@
-import { InvertedIndex } from "@/lib/collection/inverted_index";
-import { InvertedIndexSearcher } from "@/lib/search/inverted_index_searcher";
-import { Searchable } from "@/types/search";
+import { FruitName, allDocNames, allTerms, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 
-export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";
-export type Fruit = Searchable & { name: FruitName };
 export type AssertMatches = (query: string, expectedNames: FruitName[]) => void;
-
-export function getPrefixes(word: string): string[] {
-  const prefixes: string[] = [];
-
-  for (let i = 1; i <= word.length; i += 1) {
-    prefixes.push(word.slice(0, i));
-  }
-  return prefixes;
-}
-
-export function getAllSubstrings(word: string): string[] {
-  const substrings: string[] = [];
-
-  for (let start = 0; start < word.length; start += 1) {
-    for (let end = start + 1; end <= word.length; end += 1) {
-      substrings.push(word.slice(start, end));
-    }
-  }
-  return substrings;
-}
-
-export function createSearchable(tags: string[]): Searchable {
-  return { tags: new Set(tags) };
-}
-
-export const fruits = new Set([
-  "grape",
-  "banana",
-  "apple",
-  "orange",
-  "kiwi",
-  "mango",
-  "peach",
-  "pear",
-  "plum",
-  "cherry",
-  "blueberry",
-  "strawberry",
-  "raspberry",
-  "watermelon",
-  "pineapple",
-  "cantaloupe",
-  "honeydew",
-  "apricot",
-  "blackberry",
-  "papaya",
-  "pomegranate",
-  "fig",
-  "tangerine",
-  "nectarine",
-  "coconut",
-  "lychee",
-  "jackfruit",
-  "durian",
-  "persimmon",
-  "guava",
-  "dragonfruit",
-  "passionfruit",
-  "starfruit",
-  "kiwano",
-  "clementine"
-].sort());
-export const searchableEmptyDoc = createSearchable([]);
-export const searchableFruitDoc = createSearchable(Array.from(fruits));
-
-export const fruitDocs: Fruit[] = [
-  { name: "apple", tags: new Set(["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"].sort()) },
-  { name: "banana", tags: new Set(["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast"].sort()) },
-  { name: "cherry", tags: new Set(["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert"].sort()) },
-  { name: "grape", tags: new Set(["grape", "purple", "sweet", "small", "green", "snack", "juicy", "antioxidants", "seedless"].sort()) },
-  { name: "kiwi", tags: new Set(["kiwi", "green", "tart", "fiber", "vitamin-c", "fuzzy", "tropical", "small", "smoothie"].sort()) },
-  { name: "mango", tags: new Set(["mango", "tropical", "sweet", "juicy", "fiber", "smoothie", "dessert", "vitamin-a"].sort()) },
-  { name: "blueberry", tags: new Set(["blueberry", "blue", "small", "antioxidant", "sweet", "berry", "snack", "baking", "fiber"].sort()) },
-  { name: "orange", tags: new Set(["orange", "citrus", "vitamin-c", "juicy", "fiber", "breakfast", "peelable", "snack"].sort()) },
-  { name: "pear", tags: new Set(["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"].sort()) },
-  { name: "strawberry", tags: new Set(["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"].sort()) }
-];
-export const allDocNames = fruitDocs.map(item => item.name);
-export const allTerms = fruitDocs.flatMap(item => Array.from(item.tags));
-export const index = new InvertedIndex<Fruit>(fruit => fruit.tags);
-export const searcher = new InvertedIndexSearcher<Fruit>(index);
-
-fruitDocs.forEach(f => index.addDoc(f));
 
 export const searchCases: { name: string; run: (assert: AssertMatches) => void }[] = [
   {
@@ -243,6 +156,23 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
       assert("red -*red*", []);
       assert("red -red*", []);
       assert("red -*red", []);
+    }
+  },
+  {
+    name: "wildcard edge cases",
+    run: (assert: AssertMatches): void => {
+      assert("zzz*", []);
+      assert("*zzz*", []);
+      assert("*zzz", []);
+      assert("*z*z*", ["kiwi"]);
+      assert("( zzz* ~ red )", ["apple", "cherry", "strawberry"]);
+      assert("( zzz* ~ zzy* )", []);
+      assert("*ow*fat*", ["apple"]);
+      assert("*ita*a", ["mango"]);
+      assert("*ita*c", ["kiwi", "orange", "pear", "strawberry"]);
+      assert("-*ita*c", ["apple", "banana", "blueberry", "cherry", "grape", "mango"]);
+      assert("*vitamin-*", ["kiwi", "mango", "orange", "pear", "strawberry"]);
+      assert("( *ita*a ~ *ita*c )", ["kiwi", "mango", "orange", "pear", "strawberry"]);
     }
   }
 ];

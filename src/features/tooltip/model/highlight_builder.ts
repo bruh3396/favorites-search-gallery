@@ -1,4 +1,4 @@
-import { SearchQuery } from "@/lib/search/query/search_query";
+import { SearchQuery } from "@/lib/search/engine/search_query";
 import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
 
 export function buildHighlights(query: string): SearchTermHighlight[] {

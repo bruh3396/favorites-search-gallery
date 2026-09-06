@@ -1,5 +1,7 @@
 import { buildSearchTerms, parseTermGroups, sortSearchTerms } from "@/lib/search/parsers/search_term_group_parser";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
+import { MetadataSearchTerm } from "@/lib/search/terms/metadata_search_term";
 import { Searchable } from "@/types/search";
 import { isEmptyString } from "@/utils/pure/string";
 
@@ -32,12 +34,20 @@ export class SearchQuery<T extends Searchable> {
     return this.andTerms.filter(searchTerm => !searchTerm.isNegated).map(searchTerm => searchTerm.value);
   }
 
-  public filter(items: T[]): T[] {
-    return this.isEmpty ? items : items.filter(item => this.matchesAndTerms(item) && this.matchesOrGroups(item));
+  public get hasOnlyExactTerms(): boolean {
+    return this.allTerms.every(term => term instanceof ExactSearchTerm);
   }
 
-  public equals(other: SearchQuery<T>): boolean {
-    return this.raw === other.raw;
+  public get hasMetadataTerm(): boolean {
+    return this.allTerms.some(term => term instanceof MetadataSearchTerm);
+  }
+
+  private get allTerms(): AbstractSearchTerm[] {
+    return [...this.andTerms, ...this.orGroups.flat()];
+  }
+
+  public filter(items: T[]): T[] {
+    return this.isEmpty ? items : items.filter(item => this.matchesAndTerms(item) && this.matchesOrGroups(item));
   }
 
   private flattenSingletonOrGroups(): void {

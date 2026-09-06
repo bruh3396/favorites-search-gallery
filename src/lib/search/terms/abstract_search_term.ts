@@ -12,6 +12,10 @@ export abstract class AbstractSearchTerm {
     return this.isNegated ? this.baseCost + 1 : this.baseCost;
   }
 
+  public get literal(): string {
+    return this.isNegated ? `-${this.value}` : this.value;
+  }
+
   protected abstract matchesPositive(item: Searchable): boolean;
   protected abstract matchesNegated(item: Searchable): boolean;
 }

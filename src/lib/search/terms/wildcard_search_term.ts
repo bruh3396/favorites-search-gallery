@@ -1,6 +1,11 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { Searchable } from "@/types/search";
-import { WildcardMatchType } from "@/lib/search/wildcard_match_type";
+
+export enum WildcardMatchType {
+  Prefix = 10,
+  Substring = 15,
+  Regex = 20
+}
 
 export class WildcardSearchTerm extends AbstractSearchTerm {
   protected override readonly baseCost: number;

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { DiscreteRating } from "@/types/search";
-import { decodeRating } from "@/lib/search/rating";
+import { decodeRating } from "@/features/favorites/model/search/rating";
 
 describe("decodeRating", () => {
   test.each([

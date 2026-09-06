@@ -9,7 +9,8 @@ import {
   removeExtraWhitespace,
   removeLeadingModifiers,
   removeNonNumericCharacters,
-  replaceSpacesWithUnderscores
+  replaceSpacesWithUnderscores,
+  trigramsOf
 } from "@/utils/pure/string";
 import { describe, expect, test } from "vitest";
 
@@ -257,6 +258,24 @@ describe("isEmptyString", () => {
 
   test("newline character", () => {
     expect(isEmptyString("\n")).toBe(true);
+  });
+});
+
+describe("trigramsOf", () => {
+  test("empty", () => {
+    expect(trigramsOf("")).toEqual([]);
+  });
+
+  test("shorter than three characters", () => {
+    expect(trigramsOf("ab")).toEqual([]);
+  });
+
+  test("exactly three characters", () => {
+    expect(trigramsOf("cat")).toEqual(["cat"]);
+  });
+
+  test("sliding window", () => {
+    expect(trigramsOf("banana")).toEqual(["ban", "ana", "nan", "ana"]);
   });
 });
 

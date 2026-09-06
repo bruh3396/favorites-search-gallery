@@ -4,6 +4,22 @@ export function isIndexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;
 }
 
+export function lowerBound(length: number, isAtOrPast: (index: number) => boolean): number {
+  let low = 0;
+  let high = length;
+
+  while (low < high) {
+    const mid = (low + high) >>> 1;
+
+    if (isAtOrPast(mid)) {
+      high = mid;
+    } else {
+      low = mid + 1;
+    }
+  }
+  return low;
+}
+
 export function itemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
   return valuesAround(startIndex, limit, index => isIndexInBounds(array, index), index => array[index]);
 }

@@ -19,9 +19,9 @@ export function setup(dependencies: FavoritesModelDependencies): void {
 export async function loadStoredFavorites(): Promise<void> {
   const favorites = await FavoritesLoader.readStoredFavorites();
 
-  FavoritesSearcher.deferIndexing();
   FavoritesCollection.setAll(favorites);
-  processIncomingFavorites(favorites);
+  FavoritesSearcher.index(favorites);
+  FavoritesEnricher.enrich(favorites);
 }
 
 export function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
