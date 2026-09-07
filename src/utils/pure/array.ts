@@ -4,14 +4,14 @@ export function isIndexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;
 }
 
-export function lowerBound(length: number, isAtOrPast: (index: number) => boolean): number {
+export function findFirstIndexWhere(length: number, satisfiedAt: (index: number) => boolean): number {
   let low = 0;
   let high = length;
 
   while (low < high) {
     const mid = (low + high) >>> 1;
 
-    if (isAtOrPast(mid)) {
+    if (satisfiedAt(mid)) {
       high = mid;
     } else {
       low = mid + 1;

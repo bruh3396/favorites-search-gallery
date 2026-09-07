@@ -3,6 +3,7 @@ import * as FavoritesFeatures from "@/features/favorites/features/features";
 import * as FavoritesFlows from "@/features/favorites/flows/flows";
 import * as FavoritesModel from "@/features/favorites/model/model";
 import * as FavoritesView from "@/features/favorites/view/view";
+import * as TagCategoryStore from "@/lib/tag_categories/store";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_FIRST_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/action_bar";
 import { DomEvents } from "@/app/dom/events";
@@ -49,7 +50,7 @@ function setupSubFeatures(): void {
   FavoritesFeatures.setup({
     downloader: {
       getSearchResults: FavoritesModel.getCurrentSearchResults,
-      getTagCategory: tagName => FeatureBridge.postOverlay.tagCategory.call(tagName)
+      getTagCategory: TagCategoryStore.get
     },
     snippets: {
       appendToSearch: FavoritesControl.appendToSearch,
@@ -60,7 +61,6 @@ function setupSubFeatures(): void {
 
 function setupModel(): void {
   FavoritesModel.setup({
-    onTagCategoriesResolved: Events.favorites.tagCategoriesResolved.emit,
     onSearchResultsChanged: Events.favorites.searchResultsUpdated.emit
   });
 }

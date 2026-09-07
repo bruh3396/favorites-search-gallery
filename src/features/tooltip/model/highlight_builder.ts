@@ -1,8 +1,8 @@
-import { SearchQuery } from "@/lib/search/engine/search_query";
 import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
+import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 export function buildHighlights(query: string): SearchTermHighlight[] {
-  const searchQuery = new SearchQuery(query);
+  const searchQuery = parseSearchQuery(query);
   const andGroups = searchQuery.andTerms.filter(term => !term.isNegated).map(t => [t]);
   const allTagGroups = [...andGroups, ...searchQuery.orGroups];
   const highlights: SearchTermHighlight[] = [];

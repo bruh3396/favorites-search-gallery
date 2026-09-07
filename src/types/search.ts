@@ -5,10 +5,10 @@ export type TagCategoryMap = Map<string, TagCategory>;
 export type EncodedTagCategory = number | null;
 export type EncodedTagCategoryMap = Record<string, EncodedTagCategory>;
 
-export type MetadataMetric = "default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random" | "duration";
-export type SortKey = MetadataMetric;
-export type SearchableMetadataMetric = "id" | "score" | "width" | "height" | "duration";
-export type MetadataComparator = ":" | ":<" | ":>";
+export type Metric = "default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random" | "duration";
+export type SortKey = Metric;
+export type SearchableMetric = "id" | "score" | "width" | "height" | "duration";
+export type MetricComparator = ":" | ":<" | ":>";
 
 export type TagEditDatabaseRecord = {
   id: string;
@@ -28,4 +28,8 @@ export enum DiscreteRating {
 
 export interface Searchable {
   readonly tags: Set<string>;
+}
+
+export interface MetricSearchable extends Searchable {
+  getMetric: (metric: SearchableMetric) => number;
 }

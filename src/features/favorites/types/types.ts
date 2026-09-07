@@ -1,7 +1,6 @@
-import { ContentDisplayOptions, PaginationSequence } from "@/types/ui";
 import { Favorite, FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
+import { ContentDisplayOptions } from "@/types/ui";
 import { NavigationKey } from "@/types/input";
-import { TagCategoryMap } from "@/types/search";
 
 export interface FavoritesViewDependencies {
   onPageSelected: (pageNumber: number) => void;
@@ -15,7 +14,6 @@ export interface FavoritesViewDependencies {
 }
 
 export interface FavoritesModelDependencies {
-  onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void;
   onSearchResultsChanged: (searchResults: Favorite[]) => void;
 }
 
@@ -25,15 +23,6 @@ export interface FavoritesDisplay {
   advance: (direction: NavigationKey) => boolean;
   goToPage: (pageNumber: number) => void;
   teardown: () => void;
-}
-
-export interface PaginationState {
-  totalCount: number;
-  sliceStart: number;
-  sliceEnd: number;
-  currentPage: number;
-  finalPage: number;
-  sequence: PaginationSequence;
 }
 
 export interface NewFavoritesResult {

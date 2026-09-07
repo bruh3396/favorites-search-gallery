@@ -1,14 +1,14 @@
-import { MetadataComparator, SearchableMetadataMetric } from "@/types/search";
-import { isMetadataComparator, isSearchableMetadataMetric, searchableMetadataMetrics } from "@/types/guards";
+import { MetricComparator, SearchableMetric } from "@/types/search";
+import { isMetadataComparator, isSearchableMetadataMetric, searchableMetrics } from "@/types/guards";
 
-const metricPattern = Array.from(searchableMetadataMetrics).join("|");
+const metricPattern = Array.from(searchableMetrics).join("|");
 
-export class MetadataSearchExpression {
+export class MetricSearchExpression {
   public static regex: RegExp = new RegExp(`^-?(${metricPattern})(:[<>]?)(\\d+|${metricPattern})$`);
-  public readonly metric: SearchableMetadataMetric;
-  public readonly operator: MetadataComparator;
+  public readonly metric: SearchableMetric;
+  public readonly operator: MetricComparator;
   public readonly hasRightHandMetric: boolean;
-  public readonly rightHandMetric: SearchableMetadataMetric;
+  public readonly rightHandMetric: SearchableMetric;
   public readonly rightHandValue: number;
 
   constructor(term: string) {
@@ -29,8 +29,8 @@ export class MetadataSearchExpression {
     }
   }
 
-  private parseExpression(term: string): { metric: SearchableMetadataMetric; operator: MetadataComparator; value: SearchableMetadataMetric | number } {
-    const extractedExpression = MetadataSearchExpression.regex.exec(term);
+  private parseExpression(term: string): { metric: SearchableMetric; operator: MetricComparator; value: SearchableMetric | number } {
+    const extractedExpression = MetricSearchExpression.regex.exec(term);
 
     if (extractedExpression === null || extractedExpression.length !== 4) {
       return {

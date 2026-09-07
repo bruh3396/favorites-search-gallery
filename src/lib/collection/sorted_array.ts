@@ -1,4 +1,4 @@
-import { lowerBound } from "@/utils/pure/array";
+import { findFirstIndexWhere } from "@/utils/pure/array";
 
 type Comparator<T> = (a: T, b: T) => number;
 const defaultCompare = <T>(a: T, b: T): number => (a < b ? -1 : a > b ? 1 : 0);
@@ -68,6 +68,6 @@ export class SortedArray<T> {
   }
 
   private getSortedIndex(value: T): number {
-    return lowerBound(this.array.length, index => this.compare(this.array[index], value) >= 0);
+    return findFirstIndexWhere(this.array.length, index => this.compare(this.array[index], value) >= 0);
   }
 }

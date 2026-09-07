@@ -116,7 +116,7 @@ function subscribeToFavoritesEvents(): void {
   Events.favorites.contentReplaced.on(GalleryFlows.Content.refresh);
   Events.favorites.contentAdded.on(GalleryFlows.Content.refresh);
   Preferences.gallery.previewEnabled.on(GalleryModel.preview);
-  Events.favorites.searchResultsUpdated.on(GalleryFlows.Content.downscaleThumbsOutsideResults);
+  Events.favorites.searchResultsUpdated.on(GalleryFlows.Content.downscaleThumbsOutsideResults, { async: true});
 }
 
 function subscribeToPostListEvents(): void {

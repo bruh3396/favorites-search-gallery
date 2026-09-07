@@ -16,6 +16,7 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
     run: (assert: AssertMatches): void => {
       assert("*", allDocNames);
       assert("**", allDocNames);
+      assert("* ** *** **** *****", allDocNames);
     }
   },
   {

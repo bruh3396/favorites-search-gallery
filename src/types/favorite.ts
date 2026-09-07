@@ -1,5 +1,5 @@
 import { MediaItem } from "@/types/media";
-import { MetadataMetric } from "@/types/search";
+import { Metric } from "@/types/search";
 import { Post } from "@/types/api";
 
 export interface Favorite extends MediaItem {
@@ -10,7 +10,7 @@ export interface Favorite extends MediaItem {
   addTags: (newTags: string) => string;
   removeAddedTags: (tagsToRemove: string) => string;
   resetAddedTags: () => void;
-  getMetric: (metric: MetadataMetric) => number;
+  getMetric: (metric: Metric) => number;
 }
 
 export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success";

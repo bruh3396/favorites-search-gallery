@@ -3,7 +3,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { FavoriteTags } from "@/features/favorites/types/favorite_tags";
 import { MediaExtension } from "@/types/media";
-import { MetadataMetric } from "@/types/search";
+import { Metric } from "@/types/search";
 import { Post } from "@/types/api";
 import { chain } from "@/utils/pure/function";
 import { getImageFromThumb } from "@/lib/thumb/query";
@@ -47,7 +47,7 @@ export class FavoriteItem implements Favorite {
     return this.element.root;
   }
 
-  public getMetric(metric: MetadataMetric): number {
+  public getMetric(metric: Metric): number {
     switch (metric) {
       case "id":
         return this.numericId;

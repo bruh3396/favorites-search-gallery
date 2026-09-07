@@ -10,39 +10,46 @@ function expectSameTerms(actual: string[], expected: string[]): void {
 describe("TrigramIndex", () => {
   const index = new TrigramIndex(terms);
 
-  test("termsContaining finds every term with the substring", () => {
-    expectSameTerms(index.termsContaining("ana", terms), ["banana", "bandana", "cabana", "nan_ana"]);
+  test("termsMatching returns every term that contains the fragment", () => {
+    const candidates = index.termsMatching("ana", terms);
+
+    for (const term of ["banana", "bandana", "cabana", "nan_ana"]) {
+      expect(candidates).toContain(term);
+    }
   });
 
-  test("termsContaining narrows by trigram without false positives", () => {
-    expectSameTerms(index.termsContaining("and", terms), ["bandana", "abandon", "and", "sandbox", "brand"]);
+  test("termsMatching never drops a real substring match", () => {
+    const candidates = index.termsMatching("and", terms);
+
+    for (const term of ["bandana", "abandon", "and", "sandbox", "brand"]) {
+      expect(candidates).toContain(term);
+    }
   });
 
-  test("a trigram candidate that is not a real substring match is excluded", () => {
-    expectSameTerms(index.termsContaining("nana", terms), ["banana"]);
+  test("termsMatching may return trigram candidates that are not true matches", () => {
+    expect(index.termsMatching("nana", terms)).toContain("banana");
   });
 
-  test("termsContaining returns nothing when no term contains the substring", () => {
-    expectSameTerms(index.termsContaining("xyz", terms), []);
+  test("a fragment whose trigram is absent returns nothing", () => {
+    expectSameTerms(index.termsMatching("xyz", terms), []);
   });
 
-  test("termsEndingWith matches only the suffix", () => {
-    expectSameTerms(index.termsEndingWith("ana", terms), ["banana", "bandana", "cabana", "nan_ana"]);
-    expectSameTerms(index.termsEndingWith("and", terms), ["and", "brand"]);
+  test("fragments shorter than a trigram fall back to the corpus", () => {
+    expectSameTerms(index.termsMatching("an", terms), terms);
   });
 
-  test("substrings shorter than a trigram fall back to scanning the corpus", () => {
-    expectSameTerms(index.termsContaining("an", terms), terms);
-  });
-
-  test("termsMatchingAll requires every fragment via the caller predicate", () => {
-    const ordered = /ban.*ana/;
-
-    expectSameTerms(index.termsMatchingAll(["ban", "ana"], terms, term => ordered.test(term)), ["banana", "bandana"]);
+  test("termsMatchingAll intersects the candidates of every fragment", () => {
+    for (const term of ["banana", "bandana"]) {
+      expect(index.termsMatchingAll(["ban", "ana"], terms)).toContain(term);
+    }
   });
 
   test("termsMatchingAll with a fragment absent from the index yields nothing", () => {
-    expectSameTerms(index.termsMatchingAll(["ban", "zzz"], terms, () => true), []);
+    expectSameTerms(index.termsMatchingAll(["ban", "zzz"], terms), []);
+  });
+
+  test("termsMatchingAll falls back to the corpus when no fragment is a full trigram", () => {
+    expectSameTerms(index.termsMatchingAll(["an", "na"], terms), terms);
   });
 });
 
@@ -50,15 +57,15 @@ describe("TrigramIndex mutation", () => {
   test("addTerm makes a new term findable", () => {
     const index = new TrigramIndex(terms);
 
-    expectSameTerms(index.termsContaining("mango", terms), []);
+    expectSameTerms(index.termsMatching("mango", terms), []);
     index.addTerm("mango");
-    expectSameTerms(index.termsContaining("mango", [...terms, "mango"]), ["mango"]);
+    expect(index.termsMatching("mango", [...terms, "mango"])).toContain("mango");
   });
 
   test("removeTerm drops a term from its trigram buckets", () => {
     const index = new TrigramIndex(terms);
 
     index.removeTerm("banana");
-    expectSameTerms(index.termsContaining("ana", terms), ["bandana", "cabana", "nan_ana"]);
+    expect(index.termsMatching("ana", terms)).not.toContain("banana");
   });
 });

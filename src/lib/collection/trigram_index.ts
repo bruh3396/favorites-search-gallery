@@ -10,18 +10,13 @@ export class TrigramIndex {
     }
   }
 
-  public termsContaining(substring: string, corpus: string[]): string[] {
-    return this.matchingTerms(substring, corpus, (term, fragment) => term.includes(fragment));
+  public termsMatching(fragment: string, corpus: string[]): string[] {
+    return fragment.length < 3 ? corpus : [...this.candidateTerms(fragment)];
   }
 
-  public termsEndingWith(suffix: string, corpus: string[]): string[] {
-    return this.matchingTerms(suffix, corpus, (term, fragment) => term.endsWith(fragment));
-  }
-
-  public termsMatchingAll(fragments: string[], corpus: string[], matches: (term: string) => boolean): string[] {
+  public termsMatchingAll(fragments: string[], corpus: string[]): string[] {
     const narrowing = fragments.filter(fragment => fragment.length >= 3);
-    const candidates = narrowing.length === 0 ? corpus : [...this.candidateTermsOfAll(narrowing)];
-    return candidates.filter(matches);
+    return narrowing.length === 0 ? corpus : [...this.candidateTermsOfAll(narrowing)];
   }
 
   public addTerm(term: string): void {
@@ -51,26 +46,6 @@ export class TrigramIndex {
     }
   }
 
-  private matchingTerms(fragment: string, corpus: string[], matches: (term: string, fragment: string) => boolean): string[] {
-    const candidates = fragment.length < 3 ? corpus : [...this.candidateTerms(fragment)];
-    return candidates.filter(term => matches(term, fragment));
-  }
-
-  private candidateTermsOfAll(fragments: string[]): Set<string> {
-    let candidates: Set<string> | null = null;
-
-    for (const fragment of fragments) {
-      const forFragment = this.candidateTerms(fragment);
-
-      candidates = candidates === null ? forFragment : intersection(forFragment, candidates);
-
-      if (candidates.size === 0) {
-        return candidates;
-      }
-    }
-    return candidates ?? new Set<string>();
-  }
-
   private candidateTerms(substring: string): Set<string> {
     let candidates: Set<string> | null = null;
 
@@ -81,6 +56,21 @@ export class TrigramIndex {
         return new Set<string>();
       }
       candidates = candidates === null ? terms : intersection(terms, candidates);
+
+      if (candidates.size === 0) {
+        return candidates;
+      }
+    }
+    return candidates ?? new Set<string>();
+  }
+
+  private candidateTermsOfAll(fragments: string[]): Set<string> {
+    let candidates: Set<string> | null = null;
+
+    for (const fragment of fragments) {
+      const forFragment = this.candidateTerms(fragment);
+
+      candidates = candidates === null ? forFragment : intersection(forFragment, candidates);
 
       if (candidates.size === 0) {
         return candidates;

@@ -1,21 +1,24 @@
-import * as FavoritesDurationEnricher from "@/features/favorites/model/enrichment/duration_enricher";
-import * as FavoritesMetadataEnricher from "@/features/favorites/model/enrichment/metadata_enricher";
 import { Favorite } from "@/types/favorite";
-import { TagCategoryMap } from "@/types/search";
+import { FavoritesDurationEnricher } from "@/features/favorites/model/enrichment/duration_enricher";
+import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";
 import { isVideo } from "@/lib/media/type";
 import { postIsStale } from "@/lib/post/status";
 
-export function setup(
-  onFavoriteEnriched: (favorite: Favorite) => void,
-  beforeTagsChanged: (favorite: Favorite) => void,
-  afterTagsChanged: (favorite: Favorite) => void,
-  onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void
-): void {
-  FavoritesMetadataEnricher.setup(onFavoriteEnriched, beforeTagsChanged, afterTagsChanged, onTagCategoriesResolved);
-  FavoritesDurationEnricher.setup(onFavoriteEnriched);
-}
+export class FavoritesEnricher {
+  private readonly metadataEnricher: FavoritesMetadataEnricher;
+  private readonly durationEnricher: FavoritesDurationEnricher;
 
-export async function enrich(favorites: Favorite[]): Promise<void> {
-  await FavoritesMetadataEnricher.enrich(favorites.filter(favorite => postIsStale(favorite.post)));
-  FavoritesDurationEnricher.enrich(favorites.filter(favorite => isVideo(favorite) && (favorite.post.duration ?? 0) === 0));
+  constructor(
+    onFavoriteEnriched: (favorite: Favorite) => void,
+    beforeTagsChanged: (favorite: Favorite) => void,
+    afterTagsChanged: (favorite: Favorite) => void
+  ) {
+    this.metadataEnricher = new FavoritesMetadataEnricher(onFavoriteEnriched, beforeTagsChanged, afterTagsChanged);
+    this.durationEnricher = new FavoritesDurationEnricher(onFavoriteEnriched);
+  }
+
+  public async enrich(favorites: Favorite[]): Promise<void> {
+    await this.metadataEnricher.enrich(favorites.filter(favorite => postIsStale(favorite.post)));
+    this.durationEnricher.enrich(favorites.filter(favorite => isVideo(favorite) && (favorite.post.duration ?? 0) === 0));
+  }
 }

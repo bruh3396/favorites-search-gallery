@@ -1,8 +1,8 @@
-import { PrefixIndex } from "@/lib/collection/prefix_index";
+﻿import { PrefixIndex } from "@/lib/collection/prefix_index";
 import { TrigramIndex } from "@/lib/collection/trigram_index";
-import { WildcardResolver } from "@/lib/search/engine/wildcard/types";
+import { WildcardResolver } from "@/lib/search/engine/wildcard_resolver";
 
-export class IndexedWildcardResolver implements WildcardResolver {
+export class WildcardTermResolver implements WildcardResolver {
   private prefixes: PrefixIndex;
   private trigrams: TrigramIndex;
 
@@ -21,15 +21,15 @@ export class IndexedWildcardResolver implements WildcardResolver {
   }
 
   public termsContaining(fragment: string): string[] {
-    return this.trigrams.termsContaining(fragment, this.prefixes.allTerms());
+    return this.trigrams.termsMatching(fragment, this.prefixes.allTerms()).filter(term => term.includes(fragment));
   }
 
   public termsEndingWith(fragment: string): string[] {
-    return this.trigrams.termsEndingWith(fragment, this.prefixes.allTerms());
+    return this.trigrams.termsMatching(fragment, this.prefixes.allTerms()).filter(term => term.endsWith(fragment));
   }
 
   public termsMatching(fragments: string[], matches: (term: string) => boolean): string[] {
-    return this.trigrams.termsMatchingAll(fragments, this.prefixes.allTerms(), matches);
+    return this.trigrams.termsMatchingAll(fragments, this.prefixes.allTerms()).filter(matches);
   }
 
   public addTerm(term: string): void {

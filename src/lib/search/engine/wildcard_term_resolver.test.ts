@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
-import { IndexedWildcardResolver } from "@/lib/search/engine/wildcard/resolver";
+﻿import { describe, expect, test } from "vitest";
+import { WildcardTermResolver } from "@/lib/search/engine/wildcard_term_resolver";
 
 const terms = ["banana", "bandana", "cabana", "canvas", "brand", "sandbox"].slice().sort();
 
@@ -7,8 +7,8 @@ function sorted(values: string[]): string[] {
   return values.slice().sort();
 }
 
-describe("IndexedWildcardResolver", () => {
-  const resolver = new IndexedWildcardResolver(terms);
+describe("WildcardTermResolver", () => {
+  const resolver = new WildcardTermResolver(terms);
 
   test("termsStartingWith delegates to the prefix index", () => {
     expect(sorted(resolver.termsStartingWith("ban"))).toEqual(["banana", "bandana"]);
@@ -29,16 +29,16 @@ describe("IndexedWildcardResolver", () => {
   });
 
   test("an empty resolver finds nothing", () => {
-    const empty = new IndexedWildcardResolver();
+    const empty = new WildcardTermResolver();
 
     expect(empty.termsStartingWith("ban")).toEqual([]);
     expect(empty.termsContaining("ana")).toEqual([]);
   });
 });
 
-describe("IndexedWildcardResolver mutation", () => {
+describe("WildcardTermResolver mutation", () => {
   test("addTerm makes a term findable by prefix and by substring", () => {
-    const resolver = new IndexedWildcardResolver(terms);
+    const resolver = new WildcardTermResolver(terms);
 
     resolver.addTerm("banjo");
 
@@ -47,7 +47,7 @@ describe("IndexedWildcardResolver mutation", () => {
   });
 
   test("removeTerm drops a term from both the prefix and trigram sides", () => {
-    const resolver = new IndexedWildcardResolver(terms);
+    const resolver = new WildcardTermResolver(terms);
 
     resolver.removeTerm("banana");
 
@@ -56,7 +56,7 @@ describe("IndexedWildcardResolver mutation", () => {
   });
 
   test("index rebuilds both indexes from a fresh corpus", () => {
-    const resolver = new IndexedWildcardResolver(terms);
+    const resolver = new WildcardTermResolver(terms);
 
     resolver.index(["mango", "tango"]);
 

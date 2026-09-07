@@ -1,48 +1,39 @@
 import * as PostResolver from "@/lib/post/resolver";
+import * as TagCategoryStore from "@/lib/tag_categories/store";
 import { ParsedPost, Post } from "@/types/api";
 import { Favorite } from "@/types/favorite";
-import { TagCategoryMap } from "@/types/search";
 import { toTagSet } from "@/utils/pure/tag";
 
-let onFavoriteEnriched: (favorite: Favorite) => void = () => undefined;
-let beforeTagsChanged: (favorite: Favorite) => void = () => undefined;
-let afterTagsChanged: (favorite: Favorite) => void = () => undefined;
-let onTagCategoriesResolved: (categoryMap: TagCategoryMap) => void = () => undefined;
+export class FavoritesMetadataEnricher {
+  constructor(
+    private readonly onFavoriteEnriched: (favorite: Favorite) => void,
+    private readonly beforeTagsChanged: (favorite: Favorite) => void,
+    private readonly afterTagsChanged: (favorite: Favorite) => void
+  ) {}
 
-export function setup(
-  onFavoriteEnrichedFn: (favorite: Favorite) => void,
-  beforeTagsChangedFn: (favorite: Favorite) => void,
-  afterTagsChangedFn: (favorite: Favorite) => void,
-  onTagCategoriesResolvedFn: (categoryMap: TagCategoryMap) => void
-): void {
-  onFavoriteEnriched = onFavoriteEnrichedFn;
-  beforeTagsChanged = beforeTagsChangedFn;
-  afterTagsChanged = afterTagsChangedFn;
-  onTagCategoriesResolved = onTagCategoriesResolvedFn;
-}
-
-export function enrich(favorites: Favorite[]): Promise<void> {
-  const favoritesById = new Map(favorites.map(favorite => [favorite.id, favorite]));
-  return PostResolver.resolveAll(
-    favorites.map(favorite => favorite.post),
-    resolved => applyPost(favoritesById.get(resolved.post.id), resolved)
-  );
-}
-
-function applyPost(favorite: Favorite | undefined, { post, tagCategories }: ParsedPost): void {
-  if (favorite === undefined) {
-    return;
+  public enrich(favorites: Favorite[]): Promise<void> {
+    const favoritesById = new Map(favorites.map(favorite => [favorite.id, favorite]));
+    return PostResolver.resolveAll(
+      favorites.map(favorite => favorite.post),
+      resolved => this.applyPost(favoritesById.get(resolved.post.id), resolved)
+    );
   }
-  onTagCategoriesResolved(tagCategories);
 
-  if (tagsAreDifferent(favorite, post)) {
-    beforeTagsChanged(favorite);
-    favorite.enrich(post);
-    afterTagsChanged(favorite);
-  } else {
-    favorite.enrich(post);
+  private applyPost(favorite: Favorite | undefined, { post, tagCategories }: ParsedPost): void {
+    if (favorite === undefined) {
+      return;
+    }
+    TagCategoryStore.persistAll(tagCategories);
+
+    if (tagsAreDifferent(favorite, post)) {
+      this.beforeTagsChanged(favorite);
+      favorite.enrich(post);
+      this.afterTagsChanged(favorite);
+    } else {
+      favorite.enrich(post);
+    }
+    this.onFavoriteEnriched(favorite);
   }
-  onFavoriteEnriched(favorite);
 }
 
 function tagsAreDifferent(favorite: Favorite, post: Post): boolean {

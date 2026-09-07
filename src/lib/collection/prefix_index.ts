@@ -1,5 +1,5 @@
 import { SortedArray } from "@/lib/collection/sorted_array";
-import { lowerBound } from "@/utils/pure/array";
+import { findFirstIndexWhere } from "@/utils/pure/array";
 
 export class PrefixIndex {
   private readonly terms: SortedArray<string> = new SortedArray<string>();
@@ -19,7 +19,7 @@ export class PrefixIndex {
     const sortedTerms = this.terms.toArray();
     const result: string[] = [];
 
-    for (let i = lowerBound(sortedTerms.length, index => sortedTerms[index] >= prefix); i < sortedTerms.length; i += 1) {
+    for (let i = findFirstIndexWhere(sortedTerms.length, index => sortedTerms[index] >= prefix); i < sortedTerms.length; i += 1) {
       if (sortedTerms[i].startsWith(prefix)) {
         result.push(sortedTerms[i]);
       } else if (sortedTerms[i] > prefix) {

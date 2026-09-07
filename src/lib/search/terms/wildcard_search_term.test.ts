@@ -52,19 +52,14 @@ describe("WildcardSearchTerm", () => {
 
   test("compare cost", () => {
     const startsWithTerm = parseWildcardSearchTerm("banana*");
-    const containsTerm = parseWildcardSearchTerm("*bana*");
-    const containsTerm2 = parseWildcardSearchTerm("*bana*****");
     const endsWithTerm = parseWildcardSearchTerm("*banana");
-    const regexTerm = parseWildcardSearchTerm("*b*a*");
+    const substringTerm = parseWildcardSearchTerm("*bana*");
+    const substringTerm2 = parseWildcardSearchTerm("*bana*****");
+    const multiStarTerm = parseWildcardSearchTerm("*b*a*");
 
-    expect(startsWithTerm.cost).toBeLessThan(containsTerm.cost);
     expect(startsWithTerm.cost).toBeLessThan(endsWithTerm.cost);
-    expect(startsWithTerm.cost).toBeLessThan(regexTerm.cost);
-
-    expect(containsTerm.cost).toBeLessThan(endsWithTerm.cost);
-    expect(containsTerm.cost).toBeLessThan(regexTerm.cost);
-    expect(containsTerm.cost).toBe(containsTerm2.cost);
-
-    expect(endsWithTerm.cost).toBe(regexTerm.cost);
+    expect(endsWithTerm.cost).toBeLessThan(substringTerm.cost);
+    expect(substringTerm.cost).toBeLessThan(multiStarTerm.cost);
+    expect(substringTerm.cost).toBe(substringTerm2.cost);
   });
 });

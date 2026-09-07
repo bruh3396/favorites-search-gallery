@@ -4,29 +4,46 @@ import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
 
-const database = new Database<Post>("FavoritesV2", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
-const databaseUpdater = new CoalescingExecutor<Post>(100, 1_000, database.update.bind(database));
-let isDatabaseEmpty = true;
+export class FavoritesStore {
+  private readonly database = new Database<Post>("FavoritesV2", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
+  private readonly databaseUpdater = new CoalescingExecutor<Post>(100, 1_000, this.database.update.bind(this.database));
+  private isDatabaseEmpty = true;
 
-export async function writeAll(favorites: Favorite[]): Promise<void> {
-  await database.write([...favorites].reverse().map(favorite => favorite.post));
-  isDatabaseEmpty = false;
-}
+  public async writeAll(favorites: Favorite[]): Promise<void> {
+    await this.database.write([...favorites].reverse().map(favorite => favorite.post));
+    this.isDatabaseEmpty = false;
+  }
 
-export function update(favorite: Favorite): void {
-  if (!isDatabaseEmpty) {
-    databaseUpdater.schedule(favorite.post);
+  public update(favorite: Favorite): void {
+    if (!this.isDatabaseEmpty) {
+      this.databaseUpdater.schedule(favorite.post);
+    }
+  }
+
+  public async readAll(): Promise<Post[]> {
+    const records = (await this.database.exists()) ? await this.database.readAll() : [];
+
+    this.isDatabaseEmpty = records.length === 0;
+    return records;
+  }
+
+  public exists(): Promise<boolean> {
+    return this.database.exists();
+  }
+
+  public async readIds(): Promise<string[]> {
+    return (await this.database.exists()) ? this.database.readAllIds() : [];
+  }
+
+  public async hasAny(): Promise<boolean> {
+    return (await this.database.exists()) && (await this.database.count()) > 0;
+  }
+
+  public deleteId(id: string): Promise<void> {
+    return this.database.delete([id]);
+  }
+
+  public destroy(): Promise<void> {
+    return this.database.destroy();
   }
 }
-
-export async function readAll(): Promise<Post[]> {
-  const records = (await database.exists()) ? await database.readAll() : [];
-
-  isDatabaseEmpty = records.length === 0;
-  return records;
-}
-export const exists = (): Promise<boolean> => database.exists();
-export const readIds = async(): Promise<string[]> => ((await database.exists()) ? database.readAllIds() : []);
-export const hasAny = async(): Promise<boolean> => (await database.exists()) && (await database.count()) > 0;
-export const deleteId = (id: string): Promise<void> => database.delete([id]);
-export const destroy = (): Promise<void> => database.destroy();

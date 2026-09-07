@@ -1,36 +1,48 @@
-import { IndexedSearcher } from "@/lib/search/engine/indexed_searcher";
-import { IndexedWildcardResolver } from "@/lib/search/engine/wildcard/resolver";
+import { Searchable, SearchableMetric } from "@/types/search";
+import { DocsResolver } from "@/lib/search/engine/docs_resolver";
 import { InvertedIndex } from "@/lib/collection/inverted_index";
-import { SearchQuery } from "@/lib/search/engine/search_query";
-import { Searchable } from "@/types/search";
-import { WildcardExpander } from "@/lib/search/engine/wildcard/expander";
-import { hasMetadataTerm } from "@/lib/search/parsers/search_term_parser";
+import { InvertedIndexedSearcher } from "@/lib/search/engine/inverted_index_searcher";
+import { MetricIndex } from "@/lib/collection/metric_index";
+import { WildcardTermResolver } from "@/lib/search/engine/wildcard_term_resolver";
+import { expandWildcardTerms } from "@/lib/search/engine/wildcard_term_expander";
+import { isEmptyString } from "@/utils/pure/string";
+import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
+import { searchableMetrics } from "@/types/guards";
 
 export class SearchEngine<T extends Searchable> {
-  private readonly invertedIndex: InvertedIndex<T>;
-  private readonly resolver = new IndexedWildcardResolver();
-  private readonly searcher: IndexedSearcher<T>;
+  private readonly termIndex: InvertedIndex<T>;
+  private readonly metricIndex: MetricIndex<T>;
+  private readonly searcher: InvertedIndexedSearcher<T>;
+  private readonly wildcardResolver = new WildcardTermResolver();
 
-  constructor(getTerms: (doc: T) => Iterable<string>, docs: T[] = []) {
-    this.invertedIndex = new InvertedIndex<T>(getTerms);
-    this.searcher = new IndexedSearcher<T>(this.invertedIndex, new WildcardExpander(this.resolver));
+  constructor(termsFor: (doc: T) => Iterable<string>, metricFor: (doc: T, metric: SearchableMetric) => number, docs: T[] = []) {
+    this.termIndex = new InvertedIndex<T>(termsFor);
+    this.metricIndex = new MetricIndex<T>([...searchableMetrics], metricFor);
+    this.searcher = new InvertedIndexedSearcher<T>(new DocsResolver<T>(this.termIndex, this.metricIndex, metricFor));
     this.index(docs);
   }
 
   public search(query: string, candidates: T[]): T[] {
-    return hasMetadataTerm(query) ? new SearchQuery<T>(query).filter(candidates) : this.searcher.search(query, candidates);
+    if (isEmptyString(query)) {
+      return candidates;
+    }
+    const { searchQuery, isUnmatchable } = expandWildcardTerms(parseSearchQuery<T>(query), this.wildcardResolver);
+    return isUnmatchable ? [] : this.searcher.search(searchQuery, candidates);
   }
 
   public index(docs: T[]): void {
-    this.invertedIndex.addDocs(docs);
-    this.resolver.index(this.invertedIndex.indexedTerms());
+    this.termIndex.addDocs(docs);
+    this.wildcardResolver.index(this.termIndex.indexedTerms());
+    this.metricIndex.build(this.termIndex.allDocs());
   }
 
   public add(doc: T): void {
-    this.invertedIndex.addDoc(doc).forEach(term => this.resolver.addTerm(term));
+    this.termIndex.addDoc(doc).forEach(term => this.wildcardResolver.addTerm(term));
+    this.metricIndex.add(doc);
   }
 
   public remove(doc: T): void {
-    this.invertedIndex.removeDoc(doc).forEach(term => this.resolver.removeTerm(term));
+    this.termIndex.removeDoc(doc).forEach(term => this.wildcardResolver.removeTerm(term));
+    this.metricIndex.remove(doc);
   }
 }

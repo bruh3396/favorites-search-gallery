@@ -1,17 +1,17 @@
-import { chunk, isIndexInBounds, itemsAround, lowerBound, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
+import { chunk, findFirstIndexWhere, isIndexInBounds, itemsAround, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
 import { describe, expect, test } from "vitest";
 import { randomInt } from "@/utils/pure/number";
 
-describe("lowerBound", () => {
+describe("findFirstIndexWhere", () => {
   const sorted = [10, 20, 20, 30];
-  const firstAtOrAbove = (value: number): number => lowerBound(sorted.length, index => sorted[index] >= value);
+  const firstAtOrAbove = (value: number): number => findFirstIndexWhere(sorted.length, index => sorted[index] >= value);
 
   test("returns the first index whose value satisfies the predicate", () => {
     expect(firstAtOrAbove(20)).toBe(1);
   });
 
   test("skips past every element sharing the boundary value", () => {
-    expect(lowerBound(sorted.length, index => sorted[index] > 20)).toBe(3);
+    expect(findFirstIndexWhere(sorted.length, index => sorted[index] > 20)).toBe(3);
   });
 
   test("returns 0 when every element satisfies the predicate", () => {
@@ -23,7 +23,7 @@ describe("lowerBound", () => {
   });
 
   test("returns 0 for an empty range", () => {
-    expect(lowerBound(0, () => true)).toBe(0);
+    expect(findFirstIndexWhere(0, () => true)).toBe(0);
   });
 
   test("finds an exact match", () => {

@@ -3,13 +3,21 @@ import { Searchable } from "@/types/search";
 
 export enum WildcardMatchType {
   Prefix = 10,
-  Substring = 15,
-  Regex = 20
+  Suffix = 15,
+  Substring = 20,
+  MultiStar = 25
+}
+
+export interface WildcardResolutionInputs {
+  matchType: WildcardMatchType;
+  fragment: string;
+  fragments: string[];
+  regex: RegExp;
 }
 
 export class WildcardSearchTerm extends AbstractSearchTerm {
+  public readonly matchType: WildcardMatchType;
   protected override readonly baseCost: number;
-  private readonly matchType: WildcardMatchType;
   private readonly regex: RegExp;
   private readonly prefix: string;
   private readonly substring: string;
@@ -24,12 +32,13 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
     this.optimize();
   }
 
-  public findMatchingTerms(indexedTerms: string[]): string[] {
-    switch (this.matchType) {
-      case WildcardMatchType.Prefix: return this.findPrefixMatches(indexedTerms);
-      case WildcardMatchType.Substring: return this.findSubstringMatches(indexedTerms);
-      default: return this.findRegexMatches(indexedTerms);
-    }
+  public get resolutionInputs(): WildcardResolutionInputs {
+    return {
+      matchType: this.matchType,
+      fragment: this.fragment(),
+      fragments: this.value.split("*").filter(fragment => fragment !== ""),
+      regex: this.regex
+    };
   }
 
   protected override matchesPositive(item: Searchable): boolean {
@@ -42,6 +51,15 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
 
   protected override matchesNegated(item: Searchable): boolean {
     return !this.matchesPositive(item);
+  }
+
+  private fragment(): string {
+    switch (this.matchType) {
+      case WildcardMatchType.Prefix: return this.prefix;
+      case WildcardMatchType.Suffix: return this.value.slice(1);
+      case WildcardMatchType.Substring: return this.substring;
+      default: return "";
+    }
   }
 
   private optimize(): void {
@@ -78,43 +96,5 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
       }
     }
     return false;
-  }
-
-  private findPrefixMatches(indexedTerms: string[]): string[] {
-    const result: string[] = [];
-    const low = this.findFirstPrefixMatchIndex(indexedTerms);
-
-    for (let i = low; i < indexedTerms.length; i += 1) {
-      if (indexedTerms[i].startsWith(this.prefix)) {
-        result.push(indexedTerms[i]);
-      } else if (indexedTerms[i] > this.prefix) {
-        break;
-      }
-    }
-    return result;
-  }
-
-  private findSubstringMatches(indexedTerms: string[]): string[] {
-    return indexedTerms.filter(term => term.includes(this.substring));
-  }
-
-  private findRegexMatches(indexedTerms: string[]): string[] {
-    return indexedTerms.filter(term => this.regex.test(term));
-  }
-
-    private findFirstPrefixMatchIndex(terms: string[]): number {
-    let low = 0;
-    let high = terms.length - 1;
-
-    while (low <= high) {
-      const mid = (low + high) >>> 1;
-
-      if (terms[mid] < this.prefix) {
-        low = mid + 1;
-      } else {
-        high = mid - 1;
-      }
-    }
-    return low;
   }
 }

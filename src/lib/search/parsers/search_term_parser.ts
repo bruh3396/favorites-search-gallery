@@ -1,16 +1,14 @@
 import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
-import { MetadataSearchExpression } from "@/lib/search/parsers/metadata_search_expression";
-import { MetadataSearchTerm } from "@/lib/search/terms/metadata_search_term";
+import { MetricSearchExpression } from "@/lib/search/parsers/metric_search_expression";
+import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
 import { escapeParentheses } from "@/utils/pure/string";
 
 const unmatchableRegex = /^\b$/;
-const startsWithRegex = /^[^*]*\*$/;
-const containsRegex = /^\*[^*]*\*$/;
 
 export function parseSearchTerm(term: string): AbstractSearchTerm {
-  return isWildcardTerm(term) ? parseWildcardSearchTerm(term) : isMetadataTerm(term) ? parseMetadataSearchTerm(term) : parseExactSearchTerm(term);
+  return isWildcardTerm(term) ? parseWildcardSearchTerm(term) : isMetricTerm(term) ? parseMetricSearchTerm(term) : parseExactSearchTerm(term);
 }
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
@@ -18,10 +16,10 @@ export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
   return new WildcardSearchTerm(value, isNegated, chooseWildcardMatchType(value), buildWildcardRegex(value));
 }
 
-export function parseMetadataSearchTerm(term: string): MetadataSearchTerm {
+export function parseMetricSearchTerm(term: string): MetricSearchTerm {
   const { isNegated, value } = parseNegation(term);
-  const expression = new MetadataSearchExpression(value);
-  return new MetadataSearchTerm(value, isNegated, expression);
+  const expression = new MetricSearchExpression(value);
+  return new MetricSearchTerm(value, isNegated, expression);
 }
 
 export function parseExactSearchTerm(term: string): ExactSearchTerm {
@@ -33,12 +31,8 @@ export function isWildcardTerm(term: string): boolean {
   return term.includes("*");
 }
 
-export function isMetadataTerm(term: string): boolean {
-  return MetadataSearchExpression.regex.test(term);
-}
-
-export function hasMetadataTerm(query: string): boolean {
-  return query.trim().split(/\s+/).some(isMetadataTerm);
+export function isMetricTerm(term: string): boolean {
+  return MetricSearchExpression.regex.test(term);
 }
 
 function parseNegation(term: string): { isNegated: boolean; value: string } {
@@ -47,7 +41,22 @@ function parseNegation(term: string): { isNegated: boolean; value: string } {
 }
 
 function chooseWildcardMatchType(value: string): WildcardMatchType {
-  return startsWithRegex.test(value) ? WildcardMatchType.Prefix : containsRegex.test(value) ? WildcardMatchType.Substring : WildcardMatchType.Regex;
+  const first = value.indexOf("*");
+  const last = value.lastIndexOf("*");
+  const hasSingleStar = first === last;
+
+  if (hasSingleStar && last === value.length - 1) {
+    return WildcardMatchType.Prefix;
+  }
+
+  if (hasSingleStar && first === 0) {
+    return WildcardMatchType.Suffix;
+  }
+
+  if (first === 0 && last === value.length - 1 && value.indexOf("*", 1) === last) {
+    return WildcardMatchType.Substring;
+  }
+  return WildcardMatchType.MultiStar;
 }
 
 function buildWildcardRegex(value: string): RegExp {

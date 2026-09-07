@@ -4,7 +4,6 @@ import { FeatureChannel } from "@/lib/messaging/feature_channel";
 import { NavigationKey } from "@/types/input";
 import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
-import { TagCategory } from "@/types/search";
 
 export const FeatureBridge = {
   favorites: {
@@ -19,9 +18,6 @@ export const FeatureBridge = {
   gallery: {
     currentThumb: new FeatureChannel<void, HTMLElement | null>(null),
     state: new FeatureChannel<void, GalleryState>("idle")
-  },
-  postOverlay: {
-    tagCategory: new FeatureChannel<string, TagCategory | undefined>(undefined)
   },
   postList: {
     navigateToAdjacent: new FeatureChannel<NavigationKey, PostList | null>(null),

@@ -32,7 +32,7 @@ function subscribeToEvents(): void {
   Preferences.postList.tooltipEnabled.on(TooltipFlows.Toggle.hideIfDisabled);
 
   if (ON_FAVORITES_PAGE) {
-    Events.favorites.searchRequested.on(TooltipModel.rebuildHighlights);
+    Events.favorites.searchRequested.on(TooltipModel.rebuildHighlights, { async: true });
   }
 }
 
