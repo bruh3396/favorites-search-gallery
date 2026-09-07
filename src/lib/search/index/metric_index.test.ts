@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { MetricIndex } from "@/lib/collection/metric_index";
+import { MetricIndex } from "@/lib/search/index/metric_index";
 
 interface Doc {
   score: number;
@@ -18,7 +18,7 @@ const index = new MetricIndex<Doc>(["score", "width"], (doc, metric) => doc[metr
 index.build(new Set(docs));
 
 function scores(operator: ":" | ":<" | ":>", value: number): number[] {
-  return index.docsMatching({ metric: "score", operator, value }).map(doc => doc.score).sort();
+  return [...index.docsMatching({ metric: "score", operator, value })].map(doc => doc.score).sort();
 }
 
 describe("MetricIndex", () => {
@@ -55,15 +55,15 @@ describe("MetricIndex", () => {
   });
 
   test("each metric is indexed independently", () => {
-    expect(index.docsMatching({ metric: "width", operator: ":>", value: 250 }).map(doc => doc.width).sort()).toEqual([300, 400]);
+    expect([...index.docsMatching({ metric: "width", operator: ":>", value: 250 })].map(doc => doc.width).sort()).toEqual([300, 400]);
   });
 
   test("an unindexed metric returns nothing", () => {
-    expect(index.docsMatching({ metric: "height", operator: ":>", value: 0 })).toEqual([]);
+    expect([...index.docsMatching({ metric: "height", operator: ":>", value: 0 })]).toEqual([]);
   });
 
   test("querying before build returns nothing", () => {
-    expect(new MetricIndex<Doc>(["score"], doc => doc.score).docsMatching({ metric: "score", operator: ":>", value: 0 })).toEqual([]);
+    expect([...new MetricIndex<Doc>(["score"], doc => doc.score).docsMatching({ metric: "score", operator: ":>", value: 0 })]).toEqual([]);
   });
 });
 
@@ -79,38 +79,38 @@ describe("MetricIndex mutation", () => {
     const mutable = freshIndex();
 
     mutable.add({ score: 6, width: 500 });
-    expect(mutable.docsMatching({ metric: "score", operator: ":", value: 6 }).map(doc => doc.score)).toEqual([6]);
-    expect(mutable.docsMatching({ metric: "width", operator: ":", value: 500 }).map(doc => doc.width)).toEqual([500]);
+    expect([...mutable.docsMatching({ metric: "score", operator: ":", value: 6 })].map(doc => doc.score)).toEqual([6]);
+    expect([...mutable.docsMatching({ metric: "width", operator: ":", value: 500 })].map(doc => doc.width)).toEqual([500]);
   });
 
   test("add keeps entries sorted so ranges stay correct", () => {
     const mutable = freshIndex();
 
     mutable.add({ score: 4, width: 250 });
-    expect(mutable.docsMatching({ metric: "score", operator: ":<", value: 5 }).map(doc => doc.score).sort()).toEqual([3, 4]);
+    expect([...mutable.docsMatching({ metric: "score", operator: ":<", value: 5 })].map(doc => doc.score).sort()).toEqual([3, 4]);
   });
 
   test("remove drops a doc from every metric", () => {
     const mutable = freshIndex();
-    const [target] = mutable.docsMatching({ metric: "score", operator: ":", value: 8 });
+    const [target] = [...mutable.docsMatching({ metric: "score", operator: ":", value: 8 })];
 
     mutable.remove(target);
-    expect(mutable.docsMatching({ metric: "score", operator: ":", value: 8 })).toEqual([]);
-    expect(mutable.docsMatching({ metric: "width", operator: ":", value: 300 })).toEqual([]);
+    expect([...mutable.docsMatching({ metric: "score", operator: ":", value: 8 })]).toEqual([]);
+    expect([...mutable.docsMatching({ metric: "width", operator: ":", value: 300 })]).toEqual([]);
   });
 
   test("remove drops only the matching doc among equal values", () => {
     const mutable = freshIndex();
-    const [first] = mutable.docsMatching({ metric: "score", operator: ":", value: 5 });
+    const [first] = [...mutable.docsMatching({ metric: "score", operator: ":", value: 5 })];
 
     mutable.remove(first);
-    expect(mutable.docsMatching({ metric: "score", operator: ":", value: 5 }).length).toBe(1);
+    expect(mutable.docsMatching({ metric: "score", operator: ":", value: 5 }).size).toBe(1);
   });
 
   test("remove of an absent doc is a no-op", () => {
     const mutable = freshIndex();
 
     mutable.remove({ score: 999, width: 999 });
-    expect(mutable.docsMatching({ metric: "score", operator: ":<", value: 100 }).length).toBe(4);
+    expect(mutable.docsMatching({ metric: "score", operator: ":<", value: 100 }).size).toBe(4);
   });
 });

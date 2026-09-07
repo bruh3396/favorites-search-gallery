@@ -1,7 +1,7 @@
 import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
-import { MetricSearchExpression } from "@/lib/search/parsers/metric_search_expression";
+import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
 import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
 import { escapeParentheses } from "@/utils/pure/string";
 
@@ -18,8 +18,8 @@ export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
 
 export function parseMetricSearchTerm(term: string): MetricSearchTerm {
   const { isNegated, value } = parseNegation(term);
-  const expression = new MetricSearchExpression(value);
-  return new MetricSearchTerm(value, isNegated, expression);
+  const comparison = new MetricSearchComparison(value);
+  return new MetricSearchTerm(value, isNegated, comparison);
 }
 
 export function parseExactSearchTerm(term: string): ExactSearchTerm {
@@ -32,7 +32,7 @@ export function isWildcardTerm(term: string): boolean {
 }
 
 export function isMetricTerm(term: string): boolean {
-  return MetricSearchExpression.regex.test(term);
+  return MetricSearchComparison.regex.test(term);
 }
 
 function parseNegation(term: string): { isNegated: boolean; value: string } {

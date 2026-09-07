@@ -1,5 +1,5 @@
-﻿import { PrefixIndex } from "@/lib/collection/prefix_index";
-import { TrigramIndex } from "@/lib/collection/trigram_index";
+﻿import { PrefixIndex } from "@/lib/search/index/prefix_index";
+import { TrigramIndex } from "@/lib/search/index/trigram_index";
 import { WildcardResolver } from "@/lib/search/engine/wildcard_resolver";
 
 export class WildcardTermResolver implements WildcardResolver {

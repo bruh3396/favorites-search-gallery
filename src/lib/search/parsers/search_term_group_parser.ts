@@ -8,14 +8,15 @@ import { removeExtraWhitespace } from "@/utils/pure/string";
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 const meaninglessTerm = /^\**$/;
 
-export function parseSearchQuery<T extends Searchable>(query: string): SearchQuery<T> {
+export function parseSearchQuery<Doc extends Searchable>(query: string): SearchQuery<Doc> {
   const termGroups = parseTermGroups(query);
   const andTerms = buildSearchTermGroup(termGroups.andTerms);
   const orGroups = termGroups.orGroups.map(buildSearchTermGroup);
-  return normalizeSearchQuery<T>(andTerms, orGroups);
+  const normalized = normalizeSearchQuery<Doc>(andTerms, orGroups);
+  return new SearchQuery<Doc>(normalized.andTerms, normalized.orGroups, query);
 }
 
-export function normalizeSearchQuery<T extends Searchable>(andTerms: AbstractSearchTerm[], orGroups: AbstractSearchTerm[][]): SearchQuery<T> {
+export function normalizeSearchQuery<Doc extends Searchable>(andTerms: AbstractSearchTerm[], orGroups: AbstractSearchTerm[][]): SearchQuery<Doc> {
   const flattenedAndTerms = [...andTerms];
   const multiTermOrGroups: AbstractSearchTerm[][] = [];
 
@@ -28,12 +29,12 @@ export function normalizeSearchQuery<T extends Searchable>(andTerms: AbstractSea
       multiTermOrGroups.push(sortSearchTermGroup(deduped));
     }
   }
-  return new SearchQuery<T>(sortSearchTermGroup(dedupe(flattenedAndTerms)), multiTermOrGroups.sort((a, b) => a.length - b.length));
+  return new SearchQuery<Doc>(sortSearchTermGroup(dedupe(flattenedAndTerms)), multiTermOrGroups.sort((a, b) => a.length - b.length));
 }
 
-export function parseTermGroups(query: string): { orGroups: string[][]; andTerms: string[] } {
-  query = desugarNestedOrGroups(removeExtraWhitespace(query).toLowerCase());
-  return { andTerms: parseAndTerms(query), orGroups: parseOrGroups(query) };
+export function parseTermGroups(normalized: string): { orGroups: string[][]; andTerms: string[] } {
+  normalized = desugarNestedOrGroups(removeExtraWhitespace(normalized).toLowerCase());
+  return { andTerms: parseAndTerms(normalized), orGroups: parseOrGroups(normalized) };
 }
 
 export function buildSearchTermGroup(terms: string[]): AbstractSearchTerm[] {

@@ -1,6 +1,6 @@
 import { Fruit, FruitName, index } from "@/lib/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
-import { InvertedIndex } from "@/lib/collection/inverted_index";
+import { InvertedIndex } from "@/lib/search/index/inverted_index";
 
 function makeDoc(name: FruitName, tags: string[]): Fruit {
   return { name, tags: new Set(tags) };

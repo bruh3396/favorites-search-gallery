@@ -103,7 +103,16 @@ describe("MetricSearchTerm", () => {
     });
   });
 
-  describe("invalid expressions", () => {
+  describe("tautological comparison", () => {
+    test("flags a self-comparison and leaves other comparisons unflagged", () => {
+      expect(parseMetricSearchTerm("width:width").comparison.isTautological).toBe(true);
+      expect(parseMetricSearchTerm("width:>width").comparison.isTautological).toBe(true);
+      expect(parseMetricSearchTerm("width:height").comparison.isTautological).toBe(false);
+      expect(parseMetricSearchTerm("width:100").comparison.isTautological).toBe(false);
+    });
+  });
+
+  describe("invalid comparisons", () => {
     test("invalid metric defaults gracefully", () => {
       expect(() => parseMetricSearchTerm("invalid:100").matches(hd)).not.toThrow();
     });

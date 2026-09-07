@@ -99,6 +99,10 @@ export class FavoritesSearcher {
     if (sortKey === "random") {
       return shuffleInPlace([...favorites]);
     }
+
+    if (sortKey === "default") {
+      return favorites;
+    }
     const sorted = [...favorites].sort((a, b) => b.getMetric(sortKey) - a.getMetric(sortKey));
     return this.config.sortAscending() ? sorted.reverse() : sorted;
   }

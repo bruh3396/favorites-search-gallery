@@ -1,6 +1,8 @@
-import { MetricComparison } from "@/lib/search/terms/metric_search_term";
+import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
 import { SearchableMetric } from "@/types/search";
 import { findFirstIndexWhere } from "@/utils/pure/array";
+
+type AbsoluteComparison = Pick<MetricSearchComparison, "metric" | "operator" | "value">;
 
 interface Entry<Doc> {
   value: number;
@@ -9,11 +11,18 @@ interface Entry<Doc> {
 
 export class MetricIndex<Doc> {
   private readonly entriesByMetric: Map<SearchableMetric, Entry<Doc>[]> = new Map<SearchableMetric, Entry<Doc>[]>();
+  private built = false;
 
   constructor(
     private readonly metrics: readonly SearchableMetric[],
     private readonly metricFor: (doc: Doc, metric: SearchableMetric) => number
   ) { }
+
+  public ensureBuilt(docs: ReadonlySet<Doc>): void {
+    if (!this.built) {
+      this.build(docs);
+    }
+  }
 
   public build(docs: ReadonlySet<Doc>): void {
     for (const metric of this.metrics) {
@@ -25,9 +34,14 @@ export class MetricIndex<Doc> {
       entries.sort((a, b) => a.value - b.value);
       this.entriesByMetric.set(metric, entries);
     }
+    this.built = true;
   }
 
   public add(doc: Doc): void {
+    if (!this.built) {
+      return;
+    }
+
     for (const metric of this.metrics) {
       const entries = this.entriesByMetric.get(metric);
 
@@ -53,16 +67,26 @@ export class MetricIndex<Doc> {
     }
   }
 
-  public docsMatching(comparison: MetricComparison): Doc[] {
+  public docsMatching(comparison: AbsoluteComparison): ReadonlySet<Doc> {
+    const { entries, start, end } = this.matchingRange(comparison);
+    const docs = new Set<Doc>();
+
+    for (let index = start; index < end; index += 1) {
+      docs.add(entries[index].doc);
+    }
+    return docs;
+  }
+
+  private matchingRange(comparison: AbsoluteComparison): { entries: Entry<Doc>[]; start: number; end: number } {
     const entries = this.entriesByMetric.get(comparison.metric) ?? [];
 
     switch (comparison.operator) {
       case ":<":
-        return this.slice(entries, 0, this.lowerBound(entries, comparison.value));
+        return { entries, start: 0, end: this.lowerBound(entries, comparison.value) };
       case ":>":
-        return this.slice(entries, this.upperBound(entries, comparison.value), entries.length);
+        return { entries, start: this.upperBound(entries, comparison.value), end: entries.length };
       default:
-        return this.slice(entries, this.lowerBound(entries, comparison.value), this.upperBound(entries, comparison.value));
+        return { entries, start: this.lowerBound(entries, comparison.value), end: this.upperBound(entries, comparison.value) };
     }
   }
 
@@ -72,10 +96,6 @@ export class MetricIndex<Doc> {
 
   private upperBound(entries: Entry<Doc>[], value: number): number {
     return findFirstIndexWhere(entries.length, index => entries[index].value > value);
-  }
-
-  private slice(entries: Entry<Doc>[], start: number, end: number): Doc[] {
-    return entries.slice(start, end).map(entry => entry.doc);
   }
 
   private indexOfDoc(entries: Entry<Doc>[], value: number, doc: Doc): number {

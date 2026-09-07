@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { TrigramIndex } from "@/lib/collection/trigram_index";
+import { TrigramIndex } from "@/lib/search/index/trigram_index";
 
 const terms = ["banana", "bandana", "cabana", "canvas", "abandon", "and", "an", "sandbox", "brand", "nan_ana"];
 

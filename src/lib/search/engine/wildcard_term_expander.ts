@@ -6,63 +6,84 @@ import { Searchable } from "@/types/search";
 import { WildcardResolver } from "@/lib/search/engine/wildcard_resolver";
 import { normalizeSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
-export function expandWildcardTerms<T extends Searchable>(
-  searchQuery: SearchQuery<T>,
-  resolver: WildcardResolver
-): {
-  searchQuery: SearchQuery<T>;
+export interface ExpandedQuery<Doc extends Searchable> {
+  searchQuery: SearchQuery<Doc>;
   isUnmatchable: boolean;
-} {
-  const andTerms: AbstractSearchTerm[] = [];
-  const orGroups: AbstractSearchTerm[][] = [];
-
-  for (const term of searchQuery.andTerms) {
-    if (!(term instanceof WildcardSearchTerm)) {
-      andTerms.push(term);
-      continue;
-    }
-    const resolved = resolve(term, resolver);
-
-    if (term.isNegated) {
-      andTerms.push(...resolved.map(value => new ExactSearchTerm(value, true)));
-    } else if (resolved.length === 0) {
-      return { searchQuery, isUnmatchable: true };
-    } else {
-      orGroups.push(resolved.map(value => new ExactSearchTerm(value, false)));
-    }
-  }
-
-  for (const orGroup of searchQuery.orGroups) {
-    const expanded = expandOrGroup(orGroup, resolver);
-
-    if (expanded.length === 0) {
-      return { searchQuery, isUnmatchable: true };
-    }
-    orGroups.push(expanded);
-  }
-  return { searchQuery: normalizeSearchQuery<T>(andTerms, orGroups), isUnmatchable: false };
 }
 
-function expandOrGroup(orGroup: AbstractSearchTerm[], resolver: WildcardResolver): AbstractSearchTerm[] {
-  const expanded: AbstractSearchTerm[] = [];
+export class WildcardTermExpander<Doc extends Searchable> {
+  private readonly cache: Map<string, ExpandedQuery<Doc>> = new Map<string, ExpandedQuery<Doc>>();
 
-  for (const term of orGroup) {
-    if (!(term instanceof WildcardSearchTerm)) {
-      expanded.push(term);
-    } else if (!term.isNegated) {
-      expanded.push(...resolve(term, resolver).map(value => new ExactSearchTerm(value, false)));
+  constructor(private readonly resolver: WildcardResolver) { }
+
+  public expand(searchQuery: SearchQuery<Doc>): ExpandedQuery<Doc> {
+    const cached = this.cache.get(searchQuery.source);
+
+    if (cached !== undefined) {
+      return cached;
     }
+    const expanded = this.expandWildcardTerms(searchQuery);
+
+    this.cache.set(searchQuery.source, expanded);
+    return expanded;
   }
-  return expanded;
-}
 
-function resolve(term: WildcardSearchTerm, resolver: WildcardResolver): string[] {
-  const inputs = term.resolutionInputs;
+  public clearCache(): void {
+    this.cache.clear();
+  }
 
-  switch (inputs.matchType) {
-    case WildcardMatchType.Prefix: return resolver.termsStartingWith(inputs.fragment);
-    case WildcardMatchType.Suffix: return resolver.termsEndingWith(inputs.fragment);
-    case WildcardMatchType.Substring: return resolver.termsContaining(inputs.fragment);
-    default: return resolver.termsMatching(inputs.fragments, t => inputs.regex.test(t));
+  private expandWildcardTerms(searchQuery: SearchQuery<Doc>): ExpandedQuery<Doc> {
+    const andTerms: AbstractSearchTerm[] = [];
+    const orGroups: AbstractSearchTerm[][] = [];
+
+    for (const term of searchQuery.andTerms) {
+      if (!(term instanceof WildcardSearchTerm)) {
+        andTerms.push(term);
+        continue;
+      }
+      const resolved = this.resolve(term);
+
+      if (term.isNegated) {
+        andTerms.push(...resolved.map(value => new ExactSearchTerm(value, true)));
+      } else if (resolved.length === 0) {
+        return { searchQuery, isUnmatchable: true };
+      } else {
+        orGroups.push(resolved.map(value => new ExactSearchTerm(value, false)));
+      }
+    }
+
+    for (const orGroup of searchQuery.orGroups) {
+      const expanded = this.expandOrGroup(orGroup);
+
+      if (expanded.length === 0) {
+        return { searchQuery, isUnmatchable: true };
+      }
+      orGroups.push(expanded);
+    }
+    return { searchQuery: normalizeSearchQuery<Doc>(andTerms, orGroups), isUnmatchable: false };
+  }
+
+  private expandOrGroup(orGroup: AbstractSearchTerm[]): AbstractSearchTerm[] {
+    const expanded: AbstractSearchTerm[] = [];
+
+    for (const term of orGroup) {
+      if (!(term instanceof WildcardSearchTerm)) {
+        expanded.push(term);
+      } else if (!term.isNegated) {
+        expanded.push(...this.resolve(term).map(value => new ExactSearchTerm(value, false)));
+      }
+    }
+    return expanded;
+  }
+
+  private resolve(term: WildcardSearchTerm): string[] {
+    const inputs = term.resolutionInputs;
+
+    switch (inputs.matchType) {
+      case WildcardMatchType.Prefix: return this.resolver.termsStartingWith(inputs.fragment);
+      case WildcardMatchType.Suffix: return this.resolver.termsEndingWith(inputs.fragment);
+      case WildcardMatchType.Substring: return this.resolver.termsContaining(inputs.fragment);
+      default: return this.resolver.termsMatching(inputs.fragments, t => inputs.regex.test(t));
+    }
   }
 }

@@ -20,6 +20,15 @@ export function intersection<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): Set
   return result;
 }
 
+export function isInAllSets<T>(value: T, sets: ReadonlySet<T>[]): boolean {
+  for (const set of sets) {
+    if (!set.has(value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function hasIntersection<T>(setA: ReadonlySet<T>, setB: ReadonlySet<T>): boolean {
   const smaller = setA.size < setB.size ? setA : setB;
   const larger = smaller === setA ? setB : setA;

@@ -1,10 +1,11 @@
 import { Searchable, SearchableMetric } from "@/types/search";
 import { beforeEach, describe, expect, test } from "vitest";
-import { DocsResolver } from "@/lib/search/engine/docs_resolver";
-import { InvertedIndex } from "@/lib/collection/inverted_index";
-import { MetricIndex } from "@/lib/collection/metric_index";
 import { parseMetricSearchTerm, parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
-import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
+import { DocResolver } from "@/lib/search/engine/doc_resolver";
+import { InvertedIndex } from "@/lib/search/index/inverted_index";
+import { MetricIndex } from "@/lib/search/index/metric_index";
+import { PositionIndex } from "@/lib/search/index/position_index";
+import { RelativeMetricIndex } from "@/lib/search/index/relative_metric_index";
 import { searchableMetrics } from "@/types/guards";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<SearchableMetric, number>> };
@@ -26,15 +27,17 @@ function names(set: ReadonlySet<Doc>): string[] {
 
 describe("DocsResolver", () => {
   let termIndex: InvertedIndex<Doc>;
-  let metricIndex: MetricIndex<Doc>;
-  let resolver: DocsResolver<Doc>;
+  let resolver: DocResolver<Doc>;
 
   beforeEach(() => {
     termIndex = new InvertedIndex<Doc>(item => item.tags);
     docs.forEach(item => termIndex.addDoc(item));
-    metricIndex = new MetricIndex<Doc>([...searchableMetrics], metricFor);
-    metricIndex.build(termIndex.allDocs());
-    resolver = new DocsResolver<Doc>(termIndex, metricIndex, metricFor);
+    const metricIndex = new MetricIndex<Doc>([...searchableMetrics], metricFor);
+    const relativeMetricIndex = new RelativeMetricIndex<Doc>([...searchableMetrics], metricFor);
+    const positionIndex = new PositionIndex<Doc>();
+
+    positionIndex.build(docs);
+    resolver = new DocResolver<Doc>(termIndex, metricIndex, relativeMetricIndex, positionIndex);
   });
 
   describe("docsFor", () => {
@@ -53,53 +56,26 @@ describe("DocsResolver", () => {
       expect(names(resolver.docsFor(parseMetricSearchTerm("duration:<100")))).toEqual(["sd", "square"]);
     });
 
-    test("a relative metric term resolves to nothing before priming", () => {
-      expect(names(resolver.docsFor(parseMetricSearchTerm("width:>height")))).toEqual([]);
-    });
-  });
-
-  describe("prime", () => {
     test("resolves a relative metric term against the corpus", () => {
-      const query = parseSearchQuery<Doc>("width:>height");
-
-      resolver.prime(query);
-      expect(names(resolver.docsFor(query.allTerms()[0]))).toEqual(["hd", "sd"]);
+      expect(names(resolver.docsFor(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
     });
 
     test("resolves an equal relative metric term", () => {
-      const query = parseSearchQuery<Doc>("width:height");
-
-      resolver.prime(query);
-      expect(names(resolver.docsFor(query.allTerms()[0]))).toEqual(["square"]);
+      expect(names(resolver.docsFor(parseMetricSearchTerm("width:height")))).toEqual(["square"]);
     });
 
-    test("primes each relative term in the query independently", () => {
-      const query = parseSearchQuery<Doc>("width:>height height:<width");
-
-      resolver.prime(query);
-      const [first, second] = query.allTerms();
-
-      expect(names(resolver.docsFor(first))).toEqual(["hd", "sd"]);
-      expect(names(resolver.docsFor(second))).toEqual(["hd", "sd"]);
+    test("resolves each relative term consistently", () => {
+      expect(names(resolver.docsFor(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
+      expect(names(resolver.docsFor(parseMetricSearchTerm("height:<width")))).toEqual(["hd", "sd"]);
     });
 
-    test("a later prime clears relative results from an earlier query", () => {
-      const firstQuery = parseSearchQuery<Doc>("width:>height");
-      const firstTerm = firstQuery.allTerms()[0];
-
-      resolver.prime(firstQuery);
-      expect(names(resolver.docsFor(firstTerm))).toEqual(["hd", "sd"]);
-
-      resolver.prime(parseSearchQuery<Doc>("score:>0"));
-      expect(names(resolver.docsFor(firstTerm))).toEqual([]);
+    test("a tautological equality relative term matches every doc", () => {
+      expect(names(resolver.docsFor(parseMetricSearchTerm("width:width")))).toEqual(["hd", "sd", "square"]);
     });
 
-    test("evaluates relative terms through the injected accessor, not doc.getMetric", () => {
-      const query = parseSearchQuery<Doc>("width:>height");
-
-      resolver.prime(query);
-      expect("getMetric" in hd).toBe(false);
-      expect(names(resolver.docsFor(query.allTerms()[0]))).toEqual(["hd", "sd"]);
+    test("a tautological inequality relative term matches nothing", () => {
+      expect(names(resolver.docsFor(parseMetricSearchTerm("width:>width")))).toEqual([]);
+      expect(names(resolver.docsFor(parseMetricSearchTerm("width:<width")))).toEqual([]);
     });
   });
 

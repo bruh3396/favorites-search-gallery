@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { Fruit } from "@/lib/search/testing/fruit_corpus";
 import { WildcardResolver } from "@/lib/search/engine/wildcard_resolver";
-import { expandWildcardTerms } from "@/lib/search/engine/wildcard_term_expander";
+import { WildcardTermExpander } from "@/lib/search/engine/wildcard_term_expander";
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 class FakeResolver implements WildcardResolver {
@@ -29,7 +29,8 @@ class FakeResolver implements WildcardResolver {
 }
 
 function expand(query: string, byFragment: Record<string, string[]>): { andTerms: string[]; orGroups: string[][]; isUnmatchable: boolean } {
-  const result = expandWildcardTerms(parseSearchQuery<Fruit>(query), new FakeResolver(byFragment));
+  const expander = new WildcardTermExpander<Fruit>(new FakeResolver(byFragment));
+  const result = expander.expand(parseSearchQuery<Fruit>(query));
   return {
     andTerms: result.searchQuery.andTerms.map(term => term.literal),
     orGroups: result.searchQuery.orGroups.map(orGroup => orGroup.map(term => term.literal)),

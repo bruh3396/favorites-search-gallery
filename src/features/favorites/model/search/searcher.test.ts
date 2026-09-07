@@ -91,7 +91,10 @@ describe("FavoritesSearcher", () => {
 
   describe("sorting", () => {
     test("orders results by the metric, descending by default", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")]);
+      const favorites = withIndexed(
+        [favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")],
+        { sortKey: () => "score" }
+      );
 
       expect(ids(searcher.search(favorites, "cat"))).toEqual(["3", "2", "1"]);
     });
@@ -99,10 +102,16 @@ describe("FavoritesSearcher", () => {
     test("orders ascending when configured", () => {
       const favorites = withIndexed(
         [favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")],
-        { sortAscending: () => true }
+        { sortKey: () => "score", sortAscending: () => true }
       );
 
       expect(ids(searcher.search(favorites, "cat"))).toEqual(["1", "2", "3"]);
+    });
+
+    test("leaves results in match order under the default sort key", () => {
+      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")]);
+
+      expect(ids(searcher.search(favorites, "cat"))).toEqual(["1", "3", "2"]);
     });
   });
 

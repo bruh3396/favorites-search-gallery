@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { hasIntersection, intersection, union } from "@/utils/pure/set";
+import { hasIntersection, intersection, isInAllSets, union } from "@/utils/pure/set";
 
 describe("intersection", () => {
   test("empty sets", () => {
@@ -58,6 +58,32 @@ describe("intersects", () => {
   test("different sizes", () => {
     expect(hasIntersection(new Set([1]), new Set([1, 2, 3, 4, 5]))).toBe(true);
     expect(hasIntersection(new Set([9]), new Set([1, 2, 3, 4, 5]))).toBe(false);
+  });
+});
+
+describe("isInAllSets", () => {
+  test("no sets", () => {
+    expect(isInAllSets(1, [])).toBe(true);
+  });
+
+  test("present in every set", () => {
+    expect(isInAllSets(2, [new Set([1, 2]), new Set([2, 3]), new Set([2, 4])])).toBe(true);
+  });
+
+  test("missing from one set", () => {
+    expect(isInAllSets(2, [new Set([1, 2]), new Set([3, 4])])).toBe(false);
+  });
+
+  test("missing from every set", () => {
+    expect(isInAllSets(9, [new Set([1, 2]), new Set([3, 4])])).toBe(false);
+  });
+
+  test("empty set makes it false", () => {
+    expect(isInAllSets(1, [new Set([1]), new Set()])).toBe(false);
+  });
+
+  test("strings", () => {
+    expect(isInAllSets("b", [new Set(["a", "b"]), new Set(["b", "c"])])).toBe(true);
   });
 });
 

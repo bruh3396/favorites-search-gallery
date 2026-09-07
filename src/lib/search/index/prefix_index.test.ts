@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { PrefixIndex } from "@/lib/collection/prefix_index";
+import { PrefixIndex } from "@/lib/search/index/prefix_index";
 
 const terms = ["ana", "banana", "band", "bandana", "brand", "cabana", "canvas", "sandbox"].slice().sort();
 

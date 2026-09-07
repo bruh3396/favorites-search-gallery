@@ -1,48 +1,61 @@
 import { Searchable, SearchableMetric } from "@/types/search";
-import { DocsResolver } from "@/lib/search/engine/docs_resolver";
-import { InvertedIndex } from "@/lib/collection/inverted_index";
-import { InvertedIndexedSearcher } from "@/lib/search/engine/inverted_index_searcher";
-import { MetricIndex } from "@/lib/collection/metric_index";
+import { DocResolver } from "@/lib/search/engine/doc_resolver";
+import { InvertedIndex } from "@/lib/search/index/inverted_index";
+import { MetricIndex } from "@/lib/search/index/metric_index";
+import { PositionIndex } from "@/lib/search/index/position_index";
+import { RelativeMetricIndex } from "@/lib/search/index/relative_metric_index";
+import { SetSearcher } from "@/lib/search/engine/set_searcher";
+import { WildcardTermExpander } from "@/lib/search/engine/wildcard_term_expander";
 import { WildcardTermResolver } from "@/lib/search/engine/wildcard_term_resolver";
-import { expandWildcardTerms } from "@/lib/search/engine/wildcard_term_expander";
 import { isEmptyString } from "@/utils/pure/string";
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 import { searchableMetrics } from "@/types/guards";
 
-export class SearchEngine<T extends Searchable> {
-  private readonly termIndex: InvertedIndex<T>;
-  private readonly metricIndex: MetricIndex<T>;
-  private readonly searcher: InvertedIndexedSearcher<T>;
+export class SearchEngine<Doc extends Searchable> {
+  private readonly termIndex: InvertedIndex<Doc>;
+  private readonly metricIndex: MetricIndex<Doc>;
+  private readonly relativeMetricIndex: RelativeMetricIndex<Doc>;
+  private readonly positionIndex: PositionIndex<Doc>;
   private readonly wildcardResolver = new WildcardTermResolver();
+  private readonly wildcardExpander = new WildcardTermExpander<Doc>(this.wildcardResolver);
+  private readonly setSearcher: SetSearcher<Doc>;
 
-  constructor(termsFor: (doc: T) => Iterable<string>, metricFor: (doc: T, metric: SearchableMetric) => number, docs: T[] = []) {
-    this.termIndex = new InvertedIndex<T>(termsFor);
-    this.metricIndex = new MetricIndex<T>([...searchableMetrics], metricFor);
-    this.searcher = new InvertedIndexedSearcher<T>(new DocsResolver<T>(this.termIndex, this.metricIndex, metricFor));
+  constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: SearchableMetric) => number, docs: Doc[] = []) {
+    this.termIndex = new InvertedIndex<Doc>(termsFor);
+    this.metricIndex = new MetricIndex<Doc>([...searchableMetrics], metricFor);
+    this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...searchableMetrics], metricFor);
+    this.positionIndex = new PositionIndex<Doc>();
+    this.setSearcher = new SetSearcher<Doc>(new DocResolver<Doc>(this.termIndex, this.metricIndex, this.relativeMetricIndex, this.positionIndex));
     this.index(docs);
   }
 
-  public search(query: string, candidates: T[]): T[] {
+  public search(query: string, candidates: Doc[]): Doc[] {
     if (isEmptyString(query)) {
       return candidates;
     }
-    const { searchQuery, isUnmatchable } = expandWildcardTerms(parseSearchQuery<T>(query), this.wildcardResolver);
-    return isUnmatchable ? [] : this.searcher.search(searchQuery, candidates);
+    const { searchQuery, isUnmatchable } = this.wildcardExpander.expand(parseSearchQuery<Doc>(query));
+    return isUnmatchable ? [] : this.setSearcher.search(searchQuery, candidates);
   }
 
-  public index(docs: T[]): void {
+  public index(docs: Doc[]): void {
     this.termIndex.addDocs(docs);
     this.wildcardResolver.index(this.termIndex.indexedTerms());
-    this.metricIndex.build(this.termIndex.allDocs());
+    this.positionIndex.build(docs);
+    this.wildcardExpander.clearCache();
   }
 
-  public add(doc: T): void {
+  public add(doc: Doc): void {
     this.termIndex.addDoc(doc).forEach(term => this.wildcardResolver.addTerm(term));
     this.metricIndex.add(doc);
+    this.relativeMetricIndex.add(doc);
+    this.positionIndex.add(doc);
+    this.wildcardExpander.clearCache();
   }
 
-  public remove(doc: T): void {
+  public remove(doc: Doc): void {
     this.termIndex.removeDoc(doc).forEach(term => this.wildcardResolver.removeTerm(term));
     this.metricIndex.remove(doc);
+    this.relativeMetricIndex.remove(doc);
+    this.wildcardExpander.clearCache();
   }
 }
