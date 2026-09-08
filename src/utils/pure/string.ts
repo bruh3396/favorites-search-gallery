@@ -2,6 +2,10 @@ export function isOnlyDigits(text: string): boolean {
   return (/^\d+$/).test(text);
 }
 
+export function compareStrings(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 export function isEmptyString(text: string): boolean {
   return text.trim().length === 0;
 }

@@ -7,7 +7,7 @@ import { toggleDataset } from "@/utils/browser/dataset";
 const releases = new Map<string, string[]>([
   [
     "v1.23.0",
-    ["Faster searching with a new search engine"]
+    ["Improved search speed with a new search engine"]
   ],
   [
     "v1.22.4",

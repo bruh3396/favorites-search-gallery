@@ -1,81 +1,89 @@
-import { intersection } from "@/utils/pure/set";
+import { identity } from "@/utils/pure/function";
+import { intersectByKey } from "@/utils/pure/map";
 import { trigramsOf } from "@/utils/pure/string";
 
-export class TrigramIndex {
-  private readonly termsByTrigram: Map<string, Set<string>> = new Map<string, Set<string>>();
+export class TrigramIndex<T = string> {
+  private readonly itemsByTrigram: Map<string, Map<string, T>> = new Map<string, Map<string, T>>();
+  private readonly keyOf: (item: T) => string;
 
-  constructor(terms: string[]) {
-    for (const term of terms) {
-      this.addTerm(term);
+  constructor(items: T[], keyOf: (item: T) => string = identity as (item: T) => string) {
+    this.keyOf = keyOf;
+
+    for (const item of items) {
+      this.add(item);
     }
   }
 
-  public termsMatching(fragment: string, corpus: string[]): string[] {
-    return fragment.length < 3 ? corpus : [...this.candidateTerms(fragment)];
+  public matching(fragment: string, corpus: T[]): T[] {
+    return fragment.length < 3 ? corpus : [...this.candidates(fragment).values()];
   }
 
-  public termsMatchingAll(fragments: string[], corpus: string[]): string[] {
+  public matchingAll(fragments: string[], corpus: T[]): T[] {
     const narrowing = fragments.filter(fragment => fragment.length >= 3);
-    return narrowing.length === 0 ? corpus : [...this.candidateTermsOfAll(narrowing)];
+    return narrowing.length === 0 ? corpus : [...this.candidatesOfAll(narrowing).values()];
   }
 
-  public addTerm(term: string): void {
-    for (const trigram of trigramsOf(term)) {
-      let terms = this.termsByTrigram.get(trigram);
+  public add(item: T): void {
+    const key = this.keyOf(item);
 
-      if (terms === undefined) {
-        terms = new Set<string>();
-        this.termsByTrigram.set(trigram, terms);
+    for (const trigram of trigramsOf(key)) {
+      let items = this.itemsByTrigram.get(trigram);
+
+      if (items === undefined) {
+        items = new Map<string, T>();
+        this.itemsByTrigram.set(trigram, items);
       }
-      terms.add(term);
+      items.set(key, item);
     }
   }
 
-  public removeTerm(term: string): void {
-    for (const trigram of trigramsOf(term)) {
-      const terms = this.termsByTrigram.get(trigram);
+  public remove(item: T): void {
+    const key = this.keyOf(item);
 
-      if (terms === undefined) {
+    for (const trigram of trigramsOf(key)) {
+      const items = this.itemsByTrigram.get(trigram);
+
+      if (items === undefined) {
         continue;
       }
-      terms.delete(term);
+      items.delete(key);
 
-      if (terms.size === 0) {
-        this.termsByTrigram.delete(trigram);
+      if (items.size === 0) {
+        this.itemsByTrigram.delete(trigram);
       }
     }
   }
 
-  private candidateTerms(substring: string): Set<string> {
-    let candidates: Set<string> | null = null;
+  private candidates(fragment: string): Map<string, T> {
+    let candidates: Map<string, T> | null = null;
 
-    for (const trigram of trigramsOf(substring)) {
-      const terms = this.termsByTrigram.get(trigram);
+    for (const trigram of trigramsOf(fragment)) {
+      const items = this.itemsByTrigram.get(trigram);
 
-      if (terms === undefined) {
-        return new Set<string>();
+      if (items === undefined) {
+        return new Map<string, T>();
       }
-      candidates = candidates === null ? terms : intersection(terms, candidates);
+      candidates = candidates === null ? items : intersectByKey(items, candidates);
 
       if (candidates.size === 0) {
         return candidates;
       }
     }
-    return candidates ?? new Set<string>();
+    return candidates ?? new Map<string, T>();
   }
 
-  private candidateTermsOfAll(fragments: string[]): Set<string> {
-    let candidates: Set<string> | null = null;
+  private candidatesOfAll(fragments: string[]): Map<string, T> {
+    let candidates: Map<string, T> | null = null;
 
     for (const fragment of fragments) {
-      const forFragment = this.candidateTerms(fragment);
+      const forFragment = this.candidates(fragment);
 
-      candidates = candidates === null ? forFragment : intersection(forFragment, candidates);
+      candidates = candidates === null ? forFragment : intersectByKey(forFragment, candidates);
 
       if (candidates.size === 0) {
         return candidates;
       }
     }
-    return candidates ?? new Set<string>();
+    return candidates ?? new Map<string, T>();
   }
 }

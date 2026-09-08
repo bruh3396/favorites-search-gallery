@@ -19,30 +19,30 @@ export class WildcardTermResolver implements WildcardResolver {
   }
 
   public termsStartingWith(fragment: string): string[] {
-    return this.cached(`^${fragment}`, () => this.prefixes.termsStartingWith(fragment));
+    return this.cached(`^${fragment}`, () => this.prefixes.matchingPrefix(fragment));
   }
 
   public termsContaining(fragment: string): string[] {
-    return this.cached(`*${fragment}*`, () => this.trigrams.termsMatching(fragment, this.prefixes.allTerms()).filter(term => term.includes(fragment)));
+    return this.cached(`*${fragment}*`, () => this.trigrams.matching(fragment, this.prefixes.all()).filter(term => term.includes(fragment)));
   }
 
   public termsEndingWith(fragment: string): string[] {
-    return this.cached(`${fragment}$`, () => this.trigrams.termsMatching(fragment, this.prefixes.allTerms()).filter(term => term.endsWith(fragment)));
+    return this.cached(`${fragment}$`, () => this.trigrams.matching(fragment, this.prefixes.all()).filter(term => term.endsWith(fragment)));
   }
 
   public termsMatching(fragments: string[], matches: (term: string) => boolean, key: string): string[] {
-    return this.cached(`~${key}`, () => this.trigrams.termsMatchingAll(fragments, this.prefixes.allTerms()).filter(matches));
+    return this.cached(`~${key}`, () => this.trigrams.matchingAll(fragments, this.prefixes.all()).filter(matches));
   }
 
   public addTerm(term: string): void {
-    this.prefixes.addTerm(term);
-    this.trigrams.addTerm(term);
+    this.prefixes.add(term);
+    this.trigrams.add(term);
     this.cache.clear();
   }
 
   public removeTerm(term: string): void {
-    this.prefixes.removeTerm(term);
-    this.trigrams.removeTerm(term);
+    this.prefixes.remove(term);
+    this.trigrams.remove(term);
     this.cache.clear();
   }
 

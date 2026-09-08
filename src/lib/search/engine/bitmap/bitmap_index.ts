@@ -59,15 +59,12 @@ export class BitmapIndex<Doc> {
 
     this.place(doc, position);
 
-    const newTerms: string[] = [];
+    const affectedTerms = [...new Set(this.termsOf(doc))];
 
-    for (const term of new Set(this.termsOf(doc))) {
-      if (!this.postings.has(term)) {
-        newTerms.push(term);
-      }
-      this.rematerialize(term);
+    for (const term of affectedTerms) {
+      this.reMaterialize(term);
     }
-    return newTerms;
+    return affectedTerms;
   }
 
   public remove(doc: Doc): string[] {
@@ -76,9 +73,9 @@ export class BitmapIndex<Doc> {
     if (position === undefined) {
       return [];
     }
-    const terms = new Set(this.termsOf(doc));
+    const affectedTerms = [...new Set(this.termsOf(doc))];
 
-    for (const term of terms) {
+    for (const term of affectedTerms) {
       const positions = this.positionsByTerm.get(term);
 
       if (positions !== undefined) {
@@ -95,16 +92,10 @@ export class BitmapIndex<Doc> {
     this.freeList.push(position);
     this.liveCount -= 1;
 
-    const removedTerms: string[] = [];
-
-    for (const term of terms) {
-      this.rematerialize(term);
-
-      if (!this.positionsByTerm.has(term)) {
-        removedTerms.push(term);
-      }
+    for (const term of affectedTerms) {
+      this.reMaterialize(term);
     }
-    return removedTerms;
+    return affectedTerms;
   }
 
   public positionalDocs(): readonly (Doc | undefined)[] {
@@ -131,13 +122,22 @@ export class BitmapIndex<Doc> {
     return new BitSet(this.capacity);
   }
 
-  public unionOf(terms: Iterable<string>): BitSet {
+  public unionOfPostings(postings: readonly Posting[]): BitSet {
     const union = new BitSet(this.capacity);
 
-    for (const term of terms) {
-      this.postings.get(term)?.orInto(union);
+    for (const posting of postings) {
+      posting.orInto(union);
     }
     return union;
+  }
+
+  public postingEntries(): { term: string; posting: Posting }[] {
+    const entries: { term: string; posting: Posting }[] = [];
+
+    for (const [term, posting] of this.postings) {
+      entries.push({ term, posting });
+    }
+    return entries;
   }
 
   public orTermInto(accumulator: BitSet, term: string): void {
@@ -149,10 +149,7 @@ export class BitmapIndex<Doc> {
   }
 
   public docsFrom(bitset: BitSet): Doc[] {
-    const docs: Doc[] = [];
-
-    bitset.forEachPosition(position => docs.push(this.docs[position]));
-    return docs;
+    return bitset.gather(this.docs);
   }
 
   private place(doc: Doc, position: number): void {
@@ -196,7 +193,7 @@ export class BitmapIndex<Doc> {
     return postings;
   }
 
-  private rematerialize(term: string): void {
+  private reMaterialize(term: string): void {
     if (this.positionsByTerm.has(term)) {
       this.postings.set(term, this.postingFor(term));
     } else {

@@ -9,10 +9,7 @@ function bitSetFrom(size: number, positions: number[]): BitSet {
 }
 
 function positionsOf(set: BitSet): number[] {
-  const positions: number[] = [];
-
-  set.forEachPosition(position => positions.push(position));
-  return positions;
+  return set.gather(Array.from({ length: set.size }, (_, i) => i));
 }
 
 describe("BitSet", () => {
@@ -28,7 +25,7 @@ describe("BitSet", () => {
 
     set.add(10);
     set.add(10);
-    expect(set.count()).toBe(1);
+    expect(set.cardinality()).toBe(1);
     expect(set.has(10)).toBe(true);
   });
 
@@ -40,11 +37,13 @@ describe("BitSet", () => {
   });
 
   test("counts population", () => {
-    expect(new BitSet(64).count()).toBe(0);
-    expect(bitSetFrom(200, [0, 5, 63, 64, 128, 199]).count()).toBe(6);
+    expect(new BitSet(64).cardinality()).toBe(0);
+    expect(bitSetFrom(200, [0, 5, 63, 64, 128, 199]).cardinality()).toBe(6);
   });
 
-  describe("forEachPosition", () => {
+  describe("mapPositions", () => {
+    const source = Array.from({ length: 256 }, (_, i) => `d${i}`);
+
     test("visits nothing for an empty set", () => {
       expect(positionsOf(new BitSet(64))).toEqual([]);
     });
@@ -59,10 +58,32 @@ describe("BitSet", () => {
       expect(positionsOf(bitSetFrom(256, positions))).toEqual(positions);
     });
 
-    test("agrees with count", () => {
-      const set = bitSetFrom(500, [1, 2, 99, 100, 256, 499]);
+    test("maps each set position through the source in ascending order", () => {
+      const positions = [0, 31, 32, 33, 63, 64, 127, 200];
 
-      expect(positionsOf(set).length).toBe(set.count());
+      expect(bitSetFrom(256, positions).gather(source)).toEqual(positions.map(p => source[p]));
+    });
+
+    test("returns an empty array for an empty set", () => {
+      expect(new BitSet(64).gather(source)).toEqual([]);
+    });
+
+    test("produces exactly cardinality() elements", () => {
+      const set = bitSetFrom(256, [1, 2, 99, 100, 200, 255]);
+
+      expect(set.gather(source).length).toBe(set.cardinality());
+    });
+
+    test("agrees with an independent has()-scan mapping", () => {
+      const set = bitSetFrom(256, [0, 5, 32, 64, 65, 130, 255]);
+      const viaScan: string[] = [];
+
+      for (let position = 0; position < 256; position += 1) {
+        if (set.has(position)) {
+          viaScan.push(source[position]);
+        }
+      }
+      expect(set.gather(source)).toEqual(viaScan);
     });
   });
 
@@ -78,28 +99,28 @@ describe("BitSet", () => {
     test("andInPlaceIsEmpty intersects in place and reports emptiness", () => {
       const a = bitSetFrom(128, [1, 2, 3, 64]);
 
-      expect(a.andInPlaceIsEmpty(bitSetFrom(128, [2, 3, 64, 65]))).toBe(false);
+      expect(a.andInPlace(bitSetFrom(128, [2, 3, 64, 65]))).toBe(false);
       expect(positionsOf(a)).toEqual([2, 3, 64]);
     });
 
     test("andInPlaceIsEmpty reports empty on disjoint sets", () => {
       const a = bitSetFrom(64, [0, 2, 4]);
 
-      expect(a.andInPlaceIsEmpty(bitSetFrom(64, [1, 3, 5]))).toBe(true);
+      expect(a.andInPlace(bitSetFrom(64, [1, 3, 5]))).toBe(true);
       expect(a.isEmpty()).toBe(true);
     });
 
     test("andNotInPlaceIsEmpty subtracts in place and reports emptiness", () => {
       const a = bitSetFrom(128, [1, 2, 3, 64]);
 
-      expect(a.andNotInPlaceIsEmpty(bitSetFrom(128, [2, 64]))).toBe(false);
+      expect(a.andNotInPlace(bitSetFrom(128, [2, 64]))).toBe(false);
       expect(positionsOf(a)).toEqual([1, 3]);
     });
 
     test("andNotInPlaceIsEmpty reports empty when a superset is subtracted", () => {
       const a = bitSetFrom(64, [1, 2, 3]);
 
-      expect(a.andNotInPlaceIsEmpty(bitSetFrom(64, [0, 1, 2, 3, 4]))).toBe(true);
+      expect(a.andNotInPlace(bitSetFrom(64, [0, 1, 2, 3, 4]))).toBe(true);
       expect(a.isEmpty()).toBe(true);
     });
 
@@ -141,7 +162,7 @@ describe("BitSet", () => {
       const set = new BitSet(70);
 
       set.fill();
-      expect(set.count()).toBe(70);
+      expect(set.cardinality()).toBe(70);
       expect(positionsOf(set)).toEqual(Array.from({ length: 70 }, (_, i) => i));
       expect(set.has(69)).toBe(true);
       expect(set.has(70)).toBe(false);
@@ -151,7 +172,7 @@ describe("BitSet", () => {
       const set = new BitSet(64);
 
       set.fill();
-      expect(set.count()).toBe(64);
+      expect(set.cardinality()).toBe(64);
       expect(set.has(63)).toBe(true);
     });
 
@@ -159,12 +180,12 @@ describe("BitSet", () => {
       const set = new BitSet(0);
 
       set.fill();
-      expect(set.count()).toBe(0);
+      expect(set.cardinality()).toBe(0);
     });
 
     test("retainPositions keeps only the intersecting positions in place", () => {
       const set = bitSetFrom(128, [1, 40, 70, 100]);
-      const isEmpty = set.retainPositions(Int32Array.from([40, 70, 90]));
+      const isEmpty = set.andPositionsInPlace(Int32Array.from([40, 70, 90]));
 
       expect(isEmpty).toBe(false);
       expect(positionsOf(set)).toEqual([40, 70]);
@@ -173,14 +194,14 @@ describe("BitSet", () => {
     test("retainPositions reports empty when nothing intersects", () => {
       const set = bitSetFrom(128, [1, 2, 3]);
 
-      expect(set.retainPositions(Int32Array.from([50, 60]))).toBe(true);
+      expect(set.andPositionsInPlace(Int32Array.from([50, 60]))).toBe(true);
       expect(set.isEmpty()).toBe(true);
     });
 
     test("retainPositions on an empty argument clears the set", () => {
       const set = bitSetFrom(128, [1, 2, 3]);
 
-      expect(set.retainPositions(Int32Array.from([]))).toBe(true);
+      expect(set.andPositionsInPlace(Int32Array.from([]))).toBe(true);
       expect(set.isEmpty()).toBe(true);
     });
   });

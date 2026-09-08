@@ -2,7 +2,7 @@ import { BitSet } from "@/lib/search/engine/bitmap/bitset";
 
 export interface Posting {
   readonly count: number;
-  seed(size: number): BitSet;
+  toBitSet(size: number): BitSet;
   andInto(working: BitSet): boolean;
   andNotInto(working: BitSet): boolean;
   orInto(accumulator: BitSet): void;
@@ -16,21 +16,21 @@ export class DensePosting implements Posting {
 
   public get count(): number {
     if (this.cachedCount < 0) {
-      this.cachedCount = this.bits.count();
+      this.cachedCount = this.bits.cardinality();
     }
     return this.cachedCount;
   }
 
-  public seed(): BitSet {
+  public toBitSet(): BitSet {
     return this.bits.clone();
   }
 
   public andInto(working: BitSet): boolean {
-    return working.andInPlaceIsEmpty(this.bits);
+    return working.andInPlace(this.bits);
   }
 
   public andNotInto(working: BitSet): boolean {
-    return working.andNotInPlaceIsEmpty(this.bits);
+    return working.andNotInPlace(this.bits);
   }
 
   public orInto(accumulator: BitSet): void {
@@ -49,7 +49,7 @@ export class SparsePosting implements Posting {
     return this.positions.length;
   }
 
-  public seed(size: number): BitSet {
+  public toBitSet(size: number): BitSet {
     const working = new BitSet(size);
 
     for (const position of this.positions) {
@@ -59,7 +59,7 @@ export class SparsePosting implements Posting {
   }
 
   public andInto(working: BitSet): boolean {
-    return working.retainPositions(this.positions);
+    return working.andPositionsInPlace(this.positions);
   }
 
   public andNotInto(working: BitSet): boolean {

@@ -14,10 +14,7 @@ function bitSet(...positions: number[]): BitSet {
 }
 
 function positionsOf(set: BitSet): number[] {
-  const positions: number[] = [];
-
-  set.forEachPosition(position => positions.push(position));
-  return positions;
+  return set.gather(Array.from({ length: set.size }, (_, i) => i));
 }
 
 function dense(...positions: number[]): DensePosting {
@@ -39,7 +36,7 @@ describe.each(cases)("$name", ({ make }) => {
   });
 
   test("seeds a working set with its positions", () => {
-    expect(positionsOf(make(3, 40, 70).seed(SIZE))).toEqual([3, 40, 70]);
+    expect(positionsOf(make(3, 40, 70).toBitSet(SIZE))).toEqual([3, 40, 70]);
   });
 
   test("andInto intersects the working set and reports emptiness", () => {
@@ -84,7 +81,7 @@ describe.each(cases)("$name", ({ make }) => {
     expect(accumulator.has(40)).toBe(false);
     expect(accumulator.has(5)).toBe(true);
     expect(accumulator.has(0)).toBe(true);
-    expect(accumulator.count()).toBe(SIZE - 1);
+    expect(accumulator.cardinality()).toBe(SIZE - 1);
   });
 });
 

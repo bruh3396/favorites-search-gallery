@@ -19,7 +19,7 @@ function index(docs: Doc[]): BitmapIndex<Doc> {
 
 function docsForTerm(bitmapIndex: BitmapIndex<Doc>, term: string): Doc[] {
   const posting = bitmapIndex.postingForTerm(term);
-  return posting === undefined ? [] : bitmapIndex.docsFrom(posting.seed(bitmapIndex.size));
+  return posting === undefined ? [] : bitmapIndex.docsFrom(posting.toBitSet(bitmapIndex.size));
 }
 
 function countForTerm(bitmapIndex: BitmapIndex<Doc>, term: string): number {
@@ -126,17 +126,34 @@ describe("BitmapIndex", () => {
     });
   });
 
-  describe("unionOf", () => {
-    test("unions the docs of several terms", () => {
+  describe("unionOfPostings", () => {
+    function postingsFor(bitmapIndex: BitmapIndex<Doc>, ...terms: string[]): NonNullable<ReturnType<BitmapIndex<Doc>["postingForTerm"]>>[] {
+      return terms.map(term => bitmapIndex.postingForTerm(term)).filter(posting => posting !== undefined);
+    }
+
+    test("unions the docs of several postings", () => {
       const bitmapIndex = index(corpus);
 
-      expect(bitmapIndex.docsFrom(bitmapIndex.unionOf(["sweet", "sour"]))).toEqual([apple, lemon]);
+      expect(bitmapIndex.docsFrom(bitmapIndex.unionOfPostings(postingsFor(bitmapIndex, "sweet", "sour")))).toEqual([apple, lemon]);
     });
 
-    test("skips unknown terms", () => {
+    test("is empty for no postings", () => {
       const bitmapIndex = index(corpus);
 
-      expect(bitmapIndex.docsFrom(bitmapIndex.unionOf(["red", "purple"]))).toEqual([apple, cherry]);
+      expect(bitmapIndex.docsFrom(bitmapIndex.unionOfPostings([]))).toEqual([]);
+    });
+  });
+
+  describe("postingEntries", () => {
+    test("pairs every indexed term with its posting", () => {
+      const bitmapIndex = index(corpus);
+      const entries = bitmapIndex.postingEntries();
+
+      expect(entries.map(entry => entry.term).sort()).toEqual(["fruit", "red", "sour", "sweet", "yellow"]);
+      const red = entries.find(entry => entry.term === "red");
+
+      expect(red).toBeDefined();
+      expect(bitmapIndex.docsFrom((red as NonNullable<typeof red>).posting.toBitSet(bitmapIndex.size))).toEqual([apple, cherry]);
     });
   });
 
