@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BitmapIndex } from "@/lib/search/bitmap/bitmap_index";
+import { BitmapIndex } from "@/lib/search/engine/bitmap/bitmap_index";
 
 interface Doc {
   id: string;
@@ -17,10 +17,8 @@ function index(docs: Doc[]): BitmapIndex<Doc> {
   return bitmapIndex;
 }
 
-// Materialize a term's posting into docs, exercising the real seed + docsFrom path.
 function docsForTerm(bitmapIndex: BitmapIndex<Doc>, term: string): Doc[] {
   const posting = bitmapIndex.postingForTerm(term);
-
   return posting === undefined ? [] : bitmapIndex.docsFrom(posting.seed(bitmapIndex.size));
 }
 
@@ -113,8 +111,6 @@ describe("BitmapIndex", () => {
   });
 
   describe("dense vs sparse postings", () => {
-    // With a wide corpus, a common term crosses the dense threshold (size/32)
-    // while a rare term stays sparse. Both must resolve to the same docs.
     it("resolves a frequent (dense) term and a rare (sparse) term identically", () => {
       const wide = Array.from({ length: 1000 }, (_, i) => doc(`d${i}`, "common", i === 500 ? "unique" : "other"));
       const bitmapIndex = index(wide);

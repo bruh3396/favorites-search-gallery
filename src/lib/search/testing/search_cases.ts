@@ -1,4 +1,5 @@
 import { FruitName, allDocNames, allTerms, fruitDocs } from "@/lib/search/testing/fruit_corpus";
+import { Metric, Searchable } from "@/types/search";
 
 export type AssertMatches = (query: string, expectedNames: FruitName[]) => void;
 
@@ -176,6 +177,112 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
       assert("( *ita*a ~ *ita*c )", ["kiwi", "mango", "orange", "pear", "strawberry"]);
       assert("( *fat* ~ vitamin* )", ["apple", "kiwi", "mango", "orange", "pear", "strawberry"]);
       assert("( *fat* ~ red )", ["apple", "cherry", "strawberry"]);
+    }
+  }
+];
+
+export type MetricDoc = Searchable & {
+  name: string;
+  metrics: Partial<Record<Metric, number>>;
+  getMetric: (metric: Metric) => number;
+};
+
+function metricDoc(name: string, tags: string[], metrics: Partial<Record<Metric, number>>): MetricDoc {
+  return {
+    name,
+    tags: new Set(tags),
+    metrics,
+    getMetric(metric: Metric): number {
+      return this.metrics[metric] ?? 0;
+    }
+  };
+}
+
+export const metricDocs: MetricDoc[] = [
+  metricDoc("apple", ["red"], { score: 10, width: 400, height: 100 }),
+  metricDoc("banana", ["yellow"], { score: 20, width: 100, height: 400 }),
+  metricDoc("cherry", ["red"], { score: 30, width: 200, height: 200 }),
+  metricDoc("grape", ["purple"], { score: 30, width: 300, height: 150 }),
+  metricDoc("kiwi", ["green"], { score: 5, width: 150, height: 300 })
+];
+
+export type AssertMetricMatches = (query: string, expectedNames: string[]) => void;
+
+export const metricSearchCases: { name: string; run: (assert: AssertMetricMatches) => void }[] = [
+  {
+    name: "absolute comparison",
+    run: (assert: AssertMetricMatches): void => {
+      assert("score:>15", ["banana", "cherry", "grape"]);
+      assert("score:<15", ["apple", "kiwi"]);
+      assert("score:30", ["cherry", "grape"]);
+      assert("score:>1000", []);
+    }
+  },
+  {
+    name: "negated absolute comparison",
+    run: (assert: AssertMetricMatches): void => {
+      assert("-score:>15", ["apple", "kiwi"]);
+      assert("-score:30", ["apple", "banana", "kiwi"]);
+    }
+  },
+  {
+    name: "absolute comparison with a tag",
+    run: (assert: AssertMetricMatches): void => {
+      assert("red score:>15", ["cherry"]);
+      assert("red -score:<15", ["cherry"]);
+    }
+  },
+  {
+    name: "absolute comparison inside an or group",
+    run: (assert: AssertMetricMatches): void => {
+      assert("( score:>25 ~ yellow )", ["banana", "cherry", "grape"]);
+      assert("( score:>1000 ~ red )", ["apple", "cherry"]);
+    }
+  },
+  {
+    name: "two absolute comparisons",
+    run: (assert: AssertMetricMatches): void => {
+      assert("score:>15 score:<30", ["banana"]);
+    }
+  },
+  {
+    name: "relative comparison",
+    run: (assert: AssertMetricMatches): void => {
+      assert("width:>height", ["apple", "grape"]);
+      assert("width:<height", ["banana", "kiwi"]);
+    }
+  },
+  {
+    name: "negated relative comparison",
+    run: (assert: AssertMetricMatches): void => {
+      assert("-width:>height", ["banana", "cherry", "kiwi"]);
+    }
+  },
+  {
+    name: "relative comparison with a tag",
+    run: (assert: AssertMetricMatches): void => {
+      assert("red width:>height", ["apple"]);
+    }
+  },
+  {
+    name: "relative comparison inside an or group",
+    run: (assert: AssertMetricMatches): void => {
+      assert("( width:>height ~ yellow )", ["apple", "banana", "grape"]);
+    }
+  },
+  {
+    name: "a metric compared to itself",
+    run: (assert: AssertMetricMatches): void => {
+      assert("width:width", ["apple", "banana", "cherry", "grape", "kiwi"]);
+      assert("width:>width", []);
+      assert("width:<width", []);
+    }
+  },
+  {
+    name: "a negated metric compared to itself",
+    run: (assert: AssertMetricMatches): void => {
+      assert("-width:width", []);
+      assert("-width:>width", ["apple", "banana", "cherry", "grape", "kiwi"]);
     }
   }
 ];

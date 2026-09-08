@@ -3,7 +3,7 @@ import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
 import { SearchQuery } from "@/lib/search/engine/search_query";
 import { Searchable } from "@/types/search";
-import { WildcardResolver } from "@/lib/search/engine/wildcard_resolver";
+import { WildcardResolver } from "@/lib/search/engine/set/wildcard_resolver";
 import { normalizeSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 export interface ExpandedQuery<Doc extends Searchable> {

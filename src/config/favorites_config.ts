@@ -1,4 +1,6 @@
 export const FavoritesConfig = {
+  useBitmapSearchEngine: true,
+
   resultsPerPageBounds: {
     min: 1,
     max: 5_000

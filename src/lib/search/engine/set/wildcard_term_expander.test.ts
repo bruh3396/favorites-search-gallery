@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { Fruit } from "@/lib/search/testing/fruit_corpus";
-import { WildcardResolver } from "@/lib/search/engine/wildcard_resolver";
-import { WildcardTermExpander } from "@/lib/search/engine/wildcard_term_expander";
+import { WildcardResolver } from "@/lib/search/engine/set/wildcard_resolver";
+import { WildcardTermExpander } from "@/lib/search/engine/set/wildcard_term_expander";
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 class FakeResolver implements WildcardResolver {

@@ -1,8 +1,11 @@
 import * as FavoritesRating from "@/features/favorites/model/search/rating";
-import { Rating, SortKey } from "@/types/search";
+import { Rating, SearchableMetric, SortKey } from "@/types/search";
+import { BitmapSearchEngine } from "@/lib/search/engine/bitmap/bitmap_search_engine";
 import { Favorite } from "@/types/favorite";
+import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
 import { SearchEngine } from "@/lib/search/engine/search_engine";
+import { SetSearchEngine } from "@/lib/search/engine/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { shuffleInPlace } from "@/utils/pure/array";
 
@@ -15,8 +18,14 @@ export type SearcherConfig = {
   sortAscending: () => boolean;
 };
 
+function createEngine(): SearchEngine<Favorite> {
+  const termsFor = (favorite: Favorite): Set<string> => favorite.tags;
+  const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
+  return FavoritesConfig.useBitmapSearchEngine ? new BitmapSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
+}
+
 export class FavoritesSearcher {
-  private readonly engine = new SearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric));
+  private readonly engine: SearchEngine<Favorite> = createEngine();
   private readonly results = new ObservableList<Favorite>();
   private currentSearchQuery = "";
 

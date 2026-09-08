@@ -1,7 +1,7 @@
 import { Searchable, SearchableMetric } from "@/types/search";
 import { beforeEach, describe, expect, test } from "vitest";
 import { parseMetricSearchTerm, parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
-import { DocResolver } from "@/lib/search/engine/doc_resolver";
+import { DocResolver } from "@/lib/search/engine/set/doc_resolver";
 import { InvertedIndex } from "@/lib/search/index/inverted_index";
 import { MetricIndex } from "@/lib/search/index/metric_index";
 import { PositionIndex } from "@/lib/search/index/position_index";

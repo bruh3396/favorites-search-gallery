@@ -1,6 +1,6 @@
 ﻿import { PrefixIndex } from "@/lib/search/index/prefix_index";
 import { TrigramIndex } from "@/lib/search/index/trigram_index";
-import { WildcardResolver } from "@/lib/search/engine/wildcard_resolver";
+import { WildcardResolver } from "@/lib/search/engine/set/wildcard_resolver";
 
 export class WildcardTermResolver implements WildcardResolver {
   private prefixes: PrefixIndex;

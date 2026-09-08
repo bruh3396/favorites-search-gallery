@@ -1,5 +1,5 @@
 ﻿import { describe, expect, test } from "vitest";
-import { WildcardTermResolver } from "@/lib/search/engine/wildcard_term_resolver";
+import { WildcardTermResolver } from "@/lib/search/engine/set/wildcard_term_resolver";
 
 const terms = ["banana", "bandana", "cabana", "canvas", "brand", "sandbox"].slice().sort();
 

@@ -1,0 +1,187 @@
+import { describe, expect, it } from "vitest";
+import { BitSet } from "@/lib/search/engine/bitmap/bitset";
+
+function bitSetFrom(size: number, positions: number[]): BitSet {
+  const set = new BitSet(size);
+
+  positions.forEach(position => set.add(position));
+  return set;
+}
+
+function positionsOf(set: BitSet): number[] {
+  const positions: number[] = [];
+
+  set.forEachPosition(position => positions.push(position));
+  return positions;
+}
+
+describe("BitSet", () => {
+  it("stores and reports membership", () => {
+    const set = bitSetFrom(100, [0, 31, 32, 63, 64, 99]);
+
+    [0, 31, 32, 63, 64, 99].forEach(position => expect(set.has(position)).toBe(true));
+    [1, 30, 62, 98].forEach(position => expect(set.has(position)).toBe(false));
+  });
+
+  it("treats add as idempotent", () => {
+    const set = new BitSet(64);
+
+    set.add(10);
+    set.add(10);
+    expect(set.count()).toBe(1);
+    expect(set.has(10)).toBe(true);
+  });
+
+  it("keeps bits on either side of a word boundary independent", () => {
+    const set = bitSetFrom(64, [31]);
+
+    expect(set.has(31)).toBe(true);
+    expect(set.has(32)).toBe(false);
+  });
+
+  it("counts population", () => {
+    expect(new BitSet(64).count()).toBe(0);
+    expect(bitSetFrom(200, [0, 5, 63, 64, 128, 199]).count()).toBe(6);
+  });
+
+  describe("forEachPosition", () => {
+    it("visits nothing for an empty set", () => {
+      expect(positionsOf(new BitSet(64))).toEqual([]);
+    });
+
+    it("visits positions ascending within a word", () => {
+      expect(positionsOf(bitSetFrom(32, [0, 1, 3, 5, 31]))).toEqual([0, 1, 3, 5, 31]);
+    });
+
+    it("visits positions ascending across word boundaries", () => {
+      const positions = [0, 31, 32, 33, 63, 64, 127, 200];
+
+      expect(positionsOf(bitSetFrom(256, positions))).toEqual(positions);
+    });
+
+    it("agrees with count", () => {
+      const set = bitSetFrom(500, [1, 2, 99, 100, 256, 499]);
+
+      expect(positionsOf(set).length).toBe(set.count());
+    });
+  });
+
+  describe("in-place algebra", () => {
+    it("orInPlace mutates the receiver and returns it", () => {
+      const a = bitSetFrom(128, [1, 64]);
+      const result = a.orInPlace(bitSetFrom(128, [2, 65]));
+
+      expect(result).toBe(a);
+      expect(positionsOf(a)).toEqual([1, 2, 64, 65]);
+    });
+
+    it("andInPlaceIsEmpty intersects in place and reports emptiness", () => {
+      const a = bitSetFrom(128, [1, 2, 3, 64]);
+
+      expect(a.andInPlaceIsEmpty(bitSetFrom(128, [2, 3, 64, 65]))).toBe(false);
+      expect(positionsOf(a)).toEqual([2, 3, 64]);
+    });
+
+    it("andInPlaceIsEmpty reports empty on disjoint sets", () => {
+      const a = bitSetFrom(64, [0, 2, 4]);
+
+      expect(a.andInPlaceIsEmpty(bitSetFrom(64, [1, 3, 5]))).toBe(true);
+      expect(a.isEmpty()).toBe(true);
+    });
+
+    it("andNotInPlaceIsEmpty subtracts in place and reports emptiness", () => {
+      const a = bitSetFrom(128, [1, 2, 3, 64]);
+
+      expect(a.andNotInPlaceIsEmpty(bitSetFrom(128, [2, 64]))).toBe(false);
+      expect(positionsOf(a)).toEqual([1, 3]);
+    });
+
+    it("andNotInPlaceIsEmpty reports empty when a superset is subtracted", () => {
+      const a = bitSetFrom(64, [1, 2, 3]);
+
+      expect(a.andNotInPlaceIsEmpty(bitSetFrom(64, [0, 1, 2, 3, 4]))).toBe(true);
+      expect(a.isEmpty()).toBe(true);
+    });
+
+    it("orComplementInPlace unions the complement of the argument", () => {
+      const a = bitSetFrom(8, [0]);
+
+      a.orComplementInPlace(bitSetFrom(8, [0, 1]));
+      expect(positionsOf(a)).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("throws on a size mismatch", () => {
+      expect(() => new BitSet(64).orInPlace(new BitSet(128))).toThrow(/size mismatch/);
+    });
+  });
+
+  describe("lifecycle", () => {
+    it("clone is an independent copy", () => {
+      const original = bitSetFrom(128, [1, 64, 100]);
+      const copy = original.clone();
+
+      copy.add(2);
+      expect(original.has(2)).toBe(false);
+      expect(positionsOf(copy)).toEqual([1, 2, 64, 100]);
+    });
+
+    it("remove clears a single bit", () => {
+      const set = bitSetFrom(128, [1, 2, 64]);
+
+      set.remove(2);
+      expect(positionsOf(set)).toEqual([1, 64]);
+    });
+
+    it("isEmpty reflects population", () => {
+      expect(new BitSet(128).isEmpty()).toBe(true);
+      expect(bitSetFrom(128, [100]).isEmpty()).toBe(false);
+    });
+
+    it("fill sets exactly the first size positions with no phantom high bits", () => {
+      const set = new BitSet(70);
+
+      set.fill();
+      expect(set.count()).toBe(70);
+      expect(positionsOf(set)).toEqual(Array.from({ length: 70 }, (_, i) => i));
+      expect(set.has(69)).toBe(true);
+      expect(set.has(70)).toBe(false);
+    });
+
+    it("fill on a word-aligned size sets every bit", () => {
+      const set = new BitSet(64);
+
+      set.fill();
+      expect(set.count()).toBe(64);
+      expect(set.has(63)).toBe(true);
+    });
+
+    it("fill on an empty bitset stays empty", () => {
+      const set = new BitSet(0);
+
+      set.fill();
+      expect(set.count()).toBe(0);
+    });
+
+    it("retainPositions keeps only the intersecting positions in place", () => {
+      const set = bitSetFrom(128, [1, 40, 70, 100]);
+      const empty = set.retainPositions(Int32Array.from([40, 70, 90]));
+
+      expect(empty).toBe(false);
+      expect(positionsOf(set)).toEqual([40, 70]);
+    });
+
+    it("retainPositions reports empty when nothing intersects", () => {
+      const set = bitSetFrom(128, [1, 2, 3]);
+
+      expect(set.retainPositions(Int32Array.from([50, 60]))).toBe(true);
+      expect(set.isEmpty()).toBe(true);
+    });
+
+    it("retainPositions on an empty argument clears the set", () => {
+      const set = bitSetFrom(128, [1, 2, 3]);
+
+      expect(set.retainPositions(Int32Array.from([]))).toBe(true);
+      expect(set.isEmpty()).toBe(true);
+    });
+  });
+});

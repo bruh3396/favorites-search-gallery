@@ -1,8 +1,8 @@
 import { Fruit, FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 import { Metric, Searchable } from "@/types/search";
+import { MetricDoc, metricDocs, metricSearchCases, searchCases } from "@/lib/search/testing/search_cases";
+import { SetSearchEngine } from "@/lib/search/engine/set/set_search_engine";
 import { describe, expect, test } from "vitest";
-import { SearchEngine } from "@/lib/search/engine/search_engine";
-import { searchCases } from "@/lib/search/testing/search_cases";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };
 
@@ -22,11 +22,11 @@ const banana = doc("banana", ["yellow", "sweet", "fruit"], { score: 20 });
 const cherry = doc("cherry", ["red", "tart", "fruit"], { score: 30 });
 const docs = [apple, banana, cherry];
 
-function engine(seed: Doc[] = docs): SearchEngine<Doc> {
-  return new SearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric), seed);
+function engine(seed: Doc[] = docs): SetSearchEngine<Doc> {
+  return new SetSearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric), seed);
 }
 
-function search(query: string, engineToSearch: SearchEngine<Doc> = engine(), candidates: Doc[] = docs): string[] {
+function search(query: string, engineToSearch: SetSearchEngine<Doc> = engine(), candidates: Doc[] = docs): string[] {
   return engineToSearch.search(query, candidates).map(item => item.name).sort();
 }
 
@@ -65,7 +65,7 @@ describe("SearchEngine", () => {
 });
 
 describe("SearchEngine end-to-end", () => {
-  const fruitEngine = new SearchEngine<Fruit>(fruit => fruit.tags, () => 0, fruitDocs);
+  const fruitEngine = new SetSearchEngine<Fruit>(fruit => fruit.tags, () => 0, fruitDocs);
 
   function assertMatches(query: string, expectedNames: FruitName[]): void {
     const expected = expectedNames.slice().sort();
@@ -107,7 +107,7 @@ describe("SearchEngine mutation", () => {
   });
 
   test("index rebuilds the corpus from a fresh set of docs", () => {
-    const searchEngine = new SearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric));
+    const searchEngine = new SetSearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric));
     const kiwi = doc("kiwi", ["green", "fuzzy"]);
 
     expect(search("green", searchEngine, [kiwi])).toEqual([]);
@@ -119,73 +119,19 @@ describe("SearchEngine mutation", () => {
   });
 });
 
-describe("SearchEngine metric", () => {
-  const scored = [doc("apple", ["red"], { score: 10 }), doc("banana", ["yellow"], { score: 20 }), doc("cherry", ["red"], { score: 30 })];
-  const metricEngine = new SearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric), scored);
+describe("SearchEngine matches the shared metric cases", () => {
+  const metricEngine = new SetSearchEngine<MetricDoc>(item => item.tags, (item, metric) => item.getMetric(metric), metricDocs);
 
-  function searchScored(query: string): string[] {
-    return metricEngine.search(query, scored).map(item => item.name).sort();
+  function assertMatches(query: string, expectedNames: string[]): void {
+    const expected = expectedNames.slice().sort();
+    const actual = metricEngine.search(query, metricDocs).map(item => item.name).sort();
+
+    expect(actual, query).toEqual(expected);
   }
 
-  test("constant comparison", () => {
-    expect(searchScored("score:>15")).toEqual(["banana", "cherry"]);
-  });
-
-  test("negated comparison", () => {
-    expect(searchScored("-score:>15")).toEqual(["apple"]);
-  });
-
-  test("metric combined with a tag", () => {
-    expect(searchScored("red score:>15")).toEqual(["cherry"]);
-  });
-
-  test("metric inside an or group", () => {
-    expect(searchScored("( score:>25 ~ yellow )")).toEqual(["banana", "cherry"]);
-  });
-});
-
-describe("SearchEngine relative metric", () => {
-  const shaped = [
-    doc("wide", ["a"], { width: 400, height: 100, score: 5 }),
-    doc("tall", ["b"], { width: 100, height: 400, score: 9 }),
-    doc("square", ["c"], { width: 200, height: 200, score: 5 })
-  ];
-  const shapedEngine = new SearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric), shaped);
-
-  function searchShaped(query: string): string[] {
-    return shapedEngine.search(query, shaped).map(item => item.name).sort();
+  for (const group of metricSearchCases) {
+    test(group.name, () => {
+      group.run(assertMatches);
+    });
   }
-
-  test("metric compared to another metric", () => {
-    expect(searchShaped("width:>height")).toEqual(["wide"]);
-  });
-
-  test("negated relative comparison", () => {
-    expect(searchShaped("-width:>height")).toEqual(["square", "tall"]);
-  });
-
-  test("relative comparison combined with a tag", () => {
-    expect(searchShaped("width:height a")).toEqual([]);
-    expect(searchShaped("width:height c")).toEqual(["square"]);
-  });
-
-  test("two relative comparisons resolve in one query", () => {
-    expect(searchShaped("width:>height score:<9")).toEqual(["wide"]);
-  });
-
-  test("relative comparison inside an or group", () => {
-    expect(searchShaped("( width:>height ~ b )")).toEqual(["tall", "wide"]);
-  });
-
-  test("a metric compared to itself", () => {
-    expect(searchShaped("width:width")).toEqual(["square", "tall", "wide"]);
-    expect(searchShaped("width:>width")).toEqual([]);
-    expect(searchShaped("width:<width")).toEqual([]);
-  });
-
-  test("a negated metric compared to itself", () => {
-    expect(searchShaped("-width:width")).toEqual([]);
-    expect(searchShaped("-width:>width")).toEqual(["square", "tall", "wide"]);
-    expect(searchShaped("-width:<width")).toEqual(["square", "tall", "wide"]);
-  });
 });

@@ -1,41 +1,24 @@
-import { DensePosting, Posting } from "@/lib/search/bitmap/posting";
+import { DensePosting, Posting } from "@/lib/search/engine/bitmap/posting";
 import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
-import { BitSet } from "@/lib/search/bitmap/bitset";
-import { BitmapIndex } from "@/lib/search/bitmap/bitmap_index";
+import { BitSet } from "@/lib/search/engine/bitmap/bitset";
+import { BitmapIndex } from "@/lib/search/engine/bitmap/bitmap_index";
+import { MetricBitmapIndex } from "@/lib/search/engine/bitmap/metric_bitmap_index";
 import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
 import { SearchQuery } from "@/lib/search/engine/search_query";
 import { Searchable } from "@/types/search";
-import { WildcardTermResolver } from "@/lib/search/engine/wildcard_term_resolver";
-import { isEmptyString } from "@/utils/pure/string";
-import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
+import { WildcardTermResolver } from "@/lib/search/engine/set/wildcard_term_resolver";
 
-// A wildcard that resolved to no terms — the whole query can never match.
 const UNMATCHABLE = Symbol("unmatchable");
 
-export class BitmapSearchEngine<Doc extends Searchable> {
-  private readonly bitmapIndex: BitmapIndex<Doc>;
-  private readonly wildcardResolver = new WildcardTermResolver();
+export class BitmapSearcher<Doc extends Searchable> {
+  constructor(
+    private readonly bitmapIndex: BitmapIndex<Doc>,
+    private readonly metricIndex: MetricBitmapIndex<Doc>,
+    private readonly wildcardResolver: WildcardTermResolver
+  ) { }
 
-  constructor(termsFor: (doc: Doc) => Iterable<string>, docs: Doc[] = []) {
-    this.bitmapIndex = new BitmapIndex<Doc>(termsFor);
-    this.index(docs);
-  }
-
-  public index(docs: Doc[]): void {
-    this.bitmapIndex.build(docs);
-    this.wildcardResolver.index(this.bitmapIndex.indexedTerms().sort());
-  }
-
-  public search(query: string): Doc[] {
-    if (isEmptyString(query)) {
-      return this.bitmapIndex.docsFrom(this.bitmapIndex.everything());
-    }
-    const searchQuery = parseSearchQuery<Doc>(query);
-
-    if (containsMetricTerm(searchQuery)) {
-      throw new Error("BitmapSearchEngine handles tag terms only; metric terms are not supported yet");
-    }
+  public search(searchQuery: SearchQuery<Doc>): Doc[] {
     const result = this.evaluate(searchQuery);
     return result === UNMATCHABLE ? [] : this.bitmapIndex.docsFrom(result);
   }
@@ -76,6 +59,10 @@ export class BitmapSearchEngine<Doc extends Searchable> {
       const terms = this.resolveWildcard(term);
       return terms.length === 0 ? UNMATCHABLE : new DensePosting(this.bitmapIndex.unionOf(terms));
     }
+
+    if (term instanceof MetricSearchTerm) {
+      return new DensePosting(this.metricIndex.bitsetFor(term.comparison));
+    }
     return this.bitmapIndex.postingForTerm(term.value) ?? UNMATCHABLE;
   }
 
@@ -113,7 +100,7 @@ export class BitmapSearchEngine<Doc extends Searchable> {
         smallest = positives[i];
       }
     }
-    const result = smallest.seed(this.bitmapIndex.size);
+    const result = smallest.seed(this.bitmapIndex.width);
 
     for (const positive of positives) {
       if (positive !== smallest && positive.andInto(result)) {
@@ -133,11 +120,17 @@ export class BitmapSearchEngine<Doc extends Searchable> {
             this.bitmapIndex.orTermInto(group, value);
           }
         }
+      } else if (term instanceof MetricSearchTerm) {
+        const matches = this.metricIndex.bitsetFor(term.comparison);
+
+        if (term.isNegated) {
+          group.orComplementInPlace(matches);
+        } else {
+          group.orInPlace(matches);
+        }
       } else if (term.isNegated) {
         const posting = this.bitmapIndex.postingForTerm(term.value);
 
-        // "not <term>": the complement of its docs. An unknown term has no docs,
-        // so its complement is the whole corpus.
         if (posting === undefined) {
           group.fill();
         } else {
@@ -160,8 +153,4 @@ export class BitmapSearchEngine<Doc extends Searchable> {
       default: return this.wildcardResolver.termsMatching(inputs.fragments, t => inputs.regex.test(t));
     }
   }
-}
-
-function containsMetricTerm<Doc extends Searchable>(searchQuery: SearchQuery<Doc>): boolean {
-  return searchQuery.allTerms().some(term => term instanceof MetricSearchTerm);
 }

@@ -1,4 +1,4 @@
-import { BitSet } from "@/lib/search/bitmap/bitset";
+import { BitSet } from "@/lib/search/engine/bitmap/bitset";
 
 export interface Posting {
   readonly count: number;
@@ -10,7 +10,6 @@ export interface Posting {
 }
 
 export class DensePosting implements Posting {
-  // Postings are immutable after build, so the popcount is memoized on first read.
   private cachedCount = -1;
 
   constructor(private readonly bits: BitSet) { }

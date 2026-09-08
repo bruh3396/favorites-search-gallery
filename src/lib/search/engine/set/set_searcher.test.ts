@@ -1,10 +1,10 @@
 import { Fruit, FruitName, fruitDocs, index } from "@/lib/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
-import { DocResolver } from "@/lib/search/engine/doc_resolver";
+import { DocResolver } from "@/lib/search/engine/set/doc_resolver";
 import { MetricIndex } from "@/lib/search/index/metric_index";
 import { PositionIndex } from "@/lib/search/index/position_index";
 import { RelativeMetricIndex } from "@/lib/search/index/relative_metric_index";
-import { SetSearcher } from "@/lib/search/engine/set_searcher";
+import { SetSearcher } from "@/lib/search/engine/set/set_searcher";
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 const positionIndex = new PositionIndex<Fruit>();

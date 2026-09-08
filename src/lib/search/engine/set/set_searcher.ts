@@ -1,6 +1,6 @@
 import { intersection, isInAllSets } from "@/utils/pure/set";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
-import { DocResolver } from "@/lib/search/engine/doc_resolver";
+import { DocResolver } from "@/lib/search/engine/set/doc_resolver";
 import { SearchQuery } from "@/lib/search/engine/search_query";
 import { Searchable } from "@/types/search";
 

@@ -25,41 +25,11 @@ export class BitSet {
     return (this.bits[position >>> 5] & (1 << (position & 31))) !== 0;
   }
 
-  public and(other: BitSet): BitSet {
-    return this.clone().andInPlace(other);
-  }
-
-  public or(other: BitSet): BitSet {
-    return this.clone().orInPlace(other);
-  }
-
-  public andNot(other: BitSet): BitSet {
-    return this.clone().andNotInPlace(other);
-  }
-
-  public andInPlace(other: BitSet): this {
-    this.assertSameSize(other);
-
-    for (let i = 0; i < this.bits.length; i += 1) {
-      this.bits[i] &= other.bits[i];
-    }
-    return this;
-  }
-
   public orInPlace(other: BitSet): this {
     this.assertSameSize(other);
 
     for (let i = 0; i < this.bits.length; i += 1) {
       this.bits[i] |= other.bits[i];
-    }
-    return this;
-  }
-
-  public andNotInPlace(other: BitSet): this {
-    this.assertSameSize(other);
-
-    for (let i = 0; i < this.bits.length; i += 1) {
-      this.bits[i] &= ~other.bits[i];
     }
     return this;
   }
@@ -94,14 +64,6 @@ export class BitSet {
     return this;
   }
 
-  private clearHighBits(): void {
-    const remainder = this.size & 31;
-
-    if (remainder !== 0 && this.bits.length > 0) {
-      this.bits[this.bits.length - 1] &= (1 << remainder) - 1;
-    }
-  }
-
   public clone(): BitSet {
     const copy = new BitSet(this.size);
 
@@ -125,10 +87,6 @@ export class BitSet {
     return survivors.length === 0;
   }
 
-  public clear(): void {
-    this.bits.fill(0);
-  }
-
   public fill(): void {
     this.bits.fill(0xFFFFFFFF);
     this.clearHighBits();
@@ -146,9 +104,6 @@ export class BitSet {
   public count(): number {
     let count = 0;
 
-    // SWAR (parallel bit-count): constant work per word regardless of how many
-    // bits are set, unlike the Kernighan loop which iterates once per set bit —
-    // a large win on dense words (blacklist/tautology results are near-full).
     for (const word of this.bits) {
       let value = word - ((word >>> 1) & 0x55555555);
 
@@ -159,16 +114,6 @@ export class BitSet {
     return count;
   }
 
-  public positions(): number[] {
-    const positions: number[] = [];
-
-    this.forEachPosition(position => positions.push(position));
-    return positions;
-  }
-
-  // Visits every set position in ascending order. Callers that would otherwise
-  // build a positions array only to map over it (e.g. materializing docs) should
-  // use this to avoid the intermediate allocation.
   public forEachPosition(visit: (position: number) => void): void {
     for (let wordIndex = 0; wordIndex < this.bits.length; wordIndex += 1) {
       let word = this.bits[wordIndex];
@@ -180,6 +125,14 @@ export class BitSet {
         visit((wordIndex << 5) + bit);
         word &= word - 1;
       }
+    }
+  }
+
+  private clearHighBits(): void {
+    const remainder = this.size & 31;
+
+    if (remainder !== 0 && this.bits.length > 0) {
+      this.bits[this.bits.length - 1] &= (1 << remainder) - 1;
     }
   }
 
