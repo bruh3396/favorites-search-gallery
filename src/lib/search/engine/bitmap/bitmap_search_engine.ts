@@ -1,12 +1,11 @@
-import { DensePosting, Posting } from "@/lib/search/engine/bitmap/posting";
+import { DensePosting, Posting } from "@/lib/search/engine/bitmap/bits/posting";
 import { Searchable, SearchableMetric } from "@/types/search";
-import { BitmapIndex } from "@/lib/search/engine/bitmap/bitmap_index";
-import { ExpressionContext } from "@/lib/search/engine/bitmap/search_expression";
-import { MetricBitmapIndex } from "@/lib/search/engine/bitmap/metric_bitmap_index";
+import { BitmapIndex } from "@/lib/search/engine/bitmap/indexes/index";
+import { ExpressionContext } from "@/lib/search/engine/bitmap/query/expression";
+import { MetricBitmapIndex } from "@/lib/search/engine/bitmap/indexes/metric_index";
 import { SearchEngine } from "@/lib/search/engine/search_engine";
-import { WildcardPostingResolver } from "@/lib/search/engine/bitmap/wildcard_posting_resolver";
-import { isEmptyString } from "@/utils/pure/string";
-import { tryParseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
+import { WildcardPostingResolver } from "@/lib/search/engine/bitmap/wildcard/posting_resolver";
+import { tryParseSearchExpression } from "@/lib/search/query/parsers/search_expression_parser";
 
 export class BitmapSearchEngine<Doc extends Searchable> implements SearchEngine<Doc> {
   private readonly bitmapIndex: BitmapIndex<Doc>;
@@ -24,11 +23,12 @@ export class BitmapSearchEngine<Doc extends Searchable> implements SearchEngine<
   }
 
   public search(query: string, candidates?: Doc[]): Doc[] {
-    if (isEmptyString(query)) {
-      return candidates ?? this.bitmapIndex.allDocs();
-    }
     const expression = tryParseSearchExpression(query);
-    const matches = expression === undefined ? [] : expression.search(this.expressionContext());
+
+    if (expression === undefined) {
+      return [];
+    }
+    const matches = expression.evaluate(this.expressionContext());
 
     if (candidates === undefined || candidates.length === this.bitmapIndex.size) {
       return matches;

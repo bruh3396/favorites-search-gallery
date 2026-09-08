@@ -7,6 +7,7 @@ import { ObservableList } from "@/lib/collection/observable_list";
 import { SearchEngine } from "@/lib/search/engine/search_engine";
 import { SetSearchEngine } from "@/lib/search/engine/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
+import { isEmptyString } from "@/utils/pure/string";
 import { shuffleInPlace } from "@/utils/pure/array";
 
 export type SearcherConfig = {
@@ -48,7 +49,7 @@ export class FavoritesSearcher {
     return chain(
       this.results.invert(allFavorites),
       matches => this.filterByRating(matches),
-      matches => (this.config.enforcingBlacklist() ? this.engine.search(this.config.blacklistTags, matches) : matches),
+      matches => this.applyBlacklist(matches),
       matches => this.sort(matches),
       matches => this.results.set(matches)
     );
@@ -95,7 +96,15 @@ export class FavoritesSearcher {
   }
 
   private findMatches(favorites: Favorite[]): Favorite[] {
-    return this.filterByRating(this.engine.search(this.finalSearchQuery(), favorites));
+    return this.filterByRating(this.searchOrPassThrough(this.finalSearchQuery(), favorites));
+  }
+
+  private applyBlacklist(favorites: Favorite[]): Favorite[] {
+    return this.config.enforcingBlacklist() ? this.searchOrPassThrough(this.config.blacklistTags, favorites) : favorites;
+  }
+
+  private searchOrPassThrough(query: string, candidates: Favorite[]): Favorite[] {
+    return isEmptyString(query) ? candidates : this.engine.search(query, candidates);
   }
 
   private filterByRating(favorites: Favorite[]): Favorite[] {

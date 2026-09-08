@@ -185,12 +185,10 @@ describe("BitmapSearchEngine nested-group queries", () => {
   }
 
   test("routes a group nested in a group through the expression path", () => {
-    // red AND ( sweet OR ( juicy AND tropical ) )
     expect(namesOf("red ( sweet ~ ( juicy tropical ) )")).toEqual(["cherry", "strawberry"]);
   });
 
   test("an OR group nesting an AND group", () => {
-    // sweet OR ( green AND tart )  -> sweet fruits plus kiwi
     expect(namesOf("( sweet ~ ( green tart ) )"))
       .toEqual(["blueberry", "cherry", "grape", "kiwi", "mango", "pear", "strawberry"]);
   });

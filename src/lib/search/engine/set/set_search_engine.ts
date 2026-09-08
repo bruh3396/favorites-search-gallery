@@ -1,15 +1,14 @@
 import { Searchable, SearchableMetric } from "@/types/search";
-import { DocResolver } from "@/lib/search/engine/set/doc_resolver";
-import { InvertedIndex } from "@/lib/search/index/inverted_index";
-import { MetricIndex } from "@/lib/search/index/metric_index";
-import { PositionIndex } from "@/lib/search/index/position_index";
-import { RelativeMetricIndex } from "@/lib/search/index/relative_metric_index";
+import { DocResolver } from "@/lib/search/engine/set/query/doc_resolver";
+import { InvertedIndex } from "@/lib/search/engine/set/indexes/inverted";
+import { MetricIndex } from "@/lib/search/engine/set/indexes/metric";
+import { PositionIndex } from "@/lib/search/engine/set/indexes/position";
+import { RelativeMetricIndex } from "@/lib/search/engine/set/indexes/relative_metric";
 import { SearchEngine } from "@/lib/search/engine/search_engine";
-import { SetSearcher } from "@/lib/search/engine/set/set_searcher";
-import { WildcardTermExpander } from "@/lib/search/engine/set/wildcard_term_expander";
-import { WildcardTermResolver } from "@/lib/search/engine/set/wildcard_term_resolver";
-import { isEmptyString } from "@/utils/pure/string";
-import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
+import { SetSearcher } from "@/lib/search/engine/set/query/searcher";
+import { WildcardMatcher } from "@/lib/search/indexes/wildcard_matcher";
+import { WildcardTermExpander } from "@/lib/search/engine/set/wildcard/term_expander";
+import { parseSearchQuery } from "@/lib/search/query/parsers/search_term_group_parser";
 import { searchableMetrics } from "@/types/guards";
 
 export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc> {
@@ -17,8 +16,8 @@ export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc
   private readonly metricIndex: MetricIndex<Doc>;
   private readonly relativeMetricIndex: RelativeMetricIndex<Doc>;
   private readonly positionIndex: PositionIndex<Doc>;
-  private readonly wildcardResolver = new WildcardTermResolver();
-  private readonly wildcardExpander = new WildcardTermExpander<Doc>(this.wildcardResolver);
+  private readonly wildcardMatcher = new WildcardMatcher();
+  private readonly wildcardExpander = new WildcardTermExpander<Doc>(this.wildcardMatcher);
   private readonly setSearcher: SetSearcher<Doc>;
 
   constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: SearchableMetric) => number, docs: Doc[] = []) {
@@ -31,28 +30,25 @@ export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc
   }
 
   public search(query: string, candidates: Doc[]): Doc[] {
-    if (isEmptyString(query)) {
-      return candidates;
-    }
     const { searchQuery, isUnmatchable } = this.wildcardExpander.expand(parseSearchQuery<Doc>(query));
     return isUnmatchable ? [] : this.setSearcher.search(searchQuery, candidates);
   }
 
   public index(docs: Doc[]): void {
     this.termIndex.addDocs(docs);
-    this.wildcardResolver.index(this.termIndex.indexedTerms());
+    this.wildcardMatcher.index(this.termIndex.indexedTerms());
     this.positionIndex.build(docs);
   }
 
   public add(doc: Doc): void {
-    this.termIndex.addDoc(doc).forEach(term => this.wildcardResolver.addTerm(term));
+    this.termIndex.addDoc(doc).forEach(term => this.wildcardMatcher.add(term));
     this.metricIndex.add(doc);
     this.relativeMetricIndex.add(doc);
     this.positionIndex.add(doc);
   }
 
   public remove(doc: Doc): void {
-    this.termIndex.removeDoc(doc).forEach(term => this.wildcardResolver.removeTerm(term));
+    this.termIndex.removeDoc(doc).forEach(term => this.wildcardMatcher.remove(term));
     this.metricIndex.remove(doc);
     this.relativeMetricIndex.remove(doc);
   }

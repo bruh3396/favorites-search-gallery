@@ -1,5 +1,5 @@
 import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
-import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
+import { parseSearchQuery } from "@/lib/search/query/parsers/search_term_group_parser";
 
 export function buildHighlights(query: string): SearchTermHighlight[] {
   const searchQuery = parseSearchQuery(query);
