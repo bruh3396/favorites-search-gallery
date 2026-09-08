@@ -1,10 +1,10 @@
 import { Searchable, SearchableMetric } from "@/types/search";
 import { DocResolver } from "@/lib/search/engine/set/doc_resolver";
-import { SearchEngine } from "@/lib/search/engine/search_engine";
 import { InvertedIndex } from "@/lib/search/index/inverted_index";
 import { MetricIndex } from "@/lib/search/index/metric_index";
 import { PositionIndex } from "@/lib/search/index/position_index";
 import { RelativeMetricIndex } from "@/lib/search/index/relative_metric_index";
+import { SearchEngine } from "@/lib/search/engine/search_engine";
 import { SetSearcher } from "@/lib/search/engine/set/set_searcher";
 import { WildcardTermExpander } from "@/lib/search/engine/set/wildcard_term_expander";
 import { WildcardTermResolver } from "@/lib/search/engine/set/wildcard_term_resolver";
@@ -42,7 +42,6 @@ export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc
     this.termIndex.addDocs(docs);
     this.wildcardResolver.index(this.termIndex.indexedTerms());
     this.positionIndex.build(docs);
-    this.wildcardExpander.clearCache();
   }
 
   public add(doc: Doc): void {
@@ -50,13 +49,11 @@ export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc
     this.metricIndex.add(doc);
     this.relativeMetricIndex.add(doc);
     this.positionIndex.add(doc);
-    this.wildcardExpander.clearCache();
   }
 
   public remove(doc: Doc): void {
     this.termIndex.removeDoc(doc).forEach(term => this.wildcardResolver.removeTerm(term));
     this.metricIndex.remove(doc);
     this.relativeMetricIndex.remove(doc);
-    this.wildcardExpander.clearCache();
   }
 }

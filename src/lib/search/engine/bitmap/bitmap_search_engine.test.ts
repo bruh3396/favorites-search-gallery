@@ -1,6 +1,6 @@
 import { Fruit, FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 import { MetricDoc, metricDocs, metricSearchCases, searchCases } from "@/lib/search/testing/search_cases";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { BitmapSearchEngine } from "@/lib/search/engine/bitmap/bitmap_search_engine";
 import { Searchable } from "@/types/search";
 
@@ -19,28 +19,28 @@ describe("BitmapSearchEngine matches the shared search cases", () => {
   }
 
   for (const group of searchCases) {
-    it(group.name, () => {
+    test(group.name, () => {
       group.run(assertMatches);
     });
   }
 });
 
 describe("BitmapSearchEngine", () => {
-  it("returns the whole corpus for an empty query", () => {
+  test("returns the whole corpus for an empty query", () => {
     expect(bitmapEngine().search("")).toEqual(fruitDocs);
   });
 
-  it("returns results in corpus order", () => {
+  test("returns results in corpus order", () => {
     const result = bitmapEngine().search("sweet");
 
     expect(result.map(doc => doc.name)).toEqual(fruitDocs.filter(doc => doc.tags.has("sweet")).map(doc => doc.name));
   });
 
-  it("returns nothing when a required term matches no doc", () => {
+  test("returns nothing when a required term matches no doc", () => {
     expect(bitmapEngine().search("red nonexistenttag")).toEqual([]);
   });
 
-  it("re-indexes on index()", () => {
+  test("re-indexes on index()", () => {
     const engine = new BitmapSearchEngine<Fruit>(fruit => fruit.tags, () => 0, []);
 
     expect(engine.search("red")).toEqual([]);
@@ -48,7 +48,7 @@ describe("BitmapSearchEngine", () => {
     expect(engine.search("red").length).toBeGreaterThan(0);
   });
 
-  it("handles negated OR across a multi-word corpus without phantom matches", () => {
+  test("handles negated OR across a multi-word corpus without phantom matches", () => {
     interface Item extends Searchable { id: number }
     const posts: Item[] = Array.from({ length: 100 }, (_, i) => ({
       id: i,
@@ -77,7 +77,7 @@ function idsOf(items: TaggedItem[]): string[] {
 }
 
 describe("BitmapSearchEngine incremental mutation", () => {
-  it("add makes a new doc matchable, including by wildcard and empty query", () => {
+  test("add makes a new doc matchable, including by wildcard and empty query", () => {
     const engine = taggedEngine([taggedItem("1", "cat")]);
 
     engine.add(taggedItem("2", "cot"));
@@ -86,7 +86,7 @@ describe("BitmapSearchEngine incremental mutation", () => {
     expect(engine.search("").length).toBe(2);
   });
 
-  it("remove stops a doc from matching and drops its unique terms", () => {
+  test("remove stops a doc from matching and drops its unique terms", () => {
     const a = taggedItem("1", "cat");
     const b = taggedItem("2", "cat", "unique");
     const engine = taggedEngine([a, b]);
@@ -97,7 +97,7 @@ describe("BitmapSearchEngine incremental mutation", () => {
     expect(engine.search("uni*")).toEqual([]);
   });
 
-  it("reflects corrected tags after remove-then-add of the same doc", () => {
+  test("reflects corrected tags after remove-then-add of the same doc", () => {
     const target = taggedItem("1", "ct");
     const engine = taggedEngine([target]);
 
@@ -110,7 +110,7 @@ describe("BitmapSearchEngine incremental mutation", () => {
     expect(idsOf(engine.search("cat"))).toEqual(["1"]);
   });
 
-  it("reuses freed positions without leaking phantom matches", () => {
+  test("reuses freed positions without leaking phantom matches", () => {
     const items = Array.from({ length: 10 }, (_, i) => taggedItem(String(i), "tag", `u${i}`));
     const engine = taggedEngine(items);
 
@@ -121,7 +121,7 @@ describe("BitmapSearchEngine incremental mutation", () => {
     expect(engine.search("").length).toBe(6);
   });
 
-  it("grows capacity when adds exceed the initial width", () => {
+  test("grows capacity when adds exceed the initial width", () => {
     const engine = taggedEngine([taggedItem("seed", "tag")]);
 
     for (let i = 0; i < 200; i += 1) {
@@ -131,14 +131,21 @@ describe("BitmapSearchEngine incremental mutation", () => {
     expect(engine.search("").length).toBe(201);
   });
 
-  it("filters results to the given candidate subset", () => {
+  test("filters results to the given candidate subset", () => {
     const items = [taggedItem("1", "cat"), taggedItem("2", "cat"), taggedItem("3", "cat")];
     const engine = taggedEngine(items);
 
     expect(idsOf(engine.search("cat", [items[0], items[2]]))).toEqual(["1", "3"]);
   });
 
-  it("stays correct when a term crosses the sparse/dense threshold via add and remove", () => {
+  test("returns only the candidate subset for an empty query", () => {
+    const items = [taggedItem("1", "cat"), taggedItem("2", "cat"), taggedItem("3", "cat")];
+    const engine = taggedEngine(items);
+
+    expect(idsOf(engine.search("", [items[0], items[2]]))).toEqual(["1", "3"]);
+  });
+
+  test("stays correct when a term crosses the sparse/dense threshold via add and remove", () => {
     const engine = taggedEngine([]);
     const items = Array.from({ length: 5 }, (_, i) => taggedItem(String(i), "shared"));
 
@@ -166,7 +173,7 @@ describe("BitmapSearchEngine matches the shared metric cases", () => {
   }
 
   for (const group of metricSearchCases) {
-    it(group.name, () => {
+    test(group.name, () => {
       group.run(assertMatches);
     });
   }

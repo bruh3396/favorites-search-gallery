@@ -1,11 +1,10 @@
 import { IconName, icon } from "@/lib/ui/icon";
+import { PaginationSequence, PaginationState } from "@/types/ui";
 import { Stepper, buildStepper } from "@/lib/ui/settings/components/stepper_control";
 import { createElement, label, span } from "@/utils/browser/element";
 import { removeDataset, toggleDataset } from "@/utils/browser/dataset";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
-import { PaginationSequence } from "@/types/ui";
-import { PaginationState } from "@/types/ui";
 import { Preferences } from "@/app/context/preferences";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { doNothing } from "@/utils/pure/function";

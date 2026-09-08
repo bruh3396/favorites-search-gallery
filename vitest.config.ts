@@ -8,6 +8,6 @@ export default defineConfig({
     }
   },
   test: {
-    exclude: [...configDefaults.exclude, "src/playground/**"]
+    exclude: [...configDefaults.exclude]
   }
 });

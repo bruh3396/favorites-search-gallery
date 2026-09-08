@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { BitmapIndex } from "@/lib/search/engine/bitmap/bitmap_index";
 
 interface Doc {
@@ -32,31 +32,31 @@ const lemon = doc("lemon", "yellow", "fruit", "sour");
 const corpus = [apple, cherry, lemon];
 
 describe("BitmapIndex", () => {
-  it("reports the corpus size", () => {
+  test("reports the corpus size", () => {
     expect(index(corpus).size).toBe(3);
   });
 
-  it("lists every indexed term", () => {
+  test("lists every indexed term", () => {
     expect(index(corpus).indexedTerms().sort()).toEqual(["fruit", "red", "sour", "sweet", "yellow"]);
   });
 
-  it("resolves a term to the docs carrying it", () => {
+  test("resolves a term to the docs carrying it", () => {
     expect(docsForTerm(index(corpus), "red")).toEqual([apple, cherry]);
   });
 
-  it("resolves a term shared by all docs", () => {
+  test("resolves a term shared by all docs", () => {
     expect(docsForTerm(index(corpus), "fruit")).toEqual([apple, cherry, lemon]);
   });
 
-  it("returns undefined for an unknown term", () => {
+  test("returns undefined for an unknown term", () => {
     expect(index(corpus).postingForTerm("purple")).toBeUndefined();
   });
 
-  it("preserves corpus order when materializing", () => {
+  test("preserves corpus order when materializing", () => {
     expect(docsForTerm(index(corpus), "fruit").map(d => d.id)).toEqual(["apple", "cherry", "lemon"]);
   });
 
-  it("reports each term's doc count", () => {
+  test("reports each term's doc count", () => {
     const bitmapIndex = index(corpus);
 
     expect(countForTerm(bitmapIndex, "fruit")).toBe(3);
@@ -64,26 +64,26 @@ describe("BitmapIndex", () => {
     expect(countForTerm(bitmapIndex, "sweet")).toBe(1);
   });
 
-  it("everything() matches the whole corpus", () => {
+  test("everything() matches the whole corpus", () => {
     const bitmapIndex = index(corpus);
 
     expect(bitmapIndex.docsFrom(bitmapIndex.everything())).toEqual(corpus);
   });
 
-  it("emptyBitSet() matches nothing", () => {
+  test("emptyBitSet() matches nothing", () => {
     const bitmapIndex = index(corpus);
 
     expect(bitmapIndex.docsFrom(bitmapIndex.emptyBitSet())).toEqual([]);
   });
 
-  it("maps a position back to its doc", () => {
+  test("maps a position back to its doc", () => {
     const bitmapIndex = index(corpus);
 
     expect(bitmapIndex.docAt(0)).toBe(apple);
     expect(bitmapIndex.docAt(2)).toBe(lemon);
   });
 
-  it("handles a corpus larger than one word (word-boundary positions)", () => {
+  test("handles a corpus larger than one word (word-boundary positions)", () => {
     const many = Array.from({ length: 100 }, (_, i) => doc(`d${i}`, i % 2 === 0 ? "even" : "odd", "all"));
     const bitmapIndex = index(many);
 
@@ -92,7 +92,7 @@ describe("BitmapIndex", () => {
     expect(docsForTerm(bitmapIndex, "all").length).toBe(100);
   });
 
-  it("rebuilds cleanly, discarding the previous corpus", () => {
+  test("rebuilds cleanly, discarding the previous corpus", () => {
     const bitmapIndex = new BitmapIndex<Doc>(d => d.tags);
 
     bitmapIndex.build([apple]);
@@ -102,7 +102,7 @@ describe("BitmapIndex", () => {
     expect(bitmapIndex.postingForTerm("red")).toBeUndefined();
   });
 
-  it("handles an empty corpus", () => {
+  test("handles an empty corpus", () => {
     const bitmapIndex = index([]);
 
     expect(bitmapIndex.size).toBe(0);
@@ -111,7 +111,7 @@ describe("BitmapIndex", () => {
   });
 
   describe("dense vs sparse postings", () => {
-    it("resolves a frequent (dense) term and a rare (sparse) term identically", () => {
+    test("resolves a frequent (dense) term and a rare (sparse) term identically", () => {
       const wide = Array.from({ length: 1000 }, (_, i) => doc(`d${i}`, "common", i === 500 ? "unique" : "other"));
       const bitmapIndex = index(wide);
 
@@ -121,19 +121,19 @@ describe("BitmapIndex", () => {
       expect(docsForTerm(bitmapIndex, "common").length).toBe(1000);
     });
 
-    it("a singleton term resolves to its single doc", () => {
+    test("a singleton term resolves to its single doc", () => {
       expect(docsForTerm(index(corpus), "sweet")).toEqual([apple]);
     });
   });
 
   describe("unionOf", () => {
-    it("unions the docs of several terms", () => {
+    test("unions the docs of several terms", () => {
       const bitmapIndex = index(corpus);
 
       expect(bitmapIndex.docsFrom(bitmapIndex.unionOf(["sweet", "sour"]))).toEqual([apple, lemon]);
     });
 
-    it("skips unknown terms", () => {
+    test("skips unknown terms", () => {
       const bitmapIndex = index(corpus);
 
       expect(bitmapIndex.docsFrom(bitmapIndex.unionOf(["red", "purple"]))).toEqual([apple, cherry]);
@@ -141,7 +141,7 @@ describe("BitmapIndex", () => {
   });
 
   describe("orTermInto", () => {
-    it("folds a term's docs into the accumulator", () => {
+    test("folds a term's docs into the accumulator", () => {
       const bitmapIndex = index(corpus);
       const accumulator = bitmapIndex.emptyBitSet();
 
@@ -150,7 +150,7 @@ describe("BitmapIndex", () => {
       expect(bitmapIndex.docsFrom(accumulator)).toEqual([apple, cherry, lemon]);
     });
 
-    it("leaves the accumulator untouched for an unknown term", () => {
+    test("leaves the accumulator untouched for an unknown term", () => {
       const bitmapIndex = index(corpus);
       const accumulator = bitmapIndex.emptyBitSet();
 

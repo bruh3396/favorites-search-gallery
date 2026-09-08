@@ -1,4 +1,4 @@
-﻿import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { WildcardTermResolver } from "@/lib/search/engine/set/wildcard_term_resolver";
 
 const terms = ["banana", "bandana", "cabana", "canvas", "brand", "sandbox"].slice().sort();
@@ -25,7 +25,7 @@ describe("WildcardTermResolver", () => {
   test("termsMatching requires every fragment via the predicate", () => {
     const ordered = /ban.*ana/;
 
-    expect(sorted(resolver.termsMatching(["ban", "ana"], term => ordered.test(term)))).toEqual(["banana", "bandana"]);
+    expect(sorted(resolver.termsMatching(["ban", "ana"], term => ordered.test(term), ordered.source))).toEqual(["banana", "bandana"]);
   });
 
   test("an empty resolver finds nothing", () => {

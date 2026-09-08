@@ -1,5 +1,5 @@
 import { DensePosting, Posting, SparsePosting } from "@/lib/search/engine/bitmap/posting";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { BitSet } from "@/lib/search/engine/bitmap/bitset";
 
 const SIZE = 100;
@@ -34,50 +34,50 @@ const cases: { name: string; make: (...positions: number[]) => Posting }[] = [
 ];
 
 describe.each(cases)("$name", ({ make }) => {
-  it("reports its count", () => {
+  test("reports its count", () => {
     expect(make(3, 40, 70).count).toBe(3);
   });
 
-  it("seeds a working set with its positions", () => {
+  test("seeds a working set with its positions", () => {
     expect(positionsOf(make(3, 40, 70).seed(SIZE))).toEqual([3, 40, 70]);
   });
 
-  it("andInto intersects the working set and reports emptiness", () => {
+  test("andInto intersects the working set and reports emptiness", () => {
     const working = bitSet(3, 40, 70, 90);
 
     expect(make(40, 70).andInto(working)).toBe(false);
     expect(positionsOf(working)).toEqual([40, 70]);
   });
 
-  it("andInto reports empty when the intersection is empty", () => {
+  test("andInto reports empty when the intersection is empty", () => {
     const working = bitSet(1, 2, 3);
 
     expect(make(50, 60).andInto(working)).toBe(true);
     expect(working.isEmpty()).toBe(true);
   });
 
-  it("andNotInto subtracts its positions and reports emptiness", () => {
+  test("andNotInto subtracts its positions and reports emptiness", () => {
     const working = bitSet(3, 40, 70);
 
     expect(make(40).andNotInto(working)).toBe(false);
     expect(positionsOf(working)).toEqual([3, 70]);
   });
 
-  it("andNotInto reports empty when it removes everything", () => {
+  test("andNotInto reports empty when it removes everything", () => {
     const working = bitSet(40, 70);
 
     expect(make(40, 70).andNotInto(working)).toBe(true);
     expect(working.isEmpty()).toBe(true);
   });
 
-  it("orInto unions its positions into the accumulator", () => {
+  test("orInto unions its positions into the accumulator", () => {
     const accumulator = bitSet(1);
 
     make(40, 70).orInto(accumulator);
     expect(positionsOf(accumulator)).toEqual([1, 40, 70]);
   });
 
-  it("orComplementInto sets every bit except where the accumulator was 0 and it carries the position", () => {
+  test("orComplementInto sets every bit except where the accumulator was 0 and it carries the position", () => {
     const accumulator = bitSet(5);
 
     make(5, 40).orComplementInto(accumulator);
@@ -89,7 +89,7 @@ describe.each(cases)("$name", ({ make }) => {
 });
 
 describe("dense and sparse agree", () => {
-  it("produce the same andInto result", () => {
+  test("produce the same andInto result", () => {
     const denseWorking = bitSet(3, 40, 70, 90);
     const sparseWorking = bitSet(3, 40, 70, 90);
 
@@ -98,7 +98,7 @@ describe("dense and sparse agree", () => {
     expect(positionsOf(denseWorking)).toEqual(positionsOf(sparseWorking));
   });
 
-  it("produce the same orComplementInto result", () => {
+  test("produce the same orComplementInto result", () => {
     const denseAcc = bitSet(5, 12);
     const sparseAcc = bitSet(5, 12);
 

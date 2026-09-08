@@ -12,27 +12,9 @@ export interface ExpandedQuery<Doc extends Searchable> {
 }
 
 export class WildcardTermExpander<Doc extends Searchable> {
-  private readonly cache: Map<string, ExpandedQuery<Doc>> = new Map<string, ExpandedQuery<Doc>>();
-
   constructor(private readonly resolver: WildcardResolver) { }
 
   public expand(searchQuery: SearchQuery<Doc>): ExpandedQuery<Doc> {
-    const cached = this.cache.get(searchQuery.source);
-
-    if (cached !== undefined) {
-      return cached;
-    }
-    const expanded = this.expandWildcardTerms(searchQuery);
-
-    this.cache.set(searchQuery.source, expanded);
-    return expanded;
-  }
-
-  public clearCache(): void {
-    this.cache.clear();
-  }
-
-  private expandWildcardTerms(searchQuery: SearchQuery<Doc>): ExpandedQuery<Doc> {
     const andTerms: AbstractSearchTerm[] = [];
     const orGroups: AbstractSearchTerm[][] = [];
 
@@ -83,7 +65,7 @@ export class WildcardTermExpander<Doc extends Searchable> {
       case WildcardMatchType.Prefix: return this.resolver.termsStartingWith(inputs.fragment);
       case WildcardMatchType.Suffix: return this.resolver.termsEndingWith(inputs.fragment);
       case WildcardMatchType.Substring: return this.resolver.termsContaining(inputs.fragment);
-      default: return this.resolver.termsMatching(inputs.fragments, t => inputs.regex.test(t));
+      default: return this.resolver.termsMatching(inputs.fragments, t => inputs.regex.test(t), inputs.regex.source);
     }
   }
 }

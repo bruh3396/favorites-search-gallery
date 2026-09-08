@@ -12,8 +12,7 @@ export function parseSearchQuery<Doc extends Searchable>(query: string): SearchQ
   const termGroups = parseTermGroups(query);
   const andTerms = buildSearchTermGroup(termGroups.andTerms);
   const orGroups = termGroups.orGroups.map(buildSearchTermGroup);
-  const normalized = normalizeSearchQuery<Doc>(andTerms, orGroups);
-  return new SearchQuery<Doc>(normalized.andTerms, normalized.orGroups, query);
+  return normalizeSearchQuery<Doc>(andTerms, orGroups);
 }
 
 export function normalizeSearchQuery<Doc extends Searchable>(andTerms: AbstractSearchTerm[], orGroups: AbstractSearchTerm[][]): SearchQuery<Doc> {

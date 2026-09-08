@@ -150,7 +150,7 @@ export class BitmapSearcher<Doc extends Searchable> {
       case WildcardMatchType.Prefix: return this.wildcardResolver.termsStartingWith(inputs.fragment);
       case WildcardMatchType.Suffix: return this.wildcardResolver.termsEndingWith(inputs.fragment);
       case WildcardMatchType.Substring: return this.wildcardResolver.termsContaining(inputs.fragment);
-      default: return this.wildcardResolver.termsMatching(inputs.fragments, t => inputs.regex.test(t));
+      default: return this.wildcardResolver.termsMatching(inputs.fragments, t => inputs.regex.test(t), inputs.regex.source);
     }
   }
 }

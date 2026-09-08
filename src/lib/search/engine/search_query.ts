@@ -4,8 +4,7 @@ import { Searchable } from "@/types/search";
 export class SearchQuery<Doc extends Searchable> {
   constructor(
     public readonly andTerms: AbstractSearchTerm[] = [],
-    public readonly orGroups: AbstractSearchTerm[][] = [],
-    public readonly source: string = ""
+    public readonly orGroups: AbstractSearchTerm[][] = []
   ) { }
 
   public allTerms(): AbstractSearchTerm[] {

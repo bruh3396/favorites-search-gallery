@@ -1,7 +1,7 @@
+import { describe, expect, test } from "vitest";
 import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
 import { RelativeMetricIndex } from "@/lib/search/index/relative_metric_index";
 import { SearchableMetric } from "@/types/search";
-import { describe, expect, test } from "vitest";
 
 type Doc = { name: string; metrics: Partial<Record<SearchableMetric, number>> };
 

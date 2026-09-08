@@ -25,7 +25,7 @@ export class BitmapSearchEngine<Doc extends Searchable> implements SearchEngine<
 
   public search(query: string, candidates?: Doc[]): Doc[] {
     if (isEmptyString(query)) {
-      return this.bitmapIndex.allDocs();
+      return candidates ?? this.bitmapIndex.allDocs();
     }
     const matches = this.searcher.search(parseSearchQuery<Doc>(query));
 

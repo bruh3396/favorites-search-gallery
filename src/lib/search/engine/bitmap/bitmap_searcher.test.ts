@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { BitmapIndex } from "@/lib/search/engine/bitmap/bitmap_index";
 import { BitmapSearcher } from "@/lib/search/engine/bitmap/bitmap_searcher";
 import { MetricBitmapIndex } from "@/lib/search/engine/bitmap/metric_bitmap_index";
@@ -38,73 +38,73 @@ const corpus: Item[] = [
 ];
 
 describe("BitmapSearcher AND folding", () => {
-  it("intersects multiple positive terms", () => {
+  test("intersects multiple positive terms", () => {
     expect(idsFor(corpus, "red sweet")).toEqual(["1"]);
   });
 
-  it("returns nothing when a required term is absent from the index", () => {
+  test("returns nothing when a required term is absent from the index", () => {
     expect(idsFor(corpus, "red nonexistent")).toEqual([]);
   });
 
-  it("returns nothing when two present terms never co-occur", () => {
+  test("returns nothing when two present terms never co-occur", () => {
     expect(idsFor(corpus, "red green")).toEqual([]);
   });
 
-  it("returns results in corpus (position) order", () => {
+  test("returns results in corpus (position) order", () => {
     expect(searcherFor(corpus).search(parseSearchQuery<Item>("sweet")).map(d => d.id))
       .toEqual(["1", "3", "5"]);
   });
 });
 
 describe("BitmapSearcher negation folding", () => {
-  it("excludes a negated term", () => {
+  test("excludes a negated term", () => {
     expect(idsFor(corpus, "sweet -small")).toEqual(["3"]);
   });
 
-  it("ignores a negated term that matches no doc (nothing to subtract)", () => {
+  test("ignores a negated term that matches no doc (nothing to subtract)", () => {
     expect(idsFor(corpus, "sweet -nonexistent")).toEqual(["1", "3", "5"]);
   });
 
-  it("returns the whole corpus for a lone negation of an absent term", () => {
+  test("returns the whole corpus for a lone negation of an absent term", () => {
     expect(idsFor(corpus, "-nonexistent")).toEqual(["1", "2", "3", "4", "5"]);
   });
 
-  it("empties the result when negation removes every seed match", () => {
+  test("empties the result when negation removes every seed match", () => {
     expect(idsFor(corpus, "blue -sweet")).toEqual([]);
   });
 });
 
 describe("BitmapSearcher OR-group folding", () => {
-  it("keeps docs matching any term in the group", () => {
+  test("keeps docs matching any term in the group", () => {
     expect(idsFor(corpus, "small ( red ~ blue )")).toEqual(["1", "5"]);
   });
 
-  it("returns UNMATCHABLE when an OR group resolves to no docs", () => {
+  test("returns UNMATCHABLE when an OR group resolves to no docs", () => {
     expect(idsFor(corpus, "sweet ( nonexistentA ~ nonexistentB )")).toEqual([]);
   });
 
-  it("intersects multiple OR groups against the seed", () => {
+  test("intersects multiple OR groups against the seed", () => {
     expect(idsFor(corpus, "( red ~ green ) ( sweet ~ sour )"))
       .toEqual(["1", "2", "3", "4"]);
   });
 
-  it("handles a negated term inside an OR group", () => {
+  test("handles a negated term inside an OR group", () => {
     expect(idsFor(corpus, "small ( -red ~ sweet )")).toEqual(["1", "4", "5"]);
   });
 
-  it("does not build OR groups when the AND seed is already empty", () => {
+  test("does not build OR groups when the AND seed is already empty", () => {
     expect(idsFor(corpus, "red green ( sweet ~ sour )")).toEqual([]);
   });
 });
 
 describe("BitmapSearcher wildcard resolution", () => {
-  it("resolves a prefix wildcard to the union of matching terms", () => {
+  test("resolves a prefix wildcard to the union of matching terms", () => {
     const items = [item("1", "cat"), item("2", "car"), item("3", "dog")];
 
     expect(idsFor(items, "ca*")).toEqual(["1", "2"]);
   });
 
-  it("returns nothing when a wildcard matches no indexed term", () => {
+  test("returns nothing when a wildcard matches no indexed term", () => {
     const items = [item("1", "cat"), item("2", "dog")];
 
     expect(idsFor(items, "z*")).toEqual([]);
@@ -112,7 +112,7 @@ describe("BitmapSearcher wildcard resolution", () => {
 });
 
 describe("BitmapSearcher metric folding", () => {
-  it("folds a metric term into the AND intersection", () => {
+  test("folds a metric term into the AND intersection", () => {
     const items = [item("aa", "x"), item("bbbb", "x"), item("cccccc", "x")];
 
     expect(idsFor(items, "x id:>3")).toEqual(["bbbb", "cccccc"]);

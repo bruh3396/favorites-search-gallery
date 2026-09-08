@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { ZipWriter } from "@/features/favorites/features/downloader/zip_writer";
 import { crc32 as nodeCrc32 } from "zlib";
 
@@ -27,7 +27,7 @@ async function entriesOf(blob: Blob): Promise<Map<string, Uint8Array>> {
 }
 
 describe("ZipWriter", () => {
-  it("stores a single file with correct name, contents, and crc", async() => {
+  test("stores a single file with correct name, contents, and crc", async() => {
     const writer = new ZipWriter();
     const payload = new TextEncoder().encode("hello world") as Uint8Array<ArrayBuffer>;
 
@@ -38,7 +38,7 @@ describe("ZipWriter", () => {
     expect(new TextDecoder().decode(entries.get("greeting.txt"))).toBe("hello world");
   });
 
-  it("stores multiple files with binary content", async() => {
+  test("stores multiple files with binary content", async() => {
     const writer = new ZipWriter();
     const a = new Uint8Array([0, 1, 2, 255, 128]) as Uint8Array<ArrayBuffer>;
     const b = new Uint8Array(1000).map((_, i) => i % 256) as Uint8Array<ArrayBuffer>;
@@ -52,7 +52,7 @@ describe("ZipWriter", () => {
     expect(entries.get("b.bin")).toEqual(b);
   });
 
-  it("handles unicode filenames", async() => {
+  test("handles unicode filenames", async() => {
     const writer = new ZipWriter();
 
     writer.add("画像 🎨.png", new Uint8Array([1, 2, 3]) as Uint8Array<ArrayBuffer>);
@@ -61,7 +61,7 @@ describe("ZipWriter", () => {
     expect([...entries.keys()]).toEqual(["画像 🎨.png"]);
   });
 
-  it("produces an empty but valid archive", async() => {
+  test("produces an empty but valid archive", async() => {
     const bytes = new Uint8Array(await new ZipWriter().finish().arrayBuffer());
     const view = new DataView(bytes.buffer);
 

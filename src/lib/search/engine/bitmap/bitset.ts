@@ -1,6 +1,3 @@
-// De Bruijn sequence for O(1) trailing-zero count, avoiding the native Math.clz32
-// call (~200x slower in the Tampermonkey sandbox). Index by the isolated lowest
-// set bit multiplied by the constant, shifted to the top 5 bits.
 const DE_BRUIJN_BIT_POSITION = new Int8Array([
   0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
   31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
@@ -39,7 +36,8 @@ export class BitSet {
     let remaining = 0;
 
     for (let i = 0; i < this.bits.length; i += 1) {
-      remaining |= (this.bits[i] &= other.bits[i]);
+      this.bits[i] &= other.bits[i];
+      remaining |= this.bits[i];
     }
     return remaining === 0;
   }
@@ -49,7 +47,8 @@ export class BitSet {
     let remaining = 0;
 
     for (let i = 0; i < this.bits.length; i += 1) {
-      remaining |= (this.bits[i] &= ~other.bits[i]);
+      this.bits[i] &= ~other.bits[i];
+      remaining |= this.bits[i];
     }
     return remaining === 0;
   }

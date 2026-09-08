@@ -1,8 +1,8 @@
 import { Fruit, FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 import { Metric, Searchable } from "@/types/search";
 import { MetricDoc, metricDocs, metricSearchCases, searchCases } from "@/lib/search/testing/search_cases";
-import { SetSearchEngine } from "@/lib/search/engine/set/set_search_engine";
 import { describe, expect, test } from "vitest";
+import { SetSearchEngine } from "@/lib/search/engine/set/set_search_engine";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };
 
