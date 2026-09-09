@@ -1,5 +1,5 @@
 import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
-import { WildcardResolver } from "@/lib/search/wildcard_resolver";
+import { WildcardResolver } from "@/lib/search/indexes/wildcard_resolver";
 
 export class WildcardDocResolver<Doc> extends WildcardResolver<ReadonlySet<Doc>> {
   constructor(private readonly termIndex: InvertedIndex<Doc>) {

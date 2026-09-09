@@ -60,7 +60,7 @@ export const getFavorite = (id: string): Favorite | undefined => collection.get(
 
 export const searchFavorites = (query: string): Favorite[] => searcher.search(collection.getAll(), query);
 export const reSearchFavorites = (): Favorite[] => searcher.reSearch(collection.getAll());
-export const invertSearchResults = (): Favorite[] => searcher.invertResults(collection.getAll());
+export const invertSearchResults = (): Favorite[] => searcher.invertResults();
 export const getCurrentSearchQuery = (): string => searcher.getCurrentSearchQuery();
 export const getCurrentSearchResults = (): Favorite[] => searcher.getCurrentSearchResults();
 export const shuffleSearchResults = (): Favorite[] => searcher.shuffleSearchResults();

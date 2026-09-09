@@ -4,7 +4,7 @@ import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 
 export abstract class WildcardResolver<V> {
   private wildcardIndex = new WildcardIndex();
-  private readonly cache = new BoundedCache<string, V>(Infinity);
+  private readonly cache = new BoundedCache<string, V>(100);
 
   public index(terms: string[]): void {
     this.wildcardIndex = new WildcardIndex(terms);

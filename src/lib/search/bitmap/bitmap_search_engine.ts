@@ -1,13 +1,14 @@
 import { SearchEngine, TermUpdate } from "@/lib/search/search_engine";
-import { Searchable, SearchableMetric } from "@/types/search";
+import { BitSet } from "@/lib/search/bitmap/postings/bitset";
 import { BitmapEvaluator } from "@/lib/search/bitmap/logic/bitmap_evaluator";
 import { BitmapIndex } from "@/lib/search/bitmap/indexes/bitmap_index";
 import { MetricBitmapIndex } from "@/lib/search/bitmap/indexes/metric_index";
-import { PostingResolver } from "@/lib/search/bitmap/logic/posting_resolver";
+import { PostingResolver } from "@/lib/search/bitmap/resolution/posting_resolver";
+import { SearchableMetric } from "@/types/search";
 import { WildcardPostingResolver } from "@/lib/search/bitmap/resolution/wildcard_posting_resolver";
 import { tryParseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
 
-export class BitmapSearchEngine<Doc extends Searchable> implements SearchEngine<Doc> {
+export class BitmapSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly bitmapIndex: BitmapIndex<Doc>;
   private readonly metricIndex: MetricBitmapIndex<Doc>;
   private readonly wildcardResolver: WildcardPostingResolver<Doc>;
@@ -36,6 +37,10 @@ export class BitmapSearchEngine<Doc extends Searchable> implements SearchEngine<
     return matches.filter(doc => candidateSet.has(doc));
   }
 
+  public invert(current: Doc[], retain?: string): Doc[] {
+    return this.bitmapIndex.complementOfDocs(current, this.bitSetFromQuery(retain));
+  }
+
   public index(docs: Doc[]): void {
     this.bitmapIndex.build(docs);
     this.metricIndex.build(this.bitmapIndex.width, this.bitmapIndex.positionalDocs());
@@ -53,5 +58,13 @@ export class BitmapSearchEngine<Doc extends Searchable> implements SearchEngine<
     added.forEach(term => this.wildcardResolver.add(term));
     removed.forEach(term => this.wildcardResolver.remove(term));
     this.metricIndex.build(this.bitmapIndex.width, this.bitmapIndex.positionalDocs());
+  }
+
+  private bitSetFromQuery(query?: string): BitSet | undefined {
+    if (query === undefined) {
+      return undefined;
+    }
+    const expression = tryParseSearchExpression(query);
+    return expression === undefined ? undefined : this.evaluator.evaluateToBitSet(expression);
   }
 }

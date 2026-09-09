@@ -1,8 +1,8 @@
 import { DensePosting, Posting, SparsePosting } from "@/lib/search/bitmap/postings/posting";
 import { TermDelta, TermUpdate } from "@/lib/search/search_engine";
+import { insertSorted, removeValue } from "@/utils/pure/array";
 import { BitSet } from "@/lib/search/bitmap/postings/bitset";
 import { PackedPostings } from "@/lib/search/bitmap/postings/packed_postings";
-import { findFirstIndexWhere } from "@/utils/pure/array";
 
 const MIN_CAPACITY = 64;
 
@@ -25,10 +25,6 @@ export class BitmapIndex<Doc> {
 
   public get width(): number {
     return this.capacity;
-  }
-
-  private get denseThreshold(): number {
-    return Math.ceil(this.capacity / 32);
   }
 
   public build(docs: readonly Doc[], minCapacity: number = docs.length): void {
@@ -121,6 +117,24 @@ export class BitmapIndex<Doc> {
     return universe;
   }
 
+  public complementOfDocs(docs: readonly Doc[], retain?: BitSet): Doc[] {
+    const excluded = this.emptyBitSet();
+
+    for (const doc of docs) {
+      const position = this.positionOf.get(doc);
+
+      if (position !== undefined) {
+        excluded.add(position);
+      }
+    }
+    const result = this.complementOf(excluded);
+
+    if (retain !== undefined) {
+      result.andInPlace(retain);
+    }
+    return this.docsFrom(result);
+  }
+
   public unionOfPostings(postings: readonly Posting[]): BitSet {
     const union = new BitSet(this.capacity);
 
@@ -130,12 +144,42 @@ export class BitmapIndex<Doc> {
     return union;
   }
 
-  public orTermInto(accumulator: BitSet, term: string): void {
-    this.postingForTerm(term)?.orInto(accumulator);
-  }
-
   public docsFrom(bitset: BitSet): Doc[] {
     return bitset.gather(this.docs);
+  }
+
+  private place(doc: Doc, position: number): string[] {
+    this.docs[position] = doc;
+    this.positionOf.set(doc, position);
+    this.all.add(position);
+    this.liveCount += 1;
+    const newTerms: string[] = [];
+
+    for (const term of this.termsFor(doc)) {
+      const positions = this.positionsByTerm.get(term);
+
+      if (positions === undefined) {
+        this.positionsByTerm.set(term, [position]);
+        newTerms.push(term);
+      } else {
+        insertSorted(positions, position);
+      }
+    }
+    return newTerms;
+  }
+
+  private ensureCapacity(required: number): void {
+    if (required < this.capacity) {
+      return;
+    }
+    const live: Doc[] = [];
+
+    for (const doc of this.docs) {
+      if (doc !== undefined) {
+        live.push(doc);
+      }
+    }
+    this.build(live, required);
   }
 
   private rePointAll(updates: readonly TermUpdate<Doc>[]): void {
@@ -174,42 +218,12 @@ export class BitmapIndex<Doc> {
     }
   }
 
-  private place(doc: Doc, position: number): string[] {
-    this.docs[position] = doc;
-    this.positionOf.set(doc, position);
-    this.all.add(position);
-    this.liveCount += 1;
-    const newTerms: string[] = [];
-
-    for (const term of this.termsFor(doc)) {
-      const positions = this.positionsByTerm.get(term);
-
-      if (positions === undefined) {
-        this.positionsByTerm.set(term, [position]);
-        newTerms.push(term);
-      } else {
-        insertSorted(positions, position);
-      }
-    }
-    return newTerms;
-  }
-
-  private ensureCapacity(required: number): void {
-    if (required < this.capacity) {
-      return;
-    }
-    const live: Doc[] = [];
-
-    for (const doc of this.docs) {
-      if (doc !== undefined) {
-        live.push(doc);
-      }
-    }
-    this.build(live, required);
+  private denseThreshold(): number {
+    return Math.ceil(this.capacity / 32);
   }
 
   private materialize(): void {
-    const threshold = this.denseThreshold;
+    const threshold = this.denseThreshold();
 
     this.materializeDense(threshold);
     this.materializeSparse(threshold);
@@ -243,16 +257,4 @@ function capacityFor(size: number): number {
     capacity *= 2;
   }
   return capacity;
-}
-
-function insertSorted(sorted: number[], value: number): void {
-  sorted.splice(findFirstIndexWhere(sorted.length, index => sorted[index] >= value), 0, value);
-}
-
-function removeValue(sorted: number[], value: number): void {
-  const index = sorted.indexOf(value);
-
-  if (index !== -1) {
-    sorted.splice(index, 1);
-  }
 }

@@ -3,7 +3,7 @@ import { parseSearchExpression, tryParseSearchExpression } from "@/lib/search/pa
 import { BitmapEvaluator } from "@/lib/search/bitmap/logic/bitmap_evaluator";
 import { BitmapIndex } from "@/lib/search/bitmap/indexes/bitmap_index";
 import { MetricBitmapIndex } from "@/lib/search/bitmap/indexes/metric_index";
-import { PostingResolver } from "@/lib/search/bitmap/logic/posting_resolver";
+import { PostingResolver } from "@/lib/search/bitmap/resolution/posting_resolver";
 import { Searchable } from "@/types/search";
 import { WildcardPostingResolver } from "@/lib/search/bitmap/resolution/wildcard_posting_resolver";
 

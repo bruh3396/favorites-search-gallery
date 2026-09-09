@@ -155,14 +155,14 @@ describe("FavoritesSearcher", () => {
       const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog"), favorite("3", "s", "fox")]);
 
       searcher.search(favorites, "cat");
-      expect(ids(searcher.invertResults(favorites)).sort()).toEqual(["2", "3"]);
+      expect(ids(searcher.invertResults()).sort()).toEqual(["2", "3"]);
     });
 
     test("replaces the current results with the inverted set", () => {
       const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog")]);
 
       searcher.search(favorites, "cat");
-      searcher.invertResults(favorites);
+      searcher.invertResults();
       expect(ids(searcher.getCurrentSearchResults())).toEqual(["2"]);
     });
 
@@ -173,7 +173,7 @@ describe("FavoritesSearcher", () => {
       );
 
       searcher.search(favorites, "cat");
-      expect(ids(searcher.invertResults(favorites))).toEqual([]);
+      expect(ids(searcher.invertResults())).toEqual([]);
     });
   });
 

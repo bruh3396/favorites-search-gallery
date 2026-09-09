@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { WildcardResolver } from "@/lib/search/wildcard_resolver";
+import { WildcardResolver } from "@/lib/search/indexes/wildcard_resolver";
 import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 const TERMS = ["banana", "bandana", "cabana", "canvas", "brand"];

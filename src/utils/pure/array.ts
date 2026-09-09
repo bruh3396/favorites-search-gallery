@@ -77,6 +77,18 @@ export function intersectSortedNumbers(a: number[], b: number[]): number[] {
   return result;
 }
 
+export function insertSorted(sorted: number[], value: number): void {
+  sorted.splice(findFirstIndexWhere(sorted.length, index => sorted[index] >= value), 0, value);
+}
+
+export function removeValue(sorted: number[], value: number): void {
+  const index = sorted.indexOf(value);
+
+  if (index !== -1) {
+    sorted.splice(index, 1);
+  }
+}
+
 export function chunk<V>(array: V[], chunkSize: number): V[][] {
   const result: V[][] = [];
 

@@ -136,23 +136,4 @@ describe("BitmapIndex", () => {
       expect(bitmapIndex.docsFrom(bitmapIndex.unionOfPostings([]))).toEqual([]);
     });
   });
-
-  describe("orTermInto", () => {
-    test("folds a term's docs into the accumulator", () => {
-      const bitmapIndex = index(corpus);
-      const accumulator = bitmapIndex.emptyBitSet();
-
-      bitmapIndex.orTermInto(accumulator, "red");
-      bitmapIndex.orTermInto(accumulator, "sour");
-      expect(bitmapIndex.docsFrom(accumulator)).toEqual([apple, cherry, lemon]);
-    });
-
-    test("leaves the accumulator untouched for an unknown term", () => {
-      const bitmapIndex = index(corpus);
-      const accumulator = bitmapIndex.emptyBitSet();
-
-      bitmapIndex.orTermInto(accumulator, "purple");
-      expect(bitmapIndex.docsFrom(accumulator)).toEqual([]);
-    });
-  });
 });

@@ -1,6 +1,6 @@
 import { DensePosting, Posting } from "@/lib/search/bitmap/postings/posting";
 import { BitmapIndex } from "@/lib/search/bitmap/indexes/bitmap_index";
-import { WildcardResolver } from "@/lib/search/wildcard_resolver";
+import { WildcardResolver } from "@/lib/search/indexes/wildcard_resolver";
 
 export class WildcardPostingResolver<Doc> extends WildcardResolver<Posting | undefined> {
   constructor(private readonly bitmapIndex: BitmapIndex<Doc>) {

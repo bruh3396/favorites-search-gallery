@@ -1,6 +1,5 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { SearchQuery } from "@/lib/search/set/logic/search_query";
-import { Searchable } from "@/types/search";
 import { desugarNestedOrGroups } from "@/lib/search/parsers/nested_or_group_desugarer";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";
@@ -8,14 +7,14 @@ import { removeExtraWhitespace } from "@/utils/pure/string";
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;
 const meaninglessTerm = /^\**$/;
 
-export function parseSearchQuery<Doc extends Searchable>(query: string): SearchQuery<Doc> {
+export function parseSearchQuery<Doc>(query: string): SearchQuery<Doc> {
   const termGroups = parseTermGroups(query);
   const andTerms = buildSearchTermGroup(termGroups.andTerms);
   const orGroups = termGroups.orGroups.map(buildSearchTermGroup);
   return normalizeSearchQuery<Doc>(andTerms, orGroups);
 }
 
-export function normalizeSearchQuery<Doc extends Searchable>(andTerms: AbstractSearchTerm[], orGroups: AbstractSearchTerm[][]): SearchQuery<Doc> {
+export function normalizeSearchQuery<Doc>(andTerms: AbstractSearchTerm[], orGroups: AbstractSearchTerm[][]): SearchQuery<Doc> {
   const flattenedAndTerms = [...andTerms];
   const multiTermOrGroups: AbstractSearchTerm[][] = [];
 

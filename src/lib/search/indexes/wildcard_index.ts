@@ -23,11 +23,11 @@ export class WildcardIndex {
       case WildcardMatchType.Prefix:
         return this.prefixes.matchingPrefix(inputs.fragment);
       case WildcardMatchType.Suffix:
-        return this.filtered(inputs.fragment, key => key.endsWith(inputs.fragment));
+        return this.trigrams.matching(inputs.fragment, this.prefixes.all()).filter(key => key.endsWith(inputs.fragment));
       case WildcardMatchType.Substring:
-        return this.filtered(inputs.fragment, key => key.includes(inputs.fragment));
+        return this.trigrams.matching(inputs.fragment, this.prefixes.all()).filter(key => key.includes(inputs.fragment));
       default:
-        return this.filteredAll(inputs.fragments, key => inputs.regex.test(key));
+        return this.trigrams.matchingAll(inputs.fragments, this.prefixes.all()).filter(key => inputs.regex.test(key));
     }
   }
 
@@ -39,13 +39,5 @@ export class WildcardIndex {
   public remove(term: string): void {
     this.prefixes.remove(term);
     this.trigrams.remove(term);
-  }
-
-  private filtered(fragment: string, matches: (key: string) => boolean): string[] {
-    return this.trigrams.matching(fragment, this.prefixes.all()).filter(matches);
-  }
-
-  private filteredAll(fragments: string[], matches: (key: string) => boolean): string[] {
-    return this.trigrams.matchingAll(fragments, this.prefixes.all()).filter(matches);
   }
 }

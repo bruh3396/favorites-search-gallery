@@ -1,6 +1,62 @@
-import { chunk, findFirstIndexWhere, intersectSortedNumbers, isIndexInBounds, itemsAround, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
+import { chunk, findFirstIndexWhere, insertSorted, intersectSortedNumbers, isIndexInBounds, itemsAround, removeValue, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
 import { describe, expect, test } from "vitest";
 import { randomInt } from "@/utils/pure/number";
+
+describe("insertSorted", () => {
+  test("inserts into the middle keeping ascending order", () => {
+    const sorted = [1, 3, 5];
+
+    insertSorted(sorted, 4);
+    expect(sorted).toEqual([1, 3, 4, 5]);
+  });
+
+  test("inserts at the front and back", () => {
+    const front = [2, 3];
+    const back = [2, 3];
+
+    insertSorted(front, 1);
+    insertSorted(back, 9);
+    expect(front).toEqual([1, 2, 3]);
+    expect(back).toEqual([2, 3, 9]);
+  });
+
+  test("inserts into an empty array", () => {
+    const sorted: number[] = [];
+
+    insertSorted(sorted, 7);
+    expect(sorted).toEqual([7]);
+  });
+
+  test("allows duplicates", () => {
+    const sorted = [1, 2, 2, 3];
+
+    insertSorted(sorted, 2);
+    expect(sorted).toEqual([1, 2, 2, 2, 3]);
+  });
+});
+
+describe("removeValue", () => {
+  test("removes the value when present", () => {
+    const sorted = [1, 2, 3];
+
+    removeValue(sorted, 2);
+    expect(sorted).toEqual([1, 3]);
+  });
+
+  test("removes only the first occurrence", () => {
+    const sorted = [1, 2, 2, 3];
+
+    removeValue(sorted, 2);
+    expect(sorted).toEqual([1, 2, 3]);
+  });
+
+  test("leaves the array unchanged when the value is absent", () => {
+    const sorted = [1, 2, 3];
+
+    removeValue(sorted, 9);
+    expect(sorted).toEqual([1, 2, 3]);
+  });
+});
 
 describe("intersectSortedNumbers", () => {
   test("returns common elements of two ascending arrays", () => {

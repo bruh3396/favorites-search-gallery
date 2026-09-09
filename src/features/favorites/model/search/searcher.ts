@@ -45,11 +45,10 @@ export class FavoritesSearcher {
     return this.updateSearchResults(favorites);
   }
 
-  public invertResults(allFavorites: Favorite[]): Favorite[] {
+  public invertResults(): Favorite[] {
     return chain(
-      this.results.invert(allFavorites),
+      this.engine.invert(this.results.get(), this.blacklistQuery()),
       matches => this.filterByRating(matches),
-      matches => this.applyBlacklist(matches),
       matches => this.sort(matches),
       matches => this.results.set(matches)
     );
@@ -99,8 +98,8 @@ export class FavoritesSearcher {
     return this.filterByRating(this.searchOrPassThrough(this.finalSearchQuery(), favorites));
   }
 
-  private applyBlacklist(favorites: Favorite[]): Favorite[] {
-    return this.config.enforcingBlacklist() ? this.searchOrPassThrough(this.config.blacklistTags, favorites) : favorites;
+  private blacklistQuery(): string | undefined {
+    return this.config.enforcingBlacklist() && !isEmptyString(this.config.blacklistTags) ? this.config.blacklistTags : undefined;
   }
 
   private searchOrPassThrough(query: string, candidates: Favorite[]): Favorite[] {

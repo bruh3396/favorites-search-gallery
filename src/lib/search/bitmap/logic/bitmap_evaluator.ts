@@ -1,26 +1,28 @@
 import { DensePosting, EMPTY_POSTING, Posting } from "@/lib/search/bitmap/postings/posting";
 import { BitSet } from "@/lib/search/bitmap/postings/bitset";
 import { BitmapIndex } from "@/lib/search/bitmap/indexes/bitmap_index";
-import { PostingResolver } from "@/lib/search/bitmap/logic/posting_resolver";
+import { PostingResolver } from "@/lib/search/bitmap/resolution/posting_resolver";
 import { SearchExpression } from "@/lib/search/bitmap/logic/search_expression";
-import { Searchable } from "@/types/search";
 
 interface Value {
   posting: Posting;
   negated: boolean;
 }
 
-export class BitmapEvaluator<Doc extends Searchable> {
+export class BitmapEvaluator<Doc> {
   constructor(
     private readonly bitmapIndex: BitmapIndex<Doc>,
     private readonly resolver: PostingResolver<Doc>
   ) { }
 
   public evaluate(expression: SearchExpression): Doc[] {
+    return this.bitmapIndex.docsFrom(this.evaluateToBitSet(expression));
+  }
+
+  public evaluateToBitSet(expression: SearchExpression): BitSet {
     const value = this.resolve(expression);
     const bitset = this.bitmapIndex.bitSetFrom(value.posting);
-    const result = value.negated ? this.bitmapIndex.complementOf(bitset) : bitset;
-    return this.bitmapIndex.docsFrom(result);
+    return value.negated ? this.bitmapIndex.complementOf(bitset) : bitset;
   }
 
   private resolve(expr: SearchExpression): Value {

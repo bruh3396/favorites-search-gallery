@@ -3,11 +3,10 @@ import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { DocResolver } from "@/lib/search/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
 import { SearchQuery } from "@/lib/search/set/logic/search_query";
-import { Searchable } from "@/types/search";
 
 const SELECTIVE_QUERY_FRACTION = 0.25;
 
-export class SetSearcher<Doc extends Searchable> {
+export class SetSearcher<Doc> {
   constructor(
     private readonly termIndex: InvertedIndex<Doc>,
     private readonly resolver: DocResolver<Doc>

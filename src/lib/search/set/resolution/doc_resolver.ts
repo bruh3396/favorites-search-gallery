@@ -5,11 +5,10 @@ import { MetricIndex } from "@/lib/search/set/indexes/metric_index";
 import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
 import { PositionIndex } from "@/lib/search/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/lib/search/set/indexes/relative_metric_index";
-import { Searchable } from "@/types/search";
 import { WildcardDocResolver } from "@/lib/search/set/resolution/wildcard_doc_resolver";
 import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 
-export class DocResolver<Doc extends Searchable> {
+export class DocResolver<Doc> {
   constructor(
     private readonly termIndex: InvertedIndex<Doc>,
     private readonly metricIndex: MetricIndex<Doc>,

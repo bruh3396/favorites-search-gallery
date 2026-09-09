@@ -20,11 +20,6 @@ export class ObservableList<T extends Identifiable> {
     return this.items;
   }
 
-  public invert(allItems: T[]): T[] {
-    const ids = new Set(this.items.map(item => item.id));
-    return allItems.filter(item => !ids.has(item.id));
-  }
-
   public shuffle(): T[] {
     return this.set(shuffleArray(this.items));
   }

@@ -40,25 +40,6 @@ describe("ObservableList", () => {
     });
   });
 
-  describe("invert", () => {
-    test("returns items not present in the current results", () => {
-      results.set(items("1", "3"));
-      expect(ids(results.invert(items("1", "2", "3", "4")))).toEqual(["2", "4"]);
-    });
-
-    test("returns all items when results are empty", () => {
-      expect(ids(results.invert(items("1", "2")))).toEqual(["1", "2"]);
-    });
-
-    test("does not mutate the current results", () => {
-      const current = items("1");
-
-      results.set(current);
-      results.invert(items("1", "2"));
-      expect(results.get()).toBe(current);
-    });
-  });
-
   describe("shuffle", () => {
     test("keeps the same set of results", () => {
       results.set(items("1", "2", "3"));

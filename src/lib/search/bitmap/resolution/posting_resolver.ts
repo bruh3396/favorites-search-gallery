@@ -3,11 +3,10 @@ import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { BitmapIndex } from "@/lib/search/bitmap/indexes/bitmap_index";
 import { MetricBitmapIndex } from "@/lib/search/bitmap/indexes/metric_index";
 import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
-import { Searchable } from "@/types/search";
 import { WildcardPostingResolver } from "@/lib/search/bitmap/resolution/wildcard_posting_resolver";
 import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 
-export class PostingResolver<Doc extends Searchable> {
+export class PostingResolver<Doc> {
   constructor(
     private readonly bitmapIndex: BitmapIndex<Doc>,
     private readonly metricIndex: MetricBitmapIndex<Doc>,

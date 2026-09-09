@@ -1,5 +1,5 @@
 import { SearchEngine, TermUpdate } from "@/lib/search/search_engine";
-import { Searchable, SearchableMetric } from "@/types/search";
+import { SearchableMetric } from "@/types/search";
 import { DocResolver } from "@/lib/search/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
 import { MetricIndex } from "@/lib/search/set/indexes/metric_index";
@@ -10,7 +10,7 @@ import { WildcardDocResolver } from "@/lib/search/set/resolution/wildcard_doc_re
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 import { searchableMetrics } from "@/types/guards";
 
-export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc> {
+export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly termIndex: InvertedIndex<Doc>;
   private readonly metricIndex: MetricIndex<Doc>;
   private readonly relativeMetricIndex: RelativeMetricIndex<Doc>;
@@ -30,6 +30,11 @@ export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc
 
   public search(query: string, candidates: Doc[]): Doc[] {
     return this.setSearcher.search(parseSearchQuery<Doc>(query), candidates);
+  }
+
+  public invert(current: Doc[], retain?: string): Doc[] {
+    const complement = this.positionIndex.complementOf(current);
+    return retain === undefined ? complement : this.search(retain, complement);
   }
 
   public index(docs: Doc[]): void {

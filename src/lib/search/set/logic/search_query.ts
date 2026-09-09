@@ -1,7 +1,7 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { Searchable } from "@/types/search";
 
-export class SearchQuery<Doc extends Searchable> {
+export class SearchQuery<Doc> {
   constructor(
     public readonly andTerms: AbstractSearchTerm[] = [],
     public readonly orGroups: AbstractSearchTerm[][] = []
@@ -11,7 +11,7 @@ export class SearchQuery<Doc extends Searchable> {
     return [...this.andTerms, ...this.orGroups.flat()];
   }
 
-  public filter(items: Doc[]): Doc[] {
+  public filter(items: (Doc & Searchable)[]): Doc[] {
     return items.filter(item => this.matchesAndTerms(item) && this.matchesOrGroups(item));
   }
 

@@ -15,6 +15,18 @@ export class PositionIndex<Doc> {
     return this.index.get(doc) ?? -1;
   }
 
+  public complementOf(docs: readonly Doc[]): Doc[] {
+    const excluded = new Set<Doc>(docs);
+    const result: Doc[] = [];
+
+    for (const doc of this.index.keys()) {
+      if (!excluded.has(doc)) {
+        result.push(doc);
+      }
+    }
+    return result;
+  }
+
   public sort(docs: Doc[]): Doc[] {
     return docs
       .map(doc => ({ doc, position: this.positionOf(doc) }))
