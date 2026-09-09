@@ -1,8 +1,8 @@
-import { AbstractSearchTerm } from "@/lib/search/query/terms/abstract_search_term";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { SearchQuery } from "@/lib/search/engine/set/query/query";
 import { Searchable } from "@/types/search";
-import { desugarNestedOrGroups } from "@/lib/search/query/parsers/nested_or_group_desugarer";
-import { parseSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { desugarNestedOrGroups } from "@/lib/search/parsers/nested_or_group_desugarer";
+import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const orGroupRegex = /(?:^|\s+)\(\s+((?:\S+)(?:(?:\s+~\s+)\S+)*)\s+\)/g;

@@ -1,10 +1,10 @@
-import { AbstractSearchTerm } from "@/lib/search/query/terms/abstract_search_term";
-import { ExactSearchTerm } from "@/lib/search/query/terms/exact_search_term";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
 import { SearchQuery } from "@/lib/search/engine/set/query/query";
 import { Searchable } from "@/types/search";
 import { WildcardMatcher } from "@/lib/search/indexes/wildcard_matcher";
-import { WildcardSearchTerm } from "@/lib/search/query/terms/wildcard_search_term";
-import { normalizeSearchQuery } from "@/lib/search/query/parsers/search_term_group_parser";
+import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
+import { normalizeSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 export interface ExpandedQuery<Doc extends Searchable> {
   searchQuery: SearchQuery<Doc>;

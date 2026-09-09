@@ -42,7 +42,7 @@ export class DensePosting implements Posting {
   }
 }
 
-export class EmptyPosting implements Posting {
+class EmptyPosting implements Posting {
   public readonly cardinality = 0;
 
   public toBitSet(size: number): BitSet {
@@ -67,6 +67,8 @@ export class EmptyPosting implements Posting {
 }
 
 const EMPTY_POSITIONS = new Int32Array(0);
+
+export const EMPTY_POSTING: Posting = new EmptyPosting();
 
 export class SparsePosting implements Posting {
   constructor(private readonly positions: Int32Array) { }

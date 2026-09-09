@@ -5,6 +5,7 @@ const DE_BRUIJN_BIT_POSITION = new Int8Array([
 
 export class BitSet {
   private readonly words: Uint32Array;
+  private scratch = new Int32Array(0);
 
   constructor(public readonly size: number) {
     this.words = new Uint32Array(Math.ceil(size / 32));
@@ -35,13 +36,12 @@ export class BitSet {
     return cardinality;
   }
 
-  public orInPlace(other: BitSet): this {
+  public orInPlace(other: BitSet): void {
     this.assertSameSize(other);
 
     for (let i = 0; i < this.words.length; i += 1) {
       this.words[i] |= other.words[i];
     }
-    return this;
   }
 
   public andInPlace(other: BitSet): boolean {
@@ -56,19 +56,21 @@ export class BitSet {
   }
 
   public andPositionsInPlace(positions: Int32Array): boolean {
-    const survivors: number[] = [];
+    const survivors = this.getScratch(positions.length);
+    let count = 0;
 
     for (const position of positions) {
       if (this.has(position)) {
-        survivors.push(position);
+        survivors[count] = position;
+        count += 1;
       }
     }
     this.words.fill(0);
 
-    for (const position of survivors) {
-      this.add(position);
+    for (let i = 0; i < count; i += 1) {
+      this.add(survivors[i]);
     }
-    return survivors.length === 0;
+    return count === 0;
   }
 
   public andNotInPlace(other: BitSet): boolean {
@@ -131,6 +133,13 @@ export class BitSet {
       }
     }
     return result;
+  }
+
+  private getScratch(size: number): Int32Array {
+    if (this.scratch.length < size) {
+      this.scratch = new Int32Array(size);
+    }
+    return this.scratch;
   }
 
   private clearHighBits(): void {

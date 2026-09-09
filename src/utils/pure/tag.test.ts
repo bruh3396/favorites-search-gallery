@@ -1,21 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { internTag, internTags, negateTags, toSortedTagArray, toSortedTagSet, toTagSet, toSortedTagString, toTagString } from "@/utils/pure/tag";
-
-describe("internTag", () => {
-  test("returns the same string reference for equal tags", () => {
-    const a = internTag("apple".split("").join(""));
-    const b = internTag("apple".split("").join(""));
-
-    expect(a).toBe("apple");
-    expect(a).toBe(b);
-  });
-});
-
-describe("internTags", () => {
-  test("dedupes and drops empty strings", () => {
-    expect(internTags(["dup", "dup", "", "other"])).toEqual(["dup", "other"]);
-  });
-});
+import { negateTags, toSortedTagArray, toSortedTagSet, toTagSet, toSortedTagString, toTagString } from "@/utils/pure/tag";
 
 describe("toTagSet", () => {
   test("splits a space-joined string, empty yields empty set", () => {

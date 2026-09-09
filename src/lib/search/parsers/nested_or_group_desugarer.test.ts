@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { desugarNestedOrGroups } from "@/lib/search/query/parsers/nested_or_group_desugarer";
+import { desugarNestedOrGroups } from "@/lib/search/parsers/nested_or_group_desugarer";
 
 describe("desugarNestedOrGroups", () => {
   test("leaves flat queries untouched", () => {

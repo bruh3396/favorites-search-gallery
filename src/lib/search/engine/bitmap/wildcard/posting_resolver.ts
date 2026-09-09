@@ -1,6 +1,6 @@
 import { Posting } from "@/lib/search/engine/bitmap/bits/posting";
 import { WildcardMatcher } from "@/lib/search/indexes/wildcard_matcher";
-import { WildcardSearchTerm } from "@/lib/search/query/terms/wildcard_search_term";
+import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 
 export class WildcardPostingResolver {
   private matcher = new WildcardMatcher<string>();

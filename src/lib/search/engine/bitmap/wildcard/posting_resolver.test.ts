@@ -2,7 +2,7 @@ import { DensePosting, Posting } from "@/lib/search/engine/bitmap/bits/posting";
 import { describe, expect, test } from "vitest";
 import { BitmapIndex } from "@/lib/search/engine/bitmap/indexes/index";
 import { WildcardPostingResolver } from "@/lib/search/engine/bitmap/wildcard/posting_resolver";
-import { parseWildcardSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 interface Doc {
   id: string;

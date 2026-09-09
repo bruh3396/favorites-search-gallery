@@ -1,9 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { parseSearchExpression, tryParseSearchExpression } from "@/lib/search/query/parsers/search_expression_parser";
+import { parseSearchExpression, tryParseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
 import { BitmapIndex } from "@/lib/search/engine/bitmap/indexes/index";
 import { DensePosting } from "@/lib/search/engine/bitmap/bits/posting";
-import { ExpressionContext } from "@/lib/search/engine/bitmap/query/expression";
+import { BitmapEvaluator } from "@/lib/search/engine/bitmap/query/bitmap_evaluator";
 import { MetricBitmapIndex } from "@/lib/search/engine/bitmap/indexes/metric_index";
+import { PostingResolver } from "@/lib/search/engine/bitmap/query/posting_resolver";
 import { Searchable } from "@/types/search";
 import { WildcardPostingResolver } from "@/lib/search/engine/bitmap/wildcard/posting_resolver";
 
@@ -13,7 +14,7 @@ function item(id: string, ...tags: string[]): Item {
   return { id, tags: new Set(tags) };
 }
 
-function contextFor(items: Item[]): ExpressionContext<Item> {
+function evaluatorFor(items: Item[]): BitmapEvaluator<Item> {
   const bitmapIndex = new BitmapIndex<Item>(doc => doc.tags);
 
   bitmapIndex.build(items);
@@ -26,7 +27,9 @@ function contextFor(items: Item[]): ExpressionContext<Item> {
   );
 
   wildcardResolver.index(bitmapIndex.indexedTerms());
-  return { bitmapIndex, metricIndex, wildcardResolver };
+  const resolver = new PostingResolver(bitmapIndex, metricIndex, wildcardResolver);
+
+  return new BitmapEvaluator(bitmapIndex, resolver);
 }
 
 const corpus: Item[] = [
@@ -38,7 +41,7 @@ const corpus: Item[] = [
 ];
 
 function idsFor(query: string): string[] {
-  return parseSearchExpression(query).evaluate(contextFor(corpus)).map(doc => doc.id).sort();
+  return evaluatorFor(corpus).evaluate(parseSearchExpression(query)).map(doc => doc.id).sort();
 }
 
 describe("parseSearchExpression top-level AND", () => {
@@ -61,9 +64,9 @@ describe("parseSearchExpression top-level AND", () => {
 
   test("preserves a literal glued-parenthesis term", () => {
     const items = [item("a", "apple_(red)"), item("b", "banana")];
-    const context = contextFor(items);
+    const evaluator = evaluatorFor(items);
 
-    expect(parseSearchExpression("apple_(red)").evaluate(context).map(d => d.id)).toEqual(["a"]);
+    expect(evaluator.evaluate(parseSearchExpression("apple_(red)")).map(d => d.id)).toEqual(["a"]);
   });
 });
 

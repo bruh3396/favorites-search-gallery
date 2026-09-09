@@ -1,8 +1,8 @@
-import { AbstractSearchTerm } from "@/lib/search/query/terms/abstract_search_term";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { InvertedIndex } from "@/lib/search/engine/set/indexes/inverted";
 import { MetricIndex } from "@/lib/search/engine/set/indexes/metric";
-import { MetricSearchComparison } from "@/lib/search/query/parsers/metric_search_comparison";
-import { MetricSearchTerm } from "@/lib/search/query/terms/metric_search_term";
+import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
+import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
 import { PositionIndex } from "@/lib/search/engine/set/indexes/position";
 import { RelativeMetricIndex } from "@/lib/search/engine/set/indexes/relative_metric";
 import { Searchable } from "@/types/search";

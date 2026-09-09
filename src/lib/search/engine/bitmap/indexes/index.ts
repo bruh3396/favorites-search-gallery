@@ -99,12 +99,26 @@ export class BitmapIndex<Doc> {
     return sparse === undefined ? undefined : new SparsePosting(sparse);
   }
 
-  public everything(): BitSet {
+  public universe(): BitSet {
     return this.all.clone();
   }
 
   public emptyBitSet(): BitSet {
     return new BitSet(this.capacity);
+  }
+
+  public bitSetFrom(posting: Posting): BitSet {
+    const bitSet = this.emptyBitSet();
+
+    posting.orInto(bitSet);
+    return bitSet;
+  }
+
+  public complementOf(bitset: BitSet): BitSet {
+    const universe = this.universe();
+
+    universe.andNotInPlace(bitset);
+    return universe;
   }
 
   public unionOfPostings(postings: readonly Posting[]): BitSet {

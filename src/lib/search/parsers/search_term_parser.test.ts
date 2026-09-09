@@ -1,7 +1,7 @@
-import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/query/terms/wildcard_search_term";
+import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { describe, expect, test } from "vitest";
-import { isMetricTerm, isWildcardTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
-import { ExactSearchTerm } from "@/lib/search/query/terms/exact_search_term";
+import { isMetricTerm, isWildcardTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
+import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
 
 const normalTerms = [
   "",

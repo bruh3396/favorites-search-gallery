@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseExactSearchTerm, parseWildcardSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseExactSearchTerm, parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 describe("AbstractSearchTerm", () => {
   describe("literal", () => {

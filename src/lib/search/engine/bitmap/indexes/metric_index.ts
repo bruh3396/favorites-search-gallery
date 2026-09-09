@@ -1,5 +1,5 @@
 import { BitSet } from "@/lib/search/engine/bitmap/bits/bitset";
-import { MetricSearchComparison } from "@/lib/search/query/parsers/metric_search_comparison";
+import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
 import { SearchableMetric } from "@/types/search";
 import { findFirstIndexWhere } from "@/utils/pure/array";
 

@@ -1,4 +1,4 @@
-import { internTag, internTags } from "@/utils/pure/tag";
+import { toTagSet } from "@/utils/pure/tag";
 import { Favorite } from "@/types/favorite";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { MediaExtension } from "@/types/media";
@@ -17,14 +17,13 @@ export class FavoriteItem implements Favorite {
 
   constructor(source: HTMLElement | Post) {
     this.post = source instanceof HTMLElement ? thumbToPost(source) : source;
-    this.post.tags = this.post.tags.map(internTag);
     this.id = this.post.id;
     this.numericId = parseInt(this.post.id, 10);
     this.element = null;
   }
 
   public get tags(): Set<string> {
-    return new Set(this.post.tags);
+    return toTagSet(this.post.tags);
   }
 
   public get thumbUrl(): string {
@@ -37,7 +36,7 @@ export class FavoriteItem implements Favorite {
 
   public get root(): HTMLElement {
     if (this.element === null) {
-      this.element = new FavoriteElement(this.id, this.post.previewURL, this.post.tags.join(" "));
+      this.element = new FavoriteElement(this.id, this.post.previewURL, this.post.tags);
       this.element.setAspectRatio(this.post.width, this.post.height);
       this.element.setExtension(this.post.extension);
     }
@@ -83,7 +82,7 @@ function thumbToPost(thumb: HTMLElement): Post {
   const image = getImageFromThumb(thumb);
   return {
     id,
-    tags: image === null ? [] : normalizeTags(thumb),
+    tags: image === null ? "" : normalizeTags(thumb),
     width: 0,
     height: 0,
     score: 0,
@@ -94,6 +93,6 @@ function thumbToPost(thumb: HTMLElement): Post {
   };
 }
 
-function normalizeTags(thumb: HTMLElement): string[] {
-  return internTags(removeExtraWhitespace(getTagsFromThumb(thumb).replace(/\bvide\b/g, "video")).split(" "));
+function normalizeTags(thumb: HTMLElement): string {
+  return removeExtraWhitespace(getTagsFromThumb(thumb).replace(/\bvide\b/g, "video"));
 }

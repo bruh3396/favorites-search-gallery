@@ -3,7 +3,6 @@ import {
   capitalize,
   decodeHtmlEntities,
   escapeParentheses,
-  flatten,
   isEmptyString,
   isOnlyDigits,
   pluralSuffix,
@@ -277,17 +276,6 @@ describe("trigramsOf", () => {
 
   test("sliding window", () => {
     expect(trigramsOf("banana")).toEqual(["ban", "ana", "nan", "ana"]);
-  });
-});
-
-describe("flatten", () => {
-  test("empty", () => {
-    expect(flatten("")).toBe("");
-  });
-
-  test("preserves content", () => {
-    expect(flatten("1boy")).toBe("1boy");
-    expect(flatten("a b c".split(" ")[1])).toBe("b");
   });
 });
 

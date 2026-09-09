@@ -1,11 +1,13 @@
-import { ExpressionContext, SearchExpression } from "@/lib/search/engine/bitmap/query/expression";
 import { describe, expect, test } from "vitest";
+import { BitmapEvaluator } from "@/lib/search/engine/bitmap/query/bitmap_evaluator";
 import { BitmapIndex } from "@/lib/search/engine/bitmap/indexes/index";
 import { DensePosting } from "@/lib/search/engine/bitmap/bits/posting";
 import { MetricBitmapIndex } from "@/lib/search/engine/bitmap/indexes/metric_index";
+import { PostingResolver } from "@/lib/search/engine/bitmap/query/posting_resolver";
+import { SearchExpression } from "@/lib/search/engine/bitmap/query/expression";
 import { Searchable } from "@/types/search";
 import { WildcardPostingResolver } from "@/lib/search/engine/bitmap/wildcard/posting_resolver";
-import { parseSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 interface Item extends Searchable { id: string }
 
@@ -13,7 +15,7 @@ function item(id: string, ...tags: string[]): Item {
   return { id, tags: new Set(tags) };
 }
 
-function contextFor(items: Item[]): ExpressionContext<Item> {
+function evaluatorFor(items: Item[]): BitmapEvaluator<Item> {
   const bitmapIndex = new BitmapIndex<Item>(doc => doc.tags);
 
   bitmapIndex.build(items);
@@ -26,7 +28,8 @@ function contextFor(items: Item[]): ExpressionContext<Item> {
   );
 
   wildcardResolver.index(bitmapIndex.indexedTerms());
-  return { bitmapIndex, metricIndex, wildcardResolver };
+  const resolver = new PostingResolver(bitmapIndex, metricIndex, wildcardResolver);
+  return new BitmapEvaluator(bitmapIndex, resolver);
 }
 
 function leaf(term: string): SearchExpression {
@@ -34,7 +37,7 @@ function leaf(term: string): SearchExpression {
 }
 
 function idsFor(items: Item[], expression: SearchExpression): string[] {
-  return expression.evaluate(contextFor(items)).map(doc => doc.id).sort();
+  return evaluatorFor(items).evaluate(expression).map(doc => doc.id).sort();
 }
 
 const corpus: Item[] = [

@@ -1,5 +1,5 @@
 import { SearchExpression } from "@/lib/search/engine/bitmap/query/expression";
-import { parseSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const OPEN = "(";

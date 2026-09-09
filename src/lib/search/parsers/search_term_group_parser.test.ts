@@ -1,7 +1,7 @@
-import { buildSearchTermGroup, normalizeSearchQuery, parseSearchQuery, parseTermGroups, sortSearchTermGroup } from "@/lib/search/query/parsers/search_term_group_parser";
+import { buildSearchTermGroup, normalizeSearchQuery, parseSearchQuery, parseTermGroups, sortSearchTermGroup } from "@/lib/search/parsers/search_term_group_parser";
 import { describe, expect, test } from "vitest";
 import { Fruit } from "@/lib/search/testing/fruit_corpus";
-import { parseSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 function serializeQuery(query: string): string {
   const searchQuery = parseSearchQuery<Fruit>(query);

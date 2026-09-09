@@ -5,6 +5,7 @@ import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { TermUpdate } from "@/lib/search/engine/search_engine";
+import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoritesMetadataEnricher {
   private changeUpdater: CoalescingExecutor<TermUpdate<Favorite>>;
@@ -42,6 +43,6 @@ export class FavoritesMetadataEnricher {
 }
 
 function tagsAreDifferent(favorite: Favorite, post: Post): boolean {
-  const difference = favorite.tags.symmetricDifference(new Set(post.tags));
+  const difference = favorite.tags.symmetricDifference(toTagSet(post.tags));
   return difference.size > 1 || (difference.size === 1 && !difference.has(favorite.id));
 }

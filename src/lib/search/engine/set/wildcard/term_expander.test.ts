@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { Fruit } from "@/lib/search/testing/fruit_corpus";
 import { WildcardMatcher } from "@/lib/search/indexes/wildcard_matcher";
 import { WildcardTermExpander } from "@/lib/search/engine/set/wildcard/term_expander";
-import { parseSearchQuery } from "@/lib/search/query/parsers/search_term_group_parser";
+import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 function expand(query: string, vocabulary: string[]): { andTerms: string[]; orGroups: string[][]; isUnmatchable: boolean } {
   const matcher = new WildcardMatcher(undefined, [...vocabulary].sort());

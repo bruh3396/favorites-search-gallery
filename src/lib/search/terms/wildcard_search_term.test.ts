@@ -2,7 +2,7 @@ import { createSearchable, searchableEmptyDoc } from "@/lib/search/testing/searc
 import { describe, expect, test } from "vitest";
 import { fruits, searchableFruitDoc } from "@/lib/search/testing/fruit_corpus";
 import { prefixesOf, substringsOf } from "@/lib/search/testing/string";
-import { parseWildcardSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 describe("WildcardSearchTerm", () => {
   test("empty", () => {

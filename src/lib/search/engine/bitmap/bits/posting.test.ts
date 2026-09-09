@@ -1,4 +1,4 @@
-import { DensePosting, EmptyPosting, Posting, SparsePosting } from "@/lib/search/engine/bitmap/bits/posting";
+import { DensePosting, EMPTY_POSTING, Posting, SparsePosting } from "@/lib/search/engine/bitmap/bits/posting";
 import { describe, expect, test } from "vitest";
 import { BitSet } from "@/lib/search/engine/bitmap/bits/bitset";
 
@@ -86,7 +86,7 @@ describe.each(cases)("$name", ({ make }) => {
 });
 
 describe("EmptyPosting", () => {
-  const empty = new EmptyPosting();
+  const empty = EMPTY_POSTING;
 
   test("has a count of zero", () => {
     expect(empty.cardinality).toBe(0);

@@ -67,7 +67,7 @@ describe("BitmapIndex", () => {
   test("everything() matches the whole corpus", () => {
     const bitmapIndex = index(corpus);
 
-    expect(bitmapIndex.docsFrom(bitmapIndex.everything())).toEqual(corpus);
+    expect(bitmapIndex.docsFrom(bitmapIndex.universe())).toEqual(corpus);
   });
 
   test("emptyBitSet() matches nothing", () => {
@@ -100,7 +100,7 @@ describe("BitmapIndex", () => {
 
     expect(bitmapIndex.size).toBe(0);
     expect(bitmapIndex.indexedTerms()).toEqual([]);
-    expect(bitmapIndex.docsFrom(bitmapIndex.everything())).toEqual([]);
+    expect(bitmapIndex.docsFrom(bitmapIndex.universe())).toEqual([]);
   });
 
   describe("dense vs sparse postings", () => {

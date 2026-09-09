@@ -1,5 +1,6 @@
 import { Root, setupShell } from "@/app/layout/shell";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { setupAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { setupDomEvents } from "@/app/dom/events";
 import { setupHotkeyEvents } from "@/app/dom/hotkey_events";
 import { ping as setupServer } from "@/lib/remote/api";
@@ -13,7 +14,7 @@ export function setupRuntime(): void {
   setupTouchHoldEvents();
   setupSwipeEvents();
   setupHotkeyEvents();
-  // setupAutocomplete();
+  setupAutocomplete();
   setupStyles();
   setupShell();
 }

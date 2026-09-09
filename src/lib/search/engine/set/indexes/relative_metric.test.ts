@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { MetricSearchComparison } from "@/lib/search/query/parsers/metric_search_comparison";
+import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
 import { RelativeMetricIndex } from "@/lib/search/engine/set/indexes/relative_metric";
 import { SearchableMetric } from "@/types/search";
 

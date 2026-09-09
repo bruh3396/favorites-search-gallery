@@ -8,7 +8,7 @@ import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
 import { resolveMediaType } from "@/lib/media/type";
-import { internTags } from "@/utils/pure/tag";
+import { toTagString } from "@/utils/pure/tag";
 
 type SerializedFavorite = {
   id: string;
@@ -125,7 +125,7 @@ function migratePost(favorite: SerializedFavorite, imageExtension: ImageExtensio
     score: favorite.metadata.score,
     rating: RATING_STRINGS[favorite.metadata.rating] ?? "explicit",
     change: favorite.metadata.change,
-    tags: internTags(tagSet),
+    tags: toTagString(tagSet),
     fileURL: extension === undefined ? "" : withExtension(thumbUrlToImageUrl(previewURL), extension),
     previewURL,
     duration: favorite.metadata.duration,

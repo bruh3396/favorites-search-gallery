@@ -3,7 +3,6 @@ import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 import { toDimensions2D } from "@/utils/pure/geometry";
-import { internTags } from "@/utils/pure/tag";
 import { withRule34Hostname } from "@/lib/media/url";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
@@ -67,12 +66,11 @@ function getFileUrl(dom: Document): string {
   return image instanceof HTMLImageElement ? withRule34Hostname(image.src) : "";
 }
 
-function getTags(dom: Document): string[] {
-  const tags = removeExtraWhitespace(Array.from(dom.querySelectorAll(".tag>a"))
+function getTags(dom: Document): string {
+  return removeExtraWhitespace(Array.from(dom.querySelectorAll(".tag>a"))
     .filter(anchor => anchor instanceof HTMLAnchorElement && anchor.textContent !== "?")
     .map(anchor => (anchor.textContent || "").replaceAll(" ", "_"))
     .join(" ") || "");
-  return internTags(tags.split(" "));
 }
 
 function getRating(statistics: Record<string, string>): string {

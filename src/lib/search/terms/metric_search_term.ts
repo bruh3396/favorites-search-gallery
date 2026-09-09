@@ -1,6 +1,6 @@
 import { MetricComparator, MetricSearchable } from "@/types/search";
-import { AbstractSearchTerm } from "@/lib/search/query/terms/abstract_search_term";
-import { MetricSearchComparison } from "@/lib/search/query/parsers/metric_search_comparison";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
 
 type Comparator = (a: number, b: number) => boolean;
 

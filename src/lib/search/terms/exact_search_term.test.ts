@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseExactSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseExactSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { searchableEmptyDoc } from "@/lib/search/testing/searchable";
 import { searchableFruitDoc } from "@/lib/search/testing/fruit_corpus";
 

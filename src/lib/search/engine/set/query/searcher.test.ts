@@ -5,7 +5,7 @@ import { MetricIndex } from "@/lib/search/engine/set/indexes/metric";
 import { PositionIndex } from "@/lib/search/engine/set/indexes/position";
 import { RelativeMetricIndex } from "@/lib/search/engine/set/indexes/relative_metric";
 import { SetSearcher } from "@/lib/search/engine/set/query/searcher";
-import { parseSearchQuery } from "@/lib/search/query/parsers/search_term_group_parser";
+import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
 const positionIndex = new PositionIndex<Fruit>();
 

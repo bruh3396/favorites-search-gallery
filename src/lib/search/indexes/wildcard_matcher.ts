@@ -1,4 +1,4 @@
-import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/query/terms/wildcard_search_term";
+import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { PrefixIndex } from "@/lib/search/indexes/prefix_index";
 import { TrigramIndex } from "@/lib/search/indexes/trigram_index";
 import { identity } from "@/utils/pure/function";

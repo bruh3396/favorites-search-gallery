@@ -1,6 +1,6 @@
 import { Searchable, SearchableMetric } from "@/types/search";
 import { describe, expect, test } from "vitest";
-import { parseMetricSearchTerm } from "@/lib/search/query/parsers/search_term_parser";
+import { parseMetricSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 type MetricSearchable = Searchable & { getMetric: (metric: SearchableMetric) => number };
 

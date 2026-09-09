@@ -1,8 +1,8 @@
-import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/query/terms/wildcard_search_term";
-import { AbstractSearchTerm } from "@/lib/search/query/terms/abstract_search_term";
-import { ExactSearchTerm } from "@/lib/search/query/terms/exact_search_term";
-import { MetricSearchComparison } from "@/lib/search/query/parsers/metric_search_comparison";
-import { MetricSearchTerm } from "@/lib/search/query/terms/metric_search_term";
+import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
+import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
+import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
+import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
+import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
 import { escapeParentheses } from "@/utils/pure/string";
 
 const unmatchableRegex = /^\b$/;

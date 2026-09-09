@@ -1,6 +1,6 @@
 import { Fruit, FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
-import { parseSearchQuery } from "@/lib/search/query/parsers/search_term_group_parser";
+import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 import { searchCases } from "@/lib/search/testing/search_cases";
 
 describe("filter", () => {
