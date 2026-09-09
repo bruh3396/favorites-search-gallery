@@ -1,6 +1,6 @@
-import * as TagCategoryResolver from "@/lib/tag_categories/resolver";
+import * as TagCategoryResolver from "@/lib/domain/tag_categories/resolver";
 import { TagCategoryMap } from "@/types/search";
-import { getTagSetFromThumb } from "@/lib/thumb/tag";
+import { getTagSetFromThumb } from "@/lib/ui/thumb/tag";
 
 export function resolveAll(thumb: HTMLElement): Promise<TagCategoryMap> {
   const tagSet = getTagSetFromThumb(thumb);

@@ -1,4 +1,4 @@
-import { getTagSetFromThumb } from "@/lib/thumb/tag";
+import { getTagSetFromThumb } from "@/lib/ui/thumb/tag";
 
 export function render(tooltip: HTMLElement, thumb: HTMLElement, getColor: (tag: string) => string | null): void {
   tooltip.replaceChildren();

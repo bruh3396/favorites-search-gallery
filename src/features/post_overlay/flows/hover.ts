@@ -1,7 +1,7 @@
 import * as PostOverlayFlows from "@/features/post_overlay/flows/flows";
 import * as PostOverlayModel from "@/features/post_overlay/model/model";
 import * as PostOverlayView from "@/features/post_overlay/view/view";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { Preferences } from "@/app/context/preferences";
 import { galleryIdle } from "@/app/channels/feature_bridge";
 import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";

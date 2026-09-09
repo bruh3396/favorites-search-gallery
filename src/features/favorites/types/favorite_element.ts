@@ -4,7 +4,7 @@ import { favoriteElementTemplate } from "@/features/favorites/types/favorite_ele
 import { postPageUrl } from "@/lib/remote/url";
 import { resolveMediaType } from "@/lib/media/type";
 import { setDataset } from "@/utils/browser/dataset";
-import { stampActionBarId } from "@/lib/thumb/action_bar";
+import { stampActionBarId } from "@/lib/ui/thumb/action_bar";
 
 export class FavoriteElement {
   public readonly root: HTMLElement;

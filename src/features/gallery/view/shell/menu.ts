@@ -1,6 +1,6 @@
 import * as Icons from "@/assets/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryMenuAction } from "@/types/app";
 import { GalleryMenuButton } from "@/features/gallery/types/gallery_types";

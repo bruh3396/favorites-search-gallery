@@ -1,4 +1,4 @@
-import { getItemsInContainer, getThumbsInMatrix } from "@/lib/thumb/query";
+import { getItemsInContainer, getThumbsInMatrix } from "@/lib/ui/thumb/query";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 

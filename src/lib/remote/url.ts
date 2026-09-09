@@ -1,4 +1,4 @@
-import { BASE_INDEX_URL, ORIGIN, POSTS_PER_POST_LIST_PAGE } from "@/lib/rule34_constants";
+import { BASE_INDEX_URL, ORIGIN, POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
 import { FAVORITES_PAGE_ID } from "@/lib/environment";
 
 export function addFavoriteUrl(id: string): string {

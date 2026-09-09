@@ -1,6 +1,6 @@
 import * as PostOverlayFlows from "@/features/post_overlay/flows/flows";
 import * as PostOverlayView from "@/features/post_overlay/view/view";
-import * as TagCategoryStore from "@/lib/tag_categories/store";
+import * as TagCategoryStore from "@/lib/domain/tag_categories/store";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";

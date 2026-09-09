@@ -2,7 +2,7 @@ import * as ContentTiler from "@/app/layout/content_tiler";
 import * as PostListNavigatorFlows from "@/features/post_list_navigator/flows/flows";
 import * as PostListNavigatorModel from "@/features/post_list_navigator/model/model";
 import * as PostListNavigatorView from "@/features/post_list_navigator/view/view";
-import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/thumb/action_bar";
+import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb/action_bar";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";

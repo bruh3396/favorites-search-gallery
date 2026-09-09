@@ -1,10 +1,10 @@
-import * as PostResolver from "@/lib/post/resolver";
-import * as TagCategoryStore from "@/lib/tag_categories/store";
+import * as PostResolver from "@/lib/domain/post/resolver";
+import * as TagCategoryStore from "@/lib/domain/tag_categories/store";
 import { ParsedPost, Post } from "@/types/api";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { TermUpdate } from "@/lib/search/engine/search_engine";
+import { TermUpdate } from "@/lib/search/search_engine";
 import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoritesMetadataEnricher {

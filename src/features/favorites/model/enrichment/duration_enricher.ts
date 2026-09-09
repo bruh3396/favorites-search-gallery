@@ -1,4 +1,4 @@
-import * as PostStore from "@/lib/post/store";
+import * as PostStore from "@/lib/domain/post/store";
 import { Favorite } from "@/types/favorite";
 import { fetchVideoDurationFromFavorite } from "@/lib/media/duration";
 

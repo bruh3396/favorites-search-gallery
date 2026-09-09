@@ -1,5 +1,5 @@
 import * as GalleryAutoplay from "@/features/gallery/features/autoplay/autoplay";
-import { EnhancedKeyboardEvent } from "@/lib/input";
+import { EnhancedKeyboardEvent } from "@/lib/events/input";
 import { Events } from "@/app/channels/events";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";

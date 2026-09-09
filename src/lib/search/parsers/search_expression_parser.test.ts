@@ -1,12 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { parseSearchExpression, tryParseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
-import { BitmapIndex } from "@/lib/search/engine/bitmap/indexes/index";
-import { DensePosting } from "@/lib/search/engine/bitmap/bits/posting";
-import { BitmapEvaluator } from "@/lib/search/engine/bitmap/query/bitmap_evaluator";
-import { MetricBitmapIndex } from "@/lib/search/engine/bitmap/indexes/metric_index";
-import { PostingResolver } from "@/lib/search/engine/bitmap/query/posting_resolver";
+import { BitmapEvaluator } from "@/lib/search/bitmap/logic/bitmap_evaluator";
+import { BitmapIndex } from "@/lib/search/bitmap/indexes/bitmap_index";
+import { MetricBitmapIndex } from "@/lib/search/bitmap/indexes/metric_index";
+import { PostingResolver } from "@/lib/search/bitmap/logic/posting_resolver";
 import { Searchable } from "@/types/search";
-import { WildcardPostingResolver } from "@/lib/search/engine/bitmap/wildcard/posting_resolver";
+import { WildcardPostingResolver } from "@/lib/search/bitmap/resolution/wildcard_posting_resolver";
 
 interface Item extends Searchable { id: string }
 
@@ -21,14 +20,10 @@ function evaluatorFor(items: Item[]): BitmapEvaluator<Item> {
   const metricIndex = new MetricBitmapIndex<Item>(doc => doc.id.length);
 
   metricIndex.build(bitmapIndex.width, bitmapIndex.positionalDocs());
-  const wildcardResolver = new WildcardPostingResolver(
-    postings => new DensePosting(bitmapIndex.unionOfPostings(postings)),
-    term => bitmapIndex.postingForTerm(term)
-  );
+  const wildcardResolver = new WildcardPostingResolver(bitmapIndex);
 
   wildcardResolver.index(bitmapIndex.indexedTerms());
   const resolver = new PostingResolver(bitmapIndex, metricIndex, wildcardResolver);
-
   return new BitmapEvaluator(bitmapIndex, resolver);
 }
 

@@ -1,7 +1,7 @@
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { fetchFullImageBitmapFromThumb } from "@/lib/media/bitmap";
-import { getImageFromThumb } from "@/lib/thumb/query";
+import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { isImageLoaded } from "@/utils/browser/image";
 
 const fetchQueue = new ThrottleQueue(10);

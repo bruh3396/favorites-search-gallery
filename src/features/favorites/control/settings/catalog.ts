@@ -1,4 +1,4 @@
-import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar";
+import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";

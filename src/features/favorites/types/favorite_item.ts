@@ -1,13 +1,13 @@
-import { toTagSet } from "@/utils/pure/tag";
 import { Favorite } from "@/types/favorite";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { MediaExtension } from "@/types/media";
 import { Metric } from "@/types/search";
 import { Post } from "@/types/api";
-import { getImageFromThumb } from "@/lib/thumb/query";
-import { getTagsFromThumb } from "@/lib/thumb/tag";
-import { parseIdFromThumb } from "@/lib/thumb/post_id";
+import { getImageFromThumb } from "@/lib/ui/thumb/query";
+import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
+import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeExtraWhitespace } from "@/utils/pure/string";
+import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoriteItem implements Favorite {
   public readonly id: string;

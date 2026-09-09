@@ -1,4 +1,4 @@
-import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/thumb/action_bar";
+import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { GALLERY_ENABLED, PERFORMANCE_PROFILE, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";

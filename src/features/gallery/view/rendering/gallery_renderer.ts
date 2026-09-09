@@ -6,7 +6,7 @@ import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/re
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
 import { forceReflow } from "@/utils/browser/element";
-import { toMediaItem } from "@/lib/thumb/media_item";
+import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 const renderers: GalleryRenderer[] = [GalleryImageRenderer, GalleryVideoRenderer, GalleryGifRenderer];
 

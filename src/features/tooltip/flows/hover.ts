@@ -1,6 +1,6 @@
 import * as TooltipModel from "@/features/tooltip/model/model";
 import * as TooltipView from "@/features/tooltip/view/view";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { galleryIdle } from "@/app/channels/feature_bridge";
 
 export function handleMouseOver(event: EnhancedMouseEvent): void {

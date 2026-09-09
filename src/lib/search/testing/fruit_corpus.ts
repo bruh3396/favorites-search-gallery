@@ -1,4 +1,4 @@
-import { InvertedIndex } from "@/lib/search/engine/set/indexes/inverted";
+import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
 import { Searchable } from "@/types/search";
 import { createSearchable } from "@/lib/search/testing/searchable";
 

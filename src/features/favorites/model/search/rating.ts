@@ -1,5 +1,5 @@
 import { DiscreteRating, Rating } from "@/types/search";
-import { ALL_RATINGS_VALUE } from "@/lib/rule34_constants";
+import { ALL_RATINGS_VALUE } from "@/lib/constants";
 import { Favorite } from "@/types/favorite";
 
 const RATINGS_BY_INITIAL: Record<string, Rating> = {

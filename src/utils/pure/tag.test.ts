@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { negateTags, toSortedTagArray, toSortedTagSet, toTagSet, toSortedTagString, toTagString } from "@/utils/pure/tag";
+import { negateTags, toSortedTagArray, toSortedTagSet, toSortedTagString, toTagSet, toTagString } from "@/utils/pure/tag";
 
 describe("toTagSet", () => {
   test("splits a space-joined string, empty yields empty set", () => {

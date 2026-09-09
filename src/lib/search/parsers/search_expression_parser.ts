@@ -1,4 +1,4 @@
-import { SearchExpression } from "@/lib/search/engine/bitmap/query/expression";
+import { SearchExpression } from "@/lib/search/bitmap/logic/search_expression";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 

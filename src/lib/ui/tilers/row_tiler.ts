@@ -2,9 +2,9 @@ import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 import { ThumbConfig } from "@/config/thumb_config";
-import { getItemsInContainer } from "@/lib/thumb/query";
+import { getItemsInContainer } from "@/lib/ui/thumb/query";
 import { rescale } from "@/utils/pure/number";
-import { waitForThumbsToLoadInContainer } from "@/lib/thumb/loading";
+import { waitForThumbsToLoadInContainer } from "@/lib/ui/thumb/loading";
 
 export class RowTiler extends AbstractTiler {
   public layout: Layout = "row";

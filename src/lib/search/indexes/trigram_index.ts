@@ -1,4 +1,4 @@
-import { KeyCodec } from "@/lib/collection/key_codec";
+import { KeyCodec } from "@/lib/collections/key_codec";
 import { identity } from "@/utils/pure/function";
 import { intersectSortedNumbers } from "@/utils/pure/array";
 import { trigramsOf } from "@/utils/pure/string";

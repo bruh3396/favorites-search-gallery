@@ -1,9 +1,9 @@
 import { Favorite } from "@/types/favorite";
 import { FavoritesDurationEnricher } from "@/features/favorites/model/enrichment/duration_enricher";
 import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";
-import { TermUpdate } from "@/lib/search/engine/search_engine";
+import { TermUpdate } from "@/lib/search/search_engine";
 import { isVideo } from "@/lib/media/type";
-import { postIsStale } from "@/lib/post/status";
+import { postIsStale } from "@/lib/domain/post/status";
 
 export class FavoritesEnricher {
   private readonly metadataEnricher: FavoritesMetadataEnricher;

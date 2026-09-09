@@ -6,7 +6,7 @@ import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
 import { Content } from "@/app/layout/shell";
 import { ContentDisplayOptions } from "@/types/ui";
 import { DomEvents } from "@/app/dom/events";
-import { EnhancedWheelEvent } from "@/lib/input";
+import { EnhancedWheelEvent } from "@/lib/events/input";
 import { GridTiler } from "@/lib/ui/tilers/grid_tiler";
 import { Layout } from "@/types/app";
 import { NativeTiler } from "@/lib/ui/tilers/native_tiler";

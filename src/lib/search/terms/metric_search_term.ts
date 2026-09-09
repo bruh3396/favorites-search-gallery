@@ -1,6 +1,6 @@
 import { MetricComparator, MetricSearchable } from "@/types/search";
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
-import { MetricSearchComparison } from "@/lib/search/parsers/metric_search_comparison";
+import { MetricComparison } from "@/lib/search/parsers/metric_comparison";
 
 type Comparator = (a: number, b: number) => boolean;
 
@@ -11,13 +11,13 @@ const comparators: Record<MetricComparator, Comparator> = {
 };
 
 export class MetricSearchTerm extends AbstractSearchTerm {
-  public readonly comparison: MetricSearchComparison;
+  public readonly comparison: MetricComparison;
   protected override readonly baseCost: number = 0;
   private compare: Comparator;
   private rightValue: (item: MetricSearchable) => number;
   private leftValue: (item: MetricSearchable) => number;
 
-  constructor(value: string, isNegated: boolean, comparison: MetricSearchComparison) {
+  constructor(value: string, isNegated: boolean, comparison: MetricComparison) {
     super(value, isNegated);
     this.compare = comparators[comparison.operator];
     this.leftValue = (item): number => item.getMetric(comparison.metric);

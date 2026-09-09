@@ -632,8 +632,8 @@ export default defineConfig([
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",
       "src/playground/search_performance/prefix_index.ts",
-      "src/lib/thumb/action_bar.ts",
-      "src/lib/search/engine/bitmap/**",
+      "src/lib/ui/thumb/action_bar.ts",
+      "src/lib/search/bitmap/**",
       "src/app/context/preferences.ts",
       "src/features/favorites/features/downloader/zip_writer.ts"
     ],

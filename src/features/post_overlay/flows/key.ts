@@ -1,7 +1,7 @@
 import * as PostOverlayFlows from "@/features/post_overlay/flows/flows";
 import * as PostOverlayModel from "@/features/post_overlay/model/model";
 import * as PostOverlayView from "@/features/post_overlay/view/view";
-import { EnhancedKeyboardEvent } from "@/lib/input";
+import { EnhancedKeyboardEvent } from "@/lib/events/input";
 import { Preferences } from "@/app/context/preferences";
 
 export function handleKeyDown(event: EnhancedKeyboardEvent): void {

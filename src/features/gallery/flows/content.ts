@@ -7,6 +7,7 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
+import { queueMacroTask } from "@/lib/async/scheduling";
 
 export function refresh(): void {
   reIndex();
@@ -14,7 +15,7 @@ export function refresh(): void {
 }
 
 export function downscaleThumbsOutsideResults(searchResults: Favorite[]): void {
-  GalleryView.downscaleAll(new Set(searchResults.map(favorite => favorite.id)));
+  queueMacroTask(() => GalleryView.downscaleAll(new Set(searchResults.map(favorite => favorite.id))));
 }
 
 function reIndex(): void {

@@ -2,7 +2,7 @@ import * as GalleryFlows from "@/features/gallery/flows/flows";
 import * as GalleryModel from "@/features/gallery/model/model";
 import * as GalleryView from "@/features/gallery/view/view";
 import { DomEvents } from "@/app/dom/events";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { Preferences } from "@/app/context/preferences";
 import { overGalleryMenu } from "@/features/gallery/dom_tweaks/menu";
 

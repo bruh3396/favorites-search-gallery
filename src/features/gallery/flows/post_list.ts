@@ -1,7 +1,7 @@
 import * as GalleryFlows from "@/features/gallery/flows/flows";
 import * as GalleryView from "@/features/gallery/view/view";
 import { GalleryConfig } from "@/config/gallery_config";
-import { POSTS_PER_POST_LIST_PAGE } from "@/lib/rule34_constants";
+import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
 export function toggleUpscaling(value: boolean): void {

@@ -1,10 +1,10 @@
 import * as FavoritesView from "@/features/favorites/view/view";
 import { openMedia, openPost } from "@/lib/remote/actions";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { Events } from "@/app/channels/events";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { didSwipe } from "@/app/dom/swipe_events";
-import { handleActionBarClick } from "@/lib/thumb/action_bar";
+import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
 
 export function triggerPostAction(event: EnhancedMouseEvent): void {
   if (didSwipe()) {

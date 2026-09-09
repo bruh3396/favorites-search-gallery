@@ -1,5 +1,5 @@
-import { EnhancedMouseEvent } from "@/lib/input";
-import { getThumbAtPoint } from "@/lib/thumb/query";
+import { EnhancedMouseEvent } from "@/lib/events/input";
+import { getThumbAtPoint } from "@/lib/ui/thumb/query";
 
 let lastCursorX = 0;
 let lastCursorY = 0;

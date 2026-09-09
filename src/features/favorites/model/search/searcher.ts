@@ -1,11 +1,11 @@
 import * as FavoritesRating from "@/features/favorites/model/search/rating";
 import { Rating, SearchableMetric, SortKey } from "@/types/search";
-import { SearchEngine, TermUpdate } from "@/lib/search/engine/search_engine";
-import { BitmapSearchEngine } from "@/lib/search/engine/bitmap/bitmap_search_engine";
+import { SearchEngine, TermUpdate } from "@/lib/search/search_engine";
+import { BitmapSearchEngine } from "@/lib/search/bitmap/bitmap_search_engine";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { ObservableList } from "@/lib/collection/observable_list";
-import { SetSearchEngine } from "@/lib/search/engine/set/set_search_engine";
+import { ObservableList } from "@/lib/collections/observable_list";
+import { SetSearchEngine } from "@/lib/search/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
 import { shuffleInPlace } from "@/utils/pure/array";

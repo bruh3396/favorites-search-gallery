@@ -1,6 +1,6 @@
 import * as GalleryFlows from "@/features/gallery/flows/flows";
 import * as GalleryView from "@/features/gallery/view/view";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { debounceTrailing } from "@/lib/async/rate_limiting";
 

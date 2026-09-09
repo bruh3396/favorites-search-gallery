@@ -1,5 +1,5 @@
 import * as GalleryFlows from "@/features/gallery/flows/flows";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 import { didHold } from "@/app/dom/touch_hold_events";

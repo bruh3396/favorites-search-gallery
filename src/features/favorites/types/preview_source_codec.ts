@@ -1,4 +1,4 @@
-import { THUMB_ORIGIN } from "@/lib/rule34_constants";
+import { THUMB_ORIGIN } from "@/lib/constants";
 
 const previewSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
 

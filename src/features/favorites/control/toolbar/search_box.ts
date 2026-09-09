@@ -1,5 +1,5 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete, markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
-import { EnhancedMouseEvent } from "@/lib/input";
+import { EnhancedMouseEvent } from "@/lib/events/input";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";

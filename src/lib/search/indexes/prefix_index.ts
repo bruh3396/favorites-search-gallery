@@ -1,4 +1,4 @@
-import { SortedArray } from "@/lib/collection/sorted_array";
+import { SortedArray } from "@/lib/collections/sorted_array";
 import { compareStrings } from "@/utils/pure/string";
 import { findFirstIndexWhere } from "@/utils/pure/array";
 import { identity } from "@/utils/pure/function";
