@@ -20,9 +20,12 @@ function contextFor(items: Item[]): ExpressionContext<Item> {
   const metricIndex = new MetricBitmapIndex<Item>(doc => doc.id.length);
 
   metricIndex.build(bitmapIndex.width, bitmapIndex.positionalDocs());
-  const wildcardResolver = new WildcardPostingResolver(postings => new DensePosting(bitmapIndex.unionOfPostings(postings)));
+  const wildcardResolver = new WildcardPostingResolver(
+    postings => new DensePosting(bitmapIndex.unionOfPostings(postings)),
+    term => bitmapIndex.postingForTerm(term)
+  );
 
-  wildcardResolver.index(bitmapIndex.postingEntries());
+  wildcardResolver.index(bitmapIndex.indexedTerms());
   return { bitmapIndex, metricIndex, wildcardResolver };
 }
 

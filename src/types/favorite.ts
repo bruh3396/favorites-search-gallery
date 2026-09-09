@@ -7,9 +7,6 @@ export interface Favorite extends MediaItem {
   post: Post;
   enrich: (post: Post) => void;
   setDuration: (duration: number) => void;
-  addTags: (newTags: string) => string;
-  removeAddedTags: (tagsToRemove: string) => string;
-  resetAddedTags: () => void;
   getMetric: (metric: Metric) => number;
 }
 

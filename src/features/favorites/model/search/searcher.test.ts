@@ -125,34 +125,27 @@ describe("FavoritesSearcher", () => {
     });
   });
 
-  describe("reIndex", () => {
+  describe("add", () => {
     test("makes newly indexed favorites matchable", () => {
       const favorites = withIndexed([favorite("1", "s", "cat")]);
       const added = favorite("2", "s", "cat");
 
-      searcher.reIndex([added]);
+      searcher.add([added]);
       expect(ids(searcher.search([...favorites, added], "cat")).sort()).toEqual(["1", "2"]);
-    });
-
-    test("reflects corrected tags when re-indexing the same favorite", () => {
-      const target = favorite("1", "s", "ct");
-      const favorites = withIndexed([target]);
-
-      searcher.deIndex([target]);
-      target.tags.clear();
-      target.tags.add("cat");
-      searcher.reIndex([target]);
-
-      expect(ids(searcher.search(favorites, "ct"))).toEqual([]);
-      expect(ids(searcher.search(favorites, "cat"))).toEqual(["1"]);
     });
   });
 
-  describe("deIndex", () => {
-    test("stops de-indexed favorites from matching", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "cat")]);
+  describe("update", () => {
+    test("reflects corrected tags for a favorite", () => {
+      const target = favorite("1", "s", "ct");
+      const favorites = withIndexed([target]);
+      const oldTerms = new Set(target.tags);
 
-      searcher.deIndex([favorites[1]]);
+      target.tags.clear();
+      target.tags.add("cat");
+      searcher.update([{ doc: target, oldTerms, newTerms: target.tags }]);
+
+      expect(ids(searcher.search(favorites, "ct"))).toEqual([]);
       expect(ids(searcher.search(favorites, "cat"))).toEqual(["1"]);
     });
   });

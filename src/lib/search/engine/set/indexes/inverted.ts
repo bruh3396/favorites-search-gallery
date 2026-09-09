@@ -1,4 +1,5 @@
 import { SortedArray } from "@/lib/collection/sorted_array";
+import { TermDelta, TermUpdate } from "@/lib/search/engine/search_engine";
 
 export class InvertedIndex<Doc> {
   private readonly terms: SortedArray<string> = new SortedArray<string>();
@@ -45,6 +46,43 @@ export class InvertedIndex<Doc> {
       docs.add(doc);
     }
     return newTerms;
+  }
+
+  public updateDocs(updates: readonly TermUpdate<Doc>[]): TermDelta {
+    const added: string[] = [];
+    const removed: string[] = [];
+
+    for (const { doc, oldTerms, newTerms } of updates) {
+      this.docs.add(doc);
+
+      for (const term of oldTerms.difference(newTerms)) {
+        const docs = this.docsByTerm.get(term);
+
+        if (docs === undefined) {
+          continue;
+        }
+        docs.delete(doc);
+
+        if (docs.size === 0) {
+          this.docsByTerm.delete(term);
+          this.terms.remove(term);
+          removed.push(term);
+        }
+      }
+
+      for (const term of newTerms.difference(oldTerms)) {
+        let docs = this.docsByTerm.get(term);
+
+        if (docs === undefined) {
+          docs = new Set<Doc>();
+          this.docsByTerm.set(term, docs);
+          this.addTerm(term);
+          added.push(term);
+        }
+        docs.add(doc);
+      }
+    }
+    return { added, removed };
   }
 
   public removeDoc(doc: Doc): string[] {

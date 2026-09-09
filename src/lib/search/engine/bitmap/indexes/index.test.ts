@@ -76,13 +76,6 @@ describe("BitmapIndex", () => {
     expect(bitmapIndex.docsFrom(bitmapIndex.emptyBitSet())).toEqual([]);
   });
 
-  test("maps a position back to its doc", () => {
-    const bitmapIndex = index(corpus);
-
-    expect(bitmapIndex.docAt(0)).toBe(apple);
-    expect(bitmapIndex.docAt(2)).toBe(lemon);
-  });
-
   test("handles a corpus larger than one word (word-boundary positions)", () => {
     const many = Array.from({ length: 100 }, (_, i) => doc(`d${i}`, i % 2 === 0 ? "even" : "odd", "all"));
     const bitmapIndex = index(many);
@@ -141,19 +134,6 @@ describe("BitmapIndex", () => {
       const bitmapIndex = index(corpus);
 
       expect(bitmapIndex.docsFrom(bitmapIndex.unionOfPostings([]))).toEqual([]);
-    });
-  });
-
-  describe("postingEntries", () => {
-    test("pairs every indexed term with its posting", () => {
-      const bitmapIndex = index(corpus);
-      const entries = bitmapIndex.postingEntries();
-
-      expect(entries.map(entry => entry.term).sort()).toEqual(["fruit", "red", "sour", "sweet", "yellow"]);
-      const red = entries.find(entry => entry.term === "red");
-
-      expect(red).toBeDefined();
-      expect(bitmapIndex.docsFrom((red as NonNullable<typeof red>).posting.toBitSet(bitmapIndex.size))).toEqual([apple, cherry]);
     });
   });
 

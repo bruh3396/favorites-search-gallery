@@ -15,6 +15,9 @@ export const FavoritesConfig = {
   reloadFetchDelay: 100,
   skipFirstPageFetch: true,
 
+  tagUpdateCoalesceSize: 50,
+  tagUpdateCoalesceTimeout: 1500,
+
   preloadThumbs: true,
   bottomNavigationButtonsEnabled: true,
   drawerSidebarLabelsEnabled: false

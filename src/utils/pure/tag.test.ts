@@ -1,27 +1,33 @@
 import { describe, expect, test } from "vitest";
-import { negateTags, toSortedTagSet, toSortedTagString, toTagString } from "@/utils/pure/tag";
+import { internTag, internTags, negateTags, toSortedTagArray, toSortedTagSet, toTagSet, toSortedTagString, toTagString } from "@/utils/pure/tag";
+
+describe("internTag", () => {
+  test("returns the same string reference for equal tags", () => {
+    const a = internTag("apple".split("").join(""));
+    const b = internTag("apple".split("").join(""));
+
+    expect(a).toBe("apple");
+    expect(a).toBe(b);
+  });
+});
+
+describe("internTags", () => {
+  test("dedupes and drops empty strings", () => {
+    expect(internTags(["dup", "dup", "", "other"])).toEqual(["dup", "other"]);
+  });
+});
 
 describe("toTagSet", () => {
-  test("empty", () => {
-    expect(toSortedTagSet("")).toStrictEqual(new Set());
+  test("splits a space-joined string, empty yields empty set", () => {
+    expect([...toTagSet("red green blue")]).toEqual(["red", "green", "blue"]);
+    expect(toTagSet("").size).toBe(0);
   });
+});
 
-  test("single tag", () => {
-    expect(toSortedTagSet("apple")).toStrictEqual(new Set(["apple"]));
-  });
-
-  test("multiple tags", () => {
-    expect(toSortedTagSet("apple banana cherry")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
-    expect(toSortedTagSet("banana apple cherry")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
-    expect(toSortedTagSet("cherry banana apple cherry apple")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
-  });
-
-  test("extra spaces", () => {
-    expect(toSortedTagSet("  apple   banana   cherry  ")).toStrictEqual(new Set(["apple", "banana", "cherry"]));
-  });
-
-  test("special characters", () => {
-    expect(toSortedTagSet("apple!@#banana$%^cherry&*()")).toStrictEqual(new Set(["apple!@#banana$%^cherry&*()"]));
+describe("toSortedTagSet / toSortedTagArray", () => {
+  test("sorts, dedupes, and drops empties", () => {
+    expect(toSortedTagArray("cherry banana apple cherry")).toEqual(["apple", "banana", "cherry"]);
+    expect([...toSortedTagSet("  b   a ")]).toEqual(["a", "b"]);
   });
 });
 

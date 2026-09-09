@@ -1,13 +1,14 @@
+import { KeyCodec } from "@/lib/collection/key_codec";
 import { identity } from "@/utils/pure/function";
-import { intersectByKey } from "@/utils/pure/map";
+import { intersectSortedNumbers } from "@/utils/pure/array";
 import { trigramsOf } from "@/utils/pure/string";
 
 export class TrigramIndex<T = string> {
-  private readonly itemsByTrigram: Map<string, Map<string, T>> = new Map<string, Map<string, T>>();
-  private readonly keyOf: (item: T) => string;
+  private readonly idsByTrigram: Map<string, number[]> = new Map<string, number[]>();
+  private readonly codec: KeyCodec<T>;
 
   constructor(items: T[], keyOf: (item: T) => string = identity as (item: T) => string) {
-    this.keyOf = keyOf;
+    this.codec = new KeyCodec<T>(keyOf);
 
     for (const item of items) {
       this.add(item);
@@ -15,75 +16,89 @@ export class TrigramIndex<T = string> {
   }
 
   public matching(fragment: string, corpus: T[]): T[] {
-    return fragment.length < 3 ? corpus : [...this.candidates(fragment).values()];
+    return fragment.length < 3 ? corpus : this.codec.decode(this.candidates(fragment));
   }
 
   public matchingAll(fragments: string[], corpus: T[]): T[] {
     const narrowing = fragments.filter(fragment => fragment.length >= 3);
-    return narrowing.length === 0 ? corpus : [...this.candidatesOfAll(narrowing).values()];
+    return narrowing.length === 0 ? corpus : this.codec.decode(this.candidatesOfAll(narrowing));
   }
 
   public add(item: T): void {
-    const key = this.keyOf(item);
+    const key = this.codec.keyOf(item);
+
+    if (this.codec.hasKey(key)) {
+      return;
+    }
+    const id = this.codec.encode(item);
 
     for (const trigram of trigramsOf(key)) {
-      let items = this.itemsByTrigram.get(trigram);
+      const memberIds = this.idsByTrigram.get(trigram);
 
-      if (items === undefined) {
-        items = new Map<string, T>();
-        this.itemsByTrigram.set(trigram, items);
+      if (memberIds === undefined) {
+        this.idsByTrigram.set(trigram, [id]);
+      } else if (memberIds[memberIds.length - 1] !== id) {
+        memberIds.push(id);
       }
-      items.set(key, item);
     }
   }
 
   public remove(item: T): void {
-    const key = this.keyOf(item);
+    const key = this.codec.keyOf(item);
+    const id = this.codec.forget(key);
+
+    if (id === undefined) {
+      return;
+    }
 
     for (const trigram of trigramsOf(key)) {
-      const items = this.itemsByTrigram.get(trigram);
+      const ids = this.idsByTrigram.get(trigram);
 
-      if (items === undefined) {
+      if (ids === undefined) {
         continue;
       }
-      items.delete(key);
+      const at = ids.indexOf(id);
 
-      if (items.size === 0) {
-        this.itemsByTrigram.delete(trigram);
+      if (at !== -1) {
+        ids.splice(at, 1);
+      }
+
+      if (ids.length === 0) {
+        this.idsByTrigram.delete(trigram);
       }
     }
   }
 
-  private candidates(fragment: string): Map<string, T> {
-    let candidates: Map<string, T> | null = null;
+  private candidates(fragment: string): number[] {
+    let candidates: number[] | null = null;
 
     for (const trigram of trigramsOf(fragment)) {
-      const items = this.itemsByTrigram.get(trigram);
+      const memberIds = this.idsByTrigram.get(trigram);
 
-      if (items === undefined) {
-        return new Map<string, T>();
+      if (memberIds === undefined) {
+        return [];
       }
-      candidates = candidates === null ? items : intersectByKey(items, candidates);
+      candidates = candidates === null ? memberIds : intersectSortedNumbers(candidates, memberIds);
 
-      if (candidates.size === 0) {
+      if (candidates.length === 0) {
         return candidates;
       }
     }
-    return candidates ?? new Map<string, T>();
+    return candidates ?? [];
   }
 
-  private candidatesOfAll(fragments: string[]): Map<string, T> {
-    let candidates: Map<string, T> | null = null;
+  private candidatesOfAll(fragments: string[]): number[] {
+    let candidates: number[] | null = null;
 
     for (const fragment of fragments) {
       const forFragment = this.candidates(fragment);
 
-      candidates = candidates === null ? forFragment : intersectByKey(forFragment, candidates);
+      candidates = candidates === null ? forFragment : intersectSortedNumbers(candidates, forFragment);
 
-      if (candidates.size === 0) {
+      if (candidates.length === 0) {
         return candidates;
       }
     }
-    return candidates ?? new Map<string, T>();
+    return candidates ?? [];
   }
 }

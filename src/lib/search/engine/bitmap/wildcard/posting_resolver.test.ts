@@ -33,12 +33,15 @@ function harness(docs: Doc[] = corpus): Harness {
 
   bitmapIndex.build(docs);
   const state = { unions: 0 };
-  const resolver = new WildcardPostingResolver(postings => {
-    state.unions += 1;
-    return new DensePosting(bitmapIndex.unionOfPostings(postings));
-  });
+  const resolver = new WildcardPostingResolver(
+    postings => {
+      state.unions += 1;
+      return new DensePosting(bitmapIndex.unionOfPostings(postings));
+    },
+    term => bitmapIndex.postingForTerm(term)
+  );
 
-  resolver.index(bitmapIndex.postingEntries());
+  resolver.index(bitmapIndex.indexedTerms());
   return {
     bitmapIndex,
     resolver,
@@ -107,7 +110,7 @@ describe("WildcardPostingResolver caching", () => {
     const h = harness();
 
     expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
-    h.resolver.index(h.bitmapIndex.postingEntries());
+    h.resolver.index(h.bitmapIndex.indexedTerms());
     expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
     expect(h.unions).toBe(2);
   });

@@ -37,8 +37,6 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
       assert("red -sweet", ["apple"]);
       assert("red apple", ["apple"]);
       assert("red banana", []);
-      assert("12345", []);
-      assert("-12345", allDocNames);
       assert("berry", ["blueberry", "strawberry"]);
       assert("antioxidants", ["apple", "cherry", "grape", "strawberry"]);
       assert("antioxidant", ["blueberry"]);

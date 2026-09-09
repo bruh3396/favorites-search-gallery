@@ -1,10 +1,10 @@
+import { SearchEngine, TermUpdate } from "@/lib/search/engine/search_engine";
 import { Searchable, SearchableMetric } from "@/types/search";
 import { DocResolver } from "@/lib/search/engine/set/query/doc_resolver";
 import { InvertedIndex } from "@/lib/search/engine/set/indexes/inverted";
 import { MetricIndex } from "@/lib/search/engine/set/indexes/metric";
 import { PositionIndex } from "@/lib/search/engine/set/indexes/position";
 import { RelativeMetricIndex } from "@/lib/search/engine/set/indexes/relative_metric";
-import { SearchEngine } from "@/lib/search/engine/search_engine";
 import { SetSearcher } from "@/lib/search/engine/set/query/searcher";
 import { WildcardMatcher } from "@/lib/search/indexes/wildcard_matcher";
 import { WildcardTermExpander } from "@/lib/search/engine/set/wildcard/term_expander";
@@ -40,16 +40,17 @@ export class SetSearchEngine<Doc extends Searchable> implements SearchEngine<Doc
     this.positionIndex.build(docs);
   }
 
-  public add(doc: Doc): void {
-    this.termIndex.addDoc(doc).forEach(term => this.wildcardMatcher.add(term));
-    this.metricIndex.add(doc);
-    this.relativeMetricIndex.add(doc);
-    this.positionIndex.add(doc);
+  public add(docs: Doc[]): void {
+    for (const doc of docs) {
+      this.termIndex.addDoc(doc).forEach(term => this.wildcardMatcher.add(term));
+      this.positionIndex.add(doc);
+    }
   }
 
-  public remove(doc: Doc): void {
-    this.termIndex.removeDoc(doc).forEach(term => this.wildcardMatcher.remove(term));
-    this.metricIndex.remove(doc);
-    this.relativeMetricIndex.remove(doc);
+  public update(updates: readonly TermUpdate<Doc>[]): void {
+    const { added, removed } = this.termIndex.updateDocs(updates);
+
+    added.forEach(term => this.wildcardMatcher.add(term));
+    removed.forEach(term => this.wildcardMatcher.remove(term));
   }
 }

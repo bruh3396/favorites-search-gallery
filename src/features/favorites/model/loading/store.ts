@@ -3,6 +3,7 @@ import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
+import { internTags } from "@/utils/pure/tag";
 
 export class FavoritesStore {
   private readonly database = new Database<Post>("FavoritesV2", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
@@ -24,7 +25,7 @@ export class FavoritesStore {
     const records = (await this.database.exists()) ? await this.database.readAll() : [];
 
     this.isDatabaseEmpty = records.length === 0;
-    return records;
+    return records.map(record => ({ ...record, tags: internTags(record.tags) }));
   }
 
   public exists(): Promise<boolean> {

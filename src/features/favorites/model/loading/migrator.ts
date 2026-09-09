@@ -8,7 +8,7 @@ import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
 import { resolveMediaType } from "@/lib/media/type";
-import { toTagSet } from "@/utils/pure/tag";
+import { internTags } from "@/utils/pure/tag";
 
 type SerializedFavorite = {
   id: string;
@@ -116,8 +116,8 @@ export class FavoritesMigrator {
 
 function migratePost(favorite: SerializedFavorite, imageExtension: ImageExtension | undefined): Post {
   const previewURL = decompressPreviewSource(favorite.src);
-  const tags = typeof favorite.tags === "string" ? favorite.tags : [...favorite.tags].join(" ");
-  const extension = imageExtension ?? resolveAnimatedExtension(tags);
+  const tagSet = new Set(typeof favorite.tags === "string" ? favorite.tags.split(" ") : favorite.tags);
+  const extension = imageExtension ?? resolveAnimatedExtension(tagSet);
   return {
     id: favorite.id,
     width: favorite.metadata.width,
@@ -125,7 +125,7 @@ function migratePost(favorite: SerializedFavorite, imageExtension: ImageExtensio
     score: favorite.metadata.score,
     rating: RATING_STRINGS[favorite.metadata.rating] ?? "explicit",
     change: favorite.metadata.change,
-    tags,
+    tags: internTags(tagSet),
     fileURL: extension === undefined ? "" : withExtension(thumbUrlToImageUrl(previewURL), extension),
     previewURL,
     duration: favorite.metadata.duration,
@@ -135,12 +135,12 @@ function migratePost(favorite: SerializedFavorite, imageExtension: ImageExtensio
   };
 }
 
-function resolveAnimatedExtension(tags: string): MediaExtension | undefined {
+function resolveAnimatedExtension(tags: Set<string>): MediaExtension | undefined {
   switch (resolveMediaType(tags)) {
     case "video":
       return "mp4";
     case "gif":
-      return toTagSet(tags).has("animated_png") ? "png" : "gif";
+      return tags.has("animated_png") ? "png" : "gif";
     default:
       return undefined;
   }

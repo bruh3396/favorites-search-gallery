@@ -58,6 +58,25 @@ export function shuffleInPlace<V>(array: V[]): V[] {
   return array;
 }
 
+export function intersectSortedNumbers(a: number[], b: number[]): number[] {
+  const result: number[] = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) {
+      result.push(a[i]);
+      i += 1;
+      j += 1;
+    } else if (a[i] < b[j]) {
+      i += 1;
+    } else {
+      j += 1;
+    }
+  }
+  return result;
+}
+
 export function chunk<V>(array: V[], chunkSize: number): V[][] {
   const result: V[][] = [];
 

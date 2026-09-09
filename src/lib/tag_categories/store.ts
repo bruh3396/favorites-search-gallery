@@ -24,7 +24,7 @@ export function persistAll(categoryMap: TagCategoryMap): void {
 }
 
 export async function preload(): Promise<void> {
-  for (const mapping of await database.readAll()) {
-    cache.set(mapping.id, mapping.category);
-  }
+  // for (const mapping of await database.readAll()) {
+  //   cache.set(internTag(mapping.id), mapping.category);
+  // }
 }

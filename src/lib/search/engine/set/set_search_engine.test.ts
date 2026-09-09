@@ -90,20 +90,27 @@ describe("SearchEngine mutation", () => {
     expect(search("orange", searchEngine, candidates)).toEqual([]);
     expect(search("trop*", searchEngine, candidates)).toEqual([]);
 
-    searchEngine.add(mango);
+    searchEngine.add([mango]);
 
     expect(search("orange", searchEngine, candidates)).toEqual(["mango"]);
     expect(search("trop*", searchEngine, candidates)).toEqual(["mango"]);
   });
 
-  test("remove drops a doc's unique terms from the wildcard resolver", () => {
-    const searchEngine = engine();
+  test("update drops a doc's now-unreferenced terms from the wildcard resolver", () => {
+    const plum = doc("plum", ["red", "tart", "fruit"], { score: 30 });
+    const candidates = [apple, banana, plum];
+    const searchEngine = engine(candidates);
 
-    expect(search("tar*", searchEngine)).toEqual(["cherry"]);
+    expect(search("tar*", searchEngine, candidates)).toEqual(["plum"]);
 
-    searchEngine.remove(cherry);
+    const oldTerms = new Set(plum.tags);
 
-    expect(search("tar*", searchEngine, [apple, banana])).toEqual([]);
+    plum.tags.clear();
+    ["red", "fruit"].forEach(tag => plum.tags.add(tag));
+    searchEngine.update([{ doc: plum, oldTerms, newTerms: plum.tags }]);
+
+    expect(search("tar*", searchEngine, candidates)).toEqual([]);
+    expect(search("red", searchEngine, candidates)).toEqual(["apple", "plum"]);
   });
 
   test("index rebuilds the corpus from a fresh set of docs", () => {

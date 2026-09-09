@@ -2,6 +2,10 @@ export function isOnlyDigits(text: string): boolean {
   return (/^\d+$/).test(text);
 }
 
+export function flatten(text: string): string {
+  return text.length === 0 ? text : ("\0" + text).slice(1);
+}
+
 export function compareStrings(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }

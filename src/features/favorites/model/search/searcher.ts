@@ -1,10 +1,10 @@
 import * as FavoritesRating from "@/features/favorites/model/search/rating";
 import { Rating, SearchableMetric, SortKey } from "@/types/search";
+import { SearchEngine, TermUpdate } from "@/lib/search/engine/search_engine";
 import { BitmapSearchEngine } from "@/lib/search/engine/bitmap/bitmap_search_engine";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
-import { SearchEngine } from "@/lib/search/engine/search_engine";
 import { SetSearchEngine } from "@/lib/search/engine/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
@@ -67,12 +67,12 @@ export class FavoritesSearcher {
     this.engine.index(favorites);
   }
 
-  public reIndex(favorites: Favorite[]): void {
-    favorites.forEach(f => this.engine.add(f));
+  public add(favorites: Favorite[]): void {
+    this.engine.add(favorites);
   }
 
-  public deIndex(favorites: Favorite[]): void {
-    favorites.forEach(f => this.engine.remove(f));
+  public update(updates: readonly TermUpdate<Favorite>[]): void {
+    this.engine.update(updates);
   }
 
   public getCurrentSearchQuery(): string {

@@ -76,56 +76,82 @@ function idsOf(items: TaggedItem[]): string[] {
   return items.map(item => item.id).sort();
 }
 
+function correct(item: TaggedItem, ...newTags: string[]): { doc: TaggedItem; oldTerms: Set<string>; newTerms: Set<string> } {
+  const oldTerms = new Set(item.tags);
+
+  item.tags.clear();
+  newTags.forEach(tag => item.tags.add(tag));
+  return { doc: item, oldTerms, newTerms: item.tags };
+}
+
 describe("BitmapSearchEngine incremental mutation", () => {
-  test("add makes a new doc matchable, including by wildcard and empty query", () => {
+  test("add makes new docs matchable, including by wildcard and empty query", () => {
     const engine = taggedEngine([taggedItem("1", "cat")]);
 
-    engine.add(taggedItem("2", "cot"));
+    engine.add([taggedItem("2", "cot")]);
     expect(idsOf(engine.search("cot"))).toEqual(["2"]);
     expect(idsOf(engine.search("c*"))).toEqual(["1", "2"]);
     expect(engine.search("").length).toBe(2);
   });
 
-  test("remove stops a doc from matching and drops its unique terms", () => {
-    const a = taggedItem("1", "cat");
-    const b = taggedItem("2", "cat", "unique");
-    const engine = taggedEngine([a, b]);
-
-    engine.remove(b);
-    expect(idsOf(engine.search("cat"))).toEqual(["1"]);
-    expect(engine.search("unique")).toEqual([]);
-    expect(engine.search("uni*")).toEqual([]);
-  });
-
-  test("reflects corrected tags after remove-then-add of the same doc", () => {
+  test("update reflects corrected tags for a doc", () => {
     const target = taggedItem("1", "ct");
     const engine = taggedEngine([target]);
 
-    engine.remove(target);
-    target.tags.clear();
-    target.tags.add("cat");
-    engine.add(target);
+    engine.update([correct(target, "cat")]);
 
     expect(engine.search("ct")).toEqual([]);
     expect(idsOf(engine.search("cat"))).toEqual(["1"]);
   });
 
-  test("reuses freed positions without leaking phantom matches", () => {
-    const items = Array.from({ length: 10 }, (_, i) => taggedItem(String(i), "tag", `u${i}`));
-    const engine = taggedEngine(items);
+  test("update drops a term no doc references and adds a new one, keeping wildcards correct", () => {
+    const a = taggedItem("1", "cat", "unique");
+    const b = taggedItem("2", "cat");
+    const engine = taggedEngine([a, b]);
 
-    items.slice(0, 5).forEach(item => engine.remove(item));
-    engine.add(taggedItem("new", "tag"));
+    engine.update([correct(a, "cat", "fresh")]);
 
-    expect(idsOf(engine.search("tag"))).toEqual(["5", "6", "7", "8", "9", "new"]);
-    expect(engine.search("").length).toBe(6);
+    expect(engine.search("unique")).toEqual([]);
+    expect(engine.search("uni*")).toEqual([]);
+    expect(idsOf(engine.search("fresh"))).toEqual(["1"]);
+    expect(idsOf(engine.search("fre*"))).toEqual(["1"]);
+    expect(idsOf(engine.search("cat"))).toEqual(["1", "2"]);
+  });
+
+  test("a wildcard over terms untouched by an update still resolves correctly", () => {
+    const banana = taggedItem("3", "banana");
+    const engine = taggedEngine([
+      taggedItem("1", "apple"),
+      taggedItem("2", "apricot"),
+      banana
+    ]);
+
+    engine.update([correct(banana, "cherry")]);
+
+    expect(idsOf(engine.search("ap*"))).toEqual(["1", "2"]);
+    expect(idsOf(engine.search("apple"))).toEqual(["1"]);
+    expect(idsOf(engine.search("apricot"))).toEqual(["2"]);
+    expect(idsOf(engine.search("cherry"))).toEqual(["3"]);
+  });
+
+  test("a batch of docs sharing a term does not corrupt wildcard resolution", () => {
+    const engine = taggedEngine([]);
+    const shared = Array.from({ length: 20 }, (_, i) => taggedItem(String(i), "shared"));
+
+    engine.add(shared);
+    expect(idsOf(engine.search("shar*")).length).toBe(20);
+
+    engine.update(shared.map(item => correct(item, "moved")));
+    expect(engine.search("shar*")).toEqual([]);
+    expect(engine.search("shared")).toEqual([]);
+    expect(idsOf(engine.search("moved")).length).toBe(20);
   });
 
   test("grows capacity when adds exceed the initial width", () => {
     const engine = taggedEngine([taggedItem("seed", "tag")]);
 
     for (let i = 0; i < 200; i += 1) {
-      engine.add(taggedItem(`x${i}`, "tag"));
+      engine.add([taggedItem(`x${i}`, "tag")]);
     }
     expect(engine.search("tag").length).toBe(201);
     expect(engine.search("").length).toBe(201);
@@ -145,20 +171,14 @@ describe("BitmapSearchEngine incremental mutation", () => {
     expect(idsOf(engine.search("", [items[0], items[2]]))).toEqual(["1", "3"]);
   });
 
-  test("stays correct when a term crosses the sparse/dense threshold via add and remove", () => {
+  test("stays correct when a term crosses the sparse/dense threshold via add", () => {
     const engine = taggedEngine([]);
     const items = Array.from({ length: 5 }, (_, i) => taggedItem(String(i), "shared"));
 
     items.forEach((item, i) => {
-      engine.add(item);
+      engine.add([item]);
       expect(idsOf(engine.search("shared"))).toEqual(items.slice(0, i + 1).map(it => it.id).sort());
     });
-
-    for (let i = items.length - 1; i >= 0; i -= 1) {
-      engine.remove(items[i]);
-      expect(idsOf(engine.search("shared"))).toEqual(items.slice(0, i).map(it => it.id).sort());
-    }
-    expect(engine.search("shared")).toEqual([]);
   });
 });
 
@@ -177,6 +197,48 @@ describe("BitmapSearchEngine matches the shared metric cases", () => {
       group.run(assertMatches);
     });
   }
+});
+
+describe("BitmapSearchEngine resolves bare numeric queries as favorite ids", () => {
+  // A favorite's id is no longer indexed as a tag; a bare numeric token is resolved through the
+  // id metric instead. These docs carry distinct ids so an id query selects exactly one.
+  const docs: MetricDoc[] = [
+    { name: "a", tags: new Set(["cat"]), metrics: { id: 100 }, getMetric(m): number {
+ return this.metrics[m] ?? 0;
+} },
+    { name: "b", tags: new Set(["cat"]), metrics: { id: 200 }, getMetric(m): number {
+ return this.metrics[m] ?? 0;
+} },
+    { name: "c", tags: new Set(["dog"]), metrics: { id: 300 }, getMetric(m): number {
+ return this.metrics[m] ?? 0;
+} }
+  ];
+  const engine = new BitmapSearchEngine<MetricDoc>(doc => doc.tags, (doc, metric) => doc.getMetric(metric), docs);
+
+  function namesOf(query: string): string[] {
+    return engine.search(query).map(doc => doc.name).sort();
+  }
+
+  test("a bare numeric token matches the favorite with that id", () => {
+    expect(namesOf("200")).toEqual(["b"]);
+  });
+
+  test("a negated bare numeric token excludes that favorite", () => {
+    expect(namesOf("-200")).toEqual(["a", "c"]);
+  });
+
+  test("an unknown id matches nothing", () => {
+    expect(namesOf("999")).toEqual([]);
+  });
+
+  test("a bare id combines with a tag term", () => {
+    expect(namesOf("cat 100")).toEqual(["a"]);
+    expect(namesOf("cat 300")).toEqual([]);
+  });
+
+  test("an explicit id: metric term still works", () => {
+    expect(namesOf("id:300")).toEqual(["c"]);
+  });
 });
 
 describe("BitmapSearchEngine nested-group queries", () => {

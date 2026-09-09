@@ -1,6 +1,7 @@
 import { Favorite } from "@/types/favorite";
 import { FavoritesDurationEnricher } from "@/features/favorites/model/enrichment/duration_enricher";
 import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";
+import { TermUpdate } from "@/lib/search/engine/search_engine";
 import { isVideo } from "@/lib/media/type";
 import { postIsStale } from "@/lib/post/status";
 
@@ -10,10 +11,9 @@ export class FavoritesEnricher {
 
   constructor(
     onFavoriteEnriched: (favorite: Favorite) => void,
-    beforeTagsChanged: (favorite: Favorite) => void,
-    afterTagsChanged: (favorite: Favorite) => void
+    onTagsUpdated: (updates: TermUpdate<Favorite>[]) => void
   ) {
-    this.metadataEnricher = new FavoritesMetadataEnricher(onFavoriteEnriched, beforeTagsChanged, afterTagsChanged);
+    this.metadataEnricher = new FavoritesMetadataEnricher(onFavoriteEnriched, onTagsUpdated);
     this.durationEnricher = new FavoritesDurationEnricher(onFavoriteEnriched);
   }
 

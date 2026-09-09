@@ -8,7 +8,8 @@ import { escapeParentheses } from "@/utils/pure/string";
 const unmatchableRegex = /^\b$/;
 
 export function parseSearchTerm(term: string): AbstractSearchTerm {
-  return isWildcardTerm(term) ? parseWildcardSearchTerm(term) : isMetricTerm(term) ? parseMetricSearchTerm(term) : parseExactSearchTerm(term);
+  const canonical = asIdMetricTerm(term);
+  return isWildcardTerm(canonical) ? parseWildcardSearchTerm(canonical) : isMetricTerm(canonical) ? parseMetricSearchTerm(canonical) : parseExactSearchTerm(canonical);
 }
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
@@ -33,6 +34,11 @@ export function isWildcardTerm(term: string): boolean {
 
 export function isMetricTerm(term: string): boolean {
   return MetricSearchComparison.regex.test(term);
+}
+
+function asIdMetricTerm(term: string): string {
+  const { isNegated, value } = parseNegation(term);
+  return (/^\d+$/).test(value) ? `${isNegated ? "-" : ""}id:${value}` : term;
 }
 
 function parseNegation(term: string): { isNegated: boolean; value: string } {

@@ -1,6 +1,34 @@
-import { chunk, findFirstIndexWhere, isIndexInBounds, itemsAround, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
+import { chunk, findFirstIndexWhere, intersectSortedNumbers, isIndexInBounds, itemsAround, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
 import { describe, expect, test } from "vitest";
 import { randomInt } from "@/utils/pure/number";
+
+describe("intersectSortedNumbers", () => {
+  test("returns common elements of two ascending arrays", () => {
+    expect(intersectSortedNumbers([1, 3, 5, 7], [3, 4, 5, 6])).toEqual([3, 5]);
+  });
+
+  test("returns empty when there is no overlap", () => {
+    expect(intersectSortedNumbers([1, 2], [3, 4])).toEqual([]);
+  });
+
+  test("returns empty when either array is empty", () => {
+    expect(intersectSortedNumbers([], [1, 2])).toEqual([]);
+    expect(intersectSortedNumbers([1, 2], [])).toEqual([]);
+  });
+
+  test("handles full overlap", () => {
+    expect(intersectSortedNumbers([1, 2, 3], [1, 2, 3])).toEqual([1, 2, 3]);
+  });
+
+  test("does not mutate its inputs", () => {
+    const a = [1, 2, 3];
+    const b = [2, 3, 4];
+
+    intersectSortedNumbers(a, b);
+    expect(a).toEqual([1, 2, 3]);
+    expect(b).toEqual([2, 3, 4]);
+  });
+});
 
 describe("findFirstIndexWhere", () => {
   const sorted = [10, 20, 20, 30];

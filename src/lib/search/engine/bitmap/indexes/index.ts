@@ -1,5 +1,7 @@
 import { DensePosting, Posting, SparsePosting } from "@/lib/search/engine/bitmap/bits/posting";
+import { TermDelta, TermUpdate } from "@/lib/search/engine/search_engine";
 import { BitSet } from "@/lib/search/engine/bitmap/bits/bitset";
+import { PackedPostings } from "@/lib/search/engine/bitmap/bits/packed_postings";
 import { findFirstIndexWhere } from "@/utils/pure/array";
 
 const MIN_CAPACITY = 64;
@@ -11,10 +13,11 @@ export class BitmapIndex<Doc> {
   private freeList: number[] = [];
   private liveCount = 0;
   private capacity = 0;
-  private postings: Map<string, Posting> = new Map<string, Posting>();
+  private densePostings: Map<string, DensePosting> = new Map<string, DensePosting>();
+  private sparsePostings: PackedPostings = new PackedPostings();
   private all: BitSet = new BitSet(0);
 
-  constructor(private readonly extractTerms: (doc: Doc) => Iterable<string>) { }
+  constructor(private readonly termsFor: (doc: Doc) => Iterable<string>) { }
 
   public get size(): number {
     return this.liveCount;
@@ -28,8 +31,8 @@ export class BitmapIndex<Doc> {
     return Math.ceil(this.capacity / 32);
   }
 
-  public build(docs: readonly Doc[]): void {
-    this.capacity = capacityFor(docs.length);
+  public build(docs: readonly Doc[], minCapacity: number = docs.length): void {
+    this.capacity = capacityFor(Math.max(docs.length, minCapacity));
     this.docs = new Array<Doc>(this.capacity);
     this.positionsByTerm = new Map<string, number[]>();
     this.positionOf = new Map<Doc, number>();
@@ -44,58 +47,38 @@ export class BitmapIndex<Doc> {
     for (let position = 0; position < docs.length; position += 1) {
       this.place(docs[position], position);
     }
-    this.postings = this.materializeAll();
+    this.materialize();
   }
 
-  public add(doc: Doc): string[] {
-    if (this.positionOf.has(doc)) {
-      return [];
-    }
+  public add(docs: readonly Doc[]): string[] {
+    this.ensureCapacity(this.liveCount + docs.length);
+    const newTerms = new Set<string>();
 
-    if (this.freeList.length === 0) {
-      this.grow();
-    }
-    const position = this.freeList.pop() as number;
+    for (const doc of docs) {
+      const position = this.freeList.pop();
 
-    this.place(doc, position);
+      if (position === undefined) {
+        continue;
+      }
 
-    const affectedTerms = [...new Set(this.termsOf(doc))];
-
-    for (const term of affectedTerms) {
-      this.reMaterialize(term);
-    }
-    return affectedTerms;
-  }
-
-  public remove(doc: Doc): string[] {
-    const position = this.positionOf.get(doc);
-
-    if (position === undefined) {
-      return [];
-    }
-    const affectedTerms = [...new Set(this.termsOf(doc))];
-
-    for (const term of affectedTerms) {
-      const positions = this.positionsByTerm.get(term);
-
-      if (positions !== undefined) {
-        removeValue(positions, position);
-
-        if (positions.length === 0) {
-          this.positionsByTerm.delete(term);
-        }
+      for (const term of this.place(doc, position)) {
+        newTerms.add(term);
       }
     }
-    this.all.remove(position);
-    this.positionOf.delete(doc);
-    this.docs[position] = undefined as unknown as Doc;
-    this.freeList.push(position);
-    this.liveCount -= 1;
+    this.materialize();
+    return [...newTerms];
+  }
 
-    for (const term of affectedTerms) {
-      this.reMaterialize(term);
-    }
-    return affectedTerms;
+  public update(updates: readonly TermUpdate<Doc>[]): TermDelta {
+    const touched = updates.reduce((acc, { oldTerms, newTerms }) => acc.union(oldTerms.symmetricDifference(newTerms)), new Set<string>());
+    const preexisting = touched.intersection(this.positionsByTerm);
+
+    this.rePointAll(updates);
+    this.materialize();
+    return {
+      added: [...touched].filter(term => this.positionsByTerm.has(term) && !preexisting.has(term)),
+      removed: [...preexisting].filter(term => !this.positionsByTerm.has(term))
+    };
   }
 
   public positionalDocs(): readonly (Doc | undefined)[] {
@@ -103,19 +86,21 @@ export class BitmapIndex<Doc> {
   }
 
   public indexedTerms(): string[] {
-    return [...this.postings.keys()];
+    return [...this.positionsByTerm.keys()];
   }
 
   public postingForTerm(term: string): Posting | undefined {
-    return this.postings.get(term);
+    const dense = this.densePostings.get(term);
+
+    if (dense !== undefined) {
+      return dense;
+    }
+    const sparse = this.sparsePostings.slice(term);
+    return sparse === undefined ? undefined : new SparsePosting(sparse);
   }
 
   public everything(): BitSet {
     return this.all.clone();
-  }
-
-  public allDocs(): Doc[] {
-    return this.docsFrom(this.all);
   }
 
   public emptyBitSet(): BitSet {
@@ -131,34 +116,40 @@ export class BitmapIndex<Doc> {
     return union;
   }
 
-  public postingEntries(): { term: string; posting: Posting }[] {
-    const entries: { term: string; posting: Posting }[] = [];
-
-    for (const [term, posting] of this.postings) {
-      entries.push({ term, posting });
-    }
-    return entries;
-  }
-
   public orTermInto(accumulator: BitSet, term: string): void {
-    this.postings.get(term)?.orInto(accumulator);
-  }
-
-  public docAt(position: number): Doc {
-    return this.docs[position];
+    this.postingForTerm(term)?.orInto(accumulator);
   }
 
   public docsFrom(bitset: BitSet): Doc[] {
     return bitset.gather(this.docs);
   }
 
-  private place(doc: Doc, position: number): void {
-    this.docs[position] = doc;
-    this.positionOf.set(doc, position);
-    this.all.add(position);
-    this.liveCount += 1;
+  private rePointAll(updates: readonly TermUpdate<Doc>[]): void {
+    for (const { doc, oldTerms, newTerms } of updates) {
+      const position = this.positionOf.get(doc);
 
-    for (const term of this.termsOf(doc)) {
+      if (position === undefined) {
+        continue;
+      }
+      this.rePoint(position, oldTerms.difference(newTerms), newTerms.difference(oldTerms));
+    }
+  }
+
+  private rePoint(position: number, removedTerms: ReadonlySet<string>, addedTerms: ReadonlySet<string>): void {
+    for (const term of removedTerms) {
+      const positions = this.positionsByTerm.get(term);
+
+      if (positions === undefined) {
+        continue;
+      }
+      removeValue(positions, position);
+
+      if (positions.length === 0) {
+        this.positionsByTerm.delete(term);
+      }
+    }
+
+    for (const term of addedTerms) {
       const positions = this.positionsByTerm.get(term);
 
       if (positions === undefined) {
@@ -169,7 +160,30 @@ export class BitmapIndex<Doc> {
     }
   }
 
-  private grow(): void {
+  private place(doc: Doc, position: number): string[] {
+    this.docs[position] = doc;
+    this.positionOf.set(doc, position);
+    this.all.add(position);
+    this.liveCount += 1;
+    const newTerms: string[] = [];
+
+    for (const term of this.termsFor(doc)) {
+      const positions = this.positionsByTerm.get(term);
+
+      if (positions === undefined) {
+        this.positionsByTerm.set(term, [position]);
+        newTerms.push(term);
+      } else {
+        insertSorted(positions, position);
+      }
+    }
+    return newTerms;
+  }
+
+  private ensureCapacity(required: number): void {
+    if (required < this.capacity) {
+      return;
+    }
     const live: Doc[] = [];
 
     for (const doc of this.docs) {
@@ -177,43 +191,35 @@ export class BitmapIndex<Doc> {
         live.push(doc);
       }
     }
-    this.build(live);
+    this.build(live, required);
   }
 
-  private termsOf(doc: Doc): Iterable<string> {
-    return this.extractTerms(doc);
+  private materialize(): void {
+    const threshold = this.denseThreshold;
+
+    this.materializeDense(threshold);
+    this.materializeSparse(threshold);
   }
 
-  private materializeAll(): Map<string, Posting> {
-    const postings = new Map<string, Posting>();
+  private materializeDense(threshold: number): void {
+    this.densePostings = new Map<string, DensePosting>();
 
-    for (const term of this.positionsByTerm.keys()) {
-      postings.set(term, this.postingFor(term));
-    }
-    return postings;
-  }
+    for (const [term, positions] of this.positionsByTerm) {
+      if (positions.length > threshold) {
+        const bits = new BitSet(this.capacity);
 
-  private reMaterialize(term: string): void {
-    if (this.positionsByTerm.has(term)) {
-      this.postings.set(term, this.postingFor(term));
-    } else {
-      this.postings.delete(term);
-    }
-  }
-
-  private postingFor(term: string): Posting {
-    const positions = this.positionsByTerm.get(term) ?? [];
-
-    if (positions.length > this.denseThreshold) {
-      const bits = new BitSet(this.capacity);
-
-      for (const position of positions) {
-        bits.add(position);
+        for (const position of positions) {
+          bits.add(position);
+        }
+        this.densePostings.set(term, new DensePosting(bits));
       }
-      return new DensePosting(bits);
     }
-    return new SparsePosting(Int32Array.from(positions));
   }
+
+  private materializeSparse(threshold: number): void {
+    this.sparsePostings.build(this.positionsByTerm, length => length <= threshold);
+  }
+
 }
 
 function capacityFor(size: number): number {

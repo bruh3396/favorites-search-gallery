@@ -11,14 +11,14 @@ import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
 import { Preferences } from "@/app/context/preferences";
+import { tagPoolSize } from "@/utils/pure/tag"; // THROWAWAY: probe import
 
 const collection = new IdentifiedList<Favorite>();
 const searcher = new FavoritesSearcher(searcherConfig());
 const loader = new FavoritesLoader();
 const enricher = new FavoritesEnricher(
   (favorite) => loader.updateStoredFavorite(favorite),
-  (favorite) => searcher.deIndex([favorite]),
-  (favorite) => searcher.reIndex([favorite])
+  (updates) => searcher.update(updates)
 );
 const paginator = new Paginator<Favorite>(() => Preferences.favorites.resultsPerPage.value, FavoritesConfig.nearbyPageCount);
 
@@ -31,7 +31,34 @@ export async function loadStoredFavorites(): Promise<void> {
 
   collection.setAll(favorites);
   searcher.index(favorites);
+  probeTagInterning(favorites); // THROWAWAY: remove after measuring
   enricher.enrich(favorites);
+}
+
+// THROWAWAY: interning dedup probe. Remove once measured.
+function probeTagInterning(favorites: Favorite[]): void {
+  let occurrences = 0;
+  const distinct = new Set<string>();
+
+  for (const favorite of favorites) {
+    for (const tag of favorite.tags) {
+      occurrences += 1;
+      distinct.add(tag);
+    }
+  }
+  const bytesIfCopied = occurrences * 40; // ~40B per string object (heap-snapshot estimate)
+  const bytesInterned = distinct.size * 40 + occurrences * 8; // one string each + pointer slots
+
+  console.log("[tag-intern probe]", {
+    favorites: favorites.length,
+    tagOccurrences: occurrences,
+    distinctTags: distinct.size,
+    tagPoolSize: tagPoolSize(),
+    dedupRatio: (occurrences / Math.max(distinct.size, 1)).toFixed(2),
+    estBytesIfCopied: bytesIfCopied,
+    estBytesInterned: bytesInterned,
+    estSavedBytes: bytesIfCopied - bytesInterned
+  });
 }
 
 export function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
@@ -82,7 +109,7 @@ export const hasOnlyOnePage = (): boolean => paginator.hasOnlyOnePage();
 export const paginationContext = (): PaginationState => paginator.paginationState();
 
 function processIncomingFavorites(favorites: Favorite[]): void {
-  searcher.reIndex(favorites);
+  searcher.add(favorites);
   enricher.enrich(favorites);
 }
 

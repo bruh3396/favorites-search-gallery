@@ -2,40 +2,27 @@ import { Posting } from "@/lib/search/engine/bitmap/bits/posting";
 import { WildcardMatcher } from "@/lib/search/indexes/wildcard_matcher";
 import { WildcardSearchTerm } from "@/lib/search/query/terms/wildcard_search_term";
 
-interface Entry {
-  readonly term: string;
-  posting: Posting;
-}
-
-const keyOf = (entry: Entry): string => entry.term;
-
 export class WildcardPostingResolver {
-  private matcher = new WildcardMatcher<Entry>(keyOf);
-  private byTerm = new Map<string, Entry>();
+  private matcher = new WildcardMatcher<string>();
   private readonly cache = new Map<string, Posting | null>();
 
-  constructor(private readonly unionize: (postings: Posting[]) => Posting) { }
+  constructor(
+    private readonly unionize: (postings: Posting[]) => Posting,
+    private readonly postingFor: (term: string) => Posting | undefined
+  ) { }
 
-  public index(entries: Entry[]): void {
-    this.matcher = new WildcardMatcher<Entry>(keyOf, entries);
-    this.byTerm = new Map(entries.map(entry => [entry.term, entry]));
+  public index(terms: string[]): void {
+    this.matcher = new WildcardMatcher<string>(undefined, terms);
     this.cache.clear();
   }
 
-  public refresh(term: string, posting: Posting | undefined): void {
-    const existing = this.byTerm.get(term);
+  public add(term: string): void {
+    this.matcher.add(term);
+    this.cache.clear();
+  }
 
-    if (existing !== undefined && posting !== undefined) {
-      existing.posting = posting;
-    } else if (existing !== undefined) {
-      this.matcher.remove(existing);
-      this.byTerm.delete(term);
-    } else if (posting !== undefined) {
-      const entry: Entry = { term, posting };
-
-      this.matcher.add(entry);
-      this.byTerm.set(term, entry);
-    }
+  public remove(term: string): void {
+    this.matcher.remove(term);
     this.cache.clear();
   }
 
@@ -46,10 +33,23 @@ export class WildcardPostingResolver {
     if (cached !== undefined) {
       return cached ?? undefined;
     }
-    const entries = this.matcher.match(term);
-    const union = entries.length === 0 ? null : this.unionize(entries.map(entry => entry.posting));
+    const postings = this.postingsForMatches(this.matcher.match(term));
+    const union = postings.length === 0 ? null : this.unionize(postings);
 
     this.cache.set(key, union);
     return union ?? undefined;
+  }
+
+  private postingsForMatches(terms: string[]): Posting[] {
+    const postings: Posting[] = [];
+
+    for (const term of terms) {
+      const posting = this.postingFor(term);
+
+      if (posting !== undefined) {
+        postings.push(posting);
+      }
+    }
+    return postings;
   }
 }
