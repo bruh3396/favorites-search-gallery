@@ -1,8 +1,8 @@
-import * as TagCategoryStore from "@/lib/domain/tag_categories/store";
+import * as TagCategoryStore from "@/app/domain/tag/category_store";
 import { TagCategory, TagCategoryMap } from "@/types/search";
-import { fetchPostPageHtml } from "@/lib/remote/pages";
-import { fetchTagCategory } from "@/lib/remote/api";
-import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page";
+import { fetchPostPageHtml } from "@/lib/remote/fetchers/html";
+import { fetchTagCategory } from "@/lib/remote/fetchers/api";
+import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page_parser";
 import { withTimeout } from "@/lib/async/scheduling";
 
 const RESOLVE_TIMEOUT_MS = 10_000;

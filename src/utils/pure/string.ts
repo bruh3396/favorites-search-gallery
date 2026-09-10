@@ -58,3 +58,7 @@ export function trigramsOf(value: string): string[] {
   }
   return trigrams;
 }
+
+export function copyString(value: string): string {
+  return Array.from(value).join("");
+}

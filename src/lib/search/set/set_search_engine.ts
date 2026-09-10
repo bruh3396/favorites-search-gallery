@@ -1,10 +1,10 @@
 import { SearchEngine, TermUpdate } from "@/lib/search/search_engine";
-import { SearchableMetric } from "@/types/search";
 import { DocResolver } from "@/lib/search/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
 import { MetricIndex } from "@/lib/search/set/indexes/metric_index";
 import { PositionIndex } from "@/lib/search/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/lib/search/set/indexes/relative_metric_index";
+import { SearchableMetric } from "@/types/search";
 import { SetSearcher } from "@/lib/search/set/logic/set_searcher";
 import { WildcardDocResolver } from "@/lib/search/set/resolution/wildcard_doc_resolver";
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";

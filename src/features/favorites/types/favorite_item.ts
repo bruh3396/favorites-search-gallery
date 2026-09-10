@@ -1,3 +1,5 @@
+import { compressPreviewSource, decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
+import { decodeTagSet, encodeTags } from "@/app/domain/tag/dictionary";
 import { Favorite } from "@/types/favorite";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
 import { MediaExtension } from "@/types/media";
@@ -5,29 +7,34 @@ import { Metric } from "@/types/search";
 import { Post } from "@/types/api";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
+import { internString } from "@/app/domain/tag/interner";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeExtraWhitespace } from "@/utils/pure/string";
-import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoriteItem implements Favorite {
   public readonly id: string;
   public readonly post: Post;
   private readonly numericId: number;
+  private readonly tagIds: Uint16Array;
   private element: FavoriteElement | null;
 
   constructor(source: HTMLElement | Post) {
     this.post = source instanceof HTMLElement ? thumbToPost(source) : source;
-    this.id = this.post.id;
-    this.numericId = parseInt(this.post.id, 10);
+    this.id = internString(source.id);
+    this.tagIds = encodeTags(this.post.tags);
+    this.post.tags = "";
+    this.numericId = parseInt(source.id, 10);
     this.element = null;
+    this.dedupe();
   }
 
   public get tags(): Set<string> {
-    return toTagSet(this.post.tags);
+    return decodeTagSet(this.tagIds);
   }
 
   public get thumbUrl(): string {
-    return this.element === null ? this.post.previewURL : this.element.thumbUrl;
+    const compressed = this.element === null ? this.post.previewURL : this.element.thumbUrl;
+    return decompressPreviewSource(compressed);
   }
 
   public get extension(): MediaExtension | undefined {
@@ -36,7 +43,7 @@ export class FavoriteItem implements Favorite {
 
   public get root(): HTMLElement {
     if (this.element === null) {
-      this.element = new FavoriteElement(this.id, this.post.previewURL, this.post.tags);
+      this.element = new FavoriteElement(this.id, this.thumbUrl, this.post.tags);
       this.element.setAspectRatio(this.post.width, this.post.height);
       this.element.setExtension(this.post.extension);
     }
@@ -66,8 +73,9 @@ export class FavoriteItem implements Favorite {
   }
 
   public enrich(post: Post): void {
-    post.previewURL = this.post.previewURL || post.previewURL;
+    post.previewURL = compressPreviewSource(post.previewURL);
     Object.assign(this.post, post);
+    this.dedupe();
     this.element?.setAspectRatio(post.width, post.height);
     this.element?.setExtension(post.extension);
   }
@@ -75,11 +83,22 @@ export class FavoriteItem implements Favorite {
   public setDuration(duration: number): void {
     this.post.duration = duration;
   }
+
+  private dedupe(): void {
+    this.post.rating = internString(this.post.rating);
+    this.post.fileURL = "";
+    this.post.id = internString(this.post.id);
+
+    if (this.post.extension) {
+      this.post.extension = internString(this.post.extension) as MediaExtension;
+    }
+  }
 }
 
 function thumbToPost(thumb: HTMLElement): Post {
   const id = parseIdFromThumb(thumb);
   const image = getImageFromThumb(thumb);
+  const previewURL = compressPreviewSource(image?.src ?? image?.getAttribute("data-cfsrc") ?? "");
   return {
     id,
     tags: image === null ? "" : normalizeTags(thumb),
@@ -89,7 +108,7 @@ function thumbToPost(thumb: HTMLElement): Post {
     rating: "",
     change: 0,
     fileURL: "",
-    previewURL: image === null ? "" : image.src ?? image.getAttribute("data-cfsrc") ?? ""
+    previewURL
   };
 }
 

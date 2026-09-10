@@ -1,5 +1,5 @@
-import * as PostResolver from "@/lib/domain/post/resolver";
-import * as TagCategoryStore from "@/lib/domain/tag_categories/store";
+import * as PostResolver from "@/app/domain/post/resolver";
+import * as TagCategoryStore from "@/app/domain/tag/category_store";
 import { ParsedPost, Post } from "@/types/api";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Favorite } from "@/types/favorite";

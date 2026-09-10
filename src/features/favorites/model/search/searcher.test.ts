@@ -2,7 +2,10 @@ import { FavoritesSearcher, SearcherConfig } from "@/features/favorites/model/se
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 
-const favorite = (id: string, rating: string, ...tags: string[]): Favorite => ({ id, tags: new Set(tags), post: { rating }, getMetric: () => Number(id) }) as unknown as Favorite;
+const favorite = (id: string, rating: string, ...tags: string[]): Favorite => {
+  const tagSet = new Set(tags);
+  return { id, tags: tagSet, indexableTags: () => tagSet, post: { rating }, getMetric: () => Number(id) } as unknown as Favorite;
+};
 
 const ids = (results: Favorite[]): string[] => results.map(r => r.id);
 

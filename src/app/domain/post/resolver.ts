@@ -1,10 +1,10 @@
-import * as PostStore from "@/lib/domain/post/store";
+import * as PostStore from "@/app/domain/post/store";
 import { ParsedPost, Post } from "@/types/api";
 import { allMediaExtensions, extensionRegex } from "@/lib/media/constants";
-import { fetchDeletedPost, fetchPost } from "@/lib/remote/api";
+import { fetchDeletedPost, fetchPost } from "@/lib/remote/fetchers/api";
 import { ApiConfig } from "@/config/api_config";
 import { MediaExtension } from "@/types/media";
-import { postIsComplete } from "@/lib/domain/post/status";
+import { postIsComplete } from "@/app/domain/post/status";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 export async function resolveAll(stalePosts: Post[], onResolved: (resolved: ParsedPost) => void): Promise<void> {

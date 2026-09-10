@@ -1,6 +1,6 @@
 import * as FavoritesView from "@/features/favorites/view/view";
-import { openMedia, openPost } from "@/lib/remote/actions";
-import { EnhancedMouseEvent } from "@/lib/events/input";
+import { openMedia, openPost } from "@/lib/remote/fetchers/action";
+import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Events } from "@/app/channels/events";
 import { GALLERY_DISABLED } from "@/app/context/flags";
 import { didSwipe } from "@/app/dom/swipe_events";

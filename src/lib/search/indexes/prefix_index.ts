@@ -1,4 +1,4 @@
-import { SortedArray } from "@/lib/collections/sorted_array";
+import { SortedArray } from "@/lib/collection/sorted_array";
 import { compareStrings } from "@/utils/pure/string";
 import { findFirstIndexWhere } from "@/utils/pure/array";
 import { identity } from "@/utils/pure/function";
@@ -21,7 +21,7 @@ export class PrefixIndex<T = string> {
     return this.items.toArray();
   }
 
-  public matchingPrefix(prefix: string): T[] {
+  public termsMatchingPrefix(prefix: string): T[] {
     const sorted = this.items.toArray();
     const result: T[] = [];
     const start = findFirstIndexWhere(sorted.length, index => this.keyOf(sorted[index]) >= prefix);

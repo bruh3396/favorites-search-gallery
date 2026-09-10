@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Carousel } from "@/lib/collections/carousel";
+import { Carousel } from "@/lib/collection/carousel";
 import { Identifiable } from "@/types/app";
 
 const FORWARD = 1;

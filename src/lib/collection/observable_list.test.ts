@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Identifiable } from "@/types/app";
-import { ObservableList } from "@/lib/collections/observable_list";
+import { ObservableList } from "@/lib/collection/observable_list";
 
 const item = (id: string): Identifiable => ({ id });
 const items = (...ids: string[]): Identifiable[] => ids.map(item);

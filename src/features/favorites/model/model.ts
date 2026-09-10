@@ -6,7 +6,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesEnricher } from "@/features/favorites/model/enrichment/enricher";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
-import { IdentifiedList } from "@/lib/collections/identified_list";
+import { IdentifiedList } from "@/lib/collection/identified_list";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";

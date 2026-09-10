@@ -1,6 +1,6 @@
 import { AwesompleteSuggestion } from "awesomplete";
 import { Storage } from "@/lib/storage/local_storage";
-import { fetchTagCategory } from "@/lib/remote/api";
+import { fetchTagCategory } from "@/lib/remote/fetchers/api";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const STORAGE_KEY = "customTags";

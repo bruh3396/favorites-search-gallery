@@ -1,6 +1,4 @@
-import { Fruit, FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 import { Metric, Searchable } from "@/types/search";
-import { MetricDoc, metricDocs, metricSearchCases, searchCases } from "@/lib/search/testing/search_cases";
 import { describe, expect, test } from "vitest";
 import { SetSearchEngine } from "@/lib/search/set/set_search_engine";
 
@@ -64,23 +62,6 @@ describe("SearchEngine", () => {
   });
 });
 
-describe("SearchEngine end-to-end", () => {
-  const fruitEngine = new SetSearchEngine<Fruit>(fruit => fruit.tags, () => 0, fruitDocs);
-
-  function assertMatches(query: string, expectedNames: FruitName[]): void {
-    const expected = expectedNames.slice().sort();
-    const actual = fruitEngine.search(query, fruitDocs).map(item => item.name).sort();
-
-    expect(actual, query).toEqual(expected);
-  }
-
-  for (const group of searchCases) {
-    test(group.name, () => {
-      group.run(assertMatches);
-    });
-  }
-});
-
 describe("SearchEngine mutation", () => {
   test("add makes a new doc and its terms searchable, including by wildcard", () => {
     const searchEngine = engine();
@@ -124,21 +105,4 @@ describe("SearchEngine mutation", () => {
     expect(search("green", searchEngine, [kiwi])).toEqual(["kiwi"]);
     expect(search("fuz*", searchEngine, [kiwi])).toEqual(["kiwi"]);
   });
-});
-
-describe("SearchEngine matches the shared metric cases", () => {
-  const metricEngine = new SetSearchEngine<MetricDoc>(item => item.tags, (item, metric) => item.getMetric(metric), metricDocs);
-
-  function assertMatches(query: string, expectedNames: string[]): void {
-    const expected = expectedNames.slice().sort();
-    const actual = metricEngine.search(query, metricDocs).map(item => item.name).sort();
-
-    expect(actual, query).toEqual(expected);
-  }
-
-  for (const group of metricSearchCases) {
-    test(group.name, () => {
-      group.run(assertMatches);
-    });
-  }
 });

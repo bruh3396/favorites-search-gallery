@@ -1,4 +1,4 @@
-import * as PostStore from "@/lib/domain/post/store";
+import * as PostStore from "@/app/domain/post/store";
 import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "@/lib/environment";
 import { ImageExtension, MediaExtension, MediaExtensionMapping } from "@/types/media";
 import { thumbUrlToImageUrl, withExtension } from "@/lib/media/url";

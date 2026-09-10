@@ -1,4 +1,4 @@
-import { KeyCodec } from "@/lib/collections/key_codec";
+import { KeyCodec } from "@/lib/collection/key_codec";
 import { identity } from "@/utils/pure/function";
 import { intersectSortedNumbers } from "@/utils/pure/array";
 import { trigramsOf } from "@/utils/pure/string";
@@ -15,11 +15,11 @@ export class TrigramIndex<T = string> {
     }
   }
 
-  public matching(fragment: string, corpus: T[]): T[] {
+  public termsMatching(fragment: string, corpus: T[]): T[] {
     return fragment.length < 3 ? corpus : this.codec.decode(this.candidates(fragment));
   }
 
-  public matchingAll(fragments: string[], corpus: T[]): T[] {
+  public termsMatchingAll(fragments: string[], corpus: T[]): T[] {
     const narrowing = fragments.filter(fragment => fragment.length >= 3);
     return narrowing.length === 0 ? corpus : this.codec.decode(this.candidatesOfAll(narrowing));
   }

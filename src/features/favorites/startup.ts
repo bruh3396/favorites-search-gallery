@@ -3,7 +3,7 @@ import * as FavoritesFeatures from "@/features/favorites/features/features";
 import * as FavoritesFlows from "@/features/favorites/flows/flows";
 import * as FavoritesModel from "@/features/favorites/model/model";
 import * as FavoritesView from "@/features/favorites/view/view";
-import * as TagCategoryStore from "@/lib/domain/tag_categories/store";
+import * as TagCategoryStore from "@/app/domain/tag/category_store";
 import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_FIRST_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
 import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb/action_bar";
 import { DomEvents } from "@/app/dom/events";
@@ -12,7 +12,7 @@ import { FeatureBridge } from "@/app/channels/feature_bridge";
 import { IMAGUS_SUPPORT_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { createElement } from "@/utils/browser/element";
-import { deferPostPageFetchesUntil } from "@/lib/remote/pages";
+import { deferPostPageFetchesUntil } from "@/lib/remote/fetchers/html";
 import { setFavoriteTagsLookup } from "@/lib/ui/thumb/tag";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 

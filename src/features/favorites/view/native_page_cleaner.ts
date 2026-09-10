@@ -4,6 +4,26 @@ export function removeOriginalUnusedScripts(): void {
       script.remove();
     }
   }
+  releaseUnusedGlobals();
+}
+
+function releaseUnusedGlobals(): void {
+  const unused = [
+    "fluidPlayer", "webpackChunkfluid_player", "Awesomplete", "dashjs",
+    "Post",
+    "getCaptcha", "loadCaptchaScript",
+    "captchaInstance", "captchaInstanceFormKey", "captchaSiteKey",
+    "captchaProvider", "captchaScriptLoaded", "captchaRenderIdFn",
+    "captchaResponseFormKey", "captchaCSSClass"
+  ];
+
+  for (const global of unused) {
+    try {
+      delete (window as unknown as Record<string, unknown>)[global];
+    } catch {
+      // Non-configurable global slipped through; leave it in place.
+    }
+  }
 }
 
 export function takeNativeFavorites(): HTMLElement[] | undefined {

@@ -1,5 +1,5 @@
 import { TermDelta, TermUpdate } from "@/lib/search/search_engine";
-import { SortedArray } from "@/lib/collections/sorted_array";
+import { SortedArray } from "@/lib/collection/sorted_array";
 
 export class InvertedIndex<Doc> {
   private readonly terms: SortedArray<string> = new SortedArray<string>();

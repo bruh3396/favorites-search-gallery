@@ -1,5 +1,5 @@
-import { Emitter, StickyEmitter } from "@/lib/events/emitter";
-import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@/lib/events/input";
+import { Emitter, StickyEmitter } from "@/lib/event/emitter";
+import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@/lib/event/input";
 
 export function setupDomEvents(root: HTMLElement): void {
   broadcastDomLoad();

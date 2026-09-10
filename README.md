@@ -205,7 +205,7 @@ Supported:
 
 Notes:
   * "123" and "id:123" are equivalent
-  * Score requires reset to update, but will update daily in the future (*WIP)
+  * score updates weekly
   * Images and GIFs have a duration of 0
 
 ### Meta Examples

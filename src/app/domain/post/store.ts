@@ -1,4 +1,4 @@
-import { postIsComplete, postIsStale } from "@/lib/domain/post/status";
+import { postIsComplete, postIsStale } from "@/app/domain/post/status";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { KeyedDatabase } from "@/lib/storage/database";
 import { Post } from "@/types/api";

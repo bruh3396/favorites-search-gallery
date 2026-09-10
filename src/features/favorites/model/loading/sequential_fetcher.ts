@@ -3,8 +3,8 @@ import { FAVORITES_PER_PAGE } from "@/lib/constants";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_request";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { extractFavoriteElements } from "@/lib/remote/parsers/favorites";
-import { fetchFavoritesPage } from "@/lib/remote/pages";
+import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_parser";
+import { fetchFavoritesPage } from "@/lib/remote/fetchers/html";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 
 export async function fetchNewFavorites(storedIds: Set<string>, firstPageFavorites?: HTMLElement[]): Promise<HTMLElement[]> {

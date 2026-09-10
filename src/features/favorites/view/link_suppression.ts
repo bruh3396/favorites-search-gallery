@@ -1,4 +1,4 @@
-import { EnhancedMouseEvent } from "@/lib/events/input";
+import { EnhancedMouseEvent } from "@/lib/event/input";
 import { postPageUrl } from "@/lib/remote/url";
 
 let previousThumb: HTMLElement | null = null;

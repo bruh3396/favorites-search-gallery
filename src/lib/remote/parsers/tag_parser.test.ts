@@ -1,4 +1,4 @@
-import { decodeTagCategory, encodeTagCategory } from "@/lib/remote/parsers/tag";
+import { decodeTagCategory, encodeTagCategory } from "../../../app/domain/tag/category_codec";
 import { describe, expect, test } from "vitest";
 
 describe("decodeTagCategory", () => {

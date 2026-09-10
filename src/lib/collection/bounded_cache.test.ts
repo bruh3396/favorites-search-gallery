@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BoundedCache } from "@/lib/collections/bounded_cache";
+import { BoundedCache } from "@/lib/collection/bounded_cache";
 
 describe("BoundedCache", () => {
   test("stores and retrieves values", () => {

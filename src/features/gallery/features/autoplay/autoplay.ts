@@ -5,7 +5,7 @@ import { clamp, toSeconds } from "@/utils/pure/number";
 import { isImageThumb, isVideoThumb } from "@/lib/ui/thumb/media_item";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
-import { EnhancedKeyboardEvent } from "@/lib/events/input";
+import { EnhancedKeyboardEvent } from "@/lib/event/input";
 import { NavigationKey } from "@/types/input";
 import { Overlays } from "@/app/layout/shell";
 import { Preferences } from "@/app/context/preferences";

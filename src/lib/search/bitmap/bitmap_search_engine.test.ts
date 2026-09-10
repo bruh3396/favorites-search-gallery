@@ -1,29 +1,12 @@
-import { Fruit, FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
-import { MetricDoc, metricDocs, metricSearchCases, searchCases } from "@/lib/search/testing/search_cases";
+import { Fruit, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
 import { BitmapSearchEngine } from "@/lib/search/bitmap/bitmap_search_engine";
+import { MetricDoc } from "@/lib/search/testing/search_cases";
 import { Searchable } from "@/types/search";
 
 function bitmapEngine(): BitmapSearchEngine<Fruit> {
   return new BitmapSearchEngine<Fruit>(fruit => fruit.tags, () => 0, fruitDocs);
 }
-
-describe("BitmapSearchEngine matches the shared search cases", () => {
-  const engine = bitmapEngine();
-
-  function assertMatches(query: string, expectedNames: FruitName[]): void {
-    const expected = expectedNames.slice().sort();
-    const actual = engine.search(query).map(doc => doc.name).sort();
-
-    expect(actual, query).toEqual(expected);
-  }
-
-  for (const group of searchCases) {
-    test(group.name, () => {
-      group.run(assertMatches);
-    });
-  }
-});
 
 describe("BitmapSearchEngine", () => {
   test("returns the whole corpus for an empty query", () => {
@@ -182,36 +165,16 @@ describe("BitmapSearchEngine incremental mutation", () => {
   });
 });
 
-describe("BitmapSearchEngine matches the shared metric cases", () => {
-  const engine = new BitmapSearchEngine<MetricDoc>(doc => doc.tags, (doc, metric) => doc.getMetric(metric), metricDocs);
-
-  function assertMatches(query: string, expectedNames: string[]): void {
-    const expected = expectedNames.slice().sort();
-    const actual = engine.search(query).map(doc => doc.name).sort();
-
-    expect(actual, query).toEqual(expected);
-  }
-
-  for (const group of metricSearchCases) {
-    test(group.name, () => {
-      group.run(assertMatches);
-    });
-  }
-});
-
 describe("BitmapSearchEngine resolves bare numeric queries as favorite ids", () => {
-  // A favorite's id is no longer indexed as a tag; a bare numeric token is resolved through the
-  // id metric instead. These docs carry distinct ids so an id query selects exactly one.
+  const withId = (name: string, tags: string[], id: number): MetricDoc => ({
+    name,
+    tags: new Set(tags),
+    getMetric: (metric): number => (metric === "id" ? id : 0)
+  });
   const docs: MetricDoc[] = [
-    { name: "a", tags: new Set(["cat"]), metrics: { id: 100 }, getMetric(m): number {
- return this.metrics[m] ?? 0;
-} },
-    { name: "b", tags: new Set(["cat"]), metrics: { id: 200 }, getMetric(m): number {
- return this.metrics[m] ?? 0;
-} },
-    { name: "c", tags: new Set(["dog"]), metrics: { id: 300 }, getMetric(m): number {
- return this.metrics[m] ?? 0;
-} }
+    withId("a", ["cat"], 100),
+    withId("b", ["cat"], 200),
+    withId("c", ["dog"], 300)
   ];
   const engine = new BitmapSearchEngine<MetricDoc>(doc => doc.tags, (doc, metric) => doc.getMetric(metric), docs);
 

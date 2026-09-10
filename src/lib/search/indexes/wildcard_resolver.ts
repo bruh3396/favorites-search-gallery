@@ -1,4 +1,4 @@
-import { BoundedCache } from "@/lib/collections/bounded_cache";
+import { BoundedCache } from "@/lib/collection/bounded_cache";
 import { WildcardIndex } from "@/lib/search/indexes/wildcard_index";
 import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 
@@ -7,7 +7,7 @@ export abstract class WildcardResolver<V> {
   private readonly cache = new BoundedCache<string, V>(100);
 
   public index(terms: string[]): void {
-    this.wildcardIndex = new WildcardIndex(terms);
+    this.wildcardIndex = new WildcardIndex(terms, false);
     this.cache.clear();
   }
 

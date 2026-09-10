@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
 
 function makeDoc(name: FruitName, tags: string[]): Fruit {
-  return { name, tags: new Set(tags) };
+  return { name, tags: new Set(tags), getMetric: (): number => 0 };
 }
 
 function expectIndexed(term: string, indexed: boolean): void {
@@ -12,7 +12,7 @@ function expectIndexed(term: string, indexed: boolean): void {
 
 describe("index", () => {
   test("removeDoc", () => {
-    const item: Fruit = {name: "pineapple", tags: new Set<string>(["yellow", "spiky", "sour", "sweet", "unique_tag"])};
+    const item: Fruit = {name: "pineapple", tags: new Set<string>(["yellow", "spiky", "sour", "sweet", "unique_tag"]), getMetric: (): number => 0};
 
     expectIndexed("unique_tag", false);
 

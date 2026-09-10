@@ -4,7 +4,7 @@ import { SearchEngine, TermUpdate } from "@/lib/search/search_engine";
 import { BitmapSearchEngine } from "@/lib/search/bitmap/bitmap_search_engine";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { ObservableList } from "@/lib/collections/observable_list";
+import { ObservableList } from "@/lib/collection/observable_list";
 import { SetSearchEngine } from "@/lib/search/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";

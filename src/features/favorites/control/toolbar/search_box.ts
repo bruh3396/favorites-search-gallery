@@ -1,10 +1,10 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete, markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
-import { EnhancedMouseEvent } from "@/lib/events/input";
+import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { debounceLeading } from "@/lib/async/rate_limiting";
-import { openPostList } from "@/lib/remote/actions";
+import { openPostList } from "@/lib/remote/fetchers/action";
 import { queueMacroTask } from "@/lib/async/scheduling";
 import { toggleDataset } from "@/utils/browser/dataset";
 

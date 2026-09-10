@@ -1,4 +1,4 @@
-import { EnhancedMouseEvent } from "@/lib/events/input";
+import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Events } from "@/app/channels/events";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
 

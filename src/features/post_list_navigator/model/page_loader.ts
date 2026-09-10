@@ -2,7 +2,7 @@ import * as PostListNavigatorPageCache from "@/features/post_list_navigator/mode
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { RAW_THUMB_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { fetchPostList } from "@/lib/remote/pages";
+import { fetchPostList } from "@/lib/remote/fetchers/html";
 import { numbersAround } from "@/utils/pure/number";
 import { preparePostListThumbs } from "@/features/post_list_navigator/dom_tweaks/thumb_preparer";
 import { withExponentialBackoff } from "@/lib/async/scheduling";

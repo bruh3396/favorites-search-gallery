@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { KeyCodec } from "@/lib/collections/key_codec";
+import { KeyCodec } from "@/lib/collection/key_codec";
 
 interface Item {
   name: string;

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { ServerPost } from "@/types/api";
-import { parsePost } from "@/lib/remote/parsers/post";
+import { parsePost } from "@/lib/remote/parsers/post_parser";
 
 const serverPost: ServerPost = {
   id: "123",

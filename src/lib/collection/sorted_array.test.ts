@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { SortedArray } from "@/lib/collections/sorted_array";
+import { SortedArray } from "@/lib/collection/sorted_array";
 import { randomInt } from "@/utils/pure/number";
 
 function testSortedArrayOrder<T extends string | number>(sortedArray: SortedArray<T>): void {

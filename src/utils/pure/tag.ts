@@ -1,8 +1,15 @@
+import { copyString } from "@/utils/pure/string";
+
 export function toTagSet(tagString: string): Set<string> {
   if (tagString === "") {
     return new Set();
   }
-  return new Set(tagString.split(" "));
+  const tags = new Set<string>();
+
+  for (const tag of tagString.split(" ")) {
+    tags.add(copyString(tag));
+  }
+  return tags;
 }
 
 export function toSortedTagSet(tagString: string): Set<string> {

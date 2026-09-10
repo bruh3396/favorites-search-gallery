@@ -1,5 +1,5 @@
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { addFavorite, removeFavorite } from "@/lib/remote/actions";
+import { addFavorite, removeFavorite } from "@/lib/remote/fetchers/action";
 
 export function addFavoriteFromThumb(thumb: HTMLElement | undefined): Promise<AddFavoriteStatus> {
   return thumb === undefined ? Promise.resolve("error") : addFavorite(thumb.id);

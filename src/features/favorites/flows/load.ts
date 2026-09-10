@@ -2,7 +2,7 @@ import * as FavoritesFlows from "@/features/favorites/flows/flows";
 import * as FavoritesModel from "@/features/favorites/model/model";
 import * as FavoritesView from "@/features/favorites/view/view";
 import { Events } from "@/app/channels/events";
-import { fetchFavoritesCount } from "@/lib/remote/pages";
+import { fetchFavoritesCount } from "@/lib/remote/fetchers/html";
 
 export async function loadAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
   await FavoritesModel.migrateLegacyStores(() => FavoritesView.setStatus("Migrating favorites"));

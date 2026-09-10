@@ -2,7 +2,7 @@ import * as GalleryFlows from "@/features/gallery/flows/flows";
 import * as GalleryModel from "@/features/gallery/model/model";
 import * as GalleryView from "@/features/gallery/view/view";
 import { isExitKey, isNavigationKey } from "@/types/guards";
-import { EnhancedKeyboardEvent } from "@/lib/events/input";
+import { EnhancedKeyboardEvent } from "@/lib/event/input";
 import { GalleryConfig } from "@/config/gallery_config";
 import { throttle } from "@/lib/async/rate_limiting";
 import { toggleFullscreen } from "@/utils/browser/window";

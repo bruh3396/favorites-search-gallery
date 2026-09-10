@@ -3,17 +3,28 @@ import { PrefixIndex } from "@/lib/search/indexes/prefix_index";
 import { TrigramIndex } from "@/lib/search/indexes/trigram_index";
 
 export class WildcardIndex {
-  private prefixes: PrefixIndex;
-  private trigrams: TrigramIndex;
+  private prefixIndex: PrefixIndex;
+  private trigrams: TrigramIndex | null = null;
+  private readonly eager: boolean;
 
-  constructor(terms: string[] = []) {
-    this.prefixes = new PrefixIndex(terms);
-    this.trigrams = new TrigramIndex(terms);
+  constructor(terms: string[] = [], eager: boolean = false) {
+    this.eager = eager;
+    this.prefixIndex = new PrefixIndex(terms);
+
+    if (eager) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      this.trigramIndex;
+    }
+  }
+
+  private get trigramIndex(): TrigramIndex {
+    this.trigrams ??= new TrigramIndex(this.prefixIndex.all());
+    return this.trigrams;
   }
 
   public index(terms: string[]): void {
-    this.prefixes = new PrefixIndex(terms);
-    this.trigrams = new TrigramIndex(terms);
+    this.prefixIndex = new PrefixIndex(terms);
+    this.trigrams = this.eager ? new TrigramIndex(terms) : null;
   }
 
   public matchingTerms(term: WildcardSearchTerm): string[] {
@@ -21,23 +32,23 @@ export class WildcardIndex {
 
     switch (inputs.matchType) {
       case WildcardMatchType.Prefix:
-        return this.prefixes.matchingPrefix(inputs.fragment);
+        return this.prefixIndex.termsMatchingPrefix(inputs.fragment);
       case WildcardMatchType.Suffix:
-        return this.trigrams.matching(inputs.fragment, this.prefixes.all()).filter(key => key.endsWith(inputs.fragment));
+        return this.trigramIndex.termsMatching(inputs.fragment, this.prefixIndex.all()).filter(key => key.endsWith(inputs.fragment));
       case WildcardMatchType.Substring:
-        return this.trigrams.matching(inputs.fragment, this.prefixes.all()).filter(key => key.includes(inputs.fragment));
+        return this.trigramIndex.termsMatching(inputs.fragment, this.prefixIndex.all()).filter(key => key.includes(inputs.fragment));
       default:
-        return this.trigrams.matchingAll(inputs.fragments, this.prefixes.all()).filter(key => inputs.regex.test(key));
+        return this.trigramIndex.termsMatchingAll(inputs.fragments, this.prefixIndex.all()).filter(key => inputs.regex.test(key));
     }
   }
 
   public add(term: string): void {
-    this.prefixes.add(term);
-    this.trigrams.add(term);
+    this.prefixIndex.add(term);
+    this.trigrams?.add(term);
   }
 
   public remove(term: string): void {
-    this.prefixes.remove(term);
-    this.trigrams.remove(term);
+    this.prefixIndex.remove(term);
+    this.trigrams?.remove(term);
   }
 }

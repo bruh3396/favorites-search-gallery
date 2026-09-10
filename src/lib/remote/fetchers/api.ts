@@ -6,10 +6,10 @@ import { LocalOverrides } from "@/config/local_overrides";
 import { PostFetchError } from "@/types/errors";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { TagCategory } from "@/types/search";
-import { decodeTagCategory } from "@/lib/remote/parsers/tag";
-import { fetchPostPageHtml } from "@/lib/remote/pages";
-import { parsePost } from "@/lib/remote/parsers/post";
-import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page";
+import { decodeTagCategory } from "../../../app/domain/tag/category_codec";
+import { fetchPostPageHtml } from "@/lib/remote/fetchers/html";
+import { parsePost } from "@/lib/remote/parsers/post_parser";
+import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page_parser";
 
 const PRODUCTION_SERVER_ORIGIN = "https://frozencobalt.stream";
 const SERVER_ORIGIN = LocalOverrides.serverOrigin ?? PRODUCTION_SERVER_ORIGIN;

@@ -1,5 +1,5 @@
 import * as GalleryFlows from "@/features/gallery/flows/flows";
-import { EnhancedWheelEvent } from "@/lib/events/input";
+import { EnhancedWheelEvent } from "@/lib/event/input";
 
 export function handleWheel(wheelEvent: EnhancedWheelEvent): void {
   GalleryFlows.Dispatch.run(

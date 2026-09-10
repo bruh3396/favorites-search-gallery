@@ -1,8 +1,8 @@
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_request";
-import { SortedArray } from "@/lib/collections/sorted_array";
-import { extractFavoriteElements } from "@/lib/remote/parsers/favorites";
-import { fetchFavoritesPage } from "@/lib/remote/pages";
+import { SortedArray } from "@/lib/collection/sorted_array";
+import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_parser";
+import { fetchFavoritesPage } from "@/lib/remote/fetchers/html";
 import { sleep } from "@/lib/async/scheduling";
 
 export class FavoritesConcurrentFetcher {

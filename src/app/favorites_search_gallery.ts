@@ -7,7 +7,6 @@ function runFavoritesSearchGallery(): void {
     setupRuntime();
     launchFeatures();
   }
-
 }
 
 runFavoritesSearchGallery();

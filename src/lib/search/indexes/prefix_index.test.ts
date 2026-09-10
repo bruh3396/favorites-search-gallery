@@ -7,31 +7,31 @@ describe("PrefixIndex", () => {
   const index = new PrefixIndex(terms);
 
   test("finds the contiguous run of terms sharing the prefix", () => {
-    expect(index.matchingPrefix("ban")).toEqual(["banana", "band", "bandana"]);
+    expect(index.termsMatchingPrefix("ban")).toEqual(["banana", "band", "bandana"]);
   });
 
   test("matches a single term", () => {
-    expect(index.matchingPrefix("can")).toEqual(["canvas"]);
+    expect(index.termsMatchingPrefix("can")).toEqual(["canvas"]);
   });
 
   test("matches a term equal to the prefix", () => {
-    expect(index.matchingPrefix("band")).toEqual(["band", "bandana"]);
+    expect(index.termsMatchingPrefix("band")).toEqual(["band", "bandana"]);
   });
 
   test("returns nothing for a prefix that sorts between terms without matching", () => {
-    expect(index.matchingPrefix("bb")).toEqual([]);
+    expect(index.termsMatchingPrefix("bb")).toEqual([]);
   });
 
   test("returns nothing for a prefix after every term", () => {
-    expect(index.matchingPrefix("zzz")).toEqual([]);
+    expect(index.termsMatchingPrefix("zzz")).toEqual([]);
   });
 
   test("empty prefix returns every term", () => {
-    expect(index.matchingPrefix("")).toEqual(terms);
+    expect(index.termsMatchingPrefix("")).toEqual(terms);
   });
 
   test("empty index returns nothing", () => {
-    expect(new PrefixIndex([]).matchingPrefix("ban")).toEqual([]);
+    expect(new PrefixIndex([]).termsMatchingPrefix("ban")).toEqual([]);
   });
 });
 
@@ -40,14 +40,14 @@ describe("PrefixIndex mutation", () => {
     const index = new PrefixIndex(terms);
 
     index.add("banjo");
-    expect(index.matchingPrefix("ban")).toEqual(["banana", "band", "bandana", "banjo"]);
+    expect(index.termsMatchingPrefix("ban")).toEqual(["banana", "band", "bandana", "banjo"]);
   });
 
   test("removeTerm drops the term from its prefix run", () => {
     const index = new PrefixIndex(terms);
 
     index.remove("band");
-    expect(index.matchingPrefix("ban")).toEqual(["banana", "bandana"]);
+    expect(index.termsMatchingPrefix("ban")).toEqual(["banana", "bandana"]);
   });
 
   test("allTerms returns the sorted corpus", () => {

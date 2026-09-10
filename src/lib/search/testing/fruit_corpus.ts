@@ -1,9 +1,9 @@
+import { MetricSearchable, SearchableMetric } from "@/types/search";
 import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
-import { Searchable } from "@/types/search";
 import { createSearchable } from "@/lib/search/testing/searchable";
 
 export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";
-export type Fruit = Searchable & { name: FruitName };
+export type Fruit = MetricSearchable & { name: FruitName };
 
 export const fruits = new Set([
   "apple", "apricot", "banana", "blackberry", "blueberry",
@@ -16,20 +16,28 @@ export const fruits = new Set([
 ].sort());
 export const searchableFruitDoc = createSearchable(Array.from(fruits));
 
+function fruit(name: FruitName, tags: string[], metrics: Partial<Record<SearchableMetric, number>>): Fruit {
+  return {
+    name,
+    tags: new Set(tags.slice().sort()),
+    getMetric: (metric: SearchableMetric): number => metrics[metric] ?? 0
+  };
+}
+
 export const fruitDocs: Fruit[] = [
-  { name: "apple", tags: new Set(["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"].sort()) },
-  { name: "banana", tags: new Set(["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast"].sort()) },
-  { name: "cherry", tags: new Set(["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert"].sort()) },
-  { name: "grape", tags: new Set(["grape", "purple", "sweet", "small", "green", "snack", "juicy", "antioxidants", "seedless"].sort()) },
-  { name: "kiwi", tags: new Set(["kiwi", "green", "tart", "fiber", "vitamin-c", "fuzzy", "tropical", "small", "smoothie"].sort()) },
-  { name: "mango", tags: new Set(["mango", "tropical", "sweet", "juicy", "fiber", "smoothie", "dessert", "vitamin-a"].sort()) },
-  { name: "blueberry", tags: new Set(["blueberry", "blue", "small", "antioxidant", "sweet", "berry", "snack", "baking", "fiber"].sort()) },
-  { name: "orange", tags: new Set(["orange", "citrus", "vitamin-c", "juicy", "fiber", "breakfast", "peelable", "snack"].sort()) },
-  { name: "pear", tags: new Set(["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"].sort()) },
-  { name: "strawberry", tags: new Set(["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"].sort()) }
+  fruit("apple", ["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"], { score: 10, width: 400, height: 100 }),
+  fruit("banana", ["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast"], { score: 20, width: 100, height: 400 }),
+  fruit("cherry", ["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert"], { score: 30, width: 200, height: 200 }),
+  fruit("grape", ["grape", "purple", "sweet", "small", "green", "snack", "juicy", "antioxidants", "seedless"], { score: 30, width: 300, height: 150 }),
+  fruit("kiwi", ["kiwi", "green", "tart", "fiber", "vitamin-c", "fuzzy", "tropical", "small", "smoothie"], { score: 5, width: 150, height: 300 }),
+  fruit("mango", ["mango", "tropical", "sweet", "juicy", "fiber", "smoothie", "dessert", "vitamin-a"], { score: 45, width: 350, height: 250 }),
+  fruit("blueberry", ["blueberry", "blue", "small", "antioxidant", "sweet", "berry", "snack", "baking", "fiber"], { score: 15, width: 120, height: 120 }),
+  fruit("orange", ["orange", "citrus", "vitamin-c", "juicy", "fiber", "breakfast", "peelable", "snack"], { score: 25, width: 260, height: 180 }),
+  fruit("pear", ["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"], { score: 40, width: 220, height: 220 }),
+  fruit("strawberry", ["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"], { score: 35, width: 180, height: 320 })
 ];
 export const allDocNames = fruitDocs.map(item => item.name);
 export const allTerms = fruitDocs.flatMap(item => Array.from(item.tags));
-export const index = new InvertedIndex<Fruit>(fruit => fruit.tags);
+export const index = new InvertedIndex<Fruit>(f => f.tags);
 
 fruitDocs.forEach(f => index.addDoc(f));

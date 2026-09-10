@@ -1,28 +1,31 @@
 import { FruitName, allDocNames, allTerms, fruitDocs } from "@/lib/search/testing/fruit_corpus";
-import { Metric, Searchable } from "@/types/search";
+import { MetricSearchable } from "@/types/search";
 
-export type AssertMatches = (query: string, expectedNames: FruitName[]) => void;
+export type QueryAssertion = (query: string, expectedNames: FruitName[]) => void;
+export type MetricDoc = MetricSearchable & { name: string };
+export type SearchCase = { query: string; expected: FruitName[] };
+export type SearchCaseGroup = { name: string; cases?: SearchCase[]; run?: (assert: QueryAssertion) => void };
 
-export const searchCases: { name: string; run: (assert: AssertMatches) => void }[] = [
+export const searchCases: SearchCaseGroup[] = [
   {
     name: "empty",
-    run: (assert: AssertMatches): void => {
-      assert("", allDocNames);
-      assert(" ", allDocNames);
-      assert(" \n\t", allDocNames);
-    }
+    cases: [
+      { query: "", expected: allDocNames },
+      { query: " ", expected: allDocNames },
+      { query: " \n\t", expected: allDocNames }
+    ]
   },
   {
     name: "all",
-    run: (assert: AssertMatches): void => {
-      assert("*", allDocNames);
-      assert("**", allDocNames);
-      assert("* ** *** **** *****", allDocNames);
-    }
+    cases: [
+      { query: "*", expected: allDocNames },
+      { query: "**", expected: allDocNames },
+      { query: "* ** *** **** *****", expected: allDocNames }
+    ]
   },
   {
     name: "names",
-    run: (assert: AssertMatches): void => {
+    run: (assert: QueryAssertion): void => {
       for (const item of fruitDocs) {
         assert(item.name, [item.name]);
       }
@@ -30,111 +33,111 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
   },
   {
     name: "and",
-    run: (assert: AssertMatches): void => {
-      assert("low-fat_(dairy)", ["apple"]);
-      assert("red", ["apple", "cherry", "strawberry"]);
-      assert("red sweet", ["cherry", "strawberry"]);
-      assert("red -sweet", ["apple"]);
-      assert("red apple", ["apple"]);
-      assert("red banana", []);
-      assert("berry", ["blueberry", "strawberry"]);
-      assert("antioxidants", ["apple", "cherry", "grape", "strawberry"]);
-      assert("antioxidant", ["blueberry"]);
-      assert("antioxidants -antioxidant", ["apple", "cherry", "grape", "strawberry"]);
-      assert("vitamin-c", ["kiwi", "orange", "pear", "strawberry"]);
-      assert("juicy fiber -citrus", ["mango", "pear"]);
-      assert("sweet -berry", ["cherry", "grape", "mango", "pear"]);
-      assert("tropical -mango", ["kiwi"]);
-    }
+    cases: [
+      { query: "low-fat_(dairy)", expected: ["apple"] },
+      { query: "red", expected: ["apple", "cherry", "strawberry"] },
+      { query: "red sweet", expected: ["cherry", "strawberry"] },
+      { query: "red -sweet", expected: ["apple"] },
+      { query: "red apple", expected: ["apple"] },
+      { query: "red banana", expected: [] },
+      { query: "berry", expected: ["blueberry", "strawberry"] },
+      { query: "antioxidants", expected: ["apple", "cherry", "grape", "strawberry"] },
+      { query: "antioxidant", expected: ["blueberry"] },
+      { query: "antioxidants -antioxidant", expected: ["apple", "cherry", "grape", "strawberry"] },
+      { query: "vitamin-c", expected: ["kiwi", "orange", "pear", "strawberry"] },
+      { query: "juicy fiber -citrus", expected: ["mango", "pear"] },
+      { query: "sweet -berry", expected: ["cherry", "grape", "mango", "pear"] },
+      { query: "tropical -mango", expected: ["kiwi"] }
+    ]
   },
   {
     name: "or",
-    run: (assert: AssertMatches): void => {
-      assert("( red ~ blue )", ["apple", "cherry", "strawberry", "blueberry"]);
-      assert("( red ~ blue ) ( apple ~ cherry )", ["apple", "cherry"]);
-      assert("( berry ~ tart )", ["blueberry", "cherry", "kiwi", "strawberry"]);
-      assert("( vitamin-c ~ antioxidants ) sweet", ["cherry", "grape", "pear", "strawberry"]);
-      assert("( red ~ green ) -snack", ["banana", "kiwi", "pear", "strawberry"]);
-      assert("( tart ~ tropical ) ( fiber ~ smoothie )", ["cherry", "kiwi", "mango"]);
-    }
+    cases: [
+      { query: "( red ~ blue )", expected: ["apple", "cherry", "strawberry", "blueberry"] },
+      { query: "( red ~ blue ) ( apple ~ cherry )", expected: ["apple", "cherry"] },
+      { query: "( berry ~ tart )", expected: ["blueberry", "cherry", "kiwi", "strawberry"] },
+      { query: "( vitamin-c ~ antioxidants ) sweet", expected: ["cherry", "grape", "pear", "strawberry"] },
+      { query: "( red ~ green ) -snack", expected: ["banana", "kiwi", "pear", "strawberry"] },
+      { query: "( tart ~ tropical ) ( fiber ~ smoothie )", expected: ["cherry", "kiwi", "mango"] }
+    ]
   },
   {
     name: "negated or",
-    run: (assert: AssertMatches): void => {
-      assert("( red ~ -red )", allDocNames);
-      assert("( red ~ -sweet )", ["apple", "banana", "cherry", "kiwi", "orange", "strawberry"]);
-      assert("( -red ~ -sweet )", ["apple", "banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
-      assert("( red ~ -berry )", ["apple", "banana", "cherry", "grape", "kiwi", "mango", "orange", "pear", "strawberry"]);
-      assert("( -* ~ red )", ["apple", "cherry", "strawberry"]);
-      assert("fiber ( sweet ~ -red )", ["banana", "blueberry", "cherry", "kiwi", "mango", "orange", "pear"]);
-    }
+    cases: [
+      { query: "( red ~ -red )", expected: allDocNames },
+      { query: "( red ~ -sweet )", expected: ["apple", "banana", "cherry", "kiwi", "orange", "strawberry"] },
+      { query: "( -red ~ -sweet )", expected: ["apple", "banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"] },
+      { query: "( red ~ -berry )", expected: ["apple", "banana", "cherry", "grape", "kiwi", "mango", "orange", "pear", "strawberry"] },
+      { query: "( -* ~ red )", expected: ["apple", "cherry", "strawberry"] },
+      { query: "fiber ( sweet ~ -red )", expected: ["banana", "blueberry", "cherry", "kiwi", "mango", "orange", "pear"] }
+    ]
   },
   {
     name: "nested or",
-    run: (assert: AssertMatches): void => {
-      assert("( red ~ ( sweet berry ) )", ["apple", "cherry", "strawberry", "blueberry"]);
-      assert("( ( sweet berry ) ~ red )", ["apple", "cherry", "strawberry", "blueberry"]);
-      assert("( apple ~ ( green tropical ) )", ["apple", "kiwi"]);
-      assert("( ( juicy citrus ) ~ ( grainy soft ) )", ["orange", "pear"]);
-      assert("green ( red ~ ( fiber tart ) )", ["apple", "kiwi"]);
-    }
+    cases: [
+      { query: "( red ~ ( sweet berry ) )", expected: ["apple", "cherry", "strawberry", "blueberry"] },
+      { query: "( ( sweet berry ) ~ red )", expected: ["apple", "cherry", "strawberry", "blueberry"] },
+      { query: "( apple ~ ( green tropical ) )", expected: ["apple", "kiwi"] },
+      { query: "( ( juicy citrus ) ~ ( grainy soft ) )", expected: ["orange", "pear"] },
+      { query: "green ( red ~ ( fiber tart ) )", expected: ["apple", "kiwi"] }
+    ]
   },
   {
     name: "wildcard",
-    run: (assert: AssertMatches): void => {
-      assert("ch*", ["cherry"]);
-      assert("r*", ["apple", "cherry", "strawberry"]);
-      assert("*ch", ["pear"]);
-      assert("-*ch -ch* *ch*", ["apple"]);
-      assert("*ch*", ["apple", "cherry", "pear"]);
-      assert("berr*", ["blueberry", "strawberry"]);
-      assert("*berry", ["blueberry", "strawberry"]);
-      assert("*erry*", ["blueberry", "cherry", "strawberry"]);
-      assert("vitamin-*", ["kiwi", "mango", "orange", "pear", "strawberry"]);
-      assert("*c", ["kiwi", "orange", "pear", "strawberry"]);
-      assert("*vita*", ["kiwi", "mango", "orange", "pear", "strawberry"]);
-    }
+    cases: [
+      { query: "ch*", expected: ["cherry"] },
+      { query: "r*", expected: ["apple", "cherry", "strawberry"] },
+      { query: "*ch", expected: ["pear"] },
+      { query: "-*ch -ch* *ch*", expected: ["apple"] },
+      { query: "*ch*", expected: ["apple", "cherry", "pear"] },
+      { query: "berr*", expected: ["blueberry", "strawberry"] },
+      { query: "*berry", expected: ["blueberry", "strawberry"] },
+      { query: "*erry*", expected: ["blueberry", "cherry", "strawberry"] },
+      { query: "vitamin-*", expected: ["kiwi", "mango", "orange", "pear", "strawberry"] },
+      { query: "*c", expected: ["kiwi", "orange", "pear", "strawberry"] },
+      { query: "*vita*", expected: ["kiwi", "mango", "orange", "pear", "strawberry"] }
+    ]
   },
   {
     name: "mixed",
-    run: (assert: AssertMatches): void => {
-      assert("( red ~ blue ) sweet", ["cherry", "strawberry", "blueberry"]);
-      assert("( red ~ blue ) -*we*t", ["apple"]);
-      assert("( red ~ blue ) ( apple ~ ch*y )", ["apple", "cherry"]);
-      assert("( red ~ blue ) ( a* ~ cherry ) -sweet", ["apple"]);
-      assert("( r* ~ blue ) ( apple ~ cherry ) -sweet -red", []);
-      assert("*berry* sweet", ["blueberry", "strawberry"]);
-      assert("sweet -*berry", ["cherry", "grape", "mango", "pear"]);
-      assert("( s* ~ vitamin-* ) -sweet", ["apple", "banana", "kiwi", "orange"]);
-      assert("fiber sweet -*berry -green", ["cherry", "mango"]);
-      assert("small -*berry -green", ["cherry"]);
-    }
+    cases: [
+      { query: "( red ~ blue ) sweet", expected: ["cherry", "strawberry", "blueberry"] },
+      { query: "( red ~ blue ) -*we*t", expected: ["apple"] },
+      { query: "( red ~ blue ) ( apple ~ ch*y )", expected: ["apple", "cherry"] },
+      { query: "( red ~ blue ) ( a* ~ cherry ) -sweet", expected: ["apple"] },
+      { query: "( r* ~ blue ) ( apple ~ cherry ) -sweet -red", expected: [] },
+      { query: "*berry* sweet", expected: ["blueberry", "strawberry"] },
+      { query: "sweet -*berry", expected: ["cherry", "grape", "mango", "pear"] },
+      { query: "( s* ~ vitamin-* ) -sweet", expected: ["apple", "banana", "kiwi", "orange"] },
+      { query: "fiber sweet -*berry -green", expected: ["cherry", "mango"] },
+      { query: "small -*berry -green", expected: ["cherry"] }
+    ]
   },
   {
     name: "invalid",
-    run: (assert: AssertMatches): void => {
-      assert("( ~ )", []);
-      assert("( )", []);
-      assert("()", []);
-      assert("(", []);
-      assert(")", []);
-      assert("-", []);
-      assert(")-", []);
-      assert(")) apple", []);
-      assert(")) *", []);
-      assert("(apple )", []);
-      assert("( apple)", []);
-      assert("( apple ~banana )", []);
-      assert("( apple~banana )", []);
-      assert("( apple~ banana )", []);
-      assert("( apple ~ banana)", []);
-      assert("apple )", []);
-      assert("apple (", []);
-    }
+    cases: [
+      { query: "( ~ )", expected: [] },
+      { query: "( )", expected: [] },
+      { query: "()", expected: [] },
+      { query: "(", expected: [] },
+      { query: ")", expected: [] },
+      { query: "-", expected: [] },
+      { query: ")-", expected: [] },
+      { query: ")) apple", expected: [] },
+      { query: ")) *", expected: [] },
+      { query: "(apple )", expected: [] },
+      { query: "( apple)", expected: [] },
+      { query: "( apple ~banana )", expected: [] },
+      { query: "( apple~banana )", expected: [] },
+      { query: "( apple~ banana )", expected: [] },
+      { query: "( apple ~ banana)", expected: [] },
+      { query: "apple )", expected: [] },
+      { query: "apple (", expected: [] }
+    ]
   },
   {
     name: "all tags",
-    run: (assert: AssertMatches): void => {
+    run: (assert: QueryAssertion): void => {
       const orAllQuery = `( ${Array.from(allTerms).join(" ~ ")} )`;
       const andAllQuery = `${Array.from(allTerms).join(" ")}`;
 
@@ -148,139 +151,114 @@ export const searchCases: { name: string; run: (assert: AssertMatches) => void }
     }
   },
   {
-    name: "logical",
-    run: (assert: AssertMatches): void => {
-      assert("red -red", []);
-      assert("red -r*", []);
-      assert("red -*", []);
-      assert("red -*red*", []);
-      assert("red -red*", []);
-      assert("red -*red", []);
-    }
+    name: "contradiction",
+    cases: [
+      { query: "red -red", expected: [] },
+      { query: "red -r*", expected: [] },
+      { query: "red -*", expected: [] },
+      { query: "red -*red*", expected: [] },
+      { query: "red -red*", expected: [] },
+      { query: "red -*red", expected: [] }
+    ]
   },
   {
     name: "wildcard edge cases",
-    run: (assert: AssertMatches): void => {
-      assert("zzz*", []);
-      assert("*zzz*", []);
-      assert("*zzz", []);
-      assert("*z*z*", ["kiwi"]);
-      assert("( zzz* ~ red )", ["apple", "cherry", "strawberry"]);
-      assert("( zzz* ~ zzy* )", []);
-      assert("*ow*fat*", ["apple"]);
-      assert("*ita*a", ["mango"]);
-      assert("*ita*c", ["kiwi", "orange", "pear", "strawberry"]);
-      assert("-*ita*c", ["apple", "banana", "blueberry", "cherry", "grape", "mango"]);
-      assert("*vitamin-*", ["kiwi", "mango", "orange", "pear", "strawberry"]);
-      assert("( *ita*a ~ *ita*c )", ["kiwi", "mango", "orange", "pear", "strawberry"]);
-      assert("( *fat* ~ vitamin* )", ["apple", "kiwi", "mango", "orange", "pear", "strawberry"]);
-      assert("( *fat* ~ red )", ["apple", "cherry", "strawberry"]);
-    }
-  }
-];
-
-export type MetricDoc = Searchable & {
-  name: string;
-  metrics: Partial<Record<Metric, number>>;
-  getMetric: (metric: Metric) => number;
-};
-
-function metricDoc(name: string, tags: string[], metrics: Partial<Record<Metric, number>>): MetricDoc {
-  return {
-    name,
-    tags: new Set(tags),
-    metrics,
-    getMetric(metric: Metric): number {
-      return this.metrics[metric] ?? 0;
-    }
-  };
-}
-
-export const metricDocs: MetricDoc[] = [
-  metricDoc("apple", ["red"], { score: 10, width: 400, height: 100 }),
-  metricDoc("banana", ["yellow"], { score: 20, width: 100, height: 400 }),
-  metricDoc("cherry", ["red"], { score: 30, width: 200, height: 200 }),
-  metricDoc("grape", ["purple"], { score: 30, width: 300, height: 150 }),
-  metricDoc("kiwi", ["green"], { score: 5, width: 150, height: 300 })
-];
-
-export type AssertMetricMatches = (query: string, expectedNames: string[]) => void;
-
-export const metricSearchCases: { name: string; run: (assert: AssertMetricMatches) => void }[] = [
-  {
-    name: "absolute comparison",
-    run: (assert: AssertMetricMatches): void => {
-      assert("score:>15", ["banana", "cherry", "grape"]);
-      assert("score:<15", ["apple", "kiwi"]);
-      assert("score:30", ["cherry", "grape"]);
-      assert("score:>1000", []);
-    }
+    cases: [
+      { query: "zzz*", expected: [] },
+      { query: "*zzz*", expected: [] },
+      { query: "*zzz", expected: [] },
+      { query: "*z*z*", expected: ["kiwi"] },
+      { query: "( zzz* ~ red )", expected: ["apple", "cherry", "strawberry"] },
+      { query: "( zzz* ~ zzy* )", expected: [] },
+      { query: "*ow*fat*", expected: ["apple"] },
+      { query: "*ita*a", expected: ["mango"] },
+      { query: "*ita*c", expected: ["kiwi", "orange", "pear", "strawberry"] },
+      { query: "-*ita*c", expected: ["apple", "banana", "blueberry", "cherry", "grape", "mango"] },
+      { query: "*vitamin-*", expected: ["kiwi", "mango", "orange", "pear", "strawberry"] },
+      { query: "( *ita*a ~ *ita*c )", expected: ["kiwi", "mango", "orange", "pear", "strawberry"] },
+      { query: "( *fat* ~ vitamin* )", expected: ["apple", "kiwi", "mango", "orange", "pear", "strawberry"] },
+      { query: "( *fat* ~ red )", expected: ["apple", "cherry", "strawberry"] }
+    ]
   },
   {
-    name: "negated absolute comparison",
-    run: (assert: AssertMetricMatches): void => {
-      assert("-score:>15", ["apple", "kiwi"]);
-      assert("-score:30", ["apple", "banana", "kiwi"]);
-    }
+    name: "metric absolute comparison",
+    cases: [
+      { query: "score:>15", expected: ["banana", "cherry", "grape", "mango", "orange", "pear", "strawberry"] },
+      { query: "score:<15", expected: ["apple", "kiwi"] },
+      { query: "score:30", expected: ["cherry", "grape"] },
+      { query: "score:>1000", expected: [] }
+    ]
   },
   {
-    name: "absolute comparison with a tag",
-    run: (assert: AssertMetricMatches): void => {
-      assert("red score:>15", ["cherry"]);
-      assert("red -score:<15", ["cherry"]);
-    }
+    name: "metric negated absolute comparison",
+    cases: [
+      { query: "-score:>15", expected: ["apple", "blueberry", "kiwi"] },
+      { query: "-score:30", expected: ["apple", "banana", "blueberry", "kiwi", "mango", "orange", "pear", "strawberry"] }
+    ]
   },
   {
-    name: "absolute comparison inside an or group",
-    run: (assert: AssertMetricMatches): void => {
-      assert("( score:>25 ~ yellow )", ["banana", "cherry", "grape"]);
-      assert("( score:>1000 ~ red )", ["apple", "cherry"]);
-    }
+    name: "metric absolute comparison with a tag",
+    cases: [
+      { query: "red score:>15", expected: ["cherry", "strawberry"] },
+      { query: "red -score:<15", expected: ["cherry", "strawberry"] }
+    ]
   },
   {
-    name: "two absolute comparisons",
-    run: (assert: AssertMetricMatches): void => {
-      assert("score:>15 score:<30", ["banana"]);
-    }
+    name: "metric absolute comparison inside an or group",
+    cases: [
+      { query: "( score:>25 ~ yellow )", expected: ["banana", "cherry", "grape", "mango", "pear", "strawberry"] },
+      { query: "( score:>1000 ~ red )", expected: ["apple", "cherry", "strawberry"] }
+    ]
   },
   {
-    name: "relative comparison",
-    run: (assert: AssertMetricMatches): void => {
-      assert("width:>height", ["apple", "grape"]);
-      assert("width:<height", ["banana", "kiwi"]);
-    }
+    name: "metric two absolute comparisons",
+    cases: [{ query: "score:>15 score:<30", expected: ["banana", "orange"] }]
   },
   {
-    name: "negated relative comparison",
-    run: (assert: AssertMetricMatches): void => {
-      assert("-width:>height", ["banana", "cherry", "kiwi"]);
-    }
+    name: "metric relative comparison",
+    cases: [
+      { query: "width:>height", expected: ["apple", "grape", "mango", "orange"] },
+      { query: "width:<height", expected: ["banana", "kiwi", "strawberry"] }
+    ]
   },
   {
-    name: "relative comparison with a tag",
-    run: (assert: AssertMetricMatches): void => {
-      assert("red width:>height", ["apple"]);
-    }
+    name: "metric negated relative comparison",
+    cases: [{ query: "-width:>height", expected: ["banana", "blueberry", "cherry", "kiwi", "pear", "strawberry"] }]
   },
   {
-    name: "relative comparison inside an or group",
-    run: (assert: AssertMetricMatches): void => {
-      assert("( width:>height ~ yellow )", ["apple", "banana", "grape"]);
-    }
+    name: "metric relative comparison with a tag",
+    cases: [{ query: "red width:>height", expected: ["apple"] }]
   },
   {
-    name: "a metric compared to itself",
-    run: (assert: AssertMetricMatches): void => {
-      assert("width:width", ["apple", "banana", "cherry", "grape", "kiwi"]);
-      assert("width:>width", []);
-      assert("width:<width", []);
-    }
+    name: "metric relative comparison inside an or group",
+    cases: [{ query: "( width:>height ~ yellow )", expected: ["apple", "banana", "grape", "mango", "orange"] }]
   },
   {
-    name: "a negated metric compared to itself",
-    run: (assert: AssertMetricMatches): void => {
-      assert("-width:width", []);
-      assert("-width:>width", ["apple", "banana", "cherry", "grape", "kiwi"]);
-    }
+    name: "metric compared to itself",
+    cases: [
+      { query: "width:width", expected: allDocNames },
+      { query: "width:>width", expected: [] },
+      { query: "width:<width", expected: [] }
+    ]
+  },
+  {
+    name: "metric negated and compared to itself",
+    cases: [
+      { query: "-width:width", expected: [] },
+      { query: "-width:>width", expected: allDocNames }
+    ]
+  },
+  {
+    name: "tautological",
+    cases: [
+      { query: "width:width", expected: allDocNames },
+      { query: "-width:>width", expected: allDocNames },
+      { query: "-width:<width", expected: allDocNames },
+      { query: "-height:>height", expected: allDocNames },
+      { query: "( red ~ -red )", expected: allDocNames },
+      { query: "( foo ~ -foo )", expected: allDocNames },
+      { query: "( -* ~ * )", expected: allDocNames },
+      { query: "( height:0 ~ -height:0 )", expected: allDocNames }
+    ]
   }
 ];
