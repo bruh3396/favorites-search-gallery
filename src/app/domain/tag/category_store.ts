@@ -10,7 +10,7 @@ const cache: Map<string, EncodedTagCategory> = new Map();
 
 export function get(tagName: string): TagCategory | undefined {
   const encoded = cache.get(tagName);
-  return encoded === undefined ? undefined : decodeTagCategory(encoded);
+  return encoded === undefined ? undefined : decodeTagCategory(encoded) ?? "general";
 }
 
 export function persist(tagName: string, category: TagCategory): void {

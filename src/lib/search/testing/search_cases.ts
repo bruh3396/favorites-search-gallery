@@ -1,8 +1,6 @@
 import { FruitName, allDocNames, allTerms, fruitDocs } from "@/lib/search/testing/fruit_corpus";
-import { MetricSearchable } from "@/types/search";
 
 export type QueryAssertion = (query: string, expectedNames: FruitName[]) => void;
-export type MetricDoc = MetricSearchable & { name: string };
 export type SearchCase = { query: string; expected: FruitName[] };
 export type SearchCaseGroup = { name: string; cases?: SearchCase[]; run?: (assert: QueryAssertion) => void };
 

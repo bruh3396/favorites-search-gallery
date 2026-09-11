@@ -1,5 +1,6 @@
 export const FavoritesConfig = {
   useBitmapSearchEngine: true,
+  streamStoredFavoritesThreshold: 0,
 
   resultsPerPageBounds: {
     min: 1,

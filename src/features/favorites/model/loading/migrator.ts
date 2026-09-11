@@ -7,7 +7,7 @@ import { DiscreteRating } from "@/types/search";
 import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { Post } from "@/types/api";
 import { decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
-import { resolveMediaType } from "@/lib/media/type";
+import { resolveMediaType } from "@/lib/media/media_type";
 import { toTagString } from "@/utils/pure/tag";
 
 type SerializedFavorite = {
@@ -128,8 +128,8 @@ function migratePost(favorite: SerializedFavorite, imageExtension: ImageExtensio
     tags: toTagString(tagSet),
     fileURL: extension === undefined ? "" : withExtension(thumbUrlToImageUrl(previewURL), extension),
     previewURL,
-    duration: favorite.metadata.duration,
-    deleted: favorite.deleted,
+    duration: favorite.metadata.duration ?? 0,
+    deleted: favorite.deleted ?? false,
     extension,
     fetchedAt: extension === undefined ? undefined : Date.now()
   };

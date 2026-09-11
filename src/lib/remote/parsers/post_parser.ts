@@ -10,5 +10,5 @@ export function parsePost(post: ServerPost): ParsedPost {
   for (const [tagName, encoded] of Object.entries(encodedTagCategories)) {
     tagCategories.set(decodeHtmlEntities(tagName), decodeTagCategory(encoded));
   }
-  return { post: { ...rest, tags: [...tagCategories.keys()].join(" ") }, tagCategories };
+  return { post: { ...rest, tags: [...tagCategories.keys()].join(" "), deleted: false, duration: 0 }, tagCategories };
 }

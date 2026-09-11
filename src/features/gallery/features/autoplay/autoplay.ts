@@ -1,5 +1,5 @@
 import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
-import * as Icons from "@/assets/icons";
+import * as Icons from "@/assets/svg/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { clamp, toSeconds } from "@/utils/pure/number";
 import { isImageThumb, isVideoThumb } from "@/lib/ui/thumb/media_item";

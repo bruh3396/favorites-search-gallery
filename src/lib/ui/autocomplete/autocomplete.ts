@@ -1,6 +1,7 @@
 import { AUTOCOMPLETE_SELECTOR, hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
 import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
+import { HOSTNAME } from "@/lib/constants";
 import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { addCustomTagsToAutocomplete } from "@/lib/ui/autocomplete/custom_tags";
 import { fetchHtml } from "@/utils/browser/http";
@@ -151,7 +152,7 @@ async function populateAwesompleteList(inputId: string, prefix: string, awesompl
 }
 
 function getAutocompleteSuggestions(prefix: string): Promise<string> {
-  return fetchHtml(`https://ac.rule34.xxx/autocomplete.php?q=${prefix}`);
+  return fetchHtml(`https://ac.${HOSTNAME}/autocomplete.php?q=${prefix}`);
 }
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {

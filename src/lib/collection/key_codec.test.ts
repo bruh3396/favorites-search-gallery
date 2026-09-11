@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { KeyCodec } from "@/lib/collection/key_codec";
+import { KeyedIndex } from "@/lib/collection/key_codec";
 
 interface Item {
   name: string;
 }
 
-const codec = (): KeyCodec<Item> => new KeyCodec<Item>(item => item.name);
+const codec = (): KeyedIndex<Item> => new KeyedIndex<Item>(item => item.name);
 
 describe("KeyCodec", () => {
   test("encodes distinct items to ascending ids", () => {

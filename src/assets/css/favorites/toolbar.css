@@ -26,6 +26,10 @@
   background: var(--theme-gradient);
 }
 
+/* :root[data-loading] #favorites-search-button, #shuffle-button, #invert-button {
+  pointer-events: none;
+} */
+
 #favorites-toolbar-grid {
   display: grid;
   grid-template-columns:

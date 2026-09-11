@@ -22,7 +22,7 @@ describe("SortedArray", () => {
     for (let i = 0; i < 500; i += 1) {
       const num = randomInt(1000);
 
-      sortedArray.insert(num);
+      sortedArray.add(num);
       unsortedArray.push(num);
     }
 
@@ -39,7 +39,7 @@ describe("SortedArray", () => {
     for (let i = 0; i < 100; i += 1) {
       const str = Math.random().toString(36).substring(2, 7);
 
-      sortedArray.insert(str);
+      sortedArray.add(str);
       unsortedArray.push(str);
     }
 
@@ -55,7 +55,7 @@ describe("SortedArray", () => {
     const unsortedArray: string[] = [];
 
     for (const str of strings) {
-      sortedArray.insert(str);
+      sortedArray.add(str);
       unsortedArray.push(str);
     }
     testSortedArrayOrder(sortedArray);
@@ -84,7 +84,7 @@ describe("SortedArray", () => {
   test("push unsorted", () => {
     const sortedArray = new SortedArray<number>();
 
-    sortedArray.insert(5);
+    sortedArray.add(5);
     sortedArray.push(3);
     sortedArray.push(1);
     sortedArray.push(32);
@@ -96,6 +96,13 @@ describe("SortedArray", () => {
     testSortedArrayOrder(sortedArray);
   });
 
+test("addAll", () => {
+  const sortedArray = new SortedArray<number>();
+
+  sortedArray.addAll([5, 3, 1, 32, 23, 10, 7, 14]);
+  testSortedArrayOrder(sortedArray);
+});
+
   test("first on empty array", () => {
     const sortedArray = new SortedArray<number>();
 
@@ -106,7 +113,7 @@ describe("SortedArray", () => {
     const sortedArray = new SortedArray<number>();
 
     for (const n of [5, 2, 8, 1, 9, 3]) {
-      sortedArray.insert(n);
+      sortedArray.add(n);
     }
     expect(sortedArray.first()).toBe(1);
     expect(sortedArray.length).toBe(6);
@@ -127,9 +134,9 @@ describe("SortedArray", () => {
     interface Item { id: number }
     const sortedArray = new SortedArray<Item>((a, b) => a.id - b.id);
 
-    sortedArray.insert({ id: 3 });
-    sortedArray.insert({ id: 1 });
-    sortedArray.insert({ id: 2 });
+    sortedArray.add({ id: 3 });
+    sortedArray.add({ id: 1 });
+    sortedArray.add({ id: 2 });
     expect(sortedArray.first()?.id).toBe(1);
   });
 
@@ -144,7 +151,7 @@ describe("SortedArray", () => {
     const sortedArray = new SortedArray<number>();
 
     for (const n of [5, 2, 8, 1, 9, 3]) {
-      sortedArray.insert(n);
+      sortedArray.add(n);
     }
     expect(sortedArray.shift()).toBe(1);
     expect(sortedArray.shift()).toBe(2);
@@ -157,7 +164,7 @@ describe("SortedArray", () => {
     const sortedArray = new SortedArray<number>();
 
     for (const n of [5, 2, 8, 1, 9, 3]) {
-      sortedArray.insert(n);
+      sortedArray.add(n);
     }
     const drained: number[] = [];
 
@@ -184,9 +191,9 @@ describe("SortedArray", () => {
     interface Item { id: number }
     const sortedArray = new SortedArray<Item>((a, b) => a.id - b.id);
 
-    sortedArray.insert({ id: 3 });
-    sortedArray.insert({ id: 1 });
-    sortedArray.insert({ id: 2 });
+    sortedArray.add({ id: 3 });
+    sortedArray.add({ id: 1 });
+    sortedArray.add({ id: 2 });
     expect(sortedArray.shift()?.id).toBe(1);
     expect(sortedArray.shift()?.id).toBe(2);
     expect(sortedArray.shift()?.id).toBe(3);
@@ -197,7 +204,7 @@ describe("SortedArray", () => {
     const sortedArray = new SortedArray<number>();
 
     for (const n of [3, 1, 4, 1, 5, 9, 2, 6]) {
-      sortedArray.insert(n);
+      sortedArray.add(n);
     }
     expect(sortedArray.remove(4)).toBe(true);
     expect(sortedArray.toArray()).toStrictEqual([1, 1, 2, 3, 5, 6, 9]);
@@ -208,9 +215,9 @@ describe("SortedArray", () => {
   test("remove returns false when value missing", () => {
     const sortedArray = new SortedArray<number>();
 
-    sortedArray.insert(1);
-    sortedArray.insert(2);
-    sortedArray.insert(3);
+    sortedArray.add(1);
+    sortedArray.add(2);
+    sortedArray.add(3);
     expect(sortedArray.remove(99)).toBe(false);
     expect(sortedArray.toArray()).toStrictEqual([1, 2, 3]);
   });
@@ -225,9 +232,9 @@ describe("SortedArray", () => {
   test("remove one of duplicates", () => {
     const sortedArray = new SortedArray<number>();
 
-    sortedArray.insert(5);
-    sortedArray.insert(5);
-    sortedArray.insert(5);
+    sortedArray.add(5);
+    sortedArray.add(5);
+    sortedArray.add(5);
     expect(sortedArray.remove(5)).toBe(true);
     expect(sortedArray.toArray()).toStrictEqual([5, 5]);
     expect(sortedArray.remove(5)).toBe(true);
@@ -254,7 +261,7 @@ describe("SortedArray", () => {
     const sortedArray = new SortedArray<number>();
 
     for (const n of [1, 2, 3, 4, 5]) {
-      sortedArray.insert(n);
+      sortedArray.add(n);
     }
     expect(sortedArray.remove(1)).toBe(true);
     expect(sortedArray.toArray()).toStrictEqual([2, 3, 4, 5]);
@@ -274,7 +281,7 @@ describe("SortedArray", () => {
     const sortedArray = new SortedArray<Item>((a, b) => a.id - b.id);
 
     for (const item of items) {
-      sortedArray.insert(item);
+      sortedArray.add(item);
     }
     expect(sortedArray.toArray().map(i => i.id)).toStrictEqual([1, 2, 3, 4]);
 
@@ -288,9 +295,9 @@ describe("SortedArray", () => {
     interface Item { id: number }
     const sortedArray = new SortedArray<Item>((a, b) => a.id - b.id);
 
-    sortedArray.insert({ id: 1 });
-    sortedArray.insert({ id: 2 });
-    sortedArray.insert({ id: 3 });
+    sortedArray.add({ id: 1 });
+    sortedArray.add({ id: 2 });
+    sortedArray.add({ id: 3 });
     expect(sortedArray.remove({ id: 2 })).toBe(true);
     expect(sortedArray.toArray().map(i => i.id)).toStrictEqual([1, 3]);
   });

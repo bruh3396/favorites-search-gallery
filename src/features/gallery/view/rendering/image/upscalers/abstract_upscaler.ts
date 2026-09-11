@@ -32,11 +32,11 @@ export abstract class GalleryAbstractUpscaler {
     requests.forEach(request => this.directlyUpscale(request));
   }
 
-  public downscaleAll(keepIds: Set<string> = new Set()): void {
+  public downscaleAll(): void {
     this.directUpscaleQueue.reset();
 
     for (const id of [...this.upscaledIds]) {
-      if (!keepIds.has(id)) {
+      if (document.getElementById(id) === null) {
         this.upscaledIds.delete(id);
         this.evict(id);
       }

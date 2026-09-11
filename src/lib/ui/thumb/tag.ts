@@ -4,8 +4,8 @@ import { toSortedTagSet } from "@/utils/pure/tag";
 
 let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
 
-export function setFavoriteTagsLookup(fn: (id: string) => Set<string> | undefined): void {
-  getFavoriteTags = fn;
+export function setFavoriteTagsLookup(lookup: (id: string) => Set<string> | undefined): void {
+  getFavoriteTags = lookup;
 }
 
 export function getTagsFromThumb(thumb: HTMLElement): string {

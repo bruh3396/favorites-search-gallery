@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { parseSearchExpression, tryParseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
-import { BitmapEvaluator } from "@/lib/search/bitmap/logic/bitmap_evaluator";
-import { BitmapIndex } from "@/lib/search/bitmap/indexes/bitmap_index";
-import { MetricBitmapIndex } from "@/lib/search/bitmap/indexes/metric_index";
-import { PostingResolver } from "@/lib/search/bitmap/resolution/posting_resolver";
+import { BitEvaluator } from "@/lib/search/engines/bit/logic/bit_evaluator";
+import { BitIndex } from "@/lib/search/engines/bit/indexes/bit_index";
+import { MetricBitIndex } from "@/lib/search/engines/bit/indexes/metric_index";
+import { PostingResolver } from "@/lib/search/engines/bit/resolution/posting_resolver";
 import { Searchable } from "@/types/search";
-import { WildcardPostingResolver } from "@/lib/search/bitmap/resolution/wildcard_posting_resolver";
+import { WildcardPostingResolver } from "@/lib/search/engines/bit/resolution/wildcard_posting_resolver";
 
 interface Item extends Searchable { id: string }
 
@@ -13,18 +13,18 @@ function item(id: string, ...tags: string[]): Item {
   return { id, tags: new Set(tags) };
 }
 
-function evaluatorFor(items: Item[]): BitmapEvaluator<Item> {
-  const bitmapIndex = new BitmapIndex<Item>(doc => doc.tags);
+function evaluatorFor(items: Item[]): BitEvaluator<Item> {
+  const bitIndex = new BitIndex<Item>(doc => doc.tags);
 
-  bitmapIndex.build(items);
-  const metricIndex = new MetricBitmapIndex<Item>(doc => doc.id.length);
+  bitIndex.build(items);
+  const metricIndex = new MetricBitIndex<Item>(doc => doc.id.length);
 
-  metricIndex.build(bitmapIndex.width, bitmapIndex.positionalDocs());
-  const wildcardResolver = new WildcardPostingResolver(bitmapIndex);
+  metricIndex.build(bitIndex.width, bitIndex.positionalDocs());
+  const wildcardResolver = new WildcardPostingResolver(bitIndex);
 
-  wildcardResolver.index(bitmapIndex.indexedTerms());
-  const resolver = new PostingResolver(bitmapIndex, metricIndex, wildcardResolver);
-  return new BitmapEvaluator(bitmapIndex, resolver);
+  wildcardResolver.index(bitIndex.indexedTerms());
+  const resolver = new PostingResolver(bitIndex, metricIndex, wildcardResolver);
+  return new BitEvaluator(bitIndex, resolver);
 }
 
 const corpus: Item[] = [

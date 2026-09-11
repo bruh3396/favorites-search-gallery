@@ -22,6 +22,8 @@ export function parsePostFromPostPage(html: string): ParsedPost {
       score: Number(statistics.score),
       rating,
       change: 0,
+      deleted: true,
+      duration: 0,
       tags,
       fileURL: fileUrl,
       previewURL: ""

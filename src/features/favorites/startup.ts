@@ -34,13 +34,14 @@ function setup(): void {
   subscribeToPreferences();
   subscribeToDomEvents();
   serveFavoritesPageRequests();
-  setFavoriteTagsLookup(FavoritesModel.getFavoriteTags);
 }
 
 function start(): void {
   FavoritesView.removeOriginalUnusedScripts();
   deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
+  setFavoriteTagsLookup((id: string) => FavoritesModel.getFavorite(id)?.tags);
   FavoritesView.showSkeleton();
+  // FavoritesView.toggleSearchInputs(false);
   const nativeFavorites = FavoritesView.takeNativeFavorites();
 
   FavoritesFlows.Load.loadAllFavorites(ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined);
@@ -50,7 +51,8 @@ function setupSubFeatures(): void {
   FavoritesFeatures.setup({
     downloader: {
       getSearchResults: FavoritesModel.getCurrentSearchResults,
-      getTagCategory: TagCategoryStore.get
+      getTagCategory: TagCategoryStore.get,
+      getTagsForIds: FavoritesModel.getTagsForIds
     },
     snippets: {
       appendToSearch: FavoritesControl.appendToSearch,

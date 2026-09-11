@@ -24,8 +24,3 @@ export interface FavoritesDisplay {
   goToPage: (pageNumber: number) => void;
   teardown: () => void;
 }
-
-export interface NewFavoritesResult {
-  favorites: Favorite[];
-  searchResults: Favorite[];
-}

@@ -1,44 +1,118 @@
-import { isGif, isVideo } from "@/lib/media/type";
+import { isGif, isVideo } from "@/lib/media/media_type";
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { BoundaryEdge } from "@/types/boundary";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
-import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
+import { Renderer } from "@/features/gallery/types/gallery_types";
 import { forceReflow } from "@/utils/browser/element";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
-const renderers: GalleryRenderer[] = [GalleryImageRenderer, GalleryVideoRenderer, GalleryGifRenderer];
+export class GalleryRenderer {
+  private readonly root: HTMLElement;
+  private readonly imageRenderer: GalleryImageRenderer;
+  private readonly videoRenderer: GalleryVideoRenderer;
+  private readonly gifRenderer: GalleryGifRenderer;
+  private readonly renderers: Renderer[];
 
-export function setup(root: HTMLElement, onVideoEnded: () => void, onVideoDoubleClicked: (event: MouseEvent) => void, onVolumeChanged: (volume: number) => void): void {
-  renderers.forEach(r => root.appendChild(r.root));
-  GalleryVideoRenderer.setup(onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
-}
-
-export function render(thumb: HTMLElement): void {
-  hide();
-  resolve(thumb).render(thumb);
-}
-
-export function nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
-  const renderer = resolve(thumb);
-
-  if (renderer === GalleryVideoRenderer) {
-    return;
+  constructor(
+    root: HTMLElement,
+    onVideoEnded: () => void,
+    onVideoDoubleClicked: (event: MouseEvent) => void,
+    onVolumeChanged: (volume: number) => void
+  ) {
+    this.root = root;
+    this.imageRenderer = new GalleryImageRenderer();
+    this.videoRenderer = new GalleryVideoRenderer(onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
+    this.gifRenderer = new GalleryGifRenderer();
+    this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
+    this.renderers.forEach((renderer) => this.root.appendChild(renderer.root));
   }
-  const root = renderer.root;
 
-  removeDataset(root, "nudge");
-  forceReflow(root);
-  setDataset(root, "nudge", direction);
-}
+  public render(thumb: HTMLElement): void {
+    this.hide();
+    this.resolve(thumb).render(thumb);
+  }
 
-export const hide = (): void => renderers.forEach(r => r.hide());
-export const cache = (thumbs: HTMLElement[]): void => renderers.forEach(r => r.cache(thumbs));
-export { toggleZoom, toggleZoomCursor, toggleUpscaler, zoomToPoint, cacheImages, upscale, upscaleCachedThumbs, downscaleAll, reupscaleCachedThumbs, correctOrientation } from "@/features/gallery/view/rendering/image/renderer";
-export { toggleVideoLooping, restartVideo, toggleVideoPause, setVideoMuted } from "@/features/gallery/view/rendering/video/renderer";
+  public nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
+    const renderer = this.resolve(thumb);
 
-function resolve(thumb: HTMLElement): GalleryRenderer {
-  const item = toMediaItem(thumb);
-  return isVideo(item) ? GalleryVideoRenderer : isGif(item) ? GalleryGifRenderer : GalleryImageRenderer;
+    if (renderer === this.videoRenderer) {
+      return;
+    }
+    const rendererRoot = renderer.root;
+
+    removeDataset(rendererRoot, "nudge");
+    forceReflow(rendererRoot);
+    setDataset(rendererRoot, "nudge", direction);
+  }
+
+  public hide(): void {
+    this.renderers.forEach((renderer) => renderer.hide());
+  }
+
+  public cache(thumbs: HTMLElement[]): void {
+    this.renderers.forEach((renderer) => renderer.cache(thumbs));
+  }
+
+  public toggleZoom(value: boolean | undefined): boolean {
+    return this.imageRenderer.toggleZoom(value);
+  }
+
+  public toggleZoomCursor(value: boolean): boolean {
+    return this.imageRenderer.toggleZoomCursor(value);
+  }
+
+  public toggleUpscaler(value: boolean): void {
+    this.imageRenderer.toggleUpscaler(value);
+  }
+
+  public zoomToPoint(x: number, y: number): void {
+    this.imageRenderer.zoomToPoint(x, y);
+  }
+
+  public cacheImages(thumbs: HTMLElement[]): Promise<void> {
+    return this.imageRenderer.cache(thumbs);
+  }
+
+  public upscale(thumbs: HTMLElement[]): Promise<void> {
+    return this.imageRenderer.upscale(thumbs);
+  }
+
+  public upscaleCachedThumbs(): void {
+    this.imageRenderer.upscaleCachedThumbs();
+  }
+
+  public downscaleAll(): void {
+    this.imageRenderer.downscaleAll();
+  }
+
+  public reupscaleCachedThumbs(): void {
+    this.imageRenderer.reupscaleCachedThumbs();
+  }
+
+  public correctOrientation(): void {
+    this.imageRenderer.correctOrientation();
+  }
+
+  public toggleVideoLooping(value: boolean): void {
+    this.videoRenderer.toggleVideoLooping(value);
+  }
+
+  public restartVideo(): void {
+    this.videoRenderer.restartVideo();
+  }
+
+  public toggleVideoPause(): void {
+    this.videoRenderer.toggleVideoPause();
+  }
+
+  public setVideoMuted(muted: boolean): void {
+    this.videoRenderer.setVideoMuted(muted);
+  }
+
+  private resolve(thumb: HTMLElement): Renderer {
+    const item = toMediaItem(thumb);
+    return isVideo(item) ? this.videoRenderer : isGif(item) ? this.gifRenderer : this.imageRenderer;
+  }
 }

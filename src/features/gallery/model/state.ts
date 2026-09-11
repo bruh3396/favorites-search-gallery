@@ -1,25 +1,34 @@
 import { GalleryState } from "@/types/app";
 import { Preferences } from "@/app/context/preferences";
 
-let currentState = initialState();
+export class GalleryStateController {
+  private state: GalleryState = Preferences.gallery.previewEnabled.value ? "preview" : "idle";
 
-export const getCurrentState = (): GalleryState => currentState;
-export const isInGallery = (): boolean => currentState === "open";
-export const isShowingPreviews = (): boolean => currentState === "preview";
-export const isIdle = (): boolean => currentState === "idle";
+  public get currentState(): GalleryState {
+    return this.state;
+  }
 
-export function open(): void {
-  currentState = "open";
-}
+  public get isIdle(): boolean {
+    return this.state === "idle";
+  }
 
-export function close(): void {
-  currentState = "idle";
-}
+  public get isShowingPreviews(): boolean {
+    return this.state === "preview";
+  }
 
-export function preview(value: boolean): void {
-  currentState = currentState === "open" ? "open" : value ? "preview" : "idle";
-}
+  public get isInGallery(): boolean {
+    return this.state === "open";
+  }
 
-function initialState(): GalleryState {
-  return Preferences.gallery.previewEnabled.value ? "preview" : "idle";
+  public open(): void {
+    this.state = "open";
+  }
+
+  public close(): void {
+    this.state = "idle";
+  }
+
+  public preview(value: boolean): void {
+    this.state = this.state === "open" ? "open" : value ? "preview" : "idle";
+  }
 }

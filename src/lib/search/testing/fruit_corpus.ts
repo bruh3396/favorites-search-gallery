@@ -1,5 +1,5 @@
 import { MetricSearchable, SearchableMetric } from "@/types/search";
-import { InvertedIndex } from "@/lib/search/set/indexes/inverted_index";
+import { InvertedIndex } from "@/lib/search/engines/set/indexes/inverted_index";
 import { createSearchable } from "@/lib/search/testing/searchable";
 
 export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";
@@ -26,7 +26,7 @@ function fruit(name: FruitName, tags: string[], metrics: Partial<Record<Searchab
 
 export const fruitDocs: Fruit[] = [
   fruit("apple", ["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"], { score: 10, width: 400, height: 100 }),
-  fruit("banana", ["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast"], { score: 20, width: 100, height: 400 }),
+  fruit("banana", ["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast", "a12345"], { score: 20, width: 100, height: 400 }),
   fruit("cherry", ["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert"], { score: 30, width: 200, height: 200 }),
   fruit("grape", ["grape", "purple", "sweet", "small", "green", "snack", "juicy", "antioxidants", "seedless"], { score: 30, width: 300, height: 150 }),
   fruit("kiwi", ["kiwi", "green", "tart", "fiber", "vitamin-c", "fuzzy", "tropical", "small", "smoothie"], { score: 5, width: 150, height: 300 }),

@@ -1,10 +1,12 @@
+import { Metric, Rating, Searchable } from "@/types/search";
 import { MediaItem } from "@/types/media";
-import { Metric } from "@/types/search";
 import { Post } from "@/types/api";
 
-export interface Favorite extends MediaItem {
+export interface Favorite extends MediaItem, Searchable {
+  rating: Rating;
   root: HTMLElement;
   post: Post;
+  tags: Set<string>;
   enrich: (post: Post) => void;
   setDuration: (duration: number) => void;
   getMetric: (metric: Metric) => number;

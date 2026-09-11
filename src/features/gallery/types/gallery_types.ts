@@ -1,6 +1,6 @@
 import { GalleryMenuAction } from "@/types/app";
 
-export interface GalleryRenderer {
+export interface Renderer {
   root: HTMLElement;
   render: (thumb: HTMLElement) => void;
   hide: () => void;

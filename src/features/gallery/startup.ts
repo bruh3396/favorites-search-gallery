@@ -32,9 +32,9 @@ async function waitUntilPageIsReady(): Promise<void> {
 }
 
 function setup(): void {
-  setupSubFeatures();
   setupModel();
   setupView();
+  setupSubFeatures();
   setupControl();
   subscribeToEvents();
   serveExternalRequests();

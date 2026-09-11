@@ -1,5 +1,5 @@
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
-import { SearchQuery } from "@/lib/search/set/logic/search_query";
+import { SearchQuery } from "@/lib/search/engines/set/logic/search_query";
 import { desugarNestedOrGroups } from "@/lib/search/parsers/nested_or_group_desugarer";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";

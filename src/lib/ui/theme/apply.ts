@@ -1,5 +1,6 @@
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { ORIGIN } from "@/lib/constants";
 import { Theme } from "@/lib/ui/theme/themes";
 import { macroTask } from "@/lib/async/scheduling";
 import { writeCookie } from "@/utils/browser/cookie";
@@ -21,5 +22,5 @@ export function toggleGradient(enabled: boolean): void {
 function nativeStylesheetURL(dark: boolean): string {
   const platform = ON_DESKTOP_DEVICE ? "desktop" : "mobile";
   const mode = dark ? "-dark" : "";
-  return `https://rule34.xxx//css/${platform}${mode}.css?46`;
+  return `${ORIGIN}//css/${platform}${mode}.css?46`;
 }

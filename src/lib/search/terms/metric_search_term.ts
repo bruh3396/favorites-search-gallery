@@ -4,7 +4,7 @@ import { MetricComparison } from "@/lib/search/parsers/metric_comparison";
 
 type Comparator = (a: number, b: number) => boolean;
 
-const comparators: Record<MetricComparator, Comparator> = {
+export const comparators: Record<MetricComparator, Comparator> = {
   ":": (a, b) => a === b,
   ":<": (a, b) => a < b,
   ":>": (a, b) => a > b

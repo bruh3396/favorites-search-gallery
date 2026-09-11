@@ -1,3 +1,8 @@
+export function isUrl(value: string): boolean {
+  const parsed = URL.parse(value);
+  return parsed !== null && (parsed.protocol === "http:" || parsed.protocol === "https:");
+}
+
 export function readQueryParam(url: string, name: string): string | null {
   return new URL(url).searchParams.get(name);
 }

@@ -4,6 +4,7 @@ import { FavoriteItem } from "@/features/favorites/types/favorite_item";
 import { FavoritesConcurrentFetcher } from "@/features/favorites/model/loading/concurrent_fetcher";
 import { FavoritesMigrator } from "@/features/favorites/model/loading/migrator";
 import { FavoritesStore } from "@/features/favorites/model/loading/store";
+import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoritesLoader {
   private readonly store = new FavoritesStore();
@@ -11,6 +12,14 @@ export class FavoritesLoader {
 
   public readStoredFavorites(): Promise<FavoriteItem[]> {
     return this.store.readAll().then(posts => posts.map(post => new FavoriteItem(post)));
+  }
+
+  public streamStoredFavorites(onBatch: (favorites: FavoriteItem[]) => void): Promise<void> {
+    return this.store.streamAll(posts => onBatch(posts.map(post => new FavoriteItem(post))));
+  }
+
+  public countStoredFavorites(): Promise<number> {
+    return this.store.count();
   }
 
   public fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
@@ -53,6 +62,11 @@ export class FavoritesLoader {
 
   public loadFavoriteIds(): Promise<string[]> {
     return this.store.readIds();
+  }
+
+  public async getTagsForIds(ids: string[]): Promise<Map<string, Set<string>>> {
+    const posts = await this.store.readMany(ids);
+    return new Map(posts.map(post => [post.id, toTagSet(post.tags)]));
   }
 
   public destroyStore(): Promise<void> {

@@ -20,8 +20,8 @@ function releaseUnusedGlobals(): void {
   for (const global of unused) {
     try {
       delete (window as unknown as Record<string, unknown>)[global];
-    } catch {
-      // Non-configurable global slipped through; leave it in place.
+    } catch (error) {
+      console.error(error);
     }
   }
 }

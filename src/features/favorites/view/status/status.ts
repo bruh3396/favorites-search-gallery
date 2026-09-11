@@ -1,10 +1,8 @@
 import * as FavoritesEta from "@/features/favorites/view/status/eta";
 import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { NewFavoritesResult } from "@/features/favorites/types/types";
 import { Root } from "@/app/layout/shell";
 import { Timeout } from "@/types/async";
-import { pluralSuffix } from "@/utils/pure/string";
 
 let resultsCountIndicator: HTMLElement;
 let statusIndicator: HTMLElement;
@@ -45,11 +43,13 @@ export function updateFetchStatus(completed: number, resultsCount: number): void
   setResultsCount(resultsCount);
 }
 
-export function notifyNewFavoritesFound(newFavorites: NewFavoritesResult): void {
-  const newFavoritesCount = newFavorites.favorites.length;
-
-  if (newFavoritesCount > 0) {
-    setStatus(`Found ${newFavoritesCount} new favorite${pluralSuffix(newFavoritesCount)}`);
+export function setLoadProgress(loaded: number, total: number): void {
+  if (total > 0) {
+    progressBar.setProgress(loaded, total);
+    progressBar.setVisible(true);
+    setStatus(`Loading favorites - ${loaded} / ${total}`);
+  } else {
+    setStatus("Loading favorites");
   }
 }
 
@@ -64,7 +64,7 @@ export function setup(): void {
   Root.querySelector(`#${FavoritesId.toolbar}`)?.append(progressBar.element);
 }
 
-function clearStatus(): void {
+export function clearStatus(): void {
   statusIndicator.textContent = "";
   progressBar.setVisible(false);
 }

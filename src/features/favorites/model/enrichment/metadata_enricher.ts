@@ -4,7 +4,7 @@ import { ParsedPost, Post } from "@/types/api";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { TermUpdate } from "@/lib/search/search_engine";
+import { TermUpdate } from "@/lib/search/engines/search_engine";
 import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoritesMetadataEnricher {
@@ -25,10 +25,11 @@ export class FavoritesMetadataEnricher {
   }
 
   private applyPost(favorite: Favorite | undefined, { post, tagCategories }: ParsedPost): void {
+    TagCategoryStore.persistAll(tagCategories);
+
     if (favorite === undefined) {
       return;
     }
-    TagCategoryStore.persistAll(tagCategories);
 
     if (tagsAreDifferent(favorite, post)) {
       const oldTags = new Set(favorite.tags);
@@ -38,6 +39,7 @@ export class FavoritesMetadataEnricher {
     } else {
       favorite.enrich(post);
     }
+
     this.onFavoriteEnriched(favorite);
   }
 }

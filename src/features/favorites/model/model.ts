@@ -1,16 +1,15 @@
-import { FavoritesModelDependencies, NewFavoritesResult } from "@/features/favorites/types/types";
-import { FavoritesSearcher, SearcherConfig } from "@/features/favorites/model/search/searcher";
-import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
-import { Rating, SortKey } from "@/types/search";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesEnricher } from "@/features/favorites/model/enrichment/enricher";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
+import { FavoritesModelDependencies } from "@/features/favorites/types/types";
+import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
 import { IdentifiedList } from "@/lib/collection/identified_list";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
 import { Preferences } from "@/app/context/preferences";
+import { searcherConfig } from "@/features/favorites/model/config";
 
 const collection = new IdentifiedList<Favorite>();
 const searcher = new FavoritesSearcher(searcherConfig());
@@ -29,12 +28,22 @@ export async function loadStoredFavorites(): Promise<void> {
   const favorites = await loader.readStoredFavorites();
 
   collection.setAll(favorites);
-  searcher.index(favorites);
   enricher.enrich(favorites);
 }
 
-export function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
-  return loader.fetchAllFavorites((favorites) => {
+export async function streamStoredFavorites(onBatch: (count: number) => void): Promise<void> {
+  let loadedCount = 0;
+
+  await loader.streamStoredFavorites((favorites) => {
+    collection.append(favorites);
+    loadedCount += favorites.length;
+    onBatch(loadedCount);
+  });
+  enricher.enrich(collection.getAll());
+}
+
+export async function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
+  await loader.fetchAllFavorites((favorites) => {
     collection.append(favorites);
     searcher.add(favorites);
     enricher.enrich(favorites);
@@ -42,24 +51,30 @@ export function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favor
   }, firstPageFavorites);
 }
 
-export function fetchNewFavorites(firstPageFavorites?: HTMLElement[]): Promise<NewFavoritesResult> {
+export function fetchNewFavorites(firstPageFavorites?: HTMLElement[]): Promise<Favorite[]> {
   return loader.fetchNewFavorites(collection.getAllIds(), firstPageFavorites)
-    .then((favorites) => {
-      if (favorites.length > 0) {
-        collection.prepend(favorites);
-        searcher.index(collection.getAll());
-        enricher.enrich(favorites);
+    .then((newFavorites) => {
+      if (newFavorites.length > 0) {
+        collection.prepend(newFavorites);
+        searcher.add(newFavorites);
+        enricher.enrich(newFavorites);
       }
-      return { favorites, searchResults: searcher.prependResults(favorites) };
+      return newFavorites;
     });
 }
 
-export const getFavoriteTags = (id: string): Set<string> | undefined => collection.get(id)?.tags;
+export function indexAllFavorites(): void {
+  const favorites = collection.getAll();
+
+  searcher.index(favorites);
+}
+
 export const getAllFavorites = (): Favorite[] => collection.getAll();
 export const getFavorite = (id: string): Favorite | undefined => collection.get(id);
 
 export const searchFavorites = (query: string): Favorite[] => searcher.search(collection.getAll(), query);
 export const reSearchFavorites = (): Favorite[] => searcher.reSearch(collection.getAll());
+export const searchSpecificFavorites = (favorites: Favorite[]): Favorite[] => searcher.reSearch(favorites);
 export const invertSearchResults = (): Favorite[] => searcher.invertResults();
 export const getCurrentSearchQuery = (): string => searcher.getCurrentSearchQuery();
 export const getCurrentSearchResults = (): Favorite[] => searcher.getCurrentSearchResults();
@@ -69,7 +84,9 @@ export const destroyStore = (): Promise<void> => loader.destroyStore();
 export const deleteStoredFavorite = (id: string): Promise<void> => loader.deleteStoredFavorite(id);
 export const storeFavorites = (favorites: Favorite[]): Promise<void> => loader.storeFavorites(favorites);
 export const hasStoredFavorites = (): Promise<boolean> => loader.hasStoredFavorites();
+export const countStoredFavorites = (): Promise<number> => loader.countStoredFavorites();
 export const loadFavoriteIds = (): Promise<string[]> => loader.loadFavoriteIds();
+export const getTagsForIds = (ids: string[]): Promise<Map<string, Set<string>>> => loader.getTagsForIds(ids);
 export const destroyLegacyStores = (): void => loader.destroyLegacyStores();
 export const migrateLegacyStores = (onMigrating: () => void): Promise<void> => loader.migrateLegacyStores(onMigrating);
 
@@ -83,14 +100,3 @@ export const selectWrappedAdjacentPage = (direction: NavigationKey): boolean => 
 export const atFinalPage = (): boolean => paginator.atFinalPage();
 export const hasOnlyOnePage = (): boolean => paginator.hasOnlyOnePage();
 export const paginationContext = (): PaginationState => paginator.paginationState();
-
-function searcherConfig(): SearcherConfig {
-  return {
-    usingBlacklist: (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.favorites.excludeBlacklist.value,
-    enforcingBlacklist: (): boolean => !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE,
-    blacklistTags: NEGATED_BLACKLISTED_TAGS,
-    allowedRatings: (): Rating => Preferences.favorites.allowedRatings.value,
-    sortKey: (): SortKey => Preferences.favorites.sortKey.value,
-    sortAscending: (): boolean => Preferences.favorites.sortAscending.value
-  };
-}

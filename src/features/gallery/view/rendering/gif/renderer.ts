@@ -1,48 +1,50 @@
 import { GalleryConfig } from "@/config/gallery_config";
-import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
-import { doNothing } from "@/utils/pure/function";
+import { Renderer } from "@/features/gallery/types/gallery_types";
 import { gifUrl } from "@/lib/media/url";
-import { isGif } from "@/lib/media/type";
+import { isGif } from "@/lib/media/media_type";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
-const root = document.createElement("div");
-const gif = document.createElement("img");
-const preloadedGifs: HTMLImageElement[] = [];
+export class GalleryGifRenderer implements Renderer {
+  public readonly root: HTMLDivElement;
+  private readonly gif: HTMLImageElement;
+  private readonly preloadedGifs: HTMLImageElement[] = [];
 
-root.id = "gif-container";
-root.className = "gallery-image-frame";
-gif.className = "gallery-image";
-root.appendChild(gif);
+  constructor() {
+    this.root = document.createElement("div");
+    this.gif = document.createElement("img");
+    this.root.id = "gif-container";
+    this.root.className = "gallery-image-frame";
+    this.gif.className = "gallery-image";
+    this.root.appendChild(this.gif);
+  }
 
-export const GalleryGifRenderer = {
-  root,
-  render,
-  hide,
-  cache: GalleryConfig.gifPreloadingEnabled ? cacheGifs : doNothing
-} satisfies GalleryRenderer;
+  public render(thumb: HTMLElement): void {
+    this.root.style.visibility = "visible";
+    this.gif.src = "";
+    this.gif.src = gifUrl(toMediaItem(thumb));
+  }
 
-function render(thumb: HTMLElement): void {
-  root.style.visibility = "visible";
-  gif.src = "";
-  gif.src = gifUrl(toMediaItem(thumb));
-}
+  public hide(): void {
+    this.root.style.visibility = "hidden";
+    this.gif.src = "";
+  }
 
-function hide(): void {
-  root.style.visibility = "hidden";
-  gif.src = "";
-}
+  public cache(thumbs: HTMLElement[]): void {
+    if (!GalleryConfig.gifPreloadingEnabled) {
+      return;
+    }
 
-function cacheGifs(thumbs: HTMLElement[]): void {
-  const gifSources = thumbs
-    .map((thumb) => toMediaItem(thumb))
-    .filter((item) => isGif(item))
-    .slice(0, GalleryConfig.preloadedGifCount)
-    .map((item) => gifUrl(item));
+    const gifSources = thumbs
+      .map((thumb) => toMediaItem(thumb))
+      .filter((item) => isGif(item))
+      .slice(0, GalleryConfig.preloadedGifCount)
+      .map((item) => gifUrl(item));
 
-  for (const source of gifSources) {
-    const preloadedGif = new Image();
+    for (const source of gifSources) {
+      const preloadedGif = new Image();
 
-    preloadedGif.src = source;
-    preloadedGifs.push(preloadedGif);
+      preloadedGif.src = source;
+      this.preloadedGifs.push(preloadedGif);
+    }
   }
 }

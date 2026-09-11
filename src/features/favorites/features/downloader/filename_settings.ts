@@ -7,8 +7,8 @@ import { capitalize } from "@/utils/pure/string";
 
 const CATEGORIES: FilenameCategory[] = ["artist", "character", "copyright"];
 
-export function filenameFor(item: MediaItem, extension: string): string {
-  return buildFilename(item, extension, selectedCategories(), FavoritesDownloaderDependencies.getTagCategory);
+export function filenameFor(item: MediaItem, tags: Set<string>, extension: string): string {
+  return buildFilename(item, tags, extension, selectedCategories(), FavoritesDownloaderDependencies.getTagCategory);
 }
 
 export function categoryOptions(): Map<number, string> {

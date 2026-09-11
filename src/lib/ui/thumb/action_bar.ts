@@ -3,7 +3,7 @@ import { camelToKebabCase, capitalize } from "@/utils/pure/string";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
-import { Svg } from "@/assets/svg";
+import { Svg } from "@/assets/svg/svg";
 import { ThumbConfig } from "@/config/thumb_config";
 import { downloadFromThumb } from "@/lib/media/download";
 import { openPost } from "@/lib/remote/fetchers/action";

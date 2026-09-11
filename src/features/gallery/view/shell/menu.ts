@@ -1,4 +1,4 @@
-import * as Icons from "@/assets/icons";
+import * as Icons from "@/assets/svg/icons";
 import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { GalleryConfig } from "@/config/gallery_config";

@@ -1,10 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { PrefixIndex } from "@/lib/search/indexes/prefix_index";
+import { SortedArray } from "@/lib/collection/sorted_array";
+import { compareStrings } from "@/utils/pure/string";
 
 const terms = ["ana", "banana", "band", "bandana", "brand", "cabana", "canvas", "sandbox"].slice().sort();
 
 describe("PrefixIndex", () => {
-  const index = new PrefixIndex(terms);
+  const index = new PrefixIndex(new SortedArray<string>((a, b) => compareStrings(a, b), terms));
 
   test("finds the contiguous run of terms sharing the prefix", () => {
     expect(index.termsMatchingPrefix("ban")).toEqual(["banana", "band", "bandana"]);
@@ -31,29 +33,6 @@ describe("PrefixIndex", () => {
   });
 
   test("empty index returns nothing", () => {
-    expect(new PrefixIndex([]).termsMatchingPrefix("ban")).toEqual([]);
-  });
-});
-
-describe("PrefixIndex mutation", () => {
-  test("addTerm keeps the run sorted and findable", () => {
-    const index = new PrefixIndex(terms);
-
-    index.add("banjo");
-    expect(index.termsMatchingPrefix("ban")).toEqual(["banana", "band", "bandana", "banjo"]);
-  });
-
-  test("removeTerm drops the term from its prefix run", () => {
-    const index = new PrefixIndex(terms);
-
-    index.remove("band");
-    expect(index.termsMatchingPrefix("ban")).toEqual(["banana", "bandana"]);
-  });
-
-  test("allTerms returns the sorted corpus", () => {
-    const index = new PrefixIndex(terms);
-
-    index.add("banjo");
-    expect(index.all()).toEqual([...terms, "banjo"].slice().sort());
+    expect(new PrefixIndex(new SortedArray()).termsMatchingPrefix("ban")).toEqual([]);
   });
 });
