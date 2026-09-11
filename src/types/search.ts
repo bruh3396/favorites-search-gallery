@@ -7,7 +7,7 @@ export type EncodedTagCategoryMap = Record<string, EncodedTagCategory>;
 
 export type Metric = "default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random" | "duration";
 export type SortKey = Metric;
-export type SearchableMetric = "id" | "score" | "width" | "height" | "duration";
+export type SearchableMetric = Exclude<Metric, "default" | "creationTimestamp" | "lastChangedTimestamp" | "random">;
 export type MetricComparator = ":" | ":<" | ":>";
 
 export type TagEditDatabaseRecord = {

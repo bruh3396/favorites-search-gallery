@@ -1,36 +1,38 @@
-import { KeyCodec } from "@/lib/collection/key_codec";
-import { identity } from "@/utils/pure/function";
+import { KeyedIndex } from "@/lib/collection/key_codec";
+import { SortedArray } from "@/lib/collection/sorted_array";
 import { intersectSortedNumbers } from "@/utils/pure/array";
 import { trigramsOf } from "@/utils/pure/string";
 
-export class TrigramIndex<T = string> {
+export class TrigramIndex {
+  private readonly terms: SortedArray<string>;
   private readonly idsByTrigram: Map<string, number[]> = new Map<string, number[]>();
-  private readonly codec: KeyCodec<T>;
+  private readonly codec: KeyedIndex<string>;
 
-  constructor(items: T[], keyOf: (item: T) => string = identity as (item: T) => string) {
-    this.codec = new KeyCodec<T>(keyOf);
+  constructor(terms: SortedArray<string>) {
+    this.codec = new KeyedIndex<string>(s => s);
+    this.terms = terms;
 
-    for (const item of items) {
-      this.add(item);
+    for (const term of terms.toArray()) {
+      this.add(term);
     }
   }
 
-  public termsMatching(fragment: string, corpus: T[]): T[] {
-    return fragment.length < 3 ? corpus : this.codec.decode(this.candidates(fragment));
+  public termsMatching(fragment: string): string[] {
+    return fragment.length < 3 ? this.terms.toArray() : this.codec.decode(this.candidates(fragment));
   }
 
-  public termsMatchingAll(fragments: string[], corpus: T[]): T[] {
+  public termsMatchingAll(fragments: string[]): string[] {
     const narrowing = fragments.filter(fragment => fragment.length >= 3);
-    return narrowing.length === 0 ? corpus : this.codec.decode(this.candidatesOfAll(narrowing));
+    return narrowing.length === 0 ? this.terms.toArray() : this.codec.decode(this.candidatesOfAll(narrowing));
   }
 
-  public add(item: T): void {
-    const key = this.codec.keyOf(item);
+  public add(term: string): void {
+    const key = this.codec.keyOf(term);
 
     if (this.codec.hasKey(key)) {
       return;
     }
-    const id = this.codec.encode(item);
+    const id = this.codec.encode(term);
 
     for (const trigram of trigramsOf(key)) {
       const memberIds = this.idsByTrigram.get(trigram);
@@ -43,8 +45,8 @@ export class TrigramIndex<T = string> {
     }
   }
 
-  public remove(item: T): void {
-    const key = this.codec.keyOf(item);
+  public remove(term: string): void {
+    const key = this.codec.keyOf(term);
     const id = this.codec.forget(key);
 
     if (id === undefined) {

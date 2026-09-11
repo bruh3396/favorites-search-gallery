@@ -4,7 +4,6 @@ import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser
 
 const TERMS = ["banana", "bandana", "cabana", "canvas", "brand"];
 
-/** Minimal concrete resolver: the union is just the sorted list of matching terms. */
 class ListResolver extends WildcardResolver<string[]> {
   public combine = vi.fn((matches: string[]): string[] => matches.slice().sort());
 }

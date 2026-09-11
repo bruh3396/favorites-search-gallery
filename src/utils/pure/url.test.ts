@@ -1,5 +1,31 @@
 import { describe, expect, test } from "vitest";
-import { readQueryParam, withHostname, withNoQueryParams, withoutQueryParam } from "@/utils/pure/url";
+import { isUrl, readQueryParam, withHostname, withNoQueryParams, withoutQueryParam } from "@/utils/pure/url";
+
+describe("isUrl", () => {
+  test("https url", () => {
+    expect(isUrl("https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg")).toBe(true);
+  });
+
+  test("http url", () => {
+    expect(isUrl("http://x.com/p")).toBe(true);
+  });
+
+  test("url on a different host", () => {
+    expect(isUrl("https://api-cdn.rule34.xxx/thumbnails/1227/thumbnail_a34f3df084d16d51bbd0f5c06c68279f.jpg")).toBe(true);
+  });
+
+  test("compressed preview source is not a url", () => {
+    expect(isUrl("0123_123456abcde09")).toBe(false);
+  });
+
+  test("empty string is not a url", () => {
+    expect(isUrl("")).toBe(false);
+  });
+
+  test("non-http scheme is not a url", () => {
+    expect(isUrl("ftp://x.com/p")).toBe(false);
+  });
+});
 
 describe("readQueryParam", () => {
   const url = "https://rule34.xxx/index.php?page=favorites&s=view&id=12345&pid=42";

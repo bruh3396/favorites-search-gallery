@@ -2,7 +2,7 @@ import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryRenderer } from "@/features/gallery/types/gallery_types";
 import { doNothing } from "@/utils/pure/function";
 import { gifUrl } from "@/lib/media/url";
-import { isGif } from "@/lib/media/type";
+import { isGif } from "@/lib/media/media_type";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 const root = document.createElement("div");

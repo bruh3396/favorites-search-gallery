@@ -5,7 +5,7 @@ import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeNonNumericCharacters } from "@/utils/pure/string";
-import { resolveMediaType } from "@/lib/media/type";
+import { resolveMediaType } from "@/lib/media/media_type";
 import { setDataset } from "@/utils/browser/dataset";
 
 export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {

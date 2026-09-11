@@ -1,7 +1,7 @@
 import { DEFAULT_EXTENSION, allImageExtensions, extensionRegex } from "@/lib/media/constants";
 import { ImageExtension, MediaExtension, MediaItem } from "@/types/media";
 import { imageUrl, imageUrlToSampleUrl, replaceExtension, withExtension } from "@/lib/media/url";
-import { isGif, isVideo } from "@/lib/media/type";
+import { isGif, isVideo } from "@/lib/media/media_type";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 

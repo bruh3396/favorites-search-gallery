@@ -1,11 +1,12 @@
 import { FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
+import { MetricSearchable, Searchable, SearchableMetric } from "@/types/search";
 import { QueryAssertion, searchCases } from "@/lib/search/testing/search_cases";
-import { Searchable, SearchableMetric } from "@/types/search";
 import { describe, expect, test } from "vitest";
-import { BitmapSearchEngine } from "@/lib/search/bitmap/bitmap_search_engine";
-import { SetSearchEngine } from "@/lib/search/set/set_search_engine";
+import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
+import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
+export type MetricDoc = MetricSearchable & { name: string };
 type Doc = Searchable & { name: string; getMetric?: (metric: SearchableMetric) => number };
 type Searcher = (query: string, docs: Doc[]) => string[];
 
@@ -15,7 +16,7 @@ const nameOf = (doc: Doc): string => doc.name;
 
 const implementations: { name: string; implementation: Searcher }[] = [
   { name: "SetSearchEngine", implementation: (query, docs) => new SetSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf) },
-  { name: "BitmapSearchEngine", implementation: (query, docs) => new BitmapSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf) },
+  { name: "BitSearchEngine", implementation: (query, docs) => new BitSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf) },
   { name: "SearchQuery", implementation: (query, docs) => parseSearchQuery<Doc>(query).filter(docs).map(nameOf) }
 ];
 

@@ -1,53 +1,96 @@
+import { DiscreteRating, Metric, Rating } from "@/types/search";
+import { EncodedMediaExtension, EncodedMediaType, MediaExtension, MediaType, decodeMediaExtension, encodeMediaExtension } from "@/types/media";
 import { compressPreviewSource, decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
-import { decodeTagSet, encodeTags } from "@/app/domain/tag/dictionary";
+import { decodeMediaType, encodeMediaType, resolveMediaType } from "@/lib/media/media_type";
+import { toRatingString, toRatingValue } from "@/features/favorites/model/search/rating";
+import { toTagSet, toTagString } from "@/utils/pure/tag";
 import { Favorite } from "@/types/favorite";
 import { FavoriteElement } from "@/features/favorites/types/favorite_element";
-import { MediaExtension } from "@/types/media";
-import { Metric } from "@/types/search";
 import { Post } from "@/types/api";
-import { getImageFromThumb } from "@/lib/ui/thumb/query";
-import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
-import { internString } from "@/app/domain/tag/interner";
-import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
-import { removeExtraWhitespace } from "@/utils/pure/string";
+import { thumbToPost } from "@/features/favorites/types/thumb_to_post";
+
+let resolveTags: (favorite: Favorite) => ReadonlySet<string> = () => new Set<string>();
+const tagSets: WeakMap<FavoriteItem, Set<string>> = new WeakMap();
+
+export function setFavoriteTagResolver(resolver: (favorite: Favorite) => ReadonlySet<string>): void {
+  resolveTags = resolver;
+}
 
 export class FavoriteItem implements Favorite {
-  public readonly id: string;
-  public readonly post: Post;
   private readonly numericId: number;
-  private readonly tagIds: Uint16Array;
-  private element: FavoriteElement | null;
+  private width: number = 0;
+  private height: number = 0;
+  private score: number = 0;
+  private change: number = 0;
+  private duration: number = 0;
+  private fetchedAt: number = 0;
+  private rating: Rating = DiscreteRating.Explicit;
+  private encodedMediaExtension: EncodedMediaExtension = EncodedMediaExtension.Unknown;
+  private encodedMediaType: EncodedMediaType = EncodedMediaType.Image;
+  private previewUrl: string = "";
+  private element: FavoriteElement | null = null;
 
   constructor(source: HTMLElement | Post) {
-    this.post = source instanceof HTMLElement ? thumbToPost(source) : source;
-    this.id = internString(source.id);
-    this.tagIds = encodeTags(this.post.tags);
-    this.post.tags = "";
-    this.numericId = parseInt(source.id, 10);
-    this.element = null;
-    this.dedupe();
+    const post = source instanceof HTMLElement ? thumbToPost(source) : source;
+
+    this.numericId = parseInt(post.id, 10);
+    this.enrich(post);
+  }
+
+  public get id(): string {
+    return String(this.numericId);
   }
 
   public get tags(): Set<string> {
-    return decodeTagSet(this.tagIds);
+    const tags = tagSets.get(this);
+    return tags === undefined ? new Set(resolveTags(this)) : tags;
   }
 
-  public get thumbUrl(): string {
-    const compressed = this.element === null ? this.post.previewURL : this.element.thumbUrl;
-    return decompressPreviewSource(compressed);
+  public get post(): Post {
+    return {
+      id: String(this.numericId),
+      tags: this.tagsReleased ? "" : toTagString(this.tags),
+      width: this.width,
+      height: this.height,
+      score: this.score,
+      rating: toRatingString(this.rating),
+      change: this.change,
+      fileURL: "",
+      fetchedAt: this.fetchedAt,
+      duration: this.duration,
+      deleted: false,
+      previewURL: compressPreviewSource(this.previewUrl),
+      extension: this.extension
+    };
+  }
+
+  public get mediaType(): MediaType {
+    return decodeMediaType(this.encodedMediaType);
   }
 
   public get extension(): MediaExtension | undefined {
-    return this.post.extension;
+    return decodeMediaExtension(this.encodedMediaExtension);
+  }
+
+  public get thumbUrl(): string {
+    return decompressPreviewSource(this.previewUrl);
   }
 
   public get root(): HTMLElement {
     if (this.element === null) {
-      this.element = new FavoriteElement(this.id, this.thumbUrl, this.post.tags);
-      this.element.setAspectRatio(this.post.width, this.post.height);
-      this.element.setExtension(this.post.extension);
+      this.element = new FavoriteElement(this.id, this.thumbUrl, this.mediaType);
+      this.element.setAspectRatio(this.width, this.height);
+      this.element.setExtension(this.extension);
     }
     return this.element.root;
+  }
+
+  public get tagsReleased(): boolean {
+    return !tagSets.has(this);
+  }
+
+  public releaseTags(): void {
+    tagSets.delete(this);
   }
 
   public getMetric(metric: Metric): number {
@@ -55,15 +98,15 @@ export class FavoriteItem implements Favorite {
       case "id":
         return this.numericId;
       case "width":
-        return this.post.width;
+        return this.width;
       case "height":
-        return this.post.height;
+        return this.height;
       case "score":
-        return this.post.score;
+        return this.score;
       case "lastChangedTimestamp":
-        return this.post.change;
+        return this.change;
       case "duration":
-        return this.post.duration ?? 0;
+        return this.duration;
       case "creationTimestamp":
       case "default":
       case "random":
@@ -72,46 +115,23 @@ export class FavoriteItem implements Favorite {
     }
   }
 
-  public enrich(post: Post): void {
-    post.previewURL = compressPreviewSource(post.previewURL);
-    Object.assign(this.post, post);
-    this.dedupe();
-    this.element?.setAspectRatio(post.width, post.height);
-    this.element?.setExtension(post.extension);
-  }
-
   public setDuration(duration: number): void {
     this.post.duration = duration;
   }
 
-  private dedupe(): void {
-    this.post.rating = internString(this.post.rating);
-    this.post.fileURL = "";
-    this.post.id = internString(this.post.id);
-
-    if (this.post.extension) {
-      this.post.extension = internString(this.post.extension) as MediaExtension;
-    }
+  public enrich(post: Post): void {
+    this.width = post.width;
+    this.height = post.height;
+    this.score = post.score;
+    this.rating = toRatingValue(post.rating);
+    this.fetchedAt = post.fetchedAt ?? 0;
+    this.change = post.change;
+    this.duration = post.duration;
+    this.encodedMediaExtension = post.extension === undefined ? EncodedMediaExtension.Unknown : encodeMediaExtension(post.extension);
+    this.previewUrl = compressPreviewSource(post.previewURL);
+    tagSets.set(this, toTagSet(post.tags));
+    this.encodedMediaType = encodeMediaType(resolveMediaType(post.tags));
+    this.element?.setAspectRatio(post.width, post.height);
+    this.element?.setExtension(post.extension);
   }
-}
-
-function thumbToPost(thumb: HTMLElement): Post {
-  const id = parseIdFromThumb(thumb);
-  const image = getImageFromThumb(thumb);
-  const previewURL = compressPreviewSource(image?.src ?? image?.getAttribute("data-cfsrc") ?? "");
-  return {
-    id,
-    tags: image === null ? "" : normalizeTags(thumb),
-    width: 0,
-    height: 0,
-    score: 0,
-    rating: "",
-    change: 0,
-    fileURL: "",
-    previewURL
-  };
-}
-
-function normalizeTags(thumb: HTMLElement): string {
-  return removeExtraWhitespace(getTagsFromThumb(thumb).replace(/\bvide\b/g, "video"));
 }

@@ -6,9 +6,9 @@ import { TagCategory } from "@/types/search";
 const STRIPPED_CHARACTERS = /[<>:"/\\|?*' -]/g;
 const TRAILING_QUALIFIER = /_\([^)]*\)$/;
 
-export function buildFilename(item: MediaItem, extension: string, categories: FilenameCategory[], getTagCategory: (tagName: string) => TagCategory | undefined): string {
+export function buildFilename(item: MediaItem, tags: Set<string>, extension: string, categories: FilenameCategory[], getTagCategory: (tagName: string) => TagCategory | undefined): string {
   const segments: string[] = categories
-    .map(category => buildCategorySegment(item, category, getTagCategory))
+    .map(category => buildCategorySegment(tags, category, getTagCategory))
     .filter(segment => segment !== "");
 
   const suffix = segments.length === 0 ? item.id : `${DownloaderConfig.filename.categorySeparator}${item.id}`;
@@ -16,8 +16,8 @@ export function buildFilename(item: MediaItem, extension: string, categories: Fi
   return `${name}${suffix}.${extension}`;
 }
 
-function buildCategorySegment(item: MediaItem, category: FilenameCategory, getTagCategory: (tagName: string) => TagCategory | undefined): string {
-  const tagsInCategory = Array.from(item.tags)
+function buildCategorySegment(tags: Set<string>, category: FilenameCategory, getTagCategory: (tagName: string) => TagCategory | undefined): string {
+  const tagsInCategory = Array.from(tags)
     .filter(tag => getTagCategory(tag) === category)
     .sort();
   return dropQualifiedDuplicates(tagsInCategory)

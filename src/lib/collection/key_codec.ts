@@ -1,4 +1,4 @@
-export class KeyCodec<T> {
+export class KeyedIndex<T> {
   private readonly idByKey: Map<string, number> = new Map<string, number>();
   private readonly items: (T | undefined)[] = [];
 
@@ -35,10 +35,6 @@ export class KeyCodec<T> {
     this.idByKey.delete(key);
     this.items[id] = undefined;
     return id;
-  }
-
-  public decodeOne(id: number): T | undefined {
-    return this.items[id];
   }
 
   public decode(ids: number[]): T[] {

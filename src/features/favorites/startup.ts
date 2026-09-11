@@ -13,7 +13,6 @@ import { IMAGUS_SUPPORT_ENABLED } from "@/app/context/flags";
 import { Preferences } from "@/app/context/preferences";
 import { createElement } from "@/utils/browser/element";
 import { deferPostPageFetchesUntil } from "@/lib/remote/fetchers/html";
-import { setFavoriteTagsLookup } from "@/lib/ui/thumb/tag";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 
 export function startFavorites(): void {
@@ -34,13 +33,13 @@ function setup(): void {
   subscribeToPreferences();
   subscribeToDomEvents();
   serveFavoritesPageRequests();
-  setFavoriteTagsLookup(FavoritesModel.getFavoriteTags);
 }
 
 function start(): void {
   FavoritesView.removeOriginalUnusedScripts();
   deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
   FavoritesView.showSkeleton();
+  FavoritesView.toggleToolbar(false);
   const nativeFavorites = FavoritesView.takeNativeFavorites();
 
   FavoritesFlows.Load.loadAllFavorites(ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined);
@@ -50,7 +49,8 @@ function setupSubFeatures(): void {
   FavoritesFeatures.setup({
     downloader: {
       getSearchResults: FavoritesModel.getCurrentSearchResults,
-      getTagCategory: TagCategoryStore.get
+      getTagCategory: TagCategoryStore.get,
+      getTagsForIds: FavoritesModel.getTagsForIds
     },
     snippets: {
       appendToSearch: FavoritesControl.appendToSearch,

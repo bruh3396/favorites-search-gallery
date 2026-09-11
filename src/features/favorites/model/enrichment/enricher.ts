@@ -1,8 +1,8 @@
 import { Favorite } from "@/types/favorite";
 import { FavoritesDurationEnricher } from "@/features/favorites/model/enrichment/duration_enricher";
 import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";
-import { TermUpdate } from "@/lib/search/search_engine";
-import { isVideo } from "@/lib/media/type";
+import { TermUpdate } from "@/lib/search/engines/search_engine";
+import { isVideo } from "@/lib/media/media_type";
 import { postIsStale } from "@/app/domain/post/status";
 
 export class FavoritesEnricher {
@@ -19,6 +19,6 @@ export class FavoritesEnricher {
 
   public async enrich(favorites: Favorite[]): Promise<void> {
     await this.metadataEnricher.enrich(favorites.filter(favorite => postIsStale(favorite.post)));
-    this.durationEnricher.enrich(favorites.filter(favorite => isVideo(favorite) && (favorite.post.duration ?? 0) === 0));
+    this.durationEnricher.enrich(favorites.filter(favorite => isVideo(favorite) && favorite.post.duration === 0));
   }
 }

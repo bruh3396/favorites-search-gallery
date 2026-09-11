@@ -8,12 +8,24 @@ const RATINGS_BY_INITIAL: Record<string, Rating> = {
   s: DiscreteRating.Safe
 };
 
-export function decodeRating(rating: string): Rating {
+export function toRatingValue(rating: string): Rating {
   return RATINGS_BY_INITIAL[rating.charAt(0).toLowerCase()] ?? DiscreteRating.Explicit;
 }
 
-export function isRatingAllowed(rating: string, allowedRatings: Rating): boolean {
-  return (decodeRating(rating) & allowedRatings) > 0;
+export function toRatingString(rating: Rating): string {
+  switch (rating) {
+    case DiscreteRating.Safe:
+      return "s";
+    case DiscreteRating.Questionable:
+      return "q";
+    default:
+      return "e";
+  }
+}
+
+export function isRatingAllowed(rating: string | Rating, allowedRatings: Rating): boolean {
+  const decoded = typeof rating === "string" ? toRatingValue(rating) : rating;
+  return (decoded & allowedRatings) > 0;
 }
 
 export function filterByRating(favorites: Favorite[], allowedRatings: Rating): Favorite[] {

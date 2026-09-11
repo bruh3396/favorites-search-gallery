@@ -4,7 +4,8 @@ import { TagCategory } from "@/types/search";
 
 export const FavoritesDownloaderDependencies: DownloaderDependencies = {
   getSearchResults: (): MediaItem[] => [],
-  getTagCategory: (): TagCategory | undefined => undefined
+  getTagCategory: (): TagCategory | undefined => undefined,
+  getTagsForIds: (): Promise<Map<string, Set<string>>> => Promise.resolve(new Map())
 };
 
 export function setDependencies(dependencies: DownloaderDependencies): void {

@@ -1,11 +1,11 @@
 import * as FavoritesRating from "@/features/favorites/model/search/rating";
 import { Rating, SearchableMetric, SortKey } from "@/types/search";
-import { SearchEngine, TermUpdate } from "@/lib/search/search_engine";
-import { BitmapSearchEngine } from "@/lib/search/bitmap/bitmap_search_engine";
+import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
+import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
-import { SetSearchEngine } from "@/lib/search/set/set_search_engine";
+import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
 import { shuffleInPlace } from "@/utils/pure/array";
@@ -22,7 +22,7 @@ export type SearcherConfig = {
 function createEngine(): SearchEngine<Favorite> {
   const termsFor = (favorite: Favorite): Set<string> => favorite.tags;
   const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
-  return FavoritesConfig.useBitmapSearchEngine ? new BitmapSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
+  return FavoritesConfig.useBitmapSearchEngine ? new BitSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
 }
 
 export class FavoritesSearcher {
@@ -47,7 +47,7 @@ export class FavoritesSearcher {
 
   public invertResults(): Favorite[] {
     return chain(
-      this.engine.invert(this.results.get(), this.blacklistQuery()),
+      this.engine.complementOf(this.results.get(), this.blacklistQuery()),
       matches => this.filterByRating(matches),
       matches => this.sort(matches),
       matches => this.results.set(matches)
@@ -63,6 +63,9 @@ export class FavoritesSearcher {
   }
 
   public index(favorites: Favorite[]): void {
+    if (favorites.some(favorite => favorite.tagsReleased)) {
+      throw new Error("Cannot index favorites whose tags have been released; use searcher.add for new favorites instead.");
+    }
     this.engine.index(favorites);
   }
 
@@ -72,6 +75,10 @@ export class FavoritesSearcher {
 
   public update(updates: readonly TermUpdate<Favorite>[]): void {
     this.engine.update(updates);
+  }
+
+  public getTags(favorite: Favorite): ReadonlySet<string> {
+    return this.engine.termsForDoc(favorite);
   }
 
   public getCurrentSearchQuery(): string {

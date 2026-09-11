@@ -1,4 +1,4 @@
-import { Svg } from "@/assets/svg";
+import { Svg } from "@/assets/svg/svg";
 
 export type IconName = keyof typeof Svg;
 

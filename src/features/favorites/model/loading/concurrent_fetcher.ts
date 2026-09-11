@@ -67,7 +67,7 @@ export class FavoritesConcurrentFetcher {
       if (request.elements.length === 0) {
         this.allPagesFetched = true;
       } else {
-        this.pendingDelivery.insert(request);
+        this.pendingDelivery.add(request);
         this.deliverInOrder();
       }
     } catch {

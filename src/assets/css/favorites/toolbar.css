@@ -26,6 +26,10 @@
   background: var(--theme-gradient);
 }
 
+:root[data-loading] #favorites-toolbar {
+  pointer-events: none;
+}
+
 #favorites-toolbar-grid {
   display: grid;
   grid-template-columns:

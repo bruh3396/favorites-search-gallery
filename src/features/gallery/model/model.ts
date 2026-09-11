@@ -3,23 +3,23 @@ import * as GalleryState from "@/features/gallery/model/state";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/ui/thumb/favorite_actions";
 import { Boundary } from "@/types/boundary";
-import { Carousel } from "@/lib/collection/carousel";
+import { ItemCursor } from "@/lib/collection/item_cursor";
 import { NavigationKey } from "@/types/input";
 import { downloadFromThumb } from "@/lib/media/download";
 import { isVideoThumb } from "@/lib/ui/thumb/media_item";
 import { navigationDelta } from "@/utils/pure/number";
 
-const cursor = new Carousel<HTMLElement>();
-let preloadThumbsAround: (id: string) => HTMLElement[] = () => [];
+const cursor = new ItemCursor<HTMLElement>();
+let getThumbsAround: (id: string) => HTMLElement[] = () => [];
 
 export { getCurrentState, isInGallery, isShowingPreviews, close, preview } from "@/features/gallery/model/state";
 export { wrappingThumbsAroundId, clampedThumbsAroundId } from "@/features/gallery/model/item_window";
 
 export function setup(thumbsAround: (id: string) => HTMLElement[]): void {
-  preloadThumbsAround = thumbsAround;
+  getThumbsAround = thumbsAround;
 }
 
-export const getItemsAround = (id: string): HTMLElement[] => preloadThumbsAround(id);
+export const getItemsAround = (id: string): HTMLElement[] => getThumbsAround(id);
 export const jumpToLast = (): void => cursor.jumpToLast();
 export const jumpToFirst = (): void => cursor.jumpToFirst();
 export const move = (direction: NavigationKey): Boundary => cursor.move(navigationDelta(direction));

@@ -15,9 +15,9 @@ export type ServerPost = {
 
 export type Post = Omit<ServerPost, "tagCategories"> & {
   tags: string;
-  duration?: number;
+  duration: number;
+  deleted: boolean;
   extension?: MediaExtension;
-  deleted?: boolean;
   fetchedAt?: number;
 };
 

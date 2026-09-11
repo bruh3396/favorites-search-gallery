@@ -9,4 +9,4 @@ const upscaler: GalleryAbstractUpscaler = GalleryConfig.useOffscreenThumbUpscale
 export const toggleUpscaler = (value: boolean): void => upscaler.toggle(value);
 export const upscaleOne = (request: ImageRequest): void => upscaler.upscale(request);
 export const upscaleAll = (requests: ImageRequest[]): void => upscaler.upscaleAll(requests);
-export const downscaleAll = (keepIds?: Set<string>): void => upscaler.downscaleAll(keepIds);
+export const downscaleAll = (): void => upscaler.downscaleAll();

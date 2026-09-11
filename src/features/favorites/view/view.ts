@@ -12,6 +12,7 @@ import { FavoritesViewDependencies } from "@/features/favorites/types/types";
 import { ON_MOBILE_DEVICE } from "@/lib/environment";
 import { buildFavoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { doNothing } from "@/utils/pure/function";
+import { toggleDataset } from "@/utils/browser/dataset";
 
 let onContentReplaced: () => void = doNothing;
 let onContentAdded: (favorites: Favorite[]) => void = doNothing;
@@ -47,8 +48,8 @@ export function addToBottom(favorites: Favorite[]): void {
   onContentAdded(favorites);
 }
 
+export const toggleToolbar = (value: boolean): boolean => toggleDataset(document.documentElement, "loading", !value);
 export const showSkeleton = (): void => ContentTiler.tile(FavoritesSkeleton.build());
-
 export { markAsNew } from "@/features/favorites/view/badge";
 export { suppressLinkOnHoveredThumb } from "@/features/favorites/view/link_suppression";
 export { changeLayout } from "@/app/layout/content_tiler";
@@ -56,4 +57,4 @@ export { collectAspectRatios } from "@/features/favorites/view/skeleton/skeleton
 export { takeNativeFavorites, removeOriginalUnusedScripts } from "@/features/favorites/view/native_page_cleaner";
 export { togglePaginator, isGotoPagePopoverTarget, closeGotoPagePopover, buildPaginator, updatePaginator } from "@/features/favorites/view/pagination_renderer";
 export { toggle as toggleDrawer } from "@/features/favorites/view/shell/drawer";
-export { setStatus, setTemporaryStatus, setResultsCount as setMatchCount, updateFetchStatus, notifyNewFavoritesFound, setExpectedTotalFavoritesCount } from "@/features/favorites/view/status/status";
+export { setStatus, setTemporaryStatus, setResultsCount as setMatchCount, updateFetchStatus, setLoadProgress, setExpectedTotalFavoritesCount, clearStatus } from "@/features/favorites/view/status/status";

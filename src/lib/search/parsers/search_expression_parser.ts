@@ -1,4 +1,4 @@
-import { SearchExpression } from "@/lib/search/bitmap/logic/search_expression";
+import { SearchExpression } from "@/lib/search/engines/bit/logic/search_expression";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
@@ -7,7 +7,7 @@ const CLOSE = ")";
 const OR = "~";
 
 export function parseSearchExpression(query: string): SearchExpression {
-  const tokens = tokenize(query);
+  const tokens = tokenize(normalize(query));
   const parser = new Parser(tokens);
   const expression = parser.parseTopLevel();
 
@@ -23,9 +23,12 @@ export function tryParseSearchExpression(query: string): SearchExpression | unde
   }
 }
 
+function normalize(query: string): string {
+  return removeExtraWhitespace(query).toLowerCase();
+}
+
 function tokenize(query: string): string[] {
-  const normalized = removeExtraWhitespace(query).toLowerCase();
-  return normalized === "" ? [] : normalized.split(" ");
+  return query === "" ? [] : query.split(" ");
 }
 
 class Parser {

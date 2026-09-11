@@ -2,11 +2,7 @@ import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { toSortedTagSet } from "@/utils/pure/tag";
 
-let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
-
-export function setFavoriteTagsLookup(fn: (id: string) => Set<string> | undefined): void {
-  getFavoriteTags = fn;
-}
+const getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
 
 export function getTagsFromThumb(thumb: HTMLElement): string {
     const image = getImageFromThumb(thumb);

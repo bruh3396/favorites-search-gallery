@@ -1,4 +1,4 @@
-import { isGif, isVideo } from "@/lib/media/type";
+import { isGif, isVideo } from "@/lib/media/media_type";
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { BoundaryEdge } from "@/types/boundary";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";

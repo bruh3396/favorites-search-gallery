@@ -4,7 +4,7 @@ import { Favorite } from "@/types/favorite";
 
 const favorite = (id: string, rating: string, ...tags: string[]): Favorite => {
   const tagSet = new Set(tags);
-  return { id, tags: tagSet, indexableTags: () => tagSet, post: { rating }, getMetric: () => Number(id) } as unknown as Favorite;
+  return { id, tags: tagSet, post: { rating }, getMetric: () => Number(id) } as unknown as Favorite;
 };
 
 const ids = (results: Favorite[]): string[] => results.map(r => r.id);

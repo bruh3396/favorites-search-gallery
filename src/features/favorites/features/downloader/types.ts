@@ -21,4 +21,5 @@ export interface DownloadResult {
 export interface DownloaderDependencies {
   getSearchResults: () => MediaItem[];
   getTagCategory: (tagName: string) => TagCategory | undefined;
+  getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;
 }

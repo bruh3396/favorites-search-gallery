@@ -25,8 +25,8 @@ const CATEGORIES: Record<string, TagCategory> = {
 
 const ALL: FilenameCategory[] = ["artist", "character", "copyright"];
 const getTagCategory = (tag: string): TagCategory | undefined => CATEGORIES[tag];
-const item = (...tags: string[]): MediaItem => ({ id: "10146816", thumbUrl: "", tags: new Set(tags) });
-const build = (tags: string[], categories: FilenameCategory[] = ALL): string => buildFilename(item(...tags), "jpeg", categories, getTagCategory);
+const item: MediaItem = { id: "10146816", thumbUrl: "", mediaType: "image", extension: "jpg" };
+const build = (tags: string[], categories: FilenameCategory[] = ALL): string => buildFilename(item, new Set(tags), "jpeg", categories, getTagCategory);
 
 describe("buildFilename", () => {
   test("returns just the id when no categories are selected", () => {
@@ -76,7 +76,7 @@ describe("buildFilename", () => {
   test("caps length while preserving the id", () => {
     const longTags = Array.from({ length: 40 }, (_, index) => `character_number_${String(index).padStart(3, "0")}`);
     const categories: Record<string, TagCategory> = Object.fromEntries(longTags.map(tag => [tag, "character"]));
-    const name = buildFilename(item(...longTags), "jpeg", ["character"], tag => categories[tag]);
+    const name = buildFilename(item, new Set(longTags), "jpeg", ["character"], tag => categories[tag]);
     const suffix = `${CAT}10146816.jpeg`;
 
     expect(name.length).toBeLessThanOrEqual(DownloaderConfig.filename.maxLength + ".jpeg".length);

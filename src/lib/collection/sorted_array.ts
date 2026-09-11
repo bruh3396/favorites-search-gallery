@@ -8,8 +8,12 @@ export class SortedArray<T> {
   private readonly compare: Comparator<T>;
   private isSorted: boolean = true;
 
-  constructor(compare?: Comparator<T>) {
+  constructor(compare?: Comparator<T>, values?: T[]) {
     this.compare = compare ?? (defaultCompare as Comparator<T>);
+
+    if (values !== undefined) {
+      this.addAll(values);
+    }
   }
 
   public get length(): number {
@@ -20,13 +24,20 @@ export class SortedArray<T> {
     return this.isSorted ? this.array : this.sort();
   }
 
-  public insert(value: T): void {
+  public add(value: T): void {
     this.array.splice(this.getSortedIndex(value), 0, value);
   }
 
   public push(value: T): void {
     this.isSorted = false;
     this.array.push(value);
+  }
+
+  public addAll(values: T[]): void {
+    for (const value of values) {
+      this.array.push(value);
+    }
+    this.sort();
   }
 
   public first(): T | undefined {

@@ -22,6 +22,42 @@ export class Database<V extends Identifiable> {
     return this.getAllRecords(database, store);
   }
 
+  public async readAllStreamed(onBatch: (records: V[]) => void, batchSize: number = 1_000, objectStoreName: string | undefined = undefined): Promise<void> {
+    const store = objectStoreName ?? this.defaultObjectStoreName;
+    const database = await this.open(store);
+    const transaction = database.transaction(store, "readonly");
+    const objectStore = transaction.objectStore(store);
+    return new Promise((resolve, reject) => {
+      let batch: V[] = [];
+      const request = objectStore.openCursor(null, "prev");
+
+      request.onsuccess = (): void => {
+        const cursor = request.result;
+
+        if (cursor) {
+          batch.push(cursor.value as V);
+
+          if (batch.length >= batchSize) {
+            onBatch(batch);
+            batch = [];
+          }
+          cursor.continue();
+          return;
+        }
+
+        if (batch.length > 0) {
+          onBatch(batch);
+        }
+        database.close();
+        resolve();
+      };
+      request.onerror = (): void => {
+        database.close();
+        reject(request.error);
+      };
+    });
+  }
+
   public async readMany(ids: string[], objectStoreName: string | undefined = undefined): Promise<V[]> {
     if (ids.length === 0) {
       return [];

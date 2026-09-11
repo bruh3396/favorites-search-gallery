@@ -21,10 +21,28 @@ export class FavoritesStore {
   }
 
   public async readAll(): Promise<Post[]> {
-    const records = (await this.database.exists()) ? await this.database.readAll() : [];
+    const records = (await this.database.exists()) ? (await this.database.readAll()) : [];
 
     this.isDatabaseEmpty = records.length === 0;
     return records;
+  }
+
+  public async streamAll(onBatch: (posts: Post[]) => void): Promise<void> {
+    if (!(await this.database.exists())) {
+      this.isDatabaseEmpty = true;
+      return;
+    }
+    let hasStreamedAny = false;
+
+    await this.database.readAllStreamed((posts) => {
+      hasStreamedAny = true;
+      onBatch(posts);
+    }, 1_000);
+    this.isDatabaseEmpty = !hasStreamedAny;
+  }
+
+  public async count(): Promise<number> {
+    return (await this.database.exists()) ? this.database.count() : 0;
   }
 
   public exists(): Promise<boolean> {
@@ -33,6 +51,10 @@ export class FavoritesStore {
 
   public async readIds(): Promise<string[]> {
     return (await this.database.exists()) ? this.database.readAllIds() : [];
+  }
+
+  public async readMany(ids: string[]): Promise<Post[]> {
+    return (await this.database.exists()) ? this.database.readMany(ids) : [];
   }
 
   public async hasAny(): Promise<boolean> {
