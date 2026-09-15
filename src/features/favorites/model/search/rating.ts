@@ -1,5 +1,4 @@
 import { DiscreteRating, Rating } from "@/types/search";
-import { ALL_RATINGS_VALUE } from "@/lib/constants";
 import { Favorite } from "@/types/favorite";
 
 const RATINGS_BY_INITIAL: Record<string, Rating> = {
@@ -7,6 +6,8 @@ const RATINGS_BY_INITIAL: Record<string, Rating> = {
   q: DiscreteRating.Questionable,
   s: DiscreteRating.Safe
 };
+
+const ALL_RATINGS_VALUE = DiscreteRating.Explicit | DiscreteRating.Questionable | DiscreteRating.Safe;
 
 export function toRatingValue(rating: string): Rating {
   return RATINGS_BY_INITIAL[rating.charAt(0).toLowerCase()] ?? DiscreteRating.Explicit;

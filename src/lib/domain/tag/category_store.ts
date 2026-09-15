@@ -1,8 +1,8 @@
 import { EncodedTagCategory, TagCategory, TagCategoryMap, TagCategoryMapping } from "@/types/search";
-import { decodeTagCategory, encodeTagCategory } from "@/app/domain/tag/category_codec";
+import { decodeTagCategory, encodeTagCategory } from "@/lib/domain/tag/category_codec";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";
-import { internString } from "@/app/domain/tag/interner";
+import { internString } from "@/lib/search/interner";
 
 const database = new Database<TagCategoryMapping>("TagCategories", "tagCategories");
 const databaseWriter = new CoalescingExecutor<TagCategoryMapping>(500, 2_000, database.write.bind(database));

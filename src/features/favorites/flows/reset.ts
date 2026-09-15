@@ -1,5 +1,5 @@
 import * as FavoritesModel from "@/features/favorites/model/model";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { Storage } from "@/lib/storage/local_storage";
 
 const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag edits and search snippets will be preserved.";
@@ -10,6 +10,5 @@ export function reset(): void {
   if (confirm(RESET_PROMPT)) {
     Storage.clear(persistentLocalStorageKeys);
     FavoritesModel.destroyStore();
-    FavoritesModel.destroyLegacyStores();
   }
 }

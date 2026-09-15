@@ -1,6 +1,6 @@
 import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/svg/icons";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { clamp, toSeconds } from "@/utils/pure/number";
 import { isImageThumb, isVideoThumb } from "@/lib/ui/thumb/media_item";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";

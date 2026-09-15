@@ -6,7 +6,6 @@ export class PackedPostings {
   public build(positionsByTerm: ReadonlyMap<string, number[]>, isSparse: (length: number) => boolean): void {
     this.offsets.clear();
     this.lengths.clear();
-
     let total = 0;
 
     for (const positions of positionsByTerm.values()) {

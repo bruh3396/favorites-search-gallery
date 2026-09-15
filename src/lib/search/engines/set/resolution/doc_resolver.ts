@@ -3,10 +3,12 @@ import { InvertedIndex } from "@/lib/search/engines/set/indexes/inverted_index";
 import { MetricComparison } from "@/lib/search/parsers/metric_comparison";
 import { MetricIndex } from "@/lib/search/engines/set/indexes/metric_index";
 import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
+import { NumericSearchTerm } from "@/lib/search/terms/numeric_search_term";
 import { PositionIndex } from "@/lib/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/lib/search/engines/set/indexes/relative_metric_index";
 import { WildcardDocResolver } from "@/lib/search/engines/set/resolution/wildcard_doc_resolver";
 import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
+import { union } from "@/utils/pure/set";
 
 export class DocResolver<Doc> {
   constructor(
@@ -18,6 +20,10 @@ export class DocResolver<Doc> {
   ) { }
 
   public resolve(term: AbstractSearchTerm): ReadonlySet<Doc> {
+    if (term instanceof NumericSearchTerm) {
+      return this.docsForNumeric(term);
+    }
+
     if (term instanceof MetricSearchTerm) {
       return this.docsForMetric(term.comparison);
     }
@@ -30,6 +36,11 @@ export class DocResolver<Doc> {
 
   public sortByPosition(docs: Doc[]): Doc[] {
     return this.positionIndex.sort(docs);
+  }
+
+  private docsForNumeric(term: NumericSearchTerm): ReadonlySet<Doc> {
+    const taggedDocs = this.termIndex.docsForTerm(term.value) ?? new Set<Doc>();
+    return union(taggedDocs, this.docsForMetric(term.idComparison));
   }
 
   private docsForMetric(comparison: MetricComparison): ReadonlySet<Doc> {

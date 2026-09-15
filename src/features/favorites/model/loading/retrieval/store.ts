@@ -1,13 +1,17 @@
-import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "@/lib/environment";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
 
 export class FavoritesStore {
-  private readonly database = new Database<Post>("FavoritesV2", `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID : USER_ID}`);
-  private readonly databaseUpdater = new CoalescingExecutor<Post>(100, 1_000, this.database.update.bind(this.database));
+  private readonly database: Database<Post>;
+  private readonly databaseUpdater: CoalescingExecutor<Post>;
   private isDatabaseEmpty = true;
+
+  constructor(databaseKey: string) {
+    this.database = new Database<Post>("FavoritesV2", databaseKey);
+    this.databaseUpdater = new CoalescingExecutor<Post>(100, 1_000, this.database.update.bind(this.database));
+  }
 
   public async writeAll(favorites: Favorite[]): Promise<void> {
     await this.database.write([...favorites].reverse().map(favorite => favorite.post));

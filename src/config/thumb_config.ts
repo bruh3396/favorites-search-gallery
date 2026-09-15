@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/app/context/environment";
 
 export const ThumbConfig = {
   rowHeightBounds: { min: 1, max: 10 },

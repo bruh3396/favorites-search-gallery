@@ -3,7 +3,7 @@ import * as TooltipModel from "@/features/tooltip/model/model";
 import * as TooltipView from "@/features/tooltip/view/view";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { ON_FAVORITES_PAGE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { TOOLTIP_DISABLED } from "@/app/context/flags";
 import { getCurrentSearchQuery } from "@/app/channels/feature_bridge";

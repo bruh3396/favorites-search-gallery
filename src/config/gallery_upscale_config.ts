@@ -1,4 +1,4 @@
-import { USING_FIREFOX } from "@/lib/environment";
+import { USING_FIREFOX } from "@/app/context/environment";
 
 export const GalleryUpscaleConfig = {
   upscaledCanvasWidth: USING_FIREFOX ? 500 : 750,

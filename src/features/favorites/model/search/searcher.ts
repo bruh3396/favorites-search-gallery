@@ -1,36 +1,28 @@
 import * as FavoritesRating from "@/features/favorites/model/search/rating";
-import { Rating, SearchableMetric, SortKey } from "@/types/search";
+import { NEGATED_BLACKLISTED_TAGS, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/app/context/environment";
 import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
+import { Preferences } from "@/app/context/preferences";
+import { SearchableMetric } from "@/types/search";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
 import { shuffleInPlace } from "@/utils/pure/array";
 
-export type SearcherConfig = {
-  usingBlacklist: () => boolean;
-  enforcingBlacklist: () => boolean;
-  blacklistTags: string;
-  allowedRatings: () => Rating;
-  sortKey: () => SortKey;
-  sortAscending: () => boolean;
-};
-
-function createEngine(): SearchEngine<Favorite> {
-  const termsFor = (favorite: Favorite): Set<string> => favorite.tags;
-  const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
-  return FavoritesConfig.useBitmapSearchEngine ? new BitSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
-}
-
 export class FavoritesSearcher {
-  private readonly engine: SearchEngine<Favorite> = createEngine();
+  private readonly engine: SearchEngine<Favorite>;
   private readonly results = new ObservableList<Favorite>();
   private currentSearchQuery = "";
 
-  constructor(private readonly config: SearcherConfig) { }
+  constructor() {
+    const termsFor = (favorite: Favorite): Set<string> => favorite.tags;
+    const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
+
+    this.engine = FavoritesConfig.useBitSearchEngine ? new BitSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
+  }
 
   public setup(onSearchResultsChanged: (results: Favorite[]) => void): void {
     this.results.setup(onSearchResultsChanged);
@@ -74,10 +66,6 @@ export class FavoritesSearcher {
     this.engine.update(updates);
   }
 
-  public getTags(favorite: Favorite): ReadonlySet<string> {
-    return this.engine.termsForDoc(favorite);
-  }
-
   public getCurrentSearchQuery(): string {
     return this.currentSearchQuery;
   }
@@ -94,8 +82,16 @@ export class FavoritesSearcher {
     return this.results.set(this.sort(this.findMatches(favorites)));
   }
 
+  private usingBlacklist(): boolean {
+    return !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE || Preferences.favorites.excludeBlacklist.value;
+  }
+
+  private enforcingBlacklist(): boolean {
+    return !USER_IS_ON_THEIR_OWN_FAVORITES_PAGE;
+  }
+
   private finalSearchQuery(): string {
-    return this.config.usingBlacklist() ? `${this.currentSearchQuery} ${this.config.blacklistTags}` : this.currentSearchQuery;
+    return this.usingBlacklist() ? `${this.currentSearchQuery} ${NEGATED_BLACKLISTED_TAGS}` : this.currentSearchQuery;
   }
 
   private findMatches(favorites: Favorite[]): Favorite[] {
@@ -103,7 +99,7 @@ export class FavoritesSearcher {
   }
 
   private blacklistQuery(): string | undefined {
-    return this.config.enforcingBlacklist() && !isEmptyString(this.config.blacklistTags) ? this.config.blacklistTags : undefined;
+    return this.enforcingBlacklist() && !isEmptyString(NEGATED_BLACKLISTED_TAGS) ? NEGATED_BLACKLISTED_TAGS : undefined;
   }
 
   private searchOrPassThrough(query: string, candidates: Favorite[]): Favorite[] {
@@ -111,11 +107,11 @@ export class FavoritesSearcher {
   }
 
   private filterByRating(favorites: Favorite[]): Favorite[] {
-    return FavoritesRating.filterByRating(favorites, this.config.allowedRatings());
+    return FavoritesRating.filterByRating(favorites, Preferences.favorites.allowedRatings.value);
   }
 
   private sort(favorites: Favorite[]): Favorite[] {
-    const sortKey = this.config.sortKey();
+    const sortKey = Preferences.favorites.sortKey.value;
 
     if (sortKey === "random") {
       return shuffleInPlace([...favorites]);
@@ -125,6 +121,6 @@ export class FavoritesSearcher {
       return favorites;
     }
     const sorted = [...favorites].sort((a, b) => b.getMetric(sortKey) - a.getMetric(sortKey));
-    return this.config.sortAscending() ? sorted.reverse() : sorted;
+    return Preferences.favorites.sortAscending.value ? sorted.reverse() : sorted;
   }
 }

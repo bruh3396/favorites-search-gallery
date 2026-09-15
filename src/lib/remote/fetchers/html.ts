@@ -1,6 +1,5 @@
 import { favoritesPageUrl, postListUrlFromBase, postPageUrl, profilePageUrl } from "@/lib/remote/url";
 import { macroTask, withExponentialBackoff } from "@/lib/async/scheduling";
-import { FAVORITES_PAGE_ID } from "@/lib/environment";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { fetchHtml } from "@/utils/browser/http";
@@ -9,13 +8,11 @@ const generalPageRequestLimiter = new RateLimiter(Rule34NetworkConfig.generalPag
 
 let postPageFetchGate: Promise<void> = Promise.resolve();
 
-export function fetchFavoritesPage(pageNumber: number): Promise<string> {
-  return fetchHtml(favoritesPageUrl(pageNumber));
+export function fetchFavoritesPage(pageId: string, pageNumber: number): Promise<string> {
+  return fetchHtml(favoritesPageUrl(pageId, pageNumber));
 }
 
-export function fetchFavoritesCount(): Promise<number | null> {
-  const pageId = FAVORITES_PAGE_ID;
-
+export function fetchFavoritesCount(pageId: string | null): Promise<number | null> {
   if (pageId === null) {
     return Promise.resolve(null);
   }

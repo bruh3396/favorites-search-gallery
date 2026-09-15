@@ -1,47 +1,40 @@
-import * as FavoritesSequentialFetcher from "@/features/favorites/model/loading/sequential_fetcher";
+import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
-import { FavoriteItem } from "@/features/favorites/types/favorite_item";
-import { FavoritesConcurrentFetcher } from "@/features/favorites/model/loading/concurrent_fetcher";
-import { FavoritesMigrator } from "@/features/favorites/model/loading/migrator";
-import { FavoritesStore } from "@/features/favorites/model/loading/store";
+import { FavoritesConcurrentFetcher } from "@/features/favorites/model/loading/retrieval/concurrent_fetcher";
+import { FavoritesItem } from "@/features/favorites/model/loading/construction/favorites_item";
+import { FavoritesSequentialFetcher } from "@/features/favorites/model/loading/retrieval/sequential_fetcher";
+import { FavoritesStore } from "@/features/favorites/model/loading/retrieval/store";
+import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { toTagSet } from "@/utils/pure/tag";
 
-export class FavoritesLoader {
-  private readonly store = new FavoritesStore();
-  private readonly migrator = new FavoritesMigrator();
+const FAVORITES_PAGE_ID_OR_EMPTY = FAVORITES_PAGE_ID ?? "";
+const DATABASE_KEY = `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID_OR_EMPTY : USER_ID}`;
 
-  public readStoredFavorites(): Promise<FavoriteItem[]> {
-    return this.store.readAll().then(posts => posts.map(post => new FavoriteItem(post)));
+export class FavoritesLoader {
+  private readonly store = new FavoritesStore(DATABASE_KEY);
+
+  public readStoredFavorites(): Promise<FavoritesItem[]> {
+    return this.store.readAll().then(posts => posts.map(post => new FavoritesItem(post)));
   }
 
-  public streamStoredFavorites(onBatch: (favorites: FavoriteItem[]) => void): Promise<void> {
-    return this.store.streamAll(posts => onBatch(posts.map(post => new FavoriteItem(post))));
+  public streamStoredFavorites(onBatch: (favorites: FavoritesItem[]) => void): Promise<void> {
+    return this.store.streamAll(posts => onBatch(posts.map(post => new FavoritesItem(post))));
   }
 
   public countStoredFavorites(): Promise<number> {
     return this.store.count();
   }
 
-  public fetchAllFavorites(onFavoritesFound: (favorites: FavoriteItem[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
+  public fetchAllFavorites(onFavoritesFound: (favorites: FavoritesItem[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
     return new FavoritesConcurrentFetcher((elements: HTMLElement[]): void => {
-      onFavoritesFound(elements.map(element => new FavoriteItem(element)));
-    }, firstPageFavorites).fetchAllFavorites();
+      onFavoritesFound(elements.map(element => new FavoritesItem(element)));
+    }, FAVORITES_PAGE_ID_OR_EMPTY, firstPageFavorites).fetchAllFavorites();
   }
 
-  public fetchNewFavorites(existingIds: Set<string>, firstPageFavorites?: HTMLElement[]): Promise<FavoriteItem[]> {
-    return FavoritesSequentialFetcher.fetchNewFavorites(existingIds, firstPageFavorites)
-      .then(elements => elements.map(element => new FavoriteItem(element)));
-  }
-
-  public migrateLegacyStores(onMigrating: () => void): Promise<void> {
-    return this.migrator.migrateLegacyStores({
-      exists: () => this.store.exists(),
-      writeAll: (favorites: FavoriteItem[]) => this.store.writeAll(favorites)
-    }, onMigrating);
-  }
-
-  public destroyLegacyStores(): void {
-    this.migrator.destroyLegacyStores();
+  public fetchNewFavorites(existingIds: Set<string>, firstPageFavorites?: HTMLElement[]): Promise<FavoritesItem[]> {
+    return new FavoritesSequentialFetcher(Rule34NetworkConfig.favoritesPageFetchDelay, Rule34NetworkConfig.favoritesPageFetchRetries, FAVORITES_PAGE_ID_OR_EMPTY)
+      .fetchNewFavorites(existingIds, firstPageFavorites)
+      .then(elements => elements.map(element => new FavoritesItem(element)));
   }
 
   public storeFavorites(favorites: Favorite[]): Promise<void> {

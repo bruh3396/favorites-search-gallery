@@ -2,6 +2,7 @@ import * as FavoritesFlows from "@/features/favorites/flows/flows";
 import * as FavoritesModel from "@/features/favorites/model/model";
 import * as FavoritesView from "@/features/favorites/view/view";
 import { Events } from "@/app/channels/events";
+import { FAVORITES_PAGE_ID } from "@/app/context/environment";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { fetchFavoritesCount } from "@/lib/remote/fetchers/html";
 import { pluralSuffix } from "@/utils/pure/string";
@@ -67,7 +68,7 @@ async function indexLoadedFavorites(): Promise<void> {
 }
 
 async function fetchAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
-  fetchFavoritesCount().then(FavoritesView.setExpectedTotalFavoritesCount);
+  fetchFavoritesCount(FAVORITES_PAGE_ID).then(FavoritesView.setExpectedTotalFavoritesCount);
   FavoritesFlows.Display.clear();
   await FavoritesModel.fetchAllFavorites(FavoritesFlows.Display.sync, firstPageFavorites);
   FavoritesView.setStatus("Saving favorites");

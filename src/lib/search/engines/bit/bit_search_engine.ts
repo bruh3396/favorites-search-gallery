@@ -60,10 +60,6 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     this.metricIndex.build(this.bitIndex.width, this.bitIndex.positionalDocs());
   }
 
-  public termsForDoc(doc: Doc): ReadonlySet<string> {
-    return this.bitIndex.termsForDoc(doc);
-  }
-
   private bitSetFromQuery(query?: string): BitSet | undefined {
     if (query === undefined) {
       return undefined;

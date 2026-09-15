@@ -1,53 +1,60 @@
-import * as GalleryImageBudgeter from "@/features/gallery/view/rendering/image/budgeter";
-import * as GalleryImageCache from "@/features/gallery/view/rendering/image/cache";
 import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fetcher";
+import { CachedRequest, GalleryImageCache } from "@/features/gallery/view/rendering/image/cache";
+import { GalleryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { LowResolutionImageRequest } from "@/features/gallery/types/low_resolution_image_request";
-import { doNothing } from "@/utils/pure/function";
 import { isImageThumb } from "@/lib/ui/thumb/media_item";
-export { get, completedRequests } from "@/features/gallery/view/rendering/image/cache";
 
-let onRequestCompleted: (request: ImageRequest) => void = doNothing;
+export class GalleryImageLoader {
+  private readonly cache = new GalleryImageCache();
+  private readonly budgeter = new GalleryImageBudgeter(() => 0);
 
-export function setCompletionCallback(onCompleted: (request: ImageRequest) => void): void {
-  onRequestCompleted = onCompleted;
-}
+  constructor(private readonly onRequestCompleted: (request: ImageRequest) => void) {}
 
-export function load(thumbs: HTMLElement[]): ImageRequest[] {
-  const { accepted, rejected } = GalleryImageBudgeter.partition(thumbs.filter(t => isImageThumb(t)));
+  public load(thumbs: HTMLElement[]): ImageRequest[] {
+    const { accepted, rejected } = this.budgeter.partition(thumbs.filter(t => isImageThumb(t)));
 
-  GalleryImageCache.sync(accepted).forEach(request => runRequest(request));
-  return rejected;
-}
-
-export function loadImmediate(thumb: HTMLElement): void {
-  const request = new ImageRequest(thumb);
-
-  GalleryImageCache.markLowRes(request);
-  runRequest(new LowResolutionImageRequest(request));
-  runRequest(request);
-}
-
-function settleRequest(request: ImageRequest): void {
-  const cached = GalleryImageCache.get(request.id);
-
-  if (cached === undefined || request.cancelled) {
-    request.close();
-    return;
+    this.cache.sync(accepted).forEach(request => this.runRequest(request));
+    return rejected;
   }
 
-  if (cached.status !== "complete") {
-    if (request.isHighRes) {
-      GalleryImageCache.markComplete(request);
-    } else {
-      GalleryImageCache.markLowRes(request);
+  public loadImmediate(thumb: HTMLElement): void {
+    const request = new ImageRequest(thumb);
+
+    this.cache.markLowRes(request);
+    this.runRequest(new LowResolutionImageRequest(request));
+    this.runRequest(request);
+  }
+
+  public get(id: string): CachedRequest | undefined {
+    return this.cache.get(id);
+  }
+
+  public completedRequests(): ImageRequest[] {
+    return this.cache.completedRequests();
+  }
+
+  private settleRequest(request: ImageRequest): void {
+    const cached = this.cache.get(request.id);
+
+    if (cached === undefined || request.cancelled) {
+      request.close();
+      return;
     }
-    onRequestCompleted(request);
-  }
-}
 
-async function runRequest(request: ImageRequest): Promise<void> {
-  if (!request.cancelled && await GalleryImageFetcher.fetchBitmap(request)) {
-    settleRequest(request);
+    if (cached.status !== "complete") {
+      if (request.isHighRes) {
+        this.cache.markComplete(request);
+      } else {
+        this.cache.markLowRes(request);
+      }
+      this.onRequestCompleted(request);
+    }
+  }
+
+  private async runRequest(request: ImageRequest): Promise<void> {
+    if (!request.cancelled && await GalleryImageFetcher.fetchBitmap(request)) {
+      this.settleRequest(request);
+    }
   }
 }

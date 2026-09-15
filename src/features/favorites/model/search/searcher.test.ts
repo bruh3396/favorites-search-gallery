@@ -1,6 +1,54 @@
-import { FavoritesSearcher, SearcherConfig } from "@/features/favorites/model/search/searcher";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { Rating, SortKey } from "@/types/search";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { resetEnvironment, setEnvironment } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
+import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
+
+interface ConfigOverrides {
+  onOwnFavoritesPage?: boolean;
+  excludeBlacklist?: boolean;
+  allowedRatings?: Rating;
+  sortKey?: SortKey;
+  sortAscending?: boolean;
+}
+
+const preferences = {
+  excludeBlacklist: false as boolean,
+  allowedRatings: 7 as Rating,
+  sortKey: "default" as SortKey,
+  sortAscending: false as boolean
+};
+
+vi.mock("@/app/context/preferences", () => ({
+  Preferences: {
+    favorites: {
+      excludeBlacklist: {
+        get value() {
+          return preferences.excludeBlacklist;
+        }
+      },
+      allowedRatings: {
+        get value() {
+          return preferences.allowedRatings;
+        }
+      },
+      sortKey: {
+        get value() {
+          return preferences.sortKey;
+        }
+      },
+      sortAscending: {
+        get value() {
+          return preferences.sortAscending;
+        }
+      }
+    }
+  }
+}));
+
+vi.mock("@/config/favorites_config", () => ({
+  FavoritesConfig: { useBitSearchEngine: false }
+}));
 
 const favorite = (id: string, rating: string, ...tags: string[]): Favorite => {
   const tagSet = new Set(tags);
@@ -9,28 +57,33 @@ const favorite = (id: string, rating: string, ...tags: string[]): Favorite => {
 
 const ids = (results: Favorite[]): string[] => results.map(r => r.id);
 
-const config = (overrides: Partial<SearcherConfig> = {}): SearcherConfig => ({
-  usingBlacklist: () => false,
-  enforcingBlacklist: () => false,
-  blacklistTags: "-blacklisted",
-  allowedRatings: () => 7,
-  sortKey: () => "default",
-  sortAscending: () => false,
-  ...overrides
-});
+const applyOverrides = (overrides: ConfigOverrides = {}): void => {
+  setEnvironment({
+    USER_IS_ON_THEIR_OWN_FAVORITES_PAGE: overrides.onOwnFavoritesPage ?? true,
+    NEGATED_BLACKLISTED_TAGS: "-blacklisted"
+  });
+  preferences.excludeBlacklist = overrides.excludeBlacklist ?? false;
+  preferences.allowedRatings = overrides.allowedRatings ?? 7;
+  preferences.sortKey = overrides.sortKey ?? "default";
+  preferences.sortAscending = overrides.sortAscending ?? false;
+};
 
 describe("FavoritesSearcher", () => {
   let searcher: FavoritesSearcher;
 
-  const withIndexed = (favorites: Favorite[], overrides?: Partial<SearcherConfig>): Favorite[] => {
-    searcher = new FavoritesSearcher(config(overrides));
+  const withIndexed = (favorites: Favorite[], overrides?: ConfigOverrides): Favorite[] => {
+    applyOverrides(overrides);
+    searcher = new FavoritesSearcher();
     searcher.index(favorites);
     return favorites;
   };
 
   beforeEach(() => {
-    searcher = new FavoritesSearcher(config());
+    applyOverrides();
+    searcher = new FavoritesSearcher();
   });
+
+  afterEach(() => resetEnvironment());
 
   describe("search", () => {
     test("returns the favorites matching the query", () => {
@@ -63,19 +116,13 @@ describe("FavoritesSearcher", () => {
     });
 
     test("appends the blacklist tags when the blacklist is active", () => {
-      const favorites = withIndexed(
-        [favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")],
-        { usingBlacklist: () => true }
-      );
+      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")], { excludeBlacklist: true });
 
       expect(ids(searcher.search(favorites, "cat"))).toEqual(["1"]);
     });
 
     test("does not apply the blacklist when it is inactive", () => {
-      const favorites = withIndexed(
-        [favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")],
-        { usingBlacklist: () => false }
-      );
+      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")]);
 
       expect(ids(searcher.search(favorites, "cat")).sort()).toEqual(["1", "2"]);
     });
@@ -83,10 +130,7 @@ describe("FavoritesSearcher", () => {
 
   describe("filtering by rating", () => {
     test("keeps only favorites whose rating is allowed", () => {
-      const favorites = withIndexed(
-        [favorite("1", "s", "cat"), favorite("2", "e", "cat")],
-        { allowedRatings: () => 1 }
-      );
+      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "e", "cat")], { allowedRatings: 1 });
 
       expect(ids(searcher.search(favorites, "cat"))).toEqual(["1"]);
     });
@@ -94,19 +138,13 @@ describe("FavoritesSearcher", () => {
 
   describe("sorting", () => {
     test("orders results by the metric, descending by default", () => {
-      const favorites = withIndexed(
-        [favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")],
-        { sortKey: () => "score" }
-      );
+      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")], { sortKey: "score" });
 
       expect(ids(searcher.search(favorites, "cat"))).toEqual(["3", "2", "1"]);
     });
 
     test("orders ascending when configured", () => {
-      const favorites = withIndexed(
-        [favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")],
-        { sortKey: () => "score", sortAscending: () => true }
-      );
+      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")], { sortKey: "score", sortAscending: true });
 
       expect(ids(searcher.search(favorites, "cat"))).toEqual(["1", "2", "3"]);
     });
@@ -169,10 +207,10 @@ describe("FavoritesSearcher", () => {
       expect(ids(searcher.getCurrentSearchResults())).toEqual(["2"]);
     });
 
-    test("enforces the blacklist regardless of the usingBlacklist toggle", () => {
+    test("enforces the blacklist when off the user's own favorites page", () => {
       const favorites = withIndexed(
         [favorite("1", "s", "cat"), favorite("2", "s", "dog", "blacklisted")],
-        { usingBlacklist: () => false, enforcingBlacklist: () => true }
+        { onOwnFavoritesPage: false }
       );
 
       searcher.search(favorites, "cat");

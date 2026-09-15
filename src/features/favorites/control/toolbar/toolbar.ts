@@ -1,7 +1,7 @@
 import { ButtonElement, buildButton } from "@/lib/ui/widgets/button";
 import { Events } from "@/app/channels/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { buildToggleButton } from "@/lib/ui/settings/components/toggle_button";
 

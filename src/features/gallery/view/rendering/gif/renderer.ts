@@ -1,5 +1,6 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { Renderer } from "@/features/gallery/types/gallery_types";
+import { createElement } from "@/utils/browser/element";
 import { gifUrl } from "@/lib/media/url";
 import { isGif } from "@/lib/media/media_type";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
@@ -10,12 +11,8 @@ export class GalleryGifRenderer implements Renderer {
   private readonly preloadedGifs: HTMLImageElement[] = [];
 
   constructor() {
-    this.root = document.createElement("div");
-    this.gif = document.createElement("img");
-    this.root.id = "gif-container";
-    this.root.className = "gallery-image-frame";
-    this.gif.className = "gallery-image";
-    this.root.appendChild(this.gif);
+    this.gif = createElement("img", {className: "gallery-image"});
+    this.root = createElement("div", { id: "gif-container", className: "gallery-image-frame", children: [this.gif] });
   }
 
   public render(thumb: HTMLElement): void {

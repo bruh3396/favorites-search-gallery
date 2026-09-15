@@ -1,11 +1,12 @@
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { toSortedTagSet } from "@/utils/pure/tag";
 
 let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
+let resolveTagSetFromThumb: (thumb: HTMLElement) => Set<string> = getTagSetFromPostListThumb;
 
 export function setFavoriteTagsLookup(lookup: (id: string) => Set<string> | undefined): void {
   getFavoriteTags = lookup;
+  resolveTagSetFromThumb = getTagSetFromFavoritesPageThumb;
 }
 
 export function getTagsFromThumb(thumb: HTMLElement): string {
@@ -13,7 +14,9 @@ export function getTagsFromThumb(thumb: HTMLElement): string {
     return image?.title ?? image?.getAttribute("tags") ?? "";
 }
 
-export const getTagSetFromThumb: (thumb: HTMLElement) => Set<string> = ON_FAVORITES_PAGE ? getTagSetFromFavoritesPageThumb : getTagSetFromPostListThumb;
+export function getTagSetFromThumb(thumb: HTMLElement): Set<string> {
+  return resolveTagSetFromThumb(thumb);
+}
 
 function getTagSetFromFavoritesPageThumb(thumb: HTMLElement): Set<string> {
   const tags = getFavoriteTags(thumb.id);

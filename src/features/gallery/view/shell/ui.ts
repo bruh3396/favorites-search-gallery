@@ -1,6 +1,6 @@
 import * as Icons from "@/assets/svg/icons";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { ON_MOBILE_DEVICE, USING_FIREFOX } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, USING_FIREFOX } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { blurActiveElement } from "@/utils/browser/window";
 import { div } from "@/utils/browser/element";

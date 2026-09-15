@@ -1,11 +1,11 @@
 import * as GalleryFetcher from "@/features/gallery/view/rendering/image/fetcher";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { ON_POST_LIST_PAGE } from "@/lib/environment";
-import { PERFORMANCE_PROFILE } from "@/app/context/flags";
+import { ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
+import { PERFORMANCE_PROFILE } from "@/app/context/flags";
 
 function upscalingEnabled(): boolean {
   if (ON_POST_LIST_PAGE && !Preferences.postList.upscaleThumbs.value) {

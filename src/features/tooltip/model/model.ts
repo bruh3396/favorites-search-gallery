@@ -1,6 +1,6 @@
 import * as TooltipHighlightBuilder from "@/features/tooltip/model/highlight_builder";
 import * as TooltipTagMatcher from "@/features/tooltip/model/tag_matcher";
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { ON_FAVORITES_PAGE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
 let currentHighlights: SearchTermHighlight[] = [];

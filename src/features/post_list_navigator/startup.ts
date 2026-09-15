@@ -6,7 +6,7 @@ import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 
 export function startPostListNavigator(): void {

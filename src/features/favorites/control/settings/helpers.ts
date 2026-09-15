@@ -3,6 +3,7 @@ import { SettingsControl, toggle as toggleControl } from "@/lib/ui/settings/cont
 import { applyTheme, swapNativeStylesheet } from "@/lib/ui/theme/apply";
 import { Events } from "@/app/channels/events";
 import { Layout } from "@/types/app";
+import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
@@ -29,7 +30,7 @@ export function applyCurrentTheme(): void {
 
 export function applyDarkMode(dark: boolean): void {
   applyCurrentTheme();
-  swapNativeStylesheet(dark);
+  swapNativeStylesheet(dark, ON_DESKTOP_DEVICE);
 }
 
 export function isExpanded(section: SettingsSection): boolean {

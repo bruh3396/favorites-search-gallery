@@ -7,5 +7,4 @@ export interface SearchEngine<Doc> {
   index(docs: Doc[]): void;
   add(docs: Doc[]): void;
   update(updates: readonly TermUpdate<Doc>[]): void;
-  termsForDoc(doc: Doc): ReadonlySet<string>;
 }

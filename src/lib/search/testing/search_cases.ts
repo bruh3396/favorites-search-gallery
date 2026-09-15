@@ -1,8 +1,12 @@
-import { FruitName, allDocNames, allTerms, fruitDocs } from "@/lib/search/testing/fruit_corpus";
+import { Fruit, FruitName, allDocNames, allTerms, fruitDocs } from "@/lib/search/testing/fruit_corpus";
 
 export type QueryAssertion = (query: string, expectedNames: FruitName[]) => void;
 export type SearchCase = { query: string; expected: FruitName[] };
-export type SearchCaseGroup = { name: string; cases?: SearchCase[]; run?: (assert: QueryAssertion) => void };
+export type SearchCaseGroup = { name: string; cases?: SearchCase[]; run?: (assert: QueryAssertion) => void; isAST?: boolean };
+
+function matchesTagOrId(item: Fruit, tag: string): boolean {
+  return item.tags.has(tag) || ((/^\d+$/).test(tag) && item.getMetric("id") === Number(tag));
+}
 
 export const searchCases: SearchCaseGroup[] = [
   {
@@ -71,6 +75,18 @@ export const searchCases: SearchCaseGroup[] = [
     ]
   },
   {
+    name: "negated group",
+    isAST: true,
+    cases: [
+      { query: "-( red ~ sweet )", expected: ["banana", "kiwi", "orange"] },
+      { query: "-( red sweet )", expected: ["apple", "banana", "grape", "kiwi", "mango", "blueberry", "orange", "pear"] },
+      { query: "sweet -( berry ~ snack )", expected: ["mango", "pear"] },
+      { query: "( antioxidants ~ -( green ~ berry ) )", expected: ["apple", "cherry", "grape", "mango", "orange", "strawberry"] },
+      { query: "-( red )", expected: ["banana", "grape", "kiwi", "mango", "blueberry", "orange", "pear"] },
+      { query: "red -( sweet ~ tart )", expected: ["apple"] }
+    ]
+  },
+  {
     name: "nested or",
     cases: [
       { query: "( red ~ ( sweet berry ) )", expected: ["apple", "cherry", "strawberry", "blueberry"] },
@@ -78,6 +94,17 @@ export const searchCases: SearchCaseGroup[] = [
       { query: "( apple ~ ( green tropical ) )", expected: ["apple", "kiwi"] },
       { query: "( ( juicy citrus ) ~ ( grainy soft ) )", expected: ["orange", "pear"] },
       { query: "green ( red ~ ( fiber tart ) )", expected: ["apple", "kiwi"] }
+    ]
+  },
+  {
+    name: "deeply nested",
+    isAST: true,
+    cases: [
+      { query: "( red ~ ( sweet ( berry ~ tart ) ) )", expected: ["apple", "blueberry", "cherry", "strawberry"] },
+      { query: "( ( red ~ green ) ( sweet ~ tart ) )", expected: ["cherry", "grape", "kiwi", "pear", "strawberry"] },
+      { query: "( ( red sweet ) ~ ( green juicy ) )", expected: ["cherry", "grape", "pear", "strawberry"] },
+      { query: "tropical ( sweet ~ ( fiber tart ) )", expected: ["kiwi", "mango"] },
+      { query: "( red ~ ( green ( -sweet ~ tart ) ) )", expected: ["apple", "banana", "cherry", "kiwi", "strawberry"] }
     ]
   },
   {
@@ -143,8 +170,8 @@ export const searchCases: SearchCaseGroup[] = [
       assert(andAllQuery, []);
 
       for (const tag of allTerms) {
-        assert(tag, fruitDocs.filter(item => item.tags.has(tag)).map(item => item.name));
-        assert(`-${tag}`, fruitDocs.filter(item => !item.tags.has(tag)).map(item => item.name));
+        assert(tag, fruitDocs.filter(item => matchesTagOrId(item, tag)).map(item => item.name));
+        assert(`-${tag}`, fruitDocs.filter(item => !matchesTagOrId(item, tag)).map(item => item.name));
       }
     }
   },
@@ -244,6 +271,48 @@ export const searchCases: SearchCaseGroup[] = [
     cases: [
       { query: "-width:width", expected: [] },
       { query: "-width:>width", expected: allDocNames }
+    ]
+  },
+  {
+    name: "numeric matches by tag or id",
+    cases: [
+      { query: "200", expected: ["apple", "grape"] },
+      { query: "305", expected: ["grape"] },
+      { query: "88", expected: ["cherry"] },
+      { query: "101", expected: ["banana"] },
+      { query: "999", expected: [] }
+    ]
+  },
+  {
+    name: "numeric negated",
+    cases: [
+      { query: "-200", expected: ["banana", "cherry", "kiwi", "mango", "blueberry", "orange", "pear", "strawberry"] },
+      { query: "-999", expected: allDocNames }
+    ]
+  },
+  {
+    name: "numeric with a tag",
+    cases: [
+      { query: "200 red", expected: ["apple"] },
+      { query: "200 -red", expected: ["grape"] }
+    ]
+  },
+  {
+    name: "numeric inside an or group",
+    cases: [
+      { query: "( 200 ~ blue )", expected: ["apple", "grape", "blueberry"] },
+      { query: "( 88 ~ 200 )", expected: ["apple", "cherry", "grape"] },
+      { query: "( 200 ~ red )", expected: ["apple", "cherry", "grape", "strawberry"] }
+    ]
+  },
+  {
+    name: "explicit id metric does not expand to the tag",
+    cases: [
+      { query: "id:200", expected: ["apple"] },
+      { query: "id:305", expected: ["grape"] },
+      { query: "id:88", expected: ["cherry"] },
+      { query: "id:200 200", expected: ["apple"] },
+      { query: "( id:200 ~ blue )", expected: ["apple", "blueberry"] }
     ]
   },
   {

@@ -1,8 +1,8 @@
 import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
-import { GALLERY_ENABLED, PERFORMANCE_PROFILE, TOOLTIP_ENABLED } from "@/app/context/flags";
+import { GALLERY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
@@ -15,7 +15,7 @@ export const PostListSettingsCatalog = {
     id: "post-list-upscale",
     label: "Upscale",
     tooltip: "Upscale thumbnails on search pages",
-    enabled: GALLERY_ENABLED && ON_DESKTOP_DEVICE && PERFORMANCE_PROFILE === "normal",
+    enabled: GALLERY_ENABLED && ON_DESKTOP_DEVICE && Preferences.app.performanceProfile.value === "normal",
     preference: Preferences.postList.upscaleThumbs
   }),
   infiniteScroll: toggle({

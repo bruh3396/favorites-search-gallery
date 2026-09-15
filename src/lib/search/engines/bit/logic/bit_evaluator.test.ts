@@ -3,7 +3,7 @@ import { BitEvaluator } from "@/lib/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/lib/search/engines/bit/indexes/bit_index";
 import { MetricBitIndex } from "@/lib/search/engines/bit/indexes/metric_index";
 import { PostingResolver } from "@/lib/search/engines/bit/resolution/posting_resolver";
-import { SearchExpression } from "@/lib/search/engines/bit/logic/search_expression";
+import { SearchExpression } from "@/lib/search/expression/search_expression";
 import { Searchable } from "@/types/search";
 import { WildcardPostingResolver } from "@/lib/search/engines/bit/resolution/wildcard_posting_resolver";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";

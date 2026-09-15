@@ -2,7 +2,7 @@ import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode }
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { GALLERY_ENABLED, POST_OVERLAY_ENABLED, TOOLTIP_ENABLED } from "@/app/context/flags";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { ON_MOBILE_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/app/context/environment";
 import { applyCurrentTheme, applyDarkMode, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/settings/helpers";
 import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
 import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";

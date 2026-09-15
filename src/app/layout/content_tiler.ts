@@ -1,4 +1,4 @@
-import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { clamp, navigationDelta } from "@/utils/pure/number";
 import { clearFade, fadeIn, fadeInReplacement, setupFadeIn } from "@/app/layout/fade_in";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";

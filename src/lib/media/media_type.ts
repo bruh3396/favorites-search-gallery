@@ -1,4 +1,4 @@
-import { EncodedMediaType, MediaExtension, MediaItem, MediaType, mediaExtensionToType } from "@/types/media";
+import { EncodedMediaType, MediaExtension, MediaItem, MediaType } from "@/types/media";
 import { gifTags, videoTags } from "@/lib/media/constants";
 import { hasIntersection } from "@/utils/pure/set";
 import { toSortedTagSet } from "@/utils/pure/tag";
@@ -28,7 +28,7 @@ export const isVideo = (item: MediaItem): boolean => isMediaType(item, "video");
 export const isGif = (item: MediaItem): boolean => isMediaType(item, "gif");
 export const isImage = (item: MediaItem): boolean => isMediaType(item, "image");
 
-const isMediaType = (item: MediaItem, mediaType: MediaType): boolean => mediaExtensionToType(item.extension) === mediaType;
+const isMediaType = (item: MediaItem, mediaType: MediaType): boolean => item.mediaType === mediaType;
 
 function deriveMediaType(tags: string | Set<string>): EncodedMediaType {
   const tagSet = typeof tags === "string" ? toSortedTagSet(tags) : tags;

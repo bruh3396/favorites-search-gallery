@@ -1,4 +1,3 @@
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_request";
 import { SortedArray } from "@/lib/collection/sorted_array";
 import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_parser";
@@ -16,6 +15,7 @@ export class FavoritesConcurrentFetcher {
 
   constructor(
     private readonly onFavoritesFound: (elements: HTMLElement[]) => void,
+    private readonly favoritesPageId: string,
     private readonly firstPageFavorites?: HTMLElement[]
   ) { }
 
@@ -35,7 +35,7 @@ export class FavoritesConcurrentFetcher {
   }
 
   private deliverFirstPage(): void {
-    if (!FavoritesConfig.skipFirstPageFetch || this.firstPageFavorites === undefined) {
+    if (this.firstPageFavorites === undefined) {
       return;
     }
     this.nextPage = 1;
@@ -60,7 +60,7 @@ export class FavoritesConcurrentFetcher {
 
   private async fetchPage(request: FavoritesPageRequest): Promise<void> {
     try {
-      const elements = await fetchFavoritesPage(request.realPageNumber);
+      const elements = await fetchFavoritesPage(this.favoritesPageId, request.realPageNumber);
 
       request.complete(extractFavoriteElements(elements));
 

@@ -5,10 +5,10 @@ import { MetricIndex } from "@/lib/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/lib/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/lib/search/engines/set/indexes/relative_metric_index";
 import { SearchableMetric } from "@/types/search";
-import { SetSearcher } from "@/lib/search/engines/set/logic/set_searcher";
+import { SetEvaluator } from "@/lib/search/engines/set/logic/set_evaluator";
 import { WildcardDocResolver } from "@/lib/search/engines/set/resolution/wildcard_doc_resolver";
-import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 import { searchableMetrics } from "@/types/guards";
+import { tryParseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
 
 export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly termIndex: InvertedIndex<Doc>;
@@ -16,7 +16,7 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly relativeMetricIndex: RelativeMetricIndex<Doc>;
   private readonly positionIndex: PositionIndex<Doc>;
   private readonly wildcardResolver: WildcardDocResolver<Doc>;
-  private readonly setSearcher: SetSearcher<Doc>;
+  private readonly setEvaluator: SetEvaluator<Doc>;
 
   constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: SearchableMetric) => number, docs: Doc[] = []) {
     this.termIndex = new InvertedIndex<Doc>(termsFor);
@@ -24,12 +24,13 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
     this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...searchableMetrics], metricFor);
     this.positionIndex = new PositionIndex<Doc>();
     this.wildcardResolver = new WildcardDocResolver<Doc>(this.termIndex);
-    this.setSearcher = new SetSearcher<Doc>(this.termIndex, new DocResolver<Doc>(this.termIndex, this.metricIndex, this.relativeMetricIndex, this.positionIndex, this.wildcardResolver));
+    this.setEvaluator = new SetEvaluator<Doc>(this.termIndex, new DocResolver<Doc>(this.termIndex, this.metricIndex, this.relativeMetricIndex, this.positionIndex, this.wildcardResolver));
     this.index(docs);
   }
 
   public search(query: string, candidates: Doc[]): Doc[] {
-    return this.setSearcher.search(parseSearchQuery<Doc>(query), candidates);
+    const expression = tryParseSearchExpression(query);
+    return expression === undefined ? [] : this.setEvaluator.evaluate(expression, candidates);
   }
 
   public complementOf(current: Doc[], filter?: string): Doc[] {
@@ -55,9 +56,5 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
 
     added.forEach(term => this.wildcardResolver.add(term));
     removed.forEach(term => this.wildcardResolver.remove(term));
-  }
-
-  public termsForDoc(doc: Doc): ReadonlySet<string> {
-    return this.termIndex.termsForDoc(doc);
   }
 }

@@ -25,16 +25,16 @@ function fruit(name: FruitName, tags: string[], metrics: Partial<Record<Searchab
 }
 
 export const fruitDocs: Fruit[] = [
-  fruit("apple", ["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"], { score: 10, width: 400, height: 100 }),
-  fruit("banana", ["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast", "a12345"], { score: 20, width: 100, height: 400 }),
-  fruit("cherry", ["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert"], { score: 30, width: 200, height: 200 }),
-  fruit("grape", ["grape", "purple", "sweet", "small", "green", "snack", "juicy", "antioxidants", "seedless"], { score: 30, width: 300, height: 150 }),
-  fruit("kiwi", ["kiwi", "green", "tart", "fiber", "vitamin-c", "fuzzy", "tropical", "small", "smoothie"], { score: 5, width: 150, height: 300 }),
-  fruit("mango", ["mango", "tropical", "sweet", "juicy", "fiber", "smoothie", "dessert", "vitamin-a"], { score: 45, width: 350, height: 250 }),
-  fruit("blueberry", ["blueberry", "blue", "small", "antioxidant", "sweet", "berry", "snack", "baking", "fiber"], { score: 15, width: 120, height: 120 }),
-  fruit("orange", ["orange", "citrus", "vitamin-c", "juicy", "fiber", "breakfast", "peelable", "snack"], { score: 25, width: 260, height: 180 }),
-  fruit("pear", ["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"], { score: 40, width: 220, height: 220 }),
-  fruit("strawberry", ["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"], { score: 35, width: 180, height: 320 })
+  fruit("apple", ["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"], { score: 10, width: 400, height: 100, id: 200 }),
+  fruit("banana", ["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast", "a12345"], { score: 20, width: 100, height: 400, id: 101 }),
+  fruit("cherry", ["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert", "88"], { score: 30, width: 200, height: 200, id: 88 }),
+  fruit("grape", ["grape", "purple", "sweet", "small", "green", "snack", "juicy", "antioxidants", "seedless", "200"], { score: 30, width: 300, height: 150, id: 305 }),
+  fruit("kiwi", ["kiwi", "green", "tart", "fiber", "vitamin-c", "fuzzy", "tropical", "small", "smoothie"], { score: 5, width: 150, height: 300, id: 404 }),
+  fruit("mango", ["mango", "tropical", "sweet", "juicy", "fiber", "smoothie", "dessert", "vitamin-a"], { score: 45, width: 350, height: 250, id: 505 }),
+  fruit("blueberry", ["blueberry", "blue", "small", "antioxidant", "sweet", "berry", "snack", "baking", "fiber"], { score: 15, width: 120, height: 120, id: 606 }),
+  fruit("orange", ["orange", "citrus", "vitamin-c", "juicy", "fiber", "breakfast", "peelable", "snack"], { score: 25, width: 260, height: 180, id: 707 }),
+  fruit("pear", ["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"], { score: 40, width: 220, height: 220, id: 808 }),
+  fruit("strawberry", ["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"], { score: 35, width: 180, height: 320, id: 909 })
 ];
 export const allDocNames = fruitDocs.map(item => item.name);
 export const allTerms = fruitDocs.flatMap(item => Array.from(item.tags));

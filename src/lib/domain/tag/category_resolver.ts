@@ -1,4 +1,4 @@
-import * as TagCategoryStore from "@/app/domain/tag/category_store";
+import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { TagCategory, TagCategoryMap } from "@/types/search";
 import { fetchPostPageHtml } from "@/lib/remote/fetchers/html";
 import { fetchTagCategory } from "@/lib/remote/fetchers/api";

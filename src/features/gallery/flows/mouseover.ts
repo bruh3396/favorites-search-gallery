@@ -1,7 +1,7 @@
 import * as GalleryFlows from "@/features/gallery/flows/flows";
 import * as GalleryView from "@/features/gallery/view/view";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { ON_FAVORITES_PAGE } from "@/app/context/environment";
 import { debounceTrailing } from "@/lib/async/rate_limiting";
 
 export function handleMouseOver(mouseEvent: EnhancedMouseEvent): void {

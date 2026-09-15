@@ -9,7 +9,7 @@ import * as FavoritesStatus from "@/features/favorites/view/status/status";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { FavoritesViewDependencies } from "@/features/favorites/types/types";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { buildFavoriteElementTemplate } from "@/features/favorites/types/favorite_element_template";
 import { doNothing } from "@/utils/pure/function";
 import { toggleDataset } from "@/utils/browser/dataset";

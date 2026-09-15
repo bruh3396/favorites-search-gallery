@@ -2,7 +2,7 @@ import { FeatureNamespace, GalleryState } from "@/types/app";
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/event/feature_channel";
 import { NavigationKey } from "@/types/input";
-import { ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 export const FeatureBridge = {

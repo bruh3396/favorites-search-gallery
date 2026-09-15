@@ -3,7 +3,7 @@ import * as GalleryFeatures from "@/features/gallery/features/features";
 import * as GalleryFlows from "@/features/gallery/flows/flows";
 import * as GalleryModel from "@/features/gallery/model/model";
 import * as GalleryView from "@/features/gallery/view/view";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { hideTutorial, showTutorial } from "@/features/gallery/dom_tweaks/tutorial";
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";

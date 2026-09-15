@@ -1,6 +1,6 @@
 import { createElement, label, span } from "@/utils/browser/element";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { VERSION } from "@/lib/environment";
+import { VERSION } from "@/app/context/environment";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { icon } from "@/lib/ui/icon";
 

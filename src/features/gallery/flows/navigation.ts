@@ -3,7 +3,7 @@ import * as GalleryModel from "@/features/gallery/model/model";
 import * as GalleryView from "@/features/gallery/view/view";
 import { FeatureBridge, usingInfiniteScroll } from "@/app/channels/feature_bridge";
 import { NavigationKey } from "@/types/input";
-import { ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_POST_LIST_PAGE } from "@/app/context/environment";
 
 export function navigate(direction: NavigationKey): void {
   switch (GalleryModel.move(direction)) {

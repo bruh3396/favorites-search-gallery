@@ -4,14 +4,16 @@ import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { paginationSequence } from "@/lib/ui/pagination";
 
+interface PaginatorConfig {
+  resultsPerPage: () => number;
+  nearbyPageCount: number;
+}
+
 export class Paginator<T extends Identifiable> {
   private current = 1;
   private items: T[] = [];
 
-  constructor(
-    private readonly resultsPerPage: () => number,
-    private readonly nearbyPageCount: number
-  ) {}
+  constructor(private readonly config: PaginatorConfig) {}
 
   public atFinalPage(): boolean {
     return this.current === this.pageCount();
@@ -51,7 +53,7 @@ export class Paginator<T extends Identifiable> {
 
   public selectPageContaining(id: string): boolean {
     const index = this.items.findIndex(item => item.id === id);
-    return index !== -1 && this.selectPage(Math.floor(index / this.resultsPerPage()) + 1);
+    return index !== -1 && this.selectPage(Math.floor(index / this.config.resultsPerPage()) + 1);
   }
 
   public paginationState(): PaginationState {
@@ -59,18 +61,18 @@ export class Paginator<T extends Identifiable> {
       currentPage: this.current,
       finalPage: this.pageCount(),
       totalCount: this.items.length,
-      sliceStart: this.resultsPerPage() * (this.current - 1),
-      sliceEnd: this.resultsPerPage() * this.current,
-      sequence: paginationSequence(this.current, this.pageCount(), this.nearbyPageCount)
+      sliceStart: this.config.resultsPerPage() * (this.current - 1),
+      sliceEnd: this.config.resultsPerPage() * this.current,
+      sequence: paginationSequence(this.current, this.pageCount(), this.config.nearbyPageCount)
     };
   }
 
   private pageCount(): number {
-    return Math.ceil(this.items.length / this.resultsPerPage()) || 1;
+    return Math.ceil(this.items.length / this.config.resultsPerPage()) || 1;
   }
 
   private pageRange(c: number): {start: number; end: number} {
-    return { start: this.resultsPerPage() * (c - 1), end: this.resultsPerPage() * c };
+    return { start: this.config.resultsPerPage() * (c - 1), end: this.config.resultsPerPage() * c };
   }
 
   private itemsOnPage(c: number): T[] {

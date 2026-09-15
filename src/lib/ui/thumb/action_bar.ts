@@ -16,6 +16,15 @@ export enum ActionBarButton {
   Open = 4
 }
 
+export type ActionBarMode = "off" | "hover" | "always";
+
+export type ActionBarStyle = "corner" | "opaque" | "inset";
+
+export interface ActionBarCallbacks {
+  onFavoriteAdded: (id: string) => void;
+  onFavoriteRemoved: (id: string) => void;
+}
+
 interface ActionBarButtonSpec {
   bit: ActionBarButton;
   action: ActionBarAction;
@@ -27,15 +36,6 @@ interface ActionContext {
   bar: HTMLElement;
   thumb: HTMLElement;
   callbacks: ActionBarCallbacks;
-}
-
-export type ActionBarMode = "off" | "hover" | "always";
-
-export type ActionBarStyle = "corner" | "opaque" | "inset";
-
-export interface ActionBarCallbacks {
-  onFavoriteAdded: (id: string) => void;
-  onFavoriteRemoved: (id: string) => void;
 }
 
 export const ActionBarSelectors = {

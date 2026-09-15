@@ -1,6 +1,6 @@
 import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { FeatureNamespace, Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { Rating, SortKey } from "@/types/search";
 import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";

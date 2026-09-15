@@ -1,7 +1,7 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { FavoritesClass, FavoritesHelpLinks } from "@/features/favorites/types/scaffold";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 

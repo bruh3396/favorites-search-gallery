@@ -1,7 +1,7 @@
 import { ParsedPost, ServerPost } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { decodeHtmlEntities } from "@/utils/pure/string";
-import { decodeTagCategory } from "../../../app/domain/tag/category_codec";
+import { decodeTagCategory } from "@/lib/domain/tag/category_codec";
 
 export function parsePost(post: ServerPost): ParsedPost {
   const { tagCategories: encodedTagCategories, ...rest } = post;

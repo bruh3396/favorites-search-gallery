@@ -19,17 +19,6 @@ export class InvertedIndex<Doc> {
     return this.docsByTerm.get(term);
   }
 
-  public termsForDoc(doc: Doc): ReadonlySet<string> {
-    const terms = new Set<string>();
-
-    for (const [term, docs] of this.docsByTerm) {
-      if (docs.has(doc)) {
-        terms.add(term);
-      }
-    }
-    return terms;
-  }
-
   public allDocs(): ReadonlySet<Doc> {
     return this.docs;
   }

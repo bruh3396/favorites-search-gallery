@@ -32,6 +32,7 @@ export type MediaExtensionMapping = {
 export interface MediaItem {
   readonly id: string;
   readonly thumbUrl: string;
+  readonly mediaType: MediaType;
   readonly extension?: MediaExtension;
 }
 

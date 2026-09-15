@@ -1,7 +1,9 @@
 import { WildcardMatchType, WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { describe, expect, test } from "vitest";
-import { isMetricTerm, isWildcardTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
+import { isMetricTerm, isNumericTerm, isWildcardTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
+import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
+import { NumericSearchTerm } from "@/lib/search/terms/numeric_search_term";
 
 const normalTerms = [
   "",
@@ -48,10 +50,32 @@ describe("isMetricTerm", () => {
   });
 });
 
+describe("isNumericTerm", () => {
+  test("bare numerics, negated or not, are numeric terms", () => {
+    expect(["0", "7", "200", "-200"].every(term => isNumericTerm(term))).toBe(true);
+  });
+
+  test("non-numerics are not numeric terms", () => {
+    expect(["", "-", "a12345", "100cal", "200*", "id:200", "mango"].every(term => !isNumericTerm(term))).toBe(true);
+  });
+});
+
 describe("parseSearchTerm", () => {
   test("classifies terms into wildcard and exact", () => {
     expect(wildcardTerms.every(term => parseSearchTerm(term) instanceof WildcardSearchTerm)).toBe(true);
     expect(normalTerms.every(term => parseSearchTerm(term) instanceof ExactSearchTerm)).toBe(true);
+  });
+
+  test("a bare numeric is a numeric term", () => {
+    expect(parseSearchTerm("200")).toBeInstanceOf(NumericSearchTerm);
+    expect(parseSearchTerm("-200")).toBeInstanceOf(NumericSearchTerm);
+  });
+
+  test("an explicit id metric stays a metric term and does not expand to the tag", () => {
+    const term = parseSearchTerm("id:200");
+
+    expect(term).toBeInstanceOf(MetricSearchTerm);
+    expect(term).not.toBeInstanceOf(NumericSearchTerm);
   });
 });
 

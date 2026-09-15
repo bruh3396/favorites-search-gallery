@@ -1,7 +1,7 @@
 import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { actionBarHtml, stampActionBarId } from "@/lib/ui/thumb/action_bar";
 import { GALLERY_DISABLED } from "@/app/context/flags";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeNonNumericCharacters } from "@/utils/pure/string";

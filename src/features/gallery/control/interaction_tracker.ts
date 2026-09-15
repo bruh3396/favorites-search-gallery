@@ -1,7 +1,7 @@
 import { DomEvents } from "@/app/dom/events";
 import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { Timeout } from "@/types/async";
 import { doNothing } from "@/utils/pure/function";
 

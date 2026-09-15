@@ -83,6 +83,28 @@ describe("parseSearchExpression groups", () => {
   });
 });
 
+describe("parseSearchExpression negated groups", () => {
+  test("a negated OR group excludes anything matching either alternative", () => {
+    expect(idsFor("-( red ~ blue )")).toEqual(["3", "4"]);
+  });
+
+  test("a negated AND group excludes only docs matching every member", () => {
+    expect(idsFor("-( red sweet )")).toEqual(["2", "3", "4", "5"]);
+  });
+
+  test("a negated group intersects with surrounding terms", () => {
+    expect(idsFor("sweet -( red ~ blue )")).toEqual(["3"]);
+  });
+
+  test("a negated group nested inside another group", () => {
+    expect(idsFor("( sweet ~ -( green ~ blue ) )")).toEqual(["1", "2", "3", "5"]);
+  });
+
+  test("a negated single-member group behaves like a negated term", () => {
+    expect(idsFor("-( red )")).toEqual(["3", "4", "5"]);
+  });
+});
+
 describe("parseSearchExpression arbitrary nesting", () => {
   test("an OR group nesting an AND group", () => {
     expect(idsFor("( sweet ~ ( green big ) )")).toEqual(["1", "3", "5"]);

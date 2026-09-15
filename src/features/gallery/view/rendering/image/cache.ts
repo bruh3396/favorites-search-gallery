@@ -2,57 +2,59 @@ import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fe
 import { ImageRequest } from "@/features/gallery/types/image_request";
 
 type RequestStatus = "low-res" | "complete";
-type CachedRequest = {
+export type CachedRequest = {
   request: ImageRequest;
   status: RequestStatus;
 };
 
-const cache: Map<string, CachedRequest> = new Map();
+export class GalleryImageCache {
+  private readonly cache: Map<string, CachedRequest> = new Map();
 
-export function sync(candidates: ImageRequest[]): ImageRequest[] {
-  evictStale(candidates);
-  const unseen = candidates.filter(request => !cache.has(request.id));
+  public sync(candidates: ImageRequest[]): ImageRequest[] {
+    this.evictStale(candidates);
+    const unseen = candidates.filter(request => !this.cache.has(request.id));
 
-  unseen.forEach(request => markLowRes(request));
-  return unseen;
-}
+    unseen.forEach(request => this.markLowRes(request));
+    return unseen;
+  }
 
-export function markLowRes(request: ImageRequest): void {
-  mark(request, "low-res");
-}
+  public markLowRes(request: ImageRequest): void {
+    this.mark(request, "low-res");
+  }
 
-export function markComplete(request: ImageRequest): void {
-  mark(request, "complete");
-}
+  public markComplete(request: ImageRequest): void {
+    this.mark(request, "complete");
+  }
 
-export function get(id: string): CachedRequest | undefined {
-  return cache.get(id);
-}
+  public get(id: string): CachedRequest | undefined {
+    return this.cache.get(id);
+  }
 
-export function completedRequests(): ImageRequest[] {
-  return [...cache.values()].filter(cached => cached.status === "complete").map(cached => cached.request);
-}
+  public completedRequests(): ImageRequest[] {
+    return [...this.cache.values()].filter(cached => cached.status === "complete").map(cached => cached.request);
+  }
 
-function evictStale(candidates: ImageRequest[]): void {
-  const candidateIds = new Set(candidates.map(request => request.id));
+  private evictStale(candidates: ImageRequest[]): void {
+    const candidateIds = new Set(candidates.map(request => request.id));
 
-  for (const [id, cached] of cache.entries()) {
-    if (!candidateIds.has(id)) {
-      release(cached);
-      cache.delete(id);
+    for (const [id, cached] of this.cache.entries()) {
+      if (!candidateIds.has(id)) {
+        this.release(cached);
+        this.cache.delete(id);
+      }
     }
   }
-}
 
-function mark(request: ImageRequest, status: RequestStatus): void {
-  cache.set(request.id, { request, status });
-}
-
-function release(cached: CachedRequest | undefined): void {
-  if (cached === undefined) {
-    return;
+  private mark(request: ImageRequest, status: RequestStatus): void {
+    this.cache.set(request.id, { request, status });
   }
-  GalleryImageFetcher.cancelFetch(cached.request.id);
-  cached.request.close();
-  cached.request.cancel();
+
+  private release(cached: CachedRequest | undefined): void {
+    if (cached === undefined) {
+      return;
+    }
+    GalleryImageFetcher.cancelFetch(cached.request.id);
+    cached.request.close();
+    cached.request.cancel();
+  }
 }

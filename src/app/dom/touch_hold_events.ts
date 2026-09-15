@@ -1,5 +1,5 @@
 import { DomEvents } from "@/app/dom/events";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { Timeout } from "@/types/async";
 
 let timer: Timeout;

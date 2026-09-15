@@ -7,6 +7,18 @@ export function removeOriginalUnusedScripts(): void {
   releaseUnusedGlobals();
 }
 
+export function takeNativeFavorites(): HTMLElement[] | undefined {
+  const content = document.querySelector<HTMLElement>("#content, div:has(.thumb)");
+
+  if (content === null) {
+    return undefined;
+  }
+  const thumbs = Array.from(content.querySelectorAll<HTMLElement>(".thumb"));
+
+  content.remove();
+  return thumbs.length === 0 ? undefined : thumbs;
+}
+
 function releaseUnusedGlobals(): void {
   const unused = [
     "fluidPlayer", "webpackChunkfluid_player", "Awesomplete", "dashjs",
@@ -24,16 +36,4 @@ function releaseUnusedGlobals(): void {
       console.error(error);
     }
   }
-}
-
-export function takeNativeFavorites(): HTMLElement[] | undefined {
-  const content = document.querySelector<HTMLElement>("#content, div:has(.thumb)");
-
-  if (content === null) {
-    return undefined;
-  }
-  const thumbs = Array.from(content.querySelectorAll<HTMLElement>(".thumb"));
-
-  content.remove();
-  return thumbs.length === 0 ? undefined : thumbs;
 }

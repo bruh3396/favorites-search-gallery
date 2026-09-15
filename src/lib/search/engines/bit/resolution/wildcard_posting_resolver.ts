@@ -8,11 +8,11 @@ export class WildcardPostingResolver<Doc> extends WildcardResolver<Posting | und
   }
 
   protected combine(matches: string[]): Posting | undefined {
-    const postings = this.postingsForTerm(matches);
+    const postings = this.postingsForTerms(matches);
     return postings.length === 0 ? undefined : new DensePosting(this.bitIndex.unionOfPostings(postings));
   }
 
-  private postingsForTerm(terms: string[]): Posting[] {
+  private postingsForTerms(terms: string[]): Posting[] {
     const postings: Posting[] = [];
 
     for (const term of terms) {

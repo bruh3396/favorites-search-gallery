@@ -1,6 +1,6 @@
 import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { GALLERY_DISABLED } from "@/app/context/flags";
-import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/lib/environment";
+import { USER_IS_ON_THEIR_OWN_FAVORITES_PAGE } from "@/app/context/environment";
 import { actionBarHtml } from "@/lib/ui/thumb/action_bar";
 
 export const favoriteElementTemplate: HTMLElement = new DOMParser().parseFromString("", "text/html").createElement("div");

@@ -1,11 +1,13 @@
-import { ImageExtension, MediaItem } from "@/types/media";
-import { isGif, isImage, isVideo } from "@/lib/media/media_type";
+import { ImageExtension, MediaItem, MediaType } from "@/types/media";
+import { isGif, isImage, isVideo, resolveMediaType } from "@/lib/media/media_type";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
+import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
 
 export function toMediaItem(thumb: HTMLElement): MediaItem {
   return {
     id: thumb.id,
     thumbUrl: getImageFromThumb(thumb)?.src ?? "",
+    mediaType: thumb.dataset.mediaType as MediaType ?? resolveMediaType(getTagsFromThumb(thumb)),
     extension: thumb.dataset.extension as ImageExtension | undefined
   };
 }

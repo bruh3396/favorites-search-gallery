@@ -5,7 +5,7 @@ import { postPageUrl } from "@/lib/remote/url";
 import { setDataset } from "@/utils/browser/dataset";
 import { stampActionBarId } from "@/lib/ui/thumb/action_bar";
 
-export class FavoriteElement {
+export class FavoritesElement {
   public readonly root: HTMLElement;
   private readonly container: HTMLAnchorElement;
   private readonly image: HTMLImageElement;

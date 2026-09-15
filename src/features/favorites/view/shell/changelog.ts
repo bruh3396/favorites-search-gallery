@@ -1,13 +1,22 @@
 import { FavoritesDrawerViewContent } from "@/types/favorite";
 import { SettingsClass } from "@/lib/ui/settings/classes";
+import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.23.1",
+    [
+      "Added infinitely nested search support",
+      "Added group negation, e.g. -( tag1 ~ tag2 )",
+      "Reduced memory usage"
+    ]
+  ],
+  [
     "v1.23.0",
-    ["Improved search speed with a new search engine"]
+    ["Improved search speed"]
   ],
   [
     "v1.22.4",
@@ -51,15 +60,63 @@ const releases = new Map<string, string[]>([
 ]);
 
 export function buildDrawerView(): FavoritesDrawerViewContent {
-  return { mount: buildChangelogPanel };
+  let panel: HTMLElement | undefined;
+  const button = collapseExpandButton(() => panel);
+  const syncButton = (): void => {
+    if (panel !== undefined) {
+      renderCollapseState(button, allSectionsCollapsed(panel));
+    }
+  };
+  return {
+    mount: (mountPoint): void => {
+      mountPoint.classList.add(SettingsClass.view);
+      mountPoint.append(createElement("div", { className: SettingsClass.body, children: Array.from(releases, ([version, changes], index) => section(version, changes, index, syncButton)) }));
+      panel = mountPoint;
+    },
+    actions: [button]
+  };
 }
 
-function buildChangelogPanel(panel: HTMLElement): void {
-  panel.classList.add(SettingsClass.view);
-  panel.append(createElement("div", { className: SettingsClass.body, children: Array.from(releases, section) }));
+function collapseExpandButton(getPanel: () => HTMLElement | undefined): HTMLElement {
+  const button = createElement("button", { className: SettingsClass.collapseExpand, children: [icon("collapseAll"), icon("expandAll")] });
+
+  button.type = "button";
+  renderCollapseState(button, false);
+  button.addEventListener("click", () => {
+    const panel = getPanel();
+
+    if (panel === undefined) {
+      return;
+    }
+    toggleAllSections(panel);
+    renderCollapseState(button, allSectionsCollapsed(panel));
+  });
+  return button;
 }
 
-function section([version, changes]: [string, string[]], index: number): HTMLElement {
+function toggleAllSections(panel: HTMLElement): void {
+  const isCollapsed = !allSectionsCollapsed(panel);
+
+  for (const element of sections(panel)) {
+    toggleDataset(element, "collapsed", isCollapsed);
+  }
+}
+
+function allSectionsCollapsed(panel: HTMLElement): boolean {
+  const all = sections(panel);
+  return all.length > 0 && all.every((element) => element.dataset.collapsed !== undefined);
+}
+
+function sections(panel: HTMLElement): HTMLElement[] {
+  return Array.from(panel.querySelectorAll<HTMLElement>(`.${SettingsClass.section}`));
+}
+
+function renderCollapseState(button: HTMLElement, collapsed: boolean): void {
+  toggleDataset(button, "collapsed", collapsed);
+  addTooltip(button, `${collapsed ? "Expand" : "Collapse"} all`, "below");
+}
+
+function section(version: string, changes: string[], index: number, onToggle: () => void): HTMLElement {
   const isCollapsed = index !== 0;
   const container = createElement("section", { className: SettingsClass.section, dataset: isCollapsed ? { collapsed: "" } : undefined });
   const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: version });
@@ -70,6 +127,7 @@ function section([version, changes]: [string, string[]], index: number): HTMLEle
   header.type = "button";
   header.addEventListener("click", () => {
     toggleDataset(container, "collapsed");
+    onToggle();
   });
 
   container.append(header, wrap);

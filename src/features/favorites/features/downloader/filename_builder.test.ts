@@ -25,7 +25,7 @@ const CATEGORIES: Record<string, TagCategory> = {
 
 const ALL: FilenameCategory[] = ["artist", "character", "copyright"];
 const getTagCategory = (tag: string): TagCategory | undefined => CATEGORIES[tag];
-const item: MediaItem = { id: "10146816", thumbUrl: "", extension: "jpg" };
+const item: MediaItem = { id: "10146816", thumbUrl: "", extension: "jpg", mediaType: "image" };
 const build = (tags: string[], categories: FilenameCategory[] = ALL): string => buildFilename(item, new Set(tags), "jpeg", categories, getTagCategory);
 
 describe("buildFilename", () => {

@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE, USING_FIREFOX } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE, USING_FIREFOX } from "@/app/context/environment";
 import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
 import { Resolution } from "@/types/media";
 

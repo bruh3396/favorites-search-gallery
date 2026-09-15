@@ -1,5 +1,5 @@
 import { FavoritesSettingsCatalog } from "@/features/favorites/control/settings/catalog";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 
 const DesktopSettingsSections: SettingsSection[] = [

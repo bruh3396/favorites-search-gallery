@@ -1,5 +1,5 @@
 export const FavoritesConfig = {
-  useBitmapSearchEngine: true,
+  useBitSearchEngine: true,
   streamStoredFavoritesThreshold: 0,
 
   resultsPerPageBounds: {
@@ -13,11 +13,8 @@ export const FavoritesConfig = {
   infiniteScrollPreloadCount: 100,
   infiniteScrollMargin: "150%",
 
-  reloadFetchDelay: 100,
-  skipFirstPageFetch: true,
-
-  tagUpdateCoalesceSize: 50,
-  tagUpdateCoalesceTimeout: 1500,
+  apiCoalesceSize: 50,
+  apiCoalesceTimeout: 1500,
 
   preloadThumbs: true,
   bottomNavigationButtonsEnabled: true,

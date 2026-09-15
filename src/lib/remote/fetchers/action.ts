@@ -1,6 +1,5 @@
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { addFavoriteUrl, postListUrlFromQuery, postPageUrl, postVoteUrl, removeFavoriteUrl } from "@/lib/remote/url";
-import { ON_POST_LIST_PAGE } from "@/lib/environment";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { fetchHtml } from "@/utils/browser/http";
@@ -24,10 +23,7 @@ export async function addFavorite(id: string): Promise<AddFavoriteStatus> {
   if (!await favoriteAddThrottle.wait(id)) {
     return "error";
   }
-
-  if (ON_POST_LIST_PAGE) {
-    fetch(postVoteUrl(id));
-  }
+  fetch(postVoteUrl(id));
   const status = await fetchHtml(addFavoriteUrl(id));
   return SERVER_ADD_STATUS[parseInt(status, 10)] ?? "error";
 }

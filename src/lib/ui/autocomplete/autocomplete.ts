@@ -2,7 +2,6 @@ import { AUTOCOMPLETE_SELECTOR, hideAwesomplete } from "@/lib/ui/autocomplete/aw
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
 import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
 import { HOSTNAME } from "@/lib/constants";
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
 import { addCustomTagsToAutocomplete } from "@/lib/ui/autocomplete/custom_tags";
 import { fetchHtml } from "@/utils/browser/http";
 import { queueMacroTask } from "@/lib/async/scheduling";
@@ -12,8 +11,8 @@ type SnippetSuggestionSource = (prefix: string) => AwesompleteSuggestion[];
 
 let getSnippetSuggestions: SnippetSuggestionSource = () => [];
 
-export function setupAutocomplete(): void {
-  if (ON_FAVORITES_PAGE) {
+export function setupAutocomplete(enabled: boolean): void {
+  if (enabled) {
     queueMacroTask(addAwesompleteToAllInputs);
   }
 }

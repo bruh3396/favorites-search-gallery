@@ -1,5 +1,5 @@
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
 import { PostListSettingsCatalog } from "@/features/post_list_navigator/control/catalog";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";

@@ -1,4 +1,4 @@
-import { decodeTagCategory, encodeTagCategory } from "@/app/domain/tag/category_codec";
+import { decodeTagCategory, encodeTagCategory } from "@/lib/domain/tag/category_codec";
 import { describe, expect, test } from "vitest";
 
 describe("decodeTagCategory", () => {

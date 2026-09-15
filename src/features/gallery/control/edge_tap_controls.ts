@@ -1,6 +1,6 @@
 import * as GalleryView from "@/features/gallery/view/view";
 import { Events } from "@/app/channels/events";
-import { ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { macroTask } from "@/lib/async/scheduling";
 
 export function setup(): void {

@@ -3,7 +3,7 @@ import { TermDelta, TermUpdate } from "@/lib/search/engines/search_engine";
 import { insertSorted, removeValue } from "@/utils/pure/array";
 import { BitSet } from "@/lib/search/engines/bit/postings/bitset";
 import { PackedPostings } from "@/lib/search/engines/bit/postings/packed_postings";
-import { internString } from "@/app/domain/tag/interner";
+import { internString } from "@/lib/search/interner";
 
 const MIN_CAPACITY = 64;
 
@@ -87,22 +87,6 @@ export class BitIndex<Doc> {
 
   public indexedTerms(): string[] {
     return [...this.densePostings.keys(), ...this.sparsePostings.terms()];
-  }
-
-  public termsForDoc(doc: Doc): ReadonlySet<string> {
-    const position = this.positionOf.get(doc);
-    const terms = new Set<string>();
-
-    if (position === undefined) {
-      return terms;
-    }
-
-    for (const term of this.indexedTerms()) {
-      if (this.postingFor(term)?.has(position) === true) {
-        terms.add(term);
-      }
-    }
-    return terms;
   }
 
   public postingFor(term: string): Posting | undefined {
@@ -239,12 +223,8 @@ export class BitIndex<Doc> {
     }
   }
 
-  private denseThreshold(): number {
-    return Math.ceil(this.capacity / 32);
-  }
-
   private materialize(): void {
-    const threshold = this.denseThreshold();
+    const threshold = Math.ceil(this.capacity / 32);
 
     this.materializeDense(threshold);
     this.materializeSparse(threshold);

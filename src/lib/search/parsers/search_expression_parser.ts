@@ -1,10 +1,19 @@
-import { SearchExpression } from "@/lib/search/engines/bit/logic/search_expression";
+import { SearchExpression } from "@/lib/search/expression/search_expression";
 import { parseSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const OPEN = "(";
+const NEGATED_OPEN = "-(";
 const CLOSE = ")";
 const OR = "~";
+
+export function tryParseSearchExpression(query: string): SearchExpression | undefined {
+  try {
+    return parseSearchExpression(query);
+  } catch {
+    return undefined;
+  }
+}
 
 export function parseSearchExpression(query: string): SearchExpression {
   const tokens = tokenize(normalize(query));
@@ -13,14 +22,6 @@ export function parseSearchExpression(query: string): SearchExpression {
 
   parser.expectEnd();
   return expression;
-}
-
-export function tryParseSearchExpression(query: string): SearchExpression | undefined {
-  try {
-    return parseSearchExpression(query);
-  } catch {
-    return undefined;
-  }
 }
 
 function normalize(query: string): string {
@@ -61,13 +62,12 @@ class Parser {
   }
 
   private parseMember(): SearchExpression {
-    return this.peek() === OPEN ? this.parseGroup() : this.parseTerm();
+    return this.peek() === OPEN || this.peek() === NEGATED_OPEN ? this.parseGroup() : this.parseTerm();
   }
 
   private parseGroup(): SearchExpression {
     const openAt = this.cursor + 1;
-
-    this.advance();
+    const isNegated = this.advance() === NEGATED_OPEN;
     const members: SearchExpression[] = [this.parseGroupMember(openAt)];
     let separator: string | null = null;
 
@@ -80,7 +80,8 @@ class Parser {
       throw new Error(`unclosed '(' at token ${openAt}`);
     }
     this.advance();
-    return separator === OR ? SearchExpression.or(members) : SearchExpression.and(members);
+    const group = separator === OR ? SearchExpression.or(members) : SearchExpression.and(members);
+    return isNegated ? SearchExpression.not(group) : group;
   }
 
   private readSeparator(current: string | null, openAt: number): string {

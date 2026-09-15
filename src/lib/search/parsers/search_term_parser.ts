@@ -3,13 +3,29 @@ import { metricComparisonRegex, parseMetricComparison } from "@/lib/search/parse
 import { AbstractSearchTerm } from "@/lib/search/terms/abstract_search_term";
 import { ExactSearchTerm } from "@/lib/search/terms/exact_search_term";
 import { MetricSearchTerm } from "@/lib/search/terms/metric_search_term";
+import { NumericSearchTerm } from "@/lib/search/terms/numeric_search_term";
 import { escapeParentheses } from "@/utils/pure/string";
 
 const unmatchableRegex = /^\b$/;
 
 export function parseSearchTerm(term: string): AbstractSearchTerm {
-  const canonical = asIdMetricTerm(term);
-  return isWildcardTerm(canonical) ? parseWildcardSearchTerm(canonical) : isMetricTerm(canonical) ? parseMetricSearchTerm(canonical) : parseExactSearchTerm(canonical);
+  if (isNumericTerm(term)) {
+    return parseNumericSearchTerm(term);
+  }
+
+  if (isWildcardTerm(term)) {
+    return parseWildcardSearchTerm(term);
+  }
+
+  if (isMetricTerm(term)) {
+    return parseMetricSearchTerm(term);
+  }
+  return parseExactSearchTerm(term);
+}
+
+export function parseNumericSearchTerm(term: string): NumericSearchTerm {
+  const { isNegated, value } = parseNegation(term);
+  return new NumericSearchTerm(value, isNegated, parseMetricComparison(`id:${value}`));
 }
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
@@ -28,17 +44,16 @@ export function parseExactSearchTerm(term: string): ExactSearchTerm {
   return new ExactSearchTerm(value, isNegated);
 }
 
+export function isNumericTerm(term: string): boolean {
+  return (/^-?\d+$/).test(term);
+}
+
 export function isWildcardTerm(term: string): boolean {
   return term.includes("*");
 }
 
 export function isMetricTerm(term: string): boolean {
   return metricComparisonRegex.test(term);
-}
-
-function asIdMetricTerm(term: string): string {
-  const { isNegated, value } = parseNegation(term);
-  return (/^\d+$/).test(value) ? `${isNegated ? "-" : ""}id:${value}` : term;
 }
 
 function parseNegation(term: string): { isNegated: boolean; value: string } {

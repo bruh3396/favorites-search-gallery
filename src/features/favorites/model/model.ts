@@ -9,41 +9,43 @@ import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
 import { Preferences } from "@/app/context/preferences";
-import { searcherConfig } from "@/features/favorites/model/config";
 
 const collection = new IdentifiedList<Favorite>();
-const searcher = new FavoritesSearcher(searcherConfig());
+const searcher = new FavoritesSearcher();
 const loader = new FavoritesLoader();
-const enricher = new FavoritesEnricher(
-  (favorite) => loader.updateStoredFavorite(favorite),
-  (updates) => searcher.update(updates)
-);
-const paginator = new Paginator<Favorite>(() => Preferences.favorites.resultsPerPage.value, FavoritesConfig.nearbyPageCount);
+const enricher = new FavoritesEnricher({
+  onFavoriteEnriched: (favorite): void => loader.updateStoredFavorite(favorite),
+  onTagsUpdated: (updates): void => searcher.update(updates)
+});
+const paginator = new Paginator<Favorite>({
+  resultsPerPage: (): number => Preferences.favorites.resultsPerPage.value,
+  nearbyPageCount: FavoritesConfig.nearbyPageCount
+});
 
 export function setup(dependencies: FavoritesModelDependencies): void {
   searcher.setup(dependencies.onSearchResultsChanged);
 }
 
-export async function loadStoredFavorites(): Promise<void> {
-  const favorites = await loader.readStoredFavorites();
-
-  collection.setAll(favorites);
-  enricher.enrich(favorites);
+export function loadStoredFavorites(): Promise<void> {
+  return loader.readStoredFavorites().then((favorites) => {
+    collection.setAll(favorites);
+    enricher.enrich(favorites);
+  });
 }
 
-export async function streamStoredFavorites(onBatch: (count: number) => void): Promise<void> {
+export function streamStoredFavorites(onBatch: (count: number) => void): Promise<void> {
   let loadedCount = 0;
-
-  await loader.streamStoredFavorites((favorites) => {
+  return loader.streamStoredFavorites((favorites) => {
     collection.append(favorites);
     loadedCount += favorites.length;
     onBatch(loadedCount);
+  }).then(() => {
+    enricher.enrich(collection.getAll());
   });
-  enricher.enrich(collection.getAll());
 }
 
-export async function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
-  await loader.fetchAllFavorites((favorites) => {
+export function fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
+  return loader.fetchAllFavorites((favorites) => {
     collection.append(favorites);
     searcher.add(favorites);
     enricher.enrich(favorites);
@@ -87,8 +89,6 @@ export const hasStoredFavorites = (): Promise<boolean> => loader.hasStoredFavori
 export const countStoredFavorites = (): Promise<number> => loader.countStoredFavorites();
 export const loadFavoriteIds = (): Promise<string[]> => loader.loadFavoriteIds();
 export const getTagsForIds = (ids: string[]): Promise<Map<string, Set<string>>> => loader.getTagsForIds(ids);
-export const destroyLegacyStores = (): void => loader.destroyLegacyStores();
-export const migrateLegacyStores = (onMigrating: () => void): Promise<void> => loader.migrateLegacyStores(onMigrating);
 
 export const paginate = (favorites: Favorite[]): Favorite[] => paginator.paginate(favorites);
 export const repaginateCurrentResults = (): Favorite[] => paginator.paginate(searcher.getCurrentSearchResults());

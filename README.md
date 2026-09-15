@@ -159,7 +159,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 
 ### Basic
 
-Same as the normal site syntax with addition of lone "ID" without ":"
+Same as the normal site syntax with a few additions: a lone number (matching a tag **or** a post ID), deeper **Or** nesting, and relative meta comparisons.
 
 | Operator        | Syntax          | Example                                                                                                                |
 |-----------------|-----------------|------------------------------------------------------------------------------------------------------------------------|
@@ -167,8 +167,9 @@ Same as the normal site syntax with addition of lone "ID" without ":"
 | Or              | ( tag1 ~ tag2 ) | ( apple ~ banana ~ grape )                                                                                             |
 | Nested Or       | ( tag1 ~ ( tag2 tag3 ) ) | ( apple ~ ( banana grape ) )                                                                                 |
 | Not             | -tag1           | -pineapple -orange                                                                                                     |
+| Negated Group   | -( tag1 ~ tag2 )| -( apple ~ banana ) -( ripe green )                                                                                    |
 | Wildcard        | ta*1            | a\*ple\*auce b\*a\*n\*a \*grape\*                 |
-| ID              | \<id\>          | 12345                                                                                                            |
+| Numeric         | \<number\>      | 12345                                                                                                            |
 | Any Combination |                 | ( fruit ~ vegetable ~ a\*sauce ) \*apple\* -apple\* -banana -grape\* -lemon\* ( ripe ~ tasty\* ) -12345 -55555 -112234 |
 
 
@@ -204,7 +205,7 @@ Supported:
  * duration
 
 Notes:
-  * "123" and "id:123" are equivalent
+  * A lone number matches **either** a tag named that number **or** the post with that ID, so "123" finds posts tagged **123** as well as post **123**. Use "id:123" to match the ID only.
   * score updates weekly
   * Images and GIFs have a duration of 0
 
@@ -234,6 +235,27 @@ An alternative inside an **Or** group may itself be a parenthesized **And** grou
 | ( ( apple red ) ~ ( banana yellow ) )             | has both **apple** and **red**, or has both **banana** and **yellow**                           |
 | ( gif ~ ( animated -video ) ~ ( video duration:<5 ) ) | is a **gif**, or is **animated** but not a **video**, or is a **video** shorter than 5 seconds |
 | ripe ( banana ~ ( apple green ) )                 | has **ripe**, and (has **banana**, or has both **apple** and **green**)                          |
+
+### Deep Nesting
+
+The whole query is parsed as a full expression tree, so parentheses group exactly as you write them with no depth or shape limits:
+
+* Groups nest to **any depth**.
+* An **Or** alternative may itself be another **Or** group (not just an **And** group).
+* A `-` in front of a group negates the **entire group**, not just a single tag, and a negated group may appear anywhere a group can &mdash; including nested inside another group.
+
+`-( tag1 ~ tag2 )` matches every post that has **neither** tag; `-( tag1 tag2 )` matches every post that does **not** have **both** (posts with just one of them still match).
+
+| Query                                                       | Explanation                                                                                          |
+|-------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| ( apple ~ ( banana ~ cherry ) )                             | has **apple**, or has **banana**, or has **cherry** (an **Or** directly inside an **Or**)            |
+| ( red ~ ( sweet ( berry ~ tart ) ) )                        | has **red**, or has **sweet** and (a **berry** or **tart**)                                          |
+| ( ( a ~ b ) ~ ( c ( d ~ e ) ) )                             | has **a** or **b**, or has **c** together with (**d** or **e**)                                      |
+| -( banana ~ cherry )                                        | has **neither** **banana** nor **cherry**                                                            |
+| -( banana cherry )                                          | does **not** have both **banana** and **cherry** (having just one still matches)                    |
+| apple -( ripe ~ green )                                     | has **apple**, and has **neither** **ripe** nor **green**                                            |
+| ( apple ~ -( banana cherry ) )                              | has **apple**, or does **not** have both **banana** and **cherry**                                   |
+| ( apple ~ ( green -( ripe ~ rotten ) ) )                    | has **apple**, or has **green** while having **neither** **ripe** nor **rotten** (a negated group nested two levels deep) |
 
 
 ### Realistic Examples

@@ -379,7 +379,7 @@ export default defineConfig([
           format: ["PascalCase"],
           prefix: [
             "is", "has", "should", "can", "was", "did", "will", "must",
-            "using", "requires", "needs", "allows", "in", "are",
+            "using", "requires", "needs", "allows", "in", "are", "supports",
             "overflows", "includes", "contains", "exceeds", "matches"
           ]
         },

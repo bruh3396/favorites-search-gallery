@@ -1,5 +1,5 @@
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
-import { ON_FAVORITES_PAGE } from "@/lib/environment";
+import { ON_FAVORITES_PAGE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";

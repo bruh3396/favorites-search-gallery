@@ -2,11 +2,11 @@ import { DensePosting, EMPTY_POSTING, Posting } from "@/lib/search/engines/bit/p
 import { BitIndex } from "@/lib/search/engines/bit/indexes/bit_index";
 import { BitSet } from "@/lib/search/engines/bit/postings/bitset";
 import { PostingResolver } from "@/lib/search/engines/bit/resolution/posting_resolver";
-import { SearchExpression } from "@/lib/search/engines/bit/logic/search_expression";
+import { SearchExpression } from "@/lib/search/expression/search_expression";
 
 interface Value {
   posting: Posting;
-  negated: boolean;
+  isNegated: boolean;
 }
 
 export class BitEvaluator<Doc> {
@@ -22,18 +22,18 @@ export class BitEvaluator<Doc> {
   public evaluateToBitSet(expression: SearchExpression): BitSet {
     const value = this.resolve(expression);
     const bitset = this.bitIndex.bitSetFrom(value.posting);
-    return value.negated ? this.bitIndex.complementOf(bitset) : bitset;
+    return value.isNegated ? this.bitIndex.complementOf(bitset) : bitset;
   }
 
   private resolve(expr: SearchExpression): Value {
     switch (expr.node.kind) {
-      case "term": return { posting: this.postingResolver.resolve(expr.node.term), negated: expr.node.term.isNegated };
+      case "term": return { posting: this.postingResolver.resolve(expr.node.term), isNegated: expr.node.term.isNegated };
       case "and": return this.intersect(expr.node.children);
       case "or": return this.union(expr.node.children);
       case "not":
       default: {
         const value = this.resolve(expr.node.child);
-        return { posting: value.posting, negated: !value.negated };
+        return { posting: value.posting, isNegated: !value.isNegated };
       }
     }
   }
@@ -43,22 +43,22 @@ export class BitEvaluator<Doc> {
     const { positives, negatives } = this.partition(values);
 
     if (positives.length === 1 && negatives.length === 0) {
-      return { posting: positives[0], negated: false };
+      return { posting: positives[0], isNegated: false };
     }
     const result = this.intersectPostings(positives);
 
     if (result === null) {
-      return { posting: EMPTY_POSTING, negated: false };
+      return { posting: EMPTY_POSTING, isNegated: false };
     }
 
     negatives.sort((a, b) => b.cardinality - a.cardinality);
 
     for (const negative of negatives) {
       if (negative.andNotInto(result)) {
-        return { posting: EMPTY_POSTING, negated: false };
+        return { posting: EMPTY_POSTING, isNegated: false };
       }
     }
-    return { posting: new DensePosting(result), negated: false };
+    return { posting: new DensePosting(result), isNegated: false };
   }
 
   private partition(values: Value[]): { positives: Posting[]; negatives: Posting[] } {
@@ -66,7 +66,7 @@ export class BitEvaluator<Doc> {
     const negatives: Posting[] = [];
 
     for (const value of values) {
-      (value.negated ? negatives : positives).push(value.posting);
+      (value.isNegated ? negatives : positives).push(value.posting);
     }
     return { positives, negatives };
   }
@@ -103,7 +103,7 @@ export class BitEvaluator<Doc> {
     for (const child of children) {
       const value = this.resolve(child);
 
-      if (value.negated) {
+      if (value.isNegated) {
         value.posting.orComplementInto(result);
         needsUniverseMask = true;
       } else {
@@ -114,6 +114,6 @@ export class BitEvaluator<Doc> {
     if (needsUniverseMask) {
       result.andInPlace(this.bitIndex.universe());
     }
-    return { posting: new DensePosting(result), negated: false };
+    return { posting: new DensePosting(result), isNegated: false };
   }
 }

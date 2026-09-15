@@ -77,6 +77,27 @@ export function intersectSortedNumbers(a: number[], b: number[]): number[] {
   return result;
 }
 
+export function intersectSorted<T>(a: T[], b: T[], compare: (x: T, y: T) => number): T[] {
+  const result: T[] = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < a.length && j < b.length) {
+    const order = compare(a[i], b[j]);
+
+    if (order === 0) {
+      result.push(a[i]);
+      i += 1;
+      j += 1;
+    } else if (order < 0) {
+      i += 1;
+    } else {
+      j += 1;
+    }
+  }
+  return result;
+}
+
 export function insertSorted(sorted: number[], value: number): void {
   sorted.splice(findFirstIndexWhere(sorted.length, index => sorted[index] >= value), 0, value);
 }

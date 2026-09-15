@@ -4,9 +4,9 @@ import { DocResolver } from "@/lib/search/engines/set/resolution/doc_resolver";
 import { MetricIndex } from "@/lib/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/lib/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/lib/search/engines/set/indexes/relative_metric_index";
-import { SetSearcher } from "@/lib/search/engines/set/logic/set_searcher";
+import { SetEvaluator } from "@/lib/search/engines/set/logic/set_evaluator";
 import { WildcardDocResolver } from "@/lib/search/engines/set/resolution/wildcard_doc_resolver";
-import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
+import { parseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
 
 const positionIndex = new PositionIndex<Fruit>();
 
@@ -14,16 +14,16 @@ positionIndex.build(fruitDocs);
 const wildcardResolver = new WildcardDocResolver<Fruit>(index);
 
 wildcardResolver.index(index.indexedTerms());
-const searcher = new SetSearcher<Fruit>(index, new DocResolver<Fruit>(index, new MetricIndex<Fruit>([], () => 0), new RelativeMetricIndex<Fruit>([], () => 0), positionIndex, wildcardResolver));
+const searcher = new SetEvaluator<Fruit>(index, new DocResolver<Fruit>(index, new MetricIndex<Fruit>([], () => 0), new RelativeMetricIndex<Fruit>([], () => 0), positionIndex, wildcardResolver));
 
 function assertMatches(query: string, expectedNames: FruitName[]): void {
   const expected = expectedNames.slice().sort();
-  const actual = searcher.search(parseSearchQuery(query), fruitDocs).map(item => item.name).sort();
+  const actual = searcher.evaluate(parseSearchExpression(query), fruitDocs).map(item => item.name).sort();
 
   expect(actual, query).toEqual(expected);
 }
 
-describe("SetSearcher", () => {
+describe("SetEvaluator", () => {
   test("empty query returns every doc", () => {
     assertMatches("", fruitDocs.map(doc => doc.name));
   });

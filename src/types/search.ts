@@ -1,10 +1,8 @@
 export type Rating = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
 export type TagCategory = "general" | "artist" | "unknown" | "copyright" | "character" | "metadata";
 export type TagCategoryMap = Map<string, TagCategory>;
 export type EncodedTagCategory = number | null;
 export type EncodedTagCategoryMap = Record<string, EncodedTagCategory>;
-
 export type Metric = "default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random" | "duration";
 export type SortKey = Metric;
 export type SearchableMetric = Exclude<Metric, "default" | "creationTimestamp" | "lastChangedTimestamp" | "random">;

@@ -14,19 +14,23 @@ const metricOf = (doc: Doc, metric: SearchableMetric): number => doc.getMetric?.
 const termsOf = (doc: Doc): Iterable<string> => doc.tags;
 const nameOf = (doc: Doc): string => doc.name;
 
-const implementations: { name: string; implementation: Searcher }[] = [
-  { name: "SetSearchEngine", implementation: (query, docs) => new SetSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf) },
-  { name: "BitSearchEngine", implementation: (query, docs) => new BitSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf) },
-  { name: "SearchQuery", implementation: (query, docs) => parseSearchQuery<Doc>(query).filter(docs).map(nameOf) }
+const implementations: { name: string; implementation: Searcher; supportsAST: boolean }[] = [
+  { name: "SetSearchEngine", implementation: (query, docs) => new SetSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf), supportsAST: true },
+  { name: "BitSearchEngine", implementation: (query, docs) => new BitSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf), supportsAST: true },
+  { name: "SearchQuery", implementation: (query, docs) => parseSearchQuery<Doc>(query).filter(docs).map(nameOf), supportsAST: false }
 ];
 
-for (const { name, implementation } of implementations) {
+for (const { name, implementation, supportsAST } of implementations) {
   describe(`${name} end to end search cases`, () => {
     const assertMatches: QueryAssertion = (query: string, expectedNames: FruitName[]): void => {
       expect(implementation(query, fruitDocs).sort(), query).toEqual(expectedNames.slice().sort());
     };
 
     for (const group of searchCases) {
+      if (group.isAST && !supportsAST) {
+        continue;
+      }
+
       test(group.name, () => {
         group.cases?.forEach(({ query, expected }) => assertMatches(query, expected));
         group.run?.(assertMatches);

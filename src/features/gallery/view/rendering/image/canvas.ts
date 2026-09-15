@@ -1,75 +1,71 @@
 import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
 import { GalleryConfig } from "@/config/gallery_config";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
-import { insertStyle } from "@/utils/browser/injector";
+import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
+import { setDataset } from "@/utils/browser/dataset";
 import { toDimensions2D } from "@/utils/pure/geometry";
 
-const mainCanvas = document.createElement("canvas");
-const mainContext = mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
-const landscapeStyle = `
-  .gallery-image {
-      height: 100vh !important;
-      width: auto !important;
+export class GalleryImageCanvas {
+  private readonly mainCanvas = document.createElement("canvas");
+  private readonly mainContext = this.mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
+  private container: HTMLElement | null = null;
+
+  constructor() {
+    const dimensions = toDimensions2D(GalleryConfig.mainCanvasResolution);
+
+    this.mainCanvas.className = "gallery-image";
+    this.mainCanvas.width = dimensions.x;
+    this.mainCanvas.height = dimensions.y;
   }
-  `;
-const portraitStyle = `
-  .gallery-image {
-      width: 100vw !important;
-      height: auto !important;
+
+  public mount(newContainer: HTMLElement): void {
+    this.correctOrientation();
+    this.insertGalleryCanvas(newContainer);
   }
-  `;
-let container: HTMLElement;
-const dimensions = toDimensions2D(GalleryConfig.mainCanvasResolution);
 
-mainCanvas.className = "gallery-image";
-mainCanvas.width = dimensions.x;
-mainCanvas.height = dimensions.y;
-
-export function mount(newContainer: HTMLElement): void {
-  correctOrientation();
-  insertGalleryCanvas(newContainer);
-}
-
-export function draw(bitmap: ImageBitmap | null): void {
-  if (bitmap !== null) {
-    clearCanvas(mainContext);
-    drawScaledBitmap(mainContext, bitmap);
+  public draw(bitmap: ImageBitmap | null): void {
+    if (bitmap !== null) {
+      clearCanvas(this.mainContext);
+      drawScaledBitmap(this.mainContext, bitmap);
+    }
   }
-}
 
-export function clear(): void {
-  mainContext.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
-}
-
-export function zoomToPoint(x: number, y: number): void {
-  const xPercentage = clamp(roundToTwoDecimalPlaces(x / window.innerWidth), 0, 1);
-  const yPercentage = clamp(roundToTwoDecimalPlaces(y / window.innerHeight), 0, 1);
-
-  container.scrollLeft = (container.scrollWidth - container.clientWidth) * xPercentage;
-  container.scrollTop = (container.scrollHeight - container.clientHeight) * yPercentage;
-}
-
-export function correctOrientation(): void {
-  if (ON_DESKTOP_DEVICE) {
-    return;
+  public clear(): void {
+    this.mainContext.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
   }
-  const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;
-  const usingCorrectOrientation = (usingLandscape && mainCanvas.width > mainCanvas.height) || (!usingLandscape && mainCanvas.width < mainCanvas.height);
 
-  if (usingCorrectOrientation) {
-    return;
+  public zoomToPoint(x: number, y: number): void {
+    if (this.container === null) {
+      return;
+    }
+    const xPercentage = clamp(roundToTwoDecimalPlaces(x / window.innerWidth), 0, 1);
+    const yPercentage = clamp(roundToTwoDecimalPlaces(y / window.innerHeight), 0, 1);
+
+    this.container.scrollLeft = (this.container.scrollWidth - this.container.clientWidth) * xPercentage;
+    this.container.scrollTop = (this.container.scrollHeight - this.container.clientHeight) * yPercentage;
   }
-  insertStyle(usingLandscape ? landscapeStyle : portraitStyle, "gallery-canvas-orientation");
-  const tempWidth = mainCanvas.width;
 
-  mainCanvas.width = mainCanvas.height;
-  mainCanvas.height = tempWidth;
-}
+  public correctOrientation(): void {
+    if (ON_DESKTOP_DEVICE) {
+      return;
+    }
+    const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;
+    const usingCorrectOrientation = (usingLandscape && this.mainCanvas.width > this.mainCanvas.height) || (!usingLandscape && this.mainCanvas.width < this.mainCanvas.height);
 
-function insertGalleryCanvas(newContainer: HTMLElement): void {
-  newContainer.id = "canvas-container";
-  newContainer.className = "gallery-image-frame";
-  newContainer.appendChild(mainCanvas);
-  container = newContainer;
+    if (usingCorrectOrientation) {
+      return;
+    }
+    setDataset(this.mainCanvas, "orientation", usingLandscape ? "landscape" : "portrait");
+    const tempWidth = this.mainCanvas.width;
+
+    this.mainCanvas.width = this.mainCanvas.height;
+    this.mainCanvas.height = tempWidth;
+  }
+
+  private insertGalleryCanvas(newContainer: HTMLElement): void {
+    newContainer.id = "canvas-container";
+    newContainer.className = "gallery-image-frame";
+    newContainer.appendChild(this.mainCanvas);
+    this.container = newContainer;
+  }
 }

@@ -3,18 +3,20 @@ import { FavoritesDurationEnricher } from "@/features/favorites/model/enrichment
 import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 import { isVideo } from "@/lib/media/media_type";
-import { postIsStale } from "@/app/domain/post/status";
+import { postIsStale } from "@/lib/domain/post/status";
+
+interface EnricherCallbacks {
+  onFavoriteEnriched: (favorite: Favorite) => void;
+  onTagsUpdated: (updates: TermUpdate<Favorite>[]) => void;
+}
 
 export class FavoritesEnricher {
   private readonly metadataEnricher: FavoritesMetadataEnricher;
   private readonly durationEnricher: FavoritesDurationEnricher;
 
-  constructor(
-    onFavoriteEnriched: (favorite: Favorite) => void,
-    onTagsUpdated: (updates: TermUpdate<Favorite>[]) => void
-  ) {
-    this.metadataEnricher = new FavoritesMetadataEnricher(onFavoriteEnriched, onTagsUpdated);
-    this.durationEnricher = new FavoritesDurationEnricher(onFavoriteEnriched);
+  constructor(callbacks: EnricherCallbacks) {
+    this.metadataEnricher = new FavoritesMetadataEnricher(callbacks.onFavoriteEnriched, callbacks.onTagsUpdated);
+    this.durationEnricher = new FavoritesDurationEnricher(callbacks.onFavoriteEnriched);
   }
 
   public async enrich(favorites: Favorite[]): Promise<void> {

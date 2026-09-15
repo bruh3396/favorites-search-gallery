@@ -1,5 +1,5 @@
 import * as Icons from "@/assets/svg/icons";
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryMenuAction } from "@/types/app";

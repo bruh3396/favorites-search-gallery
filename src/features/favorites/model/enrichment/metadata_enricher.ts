@@ -1,5 +1,5 @@
-import * as PostResolver from "@/app/domain/post/resolver";
-import * as TagCategoryStore from "@/app/domain/tag/category_store";
+import * as PostResolver from "@/lib/domain/post/resolver";
+import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { ParsedPost, Post } from "@/types/api";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Favorite } from "@/types/favorite";
@@ -13,7 +13,7 @@ export class FavoritesMetadataEnricher {
     private readonly onFavoriteEnriched: (favorite: Favorite) => void,
     onTagsChanged: (updates: TermUpdate<Favorite>[]) => void
   ) {
-    this.changeUpdater = new CoalescingExecutor(FavoritesConfig.tagUpdateCoalesceSize, FavoritesConfig.tagUpdateCoalesceTimeout, onTagsChanged);
+    this.changeUpdater = new CoalescingExecutor(FavoritesConfig.apiCoalesceSize, FavoritesConfig.apiCoalesceTimeout, onTagsChanged);
   }
 
   public enrich(favorites: Favorite[]): Promise<void> {

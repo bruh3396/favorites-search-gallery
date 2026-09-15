@@ -96,6 +96,16 @@ video::-webkit-media-controls-enclosure {
   transform: translate(-50%, -50%);
 }
 
+.gallery-image[data-orientation="landscape"] {
+  height: 100vh !important;
+  width: auto !important;
+}
+
+.gallery-image[data-orientation="portrait"] {
+  width: 100vw !important;
+  height: auto !important;
+}
+
 #gallery-menu {
   pointer-events: none;
   position: fixed;

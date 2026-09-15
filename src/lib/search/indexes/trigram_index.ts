@@ -1,15 +1,13 @@
-import { KeyedIndex } from "@/lib/collection/key_codec";
+import { compareStrings, trigramsOf } from "@/utils/pure/string";
+import { findFirstIndexWhere, intersectSorted } from "@/utils/pure/array";
 import { SortedArray } from "@/lib/collection/sorted_array";
-import { intersectSortedNumbers } from "@/utils/pure/array";
-import { trigramsOf } from "@/utils/pure/string";
+import { internString } from "@/lib/search/interner";
 
 export class TrigramIndex {
   private readonly terms: SortedArray<string>;
-  private readonly idsByTrigram: Map<string, number[]> = new Map<string, number[]>();
-  private readonly codec: KeyedIndex<string>;
+  private readonly termsByTrigram: Map<string, string[]> = new Map<string, string[]>();
 
   constructor(terms: SortedArray<string>) {
-    this.codec = new KeyedIndex<string>(s => s);
     this.terms = terms;
 
     for (const term of terms.toArray()) {
@@ -18,69 +16,59 @@ export class TrigramIndex {
   }
 
   public termsMatching(fragment: string): string[] {
-    return fragment.length < 3 ? this.terms.toArray() : this.codec.decode(this.candidates(fragment));
+    return fragment.length < 3 ? this.terms.toArray() : this.candidatesOf(fragment);
   }
 
   public termsMatchingAll(fragments: string[]): string[] {
     const narrowing = fragments.filter(fragment => fragment.length >= 3);
-    return narrowing.length === 0 ? this.terms.toArray() : this.codec.decode(this.candidatesOfAll(narrowing));
+    return narrowing.length === 0 ? this.terms.toArray() : this.candidatesOfAll(narrowing);
   }
 
   public add(term: string): void {
-    const key = this.codec.keyOf(term);
+    const shared = internString(term);
 
-    if (this.codec.hasKey(key)) {
-      return;
-    }
-    const id = this.codec.encode(term);
+    for (const trigram of trigramsOf(shared)) {
+      const key = internString(trigram);
+      const bucket = this.termsByTrigram.get(key);
 
-    for (const trigram of trigramsOf(key)) {
-      const memberIds = this.idsByTrigram.get(trigram);
-
-      if (memberIds === undefined) {
-        this.idsByTrigram.set(trigram, [id]);
-      } else if (memberIds[memberIds.length - 1] !== id) {
-        memberIds.push(id);
+      if (bucket === undefined) {
+        this.termsByTrigram.set(key, [shared]);
+      } else {
+        this.insertIntoBucket(bucket, shared);
       }
     }
   }
 
   public remove(term: string): void {
-    const key = this.codec.keyOf(term);
-    const id = this.codec.forget(key);
+    for (const trigram of trigramsOf(term)) {
+      const bucket = this.termsByTrigram.get(trigram);
 
-    if (id === undefined) {
-      return;
-    }
-
-    for (const trigram of trigramsOf(key)) {
-      const ids = this.idsByTrigram.get(trigram);
-
-      if (ids === undefined) {
+      if (bucket === undefined) {
         continue;
       }
-      const at = ids.indexOf(id);
+      const at = this.indexInBucket(bucket, term);
 
       if (at !== -1) {
-        ids.splice(at, 1);
+        bucket.splice(at, 1);
       }
 
-      if (ids.length === 0) {
-        this.idsByTrigram.delete(trigram);
+      if (bucket.length === 0) {
+        this.termsByTrigram.delete(trigram);
       }
     }
   }
 
-  private candidates(fragment: string): number[] {
-    let candidates: number[] | null = null;
+  private candidatesOf(fragment: string): string[] {
+    let candidates: string[] | null = null;
 
     for (const trigram of trigramsOf(fragment)) {
-      const memberIds = this.idsByTrigram.get(trigram);
+      const bucket = this.termsByTrigram.get(trigram);
 
-      if (memberIds === undefined) {
+      if (bucket === undefined) {
         return [];
       }
-      candidates = candidates === null ? memberIds : intersectSortedNumbers(candidates, memberIds);
+      // candidates = candidates === null ? bucket.slice() : intersectSorted(candidates, bucket, compareStrings);
+      candidates = candidates === null ? bucket : intersectSorted(candidates, bucket, compareStrings);
 
       if (candidates.length === 0) {
         return candidates;
@@ -89,18 +77,32 @@ export class TrigramIndex {
     return candidates ?? [];
   }
 
-  private candidatesOfAll(fragments: string[]): number[] {
-    let candidates: number[] | null = null;
+  private candidatesOfAll(fragments: string[]): string[] {
+    let candidates: string[] | null = null;
 
     for (const fragment of fragments) {
-      const forFragment = this.candidates(fragment);
+      const buckets = this.candidatesOf(fragment);
 
-      candidates = candidates === null ? forFragment : intersectSortedNumbers(candidates, forFragment);
+      candidates = candidates === null ? buckets : intersectSorted(candidates, buckets, compareStrings);
 
       if (candidates.length === 0) {
         return candidates;
       }
     }
     return candidates ?? [];
+  }
+
+  private insertIntoBucket(bucket: string[], term: string): void {
+    const at = findFirstIndexWhere(bucket.length, index => compareStrings(bucket[index], term) >= 0);
+
+    if (at < bucket.length && bucket[at] === term) {
+      return;
+    }
+    bucket.splice(at, 0, term);
+  }
+
+  private indexInBucket(bucket: string[], term: string): number {
+    const at = findFirstIndexWhere(bucket.length, index => compareStrings(bucket[index], term) >= 0);
+    return at < bucket.length && bucket[at] === term ? at : -1;
   }
 }

@@ -1,4 +1,4 @@
-import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { debounceTrailing } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";

@@ -3,7 +3,7 @@ import * as GalleryFlows from "@/features/gallery/flows/flows";
 import * as GalleryModel from "@/features/gallery/model/model";
 import * as GalleryView from "@/features/gallery/view/view";
 import { GalleryConfig } from "@/config/gallery_config";
-import { ON_DESKTOP_DEVICE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 

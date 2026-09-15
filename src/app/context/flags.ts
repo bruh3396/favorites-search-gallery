@@ -1,10 +1,11 @@
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/lib/environment";
+import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
+
+export const PERFORMANCE_PROFILE = Preferences.app.performanceProfile.value;
+export const IMAGUS_SUPPORT_ENABLED = PERFORMANCE_PROFILE === "low" || PERFORMANCE_PROFILE === "potato";
 
 export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_POST_LIST_PAGE && Preferences.postList.enabled.value);
 export const FAVORITES_SEARCH_GALLERY_DISABLED = !FAVORITES_SEARCH_GALLERY_ENABLED;
-
-export const PERFORMANCE_PROFILE = Preferences.app.performanceProfile.value;
 
 export const GALLERY_ENABLED = (ON_FAVORITES_PAGE || ON_POST_LIST_PAGE) && (PERFORMANCE_PROFILE === "normal" || PERFORMANCE_PROFILE === "medium");
 export const GALLERY_DISABLED = !GALLERY_ENABLED;
@@ -14,5 +15,3 @@ export const TOOLTIP_DISABLED = !TOOLTIP_ENABLED;
 
 export const POST_OVERLAY_ENABLED = ON_FAVORITES_PAGE && ON_DESKTOP_DEVICE && PERFORMANCE_PROFILE !== "potato";
 export const POST_OVERLAY_DISABLED = !POST_OVERLAY_ENABLED;
-
-export const IMAGUS_SUPPORT_ENABLED = PERFORMANCE_PROFILE === "low" || PERFORMANCE_PROFILE === "potato";

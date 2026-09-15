@@ -1,4 +1,3 @@
-import { PLATFORM, USER_ID, VERSION } from "@/lib/environment";
 import { ParsedPost, PostResponse, Route, TagResponse } from "@/types/api";
 import { ApiConfig } from "@/config/api_config";
 import { CoalescingResolver } from "@/lib/async/coalescing";
@@ -6,14 +5,15 @@ import { LocalOverrides } from "@/config/local_overrides";
 import { PostFetchError } from "@/types/errors";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { TagCategory } from "@/types/search";
-import { decodeTagCategory } from "../../../app/domain/tag/category_codec";
+import { decodeTagCategory } from "@/lib/domain/tag/category_codec";
 import { fetchPostPageHtml } from "@/lib/remote/fetchers/html";
 import { parsePost } from "@/lib/remote/parsers/post_parser";
 import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page_parser";
 
 const PRODUCTION_SERVER_ORIGIN = "https://frozencobalt.stream";
 const SERVER_ORIGIN = LocalOverrides.serverOrigin ?? PRODUCTION_SERVER_ORIGIN;
-const REQUEST_INIT: RequestInit = { method: "POST", headers: { "X-User-Id": USER_ID, "X-Version": VERSION, "X-Platform": PLATFORM } };
+
+const REQUEST_INIT: RequestInit = { method: "POST", headers: { "X-User-Id": "", "X-Version": "", "X-Platform": "" } };
 
 const postLimiter = new RateLimiter(ApiConfig.postRateLimit);
 const tagLimiter = new RateLimiter(ApiConfig.tagRateLimit);
@@ -21,7 +21,8 @@ const tagLimiter = new RateLimiter(ApiConfig.tagRateLimit);
 const postResolver = new CoalescingResolver<string, PostResponse>(ApiConfig.coalesceSize, ApiConfig.flushTimeout, fetchPosts);
 const tagResolver = new CoalescingResolver<string, TagResponse>(ApiConfig.coalesceSize, ApiConfig.flushTimeout, fetchTagCategories);
 
-export function ping(): void {
+export function ping(identity: { userId: string; version: string; platform: string }): void {
+  REQUEST_INIT.headers = { "X-User-Id": identity.userId, "X-Version": identity.version, "X-Platform": identity.platform };
   fetchApi("ping");
 }
 
